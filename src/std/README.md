@@ -1,4 +1,4 @@
-The (partial) standard C++ library, without exceptions nor dynamic memory (new/delete).
+The (partial) C++ standard library, without exceptions nor dynamic memory (new/delete).
 
 gcc doesn't implement std for microcontrollers. So I decided to implement one to be
 able to use it and also as a learning proyect.
