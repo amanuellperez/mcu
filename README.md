@@ -1,4 +1,6 @@
-# mcu
+MCU++ library
+=============
+
 Libraries and applications for microcontrollers (right now, only for
 ATMEGA328).
 
