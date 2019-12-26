@@ -1,0 +1,276 @@
+// Copyright (C) 2019-2020 A.Manuel L.Perez
+//
+// This file is part of the MCU++ Library.
+//
+// MCU++ Library is a free library: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#include "../../std_algorithm.h"
+
+#include <alp_test.h>
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+using namespace test;
+
+void test_for_each()
+{
+    test::interfaz("for_each");
+    {
+    std::vector v = {1, 2, 3, 4};
+    std::vector res = {2, 3, 4, 5};
+
+    mtd::for_each (v.begin(), v.end(), [](int& x){++x;});
+    
+    check_equal_containers  ( v.begin(), v.end()
+			    , res.begin(), res.end(), "for_each");
+    }
+
+    {
+    std::vector v = {1, 2, 3, 4};
+    std::vector res = {2, 3, 4, 5};
+    mtd::for_each_n (v.begin(), v.size(), [](int& x){++x;});
+    check_equal_containers  ( v.begin(), v.end()
+			    , res.begin(), res.end(), "for_each_n");
+    }
+}
+
+void test_minmax()
+{
+    test::interfaz("min/max");
+
+    CHECK_TRUE(mtd::min(4, 6) == 4, "min(4,6)");
+    CHECK_TRUE(mtd::min(4, 4) == 4, "min(4,4)");
+    CHECK_TRUE(mtd::min(-7, -4) == -7, "min(-7,-4)");
+
+
+    CHECK_TRUE(mtd::max(4, 6) == 6, "max(4,6)");
+    CHECK_TRUE(mtd::max(4, 4) == 4, "max(4,4)");
+    CHECK_TRUE(mtd::max(-7, -4) == -4, "max(-7,-4)");
+
+
+}
+
+
+void test_copy()
+{
+    test::interfaz("copy");
+    
+    std::array<int, 5> a = {1,2,3,4,5};
+    int res[10];
+    for (int i = 0; i < 10; ++i)
+	res[i] = -1;
+
+    auto q = mtd::copy(a.begin(), a.end(), res);
+    CHECK_TRUE(q == (res + a.size()), "copy, return");
+    CHECK_EQUAL_CONTAINERS(a.begin(), a.end(), res, res + 5, "copy");
+    for (int i = 5; i < 10; ++i)
+	CHECK_TRUE(res[i] == -1, "copy?");
+
+
+    for (int i = 0; i < 10; ++i)
+	res[i] = -1;
+    int pru[10];
+    q = mtd::copy(pru, pru, res);
+    CHECK_TRUE(q == res, "copy, return");
+    for (int i = 0; i < 10; ++i)
+	CHECK_TRUE(res[i] == -1, "copy (copia nula)");
+}
+
+void test_copy_n()
+{
+    test::interfaz("copy_n");
+    
+    std::array<int, 5> a = {1,2,3,4,5};
+    int res[10];
+    for (int i = 0; i < 10; ++i)
+	res[i] = -1;
+
+    auto q = mtd::copy_n(a.begin(), a.size(), res);
+    CHECK_TRUE(q == (res + a.size()), "copy_n, return");
+    CHECK_EQUAL_CONTAINERS(a.begin(), a.end(), res, res + 5, "copy_n");
+    for (int i = 5; i < 10; ++i)
+	CHECK_TRUE(res[i] == -1, "copy_n?");
+
+
+    for (int i = 0; i < 10; ++i)
+	res[i] = -1;
+    int pru[10];
+    q = mtd::copy_n(pru, 0, res);
+    CHECK_TRUE(q == res, "copy_n, return");
+    for (int i = 0; i < 10; ++i)
+	CHECK_TRUE(res[i] == -1, "copy_n (copia nula)");
+}
+
+
+void test_fill()
+{
+    test::interfaz("fill");
+
+    int x[5];
+    int* xe = mtd::fill(&x[0], x + 5, 40);
+    CHECK_TRUE(xe == (x + 5), "fill(5)::return");
+
+    std::array<int, 5> res = {40, 40, 40, 40, 40};
+    CHECK_EQUAL_CONTAINERS(&x[0], xe, res.begin(), res.end(), "fill");
+
+    xe = mtd::fill(x, x, 3);
+    CHECK_TRUE(xe == x, "fill(0)::return");
+}
+
+
+void test_fill_n()
+{
+    test::interfaz("fill_n");
+
+    int x[5];
+    int* xe = mtd::fill_n(x, 5, 20);
+    CHECK_TRUE(xe == (x + 5), "fill_n(5)::return");
+
+    std::array<int, 5> res = {20, 20, 20, 20, 20};
+    CHECK_EQUAL_CONTAINERS(x, xe, res.begin(), res.end(), "fill_n");
+
+    xe = mtd::fill_n(x, 0, 3);
+    CHECK_TRUE(xe == x, "fill_n(0)::return");
+
+}
+
+template <typename It>
+void test_find(It p0, It pe, char x, const std::string& res)
+{
+    auto p = mtd::find (p0, pe, x);
+    std::string y{p0, p};
+    CHECK_TRUE(res == y, "find");
+}
+
+struct Es_uno{
+    bool operator()(char x) const {return x == '1';}
+};
+
+template <typename It, typename UnaryPredicate>
+void test_find_if(It p0, It pe, UnaryPredicate pred, const std::string& res)
+{
+    auto p = mtd::find_if (p0, pe, pred);
+    std::string y{p0, p};
+    CHECK_TRUE(res == y, "find_if");
+}
+
+
+
+template <typename It, typename UnaryPredicate>
+void test_find_if_not(It p0, It pe, UnaryPredicate pred, const std::string& res)
+{
+    auto p = mtd::find_if_not (p0, pe, pred);
+    std::string y{p0, p};
+    CHECK_TRUE(res == y, "find_if_not");
+}
+
+void test_find()
+{
+    test::interfaz("find");
+    {
+    std::string s{"abcde"};
+
+    test_find(s.begin(), s.end(), 'c', "ab");
+    test_find(s.begin(), s.end(), 'A', s);
+    test_find(s.begin(), s.end(), 'a', "");
+    }
+    {
+    std::string s{"00123"};
+    test_find_if(s.begin(), s.end(), Es_uno{}, "00");
+    s = "";
+    test_find_if(s.begin(), s.end(), Es_uno{}, "");
+    s = "0000";
+    test_find_if(s.begin(), s.end(), Es_uno{}, "0000");
+    }
+
+    {
+    std::string s{"111011"};
+    test_find_if_not(s.begin(), s.end(), Es_uno{}, "111");
+    s = "";
+    test_find_if_not(s.begin(), s.end(), Es_uno{}, "");
+    s = "1111";
+    test_find_if_not(s.begin(), s.end(), Es_uno{}, "1111");
+    }
+}
+
+template <typename It, typename T>
+void test_count(It p0, It pe, const T& x, const std::string& msg)
+{
+    std::cout << "count: ";
+    CHECK_TRUE((std::count(p0, pe, '\n')
+		== mtd::count(p0, pe, '\n')), msg);
+
+}
+
+template <typename It, typename UnaryPredicate>
+void test_count_if(It p0, It pe, UnaryPredicate p, const std::string& msg)
+{
+    std::cout << "count_if: ";
+    CHECK_TRUE((std::count_if(p0, pe, p)
+		== mtd::count_if(p0, pe, p)), msg);
+
+}
+
+
+void test_count()
+{
+    test::interfaz("count");
+
+    std::string msg = "uno-dos-tres";
+    test_count(msg.begin(), msg.end(), '-', msg);
+
+    msg = "";
+    test_count(msg.begin(), msg.end(), '-', msg);
+    
+    msg = "-";
+    test_count(msg.begin(), msg.end(), '-', msg);
+
+
+    std::vector v = {1,2,3,4,5,6,7,8,9,10};
+    test_count_if(v.begin(), v.end(), [](int x){return x % 3;}, "impares");
+    test_count_if(v.begin(), v.end(), [](int x){return false;}, "nada");
+    test_count_if(v.begin(), v.end(), [](int x){return true;}, "todos");
+
+    v.clear();
+    test_count_if(v.begin(), v.end(), [](int x){return x % 3;}, "vacio");
+}
+
+
+
+int main()
+{
+try{
+    test::header("algorithm");
+
+    test_for_each();
+    test_minmax();
+    test_copy();
+    test_copy_n();
+    test_fill();
+    test_fill_n();
+    test_find();
+    test_count();
+
+}catch(const std::exception& e){
+    std::cerr << e.what() << '\n';
+    return 1;
+}
+
+}
+
+
+
+
+

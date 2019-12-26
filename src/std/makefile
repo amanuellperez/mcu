@@ -1,0 +1,56 @@
+SOURCES= std_basic_ios.cpp 	\
+		 std_streambuf.cpp	\
+		 std_istream.cpp	\
+		 std_ostream.cpp
+
+INCS= std_cstdio.h		\
+	std_sizeof_txt.h	\
+	std_algorithm.h		\
+	std_array.h			\
+	std_basic_ios.h		\
+	std_char_traits.h	\
+	std_chrono.h		\
+	std_config.h		\
+	std_cstddef.h		\
+	std_cstdint.h		\
+	std_ctime.h			\
+	std_ios_base.h		\
+	std_ios.h			\
+	std_iosfwd.h		\
+	std_ios_types.h		\
+	std_iostream.h		\
+	std_iomanip.h		\
+	std_istream.h		\
+	std_iterator.h		\
+	std_limits.h		\
+	std_ostream.h		\
+	std_ratio.h			\
+	std_streambuf.h		\
+	std_string.h		\
+	std_type_traits.h	\
+	std_utility.h		\
+	algorithm	\
+	array		\
+	chrono		\
+	cstddef 	\
+	cstdint		\
+	ctime		\
+	iomanip		\
+	ios			\
+	iosfwd		\
+	iostream	\
+	istream		\
+	iterator	\
+	limits		\
+	ostream		\
+	ratio		\
+	streambuf	\
+	type_traits	\
+	utility
+
+
+LIB=std
+
+include $(STD_GENRULES)
+
+
