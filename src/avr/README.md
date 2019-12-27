@@ -1,4 +1,4 @@
-WARNING: This library is unstable. Maybe version 0.1???
+### WARNING: This library is unstable. Maybe version 0.1???
 
 Translators for avr.
 
@@ -27,7 +27,7 @@ iostream:
 Tested: avr-gcc 7.4.0
     
 ---
-ADVERTENCIA: Esta biblioteca es inestable. ¿Podría ser la versión 0.1?
+### ADVERTENCIA: Esta biblioteca es inestable. ¿Podría ser la versión 0.1?
 
 Traductores del avr.
 
