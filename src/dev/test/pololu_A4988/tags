@@ -1,0 +1,26 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+ASM_SOURCES	makefile	/^ASM_SOURCES=..\/..\/avr_time.S	\\$/;"	m
+BIN	makefile	/^BIN = xx$/;"	m
+MCU	makefile	/^MCU = atmega328p$/;"	m
+Num_grados_n	main.cpp	/^struct Num_grados_n{};$/;"	s	file:
+Num_steps_n	main.cpp	/^struct Num_steps_n{};$/;"	s	file:
+Pin_DIR	main.cpp	/^    struct Pin_DIR{uint8_t v;};$/;"	s	class:Pololu_A4988	file:
+Pin_STEP	main.cpp	/^    struct Pin_STEP{uint8_t v;};$/;"	s	class:Pololu_A4988	file:
+Pololu_A4988	main.cpp	/^Pololu_A4988::Pololu_A4988(Pin_STEP step, Pin_DIR dir)$/;"	f	class:Pololu_A4988
+Pololu_A4988	main.cpp	/^class Pololu_A4988{$/;"	c	file:
+SOURCES	makefile	/^SOURCES= main.cpp \\$/;"	m
+direccion_	main.cpp	/^    Pin direccion_;$/;"	m	class:Pololu_A4988	file:
+gira	main.cpp	/^void Pololu_A4988::gira(Num_grados grados)$/;"	f	class:Pololu_A4988
+gira	main.cpp	/^void Pololu_A4988::gira(Num_steps num_steps)$/;"	f	class:Pololu_A4988
+gira_en_sentido_negativo	main.cpp	/^    void gira_en_sentido_negativo() $/;"	f	class:Pololu_A4988
+gira_en_sentido_positivo	main.cpp	/^    void gira_en_sentido_positivo() $/;"	f	class:Pololu_A4988
+main	main.cpp	/^int main(void) $/;"	f
+step_	main.cpp	/^    Pin step_;$/;"	m	class:Pololu_A4988	file:
+step_us_low2high	main.cpp	/^    static constexpr uint16_t step_us_low2high = 350;$/;"	m	class:Pololu_A4988	file:
+v	main.cpp	/^    struct Pin_DIR{uint8_t v;};$/;"	m	struct:Pololu_A4988::Pin_DIR	file:
+v	main.cpp	/^    struct Pin_STEP{uint8_t v;};$/;"	m	struct:Pololu_A4988::Pin_STEP	file:
