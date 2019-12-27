@@ -53,7 +53,7 @@ Formado por varios ficheros:
 * `dev_LCD_HD44780_screen.h`: concebimos el LCD como terminal.
    Un terminal es un terminal vulgar y corriente: vas escribiendo en él. 
    Cuando llegas a la última columna automáticamente pasa a la siguiente 
-   fila, y si esta fuera la última fila tira toda lo escrito hacia arriba
+   fila, y si esta fuera la última fila tira todo lo escrito hacia arriba
    y continuas escribiendo.
    
 * `dev_LCD_HD44780_ostream.h`: concebimos el LCD como ostream.
