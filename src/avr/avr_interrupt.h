@@ -1,0 +1,436 @@
+// Copyright (C) 2019-2020 A.Manuel L.Perez
+//
+// This file is part of the MCU++ Library.
+//
+// MCU++ Library is a free library: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#pragma once
+
+#ifndef __AVR_INTERRUPT_H__
+#define __AVR_INTERRUPT_H__
+/****************************************************************************
+ *
+ *   - DESCRIPCION: Interfaz para manejar interrupciones
+ *
+ *   - COMENTARIOS: Las interrupciones están definidas a la hora de definir 
+ *	la arquitectura. Luego las conocemos en tiempo de compilación. Es más
+ *	eficiente usar templates que funciones (y si está bien hecho, podemos
+ *	detectar errores en tiempo de compilación).
+ *  
+ *   - TODO: Ahora cada vez que llamo a una función enable, 
+ *	    internamente se llama a enable_all_interrupts().
+ *	    Esta función llama a sei(). Si sei() tarda tiempo en ejecutarse
+ *	    esto parece ser una perdida de tiempo. Se puede tener un flag
+ *	    static que marque si se han habilitado las interrupciones (de
+ *	    hecho este flag lo tiene el avr, asi que podemos consultarlo)
+ *	    y si se han habilitado no se llamaría a sei(). Ahora bien, si sei
+ *	    se limita a escribir en este flag, no merece la pena perder
+ *	    tiempo. Para ver si merece la pena implementar esto hay que medir
+ *	    tiempo. De momento lo dejo así.
+ *	    
+ *
+ *   - HISTORIA:
+ *           alp  - 27/07/2017 Pruebas iniciales.
+ *		    22/01/2019 La migro a templates y defino macros.
+ *
+ ****************************************************************************/
+#include <avr/interrupt.h>
+#include <atd_bit.h>
+
+
+namespace avr{
+/*!
+ *  \brief  Interfaz para manejar interrupciones
+ *
+ */
+class Interrupt{
+public:
+    /// Habilita el uso de interrupciones. Además, recordar habilitar
+    /// cada interrupción por separado.
+    static void enable_all_interrupts() {sei();}
+
+    /// Deshabilita el uso de interrupciones
+    static void disable_all_interrupts() {cli();}
+
+    // Tipos de interrupciones que pueden ser la INT0 y la INT1
+    enum class Tipo_INT01
+    {			// se genera la interrupción cuando:
+	when_is_zero	// el pin vale 0
+	, when_change	// cambia de 0->1 ó 1->0
+	, when_falling_edge // cuando cae de 1->0
+	, when_rising_edge  // cuando sube de 0->1
+    };
+
+
+    /// Habilitamos las interrupciones INT0
+    /// Recordar definir la ISR:
+    ///		ISR(INT0_vect){ <++cuerpo de la función++> }
+    /// TODO: no está probada!!! Solo está probada el when_change.
+    template<Tipo_INT01 tipo>
+    static void enable_INT0();
+
+    // TODO: está será copia casi literal de enable_INT0
+    // static void enable_INT1(Tipo_INT01 tipo);
+
+    /// Habilitamos las interrupciones en el pin 'num_pin'
+    /// Todos los pines pueden generar interrupciones cuando cambia su
+    /// valor. Este es el tipo de interrupciones que habilitamos aquí.
+    /// Recordar definir la ISR correspondiente. Usar las macros
+    /// ISR_PCINT_PIN1x para ello
+    template<uint8_t num_pin>
+    static void enable_pin();
+
+
+
+private:
+
+    static void enable_INT0_comun()
+    {
+	// Habilitamos las interrupciones INT0
+	// TODO: OJO: la datasheet dice que "the 1-bit in de SREG is set", 
+	// aunque el libro de MAKE lo ignora. (???) (pag. 97)
+	EIMSK |= (1 << INT0);
+
+	enable_all_interrupts();
+    }
+};
+
+
+/// Recordar definir la ISR correspondiente:
+// TODO: esto es posible que sea específico del atmega328p y algún otro?
+// Si es así, hay que meterlo en el archivo de cabecera del atmega. De hecho
+// eso parece lo lógico ya que mapeo número de pins.
+//		ISR(PCINT0_vect) para pines 9, 10, 14, 15, 16, 17, 18, 19
+//		ISR(PCINT1_vect) para pines 1, 23, 24, 25, 26, 27, 28
+//		ISR(PCINT2_vect) para pines 2,  3,  4,  5,  6, 11, 12, 13
+// Defino todas estas macros para no tener que recordar este mapeo. 
+// Es más natural usar el número de pin.
+//
+// Cuidado al usar las interrupciones: si se usa USART no se pueden usar los
+// pines 2 y 3.
+#define ISR_PCINT_PIN1	ISR(PCINT1_vect)
+#define ISR_PCINT_PIN2	ISR(PCINT2_vect)
+#define ISR_PCINT_PIN3	ISR(PCINT2_vect)
+#define ISR_PCINT_PIN4	ISR(PCINT2_vect)
+#define ISR_PCINT_PIN5	ISR(PCINT2_vect)
+#define ISR_PCINT_PIN6	ISR(PCINT2_vect)
+// VCC: #define ISR_PCINT_PIN7	ISR(PCINT2_vect)
+// GND: #define ISR_PCINT_PIN8	ISR(PCINT2_vect)
+#define ISR_PCINT_PIN9	ISR(PCINT0_vect)
+#define ISR_PCINT_PIN10	ISR(PCINT0_vect)
+#define ISR_PCINT_PIN11 ISR(PCINT2_vect)
+#define ISR_PCINT_PIN12	ISR(PCINT2_vect)
+#define ISR_PCINT_PIN13	ISR(PCINT2_vect)
+#define ISR_PCINT_PIN14	ISR(PCINT0_vect)
+#define ISR_PCINT_PIN15	ISR(PCINT0_vect)
+#define ISR_PCINT_PIN16	ISR(PCINT0_vect)
+#define ISR_PCINT_PIN17	ISR(PCINT0_vect)
+#define ISR_PCINT_PIN18	ISR(PCINT0_vect)
+#define ISR_PCINT_PIN19	ISR(PCINT0_vect)
+// AVCC: #define ISR_PCINT_PIN20	ISR(PCINT2_vect)
+// AREF: #define ISR_PCINT_PIN21	ISR(PCINT2_vect)
+// GND:  #define ISR_PCINT_PIN22	ISR(PCINT2_vect)
+#define ISR_PCINT_PIN23	ISR(PCINT1_vect)
+#define ISR_PCINT_PIN24	ISR(PCINT1_vect)
+#define ISR_PCINT_PIN25	ISR(PCINT1_vect)
+#define ISR_PCINT_PIN26	ISR(PCINT1_vect)
+#define ISR_PCINT_PIN27	ISR(PCINT1_vect)
+#define ISR_PCINT_PIN28	ISR(PCINT1_vect)
+
+// Voy a usar los nombres dados a las interrupciones en la datasheet (tabla
+// 16.1). gcc les añade el _vect (???)
+// ISR de los timers
+#define ISR_TIMER0_COMPA ISR(TIMER0_COMPA_vect)
+#define ISR_TIMER0_COMPB ISR(TIMER0_COMPB_vect)
+#define ISR_TIMER0_OVF   ISR(TIMER0_OVF_vect)
+
+#define ISR_TIMER1_CAPT  ISR(TIMER1_CAPT_vect)
+#define ISR_TIMER1_COMPA ISR(TIMER1_COMPA_vect)
+#define ISR_TIMER1_COMPB ISR(TIMER1_COMPB_vect)
+#define ISR_TIMER1_OVF	 ISR(TIMER1_OVF_vect)
+
+// Según página 96 de la datasheet
+template <>
+inline void Interrupt::enable_INT0<Interrupt::Tipo_INT01::when_is_zero>()
+{
+    atd::write_zero_bit<ISC01>(EICRA);
+    atd::write_zero_bit<ISC00>(EICRA);
+
+    enable_INT0_comun();
+}
+
+
+
+
+template<>
+inline void Interrupt::enable_INT0<Interrupt::Tipo_INT01::when_change>()
+{
+    atd::write_zero_bit<ISC01>(EICRA);
+    atd::write_one_bit <ISC00>(EICRA);
+
+    enable_INT0_comun();
+}
+
+
+template<>
+inline void Interrupt::enable_INT0<Interrupt::Tipo_INT01::when_falling_edge>()
+{
+    atd::write_one_bit<ISC01>(EICRA);
+    atd::write_zero_bit<ISC00>(EICRA);
+
+    enable_INT0_comun();
+}
+
+
+template<>
+inline void Interrupt::enable_INT0<Interrupt::Tipo_INT01::when_rising_edge>()
+{
+    atd::write_one_bit<ISC01>(EICRA);
+    atd::write_one_bit<ISC00>(EICRA);
+
+    enable_INT0_comun();
+}
+
+
+
+
+// TODO: funcionan todos los pines menos el número 1, por eso comento la
+// función, para que de error si se intenta usar. 
+// Revisar qué pasa 
+// (OJO: puede que no funcionen debido a la forma en como conecto
+// el programador al avr).
+//template<>
+//inline void Interrupt::enable_pin<1>()
+//{
+//    atd::write_one_bit<PCIE1>(PCICR);
+//    atd::write_one_bit<PCINT14>(PCMSK1);
+//
+//    enable_all_interrupts();
+//}
+
+
+template<>
+inline void Interrupt::enable_pin<2>()
+{
+    atd::write_one_bit<PCIE2>(PCICR);
+    atd::write_one_bit<PCINT16>(PCMSK2);
+    enable_all_interrupts();
+}
+
+template<>
+inline void Interrupt::enable_pin<3>()
+{
+    atd::write_one_bit<PCIE2>(PCICR);
+    atd::write_one_bit<PCINT17>(PCMSK2);
+    enable_all_interrupts();
+}
+
+template<>
+inline void Interrupt::enable_pin<4>()
+{
+    atd::write_one_bit<PCIE2>(PCICR);
+    atd::write_one_bit<PCINT18>(PCMSK2);
+    enable_all_interrupts();
+}
+
+template<>
+inline void Interrupt::enable_pin<5>()
+{
+    atd::write_one_bit<PCIE2>(PCICR);
+    atd::write_one_bit<PCINT19>(PCMSK2);
+    enable_all_interrupts();
+}
+
+template<>
+inline void Interrupt::enable_pin<6>()
+{
+    atd::write_one_bit<PCIE2>(PCICR);
+    atd::write_one_bit<PCINT20>(PCMSK2);
+    enable_all_interrupts();
+}
+
+template<>
+inline void Interrupt::enable_pin<9>()
+{
+    atd::write_one_bit<PCIE0>(PCICR);
+    atd::write_one_bit<PCINT6>(PCMSK0);
+    enable_all_interrupts();
+}
+
+template<>
+inline void Interrupt::enable_pin<10>()
+{
+    atd::write_one_bit<PCIE0>(PCICR);
+    atd::write_one_bit<PCINT7>(PCMSK0);
+    enable_all_interrupts();
+}
+
+template<>
+inline void Interrupt::enable_pin<11>()
+{
+    atd::write_one_bit<PCIE2>(PCICR);
+    atd::write_one_bit<PCINT21>(PCMSK2);
+    enable_all_interrupts();
+}
+
+template<>
+inline void Interrupt::enable_pin<12>()
+{
+    atd::write_one_bit<PCIE2>(PCICR);
+    atd::write_one_bit<PCINT22>(PCMSK2);
+    enable_all_interrupts();
+}
+
+template<>
+inline void Interrupt::enable_pin<13>()
+{
+    atd::write_one_bit<PCIE2>(PCICR);
+    atd::write_one_bit<PCINT23>(PCMSK2);
+    enable_all_interrupts();
+}
+
+template<>
+inline void Interrupt::enable_pin<14>()
+{
+    atd::write_one_bit<PCIE0>(PCICR);
+    atd::write_one_bit<PCINT0>(PCMSK0);
+    enable_all_interrupts();
+}
+
+template<>
+inline void Interrupt::enable_pin<15>()
+{
+    atd::write_one_bit<PCIE0>(PCICR);
+    atd::write_one_bit<PCINT1>(PCMSK0);
+    enable_all_interrupts();
+}
+
+template<>
+inline void Interrupt::enable_pin<16>()
+{
+    atd::write_one_bit<PCIE0>(PCICR);
+    atd::write_one_bit<PCINT2>(PCMSK0);
+    enable_all_interrupts();
+}
+
+template<>
+inline void Interrupt::enable_pin<17>()
+{
+    atd::write_one_bit<PCIE0>(PCICR);
+    atd::write_one_bit<PCINT3>(PCMSK0);
+    enable_all_interrupts();
+}
+
+template<>
+inline void Interrupt::enable_pin<18>()
+{
+    atd::write_one_bit<PCIE0>(PCICR);
+    atd::write_one_bit<PCINT4>(PCMSK0);
+    enable_all_interrupts();
+}
+
+template<>
+inline void Interrupt::enable_pin<19>()
+{
+    atd::write_one_bit<PCIE0>(PCICR);
+    atd::write_one_bit<PCINT5>(PCMSK0);
+    enable_all_interrupts();
+}
+
+template<>
+inline void Interrupt::enable_pin<23>()
+{
+    atd::write_one_bit<PCIE1>(PCICR);
+    atd::write_one_bit<PCINT8>(PCMSK1);
+    enable_all_interrupts();
+}
+
+template<>
+inline void Interrupt::enable_pin<24>()
+{
+    atd::write_one_bit<PCIE1>(PCICR);
+    atd::write_one_bit<PCINT9>(PCMSK1);
+    enable_all_interrupts();
+}
+
+template<>
+inline void Interrupt::enable_pin<25>()
+{
+    atd::write_one_bit<PCIE1>(PCICR);
+    atd::write_one_bit<PCINT10>(PCMSK1);
+    enable_all_interrupts();
+}
+
+template<>
+inline void Interrupt::enable_pin<26>()
+{
+    atd::write_one_bit<PCIE1>(PCICR);
+    atd::write_one_bit<PCINT11>(PCMSK1);
+    enable_all_interrupts();
+}
+
+template<>
+inline void Interrupt::enable_pin<27>()
+{
+    atd::write_one_bit<PCIE1>(PCICR);
+    atd::write_one_bit<PCINT12>(PCMSK1);
+
+    enable_all_interrupts();
+}
+
+template<>
+inline void Interrupt::enable_pin<28>()
+{
+    atd::write_one_bit<PCIE1>(PCICR);
+    atd::write_one_bit<PCINT13>(PCMSK1);
+
+    enable_all_interrupts();
+}
+
+
+
+
+/*!
+ *  \brief  Clase que bloquea las interrupciones. Usamos RRI.
+ *
+ *  El constructor bloque las interrupciones, mientras que el destructor
+ *  las deja como estaban.
+ *
+ */
+// Ejemplo de bloqueo en la datasheet: ver pag. 153 por ejemplo.
+class Interrupts_lock{
+public:
+    Interrupts_lock()
+    {
+	sreg_ = SREG;	// Save global interrupt flag
+	cli();		// Disable interrupts
+    }
+
+    ~Interrupts_lock()
+    {
+	SREG = sreg_;	// Restor global interrupt flag
+    }
+
+
+private:
+    unsigned char sreg_;
+};
+
+
+}// namespace
+
+
+#endif
+
+
