@@ -91,7 +91,7 @@ public:
     /// Definimos la frecuencia del reloj SCL.
     /// f_scl = frecuencia en kilohercios de SCL (tipica: 100 y 400 kHz).
     /// f_clock = frecuencia a la que funciona el reloj del avr.
-    template <uint8_t f_scl, uint32_t f_clock = AVR_CLOCK_FRECUENCIA_EN_HZ>
+    template <uint16_t f_scl, uint32_t f_clock = AVR_CLOCK_FRECUENCIA_EN_HZ>
     static void SCL_frequency_in_kHz();
     
 
@@ -162,7 +162,7 @@ public:
     /// que vamos a operar.
     /// f_scl = frecuencia en kilohercios de SCL (tipica: 100 y 400 kHz).
     /// f_clock = frecuencia a la que funciona el reloj del avr.
-    template <uint8_t f_scl, uint32_t f_clock = AVR_CLOCK_FRECUENCIA_EN_HZ>
+    template <uint16_t f_scl, uint32_t f_clock = AVR_CLOCK_FRECUENCIA_EN_HZ>
     static void enable_and_set_SCL_frequency_in_kHz()
     {
 	SCL_frequency_in_kHz<f_scl, f_clock>();
@@ -396,7 +396,7 @@ public:
 // Los siguientes datos proceden de la tabla 1-1 de la application note
 // AVR315.
 template <>
-inline void TWI::SCL_frequency_in_kHz<400u, 16000000u>()
+inline void TWI::SCL_frequency_in_kHz<400u, 16000000uL>()
 {
     bit_rate_prescaler_value_1();
     TWBR = 12;
@@ -404,7 +404,7 @@ inline void TWI::SCL_frequency_in_kHz<400u, 16000000u>()
 
 
 template <>
-inline void TWI::SCL_frequency_in_kHz<100u, 16000000u>()
+inline void TWI::SCL_frequency_in_kHz<100u, 16000000uL>()
 {
     bit_rate_prescaler_value_1();
     TWBR = 72;
@@ -412,14 +412,14 @@ inline void TWI::SCL_frequency_in_kHz<100u, 16000000u>()
 
 
 template <>
-inline void TWI::SCL_frequency_in_kHz<400u, 14400000u>()
+inline void TWI::SCL_frequency_in_kHz<400u, 14400000uL>()
 {
     bit_rate_prescaler_value_1();
     TWBR = 10;
 }
 
 template <>
-inline void TWI::SCL_frequency_in_kHz<100u, 14400000u>()
+inline void TWI::SCL_frequency_in_kHz<100u, 14400000uL>()
 {
     bit_rate_prescaler_value_1();
     TWBR = 64;
@@ -427,7 +427,7 @@ inline void TWI::SCL_frequency_in_kHz<100u, 14400000u>()
 
 
 template <>
-inline void TWI::SCL_frequency_in_kHz<400u, 12000000u>()
+inline void TWI::SCL_frequency_in_kHz<400u, 12000000uL>()
 {
     bit_rate_prescaler_value_1();
     TWBR = 7;
@@ -435,14 +435,14 @@ inline void TWI::SCL_frequency_in_kHz<400u, 12000000u>()
 
 
 template <>
-inline void TWI::SCL_frequency_in_kHz<100u, 12000000u>()
+inline void TWI::SCL_frequency_in_kHz<100u, 12000000uL>()
 {
     bit_rate_prescaler_value_1();
     TWBR = 52;
 }
 
 template <>
-inline void TWI::SCL_frequency_in_kHz<400u, 8000000u>()
+inline void TWI::SCL_frequency_in_kHz<400u, 8000000uL>()
 {
     bit_rate_prescaler_value_1();
     TWBR = 2;
@@ -450,14 +450,14 @@ inline void TWI::SCL_frequency_in_kHz<400u, 8000000u>()
 
 
 template <>
-inline void TWI::SCL_frequency_in_kHz<100u, 8000000u>()
+inline void TWI::SCL_frequency_in_kHz<100u, 8000000uL>()
 {
     bit_rate_prescaler_value_1();
     TWBR = 32;
 }
 
 template <>
-inline void TWI::SCL_frequency_in_kHz<100u, 4000000u>()
+inline void TWI::SCL_frequency_in_kHz<100u, 4000000uL>()
 {
     bit_rate_prescaler_value_1();
     TWBR = 12;
@@ -465,7 +465,7 @@ inline void TWI::SCL_frequency_in_kHz<100u, 4000000u>()
 
 
 template <>
-inline void TWI::SCL_frequency_in_kHz<100u, 3600000u>()
+inline void TWI::SCL_frequency_in_kHz<100u, 3600000uL>()
 {
     bit_rate_prescaler_value_1();
     TWBR = 10;
@@ -473,21 +473,21 @@ inline void TWI::SCL_frequency_in_kHz<100u, 3600000u>()
 
 
 template <>
-inline void TWI::SCL_frequency_in_kHz<100u, 2000000u>()
+inline void TWI::SCL_frequency_in_kHz<100u, 2000000uL>()
 {
     bit_rate_prescaler_value_1();
     TWBR = 2;
 }
 
 template <>
-inline void TWI::SCL_frequency_in_kHz<50u, 2000000u>()
+inline void TWI::SCL_frequency_in_kHz<50u, 2000000uL>()
 {
     bit_rate_prescaler_value_1();
     TWBR = 12;
 }
 
 template <>
-inline void TWI::SCL_frequency_in_kHz<50u, 1000000u>()
+inline void TWI::SCL_frequency_in_kHz<50u, 1000000uL>()
 {
     bit_rate_prescaler_value_1();
     TWBR = 2;

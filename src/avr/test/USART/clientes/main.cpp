@@ -111,7 +111,7 @@ try{
 
 
 
-}catch(Excepcion& e)
+}catch(const std::excpetion& e)
 {
     std::cerr  << e.what() << std::endl;
     return -1;

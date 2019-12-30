@@ -1,7 +1,7 @@
 # -------------------------
 # Estructura de directorios
 # -------------------------
-MCU_ROOT=${MY_HOME}/prj/mcu		; export MCU_ROOT
+MCU_ROOT=${MY_HOME}/prj/git/mcu		; export MCU_ROOT
 MCU_SRC=${MCU_ROOT}/src			; export MCU_SRC
 MCU_MK=${MCU_ROOT}/mk		; export MCU_MK
 
@@ -17,11 +17,6 @@ MCU_LIB=${MY_LIB}/avrgcc		; export MCU_LIB
 # los binarios
 MCU_BIN=${MY_BIN}			; export MCU_BIN
 
-
-# Atajos de cd
-# ------------
-CDPATH=${CDPATH}:${MCU_SRC}
-export CDPATH
 
 # ---------------------
 # Reglas de compilación
@@ -58,7 +53,7 @@ LIBRARY_PATH=${MCU_LIB}	; export LIBRARY_PATH
 # PATH
 # ----
 # path del avr-g++
-PATH=${PATH}:${HOME}/bin/avr/bin
+PATH=${PATH}:${MY_HOME}/../bin/avr/bin
 export PATH
 
 # Alias

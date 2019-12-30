@@ -33,10 +33,9 @@
 
 #include <stddef.h> // ptrdiff_t
 
-// hasta que llegue C++20 defino char8_t
-using char8_t = unsigned char;
 
 namespace STD{
+
 using ::ptrdiff_t;
 using ::size_t;
 

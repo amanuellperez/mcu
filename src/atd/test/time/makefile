@@ -3,8 +3,6 @@ SOURCES= main.cpp	\
 
 BIN = xx
 
-#CXX=clang++-6.0
-USER_CXXFLAGS=-I$(MCU_INCLUDE)
+USER_LDFLAGS=-lalp
 
-include $(IMG_COMPRULES)
-
+include $(CPP_COMPRULES)

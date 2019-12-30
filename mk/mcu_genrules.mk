@@ -84,7 +84,7 @@ CPPFLAGS += -DF_CPU=$(F_CPU) -DBAUD=$(BAUD) $(PROJ_CPPFLAGS)
 # 	-std: versión del estandar a usar
 # 	-Wall: mostrar todos los warnings
 # 	-g	: produce información para poder depurar.
-CXXFLAGS = -Os -std=$(STD) -Wall -pedantic
+CXXFLAGS = -Os -std=$(STD) -Wall -pedantic $(PROJ_CXXFLAGS) $(USER_CXXFLAGS)
 
 # Use short (8-bit) data types 
 # -funsigned-char	: hace que el tipo char sea unsigned
@@ -119,7 +119,7 @@ LDFLAGS += -Wl,--gc-sections
 # LDFLAGS += -Wl,-u,vfprintf -lprintf_min      # for smaller printf
 
 # Añadimos los flags del proyecto
-LDFLAGS += $(PROJ_LDFLAGS)
+LDFLAGS += $(PROJ_LDFLAGS) $(USER_LDFLAGS)
 
 # Estos flags indican el micro para el que compilamos
 # ¿por qué lo llama BIN_ARCH???

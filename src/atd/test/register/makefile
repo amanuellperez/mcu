@@ -2,7 +2,6 @@ SOURCES= main.cpp
 
 BIN = xx
 
-#CXX = g++
+USER_LDFLAGS=-lalp
 
-include $(IMG_COMPRULES)
-
+include $(CPP_COMPRULES)

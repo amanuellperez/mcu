@@ -148,6 +148,26 @@ private:
 };
 
 
+// El centinela va a garantizar que el flujo esté bien construido (que esté
+// definido rdbuf()). De esta forma las funciones que lo llaman no tienen que
+// andar preocupandose de esto.
+class ostream::sentry{
+public:
+    explicit sentry(ostream& out);
+    ~sentry();
+
+    explicit operator bool() const {return (out_ != 0);}
+
+    sentry(const sentry&) = delete;
+    sentry& operator=(const sentry&) = delete;
+
+private:
+    // El standard explícitamente habla de tener un bool ok_; lo cual es un 
+    // error: no debería de hablar de cómo se implementa la clase!!!
+    ostream* out_;
+};
+
+
 template <typename Int>
 ostream& ostream::operator_print(const Int& x)
 {
@@ -170,24 +190,6 @@ ostream& ostream::operator_print(const Int& x)
 
 
 
-// El centinela va a garantizar que el flujo esté bien construido (que esté
-// definido rdbuf()). De esta forma las funciones que lo llaman no tienen que
-// andar preocupandose de esto.
-class ostream::sentry{
-public:
-    explicit sentry(ostream& out);
-    ~sentry();
-
-    explicit operator bool() const {return (out_ != 0);}
-
-    sentry(const sentry&) = delete;
-    sentry& operator=(const sentry&) = delete;
-
-private:
-    // El standard explícitamente habla de tener un bool ok_; lo cual es un 
-    // error: no debería de hablar de cómo se implementa la clase!!!
-    ostream* out_;
-};
 
 inline ostream& operator<<(ostream& out, char c)
 {

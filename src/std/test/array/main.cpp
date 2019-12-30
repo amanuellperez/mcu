@@ -41,7 +41,7 @@ void test_array()
     a[0] = 1;
     check_true(a[0] == 1, "operator[]");
 
-    for (int i = 0; i < a.size(); ++i)
+    for (size_t i = 0; i < a.size(); ++i)
 	a[i] = i + 1;
 
 

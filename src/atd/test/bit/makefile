@@ -9,5 +9,6 @@ BIN = xx
 #USER_CXXFLAGS=-I$(MCU_INCLUDE) -O3 -fnothrow-opt -fno-rtti -save-temps
 USER_CXXFLAGS=-I$(MCU_INCLUDE) -O3 -fnothrow-opt -fno-rtti
 
-include $(IMG_COMPRULES)
+USER_LDFLAGS=-lalp
 
+include $(CPP_COMPRULES)

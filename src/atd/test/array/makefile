@@ -1,8 +1,0 @@
-SOURCES= main.cpp 
-
-BIN = xx
-
-USER_CXXFLAGS=-I$(MCU_INCLUDE)
-
-include $(IMG_COMPRULES)
-
