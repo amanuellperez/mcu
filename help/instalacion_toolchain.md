@@ -68,12 +68,12 @@ correctamente.
       $ export PATH 
       ```
 
-     Notar que hago que busque primero en `$PREFIX/bin`.  A día de hoy tengo
-     instalada una versión de las binutils en `/usr/lib`.
+      Notar que hago que busque primero en `$PREFIX/bin`.  A día de hoy tengo
+      instalada una versión de las binutils en `/usr/lib`.
 
-     Al compilar avr-gcc quiero que use las binutils que acabo de compilar,
-     por eso necesito poner primero `$PREFIX/bin` para que encuentre la
-     versión que yo acabo de compilar.
+      Al compilar avr-gcc quiero que use las binutils que acabo de compilar,
+      por eso necesito poner primero `$PREFIX/bin` para que encuentre la
+      versión que yo acabo de compilar.
 
    3. Crear el directorio `$PREFIX`:
 
