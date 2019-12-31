@@ -23,9 +23,9 @@ cómo instalarlo en Linux, Windows y Mac.
 ### Instalación
 Para instalar la toolchain en linux:
 
-    $ sudo apt install avrdude avrdude-doc binutils-avr avr-libc gcc-avr gdb-avr
-
-
+```
+$ sudo apt install avrdude avrdude-doc binutils-avr avr-libc gcc-avr gdb-avr
+```
 
 
 
@@ -87,44 +87,48 @@ ha hecho (en caso de error de compilación puede ser necesario).
 ### binutils: linker, assembler...
 1. Descargarlo de la página que indique el link de ayuda dado al principio.
     
-    Verificar la versión descargada:
-	
-	`$ gpg --verify --keyring ./gnu-keyring.gpg binutils-2.33.1.tar.xz.sig`
-	
-    Descomprimirlo.
+   Verificar la versión descargada:
+
+   ```
+   $ gpg --verify --keyring ./gnu-keyring.gpg binutils-2.33.1.tar.xz.sig
+   ```
+
+   Descomprimirlo.
 
 2. Crear el directorio obj-avr dentro:
-    ```
-    $ mkdir obj-avr
-    $ cd obj-avr
-    ```
+   ```
+   $ mkdir obj-avr
+   $ cd obj-avr
+   ```
 	
 3. Configurarlo:
-    `$ ../configure --prefix=$PREFIX --target=avr --host=x86_64-linux-gnu \
-			    --disable-nls > log 2>&1`
+   ```
+   $ ../configure --prefix=$PREFIX --target=avr --host=x86_64-linux-gnu \
+			    --disable-nls > log 2>&1
+   ```
 
-    Notar que he añadido el `--host`. Sin el host daba un error de que no era
-    capaz de reconocer el tamaño de un long long (¿por defecto considera que
-    es una máquina de 32 bits?)
+   Notar que he añadido el `--host`. Sin el host daba un error de que no era
+   capaz de reconocer el tamaño de un long long (¿por defecto considera que
+   es una máquina de 32 bits?)
 
 4. Compilarlo e instalarlo:
 
-    ```
-    $ make
-    $ make install
-    ```
+   ```
+   $ make
+   $ make install
+   ```
 
-    Me ha dado un error. Resulta que el `configure` no ha definido la variable
-    interna `prefix=`. Escribo el `Makefile` poniendo en lugar de `prefix=`
-    --> `prefix=${PREFIX}`.
+   Me ha dado un error. Resulta que el `configure` no ha definido la variable
+   interna `prefix=`. Escribo el `Makefile` poniendo en lugar de `prefix=`
+   --> `prefix=${PREFIX}`.
 
 6. Observar que deja instalados dos directorios bin:
-    ```
-    $PREFIX/bin	    # versiones: avr-as, ...
-    $PREFIX/avr/bin # versiones: as, ld, ...
-    ```
-    Las dos parece ser necesarias. De hecho probé a eliminar la segunda
-    y no podía configurar la compilación de `avr-libc`.
+   ```
+   $PREFIX/bin	    # versiones: avr-as, ...
+   $PREFIX/avr/bin # versiones: as, ld, ...
+   ```
+   Las dos parece ser necesarias. De hecho probé a eliminar la segunda
+   y no podía configurar la compilación de `avr-libc`.
 
 ### avr-gcc: el compilador
 
@@ -132,15 +136,15 @@ Tener en cuenta que el `avr-gcc` no es más que el `gcc` compilado con `target =
 avr`.
 
 1. Instalar prerequisitos (GMP, MPFR...)
-    Se hace automático ejecutando `./contrib/download_prerequisites`.
+   Se hace automático ejecutando `./contrib/download_prerequisites`.
 
 2. Crear el directorio de compilación **FUERA** de `gcc` (eso indica en la ayuda).
 
-    Si lo tengo descomprimido en `cd-rom/gcc-9.2.0`, creo `cd-rom/obj-avr`:
-    ```
-    $ mkdir obj-avr
-    $ cd obj-avr
-    ```
+   Si lo tengo descomprimido en `cd-rom/gcc-9.2.0`, creo `cd-rom/obj-avr`:
+   ```
+   $ mkdir obj-avr
+   $ cd obj-avr
+   ```
 
 3. Lo configuramos:(ver todas las posibles opciones 
    [en la página de gcc](https://gcc.gnu.org/install/configure.html))
@@ -191,9 +195,9 @@ avr`.
      un error si el mensaje está en español es casi imposible
      encontrarlo en internet. En inglés lo encuentras fácilmente.
 
-    * Usa DWARF 2 debugging information:	`--with-dwarf2`
-      Aconsejan poner esto, pero no lo pongo. Es para depurar
-      (yo no uso el depurador).
+   * Usa DWARF 2 debugging information:	`--with-dwarf2`
+     Aconsejan poner esto, pero no lo pongo. Es para depurar
+     (yo no uso el depurador).
 
 4. Lo compilamos e instalamos:
    ```
@@ -206,8 +210,7 @@ avr`.
    Para compilar más rápido revisar el fichero html de la ayuda del `gcc`.
    Indica que `make -j 2` puede compilar en paralelo. No lo he probado.
 	
-   Para instalarlo:
-   `$ make install`
+   Para instalarlo: `$ make install`
 
 5. Aunque encuentro en `mk.log` el siguiente warning
 
@@ -240,11 +243,11 @@ Este es el más sencillo de compilar. No genera problemas.
 1. Descomprimirlo.
 2. Ejecutar:
 
-    ```
-    ./configure --prefix=$PREFIX --build=`./config.guess` --host=avr
-	make
-	make install
-    ```
+   ```
+   $ ./configure --prefix=$PREFIX --build=`./config.guess` --host=avr
+   $ make
+   $ make install
+   ```
 
 ### avrdude
 
@@ -252,16 +255,16 @@ Este es el más sencillo de compilar. No genera problemas.
 
 Para instalarlo basta con escribir:
 
-   ```
-    $sudo apt install avrdude avrdude-doc
-   ```
+```
+$sudo apt install avrdude avrdude-doc
+```
 
 ### Configuración de la toolchain
 
 Añadir al path en el `.profile` el path donde ha quedado instalada la toolchain:
-   ```
-    PATH=${PATH}:${PREFIX}/avr/bin
-   ```
+```
+PATH=${PATH}:${PREFIX}/avr/bin
+```
 
 
 ## <a name="configuracion">CONFIGURAR CABLE FTDI</a>
@@ -269,66 +272,68 @@ Añadir al path en el `.profile` el path donde ha quedado instalada la toolchain
 El cable que yo tengo es un FTDI TTL-232D-5V original. Funciona bien, no dando
 ningún problema.
 
-1. Para ver en que USB se encuentra ejecutar
-
-	`$ lsusb`
-
-    seguramente esté en `/dev/ttyUSB0`.
+1. Para ver en que USB se encuentra ejecutar 
+   `$ lsusb`
+   seguramente esté en `/dev/ttyUSB0`.
 
 
 2. Hay que meter nuestro usuario en el grupo cable, seguramente `dialout`.
 
-    Para saber en qué grupo se encuentra hacer
+   Para saber en qué grupo se encuentra hacer
 
-	`$ ls -l /dev/tty*`
+   `$ ls -l /dev/tty*`
     
-    Para darle los permisos correspondientes:
+   Para darle los permisos correspondientes:
 
-	`$ sudo usermod -a -G dialout alp`
+   `$ sudo usermod -a -G dialout alp`
 
-    No olvidar reiniciar el ordendador.
+   No olvidar reiniciar el ordendador.
 
 
 3. Conectar el cable al AVR:
 
-    Los cables son los siguientes:
+   Los cables son los siguientes:
 
-    | color	| significado	|				|
-    |-----------|---------------|-------------------------------|
-    | negro	| tierra	|				|
-    | amarillo	| RXD		| conectarlo al pin 3 del AVR	|
-    | naranja	| TXD		| conectarlo al pin 2 del AVR	|
+   | color	| significado	|				|
+   |-----------|---------------|-------------------------------|
+   | negro	| tierra	|				|
+   | amarillo	| RXD		| conectarlo al pin 3 del AVR	|
+   | naranja	| TXD		| conectarlo al pin 2 del AVR	|
 
 
 
 4. Para abrir un terminal de comunicación con el AVR, podemos:
-    * Usar `screen`:
+   * Usar `screen`:
 
-	    Para instalarlo ejecutar
+     Para instalarlo ejecutar
 
-	    `$ sudo apt install screen`
+     `$ sudo apt install screen`
 
-	    Para conectar el ordenador al avr via el cable de FTDI:
-	    ```
-	    $ screen /dev/ttyUSB0 9600
-	    (screen <serial_port> <baud_rate>)
-	    ```
+     Para conectar el ordenador al avr via el cable de FTDI:
+     ```
+     $ screen /dev/ttyUSB0 9600
+     (screen <serial_port> <baud_rate>)
+     ```
 
-	    Todo lo que se escriba en este monitor serie se enviará al AVR
-	    a través del USB.
-	    
-	    Para salir de screen: `Ctrl-A` y luego `K` (kill).
+     Todo lo que se escriba en este monitor serie se enviará al AVR
+     a través del USB.
+    
+     Para salir de screen: `Ctrl-A` y luego `K` (kill).
 
-    * Usar python (instalar primero `pyserial`):
+   * Usar python (instalar primero `pyserial`):
 	
-	    `$ python -m serial.tools.miniterm  /decv/ttyUSB0 9600`
+     `$ python -m serial.tools.miniterm  /decv/ttyUSB0 9600`
 
-	    *OJO: si no se configura python hay que ejecutar esto desde
-	    el directorio donde está instalado pyserial.*
+     *OJO: si no se configura python hay que ejecutar esto desde
+     el directorio donde está instalado pyserial.*
 
-	    Para ver qué envia y recibe:
+     Para ver qué envia y recibe:
 
-	    `$ python -m serial.tools.miniterm --filter debug /decv/ttyUSB0 9600`
+     `$ python -m serial.tools.miniterm --filter debug /decv/ttyUSB0 9600`
 
-	    En la práctica yo uso `screen`.
+     En la práctica yo uso `screen`.
+
+
+A.Manuel L.Perez (https://github.com/amanuellperez/mcu)
+
 
