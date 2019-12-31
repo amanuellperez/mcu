@@ -124,7 +124,7 @@ ha hecho (en caso de error de compilación puede ser necesario).
 
 6. Observar que deja instalados dos directorios bin:
    ```
-   $PREFIX/bin	    # versiones: avr-as, ...
+   $PREFIX/bin	   # versiones: avr-as, ...
    $PREFIX/avr/bin # versiones: as, ld, ...
    ```
    Las dos parece ser necesarias. De hecho probé a eliminar la segunda
@@ -334,6 +334,7 @@ ningún problema.
      En la práctica yo uso `screen`.
 
 
+---
 A.Manuel L.Perez (https://github.com/amanuellperez/mcu)
 
 

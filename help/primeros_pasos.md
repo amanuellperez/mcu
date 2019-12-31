@@ -1,3 +1,5 @@
+# PRIMEROS PASOS CON AVR
+
 ¿Quieres aprender a programar un microcontrolador directamente y no sabes qué
 hacer?  Aquí explico cosas básicas a nivel práctico. En principio lo explicado
 es para programar avrs.
@@ -18,47 +20,49 @@ mayoritariamente en C.
 
 * Elliot Williams, "Make:AVR Programming". ISBN: 978-1-449-35578-4 
 
-   En inglés. Enseña poco a poco construyendo proyectos asequibles. Programa
-   en C. Ideal para empezar.
+  En inglés. Enseña poco a poco construyendo proyectos asequibles. Programa
+  en C. Ideal para empezar.
 
 ### Hardware básico
 
 - El microcontrolador. 
 - Un programador: 
 
-   Yo compré uno de Baite en amazon por unos 5 euros y es el que uso.  Luego
-   [encontré el mismo](https://es.aliexpress.com/item/577097498.html) en
-   aliexpress por 1.19 euros
+  Yo compré uno de Baite en amazon por unos 5 euros y es el que uso.  Luego
+  [encontré el mismo](https://es.aliexpress.com/item/577097498.html) en
+  aliexpress por 1.19 euros
 
 - Un cable de FTDI para poder conectar el ordenador a el microcontrolador al
   PC (muy útil).
 
-   El que yo tengo es un FTDI CHIP TTL-232D-5V.
+  El que yo tengo es un FTDI CHIP TTL-232D-5V.
 
-   El primero que compré lo compre chino por 5 euros y no funcionaba bien así
-   que compré el original y la mar de contento ya que funciona sin problema.
-   Cuesta unos 25 euros.
+  El primero que compré lo compre chino por 5 euros y no funcionaba bien así
+  que compré el original y la mar de contento ya que funciona sin problema.
+  Cuesta unos 25 euros.
 
 
 ### ¿Dónde comprar?
 
-* Farnell:
+* [Farnell](https://es.farnell.com/)
   
-   Te lo sirven en 24 horas.
+  Te lo sirven en 24 horas. Facturan directamente en España.
 
-* Mouser:
+* [Mouser](https://www.mouser.es/)
 
-   Tardan una semana ya que lo envían desde los Estados Unidos.  Facturan
-   directamente desde España.
+  Tardan una semana ya que lo envían desde los Estados Unidos.  Facturan
+  directamente desde España.
 
-* Digikey:
+* [Digikey](https://www.digikey.es/)
 
-   Tardan una semana ya que lo envían desde los Estados Unidos.  No deben de
-   tener distribuidora en España así que hay que pagar las tasas en la aduana.
+  Tardan una semana ya que lo envían desde los Estados Unidos.  No deben de
+  tener distribuidora en España así que hay que pagar las tasas en la aduana.
 
 
 * Amazon:
 
-   Elegoo tiene producto que funciona bien.
+  Elegoo tiene producto que funciona bien.
 
 
+---
+A.Manuel L.Perez (https://github.com/amanuellperez/mcu)
