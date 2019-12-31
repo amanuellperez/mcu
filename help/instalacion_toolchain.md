@@ -53,25 +53,27 @@ correctamente.
 3. Antes que hacer nada:
 
    1. Definir dónde voy a instalarlo todo:
-	```
-	$ PREFIX=$HOME/root/bin/avr/
-	$ export PREFIX
-	```
+      ```
+      $ PREFIX=$HOME/root/bin/avr/
+      $ export PREFIX
+      ```
 
-   2. Añadir al `PATH` el directorio de instalación de los bin: Dejar el
-        `PATH` completamente limpio para evitar que coja programas que no 
-        debe:
+   2. Añadir al `PATH` el directorio de instalación de los bin: 
+   
+      Dejar el `PATH` completamente limpio para evitar que coja programas que
+      no debe:
 
-     ```
-     $ PATH=$PREFIX/bin:/bin:/usr/bin
-     $ export PATH 
-     ```
-     Notar que hago que busque primero en `$PREFIX/bin`.
-     A día de hoy tengo instalada una versión de las binutils en 
-    `/usr/lib`
-    Al compilar avr-gcc quiero que use las binutils que acabo de compilar,
-    por eso necesito poner primero `$PREFIX/bin` para que encuentre la
-    versión que yo acabo de compilar.
+      ```
+      $ PATH=$PREFIX/bin:/bin:/usr/bin
+      $ export PATH 
+      ```
+
+     Notar que hago que busque primero en `$PREFIX/bin`.  A día de hoy tengo
+     instalada una versión de las binutils en `/usr/lib`.
+
+     Al compilar avr-gcc quiero que use las binutils que acabo de compilar,
+     por eso necesito poner primero `$PREFIX/bin` para que encuentre la
+     versión que yo acabo de compilar.
 
    3. Crear el directorio `$PREFIX`:
 
