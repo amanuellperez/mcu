@@ -7,8 +7,8 @@ es para programar avrs.
 ### Primero: aprende a programar.
 
 Los avrs los puedes programar en C o en C++. Lo primero que hay que tener
-claro es que estos son dos lenguajes diferentes: yo se programar en C++ pero
-no se C, y alguien que programe en C dudo mucho que diga que sabe programar en
+claro es que estos son dos lenguajes diferentes: yo sé programar en C++ pero
+no sé C, y alguien que programe en C dudo mucho que diga que sabe programar en
 C++.
 
 Antes de empezar a programar un microcontrolador aprende uno de los dos
@@ -37,9 +37,9 @@ mayoritariamente en C.
 
   El que yo tengo es un FTDI CHIP TTL-232D-5V.
 
-  El primero que compré lo compre chino por 5 euros y no funcionaba bien así
-  que compré el original y la mar de contento ya que funciona sin problema.
-  Cuesta unos 25 euros.
+  Primero conseguí uno chino por 5 euros y al no funcionar bien opté
+  por comprar el original.  Cuesta unos 25 euros pero funciona bien. Lo tengo
+  ya de hace tiempo y no ha dado ningún problema.
 
 
 ### ¿Dónde comprar?
@@ -59,7 +59,7 @@ mayoritariamente en C.
   tener distribuidora en España así que hay que pagar las tasas en la aduana.
 
 
-* Amazon:
+* [Amazon](https://www.amazon.es)
 
   Elegoo tiene producto que funciona bien.
 
