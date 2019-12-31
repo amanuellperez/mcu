@@ -51,29 +51,29 @@ cargar ningún entorno mio de compilación y automáticamente todo compiló
 correctamente.
 
 3. Antes que hacer nada:
-	a)  Definir dónde voy a instalarlo todo:
-	    ```
-	    $ PREFIX=$HOME/root/bin/avr/
-	    $ export PREFIX
-	    ```
 
-	b) Añadir al `PATH` el directorio de instalación de los bin: Dejar el
-	   `PATH` completamente limpio para evitar que coja programas que no
-	   debe:
+   1. Definir dónde voy a instalarlo todo:
+	```
+	$ PREFIX=$HOME/root/bin/avr/
+	$ export PREFIX
+	```
 
-	    ```
-	    $ PATH=$PREFIX/bin:/bin:/usr/bin
-	    $ export PATH 
-	    ```
+   2. Añadir al `PATH` el directorio de instalación de los bin: Dejar el
+        `PATH` completamente limpio para evitar que coja programas que no 
+        debe:
 
-	    Notar que hago que busque primero en `$PREFIX/bin`.
-	    A día de hoy tengo instalada una versión de las binutils en 
-	    `/usr/lib`
-	    Al compilar avr-gcc quiero que use las binutils que acabo de compilar,
-	    por eso necesito poner primero `$PREFIX/bin` para que encuentre la
-	    versión que yo acabo de compilar.
+     ```
+     $ PATH=$PREFIX/bin:/bin:/usr/bin
+     $ export PATH 
+     ```
+     Notar que hago que busque primero en `$PREFIX/bin`.
+     A día de hoy tengo instalada una versión de las binutils en 
+    `/usr/lib`
+    Al compilar avr-gcc quiero que use las binutils que acabo de compilar,
+    por eso necesito poner primero `$PREFIX/bin` para que encuentre la
+    versión que yo acabo de compilar.
 
-	c) Crear el directorio `$PREFIX`:
+   3. Crear el directorio `$PREFIX`:
 
 	    `$ mkdir $PREFIX`
 
@@ -143,18 +143,18 @@ avr`.
 3. Lo configuramos:(ver todas las posibles opciones 
    [en la página de gcc](https://gcc.gnu.org/install/configure.html))
 
-    La vez que intenté compilarlo teniendo instalada la `toolchain` me 
-    generó bastantes problemas compilarlo (fallaba en la biblioteca
-    `libbacktrace`). Al final usé la configuración que tenía la toolchain de
-    Atmel (se ve mirando la versión: `avr-g++ -v`) y compiló.
+   La vez que intenté compilarlo teniendo instalada la `toolchain` me 
+   generó bastantes problemas compilarlo (fallaba en la biblioteca
+   `libbacktrace`). Al final usé la configuración que tenía la toolchain de
+   Atmel (se ve mirando la versión: `avr-g++ -v`) y compiló.
 
-    La segunda vez, al compilarlo sin tener ninguna versión instalada de la
-    toolchain, apenas ha generado problemas. 
+   La segunda vez, al compilarlo sin tener ninguna versión instalada de la
+   toolchain, apenas ha generado problemas. 
 
-    Configuro con las siguientes opciones:
+   Configuro con las siguientes opciones:
 
-    ```
-    $ ../gcc-9.2.0/configure -v 
+   ```
+   $ ../gcc-9.2.0/configure -v 
 	    --prefix=${PREFIX}			
 	    --build=x86_64-linux-gnu 
 	    --host=x86_64-linux-gnu 
@@ -169,55 +169,53 @@ avr`.
 	    # --enable-long-long  <-- esta no la he encontrado en 9.2.0
 	    # --with-system-zlib <-- no encuentra esto
 	    # --enable-shared  <-- avr soporta librerías dinámicas?
-    ```
+   ```
 
-	*¿Qué hace cada opción?*
+   *¿Qué hace cada opción?*
 
-       * `-v`: ni idea. ¿qué hace?
-       * `--with-system-zlib`: en la página de gcc indica que hay que incluirlo.
+   * `-v`: ni idea. ¿qué hace?
+   * `--with-system-zlib`: en la página de gcc indica que hay que incluirlo.
 
-	     La primera vez lo incluí y compiló la segunda vez no encontraba
-	     esta biblioteca, pero la trae el compilador así que no la incluí
-	     y compiló.
+     La primera vez lo incluí y compiló la segunda vez no encontraba
+     esta biblioteca, pero la trae el compilador así que no la incluí
+     y compiló.
 
-       * ¿dónde instalamos el compilador?: lo indica `--prefix=$PREFIX`.
-       * ¿qué target?: `--target=avr`
-       * ¿qué lenguajes usaremos?: `--enable-languages=c,c++`
-       * ¿Los mensajes los damos en español o no?:  `--disable-nls`.
+   * ¿dónde instalamos el compilador?: lo indica `--prefix=$PREFIX`.
+   * ¿qué target?: `--target=avr`
+   * ¿qué lenguajes usaremos?: `--enable-languages=c,c++`
+   * ¿Los mensajes los damos en español o no?:  `--disable-nls`.
 
-	     De hecho, en general, nunca usar programas en español. Cuando dan
-	     un error si el mensaje está en español es casi imposible
-	     encontrarlo en internet. En inglés lo encuentras fácilmente.
+     De hecho, en general, nunca usar programas en español. Cuando dan
+     un error si el mensaje está en español es casi imposible
+     encontrarlo en internet. En inglés lo encuentras fácilmente.
 
-       * Usa DWARF 2 debugging information:	`--with-dwarf2`
+    * Usa DWARF 2 debugging information:	`--with-dwarf2`
+      Aconsejan poner esto, pero no lo pongo. Es para depurar
+      (yo no uso el depurador).
 
-	     Aconsejan poner esto, pero no lo pongo. Es para depurar
-	     (yo no uso el depurador).
+4. Lo compilamos e instalamos:
+   ```
+   $ make > mk.log 2>&1 &
+   $ tail -f mk.log	
+   ``` 
+   No es necesario guardar la salida de `make`. Sin embargo, en caso de
+   error es más sencillo de revisar. Tarda más de 1 hora en compilar.
 
-4. Lo compilamos:
-    
-    a)  
-	```
-	$ make > mk.log 2>&1 &
-	$ tail -f mk.log	
-	``` 
-	No es necesario guardar la salida de `make`. Sin embargo, en caso de
-	error es más sencillo de revisar. Tarda más de 1 hora en compilar.
-
-	  Para compilar más rápido revisar el fichero html de la ayuda del `gcc`.
-	 Indica que `make -j 2` puede compilar en paralelo. No lo he probado.
+   Para compilar más rápido revisar el fichero html de la ayuda del `gcc`.
+   Indica que `make -j 2` puede compilar en paralelo. No lo he probado.
 	
-    b) `$ make install`
+   Para instalarlo:
+   `$ make install`
 
 5. Aunque encuentro en `mk.log` el siguiente warning
 
-       ```
-       libtool: install: 
+   ```
+   libtool: install: 
        warning: remember to run 
 	    'libtool --finish /home/alp/bin/avr/libexec/gcc/avr/9.2.0'
-       ```
+   ```
 
-	en internet pone que se puede ignorar. Lo ignoro y todo funciona.
+   en internet pone que se puede ignorar. Lo ignoro y todo funciona.
 
 
 
@@ -240,11 +238,11 @@ Este es el más sencillo de compilar. No genera problemas.
 1. Descomprimirlo.
 2. Ejecutar:
 
-       ```
-	./configure --prefix=$PREFIX --build=`./config.guess` --host=avr
+    ```
+    ./configure --prefix=$PREFIX --build=`./config.guess` --host=avr
 	make
 	make install
-       ```
+    ```
 
 ### avrdude
 
