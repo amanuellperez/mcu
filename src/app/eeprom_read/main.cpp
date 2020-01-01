@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez
+// Copyright (C) 2019-2020 A.Manuel L.Perez <amanuel.lperez@gmail.com>
 //
 // This file is part of the MCU++ Library.
 //
@@ -21,7 +21,7 @@
  *
  *
  *   - HISTORIA:
- *	A.Manuel Lopez- 22/09/2019 v0.0
+ *	A.Manuel L.Perez- 22/09/2019 v0.0
  *
  ****************************************************************************/
 #include <dev_EEPROM_iostream.h>

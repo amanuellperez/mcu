@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez
+// Copyright (C) 2019-2020 A.Manuel L.Perez <amanuel.lperez@gmail.com>
 //
 // This file is part of the MCU++ Library.
 //
@@ -25,7 +25,7 @@
  *
  *
  *   - HISTORIA:
- *           A.Manuel Lopez- 03/06/2019 Escrito
+ *           A.Manuel L.Perez- 03/06/2019 Escrito
  *
  ****************************************************************************/
 #include <avr/io.h>

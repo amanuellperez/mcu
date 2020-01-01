@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez
+// Copyright (C) 2019-2020 A.Manuel L.Perez <amanuel.lperez@gmail.com>
 //
 // This file is part of the MCU++ Library.
 //
@@ -29,13 +29,12 @@
  *		/scrolling-text-on-the-8x8-led-matrix-with-max7219-drivers/
  *
  *   - HISTORIA:
- *           alp  - 31/12/2018 Escrito
+ *           A.Manuel L.Perez - 31/12/2018 Escrito
  *
  ****************************************************************************/
 
 #include <util/delay.h>	
 
-#include <alp_gen.h>
 #include <avr_SPI.h>
 #include <string.h> // memset
 

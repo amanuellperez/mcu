@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez
+// Copyright (C) 2019-2020 A.Manuel L.Perez <amanuel.lperez@gmail.com>
 //
 // This file is part of the MCU++ Library.
 //
@@ -30,7 +30,7 @@
  *
  *
  *   - HISTORIA:
- *           alp  - 09/06/2019 Escrito v0.1
+ *           A.Manuel L.Perez  - 09/06/2019 Escrito v0.1
  *		    10/06/2019 v0.2: conecto el 74HC595 al SPI del avr.
  *
  ****************************************************************************/

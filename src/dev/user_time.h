@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez
+// Copyright (C) 2019-2020 A.Manuel L.Perez <amanuel.lperez@gmail.com>
 //
 // This file is part of the MCU++ Library.
 //
@@ -24,7 +24,7 @@
  * - DESCRIPCION: Funciones para gestionar time.h mediante dispositivos.
  *
  * - HISTORIA:
- *  A.Manuel Lopez
+ *  A.Manuel L.Perez
  *	01/09/2019 v0.0
  *	21/12/2019 Cambio interfaz (elimino tm por time_t).
  *

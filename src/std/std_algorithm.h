@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez
+// Copyright (C) 2019-2020 A.Manuel L.Perez <amanuel.lperez@gmail.com>
 //
 // This file is part of the MCU++ Library.
 //
@@ -24,7 +24,7 @@
  *  - DESCRIPCION: El equivalente a <algorithm>
  *
  *  - HISTORIA:
- *    A.Manuel Lopez 
+ *    A.Manuel L.Perez 
  *	08/02/2019: for_each, for_each_n
  *	16/07/2019: min/max
  *	19/09/2019: copy, copy_n, fill, fill_n

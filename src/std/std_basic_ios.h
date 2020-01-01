@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez
+// Copyright (C) 2019-2020 A.Manuel L.Perez <amanuel.lperez@gmail.com>
 //
 // This file is part of the MCU++ Library.
 //
@@ -25,7 +25,7 @@
  *  - COMENTARIOS: Iré implementando las cosas según las vaya necesitando.
  *
  *  - HISTORIA:
- *	A.Manuel Lopez- 01/10/2019 v0.0
+ *	A.Manuel L.Perez- 01/10/2019 v0.0
  *
  ****************************************************************************/
 #include "std_config.h"

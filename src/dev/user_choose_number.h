@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez
+// Copyright (C) 2019-2020 A.Manuel L.Perez <amanuel.lperez@gmail.com>
 //
 // This file is part of the MCU++ Library.
 //
@@ -29,7 +29,7 @@
  *  avr, un pic u otro micro.
  *
  *  - HISTORIA:
- *    A.Manuel Lopez
+ *    A.Manuel L.Perez
  *	30/08/2019 v0.0
  *
  ****************************************************************************/

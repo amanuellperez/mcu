@@ -57,7 +57,7 @@ PATH=${PATH}:${MY_HOME}/../bin/avr/bin
 export PATH
 
 # Alias
-alias mcu='cd ${MCU_SRC}'   
+alias s='cd ${MCU_SRC}'   
 alias mf='make flash'
 alias mc='make super_clean'
 

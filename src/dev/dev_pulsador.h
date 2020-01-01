@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez
+// Copyright (C) 2019-2020 A.Manuel L.Perez <amanuel.lperez@gmail.com>
 //
 // This file is part of the MCU++ Library.
 //
@@ -24,7 +24,7 @@
  *   - DESCRIPCION: Pulsador
  *
  *   - HISTORIA:
- *           alp  - 24/07/2017 Escrito
+ *           A.Manuel L.Perez  - 24/07/2017 Escrito
  *
  ****************************************************************************/
 #include "avr_pin.h"

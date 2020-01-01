@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez
+// Copyright (C) 2019-2020 A.Manuel L.Perez <amanuel.lperez@gmail.com>
 //
 // This file is part of the MCU++ Library.
 //
@@ -26,7 +26,7 @@
  *   - COMENTARIOS: 
  *
  *   - HISTORIA:
- *	    A.Manuel Lopez- 29/08/2019 v0.0
+ *	    A.Manuel L.Perez- 29/08/2019 v0.0
  *
  *	    TODO: lo interesante de este termómetro es la salida O.S. que
  *	    ahora no programo. Añadir esto (ver datasheet para ejemplos

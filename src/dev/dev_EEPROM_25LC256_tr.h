@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez
+// Copyright (C) 2019-2020 A.Manuel L.Perez <amanuel.lperez@gmail.com>
 //
 // This file is part of the MCU++ Library.
 //
@@ -24,7 +24,7 @@
  *   - DESCRIPCION: Traductor de la EEPROM 25LC256
  *	
  *   - HISTORIA:
- *           A.Manuel Lopez- 15/07/2019 Escrito
+ *           A.Manuel L.Perez- 15/07/2019 Escrito
  *
  *  TODO: Falta la gestión de errores:
  *	1.- ¿qué pasa si el dispositivo no responde?

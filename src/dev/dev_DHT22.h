@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez
+// Copyright (C) 2019-2020 A.Manuel L.Perez <amanuel.lperez@gmail.com>
 //
 // This file is part of the MCU++ Library.
 //
@@ -35,7 +35,7 @@
  *   - COMENTARIOS: Usa el timer0, con lo que la aplicación no puede usarlo.
  *
  *   - HISTORIA:
- *           alp  - 19/04/2018 Escrito
+ *           A.Manuel L.Perez - 19/04/2018 Escrito
  *
  ****************************************************************************/
 #include "avr_pin.h"

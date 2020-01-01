@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez
+// Copyright (C) 2019-2020 A.Manuel L.Perez <amanuel.lperez@gmail.com>
 //
 // This file is part of the MCU++ Library.
 //
@@ -24,7 +24,7 @@
  *   - DESCRIPCION: Ampliación de cstdio.
  *
  *   - HISTORIA:
- *       A.Manuel Lopez - 13/10/2019 v0.0
+ *       A.Manuel L.Perez - 13/10/2019 v0.0
  *
  ****************************************************************************/
 #include "std_config.h"
