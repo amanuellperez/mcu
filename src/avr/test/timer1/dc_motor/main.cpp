@@ -18,7 +18,7 @@
 // Controlamos la velocidad de un motor dc usando un mosfet 2N7000.
 // Circuito: libro de make, pag. 299.
 #include "../../../avr_USART.h"
-#include "../../../avr_timer1.h"
+#include "../../../avr_timer1_tr.h"
 #include "../../../avr_time.h"
 
 
@@ -33,7 +33,7 @@ int main()
 {
 //    UART_ostream uart;
 
-    Timer::top_ICR1(9000UL);
+    Timer::top_ICR(9000UL);
     Timer::pin_A_non_inverting_mode();
     Timer::on<period_in_us>();
 
@@ -41,7 +41,7 @@ int main()
     while(1){
 	uint16_t t = 1000;
 	for (int i = 1; i < 10; ++i){
-	    Timer::comparadorA(t);
+	    Timer::output_compare_register_A(t);
 	    t += 1000UL;
 	    wait_ms(2000);
 	}

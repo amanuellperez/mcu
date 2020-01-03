@@ -87,7 +87,7 @@ public:
     /// Observar que es la frecuencia en Hz, no en MHz ni kHz.
     /// Otro nombre podría ser: ciclos_por_segundo().
     static constexpr uint32_t frecuencia_en_Hz() 
-    {return AVR_CLOCK_FRECUENCIA_EN_HZ;}
+    {return AVR_CLOCK_FREQUENCY_IN_HZ;}
     // {return F_CPU;}
 
     /// Número de ciclos de reloj que se dan por segundo.

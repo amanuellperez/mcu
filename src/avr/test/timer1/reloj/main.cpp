@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez <amanuel.lperez@gmail.com>
+// Copyright (C) 2019-2020 A.Manuel L.Perez <amanuel.lperez@gmail.com>G
 //
 // This file is part of the MCU++ Library.
 //
@@ -17,7 +17,7 @@
 
 // Reloj de sistema básico. Me baso en time.h
 #include "../../../avr_USART.h"
-#include "../../../avr_timer1.h"
+#include "../../../avr_timer1_tr.h"
 #include "../../../avr_time.h"
 
 #include <time.h>
@@ -33,13 +33,12 @@ constexpr uint16_t period_in_us = 64;
 ISR_TIMER1_COMPA
 {
     system_tick();
-    // reti(); ???
 }
 
  
-UART_ostream& operator<<(UART_ostream& uart, const tm& t)
+std::ostream& operator<<(std::ostream& out, const tm& t)
 {
-    return uart << t.tm_mday << '/'
+    return out << t.tm_mday << '/'
 		<< t.tm_mon << '/'
 		<< 1900 + t.tm_year << ' '
 	        << t.tm_hour << ':'
@@ -50,7 +49,7 @@ UART_ostream& operator<<(UART_ostream& uart, const tm& t)
 
 void print_time()
 {
-    UART_ostream uart;
+    UART_iostream uart;
     time_t sec = time(nullptr);
     tm* t = gmtime(&sec);
 
@@ -74,6 +73,10 @@ void init_time()
 
 int main()
 {
+    UART_iostream uart;
+    cfg_basica(uart);
+    uart.on();
+
     Timer::on<period_in_us>();
     Timer::enable_on_compareA_match();
 
@@ -83,8 +86,7 @@ int main()
     uint16_t ocr1a = 15625; // 15625 miniticks * 64 us/minitick = 1 seg
 
 
-    Timer::top_comparadorA(ocr1a);
-//    Timer::comparadorA(ocr1a);
+    Timer::top_OCRA(ocr1a);
 
     init_time();
     Timer::on<period_in_us>();

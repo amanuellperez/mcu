@@ -1,7 +1,6 @@
 BIN = xx
 
-SOURCES= main.cpp \
-		 ../../../avr_USART.cpp
+SOURCES= main.cpp 
 
 MCU = atmega328p
 

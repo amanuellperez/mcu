@@ -91,7 +91,7 @@ public:
     /// Definimos la frecuencia del reloj SCL.
     /// f_scl = frecuencia en kilohercios de SCL (tipica: 100 y 400 kHz).
     /// f_clock = frecuencia a la que funciona el reloj del avr.
-    template <uint16_t f_scl, uint32_t f_clock = AVR_CLOCK_FRECUENCIA_EN_HZ>
+    template <uint16_t f_scl, uint32_t f_clock = AVR_CLOCK_FREQUENCY_IN_HZ>
     static void SCL_frequency_in_kHz();
     
 
@@ -162,7 +162,7 @@ public:
     /// que vamos a operar.
     /// f_scl = frecuencia en kilohercios de SCL (tipica: 100 y 400 kHz).
     /// f_clock = frecuencia a la que funciona el reloj del avr.
-    template <uint16_t f_scl, uint32_t f_clock = AVR_CLOCK_FRECUENCIA_EN_HZ>
+    template <uint16_t f_scl, uint32_t f_clock = AVR_CLOCK_FREQUENCY_IN_HZ>
     static void enable_and_set_SCL_frequency_in_kHz()
     {
 	SCL_frequency_in_kHz<f_scl, f_clock>();

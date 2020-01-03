@@ -121,7 +121,7 @@ public:
     // La función clock_speed_en_us traduce la forma de hablar del cliente (en
     // microsegundos) en la forma de hablar del avr (en divisor de frecuencia)
     template<uint16_t periodo
-	    , uint32_t clock_frecuencia_en_hz = AVR_CLOCK_FRECUENCIA_EN_HZ>
+	    , uint32_t clock_frecuencia_en_hz = AVR_CLOCK_FREQUENCY_IN_HZ>
     static void clock_speed_en_us();
 
 

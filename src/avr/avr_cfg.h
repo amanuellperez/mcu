@@ -43,10 +43,8 @@
 #endif
 
 
-// -----------------------
-// Configuración del reloj
-// -----------------------
-constexpr uint32_t AVR_CLOCK_FRECUENCIA_EN_HZ = F_CPU;
+// CONFIGURACIÓN DEL RELOJ
+    constexpr uint32_t AVR_CLOCK_FREQUENCY_IN_HZ = F_CPU;
 
 
 

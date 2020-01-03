@@ -36,6 +36,10 @@
 namespace atd{
 struct _Write_as_uint8_t{ uint8_t value; };
 
+/// EXAMPLE:
+/// std::ostream out;
+/// uint8_t x = 10;
+/// out << atd::write_as_uint8_t(x);
 inline _Write_as_uint8_t write_as_uint8_t(uint8_t x)
 {return _Write_as_uint8_t{x};}
 

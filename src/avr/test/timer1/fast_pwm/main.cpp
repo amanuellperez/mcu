@@ -16,7 +16,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 // Ejemplo básico de uso del Timer como contador
-#include "../../../avr_timer1.h"
+#include "../../../avr_timer1_tr.h"
 #include "../../../avr_time.h"
 
 #include <stdlib.h>
@@ -36,9 +36,9 @@ int main()
     uint16_t ocr1a = 300;
     uint16_t ocr1b = 300;
 
-    Timer::top_ICR1(1000);
-    Timer::comparadorA(ocr1a);
-    Timer::comparadorB(ocr1b);
+    Timer::top_ICR(1000);
+    Timer::output_compare_register_A(ocr1a);
+    Timer::output_compare_register_B(ocr1b);
     Timer::pin_A_non_inverting_mode();
     Timer::pin_B_inverting_mode();
     // Si cambias non_inverting_mode por inverting, la señal se invierte.

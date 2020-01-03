@@ -242,7 +242,7 @@ public:
     // frecuencia no válida no compila, y si cambias de frecuencia recalcula
     // automáticamente qué divisor de frecuencia usar.
     template<uint16_t frecuencia
-	, uint16_t clock_frecuencia_en_hz = AVR_CLOCK_FRECUENCIA_EN_HZ>
+	, uint16_t clock_frecuencia_en_hz = AVR_CLOCK_FREQUENCY_IN_HZ>
     static void clock_speed_in_kHz();
 
 

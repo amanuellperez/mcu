@@ -18,7 +18,7 @@
 // Ejemplo básico de uso del Timer como contador.
 // Genera una señal de 1MHz en el pin OC1A (pin 15)
 // y en el pin OC1B (pin 16)
-#include "../../../avr_timer1.h"
+#include "../../../avr_timer1_tr.h"
 #include "../../../avr_time.h"
 
 using namespace avr;
@@ -33,8 +33,8 @@ using Timer = Timer1_CTC_mode;
 // constexpr uint16_t period_in_us = 8;
 //constexpr uint16_t period_in_us = 32;	// solo para 8 MHz
 //constexpr uint16_t period_in_us = 64; // solo para 1 MHz
-constexpr uint16_t period_in_us = 128;  // solo para 8 MHz
-//constexpr uint16_t period_in_us = 256;// solo para 1 MHz
+//constexpr uint16_t period_in_us = 128;  // solo para 8 MHz
+constexpr uint16_t period_in_us = 256;// solo para 1 MHz
 //constexpr uint16_t period_in_us = 1024;//solo para 1 MHz
 
 constexpr uint16_t ocr1a = 1000; // 15625 miniticks * 64 us/minitick = 1 seg
@@ -49,7 +49,7 @@ int main()
     // El osciloscopio la marca de 996ms. Hay que calibrar el número o usar un
     // cristal externo.
 
-    Timer::top_comparadorA(ocr1a);
+    Timer::top_OCRA(ocr1a);
     Timer::pin_A_toggle_on_compare_match();
     Timer::pin_B_toggle_on_compare_match();
 

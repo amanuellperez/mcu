@@ -55,7 +55,7 @@ public:
     // Conexiones hardware del Timer
     // -----------------------------
     // Observar que tiene que ser uint16_t ya que la resolución es 256
-    static constexpr uint16_t resolucion() {return TIMER0_resolucion;}
+    static constexpr uint16_t resolution() {return TIMER0_resolution;}
 
     // Devuelve el número de pin al que está conectado la salida A del 
     // generador de ondas.
@@ -98,7 +98,7 @@ public:
     // La función clock_period_in_us traduce la forma de hablar del cliente (en
     // microsegundos) en la forma de hablar del avr (en divisor de frecuencia)
     template<uint16_t periodo
-	    , uint32_t clock_frecuencia_en_hz = AVR_CLOCK_FRECUENCIA_EN_HZ>
+	    , uint32_t clock_frecuencia_en_hz = AVR_CLOCK_FREQUENCY_IN_HZ>
     static void clock_period_in_us();
 
 
