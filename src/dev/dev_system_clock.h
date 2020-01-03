@@ -25,9 +25,21 @@
 
 #include <ctime>
 #include <time.h>
+#include <atd_cast.h>
 
 namespace dev{
 
+template <typename Timer, uint16_t timer_period_in_us>
+constexpr inline typename Timer::counter_type __system_clock_top()
+{
+    constexpr uint32_t one_second_in_us = 1000000u;
+    constexpr uint32_t top = one_second_in_us/timer_period_in_us;
+
+    static_assert(top < Timer::max(),
+                  "Top too great for this timer. Try another period or choose "
+                  "a different F_CPU.");
+    return atd::safe_static_cast<typename Timer::counter_type, uint32_t, top>();
+}
 
 
 // Timer requirements:
@@ -35,20 +47,20 @@ namespace dev{
 //	Timer::enable_output_compare_A_match_interrupt
 //	Timer::top_OCRA
 //
-// TODO: What is a timer? What is its concept? 
+// TODO: What is a timer? What concept? 
 // This class has to work with ANY timer (avr timer, pic timer...). Which are
 // the correct names for the timer requirements? 
 template <typename Timer>
 struct System_clock : public std::chrono::system_clock {
 
-    template <uint16_t system_clock_period_in_us, uint16_t system_clock_ocr1a>
+    template <uint16_t timer_period_in_us>
     constexpr static void init()
     {
-        Timer::template on<system_clock_period_in_us>();
+        Timer::template on<timer_period_in_us>();
 
 	Timer::enable_output_compare_A_match_interrupt();
 
-        Timer::top_OCRA(system_clock_ocr1a);
+        Timer::top_OCRA(__system_clock_top<Timer, timer_period_in_us>() );
     }
 
     /// Ponemos en hora el reloj.

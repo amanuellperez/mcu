@@ -24,9 +24,12 @@
 
 using System_clock = dev::System_clock<avr::Timer1_CTC_mode>;
 
-// Elegimos OCR1A para generar una señal de 1 Hz.
-constexpr static uint16_t system_clock_period_in_us = 64u;
-constexpr static uint16_t system_clock_ocr1a = 15625u; // 15625 miniticks*64 us/minitick = 1 seg
+// Dependiendo del valor de F_CPU hay que pasar un periodo diferente.
+// El compilador tiene que mostrar mensajes adecuados a cada error.
+// Probar con diferentes periodos y F_CPU.
+//constexpr static uint16_t system_clock_timer_period_in_us = 8u;
+//constexpr static uint16_t system_clock_timer_period_in_us = 32u;
+constexpr static uint16_t system_clock_timer_period_in_us = 64u;
 
 
 // Definimos el reloj del sistema
@@ -69,7 +72,7 @@ void init_uart()
 
 void init_timer()
 {
-    System_clock::init<system_clock_period_in_us, system_clock_ocr1a>();
+    System_clock::init<system_clock_timer_period_in_us>();
 }
 
 

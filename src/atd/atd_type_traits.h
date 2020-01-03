@@ -47,6 +47,16 @@ struct Pertenece_al_intervalo_cerrado
 				a <= x and x <= b
 				> {};
 
+
+
+// Tipo que permite hacer:
+// static_assert(always_false<T>::value, "aqui no debe de llegar");
+template <typename T>
+struct always_false_type : std::false_type { };
+
+template <typename T>
+inline constexpr bool always_false_v = always_false_type<T>::value;
+
 }// namespace
 
 #endif

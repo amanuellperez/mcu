@@ -69,6 +69,26 @@ void test_pertenece_al_intervalo_cerrado()
         "10 pertenece a [2,8]?");
 }
 
+template <int x>
+inline constexpr int f()
+{
+    if constexpr (x == 0)
+	return 1;
+    else if constexpr (x == 1)
+	return 30;
+    else
+	static_asser(atd::always_false_v<int>, "error");
+}
+
+#define NO_COMPILA(X) 
+
+void test_always_false()
+{
+    CHECK_TRUE(f<0>() == 1, "always_false_v");
+    CHECK_TRUE(f<1>() == 30, "always_false_v");
+    NO_COMPILA(f<2>());
+}
+
 
 
 int main()
@@ -78,6 +98,8 @@ try{
 
     test_less_than();
     test_pertenece_al_intervalo_cerrado();
+    test_always_false();
+
 }catch(std::exception& e)
 {
     std::cerr << e.what() << '\n';

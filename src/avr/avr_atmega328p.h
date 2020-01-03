@@ -95,9 +95,10 @@ constexpr uint8_t TIMER0_num_pin_B = 11u;
 constexpr uint16_t TIMER0_resolution= 256u;
 
 // Configuración del Timer1
+using TIMER1_counter_type = uint16_t;
 constexpr uint8_t TIMER1_num_pin_A = 15u;
 constexpr uint8_t TIMER1_num_pin_B = 16u;
-constexpr uint32_t TIMER1_resolution= 65536u;
+//constexpr uint32_t TIMER1_resolution= 65536u;
 
 
 

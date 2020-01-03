@@ -108,8 +108,8 @@ int main()
 	    c = contador;
 	}
 	
-	uint64_t t_us = (c*Timer::resolution() + v)*period_in_us;
-        uart << '(' << c << "*" << Timer::resolution() << "+" << v << ")*"
+	uint64_t t_us = (c*(Timer::max() + 1)+ v)*period_in_us;
+        uart << '(' << c << "*" << (Timer::max() + 1) << "+" << v << ")*"
              << period_in_us << " = ";
 
         print (t_us);

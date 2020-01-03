@@ -21,13 +21,14 @@
 #define __AVR_TIMER1_TR_H__
 /****************************************************************************
  *
- *   - DESCRIPCION: Traductor del timer 1 del AVR. Es un timer de 16 bits.
- *
- *	La salida de este timer está en los pines 15 y 16.
+ *  - DESCRIPCION: Traductor del timer 1 del AVR. 
  *   
- *   - HISTORIA:
- *           alp  - 05/08/2017 Escrita v0.0
- *		    18/07/2019 v0.1
+ *  - HISTORIA:
+ *   A.Manuel L.Perez
+ *     05/08/2017 Escrita v0.0
+ *     18/07/2019 v0.1 Reescrito.
+ *     03/01/2020 Que de un mensaje legible el compilador 
+ *		  si el periodo o la frecuencia no es correcta.
  *	
  *  TODO: faltan 3 modos de funcionamiento:
  *	+ El de capturar en el ICR.
@@ -37,7 +38,10 @@
  *  TODO: meter todas las funciones dentro de un .cpp
  *
  ****************************************************************************/
+#include <limits>
+
 #include <atd_register.h>
+#include <atd_type_traits.h>
 
 #include "avr_interrupt.h"
 #include "avr_cfg.h"
@@ -56,20 +60,35 @@ namespace avr{
 //	OCRA	16 bits
 //	OCRB	16 bits
 //	ICR	16 bits
+//
 //	TCCRA	 8 bits
 //	TCCRB	 8 bits
+//  
+//	Observar que puesto que TCNT se va a comparar con OCRA, OCRB e ICR es
+//	obligatorio que todos estos registros sean del mismo tamaño que
+//	llamaremos counter_type.
 //
 // 2. Posiciones de los pines dentro del avr:
-//	pin de entrada: T0, T1 y ICP.
+//	pin de entrada: T0, T1 y ICP.	
+//	    Observar que puesto que TCNT se va a comparar con OCRA, OCRB e ICR
+//	    es obligatorio que todos estos registros sean del mismo tamaño que
+//	    llamaremos counter_type.
+//
 //	pines de salida: A y B.
 //
 class Timer1{
 public:
     // Características del Timer
     // -------------------------
-    // TODO: la resolucion se puede deducir del número de bits de TCNT!!!
-    // Hacerlo automático!!!
-    static constexpr uint32_t resolution() {return TIMER1_resolution;}
+    using counter_type = TIMER1_counter_type;
+
+    /// The counter reaches the bottom when it becomes zero.
+    static constexpr counter_type bottom()
+    {return counter_type{0};}
+
+    /// Maximum value that reaches the counter.
+    static constexpr counter_type max() 
+    {return std::numeric_limits<counter_type>::max();}
 
     // Devuelve el número de pin al que está conectado la salida A del 
     // generador de ondas.
@@ -89,9 +108,9 @@ public:
     static void clock_frequency_entre_1024();
 
     /// Definimos el periodo del reloj que usa el timer.
-    /// clock_frecuencia_en_hz = es la frecuencia del reloj del AVR.
+    /// clock_frequency_in_hz = es la frecuencia del reloj del AVR.
     template<uint16_t periodo
-	    , uint32_t clock_frecuencia_en_hz = AVR_CLOCK_FREQUENCY_IN_HZ>
+	    , uint32_t clock_frequency_in_hz = AVR_CLOCK_FREQUENCY_IN_HZ>
     static void clock_period_in_us();
 
 
@@ -99,10 +118,10 @@ public:
     // ---------------------------
     /// Enciende el Timer, usando como reloj el reloj de periodo indicado.
     /// 'periodo' es el periodo en microsegundos al que va a funcionar el timer.
-    /// clock_frecuencia_en_hz = es la frecuencia del reloj del AVR.
+    /// clock_frequency_in_hz = es la frecuencia del reloj del AVR.
     template<uint16_t periodo
-	    , uint32_t clock_frecuencia_en_hz = AVR_CLOCK_FREQUENCY_IN_HZ>
-    static void on() {clock_period_in_us<periodo, clock_frecuencia_en_hz>();}
+	    , uint32_t clock_frequency_in_hz = AVR_CLOCK_FREQUENCY_IN_HZ>
+    static void on() {clock_period_in_us<periodo, clock_frequency_in_hz>();}
 
     /// Paramos el timer.
     static void off();
@@ -119,17 +138,17 @@ public:
 
     // Acceso a registros
     // ------------------
-    static uint16_t counter();		/// Lectura del counter.
-    static void counter(uint16_t x);	/// Escritura del counter.
+    static counter_type counter();		/// Lectura del counter.
+    static void counter(counter_type x);	/// Escritura del counter.
 
-    static uint16_t output_compare_register_A();      /// read OCRA
-    static void output_compare_register_A(uint16_t x);/// write OCRA
+    static counter_type output_compare_register_A();      /// read OCRA
+    static void output_compare_register_A(counter_type x);/// write OCRA
 
-    static uint16_t output_compare_register_B();      /// read OCRB
-    static void output_compare_register_B(uint16_t x);/// write OCRB
+    static counter_type output_compare_register_B();      /// read OCRB
+    static void output_compare_register_B(counter_type x);/// write OCRB
 
-    static uint16_t input_capture_register();	 /// Lectura del ICR.
-    static void input_capture_register(uint16_t x);/// Escritura del ICR.
+    static counter_type input_capture_register();	 /// Lectura del ICR.
+    static void input_capture_register(counter_type x);/// Escritura del ICR.
 
 
     // Interrupciones
@@ -146,6 +165,13 @@ public:
 
     /// Se captura con ISR_TIMER1_COMPB
     static void enable_output_compare_B_match_interrupt();
+
+private:
+    template<uint16_t periodo>
+    static void clock_period_in_us_1MHz();
+
+    template<uint16_t periodo>
+    static void clock_period_in_us_8MHz();
 
 }; // Timer1
 
@@ -200,30 +226,56 @@ inline void Timer1::external_clock_rising_edge()
 
 // reloj del avr a 1MHz
 // --------------------
-// a 1 us
-template<>
-inline void Timer1::clock_period_in_us<1u, 1000000UL>() 
-{clock_speed_no_preescaling();}
+template<uint16_t periodo>
+inline void Timer1::clock_period_in_us_1MHz() 
+{
+    if constexpr (periodo == 1u)
+	clock_speed_no_preescaling();
+    
+    else if constexpr (periodo == 8u)
+	clock_frequency_entre_8();
 
-// a 8 us
-template<>
-inline void Timer1::clock_period_in_us<8u, 1000000UL>() 
-{clock_frequency_entre_8();}
+    else if constexpr (periodo == 64u)
+	clock_frequency_entre_64();
 
-// a 64 us
-template<>
-inline void Timer1::clock_period_in_us<64u, 1000000UL>() 
-{clock_frequency_entre_64();}
+    else if constexpr (periodo == 256u)
+	clock_frequency_entre_256();
 
-// a 256 us
-template<>
-inline void Timer1::clock_period_in_us<256u, 1000000UL>() 
-{clock_frequency_entre_256();}
+    else if constexpr (periodo == 1024u)
+	clock_frequency_entre_1024();
 
-// a 1024 us
-template<>
-inline void Timer1::clock_period_in_us<1024u, 1000000UL>() 
-{clock_frequency_entre_1024();}
+    else
+	static_assert(atd::always_false_v<int>,
+		    "Period incorrect for Timer1. Try another one.");
+}
+
+//// a 1 us
+//template<>
+//inline void Timer1::clock_period_in_us<1u, 1000000UL>() 
+//{clock_speed_no_preescaling();}
+//
+//// a 8 us
+//template<>
+//inline void Timer1::clock_period_in_us<8u, 1000000UL>() 
+//{clock_frequency_entre_8();}
+//
+//// a 64 us
+//template<>
+//inline void Timer1::clock_period_in_us<64u, 1000000UL>() 
+//{clock_frequency_entre_64();}
+//
+//// a 256 us
+//template<>
+//inline void Timer1::clock_period_in_us<256u, 1000000UL>() 
+//{clock_frequency_entre_256();}
+//
+//// a 1024 us
+//template<>
+//inline void Timer1::clock_period_in_us<1024u, 1000000UL>() 
+//{clock_frequency_entre_1024();}
+
+
+
 
 // reloj del avr a 8MHz
 // --------------------
@@ -232,35 +284,71 @@ inline void Timer1::clock_period_in_us<1024u, 1000000UL>()
 //inline void Timer1::clock_period_in_ns<125u, 8000000UL>() 
 //{clock_frequency_no_prescaling();}
 
-// a 1 us
-template<>
-inline void Timer1::clock_period_in_us<1u, 8000000UL>() 
-{clock_frequency_entre_8();}
+template<uint16_t periodo>
+inline void Timer1::clock_period_in_us_8MHz() 
+{
+    if constexpr (periodo == 1u)
+	clock_frequency_entre_8();
 
-// a 8 us
-template<>
-inline void Timer1::clock_period_in_us<8u, 8000000UL>() 
-{clock_frequency_entre_64();}
+    else if constexpr (periodo == 8u)
+	clock_frequency_entre_64();
 
-// a 32 us
-template<>
-inline void Timer1::clock_period_in_us<32u, 8000000UL>() 
-{clock_frequency_entre_256();}
+    else if constexpr (periodo == 32u)
+	clock_frequency_entre_256();
+ 
+    else if constexpr (periodo == 128u)
+	clock_frequency_entre_1024();
+ 
+    else
+	static_assert(atd::always_false_v<int>,
+		    "Period incorrect for Timer1. Try another one.");
+}
 
-// a 128 us
-template<>
-inline void Timer1::clock_period_in_us<128u, 8000000UL>() 
-{clock_frequency_entre_1024();}
+//
+//// a 1 us
+//template<>
+//inline void Timer1::clock_period_in_us<1u, 8000000UL>() 
+//{clock_frequency_entre_8();}
+//
+//// a 8 us
+//template<>
+//inline void Timer1::clock_period_in_us<8u, 8000000UL>() 
+//{clock_frequency_entre_64();}
+//
+//// a 32 us
+//template<>
+//inline void Timer1::clock_period_in_us<32u, 8000000UL>() 
+//{clock_frequency_entre_256();}
+//
+//// a 128 us
+//template<>
+//inline void Timer1::clock_period_in_us<128u, 8000000UL>() 
+//{clock_frequency_entre_1024();}
+//
 
 
 
+template<uint16_t period
+	, uint32_t clock_frequency_in_hz>
+inline void Timer1::clock_period_in_us()
+{
+    if constexpr (clock_frequency_in_hz == 1000000UL)
+	clock_period_in_us_1MHz<period>();
 
+    else if constexpr (clock_frequency_in_hz == 8000000UL)
+	clock_period_in_us_8MHz<period>();
+
+    else
+        static_assert(atd::always_false_v<int>,
+                      "clock_period_in_us: I'm lazy. I haven't implemented "
+                      "that frequency. Please implement it.");
+}
 
 
 // Devuelve el valor del contador.
 // Importante: según la datasheet, pag. 153,  al leer los uint16_t 
 // hay que bloquear las interrupciones. Por eso el lock.  
-inline uint16_t Timer1::counter() 
+inline Timer1::counter_type Timer1::counter() 
 {
     Interrupts_lock l;
     auto res = TCNT1;
@@ -268,14 +356,14 @@ inline uint16_t Timer1::counter()
     return res;
 }
 
-inline void Timer1::counter(uint16_t x) 
+inline void Timer1::counter(Timer1::counter_type x) 
 {
     Interrupts_lock l;
     TCNT1 = x;
 }
 
 
-inline uint16_t Timer1::output_compare_register_A() 
+inline Timer1::counter_type Timer1::output_compare_register_A() 
 {
     Interrupts_lock l;
     auto res = OCR1A;
@@ -284,14 +372,14 @@ inline uint16_t Timer1::output_compare_register_A()
 }
 
 // Escribimos x en el comparador A
-inline void Timer1::output_compare_register_A(uint16_t x)
+inline void Timer1::output_compare_register_A(Timer1::counter_type x)
 {
     Interrupts_lock l;
     OCR1A = x;
 }
 
 
-inline uint16_t Timer1::output_compare_register_B() 
+inline Timer1::counter_type Timer1::output_compare_register_B() 
 {
     Interrupts_lock l;
     auto res = OCR1B;
@@ -300,14 +388,14 @@ inline uint16_t Timer1::output_compare_register_B()
 }
 
 // Escribimos x en el comparador B
-inline void Timer1::output_compare_register_B(uint16_t x)
+inline void Timer1::output_compare_register_B(Timer1::counter_type x)
 {
     Interrupts_lock l;
     OCR1B = x;
 }
 
 
-inline uint16_t Timer1::input_capture_register() 
+inline Timer1::counter_type Timer1::input_capture_register() 
 {
     Interrupts_lock l;
     auto res = ICR1;
@@ -316,7 +404,7 @@ inline uint16_t Timer1::input_capture_register()
 }
 
 // Escribimos x en el comparador B
-inline void Timer1::input_capture_register(uint16_t x)
+inline void Timer1::input_capture_register(Timer1::counter_type x)
 {
     Interrupts_lock l;
     ICR1 = x;
@@ -363,9 +451,11 @@ inline void Timer1::enable_output_compare_B_match_interrupt()
  */
 class Timer1_normal_mode: public Timer1{
 public:
+    using counter_type = Timer1::counter_type;
+
     /// Encendemos el Timer1
     template<uint16_t periodo
-	    , uint32_t clock_frecuencia_en_hz = AVR_CLOCK_FREQUENCY_IN_HZ>
+	    , uint32_t clock_frequency_in_hz = AVR_CLOCK_FREQUENCY_IN_HZ>
     static void on();
 
     /// Ponemos el contador a cero.
@@ -379,14 +469,14 @@ private:
 
 
 template<uint16_t periodo
-	, uint32_t clock_frecuencia_en_hz>
+	, uint32_t clock_frequency_in_hz>
 inline void Timer1_normal_mode::on()
 {
     Interrupts_lock l;
 
     set_normal_mode();
     pin_AB_disconnected();
-    Timer1::on<periodo, clock_frecuencia_en_hz>();
+    Timer1::on<periodo, clock_frequency_in_hz>();
 }
 
 
@@ -429,16 +519,18 @@ inline void Timer1_normal_mode::reset()
  */
 class Timer1_CTC_mode:public Timer1{
 public:
+    using counter_type = Timer1::counter_type;
+
     // Configuración del CTC.
     // 1.- ¿Dónde anotamos el valor del TOP? ¿En OCRA o en ICR?
     // Recordar definir el valor de OCR1A/ICR elegido.
     /// Define el valor del TOP como el indicado en OCR1A.
     /// El TCNT va desde 0 hasta el valor escrito en OCR1A.
-    static void top_OCRA(const uint16_t& top0);
+    static void top_OCRA(const counter_type& top0);
 
     /// Define el valor del TOP como el indicado en ICR.
     /// El TCNT va desde 0 hasta el valor escrito en ICR.
-    static void top_ICR(const uint16_t& top0);
+    static void top_ICR(const counter_type& top0);
 
     // 2.- ¿Qué generar en los pines A/B cuando sucede un compare match? 
     // ¿Una onda cuadrada (toggle)?  ¿set/clear el pin?
@@ -456,7 +548,7 @@ public:
 
 
 
-inline void Timer1_CTC_mode::top_OCRA(const uint16_t& top0)
+inline void Timer1_CTC_mode::top_OCRA(const Timer1::counter_type& top0)
 {
     // 0100
     atd::Register(TCCR1B).write_zero_bit<WGM13>	 ();
@@ -467,7 +559,7 @@ inline void Timer1_CTC_mode::top_OCRA(const uint16_t& top0)
 }
 
 
-inline void Timer1_CTC_mode::top_ICR(const uint16_t& top0)
+inline void Timer1_CTC_mode::top_ICR(const Timer1::counter_type& top0)
 {
     // 1100
     atd::Register(TCCR1B).write_one_bit<WGM13, WGM12> ();
@@ -542,6 +634,8 @@ inline void Timer1_CTC_mode::pin_B_set_on_compare_match()
  */
 class Timer1_fast_PWM:public Timer1{
 public:
+    using counter_type = Timer1::counter_type;
+
     // Configuración del Fast PWM
 
     // 1.- ¿Qué valor usamos como TOP?
@@ -561,10 +655,10 @@ public:
     /// Pero si usamos este como TOP, no vamos a generar una PWM. Asi que, en
     /// general, no llamar a esta función. Usar mejor el ICR o los valores
     /// fijos de top.
-    static void top_OCRA(uint16_t top0);
+    static void top_OCRA(counter_type top0);
 
     /// El contador va desde 0 hasta el valor escrito en ICR.
-    static void top_ICR(uint16_t top0);
+    static void top_ICR(counter_type top0);
 
 
     // 2.- ¿Qué generar en los pines A/B?
@@ -625,7 +719,7 @@ inline void Timer1_fast_PWM::top_0x03FF()
     
 }
 
-inline void Timer1_fast_PWM::top_OCRA(uint16_t top0)
+inline void Timer1_fast_PWM::top_OCRA(Timer1::counter_type top0)
 {
     // 1111
     atd::Register(TCCR1B).write_one_bit<WGM13, WGM12>();
@@ -634,7 +728,7 @@ inline void Timer1_fast_PWM::top_OCRA(uint16_t top0)
     output_compare_register_A(top0);
 }
 
-inline void Timer1_fast_PWM::top_ICR(uint16_t top0)
+inline void Timer1_fast_PWM::top_ICR(Timer1::counter_type top0)
 {
     // 1110
     atd::Register(TCCR1B).write_one_bit <WGM13, WGM12>	();

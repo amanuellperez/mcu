@@ -22,6 +22,9 @@
  *
  *   - DESCRIPCION: Necesito Num_caracteres_max para crear los ostream.
  *
+ *  - TODO: Esta función la suministra el estandar!!! Es 
+ *  numeric_limits::digits/digits10... Revisarlo y eliminar esto!!!
+ *
  *   - HISTORIA:
  *       A.Manuel L.Perez - 08/02/2019 v0.0
  *			- 11/10/2019 v0.1 Completo y simplifico cosas.
