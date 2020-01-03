@@ -142,10 +142,10 @@ public:
     static void enable_input_capture_interrupt();
 
     /// Se captura con ISR_TIMER1_COMPA
-    static void enable_on_compareA_match();
+    static void enable_output_compare_A_match_interrupt();
 
     /// Se captura con ISR_TIMER1_COMPB
-    static void enable_on_compareB_match();
+    static void enable_output_compare_B_match_interrupt();
 
 }; // Timer1
 
@@ -344,14 +344,14 @@ inline void Timer1::enable_input_capture_interrupt()
 }
 
 
-inline void Timer1::enable_on_compareA_match()
+inline void Timer1::enable_output_compare_A_match_interrupt()
 {
     atd::Register(TIMSK1).write_one_bit<OCIE1A> ();
     Interrupt::enable_all_interrupts();
 }
 
 
-inline void Timer1::enable_on_compareB_match()
+inline void Timer1::enable_output_compare_B_match_interrupt()
 {
     atd::Register(TIMSK1).write_one_bit<OCIE1B> ();
     Interrupt::enable_all_interrupts();

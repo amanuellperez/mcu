@@ -1,9 +1,7 @@
 BIN = xx
 
 SOURCES=main.cpp	\
-		../../avr_pin.cpp \
-		../../alp_gen.cpp \
-		../../avr_USART.cpp	#para depurar, incluy alp_gen y usart
+		../../avr_pin.cpp
 
 ASM_SOURCES=../../avr_square_wave.S
 

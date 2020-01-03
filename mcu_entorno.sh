@@ -23,6 +23,7 @@ MCU_BIN=${MY_BIN}			; export MCU_BIN
 # ---------------------
 # Reglas genéricas para compilar usando avr-g++
 MCU_GENRULES=${MCU_MK}/mcu_genrules.mk   ; export MCU_GENRULES
+MCU_RECRULES=${MCU_MK}/mcu_recrules.mk   ; export MCU_RECRULES
 MCU_COMRULES=${MCU_MK}/com.mk	    ; export MCU_COMRULES
 
 # Reglas particulares de cada entorno

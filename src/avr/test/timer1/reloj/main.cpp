@@ -78,7 +78,7 @@ int main()
     uart.on();
 
     Timer::on<period_in_us>();
-    Timer::enable_on_compareA_match();
+    Timer::enable_output_compare_A_match_interrupt();
 
     // Elegimos OCR1A para generar una señal de 1 Hz
     // El osciloscopio la marca de 996ms. Hay que calibrar el número o usar un
