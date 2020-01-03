@@ -18,11 +18,12 @@ INCS= 	dev_cols_glyphs.h\
 		dev_matrix_led_max7219.h\
 		dev_pot_MCP4231.h\
 		dev_pulsador.h\
-		dev_register_74HC595.h\
-		dev_speaker.h\
-		dev_TMP36.h	\
-		user_choose_number.h\
-		user_menu.h	\
+		dev_register_74HC595.h		\
+		dev_speaker.h				\
+		dev_system_clock.h			\
+		dev_TMP36.h					\
+		user_choose_number.h		\
+		user_menu.h					\
 		user_time.h
 
 #		dev_DHT22.h\

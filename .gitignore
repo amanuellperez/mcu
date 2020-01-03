@@ -1,0 +1,21 @@
+# Prerequisites
+*.d
+
+# Object files
+*.o
+
+
+# Dynamic libraries
+*.so
+
+# Static libraries
+*.a
+
+# my tests
+xx
+
+# tags
+tags
+
+# vim files
+*.swp
