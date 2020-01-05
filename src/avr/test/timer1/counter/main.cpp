@@ -24,9 +24,7 @@
 #include <stdlib.h>
 #include <std_type_traits.h>
 
-using namespace avr;
-
-using Timer = Timer1_normal_mode;
+using Timer = avr::Timer1_normal_mode;
 
 //constexpr uint16_t period_in_us = 1024;
 constexpr uint16_t period_in_us = 256;
@@ -85,25 +83,25 @@ std::ostream& operator<<(std::ostream& out, const time_in_days& t)
 
 void print(uint64_t time_en_us)
 {
-    UART_iostream uart;
+    avr::UART_iostream uart;
     uart << us_to_time_in_days(time_en_us) << "\n\r";
 }
 
 
 int main()
 {
-    UART_iostream uart;
-    cfg_basica(uart);
+    avr::UART_iostream uart;
+    avr::cfg_basica(uart);
     uart.on();
 
     Timer::on<period_in_us>();
     Timer::enable_overflow_interrupt();
 
     while(1){
-	uint16_t v;
+	Timer::counter_type v;
 	uint32_t c;
 	{// lo más atómico posible
-	    Interrupts_lock l;
+	    avr::Interrupts_lock l;
 	    v = Timer::counter();
 	    c = contador;
 	}

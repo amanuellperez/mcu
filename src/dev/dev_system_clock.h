@@ -50,6 +50,7 @@ constexpr inline typename Timer::counter_type __system_clock_top()
 // TODO: What is a timer? What concept? 
 // This class has to work with ANY timer (avr timer, pic timer...). Which are
 // the correct names for the timer requirements? 
+//
 template <typename Timer>
 struct System_clock : public std::chrono::system_clock {
 

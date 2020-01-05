@@ -78,8 +78,7 @@ namespace avr{
 //
 class Timer1{
 public:
-    // Características del Timer
-    // -------------------------
+// CARACTERÍSTICAS DEL TIMER
     using counter_type = TIMER1_counter_type;
 
     /// The counter reaches the bottom when it becomes zero.
@@ -99,8 +98,7 @@ public:
     static constexpr uint8_t num_pin_B() {return TIMER1_num_pin_B;}
 
 
-    // Configuración del reloj
-    // -----------------------
+// CONFIGURACIÓN DEL RELOJ
     static void clock_speed_no_preescaling();
     static void clock_frequency_entre_8();
     static void clock_frequency_entre_64();
@@ -114,8 +112,7 @@ public:
     static void clock_period_in_us();
 
 
-    // Encendido/apagado del timer
-    // ---------------------------
+// ENCENDIDO/APAGADO DEL TIMER
     /// Enciende el Timer, usando como reloj el reloj de periodo indicado.
     /// 'periodo' es el periodo en microsegundos al que va a funcionar el timer.
     /// clock_frequency_in_hz = es la frecuencia del reloj del AVR.
@@ -127,8 +124,7 @@ public:
     static void off();
 
 
-    // Selección de reloj externo
-    // --------------------------
+// SELECCIÓN DE RELOJ EXTERNO
     /// External clock source on T1 pin. Clock on falling edge.
     static void external_clock_falling_edge();
 
@@ -136,8 +132,7 @@ public:
     static void external_clock_rising_edge();
 
 
-    // Acceso a registros
-    // ------------------
+// ACCESO A REGISTROS
     static counter_type counter();		/// Lectura del counter.
     static void counter(counter_type x);	/// Escritura del counter.
 
@@ -151,8 +146,7 @@ public:
     static void input_capture_register(counter_type x);/// Escritura del ICR.
 
 
-    // Interrupciones
-    // --------------
+// INTERRUPCIONES
     /// Cuando se produce un overflow generamos la interrupción
     /// correspondiente. Se captura con ISR_TIMER1_OVF
     static void enable_overflow_interrupt();
@@ -224,8 +218,8 @@ inline void Timer1::external_clock_rising_edge()
 
 
 
-// reloj del avr a 1MHz
-// --------------------
+// avr clock at 1MHz
+// -----------------
 template<uint16_t periodo>
 inline void Timer1::clock_period_in_us_1MHz() 
 {
@@ -246,39 +240,12 @@ inline void Timer1::clock_period_in_us_1MHz()
 
     else
 	static_assert(atd::always_false_v<int>,
-		    "Period incorrect for Timer1. Try another one.");
+		    "Incorrect Timer1 period. Try another one.");
 }
 
-//// a 1 us
-//template<>
-//inline void Timer1::clock_period_in_us<1u, 1000000UL>() 
-//{clock_speed_no_preescaling();}
-//
-//// a 8 us
-//template<>
-//inline void Timer1::clock_period_in_us<8u, 1000000UL>() 
-//{clock_frequency_entre_8();}
-//
-//// a 64 us
-//template<>
-//inline void Timer1::clock_period_in_us<64u, 1000000UL>() 
-//{clock_frequency_entre_64();}
-//
-//// a 256 us
-//template<>
-//inline void Timer1::clock_period_in_us<256u, 1000000UL>() 
-//{clock_frequency_entre_256();}
-//
-//// a 1024 us
-//template<>
-//inline void Timer1::clock_period_in_us<1024u, 1000000UL>() 
-//{clock_frequency_entre_1024();}
 
-
-
-
-// reloj del avr a 8MHz
-// --------------------
+// avr clock at 8MHz
+// -----------------
 // a 125 ns
 //template<>
 //inline void Timer1::clock_period_in_ns<125u, 8000000UL>() 
@@ -301,30 +268,8 @@ inline void Timer1::clock_period_in_us_8MHz()
  
     else
 	static_assert(atd::always_false_v<int>,
-		    "Period incorrect for Timer1. Try another one.");
+		    "Incorrect Timer1 period. Try another one.");
 }
-
-//
-//// a 1 us
-//template<>
-//inline void Timer1::clock_period_in_us<1u, 8000000UL>() 
-//{clock_frequency_entre_8();}
-//
-//// a 8 us
-//template<>
-//inline void Timer1::clock_period_in_us<8u, 8000000UL>() 
-//{clock_frequency_entre_64();}
-//
-//// a 32 us
-//template<>
-//inline void Timer1::clock_period_in_us<32u, 8000000UL>() 
-//{clock_frequency_entre_256();}
-//
-//// a 128 us
-//template<>
-//inline void Timer1::clock_period_in_us<128u, 8000000UL>() 
-//{clock_frequency_entre_1024();}
-//
 
 
 
@@ -409,14 +354,6 @@ inline void Timer1::input_capture_register(Timer1::counter_type x)
     Interrupts_lock l;
     ICR1 = x;
 }
-
-
-
-
-
-
-
-
 
 
 inline void Timer1::enable_overflow_interrupt()

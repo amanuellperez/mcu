@@ -15,39 +15,29 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-// Ejemplo básico de uso del Timer0 como contador
+// Ejemplo básico de uso del Timer como contador
 #include "../../../avr_USART.h"
-#include "../../../avr_timer0.h"
+#include "../../../avr_timer0_tr.h"
 #include "../../../avr_time.h"
 
+#include <atd_ostream.h>
 #include <stdlib.h>
 #include <std_type_traits.h>
 
-using namespace avr;
-
+using Timer = avr::Timer0_normal_mode;
+using time_t = uint32_t;
 
 constexpr uint16_t period_in_us = 1024;
 
-volatile uint32_t contador = 0;
+//constexpr uint16_t period_in_us = 256;
 
-ISR_TIMER0
+volatile time_t contador = 0;
+
+ISR_TIMER0_OVF
 {
     ++contador;
 }
 
-void timer0_set_normal_mode()
-{
-    Interrupts_lock l;
-
-    Timer0::set_normal_mode();
-    Timer0::clock_period_in_us<period_in_us>();
-}
-
-void timer0_init()
-{
-    timer0_set_normal_mode();
-    Timer0::enable_overflow_interrupt();
-}
  
 struct time_in_days{
     uint16_t us; // microseconds: [0, 999]
@@ -82,12 +72,12 @@ time_in_days us_to_time_in_days(uint64_t time_in_us)
     return t;
 }
 
-UART_ostream& operator<<(UART_ostream& uart, const time_in_days& t)
+std::ostream& operator<<(std::ostream& out, const time_in_days& t)
 {
-    return uart << t.day << "d "
-	        << t.hour << ':'
-		<< t.min << ':'
-		<< t.sec << '.'
+    return out << t.day << "d "
+	        << atd::write_as_uint8_t(t.hour) << ':'
+		<< atd::write_as_uint8_t(t.min) << ':'
+		<< atd::write_as_uint8_t(t.sec) << '.'
 		<< t.ms << ':'
 		<< t.us;
 
@@ -95,28 +85,36 @@ UART_ostream& operator<<(UART_ostream& uart, const time_in_days& t)
 
 void print(uint64_t time_en_us)
 {
-    UART_ostream uart;
+    avr::UART_iostream uart;
     uart << us_to_time_in_days(time_en_us) << "\n\r";
 }
 
 
 int main()
 {
-    UART_ostream uart;
+    avr::UART_iostream uart;
+    avr::cfg_basica(uart);
+    uart.on();
 
-    timer0_init();
+    Timer::on<period_in_us>();
+    Timer::enable_overflow_interrupt();
 
     while(1){
-	uint8_t v;
-	uint32_t c;
+	Timer::counter_type v;
+	time_t c;
 	{// lo más atómico posible
-	    Interrupts_lock l;
-	    v = Timer0::counter();
+	    avr::Interrupts_lock l;
+	    v = Timer::counter();
 	    c = contador;
 	}
 	
-	uint64_t t_us = (c*Timer0::resolucion() + v)*period_in_us;
-	print (t_us);
+	uint64_t t_us = (c*(Timer::max() + 1)+ v)*period_in_us;
+        uart << '(' << c << "*" << (Timer::max() + 1) << "+"
+             << atd::write_as_uint8_t(v) << ")*" << period_in_us << " = ";
+
+        print (t_us);
+	uart << ".";
+
 	wait_ms(1000);
     }
 }

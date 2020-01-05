@@ -46,8 +46,8 @@
  *  - HISTORIA:
  *    A.Manuel L.Perez
  *	10/04/2018 v0.0
- *	10/07/2019 v0.1: Reescrito. Comienzo con traductor.
- *	19/10/2019 v0.2: Lo dejo como un traductor puro.
+ *	10/07/2019 Reescrito. Comienzo con traductor.
+ *	19/10/2019 Lo dejo como un traductor puro.
  *
  ****************************************************************************/
 #include <stdint.h> // uint8_t

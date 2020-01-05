@@ -23,15 +23,15 @@
  *
  *   - DESCRIPCION: Pines del ATMEGA328P
  *
- *   - COMENTARIOS: 
  *
  *   - HISTORIA:
- *           alp  - 13/01/2019 Escrito
+ *    A.Manuel L.Perez
+ *      13/01/2019 v0.0
  *
  ****************************************************************************/
 namespace avr{
-// --------------------------
-// Configuración de los pines
+
+// CONFIGURACIÓN DE LOS PINES
 // --------------------------
 // La idea es numerar los pines de acuerdo a su posición en el chip
 // y no de acuerdo a los puertos B, C y D.
@@ -78,51 +78,44 @@ constexpr uint8_t BIT_MASK[29] = {
 
 
 
-// ---------------------
-// Configuración del SPI
-// ---------------------
-constexpr uint8_t SPI_num_pin_SCK  = 19u;
-constexpr uint8_t SPI_num_pin_MISO = 18u;
-constexpr uint8_t SPI_num_pin_MOSI = 17u;
-constexpr uint8_t SPI_num_pin_SS   = 16u;
-
-// ---------------------------
-// Configuración de los timers
-// ---------------------------
-// Configuración del Timer0
-constexpr uint8_t TIMER0_num_pin_A = 12u;
-constexpr uint8_t TIMER0_num_pin_B = 11u;
-constexpr uint16_t TIMER0_resolution= 256u;
-
-// Configuración del Timer1
-using TIMER1_counter_type = uint16_t;
-constexpr uint8_t TIMER1_num_pin_A = 15u;
-constexpr uint8_t TIMER1_num_pin_B = 16u;
-//constexpr uint32_t TIMER1_resolution= 65536u;
+// CONFIGURACIÓN DEL SPI
+    constexpr uint8_t SPI_num_pin_SCK  = 19u;
+    constexpr uint8_t SPI_num_pin_MISO = 18u;
+    constexpr uint8_t SPI_num_pin_MOSI = 17u;
+    constexpr uint8_t SPI_num_pin_SS   = 16u;
 
 
 
+// CONFIGURACIÓN DE LOS TIMERS
+    // Timer0
+    using TIMER0_counter_type          = uint8_t;
+    constexpr uint8_t TIMER0_num_pin_A = 12u;
+    constexpr uint8_t TIMER0_num_pin_B = 11u;
+    //constexpr uint16_t TIMER0_resolution= 256u;
 
-// ---------------------
-// Configuración del ADC
-// ---------------------
-// Devuelve el número de pin dentro del ADC que le corresponde al num_pin
-// del avr
-template<uint8_t num_pin> struct ADC_PIN{ static uint8_t value; };
+    // Timer1
+    using TIMER1_counter_type          = uint16_t;
+    constexpr uint8_t TIMER1_num_pin_A = 15u;
+    constexpr uint8_t TIMER1_num_pin_B = 16u;
+    // constexpr uint32_t TIMER1_resolution= 65536u;
 
-template<> struct ADC_PIN<23>{ static constexpr uint8_t value = 0; };
-template<> struct ADC_PIN<24>{ static constexpr uint8_t value = 1; };
-template<> struct ADC_PIN<25>{ static constexpr uint8_t value = 2; };
-template<> struct ADC_PIN<26>{ static constexpr uint8_t value = 3; };
-template<> struct ADC_PIN<27>{ static constexpr uint8_t value = 4; };
-template<> struct ADC_PIN<28>{ static constexpr uint8_t value = 5; };
+    // CONFIGURACIÓN DEL ADC
+
+    // Devuelve el número de pin dentro del ADC que le corresponde al num_pin
+    // del avr
+    template<uint8_t num_pin> struct ADC_PIN{ static uint8_t value; };
+
+    template<> struct ADC_PIN<23>{ static constexpr uint8_t value = 0; };
+    template<> struct ADC_PIN<24>{ static constexpr uint8_t value = 1; };
+    template<> struct ADC_PIN<25>{ static constexpr uint8_t value = 2; };
+    template<> struct ADC_PIN<26>{ static constexpr uint8_t value = 3; };
+    template<> struct ADC_PIN<27>{ static constexpr uint8_t value = 4; };
+    template<> struct ADC_PIN<28>{ static constexpr uint8_t value = 5; };
 
 
-// ---------------------
-// Configuración del TWI
-// ---------------------
-constexpr uint8_t TWI_MASK_STATUS_BITS = 0xF8;
-constexpr uint8_t TWI_MASK_BIT_RATE_PRESCALER = 0x03;
+// CONFIGURACIÓN DEL TWI
+    constexpr uint8_t TWI_MASK_STATUS_BITS = 0xF8;
+    constexpr uint8_t TWI_MASK_BIT_RATE_PRESCALER = 0x03;
 
 
 
