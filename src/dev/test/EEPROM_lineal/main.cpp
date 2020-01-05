@@ -28,7 +28,7 @@ using namespace avr;
 constexpr uint8_t periodo_en_us = 16;
 
 constexpr uint8_t num_pin_chip_select = 16;
-using EEPROM = EEPROM_lineal<EEPROM_25LC256<num_pin_chip_select>>;
+using EEPROM = dev::EEPROM_lineal<dev::EEPROM_25LC256<num_pin_chip_select>>;
 
 constexpr uint16_t sz = 300;
 

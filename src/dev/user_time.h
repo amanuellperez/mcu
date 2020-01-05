@@ -27,9 +27,12 @@
  *  A.Manuel L.Perez
  *	01/09/2019 v0.0
  *	21/12/2019 Cambio interfaz (elimino tm por time_t).
+ *	05/01/2020 Añado chrono::time_point.
+ *
  *
  ****************************************************************************/
 #include <cstdint>
+#include <chrono>
 #include <atd_time.h>
 #include "user_choose_number.h"
 
@@ -41,10 +44,10 @@ namespace dev{
 /// t0: parámetro de entrada/salida. De entrada es el tiempo inicial a mostrar
 /// en el LCD. De salida es el tiempo seleccionado por el usuario.
 // LCD: pantalla con acceso aleatorio (cursor_pos) e iostream (operator<<)
-// Teclado: left, right, ok
-template <typename LCD, typename Teclado>
+// Keyboard: left, right, ok
+template <typename LCD, typename Keyboard>
 std::time_t user_get_time(
-    LCD& lcd, Teclado& key, const std::time_t& t0, uint8_t x0, uint8_t y0)
+    LCD& lcd, Keyboard& key, const std::time_t& t0, uint8_t x0, uint8_t y0)
 {
     std::tm* t = std::gmtime(&t0);
 
@@ -83,6 +86,24 @@ std::time_t user_get_time(
 					.choose2(t->tm_sec);
 
     return std::mktime(t);
+}
+
+
+/// El usuario de la aplicación fija el tiempo a través de un teclado
+/// y un LCD.
+/// t0: parámetro de entrada/salida. De entrada es el tiempo inicial a mostrar
+/// en el LCD. De salida es el tiempo seleccionado por el usuario.
+// LCD: pantalla con acceso aleatorio (cursor_pos) e iostream (operator<<)
+// Keyboard: left, right, ok
+template <typename LCD, typename Keyboard, typename Clock, typename Duration>
+std::chrono::time_point<Clock, Duration> user_get_time(LCD& lcd,
+                                         Keyboard& key,
+                                         const std::chrono::time_point<Clock, Duration>& t0,
+                                         uint8_t x0, uint8_t y0)
+{
+    time_t t = std::chrono::system_clock::to_time_t(t0);
+    t = user_get_time(lcd, key, t, x0, y0);
+    return std::chrono::system_clock::from_time_t(t);
 }
 
 

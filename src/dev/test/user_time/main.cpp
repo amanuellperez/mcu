@@ -73,7 +73,7 @@ void test_lcd_menu()
 	wait_ms(1000);
 
 	lcd.clear();
-//	std::time_t t = 0;
+	lcd << "Primera prueba: time_t";
 	std::time_t t = 630152224; // 20/12/2019 10:17:04
 	t = dev::user_get_time(lcd, key, t, 4, 2);
 
@@ -81,6 +81,21 @@ void test_lcd_menu()
 	lcd.cursor_pos(0,0);
 	lcd << "Escrito:" << atd::only_date(*t0) << ' ' << atd::only_time(*t0);
 	wait_ms(4000);
+
+	{
+            lcd.clear();
+            lcd << "Segunda prueba: duration";
+            std::time_t t = 630152224; // 20/12/2019 10:17:04
+            auto td        = std::chrono::system_clock::from_time_t(t);
+	    td = dev::user_get_time(lcd, key, td, 4, 2);
+
+	    t = std::chrono::system_clock::to_time_t(td);
+            std::tm* t0 = std::gmtime(&t);
+            lcd.cursor_pos(0, 0);
+            lcd << "Escrito:" << atd::only_date(*t0) << ' '
+                << atd::only_time(*t0);
+            wait_ms(4000);
+        }
 
     }
 

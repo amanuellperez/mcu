@@ -1,6 +1,7 @@
 DIRS = ADC\
 	pin\
 	port\
+	timer0\
 	timer1\
 	TWI\
 	USART
