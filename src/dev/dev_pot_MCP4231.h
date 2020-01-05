@@ -162,7 +162,7 @@ private:
     // Datos
     // -----
     // Pines del device
-    avr::Pin_de_salida<num_pin_no_CS> no_CS_;
+    avr::Output_pin<num_pin_no_CS> no_CS_;
 
     // Estado
     bool good_;	

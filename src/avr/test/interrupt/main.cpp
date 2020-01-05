@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+// TODO: cambiar este programa. Usa pulsadores, pero estos pertenecen a dev!!!
 #include "../../avr_interrupt.h"
 #include "../../mcu_led.h"
 #include "../../mcu_pulsador.h"

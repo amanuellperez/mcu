@@ -32,10 +32,10 @@ void SPI::cfg_pines_as_master()
     // Leer la nota pag 356 del libro de MAKE. Es fundamental poner SS a 1
     // antes que hacer un enable
     // Configuración de los pins
-    Pin<SPI_num_pin_SCK>::de_salida();
-    Pin<SPI_num_pin_MOSI>::de_salida();
-    Pin<SPI_num_pin_MISO>::de_entrada_con_pullup();// no es necesario (ver table 23-1)
-    Pin<SPI_num_pin_SS>::de_salida(); 
+    Pin<SPI_num_pin_SCK>::as_output();
+    Pin<SPI_num_pin_MOSI>::as_output();
+    Pin<SPI_num_pin_MISO>::as_input_with_pullup();// no es necesario (ver table 23-1)
+    Pin<SPI_num_pin_SS>::as_output(); 
     
     // Inicializamos SS
     // start off not selected (high)

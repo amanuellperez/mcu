@@ -335,7 +335,7 @@ inline void Timer0_CTC_mode::pin_A_toggle_on_compare_match()
     atd::Register(TCCR0A).write_one_bit <COM0A0>();
 
     // Obligatorio definirlo como de salida. 
-    Pin<num_pin_A()>::de_salida();
+    Pin<num_pin_A()>::as_output();
 }
 
 inline void Timer0_CTC_mode::pin_A_clear_on_compare_match()
@@ -344,7 +344,7 @@ inline void Timer0_CTC_mode::pin_A_clear_on_compare_match()
     atd::Register(TCCR0A).write_zero_bit<COM0A0>();
 
     // Obligatorio definirlo como de salida. 
-    Pin<num_pin_A()>::de_salida();
+    Pin<num_pin_A()>::as_output();
 }
 
 
@@ -353,7 +353,7 @@ inline void Timer0_CTC_mode::pin_A_set_on_compare_match()
     atd::Register(TCCR0A).write_one_bit <COM0A1, COM0A0>();
 
     // Obligatorio definirlo como de salida. 
-    Pin<num_pin_A()>::de_salida();
+    Pin<num_pin_A()>::as_output();
 }
 
 // Table 19-6
@@ -363,7 +363,7 @@ inline void Timer0_CTC_mode::pin_B_toggle_on_compare_match()
     atd::Register(TCCR0A).write_one_bit <COM0B0>();
 
     // Obligatorio definirlo como de salida. 
-    Pin<num_pin_B()>::de_salida();
+    Pin<num_pin_B()>::as_output();
 }
 
 inline void Timer0_CTC_mode::pin_B_clear_on_compare_match()
@@ -372,7 +372,7 @@ inline void Timer0_CTC_mode::pin_B_clear_on_compare_match()
     atd::Register(TCCR0A).write_zero_bit<COM0B0>();
 
     // Obligatorio definirlo como de salida. 
-    Pin<num_pin_B()>::de_salida();
+    Pin<num_pin_B()>::as_output();
 }
 
 
@@ -381,7 +381,7 @@ inline void Timer0_CTC_mode::pin_B_set_on_compare_match()
     atd::Register(TCCR0A).write_one_bit <COM0B1, COM0B0>();
 
     // Obligatorio definirlo como de salida. 
-    Pin<num_pin_B()>::de_salida();
+    Pin<num_pin_B()>::as_output();
 }
 
 

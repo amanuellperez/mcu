@@ -38,7 +38,7 @@ namespace dev{
 template <uint8_t n>
 class LED{
 public:
-    LED() {avr::Pin<n>::de_salida(); }
+    LED() {avr::Pin<n>::as_output(); }
 
     /// Encendemos el led
     static void on() {avr::Pin<n>::write_one();}

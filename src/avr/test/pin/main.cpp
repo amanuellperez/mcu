@@ -29,7 +29,7 @@ constexpr uint8_t num_pin = 14;
 void test_pin()
 {
     Pin<num_pin> pin;
-    pin.de_salida();
+    pin.as_output();
 
     while(1){
 	pin.write_one();
@@ -57,7 +57,7 @@ void test_dpin()
 
 void test_pin_de_salida()
 {
-    Pin_de_salida<num_pin> pin;
+    Output_pin<num_pin> pin;
 
     while(1){
 	pin.write_one();

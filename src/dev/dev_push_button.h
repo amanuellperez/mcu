@@ -17,14 +17,14 @@
 
 #pragma once
 
-#ifndef __DEV_PULSADOR_H__
-#define __DEV_PULSADOR_H__
+#ifndef __DEV_PUSHBUTTON_H__
+#define __DEV_PUSHBUTTON_H__
 /****************************************************************************
  *
- *   - DESCRIPCION: Pulsador
+ *   - DESCRIPCION: Push_button
  *
  *   - HISTORIA:
- *           A.Manuel L.Perez  - 24/07/2017 Escrito
+ *    A.Manuel L.Perez  - 24/07/2017 Escrito
  *
  ****************************************************************************/
 #include "avr_pin.h"
@@ -32,7 +32,7 @@
 namespace dev{
 
 /*!
- *  \brief  Pulsador conectado a un pin.
+ *  \brief  Push_button conectado a un pin.
  *
  *  El pulsador se conecta directamente al pin, por un lado, y a tierra, por
  *  el otro. El pin se configurará con la resistencia pull-up. De esta forma, 
@@ -45,21 +45,21 @@ namespace dev{
  *
  */
 template <uint8_t n>
-class Pulsador{
+class Push_button{
 public:
-    Pulsador() {avr::Pin<n>::de_entrada_con_pullup();}
+    Push_button() {avr::Pin<n>::as_input_with_pullup();}
 
     /// ¿está pulsado?
-    bool esta_pulsado()
+    bool is_pressed()
     {return avr::Pin<n>::is_zero();}
 
     /// ¿no está pulsado?
-    bool no_esta_pulsado()
-    {return !esta_pulsado();}
+    bool is_not_pressed()
+    {return !is_pressed();}
 
     /// Espera hasta que se pulsa el interruptor.
-    void espera_hasta_que_este_pulsado()
-    { while(!esta_pulsado()) ; }
+    void wait_until_is_pressed()
+    { while(!is_pressed()) ; }
 };
 
 

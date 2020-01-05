@@ -18,7 +18,6 @@
 #pragma once
 
 #ifndef __AVR_PIN_H__
-#define __AVR_PIN_H__
 /****************************************************************************
  *
  *   - DESCRIPCION: Clases para manejar pines del AVR
@@ -26,13 +25,16 @@
  *   - COMENTARIOS: 
  *
  *   - HISTORIA:
- *           alp  - 24/07/2017 Escrito
- *		    27/01/2019 Reescrito, paso a usar templates.
- *		    09/06/2019 Pin_de_salida<0> y pulso_1us. 
+ *    A.Manuel L.Perez
+ *      24/07/2017 Escrito
+ *	27/01/2019 Reescrito, paso a usar templates.
+ *	09/06/2019 Output_pin<0> y pulso_1us. 
+ *	05/01/2020 Migrado a inglés.
  *
  ****************************************************************************/
 #include "avr_cfg.h"
 #include "avr_time.h"
+
 
 namespace avr{
 /*!
@@ -41,13 +43,13 @@ namespace avr{
  *  Este es un pin totalmente configurable. Lo podemos cambiar de entrada a
  *  salida y viceversa en medio del código.
  *
- *  Si se quiere una versión más reestringida usar Pin_de_salida/de_entrada
+ *  Si se quiere una versión más reestringida usar Output_pin/de_entrada
  *
  */
 template <uint8_t n>
 class Pin{
 public:
-    // Construcción
+// CONSTRUCCIÓN
     constexpr Pin(){}	
 
     // No es posible copiar pins (aunque como es una template static no
@@ -55,31 +57,29 @@ public:
     Pin(const Pin&)		= delete;
     Pin& operator=(const Pin&)	= delete;
 
-    // -------------------
-    // Configuramos el pin
-    // -------------------
+// CONFIGURAMOS EL PIN
     /// Definimos el pin de salida
-    static void de_salida() 
+    static void as_output() 
     {
 	(*DDR[n]) |= BIT_MASK[n];
     }
 
     /// Definimos el pin como de entrada con la pull-up resistor
-    static void de_entrada_con_pullup() 
+    static void as_input_with_pullup() 
     {
 	(*DDR[n]) &= ~BIT_MASK[n];	// de entrada
 	(*PORT[n]) |= BIT_MASK[n];	// enables pull-up resistor
     }
 
     /// Definimos el pin como de entrada sin la pull-up resistor
-    static void de_entrada_sin_pullup() 
+    static void as_input_without_pullup() 
     {
 	(*DDR[n]) &= ~BIT_MASK[n];	// de entrada
 	(*PORT[n]) &= ~BIT_MASK[n];	// disabel pull-up resistor
     }
-    // --------------------
-    // Funciones de lectura
-    // --------------------
+
+
+// FUNCIONES DE LECTURA
     /// Leemos el valor del pin (0 ó 1)
     static uint8_t read()
     {return (*PIN[n]) & BIT_MASK[n];}
@@ -90,9 +90,7 @@ public:
     /// Devuelve si el bit es 1 o no. 
     static bool is_one() {return read();}
 
-    // ----------------------
-    // Funciones de escritura
-    // ----------------------
+// FUNCIONES DE ESCRITURA
     /// Escribimos un 1
     static void write_one()	
     {(*PORT[n]) |= BIT_MASK[n];}
@@ -113,22 +111,15 @@ public:
 	else  write_zero();
     }
     
-//    /// Accedemos a los registros directamente
-//    TODO: 27/01/19 - borrarlo si no se usa
-//    static constexpr volatile uint8_t* port(uint8_t num_pin) {return impl::PORT[num_pin];}
-//    static constexpr volatile uint8_t* ddr(uint8_t num_pin) {return impl::DDR[num_pin];}
-//    static constexpr volatile uint8_t* pin(uint8_t num_pin) {return impl::PIN[num_pin];}
-//    static constexpr uint8_t bit_mask(uint8_t num_pin) {return impl::BIT_MASK[num_pin];}
-
-    // Funciones de ayuda
-    static void pulso_1us()
+// FUNCIONES DE AYUDA
+    static void pulse_of_1us()
     {
 	write_one();
 	wait_us(1);  
 	write_zero();
     }
 
-    static void pulso_negativo_1us()
+    static void negative_pulse_of_1us()
     {
 	write_zero();
 	wait_us(1);  
@@ -146,12 +137,12 @@ public:
  *  de este tipo.
  */
 template<uint8_t n>
-class Pin_de_salida{
+class Output_pin{
 public:
-   constexpr Pin_de_salida()
-   { Pin<n>::de_salida(); }
+   constexpr Output_pin()
+   { Pin<n>::as_output(); }
 
-    Pin_de_salida& operator=(const Pin_de_salida&)	= delete;
+    Output_pin& operator=(const Output_pin&)	= delete;
 
     constexpr static void write_one()	{Pin<n>::write_one();}
     constexpr static void write_zero()	{Pin<n>::write_zero();}
@@ -160,23 +151,25 @@ public:
 
 
     // Funciones de ayuda
-    constexpr static void pulso_1us() { Pin<n>::pulso_1us(); }
-    constexpr static void pulso_negativo_1us() {Pin<n>::pulso_negativo_1us();}
+    constexpr static void pulse_of_1us() { Pin<n>::pulse_of_1us(); }
+    constexpr static void negative_pulse_of_1us() {Pin<n>::negative_pulse_of_1us();}
 };
 
 
+// Cuando quiera definir en un dispositivo un pin de forma opcional lo defino
+// como 0. El Pin<0> no está conectado realmente a ningún pin.
 template<>
-class Pin_de_salida<0>{
+class Output_pin<0>{
 public:
-    constexpr Pin_de_salida(){}
-    Pin_de_salida& operator=(const Pin_de_salida&)	= delete;
+    constexpr Output_pin(){}
+    Output_pin& operator=(const Output_pin&)	= delete;
 
     constexpr static void write_one()	{}
     constexpr static void write_zero()	{}
 
     // Funciones de ayuda
-    constexpr static void pulso_1us() {}
-    constexpr static void pulso_negativo_1us() {}
+    constexpr static void pulse_of_1us() {}
+    constexpr static void negative_pulse_of_1us() {}
 };
 
 
@@ -186,12 +179,12 @@ public:
  *
  */
 template<uint8_t n>
-class Pin_de_entrada_con_pullup{
+class Input_pin_with_pullup{
 public:
-    Pin_de_entrada_con_pullup()
-    {Pin<n>::de_entrada_con_pullup();}
+    Input_pin_with_pullup()
+    {Pin<n>::as_input_with_pullup();}
 
-    Pin_de_entrada_con_pullup& operator=(const Pin_de_entrada_con_pullup&)	= delete;
+    Input_pin_with_pullup& operator=(const Input_pin_with_pullup&) = delete;
 
     /// Leemos el valor del pin (0 ó 1)
     static uint8_t read()
@@ -210,12 +203,12 @@ public:
  *
  */
 template<uint8_t n>
-class Pin_de_entrada_sin_pullup{
+class Input_pin_without_pullup{
 public:
-    Pin_de_entrada_sin_pullup()
-    {Pin<n>::de_entrada_sin_pullup();}
+    Input_pin_without_pullup()
+    {Pin<n>::as_input_without_pullup();}
 
-    Pin_de_entrada_sin_pullup& operator=(const Pin_de_entrada_sin_pullup&)	= delete;
+    Input_pin_without_pullup& operator=(const Input_pin_without_pullup&)	= delete;
 
     /// Leemos el valor del pin (0 ó 1)
     static uint8_t read()

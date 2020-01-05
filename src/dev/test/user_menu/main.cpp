@@ -18,22 +18,22 @@
 // Conectar el LCD y 3 pulsadores a los pines indicados
 #include "../../user_menu.h"
 #include "../../dev_LCD_HD44780.h"
-#include "../../dev_pulsador.h"
+#include "../../dev_push_button.h"
 
 #include <avr_time.h>
 
 
-constexpr uint8_t teclado_enter_pin = 23;
-constexpr uint8_t teclado_up_pin = 24;
-constexpr uint8_t teclado_down_pin  = 25;
+constexpr uint8_t keyboard_enter_pin = 23;
+constexpr uint8_t keyboard_up_pin = 24;
+constexpr uint8_t keyboard_down_pin  = 25;
 
 using namespace dev;
 
 template <uint8_t down_pin, uint8_t up_pin, uint8_t enter_pin>
-struct Teclado{
-    Pulsador<down_pin> down;
-    Pulsador<up_pin> up;
-    Pulsador<enter_pin> enter;
+struct Keyboard{
+    Push_button<down_pin> down;
+    Push_button<up_pin> up;
+    Push_button<enter_pin> enter;
 };
 
 
@@ -51,7 +51,7 @@ void test_lcd_menu()
 		    , LCD_HD44780::DPin_E {6}
 		    , LCD_HD44780::DPin_D4{11, 12, 13, 14}};
 
-    Teclado<teclado_down_pin, teclado_up_pin, teclado_enter_pin> key;
+    Keyboard<keyboard_down_pin, keyboard_up_pin, keyboard_enter_pin> key;
 
     const char* menu =
         // "1. Primera opcion";

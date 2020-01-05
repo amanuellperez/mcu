@@ -11,7 +11,6 @@ DIRS = ADC\
 	interrupt\
 	SPI\
 	square_wave\
-	timer0\
 
 include $(MCU_RECRULES)
 

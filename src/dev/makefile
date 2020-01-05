@@ -17,7 +17,7 @@ INCS= 	dev_cols_glyphs.h\
 		dev_LM75.h\
 		dev_matrix_led_max7219.h\
 		dev_pot_MCP4231.h\
-		dev_pulsador.h\
+		dev_push_button.h\
 		dev_register_74HC595.h		\
 		dev_speaker.h				\
 		dev_system_clock.h			\

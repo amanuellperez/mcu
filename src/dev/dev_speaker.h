@@ -107,7 +107,7 @@ inline void Speaker::play_note(uint16_t nota, uint16_t duracion /* en ms */)
     avr::Timer1::comparador1(nota);
 
     // conectamos el speaker al timer0
-    pin_.de_salida();
+    pin_.as_output();
 
     while (duracion) {
 	_delay_ms(1);
@@ -115,7 +115,7 @@ inline void Speaker::play_note(uint16_t nota, uint16_t duracion /* en ms */)
     }
 
     // desconectamos el speaker al timer0
-    pin_.de_entrada_sin_pullup();
+    pin_.as_input_without_pullup();
 }
 
 

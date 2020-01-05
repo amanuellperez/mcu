@@ -47,11 +47,11 @@ public:
 
     /// Pasa al siguiente estado. Cuenta uno más.
     void next() {
-	clock_.pulso_1us();
+	clock_.pulse_of_1us();
     }
 
     /// Reset el contador, volviendo a encender el pin 0.
-    void reset() {reset_.pulso_1us();}
+    void reset() {reset_.pulse_of_1us();}
 
     /// Enable el contador.
     void enable() {clock_inhibit_.write_zero();}
@@ -60,9 +60,9 @@ public:
     void disable() {clock_inhibit_.write_one();}
 
 private:
-    avr::Pin_de_salida<num_pin_clock> clock_;
-    avr::Pin_de_salida<num_pin_reset> reset_;
-    avr::Pin_de_salida<num_pin_clock_inhibit> clock_inhibit_;
+    avr::Output_pin<num_pin_clock> clock_;
+    avr::Output_pin<num_pin_reset> reset_;
+    avr::Output_pin<num_pin_clock_inhibit> clock_inhibit_;
 };
 
 

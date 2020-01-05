@@ -86,9 +86,9 @@ public:
     void buffer_write(uint8_t x) { avr::SPI_master::write(x); }
 
     /// Vuelca el buffer en el registro de salida.
-    void buffer_vuelca(){ pin_rclk_.pulso_1us(); }
+    void buffer_vuelca(){ pin_rclk_.pulse_of_1us(); }
 
-    void buffer_clear() { pin_no_srclr_.pulso_negativo_1us(); }
+    void buffer_clear() { pin_no_srclr_.negative_pulse_of_1us(); }
 
     /// Escribimos en la salida el byte x
     void write(uint8_t x)
@@ -105,8 +105,8 @@ public:
     }
 
 private:
-    avr::Pin_de_salida<num_pin_RCLK> pin_rclk_;	// volcado del buffer a la salida
-    avr::Pin_de_salida<num_pin_NO_SRCLR> pin_no_srclr_;// Borra el buffer de entrada
+    avr::Output_pin<num_pin_RCLK> pin_rclk_;	// volcado del buffer a la salida
+    avr::Output_pin<num_pin_NO_SRCLR> pin_no_srclr_;// Borra el buffer de entrada
 };
 
 

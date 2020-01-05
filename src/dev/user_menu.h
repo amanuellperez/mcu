@@ -261,10 +261,10 @@ void User_menu<L,T>::lcd_move()
 {
     Redibujar redibujar = Redibujar::nada;
 
-    if (key_.up.esta_pulsado())
+    if (key_.up.is_pressed())
 	redibujar = lcd_up();
 
-    else if (key_.down.esta_pulsado())
+    else if (key_.down.is_pressed())
 	redibujar = lcd_down();
 
     redibuja(redibujar);
@@ -279,7 +279,7 @@ uint8_t User_menu<L,T>::show(uint8_t opcion_inicial)
 
     show_menu_first_time(opcion_inicial);
 
-    while (key_.enter.no_esta_pulsado()){
+    while (key_.enter.is_not_pressed()){
 	lcd_move();
 
 	wait_ms(T_clock);

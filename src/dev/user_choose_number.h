@@ -204,7 +204,7 @@ uint8_t User_choose_number<L, T>::choose2(uint8_t x0)
    
     wait_ms(300);// Hay que garantizar que el usuario haya soltado la tecla ok
 
-    while(key_.enter.no_esta_pulsado()){
+    while(key_.enter.is_not_pressed()){
 	if (ultima_tecla_pulsada_ != Tecla_pulsada::ninguna)
 	    print2(x_);
 
@@ -239,7 +239,7 @@ uint16_t User_choose_number<L, T>::choose4(uint16_t x0)
     // Hay que garantizar que el usuario haya soltado la tecla ok
     wait_ms(300);  
 
-    while(key_.enter.no_esta_pulsado()){
+    while(key_.enter.is_not_pressed()){
 	if (ultima_tecla_pulsada_ != Tecla_pulsada::ninguna)
 	    print4(x_);
 
@@ -280,7 +280,7 @@ template <typename L, typename T>
 void User_choose_number<L, T>::update_ninguna()
 {
 
-    if (key_.down.esta_pulsado()){
+    if (key_.down.is_pressed()){
 	num_ticks_pulsada_    = 0;
 	ultima_tecla_pulsada_ = Tecla_pulsada::down;
 
@@ -288,7 +288,7 @@ void User_choose_number<L, T>::update_ninguna()
 	    --x_;
     }
 
-    else if (key_.up.esta_pulsado()){
+    else if (key_.up.is_pressed()){
 	num_ticks_pulsada_    = 0;
 	ultima_tecla_pulsada_ = Tecla_pulsada::up;
 
@@ -305,7 +305,7 @@ void User_choose_number<L, T>::update_ninguna()
 template <typename L, typename T>
 void User_choose_number<L, T>::update_down()
 {
-    if (key_.down.esta_pulsado()){
+    if (key_.down.is_pressed()){
 
 	++num_ticks_pulsada_;
 
@@ -327,7 +327,7 @@ void User_choose_number<L, T>::update_down()
 template <typename L, typename T>
 void User_choose_number<L, T>::update_up()
 {
-    if (key_.up.esta_pulsado()){
+    if (key_.up.is_pressed()){
 
 	++num_ticks_pulsada_;
 

@@ -15,20 +15,20 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "../../dev_pulsador.h"
+#include "../../dev_push_button.h"
 #include "../../dev_led.h"
 #include <avr_time.h>
 
 
-// Conectar un led al pin 27 y un pulsador al pin 28
+// Conectar un led al pin 15 y un pulsador al pin 23
 // Al pulsar el pulsador se enciende el led y al soltarlo se apaga
 int main()
 {
-    dev::LED<27> led;
-    dev::Pulsador<28> pulsador;
+    dev::LED<15> led;
+    dev::Push_button<23> push_button;
 
     while(1){
-	if (pulsador.esta_pulsado())
+	if (push_button.is_pressed())
 	    led.on();
 	else 
 	    led.off();

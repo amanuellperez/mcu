@@ -31,14 +31,14 @@ public:
     void run();
 
 private:
-    Pin_de_salida<15> p1_;
-    Pin_de_salida<16> p2_;
-    Pin_de_salida<17> p3_;
-    Pin_de_salida<18> p4_;
-    Pin_de_salida<19> p5_;
-    Pin_de_salida<23> p6_;
-    Pin_de_salida<24> p7_;
-    Pin_de_salida<25> p8_;
+    Output_pin<15> p1_;
+    Output_pin<16> p2_;
+    Output_pin<17> p3_;
+    Output_pin<18> p4_;
+    Output_pin<19> p5_;
+    Output_pin<23> p6_;
+    Output_pin<24> p7_;
+    Output_pin<25> p8_;
 
     void POVDisplay(uint8_t fila_glyph);
     void clear();

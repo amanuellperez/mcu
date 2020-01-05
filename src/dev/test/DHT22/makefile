@@ -11,7 +11,7 @@ ASM_SOURCES=../../avr_time.S
 
 MCU = atmega328p
 
-include $(AVR_COMRULES)
+include $(DEV_GENRULES)
 
 
 

@@ -123,9 +123,9 @@ private:
     // Pines del device
     // ----------------
     // Usamos los mismos nombres que la datasheet
-    avr::Pin_de_salida<num_pin_no_chip_select> no_CS_;
-    avr::Pin_de_salida<num_pin_no_write_protect> no_WP_;
-    avr::Pin_de_salida<num_pin_no_hold> no_HOLD_;
+    avr::Output_pin<num_pin_no_chip_select> no_CS_;
+    avr::Output_pin<num_pin_no_write_protect> no_WP_;
+    avr::Output_pin<num_pin_no_hold> no_HOLD_;
 
 
     // Instruction Set

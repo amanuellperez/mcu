@@ -513,7 +513,7 @@ inline void Timer1_CTC_mode::pin_A_toggle_on_compare_match()
     atd::Register(TCCR1A).write_one_bit<COM1A0>();
 
     // Obligatorio definirlo como de salida. 
-    Pin<num_pin_A()>::de_salida();
+    Pin<num_pin_A()>::as_output();
 }
 
 inline void Timer1_CTC_mode::pin_A_clear_on_compare_match()
@@ -522,7 +522,7 @@ inline void Timer1_CTC_mode::pin_A_clear_on_compare_match()
     atd::Register(TCCR1A).write_zero_bit<COM1A0>();
 
     // Obligatorio definirlo como de salida. 
-    Pin<num_pin_A()>::de_salida();
+    Pin<num_pin_A()>::as_output();
 }
 
 
@@ -531,7 +531,7 @@ inline void Timer1_CTC_mode::pin_A_set_on_compare_match()
     atd::Register(TCCR1A).write_one_bit <COM1A1, COM1A0>();
 
     // Obligatorio definirlo como de salida. 
-    Pin<num_pin_A()>::de_salida();
+    Pin<num_pin_A()>::as_output();
 }
 
 
@@ -541,7 +541,7 @@ inline void Timer1_CTC_mode::pin_B_toggle_on_compare_match()
     atd::Register(TCCR1A).write_one_bit<COM1B0>();
 
     // Obligatorio definirlo como de salida. 
-    Pin<num_pin_B()>::de_salida();
+    Pin<num_pin_B()>::as_output();
 }
 
 inline void Timer1_CTC_mode::pin_B_clear_on_compare_match()
@@ -550,7 +550,7 @@ inline void Timer1_CTC_mode::pin_B_clear_on_compare_match()
     atd::Register(TCCR1A).write_zero_bit<COM1B0>();
 
     // Obligatorio definirlo como de salida. 
-    Pin<num_pin_B()>::de_salida();
+    Pin<num_pin_B()>::as_output();
 }
 
 
@@ -559,7 +559,7 @@ inline void Timer1_CTC_mode::pin_B_set_on_compare_match()
     atd::Register(TCCR1A).write_one_bit <COM1B1, COM1B0>();
 
     // Obligatorio definirlo como de salida. 
-    Pin<num_pin_B()>::de_salida();
+    Pin<num_pin_B()>::as_output();
 }
 
 
@@ -688,7 +688,7 @@ inline void Timer1_fast_PWM::pin_A_non_inverting_mode()
     atd::Register(TCCR1A).write_zero_bit<COM1A0>();
 
     // Obligatorio definirlo como de salida. 
-    Pin<num_pin_A()>::de_salida();
+    Pin<num_pin_A()>::as_output();
 }
 
 inline void Timer1_fast_PWM::pin_A_inverting_mode()
@@ -696,7 +696,7 @@ inline void Timer1_fast_PWM::pin_A_inverting_mode()
     atd::Register(TCCR1A).write_one_bit <COM1A1, COM1A0>();
 
     // Obligatorio definirlo como de salida. 
-    Pin<num_pin_A()>::de_salida();
+    Pin<num_pin_A()>::as_output();
 }
 
 
@@ -706,7 +706,7 @@ inline void Timer1_fast_PWM::pin_B_non_inverting_mode()
     atd::Register(TCCR1A).write_zero_bit<COM1B0>();
 
     // Obligatorio definirlo como de salida. 
-    Pin<num_pin_B()>::de_salida();
+    Pin<num_pin_B()>::as_output();
 }
 
 inline void Timer1_fast_PWM::pin_B_inverting_mode()
@@ -714,7 +714,7 @@ inline void Timer1_fast_PWM::pin_B_inverting_mode()
     atd::Register(TCCR1A).write_one_bit <COM1B1, COM1B0>();
 
     // Obligatorio definirlo como de salida. 
-    Pin<num_pin_B()>::de_salida();
+    Pin<num_pin_B()>::as_output();
 }
 
 
