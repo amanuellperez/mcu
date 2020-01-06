@@ -21,30 +21,21 @@
 #define __DEV_LCD_HD4780_TR_H__
 /****************************************************************************
  *
- *   - DESCRIPCION: Traductor del display HD44780
+ *  - DESCRIPCION: Traductor del display HD44780
  *  
- *   - TODO: 
- *	    Eliminar los pines dinámicos. La forma de conectar el LCD se
- *	    conoce en tiempo de compilación.
- *
- *   - DUDA: Tal como está implementado es genérico: admite conectar a 4 u 8
- *	pines. Sin embargo eso trae el pago de que si lo conectas a 4 estas
- *	enlazando también el código de 8 (son 2-3 funciones solo) aumentando
- *	el código. Se está pagando por algo que no se está usando. ¿Dividir la
- *	clase en dos, una con interfaz para 4 y otra para 8 para evitar esto?
- *
- *   - HISTORIA:
+ *  - HISTORIA:
  *     A. Manuel López:
  *	    11/07/2017 v0.0
  *	    29/07/2019 v0.1: Creo traductor.
  *	    26/09/2019 v0.2: LCD_ostream y cambios menores.
  *	    14/10/2019 v0.3: Reestructuración de ficheros.
+ *	    06/01/2020 v0.4: Elimino DPin a favor de Pin.
  *
+ * - TODO: Falta probar conectarlo a 8 pines (pero en la práctica me es
+ *   mucho más cómodo conectarlo solo a 4, no necesito 8 de momento).
  *
  ****************************************************************************/
-#include <ostream>
-
-#include <avr_dpin.h>
+#include <avr_pin.h>
 
 namespace dev{
 
@@ -70,34 +61,90 @@ namespace dev{
  *	    A   = conectado a 5V a través de una resistencia de 330 ohms.
  *	    K   = 0V
  */
+template <uint8_t num_pin_RS>
+struct LCD_HD44780_RS{
+    static constexpr uint8_t RS = num_pin_RS;
+};
+
+template <uint8_t num_pin_RW>
+struct LCD_HD44780_RW{
+    static constexpr uint8_t RW = num_pin_RW;
+};
+
+
+template <uint8_t num_pin_E>
+struct LCD_HD44780_E{
+    static constexpr uint8_t E = num_pin_E;
+};
+
+template <uint8_t num_pin_D4,
+	  uint8_t num_pin_D5,
+	  uint8_t num_pin_D6,
+	  uint8_t num_pin_D7>
+struct LCD_HD44780_D4{
+    static constexpr uint8_t D4 = num_pin_D4;
+    static constexpr uint8_t D5 = num_pin_D5;
+    static constexpr uint8_t D6 = num_pin_D6;
+    static constexpr uint8_t D7 = num_pin_D7;
+};
+
+
+template <typename num_pin_RS, 
+	  typename num_pin_RW,
+	  typename num_pin_E,
+	  typename num_pins_D4>
+struct LCD_HD44780_pins4{
+    static constexpr uint8_t num_pins_D = 4;
+
+    static constexpr uint8_t RS = num_pin_RS::RS;
+    static constexpr uint8_t RW = num_pin_RW::RW;
+    static constexpr uint8_t E  = num_pin_E::E;
+
+    static constexpr uint8_t D0 = 0;
+    static constexpr uint8_t D1 = 0;
+    static constexpr uint8_t D2 = 0;
+    static constexpr uint8_t D3 = 0;
+    static constexpr uint8_t D4 = num_pins_D4::D4;
+    static constexpr uint8_t D5 = num_pins_D4::D5;
+    static constexpr uint8_t D6 = num_pins_D4::D6;
+    static constexpr uint8_t D7 = num_pins_D4::D7;
+};
+
+
+// TODO: no están probadas las funciones de 8 bits, así que
+// no escribo de momento esta estructura struct LCD_HD44780_pins8{...}
+// de esta forma es imposible usarla sin probar.
+
+/*!
+ *  \brief  Traductor del HD44780
+ *
+ * La forma de definir un LCD es de la siguiente forma:
+ *
+ * // Si lo conectamos solo a 4 pins de datos
+ * using LCD_pins = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<4>,
+ *					   dev::LCD_HD44780_RW<5>,
+ *					   dev::LCD_HD44780_E<6>,
+ *					   dev::LCD_HD44780_D4<11,12,13,14>
+ *					   >;
+ *					   
+ * using LCD_HD44780 = dev::LCD_HD44780<LCD_pins>;
+ *
+ * En caso de que se pasen en orden equivocado los pines (por ejemplo, 
+ * se pase primero RW en vez de RS) dará un error (misterioso) de compilación
+ * impidiendo que se definan mal los pines.
+ *
+ * DUDA: ¿merece la pena modificar LCD_HD44780_pins4 para que de un error
+ * inteligible? De momento creo que no.
+ *
+ */
+template <typename num_pin>
+// requires: std::is_same_v<num_pin, LCD_HD44780_pins>;
 class LCD_HD44780{
 public:
-    // DPines que tiene el LCD. Para evitar errores en la construcción.
-    struct DPin_RS {uint8_t v;};
-    struct DPin_RW {uint8_t v;};
-    struct DPin_E  {uint8_t v;};
-
-    // cuando queremos usar 4-bit interface
-    struct DPin_D4 {uint8_t D4, D5, D6, D7;};
-
-    // cuando queremos usar 8-bit interface
-    struct DPin_D8 {uint8_t D0, D1, D2, D3, D4, D5, D6, D7;};
-
-    /// Definimos las conexiones hardware del display.
-    /// Interface 8 bits.
-    /// TODO: comento este constructor, ya que no lo he probado con el AVR.
-    /// Funcionaba bien el interfaz 8 bits con arduino, pero no he hecho
-    /// las pruebas correspondientes en AVR. Probarlo!!! Revisar la función
-    /// init8, creo que está mal.
-//    LCD_HD44780(DPin_RS rs, DPin_RW rw, DPin_E e, const DPin_D8& d);
-
-    /// Interface 4 bits.
-    LCD_HD44780(DPin_RS rs, DPin_RW rw, DPin_E e, const DPin_D4& d);
+    LCD_HD44780();
 
 
-    // -------------------------------
-    // Instrucciones: table 6, pag. 24
-    // -------------------------------
+// INSTRUCCIONES: TABLE 6, PAG. 24
     /// Clears entire display and sets DDRAM address 0 in address counter.
     void clear_display();
 
@@ -140,12 +187,9 @@ public:
     /// Fila 2: 0x40 ... 0x67
     /// ¡¡¡Observar que no van contiguas!!!
     void set_ddram_address(uint8_t addr);
-    void set_ddram_address_1row() {set_ddram_address(0x00);}
-    void set_ddram_address_2row() {set_ddram_address(0x40);}
-
 
     // TODO: uint8_t read_busy_flag_and_address(); (es la función
-    // esta_ocupado, reescribirla cambiando básicamente el nombre)
+    // is_busy, reescribirla cambiando básicamente el nombre)
 
     /// Write data to CG or DDRAM.
     /// To write into CG or DDRAM is determined by previous specification of
@@ -159,18 +203,23 @@ public:
 
 
 private:
-    // Conexiones hardware
-    avr::DPin RS;
-    avr::DPin RW;
-    avr::DPin E;
-    avr::DPin D[8]; // Si solo usamos 4 pines, serán D[4]-D[7]
+// PINS
+    static constexpr uint8_t num_pins_D = num_pin::num_pins_D;
 
-    // Configuración del IC
-    uint8_t num_pins_d = 8; // Número de pines conectados ¿4 ó 8?
-			    // TODO: ¿por qué no usar una enum?
+    using RS = avr::Pin<num_pin::RS>;
+    using RW = avr::Pin<num_pin::RW>;
+    using E = avr::Pin<num_pin::E>;
 
-    // syntactic sugar
-    bool es_interface8_bits() {return num_pins_d == 8;}
+    // Si solo usamos 4 pines, serán D<4>-D<7>
+    using D0 = avr::Pin<num_pin::D0>;
+    using D1 = avr::Pin<num_pin::D1>;
+    using D2 = avr::Pin<num_pin::D2>;
+    using D3 = avr::Pin<num_pin::D3>;
+    using D4 = avr::Pin<num_pin::D4>;
+    using D5 = avr::Pin<num_pin::D5>;
+    using D6 = avr::Pin<num_pin::D6>;
+    using D7 = avr::Pin<num_pin::D7>;
+
 
 
     /// Inicializamos el display
@@ -186,12 +235,12 @@ private:
 
     /// Indica si el display está ocupado haciendo una operación interna.
     /// Mientras esté ocupado no se puede pedirle nada más.
-    bool esta_ocupado();
+    bool is_busy();
 
     // Indica si el display está ocupado haciendo una operación interna.
     // Mientras esté ocupado no se puede pedirle nada más.
-    bool esta_ocupado8();
-    bool esta_ocupado4();
+    bool is_busy8();
+    bool is_busy4();
     
     // Funciones genéricas para escribir en el IC
     // Escribe (rs, rw, d7, d6, d5, d4, d3, d2, d1, d0) en el IC
@@ -213,16 +262,22 @@ private:
     uint8_t read_d4();
 
     // Para realizar una operación en el LCD necesitamos activar E
-    void pulso_E();
+    void pulse_E();
 
     // Espera hasta que el LCD esta disponible para la siguiente instrucción
-    // DUDA: añadirle un tiempo máximo de espera
-    void espera_estar_disponible()
-    { while(esta_ocupado()) ; }
+    void wait_to_be_available()
+    { while(is_busy()) ; }
 
+// D PIN ACCESS
+    void D_pins_as_output();
+    void D_pins_as_input_without_pullup();
+
+    void write_d4(uint8_t d);
+    void write_d8(uint8_t d);
 };
 
-
 }// namespace
+
+#include "dev_LCD_HD44780_tr.tcc"
 
 #endif

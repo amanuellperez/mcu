@@ -29,9 +29,10 @@
  *	29/07/2019 v0.1: Creo traductor.
  *	26/09/2019 v0.2: LCD_ostream y cambios menores.
  *	02/11/2019 v0.3: Añado flag stop_brcorner y wrap. Reescribo los flags.
+ *	06/01/2020 v0.4: Elimino DPin a favor de Pin.
  *
  ****************************************************************************/
-#include "dev_LCD_HD44780_tr.h"
+#include <stdint.h>
 
 namespace dev{
 
@@ -89,25 +90,31 @@ inline constexpr bool operator!=(_LCD_HD44780_screen_flags a, int b)
  *  Notación: Personalmente me resulta más natural hablar como en las matrices
  *  (num_rows x num_cols), sin embargo, en internet siempre escriben primero
  *  num_cols x num_rows (hablan de 1602 y 2004).
+ *
+ *  La forma de definir una screen es:
+ *  using LCD_pins = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<4>,
+ *					dev::LCD_HD44780_RW<5>,
+ *					dev::LCD_HD44780_E<6>,
+ *					dev::LCD_HD44780_D4<11,12,13,14>
+ *					>;
+ *
+ *  using LCD_HD44780 = dev::LCD_HD44780<LCD_pins>;
+ *  using LCD_HD44780_1602_screen = dev::LCD_HD44780_1602_screen<LCD_HD44780>;
+ *  using LCD_HD44780_2004_screen = dev::LCD_HD44780_2004_screen<LCD_HD44780>;
  */
-template <uint8_t num_cols, uint8_t num_rows>
+template <uint8_t num_cols, uint8_t num_rows, typename LCD_HD44780>
 class LCD_HD44780_screen{
 public:
     /// Conectamos el HD44780 con el interface 4 bits.
-    LCD_HD44780_screen(  LCD_HD44780::DPin_RS rs
-			, LCD_HD44780::DPin_RW rw
-			, LCD_HD44780::DPin_E e
-			, const LCD_HD44780::DPin_D4& d)
-	:lcd_{rs, rw, e, d}, x_{0}, y_{0}{}
+    LCD_HD44780_screen()
+	:x_{0}, y_{0}{}
 
     // TODO: falta hacer el de 8 bits. Solo es añadir el constructor.
     // No lo añado porque no está probado ese interfaz. Cuando se pruebe,
     // añadirlo.
 
 
-    // ----------------------
-    // Funciones de impresión
-    // ----------------------
+// FUNCIONES DE IMPRESIÓN
     /// Borra la pantalla dejando el cursor al principio.
     void clear() 
     {
@@ -144,9 +151,7 @@ public:
     const char* print_line_nowrap(const char* p, uint8_t num_max_char = cols());
 
 
-    // ---------------------
-    // Movimiento del cursor
-    // ---------------------
+// MOVIMIENTO DEL CURSOR
     /// Define la posición del cursor. En caso de pasarle una fila no 
     /// válida coloca el cursor en el (0,0).
     void cursor_pos(uint8_t col, uint8_t row);
@@ -204,18 +209,17 @@ public:
     }
 
 
-    // ---------------------------
-    // Acceso a la RAM del display
-    // ---------------------------
+
+// ACCESO A LA RAM DEL DISPLAY
     /// Lee un byte de la memoria RAM del dispositivo. En principio, 
     /// la memoria RAM de este dispositivo la voy a concebir como 4 filas de
     /// 20 bytes cada una (tiene 80 bytes) de forma que coincida con las filas
     /// del display 4 x 20.
     uint8_t read_byte(uint8_t x, uint8_t y);
 
-    // ---------------------
-    // Configuración del LCD
-    // ---------------------
+
+
+// CONFIGURACIÓN DEL LCD
     /// Enciende el LCD.
     void display_on();
 
@@ -236,8 +240,7 @@ public:
     /// Hace que el cursor no parpadee.
     void cursor_no_blink()  {cursor_blink(false);}
 
-    // Datos del LCD
-    // -------------
+// DATOS DEL LCD
     constexpr static uint8_t rows() {return num_rows;}
     constexpr static uint8_t cols() {return num_cols;}
 
@@ -326,8 +329,11 @@ private:
 
 };
 
-using LCD_HD44780_1602_screen = LCD_HD44780_screen<16,2>;
-using LCD_HD44780_2004_screen = LCD_HD44780_screen<20,4>;
+template <typename LCD_HD44780>
+using LCD_HD44780_1602_screen = LCD_HD44780_screen<16,2, LCD_HD44780>;
+
+template <typename LCD_HD44780>
+using LCD_HD44780_2004_screen = LCD_HD44780_screen<20,4, LCD_HD44780>;
 
 }// namespace
 

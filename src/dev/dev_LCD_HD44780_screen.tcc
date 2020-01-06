@@ -30,8 +30,8 @@ namespace dev{
 /***************************************************************************
  *			    LCD_HD44780_screen
  ***************************************************************************/
-//template <uint8_t num_cols, uint8_t num_rows>
-//void LCD_HD44780_screen<num_cols, num_rows>::sentido_de_escritura(bool incr_dcha)
+//template <uint8_t num_cols, uint8_t num_rows, typename LCD>
+//void LCD_HD44780_screen<num_cols, num_rows, LCD>::sentido_de_escritura(bool incr_dcha)
 //{
 //    if (incr_dcha)
 //	set_flag(incrementa_cursor_bit);
@@ -42,8 +42,8 @@ namespace dev{
 //}
 
 
-template <uint8_t num_cols, uint8_t num_rows>
-uint8_t LCD_HD44780_screen<num_cols, num_rows>::read_byte(uint8_t x, uint8_t y)
+template <uint8_t num_cols, uint8_t num_rows, typename LCD>
+uint8_t LCD_HD44780_screen<num_cols, num_rows, LCD>::read_byte(uint8_t x, uint8_t y)
 {
     cursor_pos(x, y);
     uint8_t c = lcd_.read_data_from_CG_or_DDRAM();
@@ -52,8 +52,8 @@ uint8_t LCD_HD44780_screen<num_cols, num_rows>::read_byte(uint8_t x, uint8_t y)
 }
 
 // OJO: no mantiene la posición del cursor
-template <uint8_t num_cols, uint8_t num_rows>
-void LCD_HD44780_screen<num_cols, num_rows>::copia_esta_fila_en_la_fila_anterior(uint8_t i)
+template <uint8_t num_cols, uint8_t num_rows, typename LCD>
+void LCD_HD44780_screen<num_cols, num_rows, LCD>::copia_esta_fila_en_la_fila_anterior(uint8_t i)
 {
     cursor_pos(0, i);
     
@@ -68,16 +68,16 @@ void LCD_HD44780_screen<num_cols, num_rows>::copia_esta_fila_en_la_fila_anterior
 }
 
 
-template <uint8_t num_cols, uint8_t num_rows>
-void LCD_HD44780_screen<num_cols, num_rows>::clear_row(uint8_t i)
+template <uint8_t num_cols, uint8_t num_rows, typename LCD>
+void LCD_HD44780_screen<num_cols, num_rows, LCD>::clear_row(uint8_t i)
 {
     cursor_pos(0, i);
     for (uint8_t j = 0; j < cols(); ++j)
 	lcd_.write_data_to_CG_or_DDRAM(' ');
 }
 
-template <uint8_t num_cols, uint8_t num_rows>
-void LCD_HD44780_screen<num_cols, num_rows>::scroll_text_up()
+template <uint8_t num_cols, uint8_t num_rows, typename LCD>
+void LCD_HD44780_screen<num_cols, num_rows, LCD>::scroll_text_up()
 {
     uint8_t x0 = x_, y0 = y_;
 
@@ -91,8 +91,8 @@ void LCD_HD44780_screen<num_cols, num_rows>::scroll_text_up()
 }
 
 
-template <uint8_t num_cols, uint8_t num_rows>
-void LCD_HD44780_screen<num_cols, num_rows>::mueve_cursor()
+template <uint8_t num_cols, uint8_t num_rows, typename LCD>
+void LCD_HD44780_screen<num_cols, num_rows, LCD>::mueve_cursor()
 {
     ++x_;
 
@@ -103,15 +103,15 @@ void LCD_HD44780_screen<num_cols, num_rows>::mueve_cursor()
 }
 
 
-template <uint8_t num_cols, uint8_t num_rows>
-void LCD_HD44780_screen<num_cols, num_rows>::print_imprimible_char(char c)
+template <uint8_t num_cols, uint8_t num_rows, typename LCD>
+void LCD_HD44780_screen<num_cols, num_rows, LCD>::print_imprimible_char(char c)
 {
     lcd_.write_data_to_CG_or_DDRAM(c);
     mueve_cursor();
 }
 
-template <uint8_t num_cols, uint8_t num_rows>
-void LCD_HD44780_screen<num_cols, num_rows>::print_return()
+template <uint8_t num_cols, uint8_t num_rows, typename LCD>
+void LCD_HD44780_screen<num_cols, num_rows, LCD>::print_return()
 {
     ++y_;   // este es '\n'
     if (y_ == rows()){
@@ -122,8 +122,8 @@ void LCD_HD44780_screen<num_cols, num_rows>::print_return()
 }
 
 
-template <uint8_t num_cols, uint8_t num_rows>
-bool LCD_HD44780_screen<num_cols, num_rows>::print(char c) 
+template <uint8_t num_cols, uint8_t num_rows, typename LCD>
+bool LCD_HD44780_screen<num_cols, num_rows, LCD>::print(char c) 
 {
     static_assert(sizeof(char) == sizeof(uint8_t)
 		 , "El char no es de 1 byte!!!");
@@ -137,8 +137,8 @@ bool LCD_HD44780_screen<num_cols, num_rows>::print(char c)
 }
 
 
-template <uint8_t num_cols, uint8_t num_rows>
-void LCD_HD44780_screen<num_cols, num_rows>::print(const char* c)
+template <uint8_t num_cols, uint8_t num_rows, typename LCD>
+void LCD_HD44780_screen<num_cols, num_rows, LCD>::print(const char* c)
 {
     if (flag(wrap_bit))
 	return print_wrap(c);
@@ -147,8 +147,8 @@ void LCD_HD44780_screen<num_cols, num_rows>::print(const char* c)
 	return print_nowrap(c);
 }
 
-template <uint8_t num_cols, uint8_t num_rows>
-void LCD_HD44780_screen<num_cols, num_rows>::print_wrap(const char* c)
+template <uint8_t num_cols, uint8_t num_rows, typename LCD>
+void LCD_HD44780_screen<num_cols, num_rows, LCD>::print_wrap(const char* c)
 {
 //    uint8_t n = 0;
     while(*c){
@@ -163,8 +163,8 @@ void LCD_HD44780_screen<num_cols, num_rows>::print_wrap(const char* c)
 
 
 // precondition: y_ < rows() and *p != '\0'
-template <uint8_t num_cols, uint8_t num_rows>
-void LCD_HD44780_screen<num_cols, num_rows>::print_nowrap(const char* p)
+template <uint8_t num_cols, uint8_t num_rows, typename LCD>
+void LCD_HD44780_screen<num_cols, num_rows, LCD>::print_nowrap(const char* p)
 {
     p = print_line_nowrap(p);
 
@@ -181,9 +181,9 @@ void LCD_HD44780_screen<num_cols, num_rows>::print_nowrap(const char* p)
 // que lo haya, o a '\0'.
 // OJO: el cursor queda colocado fuera del LCD  (x_ == cols()!!!) ¿Algún
 // problema?
-template <uint8_t num_cols, uint8_t num_rows>
+template <uint8_t num_cols, uint8_t num_rows, typename LCD>
 const char*
-LCD_HD44780_screen<num_cols, num_rows>::print_line_nowrap(const char* p,
+LCD_HD44780_screen<num_cols, num_rows, LCD>::print_line_nowrap(const char* p,
                                                           uint8_t num_max_char)
 {
     uint8_t x_end = x_ + std::min<uint8_t>(num_max_char, cols() - x_);
@@ -206,8 +206,8 @@ LCD_HD44780_screen<num_cols, num_rows>::print_line_nowrap(const char* p,
 }
 
 
-template <uint8_t num_cols, uint8_t num_rows>
-void LCD_HD44780_screen<num_cols, num_rows>::fill_line(uint8_t n, char c)
+template <uint8_t num_cols, uint8_t num_rows, typename LCD>
+void LCD_HD44780_screen<num_cols, num_rows, LCD>::fill_line(uint8_t n, char c)
 {
     n = x_ + std::min<uint8_t>(n, cols() - x_);
 
@@ -219,8 +219,8 @@ void LCD_HD44780_screen<num_cols, num_rows>::fill_line(uint8_t n, char c)
 
 
 // Voy a concebir el LCD como con 4 filas
-template <uint8_t num_cols, uint8_t num_rows>
-void LCD_HD44780_screen<num_cols, num_rows>::cursor_pos(uint8_t col, uint8_t row)
+template <uint8_t num_cols, uint8_t num_rows, typename LCD>
+void LCD_HD44780_screen<num_cols, num_rows, LCD>::cursor_pos(uint8_t col, uint8_t row)
 {
     if (row == 0)
 	lcd_.set_ddram_address(0x00 + col);
@@ -239,8 +239,8 @@ void LCD_HD44780_screen<num_cols, num_rows>::cursor_pos(uint8_t col, uint8_t row
 
 
 // Enciende el LCD.
-template <uint8_t num_cols, uint8_t num_rows>
-void LCD_HD44780_screen<num_cols, num_rows>::display_on() 
+template <uint8_t num_cols, uint8_t num_rows, typename LCD>
+void LCD_HD44780_screen<num_cols, num_rows, LCD>::display_on() 
 {
     set_flag(display_on_bit);
     lcd_.display_control(flag(display_on_bit),
@@ -249,8 +249,8 @@ void LCD_HD44780_screen<num_cols, num_rows>::display_on()
 }
 
 // Apaga el LCD.
-template <uint8_t num_cols, uint8_t num_rows>
-void LCD_HD44780_screen<num_cols, num_rows>::display_off() 
+template <uint8_t num_cols, uint8_t num_rows, typename LCD>
+void LCD_HD44780_screen<num_cols, num_rows, LCD>::display_off() 
 {
     unset_flag(display_on_bit);
     lcd_.display_control(flag(display_on_bit),
@@ -260,8 +260,8 @@ void LCD_HD44780_screen<num_cols, num_rows>::display_off()
 
 
 
-template <uint8_t num_cols, uint8_t num_rows>
-bool LCD_HD44780_screen<num_cols, num_rows>::cursor(bool on)
+template <uint8_t num_cols, uint8_t num_rows, typename LCD>
+bool LCD_HD44780_screen<num_cols, num_rows, LCD>::cursor(bool on)
 {
     bool res = flag(cursor_on_bit);
 
@@ -278,8 +278,8 @@ bool LCD_HD44780_screen<num_cols, num_rows>::cursor(bool on)
 }
 
 
-template <uint8_t num_cols, uint8_t num_rows>
-void LCD_HD44780_screen<num_cols, num_rows>::cursor_blink(bool yes)
+template <uint8_t num_cols, uint8_t num_rows, typename LCD>
+void LCD_HD44780_screen<num_cols, num_rows, LCD>::cursor_blink(bool yes)
 {
     if (yes)
 	set_flag(cursor_blink_bit);

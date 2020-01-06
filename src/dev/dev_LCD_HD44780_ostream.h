@@ -24,9 +24,10 @@
  *   - DESCRIPCION: Interfaz al display HD44780
  *  
  *   - HISTORIA:
- *      A. Manuel López	- 11/07/2017 v0.0
+ *      A.Manuel L.Perez: 11/07/2017 v0.0
  *			  29/07/2019 v0.1: Creo traductor.
  *			  26/09/2019 v0.2: LCD_ostream y cambios menores.
+ *			  06/01/2020 v0.3: Elimino DPin a favor de Pin.
  *
  *
  ****************************************************************************/
@@ -35,17 +36,10 @@
 
 namespace dev{
 
-template <uint8_t cols, uint8_t rows>
+template <uint8_t cols, uint8_t rows, typename  LCD>
 class LCD_HD44780_streambuf : public std::streambuf{
 public:
-    using LCD_screen = LCD_HD44780_screen<cols, rows>;
-
-    /// Conectamos el HD44780 con el interface 4 bits.
-    LCD_HD44780_streambuf(  LCD_HD44780::DPin_RS rs
-			, LCD_HD44780::DPin_RW rw
-			, LCD_HD44780::DPin_E e
-			, const LCD_HD44780::DPin_D4& d)
-	:lcd_{rs, rw, e, d}{}
+    using LCD_screen = LCD_HD44780_screen<cols, rows, LCD>;
 
     LCD_screen& screen() {return lcd_;}
     const LCD_screen& screen() const {return lcd_;}
@@ -74,16 +68,13 @@ private:
 };
 
 
-template <uint8_t cols, uint8_t rows>
+
+template <uint8_t cols, uint8_t rows, typename LCD>
 class LCD_HD44780_ostream: public std::ostream{
 public:
-    using LCD_screen = LCD_HD44780_screen<cols, rows>;
+    using LCD_screen = LCD_HD44780_screen<cols, rows, LCD>;
 
-    explicit LCD_HD44780_ostream(LCD_HD44780::DPin_RS rs
-			, LCD_HD44780::DPin_RW rw
-			, LCD_HD44780::DPin_E e
-			, const LCD_HD44780::DPin_D4& d):
-	std::ostream{&sb_}, sb_{rs, rw, e, d} {}
+    explicit LCD_HD44780_ostream() : std::ostream{&sb_} {}
 
     /// Borra la pantalla.
     void clear() {sb_.screen().clear();}
@@ -116,12 +107,15 @@ public:
     const LCD_screen& screen() const {return sb_.screen();}
 
 private:
-    LCD_HD44780_streambuf<cols, rows> sb_;
+    LCD_HD44780_streambuf<cols, rows, LCD> sb_;
     
 };
 
-using LCD_HD44780_1602_ostream = LCD_HD44780_ostream<16, 2>;
-using LCD_HD44780_2004_ostream = LCD_HD44780_ostream<20, 4>;
+template <typename LCD>
+using LCD_HD44780_1602_ostream = LCD_HD44780_ostream<16, 2, LCD>;
+
+template <typename LCD>
+using LCD_HD44780_2004_ostream = LCD_HD44780_ostream<20, 4, LCD>;
 
 
 

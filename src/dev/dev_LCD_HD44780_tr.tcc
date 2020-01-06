@@ -20,136 +20,185 @@
 #include <atd_bit.h>
 #include <avr_time.h>
 
-// TODO: inicialmente el namespace de este fichero era avr.
-// Al migrarlo a dev genera errores de compilación. Para eliminarlos 
-// uso este using namespace. Quitarlo.
-using namespace avr;
 
 namespace dev{
 
 
 // Escribe solo los bits d4-d7 de 'd' (los más significativos)
-void LCD_HD44780::write_d4_d7( uint8_t rs
+template <typename P>
+void LCD_HD44780<P>::write_d4_d7( uint8_t rs
 		, uint8_t rw
 		, uint8_t d)
 {
     d >>= 4;
-    for(uint8_t i = 4; i < 8; ++i){
-	D[i].write(d & 0x01);
-	d >>= 1;
-    }
+    write_d4(d);
 
+    RS::write(rs);
+    RW::write(rw);
 
-    RS.write(rs);
-    RW.write(rw);
-
-    pulso_E();
+    pulse_E();
 }
 
 
-
-void LCD_HD44780::write_d8(uint8_t rs
+template <typename P>
+void LCD_HD44780<P>::write_d8(uint8_t rs
 	    , uint8_t rw
 	    , uint8_t d)
 {
-    RS.write(rs);
-    RW.write(rw);
+    RS::write(rs);
+    RW::write(rw);
 
-    for(uint8_t i = 0; i < 8; ++i){
-	D[i].write(d & 0x01);
-	d >>= 1;
-    }
+    write_d8(d);
 
 
-    pulso_E();
+
+    pulse_E();
 }
 
 
-void LCD_HD44780::write_d4(uint8_t rs
+template <typename P>
+void LCD_HD44780<P>::write_d4(uint8_t d)
+{
+    D4::write(d & 0x01);
+    d >>= 1;
+    D5::write(d & 0x01);
+    d >>= 1;
+    D6::write(d & 0x01);
+    d >>= 1;
+    D7::write(d & 0x01);
+}
+
+
+template <typename P>
+void LCD_HD44780<P>::write_d8(uint8_t d)
+{
+    D0::write(d & 0x01);
+    d >>= 1;
+    D1::write(d & 0x01);
+    d >>= 1;
+    D2::write(d & 0x01);
+    d >>= 1;
+    D3::write(d & 0x01);
+    d >>= 1;
+    D4::write(d & 0x01);
+    d >>= 1;
+    D5::write(d & 0x01);
+    d >>= 1;
+    D6::write(d & 0x01);
+    d >>= 1;
+    D7::write(d & 0x01);
+}
+
+
+template <typename P>
+void LCD_HD44780<P>::write_d4(uint8_t rs
 	    , uint8_t rw
 	    , uint8_t d)
 {
-    RS.write(rs);
-    RW.write(rw);
+    RS::write(rs);
+    RW::write(rw);
 
     uint8_t x = d;
     x >>= 4;
-    for(uint8_t i = 4; i < 8; ++i){
-	D[i].write(x & 0x01);
-	x >>= 1;
-    }
+    write_d4(x);
 
-    pulso_E();
+    pulse_E();
 
+    write_d4(d);
 
-    x = d;
-    for(uint8_t i = 0; i < 4; ++i){
-	D[i + 4].write(x & 0x01);
-	x >>= 1;
-    }
-
-
-    pulso_E();
+    pulse_E();
 
 }
 
-
-bool LCD_HD44780::esta_ocupado8()
+template <typename P>
+bool LCD_HD44780<P>::is_busy8()
 {
     // marcamos el pin 7 de lectura
-    D[7].de_entrada_sin_pullup();
+    D7::as_input_without_pullup();
 
-    RS.write_zero();
-    RW.write_one();
+    RS::write_zero();
+    RW::write_one();
     _delay_us(1);
 
     bool res = false;
 
-    E.write_one();
+    E::write_one();
 //    _delay_us(1); // La datasheet dice que esta operación es instantanea
 		
     // Fundamental: leer D[7] cuando E = 1 (pag. 32, datasheet)
-    if(D[7].is_one()) 
+    if(D7::is_one()) 
 	res = true;
-    E.write_zero();
+    E::write_zero();
     
     // Dejamos el pin como estaba: de salida
-    D[7].de_salida();
+    D7::as_output();
 
     return res;
 }
     
 
-bool LCD_HD44780::esta_ocupado4()
+template <typename P>
+void LCD_HD44780<P>::D_pins_as_output()
+{
+    if constexpr (num_pins_D == 8){
+	D0::as_output();
+	D1::as_output();
+	D2::as_output();
+	D3::as_output();
+    }
+
+    D4::as_output();
+    D5::as_output();
+    D6::as_output();
+    D7::as_output();
+}
+
+template <typename P>
+void LCD_HD44780<P>::D_pins_as_input_without_pullup()
+{
+    if constexpr (num_pins_D == 8){
+	D0::as_input_without_pullup();
+	D1::as_input_without_pullup();
+	D2::as_input_without_pullup();
+	D3::as_input_without_pullup();
+    }
+
+    D4::as_input_without_pullup();
+    D5::as_input_without_pullup();
+    D6::as_input_without_pullup();
+    D7::as_input_without_pullup();
+}
+
+
+template <typename P>
+bool LCD_HD44780<P>::is_busy4()
 {
     // Vamos a leer de los pines
-    for (uint8_t i = 0; i < 8; ++i)
-	D[i].de_entrada_sin_pullup();
+    D_pins_as_input_without_pullup();
 
-    RS.write_zero();
-    RW.write_one();
+    RS::write_zero();
+    RW::write_one();
     _delay_us(1);
 
     bool res = false;
 
-    E.write_one();
+    E::write_one();
     _delay_us(1); 
 		
     // Fundamental: leer D[7] cuando E = 1 (pag. 32, datasheet)
-    if(D[7].is_one()) 
+    if(D7::is_one()) 
 	res = true;
-    E.write_zero();
+    E::write_zero();
     
     // Enviamos otro pulso a E para descartar el resto de los datos D0-D4
     // (que se envían en el segundo paquete)
-    E.write_one();
+    E::write_one();
     _delay_us(1);
-    E.write_zero();
+    E::write_zero();
 
     // Dejamos los pines como estaban
-    for (uint8_t i = 0; i < 8; ++i)
-	D[i].de_salida();
-    
+    D_pins_as_output();
+
     return res;
 }
 
@@ -157,42 +206,41 @@ bool LCD_HD44780::esta_ocupado4()
 // Esta función está implementada de acuerdo a la figura 9 de la datasheet.
 // Observar que cuando se lee es cuando el pin E está en 1, no hay que enviar
 // un pulso como en el caso de escribir.
-uint8_t LCD_HD44780::read_d4()
+template <typename P>
+uint8_t LCD_HD44780<P>::read_d4()
 {
     // Vamos a leer de los pines
-    for (uint8_t i = 0; i < 8; ++i)
-	D[i].de_entrada_sin_pullup();
+    D_pins_as_input_without_pullup();
 
-    RS.write_one();
-    RW.write_one();
+    RS::write_one();
+    RW::write_one();
 
     uint8_t res = 0x00;
 
-    E.write_one();
+    E::write_one();
     _delay_us(1);
 
-    if (D[7].valor()) atd::write_one_bit<7>(res);
-    if (D[6].valor()) atd::write_one_bit<6>(res);
-    if (D[5].valor()) atd::write_one_bit<5>(res);
-    if (D[4].valor()) atd::write_one_bit<4>(res);
+    if (D7::is_one()) atd::write_one_bit<7>(res);
+    if (D6::is_one()) atd::write_one_bit<6>(res);
+    if (D5::is_one()) atd::write_one_bit<5>(res);
+    if (D4::is_one()) atd::write_one_bit<4>(res);
 
-    E.write_zero();
+    E::write_zero();
     _delay_us(1);
-    E.write_one();
+    E::write_one();
     _delay_us(1);
     
-    if (D[7].valor()) atd::write_one_bit<3>(res);
-    if (D[6].valor()) atd::write_one_bit<2>(res);
-    if (D[5].valor()) atd::write_one_bit<1>(res);
-    if (D[4].valor()) atd::write_one_bit<0>(res);
+    if (D7::is_one()) atd::write_one_bit<3>(res);
+    if (D6::is_one()) atd::write_one_bit<2>(res);
+    if (D5::is_one()) atd::write_one_bit<1>(res);
+    if (D4::is_one()) atd::write_one_bit<0>(res);
 
 
-    E.write_zero();
+    E::write_zero();
 
     // Dejamos los pines como estaban
-    for (uint8_t i = 0; i < 8; ++i)
-	D[i].de_salida();
-    
+    D_pins_as_output();
+
     return res;
 }
 
@@ -208,7 +256,8 @@ uint8_t LCD_HD44780::read_d4()
 // funcionaría!!! (realmente sí funciona al cargar el display por primera vez,
 // pero al desconectarlo de corriente y reconectarlo deja de funcionar, lo
 // cual al principio despista mucho qué es lo que ha ocurrido).
-void LCD_HD44780::init8()
+template <typename P>
+void LCD_HD44780<P>::init8()
 {
     _delay_ms(50);   // wait for more than 40 ms
 
@@ -257,7 +306,8 @@ void LCD_HD44780::init8()
 // funcionaría!!! (realmente sí funciona al cargar el display por primera vez,
 // pero al desconectarlo de corriente y reconectarlo deja de funcionar, lo
 // cual al principio despista mucho qué es lo que ha ocurrido).
-void LCD_HD44780::init4()
+template <typename P>
+void LCD_HD44780<P>::init4()
 {
     delay_ms(50);   // wait for more than 40 ms after Vcc rises to 2.7V
 
@@ -305,55 +355,43 @@ void LCD_HD44780::init4()
     delay_us(100);
 }
 
-
-void LCD_HD44780::setup_pins()
+template <typename P>
+void LCD_HD44780<P>::setup_pins()
 {
-    // Si es 8-bit interface, inicializamos los pins D0-D7
-    // En caso contrario, los pines D4-D7
-    int num_pin0 = (num_pins_d == 8? 0: 4);
+    D_pins_as_output();
 
-    for(uint8_t i = num_pin0; i < 8; ++i)
-	D[i].de_salida();
-
-    RS.de_salida();
-    RW.de_salida();
-    E.de_salida();
+    RS::as_output();
+    RW::as_output();
+    E::as_output();
 }
 
 
 
 // Definimos las conexiones hardware del display.
 // Interface 4 bits.
- LCD_HD44780::LCD_HD44780( DPin_RS rs, DPin_RW rw, DPin_E e
-			, const DPin_D4& d)
-    :RS{rs.v}, RW{rw.v}, E{e.v}
-    , D{0_pin,0_pin,0_pin,0_pin
-	, Pin_number{d.D4}
-	, Pin_number{d.D5}
-	, Pin_number{d.D6}
-	, Pin_number{d.D7}}
+template <typename P>
+inline LCD_HD44780<P>::LCD_HD44780()
 {
-    num_pins_d = 4;
-
     setup(); 
 }
 
 
 // Para realizar una operación en el LCD necesitamos activar E
- void LCD_HD44780::pulso_E()
+template <typename P>
+void LCD_HD44780<P>::pulse_E()
 {
-    E.write_one();
+    E::write_one();
     delay_us(1);   // OJO: esto antes tenía que ponerlo a delay_ms(1)???
-    E.write_zero();
+    E::write_zero();
 }
 
 
-
- void LCD_HD44780::write_d(uint8_t rs
+template <typename P>
+void LCD_HD44780<P>::write_d(uint8_t rs
 	    , uint8_t rw
 	    , uint8_t d)
 {
-    if(es_interface8_bits())
+    if constexpr (num_pins_D == 8)
 	write_d8(rs, rw, d);
     else
 	write_d4(rs, rw, d);
@@ -361,54 +399,52 @@ void LCD_HD44780::setup_pins()
 
 
 // Instrucciones del HD44780
- void LCD_HD44780::set_ddram_address(uint8_t addr)
+template <typename P>
+void LCD_HD44780<P>::set_ddram_address(uint8_t addr)
 {
     // addr tiene que tener DB7 = 1
     atd::write_one_bit<7>(addr);
 
-    espera_estar_disponible();
+    wait_to_be_available();
     write_d(0,0, addr);
 }
 
-
-void 
-LCD_HD44780::cursor_or_display_shift(bool display_no_cursor, bool to_the_right)
+template <typename P>
+void LCD_HD44780<P>::cursor_or_display_shift(bool display_no_cursor, bool to_the_right)
 {
     uint8_t d = 0x10;
     if(display_no_cursor)	d |= 0x08;
     if(to_the_right)	d |= 0x04;
 
-    espera_estar_disponible();
+    wait_to_be_available();
     write_d(0,0,d);
 }
 
-
-void 
-LCD_HD44780::display_control(bool display_on, bool cursor_on, bool cursor_blink)
+template <typename P>
+void LCD_HD44780<P>::display_control(bool display_on, bool cursor_on, bool cursor_blink)
 {
     uint8_t d = 0x08;
     if(display_on)	d |= 0x04;
     if(cursor_on)	d |= 0x02;
     if(cursor_blink)	d |= 0x01;
 
-    espera_estar_disponible();
+    wait_to_be_available();
     write_d(0,0,d);
 }
 
- void 
-LCD_HD44780::entry_mode(bool incrementa_cursor, bool shift_display)
+template <typename P>
+void LCD_HD44780<P>::entry_mode(bool incrementa_cursor, bool shift_display)
 {
     uint8_t d = 0x04;
     if(incrementa_cursor)   d |= 0x02;
     if(shift_display)	    d |= 0x01;
 
-    espera_estar_disponible();
+    wait_to_be_available();
     write_d(0,0,d);
 }
 
-
- void 
-LCD_HD44780::function_set(bool interface_8_bits // ¿es 8 bit o 4 bit interface?
+template <typename P>
+void LCD_HD44780<P>::function_set(bool interface_8_bits // ¿es 8 bit o 4 bit interface?
 		, bool tiene_2_filas    // ¿tiene 2 ó 1 linea?
 		, bool character_font_5x8) // ¿char de 5x8 ó 5x10?
 {
@@ -418,64 +454,68 @@ LCD_HD44780::function_set(bool interface_8_bits // ¿es 8 bit o 4 bit interface?
     if(tiene_2_filas)	   d |= 0x08;
     if(character_font_5x8) d |= 0x04;
 
-    espera_estar_disponible();
+    wait_to_be_available();
     write_d(0,0,d);
 }
 
-
-bool LCD_HD44780::esta_ocupado()
+template <typename P>
+bool LCD_HD44780<P>::is_busy()
 {
-    if(num_pins_d == 8)	
-	return esta_ocupado8();
+    if constexpr (num_pins_D == 8)	
+	return is_busy8();
     else 
-	return esta_ocupado4();
+	return is_busy4();
 }
 
-
-void LCD_HD44780::write_data_to_CG_or_DDRAM(char data)
+template <typename P>
+void LCD_HD44780<P>::write_data_to_CG_or_DDRAM(char data)
 {
-    espera_estar_disponible(); 
+    wait_to_be_available(); 
     write_d(1,0,data);
 }
 
-uint8_t LCD_HD44780::read_data_from_CG_or_DDRAM()
+
+template <typename P>
+uint8_t LCD_HD44780<P>::read_data_from_CG_or_DDRAM()
 {
-    espera_estar_disponible(); 
+    wait_to_be_available(); 
     return read_d4();
 }
 
 
 
-
- void LCD_HD44780::init()
+template <typename P>
+ void LCD_HD44780<P>::init()
 {
-    E.write_zero();
+    E::write_zero();
 
-    if(num_pins_d == 8)	
+    if constexpr (num_pins_D == 8)	
 	init8();
     else 
 	init4();
 }
 
 
-
- void LCD_HD44780::setup()
+template <typename P>
+void LCD_HD44780<P>::setup()
 {
     setup_pins();
     init(); 
 }
 
- void LCD_HD44780::clear_display()	    
+template <typename P>
+void LCD_HD44780<P>::clear_display()	    
 {
-    espera_estar_disponible();
+    wait_to_be_available();
     write_d(0,0, 0x01);
 }
 
 /// Coloca el cursor en (0,0) y si el texto se estuviera moviendo en 
 /// el display, lo coloca en su posición inicial.
- void LCD_HD44780::return_home()	    
+template <typename P>
+void LCD_HD44780<P>::return_home()	    
 {
-    espera_estar_disponible();
+    wait_to_be_available();
     write_d(0,0, 0x02);
 }
 
