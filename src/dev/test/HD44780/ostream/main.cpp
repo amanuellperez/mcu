@@ -29,8 +29,6 @@ using LCD_pins = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<4>,
 				       >;
 
 using LCD_HD44780 = dev::LCD_HD44780<LCD_pins>;
-using LCD_HD44780_1602_screen = dev::LCD_HD44780_1602_screen<LCD_HD44780>;
-using LCD_HD44780_2004_screen = dev::LCD_HD44780_2004_screen<LCD_HD44780>;
 
 using LCD_HD44780_1602_ostream = dev::LCD_HD44780_1602_ostream<LCD_HD44780>;
 using LCD_HD44780_2004_ostream = dev::LCD_HD44780_2004_ostream<LCD_HD44780>;

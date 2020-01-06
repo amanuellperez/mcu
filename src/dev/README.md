@@ -62,11 +62,18 @@ Formado por varios ficheros:
    
    Ejemplo: (ver `test/HD44780`)
 ```
-LCD_HD4470_1602_ostream lcd{LCD_H44780::DPin_RS{4}
-                            , LCD_HD44780::DPin_RW{5}
-                            , LCD_HD44780::DPin_E{6}
-                            , LCD_HD44780::DPin_D4{11, 12, 13, 14}};
-    
+using LCD_pins = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<4>,
+				       dev::LCD_HD44780_RW<5>,
+				       dev::LCD_HD44780_E<6>,
+				       dev::LCD_HD44780_D4<11,12,13,14>
+				       >;
+
+using LCD_HD44780 = dev::LCD_HD44780<LCD_pins>;
+
+using LCD_HD44780_1602_ostream = dev::LCD_HD44780_1602_ostream<LCD_HD44780>;
+ 
+LCD_HD44780_1602_ostream lcd;
+
 lcd.clear();
 lcd << "hola\n"; // escribo cadenas
 lcd << 25;       // escribo números
