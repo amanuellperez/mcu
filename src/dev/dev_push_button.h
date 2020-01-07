@@ -41,24 +41,42 @@ namespace dev{
  *  Este pulsador es básico, no tiene en cuenta el bouncing. Es para, por
  *  ejemplo, encender un led cuando está pulsado un botón o cosas así.
  *
- *  El pin de entrada lo configuramos como con resistencia pull-up
+ *  El pin de entrada lo configuramos como con resistencia pull-up.
  *
+ *  Dos formas de usarlo:
+ *	1) La del vago:	
+ *		Push_button<23> b;
+ *		if (b.is_pressed()) ...
+ *
+ *	   No tenemos que hacer nada.
+ *
+ *	2) Como interfaz:
+ *		using Enter_button = Push_button<23>;
+ *		Enter_button::init(); // no olvidarlo!!!
+ *
+ *		if (Enter_button::is_pressed()) ...
+ *
+ *  Si el compilador optimiza el código deberían de generar el mismo código
+ *  las dos.
  */
 template <uint8_t n>
 class Push_button{
 public:
-    Push_button() {avr::Pin<n>::as_input_with_pullup();}
+    constexpr Push_button() {init();}
+
+    /// Inicializamos el pulsador.
+    static constexpr void init() { avr::Pin<n>::as_input_with_pullup(); }
 
     /// ¿está pulsado?
-    bool is_pressed()
+    static constexpr bool is_pressed()
     {return avr::Pin<n>::is_zero();}
 
     /// ¿no está pulsado?
-    bool is_not_pressed()
+    static constexpr bool is_not_pressed()
     {return !is_pressed();}
 
     /// Espera hasta que se pulsa el interruptor.
-    void wait_until_is_pressed()
+    static constexpr void wait_until_is_pressed()
     { while(!is_pressed()) ; }
 };
 

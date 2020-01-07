@@ -2,17 +2,18 @@
 
 
 
-INCS= 	dev_cols_glyphs.h\
-		dev_counter_CD4017B.h\
-		dev_EEPROM_25LC256_tr.h\
-		dev_EEPROM_iostream.h\
-		dev_EEPROM_lineal.h\
-		dev_LCD_HD44780.h\
-		dev_LCD_HD44780_ostream.h\
-		dev_LCD_HD44780_screen.h\
-		dev_LCD_HD44780_screen.tcc\
-		dev_LCD_HD44780_tr.h\
-		dev_LCD_HD44780_tr.tcc\
+INCS= 	dev_cols_glyphs.h			\
+		dev_counter_CD4017B.h		\
+		dev_EEPROM_25LC256_tr.h		\
+		dev_EEPROM_iostream.h		\
+		dev_EEPROM_lineal.h			\
+		dev_keyboard.h				\
+		dev_LCD_HD44780.h			\
+		dev_LCD_HD44780_ostream.h	\
+		dev_LCD_HD44780_screen.h	\
+		dev_LCD_HD44780_screen.tcc	\
+		dev_LCD_HD44780_tr.h		\
+		dev_LCD_HD44780_tr.tcc		\
 		dev_led.h\
 		dev_LM75.h\
 		dev_matrix_led_max7219.h\

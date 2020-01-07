@@ -3,6 +3,7 @@ DIRS = CD4017B			\
 	EEPROM_iostream		\
 	EEPROM_lineal		\
 	HD44780				\
+	keyboard			\
 	led					\
 	LM75				\
 	pot_MCP4231			\
