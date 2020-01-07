@@ -7,10 +7,8 @@ DIRS = ADC\
 	USART
 
 # Revisar: no compilan
-#asm\
-	interrupt\
-	SPI\
-	square_wave\
+#	interrupt\
+	SPI
 
 include $(MCU_RECRULES)
 

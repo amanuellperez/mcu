@@ -19,7 +19,6 @@
 // entre resistencias al pin 4
 
 #include "../../avr_pin.h"
-#include "../../avr_dpin.h"
 #include "../../avr_time.h"
 
 using namespace avr;
@@ -37,20 +36,6 @@ void test_pin()
 
 	pin.write_zero();
 	_delay_ms(1000);
-    }
-}
-
-void test_dpin()
-{
-    DPin pin{num_pin};
-    pin.de_salida();
-
-    while(1){
-	pin.write_one();
-	_delay_ms(500);
-
-	pin.write_zero();
-	_delay_ms(500);
     }
 }
 
@@ -72,7 +57,6 @@ void test_pin_de_salida()
 int main()
 {
     test_pin();
-    // test_dpin();
     // test_pin_de_salida();
 }
 

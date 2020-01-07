@@ -1,5 +1,4 @@
-SOURCES= dev_LCD_HD44780_tr.cpp
-#		dev_DHT22.cpp			\
+#SOURCES= dev_DHT22.cpp	
 
 
 
@@ -13,6 +12,7 @@ INCS= 	dev_cols_glyphs.h\
 		dev_LCD_HD44780_screen.h\
 		dev_LCD_HD44780_screen.tcc\
 		dev_LCD_HD44780_tr.h\
+		dev_LCD_HD44780_tr.tcc\
 		dev_led.h\
 		dev_LM75.h\
 		dev_matrix_led_max7219.h\

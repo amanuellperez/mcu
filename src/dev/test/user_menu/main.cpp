@@ -27,14 +27,25 @@ constexpr uint8_t keyboard_enter_pin = 23;
 constexpr uint8_t keyboard_up_pin = 24;
 constexpr uint8_t keyboard_down_pin  = 25;
 
-using namespace dev;
-
 template <uint8_t down_pin, uint8_t up_pin, uint8_t enter_pin>
 struct Keyboard{
-    Push_button<down_pin> down;
-    Push_button<up_pin> up;
-    Push_button<enter_pin> enter;
+    dev::Push_button<down_pin> down;
+    dev::Push_button<up_pin> up;
+    dev::Push_button<enter_pin> enter;
 };
+
+
+
+using LCD_pins = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<4>,
+				       dev::LCD_HD44780_RW<5>,
+				       dev::LCD_HD44780_E<6>,
+				       dev::LCD_HD44780_D4<11,12,13,14>
+				       >;
+
+using LCD_HD44780 = dev::LCD_HD44780<LCD_pins>;
+
+using LCD_HD44780_1602_ostream = dev::LCD_HD44780_1602_ostream<LCD_HD44780>;
+using LCD_HD44780_2004_ostream = dev::LCD_HD44780_2004_ostream<LCD_HD44780>;
 
 
 constexpr const char menu_unidad_tiempo[] = "hora\nmin\nseg";
@@ -45,11 +56,8 @@ constexpr const char menu_unidad_tiempo[] = "hora\nmin\nseg";
 void test_lcd_menu()
 {
     // Si lo conectamos solo a 4 pins de datos
-    LCD_HD44780_1602_ostream lcd{ LCD_HD44780::DPin_RS{4}
-    // LCD_HD44780_2004_ostream lcd{ LCD_HD44780::DPin_RS{4}
-		    , LCD_HD44780::DPin_RW{5}
-		    , LCD_HD44780::DPin_E {6}
-		    , LCD_HD44780::DPin_D4{11, 12, 13, 14}};
+    LCD_HD44780_1602_ostream lcd;
+    // LCD_HD44780_2004_ostream lcd;
 
     Keyboard<keyboard_down_pin, keyboard_up_pin, keyboard_enter_pin> key;
 

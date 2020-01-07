@@ -1,8 +1,6 @@
 BIN = xx
 
-SOURCES= main.cpp	\
-		 ../../dev_LCD_HD44780_tr.cpp
-
+SOURCES= main.cpp
 
 # para probar
 #F_CPU = 8000000UL
