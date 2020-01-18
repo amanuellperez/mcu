@@ -23,11 +23,11 @@
  *
  *   - DESCRIPCION: Ampliación de type_traits.h
  *
- *   - COMENTARIOS: 
  *
  *   - HISTORIA:
- *           A.Manuel L.Perez- 27/08/2019 Less_than,
- *					Pertenece_al_intervalo_cerrado
+ *    A.Manuel L.Perez
+ *    27/08/2019 Less_than, Pertenece_al_intervalo_cerrado
+ *    18/01/2020 static_array
  *
  ****************************************************************************/
 #include <type_traits>
@@ -56,6 +56,21 @@ struct always_false_type : std::false_type { };
 
 template <typename T>
 inline constexpr bool always_false_v = always_false_type<T>::value;
+
+
+
+/*!
+ *  \brief  Static array.
+ *
+ */
+template <uint8_t... args>
+struct static_array{
+    static constexpr uint8_t size = sizeof...(args);
+    static constexpr uint8_t data[size] = {args...};
+
+    constexpr uint8_t operator[](uint8_t i) const {return data[i];}
+};
+
 
 }// namespace
 

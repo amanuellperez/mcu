@@ -36,6 +36,7 @@
 #include <avr_time.h>
 #include <iomanip>
 
+#include "dev_keyboard.h"
 
 namespace dev{
 
@@ -53,15 +54,15 @@ namespace dev{
  *	enter	: equivalente a enter o fin.
  *
  */
-template <typename LCD, typename Teclado>
+template <typename LCD, typename Keyboard3>
 class User_choose_number{
 public:
     // Configuración
     // -------------
     /// Mostramos el número en el LCD e interaccionamos con el usuario via
     /// el teclado indicado.
-    User_choose_number(LCD& lcd, Teclado& key)
-		    :lcd_{lcd}, key_{key}{}
+    User_choose_number(LCD& lcd, Keyboard3)
+		    :lcd_{lcd} {}
 
     /// Posición (col, row) del LCD donde mostramos el número a elegir.
     User_choose_number& pos(uint8_t col, uint8_t row);
@@ -88,7 +89,17 @@ public:
 private:
     // pantalla y teclado usados
     LCD& lcd_;
-    Teclado& key_;
+
+    // keyboard
+    static constexpr auto enter_key()
+    { return Keyboard3::template key<Basic_keyboard_code::enter>(); }
+
+    static constexpr auto up_key()
+    { return Keyboard3::template key<Basic_keyboard_code::up>(); }
+
+    static constexpr auto down_key()
+    { return Keyboard3::template key<Basic_keyboard_code::down>(); }
+
 
     // Configuración
     uint8_t col_, row_;	    // posición donde están los 2 números.
@@ -204,7 +215,7 @@ uint8_t User_choose_number<L, T>::choose2(uint8_t x0)
    
     wait_ms(300);// Hay que garantizar que el usuario haya soltado la tecla ok
 
-    while(key_.enter.is_not_pressed()){
+    while(enter_key().is_not_pressed()){
 	if (ultima_tecla_pulsada_ != Tecla_pulsada::ninguna)
 	    print2(x_);
 
@@ -239,7 +250,7 @@ uint16_t User_choose_number<L, T>::choose4(uint16_t x0)
     // Hay que garantizar que el usuario haya soltado la tecla ok
     wait_ms(300);  
 
-    while(key_.enter.is_not_pressed()){
+    while(enter_key().is_not_pressed()){
 	if (ultima_tecla_pulsada_ != Tecla_pulsada::ninguna)
 	    print4(x_);
 
@@ -280,7 +291,7 @@ template <typename L, typename T>
 void User_choose_number<L, T>::update_ninguna()
 {
 
-    if (key_.down.is_pressed()){
+    if (down_key().is_pressed()){
 	num_ticks_pulsada_    = 0;
 	ultima_tecla_pulsada_ = Tecla_pulsada::down;
 
@@ -288,7 +299,7 @@ void User_choose_number<L, T>::update_ninguna()
 	    --x_;
     }
 
-    else if (key_.up.is_pressed()){
+    else if (up_key().is_pressed()){
 	num_ticks_pulsada_    = 0;
 	ultima_tecla_pulsada_ = Tecla_pulsada::up;
 
@@ -305,7 +316,7 @@ void User_choose_number<L, T>::update_ninguna()
 template <typename L, typename T>
 void User_choose_number<L, T>::update_down()
 {
-    if (key_.down.is_pressed()){
+    if (down_key().is_pressed()){
 
 	++num_ticks_pulsada_;
 
@@ -327,7 +338,7 @@ void User_choose_number<L, T>::update_down()
 template <typename L, typename T>
 void User_choose_number<L, T>::update_up()
 {
-    if (key_.up.is_pressed()){
+    if (up_key().is_pressed()){
 
 	++num_ticks_pulsada_;
 

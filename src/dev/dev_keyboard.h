@@ -30,43 +30,188 @@
  *    07/01/2020 v0.0 (segundo intento: introduzco codificación de caracteres)
  *
  ****************************************************************************/
-#include <dev_push_button.h>
+#include "dev_push_button.h"
+
+#include <atd_type_traits.h>
 
 namespace dev{
+/*!
+\brief  Códificación de caracteres usadas en las Basic_keyboards
+  
+see: Basic_keyboard3 for rationale.
+ */
+struct Basic_keyboard_code{
+    static constexpr uint8_t enter = '\n';
+    static constexpr uint8_t up    = 200;
+    static constexpr uint8_t down  = 201;
+    static constexpr uint8_t right = 202;
+    static constexpr uint8_t left  = 203;
+};
 
-template <uint8_t pin_button1, uint8_t char1,
-	  uint8_t pin_button2, uint8_t char2,
-	  uint8_t pin_button3, uint8_t char3>
-struct Keyboard3{
 
-    dev::Push_button<pin_button1> b1;
-    dev::Push_button<pin_button2> b2;
-    dev::Push_button<pin_button3> b3;
-
-    static constexpr uint8_t c1 = char1;
-    static constexpr uint8_t c2 = char2;
-    static constexpr uint8_t c3 = char3;
+// syntactic sugar
+namespace Key_codes{
+    static constexpr uint8_t OK_KEY = Basic_keyboard_code::enter;
+    static constexpr uint8_t ENTER_KEY = OK_KEY;
+    static constexpr uint8_t UP_KEY = Basic_keyboard_code::up;
+    static constexpr uint8_t DOWN_KEY = Basic_keyboard_code::down;
+}
 
 
-    template <uint8_t c>
-    static constexpr auto code2button(){
-	if constexpr (c == c1)
-	    return Push_button<pin_button1>{};
 
-	else if constexpr (c == c2)
-	    return Push_button<pin_button2>{};
+template <uint8_t... args>
+struct Keyboard_pins : public atd::static_array<args...>{ };
 
-	else if constexpr (c == c3)
-	    return Push_button<pin_button3>{};
+template <uint8_t... args>
+struct Keyboard_codes : public atd::static_array<args...>{ };
 
+
+/*!
+
+\brief  Códificación del teclado de 3 teclas.
+
+ */
+// Observar que lo que realmente estamos implementando es un 
+// static_map<uint8_t, uint8_t>!!!
+template <typename Pins,
+	  typename Codes>
+struct Keyboard_code{
+    static_assert(Pins::size == Codes::size, "Tienen que ser del mismo tamaño");
+
+    // interfaz genérico necesario para poder hacer el init en Basic_keyboard.
+    static constexpr uint8_t num_keys = Pins::size;
+    // Se supone que en C++17 no es necesario inicializar un static constexpr
+    // cuando tiene un constructor por defecto, pero parece ser que la versión
+    // de compilador que uso (g++9.2.0) no lo debe de tener implementado.
+    static constexpr Pins pin   = Pins{};
+    static constexpr Codes code = Codes{};
+
+    template <uint8_t c, uint8_t i = num_keys - 1>
+    static constexpr uint8_t code2pin(){
+	if constexpr (i != 255){
+	    if constexpr (code[i] == c)
+		return pin[i];
+	    else
+		return code2pin<c, static_cast<uint8_t>(i - 1)>();
+	}
+	else {
+	    static_assert(atd::always_false_v<int>,
+				    "El código no es un código válido");
+	    return 0; // para quitar warning compilador
+	}
     }
 
+};
+
+
+
+/*!
+\brief  Teclado con n pulsadores.
+
+  Esta es la primera versión (así que es posible que haya que reescribirla
+  completamente en el futuro).
+
+
+TIPOS
+
+  En principio da la impresión de que puedo tener los siguientes tipos de
+  teclados:
+
+  * Básico:
+  
+    Teclado con pocos pulsadores. Los que de momento me parecen útiles son:
+    - de 3 botones: up, down, ok.
+    - de 5 botones: los 3 anteriores más left and right.
+
+    En ambos casos podemos conectar directamente los pulsadores al avr,
+    usando 3 ó 5 pines codificados en one-hot, o usar un decoder y convertir
+    a binario los botones pulsados.
+
+
+  * Matrix:
+
+    Cuando necesitamos más pulsadores lo más práctico es conectarlos en
+    matriz. En este caso el valor leído lo meteremos en un char (será un
+    teclado como los de los PCs).
+	
+
+CODIFICACIÓN
+
+  Para poder programar de forma genérica, necesito desvincular los pines a
+  los que conectamos el teclado del significado que le atribuimos a la
+  tecla. 
+
+  A fin de cuentas esto es lo que hacemos en un teclado normal: al pulsar la
+  tecla 'a' el código que devuelve el teclado es char c = 'a'; El usuario de
+  la clase no sabe para nada en qué pin está conectada la tecla 'a'.
+
+  ¿Cómo consigo esto? Con la codificación: al definir el teclado pasamos el
+  código "ascii" que corresponde cada pulsador. 
+
+	Ejemplo:
+
+	pin pulsador	| char usado en el programa para referirnos a él
+	----------------+-----------------------------------------------
+	22		|	'+'
+	23		|	'-'
+	24		|	'\n'
+  
+	En el programa, para ver si se ha pulsado la tecla '\n' escribiremos
+	el siguiente código:
+
+		if (keyboard.key<'\n'>().is_pressed()) ...
+  
+	ó directamente:
+
+		if (Keyboard::key<'\n'>().is_pressed()) ...
+  
+	La primera versión me gusta para aplicaciones finales, donde la
+	aplicación tiene un teclado, un LCD, ... Además la ventaja de definir
+	'keyboard' en la primera opción es que el constructor inicializa el
+	teclado de la forma adecuada. Si no se crea un keyboard hay que llamar
+	a la función Keyboard::init() para inicializarlo adecuadamente.
+
+	La segunda es mejor para bibliotecas.
+
+
+PROBLEMA CON LA CODIFICACIÓN
+
+    Si la tecla significa "enter" lo lógico es codificarla como '\n', pero 
+    ¿cómo codificar "up" and "down"? No hay códigos ascii y parece ser que hay 
+    un montón de "asciis extendidos". 
+
+    Solución 1: 
+	crear mis propios códigos. Lo implemento como Basic_keyboard_code.
+	De esta forma las funciones de biblioteca saben qué teclas tiene el 
+	teclado (up, down and ok) sin necesidad de saber los pines donde están 
+	conectados.
+
+ */
+template <typename Pins, typename Codes>
+struct Basic_keyboard{
+    using Code = Keyboard_code<Pins, Codes>;
+
+    constexpr Basic_keyboard() {init();}
+
+//  Se limita a hacer:
+//  for(uint8_t i = 0; i < Code::num_keys; ++i)
+//	key<i>().init();
+    template <uint8_t i = Code::num_keys - 1>
+    static constexpr void init()
+    {
+	Push_button<Code::pin[i]>::init();
+
+	if constexpr (i > 1)
+	    init<i-1>();
+    }
 
     template <uint8_t c>
     static constexpr auto key(){
-	return code2button<c>();
+	return Push_button<Code::template code2pin<c>()>{};
     }
 };
+
+
 
 
 }// namespace

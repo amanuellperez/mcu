@@ -23,24 +23,26 @@
 #include <avr_time.h>
 
 
-constexpr uint8_t keyboard_enter_pin = 23;
-constexpr uint8_t keyboard_up_pin = 24;
-constexpr uint8_t keyboard_down_pin  = 25;
-
-
-template <uint8_t down_pin, uint8_t up_pin, uint8_t enter_pin>
-struct Keyboard{
-    dev::Push_button<down_pin> down;
-    dev::Push_button<up_pin> up;
-    dev::Push_button<enter_pin> enter;
-};
-
-
+// pines que usamos
+// ----------------
+// LCD
 using LCD_pins = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<4>,
 				       dev::LCD_HD44780_RW<5>,
 				       dev::LCD_HD44780_E<6>,
 				       dev::LCD_HD44780_D4<11,12,13,14>
 				       >;
+// keyboard
+using Keyboard_pins  = dev::Keyboard_pins<23, 24, 25>;
+
+// código asociado a cada tecla del teclado
+using namespace dev::Key_codes; // OK_KEY, UP_KEY, DOWN_KEY
+using Keyboard_codes  = dev::Keyboard_codes<OK_KEY, UP_KEY, DOWN_KEY>;
+
+
+
+// dispositivos que conectamos
+// ---------------------------
+using Keyboard = dev::Basic_keyboard<Keyboard_pins, Keyboard_codes>;
 
 using LCD_HD44780 = dev::LCD_HD44780<LCD_pins>;
 
@@ -70,7 +72,7 @@ void test_lcd_menu()
     // LCD_HD44780_1602_ostream lcd;
     LCD_HD44780_2004_ostream lcd;
 
-    Keyboard<keyboard_down_pin, keyboard_up_pin, keyboard_enter_pin> key;
+    Keyboard key;
 
 
     while(1){

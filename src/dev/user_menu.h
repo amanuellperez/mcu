@@ -39,6 +39,8 @@
 #include <atd_cstring.h>    // line_count
 #include <avr_time.h>
 
+#include "dev_keyboard.h"
+
 namespace dev{
 
 /*!
@@ -51,7 +53,7 @@ namespace dev{
  *
  *  Ver el ejemplo del test para ver cómo usarlo.
  */
-template <typename LCD, typename Teclado>
+template <typename LCD, typename Keyboard3>
 class User_menu{
 public:
     /// Mostramos el número en el LCD e interaccionamos con el usuario via
@@ -59,7 +61,7 @@ public:
     /// El menu es una cadena de C, donde cada opción de menú viene separada
     /// por '\n' (una línea = una opción).
     /// Ejemplo: const char menu[] = "1. Uno\n2. Dos\n3. Tres\n4. Atrás"
-    User_menu(LCD& lcd, Teclado& key, const char* menu);
+    User_menu(LCD& lcd, Keyboard3, const char* menu);
 
     // Dejamos el LCD en el estado en que se encontraba.
     ~User_menu();
@@ -88,7 +90,17 @@ private:
     // -----
     // Dispositivos a los que conectamos este menu
     LCD& lcd_;	    
-    Teclado& key_;
+
+    // keyboard
+    static constexpr auto enter_key()
+    { return Keyboard3::template key<Basic_keyboard_code::enter>(); }
+
+    static constexpr auto up_key()
+    { return Keyboard3::template key<Basic_keyboard_code::up>(); }
+
+    static constexpr auto down_key()
+    { return Keyboard3::template key<Basic_keyboard_code::down>(); }
+
 
     // Menu y opciones seleccionadas.
     const char* menu_;	// cadena con el menu: "1.opcion\n2.opcion\n3.opcion"
@@ -181,10 +193,10 @@ private:
 };
 
 
-template <typename LCD, typename Teclado>
-inline User_menu<LCD, Teclado>::User_menu(LCD& lcd, Teclado& key,
+template <typename LCD, typename Keyboard3>
+inline User_menu<LCD, Keyboard3>::User_menu(LCD& lcd, Keyboard3,
 	const char* menu)
-    : lcd_{lcd}, key_{key}, menu_{menu}, y0_{1}, xm_{lcd.cursor_pos_x()},
+    : lcd_{lcd}, menu_{menu}, y0_{1}, xm_{lcd.cursor_pos_x()},
       ym_{0}, yr_{0}
 {
     num_rows_ = std::min<uint8_t>(lcd.rows(), atd::line_count(menu));
@@ -261,10 +273,10 @@ void User_menu<L,T>::lcd_move()
 {
     Redibujar redibujar = Redibujar::nada;
 
-    if (key_.up.is_pressed())
+    if (up_key().is_pressed())
 	redibujar = lcd_up();
 
-    else if (key_.down.is_pressed())
+    else if (down_key().is_pressed())
 	redibujar = lcd_down();
 
     redibuja(redibujar);
@@ -279,7 +291,7 @@ uint8_t User_menu<L,T>::show(uint8_t opcion_inicial)
 
     show_menu_first_time(opcion_inicial);
 
-    while (key_.enter.is_not_pressed()){
+    while (enter_key().is_not_pressed()){
 	lcd_move();
 
 	wait_ms(T_clock);

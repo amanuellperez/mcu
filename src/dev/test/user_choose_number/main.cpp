@@ -18,28 +18,32 @@
 // Conectar el LCD y 3 pulsadores a los pines indicados
 #include "../../user_choose_number.h"
 #include "../../dev_LCD_HD44780.h"
-#include "../../dev_push_button.h"
 
 #include <avr_time.h>
 
 
-constexpr uint8_t keyboard_enter_pin = 23;
-constexpr uint8_t keyboard_up_pin = 24;
-constexpr uint8_t keyboard_down_pin  = 25;
-
-
-template <uint8_t down_pin, uint8_t up_pin, uint8_t enter_pin>
-struct Keyboard{
-    dev::Push_button<down_pin> down;
-    dev::Push_button<up_pin> up;
-    dev::Push_button<enter_pin> enter;
-};
-
+// pines que usamos
+// ----------------
+// LCD
 using LCD_pins = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<4>,
 				       dev::LCD_HD44780_RW<5>,
 				       dev::LCD_HD44780_E<6>,
 				       dev::LCD_HD44780_D4<11,12,13,14>
 				       >;
+
+// keyboard
+// pines a los que conectamos el teclado
+using Keyboard_pins  = dev::Keyboard_pins<23, 24, 25>;
+
+// código asociado a cada tecla del teclado
+using namespace dev::Key_codes; // OK_KEY, UP_KEY, DOWN_KEY
+using Keyboard_codes  = dev::Keyboard_codes<OK_KEY, UP_KEY, DOWN_KEY>;
+
+
+
+// dispositivos que conectamos
+// ---------------------------
+using Keyboard = dev::Basic_keyboard<Keyboard_pins, Keyboard_codes>;
 
 using LCD_HD44780 = dev::LCD_HD44780<LCD_pins>;
 
@@ -54,7 +58,7 @@ void test_choose_number2()
 {
     LCD_HD44780_1602_ostream lcd;
 
-    Keyboard<keyboard_down_pin, keyboard_up_pin, keyboard_enter_pin> key;
+    Keyboard keyboard;
 
     while(1){
 	lcd.clear();
@@ -64,7 +68,7 @@ void test_choose_number2()
 	lcd.clear();
 	lcd << "2 cifras [5,25]";
 	wait_ms(1000);
-	uint8_t u8 =  dev::User_choose_number{lcd, key}.pos(3, 1)
+	uint8_t u8 =  dev::User_choose_number{lcd, keyboard}.pos(3, 1)
 					     .between(5, 25)
 					     .choose2(10);
 	lcd.cursor_pos(0,0);
@@ -74,11 +78,13 @@ void test_choose_number2()
 
 	lcd.clear();
 	lcd << "4 [2890, 2910]";
-	uint16_t u16  =  dev::User_choose_number{lcd, key}.pos(3, 1)
+	uint16_t u16  =  dev::User_choose_number{lcd, keyboard}.pos(3, 1)
 						 .between(2890, 2910)
 						 .choose4(2900);
 	lcd.cursor_pos(0,0);
 	lcd << "has elegido: " << u16;
+
+	wait_ms(1000);
     }
 }
 

@@ -18,29 +18,33 @@
 // Conectar el LCD y 3 pulsadores a los pines indicados
 #include "../../user_menu.h"
 #include "../../dev_LCD_HD44780.h"
-#include "../../dev_push_button.h"
+#include "../../dev_keyboard.h"
 
 #include <avr_time.h>
 
 
-constexpr uint8_t keyboard_enter_pin = 23;
-constexpr uint8_t keyboard_up_pin = 24;
-constexpr uint8_t keyboard_down_pin  = 25;
-
-template <uint8_t down_pin, uint8_t up_pin, uint8_t enter_pin>
-struct Keyboard{
-    dev::Push_button<down_pin> down;
-    dev::Push_button<up_pin> up;
-    dev::Push_button<enter_pin> enter;
-};
-
-
-
+// pines que usamos
+// ----------------
+// LCD
 using LCD_pins = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<4>,
 				       dev::LCD_HD44780_RW<5>,
 				       dev::LCD_HD44780_E<6>,
 				       dev::LCD_HD44780_D4<11,12,13,14>
 				       >;
+
+// keyboard
+using Keyboard_pins  = dev::Keyboard_pins<23, 24, 25>;
+
+// código asociado a cada tecla del teclado
+using namespace dev::Key_codes; // OK_KEY, UP_KEY, DOWN_KEY
+using Keyboard_codes  = dev::Keyboard_codes<OK_KEY, UP_KEY, DOWN_KEY>;
+
+
+
+// dispositivos que conectamos
+// ---------------------------
+using Keyboard = dev::Basic_keyboard<Keyboard_pins, Keyboard_codes>;
+
 
 using LCD_HD44780 = dev::LCD_HD44780<LCD_pins>;
 
@@ -56,10 +60,10 @@ constexpr const char menu_unidad_tiempo[] = "hora\nmin\nseg";
 void test_lcd_menu()
 {
     // Si lo conectamos solo a 4 pins de datos
-    LCD_HD44780_1602_ostream lcd;
-    // LCD_HD44780_2004_ostream lcd;
+    // LCD_HD44780_1602_ostream lcd;
+    LCD_HD44780_2004_ostream lcd;
 
-    Keyboard<keyboard_down_pin, keyboard_up_pin, keyboard_enter_pin> key;
+    Keyboard keyboard;
 
     const char* menu =
         // "1. Primera opcion";
@@ -74,7 +78,7 @@ void test_lcd_menu()
     while(1){
 	lcd.clear();
 	lcd << "Elige: ";
-	uint8_t unidad = dev::User_menu{lcd.screen(), key, menu_unidad_tiempo}
+	uint8_t unidad = dev::User_menu{lcd.screen(), keyboard, menu_unidad_tiempo}
                          .num_rows(1)
                          .num_cols(4)
                          .pos(7, 1)
@@ -87,7 +91,7 @@ void test_lcd_menu()
 	lcd.clear();
 	lcd << "Elige: ";
 	// uint16_t en lugar de uint8_t para poder imprimirlo en lcd <<.
-        uint16_t seleccion = dev::User_menu{lcd.screen(), key, menu}
+        uint16_t seleccion = dev::User_menu{lcd.screen(), keyboard, menu}
                                  .num_rows(1)
                                  .num_cols(4)
                                  .pos(6, 1)
@@ -100,7 +104,7 @@ void test_lcd_menu()
 
 	lcd.clear();
 	lcd << "Elige: xxxx = unidades";
-        seleccion = dev::User_menu{lcd.screen(), key, menu2}
+        seleccion = dev::User_menu{lcd.screen(), keyboard, menu2}
                                  .num_rows(1)
                                  .num_cols(4)
 				 .pos(7,0)
@@ -113,7 +117,7 @@ void test_lcd_menu()
 
 
 	lcd.clear();
-	seleccion = dev::User_menu{lcd.screen(), key, menu}
+	seleccion = dev::User_menu{lcd.screen(), keyboard, menu}
 			    .num_rows(2)
 			    .pos(0, 1)
 			    .show(3);
@@ -124,7 +128,7 @@ void test_lcd_menu()
 
 	lcd.clear();
 	lcd << "Todo bien? ";
-	seleccion = dev::User_menu{lcd.screen(), key, "si\nno"}.show(3);
+	seleccion = dev::User_menu{lcd.screen(), keyboard, "si\nno"}.show(3);
 
 	lcd.clear();
 	lcd << "seleccion:\n" << seleccion;

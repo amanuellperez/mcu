@@ -22,19 +22,18 @@
 #include <avr_time.h>
 #include <avr_USART.h>
 
+// pines a los que conectamos el teclado
+using Keyboard_2pins = dev::Keyboard_pins<24, 25>;
+using Keyboard_pins  = dev::Keyboard_pins<23, 24, 25>;
 
-constexpr uint8_t keyboard_enter_pin = 23;
-constexpr uint8_t keyboard_up_pin = 24;
-constexpr uint8_t keyboard_down_pin  = 25;
+// código asociado a cada tecla del teclado
+using namespace dev::Key_codes; // OK_KEY, UP_KEY, DOWN_KEY
+using Keyboard_2codes = dev::Keyboard_codes<UP_KEY, DOWN_KEY>;
+using Keyboard_codes  = dev::Keyboard_codes<OK_KEY, UP_KEY, DOWN_KEY>;
 
-constexpr uint8_t ENTER_KEY = 0;
-constexpr uint8_t UP_KEY    = 1;
-constexpr uint8_t DOWN_KEY  = 2;
-
-using Keyboard = dev::Keyboard3<keyboard_enter_pin, ENTER_KEY,
-			        keyboard_up_pin, UP_KEY,
-				keyboard_down_pin, DOWN_KEY>;
-
+// dispositivos que conectamos
+using Keyboard = dev::Basic_keyboard<Keyboard_pins, Keyboard_codes>;
+//using Keyboard = dev::Basic_keyboard<Keyboard_2pins, Keyboard_2codes>;
 
 
 void test_keyboard()
@@ -46,7 +45,7 @@ void test_keyboard()
     Keyboard keyboard;
 
     while (1){
-	if (keyboard.key<ENTER_KEY>().is_pressed())
+	if (Keyboard::key<OK_KEY>().is_pressed())
 	    uart << "enter\n" << std::flush;
 
 	if (keyboard.key<UP_KEY>().is_pressed())
@@ -55,6 +54,9 @@ void test_keyboard()
 	if (keyboard.key<DOWN_KEY>().is_pressed())
 	    uart << "down\n" << std::flush;
 
+	// CHECK_DONT_COMPILE
+//	if (keyboard.key<100>().is_pressed())
+//	  uart << "error no tiene que compilar\n" << std::flush;
 	wait_ms(100);
     }
 }
