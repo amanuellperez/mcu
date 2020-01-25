@@ -1,5 +1,6 @@
 DIRS = algorithm\
 	array		\
+	bit			\
 	char_traits	\
 	cstddef		\
 	cstdio		\
@@ -10,6 +11,8 @@ DIRS = algorithm\
 	type_traits	\
 	utility
 
+
+# initializer_list	<--- has to compile with avr-gcc!!!
 
 include $(CPP_RECRULES)
 

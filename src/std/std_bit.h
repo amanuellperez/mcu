@@ -35,8 +35,8 @@
 namespace STD{
 
 enum class endian {
-    little = __ORDER_LITTLE_ENDIAN__,
-    big    = __ORDER_BIG_ENDIAN__,
+    little = __ORDER_LITTLE_ENDIAN__,	// MSB first 
+    big    = __ORDER_BIG_ENDIAN__,	// LSB first
     native = __BYTE_ORDER__
 };
 

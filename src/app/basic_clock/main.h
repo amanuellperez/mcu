@@ -37,7 +37,6 @@ public:
 
 private:
 // HARDWARE CONECTADO
-
     LCD_ostream lcd_;
     Keyboard keyboard_;
 

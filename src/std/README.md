@@ -1,11 +1,11 @@
 ### The (partial) C++ standard library, without exceptions nor dynamic memory (new/delete).
 
 gcc doesn't implement std for microcontrollers. So I decided to implement one to be
-able to use it and also as a learning proyect.
+able to use it and also as a learning project.
 
 I intend to write code as needed, little by little.
 
-Tested: avr-gcc 7.4.0
+Tested: avr-gcc 9.2.0
 
 ---
 
@@ -16,4 +16,4 @@ o encontrar copias de gcc, decidí comenzar a implementarla para poder usarla y 
 
 En principio iré escribiendola poco a poco, según vaya necesitando cosas.
 
-Probado con: avr-gcc 7.4.0
+Probado con: avr-gcc 9.2.0

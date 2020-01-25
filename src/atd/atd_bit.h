@@ -50,6 +50,7 @@
  *
  *  29/08/19: bit<7>::of(x)
  *  19/10/19: concat_bits, Bit_of
+ *  25/01/20: concat_bytes
  *
  ****************************************************************************/
 #include <stdint.h> // uint8_t
@@ -123,18 +124,54 @@ inline constexpr void flip_bit(Int& i)
 //    bool is_low(T& x, uint8_t p)
 //    {return is_zero(x, p);}
 
-/// Concatena los bits x,y devolviendo la cadena de 16 bits: xy.
-template <typename Int8bits>
-// requires: sizeof(Int8bits) == 1 and sizeof(char) == 8bits.
-inline uint16_t concat_bits(Int8bits x, Int8bits y)
-{
-    uint16_t res = static_cast<uint8_t>(x);
 
-    res <<= 8;   
-    res |= y;
+
+// concat_bytes
+// ------------
+template <typename Int, typename Byte>
+Int __concat_bytes(Int res, Byte b)
+{
+    res <<= 8;
+    res |= b;
 
     return res;
 }
+
+
+template <typename Int, typename Byte, typename... Tail>
+Int __concat_bytes(Int res, Byte b, Tail... b1_bn)
+{
+    res <<= 8;
+    res |= b;
+
+    return __concat_bytes(res, b1_bn...);
+}
+
+
+// Caso degenerado. ¿Alguien lo llamará?
+template <typename Int, typename Byte, typename ...Tail>
+constexpr inline Int concat_bytes(Byte b)
+{
+    return b;
+}
+
+/// Concatena los bytes x,y devolviendo la cadena de 16 bits: xy.
+/// Observar que los concatena en el orden pasados: {MSB, ..., LSB}
+template <typename Int, typename Byte, typename ...Tail>
+constexpr inline Int concat_bytes(Byte b0, Tail... b1_bn)
+{
+    Int res{0};
+    
+    res = b0;
+    return __concat_bytes(res, b1_bn...);
+}
+
+
+
+
+
+
+
 
 /// Devuelve x con todos los bits 0 menos el bit 'pos'.
 template <uint8_t pos, typename Int>

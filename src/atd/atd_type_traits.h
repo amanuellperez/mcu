@@ -31,6 +31,7 @@
  *
  ****************************************************************************/
 #include <type_traits>
+#include <cstddef>  // size_t
 
 namespace atd{
 
@@ -63,12 +64,14 @@ inline constexpr bool always_false_v = always_false_type<T>::value;
  *  \brief  Static array.
  *
  */
-template <uint8_t... args>
+template <typename T, T... args>
 struct static_array{
-    static constexpr uint8_t size = sizeof...(args);
-    static constexpr uint8_t data[size] = {args...};
+    using size_type = std::size_t;
 
-    constexpr uint8_t operator[](uint8_t i) const {return data[i];}
+    static constexpr size_type size = sizeof...(args);
+    static constexpr T data[size] = {args...};
+
+    constexpr T operator[](size_type i) const {return data[i];}
 };
 
 

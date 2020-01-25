@@ -20,7 +20,7 @@
 namespace avr{
 
 
-bool TWI::receive_data_with_ACK(volatile std::byte& x)
+bool TWI::receive_data_with_ACK(std::byte& x)
 {
     TWCR =  (1 << TWEN)|	// enable(); (ver datasheet table 26-2)
 	    (1 << TWINT)| 	// start_next_operation();
@@ -34,7 +34,7 @@ bool TWI::receive_data_with_ACK(volatile std::byte& x)
 }
 
 
-bool TWI::receive_data_with_NACK(volatile std::byte& x)
+bool TWI::receive_data_with_NACK(std::byte& x)
 {
     TWCR =	(1 << TWEN)|	// enable(); (ver datasheet table 26-2)
 	    (1 << TWINT); 	// start_next_operation();
@@ -62,7 +62,24 @@ uint8_t TWI::send(uint8_t address, std::byte x)
 }
 
 
-uint8_t TWI::receive(uint8_t address, volatile std::byte* data, uint8_t n)
+uint8_t TWI::send(uint8_t address, const std::byte* data, uint8_t n)
+{
+    send_byte(std::byte{address} << 1);    // address + write
+    if (answer_send_address_NACK())
+	return 0;
+
+    for (uint8_t i = 0; i < n; ++i, ++data){
+	send_byte(data[i]);
+	if (answer_send_data_NACK())
+	    return i;
+    }
+
+    return n;
+}
+
+
+
+uint8_t TWI::receive(uint8_t address, std::byte* data, uint8_t n)
 {
     send_byte((std::byte{address} << 1) | std::byte{0x01}); // address + read 
 

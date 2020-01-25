@@ -77,19 +77,38 @@ inline constexpr int f()
     else if constexpr (x == 1)
 	return 30;
     else
-	static_asser(atd::always_false_v<int>, "error");
+	static_assert(atd::always_false_v<int>, "error");
 }
 
-#define NO_COMPILA(X) 
+#define CHECK_DONT_COMPILE(X) 
 
 void test_always_false()
 {
+    test::interfaz("always_false_v");
+
     CHECK_TRUE(f<0>() == 1, "always_false_v");
     CHECK_TRUE(f<1>() == 30, "always_false_v");
-    NO_COMPILA(f<2>());
+    CHECK_DONT_COMPILE(f<2>());
 }
 
 
+void test_static_array()
+{
+    test::interfaz("static_array");
+
+    using Pin = atd::static_array<int, 10, 20, 30>;
+    CHECK_TRUE(Pin::data[0] == 10, "static_array::data[]");
+    CHECK_TRUE(Pin::data[1] == 20, "static_array::data[]");
+    CHECK_TRUE(Pin::data[2] == 30, "static_array::data[]");
+    CHECK_TRUE(Pin::size == 3, "static_array::size");
+
+    Pin pin;
+    CHECK_TRUE(pin[0] == 10, "static_array.operator[]");
+    CHECK_TRUE(pin[1] == 20, "static_array.operator[]");
+    CHECK_TRUE(pin[2] == 30, "static_array.operator[]");
+    CHECK_TRUE(pin.size == 3, "static_array.size");
+
+}
 
 int main()
 {
@@ -99,6 +118,7 @@ try{
     test_less_than();
     test_pertenece_al_intervalo_cerrado();
     test_always_false();
+    test_static_array();
 
 }catch(std::exception& e)
 {

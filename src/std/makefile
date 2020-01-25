@@ -8,12 +8,14 @@ INCS= std_cstdio.h		\
 	std_algorithm.h		\
 	std_array.h			\
 	std_basic_ios.h		\
+	std_bit.h			\
 	std_char_traits.h	\
 	std_chrono.h		\
 	std_config.h		\
 	std_cstddef.h		\
 	std_cstdint.h		\
 	std_ctime.h			\
+	std_initializer_list.h	\
 	std_ios_base.h		\
 	std_ios.h			\
 	std_iosfwd.h		\
@@ -31,10 +33,12 @@ INCS= std_cstdio.h		\
 	std_utility.h		\
 	algorithm	\
 	array		\
+	bit			\
 	chrono		\
 	cstddef 	\
 	cstdint		\
 	ctime		\
+	initializer_list	\
 	iomanip		\
 	ios			\
 	iosfwd		\

@@ -73,14 +73,34 @@ void test_bit()
     CHECK_TRUE(x == 0x0A, "write_zero");
 }
 
-void test_concat_bits()
+void test_concat_bytes()
 {
-    test::interfaz("concat_bits");
+    test::interfaz("concat_bytes");
 
-    CHECK_TRUE(atd::concat_bits(0x52, 0xF4) == 0x52F4, "concat_bits");
-    CHECK_TRUE(atd::concat_bits(0x00, 0x00) == 0, "concat_bits");
-    CHECK_TRUE(atd::concat_bits(0xFF, 0x00) == 0xFF00, "concat_bits");
-    CHECK_TRUE(atd::concat_bits(0x00, 0xFF) == 0x00FF, "concat_bits");
+    CHECK_TRUE(atd::concat_bytes<uint16_t>(0x52, 0xF4) == 0x52F4, "concat_bytes");
+    CHECK_TRUE(atd::concat_bytes<uint16_t>(0x00, 0x00) == 0, "concat_bytes");
+    CHECK_TRUE(atd::concat_bytes<uint16_t>(0xFF, 0x00) == 0xFF00, "concat_bytes");
+    CHECK_TRUE(atd::concat_bytes<uint16_t>(0x00, 0xFF) == 0x00FF, "concat_bytes");
+
+    CHECK_TRUE(atd::concat_bytes<uint32_t>(0x12, 0x34) == 0x1234, "concat_bytes");
+    CHECK_TRUE(atd::concat_bytes<uint32_t>(0x12, 0x34, 0x56) == 0x123456, "concat_bytes");
+    CHECK_TRUE(atd::concat_bytes<int32_t>(0x12, 0x34, 0x56) == 0x123456, "concat_bytes");
+    CHECK_TRUE(atd::concat_bytes<uint32_t>(0x12, 0x34, 0x56, 0x78) == 0x12345678, "concat_bytes");
+    CHECK_TRUE(atd::concat_bytes<int32_t>(0x12, 0x34, 0x56, 0x78) == 0x12345678, "concat_bytes");
+
+    CHECK_TRUE(atd::concat_bytes<uint64_t>(0x12, 0x34) == 0x1234, "concat_bytes");
+    CHECK_TRUE(atd::concat_bytes<uint64_t>(0x12, 0x34, 0x56) == 0x123456, "concat_bytes");
+    CHECK_TRUE(atd::concat_bytes<int64_t>(0x12, 0x34, 0x56) == 0x123456, "concat_bytes");
+    CHECK_TRUE(atd::concat_bytes<uint64_t>(0x12, 0x34, 0x56, 0x78) == 0x12345678, "concat_bytes");
+    CHECK_TRUE(atd::concat_bytes<int64_t>(0x12, 0x34, 0x56, 0x78) == 0x12345678, "concat_bytes");
+    CHECK_TRUE(atd::concat_bytes<int64_t>(0x12, 0x34, 0x56, 0x78, 0x9A) == 0x123456789A, "concat_bytes");
+    CHECK_TRUE(atd::concat_bytes<int64_t>
+		(0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC) == 0x123456789ABC, 
+		"concat_bytes");
+
+    CHECK_TRUE(atd::concat_bytes<int64_t>
+		(0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE) == 0x123456789ABCDE, 
+		"concat_bytes");
 }
 
 void test_bitmask()
@@ -178,7 +198,7 @@ try{
     test_bitmask();
     test_Bit();
     test_bit();
-    test_concat_bits();
+    test_concat_bytes();
 
 }catch(std::exception& e)
 {

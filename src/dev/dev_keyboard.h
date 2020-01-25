@@ -60,10 +60,10 @@ namespace Key_codes{
 
 
 template <uint8_t... args>
-struct Keyboard_pins : public atd::static_array<args...>{ };
+struct Keyboard_pins : public atd::static_array<uint8_t, args...>{ };
 
 template <uint8_t... args>
-struct Keyboard_codes : public atd::static_array<args...>{ };
+struct Keyboard_codes : public atd::static_array<uint8_t, args...>{ };
 
 
 /*!

@@ -44,6 +44,8 @@ namespace dev{
 template <uint8_t addr>
 class Thermometer_LM75{
 public:
+    // TODO: sacar esta enum fuera y definirla como 
+    // using Error = __LM75_Error;
     /// Errores que puede dar la lectura de la temperatura.
     enum Error {
 	ok = 0,   // no ha sucedido ningún error
@@ -58,8 +60,11 @@ public:
     /// T().
     /// Devuelve 0 si todo va bien, y distinto de cero (un código de Error)
     /// si algo ha fallado.
+    // TODO: eliminar el volatile. Probarlo en tlog.
     uint8_t refresh() volatile;
 
+    // TODO: usar Q24.8 o algo asi para codificar la parte decimal y devolver
+    // la temperatura completa, no a cachos.
     /// Devuelve la parte entera de la temperatura medida en ºC.
     uint8_t T() const volatile {return temp_[0];}
 

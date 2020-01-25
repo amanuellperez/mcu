@@ -23,6 +23,9 @@
  *
  *  - DESCRIPCION: Equivalent to <initializer_list>
  *
+ *  - WARNING: Right now it's not tested!!! (I don't know how to test this 
+ *	class using gcc)
+ *
  *  - HISTORIA:
  *    A.Manuel L.Perez
  *    25/01/2020 v0.0

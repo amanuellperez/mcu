@@ -287,7 +287,7 @@ public:
     /// Metemos en x el byte recibido.
     /// En caso de que todo vaya bien devuelve 0, en caso de error
     /// devuelve un valor distinto de 0.
-    static bool receive_data_with_ACK(volatile std::byte& x);
+    static bool receive_data_with_ACK(std::byte& x);
 
     /// Devuelve 1 si se ha recibido un dato y se ha enviado ACK como
     /// respuesta. 0 en caso contrario.
@@ -308,7 +308,7 @@ public:
     /// Metemos en x el byte recibido.
     /// En caso de que todo vaya bien devuelve 0, en caso de error
     /// devuelve un valor distinto de 0.
-    static bool receive_data_with_NACK(volatile std::byte& x);
+    static bool receive_data_with_NACK(std::byte& x);
 
     /// Devuelve 1 si se ha recibido un dato y se ha enviado NACK como
     /// respuesta. 0 en caso contrario.
@@ -334,14 +334,15 @@ public:
 
     /// Envía al dispositivo de dirección address, los bytes data[0-n).
     /// No espera a que la transmisión haya finalizado.
-    // TODO: static uint8_t send(uint8_t address, std::byte* data, uint8_t n)
     /// Devuelve el número de bytes enviados.
     static uint8_t send(uint8_t address, std::byte x);
+
+    static uint8_t send(uint8_t address, const std::byte* data, uint8_t n);
 
     /// Recibe del dispositivo de dirección address, n bytes, escribiéndolos
     /// en data[0-n). Al recibir el último byte se envia NACK.
     /// Devuelve el número de bytes recibidos.
-    static uint8_t receive(uint8_t address, volatile std::byte* data, uint8_t n);
+    static uint8_t receive(uint8_t address, std::byte* data, uint8_t n);
 
     // Es fundamental enviar send_stop en caso de que falle algo para poder
     // seguir con las comunicaciones. Start se encarga de llamar a send_start
