@@ -136,7 +136,51 @@ void test_bitmask()
     CHECK_TRUE((atd::bitmask1<7,uint8_t>() == 0b01111111u), "bitmask1");
 
 
+    CHECK_TRUE((atd::bitmask<1,2, uint8_t>() == 0x06), "bitmask");
+    CHECK_TRUE((atd::bitmask<1,1, uint8_t>() == 0x02), "bitmask");
+
+    CHECK_TRUE((atd::bitmask<1,2, int16_t>() == 0x06), "bitmask");
+    CHECK_TRUE((atd::bitmask<10,12, int16_t>() == 0x1C00), "bitmask");
+    CHECK_TRUE((atd::bitmask<0,12, int16_t>() == 0x1FFF), "bitmask");
+
+    CHECK_TRUE((atd::bitmask<31,31, uint32_t>() == 0x80000000), "bitmask");
+
+    {
+    constexpr uint8_t x = atd::bitmask<1,2,uint8_t>();
+    CHECK_TRUE(x == 0x06, "bitmask in compile time");
+    }
 }
+
+
+template <typename Int>
+void test_mask()
+{
+    // TODO: more tests!!! but how??? random? systematic?
+    constexpr atd::Mask<2,6, Int> mask;
+
+    Int x = 0x35;
+    Int res = mask(x);
+    CHECK_TRUE(res == Int{0x0D}, "Mask::get");
+
+    mask(x) = Int{0x16};
+    CHECK_TRUE(x == Int{0x59}, "Mask::set");
+}
+
+void test_mask()
+{
+    test::interfaz("Mask");
+    
+    test_mask<uint8_t>();
+    test_mask<int8_t>();
+    test_mask<uint16_t>();
+    test_mask<int16_t>();
+    test_mask<uint32_t>();
+    test_mask<int32_t>();
+    test_mask<uint64_t>();
+    test_mask<int64_t>();
+}
+
+
 
 template <typename Int>
 void test_Bit()
@@ -196,6 +240,7 @@ try{
     test::header("atd_bit");
 
     test_bitmask();
+    test_mask();
     test_Bit();
     test_bit();
     test_concat_bytes();

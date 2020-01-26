@@ -1,8 +1,0 @@
-atd:
-    Funciones genéricas que usan mi librería std. 
-    No usan excepciones ni los operadores new/delete.
-    Esta librería se puede usar tanto con gcc como con avr-gcc.
-    Si se compila con gcc se incluye el standard std. Si se compila con
-    avr-gcc se incluye mi std.
-
-

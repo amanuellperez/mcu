@@ -50,7 +50,7 @@
  *
  *  29/08/19: bit<7>::of(x)
  *  19/10/19: concat_bits, Bit_of
- *  25/01/20: concat_bytes
+ *  25/01/20: concat_bytes, bitmask
  *
  ****************************************************************************/
 #include <stdint.h> // uint8_t
@@ -132,7 +132,7 @@ template <typename Int, typename Byte>
 Int __concat_bytes(Int res, Byte b)
 {
     res <<= 8;
-    res |= b;
+    res |= static_cast<uint8_t>(b);
 
     return res;
 }
@@ -142,7 +142,7 @@ template <typename Int, typename Byte, typename... Tail>
 Int __concat_bytes(Int res, Byte b, Tail... b1_bn)
 {
     res <<= 8;
-    res |= b;
+    res |= static_cast<uint8_t>(b);
 
     return __concat_bytes(res, b1_bn...);
 }
@@ -162,7 +162,7 @@ constexpr inline Int concat_bytes(Byte b0, Tail... b1_bn)
 {
     Int res{0};
     
-    res = b0;
+    res = static_cast<uint8_t>(b0);
     return __concat_bytes(res, b1_bn...);
 }
 
@@ -171,7 +171,9 @@ constexpr inline Int concat_bytes(Byte b0, Tail... b1_bn)
 
 
 
-
+// ----
+// MASK
+// ----
 
 /// Devuelve x con todos los bits 0 menos el bit 'pos'.
 template <uint8_t pos, typename Int>
@@ -195,6 +197,64 @@ constexpr inline Int bitmask1()
     Int x = bitmask0<pos, Int>();
     return ~x;
 }
+
+
+template <uint8_t i0, uint8_t i1, uint8_t k, typename Int>
+constexpr inline Int __bitmask(Int mask)
+{
+    if constexpr (i0 <= k and k <= i1)
+	mask |= bitmask0<k, Int>();
+
+    if constexpr (k == i1)
+	return mask;
+    else
+	return __bitmask<i0, i1, k + 1>(mask);
+}
+
+
+// Devuelve una bitmask con los bits indicados.
+// Ejemplo: uint16_t mask = atd::bitmask<10,12, uint16_t>();
+//	    Devuelve mask = 0x1C00;
+template <uint8_t i0, uint8_t i1, typename Int>
+constexpr inline Int bitmask()
+{
+    Int mask{0};
+
+    return __bitmask<i0, i1, 0>(mask);
+}
+
+
+template <uint8_t i0, uint8_t i1, typename Int>
+struct __Mask{
+    static constexpr Int mask = bitmask<i0, i1, Int>();
+    static constexpr uint8_t pos = i0; // syntactic sugar
+
+    Int& reg;
+
+    constexpr __Mask(Int& reg0) : reg{reg0} { }
+
+    // get_bits
+    constexpr operator Int() const 
+    { return (reg & mask) >> pos;}
+
+    // set_bits
+    constexpr Int& operator=(const Int& x)
+    {
+	reg = ((reg & ~mask) | ((x << pos) & mask));
+	return reg;
+    }
+
+};
+
+template <uint8_t i0, uint8_t i1, typename Int>
+struct Mask{
+    constexpr __Mask<i0, i1, Int> operator()(Int& reg) const
+    { return __Mask<i0, i1, Int>{reg}; }
+};
+
+
+
+
 
 
 
