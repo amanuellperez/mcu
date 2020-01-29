@@ -45,7 +45,6 @@ public:
 
 
 using LM75_1 = Thermometer_LM75<1>;
-using LM75_2 = Thermometer_LM75<2>;
 
 
 template <typename LM75>
@@ -100,21 +99,24 @@ int main()
 
     uart << "Empezando\n";
 
+    // 1.- Configuración de TWI:
+    TWI::interrupt_disable();	// elegir siempre si generar o no interrupciones
+
+
+    // 2.- Encendemos TWI, seleccionando la frecuencia de funcionamiento:
     // OJO: para que el TWI funcione a 100kHz es necesario operar
     // a 8 MHz!!
     // según make: 8MHz/(16+2*TWBR*1) ~= 100kHz
     // TODO: mejor: TWI::speed<100>();
     // Ver table 1-1 application note avr315
-    TWI::enable_and_set_SCL_frequency_in_kHz<100>();
+    // TWI::on<100>();
+    TWI::on<50>();
 
     uart << "TWI enable\n";
     
     while (1) {
 	uart << "T1 = ";
 	lee_temperatura<LM75_1>();
-	uart << ";  T2 = ";
-	lee_temperatura<LM75_2>();
-	uart << " +- 1ºC (a 25ºC)";
 	uart << "\n";
 
 	wait_ms(1000);

@@ -4,7 +4,7 @@ DIRS = ADC\
 	timer0\
 	timer1\
 	TWI\
-	USART
+	USART 
 
 # Revisar: no compilan
 #	interrupt\

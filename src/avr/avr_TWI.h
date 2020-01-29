@@ -23,19 +23,14 @@
  *
  *   - DESCRIPCION: Traductor del TWI (I2C)
  *
- *   - COMENTARIOS: En principio pensaba hacer un traductor literal de
- *	la datasheet. Sin embargo, todas las peticiones se hacen a través
- *	del registro TWCR donde como mínimo hay que escribir los bits TWEN y
- *	TWINT. Al final doy las dos versiones:
- *	    1.- El traductor literal.
- *	    2.- Funciones que acceden directamente al registro TWCR
- *		(en principio, este interfaz parece el más sencillo de usar).
- *
  *
  *   - HISTORIA:
- *           A.Manuel L.Perez- 24/08/2019 v0.0
+ *    A.Manuel L.Perez
+ *    24/08/2019 v0.0
+ *    27/01/2020 Divido en traductor TWI_basic y driver TWI
  *
  ****************************************************************************/
+
 #include <cstddef>    // std::byte
 #include <atd_register.h>
 
@@ -43,7 +38,12 @@
 
 namespace avr{
 
-class TWI{
+/*!
+ *  \brief  Traductor literal de la datasheet.
+ *
+ *
+ */
+class TWI_basic{
 public:
     /// Selects the division factor for the bit rate generator.
     /// The bit rate generatro is a frequency divider which generatres the
@@ -83,13 +83,13 @@ public:
 	atd::Register{TWSR}.write_zero_bit<TWPS1, TWPS0>();
     }
 
-    /// Devuelve el bit rate prescaler seleccionado.
+    /// Devuelve los bits con el rate prescaler seleccionado.
     static uint8_t bit_rate_prescaler()
     { return TWSR & TWI_MASK_BIT_RATE_PRESCALER;}
 
 
     /// Definimos la frecuencia del reloj SCL.
-    /// f_scl = frecuencia en kilohercios de SCL (tipica: 100 y 400 kHz).
+    /// f_scl = frecuencia en kHz de SCL (tipica: 100 kHz y 400 kHz).
     /// f_clock = frecuencia a la que funciona el reloj del avr.
     template <uint16_t f_scl, uint32_t f_clock = AVR_CLOCK_FREQUENCY_IN_HZ>
     static void SCL_frequency_in_kHz();
@@ -97,12 +97,16 @@ public:
 
     /// Dirección que tiene el avr si funciona como slave.
     static void slave_address(uint8_t addr)
-    {	// TODO: esta función depende del atmega328p!!! Generalizarla!!!
-	// Que sirva para cualquier controlador.
-	uint8_t tmp = TWAR & 0x01;  // El address son los bits 1-7 de TWAR.
-	TWAR = tmp | (addr << 1);
+    {// TODO: usar Mask_of_bits!!!
+        TWAR =
+            (TWAR & ~TWI_MASK_SLAVE_ADDRESS) | (addr << TWI_POS_SLAVE_ADDRESS);
     }
 
+    /// Dirección que tiene el avr si funciona como slave.
+    static uint8_t slave_address()
+    {// TODO: usar Mask_of_bits!!!
+	return (TWAR >> TWI_POS_SLAVE_ADDRESS); 
+    }
 
     /// ¿Queremos que en multimaster systems se responda a la general call
     /// address (0x00)?
@@ -157,25 +161,14 @@ public:
     static void enable()
     { atd::Register{TWCR}.write_one_bit<TWEN>(); }
 
-
-    /// Enables TWI interface, definiendo la frecuencia del SCL a la 
-    /// que vamos a operar.
-    /// f_scl = frecuencia en kilohercios de SCL (tipica: 100 y 400 kHz).
-    /// f_clock = frecuencia a la que funciona el reloj del avr.
-    template <uint16_t f_scl, uint32_t f_clock = AVR_CLOCK_FREQUENCY_IN_HZ>
-    static void enable_and_set_SCL_frequency_in_kHz()
-    {
-	SCL_frequency_in_kHz<f_scl, f_clock>();
-	enable();
-    }
-
-
     /// Disables TWI interface.
     static void disable()
     { atd::Register{TWCR}.write_zero_bit<TWEN>(); }
 
 
     /// The TWI interrupt request will be activated.
+    // OJO: hay que definir globalmente las interrupciones para que esto
+    // funcione: Interrupt::enable_all_interrupts();
     static void interrupt_enable()
     { atd::Register{TWCR}.write_one_bit<TWIE>(); }
 
@@ -185,21 +178,36 @@ public:
 
     // TODO: falta el registro TWAMR
 
+};
 
-    // -------------------------------------------------------------------
-    // Otro estilo de programación: accedemos a los registros directamente
-    // -------------------------------------------------------------------
+
+
+/*!
+ *  \brief  Driver de TWI
+ */
+class TWI : public TWI_basic{
+public:
+
+    /// Enables TWI interface, definiendo la frecuencia del SCL a la 
+    /// que vamos a operar.
+    /// f_scl = frecuencia en kilohercios de SCL (tipica: 100 y 400 kHz).
+    /// f_clock = frecuencia a la que funciona el reloj del avr.
+    template <uint16_t f_scl, uint32_t f_clock = AVR_CLOCK_FREQUENCY_IN_HZ>
+    static void on()
+    {
+	enable_and_set_SCL_frequency_in_kHz<f_scl, f_clock>();
+    }
+
+    /// Turn off TWI.
+    static void off() {disable();}
+
+
     /// Enviamos una START condition.
-    // Observar que esta forma de implementarla, escribiendo 
-    // todos los bits de TWCR a la vez tiene el problema de
-    // que no permite al usuario enviar un start habilitando
-    // las interrupciones (bit TWIE). Es necesario hacer otra
-    // función start: start_con_interrupciones para hacerlo.
     static void send_start()
     {
-	TWCR =	(1 << TWEN)|	// enable(); (ver datasheet table 26-2)
-		(1 << TWINT)|	// start_next_operation();
-		(1 << TWSTA);	// generate_START_condition();
+	constexpr uint8_t mask = (1 << TWINT) | // start TWI
+				 (1 << TWSTA);	// send START
+	TWCR |= mask;
     }
 
     /// Enviamos una repeated START condition.
@@ -227,9 +235,9 @@ public:
     /// Enviamos una STOP condition.
     static void send_stop()
     {
-	TWCR =	(1 << TWEN)|	// enable(); (ver datasheet table 26-2)
-		(1 << TWINT)|	// start_next_operation();
-		(1 << TWSTO);	// generate_START_condition();
+	constexpr uint8_t mask = (1 << TWINT) | // start TWI
+				 (1 << TWSTO);	// stop
+	TWCR |= mask;
     }
 
     /// Devuelve distinto de cero si ha ido algo mal en el envío 
@@ -351,7 +359,7 @@ public:
 
     // Status register codes
     // ---------------------
-    // General TWI Master staus codes (table 26-3)
+    // General TWI Master staus codes (table 26-3/4)
     constexpr static uint8_t SRC_START = 0x08;  // START has been transmitted  
     constexpr static uint8_t SRC_REPEATED_START = 0x10;  // Repeated START has been transmitted
     constexpr static uint8_t SRC_ARBITRATION_LOST = 0x38;  // Arbitration lost
@@ -390,6 +398,17 @@ public:
     constexpr static uint8_t SRC_NO_STATE = 0xF8;  // No relevant state information available
     constexpr static uint8_t SRC_BUS_ERROR = 0x00;  // Bus error due to an illegal START or STOP condition
 
+private:
+    /// Enables TWI interface, definiendo la frecuencia del SCL a la 
+    /// que vamos a operar.
+    /// f_scl = frecuencia en kilohercios de SCL (tipica: 100 y 400 kHz).
+    /// f_clock = frecuencia a la que funciona el reloj del avr.
+    template <uint16_t f_scl, uint32_t f_clock = AVR_CLOCK_FREQUENCY_IN_HZ>
+    static void enable_and_set_SCL_frequency_in_kHz()
+    {
+	SCL_frequency_in_kHz<f_scl, f_clock>();
+	enable();
+    }
 
 };
 
@@ -496,8 +515,8 @@ inline void TWI::SCL_frequency_in_kHz<50u, 1000000uL>()
 
 
 struct TWI::Start{
-    Start() {TWI::send_start();}
-    ~Start() {TWI::send_stop();}
+    Start()	{TWI::send_start();}
+    ~Start()	{TWI::send_stop();}
 
     explicit operator bool() const {return !TWI::send_start_fail();}
 

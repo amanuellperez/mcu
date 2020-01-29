@@ -29,6 +29,8 @@
  *   - CONEXIONES:
  *	    Recordar conectar siempre el AVCC.
  *
+ *  - TODO: eliminar Register por las nuevas funciones.
+ *
  *   - HISTORIA:
  *           alp  - 26/07/2017 Escrito v0.0
  *		    29/01/2018 v0.1

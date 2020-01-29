@@ -50,12 +50,18 @@ bool TWI::receive_data_with_NACK(std::byte& x)
 
 uint8_t TWI::send(uint8_t address, std::byte x)
 {
-    send_byte(std::byte{address} << 1);    // address + write
+    // write = 0, luego basta con hacer un shift a la izda
+    std::byte SLA_W{address << 1};
+
+    send_byte(SLA_W);    
+    // AQUI: convertirlo en template <slave_address> y que
+    // se anote el error producido: nack al enviar sla_w.
     if (answer_send_address_NACK())
 	return 0;
 
     send_byte(x);
     if (answer_send_data_NACK())
+	// TODO: anotar error
 	return 0;
 
     return 1;

@@ -26,6 +26,7 @@ void print_in_binary(std::ostream& out, std::byte b)
     print_bit<6>(out, b);
     print_bit<5>(out, b);
     print_bit<4>(out, b);
+    print_bit<3>(out, b);
     print_bit<2>(out, b);
     print_bit<1>(out, b);
     print_bit<0>(out, b);

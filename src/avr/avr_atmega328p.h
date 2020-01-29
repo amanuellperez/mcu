@@ -29,6 +29,7 @@
  *      13/01/2019 v0.0
  *
  ****************************************************************************/
+
 namespace avr{
 
 // CONFIGURACIÓN DE LOS PINES
@@ -116,7 +117,8 @@ constexpr uint8_t BIT_MASK[29] = {
 // CONFIGURACIÓN DEL TWI
     constexpr uint8_t TWI_MASK_STATUS_BITS = 0xF8;
     constexpr uint8_t TWI_MASK_BIT_RATE_PRESCALER = 0x03;
-
+    constexpr uint8_t TWI_MASK_SLAVE_ADDRESS = 0xFE;
+    constexpr uint8_t TWI_POS_SLAVE_ADDRESS = 1;
 
 
 }// namespace

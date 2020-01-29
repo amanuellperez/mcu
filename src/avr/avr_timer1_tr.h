@@ -36,6 +36,7 @@
  *	+ El phase and frequency correct.
  *
  *  TODO: meter todas las funciones dentro de un .cpp
+ *  TODO: eliminar Register por las nuevas funciones.
  *
  ****************************************************************************/
 #include <limits>

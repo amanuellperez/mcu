@@ -19,5 +19,6 @@ LIB=atd
 
 
 include $(ATD_GENRULES)
+#include $(ALP_COMPRULES)
 
 

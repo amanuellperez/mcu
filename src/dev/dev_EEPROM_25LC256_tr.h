@@ -93,14 +93,16 @@ public:
     /// Devuelve el valor del bit Write-In-Process del status register.
     /// Indica si el chip está ocupado con una operación de escritura.
     static bool write_in_process(std::byte status_reg) 
-    {return atd::bit<WRITE_IN_PROCESS>::of(status_reg);}
+    //{return atd::bit<WRITE_IN_PROCESS>::of(status_reg);}
+    {return atd::is_one_bit<WRITE_IN_PROCESS>::of(status_reg);}
 
     /// Devuelve el valor del bit Write Enable Latch del status register.
     /// Indica el chip está habilitado para escribir o no. Este bit es el 
     /// que activa la instrucción write_enable() y lo desactiva
     /// write_disable().
     static bool write_enable_latch(std::byte status_reg)
-    {return atd::bit<WRITE_ENABLE_LATCH>::of(status_reg);}
+    //{return atd::bit<WRITE_ENABLE_LATCH>::of(status_reg);}
+    {return atd::is_one_bit<WRITE_ENABLE_LATCH>::of(status_reg);}
 
 
     // bits Block Protection

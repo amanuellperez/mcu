@@ -41,7 +41,7 @@ namespace atd{
 template <uint8_t pos, typename Int>
 void print_bit(std::ostream& out, Int x)
 {
-    if (atd::bit<pos>::of(x))
+    if (atd::is_one_bit<pos>::of(x))
 	out << '1';
     else 
 	out << '0';

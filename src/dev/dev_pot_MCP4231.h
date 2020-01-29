@@ -307,7 +307,7 @@ private:
 
 	std::byte res2 = avr::SPI::read();
 
-	return atd::concat_bytes(res1 & std::byte{0x01}, res2);
+	return atd::concat_bytes<uint16_t>(res1 & std::byte{0x01}, res2);
     }
 
     void write_cmd(uint8_t cmd)

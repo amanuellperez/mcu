@@ -164,8 +164,9 @@ private:
 template <>
 inline void Interrupt::enable_INT0<Interrupt::Tipo_INT01::when_is_zero>()
 {
-    atd::write_zero_bit<ISC01>(EICRA);
-    atd::write_zero_bit<ISC00>(EICRA);
+//    atd::write_zero_bit<ISC01>(EICRA);
+//    atd::write_zero_bit<ISC00>(EICRA);
+    atd::write_bits<ISC01, ISC00>::to<0,0>::in(EICRA);
 
     enable_INT0_comun();
 }
@@ -176,8 +177,9 @@ inline void Interrupt::enable_INT0<Interrupt::Tipo_INT01::when_is_zero>()
 template<>
 inline void Interrupt::enable_INT0<Interrupt::Tipo_INT01::when_change>()
 {
-    atd::write_zero_bit<ISC01>(EICRA);
-    atd::write_one_bit <ISC00>(EICRA);
+//    atd::write_zero_bit<ISC01>(EICRA);
+//    atd::write_one_bit <ISC00>(EICRA);
+    atd::write_bits<ISC01, ISC00>::to<0,1>::in(EICRA);
 
     enable_INT0_comun();
 }
@@ -186,8 +188,9 @@ inline void Interrupt::enable_INT0<Interrupt::Tipo_INT01::when_change>()
 template<>
 inline void Interrupt::enable_INT0<Interrupt::Tipo_INT01::when_falling_edge>()
 {
-    atd::write_one_bit<ISC01>(EICRA);
-    atd::write_zero_bit<ISC00>(EICRA);
+//    atd::write_one_bit<ISC01>(EICRA);
+//    atd::write_zero_bit<ISC00>(EICRA);
+    atd::write_bits<ISC01, ISC00>::to<1,0>::in(EICRA);
 
     enable_INT0_comun();
 }
@@ -196,8 +199,9 @@ inline void Interrupt::enable_INT0<Interrupt::Tipo_INT01::when_falling_edge>()
 template<>
 inline void Interrupt::enable_INT0<Interrupt::Tipo_INT01::when_rising_edge>()
 {
-    atd::write_one_bit<ISC01>(EICRA);
-    atd::write_one_bit<ISC00>(EICRA);
+//    atd::write_one_bit<ISC01>(EICRA);
+//    atd::write_one_bit<ISC00>(EICRA);
+    atd::write_bits<ISC01, ISC00>::to<1,1>::in(EICRA);
 
     enable_INT0_comun();
 }
@@ -223,178 +227,249 @@ inline void Interrupt::enable_INT0<Interrupt::Tipo_INT01::when_rising_edge>()
 template<>
 inline void Interrupt::enable_pin<2>()
 {
-    atd::write_one_bit<PCIE2>(PCICR);
-    atd::write_one_bit<PCINT16>(PCMSK2);
+//    atd::write_one_bit<PCIE2>(PCICR);
+//    atd::write_one_bit<PCINT16>(PCMSK2);
+
+    atd::write_bit<PCIE2>::to<1>::in(PCICR);
+    atd::write_bit<PCINT16>::to<1>::in(PCMSK2);
+
     enable_all_interrupts();
 }
 
 template<>
 inline void Interrupt::enable_pin<3>()
 {
-    atd::write_one_bit<PCIE2>(PCICR);
-    atd::write_one_bit<PCINT17>(PCMSK2);
+//    atd::write_one_bit<PCIE2>(PCICR);
+//    atd::write_one_bit<PCINT17>(PCMSK2);
+
+    atd::write_bit<PCIE2>::to<1>::in(PCICR);
+    atd::write_bit<PCINT17>::to<1>::in(PCMSK2);
+
     enable_all_interrupts();
 }
 
 template<>
 inline void Interrupt::enable_pin<4>()
 {
-    atd::write_one_bit<PCIE2>(PCICR);
-    atd::write_one_bit<PCINT18>(PCMSK2);
+//    atd::write_one_bit<PCIE2>(PCICR);
+//    atd::write_one_bit<PCINT18>(PCMSK2);
+
+    atd::write_bit<PCIE2>::to<1>::in(PCICR);
+    atd::write_bit<PCINT18>::to<1>::in(PCMSK2);
+
     enable_all_interrupts();
 }
 
 template<>
 inline void Interrupt::enable_pin<5>()
 {
-    atd::write_one_bit<PCIE2>(PCICR);
-    atd::write_one_bit<PCINT19>(PCMSK2);
+//    atd::write_one_bit<PCIE2>(PCICR);
+//    atd::write_one_bit<PCINT19>(PCMSK2);
+
+    atd::write_bit<PCIE2>::to<1>::in(PCICR);
+    atd::write_bit<PCINT19>::to<1>::in(PCMSK2);
+
     enable_all_interrupts();
 }
 
 template<>
 inline void Interrupt::enable_pin<6>()
 {
-    atd::write_one_bit<PCIE2>(PCICR);
-    atd::write_one_bit<PCINT20>(PCMSK2);
+//    atd::write_one_bit<PCIE2>(PCICR);
+//    atd::write_one_bit<PCINT20>(PCMSK2);
+
+    atd::write_bit<PCIE2>::to<1>::in(PCICR);
+    atd::write_bit<PCINT20>::to<1>::in(PCMSK2);
+
     enable_all_interrupts();
 }
 
 template<>
 inline void Interrupt::enable_pin<9>()
 {
-    atd::write_one_bit<PCIE0>(PCICR);
-    atd::write_one_bit<PCINT6>(PCMSK0);
+//    atd::write_one_bit<PCIE0>(PCICR);
+//    atd::write_one_bit<PCINT6>(PCMSK0);
+
+    atd::write_bit<PCIE0>::to<1>::in(PCICR);
+    atd::write_bit<PCINT6>::to<1>::in(PCMSK0);
+
     enable_all_interrupts();
 }
 
 template<>
 inline void Interrupt::enable_pin<10>()
 {
-    atd::write_one_bit<PCIE0>(PCICR);
-    atd::write_one_bit<PCINT7>(PCMSK0);
+//    atd::write_one_bit<PCIE0>(PCICR);
+//    atd::write_one_bit<PCINT7>(PCMSK0);
+
+    atd::write_bit<PCIE0>::to<1>::in(PCICR);
+    atd::write_bit<PCINT7>::to<1>::in(PCMSK0);
     enable_all_interrupts();
 }
 
 template<>
 inline void Interrupt::enable_pin<11>()
 {
-    atd::write_one_bit<PCIE2>(PCICR);
-    atd::write_one_bit<PCINT21>(PCMSK2);
+//    atd::write_one_bit<PCIE2>(PCICR);
+//    atd::write_one_bit<PCINT21>(PCMSK2);
+
+    atd::write_bit<PCIE2>::to<1>::in(PCICR);
+    atd::write_bit<PCINT21>::to<1>::in(PCMSK2);
     enable_all_interrupts();
 }
 
 template<>
 inline void Interrupt::enable_pin<12>()
 {
-    atd::write_one_bit<PCIE2>(PCICR);
-    atd::write_one_bit<PCINT22>(PCMSK2);
+//    atd::write_one_bit<PCIE2>(PCICR);
+//    atd::write_one_bit<PCINT22>(PCMSK2);
+
+    atd::write_bit<PCIE2>::to<1>::in(PCICR);
+    atd::write_bit<PCINT22>::to<1>::in(PCMSK2);
     enable_all_interrupts();
 }
 
 template<>
 inline void Interrupt::enable_pin<13>()
 {
-    atd::write_one_bit<PCIE2>(PCICR);
-    atd::write_one_bit<PCINT23>(PCMSK2);
+//    atd::write_one_bit<PCIE2>(PCICR);
+//    atd::write_one_bit<PCINT23>(PCMSK2);
+
+    atd::write_bit<PCIE2>::to<1>::in(PCICR);
+    atd::write_bit<PCINT23>::to<1>::in(PCMSK2);
     enable_all_interrupts();
 }
 
 template<>
 inline void Interrupt::enable_pin<14>()
 {
-    atd::write_one_bit<PCIE0>(PCICR);
-    atd::write_one_bit<PCINT0>(PCMSK0);
+//    atd::write_one_bit<PCIE0>(PCICR);
+//    atd::write_one_bit<PCINT0>(PCMSK0);
+
+    atd::write_bit<PCIE0>::to<1>::in(PCICR);
+    atd::write_bit<PCINT0>::to<1>::in(PCMSK0);
     enable_all_interrupts();
 }
 
 template<>
 inline void Interrupt::enable_pin<15>()
 {
-    atd::write_one_bit<PCIE0>(PCICR);
-    atd::write_one_bit<PCINT1>(PCMSK0);
+//    atd::write_one_bit<PCIE0>(PCICR);
+//    atd::write_one_bit<PCINT1>(PCMSK0);
+
+    atd::write_bit<PCIE0>::to<1>::in(PCICR);
+    atd::write_bit<PCINT1>::to<1>::in(PCMSK0);
+
     enable_all_interrupts();
 }
 
 template<>
 inline void Interrupt::enable_pin<16>()
 {
-    atd::write_one_bit<PCIE0>(PCICR);
-    atd::write_one_bit<PCINT2>(PCMSK0);
+//    atd::write_one_bit<PCIE0>(PCICR);
+//    atd::write_one_bit<PCINT2>(PCMSK0);
+
+    atd::write_bit<PCIE0>::to<1>::in(PCICR);
+    atd::write_bit<PCINT2>::to<1>::in(PCMSK0);
     enable_all_interrupts();
 }
 
 template<>
 inline void Interrupt::enable_pin<17>()
 {
-    atd::write_one_bit<PCIE0>(PCICR);
-    atd::write_one_bit<PCINT3>(PCMSK0);
+//    atd::write_one_bit<PCIE0>(PCICR);
+//    atd::write_one_bit<PCINT3>(PCMSK0);
+
+    atd::write_bit<PCIE0>::to<1>::in(PCICR);
+    atd::write_bit<PCINT3>::to<1>::in(PCMSK0);
     enable_all_interrupts();
 }
 
 template<>
 inline void Interrupt::enable_pin<18>()
 {
-    atd::write_one_bit<PCIE0>(PCICR);
-    atd::write_one_bit<PCINT4>(PCMSK0);
+//    atd::write_one_bit<PCIE0>(PCICR);
+//    atd::write_one_bit<PCINT4>(PCMSK0);
+
+    atd::write_bit<PCIE0>::to<1>::in(PCICR);
+    atd::write_bit<PCINT4>::to<1>::in(PCMSK0);
     enable_all_interrupts();
 }
 
 template<>
 inline void Interrupt::enable_pin<19>()
 {
-    atd::write_one_bit<PCIE0>(PCICR);
-    atd::write_one_bit<PCINT5>(PCMSK0);
+//    atd::write_one_bit<PCIE0>(PCICR);
+//    atd::write_one_bit<PCINT5>(PCMSK0);
+
+    atd::write_bit<PCIE0>::to<1>::in(PCICR);
+    atd::write_bit<PCINT5>::to<1>::in(PCMSK0);
     enable_all_interrupts();
 }
 
 template<>
 inline void Interrupt::enable_pin<23>()
 {
-    atd::write_one_bit<PCIE1>(PCICR);
-    atd::write_one_bit<PCINT8>(PCMSK1);
+//    atd::write_one_bit<PCIE1>(PCICR);
+//    atd::write_one_bit<PCINT8>(PCMSK1);
+
+    atd::write_bit<PCIE1>::to<1>::in(PCICR);
+    atd::write_bit<PCINT8>::to<1>::in(PCMSK1);
     enable_all_interrupts();
 }
 
 template<>
 inline void Interrupt::enable_pin<24>()
 {
-    atd::write_one_bit<PCIE1>(PCICR);
-    atd::write_one_bit<PCINT9>(PCMSK1);
+//    atd::write_one_bit<PCIE1>(PCICR);
+//    atd::write_one_bit<PCINT9>(PCMSK1);
+
+    atd::write_bit<PCIE1>::to<1>::in(PCICR);
+    atd::write_bit<PCINT9>::to<1>::in(PCMSK1);
     enable_all_interrupts();
 }
 
 template<>
 inline void Interrupt::enable_pin<25>()
 {
-    atd::write_one_bit<PCIE1>(PCICR);
-    atd::write_one_bit<PCINT10>(PCMSK1);
+//    atd::write_one_bit<PCIE1>(PCICR);
+//    atd::write_one_bit<PCINT10>(PCMSK1);
+
+    atd::write_bit<PCIE1>::to<1>::in(PCICR);
+    atd::write_bit<PCINT10>::to<1>::in(PCMSK1);
     enable_all_interrupts();
 }
 
 template<>
 inline void Interrupt::enable_pin<26>()
 {
-    atd::write_one_bit<PCIE1>(PCICR);
-    atd::write_one_bit<PCINT11>(PCMSK1);
+//    atd::write_one_bit<PCIE1>(PCICR);
+//    atd::write_one_bit<PCINT11>(PCMSK1);
+
+    atd::write_bit<PCIE1>::to<1>::in(PCICR);
+    atd::write_bit<PCINT11>::to<1>::in(PCMSK1);
     enable_all_interrupts();
 }
 
 template<>
 inline void Interrupt::enable_pin<27>()
 {
-    atd::write_one_bit<PCIE1>(PCICR);
-    atd::write_one_bit<PCINT12>(PCMSK1);
+//    atd::write_one_bit<PCIE1>(PCICR);
+//    atd::write_one_bit<PCINT12>(PCMSK1);
 
+    atd::write_bit<PCIE1>::to<1>::in(PCICR);
+    atd::write_bit<PCINT12>::to<1>::in(PCMSK1);
     enable_all_interrupts();
 }
 
 template<>
 inline void Interrupt::enable_pin<28>()
 {
-    atd::write_one_bit<PCIE1>(PCICR);
-    atd::write_one_bit<PCINT13>(PCMSK1);
+//    atd::write_one_bit<PCIE1>(PCICR);
+//    atd::write_one_bit<PCINT13>(PCMSK1);
 
+    atd::write_bit<PCIE1>::to<1>::in(PCICR);
+    atd::write_bit<PCINT13>::to<1>::in(PCMSK1);
     enable_all_interrupts();
 }
 

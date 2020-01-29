@@ -43,6 +43,8 @@
  *
  *	Ejemplo de driver: ver el potenciómetro MCP4231.
  *
+ *  - TODO: eliminar Register por las nuevas funciones.
+ *
  *  - HISTORIA:
  *    A.Manuel L.Perez
  *	10/04/2018 v0.0
