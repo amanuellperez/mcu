@@ -451,21 +451,21 @@ inline void Timer0::external_clock_rising_edge()
 inline void Timer0::enable_overflow_interrupt()
 {
     atd::Register(TIMSK0).write_one_bit<TOIE0> ();
-    Interrupt::enable_all_interrupts();
+    avr::enable_all_interrupts();
 }
 
 
 inline void Timer0::enable_output_compare_A_match_interrupt()
 {
     atd::Register(TIMSK0).write_one_bit<OCIE0A> ();
-    Interrupt::enable_all_interrupts();
+    avr::enable_all_interrupts();
 }
 
 
 inline void Timer0::enable_output_compare_B_match_interrupt()
 {
     atd::Register(TIMSK0).write_one_bit<OCIE0B> ();
-    Interrupt::enable_all_interrupts();
+    avr::enable_all_interrupts();
 }
 
 

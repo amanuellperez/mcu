@@ -1,5 +1,5 @@
-SOURCES= avr_SPI.cpp 	\
-		 avr_TWI.cpp	
+SOURCES= avr_SPI.cpp \
+		 avr_TWI.cpp
 
 
 INCS= avr_ADC.h		\

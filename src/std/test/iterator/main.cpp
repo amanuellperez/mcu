@@ -46,6 +46,33 @@ void test_reverse_iterator()
 
 }
 
+template <typename It>
+void test_advance(It it, int n)
+{
+    It p = it;
+    It q = it;
+    std::advance(p, n);
+    mtd::advance(q, n);
+    std::cout << *p << "; " << *q << '\n';
+    CHECK_TRUE(*p == *q, "advance");
+
+}
+
+void test_advance()
+{
+    test::interfaz("advance");
+
+    { // random iterator
+    int x[10];
+    for (int i = 0; i < 10; ++i)
+	x[i] = i;
+    test_advance(x, 2);
+    }
+    // TODO: probar bidirectional e input iterator!!!
+    // No puedo usar std::list ya que su tipo no es un mtd::bidirectional_it.
+}
+
+
 
 int main()
 {
@@ -53,6 +80,8 @@ try{
     test::header("std_iterator.h");
 
     test_reverse_iterator();
+    test_advance();
+
 
 }catch(const std::exception& e){
     std::cerr << e.what() << '\n';

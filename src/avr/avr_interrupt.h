@@ -50,19 +50,19 @@
 
 
 namespace avr{
+/// Habilita el uso de interrupciones. Además, recordar habilitar
+/// cada interrupción por separado.
+inline void enable_all_interrupts() {sei();}
+
+/// Deshabilita el uso de interrupciones
+inline void disable_all_interrupts() {cli();}
+
 /*!
  *  \brief  Interfaz para manejar interrupciones
  *
  */
 class Interrupt{
 public:
-    /// Habilita el uso de interrupciones. Además, recordar habilitar
-    /// cada interrupción por separado.
-    static void enable_all_interrupts() {sei();}
-
-    /// Deshabilita el uso de interrupciones
-    static void disable_all_interrupts() {cli();}
-
     // Tipos de interrupciones que pueden ser la INT0 y la INT1
     enum class Tipo_INT01
     {			// se genera la interrupción cuando:

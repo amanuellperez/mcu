@@ -117,8 +117,91 @@ constexpr uint8_t BIT_MASK[29] = {
 // CONFIGURACIÓN DEL TWI
     constexpr uint8_t TWI_MASK_STATUS_BITS = 0xF8;
     constexpr uint8_t TWI_MASK_BIT_RATE_PRESCALER = 0x03;
-    constexpr uint8_t TWI_MASK_SLAVE_ADDRESS = 0xFE;
-    constexpr uint8_t TWI_POS_SLAVE_ADDRESS = 1;
+    // bits of slave address: [1,7]
+    constexpr uint8_t TWI_SLAVE_ADDRESS_BIT0 = 1;
+    constexpr uint8_t TWI_SLAVE_ADDRESS_BITn = 7;
+
+    // TWI Status register codes
+    // -------------------------
+    // START has been transmitted  
+    constexpr static uint8_t TWI_START = 0x08; 
+    // Repeated START has been transmitted
+    constexpr static uint8_t TWI_REPEATED_START = 0x10;  
+    // Arbitration lost in SLA+R/W or data bytes
+    constexpr static uint8_t TWI_ARBITRATION_LOST = 0x38;
+
+
+    // TWI Master Transmitter status codes (table 26-3)
+    // ------------------------------------------------
+    // SLA+W has been tramsmitted and ACK received
+    constexpr static uint8_t TWI_MTM_ADDRESS_ACK = 0x18;
+    // SLA+W has been tramsmitted and NACK received 
+    constexpr static uint8_t TWI_MTM_ADDRESS_NACK = 0x20;
+    // Data byte has been tramsmitted and ACK received
+    constexpr static uint8_t TWI_MTM_DATA_ACK = 0x28;
+    // Data byte has been tramsmitted and NACK received 
+    constexpr static uint8_t TWI_MTM_DATA_NACK = 0x30;
+
+    // TWI Master Receiver status codes (table 26-4)
+    // ---------------------------------------------
+    // SLA+R has been tramsmitted and ACK received
+    constexpr static uint8_t TWI_MRM_ADDRESS_ACK = 0x40;
+    // SLA+R has been tramsmitted and NACK received
+    constexpr static uint8_t TWI_MRM_ADDRESS_NACK = 0x48;
+    // Data byte has been received and ACK tramsmitted
+    constexpr static uint8_t TWI_MRM_DATA_ACK = 0x50;
+    // Data byte has been received and NACK tramsmitted
+    constexpr static uint8_t TWI_MRM_DATA_NACK = 0x58;
+   
+    // TWI Slave Transmitter status codes (table 26-5)
+    // -----------------------------------------------
+    // Own SLA+R has been received; ACK has been returned
+    constexpr static uint8_t TWI_STM_RECEIVED_SLA_R = 0xA8;
+    // Arbitration lost in SLA+R/W as Master; own SLA+R has been received; ACK
+    // has been returned
+    constexpr static uint8_t TWI_STM_ARBITRATION_LOST = 0xB0;
+    // Data byte in TWDR has been transmitted; ACK has been received
+    constexpr static uint8_t TWI_STM_DATA_ACK = 0xB8;
+    // Data byte in TWDR has been transmitted; NOT ACK has been received
+    constexpr static uint8_t TWI_STM_DATA_NACK = 0xC0;
+    // Last data byte in TWDR has been transmitted. ACK has been received
+    constexpr static uint8_t TWI_STM_DATA_LAST_BYTE = 0xC8;
+
+    // TWI Slave Receiver status codes (table 26-6)
+    // --------------------------------------------
+    // Own SLA+W has been received ACK has been returned
+    constexpr static uint8_t TWI_SRM_SLA_W = 0x60;
+    // Arbitration lost in SLA+R/W as Master.
+    // own SLA+W has been received; ACK has been returned
+    constexpr static uint8_t TWI_SRM_ARBITRATION_LOST_SLA_W = 0x68;
+    // General call address has been received; ACK has been returned
+    constexpr static uint8_t TWI_SRM_GENERAL_CALL = 0x70;
+    // Arbitration lost in SLA+R/W as Master;
+    // General call address has been received; ACK has been returned
+    constexpr static uint8_t TWI_SRM_ARBITRATION_LOST_GENERAL_CALL= 0x78;
+    // Previously addressed with own SLA+W; data has been received.
+    // ACK has been returned.
+    constexpr static uint8_t TWI_SRM_SLA_W_DATA_ACK = 0x80;
+    // Previously addressed with own SLA+W; data has been received; NOT ACK has
+    // been returned
+    constexpr static uint8_t TWI_SRM_SLA_W_DATA_NACK = 0x88;
+    // Previously addressed with general call.
+    // Data has been received. ACK has been returned.
+    constexpr static uint8_t TWI_SRM_GENERAL_CALL_DATA_ACK = 0x90;
+    // Previously addressed with general call.
+    // Data has been received. NOT ACK has been returned.
+    constexpr static uint8_t TWI_SRM_GENERAL_CALL_DATA_NACK = 0x98;
+    // A STOP condition or repeated START condition has been received while 
+    // still addressed as Slave
+    constexpr static uint8_t TWI_SRM_STOP_OR_REPEATED_START = 0xA0;
+
+    // TWI Miscellaneous status codes (table 26-7)
+    // -------------------------------------------
+    // No relevant state information available. El hardware está ejecutando
+    // la servicio solicitado.
+    constexpr static uint8_t TWI_RUNNING = 0xF8;
+    // Bus error due to an illegal START or STOP condition
+    constexpr static uint8_t TWI_BUS_ERROR = 0x00;  
 
 
 }// namespace

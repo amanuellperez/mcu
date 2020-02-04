@@ -360,27 +360,27 @@ inline void Timer1::input_capture_register(Timer1::counter_type x)
 inline void Timer1::enable_overflow_interrupt()
 {
     atd::Register(TIMSK1).write_one_bit<TOIE1> ();
-    Interrupt::enable_all_interrupts();
+    avr::enable_all_interrupts();
 }
 
 inline void Timer1::enable_input_capture_interrupt()
 {
     atd::Register(TIMSK1).write_one_bit<ICIE1> ();
-    Interrupt::enable_all_interrupts();
+    avr::enable_all_interrupts();
 }
 
 
 inline void Timer1::enable_output_compare_A_match_interrupt()
 {
     atd::Register(TIMSK1).write_one_bit<OCIE1A> ();
-    Interrupt::enable_all_interrupts();
+    avr::enable_all_interrupts();
 }
 
 
 inline void Timer1::enable_output_compare_B_match_interrupt()
 {
     atd::Register(TIMSK1).write_one_bit<OCIE1B> ();
-    Interrupt::enable_all_interrupts();
+    avr::enable_all_interrupts();
 }
 
 /*!

@@ -1,104 +1,81 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez <amanuel.lperez@gmail.com>
-//
-// This file is part of the MCU++ Library.
-//
-// MCU++ Library is a free library: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #include "avr_TWI.h"
 
 namespace avr{
 
-
-bool TWI::receive_data_with_ACK(std::byte& x)
+uint8_t TWI::send_start()
 {
-    TWCR =  (1 << TWEN)|	// enable(); (ver datasheet table 26-2)
-	    (1 << TWINT)| 	// start_next_operation();
-	    (1 << TWEA);	// generate_ACK();
+    transmit_start();
 
-    if (answer_receive_data_with_ACK_fail())
-	return false;
+    wait_until_finished_its_current_job();
 
-    x = std::byte{TWDR};
-    return true;
-}
-
-
-bool TWI::receive_data_with_NACK(std::byte& x)
-{
-    TWCR =	(1 << TWEN)|	// enable(); (ver datasheet table 26-2)
-	    (1 << TWINT); 	// start_next_operation();
-
-    if (answer_receive_data_with_NACK_fail())
-	return false;
-
-    x = std::byte{TWDR};
-
-    return true;
-}
-
-
-uint8_t TWI::send(uint8_t address, std::byte x)
-{
-    // write = 0, luego basta con hacer un shift a la izda
-    std::byte SLA_W{address << 1};
-
-    send_byte(SLA_W);    
-    // AQUI: convertirlo en template <slave_address> y que
-    // se anote el error producido: nack al enviar sla_w.
-    if (answer_send_address_NACK())
+    if (status() != avr::TWI_START){
+	state_ = iostate::send_start_fail;
 	return 0;
-
-    send_byte(x);
-    if (answer_send_data_NACK())
-	// TODO: anotar error
-	return 0;
+    }
 
     return 1;
 }
 
 
-uint8_t TWI::send(uint8_t address, const std::byte* data, uint8_t n)
+uint8_t TWI::send_repeated_start()
 {
-    send_byte(std::byte{address} << 1);    // address + write
-    if (answer_send_address_NACK())
-	return 0;
+    transmit_repeated_start();
 
-    for (uint8_t i = 0; i < n; ++i, ++data){
-	send_byte(data[i]);
-	if (answer_send_data_NACK())
-	    return i;
+    wait_until_finished_its_current_job();
+
+    if (status() != avr::TWI_REPEATED_START){
+	state_ = iostate::send_repeated_start_fail;
+	return 0;
     }
 
-    return n;
+    return 1;
 }
 
 
 
-uint8_t TWI::receive(uint8_t address, std::byte* data, uint8_t n)
+uint8_t TWI::send_data(const std::byte* data, uint8_t n)
 {
-    send_byte((std::byte{address} << 1) | std::byte{0x01}); // address + read 
+    uint8_t i = 0;
+    for (; i < n; ++i){
 
-    if (answer_receive_address_NACK())
-	return 0;
-
-    for (uint8_t i = 0; i < n - 1; ++i, ++data){
-	if(!receive_data_with_ACK(*data))
-	    return i;
+	transmit_byte(data[i]);
+	wait_until_finished_its_current_job();
+	
+	if (status() != avr::TWI_MTM_DATA_ACK){
+	    state_ = iostate::send_data_fail;
+	    break;
+	}
     }
 
-    if(!receive_data_with_NACK(*data))
-	return n - 1;
+    return i;
+}
+
+
+uint8_t TWI::receive_data(std::byte* data, uint8_t n)
+{
+    uint8_t i = 0;
+    for (; i < n - 1; ++i){
+	start_receive_data_with_ACK();
+
+	wait_until_finished_its_current_job();
+	
+	if (status() != avr::TWI_MRM_DATA_ACK){
+	    state_ = iostate::receive_data_fail;
+	    break;
+	}
+	data[i] = TWI_basic::data();
+    }
+
+    // último byte con NACK
+    start_receive_data_with_NACK();
+
+    wait_until_finished_its_current_job();
+    
+    if (status() != avr::TWI_MRM_DATA_NACK){
+	state_ = iostate::receive_data_fail;
+	return n-1;
+    }
+    data[i] = TWI_basic::data();
 
     return n;
 }

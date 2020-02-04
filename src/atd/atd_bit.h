@@ -54,6 +54,7 @@
  *  28/01/20: write_bits (más genérica que el resto, muy eficiente y 
  *			  muy expresiva).
  *	      is_one_bit/is_zero_bit
+ *	      write_range_bits
  *
  ****************************************************************************/
 #include <stdint.h> // uint8_t
@@ -114,7 +115,7 @@ constexpr inline Int concat_bytes(Byte b0, Tail... b1_bn)
 // bitmask
 // -------
 template <uint8_t i0, uint8_t i1, uint8_t k, typename Int>
-constexpr inline Int __bitmask(Int mask)
+constexpr inline Int __make_range_bitmask(Int mask)
 {
     if constexpr (i0 <= k and k <= i1)
 	mask |= (Int{1} << k);
@@ -122,30 +123,30 @@ constexpr inline Int __bitmask(Int mask)
     if constexpr (k == i1)
 	return mask;
     else
-	return __bitmask<i0, i1, k + 1>(mask);
+	return __make_range_bitmask<i0, i1, k + 1>(mask);
 }
 
 
-// Devuelve una bitmask con los bits indicados.
-// Ejemplo: uint16_t mask = atd::bitmask<10,12, uint16_t>();
+// Devuelve una bitmask contigua con los bits indicados.
+// Ejemplo: uint16_t mask = atd::make_range_bitmask<10,12, uint16_t>();
 //	    Devuelve mask = 0x1C00;
 template <uint8_t i0, uint8_t i1, typename Int>
-constexpr inline Int bitmask()
+constexpr inline Int make_range_bitmask()
 {
     Int mask{0};
 
-    return __bitmask<i0, i1, 0>(mask);
+    return __make_range_bitmask<i0, i1, 0>(mask);
 }
 
 
 template <uint8_t i0, uint8_t i1, typename Int>
-struct __Mask_of_bits{
-    static constexpr Int mask = bitmask<i0, i1, Int>();
+struct __Range_bitmask{
+    static constexpr Int mask = make_range_bitmask<i0, i1, Int>();
     static constexpr uint8_t pos = i0; // syntactic sugar
 
     Int& reg;
 
-    constexpr __Mask_of_bits(Int& reg0) : reg{reg0} { }
+    constexpr __Range_bitmask(Int& reg0) : reg{reg0} { }
 
     // get_bits
     constexpr operator Int() const 
@@ -161,10 +162,10 @@ struct __Mask_of_bits{
 
 
 /*!
- *  \brief Working with masks.
- *
+ *  \brief Contiguous bitmask.
+ *  
  *  Example:
- *	constexpr atd::Mask_of_bits<2,6, uint8_t> mask; // mask bits 2-6
+ *	constexpr atd::Range_bitmask<2,6, uint8_t> mask; // mask bits 2-6
  *	uint8_t x = 0x35;
  *	uint8_t res = mask(x); // = get_bits_2_to_6_of(x);
  *
@@ -172,9 +173,9 @@ struct __Mask_of_bits{
  *
  */
 template <uint8_t i0, uint8_t i1, typename Int>
-struct Mask_of_bits{
-    constexpr __Mask_of_bits<i0, i1, Int> operator()(Int& reg) const
-    { return __Mask_of_bits<i0, i1, Int>{reg}; }
+struct Range_bitmask{
+    constexpr __Range_bitmask<i0, i1, Int> operator()(Int& reg) const
+    { return __Range_bitmask<i0, i1, Int>{reg}; }
 };
 
 
@@ -266,6 +267,9 @@ struct write_bits{
 }// namespace
 
 
+
+
+
 // Si queremos escribir varios bits, en plural
 template <int... bitpos>
 using write_bits = __atd::write_bits<bitpos...>;
@@ -273,6 +277,35 @@ using write_bits = __atd::write_bits<bitpos...>;
 // Si solo queremos escribir 1 bit en singular (syntactic sugar)
 template <int... bitpos>
 using write_bit = __atd::write_bits<bitpos...>;
+
+
+
+/*!
+ *  \brief  Escribimos un rango de bits 
+ *
+ *  Ejemplo:
+ *	// escribimos los bits [3,5] de x = res
+ *	atd::write_range_bits<3,5>::to<res>::in(x);
+ *
+ *	Escribe `res` en los bits [3,5] de x.
+ *
+ */
+template <int i_0, int i_n>
+struct write_range_bits{
+    template <auto res0>
+    struct to{
+	template <typename Int2>
+	static constexpr void in(Int2& x)
+	{
+	    using Int = std::remove_cv_t<Int2>;
+	    
+	    constexpr Int mask = make_range_bitmask<i_0, i_n, Int>();
+	    constexpr Int res = (Int{res0} << i_0) & mask;
+
+	    x = (x & ~mask) | res;
+	}
+    };
+};
 
 
 /*!
@@ -286,7 +319,6 @@ template <int pos>
 struct is_one_bit{
     template <typename Int>
     static bool of(const Int& x){
-//    static bool of_register(const Int& x){
 	return static_cast<bool>(x & (Int{1} << pos));
     }
 };
@@ -299,17 +331,13 @@ template <int pos>
 struct is_zero_bit{
     template <typename Int>
     static bool of(const Int& x){
-    //static bool of_register(const Int& x){
 	return !static_cast<bool>(x & (Int{1} << pos));
     }
 };
 
 
 
-// TODO: borrar estas funciones. Son las antiguas. (28/01/2020)
-// Dejar una de ejemplo (para ver como hacer un for en metaprogramming)
-///// Escribimos un 1 en las posiciones indicadas.
-///// Ejemplo: write_one_bit<1,3>(x); // escribe un 1 en los bits 1 y 3 de x
+// Ejemplo (para ver como hacer un for en metaprogramming)
 //template<int... pos, typename Int>
 //inline constexpr void write_one_bit(Int& i)
 //{
@@ -317,131 +345,7 @@ struct is_zero_bit{
 //    expand{0,
 //	    ((i |= (Int{1} << pos)), 0)...};
 //}
-//
-///// Escribimos un 0 en las posiciones indicadas.
-///// Ejemplo: write_zero_bit<1,3>(x); // escribe un 0 en los bits 1 y 3 de x
-//template<int... pos, typename Int>
-//inline constexpr void write_zero_bit(Int& i)
-//{
-//    using expand = int[];
-//    expand{0,
-//	    ((i &= ~(Int{1} << pos)), 0)...};
-//
-//}
-//
-//
-///// Cambiamos los bits de las posiciones indicadas, de 0 -> 1 y de 1 -> 0.
-///// Ejemplo: flip_bit<1,3>(x); // cambia los bits 1 y 3 de x.
-//template<int... pos, typename Int>
-//inline constexpr void flip_bit(Int& i)
-//{
-//    using expand = int[];
-//    expand{0,
-//	    ((i ^= (Int{1} << pos)), 0)...};
-//
-////	return i;
-//}
 
-// Otra forma de hacerlo: 
-// ----------------------
-// se llamaria set_bits_b(x, 1, 3, 5):
-//
-//template <typename Int, typename...Bit_ofs>
-//constexpr auto set_bits_b(Int i, Bit_ofs...bits)
-//{
-//    using expand = int[];
-//    void(expand{0,
-//	((i |= (Int(1) << bits)),0)...});
-//
-//    return i;
-//}
-
-
-//    /// ¿el bit es cero?. Sinónimo: is_low.
-//    template<typename T>
-//    bool is_zero(T& x, uint8_t p)
-//    {return !bit(x,p);}
-//
-//
-//    /// ¿el bit es low?. Sinónimo: is_zero.
-//    template<typename T>
-//    bool is_low(T& x, uint8_t p)
-//    {return is_zero(x, p);}
-
-
-
-
-// cuando el tipo T es const, la reference tiene que ser const!!!
-//template<typename T>
-//using Reference_type = std::conditional_t<std::is_const_v<T>, 
-//			    const T&, T&>;
-
-//template <uint8_t pos, typename Int>
-//class Bit_of{
-//public:
-////    using Ref = Reference_type<Int>;
-//
-//    constexpr explicit Bit_of(Int& x) : x_{x} {}
-//
-//    constexpr operator bool() const 
-//    { return (x_ & (Int{1} << pos)) != Int{0};}
-//
-//    // s = true ==> set bit
-//    // s = false ==> clear bit
-//    constexpr void operator=(bool s)
-//    {
-//	if (s) set();
-//	else clear();
-//    }
-//
-//    constexpr void set()    { x_ |= bitmask0<pos, Int>(); }
-//    constexpr void clear()  { x_ &= bitmask1<pos, Int>(); }
-//
-//private:
-//    Int& x_;	
-//};
-//
-//
-//template <uint8_t pos>
-//struct bit{
-////    /// Nos dice si el bit que ocupa la posición pos es 0 ó 1.
-////    template <typename Int>
-////    constexpr static bool of(Int x)
-////    { return static_cast<bool>(x & (Int{1} << pos)); }
-//
-//    /// Nos dice si el bit que ocupa la posición pos es 0 ó 1.
-//    template <typename Int>
-//    constexpr static Bit_of<pos, Int> of(Int& x)
-//    { return Bit_of<pos, Int>{x};}
-//
-//    template <typename Int>
-//    constexpr static Bit_of<pos, const Int> of(const Int& x)
-//    { return Bit_of<pos, const Int>{x};}
-//};
-//
-///// Devuelve x con todos los bits 0 menos el bit 'pos'.
-//TODO: borrame. No sé para qué era esta función. Borrarla.
-//template <uint8_t pos, typename Int>
-//constexpr inline Int bitmask0(Int x)
-//{ return x & (Int{1} << pos); }
-
-///// Devuelve un Int con todo 0 salvo el bit 'pos' que será 1.
-//template <uint8_t pos, typename Int>
-//constexpr inline Int bitmask0()
-//{ return (Int{1} << pos); }
-//
-///// Devuelve un Int con todo 1 salvo el bit 'pos' que será 0
-//// REVISAR:
-//// Da un warning de que estoy intentando hacer una conversión de signed a
-//// unsigned. Como no encuentro donde cambio la implementación, confío que el
-//// compilador lo optimice (???) 
-//template <uint8_t pos, typename Int>
-//constexpr inline Int bitmask1()
-//{ 
-////    return ~bitmask0<pos, Int>();
-//    Int x = bitmask0<pos, Int>();
-//    return ~x;
-//}
 }// namespace
 
 #endif

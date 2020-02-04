@@ -30,6 +30,7 @@
  *	19/09/2019: copy, copy_n, fill, fill_n
  *	03/11/2019: find, find_if, find_if_not
  *	16/11/2019: count, count_if
+ *	04/02/2020: shift_left
  *
  *   - TODO:
  *	- fill_n: especializarla a memset cuando se trate de arrays.
@@ -200,6 +201,26 @@ inline constexpr OutputIt copy_n(InputIt p, Size n, OutputIt q)
 }
 
 
+template <typename ForwardIt>
+constexpr ForwardIt shift_left(ForwardIt p0, ForwardIt pe, 
+		typename iterator_traits<ForwardIt>::difference_type n)
+{
+    if (n <= 0)
+	return pe;
+
+    if (n >= distance(p0, pe))
+	return p0;
+
+    ForwardIt q0 = p0;
+    advance(p0, n);
+
+    for (; p0 != pe; advance(p0, 1), advance(q0, 1))
+    {
+	*q0 = *p0;
+    }
+
+    return q0;
+}
 
 
 

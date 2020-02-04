@@ -27,6 +27,7 @@
  *  - HISTORIA:
  *    A.Manuel L.Perez
  *	03/11/2019: iterator_traits, reverse_iterator
+ *	04/02/2020: advance, next, prev, distance
  *
  ****************************************************************************/
 #include "std_config.h"
@@ -91,6 +92,89 @@ struct iterator_traits<const T*> {
 
 // iterator operations
 // -------------------
+// advance
+template <typename It>
+constexpr bool __is_random_access_iterator
+	= is_same_v<typename iterator_traits<It>::iterator_category,
+		    random_access_iterator_tag>;
+
+template <typename It>
+constexpr bool __is_bidirectional_iterator
+	= is_same_v<typename iterator_traits<It>::iterator_category,
+		    bidirectional_iterator_tag>;
+
+
+
+template <typename InputIterator, typename Distance>
+inline constexpr void advance (InputIterator& i, Distance n)
+{
+    if constexpr (__is_random_access_iterator<InputIterator>){
+	i += n;
+    }
+
+    else if constexpr (__is_bidirectional_iterator<InputIterator>){
+    
+	if (n > 0){
+	    for (; n != 0; --n)
+		++i;
+	} else {
+	    for (; n != 0; ++n)
+		--i;
+	}
+
+    }
+
+    else{ // default: InputIterator
+
+	for (; n != 0; --n)
+	    ++i;
+    }
+
+}
+
+
+// next
+template < typename InputIterator>
+inline constexpr InputIterator next(InputIterator x, 
+	    typename iterator_traits<InputIterator>::difference_type n = 1)
+{ 
+    advance(x, n);
+
+    return x;
+}
+
+
+// prev
+template < typename BidirectionalIterator>
+inline constexpr BidirectionalIterator prev(BidirectionalIterator x, 
+	typename iterator_traits<BidirectionalIterator>::difference_type n = 1)
+{ 
+    advance(x, -n);
+
+    return x;
+}
+
+
+// distance
+template <typename InputIterator>
+inline constexpr typename iterator_traits<InputIterator>::difference_type
+distance(InputIterator p0, InputIterator pe)
+{
+    if constexpr (__is_random_access_iterator<InputIterator>){
+	return pe - p0;
+    }
+
+    else{ // default:
+	typename iterator_traits<InputIterator>::difference_type n{0};
+	while (p0 != pe){
+	    ++p0;
+	    ++n;
+	}
+
+	return n;
+    }
+
+}
 
 
 
@@ -233,6 +317,9 @@ inline constexpr reverse_iterator<It>
 template <typename It>
 inline constexpr reverse_iterator<It> make_reverse_iterator(It i)
 {return reverse_iterator<It>{i};}
+
+
+
 
 }// namespace
 

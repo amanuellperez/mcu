@@ -247,6 +247,32 @@ void test_count()
     test_count_if(v.begin(), v.end(), [](int x){return x % 3;}, "vacio");
 }
 
+template <typename It1, typename It2>
+void test_shift_left(int n, It1 p0, It1 pe, It2 y0, It2 y1, It1 res)
+{
+    auto y = mtd::shift_left(p0, pe, n);
+    CHECK_EQUAL_CONTAINERS(p0, pe, y0, y1, "shift_left");
+    CHECK_TRUE(y == res, "shift_left");
+}
+
+void test_shift_left()
+{
+    test::interfaz("shift_left");
+
+    constexpr int sz = 7;
+    int x[sz];
+    {
+    for (int i = 0; i < sz; ++i)
+	x[i] = i;
+    std::array res = {3,4,5,6,4,5,6};
+    test_shift_left(0, x, x, x, x, x); // contenedor vacío!!!
+    test_shift_left(0, x, x + sz, x, x + sz, x + sz);
+    test_shift_left(sz, x, x + sz, x, x + sz, x);
+    test_shift_left(2*sz, x, x + sz, x, x + sz, x);
+    test_shift_left(3, x, x + sz, res.begin(), res.end(), x + 4);
+    }
+
+}
 
 
 int main()
@@ -262,6 +288,7 @@ try{
     test_fill_n();
     test_find();
     test_count();
+    test_shift_left();
 
 }catch(const std::exception& e){
     std::cerr << e.what() << '\n';

@@ -25,10 +25,15 @@
  *
  *   - COMENTARIOS: Este fichero desvincula nuestro programa del avr
  *
+ *   CUIDADO: Estas constantes aparecen en .cpp, luego hay que compilar una
+ *   biblioteca diferente para cada microcontrolador!!!
+ *
  *   - HISTORIA:
- *           alp  - 27/01/2019 Escrito
+ *    A.Manuel L.Perez
+ *    27/01/2020 v0.0
  *
  ****************************************************************************/
+
 #include <avr/io.h> // registros: DDRB... PORT...
 
 
