@@ -39,6 +39,16 @@
 
 namespace avr{
 
+// Table 26-5, junto con el diagrama figure 26-16.
+struct __TWI_basic_ioreturn_slave_transmitter_mode {
+    static constexpr uint8_t sla_r            = TWI_STM_SLA_R;
+    static constexpr uint8_t arbitration_lost = TWI_STM_ARBITRATION_LOST;
+    static constexpr uint8_t data_ack         = TWI_STM_DATA_ACK;
+    static constexpr uint8_t data_nack        = TWI_STM_DATA_NACK;
+    static constexpr uint8_t data_last_byte   = TWI_STM_DATA_LAST_BYTE;
+};
+
+
 // Table 26-6, junto con el diagrama figure 26-18.
 struct __TWI_basic_ioreturn_slave_receiver_mode {
     static constexpr uint8_t sla_w = TWI_SRM_SLA_W;
@@ -61,16 +71,13 @@ struct __TWI_basic_ioreturn_slave_receiver_mode {
 };
 
 
-// Por una parte me gustan más los nombres largos, ya que queda documentado
-// en código el significado. Sin embargo, es un incordio usarlos. Por eso
-// defino los acrónimos. Mantener los nombres largos porque de esa forma se ve
-// claramente que SRM es un acrónimo de slave_receiver_mode!!! No borrarlos.
-struct __TWI_basic_ioreturn{
-    // Nombres largos
-    using slave_receiver_mode = __TWI_basic_ioreturn_slave_receiver_mode;
 
-    // Acrónimos. 
-    using SRM = slave_receiver_mode;
+
+
+struct __TWI_basic_ioreturn{
+
+    using slave_receiver_mode    = __TWI_basic_ioreturn_slave_receiver_mode;
+    using slave_transmitter_mode = __TWI_basic_ioreturn_slave_transmitter_mode;
 
     // Miscellaneous (table 26-7)
     static constexpr uint8_t bus_error = TWI_BUS_ERROR;
@@ -81,6 +88,35 @@ struct __TWI_basic_ioreturn{
 /*!
  *  \brief  Traductor literal de la datasheet.
  *
+ *  IMPORTANTE (para principiantes):
+ *	clear TWINT = write 0
+ *	set TWINT = write 1
+ *	Sin embargo, parece ser que es habitual en micros que cuando se quiere
+ *	hacer un clear en un bit se escriba un 1, por eso la datasheet dice
+ *	que si se quiere hacer clear(TWINT) hay que escribir un 1 en TWINT.
+ *	Esto lo que hace es que se escriba un 0. De hecho me he tirado un buen
+ *	rato (demasiado para mi gusto) mirando precisamente esto: yo escribo
+ *	TWINT = 1, pero al mirar su valor resulta ser 0!!! 
+ *
+ *	El flujo de TWI usando interrpuciones es el siguiente:
+ *	TWINT = 0 <-- a la espera de que suceda algo
+ *	sucede algo y se necesita respuesta por parte del usuario:
+ *	TWINT = 1 (= ey! usuario, tienes que hacer algo!!!)
+ *	Si TWIE = 1 y activadas las interrupciones se lanza una interrupción,
+ *	Dentro del handler de la ISR siempre tendremos TWINT = 1 (precisamente
+ *	es lo que lanza la interrupción).
+ *	Después de procesar la interrupción, para decirle a TWI que continue
+ *	tenemos que hacer clear a TWINT, para ello:
+ *	1. escribimos TWINT = 1
+ *	2. el hardware traduce esto inmediatamente a TWINT= 0.
+ *
+ *	Recordar que mientras no hagamos clear(TWINT) SCL será igual a 0 (lo
+ *	cual nos va a interesar si lleva tiempo procesar lo que estemos
+ *	haciendo).
+ *
+ *	Recordar:
+ *	    1.- Escribir un 0 en TWINT = NO HACE NADA!!!
+ *	    2.- Escribir un 1 en TWINT = hace un clear.
  */
 class TWI_basic{
 public:
@@ -194,12 +230,21 @@ public:
     /// The TWI interrupt request will be activated.
     // OJO: hay que definir globalmente las interrupciones para que esto
     // funcione: Interrupt::enable_all_interrupts();
+    // Observar que hay que escribir un 0 en TWINT. Si no se escribe, no se
+    // por qué pero se hace un clear de TWINT (ojo: tal como está ahora
+    // implementado write_bit es normal ya que write_bits reescribe TWCR y 
+    // al escribir un 1 en TWINT hacemos el clear. Sin embargo, lo he probado
+    // a hacerlo directamente y sigue haciendo el clear a TWINT). Además, el
+    // ejemplo de la app.note avr315 desactiva las interrupciones de esta
+    // forma.
     static void interrupt_enable()
-    { atd::write_bit<TWIE>::to<1>::in(TWCR);}
+    { atd::write_bits<TWIE, TWINT>::to<1,0>::in(TWCR);}
 
     /// The TWI interrupt request will be disactivated.
+    // Fundamental poner TWINT = 0 (no hace nada). Ver comentarios de
+    // interrupt_enable
     static void interrupt_disable()
-    { atd::write_bit<TWIE>::to<0>::in(TWCR);}
+    { atd::write_bits<TWIE, TWINT>::to<0,0>::in(TWCR);}
 
 
     // Actions by Master Mode (see: tables 26-3/4)

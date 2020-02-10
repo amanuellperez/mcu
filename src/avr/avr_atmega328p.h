@@ -156,7 +156,8 @@ constexpr uint8_t BIT_MASK[29] = {
     // TWI Slave Transmitter status codes (table 26-5)
     // -----------------------------------------------
     // Own SLA+R has been received; ACK has been returned
-    constexpr static uint8_t TWI_STM_RECEIVED_SLA_R = 0xA8;
+    constexpr static uint8_t TWI_STM_SLA_R = 0xA8;
+
     // Arbitration lost in SLA+R/W as Master; own SLA+R has been received; ACK
     // has been returned
     constexpr static uint8_t TWI_STM_ARBITRATION_LOST = 0xB0;

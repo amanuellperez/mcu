@@ -66,6 +66,26 @@ inline constexpr const char* find_c(const char* p, char x, Int n)
     return p;
 }
 
+// TODO: ¿qué devolver? no lo tengo del todo claro, así que de momento no
+// lo implemento en general.
+//// Vuelca el buffer p0[0, N_p) en q[0, N_q).
+//// requires: InputIt = random_iterator.
+//template <typename InputIt, typename Size, typename OutputIt>
+//constexpr std::pair{InputIt, OutputIt}
+//	    dump_n(InputIt p0, Size N_p, OutputIt q, Size N_q)
+//{
+//    streamsize n = std::min(N_q, N_p);
+//	
+//    OutputIt qe = std::copy_n(p0, n, q);
+//
+//    InputIt pe;
+//    if (n < N_p)
+//	pe = std::shift_left(p0, p0 + N_p, n);
+//    else
+//	pe = p;
+//
+//    return std::pair{pe, qe};
+//}
 
 
 }// namespace

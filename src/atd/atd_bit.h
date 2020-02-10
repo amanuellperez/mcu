@@ -239,6 +239,12 @@ constexpr Int make_bitmask()
  * DUDA: al principio lo llamaba:
  *  atd::write_bits<1,3,4,7>::to<1,0,1,1>::in_register(x);
  *  El nombre un poco largo, por eso lo acorté.
+ *
+ *  TODO: Tal como lo estoy implementando estoy escribiendo todo 'x' de nuevo.
+ *  El problema es que hay ciertos bits como TWINT del TWI que si están a 1
+ *  y se vuelven a escribir a 1 eso genera un clear, poniendose TWINT a 0. No
+ *  sirve, en general, copiar el valor que tenía x. Solo hay que modificar los
+ *  bits que se quieren modificar!!! Cambiarlo!!!
  */
 namespace __atd{
 // Todo esto se traduce en asm en un simple and y or!!!
