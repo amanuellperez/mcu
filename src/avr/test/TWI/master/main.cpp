@@ -66,23 +66,69 @@ void TWI_error(std::ostream& out)
 
 constexpr uint8_t slave_address = 0x10;
 
-void test_write()
+
+void send_service1()
 {
     UART_iostream uart;
 
     uint8_t msg[4];
-    msg[0] = 24;
+    msg[0] = 0x34;
     msg[1] = 37;
     msg[2] = 98;
     msg[3] = 125;
 
 
     if (TWI::write<slave_address>(reinterpret_cast<std::byte*>(msg), 4) != 4){
-	uart << "Error: ";
+	uart << "Error enviando servicio 1: ";
 	TWI_error(uart);
     }
     else
 	uart << "Envio ok\n";
+}
+
+
+void send_service2()
+{
+    UART_iostream uart;
+
+    uint8_t msg[1];
+    msg[0] = 0x87;
+
+
+    if (TWI::write<slave_address>(reinterpret_cast<std::byte*>(msg), 1) != 1){
+	uart << "Error enviando servicio 2: ";
+	TWI_error(uart);
+    }
+    else
+	uart << "Envio ok\n";
+}
+
+void send_service3()
+{
+    UART_iostream uart;
+
+    uint8_t msg[1];
+    msg[0] = 0xAA;
+
+
+    if (TWI::write<slave_address>(reinterpret_cast<std::byte*>(msg), 1) != 1){
+	uart << "Error enviando servicio 3: ";
+	TWI_error(uart);
+    }
+    else
+	uart << "Envio ok\n";
+}
+
+
+
+void test_write()
+{
+    send_service1();
+    wait_ms(500);
+    send_service2();
+    wait_ms(500);
+    send_service3();
+    wait_ms(500);
 
 }
 
@@ -106,8 +152,6 @@ int main()
     
     while (1) {
 	test_write();
-
-	wait_ms(1000);
     } // while(1)
 }
 

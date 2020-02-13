@@ -1,11 +1,12 @@
 DIRS = algorithm	\
-	   ascii	\
-		bit	\
-		cast	\
-		cstddef	\
-		cstring	\
+	   ascii		\
+		bit			\
+		buffer		\
+		cast		\
+		cstddef		\
+		cstring		\
 		register	\
-		time	\
+		time		\
 		type_traits
 
 

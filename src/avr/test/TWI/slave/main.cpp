@@ -23,10 +23,13 @@
 #include "../../../avr_USART.h"
 #include "../../../avr_time.h"
 #include "../../../avr_interrupt.h"
+
+#include <atd_buffer.h>
 #include <algorithm>
 #include <array>
 
-constexpr uint8_t buffer_size = 5;
+
+constexpr uint8_t buffer_size = 10;
 
 inline void traza(const char* fname)
 {
@@ -57,29 +60,30 @@ inline void traza_twcr()
 //	    if (TWI::return() != running) 
 //		int ret = TWI::return();  // resultado de la última operación
 //					  // pedida a TWI
-enum class TWI_return{
-    listening,		// No tiene datos.
+enum class __TWI_slave_state {
+    listening, // No tiene datos.
     data_nack,
     bus_error,
 
-// slave receiver mode
-// -------------------
-    get_area_full,	// se está recibiendo un mensaje pero el buffer de 
-			// entrada se ha llenado.
-    eor,		// end of reading: ha finalizado la recepción de un 
-			// mensaje; quedan datos en el buffer de entrada
-			// pendientes de leer
-    
-// slave transmitter mode
-// ----------------------
-//    put_area_empty,	// La put area está vacía y nos piden datos.
-//			// Hay que escribir en ella.
-//
-//    eow,		// end of writting, everything ok
-//    eow_pane		// end of writting, put area not empty. No se han
-//			// enviado todos los datos de la put area.
-};
+    // slave receiver mode
+    // -------------------
+    get_area_full, // se está recibiendo un mensaje pero el buffer de
+                   // entrada se ha llenado.
+    eor,           // end of reading: ha finalizado la recepción de un
+                   // mensaje; quedan datos en el buffer de entrada
+                   // pendientes de leer
 
+    // slave transmitter mode
+    // ----------------------
+    put_area_empty, // La put area está vacía y nos piden datos.
+                    // Hay que escribir en ella.
+
+    eow,      // end of writting, everything ok
+    eow_pane, // end of writting, put area not empty. No se han
+              // enviado todos los datos de la put area.
+    eow_pas   // end of writting, put area small. Se han enviado todos los bytes
+              // pero el master quería más.
+};
 
 // TODO: La idea es que esto no sea más que una ampliacion del TWI con 1 byte
 // de buffer. Le ponemos una put/get area a TWI en esta clase y ocultamos el
@@ -101,7 +105,7 @@ class TWI_slave{
 public:
     using TWI = avr::TWI_basic; // TODO: parametrizarlo con esto. De esta forma
 				// queda independizado del microcontrolador.
-    using iostate= TWI_return;
+    using iostate= __TWI_slave_state;
     using streamsize = uint8_t;
 
     // Tamaño de la put/get area.
@@ -121,7 +125,7 @@ public:
 	    avr::enable_all_interrupts();
 	    TWI::init_slave<TWI_slave_address,1>(); // 1 = TWI::interrupt_enable()
 
-	    init();
+	    reset();
 	}
     };
 
@@ -131,74 +135,57 @@ public:
     /// Postcondición: get_area() == empty()
     static streamsize read_buffer(std::byte* buffer, streamsize N);
 
+    /// Escribe en el buffer de salida buf[0, n). 
+    /// Devuelve el número de bytes escritos.
+    /// A día de hoy si se n > buffer_size no hace nada, ya que esta primera
+    /// versión está limitada a enviar el buffer completo de una sola vez (no
+    /// se puede escribir poco a poco). Si en el futuro se usa, cambiarlo y
+    /// darle más flexibilidad. Esta es una versión de aprendizaje.
+    static streamsize write_buffer(const std::byte* buf, streamsize n);
+
+    static void stop_transmission();
+
+
     /// Indica si el dispositivo está ocupado ejecutando una función o no.
     static bool is_busy() {return busy_;}
 
-    /// Estado en el que queda el slave después de ejecutar algo.
-    /// Sólo es válido cuando is_busy() == false!!!
-    static iostate state() {return state_;}
-
     // Función que va dentro de la ISR
     static void handle_interrupt();
+
+    // estados: solo válidos cuando is_busy() == false!!!
+    // --------------------------------------------------
+    // TODO: creo que puedo fundier busy_ dentro de los states. Revisarlo.
+    // Ahorraríamos 1 byte.
+    static bool listening() {return state() == iostate::listening;}
+
+    // de lectura
+    static bool eor() {return state() == iostate::eor;}
+    static bool get_area_full() { return state() == iostate::get_area_full;}
+
+
+
 
 private:
     static inline iostate state_;
     static inline bool busy_;	
 
-    static inline std::array<std::byte, buffer_size> buffer_;
+    static inline atd::TWI_iobuffer<buffer_size> buffer_;
     static inline std::byte* pa_;   // posición actual de la put/get area.
 
-    // Buffer de entrada
-    // -----------------
-    // buffer = [begin, end)
-    // bytes recibidos por TWI = [begin, pa)
-    // buffer disponible para recibir más bytes = [pa, end)
-    static constexpr std::byte* in_begin() { return buffer_.begin();}
-    static std::byte* in_pa()  { return pa_; }
-    static constexpr std::byte* in_end() { return buffer_.end();}
-
-    // Adds n to the next pointer for the input sequence
-    static void gbump(int n) { pa_ += n;}
-
-    // Inicializa la get area.
-    static void reset_get_area() {pa_ = in_begin();}
-
-    // ¿Esta la get area vacía?
-    static bool get_area_empty() { return in_begin() == pa_;}
-
-    // Vuelca la get_area en buf, vaciándola. 
-    // Si el tamaño de la get area es mayor que N, no se podrá vaciar del todo
-    // quedando datos pendientes de leer en la get area.
-    // Return: número de bytes copiados en buf.
-    static streamsize dump_input_buffer(std::byte* buf, streamsize N);
-
-//
-//    // Put area
-//    // --------
-//    // La put area es: [pbase(), pptr())
-//    static constexpr std::byte* pbase() const {return buffer_.begin();}
-//    static constexpr std::byte* pptr()  const {return pa_;}
-//    static constexpr std::byte* epptr() const {return buffer_.end();}
-//
-//
-//    // Adds n to the next pointer for the output sequence
-//    static void pbump(int n) {pa_ += n;}
-//
-//    // Number of bytes 
-//    static  constexpr streamsize kk() { return epptr() - pptr(); }
-//
-//    // Inicializa la put area.
-//    static void reset_put_area() {pa_ = pbase();}
-
+    // Estado en el que queda el slave después de ejecutar algo.
+    // Sólo es válido cuando is_busy() == false!!!
+    static iostate state() {return state_;}
 
 
     // Helper functions
     // ----------------
-    static void init()
+    static void reset()
     {
 	state_ = iostate::listening;
-	pa_ = nullptr;	// ni leyendo ni escribiendo
-	busy_ = true;	// está escuchando
+        pa_ = nullptr;  // ni leyendo ni escribiendo, esto realmente sería para
+                        // depurar
+        busy_ = true;	// está escuchando
+	TWI::reset_slave<1>(); // interrupt_enable = 1
     }
 
     static void set_busy()
@@ -244,16 +231,15 @@ private:
 // tarde".
 inline void TWI_slave::srm_sla_w()
 {
-    reset_get_area();
+    buffer_.reset_as_input();
     TWI::slave_receive_data_with_ACK();
 }
 
 
 inline void TWI_slave::srm_data_ack()
 {
-    *in_pa() = TWI::data();
-    gbump(1);
-    if (in_pa() == in_end()){
+    buffer_.in_write_one(TWI::data());
+    if (buffer_.in_is_full()){
 	set_no_busy();
 	state_ = iostate::get_area_full;
     }
@@ -283,27 +269,43 @@ inline void TWI_slave::srm_stop_or_repeated_start()
 
 
 
-//inline void TWI_slave::stm_sla_r()
-//{
-//    reset_put_area();
-//    set_no_busy();
-//    state_ = iostate::put_area_empty;
-//}
-//
-//
-//inline void TWI_slave::stm_data_ack()
-//{
-//    streamsize sz = put_area_size();
-//
-//    if (sz == 0){
-//	state_ = 
-//    }
-//}
-//
-//inline void TWI_slave::stm_data_nack()
-//{
-//    kk
-//}
+inline void TWI_slave::stm_sla_r()
+{
+    set_no_busy();
+    buffer_.reset_as_output();
+    state_ = iostate::put_area_empty;
+}
+
+
+void TWI_slave::stm_data_ack()
+{
+    if (buffer_.out_is_empty()){
+	state_ = iostate::eow_pas;
+	reset();
+	set_no_busy();
+	return;
+    }
+
+    if (buffer_.out_size() == 1)
+	TWI::slave_transmit_byte_received_NACK(buffer_.out_read_one());
+
+    else
+	TWI::slave_transmit_byte_received_ACK(buffer_.out_read_one());
+
+}
+
+
+void TWI_slave::stm_data_nack()
+{
+    if (buffer_.out_is_empty())
+	state_ = iostate::eow;
+
+    else 
+	state_ = iostate::eow_pane;
+
+    TWI::not_addressed_slave_mode();
+    set_no_busy();
+}
 
 
 
@@ -320,42 +322,30 @@ inline void TWI_slave::bus_error()
 // ¿protección contra error de software?
 inline void TWI_slave::unknown_error()
 {
-    // set_no_busy(); (qué hacer???)
+    // set_no_busy(); (qué hacer???) Espero que el usuario haga algo?
     TWI::not_addressed_slave_mode();
     state_ = iostate::listening;
 }
 
 
-// Copiamos los bytes recibidos en el buffer q[0,n_q)
-// Esto es: copiamos in.[begin, pa) en q[0,N)
-//			p0[0, pe - p0) -> q[0, N)
-//			    n_p		    n_q
-//
-// TODO: esta es una función generica: atd::dump_n(...)
-TWI_slave::streamsize TWI_slave::dump_input_buffer(std::byte* buf, streamsize N_buf)
+
+TWI_slave::streamsize TWI_slave::write_buffer(const std::byte* buf,
+                                              streamsize n)
 {
-    streamsize N_p = in_pa() - in_begin();
-    streamsize n = std::min(N_buf, N_p);
-	
-    std::copy_n(in_begin(), n, buf);
+    if (is_busy())
+	return 0;
 
-    if (n < N_p)
-	pa_ = std::shift_left(in_begin(), in_end(), n);
-    else
-	reset_get_area();
+    if (n > buffer_size) // Devuelvo el control para que el usuario sepa
+	return 0;	 // que tiene que aumentar el tamaño del buffer.
 
-    return n;
+    return buffer_.out_write_all_n(buf, n);
 }
 
-
-//TWI_slave::streamsize TWI_slave::write_put_area(const std::byte* buf, streamsize N)
-//{
-//    streamsize n = std::min(N, put_area_size());
-//
-//    std::copy_n(buf, n, *pptr());
-//
-//}
-
+void TWI_slave::stop_transmission()
+{
+    avr::Interrupts_lock lock;   // garantizo control del flujo.
+    reset();
+}
 
 
 // Mira a ver si hay datos que leer en el bufer del TWI. 
@@ -370,7 +360,7 @@ TWI_slave::streamsize TWI_slave::read_buffer(std::byte* buffer, streamsize N)
 	return 0;
  
 
-    streamsize n = dump_input_buffer(buffer, N);
+    streamsize n = buffer_.in_read_all_n(buffer, N);
 
     if (state_ == iostate::get_area_full){
 	TWI::slave_receive_data_with_ACK();
@@ -378,7 +368,7 @@ TWI_slave::streamsize TWI_slave::read_buffer(std::byte* buffer, streamsize N)
     }
 
     else{ // state_ == iostate::eor
-	if (get_area_empty()){
+	if (buffer_.in_is_empty()){
 	    state_ = iostate::listening;
 	    set_busy(); 
 	}
@@ -387,14 +377,6 @@ TWI_slave::streamsize TWI_slave::read_buffer(std::byte* buffer, streamsize N)
     return n;
 }
 
-//TWI_slave::streamsize TWI_slave::write_buffer(const std::byte* buffer,
-//                                              streamsize N)
-//{
-//    if (is_busy())
-//	return 0;
-//
-//    return write_put_area(buffer, N);
-//}
 
 
 // TODO: para poder independizarlo del microcontrolador es necesario
@@ -402,12 +384,9 @@ TWI_slave::streamsize TWI_slave::read_buffer(std::byte* buffer, streamsize N)
 void TWI_slave::handle_interrupt()
 {
 
-    using SRM = TWI::ioreturn::slave_receiver_mode;
-//    using STM = TWI::iostate::slave_transmitter_mode;
+    using SRM = TWI::iostate::slave_receiver_mode;
+    using STM = TWI::iostate::slave_transmitter_mode;
 
-    // TODO: cuando el estado quede pendiente de que el usuario haga algo
-    // desactivar TWIE, de esa forma no se llamara a esta función quedando a
-    // la espera de que el usuario tome las acciones oportunas.
     switch (TWI::status()){
 
     // slave receiver mode
@@ -435,22 +414,22 @@ void TWI_slave::handle_interrupt()
 
     // slave transmitter mode
     // ----------------------
-//	case STM::sla_r:
-//	    stm_sla_r();
-//	    break;
-//
-//	case STM::data_ack:
-//	    stm_data_ack();
-//	    break;
-//
-//	case STM::data_nack:
-//	    stm_data_nack();
-//	    break;
+	case STM::sla_r:
+	    stm_sla_r();
+	    break;
+
+	case STM::data_ack:
+	    stm_data_ack();
+	    break;
+
+	case STM::data_nack:
+	    stm_data_nack();
+	    break;
 
 
     // miscellaneous states
     // --------------------
-	case TWI::ioreturn::bus_error:
+	case TWI::iostate::bus_error:
 	    bus_error();
             break;
 
@@ -481,47 +460,71 @@ enum class Service{
     service2
 };
 
-constexpr std::byte service1_id {0x34};
-constexpr std::byte service2_id {0x87};
+constexpr std::byte service1_name {0x34};
+constexpr std::byte service2_name {0x87};
 
-Service read_service_name()
+Service read_service_name(std::array<std::byte, buffer_size>& params_in)
 {
-TODO: ponerle un nombre adecuado a esto:
-    while (!TWI_slave::eor()) ... // ojo: qué pasa si se envia algo diferente?
+    avr::UART_iostream uart;
 
-    while (TWI_slave::state() != TWI_slave::iostate::eor){
-	if (TWI_slave::state() == TWI_slave::iostate::get_area_full) {
+    while (!TWI_slave::eor()){ // TODO: ojo: qué pasa si se envia algo diferente?
+	if (TWI_slave::get_area_full()) {
 	    uart << "Error: get_area_full!!! buffer muy pequeño!!!\n\n";
-TODO: en este caso finalizar la transmisión!!!
-	  return Service::error;
+	    TWI_slave::stop_transmission();
+	    return Service::error;
 	}
     } // while
 
-    if (TWI_slave::state() != TWI_slave::iostate::eor) {
+    if (!TWI_slave::eor()){
             uart << "Tendría que estar en eor, pero esta en otro estado\n";
-TODO: en este caso finalizar la transmisión !!!
+	    TWI_slave::stop_transmission();
 	    return Service::error;
     }
 
-    std::byte msg;
-    if (TWI_slave::read_buffer(msg, 1) != 1) {
+    TWI_slave::streamsize n = TWI_slave::read_buffer(params_in.data(), params_in.size());
+
+    if (n == 0) {
 	uart << "No se ha leído nada!\n";
-TODO: en este caso finalizar la transmisión !!!
+	TWI_slave::stop_transmission();
 	return Service::error;
     }
 
-    if (msg == service1_id)
+    if (params_in[0] == service1_name)
 	return Service::service1;
-    else if (msg == service2_id)
+
+    else if (params_in[0] == service2_name)
 	return Service::service2;
 
+    uart << "Servicio desconocido [" << static_cast<uint16_t>(params_in[0])
+         << "]\n";
     return Service::unknown;
-
-
 
 }
 
+// params_in[0] = nombre del servicio
+// params_in[...] = resto de parámetros
+void service1(const std::array<std::byte, buffer_size>& params_in,
+		    std::array<std::byte, buffer_size>& params_out)
+{
+    avr::UART_iostream uart;
+    uart << "Ejecutando service1\n";
+    uart << "params_in: "
+	 << static_cast<uint16_t>(params_in[1]) << ", "
+	 << static_cast<uint16_t>(params_in[2]) << ", "
+	 << static_cast<uint16_t>(params_in[3]) << '\n';
 
+    // respondemos 1 byte con 45!!!
+    params_out[0] = std::byte{45};
+}
+
+
+// params_in[0] = nombre del servicio
+// params_in[...] = resto de parámetros
+void service2(const std::array<std::byte, buffer_size>& params_in)
+{
+    avr::UART_iostream uart;
+    uart << "Ejecutando service2\n";
+}
 
 void test_servidor()
 {
@@ -534,31 +537,43 @@ void test_servidor()
     while (1){
 
 	while (TWI_slave::listening()){
-	    // do something
-	    uart << '.';
+	    asm("nop");
 	}
 
-	auto srv_name = read_service_name();
+	std::array<std::byte, buffer_size> params_in;
+	std::array<std::byte, buffer_size> params_out;
+
+	// TODO: read_service_name miente! Lee tambien params_in!!! CAMBIARLO!
+	Service srv_name = read_service_name(params_in);
 	switch (srv_name){
 	    case Service::service1:
-		uart << "Recibido service1\n";
-		service1(); // envia al master la respuesta adecuada
+		// Ejemplo: tiene parametros de entrada y salida
+		service1(params_in, params_out);  // esta función 
+			    // llama a: out = service1(in);
+			    // transformando params_in y params_out en las
+			    // structuras de datos correspondientes.
+		// TODO: que params_out sea un "vector estatico". Esto es,
+		// [begin, end) dentro de un array[begin, ...) <-- ¿esto es
+		// std::span? De esa forma no tengo que pasarle la longitud!!!
+//		write_params_out(params_out.data(), params_out.data() + 1);
 		break;
 
-// TODO: añadir más
-//	    case Service::service2:
-//		uart << "Recibido service2\n";
-//		service2(); // envia al master la respuesta adecuada
-//		break;
+	    case Service::service2:
+		// Ejemplo: no tiene parametros de entrada, pero sí de salida
+		service2(params_out); 
+//		write_params_out(params_out);
+		break;
 
 	    case Service::unknown:
-		uart << "Servicio desconocido!\n";
+		TWI_slave::stop_transmission();
 		break;
 
-	    default:
-		uart << "Unknown service\n";
+	    case Service::error:
+		TWI_slave::stop_transmission();
+		uart << "Transmission error\n";
 		break;
 	}
+
     }
 }
 
@@ -575,9 +590,9 @@ void test_read()
     while (1){
 	std::byte buffer[buffer_size];
 	
-	while (TWI_slave::state() != TWI_slave::iostate::eor){
+	while (!TWI_slave::eor()){
 
-            if (TWI_slave::state() == TWI_slave::iostate::get_area_full) {
+            if (TWI_slave::get_area_full()) {
                 uint8_t n = TWI_slave::read_buffer(buffer, buffer_size);
                 uart << "\nXXX Recibidos " << static_cast<uint16_t>(n)
                      << " datos:\n";
@@ -587,7 +602,7 @@ void test_read()
             }
         } // while
 
-        while (TWI_slave::state() == TWI_slave::iostate::eor){
+        while (TWI_slave::eor()){
 	if (uint8_t n = TWI_slave::read_buffer(buffer, buffer_size)){
 	    uart << "\nFFF Recibidos " << static_cast<uint16_t>(n)  << " datos:\n";
 	    for (uint8_t i = 0; i < n; ++i)
@@ -617,7 +632,8 @@ int main()
 
     uart << "TWI enable\n";
     
-    test_read();
+//    test_read();
+    test_servidor();
 }
 
 

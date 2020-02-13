@@ -40,7 +40,7 @@
 namespace avr{
 
 // Table 26-5, junto con el diagrama figure 26-16.
-struct __TWI_basic_ioreturn_slave_transmitter_mode {
+struct __TWI_basic_iostate_slave_transmitter_mode {
     static constexpr uint8_t sla_r            = TWI_STM_SLA_R;
     static constexpr uint8_t arbitration_lost = TWI_STM_ARBITRATION_LOST;
     static constexpr uint8_t data_ack         = TWI_STM_DATA_ACK;
@@ -50,7 +50,7 @@ struct __TWI_basic_ioreturn_slave_transmitter_mode {
 
 
 // Table 26-6, junto con el diagrama figure 26-18.
-struct __TWI_basic_ioreturn_slave_receiver_mode {
+struct __TWI_basic_iostate_slave_receiver_mode {
     static constexpr uint8_t sla_w = TWI_SRM_SLA_W;
     static constexpr 
     uint8_t arbitration_lost_sla_w = TWI_SRM_ARBITRATION_LOST_SLA_W;
@@ -74,10 +74,10 @@ struct __TWI_basic_ioreturn_slave_receiver_mode {
 
 
 
-struct __TWI_basic_ioreturn{
+struct __TWI_basic_iostate{
 
-    using slave_receiver_mode    = __TWI_basic_ioreturn_slave_receiver_mode;
-    using slave_transmitter_mode = __TWI_basic_ioreturn_slave_transmitter_mode;
+    using slave_receiver_mode    = __TWI_basic_iostate_slave_receiver_mode;
+    using slave_transmitter_mode = __TWI_basic_iostate_slave_transmitter_mode;
 
     // Miscellaneous (table 26-7)
     static constexpr uint8_t bus_error = TWI_BUS_ERROR;
@@ -120,7 +120,7 @@ struct __TWI_basic_ioreturn{
  */
 class TWI_basic{
 public:
-    using ioreturn = __TWI_basic_ioreturn;
+    using iostate = __TWI_basic_iostate;
 
     /// Selects the division factor for the bit rate generator.
     /// The bit rate generatro is a frequency divider which generatres the
@@ -205,6 +205,12 @@ public:
 	atd::write_range_bits<TWI_SLAVE_ADDRESS_BIT0,TWI_SLAVE_ADDRESS_BITn>::
 	    to<TWI_slave_address>::in(TWAR); // TWAR = TWI_slave_address;
 
+	reset_slave<TWIE_on>();
+    }
+
+    template <uint8_t TWIE_on>
+    static void reset_slave()
+    {
 	atd::write_bits<TWINT, TWEA, TWSTA, TWSTO, TWWC, TWEN, TWIE>::
 	             to<  0  ,   1 ,   0  ,   0  ,   0 ,  1, TWIE_on>::in(TWCR);
     }
@@ -292,16 +298,16 @@ public:
     // Actions by Slave Mode (see: tables 26-5/6)
     // ------------------------------------------
     /// Data byte will be transmitted and NACK should be received.
-    static void slave_transmit_byte_received_NACK(uint8_t x)
+    static void slave_transmit_byte_received_NACK(std::byte x)
     {
-	TWDR = x;
+	TWDR = std::to_integer<uint8_t>(x);
 	atd::write_bit<TWSTO, TWINT, TWEA>::to<0,1,0>::in(TWCR);
     }
 
     /// Data byte will be transmitted and NACK should be received.
-    static void slave_transmit_byte_received_ACK(uint8_t x)
+    static void slave_transmit_byte_received_ACK(std::byte x)
     {
-	TWDR = x;
+	TWDR = std::to_integer<uint8_t>(x);
 	atd::write_bit<TWSTO, TWINT, TWEA>::to<0,1,1>::in(TWCR);
     }
 
@@ -312,6 +318,14 @@ public:
     /// Data byte will be received and ACK will be returned.
     static void slave_receive_data_with_ACK()
     { atd::write_bit<TWSTO, TWINT, TWEA>::to<0,1,1>::in(TWCR); }
+
+//    /// En caso de error, recibir datos no esperados, paramos la transmisión.
+//    // TODO: revisar la implementación. No tengo claro. Es "casi" copia de la
+//    // app-note "recover_from_bus_error". 
+//    Puedo implementarlo usando reset_slave y parece que funciona.
+//    static void slave_stop_transmission()
+//    { atd::write_bit<TWSTA, TWSTO, TWINT>::to<0,1,1>::in(TWCR); }
+
 
     // Miscellaneous States (table 26-7)
     // ---------------------------------
