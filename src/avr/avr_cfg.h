@@ -49,7 +49,7 @@
 
 
 // CONFIGURACIÓN DEL RELOJ
-    constexpr uint32_t AVR_CLOCK_FREQUENCY_IN_HZ = F_CPU;
+    constexpr uint32_t MCU_CLOCK_FREQUENCY_IN_HZ = F_CPU;
 
 
 

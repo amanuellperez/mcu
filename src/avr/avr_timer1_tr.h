@@ -109,7 +109,7 @@ public:
     /// Definimos el periodo del reloj que usa el timer.
     /// clock_frequency_in_hz = es la frecuencia del reloj del AVR.
     template<uint16_t periodo
-	    , uint32_t clock_frequency_in_hz = AVR_CLOCK_FREQUENCY_IN_HZ>
+	    , uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
     static void clock_period_in_us();
 
 
@@ -118,7 +118,7 @@ public:
     /// 'periodo' es el periodo en microsegundos al que va a funcionar el timer.
     /// clock_frequency_in_hz = es la frecuencia del reloj del AVR.
     template<uint16_t periodo
-	    , uint32_t clock_frequency_in_hz = AVR_CLOCK_FREQUENCY_IN_HZ>
+	    , uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
     static void on() {clock_period_in_us<periodo, clock_frequency_in_hz>();}
 
     /// Paramos el timer.
@@ -393,7 +393,7 @@ public:
 
     /// Encendemos el Timer1
     template<uint16_t periodo
-	    , uint32_t clock_frequency_in_hz = AVR_CLOCK_FREQUENCY_IN_HZ>
+	    , uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
     static void on();
 
     /// Ponemos el contador a cero.

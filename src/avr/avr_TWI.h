@@ -39,58 +39,14 @@
 
 namespace avr{
 
-// Table 26-5, junto con el diagrama figure 26-16.
-struct __TWI_basic_iostate_slave_transmitter_mode {
-    static constexpr uint8_t sla_r            = TWI_STM_SLA_R;
-    static constexpr uint8_t arbitration_lost = TWI_STM_ARBITRATION_LOST;
-    static constexpr uint8_t data_ack         = TWI_STM_DATA_ACK;
-    static constexpr uint8_t data_nack        = TWI_STM_DATA_NACK;
-    static constexpr uint8_t data_last_byte   = TWI_STM_DATA_LAST_BYTE;
-};
-
-
-// Table 26-6, junto con el diagrama figure 26-18.
-struct __TWI_basic_iostate_slave_receiver_mode {
-    static constexpr uint8_t sla_w = TWI_SRM_SLA_W;
-    static constexpr 
-    uint8_t arbitration_lost_sla_w = TWI_SRM_ARBITRATION_LOST_SLA_W;
-    static constexpr uint8_t sla_w_data_ack  = TWI_SRM_SLA_W_DATA_ACK;
-    static constexpr uint8_t sla_w_data_nack = TWI_SRM_SLA_W_DATA_NACK;
-
-    static constexpr 
-    uint8_t general_call = TWI_SRM_GENERAL_CALL;
-    static constexpr 
-    uint8_t arbitration_lost_general_call = TWI_SRM_ARBITRATION_LOST_GENERAL_CALL;
-    static constexpr 
-    uint8_t general_call_data_ack = TWI_SRM_GENERAL_CALL_DATA_ACK;
-    static constexpr 
-    uint8_t general_call_data_nack = TWI_SRM_GENERAL_CALL_DATA_NACK;
-
-    static constexpr
-    uint8_t stop_or_repeated_start = TWI_SRM_STOP_OR_REPEATED_START;
-};
-
-
-
-
-
-struct __TWI_basic_iostate{
-
-    using slave_receiver_mode    = __TWI_basic_iostate_slave_receiver_mode;
-    using slave_transmitter_mode = __TWI_basic_iostate_slave_transmitter_mode;
-
-    // Miscellaneous (table 26-7)
-    static constexpr uint8_t bus_error = TWI_BUS_ERROR;
-    static constexpr uint8_t running   = TWI_RUNNING;
-};
-
 
 /*!
  *  \brief  Traductor literal de la datasheet.
  *
  *  IMPORTANTE (para principiantes):
  *	clear TWINT = write 0
- *	set TWINT = write 1
+ *	set TWINT   = write 1
+ *
  *	Sin embargo, parece ser que es habitual en micros que cuando se quiere
  *	hacer un clear en un bit se escriba un 1, por eso la datasheet dice
  *	que si se quiere hacer clear(TWINT) hay que escribir un 1 en TWINT.
@@ -120,8 +76,6 @@ struct __TWI_basic_iostate{
  */
 class TWI_basic{
 public:
-    using iostate = __TWI_basic_iostate;
-
     /// Selects the division factor for the bit rate generator.
     /// The bit rate generatro is a frequency divider which generatres the
     /// SCL clock frequency in the Master modes.
@@ -160,7 +114,7 @@ public:
     /// Definimos la frecuencia del reloj SCL.
     /// f_scl = frecuencia en kHz de SCL (tipica: 100 kHz y 400 kHz).
     /// f_clock = frecuencia a la que funciona el reloj del avr.
-    template <uint16_t f_scl, uint32_t f_clock = AVR_CLOCK_FREQUENCY_IN_HZ>
+    template <uint16_t f_scl, uint32_t f_clock = MCU_CLOCK_FREQUENCY_IN_HZ>
     static void SCL_frequency_in_kHz();
     
 
@@ -353,6 +307,108 @@ public:
 };
 
 
+// Los siguientes datos proceden de la tabla 1-1 de la application note
+// AVR315.
+template <>
+inline void TWI_basic::SCL_frequency_in_kHz<400u, 16000000uL>()
+{
+    bit_rate_prescaler_value_1();
+    TWBR = 12;
+}
+
+
+template <>
+inline void TWI_basic::SCL_frequency_in_kHz<100u, 16000000uL>()
+{
+    bit_rate_prescaler_value_1();
+    TWBR = 72;
+}
+
+
+template <>
+inline void TWI_basic::SCL_frequency_in_kHz<400u, 14400000uL>()
+{
+    bit_rate_prescaler_value_1();
+    TWBR = 10;
+}
+
+template <>
+inline void TWI_basic::SCL_frequency_in_kHz<100u, 14400000uL>()
+{
+    bit_rate_prescaler_value_1();
+    TWBR = 64;
+}
+
+
+template <>
+inline void TWI_basic::SCL_frequency_in_kHz<400u, 12000000uL>()
+{
+    bit_rate_prescaler_value_1();
+    TWBR = 7;
+}
+
+
+template <>
+inline void TWI_basic::SCL_frequency_in_kHz<100u, 12000000uL>()
+{
+    bit_rate_prescaler_value_1();
+    TWBR = 52;
+}
+
+template <>
+inline void TWI_basic::SCL_frequency_in_kHz<400u, 8000000uL>()
+{
+    bit_rate_prescaler_value_1();
+    TWBR = 2;
+}
+
+
+template <>
+inline void TWI_basic::SCL_frequency_in_kHz<100u, 8000000uL>()
+{
+    bit_rate_prescaler_value_1();
+    TWBR = 32;
+}
+
+template <>
+inline void TWI_basic::SCL_frequency_in_kHz<100u, 4000000uL>()
+{
+    bit_rate_prescaler_value_1();
+    TWBR = 12;
+}
+
+
+template <>
+inline void TWI_basic::SCL_frequency_in_kHz<100u, 3600000uL>()
+{
+    bit_rate_prescaler_value_1();
+    TWBR = 10;
+}
+
+
+template <>
+inline void TWI_basic::SCL_frequency_in_kHz<100u, 2000000uL>()
+{
+    bit_rate_prescaler_value_1();
+    TWBR = 2;
+}
+
+template <>
+inline void TWI_basic::SCL_frequency_in_kHz<50u, 2000000uL>()
+{
+    bit_rate_prescaler_value_1();
+    TWBR = 12;
+}
+
+template <>
+inline void TWI_basic::SCL_frequency_in_kHz<50u, 1000000uL>()
+{
+    bit_rate_prescaler_value_1();
+    TWBR = 2;
+}
+
+
+
 
 // -------------
 // Estado de TWI
@@ -407,7 +463,7 @@ public:
     /// a la que vamos a operar.
     /// f_scl = frecuencia en kilohercios de SCL (tipica: 100 y 400 kHz).
     /// f_clock = frecuencia a la que funciona el reloj del avr.
-    template <uint16_t f_scl, uint32_t f_clock = AVR_CLOCK_FREQUENCY_IN_HZ>
+    template <uint16_t f_scl, uint32_t f_clock = MCU_CLOCK_FREQUENCY_IN_HZ>
     struct on{
 	static void as_a_master()
 	{
@@ -416,14 +472,6 @@ public:
 	    state_ = iostate::good;
 	}
 
-	// Enables as a slave in the address SLAVE_ADDRESS.
-	template <uint8_t TWI_slave_address>
-	static void as_a_slave_in()
-	{
-	    SCL_frequency_in_kHz<f_scl, f_clock>();
-	    init_slave<TWI_slave_address>();
-	    state_ = iostate::good;
-	}
     };
 
 
@@ -497,107 +545,6 @@ private:
     // Error: En caso de error state() != 0
     static uint8_t receive_data(std::byte* data, uint8_t n);
 };
-
-
-// Los siguientes datos proceden de la tabla 1-1 de la application note
-// AVR315.
-template <>
-inline void TWI::SCL_frequency_in_kHz<400u, 16000000uL>()
-{
-    bit_rate_prescaler_value_1();
-    TWBR = 12;
-}
-
-
-template <>
-inline void TWI::SCL_frequency_in_kHz<100u, 16000000uL>()
-{
-    bit_rate_prescaler_value_1();
-    TWBR = 72;
-}
-
-
-template <>
-inline void TWI::SCL_frequency_in_kHz<400u, 14400000uL>()
-{
-    bit_rate_prescaler_value_1();
-    TWBR = 10;
-}
-
-template <>
-inline void TWI::SCL_frequency_in_kHz<100u, 14400000uL>()
-{
-    bit_rate_prescaler_value_1();
-    TWBR = 64;
-}
-
-
-template <>
-inline void TWI::SCL_frequency_in_kHz<400u, 12000000uL>()
-{
-    bit_rate_prescaler_value_1();
-    TWBR = 7;
-}
-
-
-template <>
-inline void TWI::SCL_frequency_in_kHz<100u, 12000000uL>()
-{
-    bit_rate_prescaler_value_1();
-    TWBR = 52;
-}
-
-template <>
-inline void TWI::SCL_frequency_in_kHz<400u, 8000000uL>()
-{
-    bit_rate_prescaler_value_1();
-    TWBR = 2;
-}
-
-
-template <>
-inline void TWI::SCL_frequency_in_kHz<100u, 8000000uL>()
-{
-    bit_rate_prescaler_value_1();
-    TWBR = 32;
-}
-
-template <>
-inline void TWI::SCL_frequency_in_kHz<100u, 4000000uL>()
-{
-    bit_rate_prescaler_value_1();
-    TWBR = 12;
-}
-
-
-template <>
-inline void TWI::SCL_frequency_in_kHz<100u, 3600000uL>()
-{
-    bit_rate_prescaler_value_1();
-    TWBR = 10;
-}
-
-
-template <>
-inline void TWI::SCL_frequency_in_kHz<100u, 2000000uL>()
-{
-    bit_rate_prescaler_value_1();
-    TWBR = 2;
-}
-
-template <>
-inline void TWI::SCL_frequency_in_kHz<50u, 2000000uL>()
-{
-    bit_rate_prescaler_value_1();
-    TWBR = 12;
-}
-
-template <>
-inline void TWI::SCL_frequency_in_kHz<50u, 1000000uL>()
-{
-    bit_rate_prescaler_value_1();
-    TWBR = 2;
-}
 
 
 // Responsable de send_stop

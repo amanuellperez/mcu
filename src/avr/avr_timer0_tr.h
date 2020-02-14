@@ -102,7 +102,7 @@ public:
     // La función clock_period_in_us traduce la forma de hablar del cliente (en
     // microsegundos) en la forma de hablar del avr (en divisor de frecuencia)
     template<uint16_t periodo
-	    , uint32_t clock_frecuencia_en_hz = AVR_CLOCK_FREQUENCY_IN_HZ>
+	    , uint32_t clock_frecuencia_en_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
     static void clock_period_in_us();
 
 // ENCENDIDO/APAGADO DEL TIMER
@@ -110,7 +110,7 @@ public:
     /// 'periodo' es el periodo en microsegundos al que va a funcionar el timer.
     /// clock_frequency_in_hz = es la frecuencia del reloj del AVR.
     template<uint16_t periodo
-	    , uint32_t clock_frequency_in_hz = AVR_CLOCK_FREQUENCY_IN_HZ>
+	    , uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
     static void on() {clock_period_in_us<periodo, clock_frequency_in_hz>();}
 
     /// Paramos el timer.
@@ -242,7 +242,7 @@ public:
 
     /// Encendemos el Timer0
     template<uint16_t periodo
-	    , uint32_t clock_frequency_in_hz = AVR_CLOCK_FREQUENCY_IN_HZ>
+	    , uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
     static void on();
 
     /// Ponemos el contador a cero.

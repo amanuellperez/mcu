@@ -127,6 +127,8 @@ public:
 //    /// Checks whether the output buffer is full.
 //    bool out_is_full() const {return pa_ == p0_();}
 
+// Info
+    constexpr size_type capacity() const {return buffer_size;}
 
 private:
     std::array<std::byte, buffer_size> buffer_; // = [p0, pe)
@@ -138,7 +140,6 @@ private:
     constexpr const std::byte* p0_() const {return buffer_.begin();}
     constexpr const std::byte* pe_() const {return buffer_.end();}
 
-    constexpr size_type capacity() const {return buffer_size;}
 };
 
 template <uint8_t sz>

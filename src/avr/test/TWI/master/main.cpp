@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+// Este microcontrolador dialoga con el test/TWI/slave
 #include "../../../avr_TWI.h"
 #include "../../../avr_USART.h"
 #include "../../../avr_time.h"
