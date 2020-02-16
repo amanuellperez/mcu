@@ -17,17 +17,17 @@
 
 // Este microcontrolador dialoga con el test/TWI/master
 
-#include "../../../avr_TWI_slave.h"
+#include "../../../avr_USART.h" // cambiar de sitio
 #include "../../../avr_TWI.h"
-#include "../../../avr_USART.h"
+#include "../../../avr_TWI_slave.h"
 #include "../../../avr_time.h"
 #include "../../../avr_interrupt.h"
 
 #include <atd_buffer.h>
 
 
-constexpr uint8_t buffer_size = 10;
-using TWI_slave = avr::TWI_slave<avr::TWI_basic, buffer_size>;
+constexpr uint8_t TWI_buffer_size = 10;
+using TWI = avr::TWI_slave<avr::TWI_basic, TWI_buffer_size>;
 
 inline void traza(const char* fname)
 {
@@ -64,29 +64,36 @@ enum class Service{
 constexpr std::byte service1_name {0x34};
 constexpr std::byte service2_name {0x87};
 
-Service read_service_name(std::array<std::byte, buffer_size>& params_in)
+Service read_service_name(std::array<std::byte, TWI_buffer_size>& params_in)
 {
     avr::UART_iostream uart;
+    uart << "read_service_name\n";
 
-    while (!TWI_slave::eor()){ // TODO: ojo: qué pasa si se envia algo diferente?
-	if (TWI_slave::get_area_full()) {
+    while (!TWI::eor()){ // TODO: ojo: qué pasa si se envia algo diferente?
+	if (TWI::rec_bf()) {
 	    uart << "Error: get_area_full!!! buffer muy pequeño!!!\n\n";
-	    TWI_slave::stop_transmission();
+	    TWI::stop_transmission();
 	    return Service::error;
 	}
     } // while
 
-    if (!TWI_slave::eor()){
+    if (!TWI::eor()){
             uart << "Tendría que estar en eor, pero esta en otro estado\n";
-	    TWI_slave::stop_transmission();
+	    TWI::stop_transmission();
 	    return Service::error;
     }
 
-    TWI_slave::streamsize n = TWI_slave::read_buffer(params_in.data(), params_in.size());
+    TWI::streamsize n = TWI::read_buffer(params_in.data(), params_in.size());
+    uart << "Leidos " << (int)n << " bytes\n";
+    if (TWI::rec_bf())
+	uart << "ERROR: estado == rec_bf\n";
+
+    if (TWI::is_listening())
+	uart << "TWI esta listening!\n";
 
     if (n == 0) {
 	uart << "No se ha leído nada!\n";
-	TWI_slave::stop_transmission();
+	TWI::stop_transmission();
 	return Service::error;
     }
 
@@ -102,10 +109,47 @@ Service read_service_name(std::array<std::byte, buffer_size>& params_in)
 
 }
 
+void print_TWI_state()
+{
+    avr::UART_iostream uart;
+    uart << "print_TWI_state = ";
+
+    if (TWI::state() == TWI::iostate::listening)
+	uart << "listening\n";
+
+    else if (TWI::state() == TWI::iostate::eor_data_nack)
+	uart << "data_nack\n";
+
+    else if (TWI::state() == TWI::iostate::bus_error)
+	uart << "bus_error\n";
+
+    else if (TWI::state() == TWI::iostate::rec_bf)
+	uart << "rec_bf\n";
+
+    else if (TWI::state() == TWI::iostate::eor)
+	uart << "eor\n";
+
+    else if (TWI::state() == TWI::iostate::wrt_be)
+	uart << "wrt_be\n";
+
+    else if (TWI::state() == TWI::iostate::eow)
+	uart << "eow\n";
+
+    else if (TWI::state() == TWI::iostate::eow_too_many_data)
+	uart << "eow_too_many_data\n";
+
+    else if (TWI::state() == TWI::iostate::eow_more_data)
+	uart << "eow_more_data\n";
+
+    else
+	uart << "desconocido\n";
+
+}
+
 // params_in[0] = nombre del servicio
 // params_in[...] = resto de parámetros
-void service1(const std::array<std::byte, buffer_size>& params_in,
-		    std::array<std::byte, buffer_size>& params_out)
+void service1(const std::array<std::byte, TWI_buffer_size>& params_in,
+		    std::array<std::byte, TWI_buffer_size>& params_out)
 {
     avr::UART_iostream uart;
     uart << "Ejecutando service1\n";
@@ -114,14 +158,45 @@ void service1(const std::array<std::byte, buffer_size>& params_in,
 	 << static_cast<uint16_t>(params_in[2]) << ", "
 	 << static_cast<uint16_t>(params_in[3]) << '\n';
 
-    // respondemos 1 byte con 45!!!
+    // respondemos 3 byte con 45!!!
     params_out[0] = std::byte{45};
+    params_out[1] = std::byte{50};
+    params_out[2] = std::byte{87};
+
+    print_TWI_state();
+    uart << "Esperamos a que esté wrt_be\n";
+    while (!TWI::wrt_be())
+    { 
+	wait_ms(100);
+	print_TWI_state();
+	
+    }
+
+
+    uint8_t n = TWI::write_buffer(params_out.data(), 3);
+    if (n != 3){
+        uart << "ERROR: write_buffer != 3 (devuelve "
+             << static_cast<uint16_t>(n) << "\n";
+        return;
+    }
+
+    uart << "devolvemos los bytes de salida ...";
+    while (TWI::is_busy())
+    { ; }
+
+    if (TWI::eow())
+	uart << "OK\n";
+    else{
+	uart << "ERROR: ";
+	print_TWI_state();
+    }
+    
 }
 
 
 // params_in[0] = nombre del servicio
 // params_in[...] = resto de parámetros
-void service2(const std::array<std::byte, buffer_size>& params_in)
+void service2(const std::array<std::byte, TWI_buffer_size>& params_in)
 {
     avr::UART_iostream uart;
     uart << "Ejecutando service2\n";
@@ -136,13 +211,14 @@ void test_servidor()
             "entre en el buffer!!!\n\n";
 
     while (1){
-
-	while (TWI_slave::listening()){
+//	uart << "listening ... ";
+	while (TWI::is_listening()){
 	    asm("nop");
 	}
+//	uart << "FIN\n";
 
-	std::array<std::byte, buffer_size> params_in;
-	std::array<std::byte, buffer_size> params_out;
+	std::array<std::byte, TWI_buffer_size> params_in;
+	std::array<std::byte, TWI_buffer_size> params_out;
 
 	// TODO: read_service_name miente! Lee tambien params_in!!! CAMBIARLO!
 	Service srv_name = read_service_name(params_in);
@@ -166,11 +242,11 @@ void test_servidor()
 		break;
 
 	    case Service::unknown:
-		TWI_slave::stop_transmission();
+		TWI::stop_transmission();
 		break;
 
 	    case Service::error:
-		TWI_slave::stop_transmission();
+		TWI::stop_transmission();
 		uart << "Transmission error\n";
 		break;
 	}
@@ -189,12 +265,12 @@ void test_read()
 	 << "Probar con distintos buffer_size\n\n";
 
     while (1){
-	std::byte buffer[buffer_size];
+	std::byte buffer[TWI_buffer_size];
 	
-	while (!TWI_slave::eor()){
+	while (!TWI::eor()){
 
-            if (TWI_slave::get_area_full()) {
-                uint8_t n = TWI_slave::read_buffer(buffer, buffer_size);
+            if (TWI::rec_bf()) {
+                uint8_t n = TWI::read_buffer(buffer, TWI_buffer_size);
                 uart << "\nXXX Recibidos " << static_cast<uint16_t>(n)
                      << " datos:\n";
                 for (uint8_t i = 0; i < n; ++i)
@@ -203,8 +279,8 @@ void test_read()
             }
         } // while
 
-        while (TWI_slave::eor()){
-	if (uint8_t n = TWI_slave::read_buffer(buffer, buffer_size)){
+        while (TWI::eor()){
+	if (uint8_t n = TWI::read_buffer(buffer, TWI_buffer_size)){
 	    uart << "\nFFF Recibidos " << static_cast<uint16_t>(n)  << " datos:\n";
 	    for (uint8_t i = 0; i < n; ++i)
 		uart << '\t' << std::to_integer<uint16_t>(buffer[i]) << '\n';
@@ -229,7 +305,7 @@ int main()
 
     uart << "Empezando\n";
 
-    TWI_slave::on<50>::in<slave_address>();
+    TWI::on<slave_address>();
 
     uart << "TWI enable\n";
     
@@ -241,7 +317,7 @@ int main()
 
 ISR(TWI_vect)
 {
-    TWI_slave::handle_interrupt();
+    TWI::handle_interrupt();
 }
 
 

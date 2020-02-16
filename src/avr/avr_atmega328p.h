@@ -121,7 +121,7 @@ constexpr uint8_t BIT_MASK[29] = {
     constexpr uint8_t TWI_SLAVE_ADDRESS_BIT0 = 1;
     constexpr uint8_t TWI_SLAVE_ADDRESS_BITn = 7;
 
-    // TWI Status register codes
+    // TWI Status register codes TODO: eliminar los codigo en mayusculas
     // -------------------------
     // START has been transmitted  
     constexpr static uint8_t TWI_START = 0x08; 
@@ -153,7 +153,48 @@ constexpr uint8_t BIT_MASK[29] = {
     // Data byte has been received and NACK tramsmitted
     constexpr static uint8_t TWI_MRM_DATA_NACK = 0x58;
    
+    // Modos comunes a transmitter/receiver mode
+    struct __TWI_basic_iostate_master_mode {
+        // START has been transmitted
+        static constexpr uint8_t start = 0x08;
 
+        // Repeated START has been transmitted
+        static constexpr uint8_t repeated_start = 0x10;
+
+        // Arbitration lost in SLA+R/W or data bytes
+        static constexpr uint8_t arbitration_lost = 0x38;
+    };
+
+    // Table 26-3, junto con el diagrama figure 26-12.
+    struct __TWI_basic_iostate_master_transmitter_mode {
+        // SLA+W has been tramsmitted and ACK received
+        static constexpr uint8_t sla_w_ack = 0x18;
+
+        // SLA+W has been tramsmitted and NACK received
+        static constexpr uint8_t sla_w_nack = 0x20;
+
+        // Data byte has been tramsmitted and ACK received
+        static constexpr uint8_t data_ack = 0x28;
+
+        // Data byte has been tramsmitted and NACK received
+        static constexpr uint8_t data_nack = 0x30;
+    };
+
+    // Table 26-4, junto con el diagrama figure 26-14.
+    struct __TWI_basic_iostate_master_receiver_mode {
+
+        // SLA+R has been tramsmitted and ACK received
+        constexpr static uint8_t sla_r_ack = 0x40;
+
+        // SLA+R has been tramsmitted and NACK received
+        constexpr static uint8_t sla_r_nack = 0x48;
+
+        // Data byte has been received and ACK tramsmitted
+        constexpr static uint8_t data_ack = 0x50;
+
+        // Data byte has been received and NACK tramsmitted
+        constexpr static uint8_t data_nack = 0x58;
+    };
 
     // Table 26-5, junto con el diagrama figure 26-16.
     struct __TWI_basic_iostate_slave_transmitter_mode {
@@ -173,6 +214,7 @@ constexpr uint8_t BIT_MASK[29] = {
 	// Last data byte in TWDR has been transmitted. ACK has been received
 	static constexpr uint8_t data_last_byte   = 0xC8;
     };
+
 
 
     // Table 26-6, junto con el diagrama figure 26-18.
@@ -214,11 +256,17 @@ constexpr uint8_t BIT_MASK[29] = {
     };
 
     struct TWI_basic_iostate{
+	using master_mode = __TWI_basic_iostate_master_mode;
+        using master_transmitter_mode =
+			        __TWI_basic_iostate_master_transmitter_mode;
 
-	using slave_receiver_mode    = __TWI_basic_iostate_slave_receiver_mode;
-	using slave_transmitter_mode = __TWI_basic_iostate_slave_transmitter_mode;
+        using master_receiver_mode =
+			        __TWI_basic_iostate_master_receiver_mode;
+        using slave_receiver_mode = __TWI_basic_iostate_slave_receiver_mode;
+        using slave_transmitter_mode =
+				 __TWI_basic_iostate_slave_transmitter_mode;
 
-	// Miscellaneous (table 26-7)
+        // Miscellaneous (table 26-7)
 	// Bus error due to an illegal START or STOP condition
 	static constexpr uint8_t bus_error = 0x00;
 

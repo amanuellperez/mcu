@@ -4,7 +4,7 @@ namespace avr{
 
 uint8_t TWI::send_start()
 {
-    transmit_start();
+    master_transmit_start();
 
     wait_until_finished_its_current_job();
 
@@ -19,7 +19,7 @@ uint8_t TWI::send_start()
 
 uint8_t TWI::send_repeated_start()
 {
-    transmit_repeated_start();
+    master_transmit_repeated_start();
 
     wait_until_finished_its_current_job();
 
@@ -38,7 +38,7 @@ uint8_t TWI::send_data(const std::byte* data, uint8_t n)
     uint8_t i = 0;
     for (; i < n; ++i){
 
-	transmit_byte(data[i]);
+	master_transmit_byte(data[i]);
 	wait_until_finished_its_current_job();
 	
 	if (status() != avr::TWI_MTM_DATA_ACK){

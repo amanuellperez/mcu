@@ -32,7 +32,6 @@
  ****************************************************************************/
 
 #include <cstddef>    // std::byte
-//#include <atd_register.h>
 #include <atd_bit.h>
 
 #include "avr_cfg.h"
@@ -147,6 +146,13 @@ public:
     static void enable()
     { atd::write_bit<TWEN>::to<1>::in(TWCR);}
 
+    // En el ejemplo de la app.note reinicia el master de la siguiente forma:
+    static void master_reset()
+    {
+	atd::write_bits<TWINT, TWEA, TWSTA, TWSTO, TWWC, TWEN, TWIE>::
+	             to<  0  ,   0 ,   0  ,   0  ,   0 ,  1,    0>::in(TWCR);
+    }
+
     /// Set up TWI slave to its initial standby state.
     /// Remember to enable interrupts after initializing the TWI.
     // TWI_on = indica si vamos a gestionar TWI usando interrupciones (=1) o
@@ -154,16 +160,16 @@ public:
     // usar polling para manejar el slave, pero lo dejo configurable ya que
     // carezco de experiencia.
     template <uint8_t TWI_slave_address, uint8_t TWIE_on = 1>
-    static void init_slave()
+    static void slave_init()
     {
 	atd::write_range_bits<TWI_SLAVE_ADDRESS_BIT0,TWI_SLAVE_ADDRESS_BITn>::
 	    to<TWI_slave_address>::in(TWAR); // TWAR = TWI_slave_address;
 
-	reset_slave<TWIE_on>();
+	slave_reset<TWIE_on>();
     }
 
     template <uint8_t TWIE_on>
-    static void reset_slave()
+    static void slave_reset()
     {
 	atd::write_bits<TWINT, TWEA, TWSTA, TWSTO, TWWC, TWEN, TWIE>::
 	             to<  0  ,   1 ,   0  ,   0  ,   0 ,  1, TWIE_on>::in(TWCR);
@@ -210,47 +216,71 @@ public:
     // Actions by Master Mode (see: tables 26-3/4)
     // --------------------------------------------
     /// A START condition will be transmitted when the bus becomes free.
-    static void transmit_start()
+    static void master_transmit_start()
     { atd::write_bits<TWSTA, TWSTO, TWINT>::to<1,0,1>::in(TWCR); }
 
     /// Repeated START will be transmitted.
-    static void transmit_repeated_start()
+    static void master_transmit_repeated_start()
     { atd::write_bits<TWSTA, TWSTO, TWINT>::to<1,0,1>::in(TWCR); }
 
     /// STOP condition will be transmitted.
-    static void transmit_stop()
+    static void master_transmit_stop()
     { atd::write_bits<TWSTA, TWSTO, TWINT>::to<0,1,1>::in(TWCR); }
 
     /// STOP condition followed by a START condition will be transmitted.
-    static void transmit_stop_followed_by_start()
+    static void master_transmit_stop_followed_by_start()
     { atd::write_bits<TWSTA, TWSTO, TWINT>::to<1,1,1>::in(TWCR); }
 
 
     /// SLA+R/W or data byte will be transmitted.
-    static void transmit_byte(uint8_t x)
+    static void master_transmit_byte(uint8_t x)
     {
 	TWDR = x;
 	atd::write_bit<TWSTA, TWSTO, TWINT>::to<0,0,1>::in(TWCR);
     }
 
-    /// Enviamos el byte x. Puede ser un SLA+W/R o datos.
-    static void transmit_byte(std::byte x)
-    { transmit_byte(std::to_integer<uint8_t>(x)); }
+    /// SLA+R/W or data byte will be transmitted.
+    static void master_transmit_byte(std::byte x)
+    {master_transmit_byte(std::to_integer<uint8_t>(x));}
+
+
+//    /// SLA+W will be transmitted to 'slave_address'.
+//    template <uint8_t slave_address>
+//    static void master_transmit_sla_w()
+//    {
+//        master_transmit_byte(SLA_W(slave_address));
+//    }
+
+
+    /// SLA+W will be transmitted to 'slave_address'.
+    static void master_transmit_sla_w(uint8_t slave_address)
+    {
+        master_transmit_byte(SLA_W(slave_address));
+    }
+
+    /// SLA+R will be transmitted to 'slave_address'.
+//    template <uint8_t slave_address>
+//    static void master_transmit_sla_r()
+    static void master_transmit_sla_r(uint8_t slave_address)
+    {
+        master_transmit_byte(SLA_R(slave_address));
+    }
+
 
 
     /// Comenzamos a recibir el siguiente byte, devolviendo
     /// ACK cuando lo hayamos recibido.
-    static void start_receive_data_with_ACK()
-    { atd::write_bit<TWSTA, TWSTO, TWINT, TWEA>::to<0,0,1,1>::in(TWCR);}
+    static void master_receive_data_with_ACK()
+    { atd::write_bits<TWSTA, TWSTO, TWINT, TWEA>::to<0,0,1,1>::in(TWCR);}
 
     /// Comenzamos a recibir el siguiente byte, devolviendo
     /// NACK cuando lo hayamos recibido.
-    static void start_receive_data_with_NACK()
-    { atd::write_bit<TWSTA, TWSTO, TWINT, TWEA>::to<0,0,1,0>::in(TWCR);}
+    static void master_receive_data_with_NACK()
+    { atd::write_bits<TWSTA, TWSTO, TWINT, TWEA>::to<0,0,1,0>::in(TWCR);}
 
 
-    // Actions by Slave Mode (see: tables 26-5/6)
-    // ------------------------------------------
+// Actions by Slave Mode (see: tables 26-5/6)
+// ------------------------------------------
     /// Data byte will be transmitted and NACK should be received.
     static void slave_transmit_byte_received_NACK(std::byte x)
     {
@@ -298,12 +328,16 @@ public:
     }
 
     /// Compone el SLA+W command
-    template <uint8_t TWI_address>
-    static constexpr uint8_t SLA_W() { return (TWI_address << 1); }
+    static constexpr uint8_t SLA_W(uint8_t TWI_address)
+    {
+        return (TWI_address << 1);
+    }
 
     /// Compone el SLA+R command
-    template <uint8_t TWI_address>
-    static constexpr uint8_t SLA_R() { return ((TWI_address << 1) | 0x01); }
+    static constexpr uint8_t SLA_R(uint8_t TWI_address)
+    {
+        return ((TWI_address << 1) | 0x01);
+    }
 };
 
 
@@ -413,234 +447,234 @@ inline void TWI_basic::SCL_frequency_in_kHz<50u, 1000000uL>()
 // -------------
 // Estado de TWI
 // -------------
-enum class __TWI_state{
-    good = 0, 
-    send_start_fail,
-    send_repeated_start_fail,
-    send_address_fail,
-    send_data_fail,
-    receive_data_fail,
-    read_send_command_fail
-};
-
-inline constexpr __TWI_state operator&(__TWI_state a, __TWI_state b)
-{return static_cast<__TWI_state>(static_cast<int>(a) & static_cast<int>(b));}
-
-inline constexpr __TWI_state operator|(__TWI_state a, __TWI_state b)
-{return static_cast<__TWI_state>(static_cast<int>(a) | static_cast<int>(b));}
-
-inline constexpr __TWI_state operator^(__TWI_state a, __TWI_state b)
-{return static_cast<__TWI_state>(static_cast<int>(a) ^ static_cast<int>(b));}
-
-inline constexpr __TWI_state operator~(__TWI_state a)
-{return static_cast<__TWI_state>(~static_cast<int>(a));}
-
-inline constexpr __TWI_state& operator&=(__TWI_state& a, __TWI_state b)
-{return a = a & b;}
-
-inline constexpr __TWI_state& operator|=(__TWI_state& a, __TWI_state b)
-{return a = a | b;}
-
-inline constexpr __TWI_state& operator^=(__TWI_state& a, __TWI_state b)
-{return a = a ^ b;}
-
-inline constexpr bool operator==(__TWI_state a, int b)
-{return static_cast<int>(a) == b;}
-
-inline constexpr bool operator!=(__TWI_state a, int b)
-{return !(a == b);}
-
-
-
-/*!
- *  \brief  Driver de TWI
- */
-class TWI : public TWI_basic{
-public:
-    using iostate = __TWI_state;
-
-    /// Enables TWI interface definiendo la frecuencia del SCL 
-    /// a la que vamos a operar.
-    /// f_scl = frecuencia en kilohercios de SCL (tipica: 100 y 400 kHz).
-    /// f_clock = frecuencia a la que funciona el reloj del avr.
-    template <uint16_t f_scl, uint32_t f_clock = MCU_CLOCK_FREQUENCY_IN_HZ>
-    struct on{
-	static void as_a_master()
-	{
-	    SCL_frequency_in_kHz<f_scl, f_clock>();
-	    enable();
-	    state_ = iostate::good;
-	}
-
-    };
-
-
-
-    /// Turn off TWI.
-    static void off() {disable();}
-
-    /// Recibe del dispositivo de dirección address, n bytes, escribiéndolos
-    /// en data[0-n). 
-    /// Return: Devuelve el número de bytes recibidos.
-    /// Error: en caso de error, state() != 0.
-    template <uint8_t TWI_address>
-    static uint8_t read(const std::byte& command, // byte que enviamos
-		 std::byte* data,	// donde almacenamos los datos
-		 uint8_t n);		// número FIJO de bytes a leer
-
-
-
-
-    /// Escribe los bytes data[0-n) en el dispositivo de dirección address.
-    /// Return: Devuelve el número de bytes escritos.
-    /// Error: en caso de error, state() != 0.
-    template <uint8_t TWI_address>
-    static uint8_t write(const std::byte* data, uint8_t n);
-
-    template <uint8_t TWI_address>
-    static uint8_t write(std::byte x)
-    {return write<TWI_address>(&x, 1);}
-
-
-// state
-    static iostate state() {return state_;}
-
-
-private:
-// Data
-    inline static iostate state_;
-
-    // Es fundamental enviar send_stop en caso de que falle algo para poder
-    // seguir con las comunicaciones. 
-    struct Stop_transmission;
-
-// Functions
-    // Transmit start y espera hasta finalizar la transmisión.
-    // Return:	on success 1
-    //		on error 0
-    static uint8_t send_start();
-    static uint8_t send_repeated_start();
-
-    // Transmit SLA+W y espera hasta finalizar la transmisión.
-    // Return:	on success 1
-    //		on error 0
-    // Error: En caso de error state() != 0
-    template <uint8_t TWI_address>
-    static uint8_t send_sla_w();
-
-    // Transmit SLA+R y espera hasta finalizar la transmisión.
-    // Return:	on success 1
-    //		on error 0
-    // Error: En caso de error state() != 0
-    template <uint8_t TWI_address>
-    static uint8_t send_sla_r();
-
-    // Transmit data[0-n) y espera hasta finalizar la transmisión.
-    // Return:	the number of bytes written.
-    // Error: En caso de error state() != 0
-    static uint8_t send_data(const std::byte* data, uint8_t n);
-
-    // Receive n bytes almacenandolos en data[0-n).
-    // Return:	the number of bytes written.
-    // Error: En caso de error state() != 0
-    static uint8_t receive_data(std::byte* data, uint8_t n);
-};
-
-
-// Responsable de send_stop
-struct TWI::Stop_transmission{
-    ~Stop_transmission() {TWI_basic::transmit_stop();}
-};
-
-
-template <uint8_t TWI_address>
-uint8_t TWI::send_sla_w()
-{
-    // write = 0, luego basta con hacer un shift a la izda
-    transmit_byte(SLA_W<TWI_address>());
-
-    wait_until_finished_its_current_job();
-
-    if (status() != TWI_MTM_ADDRESS_ACK){
-	state_ = iostate::send_address_fail;
-	return 0;
-    }
-
-    return 1;
-}
-
-
-template <uint8_t TWI_address>
-uint8_t TWI::send_sla_r()
-{
-    transmit_byte(SLA_R<TWI_address>());
-
-    wait_until_finished_its_current_job();
-
-    if (status() != TWI_MRM_ADDRESS_ACK){
-	state_ = iostate::send_address_fail;
-	return 0;
-    }
-
-    return 1;
-}
-
-
-
-
-// See table 26-2
-template <uint8_t TWI_address>
-uint8_t TWI::write(const std::byte* data, uint8_t n)
-{
-    // DUDA: si esta en mal estado devolvemos error???
-    // DUDA: si TWI no está enable, ¿lo encendemos? (<- no, ya que 
-    // hay que indicar la frecuencia) ¿error?
-    state_ = iostate::good;
-
-    Stop_transmission stop;
-
-    if (send_start() == 0)
-	return 0;
-
-    if (send_sla_w<TWI_address>() == 0)
-	return 0;
-
-    return send_data(data, n);
-}
-
-
-template <uint8_t TWI_address>
-uint8_t TWI::read(const std::byte& command, // byte que enviamos
-	     std::byte* data,	// donde almacenamos los datos
-	     uint8_t n)		// número FIJO de bytes a leer
-{
-    // DUDA: si esta en mal estado devolvemos error???
-    // DUDA: si TWI no está enable, ¿lo encendemos? (<- no, ya que 
-    // hay que indicar la frecuencia) ¿error?
-    state_ = iostate::good;
-
-    Stop_transmission stop;
-
-    if (send_start() == 0)
-	return 0;
-
-    if (send_sla_w<TWI_address>() == 0)
-	return 0;
-
-    if (send_data(&command, 1) != 1){
-	state_ = iostate::read_send_command_fail;
-	return 0;
-    }
-
-    if (send_repeated_start() == 0)
-	return 0;
-
-    if (send_sla_r<TWI_address>() == 0)
-	return 0;
-
-    return receive_data(data, n);
-}
-
+//enum class __TWI_state{
+//    good = 0, 
+//    send_start_fail,
+//    send_repeated_start_fail,
+//    send_address_fail,
+//    send_data_fail,
+//    receive_data_fail,
+//    read_send_command_fail
+//};
+//
+//inline constexpr __TWI_state operator&(__TWI_state a, __TWI_state b)
+//{return static_cast<__TWI_state>(static_cast<int>(a) & static_cast<int>(b));}
+//
+//inline constexpr __TWI_state operator|(__TWI_state a, __TWI_state b)
+//{return static_cast<__TWI_state>(static_cast<int>(a) | static_cast<int>(b));}
+//
+//inline constexpr __TWI_state operator^(__TWI_state a, __TWI_state b)
+//{return static_cast<__TWI_state>(static_cast<int>(a) ^ static_cast<int>(b));}
+//
+//inline constexpr __TWI_state operator~(__TWI_state a)
+//{return static_cast<__TWI_state>(~static_cast<int>(a));}
+//
+//inline constexpr __TWI_state& operator&=(__TWI_state& a, __TWI_state b)
+//{return a = a & b;}
+//
+//inline constexpr __TWI_state& operator|=(__TWI_state& a, __TWI_state b)
+//{return a = a | b;}
+//
+//inline constexpr __TWI_state& operator^=(__TWI_state& a, __TWI_state b)
+//{return a = a ^ b;}
+//
+//inline constexpr bool operator==(__TWI_state a, int b)
+//{return static_cast<int>(a) == b;}
+//
+//inline constexpr bool operator!=(__TWI_state a, int b)
+//{return !(a == b);}
+//
+//
+//
+///*!
+// *  \brief  Driver de TWI
+// */
+//class TWI : public TWI_basic{
+//public:
+//    using iostate = __TWI_state;
+//
+//    /// Enables TWI interface definiendo la frecuencia del SCL 
+//    /// a la que vamos a operar.
+//    /// f_scl = frecuencia en kilohercios de SCL (tipica: 100 y 400 kHz).
+//    /// f_clock = frecuencia a la que funciona el reloj del avr.
+//    template <uint16_t f_scl, uint32_t f_clock = MCU_CLOCK_FREQUENCY_IN_HZ>
+//    struct on{
+//	static void as_a_master()
+//	{
+//	    SCL_frequency_in_kHz<f_scl, f_clock>();
+//	    enable();
+//	    state_ = iostate::good;
+//	}
+//
+//    };
+//
+//
+//
+//    /// Turn off TWI.
+//    static void off() {disable();}
+//
+//    /// Recibe del dispositivo de dirección address, n bytes, escribiéndolos
+//    /// en data[0-n). 
+//    /// Return: Devuelve el número de bytes recibidos.
+//    /// Error: en caso de error, state() != 0.
+//    template <uint8_t TWI_address>
+//    static uint8_t read(const std::byte& command, // byte que enviamos
+//		 std::byte* data,	// donde almacenamos los datos
+//		 uint8_t n);		// número FIJO de bytes a leer
+//
+//
+//
+//
+//    /// Escribe los bytes data[0-n) en el dispositivo de dirección address.
+//    /// Return: Devuelve el número de bytes escritos.
+//    /// Error: en caso de error, state() != 0.
+//    template <uint8_t TWI_address>
+//    static uint8_t write(const std::byte* data, uint8_t n);
+//
+//    template <uint8_t TWI_address>
+//    static uint8_t write(std::byte x)
+//    {return write<TWI_address>(&x, 1);}
+//
+//
+//// state
+//    static iostate state() {return state_;}
+//
+//
+//private:
+//// Data
+//    inline static iostate state_;
+//
+//    // Es fundamental enviar send_stop en caso de que falle algo para poder
+//    // seguir con las comunicaciones. 
+//    struct Stop_transmission;
+//
+//// Functions
+//    // Transmit start y espera hasta finalizar la transmisión.
+//    // Return:	on success 1
+//    //		on error 0
+//    static uint8_t send_start();
+//    static uint8_t send_repeated_start();
+//
+//    // Transmit SLA+W y espera hasta finalizar la transmisión.
+//    // Return:	on success 1
+//    //		on error 0
+//    // Error: En caso de error state() != 0
+//    template <uint8_t TWI_address>
+//    static uint8_t send_sla_w();
+//
+//    // Transmit SLA+R y espera hasta finalizar la transmisión.
+//    // Return:	on success 1
+//    //		on error 0
+//    // Error: En caso de error state() != 0
+//    template <uint8_t TWI_address>
+//    static uint8_t send_sla_r();
+//
+//    // Transmit data[0-n) y espera hasta finalizar la transmisión.
+//    // Return:	the number of bytes written.
+//    // Error: En caso de error state() != 0
+//    static uint8_t send_data(const std::byte* data, uint8_t n);
+//
+//    // Receive n bytes almacenandolos en data[0-n).
+//    // Return:	the number of bytes written.
+//    // Error: En caso de error state() != 0
+//    static uint8_t receive_data(std::byte* data, uint8_t n);
+//};
+//
+//
+//// Responsable de send_stop
+//struct TWI::Stop_transmission{
+//    ~Stop_transmission() {TWI_basic::master_transmit_stop();}
+//};
+//
+//
+//template <uint8_t TWI_address>
+//uint8_t TWI::send_sla_w()
+//{
+//    // write = 0, luego basta con hacer un shift a la izda
+//    master_transmit_byte(SLA_W(TWI_address));
+//
+//    wait_until_finished_its_current_job();
+//
+//    if (status() != TWI_MTM_ADDRESS_ACK){
+//	state_ = iostate::send_address_fail;
+//	return 0;
+//    }
+//
+//    return 1;
+//}
+//
+//
+//template <uint8_t TWI_address>
+//uint8_t TWI::send_sla_r()
+//{
+//    master_transmit_byte(SLA_R<TWI_address>());
+//
+//    wait_until_finished_its_current_job();
+//
+//    if (status() != TWI_MRM_ADDRESS_ACK){
+//	state_ = iostate::send_address_fail;
+//	return 0;
+//    }
+//
+//    return 1;
+//}
+//
+//
+//
+//
+//// See table 26-2
+//template <uint8_t TWI_address>
+//uint8_t TWI::write(const std::byte* data, uint8_t n)
+//{
+//    // DUDA: si esta en mal estado devolvemos error???
+//    // DUDA: si TWI no está enable, ¿lo encendemos? (<- no, ya que 
+//    // hay que indicar la frecuencia) ¿error?
+//    state_ = iostate::good;
+//
+//    Stop_transmission stop;
+//
+//    if (send_start() == 0)
+//	return 0;
+//
+//    if (send_sla_w<TWI_address>() == 0)
+//	return 0;
+//
+//    return send_data(data, n);
+//}
+//
+//
+//template <uint8_t TWI_address>
+//uint8_t TWI::read(const std::byte& command, // byte que enviamos
+//	     std::byte* data,	// donde almacenamos los datos
+//	     uint8_t n)		// número FIJO de bytes a leer
+//{
+//    // DUDA: si esta en mal estado devolvemos error???
+//    // DUDA: si TWI no está enable, ¿lo encendemos? (<- no, ya que 
+//    // hay que indicar la frecuencia) ¿error?
+//    state_ = iostate::good;
+//
+//    Stop_transmission stop;
+//
+//    if (send_start() == 0)
+//	return 0;
+//
+//    if (send_sla_w<TWI_address>() == 0)
+//	return 0;
+//
+//    if (send_data(&command, 1) != 1){
+//	state_ = iostate::read_send_command_fail;
+//	return 0;
+//    }
+//
+//    if (send_repeated_start() == 0)
+//	return 0;
+//
+//    if (send_sla_r<TWI_address>() == 0)
+//	return 0;
+//
+//    return receive_data(data, n);
+//}
+//
 
 
 }// namespace
