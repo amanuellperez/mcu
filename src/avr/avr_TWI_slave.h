@@ -69,7 +69,7 @@ enum class __TWI_slave_state{
     eow_too_many_data= (5 << 2)|listening, 
     eow		    = (6 << 2)|listening, 
 
-    eor		    = (10 << 2) |listening,
+    eor		    = (10 << 2) |waiting,
     rec_bf	    = (11 << 2) |waiting,
     eor_data_nack   = (12 << 2) |listening,
 
@@ -171,6 +171,8 @@ public:
 			{ return state_ == iostate::eow_too_many_data; }
     static bool eow_more_data() {return state_ == iostate::eow_more_data;}
 
+// genéricos
+    static bool ok() {return state_ == iostate::ok;}
 
     // TODO: private
     // Estado en el que queda el slave después de ejecutar algo.
@@ -261,15 +263,16 @@ void TWI_slave<TWI, bsz>::srm_data_nack()
 template <typename TWI, uint8_t bsz>
 void TWI_slave<TWI, bsz>::srm_stop_or_repeated_start()
 {
-avr::UART_iostream uart;
-uart << "srm_stop_or_repeated_start ... TWCR = ";
+//avr::UART_iostream uart;
+//uart << "srm_stop_or_repeated_start ... TWCR = ";
     state_ = iostate::eor;
 
-//    TWI::interrupt_disable();  
-    TWI::not_addressed_slave_mode(); // <-- TODO: esto clears TWINT!!!
+    TWI::interrupt_disable();  
+
+//    TWI::not_addressed_slave_mode(); // <-- TODO: esto clears TWINT!!!
     // si quiero que eor sea un estado waiting, no llamarlo????
-uart << (int) TWCR << '\n';
-uart << "TWAR = " << (int) TWAR << '\n';
+//uart << (int) TWCR << " <--- TWCR\n";
+//uart << "TWAR = " << (int) TWAR << '\n';
 
 }
 
@@ -289,8 +292,8 @@ void TWI_slave<TWI, bsz>::stm_sla_r()
 template <typename TWI, uint8_t bsz>
 void TWI_slave<TWI, bsz>::stm_send_data()
 {
-avr::UART_iostream uart;
-uart << "stm_send_data\n";
+//avr::UART_iostream uart;
+//uart << "stm_send_data\n";
     if (buffer_.out_size() == 1)
 	TWI::slave_transmit_byte_received_NACK(buffer_.out_read_one());
 
@@ -390,8 +393,6 @@ template <typename TWI, uint8_t bsz>
 TWI_slave<TWI, bsz>::streamsize 
 TWI_slave<TWI, bsz>::read_buffer(std::byte* buffer, streamsize N)
 {
-//    avr::Interrupts_lock lock;
-
     if (is_busy())
 	return 0;
  
@@ -406,6 +407,7 @@ TWI_slave<TWI, bsz>::read_buffer(std::byte* buffer, streamsize N)
     else if (eor()){
 	if (buffer_.in_is_empty()){
 	    state_ = iostate::listening;
+	    TWI::not_addressed_slave_mode(); 
 	    TWI::interrupt_enable();
 	}
     }
@@ -423,8 +425,8 @@ TWI_slave<TWI, bsz>::read_buffer(std::byte* buffer, streamsize N)
 template <typename TWI, uint8_t bsz>
 void TWI_slave<TWI, bsz>::handle_interrupt()
 {
-avr::UART_iostream uart;
-uart << ">>> handle_interrupt: ";
+//avr::UART_iostream uart;
+//uart << ">>> handle_interrupt: ";
 
     using TWI_iostate = TWI_basic_iostate;
     using SRM = TWI_basic_iostate::slave_receiver_mode;
@@ -435,23 +437,23 @@ uart << ">>> handle_interrupt: ";
     // slave receiver mode
     // -------------------
 	case SRM::sla_w: 
-uart << "SRM::sla_w:\n";
+//uart << "SRM::sla_w:\n";
 	    srm_sla_w(); 
 	    break;
 
 	case SRM::sla_w_data_ack:
-uart << "SRM::sla_w_data_ack\n";
+//uart << "SRM::sla_w_data_ack\n";
 	    srm_data_ack();
 	    break;
 
 	case SRM::sla_w_data_nack:
-uart << "SRM::sla_w_data_nack\n";
+//uart << "SRM::sla_w_data_nack\n";
 	    srm_data_nack();
             break;
 
 
 	case SRM::stop_or_repeated_start:
-uart << "SRM::stop_or_repeated_start\n";
+//uart << "SRM::stop_or_repeated_start\n";
 	    srm_stop_or_repeated_start();
             break;
 
@@ -460,17 +462,17 @@ uart << "SRM::stop_or_repeated_start\n";
     // slave transmitter mode
     // ----------------------
 	case STM::sla_r:
-uart << "STM::sla_r\n";
+//uart << "STM::sla_r\n";
 	    stm_sla_r();
 	    break;
 
 	case STM::data_ack:
-uart << "STM::data_ack\n";
+//uart << "STM::data_ack\n";
 	    stm_data_ack();
 	    break;
 
 	case STM::data_nack:
-uart << "STM::data_nack\n";
+//uart << "STM::data_nack\n";
 	    stm_data_nack();
 	    break;
 
@@ -478,7 +480,7 @@ uart << "STM::data_nack\n";
     // miscellaneous states
     // --------------------
 	case TWI_iostate::bus_error:
-uart << "TWI_iostate::bus_error\n";
+//uart << "TWI_iostate::bus_error\n";
 	    bus_error();
             break;
 

@@ -231,9 +231,12 @@ public:
     static bool eow() {return state_ == iostate::eow;}
     static bool eow_data_nack() {return state_ == iostate::eow_data_nack;}
 
+// de lectura
     static bool eor() {return state_ == iostate::eor;}
     static bool eor_bf() {return state_ == iostate::eor_bf;}
 
+// genérico
+    static bool ok() {return state_ == iostate::ok;}
 
 private:
     // FUNDAMENTAL: busy_ tiene que ser volatile, ya que lo voy a usar:
@@ -279,16 +282,16 @@ private:
 
     static void twi_transmit_start()
     {
-    avr::UART_iostream uart;
-    uart << ">>> twi_transmit_start\n";
+//    avr::UART_iostream uart;
+//    uart << ">>> twi_transmit_start\n";
 	if (state_ == iostate::eow or state_ == iostate::eor){
 	    TWI::master_transmit_repeated_start();
-	    uart << "* * * master_transmit_repeated_start\n";
+//	    uart << "* * * master_transmit_repeated_start\n";
 	}
 
 	else{
 	    TWI::master_transmit_start();
-	    uart << "* * * master_transmit_start\n";
+//	    uart << "* * * master_transmit_start\n";
 	}
     }
 
@@ -328,21 +331,21 @@ private:
 template <typename TWI, uint8_t bsz>
 void TWI_master<TWI, bsz>::mm_start(uint8_t slave_address)
 {
-avr::UART_iostream uart;
-uart << "mm_start ... (state = ";
-if (state_ == iostate::transmitting)
-    uart << "transmitting)\n";
-else
-    uart << "receiving)\n";
+//avr::UART_iostream uart;
+//uart << "mm_start ... (state = ";
+//if (state_ == iostate::transmitting)
+//    uart << "transmitting)\n";
+//else
+//    uart << "receiving)\n";
 
     if (state_ == iostate::transmitting){
 	TWI::master_transmit_sla_w(slave_address);
-uart << "SLA+W\n";
+//uart << "SLA+W\n";
     }
 
     else if (state_ == iostate::receiving){
 	TWI::master_transmit_sla_r(slave_address);
-uart << "SLA+R = " << (int) TWI::SLA_R(slave_address) << "\n";
+//uart << "SLA+R = " << (int) TWI::SLA_R(slave_address) << "\n";
     }
 }
 
@@ -471,7 +474,9 @@ void TWI_master<TWI, bsz>::mrm_data_nack()
 //   --nread_;
 
 //    if (nread_ == 0)	<-- Si el programa funciona esto nunca se dará.
+    TWI::interrupt_disable();
     state_ = iostate::eor_bf;
+
 
 
 }
@@ -481,8 +486,8 @@ void TWI_master<TWI, bsz>::mrm_data_nack()
 template <typename TWI, uint8_t bsz>
 TWI_master<TWI, bsz>::streamsize TWI_master<TWI, bsz>::read(streamsize n)
 {
-avr::UART_iostream uart;
-uart << "TWI_master::read(" << n << ")\n";
+//avr::UART_iostream uart;
+//uart << "TWI_master::read(" << n << ")\n";
 
     if (is_busy() or n == 0)  // = precondition
 	return 0;
@@ -495,11 +500,11 @@ uart << "TWI_master::read(" << n << ")\n";
  
     twi_transmit_start();
     state_ = iostate::receiving;
-uart << ".............. state = ";
-if (state_ == iostate::transmitting)
-    uart << "transmitting)\n";
-else
-    uart << "receiving)\n";
+////uart << ".............. state = ";
+//if (state_ == iostate::transmitting)
+//    uart << "transmitting)\n";
+//else
+//    uart << "receiving)\n";
 
     TWI::interrupt_enable();
 
@@ -535,8 +540,9 @@ inline void TWI_master<TWI, bsz>::stop_transmission()
 template <typename TWI, uint8_t bsz>
 void TWI_master<TWI, bsz>::handle_interrupt()
 {
-avr::UART_iostream uart;
-uart << "handle_interrupt ... ";
+//    wait_ms(100);
+//avr::UART_iostream uart;
+//uart << "handle_interrupt ... ";
 
     using TWI_iostate = TWI_basic_iostate;
     using MM = TWI_iostate::master_mode;
@@ -547,12 +553,12 @@ uart << "handle_interrupt ... ";
     // modos comunes a transmitter/receiver mode
     // -----------------------------------------
 	case MM::start:
-uart << "MM::start\n";
+//uart << "MM::start\n";
 	    mm_start(slave_address_);
 	    break;
 
 	case MM::repeated_start:
-uart << "MM::repeated_start\n";
+//uart << "MM::repeated_start\n";
 	    mm_repeated_start(slave_address_);
 	    break;
 
@@ -560,22 +566,22 @@ uart << "MM::repeated_start\n";
     // master receiver mode
     // -------------------
 	case MRM::sla_r_ack:
-uart << "MRM::sla_r_ack\n";
+//uart << "MRM::sla_r_ack\n";
 	    mrm_sla_r_ack();
 	    break;
 
 	case MRM::sla_r_nack:
-uart << "MRM::sla_r_nack\n";
+//uart << "MRM::sla_r_nack\n";
 	    mrm_sla_r_nack();
 	    break;
 
 	case MRM::data_ack:
-uart << "MRM::data_ack\n";
+//uart << "MRM::data_ack\n";
 	    mrm_data_ack();
 	    break;
 
 	case MRM::data_nack:
-uart << "MRM::data_nack\n";
+//uart << "MRM::data_nack\n";
 	    mrm_data_nack();
 	    break;
 
@@ -584,22 +590,22 @@ uart << "MRM::data_nack\n";
     // master transmitter mode
     // ----------------------
 	case MTM::sla_w_ack:
-uart << "MTM::sla_w_ack\n";
+//uart << "MTM::sla_w_ack\n";
 	    mtm_sla_w_ack();
 	    break;
 
 	case MTM::sla_w_nack:
-uart << "MTM::sla_w_nack\n";
+//uart << "MTM::sla_w_nack\n";
 	    mtm_sla_w_nack();
 	    break;
 
 	case MTM::data_ack:
-uart << "MTM::data_ack\n";
+//uart << "MTM::data_ack\n";
 	    mtm_data_ack();
 	    break;
 
 	case MTM::data_nack:
-uart << "MTM::data_nack\n";
+//uart << "MTM::data_nack\n";
 	    mtm_data_nack();
 	    break;
 
@@ -608,7 +614,7 @@ uart << "MTM::data_nack\n";
     // miscellaneous states
     // --------------------
 	case TWI_iostate::bus_error:
-uart << "TWI_iostate::bus_error\n";
+//uart << "TWI_iostate::bus_error\n";
 	    bus_error();
             break;
 

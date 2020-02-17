@@ -102,7 +102,7 @@ void send_service1()
 	return;
     }
 
-    if (!TWI::eor()){
+    if (!TWI::eor_bf()){
 	uart << "FAIL\n";
 	return;
     }
@@ -118,8 +118,13 @@ void send_service1()
 	uart << '\n';
     }
 
+    if (!TWI::eor())
+	uart << "ERROR: tendría que estar en 'eor'\n";
+
     TWI::stop_transmission();
     
+    if (!TWI::ok())
+	uart << "ERROR: tendría que estar en 'ok'\n";
 
 }
 
@@ -127,7 +132,7 @@ void send_service1()
 void send_service2()
 {
     avr::UART_iostream uart;
-    uart << "Enviando service2\n";
+    uart << " =========== Enviando service2\n";
     uart << "TWI_buffer_size = " << static_cast<uint16_t>(TWI_buffer_size)
          << '\n';
 
@@ -161,7 +166,7 @@ void send_service2()
 void send_service3()
 {
     avr::UART_iostream uart;
-    uart << "Enviando service3\n";
+    uart << " =========== Enviando service3\n";
 
     uint8_t msg[1];
     msg[0] = 0xAA;
@@ -197,10 +202,10 @@ void test_write()
 {
     send_service1();
     wait_ms(500);
-//    send_service2();
-//    wait_ms(500);
-//    send_service3();
-//    wait_ms(500);
+    send_service2();
+    wait_ms(500);
+    send_service3();
+    wait_ms(500);
 
 }
 

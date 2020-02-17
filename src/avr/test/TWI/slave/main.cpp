@@ -69,19 +69,18 @@ Service read_service_name(std::array<std::byte, TWI_buffer_size>& params_in)
     avr::UART_iostream uart;
     uart << "read_service_name\n";
 
+    if (TWI::ok()){
+	uart << "ERROR: state = ok. Devolvemos control\n";
+	return Service::error;
+    }
+
     while (!TWI::eor()){ // TODO: ojo: qué pasa si se envia algo diferente?
-	if (TWI::rec_bf()) {
-	    uart << "Error: get_area_full!!! buffer muy pequeño!!!\n\n";
-	    TWI::stop_transmission();
-	    return Service::error;
-	}
+	uart << "Esperando a TWI::eor\n";
     } // while
 
-    if (!TWI::eor()){
-            uart << "Tendría que estar en eor, pero esta en otro estado\n";
-	    TWI::stop_transmission();
-	    return Service::error;
-    }
+
+    if (TWI::is_busy())
+	uart << "ERROR: TWI::is_busy!!!\n";
 
     TWI::streamsize n = TWI::read_buffer(params_in.data(), params_in.size());
     uart << "Leidos " << (int)n << " bytes\n";
@@ -152,7 +151,7 @@ void service1(const std::array<std::byte, TWI_buffer_size>& params_in,
 		    std::array<std::byte, TWI_buffer_size>& params_out)
 {
     avr::UART_iostream uart;
-    uart << "Ejecutando service1\n";
+    uart << "--------- Ejecutando service1\n";
     uart << "params_in: "
 	 << static_cast<uint16_t>(params_in[1]) << ", "
 	 << static_cast<uint16_t>(params_in[2]) << ", "
@@ -199,7 +198,7 @@ void service1(const std::array<std::byte, TWI_buffer_size>& params_in,
 void service2(const std::array<std::byte, TWI_buffer_size>& params_in)
 {
     avr::UART_iostream uart;
-    uart << "Ejecutando service2\n";
+    uart << "-------------- Recibido service2\n";
 }
 
 void test_servidor()
@@ -211,11 +210,11 @@ void test_servidor()
             "entre en el buffer!!!\n\n";
 
     while (1){
-//	uart << "listening ... ";
-	while (TWI::is_listening()){
+	uart << "listening ... ";
+	while (!TWI::eor()){
 	    asm("nop");
 	}
-//	uart << "FIN\n";
+	uart << "FIN\n";
 
 	std::array<std::byte, TWI_buffer_size> params_in;
 	std::array<std::byte, TWI_buffer_size> params_out;
@@ -239,6 +238,7 @@ void test_servidor()
 		// Ejemplo: no tiene parametros de entrada, pero sí de salida
 		service2(params_out); 
 //		write_params_out(params_out);
+		TWI::stop_transmission();
 		break;
 
 	    case Service::unknown:
@@ -251,6 +251,8 @@ void test_servidor()
 		break;
 	}
 
+	if (!TWI::ok())
+	    uart << "ERROR: state != ok\n";
     }
 }
 
