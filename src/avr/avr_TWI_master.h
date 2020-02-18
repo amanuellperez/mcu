@@ -29,7 +29,9 @@
  *	Es un proyecto de aprendizaje así que es posible que cambie bastante
  *  en el futuro.
  *
- *	
+ *  - TIPO DE USUARIO: de bajo nivel. Tiene que saber lo que hace. No impongo
+ *  muchas precondiciones en código.
+ *
  *  - HISTORIA:
  *    A.Manuel L.Perez
  *    14/02/2020 v0.0
@@ -101,26 +103,6 @@ bool __TWI_master_state_is_idle(__TWI_master_state a)
 // del protocolo TWI (I2C), no usar nada del avr. De esa forma se podrá
 // desvincular del avr en el futuro.
 //
-// El usuario es el que tiene que controlar el protocolo, es quien decide si
-// se envia una nueva petición o finaliza la transmisión:
-//	Ej 1: S|SLA+W|...|P
-//	    write(...);
-//	    while (is_busy()) { ; }
-//	    if (eow)
-//		 stop_transmission();
-//
-//	Ej 2: S|SLA+W|...|R|SLA+R|...|P
-//	    write(...);
-//	    while (is_busy()) { ; }
-//	    if (!eow)
-//		 error();
-//	    read(n);
-//	    while (is_busy()) { ; }
-//	    if (eor){
-//		read_buffer(...)
-//		stop_transmission(); 
-//	    }
-//  
 //  DUDAS 
 //	+ Si hay un error de protocolo y el master quiere recibir datos pero 
 //	  el slave no envía datos se queda colgado esperando a recibir datos. 
@@ -148,17 +130,23 @@ public:
     }
 
     /// Pone el master en receiver mode y comienza a leer. Lee exactamente 
-    /// 'n' bytes. En caso de que n > buffer_size para la transmisión no
-    /// leyendo nada, poniendo el estado en eor_bne.
+    /// 'n' bytes. En caso de que n > buffer_size no hace nada.
     /// Returns: número de bytes que va a leer.
     /// Devuelve 0 cuando: 
     ///		1. El dispositivo está ocupado.
-    ///		2. Cuando n > buffer_size.
+    ///		2. Cuando n > buffer_size or n == 0.
     /// En caso contrario siempre devuelve 'n'.
     // FUTURO: si se usa esto bastante, relajarlo. Si n > buffer_size que 
     // lea n buffer_size, y pase a eor_bne, esperando al usuario que llame a
     // read_buffer, y después continue leyendo.
-    static streamsize read(streamsize n);
+
+    template <uint8_t slave_address> 
+    static streamsize read_from(streamsize n)
+    {
+	slave_address_ = slave_address;
+	return read(n);
+    }
+
 
     /// Lee el buffer del dispositivo almacenándolos en q[0,N).
     /// Lee como máximo N bytes.
@@ -172,6 +160,7 @@ public:
     static streamsize read_buffer(std::byte* q, streamsize N);
 
 
+
     /// Escribe en el buffer de salida buf[0, n) y comienza el envío por TWI.
     /// Para ver si ha acabado la transmisión hay que mirar if (is_busy())
     /// wait();
@@ -181,8 +170,12 @@ public:
     /// versión está limitada a enviar el buffer completo de una sola vez (no
     /// se puede escribir poco a poco). Si en el futuro se usa, cambiarlo y
     /// darle más flexibilidad. Esta es una versión de aprendizaje.
+    // Observar que tal como está implementado se puede pasar de
+    // waiting/eor_bf a transmitting. De momento no estoy imponiendo en código
+    // el diagrama de estados. Doy por supuesto que el usuario sabe lo que
+    // hace.
     template <uint8_t slave_address> // tiene que estar definido en tiempo de compilación!!!
-    static streamsize write(const std::byte* buf, streamsize n)
+    static streamsize write_to(const std::byte* buf, streamsize n)
     {
 	if (is_busy())	// precondition
 	    return 0;
@@ -256,11 +249,11 @@ private:
     //		slave_address.
     //
     //	     Dos formas de implementar esto:
-    //	     1. En write<slave_address>(...) enviamos start, esperamos a que
+    //	     1. En write_to<slave_address>(...) enviamos start, esperamos a que
     //	        TWI responda que lo ha enviado y enviamos sla+w. No
     //	        necesitamos memorizar slave_address pero bloqueamos write a la
     //	        espera de que se finalice el envio del 'start'.
-    //	     2. En write<slave_address>(...) enviamos start y memorizamos
+    //	     2. En write_to<slave_address>(...) enviamos start y memorizamos
     //	        slave_address_, devolviendo el control al usuario. Cuando TWI
     //	        responde que ha enviado 'start' enviamos sla+w. No bloqueamos
     //	        write, pero tenemos que memorizar. De momento pruebo a usar
@@ -279,21 +272,12 @@ private:
 	TWI::interrupt_disable();   // es master, nunca va a estar a la escucha
     }
 
+    // Implementación de read_from
+    static streamsize read(streamsize n);
 
-    static void twi_transmit_start()
-    {
-//    avr::UART_iostream uart;
-//    uart << ">>> twi_transmit_start\n";
-	if (state_ == iostate::eow or state_ == iostate::eor){
-	    TWI::master_transmit_repeated_start();
-//	    uart << "* * * master_transmit_repeated_start\n";
-	}
-
-	else{
-	    TWI::master_transmit_start();
-//	    uart << "* * * master_transmit_start\n";
-	}
-    }
+    // Inicia una nueva transmisión, enviando START o REPEATED START,
+    // dependiendo de si estabamos en medio de una transmisión o no.
+    static void twi_transmit_start();
 
 // Respuesta a los estados comunes
     static void mm_start(uint8_t slave_address);
@@ -331,22 +315,11 @@ private:
 template <typename TWI, uint8_t bsz>
 void TWI_master<TWI, bsz>::mm_start(uint8_t slave_address)
 {
-//avr::UART_iostream uart;
-//uart << "mm_start ... (state = ";
-//if (state_ == iostate::transmitting)
-//    uart << "transmitting)\n";
-//else
-//    uart << "receiving)\n";
-
-    if (state_ == iostate::transmitting){
+    if (state_ == iostate::transmitting)
 	TWI::master_transmit_sla_w(slave_address);
-//uart << "SLA+W\n";
-    }
 
-    else if (state_ == iostate::receiving){
+    else if (state_ == iostate::receiving)
 	TWI::master_transmit_sla_r(slave_address);
-//uart << "SLA+R = " << (int) TWI::SLA_R(slave_address) << "\n";
-    }
 }
 
 
@@ -471,24 +444,26 @@ template <typename TWI, uint8_t bsz>
 void TWI_master<TWI, bsz>::mrm_data_nack()
 {
     buffer_.in_write_one(TWI::data());
-//   --nread_;
-
-//    if (nread_ == 0)	<-- Si el programa funciona esto nunca se dará.
     TWI::interrupt_disable();
     state_ = iostate::eor_bf;
-
-
-
 }
 
 
+//	if (is_busy() or is_waiting()) master_transmit_repeated_start();
+//	else master_transmit_start();
+template <typename TWI, uint8_t bsz>
+void TWI_master<TWI, bsz>::twi_transmit_start()
+{
+    if (is_idle())
+	TWI::master_transmit_start();
+
+    else
+	TWI::master_transmit_repeated_start();
+}
 
 template <typename TWI, uint8_t bsz>
 TWI_master<TWI, bsz>::streamsize TWI_master<TWI, bsz>::read(streamsize n)
 {
-//avr::UART_iostream uart;
-//uart << "TWI_master::read(" << n << ")\n";
-
     if (is_busy() or n == 0)  // = precondition
 	return 0;
 
@@ -500,11 +475,6 @@ TWI_master<TWI, bsz>::streamsize TWI_master<TWI, bsz>::read(streamsize n)
  
     twi_transmit_start();
     state_ = iostate::receiving;
-////uart << ".............. state = ";
-//if (state_ == iostate::transmitting)
-//    uart << "transmitting)\n";
-//else
-//    uart << "receiving)\n";
 
     TWI::interrupt_enable();
 
@@ -540,10 +510,6 @@ inline void TWI_master<TWI, bsz>::stop_transmission()
 template <typename TWI, uint8_t bsz>
 void TWI_master<TWI, bsz>::handle_interrupt()
 {
-//    wait_ms(100);
-//avr::UART_iostream uart;
-//uart << "handle_interrupt ... ";
-
     using TWI_iostate = TWI_basic_iostate;
     using MM = TWI_iostate::master_mode;
     using MRM = TWI_basic_iostate::master_receiver_mode;
@@ -553,12 +519,10 @@ void TWI_master<TWI, bsz>::handle_interrupt()
     // modos comunes a transmitter/receiver mode
     // -----------------------------------------
 	case MM::start:
-//uart << "MM::start\n";
 	    mm_start(slave_address_);
 	    break;
 
 	case MM::repeated_start:
-//uart << "MM::repeated_start\n";
 	    mm_repeated_start(slave_address_);
 	    break;
 
@@ -566,22 +530,18 @@ void TWI_master<TWI, bsz>::handle_interrupt()
     // master receiver mode
     // -------------------
 	case MRM::sla_r_ack:
-//uart << "MRM::sla_r_ack\n";
 	    mrm_sla_r_ack();
 	    break;
 
 	case MRM::sla_r_nack:
-//uart << "MRM::sla_r_nack\n";
 	    mrm_sla_r_nack();
 	    break;
 
 	case MRM::data_ack:
-//uart << "MRM::data_ack\n";
 	    mrm_data_ack();
 	    break;
 
 	case MRM::data_nack:
-//uart << "MRM::data_nack\n";
 	    mrm_data_nack();
 	    break;
 
@@ -590,22 +550,18 @@ void TWI_master<TWI, bsz>::handle_interrupt()
     // master transmitter mode
     // ----------------------
 	case MTM::sla_w_ack:
-//uart << "MTM::sla_w_ack\n";
 	    mtm_sla_w_ack();
 	    break;
 
 	case MTM::sla_w_nack:
-//uart << "MTM::sla_w_nack\n";
 	    mtm_sla_w_nack();
 	    break;
 
 	case MTM::data_ack:
-//uart << "MTM::data_ack\n";
 	    mtm_data_ack();
 	    break;
 
 	case MTM::data_nack:
-//uart << "MTM::data_nack\n";
 	    mtm_data_nack();
 	    break;
 
@@ -614,7 +570,6 @@ void TWI_master<TWI, bsz>::handle_interrupt()
     // miscellaneous states
     // --------------------
 	case TWI_iostate::bus_error:
-//uart << "TWI_iostate::bus_error\n";
 	    bus_error();
             break;
 

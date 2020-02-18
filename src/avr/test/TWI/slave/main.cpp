@@ -269,6 +269,8 @@ void test_read()
     while (1){
 	std::byte buffer[TWI_buffer_size];
 	
+	// El caso más habitual es que el master pida algo al slave, por ello,
+	// lo normal será que el master siempre envía primero SLA+W.
 	while (!TWI::eor()){
 
             if (TWI::rec_bf()) {
@@ -305,7 +307,8 @@ int main()
     avr::cfg_basica(uart);
     uart.on();
 
-    uart << "Empezando\n";
+    uart << "TWI slave\n"
+	 << "---------\n";
 
     TWI::on<slave_address>();
 

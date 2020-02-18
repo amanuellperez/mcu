@@ -27,7 +27,8 @@
  *
  *  - HISTORIA:
  *    A.Manuel L.Perez
- *    12/02/2020 v0.0
+ *    12/02/2020: v0.0 - TWI_iobuffer 
+ *    18/02/2020: ixtream_of_bytes
  *
  ****************************************************************************/
 #include <array>
@@ -191,6 +192,109 @@ TWI_iobuffer<sz>::out_write_all_n(const std::byte* q, size_type n_q)
     return n;
     
 }
+
+
+/*!
+ *  \brief  Análogo a std::stringstream pero para bytes.
+ *
+ *  La diferencia con std::stringstream es:
+ *	1.- Son bytes, no caracteres. No los procesamos de ninguna forma.
+ *	2.- Es un flujo de tamaño finito (es para los microcontroladores, 
+ *	    no quiero usar memoria dinámica).
+ *  
+ *  Posibles nombres:
+ *	+ bstream: suena bien, pero suena a flujo normal, no es de tamaño
+ *	    fijo.
+ *
+ *	+ bfstream: la 'f' es de fix. Problema: suena a std::fstream, sería
+ *	    confuso.
+ *
+ *	+ bfixstream: queda claro que es fijo.
+ *	+ bxtream: la 'x' significa 'fix'. Los 'xtream' serían stream
+ *	    finitos. De hecho procede de 'fiXsTREAM'.
+ *
+ *	+ byte_fixstream: nombre completo.
+ *
+ *  De estos de momento me quedo con xtream para indicar streams de tamaño 
+ *  finitos. 
+ *
+ *  Posibles nombres para bytes:
+ *
+ *	+ ibytextream/obytextream/iobytextream: como std::stringstream
+ *	+ ibyte_xtream/obyte_xstream/iobyte_xtream: mismo pero más claro.
+ *	+ ibxtream/obxtream/iobxtream: abreviado.
+ *	+ byte_ixtream/byte_oxtream/byte_ioxtream: más claro.
+ *	+ ixtream_of_bytes/oxtream_of_bytes/ioxtream_of_bytes: largo, pero claro.
+ *
+ *  Me gusta el último. Es un poco largo pero claro. Si resulta muy largo
+ *  siempre se pueden crear sinónimos en el futuro.
+ */
+// DUDA: uint8_t or int??? 
+// El avr es de 8 bits, siendo más eficiente manejar uint8_t que ints (???)
+// Sin embargo los unsigned generan muchos dolores de cabeza. De momento lo
+// dejo como uint8_t. Pasarlo a int sería ampliar funcionalidad, no dando
+// problemas.
+template <uint8_t buffer_size>
+class ioxtream_of_bytes{
+public:
+
+// Types
+    using size_type = uint8_t;
+
+// Construction
+    ioxtream_of_bytes() : q0_{p0_()}, qe_{p0_()} { }
+
+
+    // Tamaño del contenedor.
+    constexpr size_type capacity() const {return buffer_size;}
+
+    // ¿No hay datos?
+    constexpr bool empty() const {return size() == 0;}
+
+    // size = número de bytes almacenados en el flujo.
+    constexpr size_type size() const {return qe_ - q0_;}
+
+// Escritura
+    template <uint8_t sz2>
+    friend ioxtream_of_bytes<sz2>& operator<<(ioxtream_of_bytes<sz2>& out, char c)
+    {
+	// TODO: ¿le pongo un centinela? Ponerle estado? Quiero que sea lo más
+	// pequeña posible!!!
+	*(out.qe_) = std::byte{c};
+
+	if (out.qe_ != out.pe_())
+	    ++out.qe_; 
+
+	return out;
+    }
+    
+
+// Acceso como stream
+    template <uint8_t sz2>
+    friend ioxtream_of_bytes<sz2>& operator>>(ioxtream_of_bytes<sz2>& in, char& c)
+    {
+	c = std::to_integer<char>(*(in.q0_));
+	++in.q0_;
+
+	return in;
+    }
+
+private:
+    // buffer_ = [p0, pe)
+    // Los datos son [q0, pe), siendo *q0 el siguiente byte a leer.
+    std::array<std::byte, buffer_size> buffer_;
+
+    // Oculto la implementación, porque hay varias formas de hacerlo. 
+    // De momento elijo la más sencilla de implementar para hacer pruebas.
+    std::byte* q0_; // Datos: [q0, qe)
+    std::byte* qe_; 
+
+    constexpr std::byte* p0_() {return buffer_.begin();}
+    constexpr std::byte* pe_() {return buffer_.end();}
+
+};
+
+
 
 
 }// namespace

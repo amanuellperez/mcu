@@ -35,10 +35,20 @@ inline void traza_twcr()
 }
 
 
+
+// Envía primero 
+void TWI_write_and_read( <--- AQUI
+
+
+
+
+
+
+
 void send_service1()
 {
     avr::UART_iostream uart;
-    uart << " =========== Enviando service1\n";
+    uart << "Service1:\n";
 
     TWI::reset();
 
@@ -49,14 +59,14 @@ void send_service1()
     msg[3] = 125;
 
 
-    if (TWI::write<slave_address>(reinterpret_cast<std::byte*>(msg), 4) != 4){
+    if (TWI::write_to<slave_address>(reinterpret_cast<std::byte*>(msg), 4) != 4){
 	uart << "Error enviando servicio 1: ";
         uart << "Se está intentando enviar demasiados datos de golpe, aumentar "
                 "el buffer del TWI\n";
 	return;
     }
     else
-	uart << "Escribiendo ... ";
+	uart << "\tEscribiendo ... ";
 
     uint16_t i = 0;
     for (; TWI::is_busy() and i < 65000; ++i)
@@ -83,8 +93,8 @@ void send_service1()
     constexpr uint8_t out_nbytes = 3;
     static_assert(out_nbytes < TWI_buffer_size);
 
-    uart << "Leemos respuesta: ";
-    TWI::read(out_nbytes);
+    uart << "\tLeemos respuesta: ";
+    TWI::read_from<slave_address>(out_nbytes);
 
     for (; TWI::is_busy() and i < 65000; ++i)
     { ; }
@@ -132,22 +142,20 @@ void send_service1()
 void send_service2()
 {
     avr::UART_iostream uart;
-    uart << " =========== Enviando service2\n";
-    uart << "TWI_buffer_size = " << static_cast<uint16_t>(TWI_buffer_size)
-         << '\n';
+    uart << "Service2:\n";
 
 
     std::byte msg[1] = {std::byte{0x87}};
 
 
-    if (TWI::write<slave_address>(msg, 1) != 1){
+    if (TWI::write_to<slave_address>(msg, 1) != 1){
 	uart << "Error enviando servicio 1: ";
         uart << "Se está intentando enviar demasiados datos de golpe, aumentar "
                 "el buffer del TWI\n";
 	return;
     }
     else
-	uart << "Escribiendo ... ";
+	uart << "\tEscribiendo ... ";
 
     while (TWI::is_busy())
     { ; }
@@ -166,20 +174,20 @@ void send_service2()
 void send_service3()
 {
     avr::UART_iostream uart;
-    uart << " =========== Enviando service3\n";
+    uart << "Service3:\n";
 
     uint8_t msg[1];
     msg[0] = 0xAA;
 
 
-    if (TWI::write<slave_address>(reinterpret_cast<std::byte*>(msg), 1) != 1){
+    if (TWI::write_to<slave_address>(reinterpret_cast<std::byte*>(msg), 1) != 1){
 	uart << "Error enviando servicio 3: ";
         uart << "Se está intentando enviar demasiados datos de golpe, aumentar "
                 "el buffer del TWI\n";
 	return;
     }
     else
-	uart << "Escribiendo ... ";
+	uart << "\tEscribiendo ... ";
 
     while (TWI::is_busy())
     { ; }

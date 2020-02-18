@@ -196,12 +196,31 @@ void test_buffer()
 }
 
 
+
+
+void test_ioxtream()
+{
+    test::interfaz("ioxtream_of_bytes");
+
+    atd::ioxtream_of_bytes<10> bin;
+ 
+    bin << 'a';
+    bin << 'R';
+
+    char a, b;
+    bin >> a >> b;
+
+    std::cout << "LEIDO: " << a << b << '\n';
+}
+
+
 int main()
 {
 try{
     test::header("atd_buffer");
 
     test_buffer();
+    test_ioxtream();
 
 }catch(std::exception& e)
 {
