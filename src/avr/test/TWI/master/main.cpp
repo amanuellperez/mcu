@@ -36,8 +36,8 @@ inline void traza_twcr()
 
 
 
-// Envía primero 
-void TWI_write_and_read( <--- AQUI
+//// Envía primero 
+//void TWI_write_and_read( <--- AQUI
 
 
 
@@ -57,6 +57,13 @@ void send_service1()
     msg[1] = 37;
     msg[2] = 98;
     msg[3] = 125;
+
+
+    TWI::send_start();
+    if (TWI::state() != TWI::iostate::read_or_write){
+	uart << "Error: tendría que estar en read_or_write\n";
+	return;
+    }
 
 
     if (TWI::write_to<slave_address>(reinterpret_cast<std::byte*>(msg), 4) != 4){
@@ -79,7 +86,10 @@ void send_service1()
 	uart << "OK\n";
 	return;
     }
-    
+ 
+    if (TWI::prog_error()) // es el único posible error
+	uart << "Error de programación\n";
+
     if (TWI::no_response()) // es el único posible error
 	uart << "dispostivo no responde\n";
 
@@ -94,6 +104,7 @@ void send_service1()
     static_assert(out_nbytes < TWI_buffer_size);
 
     uart << "\tLeemos respuesta: ";
+    TWI::send_repeated_start();
     TWI::read_from<slave_address>(out_nbytes);
 
     for (; TWI::is_busy() and i < 65000; ++i)
@@ -107,6 +118,10 @@ void send_service1()
 	uart << "OK\n";
 	return;
     }
+
+    if (TWI::prog_error()) // es el único posible error
+	uart << "Error de programación\n";
+
     if (TWI::no_response()){ // es el único posible error
 	uart << "ERROR: dispostivo no responde\n";
 	return;
@@ -131,7 +146,7 @@ void send_service1()
     if (!TWI::eor())
 	uart << "ERROR: tendría que estar en 'eor'\n";
 
-    TWI::stop_transmission();
+    TWI::send_stop();
     
     if (!TWI::ok())
 	uart << "ERROR: tendría que estar en 'ok'\n";
@@ -148,6 +163,7 @@ void send_service2()
     std::byte msg[1] = {std::byte{0x87}};
 
 
+    TWI::send_start();
     if (TWI::write_to<slave_address>(msg, 1) != 1){
 	uart << "Error enviando servicio 1: ";
         uart << "Se está intentando enviar demasiados datos de golpe, aumentar "
@@ -165,7 +181,7 @@ void send_service2()
 
     if (TWI::eow()){
 	uart << "OK\n";
-	TWI::stop_transmission();
+	TWI::send_stop();
     }
     else
 	uart << "FAIL\n";
@@ -179,6 +195,8 @@ void send_service3()
     uint8_t msg[1];
     msg[0] = 0xAA;
 
+
+    TWI::send_start();
 
     if (TWI::write_to<slave_address>(reinterpret_cast<std::byte*>(msg), 1) != 1){
 	uart << "Error enviando servicio 3: ";
@@ -197,7 +215,7 @@ void send_service3()
 
     if (TWI::eow()){
 	uart << "OK\n";
-	TWI::stop_transmission();
+	TWI::send_stop();
     }
     else
 	uart << "FAIL\n";

@@ -28,8 +28,10 @@
  *  - HISTORIA:
  *    A.Manuel L.Perez
  *	02/11/2019 find_c
+ *	22/02/2020 copy	    TODO: especializarlo para punteros (usar memcpy)
  *
  ****************************************************************************/
+#include <utility>
 
 namespace atd{
 
@@ -66,26 +68,32 @@ inline constexpr const char* find_c(const char* p, char x, Int n)
     return p;
 }
 
-// TODO: ¿qué devolver? no lo tengo del todo claro, así que de momento no
-// lo implemento en general.
-//// Vuelca el buffer p0[0, N_p) en q[0, N_q).
-//// requires: InputIt = random_iterator.
-//template <typename InputIt, typename Size, typename OutputIt>
-//constexpr std::pair{InputIt, OutputIt}
-//	    dump_n(InputIt p0, Size N_p, OutputIt q, Size N_q)
-//{
-//    streamsize n = std::min(N_q, N_p);
-//	
-//    OutputIt qe = std::copy_n(p0, n, q);
-//
-//    InputIt pe;
-//    if (n < N_p)
-//	pe = std::shift_left(p0, p0 + N_p, n);
-//    else
-//	pe = p;
-//
-//    return std::pair{pe, qe};
-//}
+
+
+
+// copy
+// ----
+
+// La versión del standard no es segura, ya que se puede copiar fuera del 
+// rango [q0, qe) (no se pasa qe). Esta versión es segura respecto de eso.
+// Posibles nombres: copy, safe_copy. Opto por copy ya que con 'concepts' será
+// muy sencillo sobrecargar copy con las diferentes versiones no necesitando
+// nombres especiales (copy, copy_n, copy_if...)
+// TODO: usar concepts
+template <typename Input_it, typename Output_it>
+std::pair<Input_it, Output_it> copy(Input_it p0, Input_it pe,
+				    Output_it q0, Output_it qe)
+{
+    while (p0 != pe and q0 != qe){
+	*q0 = *p0;
+	++p0;
+	++q0;
+    }
+
+    return {p0, q0};
+}
+
+
 
 
 }// namespace

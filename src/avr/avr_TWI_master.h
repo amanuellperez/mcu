@@ -54,18 +54,26 @@ enum class __TWI_master_state{
 
 // state
     ok		    = (1 << 2) |idle,
-    no_response	    = (2 << 2) |idle,
-    eow_data_nack   = (3 << 2) |idle,
-    eow		    = (4 << 2) |waiting,
+    read_or_write   = (2 << 2) |waiting,
+    sla_w	    = (3 << 2) |busy,
+    sla_r	    = (4 << 2) |busy,
 
-    eor_bf	    = (5 << 2) |waiting,    // buffer full
-    eor		    = (6 << 2) |waiting,
+    no_response	    = (10 << 2) |idle,
+    eow_data_nack   = (11 << 2) |idle,
+    eow		    = (12 << 2) |waiting,
 
-    transmitting    = (20 << 2) |busy,
-    receiving	    = (21 << 2) |busy,
+    eor_bf	    = (20 << 2) |waiting,    // buffer full
+    eor		    = (21 << 2) |waiting,
 
-    bus_error	    = (30 << 2) |idle,
-    unknown_error   = (31 << 2) |idle
+    transmitting    = (30 << 2) |busy,
+    receiving	    = (31 << 2) |busy,
+
+    bus_error	    = (40 << 2) |idle,
+    unknown_error   = (41 << 2) |idle,
+
+
+    prog_error	      = (100 << 2)|idle,// error de programación: maquina de estados
+    error_buffer_size = (101 << 2)|idle// buffer pequeño
 };
 
 constexpr uint8_t __TWI_master_state_mask_group_states = 0x03;
@@ -129,6 +137,25 @@ public:
 	init();
     }
 
+    /// Inicia la transmisión. Envía START.
+    static void send_start();
+
+    /// Reinicia la transmisión. Envía REPEATED START.
+    static void send_repeated_start();
+
+    /// Finaliza la transmisión. Envía STOP.
+    static void send_stop();
+
+    /// Reinicializa el dispositivo.
+    /// En caso de que se quede colgado intentando leer, llamar a esta
+    /// función.
+    static void reset()
+    {
+	TWI::master_reset();
+	init();
+    }
+
+
     /// Pone el master en receiver mode y comienza a leer. Lee exactamente 
     /// 'n' bytes. En caso de que n > buffer_size no hace nada.
     /// Returns: número de bytes que va a leer.
@@ -177,8 +204,10 @@ public:
     template <uint8_t slave_address> // tiene que estar definido en tiempo de compilación!!!
     static streamsize write_to(const std::byte* buf, streamsize n)
     {
-	if (is_busy())	// precondition
+	if (state_ != iostate::read_or_write){	// precondition
+	    state_ = iostate::prog_error;
 	    return 0;
+	}
 
 	buffer_.reset_as_output();
 
@@ -187,25 +216,12 @@ public:
 
 	slave_address_ = slave_address;
 
-	twi_transmit_start();
-
-	state_ = iostate::transmitting;
+	state_ = iostate::sla_w;
 	TWI::interrupt_enable();
 
 	return n;
     }
 
-    /// Finaliza la transmisión. Envía STOP.
-    static void stop_transmission();
-
-    /// Reinicializa el dispositivo.
-    /// En caso de que se quede colgado intentando leer, llamar a esta
-    /// función.
-    static void reset()
-    {
-	TWI::master_reset();
-	init();
-    }
 
     // Función que va dentro de la ISR
     static void handle_interrupt();
@@ -217,8 +233,10 @@ public:
     static bool is_busy() {return __TWI_master_state_is_busy(state_);}
     static bool is_waiting() {return __TWI_master_state_is_waiting(state_);}
 
+
 // errores genéricos
     static bool no_response() {return state_ == iostate::no_response;}
+    static bool prog_error() {return state_ == iostate::prog_error;}
 
 // de escritura
     static bool eow() {return state_ == iostate::eow;}
@@ -230,6 +248,8 @@ public:
 
 // genérico
     static bool ok() {return state_ == iostate::ok;}
+
+    static iostate state() {return state_;}
 
 private:
     // FUNDAMENTAL: busy_ tiene que ser volatile, ya que lo voy a usar:
@@ -275,9 +295,9 @@ private:
     // Implementación de read_from
     static streamsize read(streamsize n);
 
-    // Inicia una nueva transmisión, enviando START o REPEATED START,
-    // dependiendo de si estabamos en medio de una transmisión o no.
-    static void twi_transmit_start();
+//    // Inicia una nueva transmisión, enviando START o REPEATED START,
+//    // dependiendo de si estabamos en medio de una transmisión o no.
+//    static void twi_transmit_start();
 
 // Respuesta a los estados comunes
     static void mm_start(uint8_t slave_address);
@@ -315,11 +335,14 @@ private:
 template <typename TWI, uint8_t bsz>
 void TWI_master<TWI, bsz>::mm_start(uint8_t slave_address)
 {
-    if (state_ == iostate::transmitting)
+    if (state_ == iostate::sla_w)
 	TWI::master_transmit_sla_w(slave_address);
 
-    else if (state_ == iostate::receiving)
+    else if (state_ == iostate::sla_r)
 	TWI::master_transmit_sla_r(slave_address);
+
+    else
+	state_ = iostate::prog_error;
 }
 
 
@@ -345,6 +368,7 @@ void TWI_master<TWI, bsz>::mtm_send_next_byte()
 template <typename TWI, uint8_t bsz>
 inline void TWI_master<TWI, bsz>::mtm_sla_w_ack()
 {
+    state_ = iostate::transmitting;
     mtm_send_next_byte();
 }
 
@@ -408,6 +432,7 @@ inline void TWI_master<TWI, bsz>::unknown_error()
 template <typename TWI, uint8_t bsz>
 void TWI_master<TWI, bsz>::mrm_sla_r_ack()
 {
+    state_ = iostate::receiving;
     mrm_receive_next_byte();
 }
 
@@ -432,7 +457,7 @@ void TWI_master<TWI, bsz>::mrm_receive_next_byte()
 template <typename TWI, uint8_t bsz>
 void TWI_master<TWI, bsz>::mrm_data_ack()
 {
-    buffer_.in_write_one(TWI::data());
+    buffer_.in_write_one(TWI::data()); // buffer_ << TWI::data();
     --nread_;
     mrm_receive_next_byte();
 }
@@ -443,7 +468,7 @@ void TWI_master<TWI, bsz>::mrm_data_ack()
 template <typename TWI, uint8_t bsz>
 void TWI_master<TWI, bsz>::mrm_data_nack()
 {
-    buffer_.in_write_one(TWI::data());
+    buffer_.in_write_one(TWI::data()); // buffer_ << TWI::data();
     TWI::interrupt_disable();
     state_ = iostate::eor_bf;
 }
@@ -451,30 +476,34 @@ void TWI_master<TWI, bsz>::mrm_data_nack()
 
 //	if (is_busy() or is_waiting()) master_transmit_repeated_start();
 //	else master_transmit_start();
-template <typename TWI, uint8_t bsz>
-void TWI_master<TWI, bsz>::twi_transmit_start()
-{
-    if (is_idle())
-	TWI::master_transmit_start();
-
-    else
-	TWI::master_transmit_repeated_start();
-}
+//template <typename TWI, uint8_t bsz>
+//void TWI_master<TWI, bsz>::twi_transmit_start()
+//{
+//    if (is_idle())
+//	TWI::master_transmit_start();
+//
+//    else
+//	TWI::master_transmit_repeated_start();
+//}
 
 template <typename TWI, uint8_t bsz>
 TWI_master<TWI, bsz>::streamsize TWI_master<TWI, bsz>::read(streamsize n)
 {
-    if (is_busy() or n == 0)  // = precondition
+    if (state_ != iostate::read_or_write or n == 0){ // precondition
+	state_ = iostate::prog_error;
 	return 0;
+    }
 
-    if (n > buffer_.capacity()) // reestricción temporal. ¿eliminarlo en el futuro?
+
+    if (n > buffer_.capacity()){ // reestricción temporal. ¿eliminarlo en el futuro?
+	state_ = iostate::error_buffer_size;
 	return 0;
+    }
 
     nread_ = n;
     buffer_.reset_as_input();
  
-    twi_transmit_start();
-    state_ = iostate::receiving;
+    state_ = iostate::sla_r;
 
     TWI::interrupt_enable();
 
@@ -491,14 +520,43 @@ TWI_master<TWI, bsz>::read_buffer(std::byte* q, streamsize N)
  
     streamsize n = buffer_.in_read_all_n(q, N);
 
-    state_ = iostate::eor;
+    if (buffer_.in_is_empty())
+	state_ = iostate::eor;
 
     return n;
 }
 
+template <typename TWI, uint8_t bsz>
+void TWI_master<TWI, bsz>::send_start()
+{
+    if (!is_idle()){ // precondition
+	state_ = iostate::prog_error;
+	return;
+    }
+
+    TWI::master_transmit_start();
+    state_ = iostate::read_or_write;
+}
+
 
 template <typename TWI, uint8_t bsz>
-inline void TWI_master<TWI, bsz>::stop_transmission()
+void TWI_master<TWI, bsz>::send_repeated_start()
+{
+    if (state_ != iostate::eow and state_ != iostate::eor){ // precondition
+	state_ = iostate::prog_error;
+	return;
+    }
+
+    TWI::master_transmit_repeated_start();
+    state_ = iostate::read_or_write;
+}
+
+
+
+// No valido la precondición: if (state_ == eor or state_ == eow).
+// De esta forma se puede parar la transmisión desde cualquier estado.
+template <typename TWI, uint8_t bsz>
+inline void TWI_master<TWI, bsz>::send_stop()
 {
     TWI::master_transmit_stop();
     TWI::interrupt_disable();

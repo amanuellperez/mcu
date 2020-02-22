@@ -245,7 +245,8 @@ public:
     ioxtream_of_bytes() : q0_{p0_()}, qe_{p0_()} { }
 
 
-    // Tamaño del contenedor.
+    /// Tamaño del contenedor.
+    // Otro nombre podria ser max_size();
     constexpr size_type capacity() const {return buffer_size;}
 
     // ¿No hay datos?
@@ -254,34 +255,41 @@ public:
     // size = número de bytes almacenados en el flujo.
     constexpr size_type size() const {return qe_ - q0_;}
 
+    /// Número de bytes que se pueden escribir.
+    // Otro nombre podría ser free_size();
+    constexpr size_type available() const {return capacity() - size();}
+
+
+
 // Escritura
-    template <uint8_t sz2>
-    friend ioxtream_of_bytes<sz2>& operator<<(ioxtream_of_bytes<sz2>& out, char c)
+    ioxtream_of_bytes& operator<<(char c)
     {
-	// TODO: ¿le pongo un centinela? Ponerle estado? Quiero que sea lo más
-	// pequeña posible!!!
-	*(out.qe_) = std::byte{c};
+//	*qe_ = std::byte{c};  // da un warning: narrowing conversion. ¿por qué
+//	si son de 1 byte los 2? Por eso lo hago con static_cast:
+	static_assert(sizeof(c) == sizeof(std::byte));
+	*qe_ = static_cast<std::byte>(c);
 
-	if (out.qe_ != out.pe_())
-	    ++out.qe_; 
+	if (qe_ != pe_())
+	    ++qe_; 
 
-	return out;
+	return *this;
     }
     
 
 // Acceso como stream
-    template <uint8_t sz2>
-    friend ioxtream_of_bytes<sz2>& operator>>(ioxtream_of_bytes<sz2>& in, char& c)
+    ioxtream_of_bytes& operator>>(char& c)
     {
-	c = std::to_integer<char>(*(in.q0_));
-	++in.q0_;
+	c = std::to_integer<char>(*q0_);
+	++q0_;
 
-	return in;
+	return *this;
     }
 
 private:
     // buffer_ = [p0, pe)
-    // Los datos son [q0, pe), siendo *q0 el siguiente byte a leer.
+    // Los datos son [q0, qe). Siguiente byte a leer: *q0. Siguiente byte
+    // donde escribir: *qe.
+    // Invariante: p0 <= q0 <= qe <= pe
     std::array<std::byte, buffer_size> buffer_;
 
     // Oculto la implementación, porque hay varias formas de hacerlo. 

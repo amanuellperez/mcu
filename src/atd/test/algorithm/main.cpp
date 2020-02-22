@@ -77,6 +77,45 @@ void test_find_c()
 }
 
 
+void test_copy()
+{
+    test::interfaz("copy");
+
+    {// p > q
+    std::vector<int> p {1,2,3,4};
+    std::vector<int> q {5,6};
+
+    auto [p0, q0] = atd::copy(p.begin(), p.end(), q.begin(), q.end());
+    CHECK_TRUE(*p0 == 3 and q0 == q.end(), "copy(p > q)");
+    CHECK_EQUAL_CONTAINERS(p.begin(), p0, q.begin(), q.end(), "copy(p > q)");
+    }
+
+    {// p == q
+    std::vector<int> p {1,2,3,4};
+    std::vector<int> q {5,6,7,8};
+
+    auto [p0, q0] = atd::copy(p.begin(), p.end(), q.begin(), q.end());
+    CHECK_TRUE(p0 == p.end() and q0 == q.end(), "copy(p == q)");
+    CHECK_EQUAL_CONTAINERS(p.begin(), p0, q.begin(), q.end(), "copy(p == q)");
+    }
+
+    {// p < q
+    std::vector<int> p {1,2};
+    std::vector<int> q {5,6,7,8};
+
+    auto [p0, q0] = atd::copy(p.begin(), p.end(), q.begin(), q.end());
+    CHECK_TRUE(p0 == p.end() and *q0 == 7, "copy(p < q)");
+    CHECK_EQUAL_CONTAINERS(p.begin(), p0, q.begin(), q0, "copy(p < q)");
+    }
+    {// degenerado: p == empty
+    std::vector<int> p;
+    std::vector<int> q {5,6,7,8};
+
+    auto [p0, q0] = atd::copy(p.begin(), p.end(), q.begin(), q.end());
+    CHECK_TRUE(p0 == p.end() and *q0 == 5, "copy(p empty)");
+    CHECK_EQUAL_CONTAINERS(p.begin(), p0, q.begin(), q0, "copy(p empty)");
+    }
+}
 
 int main()
 {
@@ -84,6 +123,7 @@ try{
     test::header("atd_algorithm");
 
     test_find_c();
+    test_copy();
 
 }catch(std::exception& e)
 {
