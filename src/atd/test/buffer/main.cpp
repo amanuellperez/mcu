@@ -41,8 +41,8 @@ constexpr ForwardIt shift_left(ForwardIt p0, ForwardIt pe,
 }
 
 
-#include "../../atd_buffer.h"
 #include <iostream> // para depurar
+#include "../../atd_buffer.h"
 
 #include <alp_test.h>
 #include <alp_string.h>
@@ -196,21 +196,162 @@ void test_buffer()
 }
 
 
-
-
-void test_ioxtream()
+void test_circular_buffer()
 {
-    test::interfaz("ioxtream_of_bytes");
+    test::interfaz("Circular_array");
 
-    atd::ioxtream_of_bytes<10> bin;
- 
-    bin << 'a';
-    bin << 'R';
+    constexpr int N = 6;
+    atd::Circular_array<int, N> buf;
 
-    char a, b;
-    bin >> a >> b;
+// estado inicial
+    CHECK_TRUE(buf.is_empty(), "is_empty");
+    CHECK_TRUE(buf.capacity() == N, "capacity");
+    CHECK_TRUE(buf.available() == N, "available");
+    CHECK_TRUE(buf.size() == 0, "size");
 
-    std::cout << "LEIDO: " << a << b << '\n';
+    int b[N];
+    for (int i = 0; i < N; ++i)
+	b[i] = 10 + i;
+
+// no lo llenamos
+    CHECK_TRUE(buf.ewrite(b, 2) == 2, "ewrite");
+    CHECK_TRUE(!buf.is_empty(), "is_empty");
+    CHECK_TRUE(buf.capacity() == N, "capacity");
+    CHECK_TRUE(buf.available() == N - 2, "available");
+    CHECK_TRUE(buf.size() == 2, "size");
+
+    int res[N];
+    CHECK_TRUE(buf.eread(res, 2) == 2, "eread");
+
+    CHECK_EQUAL_CONTAINERS(b, b + 2, res, res + 2, "eread");
+    CHECK_TRUE(buf.is_empty(), "is_empty");
+    CHECK_TRUE(buf.capacity() == N, "capacity");
+    CHECK_TRUE(buf.available() == N, "available");
+    CHECK_TRUE(buf.size() == 0, "size");
+
+// leemos en el medio
+    buf.ewrite(b, 4);
+    buf.eread(res, 2);
+    buf.eread(res, 2);
+
+    CHECK_EQUAL_CONTAINERS(b + 2, b + 4, res, res + 2, "eread");
+    CHECK_TRUE(buf.is_empty(), "is_empty");
+    CHECK_TRUE(buf.capacity() == N, "capacity");
+    CHECK_TRUE(buf.available() == N, "available");
+    CHECK_TRUE(buf.size() == 0, "size");
+
+// lo llenamos
+    CHECK_TRUE(buf.ewrite(b, N) == N, "ewrite");
+
+    CHECK_TRUE(!buf.is_empty(), "is_empty");
+    CHECK_TRUE(buf.capacity() == N, "capacity");
+    CHECK_TRUE(buf.available() == 0, "available");
+    CHECK_TRUE(buf.size() == N, "size");
+
+    CHECK_TRUE(buf.eread(res, N) == N, "eread");
+    CHECK_EQUAL_CONTAINERS(b, b + N, res, res + N, "eread");
+    CHECK_TRUE(buf.is_empty(), "is_empty");
+    CHECK_TRUE(buf.capacity() == N, "capacity");
+    CHECK_TRUE(buf.available() == N, "available");
+    CHECK_TRUE(buf.size() == 0, "size");
+
+
+// hacemos que de la vuelta
+    buf.ewrite(b, N-1);
+    buf.eread(res, 3);
+
+    buf.eread(res, 1);
+    CHECK_EQUAL_CONTAINERS(b + 3, b + 4, res, res + 1, "eread");
+
+    CHECK_TRUE(!buf.is_empty(), "is_empty");
+    CHECK_TRUE(buf.capacity() == N, "capacity");
+    CHECK_TRUE(buf.available() == 5, "available");
+    CHECK_TRUE(buf.size() == 1, "size");
+
+    buf.ewrite(b, 3);
+
+    CHECK_TRUE(!buf.is_empty(), "is_empty");
+    CHECK_TRUE(buf.capacity() == N, "capacity");
+    CHECK_TRUE(buf.available() == 2, "available");
+    CHECK_TRUE(buf.size() == 4, "size");
+
+    buf.eread(res, 3);
+
+    CHECK_EQUAL_CONTAINERS(b + 4, b + 5, res, res + 1, "eread");
+    CHECK_EQUAL_CONTAINERS(b, b + 2, res + 1, res + 3, "eread");
+
+    CHECK_TRUE(!buf.is_empty(), "is_empty");
+    CHECK_TRUE(buf.capacity() == N, "capacity");
+    CHECK_TRUE(buf.available() == 5, "available");
+    CHECK_TRUE(buf.size() == 1, "size");
+}
+
+template <typename Int>
+void test_iobxtream(const std::vector<Int>& x)
+{
+    constexpr int N = 20;
+
+    atd::iobxtream<N> bs;
+
+    for (size_t i = 0; i < x.size(); ++i){
+	if ((unsigned long)bs.available() < sizeof(Int)){
+	    CHECK_TRUE(0, "bs.available() < sizeof(Int)");
+	}
+
+	bs << x[i];
+    }
+
+    for (size_t i = 0; i < x.size(); ++i){
+	Int res{};  // para quitar warning
+	bs >> res;  
+	CHECK_TRUE(res == x[i], "operator<</>>");
+    }
+
+    // probamos a que el buffer este a medias
+    bs.reset();
+    for (size_t i = 0; i < N - 6; ++i)
+	bs << 'x';
+
+    for (size_t i = 0; i < N - 7; ++i){
+	char c;
+	bs >> c;
+    }
+
+
+    for (size_t i = 0; i < x.size(); ++i){
+	if ((unsigned long)bs.available() < sizeof(Int)){
+	    CHECK_TRUE(0, "bs.available() < sizeof(Int)");
+	}
+
+	bs << x[i];
+    }
+
+    char c;
+    bs >> c;
+
+    for (size_t i = 0; i < x.size(); ++i){
+	if ((unsigned long)bs.size() < sizeof(Int)){
+	    CHECK_TRUE(0, "bs.size() < sizeof(Int)");
+	}
+	Int res{};  // para quitar warning
+	bs >> res;  
+	CHECK_TRUE(res == x[i], "operator<</>>");
+    }
+
+}
+
+
+void test_iobxtream()
+{
+    test::interfaz("iobxtream");
+
+    test_iobxtream<char>({'a','b','c','d'});
+    test_iobxtream<short>({1,2,3,4});
+    test_iobxtream<int>({1,2,3,4});
+
+    test_iobxtream<unsigned char>({'a','b','c','d'});
+    test_iobxtream<unsigned short>({1,2,3,4});
+    test_iobxtream<unsigned int>({1,2,3,4});
 }
 
 
@@ -220,7 +361,8 @@ try{
     test::header("atd_buffer");
 
     test_buffer();
-    test_ioxtream();
+    test_circular_buffer();
+    test_iobxtream();
 
 }catch(std::exception& e)
 {

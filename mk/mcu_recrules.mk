@@ -16,7 +16,7 @@ DIST_DIRS ?= $(DIRS)
 # directorios para crear nuevas targets.
 SUBDIRS  = $(DIRS:%=build-%)
 CLEANDIRS= $(DIRS:%=clean-%)
-SUPERCLEANDIRS= $(DIRS:%=superclean-%)
+SUPERCLEANDIRS= $(DIRS:%=super_clean-%)
 TESTDIRS = $(DIRS:%=test-%)
 DISTDIRS = $(DIST_DIRS:%=dist-%)
 
@@ -48,10 +48,10 @@ $(CLEANDIRS):
 	@$(MAKE) -C $(@:clean-%=%) clean
 
 .PHONY: $(SUPERCLEANDIRS)
-superclean: $(SUPERCLEANDIRS)
+super_clean: $(SUPERCLEANDIRS)
 
 $(SUPERCLEANDIRS):
-	@$(MAKE) -C $(@:superclean-%=%) superclean
+	@$(MAKE) -C $(@:super_clean-%=%) super_clean
 
 
 .PHONY: $(DIRS)

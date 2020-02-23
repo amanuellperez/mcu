@@ -28,12 +28,14 @@
  *  - HISTORIA:
  *    A.Manuel L.Perez
  *    12/02/2020: v0.0 - TWI_iobuffer 
- *    18/02/2020: ixtream_of_bytes
+ *    22/02/2020: Circular_array, ioxtream_of_bytes
  *
  ****************************************************************************/
 #include <array>
 #include <algorithm>
-#include <cstddef>  // byte
+#include <cstddef>  // std::byte
+#include <tuple>    // std::tie
+#include "atd_algorithm.h"
 
 namespace atd{
 
@@ -193,116 +195,257 @@ TWI_iobuffer<sz>::out_write_all_n(const std::byte* q, size_type n_q)
     
 }
 
-
 /*!
- *  \brief  Análogo a std::stringstream pero para bytes.
- *
- *  La diferencia con std::stringstream es:
- *	1.- Son bytes, no caracteres. No los procesamos de ninguna forma.
- *	2.- Es un flujo de tamaño finito (es para los microcontroladores, 
- *	    no quiero usar memoria dinámica).
- *  
- *  Posibles nombres:
- *	+ bstream: suena bien, pero suena a flujo normal, no es de tamaño
- *	    fijo.
- *
- *	+ bfstream: la 'f' es de fix. Problema: suena a std::fstream, sería
- *	    confuso.
- *
- *	+ bfixstream: queda claro que es fijo.
- *	+ bxtream: la 'x' significa 'fix'. Los 'xtream' serían stream
- *	    finitos. De hecho procede de 'fiXsTREAM'.
- *
- *	+ byte_fixstream: nombre completo.
- *
- *  De estos de momento me quedo con xtream para indicar streams de tamaño 
- *  finitos. 
- *
- *  Posibles nombres para bytes:
- *
- *	+ ibytextream/obytextream/iobytextream: como std::stringstream
- *	+ ibyte_xtream/obyte_xstream/iobyte_xtream: mismo pero más claro.
- *	+ ibxtream/obxtream/iobxtream: abreviado.
- *	+ byte_ixtream/byte_oxtream/byte_ioxtream: más claro.
- *	+ ixtream_of_bytes/oxtream_of_bytes/ioxtream_of_bytes: largo, pero claro.
- *
- *  Me gusta el último. Es un poco largo pero claro. Si resulta muy largo
- *  siempre se pueden crear sinónimos en el futuro.
+ *  \brief  Array circular.
  */
-// DUDA: uint8_t or int??? 
-// El avr es de 8 bits, siendo más eficiente manejar uint8_t que ints (???)
-// Sin embargo los unsigned generan muchos dolores de cabeza. De momento lo
-// dejo como uint8_t. Pasarlo a int sería ampliar funcionalidad, no dando
-// problemas.
-template <uint8_t buffer_size>
-class ioxtream_of_bytes{
+// DUDA: buffer_size de qué tipo? size_t como std::array? uint8_t por
+// cuestiones de eficiencia? int? La regla es evitar los unsigneds!
+// Parametrizar el tipo y que el usuario elija?
+template <typename T, int N>
+class Circular_array{
 public:
-
 // Types
-    using size_type = uint8_t;
+    using value_type	    = T;
+    using pointer	    = T*;
+    using const_pointer	    = const T*;
+    using reference	    = T&;
+    using const_reference   = const T&;
+    using size_type	    = int;
+    using difference_type   = std::ptrdiff_t;
+//    using iterator	    = T*; <-- no son punteros!!!
+//    using const_iterator    = const T*;
 
-// Construction
-    ioxtream_of_bytes() : q0_{p0_()}, qe_{p0_()} { }
+// Construcción
+    Circular_array();
 
+// Acceso
+    /// Escribe exactamente n elementos en el buffer. Escribe b[0, n).
+    /// En caso de no haber espacio suficiente no hace nada.
+    /// Returns:  el número de elementos escritos. Cero si no hace nada.
+    size_type ewrite(const T* b, size_type n);
 
-    /// Tamaño del contenedor.
-    // Otro nombre podria ser max_size();
-    constexpr size_type capacity() const {return buffer_size;}
+    /// Lee exactamente n elementos del buffer almacenándolos en b[0, n).
+    /// Leerlos supone sacarlos del buffer.
+    /// En caso de no haya n elementos para leer no hace nada.
+    /// Returns:  el número de elementos leídos. Cero si no lee nada (porque
+    /// haya pocos elementos).
+    size_type eread(T* b, size_type n);
 
-    // ¿No hay datos?
-    constexpr bool empty() const {return size() == 0;}
+    // Vacía el buffer.
+    void reset();
 
-    // size = número de bytes almacenados en el flujo.
-    constexpr size_type size() const {return qe_ - q0_;}
+// Info
+    bool is_empty() const {return (q0_ == p0_ and qe_ == p0_);}
 
-    /// Número de bytes que se pueden escribir.
-    // Otro nombre podría ser free_size();
-    constexpr size_type available() const {return capacity() - size();}
+    /// Número máximo de elementos que podemos almacenar en el buffer.
+    constexpr size_type capacity() const {return N;}
 
+    /// Número de elementos que hay escritos en el buffer pendientes de ser
+    /// leídos.
+    size_type size() const;
 
-
-// Escritura
-    ioxtream_of_bytes& operator<<(char c)
-    {
-//	*qe_ = std::byte{c};  // da un warning: narrowing conversion. ¿por qué
-//	si son de 1 byte los 2? Por eso lo hago con static_cast:
-	static_assert(sizeof(c) == sizeof(std::byte));
-	*qe_ = static_cast<std::byte>(c);
-
-	if (qe_ != pe_())
-	    ++qe_; 
-
-	return *this;
-    }
-    
-
-// Acceso como stream
-    ioxtream_of_bytes& operator>>(char& c)
-    {
-	c = std::to_integer<char>(*q0_);
-	++q0_;
-
-	return *this;
-    }
+    /// Número de elementos que se pueden escribir en el buffer.
+    size_type available() const {return capacity() - size();}
 
 private:
-    // buffer_ = [p0, pe)
-    // Los datos son [q0, qe). Siguiente byte a leer: *q0. Siguiente byte
-    // donde escribir: *qe.
-    // Invariante: p0 <= q0 <= qe <= pe
-    std::array<std::byte, buffer_size> buffer_;
+// Datos
+    T p0_[N];
+    
+    // Contenedor: [p0_, pe_)
+    T* pe_() {return  p0_ + N;}
+    const T* pe_() const {return  p0_ + N;}
 
-    // Oculto la implementación, porque hay varias formas de hacerlo. 
-    // De momento elijo la más sencilla de implementar para hacer pruebas.
-    std::byte* q0_; // Datos: [q0, qe)
-    std::byte* qe_; 
+    T* q0_; // Datos: [q0_...pe_, p0_... qe_) (circular)
+    T* qe_;
 
-    constexpr std::byte* p0_() {return buffer_.begin();}
-    constexpr std::byte* pe_() {return buffer_.end();}
+// Funciones de ayuda
+
+    void eread_circular(T* b0, size_type n);
+    void eread_lineal(T* b0, size_type n);
 
 };
 
 
+template <typename T, int N>
+Circular_array<T, N>::Circular_array():q0_{p0_}, qe_{p0_}
+{ }
+
+template <typename T, int N>
+inline void Circular_array<T, N>::reset()
+{
+    q0_ = p0_;
+    qe_ = p0_;
+}
+
+
+template <typename T, int N>
+Circular_array<T, N>::size_type 
+    Circular_array<T, N>::size() const 
+{
+    if (is_empty())
+	return 0;
+
+    if (qe_ > q0_)
+	return qe_ - q0_;
+
+    return (pe_() - q0_) + (qe_ - p0_);
+}
+
+
+
+template <typename T, int N>
+Circular_array<T, N>::size_type 
+    Circular_array<T, N>::ewrite(const T* b0, size_type n)
+{
+    if (available() < n)
+	return 0;
+
+    const T* be = b0 + n;
+    std::tie(b0, qe_) = atd::copy(b0, be, qe_, pe_());
+
+    if (b0 == be)
+	return n;
+
+    qe_ = p0_;
+    std::tie(b0, qe_) = atd::copy(b0, be, qe_, q0_);
+
+    // postcondition: b0 == be and qe_ <= q0_
+    return n;
+}
+
+
+// precondition: q0_ < qe_
+template <typename T, int N>
+inline void Circular_array<T, N>::eread_lineal(T* b, size_type n)
+{
+    std::copy_n(q0_, n, b);
+
+    q0_ += n;
+
+    if (q0_ == qe_)
+	reset();
+}
+
+// precondition: qe_ <= q0_
+template <typename T, int N>
+void Circular_array<T, N>::eread_circular(T* b0, size_type n)
+{
+    if (pe_() - q0_ >= n){
+	std::copy_n(q0_, n, b0);
+	q0_ += n;
+
+	if (q0_ == qe_)
+	    q0_ = p0_;
+    }
+
+    else{
+	T* be = b0 + n;
+	std::tie(std::ignore, b0) = atd::copy(q0_, pe_(), b0, be);
+	size_type nc = pe_() - q0_; // núm. copiados
+	
+	std::tie(q0_, b0) = atd::copy(p0_, p0_ + n - nc, b0, be);
+
+	if (q0_ == qe_)
+	    reset();
+    }
+}
+
+
+
+template <typename T, int N>
+Circular_array<T, N>::size_type 
+Circular_array<T, N>::eread(T* b, size_type n)
+{
+    if (size() < n or n == 0)
+	return 0;
+
+    if (q0_ < qe_)
+	eread_lineal(b, n);
+
+    else
+	eread_circular(b, n);
+
+    return n;
+}
+
+/*!
+ *  \brief  Flujo de bytes de tamaño fijo. 
+ *
+ *  Almacena directamente los objetos como bytes, no como chars, a diferencia
+ *  de stringstream y los flujos iostream.
+ *
+ *  Los bxtreams son fix_stream de bytes.
+ *
+ *  TODO: se le puede pasar otro parámetro de template para indicar si
+ *  queremos que se codifique en little endian o en big endian.
+ *
+ *  TODO: de momento no introduzco state, dejo que sea el usuario el que mire
+ *  si hay suficiente espacio antes de escribir. (quiero que sea lo más
+ *  pequeña posible)
+ */
+template <int N>
+class iobxtream{
+public:
+    using size_type = int;
+
+// Info
+    /// Número de bytes escritos en el flujo pendientes de leer.
+    size_type size() const {return buffer_.size();}
+
+    /// Número de bytes que podemos escribir en el flujo.
+    size_type available() const {return buffer_.available();}
+
+    bool is_empty() const {return buffer_.is_empty();}
+
+// Varios
+    /// Vacía el flujo, reiniciandolo, como si lo acabaramos de construir.
+    void reset() {buffer_.reset();}
+
+// operator<<
+    iobxtream& operator<<(char c) {return write(c);}
+    iobxtream& operator<<(unsigned char c) {return write(c);}
+    iobxtream& operator<<(signed char c) {return write(c);}
+    iobxtream& operator<<(short c) {return write(c);}
+    iobxtream& operator<<(unsigned short c) {return write(c);}
+    iobxtream& operator<<(int c) {return write(c);}
+    iobxtream& operator<<(unsigned int c) {return write(c);}
+    iobxtream& operator<<(const long& c) {return write(c);}
+    iobxtream& operator<<(const unsigned long& c) {return write(c);}
+    iobxtream& operator<<(const long long& c) {return write(c);}
+    iobxtream& operator<<(const unsigned long long& c) {return write(c);}
+
+// operator>>
+    iobxtream& operator>>(char& c) {return read(c);}
+    iobxtream& operator>>(unsigned char& c) {return read(c);}
+    iobxtream& operator>>(signed char& c) {return read(c);}
+    iobxtream& operator>>(short& c) {return read(c);}
+    iobxtream& operator>>(unsigned short& c) {return read(c);}
+    iobxtream& operator>>(int& c) {return read(c);}
+    iobxtream& operator>>(unsigned int& c) {return read(c);}
+    iobxtream& operator>>(long& c) {return read(c);}
+    iobxtream& operator>>(unsigned long& c) {return read(c);}
+    iobxtream& operator>>(long long& c) {return read(c);}
+    iobxtream& operator>>(unsigned long long& c) {return read(c);}
+
+private:
+    Circular_array<std::byte, N> buffer_;
+
+
+    template <typename T>
+    iobxtream& write(const T& x)
+    {
+	buffer_.ewrite(reinterpret_cast<const std::byte*>(&x), sizeof(x));
+	return *this;
+    }
+
+    template <typename T>
+    iobxtream& read(T& x)
+    {
+	buffer_.eread(reinterpret_cast<std::byte*>(&x), sizeof(x));
+	return *this;
+    }
+
+};
 
 
 }// namespace

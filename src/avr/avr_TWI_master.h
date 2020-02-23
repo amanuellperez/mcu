@@ -204,6 +204,8 @@ public:
     template <uint8_t slave_address> // tiene que estar definido en tiempo de compilación!!!
     static streamsize write_to(const std::byte* buf, streamsize n)
     {
+	Interrupts_lock lock;	// fundamental, ya que se llamará desde 'busy'
+
 	if (state_ != iostate::read_or_write){	// precondition
 	    state_ = iostate::prog_error;
 	    return 0;

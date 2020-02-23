@@ -40,9 +40,18 @@ void test_pair()
     CHECK_TRUE(p2 == p3, "operator==");
     CHECK_TRUE(p2 != p1, "operator!=");
 
+}
 
+void test_tuple_element()
+{
+    test::interfaz("tuple_element");
 
+    using P = mtd::pair<int, float>;
+    CHECK_TRUE((std::is_same_v<mtd::tuple_element_t<0, P>, int>),
+               "tuple_element<0>");
 
+    CHECK_TRUE((std::is_same_v<mtd::tuple_element_t<1, P>, float>),
+               "tuple_element<1>");
 }
 
 
@@ -53,6 +62,7 @@ try{
     test::header("utility");
 
     test_pair();
+    test_tuple_element();
 }catch(alp::Excepcion& e){
     cerr << e.what() << '\n';
     return 1;

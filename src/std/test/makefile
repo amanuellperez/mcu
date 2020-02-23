@@ -9,6 +9,7 @@ DIRS = algorithm\
 	ratio		\
 	sizeof_txt	\
 	type_traits	\
+	tuple		\
 	utility
 
 

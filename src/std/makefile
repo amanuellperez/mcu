@@ -29,6 +29,7 @@ INCS= std_cstdio.h		\
 	std_ratio.h			\
 	std_streambuf.h		\
 	std_string.h		\
+	std_tuple.h			\
 	std_type_traits.h	\
 	std_utility.h		\
 	algorithm	\
@@ -49,6 +50,7 @@ INCS= std_cstdio.h		\
 	ostream		\
 	ratio		\
 	streambuf	\
+	tuple		\
 	type_traits	\
 	utility
 

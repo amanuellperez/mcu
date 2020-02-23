@@ -26,8 +26,10 @@
  *   - COMENTARIOS: 
  *
  *   - HISTORIA:
- *           A.Manuel L.Perez- 26/08/2019 Version de pair básica (no incluye
+ *    A.Manuel L.Perez
+ *    26/08/2019 Version de pair básica (no incluye
  *					todo lo indicado por el estandar)
+ *    23/02/2020 tuple_element, move, forward.
  *
  ****************************************************************************/
 #include "std_config.h"
@@ -35,6 +37,29 @@
 #include "std_type_traits.h"	// incluye declval
 namespace STD{
 
+// forward/move
+// ------------
+template <typename T>
+constexpr T&& forward(remove_reference_t<T>& t) noexcept
+{ return static_cast<T&&>(t); }
+
+template <typename T>
+constexpr T&& forward(remove_reference_t<T>&& t) noexcept
+{
+    static_assert(!is_lvalue_reference_v<T>, 
+		    "template argument is an lvalue reference type");
+
+    return static_cast<T&&>(t); 
+}
+
+template <typename T>
+constexpr remove_reference_t<T>&& move(T&& t) noexcept
+{ return static_cast<remove_reference_t<T>&&>(t); }
+
+
+
+// pair
+// ----
 // TODO: versión básica de pair. El standard tiene muchos más constructores y
 // funciones.
 template <typename T1, typename T2>
@@ -74,6 +99,45 @@ inline constexpr bool operator!=(const pair<T1,T2>& x, const pair<T1,T2>& y)
 
 // TODO: Falta la relación de orden de pair definida por el standard.
 
+
+
+// tuple_element
+// -------------
+template <size_t i, typename T>
+struct tuple_element;
+
+template <size_t i, typename T0, typename T1>
+struct tuple_element<i, pair<T0, T1>>
+{
+    static_assert(i < 2, "std::pair has only 2 elements");
+};
+
+// ----------------------------------
+// tuple_element<i, pair<T0, T1>>:
+//
+//  if (i == 0) return T0;
+//  else	return T1;
+// ----------------------------------
+template <typename T0, typename T1>
+struct tuple_element<0, pair<T0, T1>>
+{
+    using type = T0;
+};
+
+
+template <typename T0, typename T1>
+struct tuple_element<1, pair<T0, T1>>
+{
+    using type = T1;
+};
+
+
+
+// tuple_element_t
+// El standard marca que esto esté en <tuple>. gcc lo mete aquí en utility.
+// De momento lo dejo como gcc.
+template <size_t i, typename T>
+using tuple_element_t = typename tuple_element<i, T>::type;
 
 }// namespace
 
