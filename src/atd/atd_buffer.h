@@ -205,15 +205,7 @@ template <typename T, int N>
 class Circular_array{
 public:
 // Types
-    using value_type	    = T;
-    using pointer	    = T*;
-    using const_pointer	    = const T*;
-    using reference	    = T&;
-    using const_reference   = const T&;
     using size_type	    = int;
-    using difference_type   = std::ptrdiff_t;
-//    using iterator	    = T*; <-- no son punteros!!!
-//    using const_iterator    = const T*;
 
 // Construcción
     Circular_array();
@@ -231,11 +223,33 @@ public:
     /// haya pocos elementos).
     size_type eread(T* b, size_type n);
 
+    /// Escribe 'b' en el buffer.
+    /// precondition: !is_full();
+    void write(const T& b);
+
+    /// Lee 'b' del buffer, extrayéndolo. 
+    /// precondition: !is_empty();
+    /// Return: la misma referencia 'b'.
+    T& read(T& b);
+    
+    /// Lee 'b' del buffer, extrayéndolo. 
+    /// precondition: !is_empty();
+    /// Return: la misma referencia 'b'.
+    /// CUIDADO: se devuelve T por valor!!! Esta pensado para bytes, chars...
+    /// así que no hay problema.
+    T read()
+    {
+	T b;
+	return read(b);
+    }
+
     // Vacía el buffer.
     void reset();
 
 // Info
-    bool is_empty() const {return (q0_ == p0_ and qe_ == p0_);}
+    bool is_empty() const {return (q0_ == qe_ and q0_ == p0_);}
+    bool is_full() const  
+    { return (q0_ == p0_ and qe_ == pe_()) or (q0_ == qe_ and q0_ != p0_); }
 
     /// Número máximo de elementos que podemos almacenar en el buffer.
     constexpr size_type capacity() const {return N;}
@@ -312,6 +326,40 @@ Circular_array<T, N>::size_type
     // postcondition: b0 == be and qe_ <= q0_
     return n;
 }
+
+
+// precondition: !is_full();
+template <typename T, int N>
+void Circular_array<T, N>::write(const T& b)
+{
+    *qe_ = b;
+    ++qe_;
+
+    if (qe_ == pe_() and q0_ != p0_)
+	qe_ = p0_;
+
+}
+
+
+// precondition: !is_empty();
+template <typename T, int N>
+T& Circular_array<T, N>::read(T& b)
+{
+    b = *q0_;
+
+    ++q0_;
+
+
+    if (q0_ == qe_){ // is_empty!!!
+	q0_ = p0_;
+	qe_ = p0_;
+    }
+    else if (q0_ == pe_())
+	q0_ = p0_;
+
+    return b;
+}
+
 
 
 // precondition: q0_ < qe_

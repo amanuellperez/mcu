@@ -1,5 +1,4 @@
-SOURCES= avr_SPI.cpp \
-		 avr_TWI.cpp
+SOURCES= avr_SPI.cpp
 
 
 INCS= avr_ADC.h		\
@@ -13,7 +12,10 @@ INCS= avr_ADC.h		\
 	avr_timer0_tr.h	\
 	avr_timer1_tr.h	\
 	avr_TWI.h		\
+	avr_TWI_basic.h	\
+	avr_TWI_master.h\
 	avr_TWI_slave.h	\
+	avr_TWI_master_ioxtream.h\
 	avr_USART.h		\
 	avr_USART_tr.h		\
 	avr_USART_baud_rate.h	\

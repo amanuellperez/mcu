@@ -18,7 +18,7 @@
 // Este microcontrolador dialoga con el test/TWI/master
 
 #include "../../../avr_USART.h" // cambiar de sitio
-#include "../../../avr_TWI.h"
+#include "../../../avr_TWI_basic.h"
 #include "../../../avr_TWI_slave.h"
 #include "../../../avr_time.h"
 #include "../../../avr_interrupt.h"

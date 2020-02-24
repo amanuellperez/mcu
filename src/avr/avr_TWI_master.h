@@ -32,6 +32,10 @@
  *  - TIPO DE USUARIO: de bajo nivel. Tiene que saber lo que hace. No impongo
  *  muchas precondiciones en código.
  *
+ *  - TODO: Dar la opción de lanzar una interrupción cuando acabe de hacer
+ *  algo (cuando pase de busy a no_busy). De esa forma el usuario no tendrá
+ *  que estar haciendo polling continuamente. 
+ *
  *  - HISTORIA:
  *    A.Manuel L.Perez
  *    14/02/2020 v0.0
@@ -122,7 +126,7 @@ class TWI_master{
 public:
     using iostate= __TWI_master_state;
     using streamsize = uint8_t;
-
+    using Address = uint8_t;
 
     /// Enables TWI interface definiendo la frecuencia del SCL 
     /// a la que vamos a operar.
@@ -166,26 +170,24 @@ public:
     // FUTURO: si se usa esto bastante, relajarlo. Si n > buffer_size que 
     // lea n buffer_size, y pase a eor_bne, esperando al usuario que llame a
     // read_buffer, y después continue leyendo.
-
-    template <uint8_t slave_address> 
+    template <Address slave_address> 
     static streamsize read_from(streamsize n)
+    { return read_from(slave_address, n); }
+
+    // versión 2 de read_from. La necesito en TWI_master_ioxtream
+    static streamsize read_from(Address slave_address, streamsize n)
     {
 	slave_address_ = slave_address;
 	return read(n);
     }
 
-
     /// Lee el buffer del dispositivo almacenándolos en q[0,N).
     /// Lee como máximo N bytes.
     /// precondition: state() == iostate::eor_bf
-    /// postcondition: state() == iostate::eor
+    /// postcondition: state() == iostate::eor or eor_bf (si no vacío todo el
+    /// buffer).
     /// Returns: number of bytes leidos.
-    /// OJO: si n > N de momento no esta pensado que se pueda seguir llamando
-    /// a read_buffer para acabar de vaciarlo. Lo dejo para el futuro
-    /// (realmente merece la pena? es posible que no. Todo es más sencillo
-    /// si los buffers son suficientemente grandes).
     static streamsize read_buffer(std::byte* q, streamsize N);
-
 
 
     /// Escribe en el buffer de salida buf[0, n) y comienza el envío por TWI.
@@ -201,30 +203,27 @@ public:
     // waiting/eor_bf a transmitting. De momento no estoy imponiendo en código
     // el diagrama de estados. Doy por supuesto que el usuario sabe lo que
     // hace.
-    template <uint8_t slave_address> // tiene que estar definido en tiempo de compilación!!!
+    template <Address slave_address> // tiene que estar definido en tiempo de compilación!!!
     static streamsize write_to(const std::byte* buf, streamsize n)
-    {
-	Interrupts_lock lock;	// fundamental, ya que se llamará desde 'busy'
+    { return write_to(slave_address, buf, n); }
 
-	if (state_ != iostate::read_or_write){	// precondition
-	    state_ = iostate::prog_error;
-	    return 0;
-	}
+    // versión 2 de write_to. La necesito en TWI_master_ioxtream
+    static streamsize
+    write_to(Address slave_address, const std::byte* buf, streamsize n);
 
-	buffer_.reset_as_output();
+    /// Escribe en el buffer buf[0, n) y envía los datos vía TWI.
+    // Observar que no lo llamo write_buffer, ya que sería mentira que solo 
+    // escribimos en el buffer. El pseudocódigo de write es:
+    //	write(q, n):
+    //	    write_buffer(q, n);
+    //	    send_buffer(q, n);   // no lo hacemos así sino con interrupciones.
+    //	por eso no lo llamo write_buffer.
+    //
+    //	El caso de read_buffer es diferente ya que read_buffer se limita a
+    //	leer datos del buffer, no de TWI. Los nombres no mienten.
+    static streamsize write(const std::byte* buf, streamsize n);
 
-	if (buffer_.out_write_all_n(buf, n) != n)
-	    return 0;
-
-	slave_address_ = slave_address;
-
-	state_ = iostate::sla_w;
-	TWI::interrupt_enable();
-
-	return n;
-    }
-
-
+	    
     // Función que va dentro de la ISR
     static void handle_interrupt();
 
@@ -240,6 +239,9 @@ public:
     static bool no_response() {return state_ == iostate::no_response;}
     static bool prog_error() {return state_ == iostate::prog_error;}
 
+// inicio transmision
+    static bool read_or_write() {return state_ == iostate::read_or_write;}
+
 // de escritura
     static bool eow() {return state_ == iostate::eow;}
     static bool eow_data_nack() {return state_ == iostate::eow_data_nack;}
@@ -253,6 +255,10 @@ public:
 
     static iostate state() {return state_;}
 
+// Da la impresión de que en polling voy a necesitar esta función bastante:
+//  ENGLISH DOUBT: wait_till_no_busy??? or wait_no_busy??? @_@
+    static void wait_till_no_busy() { while (is_busy()) { asm("nop"); } }
+
 private:
     // FUNDAMENTAL: busy_ tiene que ser volatile, ya que lo voy a usar:
     //	    while (is_busy()) { ; }
@@ -261,7 +267,7 @@ private:
     //	Antes funcionaba bien y de repente dejó de funcionar!!!)
     static inline volatile iostate state_;
 
-    static inline atd::TWI_iobuffer<buffer_size> buffer_;
+    static inline atd::Circular_array<std::byte, buffer_size> buffer_;
     static inline streamsize nread_;   // num. bytes a leer (solo para receiver mode)
 
     // (RRR) El usuario pide leer o escribir. Para ello:
@@ -282,11 +288,11 @@ private:
     //	        esta opción ya que una idea de diseño de este TWI_master es
     //	        que no bloque nunca.
     //
-    static inline uint8_t slave_address_;
+    static inline Address slave_address_;
 
 
-    // Helper functions
-    // ----------------
+// Helper functions
+// ----------------
     static void init()
     {
 	TWI::enable();
@@ -302,8 +308,8 @@ private:
 //    static void twi_transmit_start();
 
 // Respuesta a los estados comunes
-    static void mm_start(uint8_t slave_address);
-    static void mm_repeated_start(uint8_t slave_address);
+    static void mm_start(Address slave_address);
+    static void mm_repeated_start(Address slave_address);
 
 // Respuesta a los estados de TWI en master receiver mode
     static void mrm_sla_r_ack();
@@ -335,7 +341,7 @@ private:
 
 
 template <typename TWI, uint8_t bsz>
-void TWI_master<TWI, bsz>::mm_start(uint8_t slave_address)
+void TWI_master<TWI, bsz>::mm_start(Address slave_address)
 {
     if (state_ == iostate::sla_w)
 	TWI::master_transmit_sla_w(slave_address);
@@ -349,7 +355,7 @@ void TWI_master<TWI, bsz>::mm_start(uint8_t slave_address)
 
 
 template <typename TWI, uint8_t bsz>
-inline void TWI_master<TWI, bsz>::mm_repeated_start(uint8_t slave_address)
+inline void TWI_master<TWI, bsz>::mm_repeated_start(Address slave_address)
 {
     mm_start(slave_address);
 }   
@@ -358,9 +364,9 @@ inline void TWI_master<TWI, bsz>::mm_repeated_start(uint8_t slave_address)
 template <typename TWI, uint8_t bsz>
 void TWI_master<TWI, bsz>::mtm_send_next_byte()
 {
-    if (!buffer_.out_is_empty())
-	TWI::master_transmit_byte(buffer_.out_read_one());
-
+    if (!buffer_.is_empty()){
+	TWI::master_transmit_byte(buffer_.read());
+    }
     else{
 	TWI::interrupt_disable();
 	state_ = iostate::eow;
@@ -459,7 +465,7 @@ void TWI_master<TWI, bsz>::mrm_receive_next_byte()
 template <typename TWI, uint8_t bsz>
 void TWI_master<TWI, bsz>::mrm_data_ack()
 {
-    buffer_.in_write_one(TWI::data()); // buffer_ << TWI::data();
+    buffer_.write(TWI::data()); // buffer_ << TWI::data();
     --nread_;
     mrm_receive_next_byte();
 }
@@ -470,7 +476,7 @@ void TWI_master<TWI, bsz>::mrm_data_ack()
 template <typename TWI, uint8_t bsz>
 void TWI_master<TWI, bsz>::mrm_data_nack()
 {
-    buffer_.in_write_one(TWI::data()); // buffer_ << TWI::data();
+    buffer_.write(TWI::data()); // buffer_ << TWI::data();
     TWI::interrupt_disable();
     state_ = iostate::eor_bf;
 }
@@ -488,6 +494,46 @@ void TWI_master<TWI, bsz>::mrm_data_nack()
 //	TWI::master_transmit_repeated_start();
 //}
 
+
+// versión 2 de write_to. La necesito en TWI_master_ioxtream
+template <typename TWI, uint8_t bsz>
+TWI_master<TWI, bsz>::streamsize TWI_master<TWI, bsz>
+    ::write_to(Address slave_address, const std::byte* buf, streamsize n)
+{
+    if (state_ != iostate::read_or_write){	// precondition
+	state_ = iostate::prog_error;
+	return 0;
+    }
+
+    buffer_.reset();
+
+    if (buffer_.ewrite(buf, n) != n)
+	return 0;
+
+    slave_address_ = slave_address;
+
+    state_ = iostate::sla_w;
+    TWI::interrupt_enable();
+
+    return n;
+}
+
+
+//template <typename TWI, uint8_t bsz>
+//TWI_master<TWI, bsz>::streamsize TWI_master<TWI, bsz>::
+//    write(const std::byte* buf, streamsize n)
+//{
+//    Interrupts_lock lock;	// fundamental, ya que se llamará desde 'busy'
+//
+//    if (buffer_.out_write_all_n(buf, n) != n)
+//	return 0;
+//
+//AQUIII
+//
+//}
+
+
+
 template <typename TWI, uint8_t bsz>
 TWI_master<TWI, bsz>::streamsize TWI_master<TWI, bsz>::read(streamsize n)
 {
@@ -503,7 +549,7 @@ TWI_master<TWI, bsz>::streamsize TWI_master<TWI, bsz>::read(streamsize n)
     }
 
     nread_ = n;
-    buffer_.reset_as_input();
+    buffer_.reset();
  
     state_ = iostate::sla_r;
 
@@ -520,9 +566,9 @@ TWI_master<TWI, bsz>::read_buffer(std::byte* q, streamsize N)
     if (!eor_bf())  // precondicion
 	return 0;
  
-    streamsize n = buffer_.in_read_all_n(q, N);
+    streamsize n = buffer_.eread(q, N);
 
-    if (buffer_.in_is_empty())
+    if (buffer_.is_empty())
 	state_ = iostate::eor;
 
     return n;

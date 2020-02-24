@@ -18,7 +18,7 @@
 // Este microcontrolador dialoga con el test/TWI/slave
 #include "../../../avr_time.h"  // TODO: cambiar orden
 #include "../../../avr_USART.h" // TODO: cambiar orden
-#include "../../../avr_TWI.h"
+#include "../../../avr_TWI_basic.h"
 #include "../../../avr_TWI_master.h"
 
 
