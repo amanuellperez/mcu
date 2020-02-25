@@ -26,7 +26,7 @@
 #include <atd_buffer.h>
 
 
-constexpr uint8_t TWI_buffer_size = 10;
+constexpr uint8_t TWI_buffer_size = 100; // voy a enviarle un tipo de cada: int8, int16, ...
 using TWI = avr::TWI_slave<avr::TWI_basic, TWI_buffer_size>;
 
 inline void traza(const char* fname)
@@ -64,9 +64,11 @@ enum class Service{
 constexpr std::byte service1_name {0x34};
 constexpr std::byte service2_name {0x87};
 
-Service read_service_name(std::array<std::byte, TWI_buffer_size>& params_in)
+// nread [out]: parametros leidos
+Service read_service_name(std::array<std::byte, TWI_buffer_size>& params_in, TWI::streamsize& nread)
 {
     avr::UART_iostream uart;
+    uart << "\n\n=================\n";
     uart << "read_service_name\n";
 
     if (TWI::ok()){
@@ -82,9 +84,9 @@ Service read_service_name(std::array<std::byte, TWI_buffer_size>& params_in)
     if (TWI::is_busy())
 	uart << "ERROR: TWI::is_busy!!!\n";
 
-    TWI::streamsize n = TWI::read_buffer(params_in.data(), params_in.size());
-    uart << "Leidos " << (int)n << " bytes, a saber: ";
-    for (uint8_t i = 0; i < n; ++i)
+    nread = TWI::read_buffer(params_in.data(), params_in.size());
+    uart << "Leidos " << (int)nread << " bytes, a saber: ";
+    for (uint8_t i = 0; i < nread; ++i)
 	uart << (int) params_in[i] << ' ';
     uart << '\n';
     
@@ -94,7 +96,7 @@ Service read_service_name(std::array<std::byte, TWI_buffer_size>& params_in)
     if (TWI::is_listening())
 	uart << "TWI esta listening!\n";
 
-    if (n == 0) {
+    if (nread == 0) {
 	uart << "No se ha leído nada!\n";
 	TWI::stop_transmission();
 	return Service::error;
@@ -205,6 +207,46 @@ void service2(const std::array<std::byte, TWI_buffer_size>& params_in)
     uart << "-------------- Recibido service2\n";
 }
 
+
+// params_in[0,n) = parametros de entrada
+void service_unknown(const std::array<std::byte, TWI_buffer_size>& params_in,
+                     TWI::streamsize n)
+{
+    avr::UART_iostream uart;
+    uart << "--------- Service unknown\n"
+	 << "Devolvemos lo recibido\n";
+
+    print_TWI_state();
+    uart << "Esperamos a que esté wrt_be\n";
+    while (!TWI::wrt_be())
+    { 
+	wait_ms(100);
+	print_TWI_state();
+	
+    }
+
+
+    uint8_t nres = TWI::write_buffer(params_in.data(), n);
+    if (nres != n){
+        uart << "ERROR: write_buffer != " << n<< " (devuelve "
+             << static_cast<uint16_t>(nres) << "\n";
+        return;
+    }
+
+    uart << "devolvemos los bytes de salida ...";
+    TWI::wait_till_no_busy();
+
+    if (TWI::eow())
+	uart << "OK\n";
+    else{
+	uart << "ERROR: ";
+	print_TWI_state();
+    }
+    
+}
+
+
+
 void test_servidor()
 {
     avr::UART_iostream uart;
@@ -224,7 +266,8 @@ void test_servidor()
 	std::array<std::byte, TWI_buffer_size> params_out;
 
 	// TODO: read_service_name miente! Lee tambien params_in!!! CAMBIARLO!
-	Service srv_name = read_service_name(params_in);
+	TWI::streamsize n;
+	Service srv_name = read_service_name(params_in, n);
 	switch (srv_name){
 	    case Service::service1:
 		// Ejemplo: tiene parametros de entrada y salida
@@ -246,8 +289,9 @@ void test_servidor()
 		break;
 
 	    case Service::unknown:
+                service_unknown(params_in, n);
 		TWI::stop_transmission();
-		break;
+                break;
 
 	    case Service::error:
 		TWI::stop_transmission();

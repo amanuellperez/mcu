@@ -35,19 +35,132 @@ inline void traza_twcr()
 }
 
 
+void twi_print_error()
+{
+    avr::UART_iostream uart;
 
-//// Envía primero 
-//void TWI_write_and_read( <--- AQUI
+    if (TWI::no_response())
+	uart << "Slave no responde.\n";
 
+    else if (TWI::eow_data_nack())
+	uart << "Error: eow_data_nack\n";
 
+    else if (TWI::prog_error())
+	uart << "Error de programación\n";
 
+    else
+	uart << "Error desconocido\n";
+}
 
+void twi_print_state()
+{
+    avr::UART_iostream uart;
+
+    if (TWI::error())
+	uart << "state == error()\n";
+
+    else if (TWI::no_response())
+	uart << "state == no_response()\n";
+
+    else if (TWI::prog_error())
+	uart << "state == prog_error()\n";
+
+    else if (TWI::eow())
+	uart << "state == eow()\n";
+
+    else if (TWI::eow_data_nack())
+	uart << "state == eow_data_nack()\n";
+
+    else if (TWI::eor())
+	uart << "state == eor()\n";
+
+    else if (TWI::eor_bf())
+	uart << "state == eor_bf()\n";
+
+    else if (TWI::ok())
+	uart << "state == ok()\n";
+
+    else
+	uart << "state DESCONOCIDO!!!\n";
+    
+}
+
+void twi_print_state(TWI::iostate st)
+{
+    avr::UART_iostream uart;
+
+    switch(st){
+    case TWI::iostate::ok:
+	uart << "ok\n";
+	break;
+
+    case TWI::iostate::read_or_write:
+	uart << "read_or_write\n";
+	break;
+
+    case TWI::iostate::sla_w:
+	uart << "sla_w\n";
+	break;
+
+    case TWI::iostate::sla_r:
+	uart << "sla_r\n";
+	break;
+
+    case TWI::iostate::no_response:
+	uart << "no_response\n";
+	break;
+
+    case TWI::iostate::transmitting:
+	uart << "transmitting\n";
+	break;
+
+    case TWI::iostate::eow:
+	uart << "eow\n";
+	break;
+
+    case TWI::iostate::eow_data_nack:
+	uart << "eow_data_nack\n";
+	break;
+
+    case TWI::iostate::error_buffer_size:
+	uart << "error_buffer_size\n";
+	break;
+
+    case TWI::iostate::receiving:
+	uart << "receiving\n";
+	break;
+
+    case TWI::iostate::eor_bf:
+	uart << "eor_bf\n";
+	break;
+
+    case TWI::iostate::eor:
+	uart << "eor\n";
+	break;
+
+    case TWI::iostate::bus_error:
+	uart << "bus_error\n";
+	break;
+
+    case TWI::iostate::unknown_error:
+	uart << "unknown_error\n";
+	break;
+
+    case TWI::iostate::prog_error:
+	uart << "prog_error\n";
+	break;
+
+    default:
+	uart << "desconocido\n";
+    }   
+}
 
 
 
 void send_service1()
 {
     avr::UART_iostream uart;
+    uart << "\n\n=================\n";
     uart << "Service1:\n";
 
     TWI::reset();
@@ -170,6 +283,7 @@ void send_service1()
 void send_service2()
 {
     avr::UART_iostream uart;
+    uart << "\n\n=================\n";
     uart << "Service2:\n";
 
 
@@ -178,7 +292,7 @@ void send_service2()
 
     TWI::send_start();
     if (TWI::write_to<slave_address>(msg, 1) != 1){
-	uart << "Error enviando servicio 1: ";
+	uart << "Error enviando servicio 2: ";
         uart << "Se está intentando enviar demasiados datos de golpe, aumentar "
                 "el buffer del TWI\n";
 	return;
@@ -202,34 +316,117 @@ void send_service2()
 void send_service3()
 {
     avr::UART_iostream uart;
+    uart << "\n\n=================\n";
     uart << "Service3:\n";
 
-    uint8_t msg[1];
-    msg[0] = 0xAA;
+    uint8_t x0 = 45;
+    uint16_t x1 = 320; // bytes (decimal): 64 1
+    uint16_t x2 = 876;	// bytes (decimal): 108 3
 
+    TWI::reset();
 
     TWI::send_start();
 
-    if (TWI::write_to<slave_address>(reinterpret_cast<std::byte*>(msg), 1) != 1){
-	uart << "Error enviando servicio 3: ";
-        uart << "Se está intentando enviar demasiados datos de golpe, aumentar "
+    uart << "\tEscribiendo ... ";
+    TWI::streamsize nres = TWI::write_to<slave_address>
+	    (reinterpret_cast<std::byte*>(&x0), sizeof(x0));
+
+    if (nres != sizeof(x0)){
+	uart << "\nERROR: write_to devuelve 0!\n";
+	if (TWI::prog_error())
+	    uart << "prog_error()!!! Revisar código!!!\n";
+	else
+	    uart << "Se está intentando enviar demasiados datos de golpe, aumentar "
                 "el buffer del TWI\n";
 	return;
     }
-    else
-	uart << "\tEscribiendo ... ";
+    
+    if (TWI::error()){
+	twi_print_error();
+	return;
+    }
+
+    nres = TWI::write(reinterpret_cast<std::byte*>(&x1), sizeof(x1));
+    if (nres != sizeof(x1)){
+	if (TWI::prog_error())
+	    uart << "ERROR: write devuelve prog_error\n";
+	else
+	    uart << "\nERROR: write(x1) devuelve " << (int) nres << "\n";
+	return;
+    }
+
+
+    nres = TWI::write(reinterpret_cast<std::byte*>(&x2), sizeof(x2));
+
+    if (nres == 0){
+	uart << "\nERROR: write(x2) devuelve 0\n";
+	return;
+    }
 
     TWI::wait_till_no_busy();
 
     if (TWI::no_response()) // es el único posible error
 	uart << "dispostivo no responde\n";
 
-    if (TWI::eow()){
-	uart << "OK\n";
-	TWI::send_stop();
-    }
-    else
+    if (!TWI::eow()){
 	uart << "FAIL\n";
+	return;
+    }
+
+    uart << "OK\n";
+
+    uart << "\tRecibiendo datos enviados ... ";
+    TWI::send_repeated_start();
+
+    TWI::read_from<slave_address>(sizeof(x0) + sizeof(x1) + sizeof(x2));
+
+    TWI::wait_till_no_busy();
+
+    uint8_t y0;
+    uint16_t y1;
+    uint16_t y2;
+    if (TWI::read_buffer((std::byte*) &y0, sizeof(y0)) != sizeof(y0)){
+	uart << "Error: no se ha recibido y1 enviado\n";
+	TWI::send_stop();
+	return;
+    }
+
+    if (TWI::read_buffer((std::byte*) &y1, sizeof(y1)) != sizeof(y1)){
+	uart << "Error: no se ha recibido y1 enviado\n";
+	TWI::send_stop();
+	return;
+    }
+
+    if (TWI::error()){
+	uart << "Error al recibir y1\n";
+	twi_print_error();
+	return;
+    }
+
+    if (TWI::read_buffer((std::byte*) &y2, sizeof(y2)) != sizeof(y2)){
+	uart << "Error: no se ha recibido y2 enviado\n";
+	TWI::send_stop();
+	return;
+    }
+
+    if (TWI::error()){
+	uart << "Error al recibir y2\n";
+	twi_print_error();
+	return;
+    }
+
+    uart << "Recibido "
+	 << (int) y0 << ' ' << y1 << ' ' << y2 << '\n';
+
+    if (x0 == y0 and x1 == y1 and x2 == y2)
+	uart << "OK\n";
+    else
+	uart << "ERROR: recibido datos diferentes a los enviados\n";
+
+    TWI::send_stop();
+    
+    if (!TWI::ok())
+	uart << "ERROR: tendría que estar en 'ok'\n";
 
 }
 

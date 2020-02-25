@@ -189,9 +189,36 @@ private:
     static inline Address slave_address_;
 
 
+    TWI_master_ioxtream& write_(const std::byte& x)
+    {// TODO: gestión de errores. Si write no devuelve sizeof(x) error	
+avr::UART_iostream uart;
+uart << "write_(byte)\n";
+	if (TWI::read_or_write()){
+            TWI::write_to(slave_address_, &x, sizeof(x));
+        }
+	else {
+	    TWI::write(&x, sizeof(x));
+	}
+
+	return *this;
+    }
+
+
+    TWI_master_ioxtream& read_(std::byte& x)
+    {// TODO: gestión de errores. Si read no devuelve sizeof(x) error
+avr::UART_iostream uart;
+uart << "read_(byte)\n";
+	TWI::wait_till_no_busy();
+	
+	TWI::read_buffer(&x, sizeof(x));
+	return *this;
+    }
+
+
     template <typename T>
     TWI_master_ioxtream& write_(const T& x)
     {// TODO: gestión de errores. Si write no devuelve sizeof(x) error	
+
 	if (TWI::read_or_write()){
             TWI::write_to(slave_address_,
                           reinterpret_cast<const std::byte*>(&x),

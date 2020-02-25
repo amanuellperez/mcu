@@ -387,6 +387,18 @@ void test_circular_buffer()
     CHECK_TRUE(buf.size() == 0, "size");
 
 
+    {// prueba que falló en TWI
+    atd::Circular_array<std::byte, 10> buf;
+    std::byte x{45};
+    CHECK_TRUE((buf.ewrite(&x, 1) == 1), "ewrite");
+    std::byte y;
+    y = buf.read();
+    CHECK_TRUE(x == y, "read");
+    std::byte x2[2] = {std::byte{32}, std::byte{67}};
+    CHECK_TRUE((buf.ewrite(x2, 2) == 2), "ewrite");
+
+    
+    }
 }
 
 

@@ -179,6 +179,10 @@ public:
     // Sólo es válido cuando is_busy() == false!!!
     static iostate state() {return state_;}
 
+// Da la impresión de que en polling voy a necesitar esta función bastante:
+//  ENGLISH DOUBT: wait_till_no_busy??? or wait_no_busy??? @_@
+    static void wait_till_no_busy() { while (is_busy()) { asm("nop"); } }
+
 private:
     static inline volatile iostate state_;
 

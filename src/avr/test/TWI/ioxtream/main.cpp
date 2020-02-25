@@ -45,10 +45,44 @@ void twi_print_error()
 	uart << "Error desconocido\n";
 }
 
+void twi_print_state()
+{
+    avr::UART_iostream uart;
+
+    if (TWI::error())
+	uart << "state == error()\n";
+
+    else if (TWI::no_response())
+	uart << "state == no_response()\n";
+
+    else if (TWI::prog_error())
+	uart << "state == prog_error()\n";
+
+    else if (TWI::eow())
+	uart << "state == eow()\n";
+
+    else if (TWI::eow_data_nack())
+	uart << "state == eow_data_nack()\n";
+
+    else if (TWI::eor())
+	uart << "state == eor()\n";
+
+    else if (TWI::eor_bf())
+	uart << "state == eor_bf()\n";
+
+    else if (TWI::ok())
+	uart << "state == ok()\n";
+
+    else
+	uart << "state DESCONOCIDO!!!\n";
+    
+}
+
 
 void send_service1()
 {
     avr::UART_iostream uart;
+    uart << "\n==============================\n";
     uart << "Service1:\n";
 
     TWI::reset();
@@ -103,6 +137,7 @@ void send_service1()
 void send_service2()
 {
     avr::UART_iostream uart;
+    uart << "\n==============================\n";
     uart << "Service2: ";
 
 
@@ -122,18 +157,108 @@ void send_service2()
 	uart << "OK\n";
 }
 
-void send_service3()
+template <typename T>
+void uart_print(const T& x)
 {
     avr::UART_iostream uart;
-    uart << "Service3: ";
+    uart << x;
+}
 
-    uint8_t msg[1];
-    msg[0] = 0xAA;
+void uart_print(std::byte b)
+{
+    avr::UART_iostream uart;
+    uart << (int) b;
+}
+
+template <typename Int>
+void send_type(const Int& x0, const char* tname)
+{
+    avr::UART_iostream uart;
+    uart << "\n==============================\n";
+    uart << "Enviando un " << tname << ": ";
 
     TWI twi;
     twi.open(slave_address);
 
-    twi << msg[0];
+    twi << x0;
+
+    if (twi.error()){
+	uart << "twi ERROR!!!";
+	twi_print_error();
+	return;
+    }
+
+
+    twi.read(sizeof(Int));
+
+    Int y0{};
+    twi >> y0;
+
+    if (y0 != x0){
+	uart << "ERROR: no se han recibido el dato enviado\n";
+        uart << "\tRecibido: ";
+	uart_print(y0);
+	uart << '\n';
+    }
+    else
+	uart << "OK\n";
+
+    twi.close();
+
+    if (twi.error())
+	twi_print_error();
+    
+}
+
+
+void send_service4()
+{
+    avr::UART_iostream uart;
+    uart << "\n==============================\n";
+    uart << "Service4: \n";
+
+    uint8_t x0 = 34;
+    uint16_t x1 = 320; // bytes (decimal): 64 1
+    uint32_t x2 = 876;
+    int8_t x3 = -4;
+    int16_t x4 = -300; // bytes (decimal): 64 1
+    int32_t x5 = -10000;
+
+    TWI twi;
+    twi.open(slave_address);
+
+    twi << x0 << x1 << x2
+	<< x3 << x4 << x5;
+
+    if (twi.error()){
+	uart << "twi ERROR!!!";
+	twi_print_error();
+	return;
+    }
+
+
+    uart << "\tLeyendo datos enviados... ";
+    twi.read(sizeof(x0) + sizeof(x1) + sizeof(x2)
+	    +sizeof(x3) + sizeof(x4) + sizeof(x5));
+
+    uint8_t y0;
+    uint16_t y1;
+    uint32_t y2;
+    int8_t y3;
+    int16_t y4;
+    int32_t y5;
+
+    twi >> y0 >> y1 >> y2 
+	>> y3 >> y4 >> y5;
+
+    if (!(y0 == x0 and y1 == x1 and y2 == x2 and
+	  y3 == x3 and y4 == x4 and y5 == x5)){
+	uart << "ERROR: no se han recibido los datos enviados\n";
+        uart << "\tRecibido: " << (int)y0 << ", " << (unsigned int)y1 << ", "
+             << (unsigned int)y2 << '\n';
+    }
+    else
+	uart << "OK\n";
 
     twi.close();
 
@@ -144,16 +269,25 @@ void send_service3()
 	uart << "OK\n";
 }
 
-
-
 void test_write()
 {
     send_service1();
     wait_ms(500);
     send_service2();
     wait_ms(500);
-    send_service3();
+    send_type<char>('a', "char");
+    send_type<std::byte>(std::byte{0x02}, "std::byte");
+    send_type<uint8_t>(34, "uint8_t");
+    send_type<uint16_t>(340, "uint16_t");
+    send_type<uint32_t>(10000, "uint32_t");
+    send_type<uint64_t>(1000000, "uint64_t");
+    send_type<int8_t>(-34, "int8_t");
+    send_type<int16_t>(-340, "int16_t");
+    send_type<int32_t>(-10000, "int32_t");
+    send_type<int64_t>(-1000000, "int64_t");
     wait_ms(500);
+//    send_service4();
+//    wait_ms(500);
 
 }
 

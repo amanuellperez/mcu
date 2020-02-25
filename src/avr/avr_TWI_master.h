@@ -173,7 +173,8 @@ public:
     /// Finaliza la transmisión. Envía STOP.
     static void send_stop();
 
-    /// Reinicializa el dispositivo.
+    /// Reinicializa el dispositivo, dejándolo en el estado inicial.
+    /// Lo deja en estado 'idle::ok'.
     /// En caso de que se quede colgado intentando leer, llamar a esta
     /// función.
     static void reset()
@@ -331,10 +332,23 @@ private:
     // Implementación de read_from
     static streamsize read(streamsize n);
 
-//    // Inicia una nueva transmisión, enviando START o REPEATED START,
-//    // dependiendo de si estabamos en medio de una transmisión o no.
-//    static void twi_transmit_start();
 
+    // Cuando no se satisface la precondición del diagrama de estados
+    // generamos este error: no_valid_state(); 
+    // Esto puede suceder: ya sea porque el slave no respondió y se intenta
+    // seguir con la comunicación, o por algún error por parte del
+    // programador. Mantenemos el error inicial que causo todo (por ejemplo,
+    // si el slave no responde interesa saber que fue así y no que se llamó a
+    // write con un estado no válido).
+    static void no_valid_state()
+    {
+	iostate st = error()? state_: iostate::prog_error;
+	reset(); // cortamos la transmisión, desconectando el dispositivo
+	state_ = st;
+    }
+
+// Respuesta a las interrupciones
+// ------------------------------
 // Respuesta a los estados comunes
     static void mm_start(Address slave_address);
     static void mm_repeated_start(Address slave_address);
@@ -378,7 +392,7 @@ void TWI_master<TWI, bsz>::mm_start(Address slave_address)
 	TWI::master_transmit_sla_r(slave_address);
 
     else
-	state_ = iostate::prog_error;
+	no_valid_state();
 }
 
 
@@ -510,18 +524,6 @@ void TWI_master<TWI, bsz>::mrm_data_nack()
 }
 
 
-//	if (is_busy() or is_waiting()) master_transmit_repeated_start();
-//	else master_transmit_start();
-//template <typename TWI, uint8_t bsz>
-//void TWI_master<TWI, bsz>::twi_transmit_start()
-//{
-//    if (is_idle())
-//	TWI::master_transmit_start();
-//
-//    else
-//	TWI::master_transmit_repeated_start();
-//}
-
 
 // versión 2 de write_to. La necesito en TWI_master_ioxtream
 template <typename TWI, uint8_t bsz>
@@ -529,7 +531,7 @@ TWI_master<TWI, bsz>::streamsize TWI_master<TWI, bsz>
     ::write_to(Address slave_address, const std::byte* buf, streamsize n)
 {
     if (state_ != iostate::read_or_write){	// precondition
-	state_ = iostate::prog_error;
+	no_valid_state();
 	return 0;
     }
 
@@ -553,8 +555,13 @@ TWI_master<TWI, bsz>::streamsize TWI_master<TWI, bsz>::
 {
     Interrupts_lock lock;	// fundamental, ya que se llamará desde 'busy'
 
-    if (!(transmitting() or eow()))  // precondition
+    // OJO: el micro funciona mucho más rápido que TWI, por eso si se llama
+    // a write_to(q,n), y  a continuación a write(q,n) puede que todavía no le
+    // haya dado tiempo a cambiar de estado, pasando de sla_w a transmitting.
+    if (!(state_ == iostate::sla_w or transmitting() or eow())){  // pre.
+	no_valid_state();
 	return 0;
+    }
 
     if (buffer_.ewrite(buf, n) != n)
 	return 0;
@@ -574,7 +581,7 @@ template <typename TWI, uint8_t bsz>
 TWI_master<TWI, bsz>::streamsize TWI_master<TWI, bsz>::read(streamsize n)
 {
     if (state_ != iostate::read_or_write or n == 0){ // precondition
-	state_ = iostate::prog_error;
+	no_valid_state();
 	return 0;
     }
 
@@ -599,8 +606,10 @@ template <typename TWI, uint8_t bsz>
 TWI_master<TWI, bsz>::streamsize 
 TWI_master<TWI, bsz>::read_buffer(std::byte* q, streamsize N)
 {
-    if (!eor_bf())  // precondicion
+    if (!eor_bf()){  // precondicion
+	no_valid_state();
 	return 0;
+    }
  
     streamsize n = buffer_.eread(q, N);
 
@@ -613,8 +622,8 @@ TWI_master<TWI, bsz>::read_buffer(std::byte* q, streamsize N)
 template <typename TWI, uint8_t bsz>
 void TWI_master<TWI, bsz>::send_start()
 {
-    if (!is_idle()){ // precondition
-	state_ = iostate::prog_error;
+    if (!is_idle()){ // pre: no puede estar en medio de una transmisión
+	no_valid_state();
 	return;
     }
 
@@ -627,7 +636,7 @@ template <typename TWI, uint8_t bsz>
 void TWI_master<TWI, bsz>::send_repeated_start()
 {
     if (state_ != iostate::eow and state_ != iostate::eor){ // precondition
-	state_ = iostate::prog_error;
+	no_valid_state();
 	return;
     }
 
@@ -642,7 +651,7 @@ void TWI_master<TWI, bsz>::send_repeated_start()
 template <typename TWI, uint8_t bsz>
 inline void TWI_master<TWI, bsz>::send_stop()
 {
-    if (is_idle()) // precondition: que esté en medio de una transmisión
+    if (is_idle()) // No esta en medio de una transmisión; no es necesario stop
 	return;
 
     TWI::master_transmit_stop();
