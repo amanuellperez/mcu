@@ -34,7 +34,16 @@
  *
  *  - TODO: Dar la opción de lanzar una interrupción cuando acabe de hacer
  *  algo (cuando pase de busy a no_busy). De esa forma el usuario no tendrá
- *  que estar haciendo polling continuamente. 
+ *  que estar haciendo polling continuamente.  (ANTES DE HACERLO: ¿merece la
+ *  pena? ¿Lo voy a usar?)
+ *
+ *  - TODO: La mejor forma de usarlo es teniendo un buffer suficientemente
+ *  grande para que se lea/escriba cualquier mensaje. Sin embargo está casi
+ *  (basta con que read_buffer se pueda llamar tambien en estado
+ *  receiving/nread_ > 0) preparado para que se pueda
+ *  enviar/recibir mensajes de cualquier tamaño independientemente del buffer
+ *  interno usado. Revisarlo e implementarlo (ANTES DE HACERLO: ¿merece la
+ *  pena? ¿Lo voy a usar?)
  *
  *  - HISTORIA:
  *    A.Manuel L.Perez
@@ -50,37 +59,48 @@
 
 namespace avr{
 
-enum class __TWI_master_state{
-// group of states
-    idle = 0x00,
-    busy = 0x01,
+enum class __TWI_master_state : uint8_t {
+// group of states: gg (2 bits)
+    idle    = 0x00,
+    busy    = 0x01,
     waiting = 0x02,
 
-// state
-    ok		    = (1 << 2) |idle,
-    read_or_write   = (2 << 2) |waiting,
-    sla_w	    = (3 << 2) |busy,
-    sla_r	    = (4 << 2) |busy,
+// error: e (1 bit) 
+// (RRR) para que sea sencillo saber si hay un error o no
+    error = 0x04,
 
-    no_response	    = (10 << 2) |idle,
-    eow_data_nack   = (11 << 2) |idle,
-    eow		    = (12 << 2) |waiting,
+// state: 5 bits (hasta 32)
+    ok = (1 << 3) | idle,
 
-    eor_bf	    = (20 << 2) |waiting,    // buffer full
-    eor		    = (21 << 2) |waiting,
+    read_or_write = (2 << 3) | waiting,
+    sla_w         = (3 << 3) | busy,
+    sla_r         = (4 << 3) | busy,
+    no_response   = (5 << 3) | error | idle,
 
-    transmitting    = (30 << 2) |busy,
-    receiving	    = (31 << 2) |busy,
+// transmitting
+    transmitting      = (10 << 3) | busy,
+    eow               = (11 << 3) | waiting,
+    eow_data_nack     = (12 << 3) | error | idle,
+    error_buffer_size = (13 << 3) | error | idle, // buffer pequeño
 
-    bus_error	    = (40 << 2) |idle,
-    unknown_error   = (41 << 2) |idle,
+// receiving
+    receiving         = (20 << 3) | busy,
+    eor_bf            = (21 << 3) | waiting, // buffer full
+    eor               = (22 << 3) | waiting,
 
-
-    prog_error	      = (100 << 2)|idle,// error de programación: maquina de estados
-    error_buffer_size = (101 << 2)|idle// buffer pequeño
+// errors
+    bus_error         = (25 << 3) | error | idle,
+    unknown_error     = (26 << 3) | error | idle,
+    prog_error        = (27 << 3) | error | idle // error de programación
 };
 
 constexpr uint8_t __TWI_master_state_mask_group_states = 0x03;
+constexpr uint8_t __TWI_master_state_mask_error = 0x04;
+
+bool __TWI_master_state_error(__TWI_master_state a)
+{
+    return (static_cast<uint8_t>(a) & __TWI_master_state_mask_error);
+}
 
 bool __TWI_master_state_is_group(__TWI_master_state a, __TWI_master_state group)
 {
@@ -142,6 +162,9 @@ public:
     }
 
     /// Inicia la transmisión. Envía START.
+    /// Elimina el estado en el que estuviera TWI perdiéndose la información
+    /// de cómo fue la última transmisión.
+    /// Precondición: is_idle(); // = no está en medio de una transmisión.
     static void send_start();
 
     /// Reinicia la transmisión. Envía REPEATED START.
@@ -235,6 +258,9 @@ public:
     static bool is_waiting() {return __TWI_master_state_is_waiting(state_);}
 
 
+// ¿hay un error?
+    static bool error() {return __TWI_master_state_error(state_);}
+
 // errores genéricos
     static bool no_response() {return state_ == iostate::no_response;}
     static bool prog_error() {return state_ == iostate::prog_error;}
@@ -243,10 +269,12 @@ public:
     static bool read_or_write() {return state_ == iostate::read_or_write;}
 
 // de escritura
+    static bool transmitting() {return state_ == iostate::transmitting;}
     static bool eow() {return state_ == iostate::eow;}
     static bool eow_data_nack() {return state_ == iostate::eow_data_nack;}
 
 // de lectura
+    static bool receiving() {return state_ == iostate::receiving;}
     static bool eor() {return state_ == iostate::eor;}
     static bool eor_bf() {return state_ == iostate::eor_bf;}
 
@@ -519,18 +547,26 @@ TWI_master<TWI, bsz>::streamsize TWI_master<TWI, bsz>
 }
 
 
-//template <typename TWI, uint8_t bsz>
-//TWI_master<TWI, bsz>::streamsize TWI_master<TWI, bsz>::
-//    write(const std::byte* buf, streamsize n)
-//{
-//    Interrupts_lock lock;	// fundamental, ya que se llamará desde 'busy'
-//
-//    if (buffer_.out_write_all_n(buf, n) != n)
-//	return 0;
-//
-//AQUIII
-//
-//}
+template <typename TWI, uint8_t bsz>
+TWI_master<TWI, bsz>::streamsize TWI_master<TWI, bsz>::
+    write(const std::byte* buf, streamsize n)
+{
+    Interrupts_lock lock;	// fundamental, ya que se llamará desde 'busy'
+
+    if (!(transmitting() or eow()))  // precondition
+	return 0;
+
+    if (buffer_.ewrite(buf, n) != n)
+	return 0;
+
+    if (state_ == iostate::eow){
+	state_ = iostate::transmitting;
+	mtm_send_next_byte();
+	TWI::interrupt_enable();
+    }
+
+    return n;
+}
 
 
 
@@ -606,6 +642,9 @@ void TWI_master<TWI, bsz>::send_repeated_start()
 template <typename TWI, uint8_t bsz>
 inline void TWI_master<TWI, bsz>::send_stop()
 {
+    if (is_idle()) // precondition: que esté en medio de una transmisión
+	return;
+
     TWI::master_transmit_stop();
     TWI::interrupt_disable();
     state_ = iostate::ok;

@@ -61,6 +61,13 @@ namespace avr{
  *	...
  *	twi.close();
  *
+ *	// NO OLVIDAR LA ISR!!!
+ *	ISR(TWI_vect)
+ *	{
+ *	    TWI::handle_interrupt();
+ *	}
+
+ *
  *  DUDA: ¿ponerle un state?
  *	Por una parte quiero que sea lo más eficiente posible, pero por otra
  *	un state es muy natural en un flujo. 
@@ -75,15 +82,26 @@ public:
     using Address = TWI::Address;
     using streamsize = TWI::streamsize;
 
+// Destructor
+    TWI_master_ioxtream() {}
+
+    /// Construimos la conexión conectandola
+    explicit TWI_master_ioxtream(Address slave_address)
+    {open(slave_address);}
+
+    ~TWI_master_ioxtream() {close();}
+
+// init
     /// Enables TWI interface definiendo la frecuencia del SCL 
     /// a la que vamos a operar.
     /// f_scl = frecuencia en kilohercios de SCL (tipica: 100 y 400 kHz).
     /// f_clock = frecuencia a la que funciona el reloj del avr.
     template <uint16_t f_scl, uint32_t f_clock = MCU_CLOCK_FREQUENCY_IN_HZ>
-    static void on() {TWI::on<f_scl, f_clock>();}
+    static void on() {TWI::template on<f_scl, f_clock>();}
 
     /// Reinicializa el dispositivo.
     static void reset() {TWI::reset();}
+
 
 // open/close
     /// Inicia una transmisión. 
@@ -101,10 +119,11 @@ public:
     /// No bloquea.
     /// Precondición: se ha llamado a open antes.
     /// Return: true, todo va bien; false, error (se viola la precondición)
-    void read(streamsize n);
+    bool read(streamsize n);
 
 
 // operator<<. Ninguna bloquea.
+    TWI_master_ioxtream& operator<<(std::byte c) {return write_(c);}
     TWI_master_ioxtream& operator<<(char c) {return write_(c);}
     TWI_master_ioxtream& operator<<(unsigned char c) {return write_(c);}
     TWI_master_ioxtream& operator<<(signed char c) {return write_(c);}
@@ -118,6 +137,7 @@ public:
     TWI_master_ioxtream& operator<<(const unsigned long long& c) {return write_(c);}
 
 // operator>>. Todas bloquean.
+    TWI_master_ioxtream& operator>>(std::byte c) {return read_(c);}
     TWI_master_ioxtream& operator>>(char& c) {return read_(c);}
     TWI_master_ioxtream& operator>>(unsigned char& c) {return read_(c);}
     TWI_master_ioxtream& operator>>(signed char& c) {return read_(c);}
@@ -131,42 +151,86 @@ public:
     TWI_master_ioxtream& operator>>(unsigned long long& c) {return read_(c);}
     
 
+// ISR
+    // FUNDAMENTAL: no olvidar llamar a esta función!!!
+    static void handle_interrupt() {TWI::handle_interrupt();}
+
+
+// estados
+// -------
+// grupos
+    static bool is_idle() {return TWI::is_idle();} 
+    static bool is_busy() {return TWI::is_busy();}
+    static bool is_waiting() {return TWI::is_waiting();}
+
+
+// ¿algún error?
+    static bool error() {return TWI::error();}
+
+// errores genéricos
+    static bool no_response() {return TWI::no_response();}
+    static bool prog_error() {return TWI::prog_error();}
+
+
+// de escritura
+    static bool eow() {return TWI::eow();}
+    static bool eow_data_nack() {return TWI::eow_data_nack();}
+
+// de lectura
+    static bool eor() {return TWI::eor();}
+    static bool eor_bf() {return TWI::eor_bf();}
+
+// genérico
+    static bool ok() {return TWI::ok();}
+
 private:
 // Data
     // Solo podemos conectarnos a un slave a la vez, por eso lo defino static.
-    static Address slave_addres_;
+    static inline Address slave_address_;
 
 
     template <typename T>
     TWI_master_ioxtream& write_(const T& x)
-    {
-AQUIII: solo falta write_ y read_
-	TWI::(reinterpret_cast<const std::byte*>(&x), sizeof(x));
+    {// TODO: gestión de errores. Si write no devuelve sizeof(x) error	
+	if (TWI::read_or_write()){
+            TWI::write_to(slave_address_,
+                          reinterpret_cast<const std::byte*>(&x),
+                          sizeof(x));
+        }
+	else {
+	    TWI::write(reinterpret_cast<const std::byte*>(&x), sizeof(x));
+	}
+
 	return *this;
     }
 
     template <typename T>
     TWI_master_ioxtream& read_(T& x)
-    {
-	buffer_.eread(reinterpret_cast<std::byte*>(&x), sizeof(x));
+    {// TODO: gestión de errores. Si read no devuelve sizeof(x) error
+	TWI::wait_till_no_busy();
+	
+	TWI::read_buffer(reinterpret_cast<std::byte*>(&x), sizeof(x));
 	return *this;
     }
 
 };
 
 template <typename T, uint8_t bsz>
-inline bool TWI_master_ioxtream::open(Address slave_address)
+inline bool TWI_master_ioxtream<T, bsz>::open(Address slave_address)
 {
     if (!TWI::is_idle())
-	return false;
+	return false; // ¿hacer mejor TWI::reset()?
+
+    slave_address_ = slave_address;
 
     TWI::send_start();
+
     return true;
 }
 
 
 template <typename T, uint8_t bsz>
-inline void TWI_master_ioxtream::close()
+inline void TWI_master_ioxtream<T, bsz>::close()
 {
     TWI::wait_till_no_busy();
 
@@ -176,7 +240,7 @@ inline void TWI_master_ioxtream::close()
 }
 
 template <typename T, uint8_t bsz>
-bool TWI_master_ioxtream::read(streamsize n)
+bool TWI_master_ioxtream<T, bsz>::read(streamsize n)
 {
     if (TWI::is_idle()) // no envio start para obligar al usuario a llamar
 	return false;	// a open, pasando la dirección del slave.

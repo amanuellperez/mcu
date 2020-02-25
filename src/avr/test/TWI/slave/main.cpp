@@ -83,7 +83,11 @@ Service read_service_name(std::array<std::byte, TWI_buffer_size>& params_in)
 	uart << "ERROR: TWI::is_busy!!!\n";
 
     TWI::streamsize n = TWI::read_buffer(params_in.data(), params_in.size());
-    uart << "Leidos " << (int)n << " bytes\n";
+    uart << "Leidos " << (int)n << " bytes, a saber: ";
+    for (uint8_t i = 0; i < n; ++i)
+	uart << (int) params_in[i] << ' ';
+    uart << '\n';
+    
     if (TWI::rec_bf())
 	uart << "ERROR: estado == rec_bf\n";
 

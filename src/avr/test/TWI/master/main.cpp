@@ -52,11 +52,16 @@ void send_service1()
 
     TWI::reset();
 
-    uint8_t msg[4];
+    constexpr uint8_t N = 8;
+    uint8_t msg[N];
     msg[0] = 0x34;
     msg[1] = 37;
     msg[2] = 98;
     msg[3] = 125;
+    msg[4] = 15;
+    msg[5] = 30;
+    msg[6] = 45;
+    msg[7] = 60;
 
 
     TWI::send_start();
@@ -66,7 +71,7 @@ void send_service1()
     }
 
 
-    if (TWI::write_to<slave_address>(reinterpret_cast<std::byte*>(msg), 4) != 4){
+    if (TWI::write_to<slave_address>(reinterpret_cast<std::byte*>(msg), 3) != 3){
 	uart << "Error enviando servicio 1: ";
         uart << "Se está intentando enviar demasiados datos de golpe, aumentar "
                 "el buffer del TWI\n";
@@ -74,6 +79,14 @@ void send_service1()
     }
     else
 	uart << "\tEscribiendo ... ";
+
+    for (uint8_t i = 3; i < N; ++i){
+// 	wait_ms(100); <-- simula una transmisión lenta. Tal como está ahora
+			// el slave no muetra los datos hasta que no recibe
+			// todo. Esto se podría mejorar bastante. Para el
+			// futuro si lo uso.
+	TWI::write((std::byte*)(&msg[i]), 1);
+    }
 
     uint16_t i = 0;
     for (; TWI::is_busy() and i < 65000; ++i)
@@ -173,8 +186,7 @@ void send_service2()
     else
 	uart << "\tEscribiendo ... ";
 
-    while (TWI::is_busy())
-    { ; }
+    TWI::wait_till_no_busy();
     
     if (TWI::no_response()) // es el único posible error
 	uart << "dispostivo no responde\n";
@@ -207,9 +219,8 @@ void send_service3()
     else
 	uart << "\tEscribiendo ... ";
 
-    while (TWI::is_busy())
-    { ; }
-    
+    TWI::wait_till_no_busy();
+
     if (TWI::no_response()) // es el único posible error
 	uart << "dispostivo no responde\n";
 
