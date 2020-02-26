@@ -455,7 +455,7 @@ void test_eeprom_automatico()
 int main()
 {
     avr::UART_iostream uart;
-    cfg_basica(uart);
+    avr::basic_cfg(uart);
     uart.on();
 
     while(1){

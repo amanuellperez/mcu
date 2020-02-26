@@ -108,7 +108,7 @@ void test_single_mode_alto_nivel()
 int main() 
 {
     avr::UART_iostream uart;
-    avr::cfg_basica(uart);
+    avr::basic_cfg(uart);
     uart.on();
 
     test_single_mode_bajo_nivel();

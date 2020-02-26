@@ -91,7 +91,7 @@ void print(uint64_t time_en_us)
 int main()
 {
     avr::UART_iostream uart;
-    avr::cfg_basica(uart);
+    avr::basic_cfg(uart);
     uart.on();
 
     Timer::on<period_in_us>();

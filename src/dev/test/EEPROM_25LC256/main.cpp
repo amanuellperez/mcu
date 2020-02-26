@@ -110,7 +110,7 @@ void test_write(EEPROM& eeprom)
 
 void test_uint8_t() {
     avr::UART_iostream uart;
-    cfg_basica(uart);
+    avr::basic_cfg(uart);
     uart.on();
 
     avr::SPI::on_as_a_master<periodo_en_us>();

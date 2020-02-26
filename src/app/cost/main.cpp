@@ -22,7 +22,7 @@
 void show_sizes_types()
 {
     avr::UART_iostream uart;
-    avr::cfg_basica(uart);
+    avr::basic_cfg(uart);
     uart.on();
 
     while(1){

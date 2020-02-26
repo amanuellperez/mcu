@@ -50,7 +50,7 @@ bool get_ack(UART_iostream& uart)
 int main() 
 {
     UART_iostream uart;
-    cfg_basica(uart);
+    avr::basic_cfg(uart);
     uart.on();
 
 

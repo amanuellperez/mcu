@@ -74,7 +74,7 @@ void init_time()
 int main()
 {
     UART_iostream uart;
-    cfg_basica(uart);
+    avr::basic_cfg(uart);
     uart.on();
 
     Timer::on<period_in_us>();

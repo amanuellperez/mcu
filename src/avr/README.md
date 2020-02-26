@@ -12,6 +12,7 @@ To avoid it I use translators: instead of remember the datasheet is easier to wr
      
 everybody can understand this code. 
 
+### `UART` as a stream
 Besides translators I provide another classes. For instance, I treat UART as a normal
 iostream:
 
@@ -60,8 +61,8 @@ void service(const Data_in& in, Data_out& out)
 
 TWI includes:
 
-* `avr_TWI_basic.h`: translator of the datasheet.  
-		     Everything you can do with the hardware.
+* `avr_TWI_basic.h`: translator of the datasheet. Everything you can do with 
+the hardware. 
 		    
 
 The problem with avr TWI is that its buffer is only of 1 byte. I change this
@@ -98,7 +99,7 @@ algo. Ese estilo de programar es propenso a errores.
 
 Para evitarlo creo los traductores:
 en lugar de recordar que para mirar si USART está listo para transmitir tengo que mirar
-si el bit UDRE0 del registro UCSR0A es 1, basta con escribir 
+si el bit `UDRE0` del registro `UCSR0A` es 1, basta con escribir 
 
      if (USART::is_ready_to_transmit()) { haz_algo(); }
      
@@ -106,6 +107,7 @@ Es mucho más legible, menos propenso a error y más fácil de portar. Además, 
 son muy sencillos de escribir: basta con leer la datasheet y escribir las funciones correspondientes.
 La propia datasheet te da la mayoría de las veces el nombre de la función que tienes que escribir.
 
+### `UART` como flujo
 Además de los traductores suministro también algunas clases de más alto nivel. Por ejemplo, 
 un flujo normal y corriente para acceder a UART. 
 
@@ -157,8 +159,8 @@ void service(const Data_in& in, Data_out& out)
 
 El paquete TWI incluye:
 
-* `avr_TWI_basic.h`: traductor de la datasheet.  
-		     Son todas las funciones que tiene el hardware de TWI.
+* `avr_TWI_basic.h`: traductor de la datasheet.  Son todas las funciones que 
+  tiene el hardware de TWI.
 		    
 
 El problema que tiene el TWI del avr es que tiene un buffer interno de 1 byte. 

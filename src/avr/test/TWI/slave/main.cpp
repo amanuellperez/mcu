@@ -353,7 +353,7 @@ void test_read()
 int main() 
 {
     avr::UART_iostream uart;
-    avr::cfg_basica(uart);
+    avr::basic_cfg(uart);
     uart.on();
 
     uart << "TWI slave\n"

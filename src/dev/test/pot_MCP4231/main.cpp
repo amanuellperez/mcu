@@ -122,8 +122,8 @@ void test_flags(Pot_MCP4231<n>& pot, const char* nombre)
 
 
 void test() {
-    UART_iostream uart;
-    cfg_basica(uart);
+    avr::UART_iostream uart;
+    avr::basic_cfg(uart);
     uart.on();
 
     SPI::on_as_a_master<periodo_en_us>();

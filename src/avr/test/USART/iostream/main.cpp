@@ -36,7 +36,7 @@ using traits = std::char_traits<char>;
 void test_streambuf()
 { 
     UART_iostream uart;
-    cfg_basica(uart);
+    avr::basic_cfg(uart);
     uart.on();
 
     uart << "\n---------------\n";
@@ -93,7 +93,7 @@ void test_int(UART_iostream& uart, const char* tipo)
 void test_iostream()
 {
     UART_iostream uart;
-    cfg_basica(uart);
+    avr::basic_cfg(uart);
     uart.on();
 
     uart << "\n---------------\n";

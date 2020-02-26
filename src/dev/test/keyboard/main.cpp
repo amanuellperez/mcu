@@ -39,7 +39,7 @@ using Keyboard = dev::Basic_keyboard<Keyboard_pins, Keyboard_codes>;
 void test_keyboard()
 {
     avr::UART_iostream uart;
-    avr::cfg_basica(uart);
+    avr::basic_cfg(uart);
     uart.on();
 
     Keyboard keyboard;

@@ -65,7 +65,7 @@ void test_system_clock()
 void init_uart()
 {
     avr::UART_iostream uart;
-    avr::cfg_basica(uart);
+    avr::basic_cfg(uart);
     uart.on();
 }
 

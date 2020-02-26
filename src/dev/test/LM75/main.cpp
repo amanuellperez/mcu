@@ -34,8 +34,8 @@ using LM75_1 = dev::Thermometer_LM75<1>;
 
 int main() 
 {
-    UART_iostream uart;
-    cfg_basica(uart);
+    avr::UART_iostream uart;
+    avr::basic_cfg(uart);
     uart.on();
 
     uart << "\nPrueba del LM75\n";

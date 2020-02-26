@@ -5,8 +5,6 @@ DIRS = CD4017B			\
 	HD44780				\
 	keyboard			\
 	led					\
-	LM75				\
-	pot_MCP4231			\
 	push_button			\
 	system_clock		\
 	user_choose_number	\
@@ -21,6 +19,8 @@ DIRS = CD4017B			\
 	pololu_A4988\
 	speaker\
 	TMP36\
+	LM75				\
+	pot_MCP4231			\
 
 include $(MCU_RECRULES)
 

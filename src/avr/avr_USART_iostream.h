@@ -265,7 +265,7 @@ private:
 template <uint32_t baud_rate = 9600u,
 	  uint32_t f_clock   = MCU_CLOCK_FREQUENCY_IN_HZ,
 	  uint32_t tolerance = 2>
-void cfg_basica(UART_iostream&) 
+void basic_cfg(UART_iostream&) 
 {                                
     UART::baud_speed<f_clock, baud_rate, tolerance>();
 

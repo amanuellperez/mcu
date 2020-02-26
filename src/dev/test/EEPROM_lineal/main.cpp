@@ -242,8 +242,8 @@ void test_eeprom_automatico()
 
 int main()
 {
-    UART_iostream uart;
-    cfg_basica(uart);
+    avr::UART_iostream uart;
+    avr::basic_cfg(uart);
     uart.on();
 
 test_eeprom_interactiva();
