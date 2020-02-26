@@ -130,6 +130,31 @@ void service(const Data_in& in, Data_out& out)
 
 ```
 
+El paquete TWI incluye:
+
+* `avr_TWI_basic.h`: traductor de la datasheet.  
+		     Son todas las funciones que tiene el hardware de TWI.
+		    
+
+El problema que tiene el TWI del avr es que tiene un buffer interno de 1 byte. 
+Por software modifico esto suministrando un TWI con un buffer interno más
+grande. Aprovecho y separo TWI en 3 diferentes configuraciones:
+
+* `avr_TWI_master.h`: TWI con buffer que funciona únicamente como master.
+* `avr_TWI_slave.h`: TWI con buffer que funciona únicamente como slave.
+* `avr_TWI_multimaster.h`: TWI con buffer que funciona como master o slave.
+(TODO: no está implementado de momento)
+
+Pero es un rollo tener que andar recordando el protocolo de TWI. ¿No es mejor
+concebirlo como un `iostream` vulgar y corriente? De eso se encarga:
+* `avr_TWI_master_ioxtream.h`: concebimos TWI como un `ioxtream`. Este solo
+  funciona como master. 
+
+#### ¿iostream vs ioxtream?
+¿Cuál es la diferencia entre un `iostream` y un `ioxtream`? Los `iostream`
+clásicos de C++ son flujos de caracteres, mientras que un `ioxtream` es un flujo
+de bytes (en TWI, SPI... son precisamente estos flujos los que nos interesan).
+
 
  Probado con: avr-gcc 9.2.0
  
