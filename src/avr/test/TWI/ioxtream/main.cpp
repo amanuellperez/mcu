@@ -22,28 +22,12 @@
 #include "../../../avr_TWI_master_ioxtream.h"
 
 
-constexpr uint8_t TWI_buffer_size = 10;
+constexpr uint8_t TWI_buffer_size = 100;
 using TWI = avr::TWI_master_ioxtream<avr::TWI_basic, TWI_buffer_size>;
 
 constexpr uint8_t slave_address = 0x10;
 
 
-void twi_print_error()
-{
-    avr::UART_iostream uart;
-
-    if (TWI::no_response())
-	uart << "Slave no responde.\n";
-
-    else if (TWI::eow_data_nack())
-	uart << "Error: eow_data_nack\n";
-
-    else if (TWI::prog_error())
-	uart << "Error de programación\n";
-
-    else
-	uart << "Error desconocido\n";
-}
 
 void twi_print_state()
 {
@@ -77,6 +61,34 @@ void twi_print_state()
 	uart << "state DESCONOCIDO!!!\n";
     
 }
+
+void twi_print_error()
+{
+    avr::UART_iostream uart;
+
+    if (TWI::no_response())
+	uart << "Slave no responde.\n";
+
+    else if (TWI::eow_data_nack())
+	uart << "Error: eow_data_nack\n";
+
+    else if (TWI::prog_error())
+	uart << "Error de programación\n";
+
+    else if (TWI::error_buffer_size())
+	uart << "Error, buffer pequeño\n";
+
+    else if (TWI::bus_error())
+	uart << "bus_error!!!\n";
+
+    else if (TWI::unknown_error())
+	uart << "unknown_error\n";
+
+    else
+	uart << "Error desconocido\n";
+    
+}
+
 
 
 void send_service1()
@@ -196,6 +208,7 @@ void send_type(const Int& x0, const char* tname)
 
     if (y0 != x0){
 	uart << "ERROR: no se han recibido el dato enviado\n";
+	uart << "\tEnviado: "; uart_print(x0); uart << '\n';
         uart << "\tRecibido: ";
 	uart_print(y0);
 	uart << '\n';
@@ -264,18 +277,13 @@ void send_service4()
 
     if (twi.error())
 	twi_print_error();
-    
-    else
-	uart << "OK\n";
 }
 
-void test_write()
+void test_all_send_type()
 {
-    send_service1();
-    wait_ms(500);
-    send_service2();
-    wait_ms(500);
     send_type<char>('a', "char");
+    send_type<signed char>('c', "signed char");
+    send_type<unsigned char>('r', "unsigned char");
     send_type<std::byte>(std::byte{0x02}, "std::byte");
     send_type<uint8_t>(34, "uint8_t");
     send_type<uint16_t>(340, "uint16_t");
@@ -285,17 +293,86 @@ void test_write()
     send_type<int16_t>(-340, "int16_t");
     send_type<int32_t>(-10000, "int32_t");
     send_type<int64_t>(-1000000, "int64_t");
-    wait_ms(500);
-//    send_service4();
-//    wait_ms(500);
+}
 
+struct Data{
+    uint8_t x;
+    int16_t y;
+    char z;
+
+    static constexpr uint8_t size()
+    {return sizeof(uint8_t) + sizeof(int16_t) + sizeof(char);}
+};
+
+template <typename Istream>
+Istream& operator>>(Istream& in, Data& d)
+{
+    in >> d.x >> d.y >> d.z; 
+    return in;
+}
+
+template <typename Ostream>
+Ostream& operator<<(Ostream& out, const Data& d)
+{ 
+   out << d.x << d.y << d.z;
+   return out;
+}
+
+void service(const Data& in, Data& out)
+{
+    avr::UART_iostream uart;
+
+    TWI twi;
+    twi.open(slave_address);
+    
+    twi << in;
+
+    if (twi.error()){
+	uart << "Error: ";
+	twi_print_error();
+	return;
+    }
+
+    twi.read(Data::size());
+    twi >> out;
+
+    twi.close();
+
+    if (twi.error())
+	twi_print_error();
+}
+
+
+void test_typical_service()
+{
+    avr::UART_iostream uart;
+    uart << "\n==============================\n";
+    uart << "typical_service: ";
+
+
+    Data d0{3, 800, 'x'};
+    Data d1;
+    service(d0, d1);
+
+    if (d0.x != d1.x or d0.y != d1.y or d0.z != d1.z)
+	uart << "ERROR: recibido d1 diferente al enviado!!!\n";
+    else
+	uart << "OK\n";
 }
 
 
 void test_master()
 {
     while (1) {
-	test_write();
+	send_service1();
+	wait_ms(500);
+	send_service2();
+	wait_ms(500);
+	test_all_send_type();
+	wait_ms(500);
+	send_service4();
+	test_typical_service();
+	wait_ms(500);
     }
 }
 
@@ -306,7 +383,9 @@ int main()
     avr::cfg_basica(uart);
     uart.on();
 
+    uart << "\n\n\n* * * * * * * * * * * * * * * * * * * * * * * * * * * *\n";
     uart << "Empezando como MASTER ioxtream\n";
+    uart << "* * * * * * * * * * * * * * * * * * * * * * * * * * * *\n";
 
     TWI::on<50>();
 

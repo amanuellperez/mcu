@@ -144,10 +144,12 @@ bool __TWI_master_state_is_idle(__TWI_master_state a)
 template <typename TWI, uint8_t buffer_size>
 class TWI_master{
 public:
+// Types
     using iostate= __TWI_master_state;
     using streamsize = uint8_t;
     using Address = uint8_t;
 
+// on/off (off (???))
     /// Enables TWI interface definiendo la frecuencia del SCL 
     /// a la que vamos a operar.
     /// f_scl = frecuencia en kilohercios de SCL (tipica: 100 y 400 kHz).
@@ -251,35 +253,36 @@ public:
     // Función que va dentro de la ISR
     static void handle_interrupt();
 
-// estados
-// -------
-// grupos
+// states
+// ------
+// groups
     static bool is_idle() {return __TWI_master_state_is_idle(state_);}
     static bool is_busy() {return __TWI_master_state_is_busy(state_);}
     static bool is_waiting() {return __TWI_master_state_is_waiting(state_);}
 
-
-// ¿hay un error?
+// is there an error?
     static bool error() {return __TWI_master_state_error(state_);}
 
-// errores genéricos
+// generic errors
     static bool no_response() {return state_ == iostate::no_response;}
     static bool prog_error() {return state_ == iostate::prog_error;}
 
 // inicio transmision
     static bool read_or_write() {return state_ == iostate::read_or_write;}
 
-// de escritura
+// transmitting
     static bool transmitting() {return state_ == iostate::transmitting;}
     static bool eow() {return state_ == iostate::eow;}
     static bool eow_data_nack() {return state_ == iostate::eow_data_nack;}
+    static bool error_buffer_size()
+			    { return state_ == iostate::error_buffer_size; }
 
-// de lectura
+// receiving
     static bool receiving() {return state_ == iostate::receiving;}
     static bool eor() {return state_ == iostate::eor;}
     static bool eor_bf() {return state_ == iostate::eor_bf;}
 
-// genérico
+// generics
     static bool ok() {return state_ == iostate::ok;}
 
     static iostate state() {return state_;}
@@ -334,13 +337,13 @@ private:
 
 
     // Cuando no se satisface la precondición del diagrama de estados
-    // generamos este error: no_valid_state(); 
+    // generamos este error: invalid_state(); 
     // Esto puede suceder: ya sea porque el slave no respondió y se intenta
     // seguir con la comunicación, o por algún error por parte del
     // programador. Mantenemos el error inicial que causo todo (por ejemplo,
     // si el slave no responde interesa saber que fue así y no que se llamó a
     // write con un estado no válido).
-    static void no_valid_state()
+    static void invalid_state()
     {
 	iostate st = error()? state_: iostate::prog_error;
 	reset(); // cortamos la transmisión, desconectando el dispositivo
@@ -392,7 +395,7 @@ void TWI_master<TWI, bsz>::mm_start(Address slave_address)
 	TWI::master_transmit_sla_r(slave_address);
 
     else
-	no_valid_state();
+	invalid_state();
 }
 
 
@@ -531,7 +534,7 @@ TWI_master<TWI, bsz>::streamsize TWI_master<TWI, bsz>
     ::write_to(Address slave_address, const std::byte* buf, streamsize n)
 {
     if (state_ != iostate::read_or_write){	// precondition
-	no_valid_state();
+	invalid_state();
 	return 0;
     }
 
@@ -559,7 +562,7 @@ TWI_master<TWI, bsz>::streamsize TWI_master<TWI, bsz>::
     // a write_to(q,n), y  a continuación a write(q,n) puede que todavía no le
     // haya dado tiempo a cambiar de estado, pasando de sla_w a transmitting.
     if (!(state_ == iostate::sla_w or transmitting() or eow())){  // pre.
-	no_valid_state();
+	invalid_state();
 	return 0;
     }
 
@@ -581,7 +584,7 @@ template <typename TWI, uint8_t bsz>
 TWI_master<TWI, bsz>::streamsize TWI_master<TWI, bsz>::read(streamsize n)
 {
     if (state_ != iostate::read_or_write or n == 0){ // precondition
-	no_valid_state();
+	invalid_state();
 	return 0;
     }
 
@@ -607,7 +610,7 @@ TWI_master<TWI, bsz>::streamsize
 TWI_master<TWI, bsz>::read_buffer(std::byte* q, streamsize N)
 {
     if (!eor_bf()){  // precondicion
-	no_valid_state();
+	invalid_state();
 	return 0;
     }
  
@@ -623,7 +626,7 @@ template <typename TWI, uint8_t bsz>
 void TWI_master<TWI, bsz>::send_start()
 {
     if (!is_idle()){ // pre: no puede estar en medio de una transmisión
-	no_valid_state();
+	invalid_state();
 	return;
     }
 
@@ -636,7 +639,7 @@ template <typename TWI, uint8_t bsz>
 void TWI_master<TWI, bsz>::send_repeated_start()
 {
     if (state_ != iostate::eow and state_ != iostate::eor){ // precondition
-	no_valid_state();
+	invalid_state();
 	return;
     }
 

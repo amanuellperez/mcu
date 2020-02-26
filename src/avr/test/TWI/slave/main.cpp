@@ -117,7 +117,7 @@ Service read_service_name(std::array<std::byte, TWI_buffer_size>& params_in, TWI
 void print_TWI_state()
 {
     avr::UART_iostream uart;
-    uart << "print_TWI_state = ";
+    uart << "state = ";
 
     if (TWI::state() == TWI::iostate::listening)
 	uart << "listening\n";
@@ -221,6 +221,7 @@ void service_unknown(const std::array<std::byte, TWI_buffer_size>& params_in,
     while (!TWI::wrt_be())
     { 
 	wait_ms(100);
+	uart << "Tendría que estar en state == wrt_be, pero está en: ";
 	print_TWI_state();
 	
     }

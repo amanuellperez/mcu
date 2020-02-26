@@ -31,6 +31,16 @@
  *  - TIPO DE USUARIO: normal. No necesita saber cosas de bajo nivel del
  *	protocolo TWI.
  *
+ *  - TODO: Sería interesante que se pudiera indicar como parámetro si se
+ *  quiere enviar como little or big endian.
+ *
+ *  - TODO: TWI_master tiene la restricción de que todo lo envíado/recibido
+ *  tiene que entrar en el buffer, así que hay que elegir un tamaño de buffer
+ *  suficientemente grande, sino se producirá el error error_buffer_size. No
+ *  es complicado mejorarlo, pero de momento parece sencillo y práctico enviar
+ *  todo de una misma vez. A fin de cuentas esta es una versión de aprendizaje
+ *  y no se si la usaré o no. 
+ *
  *  - HISTORIA:
  *    A.Manuel L.Perez
  *    24/02/2020 v0.0
@@ -81,6 +91,7 @@ public:
     using TWI = TWI_master<TWI_basic, buffer_size>;   
     using Address = TWI::Address;
     using streamsize = TWI::streamsize;
+    using iostate = TWI::iostate;   // para depurar
 
 // Destructor
     TWI_master_ioxtream() {}
@@ -137,7 +148,7 @@ public:
     TWI_master_ioxtream& operator<<(const unsigned long long& c) {return write_(c);}
 
 // operator>>. Todas bloquean.
-    TWI_master_ioxtream& operator>>(std::byte c) {return read_(c);}
+    TWI_master_ioxtream& operator>>(std::byte& c) {return read_(c);}
     TWI_master_ioxtream& operator>>(char& c) {return read_(c);}
     TWI_master_ioxtream& operator>>(unsigned char& c) {return read_(c);}
     TWI_master_ioxtream& operator>>(signed char& c) {return read_(c);}
@@ -170,6 +181,8 @@ public:
 // errores genéricos
     static bool no_response() {return TWI::no_response();}
     static bool prog_error() {return TWI::prog_error();}
+    static bool bus_error() {return TWI::state() == TWI::iostate::bus_error;}
+    static bool unknown_error() {return TWI::state() == TWI::iostate::unknown_error;}
 
 
 // de escritura
@@ -179,9 +192,14 @@ public:
 // de lectura
     static bool eor() {return TWI::eor();}
     static bool eor_bf() {return TWI::eor_bf();}
+    static bool error_buffer_size() { return TWI::error_buffer_size();}
 
 // genérico
     static bool ok() {return TWI::ok();}
+
+// para depurar
+    static iostate state() {return TWI::state();}
+
 
 private:
 // Data
@@ -189,36 +207,9 @@ private:
     static inline Address slave_address_;
 
 
-    TWI_master_ioxtream& write_(const std::byte& x)
-    {// TODO: gestión de errores. Si write no devuelve sizeof(x) error	
-avr::UART_iostream uart;
-uart << "write_(byte)\n";
-	if (TWI::read_or_write()){
-            TWI::write_to(slave_address_, &x, sizeof(x));
-        }
-	else {
-	    TWI::write(&x, sizeof(x));
-	}
-
-	return *this;
-    }
-
-
-    TWI_master_ioxtream& read_(std::byte& x)
-    {// TODO: gestión de errores. Si read no devuelve sizeof(x) error
-avr::UART_iostream uart;
-uart << "read_(byte)\n";
-	TWI::wait_till_no_busy();
-	
-	TWI::read_buffer(&x, sizeof(x));
-	return *this;
-    }
-
-
     template <typename T>
     TWI_master_ioxtream& write_(const T& x)
     {// TODO: gestión de errores. Si write no devuelve sizeof(x) error	
-
 	if (TWI::read_or_write()){
             TWI::write_to(slave_address_,
                           reinterpret_cast<const std::byte*>(&x),
@@ -259,6 +250,9 @@ inline bool TWI_master_ioxtream<T, bsz>::open(Address slave_address)
 template <typename T, uint8_t bsz>
 inline void TWI_master_ioxtream<T, bsz>::close()
 {
+    if (TWI::is_idle())	// No estamos dentro de una transmisión
+	return;
+
     TWI::wait_till_no_busy();
 
     // if (TWI::eow() or TWI::eor())	<--- al no ponerlo podemos cerrar

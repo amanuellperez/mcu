@@ -24,7 +24,42 @@ iostream:
     uart >> x;
     uart << "x = [" << x << "]\n";
     
-Tested: avr-gcc 7.4.0
+### TWI_master_ioxtream
+
+```
+#include <avr_TWI_basic.h>
+#include <avr_TWI_master_ioxtream.h>
+
+constexpr uint8_t TWI_buffer_size = 100;
+using TWI = avr::TWI_master_ioxtream<avr::TWI_basic, TWI_buffer_size>;
+constexpr uint8_t slave_address = 0x10;
+
+void service(const Data_in& in, Data_out& out)
+{
+    TWI twi;
+    twi.open(slave_address);
+    
+    twi << in;
+
+    if (twi.error()){
+	uart << "Error: ";
+	twi_print_error();
+	return;
+    }
+
+    twi.read(Data::size()); // TODO: how to improve this???
+    twi >> out;
+
+    twi.close();
+
+    if (twi.error())
+	twi_print_error();
+}
+
+```
+
+
+Tested: avr-gcc 9.2.0
     
 ---
 ### ADVERTENCIA: Esta biblioteca es inestable. ¿Podría ser la versión 0.1?
@@ -57,6 +92,44 @@ un flujo normal y corriente para acceder a UART.
     uint16_t x;
     uart >> x;
     uart << "Has escrito [" << x << "]\n";
+ 
+
+### TWI_master_ioxtream
+Si se quiere usar TWI como master concibiéndolo como un flujo usar
+`avr::TWI_master_ioxtream`.
+
+```
+#include <avr_TWI_basic.h>
+#include <avr_TWI_master_ioxtream.h>
+
+constexpr uint8_t TWI_buffer_size = 100;
+using TWI = avr::TWI_master_ioxtream<avr::TWI_basic, TWI_buffer_size>;
+constexpr uint8_t slave_address = 0x10;
+
+void service(const Data_in& in, Data_out& out)
+{
+    TWI twi;
+    twi.open(slave_address);
     
- Probado con: avr-gcc 7.4.0
+    twi << in;
+
+    if (twi.error()){
+	uart << "Error: ";
+	twi_print_error();
+	return;
+    }
+
+    twi.read(Data::size()); // TODO: how to improve this???
+    twi >> out;
+
+    twi.close();
+
+    if (twi.error())
+	twi_print_error();
+}
+
+```
+
+
+ Probado con: avr-gcc 9.2.0
  
