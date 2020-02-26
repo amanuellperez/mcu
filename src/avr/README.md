@@ -58,6 +58,31 @@ void service(const Data_in& in, Data_out& out)
 
 ```
 
+TWI includes:
+
+* `avr_TWI_basic.h`: translator of the datasheet.  
+		     Everything you can do with the hardware.
+		    
+
+The problem with avr TWI is that its buffer is only of 1 byte. I change this
+behaviour by software. 3 different configurations are given:
+
+* `avr_TWI_master.h`: TWI with buffer. Only works as a master.
+* `avr_TWI_slave.h`: TWI with buffer. Only works as a slave.
+* `avr_TWI_multimaster.h`: TWI with buffer that can work as a master or slave.
+(TODO).
+
+But I don't want to remember the TWI protocol. It would be great if I can treat
+TWI as a normal `iostream`:
+
+* `avr_TWI_master_ioxtream.h`: TWI works as an `ioxtream`. Only works as a
+  master.
+
+#### ¿iostream vs ioxtream?
+What is the difference between an `iostream` and an `ioxtream`? `iostreams` are
+character streams, but `ioxtreams` are bytes streams. I want to send `uint16_t x
+= 500` as two byts '0x01F4` and not as 3 characters '5', '0', '0'.
+
 
 Tested: avr-gcc 9.2.0
     
