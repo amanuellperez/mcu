@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-// Este es un cliente de USART. Lo ejecuto en linux para comunicarme con el
+// Este es un cliente de UART. Lo ejecuto en linux para comunicarme con el
 // AVR vía USB-UART.
 //
 // Este programa va con el programa tst_leds1.cpp
@@ -41,7 +41,7 @@ int main()
 try{
     Termios usb{"/dev/ttyUSB0"};
     
-    configura_por_defecto_AVR_USART(usb);
+    configura_por_defecto_AVR_UART(usb);
 
     unsigned char c = 'f';
 

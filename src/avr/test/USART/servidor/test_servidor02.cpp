@@ -22,13 +22,13 @@
 //
 #include "../../mcu_led.h"
 #include "../../avr_time.h"
-#include "../../avr_USART.h"
+#include "../../avr_UART.h"
 
 using namespace avr;
 
 int main(void) 
 {
-    auto usart = USART::init();
+    auto usart = UART::init();
 
     // ¡¡el nombre_programa tiene que ir en flash memory!!!
     auto nombre_programa = "cdabcdefghijklmn";
@@ -38,7 +38,7 @@ int main(void)
     
 	// Esperamos a que nos pregunten quiénes somos (Who are you?)
 	while (1){
-	    USART::receive(res);
+	    UART::receive(res);
 	    usart << res;
 	}
 

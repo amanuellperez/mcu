@@ -44,6 +44,11 @@
  *  enviar/recibir mensajes de cualquier tamaño independientemente del buffer
  *  interno usado. Revisarlo e implementarlo (ANTES DE HACERLO: ¿merece la
  *  pena? ¿Lo voy a usar?)
+ *  
+ *  - TODO: Esta clase es totalmente independiente del avr::TWI (bueno, ahora
+ *  depende porque es el primer intento). Sacarlo de avr. Debería de estar
+ *  en... dev? (no es un dispositivo, sino un ampliador de hardware)
+ *  drivers???
  *
  *  - HISTORIA:
  *    A.Manuel L.Perez

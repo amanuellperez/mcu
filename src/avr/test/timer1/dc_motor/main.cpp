@@ -17,8 +17,8 @@
 
 // Controlamos la velocidad de un motor dc usando un mosfet 2N7000.
 // Circuito: libro de make, pag. 299.
-#include "../../../avr_USART.h"
-#include "../../../avr_timer1_tr.h"
+#include "../../../avr_UART.h"
+#include "../../../avr_timer1_basic.h"
 #include "../../../avr_time.h"
 
 

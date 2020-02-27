@@ -17,12 +17,12 @@
 
 #pragma once
 
-#ifndef __AVR_USART_H__
-#define __AVR_USART_H__
+#ifndef __AVR_UART_H__
+#define __AVR_UART_H__
 
-#include "avr_USART_baud_rate.h"
-#include "avr_USART_tr.h"
-#include "avr_USART_iostream.h"
+#include "avr_UART_baud_rate.h"
+#include "avr_UART_basic.h"
+#include "avr_UART_iostream.h"
 
 
 #endif

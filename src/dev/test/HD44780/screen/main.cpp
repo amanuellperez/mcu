@@ -17,7 +17,7 @@
 
 
 #include "../../../dev_LCD_HD44780_screen.h"
-#include "../../../dev_LCD_HD44780_tr.h"
+#include "../../../dev_LCD_HD44780_basic.h"
 #include <avr_time.h>
 #include <stddef.h>
 

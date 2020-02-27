@@ -20,7 +20,7 @@
 #include "../../dev_keyboard.h"
 
 #include <avr_time.h>
-#include <avr_USART.h>
+#include <avr_UART.h>
 
 // pines a los que conectamos el teclado
 using Keyboard_2pins = dev::Keyboard_pins<24, 25>;

@@ -20,7 +20,7 @@
 // Conectar el cable FTDI. Si se pulsa + se incrementa la frecuencia, si -
 // se decrementa.
 #include "../mcu_speaker.h"
-#include "../avr_USART.h"
+#include "../avr_UART.h"
 
 // Configuración de las conexiones
 constexpr uint8_t num_pin_speaker = 15;
@@ -32,24 +32,24 @@ using namespace avr;
 int main()
 {
     auto speaker = Speaker::nuevo<num_pin_speaker>();
-    USART::init();
+    UART::init();
     
     uint16_t frecuencia = 20;	// empezamos con 20 herzios
     uint16_t incr = 10;		// vamos incrementando de incr en incr
 
-    USART::print("\r\n---------\r\n");
-    USART::print("EMPEZAMOS\r\n");
-    USART::print("---------\r\n\r\n");
+    UART::print("\r\n---------\r\n");
+    UART::print("EMPEZAMOS\r\n");
+    UART::print("---------\r\n\r\n");
     while(1){
 	auto nota = Speaker::nota(frecuencia);
 
-	USART::print("frecuencia = ");
-	USART::println(frecuencia);
+	UART::print("frecuencia = ");
+	UART::println(frecuencia);
 
 	speaker.play_note(nota, 200);
 
-	USART::print("Pulsa una tecla para continuar (+, -, * ó /)\r\n");
-	char c = USART::receive();
+	UART::print("Pulsa una tecla para continuar (+, -, * ó /)\r\n");
+	char c = UART::receive();
 
 	if (c == '+')
 	    frecuencia += incr;

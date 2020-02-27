@@ -22,12 +22,12 @@
 // valor. Para evitar esto habría que meter las cadenas de texto en la EEPROM
 // del avr.
 #include "../../../dev_EEPROM_iostream.h"
-#include "../../../dev_EEPROM_25LC256_tr.h"
+#include "../../../dev_EEPROM_25LC256_basic.h"
 #include "../../../dev_EEPROM_lineal.h"
 
 #include <atd_time.h>
 
-#include <avr_USART.h>
+#include <avr_UART.h>
 #include <avr_time.h>
 #include <atd_cast.h>
 #include <atd_cstddef.h>

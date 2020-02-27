@@ -19,7 +19,7 @@
 #include "../../alp_avr.h"
 #include "../../avr_pin.h"
 #include "../../avr_time.h"
-#include "../../avr_USART.h"
+#include "../../avr_UART.h"
 
 
 using namespace avr;
@@ -146,7 +146,7 @@ int main(void)
 {
     Pololu_A4988 pololu{Pololu_A4988::Pin_STEP{12}, Pololu_A4988::Pin_DIR{13}};
 
-    auto usart = USART::init();
+    auto usart = UART::init();
     usart << "Iniciado correctamente\n\r";
 
     while(1){

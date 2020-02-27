@@ -26,8 +26,8 @@
  ****************************************************************************/
 #include <dev_EEPROM_iostream.h>
 #include <dev_EEPROM_lineal.h>
-#include <dev_EEPROM_25LC256_tr.h>
-#include <avr_USART.h>
+#include <dev_EEPROM_25LC256_basic.h>
+#include <avr_UART.h>
 #include <avr_time.h>
 #include <atd_cstddef.h>
 #include <atd_istream.h>

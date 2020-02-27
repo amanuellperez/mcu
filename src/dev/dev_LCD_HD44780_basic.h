@@ -17,8 +17,8 @@
 
 #pragma once
 
-#ifndef __DEV_LCD_HD4780_TR_H__
-#define __DEV_LCD_HD4780_TR_H__
+#ifndef __DEV_LCD_HD4780_BASIC_H__
+#define __DEV_LCD_HD4780_BASIC_H__
 /****************************************************************************
  *
  *  - DESCRIPCION: Traductor del display HD44780
@@ -278,6 +278,6 @@ private:
 
 }// namespace
 
-#include "dev_LCD_HD44780_tr.tcc"
+#include "dev_LCD_HD44780_basic.tcc"
 
 #endif

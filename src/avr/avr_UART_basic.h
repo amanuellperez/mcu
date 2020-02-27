@@ -16,8 +16,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #pragma once
-#ifndef __AVR_USART_TR_H__
-#define __AVR_USART_TR_H__
+#ifndef __AVR_UART_BASIC_H__
+#define __AVR_UART_BASIC_H__
 /****************************************************************************
  *
  * - DESCRIPCION: Traductor del módulo UART del avr.
@@ -32,16 +32,15 @@
 #include <avr/io.h>
 
 #include "avr_cfg.h"	
-//#include <atd_register.h>
 #include <atd_bit.h>
 
-#include "avr_USART_baud_rate.h"
+#include "avr_UART_baud_rate.h"
 
 namespace avr{
 
 
 /*!
- *  \brief  Representa el puerto UART del avr.
+ *  \brief  Traductor del UART del avr.
  *
  *  Siempre que se quiera usar, llamar a UART::on().
  *
@@ -61,7 +60,7 @@ namespace avr{
  *		usart << "frecuencia = [" << f << "]\n\r";
  *
  */
-class UART{
+class UART_basic{
 public:
     // Configuración del UART
     // -----------------------
@@ -85,18 +84,15 @@ public:
     /// y la última operación que realizó el UART fue leer, mantiene en el
     /// data register (UDR0) el último valor leído (hace de get area de 1 byte).
     static bool are_there_data_unread()
-    // {return atd::Register{UCSR0A}.is_one_bit<RXC0>();}
     {return atd::is_one_bit<RXC0>::of(UCSR0A);}
 
     /// Devuelve true si se ha enviado todo el frame
     static bool is_transmit_complete()
-//    { return atd::Register{UCSR0A}.is_one_bit<TXC0>(); }
     {return atd::is_one_bit<TXC0>::of(UCSR0A);}
 
     /// Devuelve true si el UART está ocupado transmitiendo.
     /// Para poder transmitir algo hay que esperar a que deje de transmitir.
     static bool is_ready_to_transmit()
-//    {return atd::Register{UCSR0A}.is_one_bit<UDRE0>();}
     {return atd::is_one_bit<UDRE0>::of(UCSR0A);}
     
 
@@ -106,18 +102,15 @@ public:
     /// Returns true if the next character in the receive buffer had
     /// a frame error when received.
     static bool is_there_a_frame_error()
-//    {return atd::Register{UCSR0A}.is_one_bit<FE0>(); }
     {return atd::is_one_bit<FE0>::of(UCSR0A);}
 
     /// Return true if a Data OverRun condition is detected.
     static bool is_there_data_overrun()
-//    {return atd::Register{UCSR0A}.is_one_bit<DOR0>(); }
     {return atd::is_one_bit<DOR0>::of(UCSR0A);}
 
     /// Return true if the next character in the receive buffer had a Parity
     /// Error when received and the Parity Checking was enabled.
     static bool is_there_a_parity_error()
-//    {return atd::Register{UCSR0A}.is_one_bit<UPE0>(); }
     {return atd::is_one_bit<UPE0>::of(UCSR0A);}
 
 
@@ -126,20 +119,17 @@ public:
     // ----------------------
     /// Double the transfer rate of communication
     static void double_transmission_speed()
-    //{ atd::Register(UCSR0A).write_one_bit<U2X0> ();}
     { atd::write_bit<U2X0>::to<1>::in(UCSR0A);}
 
     /// Usamos la velocidad normal de transmisión
     // DUDA: en la datasheet pone que siempre que se escriba en UCSR0A
     // hay que escribir ciertos bits a 0 (vg: el bit DOR0 y otros) ???
     static void normal_transmission_speed()
-    //{ atd::Register(UCSR0A).write_zero_bit<U2X0> ();}
     { atd::write_bit<U2X0>::to<0>::in(UCSR0A);}
 
 
     /// Enable multi-processor communication mode.
     static void multiprocessor_communication_mode()
-    //{ atd::Register(UCSR0A).write_one_bit<MPCM0> ();}
     { atd::write_bit<MPCM0>::to<1>::in(UCSR0A);}
 
 
@@ -152,39 +142,32 @@ public:
 
     /// Enable receiver.
     static void enable_receiver()
-    // {atd::Register(UCSR0B).write_one_bit<RXEN0> ();}
     { atd::write_bit<RXEN0>::to<1>::in(UCSR0B);}
 
     /// Disable receiver.
     static void disable_receiver()
-    // {atd::Register(UCSR0B).write_zero_bit<RXEN0> ();}
     { atd::write_bit<RXEN0>::to<0>::in(UCSR0B);}
 
     /// ¿Is receiver enable?
     static bool is_receiver_enable()
-    // {return atd::Register{UCSR0B}.is_one_bit<RXEN0>();}
     {return atd::is_one_bit<RXEN0>::of(UCSR0B);}
 
     /// Enable transmitter
     static void enable_transmitter()
-    // {atd::Register(UCSR0B).write_one_bit<TXEN0> ();}
     { atd::write_bit<TXEN0>::to<1>::in(UCSR0B);}
 
     /// Disable transmitter
     static void disable_transmitter()
-    //{atd::Register(UCSR0B).write_zero_bit<TXEN0> ();}
     { atd::write_bit<TXEN0>::to<0>::in(UCSR0B);}
 
     /// ¿Is transmitter enable?
     static bool is_transmitter_enable()
-//    {return atd::Register{UCSR0B}.is_one_bit<TXEN0>();}
     {return atd::is_one_bit<TXEN0>::of(UCSR0B);}
 
 
     /// Parity mode disabled
     static void parity_mode_disabled()
     {// mode 00
-//	atd::Register(UCSR0C).write_zero_bit<UPM01, UPM00>();
 	atd::write_bits<UPM01, UPM00>::to<0,0>::in(UCSR0C);
     }
 
@@ -192,8 +175,6 @@ public:
     /// Parity mode enabled, even parity
     static void parity_mode_enabled_even_parity()
     {// mode 10
-//	atd::Register(UCSR0C).write_one_bit <UPM01>();
-//	atd::Register(UCSR0C).write_zero_bit<UPM00>();
 	atd::write_bits<UPM01, UPM00>::to<1,0>::in(UCSR0C);
     }
 
@@ -201,47 +182,36 @@ public:
     /// Parity mode enabled, odd parity
     static void parity_mode_enabled_odd_parity()
     {// mode 11
-//	atd::Register(UCSR0C).write_one_bit <UPM01, UPM00>();
 	atd::write_bits<UPM01, UPM00>::to<1,1>::in(UCSR0C);
     }
     
     /// One stop bit inserted by the transmitter. The receiver ignores
     /// this setting.
     static void one_stop_bit()
-    // { atd::Register(UCSR0C).write_zero_bit <USBS0>(); }
     { atd::write_bit<USBS0>::to<0>::in(UCSR0C);}
 
 
     /// Two stop bit inserted by the transmitter. The receiver ignores
     /// this setting.
     static void two_stop_bit()
-    // { atd::Register(UCSR0C).write_zero_bit <USBS0>(); } <-- ERROR!!!
     { atd::write_bit<USBS0>::to<1>::in(UCSR0C);}
 
 
     // Definimos el character size
     static void character_size_5()
     {// 000
-//	atd::Register(UCSR0B).write_zero_bit<UCSZ02>();
-//	atd::Register(UCSR0C).write_zero_bit<UCSZ01, UCSZ00>();
         atd::write_bit <UCSZ02>	       ::to<0>  ::in(UCSR0B);
         atd::write_bits<UCSZ01, UCSZ00>::to<0,0>::in(UCSR0C);
     }
 
     static void character_size_6()
     {// 001
-//	atd::Register(UCSR0B).write_zero_bit<UCSZ02>();
-//	atd::Register(UCSR0C).write_zero_bit<UCSZ01>();
-//	atd::Register(UCSR0C).write_one_bit <UCSZ00>();
         atd::write_bit <UCSZ02>	       ::to<0>  ::in(UCSR0B);
         atd::write_bits<UCSZ01, UCSZ00>::to<0,1>::in(UCSR0C);
     }
 
     static void character_size_7()
     {// 010
-//	atd::Register(UCSR0B).write_zero_bit<UCSZ02>();
-//	atd::Register(UCSR0C).write_one_bit<UCSZ01>();
-//	atd::Register(UCSR0C).write_zero_bit <UCSZ00>();
         atd::write_bit <UCSZ02>	       ::to<0>  ::in(UCSR0B);
         atd::write_bits<UCSZ01, UCSZ00>::to<1,0>::in(UCSR0C);
     }
@@ -249,23 +219,18 @@ public:
 
     static void character_size_8()
     {// 011
-//	atd::Register(UCSR0B).write_zero_bit<UCSZ02>();
-//	atd::Register(UCSR0C).write_one_bit<UCSZ01, UCSZ00>();
         atd::write_bit <UCSZ02>	       ::to<0>  ::in(UCSR0B);
         atd::write_bits<UCSZ01, UCSZ00>::to<1,1>::in(UCSR0C);
     }
 
     static void character_size_9()
     {// 111
-	// atd::Register(UCSR0B).write_one_bit<UCSZ02>();
-	// atd::Register(UCSR0C).write_one_bit<UCSZ01, UCSZ00>();
         atd::write_bit <UCSZ02>	       ::to<1>  ::in(UCSR0B);
         atd::write_bits<UCSZ01, UCSZ00>::to<1,1>::in(UCSR0C);
     }
 
 
     static void asynchronous_mode() // modo 00
-//    {atd::Register(UCSR0C).write_zero_bit<UMSEL01, UMSEL00>();}
     {atd::write_bits<UMSEL01, UMSEL00>::to<0, 0>::in(UCSR0C);}
 
     /// Definimos la velocidad a la que queremos transmitir datos.
@@ -276,7 +241,7 @@ public:
 
 
 template <uint32_t f_clock, uint32_t baud_rate, uint32_t tolerance>
-void UART::baud_speed()
+void UART_basic::baud_speed()
 {
     auto [mode, ubbr] = UBBRn<f_clock, baud_rate, tolerance>();
 

@@ -20,7 +20,7 @@
 #ifndef __DEV_LCD_HD4780_H__
 #define __DEV_LCD_HD4780_H__
 
-#include "dev_LCD_HD44780_tr.h"
+#include "dev_LCD_HD44780_basic.h"
 #include "dev_LCD_HD44780_screen.h"
 #include "dev_LCD_HD44780_screen.tcc"
 #include "dev_LCD_HD44780_ostream.h"

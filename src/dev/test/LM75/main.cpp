@@ -21,7 +21,7 @@
 #include <avr_TWI.h>
 #include "../../dev_LM75.h"
 
-#include <avr_USART.h>
+#include <avr_UART.h>
 #include <avr_time.h>
 
 

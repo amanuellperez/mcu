@@ -17,7 +17,7 @@
 
 // Problema:
 //  ¿cómo comunicarse con el microcontrolador desde el ordenador?
-//  Una posible solución es usar USART.
+//  Una posible solución es usar UART.
 //
 //  Este programa responde a instrucciones dadas desde el ordenador. Al pulsar
 //  los números del 1 al 8 se encienden uno de los 8 leds.
@@ -30,7 +30,7 @@
 //  Este programa dialoga con el programa test_cliente01.cpp
 #include "../../mcu_led.h"
 #include "../../avr_time.h"
-#include "../../avr_USART.h"
+#include "../../avr_UART.h"
 
 using namespace avr;
 
@@ -39,12 +39,12 @@ int main(void)
 
     LED led[8] = {9_pin, 10_pin, 11_pin, 12_pin, 13_pin, 14_pin, 15_pin, 16_pin};
 
-    auto usart = USART::init();
+    auto usart = UART::init();
 
     while(1){
 	char res;
     
-	if (USART::receive(res)){
+	if (UART::receive(res)){
 	    usart << res;
 	    switch(res){
 		case '1': led[0].on(); break;

@@ -15,7 +15,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "dev_LCD_HD44780_tr.h"
 
 #include <atd_bit.h>
 #include <avr_time.h>

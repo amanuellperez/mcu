@@ -16,7 +16,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "../../mcu_DHT22.h"
-#include "../../avr_USART.h"
+#include "../../avr_UART.h"
 #include "../../avr_time.h"
 
 // No consigo programar bien este sensor.
@@ -35,7 +35,7 @@ using namespace avr;
 
 void lee(DHT22& sensor)
 {
-    auto usart = USART::as_a_stream();
+    auto usart = UART::as_a_stream();
 
     switch(sensor.read()){
 	case DHT22::Error::NONE:
@@ -74,7 +74,7 @@ void lee(DHT22& sensor)
 
 int main() 
 {
-    auto usart = USART::init();
+    auto usart = UART::init();
 
     DHT22 sensor1{12};
     DHT22 sensor2{13};

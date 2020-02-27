@@ -18,16 +18,13 @@
 // Probamos el UART.
 // Conectar el FTDI y abrir screen. Lo que se escriba en teclado se envia
 // al microcontrolador que lo devuelve, con lo que lo vemos en pantalla.
-#include "../../../avr_USART_iostream.h"
+#include "../../../avr_UART_iostream.h"
 #include "../../../avr_time.h"
 
 #include <atd_istream.h>
 #include <atd_ostream.h>
 
 #include <avr/power.h>
-using namespace avr;
-
-
 
 using int_type = std::char_traits<char>::int_type;
 using char_type = std::char_traits<char>::char_type;
@@ -35,7 +32,7 @@ using traits = std::char_traits<char>;
 
 void test_streambuf()
 { 
-    UART_iostream uart;
+    avr::UART_iostream uart;
     avr::basic_cfg(uart);
     uart.on();
 
@@ -56,7 +53,7 @@ void test_streambuf()
 }
 
 template <typename Int>
-void test_int(UART_iostream& uart, const char* tipo)
+void test_int(avr::UART_iostream& uart, const char* tipo)
 {
     uart << "\n\nLectura de un " << tipo << "\n";
     uart << "----------------------\n";
@@ -92,7 +89,7 @@ void test_int(UART_iostream& uart, const char* tipo)
 
 void test_iostream()
 {
-    UART_iostream uart;
+    avr::UART_iostream uart;
     avr::basic_cfg(uart);
     uart.on();
 

@@ -15,9 +15,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "../../dev_EEPROM_25LC256_tr.h"
+#include "../../dev_EEPROM_25LC256_basic.h"
 #include "../../dev_EEPROM_lineal.h"
-#include <avr_USART.h>
+#include <avr_UART.h>
 #include <avr_time.h>
 #include <atd_cast.h>
 #include <atd_cstddef.h>

@@ -8,7 +8,7 @@ write one to make the microcontroller to do something.
 
 To avoid it I use translators: instead of remember the datasheet is easier to write
 
-     if (USART::is_ready_to_transmit()) { do_something(); }
+     if (UART::is_ready_to_transmit()) { do_something(); }
      
 everybody can understand this code. 
 
@@ -57,6 +57,11 @@ void service(const Data_in& in, Data_out& out)
 	twi_print_error();
 }
 
+// Don't forget the ISR!!!
+ISR(TWI_vect)
+{
+    TWI::handle_interrupt();
+}
 ```
 
 TWI includes:
@@ -98,10 +103,10 @@ que estar leyendo la datasheet para recordar que bit tienes que poner a 1 para h
 algo. Ese estilo de programar es propenso a errores. 
 
 Para evitarlo creo los traductores:
-en lugar de recordar que para mirar si USART está listo para transmitir tengo que mirar
+en lugar de recordar que para mirar si UART está listo para transmitir tengo que mirar
 si el bit `UDRE0` del registro `UCSR0A` es 1, basta con escribir 
 
-     if (USART::is_ready_to_transmit()) { haz_algo(); }
+     if (UART::is_ready_to_transmit()) { haz_algo(); }
      
 Es mucho más legible, menos propenso a error y más fácil de portar. Además, los traductores
 son muy sencillos de escribir: basta con leer la datasheet y escribir las funciones correspondientes.
@@ -153,6 +158,12 @@ void service(const Data_in& in, Data_out& out)
 
     if (twi.error())
 	twi_print_error();
+}
+
+// No olvides definir la ISR
+ISR(TWI_vect)
+{
+    TWI::handle_interrupt();
 }
 
 ```

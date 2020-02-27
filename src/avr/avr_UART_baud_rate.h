@@ -17,8 +17,8 @@
 
 #pragma once
 
-#ifndef __AVR_USART_BAUD_RATE_H__
-#define __AVR_USART_BAUD_RATE_H__
+#ifndef __AVR_UART_BAUD_RATE_H__
+#define __AVR_UART_BAUD_RATE_H__
 /****************************************************************************
  *
  *   - DESCRIPCION: Calculamos el valor del UBBRn y el tipo de velocidad
@@ -31,7 +31,7 @@
  *	    2.- setbaud.h selecciona la velocidad definiendo la variable
  *	    USE_2X lo cual es una forma muy oscura de razonar. Prefiero llamar
  *	    a una función UBBRn() que me devuelve UBBR y el modo al que
- *	    configurar el USART.
+ *	    configurar el UART.
  *
  *   - HISTORIA:
  *           A.Manuel L.Perez- 27/08/2019 v0.0

@@ -1,6 +1,6 @@
 DIRS = ostream	\
 	screen		\
-	tr		
+	basic
 
 
 include $(MCU_RECRULES)

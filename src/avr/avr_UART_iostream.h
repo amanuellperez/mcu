@@ -17,8 +17,8 @@
 
 #pragma once
 
-#ifndef __AVR_USART_IOSTREAM_H__
-#define __AVR_USART_IOSTREAM_H__
+#ifndef __AVR_UART_IOSTREAM_H__
+#define __AVR_UART_IOSTREAM_H__
 /****************************************************************************
  *
  *  - DESCRIPCION: Implementación del flujo uart.
@@ -30,7 +30,7 @@
  *
  ****************************************************************************/
 
-#include "avr_USART.h"
+#include "avr_UART_basic.h"
 
 #include <iostream>
 #include <streambuf>
@@ -40,8 +40,10 @@ namespace avr{
 
 class UART_streambuf_unbuffered : public std::streambuf {
 public:
+    using UART = UART_basic;
+
     UART_streambuf_unbuffered() : state_{State::consumido} 
-    { UART::asynchronous_mode(); } // es UART, no USART, siempre asincrono.
+    { UART::asynchronous_mode(); } // es UART, no UART, siempre asincrono.
 
     // Enciende el UART. Antes de encenderlo recordar haberlo configurado.
     static void on();
@@ -267,6 +269,8 @@ template <uint32_t baud_rate = 9600u,
 	  uint32_t tolerance = 2>
 void basic_cfg(UART_iostream&) 
 {                                
+    using UART = UART_basic;
+
     UART::baud_speed<f_clock, baud_rate, tolerance>();
 
     UART::parity_mode_disabled();

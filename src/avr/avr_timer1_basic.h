@@ -17,8 +17,8 @@
 
 #pragma once
 
-#ifndef __AVR_TIMER1_TR_H__
-#define __AVR_TIMER1_TR_H__
+#ifndef __AVR_TIMER1_BASIC_H__
+#define __AVR_TIMER1_BASIC_H__
 /****************************************************************************
  *
  *  - DESCRIPCION: Traductor del timer 1 del AVR. 

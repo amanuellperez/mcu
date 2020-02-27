@@ -19,7 +19,7 @@
 // carpeta cliente) via UART.
 #include "../../../dev_EEPROM_25LC256.h"
 #include "../../../dev_EEPROM_buffer.h"
-#include <avr_USART.h>
+#include <avr_UART.h>
 #include <avr_time.h>
 
 

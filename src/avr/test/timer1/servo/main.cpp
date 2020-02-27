@@ -20,7 +20,7 @@
 // servo juntas. Y conectar el pin OC1A (15) al de control del servo.
 // A través de UART darle los valores de los pulsos que se quiera. 
 // (Con los servos que tengo van de 7 ms hasta 2.7 ms)
-#include "../../../avr_USART.h"
+#include "../../../avr_UART.h"
 #include "../../../avr_timer1.h"
 #include "../../../avr_time.h"
 

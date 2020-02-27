@@ -41,6 +41,9 @@
  *  todo de una misma vez. A fin de cuentas esta es una versión de aprendizaje
  *  y no se si la usaré o no. 
  *
+ *  - TODO: esta clase no depende del avr::TWI. Sacarla de avr (hacerlo a la
+ *  vez que se saque TWI_master/slave).
+ *
  *  - HISTORIA:
  *    A.Manuel L.Perez
  *    24/02/2020 v0.0

@@ -17,8 +17,8 @@
 
 #pragma once
 
-#ifndef __DEV_EEPROM_25LC256_TR_H__
-#define __DEV_EEPROM_25LC256_TR_H__
+#ifndef __DEV_EEPROM_25LC256_BASIC_H__
+#define __DEV_EEPROM_25LC256_BASIC_H__
 /****************************************************************************
  *
  *   - DESCRIPCION: Traductor de la EEPROM 25LC256

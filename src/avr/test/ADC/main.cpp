@@ -16,7 +16,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "../../avr_ADC.h"
-#include "../../avr_USART.h"
+#include "../../avr_UART.h"
 #include "../../avr_time.h"
 
 using namespace avr;

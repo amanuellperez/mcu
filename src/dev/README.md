@@ -26,7 +26,7 @@ Los dispositivos que fijo que funcionan (por lo menos a día de hoy) son:
 
 Formado por varios ficheros:
 
-* `dev_EEPROM_25LC256_tr.h`:   es el traductor de la EEPROM 25LC256. 
+* `dev_EEPROM_25LC256_basic.h`:   es el traductor de la EEPROM 25LC256. 
 * `dev_EEPROM_lineal.h`: concebimos la memoria como lineal.
 
 * `dev_EEPROM_iostream.h`: concebimos la memoria como un flujo normal.
@@ -49,7 +49,7 @@ Es el típico LCD 16 x 2 ó 20 x 4.
 
 Formado por varios ficheros:
 
-* `dev_LCD_HD44780_tr.h`: es el traductor del dispositivo.
+* `dev_LCD_HD44780_basic.h`: es el traductor del dispositivo.
 * `dev_LCD_HD44780_screen.h`: concebimos el LCD como terminal.
    Un terminal es un terminal vulgar y corriente: vas escribiendo en él. 
    Cuando llegas a la última columna automáticamente pasa a la siguiente 

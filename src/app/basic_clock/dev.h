@@ -31,7 +31,7 @@
  *
  ****************************************************************************/
 #include <stdint.h>
-#include <avr_timer1_tr.h>
+#include <avr_timer1_basic.h>
 
 #include <dev_LCD_HD44780.h>
 #include <dev_keyboard.h>

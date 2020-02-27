@@ -19,7 +19,7 @@
 // Genera una señal de 1MHz en el pin OC1A (pin 15)
 // y en el pin OC1B (pin 16). Conectar el osciloscopio a estos pines para
 // comprobarlo.
-#include "../../../avr_timer0_tr.h"
+#include "../../../avr_timer0_basic.h"
 #include "../../../avr_time.h"
 
 using namespace avr;

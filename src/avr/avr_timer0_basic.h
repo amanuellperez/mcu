@@ -17,8 +17,8 @@
 
 #pragma once
 
-#ifndef __AVR_TIMER0_H__
-#define __AVR_TIMER0_H__
+#ifndef __AVR_TIMER0_BASIC_H__
+#define __AVR_TIMER0_BASIC_H__
 
 /****************************************************************************
  *

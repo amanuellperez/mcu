@@ -22,13 +22,13 @@
 //
 #include "../../mcu_led.h"
 #include "../../avr_time.h"
-#include "../../avr_USART.h"
+#include "../../avr_UART.h"
 
 using namespace avr;
 
 int main() 
 {
-    auto usart = USART::init();
+    auto usart = UART::init();
 
     // ¡¡el nombre_programa tiene que ir en flash memory!!!
     const char abc[] = "abcdefghijklmnñopqrstuvwxyz0123456789";

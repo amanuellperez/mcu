@@ -21,7 +21,7 @@
 //  termómetro logger)
 //
 #include "../../avr_time.h"
-#include "../../avr_USART.h"
+#include "../../avr_UART.h"
 
 using namespace avr;
 

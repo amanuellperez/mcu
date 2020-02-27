@@ -19,7 +19,7 @@
 // Hacemos un órgano conectado al teclado.
 // Conectar el cable FTDI para tocar las notas que se quieran.
 #include "../mcu_speaker.h"
-#include "../avr_USART.h"
+#include "../avr_UART.h"
 
 // Configuración de las conexiones
 constexpr uint8_t num_pin_speaker = 15;
@@ -96,9 +96,9 @@ void play_note(Speaker& speaker, char c, uint16_t duracion)
 int main()
 {
     auto speaker = Speaker::nuevo<num_pin_speaker>();
-    USART::init();
+    UART::init();
     
-    auto usart = USART::as_a_stream();
+    auto usart = UART::as_a_stream();
 
     usart << "\r\n--------------------------\r\n";
     usart << "ÓRGANO (usando el teclado)\r\n";
@@ -112,7 +112,7 @@ int main()
 //	for(uint8_t i = 0; i < 20; ++i)
 //	    speaker.play_note(melodia[i], duracion[i]);
 
-	char c = USART::receive();
+	char c = UART::receive();
 	play_note(speaker, c, 200);
 
     }

@@ -17,9 +17,9 @@
 
 #include "../../dev_system_clock.h"
 #include <avr_interrupt.h>
-#include <avr_USART.h>
+#include <avr_UART.h>
 #include <avr_time.h>
-#include <avr_timer1_tr.h>
+#include <avr_timer1_basic.h>
 #include <atd_time.h>
 
 using System_clock = dev::System_clock<avr::Timer1_CTC_mode>;

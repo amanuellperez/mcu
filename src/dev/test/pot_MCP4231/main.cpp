@@ -17,7 +17,7 @@
 
 // Conectar dos potenciometros. De esta forma probamos SPI también.
 #include "../../dev_pot_MCP4231.h"
-#include <avr_USART.h>
+#include <avr_UART.h>
 #include <avr_time.h>
 #include <atd_cast.h>
 
