@@ -307,15 +307,13 @@ struct Data{
 template <typename Istream>
 Istream& operator>>(Istream& in, Data& d)
 {
-    in >> d.x >> d.y >> d.z; 
-    return in;
+    return in >> d.x >> d.y >> d.z; 
 }
 
 template <typename Ostream>
 Ostream& operator<<(Ostream& out, const Data& d)
 { 
-   out << d.x << d.y << d.z;
-   return out;
+   return out << d.x << d.y << d.z;
 }
 
 void service(const Data& in, Data& out)
@@ -360,6 +358,46 @@ void test_typical_service()
 	uart << "OK\n";
 }
 
+void test_n()
+{
+    constexpr int data_size = 3;
+    std::byte data[3] = {std::byte{10}, std::byte{20}, std::byte{30}};
+
+    avr::UART_iostream uart;
+    uart << "\n==============================\n";
+    uart << "Probando read(q,n) y write(q, n): ";
+    TWI twi;
+    twi.open(slave_address);
+
+    if (twi.write(data, data_size) != data_size){
+	uart << "ERROR en write: data_size recibido erroneo!\n";
+	return;
+    }
+
+
+    std::byte q[data_size];
+    if (twi.read(q, data_size) != data_size){
+	uart << "ERROR en read: data_size recibido erroneo!\n";
+	return;
+    }
+
+    for (int i = 0; i < data_size; ++i){
+	if (data[i] != q[i])
+	    uart << "ERROR: q[" << i << "] = " << (int) q[i] 
+		 << " != data[" << i << "] = " << (int) data[i] << '\n';
+    }
+
+    twi.close();
+
+    if (twi.error())
+	twi_print_error();
+
+    else 
+	uart << "OK\n";
+
+}
+
+
 
 void test_master()
 {
@@ -372,7 +410,8 @@ void test_master()
 	wait_ms(500);
 	send_service4();
 	test_typical_service();
-	wait_ms(500);
+	wait_ms(200);
+	test_n();
     }
 }
 

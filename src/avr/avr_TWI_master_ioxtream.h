@@ -74,12 +74,19 @@ namespace avr{
  *	...
  *	twi.close();
  *
+ *	if (twi.error())
+ *	    // error...
+ *
  *	// NO OLVIDAR LA ISR!!!
  *	ISR(TWI_vect)
  *	{
  *	    TWI::handle_interrupt();
  *	}
 
+ *  TODO: Tal como está hecho ahora no se puede escribir después de leer.
+ *	Habría que cerrar el flujo y volverlo a abrir. Pero creo que la forma
+ *	habitual de manejar twi será: 1. escribo; 2. leo; 3. cierro. En
+ *	principio no necesito escribir después de leer.
  *
  *  DUDA: ¿ponerle un state?
  *	Por una parte quiero que sea lo más eficiente posible, pero por otra
@@ -132,8 +139,7 @@ public:
     /// Vamos a leer exactamente n bytes de TWI.
     /// No bloquea.
     /// Precondición: se ha llamado a open antes.
-    /// Return: true, todo va bien; false, error (se viola la precondición)
-    bool read(streamsize n);
+    void read(streamsize n);
 
 
 // operator<<. Ninguna bloquea.
@@ -164,6 +170,17 @@ public:
     TWI_master_ioxtream& operator>>(long long& c) {return read_(c);}
     TWI_master_ioxtream& operator>>(unsigned long long& c) {return read_(c);}
     
+
+// Lectura/escritura en bloque
+    /// Lee exáctamente n bytes metiéndolos en q[0, n).
+    /// Bloquea la ejecución. Hasta que no lee todo no devuelve el control.
+    /// OJO: incompatible con el uso de read(n). 
+    streamsize read(std::byte* q, streamsize n);
+
+    /// Escribe q[0,n) en el flujo.
+    /// No bloquea. q[0,n) se mete en el buffer interno de TWI y lo irá
+    /// enviando poco a poco.
+    streamsize write(const std::byte* q, streamsize n);
 
 // ISR
     // FUNDAMENTAL: no olvidar llamar a esta función!!!
@@ -206,8 +223,7 @@ public:
 
 private:
 // Data
-    // Solo podemos conectarnos a un slave a la vez, por eso lo defino static.
-    static inline Address slave_address_;
+    Address slave_address_;
 
 
     template <typename T>
@@ -264,19 +280,41 @@ inline void TWI_master_ioxtream<T, bsz>::close()
 }
 
 template <typename T, uint8_t bsz>
-bool TWI_master_ioxtream<T, bsz>::read(streamsize n)
+void TWI_master_ioxtream<T, bsz>::read(streamsize n)
 {
-    if (TWI::is_idle()) // no envio start para obligar al usuario a llamar
-	return false;	// a open, pasando la dirección del slave.
+    if (TWI::is_idle()) 
+	TWI::send_start();
 
     TWI::wait_till_no_busy();
 
-    if (!TWI::read_or_write())
+    if (!TWI::read_or_write()) // ignoramos el state real de TWI
 	TWI::send_repeated_start();
 
     TWI::read_from(slave_address_, n);
+}
 
-    return true;
+template <typename T, uint8_t bsz>
+TWI_master_ioxtream<T, bsz>::streamsize
+TWI_master_ioxtream<T, bsz>::read(std::byte* q, streamsize n)
+{
+    read(n);
+    
+    TWI::wait_till_no_busy();
+
+    return TWI::read_buffer(q, n);
+}
+
+
+// pre: state() == read_or_write() or state() == transmitting()
+template <typename T, uint8_t bsz>
+TWI_master_ioxtream<T, bsz>::streamsize 
+TWI_master_ioxtream<T, bsz>::write(const std::byte* q, streamsize n)
+{
+    if (TWI::read_or_write())
+	return TWI::write_to(slave_address_, q, n);
+
+    else 
+	return TWI::write(q, n);
 }
 
 
