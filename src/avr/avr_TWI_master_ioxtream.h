@@ -174,7 +174,7 @@ public:
 // Lectura/escritura en bloque
     /// Lee exáctamente n bytes metiéndolos en q[0, n).
     /// Bloquea la ejecución. Hasta que no lee todo no devuelve el control.
-    /// OJO: incompatible con el uso de read(n). 
+    /// Precondition: se ha llamado a read(N) antes (con N >= n).
     streamsize read(std::byte* q, streamsize n);
 
     /// Escribe q[0,n) en el flujo.
@@ -197,6 +197,7 @@ public:
 
 // ¿algún error?
     static bool error() {return TWI::error();}
+    static bool error(iostate st) {return TWI::error(st);}
 
 // errores genéricos
     static bool no_response() {return TWI::no_response();}
@@ -293,11 +294,30 @@ void TWI_master_ioxtream<T, bsz>::read(streamsize n)
     TWI::read_from(slave_address_, n);
 }
 
+
+// (*) Al principio pensé en que el usuario tuviese que elegir entre llamar a
+// read(n) o a read(q, n), para no tener que escribir código del tipo:
+//	twi.read(n);
+//	twi.read(q, n);
+//  que parece un poco redundante.
+//  Sin embargo, nada más que escribí el primer programa me confundí, ya que
+//  la forma que tengo de operar es:
+//	read_object(st){
+//	    twi.open();
+//	    twi << cmd;
+//	    twi.read(size_object);
+//	    twi >> st; 
+//	}
+//
+//  y el operator>> unas veces se limita a llamar a operator>>, mientras que
+//  otras llama a read(q,n)!!!  Luego con esta forma de razonar llamaré a
+//  read(n) y luego a read(q,n).
+//	
 template <typename T, uint8_t bsz>
 TWI_master_ioxtream<T, bsz>::streamsize
 TWI_master_ioxtream<T, bsz>::read(std::byte* q, streamsize n)
 {
-    read(n);
+//    read(n); (*)
     
     TWI::wait_till_no_busy();
 

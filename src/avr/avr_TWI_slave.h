@@ -84,24 +84,24 @@ enum class __TWI_slave_state{
 
 constexpr uint8_t __TWI_slave_state_mask_group_states = 0x03;
 
-bool __TWI_slave_state_is_group(__TWI_slave_state a, __TWI_slave_state group)
+inline bool __TWI_slave_state_is_group(__TWI_slave_state a, __TWI_slave_state group)
 {
     return 
     (static_cast<uint8_t>(a) & __TWI_slave_state_mask_group_states) == 
 	static_cast<uint8_t>(group);
 }
 
-bool __TWI_slave_state_is_busy(__TWI_slave_state a)
+inline bool __TWI_slave_state_is_busy(__TWI_slave_state a)
 {
     return __TWI_slave_state_is_group(a, __TWI_slave_state::busy);
 }
 
-bool __TWI_slave_state_is_waiting(__TWI_slave_state a)
+inline bool __TWI_slave_state_is_waiting(__TWI_slave_state a)
 {
     return __TWI_slave_state_is_group(a, __TWI_slave_state::waiting);
 }
 
-bool __TWI_slave_state_is_listening(__TWI_slave_state a)
+inline bool __TWI_slave_state_is_listening(__TWI_slave_state a)
 {
     return __TWI_slave_state_is_group(a, __TWI_slave_state::listening);
 }
@@ -418,9 +418,6 @@ TWI_slave<TWI, bsz>::read_buffer(std::byte* buffer, streamsize N)
 template <typename TWI, uint8_t bsz>
 void TWI_slave<TWI, bsz>::handle_interrupt()
 {
-avr::UART_iostream uart;
-uart << "handle_interrupt: ";
-
     using TWI_iostate = TWI_basic_iostate;
     using SRM = TWI_basic_iostate::slave_receiver_mode;
     using STM = TWI_basic_iostate::slave_transmitter_mode;
@@ -430,23 +427,19 @@ uart << "handle_interrupt: ";
     // slave receiver mode
     // -------------------
 	case SRM::sla_w: 
-uart << "SRM::sla_w\n";
 	    srm_sla_w(); 
 	    break;
 
 	case SRM::sla_w_data_ack:
-uart << "SRM::sla_w_data_ac\n";
 	    srm_data_ack();
 	    break;
 
 	case SRM::sla_w_data_nack:
-uart << "SRM::sla_w_data_nac\n";
 	    srm_data_nack();
             break;
 
 
 	case SRM::stop_or_repeated_start:
-uart << "SRM::stop_or_repeated_star\n";
 	    srm_stop_or_repeated_start();
             break;
 
@@ -455,17 +448,14 @@ uart << "SRM::stop_or_repeated_star\n";
     // slave transmitter mode
     // ----------------------
 	case STM::sla_r:
-uart << "STM::sla_r\n";
 	    stm_sla_r();
 	    break;
 
 	case STM::data_ack:
-uart << "STM::data_ac\n";
 	    stm_data_ack();
 	    break;
 
 	case STM::data_nack:
-uart << "STM::data_nac\n";
 	    stm_data_nack();
 	    break;
 
@@ -473,7 +463,6 @@ uart << "STM::data_nac\n";
     // miscellaneous states
     // --------------------
 	case TWI_iostate::bus_error:
-uart << "TWI_iostate::bus_erro\n";
 	    bus_error();
             break;
 

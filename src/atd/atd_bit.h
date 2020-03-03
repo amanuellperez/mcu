@@ -174,6 +174,8 @@ struct __Range_bitmask{
  */
 template <uint8_t i0, uint8_t i1, typename Int>
 struct Range_bitmask{
+    static_assert (i0 <= i1, "i0 must be less or equal than i1");
+
     constexpr __Range_bitmask<i0, i1, Int> operator()(Int& reg) const
     { return __Range_bitmask<i0, i1, Int>{reg}; }
 };

@@ -1,0 +1,437 @@
+// Copyright (C) 2019-2020 A.Manuel L.Perez <amanuel.lperez@gmail.com>
+//
+// This file is part of the MCU++ Library.
+//
+// MCU++ Library is a free library: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+// Conectar el LCD y 3 pulsadores a los pines indicados
+#include <avr_time.h>
+#include <avr_UART.h>	// TODO: cambiar orden
+#include "dev_BMP280_basic.h"
+#include <atd_ostream.h>
+#include <cstddef>
+#include <atd_cstddef.h>
+
+// pines que usamos
+// ----------------
+
+
+// dispositivos que conectamos
+// ---------------------------
+using TWI = avr::TWI_master_ioxtream<avr::TWI_basic, TWI_buffer_size>;
+using Sensor = dev::BMP280_TWI;
+
+// para depurar
+static constexpr uint8_t slave_address = 0x76;
+
+void twi_print_state(TWI::iostate st)
+{
+    avr::UART_iostream uart;
+    uart << "state = ";
+
+    switch(st){
+	case TWI::iostate::ok:
+	uart << "ok\n";
+	break;
+
+	case TWI::iostate::read_or_write:
+	uart << "read_or_write\n";
+	break;
+
+	case TWI::iostate::sla_w:
+	uart << "sla_w\n";
+	break;
+
+	case TWI::iostate::sla_r:
+	uart << "sla_r\n";
+	break;
+
+	case TWI::iostate::no_response:
+	uart << "no_response\n";
+	break;
+
+	case TWI::iostate::transmitting:
+	uart << "transmitting\n";
+	break;
+
+	case TWI::iostate::eow:
+	uart << "eow\n";
+	break;
+
+	case TWI::iostate::eow_data_nack:
+	uart << "eow_data_nack\n";
+	break;
+
+	case TWI::iostate::error_buffer_size:
+	uart << "error_buffer_size\n";
+	break;
+
+	case TWI::iostate::receiving:
+	uart << "receiving\n";
+	break;
+
+	case TWI::iostate::eor_bf:
+	uart << "eor_bf\n";
+	break;
+
+	case TWI::iostate::eor:
+	uart << "eor\n";
+	break;
+
+	case TWI::iostate::bus_error:
+	uart << "bus_error\n";
+	break;
+
+	case TWI::iostate::unknown_error:
+	uart << "unknown_error\n";
+	break;
+
+	case TWI::iostate::prog_error:
+	uart << "prog_error\n";
+	break;
+
+	default:
+	uart << "desconocido\n";
+	break;
+    }
+}
+void bmp280_read_all_mem(std::byte addr, std::byte* mem, uint8_t n)
+{
+    TWI twi;
+    twi.open(slave_address);
+    
+    twi << addr;
+    twi.read(n);
+    twi.read(mem, n);
+
+    twi.close();
+
+    if (twi.error()){
+	avr::UART_iostream uart;
+	uart << "ERROR (bmp280_read_all_mem): ";
+	twi_print_state(TWI::state());
+    }
+
+}
+
+void print_in_hex(std::ostream& uart, std::byte* p, uint8_t n)
+{
+    for (uint8_t i = 0; i < n; ++i){
+	atd::print_in_hex(uart, p[i]);
+	uart << ' ';
+    }
+    uart << '\n';
+}
+
+void mem_dump_(std::ostream& uart, 
+	       std::byte addr, std::byte* mem, uint8_t mem_size)
+{
+    bmp280_read_all_mem(addr, mem, mem_size);
+
+    uart << "Memoria [";
+    atd::print_in_hex(uart, addr);
+    uart << "]:\n";
+
+    print_in_hex(uart, mem, mem_size);
+    uart << "\n";
+}
+
+void mem_dump(std::ostream& uart)
+{
+//    {
+//    constexpr uint8_t mem_size = 24;
+//    constexpr std::byte addr{0x88};
+//    std::byte mem[mem_size];
+//    uart << "Calibration params: ";
+//
+//    mem_dump_(uart, addr, mem, mem_size);
+//    }
+
+    // Hay que leerlo en dos partes. 'reset' es de solo escritura,
+    // si se intenta leer falla la lectura del resto.
+    {
+    constexpr uint8_t mem_size = 1;
+    constexpr std::byte addr{0xD0};
+    std::byte mem[mem_size];
+
+    mem_dump_(uart, addr, mem, mem_size);
+    }
+    {
+    constexpr uint8_t mem_size = 3;
+    constexpr std::byte addr{0xF3};
+    std::byte mem[mem_size];
+    mem_dump_(uart, addr, mem, mem_size);
+    }
+    {
+    constexpr uint8_t mem_size = 6;
+    constexpr std::byte addr{0xF7};
+    std::byte mem[mem_size];
+    mem_dump_(uart, addr, mem, mem_size);
+    }
+
+
+}
+
+
+
+void print_mode(std::ostream& out, std::byte mode)
+{
+    using Cfg = dev::__BMP280_config;
+    if (mode == Cfg::sleep_mode)
+	out << "sleep_mode\n";
+    else if (mode == Cfg::force_mode)
+	out << "force_mode\n";
+    else if (mode == Cfg::normal_mode)
+	out << "normal_mode\n";
+    else
+	out << "ERROR: mode desconocido\n\\nn";
+}
+
+void print_oversampling(std::ostream& out, std::byte osr)
+{
+    using Cfg = dev::__BMP280_config;
+    if (osr == Cfg::oversampling_none)
+	out << "oversampling_none\n";
+
+    else if (osr == Cfg::oversampling_x1)
+	out << "oversampling_x1\n";
+
+    else if (osr == Cfg::oversampling_x2)
+	out << "oversampling_x2\n";
+
+    else if (osr == Cfg::oversampling_x4)
+	out << "oversampling_x4\n";
+
+    else if (osr == Cfg::oversampling_x8)
+	out << "oversampling_x8\n";
+
+    else if (osr == Cfg::oversampling_x16)
+	out << "oversampling_x16\n";
+
+    else
+	out << "ERROR: desconocido\n";
+
+}
+
+void print_t_sb(std::ostream& out, std::byte t_sb)
+{
+    using Cfg = dev::__BMP280_config;
+
+    if (t_sb == Cfg::t_sb_0_5_ms)
+	out << "t_sb_0_5_ms\n";
+
+    else if (t_sb == Cfg::t_sb_62_5_ms)
+	out << "t_sb_62_5_ms\n";
+
+    else if (t_sb == Cfg::t_sb_125_ms)
+	out << "t_sb_125_ms\n";
+
+    else if (t_sb == Cfg::t_sb_250_ms)
+	out << "t_sb_250_ms\n";
+
+    else if (t_sb == Cfg::t_sb_500_ms)
+	out << "t_sb_500_ms\n";
+
+    else if (t_sb == Cfg::t_sb_1000_ms)
+	out << "t_sb_1000_ms\n";
+
+    else if (t_sb == Cfg::t_sb_2000_ms)
+	out << "t_sb_2000_ms\n";
+
+    else if (t_sb == Cfg::t_sb_4000_ms)
+	out << "t_sb_4000_ms\n";
+
+    else
+	out << "ERROR: desconocido\n";
+}
+
+void print_filter(std::ostream& out, std::byte filter)
+{
+    using Cfg = dev::__BMP280_config;
+
+    if (filter == Cfg::filter_off)
+	out << "filter_off\n";
+
+    else if (filter == Cfg::filter_coeff_2)
+	out << "filter_coeff_2\n";
+
+    else if (filter == Cfg::filter_coeff_4)
+	out << "filter_coeff_4\n";
+
+    else if (filter == Cfg::filter_coeff_8)
+	out << "filter_coeff_8\n";
+
+    else if (filter == Cfg::filter_coeff_16)
+	out << "filter_coeff_16\n";
+
+    else
+	out << "ERROR: desconocido: [" << (int) filter << "]\n";
+}
+
+void print_spi3w_en(std::ostream& out, std::byte spi3w_en)
+{
+    using Cfg = dev::__BMP280_config;
+
+    if (spi3w_en == Cfg::spi3w_disable)
+	out << "spi3w_disable\n";
+
+    else if (spi3w_en == Cfg::spi3w_enable)
+	out << "spi3w_enable\n";
+
+
+    else
+	out << "ERROR: desconocido\n";
+}
+
+void print_cfg(std::ostream& out, dev::__BMP280_config& cfg)
+{
+    out << "\n---------- Cfg ----------\n";
+    print_mode(out, cfg.mode);
+    out << "osrs_t ... ";
+    print_oversampling(out, cfg.osrs_t);
+    out << "osrs_p ... ";
+    print_oversampling(out, cfg.osrs_p);
+    out << "t_sb ... ";
+    print_t_sb(out, cfg.t_sb);
+    out << "filter_coeff ... ";
+    print_filter(out, cfg.filter);
+    out << "spi3w_en ... ";
+    print_spi3w_en(out, cfg.spi3w_en);
+    out << "-------------------------\n";
+}
+
+
+void cfg(Sensor& sensor)
+{
+    avr::UART_iostream uart;
+    uart << "init ... ";
+    if (sensor.init() != 0){
+	uart << "ERROR ... ";
+	twi_print_state(sensor.state());
+    }
+    else
+	uart << "OK\n";
+
+    using Cfg = Sensor::Config;
+    Cfg cfg;
+ 
+    Cfg::handheld_device_low_power(cfg);
+//    Cfg::indoor_navigation(cfg);
+    // parametros definidos en el ejemplo de Bosh.
+//    cfg.mode     = Cfg::normal_mode;
+//    cfg.osrs_t   = Cfg::oversampling_x2;
+//    cfg.osrs_p   = Cfg::oversampling_x4;
+//    cfg.t_sb     = Cfg::t_sb_1000_ms;
+//    cfg.filter   = Cfg::filter_coeff_2;
+
+
+    cfg.spi3w_en = Cfg::spi3w_disable; // es TWI
+
+
+    sensor.write(cfg); 
+
+    if (sensor.error()){
+	uart << "Error al configurar el sensor\n";
+	twi_print_state(sensor.state());
+    }
+    else
+	uart << "cfg OK\n";
+
+
+    Cfg cfg2;
+    sensor.read(cfg2);
+    uart << "LEIDOS:\n";
+
+    print_cfg(uart, cfg2);
+}
+
+
+void print_params(std::iostream& uart, Sensor& sensor)
+{
+    uart << "dig_T1 = [" << sensor.dig_T1() << "]\n";
+    uart << "dig_T2 = [" << sensor.dig_T2() << "]\n";
+    uart << "dig_T3 = [" << sensor.dig_T3() << "]\n";
+
+    uart << "dig_P1 = [" << sensor.dig_P1() << "]\n";
+    uart << "dig_P2 = [" << sensor.dig_P2() << "]\n";
+    uart << "dig_P3 = [" << sensor.dig_P3() << "]\n";
+    uart << "dig_P4 = [" << sensor.dig_P4() << "]\n";
+    uart << "dig_P5 = [" << sensor.dig_P5() << "]\n";
+    uart << "dig_P6 = [" << sensor.dig_P6() << "]\n";
+    uart << "dig_P7 = [" << sensor.dig_P7() << "]\n";
+    uart << "dig_P8 = [" << sensor.dig_P8() << "]\n";
+    uart << "dig_P9 = [" << sensor.dig_P9() << "]\n";
+}
+
+
+void print(std::ostream& out, const Sensor::Temp_and_press& tp, Sensor& sensor)
+{
+    out << "Temperatura = " << tp.temperature << '\n'
+	<< "Presión = " << tp.pressure << '\n'
+	// TODO: 
+	// T: 2144 --> 21.44 (<- quiero imprimir esto)
+	//	auto [T, Td] = T_as_Q(T_in_dC); <-- esto no es como chrono???
+	// P: 
+	<< "T comp. = " << sensor.compensate_T(tp.temperature) << '\n';
+    uint32_t press_q248 = sensor.compensate_P(tp.pressure);
+    out << "P comp. = " << press_q248 
+			<< " (" << press_q248/25600 << " hPa)\n";
+
+}
+
+void test_bmp280()
+{
+    // init_UART();
+    avr::UART_iostream uart;
+    avr::basic_cfg(uart);
+    uart.on();
+
+    uart << "----------------------------------------\n"
+	 << "BMP280\n"
+	 << "----------------------------------------\n\n";
+    // init_TWI();
+    // 50 kHz es la unica frecuencia de TWI que va a 1MHz.
+    // 100 kHz a 8 MHz
+    TWI::on<50>();
+
+    // init_sensor();
+    Sensor sensor;
+    cfg(sensor);
+
+    while (1){
+	Sensor::Temp_and_press tp;
+	sensor.read(tp);
+
+	print(uart, tp, sensor);
+
+        wait_ms(4000);
+    }
+}
+
+
+
+int main()
+{
+    test_bmp280();
+}
+
+
+
+
+ISR(TWI_vect)
+{
+    TWI::handle_interrupt();
+}
+
+

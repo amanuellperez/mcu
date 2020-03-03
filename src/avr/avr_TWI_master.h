@@ -102,29 +102,29 @@ enum class __TWI_master_state : uint8_t {
 constexpr uint8_t __TWI_master_state_mask_group_states = 0x03;
 constexpr uint8_t __TWI_master_state_mask_error = 0x04;
 
-bool __TWI_master_state_error(__TWI_master_state a)
+inline bool __TWI_master_state_error(__TWI_master_state a)
 {
     return (static_cast<uint8_t>(a) & __TWI_master_state_mask_error);
 }
 
-bool __TWI_master_state_is_group(__TWI_master_state a, __TWI_master_state group)
+inline bool __TWI_master_state_is_group(__TWI_master_state a, __TWI_master_state group)
 {
     return 
     (static_cast<uint8_t>(a) & __TWI_master_state_mask_group_states) == 
 	static_cast<uint8_t>(group);
 }
 
-bool __TWI_master_state_is_busy(__TWI_master_state a)
+inline bool __TWI_master_state_is_busy(__TWI_master_state a)
 {
     return __TWI_master_state_is_group(a, __TWI_master_state::busy);
 }
 
-bool __TWI_master_state_is_waiting(__TWI_master_state a)
+inline bool __TWI_master_state_is_waiting(__TWI_master_state a)
 {
     return __TWI_master_state_is_group(a, __TWI_master_state::waiting);
 }
 
-bool __TWI_master_state_is_idle(__TWI_master_state a)
+inline bool __TWI_master_state_is_idle(__TWI_master_state a)
 {
     return __TWI_master_state_is_group(a, __TWI_master_state::idle);
 }
@@ -267,6 +267,7 @@ public:
 
 // is there an error?
     static bool error() {return __TWI_master_state_error(state_);}
+    static bool error(iostate st) {return __TWI_master_state_error(st);}
 
 // generic errors
     static bool no_response() {return state_ == iostate::no_response;}

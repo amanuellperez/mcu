@@ -376,6 +376,7 @@ void test_n()
 
 
     std::byte q[data_size];
+    twi.read(data_size);
     if (twi.read(q, data_size) != data_size){
 	uart << "ERROR en read: data_size recibido erroneo!\n";
 	return;
