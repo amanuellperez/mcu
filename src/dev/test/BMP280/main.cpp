@@ -316,7 +316,8 @@ void cfg(Sensor& sensor)
 {
     avr::UART_iostream uart;
     uart << "init ... ";
-    if (sensor.init() != 0){
+    sensor.init();
+    if (sensor.error()){
 	uart << "ERROR ... ";
 	twi_print_state(sensor.state());
     }
@@ -377,14 +378,14 @@ void print_params(std::iostream& uart, Sensor& sensor)
 
 void print(std::ostream& out, const Sensor::Temp_and_press& tp, Sensor& sensor)
 {
-    out << "Temperatura = " << tp.temperature << '\n'
-	<< "Presión = " << tp.pressure << '\n'
+    out << "Temperatura = " << tp.utemperature << '\n'
+	<< "Presión = " << tp.upressure << '\n'
 	// TODO: 
 	// T: 2144 --> 21.44 (<- quiero imprimir esto)
 	//	auto [T, Td] = T_as_Q(T_in_dC); <-- esto no es como chrono???
 	// P: 
-	<< "T comp. = " << sensor.compensate_T(tp.temperature) << '\n';
-    uint32_t press_q248 = sensor.compensate_P(tp.pressure);
+	<< "T comp. = " << sensor.compensate_T(tp.utemperature) << '\n';
+    uint32_t press_q248 = sensor.compensate_P(tp.upressure);
     out << "P comp. = " << press_q248 
 			<< " (" << press_q248/25600 << " hPa)\n";
 

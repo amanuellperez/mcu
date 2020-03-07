@@ -5,6 +5,8 @@ DIRS = algorithm	\
 		cast		\
 		cstddef		\
 		cstring		\
+		decimal		\
+		math		\
 		register	\
 		time		\
 		type_traits

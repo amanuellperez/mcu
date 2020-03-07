@@ -19,55 +19,85 @@
 
 #ifndef __ATD_MATH_H__
 #define __ATD_MATH_H__
+/****************************************************************************
+ *
+ *  - DESCRIPCION: Funciones matemáticas.
+ *
+ *  - HISTORIA:
+ *    A.Manuel L.Perez
+ *    07/03/2020 v0.0
+ *
+ ****************************************************************************/
+#include <stdlib.h>
+#include <utility>
 
 namespace atd{
-
-
-
-/// Resta a-b siempre que a sea mayor que b.
-/// Esta función esta para unsigned int.
-template <typename T>
-inline T resta_si_se_puede(T a, T b)
+/*!
+ *  \brief  Devuelve el cociente y el resto de dividir D/d
+ *
+ *  Es la función std::div pero en lugar de devolver una estructura, 
+ *  devuelve directamente el cociente y el resto.
+ *
+ *  Ejemplo:
+ *  \code 
+ *	auto [q, r] = alp::div(20, 3);	// q = 6; r = 2
+ *  \endcode
+ */
+template <typename Int>
+// requires: is_integer(Int)
+std::pair<Int, Int> div(Int D, Int d)
 {
-    return (a > b ? a - b : b);
+    auto res = std::div(D, d);
+    return {res.quot, res.rem};
 }
 
 
-/***************************************************************************
- *		FORMAS EFICIENTES DE DIVIDIR ENTRE 2^x
- ***************************************************************************/
-/// Dividimos entre 2
-template<typename T>
-inline T divide_entre_2(T x) {return x >> 1;}
 
-/// Dividimos entre 4
-template<typename T>
-inline T divide_entre_4(T x) {return x >> 2;}
-
-/// Dividimos entre 8
-template<typename T>
-inline T divide_entre_8(T x) {return x >> 3;}
-
-/// Dividimos entre 16
-/// Si redondea = true, redondeamos; en caso contrario, truncamos.
-/// Como en C++ lo habitual al dividir es truncar, por eso pongo por defecto
-/// que se trunque.
+// TODO: borrar todo esto (07/03/20)
+///// Resta a-b siempre que a sea mayor que b.
+///// Esta función esta para unsigned int.
+//template <typename T>
+//inline T resta_si_se_puede(T a, T b)
+//{
+//    return (a > b ? a - b : b);
+//}
 //
-// TODO: convertir en template el bool redondea, para que sea más
-// eficiente???
-template<typename T>
-inline T divide_entre_16(T x, bool redondea = false)
-{
-    if(redondea)
-	return (x+8) >> 4;
-
-    return x >> 4;
-}
-
-
-/// Dividimos entre 1024
-template<typename T>
-inline T divide_entre_1024(T x) {return x >> 10;}
+//
+///***************************************************************************
+// *		FORMAS EFICIENTES DE DIVIDIR ENTRE 2^x
+// ***************************************************************************/
+///// Dividimos entre 2
+//template<typename T>
+//inline T divide_entre_2(T x) {return x >> 1;}
+//
+///// Dividimos entre 4
+//template<typename T>
+//inline T divide_entre_4(T x) {return x >> 2;}
+//
+///// Dividimos entre 8
+//template<typename T>
+//inline T divide_entre_8(T x) {return x >> 3;}
+//
+///// Dividimos entre 16
+///// Si redondea = true, redondeamos; en caso contrario, truncamos.
+///// Como en C++ lo habitual al dividir es truncar, por eso pongo por defecto
+///// que se trunque.
+////
+//// TODO: convertir en template el bool redondea, para que sea más
+//// eficiente???
+//template<typename T>
+//inline T divide_entre_16(T x, bool redondea = false)
+//{
+//    if(redondea)
+//	return (x+8) >> 4;
+//
+//    return x >> 4;
+//}
+//
+//
+///// Dividimos entre 1024
+//template<typename T>
+//inline T divide_entre_1024(T x) {return x >> 10;}
 
 
 } // namespace

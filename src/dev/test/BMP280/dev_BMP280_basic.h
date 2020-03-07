@@ -204,12 +204,12 @@ struct __BMP280_config{
 
 
 // Table 7: recommended filter settings use cases
-    static constexpr void handheld_device_low_power(__BMP280_config& cfg);
-    static constexpr void handheld_device_dynamic(__BMP280_config& cfg);
-    static constexpr void weather_monitoring(__BMP280_config& cfg);
-    static constexpr void elevator_floor_change_detector(__BMP280_config& cfg);
-    static constexpr void drop_detection(__BMP280_config& cfg);
-    static constexpr void indoor_navigation(__BMP280_config& cfg);
+    static void handheld_device_low_power(__BMP280_config& cfg);
+    static void handheld_device_dynamic(__BMP280_config& cfg);
+    static void weather_monitoring(__BMP280_config& cfg);
+    static void elevator_floor_change_detector(__BMP280_config& cfg);
+    static void drop_detection(__BMP280_config& cfg);
+    static void indoor_navigation(__BMP280_config& cfg);
 
 
 // Memory
@@ -224,7 +224,9 @@ struct __BMP280_config{
     template <typename Ixtream>
     friend Ixtream& operator>>(Ixtream& in, __BMP280_config& st);
 
-    // Escribe toda la configuración
+    // Escribe toda la configuración. La configuración hay que escribirla
+    // de una determinada forma: hay que hacer reset, leer... luego no vale
+    // un simple write. Usar esta función para ello.
     template <typename TWI>
     void twi_write(TWI& out, typename TWI::Address slave_address) const;
 
@@ -280,43 +282,7 @@ private:
 //    // Codifica la región de memoria 'mem' en la estructura st
     static void mem_to_struct(std::byte* mem, __BMP280_config& st);
     static void struct_to_mem(const __BMP280_config& st, std::byte* mem);
-    static void struct_to_ctrl_meas_only(const __BMP280_config& st,
-							    std::byte* mem);
 };
-
-// mem -> st
-inline void __BMP280_config::mem_to_struct(std::byte* mem, __BMP280_config& st)
-{
-    st.osrs_t   = mask_osrs_t(mem[0]);
-    st.osrs_p   = mask_osrs_p(mem[0]);
-    st.mode     = mask_mode(mem[0]);
-
-    st.t_sb     = mask_t_sb(mem[1]);
-    st.filter   = mask_filter(mem[1]);
-    st.spi3w_en = mask_spi3w_en(mem[1]);
-}
-
-
-inline void 
-__BMP280_config::struct_to_ctrl_meas_only(const __BMP280_config& st,
-                                                      std::byte* mem)
-{
-    mask_osrs_t(mem[0])   = st.osrs_t;
-    mask_osrs_p(mem[0])   = st.osrs_p;
-    mask_mode(mem[0])     = st.mode;
-}
-
-
-
-// st -> mem
-inline void __BMP280_config::struct_to_mem(const __BMP280_config& st, std::byte* mem)
-{
-    struct_to_ctrl_meas_only(st, mem);
-
-    mask_t_sb(mem[1])     = st.t_sb;
-    mask_filter(mem[1])   = st.filter;
-    mask_spi3w_en(mem[1]) = st.spi3w_en;
-}
 
 
 
@@ -340,7 +306,7 @@ Ixtream& operator>>(Ixtream& in, __BMP280_config& st)
 // de SPI lo miramos.
 // En caso de error el error queda en el estado del flujo de salida out.
 template <typename TWI>
-inline void __BMP280_config::twi_write(TWI& out, 
+void __BMP280_config::twi_write(TWI& out, 
 	typename TWI::Address slave_address) const
 { 
     std::byte mem[size];
@@ -362,7 +328,8 @@ inline void __BMP280_config::twi_write(TWI& out,
 
     
 // 2. Leer. El ejemplo de Bosch dice que siempre hay que leer antes de
-// escribir la cfg.
+// escribir la cfg. De hecho he tenido problemas al principio porque no
+// quedaba bien configurado. 
     std::byte tmp[2];
     out.open(slave_address);
     out << address;
@@ -376,7 +343,7 @@ inline void __BMP280_config::twi_write(TWI& out,
 	return;
     }
 
-// 1. Enviar primero enviar config.
+// 3. Enviar primero enviar config.
 //    datasheet (4.3.5): In sleep mode writes are not ignored.
 //    Esto es, este registro solo se puede escribir en sleep mode y hay que
 //    escribirlo el solito, sin escribir ctrl_meas a la vez. (De hecho,
@@ -391,7 +358,7 @@ inline void __BMP280_config::twi_write(TWI& out,
     if (out.error())
 	return;
 
-// 2. Enviar primero enviar ctrl_meas
+// 4. Enviar primero enviar ctrl_meas
     out.open(slave_address);
 
     out << ctrl_meas_address
@@ -402,75 +369,6 @@ inline void __BMP280_config::twi_write(TWI& out,
 }
 
 
-// Table 7
-inline constexpr void __BMP280_config::handheld_device_low_power(__BMP280_config& cfg)
-{
-    cfg.mode   = normal_mode;
-    cfg.osrs_p = oversampling_x16;
-    cfg.osrs_t = oversampling_x2;
-    cfg.filter = filter_coeff_4;
-    cfg.t_sb   = t_sb_62_5_ms; // ODR (see table 14)
-    // cfg.spi3w_en = lo define la clase: 0 para TWI y SPI, 1 para SPI_3_WIRE
-}
-
-// Table 7
-inline constexpr void __BMP280_config::handheld_device_dynamic(__BMP280_config& cfg)
-{
-    cfg.mode   = normal_mode;
-    cfg.osrs_p = oversampling_x4;
-    cfg.osrs_t = oversampling_x1;
-    cfg.filter = filter_coeff_16;
-    cfg.t_sb   = t_sb_0_5_ms; // ODR (see table 14)
-    // cfg.spi3w_en = lo define la clase: 0 para TWI y SPI, 1 para SPI_3_WIRE
-}
-
-
-// Table 7
-inline constexpr void __BMP280_config::weather_monitoring(__BMP280_config& cfg)
-{
-    cfg.mode =  force_mode;
-    cfg.osrs_p = oversampling_x1;
-    cfg.osrs_t = oversampling_x1;
-    cfg.filter = filter_off;
-    // cfg.t_sb = ¿Qué valor poner aqui en force_mode? Se supone que lo ignora
-    // cfg.spi3w_en = lo define la clase: 0 para TWI y SPI, 1 para SPI_3_WIRE
-}
-
-
-// Table 7
-inline constexpr void __BMP280_config::elevator_floor_change_detector(__BMP280_config& cfg)
-{
-    cfg.mode   = normal_mode;
-    cfg.osrs_p = oversampling_x4;
-    cfg.osrs_t = oversampling_x1;
-    cfg.filter = filter_coeff_4;
-    cfg.t_sb   = t_sb_125_ms; // ODR (see table 14)
-    // cfg.spi3w_en = lo define la clase: 0 para TWI y SPI, 1 para SPI_3_WIRE
-}
-
-// Table 7
-inline constexpr void __BMP280_config::drop_detection(__BMP280_config& cfg)
-{
-    cfg.mode   = normal_mode;
-    cfg.osrs_p = oversampling_x2;
-    cfg.osrs_t = oversampling_x1;
-    cfg.filter = filter_off;
-    cfg.t_sb   = t_sb_0_5_ms; // ODR (see table 14)
-    // cfg.spi3w_en = lo define la clase: 0 para TWI y SPI, 1 para SPI_3_WIRE
-}
-
-
-// Table 7
-inline constexpr void __BMP280_config::indoor_navigation(__BMP280_config& cfg)
-{
-    cfg.mode   = normal_mode;
-    cfg.osrs_p = oversampling_x16;
-    cfg.osrs_t = oversampling_x2;
-    cfg.filter = filter_coeff_16;
-    cfg.t_sb   = t_sb_0_5_ms; // ODR (see table 14)
-    // cfg.spi3w_en = lo define la clase: 0 para TWI y SPI, 1 para SPI_3_WIRE
-}
-
 
 
 
@@ -478,8 +376,8 @@ inline constexpr void __BMP280_config::indoor_navigation(__BMP280_config& cfg)
 // datasheet 4.3.6/7 y 3.9
 // According to 3.9: use a burst read to read from 0xF7 to 0xFC.
 struct __BMP280_temp_and_press{
-    uint32_t pressure;
-    int32_t temperature;
+    uint32_t upressure;	// uncompensated pressure
+    int32_t utemperature; // uncompensated temperature
 
 // Memory
     static constexpr Memory_type mem_type = Memory_type::read_and_write;
@@ -510,14 +408,6 @@ private:
     static constexpr int32_t press_max = 0xFFFF0;
 };
 
-inline void __BMP280_temp_and_press::make_bounded(__BMP280_temp_and_press& st)
-{
-    if (st.temperature <= temp_min || st.temperature >= temp_max)
-	st.temperature = 0;
-
-    if (st.pressure <= press_min || st.pressure >= press_max)
-	st.pressure = 0;
-}
 
 
 template <typename Ixtream>
@@ -655,8 +545,7 @@ protected:
 
     // No podemos inicializar el sensor hasta no haber configurado
     // SPI o TWI. Por eso no puedo hacer el init en el constructor.
-    // Devuelve 0 si todo va bien.
-    uint8_t init() { return 0;}
+    void init() { }
 
 // Data
     Calibration calibration_;
@@ -667,9 +556,11 @@ protected:
 
 
 // TODO: convertirla en template, para independizarlo del avr.
+// TODO: elegir buffer_size.
 class BMP280_TWI : public BMP280_base {
 public:
     using TWI = avr::TWI_master_ioxtream<avr::TWI_basic, TWI_buffer_size>;
+    using State = TWI::iostate;
 
     // TODO: esta es una función genérica: lee una zona de memoria en el
     // device conectado via TWI y la devuelve codificada en la estructura T
@@ -682,7 +573,7 @@ public:
     static TWI::iostate read_object(T& st)
     {
 	static_assert (is_readable(T::mem_type));
-    
+
 	TWI twi;
 	twi.open(slave_address);
 	 
@@ -721,13 +612,16 @@ public:
 
 
 
+// (RRR) Gestión de errores:
+//	 Voy a usar el equivalente a errno local a través de un state.
+//	 Todas las operaciones que puedan fallar modificarán el state,
+//	 quedando almacenado ahí el exito/fracaso de la operación.
+//
 // CONSTRUCTION
-    uint8_t init();
+    /// Inicializa el sensor. 
+    void init();
 
     /// Read the device id.
-    // TODO: devolver el iostate o memorizarlo mejor y devolver el número
-    // leido. Observar que si en la aplicación hay más dispositivos TWI si
-    // alguien más llama a TWI se perderá el estado. d
     void read(Id& id) {state_ = read_object(id);}
 
     /// The device is reset using the complete power-on-reset procedure.
@@ -753,10 +647,10 @@ public:
     bool no_response() const {return state_ == TWI::iostate::no_response;}
 
     // para depurar
-    TWI::iostate state() const {return state_;}
+    State state() const {return state_;}
 
 private:
-    TWI::iostate state_;
+    State state_;
 
     // TODO: el último bit se puede elegir:
     // Connecting SDO to GND results in slave address 1110110 (0x76);

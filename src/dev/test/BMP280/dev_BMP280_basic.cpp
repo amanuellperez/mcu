@@ -53,8 +53,7 @@ uint32_t __BMP280_calibration::compensate_P(const uint32_t& adc_P) const
 
 
 
-// TODO: códigos de error --> state!!!
-uint8_t BMP280_TWI::init()
+void BMP280_TWI::init()
 {
     BMP280_base::init();
 
@@ -62,35 +61,39 @@ uint8_t BMP280_TWI::init()
     state_ = read_object(id);
 
     if (error()){
-	return 1;
+	state_ = TWI::state();
+	return;
     }
 
     if (!id.is_valid()){
-	return 2;		// otro dispositivo!!!
+	state_ = TWI::state();
+	return;
     }
 
     reset();	// Los de Bosch en el ejemplo hacen un reset antes de leer
 		// los params.
-    if (error())
-	return 2;
+    if (error()){
+	state_ = TWI::state();
+	return;
+    }
 
     read_calibration_params();
 
     if (error()){
-	return 3;   
+	state_ = TWI::state();
+	return;
     }
 
-    return 0;
 }
 
 void __BMP280_temp_and_press::mem_to_struct(const std::byte* mem,
                                             __BMP280_temp_and_press& st)
 {
-    st.pressure = atd::concat_bytes<uint32_t>(mem[0], mem[1], mem[2]);
-    st.pressure >>= 4;
+    st.upressure = atd::concat_bytes<uint32_t>(mem[0], mem[1], mem[2]);
+    st.upressure >>= 4;
 
-    st.temperature = atd::concat_bytes<int32_t>(mem[3], mem[4], mem[5]);
-    st.temperature >>= 4;
+    st.utemperature = atd::concat_bytes<int32_t>(mem[3], mem[4], mem[5]);
+    st.utemperature >>= 4;
 }
 
 
@@ -113,6 +116,115 @@ void __BMP280_calibration::mem_to_struct(std::byte* mem,
     st.dig_P7 = atd::concat_bytes<int16_t>(mem[19], mem[18]);
     st.dig_P8 = atd::concat_bytes<int16_t>(mem[21], mem[20]);
     st.dig_P9 = atd::concat_bytes<int16_t>(mem[23], mem[22]);
+}
+
+
+
+// mem -> st
+void __BMP280_config::mem_to_struct(std::byte* mem, __BMP280_config& st)
+{
+    st.osrs_t   = mask_osrs_t(mem[0]);
+    st.osrs_p   = mask_osrs_p(mem[0]);
+    st.mode     = mask_mode(mem[0]);
+
+    st.t_sb     = mask_t_sb(mem[1]);
+    st.filter   = mask_filter(mem[1]);
+    st.spi3w_en = mask_spi3w_en(mem[1]);
+}
+
+
+
+// st -> mem
+void __BMP280_config::struct_to_mem(const __BMP280_config& st, std::byte* mem)
+{
+    mask_osrs_t(mem[0])   = st.osrs_t;
+    mask_osrs_p(mem[0])   = st.osrs_p;
+    mask_mode(mem[0])     = st.mode;
+
+    mask_t_sb(mem[1])     = st.t_sb;
+    mask_filter(mem[1])   = st.filter;
+    mask_spi3w_en(mem[1]) = st.spi3w_en;
+}
+
+
+// Table 7
+void __BMP280_config::handheld_device_low_power(__BMP280_config& cfg)
+{
+    cfg.mode   = normal_mode;
+    cfg.osrs_p = oversampling_x16;
+    cfg.osrs_t = oversampling_x2;
+    cfg.filter = filter_coeff_4;
+    cfg.t_sb   = t_sb_62_5_ms; // ODR (see table 14)
+    // cfg.spi3w_en = lo define la clase: 0 para TWI y SPI, 1 para SPI_3_WIRE
+}
+
+// Table 7
+void __BMP280_config::handheld_device_dynamic(__BMP280_config& cfg)
+{
+    cfg.mode   = normal_mode;
+    cfg.osrs_p = oversampling_x4;
+    cfg.osrs_t = oversampling_x1;
+    cfg.filter = filter_coeff_16;
+    cfg.t_sb   = t_sb_0_5_ms; // ODR (see table 14)
+    // cfg.spi3w_en = lo define la clase: 0 para TWI y SPI, 1 para SPI_3_WIRE
+}
+
+
+// Table 7
+void __BMP280_config::weather_monitoring(__BMP280_config& cfg)
+{
+    cfg.mode =  force_mode;
+    cfg.osrs_p = oversampling_x1;
+    cfg.osrs_t = oversampling_x1;
+    cfg.filter = filter_off;
+    // cfg.t_sb = ¿Qué valor poner aqui en force_mode? Se supone que lo ignora
+    // cfg.spi3w_en = lo define la clase: 0 para TWI y SPI, 1 para SPI_3_WIRE
+}
+
+
+// Table 7
+void __BMP280_config::elevator_floor_change_detector(__BMP280_config& cfg)
+{
+    cfg.mode   = normal_mode;
+    cfg.osrs_p = oversampling_x4;
+    cfg.osrs_t = oversampling_x1;
+    cfg.filter = filter_coeff_4;
+    cfg.t_sb   = t_sb_125_ms; // ODR (see table 14)
+    // cfg.spi3w_en = lo define la clase: 0 para TWI y SPI, 1 para SPI_3_WIRE
+}
+
+// Table 7
+void __BMP280_config::drop_detection(__BMP280_config& cfg)
+{
+    cfg.mode   = normal_mode;
+    cfg.osrs_p = oversampling_x2;
+    cfg.osrs_t = oversampling_x1;
+    cfg.filter = filter_off;
+    cfg.t_sb   = t_sb_0_5_ms; // ODR (see table 14)
+    // cfg.spi3w_en = lo define la clase: 0 para TWI y SPI, 1 para SPI_3_WIRE
+}
+
+
+// Table 7
+ void __BMP280_config::indoor_navigation(__BMP280_config& cfg)
+{
+    cfg.mode   = normal_mode;
+    cfg.osrs_p = oversampling_x16;
+    cfg.osrs_t = oversampling_x2;
+    cfg.filter = filter_coeff_16;
+    cfg.t_sb   = t_sb_0_5_ms; // ODR (see table 14)
+    // cfg.spi3w_en = lo define la clase: 0 para TWI y SPI, 1 para SPI_3_WIRE
+}
+
+
+
+void __BMP280_temp_and_press::make_bounded(__BMP280_temp_and_press& st)
+{
+    if (st.utemperature <= temp_min || st.utemperature >= temp_max)
+	st.utemperature = 0;
+
+    if (st.upressure <= press_min || st.upressure >= press_max)
+	st.upressure = 0;
 }
 
 }// namespace
