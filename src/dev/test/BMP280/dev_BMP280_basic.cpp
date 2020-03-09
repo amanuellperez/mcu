@@ -6,9 +6,11 @@
 namespace dev{
 
 
+// Output value of “5123” equals 51.23 DegC.  
 // From datasheet  (3.11.3)
 // This is magic!!! Copy it and hopes it works.
-int32_t __BMP280_calibration::compensate_T(const int32_t& adc_T)
+__BMP280_calibration::Temperature_type 
+	__BMP280_calibration::compensate_T(const int32_t& adc_T)
 {
     int32_t var1 =
         ((((adc_T >> 3) - ((int32_t)dig_T1 << 1))) * ((int32_t)dig_T2)) >> 11;
@@ -21,8 +23,10 @@ int32_t __BMP280_calibration::compensate_T(const int32_t& adc_T)
 
     int32_t T = (t_fine * 5 + 128) >> 8;
 
-    return T;
+    return Temperature_type::from_internal_value(T);
 }
+
+
 
 // From datasheet (3.11.3)
 // This is magic!!! Copy it and hopes it works.

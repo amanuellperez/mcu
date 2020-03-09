@@ -14,6 +14,7 @@ INCS= std_cstdio.h		\
 	std_config.h		\
 	std_cstddef.h		\
 	std_cstdint.h		\
+	std_cstdlib.h		\
 	std_ctime.h			\
 	std_initializer_list.h	\
 	std_ios_base.h		\
@@ -38,6 +39,7 @@ INCS= std_cstdio.h		\
 	chrono		\
 	cstddef 	\
 	cstdint		\
+	cstdlib		\
 	ctime		\
 	initializer_list	\
 	iomanip		\

@@ -41,7 +41,7 @@
 #include <avr_TWI.h>
 #include <cstddef>  // std::byte
 #include <atd_bit.h>
-
+#include <atd_decimal.h>
 
 constexpr uint8_t TWI_buffer_size = 100;
 
@@ -445,10 +445,10 @@ struct __BMP280_calibration{
     int16_t dig_P8;
     int16_t dig_P9;
 
+    using Temperature_type = atd::Decimal<int32_t, 2>;
 
     /// Returns temperature in DegC, resolution is 0.01 DegC. 
-    /// Output value of “5123” equals 51.23 DegC.  
-    int32_t compensate_T(const int32_t& adc_T);
+    Temperature_type compensate_T(const int32_t& adc_T);
 
     /// Returns pressure in Pa as unsigned 32 bit integer in Q24.8 format (24
     /// integer bits and 8 fractional bits).
@@ -506,6 +506,8 @@ public:
     using Status = __BMP280_status;
     using Config = __BMP280_config;
     using Temp_and_press = __BMP280_temp_and_press;
+    using Calibration = __BMP280_calibration;
+    using Temperature_type = Calibration::Temperature_type;
 
 // Calibration parameters (for debugging purpose)
     uint16_t dig_T1() const {return calibration_.dig_T1;}
@@ -524,7 +526,7 @@ public:
 
     /// Returns temperature in DegC, resolution is 0.01 DegC. 
     /// Output value of “5123” equals 51.23 DegC.  
-    int32_t compensate_T(const int32_t& adc_T)
+    Temperature_type compensate_T(const int32_t& adc_T)
     {return calibration_.compensate_T(adc_T);}
 
     /// Returns pressure in Pa as unsigned 32 bit integer in Q24.8 format (24
@@ -538,7 +540,6 @@ public:
 
 protected:
 // Types
-    using Calibration = __BMP280_calibration;
 
 // Construcción: esta clase es de implementación.
     BMP280_base() {}

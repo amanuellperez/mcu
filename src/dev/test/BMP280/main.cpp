@@ -381,10 +381,9 @@ void print(std::ostream& out, const Sensor::Temp_and_press& tp, Sensor& sensor)
     out << "Temperatura = " << tp.utemperature << '\n'
 	<< "Presión = " << tp.upressure << '\n'
 	// TODO: 
-	// T: 2144 --> 21.44 (<- quiero imprimir esto)
-	//	auto [T, Td] = T_as_Q(T_in_dC); <-- esto no es como chrono???
-	// P: 
-	<< "T comp. = " << sensor.compensate_T(tp.utemperature) << '\n';
+	// P: 2144 --> 21.44 (<- quiero imprimir esto)
+	//	auto [P, Pd] = T_as_Q(T_in_dC); <-- esto no es como chrono???
+	<< "T comp. = " << sensor.compensate_T(tp.utemperature) << " ºC\n";
     uint32_t press_q248 = sensor.compensate_P(tp.upressure);
     out << "P comp. = " << press_q248 
 			<< " (" << press_q248/25600 << " hPa)\n";

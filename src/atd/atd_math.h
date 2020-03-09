@@ -28,7 +28,7 @@
  *    07/03/2020 v0.0
  *
  ****************************************************************************/
-#include <stdlib.h>
+#include <cstdlib>
 #include <utility>
 
 namespace atd{

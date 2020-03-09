@@ -35,6 +35,7 @@
 
 #include <utility>
 #include "atd_math.h"
+#include <iostream>
 
 namespace atd{
 
@@ -176,6 +177,19 @@ inline Decimal<I, n> operator-(Decimal<I,n> a,
 {
     a -= b;
     return a;
+}
+
+
+/***************************************************************************
+ *			    FUNCIONES AYUDA
+ ***************************************************************************/
+template <typename Int, int ndigits>
+inline std::ostream& operator<<(std::ostream& out,
+                                const atd::Decimal<Int, ndigits>& d)
+{
+    auto [n, f] = d.value();
+
+    return out << n << '.' << f;
 }
 
 
