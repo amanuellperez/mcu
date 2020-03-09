@@ -52,6 +52,37 @@ std::pair<Int, Int> div(Int D, Int d)
 }
 
 
+/// Devuelve la potencia 10^n.
+template <int n, typename Int>
+inline constexpr Int ten_to_the()
+{
+    static_assert(n >= 0, "n must be greater than 0");
+
+    if constexpr (n == 0)
+	return Int{1};
+
+    else 
+	return Int{10} * ten_to_the<n - 1, Int>();
+}
+
+
+/// Devuelve los n mos significant digits de x.
+///
+/// Ejemplo:
+///	    int x = most_significant_digits<int, 2>(1234);
+///
+/// Devuelve x == 12;
+template <typename Int, int n>
+inline constexpr Int most_significant_digits(Int x)
+{
+    static_assert(n > 0, "n must be greater than 0");
+
+    while (x > ten_to_the<n, Int>())
+	x /= Int{10};
+
+    return x;
+}
+
 
 // TODO: borrar todo esto (07/03/20)
 ///// Resta a-b siempre que a sea mayor que b.

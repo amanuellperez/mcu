@@ -66,6 +66,17 @@ void test_decimal_value(Int n, Int f, Int fres)
 }
 
 
+template <typename Int, int ndigits>
+void test_decimal_from_internal_value(Int x, Int n, Int f)
+{
+    auto dec = atd::Decimal<int, ndigits>::from_internal_value(x);
+    auto [integer_part, fractional_part] = dec.value();
+
+    CHECK_TRUE(integer_part == n and
+	       fractional_part == f, alp::as_str() << "from_internal_value(" << n << ", " << f << ")");
+}
+
+
 void test_decimal()
 {
     test::interfaz("Decimal");
@@ -78,6 +89,13 @@ void test_decimal()
     test_decimal_construct<int, 2>(3, 14, 314);
     test_decimal_construct<int, 2>(3, 141, 314);
     test_decimal_construct<int, 2>(3, 1415, 314);
+
+    test_decimal_construct<int, 1>(3, 14, 31);
+    test_decimal_construct<int, 2>(3, 14, 314);
+    test_decimal_construct<int, 3>(3, 14, 3014);
+    test_decimal_construct<int, 4>(3, 14, 30014);
+    test_decimal_construct<int, 5>(3, 14, 300014);
+
 
 // normal -
     test_decimal_construct<int, 2>(-3, 01, -301);
@@ -95,6 +113,13 @@ void test_decimal()
     test_decimal_value<int, 2>(3, 10, 10);
     test_decimal_value<int, 2>(3, 141, 14);
     test_decimal_value<int, 2>(3, 1415, 14);
+
+// normal
+    test_decimal_from_internal_value<int, 1>(314, 31, 4);
+    test_decimal_from_internal_value<int, 2>(314, 3, 14);
+    test_decimal_from_internal_value<int, 3>(3014, 3, 14);
+    test_decimal_from_internal_value<int, 4>(30014, 3, 14);
+    test_decimal_from_internal_value<int, 5>(300014, 3, 14);
 
 // arithmetic
     atd::Decimal<int, 2> a{3,14};

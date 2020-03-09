@@ -34,36 +34,9 @@
  ****************************************************************************/
 
 #include <utility>
-#include "atd_math.h"	// atd::div
+#include "atd_math.h"
 
 namespace atd{
-
-// TODO: a math
-/// Devuelve la potencia 10^n.
-template <int n, typename Int>
-inline constexpr Int ten_to_the()
-{
-    static_assert(n >= 0, "n must be greater than 0");
-
-    if constexpr (n == 0)
-	return Int{1};
-
-    else 
-	return Int{10} * ten_to_the<n - 1, Int>();
-}
-
-
-// TODO: a math
-template <typename Int, int n>
-inline constexpr Int most_significant_digits(Int x)
-{
-    static_assert(n > 0, "n must be greater than 0");
-
-    while (x > ten_to_the<n, Int>())
-	x /= Int{10};
-
-    return x;
-}
 
 
 /*!
@@ -89,6 +62,20 @@ public:
 	    construct(integer_part, fractional_part);
     }
 
+    /// Construimos un número decimal usando su representación interna.
+    /// (RRR) Podríamos usar el constructor: 
+    ///
+    ///		    Decimal<int, 2> x{314};
+    ///
+    ///	      pero por defecto yo entiendo que estoy definiendo x == 314'00.
+    ///	      Para evitar ello defino from_internal_value(314); Queda clara
+    ///	      la intención:
+    /// 
+    ///		    auto x = Decimal<int, 2>::from_internal_value(314);
+    ///
+    ///	      definimos x == 3'14.
+    ///
+    static Decimal from_internal_value(rep x);
 
     Decimal(const Decimal&) = default;
     Decimal& operator=(const Decimal&) = default;
@@ -122,6 +109,17 @@ private:
     void construct_0digits(rep integer_part, rep fractional_part);
     void construct(rep integer_part, rep fractional_part);
 };
+
+
+
+template <typename I, int n>
+inline 
+Decimal<I,n> Decimal<I,n>::from_internal_value(rep x)
+{
+    Decimal dec;
+    dec.x_ = x;
+    return dec;
+}
 
 
 template <typename I, int n>
