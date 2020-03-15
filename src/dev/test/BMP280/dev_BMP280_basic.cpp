@@ -30,7 +30,7 @@ __BMP280_calibration::Temperature_type
 
 // From datasheet (3.11.3)
 // This is magic!!! Copy it and hopes it works.
-uint32_t __BMP280_calibration::compensate_P(const uint32_t& adc_P) const
+uint32_t __BMP280_calibration::compensate_P_(const uint32_t& adc_P) const
 {
     // Observar que usa t_fine!!! Hay que calcular primero compensate_T!!!
     int64_t var1 = ((int64_t)t_fine) - 128000;
@@ -44,7 +44,7 @@ uint32_t __BMP280_calibration::compensate_P(const uint32_t& adc_P) const
     var1 = ((int64_t{0x800000000000} + var1) * ((int64_t)dig_P1)) >> 33;
 
     if (var1 == 0)
-        return 0; // avoid exception caused by division by zero
+	return 0; // avoid exception caused by division by zero
 
     int64_t p    = 1048576 - adc_P;
     p    = (((p << 31) - var2) * 3125) / var1;

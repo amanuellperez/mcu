@@ -384,9 +384,28 @@ void print(std::ostream& out, const Sensor::Temp_and_press& tp, Sensor& sensor)
 	// P: 2144 --> 21.44 (<- quiero imprimir esto)
 	//	auto [P, Pd] = T_as_Q(T_in_dC); <-- esto no es como chrono???
 	<< "T comp. = " << sensor.compensate_T(tp.utemperature) << " ºC\n";
-    uint32_t press_q248 = sensor.compensate_P(tp.upressure);
+    uint32_t press_q248 = sensor.compensate_P_(tp.upressure);
     out << "P comp. = " << press_q248 
 			<< " (" << press_q248/25600 << " hPa)\n";
+
+//    out << "P comp. = " << sensor.compensate_P(tp.upressure)
+//			<< " Pa\n";
+
+    int32_t kk = press_q248/256;
+    out << "kk = " << kk << "\n";
+    auto kk2 = atd::Decimal<int32_t, 2>::from_internal_value(kk);
+    out << "value2 = " << kk2.internal_value() << "\n";
+    // std::pair<int32_t, int32_t> res = kk2.value();
+
+    int32_t xx = 93456;
+//    std::pair<int32_t, int32_t> res = 
+//		    atd::div<int32_t>(xx, 100);
+
+    // AQUI: si tipo == int llamar a div, en caso contrario llamar a ldiv!!!
+    // Meterlo en atd::div!!!
+    auto res = std::ldiv(xx, 100);
+    out << "kk2 = " << res.quot << '.' << res.rem << '\n';
+    // out << "kk2 = " << res.first << '.' << res.second << '\n';
 
 }
 

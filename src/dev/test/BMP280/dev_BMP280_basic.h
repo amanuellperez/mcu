@@ -446,6 +446,7 @@ struct __BMP280_calibration{
     int16_t dig_P9;
 
     using Temperature_type = atd::Decimal<int32_t, 2>;
+    using Pressure_type = atd::Decimal<uint32_t, 2>;
 
     /// Returns temperature in DegC, resolution is 0.01 DegC. 
     Temperature_type compensate_T(const int32_t& adc_T);
@@ -455,7 +456,12 @@ struct __BMP280_calibration{
     ///
     /// Output value of “24674867” represents 
     ///			24674867/256 = 96386.2 Pa = 963.862 hPa
-    uint32_t compensate_P(const uint32_t& adc_P) const;
+    Pressure_type compensate_P(const uint32_t& adc_P) const{
+	uint32_t pc = compensate_P_(adc_P/256u);
+	return Pressure_type::from_internal_value(pc);
+    }
+
+    uint32_t compensate_P_(const uint32_t& adc_P) const;
 
 
 // Memory
@@ -508,6 +514,7 @@ public:
     using Temp_and_press = __BMP280_temp_and_press;
     using Calibration = __BMP280_calibration;
     using Temperature_type = Calibration::Temperature_type;
+    using Pressure_type = Calibration::Pressure_type;
 
 // Calibration parameters (for debugging purpose)
     uint16_t dig_T1() const {return calibration_.dig_T1;}
@@ -535,8 +542,11 @@ public:
     /// Output value of “24674867” represents 
     ///			24674867/256 = 96386.2 Pa = 963.862 hPa
     /// Llamar primero a compensate_T y luego compensate_P <--- TODO: ordenar.
-    uint32_t compensate_P(const uint32_t& adc_P) const
+    Pressure_type compensate_P(const uint32_t& adc_P) const
     {return calibration_.compensate_P(adc_P);}
+
+    uint32_t compensate_P_(const uint32_t& adc_P) const
+    {return calibration_.compensate_P_(adc_P);}
 
 protected:
 // Types
