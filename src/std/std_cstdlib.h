@@ -39,9 +39,21 @@
 namespace STD{
     using ::div_t;
     using ::ldiv_t;
+//    using ::lldiv_t;
     
-    using ::div;
     using ::ldiv;
+//   using ::lldiv;
+
+    inline ::div_t div(int x, int y) 
+    { return ::div(x, y); }
+
+    inline ::ldiv_t div(long x, long y) 
+    {return ::ldiv(x ,y);}
+
+    //inline ::lldiv_t div(long long x, long long y) 
+    inline void div(long long x, long long y) 
+    {static_assert(true, "Not defined ::lldiv_t");}
+//    {return ::lldiv(x ,y);}
 
 }// namespace
 

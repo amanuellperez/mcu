@@ -32,25 +32,6 @@
 #include <utility>
 
 namespace atd{
-/*!
- *  \brief  Devuelve el cociente y el resto de dividir D/d
- *
- *  Es la función std::div pero en lugar de devolver una estructura, 
- *  devuelve directamente el cociente y el resto.
- *
- *  Ejemplo:
- *  \code 
- *	auto [q, r] = alp::div(20, 3);	// q = 6; r = 2
- *  \endcode
- */
-template <typename Int>
-// requires: is_integer(Int)
-std::pair<Int, Int> div(Int D, Int d)
-{
-    auto res = std::div(D, d);
-    return {res.quot, res.rem};
-}
-
 
 /// Devuelve la potencia 10^n.
 template <int n, typename Int>

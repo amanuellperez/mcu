@@ -36,15 +36,16 @@
 #include <utility>
 #include "atd_math.h"
 #include <iostream>
+#include <cstdlib>
 
 namespace atd{
 
 
 /*!
- *  \brief  Número decimal con ndigits cifras deccimales.
+ *  \brief  Número decimal con ndecimals cifras decimales.
  *
  */
-template <typename Int, int ndigits>
+template <typename Int, int ndecimals>
 class Decimal{
 public:
 // Types
@@ -53,10 +54,15 @@ public:
 // Construction
     Decimal() = default;
 
+    /// Definioms el número con la parte fraccionaria (si la tiene) igual a
+    /// cero.
+    Decimal(rep integer_part):Decimal{integer_part, rep{0}}
+    {}
+
     /// Definimos el número "integer_part'fractional_part". 
     Decimal(rep integer_part, rep fractional_part)
     {
-	if constexpr (ndigits == 0)
+	if constexpr (ndecimals == 0)
 	    construct_0digits(integer_part, fractional_part);
 
 	else
@@ -85,13 +91,16 @@ public:
     ~Decimal() = default;
 
 // Info
-    static constexpr int num_digits() {return ndigits;}
+    static constexpr int num_digits() {return ndecimals;}
     
     /// Devuelve el número como {integer_part, fractional_part}
-    std::pair<rep, rep> value() const 
-    { return atd::div(x_, ten_to_the_n); }
+    std::pair<rep, rep> value() const
+    {
+        auto [q, r] = std::div(x_, ten_to_the_n);
+        return std::pair<rep, rep>{q, r};
+    }
 
-// Observer.
+    // Observer.
     rep internal_value() const {return x_;}
 
 // Arithmetic
@@ -103,7 +112,7 @@ private:
     // vale 3.14
     rep x_;
 
-    static constexpr rep ten_to_the_n = ten_to_the<ndigits, rep>();
+    static constexpr rep ten_to_the_n = ten_to_the<ndecimals, rep>();
 
 
 // construcción
@@ -183,13 +192,20 @@ inline Decimal<I, n> operator-(Decimal<I,n> a,
 /***************************************************************************
  *			    FUNCIONES AYUDA
  ***************************************************************************/
-template <typename Int, int ndigits>
+template <typename Int, int ndecimals>
 inline std::ostream& operator<<(std::ostream& out,
-                                const atd::Decimal<Int, ndigits>& d)
+                                const atd::Decimal<Int, ndecimals>& d)
 {
     auto [n, f] = d.value();
 
-    return out << n << '.' << f;
+    out << n;
+
+    if constexpr (ndecimals > 0){
+	out.width(ndecimals);
+	out.fill('0');
+	out << '.' << std::right << f;
+    }
+    return out;
 }
 
 

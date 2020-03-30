@@ -27,13 +27,6 @@
 using namespace test;
 
 
-void test_div()
-{
-    test::interfaz("div");
-
-    auto [q, r] = atd::div(20, 3);
-    CHECK_TRUE(q == 6 and r == 2, "div(20/3)");
-}
 
 
 int main()
@@ -41,7 +34,6 @@ int main()
 try{
     test::header("atd_math");
 
-    test_div();
 
 }catch(std::exception& e)
 {

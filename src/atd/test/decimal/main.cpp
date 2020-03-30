@@ -137,6 +137,14 @@ void test_decimal()
     c = a - b;
     CHECK_TRUE(c.internal_value() == 314 - 245, "a - b");
 
+// operator<<
+    {
+    atd::Decimal<int, 2> a{922,06};
+    std::cout << "out:" << a << " =? 922.06\n";
+
+    atd::Decimal<int, 0> b{876};
+    std::cout << "out:" << b << " =? 876\n";
+    }
 }
 
 
