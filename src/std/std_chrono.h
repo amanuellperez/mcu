@@ -160,7 +160,8 @@ struct duration_values{
  *  \brief  duration
  *
  *  The tick period is the amount of time which occurs from one
- *  tick to the next, in units of seconds. 
+ *  tick to the next, in units of seconds. (= the number of seconds from one
+ *  tick to the next).
  *  Tenemos que: num_segundos = count() * period;
  */
 template <typename Rep, typename Period>
@@ -174,8 +175,7 @@ public:
     using rep    = Rep;
     using period = typename Period::type;
 
-    // construction
-    // ------------
+// construction
     constexpr duration() = default;
     
     // TODO: falta requirements.
@@ -193,10 +193,10 @@ public:
 
     ~duration() = default;
 
-    // observer
+// observer
     constexpr rep count() const { return num_ticks_;}
 
-    // arithmetic
+// arithmetic
     constexpr duration operator+() const;
     constexpr duration operator-() const;
 

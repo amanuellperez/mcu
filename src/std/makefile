@@ -4,6 +4,7 @@ SOURCES= std_basic_ios.cpp 	\
 		 std_ostream.cpp
 
 INCS= std_cstdio.h		\
+	std_cmath.h			\
 	std_sizeof_txt.h	\
 	std_algorithm.h		\
 	std_array.h			\
@@ -26,6 +27,7 @@ INCS= std_cstdio.h		\
 	std_istream.h		\
 	std_iterator.h		\
 	std_limits.h		\
+	std_numeric.h		\
 	std_ostream.h		\
 	std_ratio.h			\
 	std_streambuf.h		\
@@ -37,6 +39,7 @@ INCS= std_cstdio.h		\
 	array		\
 	bit			\
 	chrono		\
+	cmath		\
 	cstddef 	\
 	cstdint		\
 	cstdlib		\
@@ -49,6 +52,7 @@ INCS= std_cstdio.h		\
 	istream		\
 	iterator	\
 	limits		\
+	numeric		\
 	ostream		\
 	ratio		\
 	streambuf	\

@@ -6,6 +6,7 @@ DIRS = algorithm	\
 		cstddef		\
 		cstring		\
 		decimal		\
+		magnitude	\
 		math		\
 		register	\
 		time		\

@@ -13,6 +13,7 @@ INCS= atd_algorithm.h	\
 	atd_istream.h		\
 	atd_ostream.h		\
 	atd_math.h 			\
+	atd_ratio.h			\
 	atd_register.h		\
 	atd_time.h			\
 	atd_type_traits.h

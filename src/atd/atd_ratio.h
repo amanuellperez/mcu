@@ -47,7 +47,7 @@ template <typename T>
 struct is_ratio : std::false_type { };
 
 template <intmax_t N, intmax_t D>
-struct is_ratio<ratio<N, D>> : std::true_type { };
+struct is_ratio<std::ratio<N, D>> : std::true_type { };
 
 }// namespace
 
