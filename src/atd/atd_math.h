@@ -33,7 +33,7 @@
 
 namespace atd{
 
-/// Devuelve la potencia 10^n.
+/// Devuelve la potencia 10^n == ten_to_the<n, int>.
 template <int n, typename Int>
 inline constexpr Int ten_to_the()
 {
@@ -47,7 +47,7 @@ inline constexpr Int ten_to_the()
 }
 
 
-/// Devuelve los n mos significant digits de x.
+/// Devuelve los n most significant digits de x.
 ///
 /// Ejemplo:
 ///	    int x = most_significant_digits<int, 2>(1234);

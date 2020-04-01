@@ -22,7 +22,7 @@
  *
  *  - DESCRIPCION: Magnitudes definidas en el S.I.
  *
- *  - COMENTARIOS: 
+ *  - SEE: ver std::chrono, ver atd::decimal.
  *
  *  - HISTORIA:
  *    A.Manuel L.Perez
@@ -35,6 +35,8 @@
 #include <ratio>
 #include <type_traits>
 #include <numeric>
+
+#include <iostream>
 
 #include "atd_ratio.h"
 
@@ -155,7 +157,7 @@ constexpr inline To_magnitude
  *
  */
 template <typename Unit0, typename Rep0, typename Multiplier0>
-struct Magnitude{
+class Magnitude{
     // preconditions. TODO: con concepts esto se puede simplificar.
     static_assert(is_ratio<Multiplier0>::value,
                   "Multiplier must be a specialization of ratio");
@@ -180,7 +182,13 @@ public:
     constexpr explicit Magnitude(const Magnitude<Unit, Rep2, Multiplier2>& m)
 	: value_{magnitude_cast<Magnitude>(m).value()} {}
 
-    
+    template <typename Rep2, typename Multiplier2>
+    Magnitude& operator=(const Magnitude<Unit, Rep2, Multiplier2>& m)
+    {
+	value_ = magnitude_cast<Magnitude>(m).value();
+	return *this;
+    }
+
 // Observer
     constexpr Rep value() const {return value_;}
 
@@ -266,6 +274,8 @@ constexpr inline std::common_type_t<
     using CM = std::common_type_t<Magnitude<Unit, Rep1, Multiplier1>,
 				  Magnitude<Unit, Rep2, Multiplier2>>;
 
+std::cout << ">> a = " << a.value() << '\n';
+std::cout << ">> b = " << b.value() << '\n';
     return CM{CM{a}.value() + CM{b}.value()};
 }
 
@@ -365,6 +375,11 @@ constexpr inline bool operator>=(
 	    const Magnitude<Unit, Rep2, Multiplier2>& b)
 { return !(a < b);}
 
+
+// operator << 
+template <typename U, typename R, typename M>
+std::ostream& operator<<(std::ostream& out, const Magnitude<U, R, M>& m)
+{ return out << m.value(); }
 }// namespace atd
 
 

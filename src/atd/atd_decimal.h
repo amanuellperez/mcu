@@ -23,9 +23,7 @@
  *  - DESCRIPCION: Clase para manejar números decimales con un número fijo de
  *	cifras.
  *
- *  - TODO:
- *	+ que se puedan sumar números decimales con diferentes cifras.
- *	+ añadir multiplicar y dividir números decimales.
+ *  - SEE: ver std::chrono, ver atd::magnitude, tienen la misma estructura.
  *
  *  - HISTORIA:
  *    A.Manuel L.Perez
@@ -40,34 +38,74 @@
 
 namespace atd{
 
+template <typename Rep, int ndecimals>
+class Decimal;
+
+// Un número decimal lo estoy almacenando como x*10^(-n).
+// Queremos escribir x1*10^(-n1) como x2*10^(-n2):
+//
+//	    x2*10^(-n2) = x1*10^(-n1) ==> x2 = x1*10^(n2-n1)
+//
+// Fórmula que nos dice cómo calcular x2 a partir de x1.
+//
+template <typename To_decimal, typename Rep1, int n1>
+constexpr inline To_decimal decimal_cast(const Decimal<Rep1, n1>& d)
+{
+    constexpr int n2 = To_decimal::num_decimals;
+
+    if constexpr (n2 == n1)
+	return To_decimal{d.internal_value()};
+
+    else if constexpr (n2 > n1)
+        return To_decimal::from_internal_value(d.internal_value() *
+                                       ten_to_the<n2 - n1, typename To_decimal::Rep>());
+
+    else
+        return To_decimal::from_internal_value(d.internal_value() /
+			    ten_to_the<n1 - n2, typename To_decimal::Rep>());
+}
+
+
 
 /*!
- *  \brief  Número decimal con ndecimals cifras decimales.
+ *  \brief  Número decimal con num_decimals cifras decimales.
+ *
+ *  Lo que vamos a hacer es operar con números con un número fijo de
+ *  decimales. Esto es, si multiplicamos/dividimos números con 2 cifras
+ *  decimales el resultado tiene también 2 cifras decimales!!! (= FIX)
+ *
+ *  Internamente estamos escribiendo el número como potencia de 10:
+ *
+ *		    x*10^(-n)
+ *
+ *  siendo x = el valor que almacenamos, y 'n' el número de cifras decimales.
+ *
+ *  Ejemplo:
+ *	2.78 = 278*10^(-2)  ==> almacenamos 278, usamos n = 2.
  *
  */
-template <typename Int, int ndecimals>
+template <typename Rep0, int ndecimals0>
 class Decimal{
 public:
 // Types
-    using rep = Int; // representación. Copio la notación de chrono.
+    using Rep = Rep0; // representación. Copio la notación de chrono.
+    static constexpr int num_decimals = ndecimals0;
 
 // Construction
-    Decimal() = default;
+    constexpr Decimal() = default;
 
-    /// Definioms el número con la parte fraccionaria (si la tiene) igual a
+    /// Definimos el número con la parte fraccionaria (si la tiene) igual a
     /// cero.
-    Decimal(rep integer_part):Decimal{integer_part, rep{0}}
-    {}
+    constexpr explicit Decimal(Rep integer_part):Decimal{integer_part, Rep{0}}
+    { }
 
     /// Definimos el número "integer_part'fractional_part". 
-    Decimal(rep integer_part, rep fractional_part)
-    {
-	if constexpr (ndecimals == 0)
-	    construct_0digits(integer_part, fractional_part);
+    constexpr Decimal(Rep integer_part, Rep fractional_part);
 
-	else
-	    construct(integer_part, fractional_part);
-    }
+    template <typename Rep2, int n2>
+    constexpr explicit Decimal(const Decimal<Rep2, n2>& d)
+	:x_{decimal_cast<Decimal>(d).internal_value()} {}
+
 
     /// Construimos un número decimal usando su representación interna.
     /// (RRR) Podríamos usar el constructor: 
@@ -82,51 +120,62 @@ public:
     ///
     ///	      definimos x == 3'14.
     ///
-    static Decimal from_internal_value(rep x);
+    constexpr static Decimal from_internal_value(Rep x);
 
-    Decimal(const Decimal&) = default;
-    Decimal& operator=(const Decimal&) = default;
-
-
-    ~Decimal() = default;
 
 // Info
-    static constexpr int num_digits() {return ndecimals;}
     
     /// Devuelve el número como {integer_part, fractional_part}
-    std::pair<rep, rep> value() const
+    std::pair<Rep, Rep> value() const
     {
         auto [q, r] = std::div(x_, ten_to_the_n);
-        return std::pair<rep, rep>{q, r};
+        return std::pair<Rep, Rep>{q, r};
     }
 
-    // Observer.
-    rep internal_value() const {return x_;}
+// Observer
+    constexpr Rep internal_value() const {return x_;}
 
-// Arithmetic
-    Decimal& operator+=(const Decimal& a);
-    Decimal& operator-=(const Decimal& a);
+// Estructura algebraica de espacio vectorial
+    // Suma
+    constexpr Decimal& operator+=(const Decimal& a);
+    constexpr Decimal& operator-=(const Decimal& a);
+
+    // Producto por escalares
+    constexpr Decimal& operator*=(const Rep& s);
+    constexpr Decimal& operator/=(const Rep& s);
 
 private:
     // Ejemplo: si num_cifras == 2 y value_ = 314, entonces el número decimal
     // vale 3.14
-    rep x_;
+    Rep x_;
 
-    static constexpr rep ten_to_the_n = ten_to_the<ndecimals, rep>();
+    static constexpr Rep ten_to_the_n = ten_to_the<num_decimals, Rep>();
 
 
 // construcción
-    void construct_0digits(rep integer_part, rep fractional_part);
-    void construct(rep integer_part, rep fractional_part);
+    constexpr void construct_0digits(Rep integer_part, Rep fractional_part);
+    constexpr void construct(Rep integer_part, Rep fractional_part);
 };
+
+
+template <typename I, int n>
+inline constexpr 
+Decimal<I,n>::Decimal(Rep integer_part, Rep fractional_part)
+{
+    if constexpr (n == 0)
+	construct_0digits(integer_part, fractional_part);
+
+    else
+	construct(integer_part, fractional_part);
+}
 
 
 
 template <typename I, int n>
-inline 
-Decimal<I,n> Decimal<I,n>::from_internal_value(rep x)
+inline constexpr 
+Decimal<I,n> Decimal<I,n>::from_internal_value(Rep x)
 {
-    Decimal dec;
+    Decimal dec{};  // Tengo que escribirlo como dec{} para evitar un warning
     dec.x_ = x;
     return dec;
 }
@@ -134,14 +183,14 @@ Decimal<I,n> Decimal<I,n>::from_internal_value(rep x)
 
 template <typename I, int n>
 inline 
-void Decimal<I, n>::construct_0digits(rep integer_part, rep fractional_part)
+constexpr void Decimal<I, n>::construct_0digits(Rep integer_part, Rep fractional_part)
 { x_ = integer_part; }
 
 
 template <typename I, int n>
-void Decimal<I,n>::construct(rep integer_part, rep fractional_part)
+constexpr void Decimal<I,n>::construct(Rep integer_part, Rep fractional_part)
 {
-    fractional_part = most_significant_digits<rep, n>(fractional_part);
+    fractional_part = most_significant_digits<Rep, n>(fractional_part);
 
     x_ = integer_part * ten_to_the_n;
 
@@ -152,8 +201,9 @@ void Decimal<I,n>::construct(rep integer_part, rep fractional_part)
 	x_ -= fractional_part;
 }
 
+
 template <typename I, int n>
-inline Decimal<I,n>& Decimal<I,n>::operator+=(const Decimal& a)
+inline constexpr Decimal<I,n>& Decimal<I,n>::operator+=(const Decimal& a)
 {
     x_ += a.x_;
 
@@ -162,48 +212,183 @@ inline Decimal<I,n>& Decimal<I,n>::operator+=(const Decimal& a)
 
 
 template <typename I, int n>
-inline Decimal<I,n>& Decimal<I,n>::operator-=(const Decimal& a)
+inline constexpr Decimal<I,n>& Decimal<I,n>::operator-=(const Decimal& a)
 {
     x_ -= a.x_;
 
     return *this;
 }
 
-// TODO: que se puedan sumar dos decimales con números de cifras diferentes, y
-// tipos rep diferentes.
+
 template <typename I, int n>
-inline Decimal<I, n> operator+(Decimal<I,n> a, 
-			       const Decimal<I,n>& b)
+inline constexpr Decimal<I,n>& Decimal<I,n>::operator*=(const Rep& a)
 {
-    a += b;
-    return a;
+    x_ *= a;
+
+    return *this;
 }
 
 
 template <typename I, int n>
-inline Decimal<I, n> operator-(Decimal<I,n> a, 
-			       const Decimal<I,n>& b)
+inline constexpr Decimal<I,n>& Decimal<I,n>::operator/=(const Rep& a)
 {
-    a -= b;
-    return a;
+    x_ /= a;
+
+    return *this;
+}
+
+}// namespace atd
+
+
+// El common_type es el número con mayor cifras decimales.
+// Como suele ocurrir con este tipo de funciones, hay un problema con el
+// overflow. De momento voy a dar por supuesto que Rep es suficientemente
+// grande para que no haya overflow (que es lo que suponemos en la práctica).
+template <typename Rep1, int n1, typename Rep2, int n2>
+struct std::common_type<atd::Decimal<Rep1, n1>, atd::Decimal<Rep2, n2>>{
+
+    using Rep = std::common_type_t<Rep1, Rep2>;
+    static constexpr int n = std::max(n1, n2);
+
+    using type = atd::Decimal<Rep, n>;
+};
+
+
+
+namespace atd{
+
+// Estructura algebráica de espacio vectorial
+// ------------------------------------------
+template <typename R1, int n1, typename R2, int n2>
+constexpr inline std::common_type_t<Decimal<R1, n1>, Decimal<R2, n2>>
+    operator+(const Decimal<R1,n1>& a, const Decimal<R2,n2>& b)
+{
+    using CT = std::common_type_t<Decimal<R1, n1>, Decimal<R2, n2>>;
+
+    return CT::from_internal_value(CT{a}.internal_value() +
+                                   CT{b}.internal_value());
 }
 
 
-/***************************************************************************
- *			    FUNCIONES AYUDA
- ***************************************************************************/
-template <typename Int, int ndecimals>
-inline std::ostream& operator<<(std::ostream& out,
-                                const atd::Decimal<Int, ndecimals>& d)
+template <typename R1, int n1, typename R2, int n2>
+constexpr inline std::common_type_t<Decimal<R1, n1>, Decimal<R2, n2>>
+    operator-(const Decimal<R1,n1>& a, const Decimal<R2,n2>& b)
+{
+    using CT = std::common_type_t<Decimal<R1, n1>, Decimal<R2, n2>>;
+
+    return CT::from_internal_value(CT{a}.internal_value() -
+                                   CT{b}.internal_value());
+}
+
+
+// Multiplicación:  x1*10^(-n1) * x2*10^(-n2) = (x1*x2)*10^-(n1+n2)
+// TODO: ¿qué pasa con overflow?
+template <typename R1, int n1, typename R2, int n2>
+constexpr inline Decimal<std::common_type_t<R1, R2>, n1 + n2>
+    operator*(const Decimal<R1,n1>& a, const Decimal<R2,n2>& b)
+{
+    // El resultado de la operación  tendrá n1 + n2 cifras decimales
+    using Res = Decimal<std::common_type_t<R1, R2>, n1 + n2>;
+
+    return Res::from_internal_value(a.internal_value() * b.internal_value());
+}
+
+
+// División:  x1*10^(-n1) / x2*10^(-n2) = (x1*10^n2/x2)*10^-n1
+// TODO: ¿qué pasa con overflow?
+template <typename R1, int n1, typename R2, int n2>
+constexpr inline Decimal<R1, n1>
+    operator/(const Decimal<R1,n1>& a, const Decimal<R2,n2>& b)
+{
+    using Rep = std::common_type_t<R1, R2>;
+
+    return Decimal<R1,n1>::from_internal_value(
+	(a.internal_value() * ten_to_the<n2, Rep>())/b.internal_value());
+}
+
+
+template <typename R1, int n1, typename R2>
+constexpr inline Decimal<R1, n1> operator*(const R2& a, Decimal<R1, n1> v)
+{
+    v *= a;
+    return v;
+}
+
+
+template <typename R1, int n1, typename R2>
+constexpr inline Decimal<R1, n1> operator*(Decimal<R1, n1> v, const R2& a)
+{
+    return a*v;
+}
+
+template <typename R1, int n1, typename R2>
+constexpr inline Decimal<R1, n1> operator/(Decimal<R1, n1> v, const R2& a)
+{
+    v /= a;
+    return v;
+}
+
+
+
+// Comparisons
+// -----------
+template <typename R1, int n1, typename R2, int n2>
+constexpr inline 
+bool operator==(const Decimal<R1, n1>& a, const Decimal<R2, n2>& b)
+{
+    using CT = std::common_type_t<Decimal<R1, n1>, Decimal<R2, n2>>;
+
+    return CT{a}.internal_value() == CT{b}.internal_value();
+}
+
+template <typename R1, int n1, typename R2, int n2>
+constexpr inline 
+bool operator!=(const Decimal<R1, n1>& a, const Decimal<R2, n2>& b)
+{ return !(a == b); }
+
+
+template <typename R1, int n1, typename R2, int n2>
+constexpr inline 
+bool operator<(const Decimal<R1, n1>& a, const Decimal<R2, n2>& b)
+{
+    using CT = std::common_type_t<Decimal<R1, n1>, Decimal<R2, n2>>;
+
+    return CT{a}.internal_value() < CT{b}.internal_value();
+}
+
+template <typename R1, int n1, typename R2, int n2>
+constexpr inline 
+bool operator<=(const Decimal<R1, n1>& a, const Decimal<R2, n2>& b)
+{ return !(b < a); }
+
+
+template <typename R1, int n1, typename R2, int n2>
+constexpr inline 
+bool operator>(const Decimal<R1, n1>& a, const Decimal<R2, n2>& b)
+{ return (b < a); }
+
+
+template <typename R1, int n1, typename R2, int n2>
+constexpr inline 
+bool operator>=(const Decimal<R1, n1>& a, const Decimal<R2, n2>& b)
+{ return !(a < b); }
+
+
+// Serialización
+// -------------
+template <typename Rep, int ndecimals>
+std::ostream& operator<<(std::ostream& out,
+                                const atd::Decimal<Rep, ndecimals>& d)
 {
     auto [n, f] = d.value();
-
     out << n;
 
     if constexpr (ndecimals > 0){
+	out << '.';
+
 	out.width(ndecimals);
 	out.fill('0');
-	out << '.' << std::right << f;
+	out << std::right << f;
     }
     return out;
 }
