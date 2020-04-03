@@ -45,9 +45,9 @@ namespace atd{
 // Unit
 // ----
 /// Unidades en sistema MKS
-template <int M, int K, int S>
+template <int M, int Kg, int S, int Kelvin>
 struct Unit{
-    enum {m = M, kg = K, s = S};
+    enum {m = M, kg = Kg, s = S, K = Kelvin};
 };
 
 // Operaciones
@@ -56,7 +56,9 @@ template <typename U1, typename U2>
 struct __Unit_plus{
     using type = Unit<U1::m + U2::m,
 		      U1::kg + U2::kg,
-		      U1::s + U2::s>;
+		      U1::s + U2::s,
+		      U1::K + U2::K
+		     >;
 };
 
 template <typename U1, typename U2>
@@ -67,7 +69,9 @@ template <typename U1, typename U2>
 struct __Unit_minus{
     using type = Unit<U1::m - U2::m,
 		      U1::kg - U2::kg,
-		      U1::s - U2::s>;
+		      U1::s - U2::s,
+		      U1::K - U2::K
+		     >;
 };
 
 template <typename U1, typename U2>
@@ -75,56 +79,65 @@ using Unit_minus = typename __Unit_minus<U1, U2>::type;
 
 
 // Different types of units
-using Units_meter    = Unit<1, 0, 0>;
-using Units_kilogram = Unit<0, 1, 0>;
-using Units_pascal   = Unit<-1, 1, -2>;
+using Units_meter    = Unit< 1, 0,  0,  0>;
+using Units_kilogram = Unit< 0, 1,  0,  0>;
+using Units_pascal   = Unit<-1, 1, -2,  0>;
+using Units_kelvin   = Unit< 0, 0,  0,  1>;
 
-
-
-template <typename Unit0, typename Rep0, typename Multiplier0>
-struct Magnitude;
+template <typename Unit0,
+          typename Rep0,
+          typename Multiplier0, typename Different = std::ratio<0>>
+class Magnitude;
 
 // --------------
 // magnitude_cast
 // --------------
-// El número de units medidos por una magnitud viene dado por:
+// La medida en el sistema internacional será:
 //
-//		num_units = value() * multiplier;
+//		SI = value() * multiplier + displacement;
 //
 // Si queremos convertir una magnitud en otra tiene que cumplirse que:
-//	num_units = value1() * multiplier1 = value2() * multiplier2;
+//	SI = value1() * m1 + d1 = value2() * m2 + d2;
 //
 // despejando:
-//	value2() = value1() * multiplier1 / multiplier2;
 //
-//  Lo que hacemos es calcular estáticamente CF = multiplier1 / multiplier2 
-//  y operar.
+//	value2() = value1() * m1 / m2 + (d1 - d2) * m1 / m2;
+//
+// Llamemos q = m1 / m2, y d = (d1 - d2) * m1 / m2;
+//
+//  Lo que hacemos es calcular estáticamente q = m1 / m2 y operar.
 template <typename To_magnitude, 
-	  typename Unit, typename Rep, typename Multiplier>
+	  typename Unit, typename Rep, typename Multiplier, typename Displacement>
 constexpr inline To_magnitude
-		    magnitude_cast(const Magnitude<Unit, Rep, Multiplier>& m)
+	magnitude_cast(const Magnitude<Unit, Rep, Multiplier, Displacement>& m)
 {
-    constexpr std::ratio_divide<Multiplier, typename To_magnitude::Multiplier> CF;
     using CR = std::common_type_t<typename To_magnitude::Rep, Rep>;
 
-    if constexpr (CF.num == 1 and CF.den == 1)	
-        return To_magnitude(static_cast<typename To_magnitude::Rep>(m.value()));
-    
-    else if (CF.num != 1 and CF.den == 1) 
-	return To_magnitude(
-	    static_cast<typename To_magnitude::Rep>(
-		    static_cast<CR>(m.value()) * static_cast<CR>(CF.num))
-			  );
+    using Q = std::ratio_divide<Multiplier, typename To_magnitude::Multiplier>;
+    using DIFF = std::ratio_subtract<Displacement, typename To_magnitude::Displacement>;
+    using Q_D = std::ratio_multiply<Q, DIFF>; // = ratio Q_D = (d1 - d2) * m1 / m2;
+    constexpr typename To_magnitude::Rep D{Q_D::num/Q_D::den};// Rep D = (d1 - d2) * m1 / m2;
 
-    else if (CF.num == 1 and CF.den != 1)
+    if constexpr (Q::num == 1 and Q::den == 1)	
+        return To_magnitude(static_cast<typename To_magnitude::Rep>(m.value()) + D);
+    
+    else if (Q::num != 1 and Q::den == 1) {
+        return To_magnitude(
+	    static_cast<typename To_magnitude::Rep>(
+		    static_cast<CR>(m.value()) * static_cast<CR>(Q::num) + D)
+			  );
+    }
+
+    else if (Q::num == 1 and Q::den != 1)
 	return To_magnitude(static_cast<typename To_magnitude::Rep>(
-		    static_cast<CR>(m.value()) / static_cast<CR>(CF.den)));
+		    static_cast<CR>(m.value()) / static_cast<CR>(Q::den)) + D);
 
     else
 	return To_magnitude(static_cast<typename To_magnitude::Rep>(
 	    static_cast<CR>(
-	    m.value()) * static_cast<CR>(CF.num) / static_cast<CR>(CF.den)));
+	    m.value()) * static_cast<CR>(Q::num) / static_cast<CR>(Q::den)) + D);
 }
+
 
 
 
@@ -143,33 +156,49 @@ constexpr inline To_magnitude
  *  Rep: tipo usado para almacenar los datos. En un ordenador será típicamente
  *	 double pero en un microcontrolador será atd::Decimal.
  *
- *  Multiplier: múltiplo (o submúltiplo) de la unidad que usamos. Es de tipo
- *	      std::ratio.
+ *  Multiplier: factor de conversión = SI/unidades. Es de tipo std::ratio.
+ *		Ejemplo: para definir cm ==> multiplier = 1m/100cm = 1:100.
+ *
+ *  Displacement: La mayoría de las unidades que usamos son múltiplos unas de
+ *  otras (mm, m, km se diferencian solo en un factor de escala). Sin embargo
+ *  las temperaturas son de la forma K = m*T + d, donde K sería la temperatura
+ *  en Kelvins y T puede ser Celsius, Fahrenheit.... Para poder manejar
+ *  temperaturas necesito este 'displacement'.
+ *
  *
  *  Ejemplos
  *  --------
- *	Ejemplo		    |	unit	 | múltiplo
- *  ------------------------+------------+-----------
- *  2.4 km = 2.4 * 1000*m	longitud    1000
- *  2.4  m = 2.4 *    1*m	long.	    1
- *  2.4 mm = 2.4 * 0.001*m	long.	    1:1000
+ *	Ejemplo			|   unit    | múltiplo	| displacement
+ *  ----------------------------+-----------+-------------------------------
+ *  2.4 km = 2.4 * 1000  m	| longitud  | 1000	|   0
+ *  2.4  m = 2.4 *    1  m	| long.	    | 1		|   0
+ *  2.4 mm = 2.4 * 0.001 m	| long.	    | 1:100	|   0
  *
+ *  20 ºC  = 20 * 1 + 273'15 K	| temper.   | 1		|   27315:100
+ *  52 ºF  = 52*5/9 + 45967/180K| temper.   | 5:9	|   45967:180
  *
  */
-template <typename Unit0, typename Rep0, typename Multiplier0>
-class Magnitude{
+template <typename Unit0,
+          typename Rep0,
+          typename Multiplier0, typename Displacement0>
+class Magnitude {
     // preconditions. TODO: con concepts esto se puede simplificar.
     static_assert(is_ratio<Multiplier0>::value,
                   "Multiplier must be a specialization of ratio");
     static_assert(Multiplier0::num > 0, "Multiplier must be positive");
 
+    static_assert(is_ratio<Displacement0>::value,
+                  "Displacement must be a specialization of ratio");
+    static_assert(Displacement0::num >= 0, "Displacement must be positive");
+
 public:
 // Types
-    using Unit     = Unit0;
-    using Rep      = Rep0;
-    using Multiplier = Multiplier0;
+    using Unit         = Unit0;
+    using Rep          = Rep0;
+    using Multiplier   = Multiplier0;
+    using Displacement = Displacement0;
 
-// Construction
+    // Construction
     constexpr Magnitude() = default;
 
     // TODO: poner como requirement que Rep2 se pueda convertir en Rep
@@ -177,13 +206,12 @@ public:
     constexpr explicit Magnitude(const Rep2& value0)
 	: value_{static_cast<Rep>(value0)} {}
 
-
-    template <typename Rep2, typename Multiplier2>
-    constexpr explicit Magnitude(const Magnitude<Unit, Rep2, Multiplier2>& m)
+    template <typename Rep2, typename M2, typename D2>
+    constexpr Magnitude(const Magnitude<Unit, Rep2, M2, D2>& m)
 	: value_{magnitude_cast<Magnitude>(m).value()} {}
 
-    template <typename Rep2, typename Multiplier2>
-    Magnitude& operator=(const Magnitude<Unit, Rep2, Multiplier2>& m)
+    template <typename Rep2, typename M2, typename D2>
+    Magnitude& operator=(const Magnitude<Unit, Rep2, M2, D2>& m)
     {
 	value_ = magnitude_cast<Magnitude>(m).value();
 	return *this;
@@ -206,35 +234,35 @@ private:
     Rep value_;
 };
 
-template <typename U, typename R, typename M>
-inline constexpr Magnitude<U, R, M>& 
-		    Magnitude<U, R, M>::operator+=(const Magnitude<U, R, M>& x)
+template <typename U, typename R, typename M, typename D>
+inline constexpr Magnitude<U, R, M, D>& 
+	    Magnitude<U, R, M, D>::operator+=(const Magnitude<U, R, M, D>& x)
 {
     value_ += x.value();
     return *this;
 }
 
 
-template <typename U, typename R, typename M>
-inline constexpr Magnitude<U, R, M>& 
-		    Magnitude<U,R,M>::operator-=(const Magnitude<U, R, M>& x)
+template <typename U, typename R, typename M, typename D>
+inline constexpr Magnitude<U, R, M, D>& 
+		Magnitude<U,R,M, D>::operator-=(const Magnitude<U, R, M, D>& x)
 {
     value_ -= x.value();
     return *this;
 }
 
 
-template <typename U, typename Rep, typename M>
-inline constexpr Magnitude<U, Rep, M>& 
-				Magnitude<U, Rep, M>::operator*=(const Rep& a)
+template <typename U, typename Rep, typename M, typename D>
+inline constexpr Magnitude<U, Rep, M, D>& 
+			Magnitude<U, Rep, M, D>::operator*=(const Rep& a)
 {
     value_ *= a;
     return *this;
 }
 
-template <typename U, typename Rep, typename M>
-inline constexpr Magnitude<U, Rep, M>& 
-				Magnitude<U, Rep, M>::operator/=(const Rep& a)
+template <typename U, typename Rep, typename M, typename D>
+inline constexpr Magnitude<U, Rep, M, D>& 
+			    Magnitude<U, Rep, M, D>::operator/=(const Rep& a)
 {
     value_ /= a;
     return *this;
@@ -242,19 +270,61 @@ inline constexpr Magnitude<U, Rep, M>&
 
 }// namespace atd
 
-template <typename Unit, typename Rep1, typename Multiplier1,
-			 typename Rep2, typename Multiplier2>
-struct std::common_type<atd::Magnitude<Unit, Rep1, Multiplier1>,
-		   atd::Magnitude<Unit, Rep2, Multiplier2>>{
 
-    using Rep = std::common_type_t<Rep1, Rep2>;
-    
-    static constexpr auto num = std::gcd(Multiplier1::num, Multiplier2::num);
-    static constexpr auto den = std::lcm(Multiplier1::den, Multiplier2::den);
+// if (Magnitude1::Displacement == Magnitude2::Displacement)
+//	type = common_type_equal_displacement(Magnitude1, Magnitude2);
+//  else
+//	type = common_type_different_displacement(Magnitude1, Magnitude2);
+template <typename Mangitude1, typename Mangitude2, 
+	  bool equal_displacement = true>
+struct __Magnitud_common_type{
+    using Unit = typename Mangitude1::Unit;
+    using R1   = typename Mangitude1::Rep;
+    using M1   = typename Mangitude1::Multiplier;
+    using D1   = typename Mangitude1::Displacement;
+
+    using Unit2 = typename Mangitude2::Unit;
+    using R2    = typename Mangitude2::Rep;
+    using M2    = typename Mangitude2::Multiplier;
+    using D2    = typename Mangitude2::Displacement;
+
+    static_assert(std::is_same_v<Unit, Unit2>);
+
+    using Rep = std::common_type_t<R1, R2>;
+
+    // Multiplier = gcd(Multiplier1, Multiplier2);
+    static constexpr auto num = std::gcd(M1::num, M2::num);
+    static constexpr auto den = std::lcm(M1::den, M2::den);
 
     using Multiplier = std::ratio<num, den>;
+    using type = atd::Magnitude<Unit, Rep, Multiplier, D1>;
+};
 
-    using type = atd::Magnitude<Unit, Rep, Multiplier>;
+// caso raro (para temperaturas que se conviertan de ºC a ºF)
+// En este caso no me rompo los cuernos y hago que el tipo común sea la
+// unidad del sistema internacional
+template <typename Mangitude1, typename Mangitude2>
+struct __Magnitud_common_type<Mangitude1, Mangitude2, false>{
+    using Unit = typename Mangitude1::Unit;
+    using Unit2 = typename Mangitude2::Unit;
+    static_assert(std::is_same_v<Unit, Unit2>);
+
+    using R1 = typename Mangitude1::Rep;
+    using R2 = typename Mangitude2::Rep;
+    using Rep = std::common_type_t<R1, R2>;
+
+    using type = atd::Magnitude<Unit, Rep, std::ratio<1>, std::ratio<0>>;
+};
+
+
+template <typename Unit, typename R1, typename M1, typename D1,
+			 typename R2, typename M2, typename D2>
+struct std::common_type<atd::Magnitude<Unit, R1, M1, D1>,
+		   atd::Magnitude<Unit, R2, M2, D2>>
+{
+    using type = typename 
+        __Magnitud_common_type<atd::Magnitude<Unit, R1, M1, D1>,
+                               atd::Magnitude<Unit, R2, M2, D2>>::type;
 };
 
 
@@ -263,52 +333,51 @@ namespace atd{
 // ---------------------
 // non-member arithmetic
 // ---------------------
-template <typename Unit, typename Rep1, typename Multiplier1,
-			 typename Rep2, typename Multiplier2>
+template <typename Unit, typename Rep1, typename Multiplier1, typename D1,
+			 typename Rep2, typename Multiplier2, typename D2>
 constexpr inline std::common_type_t<
-	    Magnitude<Unit, Rep1, Multiplier1>,
-	    Magnitude<Unit, Rep2, Multiplier2>>
-    operator+(const Magnitude<Unit, Rep1, Multiplier1>& a,
-	      const Magnitude<Unit, Rep2, Multiplier2>& b)
+	    Magnitude<Unit, Rep1, Multiplier1, D1>,
+	    Magnitude<Unit, Rep2, Multiplier2, D2>>
+    operator+(const Magnitude<Unit, Rep1, Multiplier1, D1>& a,
+	      const Magnitude<Unit, Rep2, Multiplier2, D2>& b)
 {
-    using CM = std::common_type_t<Magnitude<Unit, Rep1, Multiplier1>,
-				  Magnitude<Unit, Rep2, Multiplier2>>;
+    using CM = std::common_type_t<Magnitude<Unit, Rep1, Multiplier1, D1>,
+				  Magnitude<Unit, Rep2, Multiplier2, D2>>;
 
-std::cout << ">> a = " << a.value() << '\n';
-std::cout << ">> b = " << b.value() << '\n';
     return CM{CM{a}.value() + CM{b}.value()};
 }
 
 
-template <typename Unit, typename Rep1, typename Multiplier1,
-			 typename Rep2, typename Multiplier2>
-constexpr inline std::common_type_t<
-	    Magnitude<Unit, Rep1, Multiplier1>,
-	    Magnitude<Unit, Rep2, Multiplier2>>
-    operator-(const Magnitude<Unit, Rep1, Multiplier1>& a,
-	      const Magnitude<Unit, Rep2, Multiplier2>& b)
+template <typename Unit, typename Rep1, typename Multiplier1, typename D1,
+			 typename Rep2, typename Multiplier2, typename D2>
+constexpr inline std::common_type_t <
+				    Magnitude<Unit, Rep1, Multiplier1, D1>,
+				    Magnitude<Unit, Rep2, Multiplier2, D2>
+				    >
+    operator-(const Magnitude<Unit, Rep1, Multiplier1, D1>& a,
+	      const Magnitude<Unit, Rep2, Multiplier2, D2>& b)
 {
-    using CM = std::common_type_t<Magnitude<Unit, Rep1, Multiplier1>,
-				  Magnitude<Unit, Rep2, Multiplier2>>;
+    using CM = std::common_type_t<Magnitude<Unit, Rep1, Multiplier1, D1>,
+				  Magnitude<Unit, Rep2, Multiplier2, D2>>;
 
     return CM{CM{a}.value() - CM{b}.value()};
 }
 
 
 
-template <typename Unit, typename Rep1, typename Multiplier,
+template <typename Unit, typename Rep1, typename M, typename D,
 			 typename Rep2>
-constexpr inline Magnitude<Unit, Rep1, Multiplier>
-    operator*(const Rep2& a, Magnitude<Unit, Rep1, Multiplier> v)
+constexpr inline Magnitude<Unit, Rep1, M, D>
+    operator*(const Rep2& a, Magnitude<Unit, Rep1, M, D> v)
 {
     v *= a;
     return v;
 }
 
-template <typename Unit, typename Rep1, typename Multiplier,
+template <typename Unit, typename Rep1, typename M, typename D,
 			 typename Rep2>
-constexpr inline Magnitude<Unit, Rep1, Multiplier>
-    operator*(Magnitude<Unit, Rep1, Multiplier> v, const Rep2& a)
+constexpr inline Magnitude<Unit, Rep1, M, D>
+    operator*(Magnitude<Unit, Rep1, M, D> v, const Rep2& a)
 {
     return a*v;
 }
@@ -318,70 +387,71 @@ constexpr inline Magnitude<Unit, Rep1, Multiplier>
 // -----------
 // Comparisons
 // -----------
-template <typename Unit, typename Rep1, typename Multiplier1,
-			 typename Rep2, typename Multiplier2>
+template <typename Unit, typename Rep1, typename M1, typename D1,
+			 typename Rep2, typename M2, typename D2>
 constexpr inline bool operator==(
-	    const Magnitude<Unit, Rep1, Multiplier1>& a,
-	    const Magnitude<Unit, Rep2, Multiplier2>& b)
+	    const Magnitude<Unit, Rep1, M1, D1>& a,
+	    const Magnitude<Unit, Rep2, M2, D2>& b)
 {
-    using CT = std::common_type_t<Magnitude<Unit, Rep1, Multiplier1>,
-                                  Magnitude<Unit, Rep2, Multiplier2>>;
+    using CT = std::common_type_t<Magnitude<Unit, Rep1, M1, D1>,
+                                  Magnitude<Unit, Rep2, M2, D2>>;
 
     return CT{a}.value() == CT{b}.value();
 }
 
-template <typename Unit, typename Rep1, typename Multiplier1,
-			 typename Rep2, typename Multiplier2>
+template <typename Unit, typename Rep1, typename M1, typename D1,
+			 typename Rep2, typename M2, typename D2>
 constexpr inline bool operator!=(
-	    const Magnitude<Unit, Rep1, Multiplier1>& a,
-	    const Magnitude<Unit, Rep2, Multiplier2>& b)
+	    const Magnitude<Unit, Rep1, M1, D1>& a,
+	    const Magnitude<Unit, Rep2, M2, D2>& b)
 { return !(a == b); }
 
-template <typename Unit, typename Rep1, typename Multiplier1,
-			 typename Rep2, typename Multiplier2>
+template <typename Unit, typename Rep1, typename M1, typename D1,
+			 typename Rep2, typename M2, typename D2>
 constexpr inline bool operator<(
-	    const Magnitude<Unit, Rep1, Multiplier1>& a,
-	    const Magnitude<Unit, Rep2, Multiplier2>& b)
+	    const Magnitude<Unit, Rep1, M1, D1>& a,
+	    const Magnitude<Unit, Rep2, M2, D2>& b)
 {
-    using CT = std::common_type_t<Magnitude<Unit, Rep1, Multiplier1>,
-                                  Magnitude<Unit, Rep2, Multiplier2>>;
+    using CT = std::common_type_t<Magnitude<Unit, Rep1, M1, D1>,
+                                  Magnitude<Unit, Rep2, M2, D2>>;
 
     return CT{a}.value() < CT{b}.value();
 }
 
 
-template <typename Unit, typename Rep1, typename Multiplier1,
-			 typename Rep2, typename Multiplier2>
+template <typename Unit, typename Rep1, typename M1, typename D1,
+			 typename Rep2, typename M2, typename D2>
 constexpr inline bool operator<=(
-	    const Magnitude<Unit, Rep1, Multiplier1>& a,
-	    const Magnitude<Unit, Rep2, Multiplier2>& b)
+	    const Magnitude<Unit, Rep1, M1, D1>& a,
+	    const Magnitude<Unit, Rep2, M2, D2>& b)
 { return !(b < a);}
 
 
 
-template <typename Unit, typename Rep1, typename Multiplier1,
-			 typename Rep2, typename Multiplier2>
+template <typename Unit, typename Rep1, typename M1, typename D1,
+			 typename Rep2, typename M2, typename D2>
 constexpr inline bool operator>(
-	    const Magnitude<Unit, Rep1, Multiplier1>& a,
-	    const Magnitude<Unit, Rep2, Multiplier2>& b)
+	    const Magnitude<Unit, Rep1, M1, D1>& a,
+	    const Magnitude<Unit, Rep2, M2, D2>& b)
 { return b < a;}
 
 
 
-template <typename Unit, typename Rep1, typename Multiplier1,
-			 typename Rep2, typename Multiplier2>
+template <typename Unit, typename Rep1, typename M1, typename D1,
+			 typename Rep2, typename M2, typename D2>
 constexpr inline bool operator>=(
-	    const Magnitude<Unit, Rep1, Multiplier1>& a,
-	    const Magnitude<Unit, Rep2, Multiplier2>& b)
+	    const Magnitude<Unit, Rep1, M1, D1>& a,
+	    const Magnitude<Unit, Rep2, M2, D2>& b)
 { return !(a < b);}
 
 
 // operator << 
-template <typename U, typename R, typename M>
-std::ostream& operator<<(std::ostream& out, const Magnitude<U, R, M>& m)
+template <typename U, typename R, typename M, typename D>
+std::ostream& operator<<(std::ostream& out, const Magnitude<U, R, M, D>& m)
 { return out << m.value(); }
 }// namespace atd
 
 
 #endif
+
 

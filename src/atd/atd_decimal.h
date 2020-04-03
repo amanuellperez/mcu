@@ -96,7 +96,8 @@ public:
 
     /// Definimos el número con la parte fraccionaria (si la tiene) igual a
     /// cero.
-    constexpr explicit Decimal(Rep integer_part):Decimal{integer_part, Rep{0}}
+    constexpr explicit Decimal(Rep integer_part)
+	:x_{construct(integer_part, 0)}
     { }
 
     /// Definimos el número "integer_part'fractional_part". 
@@ -153,21 +154,15 @@ private:
 
 
 // construcción
-    constexpr void construct_0digits(Rep integer_part, Rep fractional_part);
-    constexpr void construct(Rep integer_part, Rep fractional_part);
+    constexpr Rep construct(Rep integer_part, Rep fractional_part);
 };
 
 
 template <typename I, int n>
 inline constexpr 
 Decimal<I,n>::Decimal(Rep integer_part, Rep fractional_part)
-{
-    if constexpr (n == 0)
-	construct_0digits(integer_part, fractional_part);
-
-    else
-	construct(integer_part, fractional_part);
-}
+    : x_{construct(integer_part, fractional_part)}
+{ }
 
 
 
@@ -181,16 +176,16 @@ Decimal<I,n> Decimal<I,n>::from_internal_value(Rep x)
 }
 
 
-template <typename I, int n>
-inline 
-constexpr void Decimal<I, n>::construct_0digits(Rep integer_part, Rep fractional_part)
-{ x_ = integer_part; }
-
 
 template <typename I, int n>
-constexpr void Decimal<I,n>::construct(Rep integer_part, Rep fractional_part)
+constexpr Decimal<I,n>::Rep 
+	    Decimal<I,n>::construct(Rep integer_part, Rep fractional_part)
 {
-    fractional_part = most_significant_digits<Rep, n>(fractional_part);
+    if constexpr (n != 0)
+	fractional_part = most_significant_digits<Rep, n>(fractional_part);
+    else
+	fractional_part = 0;
+
 
     x_ = integer_part * ten_to_the_n;
 
@@ -199,6 +194,8 @@ constexpr void Decimal<I,n>::construct(Rep integer_part, Rep fractional_part)
 
     else
 	x_ -= fractional_part;
+
+    return x_;
 }
 
 

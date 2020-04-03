@@ -127,6 +127,10 @@ void test_decimal_construct()
     test_decimal_from_internal_value<int, 4>(30014, 3, 14);
     test_decimal_from_internal_value<int, 5>(300014, 3, 14);
 
+// constexpr
+    {
+	constexpr atd::Decimal<int, 2> c{3,14};
+    }
 
 // Conversiones
     test_decimal_construct_convert<1,1>(31,4, 314);
@@ -293,10 +297,10 @@ void test_decimal()
 // operator<<
     {
     atd::Decimal<int, 2> a{922,06};
-    std::cout << "out:" << a << " =? 922.06\n";
+    CHECK_STDOUT(a, "922.06");
 
     atd::Decimal<int, 0> b{876};
-    std::cout << "out:" << b << " =? 876\n";
+    CHECK_STDOUT(b, "876");
     }
 }
 

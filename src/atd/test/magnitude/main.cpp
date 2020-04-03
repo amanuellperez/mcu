@@ -30,18 +30,20 @@ void test_unit()
 {
     test::interfaz("Unit");
     
-    using U1 = atd::Unit<1,2,3>;
-    using U2 = atd::Unit<4,5,6>;
+    using U1 = atd::Unit<1,2,3,4>;
+    using U2 = atd::Unit<5,6,7,8>;
 
     using Up = atd::Unit_plus<U1, U2>;
     CHECK_TRUE(Up::m == U1::m + U2::m and
 	       Up::kg == U1::kg + U2::kg and
-	       Up::s == U1::s + U2::s, "Unit_plus");
+	       Up::s == U1::s + U2::s and
+	       Up::K == U1::K + U2::K, "Unit_plus");
 
     using Um = atd::Unit_minus<U1, U2>;
     CHECK_TRUE(Um::m == U1::m - U2::m and
 	       Um::kg == U1::kg - U2::kg and
-	       Um::s == U1::s - U2::s, "Unit_minus");
+	       Um::s == U1::s - U2::s and
+	       Um::K == U1::K - U2::K, "Unit_minus");
 }
 
 // Pruebas básicas con un único tipo de multiplier (EJ: todo en metros)
@@ -66,6 +68,7 @@ void test_magnitude_basic()
 {// relación de orden
     Meter a{10};
     Meter b{20};
+    CHECK_TRUE(Meter{10} == Meter{10}, "operator==");
     CHECK_TRUE(a != b, "operator!=");
     CHECK_TRUE(a < b, "operator<");
     CHECK_TRUE(a <= b, "operator<=");
@@ -117,6 +120,8 @@ void test_magnitude_basic()
     CHECK_TRUE(m3 == m4, "operator/");
 }
 
+
+//
 void test_common_type()
 {
     {// caso degenerado
@@ -162,6 +167,9 @@ void test_magnitude_multiplier()
     {
     auto m1 = Meter{3} + Centimeter{25} + Milimeter{7};
     CHECK_TRUE(m1.value() == 3257, "Meter + Centimeter + Milimeter");
+
+    Centimeter m2 = Meter{3} + Centimeter{25} + Milimeter{7};
+    CHECK_TRUE(m2 == Centimeter{325}, "Meter + Centimeter + Milimeter");
     }
 
     {
@@ -170,6 +178,58 @@ void test_magnitude_multiplier()
     }
 
 }
+
+// Igual que test_magnitude_multiplier pero con tipo double
+void test_magnitude_multiplier2()
+{// mezclamos diferentes multipliers
+    using Kilometer = atd::Magnitude<atd::Units_meter, double, std::kilo>;
+    using Meter = atd::Magnitude<atd::Units_meter, double, std::ratio<1>>;
+    using Centimeter = atd::Magnitude<atd::Units_meter, double, std::centi>;
+    using Milimeter = atd::Magnitude<atd::Units_meter, double, std::milli>;
+
+    {
+    auto m1 = Meter{3} + Centimeter{25} + Milimeter{7};
+    CHECK_TRUE(m1.value() == 3257, "Meter + Centimeter + Milimeter");
+
+    Centimeter m2 = Meter{3} + Centimeter{25} + Milimeter{7};
+    CHECK_TRUE(m2 == Centimeter{325.7}, "Meter + Centimeter + Milimeter");
+
+    Meter m3 = Meter{3} + Centimeter{25} + Milimeter{7};
+    CHECK_TRUE(m3 == Meter{3.257}, "Meter + Centimeter + Milimeter");
+    }
+
+    {
+    auto m = Kilometer{2} + Meter{27};
+    CHECK_TRUE(m.value() == 2027, "Kilometer + Meter");
+    }
+
+}
+
+
+void test_magnitud_conversiones()
+{
+    using Kilometer = atd::Magnitude<atd::Units_meter, double, std::kilo>;
+    using Meter = atd::Magnitude<atd::Units_meter, double, std::ratio<1>>;
+    using Centimeter = atd::Magnitude<atd::Units_meter, double, std::centi>;
+    using Milimeter = atd::Magnitude<atd::Units_meter, double, std::milli>;
+
+    {// Conversión básica
+    Centimeter cm = Meter{3};
+    CHECK_TRUE(cm == Centimeter{300}, "meter -> cm");
+    CHECK_TRUE(cm.value() == 300, "meter -> cm");
+
+    CHECK_TRUE(Kilometer{2.345} == Milimeter{2345000}, "km <-> mm");
+    CHECK_TRUE(Meter{Milimeter{1234}} == Meter{1.234}, "m <-> mm");
+    CHECK_TRUE(Meter{Milimeter{1234}}.value() == 1.234, "m <-> mm");
+
+    CHECK_TRUE(Milimeter{Centimeter{3}} == Milimeter{30}, "cm -> mm");
+    CHECK_TRUE(Milimeter{Centimeter{3}}.value() == 30, "cm -> mm");
+
+    CHECK_TRUE(Centimeter{Milimeter{3}} == Centimeter{0.3}, "mm -> cm");
+    CHECK_TRUE(Centimeter{Milimeter{3}}.value() == 0.3, "mm -> cm");
+    }
+}
+
 
 void test_magnitud_and_decimal()
 {
@@ -181,11 +241,18 @@ void test_magnitud_and_decimal()
 
     Pascal p1{Pascal::Rep{92045,3}};
     Hecto_pascal p2{Hecto_pascal::Rep{10,423}};
-    auto res = p1 + p2;
-    std::cout << "res = " << res << '\n';
 
+    CHECK_STDOUT(p2, "10.423");
+    std::cout << ">>> Convierto a pascal\n";
+    Pascal p2_to_pascal{p2};
+
+    CHECK_STDOUT(p2_to_pascal, "1042.3");
     Pascal rp = p1 + p2;
-    std::cout << "res en pascal = " << rp << '\n';
+    auto [n, f] = rp.value().value(); 
+    CHECK_TRUE(n == 93087 and f == 6, "pascal + hectopascal");
+
+    // pruebo que compile operator<<
+    CHECK_STDOUT(rp, "93086.6");
 }
 
 void test_magnitude()
@@ -194,7 +261,9 @@ void test_magnitude()
 
     test_magnitude_basic();
     test_common_type();
+    test_magnitud_conversiones();
     test_magnitude_multiplier();
+    test_magnitude_multiplier2();
     test_magnitud_and_decimal();
 }
 
