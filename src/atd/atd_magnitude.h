@@ -469,6 +469,99 @@ constexpr inline bool operator>=(
 template <typename U, typename R, typename M, typename D>
 std::ostream& operator<<(std::ostream& out, const Magnitude<U, R, M, D>& m)
 { return out << m.value(); }
+
+
+
+// Magnitudes por defecto
+// ----------------------
+// Lenght
+// ------
+template <typename Int, typename Multiplier>
+using __Meter = atd::Magnitude<atd::Units_meter, Int, Multiplier>;
+
+template <typename Int>
+using Kilometer = __Meter<Int, std::kilo>;
+
+template <typename Int>
+using Hectometer = __Meter<Int, std::hecto>;
+
+template <typename Int>
+using Decameter = __Meter<Int, std::deca>;
+
+template <typename Int>
+using Meter = __Meter<Int, std::ratio<1>>;
+
+template <typename Int>
+using Decimeter = __Meter<Int, std::deci>;
+
+template <typename Int>
+using Centimeter = __Meter<Int, std::centi>;
+
+template <typename Int>
+using Millimeter = __Meter<Int, std::milli>;
+
+
+// Temperature
+// -----------
+// Kelvin
+template <typename Int, typename Multiplier>
+using __Kelvin = Magnitude<atd::Units_kelvin, Int, Multiplier>;
+
+template <typename Int>
+using Kelvin = __Kelvin<Int, std::ratio<1>>;
+
+
+// Celsius
+template <typename Int, typename Multiplier>
+using __Celsius = Magnitude<atd::Units_kelvin, Int, 
+			    Multiplier, std::ratio<27315, 100>>;
+
+template <typename Int>
+using Celsius = __Celsius<Int, std::ratio<1>>;
+
+template <typename Int>
+using Decicelsius = __Celsius<Int, std::deci>;
+
+template <typename Int>
+using Centicelsius = __Celsius<Int, std::centi>;
+
+template <typename Int>
+using Millicelsius = __Celsius<Int, std::milli>;
+
+
+// Fahrenheit
+template <typename Int>
+using Fahrenheit = atd::Magnitude<atd::Units_kelvin,
+				  Int,
+				  std::ratio<5, 9>, std::ratio<45967, 180>>;
+
+
+// Pressure
+// --------
+template <typename Int, typename Multiplier>
+using __Pascal = atd::Magnitude<atd::Units_pascal, Int, Multiplier>;
+
+template <typename Int>
+using Kilopascal = __Pascal<Int, std::kilo>;
+
+template <typename Int>
+using Hectopascal = __Pascal<Int, std::hecto>;
+
+template <typename Int>
+using Decapascal = __Pascal<Int, std::deca>;
+
+template <typename Int>
+using Pascal = __Pascal<Int, std::ratio<1>>;
+
+template <typename Int>
+using Decipascal = __Pascal<Int, std::deci>;
+    
+template <typename Int>
+using Centipascal = __Pascal<Int, std::centi>;
+
+template <typename Int>
+using Millipascal = __Pascal<Int, std::milli>;
+
 }// namespace atd
 
 

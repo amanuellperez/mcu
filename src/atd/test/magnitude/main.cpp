@@ -49,7 +49,8 @@ void test_unit()
 // Pruebas básicas con un único tipo de multiplier (EJ: todo en metros)
 void test_magnitude_basic()
 {
-    using Meter = atd::Magnitude<atd::Units_meter, int, std::ratio<1>>;
+    using Meter = atd::Meter<int>;
+   // using Meter = atd::Magnitude<atd::Units_meter, int, std::ratio<1>>;
     
 
 // constructor
@@ -135,9 +136,9 @@ void test_common_type()
     }
     {
     using Kilometer = atd::Magnitude<atd::Units_meter, int, std::ratio<1000>>;
-    using Milimeter = atd::Magnitude<atd::Units_meter, long int, std::ratio<1,1000>>;
+    using Millimeter = atd::Magnitude<atd::Units_meter, long int, std::ratio<1,1000>>;
 
-    using CM = std::common_type_t<Kilometer, Milimeter>;
+    using CM = std::common_type_t<Kilometer, Millimeter>;
     CHECK_TRUE((std::is_same_v<atd::Units_meter, CM::Unit>), "common_type::Unit");
     CHECK_TRUE((std::is_same_v<CM::Rep, long int>), "common_type::Rep");
     CHECK_TRUE((std::is_same_v<CM::Multiplier, std::ratio<1,1000>>),
@@ -162,14 +163,14 @@ void test_magnitude_multiplier()
     using Kilometer = atd::Magnitude<atd::Units_meter, int, std::kilo>;
     using Meter = atd::Magnitude<atd::Units_meter, int, std::ratio<1>>;
     using Centimeter = atd::Magnitude<atd::Units_meter, int, std::centi>;
-    using Milimeter = atd::Magnitude<atd::Units_meter, int, std::milli>;
+    using Millimeter = atd::Magnitude<atd::Units_meter, int, std::milli>;
 
     {
-    auto m1 = Meter{3} + Centimeter{25} + Milimeter{7};
-    CHECK_TRUE(m1.value() == 3257, "Meter + Centimeter + Milimeter");
+    auto m1 = Meter{3} + Centimeter{25} + Millimeter{7};
+    CHECK_TRUE(m1.value() == 3257, "Meter + Centimeter + Millimeter");
 
-    Centimeter m2 = Meter{3} + Centimeter{25} + Milimeter{7};
-    CHECK_TRUE(m2 == Centimeter{325}, "Meter + Centimeter + Milimeter");
+    Centimeter m2 = Meter{3} + Centimeter{25} + Millimeter{7};
+    CHECK_TRUE(m2 == Centimeter{325}, "Meter + Centimeter + Millimeter");
     }
 
     {
@@ -185,17 +186,17 @@ void test_magnitude_multiplier2()
     using Kilometer = atd::Magnitude<atd::Units_meter, double, std::kilo>;
     using Meter = atd::Magnitude<atd::Units_meter, double, std::ratio<1>>;
     using Centimeter = atd::Magnitude<atd::Units_meter, double, std::centi>;
-    using Milimeter = atd::Magnitude<atd::Units_meter, double, std::milli>;
+    using Millimeter = atd::Magnitude<atd::Units_meter, double, std::milli>;
 
     {
-    auto m1 = Meter{3} + Centimeter{25} + Milimeter{7};
-    CHECK_TRUE(m1.value() == 3257, "Meter + Centimeter + Milimeter");
+    auto m1 = Meter{3} + Centimeter{25} + Millimeter{7};
+    CHECK_TRUE(m1.value() == 3257, "Meter + Centimeter + Millimeter");
 
-    Centimeter m2 = Meter{3} + Centimeter{25} + Milimeter{7};
-    CHECK_TRUE(m2 == Centimeter{325.7}, "Meter + Centimeter + Milimeter");
+    Centimeter m2 = Meter{3} + Centimeter{25} + Millimeter{7};
+    CHECK_TRUE(m2 == Centimeter{325.7}, "Meter + Centimeter + Millimeter");
 
-    Meter m3 = Meter{3} + Centimeter{25} + Milimeter{7};
-    CHECK_TRUE(m3 == Meter{3.257}, "Meter + Centimeter + Milimeter");
+    Meter m3 = Meter{3} + Centimeter{25} + Millimeter{7};
+    CHECK_TRUE(m3 == Meter{3.257}, "Meter + Centimeter + Millimeter");
     }
 
     {
@@ -208,39 +209,48 @@ void test_magnitude_multiplier2()
 
 void test_magnitud_conversiones()
 {
-    using Kilometer = atd::Magnitude<atd::Units_meter, double, std::kilo>;
-    using Meter = atd::Magnitude<atd::Units_meter, double, std::ratio<1>>;
-    using Centimeter = atd::Magnitude<atd::Units_meter, double, std::centi>;
-    using Milimeter = atd::Magnitude<atd::Units_meter, double, std::milli>;
+//    using Kilometer = atd::Magnitude<atd::Units_meter, double, std::kilo>;
+//    using Meter = atd::Magnitude<atd::Units_meter, double, std::ratio<1>>;
+//    using Centimeter = atd::Magnitude<atd::Units_meter, double, std::centi>;
+//    using Millimeter = atd::Magnitude<atd::Units_meter, double, std::milli>;
+
+    using Kilometer = atd::Kilometer<double>;
+    using Meter = atd::Meter<double>;
+    using Centimeter = atd::Centimeter<double>;
+    using Millimeter = atd::Millimeter<double>;
+
 
     {// Conversión básica
     Centimeter cm = Meter{3};
     CHECK_TRUE(cm == Centimeter{300}, "meter -> cm");
     CHECK_TRUE(cm.value() == 300, "meter -> cm");
 
-    CHECK_TRUE(Kilometer{2.345} == Milimeter{2345000}, "km <-> mm");
-    CHECK_TRUE(Meter{Milimeter{1234}} == Meter{1.234}, "m <-> mm");
-    CHECK_TRUE(Meter{Milimeter{1234}}.value() == 1.234, "m <-> mm");
+    CHECK_TRUE(Kilometer{2.345} == Millimeter{2345000}, "km <-> mm");
+    CHECK_TRUE(Meter{Millimeter{1234}} == Meter{1.234}, "m <-> mm");
+    CHECK_TRUE(Meter{Millimeter{1234}}.value() == 1.234, "m <-> mm");
 
-    CHECK_TRUE(Milimeter{Centimeter{3}} == Milimeter{30}, "cm -> mm");
-    CHECK_TRUE(Milimeter{Centimeter{3}}.value() == 30, "cm -> mm");
+    CHECK_TRUE(Millimeter{Centimeter{3}} == Millimeter{30}, "cm -> mm");
+    CHECK_TRUE(Millimeter{Centimeter{3}}.value() == 30, "cm -> mm");
 
-    CHECK_TRUE(Centimeter{Milimeter{3}} == Centimeter{0.3}, "mm -> cm");
-    CHECK_TRUE(Centimeter{Milimeter{3}}.value() == 0.3, "mm -> cm");
+    CHECK_TRUE(Centimeter{Millimeter{3}} == Centimeter{0.3}, "mm -> cm");
+    CHECK_TRUE(Centimeter{Millimeter{3}}.value() == 0.3, "mm -> cm");
     }
 }
 
 
 void test_magnitude_and_decimal()
 {
-    using Pascal =
-        atd::Magnitude<atd::Units_pascal, atd::Decimal<int, 1>, std::ratio<1>>;
+//    using Pascal =
+//        atd::Magnitude<atd::Units_pascal, atd::Decimal<int, 1>, std::ratio<1>>;
+//
+//    using Hectopascal =
+//        atd::Magnitude<atd::Units_pascal, atd::Decimal<int, 3>, std::hecto>;
 
-    using Hecto_pascal =
-        atd::Magnitude<atd::Units_pascal, atd::Decimal<int, 3>, std::hecto>;
+    using Pascal = atd::Pascal<atd::Decimal<int, 1>>;
+    using Hectopascal = atd::Hectopascal<atd::Decimal<int, 3>>;
 
     Pascal p1{Pascal::Rep{92045,3}};
-    Hecto_pascal p2{Hecto_pascal::Rep{10,423}};
+    Hectopascal p2{Hectopascal::Rep{10,423}};
 
     CHECK_STDOUT(p2, "10.423");
     std::cout << ">>> Convierto a pascal\n";
@@ -263,17 +273,20 @@ bool equal(double x, double y)
 
 void test_magnitude_temperature()
 {
-    using Kelvin = atd::
-        Magnitude<atd::Units_kelvin, double, std::ratio<1>>;
-
-    using Celsius = atd::
-        Magnitude<atd::Units_kelvin, double, std::ratio<1>, std::ratio<27315, 100>>;
-
-    using Fahrenheit = atd::Magnitude<atd::Units_kelvin,
-                                      double,
-                                      std::ratio<5, 9>,
-                                      std::ratio<45967, 180>>;
-
+//    using Kelvin = atd::
+//        Magnitude<atd::Units_kelvin, double, std::ratio<1>>;
+//
+//    using Celsius = atd::
+//        Magnitude<atd::Units_kelvin, double, std::ratio<1>, std::ratio<27315, 100>>;
+//
+//    using Fahrenheit = atd::Magnitude<atd::Units_kelvin,
+//                                      double,
+//                                      std::ratio<5, 9>,
+//                                      std::ratio<45967, 180>>;
+//
+    using Kelvin = atd::Kelvin<double>;
+    using Celsius = atd::Celsius<double>;
+    using Fahrenheit = atd::Fahrenheit<double>;
     CHECK_TRUE((equal(Kelvin{Celsius{0}}.value(), Kelvin{273.15}.value())),
                "ºC -> ºK");
     CHECK_TRUE(Kelvin{Celsius{20}} == Kelvin{293.15}, "ºC -> ºK");
@@ -324,16 +337,21 @@ void test_magnitude_temperature()
 void test_magnitude_temperature_decimal()
 {
     using Rep = atd::Decimal<int, 2>;
-    using Kelvin = atd::
-        Magnitude<atd::Units_kelvin, atd::Decimal<int,2>, std::ratio<1>>;
 
-    using Celsius = atd::
-        Magnitude<atd::Units_kelvin, atd::Decimal<int,2>, std::ratio<1>, std::ratio<27315, 100>>;
+    using Kelvin = atd::Kelvin<Rep>;
+    using Celsius = atd::Celsius<Rep>;
+    using Fahrenheit = atd::Fahrenheit<Rep>;
 
-    using Fahrenheit = atd::Magnitude<atd::Units_kelvin,
-                                      atd::Decimal<int,2>,
-                                      std::ratio<5, 9>,
-                                      std::ratio<45967, 180>>;
+//    using Kelvin = atd::
+//        Magnitude<atd::Units_kelvin, atd::Decimal<int,2>, std::ratio<1>>;
+
+//    using Celsius = atd::
+//        Magnitude<atd::Units_kelvin, atd::Decimal<int,2>, std::ratio<1>, std::ratio<27315, 100>>;
+
+//    using Fahrenheit = atd::Magnitude<atd::Units_kelvin,
+//                                      atd::Decimal<int,2>,
+//                                      std::ratio<5, 9>,
+//                                      std::ratio<45967, 180>>;
 
     CHECK_TRUE((Kelvin{Celsius{0}} == Kelvin{Rep{273,15}}), "ºC -> ºK");
     CHECK_TRUE((Kelvin{Celsius{20}}== Kelvin{Rep{293,15}}), "ºC -> ºK");
