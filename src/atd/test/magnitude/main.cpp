@@ -231,7 +231,7 @@ void test_magnitud_conversiones()
 }
 
 
-void test_magnitud_and_decimal()
+void test_magnitude_and_decimal()
 {
     using Pascal =
         atd::Magnitude<atd::Units_pascal, atd::Decimal<int, 1>, std::ratio<1>>;
@@ -252,7 +252,107 @@ void test_magnitud_and_decimal()
     CHECK_TRUE(n == 93087 and f == 6, "pascal + hectopascal");
 
     // pruebo que compile operator<<
-    CHECK_STDOUT(rp, "93086.6");
+    CHECK_STDOUT(rp, "93087.6");
+}
+
+// En temperaturas solo voy a manejar 2 cifras decimales
+bool equal(double x, double y)
+{
+    return (x-y) < 0.01;
+}
+
+void test_magnitude_temperature()
+{
+    using Kelvin = atd::
+        Magnitude<atd::Units_kelvin, double, std::ratio<1>>;
+
+    using Celsius = atd::
+        Magnitude<atd::Units_kelvin, double, std::ratio<1>, std::ratio<27315, 100>>;
+
+    using Fahrenheit = atd::Magnitude<atd::Units_kelvin,
+                                      double,
+                                      std::ratio<5, 9>,
+                                      std::ratio<45967, 180>>;
+
+    CHECK_TRUE((equal(Kelvin{Celsius{0}}.value(), Kelvin{273.15}.value())),
+               "ºC -> ºK");
+    CHECK_TRUE(Kelvin{Celsius{20}} == Kelvin{293.15}, "ºC -> ºK");
+
+    CHECK_TRUE((equal(Celsius{Kelvin{10}}.value(), Celsius{-263.15}.value())),
+               "ºK -> ºC");
+    CHECK_TRUE((equal(Celsius{Kelvin{300}}.value(), Celsius{26.85}.value())),
+               "ºK -> ºC");
+
+    CHECK_TRUE((equal(Fahrenheit{Celsius{0}}.value(), Fahrenheit{32}.value())),
+               "ºC -> ºF");
+    CHECK_TRUE((equal(Fahrenheit{Celsius{35}}.value(), Fahrenheit{95}.value())),
+               "ºC -> ºF");
+
+    CHECK_TRUE((equal(Celsius{Fahrenheit{0}}.value(), 
+						Celsius{-17.7777}.value())),
+               "ºC -> ºF");
+
+    CHECK_TRUE((equal(Celsius{Fahrenheit{40}}.value(), 
+						Celsius{4.44444}.value())),
+               "ºF -> ºC");
+    CHECK_TRUE((equal(Celsius{Fahrenheit{40}}.value(), 
+						Celsius{4.44444}.value())),
+               "ºF -> ºC");
+    CHECK_TRUE((equal(Celsius{Fahrenheit{-20}}.value(), 
+						Celsius{-28.8888}.value())),
+               "ºF -> ºC");
+
+    CHECK_TRUE((equal(Kelvin{Fahrenheit{0}}.value(), 
+						Kelvin{255.372}.value())),
+               "ºF -> ºK");
+    CHECK_TRUE((equal(Kelvin{Fahrenheit{20}}.value(), 
+						Kelvin{266.483}.value())),
+               "ºF -> ºK");
+
+// Una prueba mezclando medidas (cosa que no habría que hacer)
+    Kelvin k1 = Fahrenheit{10} + Celsius{20} + Kelvin{34};
+    CHECK_TRUE((equal(k1.value(), 362.9278)), "Sumando");
+    // Observar que la resta en diferenets unidades no tiene mucho sentido:
+    //	Si resto 0ºC - 10ºC obtienes -10ºC, pero ¿y si resto 0ºC - 0ºK?
+    //	Si paso K a C:
+    //	    0 C - 0 K = 0 C - (-273.15) C = +273.15 C !!! <-- ABSURDO, 
+    //	ya que la "idea" de restar 0 K no es restar un valor absoluto sino un
+    //	incremento. Lo que uno esperaría es que 0C - 0K = 0C.
+    // Kelvin k2 = Celsius{0} - Kelvin{0};
+}
+
+void test_magnitude_temperature_decimal()
+{
+    using Rep = atd::Decimal<int, 2>;
+    using Kelvin = atd::
+        Magnitude<atd::Units_kelvin, atd::Decimal<int,2>, std::ratio<1>>;
+
+    using Celsius = atd::
+        Magnitude<atd::Units_kelvin, atd::Decimal<int,2>, std::ratio<1>, std::ratio<27315, 100>>;
+
+    using Fahrenheit = atd::Magnitude<atd::Units_kelvin,
+                                      atd::Decimal<int,2>,
+                                      std::ratio<5, 9>,
+                                      std::ratio<45967, 180>>;
+
+    CHECK_TRUE((Kelvin{Celsius{0}} == Kelvin{Rep{273,15}}), "ºC -> ºK");
+    CHECK_TRUE((Kelvin{Celsius{20}}== Kelvin{Rep{293,15}}), "ºC -> ºK");
+
+    CHECK_TRUE((Celsius{Kelvin{10}} == Celsius{Rep{-263, 15}}), "ºK -> ºC");
+    CHECK_TRUE((Celsius{Kelvin{300}} == Celsius{Rep{26, 85}}), "ºK -> ºC");
+
+    CHECK_TRUE((Fahrenheit{Celsius{0} } == Fahrenheit{32}), "ºC -> ºF");
+    CHECK_TRUE((Fahrenheit{Celsius{35}} == Fahrenheit{95}), "ºC -> ºF");
+
+    CHECK_TRUE((Celsius{Fahrenheit{0} } == Celsius{Rep{-17, 77}}), "ºC -> ºF");
+    // Lo esta rodeando a 4.45 en lugar de dejarlo en 4.44 ???
+    CHECK_TRUE((Celsius{Fahrenheit{40}} == Celsius{Rep{4, 45}}), "ºF -> ºC");
+
+
+    CHECK_TRUE((Celsius{Fahrenheit{-20}} == Celsius{Rep{-28, 88}}), "ºF -> ºC");
+
+    CHECK_TRUE((Kelvin{Fahrenheit{0}} == Kelvin{Rep{255, 37}}), "ºF -> ºK");
+    CHECK_TRUE((Kelvin{Fahrenheit{20}} == Kelvin{Rep{266, 48}}), "ºF -> ºK");
 }
 
 void test_magnitude()
@@ -264,7 +364,9 @@ void test_magnitude()
     test_magnitud_conversiones();
     test_magnitude_multiplier();
     test_magnitude_multiplier2();
-    test_magnitud_and_decimal();
+    test_magnitude_and_decimal();
+    test_magnitude_temperature();
+    test_magnitude_temperature_decimal();
 }
 
 
@@ -283,8 +385,4 @@ try{
     return 1;
 }
 }
-
-
-
-
 

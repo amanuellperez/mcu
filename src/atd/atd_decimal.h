@@ -129,7 +129,11 @@ public:
     /// Devuelve el número como {integer_part, fractional_part}
     std::pair<Rep, Rep> value() const
     {
-        auto [q, r] = std::div(x_, ten_to_the_n);
+        auto [q, r] = std::div(std::abs(x_), ten_to_the_n);
+
+	if (x_ < 0) 
+	    q = -q;
+
         return std::pair<Rep, Rep>{q, r};
     }
 

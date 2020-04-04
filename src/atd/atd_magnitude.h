@@ -22,6 +22,16 @@
  *
  *  - DESCRIPCION: Magnitudes definidas en el S.I.
  *
+ *    Hay que tener cuidado al restar temperaturas de diferentes unidades ya
+ *    que no está claro en qué consiste eso de restar:
+ *
+ *	Observar que la resta en diferenets unidades no tiene mucho sentido:
+ *	Si resto 0ºC - 10ºC obtienes -10ºC, pero ¿y si resto 0ºC - 0ºK?
+ *	Si paso K a C:
+ *	0 C - 0 K = 0 C - (-273.15) C = +273.15 C !!! <-- ABSURDO, 
+ *	ya que la "idea" de restar 0 K no es restar un valor absoluto sino un
+ *	incremento. Lo que uno esperaría es que 0C - 0K = 0C.
+ *
  *  - SEE: ver std::chrono, ver atd::decimal.
  *
  *  - HISTORIA:
@@ -101,9 +111,9 @@ class Magnitude;
 //
 // despejando:
 //
-//	value2() = value1() * m1 / m2 + (d1 - d2) * m1 / m2;
+//	value2() = value1() * m1 / m2 + (d1 - d2) / m2;
 //
-// Llamemos q = m1 / m2, y d = (d1 - d2) * m1 / m2;
+// Llamemos q = m1 / m2, y d = (d1 - d2) / m2;
 //
 //  Lo que hacemos es calcular estáticamente q = m1 / m2 y operar.
 template <typename To_magnitude, 
@@ -113,10 +123,19 @@ constexpr inline To_magnitude
 {
     using CR = std::common_type_t<typename To_magnitude::Rep, Rep>;
 
+// Q = m1 / m2;
     using Q = std::ratio_divide<Multiplier, typename To_magnitude::Multiplier>;
-    using DIFF = std::ratio_subtract<Displacement, typename To_magnitude::Displacement>;
-    using Q_D = std::ratio_multiply<Q, DIFF>; // = ratio Q_D = (d1 - d2) * m1 / m2;
-    constexpr typename To_magnitude::Rep D{Q_D::num/Q_D::den};// Rep D = (d1 - d2) * m1 / m2;
+
+// Rep D = (d1 - d2) / m2:
+    using DIFF =
+        std::ratio_subtract<Displacement, typename To_magnitude::Displacement>;
+    using Q_D = std::ratio_divide<DIFF, typename To_magnitude::Multiplier>; 
+    constexpr typename To_magnitude::Rep D{CR{Q_D::num}/CR{Q_D::den}};
+
+//std::cout << "DIFF = " << DIFF::num << "/" << DIFF::den << '\n';
+//std::cout << "Q_D = " << Q_D::num << "/" << Q_D::den << '\n';
+//std::cout << "Q = " << Q::num << "/" << Q::den << '\n';
+//std::cout << "D = " << D << '\n';
 
     if constexpr (Q::num == 1 and Q::den == 1)	
         return To_magnitude(static_cast<typename To_magnitude::Rep>(m.value()) + D);

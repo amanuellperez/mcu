@@ -47,11 +47,22 @@ void test_ten_to_the()
 }
 
 template <typename Int, int ndigits>
-void test_decimal_construct(Int n, Int f, Int res)
+void test_decimal_construct(Int n, Int f, Int rep, Int res_n, Int res_f)
 {
-    atd::Decimal<Int, ndigits> dec{n,f};
-    CHECK_TRUE(dec.internal_value() == res, alp::as_str() << "dec{" << n << ", " << f << "}");
+    std::cout << "test_decimal_construct(" << n << ", " << f << ", " << rep
+              << ", " << res_n << ", " << res_f << ")\n";
 
+    atd::Decimal<Int, ndigits> dec{n,f};
+    CHECK_TRUE(dec.internal_value() == rep, 
+	    alp::as_str() << "dec{" << n << ", " << f << "}");
+
+    auto [n1, f1] = dec.value();
+
+    std::cout << "res = [" << res_n << "." << res_f << "] =? [" << n1 << "."
+              << f1 << '\n';
+    CHECK_TRUE(n1 == res_n and f1 == res_f,
+               alp::as_str() << "dec<" << ndigits << ">{" << n << ", " << f << "} genera [" << n1
+                             << "." << f1 << ']');
 }
 
 template <typename Int, int ndigits>
@@ -88,31 +99,33 @@ void test_decimal_construct_convert(int integer_part, int frac_part, int res)
 void test_decimal_construct()
 {
 // normal +
-    test_decimal_construct<int, 2>(3,  0, 300);
-    test_decimal_construct<int, 2>(3,  1, 301);
-    test_decimal_construct<int, 2>(3, 01, 301);
-    test_decimal_construct<int, 2>(3, 10, 310);
-    test_decimal_construct<int, 2>(3, 14, 314);
-    test_decimal_construct<int, 2>(3, 141, 314);
-    test_decimal_construct<int, 2>(3, 1415, 314);
+    std::cout << "1ª tanda\n";
+    test_decimal_construct<int, 2>(3,  0, 300, 3,00); // CUIDADO: 00 es en octal!!!
+    test_decimal_construct<int, 2>(3,  1, 301, 3,01); // NO USAR 01!!!
+    test_decimal_construct<int, 2>(3, 01, 301, 3,01);
+    test_decimal_construct<int, 2>(3, 10, 310, 3,10);
+    test_decimal_construct<int, 2>(3, 14, 314, 3,14);
+    test_decimal_construct<int, 2>(3, 141, 314,3,14);
+    test_decimal_construct<int, 2>(3, 1415, 314,3,14);
 
-    test_decimal_construct<int, 1>(3, 14, 31);
-    test_decimal_construct<int, 2>(3, 14, 314);
-    test_decimal_construct<int, 3>(3, 14, 3014);
-    test_decimal_construct<int, 4>(3, 14, 30014);
-    test_decimal_construct<int, 5>(3, 14, 300014);
+    std::cout << "2ª tanda\n";
+    test_decimal_construct<int, 1>(3, 14, 31	, 3,1);
+    test_decimal_construct<int, 2>(3, 14, 314	, 3,14);
+    test_decimal_construct<int, 3>(3, 14, 3014	, 3,14);
+    test_decimal_construct<int, 4>(3, 14, 30014	, 3,14);
+    test_decimal_construct<int, 5>(3, 14, 300014, 3,14);
 
 
 // normal -
-    test_decimal_construct<int, 2>(-3, 01, -301);
-    test_decimal_construct<int, 2>(-3, 10, -310);
-    test_decimal_construct<int, 2>(-3, 14, -314);
-    test_decimal_construct<int, 2>(-3, 141, -314);
-    test_decimal_construct<int, 2>(-3, 1415, -314);
+    test_decimal_construct<int, 2>(-3,  1, -301, -3, 1);
+    test_decimal_construct<int, 2>(-3, 10, -310, -3,10);
+    test_decimal_construct<int, 2>(-3, 14, -314, -3,14);
+    test_decimal_construct<int, 2>(-3, 141, -314,-3,14);
+    test_decimal_construct<int, 2>(-3, 1415, -314,-3,14);
 
 // degenerado
-    test_decimal_construct<int, 0>(3, 1415, 3);
-    test_decimal_construct<int, 0>(-3, 1415, -3);
+    test_decimal_construct<int, 0>(3, 1415, 3, 3,0);
+    test_decimal_construct<int, 0>(-3, 1415, -3, -3,0);
 
 
     test_decimal_value<int, 2>(3,  1, 1);
@@ -142,6 +155,11 @@ void test_decimal_construct()
     test_decimal_construct_convert<3,2>(31,415, 3141);
     test_decimal_construct_convert<3,3>(31,415, 31415);
     test_decimal_construct_convert<3,4>(31,415, 314150);
+
+{// bug
+    atd::Decimal<int, 2> d{-28, 89};
+    CHECK_STDOUT(d, "-28.89");
+}
 
 }
 
