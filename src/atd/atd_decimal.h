@@ -35,6 +35,7 @@
 #include "atd_math.h"
 #include <iostream>
 #include <cstdlib>
+#include <cmath>
 
 namespace atd{
 
@@ -295,16 +296,35 @@ constexpr inline Decimal<std::common_type_t<R1, R2>, n1 + n2>
 }
 
 
-// División:  x1*10^(-n1) / x2*10^(-n2) = (x1*10^n2/x2)*10^-n1
-// TODO: ¿qué pasa con overflow?
+// TODO: ¿qué pasa con overflow? Me ha dado overflow!!! ¿cómo poder avisar?
+// Naive implementation:
+//	x1*10^(-n1) / x2*10^(-n2) = (x1*10^n2/x2)*10^-n1
+//  Problema: overflow en 12345'000/100'000
+//	al multiplicar 12345*1000 = 12345000 = overflow
+//	pero el resultado sí que se puede almacenar en un decimal de 3 cifras:
+//	sería 123'450!!!
+//
+//  Mejora:
+//	Escribimos x1/x2 como número mixto x1/x2 = q + r/x2 y operamos:
+//	x1*10^(-n1) / x2*10^(-n2) = (q + r/x2)*10^n2*10^(-n1)
+//				  = (q*10^n2 + r*10^n2/x2)*10^(-n1)
+//	Así evitamos el overflow en del ejemplo anterior.
+//
 template <typename R1, int n1, typename R2, int n2>
 constexpr inline Decimal<R1, n1>
     operator/(const Decimal<R1,n1>& a, const Decimal<R2,n2>& b)
 {
     using Rep = std::common_type_t<R1, R2>;
 
-    return Decimal<R1,n1>::from_internal_value(
-	(a.internal_value() * ten_to_the<n2, Rep>())/b.internal_value());
+    Rep x1 = a.internal_value();
+    Rep x2 = b.internal_value();
+
+    auto [q, r] = std::div(x1, x2);
+
+    Rep xr = q*ten_to_the<n2, Rep>() + (r * ten_to_the<n2, Rep>())/x2;
+
+    return Decimal<R1, n1>::from_internal_value(xr);
+
 }
 
 

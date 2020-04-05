@@ -388,7 +388,14 @@ void print(std::ostream& out, const Sensor::Temp_and_press& tp, Sensor& sensor)
 //			<< " (" << press_q248/25600 << " hPa)\n";
 
     auto press = sensor.compensate_P(tp.upressure);
-    out << ">>> P comp. = " << press << " Pa (= " << press.internal_value() << ")\n";
+    using Hectopascal = atd::Hectopascal<atd::Decimal<int32_t, 2>>;
+    out << ">>> P comp. = " << press << " Pa (" << 
+			"(" << Hectopascal{press} << " hPa)\n";
+
+    Sensor::Pascal tmp = press;
+    atd::Hectopascal<atd::Decimal<int32_t, 3>> kk = tmp;
+    out << "tmp = " << tmp.value().internal_value() << '\n';
+    out << "kk = " << kk.value().internal_value() << '\n';
 
 }
 

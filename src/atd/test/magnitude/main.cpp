@@ -263,6 +263,8 @@ void test_magnitude_and_decimal()
 
     // pruebo que compile operator<<
     CHECK_STDOUT(rp, "93087.6");
+
+
 }
 
 // En temperaturas solo voy a manejar 2 cifras decimales

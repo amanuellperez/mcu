@@ -42,6 +42,7 @@
 #include <cstddef>  // std::byte
 #include <atd_bit.h>
 #include <atd_decimal.h>
+#include <atd_magnitude.h>
 
 constexpr uint8_t TWI_buffer_size = 100;
 
@@ -446,7 +447,9 @@ struct __BMP280_calibration{
     int16_t dig_P9;
 
     using Temperature_type = atd::Decimal<int32_t, 2>; // in DegC
-    using Pressure_type = atd::Decimal<int32_t, 0>; // in Pascals
+//    using Pascal = atd::Decimal<int32_t, 0>; // in Pascals
+
+    using Pascal = atd::Pascal<atd::Decimal<int32_t, 0>>;
 
     /// Returns temperature in DegC, resolution is 0.01 DegC. 
     Temperature_type compensate_T(const int32_t& adc_T);
@@ -456,9 +459,10 @@ struct __BMP280_calibration{
     ///
     /// Output value of “24674867” represents 
     ///			24674867/256 = 96386.2 Pa = 963.862 hPa
-    Pressure_type compensate_P(const int32_t& adc_P) const{
+    Pascal compensate_P(const int32_t& adc_P) const{
 	int32_t pc = compensate_P_(adc_P)/256;
-	return Pressure_type::from_internal_value(pc);
+	using Decimal = Pascal::Rep;
+	return Pascal{Decimal::from_internal_value(pc)};
     }
 
     int32_t compensate_P_(const int32_t& adc_P) const;
@@ -514,7 +518,7 @@ public:
     using Temp_and_press = __BMP280_temp_and_press;
     using Calibration = __BMP280_calibration;
     using Temperature_type = Calibration::Temperature_type;
-    using Pressure_type = Calibration::Pressure_type;
+    using Pascal = Calibration::Pascal;
 
 // Calibration parameters (for debugging purpose)
     uint16_t dig_T1() const {return calibration_.dig_T1;}
@@ -542,7 +546,7 @@ public:
     /// Output value of “24674867” represents 
     ///			24674867/256 = 96386.2 Pa = 963.862 hPa
     /// Llamar primero a compensate_T y luego compensate_P <--- TODO: ordenar.
-    Pressure_type compensate_P(const uint32_t& adc_P) const
+    Pascal compensate_P(const uint32_t& adc_P) const
     {return calibration_.compensate_P(adc_P);}
 
     int32_t compensate_P_(const int32_t& adc_P) const

@@ -49,8 +49,8 @@ void test_ten_to_the()
 template <typename Int, int ndigits>
 void test_decimal_construct(Int n, Int f, Int rep, Int res_n, Int res_f)
 {
-    std::cout << "test_decimal_construct(" << n << ", " << f << ", " << rep
-              << ", " << res_n << ", " << res_f << ")\n";
+//    std::cout << "test_decimal_construct(" << n << ", " << f << ", " << rep
+//              << ", " << res_n << ", " << res_f << ")\n";
 
     atd::Decimal<Int, ndigits> dec{n,f};
     CHECK_TRUE(dec.internal_value() == rep, 
@@ -58,8 +58,8 @@ void test_decimal_construct(Int n, Int f, Int rep, Int res_n, Int res_f)
 
     auto [n1, f1] = dec.value();
 
-    std::cout << "res = [" << res_n << "." << res_f << "] =? [" << n1 << "."
-              << f1 << '\n';
+//    std::cout << "res = [" << res_n << "." << res_f << "] =? [" << n1 << "."
+//              << f1 << '\n';
     CHECK_TRUE(n1 == res_n and f1 == res_f,
                alp::as_str() << "dec<" << ndigits << ">{" << n << ", " << f << "} genera [" << n1
                              << "." << f1 << ']');
@@ -143,6 +143,15 @@ void test_decimal_construct()
 // constexpr
     {
 	constexpr atd::Decimal<int, 2> c{3,14};
+    }
+
+// syntax sugar
+    {
+	using Int = atd::Decimal<int, 3>;
+
+	// Al escribir Int{10,23} se espera escribir el decimal "10,230"
+	Int a{10,23};
+	CHECK_TRUE(a.internal_value() == 10230, "AQUIII constructor");
     }
 
 // Conversiones
@@ -253,7 +262,7 @@ void test_decimal_division(int ip1, int fp1, int ip2, int fp2,
     atd::Decimal<int, n2> y{ip2,fp2};
     auto p = x / y;
     auto [ip, fp] = p.value();
-    CHECK_TRUE(ip == ipr and fp == fpr, "operator*");
+    CHECK_TRUE(ip == ipr and fp == fpr, "operator/");
 }
 
 
@@ -298,8 +307,15 @@ void test_decimal_arithmetic()
     test_decimal_division<1,5>(10,2   , 7,12345,    1,4);
     test_decimal_division<0,0>(10,0   , 2,0,	    5,0);
     test_decimal_division<2,1>(3,14   , 2, 3,	    1,36);
-}
 
+    {// bug: overflow!!!
+	using Int = atd::Decimal<int, 3>;
+	Int a {12345};
+	Int b {100};
+
+	CHECK_TRUE(((a / b) == Int{123,450}), "operator/");
+    }
+}
 
 
 void test_decimal()
@@ -310,7 +326,6 @@ void test_decimal()
     test_decimal_common_type();
     test_decimal_order();
     test_decimal_arithmetic();
-
 
 // operator<<
     {
@@ -356,6 +371,7 @@ try{
     test_ten_to_the();
     test_most_significant_digits();
     test_decimal();
+
 
 }catch(std::exception& e)
 {
