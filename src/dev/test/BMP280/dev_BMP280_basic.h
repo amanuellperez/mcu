@@ -446,13 +446,14 @@ struct __BMP280_calibration{
     int16_t dig_P8;
     int16_t dig_P9;
 
-    using Temperature_type = atd::Decimal<int32_t, 2>; // in DegC
-//    using Pascal = atd::Decimal<int32_t, 0>; // in Pascals
+// Unidades en las que medimos la temperatura y la presión.
+    using Celsius	   = atd::Celsius<atd::Decimal<int32_t, 2>>;
+    using Pascal           = atd::Pascal<atd::Decimal<int32_t, 0>>;
+    using Hectopascal      = atd::Hectopascal<atd::Decimal<int32_t, 2>>;
 
-    using Pascal = atd::Pascal<atd::Decimal<int32_t, 0>>;
-
+// Compensate functions
     /// Returns temperature in DegC, resolution is 0.01 DegC. 
-    Temperature_type compensate_T(const int32_t& adc_T);
+    Celsius compensate_T(const int32_t& adc_T);
 
     /// Returns pressure in Pa as unsigned 32 bit integer in Q24.8 format (24
     /// integer bits and 8 fractional bits).
@@ -512,15 +513,16 @@ inline Ixtream& operator>>(Ixtream& in, __BMP280_calibration& st)
 class BMP280_base{
 public:
 // Types
-    using Id	 = __BMP280_id;
-    using Status = __BMP280_status;
-    using Config = __BMP280_config;
-    using Temp_and_press = __BMP280_temp_and_press;
-    using Calibration = __BMP280_calibration;
-    using Temperature_type = Calibration::Temperature_type;
-    using Pascal = Calibration::Pascal;
+    using Id               = __BMP280_id;
+    using Status           = __BMP280_status;
+    using Config           = __BMP280_config;
+    using Temp_and_press   = __BMP280_temp_and_press;
+    using Calibration      = __BMP280_calibration;
+    using Celsius          = Calibration::Celsius;
+    using Pascal           = Calibration::Pascal;
+    using Hectopascal      = Calibration::Hectopascal;
 
-// Calibration parameters (for debugging purpose)
+    // Calibration parameters (for debugging purpose)
     uint16_t dig_T1() const {return calibration_.dig_T1;}
     int16_t dig_T2() const {return calibration_.dig_T2;}
     int16_t dig_T3() const {return calibration_.dig_T3;}
@@ -537,7 +539,7 @@ public:
 
     /// Returns temperature in DegC, resolution is 0.01 DegC. 
     /// Output value of “5123” equals 51.23 DegC.  
-    Temperature_type compensate_T(const int32_t& adc_T)
+    Celsius compensate_T(const int32_t& adc_T)
     {return calibration_.compensate_T(adc_T);}
 
     /// Returns pressure in Pa as unsigned 32 bit integer in Q24.8 format (24

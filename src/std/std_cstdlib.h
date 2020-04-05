@@ -44,7 +44,7 @@ namespace STD{
     using ::ldiv;
 //   using ::lldiv;
 
-    constexpr inline ::div_t div(int x, int y) 
+    inline ::div_t div(int x, int y) 
     { return ::div(x, y); }
 
     inline ::ldiv_t div(long x, long y) 

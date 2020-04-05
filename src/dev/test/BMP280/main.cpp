@@ -378,25 +378,21 @@ void print_params(std::iostream& uart, Sensor& sensor)
 
 void print(std::ostream& out, const Sensor::Temp_and_press& tp, Sensor& sensor)
 {
+// AQUI: revisar interfaz. Mejor: sensor.T() y sensor.P()  y sensor.hP() en
+// hectoPascales (que sean sinónimos
+// de compensate_T(). Probar demás modos a ver si funcionan. 
+// Revisar: hay que medir primero la T y luego la P (funciones compensate).
+// Automatizarlo y simplificarlo.
     out << "T (sin comp.)= " << tp.utemperature << '\n'
 	<< "P (sin comp.)= " << tp.upressure << '\n'
-	// TODO: 
-	// P: 2144 --> 21.44 (<- quiero imprimir esto)
 	<< "T comp. = " << sensor.compensate_T(tp.utemperature) << " ºC\n";
 //    int32_t press_q248 = sensor.compensate_P_(tp.upressure);
 //    out << "P comp. = " << press_q248 
 //			<< " (" << press_q248/25600 << " hPa)\n";
 
     auto press = sensor.compensate_P(tp.upressure);
-    using Hectopascal = atd::Hectopascal<atd::Decimal<int32_t, 2>>;
-    out << ">>> P comp. = " << press << " Pa (" << 
-			"(" << Hectopascal{press} << " hPa)\n";
-
-    Sensor::Pascal tmp = press;
-    atd::Hectopascal<atd::Decimal<int32_t, 3>> kk = tmp;
-    out << "tmp = " << tmp.value().internal_value() << '\n';
-    out << "kk = " << kk.value().internal_value() << '\n';
-
+    out << ">>> P comp. = " << press << " Pa (" << Sensor::Hectopascal{press}
+        << " hPa)\n";
 }
 
 void test_bmp280()
