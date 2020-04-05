@@ -27,24 +27,6 @@
 using namespace test;
 
 
-template <typename Int, int n>
-void test_ten_to_the(Int res)
-{
-    constexpr Int x = atd::ten_to_the<n, Int>();
-    CHECK_TRUE(x == res, alp::as_str() << "ten_to_the(" << n << ")");
-}
-
-
-void test_ten_to_the()
-{
-    test::interfaz("ten_to_the");
- 
-    test_ten_to_the<int, 0>(1);
-    test_ten_to_the<int, 1>(10);
-    test_ten_to_the<int, 2>(100);
-    test_ten_to_the<int, 3>(1000);
-    test_ten_to_the<int, 4>(10000);
-}
 
 template <typename Int, int ndigits>
 void test_decimal_construct(Int n, Int f, Int rep, Int res_n, Int res_f)
@@ -100,38 +82,38 @@ void test_decimal_construct()
 {
 // normal +
     std::cout << "1ª tanda\n";
-    test_decimal_construct<int, 2>(3,  0, 300, 3,00); // CUIDADO: 00 es en octal!!!
-    test_decimal_construct<int, 2>(3,  1, 301, 3,01); // NO USAR 01!!!
-    test_decimal_construct<int, 2>(3, 01, 301, 3,01);
-    test_decimal_construct<int, 2>(3, 10, 310, 3,10);
-    test_decimal_construct<int, 2>(3, 14, 314, 3,14);
-    test_decimal_construct<int, 2>(3, 141, 314,3,14);
-    test_decimal_construct<int, 2>(3, 1415, 314,3,14);
+    test_decimal_construct<int, 2>(3,0,	    300, 3,0); 
+    test_decimal_construct<int, 2>(3,1,	    310, 3,10);
+    test_decimal_construct<int, 2>(3,1,	    310, 3,10);
+    test_decimal_construct<int, 2>(3,10,    310, 3,10);
+    test_decimal_construct<int, 2>(3,14,    314, 3,14);
+    test_decimal_construct<int, 2>(3,141,   314, 3,14);
+    test_decimal_construct<int, 2>(3,1415,  314, 3,14);
 
     std::cout << "2ª tanda\n";
     test_decimal_construct<int, 1>(3, 14, 31	, 3,1);
     test_decimal_construct<int, 2>(3, 14, 314	, 3,14);
-    test_decimal_construct<int, 3>(3, 14, 3014	, 3,14);
-    test_decimal_construct<int, 4>(3, 14, 30014	, 3,14);
-    test_decimal_construct<int, 5>(3, 14, 300014, 3,14);
+    test_decimal_construct<int, 3>(3, 14, 3140	, 3,140);
+    test_decimal_construct<int, 4>(3, 14, 31400	, 3,1400);
+    test_decimal_construct<int, 5>(3, 14, 314000, 3,14000);
 
 
 // normal -
-    test_decimal_construct<int, 2>(-3,  1, -301, -3, 1);
-    test_decimal_construct<int, 2>(-3, 10, -310, -3,10);
-    test_decimal_construct<int, 2>(-3, 14, -314, -3,14);
-    test_decimal_construct<int, 2>(-3, 141, -314,-3,14);
-    test_decimal_construct<int, 2>(-3, 1415, -314,-3,14);
+    test_decimal_construct<int, 2>(-3,1,    -310,   -3,10);
+    test_decimal_construct<int, 2>(-3,10,   -310,   -3,10);
+    test_decimal_construct<int, 2>(-3,14,   -314,   -3,14);
+    test_decimal_construct<int, 2>(-3,141,  -314,   -3,14);
+    test_decimal_construct<int, 2>(-3,1415, -314,   -3,14);
 
 // degenerado
-    test_decimal_construct<int, 0>(3, 1415, 3, 3,0);
-    test_decimal_construct<int, 0>(-3, 1415, -3, -3,0);
+    test_decimal_construct<int, 0>( 3,1415,  3,  3,0);
+    test_decimal_construct<int, 0>(-3,1415, -3, -3,0);
 
 
-    test_decimal_value<int, 2>(3,  1, 1);
-    test_decimal_value<int, 2>(3, 10, 10);
-    test_decimal_value<int, 2>(3, 141, 14);
-    test_decimal_value<int, 2>(3, 1415, 14);
+    test_decimal_value<int, 2>(3,1,	10);
+    test_decimal_value<int, 2>(3,10,	10);
+    test_decimal_value<int, 2>(3,141,	14);
+    test_decimal_value<int, 2>(3,1415,	14);
 
 // normal
     test_decimal_from_internal_value<int, 1>(314, 31, 4);
@@ -338,29 +320,6 @@ void test_decimal()
 }
 
 
-template <typename Int, int n>
-void test_most_significant_digits(Int x0, Int res)
-{
-    Int x = atd::most_significant_digits<Int, n>(x0);
-    CHECK_TRUE(x == res,
-               alp::as_str() << "most_significant_digits(" << x0 << ")");
-}
-
-void test_most_significant_digits()
-{
-    test::interfaz("most_significant_digits");
-
-    test_most_significant_digits<int, 1>(1, 1);
-    test_most_significant_digits<int, 1>(12, 1);
-    test_most_significant_digits<int, 1>(123, 1);
-    test_most_significant_digits<int, 1>(1234, 1);
-
-    test_most_significant_digits<int, 2>(1, 1);
-    test_most_significant_digits<int, 2>(12, 12);
-    test_most_significant_digits<int, 2>(123, 12);
-    test_most_significant_digits<int, 2>(1234, 12);
-
-}
 
 
 int main()
@@ -368,8 +327,6 @@ int main()
 try{
     test::header("atd_decimal");
 
-    test_ten_to_the();
-    test_most_significant_digits();
     test_decimal();
 
 

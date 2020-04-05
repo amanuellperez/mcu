@@ -25,6 +25,15 @@
  *
  *  - SEE: ver std::chrono, ver atd::magnitude, tienen la misma estructura.
  *
+ *  - TODO:
+ *    ¿Cómo construir el Decimal<3> x con valor 3.001?
+ *    Si escribo Decimal<3> x{3,1}, este es "3.1", para escribir "3.001"
+ *    tendría que poder escribir Decimal<3> x{3, 001} lo cual significa
+ *    "3.(octal 01)" diferente en general de "3.001". 
+ *    Como esto es algo que no creo que use, y siempre se puede definir
+ *    Decimal<3>::from_internal_value(3001); de momento me olvido de este
+ *    problema. 
+ *
  *  - HISTORIA:
  *    A.Manuel L.Perez
  *    04/03/2020 v0.0. Versión mínima (muy limitada, para probarla).
@@ -59,11 +68,11 @@ constexpr inline To_decimal decimal_cast(const Decimal<Rep1, n1>& d)
 
     else if constexpr (n2 > n1)
         return To_decimal::from_internal_value(d.internal_value() *
-                                       ten_to_the<n2 - n1, typename To_decimal::Rep>());
+	    ten_to_the<typename To_decimal::Rep>(n2 - n1));
 
     else
         return To_decimal::from_internal_value(d.internal_value() /
-			    ten_to_the<n1 - n2, typename To_decimal::Rep>());
+			    ten_to_the<typename To_decimal::Rep>(n1 - n2));
 }
 
 
@@ -155,7 +164,7 @@ private:
     // vale 3.14
     Rep x_;
 
-    static constexpr Rep ten_to_the_n = ten_to_the<num_decimals, Rep>();
+    static constexpr Rep ten_to_the_n = ten_to_the<Rep>(num_decimals);
 
 
 // construcción
@@ -186,8 +195,15 @@ template <typename I, int n>
 constexpr Decimal<I,n>::Rep 
 	    Decimal<I,n>::construct(Rep integer_part, Rep fractional_part)
 {
-    if constexpr (n != 0)
-	fractional_part = most_significant_digits<Rep, n>(fractional_part);
+    if constexpr (n != 0){
+	int ndigits = number_of_digits(fractional_part);
+
+	if (ndigits >= n) 
+	    fractional_part = most_significant_digits<Rep, n>(fractional_part);
+	else{
+	    fractional_part *= ten_to_the<Rep>(n - ndigits);
+	}
+    }
     else
 	fractional_part = 0;
 
@@ -319,9 +335,9 @@ constexpr inline Decimal<R1, n1>
     Rep x1 = a.internal_value();
     Rep x2 = b.internal_value();
 
-    auto [q, r] = std::div(x1, x2);
+    auto [q, r] = atd::div(x1, x2);
 
-    Rep xr = q*ten_to_the<n2, Rep>() + (r * ten_to_the<n2, Rep>())/x2;
+    Rep xr = q*ten_to_the<Rep>(n2) + (r * ten_to_the<Rep>(n2))/x2;
 
     return Decimal<R1, n1>::from_internal_value(xr);
 

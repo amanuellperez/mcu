@@ -25,7 +25,8 @@
  *
  *  - HISTORIA:
  *    A.Manuel L.Perez
- *    07/03/2020 v0.0
+ *    07/03/2020 ten_to_the
+ *    05/04/2020 number_of_digits, div
  *
  ****************************************************************************/
 #include <cstdlib>
@@ -33,17 +34,14 @@
 
 namespace atd{
 
-/// Devuelve la potencia 10^n == ten_to_the<n, int>.
-template <int n, typename Int>
-inline constexpr Int ten_to_the()
+template <typename Int>
+inline constexpr Int ten_to_the(int n)
 {
-    static_assert(n >= 0, "n must be greater than 0");
-
-    if constexpr (n == 0)
+    if (n == 0)
 	return Int{1};
 
     else 
-	return Int{10} * ten_to_the<n - 1, Int>();
+	return Int{10} * ten_to_the<Int>(n - 1);
 }
 
 
@@ -58,10 +56,34 @@ inline constexpr Int most_significant_digits(Int x)
 {
     static_assert(n > 0, "n must be greater than 0");
 
-    while (x > ten_to_the<n, Int>())
+    while (x > ten_to_the<Int>(n))
 	x /= Int{10};
 
     return x;
+}
+
+// Devuelve el número de cifras que tiene x.
+// Ejemplo: number_of_digits(324) == 3;
+template <typename Int>
+inline constexpr int number_of_digits(Int x)
+{
+    int n = 1;
+
+    while (x >= Int{10}){
+	++n;
+	x /= 10;
+    }
+
+    return n;
+}
+
+
+
+// El standard no define std::div como constexpr!!!
+template <typename Int>
+inline constexpr std::pair<Int, Int> div(Int x, Int y)
+{
+    return {x / y, x % y};
 }
 
 
