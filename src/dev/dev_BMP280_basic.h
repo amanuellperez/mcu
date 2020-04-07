@@ -34,6 +34,16 @@
  *  - HISTORIA:
  *    A.Manuel L.Perez
  *    21/01/2020 v0.0
+ *    07/04/2020 v0.1
+ *		 TODO (básico):
+ *		 - BMP280_TWI: parametrizarlo pasándole el TWI_buffer_size.
+ *		 - BMP280_TWI: que se pueda elegir si conectarlo al 0x76/77
+ *			       (pasarlo como parámetro de template? sí)
+ *		 - BMP280_TWI: revisar código. Hacer esto después de
+ *			       implementar BME280/680 para comparar).
+ *			       Hay funciones genéricas de TWI que se pueden
+ *			       sacar de aquí.
+ *		 - Crear BMP280_SPI: se conecta vía SPI al sensor.
  *
  ****************************************************************************/
 
@@ -537,35 +547,35 @@ public:
     int16_t dig_P8() const {return calibration_.dig_P8;}
     int16_t dig_P9() const {return calibration_.dig_P9;}
 
-    /// Returns temperature in DegC, resolution is 0.01 DegC. 
-    /// Output value of “5123” equals 51.23 DegC.  
-    Celsius compensate_T(const int32_t& adc_T)
-    {return calibration_.compensate_T(adc_T);}
-
-    /// Returns pressure in Pa as unsigned 32 bit integer in Q24.8 format (24
-    /// integer bits and 8 fractional bits).
-    ///
-    /// Output value of “24674867” represents 
-    ///			24674867/256 = 96386.2 Pa = 963.862 hPa
-    /// Llamar primero a compensate_T y luego compensate_P <--- TODO: ordenar.
-    Pascal compensate_P(const uint32_t& adc_P) const
-    {return calibration_.compensate_P(adc_P);}
-
-    int32_t compensate_P_(const int32_t& adc_P) const
-    {return calibration_.compensate_P_(adc_P);}
 
 protected:
-// Types
+// Data
+    Calibration calibration_;
 
-// Construcción: esta clase es de implementación.
+
+// Construcción
+    // Esta clase es de implementación.
     BMP280_base() {}
 
     // No podemos inicializar el sensor hasta no haber configurado
     // SPI o TWI. Por eso no puedo hacer el init en el constructor.
     void init() { }
 
-// Data
-    Calibration calibration_;
+
+// Reading T and P
+    // Returns temperature in Celsius.
+    Celsius compensate_T(const int32_t& adc_T)
+    {return calibration_.compensate_T(adc_T);}
+
+    // Returns pressure in Pascals.
+    Pascal compensate_P(const uint32_t& adc_P) const
+    {return calibration_.compensate_P(adc_P);}
+
+
+    // Para depurar
+//    int32_t compensate_P_(const int32_t& adc_P) const
+//    {return calibration_.compensate_P_(adc_P);}
+
 
 };
 
@@ -636,8 +646,34 @@ public:
 //
 // CONSTRUCTION
     /// Inicializa el sensor. 
+    /// Verifica que haya comunicación con el sensor y que el sensor conectado
+    /// sea realmente un BMP280. Para ello comprueba que el id sea el
+    /// correspondiente.
     void init();
 
+
+// Modos de funcionamiento propuestos por BOSCH
+    void handheld_device_low_power()
+    { write_cfg_(Config::handheld_device_low_power); }
+
+    void handheld_device_dynamic()
+    { write_cfg_(Config::handheld_device_dynamic);}
+
+    void weather_monitoring()
+    { write_cfg_(Config::weather_monitoring);}
+
+    void elevator_floor_change_detector()
+    { write_cfg_(Config::elevator_floor_change_detector);}
+
+    void drop_detection()
+    { write_cfg_(Config::drop_detection);}
+
+    void indoor_navigation()
+    { write_cfg_(Config::indoor_navigation);}
+
+
+// Funciones de bajo nivel
+// -----------------------
     /// Read the device id.
     void read(Id& id) {state_ = read_object(id);}
 
@@ -645,17 +681,48 @@ public:
     void reset() { state_ = write_object(__BMP280_reset{});}
 
     /// Read the status register.
-    /// out: Status&
+//    /// out: Status&
     void read(Status& res) {state_ = read_object(res);}
 
     void read(Config& res) {state_ = read_object(res);}
     void write(Config& cfg);
 
-    /// Reads temperature in deg
-    //TODO: read_T_in_dC();
-
     void read(Temp_and_press& res) {state_ = read_object(res);}
-    
+ 
+
+    /// Returns temperature and pressure.
+    std::pair<Celsius, Pascal> T_and_P()
+    {
+	Temp_and_press tp;
+	read(tp);
+	Celsius T = compensate_T(tp.utemperature);
+	Pascal P = compensate_P(tp.upressure);
+
+	return {T, P};
+    }
+
+    /// Returns temperature and pressure (in hectopascals)
+    std::pair<Celsius, Hectopascal> T_and_hP()
+    {
+	auto [T, P] = T_and_P();
+	return {T, Hectopascal{P}};
+    }
+
+    /// Returns only the temperature.
+    Celsius T()
+    {
+	auto [T, P] = T_and_P();
+	return T;
+    }
+
+    // No suministro P().
+    // (RRR) Para medir la presión es necesario medir siempre la temperatura
+    // primero. Al no suministrar P() pero sí T_and_P() el cliente de la clase
+    // está obligado a calcular la T siempre que quiera calcular P. De esta
+    // forma evito código del tipo:
+    //		T = sensor.T();
+    //		P = sensor.P();	// Volvería a leer la T!!! Innecesario.
+    // Pascal P();
 
 // states
     bool good() const {return !error();}
@@ -679,6 +746,8 @@ private:
     //		On error, != 0.
     void read_calibration_params() {state_ = read_object(calibration_);}
 
+
+    void write_cfg_(void f(Config&));
 };
 
 
@@ -687,6 +756,15 @@ inline void BMP280_TWI::write(Config& cfg)
     TWI twi;
     cfg.twi_write(twi, slave_address);
 }
+
+inline void BMP280_TWI::write_cfg_(void f(Config&))
+{
+    Config cfg;
+    f(cfg);
+    cfg.spi3w_en = Config::spi3w_disable; // es TWI
+    write(cfg); 
+}
+
 
 }// namespace
 

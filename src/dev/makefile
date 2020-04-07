@@ -1,8 +1,8 @@
-#SOURCES= dev_DHT22.cpp	
+SOURCES= dev_BMP280_basic.cpp	
 
 
-
-INCS= 	dev_cols_glyphs.h			\
+INCS= 	dev_BMP280_basic.h	\
+		dev_cols_glyphs.h			\
 		dev_counter_CD4017B.h		\
 		dev_EEPROM_25LC256_basic.h		\
 		dev_EEPROM_iostream.h		\

@@ -18,7 +18,7 @@
 // Conectar el LCD y 3 pulsadores a los pines indicados
 #include <avr_time.h>
 #include <avr_UART.h>	// TODO: cambiar orden
-#include "dev_BMP280_basic.h"
+#include "../../dev_BMP280_basic.h"
 #include <atd_ostream.h>
 #include <cstddef>
 #include <atd_cstddef.h>
@@ -312,7 +312,7 @@ void print_cfg(std::ostream& out, dev::__BMP280_config& cfg)
 }
 
 
-void cfg(Sensor& sensor)
+void init(Sensor& sensor)
 {
     avr::UART_iostream uart;
     uart << "init ... ";
@@ -324,23 +324,26 @@ void cfg(Sensor& sensor)
     else
 	uart << "OK\n";
 
-    using Cfg = Sensor::Config;
-    Cfg cfg;
- 
-    Cfg::handheld_device_low_power(cfg);
-//    Cfg::indoor_navigation(cfg);
-    // parametros definidos en el ejemplo de Bosh.
-//    cfg.mode     = Cfg::normal_mode;
-//    cfg.osrs_t   = Cfg::oversampling_x2;
-//    cfg.osrs_p   = Cfg::oversampling_x4;
-//    cfg.t_sb     = Cfg::t_sb_1000_ms;
-//    cfg.filter   = Cfg::filter_coeff_2;
+    // Modos por defecto que propone Bosch.
+    sensor.handheld_device_low_power();
+    // sensor.handheld_device_dynamic();
+    // sensor.weather_monitoring(); <-- este es forced mode
+    // sensor.elevator_floor_change_detector();
+    // sensor.drop_detection();
+    // sensor.indoor_navigation();
 
+// Configuración a bajo nivel:
+//    using Cfg = Sensor::Config;
+//    Cfg cfg;
+//    cfg.mode   = normal_mode;
+//    cfg.osrs_p = oversampling_x16;
+//    cfg.osrs_t = oversampling_x2;
+//    cfg.filter = filter_coeff_4;
+//    cfg.t_sb   = t_sb_62_5_ms; // ODR (see table 14)
+//    cfg.spi3w_en = Cfg::spi3w_disable; // es TWI
 
-    cfg.spi3w_en = Cfg::spi3w_disable; // es TWI
+//   sensor.write(cfg); 
 
-
-    sensor.write(cfg); 
 
     if (sensor.error()){
 	uart << "Error al configurar el sensor\n";
@@ -350,7 +353,8 @@ void cfg(Sensor& sensor)
 	uart << "cfg OK\n";
 
 
-    Cfg cfg2;
+// depurar configuración:
+    Sensor::Config cfg2;
     sensor.read(cfg2);
     uart << "LEIDOS:\n";
 
@@ -376,28 +380,27 @@ void print_params(std::iostream& uart, Sensor& sensor)
 }
 
 
-void print(std::ostream& out, const Sensor::Temp_and_press& tp, Sensor& sensor)
+void debug(std::ostream& out, Sensor& sensor)
 {
-// AQUI: revisar interfaz. Mejor: sensor.T() y sensor.P()  y sensor.hP() en
-// hectoPascales (que sean sinónimos
-// de compensate_T(). Probar demás modos a ver si funcionan. 
-// Revisar: hay que medir primero la T y luego la P (funciones compensate).
-// Automatizarlo y simplificarlo.
-    out << "T (sin comp.)= " << tp.utemperature << '\n'
-	<< "P (sin comp.)= " << tp.upressure << '\n'
-	<< "T comp. = " << sensor.compensate_T(tp.utemperature) << " ºC\n";
+    Sensor::Temp_and_press tp;
+    sensor.read(tp);
+
+    out << "\nsin comp: uT = " << tp.utemperature
+	<< "; uP = " << tp.upressure << '\n';
+//	<< "comp: T = " << sensor.compensate_T(tp.utemperature) << " ºC; ";
 //    int32_t press_q248 = sensor.compensate_P_(tp.upressure);
 //    out << "P comp. = " << press_q248 
 //			<< " (" << press_q248/25600 << " hPa)\n";
 
-    auto press = sensor.compensate_P(tp.upressure);
-    out << ">>> P comp. = " << press << " Pa (" << Sensor::Hectopascal{press}
-        << " hPa)\n";
+//    auto press = sensor.compensate_P(tp.upressure);
+//    out << "P = " << press << " Pa (" << Sensor::Hectopascal{press}
+//        << " hPa)\n";
+
 }
 
 void test_bmp280()
 {
-    // init_UART();
+// init_UART();
     avr::UART_iostream uart;
     avr::basic_cfg(uart);
     uart.on();
@@ -405,20 +408,34 @@ void test_bmp280()
     uart << "----------------------------------------\n"
 	 << "BMP280\n"
 	 << "----------------------------------------\n\n";
-    // init_TWI();
+
+// init_TWI();
     // 50 kHz es la unica frecuencia de TWI que va a 1MHz.
     // 100 kHz a 8 MHz
     TWI::on<50>();
 
-    // init_sensor();
+// init_sensor();
     Sensor sensor;
-    cfg(sensor);
+    init(sensor);
 
     while (1){
-	Sensor::Temp_and_press tp;
-	sensor.read(tp);
+	debug(uart, sensor);
 
-	print(uart, tp, sensor);
+	auto [T, P] = sensor.T_and_P();
+	uart << "T_and_P = " << T << " ºC; P = " << P << " Pa\n";
+
+	auto [T2, hP] = sensor.T_and_hP();
+	uart << "T_and_hP= " << T2 << " ºC; P = " << hP << " hPa\n";
+
+	uart << "T       = " << sensor.T() << " ºC\n";
+
+	// Probar a desconectar el sensor mientras está funcionando. Tiene que
+	// generar el error correspondiente.
+	if (sensor.no_response())
+	    uart << "Error: no response\n";
+
+	if (sensor.error())
+	    uart << "Error: error en el sensor!!!\n";
 
         wait_ms(4000);
     }
