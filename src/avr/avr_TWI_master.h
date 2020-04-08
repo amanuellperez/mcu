@@ -146,13 +146,13 @@ inline bool __TWI_master_state_is_idle(__TWI_master_state a)
 //	  En principio como funcionamos por interrupciones no bloqueamos el 
 //	  microcontrolador, pero ¿cómo desbloquear la comunicación?
 //
-template <typename TWI, uint8_t buffer_size>
+template <typename TWI, typename TWI::streamsize buffer_size>
 class TWI_master{
 public:
 // Types
-    using iostate= __TWI_master_state;
-    using streamsize = uint8_t;
-    using Address = uint8_t;
+    using iostate    = __TWI_master_state;
+    using streamsize = typename TWI::streamsize;
+    using Address    = typename TWI::Address;
 
 // on/off (off (???))
     /// Enables TWI interface definiendo la frecuencia del SCL 
@@ -391,7 +391,7 @@ private:
 };
 
 
-template <typename TWI, uint8_t bsz>
+template <typename TWI, typename TWI::streamsize bsz>
 void TWI_master<TWI, bsz>::mm_start(Address slave_address)
 {
     if (state_ == iostate::sla_w)
@@ -405,14 +405,14 @@ void TWI_master<TWI, bsz>::mm_start(Address slave_address)
 }
 
 
-template <typename TWI, uint8_t bsz>
+template <typename TWI, typename TWI::streamsize bsz>
 inline void TWI_master<TWI, bsz>::mm_repeated_start(Address slave_address)
 {
     mm_start(slave_address);
 }   
 
 
-template <typename TWI, uint8_t bsz>
+template <typename TWI, typename TWI::streamsize bsz>
 void TWI_master<TWI, bsz>::mtm_send_next_byte()
 {
     if (!buffer_.is_empty()){
@@ -424,7 +424,7 @@ void TWI_master<TWI, bsz>::mtm_send_next_byte()
     }
 }
 
-template <typename TWI, uint8_t bsz>
+template <typename TWI, typename TWI::streamsize bsz>
 inline void TWI_master<TWI, bsz>::mtm_sla_w_ack()
 {
     state_ = iostate::transmitting;
@@ -432,7 +432,7 @@ inline void TWI_master<TWI, bsz>::mtm_sla_w_ack()
 }
 
 
-template <typename TWI, uint8_t bsz>
+template <typename TWI, typename TWI::streamsize bsz>
 void TWI_master<TWI, bsz>::mm_stop(iostate st)
 {
     TWI::master_transmit_stop();
@@ -440,21 +440,21 @@ void TWI_master<TWI, bsz>::mm_stop(iostate st)
     state_ = st;
 }
 
-template <typename TWI, uint8_t bsz>
+template <typename TWI, typename TWI::streamsize bsz>
 inline void TWI_master<TWI, bsz>::mtm_sla_w_nack()
 {
     mm_stop(iostate::no_response);
 }
 
 
-template <typename TWI, uint8_t bsz>
+template <typename TWI, typename TWI::streamsize bsz>
 inline void TWI_master<TWI, bsz>::mtm_data_ack()
 {
     mtm_send_next_byte();
 }
 
 
-template <typename TWI, uint8_t bsz>
+template <typename TWI, typename TWI::streamsize bsz>
 inline void TWI_master<TWI, bsz>::mtm_data_nack()
 {
     mm_stop(iostate::eow_data_nack);
@@ -463,7 +463,7 @@ inline void TWI_master<TWI, bsz>::mtm_data_nack()
 
 
 
-template <typename TWI, uint8_t bsz>
+template <typename TWI, typename TWI::streamsize bsz>
 void TWI_master<TWI, bsz>::mtm_error(iostate st)
 {
     TWI::interrupt_disable();
@@ -472,7 +472,7 @@ void TWI_master<TWI, bsz>::mtm_error(iostate st)
 
 }
 
-template <typename TWI, uint8_t bsz>
+template <typename TWI, typename TWI::streamsize bsz>
 inline void TWI_master<TWI, bsz>::bus_error()
 {
     mtm_error(iostate::bus_error);
@@ -481,27 +481,27 @@ inline void TWI_master<TWI, bsz>::bus_error()
 // Este caso lo tienen así implementado en la app-note, pero
 // ¿qué estatus puede ser este desconocido? ¿error de hardware?
 // ¿protección contra error de software?
-template <typename TWI, uint8_t bsz>
+template <typename TWI, typename TWI::streamsize bsz>
 inline void TWI_master<TWI, bsz>::unknown_error()
 {
     mtm_error(iostate::unknown_error);
 }
 
 
-template <typename TWI, uint8_t bsz>
+template <typename TWI, typename TWI::streamsize bsz>
 void TWI_master<TWI, bsz>::mrm_sla_r_ack()
 {
     state_ = iostate::receiving;
     mrm_receive_next_byte();
 }
 
-template <typename TWI, uint8_t bsz>
+template <typename TWI, typename TWI::streamsize bsz>
 inline void TWI_master<TWI, bsz>::mrm_sla_r_nack()
 {
     mm_stop(iostate::no_response);
 }
 
-template <typename TWI, uint8_t bsz>
+template <typename TWI, typename TWI::streamsize bsz>
 void TWI_master<TWI, bsz>::mrm_receive_next_byte()
 {
     if (nread_ == 1)
@@ -513,7 +513,7 @@ void TWI_master<TWI, bsz>::mrm_receive_next_byte()
 
 
 
-template <typename TWI, uint8_t bsz>
+template <typename TWI, typename TWI::streamsize bsz>
 void TWI_master<TWI, bsz>::mrm_data_ack()
 {
     buffer_.write(TWI::data()); // buffer_ << TWI::data();
@@ -524,7 +524,7 @@ void TWI_master<TWI, bsz>::mrm_data_ack()
 
 
 // Recibimos el último byte.
-template <typename TWI, uint8_t bsz>
+template <typename TWI, typename TWI::streamsize bsz>
 void TWI_master<TWI, bsz>::mrm_data_nack()
 {
     buffer_.write(TWI::data()); // buffer_ << TWI::data();
@@ -535,7 +535,7 @@ void TWI_master<TWI, bsz>::mrm_data_nack()
 
 
 // versión 2 de write_to. La necesito en TWI_master_ioxtream
-template <typename TWI, uint8_t bsz>
+template <typename TWI, typename TWI::streamsize bsz>
 TWI_master<TWI, bsz>::streamsize TWI_master<TWI, bsz>
     ::write_to(Address slave_address, const std::byte* buf, streamsize n)
 {
@@ -558,7 +558,7 @@ TWI_master<TWI, bsz>::streamsize TWI_master<TWI, bsz>
 }
 
 
-template <typename TWI, uint8_t bsz>
+template <typename TWI, typename TWI::streamsize bsz>
 TWI_master<TWI, bsz>::streamsize TWI_master<TWI, bsz>::
     write(const std::byte* buf, streamsize n)
 {
@@ -586,7 +586,7 @@ TWI_master<TWI, bsz>::streamsize TWI_master<TWI, bsz>::
 
 
 
-template <typename TWI, uint8_t bsz>
+template <typename TWI, typename TWI::streamsize bsz>
 TWI_master<TWI, bsz>::streamsize TWI_master<TWI, bsz>::read(streamsize n)
 {
     if (state_ != iostate::read_or_write or n == 0){ // precondition
@@ -611,7 +611,7 @@ TWI_master<TWI, bsz>::streamsize TWI_master<TWI, bsz>::read(streamsize n)
 }
 
 
-template <typename TWI, uint8_t bsz>
+template <typename TWI, typename TWI::streamsize bsz>
 TWI_master<TWI, bsz>::streamsize 
 TWI_master<TWI, bsz>::read_buffer(std::byte* q, streamsize N)
 {
@@ -628,7 +628,7 @@ TWI_master<TWI, bsz>::read_buffer(std::byte* q, streamsize N)
     return n;
 }
 
-template <typename TWI, uint8_t bsz>
+template <typename TWI, typename TWI::streamsize bsz>
 void TWI_master<TWI, bsz>::send_start()
 {
     if (!is_idle()){ // pre: no puede estar en medio de una transmisión
@@ -641,7 +641,7 @@ void TWI_master<TWI, bsz>::send_start()
 }
 
 
-template <typename TWI, uint8_t bsz>
+template <typename TWI, typename TWI::streamsize bsz>
 void TWI_master<TWI, bsz>::send_repeated_start()
 {
     if (state_ != iostate::eow and state_ != iostate::eor){ // precondition
@@ -657,7 +657,7 @@ void TWI_master<TWI, bsz>::send_repeated_start()
 
 // No valido la precondición: if (state_ == eor or state_ == eow).
 // De esta forma se puede parar la transmisión desde cualquier estado.
-template <typename TWI, uint8_t bsz>
+template <typename TWI, typename TWI::streamsize bsz>
 inline void TWI_master<TWI, bsz>::send_stop()
 {
     if (is_idle()) // No esta en medio de una transmisión; no es necesario stop
@@ -670,7 +670,7 @@ inline void TWI_master<TWI, bsz>::send_stop()
 
 // Para poder independizarlo del microcontrolador es necesario
 // darle un nombre a los estados que dependan del protocolo de TWI!!!
-template <typename TWI, uint8_t bsz>
+template <typename TWI, typename TWI::streamsize bsz>
 void TWI_master<TWI, bsz>::handle_interrupt()
 {
     using TWI_iostate = TWI_basic_iostate;

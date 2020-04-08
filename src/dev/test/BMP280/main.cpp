@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez <amanuel.lperez@gmail.com>
+// Copyright (C) 2020 A.Manuel L.Perez <amanuel.lperez@gmail.com>
 //
 // This file is part of the MCU++ Library.
 //
@@ -15,7 +15,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-// Conectar el LCD y 3 pulsadores a los pines indicados
 #include <avr_time.h>
 #include <avr_UART.h>	// TODO: cambiar orden
 #include "../../dev_BMP280_basic.h"
@@ -29,8 +28,9 @@
 
 // dispositivos que conectamos
 // ---------------------------
-using TWI = avr::TWI_master_ioxtream<avr::TWI_basic, TWI_buffer_size>;
 using Sensor = dev::BMP280_TWI;
+using TWI = Sensor::TWI;
+// using TWI = avr::TWI_master_ioxtream<avr::TWI_basic, TWI_buffer_size>;
 
 // para depurar
 static constexpr uint8_t slave_address = 0x76;

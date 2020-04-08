@@ -75,6 +75,11 @@ namespace avr{
  */
 class TWI_basic{
 public:
+// Types
+    using streamsize = uint8_t;
+    using Address = uint8_t;
+
+// Functions
     /// Selects the division factor for the bit rate generator.
     /// The bit rate generatro is a frequency divider which generatres the
     /// SCL clock frequency in the Master modes.

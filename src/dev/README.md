@@ -6,7 +6,7 @@ Read the spanish description.
 
 TODO: write this in english xD
 
-Tested: avr-gcc 7.4.0
+Tested: avr-gcc 9.2.0
 
 ---
 
@@ -81,4 +81,4 @@ lcd << 25;       // escribo números
 
 
 
-Probado con: avr-gcc 7.4.0
+Probado con: avr-gcc 9.2.0

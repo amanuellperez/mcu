@@ -36,7 +36,6 @@
  *    21/01/2020 v0.0
  *    07/04/2020 v0.1
  *		 TODO (básico):
- *		 - BMP280_TWI: parametrizarlo pasándole el TWI_buffer_size.
  *		 - BMP280_TWI: que se pueda elegir si conectarlo al 0x76/77
  *			       (pasarlo como parámetro de template? sí)
  *		 - BMP280_TWI: revisar código. Hacer esto después de
@@ -53,8 +52,7 @@
 #include <atd_bit.h>
 #include <atd_decimal.h>
 #include <atd_magnitude.h>
-
-constexpr uint8_t TWI_buffer_size = 100;
+#include <atd_memory.h>
 
 
 namespace avr{
@@ -80,24 +78,69 @@ static TWI_master_ioxtream<T, bsz>::streamsize
     return twi.write(q, n); // twi.close() lo llama el destructor
 }
 
+// Dispositivo de tipo memoria.
+template <typename avr::TWI_basic::Address slave_address,
+          typename avr::TWI_basic::streamsize TWI_buffer_size>
+struct TWI_master_memory_type {
+
+    using TWI = avr::TWI_master_ioxtream<avr::TWI_basic, TWI_buffer_size>;
+
+    using iostate = typename TWI::iostate;
+
+    // TODO: sacarla fuera.
+    // Lee una zona de memoria en el
+    // device conectado via TWI y la devuelve codificada en la estructura T
+    // correspondiente. La clase T contiene toda la información de cómo es
+    // almacenada en el device.
+    // Params: [out] st: objeto leido.
+    // Return value: On success 0, on error TWI::error.
+    template <typename T>
+    static iostate read(T& st)
+    {
+	static_assert (atd::is_readable(T::mem_type));
+
+	TWI twi;
+	twi.open(slave_address);
+	 
+	twi << T::address;
+
+	if (twi.error())
+	    return TWI::state();
+
+	twi.read(T::size);
+
+	twi >> st;
+
+	twi.close();
+
+	return TWI::state();
+    }
+
+
+    template <typename T>
+    static TWI::iostate write(const T& st)
+    {
+	static_assert (atd::is_writeable(T::mem_type));
+
+	TWI twi;
+	twi.open(slave_address);
+	
+
+	twi << T::address << st;
+
+	twi.close();
+
+	return TWI::state();
+	
+    }
+
+
+};
+
+
 }// namespace avr
 
 namespace dev{
-
-// TODO: genérico. Sacarlo fuera (atd_mem???)
-enum class Memory_type{
-    read = 1,
-    write = 2,
-    read_only = read,
-    write_only = write, 
-    read_and_write = read | write
-};
-
-inline constexpr bool is_readable(Memory_type mem)
-{return mem == Memory_type::read or mem == Memory_type::read_and_write;}
-
-inline constexpr bool is_writeable(Memory_type mem)
-{return mem == Memory_type::write or mem == Memory_type::read_and_write;}
 
 
 // ---------------------------------------------------------------------------
@@ -110,7 +153,7 @@ struct __BMP280_id{
     bool is_valid() const;
 
 // Memory
-    static constexpr Memory_type mem_type = Memory_type::read_only;
+    static constexpr atd::Memory_type mem_type = atd::Memory_type::read_only;
     static constexpr std::byte address{0xD0};
     static constexpr uint8_t size = 1;	
 
@@ -135,7 +178,7 @@ struct __BMP280_reset{
     static constexpr std::byte reset_cmd {0xB6};
 
 // Memoria donde guardamos el objeto
-    static constexpr Memory_type mem_type = Memory_type::write_only;
+    static constexpr atd::Memory_type mem_type = atd::Memory_type::write_only;
     static constexpr std::byte address{0xE0};
     static constexpr uint8_t size = 1;
 
@@ -161,7 +204,7 @@ struct __BMP280_status{
 
 
 // Memory
-    static constexpr Memory_type mem_type = Memory_type::read_only;
+    static constexpr atd::Memory_type mem_type = atd::Memory_type::read_only;
     static constexpr std::byte address{0xF3};
     static constexpr uint8_t size = 1;	
 
@@ -224,7 +267,7 @@ struct __BMP280_config{
 
 
 // Memory
-    static constexpr Memory_type mem_type = Memory_type::read_and_write;
+    static constexpr atd::Memory_type mem_type = atd::Memory_type::read_and_write;
     static constexpr std::byte address{0xF4};
     static constexpr uint8_t size = 2;	
 
@@ -391,7 +434,7 @@ struct __BMP280_temp_and_press{
     int32_t utemperature; // uncompensated temperature
 
 // Memory
-    static constexpr Memory_type mem_type = Memory_type::read_and_write;
+    static constexpr atd::Memory_type mem_type = atd::Memory_type::read_and_write;
     static constexpr std::byte address {0xF7};
     static constexpr uint8_t size = 6;
 
@@ -480,7 +523,7 @@ struct __BMP280_calibration{
 
 
 // Memory
-    static constexpr Memory_type mem_type = Memory_type::read_only;
+    static constexpr atd::Memory_type mem_type = atd::Memory_type::read_only;
     static constexpr std::byte address {0x88};
     static constexpr uint8_t size = 24;
 
@@ -581,71 +624,29 @@ protected:
 
 
 
-
-// TODO: convertirla en template, para independizarlo del avr.
-// TODO: elegir buffer_size.
-class BMP280_TWI : public BMP280_base {
-public:
-    using TWI = avr::TWI_master_ioxtream<avr::TWI_basic, TWI_buffer_size>;
-    using State = TWI::iostate;
-
-    // TODO: esta es una función genérica: lee una zona de memoria en el
-    // device conectado via TWI y la devuelve codificada en la estructura T
-    // correspondiente. La clase T contiene toda la información de cómo es
-    // almacenada en el device.
-    // Params: [out] st: objeto leido.
-    // Return value: On success 0, on error TWI::error.
-    // TODO: funcion genérica, sacarla fuera (meterla en TWI???)
-    template <typename T>
-    static TWI::iostate read_object(T& st)
-    {
-	static_assert (is_readable(T::mem_type));
-
-	TWI twi;
-	twi.open(slave_address);
-	 
-	twi << T::address;
-
-	if (twi.error())
-	    return TWI::state();
-
-	twi.read(T::size);
-
-	twi >> st;
-
-	twi.close();
-
-	return TWI::state();
-    }
-
-
-    // TODO: funcion genérica, sacarla fuera (meterla en TWI???)
-    template <typename T>
-    static TWI::iostate write_object(const T& st)
-    {
-	static_assert (is_writeable(T::mem_type));
-
-	TWI twi;
-	twi.open(slave_address);
-	
-
-	twi << T::address << st;
-
-	twi.close();
-
-	return TWI::state();
-	
-    }
-
-
-
 // (RRR) Gestión de errores:
 //	 Voy a usar el equivalente a errno local a través de un state.
 //	 Todas las operaciones que puedan fallar modificarán el state,
 //	 quedando almacenado ahí el exito/fracaso de la operación.
 //
-// CONSTRUCTION
-    /// Inicializa el sensor. 
+// TODO: convertirla en template, para independizarlo del avr.
+// TODO: elegir buffer_size.
+class BMP280_TWI : public BMP280_base {
+public:
+    static constexpr uint8_t TWI_buffer_size = 100; // TODO: ajustarlo al mínimo?
+    using TWI = avr::TWI_master_ioxtream<avr::TWI_basic, TWI_buffer_size>;
+    using State = TWI::iostate;
+
+    // TODO: el último bit se puede elegir:
+    // Connecting SDO to GND results in slave address 1110110 (0x76);
+    // connection it to V_DDIO results in 1110111 (0x77).
+    static constexpr TWI::Address slave_address = 0x76;
+
+    using TWI_port =
+		   avr::TWI_master_memory_type<slave_address, TWI_buffer_size>;
+
+    // CONSTRUCTION
+    /// Inicializa el sensor.
     /// Verifica que haya comunicación con el sensor y que el sensor conectado
     /// sea realmente un BMP280. Para ello comprueba que el id sea el
     /// correspondiente.
@@ -675,19 +676,19 @@ public:
 // Funciones de bajo nivel
 // -----------------------
     /// Read the device id.
-    void read(Id& id) {state_ = read_object(id);}
+    void read(Id& id) {state_ = TWI_port::read(id);}
 
     /// The device is reset using the complete power-on-reset procedure.
-    void reset() { state_ = write_object(__BMP280_reset{});}
+    void reset() { state_ = TWI_port::write(__BMP280_reset{});}
 
     /// Read the status register.
 //    /// out: Status&
-    void read(Status& res) {state_ = read_object(res);}
+    void read(Status& res) {state_ = TWI_port::read(res);}
 
-    void read(Config& res) {state_ = read_object(res);}
+    void read(Config& res) {state_ = TWI_port::read(res);}
     void write(Config& cfg);
 
-    void read(Temp_and_press& res) {state_ = read_object(res);}
+    void read(Temp_and_press& res) {state_ = TWI_port::read(res);}
  
 
     /// Returns temperature and pressure.
@@ -736,15 +737,11 @@ public:
 private:
     State state_;
 
-    // TODO: el último bit se puede elegir:
-    // Connecting SDO to GND results in slave address 1110110 (0x76);
-    // connection it to V_DDIO results in 1110111 (0x77).
-    static constexpr TWI::Address slave_address = 0x76;
 
 
     // Returns: On success, 0.
     //		On error, != 0.
-    void read_calibration_params() {state_ = read_object(calibration_);}
+    void read_calibration_params() {state_ = TWI_port::read(calibration_);}
 
 
     void write_cfg_(void f(Config&));

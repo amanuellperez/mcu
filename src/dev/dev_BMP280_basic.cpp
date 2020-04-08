@@ -63,7 +63,7 @@ void BMP280_TWI::init()
     BMP280_base::init();
 
     __BMP280_id id;
-    state_ = read_object(id);
+    state_ = TWI_port::read(id);
 
     if (error()){
 	state_ = TWI::state();
