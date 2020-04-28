@@ -146,13 +146,16 @@ inline bool __TWI_master_state_is_idle(__TWI_master_state a)
 //	  En principio como funcionamos por interrupciones no bloqueamos el 
 //	  microcontrolador, pero ¿cómo desbloquear la comunicación?
 //
-template <typename TWI, typename TWI::streamsize buffer_size>
+template <typename TWI, typename TWI::streamsize buffer_size0>
 class TWI_master{
 public:
 // Types
     using iostate    = __TWI_master_state;
     using streamsize = typename TWI::streamsize;
     using Address    = typename TWI::Address;
+
+// cfg data
+    static constexpr streamsize buffer_size = buffer_size0;
 
 // on/off (off (???))
     /// Enables TWI interface definiendo la frecuencia del SCL 
@@ -305,7 +308,7 @@ private:
     //	Antes funcionaba bien y de repente dejó de funcionar!!!)
     static inline volatile iostate state_;
 
-    static inline atd::Circular_array<std::byte, buffer_size> buffer_;
+    static inline atd::Circular_array<std::byte, buffer_size0> buffer_;
     static inline streamsize nread_;   // num. bytes a leer (solo para receiver mode)
 
     // (RRR) El usuario pide leer o escribir. Para ello:

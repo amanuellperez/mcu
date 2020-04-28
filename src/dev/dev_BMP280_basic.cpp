@@ -58,39 +58,6 @@ int32_t __BMP280_calibration::compensate_P_(const int32_t& adc_P) const
 
 
 
-void BMP280_TWI::init()
-{
-    BMP280_base::init();
-
-    __BMP280_id id;
-    state_ = TWI_port::read(id);
-
-    if (error()){
-	state_ = TWI::state();
-	return;
-    }
-
-    if (!id.is_valid()){
-	state_ = TWI::state();
-	return;
-    }
-
-    reset();	// Los de Bosch en el ejemplo hacen un reset antes de leer
-		// los params.
-    if (error()){
-	state_ = TWI::state();
-	return;
-    }
-
-    read_calibration_params();
-
-    if (error()){
-	state_ = TWI::state();
-	return;
-    }
-
-}
-
 void __BMP280_temp_and_press::mem_to_struct(const std::byte* mem,
                                             __BMP280_temp_and_press& st)
 {

@@ -28,9 +28,14 @@
 
 // dispositivos que conectamos
 // ---------------------------
-using Sensor = dev::BMP280_TWI;
-using TWI = Sensor::TWI;
-// using TWI = avr::TWI_master_ioxtream<avr::TWI_basic, TWI_buffer_size>;
+// Dispositivo TWI al que conectamos
+static constexpr uint8_t TWI_buffer_size = 100; 
+using TWI_master = avr::TWI_master<avr::TWI_basic, TWI_buffer_size>;
+
+
+// Dispositivos
+using TWI = avr::TWI_master_ioxtream<TWI_master>;
+using Sensor = dev::BMP280_TWI<TWI_master>;
 
 // para depurar
 static constexpr uint8_t slave_address = 0x76;
@@ -412,7 +417,7 @@ void test_bmp280()
 // init_TWI();
     // 50 kHz es la unica frecuencia de TWI que va a 1MHz.
     // 100 kHz a 8 MHz
-    TWI::on<50>();
+    TWI_master::on<50>();
 
 // init_sensor();
     Sensor sensor;
@@ -453,7 +458,7 @@ int main()
 
 ISR(TWI_vect)
 {
-    TWI::handle_interrupt();
+    TWI_master::handle_interrupt();
 }
 
 

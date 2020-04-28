@@ -95,10 +95,12 @@ namespace avr{
  *	(Regla: ante la duda, implementación mínima. Siempre se puede añadir
  *	en el futuro sin cambiar el código actual.)
  */
-template <typename TWI_basic, uint8_t buffer_size>
+//template <typename TWI_basic, uint8_t buffer_size>
+template <typename TWI_master>
 class TWI_master_ioxtream{
 public:
-    using TWI = TWI_master<TWI_basic, buffer_size>;   
+    // using TWI = TWI_master<TWI_basic, buffer_size>;   
+    using TWI = TWI_master;
     using Address = TWI::Address;
     using streamsize = TWI::streamsize;
     using iostate = TWI::iostate;   // para depurar
@@ -113,12 +115,14 @@ public:
     ~TWI_master_ioxtream() {close();}
 
 // init
-    /// Enables TWI interface definiendo la frecuencia del SCL 
-    /// a la que vamos a operar.
-    /// f_scl = frecuencia en kilohercios de SCL (tipica: 100 y 400 kHz).
-    /// f_clock = frecuencia a la que funciona el reloj del avr.
-    template <uint16_t f_scl, uint32_t f_clock = MCU_CLOCK_FREQUENCY_IN_HZ>
-    static void on() {TWI::template on<f_scl, f_clock>();}
+// El cliente es el responsable de la gestión de TWI. Es él el que se encarga
+// de encenderlo o apagarlo.
+//    /// Enables TWI interface definiendo la frecuencia del SCL 
+//    /// a la que vamos a operar.
+//    /// f_scl = frecuencia en kilohercios de SCL (tipica: 100 y 400 kHz).
+//    /// f_clock = frecuencia a la que funciona el reloj del avr.
+//    template <uint16_t f_scl, uint32_t f_clock = MCU_CLOCK_FREQUENCY_IN_HZ>
+//    static void on() {TWI::template on<f_scl, f_clock>();}
 
     /// Reinicializa el dispositivo.
     static void reset() {TWI::reset();}
@@ -183,8 +187,10 @@ public:
     streamsize write(const std::byte* q, streamsize n);
 
 // ISR
-    // FUNDAMENTAL: no olvidar llamar a esta función!!!
-    static void handle_interrupt() {TWI::handle_interrupt();}
+//    // FUNDAMENTAL: no olvidar llamar a esta función!!! <-- la llama el
+//    main, usando directamente TWI_master o TWI_multimaster. Nosotros no
+//    podemos decidir aquí!!!
+//    static void handle_interrupt() {TWI::handle_interrupt();}
 
 
 // estados
@@ -253,8 +259,8 @@ private:
 
 };
 
-template <typename T, uint8_t bsz>
-inline bool TWI_master_ioxtream<T, bsz>::open(Address slave_address)
+template <typename T>
+inline bool TWI_master_ioxtream<T>::open(Address slave_address)
 {
     if (!TWI::is_idle())
 	return false; // ¿hacer mejor TWI::reset()?
@@ -267,8 +273,8 @@ inline bool TWI_master_ioxtream<T, bsz>::open(Address slave_address)
 }
 
 
-template <typename T, uint8_t bsz>
-inline void TWI_master_ioxtream<T, bsz>::close()
+template <typename T>
+inline void TWI_master_ioxtream<T>::close()
 {
     if (TWI::is_idle())	// No estamos dentro de una transmisión
 	return;
@@ -280,8 +286,8 @@ inline void TWI_master_ioxtream<T, bsz>::close()
     TWI::send_stop();
 }
 
-template <typename T, uint8_t bsz>
-void TWI_master_ioxtream<T, bsz>::read(streamsize n)
+template <typename T>
+void TWI_master_ioxtream<T>::read(streamsize n)
 {
     if (TWI::is_idle()) 
 	TWI::send_start();
@@ -313,9 +319,9 @@ void TWI_master_ioxtream<T, bsz>::read(streamsize n)
 //  otras llama a read(q,n)!!!  Luego con esta forma de razonar llamaré a
 //  read(n) y luego a read(q,n).
 //	
-template <typename T, uint8_t bsz>
-TWI_master_ioxtream<T, bsz>::streamsize
-TWI_master_ioxtream<T, bsz>::read(std::byte* q, streamsize n)
+template <typename T>
+TWI_master_ioxtream<T>::streamsize
+TWI_master_ioxtream<T>::read(std::byte* q, streamsize n)
 {
 //    read(n); (*)
     
@@ -326,9 +332,9 @@ TWI_master_ioxtream<T, bsz>::read(std::byte* q, streamsize n)
 
 
 // pre: state() == read_or_write() or state() == transmitting()
-template <typename T, uint8_t bsz>
-TWI_master_ioxtream<T, bsz>::streamsize 
-TWI_master_ioxtream<T, bsz>::write(const std::byte* q, streamsize n)
+template <typename T>
+TWI_master_ioxtream<T>::streamsize 
+TWI_master_ioxtream<T>::write(const std::byte* q, streamsize n)
 {
     if (TWI::read_or_write())
 	return TWI::write_to(slave_address_, q, n);

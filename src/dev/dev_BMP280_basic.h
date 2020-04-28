@@ -52,93 +52,9 @@
 #include <atd_bit.h>
 #include <atd_decimal.h>
 #include <atd_magnitude.h>
-#include <atd_memory.h>
+#include <avr_TWI_master_memory_type.h>
 
 
-namespace avr{
-
-
-// TODO: quiero que sea
-//	write(TWI, q, n); <-- es más estandard!!! TWI sería el flujo!!!
-//  en lugar de 
-//	write(TWI, slave_addres, q, n);
-//  luego le tenemos que pasar el slave de alguna otra forma.
-//  1. write(TWI<slave_address>, q, n);
-//  2. write(TWI_slave{slave}, q, n);
-//  3. ???
-template <typename T, uint8_t bsz>
-static TWI_master_ioxtream<T, bsz>::streamsize
-    write(TWI_master_ioxtream<T, bsz>& twi,
-	  typename TWI_master_ioxtream<T, bsz>::Address slave_address,
-	  const std::byte* q,
-	  typename TWI_master_ioxtream<T, bsz>::streamsize n)
-{
-    twi.open(slave_address);
-     
-    return twi.write(q, n); // twi.close() lo llama el destructor
-}
-
-// Dispositivo de tipo memoria.
-template <typename avr::TWI_basic::Address slave_address,
-          typename avr::TWI_basic::streamsize TWI_buffer_size>
-struct TWI_master_memory_type {
-
-    using TWI = avr::TWI_master_ioxtream<avr::TWI_basic, TWI_buffer_size>;
-
-    using iostate = typename TWI::iostate;
-
-    // TODO: sacarla fuera.
-    // Lee una zona de memoria en el
-    // device conectado via TWI y la devuelve codificada en la estructura T
-    // correspondiente. La clase T contiene toda la información de cómo es
-    // almacenada en el device.
-    // Params: [out] st: objeto leido.
-    // Return value: On success 0, on error TWI::error.
-    template <typename T>
-    static iostate read(T& st)
-    {
-	static_assert (atd::is_readable(T::mem_type));
-
-	TWI twi;
-	twi.open(slave_address);
-	 
-	twi << T::address;
-
-	if (twi.error())
-	    return TWI::state();
-
-	twi.read(T::size);
-
-	twi >> st;
-
-	twi.close();
-
-	return TWI::state();
-    }
-
-
-    template <typename T>
-    static TWI::iostate write(const T& st)
-    {
-	static_assert (atd::is_writeable(T::mem_type));
-
-	TWI twi;
-	twi.open(slave_address);
-	
-
-	twi << T::address << st;
-
-	twi.close();
-
-	return TWI::state();
-	
-    }
-
-
-};
-
-
-}// namespace avr
 
 namespace dev{
 
@@ -628,22 +544,24 @@ protected:
 //	 Voy a usar el equivalente a errno local a través de un state.
 //	 Todas las operaciones que puedan fallar modificarán el state,
 //	 quedando almacenado ahí el exito/fracaso de la operación.
-//
-// TODO: convertirla en template, para independizarlo del avr.
-// TODO: elegir buffer_size.
+template <typename TWI_master>
 class BMP280_TWI : public BMP280_base {
 public:
     static constexpr uint8_t TWI_buffer_size = 100; // TODO: ajustarlo al mínimo?
-    using TWI = avr::TWI_master_ioxtream<avr::TWI_basic, TWI_buffer_size>;
-    using State = TWI::iostate;
+
+    static_assert(TWI_buffer_size <= TWI_master::buffer_size,
+                  "Buffer too small!!! Choose a bigger one.");
+
+    using TWI = avr::TWI_master_ioxtream<TWI_master>;
 
     // TODO: el último bit se puede elegir:
     // Connecting SDO to GND results in slave address 1110110 (0x76);
     // connection it to V_DDIO results in 1110111 (0x77).
-    static constexpr TWI::Address slave_address = 0x76;
+    static constexpr TWI_master::Address slave_address = 0x76;
 
-    using TWI_port =
-		   avr::TWI_master_memory_type<slave_address, TWI_buffer_size>;
+    using TWI_port = avr::TWI_master_memory_type<slave_address, TWI_master>;
+
+    using State = TWI_master::iostate;
 
     // CONSTRUCTION
     /// Inicializa el sensor.
@@ -727,16 +645,15 @@ public:
 
 // states
     bool good() const {return !error();}
-    bool error() const {return TWI::error(state_);}
+    bool error() const {return TWI_master::error(state_);}
 
-    bool no_response() const {return state_ == TWI::iostate::no_response;}
+    bool no_response() const {return state_ == TWI_master::iostate::no_response;}
 
     // para depurar
     State state() const {return state_;}
 
 private:
     State state_;
-
 
 
     // Returns: On success, 0.
@@ -748,13 +665,15 @@ private:
 };
 
 
-inline void BMP280_TWI::write(Config& cfg)
+template <typename TWI>
+inline void BMP280_TWI<TWI>::write(Config& cfg)
 {
     TWI twi;
     cfg.twi_write(twi, slave_address);
 }
 
-inline void BMP280_TWI::write_cfg_(void f(Config&))
+template <typename TWI>
+inline void BMP280_TWI<TWI>::write_cfg_(void f(Config&))
 {
     Config cfg;
     f(cfg);
@@ -762,6 +681,40 @@ inline void BMP280_TWI::write_cfg_(void f(Config&))
     write(cfg); 
 }
 
+
+template <typename TWI>
+inline void BMP280_TWI<TWI>::init()
+{
+    BMP280_base::init();
+
+    __BMP280_id id;
+    state_ = TWI_port::read(id);
+
+    if (error()){
+	state_ = TWI::state();
+	return;
+    }
+
+    if (!id.is_valid()){
+	state_ = TWI::state();
+	return;
+    }
+
+    reset();	// Los de Bosch en el ejemplo hacen un reset antes de leer
+		// los params.
+    if (error()){
+	state_ = TWI::state();
+	return;
+    }
+
+    read_calibration_params();
+
+    if (error()){
+	state_ = TWI::state();
+	return;
+    }
+
+}
 
 }// namespace
 

@@ -23,7 +23,10 @@
 
 
 constexpr uint8_t TWI_buffer_size = 100;
-using TWI = avr::TWI_master_ioxtream<avr::TWI_basic, TWI_buffer_size>;
+using TWI_master = avr::TWI_master<avr::TWI_basic, TWI_buffer_size>;
+
+//using TWI = avr::TWI_master_ioxtream<avr::TWI_basic, TWI_buffer_size>;
+using TWI = avr::TWI_master_ioxtream<TWI_master>;
 
 constexpr uint8_t slave_address = 0x10;
 
@@ -427,7 +430,7 @@ int main()
     uart << "Empezando como MASTER ioxtream\n";
     uart << "* * * * * * * * * * * * * * * * * * * * * * * * * * * *\n";
 
-    TWI::on<50>();
+    TWI_master::on<50>();
 
     uart << "TWI enable\n";
  
@@ -438,6 +441,6 @@ int main()
 
 ISR(TWI_vect)
 {
-    TWI::handle_interrupt();
+    TWI_master::handle_interrupt();
 }
 
