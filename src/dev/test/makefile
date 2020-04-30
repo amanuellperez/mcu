@@ -1,4 +1,5 @@
 DIRS = CD4017B			\
+	   DS1307			\
 	EEPROM_25LC256		\
 	EEPROM_iostream		\
 	EEPROM_lineal		\
