@@ -16,7 +16,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 // Primera prueba para ver si todo conecta bien
-#include "../../alp_avr.h"
 #include "../../avr_pin.h"
 #include "../../avr_time.h"
 #include "../../avr_UART.h"
@@ -29,6 +28,8 @@ struct Num_steps_n{};
 
 // Al definir grados como int16_t podemos ir desde -32.768 hasta 32.767, que
 // supone que podemos dar como mucho 91 vueltas (91*360 = 32.760)
+// TODO: he eliminado Integral_type. Ahora está atd_magnitude. Crear Degree o
+// algo así para manejar grados sexagesimales.
 using Num_grados = alp::Integral_type<Num_grados_n, int16_t>;
 
 // Al definir stes como uint16_t podemos dar hasta 327 vueltas en el sentido

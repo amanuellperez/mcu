@@ -19,12 +19,8 @@
 #include "../../../avr_timer1_basic.h"
 #include "../../../avr_time.h"
 
-#include <stdlib.h>
-#include <std_type_traits.h>
 
-using namespace avr;
-
-using Timer = Timer1_fast_PWM;
+using Timer = avr::Timer1_fast_PWM;
 
 //constexpr uint16_t period_in_us = 1024;
 constexpr uint16_t period_in_us = 64;
@@ -32,8 +28,7 @@ constexpr uint16_t period_in_us = 64;
 
 int main()
 {
-//    UART_ostream uart;
-    uint16_t ocr1a = 300;
+    uint16_t ocr1a = 100;
     uint16_t ocr1b = 300;
 
     Timer::top_ICR(1000);

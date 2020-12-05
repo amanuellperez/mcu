@@ -4,4 +4,6 @@ SOURCES= main.cpp
 
 MCU = atmega328p
 
-include $(AVR_GENRULES)
+#F_CPU=1000000UL
+
+include $(APP_GENRULES)

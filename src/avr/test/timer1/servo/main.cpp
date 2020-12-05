@@ -21,25 +21,25 @@
 // A través de UART darle los valores de los pulsos que se quiera. 
 // (Con los servos que tengo van de 7 ms hasta 2.7 ms)
 #include "../../../avr_UART.h"
-#include "../../../avr_timer1.h"
+#include "../../../avr_timer1_basic.h"
 #include "../../../avr_time.h"
 
-#include <stdlib.h>
-#include <std_type_traits.h>
 
-using namespace avr;
-
-using Timer = Timer1_fast_PWM;
+using Timer = avr::Timer1_fast_PWM;
 
 constexpr uint16_t period_in_us = 1;
 
 
 int main()
 {
-    UART_ostream uart;
+    avr::UART_iostream uart;
+    avr::basic_cfg(uart);
+    uart.on();
 
-    Timer::top_ICR1(20000UL);
-    Timer::registro_ICR1(20000UL);
+
+    Timer::top_ICR(20000UL); // 20000 us = 20 ms
+    Timer::output_compare_register_A(1500UL); // 1.5 ms = posición central +-
+
     Timer::pin_A_non_inverting_mode();
     Timer::on<period_in_us>();
 
@@ -47,10 +47,10 @@ int main()
     while(1){
 	uint16_t t;
 	uart << "Duración del pulso (de 1000 a 2000 us): ";
-	UART::receive(t);
+	uart >> t;
 	
 	uart << t << "\n\r"; // echo
-	Timer::comparadorA(t);
+	Timer::output_compare_register_A(t);
 
 	wait_ms(1000);
     }

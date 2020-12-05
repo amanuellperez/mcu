@@ -26,8 +26,8 @@
 
 using Timer = avr::Timer1_normal_mode;
 
-//constexpr uint16_t period_in_us = 1024;
-constexpr uint16_t period_in_us = 256;
+constexpr uint16_t period_in_us = 1024;
+//constexpr uint16_t period_in_us = 256;
 
 volatile uint32_t contador = 0;
 

@@ -22,9 +22,8 @@
 #include "../../../avr_timer1_basic.h"
 #include "../../../avr_time.h"
 
-using namespace avr;
 
-using Timer = Timer1_CTC_mode;
+using Timer = avr::Timer1_CTC_mode;
 
 // Probar cada periodo con diferentes frecuencias: 1 MHz y 8 MHz.
 // Para los 8 MHz hay que definir el fuse correspondiente y F_CPU en el
