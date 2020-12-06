@@ -33,9 +33,8 @@
 #include "../../avr_SPI.h"
 #include "../../avr_pin.h"
 
-using namespace avr;
 
-using SPI = SPI_master;
+using SPI = avr::SPI;
 
 constexpr uint8_t num_pin_RCLK = 12;
 constexpr uint16_t periodo_en_us = 2;	// 2 microsegundos!!!
@@ -44,20 +43,20 @@ constexpr uint8_t num_pin_no_chip_select = 16;
 
 int main() 
 {
-    Pin_de_salida<num_pin_no_chip_select> no_CS;
+    avr::Output_pin<num_pin_no_chip_select> no_CS;
 
-    SPI::on<periodo_en_us>();
+    SPI::on_as_a_master<periodo_en_us>();
     SPI::spi_mode(0,0);
     SPI::data_order_MSB();
 
     no_CS.write_one();
 
-    Pin_de_salida<num_pin_RCLK> pin_vuelca_buffer;
+    avr::Output_pin<num_pin_RCLK> pin_vuelca_buffer;
 
     while (1) {
-	for (uint8_t p = 1; p != 0; p <<= 1){
+	for (std::byte p{1}; p != std::byte{0}; p <<= 1){
 	    SPI::write(p);
-	    pin_vuelca_buffer.pulso_1us();
+	    pin_vuelca_buffer.pulse_of_1us();
 	    wait_ms(100);
 	}
   } // while(1)

@@ -321,7 +321,8 @@ struct write_range_bits{
  *
  *  DUDA: is_one_bit<1>::of_register(x) vs is_one_bit<1>::of(x)???
  *  El primero al usarlo me resulta más dificil de leer. Es mejor lo criptico,
- *  pero la regla es evisa ser criptico!!! Pruebo con of!!
+ *  pero la regla es evisa ser criptico!!! Pruebo con of!! 
+ *  Pero me gusta también of_register!!! Que el tiempo y el uso elija.
  */
 template <int pos>
 struct is_one_bit{
@@ -329,17 +330,30 @@ struct is_one_bit{
     static bool of(const Int& x){
 	return static_cast<bool>(x & (Int{1} << pos));
     }
+
+    template <typename Int>
+    static bool of_register(const Int& x){
+	return of(x);
+    }
 };
 
 
 /*!
  *  \brief  is_zero_bit<1>::of_register(x)?
+ *
+ *  DUDA: mejor solo 'of' o 'of_register'. En código ahora me gusta más la
+ *  segunda opción. Que la experiencia lo elija.
  */
 template <int pos>
 struct is_zero_bit{
     template <typename Int>
     static bool of(const Int& x){
 	return !static_cast<bool>(x & (Int{1} << pos));
+    }
+
+    template <typename Int>
+    static bool of_register(const Int& x){
+	return of(x);
     }
 };
 

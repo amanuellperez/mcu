@@ -32,16 +32,18 @@
  *  - TODO: eliminar Register por las nuevas funciones.
  *
  *   - HISTORIA:
- *           alp  - 26/07/2017 Escrito v0.0
- *		    29/01/2018 v0.1
- *		    05/08/2019 Acabo el traductor.
- *			       TODO: falta probar todas las funciones.
- *			       ¿Cómo probarlas? De momento según vaya haciendo
- *			       proyectos, pero sería mejor hacer un test
- *			       detallado.
+ *    A.Manuel L.Perez
+ *	26/07/2017 Escrito v0.0
+ *	29/01/2018 v0.1
+ *	05/08/2019 Acabo el traductor.
+ *		TODO: falta probar todas las funciones.
+ *		¿Cómo probarlas? De momento según vaya haciendo
+ *		proyectos, pero sería mejor hacer un test
+ *		detallado.
  *
  ****************************************************************************/
-#include <atd_register.h>
+
+#include <atd_bit.h>
 #include "avr_cfg.h"
 
 namespace avr{
@@ -86,8 +88,9 @@ public:
     /// Datasheet: AREF, Internal Vref turned off
     static void AREF_external()
     {// 00
-      atd::Register(ADMUX).write_zero_bit<REFS1>();
-      atd::Register(ADMUX).write_zero_bit<REFS0>();
+	atd::write_bits<REFS1, REFS0>::to<0,0>::in(ADMUX);
+//      atd::Register(ADMUX).write_zero_bit<REFS1>();
+//      atd::Register(ADMUX).write_zero_bit<REFS0>();
     }
 
     /// Tomamos AREF = AVCC.
@@ -96,16 +99,18 @@ public:
     /// La datasheet lo llama "AVCC with external capacitor at AREF pin"
     static void AREF_internal_to_AVCC()
     {// 01
-      atd::Register(ADMUX).write_zero_bit<REFS1>();
-      atd::Register(ADMUX).write_one_bit<REFS0>();
+	atd::write_bits<REFS1, REFS0>::to<0,1>::in(ADMUX);
+//      atd::Register(ADMUX).write_zero_bit<REFS1>();
+//      atd::Register(ADMUX).write_one_bit<REFS0>();
     }
 
     /// Datasheet: Internal 1.1V Voltage Reference with external capacitor 
     /// at AREF pin
     static void AREF_internal_to_1_1V()
     {// 11
-      atd::Register(ADMUX).write_one_bit<REFS1>();
-      atd::Register(ADMUX).write_one_bit<REFS0>();
+	atd::write_bits<REFS1, REFS0>::to<1,1>::in(ADMUX);
+//      atd::Register(ADMUX).write_one_bit<REFS1>();
+//      atd::Register(ADMUX).write_one_bit<REFS0>();
     }
 
 
@@ -129,12 +134,14 @@ public:
     //		    9 8 7 6 5 4 3 2 | 1 0 - - - - - - 
     //
     static void left_adjust_result()
-    { atd::Register(ADMUX).write_one_bit<ADLAR>(); }
+    {atd::write_bits<ADLAR>::to<1>::in(ADMUX);}
+//    { atd::Register(ADMUX).write_one_bit<ADLAR>(); }
 
     /// Esta es la opción por defecto.
     /// Ajusta a la derecha ADCH-ADCL. Ver left_adjust_result.
     static void right_adjust_result()
-    { atd::Register(ADMUX).write_zero_bit<ADLAR>();}
+    {atd::write_bits<ADLAR>::to<0>::in(ADMUX);}
+//    { atd::Register(ADMUX).write_zero_bit<ADLAR>();}
 
     /// Seleccionamos el pin en el que queremos que el ADC lea.
     /// El número de pin pasado es el pin del chip real. De esta forma
@@ -148,11 +155,13 @@ public:
 
     /// Enable ADC. Esta sería la función on()
     static void enable() 
-    { atd::Register(ADCSRA).write_one_bit<ADEN>(); }
+    {atd::write_bits<ADEN>::to<1>::in(ADCSRA);}
+//    { atd::Register(ADCSRA).write_one_bit<ADEN>(); }
 
     /// Disable ADC.
     static void disable() 
-    { atd::Register(ADCSRA).write_zero_bit<ADEN>(); }
+    {atd::write_bits<ADEN>::to<0>::in(ADCSRA);}
+//    { atd::Register(ADCSRA).write_zero_bit<ADEN>(); }
 
 
     /// Indicamos al ADC que proceda a leer del pin el valor.
@@ -160,33 +169,39 @@ public:
     /// En free running mode: write this bit to one to start the first
     /// conversion.
     static void start_conversion() 
-    { atd::Register(ADCSRA).write_one_bit<ADSC>(); }
+    {atd::write_bits<ADSC>::to<1>::in(ADCSRA);}
+//    { atd::Register(ADCSRA).write_one_bit<ADSC>(); }
 
     /// El ADC ¿ha acabado la conversión?
     // En single mode: ADCSRA.ADSC será 1 mientras la conversión esté en
     // progreso. Pasará a 1 cuando acabe.
     static bool is_the_conversion_complete()
-    { return atd::Register(ADCSRA).is_zero_bit<ADSC>(); }
+    {return atd::is_zero_bit<ADSC>::of_register(ADCSRA);}
+//    { return atd::Register(ADCSRA).is_zero_bit<ADSC>(); }
 
     /// Auto-trigger enable. 
     /// The ADC will start a conversion on a positive edge of the selected 
     /// trigger signal. Hay que seleccionar la trigger signal.
     static void auto_trigger_enable()
-    { atd::Register(ADCSRA).write_one_bit<ADATE>(); }
+    {atd::write_bits<ADATE>::to<1>::in(ADCSRA);}
+//    { atd::Register(ADCSRA).write_one_bit<ADATE>(); }
 
     /// Auto trigger disable.
     static void auto_trigger_disable()
-    { atd::Register(ADCSRA).write_zero_bit<ADATE>(); }
+    {atd::write_bits<ADATE>::to<0>::in(ADCSRA);}
+//    { atd::Register(ADCSRA).write_zero_bit<ADATE>(); }
 
     /// Activamos the ADC Conversion Complete Interrupt.
     /// When this bit is written to one and the I-bit in SREG is set, the
     /// ADC Conversion Conversion Interrupt is activated.
     static void interrupt_enable()
-    { atd::Register(ADCSRA).write_one_bit<ADIE>(); }
+    {atd::write_bits<ADIE>::to<1>::in(ADCSRA);}
+//    { atd::Register(ADCSRA).write_one_bit<ADIE>(); }
 
     /// Desactivamos the ADC Conversion Complete Interrupt.
     static void interrupt_disable()
-    { atd::Register(ADCSRA).write_zero_bit<ADIE>(); }
+    {atd::write_bits<ADIE>::to<0>::in(ADCSRA);}
+//    { atd::Register(ADCSRA).write_zero_bit<ADIE>(); }
 
     // TODO: analog_comparator_multiplexer_enable();
     
@@ -194,48 +209,56 @@ public:
     /// Cada vez que se acaba una conversión empieza otra automáticamente
     static void auto_trigger_source_free_running_mode()
     {// 000
-	atd::Register(ADCSRB).write_zero_bit<ADTS2, ADTS1, ADTS0>();
+	atd::write_bits<ADTS2, ADTS1, ADTS0>::to<0,0,0>::in(ADCSRB);
+//	atd::Register(ADCSRB).write_zero_bit<ADTS2, ADTS1, ADTS0>();
     }
 
     static void auto_trigger_source_analog_comparator()
     {// 001
-	atd::Register(ADCSRB).write_zero_bit<ADTS2, ADTS1>();
-	atd::Register(ADCSRB).write_one_bit<ADTS0>();
+	atd::write_bits<ADTS2, ADTS1, ADTS0>::to<0,0,1>::in(ADCSRB);
+//	atd::Register(ADCSRB).write_zero_bit<ADTS2, ADTS1>();
+//	atd::Register(ADCSRB).write_one_bit<ADTS0>();
     }
 
     static void auto_trigger_source_external_interrup_request_0()
     {// 010
-	atd::Register(ADCSRB).write_zero_bit<ADTS2, ADTS0>();
-	atd::Register(ADCSRB).write_one_bit<ADTS1>();
+	atd::write_bits<ADTS2, ADTS1, ADTS0>::to<0,1,0>::in(ADCSRB);
+//	atd::Register(ADCSRB).write_zero_bit<ADTS2, ADTS0>();
+//	atd::Register(ADCSRB).write_one_bit<ADTS1>();
     }
 
     static void auto_trigger_source_timer0_compare_match_A()
     {// 011
-	atd::Register(ADCSRB).write_zero_bit<ADTS2>();
-	atd::Register(ADCSRB).write_one_bit<ADTS1, ADTS0>();
+	atd::write_bits<ADTS2, ADTS1, ADTS0>::to<0,1,1>::in(ADCSRB);
+//	atd::Register(ADCSRB).write_zero_bit<ADTS2>();
+//	atd::Register(ADCSRB).write_one_bit<ADTS1, ADTS0>();
     }
 
     static void auto_trigger_source_timer0_overflow()
     {// 100
-	atd::Register(ADCSRB).write_one_bit<ADTS2>();
-	atd::Register(ADCSRB).write_zero_bit<ADTS1, ADTS0>();
+	atd::write_bits<ADTS2, ADTS1, ADTS0>::to<1,0,0>::in(ADCSRB);
+//	atd::Register(ADCSRB).write_one_bit<ADTS2>();
+//	atd::Register(ADCSRB).write_zero_bit<ADTS1, ADTS0>();
     }
 
     static void auto_trigger_source_timer1_compare_match_B()
     {// 101
-	atd::Register(ADCSRB).write_one_bit<ADTS2, ADTS0>();
-	atd::Register(ADCSRB).write_zero_bit<ADTS1>();
+	atd::write_bits<ADTS2, ADTS1, ADTS0>::to<1,0,1>::in(ADCSRB);
+//	atd::Register(ADCSRB).write_one_bit<ADTS2, ADTS0>();
+//	atd::Register(ADCSRB).write_zero_bit<ADTS1>();
     }
 
     static void auto_trigger_source_timer1_overflow()
     {// 110
-	atd::Register(ADCSRB).write_one_bit<ADTS2, ADTS1>();
-	atd::Register(ADCSRB).write_zero_bit<ADTS0>();
+	atd::write_bits<ADTS2, ADTS1, ADTS0>::to<1,1,0>::in(ADCSRB);
+//	atd::Register(ADCSRB).write_one_bit<ADTS2, ADTS1>();
+//	atd::Register(ADCSRB).write_zero_bit<ADTS0>();
     }
 
     static void auto_trigger_source_timer1_capture_event()
     {// 111
-	atd::Register(ADCSRB).write_one_bit<ADTS2, ADTS1, ADTS0>();
+	atd::write_bits<ADTS2, ADTS1, ADTS0>::to<1,1,1>::in(ADCSRB);
+//	atd::Register(ADCSRB).write_one_bit<ADTS2, ADTS1, ADTS0>();
     }
 
     /// Elegimos la frecuencia a la que queremos que funcione el ADC
@@ -418,49 +441,56 @@ private:
     static void clock_speed_entre_2()
     {
 	/// 000 ó 001
-	atd::Register(ADCSRA).write_zero_bit<ADPS2, ADPS1, ADPS0>();
+	atd::write_bits<ADPS2, ADPS1, ADPS0>::to<0,0,0>::in(ADCSRA);
+//	atd::Register(ADCSRA).write_zero_bit<ADPS2, ADPS1, ADPS0>();
     }
 
 
     static void clock_speed_entre_4()
     {
 	// 010
-	atd::Register(ADCSRA).write_zero_bit<ADPS2, ADPS0>   ();
-	atd::Register(ADCSRA).write_one_bit <ADPS1>	    ();
+	atd::write_bits<ADPS2, ADPS1, ADPS0>::to<0,1,0>::in(ADCSRA);
+//	atd::Register(ADCSRA).write_zero_bit<ADPS2, ADPS0>   ();
+//	atd::Register(ADCSRA).write_one_bit <ADPS1>	    ();
     }
 
     static void clock_speed_entre_8()
     {
 	// 011
-	atd::Register(ADCSRA).write_zero_bit<ADPS2>	    ();
-	atd::Register(ADCSRA).write_one_bit <ADPS1, ADPS0>   ();
+	atd::write_bits<ADPS2, ADPS1, ADPS0>::to<0,1,1>::in(ADCSRA);
+//	atd::Register(ADCSRA).write_zero_bit<ADPS2>	    ();
+//	atd::Register(ADCSRA).write_one_bit <ADPS1, ADPS0>   ();
     }
 
     static void clock_speed_entre_16()
     {
 	// 100
-	atd::Register(ADCSRA).write_one_bit <ADPS2>	    ();
-	atd::Register(ADCSRA).write_zero_bit<ADPS1, ADPS0>   ();
-	}
+	atd::write_bits<ADPS2, ADPS1, ADPS0>::to<1,0,0>::in(ADCSRA);
+//	atd::Register(ADCSRA).write_one_bit <ADPS2>	    ();
+//	atd::Register(ADCSRA).write_zero_bit<ADPS1, ADPS0>   ();
+    }
 
     static void clock_speed_entre_32()
     {
 	// 101
-	atd::Register(ADCSRA).write_one_bit <ADPS2, ADPS0>   ();
-	atd::Register(ADCSRA).write_zero_bit<ADPS1>	    ();
+	atd::write_bits<ADPS2, ADPS1, ADPS0>::to<1,0,1>::in(ADCSRA);
+//	atd::Register(ADCSRA).write_one_bit <ADPS2, ADPS0>   ();
+//	atd::Register(ADCSRA).write_zero_bit<ADPS1>	    ();
     }
 
     static void clock_speed_entre_64()
     {
 	// 110
-	atd::Register(ADCSRA).write_one_bit <ADPS2, ADPS1>   ();
-	atd::Register(ADCSRA).write_zero_bit<ADPS0>	    ();
+	atd::write_bits<ADPS2, ADPS1, ADPS0>::to<1,1,0>::in(ADCSRA);
+//	atd::Register(ADCSRA).write_one_bit <ADPS2, ADPS1>   ();
+//	atd::Register(ADCSRA).write_zero_bit<ADPS0>	    ();
     }
 
     static void clock_speed_entre_128()
     {
 	// 111
-	atd::Register(ADCSRA).write_one_bit <ADPS2, ADPS1, ADPS0>   ();
+	atd::write_bits<ADPS2, ADPS1, ADPS0>::to<1,1,1>::in(ADCSRA);
+//	atd::Register(ADCSRA).write_one_bit <ADPS2, ADPS1, ADPS0>   ();
     }
 };
 

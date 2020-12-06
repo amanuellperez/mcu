@@ -38,7 +38,7 @@
  *
  ****************************************************************************/
 
-#include <atd_register.h>
+#include <atd_bit.h>
 #include <atd_type_traits.h>
 
 #include "avr_interrupt.h"
@@ -268,15 +268,18 @@ inline void Timer0_normal_mode::on()
 
 inline void Timer0_normal_mode::set_normal_mode()
 {
-    atd::Register(TCCR0B).write_zero_bit<WGM02>	 ();
-    atd::Register(TCCR0A).write_zero_bit<WGM01, WGM00>();
+    atd::write_bits<WGM02>::to<0>::in(TCCR0B);
+    atd::write_bits<WGM01, WGM00>::to<0,0>::in(TCCR0A);
+//    atd::Register(TCCR0B).write_zero_bit<WGM02>	 ();
+//    atd::Register(TCCR0A).write_zero_bit<WGM01, WGM00>();
 }
 
 
 inline void Timer0_normal_mode::pin_AB_disconnected()
 {   // 00
-    atd::Register(TCCR0A).write_zero_bit <COM0A0, COM0A0>();
-    atd::Register(TCCR0A).write_zero_bit <COM0B0, COM0B0>();
+    atd::write_bits<COM0A1, COM0A0, COM0B1, COM0B0>::to<0,0,0,0>::in(TCCR0A);
+//    atd::Register(TCCR0A).write_zero_bit <COM0A0, COM0A0>();
+//    atd::Register(TCCR0A).write_zero_bit <COM0B0, COM0B0>();
 }
 
 
@@ -319,9 +322,11 @@ public:
 inline void Timer0_CTC_mode::top_OCRA(const Timer0::counter_type& top0)
 {
     // 010
-    atd::Register(TCCR0B).write_zero_bit <WGM02>();
-    atd::Register(TCCR0A).write_one_bit<WGM01>();
-    atd::Register(TCCR0A).write_zero_bit<WGM00>();
+    atd::write_bits<WGM02>::to<0>::in(TCCR0B);
+    atd::write_bits<WGM01, WGM00>::to<1,0>::in(TCCR0A);
+//    atd::Register(TCCR0B).write_zero_bit <WGM02>();
+//    atd::Register(TCCR0A).write_one_bit<WGM01>();
+//    atd::Register(TCCR0A).write_zero_bit<WGM00>();
 
     output_compare_register_A(top0);
 }
@@ -331,8 +336,9 @@ inline void Timer0_CTC_mode::top_OCRA(const Timer0::counter_type& top0)
 // Table 19-3.
 inline void Timer0_CTC_mode::pin_A_toggle_on_compare_match()
 {   // 01
-    atd::Register(TCCR0A).write_zero_bit<COM0A1>();
-    atd::Register(TCCR0A).write_one_bit <COM0A0>();
+    atd::write_bits<COM0A1, COM0A0>::to<0,1>::in(TCCR0A);
+//    atd::Register(TCCR0A).write_zero_bit<COM0A1>();
+//    atd::Register(TCCR0A).write_one_bit <COM0A0>();
 
     // Obligatorio definirlo como de salida. 
     Pin<num_pin_A()>::as_output();
@@ -340,8 +346,9 @@ inline void Timer0_CTC_mode::pin_A_toggle_on_compare_match()
 
 inline void Timer0_CTC_mode::pin_A_clear_on_compare_match()
 {   // 10
-    atd::Register(TCCR0A).write_one_bit <COM0A1>();
-    atd::Register(TCCR0A).write_zero_bit<COM0A0>();
+    atd::write_bits<COM0A1, COM0A0>::to<1,0>::in(TCCR0A);
+//    atd::Register(TCCR0A).write_one_bit <COM0A1>();
+//    atd::Register(TCCR0A).write_zero_bit<COM0A0>();
 
     // Obligatorio definirlo como de salida. 
     Pin<num_pin_A()>::as_output();
@@ -350,7 +357,8 @@ inline void Timer0_CTC_mode::pin_A_clear_on_compare_match()
 
 inline void Timer0_CTC_mode::pin_A_set_on_compare_match()
 {   // 11
-    atd::Register(TCCR0A).write_one_bit <COM0A1, COM0A0>();
+    atd::write_bits<COM0A1, COM0A0>::to<1,1>::in(TCCR0A);
+//    atd::Register(TCCR0A).write_one_bit <COM0A1, COM0A0>();
 
     // Obligatorio definirlo como de salida. 
     Pin<num_pin_A()>::as_output();
@@ -359,8 +367,9 @@ inline void Timer0_CTC_mode::pin_A_set_on_compare_match()
 // Table 19-6
 inline void Timer0_CTC_mode::pin_B_toggle_on_compare_match()
 {   // 01
-    atd::Register(TCCR0A).write_zero_bit<COM0B1>();
-    atd::Register(TCCR0A).write_one_bit <COM0B0>();
+    atd::write_bits<COM0B1, COM0B0>::to<0,1>::in(TCCR0A);
+//    atd::Register(TCCR0A).write_zero_bit<COM0B1>();
+//    atd::Register(TCCR0A).write_one_bit <COM0B0>();
 
     // Obligatorio definirlo como de salida. 
     Pin<num_pin_B()>::as_output();
@@ -368,8 +377,9 @@ inline void Timer0_CTC_mode::pin_B_toggle_on_compare_match()
 
 inline void Timer0_CTC_mode::pin_B_clear_on_compare_match()
 {   // 10
-    atd::Register(TCCR0A).write_one_bit <COM0B1>();
-    atd::Register(TCCR0A).write_zero_bit<COM0B0>();
+    atd::write_bits<COM0B1, COM0B0>::to<1,0>::in(TCCR0A);
+//    atd::Register(TCCR0A).write_one_bit <COM0B1>();
+//    atd::Register(TCCR0A).write_zero_bit<COM0B0>();
 
     // Obligatorio definirlo como de salida. 
     Pin<num_pin_B()>::as_output();
@@ -378,7 +388,8 @@ inline void Timer0_CTC_mode::pin_B_clear_on_compare_match()
 
 inline void Timer0_CTC_mode::pin_B_set_on_compare_match()
 {   // 11
-    atd::Register(TCCR0A).write_one_bit <COM0B1, COM0B0>();
+    atd::write_bits<COM0B1, COM0B0>::to<1,1>::in(TCCR0A);
+//    atd::Register(TCCR0A).write_one_bit <COM0B1, COM0B0>();
 
     // Obligatorio definirlo como de salida. 
     Pin<num_pin_B()>::as_output();
@@ -392,54 +403,62 @@ inline void Timer0_CTC_mode::pin_B_set_on_compare_match()
 
 inline void Timer0::off()
 { // 000
-    atd::Register(TCCR0B).write_zero_bit<CS02, CS01, CS00>();
+    atd::write_bits<CS02, CS01, CS00>::to<0,0,0>::in(TCCR0B);
+//    atd::Register(TCCR0B).write_zero_bit<CS02, CS01, CS00>();
 }
 
 
 inline void Timer0::clock_speed_no_preescaling() 
 {   // 001
-    atd::Register(TCCR0B).write_zero_bit<CS02, CS01>();
-    atd::Register(TCCR0B).write_one_bit <CS00>	();
+    atd::write_bits<CS02, CS01, CS00>::to<0,0,1>::in(TCCR0B);
+//    atd::Register(TCCR0B).write_zero_bit<CS02, CS01>();
+//    atd::Register(TCCR0B).write_one_bit <CS00>	();
 }
 
 /// Frecuencia del reloj preescalado =  clk_io/8
 inline void Timer0::clock_frequency_entre_8()
 {   // 010
-    atd::Register(TCCR0B).write_zero_bit<CS02, CS00>	();
-    atd::Register(TCCR0B).write_one_bit <CS01>	();
+    atd::write_bits<CS02, CS01, CS00>::to<0,1,0>::in(TCCR0B);
+//    atd::Register(TCCR0B).write_zero_bit<CS02, CS00>	();
+//    atd::Register(TCCR0B).write_one_bit <CS01>	();
 }
 
 /// Frecuencia del reloj preescalado =  clk_io/64
 inline void Timer0::clock_frequency_entre_64()
 {   //011
-    atd::Register(TCCR0B).write_zero_bit<CS02>	();
-    atd::Register(TCCR0B).write_one_bit <CS01, CS00>	();
+    atd::write_bits<CS02, CS01, CS00>::to<0,1,1>::in(TCCR0B);
+//    atd::Register(TCCR0B).write_zero_bit<CS02>	();
+//    atd::Register(TCCR0B).write_one_bit <CS01, CS00>	();
 }
 
 /// Frecuencia del reloj preescalado =  clk_io/256
 inline void Timer0::clock_frequency_entre_256()
 {   // 100
-    atd::Register(TCCR0B).write_one_bit <CS02>	();
-    atd::Register(TCCR0B).write_zero_bit<CS01, CS00>	();
+    atd::write_bits<CS02, CS01, CS00>::to<1,0,0>::in(TCCR0B);
+//    atd::Register(TCCR0B).write_one_bit <CS02>	();
+//    atd::Register(TCCR0B).write_zero_bit<CS01, CS00>	();
 }
 
 /// Frecuencia del reloj preescalado =  clk_io/1024
 inline void Timer0::clock_frequency_entre_1024()
 {   // 101
-    atd::Register(TCCR0B).write_one_bit <CS02, CS00>	();
-    atd::Register(TCCR0B).write_zero_bit<CS01>	();
+    atd::write_bits<CS02, CS01, CS00>::to<1,0,1>::in(TCCR0B);
+//    atd::Register(TCCR0B).write_one_bit <CS02, CS00>	();
+//    atd::Register(TCCR0B).write_zero_bit<CS01>	();
 }
 
 
 inline void Timer0::external_clock_falling_edge()
 {// 110
-    atd::Register(TCCR0B).write_one_bit <CS02, CS01>	();
-    atd::Register(TCCR0B).write_zero_bit<CS00>	();
+    atd::write_bits<CS02, CS01, CS00>::to<1,1,0>::in(TCCR0B);
+//    atd::Register(TCCR0B).write_one_bit <CS02, CS01>	();
+//    atd::Register(TCCR0B).write_zero_bit<CS00>	();
 }
 
 inline void Timer0::external_clock_rising_edge()
 {// 111
-    atd::Register(TCCR0B).write_one_bit <CS02, CS01, CS00>();
+    atd::write_bits<CS02, CS01, CS00>::to<1,1,1>::in(TCCR0B);
+//    atd::Register(TCCR0B).write_one_bit <CS02, CS01, CS00>();
 }
 
 
@@ -450,21 +469,24 @@ inline void Timer0::external_clock_rising_edge()
 // --------------
 inline void Timer0::enable_overflow_interrupt()
 {
-    atd::Register(TIMSK0).write_one_bit<TOIE0> ();
+    atd::write_bits<TOIE0>::to<1>::in(TIMSK0);
+//    atd::Register(TIMSK0).write_one_bit<TOIE0> ();
     avr::enable_all_interrupts();
 }
 
 
 inline void Timer0::enable_output_compare_A_match_interrupt()
 {
-    atd::Register(TIMSK0).write_one_bit<OCIE0A> ();
+    atd::write_bits<OCIE0A>::to<1>::in(TIMSK0);
+//    atd::Register(TIMSK0).write_one_bit<OCIE0A> ();
     avr::enable_all_interrupts();
 }
 
 
 inline void Timer0::enable_output_compare_B_match_interrupt()
 {
-    atd::Register(TIMSK0).write_one_bit<OCIE0B> ();
+    atd::write_bits<OCIE0B>::to<1>::in(TIMSK0);
+//    atd::Register(TIMSK0).write_one_bit<OCIE0B> ();
     avr::enable_all_interrupts();
 }
 

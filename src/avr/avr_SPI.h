@@ -43,8 +43,6 @@
  *
  *	Ejemplo de driver: ver el potenciómetro MCP4231.
  *
- *  - TODO: eliminar Register por las nuevas funciones.
- *
  *  - HISTORIA:
  *    A.Manuel L.Perez
  *	10/04/2018 v0.0
@@ -56,7 +54,7 @@
 #include <cstddef>    // byte
 #include "avr_cfg.h"
 #include "avr_pin.h"
-#include <atd_register.h>
+#include <atd_bit.h>
 
 // Functions
 namespace avr{
@@ -72,37 +70,44 @@ public:
     /// Causes the SPI interrupt to be executed if a serial transmission is
     /// completed and interrupts are enable.
     static void interrupt_enable() 
-    { atd::Register{SPCR}.write_one_bit<SPIE>(); }
+    {atd::write_bit<SPIE>::to<1>::in(SPCR);}
+//    { atd::Register{SPCR}.write_one_bit<SPIE>(); }
 
     /// Disable interrupt.
     static void interrupt_disable() 
-    { atd::Register{SPCR}.write_zero_bit<SPIE>(); }
+    {atd::write_bit<SPIE>::to<0>::in(SPCR);}
+//    { atd::Register{SPCR}.write_zero_bit<SPIE>(); }
 
     /// Enable SPI as master. This must be set to enable SPI operations.
     static void enable_as_a_master() 
-    { atd::Register{SPCR}.write_one_bit<MSTR, SPE>(); }
+    {atd::write_bits<MSTR, SPE>::to<1,1>::in(SPCR);}
+//    { atd::Register{SPCR}.write_one_bit<MSTR, SPE>(); }
 
 
     /// Enable SPI as a slave. This must be set to enable SPI operations.
     static void enable_as_a_slave() 
     { 
-	atd::Register{SPCR}.write_zero_bit<MSTR>();
-	atd::Register{SPCR}.write_one_bit<SPE>();
+	atd::write_bits<MSTR, SPE>::to<0,1>::in(SPCR);
+//	atd::Register{SPCR}.write_zero_bit<MSTR>();
+//	atd::Register{SPCR}.write_one_bit<SPE>();
     }
 
     /// Disable SPI.
     static void disable() 
-    { atd::Register{SPCR}.write_zero_bit<SPE>(); }
+    {atd::write_bit<SPE>::to<0>::in(SPCR);}
+//    { atd::Register{SPCR}.write_zero_bit<SPE>(); }
  
 
     /// El SPI envia primero el LSB (least significant bit = unidades)
     static void data_order_LSB() 
-    { return atd::Register{SPCR}.write_one_bit<DORD>(); }
+    {atd::write_bit<DORD>::to<1>::in(SPCR);}
+//    { return atd::Register{SPCR}.write_one_bit<DORD>(); }
 
 
     /// El SPI envia primero el MSB (most significant bit)
     static void data_order_MSB() 
-    { return atd::Register{SPCR}.write_zero_bit<DORD>(); }
+    {atd::write_bit<DORD>::to<0>::in(SPCR);}
+//    { return atd::Register{SPCR}.write_zero_bit<DORD>(); }
 
 
     /// Configuramos el modo de operación: la polaridad cpol y la fase cpha
@@ -129,12 +134,14 @@ public:
 
     /// Is a serial transfer complete?
     static bool is_transmission_complete()
-    { return atd::Register{SPSR}.is_one_bit<SPIF>(); }
+    {return atd::is_one_bit<SPIF>::of_register(SPSR);}
+//    { return atd::Register{SPSR}.is_one_bit<SPIF>(); }
 
     /// The SPI data register was written during data transfer?
     // To clear this bit first read WCOL, then read SPI data register.
     static bool is_a_write_collision()
-    { return atd::Register{SPSR}.is_one_bit<WCOL>(); }
+    {return atd::is_one_bit<WCOL>::of_register(SPSR);}
+//    { return atd::Register{SPSR}.is_one_bit<WCOL>(); }
 
 
     /// Write x in the data register and initiates data transmissioin (si SS
