@@ -31,7 +31,7 @@ Main::Main()
 
 void Main::init_lcd()
 {
-    lcd_.screen().stop_brcorner(true);	// no lo voy a usar como terminal
+    lcd_.screen().stop_brcorner(true);// I'm not going to use it as a terminal
     lcd_.screen().nowrap(); 
 }
 
@@ -41,11 +41,11 @@ void Main::init_system_clock()
     System_clock::init<system_clock_timer_period_in_us>();
 
     System_clock::time_point t0;    // = zero
-    pantalla_cambio_hora(t0);
+    window_set_time(t0);
 }
 
 
-void Main::pantalla_cambio_hora(System_clock::time_point t0)
+void Main::window_set_time(System_clock::time_point t0)
 {
     lcd_.clear();
 

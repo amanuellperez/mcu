@@ -26,23 +26,23 @@ void Main::run()
 //	if (errno_)
 //	    error();
 //	else 
-	    pantalla_principal();
+	    window_main();
 
 	wait_ms(100);
     }
 }
 
 
-void Main::pantalla_principal()
+void Main::window_main()
 {
-    show_pantalla_principal();
+    show_window_main();
 
     if (keyboard_.key<OK_KEY>().is_pressed())
-	pantalla_cambio_hora(System_clock::now());
+	window_set_time(System_clock::now());
 }
 
 
-void Main::show_pantalla_principal()
+void Main::show_window_main()
 {
     print(System_clock::now());
 }

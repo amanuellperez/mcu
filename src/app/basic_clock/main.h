@@ -27,7 +27,7 @@
 #include <avr_time.h>
 
 /*!
- *  \brief  Aplicación que ejecutamos.
+ *  \brief  Application.
  *
  */
 class Main {
@@ -36,26 +36,24 @@ public:
     void run();
 
 private:
-// HARDWARE CONECTADO
+// Hardware
     LCD_ostream lcd_;
     Keyboard keyboard_;
 
 
-// INIT HARDWARE
+// init: hardware
     void init_lcd();
     void init_keyboard() { }
     void init_system_clock();
 
+// Window: main
+    void window_main();
+    void show_window_main();
 
-// PANTALLA PRINCIPAL
-    void pantalla_principal();
-    void show_pantalla_principal();
-    // void menu_pantalla_principal();
+// Window : set_time
+    void window_set_time(System_clock::time_point t0);
 
-// PANTALLA CAMBIO DE HORA
-    void pantalla_cambio_hora(System_clock::time_point t0);
-
-// FUNCIONES DE AYUDA
+// Helping functions
     void print(const System_clock::time_point& t0);
 };
 

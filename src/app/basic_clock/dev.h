@@ -22,8 +22,7 @@
 
 /****************************************************************************
  *
- *  - DESCRIPCION: Dispositivos hardware a los que conectamos y cómo los
- *	conectamos.
+ *  - DESCRIPCION: Hardware connections
  *
  *  - HISTORIA:
  *    A.Manuel L.Perez
@@ -37,35 +36,35 @@
 #include <dev_keyboard.h>
 #include <dev_system_clock.h>
 
-// pines usados
+// pins usados
 // ------------
-// Reservo UART para depurar: pines 2 y 3
+// UART for debugging purpose: pins 2 and 3
 constexpr uint8_t LCD_RS_pin = 4;
 constexpr uint8_t LCD_RW_pin = 5;
 constexpr uint8_t LCD_E_pin  = 6;
-// Alimentación: 7, 8
-// disponibles: 9 y 10
+// VCC and GND: 7, 8
+// available: 9 y 10
 constexpr uint8_t LCD_D4_pin = 11;
 constexpr uint8_t LCD_D5_pin = 12;
 constexpr uint8_t LCD_D6_pin = 13;
 constexpr uint8_t LCD_D7_pin = 14;
 
-// disponible: 15
+// available: 15
 
-// No uso SPI: disponibles pines 16, 17, 18, 19
+// Not using SPI: available pins 16, 17, 18, 19
 
 // Alimentación y AREF: 20, 21, 22
 
 using Keyboard_pins = dev::Keyboard_pins<23, 24, 25>;
 
-// disponible: 26
+// available: 26
 
-// No uso TWI: disponibles pines 27 y 28
+// Not using TWI: available pins 27 and 28
 
 
 
-// dispositivos a los que conectamos
-// ---------------------------------
+// Hardware connections
+// --------------------
 using LCD_pins = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<LCD_RS_pin>,
 					dev::LCD_HD44780_RW<LCD_RW_pin>,
 					dev::LCD_HD44780_E<LCD_E_pin>,
