@@ -60,11 +60,11 @@ varias clases:
 
 NOTACIÓN
 
-Los archivos asociados a los traductores los llamaré `<dispositivo>_tr.h`.
+Los archivos asociados a los traductores los llamaré `<dispositivo>_basic.h`.
 Así, por ejemplo, tenemos:
-* `avr_USART_tr.h`: traductor del USART.
-* `avr_timer0_tr.h`: traductor del Timer0.
-* `avr_SPI_tr.h`: traductor del SPI.
+* `avr_UART_basic.h`: traductor del UART.
+* `avr_timer0_basic.h`: traductor del Timer0.
+* `avr_SPI_basic.h`: traductor del SPI.
 
 
 

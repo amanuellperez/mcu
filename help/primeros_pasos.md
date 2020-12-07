@@ -26,6 +26,7 @@ mayoritariamente en C.
 ### Hardware básico
 
 - El microcontrolador. 
+
 - Un programador: 
 
   Yo compré uno de Baite en amazon por unos 5 euros y es el que uso.  Luego
@@ -41,9 +42,29 @@ mayoritariamente en C.
   por comprar el original.  Cuesta unos 25 euros pero funciona bien. Lo tengo
   ya de hace tiempo y no ha dado ningún problema.
 
+- Breadboards.
+  En general, las que venden en Amazon están bien (aunque en una ocasión
+  compré de una marca china desconocida y tuve que tirarlas a la basura). Las
+  de Elegoo funcionan bien.
+
+- Cable para conectar las breadboards.
+  El mejor es el AWG22, solid core. Es cable caro pero ideal para conectar en
+  las breadboards.
+
+- Pelador de cables:
+  Dependiendo de lo que vayas ha hacer necesitarás un buen pelador de cables o
+  no. Yo tengo el de Stanley, el FatMax. Funciona fenomenalmente. Con todo
+  como siempre depende de lo que vayas a hacer.
+
+- Un multímetro:
+  Al principio para empezar cualquier multímetro vale. Yo ahora uso el
+  AM-510-EUR de AMPROBE. Los hay mejores y los hay peores (y el precio va de
+  acuerdo con ello). 
+
 
 ### ¿Dónde comprar?
 
+#### Distribuidores profesionales de electrónica
 * [Farnell](https://es.farnell.com/)
   
   Te lo sirven en 24 horas. Facturan directamente en España.
@@ -59,9 +80,39 @@ mayoritariamente en C.
   tener distribuidora en España así que hay que pagar las tasas en la aduana.
 
 
+
+#### Intermediarios
+
 * [Amazon](https://www.amazon.es)
 
-  Elegoo tiene producto que funciona bien.
+  Amazon distribuye todo el producto de Elegoo. 
+  
+  Aunque ya no suele aparecer en
+  los primeros productos, merece la pena buscar la marca Sodial: te tarda 1
+  mes en llegar pero es barato (y supongo que la calidad irá de acuerdo
+  con el precio, pero para aprender electrónica está bien ya que funciona su
+  producto).
+
+
+* [Aliexpres](https://es.aliexpress.com/)
+
+  Producto chino. Pedir las cosas con tiempo, ya que tarda bastante. Amazon
+  distribuye productos de marcas que se pueden encontrar en Aliexpres bastante
+  más caro. 
+
+* [Ebay](https://www.ebay.com/)
+
+  Merece la pena cotillear.
+
+
+### Marcas que parece que funcionan bien.
+
+* [Adafruit](https://www.adafruit.com/)
+
+* [Sparkfun](https://www.sparkfun.com/)
+
+* [Elegoo](https://www.elegoo.com/)
+
 
 
 ---
