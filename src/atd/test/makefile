@@ -8,7 +8,6 @@ DIRS = algorithm	\
 		decimal		\
 		magnitude	\
 		math		\
-		register	\
 		time		\
 		type_traits
 

@@ -18,12 +18,10 @@
 #include "avr_SPI.h"
 #include "avr_pin.h"
 
-#include <atd_register.h>
+#include <atd_bit.h>
 
 // Observar que todas son funciones de configuración que se ejecutan una sola
 // vez. No es imprescindible que sean las más eficientes.
-
-using atd::Register;
 
 namespace avr{
 
@@ -46,63 +44,81 @@ void SPI::cfg_pines_as_master()
 void SPI::spi_mode(bool cpol, bool cpha)
 {
     if (cpol == 0)
-	Register{SPCR}.write_zero_bit<CPOL>();
+	atd::write_bit<CPOL>::to<0>::in(SPCR);
+//	Register{SPCR}.write_zero_bit<CPOL>();
     else 
-	Register{SPCR}.write_one_bit<CPOL>();
+	atd::write_bit<CPOL>::to<1>::in(SPCR);
+//	Register{SPCR}.write_one_bit<CPOL>();
 
 
     if (cpha == 0)
-	Register{SPCR}.write_zero_bit<CPHA>();
+	atd::write_bit<CPHA>::to<0>::in(SPCR);
+//	Register{SPCR}.write_zero_bit<CPHA>();
     else
-	Register{SPCR}.write_one_bit<CPHA>();
+	atd::write_bit<CPHA>::to<1>::in(SPCR);
+//	Register{SPCR}.write_one_bit<CPHA>();
 }
 
 
 // De acuerdo con la tabla 23-5
 void SPI::clock_speed_entre_2()
-{
-    Register{SPSR}.write_one_bit<SPI2X>();
-    Register{SPSR}.write_zero_bit<SPR1, SPR0>();
+{// 100
+    atd::write_bit<SPI2X>::to<1>::in(SPSR);
+    atd::write_bit<SPR1, SPR0>::to<0,0>::in(SPCR);
+//    Register{SPSR}.write_one_bit<SPI2X>();
+//    Register{SPSR}.write_zero_bit<SPR1, SPR0>(); <-- ERROR!!! no es SPSR
 }
 
 void SPI::clock_speed_entre_4()
-{
-    Register{SPSR}.write_zero_bit<SPI2X>();
-    Register{SPSR}.write_zero_bit<SPR1, SPR0>();
+{// 000
+    atd::write_bit<SPI2X>::to<0>::in(SPSR);
+    atd::write_bit<SPR1, SPR0>::to<0,0>::in(SPCR);
+//    Register{SPSR}.write_zero_bit<SPI2X>();
+//    Register{SPSR}.write_zero_bit<SPR1, SPR0>();
 }
 
 void SPI::clock_speed_entre_8()
-{
-    Register{SPSR}.write_one_bit<SPI2X>();
-    Register{SPSR}.write_zero_bit<SPR1>();
-    Register{SPSR}.write_one_bit<SPR0>();
+{// 101
+    atd::write_bit<SPI2X>::to<1>::in(SPSR);
+    atd::write_bit<SPR1, SPR0>::to<0,1>::in(SPCR);
+//    Register{SPSR}.write_one_bit<SPI2X>();
+//    Register{SPSR}.write_zero_bit<SPR1>();
+//    Register{SPSR}.write_one_bit<SPR0>();
 }
 
 void SPI::clock_speed_entre_16()
-{
-    Register{SPSR}.write_zero_bit<SPI2X>();
-    Register{SPSR}.write_zero_bit<SPR1>();
-    Register{SPSR}.write_one_bit<SPR0>();
+{// 001
+    atd::write_bit<SPI2X>::to<0>::in(SPSR);
+    atd::write_bit<SPR1, SPR0>::to<0,1>::in(SPCR);
+//    Register{SPSR}.write_zero_bit<SPI2X>();
+//    Register{SPSR}.write_zero_bit<SPR1>();
+//    Register{SPSR}.write_one_bit<SPR0>();
 }
 
 void SPI::clock_speed_entre_32()
-{
-    Register{SPSR}.write_one_bit<SPI2X>();
-    Register{SPSR}.write_one_bit<SPR1>();
-    Register{SPSR}.write_zero_bit<SPR0>();
+{// 110
+    atd::write_bit<SPI2X>::to<1>::in(SPSR);
+    atd::write_bit<SPR1, SPR0>::to<1,0>::in(SPCR);
+//    Register{SPSR}.write_one_bit<SPI2X>();
+//    Register{SPSR}.write_one_bit<SPR1>();
+//    Register{SPSR}.write_zero_bit<SPR0>();
 }
 
 void SPI::clock_speed_entre_64()
-{
-    Register{SPSR}.write_zero_bit<SPI2X>();
-    Register{SPSR}.write_one_bit<SPR1>();
-    Register{SPSR}.write_zero_bit<SPR0>();
+{// 010
+    atd::write_bit<SPI2X>::to<0>::in(SPSR);
+    atd::write_bit<SPR1, SPR0>::to<1,0>::in(SPCR);
+//    Register{SPSR}.write_zero_bit<SPI2X>();
+//    Register{SPSR}.write_one_bit<SPR1>();
+//    Register{SPSR}.write_zero_bit<SPR0>();
 }
 
 void SPI::clock_speed_entre_128()
-{
-    Register{SPSR}.write_zero_bit<SPI2X>();
-    Register{SPSR}.write_one_bit<SPR1,SPR0>();
+{// 011
+    atd::write_bit<SPI2X>::to<0>::in(SPSR);
+    atd::write_bit<SPR1, SPR0>::to<1,1>::in(SPCR);
+//    Register{SPSR}.write_zero_bit<SPI2X>();
+//    Register{SPSR}.write_one_bit<SPR1,SPR0>();
 }
 
 
