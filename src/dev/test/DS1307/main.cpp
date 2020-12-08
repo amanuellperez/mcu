@@ -301,7 +301,8 @@ void test_output()
     avr::UART_iostream uart;
 
     uart <<  "Probando output\n"
-	 << "Conectar el osciloscopio al pin 7\n";
+	 << "Conectar el osciloscopio al pin 7 y recordar haber puesto\n"
+	 << "la pull-up resistor en el pin 7.\n";
 
     RTC rtc;
 
