@@ -26,6 +26,7 @@
  * - HISTORIA:
  *  A.Manuel L.Perez 
  *	31/03/2020 gcd, lcm
+ *	08/12/2020 iota
  *
  *
  ****************************************************************************/
@@ -66,6 +67,15 @@ inline constexpr common_type_t<Int1, Int2> lcm(Int1 a, Int2 b)
 	return 0;
 
     return abs(a * b) / gcd(a, b); 
+}
+
+template <typename It, typename T>
+constexpr void iota(It p0, It pe, T value)
+{
+    for (; p0 != pe; ++p0){
+	*p0 = value;
+	++value;
+    }
 }
 
 }// namespace

@@ -34,7 +34,7 @@
 
 #include "std_config.h"
 #include <stdlib.h>   // size_t
-#include <stddef.h> // ptrdiff_t
+#include <cstddef> // std::ptrdiff_t
 
 namespace STD{
 

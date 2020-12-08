@@ -65,6 +65,18 @@ void test_lcm()
 }
 
 
+void test_iota()
+{
+    test::interfaz("iota");
+ 
+    std::array<int, 10> x;
+    std::array<int, 10> y;
+
+    std::iota(x.begin(), x.end(), 10);
+    mtd::iota(y.begin(), y.end(), 10);
+    CHECK_EQUAL_CONTAINERS_C(x, y, "iota");
+
+}
 
 int main()
 {
@@ -73,6 +85,7 @@ try{
 
     test_gcd();
     test_lcm();
+    test_iota();
 
 }catch(const std::exception& e){
     std::cerr << e.what() << '\n';
