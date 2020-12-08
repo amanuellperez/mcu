@@ -74,17 +74,10 @@ void __DS1307_control_register::mem_to_struct(const std::byte& mem,
 void __DS1307_control_register::struct_to_mem(const __DS1307_control_register& st, 
 				std::byte& mem)
 {
-avr::UART_iostream uart;
-uart << "struct_to_mem\n";
-uart << "output_control = " << st.output_control << '\n'
-     << "square_wave_enable = " << st.square_wave_enable << '\n'
-     << "rate_select = " << (int) st.rate_select << '\n';
-
     mem = std::byte{0};
     mask_output_control(mem)     = (st.output_control? std::byte{1}:std::byte{0});
     mask_square_wave_enable(mem) = (st.square_wave_enable? std::byte{1}:std::byte{0});
     mask_rate_select(mem)        = st.rate_select;
-uart << "-----> mem = " << int(mem) << '\n';
 }
 
 

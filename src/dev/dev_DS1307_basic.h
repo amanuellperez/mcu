@@ -37,6 +37,7 @@
 #include <avr_TWI.h>
 #include <atd_bit.h>
 
+#include <avr_UART_iostream.h>	// TODO: borrame
 
 namespace dev{
 
@@ -136,6 +137,7 @@ struct __DS1307_control_register{
     bool square_wave_enable;
     std::byte rate_select;
 
+    __DS1307_control_register() {}
     __DS1307_control_register(bool out, bool square, uint8_t rate)
 	: output_control{out}, square_wave_enable{square}, rate_select{rate}{}
 
@@ -259,6 +261,7 @@ public:
 
 
 // Output
+// Recordar encender el reloj para poder generar las square waves
     void output_high();	// out = 1
     void output_low();	// out = 0
     void output_square_wave_1Hz();   // set to       1Hz
@@ -268,6 +271,8 @@ public:
 
     void disable_output() {output_low();}
     void disable_square_wave() {disable_output();}
+
+    void read(Control_register& c) {state_ = TWI::read(c);}
 
 
 // States

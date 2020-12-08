@@ -305,19 +305,44 @@ void test_output()
 
     RTC rtc;
 
+    RTC::Clock t;
+    t.seconds = 55;
+    t.minutes = 59;
+    t.hours   = 23;
+    t.day    = 0;
+    t.date    = 28;
+    t.month   = 2;
+    t.year    = 21;
+
+    t.clock_on = true; // FUNDAMENTAL: RECORDAR ENCENDER EL RELOJ!!!
+
+    rtc.write(t);
+    if (rtc.error())
+	uart << "Error al intentar escribir la hora\n";
+
     while (1){
-	rtc.output_high();
-	uart << "out = 1\n";
-	twi_print_state();
-	wait_ms(5000);
-	rtc.output_low();
-	twi_print_state();
-	uart << "out = 0\n";
-	wait_ms(5000);
-	uart << "out = square_wave 1\n";
-	rtc.output_square_wave_1Hz();
-	twi_print_state();
-	wait_ms(5000);
+	uart << "\n\n[0] - low\n"
+	     << "[1] - high\n"
+	     << "[h] - 1 Hz\n"
+	     << "[4] - 4.096 kHz\n"
+	     << "[8] - 8.192 kHz\n"
+	     << "[3] - 32.768 kHz\n"
+	     << "[r] - return\n";
+
+	char res{};
+	uart >> res;
+
+	switch(res){
+	    case '0': rtc.output_low(); break;
+	    case '1': rtc.output_high(); break;
+	    case 'h': rtc.output_square_wave_1Hz(); break;
+	    case '4': rtc.output_square_wave_4kHz(); break;
+	    case '8': rtc.output_square_wave_8kHz(); break;
+	    case '3': rtc.output_square_wave_32kHz(); break;
+	    case 'r':
+	    case 'R': return;
+	}
+
     }
 
 }
@@ -340,23 +365,25 @@ int main()
 	 << "DS1307\n"
 	 << "----------------------------------------\n\n";
 
-    uart << "Menu:\n"
-	 << "[b]atería auxiliar\n"
-	 << "[c]lock\n"
-	 << "[o]utput\n"
-	 << "[r]am\n";
+    while(1){
+	uart << "\n\nMenu:\n"
+	     << "[b]atería auxiliar\n"
+	     << "[c]lock\n"
+	     << "[o]utput\n"
+	     << "[r]am\n";
 
-    char res{};
-    uart >> res;
+	char res{};
+	uart >> res;
 
-    if (res == 'r' or res == 'R')
-	test_ram();
-    else if (res == 'b' or res == 'B')
-	test_bateria();
-    else if (res == 'o' or res == 'O')
-	test_output();
-    else
-	test_clock();
+	if (res == 'r' or res == 'R')
+	    test_ram();
+	else if (res == 'b' or res == 'B')
+	    test_bateria();
+	else if (res == 'o' or res == 'O')
+	    test_output();
+	else
+	    test_clock();
+    }
 }
 
 
