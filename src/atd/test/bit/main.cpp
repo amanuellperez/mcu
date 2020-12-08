@@ -146,6 +146,11 @@ void test_mask()
     mask(x) = Int{0x16};
     CHECK_TRUE(x == Int{0x59}, "Range_bitmask::set");
 
+    {// const
+    const Int cx = 0x35;
+    Int cres = mask(cx);
+    CHECK_TRUE(cres == Int{0x0D}, "Range_bitmask::get");
+    }
     // ASSERT_NOT_COMPILE(constexpr atd::Range_bitmask<6,5, Int> mask4;)
 }
 

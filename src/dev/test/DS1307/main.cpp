@@ -20,6 +20,7 @@
 #include <avr_UART.h>
 #include <atd_ostream.h>
 #include <cstddef>
+#include <numeric>
 #include <atd_cstddef.h>
 
 // pines que usamos
@@ -34,11 +35,74 @@ using TWI = avr::TWI_master<avr::TWI_basic, TWI_buffer_size>;
 
 using RTC = dev::DS1307<TWI>;
 
+
+void twi_print_state()
+{
+    avr::UART_iostream uart;
+
+    if (TWI::error())
+	uart << "state == error()\n";
+
+    else if (TWI::no_response())
+	uart << "state == no_response()\n";
+
+    else if (TWI::prog_error())
+	uart << "state == prog_error()\n";
+
+    else if (TWI::eow())
+	uart << "state == eow()\n";
+
+    else if (TWI::eow_data_nack())
+	uart << "state == eow_data_nack()\n";
+
+    else if (TWI::eor())
+	uart << "state == eor()\n";
+
+    else if (TWI::eor_bf())
+	uart << "state == eor_bf()\n";
+
+    else if (TWI::ok())
+	uart << "state == ok()\n";
+
+    else
+	uart << "state DESCONOCIDO!!!\n";
+    
+}
+
+void twi_print_error()
+{
+    avr::UART_iostream uart;
+
+    if (TWI::no_response())
+	uart << "Slave no responde.\n";
+
+    else if (TWI::eow_data_nack())
+	uart << "Error: eow_data_nack\n";
+
+    else if (TWI::prog_error())
+	uart << "Error de programación\n";
+
+    else if (TWI::error_buffer_size())
+	uart << "Error, buffer pequeño\n";
+
+    else if (TWI::state() == TWI::iostate::bus_error)
+	uart << "bus_error!!!\n";
+
+    else if (TWI::state() == TWI::iostate::unknown_error)
+	uart << "unknown_error\n";
+
+    else
+	uart << "Error desconocido\n";
+    
+}
+
+
 // TODO: si lo defino con std::ostream no coge esta función sino la template
 // del DS1307.h!!! ¿por qué? Debería de coger la función más especializada.
 // Con todo con concepts este problema debería de desaparecer ya que la
 // template quedaría sobrecargada solo para IOxtreams.
-avr::UART_iostream& operator<<(avr::UART_iostream& out, const dev::__DS1307_clock& t)
+avr::UART_iostream& operator<<(avr::UART_iostream& out,
+                               const dev::__DS1307_timekeeper& t)
 {
     if (t.clock_on){
 	out << "Encendido: "
@@ -55,7 +119,8 @@ avr::UART_iostream& operator<<(avr::UART_iostream& out, const dev::__DS1307_cloc
 
 	out    << atd::write_as_uint8_t(t.date) << '/'
 	     << atd::write_as_uint8_t(t.month) << '/'
-	     << atd::write_as_uint8_t(t.year);
+	     << atd::write_as_uint8_t(t.year) << "; day = " 
+	     << atd::write_as_uint8_t(t.day);
     }
     else
 	out << "Apagado!!!";
@@ -64,21 +129,13 @@ avr::UART_iostream& operator<<(avr::UART_iostream& out, const dev::__DS1307_cloc
 }
 
 
-void test_ds1307()
+void test_clock()
 {
-// init_UART();
     avr::UART_iostream uart;
-    avr::basic_cfg(uart);
-    uart.on();
 
-    uart << "----------------------------------------\n"
-	 << "DS1307\n"
-	 << "----------------------------------------\n\n";
+    uart << "\nProbando clock\n"
+	 <<   "==============\n";
 
-// init_TWI();
-    // 50 kHz es la unica frecuencia de TWI que va a 1MHz.
-    // 100 kHz a 8 MHz
-    TWI::on<50>();
 
 // init_rtc();
     RTC rtc;
@@ -88,6 +145,7 @@ void test_ds1307()
     t.minutes = 59;
 //    t.AMPM_format = true;
 //    t.is_PM = true;
+//    t.hours   = 11;
 
     t.hours   = 23;
     t.day    = 0;
@@ -121,14 +179,184 @@ void test_ds1307()
 	    rtc.write(t);
 	    uart << "APAGANDO/ENCENDIENDO EL RELOJ\n";
 	}
+
     }
+}
+
+void test_bateria()
+{
+    avr::UART_iostream uart;
+
+    uart << "\nProbando la batería auxiliar\n"
+	 << "Prueba a desconectar el reloj de la batería principal y "
+	 << "volver a reconectarlo.\n";
+
+
+// init_rtc();
+    RTC rtc;
+
+    RTC::Clock t;
+    t.seconds = 55;
+    t.minutes = 59;
+//    t.AMPM_format = true;
+//    t.is_PM = true;
+//    t.hours   = 11;
+
+    t.hours   = 23;
+    t.day    = 0;
+    t.date    = 28;
+    t.month   = 2;
+    t.year    = 21;
+
+    t.clock_on = true;
+
+    rtc.write(t);
+    if (rtc.error())
+	uart << "Error al intentar escribir la hora\n";
+
+    while (1){
+	rtc.read(t);
+	uart << t << '\n';
+
+	// Probar a desconectar el sensor mientras está funcionando. Tiene que
+	// generar el error correspondiente.
+	if (rtc.no_response())
+	    uart << "Error: no response\n";
+
+	if (rtc.error())
+	    uart << "Error: error en el rtc!!!\n";
+
+        wait_ms(1000);
+
+    }
+}
+
+
+void test_ram()
+{
+    avr::UART_iostream uart;
+
+    uart << "----------------------------------------\n"
+	 << "Probando la RAM\n"
+	 << "----------------------------------------\n\n";
+
+// init_rtc();
+    RTC rtc;
+
+    while (1){
+	constexpr int N = 56;
+	std::byte buf[N];
+	std::iota((uint8_t*) buf, (uint8_t*) &buf[N], 0);
+
+	uint8_t nw = rtc.ram_write(buf, N, 0);
+	if (nw != N){
+	    uart << "ERROR: no se han escrito todos los bytes\n";
+	    uart << "Escritos " << atd::write_as_uint8_t(nw) << '\n';
+	    twi_print_state();
+	    twi_print_error();
+	}
+
+	if (rtc.error())
+	    uart << "Error al intentar escribir en la RAM\n";
+
+	std::byte res[N];
+	std::fill(res, &res[N], std::byte{0});
+
+	if (rtc.ram_read(res, N, 0) != N)
+	    uart << "ERROR: no se han leído todos bytes\n";
+
+	if (rtc.error())
+	    uart << "Error al intentar leer en la RAM\n";
+    
+	for (uint8_t i = 0; i < N; ++i)
+	    uart << std::to_integer<int>(res[i]) << ", ";
+
+	uart << '\n';
+
+	// Probar a desconectar el sensor mientras está funcionando. Tiene que
+	// generar el error correspondiente.
+	if (rtc.no_response())
+	    uart << "Error: no response\n";
+
+	if (rtc.error())
+	    uart << "Error: error en el rtc!!!\n";
+
+
+	std::fill(res, &res[N], std::byte{0});
+	if (rtc.ram_read(res, 10, 10) != 10)
+	    uart << "ERROR: no se han leído todos bytes\n";
+
+	uart << "\nSegunda lectura:\n";
+	for (uint8_t i = 0; i < N; ++i)
+	    uart << std::to_integer<int>(res[i]) << ", ";
+
+        wait_ms(5000);
+    }
+}
+
+
+
+void test_output()
+{
+    avr::UART_iostream uart;
+
+    uart <<  "Probando output\n"
+	 << "Conectar el osciloscopio al pin 7\n";
+
+    RTC rtc;
+
+    while (1){
+	rtc.output_high();
+	uart << "out = 1\n";
+	twi_print_state();
+	wait_ms(5000);
+	rtc.output_low();
+	twi_print_state();
+	uart << "out = 0\n";
+	wait_ms(5000);
+	uart << "out = square_wave 1\n";
+	rtc.output_square_wave_1Hz();
+	twi_print_state();
+	wait_ms(5000);
+    }
+
 }
 
 
 
 int main()
 {
-    test_ds1307();
+// init_UART();
+    avr::UART_iostream uart;
+    avr::basic_cfg(uart);
+    uart.on();
+
+// init_TWI();
+    // 50 kHz es la unica frecuencia de TWI que va a 1MHz.
+    // 100 kHz a 8 MHz
+    TWI::on<50>();
+
+    uart << "----------------------------------------\n"
+	 << "DS1307\n"
+	 << "----------------------------------------\n\n";
+
+    uart << "Menu:\n"
+	 << "[b]atería auxiliar\n"
+	 << "[c]lock\n"
+	 << "[o]utput\n"
+	 << "[r]am\n";
+
+    char res{};
+    uart >> res;
+
+    if (res == 'r' or res == 'R')
+	test_ram();
+    else if (res == 'b' or res == 'B')
+	test_bateria();
+    else if (res == 'o' or res == 'O')
+	test_output();
+    else
+	test_clock();
 }
 
 

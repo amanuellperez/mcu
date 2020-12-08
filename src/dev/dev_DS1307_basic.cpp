@@ -1,8 +1,9 @@
 #include "dev_DS1307_basic.h"
 
+#include <avr_UART_iostream.h> // TODO: borrame
 namespace dev{
 
-void __DS1307_clock::mem_to_struct(__DS1307_clock& st)
+void __DS1307_timekeeper::mem_to_struct(__DS1307_timekeeper& st)
 {
     if (mask_CH(st.seconds))
 	st.clock_on = false;
@@ -32,7 +33,7 @@ void __DS1307_clock::mem_to_struct(__DS1307_clock& st)
 }
 
 
-__DS1307_clock __DS1307_clock::struct_to_mem(__DS1307_clock st)
+__DS1307_timekeeper __DS1307_timekeeper::struct_to_mem(__DS1307_timekeeper st)
 {
     st.seconds = atd::int2BCD(st.seconds);
     st.minutes = atd::int2BCD(st.minutes);
@@ -58,6 +59,35 @@ __DS1307_clock __DS1307_clock::struct_to_mem(__DS1307_clock st)
 
     return st;
 }
+
+
+
+void __DS1307_control_register::mem_to_struct(const std::byte& mem,
+                              __DS1307_control_register& st)
+{
+    st.output_control     = (mask_output_control(mem) == std::byte{1});
+    st.square_wave_enable = (mask_square_wave_enable(mem) == std::byte{1});
+    st.rate_select        = mask_rate_select(mem);
+}
+
+
+void __DS1307_control_register::struct_to_mem(const __DS1307_control_register& st, 
+				std::byte& mem)
+{
+avr::UART_iostream uart;
+uart << "struct_to_mem\n";
+uart << "output_control = " << st.output_control << '\n'
+     << "square_wave_enable = " << st.square_wave_enable << '\n'
+     << "rate_select = " << (int) st.rate_select << '\n';
+
+    mem = std::byte{0};
+    mask_output_control(mem)     = (st.output_control? std::byte{1}:std::byte{0});
+    mask_square_wave_enable(mem) = (st.square_wave_enable? std::byte{1}:std::byte{0});
+    mask_rate_select(mem)        = st.rate_select;
+uart << "-----> mem = " << int(mem) << '\n';
+}
+
+
 }// namespace
 
 

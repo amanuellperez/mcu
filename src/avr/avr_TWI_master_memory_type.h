@@ -38,39 +38,22 @@
 
 namespace avr{
 
-
-// TODO: quiero que sea <-- BORRAR (28/04/2020)
-//	write(TWI, q, n); <-- es más estandard!!! TWI sería el flujo!!!
-//  en lugar de 
-//	write(TWI, slave_addres, q, n);
-//  luego le tenemos que pasar el slave de alguna otra forma.
-//  1. write(TWI<slave_address>, q, n);
-//  2. write(TWI_slave{slave}, q, n);
-//  3. ???
-//template <typename T, uint8_t bsz>
-//static TWI_master_ioxtream<T, bsz>::streamsize
-//    write(TWI_master_ioxtream<T, bsz>& twi,
-//	  typename TWI_master_ioxtream<T, bsz>::Address slave_address,
-//	  const std::byte* q,
-//	  typename TWI_master_ioxtream<T, bsz>::streamsize n)
-//{
-//    twi.open(slave_address);
-//     
-//    return twi.write(q, n); // twi.close() lo llama el destructor
-//}
-
-// Dispositivo de tipo memoria.
-template <typename avr::TWI_basic::Address slave_address,
+/*!
+ *  \brief  Dispositivo de memoria.
+ *
+ *  Oculta todo el protocolo TWI.
+ *
+ *  Para ver un ejemplo de implementación ver BMP280 ó DS1307
+ *
+ */
+template <avr::TWI_basic::Address slave_address,
 	 typename TWI_master>
-//          typename avr::TWI_basic::streamsize TWI_buffer_size>
 struct TWI_master_memory_type {
 
-    // using TWI = avr::TWI_master_ioxtream<avr::TWI_basic, TWI_buffer_size>;
     using TWI = avr::TWI_master_ioxtream<TWI_master>;
 
     using iostate = typename TWI::iostate;
 
-    // TODO: sacarla fuera de la struct.
     // Lee una zona de memoria en el
     // device conectado via TWI y la devuelve codificada en la estructura T
     // correspondiente. La clase T contiene toda la información de cómo es
@@ -78,47 +61,61 @@ struct TWI_master_memory_type {
     // Params: [out] st: objeto leido.
     // Return value: On success 0, on error TWI::error.
     template <typename T>
-    static iostate read(T& st)
-    {
-	static_assert (atd::is_readable(T::mem_type));
-
-	TWI twi;
-	twi.open(slave_address);
-	 
-	twi << T::address;
-
-	if (twi.error())
-	    return TWI::state();
-
-	twi.read(T::size);
-
-	twi >> st;
-
-	twi.close();
-
-	return TWI::state();
-    }
-
+    static iostate read(T& st);
 
     template <typename T>
-    static TWI::iostate write(const T& st)
-    {
-	static_assert (atd::is_writeable(T::mem_type));
-
-	TWI twi;
-	twi.open(slave_address);
-	
-
-	twi << T::address << st;
-
-	twi.close();
-
-	return TWI::state();
-	
-    }
-
+    static TWI::iostate write(const T& st);
 
 };
+
+
+
+// ------------------------------
+// avr_TWI_master_memory_type.cxx
+// ------------------------------
+template <avr::TWI_basic::Address slave_address, typename TWI_master>
+template <typename T>
+TWI_master_memory_type<slave_address, TWI_master>::iostate
+TWI_master_memory_type<slave_address, TWI_master>::read(T& st)
+{
+    static_assert (atd::is_readable(T::mem_type));
+
+    TWI twi;
+    twi.open(slave_address);
+     
+    twi << T::address;
+
+    if (twi.error())
+	return TWI::state();
+
+    twi.read(T::size);
+
+    twi >> st;
+
+    twi.close();
+
+    return TWI::state();
+}
+
+
+template <avr::TWI_basic::Address slave_address, typename TWI_master>
+template <typename T>
+TWI_master_memory_type<slave_address, TWI_master>::iostate
+TWI_master_memory_type<slave_address, TWI_master>::write(const T& st)
+{
+    static_assert (atd::is_writeable(T::mem_type));
+
+    TWI twi;
+    twi.open(slave_address);
+    
+
+    twi << T::address << st;
+
+    twi.close();
+
+    return TWI::state();
+    
+}
 
 
 }// namespace avr

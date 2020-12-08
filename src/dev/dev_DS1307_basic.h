@@ -37,14 +37,15 @@
 #include <avr_TWI.h>
 #include <atd_bit.h>
 
+
 namespace dev{
 
-// Table 2: only time.
+// Table 2: only time (not RAM)
 // ¿Por qué no usar time_t para guardar los datos?
 // Porque este es un traductor. La idea es que se pueda escribir leyendo
 // literalmente la datasheet, de esa forma habrá menos errores de traducción.
-struct __DS1307_clock{
-// Datos
+struct __DS1307_timekeeper{
+// Data
     uint8_t seconds;
     uint8_t minutes;
     uint8_t hours;
@@ -68,10 +69,10 @@ struct __DS1307_clock{
     static constexpr uint8_t size = 7;
 
     template <typename Ixtream>
-    friend Ixtream& operator>>(Ixtream& in, __DS1307_clock& st);
+    friend Ixtream& operator>>(Ixtream& in, __DS1307_timekeeper& st);
 
     template <typename Oxtream>
-    friend Oxtream& operator<<(Oxtream& out, const __DS1307_clock& st);
+    friend Oxtream& operator<<(Oxtream& out, const __DS1307_timekeeper& st);
 
 
 private:
@@ -83,16 +84,16 @@ private:
     static constexpr atd::Range_bitmask<5, 5, uint8_t> mask_AMPM_PM{};
 
 
-    static void mem_to_struct(__DS1307_clock& st);
-    static __DS1307_clock struct_to_mem(__DS1307_clock st0);
+    static void mem_to_struct(__DS1307_timekeeper& st);
+    static __DS1307_timekeeper struct_to_mem(__DS1307_timekeeper st0);
 };
 
 
 
 template <typename Ixtream>
-Ixtream& operator>>(Ixtream& in, __DS1307_clock& st)
+Ixtream& operator>>(Ixtream& in, __DS1307_timekeeper& st)
 {
-    using Clock = __DS1307_clock;
+    using T = __DS1307_timekeeper;
 
     in >> st.seconds;
     in >> st.minutes;
@@ -102,18 +103,18 @@ Ixtream& operator>>(Ixtream& in, __DS1307_clock& st)
     in >> st.month;
     in >> st.year;
 
-    Clock::mem_to_struct(st);
+    T::mem_to_struct(st);
 
     return in;
 }
 
 
 template <typename Oxtream>
-Oxtream& operator<<(Oxtream& out, const __DS1307_clock& st0)
+Oxtream& operator<<(Oxtream& out, const __DS1307_timekeeper& st0)
 {
-    using Clock = __DS1307_clock;
+    using T = __DS1307_timekeeper;
 
-    Clock st = Clock::struct_to_mem(st0);
+    T st = T::struct_to_mem(st0);
 
     out << st.seconds;
     out << st.minutes;
@@ -127,11 +128,100 @@ Oxtream& operator<<(Oxtream& out, const __DS1307_clock& st0)
 }
 
 
+
+// Control register
+struct __DS1307_control_register{
+// Data
+    bool output_control;
+    bool square_wave_enable;
+    std::byte rate_select;
+
+    __DS1307_control_register(bool out, bool square, uint8_t rate)
+	: output_control{out}, square_wave_enable{square}, rate_select{rate}{}
+
+// Memory
+    static constexpr atd::Memory_type mem_type =
+					      atd::Memory_type::read_and_write;
+    static constexpr std::byte address {0x07};
+    static constexpr uint8_t size = 1;
+
+    template <typename Ixtream>
+    friend Ixtream& operator>>(Ixtream& in, __DS1307_control_register& st);
+
+    template <typename Oxtream>
+    friend Oxtream& operator<<(Oxtream& out, const __DS1307_control_register& st);
+
+
+// Table control register
+// Posible mejora de eficiencia (?): no inicializar los valores que no se
+// usan. Mirar la tabla en la datasheet. Aunque complica el código y no parece
+// que mejore mucho.
+    static __DS1307_control_register output_high()
+    {return __DS1307_control_register{true, false, 0};}
+
+    static __DS1307_control_register output_low()
+    {return __DS1307_control_register{false, false, 0};}
+
+    static __DS1307_control_register output_square_wave_1Hz()
+    {return __DS1307_control_register{false, true, 0x00};}
+
+    static __DS1307_control_register output_square_wave_4kHz()
+    {return __DS1307_control_register{false, true, 0x01};}
+
+    static __DS1307_control_register output_square_wave_8kHz()
+    {return __DS1307_control_register{false, true, 0x02};}
+
+    static __DS1307_control_register output_square_wave_32kHz()
+    {return __DS1307_control_register{false, true, 0x03};}
+
+
+private:
+    static constexpr atd::Range_bitmask<7, 7, std::byte> mask_output_control{};
+    static constexpr atd::Range_bitmask<4, 4, std::byte> mask_square_wave_enable{};
+    static constexpr atd::Range_bitmask<0, 1, std::byte> mask_rate_select{};
+
+    static void mem_to_struct(const std::byte& mem,
+                              __DS1307_control_register& st);
+
+    static void struct_to_mem(const __DS1307_control_register& st, 
+				std::byte& mem);
+};
+
+
+template <typename Ixtream>
+Ixtream& operator>>(Ixtream& in, __DS1307_control_register& st)
+{
+    using T = __DS1307_control_register;
+
+    std::byte mem;
+    in >> mem;
+
+    T::mem_to_struct(mem, st);
+
+    return in;
+}
+
+
+template <typename Oxtream>
+Oxtream& operator<<(Oxtream& out, const __DS1307_control_register& st)
+{
+    using T = __DS1307_control_register;
+
+    std::byte mem;
+    T::struct_to_mem(st, mem);
+
+    out << mem;
+
+    return out;
+}
+
+
+
 /*!
  *  \brief  Driver básico del DS1307.
  *
- *  Errores: el reloj tiene un state donde se anotará el resultado de la
- *  última operación. 
+ *  Gestión de errores: el reloj tiene un state donde se anotará el resultado 
+ *  de la última operación. 
  *
  */
 template <typename TWI_master>
@@ -139,7 +229,7 @@ class DS1307{
 public:
 // Configuración de TWI
     using Address = typename TWI_master::Address;
-    static constexpr Address slave_address = 0x68;	// es fija.
+    static constexpr Address slave_address = 0x68; // es fija.
     static constexpr uint8_t TWI_buffer_size = 70; // tiene 64 bytes de memoria
 
     static_assert(TWI_master::buffer_size >= TWI_buffer_size);
@@ -147,15 +237,37 @@ public:
 // Types
     using TWI   = avr::TWI_master_memory_type<slave_address, TWI_master>;
     using State = TWI::iostate;
-    using Clock  = __DS1307_clock;
+    using Clock  = __DS1307_timekeeper;
+    using Control_register = __DS1307_control_register;
 
 
-// Operaciones
+// Clock reading & writing
     /// Lectura del reloj
     void read(Clock& t) {state_ = TWI::read(t);}
 
     /// Escritura en el reloj.
     void write(const Clock& t) { state_ = TWI::write(t); }
+
+// RAM access
+    /// Leemos ram[i... i + n) guardándolo en buf.
+    /// Devuelve el número de bytes leidos.
+    uint8_t ram_read(std::byte* buf, uint8_t n, uint8_t i);
+
+    /// Escribimos n bytes de buf en ram[i... i+n).
+    /// Devuelve el número de bytes escritos.
+    uint8_t ram_write(std::byte* buf, uint8_t n, uint8_t i);
+
+
+// Output
+    void output_high();	// out = 1
+    void output_low();	// out = 0
+    void output_square_wave_1Hz();   // set to       1Hz
+    void output_square_wave_4kHz();  // set to  4.096kHz
+    void output_square_wave_8kHz();  // set to  8.192kHz
+    void output_square_wave_32kHz(); // set to 32.768kHz
+
+    void disable_output() {output_low();}
+    void disable_square_wave() {disable_output();}
 
 
 // States
@@ -170,7 +282,88 @@ public:
 private:
     State state_;
 
+    static constexpr uint8_t ram_address {0x08};
+
 };
+
+template <typename TWI_master>
+uint8_t DS1307<TWI_master>::ram_read(std::byte* buf, uint8_t n, uint8_t i)
+{
+    using TWI = avr::TWI_master_ioxtream<TWI_master>;
+
+    TWI twi;
+    twi.open(slave_address);
+     
+    uint8_t addr = ram_address + i;
+    twi << std::byte{addr};
+
+    if (twi.error()){
+	state_ = TWI::state();
+	return 0;
+    }
+
+    twi.read(n);
+
+    uint8_t nread = twi.read(buf, n);
+
+    twi.close();
+
+    state_ = TWI::state();
+
+    return nread;
+
+}
+
+template <typename TWI_master>
+uint8_t DS1307<TWI_master>::ram_write(std::byte* buf, uint8_t n, uint8_t i)
+{
+    using TWI = avr::TWI_master_ioxtream<TWI_master>;
+
+    TWI twi;
+    twi.open(slave_address);
+ 
+    if (twi.error()){
+	state_ = TWI::state();
+	return 0;
+    }
+
+    uint8_t addr = ram_address + i;
+    twi << std::byte{addr};
+
+    uint8_t nwrite = twi.write(buf, n);
+
+    twi.close();
+
+    state_ = TWI::state();
+
+    return nwrite;
+}
+
+template <typename TWI_master>
+inline void DS1307<TWI_master>::output_high()
+{ state_ = TWI::write(Control_register::output_high()); }
+
+template <typename TWI_master>
+inline void DS1307<TWI_master>::output_low()
+{ state_ = TWI::write(Control_register::output_low()); }
+
+template <typename TWI_master>
+inline void DS1307<TWI_master>::output_square_wave_1Hz()
+{ state_ = TWI::write(Control_register::output_square_wave_1Hz()); }
+
+template <typename TWI_master>
+inline void DS1307<TWI_master>::output_square_wave_4kHz()
+{ state_ = TWI::write(Control_register::output_square_wave_4kHz()); }
+
+template <typename TWI_master>
+inline void DS1307<TWI_master>::output_square_wave_8kHz()
+{ state_ = TWI::write(Control_register::output_square_wave_8kHz()); }
+
+template <typename TWI_master>
+inline void DS1307<TWI_master>::output_square_wave_32kHz()
+{ state_ = TWI::write(Control_register::output_square_wave_32kHz()); }
+
+
 
 }// namespace
 

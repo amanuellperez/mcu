@@ -148,7 +148,7 @@ struct __Range_bitmask{
 
     constexpr __Range_bitmask(Int& reg0) : reg{reg0} { }
 
-    // get_bits
+    // get_bits: observar que colocamos el bit i0 en la posición 0
     constexpr operator Int() const 
     { return (reg & mask) >> pos;}
 
@@ -178,6 +178,9 @@ struct Range_bitmask{
 
     constexpr __Range_bitmask<i0, i1, Int> operator()(Int& reg) const
     { return __Range_bitmask<i0, i1, Int>{reg}; }
+
+    constexpr __Range_bitmask<i0, i1, const Int> operator()(const Int& reg) const
+    { return __Range_bitmask<i0, i1, const Int>{reg}; }
 };
 
 
