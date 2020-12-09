@@ -53,7 +53,7 @@ namespace avr{
  *	rato (demasiado para mi gusto) mirando precisamente esto: yo escribo
  *	TWINT = 1, pero al mirar su valor resulta ser 0!!! 
  *
- *	El flujo de TWI usando interrpuciones es el siguiente:
+ *	El flujo de TWI usando interrupciones es el siguiente:
  *	TWINT = 0 <-- a la espera de que suceda algo
  *	sucede algo y se necesita respuesta por parte del usuario:
  *	TWINT = 1 (= ey! usuario, tienes que hacer algo!!!)

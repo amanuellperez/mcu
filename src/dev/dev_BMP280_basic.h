@@ -36,8 +36,6 @@
  *    21/01/2020 v0.0
  *    07/04/2020 v0.1
  *		 TODO (básico):
- *		 - BMP280_TWI: que se pueda elegir si conectarlo al 0x76/77
- *			       (pasarlo como parámetro de template? sí)
  *		 - BMP280_TWI: revisar código. Hacer esto después de
  *			       implementar BME280/680 para comparar).
  *			       Hay funciones genéricas de TWI que se pueden
@@ -132,11 +130,14 @@ private:
     static constexpr atd::Range_bitmask<0, 0, std::byte> mask_im_update{};
 
     // Codifica la región de memoria 'mem' en la estructura st
-    static void mem_to_struct(std::byte* mem, __BMP280_status& st);
+    static void mem_to_struct(const std::array<std::byte, size>& mem
+				, __BMP280_status& st);
 };
 
 
-inline void __BMP280_status::mem_to_struct(std::byte* mem, __BMP280_status& st)
+inline void
+__BMP280_status::mem_to_struct(const std::array<std::byte, size>& mem,
+                               __BMP280_status& st)
 {
     st.measuring = (mask_measuring(mem[0]) == std::byte{0}? false: true);
     st.im_update = (mask_im_update(mem[0]) == std::byte{0}? false: true);
@@ -148,8 +149,8 @@ Ixtream& operator>>(Ixtream& in, __BMP280_status& st)
 { 
     using T = __BMP280_status;
 
-    std::byte mem[T::size];
-    in.read(mem, T::size);
+    std::array<std::byte, T::size> mem;
+    in.read(mem.data(), T::size);
 
     T::mem_to_struct(mem, st);
 
@@ -250,8 +251,8 @@ private:
     static constexpr atd::Range_bitmask<0, 0, std::byte> mask_spi3w_en{};
 
 //    // Codifica la región de memoria 'mem' en la estructura st
-    static void mem_to_struct(std::byte* mem, __BMP280_config& st);
-    static void struct_to_mem(const __BMP280_config& st, std::byte* mem);
+    static void mem_to_struct(const std::array<std::byte,size>& mem, __BMP280_config& st);
+    static void struct_to_mem(const __BMP280_config& st, std::array<std::byte,size>& mem);
 };
 
 
@@ -262,8 +263,8 @@ Ixtream& operator>>(Ixtream& in, __BMP280_config& st)
 { 
     using T = __BMP280_config;
 
-    std::byte mem[T::size];
-    in.read(mem, T::size);
+    std::array<std::byte, T::size> mem;
+    in.read(mem.data(), T::size);
 
     T::mem_to_struct(mem, st);
 
@@ -279,7 +280,8 @@ template <typename TWI>
 void __BMP280_config::twi_write(TWI& out, 
 	typename TWI::Address slave_address) const
 { 
-    std::byte mem[size];
+    // std::byte mem[size];
+    std::array<std::byte, size> mem;
     struct_to_mem(*this, mem);
 
 // 1. Poner el dispositivo en sleep mode. 
@@ -299,7 +301,8 @@ void __BMP280_config::twi_write(TWI& out,
     
 // 2. Leer. El ejemplo de Bosch dice que siempre hay que leer antes de
 // escribir la cfg. De hecho he tenido problemas al principio porque no
-// quedaba bien configurado. 
+// quedaba bien configurado (pero tenía un error ya que no inicializaba mem.
+// Los problemas fueron por culpa de este error???)
     std::byte tmp[2];
     out.open(slave_address);
     out << address;
@@ -362,7 +365,8 @@ struct __BMP280_temp_and_press{
 
 private:
     // Codifica la región de memoria 'mem' en la estructura st
-    static void mem_to_struct(const std::byte* mem, __BMP280_temp_and_press& st);
+    static void mem_to_struct(const std::array<std::byte, size>& mem, 
+						__BMP280_temp_and_press& st);
 
     // Mira a ver si los valores de temperatura y presión están dentro de los
     // límites. Si no lo están, los pone a 0 (de esa forma el usuario puede 
@@ -385,9 +389,9 @@ Ixtream& operator>>(Ixtream& in, __BMP280_temp_and_press& st)
 { 
     using T = __BMP280_temp_and_press;
 
-    std::byte mem[T::size];
+    std::array<std::byte, T::size> mem;
 
-    in.read(mem, T::size);
+    in.read(mem.data(), T::size);
 
     T::mem_to_struct(mem, st);
 
@@ -448,8 +452,8 @@ struct __BMP280_calibration{
 
 private:
     // Codifica la región de memoria 'mem' en la estructura st
-    // mem -> st
-    static void mem_to_struct(std::byte* mem, __BMP280_calibration& st);
+    static void mem_to_struct(const std::array<std::byte, size>& mem, 
+						    __BMP280_calibration& st);
 
     // Carries a fine resolution temperature value over to the pressure
     // compensation formula.
@@ -462,9 +466,9 @@ inline Ixtream& operator>>(Ixtream& in, __BMP280_calibration& st)
 { 
     using T = __BMP280_calibration;
 
-    std::byte mem[T::size];
+    std::array<std::byte, T::size> mem;
 
-    in.read(mem, T::size);
+    in.read(mem.data(), T::size);
 
     T::mem_to_struct(mem, st);
 
@@ -544,7 +548,7 @@ protected:
 //	 Voy a usar el equivalente a errno local a través de un state.
 //	 Todas las operaciones que puedan fallar modificarán el state,
 //	 quedando almacenado ahí el exito/fracaso de la operación.
-template <typename TWI_master>
+template <typename TWI_master, typename TWI_master::Address slave_address0>
 class BMP280_TWI : public BMP280_base {
 public:
     static constexpr uint8_t TWI_buffer_size = 100; // TODO: ajustarlo al mínimo?
@@ -554,10 +558,12 @@ public:
 
     using TWI = avr::TWI_master_ioxtream<TWI_master>;
 
-    // TODO: el último bit se puede elegir:
+    // Slave address: el último bit se puede elegir:
     // Connecting SDO to GND results in slave address 1110110 (0x76);
     // connection it to V_DDIO results in 1110111 (0x77).
-    static constexpr TWI_master::Address slave_address = 0x76;
+    static constexpr TWI_master::Address slave_address = slave_address0;
+    static_assert(slave_address == 0x76 or slave_address == 0x77,
+	    "Wrong BMP280 address. Available only: 0x76 and 0x77");
 
     using TWI_port = avr::TWI_master_memory_type<slave_address, TWI_master>;
 
@@ -656,24 +662,21 @@ private:
     State state_;
 
 
-    // Returns: On success, 0.
-    //		On error, != 0.
     void read_calibration_params() {state_ = TWI_port::read(calibration_);}
-
 
     void write_cfg_(void f(Config&));
 };
 
 
-template <typename TWI>
-inline void BMP280_TWI<TWI>::write(Config& cfg)
+template <typename TWI, typename TWI::Address sa>
+inline void BMP280_TWI<TWI, sa>::write(Config& cfg)
 {
     TWI twi;
     cfg.twi_write(twi, slave_address);
 }
 
-template <typename TWI>
-inline void BMP280_TWI<TWI>::write_cfg_(void f(Config&))
+template <typename TWI, typename TWI::Address sa>
+inline void BMP280_TWI<TWI,sa>::write_cfg_(void f(Config&))
 {
     Config cfg;
     f(cfg);
@@ -682,8 +685,8 @@ inline void BMP280_TWI<TWI>::write_cfg_(void f(Config&))
 }
 
 
-template <typename TWI>
-inline void BMP280_TWI<TWI>::init()
+template <typename TWI, typename TWI::Address sa>
+inline void BMP280_TWI<TWI,sa>::init()
 {
     BMP280_base::init();
 

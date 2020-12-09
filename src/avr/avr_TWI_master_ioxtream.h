@@ -176,15 +176,28 @@ public:
     
 
 // Lectura/escritura en bloque
-    /// Lee exáctamente n bytes metiéndolos en q[0, n).
+
+    // read: C-style
+    /// Lee exáctamente n bytes metiéndolos en q[0, n). 
     /// Bloquea la ejecución. Hasta que no lee todo no devuelve el control.
     /// Precondition: se ha llamado a read(N) antes (con N >= n).
     streamsize read(std::byte* q, streamsize n);
 
+    // read: array-style
+//    template <streamsize N>  doesn't work!!!
+//    streamsize read(std::array<std::byte, N>& q) {return read(q.data(), N);}
+
+    // write C-style
     /// Escribe q[0,n) en el flujo.
     /// No bloquea. q[0,n) se mete en el buffer interno de TWI y lo irá
     /// enviando poco a poco.
     streamsize write(const std::byte* q, streamsize n);
+
+    // write: array-style
+//    template <streamsize N> doesn't work!!!
+//    streamsize write(const std::array<std::byte, N>& q) 
+//    {return write(q.data(), N);}
+
 
 // ISR
 //    // FUNDAMENTAL: no olvidar llamar a esta función!!! <-- la llama el
