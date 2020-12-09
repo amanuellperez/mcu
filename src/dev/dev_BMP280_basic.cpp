@@ -109,6 +109,10 @@ void __BMP280_config::mem_to_struct(std::byte* mem, __BMP280_config& st)
 // st -> mem
 void __BMP280_config::struct_to_mem(const __BMP280_config& st, std::byte* mem)
 {
+// FUNDAMENTAL: inicializar la memoria!!!
+    mem[0] = std::byte{0};
+    mem[1] = std::byte{0};
+
     mask_osrs_t(mem[0])   = st.osrs_t;
     mask_osrs_p(mem[0])   = st.osrs_p;
     mask_mode(mem[0])     = st.mode;

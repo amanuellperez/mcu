@@ -1,6 +1,5 @@
 #include "dev_DS1307_basic.h"
 
-#include <avr_UART_iostream.h> // TODO: borrame
 namespace dev{
 
 void __DS1307_timekeeper::mem_to_struct(__DS1307_timekeeper& st)
@@ -61,7 +60,6 @@ __DS1307_timekeeper __DS1307_timekeeper::struct_to_mem(__DS1307_timekeeper st)
 }
 
 
-
 void __DS1307_control_register::mem_to_struct(const std::byte& mem,
                               __DS1307_control_register& st)
 {
@@ -75,8 +73,8 @@ void __DS1307_control_register::struct_to_mem(const __DS1307_control_register& s
 				std::byte& mem)
 {
     mem = std::byte{0};
-    mask_output_control(mem)     = (st.output_control? std::byte{1}:std::byte{0});
-    mask_square_wave_enable(mem) = (st.square_wave_enable? std::byte{1}:std::byte{0});
+    mask_output_control(mem)     = atd::to_byte(st.output_control);
+    mask_square_wave_enable(mem) = atd::to_byte(st.square_wave_enable);
     mask_rate_select(mem)        = st.rate_select;
 }
 

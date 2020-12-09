@@ -376,14 +376,13 @@ int main()
 	char res{};
 	uart >> res;
 
-	if (res == 'r' or res == 'R')
-	    test_ram();
-	else if (res == 'b' or res == 'B')
-	    test_bateria();
-	else if (res == 'o' or res == 'O')
-	    test_output();
-	else
-	    test_clock();
+	switch(res){
+	    case 'r': case 'R': test_ram(); break;
+	    case 'b': case 'B': test_bateria(); break;
+	    case 'o': case 'O': test_output(); break;
+	    default:
+		    test_clock();
+	}
     }
 }
 

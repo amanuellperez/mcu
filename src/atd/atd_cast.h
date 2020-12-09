@@ -79,6 +79,15 @@ inline constexpr R safe_static_cast()
     return static_cast<R>(x);
 }
 
+
+// Conversión de bool -> std::byte (necesaria para usarla en las máscaras de
+// bits 
+inline std::byte to_byte(bool x)
+{
+    if (x)  return std::byte{1};
+    else    return std::byte{0};
+}
+
 }// namespace
 
 
