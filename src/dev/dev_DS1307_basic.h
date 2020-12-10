@@ -237,7 +237,7 @@ public:
     static_assert(TWI_master::buffer_size >= TWI_buffer_size);
 
 // Types
-    using TWI   = avr::TWI_master_memory_type<slave_address, TWI_master>;
+    using TWI   = avr::TWI_master_memory_type<TWI_master, slave_address>;
     using State = TWI::iostate;
     using Clock  = __DS1307_timekeeper;
     using Control_register = __DS1307_control_register;

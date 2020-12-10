@@ -73,6 +73,9 @@ struct __BMP280_id{
 
 private:
     // unico posible valor que puede tomar el id
+    // Según la datasheet del BME280 (5.2) puede tener los siguientes valores:
+    //	0x56/0x57 = samples
+    //	0x58      = mass production
     static constexpr std::byte unique_value{0x58};
 };
 
@@ -198,8 +201,8 @@ struct __BMP280_config{
     // Escribe toda la configuración. La configuración hay que escribirla
     // de una determinada forma: hay que hacer reset, leer... luego no vale
     // un simple write. Usar esta función para ello.
-    template <typename TWI>
-    void twi_write(TWI& out, typename TWI::Address slave_address) const;
+    template <typename TWI, typename TWI::Address slave_address>
+    void twi_write(TWI& out) const;
 
 
 // Options
@@ -276,9 +279,8 @@ Ixtream& operator>>(Ixtream& in, __BMP280_config& st)
 // TODO: ¿cómo generalizarla a que funcione con SPI? Cuando tenga el interfaz
 // de SPI lo miramos.
 // En caso de error el error queda en el estado del flujo de salida out.
-template <typename TWI>
-void __BMP280_config::twi_write(TWI& out, 
-	typename TWI::Address slave_address) const
+template <typename TWI, typename TWI::Address slave_address>
+void __BMP280_config::twi_write(TWI& out) const
 { 
     // std::byte mem[size];
     std::array<std::byte, size> mem;
@@ -331,7 +333,7 @@ void __BMP280_config::twi_write(TWI& out,
     if (out.error())
 	return;
 
-// 4. Enviar primero enviar ctrl_meas
+// 4. Enviar primero ctrl_meas
     out.open(slave_address);
 
     out << ctrl_meas_address
@@ -565,7 +567,7 @@ public:
     static_assert(slave_address == 0x76 or slave_address == 0x77,
 	    "Wrong BMP280 address. Available only: 0x76 and 0x77");
 
-    using TWI_port = avr::TWI_master_memory_type<slave_address, TWI_master>;
+    using TWI_port = avr::TWI_master_memory_type<TWI_master, slave_address>;
 
     using State = TWI_master::iostate;
 
@@ -672,11 +674,11 @@ template <typename TWI, typename TWI::Address sa>
 inline void BMP280_TWI<TWI, sa>::write(Config& cfg)
 {
     TWI twi;
-    cfg.twi_write(twi, slave_address);
+    cfg.twi_write<TWI, slave_address>(twi);
 }
 
 template <typename TWI, typename TWI::Address sa>
-inline void BMP280_TWI<TWI,sa>::write_cfg_(void f(Config&))
+void BMP280_TWI<TWI,sa>::write_cfg_(void f(Config&))
 {
     Config cfg;
     f(cfg);
@@ -686,7 +688,7 @@ inline void BMP280_TWI<TWI,sa>::write_cfg_(void f(Config&))
 
 
 template <typename TWI, typename TWI::Address sa>
-inline void BMP280_TWI<TWI,sa>::init()
+void BMP280_TWI<TWI,sa>::init()
 {
     BMP280_base::init();
 

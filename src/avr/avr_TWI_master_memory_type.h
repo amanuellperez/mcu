@@ -46,8 +46,7 @@ namespace avr{
  *  Para ver un ejemplo de implementación ver BMP280 ó DS1307
  *
  */
-template <avr::TWI_basic::Address slave_address,
-	 typename TWI_master>
+template <typename TWI_master, typename TWI_master::Address slave_address>
 struct TWI_master_memory_type {
 
     using TWI = avr::TWI_master_ioxtream<TWI_master>;
@@ -73,10 +72,10 @@ struct TWI_master_memory_type {
 // ------------------------------
 // avr_TWI_master_memory_type.cxx
 // ------------------------------
-template <avr::TWI_basic::Address slave_address, typename TWI_master>
+template <typename TWI_master, typename TWI_master::Address slave_address>
 template <typename T>
-TWI_master_memory_type<slave_address, TWI_master>::iostate
-TWI_master_memory_type<slave_address, TWI_master>::read(T& st)
+TWI_master_memory_type<TWI_master, slave_address>::iostate
+TWI_master_memory_type<TWI_master, slave_address>::read(T& st)
 {
     static_assert (atd::is_readable(T::mem_type));
 
@@ -98,10 +97,10 @@ TWI_master_memory_type<slave_address, TWI_master>::read(T& st)
 }
 
 
-template <avr::TWI_basic::Address slave_address, typename TWI_master>
+template <typename TWI_master, typename TWI_master::Address slave_address>
 template <typename T>
-TWI_master_memory_type<slave_address, TWI_master>::iostate
-TWI_master_memory_type<slave_address, TWI_master>::write(const T& st)
+TWI_master_memory_type<TWI_master, slave_address>::iostate
+TWI_master_memory_type<TWI_master, slave_address>::write(const T& st)
 {
     static_assert (atd::is_writeable(T::mem_type));
 

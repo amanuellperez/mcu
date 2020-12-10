@@ -35,7 +35,7 @@ using TWI_master = avr::TWI_master<avr::TWI_basic, TWI_buffer_size>;
 
 // Dispositivos
 using TWI = avr::TWI_master_ioxtream<TWI_master>;
-using Sensor = dev::BMP280_TWI<TWI_master, 0x76>;
+using Sensor = dev::BMP280_TWI<TWI_master, 0x77>;
 
 // En el breakout de adafruit la dirección la determina la conexión del pin
 // SDO:
@@ -44,7 +44,7 @@ using Sensor = dev::BMP280_TWI<TWI_master, 0x76>;
 
 
 // para depurar
-static constexpr uint8_t slave_address = 0x76;
+static constexpr uint8_t slave_address = 0x77;
 
 void twi_print_state(TWI::iostate st)
 {
