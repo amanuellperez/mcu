@@ -35,9 +35,14 @@
  ****************************************************************************/
 
 #include <atd_memory.h>
+#include <cstddef>  // std::byte
 #include "avr_TWI_master_ioxtream.h"
 
 namespace avr{
+
+
+// syntactic sugar
+using __Mem_address = std::byte;
 
 /*!
  *  \brief  Dispositivo de memoria.
@@ -56,7 +61,7 @@ namespace avr{
  *  
  *  // Memory
  *      static constexpr atd::Memory_type mem_type = atd::Memory_type::read_only;
- *      static constexpr std::byte address{0xD0};
+ *      static constexpr std::byte address{0xD0}; // siempre std::byte!!!
  *      static constexpr uint8_t size = 1;	
  *
  *  // Format functions: transforman el array de bytes 'mem' leido del 
@@ -98,20 +103,38 @@ template <typename TWI_master, typename TWI_master::Address slave_address>
 struct TWI_master_memory_type {
 
     using TWI = avr::TWI_master_ioxtream<TWI_master>;
-
     using iostate = typename TWI::iostate;
+
+    using Mem_address = __Mem_address;    // Dirección de una zona de memoria dentro 
+				    // del dispositivo.
 
     // Lee una zona de memoria en el
     // device conectado via TWI y la devuelve codificada en la estructura T
     // correspondiente. La clase T contiene toda la información de cómo es
     // almacenada en el device.
     // Params: [out] st: objeto leido.
-    // Return value: On success 0, on error TWI::error.
     template <typename T>
     static iostate read(T& st);
 
     template <typename T>
-    static TWI::iostate write(const T& st);
+    static iostate write(const T& st);
+
+
+    // Funciones sin codificar: leemos/escribimos una zona de memoria como
+    // array de bytes.
+    // (RRR) ¿por qué pasar como parámetro de plantilla n?
+    // En principio esta clase la estoy usando para manejar dispositivos (BMP,
+    // DS1307...) y no memoria. En este tipo de dispositivos conozco en tiempo 
+    // de compilación dónde y cuánto quiero leer. 
+    // Lee 'n' bytes del dispositivo a partir de la dirección 'address'
+    // guardando el resultado en 'mem'.
+    template <Mem_address address, typename TWI_master::streamsize n>
+    static iostate mem_read(std::byte* mem);
+
+    // Escribe 'n' bytes de 'mem' a partir de la dirección 'address' en el 
+    // dispositivo.
+    template <Mem_address address, typename TWI_master::streamsize n>
+    static iostate mem_write(const std::byte* mem);
 
 private:
     template <typename T>
@@ -132,7 +155,7 @@ private:
 
 // ------------------------------
 // avr_TWI_master_memory_type.cxx
-// ------------------------------.
+// ------------------------------
 // Detecta si la clase T tiene el tipo use_struct_as_mem
 template <typename T, typename = void>
 struct __has_use_struct_as_mem : std::false_type {};
@@ -140,6 +163,49 @@ struct __has_use_struct_as_mem : std::false_type {};
 template <typename T>
 struct __has_use_struct_as_mem<T, 
 	std::void_t<decltype(T::use_struct_as_mem)> > : std::true_type {};
+
+
+
+template <typename TWI_master, typename TWI_master::Address slave_address>
+template <__Mem_address mem_address, typename TWI_master::streamsize n>
+inline TWI_master_memory_type<TWI_master, slave_address>::iostate
+TWI_master_memory_type<TWI_master, slave_address>::mem_read(std::byte* mem)
+{
+    TWI twi;		    
+    twi.open(slave_address);
+     
+    twi << mem_address;
+
+    if (twi.error())
+	return TWI::state();
+
+    twi.read(n);
+    twi.read(mem, n);
+
+    twi.close();	
+
+    return TWI::state();
+}
+
+
+template <typename TWI_master, typename TWI_master::Address slave_address>
+template <__Mem_address mem_address, typename TWI_master::streamsize n>
+inline TWI_master_memory_type<TWI_master, slave_address>::iostate
+TWI_master_memory_type<TWI_master, slave_address>::mem_write(const std::byte* mem)
+{
+    TWI twi;
+    twi.open(slave_address);
+
+    if (twi.error())
+	return TWI::state();
+
+    twi << mem_address;
+    twi.write(mem, n);
+
+    twi.close();
+
+    return TWI::state();
+}
 
 
 
@@ -186,18 +252,7 @@ TWI_master_memory_type<TWI_master, slave_address>::read_without_optimization
 
     std::array<std::byte, T::size> mem;
 
-    TWI twi;		    
-    twi.open(slave_address);	// TWI conection
-     
-    twi << T::address;
-
-    if (twi.error())
-	return TWI::state();
-
-    twi.read(T::size);
-    twi.read(mem.data(), T::size);
-
-    twi.close();		// end TWI conection
+    mem_read<T::address, T::size>(mem.data());
 
     T::mem_to_struct(mem, st);
 
@@ -221,17 +276,7 @@ TWI_master_memory_type<TWI_master, slave_address>::write_without_optimization
     std::fill(mem.begin(), mem.end(), std::byte{0}); // ver nota
     T::struct_to_mem(st, mem);
 
-    TWI twi;
-    twi.open(slave_address);
-
-    if (twi.error())
-	return TWI::state();
-
-    twi << T::address;
-    twi.write(mem.data(), T::size);
-
-
-    twi.close();
+    mem_write<T::address, T::size>(mem.data());
 
     return TWI::state();
     

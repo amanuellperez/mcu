@@ -152,7 +152,8 @@ public:
 // Types
     using iostate    = __TWI_master_state;
     using streamsize = typename TWI::streamsize;
-    using Address    = typename TWI::Address;
+    using Address    = typename TWI::Address; // Direcciones de los dispositivos 
+					      // conectados via TWI
 
 // cfg data
     static constexpr streamsize buffer_size = buffer_size0;

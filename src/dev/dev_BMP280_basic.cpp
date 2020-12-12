@@ -113,10 +113,12 @@ void __BMP280_config::mem_to_struct(const std::array<std::byte, size>& mem,
 
 
 // st -> mem
+//void __BMP280_config::struct_to_mem(const __BMP280_config& st,
+//                                    std::array<std::byte, size>& mem)
 void __BMP280_config::struct_to_mem(const __BMP280_config& st,
-                                    std::array<std::byte, size>& mem)
+                                    std::byte* mem)
 {
-    static_assert(mem.size() == 2, "mem"); // voy a usar 2 bytes
+//    static_assert(mem.size() == 2, "mem"); // voy a usar 2 bytes
 
 // FUNDAMENTAL: inicializar la memoria!!!
     mem[0] = std::byte{0};

@@ -176,7 +176,8 @@ struct __BMP280_config{
 
 //  mem <-> struct
     static void mem_to_struct(const std::array<std::byte,size>& mem, __BMP280_config& st);
-    static void struct_to_mem(const __BMP280_config& st, std::array<std::byte,size>& mem);
+    // static void struct_to_mem(const __BMP280_config& st, std::array<std::byte,size>& mem);
+    static void struct_to_mem(const __BMP280_config& st, std::byte* mem);
 
     // Este registro tiene forma específica de ser escrito
     static constexpr std::byte ctrl_meas_address{0xF4};
@@ -187,7 +188,7 @@ struct __BMP280_config{
     // de una determinada forma: hay que hacer reset, leer... luego no vale
     // un simple write. Usar esta función para ello.
     template <typename TWI, typename TWI::Address slave_address>
-    void twi_write(TWI& out) const;
+    void twi_write() const;
 
 
 // Options
@@ -246,68 +247,45 @@ private:
 // TODO: ¿cómo generalizarla a que funcione con SPI? Cuando tenga el interfaz
 // de SPI lo miramos.
 // En caso de error el error queda en el estado del flujo de salida out.
-template <typename TWI, typename TWI::Address slave_address>
-// TWI = TWI_master
-void __BMP280_config::twi_write(TWI& out) const
+template <typename TWI_master, typename TWI_master::Address slave_address>
+void __BMP280_config::twi_write() const
 { 
-    std::array<std::byte, size> mem;
+    avr::TWI_master_memory_type<TWI_master, slave_address> twi_mem;
+
+    std::byte mem[size];
     struct_to_mem(*this, mem);
 
 // 1. Poner el dispositivo en sleep mode. 
 //    El ejemplo de Bosch dice que la forma más rápida de hacerlo es con
 //    reset.
-    __BMP280_reset reset;
 
-    out.open(slave_address);
-    out << reset.address
-	<< reset;
+    twi_mem.write(__BMP280_reset{});
 
-    out.close();
-
-    if (out.error()){
+    if (TWI_master::error())
 	return;
-    }
 
     
 // 2. Leer. El ejemplo de Bosch dice que siempre hay que leer antes de
-// escribir la cfg. De hecho he tenido problemas al principio porque no
-// quedaba bien configurado (pero tenía un error ya que no inicializaba mem.
-// Los problemas fueron por culpa de este error???)
+// escribir la cfg. ¿Es realmente necesario?
     std::byte tmp[2];
-    out.open(slave_address);
-    out << address;
 
-    out.read(2);
-    out >> tmp[0] >> tmp[1];
+    twi_mem.template mem_read<address, 2>(tmp);
 
-    out.close();
-
-    if (out.error()){
+    if (TWI_master::error())
 	return;
-    }
 
 // 3. Enviar primero enviar config.
 //    datasheet (4.3.5): In sleep mode writes are not ignored.
 //    Esto es, este registro solo se puede escribir en sleep mode y hay que
 //    escribirlo el solito, sin escribir ctrl_meas a la vez. (De hecho,
 //    al principio intenté escribirlo a la vez que ctrl_meas y no funcionaba).
-    out.open(slave_address);
+    twi_mem.template mem_write<config_address, 1>(&(mem[1]));
 
-    out << config_address
-	<< mem[1];
-
-    out.close();
-
-    if (out.error())
+    if (TWI_master::error())
 	return;
 
 // 4. Enviar primero ctrl_meas
-    out.open(slave_address);
-
-    out << ctrl_meas_address
-	<< mem[0];
-
-    out.close();
+    twi_mem.template mem_write<ctrl_meas_address, 1>(&(mem[0]));
 
 }
 
@@ -481,15 +459,19 @@ protected:
 //	 Voy a usar el equivalente a errno local a través de un state.
 //	 Todas las operaciones que puedan fallar modificarán el state,
 //	 quedando almacenado ahí el exito/fracaso de la operación.
-template <typename TWI_master, typename TWI_master::Address slave_address0>
+template <typename TWI_master0, typename TWI_master0::Address slave_address0>
 class BMP280_TWI : public BMP280_base {
 public:
     static constexpr uint8_t TWI_buffer_size = 100; // TODO: ajustarlo al mínimo?
 
+    // Me generó algo de lío no identificar bien cada tipo de TWI.
+    using TWI_master = TWI_master0;
+    using TWI_ioxtream = avr::TWI_master_ioxtream<TWI_master>;
+    using TWI = TWI_ioxtream;
+
     static_assert(TWI_buffer_size <= TWI_master::buffer_size,
                   "Buffer too small!!! Choose a bigger one.");
 
-    using TWI = avr::TWI_master_ioxtream<TWI_master>;
 
     // Slave address: el último bit se puede elegir:
     // Connecting SDO to GND results in slave address 1110110 (0x76);
@@ -601,11 +583,10 @@ private:
 };
 
 
-template <typename TWI, typename TWI::Address sa>
-inline void BMP280_TWI<TWI, sa>::write(Config& cfg)
+template <typename TWI_master, typename TWI_master::Address sa>
+inline void BMP280_TWI<TWI_master, sa>::write(Config& cfg)
 {
-    TWI twi;
-    cfg.twi_write<TWI, slave_address>(twi);
+    cfg.twi_write<TWI_master, slave_address>();
 }
 
 template <typename TWI, typename TWI::Address sa>
