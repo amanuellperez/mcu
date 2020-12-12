@@ -35,11 +35,8 @@
  *    A.Manuel L.Perez
  *    21/01/2020 v0.0
  *    07/04/2020 v0.1
+ *    12/12/2020 v0.2
  *		 TODO (básico):
- *		 - BMP280_TWI: revisar código. Hacer esto después de
- *			       implementar BME280/680 para comparar).
- *			       Hay funciones genéricas de TWI que se pueden
- *			       sacar de aquí.
  *		 - Crear BMP280_SPI: se conecta vía SPI al sensor.
  *
  ****************************************************************************/
@@ -56,7 +53,6 @@
 
 namespace dev{
 
-
 // ---------------------------------------------------------------------------
 // datasheet 4.3.1
 struct __BMP280_id{
@@ -70,6 +66,8 @@ struct __BMP280_id{
     static constexpr atd::Memory_type mem_type = atd::Memory_type::read_only;
     static constexpr std::byte address{0xD0};
     static constexpr uint8_t size = 1;	
+
+    static constexpr bool use_struct_as_mem = true;
 
 private:
     // unico posible valor que puede tomar el id
@@ -94,11 +92,12 @@ inline bool __BMP280_id::is_valid() const
 struct __BMP280_reset{
     static constexpr std::byte reset_cmd {0xB6};
 
-// Memoria donde guardamos el objeto
+// Memory
     static constexpr atd::Memory_type mem_type = atd::Memory_type::write_only;
     static constexpr std::byte address{0xE0};
     static constexpr uint8_t size = 1;
 
+    static constexpr bool use_struct_as_mem = true;
 };
 
 
@@ -119,22 +118,19 @@ struct __BMP280_status{
     bool measuring; // Is there a conversion running?
     bool im_update;
 
-
 // Memory
     static constexpr atd::Memory_type mem_type = atd::Memory_type::read_only;
     static constexpr std::byte address{0xF3};
     static constexpr uint8_t size = 1;	
 
-    template <typename Ixtream>
-    friend Ixtream& operator>>(Ixtream& in, __BMP280_status& st);
+// mem <-> struct
+    static void mem_to_struct(const std::array<std::byte, size>& mem
+				, __BMP280_status& st);
 
 private:
     static constexpr atd::Range_bitmask<3, 3, std::byte> mask_measuring{};
     static constexpr atd::Range_bitmask<0, 0, std::byte> mask_im_update{};
 
-    // Codifica la región de memoria 'mem' en la estructura st
-    static void mem_to_struct(const std::array<std::byte, size>& mem
-				, __BMP280_status& st);
 };
 
 
@@ -142,23 +138,10 @@ inline void
 __BMP280_status::mem_to_struct(const std::array<std::byte, size>& mem,
                                __BMP280_status& st)
 {
-    st.measuring = (mask_measuring(mem[0]) == std::byte{0}? false: true);
-    st.im_update = (mask_im_update(mem[0]) == std::byte{0}? false: true);
+    st.measuring = atd::to_bool(mask_measuring(mem[0]));
+    st.im_update = atd::to_bool(mask_im_update(mem[0]));
 }
 
-
-template <typename Ixtream>
-Ixtream& operator>>(Ixtream& in, __BMP280_status& st)
-{ 
-    using T = __BMP280_status;
-
-    std::array<std::byte, T::size> mem;
-    in.read(mem.data(), T::size);
-
-    T::mem_to_struct(mem, st);
-
-    return in;
-}
 
 
 
@@ -191,12 +174,14 @@ struct __BMP280_config{
     static constexpr std::byte address{0xF4};
     static constexpr uint8_t size = 2;	
 
+//  mem <-> struct
+    static void mem_to_struct(const std::array<std::byte,size>& mem, __BMP280_config& st);
+    static void struct_to_mem(const __BMP280_config& st, std::array<std::byte,size>& mem);
+
     // Este registro tiene forma específica de ser escrito
     static constexpr std::byte ctrl_meas_address{0xF4};
     static constexpr std::byte config_address{0xF5};
 
-    template <typename Ixtream>
-    friend Ixtream& operator>>(Ixtream& in, __BMP280_config& st);
 
     // Escribe toda la configuración. La configuración hay que escribirla
     // de una determinada forma: hay que hacer reset, leer... luego no vale
@@ -253,26 +238,8 @@ private:
     static constexpr atd::Range_bitmask<2, 4, std::byte> mask_filter{};
     static constexpr atd::Range_bitmask<0, 0, std::byte> mask_spi3w_en{};
 
-//    // Codifica la región de memoria 'mem' en la estructura st
-    static void mem_to_struct(const std::array<std::byte,size>& mem, __BMP280_config& st);
-    static void struct_to_mem(const __BMP280_config& st, std::array<std::byte,size>& mem);
 };
 
-
-
-
-template <typename Ixtream>
-Ixtream& operator>>(Ixtream& in, __BMP280_config& st)
-{ 
-    using T = __BMP280_config;
-
-    std::array<std::byte, T::size> mem;
-    in.read(mem.data(), T::size);
-
-    T::mem_to_struct(mem, st);
-
-    return in;
-}
 
 // Esta función se encarga de gestionar toda la transmisión:
 // la abre, envia todos los datos, la cierra. Por eso la llamo twi_
@@ -280,9 +247,9 @@ Ixtream& operator>>(Ixtream& in, __BMP280_config& st)
 // de SPI lo miramos.
 // En caso de error el error queda en el estado del flujo de salida out.
 template <typename TWI, typename TWI::Address slave_address>
+// TWI = TWI_master
 void __BMP280_config::twi_write(TWI& out) const
 { 
-    // std::byte mem[size];
     std::array<std::byte, size> mem;
     struct_to_mem(*this, mem);
 
@@ -290,6 +257,7 @@ void __BMP280_config::twi_write(TWI& out) const
 //    El ejemplo de Bosch dice que la forma más rápida de hacerlo es con
 //    reset.
     __BMP280_reset reset;
+
     out.open(slave_address);
     out << reset.address
 	<< reset;
@@ -359,16 +327,14 @@ struct __BMP280_temp_and_press{
     static constexpr std::byte address {0xF7};
     static constexpr uint8_t size = 6;
 
-    // En caso de que los valores leídos no estén dentro de los límites
-    // devuelve 0.
-    /// Devuelve los valores de temperatura y presión sin compensar.
-    template <typename Ixtream>
-    friend Ixtream& operator>>(Ixtream& in, __BMP280_temp_and_press& st);
-
-private:
-    // Codifica la región de memoria 'mem' en la estructura st
+// mem <-> struct
+/// Devuelve los valores de temperatura y presión sin compensar.
+// En caso de que los valores leídos no estén dentro de los límites
+// devuelve 0.
     static void mem_to_struct(const std::array<std::byte, size>& mem, 
 						__BMP280_temp_and_press& st);
+
+private:
 
     // Mira a ver si los valores de temperatura y presión están dentro de los
     // límites. Si no lo están, los pone a 0 (de esa forma el usuario puede 
@@ -383,24 +349,6 @@ private:
     static constexpr int32_t press_min = 0x00000;
     static constexpr int32_t press_max = 0xFFFF0;
 };
-
-
-
-template <typename Ixtream>
-Ixtream& operator>>(Ixtream& in, __BMP280_temp_and_press& st)
-{ 
-    using T = __BMP280_temp_and_press;
-
-    std::array<std::byte, T::size> mem;
-
-    in.read(mem.data(), T::size);
-
-    T::mem_to_struct(mem, st);
-
-    T::make_bounded(st);
-
-    return in;
-}
 
 
 
@@ -449,33 +397,16 @@ struct __BMP280_calibration{
     static constexpr std::byte address {0x88};
     static constexpr uint8_t size = 24;
 
-    template <typename Ixtream>
-    friend Ixtream& operator>>(Ixtream& in, __BMP280_calibration& st);
-
-private:
-    // Codifica la región de memoria 'mem' en la estructura st
+// mem <-> struct
     static void mem_to_struct(const std::array<std::byte, size>& mem, 
 						    __BMP280_calibration& st);
+
+private:
 
     // Carries a fine resolution temperature value over to the pressure
     // compensation formula.
     int32_t t_fine;
 };
-
-
-template <typename Ixtream>
-inline Ixtream& operator>>(Ixtream& in, __BMP280_calibration& st)
-{ 
-    using T = __BMP280_calibration;
-
-    std::array<std::byte, T::size> mem;
-
-    in.read(mem.data(), T::size);
-
-    T::mem_to_struct(mem, st);
-
-    return in;
-}
 
 
 

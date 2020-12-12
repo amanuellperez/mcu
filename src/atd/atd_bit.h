@@ -161,6 +161,19 @@ struct __Range_bitmask{
 };
 
 
+// syntactic sugar
+/// Returns true if r != 0, false if == 0.
+template <uint8_t i0, uint8_t i1, typename Int>
+inline bool to_bool(const __Range_bitmask<i0, i1, Int>& r)
+{
+    if (r == Int{0})
+	return false;
+    else
+	return true;
+}
+
+
+
 /*!
  *  \brief Contiguous bitmask.
  *  

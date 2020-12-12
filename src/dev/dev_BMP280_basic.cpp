@@ -67,6 +67,8 @@ void __BMP280_temp_and_press::mem_to_struct(
 
     st.utemperature = atd::concat_bytes<int32_t>(mem[3], mem[4], mem[5]);
     st.utemperature >>= 4;
+
+    make_bounded(st);
 }
 
 

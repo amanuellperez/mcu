@@ -136,6 +136,7 @@ void test_bitmask()
 template <typename Int>
 void test_mask()
 {
+    {
     // TODO: more tests!!! but how??? random? systematic?
     constexpr atd::Range_bitmask<2,6, Int> mask;
 
@@ -152,6 +153,18 @@ void test_mask()
     CHECK_TRUE(cres == Int{0x0D}, "Range_bitmask::get");
     }
     // ASSERT_NOT_COMPILE(constexpr atd::Range_bitmask<6,5, Int> mask4;)
+}
+
+    {// to_bool
+    constexpr atd::Range_bitmask<3,3, Int> mask;
+
+    Int x = 0x39;
+    CHECK_TRUE(atd::to_bool(mask(x)), "to_bool(Range_bitmask)");
+
+    x = Int{0x11};
+    CHECK_TRUE(!atd::to_bool(mask(x)), "!to_bool(Range_bitmask)");
+
+    }
 }
 
 void test_mask()

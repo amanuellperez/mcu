@@ -37,7 +37,6 @@
 #include <avr_TWI.h>
 #include <atd_bit.h>
 
-#include <avr_UART_iostream.h>	// TODO: borrame
 
 namespace dev{
 
@@ -63,17 +62,20 @@ struct __DS1307_timekeeper{
     bool is_PM; // si AMPM_format == true, indica si es PM o no (en cuyo caso sería
                 // AM). Si AMPM_format == false su valor no está definido.
 
-    // Memory
+// Memory
     static constexpr atd::Memory_type mem_type =
 					      atd::Memory_type::read_and_write;
     static constexpr std::byte address {0x00};
     static constexpr uint8_t size = 7;
+
+    static constexpr bool use_struct_as_mem = true;
 
     template <typename Ixtream>
     friend Ixtream& operator>>(Ixtream& in, __DS1307_timekeeper& st);
 
     template <typename Oxtream>
     friend Oxtream& operator<<(Oxtream& out, const __DS1307_timekeeper& st);
+
 
 
 private:
@@ -146,6 +148,8 @@ struct __DS1307_control_register{
 					      atd::Memory_type::read_and_write;
     static constexpr std::byte address {0x07};
     static constexpr uint8_t size = 1;
+
+    static constexpr bool use_struct_as_mem = true;
 
     template <typename Ixtream>
     friend Ixtream& operator>>(Ixtream& in, __DS1307_control_register& st);

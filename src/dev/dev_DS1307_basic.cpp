@@ -1,5 +1,7 @@
 #include "dev_DS1307_basic.h"
 
+#include <atd_cast.h>
+
 namespace dev{
 
 void __DS1307_timekeeper::mem_to_struct(__DS1307_timekeeper& st)
