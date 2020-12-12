@@ -30,8 +30,6 @@
 // ampliamos convirtiéndolos en xtreams
 #include "avr_TWI_master_ioxtream.h"
 
-// Tipos de dispositivos
-#include "avr_TWI_master_memory_type.h"
 
 #endif
 

@@ -47,7 +47,7 @@
 #include <atd_bit.h>
 #include <atd_decimal.h>
 #include <atd_magnitude.h>
-#include <avr_TWI_master_memory_type.h>
+#include "dev_TWI_memory_type.h"
 
 
 
@@ -250,7 +250,7 @@ private:
 template <typename TWI_master, typename TWI_master::Address slave_address>
 void __BMP280_config::twi_write() const
 { 
-    avr::TWI_master_memory_type<TWI_master, slave_address> twi_mem;
+    TWI_memory_type<TWI_master, slave_address> twi_mem;
 
     std::byte mem[size];
     struct_to_mem(*this, mem);
@@ -480,7 +480,7 @@ public:
     static_assert(slave_address == 0x76 or slave_address == 0x77,
 	    "Wrong BMP280 address. Available only: 0x76 and 0x77");
 
-    using TWI_port = avr::TWI_master_memory_type<TWI_master, slave_address>;
+    using TWI_mem = TWI_memory_type<TWI_master, slave_address>;
 
     using State = TWI_master::iostate;
 
@@ -515,19 +515,19 @@ public:
 // Funciones de bajo nivel
 // -----------------------
     /// Read the device id.
-    void read(Id& id) {state_ = TWI_port::read(id);}
+    void read(Id& id) {state_ = TWI_mem::read(id);}
 
     /// The device is reset using the complete power-on-reset procedure.
-    void reset() { state_ = TWI_port::write(__BMP280_reset{});}
+    void reset() { state_ = TWI_mem::write(__BMP280_reset{});}
 
     /// Read the status register.
 //    /// out: Status&
-    void read(Status& res) {state_ = TWI_port::read(res);}
+    void read(Status& res) {state_ = TWI_mem::read(res);}
 
-    void read(Config& res) {state_ = TWI_port::read(res);}
+    void read(Config& res) {state_ = TWI_mem::read(res);}
     void write(Config& cfg);
 
-    void read(Temp_and_press& res) {state_ = TWI_port::read(res);}
+    void read(Temp_and_press& res) {state_ = TWI_mem::read(res);}
  
 
     /// Returns temperature and pressure.
@@ -577,7 +577,7 @@ private:
     State state_;
 
 
-    void read_calibration_params() {state_ = TWI_port::read(calibration_);}
+    void read_calibration_params() {state_ = TWI_mem::read(calibration_);}
 
     void write_cfg_(void f(Config&));
 };
@@ -605,7 +605,7 @@ void BMP280_TWI<TWI,sa>::init()
     BMP280_base::init();
 
     __BMP280_id id;
-    state_ = TWI_port::read(id);
+    state_ = TWI_mem::read(id);
 
     if (error()){
 	state_ = TWI::state();

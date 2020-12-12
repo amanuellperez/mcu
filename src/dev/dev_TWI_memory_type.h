@@ -17,28 +17,24 @@
 
 #pragma once
 
-#ifndef __AVR_TWI_MASTER_MEMORY_TYPE_H__
-#define __AVR_TWI_MASTER_MEMORY_TYPE_H__
+#ifndef __DEV_TWI_MEMORY_TYPE_H__
+#define __DEV_TWI_MEMORY_TYPE_H__
 /****************************************************************************
  *
  *  - DESCRIPCION: Concebimos el dispositivo TWI como una memoria.
  *
- *  - TODO: este fichero no depende del avr. Es una capa colocada encima de
- *  TWI. ¿meterlo en namespace mcu? Tampoco quiero crear demasiados
- *  namespaces. (???)
- *
  *  - HISTORIA:
  *    A.Manuel L.Perez
  *    28/04/2020 v0.0
- *    12/12/2020 v0.1
+ *    12/12/2020 v0.1 
  *
  ****************************************************************************/
 
 #include <atd_memory.h>
 #include <cstddef>  // std::byte
-#include "avr_TWI_master_ioxtream.h"
+#include <avr_TWI_master_ioxtream.h>
 
-namespace avr{
+namespace dev{
 
 
 // syntactic sugar
@@ -100,13 +96,18 @@ using __Mem_address = std::byte;
  *  };
  */
 template <typename TWI_master, typename TWI_master::Address slave_address>
-struct TWI_master_memory_type {
+struct TWI_memory_type {
 
-    using TWI = avr::TWI_master_ioxtream<TWI_master>;
+// Configuración de la conexión con el dispositivo
+    using TWI     = avr::TWI_master_ioxtream<TWI_master>;
+    using Slave_address = TWI_master::Address;
     using iostate = typename TWI::iostate;
 
-    using Mem_address = __Mem_address;    // Dirección de una zona de memoria dentro 
-				    // del dispositivo.
+//// Tipos para configurar un segmento de memoria
+//// Un segmento de memoria queda definido dando:
+//    using Memory_type = atd::Memory_type;
+    using Mem_address = __Mem_address;
+//    using Size        = uint8_t;
 
     // Lee una zona de memoria en el
     // device conectado via TWI y la devuelve codificada en la estructura T
@@ -154,7 +155,7 @@ private:
 
 
 // ------------------------------
-// avr_TWI_master_memory_type.cxx
+// avr_TWI_memory_type.cxx
 // ------------------------------
 // Detecta si la clase T tiene el tipo use_struct_as_mem
 template <typename T, typename = void>
@@ -168,8 +169,8 @@ struct __has_use_struct_as_mem<T,
 
 template <typename TWI_master, typename TWI_master::Address slave_address>
 template <__Mem_address mem_address, typename TWI_master::streamsize n>
-inline TWI_master_memory_type<TWI_master, slave_address>::iostate
-TWI_master_memory_type<TWI_master, slave_address>::mem_read(std::byte* mem)
+inline TWI_memory_type<TWI_master, slave_address>::iostate
+TWI_memory_type<TWI_master, slave_address>::mem_read(std::byte* mem)
 {
     TWI twi;		    
     twi.open(slave_address);
@@ -190,8 +191,8 @@ TWI_master_memory_type<TWI_master, slave_address>::mem_read(std::byte* mem)
 
 template <typename TWI_master, typename TWI_master::Address slave_address>
 template <__Mem_address mem_address, typename TWI_master::streamsize n>
-inline TWI_master_memory_type<TWI_master, slave_address>::iostate
-TWI_master_memory_type<TWI_master, slave_address>::mem_write(const std::byte* mem)
+inline TWI_memory_type<TWI_master, slave_address>::iostate
+TWI_memory_type<TWI_master, slave_address>::mem_write(const std::byte* mem)
 {
     TWI twi;
     twi.open(slave_address);
@@ -211,8 +212,8 @@ TWI_master_memory_type<TWI_master, slave_address>::mem_write(const std::byte* me
 
 template <typename TWI_master, typename TWI_master::Address slave_address>
 template <typename T>
-inline TWI_master_memory_type<TWI_master, slave_address>::iostate
-TWI_master_memory_type<TWI_master, slave_address>::read(T& st)
+inline TWI_memory_type<TWI_master, slave_address>::iostate
+TWI_memory_type<TWI_master, slave_address>::read(T& st)
 {
     static_assert (atd::is_readable(T::mem_type));
     
@@ -226,8 +227,8 @@ TWI_master_memory_type<TWI_master, slave_address>::read(T& st)
 
 template <typename TWI_master, typename TWI_master::Address slave_address>
 template <typename T>
-inline TWI_master_memory_type<TWI_master, slave_address>::iostate
-TWI_master_memory_type<TWI_master, slave_address>::write(const T& st)
+inline TWI_memory_type<TWI_master, slave_address>::iostate
+TWI_memory_type<TWI_master, slave_address>::write(const T& st)
 {
     static_assert (atd::is_writeable(T::mem_type));
 
@@ -244,8 +245,8 @@ TWI_master_memory_type<TWI_master, slave_address>::write(const T& st)
 
 template <typename TWI_master, typename TWI_master::Address slave_address>
 template <typename T>
-TWI_master_memory_type<TWI_master, slave_address>::iostate
-TWI_master_memory_type<TWI_master, slave_address>::read_without_optimization
+TWI_memory_type<TWI_master, slave_address>::iostate
+TWI_memory_type<TWI_master, slave_address>::read_without_optimization
 									(T& st)
 {
     static_assert (atd::is_readable(T::mem_type));
@@ -266,8 +267,8 @@ TWI_master_memory_type<TWI_master, slave_address>::read_without_optimization
 // garantizado que el usuario no comete ese error.
 template <typename TWI_master, typename TWI_master::Address slave_address>
 template <typename T>
-TWI_master_memory_type<TWI_master, slave_address>::iostate
-TWI_master_memory_type<TWI_master, slave_address>::write_without_optimization
+TWI_memory_type<TWI_master, slave_address>::iostate
+TWI_memory_type<TWI_master, slave_address>::write_without_optimization
 								    (const T& st)
 {
     static_assert (atd::is_writeable(T::mem_type));
@@ -286,8 +287,8 @@ TWI_master_memory_type<TWI_master, slave_address>::write_without_optimization
 
 template <typename TWI_master, typename TWI_master::Address slave_address>
 template <typename T>
-TWI_master_memory_type<TWI_master, slave_address>::iostate
-TWI_master_memory_type<TWI_master, slave_address>::read_with_optimization(T& st)
+TWI_memory_type<TWI_master, slave_address>::iostate
+TWI_memory_type<TWI_master, slave_address>::read_with_optimization(T& st)
 {
     TWI twi;
     twi.open(slave_address);
@@ -310,8 +311,8 @@ TWI_master_memory_type<TWI_master, slave_address>::read_with_optimization(T& st)
 
 template <typename TWI_master, typename TWI_master::Address slave_address>
 template <typename T>
-TWI_master_memory_type<TWI_master, slave_address>::iostate
-TWI_master_memory_type<TWI_master, slave_address>::write_with_optimization
+TWI_memory_type<TWI_master, slave_address>::iostate
+TWI_memory_type<TWI_master, slave_address>::write_with_optimization
 								   (const T& st)
 {
     TWI twi;

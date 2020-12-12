@@ -36,7 +36,7 @@
 #include <atd_bcd.h>
 #include <avr_TWI.h>
 #include <atd_bit.h>
-
+#include "dev_TWI_memory_type.h"
 
 namespace dev{
 
@@ -241,7 +241,7 @@ public:
     static_assert(TWI_master::buffer_size >= TWI_buffer_size);
 
 // Types
-    using TWI   = avr::TWI_master_memory_type<TWI_master, slave_address>;
+    using TWI   = TWI_memory_type<TWI_master, slave_address>;
     using State = TWI::iostate;
     using Clock  = __DS1307_timekeeper;
     using Control_register = __DS1307_control_register;
