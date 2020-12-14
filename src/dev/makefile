@@ -1,8 +1,10 @@
 SOURCES= dev_BMP280_basic.cpp	\
+		 dev_BME280_basic.cpp	\
 		 dev_DS1307_basic.cpp
 
 
-INCS= 	dev_BMP280_basic.h	\
+INCS= 	dev_BMP280_basic.h			\
+		dev_BME280_basic.h			\
 		dev_cols_glyphs.h			\
 		dev_counter_CD4017B.h		\
 		dev_DS1307_basic.h			\
@@ -15,12 +17,12 @@ INCS= 	dev_BMP280_basic.h	\
 		dev_LCD_HD44780_screen.h	\
 		dev_LCD_HD44780_screen.tcc	\
 		dev_LCD_HD44780_basic.h		\
-		dev_LCD_HD44780_basic.tcc		\
-		dev_led.h\
-		dev_LM75.h\
-		dev_matrix_led_max7219.h\
-		dev_pot_MCP4231.h\
-		dev_push_button.h\
+		dev_LCD_HD44780_basic.tcc	\
+		dev_led.h					\
+		dev_LM75.h					\
+		dev_matrix_led_max7219.h	\
+		dev_pot_MCP4231.h			\
+		dev_push_button.h			\
 		dev_register_74HC595.h		\
 		dev_speaker.h				\
 		dev_system_clock.h			\

@@ -1,0 +1,765 @@
+// Copyright (C) 2020 A.Manuel L.Perez <amanuel.lperez@gmail.com>
+//
+// This file is part of the MCU++ Library.
+//
+// MCU++ Library is a free library: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#include "../../dev_BME280_basic.h"
+#include <avr_time.h>
+#include <avr_UART.h>	
+#include <atd_ostream.h>
+#include <cstddef>
+#include <atd_cstddef.h>
+#include <avr_TWI_basic.h>
+
+// pines que usamos
+// ----------------
+
+
+// dispositivos que conectamos
+// ---------------------------
+// Dispositivo TWI al que conectamos
+static constexpr uint8_t TWI_buffer_size = 100; 
+using TWI_master = avr::TWI_master<avr::TWI_basic, TWI_buffer_size>;
+
+
+// Dispositivos
+using TWI = avr::TWI_master_ioxtream<TWI_master>;
+using Sensor = dev::BME280_TWI<TWI_master, 0x76>;
+
+// En el breakout de adafruit la dirección la determina la conexión del pin
+// SDO:
+//	si SDO = GND	    ==> slave_address = 0x76
+//	si SDO = flotante   ==> slave_address = 0x77
+
+
+// para depurar
+static constexpr uint8_t slave_address = 0x76;
+
+void twi_print_state(TWI::iostate st)
+{
+    avr::UART_iostream uart;
+    uart << "state = ";
+
+    switch(st){
+	case TWI::iostate::ok:
+	uart << "ok\n";
+	break;
+
+	case TWI::iostate::read_or_write:
+	uart << "read_or_write\n";
+	break;
+
+	case TWI::iostate::sla_w:
+	uart << "sla_w\n";
+	break;
+
+	case TWI::iostate::sla_r:
+	uart << "sla_r\n";
+	break;
+
+	case TWI::iostate::no_response:
+	uart << "no_response\n";
+	break;
+
+	case TWI::iostate::transmitting:
+	uart << "transmitting\n";
+	break;
+
+	case TWI::iostate::eow:
+	uart << "eow\n";
+	break;
+
+	case TWI::iostate::eow_data_nack:
+	uart << "eow_data_nack\n";
+	break;
+
+	case TWI::iostate::error_buffer_size:
+	uart << "error_buffer_size\n";
+	break;
+
+	case TWI::iostate::receiving:
+	uart << "receiving\n";
+	break;
+
+	case TWI::iostate::eor_bf:
+	uart << "eor_bf\n";
+	break;
+
+	case TWI::iostate::eor:
+	uart << "eor\n";
+	break;
+
+	case TWI::iostate::bus_error:
+	uart << "bus_error\n";
+	break;
+
+	case TWI::iostate::unknown_error:
+	uart << "unknown_error\n";
+	break;
+
+	case TWI::iostate::prog_error:
+	uart << "prog_error\n";
+	break;
+
+	default:
+	uart << "desconocido\n";
+	break;
+    }
+}
+
+
+void bme280_read_all_mem(std::byte addr, std::byte* mem, uint8_t n)
+{
+    TWI twi;
+    twi.open(slave_address);
+    
+    twi << addr;
+    twi.read(n);
+    twi.read(mem, n);
+
+    twi.close();
+
+    if (twi.error()){
+	avr::UART_iostream uart;
+	uart << "ERROR (bme280_read_all_mem): ";
+	twi_print_state(TWI::state());
+    }
+
+}
+
+void print_in_hex(std::ostream& uart, std::byte* p, uint8_t n)
+{
+    for (uint8_t i = 0; i < n; ++i){
+	atd::print_in_hex(uart, p[i]);
+	uart << ' ';
+    }
+    uart << '\n';
+}
+
+void mem_dump_(std::ostream& uart, 
+	       std::byte addr, std::byte* mem, uint8_t mem_size)
+{
+    bme280_read_all_mem(addr, mem, mem_size);
+
+    uart << "Memoria [";
+    atd::print_in_hex(uart, addr);
+    uart << "]:\n";
+
+    print_in_hex(uart, mem, mem_size);
+    uart << "\n";
+}
+
+void mem_dump(std::ostream& uart)
+{
+//    {
+//    constexpr uint8_t mem_size = 24;
+//    constexpr std::byte addr{0x88};
+//    std::byte mem[mem_size];
+//    uart << "Calibration params: ";
+//
+//    mem_dump_(uart, addr, mem, mem_size);
+//    }
+
+    // Hay que leerlo en dos partes. 'reset' es de solo escritura,
+    // si se intenta leer falla la lectura del resto.
+    {
+    constexpr uint8_t mem_size = 1;
+    constexpr std::byte addr{0xD0};
+    std::byte mem[mem_size];
+
+    mem_dump_(uart, addr, mem, mem_size);
+    }
+    {
+    constexpr uint8_t mem_size = 3;
+    constexpr std::byte addr{0xF3};
+    std::byte mem[mem_size];
+    mem_dump_(uart, addr, mem, mem_size);
+    }
+    {
+    constexpr uint8_t mem_size = 6;
+    constexpr std::byte addr{0xF7};
+    std::byte mem[mem_size];
+    mem_dump_(uart, addr, mem, mem_size);
+    }
+
+
+}
+
+
+
+void print_mode(std::ostream& out, std::byte mode)
+{
+    using Cfg = dev::__BME280_config;
+    if (mode == Cfg::sleep_mode)
+	out << "sleep_mode\n";
+    else if (mode == Cfg::force_mode)
+	out << "force_mode\n";
+    else if (mode == Cfg::normal_mode)
+	out << "normal_mode\n";
+    else
+	out << "ERROR: mode desconocido\n\\nn";
+}
+
+void print_oversampling(std::ostream& out, std::byte osr)
+{
+    using Cfg = dev::__BME280_config;
+    if (osr == Cfg::oversampling_none)
+	out << "oversampling_none\n";
+
+    else if (osr == Cfg::oversampling_x1)
+	out << "oversampling_x1\n";
+
+    else if (osr == Cfg::oversampling_x2)
+	out << "oversampling_x2\n";
+
+    else if (osr == Cfg::oversampling_x4)
+	out << "oversampling_x4\n";
+
+    else if (osr == Cfg::oversampling_x8)
+	out << "oversampling_x8\n";
+
+    else if (osr == Cfg::oversampling_x16)
+	out << "oversampling_x16\n";
+
+    else
+	out << "ERROR: desconocido\n";
+
+}
+
+void print_t_sb(std::ostream& out, std::byte t_sb)
+{
+    using Cfg = dev::__BME280_config;
+
+    if (t_sb == Cfg::t_sb_0_5_ms)
+	out << "t_sb_0_5_ms\n";
+
+    else if (t_sb == Cfg::t_sb_62_5_ms)
+	out << "t_sb_62_5_ms\n";
+
+    else if (t_sb == Cfg::t_sb_125_ms)
+	out << "t_sb_125_ms\n";
+
+    else if (t_sb == Cfg::t_sb_250_ms)
+	out << "t_sb_250_ms\n";
+
+    else if (t_sb == Cfg::t_sb_500_ms)
+	out << "t_sb_500_ms\n";
+
+    else if (t_sb == Cfg::t_sb_1000_ms)
+	out << "t_sb_1000_ms\n";
+
+    else if (t_sb == Cfg::t_sb_2000_ms)
+	out << "t_sb_2000_ms\n";
+
+    else if (t_sb == Cfg::t_sb_4000_ms)
+	out << "t_sb_4000_ms\n";
+
+    else
+	out << "ERROR: desconocido\n";
+}
+
+void print_filter(std::ostream& out, std::byte filter)
+{
+    using Cfg = dev::__BME280_config;
+
+    if (filter == Cfg::filter_off)
+	out << "filter_off\n";
+
+    else if (filter == Cfg::filter_coeff_2)
+	out << "filter_coeff_2\n";
+
+    else if (filter == Cfg::filter_coeff_4)
+	out << "filter_coeff_4\n";
+
+    else if (filter == Cfg::filter_coeff_8)
+	out << "filter_coeff_8\n";
+
+    else if (filter == Cfg::filter_coeff_16)
+	out << "filter_coeff_16\n";
+
+    else
+	out << "ERROR: desconocido: [" << (int) filter << "]\n";
+}
+
+void print_spi3w_en(std::ostream& out, std::byte spi3w_en)
+{
+    using Cfg = dev::__BME280_config;
+
+    if (spi3w_en == Cfg::spi3w_disable)
+	out << "spi3w_disable\n";
+
+    else if (spi3w_en == Cfg::spi3w_enable)
+	out << "spi3w_enable\n";
+
+
+    else
+	out << "ERROR: desconocido\n";
+}
+
+void print_cfg(std::ostream& out, dev::__BME280_config& cfg)
+{
+    out << "\n---------- Cfg ----------\n";
+    print_mode(out, cfg.mode);
+    out << "osrs_t ... ";
+    print_oversampling(out, cfg.osrs_t);
+    out << "osrs_p ... ";
+    print_oversampling(out, cfg.osrs_p);
+    out << "t_sb ... ";
+    print_t_sb(out, cfg.t_sb);
+    out << "filter_coeff ... ";
+    print_filter(out, cfg.filter);
+    out << "spi3w_en ... ";
+    print_spi3w_en(out, cfg.spi3w_en);
+    out << "-------------------------\n";
+}
+//
+//
+//void init(Sensor& sensor)
+//{
+//    avr::UART_iostream uart;
+//    uart << "init ... ";
+//    sensor.init();
+//    if (sensor.error()){
+//	uart << "ERROR ... ";
+//	twi_print_state(sensor.state());
+//    }
+//    else
+//	uart << "OK\n";
+//
+//    // Modos por defecto que propone Bosch.
+////    sensor.handheld_device_low_power();
+//    // sensor.handheld_device_dynamic();
+//    // sensor.weather_monitoring(); <-- este es forced mode
+//    // sensor.elevator_floor_change_detector();
+//    // sensor.drop_detection();
+//    // sensor.indoor_navigation();
+//
+//// Configuración a bajo nivel:
+//// Table 9: indoor navigation
+//    using Cfg = Sensor::Config;
+//    Cfg cfg;
+//    cfg.mode   = normal_mode;
+//    cfg.t_sb   = t_sb_0_5_ms; 
+//    cfg.osrs_p = oversampling_x16;
+//    cfg.osrs_t = oversampling_x2;
+//    cfg.osrs_h = oversampling_x1;
+//    cfg.filter = filter_coeff_16;
+//    cfg.spi3w_en = Cfg::spi3w_disable; // es TWI
+//
+//    sensor.write(cfg); 
+//
+//
+//    if (sensor.error()){
+//	uart << "Error al configurar el sensor\n";
+//	twi_print_state(sensor.state());
+//    }
+//    else
+//	uart << "cfg OK\n";
+//
+//
+//// depurar configuración:
+//    Sensor::Config cfg2;
+//    sensor.read(cfg2);
+//    uart << "LEIDOS:\n";
+//
+//    print_cfg(uart, cfg2);
+//}
+
+
+void print_params(std::iostream& uart, Sensor& sensor)
+{
+    uart << "dig_T1 = [" << sensor.dig_T1() << "]\n";
+    uart << "dig_T2 = [" << sensor.dig_T2() << "]\n";
+    uart << "dig_T3 = [" << sensor.dig_T3() << "]\n";
+
+    uart << "dig_P1 = [" << sensor.dig_P1() << "]\n";
+    uart << "dig_P2 = [" << sensor.dig_P2() << "]\n";
+    uart << "dig_P3 = [" << sensor.dig_P3() << "]\n";
+    uart << "dig_P4 = [" << sensor.dig_P4() << "]\n";
+    uart << "dig_P5 = [" << sensor.dig_P5() << "]\n";
+    uart << "dig_P6 = [" << sensor.dig_P6() << "]\n";
+    uart << "dig_P7 = [" << sensor.dig_P7() << "]\n";
+    uart << "dig_P8 = [" << sensor.dig_P8() << "]\n";
+    uart << "dig_P9 = [" << sensor.dig_P9() << "]\n";
+
+    uart << "dig_H1 = [" << (int) sensor.dig_H1() << "]\n";
+    uart << "dig_H2 = [" << sensor.dig_H2() << "]\n";
+    uart << "dig_H3 = [" << (int) sensor.dig_H3() << "]\n";
+    uart << "dig_H4 = [" << sensor.dig_H4() << "]\n";
+    uart << "dig_H5 = [" << sensor.dig_H5() << "]\n";
+    uart << "dig_H6 = [" << (int) sensor.dig_H6() << "]\n";
+}
+
+
+
+
+//void debug(std::ostream& out, Sensor& sensor)
+//{
+//    Sensor::Temp_and_press tp;
+//    sensor.read(tp);
+//
+//    out << "\nsin comp: uT = " << tp.utemperature
+//	<< "; uP = " << tp.upressure << '\n';
+////	<< "comp: T = " << sensor.compensate_T(tp.utemperature) << " ºC; ";
+////    int32_t press_q248 = sensor.compensate_P_(tp.upressure);
+////    out << "P comp. = " << press_q248 
+////			<< " (" << press_q248/25600 << " hPa)\n";
+//
+////    auto press = sensor.compensate_P(tp.upressure);
+////    out << "P = " << press << " Pa (" << Sensor::Hectopascal{press}
+////        << " hPa)\n";
+//
+//}
+
+//void test_bme280()
+//{
+//// init_UART();
+//    avr::UART_iostream uart;
+//    avr::basic_cfg(uart);
+//    uart.on();
+//
+//    uart << "----------------------------------------\n"
+//	 << "BME280\n"
+//	 << "----------------------------------------\n\n";
+//
+//// init_TWI();
+//    // 50 kHz es la unica frecuencia de TWI que va a 1MHz.
+//    // 100 kHz a 8 MHz
+//    TWI_master::on<50>();
+//
+//// init_sensor();
+//    Sensor sensor;
+//    init(sensor);
+//
+//    while (1){
+////	debug(uart, sensor);
+//
+//	auto [T, P] = sensor.T_and_P();
+//	uart << "T_and_P = " << T << " ºC; P = " << P << " Pa\n";
+//
+//	auto [T2, hP] = sensor.T_and_hP();
+//	uart << "T_and_hP= " << T2 << " ºC; P = " << hP << " hPa\n";
+//
+//	uart << "T       = " << sensor.T() << " ºC\n";
+//
+//	// Probar a desconectar el sensor mientras está funcionando. Tiene que
+//	// generar el error correspondiente.
+//	if (sensor.no_response())
+//	    uart << "Error: no response\n";
+//
+//	if (sensor.error())
+//	    uart << "Error: error en el sensor!!!\n";
+//
+//        wait_ms(4000);
+//    }
+//}
+
+
+void test_basic()
+{
+// init_UART();
+    avr::UART_iostream uart;
+    avr::basic_cfg(uart);
+    uart.on();
+
+    uart << "----------------------------------------\n"
+	 << "BME280 (test basico)\n"
+	 << "----------------------------------------\n\n";
+
+// init_TWI();
+    // 50 kHz es la unica frecuencia de TWI que va a 1MHz.
+    // 100 kHz a 8 MHz
+    TWI_master::on<50>();
+
+// init_sensor();
+    Sensor sensor;
+
+    while(1){
+	Sensor::Id id;
+	sensor.read(id);
+	if (sensor.no_response())
+	    uart << "Error: no response\n";
+
+	else if (sensor.error()){
+	    uart << "Error: ";
+	    twi_print_state(sensor.state());
+	    uart << '\n';
+	}
+
+	else if (!id.is_valid())
+	    uart << "ID no válido. No es un BME280!!!\n";
+
+	else
+	    uart << "OK. Sensor BME280 conectado.\n";
+
+	wait_ms(1000);
+
+    }
+}
+
+
+void test_calib()
+{
+// init_UART();
+    avr::UART_iostream uart;
+    avr::basic_cfg(uart);
+    uart.on();
+
+    uart << "----------------------------------------\n"
+	 << "BME280 (test calib)\n"
+	 << "----------------------------------------\n\n";
+
+// init_TWI();
+    // 50 kHz es la unica frecuencia de TWI que va a 1MHz.
+    // 100 kHz a 8 MHz
+    TWI_master::on<50>();
+
+// init_sensor();
+    Sensor sensor;
+
+    while(1){
+	sensor.init();
+	if (sensor.error()){
+	    uart << "ERROR ... ";
+	    twi_print_state(sensor.state());
+	}
+	else {
+	    uart << "\n\n-----------------------\n";
+	    print_params(uart, sensor);
+	}
+
+	wait_ms(5000);
+    }
+}
+
+
+void test_config()
+{
+// init_UART();
+    avr::UART_iostream uart;
+    avr::basic_cfg(uart);
+    uart.on();
+
+    uart << "----------------------------------------\n"
+	 << "BME280 (test config)\n"
+	 << "----------------------------------------\n\n";
+
+// init_TWI();
+    // 50 kHz es la unica frecuencia de TWI que va a 1MHz.
+    // 100 kHz a 8 MHz
+    TWI_master::on<50>();
+
+// init_sensor();
+    Sensor sensor;
+
+    while(1){
+	// Table 9: indoor navigation
+	using Cfg = Sensor::Config;
+	Cfg cfg0;
+	cfg0.mode   = Cfg::normal_mode;
+	cfg0.t_sb   = Cfg::t_sb_0_5_ms; 
+	cfg0.osrs_p = Cfg::oversampling_x16;
+	cfg0.osrs_t = Cfg::oversampling_x2;
+	cfg0.osrs_h = Cfg::oversampling_x1;
+	cfg0.filter = Cfg::filter_coeff_16;
+	cfg0.spi3w_en = Cfg::spi3w_disable; // es TWI
+
+	sensor.write(cfg0); 
+
+	if (sensor.no_response())
+	    uart << "Error: no response\n";
+
+	else if (sensor.error()){
+	    uart << "Error: ";
+	    twi_print_state(sensor.state());
+	    uart << '\n';
+	}
+	else {
+	    uart << "ESCRITO:\n";
+	    print_cfg(uart, cfg0);
+
+	    Sensor::Config cfg1;
+	    sensor.read(cfg1);
+	    uart << "LEIDOS:\n";
+
+	    print_cfg(uart, cfg1);
+	}
+
+	wait_ms(5000);
+
+    }
+}
+
+
+void test_uncompensated()
+{
+// init_UART();
+    avr::UART_iostream uart;
+    avr::basic_cfg(uart);
+    uart.on();
+
+    uart << "----------------------------------------\n"
+	 << "BME280 (test uncompensated)\n"
+	 << "----------------------------------------\n\n";
+
+// init_TWI();
+    // 50 kHz es la unica frecuencia de TWI que va a 1MHz.
+    // 100 kHz a 8 MHz
+    TWI_master::on<50>();
+
+// init_sensor();
+    Sensor sensor;
+
+    // Table 9: indoor navigation
+    using Cfg = Sensor::Config;
+    Cfg cfg0;
+    cfg0.mode   = Cfg::normal_mode;
+    cfg0.t_sb   = Cfg::t_sb_0_5_ms; 
+    cfg0.osrs_p = Cfg::oversampling_x16;
+    cfg0.osrs_t = Cfg::oversampling_x2;
+    cfg0.osrs_h = Cfg::oversampling_x1;
+    cfg0.filter = Cfg::filter_coeff_16;
+    cfg0.spi3w_en = Cfg::spi3w_disable; // es TWI
+
+    sensor.write(cfg0); 
+
+    if (sensor.no_response())
+	uart << "Error: no response\n";
+
+    else if (sensor.error()){
+	uart << "Error: ";
+	twi_print_state(sensor.state());
+	uart << '\n';
+    }
+    else
+	uart << "Configuracion: OK\n";
+
+
+    while(1){
+	Sensor::Temp_and_press_and_hum data;
+
+	sensor.read(data);
+
+	if (sensor.no_response())
+	    uart << "Error: no response\n";
+
+	else if (sensor.error()){
+	    uart << "Error: ";
+	    twi_print_state(sensor.state());
+	    uart << '\n';
+	}
+	else{
+	    uart << "\n\nupressure    = " << data.upressure << '\n'
+		 << "utemperature = " << data.utemperature << '\n'
+		 << "uhumidity    = " << data.uhumidity << '\n';
+	}
+
+	wait_ms(3000);
+
+    }
+}
+
+
+void test_t_p_h()
+{
+// init_UART();
+    avr::UART_iostream uart;
+    avr::basic_cfg(uart);
+    uart.on();
+
+    uart << "----------------------------------------\n"
+	 << "BME280 (test T, P, H)\n"
+	 << "----------------------------------------\n\n";
+
+// init_TWI();
+    // 50 kHz es la unica frecuencia de TWI que va a 1MHz.
+    // 100 kHz a 8 MHz
+    TWI_master::on<50>();
+
+// init_sensor();
+    Sensor sensor;
+
+    sensor.init(); // FUNDAMENTAL!!!
+
+    // Table 9: indoor navigation
+//    using Cfg = Sensor::Config;
+//    Cfg cfg0;
+//    cfg0.mode   = Cfg::normal_mode;
+//    cfg0.t_sb   = Cfg::t_sb_0_5_ms; 
+//    cfg0.osrs_p = Cfg::oversampling_x16;
+//    cfg0.osrs_t = Cfg::oversampling_x2;
+//    cfg0.osrs_h = Cfg::oversampling_x1;
+//    cfg0.filter = Cfg::filter_coeff_16;
+//    cfg0.spi3w_en = Cfg::spi3w_disable; // es TWI
+//    sensor.write(cfg0); 
+
+    sensor.indoor_navigation();
+
+    if (sensor.no_response())
+	uart << "Error: no response\n";
+
+    else if (sensor.error()){
+	uart << "Error: ";
+	twi_print_state(sensor.state());
+	uart << '\n';
+    }
+    else
+	uart << "Configuracion: OK\n";
+
+
+    while(1){
+	using Hectopascal = Sensor::Hectopascal;
+	Sensor::Celsius T;
+	Sensor::Pascal P;
+	Sensor::Relative_humidity H;
+	sensor.T_and_P_and_H(T, P, H);
+
+	uart  << "T_and_P = " << T << " ºC; P = " << Hectopascal{P}
+	      << " Pa; H = " << H << "%\n";
+
+	if (sensor.no_response())
+	    uart << "Error: no response\n";
+
+	else if (sensor.error()){
+	    uart << "Error: ";
+	    twi_print_state(sensor.state());
+	    uart << '\n';
+	}
+
+
+	wait_ms(3000);
+
+    }
+}
+
+
+int main()
+{
+//    test_basic();
+//    test_calib();
+//    test_config();
+//    test_uncompensated();
+    test_t_p_h();
+}
+
+
+
+
+ISR(TWI_vect)
+{
+    TWI_master::handle_interrupt();
+}
+
+

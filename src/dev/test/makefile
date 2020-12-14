@@ -1,16 +1,18 @@
-DIRS = CD4017B			\
-	   DS1307			\
-	EEPROM_25LC256		\
-	EEPROM_iostream		\
-	EEPROM_lineal		\
-	HD44780				\
-	keyboard			\
-	led					\
-	push_button			\
-	system_clock		\
-	user_choose_number	\
-	user_menu			\
-	user_time
+DIRS = 	BMP280			\
+		BME280			\
+		CD4017B			\
+		DS1307			\
+		EEPROM_25LC256	\
+		EEPROM_iostream	\
+		EEPROM_lineal	\
+		HD44780			\
+		keyboard		\
+		led				\
+		push_button		\
+		system_clock	\
+		user_choose_number	\
+		user_menu		\
+		user_time
 
 # Revisar
 #74HC595\
