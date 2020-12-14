@@ -114,6 +114,25 @@ mayoritariamente en C.
 * [Elegoo](https://www.elegoo.com/)
 
 
+### Breadboards, programadores...
+
+#### Breadboards
+Una vez que tenemos las breadboards conviene conectarlas. Si se van a usar
+dispositivos TWI y SPI queda mucho más ordenado dejando raíles específicos
+para estos protocolos. Una primera versión de cómo conectar la da la siguiente
+[imagen](breadboard_ic2_spi_v1.0.jpg).
+
+
+
+#### Programadores
+¿Cómo conectar el programador al dispositivo avr? 
+
+El libro de Make trae algunas sugerencias. Evolucionándolas yo, a día de hoy,
+uso los siguientes programadores:
+* [v1](programador_v1.4.0.jpg)
+* [v2](programador_v2.1.0.jpg)
+
+
 
 ---
 A.Manuel L.Perez (https://github.com/amanuellperez/mcu)
