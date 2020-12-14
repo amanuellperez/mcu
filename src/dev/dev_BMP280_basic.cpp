@@ -1,7 +1,5 @@
 #include "dev_BMP280_basic.h"
 
-#include <avr_UART.h>	// TODO: borrame. Depurar
-
 #include <atd_bit.h>
 namespace dev{
 
@@ -207,10 +205,10 @@ void __BMP280_config::drop_detection(__BMP280_config& cfg)
 
 void __BMP280_temp_and_press::make_bounded(__BMP280_temp_and_press& st)
 {
-    if (st.utemperature <= temp_min || st.utemperature >= temp_max)
+    if (st.utemperature <= utemp_min || st.utemperature >= utemp_max)
 	st.utemperature = 0;
 
-    if (st.upressure <= press_min || st.upressure >= press_max)
+    if (st.upressure <= upress_min || st.upressure >= upress_max)
 	st.upressure = 0;
 }
 

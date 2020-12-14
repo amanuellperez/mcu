@@ -301,7 +301,7 @@ struct __BMP280_temp_and_press{
     int32_t utemperature; // uncompensated temperature
 
 // Memory
-    static constexpr atd::Memory_type mem_type = atd::Memory_type::read_and_write;
+    static constexpr atd::Memory_type mem_type = atd::Memory_type::read_only;
     static constexpr std::byte address {0xF7};
     static constexpr uint8_t size = 6;
 
@@ -321,11 +321,11 @@ private:
 
 // Límites (estos no los he encontrado en la datasheet, sino en el ejemplo 
 // de Bosch)
-    static constexpr int32_t temp_min = 0x00000;
-    static constexpr int32_t temp_max = 0xFFFF0;
+    static constexpr int32_t utemp_min = 0x00000;
+    static constexpr int32_t utemp_max = 0xFFFF0;
 
-    static constexpr int32_t press_min = 0x00000;
-    static constexpr int32_t press_max = 0xFFFF0;
+    static constexpr int32_t upress_min = 0x00000;
+    static constexpr int32_t upress_max = 0xFFFF0;
 };
 
 
@@ -402,11 +402,12 @@ public:
     using Config           = __BMP280_config;
     using Temp_and_press   = __BMP280_temp_and_press;
     using Calibration      = __BMP280_calibration;
+
     using Celsius          = Calibration::Celsius;
     using Pascal           = Calibration::Pascal;
     using Hectopascal      = Calibration::Hectopascal;
 
-    // Calibration parameters (for debugging purpose)
+// Calibration parameters (for debugging purpose)
     uint16_t dig_T1() const {return calibration_.dig_T1;}
     int16_t dig_T2() const {return calibration_.dig_T2;}
     int16_t dig_T3() const {return calibration_.dig_T3;}
@@ -427,7 +428,7 @@ protected:
     Calibration calibration_;
 
 
-// Construcción
+// Constructor
     // Esta clase es de implementación.
     BMP280_base() {}
 
@@ -464,10 +465,8 @@ class BMP280_TWI : public BMP280_base {
 public:
     static constexpr uint8_t TWI_buffer_size = 100; // TODO: ajustarlo al mínimo?
 
-    // Me generó algo de lío no identificar bien cada tipo de TWI.
-    using TWI_master = TWI_master0;
-    using TWI_ioxtream = avr::TWI_master_ioxtream<TWI_master>;
-    using TWI = TWI_ioxtream;
+    // Conexión TWI
+    using TWI_master   = TWI_master0;
 
     static_assert(TWI_buffer_size <= TWI_master::buffer_size,
                   "Buffer too small!!! Choose a bigger one.");
@@ -521,7 +520,6 @@ public:
     void reset() { state_ = TWI_mem::write(__BMP280_reset{});}
 
     /// Read the status register.
-//    /// out: Status&
     void read(Status& res) {state_ = TWI_mem::read(res);}
 
     void read(Config& res) {state_ = TWI_mem::read(res);}

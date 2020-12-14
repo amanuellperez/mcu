@@ -139,7 +139,7 @@ public:
     /// Devuelve el número como {integer_part, fractional_part}
     std::pair<Rep, Rep> value() const
     {
-        auto [q, r] = std::div(std::abs(x_), ten_to_the_n);
+        auto [q, r] = atd::div(atd::abs(x_), ten_to_the_n);
 
 	if (x_ < 0) 
 	    q = -q;
@@ -169,6 +169,7 @@ private:
 
 // construcción
     constexpr Rep construct(Rep integer_part, Rep fractional_part);
+
 };
 
 

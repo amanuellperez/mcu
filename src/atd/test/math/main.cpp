@@ -112,6 +112,26 @@ void test_div()
     CHECK_TRUE(x == const_test_div(), "constexpr div");
 }
 
+void test_abs()
+{
+    test::interfaz("test_abs()");
+    for (int n = 0; n < 100; ++n){
+	if (atd::abs(n) != n)
+	    CHECK_TRUE(true, alp::as_str() << "test_abs(" << n << ")");
+    }
+
+    for (int n = -100; n < 0; ++n){
+	if (atd::abs(n) != -n)
+	    CHECK_TRUE(true, alp::as_str() << "test_abs(" << n << ")");
+    }
+
+    for (unsigned int n = 0; n < 100; ++n){
+	if (atd::abs(n) != n)
+	    CHECK_TRUE(true, alp::as_str() << "test_abs(" << n << ")");
+    }
+
+}
+
 
 int main()
 {
@@ -122,6 +142,7 @@ try{
     test_ten_to_the();
     test_most_significant_digits();
     test_div();
+    test_abs();
 
 }catch(std::exception& e)
 {
