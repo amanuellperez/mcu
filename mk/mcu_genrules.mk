@@ -1,4 +1,4 @@
-# Copyright (C) 2019-2020 A.Manuel L.Perez
+# Copyright (C) 2019-2020 A.Manuel L.Perez <amanuel.lperez@gmail.com>
 #
 # This file is part of the MCU++ Library.
 #
@@ -33,6 +33,8 @@
 # 		21/07/17: Creado a partir del del libro de MAKE.
 #
 #***************************************************************************
+include $(MCU_FUSES)
+
 # ----------------
 # PROGRAMAS USADOS
 # ----------------
@@ -324,23 +326,33 @@ avrdude_terminal:
 # help
 .PHONY: help
 help:
-	@$(PRINTF) "\n"
-	@$(PRINTF) "flash	          : Compila y carga el programa en el avr\n"
-	@$(PRINTF) "size 	          : Muestra el tamaño del programa\n"
-	@$(PRINTF) "         (OJO: hay un problema con el avr-size que yo compilé, no funciona. Usar el que había instalado antes.\n"
-	@$(PRINTF) "          PERO todo funciona si se quitan las opciones: avr-size xx.elf!!! PROBARLO\n"
-	@$(PRINTF) "show_fuses       : Muestra los fuses\n"
-	@$(PRINTF) "set_default_fuses: Escribe los fuses como vienen de fábrica\n"
+	@$(PRINTF) "\nHELP:\n"
+	@$(PRINTF) "-----\n"
+	@$(PRINTF) "flash	: Compila y carga el programa en el avr\n"
+	@$(PRINTF) "size 	: Muestra el tamaño del programa\n"
+	@$(PRINTF) "          OJO: hay un problema con el avr-size que yo compilé,\n"
+	@$(PRINTF) "          no funciona. Usar el que había instalado antes.\n"
+	@$(PRINTF) "          PERO todo funciona si se quitan las opciones:\n"
+	@$(PRINTF) "          avr-size xx.elf!!! PROBARLO\n"
+	@$(PRINTF) "help	: Muestra esta ayuda.\n"
+	@$(PRINTF) "debug	: Muestra las variables usadas para compilar.\n"
+	@$(PRINTF) "          Si se quiere ver el código asm que genera,\n"
+	@$(PRINTF) "          compilar con la opción -save-temps.\n"
+	@$(PRINTF) "\nFUSES:\n"
+	@$(PRINTF) "------\n"
+	@$(PRINTF) "show_fuses       : Muestra los fuses.\n"
+	@$(PRINTF) "set_default_fuses: Escribe los fuses como vienen de fábrica.\n"
 	@$(PRINTF) "set_fast_fuse    : No dividimos la frecuencia de reloj entre 8,\n"
-	@$(PRINTF) "                   dejando su máximo valor\n"
+	@$(PRINTF) "                   dejando su máximo valor.\n"
 	@$(PRINTF) "set_clock_output_fuse: No dividimos la frecuencia del reloj entre 8\n"
-	@$(PRINTF) "                   y la sacamos por el pin CLKO para usarla o verla en el osciloscopio\n"
+	@$(PRINTF) "                   y la sacamos por el pin CLKO para usarla o verla\n"
+	@$(PRINTF) "                   en el osciloscopio.\n"
 	@$(PRINTF) "set_clock_output_divide_by_8_fuse: Dividimos la frecuencia del reloj entre 8\n"
-	@$(PRINTF) "                   y la sacamos por el pin CLKO para usarla o verla en el osciloscopio\n"
-	@$(PRINTF) "help	         : Muestra esta ayuda\n"
-	@$(PRINTF) "debug	         : Muestra las variables usadas para compilar\n"
-	@$(PRINTF) "Si se quiere ver el código asm que genera, "
-	@$(PRINTF) "compilar con la opción -save-temps\n"
+	@$(PRINTF) "                   y la sacamos por el pin CLKO para usarla o verla en\n"
+	@$(PRINTF) "                   el osciloscopio.\n"
+	@$(PRINTF) "fuses            : Configura los fuses. Hay que definir las variables:\n"
+	@$(PRINTF) "                   LFUSE, HFUSE y EFUSE. Si alguna no se define se usa\n"
+	@$(PRINTF) "                   el valor por defecto de fábrica.\n"
 	@$(PRINTF) "\n"
 	
 
@@ -430,9 +442,10 @@ flash_109: flash
 # Fuses
 # -----
 # Valores por defecto para atmega328
-LFUSE ?= 0x62
-HFUSE ?= 0xD9
-EFUSE ?= 0xFF
+LFUSE ?= $(LFUSE_DEFAULT)
+HFUSE ?= $(HFUSE_DEFAULT)
+EFUSE ?= $(EFUSE_DEFAULT)
+
 
 # Generic 
 FUSE_STRING = -U lfuse:w:$(LFUSE):m -U hfuse:w:$(HFUSE):m -U efuse:w:$(EFUSE):m 
@@ -449,24 +462,27 @@ set_default_fuses:  fuses
 
 # Set the fuse byte for full-speed mode
 # Note: can also be set in firmware for modern chips
-set_fast_fuse: LFUSE = 0xE2
+#set_fast_fuse: LFUSE = 0xE2
+set_fast_fuse: LFUSE = $(LFUSE_FAST_FUSE)
 set_fast_fuse: FUSE_STRING = -U lfuse:w:$(LFUSE):m 
 set_fast_fuse: fuses
 
 # Sacamos el reloj por el pin CLKO a la frecuencia del reloj del AVR
-set_clock_output_fuse: LFUSE = 0xA2
+#set_clock_output_fuse: LFUSE = 0xA2
+set_clock_output_fuse: LFUSE = $(LFUSE_CLOCK_OUTPUT_FUSE)
 set_clock_output_fuse: FUSE_STRING = -U lfuse:w:$(LFUSE):m 
 set_clock_output_fuse: fuses
 
 # Sacamos el reloj por el pin CLKO, dividiendo la frecuencia del reloj entre 8
-set_clock_output_divide_by_8_fuse: LFUSE = 0x22
+#set_clock_output_divide_by_8_fuse: LFUSE = 0x22
+set_clock_output_divide_by_8_fuse: $(LFUSE_CLOCK_OUTPUT_DIVIDE_BY_8)
 set_clock_output_divide_by_8_fuse: FUSE_STRING = -U lfuse:w:$(LFUSE):m 
 set_clock_output_divide_by_8_fuse: fuses
 
 
-
 # Set the EESAVE fuse byte to preserve EEPROM across flashes
-set_eeprom_save_fuse: HFUSE = 0xD7
+#set_eeprom_save_fuse: HFUSE = 0xD7
+set_eeprom_save_fuse: HFUSE = $(HFUSE_EEPROM_SAVE_FUSE)
 set_eeprom_save_fuse: FUSE_STRING = -U hfuse:w:$(HFUSE):m
 set_eeprom_save_fuse: fuses
 

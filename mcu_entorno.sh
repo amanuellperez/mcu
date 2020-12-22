@@ -3,7 +3,7 @@
 # -------------------------
 MCU_ROOT=${MY_HOME}/prj/git/mcu		; export MCU_ROOT
 MCU_SRC=${MCU_ROOT}/src			; export MCU_SRC
-MCU_MK=${MCU_ROOT}/mk		; export MCU_MK
+MCU_MK=${MCU_ROOT}/mk			; export MCU_MK
 
 
 # donde distribuimos los archivos
@@ -22,9 +22,10 @@ MCU_BIN=${MY_BIN}			; export MCU_BIN
 # Reglas de compilación
 # ---------------------
 # Reglas genéricas para compilar usando avr-g++
-MCU_GENRULES=${MCU_MK}/mcu_genrules.mk   ; export MCU_GENRULES
-MCU_RECRULES=${MCU_MK}/mcu_recrules.mk   ; export MCU_RECRULES
-MCU_COMRULES=${MCU_MK}/com.mk	    ; export MCU_COMRULES
+MCU_GENRULES=${MCU_MK}/mcu_genrules.mk  ; export MCU_GENRULES
+MCU_RECRULES=${MCU_MK}/mcu_recrules.mk  ; export MCU_RECRULES
+MCU_FUSES=${MCU_MK}/mcu_fuses.mk	; export MCU_FUSES
+MCU_COMRULES=${MCU_MK}/com.mk		; export MCU_COMRULES
 
 # Reglas particulares de cada entorno
 STD_GENRULES=${MCU_MK}/std.mk	; export STD_GENRULES
