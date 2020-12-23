@@ -350,6 +350,10 @@ help:
 	@$(PRINTF) "set_clock_output_divide_by_8_fuse: Dividimos la frecuencia del reloj entre 8\n"
 	@$(PRINTF) "                   y la sacamos por el pin CLKO para usarla o verla en\n"
 	@$(PRINTF) "                   el osciloscopio.\n"
+	@$(PRINTF) "set_external_crystal_8MHz:\n"
+	@$(PRINTF) "                   Conectamos un cristal externo de 8MHz,\n"
+	@$(PRINTF) "                   dividiendo la frecuencia del reloj entre 8,\n"
+	@$(PRINTF) "                   y no sacando el reloj por el pin CLKO.\n"
 	@$(PRINTF) "fuses            : Configura los fuses. Hay que definir las variables:\n"
 	@$(PRINTF) "                   LFUSE, HFUSE y EFUSE. Si alguna no se define se usa\n"
 	@$(PRINTF) "                   el valor por defecto de fábrica.\n"
@@ -475,9 +479,16 @@ set_clock_output_fuse: fuses
 
 # Sacamos el reloj por el pin CLKO, dividiendo la frecuencia del reloj entre 8
 #set_clock_output_divide_by_8_fuse: LFUSE = 0x22
-set_clock_output_divide_by_8_fuse: $(LFUSE_CLOCK_OUTPUT_DIVIDE_BY_8)
+set_clock_output_divide_by_8_fuse: LFUSE = $(LFUSE_CLOCK_OUTPUT_DIVIDE_BY_8)
 set_clock_output_divide_by_8_fuse: FUSE_STRING = -U lfuse:w:$(LFUSE):m 
 set_clock_output_divide_by_8_fuse: fuses
+
+# Usamos un cristal externo de 8MHz, no dividiendo la frecuencia entre 8 
+# TODO: el nombre es confuso, ¿cómo llamarlo?
+set_external_crystal_8MHz: LFUSE = $(LFUSE_SET_EXTERNAL_CRYSTAL_8MHZ)
+set_external_crystal_8MHz: FUSE_STRING = -U lfuse:w:$(LFUSE):m 
+set_external_crystal_8MHz: fuses
+
 
 
 # Set the EESAVE fuse byte to preserve EEPROM across flashes
