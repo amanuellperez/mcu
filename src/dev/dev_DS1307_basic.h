@@ -46,13 +46,13 @@ namespace dev{
 // literalmente la datasheet, de esa forma habrá menos errores de traducción.
 struct __DS1307_timekeeper{
 // Data
-    uint8_t seconds;
-    uint8_t minutes;
-    uint8_t hours;
-    uint8_t day;
-    uint8_t date;
-    uint8_t month;
-    uint8_t year;
+    uint8_t seconds;// 00-59
+    uint8_t minutes;// 00-59
+    uint8_t hours;  // 00-23 or 01-12 + AM/PM
+    uint8_t day;    // day of the week (01-07)
+    uint8_t date;   // day of the month (01-31)
+    uint8_t month;  // 01-12
+    uint8_t year;   // 00-99 (from 2000 to 2099)
 
 // Configuración del reloj
     bool clock_on = true;// = not CH; true = working; false = clock halted.
@@ -231,7 +231,7 @@ Oxtream& operator<<(Oxtream& out, const __DS1307_control_register& st)
  *
  */
 template <typename TWI_master>
-class DS1307{
+class DS1307_basic{
 public:
 // Configuración de TWI
     using Address = typename TWI_master::Address;
@@ -296,7 +296,7 @@ private:
 };
 
 template <typename TWI_master>
-uint8_t DS1307<TWI_master>::ram_read(std::byte* buf, uint8_t n, uint8_t i)
+uint8_t DS1307_basic<TWI_master>::ram_read(std::byte* buf, uint8_t n, uint8_t i)
 {
     using TWI = avr::TWI_master_ioxtream<TWI_master>;
 
@@ -324,7 +324,7 @@ uint8_t DS1307<TWI_master>::ram_read(std::byte* buf, uint8_t n, uint8_t i)
 }
 
 template <typename TWI_master>
-uint8_t DS1307<TWI_master>::ram_write(std::byte* buf, uint8_t n, uint8_t i)
+uint8_t DS1307_basic<TWI_master>::ram_write(std::byte* buf, uint8_t n, uint8_t i)
 {
     using TWI = avr::TWI_master_ioxtream<TWI_master>;
 
@@ -349,27 +349,27 @@ uint8_t DS1307<TWI_master>::ram_write(std::byte* buf, uint8_t n, uint8_t i)
 }
 
 template <typename TWI_master>
-inline void DS1307<TWI_master>::output_high()
+inline void DS1307_basic<TWI_master>::output_high()
 { state_ = TWI::write(Control_register::output_high()); }
 
 template <typename TWI_master>
-inline void DS1307<TWI_master>::output_low()
+inline void DS1307_basic<TWI_master>::output_low()
 { state_ = TWI::write(Control_register::output_low()); }
 
 template <typename TWI_master>
-inline void DS1307<TWI_master>::output_square_wave_1Hz()
+inline void DS1307_basic<TWI_master>::output_square_wave_1Hz()
 { state_ = TWI::write(Control_register::output_square_wave_1Hz()); }
 
 template <typename TWI_master>
-inline void DS1307<TWI_master>::output_square_wave_4kHz()
+inline void DS1307_basic<TWI_master>::output_square_wave_4kHz()
 { state_ = TWI::write(Control_register::output_square_wave_4kHz()); }
 
 template <typename TWI_master>
-inline void DS1307<TWI_master>::output_square_wave_8kHz()
+inline void DS1307_basic<TWI_master>::output_square_wave_8kHz()
 { state_ = TWI::write(Control_register::output_square_wave_8kHz()); }
 
 template <typename TWI_master>
-inline void DS1307<TWI_master>::output_square_wave_32kHz()
+inline void DS1307_basic<TWI_master>::output_square_wave_32kHz()
 { state_ = TWI::write(Control_register::output_square_wave_32kHz()); }
 
 

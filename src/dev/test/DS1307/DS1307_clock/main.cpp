@@ -1,0 +1,159 @@
+// Copyright (C) 2020 A.Manuel L.Perez <amanuel.lperez@gmail.com>
+//
+// This file is part of the MCU++ Library.
+//
+// MCU++ Library is a free library: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#include "../../../dev_DS1307_clock.h"
+#include <avr_time.h>
+#include <avr_UART.h>
+#include <atd_ostream.h>
+#include <cstddef>
+#include <numeric>
+#include <atd_cstddef.h>
+#include <atd_time.h>
+
+// pines que usamos
+// ----------------
+
+
+// dispositivos que conectamos
+// ---------------------------
+// Dispositivo TWI al que conectamos
+static constexpr uint8_t TWI_buffer_size = 70; 
+using TWI = avr::TWI_master<avr::TWI_basic, TWI_buffer_size>;
+
+using RTC = dev::DS1307_clock<TWI>;
+
+
+
+
+
+
+// TODO: si lo defino con std::ostream no coge esta función sino la template
+// del DS1307.h!!! ¿por qué? Debería de coger la función más especializada.
+// Con todo con concepts este problema debería de desaparecer ya que la
+// template quedaría sobrecargada solo para IOxtreams.
+avr::UART_iostream& print(avr::UART_iostream& out, const RTC::Clock& t)
+{
+    if (t.clock_on){
+	out << "Encendido: "
+	    << atd::write_as_uint8_t(t.hours) << ':'
+	     << atd::write_as_uint8_t(t.minutes) << ':' 
+	     << atd::write_as_uint8_t(t.seconds) << ' ';
+
+	if (t.AMPM_format){
+	    if (t.is_PM)
+		out << "PM ";
+	    else
+		out << "AM ";
+	}
+
+	out    << atd::write_as_uint8_t(t.date) << '/'
+	     << atd::write_as_uint8_t(t.month) << '/'
+	     << atd::write_as_uint8_t(t.year) << "; day = " 
+	     << atd::write_as_uint8_t(t.day);
+    }
+    else
+	out << "Apagado!!!";
+
+    return out;
+}
+
+
+
+std::ostream& operator<<(std::ostream& out, const RTC::time_point& t0)
+{
+    std::time_t sec = RTC::to_time_t(t0);
+    std::tm t;
+    ::gmtime_r(&sec, &t);
+
+    return out << atd::only_date(t) << ' ' << atd::only_time(t);
+}
+
+
+void test_clock()
+{
+    avr::UART_iostream uart;
+
+    uart << "\nProbando clock\n"
+	 <<   "==============\n";
+
+
+// init_rtc();
+    RTC rtc;
+
+    RTC::Clock t;
+
+    t.hours = 16;
+    t.minutes = 44;
+    t.seconds = 0;
+
+    t.date = 27;
+    t.day = 0;
+    t.month = 12;
+    t.year= 20;
+
+
+    rtc.init(t);
+    if (rtc.error())
+	uart << "Error al intentar escribir la hora\n";
+
+
+    while (1){
+	rtc.read(t);
+	print(uart, t)  << '\n';
+	uart << rtc.now() << '\n';
+
+	// Probar a desconectar el sensor mientras está funcionando. Tiene que
+	// generar el error correspondiente.
+	if (rtc.no_response())
+	    uart << "Error: no response\n";
+
+	if (rtc.error())
+	    uart << "Error: error en el rtc!!!\n";
+
+        wait_ms(1000);
+
+    }
+}
+
+int main()
+{
+// init_UART();
+    avr::UART_iostream uart;
+    avr::basic_cfg(uart);
+    uart.on();
+
+// init_TWI();
+    // 50 kHz es la unica frecuencia de TWI que va a 1MHz.
+    // 100 kHz a 8 MHz
+    TWI::on<50>();
+
+    uart << "----------------------------------------\n"
+	 << "DS1307 as a system clock\n"
+	 << "----------------------------------------\n\n";
+
+    test_clock();
+}
+
+
+
+
+ISR(TWI_vect)
+{
+    TWI::handle_interrupt();
+}
+
+

@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "../../dev_DS1307_basic.h"
+#include "../../../dev_DS1307_basic.h"
 #include <avr_time.h>
 #include <avr_UART.h>
 #include <atd_ostream.h>
@@ -33,7 +33,7 @@
 static constexpr uint8_t TWI_buffer_size = 70; 
 using TWI = avr::TWI_master<avr::TWI_basic, TWI_buffer_size>;
 
-using RTC = dev::DS1307<TWI>;
+using RTC = dev::DS1307_basic<TWI>;
 
 
 void twi_print_state()

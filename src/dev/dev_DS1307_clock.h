@@ -1,0 +1,155 @@
+// Copyright (C) 2020 A.Manuel L.Perez <amanuel.lperez@gmail.com>
+//
+// This file is part of the MCU++ Library.
+//
+// MCU++ Library is a free library: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+
+#pragma once
+
+#ifndef __DEV_DS1307_CLOCK_H__
+#define __DEV_DS1307_CLOCK_H__
+/****************************************************************************
+ *
+ *  - DESCRIPCION: Clock bases on DS1307
+ *
+ *  - COMENTARIOS: 
+ *
+ *  - HISTORIA:
+ *    A.Manuel L.Perez
+ *    25/12/2020 v0.0
+ *
+ ****************************************************************************/
+#include "dev_DS1307_basic.h"
+
+#include <chrono>
+
+namespace dev{
+
+/*!
+ *  \brief  DS1307 as a standard clock.
+ *
+ *  Remember to define the correspondent TWI's ISR. Example:
+ *
+ *  ISR(TWI_vect)
+ *  {
+ *	TWI::handle_interrupt();
+ *  }
+ *
+ */
+template <typename TWI_master>
+class DS1307_clock : public DS1307_basic<TWI_master> {
+public:
+// From DS1307_basic
+    using Clock = DS1307_basic<TWI_master>::Clock;
+
+// As a clock
+    using duration  = std::chrono::seconds; 
+    using rep       = duration::rep;
+    using period    = duration::period;
+
+    using time_point = std::chrono::time_point<DS1307_clock, duration>;
+    static constexpr bool is_steady = true;
+
+    void init(Clock& t);
+
+    // Be carefull: is more efficient to call read instead of 'now'.
+    time_point now() noexcept;
+
+    // Map to C API
+    static time_t to_time_t(const time_point& t) noexcept;
+    static time_point from_time_t(time_t t) noexcept;
+
+private:
+
+    time_t to_time_t(const Clock& t);
+    std::tm to_tm(const Clock& t);
+};
+
+
+// Para saber si ha ocurrido algún error mirar el estado del RTC.
+template <typename TWI>
+inline void DS1307_clock<TWI>::init(Clock& t) 
+{
+    t.clock_on = true;
+    this->write(t);
+}
+
+
+
+// Para ver si ha ocurrido algún error mirar el state del RTC.
+template <typename TWI>
+inline DS1307_clock<TWI>::time_point DS1307_clock<TWI>::now() noexcept
+{
+    Clock t;
+    this->read(t); // no compila sin el 'this' (error: unqualified lookup @_@)
+
+    return time_point{duration{to_time_t(t)}};
+}
+
+
+template <typename TWI>
+std::tm DS1307_clock<TWI>::to_tm(const Clock& t)
+{
+    std::tm res;
+
+    res.tm_sec  = t.seconds;
+    res.tm_min  = t.minutes;
+    res.tm_hour = t.hours;
+    res.tm_mday = t.date;
+    res.tm_wday = t.day - 1;
+    res.tm_mon  = t.month - 1;
+    res.tm_year = (2000 + t.year) - 1900;
+
+    return res;
+}
+
+
+
+template <typename TWI>
+inline time_t DS1307_clock<TWI>::to_time_t(const Clock& t0)
+{
+    std::tm tm0 = to_tm(t0);
+    return ::mktime(&tm0);
+}
+
+
+
+// en avr-libc, time_t está definido como uint32_t, time_point está usando
+// seconds que tiene int64_t como representación. Como se ve con avr-libc no
+// se pueden manejar time_t negativos (aunque sí time_points negativos).
+template <typename TWI>
+inline time_t DS1307_clock<TWI>::to_time_t(const time_point& t) noexcept
+{
+    return static_cast<time_t>(t.time_since_epoch().count());
+}
+
+
+template <typename TWI>
+inline DS1307_clock<TWI>::time_point DS1307_clock<TWI>::from_time_t(time_t t) noexcept
+{
+    return time_point{duration{t}};
+}
+
+} // namespace
+
+
+
+
+
+
+#endif
+
+
+

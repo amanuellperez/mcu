@@ -788,7 +788,7 @@ struct system_clock{
 
     static time_point now() noexcept;
 
-    // Ma to C API
+    // Map to C API
     static time_t to_time_t(const time_point& t) noexcept;
     static time_point from_time_t(time_t t) noexcept;
 };
