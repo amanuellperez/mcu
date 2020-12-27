@@ -71,10 +71,9 @@ public:
     static time_t to_time_t(const time_point& t) noexcept;
     static time_point from_time_t(time_t t) noexcept;
 
-private:
+    static time_t to_time_t(const Clock& t);
+    static std::tm to_tm(const Clock& t);
 
-    time_t to_time_t(const Clock& t);
-    std::tm to_tm(const Clock& t);
 };
 
 

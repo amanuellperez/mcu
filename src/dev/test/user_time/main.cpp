@@ -69,7 +69,7 @@ tm new_tm()
 void test_lcd_menu()
 {
     // Si lo conectamos solo a 4 pins de datos
-    // LCD_HD44780_1602_ostream lcd;
+    // NO USAR ESTE: LCD_HD44780_1602_ostream lcd;
     LCD_HD44780_2004_ostream lcd;
 
     Keyboard key;
@@ -77,7 +77,7 @@ void test_lcd_menu()
 
     while(1){
 	lcd.clear();
-	lcd << "Probarlo con un LCD de 20 x 4!!!";
+	lcd << "Probarlo con un LCD de 20 x 4!";
 	wait_ms(1000);
 
 	lcd.clear();

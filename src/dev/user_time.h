@@ -28,7 +28,7 @@
  *	01/09/2019 v0.0
  *	21/12/2019 Cambio interfaz (elimino tm por time_t).
  *	05/01/2020 Añado chrono::time_point.
- *
+ *	27/12/2020 Generalizando para poder usarlo con RTC.
  *
  ****************************************************************************/
 #include <cstdint>
@@ -45,47 +45,54 @@ namespace dev{
 /// en el LCD. De salida es el tiempo seleccionado por el usuario.
 // LCD: pantalla con acceso aleatorio (cursor_pos) e iostream (operator<<)
 // Keyboard: left, right, ok
+template <typename LCD, typename Keyboard, typename Date_time>
+void user_get_time(LCD& lcd,
+                   Keyboard& key,
+                   atd::Generic_time<Date_time>& t,
+                   uint8_t x0, uint8_t y0)
+{
+    lcd.cursor_pos(x0, y0);
+    t.print_date(lcd);
+
+    lcd.cursor_pos(x0, y0 + 1);
+    t.print_time(lcd);
+
+    t.day(User_choose_number{lcd, key}.pos(x0, y0)
+					.between(1, 31)
+					.choose2(t.day()));
+
+    t.month(User_choose_number{lcd, key}.pos(x0 + 3, y0)
+				       .between(1, 12)
+				       .choose2(t.month()));
+
+    t.year(User_choose_number{lcd, key}.pos(x0 + 6, y0)
+					.choose4(t.year()));
+
+    t.hours(User_choose_number{lcd, key}.pos(x0, y0 + 1)
+					.max(23)
+					.choose2(t.hours()));
+
+    t.minutes(User_choose_number{lcd, key}.pos(x0 + 3, y0 + 1)
+					.max(59)
+					.choose2(t.minutes()));
+
+    t.seconds(User_choose_number{lcd, key}.pos(x0 + 6, y0 + 1)
+					.max(59)
+					.choose2(t.seconds()));
+
+}
+
+
 template <typename LCD, typename Keyboard>
 std::time_t user_get_time(
     LCD& lcd, Keyboard& key, const std::time_t& t0, uint8_t x0, uint8_t y0)
 {
-    std::tm* t = std::gmtime(&t0);
+    std::tm* mt = std::gmtime(&t0);
+    
+    atd::Generic_time<std::tm> t{*mt};
+    user_get_time(lcd, key, t, x0, y0);
 
-    lcd.cursor_pos(x0, y0);
-    lcd << atd::only_date(*t);
-
-    lcd.cursor_pos(x0, y0 + 1);
-    lcd << atd::only_time(*t);
-
-    t->tm_mday = User_choose_number{lcd, key}.pos(x0, y0)
-					.between(1, 31)
-					.choose2(t->tm_mday);
-
-    // el month empieza en 0, de ahí el +-1
-    t->tm_mon = User_choose_number{lcd, key}.pos(x0 + 3, y0)
-				       .between(1, 12)
-				       .choose2(t->tm_mon + 1);
-    --t->tm_mon;   
-
-    // el año se especifica desde 1900
-    t->tm_year = User_choose_number{lcd, key}.pos(x0 + 6, y0)
-					.choose4(t->tm_year + 1900);
-    t->tm_year -= 1900;
-
-
-    t->tm_hour = User_choose_number{lcd, key}.pos(x0, y0 + 1)
-					.max(23)
-					.choose2(t->tm_hour);
-
-    t->tm_min = User_choose_number{lcd, key}.pos(x0 + 3, y0 + 1)
-					.max(59)
-					.choose2(t->tm_min);
-
-    t->tm_sec = User_choose_number{lcd, key}.pos(x0 + 6, y0 + 1)
-					.max(59)
-					.choose2(t->tm_sec);
-
-    return std::mktime(t);
+    return std::mktime(mt);
 }
 
 

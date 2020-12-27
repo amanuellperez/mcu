@@ -74,7 +74,7 @@ static bool read(std::istream& in, Only_date_no_const_ d)
     --d.t->tm_mon;
     d.t->tm_year -= 1900;
 
-    return date_is_valid(*d.t);
+    return is_valid_date(*d.t);
 }
 
 
@@ -122,7 +122,7 @@ static bool read(std::istream& in, Only_time_no_const_ d)
     in >> atd::read_as_int8_t(tmp);
     d.t->tm_sec = tmp;
 
-    return time_is_valid(*d.t);
+    return is_valid_time(*d.t);
 }
 
 std::istream& operator>>(std::istream& in, Only_time_no_const_ d)
@@ -132,6 +132,31 @@ std::istream& operator>>(std::istream& in, Only_time_no_const_ d)
 
     return in;
 }
+
+
+// El formato es español. Habría que definir locales para generalizarlo.
+void Generic_time<std::tm>::print_time(std::ostream& out, char sep) const
+{ 
+    char f = out.fill('0');
+    out << std::setw(2) << hours() << sep
+	<< std::setw(2) << minutes() << sep
+	<< std::setw(2) << seconds();
+
+    out.fill(f);
+}
+
+void Generic_time<std::tm>::print_date(std::ostream& out, char sep) const
+{
+    char f = out.fill('0');
+
+    out << std::setw(2) << day() << sep
+	<< std::setw(2) << month() << sep
+	<< std::setw(4) << year();
+
+    out.fill(f);
+}
+
+
 
 
 }// namespace

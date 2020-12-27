@@ -132,12 +132,61 @@ void test_istream()
 
 }
  
+void test_generic_time()
+{
+    test::interfaz("Generic_time");
+
+    std::tm t;
+
+    t.tm_sec = 1;
+    t.tm_min = 2;
+    t.tm_hour = 3;
+    t.tm_mday = 4;
+    t.tm_mon = 5;
+    t.tm_year = 6;
+
+    atd::Generic_time<std::tm> gt{t};
+    CHECK_TRUE(gt.seconds() == 1, "seconds");
+    CHECK_TRUE(gt.minutes() == 2, "minutes");
+    CHECK_TRUE(gt.hours() == 3, "hours");
+    CHECK_TRUE(gt.day() == 4, "day");
+    CHECK_TRUE(gt.month() == 6, "month");
+    CHECK_TRUE(gt.year() == 1906, "year");
+
+    gt.seconds(9);
+    gt.minutes(8);
+    gt.hours(7);
+    gt.day(10);
+    gt.month(12);
+    gt.year(2020);
+
+    CHECK_TRUE(gt.seconds() == 9, "seconds");
+    CHECK_TRUE(gt.minutes() == 8, "minutes");
+    CHECK_TRUE(gt.hours() == 7, "hours");
+    CHECK_TRUE(gt.day() == 10, "day");
+    CHECK_TRUE(gt.month() == 12, "month");
+    CHECK_TRUE(gt.year() == 2020, "year");
+
+    CHECK_TRUE(t.tm_sec == 9, "tm_sec");
+    CHECK_TRUE(t.tm_min == 8, "tm_min");
+    CHECK_TRUE(t.tm_hour == 7, "tm_hour");
+    CHECK_TRUE(t.tm_mday == 10, "tm_mday");
+    CHECK_TRUE(t.tm_mon == 11, "tm_mon");
+    CHECK_TRUE(t.tm_year == 2020 - 1900, "tm_year");
+
+    std::cout << "check["; gt.print_time(std::cout); std::cout << "]: 07:08:09\n";
+
+    std::cout << "check["; gt.print_date(std::cout); std::cout << "]: 10/02/2020\n";
+}
+
+
 int main()
 {
 try{
     test::header("atd_time");
     test_ostream();
     test_istream();
+    test_generic_time();
 }catch(const std::exception& e){
     std::cerr << e.what() << '\n';
     return 1;

@@ -8,6 +8,7 @@ INCS= 	dev_BMP280_basic.h			\
 		dev_cols_glyphs.h			\
 		dev_counter_CD4017B.h		\
 		dev_DS1307_basic.h			\
+		dev_DS1307_clock.h			\
 		dev_EEPROM_25LC256_basic.h	\
 		dev_EEPROM_iostream.h		\
 		dev_EEPROM_lineal.h			\
