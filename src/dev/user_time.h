@@ -52,10 +52,10 @@ void user_get_time(LCD& lcd,
                    uint8_t x0, uint8_t y0)
 {
     lcd.cursor_pos(x0, y0);
-    t.print_date(lcd);
+    atd::print_date(lcd, t);
 
     lcd.cursor_pos(x0, y0 + 1);
-    t.print_time(lcd);
+    atd::print_time(lcd, t);
 
     t.day(User_choose_number{lcd, key}.pos(x0, y0)
 					.between(1, 31)

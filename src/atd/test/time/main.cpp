@@ -174,9 +174,9 @@ void test_generic_time()
     CHECK_TRUE(t.tm_mon == 11, "tm_mon");
     CHECK_TRUE(t.tm_year == 2020 - 1900, "tm_year");
 
-    std::cout << "check["; gt.print_time(std::cout); std::cout << "]: 07:08:09\n";
+    std::cout << "check["; print_time(std::cout, gt); std::cout << "]: 07:08:09\n";
 
-    std::cout << "check["; gt.print_date(std::cout); std::cout << "]: 10/02/2020\n";
+    std::cout << "check["; print_date(std::cout, gt); std::cout << "]: 10/02/2020\n";
 }
 
 

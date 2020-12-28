@@ -112,9 +112,16 @@ void test_clock()
 
 
     while (1){
+	atd::Generic_time<RTC::Clock> gt{t};
+
 	rtc.read(t);
 	print(uart, t)  << '\n';
 	uart << rtc.now() << '\n';
+	uart << "print_date: ";
+	atd::print_date(uart, gt);
+	uart << "\nprint_time: ";
+	atd::print_time(uart, gt);
+	uart << '\n';
 
 	// Probar a desconectar el sensor mientras está funcionando. Tiene que
 	// generar el error correspondiente.

@@ -134,27 +134,6 @@ std::istream& operator>>(std::istream& in, Only_time_no_const_ d)
 }
 
 
-// El formato es español. Habría que definir locales para generalizarlo.
-void Generic_time<std::tm>::print_time(std::ostream& out, char sep) const
-{ 
-    char f = out.fill('0');
-    out << std::setw(2) << hours() << sep
-	<< std::setw(2) << minutes() << sep
-	<< std::setw(2) << seconds();
-
-    out.fill(f);
-}
-
-void Generic_time<std::tm>::print_date(std::ostream& out, char sep) const
-{
-    char f = out.fill('0');
-
-    out << std::setw(2) << day() << sep
-	<< std::setw(2) << month() << sep
-	<< std::setw(4) << year();
-
-    out.fill(f);
-}
 
 
 

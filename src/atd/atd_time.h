@@ -164,7 +164,37 @@ template <typename T>
 class Generic_time;
 
 
+// El formato es español. Habría que definir locales para generalizarlo.
+template <typename T>
+std::ostream& print_time(std::ostream& out, const Generic_time<T>& t, char sep = ':')
+{ 
+    char f = out.fill('0');
+    out << std::setw(2) << t.hours() << sep
+	<< std::setw(2) << t.minutes() << sep
+	<< std::setw(2) << t.seconds();
+
+    out.fill(f);
+    
+    return out;
+}
+
+template <typename T>
+std::ostream& print_date(std::ostream& out, const Generic_time<T>& t, char sep = '/')
+{
+    char f = out.fill('0');
+
+    out << std::setw(2) << t.day() << sep
+	<< std::setw(2) << t.month() << sep
+	<< std::setw(4) << t.year();
+
+    out.fill(f);
+
+    return out;
+}
+
+
 // Especialización para std::tm
+// ----------------------------
 template<>
 class Generic_time<std::tm>{
 public:
@@ -191,10 +221,6 @@ public:
     /* tm_year = Year - 1900 */
     int year() const {return t_.tm_year + 1900;}
     void year(int y) {t_.tm_year = y - 1900;}
-
-// operations
-    void print_time(std::ostream& out, char sep = ':') const;
-    void print_date(std::ostream& out, char sep = '/') const;
 
 private:
     std::tm& t_;
