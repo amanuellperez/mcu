@@ -68,9 +68,48 @@ programar.
    con 1'5 voltios? 
 
 
+## RTC clock
+
+En lugar de usar el timer del avr, como en el `basic_clock`, podemos conectar
+el avr a un RTC. Para hacer pruebas he elegido el DS1307 (¿por qué? ni idea,
+supongo que sería uno de los primeros que apareció en internet cuando empecé a
+buscar).
+
+La ventaja de usar un RTC en lugar del timer es precisamente liberar al avr
+del control del tiempo, que lo hace todo el RTC. Además, si se le conecta una
+pila de botón al RTC se puede desconectar todo el dispositivo manteniendo el
+RTC encendido.
 
 
+### Versión 0.0
+
+Da la impresión de funcionar bien (cuando lo tenga meses encendido
+podré opinar, aunque el RTC es de esperar que funcione bien). Al implementar
+este reloj ya se observa que en todo proyecto vamos a tener que tener que
+hacer mínimo 2 prototipos:
+
+1. [Prototipo breadboard](rtc_clock/rtc_clock_breadboard_v00.jpg):
+   Conectamos todo en la breadboard todo y vamos probando y programando todo.
+
+2. [Prototipo modular](rtc_clock/rtc_clock_proto_v00.jpg):
+   La idea es hacer un prototipo con el que poder experimentar. En este caso,
+   como es un reloj, lo que quiero es dejar el reloj días o meses funcionando 
+   para ver si retrasa o adelante. Si fuera un cambio un sensor para medir la
+   altura a la que me encuentro, quiero poder llevarlo en el bolsillo para
+   poder probarlo. Pero no busco un prototipo definitivo ya que puede tener
+   errores de diseño (total, todavía es la versión 0.0 = versión de
+   aprendizaje). Por ello voy a construirlo con partes modulares que pueda
+   reutilizar en otros proyectos (en la foto se ve que el LCD con los 3
+   botones lo puedo usar en otros proyectos).
 
 
+#### Problemas
+
+A parte de los problemas que ya observé en el `basic_clock` (LCD radiante y
+uso 7.5 voltios de alimentación) se ve que faltan cosas:
+1. No aparece el día de la semana, pero el RTC lo suministra.
+2. Al poner la hora no es posible pasar de 00 a 59. Si quieres poner 50
+   minutos te toca ir desde 00 hasta 50, lo cual es incómodo.
+3. Con el LCD radiante sería interesante poder apagar el LCD.
 
 

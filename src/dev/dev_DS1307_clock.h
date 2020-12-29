@@ -38,36 +38,32 @@
 
 namespace atd{
 template<>
-class Generic_time<dev::__DS1307_timekeeper>{
-public:
-// constructor
-    Generic_time(dev::__DS1307_timekeeper& t):t_{t} {}
+struct Generic_time_translator<dev::__DS1307_timekeeper>{
+    
+    using DS = dev::__DS1307_timekeeper;
 
-// members
-    int seconds() const { return t_.seconds; }
-    void seconds(int s) { t_.seconds= s; }
+    static int seconds(const DS& t) { return t.seconds; }
+    static void seconds(DS& t, int s) { t.seconds= s; }
 
-    int minutes() const { return t_.minutes; }
-    void minutes(int m) { t_.minutes = m; }
+    static int minutes(const DS& t) { return t.minutes; }
+    static void minutes(DS& t, int m) { t.minutes = m; }
 
     // OJO: de momento damos por supuesto que el reloj está configurado
     // en 00-23 horas
-    int hours() const { return t_.hours; }
-    void hours(int h) { t_.hours= h; }
+    static int hours(const DS& t) { return t.hours; }
+    static void hours(DS& t, int h) { t.hours= h; }
 
-    int day() const { return t_.date; }
-    void day(int d) { t_.date = d; }
+    static int day(const DS& t) { return t.date; }
+    static void day(DS& t, int d) { t.date = d; }
 
-    int month() const { return t_.month; }
-    void month(int m) {t_.month = m;}
+    static int month(const DS& t) { return t.month; }
+    static void month(DS& t, int m) {t.month = m;}
 
     /* year = only 2 digits yy */
-    int year() const {return t_.year + 2000;}
-    void year(int y) {t_.year = static_cast<uint8_t>(y - 2000);}
-
-private:
-    dev::__DS1307_timekeeper& t_;
+    static int year(const DS& t) {return t.year + 2000;}
+    static void year(DS& t, int y) { t.year = static_cast<uint8_t>(y - 2000); }
 };
+
 }// namespace atd
 
 

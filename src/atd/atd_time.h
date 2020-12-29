@@ -160,13 +160,85 @@ inline bool is_valid_time(const std::tm& t)
  *	    "fusionar" estas diferentes formas de hablar. Esta struct
  *	    Generic_time es lo que hace.
  */
+
+// DUDA: ¿cómo llamarlo?
+// Generic_time_translator es el interfaz que suministra cada reloj indicando
+// cómo traducir de su idioma al idioma de Generic_time. Ver
+// Generic_time_translator<std::tm> para ver ejemplo de implementación.
+// (RRR) El problema está en definir dos versiones de Generic_time: const y no
+//       const. Si se deja hacer esto a quien implementa la clase de reloj le
+//       toca implementar las dos versiones. El Generic_time_translator
+//       es una forma de implementar Generic_time y const_Generic_time en
+//       general y que solo sea necesario implementar Generic_time_translator
+//       una sola vez.
 template <typename T>
-class Generic_time;
+struct Generic_time_translator;
+
+
+// versión const
+template <typename T>
+class const_Generic_time{
+public:
+    using GT = Generic_time_translator<T>;
+
+// constructor
+    const_Generic_time(const T& t):t_{t} {}
+
+// members
+    int seconds() const { return GT::seconds(t_); }
+    int minutes() const { return GT::minutes(t_); }
+    int hours() const   { return GT::hours(t_); }
+
+    int day() const   { return GT::day(t_); }
+    int month() const { return GT::month(t_); }
+    int year() const  { return GT::year(t_);}
+
+private:
+    const T& t_;
+};
+
+
+// versión no const
+template <typename T>
+class Generic_time{
+public:
+    using GT = Generic_time_translator<T>;
+
+// constructor
+    Generic_time(T& t):t_{t} {}
+
+// Conversión implícita: no const a const (es lo de esperar)
+    operator const_Generic_time<T>() const { return const_Generic_time{t_};}
+
+// members
+    int seconds() const { return GT::seconds(t_); }
+    void seconds(int s) { GT::seconds(t_, s); }
+
+    int minutes() const { return GT::minutes(t_); }
+    void minutes(int m) { GT::minutes(t_, m); }
+
+    int hours() const { return GT::hours(t_); }
+    void hours(int h) { GT::hours(t_, h); }
+
+    int day() const { return GT::day(t_); }
+    void day(int d) { GT::day(t_, d); }
+
+    int month() const { return GT::month(t_); }
+    void month(int m) { GT::month(t_, m);}
+
+    int year() const { return GT::year(t_);}
+    void year(int y) { GT::year(t_, y);}
+
+//private:
+    T& t_;
+};
+
 
 
 // El formato es español. Habría que definir locales para generalizarlo.
 template <typename T>
-std::ostream& print_time(std::ostream& out, const Generic_time<T>& t, char sep = ':')
+std::ostream&
+print_time(std::ostream& out, const const_Generic_time<T>& t, char sep = ':')
 { 
     char f = out.fill('0');
     out << std::setw(2) << t.hours() << sep
@@ -179,7 +251,7 @@ std::ostream& print_time(std::ostream& out, const Generic_time<T>& t, char sep =
 }
 
 template <typename T>
-std::ostream& print_date(std::ostream& out, const Generic_time<T>& t, char sep = '/')
+std::ostream& print_date(std::ostream& out, const const_Generic_time<T>& t, char sep = '/')
 {
     char f = out.fill('0');
 
@@ -192,38 +264,49 @@ std::ostream& print_date(std::ostream& out, const Generic_time<T>& t, char sep =
     return out;
 }
 
+// Versiones no const.
+// TODO: estas versiones sobran. Deberían de poder convertirse directamente el
+// Generic_time a const_Generic_time. Sin embargo, falla la deducción
+// automática. ¿Por qué???
+template <typename T>
+inline std::ostream&
+print_time(std::ostream& out, const Generic_time<T>& t, char sep = ':')
+{
+    return print_time(out, const_Generic_time<T>{t}, sep);
+}
+
+template <typename T>
+inline std::ostream&
+print_date(std::ostream& out, const Generic_time<T>& t, char sep = '/')
+{
+    return print_date(out, const_Generic_time<T>{t}, sep);
+}
+
 
 // Especialización para std::tm
 // ----------------------------
 template<>
-class Generic_time<std::tm>{
-public:
-// constructor
-    Generic_time(std::tm& t):t_{t} {}
-
+struct Generic_time_translator<std::tm>{
 // members
-    int seconds() const { return t_.tm_sec; }
-    void seconds(int s) { t_.tm_sec = s; }
+    static int seconds(const std::tm& t) { return t.tm_sec; }
+    static void seconds(std::tm& t, int s) { t.tm_sec = s; }
 
-    int minutes() const { return t_.tm_min; }
-    void minutes(int m) { t_.tm_min = m; }
+    static int minutes(const std::tm& t) { return t.tm_min; }
+    static void minutes(std::tm& t, int m) { t.tm_min = m; }
 
-    int hours() const { return t_.tm_hour; }
-    void hours(int h) { t_.tm_hour = h; }
+    static int hours(const std::tm& t) { return t.tm_hour; }
+    static void hours(std::tm& t, int h) { t.tm_hour = h; }
 
-    int day() const { return t_.tm_mday; }
-    void day(int d) { t_.tm_mday = d; }
+    static int day(const std::tm& t) { return t.tm_mday; }
+    static void day(std::tm& t, int d) { t.tm_mday = d; }
 
     // tm_mon = (0-11)
-    int month() const { return t_.tm_mon + 1; }
-    void month(int m) {t_.tm_mon = m - 1;}
+    static int month(const std::tm& t) { return t.tm_mon + 1; }
+    static void month(std::tm& t, int m) {t.tm_mon = m - 1;}
 
     /* tm_year = Year - 1900 */
-    int year() const {return t_.tm_year + 1900;}
-    void year(int y) {t_.tm_year = y - 1900;}
-
-private:
-    std::tm& t_;
+    static int year(const std::tm& t) {return t.tm_year + 1900;}
+    static void year(std::tm& t, int y) {t.tm_year = y - 1900;}
 };
 
 
