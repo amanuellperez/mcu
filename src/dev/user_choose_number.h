@@ -31,15 +31,20 @@
  *  - HISTORIA:
  *    A.Manuel L.Perez
  *	30/08/2019 v0.0
+ *	30/12/2020 Dos tipos: lineal y circular.
  *
  ****************************************************************************/
 #include <avr_time.h>
 #include <iomanip>
+#include <limits>
 
 #include "dev_keyboard.h"
 
 namespace dev{
 
+// Tipos 
+constexpr int user_choose_number_type_lineal   = 0;
+constexpr int user_choose_number_type_circular = 1;
 
 
 /*!
@@ -53,10 +58,30 @@ namespace dev{
  *	up, down: equivalentes a decrementar, incrementar
  *	enter	: equivalente a enter o fin.
  *
+ *  Dos formas diferentes de poder elegir el número:
+ *	1. type = lineal:
+ *	   El usuario al pulsar up, down se mueve desde [min(), max()]. Al
+ *	   llegar a min() por mucho que pulse down no baja. Al llegar a max()
+ *	   la tecla up no hace nada.
+ *
+ *	2. type = circular:
+ *	   Al llegar a min() y pulsar down se pasa a max(), y viceversa, al
+ *	   llegar a max() y pulsar up se pasa a min().
+ *	   Esta sería la forma de operar al configurar la hora: 
+ *	   Si queremos poner en hora el reloj y son las 10:50, para escribir
+ *	   los 50 minutos pulsamos down yendo desde 00 -> 59 -> 58 ... -> 55.
+ *	   En el modo lineal habría que ir desde 00 -> 01 -> 02 ->... ->55 lo
+ *	   cual es más incómodo.
  */
-template <typename LCD, typename Keyboard3>
+template <typename LCD, typename Keyboard3, int type0>
 class User_choose_number{
 public:
+    static_assert(type0 == user_choose_number_type_lineal or 
+		  type0 == user_choose_number_type_circular, 
+		  "incorrect User_choose_number_type");
+
+    static constexpr int type = type0; // lineal o circular
+
     // Configuración
     // -------------
     /// Mostramos el número en el LCD e interaccionamos con el usuario via
@@ -78,7 +103,7 @@ public:
 
     // Funciones para elegir
     // ---------------------
-    /// Elegimos un número de 2 cifras.a
+    /// Elegimos un número de 2 cifras.
     /// Returns: valor elegido.
     uint8_t choose2(uint8_t x0);
 
@@ -103,8 +128,8 @@ private:
 
     // Configuración
     uint8_t col_, row_;	    // posición donde están los 2 números.
-    uint16_t min_ = 0;	    // valor mínimo que puede tener el número.
-    uint16_t max_ = 65535;  // valor máximo que puede tener el número.
+    uint16_t min_ = std::numeric_limits<uint16_t>::min();
+    uint16_t max_ = std::numeric_limits<uint16_t>::max();
 
     // Datos
     // -----
@@ -162,8 +187,8 @@ private:
 
 
 
-template <typename L, typename T>
-inline User_choose_number<L,T>& User_choose_number<L,T>::pos(uint8_t col, uint8_t row)
+template <typename L, typename T, int t0>
+inline User_choose_number<L,T, t0>& User_choose_number<L,T, t0>::pos(uint8_t col, uint8_t row)
 {
     col_ = col;
     row_ = row;
@@ -172,22 +197,23 @@ inline User_choose_number<L,T>& User_choose_number<L,T>::pos(uint8_t col, uint8_
 }
 
 
-template <typename L, typename T>
-inline User_choose_number<L,T>& User_choose_number<L,T>::min(uint16_t m)
+template <typename L, typename T, int t0>
+inline User_choose_number<L,T, t0>& User_choose_number<L,T, t0>::min(uint16_t m)
 {
     min_= m;
     return *this;
 }
 
-template <typename L, typename T>
-inline User_choose_number<L,T>& User_choose_number<L,T>::max(uint16_t M)
+template <typename L, typename T, int t0>
+inline User_choose_number<L,T, t0>& User_choose_number<L,T, t0>::max(uint16_t M)
 {
     max_ = M;
     return *this;
 }
 
-template <typename L, typename T>
-inline User_choose_number<L,T>& User_choose_number<L,T>::between(uint16_t m, uint16_t M)
+template <typename L, typename T, int t0>
+inline User_choose_number<L, T, t0>&
+User_choose_number<L, T, t0>::between(uint16_t m, uint16_t M)
 {
     min(m);
     max(M);
@@ -198,11 +224,10 @@ inline User_choose_number<L,T>& User_choose_number<L,T>::between(uint16_t m, uin
 
 
 // El cliente elige un número de 2 cifras
-template <typename L, typename T>
-uint8_t User_choose_number<L, T>::choose2(uint8_t x0)
+template <typename L, typename T, int t0>
+uint8_t User_choose_number<L, T, t0>::choose2(uint8_t x0)
 { 
     char fill_char = lcd_.fill('0');
-
 
     x_ = x0;
 
@@ -232,8 +257,8 @@ uint8_t User_choose_number<L, T>::choose2(uint8_t x0)
 }
 
 
-template <typename L, typename T>
-uint16_t User_choose_number<L, T>::choose4(uint16_t x0)
+template <typename L, typename T, int t0>
+uint16_t User_choose_number<L, T, t0>::choose4(uint16_t x0)
 { 
 
     x_ = x0;
@@ -268,8 +293,8 @@ uint16_t User_choose_number<L, T>::choose4(uint16_t x0)
 
 
 
-template <typename L, typename T>
-void User_choose_number<L, T>::update()
+template <typename L, typename T, int t0>
+void User_choose_number<L, T, t0>::update()
 {
     switch(ultima_tecla_pulsada_){
 	case Tecla_pulsada::down:
@@ -287,8 +312,8 @@ void User_choose_number<L, T>::update()
 }
 
 
-template <typename L, typename T>
-void User_choose_number<L, T>::update_ninguna()
+template <typename L, typename T, int t0>
+void User_choose_number<L, T, t0>::update_ninguna()
 {
 
     if (down_key().is_pressed()){
@@ -313,8 +338,8 @@ void User_choose_number<L, T>::update_ninguna()
 
 // La última tecla pulsada fue down. Si la tecla sigue pulsada
 // vamos decrementando el número cada vez más rápidamente.
-template <typename L, typename T>
-void User_choose_number<L, T>::update_down()
+template <typename L, typename T, int t0>
+void User_choose_number<L, T, t0>::update_down()
 {
     if (down_key().is_pressed()){
 
@@ -327,16 +352,21 @@ void User_choose_number<L, T>::update_down()
 	    }
 	    else
 		--x_;
-
 	}
+	else{
+	    if constexpr (type == user_choose_number_type_circular){
+		x_ = max_;
+	    }
+	}
+
     }
     else 
 	ultima_tecla_pulsada_ = Tecla_pulsada::ninguna;
 }
 
 
-template <typename L, typename T>
-void User_choose_number<L, T>::update_up()
+template <typename L, typename T, int t0>
+void User_choose_number<L, T, t0>::update_up()
 {
     if (up_key().is_pressed()){
 
@@ -350,27 +380,43 @@ void User_choose_number<L, T>::update_up()
 	    else
 		++x_;
 	}
+	else{
+	    if constexpr (type == user_choose_number_type_circular){
+		x_ = min_;
+	    }
+	}
     }
     else 
 	ultima_tecla_pulsada_ = Tecla_pulsada::ninguna;
 }
 
 
-template <typename L, typename T>
-void User_choose_number<L, T>::print2(uint8_t x)
+template <typename L, typename T, int t0>
+void User_choose_number<L, T, t0>::print2(uint8_t x)
 {
     lcd_.cursor_pos(col_, row_);
     lcd_ << std::setw(2) << static_cast<uint16_t>(x);
     lcd_.cursor_pos(col_ + 1, row_);
 }
 
-template <typename L, typename T>
-void User_choose_number<L, T>::print4(uint16_t x)
+template <typename L, typename T, int t0>
+void User_choose_number<L, T, t0>::print4(uint16_t x)
 {
     lcd_.cursor_pos(col_, row_);
     lcd_ << std::setw(4) << x;
     lcd_.cursor_pos(col_ + 3, row_);
 }
+
+// syntactic sugar
+template <typename L, typename K>
+User_choose_number<L, K, user_choose_number_type_lineal>
+user_choose_number_lineal(L& lcd,  K k)
+{ return User_choose_number<L, K, user_choose_number_type_lineal>{lcd, k}; }
+
+template <typename L, typename K>
+User_choose_number<L, K, user_choose_number_type_circular>
+user_choose_number_circular(L& lcd,  K k)
+{ return User_choose_number<L, K, user_choose_number_type_circular>{lcd, k}; }
 
 
 }// namespace

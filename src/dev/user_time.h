@@ -29,6 +29,8 @@
  *	21/12/2019 Cambio interfaz (elimino tm por time_t).
  *	05/01/2020 Añado chrono::time_point.
  *	27/12/2020 Generalizando para poder usarlo con RTC.
+ *	30/12/2020 Hacemos la elección de los números circular (pasamos de 00
+ *	           a 59 segundos)
  *
  ****************************************************************************/
 #include <cstdint>
@@ -57,26 +59,26 @@ void user_get_time(LCD& lcd,
     lcd.cursor_pos(x0, y0 + 1);
     atd::print_time(lcd, t);
 
-    t.day(User_choose_number{lcd, key}.pos(x0, y0)
+    t.day(user_choose_number_circular(lcd, key).pos(x0, y0)
 					.between(1, 31)
 					.choose2(t.day()));
 
-    t.month(User_choose_number{lcd, key}.pos(x0 + 3, y0)
+    t.month(user_choose_number_circular(lcd, key).pos(x0 + 3, y0)
 				       .between(1, 12)
 				       .choose2(t.month()));
 
-    t.year(User_choose_number{lcd, key}.pos(x0 + 6, y0)
+    t.year(user_choose_number_circular(lcd, key).pos(x0 + 6, y0)
 					.choose4(t.year()));
 
-    t.hours(User_choose_number{lcd, key}.pos(x0, y0 + 1)
+    t.hours(user_choose_number_circular(lcd, key).pos(x0, y0 + 1)
 					.max(23)
 					.choose2(t.hours()));
 
-    t.minutes(User_choose_number{lcd, key}.pos(x0 + 3, y0 + 1)
+    t.minutes(user_choose_number_circular(lcd, key).pos(x0 + 3, y0 + 1)
 					.max(59)
 					.choose2(t.minutes()));
 
-    t.seconds(User_choose_number{lcd, key}.pos(x0 + 6, y0 + 1)
+    t.seconds(user_choose_number_circular(lcd, key).pos(x0 + 6, y0 + 1)
 					.max(59)
 					.choose2(t.seconds()));
 

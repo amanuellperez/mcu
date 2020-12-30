@@ -66,9 +66,13 @@ void test_choose_number2()
 	wait_ms(1000);
 
 	lcd.clear();
+	lcd << "PRUEBA LINEAL";
+	wait_ms(1000);
+
+	lcd.clear();
 	lcd << "2 cifras [5,25]";
 	wait_ms(1000);
-	uint8_t u8 =  dev::User_choose_number{lcd, keyboard}.pos(3, 1)
+	uint8_t u8 =  dev::user_choose_number_lineal(lcd, keyboard).pos(3, 1)
 					     .between(5, 25)
 					     .choose2(10);
 	lcd.cursor_pos(0,0);
@@ -78,13 +82,39 @@ void test_choose_number2()
 
 	lcd.clear();
 	lcd << "4 [2890, 2910]";
-	uint16_t u16  =  dev::User_choose_number{lcd, keyboard}.pos(3, 1)
+	uint16_t u16  =  dev::user_choose_number_lineal(lcd, keyboard).pos(3, 1)
 						 .between(2890, 2910)
 						 .choose4(2900);
 	lcd.cursor_pos(0,0);
 	lcd << "has elegido: " << u16;
 
 	wait_ms(1000);
+
+	lcd.clear();
+	lcd << "PRUEBA CIRCULAR";
+	wait_ms(1000);
+
+	lcd.clear();
+	lcd << "2 cifras [5,25]";
+	wait_ms(1000);
+	u8 =  dev::user_choose_number_circular(lcd, keyboard).pos(3, 1)
+					     .between(5, 25)
+					     .choose2(10);
+	lcd.cursor_pos(0,0);
+	lcd << "has elegido: " << static_cast<uint16_t>(u8);
+
+	wait_ms(1000);
+
+	lcd.clear();
+	lcd << "4 [2890, 2910]";
+	u16  =  dev::user_choose_number_circular(lcd, keyboard).pos(3, 1)
+						 .between(2890, 2910)
+						 .choose4(2900);
+	lcd.cursor_pos(0,0);
+	lcd << "has elegido: " << u16;
+
+	wait_ms(1000);
+
     }
 }
 
