@@ -52,6 +52,7 @@ void test_lcd4()
 	lcd.write_data_to_CG_or_DDRAM('?');
 	wait_ms(1000);
 
+
 	lcd.clear_display();
 	lcd.return_home();
 	print(lcd, "copiando esta fi");
@@ -112,6 +113,7 @@ void test_lcd4()
 	lcd.display_control(false, false, false);
 	wait_ms(1000);
 	lcd.display_control(true, false, false);
+	wait_ms(1000);
 	lcd.clear_display();
 	print(lcd, "Encendido?");
 	wait_ms(1000);

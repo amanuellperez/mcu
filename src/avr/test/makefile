@@ -1,4 +1,5 @@
 DIRS = ADC\
+	interrupt\
 	pin\
 	port\
 	timer0\
@@ -7,8 +8,7 @@ DIRS = ADC\
 	USART 
 
 # Revisar: no compilan
-#	interrupt\
-	SPI
+#	SPI
 
 include $(MCU_RECRULES)
 

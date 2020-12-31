@@ -41,8 +41,9 @@
  *	    
  *
  *   - HISTORIA:
- *           alp  - 27/07/2017 Pruebas iniciales.
- *		    22/01/2019 La migro a templates y defino macros.
+ *    A.Manuel L.Perez
+ *    27/07/2017 Pruebas iniciales.
+ *    22/01/2019 La migro a templates y defino macros.
  *
  ****************************************************************************/
 #include <avr/interrupt.h>

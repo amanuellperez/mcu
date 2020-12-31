@@ -164,6 +164,9 @@ public:
 
 
     /// Set entire display on/off, cursor on/off and blinking of cursor on/off
+    // display_on = false apaga el display. Esto lo único que hace es no
+    // mostrar en pantalla el mensaje correspondiente. El LCD sigue
+    // funcionando.
     void display_control(bool display_on, bool cursor_on, bool cursor_blink);
 
     /// Moves cursor or shift display.

@@ -1,7 +1,6 @@
 BIN = xx
 
-SOURCES= main.cpp \
-		 ../../avr_pin.cpp 
+SOURCES= main.cpp
 
 
 MCU = atmega328p
