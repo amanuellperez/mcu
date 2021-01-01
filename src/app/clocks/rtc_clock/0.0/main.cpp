@@ -49,11 +49,28 @@ void Main::init_rtc_clock()
 }
 
 
+
+void Main::window_set_time_first_time()
+{
+    RTC::Clock t;
+    rtc.read(t);
+
+    if (t == rtc.default_time())
+	window_set_time(t);
+}
+
+
 void Main::window_set_time()
 {
     RTC::Clock t;
     rtc.read(t);
 
+    window_set_time(t);
+}
+
+
+void Main::window_set_time(RTC::Clock& t)
+{
     atd::Generic_time<RTC::Clock> gt{t};
 
     lcd_.clear();
@@ -64,7 +81,6 @@ void Main::window_set_time()
     rtc.write(t);
 //    if (rtc.error())
 //	uart << "Error al intentar escribir la hora\n";
-
 }
 
 

@@ -77,7 +77,7 @@ inline constexpr bool operator!=(_LCD_HD44780_screen_flags a, int b)
 
 
 /*!
- *  \brief  Concebimos el LCD como una terminal normal y corrbente.
+ *  \brief  Concebimos el LCD como una terminal normal y corriente.
  *
  *  Esta clase nos permite concebir el LCD como un terminal o pantalla: vamos
  *  escribiendo, si llegamos al final de una línea introduce un retorno de
@@ -105,6 +105,7 @@ inline constexpr bool operator!=(_LCD_HD44780_screen_flags a, int b)
 template <uint8_t num_cols, uint8_t num_rows, typename LCD_HD44780>
 class LCD_HD44780_screen{
 public:
+// Init
     /// Conectamos el HD44780 con el interface 4 bits.
     LCD_HD44780_screen()
 	:x_{0}, y_{0}{}
@@ -112,6 +113,14 @@ public:
     // TODO: falta hacer el de 8 bits. Solo es añadir el constructor.
     // No lo añado porque no está probado ese interfaz. Cuando se pruebe,
     // añadirlo.
+
+//    /// Reinicializa el lcd. 
+//    /// Una forma de ahorrar energía es apagar el LCD y dormir el avr cuando
+//    /// no se vaya a usar. El problema al desconectar el LCD de alimentación
+//    /// es que hay que volverlo a inicializarlo. No es necesario configurar
+//    /// los pines del LCD ya que el avr solo lo hemos dormido.
+//    NO FUNCIONA!!! ???
+//    void reset() {lcd_.reset();}
 
 
 // FUNCIONES DE IMPRESIÓN

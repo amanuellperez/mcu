@@ -143,6 +143,13 @@ class LCD_HD44780{
 public:
     LCD_HD44780();
 
+//    /// Reinicializa el lcd. 
+//    /// Una forma de ahorrar energía es apagar el LCD y dormir el avr cuando
+//    /// no se vaya a usar. El problema al desconectar el LCD de alimentación
+//    /// es que hay que volverlo a inicializarlo. No es necesario configurar
+//    /// los pines del LCD ya que el avr solo lo hemos dormido.
+//    NO FUNCIONA!!!
+//    void reset() {setup();}
 
 // INSTRUCCIONES: TABLE 6, PAG. 24
     /// Clears entire display and sets DDRAM address 0 in address counter.

@@ -1,10 +1,11 @@
-DIRS = ADC\
+DIRS = ADC	\
 	interrupt\
-	pin\
-	port\
-	timer0\
-	timer1\
-	TWI\
+	pin		\
+	port	\
+	sleep	\
+	timer0	\
+	timer1	\
+	TWI		\
 	USART 
 
 # Revisar: no compilan

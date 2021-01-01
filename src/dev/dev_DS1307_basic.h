@@ -131,6 +131,22 @@ Oxtream& operator<<(Oxtream& out, const __DS1307_timekeeper& st0)
 }
 
 
+// CUIDADO: Solo comparo la hora y la fecha
+// Lo añado para poder comparar default_time con la hora que tiene el RTC.
+inline bool operator==(const __DS1307_timekeeper& a, 
+		       const __DS1307_timekeeper& b)
+{
+    return ((a.seconds == b.seconds) and (a.minutes == b.minutes) and
+            (a.hours == b.hours) and (a.date == b.date) and
+            (a.month == b.month) and (a.year == b.year));
+}
+
+
+inline bool operator!=(const __DS1307_timekeeper& a,
+                       const __DS1307_timekeeper& b)
+{return !(a == b);}
+
+
 
 // Control register
 struct __DS1307_control_register{
@@ -288,6 +304,9 @@ public:
     // para depurar
     State state() const {return state_;}
 
+// Valor inicial que toma el reloj cuando se inicializa
+    static Clock default_time();
+
 private:
     State state_;
 
@@ -371,8 +390,22 @@ inline void DS1307_basic<TWI_master>::output_square_wave_8kHz()
 template <typename TWI_master>
 inline void DS1307_basic<TWI_master>::output_square_wave_32kHz()
 { state_ = TWI::write(Control_register::output_square_wave_32kHz()); }
+// see page 8, datasheet
+template <typename TWI_master>
+inline DS1307_basic<TWI_master>::Clock DS1307_basic<TWI_master>::default_time()
+{
+    Clock res;
 
+    res.date    = 1;
+    res.month   = 1;
+    res.year    = 0;
 
+    res.hours   = 0;
+    res.minutes = 0;
+    res.seconds = 0;
+
+    return res;
+}
 
 }// namespace
 

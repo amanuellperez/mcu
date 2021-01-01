@@ -53,7 +53,9 @@ private:
     void show_window_main();
 
 // Window : set_time
+    void window_set_time_first_time();
     void window_set_time();
+    void window_set_time(RTC::Clock& t);
 
 // Helping functions
     void print(const RTC::Clock& t);

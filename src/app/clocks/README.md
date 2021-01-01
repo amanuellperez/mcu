@@ -88,10 +88,10 @@ podré opinar, aunque el RTC es de esperar que funcione bien). Al implementar
 este reloj ya se observa que en todo proyecto vamos a tener que tener que
 hacer mínimo 2 prototipos:
 
-1. [Prototipo breadboard](rtc_clock/rtc_clock_breadboard_v00.jpg):
+1. [Prototipo breadboard](rtc_clock/0.0/rtc_clock_breadboard_v00.jpg):
    Conectamos todo en la breadboard todo y vamos probando y programando todo.
 
-2. [Prototipo modular](rtc_clock/rtc_clock_proto_v00.jpg):
+2. [Prototipo modular](rtc_clock/0.0/rtc_clock_proto_v00.jpg):
    La idea es hacer un prototipo con el que poder experimentar. En este caso,
    como es un reloj, lo que quiero es dejar el reloj días o meses funcionando 
    para ver si retrasa o adelante. Si fuera un cambio un sensor para medir la

@@ -220,7 +220,7 @@ preprocesa:$(SOURCES)
 # el preprocesador (de que no tiene definido F_CPU...)
 %.d: %.cpp
 	@$(PRINTF) "Generando DEPENDENCIAS..."
-	@$(MAKE_DEPEND) $(CPPFLAGS) $(CXXFLAGS) $< > $@.$$$$;\
+	@$(MAKE_DEPEND) $(CXXFLAGS) $(CPPFLAGS) $(BIN_ARCH) $< > $@.$$$$;\
 	$(SED) 's/\($*\)\.o[ :]*/\1.o $@ : /g' < $@.$$$$ > $@; \
 	$(RM) $@.$$$$
 	@$(PRINTF) "\n"
