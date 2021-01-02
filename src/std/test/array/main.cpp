@@ -36,29 +36,31 @@ void test_array()
 
     mtd::array<int, 5> a = {4,5,6,7,8};
 
-    check_true(a.size() == 5, "size()");
+    CHECK_TRUE(a.size() == 5, "size()");
 
     a[0] = 1;
-    check_true(a[0] == 1, "operator[]");
+    CHECK_TRUE(a[0] == 1, "operator[]");
 
     for (size_t i = 0; i < a.size(); ++i)
 	a[i] = i + 1;
 
 
-    check_true(a[0] == a.front(), "front()");
-    check_true(a[a.size()-1] == a.back(), "back()");
+    CHECK_TRUE(a[0] == a.front(), "front()");
+    CHECK_TRUE(a[a.size()-1] == a.back(), "back()");
 
     // El estandar dice que esto debería de ser válido
 //    array<int,0> b;
-//    check_true(b.size() == 0, "size() vacio");
-//    check_true(b.empty() == true, "empty()");
+//    CHECK_TRUE(b.size() == 0, "size() vacio");
+//    CHECK_TRUE(b.empty() == true, "empty()");
 
-    check_true(a.begin() == &a[0], "begin()");
-    check_true(a.end() == &a[a.size()], "end()");
+    CHECK_TRUE(a.begin() == &a[0], "begin()");
+    CHECK_TRUE(a.end() == &a[a.size()], "end()");
 
 //    a.fill(10);
     
-
+    // Probamos deducción automática
+    mtd::array b = {2,3,4};
+    CHECK_TRUE(b[0] == 2, "deducción automática");
 }
 
 

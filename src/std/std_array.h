@@ -35,6 +35,7 @@
 #include "std_config.h"
 #include <stdlib.h>   // size_t
 #include <cstddef> // std::ptrdiff_t
+#include "std_type_traits.h"
 
 namespace STD{
 
@@ -121,7 +122,10 @@ struct array{
 };
 
 
-
+// deduction guides
+template <typename T, typename... U>
+array(T, U...) -> array<enable_if_t<(is_same_v<T, U> && ...), T>,
+			1 + sizeof...(U)>;
 
 }// namespace
 
