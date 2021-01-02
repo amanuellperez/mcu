@@ -1,5 +1,5 @@
-DIRS = basic_clock	\
-	   blink	\
+DIRS =  clocks 		\
+	   	blink		\
 		cost		\
 		eeprom_read	\
 		POV_toy

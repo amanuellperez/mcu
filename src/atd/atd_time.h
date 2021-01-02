@@ -161,6 +161,35 @@ inline bool is_valid_time(const std::tm& t)
  *	    Generic_time es lo que hace.
  */
 
+struct Generic_time_traits{
+    static constexpr int seconds_min = 0;
+    static constexpr int seconds_max = 59;
+
+    static constexpr int minutes_min = 0;
+    static constexpr int minutes_max = 59;
+
+    static constexpr int hours_min = 0;
+    static constexpr int hours_max = 23;
+
+    static constexpr int day_min = 1;
+    static constexpr int day_max = 31;
+
+    static constexpr int month_min = 1;
+    static constexpr int month_max = 12;
+
+    // (RRR) Empezamos en 0 para poder usar el array weekday_as_str
+    static constexpr int weekday_min = 0;
+    static constexpr int weekday_max = 6;
+
+    // TODO: Esto está en español. Es un locale. 
+    // Meterlo en un .cpp para que al compilar se pueda elegir el idioma
+    // de la aplicación.
+    static constexpr char weekday_as_str1[] = "DLMXJVS";
+    static constexpr char weekday_as_str2[] = "DoLuMaMiJuViSa";
+    static constexpr char weekday_as_str3[] = "DomLunMarMieJueVieSab";
+};
+
+
 // DUDA: ¿cómo llamarlo?
 // Generic_time_translator es el interfaz que suministra cada reloj indicando
 // cómo traducir de su idioma al idioma de Generic_time. Ver
@@ -192,6 +221,9 @@ public:
     int day() const   { return GT::day(t_); }
     int month() const { return GT::month(t_); }
     int year() const  { return GT::year(t_);}
+
+    // weekday = [0..6]
+    int weekday() const {return GT::weekday(t_);}
 
 private:
     const T& t_;
@@ -229,7 +261,10 @@ public:
     int year() const { return GT::year(t_);}
     void year(int y) { GT::year(t_, y);}
 
-//private:
+    int weekday() const {return GT::weekday(t_);}
+    void weekday(int wd) {GT::weekday(t_, wd);}
+
+private:
     T& t_;
 };
 
@@ -264,6 +299,16 @@ std::ostream& print_date(std::ostream& out, const const_Generic_time<T>& t, char
     return out;
 }
 
+
+
+template <typename T>
+std::ostream&
+print_weekday1(std::ostream& out, const const_Generic_time<T>& t)
+{
+    return out << Generic_time_traits::weekday_as_str1[t.weekday()];
+}
+
+
 // Versiones no const.
 // TODO: estas versiones sobran. Deberían de poder convertirse directamente el
 // Generic_time a const_Generic_time. Sin embargo, falla la deducción
@@ -282,6 +327,12 @@ print_date(std::ostream& out, const Generic_time<T>& t, char sep = '/')
     return print_date(out, const_Generic_time<T>{t}, sep);
 }
 
+template <typename T>
+std::ostream&
+print_weekday1(std::ostream& out, const Generic_time<T>& t)
+{
+    return print_weekday1(out, const_Generic_time<T>{t});
+}
 
 // Especialización para std::tm
 // ----------------------------
@@ -307,6 +358,11 @@ struct Generic_time_translator<std::tm>{
     /* tm_year = Year - 1900 */
     static int year(const std::tm& t) {return t.tm_year + 1900;}
     static void year(std::tm& t, int y) {t.tm_year = y - 1900;}
+
+    /* tm_wday = weekday */
+    static int weekday(const std::tm& t) {return t.tm_wday;}
+    static void weekday(std::tm& t, int wd) {t.tm_wday = wd;}
+
 };
 
 

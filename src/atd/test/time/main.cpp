@@ -144,6 +144,7 @@ void test_generic_time()
     t.tm_mday = 4;
     t.tm_mon = 5;
     t.tm_year = 6;
+    t.tm_wday = 3;
 
     atd::Generic_time<std::tm> gt{t};
     CHECK_TRUE(gt.seconds() == 1, "seconds");
@@ -152,6 +153,7 @@ void test_generic_time()
     CHECK_TRUE(gt.day() == 4, "day");
     CHECK_TRUE(gt.month() == 6, "month");
     CHECK_TRUE(gt.year() == 1906, "year");
+    CHECK_TRUE(gt.weekday() == 3, "weekday");
 
     gt.seconds(9);
     gt.minutes(8);
@@ -159,6 +161,7 @@ void test_generic_time()
     gt.day(10);
     gt.month(12);
     gt.year(2020);
+    gt.weekday(2);
 
     CHECK_TRUE(gt.seconds() == 9, "seconds");
     CHECK_TRUE(gt.minutes() == 8, "minutes");
@@ -166,6 +169,7 @@ void test_generic_time()
     CHECK_TRUE(gt.day() == 10, "day");
     CHECK_TRUE(gt.month() == 12, "month");
     CHECK_TRUE(gt.year() == 2020, "year");
+    CHECK_TRUE(gt.weekday() == 2, "weekday");
 
     CHECK_TRUE(t.tm_sec == 9, "tm_sec");
     CHECK_TRUE(t.tm_min == 8, "tm_min");
@@ -173,12 +177,15 @@ void test_generic_time()
     CHECK_TRUE(t.tm_mday == 10, "tm_mday");
     CHECK_TRUE(t.tm_mon == 11, "tm_mon");
     CHECK_TRUE(t.tm_year == 2020 - 1900, "tm_year");
+    CHECK_TRUE(t.tm_wday == 2, "tm_wday");
 
     std::cout << "check[";
     print_time(std::cout, gt);
     std::cout << "]: 07:08:09\n";
 
     std::cout << "check["; print_date(std::cout, gt); std::cout << "]: 10/02/2020\n";
+    std::cout << "check["; print_weekday1(std::cout, gt);
+    std::cout << "]: M\n";
 }
 
 

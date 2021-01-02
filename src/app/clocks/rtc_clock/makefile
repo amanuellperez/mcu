@@ -1,14 +1,6 @@
-BIN = xx
-
-SOURCES= main.cpp	\
-	main_run.cpp	\
-	twi.cpp
+DIRS =  0.0
 
 
-MCU = atmega328p
-
-include $(APP_GENRULES)
-
-
+include $(MCU_RECRULES)
 
 

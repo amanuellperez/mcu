@@ -28,15 +28,9 @@
  *  - HISTORIA:
  *    A.Manuel L.Perez
  *	02/11/2019 v0.0
+ *	02/01/2020 Reescrito.
  *
  ****************************************************************************/
-#include <stdint.h>
-
-#include <algorithm>
-#include <iterator>
-
-#include <atd_algorithm.h>  // find_c
-#include <atd_cstring.h>    // line_count
 #include <avr_time.h>
 
 #include "dev_keyboard.h"
@@ -53,15 +47,16 @@ namespace dev{
  *
  *  Ver el ejemplo del test para ver cómo usarlo.
  */
-template <typename LCD, typename Keyboard3>
+template <typename LCD, typename Keyboard3, typename Array>
 class User_choose_string{
 public:
+    using size_type = typename Array::size_type;
+
     /// Mostramos el número en el LCD e interaccionamos con el usuario via
     /// el teclado indicado.
-    /// El menu es una cadena de C, donde cada opción de menú viene separada
-    /// por '\n' (una línea = una opción).
-    /// Ejemplo: const char menu[] = "1. Uno\n2. Dos\n3. Tres\n4. Atrás"
-    User_choose_string(LCD& lcd, Keyboard3, const char* menu);
+    User_choose_string(LCD& lcd,
+                       Keyboard3,
+                       const Array& str);
 
     // Dejamos el LCD en el estado en que se encontraba.
     ~User_choose_string();
@@ -71,14 +66,14 @@ public:
     User_choose_string& rows(uint8_t n);
 
     /// Número de filas del menú que mostramos en el LCD.
-    uint8_t rows()  const {return num_rows_;}
+    uint8_t rows()  const {return rows_;}
 
     /// Número de columnas que mostramos en el display.
     /// precondition: n <= lcd.cols();
     User_choose_string& cols(uint8_t n);
 
     /// Número de columnas del menú que mostramos en el LCD.
-    uint8_t cols()  const {return num_cols_;}
+    uint8_t cols()  const {return cols_;}
 
     /// Posición dentro del LCD en el que empieza el menú.
     /// (x,y) = esquina superior izquierda donde empieza el menú.
@@ -86,10 +81,10 @@ public:
 
 
     /// Muestra el menu, mostrando como primera opción la indicada por
-    /// 'opcion_inicial'. 
+    /// 'first_option'. 
     /// Returns: la opción de menu elegida por el usuario (las opciones
     /// empiezan en la primera y no en cero).
-    uint8_t show(uint8_t opcion_inicial = 1);
+    uint8_t show(uint8_t first_option = 1);
 
 private:
 // Data
@@ -109,11 +104,7 @@ private:
 
 
     // Menu y opciones seleccionadas.
-    const char* menu_;	// cadena con el menu: "1.opcion\n2.opcion\n3.opcion"
-
-    // [op0, ope): opciones que mostramos en el LCD.
-    const char* op0_;   
-    const char* ope_; 
+    const Array str_;
 
     uint8_t y0_;    // Posición de la primera opción del  menu que mostramos 
 		    // en pantalla.
@@ -134,9 +125,9 @@ private:
     // Dimensiones del menú en el LCD (son las dimensiones de la ventana_menu)
     // -----------------------------------------------------------------------
     // número de filas que mostramos en el LCD <= lcd_.rows()
-    // Mostraremos las filas ym_, ym_ + 1, ..., ym_ + num_rows_ - 1
-    uint8_t num_rows_;	
-    uint8_t num_cols_;	
+    // Mostraremos las filas ym_, ym_ + 1, ..., ym_ + rows_ - 1
+    uint8_t rows_;	
+    uint8_t cols_;	
 
 
     // Estado del LCD antes
@@ -162,14 +153,14 @@ private:
     }
 
     // Muestra en el LCD el menu [p0, '\0'), colocando el cursor en (xm_, yr_)
-    void show(const char* p0);
+    void show_option(size_type i0);
 
     // Muestra por primera vez el menu en el LCD. Se encarga de inicializar
     // todas las variables de este objeto.
-    void show_menu_first_time(uint8_t opcion_inicial);
+    void show_str_first_time(uint8_t first_option);
 
 
-    enum class Redraw {nada, cursor, todo};
+    enum class Redraw {no, cursor, all};
 
     // Redibuja el LCD de acuerdo a redraw: puede no redraw nada, o solo
     // recolocar el cursor, o redrawlo todo.
@@ -186,28 +177,31 @@ private:
     // Mueve el cursor hacia arriba. Si está en la primera fila del lcd,
     // entonces mueve todo el lcd hacia arriba.
     Redraw lcd_up();
+    
 
+    // Los arrays de caracteres y los de cadenas los imprimimos 
+    // de forma diferente. La función print fusiona el interfaz.
+    void print(const char* p, uint8_t n);
+    void print(char p, uint8_t);
 
-// Funciones de ayuda genéricas
-    static const char* reverse_find(const char* op, const char* menu, char x);
 };
 
-
-template <typename LCD, typename Keyboard3>
-inline User_choose_string<LCD, Keyboard3>::User_choose_string(LCD& lcd, Keyboard3,
-	const char* menu)
-    : lcd_{lcd}, menu_{menu}, y0_{1}, xm_{lcd.cursor_pos_x()},
-      ym_{0}, yr_{0}
+template <typename LCD, typename Keyboard3, typename Array>
+inline User_choose_string<LCD, Keyboard3, Array>::User_choose_string(
+    LCD& lcd, Keyboard3, const Array& menu)
+    : lcd_{lcd}, str_{menu}, 
+      y0_{0}, 
+      xm_{lcd.cursor_pos_x()}, ym_{0}, yr_{0}
 {
-    num_rows_ = std::min<uint8_t>(lcd.rows(), atd::line_count(menu));
-    num_cols_ = lcd.cols();
+    rows_ = std::min<uint8_t>(lcd.rows(), menu.size());
+    cols_ = lcd.cols();
 
     init_LCD();
 }
 
 
-template <typename L, typename T>
-User_choose_string<L,T>::~User_choose_string()
+template <typename L, typename K, typename A>
+User_choose_string<L,K, A>::~User_choose_string()
 {
     if (!lcd_cursor_on_)
 	lcd_.cursor_off();
@@ -218,24 +212,24 @@ User_choose_string<L,T>::~User_choose_string()
 
 
 
-template <typename L, typename T>
-inline User_choose_string<L, T>& User_choose_string<L,T>::rows(uint8_t n)
+template <typename L, typename K, typename A>
+inline User_choose_string<L, K, A>& User_choose_string<L,K, A>::rows(uint8_t n)
 {
-    num_rows_ = n;
+    rows_ = n;
     return *this;
 }
 
 
-template <typename L, typename T>
-inline User_choose_string<L, T>& User_choose_string<L,T>::cols(uint8_t n)
+template <typename L, typename K, typename A>
+inline User_choose_string<L, K, A>& User_choose_string<L,K, A>::cols(uint8_t n)
 {
-    num_cols_ = n;
+    cols_ = n;
     return *this;
 }
 
 
-template <typename L, typename T>
-inline User_choose_string<L, T>& User_choose_string<L,T>::pos(uint8_t x, uint8_t y)
+template <typename L, typename K, typename A>
+inline User_choose_string<L, K, A>& User_choose_string<L,K, A>::pos(uint8_t x, uint8_t y)
 {
     xm_ = x;
     ym_ = y;
@@ -244,34 +238,20 @@ inline User_choose_string<L, T>& User_choose_string<L,T>::pos(uint8_t x, uint8_t
 
 
 
-template <typename L, typename T>
-void User_choose_string<L,T>::show_menu_first_time(uint8_t opcion_inicial)
+template <typename L, typename K, typename A>
+void User_choose_string<L,K, A>::show_str_first_time(uint8_t first_option)
 {
-    // opcion que mostramos
     yr_ = 0;
-    y0_ = opcion_inicial;
+    y0_ = first_option;
 
-    // Opciones que mostramos en el LCD: [opc0_, opce_)
-    op0_ = atd::find_c(menu_, '\n', opcion_inicial - 1u);
-    if (*op0_ == '\0'){
-	op0_ = menu_;
-	y0_ = 1;
-    }
-    else
-	++op0_;
-
-    ope_ = atd::find_c(op0_, '\n', rows());
-    if (*ope_ != '\0')	++ope_;
-
-
-    show(op0_);
+    show_option(y0_);
 }
 
 
-template <typename L, typename T>
-void User_choose_string<L,T>::lcd_move()
+template <typename L, typename K, typename A>
+void User_choose_string<L,K, A>::lcd_move()
 {
-    Redraw redraw = Redraw::nada;
+    Redraw redraw = Redraw::no;
 
     if (up_key().is_pressed())
 	redraw = lcd_up();
@@ -284,12 +264,12 @@ void User_choose_string<L,T>::lcd_move()
 
 
 
-template <typename L, typename T>
-uint8_t User_choose_string<L,T>::show(uint8_t opcion_inicial)
+template <typename L, typename K, typename A>
+uint8_t User_choose_string<L,K, A>::show(uint8_t first_option)
 {
     wait_ms(T_clock);	// Le damos tiempo al usuario a que suelte enter.
 
-    show_menu_first_time(opcion_inicial);
+    show_str_first_time(first_option);
 
     while (enter_key().is_not_pressed()){
 	lcd_move();
@@ -301,94 +281,84 @@ uint8_t User_choose_string<L,T>::show(uint8_t opcion_inicial)
 }
 
 
-template <typename L, typename T>
-void User_choose_string<L,T>::redibuja(Redraw redraw)
+template <typename L, typename K, typename A>
+void User_choose_string<L,K, A>::redibuja(Redraw redraw)
 {
-    if (redraw == Redraw::todo)
-	show(op0_);
+    if (redraw == Redraw::all)
+	show_option(y0_);
 
     else if (redraw == Redraw::cursor)
 	lcd_.cursor_pos(xm_, ym_ + yr_);
 }
 
+template <typename L, typename K, typename A>
+inline void User_choose_string<L,K, A>::print(const char* p, uint8_t n)
+{ lcd_.print_line_nowrap(p, cols()); }
 
-template <typename L, typename T>
-void User_choose_string<L,T>::show(const char* p)
+template <typename L, typename K, typename A>
+inline void User_choose_string<L,K, A>::print(char c, uint8_t)
+{ lcd_.print(c); }
+
+
+template <typename L, typename K, typename A>
+void User_choose_string<L,K, A>::show_option(size_type i0)
 {
-    for (uint8_t y = 0; y < rows() and *p != '\0'; ++y){
-	lcd_.cursor_pos(xm_, ym_ + y);
-	p = lcd_.print_line_nowrap(p, cols());
+    for (size_type i = 0; i < rows() and (i + i0 < str_.size()); ++i){
+	lcd_.cursor_pos(xm_, ym_ + i);
+	print(str_[i + i0], cols());
     }
 
     lcd_.cursor_pos(xm_, ym_ + yr_);
 }
 
-template <typename L, typename T>
-typename User_choose_string<L,T>::Redraw User_choose_string<L,T>::lcd_down()
+
+template <typename L, typename K, typename A>
+typename User_choose_string<L, K, A>::Redraw
+				    User_choose_string<L, K, A>::lcd_up()
 {
     if (yr_ < rows() - 1){
 	++yr_;
 	return Redraw::cursor;
     }
 
-    if (*ope_ == '\0')
-	return Redraw::nada;
-    else{
-	op0_ = atd::find_c(op0_, '\n');
-	ope_ = atd::find_c(ope_, '\n');
-
-	if (*op0_ != '\0') ++op0_;
-	if (*ope_ != '\0') ++ope_;
-
+    if (y0_ + yr_ < str_.size() - 1){
 	++y0_;
+	return Redraw::all;
     }
 
-    return Redraw::todo;
+    return Redraw::no;
+
 }
 
+
 // Devuelve true si hay que redraw el lcd.
-template <typename L, typename T>
-typename User_choose_string<L,T>::Redraw User_choose_string<L,T>::lcd_up()
+template <typename L, typename K, typename A>
+typename User_choose_string<L, K, A>::Redraw
+					User_choose_string<L, K, A>::lcd_down()
 {
     if (yr_ > 0){
 	--yr_;
 	return Redraw::cursor;
     }
 
-    if (op0_ == menu_)
-	return Redraw::nada;
-
-    else{
-	if (op0_ != menu_)
-	    op0_ = reverse_find(op0_, menu_, '\n');
-
-	if (ope_ != menu_)
-	    ope_ = reverse_find(ope_, menu_, '\n');
-
+    if (y0_ > 0){
 	--y0_;
+	return Redraw::all;
     }
 
-    return Redraw::todo;
+    return Redraw::no;
+
 }
 
-// precondicion: op != menu
-template <typename L, typename T>
-const char* User_choose_string<L,T>::reverse_find(const char* op, const char* menu, char x)
+
+
+// syntactic sugar
+template <typename LCD, typename Keyboard3, typename A>
+User_choose_string<LCD, Keyboard3, A> user_choose_string(
+    LCD& lcd, Keyboard3 k, const A& str)
+
 {
-    --op;   // *op == '\n'
-    --op;   // *op == anterior a '\n'
-
-    auto pe = std::reverse_iterator{menu};
-
-    auto res =
-        std::find(std::reverse_iterator{op}, pe, x);
-
-    if (res == pe)
-	return menu;
-
-    op = res.base(); // el base es el siguiente a '\n', que es lo que buscamos
-
-    return op;
+    return User_choose_string<LCD, Keyboard3, A>{lcd, k, str};
 }
 
 }// namespace

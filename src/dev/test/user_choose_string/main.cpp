@@ -16,12 +16,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 // Conectar el LCD y 3 pulsadores a los pines indicados
-#include "../../user_menu.h"
+#include "../../user_choose_string.h"
 #include "../../dev_LCD_HD44780.h"
 #include "../../dev_keyboard.h"
 
 #include <avr_time.h>
-
+#include <array>
 
 // pines que usamos
 // ----------------
@@ -52,7 +52,7 @@ using LCD_HD44780_1602_ostream = dev::LCD_HD44780_1602_ostream<LCD_HD44780>;
 using LCD_HD44780_2004_ostream = dev::LCD_HD44780_2004_ostream<LCD_HD44780>;
 
 
-constexpr const char menu_unidad_tiempo[] = "hora\nmin\nseg";
+constexpr std::array menu_unidad_tiempo = {"hora", "min", "seg"};
 
 
  
@@ -65,19 +65,54 @@ void test_lcd_menu()
 
     Keyboard keyboard;
 
-    const char* menu =
-        "1. Primera opcion, un rato larga\n"
-        "2. Segunda\n"
-        "3. Tercera opcion tambien larga\n"
-        "4. Cuarta\n"
-        "5. Quinta";
+    constexpr std::array menu ={
+	"0. cero",
+        "1. Primera opcion, un rato larga",
+        "2. Segunda",
+        "3. Tercera opcion tambien larga",
+        "4. Cuarta",
+        "5. Quinta"};
 
-    const char menu2[] = "seg\nmin\nhora\ndia";
+    constexpr std::array menu2 ={ "seg", "min", "hora", "dia"};
+
 
     while(1){
+
+	constexpr std::array days ={'D', 'L', 'M', 'X', 'J', 'V', 'S'};
+
 	lcd.clear();
 	lcd << "Elige: ";
-	uint8_t unidad = dev::User_menu{lcd.screen(), keyboard, menu_unidad_tiempo}
+	uint8_t day = dev::user_choose_string(lcd.screen(), keyboard, days)
+                         .rows(1)
+                         .cols(4)
+                         .pos(7, 1)
+                         .show(0);
+
+	lcd.clear();
+	lcd << "Seleccion: " << static_cast<uint16_t>(day);
+	wait_ms(1000);
+
+	constexpr std::array days2 ={"Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sa"};
+
+	lcd.clear();
+	lcd << "Elige: ";
+	uint8_t day2 = dev::user_choose_string(lcd.screen(), keyboard, days2)
+                         .rows(1)
+                         .cols(4)
+                         .pos(7, 1)
+                         .show(0);
+
+	lcd.clear();
+	lcd << "Seleccion: " << static_cast<uint16_t>(day2);
+	wait_ms(1000);
+
+
+
+
+
+	lcd.clear();
+	lcd << "Elige: ";
+	uint8_t unidad = dev::user_choose_string(lcd.screen(), keyboard, menu_unidad_tiempo)
                          .rows(1)
                          .cols(4)
                          .pos(7, 1)
@@ -90,7 +125,7 @@ void test_lcd_menu()
 	lcd.clear();
 	lcd << "Elige: ";
 	// uint16_t en lugar de uint8_t para poder imprimirlo en lcd <<.
-        uint16_t seleccion = dev::User_menu{lcd.screen(), keyboard, menu}
+        uint16_t seleccion = dev::user_choose_string(lcd.screen(), keyboard, menu)
                                  .rows(1)
                                  .cols(4)
                                  .pos(6, 1)
@@ -103,7 +138,7 @@ void test_lcd_menu()
 
 	lcd.clear();
 	lcd << "Elige: xxxx = unidades";
-        seleccion = dev::User_menu{lcd.screen(), keyboard, menu2}
+        seleccion = dev::user_choose_string(lcd.screen(), keyboard, menu2)
                                  .rows(1)
                                  .cols(4)
 				 .pos(7,0)
@@ -116,7 +151,7 @@ void test_lcd_menu()
 
 
 	lcd.clear();
-	seleccion = dev::User_menu{lcd.screen(), keyboard, menu}
+	seleccion = dev::user_choose_string(lcd.screen(), keyboard, menu)
 			    .rows(2)
 			    .pos(0, 1)
 			    .show(3);
@@ -127,9 +162,11 @@ void test_lcd_menu()
 
 	lcd.clear();
 	lcd << "Todo bien? ";
-	seleccion = dev::User_menu{lcd.screen(), keyboard, "si\nno"}.show(3);
+	constexpr std::array sino = {"si", "no"};
+        seleccion =
+            dev::User_choose_string(lcd.screen(), keyboard, sino).show(0);
 
-	lcd.clear();
+        lcd.clear();
 	lcd << "seleccion:\n" << seleccion;
 
 	wait_ms(1000);
