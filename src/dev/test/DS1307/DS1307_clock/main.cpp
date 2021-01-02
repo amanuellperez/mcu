@@ -106,7 +106,7 @@ void test_clock()
     t.year= 20;
 
 
-    rtc.init(t);
+    rtc.turn_on(t);
     if (rtc.error())
 	uart << "Error al intentar escribir la hora\n";
 

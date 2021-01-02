@@ -41,11 +41,16 @@ void Main::init_lcd()
 }
 
 
+// precondition: que el LCD esté funcionando. 
 void Main::init_rtc_clock()
 {
     RTC::Clock t;
-    rtc.read(t);    // valor inicial que trae por defecto el RTC
-    rtc.init(t);
+    rtc.read(t);    
+
+    if (!t.clock_on){
+	t.clock_on = true;
+	window_set_time(t);
+    }
 }
 
 
@@ -55,8 +60,6 @@ void Main::window_set_time_first_time()
     RTC::Clock t;
     rtc.read(t);
 
-    if (t == rtc.default_time())
-	window_set_time(t);
 }
 
 
@@ -76,11 +79,10 @@ void Main::window_set_time(RTC::Clock& t)
     lcd_.clear();
 
     dev::user_get_time(lcd_, keyboard_, gt, 0, 0);
+    rtc.write(t);
+
     wait_release_key();
 
-    rtc.write(t);
-//    if (rtc.error())
-//	uart << "Error al intentar escribir la hora\n";
 }
 
 

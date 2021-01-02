@@ -22,7 +22,7 @@
 
 void Main::run()
 {
-    window_set_time_first_time();
+    init_rtc_clock();
 
     while(1){
 	if (rtc.error())

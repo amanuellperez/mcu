@@ -95,7 +95,7 @@ public:
     using time_point = std::chrono::time_point<DS1307_clock, duration>;
     static constexpr bool is_steady = true;
 
-    void init(Clock& t);
+    void turn_on(Clock& t);
 
     // Be carefull: is more efficient to call read instead of 'now'.
     // now: first call read, then translate Clock to time_point.
@@ -113,7 +113,7 @@ public:
 
 // Para saber si ha ocurrido algún error mirar el estado del RTC.
 template <typename TWI>
-inline void DS1307_clock<TWI>::init(Clock& t) 
+inline void DS1307_clock<TWI>::turn_on(Clock& t) 
 {
     t.clock_on = true;
     this->write(t);
