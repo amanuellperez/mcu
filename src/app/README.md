@@ -4,4 +4,4 @@ Some applications.
 
 Algunas aplicaciones.
 
-* `clocks`: Diferentes tipos de relojes.
+* [clocks](clocks/README.md): Diferentes tipos de relojes.
