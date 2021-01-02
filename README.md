@@ -56,6 +56,6 @@ Este directorio lo descompongo de momento en los siguientes:
 
 * debug: Funciones para depurar los dispositivos. Compilarlo detrás de dev.
 
-* app: Aplicaciones
+* [app](src/app/README.md): Aplicaciones
 
 #### mk: Reglas para compilar
