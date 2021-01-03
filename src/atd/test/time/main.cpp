@@ -186,6 +186,8 @@ void test_generic_time()
     std::cout << "check["; print_date(std::cout, gt); std::cout << "]: 10/02/2020\n";
     std::cout << "check["; print_weekday1(std::cout, gt);
     std::cout << "]: M\n";
+    std::cout << "check["; print_weekday2(std::cout, gt);
+    std::cout << "]: Ma\n";
 }
 
 

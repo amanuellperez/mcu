@@ -44,7 +44,7 @@ void test_length()
 
 void test_cstring()
 {
-    test::header("const_cstring");
+    test::interfaz("const_cstring");
 
     constexpr const char* msg = "esto es una prueba";
 
@@ -62,6 +62,75 @@ void test_cstring()
     }
     
 }
+
+
+void test_nstring()
+{
+    test::interfaz("const_nstring");
+
+    constexpr const char* msg = "DoLuMaMiJuViSa";
+
+    constexpr atd::const_nstring s(&msg[2], 2);
+
+    CHECK_TRUE(s.length() == 2, "length");
+    CHECK_TRUE(s.data() == msg + 2, "data");
+
+    CHECK_EQUAL_CONTAINERS(&msg[2], &msg[4],
+			    s.begin(), s.end(), "begin/end");
+    {
+    std::stringstream res;
+    res << s;
+    CHECK_TRUE(res.str() == "Lu", "operator<<");
+    }
+    
+}
+
+void test_array_nstring()
+{
+    test::interfaz("Array_const_nstrings");
+
+    {
+    const char days_str[] = "DLMXJVS";
+
+    atd::Array_const_nstrings day{days_str, 1};
+    CHECK_TRUE(day.size() == 7, "size");
+
+    {
+    std::stringstream res;
+    res << day[2];
+    CHECK_TRUE(res.str() == "M", "operator[]");
+    }
+    }
+
+    {
+    const char days_str[] = "DoLuMaMiJuViSa";
+
+    atd::Array_const_nstrings day{days_str, 2};
+    CHECK_TRUE(day.size() == 7, "size");
+
+    {
+    std::stringstream res;
+    res << day[0];
+    CHECK_TRUE(res.str() == "Do", "operator[]");
+    }
+    }
+
+
+    {
+    const char days_str[] = "DomLunMarMieJueVieSab";
+
+    atd::Array_const_nstrings day{days_str, 3};
+    CHECK_TRUE(day.size() == 7, "size");
+
+    {
+    std::stringstream res;
+    res << day[6];
+    CHECK_TRUE(res.str() == "Sab", "operator[]");
+    }
+    }
+
+}
+
 
 void test_line_count(const char* s, size_t res)
 {
@@ -89,6 +158,8 @@ try{
 
     test_length();
     test_cstring();
+    test_nstring();
+    test_array_nstring();
     test_line_count();
 
 }catch(const std::exception& e)

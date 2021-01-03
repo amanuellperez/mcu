@@ -17,8 +17,8 @@
 
 #pragma once
 
-#ifndef __ATD_STRING_H__
-#define __ATD_STRING_H__
+#ifndef __ATD_CSTRING_H__
+#define __ATD_CSTRING_H__
 /****************************************************************************
  *
  *  - DESCRIPCION: Manejo de cadenas tipo C
@@ -28,6 +28,7 @@
  *  - HISTORIA:
  *    A.Manuel L.Perez
  *	16/11/2019 length, line_count, const_cstring
+ *	03/01/2020 const_nstring
  *
  ****************************************************************************/
 
@@ -63,19 +64,14 @@ inline constexpr std::size_t length(const char* str) noexcept
  *  prefiero const_cstring).
  *
  */
-class const_cstring{
+class const_cstring_base{
 public:
-    // tipos
+// types
     using size_type = std::size_t;
 
-    // constructor
-    // -----------
-    constexpr const_cstring(const char str[]) noexcept
-	: p_{str}, len_{atd::length(str)} {}
 
-
-    // iterators
-    // ---------
+// iterators
+// ---------
     /// Returns an iterator to the beginning.
     constexpr const char* begin() const noexcept {return p_;}
 
@@ -89,8 +85,8 @@ public:
     constexpr const char* cend() const noexcept {return p_ + len_;}
 
 
-    // element access
-    // --------------
+// element access
+// --------------
     /// Returns the character at position i.
     constexpr const char operator[](size_type i) const noexcept
     {return p_[i];}
@@ -100,27 +96,114 @@ public:
     {return p_;}
 
 
-    // capacity
-    // --------
+// capacity
+// --------
     /// Returns de number of characters.
     constexpr std::size_t length() const noexcept {return len_;}
 
     /// Returns de number of characters.
     constexpr std::size_t size() const noexcept {return length();}
 
+protected:
+// constructor
+// -----------
+    constexpr const_cstring_base(const char str[]) noexcept
+	: p_{str}, len_{atd::length(str)} {}
+
+    constexpr const_cstring_base(const char str[], size_type n) noexcept
+	: p_{str}, len_{n} {}
 
 private:
-    // datos
+// data
     const char* p_;
     std::size_t len_;
 };
 
-inline const char* begin(const const_cstring& s) {return s.begin();}
-inline const char* end(const const_cstring& s) {return s.end();}
+inline const char* begin(const const_cstring_base& s) {return s.begin();}
+inline const char* end(const const_cstring_base& s) {return s.end();}
 
+
+
+
+/*!
+ *  \brief  String tipo C
+ *
+ */
+class const_cstring : public const_cstring_base
+{
+public:
+    constexpr const_cstring(const char str[]) noexcept 
+	: const_cstring_base(str) { }
+};
 
 inline std::ostream& operator<<(std::ostream& out, const const_cstring& s)
 { return out << s.data(); }
+
+
+/*!
+ *  \brief String definida por el número de elementos.
+ *
+ *  (RRR) Cuando quiero darle a un usuario en un LCD la opción de elegir el
+ *        día de la semana, anoto todos los días en un array "DoLuMaMiJuViSa".
+ *        Para imprimir el "Ju" necesito pasar o bien dos punteros (apuntando
+ *        a 'J' y a la 'V') o bien un puntero y la longitud. const_nstring
+ *        implementa esta segunda opción.
+ *
+ */
+class const_nstring : public const_cstring_base
+{
+public:
+    constexpr const_nstring(const char str[], size_type n) noexcept 
+	: const_cstring_base(str, n) { }
+};
+
+inline std::ostream& operator<<(std::ostream& out, const const_nstring& s)
+{ 
+    for (auto x: s)
+	out << x;
+
+    return out;
+}
+
+
+/*!
+ *  \brief  Array de strings de longitud fija
+ *
+ *  Ejemplo: "DoLuMaMiJuViSa" es un array de 7 cadenas de longitud fija.
+ *  En lugar de definirlo como array {"Do", "Lu", ..., "Sa"} es más práctico
+ *  definirlo como una única cadena ya que esa lo podemos almacenar
+ *  directamente en la EEPROM del microcontrolador.
+ *
+ */
+class Array_const_nstrings{
+public:
+    using size_type = std::size_t;
+
+// Constructor
+    /// data: cadena de C con el array
+    /// row_size: longitud de cada elemento.
+    // Ejemplo: si data = "DoLuMaMiJuViSa", row_size == 2.
+    constexpr Array_const_nstrings(const char* data,
+                                   size_type row_size) noexcept
+        : data_{data}, row_size_{row_size}, 
+	  num_rows_{atd::length(data) / row_size}
+    { }
+
+    // Access
+    constexpr const_nstring operator[](size_type n) noexcept
+    {return const_nstring{&data_[n*row_size_], row_size_};}
+
+    constexpr const_nstring operator[](size_type n) const noexcept
+    {return const_nstring{&data_[n*row_size_], row_size_};}
+
+    constexpr size_type size() const {return num_rows_;}
+
+private:
+// Data
+    const char* data_;
+    size_type row_size_;
+    size_type num_rows_;
+};
 
 
 

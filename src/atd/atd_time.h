@@ -37,6 +37,8 @@
 #include <istream>
 #include <iomanip>
 
+#include "atd_cstring.h"    // const_nstring
+
 
 namespace atd{
 // Construcción
@@ -183,10 +185,15 @@ struct Generic_time_traits{
 
     // TODO: Esto está en español. Es un locale. 
     // Meterlo en un .cpp para que al compilar se pueda elegir el idioma
-    // de la aplicación.
+    // de la aplicación. 
+    // De hecho aunque los constexpr los debería de meter el compilador en la
+    // EEPROM no lo hace así. Hay que sacar todas estas constantes y
+    // definirlas en un fichero aparte que se pueda elegir si se quieren
+    // definir así o guardar en la EEPROM. Estas las vamos a cargar en memoria
+    // ya que el usuario tendrá que elegir el día de la semana.
     static constexpr char weekday_as_str1[] = "DLMXJVS";
     static constexpr char weekday_as_str2[] = "DoLuMaMiJuViSa";
-    static constexpr char weekday_as_str3[] = "DomLunMarMieJueVieSab";
+//   static constexpr char weekday_as_str3[] = "DomLunMarMieJueVieSab";
 };
 
 
@@ -309,6 +316,16 @@ print_weekday1(std::ostream& out, const const_Generic_time<T>& t)
 }
 
 
+template <typename T>
+std::ostream&
+print_weekday2(std::ostream& out, const const_Generic_time<T>& t)
+{
+    const_nstring day{&Generic_time_traits::weekday_as_str2[2*t.weekday()], 2};
+
+    return out << day;
+}
+
+
 // Versiones no const.
 // TODO: estas versiones sobran. Deberían de poder convertirse directamente el
 // Generic_time a const_Generic_time. Sin embargo, falla la deducción
@@ -316,23 +333,24 @@ print_weekday1(std::ostream& out, const const_Generic_time<T>& t)
 template <typename T>
 inline std::ostream&
 print_time(std::ostream& out, const Generic_time<T>& t, char sep = ':')
-{
-    return print_time(out, const_Generic_time<T>{t}, sep);
-}
+{ return print_time(out, const_Generic_time<T>{t}, sep); }
 
 template <typename T>
 inline std::ostream&
 print_date(std::ostream& out, const Generic_time<T>& t, char sep = '/')
-{
-    return print_date(out, const_Generic_time<T>{t}, sep);
-}
+{ return print_date(out, const_Generic_time<T>{t}, sep); }
 
 template <typename T>
 std::ostream&
 print_weekday1(std::ostream& out, const Generic_time<T>& t)
-{
-    return print_weekday1(out, const_Generic_time<T>{t});
-}
+{ return print_weekday1(out, const_Generic_time<T>{t}); }
+
+template <typename T>
+std::ostream&
+print_weekday2(std::ostream& out, const Generic_time<T>& t)
+{ return print_weekday2(out, const_Generic_time<T>{t}); }
+
+
 
 // Especialización para std::tm
 // ----------------------------
