@@ -28,7 +28,7 @@
  *  - HISTORIA:
  *    A.Manuel L.Perez
  *	02/11/2019 v0.0
- *	02/01/2020 Reescrito.
+ *	02/01/2020 v0.1 Reescrito.
  *
  ****************************************************************************/
 #include <avr_time.h>
@@ -36,6 +36,19 @@
 #include "dev_keyboard.h"
 
 namespace dev{
+
+// En los LCD se suele dar cols x rows (al contrario que en las matrices).
+// Seguiré con esa convención aquí.
+template <typename LCD_t,
+          typename Keyboard3_t,
+          uint8_t ncols, uint8_t nrows>
+struct User_choose_string_interface {
+    using LCD                     = LCD_t;
+    using Keyboard3               = Keyboard3_t;
+    static constexpr uint8_t rows = nrows;
+    static constexpr uint8_t cols = ncols;
+};
+
 
 /*!
  *  \brief  Muestra un menu en el LCD y permite seleccionar una opción via 
@@ -46,10 +59,22 @@ namespace dev{
  *	enter	: equivalente a enter o fin.
  *
  *  Ver el ejemplo del test para ver cómo usarlo.
+ *
+ *  Observaciones:
+ *	1. Al principio definía dinámicamente rows x cols. Sin embargo, al
+ *	   observar que estas dimensiones se tienen que conocer en tiempo de
+ *	   compilación reescribí la clase para poder pasarlas como parámetro
+ *	   de template. El test inicial, donde definía las rows x cols
+ *	   dinámicamente ocupaba 6954 bytes. Al definirlo en tiempo de
+ *	   compilación el mismo test paso a 6208 bytes, ahorrando 700 bytes.
+ *	   Da la impresión de que sí merece la pena.
  */
-template <typename LCD, typename Keyboard3, typename Array>
+template <typename Interface, typename Array>
 class User_choose_string{
 public:
+    using LCD	    = Interface::LCD;
+    using Keyboard3 = Interface::Keyboard3;
+
     using size_type = typename Array::size_type;
 
     /// Mostramos el número en el LCD e interaccionamos con el usuario via
@@ -61,19 +86,11 @@ public:
     // Dejamos el LCD en el estado en que se encontraba.
     ~User_choose_string();
 
-    /// Número de filas que mostramos en el display.
-    /// precondition: n <= lcd.rows();
-    User_choose_string& rows(uint8_t n);
-
     /// Número de filas del menú que mostramos en el LCD.
-    uint8_t rows()  const {return rows_;}
-
-    /// Número de columnas que mostramos en el display.
-    /// precondition: n <= lcd.cols();
-    User_choose_string& cols(uint8_t n);
+    constexpr uint8_t rows()  const {return rows_;}
 
     /// Número de columnas del menú que mostramos en el LCD.
-    uint8_t cols()  const {return cols_;}
+    constexpr uint8_t cols()  const {return cols_;}
 
     /// Posición dentro del LCD en el que empieza el menú.
     /// (x,y) = esquina superior izquierda donde empieza el menú.
@@ -126,8 +143,8 @@ private:
     // -----------------------------------------------------------------------
     // número de filas que mostramos en el LCD <= lcd_.rows()
     // Mostraremos las filas ym_, ym_ + 1, ..., ym_ + rows_ - 1
-    uint8_t rows_;	
-    uint8_t cols_;	
+    static constexpr uint8_t rows_ = Interface::rows;
+    static constexpr uint8_t cols_ = Interface::cols;
 
 
     // Estado del LCD antes
@@ -164,11 +181,12 @@ private:
 
     // Redibuja el LCD de acuerdo a redraw: puede no redraw nada, o solo
     // recolocar el cursor, o redrawlo todo.
-    void redibuja(Redraw redraw);
+    void redraw(Redraw type);
 
-    // Si el usuario pulsa up, mueve el lcd hacia arriba, y si pulsa down, lo
-    // mueve hacia abajo.
+    // ¿Qué hacer cuando el usuario pulsa up/down/ok? lcd_move decide.
     void lcd_move();
+    void lcd_move_foreward();
+    void lcd_move_backwards();
 
     // Mueve el cursor hacia abajo. Si está en la última fila del lcd,
     // entonces mueve todo el lcd hacia abajo.
@@ -186,22 +204,20 @@ private:
 
 };
 
-template <typename LCD, typename Keyboard3, typename Array>
-inline User_choose_string<LCD, Keyboard3, Array>::User_choose_string(
-    LCD& lcd, Keyboard3, const Array& menu)
-    : lcd_{lcd}, str_{menu}, 
+template <typename I, typename Array>
+inline User_choose_string<I, Array>::User_choose_string(
+    LCD& lcd, Keyboard3, const Array& str0)
+    : lcd_{lcd}, str_{str0}, 
       y0_{0}, 
       xm_{lcd.cursor_pos_x()}, ym_{0}, yr_{0}
 {
-    rows_ = std::min<uint8_t>(lcd.rows(), menu.size());
-    cols_ = lcd.cols();
 
     init_LCD();
 }
 
 
-template <typename L, typename K, typename A>
-User_choose_string<L,K, A>::~User_choose_string()
+template <typename I, typename A>
+User_choose_string<I, A>::~User_choose_string()
 {
     if (!lcd_cursor_on_)
 	lcd_.cursor_off();
@@ -212,24 +228,9 @@ User_choose_string<L,K, A>::~User_choose_string()
 
 
 
-template <typename L, typename K, typename A>
-inline User_choose_string<L, K, A>& User_choose_string<L,K, A>::rows(uint8_t n)
-{
-    rows_ = n;
-    return *this;
-}
 
-
-template <typename L, typename K, typename A>
-inline User_choose_string<L, K, A>& User_choose_string<L,K, A>::cols(uint8_t n)
-{
-    cols_ = n;
-    return *this;
-}
-
-
-template <typename L, typename K, typename A>
-inline User_choose_string<L, K, A>& User_choose_string<L,K, A>::pos(uint8_t x, uint8_t y)
+template <typename I, typename A>
+inline User_choose_string<I, A>& User_choose_string<I, A>::pos(uint8_t x, uint8_t y)
 {
     xm_ = x;
     ym_ = y;
@@ -238,8 +239,8 @@ inline User_choose_string<L, K, A>& User_choose_string<L,K, A>::pos(uint8_t x, u
 
 
 
-template <typename L, typename K, typename A>
-void User_choose_string<L,K, A>::show_str_first_time(uint8_t first_option)
+template <typename I, typename A>
+void User_choose_string<I, A>::show_str_first_time(uint8_t first_option)
 {
     yr_ = 0;
     y0_ = first_option;
@@ -248,24 +249,54 @@ void User_choose_string<L,K, A>::show_str_first_time(uint8_t first_option)
 }
 
 
-template <typename L, typename K, typename A>
-void User_choose_string<L,K, A>::lcd_move()
+// (RRR) Si dibujamos varias líneas, como en un menú, para seleccionar una
+//       al pulsar down quiero mover el cursor hacia abajo, esto es,
+//       incrementar el índice de la selección. Pero si solo muestro 1 línea
+//       al pulsar down lo que quiero es ir hacia atrás.
+template <typename I, typename A>
+void User_choose_string<I, A>::lcd_move()
 {
-    Redraw redraw = Redraw::no;
+    if constexpr (rows_ == 1)
+	lcd_move_foreward();
+    else
+	lcd_move_backwards();
+}
+
+
+template <typename I, typename A>
+void User_choose_string<I, A>::lcd_move_foreward()
+{
+    Redraw rdw = Redraw::no;
 
     if (up_key().is_pressed())
-	redraw = lcd_up();
+	rdw = lcd_up();
 
     else if (down_key().is_pressed())
-	redraw = lcd_down();
+	rdw = lcd_down();
 
-    redibuja(redraw);
+    redraw(rdw);
+}
+
+
+template <typename I, typename A>
+void User_choose_string<I, A>::lcd_move_backwards()
+{
+    Redraw rdw = Redraw::no;
+
+    if (up_key().is_pressed())
+	rdw = lcd_down();
+
+    else if (down_key().is_pressed())
+	rdw = lcd_up();
+
+    redraw(rdw);
 }
 
 
 
-template <typename L, typename K, typename A>
-uint8_t User_choose_string<L,K, A>::show(uint8_t first_option)
+
+template <typename I, typename A>
+uint8_t User_choose_string<I, A>::show(uint8_t first_option)
 {
     wait_ms(T_clock);	// Le damos tiempo al usuario a que suelte enter.
 
@@ -281,27 +312,27 @@ uint8_t User_choose_string<L,K, A>::show(uint8_t first_option)
 }
 
 
-template <typename L, typename K, typename A>
-void User_choose_string<L,K, A>::redibuja(Redraw redraw)
+template <typename I, typename A>
+void User_choose_string<I, A>::redraw(Redraw type)
 {
-    if (redraw == Redraw::all)
+    if (type == Redraw::all)
 	show_option(y0_);
 
-    else if (redraw == Redraw::cursor)
+    else if (type == Redraw::cursor)
 	lcd_.cursor_pos(xm_, ym_ + yr_);
 }
 
-template <typename L, typename K, typename A>
-inline void User_choose_string<L,K, A>::print(const char* p, uint8_t n)
+template <typename I, typename A>
+inline void User_choose_string<I, A>::print(const char* p, uint8_t n)
 { lcd_.print_line_nowrap(p, cols()); }
 
-template <typename L, typename K, typename A>
-inline void User_choose_string<L,K, A>::print(char c, uint8_t)
+template <typename I, typename A>
+inline void User_choose_string<I, A>::print(char c, uint8_t)
 { lcd_.print(c); }
 
 
-template <typename L, typename K, typename A>
-void User_choose_string<L,K, A>::show_option(size_type i0)
+template <typename I, typename A>
+void User_choose_string<I, A>::show_option(size_type i0)
 {
     for (size_type i = 0; i < rows() and (i + i0 < str_.size()); ++i){
 	lcd_.cursor_pos(xm_, ym_ + i);
@@ -312,9 +343,9 @@ void User_choose_string<L,K, A>::show_option(size_type i0)
 }
 
 
-template <typename L, typename K, typename A>
-typename User_choose_string<L, K, A>::Redraw
-				    User_choose_string<L, K, A>::lcd_up()
+template <typename I, typename A>
+typename User_choose_string<I, A>::Redraw
+				    User_choose_string<I, A>::lcd_up()
 {
     if (yr_ < rows() - 1){
 	++yr_;
@@ -332,9 +363,9 @@ typename User_choose_string<L, K, A>::Redraw
 
 
 // Devuelve true si hay que redraw el lcd.
-template <typename L, typename K, typename A>
-typename User_choose_string<L, K, A>::Redraw
-					User_choose_string<L, K, A>::lcd_down()
+template <typename I, typename A>
+typename User_choose_string<I, A>::Redraw
+					User_choose_string<I, A>::lcd_down()
 {
     if (yr_ > 0){
 	--yr_;
@@ -353,12 +384,17 @@ typename User_choose_string<L, K, A>::Redraw
 
 
 // syntactic sugar
-template <typename LCD, typename Keyboard3, typename A>
-User_choose_string<LCD, Keyboard3, A> user_choose_string(
-    LCD& lcd, Keyboard3 k, const A& str)
+template <uint8_t ncols, uint8_t nrows = 1, 
+	 typename LCD, typename Keyboard3, 
+	 typename Array>
+User_choose_string<User_choose_string_interface<LCD, Keyboard3, ncols, nrows>, 
+		   Array>
+user_choose_string(LCD& lcd, Keyboard3 k, const Array& str)
 
 {
-    return User_choose_string<LCD, Keyboard3, A>{lcd, k, str};
+    using Interface = User_choose_string_interface<LCD, Keyboard3,
+						   ncols, nrows>;
+    return User_choose_string<Interface, Array>{lcd, k, str};
 }
 
 }// namespace

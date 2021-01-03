@@ -82,9 +82,7 @@ void test_lcd_menu()
 
 	lcd.clear();
 	lcd << "Elige: ";
-	uint8_t day = dev::user_choose_string(lcd.screen(), keyboard, days)
-                         .rows(1)
-                         .cols(4)
+	uint8_t day = dev::user_choose_string<4>(lcd.screen(), keyboard, days)
                          .pos(7, 1)
                          .show(0);
 
@@ -96,9 +94,7 @@ void test_lcd_menu()
 
 	lcd.clear();
 	lcd << "Elige: ";
-	uint8_t day2 = dev::user_choose_string(lcd.screen(), keyboard, days2)
-                         .rows(1)
-                         .cols(4)
+	uint8_t day2 = dev::user_choose_string<4>(lcd.screen(), keyboard, days2)
                          .pos(7, 1)
                          .show(0);
 
@@ -112,9 +108,7 @@ void test_lcd_menu()
 
 	lcd.clear();
 	lcd << "Elige: ";
-	uint8_t unidad = dev::user_choose_string(lcd.screen(), keyboard, menu_unidad_tiempo)
-                         .rows(1)
-                         .cols(4)
+	uint8_t unidad = dev::user_choose_string<4>(lcd.screen(), keyboard, menu_unidad_tiempo)
                          .pos(7, 1)
                          .show(1);
 
@@ -125,9 +119,7 @@ void test_lcd_menu()
 	lcd.clear();
 	lcd << "Elige: ";
 	// uint16_t en lugar de uint8_t para poder imprimirlo en lcd <<.
-        uint16_t seleccion = dev::user_choose_string(lcd.screen(), keyboard, menu)
-                                 .rows(1)
-                                 .cols(4)
+        uint16_t seleccion = dev::user_choose_string<4>(lcd.screen(), keyboard, menu)
                                  .pos(6, 1)
                                  .show();
 
@@ -138,9 +130,7 @@ void test_lcd_menu()
 
 	lcd.clear();
 	lcd << "Elige: xxxx = unidades";
-        seleccion = dev::user_choose_string(lcd.screen(), keyboard, menu2)
-                                 .rows(1)
-                                 .cols(4)
+        seleccion = dev::user_choose_string<4>(lcd.screen(), keyboard, menu2)
 				 .pos(7,0)
                                  .show();
 
@@ -151,8 +141,7 @@ void test_lcd_menu()
 
 
 	lcd.clear();
-	seleccion = dev::user_choose_string(lcd.screen(), keyboard, menu)
-			    .rows(2)
+	seleccion = dev::user_choose_string<10,2>(lcd.screen(), keyboard, menu)
 			    .pos(0, 1)
 			    .show(3);
 
@@ -164,7 +153,17 @@ void test_lcd_menu()
 	lcd << "Todo bien? ";
 	constexpr std::array sino = {"si", "no"};
         seleccion =
-            dev::User_choose_string(lcd.screen(), keyboard, sino).show(0);
+            dev::user_choose_string<2,2>(lcd.screen(), keyboard, sino).show(0);
+
+        lcd.clear();
+	lcd << "seleccion:\n" << seleccion;
+
+	wait_ms(1000);
+
+	lcd.clear();
+	lcd << "Todo bien (2)? ";
+        seleccion =
+            dev::user_choose_string<2>(lcd.screen(), keyboard, sino).show(0);
 
         lcd.clear();
 	lcd << "seleccion:\n" << seleccion;
