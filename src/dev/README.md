@@ -1,8 +1,8 @@
-### WARNING: unstable library. Some of the files may not compile.
+# WARNING: unstable library. Some of the files may not compile.
 
-Drivers for some devices.
+Drivers for some devices. 
 
-Read the spanish description.
+Read the spanish description or look the directory `test`.
 
 TODO: write this in english xD
 
@@ -10,7 +10,7 @@ Tested: avr-gcc 9.2.0
 
 ---
 
-### ADVERTENCIA: Es inestable. Algunos de los ficheros puede que ni compilen.
+# ADVERTENCIA: Es inestable. Algunos de los ficheros puede que ni compilen.
 
 Dispositivos a los que accedemos desde el microcontrolador.
 
@@ -22,7 +22,7 @@ No los borro ya que con simples cambios seguramente se pueden actualizar.
 
 Los dispositivos que fijo que funcionan (por lo menos a día de hoy) son:
 
-### EEPROM 25LC256
+## EEPROM 25LC256
 
 Formado por varios ficheros:
 
@@ -43,7 +43,7 @@ out.close();
 
 
 
-### LCD HD44780
+## LCD HD44780
 
 Es el típico LCD 16 x 2 ó 20 x 4.
 
@@ -78,6 +78,28 @@ lcd.clear();
 lcd << "hola\n"; // escribo cadenas
 lcd << 25;       // escribo números
 ```
+
+### Tipos de LCDs
+
+La diferencia fundamental entre los LCDs son:
+1. El driver que usan. De momento el único que tengo implementado es el HD44780.
+2. El tamaño del display: 16 x 02 (2 filas x 16 columnas), 20 x 04, 40 x 04.
+3. El potencial al que trabajan: a 5V, a 3'3 V.
+4. El tipo de pantalla: puede estar iluminada o ser reflectante.
+5. El color. La mayoría son monocolores pero se pueden encontrar multicolores.
+   Además el fondo puede ser azul, verde...
+
+Algunas referencias:
+* 1602A: el típico que usa la gente de Arduino. Es de 16 x 02. Los hay a 5 V y
+  también a 3'3 V.
+* GFC1602M: de 16 x 02, a 5 V, pero reflectante.
+* 1602O: de 16 x 02, de 3'3 a 5 V, multicolor. El driver es el AIP31068, es
+  I2C (TWI).
+* 2004A: de 20 x 04. A 5 V.
+* 4004A: LCD de gran tamaño, de 40 x 04.
+
+En aliexpress se pueden encontrar los de la marca Surenoo. Desconozco si serán
+buenos, pero para aprender a manejarlos y jugar con ellos funcionan bien.
 
 
 
