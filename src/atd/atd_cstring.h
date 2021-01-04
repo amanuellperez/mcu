@@ -149,6 +149,7 @@ inline std::ostream& operator<<(std::ostream& out, const const_cstring& s)
  *        a 'J' y a la 'V') o bien un puntero y la longitud. const_nstring
  *        implementa esta segunda opción.
  *
+ *  DUDA: ¿esto no sería std::span? 
  */
 class const_nstring : public const_cstring_base
 {

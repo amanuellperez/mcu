@@ -25,38 +25,44 @@ using namespace test;
 
 
 
+constexpr char weekday_as_str1[] = "DLMXJVS";
+constexpr char weekday_as_str2[] = "DoLuMaMiJuViSa";
+
 void test_ostream()
 {
     test::interfaz("only_date/time - write");
 
-    tm t;
-    t.tm_mday = 25;
-    t.tm_mon = 10 - 1;
-    t.tm_year = 2112 - 1900;
-    t.tm_hour = 8;
-    t.tm_min = 16;
-    t.tm_sec = 2;
+    std::tm t;
+
+    atd::Generic_time<std::tm> gt{t};
+    gt.day(25);
+    gt.month(10);
+    gt.year(2112);
+    gt.hours(8);
+    gt.minutes(16);
+    gt.seconds(2);
+
 
     {
     std::stringstream str;
-    str << atd::only_date(t);
+    str << atd::only_date(gt);
     CHECK_TRUE(str.str() == "25/10/2112", "<< only_date");
     }
     {
     std::stringstream str;
-    str << atd::only_date(t, 'x');
+    str << atd::only_date(gt, 'x');
     CHECK_TRUE(str.str() == "25x10x2112", "<< only_date");
     }
 
     {
     std::stringstream str;
-    str << atd::only_time(t);
+    str << atd::only_time(gt);
     CHECK_TRUE(str.str() == "08:16:02", "<< only_time");
     }
 
     {
     std::stringstream str;
-    str << atd::only_time(t, '-');
+    str << atd::only_time(gt, '-');
     CHECK_TRUE(str.str() == "08-16-02", "<< only_time");
     }
 
@@ -65,7 +71,8 @@ void test_ostream()
 void test_only_date_input(const std::string& date, char sep, bool fail = false)
 {
     std::cout << "test: [" << date << "]\n";
-    tm t;
+    std::tm t;
+
     std::stringstream in;
     in << date;
     in >> atd::only_date(t, sep);
@@ -184,9 +191,9 @@ void test_generic_time()
     std::cout << "]: 07:08:09\n";
 
     std::cout << "check["; print_date(std::cout, gt); std::cout << "]: 10/02/2020\n";
-    std::cout << "check["; print_weekday1(std::cout, gt);
+    std::cout << "check["; print_weekday<1>(std::cout, gt, weekday_as_str1);
     std::cout << "]: M\n";
-    std::cout << "check["; print_weekday2(std::cout, gt);
+    std::cout << "check["; print_weekday<2>(std::cout, gt, weekday_as_str2);
     std::cout << "]: Ma\n";
 }
 

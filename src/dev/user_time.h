@@ -37,28 +37,32 @@
 #include <chrono>
 #include <atd_time.h>
 #include "user_choose_number.h"
+#include "user_choose_string.h"
 
 
 namespace dev{
 
-/// El usuario de la aplicación fija el tiempo a través de un teclado
-/// y un LCD.
-/// t0: parámetro de entrada/salida. De entrada es el tiempo inicial a mostrar
-/// en el LCD. De salida es el tiempo seleccionado por el usuario.
-// LCD: pantalla con acceso aleatorio (cursor_pos) e iostream (operator<<)
-// Keyboard: left, right, ok
+template <uint8_t names_length, typename LCD, typename Keyboard, typename Date_time>
+void user_get_weekday(LCD& lcd,
+                   Keyboard& key,
+                   atd::Generic_time<Date_time>& t,
+                   uint8_t x0, uint8_t y0,
+		   const char* names_weekday)
+{
+    t.weekday(user_choose_string<names_length>(lcd.screen(), key, 
+			atd::Array_const_nstrings{names_weekday, names_length})
+		.pos(x0, y0)
+		.show(t.weekday()));
+}
+
+
+
 template <typename LCD, typename Keyboard, typename Date_time>
-void user_get_time(LCD& lcd,
+void user_get_date(LCD& lcd,
                    Keyboard& key,
                    atd::Generic_time<Date_time>& t,
                    uint8_t x0, uint8_t y0)
 {
-    lcd.cursor_pos(x0, y0);
-    atd::print_date(lcd, t);
-
-    lcd.cursor_pos(x0, y0 + 1);
-    atd::print_time(lcd, t);
-
     t.day(user_choose_number_circular(lcd, key).pos(x0, y0)
 					.between(1, 31)
 					.choose2(t.day()));
@@ -69,50 +73,27 @@ void user_get_time(LCD& lcd,
 
     t.year(user_choose_number_circular(lcd, key).pos(x0 + 6, y0)
 					.choose4(t.year()));
+}
 
-    t.hours(user_choose_number_circular(lcd, key).pos(x0, y0 + 1)
+
+template <typename LCD, typename Keyboard, typename Date_time>
+void user_get_time(LCD& lcd,
+                   Keyboard& key,
+                   atd::Generic_time<Date_time>& t,
+                   uint8_t x0, uint8_t y0)
+{
+    t.hours(user_choose_number_circular(lcd, key).pos(x0, y0)
 					.max(23)
 					.choose2(t.hours()));
 
-    t.minutes(user_choose_number_circular(lcd, key).pos(x0 + 3, y0 + 1)
+    t.minutes(user_choose_number_circular(lcd, key).pos(x0 + 3, y0)
 					.max(59)
 					.choose2(t.minutes()));
 
-    t.seconds(user_choose_number_circular(lcd, key).pos(x0 + 6, y0 + 1)
+    t.seconds(user_choose_number_circular(lcd, key).pos(x0 + 6, y0)
 					.max(59)
 					.choose2(t.seconds()));
 
-}
-
-
-template <typename LCD, typename Keyboard>
-std::time_t user_get_time(
-    LCD& lcd, Keyboard& key, const std::time_t& t0, uint8_t x0, uint8_t y0)
-{
-    std::tm* mt = std::gmtime(&t0);
-    
-    atd::Generic_time<std::tm> t{*mt};
-    user_get_time(lcd, key, t, x0, y0);
-
-    return std::mktime(mt);
-}
-
-
-/// El usuario de la aplicación fija el tiempo a través de un teclado
-/// y un LCD.
-/// t0: parámetro de entrada/salida. De entrada es el tiempo inicial a mostrar
-/// en el LCD. De salida es el tiempo seleccionado por el usuario.
-// LCD: pantalla con acceso aleatorio (cursor_pos) e iostream (operator<<)
-// Keyboard: left, right, ok
-template <typename LCD, typename Keyboard, typename Clock, typename Duration>
-std::chrono::time_point<Clock, Duration> user_get_time(LCD& lcd,
-                                         Keyboard& key,
-                                         const std::chrono::time_point<Clock, Duration>& t0,
-                                         uint8_t x0, uint8_t y0)
-{
-    time_t t = std::chrono::system_clock::to_time_t(t0);
-    t = user_get_time(lcd, key, t, x0, y0);
-    return std::chrono::system_clock::from_time_t(t);
 }
 
 

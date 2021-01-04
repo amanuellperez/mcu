@@ -25,6 +25,7 @@
 #include "cfg.h"
 #include <dev_system_clock.h>
 #include <avr_time.h>
+#include <user_time.h>
 
 /*!
  *  \brief  Application.
@@ -53,8 +54,15 @@ private:
 // Window : set_time
     void window_set_time(System_clock::time_point t0);
 
-// Helping functions
+// print_time
     void print(const System_clock::time_point& t0);
+    void print_time(atd::Generic_time<std::tm> t, uint8_t x0, uint8_t y0);
+
+// get_time
+    void get_time(atd::Generic_time<std::tm> t, uint8_t x0, uint8_t y0);
+    std::time_t get_time(const std::time_t& t0, uint8_t x0, uint8_t y0);
+    System_clock::time_point user_get_time(const System_clock::time_point& t0,
+              uint8_t x0, uint8_t y0);
 };
 
 

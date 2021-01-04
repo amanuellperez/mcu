@@ -33,6 +33,8 @@
  ****************************************************************************/
 #include <avr_time.h>
 
+#include <atd_cstring.h>
+
 #include "dev_keyboard.h"
 
 namespace dev{
@@ -201,6 +203,7 @@ private:
     // de forma diferente. La función print fusiona el interfaz.
     void print(const char* p, uint8_t n);
     void print(char p, uint8_t);
+    void print(const atd::const_nstring&, uint8_t);
 
 };
 
@@ -330,6 +333,9 @@ template <typename I, typename A>
 inline void User_choose_string<I, A>::print(char c, uint8_t)
 { lcd_.print(c); }
 
+template <typename I, typename A>
+inline void User_choose_string<I, A>::print(const atd::const_nstring& str, uint8_t)
+{ lcd_.print_line_nowrap(str.data(), str.size()); }
 
 template <typename I, typename A>
 void User_choose_string<I, A>::show_option(size_type i0)

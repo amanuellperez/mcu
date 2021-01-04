@@ -48,16 +48,4 @@ void Main::show_window_main()
 }
 
 
-void Main::print(const System_clock::time_point& t0)
-{
-    std::time_t sec = System_clock::to_time_t(t0);
-    std::tm t;
-    ::gmtime_r(&sec, &t);
-
-    lcd_.cursor_pos(0,0);
-    lcd_ << atd::only_date(t);
-    lcd_.cursor_pos(0,1);
-    lcd_ << atd::only_time(t);
-}
-
 

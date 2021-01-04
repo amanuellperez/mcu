@@ -16,6 +16,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "main.h"
+#include "time.h"
 
 #include <user_time.h>
 
@@ -45,11 +46,12 @@ void Main::init_system_clock()
 }
 
 
+
 void Main::window_set_time(System_clock::time_point t0)
 {
     lcd_.clear();
 
-    t0 = dev::user_get_time(lcd_, keyboard_, t0, 0, 0);
+    t0 = user_get_time(t0, 0, 0);
     wait_release_key();
 
     System_clock::set(t0);

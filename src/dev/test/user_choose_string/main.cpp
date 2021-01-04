@@ -20,6 +20,8 @@
 #include "../../dev_LCD_HD44780.h"
 #include "../../dev_keyboard.h"
 
+#include <atd_cstring.h>    // nstring
+
 #include <avr_time.h>
 #include <array>
 
@@ -78,11 +80,13 @@ void test_lcd_menu()
 
     while(1){
 
-	constexpr std::array days ={'D', 'L', 'M', 'X', 'J', 'V', 'S'};
+//	constexpr std::array days ={'D', 'L', 'M', 'X', 'J', 'V', 'S'};
+	constexpr const char* days = "DLMXJVS";
 
 	lcd.clear();
 	lcd << "Elige: ";
-	uint8_t day = dev::user_choose_string<4>(lcd.screen(), keyboard, days)
+	uint8_t day = dev::user_choose_string<1>(lcd.screen(), keyboard, 
+		    atd::Array_const_nstrings{days, 1})
                          .pos(7, 1)
                          .show(0);
 
@@ -90,20 +94,19 @@ void test_lcd_menu()
 	lcd << "Seleccion: " << static_cast<uint16_t>(day);
 	wait_ms(1000);
 
-	constexpr std::array days2 ={"Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sa"};
+//	constexpr std::array days2 ={"Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sa"};
+	constexpr const char* days2 = "DoLuMaMiJuViSa";
 
 	lcd.clear();
 	lcd << "Elige: ";
-	uint8_t day2 = dev::user_choose_string<4>(lcd.screen(), keyboard, days2)
+	uint8_t day2 = dev::user_choose_string<2>(lcd.screen(), keyboard, 
+		    atd::Array_const_nstrings{days2, 2})
                          .pos(7, 1)
-                         .show(0);
+                         .show(2);
 
 	lcd.clear();
 	lcd << "Seleccion: " << static_cast<uint16_t>(day2);
 	wait_ms(1000);
-
-
-
 
 
 	lcd.clear();

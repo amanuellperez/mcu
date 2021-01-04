@@ -48,67 +48,6 @@ namespace atd{
 void reset(std::tm& t);
 
 
-// ---------------------
-// Manipulador only_date
-// ---------------------
-struct Only_date_no_const_ {
-    std::tm* t;
-    char separador;
-};
-
-struct Only_date_const_ {
-    const std::tm* t;
-    char separador;
-};
-
-inline Only_date_no_const_ only_date(std::tm& t, char separador = '/') 
-{return Only_date_no_const_{&t, separador};}
-
-inline Only_date_const_ only_date(const std::tm& t, char separador = '/') 
-{return Only_date_const_{&t, separador};}
-
-
-std::ostream& print(std::ostream& out, const Only_date_const_& d);
-
-inline std::ostream& operator<<(std::ostream& out, const Only_date_no_const_& d)
-{ return print(out, Only_date_const_{d.t, d.separador}); }
-
-inline std::ostream& operator<<(std::ostream& out, const Only_date_const_& d)
-{ return print(out, d); }
-
-
-std::istream& operator>>(std::istream& in, Only_date_no_const_ d);
-
-// ---------------------
-// Manipulador only_time
-// ---------------------
-struct Only_time_no_const_ {
-    std::tm* t;
-    char separador;
-};
-
-struct Only_time_const_ {
-    const std::tm* t;
-    char separador;
-};
-
-inline Only_time_no_const_ only_time(std::tm& t, char sep = ':') 
-{return Only_time_no_const_{&t, sep};}
-
-inline Only_time_const_ only_time(const std::tm& t, char sep = ':') 
-{return Only_time_const_{&t, sep};}
-
-
-std::ostream& print(std::ostream& out, const Only_time_const_& t);
-
-inline std::ostream& operator<<(std::ostream& out, const Only_time_no_const_& d)
-{return print(out, Only_time_const_{d.t, d.separador});}
-
-inline std::ostream& operator<<(std::ostream& out, const Only_time_const_& d)
-{return print(out, d);}
-
-std::istream& operator>>(std::istream& in, Only_time_no_const_ d);
-
 
 // Funciones de validación de fechas
 // ---------------------------------
@@ -182,18 +121,6 @@ struct Generic_time_traits{
     // (RRR) Empezamos en 0 para poder usar el array weekday_as_str
     static constexpr int weekday_min = 0;
     static constexpr int weekday_max = 6;
-
-    // TODO: Esto está en español. Es un locale. 
-    // Meterlo en un .cpp para que al compilar se pueda elegir el idioma
-    // de la aplicación. 
-    // De hecho aunque los constexpr los debería de meter el compilador en la
-    // EEPROM no lo hace así. Hay que sacar todas estas constantes y
-    // definirlas en un fichero aparte que se pueda elegir si se quieren
-    // definir así o guardar en la EEPROM. Estas las vamos a cargar en memoria
-    // ya que el usuario tendrá que elegir el día de la semana.
-    static constexpr char weekday_as_str1[] = "DLMXJVS";
-    static constexpr char weekday_as_str2[] = "DoLuMaMiJuViSa";
-//   static constexpr char weekday_as_str3[] = "DomLunMarMieJueVieSab";
 };
 
 
@@ -237,6 +164,8 @@ private:
 };
 
 
+// Observar que al internamente solo almacenar una referncia se puede pasar
+// por valor.
 // versión no const
 template <typename T>
 class Generic_time{
@@ -276,8 +205,11 @@ private:
 };
 
 
-
+// Funciones de impresión
+// ----------------------
 // El formato es español. Habría que definir locales para generalizarlo.
+// (???) Se podía meter lo que dependa en español en un fichero _es.tcc y
+// compilarlo condicionalmente.
 template <typename T>
 std::ostream&
 print_time(std::ostream& out, const const_Generic_time<T>& t, char sep = ':')
@@ -308,21 +240,15 @@ std::ostream& print_date(std::ostream& out, const const_Generic_time<T>& t, char
 
 
 
-template <typename T>
-std::ostream&
-print_weekday1(std::ostream& out, const const_Generic_time<T>& t)
+template <size_t weekdays_length, typename T>
+std::ostream& print_weekday(std::ostream& out,
+                            const const_Generic_time<T>& t,
+                            const char* weekdays)
 {
-    return out << Generic_time_traits::weekday_as_str1[t.weekday()];
-}
+    atd::Array_const_nstrings day{weekdays, weekdays_length};
+    out << day[t.weekday()];
 
-
-template <typename T>
-std::ostream&
-print_weekday2(std::ostream& out, const const_Generic_time<T>& t)
-{
-    const_nstring day{&Generic_time_traits::weekday_as_str2[2*t.weekday()], 2};
-
-    return out << day;
+    return out;
 }
 
 
@@ -340,15 +266,71 @@ inline std::ostream&
 print_date(std::ostream& out, const Generic_time<T>& t, char sep = '/')
 { return print_date(out, const_Generic_time<T>{t}, sep); }
 
-template <typename T>
+template <size_t weekdays_length, typename T>
 std::ostream&
-print_weekday1(std::ostream& out, const Generic_time<T>& t)
-{ return print_weekday1(out, const_Generic_time<T>{t}); }
+print_weekday(std::ostream& out, const Generic_time<T>& t, const char* weekdays)
+{
+    return 
+	print_weekday<weekdays_length>(out, const_Generic_time<T>{t}, weekdays);
+}
+
+
+// Manipuladores de impresión
+// --------------------------
+template <typename GenT>
+struct _Only_time{
+    _Only_time(GenT t0, char sep0)
+	: t{t0}, sep{sep0} {}
+
+    GenT t;
+    char sep;
+};
+
+// Bastaría con la versión const_Generic_time, pero no convierte de forma
+// automática Generic_time en const_Generic_time (???)
+template <typename T>
+inline _Only_time<Generic_time<T>> only_time(Generic_time<T> t, char sep = ':')
+{ return _Only_time<Generic_time<T>>{t, sep}; }
 
 template <typename T>
-std::ostream&
-print_weekday2(std::ostream& out, const Generic_time<T>& t)
-{ return print_weekday2(out, const_Generic_time<T>{t}); }
+inline _Only_time<const_Generic_time<T>> only_time(const_Generic_time<T> t,
+                                                   char sep = ':')
+{ return _Only_time<const_Generic_time<T>>{t, sep}; }
+
+template <typename T>
+inline std::ostream& operator<<(std::ostream& out, _Only_time<T> ot)
+{
+    print_time(out, ot.t, ot.sep);
+    return out;
+}
+
+
+template <typename GenT>
+struct _Only_date{
+    _Only_date(GenT t0, char sep0)
+	: t{t0}, sep{sep0} {}
+
+    GenT t;
+    char sep;
+};
+
+template <typename T>
+inline _Only_date<Generic_time<T>> only_date(Generic_time<T> t, char sep = '/')
+{ return _Only_date<Generic_time<T>>{t, sep}; }
+
+template <typename T>
+inline _Only_date<const_Generic_time<T>> only_date(const_Generic_time<T> t,
+                                                   char sep = '/')
+{ return _Only_date<const_Generic_time<T>>{t, sep}; }
+
+
+template <typename T>
+inline std::ostream& operator<<(std::ostream& out, _Only_date<T> ot)
+{
+    print_date(out, ot.t, ot.sep);
+    return out;
+}
+
 
 
 
@@ -382,6 +364,73 @@ struct Generic_time_translator<std::tm>{
     static void weekday(std::tm& t, int wd) {t.tm_wday = wd;}
 
 };
+
+// TODO: eliminar este a favor del manipulador de Generic_time.
+//       Para poder eliminarlo faltaría crear los operadores >> en
+//       Generic_time. ¿Merece la pena? ¿Los he usado alguna vez?
+// ---------------------
+// Manipulador only_date
+// ---------------------
+struct Only_date_no_const_ {
+    std::tm* t;
+    char separador;
+};
+
+struct Only_date_const_ {
+    const std::tm* t;
+    char separador;
+};
+
+inline Only_date_no_const_ only_date(std::tm& t, char sep= '/') 
+{return Only_date_no_const_{&t, sep};}
+
+inline Only_date_const_ only_date(const std::tm& t, char separador = '/') 
+{return Only_date_const_{&t, separador};}
+
+
+
+
+std::ostream& print(std::ostream& out, const Only_date_const_& d);
+
+inline std::ostream& operator<<(std::ostream& out, const Only_date_no_const_& d)
+{ return print(out, Only_date_const_{d.t, d.separador}); }
+
+inline std::ostream& operator<<(std::ostream& out, const Only_date_const_& d)
+{ return print(out, d); }
+
+
+std::istream& operator>>(std::istream& in, Only_date_no_const_ d);
+
+// ---------------------
+// Manipulador only_time
+// ---------------------
+struct Only_time_no_const_ {
+    std::tm* t;
+    char separador;
+};
+
+struct Only_time_const_ {
+    const std::tm* t;
+    char separador;
+};
+
+
+inline Only_time_no_const_ only_time(std::tm& t, char sep = ':') 
+{return Only_time_no_const_{&t, sep};}
+
+inline Only_time_const_ only_time(const std::tm& t, char sep = ':') 
+{return Only_time_const_{&t, sep};}
+
+
+std::ostream& print(std::ostream& out, const Only_time_const_& t);
+
+inline std::ostream& operator<<(std::ostream& out, const Only_time_no_const_& d)
+{return print(out, Only_time_const_{d.t, d.separador});}
+
+inline std::ostream& operator<<(std::ostream& out, const Only_time_const_& d)
+{return print(out, d);}
+
+std::istream& operator>>(std::istream& in, Only_time_no_const_ d);
 
 
 
