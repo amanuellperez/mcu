@@ -57,11 +57,11 @@ private:
 
 // print_time
     void print(const System_clock::time_point& t0);
-    void print_time(atd::Generic_time<std::tm> t, uint8_t x0, uint8_t y0);
+    void print(atd::Generic_time<std::tm> t, uint8_t x0, uint8_t y0);
 
 // get_time
-    void get_time(atd::Generic_time<std::tm> t, uint8_t x0, uint8_t y0);
-    std::time_t get_time(const std::time_t& t0, uint8_t x0, uint8_t y0);
+    void user_get_time(atd::Generic_time<std::tm> t, uint8_t x0, uint8_t y0);
+    std::time_t user_get_time(const std::time_t& t0, uint8_t x0, uint8_t y0);
     System_clock::time_point user_get_time(const System_clock::time_point& t0,
               uint8_t x0, uint8_t y0);
 };

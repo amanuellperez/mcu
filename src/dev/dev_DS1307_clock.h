@@ -62,6 +62,10 @@ struct Generic_time_translator<dev::__DS1307_timekeeper>{
     /* year = only 2 digits yy */
     static int year(const DS& t) {return t.year + 2000;}
     static void year(DS& t, int y) { t.year = static_cast<uint8_t>(y - 2000); }
+
+    /* day = [1..7] ==> weekday = day - 1 */
+    static int weekday(const DS& t) {return t.day - 1;}
+    static void weekday(DS&t, int wd) { t.day = wd + 1;}
 };
 
 }// namespace atd

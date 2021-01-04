@@ -48,20 +48,9 @@ void Main::show_window_main()
 {
     RTC::Clock t;
     rtc.read(t);
-    print(t);
+    print_time(atd::Generic_time<RTC::Clock>{t}, 0, 0);
 }
 
-
-void Main::print(const RTC::Clock& t)
-{
-    atd::const_Generic_time<RTC::Clock> gt{t};
-
-    lcd_.cursor_pos(0,0);
-    atd::print_date(lcd_, gt);
-
-    lcd_.cursor_pos(0,1);
-    atd::print_time(lcd_, gt);
-}
 
 
 void Main::error()

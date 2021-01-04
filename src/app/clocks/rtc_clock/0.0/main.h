@@ -25,6 +25,7 @@
 #include "cfg.h"
 #include <dev_system_clock.h>
 #include <avr_time.h>
+#include <user_time.h>
 
 /*!
  *  \brief  Application.
@@ -47,18 +48,19 @@ private:
     void init_lcd();
     void init_keyboard() { }
     void init_rtc_clock();
+    void init_time(RTC::Clock& t);
 
 // Window: main
     void window_main();
     void show_window_main();
 
 // Window : set_time
-    void window_set_time_first_time();
     void window_set_time();
     void window_set_time(RTC::Clock& t);
 
 // Helping functions
-    void print(const RTC::Clock& t);
+    void print_time(atd::Generic_time<RTC::Clock> t, uint8_t x0, uint8_t y0);
+    void user_get_time(atd::Generic_time<RTC::Clock> t, uint8_t x0, uint8_t y0);
 
     void error();
 };

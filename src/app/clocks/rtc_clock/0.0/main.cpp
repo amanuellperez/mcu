@@ -41,6 +41,23 @@ void Main::init_lcd()
 }
 
 
+void Main::init_time(RTC::Clock& t)
+{
+    atd::Generic_time<RTC::Clock> gt{t};
+
+    gt.day(1);
+    gt.month(1);
+    gt.year(2021);
+
+    gt.hours(12);
+    gt.minutes(0);
+    gt.seconds(0);
+
+    // Que no se olvide encenderlo!!!
+    t.clock_on =  true;
+}
+
+
 // precondition: que el LCD esté funcionando. 
 void Main::init_rtc_clock()
 {
@@ -48,19 +65,11 @@ void Main::init_rtc_clock()
     rtc.read(t);    
 
     if (!t.clock_on){
-	t.clock_on = true;
+	init_time(t);
 	window_set_time(t);
     }
 }
 
-
-
-void Main::window_set_time_first_time()
-{
-    RTC::Clock t;
-    rtc.read(t);
-
-}
 
 
 void Main::window_set_time()
@@ -78,7 +87,9 @@ void Main::window_set_time(RTC::Clock& t)
 
     lcd_.clear();
 
-    dev::user_get_time(lcd_, keyboard_, gt, 0, 0);
+    print_time(gt, 0, 0);
+    user_get_time(gt, 0, 0);
+
     rtc.write(t);
 
     wait_release_key();

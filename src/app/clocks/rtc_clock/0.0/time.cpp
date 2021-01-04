@@ -19,7 +19,7 @@
 #include "cfg.h"
 
 
-void Main::print(atd::Generic_time<std::tm> t, uint8_t x0, uint8_t y0)
+void Main::print_time(atd::Generic_time<RTC::Clock> t, uint8_t x0, uint8_t y0)
 {
     lcd_.cursor_pos(x0, y0);
     atd::print_date(lcd_, t);
@@ -32,49 +32,15 @@ void Main::print(atd::Generic_time<std::tm> t, uint8_t x0, uint8_t y0)
 }
 
 
-void Main::print(const System_clock::time_point& t0)
-{
-    std::time_t sec = System_clock::to_time_t(t0);
-    std::tm t;
-    ::gmtime_r(&sec, &t);
-
-    print(atd::Generic_time{t}, 0, 0);
-}
-
-
 // Decidimos cómo mostrar la fecha y la hora al usuario
-void Main::user_get_time(atd::Generic_time<std::tm> t, 
-	      uint8_t x0, uint8_t y0)
+void Main::user_get_time(atd::Generic_time<RTC::Clock> t, uint8_t x0, uint8_t y0)
 {
-    print(t, x0, y0);	
     dev::user_get_date(lcd_, keyboard_, t, x0, y0);
+    dev::user_get_weekday<week_days_length>(lcd_, keyboard_, t, 
+					    x0 + 9, y0 + 1,
+					    week_days);
     dev::user_get_time(lcd_, keyboard_, t, x0, y0 + 1);
-//    dev::user_get_weekday<week_days_length>(lcd_, keyboard_, t, 
-//					    x0 + 9, y0 + 1,
-//					    week_days);
-
 }
 
 
-std::time_t Main::user_get_time(const std::time_t& t0, uint8_t x0, uint8_t y0)
-{
-    std::tm mt;
-    ::gmtime_r(&t0, &mt);
-    
-    atd::Generic_time<std::tm> t{mt};
 
-    user_get_time(t, x0, y0);
-
-    return std::mktime(&mt);
-}
-
-
-System_clock::time_point Main::user_get_time(const System_clock::time_point& t0,
-              uint8_t x0, uint8_t y0)
-{
-    time_t t = std::chrono::system_clock::to_time_t(t0);
-
-    t = user_get_time(t, x0, y0);
-
-    return std::chrono::system_clock::from_time_t(t);
-}

@@ -23,6 +23,9 @@
 
 constexpr uint8_t time_wait_release_key = 100; // in ms
 
+// Dias de la semana
+constexpr const char* week_days = "DoLuMaMiJuViSa";
+constexpr const uint8_t week_days_length = 2;
 
 #endif
 
