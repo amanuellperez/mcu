@@ -5,7 +5,6 @@ SOURCES= main.cpp	\
 	system_clock.cpp\
 	time.cpp
 
-
 MCU = atmega328p
 
 include $(APP_GENRULES)

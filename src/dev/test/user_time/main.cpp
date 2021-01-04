@@ -172,7 +172,10 @@ void test_user_time()
             std::tm* t0 = std::gmtime(&t);
             lcd.cursor_pos(0, 0);
             lcd << "Escrito:" << atd::only_date(*t0) << ' '
-                << atd::only_time(*t0);
+                << atd::only_time(*t0)
+		<< " xx";
+//            atd::print_weekday<week_days_length>(
+//                lcd, atd::Generic_time<std::tm>{*t0}, week_days);
             wait_ms(4000);
         }
 

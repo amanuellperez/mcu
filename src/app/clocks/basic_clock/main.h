@@ -46,6 +46,7 @@ private:
     void init_lcd();
     void init_keyboard() { }
     void init_system_clock();
+    std::time_t init_time_t();
 
 // Window: main
     void window_main();

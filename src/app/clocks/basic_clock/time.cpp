@@ -50,22 +50,23 @@ void Main::get_time(atd::Generic_time<std::tm> t,
 
     dev::user_get_date(lcd_, keyboard_, t, x0, y0);
     dev::user_get_time(lcd_, keyboard_, t, x0, y0 + 1);
-    dev::user_get_weekday<week_days_length>(lcd_, keyboard_, t, 
-					    x0 + 9, y0 + 1,
-					    week_days);
+//    dev::user_get_weekday<week_days_length>(lcd_, keyboard_, t, 
+//					    x0 + 9, y0 + 1,
+//					    week_days);
 
 }
 
 
 std::time_t Main::get_time(const std::time_t& t0, uint8_t x0, uint8_t y0)
 {
-    std::tm* mt = std::gmtime(&t0);
+    std::tm mt;
+    ::gmtime_r(&t0, &mt);
     
-    atd::Generic_time<std::tm> t{*mt};
+    atd::Generic_time<std::tm> t{mt};
 
     get_time(t, x0, y0);
 
-    return std::mktime(mt);
+    return std::mktime(&mt);
 }
 
 
@@ -73,6 +74,7 @@ System_clock::time_point Main::user_get_time(const System_clock::time_point& t0,
               uint8_t x0, uint8_t y0)
 {
     time_t t = std::chrono::system_clock::to_time_t(t0);
+
     t = get_time(t, x0, y0);
 
     return std::chrono::system_clock::from_time_t(t);

@@ -5,6 +5,7 @@ DIRS = algorithm\
 	cmath		\
 	cstddef		\
 	cstdio		\
+	cstring		\
 	iostream	\
 	iterator	\
 	numeric		\

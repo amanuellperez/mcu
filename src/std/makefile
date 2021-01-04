@@ -31,6 +31,7 @@ INCS= std_cstdio.h		\
 	std_ostream.h		\
 	std_ratio.h			\
 	std_streambuf.h		\
+	std_cstring.h		\
 	std_string.h		\
 	std_tuple.h			\
 	std_type_traits.h	\
@@ -43,6 +44,7 @@ INCS= std_cstdio.h		\
 	cstddef 	\
 	cstdint		\
 	cstdlib		\
+	cstring		\
 	ctime		\
 	initializer_list	\
 	iomanip		\

@@ -19,6 +19,7 @@
 #include "time.h"
 
 #include <user_time.h>
+#include <cstring>  // memset
 
 Main::Main()
 {
@@ -37,12 +38,33 @@ void Main::init_lcd()
 }
 
 
+std::time_t Main::init_time_t()
+{
+    std::tm mt;
+    std::memset(&mt, 0, sizeof(std::tm)); // fundamental inicializarlo todo
+
+    atd::Generic_time<std::tm> gt{mt};
+
+    gt.day(1);
+    gt.month(1);
+    gt.year(2021);
+
+    gt.hours(12);
+    gt.minutes(0);
+    gt.seconds(0);
+
+    return std::mktime(&mt);
+}
+
+
 void Main::init_system_clock()
 {
     System_clock::init<system_clock_timer_period_in_us>();
 
-    System_clock::time_point t0;    // = zero
-    window_set_time(t0);
+    time_t t0 = init_time_t();
+    System_clock::time_point t = std::chrono::system_clock::from_time_t(t0);
+
+    window_set_time(t);
 }
 
 
