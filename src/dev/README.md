@@ -88,8 +88,11 @@ La diferencia fundamental entre los LCDs son:
 4. El tipo de pantalla: puede estar iluminada o ser reflectante.
 5. El color. La mayoría son monocolores pero se pueden encontrar multicolores.
    Además el fondo puede ser azul, verde...
+6. El tipo de caracteres que trae: puede ser inglés/japonés; inglés/europeo y
+   hay más (ruso por ejemplo).
 
-Algunas referencias:
+
+### Algunas referencias:
 * 1602A: el típico que usa la gente de Arduino. Es de 16 x 02. Los hay a 5 V y
   también a 3'3 V.
 * GFC1602M: de 16 x 02, a 5 V, pero reflectante.
@@ -99,7 +102,9 @@ Algunas referencias:
 * 4004A: LCD de gran tamaño, de 40 x 04.
 
 En aliexpress se pueden encontrar los de la marca Surenoo. Desconozco si serán
-buenos, pero para aprender a manejarlos y jugar con ellos funcionan bien.
+buenos, pero para aprender a manejarlos y jugar con ellos funcionan bien. Son
+bastante más baratos que los que vende Amazon, además que en Amazon no te
+indican ninguna característica con lo que no sabes lo que estas comprando. 
 
 
 
