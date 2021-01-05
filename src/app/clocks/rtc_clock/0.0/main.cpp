@@ -41,9 +41,9 @@ void Main::init_lcd()
 }
 
 
-void Main::init_time(RTC::Clock& t)
+void Main::init_time(RTC::Time_point& t)
 {
-    atd::Generic_time<RTC::Clock> gt{t};
+    atd::Generic_time<RTC::Time_point> gt{t};
 
     gt.day(1);
     gt.month(1);
@@ -61,7 +61,7 @@ void Main::init_time(RTC::Clock& t)
 // precondition: que el LCD esté funcionando. 
 void Main::init_rtc_clock()
 {
-    RTC::Clock t;
+    RTC::Time_point t;
     rtc.read(t);    
 
     if (!t.clock_on){
@@ -74,16 +74,16 @@ void Main::init_rtc_clock()
 
 void Main::window_set_time()
 {
-    RTC::Clock t;
+    RTC::Time_point t;
     rtc.read(t);
 
     window_set_time(t);
 }
 
 
-void Main::window_set_time(RTC::Clock& t)
+void Main::window_set_time(RTC::Time_point& t)
 {
-    atd::Generic_time<RTC::Clock> gt{t};
+    atd::Generic_time<RTC::Time_point> gt{t};
 
     lcd_.clear();
 

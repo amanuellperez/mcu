@@ -140,7 +140,7 @@ void test_clock()
 // init_rtc();
     RTC rtc;
 
-    RTC::Clock t;
+    RTC::Time_point t;
     t.seconds = 55;
     t.minutes = 59;
 //    t.AMPM_format = true;
@@ -195,7 +195,7 @@ void test_bateria()
 // init_rtc();
     RTC rtc;
 
-    RTC::Clock t;
+    RTC::Time_point t;
     t.seconds = 55;
     t.minutes = 59;
 //    t.AMPM_format = true;
@@ -306,7 +306,7 @@ void test_output()
 
     RTC rtc;
 
-    RTC::Clock t;
+    RTC::Time_point t;
     t.seconds = 55;
     t.minutes = 59;
     t.hours   = 23;

@@ -45,7 +45,7 @@ using RTC = dev::DS1307_clock<TWI>;
 // del DS1307.h!!! ¿por qué? Debería de coger la función más especializada.
 // Con todo con concepts este problema debería de desaparecer ya que la
 // template quedaría sobrecargada solo para IOxtreams.
-avr::UART_iostream& print(avr::UART_iostream& out, const RTC::Clock& t)
+avr::UART_iostream& print(avr::UART_iostream& out, const RTC::Time_point& t)
 {
     if (t.clock_on){
 	out << "Encendido: "
@@ -94,7 +94,7 @@ void test_clock()
 // init_rtc();
     RTC rtc;
 
-    RTC::Clock t;
+    RTC::Time_point t;
 
     t.hours = 16;
     t.minutes = 44;
@@ -112,7 +112,7 @@ void test_clock()
 
 
     while (1){
-	atd::Generic_time<RTC::Clock> gt{t};
+	atd::Generic_time<RTC::Time_point> gt{t};
 
 	rtc.read(t);
 	print(uart, t)  << '\n';

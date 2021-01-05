@@ -48,7 +48,7 @@ private:
     void init_lcd();
     void init_keyboard() { }
     void init_rtc_clock();
-    void init_time(RTC::Clock& t);
+    void init_time(RTC::Time_point& t);
 
 // Window: main
     void window_main();
@@ -56,11 +56,11 @@ private:
 
 // Window : set_time
     void window_set_time();
-    void window_set_time(RTC::Clock& t);
+    void window_set_time(RTC::Time_point& t);
 
 // Helping functions
-    void print_time(atd::Generic_time<RTC::Clock> t, uint8_t x0, uint8_t y0);
-    void user_get_time(atd::Generic_time<RTC::Clock> t, uint8_t x0, uint8_t y0);
+    void print_time(atd::Generic_time<RTC::Time_point> t, uint8_t x0, uint8_t y0);
+    void user_get_time(atd::Generic_time<RTC::Time_point> t, uint8_t x0, uint8_t y0);
 
     void error();
 };

@@ -46,9 +46,9 @@ void Main::window_main()
 
 void Main::show_window_main()
 {
-    RTC::Clock t;
+    RTC::Time_point t;
     rtc.read(t);
-    print_time(atd::Generic_time<RTC::Clock>{t}, 0, 0);
+    print_time(atd::Generic_time<RTC::Time_point>{t}, 0, 0);
 }
 
 

@@ -22,7 +22,7 @@
 #define __DEV_DS1307_CLOCK_H__
 /****************************************************************************
  *
- *  - DESCRIPCION: Clock bases on DS1307
+ *  - DESCRIPCION: Time_point bases on DS1307
  *
  *  - COMENTARIOS: 
  *
@@ -89,7 +89,7 @@ template <typename TWI_master>
 class DS1307_clock : public DS1307_basic<TWI_master> {
 public:
 // From DS1307_basic
-    using Clock = DS1307_basic<TWI_master>::Clock;
+    using Time_point = DS1307_basic<TWI_master>::Time_point;
 
 // As a clock
     using duration  = std::chrono::seconds; 
@@ -99,25 +99,25 @@ public:
     using time_point = std::chrono::time_point<DS1307_clock, duration>;
     static constexpr bool is_steady = true;
 
-    void turn_on(Clock& t);
+    void turn_on(Time_point& t);
 
     // Be carefull: is more efficient to call read instead of 'now'.
-    // now: first call read, then translate Clock to time_point.
+    // now: first call read, then translate Time_point to time_point.
     time_point now() noexcept;
 
     // Map to C API
     static time_t to_time_t(const time_point& t) noexcept;
     static time_point from_time_t(time_t t) noexcept;
 
-    static time_t to_time_t(const Clock& t);
-    static std::tm to_tm(const Clock& t);
+    static time_t to_time_t(const Time_point& t);
+    static std::tm to_tm(const Time_point& t);
 
 };
 
 
 // Para saber si ha ocurrido algún error mirar el estado del RTC.
 template <typename TWI>
-inline void DS1307_clock<TWI>::turn_on(Clock& t) 
+inline void DS1307_clock<TWI>::turn_on(Time_point& t) 
 {
     t.clock_on = true;
     this->write(t);
@@ -129,7 +129,7 @@ inline void DS1307_clock<TWI>::turn_on(Clock& t)
 template <typename TWI>
 inline DS1307_clock<TWI>::time_point DS1307_clock<TWI>::now() noexcept
 {
-    Clock t;
+    Time_point t;
     this->read(t); // no compila sin el 'this' (error: unqualified lookup @_@)
 
     return time_point{duration{to_time_t(t)}};
@@ -137,7 +137,7 @@ inline DS1307_clock<TWI>::time_point DS1307_clock<TWI>::now() noexcept
 
 
 template <typename TWI>
-std::tm DS1307_clock<TWI>::to_tm(const Clock& t)
+std::tm DS1307_clock<TWI>::to_tm(const Time_point& t)
 {
     std::tm res;
 
@@ -155,7 +155,7 @@ std::tm DS1307_clock<TWI>::to_tm(const Clock& t)
 
 
 template <typename TWI>
-inline time_t DS1307_clock<TWI>::to_time_t(const Clock& t0)
+inline time_t DS1307_clock<TWI>::to_time_t(const Time_point& t0)
 {
     std::tm tm0 = to_tm(t0);
     return ::mktime(&tm0);

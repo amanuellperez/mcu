@@ -19,7 +19,7 @@
 #include "cfg.h"
 
 
-void Main::print_time(atd::Generic_time<RTC::Clock> t, uint8_t x0, uint8_t y0)
+void Main::print_time(atd::Generic_time<RTC::Time_point> t, uint8_t x0, uint8_t y0)
 {
     lcd_.cursor_pos(x0, y0);
     atd::print_date(lcd_, t);
@@ -33,7 +33,7 @@ void Main::print_time(atd::Generic_time<RTC::Clock> t, uint8_t x0, uint8_t y0)
 
 
 // Decidimos cómo mostrar la fecha y la hora al usuario
-void Main::user_get_time(atd::Generic_time<RTC::Clock> t, uint8_t x0, uint8_t y0)
+void Main::user_get_time(atd::Generic_time<RTC::Time_point> t, uint8_t x0, uint8_t y0)
 {
     dev::user_get_date(lcd_, keyboard_, t, x0, y0);
     dev::user_get_weekday<week_days_length>(lcd_, keyboard_, t, 

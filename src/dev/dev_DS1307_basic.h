@@ -257,18 +257,18 @@ public:
     static_assert(TWI_master::buffer_size >= TWI_buffer_size);
 
 // Types
-    using TWI   = TWI_memory_type<TWI_master, slave_address>;
-    using State = TWI::iostate;
-    using Clock  = __DS1307_timekeeper;
+    using TWI              = TWI_memory_type<TWI_master, slave_address>;
+    using State            = TWI::iostate;
+    using Time_point       = __DS1307_timekeeper;
     using Control_register = __DS1307_control_register;
 
 
 // Clock reading & writing
     /// Lectura del reloj
-    void read(Clock& t) {state_ = TWI::read(t);}
+    void read(Time_point& t) {state_ = TWI::read(t);}
 
     /// Escritura en el reloj.
-    void write(const Clock& t) { state_ = TWI::write(t); }
+    void write(const Time_point& t) { state_ = TWI::write(t); }
 
 // RAM access
     /// Leemos ram[i... i + n) guardándolo en buf.
@@ -305,7 +305,7 @@ public:
     State state() const {return state_;}
 
 // Valor inicial que toma el reloj cuando se inicializa
-    static Clock default_time();
+    static Time_point default_time();
 
 private:
     State state_;
@@ -392,9 +392,9 @@ inline void DS1307_basic<TWI_master>::output_square_wave_32kHz()
 { state_ = TWI::write(Control_register::output_square_wave_32kHz()); }
 // see page 8, datasheet
 template <typename TWI_master>
-inline DS1307_basic<TWI_master>::Clock DS1307_basic<TWI_master>::default_time()
+inline DS1307_basic<TWI_master>::Time_point DS1307_basic<TWI_master>::default_time()
 {
-    Clock res;
+    Time_point res;
 
     res.date    = 1;
     res.month   = 1;
