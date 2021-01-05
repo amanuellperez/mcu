@@ -39,6 +39,11 @@
 
 namespace dev{
 
+
+// Tipos 
+constexpr int user_choose_string_type_lineal   = 0;
+constexpr int user_choose_string_type_circular = 1;
+
 // En los LCD se suele dar cols x rows (al contrario que en las matrices).
 // Seguiré con esa convención aquí.
 template <typename LCD_t,
@@ -71,9 +76,15 @@ struct User_choose_string_interface {
  *	   compilación el mismo test paso a 6208 bytes, ahorrando 700 bytes.
  *	   Da la impresión de que sí merece la pena.
  */
-template <typename Interface, typename Array>
+template <typename Interface, typename Array, int type0>
 class User_choose_string{
 public:
+    static_assert(type0 == user_choose_string_type_lineal or 
+		  type0 == user_choose_string_type_circular, 
+		  "incorrect user_choose_string_type");
+
+    static constexpr int type = type0; // lineal o circular
+
     using LCD	    = Interface::LCD;
     using Keyboard3 = Interface::Keyboard3;
 
@@ -207,8 +218,8 @@ private:
 
 };
 
-template <typename I, typename Array>
-inline User_choose_string<I, Array>::User_choose_string(
+template <typename I, typename Array, int t>
+inline User_choose_string<I, Array, t>::User_choose_string(
     LCD& lcd, Keyboard3, const Array& str0)
     : lcd_{lcd}, str_{str0}, 
       y0_{0}, 
@@ -219,8 +230,8 @@ inline User_choose_string<I, Array>::User_choose_string(
 }
 
 
-template <typename I, typename A>
-User_choose_string<I, A>::~User_choose_string()
+template <typename I, typename A, int t>
+User_choose_string<I, A, t>::~User_choose_string()
 {
     if (!lcd_cursor_on_)
 	lcd_.cursor_off();
@@ -232,8 +243,8 @@ User_choose_string<I, A>::~User_choose_string()
 
 
 
-template <typename I, typename A>
-inline User_choose_string<I, A>& User_choose_string<I, A>::pos(uint8_t x, uint8_t y)
+template <typename I, typename A, int t>
+inline User_choose_string<I, A, t>& User_choose_string<I, A, t>::pos(uint8_t x, uint8_t y)
 {
     xm_ = x;
     ym_ = y;
@@ -242,8 +253,8 @@ inline User_choose_string<I, A>& User_choose_string<I, A>::pos(uint8_t x, uint8_
 
 
 
-template <typename I, typename A>
-void User_choose_string<I, A>::show_str_first_time(uint8_t first_option)
+template <typename I, typename A, int t>
+void User_choose_string<I, A, t>::show_str_first_time(uint8_t first_option)
 {
     yr_ = 0;
     y0_ = first_option;
@@ -256,8 +267,8 @@ void User_choose_string<I, A>::show_str_first_time(uint8_t first_option)
 //       al pulsar down quiero mover el cursor hacia abajo, esto es,
 //       incrementar el índice de la selección. Pero si solo muestro 1 línea
 //       al pulsar down lo que quiero es ir hacia atrás.
-template <typename I, typename A>
-void User_choose_string<I, A>::lcd_move()
+template <typename I, typename A, int t>
+void User_choose_string<I, A, t>::lcd_move()
 {
     if constexpr (rows_ == 1)
 	lcd_move_foreward();
@@ -266,8 +277,8 @@ void User_choose_string<I, A>::lcd_move()
 }
 
 
-template <typename I, typename A>
-void User_choose_string<I, A>::lcd_move_foreward()
+template <typename I, typename A, int t>
+void User_choose_string<I, A, t>::lcd_move_foreward()
 {
     Redraw rdw = Redraw::no;
 
@@ -281,8 +292,8 @@ void User_choose_string<I, A>::lcd_move_foreward()
 }
 
 
-template <typename I, typename A>
-void User_choose_string<I, A>::lcd_move_backwards()
+template <typename I, typename A, int t>
+void User_choose_string<I, A, t>::lcd_move_backwards()
 {
     Redraw rdw = Redraw::no;
 
@@ -298,8 +309,8 @@ void User_choose_string<I, A>::lcd_move_backwards()
 
 
 
-template <typename I, typename A>
-uint8_t User_choose_string<I, A>::show(uint8_t first_option)
+template <typename I, typename A, int t>
+uint8_t User_choose_string<I, A, t>::show(uint8_t first_option)
 {
     wait_ms(T_clock);	// Le damos tiempo al usuario a que suelte enter.
 
@@ -315,8 +326,8 @@ uint8_t User_choose_string<I, A>::show(uint8_t first_option)
 }
 
 
-template <typename I, typename A>
-void User_choose_string<I, A>::redraw(Redraw type)
+template <typename I, typename A, int t>
+void User_choose_string<I, A, t>::redraw(Redraw type)
 {
     if (type == Redraw::all)
 	show_option(y0_);
@@ -325,20 +336,20 @@ void User_choose_string<I, A>::redraw(Redraw type)
 	lcd_.cursor_pos(xm_, ym_ + yr_);
 }
 
-template <typename I, typename A>
-inline void User_choose_string<I, A>::print(const char* p, uint8_t n)
+template <typename I, typename A, int t>
+inline void User_choose_string<I, A, t>::print(const char* p, uint8_t n)
 { lcd_.print_line_nowrap(p, cols()); }
 
-template <typename I, typename A>
-inline void User_choose_string<I, A>::print(char c, uint8_t)
+template <typename I, typename A, int t>
+inline void User_choose_string<I, A, t>::print(char c, uint8_t)
 { lcd_.print(c); }
 
-template <typename I, typename A>
-inline void User_choose_string<I, A>::print(const atd::const_nstring& str, uint8_t)
+template <typename I, typename A, int t>
+inline void User_choose_string<I, A, t>::print(const atd::const_nstring& str, uint8_t)
 { lcd_.print_line_nowrap(str.data(), str.size()); }
 
-template <typename I, typename A>
-void User_choose_string<I, A>::show_option(size_type i0)
+template <typename I, typename A, int t>
+void User_choose_string<I, A, t>::show_option(size_type i0)
 {
     for (size_type i = 0; i < rows() and (i + i0 < str_.size()); ++i){
 	lcd_.cursor_pos(xm_, ym_ + i);
@@ -348,10 +359,9 @@ void User_choose_string<I, A>::show_option(size_type i0)
     lcd_.cursor_pos(xm_, ym_ + yr_);
 }
 
-
-template <typename I, typename A>
-typename User_choose_string<I, A>::Redraw
-				    User_choose_string<I, A>::lcd_up()
+template <typename I, typename A, int t>
+typename User_choose_string<I, A, t>::Redraw
+					User_choose_string<I, A, t>::lcd_up()
 {
     if (yr_ < rows() - 1){
 	++yr_;
@@ -363,15 +373,23 @@ typename User_choose_string<I, A>::Redraw
 	return Redraw::all;
     }
 
+    if constexpr (type == user_choose_string_type_circular){
+	if (y0_ + yr_ == str_.size() - 1){
+	    y0_ = 0;
+	    yr_ = 0;
+	    return Redraw::all;
+	}
+    }
+
     return Redraw::no;
 
 }
 
 
 // Devuelve true si hay que redraw el lcd.
-template <typename I, typename A>
-typename User_choose_string<I, A>::Redraw
-					User_choose_string<I, A>::lcd_down()
+template <typename I, typename A, int t>
+typename User_choose_string<I, A, t>::Redraw
+					User_choose_string<I, A, t>::lcd_down()
 {
     if (yr_ > 0){
 	--yr_;
@@ -381,6 +399,14 @@ typename User_choose_string<I, A>::Redraw
     if (y0_ > 0){
 	--y0_;
 	return Redraw::all;
+    }
+
+    if constexpr (type == user_choose_string_type_circular){
+	if (y0_ == 0){
+	    y0_ = str_.size() - rows();
+	    yr_ = rows() - 1;
+	    return Redraw::all;
+	}
     }
 
     return Redraw::no;
@@ -394,14 +420,34 @@ template <uint8_t ncols, uint8_t nrows = 1,
 	 typename LCD, typename Keyboard3, 
 	 typename Array>
 User_choose_string<User_choose_string_interface<LCD, Keyboard3, ncols, nrows>, 
-		   Array>
-user_choose_string(LCD& lcd, Keyboard3 k, const Array& str)
+		   Array, user_choose_string_type_lineal>
+user_choose_string_lineal(LCD& lcd, Keyboard3 k, const Array& str)
 
 {
     using Interface = User_choose_string_interface<LCD, Keyboard3,
 						   ncols, nrows>;
-    return User_choose_string<Interface, Array>{lcd, k, str};
+    return 
+	User_choose_string<Interface, Array, user_choose_string_type_lineal>
+								{lcd, k, str};
 }
+
+
+template <uint8_t ncols, uint8_t nrows = 1, 
+	 typename LCD, typename Keyboard3, 
+	 typename Array>
+User_choose_string<User_choose_string_interface<LCD, Keyboard3, ncols, nrows>, 
+		   Array, user_choose_string_type_circular>
+user_choose_string_circular(LCD& lcd, Keyboard3 k, const Array& str)
+
+{
+    using Interface = User_choose_string_interface<LCD, Keyboard3,
+						   ncols, nrows>;
+    return User_choose_string<Interface,
+                              Array,
+                              user_choose_string_type_circular>{lcd, k, str};
+}
+
+
 
 }// namespace
 

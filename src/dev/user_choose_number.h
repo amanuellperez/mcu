@@ -78,7 +78,7 @@ class User_choose_number{
 public:
     static_assert(type0 == user_choose_number_type_lineal or 
 		  type0 == user_choose_number_type_circular, 
-		  "incorrect User_choose_number_type");
+		  "incorrect user_choose_number_type");
 
     static constexpr int type = type0; // lineal o circular
 

@@ -11,7 +11,7 @@ DIRS = 	BMP280			\
 		push_button		\
 		system_clock	\
 		user_choose_number	\
-		user_menu		\
+		user_choose_string \
 		user_time
 
 # Revisar
