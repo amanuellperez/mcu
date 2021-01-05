@@ -15,9 +15,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include <avr_time.h>
-#include <avr_UART.h>	// TODO: cambiar orden
 #include "../../dev_BMP280_basic.h"
+#include <avr_time.h>
+#include <avr_UART.h>	
 #include <atd_ostream.h>
 #include <cstddef>
 #include <atd_cstddef.h>
@@ -31,11 +31,16 @@
 // Dispositivo TWI al que conectamos
 static constexpr uint8_t TWI_buffer_size = 100; 
 using TWI_master = avr::TWI_master<avr::TWI_basic, TWI_buffer_size>;
+// 50 kHz es la unica frecuencia de TWI que va a 1MHz.
+// 100 kHz a 8 MHz
+static constexpr int TWI_frecuency = 50; // kHz
 
 
 // Dispositivos
 using TWI = avr::TWI_master_ioxtream<TWI_master>;
-using Sensor = dev::BMP280_TWI<TWI_master, 0x77>;
+
+static constexpr TWI::Address sensor_twi_address = 0x77;
+using Sensor = dev::BMP280_TWI<TWI_master, sensor_twi_address>;
 
 // En el breakout de adafruit la dirección la determina la conexión del pin
 // SDO:
@@ -421,9 +426,7 @@ void test_bmp280()
 	 << "----------------------------------------\n\n";
 
 // init_TWI();
-    // 50 kHz es la unica frecuencia de TWI que va a 1MHz.
-    // 100 kHz a 8 MHz
-    TWI_master::on<50>();
+    TWI_master::on<TWI_frecuency>();
 
 // init_sensor();
     Sensor sensor;
