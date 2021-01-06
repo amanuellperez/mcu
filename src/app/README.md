@@ -21,7 +21,7 @@ Algunas aplicaciones.
 * [eeprom_read](util/eeprom_read): Hace un volcado de memoria de una EEPROM. Así
   podemos depurar y ver su contenido.
 
-* [lcd_char_set](util/lcd_char_set): ¿Qué character set tiene un LCD? Esta
+* [lcd_charset](util/lcd_charset): ¿Qué character set tiene un LCD? Esta
   aplicación muestra en la pantalla del LCD todos los caracteres que trae en
   la ROM, así se puede saber si es 'inglés/japonés', 'inglés/europeo' u otros.
 
