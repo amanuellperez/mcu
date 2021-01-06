@@ -40,9 +40,9 @@ namespace atd{
 /// Devuelve la longitud de la cadena tipo c 'str'. 
 /// Esta función está pensada para ser ejecutada en compilación.
 /// Es la equivalente a strlen de C, pero en tiempo de compilación.
-inline constexpr std::size_t length(const char* str) noexcept
+inline constexpr std::size_t strlen(const char* str) noexcept
 {
-    return *str ? 1 + length(str + 1) : 0;
+    return *str ? 1 + strlen(str + 1) : 0;
 }
 
 
@@ -108,7 +108,7 @@ protected:
 // constructor
 // -----------
     constexpr const_cstring_base(const char str[]) noexcept
-	: p_{str}, len_{atd::length(str)} {}
+	: p_{str}, len_{atd::strlen(str)} {}
 
     constexpr const_cstring_base(const char str[], size_type n) noexcept
 	: p_{str}, len_{n} {}
@@ -187,7 +187,7 @@ public:
     constexpr Array_const_nstrings(const char* data,
                                    size_type row_size) noexcept
         : data_{data}, row_size_{row_size}, 
-	  num_rows_{atd::length(data) / row_size}
+	  num_rows_{atd::strlen(data) / row_size}
     { }
 
     // Access

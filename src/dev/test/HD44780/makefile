@@ -1,6 +1,7 @@
-DIRS = ostream	\
-	screen		\
-	basic
+DIRS = 	basic	\
+	   	symbols	\
+		screen	\
+		ostream	
 
 
 include $(MCU_RECRULES)

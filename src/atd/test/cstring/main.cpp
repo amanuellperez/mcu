@@ -28,16 +28,16 @@ using namespace test;
 
 void test_length()
 {
-    test::interfaz("length");
+    test::interfaz("strlen");
 
     {
     constexpr const char* msg = "";
-    constexpr int n = atd::length(msg);
+    constexpr int n = atd::strlen(msg);
     CHECK_TRUE(n == strlen(msg), msg);
     }
     {
     constexpr const char* msg = "hola";
-    constexpr int n = atd::length(msg);
+    constexpr int n = atd::strlen(msg);
     CHECK_TRUE(n == strlen(msg), msg);
     }
 }
