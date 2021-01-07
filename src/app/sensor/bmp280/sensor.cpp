@@ -22,7 +22,7 @@ void Main::print_sensor()
     auto [T, hP] = sensor_.T_and_hP();
 
     lcd_.cursor_pos(0, 0);
-    lcd_ << T << " ºC";
+    lcd_ << T << ' ' << lcd_symbol::of("º") << 'C';
     lcd_.cursor_pos(0, 1);
     lcd_ << hP << " hPa";
 }

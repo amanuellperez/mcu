@@ -21,6 +21,7 @@
 #define __DEV_LCD_HD4780_H__
 
 #include "dev_LCD_HD44780_basic.h"
+#include "dev_LCD_HD44780_charset.h"
 #include "dev_LCD_HD44780_screen.h"
 #include "dev_LCD_HD44780_screen.tcc"
 #include "dev_LCD_HD44780_ostream.h"

@@ -1,5 +1,5 @@
 DIRS = 	basic	\
-	   	symbols	\
+	   	charset \
 		screen	\
 		ostream	
 
