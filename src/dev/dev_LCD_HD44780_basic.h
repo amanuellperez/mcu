@@ -30,6 +30,7 @@
  *	    26/09/2019 v0.2: LCD_ostream y cambios menores.
  *	    14/10/2019 v0.3: Reestructuración de ficheros.
  *	    06/01/2020 v0.4: Elimino DPin a favor de Pin.
+ *	    07/01/2020       set_cgram_address
  *
  * - TODO: Falta probar conectarlo a 8 pines (pero en la práctica me es
  *   mucho más cómodo conectarlo solo a 4, no necesito 8 de momento).
@@ -188,7 +189,9 @@ public:
 		    , bool tiene_2_filas    // ¿tiene 2 ó 1 linea?
 		    , bool character_font_5x8); // ¿char de 5x8 ó 5x10?
 
-    // TODO: set_cgram_address
+    /// Sets CGRAM address.
+    /// CGRAM data is sent and received after this setting.
+    void set_cgram_address(uint8_t addr);
 
     /// Sets DDRAM address: la dirección donde vamos a escribir el siguiente
     /// caracter.

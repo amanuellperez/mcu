@@ -16,6 +16,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+
 #include "../../../dev_LCD_HD44780_screen.h"
 #include "../../../dev_LCD_HD44780_basic.h"
 #include "../../../dev_LCD_HD44780_charset.h"
@@ -158,7 +159,7 @@ void print4(LCD& lcd)
     lcd.print(symbol::of("Σ"));
     lcd.print(symbol::of("π"));
     lcd.print(symbol::of("\x53\x43"));
-    lcd.print(symbol::of("y"));
+    lcd.print(symbol::of("yy"));
     lcd.print(symbol::of("于"));
     lcd.print(symbol::of("万"));
     lcd.print(symbol::of("円"));

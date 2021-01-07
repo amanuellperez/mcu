@@ -219,28 +219,20 @@ uint8_t LCD_HD44780<P>::read_d4()
     E::write_one();
     _delay_us(1);
 
-    if (D7::is_one()) //atd::write_one_bit<7>(res);
-		    atd::write_bit<7>::to<1>::in(res);
-    if (D6::is_one()) //atd::write_one_bit<6>(res);
-		    atd::write_bit<6>::to<1>::in(res);
-    if (D5::is_one()) //atd::write_one_bit<5>(res);
-		    atd::write_bit<5>::to<1>::in(res);
-    if (D4::is_one()) //atd::write_one_bit<4>(res);
-		    atd::write_bit<4>::to<1>::in(res);
+    if (D7::is_one()) atd::write_bit<7>::to<1>::in(res);
+    if (D6::is_one()) atd::write_bit<6>::to<1>::in(res);
+    if (D5::is_one()) atd::write_bit<5>::to<1>::in(res);
+    if (D4::is_one()) atd::write_bit<4>::to<1>::in(res);
 
     E::write_zero();
     _delay_us(1);
     E::write_one();
     _delay_us(1);
     
-    if (D7::is_one()) // atd::write_one_bit<3>(res);
-		    atd::write_bit<3>::to<1>::in(res);
-    if (D6::is_one()) // atd::write_one_bit<2>(res);
-		    atd::write_bit<2>::to<1>::in(res);
-    if (D5::is_one()) // atd::write_one_bit<1>(res);
-		    atd::write_bit<1>::to<1>::in(res);
-    if (D4::is_one()) // atd::write_one_bit<0>(res);
-		    atd::write_bit<0>::to<1>::in(res);
+    if (D7::is_one()) atd::write_bit<3>::to<1>::in(res);
+    if (D6::is_one()) atd::write_bit<2>::to<1>::in(res);
+    if (D5::is_one()) atd::write_bit<1>::to<1>::in(res);
+    if (D4::is_one()) atd::write_bit<0>::to<1>::in(res);
 
 
     E::write_zero();
@@ -410,12 +402,23 @@ template <typename P>
 void LCD_HD44780<P>::set_ddram_address(uint8_t addr)
 {
     // addr tiene que tener DB7 = 1
-//    atd::write_one_bit<7>(addr);
     atd::write_bit<7>::to<1>::in(addr);
 
     wait_to_be_available();
     write_d(0,0, addr);
 }
+
+
+template <typename P>
+void LCD_HD44780<P>::set_cgram_address(uint8_t addr)
+{
+    // bits DB7 = 0 and DB6 = 1
+    atd::write_bits<7, 6>::to<0, 1>::in(addr);
+
+    wait_to_be_available();
+    write_d(0,0, addr);
+}
+
 
 template <typename P>
 void LCD_HD44780<P>::cursor_or_display_shift(bool display_no_cursor, bool to_the_right)
