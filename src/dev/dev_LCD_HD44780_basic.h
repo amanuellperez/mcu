@@ -37,6 +37,7 @@
  *	    14/10/2019 v0.3: Reestructuración de ficheros.
  *	    06/01/2020 v0.4: Elimino DPin a favor de Pin.
  *	    07/01/2020       set_cgram_address
+ *	    08/01/2020 v0.5: Reestructuro para poder user LCD 40 x 04.
  *
  ****************************************************************************/
 #include <avr_pin.h>
@@ -76,10 +77,6 @@ struct LCD_HD44780_RW{
 };
 
 
-template <uint8_t pin_E>
-struct LCD_HD44780_E{
-    static constexpr uint8_t E = pin_E;
-};
 
 template <uint8_t pin_D4,
 	  uint8_t pin_D5,
@@ -95,14 +92,12 @@ struct LCD_HD44780_D4{
 
 template <typename pin_RS, 
 	  typename pin_RW,
-	  typename pin_E,
 	  typename pins_D4>
 struct LCD_HD44780_base_pins4{
     static constexpr uint8_t num_D_pins = 4;
 
     static constexpr uint8_t RS = pin_RS::RS;
     static constexpr uint8_t RW = pin_RW::RW;
-    static constexpr uint8_t E  = pin_E::E;
 
     static constexpr uint8_t D0 = 0;
     static constexpr uint8_t D1 = 0;
@@ -314,12 +309,18 @@ private:
 /***************************************************************************
  *		  LCD_HD44780: display 16 x 2 or 20 x 4
  ***************************************************************************/
+template <uint8_t pin_E>
+struct LCD_HD44780_E{
+    static constexpr uint8_t E = pin_E;
+};
+
+
 template <typename pin_RS, 
 	  typename pin_RW,
 	  typename pin_E,
 	  typename pins_D4>
 struct LCD_HD44780_pins4{
-    using Base_pins = LCD_HD44780_base_pins4<pin_RS, pin_RW, pin_E, pins_D4>;
+    using Base_pins = LCD_HD44780_base_pins4<pin_RS, pin_RW, pins_D4>;
 
     static constexpr uint8_t E  = pin_E::E;
 };
@@ -421,6 +422,158 @@ private:
     void setup_pins() { E::as_output(); }
 
 };
+
+/***************************************************************************
+ *		  LCD_HD44780_4004: display 40 x 04
+ ***************************************************************************/
+template <uint8_t pin_E1, uint8_t pin_E2>
+struct LCD_HD44780_4004_E{
+    static constexpr uint8_t E1 = pin_E1;
+    static constexpr uint8_t E2 = pin_E2;
+};
+
+
+template <typename pin_RS, 
+	  typename pin_RW,
+	  typename pin_E,
+	  typename pins_D4>
+struct LCD_HD44780_4004_pins4{
+    using Base_pins = LCD_HD44780_base_pins4<pin_RS, pin_RW, pins_D4>;
+
+    static constexpr uint8_t E1  = pin_E::E1;
+    static constexpr uint8_t E2  = pin_E::E2;
+};
+
+
+template <typename pin>
+// requires: std::is_same_v<pin, LCD_HD44780_pins>;
+class LCD_HD44780_4004: public LCD_HD44780_base<typename pin::Base_pins>{
+public:
+    using Base = LCD_HD44780_base<typename pin::Base_pins>;
+
+    LCD_HD44780_4004():Base() {setup();}
+
+// INSTRUCCIONES: TABLE 6, PAG. 24
+    /// Clears entire display and sets DDRAM address 0 in address counter.
+    void clear_display()
+    {
+        Base::template clear_display<E1>();
+        Base::template clear_display<E2>();
+    }
+
+    /// Sets DDRAM address 0 in address counter. Also returns display from 
+    /// being shifted to original position. DDRAM contents remain unchanged.
+    void return_home()
+    {
+        Base::template return_home<E1>();
+        Base::template return_home<E2>();
+    }
+
+    /// Set cursor move direction and specifies display shift.
+    /// If incrementa_cursor = true increments the DDRAM address by 1 when 
+    /// a character code is written into or read from DDRAM.
+    /// If incrementa_cursor = false, decrements DDRAM address.
+    ///
+    /// If shift_display = true shifts the entire display to the right (if
+    /// incrementa_cursor = true) or to the left (if incrementa_cursor = false).
+    /// If shift_display = false the display does not shift.
+    void entry_mode1(bool incrementa_cursor, bool shift_display)
+    {Base:: template entry_mode<E1>(incrementa_cursor, shift_display);}
+
+    void entry_mode2(bool incrementa_cursor, bool shift_display)
+    {Base:: template entry_mode<E2>(incrementa_cursor, shift_display);}
+
+
+    /// Set entire display on/off, cursor on/off and blinking of cursor on/off
+    // display_on = false apaga el display. Esto lo único que hace es no
+    // mostrar en pantalla el mensaje correspondiente. El LCD sigue
+    // funcionando.
+    void display_control1(bool display_on, bool cursor_on, bool cursor_blink)
+    {Base:: template display_control<E1>(display_on, cursor_on, cursor_blink);}
+
+    void display_control2(bool display_on, bool cursor_on, bool cursor_blink)
+    {Base:: template display_control<E2>(display_on, cursor_on, cursor_blink);}
+
+    /// Moves cursor or shift display.
+    /// If display_no_cursor = true shift display, else move cursor.
+    /// If to_the_right = true move to the right, else to the left.
+    void cursor_or_display_shift1(bool display_no_cursor, bool to_the_right)
+    { Base::template cursor_or_display_shift<E1>(display_no_cursor,
+                                                  to_the_right); }
+
+    void cursor_or_display_shift2(bool display_no_cursor, bool to_the_right)
+    { Base::template cursor_or_display_shift<E2>(display_no_cursor,
+                                                  to_the_right); }
+
+    /// Sets interface data lenght (4 ó 8 bits), number of display lines
+    /// (1 ó 2), and character font (5 x 8 or 5 x 10)
+    void function_set(bool interface_8_bits // ¿es 8 bit o 4 bit interface?
+		    , bool tiene_2_filas    // ¿tiene 2 ó 1 linea?
+		    , bool character_font_5x8) // ¿char de 5x8 ó 5x10?
+    {
+        Base::template function_set(
+            interface_8_bits, tiene_2_filas, character_font_5x8);
+    }
+
+
+    /// Sets DDRAM address: la dirección donde vamos a escribir el siguiente
+    /// caracter.
+    /// En el display de 2 filas, las direcciones en hexadecimal van:
+    /// Fila 1: 0x00 ... 0x27
+    /// Fila 2: 0x40 ... 0x67
+    /// ¡¡¡Observar que no van contiguas!!!
+    void set_ddram_address1(uint8_t addr)
+    {Base::template set_ddram_address<E1>(addr);}
+
+    void set_ddram_address2(uint8_t addr)
+    {Base::template set_ddram_address<E2>(addr);}
+
+    /// Sets CGRAM address.
+    /// CGRAM data is sent and received after this setting.
+    void set_cgram_address1(uint8_t addr)
+    {Base::template set_cgram_address<E1>(addr);}
+
+    void set_cgram_address2(uint8_t addr)
+    {Base::template set_cgram_address<E2>(addr);}
+
+    /// Write data to CG or DDRAM.
+    /// To write into CG or DDRAM is determined by previous specification of
+    /// the CGRAM or DDRAM address setting.
+    void write_data_to_CG_or_DDRAM1(char data)
+    {Base::template write_data_to_CG_or_DDRAM<E1>(data);}
+
+    void write_data_to_CG_or_DDRAM2(char data)
+    {Base::template write_data_to_CG_or_DDRAM<E2>(data);}
+
+    /// Read data from CG or DDRAM.
+    /// Before entering this read instruction, either CGRAM or DDRAM address
+    /// set instruction must be executed.
+    uint8_t read_data_from_CG_or_DDRAM1()
+    {return Base::template read_data_from_CG_or_DDRAM<E1>();}
+
+    uint8_t read_data_from_CG_or_DDRAM2()
+    {return Base::template read_data_from_CG_or_DDRAM<E2>();}
+
+private:
+    using E1 = avr::Pin<pin::E1>;
+    using E2 = avr::Pin<pin::E2>;
+
+    void setup()
+    {
+        setup_pins();
+	Base:: template init<E1>(); 
+	Base:: template init<E2>(); 
+    }
+
+    void setup_pins() 
+    { 
+	E1::as_output(); 
+	E2::as_output(); 
+    }
+
+};
+
+
 
 }// namespace
 
