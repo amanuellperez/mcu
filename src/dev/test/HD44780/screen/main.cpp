@@ -37,8 +37,8 @@ using LCD_HD44780_2004_screen = dev::LCD_HD44780_2004_screen<LCD_HD44780>;
 
 void test_lcd_screen4()
 {
-    LCD_HD44780_1602_screen lcd;
-    // LCD_HD44780_2004_screen lcd;
+    // LCD_HD44780_1602_screen lcd;
+    LCD_HD44780_2004_screen lcd;
 
     lcd.clear();
     lcd.print("LCD screen");
@@ -78,6 +78,7 @@ void test_lcd_screen4()
     wait_ms(1000);
 
     lcd.clear();
+    lcd.stop_brcorner(false);
     lcd.print("scroll up? si\n");
     lcd.print("12345678901234");
     wait_ms(1000);
@@ -216,14 +217,6 @@ void test_lcd_screen4_basico()
     lcd.clear();
     lcd.print("Hola");
     wait_ms(1000);
-}
-
-template <int c>
-constexpr char lcd_symbol()
-{
-    if constexpr (c == int("º"))
-	return 0xDF;
-
 }
 
 

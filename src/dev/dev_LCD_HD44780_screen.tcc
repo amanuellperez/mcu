@@ -76,6 +76,7 @@ void LCD_HD44780_screen<num_cols, num_rows, LCD>::clear_row(uint8_t i)
 	lcd_.write_data_to_CG_or_DDRAM(' ');
 }
 
+
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
 void LCD_HD44780_screen<num_cols, num_rows, LCD>::scroll_text_up()
 {
@@ -92,7 +93,7 @@ void LCD_HD44780_screen<num_cols, num_rows, LCD>::scroll_text_up()
 
 
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
-void LCD_HD44780_screen<num_cols, num_rows, LCD>::mueve_cursor()
+void LCD_HD44780_screen<num_cols, num_rows, LCD>::cursor_move()
 {
     ++x_;
 
@@ -107,7 +108,7 @@ template <uint8_t num_cols, uint8_t num_rows, typename LCD>
 void LCD_HD44780_screen<num_cols, num_rows, LCD>::print_imprimible_char(char c)
 {
     lcd_.write_data_to_CG_or_DDRAM(c);
-    mueve_cursor();
+    cursor_move();
 }
 
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
@@ -126,7 +127,7 @@ template <uint8_t num_cols, uint8_t num_rows, typename LCD>
 bool LCD_HD44780_screen<num_cols, num_rows, LCD>::print(char c) 
 {
     static_assert(sizeof(char) == sizeof(uint8_t)
-		 , "El char no es de 1 byte!!!");
+		 , "sizeof(char) != 1 byte!!!");
 
     if (c == '\n')
 	print_return();

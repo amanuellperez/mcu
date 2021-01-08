@@ -310,7 +310,7 @@ private:
     // Hace que el cursor parpadee o deje de parpadear.
     void cursor_blink(bool yes);
     
-    void mueve_cursor();
+    void cursor_move();
     void scroll_text_up();
     void copia_esta_fila_en_la_fila_anterior(uint8_t i);
     void print_return();
