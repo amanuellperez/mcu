@@ -5,9 +5,9 @@ DIRS = 	BMP280			\
 		EEPROM_25LC256	\
 		EEPROM_iostream	\
 		EEPROM_lineal	\
-		HD44780			\
 		keyboard		\
 		led				\
+		LCD				\
 		push_button		\
 		system_clock	\
 		user_choose_number	\

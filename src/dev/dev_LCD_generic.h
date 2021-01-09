@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez <amanuel.lperez@gmail.com>
+// Copyright (C) 2021 A.Manuel L.Perez <amanuel.lperez@gmail.com>
 //
 // This file is part of the MCU++ Library.
 //
@@ -17,11 +17,28 @@
 
 #pragma once
 
-#ifndef __DEV_LCD_HD4780_H__
-#define __DEV_LCD_HD4780_H__
+#ifndef __DEV_LCD_GENERIC_H__
+#define __DEV_LCD_GENERIC_H__
+/****************************************************************************
+ *
+ *  - DESCRIPCION: LCD "virtual"
+ *
+ *  - COMENTARIOS: 
+ *
+ *  - HISTORIA:
+ *    A.Manuel L.Perez
+ *    09/01/2020 v0.0
+ *
+ ****************************************************************************/
 
-#include "dev_LCD_HD44780_basic.h"
-#include "dev_LCD_HD44780_charset.h"
-#include "dev_LCD_ostream.h"
+namespace dev{
+
+template <typename LCD>
+class Generic_LCD;
+
+}// namespace
+
 
 #endif
+
+

@@ -1,8 +1,8 @@
 DIRS =  clocks 		\
 	   	blink		\
-		cost		\
-		eeprom_read	\
-		POV_toy
+		POV_toy		\
+		sensor		\
+		util		
 
 
 include $(MCU_RECRULES)

@@ -17,32 +17,32 @@
 
 #pragma once
 
-#ifndef __DEV_LCD_HD4780_OSTREAM_H__
-#define __DEV_LCD_HD4780_OSTREAM_H__
+#ifndef __DEV_LCD_OSTREAM_H__
+#define __DEV_LCD_OSTREAM_H__
 /****************************************************************************
  *
  *   - DESCRIPCION: Interfaz al display HD44780
  *  
  *   - HISTORIA:
- *      A.Manuel L.Perez: 11/07/2017 v0.0
- *			  29/07/2019 v0.1: Creo traductor.
- *			  26/09/2019 v0.2: LCD_ostream y cambios menores.
- *			  06/01/2020 v0.3: Elimino DPin a favor de Pin.
- *
+ *      A.Manuel L.Perez: 
+ *      11/07/2017 v0.0
+ *	29/07/2019 v0.1: Creo traductor.
+ *	26/09/2019 v0.2: LCD_ostream y cambios menores.
+ *	06/01/2020 v0.3: Elimino DPin a favor de Pin.
  *
  ****************************************************************************/
 #include <ostream>
-#include "dev_LCD_HD44780_screen.h"
+#include "dev_LCD_screen.h"
 
 namespace dev{
 
 template <uint8_t cols, uint8_t rows, typename  LCD>
-class LCD_HD44780_streambuf : public std::streambuf{
+class LCD_streambuf : public std::streambuf{
 public:
-    using LCD_screen = LCD_HD44780_screen<cols, rows, LCD>;
+    using Screen = LCD_screen<cols, rows, LCD>;
 
-    LCD_screen& screen() {return lcd_;}
-    const LCD_screen& screen() const {return lcd_;}
+    Screen& screen() {return lcd_;}
+    const Screen& screen() const {return lcd_;}
 
 
 protected:
@@ -64,17 +64,17 @@ protected:
 
 
 private:
-    LCD_screen lcd_;   
+    Screen lcd_;   
 };
 
 
 
 template <uint8_t cols, uint8_t rows, typename LCD>
-class LCD_HD44780_ostream: public std::ostream{
+class LCD_ostream: public std::ostream{
 public:
-    using LCD_screen = LCD_HD44780_screen<cols, rows, LCD>;
+    using Screen = LCD_screen<cols, rows, LCD>;
 
-    explicit LCD_HD44780_ostream() : std::ostream{&sb_} {}
+    explicit LCD_ostream() : std::ostream{&sb_} {}
 
     /// Borra la pantalla.
     void clear() {sb_.screen().clear();}
@@ -103,20 +103,22 @@ public:
     void cursor_no_blink()  {sb_.screen().cursor_no_blink();}
 
     /// Acceso a la screen.
-    LCD_screen& screen() {return sb_.screen();}
-    const LCD_screen& screen() const {return sb_.screen();}
+    Screen& screen() {return sb_.screen();}
+    const Screen& screen() const {return sb_.screen();}
 
 private:
-    LCD_HD44780_streambuf<cols, rows, LCD> sb_;
+    LCD_streambuf<cols, rows, LCD> sb_;
     
 };
 
 template <typename LCD>
-using LCD_HD44780_1602_ostream = LCD_HD44780_ostream<16, 2, LCD>;
+using LCD_ostream_1602 = LCD_ostream<16, 2, LCD>;
 
 template <typename LCD>
-using LCD_HD44780_2004_ostream = LCD_HD44780_ostream<20, 4, LCD>;
+using LCD_ostream_2004 = LCD_ostream<20, 4, LCD>;
 
+template <typename LCD>
+using LCD_ostream_4004 = LCD_ostream<40, 4, LCD>;
 
 
 

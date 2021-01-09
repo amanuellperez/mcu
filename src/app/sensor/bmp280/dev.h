@@ -63,7 +63,7 @@ using LCD_pins = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<LCD_RS_pin>,
 							    LCD_D6_pin, 
 							    LCD_D7_pin>>;
 
-using LCD_ostream = dev::LCD_HD44780_1602_ostream<dev::LCD_HD44780<LCD_pins>>;
+using LCD_ostream = dev::LCD_ostream_1602<dev::LCD_HD44780<LCD_pins>>;
 using lcd_symbol = dev::HD44780_charset_A00;
 
 // Sensor

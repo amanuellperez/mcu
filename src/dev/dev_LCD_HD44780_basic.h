@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez <amanuel.lperez@gmail.com>
+// Copyright (C) 2019-2021 A.Manuel L.Perez <amanuel.lperez@gmail.com>
 //
 // This file is part of the MCU++ Library.
 //
@@ -36,8 +36,8 @@
  *	    26/09/2019 v0.2: LCD_ostream y cambios menores.
  *	    14/10/2019 v0.3: Reestructuración de ficheros.
  *	    06/01/2020 v0.4: Elimino DPin a favor de Pin.
- *	    07/01/2020       set_cgram_address
- *	    08/01/2020 v0.5: Reestructuro para poder user LCD 40 x 04.
+ *	    07/01/2021       set_cgram_address
+ *	    08/01/2021 v0.5: Reestructuro para poder usar LCD 40 x 04.
  *
  ****************************************************************************/
 #include <avr_pin.h>
@@ -117,45 +117,33 @@ struct LCD_HD44780_base_pins4{
 /*!
  *  \brief  Traductor del HD44780
  *
- * La forma de definir un LCD es de la siguiente forma:
- *
- * // Si lo conectamos solo a 4 pins de datos
- * using LCD_pins = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<4>,
- *					   dev::LCD_HD44780_RW<5>,
- *					   dev::LCD_HD44780_E<6>,
- *					   dev::LCD_HD44780_D4<11,12,13,14>
- *					   >;
- *					   
- * using LCD_HD44780_base = dev::LCD_HD44780_base<LCD_pins>;
- *
- * En caso de que se pasen en orden equivocado los pines (por ejemplo, 
- * se pase primero RW en vez de RS) dará un error (misterioso) de compilación
- * impidiendo que se definan mal los pines.
- *
- * DUDA: ¿merece la pena modificar LCD_HD44780_pins4 para que de un error
- * inteligible? De momento creo que no.
- *
+ *  (RRR) Los LCDs de 16 x 02, 20 x 04 y 40 x 04 usan las mismas funciones.
+ *        Esta clase contiene todas estas funciones. Cada LCD particular
+ *        concretará los pines usados (ahora es decidir qué pin E se usa, ya
+ *        que el LCD 40 x 04 tiene 2 pines E).
  */
 template <typename pin>
 // requires: std::is_same_v<pin, LCD_HD44780_pins>;
 class LCD_HD44780_base{
 public:
-    LCD_HD44780_base();
 
 protected:
+//    LCD_HD44780_base(); <-- llamar a setup_pins() para inicializarlo.
+    static void setup_pins();
+
     /// Inicializamos el IC
     template <typename pin_E>
-    void init();	
+    static void init();	
 
 // INSTRUCCIONES: TABLE 6, PAG. 24
     /// Clears entire display and sets DDRAM address 0 in address counter.
     template <typename pin_E>
-    void clear_display();
+    static void clear_display();
 
     /// Sets DDRAM address 0 in address counter. Also returns display from 
     /// being shifted to original position. DDRAM contents remain unchanged.
     template <typename pin_E>
-    void return_home();
+    static void return_home();
 
 
     /// Set cursor move direction and specifies display shift.
@@ -167,27 +155,27 @@ protected:
     /// incrementa_cursor = true) or to the left (if incrementa_cursor = false).
     /// If shift_display = false the display does not shift.
     template <typename pin_E>
-    void entry_mode(bool incrementa_cursor, bool shift_display);
+    static void entry_mode(bool incrementa_cursor, bool shift_display);
 
     /// Set entire display on/off, cursor on/off and blinking of cursor on/off
     // display_on = false apaga el display. Esto lo único que hace es no
     // mostrar en pantalla el mensaje correspondiente. El LCD sigue
     // funcionando.
     template <typename pin_E>
-    void display_control(bool display_on, bool cursor_on, bool cursor_blink);
+    static void display_control(bool display_on, bool cursor_on, bool cursor_blink);
 
 
     /// Moves cursor or shift display.
     /// If display_no_cursor = true shift display, else move cursor.
     /// If to_the_right = true move to the right, else to the left.
     template <typename pin_E>
-    void cursor_or_display_shift(bool display_no_cursor, bool to_the_right);
+    static void cursor_or_display_shift(bool display_no_cursor, bool to_the_right);
  
 
     /// Sets interface data lenght (4 ó 8 bits), number of display lines
     /// (1 ó 2), and character font (5 x 8 or 5 x 10)
     template <typename pin_E>
-    void function_set(bool interface_8_bits // ¿es 8 bit o 4 bit interface?
+    static void function_set(bool interface_8_bits // ¿es 8 bit o 4 bit interface?
 		    , bool tiene_2_filas    // ¿tiene 2 ó 1 linea?
 		    , bool character_font_5x8); // ¿char de 5x8 ó 5x10?
 
@@ -196,13 +184,13 @@ protected:
     /// To write into CG or DDRAM is determined by previous specification of
     /// the CGRAM or DDRAM address setting.
     template <typename pin_E>
-    void write_data_to_CG_or_DDRAM(char data);
+    static void write_data_to_CG_or_DDRAM(char data);
 
     /// Read data from CG or DDRAM.
     /// Before entering this read instruction, either CGRAM or DDRAM address
     /// set instruction must be executed.
     template <typename pin_E>
-    uint8_t read_data_from_CG_or_DDRAM();
+    static uint8_t read_data_from_CG_or_DDRAM();
 
 
     /// Sets DDRAM address: la dirección donde vamos a escribir el siguiente
@@ -212,13 +200,13 @@ protected:
     /// Fila 2: 0x40 ... 0x67
     /// ¡¡¡Observar que no van contiguas!!!
     template <typename pin_E>
-    void set_ddram_address(uint8_t addr);
+    static void set_ddram_address(uint8_t addr);
 
 
     /// Sets CGRAM address.
     /// CGRAM data is sent and received after this setting.
     template <typename pin_E>
-    void set_cgram_address(uint8_t addr);
+    static void set_cgram_address(uint8_t addr);
 
     // TODO: uint8_t read_busy_flag_and_address(); (es la función
     // is_busy, reescribirla cambiando básicamente el nombre)
@@ -242,66 +230,61 @@ private:
 
 
 
-    /// Inicializamos el display
-    void setup();
-    void setup_pins();	// hacemos el setup a todos los pins
-
-
     // Este display tiene 2 formas de funcionamiento:
     //	interfaz de 8 bits e interfaz de 4 bits. Cada interfaz
     //	tiene su propia forma de inicializarse.
 //    void init8();
     template <typename pin_E>
-    void init4();
+    static void init4();
 
     /// Indica si el display está ocupado haciendo una operación interna.
     /// Mientras esté ocupado no se puede pedirle nada más.
     template <typename pin_E>
-    bool is_busy();
+    static bool is_busy();
 
     // Indica si el display está ocupado haciendo una operación interna.
     // Mientras esté ocupado no se puede pedirle nada más.
 //    bool is_busy8();
     template <typename pin_E>
-    bool is_busy4();
+    static bool is_busy4();
     
     // Funciones genéricas para escribir en el IC
     // Escribe (rs, rw, d7, d6, d5, d4, d3, d2, d1, d0) en el IC
     // Esta es la función clave a la hora de escribir. Internamente se 
     // encarga de mirar si usamos 4 ó 8 bit interface.
     template <typename pin_E>
-    void write_d(uint8_t rs, uint8_t rw, uint8_t d);
+    static void write_d(uint8_t rs, uint8_t rw, uint8_t d);
 
     // Implementación de write_d. No llamar a estas funciones NUNCA
     // directamente, sino siempre a través de write_d!!!
 //    void write_d8(uint8_t rs, uint8_t rw, uint8_t d);
     template <typename pin_E>
-    void write_d4(uint8_t rs, uint8_t rw, uint8_t d);
+    static void write_d4(uint8_t rs, uint8_t rw, uint8_t d);
 
     // Escribe solo los bits d4-d7 de 'd' (los más significativos)
     // Escribe (rs, rw, d7, d6, d5, d4) en el IC
     template <typename pin_E>
-    void write_d4_d7(uint8_t rs, uint8_t rw, uint8_t d);
+    static void write_d4_d7(uint8_t rs, uint8_t rw, uint8_t d);
 
     // Lee un byte usando solo los bits d4-d7 (esta función solo
     // se usa en read_data_from_CG_or_DDRAM).
     template <typename pin_E>
-    uint8_t read_d4();
+    static uint8_t read_d4();
 
     // Para realizar una operación en el LCD necesitamos activar E
     template <typename pin_E>
-    void pulse_E();
+    static void pulse_E();
 
     // Espera hasta que el LCD esta disponible para la siguiente instrucción
     template <typename pin_E>
-    void wait_to_be_available()
+    static void wait_to_be_available()
     { while(is_busy<pin_E>()) ; }
 
 // D PIN ACCESS
-    void D_pins_as_output();
-    void D_pins_as_input_without_pullup();
+    static void D_pins_as_output();
+    static void D_pins_as_input_without_pullup();
 
-    void write_d4(uint8_t d);
+    static void write_d4(uint8_t d);
 //    void write_d8(uint8_t d);
 };
 
@@ -325,6 +308,25 @@ struct LCD_HD44780_pins4{
     static constexpr uint8_t E  = pin_E::E;
 };
 
+/*!
+ * La forma de definir un LCD es de la siguiente forma:
+ *
+ * // Si lo conectamos solo a 4 pins de datos
+ * using LCD_pins = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<4>,
+ *					   dev::LCD_HD44780_RW<5>,
+ *					   dev::LCD_HD44780_E<6>,
+ *					   dev::LCD_HD44780_D4<11,12,13,14>
+ *					   >;
+ *					   
+ * using LCD_HD44780_base = dev::LCD_HD44780_base<LCD_pins>;
+ *
+ * En caso de que se pasen en orden equivocado los pines (por ejemplo, 
+ * se pase primero RW en vez de RS) dará un error (misterioso) de compilación
+ * impidiendo que se definan mal los pines.
+ *
+ * DUDA: ¿merece la pena modificar LCD_HD44780_pins4 para que de un error
+ * inteligible? De momento creo que no.
+ */
 
 template <typename pin>
 // requires: std::is_same_v<pin, LCD_HD44780_pins>;
@@ -332,16 +334,29 @@ class LCD_HD44780: public LCD_HD44780_base<typename pin::Base_pins>{
 public:
     using Base = LCD_HD44780_base<typename pin::Base_pins>;
 
-    LCD_HD44780():Base() {setup();}
+// Construcción:
+//  Suministro 2 formas de usar el LCD:
+//  1. Defines un objeto que se autoinicializa: LCD_HD44780 lcd;
+//  2. No definir el objeto y usar todas las funciones static. No olvidar
+//     llamar a init():
+//	    LCD_HD44780::init();
+//	    LCD_HD44780::clear_display(); 
+//	    ...
+//  En principio me gusta más 1, pero al implementar LCD_screen es más
+//  práctico 2 ya que concibo el LCD como interfaz.
+//		
+    LCD_HD44780():Base() {init();}
+
+    static void init();
 
 // INSTRUCCIONES: TABLE 6, PAG. 24
     /// Clears entire display and sets DDRAM address 0 in address counter.
-    void clear_display()
+    static void clear_display()
     {Base:: template clear_display<E>();}
 
     /// Sets DDRAM address 0 in address counter. Also returns display from 
     /// being shifted to original position. DDRAM contents remain unchanged.
-    void return_home()
+    static void return_home()
     {Base:: template return_home<E>();}
 
     /// Set cursor move direction and specifies display shift.
@@ -352,7 +367,7 @@ public:
     /// If shift_display = true shifts the entire display to the right (if
     /// incrementa_cursor = true) or to the left (if incrementa_cursor = false).
     /// If shift_display = false the display does not shift.
-    void entry_mode(bool incrementa_cursor, bool shift_display)
+    static void entry_mode(bool incrementa_cursor, bool shift_display)
     {Base:: template entry_mode<E>(incrementa_cursor, shift_display);}
 
 
@@ -360,20 +375,20 @@ public:
     // display_on = false apaga el display. Esto lo único que hace es no
     // mostrar en pantalla el mensaje correspondiente. El LCD sigue
     // funcionando.
-    void display_control(bool display_on, bool cursor_on, bool cursor_blink)
+    static void display_control(bool display_on, bool cursor_on, bool cursor_blink)
     {Base:: template display_control<E>(display_on, cursor_on, cursor_blink);}
 
     /// Moves cursor or shift display.
     /// If display_no_cursor = true shift display, else move cursor.
     /// If to_the_right = true move to the right, else to the left.
-    void cursor_or_display_shift(bool display_no_cursor, bool to_the_right)
+    static void cursor_or_display_shift(bool display_no_cursor, bool to_the_right)
     { Base::template cursor_or_display_shift<E>(display_no_cursor,
                                                   to_the_right); }
 
 
     /// Sets interface data lenght (4 ó 8 bits), number of display lines
     /// (1 ó 2), and character font (5 x 8 or 5 x 10)
-    void function_set(bool interface_8_bits // ¿es 8 bit o 4 bit interface?
+    static void function_set(bool interface_8_bits // ¿es 8 bit o 4 bit interface?
 		    , bool tiene_2_filas    // ¿tiene 2 ó 1 linea?
 		    , bool character_font_5x8) // ¿char de 5x8 ó 5x10?
     {
@@ -388,40 +403,47 @@ public:
     /// Fila 1: 0x00 ... 0x27
     /// Fila 2: 0x40 ... 0x67
     /// ¡¡¡Observar que no van contiguas!!!
-    void set_ddram_address(uint8_t addr)
+    static void set_ddram_address(uint8_t addr)
     {Base::template set_ddram_address<E>(addr);}
 
 
     /// Sets CGRAM address.
     /// CGRAM data is sent and received after this setting.
-    void set_cgram_address(uint8_t addr)
+    static void set_cgram_address(uint8_t addr)
     {Base::template set_cgram_address<E>(addr);}
 
 
     /// Write data to CG or DDRAM.
     /// To write into CG or DDRAM is determined by previous specification of
     /// the CGRAM or DDRAM address setting.
-    void write_data_to_CG_or_DDRAM(char data)
+    static void write_data_to_CG_or_DDRAM(char data)
     {Base::template write_data_to_CG_or_DDRAM<E>(data);}
 
     /// Read data from CG or DDRAM.
     /// Before entering this read instruction, either CGRAM or DDRAM address
     /// set instruction must be executed.
-    uint8_t read_data_from_CG_or_DDRAM()
+    static uint8_t read_data_from_CG_or_DDRAM()
     {return Base::template read_data_from_CG_or_DDRAM<E>();}
 
 private:
     using E = avr::Pin<pin::E>;
 
-    void setup()
-    {
-        setup_pins();
-	Base:: template init<E>(); 
-    }
 
-    void setup_pins() { E::as_output(); }
+    static void setup_pins() { E::as_output(); }
 
 };
+
+
+template <typename pin>
+void LCD_HD44780<pin>::init() 
+{
+    Base::setup_pins();
+    setup_pins();
+
+    Base:: template init<E>(); 
+}
+
+
 
 /***************************************************************************
  *		  LCD_HD44780_4004: display 40 x 04
@@ -444,18 +466,51 @@ struct LCD_HD44780_4004_pins4{
     static constexpr uint8_t E2  = pin_E::E2;
 };
 
-
+/*!
+ *  \brief  LCD de 40 x 04 basado en el HD44780 driver.
+ *
+ *  (RRR) ¿Por qué definir dos funciones para cada pin E en lugar de pasarle
+ *        como parámetro el pin E?
+ *
+ *        Podemos hacer:
+ *        1. Dos funciones diferentes: 
+ *		    entry_mode1(...);
+ *		    entry_mode2(...);
+ *
+ *	  2. Una función template parametrizada por E:
+ *		   entry_mode<E1>(...);
+ *
+ *	  3. Pasarle  el pin como parámetro:
+ *	          entry_mode(E1, ...);
+ *
+ *       La idea del traductor es traducir la datasheet sin añadir
+ *       funcionalidad. De esa forma resulta muy sencillo implementarlo y no
+ *       se introduce ninguna ineficiencia. Por ello descarto la opción 3.
+ *       Entre la 1 y la 2, parecen iguales. De momento no tengo criterio para
+ *       poder elegir entre 1 ó 2. Me resulta más sencilla la 1, por eso lo
+ *       implemento así.
+ *
+ */
 template <typename pin>
-// requires: std::is_same_v<pin, LCD_HD44780_pins>;
+// requires: std::is_same_v<pin, LCD_HD44780_4004_pins4>;
 class LCD_HD44780_4004: public LCD_HD44780_base<typename pin::Base_pins>{
 public:
     using Base = LCD_HD44780_base<typename pin::Base_pins>;
 
-    LCD_HD44780_4004():Base() {setup();}
+    LCD_HD44780_4004() {init();}
+
+    static void init() 
+    {
+	Base::setup_pins();
+	setup_pins();
+
+	Base:: template init<E1>(); 
+	Base:: template init<E2>(); 
+    }
 
 // INSTRUCCIONES: TABLE 6, PAG. 24
     /// Clears entire display and sets DDRAM address 0 in address counter.
-    void clear_display()
+    static void clear_display()
     {
         Base::template clear_display<E1>();
         Base::template clear_display<E2>();
@@ -463,7 +518,7 @@ public:
 
     /// Sets DDRAM address 0 in address counter. Also returns display from 
     /// being shifted to original position. DDRAM contents remain unchanged.
-    void return_home()
+    static void return_home()
     {
         Base::template return_home<E1>();
         Base::template return_home<E2>();
@@ -477,10 +532,10 @@ public:
     /// If shift_display = true shifts the entire display to the right (if
     /// incrementa_cursor = true) or to the left (if incrementa_cursor = false).
     /// If shift_display = false the display does not shift.
-    void entry_mode1(bool incrementa_cursor, bool shift_display)
+    static void entry_mode1(bool incrementa_cursor, bool shift_display)
     {Base:: template entry_mode<E1>(incrementa_cursor, shift_display);}
 
-    void entry_mode2(bool incrementa_cursor, bool shift_display)
+    static void entry_mode2(bool incrementa_cursor, bool shift_display)
     {Base:: template entry_mode<E2>(incrementa_cursor, shift_display);}
 
 
@@ -488,26 +543,26 @@ public:
     // display_on = false apaga el display. Esto lo único que hace es no
     // mostrar en pantalla el mensaje correspondiente. El LCD sigue
     // funcionando.
-    void display_control1(bool display_on, bool cursor_on, bool cursor_blink)
+    static void display_control1(bool display_on, bool cursor_on, bool cursor_blink)
     {Base:: template display_control<E1>(display_on, cursor_on, cursor_blink);}
 
-    void display_control2(bool display_on, bool cursor_on, bool cursor_blink)
+    static void display_control2(bool display_on, bool cursor_on, bool cursor_blink)
     {Base:: template display_control<E2>(display_on, cursor_on, cursor_blink);}
 
     /// Moves cursor or shift display.
     /// If display_no_cursor = true shift display, else move cursor.
     /// If to_the_right = true move to the right, else to the left.
-    void cursor_or_display_shift1(bool display_no_cursor, bool to_the_right)
+    static void cursor_or_display_shift1(bool display_no_cursor, bool to_the_right)
     { Base::template cursor_or_display_shift<E1>(display_no_cursor,
                                                   to_the_right); }
 
-    void cursor_or_display_shift2(bool display_no_cursor, bool to_the_right)
+    static void cursor_or_display_shift2(bool display_no_cursor, bool to_the_right)
     { Base::template cursor_or_display_shift<E2>(display_no_cursor,
                                                   to_the_right); }
 
     /// Sets interface data lenght (4 ó 8 bits), number of display lines
     /// (1 ó 2), and character font (5 x 8 or 5 x 10)
-    void function_set(bool interface_8_bits // ¿es 8 bit o 4 bit interface?
+    static void function_set(bool interface_8_bits // ¿es 8 bit o 4 bit interface?
 		    , bool tiene_2_filas    // ¿tiene 2 ó 1 linea?
 		    , bool character_font_5x8) // ¿char de 5x8 ó 5x10?
     {
@@ -522,50 +577,43 @@ public:
     /// Fila 1: 0x00 ... 0x27
     /// Fila 2: 0x40 ... 0x67
     /// ¡¡¡Observar que no van contiguas!!!
-    void set_ddram_address1(uint8_t addr)
+    static void set_ddram_address1(uint8_t addr)
     {Base::template set_ddram_address<E1>(addr);}
 
-    void set_ddram_address2(uint8_t addr)
+    static void set_ddram_address2(uint8_t addr)
     {Base::template set_ddram_address<E2>(addr);}
 
     /// Sets CGRAM address.
     /// CGRAM data is sent and received after this setting.
-    void set_cgram_address1(uint8_t addr)
+    static void set_cgram_address1(uint8_t addr)
     {Base::template set_cgram_address<E1>(addr);}
 
-    void set_cgram_address2(uint8_t addr)
+    static void set_cgram_address2(uint8_t addr)
     {Base::template set_cgram_address<E2>(addr);}
 
     /// Write data to CG or DDRAM.
     /// To write into CG or DDRAM is determined by previous specification of
     /// the CGRAM or DDRAM address setting.
-    void write_data_to_CG_or_DDRAM1(char data)
+    static void write_data_to_CG_or_DDRAM1(char data)
     {Base::template write_data_to_CG_or_DDRAM<E1>(data);}
 
-    void write_data_to_CG_or_DDRAM2(char data)
+    static void write_data_to_CG_or_DDRAM2(char data)
     {Base::template write_data_to_CG_or_DDRAM<E2>(data);}
 
     /// Read data from CG or DDRAM.
     /// Before entering this read instruction, either CGRAM or DDRAM address
     /// set instruction must be executed.
-    uint8_t read_data_from_CG_or_DDRAM1()
+    static uint8_t read_data_from_CG_or_DDRAM1()
     {return Base::template read_data_from_CG_or_DDRAM<E1>();}
 
-    uint8_t read_data_from_CG_or_DDRAM2()
+    static uint8_t read_data_from_CG_or_DDRAM2()
     {return Base::template read_data_from_CG_or_DDRAM<E2>();}
 
 private:
     using E1 = avr::Pin<pin::E1>;
     using E2 = avr::Pin<pin::E2>;
 
-    void setup()
-    {
-        setup_pins();
-	Base:: template init<E1>(); 
-	Base:: template init<E2>(); 
-    }
-
-    void setup_pins() 
+    static void setup_pins() 
     { 
 	E1::as_output(); 
 	E2::as_output(); 

@@ -13,13 +13,15 @@ INCS= 	dev_BMP280_basic.h			\
 		dev_EEPROM_iostream.h		\
 		dev_EEPROM_lineal.h			\
 		dev_keyboard.h				\
+		dev_LCD_generic.h			\
+		dev_LCD_screen.h			\
+		dev_LCD_screen.tcc			\
+		dev_LCD_ostream.h			\
 		dev_LCD_HD44780.h			\
 		dev_LCD_HD44780_basic.h		\
 		dev_LCD_HD44780_basic.tcc	\
 		dev_LCD_HD44780_charset.h	\
-		dev_LCD_HD44780_screen.h	\
-		dev_LCD_HD44780_screen.tcc	\
-		dev_LCD_HD44780_ostream.h	\
+		dev_LCD_HD44780_generic.h	\
 		dev_led.h					\
 		dev_LM75.h					\
 		dev_matrix_led_max7219.h	\

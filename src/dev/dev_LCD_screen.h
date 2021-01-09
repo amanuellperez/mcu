@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez <amanuel.lperez@gmail.com>
+// Copyright (C) 2019-2021 A.Manuel L.Perez <amanuel.lperez@gmail.com>
 //
 // This file is part of the MCU++ Library.
 //
@@ -17,8 +17,8 @@
 
 #pragma once
 
-#ifndef __DEV_LCD_HD4780_SCREEN_H__
-#define __DEV_LCD_HD4780_SCREEN_H__
+#ifndef __DEV_LCD_SCREEN_H__
+#define __DEV_LCD_SCREEN_H__
 /****************************************************************************
  *
  *  - DESCRIPCION: Interfaz al display HD44780
@@ -30,15 +30,18 @@
  *	26/09/2019 v0.2: LCD_ostream y cambios menores.
  *	02/11/2019 v0.3: Añado flag stop_brcorner y wrap. Reescribo los flags.
  *	06/01/2020 v0.4: Elimino DPin a favor de Pin.
+ *	09/01/2021 v0.5: Reestructurado. Lo desvinculo del HD44780.
+ *		         Uso Generic_LCD.
  *
  ****************************************************************************/
 #include <stdint.h>
+#include "dev_LCD_HD44780_generic.h" // TODO: dejar solo generic
 
 namespace dev{
 
 // Screen flags
 // ------------
-enum class _LCD_HD44780_screen_flags {
+enum class _LCD_screen_flags {
     display_on_bit        = 1L << 0,
     incrementa_cursor_bit = 1L << 1,
     cursor_on_bit         = 1L << 2,
@@ -47,31 +50,31 @@ enum class _LCD_HD44780_screen_flags {
     wrap_bit		  = 1L << 5
 };
 
-inline constexpr _LCD_HD44780_screen_flags operator&(_LCD_HD44780_screen_flags a, _LCD_HD44780_screen_flags b)
-{return static_cast<_LCD_HD44780_screen_flags>(static_cast<int>(a) & static_cast<int>(b));}
+inline constexpr _LCD_screen_flags operator&(_LCD_screen_flags a, _LCD_screen_flags b)
+{return static_cast<_LCD_screen_flags>(static_cast<int>(a) & static_cast<int>(b));}
 
-inline constexpr _LCD_HD44780_screen_flags operator|(_LCD_HD44780_screen_flags a, _LCD_HD44780_screen_flags b)
-{return static_cast<_LCD_HD44780_screen_flags>(static_cast<int>(a) | static_cast<int>(b));}
+inline constexpr _LCD_screen_flags operator|(_LCD_screen_flags a, _LCD_screen_flags b)
+{return static_cast<_LCD_screen_flags>(static_cast<int>(a) | static_cast<int>(b));}
 
-inline constexpr _LCD_HD44780_screen_flags operator^(_LCD_HD44780_screen_flags a, _LCD_HD44780_screen_flags b)
-{return static_cast<_LCD_HD44780_screen_flags>(static_cast<int>(a) ^ static_cast<int>(b));}
+inline constexpr _LCD_screen_flags operator^(_LCD_screen_flags a, _LCD_screen_flags b)
+{return static_cast<_LCD_screen_flags>(static_cast<int>(a) ^ static_cast<int>(b));}
 
-inline constexpr _LCD_HD44780_screen_flags operator~(_LCD_HD44780_screen_flags a)
-{return static_cast<_LCD_HD44780_screen_flags>(~static_cast<int>(a));}
+inline constexpr _LCD_screen_flags operator~(_LCD_screen_flags a)
+{return static_cast<_LCD_screen_flags>(~static_cast<int>(a));}
 
-inline constexpr _LCD_HD44780_screen_flags& operator&=(_LCD_HD44780_screen_flags& a, _LCD_HD44780_screen_flags b)
+inline constexpr _LCD_screen_flags& operator&=(_LCD_screen_flags& a, _LCD_screen_flags b)
 {return a = a & b;}
 
-inline constexpr _LCD_HD44780_screen_flags& operator|=(_LCD_HD44780_screen_flags& a, _LCD_HD44780_screen_flags b)
+inline constexpr _LCD_screen_flags& operator|=(_LCD_screen_flags& a, _LCD_screen_flags b)
 {return a = a | b;}
 
-inline constexpr _LCD_HD44780_screen_flags& operator^=(_LCD_HD44780_screen_flags& a, _LCD_HD44780_screen_flags b)
+inline constexpr _LCD_screen_flags& operator^=(_LCD_screen_flags& a, _LCD_screen_flags b)
 {return a = a ^ b;}
 
-inline constexpr bool operator==(_LCD_HD44780_screen_flags a, int b)
+inline constexpr bool operator==(_LCD_screen_flags a, int b)
 {return static_cast<int>(a) == b;}
 
-inline constexpr bool operator!=(_LCD_HD44780_screen_flags a, int b)
+inline constexpr bool operator!=(_LCD_screen_flags a, int b)
 {return !(a == b);}
 
 
@@ -102,25 +105,13 @@ inline constexpr bool operator!=(_LCD_HD44780_screen_flags a, int b)
  *  using LCD_HD44780_1602_screen = dev::LCD_HD44780_1602_screen<LCD_HD44780>;
  *  using LCD_HD44780_2004_screen = dev::LCD_HD44780_2004_screen<LCD_HD44780>;
  */
-template <uint8_t num_cols, uint8_t num_rows, typename LCD_HD44780>
-class LCD_HD44780_screen{
+template <uint8_t num_cols, uint8_t num_rows, typename LCD_type>
+class LCD_screen{
 public:
 // Init
     /// Conectamos el HD44780 con el interface 4 bits.
-    LCD_HD44780_screen()
-	:x_{0}, y_{0}{}
-
-    // TODO: falta hacer el de 8 bits. Solo es añadir el constructor.
-    // No lo añado porque no está probado ese interfaz. Cuando se pruebe,
-    // añadirlo.
-
-//    /// Reinicializa el lcd. 
-//    /// Una forma de ahorrar energía es apagar el LCD y dormir el avr cuando
-//    /// no se vaya a usar. El problema al desconectar el LCD de alimentación
-//    /// es que hay que volverlo a inicializarlo. No es necesario configurar
-//    /// los pines del LCD ya que el avr solo lo hemos dormido.
-//    NO FUNCIONA!!! ???
-//    void reset() {lcd_.reset();}
+    LCD_screen()
+	:x_{0}, y_{0} { } 
 
 
 // FUNCIONES DE IMPRESIÓN
@@ -172,13 +163,13 @@ public:
     uint8_t cursor_pos_y() const {return y_;}
 
 
-    // TODO: estas funciones no pertenecen a un screen, más bien pertenecen a
-    // un cartel publicitario.
-    /// Mueve el display 1 posición a la derecha.
-    void cursor_shift_right() {lcd_.cursor_or_display_shift(false, true);}
-
-    /// Mueve el display 1 posición a la izquierda.
-    void cursor_shift_left() {lcd_.cursor_or_display_shift(false, false);}
+//    // TODO: estas funciones no pertenecen a un screen, más bien pertenecen a
+//    // un cartel publicitario.
+//    /// Mueve el display 1 posición a la derecha.
+//    void cursor_shift_right() {LCD::cursor_or_display_shift(false, true);}
+//
+//    /// Mueve el display 1 posición a la izquierda.
+//    void cursor_shift_left() {LCD::cursor_or_display_shift(false, false);}
 
     /// Flag que indica si al llegar a la esquina inferior derecha se deja
     /// de hacer el scrol o no.
@@ -255,18 +246,18 @@ public:
 
     
 private:
-    // Hardware al que está conectado
-    LCD_HD44780 lcd_;
+// Hardware al que está conectado
+    Generic_LCD<LCD_type> lcd_;
 
-    // Datos
+// Data
     // Invariante: el cursor siempre está en una posición válida de escritura.
     // (x_, y_) = posición del LCD real donde se puede escribir.
-    uint8_t x_, y_; // (row, col) en la que se encuentra el cursor.
+    uint8_t x_, y_; // (col, row) en la que se encuentra el cursor.
 
 
     // screen_flags
     // ------------
-    using scrflags = _LCD_HD44780_screen_flags;
+    using scrflags = _LCD_screen_flags;
     
     // Flags que necesito para desacoplar las responsabilidades
     // de las instrucciones entry_mode y display_control
@@ -338,16 +329,19 @@ private:
 
 };
 
-template <typename LCD_HD44780>
-using LCD_HD44780_1602_screen = LCD_HD44780_screen<16,2, LCD_HD44780>;
+template <typename LCD>
+using LCD_screen_1602 = LCD_screen<16,2, LCD>;
 
-template <typename LCD_HD44780>
-using LCD_HD44780_2004_screen = LCD_HD44780_screen<20,4, LCD_HD44780>;
+template <typename LCD>
+using LCD_screen_2004 = LCD_screen<20,4, LCD>;
+
+template <typename LCD>
+using LCD_screen_4004 = LCD_screen<40,4, LCD>;
 
 }// namespace
 
 
-#include "dev_LCD_HD44780_screen.tcc"
+#include "dev_LCD_screen.tcc"
 
 
 #endif

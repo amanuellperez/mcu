@@ -17,11 +17,12 @@
 
 
 #include "../../../dev_LCD_HD44780.h"
+#include "../../../dev_LCD_ostream.h"
 #include <avr_time.h>
 #include <stddef.h>
 
 
-// Si lo conectamos solo a 4 pins de datos
+// 16 x 02 and 20 x 04
 using LCD_pins = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<4>,
 				       dev::LCD_HD44780_RW<5>,
 				       dev::LCD_HD44780_E<6>,
@@ -30,14 +31,29 @@ using LCD_pins = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<4>,
 
 using LCD_HD44780 = dev::LCD_HD44780<LCD_pins>;
 
-using LCD_HD44780_1602_ostream = dev::LCD_HD44780_1602_ostream<LCD_HD44780>;
-using LCD_HD44780_2004_ostream = dev::LCD_HD44780_2004_ostream<LCD_HD44780>;
 
+// 40 x 04
+using LCD_4004_pins = dev::LCD_HD44780_4004_pins4<dev::LCD_HD44780_RS<4>,
+				       dev::LCD_HD44780_RW<5>,
+				       dev::LCD_HD44780_4004_E<6, 10>,
+				       dev::LCD_HD44780_D4<11,12,13,14>
+				       >;
+
+using LCD_HD44780_4004 = dev::LCD_HD44780_4004<LCD_4004_pins>;
+
+// ostreams
+using LCD_HD44780_ostream_1602 = dev::LCD_ostream_1602<LCD_HD44780>;
+using LCD_HD44780_ostream_2004 = dev::LCD_ostream_2004<LCD_HD44780>;
+using LCD_HD44780_ostream_4004 = dev::LCD_ostream_4004<LCD_HD44780_4004>;
+
+
+//using LCD_ostream = LCD_HD44780_ostream_1602;
+//using LCD_ostream = LCD_HD44780_ostream_2004;
+using LCD_ostream = LCD_HD44780_ostream_4004;
 
 void test_lcd_ostream4()
 {
-//    LCD_HD44780_1602_ostream lcd;
-    LCD_HD44780_2004_ostream lcd;
+    LCD_ostream lcd;
 
     while(1){
 	lcd.clear();
@@ -46,8 +62,9 @@ void test_lcd_ostream4()
 	char c = 'x';
 	lcd << "\nUn caracter (x): [" << c << "]";
 	wait_ms(1000);
-	lcd << "\nUna frase un poco larga...";
-	wait_ms(1500);
+        lcd << "\nUna frase que sea un poco larga, para que no entre en una "
+               "linea...";
+        wait_ms(1500);
 	char u8 = 'c';
 	lcd << "\nUn uint8_t(c): [" << u8 << "]";
 	wait_ms(1000);

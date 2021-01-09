@@ -50,17 +50,17 @@ Es el típico LCD 16 x 2 ó 20 x 4.
 Formado por varios ficheros:
 
 * `dev_LCD_HD44780_basic.h`: es el traductor del dispositivo.
-* `dev_LCD_HD44780_screen.h`: concebimos el LCD como terminal.
+* `dev_LCD_screen.h`: concebimos el LCD como terminal.
    Un terminal es un terminal vulgar y corriente: vas escribiendo en él. 
    Cuando llegas a la última columna automáticamente pasa a la siguiente 
    fila, y si esta fuera la última fila tira todo lo escrito hacia arriba
    y continuas escribiendo.
    
-* `dev_LCD_HD44780_ostream.h`: concebimos el LCD como ostream.
-   Por defecto se suministran LCD de 16x2 y de 20x04: `LCD_HD44780_1602_ostream`
-   y `LCD_HD44780_2004_ostream`.
+* `dev_LCD_ostream.h`: concebimos el LCD como ostream.
+   Por defecto se suministran LCD de 16x2 y de 20x04: `LCD_ostream_1602`
+   y `LCD_ostream_2004`.
    
-   Ejemplo: (ver `test/HD44780`)
+   Ejemplo: (ver `test/LCD`)
 ```
 using LCD_pins = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<4>,
 				       dev::LCD_HD44780_RW<5>,
@@ -70,9 +70,9 @@ using LCD_pins = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<4>,
 
 using LCD_HD44780 = dev::LCD_HD44780<LCD_pins>;
 
-using LCD_HD44780_1602_ostream = dev::LCD_HD44780_1602_ostream<LCD_HD44780>;
+using LCD_ostream = dev::LCD_ostream_1602<LCD_HD44780>;
  
-LCD_HD44780_1602_ostream lcd;
+LCD_ostream lcd;
 
 lcd.clear();
 lcd << "hola\n"; // escribo cadenas

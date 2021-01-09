@@ -370,13 +370,13 @@ void LCD_HD44780_base<P>::setup_pins()
 
 
 
-// Definimos las conexiones hardware del display.
-// Interface 4 bits.
-template <typename P>
-inline LCD_HD44780_base<P>::LCD_HD44780_base()
-{
-    setup(); 
-}
+//// Definimos las conexiones hardware del display.
+//// Interface 4 bits.
+//template <typename P>
+//inline LCD_HD44780_base<P>::LCD_HD44780_base()
+//{
+//    setup(); 
+//}
 
 
 // Para realizar una operación en el LCD necesitamos activar E
@@ -526,11 +526,6 @@ void LCD_HD44780_base<P>::init()
 }
 
 
-template <typename P>
-void LCD_HD44780_base<P>::setup()
-{
-    setup_pins();
-}
 
 template <typename P>
 template <typename pin_E>

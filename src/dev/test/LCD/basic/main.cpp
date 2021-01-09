@@ -28,19 +28,32 @@ using LCD_pins = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<4>,
 				       dev::LCD_HD44780_D4<11,12,13,14>
 				       >;
 
-using LCD_HD44780 = dev::LCD_HD44780<LCD_pins>;
+using LCD = dev::LCD_HD44780<LCD_pins>;
 
 
-void print(LCD_HD44780& lcd, const char* c)
+void print(LCD& lcd, const char* c)
 {
     while(*c)
 	lcd.write_data_to_CG_or_DDRAM(*c++);
 }
 
+void test_static()
+{
+    LCD::init();
+
+    // Probamos que funcionen las funciones básicas de impresión
+    // Si no el resto no funcionará.
+    LCD::write_data_to_CG_or_DDRAM('O');
+    LCD::write_data_to_CG_or_DDRAM('K');
+    LCD::write_data_to_CG_or_DDRAM('?');
+    wait_ms(1000);
+}
+
+
 // Probamos el LCD conectado a 4 pines de datos 
 void test_lcd4()
 {
-    LCD_HD44780 lcd;
+    LCD lcd;
 
     const char shift_izda[] = "shift izda";
     const char shift_dcha[] = "shift dcha";
@@ -191,7 +204,7 @@ void test_lcd4()
 }
 
 
-void new_glyph(LCD_HD44780& lcd, const char glyph[8])
+void new_glyph(LCD& lcd, const char glyph[8])
 {
     for (uint8_t i  = 0; i < 8; ++i)
 	lcd.write_data_to_CG_or_DDRAM(glyph[i]);
@@ -199,7 +212,7 @@ void new_glyph(LCD_HD44780& lcd, const char glyph[8])
 }
 
 
-void show_glyphs(LCD_HD44780& lcd,
+void show_glyphs(LCD& lcd,
 	const char g1[8], 
 	const char g2[8], 
 	const char g3[8], 
@@ -235,7 +248,7 @@ void test_cgram4()
 {
     using namespace dev::character_glyphs_basic;
 
-    LCD_HD44780 lcd;
+    LCD lcd;
     show_glyphs(lcd,
                 bell,
                 arrow_up,
@@ -277,6 +290,7 @@ void test_cgram4()
 int main()
 {
     while(1){
+	test_static();
 	test_lcd4();
 	test_cgram4();
     }
