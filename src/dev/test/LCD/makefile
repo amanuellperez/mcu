@@ -1,6 +1,7 @@
-DIRS = 	basic	\
-	   	charset \
-		screen	\
+DIRS = 	basic		\
+		basic_4004	\
+	   	charset 	\
+		screen		\
 		ostream	
 
 
