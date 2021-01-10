@@ -50,8 +50,15 @@ using Keyboard = dev::Basic_keyboard<Keyboard_pins, Keyboard_codes>;
 
 using LCD_HD44780 = dev::LCD_HD44780<LCD_pins>;
 
-using LCD_HD44780_1602_ostream = dev::LCD_HD44780_1602_ostream<LCD_HD44780>;
-using LCD_HD44780_2004_ostream = dev::LCD_HD44780_2004_ostream<LCD_HD44780>;
+// Tipos de LCDs probados
+using LCD_ostream_1602 = dev::LCD_ostream_1602<LCD_HD44780>;
+using LCD_ostream_2004 = dev::LCD_ostream_2004<LCD_HD44780>;
+
+// Choose LCD to test
+// using LCD = LCD_ostream_1602;
+using LCD = LCD_ostream_2004;
+
+
 
 
 constexpr std::array menu_unidad_tiempo = {"hora", "min", "seg"};
@@ -61,9 +68,7 @@ constexpr std::array menu_unidad_tiempo = {"hora", "min", "seg"};
 // Probamos el LCD_stream conectado a 4 pines de datos 
 void test_lcd_menu()
 {
-    // Si lo conectamos solo a 4 pins de datos
-    // LCD_HD44780_1602_ostream lcd;
-    LCD_HD44780_2004_ostream lcd;
+    LCD lcd;
 
     Keyboard keyboard;
 

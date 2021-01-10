@@ -42,12 +42,8 @@ namespace dev{
 // Screen flags
 // ------------
 enum class _LCD_screen_flags {
-    display_on_bit        = 1L << 0,
-    incrementa_cursor_bit = 1L << 1,
-    cursor_on_bit         = 1L << 2,
-    cursor_blink_bit      = 1L << 3,
-    stop_brcorner_bit	  = 1L << 4,	// stop bottom-right corner
-    wrap_bit		  = 1L << 5
+    stop_brcorner_bit	  = 1L << 1,	// stop bottom-right corner
+    wrap_bit		  = 1L << 2
 };
 
 inline constexpr _LCD_screen_flags operator&(_LCD_screen_flags a, _LCD_screen_flags b)
@@ -221,24 +217,24 @@ public:
 
 // CONFIGURACIÓN DEL LCD
     /// Enciende el LCD.
-    void display_on();
+    void display_on() {lcd_.display_on();}
 
     /// Apaga el LCD.
-    void display_off();
+    void display_off() {lcd_.display_off();}
 
     /// Muestra el cursor.
     /// Returns: El estado anterior del cursor.
-    bool cursor_on()	{return cursor(true);}
+    bool cursor_on()	{return lcd_.cursor_on();}
 
     /// No muestra el cursor.
     /// Returns: El estado anterior del cursor.
-    bool cursor_off()	{return cursor(false);}
+    bool cursor_off()	{return lcd_.cursor_off();}
 
     /// Hace que el cursor parpadee.
-    void cursor_blink()	    {cursor_blink(true);}
+    void cursor_blink()	    {lcd_.cursor_blink();}
 
     /// Hace que el cursor no parpadee.
-    void cursor_no_blink()  {cursor_blink(false);}
+    void cursor_no_blink()  {lcd_.cursor_no_blink();}
 
 // DATOS DEL LCD
     constexpr static uint8_t rows() {return num_rows;}
@@ -259,14 +255,6 @@ private:
     // ------------
     using scrflags = _LCD_screen_flags;
     
-    // Flags que necesito para desacoplar las responsabilidades
-    // de las instrucciones entry_mode y display_control
-    static constexpr scrflags display_on_bit  = scrflags::display_on_bit;
-    static constexpr scrflags incrementa_cursor_bit =
-						scrflags::incrementa_cursor_bit;
-    static constexpr scrflags cursor_on_bit    = scrflags::cursor_on_bit;
-    static constexpr scrflags cursor_blink_bit = scrflags::cursor_blink_bit;
-
     // Indica si cuando se intenta imprimir en el último caracter de la
     // screen, el caracter de la última línea a la derecha, se imprime el
     // caracter y se hace el '\n', o si no se imprime el '\n' (stop = true).
@@ -279,9 +267,7 @@ private:
     // continuamos escribiendola en la siguiente línea o no.
     static constexpr scrflags wrap_bit = scrflags::wrap_bit;
 
-    scrflags scrflags_ = scrflags::display_on_bit |
-			 scrflags::incrementa_cursor_bit |
-			 scrflags::wrap_bit;
+    scrflags scrflags_ = scrflags::wrap_bit;
 
     // Añade los flags de flg a scrflags_
     void set_flag(scrflags flg) { scrflags_ |= flg; }

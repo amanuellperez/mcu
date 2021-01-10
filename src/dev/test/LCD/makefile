@@ -1,8 +1,8 @@
 DIRS = 	basic		\
 		basic_4004	\
 	   	charset 	\
-		screen		\
-		ostream	
+		ostream		\
+		screen
 
 
 include $(MCU_RECRULES)

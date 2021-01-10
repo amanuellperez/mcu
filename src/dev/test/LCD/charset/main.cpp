@@ -17,14 +17,15 @@
 
 
 
-#include "../../../dev_LCD_HD44780_screen.h"
+#include "../../../dev_LCD_screen.h"
 #include "../../../dev_LCD_HD44780_basic.h"
 #include "../../../dev_LCD_HD44780_charset.h"
 #include <avr_time.h>
 #include <stddef.h>
 
 
-// Si lo conectamos solo a 4 pins de datos
+
+// 16 x 02 and 20 x 04
 using LCD_pins = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<4>,
 				       dev::LCD_HD44780_RW<5>,
 				       dev::LCD_HD44780_E<6>,
@@ -32,10 +33,26 @@ using LCD_pins = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<4>,
 				       >;
 
 using LCD_HD44780 = dev::LCD_HD44780<LCD_pins>;
-using LCD_HD44780_1602_screen = dev::LCD_HD44780_1602_screen<LCD_HD44780>;
-using LCD_HD44780_2004_screen = dev::LCD_HD44780_2004_screen<LCD_HD44780>;
 
-using LCD = LCD_HD44780_1602_screen;
+// 40 x 04
+using LCD_4004_pins = dev::LCD_HD44780_4004_pins4<dev::LCD_HD44780_RS<4>,
+				       dev::LCD_HD44780_RW<5>,
+				       dev::LCD_HD44780_4004_E<6, 10>,
+				       dev::LCD_HD44780_D4<11,12,13,14>
+				       >;
+
+using LCD_HD44780_4004 = dev::LCD_HD44780_4004<LCD_4004_pins>;
+
+// Tipos de LCD screen probados
+using LCD_HD44780_1602_screen = dev::LCD_screen_1602<LCD_HD44780>;
+using LCD_HD44780_2004_screen = dev::LCD_screen_2004<LCD_HD44780>;
+using LCD_HD44780_4004_screen = dev::LCD_screen_4004<LCD_HD44780_4004>;
+
+// Choose what LCD to test
+//using LCD = LCD_HD44780_1602_screen;
+//using LCD = LCD_HD44780_2004_screen;
+using LCD = LCD_HD44780_4004_screen;
+
 using symbol = dev::HD44780_charset_A00;
 
 void print1(LCD& lcd)

@@ -47,7 +47,7 @@ using LCD_HD44780_1602_screen = dev::LCD_screen_1602<LCD_HD44780>;
 using LCD_HD44780_2004_screen = dev::LCD_screen_2004<LCD_HD44780>;
 using LCD_HD44780_4004_screen = dev::LCD_screen_4004<LCD_HD44780_4004>;
 
-// Choose what LCD to test
+// Choose LCD to test
 //using LCD = LCD_HD44780_1602_screen;
 //using LCD = LCD_HD44780_2004_screen;
 using LCD = LCD_HD44780_4004_screen;
@@ -64,18 +64,20 @@ void rprint(LCD& lcd, const char* msg)
 
 }
 
-const char long_msg[] = "En un lugar de la mancha, de cuyo nombre no quiero "
-		   "acordarme. Creo que paso de escribir todo el Quijote."
-		   "Aunque necesito escribir mas si quiero ver como se "
-		   "comporta el LCD de 40 x 04.";
+const char long_msg[] = "En un lugar de La Mancha, de cuyo nombre"
+                        "no quiero acordarme, no ha mucho tiempo "
+                        "que vivia un hidalgo de los de lanza en "
+                        "astillero, adarga antigua, rocin flaco y"
+			"galgo corredor. Don Quijote (Cervantes)";
 
-void test_lcd_screen4_16()
+
+void test_lcd_screen4_1602()
 {
     LCD lcd;
 
 // ------
     lcd.clear();
-    lcd.print("LCD screen (16)");
+    lcd.print("LCD screen(1602)");
     wait_ms(1000);
 
 
@@ -153,7 +155,7 @@ void test_lcd_screen4_16()
     wait_ms(1000);
 
 // -----
-    const char menu[] = "First option, is very long\nSecond option\nThird";
+    const char menu[] = "First option, is very long";
     lcd.clear();
     lcd.nowrap();
     lcd.print("nowrap true");
@@ -202,7 +204,7 @@ void test_lcd_screen4_16()
     p = long_msg;
     while (*p){
 	lcd.print(*p);
-	wait_ms(50);
+	wait_ms(40);
 	++p;
     }
     wait_ms(1000);
@@ -263,7 +265,7 @@ void test_lcd_screen4_16()
 }
 
 
-void test_lcd_screen4_20()
+void test_lcd_screen4_2004()
 {
     LCD lcd;
 
@@ -464,7 +466,7 @@ void test_lcd_screen4_20()
 }
 
 
-void test_lcd_screen4_40()
+void test_lcd_screen4_4004()
 {
     LCD lcd;
 
@@ -570,7 +572,7 @@ void test_lcd_screen4_40()
     wait_ms(1000);
     lcd.clear();
     lcd.print(menu);
-    wait_ms(3000);
+    wait_ms(2000);
     lcd.wrap();
 
 // -----
@@ -580,7 +582,7 @@ void test_lcd_screen4_40()
     wait_ms(1000);
     lcd.clear();
     lcd.print(menu);
-    wait_ms(3000);
+    wait_ms(2000);
     lcd.wrap();
 
 // -----
@@ -688,11 +690,11 @@ void test_lcd_screen4_basico()
 void test_lcd_screen4()
 {
     switch(LCD::cols()){
-	case 16: test_lcd_screen4_16(); break;
-	case 20: test_lcd_screen4_20(); break;
-	case 40: test_lcd_screen4_40(); break;
+	case 16: test_lcd_screen4_1602(); break;
+	case 20: test_lcd_screen4_2004(); break;
+	case 40: test_lcd_screen4_4004(); break;
 
-	default: test_lcd_screen4_16(); break;
+	default: test_lcd_screen4_1602(); break;
     }
 }
 

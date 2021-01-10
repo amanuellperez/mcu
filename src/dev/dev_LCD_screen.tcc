@@ -218,60 +218,6 @@ void LCD_screen<num_cols, num_rows, LCD>::cursor_pos(uint8_t col, uint8_t row)
 }
 
 
-// Enciende el LCD.
-template <uint8_t num_cols, uint8_t num_rows, typename LCD>
-void LCD_screen<num_cols, num_rows, LCD>::display_on() 
-{
-    set_flag(display_on_bit);
-    lcd_.display_control(flag(display_on_bit),
-			 flag(cursor_on_bit),
-			 flag(cursor_blink_bit));
-
-    cursor_pos(x_, y_);
-}
-
-// Apaga el LCD.
-template <uint8_t num_cols, uint8_t num_rows, typename LCD>
-void LCD_screen<num_cols, num_rows, LCD>::display_off() 
-{
-    unset_flag(display_on_bit);
-    lcd_.display_control(flag(display_on_bit),
-			 flag(cursor_on_bit),
-			 flag(cursor_blink_bit));
-}
-
-
-
-template <uint8_t num_cols, uint8_t num_rows, typename LCD>
-bool LCD_screen<num_cols, num_rows, LCD>::cursor(bool on)
-{
-    bool res = flag(cursor_on_bit);
-
-    if (on)
-	set_flag(cursor_on_bit);
-    else
-	unset_flag(cursor_on_bit);
-
-    lcd_.display_control(flag(display_on_bit),
-			 flag(cursor_on_bit),
-			 flag(cursor_blink_bit));
-
-    return res;
-}
-
-
-template <uint8_t num_cols, uint8_t num_rows, typename LCD>
-void LCD_screen<num_cols, num_rows, LCD>::cursor_blink(bool yes)
-{
-    if (yes)
-	set_flag(cursor_blink_bit);
-    else
-	unset_flag(cursor_blink_bit);
-
-    lcd_.display_control(flag(display_on_bit),
-			 flag(cursor_on_bit),
-			 flag(cursor_blink_bit));
-}
 
 
 
