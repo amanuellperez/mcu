@@ -109,8 +109,8 @@ indican ninguna característica con lo que no sabes lo que estas comprando.
 ### Vídeos
 Estas son las pruebas de `LCD_screen` (los grabé con el móvil y han quedado la
 mar de cutres, pero bueno son los primeros y no creo que nadie los vea):
-* [test screen 16 x 02](https://youtu.be/garxHAmSEDU)
-* [test screen 20 x 04](https://youtu.be/garxHAmSEDU)
+* [test screen 16 x 02](https://youtu.be/Q0Fmtg7nzDE)
+* [test screen 20 x 04](https://youtu.be/garxHAmSEDU) (este se ve fatal)
 * [test screen 40 x 04](https://youtu.be/3GiaSXCdTn0)
 
 
