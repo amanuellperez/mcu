@@ -22,9 +22,9 @@ Driver: HD44780.
 
 ## RTC (Real-Time Clock)
 
-| reference | i2c | spi |
+| Reference | I2C | SPI |
 |-----------|:---:|:---:|
-|ds1307	    |  x  |     |
+|DS1307	    |  x  |     |
 
 
 ## Sensors
@@ -38,8 +38,11 @@ Driver: HD44780.
 
 
 T = temperature
+
 P = pressure
+
 H = humidity
+
 G = gas
 
 
