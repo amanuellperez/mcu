@@ -113,5 +113,8 @@ mar de cutres, pero bueno son los primeros y no creo que nadie los vea):
 * [test screen 20 x 04](https://youtu.be/garxHAmSEDU) (este se ve fatal)
 * [test screen 40 x 04](https://youtu.be/3GiaSXCdTn0)
 
+### Documentación
+* app note AN658 de Microchip: [LCD
+  Fundamentals](https://www.microchip.com/wwwAppNotes/AppNotes.aspx?appnote=en011075)
 
 Probado con: avr-gcc 9.2.0
