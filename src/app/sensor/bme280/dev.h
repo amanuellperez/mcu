@@ -22,7 +22,7 @@
 
 #include <dev_LCD_HD44780.h>
 #include <avr_TWI.h>
-#include <dev_BMP280_basic.h>
+#include <dev_BME280_basic.h>
 
 // pins usados
 // ------------
@@ -49,7 +49,7 @@ constexpr uint8_t LCD_D7_pin = 14;
 static constexpr uint8_t TWI_buffer_size = 100; 
 using TWI = avr::TWI_master<avr::TWI_basic, TWI_buffer_size>;
 static constexpr int TWI_frecuency = 50; // kHz
-static constexpr TWI::Address twi_sensor_address = 0x77;
+static constexpr TWI::Address twi_sensor_address = 0x76;
 
 
 
@@ -68,7 +68,7 @@ using LCD_ostream = dev::LCD_ostream_1602<dev::LCD_HD44780<LCD_pins>>;
 using lcd_symbol = dev::HD44780_charset_A00;
 
 // Sensor
-using Sensor = dev::BMP280_TWI<TWI, twi_sensor_address>;
+using Sensor = dev::BME280_TWI<TWI, twi_sensor_address>;
 
 
 #endif

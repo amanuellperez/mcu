@@ -18,33 +18,32 @@
 #include "main.h"
 
 
-Main::Main()
+void Main::init_sensor()
 {
-// init_hardware():
-    init_TWI();
-    init_lcd();
-    init_sensor();
+    sensor_.init();
+    sensor_.indoor_navigation();
+
+    if (sensor_.error()) {
+	lcd_.clear();
+	lcd_ << "Sensor no responde";
+	wait_ms(1000);
+    }
 }
 
-
-void Main::init_TWI()
+void Main::print_sensor()
 {
-    TWI::on<TWI_frecuency>();
+    Sensor::Celsius T;
+    Sensor::Pascal P;
+    Sensor::Relative_humidity H;
+    sensor_.T_and_P_and_H(T, P, H);
+    Sensor::Hectopascal hP{P};
+
+    lcd_.cursor_pos(0, 0);
+    lcd_ << T << ' ' << lcd_symbol::of("º") << 'C';
+    lcd_ << "  " << H << "%";
+    lcd_.cursor_pos(0, 1);
+    lcd_ << hP << " hPa";
 }
 
-
-void Main::init_lcd()
-{
-    lcd_.screen().stop_brcorner(true);// I'm not going to use it as a terminal
-    lcd_.screen().nowrap(); 
-}
-
-
-
-int main()
-{
-    Main app;
-    app.run();
-}
 
 

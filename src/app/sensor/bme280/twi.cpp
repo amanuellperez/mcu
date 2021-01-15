@@ -15,36 +15,15 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+
 #include "main.h"
 
+#include <avr_interrupt.h>
 
-Main::Main()
+
+ISR(TWI_vect)
 {
-// init_hardware():
-    init_TWI();
-    init_lcd();
-    init_sensor();
-}
-
-
-void Main::init_TWI()
-{
-    TWI::on<TWI_frecuency>();
-}
-
-
-void Main::init_lcd()
-{
-    lcd_.screen().stop_brcorner(true);// I'm not going to use it as a terminal
-    lcd_.screen().nowrap(); 
-}
-
-
-
-int main()
-{
-    Main app;
-    app.run();
+    TWI::handle_interrupt();
 }
 
 

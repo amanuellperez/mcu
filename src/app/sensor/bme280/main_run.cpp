@@ -17,34 +17,29 @@
 
 #include "main.h"
 
-
-Main::Main()
+void Main::run()
 {
-// init_hardware():
-    init_TWI();
-    init_lcd();
-    init_sensor();
+    while(1){
+	if (sensor_.error()) {
+	    lcd_.clear();
+	    lcd_ << "Error en el sensor";
+	}
+	else
+	    window_main();
+
+	wait_ms(1000);
+    }
 }
 
-
-void Main::init_TWI()
+void Main::window_main()
 {
-    TWI::on<TWI_frecuency>();
+    show_window_main();
 }
 
-
-void Main::init_lcd()
+void Main::show_window_main()
 {
-    lcd_.screen().stop_brcorner(true);// I'm not going to use it as a terminal
-    lcd_.screen().nowrap(); 
+    print_sensor();
 }
 
-
-
-int main()
-{
-    Main app;
-    app.run();
-}
 
 

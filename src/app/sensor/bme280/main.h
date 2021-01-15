@@ -15,36 +15,36 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "main.h"
+#pragma once
+
+#ifndef __SENSOR_MAIN_H__
+#define __SENSOR_MAIN_H__
+
+#include "dev.h"
+
+class Main{
+public:
+    Main();
+    void run();
+
+private:
+// Hardware
+    LCD_ostream lcd_;
+    Sensor sensor_;
+
+// init: hardware
+    void init_TWI();
+    void init_lcd();
+    void init_sensor();
+
+// Window: main
+    void window_main();
+    void show_window_main();
+
+// sensor
+    void print_sensor();
+};
 
 
-Main::Main()
-{
-// init_hardware():
-    init_TWI();
-    init_lcd();
-    init_sensor();
-}
-
-
-void Main::init_TWI()
-{
-    TWI::on<TWI_frecuency>();
-}
-
-
-void Main::init_lcd()
-{
-    lcd_.screen().stop_brcorner(true);// I'm not going to use it as a terminal
-    lcd_.screen().nowrap(); 
-}
-
-
-
-int main()
-{
-    Main app;
-    app.run();
-}
-
+#endif
 

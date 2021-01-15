@@ -17,6 +17,20 @@
 
 #include "main.h"
 
+
+void Main::init_sensor()
+{
+    sensor_.init();
+//    sensor_.handheld_device_low_power();
+    sensor_.indoor_navigation();
+
+    if (sensor_.error()) {
+	lcd_.clear();
+	lcd_ << "Sensor no responde";
+	wait_ms(1000);
+    }
+}
+
 void Main::print_sensor()
 {
     auto [T, hP] = sensor_.T_and_hP();
