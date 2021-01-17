@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez <amanuel.lperez@gmail.com>
+// Copyright (C) 2021 A.Manuel L.Perez <amanuel.lperez@gmail.com>
 //
 // This file is part of the MCU++ Library.
 //
@@ -16,33 +16,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "main.h"
-
+#include "cfg.h"
 #include <user_time.h>
-
-Main::Main()
-{
-// init_hardware():
-    init_TWI();
-    init_lcd();
-    init_keyboard();
-    init_rtc_clock();
-
-//    // No meto este wait en init_keyboard para que se vea explicitamente
-//    wait_ms(200);   // Garantizamos que los botones dejen de hacer bouncing
-}
-
-
-void Main::init_TWI()
-{
-    TWI::on<TWI_frecuency>();
-}
-
-void Main::init_lcd()
-{
-    lcd_.screen().stop_brcorner(true);// I'm not going to use it as a terminal
-    lcd_.screen().nowrap(); 
-}
-
 
 void Main::init_time(RTC::Time_point& t)
 {
@@ -67,13 +42,10 @@ void Main::init_rtc_clock()
     RTC::Time_point t;
     rtc_.read(t);    
 
-    if (rtc_.error())
-	return;
-
     if (!t.clock_on){
 	lcd_.clear();
-	lcd_ << "RTC v0.0";  // presentación y sirve para depurar
-	wait_ms(500);
+	lcd_ << "BME280 v1.0";  // presentación y sirve para depurar
+	wait_ms(200);
 	init_time(t);
 	window_set_time(t);
     }
@@ -96,8 +68,8 @@ void Main::window_set_time(RTC::Time_point& t)
 
     lcd_.clear();
 
-    print_time(gt, 0, 0);
-    user_get_time(gt, 0, 0);
+    print_datetime(gt, 0, 0);
+    user_get_datetime(gt, 0, 0);
 
     rtc_.write(t);
 
@@ -107,10 +79,27 @@ void Main::window_set_time(RTC::Time_point& t)
 
 
 
-int main()
+void Main::print_datetime(atd::Generic_time<RTC::Time_point> t, uint8_t x0, uint8_t y0)
 {
-    Main app;
-    app.run();
+    lcd_.cursor_pos(x0, y0);
+    atd::print_date(lcd_, t);
+
+    lcd_.cursor_pos(x0, y0 + 1);
+    atd::print_time(lcd_, t);
+
+    lcd_.cursor_pos(x0 + 9, y0+1);
+    atd::print_weekday<week_days_length>(lcd_, t, week_days);
+}
+
+
+// Decidimos cómo mostrar la fecha y la hora al usuario
+void Main::user_get_datetime(atd::Generic_time<RTC::Time_point> t, uint8_t x0, uint8_t y0)
+{
+    dev::user_get_date(lcd_, keyboard_, t, x0, y0);
+    dev::user_get_weekday<week_days_length>(lcd_, keyboard_, t, 
+					    x0 + 9, y0 + 1,
+					    week_days);
+    dev::user_get_time(lcd_, keyboard_, t, x0, y0 + 1);
 }
 
 

@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez <amanuel.lperez@gmail.com>
+// Copyright (C) 2021 A.Manuel L.Perez <amanuel.lperez@gmail.com>
 //
 // This file is part of the MCU++ Library.
 //
@@ -17,23 +17,15 @@
 
 #pragma once
 
-#ifndef __RTC_CLOCK_DEV_H__
-#define __RTC_CLOCK_DEV_H__
+#ifndef __SENSOR_DEV_H__
+#define __SENSOR_DEV_H__
 
-/****************************************************************************
- *
- *  - DESCRIPCION: Hardware connections
- *
- *  - HISTORIA:
- *    A.Manuel L.Perez
- *    25/12/2020 v0.0
- *
- ****************************************************************************/
-#include <stdint.h>
+#include <avr_TWI.h>
 
 #include <dev_LCD_HD44780.h>
 #include <dev_keyboard.h>
 
+#include <dev_BME280_basic.h>
 #include <dev_DS1307_clock.h>
 
 // pins usados
@@ -60,13 +52,16 @@ using Keyboard_pins = dev::Keyboard_pins<23, 24, 25>;
 // available: 26
 
 // using TWI: pins 27 and 28
-static constexpr uint8_t TWI_buffer_size = 70; 
+static constexpr uint8_t TWI_buffer_size = 100; 
 using TWI = avr::TWI_master<avr::TWI_basic, TWI_buffer_size>;
 static constexpr int TWI_frecuency = 50; // kHz
+static constexpr TWI::Address twi_sensor_address = 0x76;
+// twi_RTC_address = 0x68 (fijo)
 
 
 // Hardware connections
 // --------------------
+// LCD
 using LCD_pins = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<LCD_RS_pin>,
 					dev::LCD_HD44780_RW<LCD_RW_pin>,
 					dev::LCD_HD44780_E<LCD_E_pin>,
@@ -76,17 +71,17 @@ using LCD_pins = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<LCD_RS_pin>,
 							    LCD_D7_pin>>;
 
 using LCD_ostream = dev::LCD_ostream_1602<dev::LCD_HD44780<LCD_pins>>;
-
+using lcd_symbol = dev::HD44780_charset_A00;
 
 // keyboard
 using namespace dev::Key_codes; // OK_KEY, UP_KEY, DOWN_KEY
 using Keyboard_codes = dev::Keyboard_codes<OK_KEY, UP_KEY, DOWN_KEY>;
 using Keyboard       = dev::Basic_keyboard<Keyboard_pins, Keyboard_codes>;
 
-// RTC_clock
 
-using RTC = dev::DS1307_clock<TWI>;
-
+// Other
+using Sensor = dev::BME280_TWI<TWI, twi_sensor_address>;
+using RTC    = dev::DS1307_clock<TWI>;
 
 
 #endif

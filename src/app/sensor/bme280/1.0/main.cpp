@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez <amanuel.lperez@gmail.com>
+// Copyright (C) 2021 A.Manuel L.Perez <amanuel.lperez@gmail.com>
 //
 // This file is part of the MCU++ Library.
 //
@@ -15,51 +15,39 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-
 #include "main.h"
-#include <dev_system_clock.h>
-#include <atd_time.h>
 
-void Main::run()
+
+Main::Main()
 {
-    while(1){
-	if (rtc_.error())
-	    error();
-	else 
-	    window_main();
+// init_hardware():
+    init_TWI();
+    init_lcd();
+    init_keyboard();
+    init_sensor();
+    init_rtc_clock();
+}
 
-	wait_ms(100); // ¿se puede poner 500 ms? No, dejaría de funcionar el
-		      // teclado ya que solo se miraría cada 500 ms si se
-		      // ha pulsado una tecla o no.
-    }
+
+void Main::init_TWI()
+{
+    TWI::on<TWI_frecuency>();
+}
+
+
+void Main::init_lcd()
+{
+    lcd_.screen().stop_brcorner(true);// I'm not going to use it as a terminal
+    lcd_.screen().nowrap(); 
+    lcd_.fill('0');
 }
 
 
 
-
-void Main::window_main()
+int main()
 {
-    show_window_main();
-
-    if (user_press_change_time())
-    {
-	wait_user_release_change_time();
-	window_set_time();
-    }
+    Main app;
+    app.run();
 }
 
 
-void Main::show_window_main()
-{
-    RTC::Time_point t;
-    rtc_.read(t);
-    print_time(atd::Generic_time<RTC::Time_point>{t}, 0, 0);
-}
-
-
-
-void Main::error()
-{
-    lcd_.clear();
-    lcd_ << "RTC error";
-}

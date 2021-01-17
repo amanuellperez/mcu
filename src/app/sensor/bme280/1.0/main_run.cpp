@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez <amanuel.lperez@gmail.com>
+// Copyright (C) 2021 A.Manuel L.Perez <amanuel.lperez@gmail.com>
 //
 // This file is part of the MCU++ Library.
 //
@@ -15,27 +15,27 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-
 #include "main.h"
-#include <dev_system_clock.h>
-#include <atd_time.h>
 
 void Main::run()
 {
+    lcd_.clear();
+
     while(1){
-	if (rtc_.error())
-	    error();
-	else 
+	// TODO: if (errno_) error();
+	if (sensor_.error()) {
+	    lcd_.clear();
+	    lcd_ << "Sensor error";
+	} else if (rtc_.error()) {
+	    lcd_.clear();
+	    lcd_ << "RTC error";
+	}
+	else
 	    window_main();
 
-	wait_ms(100); // ¿se puede poner 500 ms? No, dejaría de funcionar el
-		      // teclado ya que solo se miraría cada 500 ms si se
-		      // ha pulsado una tecla o no.
+	wait_ms(100);
     }
 }
-
-
-
 
 void Main::window_main()
 {
@@ -48,18 +48,28 @@ void Main::window_main()
     }
 }
 
-
 void Main::show_window_main()
 {
-    RTC::Time_point t;
-    rtc_.read(t);
-    print_time(atd::Generic_time<RTC::Time_point>{t}, 0, 0);
+    RTC::Time_point t0;
+    rtc_.read(t0);
+    atd::Generic_time<RTC::Time_point> t{t0};
+    
+    lcd_.cursor_pos(0, 0);
+    lcd_ << std::setw(2) << t.hours() << ':'
+	<< std::setw(2) << t.minutes();
+
+    Sensor::Celsius T;
+    Sensor::Pascal P;
+    Sensor::Relative_humidity H;
+    sensor_.T_and_P_and_H(T, P, H);
+    Sensor::Hectopascal hP{P};
+
+    lcd_.cursor_pos(8, 0);
+    lcd_ << T << ' ' << lcd_symbol::of("º") << 'C';
+    lcd_.cursor_pos(0, 1);
+    lcd_ << H << "% ";
+    lcd_ << hP << " hPa ";
 }
 
 
 
-void Main::error()
-{
-    lcd_.clear();
-    lcd_ << "RTC error";
-}

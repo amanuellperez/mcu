@@ -37,10 +37,19 @@ hacer mínimo 2 prototipos:
 
 A parte de los problemas que ya observé en el `basic_clock` (LCD radiante y
 uso 7.5 voltios de alimentación) se ve que faltan cosas:
-1. No aparece el día de la semana, pero el RTC lo suministra.
-2. Al poner la hora no es posible pasar de 00 a 59. Si quieres poner 50
+1. (corregido) No aparece el día de la semana, pero el RTC lo suministra.
+2. (corregido) Al poner la hora no es posible pasar de 00 a 59. Si quieres poner 50
    minutos te toca ir desde 00 hasta 50, lo cual es incómodo.
-3. Con el LCD radiante sería interesante poder apagar el LCD.
+3. (corregido) Con el LCD radiante sería interesante poder apagar el LCD.
+   Añado un interruptor para apagar/encender tanto LCD como avr. Por ello
+   cuando se inicializa el avr al inicializar el RTC mira a ver si está
+   encendido. Si está encendido no pide la hora.
+4. (corregido) Al dejar el reloj funcionando, si se prueba a apagar y encender 
+   hay veces se enciende pidiendo que se ponga en hora. Otras veces arranca
+   correctamente. ¿Qué es lo que pasaba? Parece ser que el botón OK hace
+   bouncing. De hecho si antes de encenderlo le das un golpe y lo enciendes
+   siempre arranca pidiendo que se ponga en hora. Para evitar este problema
+   en lugar de usar un único botón uso dos para ponerlo en hora (OK y DOWN).
 
 
 ## Versión 0.0.1
