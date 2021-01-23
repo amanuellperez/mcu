@@ -31,45 +31,9 @@ void Main::run()
 	    lcd_ << "RTC error";
 	}
 	else
-	    window_main();
+	    window_main_.run();
 
-	wait_ms(100);
+	wait_ms(time_polling);
     }
 }
-
-void Main::window_main()
-{
-    show_window_main();
-
-    if (user_press_change_time())
-    {
-	wait_user_release_change_time();
-	window_set_time();
-    }
-}
-
-void Main::show_window_main()
-{
-    RTC::Time_point t0;
-    rtc_.read(t0);
-    atd::Generic_time<RTC::Time_point> t{t0};
-    
-    lcd_.cursor_pos(0, 0);
-    lcd_ << std::setw(2) << t.hours() << ':'
-	<< std::setw(2) << t.minutes();
-
-    Sensor::Celsius T;
-    Sensor::Pascal P;
-    Sensor::Relative_humidity H;
-    sensor_.T_and_P_and_H(T, P, H);
-    Sensor::Hectopascal hP{P};
-
-    lcd_.cursor_pos(8, 0);
-    lcd_ << T << ' ' << lcd_symbol::of("º") << 'C';
-    lcd_.cursor_pos(0, 1);
-    lcd_ << H << "% ";
-    lcd_ << hP << " hPa ";
-}
-
-
 

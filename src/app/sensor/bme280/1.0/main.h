@@ -23,12 +23,67 @@
 #include "dev.h"
 #include "cfg.h"
 
+class Main;
+
+// Idea: concibo lo que quiero mostrar como un scroll (= papel con un número 
+// fijo de filas) donde muestro solo una pequeña parte a través de una
+// ventana. La ventana es del ancho del scroll, así que solo tenemos que
+// moverla de arriba abajo.
+struct Window_main{
+    Window_main(Main* main):main_{main} {} 
+
+    void run();
+
+    void show();
+
+    void scroll_up(); 
+    void scroll_down();
+    
+    void print_date(uint8_t row, const RTC::Time_point& t0);
+    void print_time(uint8_t row, const RTC::Time_point& t0);
+    void print(uint8_t row,
+               const Sensor::Celsius& T,
+               const Sensor::Relative_humidity& H);
+    void print(uint8_t row, const Sensor::Hectopascal& hp);
+    
+    void draw_cursor();
+
+    void lcd_fill_blank();
+    
+    bool redraw();
+
+    // window rows
+    static constexpr uint8_t wrows_ = LCD_ostream::rows();
+    static constexpr uint8_t wcols_ = LCD_ostream::cols();
+
+    // scroll rows
+    static constexpr uint8_t srows_ = 4;
+
+    // window position
+    uint8_t yw_ = 1; // Fila donde empezamos a dibujar el scroll
+
+    // cursor position (relative to the window)
+    uint8_t yc_ = 0;     
+
+    // ¿hay que redibujar la ventana?
+    bool redraw_ = true;
+
+// (RRR) Necesito acceder a todo el hardware y a funciones de main.
+    Main* main_;
+
+    LCD_ostream& lcd();
+    Keyboard keyboard();
+    RTC& rtc();
+    Sensor& sensor();
+
+};
+
+
 class Main{
 public:
     Main();
     void run();
 
-private:
 // Hardware
     LCD_ostream lcd_;
     Keyboard keyboard_;
@@ -36,7 +91,10 @@ private:
     Sensor sensor_;
     RTC rtc_;
 
+// Time
+    void window_set_time();
 
+private:
 // init: hardware
     void init_TWI();
     void init_lcd();
@@ -47,10 +105,9 @@ private:
 
 // Window: main
     void window_main();
-    void show_window_main();
+    Window_main window_main_{this};
 
 // Window : set_time
-    void window_set_time();
     void window_set_time(RTC::Time_point& t);
 
 // Helping functions
@@ -86,6 +143,13 @@ inline void wait_release_key()
 {
     wait_ms(time_wait_release_key);
 }
+
+
+
+inline LCD_ostream& Window_main::lcd() {return main_->lcd_;}
+inline Keyboard Window_main::keyboard() {return main_->keyboard_;}
+inline RTC& Window_main::rtc() {return main_->rtc_;}
+inline Sensor& Window_main::sensor() {return main_->sensor_;}
 
 
 #endif

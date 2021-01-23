@@ -55,7 +55,7 @@ using Keyboard_pins = dev::Keyboard_pins<23, 24, 25>;
 static constexpr uint8_t TWI_buffer_size = 100; 
 using TWI = avr::TWI_master<avr::TWI_basic, TWI_buffer_size>;
 static constexpr int TWI_frecuency = 50; // kHz
-static constexpr TWI::Address twi_sensor_address = 0x76;
+static constexpr TWI::Address twi_sensor_address = 0x77;
 // twi_RTC_address = 0x68 (fijo)
 
 

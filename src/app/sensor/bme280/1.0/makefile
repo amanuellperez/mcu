@@ -4,7 +4,8 @@ SOURCES= main.cpp	\
 	main_run.cpp	\
 	sensor.cpp		\
 	time.cpp		\
-	twi.cpp
+	twi.cpp			\
+	window_main.cpp
 
 
 MCU = atmega328p

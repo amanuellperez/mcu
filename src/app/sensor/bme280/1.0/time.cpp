@@ -43,11 +43,13 @@ void Main::init_rtc_clock()
     rtc_.read(t);    
 
     if (!t.clock_on){
-	lcd_.clear();
-	lcd_ << "BME280 v1.0";  // presentación y sirve para depurar
-	wait_ms(200);
-	init_time(t);
-	window_set_time(t);
+	t.clock_on = true;
+	rtc_.write(t);
+//	lcd_.clear();
+//	lcd_ << "BME280 v1.0";  // presentación y sirve para depurar
+//	wait_ms(200);
+//	init_time(t);
+//	window_set_time(t);
     }
 }
 

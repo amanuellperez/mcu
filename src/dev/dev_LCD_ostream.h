@@ -69,10 +69,10 @@ private:
 
 
 
-template <uint8_t cols, uint8_t rows, typename LCD>
+template <uint8_t cols0, uint8_t rows0, typename LCD>
 class LCD_ostream: public std::ostream{
 public:
-    using Screen = LCD_screen<cols, rows, LCD>;
+    using Screen = LCD_screen<cols0, rows0, LCD>;
 
     explicit LCD_ostream() : std::ostream{&sb_} {}
 
@@ -106,8 +106,14 @@ public:
     Screen& screen() {return sb_.screen();}
     const Screen& screen() const {return sb_.screen();}
 
+    /// Número de filas del LCD
+    static constexpr uint8_t rows() {return rows0;}
+
+    /// Número de columnas del LCD
+    static constexpr uint8_t cols() {return cols0;}
+
 private:
-    LCD_streambuf<cols, rows, LCD> sb_;
+    LCD_streambuf<cols0, rows0, LCD> sb_;
     
 };
 
