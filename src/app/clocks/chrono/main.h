@@ -1,0 +1,68 @@
+// Copyright (C) 2021 A.Manuel L.Perez <amanuel.lperez@gmail.com>
+//
+// This file is part of the MCU++ Library.
+//
+// MCU++ Library is a free library: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#pragma once
+
+#ifndef __CHRONO_MAIN_H__
+#define __CHRONO_MAIN_H__
+
+
+#include "dev.h"
+#include "cfg.h"
+
+#include <avr_time.h>
+#include <user_time.h>
+
+/*!
+ *  \brief  Application.
+ *
+ */
+class Main {
+public:
+    Main();
+    void run();
+
+private:
+// Hardware
+    LCD_ostream lcd_;
+    Keyboard keyboard_;
+
+// State: pasarlo a flags si se usan más de 1 flag.
+    bool chrono_on = false;
+
+// init: hardware
+    void init_lcd();
+    void init_keyboard() { }
+    void init_chronometer();
+
+
+// Window: main
+    void window_main();
+    void show_window_main();
+
+};
+
+
+inline void wait_release_key()
+{
+    wait_ms(time_wait_release_key);
+}
+
+
+
+#endif
+
