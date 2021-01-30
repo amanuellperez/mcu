@@ -41,8 +41,10 @@ private:
     LCD_ostream lcd_;
     Keyboard keyboard_;
 
-// State: pasarlo a flags si se usan más de 1 flag.
-    bool chrono_on = false;
+// state: pasarlo a flags si se usan más de 1 flag.
+    enum class State {stop, running, alarm };
+
+    State state_ = State::stop;
 
 // init: hardware
     void init_lcd();
@@ -52,8 +54,11 @@ private:
 
 // Window: main
     void window_main();
-    void show_window_main();
+    void window_state_stop();
+    void window_state_running();
+    void window_state_alarm();
 
+    void print_time();
 };
 
 

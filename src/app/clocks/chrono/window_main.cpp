@@ -20,29 +20,66 @@
 
 void Main::window_main()
 {
-    if (chrono_on)
-	show_window_main();
-
-    if (keyboard_.key<OK_KEY>().is_pressed()){
-	if (chrono_on)
-	    Chronometer::stop();
-
-	else
-	    Chronometer::start();
-    
-	chrono_on = !chrono_on;
-
-	show_window_main();
-
-	wait_release_key();
+    switch(state_){
+	case State::stop    : window_state_stop(); break;
+	case State::running : window_state_running(); break;
+	case State::alarm   : window_state_alarm(); break;
     }
 
 }
 
 
-void Main::show_window_main()
+void Main::window_state_stop()
+{
+    while (keyboard_.key<OK_KEY>().is_not_pressed()){
+	if (keyboard_.key<UP_KEY>().is_pressed()){
+	    Chronometer::add(std::chrono::seconds{1});
+	    print_time();
+	}
+
+	else if (keyboard_.key<DOWN_KEY>().is_pressed()){
+	    Chronometer::substract(std::chrono::seconds{1});
+	    print_time();
+	}
+
+	wait_release_key();
+    }
+
+    Chronometer::start();
+    state_ = State::running;
+
+    wait_release_key();
+}
+
+
+void Main::window_state_running()
+{
+    if (keyboard_.key<OK_KEY>().is_pressed()){
+	Chronometer::stop();
+	state_ = State::stop;
+    }
+
+    else if (std::chrono::seconds{Chronometer::now().time_since_epoch()} ==
+             std::chrono::seconds{0}) {
+	Chronometer::stop();
+	state_ = State::alarm;
+    }
+
+    print_time();
+
+}
+
+void Main::window_state_alarm()
+{
+    lcd_.clear();
+    lcd_ << "ALARM!!!";
+}
+
+
+void Main::print_time()
 {
     lcd_.cursor_pos(0,0);
-    lcd_ << Chronometer::now()/10;
+    std::chrono::seconds sec{Chronometer::now().time_since_epoch()};
+    lcd_ << sec.count();
 }
 
