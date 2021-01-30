@@ -15,56 +15,21 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "main.h"
+#pragma once
 
-Main::Main()
-{
-// init_hardware():
-    init_lcd();
-    init_keyboard();
-    init_chronometer();
-}
+#ifndef __CHRONO_KEYBOARD_H__
+#define __CHRONO_KEYBOARD_H__
 
+#include <stdint.h>
 
+class Keyboard_time_to_wait{
+public:
+    void reset() {n = 0;}
+    int16_t time_up();
+    int16_t time_down();
 
-void Main::init_lcd()
-{
-    lcd_.screen().stop_brcorner(true);// I'm not going to use it as a terminal
-    lcd_.screen().nowrap(); 
-    lcd_.fill('0');
-}
+private:
+    int8_t n = 0;
+};
 
-void Main::init_chronometer()
-{
-    Chronometer::init();
-}
-
-
-void Main::run()
-{
-    print_time();
-
-    while(1){
-//	if (errno_)
-//	    error();
-//	else 
-	    window_main();
-
-	wait_ms(100); // es un reloj de horno. Miro el teclado cada 100 ms
-//	wait_ms(10); // es un cronometro que funciona a 1 ms. 
-//		    // Actualizo el LCD cada 1 ms (si se elimina este wait_ms
-//		    // el LCD se actualiza tan rápido que no se ve nada)
-    }
-}
-
-
-
-int main()
-{
-    Main app;
-    app.run();
-}
-
-
-
-
+#endif

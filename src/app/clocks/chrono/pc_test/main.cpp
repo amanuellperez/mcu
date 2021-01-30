@@ -27,7 +27,7 @@ void test_sexagesimal_time()
 {
     test::interfaz("__Chronometer_sexagtime");
 
-    using Sexag = dev::__Chronometer_ms_sexagtime;
+    using Sexag = dev::__Chronometer_sexagesimal_ms;
 
     {// 0
     Sexag t;

@@ -15,56 +15,49 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "main.h"
+#include "keyboard.h"
 
-Main::Main()
+int16_t Keyboard_time_to_wait::time_up()
 {
-// init_hardware():
-    init_lcd();
-    init_keyboard();
-    init_chronometer();
-}
+    if (n < 0)
+	n = 0;
 
-
-
-void Main::init_lcd()
-{
-    lcd_.screen().stop_brcorner(true);// I'm not going to use it as a terminal
-    lcd_.screen().nowrap(); 
-    lcd_.fill('0');
-}
-
-void Main::init_chronometer()
-{
-    Chronometer::init();
-}
-
-
-void Main::run()
-{
-    print_time();
-
-    while(1){
-//	if (errno_)
-//	    error();
-//	else 
-	    window_main();
-
-	wait_ms(100); // es un reloj de horno. Miro el teclado cada 100 ms
-//	wait_ms(10); // es un cronometro que funciona a 1 ms. 
-//		    // Actualizo el LCD cada 1 ms (si se elimina este wait_ms
-//		    // el LCD se actualiza tan rápido que no se ve nada)
+    if (n < 10){
+	++n;
+	return 1;
     }
+    else if (n < 22){
+	++n;
+	return 10;
+    }
+    else if (n < 50){
+	++n;
+	return 60;
+    }
+
+    else
+	return 600;
+
 }
 
-
-
-int main()
+int16_t Keyboard_time_to_wait::time_down()
 {
-    Main app;
-    app.run();
+    if (n > 0)
+	n = 0;
+
+    if (n > -10){
+	--n;
+	return 1;
+    }
+    else if (n > -22){
+	--n;
+	return 10;
+    }
+    else if (n > -50){
+	--n;
+	return 60;
+    }
+    else
+	return 600;
+
 }
-
-
-
-

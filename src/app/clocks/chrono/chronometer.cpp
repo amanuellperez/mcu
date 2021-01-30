@@ -15,56 +15,28 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "main.h"
+#include "chronometer.h"
 
-Main::Main()
+
+namespace dev{
+
+__Chronometer_sexagesimal_ms::__Chronometer_sexagesimal_ms(int32_t t)
 {
-// init_hardware():
-    init_lcd();
-    init_keyboard();
-    init_chronometer();
+    int32_t tmp;
+    std::tie(tmp, milliseconds) = atd::div<int32_t>(t, 1000);
+    std::tie(tmp, seconds) = atd::div<int32_t>(tmp, 60);
+    std::tie(hours, minutes) = atd::div<int32_t>(tmp, 60);
 }
 
 
-
-void Main::init_lcd()
+int32_t __Chronometer_sexagesimal_ms::to_milliseconds() const
 {
-    lcd_.screen().stop_brcorner(true);// I'm not going to use it as a terminal
-    lcd_.screen().nowrap(); 
-    lcd_.fill('0');
+    int32_t res = milliseconds;
+    res += seconds*1000;
+    res += minutes*60*1000;
+    res += hours*60*60*1000;
+
+    return res;
 }
 
-void Main::init_chronometer()
-{
-    Chronometer::init();
-}
-
-
-void Main::run()
-{
-    print_time();
-
-    while(1){
-//	if (errno_)
-//	    error();
-//	else 
-	    window_main();
-
-	wait_ms(100); // es un reloj de horno. Miro el teclado cada 100 ms
-//	wait_ms(10); // es un cronometro que funciona a 1 ms. 
-//		    // Actualizo el LCD cada 1 ms (si se elimina este wait_ms
-//		    // el LCD se actualiza tan rápido que no se ve nada)
-    }
-}
-
-
-
-int main()
-{
-    Main app;
-    app.run();
-}
-
-
-
-
+}// namespace

@@ -1,4 +1,5 @@
-SOURCES= main.cpp
+SOURCES= main.cpp	\
+		 ../chronometer.cpp
 
 BIN = xx
 

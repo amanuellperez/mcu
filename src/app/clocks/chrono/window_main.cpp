@@ -16,7 +16,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "main.h"
+#include "keyboard.h"
 
+#include <user_choose_number.h>
 
 void Main::window_main()
 {
@@ -29,18 +31,23 @@ void Main::window_main()
 }
 
 
+
 void Main::window_state_stop()
 {
+    Keyboard_time_to_wait wait;
+
     while (keyboard_.key<OK_KEY>().is_not_pressed()){
 	if (keyboard_.key<UP_KEY>().is_pressed()){
-	    Chronometer::add(std::chrono::seconds{1});
+	    Chronometer::add(std::chrono::seconds{wait.time_up()});
 	    print_time();
 	}
 
 	else if (keyboard_.key<DOWN_KEY>().is_pressed()){
-	    Chronometer::substract(std::chrono::seconds{1});
+	    Chronometer::substract(std::chrono::seconds{wait.time_down()});
 	    print_time();
 	}
+	else
+	    wait.reset();
 
 	wait_release_key();
     }
@@ -79,7 +86,11 @@ void Main::window_state_alarm()
 void Main::print_time()
 {
     lcd_.cursor_pos(0,0);
-    std::chrono::seconds sec{Chronometer::now().time_since_epoch()};
-    lcd_ << sec.count();
+    auto sexag = Chronometer::sexagesimal_count();
+    lcd_ << std::setw(2) << sexag.hours 
+	 << ':' << std::setw(2) << sexag.minutes 
+	 << ':' << std::setw(2) << sexag.seconds
+	 << ':' << std::setw(3) << sexag.milliseconds;
 }
+
 

@@ -83,7 +83,6 @@ using namespace dev::Key_codes; // OK_KEY, UP_KEY, DOWN_KEY
 using Keyboard_codes = dev::Keyboard_codes<OK_KEY, UP_KEY, DOWN_KEY>;
 using Keyboard       = dev::Basic_keyboard<Keyboard_pins, Keyboard_codes>;
 
-
 constexpr static uint16_t chronometer_timer_period_in_us = 64u;
 using Chronometer                                        = dev::
     Chronometer_ms<avr::Timer1_CTC_mode, chronometer_timer_period_in_us, false>;

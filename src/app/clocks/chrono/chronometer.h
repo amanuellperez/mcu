@@ -19,8 +19,15 @@
 
 #ifndef __CHRONOMETER_H__
 #define __CHRONOMETER_H__
-
-
+/****************************************************************************
+ *
+ *  - DESCRIPCION: Cronómetro básico
+ *
+ *  - HISTORIA:
+ *    A.Manuel L.Perez
+ *    30/01/2021 v0.0
+ *
+ ****************************************************************************/
 #include <chrono>
 #include <atd_cast.h>
 #include <atd_math.h> // div
@@ -30,19 +37,36 @@ namespace dev{
 
 // De momento voy a usar el chronometro para medir tiempos. La diferencia con
 // un reloj es su resolución: capaz de medir los milisegundos.
-struct __Chronometer_ms_sexagtime{
+// Observar que no es más que una std::duration representada en sexagesimal.
+// (???) Esta clase realmente es sexagesimal_milliseconds, esto es, un número
+//       de milisegundos dados en sexagesimal. ¿Por qué no definirla en
+//       general? Por la resolución. En el chronometro incluyo hasta el número
+//       de horas, pero se podría contar también el dia, mes y año. ¿cómo
+//       hacerlo genérico? ¿Merece la pena?
+struct __Chronometer_sexagesimal_ms{
     int16_t milliseconds; // 00-999
     int8_t seconds;// 00-59
     int8_t minutes;// 00-59
     int8_t hours;  // 00-23
 
-    __Chronometer_ms_sexagtime() {}
-    __Chronometer_ms_sexagtime(int32_t ms);
+    __Chronometer_sexagesimal_ms() {}
+
+    // conversión de ms a sexagesimal
+    __Chronometer_sexagesimal_ms(int32_t ms);
+
+    // conversión de sexagesimal a ms
     int32_t to_milliseconds() const;
+
+    // std usa count(). La suministro por si en el futuro lo generalizo y lo
+    // podemos integrar con std::duration.
+    int32_t count() const {return to_milliseconds();}
+
 };
 
-inline bool operator==(const __Chronometer_ms_sexagtime& a,
-	               const __Chronometer_ms_sexagtime& b)
+
+
+inline bool operator==(const __Chronometer_sexagesimal_ms& a,
+	               const __Chronometer_sexagesimal_ms& b)
 {
     return a.milliseconds == b.milliseconds
 	and a.seconds == b.seconds
@@ -50,30 +74,14 @@ inline bool operator==(const __Chronometer_ms_sexagtime& a,
 	and a.hours == b.hours;
 }
 
-inline bool operator!=(const __Chronometer_ms_sexagtime& a,
-	               const __Chronometer_ms_sexagtime& b)
+inline bool operator!=(const __Chronometer_sexagesimal_ms& a,
+	               const __Chronometer_sexagesimal_ms& b)
 {
     return !(a == b);
 }
 
-inline __Chronometer_ms_sexagtime::__Chronometer_ms_sexagtime(int32_t t)
-{
-    int32_t tmp;
-    std::tie(tmp, milliseconds) = atd::div<int32_t>(t, 1000);
-    std::tie(tmp, seconds) = atd::div<int32_t>(tmp, 60);
-    std::tie(hours, minutes) = atd::div<int32_t>(tmp, 60);
-}
 
 
-inline int32_t __Chronometer_ms_sexagtime::to_milliseconds() const
-{
-    int32_t res = milliseconds;
-    res += seconds*1000;
-    res += minutes*60*1000;
-    res += hours*60*60*1000;
-
-    return res;
-}
 
 
 
@@ -112,7 +120,10 @@ struct Chronometer_ms{
     using rep        = duration::rep;
     using period     = duration::period;
     using time_point = std::chrono::time_point<Chronometer_ms, duration>;
-    using Sexagesimal_time = __Chronometer_ms_sexagtime;
+
+    // milliseconds in sexagesimal representation
+    using Sexagesimal_ms = __Chronometer_sexagesimal_ms;
+
 
     /// init chronometer
     //TODO: usar Generic_timer
@@ -125,9 +136,6 @@ struct Chronometer_ms{
 	reset();
     }
 
-    static time_point now() noexcept 
-    {return time_point{duration{milliseconds_}};}
-
     /// Reinicia el cronómetro y lo enciende.
     static void start()
     {
@@ -136,6 +144,24 @@ struct Chronometer_ms{
 
     /// Para el cronómetro sin borrar el tiempo actual.
     static void stop() { Timer::off(); }
+
+
+// Lectura
+    // la incluyo para que sea similar a un clock std
+    static time_point now() noexcept 
+    {return time_point{duration{milliseconds_}};}
+
+    // en un chronometro parece más útil esta funcion que no now() (<-- la
+    // elimino?) 
+    static rep count() {return milliseconds_;}
+    static Sexagesimal_ms sexagesimal_count() 
+    { return Sexagesimal_ms{milliseconds_}; }
+
+// Escritura
+    static void count(const Sexagesimal_ms& sexag)
+    { milliseconds_ = sexag.count(); }
+
+
 
     // precondition: state == stop
     static void add(duration incr_t0) 
@@ -149,7 +175,10 @@ struct Chronometer_ms{
     static void substract(duration incr_t0) 
     {
 	duration incr_t{incr_t0};
-	milliseconds_ -= incr_t.count();
+	if (milliseconds_ > incr_t.count())
+	    milliseconds_ -= incr_t.count();
+	else 
+	    milliseconds_ = 0;
     }
 
 

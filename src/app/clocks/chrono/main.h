@@ -20,8 +20,19 @@
 #ifndef __CHRONO_MAIN_H__
 #define __CHRONO_MAIN_H__
 
-
+/****************************************************************************
+ *
+ *  - DESCRIPCION: Reloj de horno
+ *
+ *  - COMENTARIOS: 
+ *
+ *  - HISTORIA:
+ *    A.Manuel L.Perez
+ *    30/01/2021 v0.0
+ *
+ ****************************************************************************/
 #include "dev.h"
+#include "keyboard.h"
 #include "cfg.h"
 
 #include <avr_time.h>
