@@ -387,6 +387,47 @@ void test_magnitude_temperature_decimal()
     CHECK_TRUE((Kelvin{Fahrenheit{20}} == Kelvin{Rep{266, 48}}), "ºF -> ºK");
 }
 
+void test_magnitude_frequency()
+{
+    using Int = atd::Decimal<int, 3>;
+    using Kilohertz = atd::Kilohertz<Int>;
+    using Megahertz = atd::Megahertz<Int>;
+    using Millisecond = atd::Millisecond<Int>;
+    using Microsecond = atd::Microsecond<Int>;
+
+    // Microsecond T = atd::inverse(res);
+    using Mag_inverse = atd::Magnitude_inverse_t<Megahertz>;
+    CHECK_TRUE((std::is_same_v<Mag_inverse::Unit, Microsecond::Unit>),
+               "Mag_inverse::Unit");
+    CHECK_TRUE((std::is_same_v<Mag_inverse::Rep, Microsecond::Rep>),
+               "Mag_inverse::Rep");
+    CHECK_TRUE((std::is_same_v<Mag_inverse::Multiplier, Microsecond::Multiplier>),
+               "Mag_inverse::Multiplier");
+    CHECK_TRUE((std::is_same_v<Mag_inverse::Displacement, Microsecond::Displacement>),
+               "Mag_inverse::Displacement");
+
+    {
+    auto f = Megahertz{2};
+    Microsecond T1 = atd::inverse(f);
+//    std::cout << "T1 = " << T1.value() << " us\n";
+    CHECK_TRUE((T1.value() == Int{0,5}), "atd::inverse");
+    }
+
+    {
+    auto f = Kilohertz{2};
+    Microsecond T1 = atd::inverse(f);
+    CHECK_TRUE((T1.value() == Int{500,0}), "atd::inverse");
+    Millisecond T2 = atd::inverse(f);
+    CHECK_TRUE((T2.value() == Int{0,5}), "atd::inverse");
+//    // observar cómo se calcula correctamente con las unidades
+//    std::cout << "T1 = " << T1.value() << " us\n";
+//    std::cout << "T2 = " << T2.value() << " ms\n";
+    }
+
+
+}
+
+
 void test_magnitude()
 {
     test::interfaz("Magnitude");
@@ -399,6 +440,7 @@ void test_magnitude()
     test_magnitude_and_decimal();
     test_magnitude_temperature();
     test_magnitude_temperature_decimal();
+    test_magnitude_frequency();
 }
 
 

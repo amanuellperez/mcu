@@ -1,4 +1,4 @@
-// Copyright (C) 2020 A.Manuel L.Perez <amanuel.lperez@gmail.com>
+// Copyright (C) 2020-2021 A.Manuel L.Perez <amanuel.lperez@gmail.com>
 //
 // This file is part of the MCU++ Library.
 //
@@ -41,7 +41,7 @@
  *    Temperature and Pressure pero quiero dejar una estructura genérica para
  *    poder irla ampliando poco a poco.
  *
- *    30/01/2021 0.0: añado hertz.
+ *    30/01/2021 0.0: añado hertz, period y inverse.
  *
  ****************************************************************************/
 #include <ratio>
@@ -91,11 +91,22 @@ template <typename U1, typename U2>
 using Unit_minus = typename __Unit_minus<U1, U2>::type;
 
 
+// Inverse: Unit_inverse<U>
+template <typename U>
+struct __Unit_inverse{
+    using type = Unit<-U::m, -U::kg, -U::s, -U::K>;
+};
+
+template <typename U>
+using Unit_inverse = typename __Unit_inverse<U>::type;
+
+
 // Different types of units
 using Units_meter    = Unit< 1, 0,  0,  0>;
 using Units_kilogram = Unit< 0, 1,  0,  0>;
-using Units_pascal   = Unit<-1, 1, -2,  0>;
+using Units_second   = Unit< 0, 0,  1,  0>;
 using Units_kelvin   = Unit< 0, 0,  0,  1>;
+using Units_pascal   = Unit<-1, 1, -2,  0>;
 using Units_hertz    = Unit< 0, 0, -1,  0>;
 
 template <typename Unit0,
@@ -257,6 +268,9 @@ private:
     Rep value_;
 };
 
+
+
+
 template <typename U, typename R, typename M, typename D>
 inline constexpr Magnitude<U, R, M, D>& 
 	    Magnitude<U, R, M, D>::operator+=(const Magnitude<U, R, M, D>& x)
@@ -387,6 +401,36 @@ constexpr inline std::common_type_t <
 }
 
 
+// Magnitud_inverse(Magnitud)
+template <typename Mag>
+struct __Magnitude_inverse{
+    using type = Magnitude<Unit_inverse<typename Mag::Unit>, 
+			   typename Mag::Rep, 
+			   ratio_inverse<typename Mag::Multiplier>, 
+			   typename Mag::Displacement>;
+};
+
+template <typename Mag>
+using Magnitude_inverse_t = __Magnitude_inverse<Mag>::type;
+
+/// Hace 1/magnitud.
+// (RRR) Introduzco esta función para poder convertir frecuencias en periodos
+//	  y viceversa:
+//        f = 2 Mhz ==> T = 1/f = .5 us
+// (RRR) La función inverse habilita el poder dividir magnitudes:
+//	 velocity = space / time 
+//	 De momento no está implementado pero ya queda preparado para el
+//	 futuro.
+template <typename U, typename R, typename M, typename D>
+constexpr inline Magnitude_inverse_t<Magnitude<U, R, M, D>>
+inverse(const Magnitude<U, R, M, D>& a)
+{
+    R res = R{1} / a.value();
+
+    return Magnitude_inverse_t<Magnitude<U, R, M, D>> {res};
+}
+
+
 
 template <typename Unit, typename Rep1, typename M, typename D,
 			 typename Rep2>
@@ -404,6 +448,7 @@ constexpr inline Magnitude<Unit, Rep1, M, D>
 {
     return a*v;
 }
+
 
 
 
@@ -521,6 +566,25 @@ using Gigahertz = __Hertz<Int, std::giga>;
 template <typename Int>
 using Terahertz = __Hertz<Int, std::tera>;
 
+
+// Period
+// ------
+// (???) Observar que std::chrono define todo esto. 
+//       ¿se podría integrar magnitud con chrono?
+template <typename Int, typename Multiplier>
+using __Second = atd::Magnitude<atd::Units_second, Int, Multiplier>;
+
+template <typename Int>
+using Millisecond = __Second<Int, std::milli>;
+
+template <typename Int>
+using Microsecond = __Second<Int, std::micro>;
+
+template <typename Int>
+using Nanosecond = __Second<Int, std::nano>;
+
+template <typename Int>
+using Picosecond = __Second<Int, std::pico>;
 
 
 // Temperature

@@ -29,6 +29,7 @@
  *  - HISTORIA:
  *    A.Manuel L.Perez
  *    31/03/2020 is_ratio
+ *    31/01/2021 ratio_inverse
  *
  ****************************************************************************/
 #include <type_traits>
@@ -48,6 +49,11 @@ struct is_ratio : std::false_type { };
 
 template <intmax_t N, intmax_t D>
 struct is_ratio<std::ratio<N, D>> : std::true_type { };
+
+// ratio_inverse(num/den) == den/num
+template <typename r>
+using ratio_inverse = std::ratio<r::den, r::num>;
+
 
 }// namespace
 

@@ -8,6 +8,7 @@ DIRS = algorithm	\
 		decimal		\
 		magnitude	\
 		math		\
+		ratio		\
 		time		\
 		type_traits
 
