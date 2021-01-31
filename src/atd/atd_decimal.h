@@ -211,7 +211,7 @@ constexpr Decimal<I,n>::Rep
 
     x_ = integer_part * ten_to_the_n;
 
-    if (x_ > 0)
+    if (x_ >= 0)
 	x_ += fractional_part;
 
     else
@@ -343,6 +343,13 @@ constexpr inline Decimal<R1, n1>
     return Decimal<R1, n1>::from_internal_value(xr);
 
 }
+
+
+template <typename R, int n>
+constexpr inline Decimal<R, n>
+    operator/(const R& a, const Decimal<R,n>& b)
+{ return Decimal<R,n>::from_internal_value(a * ten_to_the<R>(n)) / b; }
+
 
 
 template <typename R1, int n1, typename R2>

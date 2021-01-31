@@ -41,6 +41,8 @@
  *    Temperature and Pressure pero quiero dejar una estructura genérica para
  *    poder irla ampliando poco a poco.
  *
+ *    30/01/2021 0.0: añado hertz.
+ *
  ****************************************************************************/
 #include <ratio>
 #include <type_traits>
@@ -94,6 +96,7 @@ using Units_meter    = Unit< 1, 0,  0,  0>;
 using Units_kilogram = Unit< 0, 1,  0,  0>;
 using Units_pascal   = Unit<-1, 1, -2,  0>;
 using Units_kelvin   = Unit< 0, 0,  0,  1>;
+using Units_hertz    = Unit< 0, 0, -1,  0>;
 
 template <typename Unit0,
           typename Rep0,
@@ -501,6 +504,25 @@ template <typename Int>
 using Millimeter = __Meter<Int, std::milli>;
 
 
+// Frequency
+// ---------
+template <typename Int, typename Multiplier>
+using __Hertz = atd::Magnitude<atd::Units_hertz, Int, Multiplier>;
+
+template <typename Int>
+using Kilohertz = __Hertz<Int, std::kilo>;
+
+template <typename Int>
+using Megahertz = __Hertz<Int, std::mega>;
+
+template <typename Int>
+using Gigahertz = __Hertz<Int, std::giga>;
+
+template <typename Int>
+using Terahertz = __Hertz<Int, std::tera>;
+
+
+
 // Temperature
 // -----------
 // Kelvin
@@ -561,6 +583,7 @@ using Centipascal = __Pascal<Int, std::centi>;
 
 template <typename Int>
 using Millipascal = __Pascal<Int, std::milli>;
+
 
 }// namespace atd
 

@@ -100,10 +100,10 @@ public:
 
 // CONFIGURACIÓN DEL RELOJ
     static void clock_speed_no_preescaling();
-    static void clock_frequency_entre_8();
-    static void clock_frequency_entre_64();
-    static void clock_frequency_entre_256();
-    static void clock_frequency_entre_1024();
+    static void clock_frequency_divide_by_8();
+    static void clock_frequency_divide_by_64();
+    static void clock_frequency_divide_by_256();
+    static void clock_frequency_divide_by_1024();
 
     /// Definimos el periodo del reloj que usa el timer.
     /// clock_frequency_in_hz = es la frecuencia del reloj del AVR.
@@ -180,22 +180,22 @@ inline void Timer1::clock_speed_no_preescaling()
     atd::write_bits<CS12, CS11, CS10>::to<0,0,1>::in(TCCR1B);
 }
     
-inline void Timer1::clock_frequency_entre_8()
+inline void Timer1::clock_frequency_divide_by_8()
 {// 010
     atd::write_bits<CS12, CS11, CS10>::to<0,1,0>::in(TCCR1B);
 }
 
-inline void Timer1::clock_frequency_entre_64()
+inline void Timer1::clock_frequency_divide_by_64()
 {// 011
     atd::write_bits<CS12, CS11, CS10>::to<0,1,1>::in(TCCR1B);
 }
 
-inline void Timer1::clock_frequency_entre_256()
+inline void Timer1::clock_frequency_divide_by_256()
 {// 100
     atd::write_bits<CS12, CS11, CS10>::to<1,0,0>::in(TCCR1B);
 }
 
-inline void Timer1::clock_frequency_entre_1024()
+inline void Timer1::clock_frequency_divide_by_1024()
 {// 101
     atd::write_bits<CS12, CS11, CS10>::to<1,0,1>::in(TCCR1B);
 }
@@ -214,23 +214,23 @@ inline void Timer1::external_clock_rising_edge()
 
 // avr clock at 1MHz
 // -----------------
-template<uint16_t periodo>
+template<uint16_t period>
 inline void Timer1::clock_period_in_us_1MHz() 
 {
-    if constexpr (periodo == 1u)
+    if constexpr (period == 1u)
 	clock_speed_no_preescaling();
     
-    else if constexpr (periodo == 8u)
-	clock_frequency_entre_8();
+    else if constexpr (period == 8u)
+	clock_frequency_divide_by_8();
 
-    else if constexpr (periodo == 64u)
-	clock_frequency_entre_64();
+    else if constexpr (period == 64u)
+	clock_frequency_divide_by_64();
 
-    else if constexpr (periodo == 256u)
-	clock_frequency_entre_256();
+    else if constexpr (period == 256u)
+	clock_frequency_divide_by_256();
 
-    else if constexpr (periodo == 1024u)
-	clock_frequency_entre_1024();
+    else if constexpr (period == 1024u)
+	clock_frequency_divide_by_1024();
 
     else
 	static_assert(atd::always_false_v<int>,
@@ -245,20 +245,20 @@ inline void Timer1::clock_period_in_us_1MHz()
 //inline void Timer1::clock_period_in_ns<125u, 8000000UL>() 
 //{clock_frequency_no_prescaling();}
 
-template<uint16_t periodo>
+template<uint16_t period>
 inline void Timer1::clock_period_in_us_8MHz() 
 {
-    if constexpr (periodo == 1u)
-	clock_frequency_entre_8();
+    if constexpr (period == 1u)
+	clock_frequency_divide_by_8();
 
-    else if constexpr (periodo == 8u)
-	clock_frequency_entre_64();
+    else if constexpr (period == 8u)
+	clock_frequency_divide_by_64();
 
-    else if constexpr (periodo == 32u)
-	clock_frequency_entre_256();
+    else if constexpr (period == 32u)
+	clock_frequency_divide_by_256();
  
-    else if constexpr (periodo == 128u)
-	clock_frequency_entre_1024();
+    else if constexpr (period == 128u)
+	clock_frequency_divide_by_1024();
  
     else
 	static_assert(atd::always_false_v<int>,
@@ -375,6 +375,8 @@ inline void Timer1::enable_output_compare_B_match_interrupt()
     atd::write_bits<OCIE1B>::to<1>::in(TIMSK1);
     avr::enable_all_interrupts();
 }
+
+
 
 /*!
  *  \brief  Timer1 funcionando en normal mode.

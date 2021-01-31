@@ -235,6 +235,18 @@ void test_magnitud_conversiones()
     CHECK_TRUE(Centimeter{Millimeter{3}} == Centimeter{0.3}, "mm -> cm");
     CHECK_TRUE(Centimeter{Millimeter{3}}.value() == 0.3, "mm -> cm");
     }
+
+    {// hertz
+    using Kilohertz = atd::Kilohertz<double>;
+    using Megahertz = atd::Megahertz<double>;
+    using Gigahertz = atd::Gigahertz<double>;
+    using Terahertz = atd::Terahertz<double>;
+
+    Kilohertz f = Megahertz{4};
+    CHECK_TRUE(f == Kilohertz{4000}, "MHz -> kHz");
+    CHECK_TRUE(Megahertz{Gigahertz{2}} == Megahertz{2000}, "GHz <-> MHz");
+    CHECK_TRUE(Terahertz{Gigahertz{2}} == Terahertz{0.002}, "THz <-> GHz");
+    }
 }
 
 

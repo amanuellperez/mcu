@@ -47,6 +47,8 @@ void test_decimal_construct(Int n, Int f, Int rep, Int res_n, Int res_f)
                              << "." << f1 << ']');
 }
 
+
+
 template <typename Int, int ndigits>
 void test_decimal_value(Int n, Int f, Int fres)
 {
@@ -91,12 +93,16 @@ void test_decimal_construct()
     test_decimal_construct<int, 2>(3,1415,  314, 3,14);
 
     std::cout << "2ª tanda\n";
-    test_decimal_construct<int, 1>(3, 14, 31	, 3,1);
+    test_decimal_construct<int, 1>(3, 1415, 31	, 3,1);
     test_decimal_construct<int, 2>(3, 14, 314	, 3,14);
     test_decimal_construct<int, 3>(3, 14, 3140	, 3,140);
     test_decimal_construct<int, 4>(3, 14, 31400	, 3,1400);
     test_decimal_construct<int, 5>(3, 14, 314000, 3,14000);
 
+// bug: no funcionaba bien con 0.xxx
+    test_decimal_construct<int, 1>(0,10, 1, 0,1); 
+    test_decimal_construct<int, 2>(0,10, 10, 0,10); 
+    test_decimal_construct<int, 3>(0,10, 100, 0,100); 
 
 // normal -
     test_decimal_construct<int, 2>(-3,1,    -310,   -3,10);
@@ -286,6 +292,7 @@ void test_decimal_arithmetic()
     test_decimal_multiplication<2,2>(3,14   , 2,75  , 8,6350);
     test_decimal_multiplication<1,5>(10,2   , 7,12345,	72,659190);
 
+// División
     test_decimal_division<1,5>(10,2   , 7,12345,    1,4);
     test_decimal_division<0,0>(10,0   , 2,0,	    5,0);
     test_decimal_division<2,1>(3,14   , 2, 3,	    1,36);
@@ -297,6 +304,16 @@ void test_decimal_arithmetic()
 
 	CHECK_TRUE(((a / b) == Int{123,450}), "operator/");
     }
+
+    {// inverse
+	using Int = atd::Decimal<int, 3>;
+	CHECK_TRUE(((1 / Int{100}) == Int::from_internal_value(10)), "operator/");
+	CHECK_TRUE(((1 / Int{2,34}) == Int{0,427}), "operator/");
+	// f = 2 MHz ==> T = 0.5 ms:
+	CHECK_TRUE(((1 / Int{2}) == Int{0,5}), "operator/");
+    }
+
+
 }
 
 

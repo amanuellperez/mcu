@@ -35,6 +35,7 @@
 
 namespace atd{
 
+/// Devuelve 10^n
 template <typename Int>
 inline constexpr Int ten_to_the(int n)
 {
@@ -57,7 +58,7 @@ inline constexpr Int most_significant_digits(Int x)
 {
     static_assert(n > 0, "n must be greater than 0");
 
-    while (x > ten_to_the<Int>(n))
+    while (x >= ten_to_the<Int>(n))
 	x /= Int{10};
 
     return x;

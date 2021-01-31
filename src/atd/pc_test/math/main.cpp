@@ -82,6 +82,10 @@ void test_most_significant_digits()
     test_most_significant_digits<int, 2>(123, 12);
     test_most_significant_digits<int, 2>(1234, 12);
 
+// bug:
+    test_most_significant_digits<int, 1>(10, 1);
+    test_most_significant_digits<int, 2>(100, 10);
+    
 }
 
 

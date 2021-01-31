@@ -20,8 +20,8 @@
 #ifndef __DEV_SPEAKER_H__
 #define __DEV_SPEAKER_H__
 
-#include "avr_timers.h"
-#include "avr_pin.h"
+#include <avr_timers.h>
+#include <avr_pin.h>
 
 
 namespace dev{
@@ -36,7 +36,6 @@ namespace dev{
 class Speaker{
 public:
 //    using Timer1 = Timer1_16bits;
-
 
     /// Creamos un nuevo Speaker
     // Tengo que crearlo de esta forma ya que no puedo definir el constructor
@@ -135,59 +134,59 @@ inline void Speaker::play_note(uint16_t nota, uint16_t duracion /* en ms */)
 //  Para jugar, probar en test_speaker02.cpp
 //--------------------------------------------------------------------------
 
-
-
-// Precondición: frecuencia1 <= frecuencia2
-// En esta sirena vamos de forma continua de frecuencia1 a frecuencia2
-// y luego volvemos de forma continua de frecuencia2 a frecuencia1.
-inline void sirena01(Speaker& speaker
-	    , uint16_t frecuencia1
-	    , uint16_t frecuencia2
-	    , uint16_t duracion /* en ms */)
-{
-    auto nota1 = Speaker::nota(frecuencia1);
-    auto nota2 = Speaker::nota(frecuencia2);
-
-    for(uint16_t i = nota2; i <= nota1; ++i)
-	speaker.play_note(i, duracion);
-
-    for(uint16_t i = nota1; i >= nota2; --i)
-	speaker.play_note(i, duracion);
-}
-
-
-// En esta sirena nos limitamos a alternar las dos frecuencias
-inline void sirena03(Speaker& speaker
-	    , uint16_t frecuencia1
-	    , uint16_t frecuencia2
-	    , uint16_t duracion1 /* en ms */
-	    , uint16_t duracion2 /* en ms */)
-{
-    auto nota1 = Speaker::nota(frecuencia1);
-    auto nota2 = Speaker::nota(frecuencia2);
-
-    speaker.play_note(nota1, duracion1);
-    speaker.play_note(nota2, duracion2);
-
-}
-
-
-// En esta sirena nos limitamos a alternar las dos frecuencias
-inline void sirena02(Speaker& speaker
-	    , uint16_t frecuencia1
-	    , uint16_t frecuencia2
-	    , uint16_t duracion /* en ms */)
-{
-    sirena03(speaker, frecuencia1, frecuencia2, duracion, duracion);
-
-}
-
-inline void alarma01(Speaker& speaker, uint16_t frecuencia, uint16_t duracion)
-{
-    speaker.play_note(Speaker::nota(frecuencia), duracion);
-    avr::wait_ms(duracion);
-}
-
+//
+//
+//// Precondición: frecuencia1 <= frecuencia2
+//// En esta sirena vamos de forma continua de frecuencia1 a frecuencia2
+//// y luego volvemos de forma continua de frecuencia2 a frecuencia1.
+//inline void sirena01(Speaker& speaker
+//	    , uint16_t frecuencia1
+//	    , uint16_t frecuencia2
+//	    , uint16_t duracion /* en ms */)
+//{
+//    auto nota1 = Speaker::nota(frecuencia1);
+//    auto nota2 = Speaker::nota(frecuencia2);
+//
+//    for(uint16_t i = nota2; i <= nota1; ++i)
+//	speaker.play_note(i, duracion);
+//
+//    for(uint16_t i = nota1; i >= nota2; --i)
+//	speaker.play_note(i, duracion);
+//}
+//
+//
+//// En esta sirena nos limitamos a alternar las dos frecuencias
+//inline void sirena03(Speaker& speaker
+//	    , uint16_t frecuencia1
+//	    , uint16_t frecuencia2
+//	    , uint16_t duracion1 /* en ms */
+//	    , uint16_t duracion2 /* en ms */)
+//{
+//    auto nota1 = Speaker::nota(frecuencia1);
+//    auto nota2 = Speaker::nota(frecuencia2);
+//
+//    speaker.play_note(nota1, duracion1);
+//    speaker.play_note(nota2, duracion2);
+//
+//}
+//
+//
+//// En esta sirena nos limitamos a alternar las dos frecuencias
+//inline void sirena02(Speaker& speaker
+//	    , uint16_t frecuencia1
+//	    , uint16_t frecuencia2
+//	    , uint16_t duracion /* en ms */)
+//{
+//    sirena03(speaker, frecuencia1, frecuencia2, duracion, duracion);
+//
+//}
+//
+//inline void alarma01(Speaker& speaker, uint16_t frecuencia, uint16_t duracion)
+//{
+//    speaker.play_note(Speaker::nota(frecuencia), duracion);
+//    avr::wait_ms(duracion);
+//}
+//
 
 
 }// namespace

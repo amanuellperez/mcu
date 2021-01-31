@@ -100,8 +100,9 @@ constexpr uint8_t BIT_MASK[29] = {
     constexpr uint8_t TIMER1_num_pin_B = 16u;
     // constexpr uint32_t TIMER1_resolution= 65536u;
 
-    // CONFIGURACIÓN DEL ADC
 
+
+// CONFIGURACIÓN DEL ADC
     // Devuelve el número de pin dentro del ADC que le corresponde al num_pin
     // del avr
     template<uint8_t num_pin> struct ADC_PIN{ static uint8_t value; };
