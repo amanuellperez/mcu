@@ -254,9 +254,10 @@ constexpr Int make_bitmask()
  *  Lo que hace es:
  *	    x = 0bxxxxxxxx --> 0b1xx01x1x
  *
- * DUDA: al principio lo llamaba:
- *  atd::write_bits<1,3,4,7>::to<1,0,1,1>::in_register(x);
- *  El nombre un poco largo, por eso lo acorté.
+ * (RRR) Al principio lo llamaba:
+ *       atd::write_bits<1,3,4,7>::to<1,0,1,1>::in_register(x);
+ *       El nombre un poco largo, por eso lo acorté. 
+ *       Después de usarlo un tiempo, queda bien.
  *
  *  TODO: Tal como lo estoy implementando estoy escribiendo todo 'x' de nuevo.
  *  El problema es que hay ciertos bits como TWINT del TWI que si están a 1
@@ -371,6 +372,59 @@ struct is_zero_bit{
     static bool of_register(const Int& x){
 	return of(x);
     }
+};
+
+
+/*!
+ *  \brief  Lee los bits indicados.
+ *
+ *
+ *  Ejemplo:
+ *	int x = 0b1001001;
+ *	y = atd::read_bits<3,5>(x)
+ *	devuelve: y == 0b00001000;
+ *
+ *  (RRR) En principio hay 2 formas básicas de implementar esta función:
+ *        1. Que haga cero todos los bits que no se quieran leer.
+ *           Ejemplo: read_bits<3,4>(0b11111111) devuelve 00011000.
+ *
+ *        2. Que se haga lo mismo que en 1 y además se haga un shift de todos
+ *           los bits a la derecha:
+ *           Ejemplo: read_bits<3,4>(0b11111111) devuelve 00000011.
+ *		
+ *	  La 2ª opción es más complicada de implementar y no queda claro qué
+ *	  hacer si se quiere leer bits al azar:
+ *	      read_bits<1,3>(0b11111111) primero haría 0b00001010, y ahora
+ *	      ¿cómo hacer el shift? ¿los colapso? Devuelvo 101 (eliminando el
+ *	      0 en la posición del bit 0) o devuelvo 11 (que sería el valor de
+ *	      los bits).
+ *
+ *	 Quizás solo leer bits sin hacer el shift sea mejor llamarlo como hago
+ *	 ahora read_bits, y si se quiere hacer un shift llamarlo
+ *	 read_range_bits ya que se va a leer un rango. ¿Merece la pena
+ *	 hacerlo? ¿Generará un lío el shift? De momento pruebo con esta.
+ *	 Devuelvo 101 (eliminando el 0 en la posición del bit 0) o devuelvo 11
+ *	 (que sería el valor de los bits).
+ *
+ *   Quizás solo leer bits sin hacer el shift sea mejor llamarlo como hago
+ *   ahora read_bits, y si se quiere hacer un shift llamarlo read_range_bits
+ *   ya que se va a leer un rango. ¿Merece la pena hacerlo? ¿Generará un lío
+ *   el shift? De momento pruebo con esta. El uso lo dirá.
+ */
+template <int... bitpos>
+struct read_bits{
+    using positions = static_array<int, bitpos...>;
+    
+    template <typename Int2>
+    static constexpr std::remove_cv_t<Int2> of(Int2& x)
+    {
+	using Int = std::remove_cv_t<Int2>;
+
+	constexpr Int mask = make_bitmask<positions, Int>();
+	
+	return x & mask;
+    }
+
 };
 
 

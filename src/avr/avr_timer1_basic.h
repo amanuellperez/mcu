@@ -107,18 +107,23 @@ public:
 
     /// Definimos el periodo del reloj que usa el timer.
     /// clock_frequency_in_hz = es la frecuencia del reloj del AVR.
-    template<uint16_t periodo
+    template<uint16_t period
 	    , uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
-    static void clock_period_in_us();
+    static void set_clock_period_in_us();
+
+    /// Devuelve el periodo del reloj que usa el timer.
+    /// Devuelve 0, si está apagado o si está conectado al pin T1.
+    template<uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
+    static uint16_t clock_period_in_us();
 
 
 // ENCENDIDO/APAGADO DEL TIMER
     /// Enciende el Timer, usando como reloj el reloj de periodo indicado.
     /// 'periodo' es el periodo en microsegundos al que va a funcionar el timer.
     /// clock_frequency_in_hz = es la frecuencia del reloj del AVR.
-    template<uint16_t periodo
+    template<uint16_t period
 	    , uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
-    static void on() {clock_period_in_us<periodo, clock_frequency_in_hz>();}
+    static void on() {set_clock_period_in_us<period, clock_frequency_in_hz>();}
 
     /// Paramos el timer.
     static void off();
@@ -161,11 +166,13 @@ public:
     static void enable_output_compare_B_match_interrupt();
 
 private:
-    template<uint16_t periodo>
-    static void clock_period_in_us_1MHz();
+    template<uint16_t period>
+    static void set_clock_period_in_us_1MHz();
 
-    template<uint16_t periodo>
-    static void clock_period_in_us_8MHz();
+    template<uint16_t period>
+    static void set_clock_period_in_us_8MHz();
+
+    static uint16_t clock_period_in_us_1MHz();
 
 }; // Timer1
 
@@ -215,7 +222,7 @@ inline void Timer1::external_clock_rising_edge()
 // avr clock at 1MHz
 // -----------------
 template<uint16_t period>
-inline void Timer1::clock_period_in_us_1MHz() 
+inline void Timer1::set_clock_period_in_us_1MHz() 
 {
     if constexpr (period == 1u)
 	clock_speed_no_preescaling();
@@ -237,6 +244,10 @@ inline void Timer1::clock_period_in_us_1MHz()
 		    "Incorrect Timer1 period. Try another one.");
 }
 
+uint16_t Timer1::clock_period_in_us_1MHz()
+{
+// AQUI
+}
 
 // avr clock at 8MHz
 // -----------------
@@ -246,7 +257,7 @@ inline void Timer1::clock_period_in_us_1MHz()
 //{clock_frequency_no_prescaling();}
 
 template<uint16_t period>
-inline void Timer1::clock_period_in_us_8MHz() 
+inline void Timer1::set_clock_period_in_us_8MHz() 
 {
     if constexpr (period == 1u)
 	clock_frequency_divide_by_8();
@@ -266,20 +277,32 @@ inline void Timer1::clock_period_in_us_8MHz()
 }
 
 
-
-template<uint16_t period
-	, uint32_t clock_frequency_in_hz>
-inline void Timer1::clock_period_in_us()
+template<uint32_t clock_frequency_in_hz>
+inline uint16_t Timer1::clock_period_in_us()
 {
     if constexpr (clock_frequency_in_hz == 1000000UL)
-	clock_period_in_us_1MHz<period>();
-
-    else if constexpr (clock_frequency_in_hz == 8000000UL)
-	clock_period_in_us_8MHz<period>();
+	return clock_period_in_us_1MHz();
 
     else
         static_assert(atd::always_false_v<int>,
                       "clock_period_in_us: I'm lazy. I haven't implemented "
+                      "that frequency. Please implement it.");
+}
+
+
+template<uint16_t period
+	, uint32_t clock_frequency_in_hz>
+inline void Timer1::set_clock_period_in_us()
+{
+    if constexpr (clock_frequency_in_hz == 1000000UL)
+	set_clock_period_in_us_1MHz<period>();
+
+    else if constexpr (clock_frequency_in_hz == 8000000UL)
+	set_clock_period_in_us_8MHz<period>();
+
+    else
+        static_assert(atd::always_false_v<int>,
+                      "set_clock_period_in_us: I'm lazy. I haven't implemented "
                       "that frequency. Please implement it.");
 }
 
@@ -387,7 +410,7 @@ public:
     using counter_type = Timer1::counter_type;
 
     /// Encendemos el Timer1
-    template<uint16_t periodo
+    template<uint16_t period
 	    , uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
     static void on();
 
@@ -401,7 +424,7 @@ private:
 };
 
 
-template<uint16_t periodo
+template<uint16_t period
 	, uint32_t clock_frequency_in_hz>
 inline void Timer1_normal_mode::on()
 {
@@ -409,7 +432,7 @@ inline void Timer1_normal_mode::on()
 
     set_normal_mode();
     pin_AB_disconnected();
-    Timer1::on<periodo, clock_frequency_in_hz>();
+    Timer1::on<period, clock_frequency_in_hz>();
 }
 
 

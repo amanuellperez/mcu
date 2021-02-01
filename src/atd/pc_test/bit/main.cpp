@@ -132,6 +132,38 @@ void test_bitmask()
     }
 }
 
+void test_make_bitmask()
+{
+    test::interfaz("make_bitmask");
+    CHECK_TRUE((atd::make_bitmask<atd::static_array<uint8_t, 0>, uint8_t>() ==
+                0b00000001),
+               "make_bitmask");
+    CHECK_TRUE((atd::make_bitmask<atd::static_array<uint8_t, 1>, uint8_t>() ==
+                0b00000010),
+               "make_bitmask");
+    CHECK_TRUE((atd::make_bitmask<atd::static_array<uint8_t, 2>, uint8_t>() ==
+                0b00000100),
+               "make_bitmask");
+    CHECK_TRUE((atd::make_bitmask<atd::static_array<uint8_t, 3>, uint8_t>() ==
+                0b00001000),
+               "make_bitmask");
+    CHECK_TRUE((atd::make_bitmask<atd::static_array<uint8_t, 4>, uint8_t>() ==
+                0b00010000),
+               "make_bitmask");
+    CHECK_TRUE((atd::make_bitmask<atd::static_array<uint8_t, 5>, uint8_t>() ==
+                0b00100000),
+               "make_bitmask");
+    CHECK_TRUE((atd::make_bitmask<atd::static_array<uint8_t, 6>, uint8_t>() ==
+                0b01000000),
+               "make_bitmask");
+    CHECK_TRUE((atd::make_bitmask<atd::static_array<uint8_t, 7>, uint8_t>() ==
+                0b10000000),
+               "make_bitmask");
+
+    CHECK_TRUE((atd::make_bitmask<atd::static_array<uint8_t, 1, 3, 7>, uint8_t>() ==
+                0b10001010),
+               "make_bitmask");
+}
 
 template <typename Int>
 void test_mask()
@@ -243,6 +275,42 @@ void test_write_range_bits()
     test_write_range_bits<2,5,0x05>(0xFF, 0xD7);
 }
 
+void test_read_bits()
+{
+    test::interfaz("read_bits");
+
+    uint8_t data = 0b01011010;
+
+// 1 bit
+    CHECK_TRUE((atd::read_bits<0>::of(data) == 0b00000000), "read_bits");
+    CHECK_TRUE((atd::read_bits<1>::of(data) == 0b00000010), "read_bits");
+    CHECK_TRUE((atd::read_bits<2>::of(data) == 0b00000000), "read_bits");
+    CHECK_TRUE((atd::read_bits<3>::of(data) == 0b00001000), "read_bits");
+    CHECK_TRUE((atd::read_bits<4>::of(data) == 0b00010000), "read_bits");
+    CHECK_TRUE((atd::read_bits<5>::of(data) == 0b00000000), "read_bits");
+    CHECK_TRUE((atd::read_bits<6>::of(data) == 0b01000000), "read_bits");
+    CHECK_TRUE((atd::read_bits<7>::of(data) == 0b00000000), "read_bits");
+
+// 2 bit
+    CHECK_TRUE((atd::read_bits<0,1>::of(data) == 0b00000010), "read_bits");
+    CHECK_TRUE((atd::read_bits<1,0>::of(data) == 0b00000010), "read_bits");
+    CHECK_TRUE((atd::read_bits<0,6>::of(data) == 0b01000000), "read_bits");
+    CHECK_TRUE((atd::read_bits<0,7>::of(data) == 0b00000000), "read_bits");
+    CHECK_TRUE((atd::read_bits<1,6>::of(data) == 0b01000010), "read_bits");
+    CHECK_TRUE((atd::read_bits<1,7>::of(data) == 0b00000010), "read_bits");
+
+// more
+    CHECK_TRUE((atd::read_bits<0>::of(data)	== 0b00000000), "read_bits");
+    CHECK_TRUE((atd::read_bits<0,1>::of(data)	== 0b00000010), "read_bits");
+    CHECK_TRUE((atd::read_bits<0,1,2>::of(data) == 0b00000010), "read_bits");
+    CHECK_TRUE((atd::read_bits<0,1,2,3>::of(data)   == 0b00001010), "read_bits");
+    CHECK_TRUE((atd::read_bits<0,1,2,3,4>::of(data) == 0b00011010), "read_bits");
+    CHECK_TRUE((atd::read_bits<0,1,2,3,4,5>::of(data) == 0b00011010), "read_bits");
+    CHECK_TRUE((atd::read_bits<0,1,2,3,4,5,6>::of(data) == 0b01011010), "read_bits");
+    CHECK_TRUE((atd::read_bits<0,1,2,3,4,5,6,7>::of(data) == 0b01011010), "read_bits");
+
+}
+
 
 int main()
 {
@@ -250,11 +318,13 @@ try{
     test::header("atd_bit");
 
     test_bitmask();
+    test_make_bitmask();
     test_mask();
     test_bit();
     test_concat_bytes();
     test_write_bits();
     test_write_range_bits();
+    test_read_bits();
 
 }catch(std::exception& e)
 {

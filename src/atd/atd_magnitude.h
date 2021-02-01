@@ -555,6 +555,9 @@ template <typename Int, typename Multiplier>
 using __Hertz = atd::Magnitude<atd::Units_hertz, Int, Multiplier>;
 
 template <typename Int>
+using Hertz = __Hertz<Int, std::ratio<1,1>>;
+
+template <typename Int>
 using Kilohertz = __Hertz<Int, std::kilo>;
 
 template <typename Int>
@@ -573,6 +576,9 @@ using Terahertz = __Hertz<Int, std::tera>;
 //       ¿se podría integrar magnitud con chrono?
 template <typename Int, typename Multiplier>
 using __Second = atd::Magnitude<atd::Units_second, Int, Multiplier>;
+
+template <typename Int>
+using Second = __Second<Int, std::ratio<1,1>>;
 
 template <typename Int>
 using Millisecond = __Second<Int, std::milli>;
