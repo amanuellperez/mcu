@@ -55,6 +55,7 @@
  *			  muy expresiva).
  *	      is_one_bit/is_zero_bit
  *	      write_range_bits
+ *  01/02/21: read_bits, zero::with_bits::to
  *
  ****************************************************************************/
 #include <stdint.h> // uint8_t
@@ -424,6 +425,58 @@ struct read_bits{
 	
 	return x & mask;
     }
+
+};
+
+
+/*!
+ *  \brief  Cero con ciertos bits escritos.
+ *
+ *  (RRR) Al querer leer el divisor de la frecuencia del reloj de un timer (el
+ *        1) encuentro el problema de cómo dejarlo en general. La forma de
+ *        leer esto es leer una sería de bits de un registro. A partir de esos
+ *        bits se calculan el divisor de frecuencia. 
+ *
+ *        El problema es que esos bits no tienen por qué ser los mismos en
+ *        todos los avr. Si escribo:
+ *           switch(atd::read_bits<CS12, CS11, CS10>::of(TCCR1B)){
+ *		    case 0xA0: ...
+ *		    case 0xA1: ...
+ *		    ...
+ *	    }
+ *
+ *	  y luego cambian la posición de los bits en otro avr no funcionaría
+ *	  el código. Por supuesto que puedo usar un archivo donde escribir
+ *	  todos esos valores y cambiarlos dependiendo del avr, pero la
+ *	  implementación del timer es el traductor de la datasheet llena por
+ *	  todos los sitios de datos de bajo nivel. Si se quiere usar un timer
+ *	  diferente, hay que cambiar de traductor. No son necesarios tener 2
+ *	  archivos: el traductor y otro con todas las constantes.
+ *	  
+ *	  Esta clase permite hacer esto:
+ *           switch(atd::read_bits<CS12, CS11, CS10>::of(TCCR1B)){
+ *              case 
+ *              atd::zero<uint8_t>::with_bits<CS12, CS11, CS10>::to<0,1,0>(): ...
+ *              atd::zero<uint8_t>::with_bits<CS12, CS11, CS10>::to<1,1,0>(): ...
+ *              ...
+ *	    }
+ *
+ */
+template <typename Int>
+struct zero{
+
+    template <int... bitpos>
+    struct with_bits{
+    
+	template <int... value_bits>
+	static constexpr Int to()
+	{
+	    Int res{0};
+
+	    write_bits<bitpos...>::template to<value_bits ...>::in(res);
+	    return res;
+	}
+    };
 
 };
 
