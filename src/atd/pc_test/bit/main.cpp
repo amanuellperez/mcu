@@ -311,6 +311,26 @@ void test_read_bits()
 
 }
 
+void test_zero_with_bits()
+{
+    test::interfaz("zero_with_bits");
+
+// 1 bit
+    CHECK_TRUE((atd::zero<uint8_t>::with_bits<0>::to<1>() == 0b00000001), "zero_with_bits");
+    CHECK_TRUE((atd::zero<uint8_t>::with_bits<1>::to<1>() == 0b00000010), "zero_with_bits");
+    CHECK_TRUE((atd::zero<uint8_t>::with_bits<2>::to<1>() == 0b00000100), "zero_with_bits");
+    CHECK_TRUE((atd::zero<uint8_t>::with_bits<3>::to<1>() == 0b00001000), "zero_with_bits");
+    CHECK_TRUE((atd::zero<uint8_t>::with_bits<4>::to<1>() == 0b00010000), "zero_with_bits");
+    CHECK_TRUE((atd::zero<uint8_t>::with_bits<5>::to<1>() == 0b00100000), "zero_with_bits");
+    CHECK_TRUE((atd::zero<uint8_t>::with_bits<6>::to<1>() == 0b01000000), "zero_with_bits");
+    CHECK_TRUE((atd::zero<uint8_t>::with_bits<7>::to<1>() == 0b10000000), "zero_with_bits");
+
+// more bits
+    CHECK_TRUE((atd::zero<uint8_t>::with_bits<0,2,4,6>::to<1,1,1,1>() == 0b01010101), "zero_with_bits");
+    CHECK_TRUE((atd::zero<uint8_t>::with_bits<0,1,2,3>::to<1,1,1,1>() == 0b00001111), "zero_with_bits");
+
+}
+
 
 int main()
 {
@@ -325,6 +345,7 @@ try{
     test_write_bits();
     test_write_range_bits();
     test_read_bits();
+    test_zero_with_bits();
 
 }catch(std::exception& e)
 {

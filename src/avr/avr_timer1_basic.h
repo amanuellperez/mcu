@@ -29,6 +29,7 @@
  *     18/07/2019 v0.1 Reescrito.
  *     03/01/2020 Que de un mensaje legible el compilador 
  *		  si el periodo o la frecuencia no es correcta.
+ *     01/02/2021 frequency_divisor, clock_period_in_us
  *	
  *  TODO: faltan 3 modos de funcionamiento:
  *	+ El de capturar en el ICR.
@@ -99,6 +100,18 @@ public:
 
 
 // CONFIGURACIÓN DEL RELOJ
+    enum class Frequency_divisor{
+		    undefined,    
+		    no_preescaling,
+		    divide_by_8,
+		    divide_by_64,
+		    divide_by_256,
+		    divide_by_1024};
+
+    // Obtenemos el divisor de frecuencia que se aplica al reloj del micro.
+    static Frequency_divisor frequency_divisor();
+
+    // Establecemos el divisor de frecuencia a aplicar al reloj del micro.
     static void clock_speed_no_preescaling();
     static void clock_frequency_divide_by_8();
     static void clock_frequency_divide_by_64();
@@ -177,6 +190,29 @@ private:
 }; // Timer1
 
 
+inline Timer1::Frequency_divisor Timer1::frequency_divisor()
+{ 
+    switch(atd::read_bits<CS12, CS11, CS10>::of(TCCR1B)){
+	case atd::zero<uint8_t>::with_bits<CS12, CS11, CS10>::to<0,0,1>():
+	    return Frequency_divisor::no_preescaling;
+
+	case atd::zero<uint8_t>::with_bits<CS12, CS11, CS10>::to<0,1,0>():
+	    return Frequency_divisor::divide_by_8;
+
+	case atd::zero<uint8_t>::with_bits<CS12, CS11, CS10>::to<0,1,1>():
+	    return Frequency_divisor::divide_by_64;
+
+	case atd::zero<uint8_t>::with_bits<CS12, CS11, CS10>::to<1,0,0>():
+	    return Frequency_divisor::divide_by_256;
+
+	case atd::zero<uint8_t>::with_bits<CS12, CS11, CS10>::to<1,0,1>():
+	    return Frequency_divisor::divide_by_1024;
+    }
+
+    return Frequency_divisor::undefined;
+}
+
+
 inline void Timer1::off()
 { // 000
     atd::write_bits<CS12, CS11, CS10>::to<0,0,0>::in(TCCR1B);
@@ -244,10 +280,21 @@ inline void Timer1::set_clock_period_in_us_1MHz()
 		    "Incorrect Timer1 period. Try another one.");
 }
 
-uint16_t Timer1::clock_period_in_us_1MHz()
+// TODO: a .cpp???
+inline uint16_t Timer1::clock_period_in_us_1MHz()
 {
-// AQUI
+    switch(frequency_divisor()){
+	case Frequency_divisor::no_preescaling	: return 1u;
+	case Frequency_divisor::divide_by_8	: return 8u;
+	case Frequency_divisor::divide_by_64	: return 64u;
+	case Frequency_divisor::divide_by_256	: return 256u;
+	case Frequency_divisor::divide_by_1024	: return 1024u;
+	case Frequency_divisor::undefined	: return 0;
+    }
+
+    return 0;
 }
+
 
 // avr clock at 8MHz
 // -----------------
