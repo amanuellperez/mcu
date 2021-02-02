@@ -41,8 +41,8 @@ namespace STD{
 template <typename Int1, typename Int2>
 constexpr common_type_t<Int1, Int2> gcd(Int1 a, Int2 b)
 {
-    a = abs(a);
-    b = abs(b);
+    a = __abs(a);  // versiones constexpr
+    b = __abs(b);
 
     while (true) {
         if (b == 0) return a;
@@ -66,7 +66,7 @@ inline constexpr common_type_t<Int1, Int2> lcm(Int1 a, Int2 b)
     if (a == 0 or b == 0)   // standard: devuelve 0 si alguno es cero
 	return 0;
 
-    return abs(a * b) / gcd(a, b); 
+    return __abs(a * b) / gcd(a, b); 
 }
 
 template <typename It, typename T>

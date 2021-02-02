@@ -37,6 +37,14 @@ inline int abs(int n) { return n >= 0? n: -n; }
 inline long abs(long n) { return n >= 0? n: -n; }
 inline long long abs(long long n) { return n >= 0? n: -n; }
 
+
+// El standard no define abs como constexpr y parece ser que prohibe a las
+// implementaciones añadir constexpr cuando no está indicado así. Defino estas
+// internas para poder usarlas.
+constexpr inline int __abs(int n) { return n >= 0? n: -n; }
+constexpr inline long __abs(long n) { return n >= 0? n: -n; }
+constexpr inline long long __abs(long long n) { return n >= 0? n: -n; }
+
 }// namespace
 
 

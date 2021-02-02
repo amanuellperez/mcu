@@ -24,6 +24,7 @@
 #include "../../../avr_UART_iostream.h"
 
 
+using namespace avr::literals;
 using Timer = avr::Timer1_CTC_mode;
 
 // Probar cada periodo con diferentes frecuencias: 1 MHz y 8 MHz.
@@ -31,39 +32,13 @@ using Timer = avr::Timer1_CTC_mode;
 // makefile.
 // Medir la salida con el osciloscopio.
 
-//// Para 1 MHz
-//constexpr uint16_t period_in_us = 1;
-////constexpr uint16_t period_in_us = 8;
-////constexpr uint16_t period_in_us = 64; // solo para 1 MHz
-////constexpr uint16_t period_in_us = 256;// solo para 1 MHz
-////constexpr uint16_t period_in_us = 1024;//solo para 1 MHz
-////constexpr uint16_t period_in_us = 10; // <-- no tiene que compilar
-//
-//
-//// Para 8 MHz
-////constexpr uint16_t period_in_us = 1;
-////constexpr uint16_t period_in_us = 8;
-////constexpr uint16_t period_in_us = 32;
-////constexpr uint16_t period_in_us = 128;
-////constexpr uint16_t period_in_us = 1024;// <-- error! no tiene que compilar.
-//
-//
-//
-//// El periodo de salida del osciloscopio será: 2*top*period_in_us +- error
-//// El error es debido a la incertidumbre en la frecuencia del reloj del avr.
-//constexpr Timer::counter_type top = 1000; 
-
 // Si se quiere que generar una señal de 1 segundo, usar period_in_us = 64 y:
 //constexpr uint16_t top = 15625; // 15625 miniticks * 64 us/minitick = 1 seg
-
-    // Elegimos OCR1A para generar una señal de 1 Hz
-    // El osciloscopio la marca de 996ms. Hay que calibrar el número o usar un
-    // cristal externo.
 
 
 void timer_on_1MHz(uint16_t period_in_us)
 {
-    if constexpr (F_CPU == 1000000UL){
+    if constexpr (avr::clock_frequency == 1_MHz){
 	avr::UART_iostream uart;
 
 	switch(period_in_us){
@@ -82,7 +57,7 @@ void timer_on_1MHz(uint16_t period_in_us)
 
 void timer_on_8MHz(uint16_t period_in_us)
 {
-    if constexpr (F_CPU == 8000000UL){ // si no se pone aunque no se llame a 
+    if constexpr (avr::clock_frequency == 8_MHz){// si no se pone aunque no se llame a 
 	    // timer_on_8MHz (por ser a 1MHz) la compila, generando error!!!
 	avr::UART_iostream uart;
 
@@ -104,10 +79,10 @@ void timer_on_8MHz(uint16_t period_in_us)
 // TODO if avr::clock_frequency == 1_Mhz ...
 void timer_on(uint16_t period_in_us)
 {
-    if constexpr (F_CPU == 1000000UL)
+    if constexpr (avr::clock_frequency == 1_MHz)
 	timer_on_1MHz(period_in_us);
 
-    else if constexpr (F_CPU == 8000000UL)
+    else if constexpr (avr::clock_frequency == 8_MHz)
 	timer_on_8MHz(period_in_us);
 
 }
@@ -162,14 +137,17 @@ uint16_t select_period_8MHz()
     return 1;
 }
 
+
 uint16_t select_period()
 {
-    if constexpr (F_CPU == 1000000UL)
+    if constexpr (avr::clock_frequency == 1_MHz)
 	return select_period_1MHz();
 
-    else if constexpr (F_CPU == 8000000UL)
+    else if constexpr (avr::clock_frequency == 8_MHz)
 	return select_period_8MHz();
 
+    else
+	return 1;
 }
 
 

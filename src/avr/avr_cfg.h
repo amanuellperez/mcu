@@ -35,7 +35,7 @@
  ****************************************************************************/
 
 #include <avr/io.h> // registros: DDRB... PORT...
-
+#include "avr_types.h"
 
 
 
@@ -49,7 +49,14 @@
 
 
 // CONFIGURACIÓN DEL RELOJ
+// TODO: eliminar esta a favor de clock_frequency!!!
     constexpr uint32_t MCU_CLOCK_FREQUENCY_IN_HZ = F_CPU;
+
+namespace avr{
+constexpr Hertz clock_frequency{F_CPU};
+
+}// namespace
+
 
 
 
