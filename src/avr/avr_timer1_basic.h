@@ -547,10 +547,12 @@ public:
 
     // 2.- ¿Qué generar en los pines A/B cuando sucede un compare match? 
     // ¿Una onda cuadrada (toggle)?  ¿set/clear el pin?
+    static void pin_A_disconnected();
     static void pin_A_toggle_on_compare_match();
     static void pin_A_set_on_compare_match();
     static void pin_A_clear_on_compare_match();
 
+    static void pin_B_disconnected();
     static void pin_B_toggle_on_compare_match();
     static void pin_B_set_on_compare_match();
     static void pin_B_clear_on_compare_match();
@@ -582,6 +584,14 @@ inline void Timer1_CTC_mode::top_ICR(const Timer1::counter_type& top0)
 
 
 // Table 20-3.
+inline void Timer1_CTC_mode::pin_A_disconnected()
+{
+    atd::write_bits<COM1A1, COM1A0>::to<0,0>::in(TCCR1A);
+    // (???) ¿En qué estado dejar el puerto pin_A()?
+}
+
+
+
 inline void Timer1_CTC_mode::pin_A_toggle_on_compare_match()
 {   // 01
     atd::write_bits<COM1A1, COM1A0>::to<0,1>::in(TCCR1A);
@@ -607,6 +617,12 @@ inline void Timer1_CTC_mode::pin_A_set_on_compare_match()
     Pin<num_pin_A()>::as_output();
 }
 
+
+inline void Timer1_CTC_mode::pin_B_disconnected()
+{
+    atd::write_bits<COM1B1, COM1B0>::to<0,0>::in(TCCR1A);
+    // (???) ¿En qué estado dejar el puerto pin_B()?
+}
 
 inline void Timer1_CTC_mode::pin_B_toggle_on_compare_match()
 {   // 01

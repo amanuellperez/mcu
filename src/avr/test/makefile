@@ -3,6 +3,7 @@ DIRS = ADC	\
 	pin		\
 	port	\
 	sleep	\
+	signal_generator \
 	timer0	\
 	timer1	\
 	TWI		\
