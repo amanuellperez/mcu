@@ -129,6 +129,9 @@ public:
     template<uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
     static uint16_t clock_period_in_us();
 
+    template<uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
+    static Microsecond clock_period();
+
 
 // ENCENDIDO/APAGADO DEL TIMER
     /// Enciende el Timer, usando como reloj el reloj de periodo indicado.
@@ -334,6 +337,13 @@ inline uint16_t Timer1::clock_period_in_us()
         static_assert(atd::always_false_v<int>,
                       "clock_period_in_us: I'm lazy. I haven't implemented "
                       "that frequency. Please implement it.");
+}
+
+
+template<uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
+inline Microsecond Timer1::clock_period()
+{
+    return Microsecond{clock_period_in_us<clock_frequency_in_hz>()};
 }
 
 

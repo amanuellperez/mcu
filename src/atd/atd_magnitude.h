@@ -111,7 +111,7 @@ using Units_hertz    = Unit< 0, 0, -1,  0>;
 
 template <typename Unit0,
           typename Rep0,
-          typename Multiplier0, typename Different = std::ratio<0>>
+          typename Multiplier0, typename Displacement = std::ratio<0>>
 class Magnitude;
 
 // --------------
@@ -558,16 +558,16 @@ template <typename Int>
 using Hertz = __Hertz<Int, std::ratio<1,1>>;
 
 template <typename Int>
-using Kilohertz = __Hertz<Int, std::kilo>;
+using KiloHertz = __Hertz<Int, std::kilo>;
 
 template <typename Int>
-using Megahertz = __Hertz<Int, std::mega>;
+using MegaHertz = __Hertz<Int, std::mega>;
 
 template <typename Int>
-using Gigahertz = __Hertz<Int, std::giga>;
+using GigaHertz = __Hertz<Int, std::giga>;
 
 template <typename Int>
-using Terahertz = __Hertz<Int, std::tera>;
+using TeraHertz = __Hertz<Int, std::tera>;
 
 
 // Period

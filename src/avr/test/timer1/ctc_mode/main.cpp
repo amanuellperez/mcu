@@ -140,14 +140,19 @@ uint16_t select_period_8MHz()
 
 uint16_t select_period()
 {
+    avr::UART_iostream uart;
+    uart << "select_period(" << avr::clock_frequency << ")\n";
+    uart << "1_MHz = " << 1_MHz << '\n';
     if constexpr (avr::clock_frequency == 1_MHz)
 	return select_period_1MHz();
 
     else if constexpr (avr::clock_frequency == 8_MHz)
 	return select_period_8MHz();
 
-    else
+    else{
+	uart << "ERROR: select_period(), frecuencia desconocida\n";
 	return 1;
+    }
 }
 
 
@@ -175,7 +180,10 @@ int main()
 	uart << "\n\nState:\n"
 	        "top = " << top <<
 		"\nperiod_in_us                = " << period_in_us <<
-		"\nTimer::clock_period_in_us() = " << Timer::clock_period_in_us() << " us\n";
+		"\nTimer::clock_period_in_us() = " << Timer::clock_period_in_us();
+//	avr::Microsecond us = Timer::clock_period();
+//		uart << "\nTimer::clock_period()       = " << us << '\n';
+//		"\nTimer::clock_period()       = " << Timer::clock_period() << '\n';
 
         uint32_t period = uint32_t{2} * uint32_t{top} * uint32_t{period_in_us};
         uart << "\n\nMenu:\n"

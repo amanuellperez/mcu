@@ -40,14 +40,15 @@
 namespace avr{
 
 // Las frecuencias y los periodos tienen que tener el mismo tipo rep 
-// (mismo número número de decimales). TODO: mejorar esto para eliminar esta
-// restricción (?)
-using __Freq_Rep = atd::Decimal<uint32_t, 3>;
+// (mismo número número de decimales). 
+// Con 2 decimales en uint32_t nos entra: 4*10^9 = 4*10^7*10^2, podemos 
+// representar números con 7 cifras en la parte entera (hasta 40*10^6 Hz).
+using __Freq_Rep = atd::Decimal<uint32_t, 2>;
 
 // Frequencies types
 using Hertz     = atd::Hertz<__Freq_Rep>;
-using KiloHertz = atd::Kilohertz<__Freq_Rep>;
-using MegaHertz = atd::Megahertz<__Freq_Rep>;
+using KiloHertz = atd::KiloHertz<__Freq_Rep>;
+using MegaHertz = atd::MegaHertz<__Freq_Rep>;
 
 // Period types
 using Second      = atd::Second<__Freq_Rep>;

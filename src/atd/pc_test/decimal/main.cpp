@@ -231,10 +231,14 @@ template <int n1, int n2>
 void test_decimal_multiplication(int ip1, int fp1, int ip2, int fp2, 
 				 int ipr, int fpr)
 {
+    std::cerr << "test_decimal_multiplication(" << ip1 << ", " << fp1 << ")\n";
     atd::Decimal<int, n1> x{ip1,fp1};
     atd::Decimal<int, n2> y{ip2,fp2};
     auto p = x*y;
-    CHECK_TRUE(p.num_decimals == x.num_decimals + y.num_decimals, "operator*");
+    std::cerr << x << " * " << y << " = " << p << '\n';
+
+    CHECK_TRUE(p.num_decimals == std::max(x.num_decimals, y.num_decimals),
+               "operator*");
     auto [ip, fp] = p.value();
     CHECK_TRUE(ip == ipr and fp == fpr, "operator*");
 }
@@ -289,8 +293,18 @@ void test_decimal_arithmetic()
     CHECK_TRUE(c == a, "a/2");
 
 // Producto
-    test_decimal_multiplication<2,2>(3,14   , 2,75  , 8,6350);
-    test_decimal_multiplication<1,5>(10,2   , 7,12345,	72,659190);
+    test_decimal_multiplication<2,2>(3,14   , 2,75  , 8,63);
+    test_decimal_multiplication<1,5>(10,2   , 7,12345,	72,65919);
+    
+    {// bug
+	using Int = atd::Decimal<int, 3>;
+	Int a{1};
+	Int b{1000000};
+	Int res{1000000};
+	std::cout << a << " * " << b << " = " << a*b << '\n';
+	CHECK_TRUE(a*b == res, "----operator*");
+    }
+    test_decimal_multiplication<3,3>(1,0, 1000000,0,	1000000,0);
 
 // División
     test_decimal_division<1,5>(10,2   , 7,12345,    1,4);

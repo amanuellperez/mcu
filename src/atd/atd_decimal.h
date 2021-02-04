@@ -137,7 +137,7 @@ public:
 // Info
     
     /// Devuelve el número como {integer_part, fractional_part}
-    std::pair<Rep, Rep> value() const
+    constexpr std::pair<Rep, Rep> value() const
     {
         auto [q, r] = atd::div(atd::abs(x_), ten_to_the_n);
 
@@ -301,15 +301,40 @@ constexpr inline std::common_type_t<Decimal<R1, n1>, Decimal<R2, n2>>
 
 
 // Multiplicación:  x1*10^(-n1) * x2*10^(-n2) = (x1*x2)*10^-(n1+n2)
-// TODO: ¿qué pasa con overflow?
+// Problema: ¿qué pasa con overflow?
+//	Si multiplico 1'000 * 1000000'000 obtengo:
+//	1000 * 1000000000 = 10^3*10^9 = 10^12 número que no entra en un
+//	int32_t. Sin embargo 1'000*1000000'000 = 1000000'000 que sí debería de
+//	entrar.
+//
+// * Solución 1:
+//	Sean los números i1'f1 y i2'f2 (integer'fractional part).
+//	Entonces:
+//	i1'f1 * i2'f2 = (i1 + f1*10^(-n))*(i2 + f2*10^(-n))
+//	              = i1*i2 + (i1*f2 + i2*f1 + (f1*f2)*10^(-n))*10^(-n)
+//
+//	De esta forma si multiplico 1'000 * 1000000'000, hacemos
+//	1*10^6 + (0*0 + 0*0 + 0*0) = 10^6
+//	añadiendo la parte decimal quedaría almacenado internamente como 10^9,
+//	que entra en uint32_t.
 template <typename R1, int n1, typename R2, int n2>
-constexpr inline Decimal<std::common_type_t<R1, R2>, n1 + n2>
+//constexpr inline Decimal<std::common_type_t<R1, R2>, n1 + n2>
+constexpr inline Decimal<std::common_type_t<R1, R2>, std::max(n1,n2)>
     operator*(const Decimal<R1,n1>& a, const Decimal<R2,n2>& b)
 {
     // El resultado de la operación  tendrá n1 + n2 cifras decimales
-    using Res = Decimal<std::common_type_t<R1, R2>, n1 + n2>;
+    constexpr int n = std::max(n1, n2);
+    using Res = Decimal<std::common_type_t<R1, R2>, n>;
+    using Rep = typename Res::Rep;
 
-    return Res::from_internal_value(a.internal_value() * b.internal_value());
+    constexpr typename Res::Rep ten_to_the_n = ten_to_the<Rep>(n);
+
+    auto [i1, f1] = Res{a}.value();
+    auto [i2, f2] = Res{b}.value();
+
+    Rep res = i1*i2*ten_to_the_n + (i1*f2 + i2*f1 + (f1*f2)/ten_to_the_n);
+
+    return Res::from_internal_value(res);
 }
 
 

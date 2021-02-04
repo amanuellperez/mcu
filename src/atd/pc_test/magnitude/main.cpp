@@ -236,16 +236,16 @@ void test_magnitud_conversiones()
     CHECK_TRUE(Centimeter{Millimeter{3}}.value() == 0.3, "mm -> cm");
     }
 
-    {// hertz
-    using Kilohertz = atd::Kilohertz<double>;
-    using Megahertz = atd::Megahertz<double>;
-    using Gigahertz = atd::Gigahertz<double>;
-    using Terahertz = atd::Terahertz<double>;
+    {// Hertz
+    using KiloHertz = atd::KiloHertz<double>;
+    using MegaHertz = atd::MegaHertz<double>;
+    using GigaHertz = atd::GigaHertz<double>;
+    using TeraHertz = atd::TeraHertz<double>;
 
-    Kilohertz f = Megahertz{4};
-    CHECK_TRUE(f == Kilohertz{4000}, "MHz -> kHz");
-    CHECK_TRUE(Megahertz{Gigahertz{2}} == Megahertz{2000}, "GHz <-> MHz");
-    CHECK_TRUE(Terahertz{Gigahertz{2}} == Terahertz{0.002}, "THz <-> GHz");
+    KiloHertz f = MegaHertz{4};
+    CHECK_TRUE(f == KiloHertz{4000}, "MHz -> kHz");
+    CHECK_TRUE(MegaHertz{GigaHertz{2}} == MegaHertz{2000}, "GHz <-> MHz");
+    CHECK_TRUE(TeraHertz{GigaHertz{2}} == TeraHertz{0.002}, "THz <-> GHz");
     }
 }
 
@@ -389,14 +389,40 @@ void test_magnitude_temperature_decimal()
 
 void test_magnitude_frequency()
 {
-    using Int = atd::Decimal<int, 3>;
-    using Kilohertz = atd::Kilohertz<Int>;
-    using Megahertz = atd::Megahertz<Int>;
+    using Int = atd::Decimal<uint32_t, 3>;
+    using Hertz = atd::Hertz<Int>;
+    using KiloHertz = atd::KiloHertz<Int>;
+    using MegaHertz = atd::MegaHertz<Int>;
     using Millisecond = atd::Millisecond<Int>;
     using Microsecond = atd::Microsecond<Int>;
 
+    // Types
+    CHECK_TRUE((std::is_same_v<Hertz::Displacement, std::ratio<0>>),
+	    "Hertz::Displacement == 0");
+
+    // Range
+    {
+	Hertz f{1000000}; // = 1MHz
+	CHECK_TRUE(f.value() == Int{1000000}, "Hertz{1000000}");
+    }
+
+    // common_type
+    {
+    using CM = std::common_type_t<Hertz, MegaHertz>;
+    CHECK_TRUE((std::is_same_v<Hertz::Unit, CM::Unit>), "common_type::Unit");
+    CHECK_TRUE((std::is_same_v<Hertz::Rep, CM::Rep>), "common_type::Rep");
+    CHECK_TRUE((std::is_same_v<Hertz::Multiplier, CM::Multiplier>),
+               "common_type::Multiplier");
+    CHECK_TRUE((std::is_same_v<Hertz, CM>), "common_type");
+    }
+    {
+    using CR = std::common_type_t<Hertz::Rep, MegaHertz::Rep>;
+    CHECK_TRUE((std::is_same_v<CR, Int>), "common_type::Rep");
+    }
+
+
     // Microsecond T = atd::inverse(res);
-    using Mag_inverse = atd::Magnitude_inverse_t<Megahertz>;
+    using Mag_inverse = atd::Magnitude_inverse_t<MegaHertz>;
     CHECK_TRUE((std::is_same_v<Mag_inverse::Unit, Microsecond::Unit>),
                "Mag_inverse::Unit");
     CHECK_TRUE((std::is_same_v<Mag_inverse::Rep, Microsecond::Rep>),
@@ -407,14 +433,14 @@ void test_magnitude_frequency()
                "Mag_inverse::Displacement");
 
     {
-    auto f = Megahertz{2};
+    auto f = MegaHertz{2};
     Microsecond T1 = atd::inverse(f);
 //    std::cout << "T1 = " << T1.value() << " us\n";
     CHECK_TRUE((T1.value() == Int{0,5}), "atd::inverse");
     }
 
     {
-    auto f = Kilohertz{2};
+    auto f = KiloHertz{2};
     Microsecond T1 = atd::inverse(f);
     CHECK_TRUE((T1.value() == Int{500,0}), "atd::inverse");
     Millisecond T2 = atd::inverse(f);
@@ -422,6 +448,41 @@ void test_magnitude_frequency()
 //    // observar cómo se calcula correctamente con las unidades
 //    std::cout << "T1 = " << T1.value() << " us\n";
 //    std::cout << "T2 = " << T2.value() << " ms\n";
+    }
+
+    {// magnitud_cast
+	MegaHertz f0{1};
+	Hertz f1 = atd::magnitude_cast<Hertz>(f0);
+//	std::cout << "f1 en hertz = " << f1.value() << '\n';
+	CHECK_TRUE(f1.value() == Int{1000000}, "magnitude_cast");
+    }
+
+
+    {// Constructor
+	MegaHertz f0{1};
+	Hertz f1{f0};
+//	std::cout << "f1 en hertz = " << f1.value() << '\n';
+//	std::cout << "Int{1000000}= " << Int{1000000} << '\n';
+	CHECK_TRUE(f1.value() == Int{1000000}, "Hertz{MegaHertz{1}}");
+    }
+
+    {// comparando Hertz == MegaHertz
+	Hertz f0{1000000};
+	MegaHertz f1{1};
+	
+//	std::cout << "f0 = " << f0.value() << '\n';
+//	std::cout << "f1 = " << f1.value() << '\n';
+//	using CT = std::common_type_t<Hertz, MegaHertz>;
+//	std::cout << "CT{f0} = " << CT{f0}.value() << '\n';
+//	std::cout << "CT{f1} = " << CT{f1}.value() << '\n';
+//        std::cout << "CT::M = " << CT::Multiplier::num << "/"
+//                  << CT::Multiplier::den << '\n';
+//        std::cout << "Hertz::M = " << Hertz::Multiplier::num << "/"
+//                  << Hertz::Multiplier::den << '\n';
+//        std::cout << "MegaHertz::M = " << MegaHertz::Multiplier::num << "/"
+//                  << MegaHertz::Multiplier::den << '\n';
+
+        CHECK_TRUE(f0 == f1, "hertz == megahertz???");
     }
 
 
