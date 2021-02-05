@@ -302,7 +302,7 @@ void test_decimal_arithmetic()
 	Int b{1000000};
 	Int res{1000000};
 	std::cout << a << " * " << b << " = " << a*b << '\n';
-	CHECK_TRUE(a*b == res, "----operator*");
+	CHECK_TRUE(a*b == res, "operator*");
     }
     test_decimal_multiplication<3,3>(1,0, 1000000,0,	1000000,0);
 
@@ -331,6 +331,16 @@ void test_decimal_arithmetic()
 }
 
 
+void test_decimal_cast()
+{
+    using Dec = atd::Decimal<int, 3>;
+
+    Dec d{25,3};
+    CHECK_TRUE(atd::to_integer(d) == 25, "to_integer");
+    CHECK_TRUE(atd::to_integer<long>(d) == 25L, "to_integer");
+}
+
+
 void test_decimal()
 {
     test::interfaz("Decimal");
@@ -339,6 +349,7 @@ void test_decimal()
     test_decimal_common_type();
     test_decimal_order();
     test_decimal_arithmetic();
+    test_decimal_cast();
 
 // operator<<
     {

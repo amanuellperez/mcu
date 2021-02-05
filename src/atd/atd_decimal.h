@@ -36,7 +36,8 @@
  *
  *  - HISTORIA:
  *    A.Manuel L.Perez
- *    04/03/2020 v0.0. Versión mínima (muy limitada, para probarla).
+ *    04/03/2020 v0.0: Versión mínima (muy limitada, para probarla).
+ *    05/02/2021       to_integer.
  *
  ****************************************************************************/
 
@@ -461,6 +462,21 @@ std::ostream& operator<<(std::ostream& out,
 	out << std::right << f;
     }
     return out;
+}
+
+
+// casting
+template <typename Rep, int N>
+constexpr Rep to_integer(const Decimal<Rep, N>& d)
+{
+    auto [i, f] = d.value();
+    return i;
+}
+
+template <typename Rep2, typename Rep, int N>
+constexpr Rep2 to_integer(const Decimal<Rep, N>& d)
+{
+    return static_cast<Rep2>(to_integer(d));
 }
 
 
