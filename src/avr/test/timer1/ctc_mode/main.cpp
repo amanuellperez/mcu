@@ -76,7 +76,6 @@ void timer_on_8MHz(uint16_t period_in_us)
 
 
 
-// TODO if avr::clock_frequency == 1_Mhz ...
 void timer_on(uint16_t period_in_us)
 {
     if constexpr (avr::clock_frequency == 1_MHz)
@@ -140,9 +139,6 @@ uint16_t select_period_8MHz()
 
 uint16_t select_period()
 {
-    avr::UART_iostream uart;
-    uart << "select_period(" << avr::clock_frequency << ")\n";
-    uart << "1_MHz = " << 1_MHz << '\n';
     if constexpr (avr::clock_frequency == 1_MHz)
 	return select_period_1MHz();
 
@@ -150,6 +146,7 @@ uint16_t select_period()
 	return select_period_8MHz();
 
     else{
+	avr::UART_iostream uart;
 	uart << "ERROR: select_period(), frecuencia desconocida\n";
 	return 1;
     }
