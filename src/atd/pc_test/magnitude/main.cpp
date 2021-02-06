@@ -50,6 +50,7 @@ void test_unit()
 void test_magnitude_basic()
 {
     using Meter = atd::Meter<int>;
+    using Kilometer = atd::Kilometer<int>;
    // using Meter = atd::Magnitude<atd::Units_meter, int, std::ratio<1>>;
     
 
@@ -86,6 +87,13 @@ void test_magnitude_basic()
     CHECK_TRUE(!(b > a), "operator>");
     CHECK_TRUE(b >= a, "operator>=");
 }
+
+{// relación de orden(3)
+    CHECK_TRUE(Meter{1000} == Kilometer{1}, "operator!=");
+    CHECK_TRUE(Meter{2000} < Kilometer{5}, "operator<");
+    CHECK_TRUE(Meter{2000} > Kilometer{1}, "operator>");
+}
+
 
 // estructura de espacio vectorial
     m1 += m2;
@@ -485,6 +493,19 @@ void test_magnitude_frequency()
         CHECK_TRUE(f0 == f1, "hertz == megahertz???");
     }
 
+
+    {
+	uint32_t period_in_us = 1;
+	Hertz freq{5000};
+	Microsecond T0 = atd::inverse(freq);
+	std::cout << "freq = " << freq << " Hz\n";
+	std::cout << "T0 = " << T0 << " us\n";
+	uint32_t T = atd::to_integer(T0.value());
+	std::cout << "T = " << T << " us\n";
+        uint32_t top = T / (static_cast<uint32_t>(period_in_us) * uint32_t{2});
+	std::cout << "top = " << top << "\n";
+
+    }
 
 }
 

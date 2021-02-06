@@ -17,8 +17,8 @@
 
 #pragma once
 
-#ifndef __AVR_SIGNAL_GENERATOR_H__
-#define __AVR_SIGNAL_GENERATOR_H__
+#ifndef __AVR_SIGNAL_GENERATOR_SF_H__
+#define __AVR_SIGNAL_GENERATOR_SF_H__
 /****************************************************************************
  *
  *  - DESCRIPCION: Generador de señales
@@ -40,7 +40,12 @@ namespace avr{
 // TODO: usar Generic_timer para parametrizar este signal_generator
 
 /*!
- *  \brief  Generador de señales.
+ *  \brief  Generador de señales SF (same frequency both channels)
+ *
+ *  Las señales generadas por el avr en los dos canales son siempre de la
+ *  misma frecuencia!!! Para indicarlo llamo a esta clase SF, de tal manera
+ *  que el cliente al usarla recuerde que no puede generar 2 ondas de
+ *  frecuencia diferente en cada canal.
  *
  *  Es un generador de señales genérico vinculado a un Timer. 
  *  En principio tiene 2 canales, channel 1 and 2.
@@ -52,7 +57,7 @@ namespace avr{
  *  Al ser genérico no debe de depender de avr.
  *
  */
-struct Signal_generator{
+struct Signal_generator_sf{
 // TODO: esto son parametros de template
     using Timer = Timer1_CTC_mode;
     static constexpr uint8_t pin_channel1 = Timer1_CTC_mode::num_pin_A();
@@ -68,27 +73,51 @@ struct Signal_generator{
     /// Genera una onda cuadrada en el channel 1.
     // TODO: es más elegante:
     //          top = Timer::clock_frequency()/(2*freq_sq);
-    static void ch1_square_wave(const Hertz& freq_sq)
+    static void frequency(const Hertz& freq_sq)
     {// Generic_timer
-	Microsecond T_sq0 = atd::inverse(freq_sq);
-	Timer::counter_type T_sq = atd::to_integer<Timer::counter>(T_sq0);
-        Timer::counter_type top =
-            T_sq /
-            (static_cast<uint32_t>(Timer::clock_period_in_us()) * Timer::counter_type{2});
+// (---) Esta opción no funciona.
+//	using Int = Timer::counter_type;
+//	Microsecond T_sq0 = atd::inverse(freq_sq);
+//	Int T_sq = atd::to_integer<Int>(T_sq0.value());
+//        Int top =
+//            T_sq /
+//            (static_cast<Int>(Timer::clock_period_in_us()) * Int{2});
+
+	uint32_t tmp = uint32_t{2} * static_cast<uint32_t>(Timer::clock_period_in_us())
+		  * atd::to_integer(freq_sq.value());
+	Timer::counter_type top = uint32_t{1000000u}/tmp;
 
         Timer::top_OCRA(top);
-	Timer::pin_A_toggle_on_compare_match();
     }
+
+    static Hertz frequency()
+    {
+	auto top = Timer::output_compare_register_A();
+        uint32_t tmp = uint32_t{2} *
+                       static_cast<uint32_t>(Timer::clock_period_in_us()) *
+                       uint32_t{top};
+
+	uint32_t freq = uint32_t{1000000u}/tmp;
+	return Hertz{freq};
+    }
+
+    /// Enciende el channel 1.
+    static void ch1_on()
+    {Timer::pin_A_toggle_on_compare_match();}
 
     /// Apaga el channel 1.
     static void ch1_off()
     { Timer::pin_A_disconnected(); }
 
-    /// Genera una onda cuadrada en el channel 2.
-    static void ch2_square_wave(const Hertz& freq);
+
+    /// Enciende el channel 2.
+    static void ch2_on()
+    {Timer::pin_B_toggle_on_compare_match();}
 
     /// Apaga el channel 2.
-    static void ch2_off();
+    static void ch2_off()
+    { Timer::pin_B_disconnected(); }
+
 };
 
 
