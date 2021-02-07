@@ -25,7 +25,7 @@
 
 using namespace avr;
 
-using Timer = Timer1_CTC_mode;
+using Timer = Timer1;
 
 constexpr uint16_t period_in_us = 64;
 

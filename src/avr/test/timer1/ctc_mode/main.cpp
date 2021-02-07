@@ -232,8 +232,10 @@ int main()
     uint16_t period_in_us = 1;
     Timer::counter_type top = 1000;
 
-    Timer::mode_CTC_top_OCR1A();
-    Timer::output_compare_register_A(top);
+    //Timer::mode_CTC_top_OCR1A();
+    //Timer::output_compare_register_A(top);
+    Timer::mode_CTC_top_ICR1();
+    Timer::input_capture_register(top);
     Timer::CTC_pin_A_toggle_on_compare_match(); // para que se vea algo al ppio
     Timer::CTC_pin_B_toggle_on_compare_match();
     timer_on(period_in_us);
@@ -296,7 +298,8 @@ int main()
 		uart << "\ntop (max " << Timer::max() << ") = ";
 		uart >> top;
 		uart << top << '\n';
-		Timer::output_compare_register_A(top);
+		//Timer::output_compare_register_A(top);
+		Timer::input_capture_register(top);
 		break;
 
 	    default:

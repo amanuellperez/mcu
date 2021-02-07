@@ -15,13 +15,13 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "../../avr_signal_generator_sf.h"
-#include "../../avr_time.h"
-#include "../../avr_types.h"
-#include "../../avr_UART_iostream.h"
+#include "../../../avr_signal_generator_sf.h"
+#include "../../../avr_time.h"
+#include "../../../avr_types.h"
+#include "../../../avr_UART_iostream.h"
 
 
-using Signal_gen = avr::Signal_generator_sf;
+using PW_gen = avr::PWM_generator_sf;
 
 
 struct Main{
@@ -48,23 +48,38 @@ void Main::ch1_menu()
 {
     avr::UART_iostream uart;
     uart << "\n\nchannel 1:\n"
+	    "[i]nverting mode\n"
+	    "[n]on inverting mode\n"
 	    "[o]n\n"
 	    "o[f]f\n";
 
+    uint16_t duty_cycle{};
     char c{};
     uart >> c;
     switch(c){
+	case 'i':
+	    PW_gen::ch1_inverting_mode();
+	    break;
+
+	case 'n':
+	    PW_gen::ch1_non_inverting_mode();
+	    break;
+
 	case 'o':
-	    Signal_gen::ch1_on();
+	    uart << "duty_cycle = ";
+	    uart >> duty_cycle;
+	    uart << duty_cycle << " %\n";
+	    PW_gen::ch1_on(duty_cycle);
 	    ch1_on_ = true;
 	    break;
 
 	case 'f':
-	    Signal_gen::ch1_off();
+	    PW_gen::ch1_off();
 	    ch1_on_ = false;
 	    break;
 
     }  
+
 }
 
 
@@ -73,19 +88,33 @@ void Main::ch2_menu()
 {
     avr::UART_iostream uart;
     uart << "\n\nchannel 2:\n"
+	    "[i]nverting mode\n"
+	    "[n]on inverting mode\n"
 	    "[o]n\n"
 	    "o[f]f\n";
 
+    uint16_t duty_cycle{};
     char c{};
     uart >> c;
     switch(c){
+	case 'i':
+	    PW_gen::ch2_inverting_mode();
+	    break;
+
+	case 'n':
+	    PW_gen::ch2_non_inverting_mode();
+	    break;
+
 	case 'o':
-	    Signal_gen::ch2_on();
-	    ch2_on_ = false;
+	    uart << "duty_cycle = ";
+	    uart >> duty_cycle;
+	    uart << duty_cycle << " %\n";
+	    PW_gen::ch2_on(duty_cycle);
+	    ch2_on_ = true;
 	    break;
 
 	case 'f':
-	    Signal_gen::ch2_off();
+	    PW_gen::ch2_off();
 	    ch2_on_ = false;
 	    break;
 
@@ -122,11 +151,11 @@ void Main::timer_on_1MHz(uint16_t period_in_us)
     avr::UART_iostream uart;
 
     switch(period_in_us){
-	case 1: Signal_gen::on<1>(); break;
-	case 8: Signal_gen::on<8>(); break;
-	case 64: Signal_gen::on<64>(); break;
-	case 256: Signal_gen::on<256>(); break;
-	case 1024: Signal_gen::on<1024>(); break;
+	case 1: PW_gen::on<1>(); break;
+	case 8: PW_gen::on<8>(); break;
+	case 64: PW_gen::on<64>(); break;
+	case 256: PW_gen::on<256>(); break;
+	case 1024: PW_gen::on<1024>(); break;
 	default:
 	    uart << "period_in_us [" << period_in_us << "] no válido\n";
 	    break;
@@ -143,26 +172,26 @@ void Main::run()
 {
     avr::UART_iostream uart;
 
-    uart << "\n\nSignal_generator\n"
-            "----------------\n"
+    uart << "\n\nPWM generator\n"
+                "-------------\n"
             "Connect oscilloscope to pins:\n"
-            "channel 1 = pin " << uint16_t{Signal_gen::pin_channel1} << '\n'
-         << "channel 2 = pin " << uint16_t{Signal_gen::pin_channel2} << '\n';
+            "channel 1 = pin " << uint16_t{PW_gen::pin_channel1} << '\n'
+         << "channel 2 = pin " << uint16_t{PW_gen::pin_channel2} << '\n';
 
     while(1){
 	uart << "\n\nState"
 	          "\n-----"
 		"\ntimer period = " << period_in_us_ << " us"
 	        "\nfrequency (wanted) = " << freq_ << " Hz"
-	        "\nfrequency (real)   = " << Signal_gen::frequency() << " Hz"
+	        "\nfrequency (real)   = " << PW_gen::frequency() << " Hz"
 		"\nch1 on = " << (ch1_on_? "yes": "no") 
 	     << "\nch2 on = " << (ch2_on_? "yes": "no") 
 	     << '\n';
 
 	uart << "\n\nMenu:\n"
-	        "signal generator [p]eriod\n"
-	        "signal generator o[f]f\n"
-		"signal generator [o]n\n"
+	        "[p]eriod\n"
+	        "o[f]f\n"
+		"[o]n\n"
 		"[s]elect frequency\n"
 		"ch[1] menu\n"
 		"ch[2] menu\n";
@@ -173,13 +202,12 @@ void Main::run()
 	switch(c){
 	    case 'p':
 		period_in_us_ = select_period_1MHz();
-		Signal_gen::off();
+		PW_gen::off();
 		timer_on_1MHz(period_in_us_);
-		Signal_gen::frequency(freq_); // actualizamos top con ese period
 		break;
 
 	    case 'f':
-		Signal_gen::off();
+		PW_gen::off();
 		break;
 	    case 'o':
 		on();
@@ -190,7 +218,7 @@ void Main::run()
 		uart >> num;
 		uart << num << '\n';
 		freq_ = avr::Hertz{num};
-		Signal_gen::frequency(freq_);
+		PW_gen::frequency(freq_);
 		break;
 
 	    case '1':
@@ -217,6 +245,7 @@ Main::Main()
 
 // init_signal_generator()
     timer_on_1MHz(period_in_us_);
+    PW_gen::frequency(freq_);
 }
 
 

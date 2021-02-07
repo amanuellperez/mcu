@@ -57,69 +57,165 @@ namespace avr{
  *  Al ser genérico no debe de depender de avr.
  *
  */
-struct Signal_generator_sf{
+namespace __avr{
+class Signal_generator_sf{
+public:
 // TODO: esto son parametros de template
-    using Timer = Timer1_CTC_mode;
-    static constexpr uint8_t pin_channel1 = Timer1_CTC_mode::num_pin_A();
-    static constexpr uint8_t pin_channel2 = Timer1_CTC_mode::num_pin_B();
+    using Timer = Timer1;
+    static constexpr uint8_t pin_channel1 = Timer::OCA_pin();
+    static constexpr uint8_t pin_channel2 = Timer::OCB_pin();
 
-    /// Encendemos el generador de señales
-    template<uint16_t period>
-    static void on() { Timer::template on<period>();}
-    
     /// Apagamos el generador de señales.
     static void off() { Timer::off(); }
-
-    /// Genera una onda cuadrada en el channel 1.
-    // TODO: es más elegante:
-    //          top = Timer::clock_frequency()/(2*freq_sq);
-    static void frequency(const Hertz& freq_sq)
-    {// Generic_timer
-// (---) Esta opción no funciona.
-//	using Int = Timer::counter_type;
-//	Microsecond T_sq0 = atd::inverse(freq_sq);
-//	Int T_sq = atd::to_integer<Int>(T_sq0.value());
-//        Int top =
-//            T_sq /
-//            (static_cast<Int>(Timer::clock_period_in_us()) * Int{2});
-
-	uint32_t tmp = uint32_t{2} * static_cast<uint32_t>(Timer::clock_period_in_us())
-		  * atd::to_integer(freq_sq.value());
-	Timer::counter_type top = uint32_t{1000000u}/tmp;
-
-        Timer::top_OCRA(top);
-    }
-
-    static Hertz frequency()
-    {
-	auto top = Timer::output_compare_register_A();
-        uint32_t tmp = uint32_t{2} *
-                       static_cast<uint32_t>(Timer::clock_period_in_us()) *
-                       uint32_t{top};
-
-	uint32_t freq = uint32_t{1000000u}/tmp;
-	return Hertz{freq};
-    }
-
-    /// Enciende el channel 1.
-    static void ch1_on()
-    {Timer::pin_A_toggle_on_compare_match();}
 
     /// Apaga el channel 1.
     static void ch1_off()
     { Timer::pin_A_disconnected(); }
 
-
-    /// Enciende el channel 2.
-    static void ch2_on()
-    {Timer::pin_B_toggle_on_compare_match();}
-
     /// Apaga el channel 2.
     static void ch2_off()
     { Timer::pin_B_disconnected(); }
 
+
 };
 
+}// namespace __avr
+
+
+class Square_wave_generator_sf: public __avr::Signal_generator_sf{
+public:
+    /// Genera una onda cuadrada en el channel 1.
+    // TODO: es más elegante:
+    //          top = Timer::clock_frequency()/(2*freq_sq);
+    // (???) Se podria calcular en tiempo de compilación top, si se pasa
+    //	     clock_period_in_us como parámetro de plantilla.
+    static Timer::counter_type frequency(const Hertz& freq_sq)
+    {
+        uint32_t tmp = uint32_t{2} *
+                       static_cast<uint32_t>(Timer::clock_period_in_us()) *
+                       atd::to_integer(freq_sq.value());
+
+        Timer::counter_type top = (uint32_t{1000000u}/tmp - 1);
+
+        //Timer::output_compare_registar_A(top);
+	Timer::input_capture_register(top);
+
+	return top;
+    }
+
+    /// Frecuencia que genera (en caso de que esté encendido y funcionando).
+    static Hertz frequency()
+    {
+	// auto top = Timer::output_compare_register_A();
+	auto top = Timer::input_capture_register();
+        uint32_t tmp = uint32_t{2} *
+                       static_cast<uint32_t>(Timer::clock_period_in_us()) *
+                       (uint32_t{top} + 1);
+
+	uint32_t freq = uint32_t{1000000u}/tmp;
+	return Hertz{freq};
+    }
+
+    /// Encendemos el generador de señales
+    template<uint16_t period>
+    static void on() 
+    { 
+	Timer::template on<period>();
+        Timer::mode_CTC_top_ICR1();
+    }
+    
+
+// square_wave
+// -----------
+    /// Enciende el channel 1.
+    static void ch1_on()
+    {
+        Timer::CTC_pin_A_toggle_on_compare_match();
+    }
+
+
+    /// Enciende el channel 2. 
+    static void ch2_on()
+    { Timer::CTC_pin_B_toggle_on_compare_match(); }
+
+
+};
+
+
+class PWM_generator_sf : public __avr::Signal_generator_sf{
+public:
+    /// Genera una onda cuadrada en el channel 1.
+    // OJO: es diferente de la de Square_wave_generator_sf, por culpa del 2*
+    static Timer::counter_type frequency(const Hertz& freq_sq)
+    {
+        uint32_t tmp = static_cast<uint32_t>(Timer::clock_period_in_us()) *
+                       atd::to_integer(freq_sq.value());
+
+        Timer::counter_type top = (uint32_t{1000000u}/tmp - 1);
+
+        //Timer::output_compare_registar_A(top);
+	Timer::input_capture_register(top);
+
+	return top;
+    }
+
+    /// Frecuencia que genera (en caso de que esté encendido y funcionando).
+    static Hertz frequency()
+    {
+	// auto top = Timer::output_compare_register_A();
+	auto top = Timer::input_capture_register();
+        uint32_t tmp = static_cast<uint32_t>(Timer::clock_period_in_us()) *
+                       (uint32_t{top} + 1);
+
+	uint32_t freq = uint32_t{1000000u}/tmp;
+	return Hertz{freq};
+    }
+    /// Encendemos el generador de señales
+    template<uint16_t period>
+    static void on() 
+    {
+        Timer::mode_fast_PWM_top_ICR1();
+	Timer::template on<period>();
+    }
+
+    static void ch1_non_inverting_mode()
+    { Timer::PWM_pin_A_non_inverting_mode();}
+
+    static void ch1_inverting_mode()
+    { Timer:: PWM_pin_A_inverting_mode();}
+
+    static void ch2_non_inverting_mode()
+    { Timer::PWM_pin_B_non_inverting_mode();}
+
+    static void ch2_inverting_mode()
+    { Timer::PWM_pin_B_inverting_mode();}
+
+
+    /// Enciende el channel 1, generando una PWM de frecuencia `freq` y
+    /// `duty_cycle`. El duty_cycle da el tanto por cien como número entero.
+    /// Ejemplo: duty_cycle = 10, es un 10%.
+    static void ch1_on(const uint8_t duty_cycle)
+    {// uint32_t clave, para que no haya overflow!!!
+	uint32_t ocr1a = Timer::input_capture_register();
+	ocr1a = (duty_cycle*ocr1a)/100;
+
+        Timer::output_compare_register_A(ocr1a);
+	Timer::PWM_pin_A_non_inverting_mode();
+    }
+
+    /// Enciende el channel 2. 
+    static void ch2_on(const uint8_t duty_cycle)
+    {
+	uint32_t ocr1b = Timer::input_capture_register();
+	ocr1b = (duty_cycle*ocr1b)/100;
+
+        Timer::output_compare_register_B(ocr1b);
+	Timer::PWM_pin_B_non_inverting_mode();
+    }
+
+
+
+};
 
 }// namespace
 

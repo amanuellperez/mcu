@@ -150,7 +150,7 @@ void oca_menu(uint16_t& ocr1a)
 	    "[d]isconnect\n"
 	    "[i]nverting mode\n"
 	    "[n]on inverting mode\n"
-	    "[t]oggle on compare match\n";
+	    "[t]oggle on compare match (NO FUNCIONA???)\n";
 
 
     char c{};
