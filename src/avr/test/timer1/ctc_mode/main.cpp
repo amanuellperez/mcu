@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez <amanuel.lperez@gmail.com>
+// Copyright (C) 2019-2021 A.Manuel L.Perez <amanuel.lperez@gmail.com>
 //
 // This file is part of the MCU++ Library.
 //
@@ -15,17 +15,13 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-// Ejemplo básico de uso del Timer como contador.
-// Genera una señal de 1MHz en el pin OC1A (pin 15)
-// y en el pin OC1B (pin 16). Conectar el osciloscopio a estos pines para
-// comprobarlo.
 #include "../../../avr_timer1_basic.h"
 #include "../../../avr_time.h"
 #include "../../../avr_UART_iostream.h"
 
 
 using namespace avr::literals;
-using Timer = avr::Timer1_CTC_mode;
+using Timer = avr::Timer1;
 
 // Probar cada periodo con diferentes frecuencias: 1 MHz y 8 MHz.
 // Para los 8 MHz hay que definir el fuse correspondiente y F_CPU en el
@@ -153,13 +149,76 @@ uint16_t select_period()
 }
 
 
-void run_timer(uint16_t period_in_us, Timer::counter_type top)
+
+void oca_menu()
 {
-    Timer::top_OCRA(top);
-    Timer::pin_A_toggle_on_compare_match();
-    Timer::pin_B_toggle_on_compare_match();
-    timer_on(period_in_us);
+    avr::UART_iostream uart;
+
+    uart << "\nOCA menu:\n"
+	    "[d]isconnect\n"
+	    "[t]oggle on compare match\n"
+	    "[c]lear on compare match\n"
+	    "[s]et on compare match\n"
+	    "Observar que 'clear' y 'set' no hacen nada.\n"
+	    "Supongo (?) que la idea es que el pin cambie transcurrido\n"
+	    "un tiempo (el tiempo que tarda el timer en llegar al TOP\n";
+
+
+    char c{};
+    uart >> c;
+    switch(c){
+	case 'd':
+	    Timer::pin_A_disconnected();
+	    break;
+
+	case 't': 
+	    Timer::CTC_pin_A_toggle_on_compare_match();
+	    break;
+
+	case 'c': 
+	    Timer::CTC_pin_A_clear_on_compare_match();
+	    break;
+
+	case 's': 
+	    Timer::CTC_pin_A_set_on_compare_match();
+	    break;
+    }
 }
+
+void ocb_menu()
+{
+    avr::UART_iostream uart;
+
+    uart << "\nOCB menu:\n"
+	    "[d]isconnect\n"
+	    "[t]oggle on compare match\n"
+	    "[c]lear on compare match\n"
+	    "[s]et on compare match\n";
+
+
+    char c{};
+    uart >> c;
+    switch(c){
+	case 'd':
+	    Timer::pin_B_disconnected();
+	    break;
+
+	case 't': 
+	    Timer::CTC_pin_B_toggle_on_compare_match();
+	    break;
+
+	case 'c': 
+	    Timer::CTC_pin_B_clear_on_compare_match();
+	    break;
+
+	case 's': 
+	    Timer::CTC_pin_B_set_on_compare_match();
+	    break;
+    }
+
+}
+
+
 
 
 int main()
@@ -169,57 +228,79 @@ int main()
     avr::basic_cfg(uart);
     uart.on();
 
-
+// init_timer()
     uint16_t period_in_us = 1;
     Timer::counter_type top = 1000;
 
+    Timer::mode_CTC_top_OCR1A();
+    Timer::output_compare_register_A(top);
+    Timer::CTC_pin_A_toggle_on_compare_match(); // para que se vea algo al ppio
+    Timer::CTC_pin_B_toggle_on_compare_match();
+    timer_on(period_in_us);
+
+    uart << "\n\nCTC mode test\n"
+            "-------------\n"
+            "Connect oscilloscope to pins "
+         << uint16_t{Timer::OCA_pin()} << " and " << uint16_t{Timer::OCB_pin()}
+         << '\n';
+
     while(1){
-	uart << "\n\nState:\n"
+        uint32_t period = uint32_t{2} * (uint32_t{top} + 1)* uint32_t{period_in_us};
+
+	uart << "\n\nState\n"
+		    "-----\n"
 	        "top = " << top <<
 		"\nperiod_in_us                = " << period_in_us <<
-		"\nTimer::clock_period_in_us() = " << Timer::clock_period_in_us();
-//	avr::Microsecond us = Timer::clock_period();
-//		uart << "\nTimer::clock_period()       = " << us << '\n';
-//		"\nTimer::clock_period()       = " << Timer::clock_period() << '\n';
+		"\nTimer::clock_period_in_us() = " << Timer::clock_period_in_us() <<
+                "\nPeriodo a ver en el osciloscopio: " <<
+		period << " us +- error ("
+                "2*(top + 1)*period_in_us)\n";
 
-        uint32_t period = uint32_t{2} * uint32_t{top} * uint32_t{period_in_us};
-        uart << "\n\nMenu:\n"
+        uart << "\nMenu\n"
+	            "----\n"
                 "o[f]f\n"
 		"[o]n\n"
                 "[p]eriod_in_us (apaga el timer. Llamar a on)\n"
                 "[t]op (apaga el timer. Llamar a on)\n"
-                "\nPeriodo a ver en el osciloscopio: "
-                "2*top*period_in_us = " << 
-		period << " us +- error\n\n"
-		"Elige opción del menu\n";
+		"OC[A] menu\n"
+		"OC[B] menu\n";
 
         char c{};
 	uart >> c;
 	switch(c){
 	    case 'o':
-		run_timer(period_in_us, top);
+		timer_on(period_in_us);
 		break;
 
 	    case 'f':
 		Timer::off();
 		break;
 
+	    case 'a':
+	    case 'A':
+		oca_menu();
+		break;
+
+	    case 'b':
+	    case 'B':
+		ocb_menu();
+		break;
+
 	    case 'p':
 		Timer::off();
 		period_in_us = select_period();
-		run_timer(period_in_us, top);
+		timer_on(period_in_us);
 		break;
 
 	    case 't':
-		Timer::off();
-		uart << "\ntop = ";
+		uart << "\ntop (max " << Timer::max() << ") = ";
 		uart >> top;
 		uart << top << '\n';
-		run_timer(period_in_us, top);
+		Timer::output_compare_register_A(top);
 		break;
 
 	    default:
-		uart << "No entiendo\n";
+		uart << "I don't understand.\n";
 		break;
 
 	}

@@ -24,7 +24,7 @@
 #include <stdlib.h>
 #include <std_type_traits.h>
 
-using Timer = avr::Timer1_normal_mode;
+using Timer = avr::Timer1;
 
 constexpr uint16_t period_in_us = 1024;
 //constexpr uint16_t period_in_us = 256;
@@ -90,10 +90,15 @@ void print(uint64_t time_en_us)
 
 int main()
 {
+// init_uart();
     avr::UART_iostream uart;
     avr::basic_cfg(uart);
     uart.on();
 
+// init_timer();
+    Timer::mode_normal();
+    Timer::pin_A_disconnected(); // (???) creo que es innecesario 
+    Timer::pin_B_disconnected();
     Timer::on<period_in_us>();
     Timer::enable_overflow_interrupt();
 
@@ -106,9 +111,9 @@ int main()
 	    c = contador;
 	}
 	
-	uint64_t t_us = (c*(Timer::max() + 1)+ v)*period_in_us;
-        uart << '(' << c << "*" << (Timer::max() + 1) << "+" << v << ")*"
-             << period_in_us << " = ";
+	uint64_t t_us = (c*(uint64_t{Timer::max()} + 1)+ v)*period_in_us;
+        uart << '(' << c << "*" << (uint64_t{Timer::max()} + 1) << "+" << v << ")*"
+             << period_in_us << " = " << t_us << " us = ";
 
         print (t_us);
 	wait_ms(1000);

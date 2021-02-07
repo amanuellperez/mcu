@@ -30,6 +30,16 @@
  *     03/01/2020 Que de un mensaje legible el compilador 
  *		  si el periodo o la frecuencia no es correcta.
  *     01/02/2021 frequency_divisor, clock_period_in_us
+ *     06/02/2021 v0.2. Reestructurado: lo escribo como traductor puro.
+ *                Al principio había creado distintas clases Timer1_CTC_mode,
+ *                Timer1_normal_mode... para separar los diferentes modos de
+ *                funcionamiento del timer. Sin embargo, si se quiere hacer un
+ *                generador de señales, este va a usar funciones de CTC_mode y
+ *                de PWM_mode con lo que no puedo usar 2 clases diferentes.
+ *                Además, al dejarlo como traductor es más sencillo de
+ *                implementar: basta leer la datasheet e ir traduciéndola a
+ *                código.
+ *                
  *	
  *  TODO: faltan 3 modos de funcionamiento:
  *	+ El de capturar en el ICR.
@@ -92,11 +102,11 @@ public:
 
     // Devuelve el número de pin al que está conectado la salida A del 
     // generador de ondas.
-    static constexpr uint8_t num_pin_A() {return TIMER1_num_pin_A; }
+    static constexpr uint8_t OCA_pin() {return TIMER1_OCA_pin; }
 
     // Devuelve el número de pin al que está conectado la salida B del 
     // generador de ondas.
-    static constexpr uint8_t num_pin_B() {return TIMER1_num_pin_B;}
+    static constexpr uint8_t OCB_pin() {return TIMER1_OCB_pin;}
 
 
 // CONFIGURACIÓN DEL RELOJ
@@ -165,6 +175,74 @@ public:
 
     static counter_type input_capture_register();	 /// Lectura del ICR.
     static void input_capture_register(counter_type x);/// Escritura del ICR.
+
+// WAVEFORM GENERATION MODES (table 20-6)
+// normal mode
+    static void mode_normal();
+
+// CTC modes
+    static void mode_CTC_top_OCR1A();
+    static void mode_CTC_top_ICR1();
+
+// Fast PWM modes
+    /// El contador va desde 0 hasta 0x00FF. (top = 0x00FF)
+    static void mode_fast_PWM_top_0x00FF();
+
+    /// El contador va desde 0 hasta 0x01FF. (top = 0x01FF)
+    static void mode_fast_PWM_top_0x01FF();
+
+    /// El contador va desde 0 hasta 0x03FF. (top = 0x03FF)
+    static void mode_fast_PWM_top_0x03FF();
+
+    static void mode_fast_PWM_top_ICR1();
+    static void mode_fast_PWM_top_OCR1A();
+
+// PWM phase correct modes
+    static void mode_PWM_phase_correct_top_0x00FF();
+    static void mode_PWM_phase_correct_top_0x01FF();
+    static void mode_PWM_phase_correct_top_0x03FF();
+    static void mode_PWM_phase_correct_top_ICR1();
+    static void mode_PWM_phase_correct_top_OCR1A();
+
+// PWM phase and frequency correct modes
+    static void mode_PWM_phase_and_frequency_correct_top_ICR1();
+    static void mode_PWM_phase_and_frequency_correct_top_OCR1A();
+
+
+// pins operation 
+    // comunes a todas las tablas (20-3,4 y 5)
+    static void pin_A_disconnected();
+    static void pin_B_disconnected();
+
+    // comunes a PWM
+    static void PWM_pin_A_non_inverting_mode();
+    static void PWM_pin_A_inverting_mode();
+    static void PWM_pin_B_non_inverting_mode();
+    static void PWM_pin_B_inverting_mode();
+
+    // table 20-3
+    static void CTC_pin_A_toggle_on_compare_match();
+    static void CTC_pin_A_clear_on_compare_match();
+    static void CTC_pin_A_set_on_compare_match();
+
+    static void CTC_pin_B_toggle_on_compare_match();
+    static void CTC_pin_B_clear_on_compare_match();
+    static void CTC_pin_B_set_on_compare_match();
+
+    // table 20-4
+    // Only for mode_fast_PWM_top_ICR1() and mode_fast_PWM_top_OCR1A():
+    // Toggle OC1A on compare match, OC1B disconnected.
+    static void fast_PWM_pin_A_toggle_on_compare_match();
+
+    // static void fast_PWM_pin_B_toggle_on_compare_match(); <--- ???
+
+    // Table 20-5, Phase correct and phase and frequency correct PWM
+    // Only for: PWM, phase and frequency correct top OCR1A, and PWM, phase
+    // correct top OCR1A.
+    // Toggle OC1A on compare match, OC1B disconnected.
+    static void phase_PWM_pin_A_toggle_on_compare_match();
+    // static void phase_PWM_pin_B_toggle_on_compare_match();<--- ???
+
 
 
 // INTERRUPCIONES
@@ -457,346 +535,437 @@ inline void Timer1::enable_output_compare_B_match_interrupt()
 }
 
 
-
-/*!
- *  \brief  Timer1 funcionando en normal mode.
- *
- */
-class Timer1_normal_mode: public Timer1{
-public:
-    using counter_type = Timer1::counter_type;
-
-    /// Encendemos el Timer1
-    template<uint16_t period
-	    , uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
-    static void on();
-
-    /// Ponemos el contador a cero.
-    static void reset();
-
-
-private:
-    static void set_normal_mode();
-    static void pin_AB_disconnected();
-};
-
-
-template<uint16_t period
-	, uint32_t clock_frequency_in_hz>
-inline void Timer1_normal_mode::on()
+inline void Timer1::mode_normal()
 {
-    Interrupts_lock l;
-
-    set_normal_mode();
-    pin_AB_disconnected();
-    Timer1::on<period, clock_frequency_in_hz>();
+    atd::write_bits<WGM13, WGM12>::to<0,0>::in(TCCR1B);
+    atd::write_bits<WGM11, WGM10>::to<0,0>::in(TCCR1A);
 }
 
-
-// Modo de funcionamiento del timer: normal. Cuenta de 0 a 0xFFFF
-// y vuelve a empezar.
-inline void Timer1_normal_mode::set_normal_mode()
+inline void Timer1::mode_PWM_phase_correct_top_0x00FF()
 {
-//    Interrupts_lock l; Son de 8 bits, no es necesario bloquearlo
+    atd::write_bits<WGM13, WGM12>::to<0,0>::in(TCCR1B);
+    atd::write_bits<WGM11, WGM10>::to<0,1>::in(TCCR1A);
 
-    atd::write_bits<WGM10, WGM11>::to<0,0>::in(TCCR1A);
-    atd::write_bits<WGM12, WGM13>::to<0,0>::in(TCCR1B);
 }
 
-inline void Timer1_normal_mode::pin_AB_disconnected()
-{   // 00
-    atd::write_bits<COM1A1, COM1A0, COM1B1, COM1B0>
-	       ::to<0,0,0,0>::in(TCCR1A);
+inline void Timer1::mode_PWM_phase_correct_top_0x01FF()
+{
+    atd::write_bits<WGM13, WGM12>::to<0,0>::in(TCCR1B);
+    atd::write_bits<WGM11, WGM10>::to<1,0>::in(TCCR1A);
 }
 
-
-
-inline void Timer1_normal_mode::reset()
+inline void Timer1::mode_PWM_phase_correct_top_0x03FF()
 {
-    Interrupts_lock l; 
-    TCNT1 = 0; 
+    atd::write_bits<WGM13, WGM12>::to<0,0>::in(TCCR1B);
+    atd::write_bits<WGM11, WGM10>::to<1,1>::in(TCCR1A);
 }
 
-
-//
-
-/*!
- *  \brief  CTC mode. 
- *
- *
- *  Una de las utilidades de este modo es generar una onda cuadrada en los
- *  pines A y B. Tal como funciona el Timer1 genera la misma señal en ambos
- *  pines.
- *
- *  Ver el test como ejemplo.
- */
-class Timer1_CTC_mode:public Timer1{
-public:
-    using counter_type = Timer1::counter_type;
-
-    // Configuración del CTC.
-    // 1.- ¿Dónde anotamos el valor del TOP? ¿En OCRA o en ICR?
-    // Recordar definir el valor de OCR1A/ICR elegido.
-    /// Define el valor del TOP como el indicado en OCR1A.
-    /// El TCNT va desde 0 hasta el valor escrito en OCR1A.
-    static void top_OCRA(const counter_type& top0);
-
-    /// Define el valor del TOP como el indicado en ICR.
-    /// El TCNT va desde 0 hasta el valor escrito en ICR.
-    static void top_ICR(const counter_type& top0);
-
-    // 2.- ¿Qué generar en los pines A/B cuando sucede un compare match? 
-    // ¿Una onda cuadrada (toggle)?  ¿set/clear el pin?
-    static void pin_A_disconnected();
-    static void pin_A_toggle_on_compare_match();
-    static void pin_A_set_on_compare_match();
-    static void pin_A_clear_on_compare_match();
-
-    static void pin_B_disconnected();
-    static void pin_B_toggle_on_compare_match();
-    static void pin_B_set_on_compare_match();
-    static void pin_B_clear_on_compare_match();
-
-    // 3.- Recordar encender el Timer (llamar a on).
-
-};
-
-
-
-inline void Timer1_CTC_mode::top_OCRA(const Timer1::counter_type& top0)
+inline void Timer1::mode_CTC_top_OCR1A()
 {
-    // 0100
     atd::write_bits<WGM13, WGM12>::to<0,1>::in(TCCR1B);
     atd::write_bits<WGM11, WGM10>::to<0,0>::in(TCCR1A);
-
-    output_compare_register_A(top0);
 }
 
-
-inline void Timer1_CTC_mode::top_ICR(const Timer1::counter_type& top0)
+inline void Timer1::mode_fast_PWM_top_0x00FF()
 {
-    // 1100
-    atd::write_bits<WGM13, WGM12>::to<1,1>::in(TCCR1B);
-    atd::write_bits<WGM11, WGM10>::to<0,0>::in(TCCR1A);
+    atd::write_bits<WGM13, WGM12>::to<0,1>::in(TCCR1B);
+    atd::write_bits<WGM11, WGM10>::to<0,1>::in(TCCR1A);
+}
 
-    input_capture_register(top0);
+inline void Timer1::mode_fast_PWM_top_0x01FF()
+{
+    atd::write_bits<WGM13, WGM12>::to<0,1>::in(TCCR1B);
+    atd::write_bits<WGM11, WGM10>::to<1,0>::in(TCCR1A);
+}
+
+inline void Timer1::mode_fast_PWM_top_0x03FF()
+{
+    atd::write_bits<WGM13, WGM12>::to<0,1>::in(TCCR1B);
+    atd::write_bits<WGM11, WGM10>::to<1,1>::in(TCCR1A);
+}
+
+inline void Timer1::mode_PWM_phase_and_frequency_correct_top_ICR1()
+{
+    atd::write_bits<WGM13, WGM12>::to<1,0>::in(TCCR1B);
+    atd::write_bits<WGM11, WGM10>::to<0,0>::in(TCCR1A);
+}
+
+inline void Timer1::mode_PWM_phase_and_frequency_correct_top_OCR1A()
+{
+    atd::write_bits<WGM13, WGM12>::to<1,0>::in(TCCR1B);
+    atd::write_bits<WGM11, WGM10>::to<0,1>::in(TCCR1A);
+}
+
+inline void Timer1::mode_PWM_phase_correct_top_ICR1()
+{
+    atd::write_bits<WGM13, WGM12>::to<1,0>::in(TCCR1B);
+    atd::write_bits<WGM11, WGM10>::to<1,0>::in(TCCR1A);
+}
+
+inline void Timer1::mode_PWM_phase_correct_top_OCR1A()
+{
+    atd::write_bits<WGM13, WGM12>::to<1,0>::in(TCCR1B);
+    atd::write_bits<WGM11, WGM10>::to<1,1>::in(TCCR1A);
+}
+
+inline void Timer1::mode_CTC_top_ICR1()
+{
+    atd::write_bits<WGM13, WGM12>::to<1,1>::in(TCCR1B);
+    atd::write_bits<WGM11, WGM10>::to<0,1>::in(TCCR1A);
+}
+
+inline void Timer1::mode_fast_PWM_top_ICR1()
+{
+    atd::write_bits<WGM13, WGM12>::to<1,1>::in(TCCR1B);
+    atd::write_bits<WGM11, WGM10>::to<1,0>::in(TCCR1A);
+}
+
+inline void Timer1::mode_fast_PWM_top_OCR1A()
+{
+    atd::write_bits<WGM13, WGM12>::to<1,1>::in(TCCR1B);
+    atd::write_bits<WGM11, WGM10>::to<1,1>::in(TCCR1A);
 }
 
 
-// Table 20-3.
-inline void Timer1_CTC_mode::pin_A_disconnected()
+// pins
+// ----
+inline void Timer1::pin_A_disconnected()
 {
     atd::write_bits<COM1A1, COM1A0>::to<0,0>::in(TCCR1A);
     // (???) ¿En qué estado dejar el puerto pin_A()?
 }
 
-
-
-inline void Timer1_CTC_mode::pin_A_toggle_on_compare_match()
-{   // 01
-    atd::write_bits<COM1A1, COM1A0>::to<0,1>::in(TCCR1A);
-
-    // Obligatorio definirlo como de salida. 
-    Pin<num_pin_A()>::as_output();
-}
-
-inline void Timer1_CTC_mode::pin_A_clear_on_compare_match()
-{   // 10
-    atd::write_bits<COM1A1, COM1A0>::to<1,0>::in(TCCR1A);
-
-    // Obligatorio definirlo como de salida. 
-    Pin<num_pin_A()>::as_output();
-}
-
-
-inline void Timer1_CTC_mode::pin_A_set_on_compare_match()
-{   // 11
-    atd::write_bits<COM1A1, COM1A0>::to<1,1>::in(TCCR1A);
-
-    // Obligatorio definirlo como de salida. 
-    Pin<num_pin_A()>::as_output();
-}
-
-
-inline void Timer1_CTC_mode::pin_B_disconnected()
+inline void Timer1::pin_B_disconnected()
 {
     atd::write_bits<COM1B1, COM1B0>::to<0,0>::in(TCCR1A);
     // (???) ¿En qué estado dejar el puerto pin_B()?
 }
 
-inline void Timer1_CTC_mode::pin_B_toggle_on_compare_match()
+inline void Timer1::fast_PWM_pin_A_toggle_on_compare_match()
 {   // 01
-    atd::write_bits<COM1B1, COM1B0>::to<0,1>::in(TCCR1A);
+    atd::write_bits<COM1A1, COM1A0>::to<0,1>::in(TCCR1A);
 
     // Obligatorio definirlo como de salida. 
-    Pin<num_pin_B()>::as_output();
-}
-
-inline void Timer1_CTC_mode::pin_B_clear_on_compare_match()
-{   // 10
-    atd::write_bits<COM1B1, COM1B0>::to<1,0>::in(TCCR1A);
-
-    // Obligatorio definirlo como de salida. 
-    Pin<num_pin_B()>::as_output();
+    Pin<OCA_pin()>::as_output();
 }
 
 
-inline void Timer1_CTC_mode::pin_B_set_on_compare_match()
-{   // 11
-    atd::write_bits<COM1B1, COM1B0>::to<1,1>::in(TCCR1A);
-
-    // Obligatorio definirlo como de salida. 
-    Pin<num_pin_B()>::as_output();
-}
-
-
-
-/*!
- *  \brief  Hacemos que el Timer 1 funcione en el modo fast PWM.
- *
- *
- */
-class Timer1_fast_PWM:public Timer1{
-public:
-    using counter_type = Timer1::counter_type;
-
-    // Configuración del Fast PWM
-
-    // 1.- ¿Qué valor usamos como TOP?
-
-    /// El contador va desde 0 hasta 0x00FF. (top = 0x00FF)
-    static void top_0x00FF();
-
-    /// El contador va desde 0 hasta 0x01FF. (top = 0x01FF)
-    static void top_0x01FF();
-
-    /// El contador va desde 0 hasta 0x03FF. (top = 0x03FF)
-    static void top_0x03FF();
-
-    /// El contador va desde 0 hasta el valor escrito en el comparador A.
-    /// OJO: no tengo claro como funciona este modo, pero recordar que la
-    /// señal que se genera en el pin A procede de comparar con el comparador A.
-    /// Pero si usamos este como TOP, no vamos a generar una PWM. Asi que, en
-    /// general, no llamar a esta función. Usar mejor el ICR o los valores
-    /// fijos de top.
-    static void top_OCRA(counter_type top0);
-
-    /// El contador va desde 0 hasta el valor escrito en ICR.
-    static void top_ICR(counter_type top0);
-
-
-    // 2.- ¿Qué generar en los pines A/B?
-
-    /// Este modo de funcionamiento creo que genera una onda cuadrada. ¿Por
-    /// qué aparece aquí? Ni idea. Ver pag. 170 datasheet.
-//    static void toggle_pin_A_on_compare_match_pin_B_disconnected();
-
-    /// Generamos en el pin A una señal PWM.
-    /// En este modo si ponemos 300 en el comparador A y ICR = 1000, 
-    /// el duty cycle es del 30% (suponiendo haber llamado a top_ICR())
-    static void pin_A_non_inverting_mode();
-
-    /// Generamos en el pin A una señal PWM.
-    /// En este modo si ponemos 300 en el comparador A y ICR = 1000, 
-    /// el duty cycle es del 70% (suponiendo haber llamado a top_ICR())
-    static void pin_A_inverting_mode();
-
-    /// Generamos en el pin B una señal PWM.
-    /// En este modo si ponemos 300 en el comparador A y ICR = 1000, 
-    /// el duty cycle es del 30% (suponiendo haber llamado a top_ICR())
-    static void pin_B_non_inverting_mode();
-
-    /// Generamos en el pin A una señal PWM.
-    /// En este modo si ponemos 300 en el comparador A y ICR = 1000, 
-    /// el duty cycle es del 70% (suponiendo haber llamado a top_ICR())
-    static void pin_B_inverting_mode();
-
-    // 3.- Que no se olvide encender el Timer llamando a la función on().
-};
-
-
-inline void Timer1_fast_PWM::top_0x00FF()
-{
-    // 0101
-    atd::write_bits<WGM13, WGM12>::to<0,1>::in(TCCR1B);
-    atd::write_bits<WGM11, WGM10>::to<0,1>::in(TCCR1A);
-}
-
-
-inline void Timer1_fast_PWM::top_0x01FF()
-{
-    // 0110
-    atd::write_bits<WGM13, WGM12>::to<0,1>::in(TCCR1B);
-    atd::write_bits<WGM11, WGM10>::to<1,0>::in(TCCR1A);
-}
-
-inline void Timer1_fast_PWM::top_0x03FF()
-{
-    // 0111
-    atd::write_bits<WGM13, WGM12>::to<0,1>::in(TCCR1B);
-    atd::write_bits<WGM11, WGM10>::to<1,1>::in(TCCR1A);
-    
-}
-
-inline void Timer1_fast_PWM::top_OCRA(Timer1::counter_type top0)
-{
-    // 1111
-    atd::write_bits<WGM13, WGM12>::to<1,1>::in(TCCR1B);
-    atd::write_bits<WGM11, WGM10>::to<1,1>::in(TCCR1A);
-
-    output_compare_register_A(top0);
-}
-
-inline void Timer1_fast_PWM::top_ICR(Timer1::counter_type top0)
-{
-    // 1110
-    atd::write_bits<WGM13, WGM12>::to<1,1>::in(TCCR1B);
-    atd::write_bits<WGM11, WGM10>::to<1,0>::in(TCCR1A);
-    
-    input_capture_register(top0);
-}
-
-
-//inline void Timer1_fast_PWM::toggle_pin_A_on_compare_match_pin_B_disconnected()
-//{   // 01
-//    atd::Register(TCCR1A).write_zero_bit<COM1A1>();
-//    atd::Register(TCCR1A).write_one_bit <COM1A0>();
-//}
-
-inline void Timer1_fast_PWM::pin_A_non_inverting_mode()
+inline void Timer1::PWM_pin_A_non_inverting_mode()
 {   // 10
     atd::write_bits<COM1A1, COM1A0>::to<1,0>::in(TCCR1A);
 
     // Obligatorio definirlo como de salida. 
-    Pin<num_pin_A()>::as_output();
+    Pin<OCA_pin()>::as_output();
 }
 
-inline void Timer1_fast_PWM::pin_A_inverting_mode()
+inline void Timer1::PWM_pin_A_inverting_mode()
 {   // 11
     atd::write_bits<COM1A1, COM1A0>::to<1,1>::in(TCCR1A);
 
     // Obligatorio definirlo como de salida. 
-    Pin<num_pin_A()>::as_output();
+    Pin<OCA_pin()>::as_output();
 }
 
 
-inline void Timer1_fast_PWM::pin_B_non_inverting_mode()
+inline void Timer1::PWM_pin_B_non_inverting_mode()
 {   // 10
     atd::write_bits<COM1B1, COM1B0>::to<1,0>::in(TCCR1A);
 
     // Obligatorio definirlo como de salida. 
-    Pin<num_pin_B()>::as_output();
+    Pin<OCB_pin()>::as_output();
 }
 
-inline void Timer1_fast_PWM::pin_B_inverting_mode()
+inline void Timer1::PWM_pin_B_inverting_mode()
 {   // 11
     atd::write_bits<COM1B1, COM1B0>::to<1,1>::in(TCCR1A);
 
     // Obligatorio definirlo como de salida. 
-    Pin<num_pin_B()>::as_output();
+    Pin<OCB_pin()>::as_output();
 }
 
 
+
+inline void Timer1::CTC_pin_A_toggle_on_compare_match()
+{   // 01
+    atd::write_bits<COM1A1, COM1A0>::to<0,1>::in(TCCR1A);
+
+    // Obligatorio definirlo como de salida. 
+    Pin<OCA_pin()>::as_output();
+}
+
+inline void Timer1::CTC_pin_A_clear_on_compare_match()
+{   // 10
+    atd::write_bits<COM1A1, COM1A0>::to<1,0>::in(TCCR1A);
+
+    // Obligatorio definirlo como de salida. 
+    Pin<OCA_pin()>::as_output();
+}
+
+
+inline void Timer1::CTC_pin_A_set_on_compare_match()
+{   // 11
+    atd::write_bits<COM1A1, COM1A0>::to<1,1>::in(TCCR1A);
+
+    // Obligatorio definirlo como de salida. 
+    Pin<OCA_pin()>::as_output();
+}
+
+
+inline void Timer1::CTC_pin_B_toggle_on_compare_match()
+{   // 01
+    atd::write_bits<COM1B1, COM1B0>::to<0,1>::in(TCCR1A);
+
+    // Obligatorio definirlo como de salida. 
+    Pin<OCB_pin()>::as_output();
+}
+
+inline void Timer1::CTC_pin_B_clear_on_compare_match()
+{   // 10
+    atd::write_bits<COM1B1, COM1B0>::to<1,0>::in(TCCR1A);
+
+    // Obligatorio definirlo como de salida. 
+    Pin<OCB_pin()>::as_output();
+}
+
+
+inline void Timer1::CTC_pin_B_set_on_compare_match()
+{   // 11
+    atd::write_bits<COM1B1, COM1B0>::to<1,1>::in(TCCR1A);
+
+    // Obligatorio definirlo como de salida. 
+    Pin<OCB_pin()>::as_output();
+}
+
+
+
+///*!
+// *  \brief  Timer1 funcionando en normal mode.
+// *
+// */
+//class Timer1_normal_mode: public Timer1{
+//public:
+//    using counter_type = Timer1::counter_type;
+//
+//    /// Encendemos el Timer1
+//    template<uint16_t period
+//	    , uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
+//    static void on();
+//
+//    /// Ponemos el contador a cero.
+//    static void reset();
+//
+//
+//private:
+//    static void set_normal_mode();
+//    static void pin_AB_disconnected();
+//};
+//
+//
+//template<uint16_t period
+//	, uint32_t clock_frequency_in_hz>
+//inline void Timer1_normal_mode::on()
+//{
+//    Interrupts_lock l;
+//
+//    set_normal_mode();
+//    pin_AB_disconnected();
+//    Timer1::on<period, clock_frequency_in_hz>();
+//}
+//
+//
+//// Modo de funcionamiento del timer: normal. Cuenta de 0 a 0xFFFF
+//// y vuelve a empezar.
+//inline void Timer1_normal_mode::set_normal_mode()
+//{
+////    Interrupts_lock l; Son de 8 bits, no es necesario bloquearlo
+//
+//    atd::write_bits<WGM10, WGM11>::to<0,0>::in(TCCR1A);
+//    atd::write_bits<WGM12, WGM13>::to<0,0>::in(TCCR1B);
+//}
+//
+//inline void Timer1_normal_mode::pin_AB_disconnected()
+//{   // 00
+//    atd::write_bits<COM1A1, COM1A0, COM1B1, COM1B0>
+//	       ::to<0,0,0,0>::in(TCCR1A);
+//}
+//
+//
+//
+//inline void Timer1_normal_mode::reset()
+//{
+//    Interrupts_lock l; 
+//    TCNT1 = 0; 
+//}
+//
+//
+////
+//
+///*!
+// *  \brief  CTC mode. 
+// *
+// *
+// *  Una de las utilidades de este modo es generar una onda cuadrada en los
+// *  pines A y B. Tal como funciona el Timer1 genera la misma señal en ambos
+// *  pines.
+// *
+// *  Ver el test como ejemplo.
+// */
+//class Timer1_CTC_mode:public Timer1{
+//public:
+//    using counter_type = Timer1::counter_type;
+//
+//    // Configuración del CTC.
+//    // 1.- ¿Dónde anotamos el valor del TOP? ¿En OCRA o en ICR?
+//    // Recordar definir el valor de OCR1A/ICR elegido.
+//    /// Define el valor del TOP como el indicado en OCR1A.
+//    /// El TCNT va desde 0 hasta el valor escrito en OCR1A.
+//    static void top_OCRA(const counter_type& top0);
+//
+//    /// Define el valor del TOP como el indicado en ICR.
+//    /// El TCNT va desde 0 hasta el valor escrito en ICR.
+//    static void top_ICR(const counter_type& top0);
+//
+//    // 2.- ¿Qué generar en los pines A/B cuando sucede un compare match? 
+//    // ¿Una onda cuadrada (toggle)?  ¿set/clear el pin?
+//    static void pin_A_disconnected();
+//    static void pin_A_toggle_on_compare_match();
+//    static void pin_A_set_on_compare_match();
+//    static void pin_A_clear_on_compare_match();
+//
+//    static void pin_B_disconnected();
+//    static void pin_B_toggle_on_compare_match();
+//    static void pin_B_set_on_compare_match();
+//    static void pin_B_clear_on_compare_match();
+//
+//    // 3.- Recordar encender el Timer (llamar a on).
+//
+//};
+//
+//
+//
+//inline void Timer1_CTC_mode::top_OCRA(const Timer1::counter_type& top0)
+//{
+//    // 0100
+//    atd::write_bits<WGM13, WGM12>::to<0,1>::in(TCCR1B);
+//    atd::write_bits<WGM11, WGM10>::to<0,0>::in(TCCR1A);
+//
+//    output_compare_register_A(top0);
+//}
+//
+//
+//inline void Timer1_CTC_mode::top_ICR(const Timer1::counter_type& top0)
+//{
+//    // 1100
+//    atd::write_bits<WGM13, WGM12>::to<1,1>::in(TCCR1B);
+//    atd::write_bits<WGM11, WGM10>::to<0,0>::in(TCCR1A);
+//
+//    input_capture_register(top0);
+//}
+//
+//
+//// Table 20-3.
+//
+//
+///*!
+// *  \brief  Hacemos que el Timer 1 funcione en el modo fast PWM.
+// *
+// *
+// */
+//class Timer1_fast_PWM:public Timer1{
+//public:
+//    using counter_type = Timer1::counter_type;
+//
+//    // Configuración del Fast PWM
+//
+//    // 1.- ¿Qué valor usamos como TOP?
+//
+//    /// El contador va desde 0 hasta 0x00FF. (top = 0x00FF)
+//    static void top_0x00FF();
+//
+//    /// El contador va desde 0 hasta 0x01FF. (top = 0x01FF)
+//    static void top_0x01FF();
+//
+//    /// El contador va desde 0 hasta 0x03FF. (top = 0x03FF)
+//    static void top_0x03FF();
+//
+//    /// El contador va desde 0 hasta el valor escrito en el comparador A.
+//    /// OJO: no tengo claro como funciona este modo, pero recordar que la
+//    /// señal que se genera en el pin A procede de comparar con el comparador A.
+//    /// Pero si usamos este como TOP, no vamos a generar una PWM. Asi que, en
+//    /// general, no llamar a esta función. Usar mejor el ICR o los valores
+//    /// fijos de top.
+//    static void top_OCRA(counter_type top0);
+//
+//    /// El contador va desde 0 hasta el valor escrito en ICR.
+//    static void top_ICR(counter_type top0);
+//
+//
+//    // 2.- ¿Qué generar en los pines A/B?
+//
+//    /// Este modo de funcionamiento creo que genera una onda cuadrada. ¿Por
+//    /// qué aparece aquí? Ni idea. Ver pag. 170 datasheet.
+////    static void toggle_pin_A_on_compare_match_pin_B_disconnected();
+//
+//    /// Generamos en el pin A una señal PWM.
+//    /// En este modo si ponemos 300 en el comparador A y ICR = 1000, 
+//    /// el duty cycle es del 30% (suponiendo haber llamado a top_ICR())
+//    static void pin_A_non_inverting_mode();
+//
+//    /// Generamos en el pin A una señal PWM.
+//    /// En este modo si ponemos 300 en el comparador A y ICR = 1000, 
+//    /// el duty cycle es del 70% (suponiendo haber llamado a top_ICR())
+//    static void pin_A_inverting_mode();
+//
+//    /// Generamos en el pin B una señal PWM.
+//    /// En este modo si ponemos 300 en el comparador A y ICR = 1000, 
+//    /// el duty cycle es del 30% (suponiendo haber llamado a top_ICR())
+//    static void pin_B_non_inverting_mode();
+//
+//    /// Generamos en el pin A una señal PWM.
+//    /// En este modo si ponemos 300 en el comparador A y ICR = 1000, 
+//    /// el duty cycle es del 70% (suponiendo haber llamado a top_ICR())
+//    static void pin_B_inverting_mode();
+//
+//    // 3.- Que no se olvide encender el Timer llamando a la función on().
+//};
+//
+//
+//
+//
+//inline void Timer1_fast_PWM::top_0x01FF()
+//{
+//    // 0110
+//    atd::write_bits<WGM13, WGM12>::to<0,1>::in(TCCR1B);
+//    atd::write_bits<WGM11, WGM10>::to<1,0>::in(TCCR1A);
+//}
+//
+//inline void Timer1_fast_PWM::top_0x03FF()
+//{
+//    // 0111
+//    atd::write_bits<WGM13, WGM12>::to<0,1>::in(TCCR1B);
+//    atd::write_bits<WGM11, WGM10>::to<1,1>::in(TCCR1A);
+//    
+//}
+//
+//inline void Timer1_fast_PWM::top_OCRA(Timer1::counter_type top0)
+//{
+//    // 1111
+//    atd::write_bits<WGM13, WGM12>::to<1,1>::in(TCCR1B);
+//    atd::write_bits<WGM11, WGM10>::to<1,1>::in(TCCR1A);
+//
+//    output_compare_register_A(top0);
+//}
+//
+//inline void Timer1_fast_PWM::top_ICR(Timer1::counter_type top0)
+//{
+//    // 1110
+//    atd::write_bits<WGM13, WGM12>::to<1,1>::in(TCCR1B);
+//    atd::write_bits<WGM11, WGM10>::to<1,0>::in(TCCR1A);
+//    
+//    input_capture_register(top0);
+//}
+//
+//
 
 }// namespace
 
