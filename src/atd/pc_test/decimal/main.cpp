@@ -328,6 +328,22 @@ void test_decimal_arithmetic()
     }
 
 
+// operaciones con Rep
+    {
+	using Int = atd::Decimal<int, 3>;
+	Int a{5,4};
+	Int b = a + 3;
+	CHECK_TRUE((b == Int{8,4}), "Decimal + int");
+
+	b = a + 0;
+	CHECK_TRUE((b == a), "Decimal + int");
+
+	b = a - 3;
+	CHECK_TRUE((b == Int{2,4}), "Decimal - int");
+
+	b = a - 0;
+	CHECK_TRUE((b == a), "Decimal - int");
+    }
 }
 
 

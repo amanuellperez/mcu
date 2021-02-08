@@ -38,6 +38,16 @@
  *    A.Manuel L.Perez
  *    04/03/2020 v0.0: Versión mínima (muy limitada, para probarla).
  *    05/02/2021       to_integer.
+ *    08/02/2021       Había definido explicit el constructor. Sin embargo,
+ *                     un 'int' es un 'Decimal<int>' con parte fraccionaria
+ *                     igual a 0. Sí tiene sentido que se pueda pasar de int a
+ *                     Decimal implícitamente. El recíproco no ya que perdería
+ *                     decimales.
+ *                     De esta forma puedo hacer: Decimal<int> + int.
+ *                     Bueno, esa era la idea inicial. En las pruebas falla 
+ *		       la deducción automática (¿culpa del otro constructor de
+ *		       tipo template?) así que defino operator+(int, Decimal) 
+ *		       (con todo no debería de ser necesario. Revisar!!!)
  *
  ****************************************************************************/
 
@@ -299,6 +309,23 @@ constexpr inline std::common_type_t<Decimal<R1, n1>, Decimal<R2, n2>>
     return CT::from_internal_value(CT{a}.internal_value() -
                                    CT{b}.internal_value());
 }
+
+template <typename R, int n>
+constexpr inline Decimal<R, n> operator+(const Decimal<R,n>& a, const R& b)
+{ return a + Decimal<R,n>{b}; }
+
+template <typename R, int n>
+constexpr inline Decimal<R, n> operator+(const R& a, const Decimal<R,n>& b)
+{ return b + a;}
+
+
+template <typename R, int n>
+constexpr inline Decimal<R, n> operator-(const Decimal<R,n>& a, const R& b)
+{ return a - Decimal<R,n>{b}; }
+
+template <typename R, int n>
+constexpr inline Decimal<R, n> operator-(const R& a, const Decimal<R,n>& b)
+{ return b - a;}
 
 
 // Multiplicación:  x1*10^(-n1) * x2*10^(-n2) = (x1*x2)*10^-(n1+n2)
