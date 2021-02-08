@@ -127,6 +127,24 @@ void test_magnitude_basic()
 
     m4 = m1*2;
     CHECK_TRUE(m3 == m4, "operator/");
+
+// operator/ (mismas magnitudes)
+    {
+	Meter m1{1};
+	Kilometer m2{1};
+	int r = m2 / m1;
+	CHECK_TRUE(r == 1000, "Kilometer / Meter");
+
+	r = m1 / m2; // como int no tiene resolución, devuelve 0.
+	CHECK_TRUE(r == 0, "Meter / Kilometer");
+
+	m1 = Meter{50000};
+	m2 = Kilometer{25};
+	r = m1 / m2;
+	CHECK_TRUE(r == 2, "Kilometer / Meter");
+	CHECK_TRUE(m1 / m1 == 1, "Meter / Meter");
+
+    }
 }
 
 

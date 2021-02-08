@@ -42,6 +42,7 @@
  *    poder irla ampliando poco a poco.
  *
  *    30/01/2021 0.0: añado hertz, period y inverse.
+ *    08/02/2021      operator / (entre magnitudes del mismo tipo).
  *
  ****************************************************************************/
 #include <ratio>
@@ -428,6 +429,25 @@ inverse(const Magnitude<U, R, M, D>& a)
     R res = R{1} / a.value();
 
     return Magnitude_inverse_t<Magnitude<U, R, M, D>> {res};
+}
+
+// Razón de dos magnitudes.
+// Observar que no es la división de 2 magnitudes (eso sería espacio/tiempo =
+// velocidad), sino la división de 2 magnitudes del mismo tipo, que da como
+// resultado el número de veces que es mayor una que otra.
+template <typename U, typename Rep1, typename Rep2, typename M1, typename M2, typename D>
+constexpr inline std::common_type_t<Rep1, Rep2> 
+	    operator/(const Magnitude<U, Rep1, M1, D>& a, 
+		      const Magnitude<U, Rep2, M2, D>& b)
+{
+    using CR = std::common_type_t<Rep1, Rep2>;
+    using Q  = std::ratio_divide<M1, M2>;
+
+    CR res = (static_cast<CR>(a.value()) * static_cast<CR>(Q::num)) 
+		/ 
+	     (static_cast<CR>(b.value()) * static_cast<CR>(Q::den));
+
+    return res;
 }
 
 
