@@ -294,7 +294,7 @@ template <typename U, typename Rep, typename M, typename D>
 inline constexpr Magnitude<U, Rep, M, D>& 
 			Magnitude<U, Rep, M, D>::operator*=(const Rep& a)
 {
-    value_ *= a;
+    value_ = value_ * a;
     return *this;
 }
 
@@ -402,6 +402,27 @@ constexpr inline std::common_type_t <
 }
 
 
+template <typename Unit, typename R1, typename M, typename D,
+			 typename R2,
+	  std::enable_if_t<std::is_convertible_v<R2, R1>, bool> = true>
+constexpr inline Magnitude<Unit, R1, M, D>
+    operator*(const R2& a, Magnitude<Unit, R1, M, D> v)
+{
+    v *= a;
+    return v;
+}
+
+template <typename Unit, typename R1, typename M, typename D,
+			 typename R2,
+	  std::enable_if_t<std::is_convertible_v<R2, R1>, bool> = true>
+constexpr inline Magnitude<Unit, R1, M, D>
+    operator*(Magnitude<Unit, R1, M, D> v, const R2& a)
+{
+    return a*v;
+}
+
+
+
 // Magnitud_inverse(Magnitud)
 template <typename Mag>
 struct __Magnitude_inverse{
@@ -431,6 +452,15 @@ inverse(const Magnitude<U, R, M, D>& a)
     return Magnitude_inverse_t<Magnitude<U, R, M, D>> {res};
 }
 
+template <typename U, typename R, typename M, typename D>
+constexpr inline Magnitude_inverse_t<Magnitude<U, R, M, D>>
+operator/(const R& a, const Magnitude<U, R, M, D>& b)
+{
+    return a * inverse(b);
+}
+
+
+
 // Razón de dos magnitudes.
 // Observar que no es la división de 2 magnitudes (eso sería espacio/tiempo =
 // velocidad), sino la división de 2 magnitudes del mismo tipo, que da como
@@ -448,25 +478,6 @@ constexpr inline std::common_type_t<Rep1, Rep2>
 	     (static_cast<CR>(b.value()) * static_cast<CR>(Q::den));
 
     return res;
-}
-
-
-
-template <typename Unit, typename Rep1, typename M, typename D,
-			 typename Rep2>
-constexpr inline Magnitude<Unit, Rep1, M, D>
-    operator*(const Rep2& a, Magnitude<Unit, Rep1, M, D> v)
-{
-    v *= a;
-    return v;
-}
-
-template <typename Unit, typename Rep1, typename M, typename D,
-			 typename Rep2>
-constexpr inline Magnitude<Unit, Rep1, M, D>
-    operator*(Magnitude<Unit, Rep1, M, D> v, const Rep2& a)
-{
-    return a*v;
 }
 
 

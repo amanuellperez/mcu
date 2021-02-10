@@ -476,6 +476,32 @@ void test_magnitude_frequency()
 //    std::cout << "T2 = " << T2.value() << " ms\n";
     }
 
+    {// 1 / 1_ms
+	Millisecond T{1};
+	auto f = Int{1} / T;
+	CHECK_TRUE((std::is_same_v<decltype(f), KiloHertz>), "1/ms = kHz");
+	CHECK_TRUE(f == KiloHertz{1}, "1/ms = kHz");
+    }
+    {// 1 / 2_ms
+	Millisecond T{2};
+	auto f = Int{1} / T;
+	CHECK_TRUE((std::is_same_v<decltype(f), KiloHertz>), "1/ms = kHz");
+	CHECK_TRUE((f == KiloHertz{Int{0,5}}), "1/ms = kHz");
+    }
+    {// 5 / 2_ms
+	Millisecond T{2};
+	auto f = Int{5} / T;
+	CHECK_TRUE((std::is_same_v<decltype(f), KiloHertz>), "1/ms = kHz");
+	CHECK_TRUE((f == KiloHertz{Int{2,5}}), "1/ms = kHz");
+    }
+    {// 1 / 1_us
+	Microsecond T{1};
+	auto f = Int{1} / T;
+	CHECK_TRUE((std::is_same_v<decltype(f), MegaHertz>), "1/us = MHz");
+	CHECK_TRUE((f == MegaHertz{Int{1,0}}), "1/us = MHz");
+    }
+
+
     {// magnitud_cast
 	MegaHertz f0{1};
 	Hertz f1 = atd::magnitude_cast<Hertz>(f0);

@@ -413,13 +413,16 @@ constexpr inline Decimal<R1, n1> operator*(const R2& a, Decimal<R1, n1> v)
 }
 
 
-template <typename R1, int n1, typename R2>
+template <typename R1, int n1, typename R2,
+	  std::enable_if_t<std::is_convertible_v<R2, R1>, bool> = true>
 constexpr inline Decimal<R1, n1> operator*(Decimal<R1, n1> v, const R2& a)
 {
     return a*v;
 }
 
-template <typename R1, int n1, typename R2>
+// solo si R2 es convertible a R1.
+template <typename R1, int n1, typename R2,
+	  std::enable_if_t<std::is_convertible_v<R2, R1>, bool> = true>
 constexpr inline Decimal<R1, n1> operator/(Decimal<R1, n1> v, const R2& a)
 {
     v /= a;
