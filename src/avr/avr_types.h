@@ -67,6 +67,15 @@ constexpr KiloHertz operator"" _KHz (unsigned long long int freq)
 constexpr MegaHertz operator"" _MHz (unsigned long long int freq)
 {return MegaHertz{freq};}
 
+constexpr Second operator"" _s (unsigned long long int t)
+{return Second{t};}
+
+constexpr Millisecond operator"" _ms (unsigned long long int t)
+{return Millisecond{t};}
+
+constexpr Microsecond operator"" _us (unsigned long long int t)
+{return Microsecond{t};}
+
 }
 
 }// namespace

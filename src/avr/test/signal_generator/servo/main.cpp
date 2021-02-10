@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez <amanuel.lperez@gmail.com>
+// Copyright (C) 2019-2021 A.Manuel L.Perez <amanuel.lperez@gmail.com>
 //
 // This file is part of the MCU++ Library.
 //
@@ -15,36 +15,48 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-// Controlamos la velocidad de un motor dc usando un mosfet 2N7000.
-// Circuito: libro de make, pag. 299.
+// Conectar los pines +- del servo a la fuente de alimentación (independiente
+// de la del avr). Conectar las tierras de la fuente de alimentación y del
+// servo juntas. Y conectar el pin OC1A (15) al de control del servo.
+// A través de UART darle los valores de los pulsos que se quiera. 
+// (Con los servos que tengo van de 7 ms hasta 2.7 ms)
 #include "../../../avr_UART.h"
 #include "../../../avr_timer1_basic.h"
+#include "../../../avr_signal_generator.h"
 #include "../../../avr_time.h"
 
 
-using namespace avr;
+using PWM = avr::PWM_generator;
 
-using Timer = Timer1_fast_PWM;
 
 constexpr uint16_t period_in_us = 1;
 
 
 int main()
 {
-//    UART_ostream uart;
+// init_uart()
+    avr::UART_iostream uart;
+    avr::basic_cfg(uart);
+    uart.on();
 
-    Timer::top_ICR(9000UL);
+// init_pwm()
+    PWM::period(20_ms);
+    //Timer::top_ICR(20000UL); // 20000 us = 20 ms
+    Timer::output_compare_register_A(1500UL); // 1.5 ms = posición central +-
+
     Timer::pin_A_non_inverting_mode();
     Timer::on<period_in_us>();
 
 
     while(1){
-	uint16_t t = 1000;
-	for (int i = 1; i < 10; ++i){
-	    Timer::output_compare_register_A(t);
-	    t += 1000UL;
-	    wait_ms(2000);
-	}
+	uint16_t t;
+	uart << "Duración del pulso (de 1000 a 2000 us): ";
+	uart >> t;
+	
+	uart << t << "\n\r"; // echo
+	Timer::output_compare_register_A(t);
+
+	wait_ms(1000);
     }
 }
 

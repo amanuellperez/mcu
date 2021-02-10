@@ -302,7 +302,7 @@ template <typename U, typename Rep, typename M, typename D>
 inline constexpr Magnitude<U, Rep, M, D>& 
 			    Magnitude<U, Rep, M, D>::operator/=(const Rep& a)
 {
-    value_ /= a;
+    value_ = value_ / a;
     return *this;
 }
 
@@ -422,6 +422,15 @@ constexpr inline Magnitude<Unit, R1, M, D>
 }
 
 
+template <typename Unit, typename R1, typename M, typename D,
+			 typename R2,
+	  std::enable_if_t<std::is_convertible_v<R2, R1>, bool> = true>
+constexpr inline Magnitude<Unit, R1, M, D>
+    operator/(Magnitude<Unit, R1, M, D> v, const R2& a)
+{
+    v /= a;
+    return v;
+}
 
 // Magnitud_inverse(Magnitud)
 template <typename Mag>

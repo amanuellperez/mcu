@@ -88,37 +88,29 @@ public:
 
 class Square_wave_generator: public __avr::Signal_generator{
 public:
-    /// Genera una onda cuadrada en el channel 1.
-    // TODO: es más elegante:
-    //          top = Timer::clock_frequency()/(2*freq_sq);
-    // (???) Se podria calcular en tiempo de compilación top, si se pasa
-    //	     clock_period_in_us como parámetro de plantilla.
-    static Timer::counter_type frequency(const Hertz& freq_sq)
+    /// Define la frecuencia que se genera en ch1 y ch2
+    static void frequency(const Hertz& freq_sq)
     {
-        uint32_t tmp = uint32_t{2} *
-                       static_cast<uint32_t>(Timer::clock_period_in_us()) *
-                       atd::to_integer(freq_sq.value());
-
-        Timer::counter_type top = (uint32_t{1000000u}/tmp - 1);
-
-        //Timer::output_compare_registar_A(top);
-	Timer::input_capture_register(top);
-
-	return top;
+	auto top = (Timer::clock_frequency() / (2*freq_sq)) - 1ul;
+	Timer::input_capture_register(atd::to_integer<Timer::counter_type>(top));
     }
 
     /// Frecuencia que genera (en caso de que esté encendido y funcionando).
     static Hertz frequency()
     {
-	// auto top = Timer::output_compare_register_A();
 	auto top = Timer::input_capture_register();
-        uint32_t tmp = uint32_t{2} *
-                       static_cast<uint32_t>(Timer::clock_period_in_us()) *
-                       (uint32_t{top} + 1);
-
-	uint32_t freq = uint32_t{1000000u}/tmp;
-	return Hertz{freq};
+        return Timer::clock_frequency() / Hertz::Rep{2*(1ul + top)};
     }
+
+    /// Frecuencia máxima que se puede generar con el Timer usando ese 
+    /// clock_period(). Para generar más grandes probar a cambiar 
+    /// Timer::clock_period().
+    static Hertz max_frequency()
+    {
+        return Timer::clock_frequency() *
+               Hertz::Rep{2 * (1ul + sizeof(Timer::counter_type))};
+    }
+
 
     /// Encendemos el generador de señales
     template<uint16_t period>
@@ -133,9 +125,7 @@ public:
 // -----------
     /// Enciende el channel 1.
     static void ch1_on()
-    {
-        Timer::CTC_pin_A_toggle_on_compare_match();
-    }
+    { Timer::CTC_pin_A_toggle_on_compare_match(); }
 
 
     /// Enciende el channel 2. 
@@ -148,32 +138,41 @@ public:
 
 class PWM_generator : public __avr::Signal_generator{
 public:
-    /// Genera una onda cuadrada en el channel 1.
+    enum class Mode{
+	inverting, non_inverting
+    };
+
+    /// Define la frecuencia que se genera en ch1 y ch2
     // OJO: es diferente de la de Square_wave_generator, por culpa del 2*
-    static Timer::counter_type frequency(const Hertz& freq_sq)
+    static void frequency(const Hertz& freq_sq)
     {
-        uint32_t tmp = static_cast<uint32_t>(Timer::clock_period_in_us()) *
-                       atd::to_integer(freq_sq.value());
-
-        Timer::counter_type top = (uint32_t{1000000u}/tmp - 1);
-
-        //Timer::output_compare_registar_A(top);
-	Timer::input_capture_register(top);
-
-	return top;
+	auto top = (Timer::clock_frequency() / freq_sq) - 1ul;
+	Timer::input_capture_register(atd::to_integer<Timer::counter_type>(top));
     }
 
     /// Frecuencia que genera (en caso de que esté encendido y funcionando).
     static Hertz frequency()
     {
-	// auto top = Timer::output_compare_register_A();
 	auto top = Timer::input_capture_register();
-        uint32_t tmp = static_cast<uint32_t>(Timer::clock_period_in_us()) *
-                       (uint32_t{top} + 1);
-
-	uint32_t freq = uint32_t{1000000u}/tmp;
-	return Hertz{freq};
+        return Timer::clock_frequency() / Hertz::Rep{1ul + top};
     }
+
+    /// Define el periodo a generar de la señal generada en ch1 y ch2.
+    static void period(const Microsecond& T_s)
+    {
+	auto top = (T_s / Timer::clock_period()) - 1ul;
+	Timer::input_capture_register(atd::to_integer<Timer::counter_type>(top));
+    }
+
+    static Microsecond period()
+    {
+	auto top = Timer::input_capture_register();
+	uint32_t T = (top + 1) * Timer::clock_period_in_us();
+
+	return Microsecond{T};
+    }
+
+
     /// Encendemos el generador de señales
     template<uint16_t period>
     static void on() 
@@ -198,27 +197,56 @@ public:
     /// Enciende el channel 1, generando una PWM de frecuencia `freq` y
     /// `duty_cycle`. El duty_cycle da el tanto por cien como número entero.
     /// Ejemplo: duty_cycle = 10, es un 10%.
-    static void ch1_on(const uint8_t duty_cycle)
+    // (RRR) ¿por qué no pasarle también la frecuencia?
+    //       Porque la frecuencia es la misma en los dos canales. Si se la
+    //       pasara aquí estaría cambiando también la del otro canal, cosa que
+    //       a lo mejor no se busca, generando errores.
+    static void ch1_on(uint8_t duty_cycle,
+                       Mode mode = Mode::non_inverting)
     {// uint32_t clave, para que no haya overflow!!!
 	uint32_t ocr1a = Timer::input_capture_register();
 	ocr1a = (duty_cycle*ocr1a)/100;
-
-        Timer::output_compare_register_A(ocr1a);
-	Timer::PWM_pin_A_non_inverting_mode();
+	
+	ch1_on_ocr1a(ocr1a, mode);
     }
 
-    /// Enciende el channel 2. 
-    static void ch2_on(const uint8_t duty_cycle)
+
+    static void ch1_on(const Microsecond duty_cycle,
+                       Mode mode = Mode::non_inverting)
+    {
+	auto ocr1a = duty_cycle / Timer::clock_period();
+	ch1_on_ocr1a(atd::to_integer(ocr1a), mode);
+    }
+
+
+
+    /// Enciende el channel 2.
+    static void ch2_on(const uint8_t duty_cycle,
+                       Mode mode = Mode::non_inverting)
     {
 	uint32_t ocr1b = Timer::input_capture_register();
 	ocr1b = (duty_cycle*ocr1b)/100;
 
         Timer::output_compare_register_B(ocr1b);
-	Timer::PWM_pin_B_non_inverting_mode();
+
+	if (mode == Mode::non_inverting)
+	    Timer::PWM_pin_B_non_inverting_mode();
+	else 
+	    Timer::PWM_pin_B_inverting_mode();
     }
 
 
+private:
+    static void ch1_on_ocr1a(uint32_t ocr1a, Mode mode)
+    {
+        Timer::output_compare_register_A(ocr1a);
 
+	if (mode == Mode::non_inverting)
+	    Timer::PWM_pin_A_non_inverting_mode();
+	else 
+	    Timer::PWM_pin_A_inverting_mode();
+
+    }
 };
 
 }// namespace

@@ -131,11 +131,17 @@ public:
 
     /// Devuelve el periodo del reloj que usa el timer.
     /// Devuelve 0, si está apagado o si está conectado al pin T1.
+    // TODO: hacer esta private. Usar mejor clock_period()
     template<uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
     static uint16_t clock_period_in_us();
 
     template<uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
     static Microsecond clock_period();
+
+    /// Frecuencia a la que funciona internamente el timer.
+    /// Se cumple que clock_frequency() = 1 / clock_period();
+    template <uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
+    static Hertz clock_frequency();
 
 
 // ENCENDIDO/APAGADO DEL TIMER
@@ -262,6 +268,7 @@ private:
     static void set_clock_period_in_us_8MHz();
 
     static uint16_t clock_period_in_us_1MHz();
+    static Hertz clock_frequency_in_Hz_1MHz();
 
 }; // Timer1
 
@@ -371,6 +378,21 @@ inline uint16_t Timer1::clock_period_in_us_1MHz()
     return 0;
 }
 
+inline Hertz Timer1::clock_frequency_in_Hz_1MHz()
+{
+    using Rep = Hertz::Rep;
+    switch(frequency_divisor()){
+	case Frequency_divisor::no_preescaling	: return Hertz{1000000ul};
+	case Frequency_divisor::divide_by_8	: return Hertz{125000ul};
+	case Frequency_divisor::divide_by_64	: return Hertz{15625ul};
+	case Frequency_divisor::divide_by_256	: return Hertz{Rep{3906ul,25ul}};
+	case Frequency_divisor::divide_by_1024	: return Hertz{Rep{976ul,56ul}};
+	case Frequency_divisor::undefined	: return Hertz{0};
+    }
+
+    return Hertz{0};
+}
+
 
 // avr clock at 8MHz
 // -----------------
@@ -435,6 +457,21 @@ inline void Timer1::set_clock_period_in_us()
                       "set_clock_period_in_us: I'm lazy. I haven't implemented "
                       "that frequency. Please implement it.");
 }
+
+
+
+template<uint32_t clock_frequency_in_hz>
+inline Hertz Timer1::clock_frequency()
+{
+    if constexpr (clock_frequency_in_hz == 1000000UL)
+	return clock_frequency_in_Hz_1MHz();
+
+    else
+        static_assert(atd::always_false_v<int>,
+                      "clock_frequency: I'm lazy. I haven't implemented "
+                      "that frequency. Please implement it.");
+}
+
 
 
 // Devuelve el valor del contador.

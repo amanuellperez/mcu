@@ -117,7 +117,9 @@ public:
 
     /// Definimos el número con la parte fraccionaria (si la tiene) igual a
     /// cero.
-    constexpr explicit Decimal(Rep integer_part)
+    // No es explicit ya que sí tiene sentido concebir que un 'int' se
+    // convierta en Decimal<int>, ya que no hay pérdida de resolución. 
+    constexpr Decimal(Rep integer_part)
 	:x_{construct(integer_part, 0)}
     { }
 
@@ -125,7 +127,7 @@ public:
     constexpr Decimal(Rep integer_part, Rep fractional_part);
 
     template <typename Rep2, int n2>
-    constexpr explicit Decimal(const Decimal<Rep2, n2>& d)
+    constexpr Decimal(const Decimal<Rep2, n2>& d)
 	:x_{decimal_cast<Decimal>(d).internal_value()} {}
 
 

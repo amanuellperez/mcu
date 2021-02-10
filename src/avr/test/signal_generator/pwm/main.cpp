@@ -15,13 +15,13 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "../../../avr_signal_generator_sf.h"
+#include "../../../avr_signal_generator.h"
 #include "../../../avr_time.h"
 #include "../../../avr_types.h"
 #include "../../../avr_UART_iostream.h"
 
 
-using PW_gen = avr::PWM_generator_sf;
+using PW_gen = avr::PWM_generator;
 
 
 struct Main{
@@ -168,6 +168,19 @@ void Main::on()
     timer_on_1MHz(period_in_us_);
 }
 
+void debug_freq(avr::Hertz freq_sq)
+{
+    avr::UART_iostream uart;
+    uart << "\ndebug_freq: "
+	    "\nTimer::clock_frequency() / freq_sq - 1ul = ";
+    uart << avr::Timer1::clock_frequency();
+    uart << " / " << freq_sq << " - 1\n\t top = ";
+    auto top = (avr::Timer1::clock_frequency() / freq_sq) - 1ul;
+    uart << top << '\n';
+
+
+}
+
 void Main::run()
 {
     avr::UART_iostream uart;
@@ -181,18 +194,23 @@ void Main::run()
     while(1){
 	uart << "\n\nState"
 	          "\n-----"
-		"\ntimer period = " << period_in_us_ << " us"
-	        "\nfrequency (wanted) = " << freq_ << " Hz"
-	        "\nfrequency (real)   = " << PW_gen::frequency() << " Hz"
+		"\ntimer period (wanted) = " << period_in_us_ << " us"
+		"\ntimer period (real) = " << avr::Timer1::clock_period() << " us"
+		"\ntimer frequency (real) = " << avr::Timer1::clock_frequency() << " Hz"
+		"\nGenerated signal:"
+	        "\n    frequency (wanted) = " << freq_ << " Hz"
+	        "\n    frequency (real)   = " << PW_gen::frequency() << " Hz"
+		"\n    period    (real)   = " << avr::Millisecond{PW_gen::period()} << " ms"
 		"\nch1 on = " << (ch1_on_? "yes": "no") 
 	     << "\nch2 on = " << (ch2_on_? "yes": "no") 
 	     << '\n';
 
 	uart << "\n\nMenu:\n"
-	        "[p]eriod\n"
+	        "[t]imer period\n"
 	        "o[f]f\n"
 		"[o]n\n"
-		"[s]elect frequency\n"
+		"[s]elect signal frequency\n"
+		"select signal [p]eriod\n"
 		"ch[1] menu\n"
 		"ch[2] menu\n";
 
@@ -200,7 +218,7 @@ void Main::run()
 	char c{};
 	uart >> c;
 	switch(c){
-	    case 'p':
+	    case 't':
 		period_in_us_ = select_period_1MHz();
 		PW_gen::off();
 		timer_on_1MHz(period_in_us_);
@@ -213,12 +231,21 @@ void Main::run()
 		on();
 		break;
 
+	    case 'p':
+		uart << "\nperiod (in us) = ";
+		uart >> num;
+		uart << num << '\n';
+		PW_gen::period(avr::Microsecond{num});
+		freq_ = atd::inverse(avr::Microsecond{num});
+		break;
+
 	    case 's': 
 		uart << "\nfreq (in Hz) = ";
 		uart >> num;
 		uart << num << '\n';
 		freq_ = avr::Hertz{num};
 		PW_gen::frequency(freq_);
+		//debug_freq(freq_);
 		break;
 
 	    case '1':

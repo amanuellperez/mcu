@@ -108,7 +108,11 @@ void test_magnitude_basic()
     m1 /= 2;
     CHECK_TRUE(m1.value() == 10, "operator/=");
 
+    {
+	auto res = m1 / 2;
+	CHECK_TRUE(res.value() == 5, "operator/=");
 
+    }
     using CM = std::common_type_t<Meter, Meter>;
     CHECK_TRUE((std::is_same_v<Meter::Unit, CM::Unit>), "common_type::Unit");
     CHECK_TRUE((std::is_same_v<Meter::Rep, CM::Rep>), "common_type::Rep");

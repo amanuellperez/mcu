@@ -344,6 +344,16 @@ void test_decimal_arithmetic()
 	b = a - 0;
 	CHECK_TRUE((b == a), "Decimal - int");
     }
+
+    {// mezcla
+	using Int = atd::Decimal<int, 3>;
+	Int a{10};
+	Int b{2};
+	auto c = a / b - 1;
+	int d = atd::to_integer(c);
+	CHECK_TRUE(d == 4, "a / b - 1");
+
+    }
 }
 
 
