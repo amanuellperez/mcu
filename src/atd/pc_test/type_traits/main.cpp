@@ -80,7 +80,6 @@ inline constexpr int f()
 	static_assert(atd::always_false_v<int>, "error");
 }
 
-#define CHECK_DONT_COMPILE(X) 
 
 void test_always_false()
 {
@@ -88,7 +87,7 @@ void test_always_false()
 
     CHECK_TRUE(f<0>() == 1, "always_false_v");
     CHECK_TRUE(f<1>() == 30, "always_false_v");
-    CHECK_DONT_COMPILE(f<2>());
+    CHECK_DONT_COMPILE(f<2>(), "f");
 }
 
 
@@ -110,6 +109,37 @@ void test_static_array()
 
 }
 
+void test_has_same_sign()
+{
+    test::interfaz("has_same_sign");
+
+    CHECK_TRUE((atd::has_same_sign<int, int>()), "has_same_sign");
+    CHECK_TRUE((!atd::has_same_sign<int, unsigned int>()), "has_same_sign");
+
+}
+
+template <typename T, typename U>
+void test_same_type_double_bits()
+{
+    CHECK_TRUE((std::is_same_v<atd::same_type_with_double_bits<T>, U>),
+               "same_type_with_double_bits");
+}
+
+void test_same_type_double_bits()
+{
+    test::interfaz("same_type_with_double_bits");
+    test_same_type_double_bits<uint8_t, uint16_t>();
+    test_same_type_double_bits<uint16_t, uint32_t>();
+    test_same_type_double_bits<uint32_t, uint64_t>();
+    test_same_type_double_bits<uint64_t, uint64_t>();
+
+    test_same_type_double_bits<int8_t, int16_t>();
+    test_same_type_double_bits<int16_t, int32_t>();
+    test_same_type_double_bits<int32_t, int64_t>();
+    test_same_type_double_bits<int64_t, int64_t>();
+}
+
+
 int main()
 {
 try{
@@ -119,6 +149,8 @@ try{
     test_pertenece_al_intervalo_cerrado();
     test_always_false();
     test_static_array();
+    test_has_same_sign();
+    test_same_type_double_bits();
 
 }catch(std::exception& e)
 {

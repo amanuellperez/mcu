@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez <amanuel.lperez@gmail.com>
+// Copyright (C) 2019-2021 A.Manuel L.Perez <amanuel.lperez@gmail.com>
 //
 // This file is part of the MCU++ Library.
 //
@@ -28,10 +28,12 @@
  *    A.Manuel L.Perez
  *    27/08/2019 Less_than, Pertenece_al_intervalo_cerrado
  *    18/01/2020 static_array
+ *    12/02/2021 has_same_sign, same_type_with_double_bits
  *
  ****************************************************************************/
 #include <type_traits>
 #include <cstddef>  // size_t
+#include <stdint.h> // uint8_t ...
 
 namespace atd{
 
@@ -74,6 +76,84 @@ struct static_array{
     constexpr T operator[](size_type i) const {return data[i];}
 };
 
+
+/*!
+ *  bool has_same_sign(Integer T, Integer U)
+ *  {
+ *     if (sign(T) == sign(U))
+ *          return true;
+ *     else
+ *          return false;
+ *  }
+ *
+ */
+template <typename T, typename U>
+inline constexpr bool has_same_sign()
+{
+    if constexpr (std::is_signed_v<T> and std::is_signed_v<U>)
+	return true;
+    else if constexpr (!std::is_signed_v<T> and !std::is_signed_v<U>)
+	return true;
+    else
+	return false;
+}
+
+/*!
+ *  \brief  Devuelve el mismo type pero con el doble de bits.
+ *
+ *  Si no existe, devuelve el mismo tipo.
+ *  
+ *  Integer same_type_with_double_bits(Integer T)
+ *  {
+ *	switch(T){
+ *	    case uint8_t : return uint16_t;
+ *	    case uint16_t: return uint32_t;
+ *	    case uint32_t: return uint64_t;
+ *	    // idem para signed
+ *	} 
+ *
+ *	return T;
+ *  }
+ */
+template <typename T>
+struct same_type_with_double_bits_{
+    using type = T;
+};
+
+template<>
+struct same_type_with_double_bits_<uint8_t>{
+    using type = uint16_t;
+};
+
+template<>
+struct same_type_with_double_bits_<uint16_t>{
+    using type = uint32_t;
+};
+
+template<>
+struct same_type_with_double_bits_<uint32_t>{
+    using type = uint64_t;
+};
+
+
+template<>
+struct same_type_with_double_bits_<int8_t>{
+    using type = int16_t;
+};
+
+template<>
+struct same_type_with_double_bits_<int16_t>{
+    using type = int32_t;
+};
+
+template<>
+struct same_type_with_double_bits_<int32_t>{
+    using type = int64_t;
+};
+
+template <typename T>
+using same_type_with_double_bits =
+    typename same_type_with_double_bits_<T>::type;
 
 }// namespace
 
