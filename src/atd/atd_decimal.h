@@ -52,10 +52,12 @@
  ****************************************************************************/
 
 #include <utility>
-#include "atd_math.h"
 #include <iostream>
 #include <cstdlib>
 #include <cmath>
+
+#include "atd_math.h"
+#include "atd_type_traits.h"
 
 namespace atd{
 
@@ -69,13 +71,29 @@ class Decimal;
 //
 // Fórmula que nos dice cómo calcular x2 a partir de x1.
 //
+// Esta función hace el cast de forma explícita, lo cual implica que en
+// general, se perderá resolución. Es responsabilidad del usuario garantizar
+// que esa pérdida no existe o no le importa.
+// Ejemplo:
+//	Decimal<uint8_t,2> x8{2,43};
+//
+//	Decimal<uint16_t, 2> x16 = x8; // OK, implítico
+//	Decimal<uint8_t,1> x2 = x8;    // ERROR: se quiere convertir
+//				       // 2.43 ---> 2.4!!! Se pierde el 0.03
+//
+//	Decimal<uint8_t,1> x3 = decimal_cast<Decimal<uint8_t,1>>(x8);// OK
+//				      // el usuario sabe que pierde el 0.03
+//
+// La regla es: el único cambio implítico permitido es cuando se aumenta el
+// número de bits del tipo Rep (de 8 a 16, o 32, ó 64). Cualquier otro cambio
+// tiene que ser explítico usando decimal_cast.
 template <typename To_decimal, typename Rep1, int n1>
 constexpr inline To_decimal decimal_cast(const Decimal<Rep1, n1>& d)
 {
     constexpr int n2 = To_decimal::num_decimals;
 
     if constexpr (n2 == n1)
-	return To_decimal{d.internal_value()};
+	return To_decimal::from_internal_value(d.internal_value());
 
     else if constexpr (n2 > n1)
         return To_decimal::from_internal_value(d.internal_value() *
@@ -123,12 +141,12 @@ public:
 	:x_{construct(integer_part, 0)}
     { }
 
+
     /// Definimos el número "integer_part'fractional_part". 
     constexpr Decimal(Rep integer_part, Rep fractional_part);
 
     template <typename Rep2, int n2>
-    constexpr Decimal(const Decimal<Rep2, n2>& d)
-	:x_{decimal_cast<Decimal>(d).internal_value()} {}
+    constexpr Decimal(const Decimal<Rep2, n2>& d);
 
 
     /// Construimos un número decimal usando su representación interna.
@@ -150,27 +168,25 @@ public:
 // Info
     
     /// Devuelve el número como {integer_part, fractional_part}
-    constexpr std::pair<Rep, Rep> value() const
-    {
-        auto [q, r] = atd::div(atd::abs(x_), ten_to_the_n);
-
-	if (x_ < 0) 
-	    q = -q;
-
-        return std::pair<Rep, Rep>{q, r};
-    }
+    constexpr std::pair<Rep, Rep> value() const;
 
 // Observer
     constexpr Rep internal_value() const {return x_;}
 
-// Estructura algebraica de espacio vectorial
-    // Suma
+
+// Estructura algebraica
+    // Operaciones con decimales
     constexpr Decimal& operator+=(const Decimal& a);
     constexpr Decimal& operator-=(const Decimal& a);
+    constexpr Decimal& operator*=(const Decimal& a);
+    constexpr Decimal& operator/=(const Decimal& a);
 
-    // Producto por escalares
+    // Operaciones con escalares
+    constexpr Decimal& operator+=(const Rep& a);
+    constexpr Decimal& operator-=(const Rep& a);
     constexpr Decimal& operator*=(const Rep& s);
     constexpr Decimal& operator/=(const Rep& s);
+
 
 private:
     // Ejemplo: si num_cifras == 2 y value_ = 314, entonces el número decimal
@@ -192,6 +208,30 @@ Decimal<I,n>::Decimal(Rep integer_part, Rep fractional_part)
     : x_{construct(integer_part, fractional_part)}
 { }
 
+
+
+// (RRR) Se podría permitir el casting de Decimal<uint16_t, 2> x1{2,34}
+//       a Decimal<uint16_t, 3> x2{x1}; ya que 2.34 entra en este tipo
+//       como 2.340. Sin embargo, habría casos en los que se perdería
+//       resolución. Por ejemplo, si x1 = 600.00 --> x2 = 600.000
+//       (overflow, ya que 600000 no entra en un uint16_t). Por eso obligo
+//       a que se haga de forma explicita el casting en este caso llamando
+//       a decimal_cast, para que el usuario sea consciente de si produce
+//       overflow o no.
+template <typename Rep, int n>
+template <typename Rep2, int n2>
+constexpr inline Decimal<Rep, n>::Decimal(const Decimal<Rep2, n2>& d)
+    :x_{decimal_cast<Decimal>(d).internal_value()} 
+{
+    static_assert(sizeof(Rep2) <= sizeof(Rep),
+		  "Rep2 has to be convertible to Rep");
+    static_assert(has_same_sign<Rep2, Rep>(),
+		  "Different signs of Rep2 and To_decimal::Rep!!!");
+    static_assert(n2 == num_decimals,
+	      "If you change the number of decimals, you loose precision."
+	      "Make explicit the cast: call 'decimal_cast'");
+		
+}
 
 
 template <typename I, int n>
@@ -233,7 +273,20 @@ constexpr Decimal<I,n>::Rep
     return x_;
 }
 
+template <typename Rep, int n>
+constexpr inline std::pair<Rep, Rep> Decimal<Rep, n>::value() const
+{
+    auto [q, r] = atd::div(atd::abs(x_), ten_to_the_n);
 
+    if (x_ < 0) 
+	q = -q;
+
+    return std::pair<Rep, Rep>{q, r};
+}
+
+
+// operaciones con Decimals
+// ------------------------
 template <typename I, int n>
 inline constexpr Decimal<I,n>& Decimal<I,n>::operator+=(const Decimal& a)
 {
@@ -252,6 +305,55 @@ inline constexpr Decimal<I,n>& Decimal<I,n>::operator-=(const Decimal& a)
 }
 
 
+template <typename R, int n>
+constexpr inline Decimal<R, n>& Decimal<R,n>::operator*=(const Decimal<R,n>& a)
+{
+    using Int = same_type_with_double_bits<R>; 
+    
+    Int x = x_;
+    Int y = a.x_;
+    Int res = (x*y)/ten_to_the_n;
+
+    x_ = res;
+
+    return *this;
+}
+
+
+template <typename R, int n>
+constexpr inline Decimal<R, n>& Decimal<R,n>::operator/=(const Decimal<R,n>& a)
+{
+    using Int = same_type_with_double_bits<R>; 
+    
+    Int x = x_;
+    Int y = a.x_;
+    Int res = (x * ten_to_the_n) / y;
+
+    x_ = res;
+
+    return *this;
+}
+
+
+// operaciones con Rep
+// -------------------
+template <typename I, int n>
+inline constexpr Decimal<I,n>& Decimal<I,n>::operator+=(const Rep& a)
+{
+    x_ += (a * ten_to_the_n);
+
+    return *this;
+}
+
+
+template <typename I, int n>
+inline constexpr Decimal<I,n>& Decimal<I,n>::operator-=(const Rep& a)
+{
+    x_ -= (a * ten_to_the_n);
+
+    return *this;
+}
+
 template <typename I, int n>
 inline constexpr Decimal<I,n>& Decimal<I,n>::operator*=(const Rep& a)
 {
@@ -260,7 +362,6 @@ inline constexpr Decimal<I,n>& Decimal<I,n>::operator*=(const Rep& a)
     return *this;
 }
 
-
 template <typename I, int n>
 inline constexpr Decimal<I,n>& Decimal<I,n>::operator/=(const Rep& a)
 {
@@ -268,6 +369,8 @@ inline constexpr Decimal<I,n>& Decimal<I,n>::operator/=(const Rep& a)
 
     return *this;
 }
+
+
 
 }// namespace atd
 
@@ -297,8 +400,12 @@ constexpr inline std::common_type_t<Decimal<R1, n1>, Decimal<R2, n2>>
 {
     using CT = std::common_type_t<Decimal<R1, n1>, Decimal<R2, n2>>;
 
-    return CT::from_internal_value(CT{a}.internal_value() +
-                                   CT{b}.internal_value());
+    CT x = decimal_cast<CT>(a);
+    CT y = decimal_cast<CT>(b);
+
+    x += y;
+
+    return x;
 }
 
 
@@ -308,103 +415,68 @@ constexpr inline std::common_type_t<Decimal<R1, n1>, Decimal<R2, n2>>
 {
     using CT = std::common_type_t<Decimal<R1, n1>, Decimal<R2, n2>>;
 
-    return CT::from_internal_value(CT{a}.internal_value() -
-                                   CT{b}.internal_value());
+    CT x = decimal_cast<CT>(a);
+    CT y = decimal_cast<CT>(b);
+
+    x -= y;
+
+    return x;
 }
 
+
+
+// Como usar números decimals es realmente usar "FIX aritmetic", devolvemos
+// un decimal con el número máximo de cifras con las que operamos.
+template <typename R1, int n1, typename R2, int n2>
+constexpr inline std::common_type_t<Decimal<R1, n1>, Decimal<R2, n2>>
+    operator*(const Decimal<R1,n1>& a, const Decimal<R2,n2>& b)
+{
+    using CT = std::common_type_t<Decimal<R1, n1>, Decimal<R2, n2>>;
+
+    CT x = decimal_cast<CT>(a);
+    CT y = decimal_cast<CT>(b);
+
+    x *= y;
+
+    return x;
+}
+
+
+
+// Como usar números decimals es realmente usar "FIX aritmetic", devolvemos
+// un decimal con el número máximo de cifras con las que operamos.
+template <typename R1, int n1, typename R2, int n2>
+constexpr inline std::common_type_t<Decimal<R1, n1>, Decimal<R2, n2>>
+    operator/(const Decimal<R1,n1>& a, const Decimal<R2,n2>& b)
+{
+    using CT = std::common_type_t<Decimal<R1, n1>, Decimal<R2, n2>>;
+
+    CT x = decimal_cast<CT>(a);
+    CT y = decimal_cast<CT>(b);
+
+    x /= y;
+
+    return x;
+}
+
+
+// operaciones con escalares
+// -------------------------
 template <typename R, int n>
-constexpr inline Decimal<R, n> operator+(const Decimal<R,n>& a, const R& b)
-{ return a + Decimal<R,n>{b}; }
+constexpr inline Decimal<R, n> operator+(Decimal<R,n> a, const R& b)
+{ return a += b; }
 
 template <typename R, int n>
 constexpr inline Decimal<R, n> operator+(const R& a, const Decimal<R,n>& b)
 { return b + a;}
 
-
 template <typename R, int n>
-constexpr inline Decimal<R, n> operator-(const Decimal<R,n>& a, const R& b)
-{ return a - Decimal<R,n>{b}; }
+constexpr inline Decimal<R, n> operator-(Decimal<R,n> a, const R& b)
+{ return a -= b; }
 
 template <typename R, int n>
 constexpr inline Decimal<R, n> operator-(const R& a, const Decimal<R,n>& b)
-{ return b - a;}
-
-
-// Multiplicación:  x1*10^(-n1) * x2*10^(-n2) = (x1*x2)*10^-(n1+n2)
-// Problema: ¿qué pasa con overflow?
-//	Si multiplico 1'000 * 1000000'000 obtengo:
-//	1000 * 1000000000 = 10^3*10^9 = 10^12 número que no entra en un
-//	int32_t. Sin embargo 1'000*1000000'000 = 1000000'000 que sí debería de
-//	entrar.
-//
-// * Solución 1:
-//	Sean los números i1'f1 y i2'f2 (integer'fractional part).
-//	Entonces:
-//	i1'f1 * i2'f2 = (i1 + f1*10^(-n))*(i2 + f2*10^(-n))
-//	              = i1*i2 + (i1*f2 + i2*f1 + (f1*f2)*10^(-n))*10^(-n)
-//
-//	De esta forma si multiplico 1'000 * 1000000'000, hacemos
-//	1*10^6 + (0*0 + 0*0 + 0*0) = 10^6
-//	añadiendo la parte decimal quedaría almacenado internamente como 10^9,
-//	que entra en uint32_t.
-template <typename R1, int n1, typename R2, int n2>
-//constexpr inline Decimal<std::common_type_t<R1, R2>, n1 + n2>
-constexpr inline Decimal<std::common_type_t<R1, R2>, std::max(n1,n2)>
-    operator*(const Decimal<R1,n1>& a, const Decimal<R2,n2>& b)
-{
-    // El resultado de la operación  tendrá n1 + n2 cifras decimales
-    constexpr int n = std::max(n1, n2);
-    using Res = Decimal<std::common_type_t<R1, R2>, n>;
-    using Rep = typename Res::Rep;
-
-    constexpr typename Res::Rep ten_to_the_n = ten_to_the<Rep>(n);
-
-    auto [i1, f1] = Res{a}.value();
-    auto [i2, f2] = Res{b}.value();
-
-    Rep res = i1*i2*ten_to_the_n + (i1*f2 + i2*f1 + (f1*f2)/ten_to_the_n);
-
-    return Res::from_internal_value(res);
-}
-
-
-// TODO: ¿qué pasa con overflow? Me ha dado overflow!!! ¿cómo poder avisar?
-// Naive implementation:
-//	x1*10^(-n1) / x2*10^(-n2) = (x1*10^n2/x2)*10^-n1
-//  Problema: overflow en 12345'000/100'000
-//	al multiplicar 12345*1000 = 12345000 = overflow
-//	pero el resultado sí que se puede almacenar en un decimal de 3 cifras:
-//	sería 123'450!!!
-//
-//  Mejora:
-//	Escribimos x1/x2 como número mixto x1/x2 = q + r/x2 y operamos:
-//	x1*10^(-n1) / x2*10^(-n2) = (q + r/x2)*10^n2*10^(-n1)
-//				  = (q*10^n2 + r*10^n2/x2)*10^(-n1)
-//	Así evitamos el overflow en del ejemplo anterior.
-//
-template <typename R1, int n1, typename R2, int n2>
-constexpr inline Decimal<R1, n1>
-    operator/(const Decimal<R1,n1>& a, const Decimal<R2,n2>& b)
-{
-    using Rep = std::common_type_t<R1, R2>;
-
-    Rep x1 = a.internal_value();
-    Rep x2 = b.internal_value();
-
-    auto [q, r] = atd::div(x1, x2);
-
-    Rep xr = q*ten_to_the<Rep>(n2) + (r * ten_to_the<Rep>(n2))/x2;
-
-    return Decimal<R1, n1>::from_internal_value(xr);
-
-}
-
-
-template <typename R, int n>
-constexpr inline Decimal<R, n>
-    operator/(const R& a, const Decimal<R,n>& b)
-{ return Decimal<R,n>::from_internal_value(a * ten_to_the<R>(n)) / b; }
-
+{ return (Decimal<R,n>{a} - b);}
 
 
 template <typename R1, int n1, typename R2>
@@ -413,7 +485,6 @@ constexpr inline Decimal<R1, n1> operator*(const R2& a, Decimal<R1, n1> v)
     v *= a;
     return v;
 }
-
 
 template <typename R1, int n1, typename R2,
 	  std::enable_if_t<std::is_convertible_v<R2, R1>, bool> = true>
@@ -432,6 +503,14 @@ constexpr inline Decimal<R1, n1> operator/(Decimal<R1, n1> v, const R2& a)
 }
 
 
+template <typename R, int n>
+constexpr inline Decimal<R, n>
+    operator/(const R& a, const Decimal<R,n>& b)
+{ return Decimal<R,n>::from_internal_value(a * ten_to_the<R>(n)) / b; }
+
+
+
+
 
 // Comparisons
 // -----------
@@ -441,7 +520,10 @@ bool operator==(const Decimal<R1, n1>& a, const Decimal<R2, n2>& b)
 {
     using CT = std::common_type_t<Decimal<R1, n1>, Decimal<R2, n2>>;
 
-    return CT{a}.internal_value() == CT{b}.internal_value();
+    CT x = decimal_cast<CT>(a);
+    CT y = decimal_cast<CT>(b);
+
+    return x.internal_value() == y.internal_value();
 }
 
 template <typename R1, int n1, typename R2, int n2>
@@ -456,7 +538,10 @@ bool operator<(const Decimal<R1, n1>& a, const Decimal<R2, n2>& b)
 {
     using CT = std::common_type_t<Decimal<R1, n1>, Decimal<R2, n2>>;
 
-    return CT{a}.internal_value() < CT{b}.internal_value();
+    CT x = decimal_cast<CT>(a);
+    CT y = decimal_cast<CT>(b);
+
+    return x.internal_value() < y.internal_value();
 }
 
 template <typename R1, int n1, typename R2, int n2>
@@ -483,10 +568,15 @@ template <typename Rep, int ndecimals>
 std::ostream& operator<<(std::ostream& out,
                                 const atd::Decimal<Rep, ndecimals>& d)
 {
-    auto [n, f] = d.value();
+    using Int = std::conditional_t<std::is_same_v<Rep,uint8_t>, 
+				   unsigned int, Rep>; // para poder imprimir uint8_t como int
+    auto [n0, f0] = d.value();
+    Int n = n0;
+
     out << n;
 
     if constexpr (ndecimals > 0){
+	Int f = f0;
 	out << '.';
 
 	out.width(ndecimals);

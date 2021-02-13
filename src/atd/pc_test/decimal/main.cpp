@@ -1,4 +1,4 @@
-// Copyright (C) 2020 A.Manuel L.Perez <amanuel.lperez@gmail.com>
+// Copyright (C) 2020-2021 A.Manuel L.Perez <amanuel.lperez@gmail.com>
 //
 // This file is part of the MCU++ Library.
 //
@@ -76,7 +76,7 @@ void test_decimal_construct_convert(int integer_part, int frac_part, int res)
 {
     atd::Decimal<int, n1> d1{integer_part, frac_part};
 
-    atd::Decimal<int, n2> d2{d1};
+    atd::Decimal<int, n2> d2 = atd::decimal_cast<atd::Decimal<int, n2>>(d1);
     CHECK_TRUE(d2.internal_value() == res, "constructor conversion");
 }
 
@@ -139,7 +139,7 @@ void test_decimal_construct()
 
 	// Al escribir Int{10,23} se espera escribir el decimal "10,230"
 	Int a{10,23};
-	CHECK_TRUE(a.internal_value() == 10230, "AQUIII constructor");
+	CHECK_TRUE(a.internal_value() == 10230, "constructor");
     }
 
 // Conversiones
@@ -158,6 +158,21 @@ void test_decimal_construct()
     CHECK_STDOUT(d, "-28.89");
 }
 
+{// construcción con tipo diferentes
+//    uint16_t x16 = 300;
+//    atd::Decimal<uint8_t, 1> d0{x16};
+//    std::cout << "---------------------" << d0 << '\n';
+
+}
+
+{// conversiones de Decimal8 -> Decimal16
+    atd::Decimal<uint8_t, 1> d0{2};
+    atd::Decimal<uint16_t, 1> d1{d0};
+    CHECK_TRUE((d1 == atd::Decimal<uint16_t,1>{2}), "uint8_t -> uint16_t");
+
+    CHECK_DONT_COMPILE((atd::Decimal<uint8_t, 1> d2{atd::Decimal<uint16_t,1>{300}};), 
+	        "conversión uint16_t -> uint8_t")
+}
 }
 
 
@@ -231,11 +246,11 @@ template <int n1, int n2>
 void test_decimal_multiplication(int ip1, int fp1, int ip2, int fp2, 
 				 int ipr, int fpr)
 {
-    std::cerr << "test_decimal_multiplication(" << ip1 << ", " << fp1 << ")\n";
+//    std::cerr << "test_decimal_multiplication(" << ip1 << ", " << fp1 << ")\n";
     atd::Decimal<int, n1> x{ip1,fp1};
     atd::Decimal<int, n2> y{ip2,fp2};
     auto p = x*y;
-    std::cerr << x << " * " << y << " = " << p << '\n';
+//   std::cerr << x << " * " << y << " = " << p << '\n';
 
     CHECK_TRUE(p.num_decimals == std::max(x.num_decimals, y.num_decimals),
                "operator*");
@@ -258,39 +273,55 @@ void test_decimal_division(int ip1, int fp1, int ip2, int fp2,
 }
 
 
-void test_decimal_arithmetic()
+
+void test_decimal_arithmetic_decimal()
 {
+    using Dec = atd::Decimal<int, 2>;
+
 // arithmetic
-    atd::Decimal<int, 2> a{3,14};
-    atd::Decimal<int, 2> b{2,45};
+    Dec a{3,14};
+    Dec b{2,45};
 
     a += b;
-    CHECK_TRUE(a.internal_value() == 314 + 245, "a += b");
+    CHECK_TRUE((a == Dec{5,59}), "a += b");
     
     a -= b;
-    CHECK_TRUE(a.internal_value() == 314, "a -= b");
+    CHECK_TRUE((a == Dec{3,14}), "a -= b");
 
-    atd::Decimal<int, 2> c = a;
-    CHECK_TRUE(c == a, "operator=");
+    a *= b;
+    CHECK_TRUE((a == Dec{7,69}), "a *= b");
 
-// Suma
-    c = a + b;
-    CHECK_TRUE(c.internal_value() == a.internal_value() + b.internal_value(),
-               "a + b");
+    a = Dec{4,82};
+    b = Dec{2,1};
+    a /= b;
+    CHECK_TRUE((a == Dec{2,29}), "a /= b");
+
+    {// casos que podrían dar overflow (con una naive implementation)
+	using Int = atd::Decimal<uint8_t, 1>;
+	Int a{5}; // interno = 50
+	Int b{5}; // interno = 50
+	b *= a;   // interno = 50*50 = 2500 , overflow
+		  // pero el resultado es 25.0, que entra en uint8_t.
+	CHECK_TRUE(b == Int{25}, "a *= b");
+
+	a = Int{4,3};
+	b = Int{2};
+	a /= b;
+	CHECK_TRUE((a == Int{2,1}), "a /= b");
+
+    }
+
+    
+// Operaciones binarias
+    a = Dec{3,14};
+    b = Dec{2,45};
+    Dec c = a + b;
+    CHECK_TRUE((c == Dec{5,59}), "a + b");
 
     c = a - b;
-    CHECK_TRUE(c.internal_value() == a.internal_value() - b.internal_value(),
-               "a - b");
+    CHECK_TRUE((c == Dec{0,69}), "a - b");
 
-// Producto por escalares
-    c = 2*a;
-    CHECK_TRUE(c.internal_value() == 2*a.internal_value(), "2*a");
 
-    c = a*2;
-    CHECK_TRUE(c.internal_value() == 2*a.internal_value(), "a*2");
-
-    c = c/2;
-    CHECK_TRUE(c == a, "a/2");
 
 // Producto
     test_decimal_multiplication<2,2>(3,14   , 2,75  , 8,63);
@@ -301,13 +332,13 @@ void test_decimal_arithmetic()
 	Int a{1};
 	Int b{1000000};
 	Int res{1000000};
-	std::cout << a << " * " << b << " = " << a*b << '\n';
+	// std::cout << a << " * " << b << " = " << a*b << '\n';
 	CHECK_TRUE(a*b == res, "operator*");
     }
     test_decimal_multiplication<3,3>(1,0, 1000000,0,	1000000,0);
 
 // División
-    test_decimal_division<1,5>(10,2   , 7,12345,    1,4);
+    test_decimal_division<1,5>(10,2   , 7,12345,    1,43189);
     test_decimal_division<0,0>(10,0   , 2,0,	    5,0);
     test_decimal_division<2,1>(3,14   , 2, 3,	    1,36);
 
@@ -327,28 +358,66 @@ void test_decimal_arithmetic()
 	CHECK_TRUE(((1 / Int{2}) == Int{0,5}), "operator/");
     }
 
+}
 
-// operaciones con Rep
-    {
-	using Int = atd::Decimal<int, 3>;
-	Int a{5,4};
-	Int b = a + 3;
-	CHECK_TRUE((b == Int{8,4}), "Decimal + int");
+void test_decimal_arithmetic_escalar()
+{
+    using Dec = atd::Decimal<int, 2>;
 
-	b = a + 0;
-	CHECK_TRUE((b == a), "Decimal + int");
+// operator ?=
+// -----------
+    Dec a{2,81};
+    a += 3;
+    CHECK_TRUE(a.internal_value() == 581, "a += 3");
 
-	b = a - 3;
-	CHECK_TRUE((b == Int{2,4}), "Decimal - int");
+    a -= 3;
+    CHECK_TRUE(a.internal_value() == 281, "a -= 3");
 
-	b = a - 0;
-	CHECK_TRUE((b == a), "Decimal - int");
-    }
+    a *=2;
+    CHECK_TRUE(a.internal_value() == 281*2, "a *=2");
+
+    a /= 2;
+    CHECK_TRUE(a.internal_value() == 281, "a /= 2");
+
+
+// decimal ? rep
+// -------------
+    a = Dec{5,4};
+
+    Dec b = a + 3;
+    CHECK_TRUE((b == Dec{8,4}), "Decimal + int");
+
+    b = 3 + a;
+    CHECK_TRUE((b == Dec{8,4}), "int + Decimal");
+
+    b = a + 0;
+    CHECK_TRUE((b == a), "Decimal + int");
+
+    b = a - 3;
+    CHECK_TRUE((b == Dec{2,4}), "Decimal - int");
+
+    b = 3 - a;
+    CHECK_TRUE((b == Dec{-2,4}), "int - Decimal");
+
+    b = a - 0;
+    CHECK_TRUE((b == a), "Decimal - int");
+
+    b = 2*a;
+    CHECK_TRUE((b == Dec{10,8}), "Decimal*int");
+
+    b = a*2;
+    CHECK_TRUE((b == Dec{10,8}), "int*Decimal");
+
+    b = a / 2;
+    CHECK_TRUE((b == Dec{2,7}), "Decimal / int");
+
+    b = 2 / a;
+    CHECK_TRUE((b == Dec{0,37}), "int / Decimal");
+
 
     {// mezcla
-	using Int = atd::Decimal<int, 3>;
-	Int a{10};
-	Int b{2};
+	Dec a{10};
+	Dec b{2};
 	auto c = a / b - 1;
 	int d = atd::to_integer(c);
 	CHECK_TRUE(d == 4, "a / b - 1");
@@ -356,14 +425,80 @@ void test_decimal_arithmetic()
     }
 }
 
+void test_decimal_arithmetic()
+{
+    test_decimal_arithmetic_decimal();
+    test_decimal_arithmetic_escalar();
+}
 
+// ¿Qué castings puedo hacer?
+// 1. De signo: (explicitos)
+//	unsigned -> int
+//	int      -> unsigned
+//
+// 2. De núm. bits:
+//      8 -> 16 (implicito)
+//      16-> 8  (explícito)
+//
+// 3. De núm. decimals: (explitico)
+//      2 -> 3 
+//      3 -> 2
 void test_decimal_cast()
 {
-    using Dec = atd::Decimal<int, 3>;
+    using uDec8_1 = atd::Decimal<uint8_t, 1>;
+    using uDec16_1 = atd::Decimal<uint16_t, 1>;
+    using uDec16_2 = atd::Decimal<uint16_t, 2>;
+    using Dec16_2 = atd::Decimal<int16_t, 2>;
 
-    Dec d{25,3};
-    CHECK_TRUE(atd::to_integer(d) == 25, "to_integer");
-    CHECK_TRUE(atd::to_integer<long>(d) == 25L, "to_integer");
+// De signo:
+{
+    uDec16_2 x1{2,34};
+    // 1. unsigned --> signed
+    CHECK_DONT_COMPILE(Dec16_2 x2 = x1, "cast: uint -> int");
+    Dec16_2 x3 = atd::decimal_cast<Dec16_2>(x1);
+    CHECK_TRUE((x3 == Dec16_2{2,34}), "decimal_cast");
+
+    // 2. signed --> unsigned
+    CHECK_DONT_COMPILE(uDec16_2 x4 = x3, "cast: int -> uint");
+    uDec16_2 x5 = atd::decimal_cast<uDec16_2>(x3);
+    CHECK_TRUE((x5 == uDec16_2{2,34}), "decimal_cast");
+
+}
+
+// De núm bits:
+{
+    // 8 --> 16
+    uDec8_1 x1{2,3};
+    uDec16_1 x2 = x1;
+    CHECK_TRUE((x2 == uDec16_1{2,3}), "implicit cast");
+
+    // 16 --> 8
+    CHECK_DONT_COMPILE(uDec8_1 x3 = x2, "cast: 16 --> 8");
+    uDec8_1 x4 = atd::decimal_cast<uDec8_1>(x2);
+    CHECK_TRUE((x4 == uDec8_1{2,3}), "decimal_cast");
+}
+
+// de núm. decimals:
+{
+    uDec16_1 x1{2,3};
+    CHECK_DONT_COMPILE(uDec16_2 x2 = x1, "cast: ndecimals 1 -> 2");
+    uDec16_2 x3 = atd::decimal_cast<uDec16_2>(x1);
+    CHECK_TRUE((x3 == uDec16_2{2,3}), "decimal_cast");
+}
+
+}
+
+
+
+void test_to_integer()
+{
+    using Dec8_1 = atd::Decimal<uint8_t, 1>;
+
+    Dec8_1 d{10,3};
+    CHECK_TRUE(atd::to_integer(d) == 10, "to_integer");
+    CHECK_TRUE(atd::to_integer<long>(d) == 10UL, "to_integer");
+
+
 }
 
 
@@ -376,6 +511,7 @@ void test_decimal()
     test_decimal_order();
     test_decimal_arithmetic();
     test_decimal_cast();
+    test_to_integer();
 
 // operator<<
     {
