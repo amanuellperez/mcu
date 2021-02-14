@@ -479,24 +479,22 @@ constexpr inline Decimal<R, n> operator-(const R& a, const Decimal<R,n>& b)
 { return (Decimal<R,n>{a} - b);}
 
 
-template <typename R1, int n1, typename R2>
-constexpr inline Decimal<R1, n1> operator*(const R2& a, Decimal<R1, n1> v)
+template <typename R, int n>
+constexpr inline Decimal<R, n> operator*(const R& a, Decimal<R, n> v)
 {
     v *= a;
     return v;
 }
 
-template <typename R1, int n1, typename R2,
-	  std::enable_if_t<std::is_convertible_v<R2, R1>, bool> = true>
-constexpr inline Decimal<R1, n1> operator*(Decimal<R1, n1> v, const R2& a)
+template <typename R, int n>
+constexpr inline Decimal<R, n> operator*(Decimal<R, n> v, const R& a)
 {
     return a*v;
 }
 
 // solo si R2 es convertible a R1.
-template <typename R1, int n1, typename R2,
-	  std::enable_if_t<std::is_convertible_v<R2, R1>, bool> = true>
-constexpr inline Decimal<R1, n1> operator/(Decimal<R1, n1> v, const R2& a)
+template <typename R, int n>
+constexpr inline Decimal<R, n> operator/(Decimal<R, n> v, const R& a)
 {
     v /= a;
     return v;
@@ -504,8 +502,7 @@ constexpr inline Decimal<R1, n1> operator/(Decimal<R1, n1> v, const R2& a)
 
 
 template <typename R, int n>
-constexpr inline Decimal<R, n>
-    operator/(const R& a, const Decimal<R,n>& b)
+constexpr inline Decimal<R, n> operator/(const R& a, const Decimal<R,n>& b)
 { return Decimal<R,n>::from_internal_value(a * ten_to_the<R>(n)) / b; }
 
 

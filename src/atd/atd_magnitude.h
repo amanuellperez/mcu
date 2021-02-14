@@ -33,7 +33,19 @@
  *	incremento. Lo que uno esperaría es que 0C - 0K = 0C.
  *
  *  - SEE: ver std::chrono, ver atd::decimal.
+ *  
+ *  - TODO: Al usarlo se ve que hay un claro error de diseño. Una magnitud es
+ *	    la longitud, otra la frecuencia, otra el periodo y otra la
+ *	    velocidad. Cada una de ellas se puede representar usando
+ *	    diferentes unidades. Yo quiero hacer:
+ *		    Speed v = 2_km_per_second = Kilometer{2}/Second{1};
+ *		    Frequency f1 = 2_Hz;
+ *		    Lenght l1 = 3_m;
+ *		    Lenght l2 = 2_km;
+ *		    Lenght l3 = l1 + l2;
+ *		    Time t = 3_s; <--- este es std::duration
  *
+ *  
  *  - HISTORIA:
  *    A.Manuel L.Perez
  *    31/03/2020 v0.0 - versión mínima basada en Stroustrup (The C++
@@ -103,12 +115,12 @@ using Unit_inverse = typename __Unit_inverse<U>::type;
 
 
 // Different types of units
-using Units_meter    = Unit< 1, 0,  0,  0>;
+using Units_length    = Unit< 1, 0,  0,  0>;
 using Units_kilogram = Unit< 0, 1,  0,  0>;
-using Units_second   = Unit< 0, 0,  1,  0>;
-using Units_kelvin   = Unit< 0, 0,  0,  1>;
-using Units_pascal   = Unit<-1, 1, -2,  0>;
-using Units_hertz    = Unit< 0, 0, -1,  0>;
+using Units_time   = Unit< 0, 0,  1,  0>;
+using Units_temperature   = Unit< 0, 0,  0,  1>;
+using Units_pressure   = Unit<-1, 1, -2,  0>;
+using Units_frequency    = Unit< 0, 0, -1,  0>;
 
 template <typename Unit0,
           typename Rep0,
@@ -207,7 +219,7 @@ constexpr inline To_magnitude
  *  ----------------------------+-----------+-------------------------------
  *  2.4 km = 2.4 * 1000  m	| longitud  | 1000	|   0
  *  2.4  m = 2.4 *    1  m	| long.	    | 1		|   0
- *  2.4 mm = 2.4 * 0.001 m	| long.	    | 1:100	|   0
+ *  2.4 mm = 2.4 * 0.001 m	| long.	    | 1:1000	|   0
  *
  *  20 ºC  = 20 * 1 + 273'15 K	| temper.   | 1		|   27315:100
  *  52 ºF  = 52*5/9 + 45967/180K| temper.   | 5:9	|   45967:180
@@ -255,15 +267,13 @@ public:
 // Observer
     constexpr Rep value() const {return value_;}
 
-// Estructura algebráica de espacio vectorial
-    // Suma de vectores
-    constexpr Magnitude& operator+=(const Magnitude& x);
-    constexpr Magnitude& operator-=(const Magnitude& x);
-    
-    // Producto por escalares
+// Operaciones con escalares
     constexpr Magnitude& operator*=(const Rep& a);
     constexpr Magnitude& operator/=(const Rep& a);
 
+// Operaciones con magnitudes
+    constexpr Magnitude& operator+=(const Magnitude& x);
+    constexpr Magnitude& operator-=(const Magnitude& x);
 
 private:
     Rep value_;
@@ -271,7 +281,8 @@ private:
 
 
 
-
+// operaciones con magnitudes
+// --------------------------
 template <typename U, typename R, typename M, typename D>
 inline constexpr Magnitude<U, R, M, D>& 
 	    Magnitude<U, R, M, D>::operator+=(const Magnitude<U, R, M, D>& x)
@@ -290,6 +301,9 @@ inline constexpr Magnitude<U, R, M, D>&
 }
 
 
+
+// operaciones con escalares
+// -------------------------
 template <typename U, typename Rep, typename M, typename D>
 inline constexpr Magnitude<U, Rep, M, D>& 
 			Magnitude<U, Rep, M, D>::operator*=(const Rep& a)
@@ -402,21 +416,63 @@ constexpr inline std::common_type_t <
 }
 
 
-template <typename Unit, typename R1, typename M, typename D,
-			 typename R2,
-	  std::enable_if_t<std::is_convertible_v<R2, R1>, bool> = true>
+// TODO: de momento me olvido del desplazamiento D. En principio D solo lo uso
+// en temperaturas así que no creo que sea necesario tenerlo en cuenta a la
+// hora de multiplicar ya que ¿qué sentido tiene multiplicar dos temperaturas?
+template <typename U1, typename R1, typename M1, typename D,
+	  typename U2, typename R2, typename M2>
+inline constexpr Magnitude<Unit_plus<U1, U2>,
+			  std::common_type<R1, R2>,
+			  std::ratio_multiply<M1, M2>,
+			  D>
+operator*(const Magnitude<U1,R1,M1,D>& m1, const Magnitude<U2,R2,M2,D>& m2)
+{
+    using Rep = std::common_type<R1, R2>;
+    using CT = Magnitude<Unit_plus<U1, U2>,
+			  Rep,
+			  std::ratio_multiply<M1, M2>,
+			  D>;
+
+    Rep x1 = m1.value();
+    Rep x2 = m2.value();
+
+    return CT{x1*x2};
+
+}
+
+
+// Razón de dos magnitudes.
+// Observar que no es la división de 2 magnitudes (eso sería espacio/tiempo =
+// velocidad), sino la división de 2 magnitudes del mismo tipo, que da como
+// resultado el número de veces que es mayor una que otra.
+template <typename U, typename Rep1, typename Rep2, typename M1, typename M2, typename D>
+constexpr inline std::common_type_t<Rep1, Rep2> 
+	    operator/(const Magnitude<U, Rep1, M1, D>& a, 
+		      const Magnitude<U, Rep2, M2, D>& b)
+{
+    using CR = std::common_type_t<Rep1, Rep2>;
+    using Q  = std::ratio_divide<M1, M2>;
+
+    CR res = (static_cast<CR>(a.value()) * static_cast<CR>(Q::num)) 
+		/ 
+	     (static_cast<CR>(b.value()) * static_cast<CR>(Q::den));
+
+    return res;
+}
+
+// operaciones con escalares
+// -------------------------
+template <typename Unit, typename R1, typename M, typename D>
 constexpr inline Magnitude<Unit, R1, M, D>
-    operator*(const R2& a, Magnitude<Unit, R1, M, D> v)
+    operator*(const R1& a, Magnitude<Unit, R1, M, D> v)
 {
     v *= a;
     return v;
 }
 
-template <typename Unit, typename R1, typename M, typename D,
-			 typename R2,
-	  std::enable_if_t<std::is_convertible_v<R2, R1>, bool> = true>
+template <typename Unit, typename R1, typename M, typename D>
 constexpr inline Magnitude<Unit, R1, M, D>
-    operator*(Magnitude<Unit, R1, M, D> v, const R2& a)
+    operator*(Magnitude<Unit, R1, M, D> v, const R1& a)
 {
     return a*v;
 }
@@ -470,24 +526,6 @@ operator/(const R& a, const Magnitude<U, R, M, D>& b)
 
 
 
-// Razón de dos magnitudes.
-// Observar que no es la división de 2 magnitudes (eso sería espacio/tiempo =
-// velocidad), sino la división de 2 magnitudes del mismo tipo, que da como
-// resultado el número de veces que es mayor una que otra.
-template <typename U, typename Rep1, typename Rep2, typename M1, typename M2, typename D>
-constexpr inline std::common_type_t<Rep1, Rep2> 
-	    operator/(const Magnitude<U, Rep1, M1, D>& a, 
-		      const Magnitude<U, Rep2, M2, D>& b)
-{
-    using CR = std::common_type_t<Rep1, Rep2>;
-    using Q  = std::ratio_divide<M1, M2>;
-
-    CR res = (static_cast<CR>(a.value()) * static_cast<CR>(Q::num)) 
-		/ 
-	     (static_cast<CR>(b.value()) * static_cast<CR>(Q::den));
-
-    return res;
-}
 
 
 
@@ -565,49 +603,49 @@ std::ostream& operator<<(std::ostream& out, const Magnitude<U, R, M, D>& m)
 // Lenght
 // ------
 template <typename Int, typename Multiplier>
-using __Meter = atd::Magnitude<atd::Units_meter, Int, Multiplier>;
+using Length = atd::Magnitude<atd::Units_length, Int, Multiplier>;
 
 template <typename Int>
-using Kilometer = __Meter<Int, std::kilo>;
+using Kilometer = Length<Int, std::kilo>;
 
 template <typename Int>
-using Hectometer = __Meter<Int, std::hecto>;
+using Hectometer = Length<Int, std::hecto>;
 
 template <typename Int>
-using Decameter = __Meter<Int, std::deca>;
+using Decameter = Length<Int, std::deca>;
 
 template <typename Int>
-using Meter = __Meter<Int, std::ratio<1>>;
+using Meter = Length<Int, std::ratio<1>>;
 
 template <typename Int>
-using Decimeter = __Meter<Int, std::deci>;
+using Decimeter = Length<Int, std::deci>;
 
 template <typename Int>
-using Centimeter = __Meter<Int, std::centi>;
+using Centimeter = Length<Int, std::centi>;
 
 template <typename Int>
-using Millimeter = __Meter<Int, std::milli>;
+using Millimeter = Length<Int, std::milli>;
 
 
 // Frequency
 // ---------
 template <typename Int, typename Multiplier>
-using __Hertz = atd::Magnitude<atd::Units_hertz, Int, Multiplier>;
+using Frequency = atd::Magnitude<atd::Units_frequency, Int, Multiplier>;
 
 template <typename Int>
-using Hertz = __Hertz<Int, std::ratio<1,1>>;
+using Hertz = Frequency<Int, std::ratio<1,1>>;
 
 template <typename Int>
-using KiloHertz = __Hertz<Int, std::kilo>;
+using KiloHertz = Frequency<Int, std::kilo>;
 
 template <typename Int>
-using MegaHertz = __Hertz<Int, std::mega>;
+using MegaHertz = Frequency<Int, std::mega>;
 
 template <typename Int>
-using GigaHertz = __Hertz<Int, std::giga>;
+using GigaHertz = Frequency<Int, std::giga>;
 
 template <typename Int>
-using TeraHertz = __Hertz<Int, std::tera>;
+using TeraHertz = Frequency<Int, std::tera>;
 
 
 // Period
@@ -615,29 +653,29 @@ using TeraHertz = __Hertz<Int, std::tera>;
 // (???) Observar que std::chrono define todo esto. 
 //       ¿se podría integrar magnitud con chrono?
 template <typename Int, typename Multiplier>
-using __Second = atd::Magnitude<atd::Units_second, Int, Multiplier>;
+using Time = atd::Magnitude<atd::Units_time, Int, Multiplier>;
 
 template <typename Int>
-using Second = __Second<Int, std::ratio<1,1>>;
+using Second = Time<Int, std::ratio<1,1>>;
 
 template <typename Int>
-using Millisecond = __Second<Int, std::milli>;
+using Millisecond = Time<Int, std::milli>;
 
 template <typename Int>
-using Microsecond = __Second<Int, std::micro>;
+using Microsecond = Time<Int, std::micro>;
 
 template <typename Int>
-using Nanosecond = __Second<Int, std::nano>;
+using Nanosecond = Time<Int, std::nano>;
 
 template <typename Int>
-using Picosecond = __Second<Int, std::pico>;
+using Picosecond = Time<Int, std::pico>;
 
 
 // Temperature
 // -----------
 // Kelvin
 template <typename Int, typename Multiplier>
-using __Kelvin = Magnitude<atd::Units_kelvin, Int, Multiplier>;
+using __Kelvin = Magnitude<atd::Units_temperature, Int, Multiplier>;
 
 template <typename Int>
 using Kelvin = __Kelvin<Int, std::ratio<1>>;
@@ -645,7 +683,7 @@ using Kelvin = __Kelvin<Int, std::ratio<1>>;
 
 // Celsius
 template <typename Int, typename Multiplier>
-using __Celsius = Magnitude<atd::Units_kelvin, Int, 
+using __Celsius = Magnitude<atd::Units_temperature, Int, 
 			    Multiplier, std::ratio<27315, 100>>;
 
 template <typename Int>
@@ -663,7 +701,7 @@ using Millicelsius = __Celsius<Int, std::milli>;
 
 // Fahrenheit
 template <typename Int>
-using Fahrenheit = atd::Magnitude<atd::Units_kelvin,
+using Fahrenheit = atd::Magnitude<atd::Units_temperature,
 				  Int,
 				  std::ratio<5, 9>, std::ratio<45967, 180>>;
 
@@ -671,28 +709,28 @@ using Fahrenheit = atd::Magnitude<atd::Units_kelvin,
 // Pressure
 // --------
 template <typename Int, typename Multiplier>
-using __Pascal = atd::Magnitude<atd::Units_pascal, Int, Multiplier>;
+using Pressure = atd::Magnitude<atd::Units_pressure, Int, Multiplier>;
 
 template <typename Int>
-using Kilopascal = __Pascal<Int, std::kilo>;
+using Kilopascal = Pressure<Int, std::kilo>;
 
 template <typename Int>
-using Hectopascal = __Pascal<Int, std::hecto>;
+using Hectopascal = Pressure<Int, std::hecto>;
 
 template <typename Int>
-using Decapascal = __Pascal<Int, std::deca>;
+using Decapascal = Pressure<Int, std::deca>;
 
 template <typename Int>
-using Pascal = __Pascal<Int, std::ratio<1>>;
+using Pascal = Pressure<Int, std::ratio<1>>;
 
 template <typename Int>
-using Decipascal = __Pascal<Int, std::deci>;
+using Decipascal = Pressure<Int, std::deci>;
     
 template <typename Int>
-using Centipascal = __Pascal<Int, std::centi>;
+using Centipascal = Pressure<Int, std::centi>;
 
 template <typename Int>
-using Millipascal = __Pascal<Int, std::milli>;
+using Millipascal = Pressure<Int, std::milli>;
 
 
 }// namespace atd

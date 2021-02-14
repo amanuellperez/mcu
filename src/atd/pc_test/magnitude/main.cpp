@@ -51,7 +51,7 @@ void test_magnitude_basic()
 {
     using Meter = atd::Meter<int>;
     using Kilometer = atd::Kilometer<int>;
-   // using Meter = atd::Magnitude<atd::Units_meter, int, std::ratio<1>>;
+   // using Meter = atd::Magnitude<atd::Units_length, int, std::ratio<1>>;
     
 
 // constructor
@@ -156,7 +156,7 @@ void test_magnitude_basic()
 void test_common_type()
 {
     {// caso degenerado
-    using Kilometer = atd::Magnitude<atd::Units_meter, int, std::ratio<1000>>;
+    using Kilometer = atd::Magnitude<atd::Units_length, int, std::ratio<1000>>;
 
     using CM = std::common_type_t<Kilometer, Kilometer>;
     CHECK_TRUE((std::is_same_v<CM::Unit, Kilometer::Unit>), "common_type::Unit");
@@ -165,22 +165,22 @@ void test_common_type()
                "common_type::Multiplier");
     }
     {
-    using Kilometer = atd::Magnitude<atd::Units_meter, int, std::ratio<1000>>;
-    using Millimeter = atd::Magnitude<atd::Units_meter, long int, std::ratio<1,1000>>;
+    using Kilometer = atd::Magnitude<atd::Units_length, int, std::ratio<1000>>;
+    using Millimeter = atd::Magnitude<atd::Units_length, long int, std::ratio<1,1000>>;
 
     using CM = std::common_type_t<Kilometer, Millimeter>;
-    CHECK_TRUE((std::is_same_v<atd::Units_meter, CM::Unit>), "common_type::Unit");
+    CHECK_TRUE((std::is_same_v<atd::Units_length, CM::Unit>), "common_type::Unit");
     CHECK_TRUE((std::is_same_v<CM::Rep, long int>), "common_type::Rep");
     CHECK_TRUE((std::is_same_v<CM::Multiplier, std::ratio<1,1000>>),
                "common_type::Multiplier");
     }
 
     {
-    using Kilometer = atd::Magnitude<atd::Units_meter, double, std::kilo>;
-    using Foot = atd::Magnitude<atd::Units_meter, float, std::ratio<3048,10000>>;
+    using Kilometer = atd::Magnitude<atd::Units_length, double, std::kilo>;
+    using Foot = atd::Magnitude<atd::Units_length, float, std::ratio<3048,10000>>;
 
     using CM = std::common_type_t<Kilometer, Foot>;
-    CHECK_TRUE((std::is_same_v<atd::Units_meter, CM::Unit>), "common_type::Unit");
+    CHECK_TRUE((std::is_same_v<atd::Units_length, CM::Unit>), "common_type::Unit");
     CHECK_TRUE((std::is_same_v<CM::Rep, double>), "common_type::Rep");
     CHECK_TRUE((std::is_same_v<CM::Multiplier, std::ratio<1,1250>>),
                "common_type::Multiplier");
@@ -190,10 +190,10 @@ void test_common_type()
 
 void test_magnitude_multiplier()
 {// mezclamos diferentes multipliers
-    using Kilometer = atd::Magnitude<atd::Units_meter, int, std::kilo>;
-    using Meter = atd::Magnitude<atd::Units_meter, int, std::ratio<1>>;
-    using Centimeter = atd::Magnitude<atd::Units_meter, int, std::centi>;
-    using Millimeter = atd::Magnitude<atd::Units_meter, int, std::milli>;
+    using Kilometer = atd::Magnitude<atd::Units_length, int, std::kilo>;
+    using Meter = atd::Magnitude<atd::Units_length, int, std::ratio<1>>;
+    using Centimeter = atd::Magnitude<atd::Units_length, int, std::centi>;
+    using Millimeter = atd::Magnitude<atd::Units_length, int, std::milli>;
 
     {
     auto m1 = Meter{3} + Centimeter{25} + Millimeter{7};
@@ -213,10 +213,10 @@ void test_magnitude_multiplier()
 // Igual que test_magnitude_multiplier pero con tipo double
 void test_magnitude_multiplier2()
 {// mezclamos diferentes multipliers
-    using Kilometer = atd::Magnitude<atd::Units_meter, double, std::kilo>;
-    using Meter = atd::Magnitude<atd::Units_meter, double, std::ratio<1>>;
-    using Centimeter = atd::Magnitude<atd::Units_meter, double, std::centi>;
-    using Millimeter = atd::Magnitude<atd::Units_meter, double, std::milli>;
+    using Kilometer = atd::Magnitude<atd::Units_length, double, std::kilo>;
+    using Meter = atd::Magnitude<atd::Units_length, double, std::ratio<1>>;
+    using Centimeter = atd::Magnitude<atd::Units_length, double, std::centi>;
+    using Millimeter = atd::Magnitude<atd::Units_length, double, std::milli>;
 
     {
     auto m1 = Meter{3} + Centimeter{25} + Millimeter{7};
@@ -239,10 +239,10 @@ void test_magnitude_multiplier2()
 
 void test_magnitud_conversiones()
 {
-//    using Kilometer = atd::Magnitude<atd::Units_meter, double, std::kilo>;
-//    using Meter = atd::Magnitude<atd::Units_meter, double, std::ratio<1>>;
-//    using Centimeter = atd::Magnitude<atd::Units_meter, double, std::centi>;
-//    using Millimeter = atd::Magnitude<atd::Units_meter, double, std::milli>;
+//    using Kilometer = atd::Magnitude<atd::Units_length, double, std::kilo>;
+//    using Meter = atd::Magnitude<atd::Units_length, double, std::ratio<1>>;
+//    using Centimeter = atd::Magnitude<atd::Units_length, double, std::centi>;
+//    using Millimeter = atd::Magnitude<atd::Units_length, double, std::milli>;
 
     using Kilometer = atd::Kilometer<double>;
     using Meter = atd::Meter<double>;
@@ -288,7 +288,7 @@ void test_magnitude_and_decimal()
 //    using Hectopascal =
 //        atd::Magnitude<atd::Units_pascal, atd::Decimal<int, 3>, std::hecto>;
 
-    using Pascal = atd::Pascal<atd::Decimal<int, 1>>;
+    using Pascal = atd::Pascal<atd::Decimal<int, 3>>;
     using Hectopascal = atd::Hectopascal<atd::Decimal<int, 3>>;
 
     Pascal p1{Pascal::Rep{92045,3}};
@@ -298,10 +298,10 @@ void test_magnitude_and_decimal()
     std::cout << ">>> Convierto a pascal\n";
     Pascal p2_to_pascal{p2};
 
-    CHECK_STDOUT(p2_to_pascal, "1042.3");
+    CHECK_STDOUT(p2_to_pascal, "1042.300");
     Pascal rp = p1 + p2;
     auto [n, f] = rp.value().value(); 
-    CHECK_TRUE(n == 93087 and f == 6, "pascal + hectopascal");
+    CHECK_TRUE(n == 93087 and f == 600, "pascal + hectopascal");
 
     // pruebo que compile operator<<
     CHECK_STDOUT(rp, "93087.6");
@@ -555,6 +555,47 @@ void test_magnitude_frequency()
 
     }
 
+    {// bug: Magnitude * Decimal ¿qué funcion llamar?
+	Hertz f{10};
+	Int a = 20;
+	Hertz res = f * a;
+	std::cout << res << '\n';
+    }
+
+}
+
+void test_arithmetic()
+{
+    using Kilometer = atd::Kilometer<double>;
+    using Meter = atd::Meter<double>;
+
+// operaciones con escalares
+    {
+	Kilometer a{3};
+	auto b = 2.0*a;
+	CHECK_TRUE((std::is_same_v<decltype(b), Kilometer>), "int * kilometer");
+	CHECK_TRUE(b == Kilometer{6}, "int * kilometer");
+    }
+    {
+	Kilometer a{3};
+	auto b = a / 2;
+	CHECK_TRUE((std::is_same_v<decltype(b), Kilometer>), "kilometer / int");
+	CHECK_TRUE(b == Kilometer{1.5}, "kilometer / int");
+    }
+
+// operaciones con magnitudes
+    {
+	Kilometer a{3};
+	Meter b{2};
+	auto c = a + b;
+	CHECK_TRUE((std::is_same_v<decltype(c), Meter>), "Meter + Kilometer");
+	CHECK_TRUE(c == Meter{3002}, "Meter + Kilometer");
+
+	auto d = a - b;
+	CHECK_TRUE((std::is_same_v<decltype(d), Meter>), "Kilometer - Meter");
+	CHECK_TRUE(d == Meter{2998}, "Kilometer - Meter");
+    }
+
 }
 
 
@@ -567,10 +608,47 @@ void test_magnitude()
     test_magnitud_conversiones();
     test_magnitude_multiplier();
     test_magnitude_multiplier2();
+    test_arithmetic();
     test_magnitude_and_decimal();
     test_magnitude_temperature();
     test_magnitude_temperature_decimal();
     test_magnitude_frequency();
+}
+
+
+template <typename Multiplier>
+using Frequency = atd::Frequency<int, Multiplier>;
+
+using Hertz = atd::Hertz<int>;
+using MegaHertz = atd::MegaHertz<int>;
+
+Hertz operator"" _Hz(unsigned long long int x) { return Hertz{x}; }
+MegaHertz operator"" _MHz(unsigned long long int x) 
+{ return MegaHertz{x}; }
+
+
+template<typename Multiplier>
+void f(const Frequency<Multiplier>& f)
+{
+    std::cout << "frequency = " << f;
+
+    if constexpr (std::is_same_v<Multiplier, std::ratio<1,1>>)
+	std::cout << " Hz\n";
+    else if constexpr (std::is_same_v<Multiplier, std::mega>)
+	std::cout << " MHz\n";
+    else
+	std::cout << " unknown!!!\n";
+
+    std::cout << "en Hz = " << Hertz{f} << " Hz\n";
+
+}
+
+void test_usability()
+{
+    f(Hertz{20});
+    f(30_Hz);
+    f(MegaHertz{2});
+    f(5_MHz);
 }
 
 
@@ -582,6 +660,7 @@ try{
     
     test_unit();
     test_magnitude();
+    test_usability();
 
 }catch(std::exception& e)
 {
