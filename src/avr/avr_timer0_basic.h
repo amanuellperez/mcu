@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez <amanuel.lperez@gmail.com>
+// Copyright (C) 2019-2021 A.Manuel L.Perez <amanuel.lperez@gmail.com>
 //
 // This file is part of the MCU++ Library.
 //
@@ -24,17 +24,13 @@
  *
  *  - DESCRIPCION: Traductor del timer 0 del AVR. Es un timer de 8 bits.
  *
- *  - TODO:
- *    Faltan implementar los modos:
- *	    * Fast PWM
- *	    * PWM, Phase correct
- *
  *  - HISTORIA:
  *    A.Manuel L.Perez
  *
- *      06/08/2017 v0.0
- *      18/07/2019 Reescrito.
- *      04/01/2020 Creado traductor.
+ *      06/08/2017 v0.0: Escrito.
+ *      18/07/2019 v0.1: Reescrito.
+ *      04/01/2020       Creado traductor.
+ *      14/02/2021 v0.2: Convertido en traductor puro.
  *
  ****************************************************************************/
 
@@ -53,7 +49,7 @@ class Timer0{
 
 public:
 // CARACTERÍSTICAS DEL TIMER
-    using counter_type = TIMER0_counter_type;
+    using counter_type = TIMER0::counter_type;
 
     /// The counter reaches the bottom when it becomes zero.
     static constexpr counter_type bottom() {return counter_type{0};}
@@ -64,28 +60,31 @@ public:
 
     // Devuelve el número de pin al que está conectado la salida A del 
     // generador de ondas.
-    static constexpr counter_type num_pin_A() {return TIMER0_num_pin_A; }
+    static constexpr counter_type OCA_pin() {return TIMER0::OCA_pin; }
 
     // Devuelve el número de pin al que está conectado la salida B del 
     // generador de ondas.
-    static constexpr counter_type num_pin_B() {return TIMER0_num_pin_B;}
+    static constexpr counter_type OCB_pin() {return TIMER0::OCB_pin;}
 
 
 // CONFIGURACIÓN DEL RELOJ
+    enum class Frequency_divisor{
+		    undefined,    
+		    no_preescaling,
+		    divide_by_8,
+		    divide_by_64,
+		    divide_by_256,
+		    divide_by_1024};
+
+    // Obtenemos el divisor de frecuencia que se aplica al reloj del micro.
+    static Frequency_divisor frequency_divisor();
+
     // Selección del reloj y de su velocidad (según tabla 19-10)
-    /// No hacemos preescalado.
+    // Establecemos el divisor de frecuencia a aplicar al reloj del micro.
     static void clock_speed_no_preescaling();
-
-    /// Dividimos la frecuencia del reloj entre 8.
     static void clock_frequency_divide_by_8();
-
-    /// Dividimos la frecuencia del reloj entre 64.
     static void clock_frequency_divide_by_64();
-
-    /// Dividimos la frecuencia del reloj entre 256.
     static void clock_frequency_divide_by_256();
-
-    /// Dividimos la frecuencia del reloj entre 1024.
     static void clock_frequency_divide_by_1024();
 
     // El timer lo que cuenta es tiempo, cuenta microsegundos.
@@ -103,7 +102,16 @@ public:
     // microsegundos) en la forma de hablar del avr (en divisor de frecuencia)
     template<uint16_t period
 	    , uint32_t clock_frecuencia_en_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
-    static void clock_period_in_us();
+    static void set_clock_period_in_us();
+
+    template<uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
+    static Microsecond clock_period();
+
+    /// Frecuencia a la que funciona internamente el timer.
+    /// Se cumple que clock_frequency() = 1 / clock_period();
+    template <uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
+    static Hertz clock_frequency();
+
 
 // ENCENDIDO/APAGADO DEL TIMER
     /// Enciende el Timer, usando como reloj el reloj de periodo indicado.
@@ -111,7 +119,7 @@ public:
     /// clock_frequency_in_hz = es la frecuencia del reloj del AVR.
     template<uint16_t period
 	    , uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
-    static void on() {clock_period_in_us<period, clock_frequency_in_hz>();}
+    static void on() {set_clock_period_in_us<period, clock_frequency_in_hz>();}
 
     /// Paramos el timer.
     static void off();
@@ -135,6 +143,45 @@ public:
     static counter_type output_compare_register_B() {return OCR0B;}
     static void output_compare_register_B(counter_type x) {OCR0B = x;}
 
+// WAVEFORM GENERATION MODES (table 19-9)
+    static void mode_normal();
+
+    static void mode_CTC();
+
+    static void mode_fast_PWM_top_OCRA();
+    static void mode_fast_PWM_top_0xFF();
+
+    static void mode_PWM_phase_correct_top_CORA();
+    static void mode_PWM_phase_correct_top_0xFF();
+
+// pins operation 
+    // comunes a todas las tablas (19-3 y siguientes)
+    static void pin_A_disconnected();
+    static void pin_B_disconnected();
+
+    // table 19-3 and 19-6
+    static void CTC_pin_A_toggle_on_compare_match();
+    static void CTC_pin_A_clear_on_compare_match();
+    static void CTC_pin_A_set_on_compare_match();
+
+    static void CTC_pin_B_toggle_on_compare_match();
+    static void CTC_pin_B_clear_on_compare_match();
+    static void CTC_pin_B_set_on_compare_match();
+
+    // tables 19-4,5, 7 and 8.
+    static void PWM_pin_A_non_inverting_mode();
+    static void PWM_pin_A_inverting_mode();
+    static void PWM_pin_B_non_inverting_mode();
+    static void PWM_pin_B_inverting_mode();
+
+    // Solo para los modos mode_PWM_phase_correct_top_OCRA y
+    // mode_fast_PWM_top_OCRA
+    static void PWM_pin_A_toggle_on_compare_match();
+
+    // La datasheet indica que no hay toggle mode en el pin B.
+    // TODO: confirmarlo (no siendo que sea una errata).
+//    static void PWM_pin_B_toggle_on_compare_match();
+
 
 // INTERRUPCIONES
     /// Se captura con ISR_TIMER0_OVF
@@ -149,241 +196,42 @@ public:
 
 private:
     template<uint16_t period>
-    static void clock_period_in_us_1MHz();
+    static void set_clock_period_in_us_1MHz();
 
     template<uint16_t period>
-    static void clock_period_in_us_8MHz();
+    static void set_clock_period_in_us_8MHz();
+
+    static Microsecond clock_period_in_us_1MHz();
+    static Hertz clock_frequency_in_Hz_1MHz();
 
 }; // Timer0
 
 
+inline Timer0::Frequency_divisor Timer0::frequency_divisor()
+{ 
+    switch(atd::read_bits<CS02, CS01, CS00>::of(TCCR0B)){
+	case atd::zero<uint8_t>::with_bits<CS02, CS01, CS00>::to<0,0,1>():
+	    return Frequency_divisor::no_preescaling;
 
+	case atd::zero<uint8_t>::with_bits<CS02, CS01, CS00>::to<0,1,0>():
+	    return Frequency_divisor::divide_by_8;
 
+	case atd::zero<uint8_t>::with_bits<CS02, CS01, CS00>::to<0,1,1>():
+	    return Frequency_divisor::divide_by_64;
 
-// avr clock at 1MHz
-// -----------------
-template<uint16_t period>
-inline void Timer0::clock_period_in_us_1MHz() 
-{
-    if constexpr (period == 1u)
-	clock_speed_no_preescaling();
-    
-    else if constexpr (period == 8u)
-	clock_frequency_divide_by_8();
+	case atd::zero<uint8_t>::with_bits<CS02, CS01, CS00>::to<1,0,0>():
+	    return Frequency_divisor::divide_by_256;
 
-    else if constexpr (period == 64u)
-	clock_frequency_divide_by_64();
+	case atd::zero<uint8_t>::with_bits<CS02, CS01, CS00>::to<1,0,1>():
+	    return Frequency_divisor::divide_by_1024;
+    }
 
-    else if constexpr (period == 256u)
-	clock_frequency_divide_by_256();
-
-    else if constexpr (period == 1024u)
-	clock_frequency_divide_by_1024();
-
-    else
-	static_assert(atd::always_false_v<int>,
-		    "Incorrect Timer0 period. Try another one.");
+    return Frequency_divisor::undefined;
 }
 
 
-
-// avr clock at 8MHz
-// -----------------
-// a 125 ns
-//template<>
-//inline void Timer0::clock_period_in_ns<125u, 8000000UL>() 
-//{clock_frequency_no_prescaling();}
-
-template<uint16_t period>
-inline void Timer0::clock_period_in_us_8MHz() 
-{
-    if constexpr (period == 1u)
-	clock_frequency_divide_by_8();
-
-    else if constexpr (period == 8u)
-	clock_frequency_divide_by_64();
-
-    else if constexpr (period == 32u)
-	clock_frequency_divide_by_256();
- 
-    else if constexpr (period == 128u)
-	clock_frequency_divide_by_1024();
- 
-    else
-	static_assert(atd::always_false_v<int>,
-		    "Incorrect Timer0 period. Try another one.");
-}
-
-
-template<uint16_t period
-	, uint32_t clock_frequency_in_hz>
-inline void Timer0::clock_period_in_us()
-{
-    if constexpr (clock_frequency_in_hz == 1000000UL)
-	clock_period_in_us_1MHz<period>();
-
-    else if constexpr (clock_frequency_in_hz == 8000000UL)
-	clock_period_in_us_8MHz<period>();
-
-    else
-        static_assert(atd::always_false_v<int>,
-                      "clock_period_in_us: I'm lazy. I haven't implemented "
-                      "that frequency. Please implement it.");
-}
-
-
-/*!
- *  \brief  Timer0 in normal mode.
- *
- */
-class Timer0_normal_mode : public Timer0 {
-public:
-    using counter_type = Timer0::counter_type;
-
-    /// Encendemos el Timer0
-    template<uint16_t periodo
-	    , uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
-    static void on();
-
-    /// Ponemos el contador a cero.
-    static void reset() { TCNT0 = 0; }
-
-
-private:
-    static void set_normal_mode();
-    static void pin_AB_disconnected();
-};
-
-
-
-template<uint16_t period
-	, uint32_t clock_frequency_in_hz>
-inline void Timer0_normal_mode::on()
-{
-    set_normal_mode();
-    pin_AB_disconnected();
-    Timer0::on<period, clock_frequency_in_hz>();
-}
-
-
-inline void Timer0_normal_mode::set_normal_mode()
-{
-    atd::write_bits<WGM02>::to<0>::in(TCCR0B);
-    atd::write_bits<WGM01, WGM00>::to<0,0>::in(TCCR0A);
-}
-
-
-inline void Timer0_normal_mode::pin_AB_disconnected()
-{   // 00
-    atd::write_bits<COM0A1, COM0A0, COM0B1, COM0B0>::to<0,0,0,0>::in(TCCR0A);
-}
-
-
-
-/*!
- *  \brief  CTC mode. 
- *
- *
- *  Una de las utilidades de este modo es generar una onda cuadrada en los
- *  pines A y B. Tal como funciona el Timer0 genera la misma señal en ambos
- *  pines.
- *
- *  Ver el test como ejemplo.
- */
-class Timer0_CTC_mode:public Timer0 {
-public:
-    using counter_type = Timer0::counter_type;
-
-    // Configuración del CTC.
-    // 1.- Definir el top.
-    /// El TCNT va desde 0 hasta el TOP.
-    static void top_OCRA(const counter_type& top0);
-
-    // 2.- ¿Qué generar en los pines A/B cuando sucede un compare match? 
-    // ¿Una onda cuadrada (toggle)?  ¿set/clear el pin?
-    static void pin_A_toggle_on_compare_match();
-    static void pin_A_set_on_compare_match();
-    static void pin_A_clear_on_compare_match();
-
-    static void pin_B_toggle_on_compare_match();
-    static void pin_B_set_on_compare_match();
-    static void pin_B_clear_on_compare_match();
-
-    // 3.- Recordar encender el Timer (llamar a on).
-
-};
-
-
-
-inline void Timer0_CTC_mode::top_OCRA(const Timer0::counter_type& top0)
-{
-    // 010
-    atd::write_bits<WGM02>::to<0>::in(TCCR0B);
-    atd::write_bits<WGM01, WGM00>::to<1,0>::in(TCCR0A);
-
-    output_compare_register_A(top0);
-}
-
-
-
-// Table 19-3.
-inline void Timer0_CTC_mode::pin_A_toggle_on_compare_match()
-{   // 01
-    atd::write_bits<COM0A1, COM0A0>::to<0,1>::in(TCCR0A);
-
-    // Obligatorio definirlo como de salida. 
-    Pin<num_pin_A()>::as_output();
-}
-
-inline void Timer0_CTC_mode::pin_A_clear_on_compare_match()
-{   // 10
-    atd::write_bits<COM0A1, COM0A0>::to<1,0>::in(TCCR0A);
-
-    // Obligatorio definirlo como de salida. 
-    Pin<num_pin_A()>::as_output();
-}
-
-
-inline void Timer0_CTC_mode::pin_A_set_on_compare_match()
-{   // 11
-    atd::write_bits<COM0A1, COM0A0>::to<1,1>::in(TCCR0A);
-
-    // Obligatorio definirlo como de salida. 
-    Pin<num_pin_A()>::as_output();
-}
-
-// Table 19-6
-inline void Timer0_CTC_mode::pin_B_toggle_on_compare_match()
-{   // 01
-    atd::write_bits<COM0B1, COM0B0>::to<0,1>::in(TCCR0A);
-
-    // Obligatorio definirlo como de salida. 
-    Pin<num_pin_B()>::as_output();
-}
-
-inline void Timer0_CTC_mode::pin_B_clear_on_compare_match()
-{   // 10
-    atd::write_bits<COM0B1, COM0B0>::to<1,0>::in(TCCR0A);
-
-    // Obligatorio definirlo como de salida. 
-    Pin<num_pin_B()>::as_output();
-}
-
-
-inline void Timer0_CTC_mode::pin_B_set_on_compare_match()
-{   // 11
-    atd::write_bits<COM0B1, COM0B0>::to<1,1>::in(TCCR0A);
-
-    // Obligatorio definirlo como de salida. 
-    Pin<num_pin_B()>::as_output();
-}
-
-
-
-
-
-
-
+// preescaler
+// ----------
 inline void Timer0::off()
 { // 000
     atd::write_bits<CS02, CS01, CS00>::to<0,0,0>::in(TCCR0B);
@@ -431,6 +279,284 @@ inline void Timer0::external_clock_rising_edge()
 }
 
 
+// avr clock at 1MHz
+// -----------------
+template<uint16_t period>
+inline void Timer0::set_clock_period_in_us_1MHz() 
+{
+    if constexpr (period == 1u)
+	clock_speed_no_preescaling();
+    
+    else if constexpr (period == 8u)
+	clock_frequency_divide_by_8();
+
+    else if constexpr (period == 64u)
+	clock_frequency_divide_by_64();
+
+    else if constexpr (period == 256u)
+	clock_frequency_divide_by_256();
+
+    else if constexpr (period == 1024u)
+	clock_frequency_divide_by_1024();
+
+    else
+	static_assert(atd::always_false_v<int>,
+		    "Incorrect Timer0 period. Try another one.");
+}
+
+// avr clock at 8MHz
+// -----------------
+// a 125 ns
+//template<>
+//inline void Timer0::clock_period_in_ns<125u, 8000000UL>() 
+//{clock_frequency_no_prescaling();}
+
+template<uint16_t period>
+inline void Timer0::set_clock_period_in_us_8MHz() 
+{
+    if constexpr (period == 1u)
+	clock_frequency_divide_by_8();
+
+    else if constexpr (period == 8u)
+	clock_frequency_divide_by_64();
+
+    else if constexpr (period == 32u)
+	clock_frequency_divide_by_256();
+ 
+    else if constexpr (period == 128u)
+	clock_frequency_divide_by_1024();
+ 
+    else
+	static_assert(atd::always_false_v<int>,
+		    "Incorrect Timer0 period. Try another one.");
+}
+
+
+template<uint16_t period
+	, uint32_t clock_frequency_in_hz>
+inline void Timer0::set_clock_period_in_us()
+{
+    if constexpr (clock_frequency_in_hz == 1000000UL)
+	set_clock_period_in_us_1MHz<period>();
+
+    else if constexpr (clock_frequency_in_hz == 8000000UL)
+	set_clock_period_in_us_8MHz<period>();
+
+    else
+        static_assert(atd::always_false_v<int>,
+                      "set_clock_period_in_us: I'm lazy. I haven't implemented "
+                      "that frequency. Please implement it.");
+}
+
+// TODO: a .cpp?
+inline Microsecond Timer0::clock_period_in_us_1MHz()
+{
+    switch(frequency_divisor()){
+	case Frequency_divisor::no_preescaling	: return Microsecond{1u};
+	case Frequency_divisor::divide_by_8	: return Microsecond{8u};
+	case Frequency_divisor::divide_by_64	: return Microsecond{64u};
+	case Frequency_divisor::divide_by_256	: return Microsecond{256u};
+	case Frequency_divisor::divide_by_1024	: return Microsecond{1024u};
+	case Frequency_divisor::undefined	: return Microsecond{0};
+    }
+
+    return Microsecond{0};
+}
+
+
+template<uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
+inline Microsecond Timer0::clock_period()
+{
+    if constexpr (clock_frequency_in_hz == 1000000UL)
+	return clock_period_in_us_1MHz();
+
+    else
+        static_assert(atd::always_false_v<int>,
+                      "clock_period: I'm lazy. I haven't implemented "
+                      "that frequency. Please implement it.");
+}
+
+
+
+inline Hertz Timer0::clock_frequency_in_Hz_1MHz()
+{
+    using Rep = Hertz::Rep;
+    switch(frequency_divisor()){
+	case Frequency_divisor::no_preescaling	: return Hertz{1000000ul};
+	case Frequency_divisor::divide_by_8	: return Hertz{125000ul};
+	case Frequency_divisor::divide_by_64	: return Hertz{15625ul};
+	case Frequency_divisor::divide_by_256	: return Hertz{Rep{3906ul,25ul}};
+	case Frequency_divisor::divide_by_1024	: return Hertz{Rep{976ul,56ul}};
+	case Frequency_divisor::undefined	: return Hertz{0};
+    }
+
+    return Hertz{0};
+}
+
+
+template<uint32_t clock_frequency_in_hz>
+inline Hertz Timer0::clock_frequency()
+{
+    if constexpr (clock_frequency_in_hz == 1000000UL)
+	return clock_frequency_in_Hz_1MHz();
+
+    else
+        static_assert(atd::always_false_v<int>,
+                      "clock_frequency: I'm lazy. I haven't implemented "
+                      "that frequency. Please implement it.");
+}
+
+// Modos de funcionamiento
+// -----------------------
+inline void Timer0::mode_normal()
+{
+    atd::write_bits<WGM02>::to<0>::in(TCCR0B);
+    atd::write_bits<WGM01, WGM00>::to<0,0>::in(TCCR0A);
+}
+
+inline void Timer0::mode_PWM_phase_correct_top_0xFF()
+{
+    atd::write_bits<WGM02>::to<0>::in(TCCR0B);
+    atd::write_bits<WGM01, WGM00>::to<0,1>::in(TCCR0A);
+}
+
+inline void Timer0::mode_CTC()
+{
+    atd::write_bits<WGM02>::to<0>::in(TCCR0B);
+    atd::write_bits<WGM01, WGM00>::to<1,0>::in(TCCR0A);
+}
+
+inline void Timer0::mode_fast_PWM_top_0xFF()
+{
+    atd::write_bits<WGM02>::to<0>::in(TCCR0B);
+    atd::write_bits<WGM01, WGM00>::to<1,1>::in(TCCR0A);
+}
+
+inline void Timer0::mode_PWM_phase_correct_top_CORA()
+{
+    atd::write_bits<WGM02>::to<1>::in(TCCR0B);
+    atd::write_bits<WGM01, WGM00>::to<0,1>::in(TCCR0A);
+}
+
+inline void Timer0::mode_fast_PWM_top_OCRA()
+{
+    atd::write_bits<WGM02>::to<1>::in(TCCR0B);
+    atd::write_bits<WGM01, WGM00>::to<1,1>::in(TCCR0A);
+}
+
+
+// pins
+// ----
+inline void Timer0::pin_A_disconnected()
+{ 
+    atd::write_bits<COM0A1, COM0A0>::to<0,0>::in(TCCR0A); 
+    // (???) ¿En qué estado dejar el puerto pin_B()?
+}
+
+inline void Timer0::pin_B_disconnected()
+{ 
+    atd::write_bits<COM0B1, COM0B0>::to<0,0>::in(TCCR0A); 
+    // (???) ¿En qué estado dejar el puerto pin_B()?
+}
+
+
+inline void Timer0::CTC_pin_A_toggle_on_compare_match()
+{ 
+    atd::write_bits<COM0A1, COM0A0>::to<0,1>::in(TCCR0A); 
+
+    // Obligatorio definirlo como de salida. 
+    Pin<OCA_pin()>::as_output();
+}
+
+inline void Timer0::CTC_pin_A_clear_on_compare_match()
+{ 
+    atd::write_bits<COM0A1, COM0A0>::to<1,0>::in(TCCR0A); 
+
+    // Obligatorio definirlo como de salida. 
+    Pin<OCA_pin()>::as_output();
+}
+
+inline void Timer0::CTC_pin_A_set_on_compare_match()
+{ 
+    atd::write_bits<COM0A1, COM0A0>::to<1,1>::in(TCCR0A); 
+
+    // Obligatorio definirlo como de salida. 
+    Pin<OCA_pin()>::as_output();
+}
+
+
+
+
+inline void Timer0::CTC_pin_B_toggle_on_compare_match()
+{ 
+    atd::write_bits<COM0B1, COM0B0>::to<0,1>::in(TCCR0A); 
+
+    // Obligatorio definirlo como de salida. 
+    Pin<OCB_pin()>::as_output();
+}
+
+
+inline void Timer0::CTC_pin_B_clear_on_compare_match()
+{ 
+    atd::write_bits<COM0B1, COM0B0>::to<1,0>::in(TCCR0A); 
+
+    // Obligatorio definirlo como de salida. 
+    Pin<OCB_pin()>::as_output();
+}
+
+
+inline void Timer0::CTC_pin_B_set_on_compare_match()
+{ 
+    atd::write_bits<COM0B1, COM0B0>::to<1,1>::in(TCCR0A); 
+
+    // Obligatorio definirlo como de salida. 
+    Pin<OCB_pin()>::as_output();
+}
+
+
+inline void Timer0::PWM_pin_A_non_inverting_mode()
+{ 
+    atd::write_bits<COM0A1, COM0A0>::to<1,0>::in(TCCR0A); 
+
+    // Obligatorio definirlo como de salida. 
+    Pin<OCA_pin()>::as_output();
+}
+
+
+inline void Timer0::PWM_pin_A_inverting_mode()
+{ 
+    atd::write_bits<COM0A1, COM0A0>::to<1,1>::in(TCCR0A); 
+
+    // Obligatorio definirlo como de salida. 
+    Pin<OCA_pin()>::as_output();
+}
+
+
+inline void Timer0::PWM_pin_B_non_inverting_mode()
+{ 
+    atd::write_bits<COM0B1, COM0B0>::to<1,0>::in(TCCR0A); 
+
+    // Obligatorio definirlo como de salida. 
+    Pin<OCB_pin()>::as_output();
+}
+
+
+inline void Timer0::PWM_pin_B_inverting_mode()
+{ 
+    atd::write_bits<COM0B1, COM0B0>::to<1,1>::in(TCCR0A); 
+
+    // Obligatorio definirlo como de salida. 
+    Pin<OCB_pin()>::as_output();
+}
+
+
+inline void Timer0::PWM_pin_A_toggle_on_compare_match()
+{ 
+    atd::write_bits<COM0A1, COM0A0>::to<0,1>::in(TCCR0A); 
+
+    // Obligatorio definirlo como de salida. 
+    Pin<OCA_pin()>::as_output();
+}
 
 
 
@@ -455,9 +581,6 @@ inline void Timer0::enable_output_compare_B_match_interrupt()
     atd::write_bits<OCIE0B>::to<1>::in(TIMSK0);
     avr::enable_all_interrupts();
 }
-
-
-
 
 
 }// namespace avr

@@ -150,7 +150,7 @@ void oca_menu(uint16_t& ocr1a)
 	    "[d]isconnect\n"
 	    "[i]nverting mode\n"
 	    "[n]on inverting mode\n"
-	    "[t]oggle on compare match (NO FUNCIONA???)\n";
+	    "[t]oggle on compare match (NO FUNCIONA?? )\n";
 
 
     char c{};
@@ -259,7 +259,7 @@ int main()
 		    "\nocra = " << ocr1a << 
 		    "\nocrb = " << ocr1b << 
 		    "\nperiod_in_us                = " << period_in_us <<
-		    "\nTimer::clock_period_in_us() = " << Timer::clock_period_in_us() <<
+		    "\nTimer::clock_period_in_us() = " << Timer::clock_period() <<
                 "\nA ver en el osciloscopio: " <<
 		period << " us +- error ((top + 1)*period_in_us)\n"
 		"OCA cambia en " << T_a << " us\n"

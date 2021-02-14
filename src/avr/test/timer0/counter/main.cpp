@@ -24,7 +24,7 @@
 #include <stdlib.h>
 #include <std_type_traits.h>
 
-using Timer = avr::Timer0_normal_mode;
+using Timer = avr::Timer0;
 using time_t = uint32_t;
 
 constexpr uint16_t period_in_us = 1024;

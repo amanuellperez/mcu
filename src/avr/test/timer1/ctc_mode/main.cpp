@@ -253,7 +253,7 @@ int main()
 		    "-----\n"
 	        "top = " << top <<
 		"\nperiod_in_us                = " << period_in_us <<
-		"\nTimer::clock_period_in_us() = " << Timer::clock_period_in_us() <<
+		"\nTimer::clock_period_in_us() = " << Timer::clock_period() <<
                 "\nPeriodo a ver en el osciloscopio: " <<
 		period << " us +- error ("
                 "2*(top + 1)*period_in_us)\n";

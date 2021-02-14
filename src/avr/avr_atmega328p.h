@@ -89,16 +89,20 @@ constexpr uint8_t BIT_MASK[29] = {
 
 // CONFIGURACIÓN DE LOS TIMERS
     // Timer0
-    using TIMER0_counter_type          = uint8_t;
-    constexpr uint8_t TIMER0_num_pin_A = 12u;
-    constexpr uint8_t TIMER0_num_pin_B = 11u;
-    //constexpr uint16_t TIMER0_resolution= 256u;
+    struct TIMER0{
+        using counter_type                 = uint8_t;
+        static constexpr uint8_t OCA_pin   = 12u;
+        static constexpr uint8_t OCB_pin   = 11u;
+	//constexpr uint16_t resolution= 256u;
+    };
 
     // Timer1
-    using TIMER1_counter_type          = uint16_t;
-    constexpr uint8_t TIMER1_OCA_pin   = 15u;
-    constexpr uint8_t TIMER1_OCB_pin   = 16u;
-    // constexpr uint32_t TIMER1_resolution= 65536u;
+    struct TIMER1{
+        using counter_type                 = uint16_t;
+        static constexpr uint8_t OCA_pin   = 15u;
+        static constexpr uint8_t OCB_pin   = 16u;
+	// constexpr uint32_t resolution= 65536u;
+    };
 
 
 

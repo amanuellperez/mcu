@@ -85,7 +85,7 @@ namespace avr{
 class Timer1{
 public:
 // CARACTERÍSTICAS DEL TIMER
-    using counter_type = TIMER1_counter_type;
+    using counter_type = TIMER1::counter_type;
 
     /// The counter reaches the bottom when it becomes zero.
     static constexpr counter_type bottom()
@@ -97,11 +97,11 @@ public:
 
     // Devuelve el número de pin al que está conectado la salida A del 
     // generador de ondas.
-    static constexpr uint8_t OCA_pin() {return TIMER1_OCA_pin; }
+    static constexpr uint8_t OCA_pin() {return TIMER1::OCA_pin; }
 
     // Devuelve el número de pin al que está conectado la salida B del 
     // generador de ondas.
-    static constexpr uint8_t OCB_pin() {return TIMER1_OCB_pin;}
+    static constexpr uint8_t OCB_pin() {return TIMER1::OCB_pin;}
 
 
 // CONFIGURACIÓN DEL RELOJ
@@ -128,12 +128,6 @@ public:
     template<uint16_t period
 	    , uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
     static void set_clock_period_in_us();
-
-    /// Devuelve el periodo del reloj que usa el timer.
-    /// Devuelve 0, si está apagado o si está conectado al pin T1.
-    // TODO: hacer esta private. Usar mejor clock_period()
-    template<uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
-    static uint16_t clock_period_in_us();
 
     template<uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
     static Microsecond clock_period();
@@ -245,7 +239,6 @@ public:
     // static void phase_PWM_pin_B_toggle_on_compare_match();<--- ???
 
 
-
 // INTERRUPCIONES
     /// Cuando se produce un overflow generamos la interrupción
     /// correspondiente. Se captura con ISR_TIMER1_OVF
@@ -267,7 +260,7 @@ private:
     template<uint16_t period>
     static void set_clock_period_in_us_8MHz();
 
-    static uint16_t clock_period_in_us_1MHz();
+    static Microsecond clock_period_in_us_1MHz();
     static Hertz clock_frequency_in_Hz_1MHz();
 
 }; // Timer1
@@ -364,18 +357,18 @@ inline void Timer1::set_clock_period_in_us_1MHz()
 }
 
 // TODO: a .cpp???
-inline uint16_t Timer1::clock_period_in_us_1MHz()
+inline Microsecond Timer1::clock_period_in_us_1MHz()
 {
     switch(frequency_divisor()){
-	case Frequency_divisor::no_preescaling	: return 1u;
-	case Frequency_divisor::divide_by_8	: return 8u;
-	case Frequency_divisor::divide_by_64	: return 64u;
-	case Frequency_divisor::divide_by_256	: return 256u;
-	case Frequency_divisor::divide_by_1024	: return 1024u;
-	case Frequency_divisor::undefined	: return 0;
+	case Frequency_divisor::no_preescaling	: return Microsecond{1u};
+	case Frequency_divisor::divide_by_8	: return Microsecond{8u};
+	case Frequency_divisor::divide_by_64	: return Microsecond{64u};
+	case Frequency_divisor::divide_by_256	: return Microsecond{256u};
+	case Frequency_divisor::divide_by_1024	: return Microsecond{1024u};
+	case Frequency_divisor::undefined	: return Microsecond{0};
     }
 
-    return 0;
+    return Microsecond{0};
 }
 
 inline Hertz Timer1::clock_frequency_in_Hz_1MHz()
@@ -422,23 +415,17 @@ inline void Timer1::set_clock_period_in_us_8MHz()
 }
 
 
-template<uint32_t clock_frequency_in_hz>
-inline uint16_t Timer1::clock_period_in_us()
+
+template<uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
+inline Microsecond Timer1::clock_period()
 {
     if constexpr (clock_frequency_in_hz == 1000000UL)
 	return clock_period_in_us_1MHz();
 
     else
         static_assert(atd::always_false_v<int>,
-                      "clock_period_in_us: I'm lazy. I haven't implemented "
+                      "clock_period: I'm lazy. I haven't implemented "
                       "that frequency. Please implement it.");
-}
-
-
-template<uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
-inline Microsecond Timer1::clock_period()
-{
-    return Microsecond{clock_period_in_us<clock_frequency_in_hz>()};
 }
 
 
@@ -567,6 +554,8 @@ inline void Timer1::enable_output_compare_B_match_interrupt()
 }
 
 
+// Modos de funcionamiento
+// -----------------------
 inline void Timer1::mode_normal()
 {
     atd::write_bits<WGM13, WGM12>::to<0,0>::in(TCCR1B);
