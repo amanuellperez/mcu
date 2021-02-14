@@ -245,6 +245,9 @@ public:
     using Multiplier   = Multiplier0;
     using Displacement = Displacement0;
 
+    using Scalar       = Rep;  // las magnitudes las multiplicamos/dividimos 
+			       // por escalares.
+
     // Construction
     constexpr Magnitude() = default;
 
@@ -268,8 +271,8 @@ public:
     constexpr Rep value() const {return value_;}
 
 // Operaciones con escalares
-    constexpr Magnitude& operator*=(const Rep& a);
-    constexpr Magnitude& operator/=(const Rep& a);
+    constexpr Magnitude& operator*=(const Scalar& a);
+    constexpr Magnitude& operator/=(const Scalar& a);
 
 // Operaciones con magnitudes
     constexpr Magnitude& operator+=(const Magnitude& x);
@@ -306,7 +309,7 @@ inline constexpr Magnitude<U, R, M, D>&
 // -------------------------
 template <typename U, typename Rep, typename M, typename D>
 inline constexpr Magnitude<U, Rep, M, D>& 
-			Magnitude<U, Rep, M, D>::operator*=(const Rep& a)
+			Magnitude<U, Rep, M, D>::operator*=(const Scalar& a)
 {
     value_ = value_ * a;
     return *this;
@@ -314,7 +317,7 @@ inline constexpr Magnitude<U, Rep, M, D>&
 
 template <typename U, typename Rep, typename M, typename D>
 inline constexpr Magnitude<U, Rep, M, D>& 
-			    Magnitude<U, Rep, M, D>::operator/=(const Rep& a)
+			    Magnitude<U, Rep, M, D>::operator/=(const Scalar& a)
 {
     value_ = value_ / a;
     return *this;
@@ -462,27 +465,27 @@ constexpr inline std::common_type_t<Rep1, Rep2>
 
 // operaciones con escalares
 // -------------------------
-template <typename Unit, typename R1, typename M, typename D>
-constexpr inline Magnitude<Unit, R1, M, D>
-    operator*(const R1& a, Magnitude<Unit, R1, M, D> v)
+template <typename U, typename R, typename M, typename D>
+constexpr inline Magnitude<U, R, M, D>
+operator*(const typename Magnitude<U, R, M, D>::Scalar& a,
+          Magnitude<U, R, M, D> v)
 {
     v *= a;
     return v;
 }
 
-template <typename Unit, typename R1, typename M, typename D>
-constexpr inline Magnitude<Unit, R1, M, D>
-    operator*(Magnitude<Unit, R1, M, D> v, const R1& a)
+template <typename U, typename R, typename M, typename D>
+constexpr inline Magnitude<U, R, M, D>
+operator*(Magnitude<U, R, M, D> v,
+          const typename Magnitude<U, R, M, D>::Scalar& a)
 {
     return a*v;
 }
 
-
-template <typename Unit, typename R1, typename M, typename D,
-			 typename R2,
-	  std::enable_if_t<std::is_convertible_v<R2, R1>, bool> = true>
-constexpr inline Magnitude<Unit, R1, M, D>
-    operator/(Magnitude<Unit, R1, M, D> v, const R2& a)
+template <typename U, typename R, typename M, typename D>
+constexpr inline Magnitude<U, R, M, D>
+operator/(Magnitude<U, R, M, D> v,
+          const typename Magnitude<U, R, M, D>::Scalar& a)
 {
     v /= a;
     return v;
