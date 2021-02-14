@@ -22,7 +22,7 @@
 #include <avr_timer1_basic.h>
 #include <atd_time.h>
 
-using System_clock = dev::System_clock<avr::Timer1_CTC_mode>;
+using System_clock = dev::System_clock<avr::Timer1>;
 
 // Dependiendo del valor de F_CPU hay que pasar un periodo diferente.
 // El compilador tiene que mostrar mensajes adecuados a cada error.

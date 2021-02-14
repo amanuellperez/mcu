@@ -131,9 +131,11 @@ struct Chronometer_ms{
     {
 	Timer::enable_output_compare_A_match_interrupt();
 
-        Timer::top_OCRA(__Chronometer_ms_top<Timer, timer_period_in_us>() );
+	Timer::mode_CTC_top_OCR1A();
+        Timer::output_compare_register_A(
+            __Chronometer_ms_top<Timer, timer_period_in_us>());
 
-	reset();
+        reset();
     }
 
     /// Reinicia el cronómetro y lo enciende.

@@ -18,6 +18,7 @@ INCS= avr_ADC.h		\
 	avr_TWI_master.h\
 	avr_TWI_slave.h	\
 	avr_TWI_master_ioxtream.h\
+	avr_types.h		\
 	avr_UART.h		\
 	avr_UART_basic.h		\
 	avr_UART_baud_rate.h	\

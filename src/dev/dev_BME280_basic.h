@@ -352,7 +352,7 @@ struct __BME280_calibration{
 
 // Unidades en las que medimos la temperatura y la presión.
     using Celsius	   = atd::Celsius<atd::Decimal<int32_t, 2>>;
-    using Pascal           = atd::Pascal<atd::Decimal<int32_t, 0>>;
+    using Pascal           = atd::Pascal<atd::Decimal<int32_t, 2>>;
     using Hectopascal      = atd::Hectopascal<atd::Decimal<int32_t, 2>>;
     using Relative_humidity= atd::Decimal<uint32_t, 2>;
 

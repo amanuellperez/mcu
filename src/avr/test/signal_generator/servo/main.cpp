@@ -27,7 +27,7 @@
 
 
 using PWM = avr::PWM_generator;
-
+using namespace avr::literals;
 
 constexpr uint16_t period_in_us = 1;
 
@@ -40,21 +40,19 @@ int main()
     uart.on();
 
 // init_pwm()
+    PWM::on<period_in_us>();
     PWM::period(20_ms);
-    //Timer::top_ICR(20000UL); // 20000 us = 20 ms
-    Timer::output_compare_register_A(1500UL); // 1.5 ms = posición central +-
+    PWM::ch1_on(1500_us);
 
-    Timer::pin_A_non_inverting_mode();
-    Timer::on<period_in_us>();
-
-
+    uart << "\n\nServo\n"
+	        "-----\n";
     while(1){
 	uint16_t t;
 	uart << "Duración del pulso (de 1000 a 2000 us): ";
 	uart >> t;
-	
-	uart << t << "\n\r"; // echo
-	Timer::output_compare_register_A(t);
+	uart << t << "\n";
+
+	PWM::ch1_duty_cycle(avr::Microsecond{t});
 
 	wait_ms(1000);
     }

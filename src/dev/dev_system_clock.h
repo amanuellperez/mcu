@@ -61,7 +61,9 @@ struct System_clock : public std::chrono::system_clock {
 
 	Timer::enable_output_compare_A_match_interrupt();
 
-        Timer::top_OCRA(__system_clock_top<Timer, timer_period_in_us>() );
+	Timer::mode_CTC_top_OCR1A();
+        Timer::output_compare_register_A(
+            __system_clock_top<Timer, timer_period_in_us>());
     }
 
     /// Ponemos en hora el reloj.

@@ -146,7 +146,8 @@ void debug_freq(avr::Hertz freq_sq)
 	    "\nTimer::clock_frequency() / 2*freq_sq - 1ul = ";
     uart << avr::Timer1::clock_frequency();
     uart << " / " << freq_sq << " - 1\n\t top = ";
-    auto top = (avr::Timer1::clock_frequency() / (2*freq_sq)) - 1ul;
+    avr::Hertz::Scalar two = 2;
+    auto top = (avr::Timer1::clock_frequency() / (two * freq_sq)) - 1ul;
     uart << top << '\n';
 
 }

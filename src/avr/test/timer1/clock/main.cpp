@@ -22,10 +22,7 @@
 
 #include <time.h>
 
-
-using namespace avr;
-
-using Timer = Timer1;
+using Timer = avr::Timer1;
 
 constexpr uint16_t period_in_us = 64;
 
@@ -49,7 +46,7 @@ std::ostream& operator<<(std::ostream& out, const tm& t)
 
 void print_time()
 {
-    UART_iostream uart;
+    avr::UART_iostream uart;
     time_t sec = time(nullptr);
     tm* t = gmtime(&sec);
 
@@ -73,7 +70,7 @@ void init_time()
 
 int main()
 {
-    UART_iostream uart;
+    avr::UART_iostream uart;
     avr::basic_cfg(uart);
     uart.on();
 
@@ -86,7 +83,8 @@ int main()
     uint16_t ocr1a = 15625; // 15625 miniticks * 64 us/minitick = 1 seg
 
 
-    Timer::top_OCRA(ocr1a);
+    Timer::mode_CTC_top_OCR1A();
+    Timer::output_compare_register_A(ocr1a);
 
     init_time();
     Timer::on<period_in_us>();

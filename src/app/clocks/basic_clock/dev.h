@@ -82,7 +82,7 @@ using Keyboard_codes = dev::Keyboard_codes<OK_KEY, UP_KEY, DOWN_KEY>;
 using Keyboard       = dev::Basic_keyboard<Keyboard_pins, Keyboard_codes>;
 
 // system_clock
-using System_clock = dev::System_clock<avr::Timer1_CTC_mode>;
+using System_clock = dev::System_clock<avr::Timer1>;
 constexpr static uint16_t system_clock_timer_period_in_us = 64u;
 
 
