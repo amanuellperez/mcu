@@ -151,7 +151,7 @@ public:
     static void mode_fast_PWM_top_OCRA();
     static void mode_fast_PWM_top_0xFF();
 
-    static void mode_PWM_phase_correct_top_CORA();
+    static void mode_PWM_phase_correct_top_OCRA();
     static void mode_PWM_phase_correct_top_0xFF();
 
 // pins operation 
@@ -179,7 +179,6 @@ public:
     static void PWM_pin_A_toggle_on_compare_match();
 
     // La datasheet indica que no hay toggle mode en el pin B.
-    // TODO: confirmarlo (no siendo que sea una errata).
 //    static void PWM_pin_B_toggle_on_compare_match();
 
 
@@ -432,7 +431,7 @@ inline void Timer0::mode_fast_PWM_top_0xFF()
     atd::write_bits<WGM01, WGM00>::to<1,1>::in(TCCR0A);
 }
 
-inline void Timer0::mode_PWM_phase_correct_top_CORA()
+inline void Timer0::mode_PWM_phase_correct_top_OCRA()
 {
     atd::write_bits<WGM02>::to<1>::in(TCCR0B);
     atd::write_bits<WGM01, WGM00>::to<0,1>::in(TCCR0A);
