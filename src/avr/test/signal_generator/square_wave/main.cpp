@@ -16,12 +16,13 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "../../../avr_signal_generator.h"
+#include "../../../avr_timer1_generic.h"
 #include "../../../avr_time.h"
 #include "../../../avr_types.h"
 #include "../../../avr_UART_iostream.h"
 
 
-using SW_gen = avr::Square_wave_generator;
+using SW_gen = avr::Square_wave_generator<avr::Timer1>;
 
 
 struct Main{

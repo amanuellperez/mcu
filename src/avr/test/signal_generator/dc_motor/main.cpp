@@ -19,12 +19,12 @@
 // Circuito: libro de make, pag. 299.
 #include "../../../avr_UART.h"
 #include "../../../avr_signal_generator.h"
-#include "../../../avr_timer1_basic.h"
+#include "../../../avr_timer1_generic.h"
 #include "../../../avr_time.h"
 
 
 
-using SG = avr::PWM_generator;
+using SG = avr::PWM_generator<avr::Timer1>;
 
 constexpr uint16_t period_in_us = 1;
 

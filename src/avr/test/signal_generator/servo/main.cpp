@@ -21,12 +21,12 @@
 // A través de UART darle los valores de los pulsos que se quiera. 
 // (Con los servos que tengo van de 7 ms hasta 2.7 ms)
 #include "../../../avr_UART.h"
-#include "../../../avr_timer1_basic.h"
+#include "../../../avr_timer1_generic.h"
 #include "../../../avr_signal_generator.h"
 #include "../../../avr_time.h"
 
 
-using PWM = avr::PWM_generator;
+using PWM = avr::PWM_generator<avr::Timer1>;
 using namespace avr::literals;
 
 constexpr uint16_t period_in_us = 1;

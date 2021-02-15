@@ -43,6 +43,7 @@ namespace avr{
 // (mismo número número de decimales). 
 // Con 2 decimales en uint32_t nos entra: 4*10^9 = 4*10^7*10^2, podemos 
 // representar números con 7 cifras en la parte entera (hasta 40*10^6 Hz).
+// TODO: cambiarle el nombre. Scalar? Scalar_type? Scalar_t?
 using __Freq_Rep = atd::Decimal<uint32_t, 2>;
 
 // Frequencies types

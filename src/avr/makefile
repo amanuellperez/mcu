@@ -13,16 +13,18 @@ INCS= avr_ADC.h		\
 	avr_time.h		\
 	avr_timer0_basic.h	\
 	avr_timer1_basic.h	\
+	avr_timer1_generic.h\
 	avr_TWI.h		\
 	avr_TWI_basic.h	\
 	avr_TWI_master.h\
 	avr_TWI_slave.h	\
 	avr_TWI_master_ioxtream.h\
-	avr_types.h		\
-	avr_UART.h		\
+	avr_types.h				\
+	avr_UART.h				\
 	avr_UART_basic.h		\
 	avr_UART_baud_rate.h	\
-	avr_UART_iostream.h	\
+	avr_UART_iostream.h		\
+	gen_types.h				\
 	mcu_cfg.h
 
 

@@ -30,9 +30,9 @@
  *    30/01/2021 v0.0
  *
  ****************************************************************************/
-#include "avr_types.h"	// TODO: realmente será mcu_types.h
+#include "gen_types.h"
 
-#include "avr_timer1_basic.h"	// TODO: eliminar al generalizar
+#include <stdint.h> // uint8_t
 
 namespace avr{
 
@@ -52,40 +52,42 @@ namespace avr{
  *  Al ser genérico no debe de depender de avr.
  *
  */
-namespace __avr{
-class Signal_generator{
+template <typename Timer_n>
+class Signal_generator_base{
 public:
-// TODO: esto son parametros de template
-    using Timer = Timer1;
-    static constexpr uint8_t pin_channel1 = Timer::OCA_pin();
-    static constexpr uint8_t pin_channel2 = Timer::OCB_pin();
+    using GT = gen::Generic_timer<Timer_n>;
+
+    static constexpr uint8_t pin_channel1 = GT::pin_channel1;
+    static constexpr uint8_t pin_channel2 = GT::pin_channel2;
 
     /// Constante que nos indica si los dos canales funcionan siempre a la
     /// misma frecuencia.
-    static constexpr bool ch1_and_ch2_same_frequency = true;
+    static constexpr bool ch1_and_ch2_same_frequency =
+						GT::ch1_and_ch2_same_frequency;
 
     /// Apagamos el generador de señales.
-    static void off() { Timer::off(); }
+    static void off() { GT::off(); }
 
-    /// Apaga el channel 1.
-    static void ch1_off()
-    { Timer::pin_A_disconnected(); }
 
-    /// Apaga el channel 2.
-    static void ch2_off()
-    { Timer::pin_B_disconnected(); }
-
+protected:
+    // Clase de implementación.
+    Signal_generator_base() {}
 
 };
-
-}// namespace __avr
 
 
 /***************************************************************************
  *			Square_wave_generator
  ***************************************************************************/
-class Square_wave_generator: public __avr::Signal_generator{
+template <typename Timer_n>
+class Square_wave_generator: public Signal_generator_base<Timer_n>{
 public:
+    using GT           = gen::Generic_timer<Timer_n>;
+    using counter_type = typename GT::counter_type;
+    using Microsecond  = typename GT::Microsecond;
+    using Hertz	       = typename GT::Hertz;
+    using Scalar       = typename GT::Scalar;
+
     /// Define la frecuencia que se genera en ch1 y ch2
     static void frequency(const Hertz& freq_sq);
 
@@ -104,64 +106,83 @@ public:
 
 // square_wave
 // -----------
-    /// Enciende el channel 1.
+    // Turn on/off
     static void ch1_on();
+    static void ch1_off();
 
-    /// Enciende el channel 2. 
     static void ch2_on();
+    static void ch2_off();
 };
 
 
-/// Define la frecuencia que se genera en ch1 y ch2
-inline void Square_wave_generator::frequency(const Hertz& freq_sq)
-{
-    Hertz::Scalar two = 2;
-    auto top = (Timer::clock_frequency() / (two*freq_sq)) - 1ul;
-    Timer::input_capture_register(atd::to_integer<Timer::counter_type>(top));
+/// Encendemos el generador de señales
+template <typename T>
+template<uint16_t period>
+inline void Square_wave_generator<T>::on() 
+{ 
+    GT::template on<period>();
+    GT::mode_square_wave();
 }
+
+
+/// Define la frecuencia que se genera en ch1 y ch2
+template <typename T>
+inline void Square_wave_generator<T>::frequency(const Hertz& freq_sq)
+{
+    Scalar two = 2;
+    auto top = (GT::clock_frequency() / (two*freq_sq)) - 1ul;
+    GT::square_wave_top(top);
+}
+
 
 /// Frecuencia que genera (en caso de que esté encendido y funcionando).
-inline Hertz Square_wave_generator::frequency()
+template <typename T>
+inline Square_wave_generator<T>::Hertz Square_wave_generator<T>::frequency()
 {
-    auto top = Timer::input_capture_register();
-    return Timer::clock_frequency() / Hertz::Rep{2*(1ul + top)};
+    auto top = GT::square_wave_top();
+    return GT::clock_frequency() / Scalar{2*(1ul + top)};
 }
 
-inline Hertz Square_wave_generator::max_frequency()
+template <typename T>
+inline Square_wave_generator<T>::Hertz Square_wave_generator<T>::max_frequency()
 {
-    return Timer::clock_frequency() *
-	   Hertz::Rep{2 * (1ul + sizeof(Timer::counter_type))};
-}
-
-
-/// Encendemos el generador de señales
-template<uint16_t period>
-inline void Square_wave_generator::on() 
-{ 
-    Timer::template on<period>();
-    Timer::mode_CTC_top_ICR1();
+    return GT::clock_frequency() * Scalar{2 * (1ul + sizeof(counter_type))};
 }
 
 
 // square_wave
 // -----------
-/// Enciende el channel 1.
-inline void Square_wave_generator::ch1_on()
-{ Timer::CTC_pin_A_toggle_on_compare_match(); }
+template <typename T>
+inline void Square_wave_generator<T>::ch1_on()
+{ GT::square_wave_ch1_on(); }
+
+template <typename T>
+inline void Square_wave_generator<T>::ch1_off()
+{ GT::square_wave_ch1_off(); }
 
 
-/// Enciende el channel 2. 
-inline void Square_wave_generator::ch2_on()
-{ Timer::CTC_pin_B_toggle_on_compare_match(); }
+template <typename T>
+inline void Square_wave_generator<T>::ch2_on()
+{ GT::square_wave_ch2_on(); }
 
+template <typename T>
+inline void Square_wave_generator<T>::ch2_off()
+{ GT::square_wave_ch2_off(); }
 
 
 
 /***************************************************************************
  *				PWM_generator
  ***************************************************************************/
-class PWM_generator : public __avr::Signal_generator{
+template <typename Timer_n>
+class PWM_generator : public Signal_generator_base<Timer_n>{
 public:
+    using GT           = gen::Generic_timer<Timer_n>;
+    using counter_type = typename GT::counter_type;
+    using Microsecond  = typename GT::Microsecond;
+    using Hertz	       = typename GT::Hertz;
+    using Scalar       = typename GT::Scalar;
+
     enum class Mode{
 	inverting, non_inverting
     };
@@ -191,11 +212,13 @@ public:
 // ------------------------------------------------------------
     static void ch1_non_inverting_mode();
     static void ch1_inverting_mode();
-    static void ch1_mode(Mode mode);
+    static void ch1_on(Mode mode);
+    static void ch1_off();
 
     static void ch2_non_inverting_mode();
     static void ch2_inverting_mode();
-    static void ch2_mode(Mode mode);
+    static void ch2_on(Mode mode);
+    static void ch2_off();
 
     /// Define el duty_cycle como tanto por cien.
     /// Ejemplo: ch1_duty_cycle(30); => duty_cycle = 30%
@@ -227,142 +250,172 @@ public:
     static void ch2_on(const Microsecond duty_cycle,
                        Mode mode = Mode::non_inverting);
 
+
+
 };
 
 
+/// Encendemos el generador de señales
+template <typename T>
+template<uint16_t period>
+inline void PWM_generator<T>::on() 
+{
+    GT::mode_PWM_mode();
+    GT::template on<period>();
+}
 
 
 
 // OJO: es diferente de la de Square_wave_generator, por culpa del 2*
-inline void PWM_generator::frequency(const Hertz& freq_sq)
+template <typename T>
+inline void PWM_generator<T>::frequency(const Hertz& freq_sq)
 {
-    auto top = (Timer::clock_frequency() / freq_sq) - 1ul;
-    Timer::input_capture_register(atd::to_integer<Timer::counter_type>(top));
+    auto top = (GT::clock_frequency() / freq_sq) - 1ul;
+    GT::PWM_top(top);
 }
 
 /// Frecuencia que genera (en caso de que esté encendido y funcionando).
-inline Hertz PWM_generator::frequency()
+template <typename T>
+inline PWM_generator<T>::Hertz PWM_generator<T>::frequency()
 {
-    auto top = Timer::input_capture_register();
-    return Timer::clock_frequency() / Hertz::Rep{1ul + top};
+    auto top = GT::PWM_top();
+    return GT::clock_frequency() / Scalar{1ul + top};
 }
 
 /// Define el periodo a generar de la señal generada en ch1 y ch2.
-inline void PWM_generator::period(const Microsecond& T_s)
+template <typename T>
+inline void PWM_generator<T>::period(const Microsecond& T_s)
 {
-    auto top = (T_s / Timer::clock_period()) - 1ul;
-    Timer::input_capture_register(atd::to_integer<Timer::counter_type>(top));
+    auto top = (T_s / GT::clock_period()) - 1ul;
+    GT::PWM_top(top);
 }
 
-inline Microsecond PWM_generator::period()
+template <typename Timer_n>
+inline PWM_generator<Timer_n>::Microsecond PWM_generator<Timer_n>::period()
 {
-    auto top = Timer::input_capture_register();
-    uint32_t T = (top + 1) * Timer::clock_period_in_us();
+    auto top = GT::PWM_top();
+    Microsecond T = (top + 1) * GT::clock_period();
 
-    return Microsecond{T};
+    return T;
 }
 
 
-/// Encendemos el generador de señales
-template<uint16_t period>
-inline void PWM_generator::on() 
-{
-    Timer::mode_fast_PWM_top_ICR1();
-    Timer::template on<period>();
-}
 
 
 // modos de funcionamiento
 // -----------------------
-inline void PWM_generator::ch1_non_inverting_mode()
-{ Timer::PWM_pin_A_non_inverting_mode();}
+template <typename T>
+inline void PWM_generator<T>::ch1_non_inverting_mode()
+{ GT::PWM_ch1_non_inverting_mode();}
 
-inline void PWM_generator::ch1_inverting_mode()
-{ Timer:: PWM_pin_A_inverting_mode();}
+template <typename T>
+inline void PWM_generator<T>::ch1_inverting_mode()
+{ GT::PWM_ch1_inverting_mode();}
 
-inline void PWM_generator::ch2_non_inverting_mode()
-{ Timer::PWM_pin_B_non_inverting_mode();}
+template <typename T>
+inline void PWM_generator<T>::ch2_non_inverting_mode()
+{ GT::PWM_ch2_non_inverting_mode();}
 
-inline void PWM_generator::ch2_inverting_mode()
-{ Timer::PWM_pin_B_inverting_mode();}
+template <typename T>
+inline void PWM_generator<T>::ch2_inverting_mode()
+{ GT::PWM_ch2_inverting_mode();}
 
-inline void PWM_generator::ch1_mode(Mode mode)
+template <typename T>
+inline void PWM_generator<T>::ch1_on(Mode mode)
 {
     if (mode == Mode::non_inverting)
-	Timer::PWM_pin_A_non_inverting_mode();
+	ch1_non_inverting_mode();
     else 
-	Timer::PWM_pin_A_inverting_mode();
+	ch1_inverting_mode();
 
 }
 
-inline void PWM_generator::ch2_mode(Mode mode)
+template <typename T>
+inline void PWM_generator<T>::ch2_on(Mode mode)
 {
     if (mode == Mode::non_inverting)
-	Timer::PWM_pin_B_non_inverting_mode();
+	ch2_non_inverting_mode();
     else 
-	Timer::PWM_pin_B_inverting_mode();
+	ch2_inverting_mode();
 }
+
+template <typename T>
+inline void PWM_generator<T>::ch1_off()
+{ GT::PWM_ch1_off(); }
+
+template <typename T>
+inline void PWM_generator<T>::ch2_off()
+{ GT::PWM_ch2_off(); }
+
 
 
 // duty_cycle
 // ----------
-inline void PWM_generator::ch1_duty_cycle(uint8_t duty_cycle)
+template <typename T>
+inline void PWM_generator<T>::ch1_duty_cycle(uint8_t duty_cycle)
 {// uint32_t clave, para que no haya overflow!!!
-    uint32_t ocr1a = Timer::input_capture_register();
+    uint32_t ocr1a = GT::PWM_top();
     ocr1a = (duty_cycle*ocr1a)/100;
-    Timer::output_compare_register_A(ocr1a);
+    GT::PWM_ch1_duty_top(ocr1a);
 }
 
 
-inline void PWM_generator::ch1_duty_cycle(const Microsecond duty_cycle)
+template <typename T>
+inline void PWM_generator<T>::ch1_duty_cycle(const Microsecond duty_cycle)
 {
-    auto ocr1a = duty_cycle / Timer::clock_period();
-    Timer::output_compare_register_A(atd::to_integer(ocr1a));
+    auto ocr1a = duty_cycle / GT::clock_period();
+    GT::PWM_ch1_duty_top(ocr1a);
 }
 
 
-inline void PWM_generator::ch2_duty_cycle(uint8_t duty_cycle)
+template <typename T>
+inline void PWM_generator<T>::ch2_duty_cycle(uint8_t duty_cycle)
 {// uint32_t clave, para que no haya overflow!!!
-    uint32_t ocr1b = Timer::input_capture_register();
+    uint32_t ocr1b = GT::PWM_top();
     ocr1b = (duty_cycle*ocr1b)/100;
-    Timer::output_compare_register_B(ocr1b);
+    GT::PWM_ch2_duty_top(ocr1b);
 }
 
 
-inline void PWM_generator::ch2_duty_cycle(const Microsecond duty_cycle)
+template <typename T>
+inline void PWM_generator<T>::ch2_duty_cycle(const Microsecond duty_cycle)
 {
-    auto ocr1b = duty_cycle / Timer::clock_period();
-    Timer::output_compare_register_B(atd::to_integer(ocr1b));
+    auto ocr1b = duty_cycle / GT::clock_period();
+    GT::PWM_ch2_duty_top(ocr1b);
 }
 
 
 // syntax sugar
 // ------------
-inline void PWM_generator::ch1_on(uint8_t duty_cycle, Mode mode)
+template <typename T>
+inline void PWM_generator<T>::ch1_on(uint8_t duty_cycle, Mode mode)
 {
     ch1_duty_cycle(duty_cycle);
-    ch1_mode(mode);
+    ch1_on(mode);
 }
 
 
-inline void PWM_generator::ch1_on(const Microsecond duty_cycle, Mode mode)
+template <typename T>
+inline void PWM_generator<T>::ch1_on(const Microsecond duty_cycle, Mode mode)
 {
     ch1_duty_cycle(duty_cycle);
-    ch1_mode(mode);
+    ch1_on(mode);
 }
 
 
-inline void PWM_generator::ch2_on(uint8_t duty_cycle, Mode mode)
+template <typename T>
+inline void PWM_generator<T>::ch2_on(uint8_t duty_cycle, Mode mode)
 {
     ch2_duty_cycle(duty_cycle);
-    ch2_mode(mode);
+    ch2_on(mode);
 }   
 
 
-inline void PWM_generator::ch2_on(const Microsecond duty_cycle, Mode mode)
+template <typename T>
+inline void PWM_generator<T>::ch2_on(const Microsecond duty_cycle, Mode mode)
 {
     ch2_duty_cycle(duty_cycle);
-    ch2_mode(mode);
+    ch2_on(mode);
 }
 
 

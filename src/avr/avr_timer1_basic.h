@@ -757,10 +757,10 @@ inline void Timer1::CTC_pin_B_set_on_compare_match()
     Pin<OCB_pin()>::as_output();
 }
 
+}// namespace avr
 
 
 
-}// namespace
 
 #endif
 
