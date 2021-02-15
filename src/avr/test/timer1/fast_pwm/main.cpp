@@ -141,7 +141,7 @@ uint16_t select_period()
 }
 
 
-void oca_menu(uint16_t& ocr1a)
+void oca_menu()
 {
     avr::UART_iostream uart;
 
@@ -150,17 +150,18 @@ void oca_menu(uint16_t& ocr1a)
 	    "[d]isconnect\n"
 	    "[i]nverting mode\n"
 	    "[n]on inverting mode\n"
-	    "[t]oggle on compare match (NO FUNCIONA?? )\n";
+	    "[t]oggle on compare match (Solo para modo top_OCR1A)\n";
 
 
+    uint16_t tmp{};
     char c{};
     uart >> c;
     switch(c){
 	case 'c':
-	    uart << "ocr1a = ";
-	    uart >> ocr1a;
-	    uart << ocr1a << '\n';
-	    Timer::output_compare_register_A(ocr1a);
+	    uart << "OCR1A = ";
+	    uart >> tmp;
+	    uart << tmp << '\n';
+	    Timer::output_compare_register_A(tmp);
 	    break;
 
 	case 'd':
@@ -178,11 +179,12 @@ void oca_menu(uint16_t& ocr1a)
 	case 't': 
 	    Timer::fast_PWM_pin_A_toggle_on_compare_match();
 	    break;
+
     }
 }
 
 
-void ocb_menu(uint16_t& ocr1b)
+void ocb_menu()
 {
     avr::UART_iostream uart;
 
@@ -194,14 +196,15 @@ void ocb_menu(uint16_t& ocr1b)
 //	    "[t]oggle on compare match\n";
 
 
+    uint16_t tmp{};
     char c{};
     uart >> c;
     switch(c){
 	case 'c':
-	    uart << "ocr1b = ";
-	    uart >> ocr1b;
-	    uart << ocr1b << '\n';
-	    Timer::output_compare_register_B(ocr1b);
+	    uart << "OCR1B = ";
+	    uart >> tmp;
+	    uart << tmp << '\n';
+	    Timer::output_compare_register_B(tmp);
 	    break;
 	case 'd':
 	    Timer::pin_B_disconnected();
@@ -221,6 +224,100 @@ void ocb_menu(uint16_t& ocr1b)
     }
 }
 
+enum class Mode{
+    top_0x00FF, top_0x01FF, top_0x03FF, top_ICR1, top_OCR1A
+};
+
+Mode mode_menu()
+{
+    avr::UART_iostream uart;
+    uart << "Select mode:\n"
+	    "[1] top 0x00FF\n"
+	    "[2] top 0x01FF\n"
+	    "[3] top 0x03FF\n"
+	    "[4] top ICR1\n"
+	    "[5] top OCR1A\n";
+
+    char c{};
+    uart >> c;
+    switch (c){
+	case '1': 
+	    Timer::mode_fast_PWM_top_0x00FF();
+	    return Mode::top_0x00FF;
+
+	case '2': 
+	    Timer::mode_fast_PWM_top_0x01FF();
+	    return Mode::top_0x01FF;
+
+	case '3': 
+	    Timer::mode_fast_PWM_top_0x03FF();
+	    return Mode::top_0x03FF;
+
+	case '4': 
+	    Timer::mode_fast_PWM_top_ICR1();
+	    return Mode::top_ICR1;
+
+	case '5': 
+	    Timer::mode_fast_PWM_top_OCR1A();
+	    return Mode::top_OCR1A;
+    }
+
+    return Mode::top_ICR1;
+}
+
+
+void print(Mode mode)
+{
+    avr::UART_iostream uart;
+
+    avr::Microsecond period;
+    avr::Microsecond T_a;
+    avr::Microsecond T_b;
+
+    switch(mode){
+	case Mode::top_0x00FF:
+	    uart << "\nmode = top_0x00FF";
+	    period = (uint32_t{0x00FF} + 1)* Timer::clock_period();
+	    T_a= Timer::output_compare_register_A()* Timer::clock_period();
+	    T_b= Timer::output_compare_register_B()* Timer::clock_period();
+	    break;
+
+	case Mode::top_0x01FF:
+	    uart << "\nmode = top_0x01FF";
+	    period = (uint32_t{0x01FF} + 1)* Timer::clock_period();
+	    T_a= Timer::output_compare_register_A()* Timer::clock_period();
+	    T_b= Timer::output_compare_register_B()* Timer::clock_period();
+	    break;
+
+	case Mode::top_0x03FF:
+	    uart << "\nmode = top_0x03FF";
+	    period = (uint32_t{0x03FF} + 1)* Timer::clock_period();
+	    T_a= Timer::output_compare_register_A()* Timer::clock_period();
+	    T_b= Timer::output_compare_register_B()* Timer::clock_period();
+	    break;
+
+	case Mode::top_ICR1:
+	    uart << "\nmode = top_ICR1";
+	    period = (Timer::input_capture_register() + 1)* Timer::clock_period();
+	    T_a= Timer::output_compare_register_A()* Timer::clock_period();
+	    T_b= Timer::output_compare_register_B()* Timer::clock_period();
+	    break;
+
+	case Mode::top_OCR1A:
+	    uart << "\nmode = top_OCR1A";
+	    uart << "\npin B desconectado!!! Señal solo se ve en pin A\n";
+	    period = (Timer::output_compare_register_A() + 1)* Timer::clock_period();
+	    T_b= Timer::output_compare_register_B()* Timer::clock_period();
+	    T_a = avr::Microsecond{0};
+	    break;
+    }
+
+    uart << "\nA ver en el osciloscopio:\n"
+	    "      periodo = " << period << " us\n"
+	    "      T_a     = " << T_a << " us\n"
+	    "      T_b     = " << T_b << " us\n";
+}
+
 int main()
 {
 // init_uart()
@@ -229,16 +326,16 @@ int main()
     uart.on();
 
 // init_timer()
+    Mode mode = Mode::top_ICR1;
+
     uint16_t period_in_us = 64;
     Timer::counter_type top = 1000;
-    uint16_t ocr1a = 100;
-    uint16_t ocr1b = 300;
 
     // configuración inicial, para que se vea algo en el osciloscopio
     Timer::mode_fast_PWM_top_ICR1();
-    Timer::input_capture_register(top);
-    Timer::output_compare_register_A(ocr1a);
-    Timer::output_compare_register_B(ocr1b);
+    Timer::input_capture_register(1000);
+    Timer::output_compare_register_A(500);
+    Timer::output_compare_register_B(200);
     Timer::PWM_pin_A_non_inverting_mode();
     Timer::PWM_pin_B_inverting_mode();
     timer_on(period_in_us);
@@ -250,29 +347,25 @@ int main()
          << '\n';
 
     while(1){
-        uint32_t period = (uint32_t{top} + 1)* uint32_t{period_in_us};
-        uint32_t T_a= (uint32_t{ocr1a})* uint32_t{period_in_us};
-        uint32_t T_b= (uint32_t{ocr1b})* uint32_t{period_in_us};
 	uart << "\n\nState"
-	          "\n-----"
-		    "\ntop = " << top <<
-		    "\nocra = " << ocr1a << 
-		    "\nocrb = " << ocr1b << 
-		    "\nperiod_in_us                = " << period_in_us <<
-		    "\nTimer::clock_period_in_us() = " << Timer::clock_period() <<
-                "\nA ver en el osciloscopio: " <<
-		period << " us +- error ((top + 1)*period_in_us)\n"
-		"OCA cambia en " << T_a << " us\n"
-		"OCB cambia en " << T_b << " us\n";
+	          "\n-----";
+	print(mode);
+
+	uart <<  "\nICR1 = " << Timer::input_capture_register() <<
+		 "\nOCRA = " << Timer::output_compare_register_A() << 
+		 "\nOCRB = " << Timer::output_compare_register_B() << 
+		 "\nTimer::clock_period() = " << Timer::clock_period() << '\n';
 
 	uart << "\nMenu\n"
 	          "----\n"
                 "o[f]f\n"
 		"[o]n\n"
                 "[p]eriod_in_us (apaga el timer. Llamar a on)\n"
-                "[t]op (apaga el timer. Llamar a on)\n"
+		"[m]ode\n"
 		"OC[A] menu\n"
-		"OC[B] menu\n";
+		"OC[B] menu\n"
+		"[I]CR1 select\n";
+
 
         char c{};
 	uart >> c;
@@ -287,12 +380,17 @@ int main()
 
 	    case 'a':
 	    case 'A':
-		oca_menu(ocr1a);
+		oca_menu();
 		break;
 
 	    case 'b':
 	    case 'B':
-		ocb_menu(ocr1b);
+		ocb_menu();
+		break;
+
+	    case 'm':
+	    case 'M':
+		mode = mode_menu();
 		break;
 
 	    case 'p':
@@ -301,11 +399,12 @@ int main()
 		timer_on(period_in_us);
 		break;
 
-	    case 't':
-		uart << "\ntop (max " << Timer::max() << ") = ";
+	    case 'i':
+	    case 'I':
+		uart << "\nICR1 (max " << Timer::max() << ") = ";
 		uart >> top;
 		uart << top << '\n';
-		Timer::output_compare_register_A(top);
+		Timer::input_capture_register(top);
 		break;
 
 	    default:

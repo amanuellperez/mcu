@@ -262,9 +262,9 @@ int main()
     while(1){
 	avr::Microsecond period{};
 	if (mode == Mode::top_0xFF)
-	    period = Timer::clock_period() * 0xFF;
+	    period = Timer::clock_period() * (0xFF + 1);
 	else 
-	    period = Timer::clock_period() * Timer::output_compare_register_A();
+	    period = Timer::clock_period() * (Timer::output_compare_register_A() + 1);
 
 	uart << "\n\nState\n"
 		    "-----"
