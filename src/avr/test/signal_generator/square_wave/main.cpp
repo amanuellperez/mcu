@@ -25,6 +25,35 @@
 using SW_gen = avr::Square_wave_generator<avr::Timer1>;
 
 
+
+void print(const avr::Microsecond& t)
+{
+    avr::UART_iostream uart;
+    if (t < avr::Microsecond{1000})
+	uart << t << " us";
+
+    else if (t < avr::Millisecond{1000})
+	uart << avr::Millisecond{t} << " ms";
+
+    else 
+	uart << avr::Second{t} << " s";
+
+}
+
+void print(const avr::Hertz& f)
+{
+    avr::UART_iostream uart;
+    if (f < avr::Hertz{1000})
+	uart << f << " Hz";
+
+    else if (f < avr::KiloHertz{1000})
+	uart << avr::KiloHertz{f} << " KHz";
+
+    else 
+	uart << avr::MegaHertz{f} << " MHz";
+}
+
+
 struct Main{
     Main();
 
@@ -161,23 +190,31 @@ void Main::run()
                 "---------------------\n"
             "Connect oscilloscope to pins:\n"
             "channel 1 = pin " << uint16_t{SW_gen::pin_channel1} << '\n'
-         << "channel 2 = pin " << uint16_t{SW_gen::pin_channel2} << '\n';
+         << "channel 2 = pin " << uint16_t{SW_gen::pin_channel2} 
+	 << "\n\nPress a key to continue\n";
+
+	char c{};
+	uart >> c;
 
     while(1){
 	uart << "\n\nState"
 	          "\n-----"
-		"\ntimer period (wanted) = " << period_in_us_ << " us"
-		"\ntimer period (real)   = " << avr::Timer1::clock_period() << " us"
-		"\ntimer frequency (real) = " << avr::Timer1::clock_frequency() << " Hz"
-		"\nGenerated signal:"
-	        "\n    frequency (wanted) = " << freq_ << " Hz"
-	        "\n    frequency (real)   = " << SW_gen::frequency() << " Hz"
-		"\nch1 on = " << (ch1_on_? "yes": "no") 
-	     << "\nch2 on = " << (ch2_on_? "yes": "no") 
+		"\nTimer: period  = ";
+	print(avr::Timer1::clock_period());
+
+	uart << "; frequency  = ";
+	print(avr::Timer1::clock_frequency());
+
+	uart << "\n\nGenerated signal:"
+	        "\n    frequency  = ";
+	print(SW_gen::frequency());
+
+	uart << "\n    ch1 " << (ch1_on_? "on": "off") 
+	     << "\n    ch2 " << (ch2_on_? "on": "off") 
 	     << '\n';
 
 	uart << "\n\nMenu:\n"
-	        "[p]eriod\n"
+	        "Timer [p]eriod\n"
 	        "o[f]f\n"
 		"[o]n\n"
 		"[s]elect frequency\n"
@@ -185,7 +222,6 @@ void Main::run()
 		"ch[2] menu\n";
 
 	uint32_t num;
-	char c{};
 	uart >> c;
 	switch(c){
 	    case 'p':
@@ -202,7 +238,7 @@ void Main::run()
 		break;
 
 	    case 's': 
-		uart << "\nfreq (in Hz, máx " << SW_gen::max_frequency() << ") = ";
+		uart << "\nfreq (in Hz, máx " << SW_gen::max_frequency() << " no mas de 2^16 = 65500) = ";
 		uart >> num;
 		uart << num << '\n';
 		freq_ = avr::Hertz{num};

@@ -45,7 +45,13 @@ public:
 			    // y Hertz. ¿qué nombre común usar? ponerlo en
 			    // avr_types.h
 
-// pines 
+    enum class Mode {
+        fix_0x00FF, fix_0x01FF, fix_0x03FF,
+        only_channel2,
+        both_channels
+    };
+
+    // pines 
     static constexpr uint8_t pin_channel1 = Timer::OCA_pin();
     static constexpr uint8_t pin_channel2 = Timer::OCB_pin();
 
@@ -97,28 +103,132 @@ public:
 
 // PWM mode
 // --------
-// En este modo el timer cuenta desde 0 hasta PWM_top. 
-// El pin de salida cambiará cuando alcance duty_top y PWM_top.
-// El periodo de la señal generada será PWM_top, mientras que el duty_cycle
-// será duty_top / PWM_top.
-    static void mode_PWM_mode() { Timer::mode_fast_PWM_top_ICR1();}
+    template <uint32_t top>
+    static void PWM_mode_fix_frequency()
+    {
+	if constexpr (top == 0x00FF){
+	    Timer::mode_fast_PWM_top_0x00FF();
+	    mode_ = Mode::fix_0x00FF;
+	}
+
+	else if constexpr (top == 0x01FF){
+	    Timer::mode_fast_PWM_top_0x01FF();
+	    mode_ = Mode::fix_0x01FF;
+	}
+
+	else if constexpr (top == 0x03FF){
+	    Timer::mode_fast_PWM_top_0x03FF();
+	    mode_ = Mode::fix_0x03FF;
+	}
+
+	else
+            static_assert(atd::always_false_v<int>,
+                          "Incorrect fix_frequency. Possible values: 0x00FF, "
+                          "0x01FF or 0x03FF");
+    }
+
+
+    static void PWM_mode_variable_pwm_only_channel2()
+    { 
+	Timer::mode_fast_PWM_top_OCR1A();
+	mode_ = Mode::only_channel2;
+    }
+
+    static void PWM_mode_variable_pwm_both_channels()
+    { 
+	Timer::mode_fast_PWM_top_ICR1();
+	mode_ = Mode::both_channels;
+    }
+
 
     // configuración
     static void PWM_top(Scalar top)
-    { Timer::input_capture_register(atd::to_integer<counter_type>(top));}
+    { 
+	switch(mode_){
+	    case Mode::only_channel2:
+                Timer::output_compare_register_A(
+					atd::to_integer<counter_type>(top));
+                break;
+
+	    case Mode::both_channels:
+                Timer::input_capture_register(
+					atd::to_integer<counter_type>(top));
+                break;
+
+	    case Mode::fix_0x00FF:
+	    case Mode::fix_0x01FF:
+	    case Mode::fix_0x03FF:
+		// (???) el cliente no debería de llamar nunca a PWM_top si ha
+		//       esta en este modo. Sería ideal poder informar al
+		//       usuario de la clase de que se está confundiendo, pero
+		//       esta función es dinámica. ¿cómo dar un mensaje de
+		//       error? ¿habilitar trazas? (no parece buena idea,
+		//       podría crecer mucho el tamaño del programa).
+		//       Otra forma podría ser con un errno(). Se fija el
+		//       errno aquí y el usuario cuando detecte un error que
+		//       lo trace él.
+		break;
+	}
+    }
+
 
     static counter_type PWM_top() 
-    {return Timer::input_capture_register();}
+    {
+	switch(mode_){
+	    case Mode::only_channel2:
+		return Timer::output_compare_register_A();
+
+	    case Mode::both_channels:
+		return Timer::input_capture_register();
+
+	    case Mode::fix_0x00FF:
+		return counter_type{0x00FF};
+
+	    case Mode::fix_0x01FF:
+		return counter_type{0x01FF};
+
+	    case Mode::fix_0x03FF:
+		return counter_type{0x03FF};
+	}
+
+	return 0;
+    }
 
     static void PWM_ch1_duty_top(Scalar duty_top)
     {
-        Timer::output_compare_register_A(
+	switch(mode_){
+	    case Mode::both_channels:
+	    case Mode::fix_0x00FF:
+	    case Mode::fix_0x01FF:
+	    case Mode::fix_0x03FF:
+		Timer::output_compare_register_A(
 				    atd::to_integer<counter_type>(duty_top));
+		break;
+
+	    case Mode::only_channel2:
+		// ERROR: en only_channel2 no se puede fijar el OCRA
+		break;
+	}
     }
 
     static counter_type PWM_ch1_duty_top()
-    {return Timer::output_compare_register_A();}
+    {
+	switch(mode_){
+	    case Mode::both_channels:
+	    case Mode::fix_0x00FF:
+	    case Mode::fix_0x01FF:
+	    case Mode::fix_0x03FF:
+		return Timer::output_compare_register_A();
 
+	    case Mode::only_channel2:
+		// ERROR: en only_channel2 no tiene sentido duty_top
+		return 0;
+	}
+
+	return 0;
+    }
+
+    // En todos los modos de funcionamiento OCRB contiene el duty_top
     static void PWM_ch2_duty_top(Scalar duty_top)
     {
         Timer::output_compare_register_B(
@@ -149,6 +259,8 @@ public:
     { Timer::pin_B_disconnected(); }
 
 
+private:
+    inline static Mode mode_;
 
 };
 

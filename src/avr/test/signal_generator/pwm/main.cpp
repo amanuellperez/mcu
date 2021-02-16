@@ -31,46 +31,122 @@ struct Main{
     void run();
 
     void on();
+    void select_mode();
     void ch1_menu();
     void ch2_menu();
 
     static uint16_t select_period_1MHz();
     static void timer_on_1MHz(uint16_t period_in_us);
 
+    void print_mode();
+
 // data
     avr::Hertz freq_ {100};
     bool ch1_on_ = false;
     bool ch2_on_ = false;
     uint16_t period_in_us_ = 1;
+    enum class Mode { fix_frequency, only_channel2, both_channels, none};
+    Mode mode_ = Mode::none;
 };
+
+void Main::print_mode()
+{
+    avr::UART_iostream uart;
+    switch(mode_){
+	case Mode::fix_frequency:
+	    uart << "fix_frequency";
+	    break;
+
+	case Mode::only_channel2:
+	    uart << "only_channel2";
+	    break;
+
+	case Mode::both_channels:
+	    uart << "both_channels";
+	    break;
+
+	case Mode::none:
+	    uart << "none";
+	    break;
+    }
+}
+
+void Main::select_mode()
+{
+    avr::UART_iostream uart;
+    uart << "\n\nMode:\n"
+	    "[0] - fix 0x00FF\n"
+	    "[1] - fix 0x01FF\n"
+	    "[3] - fix 0x03FF\n"
+	    "[b]oth channels\n"
+	    "[o]nly channel 2\n";
+
+    char c{};
+    uart >> c;
+    switch(c){
+	case '0':
+	    PW_gen::mode_fix_frequency<0x00FF>();
+	    mode_ = Mode::fix_frequency;
+	    break;
+
+	case '1':
+	    PW_gen::mode_fix_frequency<0x01FF>();
+	    mode_ = Mode::fix_frequency;
+	    break;
+
+	case '3':
+	    PW_gen::mode_fix_frequency<0x03FF>();
+	    mode_ = Mode::fix_frequency;
+	    break;
+
+	case 'b':
+	    PW_gen::mode_variable_pwm_both_channels();
+	    mode_ = Mode::both_channels;
+	    break;
+
+	case 'o':
+	    PW_gen::mode_variable_pwm_only_channel2();
+	    mode_ = Mode::only_channel2;
+	    break;
+    }
+
+}
 
 
 void Main::ch1_menu()
 {
     avr::UART_iostream uart;
     uart << "\n\nchannel 1:\n"
-	    "[i]nverting mode\n"
-	    "[n]on inverting mode\n"
-	    "[o]n\n"
+	    "[p] - duty cycle (as %)\n"
+	    "[m] - duty cycle in microseconds\n"
+	    "[i]nverting mode (turn on ch1)\n"
+	    "[n]on inverting mode (turn on ch1)\n"
 	    "o[f]f\n";
 
-    uint16_t duty_cycle{};
+    uint16_t tmp{};
     char c{};
     uart >> c;
     switch(c){
+	case 'p':
+	    uart << "duty_cycle  (0 to 100) = ";
+	    uart >> tmp;
+	    PW_gen::ch1_duty_cycle(tmp);
+	    break;
+
+	case 'm':
+	    uart << "duty_cycle  (in microseconds) = ";
+	    uart >> tmp;
+	    PW_gen::ch1_duty_cycle(PW_gen::Microsecond{tmp});
+	    break;
+
+
 	case 'i':
 	    PW_gen::ch1_inverting_mode();
+	    ch1_on_ = true;
 	    break;
 
 	case 'n':
 	    PW_gen::ch1_non_inverting_mode();
-	    break;
-
-	case 'o':
-	    uart << "duty_cycle = ";
-	    uart >> duty_cycle;
-	    uart << duty_cycle << " %\n";
-	    PW_gen::ch1_on(duty_cycle);
 	    ch1_on_ = true;
 	    break;
 
@@ -89,28 +165,35 @@ void Main::ch2_menu()
 {
     avr::UART_iostream uart;
     uart << "\n\nchannel 2:\n"
+	    "[p] - duty cycle (as %)\n"
+	    "[m] - duty cycle in microseconds\n"
 	    "[i]nverting mode\n"
 	    "[n]on inverting mode\n"
-	    "[o]n\n"
 	    "o[f]f\n";
 
-    uint16_t duty_cycle{};
+    uint16_t tmp{};
     char c{};
     uart >> c;
     switch(c){
+	case 'p':
+	    uart << "duty_cycle  (0 to 100) = ";
+	    uart >> tmp;
+	    PW_gen::ch2_duty_cycle(tmp);
+	    break;
+
+	case 'm':
+	    uart << "duty_cycle  (in microseconds) = ";
+	    uart >> tmp;
+	    PW_gen::ch2_duty_cycle(PW_gen::Microsecond{tmp});
+	    break;
+
 	case 'i':
 	    PW_gen::ch2_inverting_mode();
+	    ch2_on_ = true;
 	    break;
 
 	case 'n':
 	    PW_gen::ch2_non_inverting_mode();
-	    break;
-
-	case 'o':
-	    uart << "duty_cycle = ";
-	    uart >> duty_cycle;
-	    uart << duty_cycle << " %\n";
-	    PW_gen::ch2_on(duty_cycle);
 	    ch2_on_ = true;
 	    break;
 
@@ -182,6 +265,33 @@ void debug_freq(avr::Hertz freq_sq)
 
 }
 
+void print(const avr::Microsecond& t)
+{
+    avr::UART_iostream uart;
+    if (t < avr::Microsecond{1000})
+	uart << t << " us";
+
+    else if (t < avr::Millisecond{1000})
+	uart << avr::Millisecond{t} << " ms";
+
+    else 
+	uart << avr::Second{t} << " s";
+
+}
+
+void print(const avr::Hertz& f)
+{
+    avr::UART_iostream uart;
+    if (f < avr::Hertz{1000})
+	uart << f << " Hz";
+
+    else if (f < avr::KiloHertz{1000})
+	uart << avr::KiloHertz{f} << " KHz";
+
+    else 
+	uart << avr::MegaHertz{f} << " MHz";
+}
+
 void Main::run()
 {
     avr::UART_iostream uart;
@@ -190,33 +300,48 @@ void Main::run()
                 "-------------\n"
             "Connect oscilloscope to pins:\n"
             "channel 1 = pin " << uint16_t{PW_gen::pin_channel1} << '\n'
-         << "channel 2 = pin " << uint16_t{PW_gen::pin_channel2} << '\n';
+         << "channel 2 = pin " << uint16_t{PW_gen::pin_channel2} <<
+	    "\n\nPress a key to continue\n";
+    char c{};
+    uart >> c;
 
     while(1){
 	uart << "\n\nState"
 	          "\n-----"
-		"\ntimer period (wanted) = " << period_in_us_ << " us"
-		"\ntimer period (real) = " << avr::Timer1::clock_period() << " us"
-		"\ntimer frequency (real) = " << avr::Timer1::clock_frequency() << " Hz"
-		"\nGenerated signal:"
-	        "\n    frequency (wanted) = " << freq_ << " Hz"
-	        "\n    frequency (real)   = " << PW_gen::frequency() << " Hz"
-		"\n    period    (real)   = " << avr::Millisecond{PW_gen::period()} << " ms"
-		"\nch1 on = " << (ch1_on_? "yes": "no") 
-	     << "\nch2 on = " << (ch2_on_? "yes": "no") 
-	     << '\n';
+		"\nTimer: period = ";
+	print(avr::Timer1::clock_period());
+	uart << "; frequency  = ";
+	print(avr::Timer1::clock_frequency());
 
-	uart << "\n\nMenu:\n"
+	uart << "\n\nGenerated signal:"
+		"\n    mode = ";
+	print_mode();
+	uart << "\n    frequency = ";
+	print(PW_gen::frequency());
+	uart << "; period = ";
+
+	print(PW_gen::period());
+	uart << "\n\n channel |    on/off    |    duty_cycle"
+	          "\n---------+--------------+-----------------"
+	          "\n   ch1   |     " << (ch1_on_? "on": "off") 
+	     << "       |    ";
+	print(PW_gen::ch1_duty_cycle());
+
+	uart << "\n   ch2   |     " << (ch2_on_? "on": "off") 
+	     << "       |    ";
+	print(PW_gen::ch2_duty_cycle());
+
+	uart << "\n\n\nMenu:\n"
 	        "[t]imer period\n"
 	        "o[f]f\n"
 		"[o]n\n"
-		"[s]elect signal frequency\n"
-		"select signal [p]eriod\n"
+		"[m]ode\n"
+		"[s]elect signal frequency (only mode != fix_frequency)\n"
+		"select signal [p]eriod (only mode != fix_frequency)\n"
 		"ch[1] menu\n"
 		"ch[2] menu\n";
 
 	uint32_t num;
-	char c{};
 	uart >> c;
 	switch(c){
 	    case 't':
@@ -230,6 +355,10 @@ void Main::run()
 		break;
 	    case 'o':
 		on();
+		break;
+
+	    case 'm':
+		select_mode();
 		break;
 
 	    case 'p':

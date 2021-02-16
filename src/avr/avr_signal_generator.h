@@ -37,7 +37,6 @@
 namespace avr{
 
 // TODO: este realmente es dev_signal...
-// TODO: usar Generic_timer para parametrizar este signal_generator
 
 /*!
  *  \brief  Generador de señales SF (same frequency both channels)
@@ -187,7 +186,10 @@ public:
 	inverting, non_inverting
     };
 
-    /// Encendemos el generador de señales
+    /// Encendemos el generador de señales. 
+    /// Esto es, pulsamos el botón 'on'. De momento no hemos elegido modo de
+    /// funcionamiento ni nada más. Recordar elegir modo, frecuencia, duty y
+    /// luego encender el canal.
     template<uint16_t period>
     static void on();
 
@@ -207,6 +209,22 @@ public:
     /// Periodo que genera
     static Microsecond period();
 
+// configuración
+// -------------
+    /// Generamos PWM en los dos canales. La frecuencia queda limitada a un
+    /// rango de valores suministrados por el Timer.
+    template <uint32_t top>
+    static void mode_fix_frequency();
+
+    /// Generamos PWM de cualquier frecuencia y duty_cycle, pero solo en 
+    /// el channel 2. El channel 1 desconectado. (OJO: se podía hacer un 
+    /// toggle en channel 1, implementarlo aquí ???)
+    static void mode_variable_pwm_only_channel2();
+
+    /// Generamos PWM de cualquier frecuencia y duty_cycle. Esta función no la
+    /// suministan todos los Timers.  EX: Timer0 no dispone de él.
+    static void mode_variable_pwm_both_channels();
+
 
 // modos de funcionamiento. Enciende el channel correspondiente
 // ------------------------------------------------------------
@@ -223,34 +241,13 @@ public:
     /// Define el duty_cycle como tanto por cien.
     /// Ejemplo: ch1_duty_cycle(30); => duty_cycle = 30%
     static void ch1_duty_cycle(uint8_t duty_cycle);
+    static void ch2_duty_cycle(const Microsecond& duty_cycle);
 
-    static void ch1_duty_cycle(const Microsecond duty_cycle);
-
+    // Define el duty_cycle como el número de microsegundos.
+    static void ch1_duty_cycle(const Microsecond& duty_cycle);
     static void ch2_duty_cycle(uint8_t duty_cycle);
-    static void ch2_duty_cycle(const Microsecond duty_cycle);
-
-
-// syntax sugar
-// ------------
-    /// Enciende el channel 1, generando una PWM de frecuencia `freq` y
-    /// `duty_cycle`. El duty_cycle da el tanto por cien como número entero.
-    /// Ejemplo: duty_cycle = 10, es un 10%.
-    // (RRR) ¿por qué no pasarle también la frecuencia?
-    //       Porque la frecuencia es la misma en los dos canales. Si se la
-    //       pasara aquí estaría cambiando también la del otro canal, cosa que
-    //       a lo mejor no se busca, generando errores.
-    static void ch1_on(uint8_t duty_cycle, Mode mode = Mode::non_inverting);
-
-    static void ch1_on(const Microsecond duty_cycle,
-                       Mode mode = Mode::non_inverting);
-
-    static void ch2_on(const uint8_t duty_cycle,
-                       Mode mode = Mode::non_inverting);
-
-    static void ch2_on(const Microsecond duty_cycle,
-                       Mode mode = Mode::non_inverting);
-
-
+    static Microsecond ch1_duty_cycle();
+    static Microsecond ch2_duty_cycle();
 
 };
 
@@ -260,7 +257,6 @@ template <typename T>
 template<uint16_t period>
 inline void PWM_generator<T>::on() 
 {
-    GT::mode_PWM_mode();
     GT::template on<period>();
 }
 
@@ -300,6 +296,22 @@ inline PWM_generator<Timer_n>::Microsecond PWM_generator<Timer_n>::period()
 }
 
 
+// configuración
+// -------------
+template <typename T>
+template <uint32_t top>
+inline void PWM_generator<T>::mode_fix_frequency()
+{ GT::template PWM_mode_fix_frequency<top>(); }
+
+
+template <typename T>
+inline void PWM_generator<T>::mode_variable_pwm_only_channel2()
+{ GT::PWM_mode_variable_pwm_only_channel2();}
+
+
+template <typename T>
+inline void PWM_generator<T>::mode_variable_pwm_both_channels()
+{ GT::PWM_mode_variable_pwm_both_channels();}
 
 
 // modos de funcionamiento
@@ -361,12 +373,15 @@ inline void PWM_generator<T>::ch1_duty_cycle(uint8_t duty_cycle)
 
 
 template <typename T>
-inline void PWM_generator<T>::ch1_duty_cycle(const Microsecond duty_cycle)
+inline void PWM_generator<T>::ch1_duty_cycle(const Microsecond& duty_cycle)
 {
     auto ocr1a = duty_cycle / GT::clock_period();
     GT::PWM_ch1_duty_top(ocr1a);
 }
 
+template <typename T>
+inline PWM_generator<T>::Microsecond PWM_generator<T>::ch1_duty_cycle()
+{ return GT::PWM_ch1_duty_top() * GT::clock_period(); }
 
 template <typename T>
 inline void PWM_generator<T>::ch2_duty_cycle(uint8_t duty_cycle)
@@ -378,46 +393,15 @@ inline void PWM_generator<T>::ch2_duty_cycle(uint8_t duty_cycle)
 
 
 template <typename T>
-inline void PWM_generator<T>::ch2_duty_cycle(const Microsecond duty_cycle)
+inline void PWM_generator<T>::ch2_duty_cycle(const Microsecond& duty_cycle)
 {
     auto ocr1b = duty_cycle / GT::clock_period();
     GT::PWM_ch2_duty_top(ocr1b);
 }
 
-
-// syntax sugar
-// ------------
 template <typename T>
-inline void PWM_generator<T>::ch1_on(uint8_t duty_cycle, Mode mode)
-{
-    ch1_duty_cycle(duty_cycle);
-    ch1_on(mode);
-}
-
-
-template <typename T>
-inline void PWM_generator<T>::ch1_on(const Microsecond duty_cycle, Mode mode)
-{
-    ch1_duty_cycle(duty_cycle);
-    ch1_on(mode);
-}
-
-
-template <typename T>
-inline void PWM_generator<T>::ch2_on(uint8_t duty_cycle, Mode mode)
-{
-    ch2_duty_cycle(duty_cycle);
-    ch2_on(mode);
-}   
-
-
-template <typename T>
-inline void PWM_generator<T>::ch2_on(const Microsecond duty_cycle, Mode mode)
-{
-    ch2_duty_cycle(duty_cycle);
-    ch2_on(mode);
-}
-
+inline PWM_generator<T>::Microsecond PWM_generator<T>::ch2_duty_cycle()
+{ return GT::PWM_ch2_duty_top() * GT::clock_period(); }
 
 
 
