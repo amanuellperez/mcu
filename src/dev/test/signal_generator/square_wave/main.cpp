@@ -15,14 +15,14 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "../../../avr_signal_generator.h"
-#include "../../../avr_timer1_generic.h"
-#include "../../../avr_time.h"
-#include "../../../avr_types.h"
-#include "../../../avr_UART_iostream.h"
+#include "../../../dev_signal_generator.h"
+#include <avr_timer1_generic.h>
+#include <avr_timer0_generic.h>
+#include <avr_time.h>
+#include <avr_types.h>
+#include <avr_UART_iostream.h>
 
 
-using SW_gen = avr::Square_wave_generator<avr::Timer1>;
 
 
 
@@ -54,7 +54,10 @@ void print(const avr::Hertz& f)
 }
 
 
+template <typename Timern>
 struct Main{
+    using SW_gen = dev::Square_wave_generator<Timern>;
+
     Main();
 
     void run();
@@ -73,8 +76,8 @@ struct Main{
     uint16_t period_in_us_ = 1;
 };
 
-
-void Main::ch1_menu()
+template <typename T>
+void Main<T>::ch1_menu()
 {
     avr::UART_iostream uart;
     uart << "\n\nchannel 1:\n"
@@ -99,7 +102,8 @@ void Main::ch1_menu()
 
 
 
-void Main::ch2_menu()
+template <typename T>
+void Main<T>::ch2_menu()
 {
     avr::UART_iostream uart;
     uart << "\n\nchannel 2:\n"
@@ -122,7 +126,8 @@ void Main::ch2_menu()
     }  
 }
 		
-uint16_t Main::select_period_1MHz()
+template <typename T>
+uint16_t Main<T>::select_period_1MHz()
 {
     avr::UART_iostream uart;
 
@@ -147,16 +152,17 @@ uint16_t Main::select_period_1MHz()
     return 1;
 }
 
-void Main::timer_on_1MHz(uint16_t period_in_us)
+template <typename T>
+void Main<T>::timer_on_1MHz(uint16_t period_in_us)
 {
     avr::UART_iostream uart;
 
     switch(period_in_us){
-	case 1: SW_gen::on<1>(); break;
-	case 8: SW_gen::on<8>(); break;
-	case 64: SW_gen::on<64>(); break;
-	case 256: SW_gen::on<256>(); break;
-	case 1024: SW_gen::on<1024>(); break;
+	case 1: SW_gen::template on<1>(); break;
+	case 8: SW_gen::template on<8>(); break;
+	case 64: SW_gen::template on<64>(); break;
+	case 256: SW_gen::template on<256>(); break;
+	case 1024: SW_gen::template on<1024>(); break;
 	default:
 	    uart << "period_in_us [" << period_in_us << "] no válido\n";
 	    break;
@@ -164,7 +170,8 @@ void Main::timer_on_1MHz(uint16_t period_in_us)
 }
 
 
-void Main::on()
+template <typename T>
+void Main<T>::on()
 {
     timer_on_1MHz(period_in_us_);
 }
@@ -182,7 +189,8 @@ void debug_freq(avr::Hertz freq_sq)
 
 }
 
-void Main::run()
+template <typename T>
+void Main<T>::run()
 {
     avr::UART_iostream uart;
 
@@ -219,7 +227,8 @@ void Main::run()
 		"[o]n\n"
 		"[s]elect frequency\n"
 		"ch[1] menu\n"
-		"ch[2] menu\n";
+		"ch[2] menu\n"
+		"[b]ack to main menu\n";
 
 	uint32_t num;
 	uart >> c;
@@ -238,7 +247,7 @@ void Main::run()
 		break;
 
 	    case 's': 
-		uart << "\nfreq (in Hz, máx " << SW_gen::max_frequency() << " no mas de 2^16 = 65500) = ";
+		uart << "\nfreq (in Hz, máx " << SW_gen::max_frequency() << ") = ";
 		uart >> num;
 		uart << num << '\n';
 		freq_ = avr::Hertz{num};
@@ -254,20 +263,18 @@ void Main::run()
 		ch2_menu();
 		break;
 
+	    case 'b':
+		return;
+
 	}
 
 
     }
 }
 
-Main::Main()
+template <typename T>
+Main<T>::Main()
 {
-// init_uart()
-    avr::UART_iostream uart;
-    avr::basic_cfg(uart);
-    uart.on();
-
-
 // init_signal_generator()
     timer_on_1MHz(period_in_us_);
 }
@@ -275,8 +282,30 @@ Main::Main()
 
 int main()
 {
+// init_uart()
+    avr::UART_iostream uart;
+    avr::basic_cfg(uart);
+    uart.on();
 
-    Main app;
-    app.run();
+    uart << "\n\nSquare_wave_generator\n"
+                "---------------------\n";
+
+    while (1){
+	uart << "\n\nSelect timer to test:\n"
+		"[0] - Timer 0\n"
+		"[1] - Timer 1\n";
+
+	char c{};
+	uart >> c;
+	if (c == '0'){
+	    Main<avr::Timer0> app;
+	    app.run();
+	}
+	else {
+	    Main<avr::Timer1> app;
+	    app.run();
+	}
+    }
 }
+
 

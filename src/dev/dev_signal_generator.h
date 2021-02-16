@@ -17,8 +17,8 @@
 
 #pragma once
 
-#ifndef __AVR_SIGNAL_GENERATOR_H__
-#define __AVR_SIGNAL_GENERATOR_H__
+#ifndef __DEV_SIGNAL_GENERATOR_H__
+#define __DEV_SIGNAL_GENERATOR_H__
 /****************************************************************************
  *
  *  - DESCRIPCION: Generador de señales
@@ -34,9 +34,7 @@
 
 #include <stdint.h> // uint8_t
 
-namespace avr{
-
-// TODO: este realmente es dev_signal...
+namespace dev{
 
 /*!
  *  \brief  Generador de señales SF (same frequency both channels)
@@ -55,6 +53,10 @@ template <typename Timer_n>
 class Signal_generator_base{
 public:
     using GT = gen::Generic_timer<Timer_n>;
+    using counter_type = typename GT::counter_type;
+    using Microsecond  = typename GT::Microsecond;
+    using Hertz	       = typename GT::Hertz;
+    using Scalar       = typename GT::Scalar;
 
     static constexpr uint8_t pin_channel1 = GT::pin_channel1;
     static constexpr uint8_t pin_channel2 = GT::pin_channel2;
@@ -67,6 +69,15 @@ public:
     /// Apagamos el generador de señales.
     static void off() { GT::off(); }
 
+
+// Info
+    /// Periodo al que funciona internamente el timer.
+    static Microsecond clock_period() 
+    {return GT::clock_period();}
+
+    /// Frecuencia a la que funciona internamente el timer.
+    static Hertz clock_frequency()
+    { return GT::clock_frequency(); }
 
 protected:
     // Clase de implementación.
@@ -270,11 +281,14 @@ inline void PWM_generator<T>::frequency(const Hertz& freq_sq)
     GT::PWM_top(top);
 }
 
-/// Frecuencia que genera (en caso de que esté encendido y funcionando).
+// (RRR) ¿por qué definir Scalar el top?
+//       Observar que estamos sumandole 1 al top. Si es el Timer0 el top
+//       devuelve un uint8_t igual a 0xFF. Al sumarle 1 pasaría a 0xFF + 1 =
+//       0x00!!!
 template <typename T>
 inline PWM_generator<T>::Hertz PWM_generator<T>::frequency()
 {
-    auto top = GT::PWM_top();
+    Scalar top = GT::PWM_top(); 
     return GT::clock_frequency() / Scalar{1ul + top};
 }
 

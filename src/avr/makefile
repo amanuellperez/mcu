@@ -12,6 +12,7 @@ INCS= avr_ADC.h		\
 	avr_SPI.h		\
 	avr_time.h		\
 	avr_timer0_basic.h	\
+	avr_timer0_generic.h\
 	avr_timer1_basic.h	\
 	avr_timer1_generic.h\
 	avr_TWI.h		\

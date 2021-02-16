@@ -20,13 +20,13 @@
 // servo juntas. Y conectar el pin OC1A (15) al de control del servo.
 // A través de UART darle los valores de los pulsos que se quiera. 
 // (Con los servos que tengo van de 7 ms hasta 2.7 ms)
-#include "../../../avr_UART.h"
-#include "../../../avr_timer1_generic.h"
-#include "../../../avr_signal_generator.h"
-#include "../../../avr_time.h"
+#include "../../../dev_signal_generator.h"
+#include <avr_UART.h>
+#include <avr_timer1_generic.h>
+#include <avr_time.h>
 
 
-using PWM = avr::PWM_generator<avr::Timer1>;
+using PWM = dev::PWM_generator<avr::Timer1>;
 using namespace avr::literals;
 
 constexpr uint16_t period_in_us = 1;
@@ -42,7 +42,8 @@ int main()
 // init_pwm()
     PWM::on<period_in_us>();
     PWM::period(20_ms);
-    PWM::ch1_on(1500_us);
+    PWM::ch1_duty_cycle(1500_us);
+    PWM::ch1_non_inverting_mode();
 
     uart << "\n\nServo\n"
 	        "-----\n";

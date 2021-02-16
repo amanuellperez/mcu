@@ -17,14 +17,14 @@
 
 // Controlamos la velocidad de un motor dc usando un mosfet 2N7000.
 // Circuito: libro de make, pag. 299.
-#include "../../../avr_UART.h"
-#include "../../../avr_signal_generator.h"
-#include "../../../avr_timer1_generic.h"
-#include "../../../avr_time.h"
+#include "../../../dev_signal_generator.h"
+#include <avr_UART.h>
+#include <avr_timer1_generic.h>
+#include <avr_time.h>
 
 
 
-using SG = avr::PWM_generator<avr::Timer1>;
+using SG = dev::PWM_generator<avr::Timer1>;
 
 constexpr uint16_t period_in_us = 1;
 
@@ -66,7 +66,7 @@ int main()
 	uart >> c;
 	switch(c){
 	    case 'o':
-		SG::ch1_on(duty_cycle);
+		SG::ch1_non_inverting_mode();
 		break;
 
 	    case 'f':
@@ -85,16 +85,9 @@ int main()
 		uart << "duty_cycle = ";
 		uart >> duty_cycle;
 		uart << duty_cycle << " %\n";
-		SG::ch1_on(duty_cycle);
+		SG::ch1_duty_cycle(duty_cycle);
 		break;
 	}
-
-//	uint16_t t = 1000;
-//	for (int i = 1; i < 10; ++i){
-//	    t += 1000UL;
-//	    SG::ch1_on(t);
-//	    wait_ms(2000);
-//	}
     }
 }
 
