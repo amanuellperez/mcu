@@ -28,6 +28,7 @@ INCS= 	dev_BMP280_basic.h			\
 		dev_pot_MCP4231.h			\
 		dev_push_button.h			\
 		dev_register_74HC595.h		\
+		dev_signal_generator.h		\
 		dev_speaker.h				\
 		dev_system_clock.h			\
 		dev_TMP36.h					\
