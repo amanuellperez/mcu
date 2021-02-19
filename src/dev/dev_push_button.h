@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez <amanuel.lperez@gmail.com>
+// Copyright (C) 2019-2021 A.Manuel L.Perez <amanuel.lperez@gmail.com>
 //
 // This file is part of the MCU++ Library.
 //
@@ -24,7 +24,9 @@
  *   - DESCRIPCION: Push_button
  *
  *   - HISTORIA:
- *    A.Manuel L.Perez  - 24/07/2017 Escrito
+ *    A.Manuel L.Perez
+ *    24/07/2017 Push_button v0.0
+ *    19/02/2021 Push_button_level_change v0.0
  *
  ****************************************************************************/
 #include "avr_pin.h"
@@ -80,6 +82,53 @@ public:
     { while(!is_pressed()) ; }
 };
 
+
+/*!
+ *  \brief  Pulsador que devuelve press solo cuando se produce un cambio de
+ *  nivel.
+ *
+ * ¿Cómo manejar un pulsador?
+ * Se puede mirar:
+ *    1. Si se encuentra pulsado o no. Ese es Push_button.
+ *    2. Si se ha pulsado desde la última vez que se miró. Este es este
+ *       pulsador.
+ *
+ */
+template <uint8_t n>
+class Push_button_level_change{
+public:
+    constexpr Push_button_level_change() {init();}
+
+    /// Inicializamos el pulsador.
+    static constexpr void init() { avr::Pin<n>::as_input_with_pullup(); }
+
+    /// ¿está pulsado?
+    static bool is_pressed();
+
+    /// ¿no está pulsado?
+    static constexpr bool is_not_pressed()
+    {return !is_pressed();}
+
+private:
+    inline static bool look_ = true;
+
+};
+
+
+template <uint8_t n>
+bool Push_button_level_change<n>::is_pressed()
+{
+    if (avr::Pin<n>::is_zero()){
+	if (look_){
+	    look_ = false;
+	    return true;
+	}
+    }
+    else
+	look_ = true;
+
+    return false;
+}
 
 
 }// namespace

@@ -1,11 +1,6 @@
-BIN = xx
+DIRS = 	push_button				\
+		push_button_level_change
 
-SOURCES= main.cpp
-
-MCU = atmega328p
-
-include $(DEV_GENRULES)
-
-
+include $(MCU_RECRULES)
 
 
