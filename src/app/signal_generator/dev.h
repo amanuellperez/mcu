@@ -57,7 +57,7 @@ constexpr uint8_t Speaker_pin = 15; // Timer1
 // Alimentación y AREF: 20, 21, 22
 
 constexpr uint8_t OK_pin = 23;
-using Keyboard_pins = dev::Keyboard_pins<24, 25>;
+using Keyboard_pins = dev::Keyboard_pins<OK_pin, 24, 25>;
 
 // available: 26
 
@@ -80,7 +80,7 @@ using LCD_ostream = dev::LCD_ostream_1602<dev::LCD_HD44780<LCD_pins>>;
 
 // keyboard
 using namespace dev::Key_codes; // UP_KEY, DOWN_KEY
-using Keyboard_codes = dev::Keyboard_codes<UP_KEY, DOWN_KEY>;
+using Keyboard_codes = dev::Keyboard_codes<OK_KEY, UP_KEY, DOWN_KEY>;
 using Keyboard       = dev::Basic_keyboard<Keyboard_pins, Keyboard_codes>;
 using OK_key         = dev::Push_button_level_change<OK_pin>;
 

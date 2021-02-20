@@ -43,22 +43,76 @@ private:
 // Data
     avr::Hertz freq_gen_{440u};
     bool on_ = false;	    
+    uint16_t sw_period_ = 1; // us
 
 // init: hardware
     void init_lcd();
     void init_keyboard() { }
-    void init_speaker();
+    void init_signal_generator(uint16_t period_in_us);
 
-// Window: main
+//  main
     void window_main();
     void show_window_main();
 
-// Speaker
+//  sw_generator
+    void window_sw_generator();
+    void show_window_sw_generator();
+
+//  sweep
+    void window_sweep_menu();
+    void window_sweep_run();
+    bool sw_generator_run();
+
+// cfg
+    void window_cfg();
+
+
+// Signal generator
     void turn_on();
     void turn_off();
     void next_frequency();
     void previous_frequency();
 
+    // TODO: esto queda confuso, es mejor asociar directamente a cada opción
+    // la función a la que llamar:
+    // menu = {{"SW generator", window_sw_generator},
+    //         {"sweep", window_sweep_menu},
+    //         {"cfg", window_cfg}};
+    static constexpr std::array window_main_menu
+	    { "SW generator", "sweep", "cfg"};
+
+    static constexpr uint8_t sw_generator_opt = 0;
+    static constexpr uint8_t sweep_opt = 1;
+    static constexpr uint8_t cfg_opt = 2;
+
+    static constexpr std::array period_opts
+    {"1", "8", "64", "256", "1024"};
+
+    uint16_t index2period(uint16_t i)
+    {
+	switch(i){
+	    case 0: return 1;
+	    case 1: return 8;
+	    case 2: return 64;
+	    case 3: return 256;
+	    case 4: return 1024;
+	}
+
+	return 1;
+    }
+
+    uint16_t period2index(uint16_t p)
+    {
+	switch(p){
+	    case 1: return 0;
+	    case 8: return 1;
+	    case 64: return 2;
+	    case 256: return 3;
+	    case 1024: return 4;
+	}
+
+	return 0;
+    }
 };
 
 

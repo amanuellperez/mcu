@@ -17,40 +17,18 @@
 
 #include "main.h"
 
-void Main::init_speaker()
+void Main::window_sweep_menu()
 {
-    speaker_.on<timer_period_in_us>();
-    speaker_.frequency(freq_gen_);
-    freq_gen_ = speaker_.frequency();
+    lcd_ << "TODO sweep_menu";
+    wait_ms(1000);
 }
 
-
-void Main::turn_on()
+void Main::window_sweep_run()
 {
-    on_ = true;
-
-
-    speaker_.ch1_on();
+    lcd_ << "TODO sweep_run";
+    wait_ms(1000);
 }
 
-void Main::turn_off()
-{
-    on_ = false;
-
-    speaker_.ch1_off();
-}
-
-void Main::next_frequency()
-{
-    speaker_.next_frequency();
-    freq_gen_ = speaker_.frequency();
-}
-
-void Main::previous_frequency()
-{
-    speaker_.previous_frequency();
-    freq_gen_ = speaker_.frequency();
-}
 
 
 

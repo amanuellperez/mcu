@@ -20,8 +20,10 @@
 #define __SOUND_GENERATOR_CFG_H__
 
 #include <stdint.h>
+#include <array>
 
 constexpr uint8_t time_wait_release_key = 100; // in ms
+constexpr uint8_t time_scan_keyboard    = 100; // in ms
 
 
 

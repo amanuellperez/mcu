@@ -15,63 +15,26 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-
 #include "main.h"
+#include <user_choose_string.h>
 
-void Main::run()
+void Main::window_cfg()
 {
-    show_window_main();
+    lcd_ << "Timer period:"
+            "\n     ";
+    lcd_.width(4);
+    lcd_ << sw_period_ << " us";
 
-    while(1){
-//	if (errno_)
-//	    error();
-//	else 
-	    window_main();
+    wait_release_key();
 
-	wait_ms(100);
-    }
+    uint8_t opt = dev::user_choose_string_circular<4>(
+			 lcd_.screen(), keyboard_, period_opts)
+			 .pos(5, 1)
+			 .show(period2index(sw_period_));
+
+
+    init_signal_generator(index2period(opt));
+
+    wait_release_key();
 }
-
-
-void Main::window_main()
-{
-    bool redraw = false;
-
-    if (ok_key_.is_pressed()){
-	if (on_)
-	    turn_off();
-	else
-	    turn_on();
-
-	redraw = true;
-    }
-
-    if (keyboard_.key<UP_KEY>().is_pressed()){
-	next_frequency();
-	redraw = true;
-    }
-
-    if (keyboard_.key<DOWN_KEY>().is_pressed()){
-	previous_frequency();
-	redraw = true;
-    }
-
-    if (redraw)
-	show_window_main();
-
-}
-
-
-void Main::show_window_main()
-{
-    lcd_.clear();
-    lcd_ << freq_gen_ << " Hz\n";
-
-    if (on_)
-	lcd_ << "ON";
-    else
-	lcd_ << "OFF";
-}
-
-
 

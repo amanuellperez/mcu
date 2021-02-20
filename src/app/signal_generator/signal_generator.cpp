@@ -16,35 +16,49 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "main.h"
-#include "time.h"
 
-
-Main::Main()
+void Main::init_signal_generator(uint16_t period_in_us)
 {
-// init_hardware():
-    init_lcd();
-    init_keyboard();
-    init_speaker();
+    sw_period_ = period_in_us;
 
-// init data
-    freq_gen_ = avr::Hertz{440u};
+    switch(period_in_us){
+	    case 1: speaker_.on<1>(); break;
+	    case 8: speaker_.on<8>(); break;
+	    case 64: speaker_.on<64>(); break;
+	    case 256: speaker_.on<256>(); break;
+	    case 1024: speaker_.on<1024>(); break;
+
+    }
+
+    speaker_.frequency(freq_gen_);
+    freq_gen_ = speaker_.frequency();
+}
+
+
+void Main::turn_on()
+{
+    on_ = true;
+
+    speaker_.ch1_on();
+}
+
+void Main::turn_off()
+{
     on_ = false;
+
+    speaker_.ch1_off();
 }
 
-
-
-void Main::init_lcd()
+void Main::next_frequency()
 {
-    lcd_.screen().stop_brcorner(true);// I'm not going to use it as a terminal
-    lcd_.screen().nowrap(); 
+    speaker_.next_frequency();
+    freq_gen_ = speaker_.frequency();
 }
 
-
-
-int main()
+void Main::previous_frequency()
 {
-    Main app;
-    app.run();
+    speaker_.previous_frequency();
+    freq_gen_ = speaker_.frequency();
 }
 
 
