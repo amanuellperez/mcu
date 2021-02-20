@@ -20,6 +20,8 @@
 void Main::init_speaker()
 {
     speaker_.on<timer_period_in_us>();
+    speaker_.frequency(freq_gen_);
+    freq_gen_ = speaker_.frequency();
 }
 
 
@@ -27,7 +29,7 @@ void Main::turn_on()
 {
     on_ = true;
 
-    update_frequency();
+
     speaker_.ch1_on();
 }
 
@@ -38,24 +40,17 @@ void Main::turn_off()
     speaker_.ch1_off();
 }
 
-void Main::freq_gen_add(uint8_t x)
+void Main::next_frequency()
 {
-    freq_gen_ += avr::Hertz{x};
-
-    if (on_)
-	update_frequency();
-}
-
-void Main::freq_gen_substract(uint8_t x)
-{
-    freq_gen_ -= avr::Hertz{x};
-
-    if (on_)
-	update_frequency();
-}
-
-void Main::update_frequency()
-{
-    speaker_.frequency(freq_gen_);
+    speaker_.next_frequency();
     freq_gen_ = speaker_.frequency();
 }
+
+void Main::previous_frequency()
+{
+    speaker_.previous_frequency();
+    freq_gen_ = speaker_.frequency();
+}
+
+
+

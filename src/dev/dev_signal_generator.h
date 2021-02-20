@@ -85,10 +85,19 @@ protected:
 
 };
 
-
-/***************************************************************************
- *			Square_wave_generator
- ***************************************************************************/
+/*!
+ *  \brief  Square_wave_generator
+ *
+ *  No puede generar una onda cuadrada de cualquier frecuencia, sino solo un
+ *  conjunto discreto de frecuencias:
+ *		f_min = f_1, f_2, f_3, ..., f_max
+ *
+ *  Notation:
+ *      f[n-1] = previous frequency
+ *      f[n]   = frecuencia actual
+ *      f[n+1] = next frequency
+ *  
+ */
 template <typename Timer_n>
 class Square_wave_generator: public Signal_generator_base<Timer_n>{
 public:
@@ -98,9 +107,21 @@ public:
     using Hertz	       = typename GT::Hertz;
     using Scalar       = typename GT::Scalar;
 
+// Frequency
+// ---------
     /// Define la frecuencia que se genera en ch1 y ch2
     static void frequency(const Hertz& freq_sq);
 
+    /// Define la frecuencia a generar como la siguiente a la actual.
+    /// En caso de que sea la máxima, no hace nada.
+    static void next_frequency();
+
+    /// Define la frecuencia a generar como la anterior a la actual.
+    /// En caso de que sea la mínima, no hace nada.
+    static void previous_frequency();
+
+// Info
+// ----
     /// Frecuencia que genera (en caso de que esté encendido y funcionando).
     static Hertz frequency();
 
@@ -109,6 +130,11 @@ public:
     /// Timer::clock_period().
     static Hertz max_frequency();
 
+    static Hertz min_frequency();
+
+
+// on
+// --
     /// Encendemos el generador de señales
     template<uint16_t period>
     static void on();
@@ -134,8 +160,8 @@ inline void Square_wave_generator<T>::on()
     GT::mode_square_wave();
 }
 
-
-/// Define la frecuencia que se genera en ch1 y ch2
+// set frequency
+// -------------
 template <typename T>
 inline void Square_wave_generator<T>::frequency(const Hertz& freq_sq)
 {
@@ -145,7 +171,25 @@ inline void Square_wave_generator<T>::frequency(const Hertz& freq_sq)
 }
 
 
-/// Frecuencia que genera (en caso de que esté encendido y funcionando).
+template <typename T>
+inline void Square_wave_generator<T>::previous_frequency()
+{
+    auto top = GT::square_wave_top();
+    if (top < GT::square_wave_max_top())
+	GT::square_wave_top(top + 1u);
+}
+
+template <typename T>
+inline void Square_wave_generator<T>::next_frequency()
+{
+    auto top = GT::square_wave_top();
+    if (top > GT::square_wave_min_top())
+	GT::square_wave_top(top - 1u);
+}
+
+
+// info
+// ----
 template <typename T>
 inline Square_wave_generator<T>::Hertz Square_wave_generator<T>::frequency()
 {

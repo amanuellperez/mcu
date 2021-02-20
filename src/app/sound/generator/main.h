@@ -56,9 +56,8 @@ private:
 // Speaker
     void turn_on();
     void turn_off();
-    void freq_gen_add(uint8_t x);
-    void freq_gen_substract(uint8_t x);
-    void update_frequency();
+    void next_frequency();
+    void previous_frequency();
 
 };
 

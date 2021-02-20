@@ -85,6 +85,14 @@ public:
     static void square_wave_top(Scalar x)
     { Timer::input_capture_register(atd::to_integer<counter_type>(x));}
 
+    /// Devuelve el valor mínimo que puede tomar el top
+    static counter_type square_wave_min_top()
+    { return Timer::bottom();}
+
+    /// Devuelve el valor máximo que puede tomar el top
+    static counter_type square_wave_max_top()
+    { return Timer::max();}
+
     static counter_type square_wave_top()
     { return Timer::input_capture_register();}
     

@@ -87,7 +87,7 @@ using OK_key         = dev::Push_button_level_change<OK_pin>;
 
 // Speaker
 using Square_wave_generator = dev::Square_wave_generator<avr::Timer1>;
-constexpr uint8_t timer_period_in_us = 8;
+constexpr uint8_t timer_period_in_us = 1;
 
 #endif
 

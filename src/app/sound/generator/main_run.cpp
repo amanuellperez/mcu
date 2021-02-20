@@ -47,14 +47,12 @@ void Main::window_main()
     }
 
     if (keyboard_.key<UP_KEY>().is_pressed()){
-	freq_gen_add(1);
-	freq_gen_ += avr::Hertz{1};
+	next_frequency();
 	redraw = true;
     }
 
     if (keyboard_.key<DOWN_KEY>().is_pressed()){
-	freq_gen_substract(1);
-	freq_gen_ -= avr::Hertz{1};
+	previous_frequency();
 	redraw = true;
     }
 
