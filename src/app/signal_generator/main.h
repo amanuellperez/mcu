@@ -57,11 +57,11 @@ private:
 //  sw_generator
     void window_sw_generator();
     void show_window_sw_generator();
+    uint8_t sw_generator_scan_keyboard();
 
 //  sweep
     void window_sweep_menu();
     void window_sweep_run();
-    bool sw_generator_run();
 
 // cfg
     void window_cfg();

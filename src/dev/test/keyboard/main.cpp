@@ -17,10 +17,10 @@
 
 // Conectar 3 pulsadores a los pines indicados. La salida la mostramos por
 // UART.
+#include <avr_UART.h>
 #include "../../dev_keyboard.h"
 
 #include <avr_time.h>
-#include <avr_UART.h>
 
 // pines a los que conectamos el teclado
 using Keyboard_2pins = dev::Keyboard_pins<24, 25>;
@@ -39,8 +39,7 @@ using Keyboard = dev::Basic_keyboard<Keyboard_pins, Keyboard_codes>;
 void test_keyboard()
 {
     avr::UART_iostream uart;
-    avr::basic_cfg(uart);
-    uart.on();
+    uart << "\n\nPress test\n";
 
     Keyboard keyboard;
 
@@ -61,9 +60,49 @@ void test_keyboard()
     }
 }
 
+void test_read()
+{
+    avr::UART_iostream uart;
+
+    uart << "\n\nRead test\n";
+
+    Keyboard keyboard;
+    
+    while(1){
+	uint8_t c = keyboard.read();
+	switch(c){
+	    case OK_KEY: uart << "ok\n"; break;
+	    case UP_KEY: uart << "up\n"; break;
+	    case DOWN_KEY: uart << "down\n"; break;
+	    case NO_KEY: uart << "none\n"; break;
+	}
+	wait_ms(100);
+    }
+
+}
+
+
 int main()
 {
-    test_keyboard();
+// init_uart():
+    avr::UART_iostream uart;
+    avr::basic_cfg(uart);
+    uart.on();
+
+    uart << "\n\nKeyboard test\n"
+	        "-------------\n";
+
+    uart << "Menu:\n"
+	    "[1]. Test press functions\n"
+	    "[2]. Test read function\n";
+
+    char c{};
+    uart >> c;
+
+    if (c == '1')
+	test_keyboard();
+    else
+	test_read();
 }
 
 

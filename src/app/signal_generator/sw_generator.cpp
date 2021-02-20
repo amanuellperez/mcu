@@ -24,64 +24,64 @@ void Main::window_sw_generator()
     wait_release_key();
 
     while(1){
-//	uint8_t c = keyboard_.read();
-//
-//	switch(c){
-//	    case OK_KEY:
-//	    case CANCEL_KEY:
-//	    case UP_KEY:
-//	    case DOWN_KEY:
-//	}
+	bool redraw = true;
 
+	uint8_t c = sw_generator_scan_keyboard();
+	switch (c){
+	    case OK_KEY:
+		if (on_)
+		    turn_off();
+		else
+		    turn_on();
 
-	if (sw_generator_run()){
-	    turn_off();
-	    wait_release_key();
-	    return;
+		break;
+
+	    case UP_KEY:
+		next_frequency();
+		break;
+
+	    case DOWN_KEY:
+		previous_frequency();
+		break;
+
+	    case CANCEL_KEY:
+		turn_off();
+		wait_release_key();
+		return;
+
+	    default:
+		redraw = false;
+		break;
 	}
+
+	if (redraw)
+	    show_window_sw_generator();
 
 	wait_ms(time_scan_keyboard);
     }
 }
 
-// TODO: esta función mezcla 2 responsabilidades:
-//	    1. scanea el teclado
-//	    2. decide que hacer en función de ello.
-//	Al crear keyboard_.read() se separarán y quedará bien.
-bool Main::sw_generator_run()
-{
-    bool redraw = false;
 
+uint8_t Main::sw_generator_scan_keyboard()
+{
     if (keyboard_.key<OK_KEY>().is_pressed()
 	    and keyboard_.key<DOWN_KEY>().is_pressed()){
-	return true;
+	return CANCEL_KEY;
     }
 
-    if (ok_key_.is_pressed()){
-	if (on_)
-	    turn_off();
-	else
-	    turn_on();
+    if (ok_key_.is_pressed())
+	return OK_KEY;
 
-	redraw = true;
-    }
+    if (keyboard_.key<DOWN_KEY>().is_pressed())
+	return DOWN_KEY;
 
+    if (keyboard_.key<UP_KEY>().is_pressed())
+	return UP_KEY;
 
-    if (keyboard_.key<UP_KEY>().is_pressed()){
-	next_frequency();
-	redraw = true;
-    }
+    return NO_KEY;
 
-    if (keyboard_.key<DOWN_KEY>().is_pressed()){
-	previous_frequency();
-	redraw = true;
-    }
-
-    if (redraw)
-	show_window_sw_generator();
-
-    return false;
 }
+
 
 
 void Main::show_window_sw_generator()

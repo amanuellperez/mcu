@@ -27,7 +27,8 @@
  *
  *  - HISTORIA:
  *    A.Manuel L.Perez
- *    07/01/2020 v0.0 (segundo intento: introduzco codificación de caracteres)
+ *    07/01/2020 v0.0 Introduzco codificación de caracteres.
+ *    20/02/2021      read
  *
  ****************************************************************************/
 #include "dev_push_button.h"
@@ -46,11 +47,14 @@ struct Basic_keyboard_code{
     static constexpr uint8_t down  = 201;
     static constexpr uint8_t right = 202;
     static constexpr uint8_t left  = 203;
+
+    static constexpr uint8_t null  = 0;
 };
 
 
 // syntactic sugar
 namespace Key_codes{
+    static constexpr uint8_t NO_KEY = Basic_keyboard_code::null;
     static constexpr uint8_t OK_KEY = Basic_keyboard_code::enter;
     static constexpr uint8_t ENTER_KEY = OK_KEY;
     static constexpr uint8_t UP_KEY = Basic_keyboard_code::up;
@@ -201,13 +205,33 @@ struct Basic_keyboard{
     {
 	Push_button<Code::pin[i]>::init();
 
-	if constexpr (i > 1)
+	if constexpr (i >= 1)
 	    init<i-1>();
     }
 
     template <uint8_t c>
     static constexpr auto key(){
 	return Push_button<Code::template code2pin<c>()>{};
+    }
+
+    /// Scanea el teclado devolviendo el caracter asociado a la tecla pulsada.
+    /// En caso de que no haya ninguna tecla pulsada devuelve NO_KEY.
+    /// No bloquea la ejecución del programa.
+    // for (uint8_t i = 0; i < Code::num_keys; ++i)
+    //     if (key<i>().is_pressed())
+    //		    return code[i];
+    //
+    //	return null;
+    template <uint8_t i = Code::num_keys - 1>
+    static constexpr uint8_t read()
+    {
+	if (Push_button<Code::pin[i]>::is_pressed())
+	    return Code::code[i];
+
+	if constexpr (i >= 1)
+            return read<i-1>();
+
+	return Key_codes::NO_KEY;
     }
 };
 
