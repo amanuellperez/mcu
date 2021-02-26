@@ -27,12 +27,10 @@
  *   - HISTORIA:
  *    A.Manuel L.Perez
  *    27/08/2019 Less_than, Pertenece_al_intervalo_cerrado
- *    18/01/2020 static_array
  *    12/02/2021 has_same_sign, same_type_with_double_bits
  *
  ****************************************************************************/
 #include <type_traits>
-#include <cstddef>  // size_t
 #include <stdint.h> // uint8_t ...
 
 namespace atd{
@@ -61,20 +59,6 @@ template <typename T>
 inline constexpr bool always_false_v = always_false_type<T>::value;
 
 
-
-/*!
- *  \brief  Static array.
- *
- */
-template <typename T, T... args>
-struct static_array{
-    using size_type = std::size_t;
-
-    static constexpr size_type size = sizeof...(args);
-    static constexpr T data[size] = {args...};
-
-    constexpr T operator[](size_type i) const {return data[i];}
-};
 
 
 /*!

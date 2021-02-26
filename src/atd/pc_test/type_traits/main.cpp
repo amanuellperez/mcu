@@ -91,23 +91,6 @@ void test_always_false()
 }
 
 
-void test_static_array()
-{
-    test::interfaz("static_array");
-
-    using Pin = atd::static_array<int, 10, 20, 30>;
-    CHECK_TRUE(Pin::data[0] == 10, "static_array::data[]");
-    CHECK_TRUE(Pin::data[1] == 20, "static_array::data[]");
-    CHECK_TRUE(Pin::data[2] == 30, "static_array::data[]");
-    CHECK_TRUE(Pin::size == 3, "static_array::size");
-
-    Pin pin;
-    CHECK_TRUE(pin[0] == 10, "static_array.operator[]");
-    CHECK_TRUE(pin[1] == 20, "static_array.operator[]");
-    CHECK_TRUE(pin[2] == 30, "static_array.operator[]");
-    CHECK_TRUE(pin.size == 3, "static_array.size");
-
-}
 
 void test_has_same_sign()
 {
@@ -148,7 +131,6 @@ try{
     test_less_than();
     test_pertenece_al_intervalo_cerrado();
     test_always_false();
-    test_static_array();
     test_has_same_sign();
     test_same_type_double_bits();
 

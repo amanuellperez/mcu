@@ -9,6 +9,7 @@ DIRS = algorithm	\
 		magnitude	\
 		math		\
 		ratio		\
+		static		\
 		time		\
 		type_traits
 
