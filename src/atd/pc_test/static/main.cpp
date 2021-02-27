@@ -22,12 +22,31 @@
 
 using namespace test;
 
+struct Opt{
+    int id;
+    int next;
+};
+
+std::ostream& operator<<(std::ostream& out, const Opt& opt)
+{
+    return out<< '(' << opt.id << ", " << opt.next << ')';
+}
+
+bool operator==(const Opt& a, const Opt& b)
+{
+    return a.id == b.id and a.next == b.next;
+}
+
 
 void test_static_array()
 {
     test::interfaz("static_array");
 
     using Pin = atd::static_array<int, 10, 20, 30>;
+    CHECK_TRUE(Pin::at<0> == 10, "static_array::at<>");
+    CHECK_TRUE(Pin::at<1> == 20, "static_array::at<>");
+    CHECK_TRUE(Pin::at<2> == 30, "static_array::at<>");
+
     CHECK_TRUE(Pin::data[0] == 10, "static_array::data[]");
     CHECK_TRUE(Pin::data[1] == 20, "static_array::data[]");
     CHECK_TRUE(Pin::data[2] == 30, "static_array::data[]");
@@ -39,9 +58,71 @@ void test_static_array()
     CHECK_TRUE(pin[2] == 30, "static_array.operator[]");
     CHECK_TRUE(pin.size == 3, "static_array.size");
 
-    using Pin2 = atd::static_array_add<int, 40, Pin>;
+    // caso degenerado
+    using Null = atd::static_array<int>;
+    CHECK_TRUE(Null::size == 0, "static_array.size");
+
+// static_array_push_back
+    using Pin2 = atd::static_array_push_back<int, Pin, 40>;
     CHECK_TRUE((std::is_same_v<Pin2, atd::static_array<int, 10, 20, 30, 40>>),
-		"static_array_add");
+		"static_array_push_back");
+
+// static_array_push_front
+    {
+    using Pin2 = atd::static_array_push_front<int, Pin, 40>;
+    CHECK_TRUE((std::is_same_v<Pin2, atd::static_array<int, 40, 10, 20, 30>>),
+		"static_array_push_front");
+    }
+
+
+}
+
+
+template <int opt0>
+struct is_opt{
+    constexpr bool operator()(const Opt& opt) const { return (opt.id == opt0); }
+
+};
+
+
+void test_static_find_if()
+{
+    using Array_opt = atd::static_array<Opt, Opt{0, 1}, Opt{2, 1}, Opt{0, 2},
+	  Opt{1,1}, Opt{2,2}, Opt{0, 3}, Opt{1,2}>;
+
+    using Subset0 = atd::static_find_subset_if<is_opt<0>, Array_opt>::type;
+    using Subset1 = atd::static_find_subset_if<is_opt<1>, Array_opt>::type;
+    using Subset2 = atd::static_find_subset_if<is_opt<2>, Array_opt>::type;
+    using Subset3 = atd::static_find_subset_if<is_opt<3>, Array_opt>::type;
+
+    CHECK_TRUE(Subset0::size == 3, "static_find_subset_if");
+    CHECK_TRUE(Subset1::size == 2, "static_find_subset_if");
+    CHECK_TRUE(Subset2::size == 2, "static_find_subset_if");
+    CHECK_TRUE(Subset3::size == 0, "static_find_subset_if");
+
+    CHECK_TRUE((Subset0::at<0> == Opt{0,1}), "static_find_subset_if");
+    CHECK_TRUE((Subset0::at<1> == Opt{0,2}), "static_find_subset_if");
+    CHECK_TRUE((Subset0::at<2> == Opt{0,3}), "static_find_subset_if");
+
+    CHECK_TRUE((Subset1::at<0> == Opt{1,1}), "static_find_subset_if");
+    CHECK_TRUE((Subset1::at<1> == Opt{1,2}), "static_find_subset_if");
+
+    CHECK_TRUE((Subset2::at<0> == Opt{2,1}), "static_find_subset_if");
+    CHECK_TRUE((Subset2::at<1> == Opt{2,2}), "static_find_subset_if");
+}
+
+
+void test_variadic_element()
+{
+    test::interfaz("static_variadic_element");
+
+    CHECK_TRUE((atd::static_variadic_element<0, int, 10, 20, 30> == 10),
+	"static_variadic_element");
+    CHECK_TRUE((atd::static_variadic_element<1, int, 10, 20, 30> == 20),
+	"static_variadic_element");
+    CHECK_TRUE((atd::static_variadic_element<2, int, 10, 20, 30> == 30),
+	"static_variadic_element");
+
 }
 
 int main()
@@ -49,7 +130,9 @@ int main()
 try{
     test::header("atd_static");
 
+    test_variadic_element();
     test_static_array();
+    test_static_find_if();
 
 }catch(std::exception& e)
 {

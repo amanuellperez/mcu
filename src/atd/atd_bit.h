@@ -61,7 +61,7 @@
 #include <stdint.h> // uint8_t
 #include <cstddef>
 #include <type_traits>
-#include "atd_type_traits.h"	// static_array
+#include "atd_static.h"	// static_array
 
 // avr define bit
 #undef bit
