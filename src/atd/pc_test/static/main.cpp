@@ -75,6 +75,28 @@ void test_static_array()
     }
 
 
+// Funciona con algoritmos std?
+    {
+	using Array = atd::static_array<int, 0,1,2,0,1,0,3,3,4,0>;
+	
+	int n0 = std::count(Array::begin(), Array::end(), 0);
+	CHECK_TRUE(n0 == 4, "count");
+
+	int n1 = std::count(Array::begin(), Array::end(), 1);
+	CHECK_TRUE(n1 == 2, "count");
+
+	int n2 = std::count(Array::begin(), Array::end(), 2);
+	CHECK_TRUE(n2 == 1, "count");
+
+	int n3 = std::count(Array::begin(), Array::end(), 3);
+	CHECK_TRUE(n3 == 2, "count");
+
+	int n4 = std::count(Array::begin(), Array::end(), 4);
+	CHECK_TRUE(n4 == 1, "count");
+
+	int n5 = std::count(Array::begin(), Array::end(), 5);
+	CHECK_TRUE(n5 == 0, "count");
+    }
 }
 
 
@@ -90,25 +112,25 @@ void test_static_find_if()
     using Array_opt = atd::static_array<Opt, Opt{0, 1}, Opt{2, 1}, Opt{0, 2},
 	  Opt{1,1}, Opt{2,2}, Opt{0, 3}, Opt{1,2}>;
 
-    using Subset0 = atd::static_find_subset_if<is_opt<0>, Array_opt>::type;
-    using Subset1 = atd::static_find_subset_if<is_opt<1>, Array_opt>::type;
-    using Subset2 = atd::static_find_subset_if<is_opt<2>, Array_opt>::type;
-    using Subset3 = atd::static_find_subset_if<is_opt<3>, Array_opt>::type;
+    using Subset0 = atd::static_extract_subset<is_opt<0>, Array_opt>;
+    using Subset1 = atd::static_extract_subset<is_opt<1>, Array_opt>;
+    using Subset2 = atd::static_extract_subset<is_opt<2>, Array_opt>;
+    using Subset3 = atd::static_extract_subset<is_opt<3>, Array_opt>;
 
-    CHECK_TRUE(Subset0::size == 3, "static_find_subset_if");
-    CHECK_TRUE(Subset1::size == 2, "static_find_subset_if");
-    CHECK_TRUE(Subset2::size == 2, "static_find_subset_if");
-    CHECK_TRUE(Subset3::size == 0, "static_find_subset_if");
+    CHECK_TRUE(Subset0::size == 3, "static_extract_subset");
+    CHECK_TRUE(Subset1::size == 2, "static_extract_subset");
+    CHECK_TRUE(Subset2::size == 2, "static_extract_subset");
+    CHECK_TRUE(Subset3::size == 0, "static_extract_subset");
 
-    CHECK_TRUE((Subset0::at<0> == Opt{0,1}), "static_find_subset_if");
-    CHECK_TRUE((Subset0::at<1> == Opt{0,2}), "static_find_subset_if");
-    CHECK_TRUE((Subset0::at<2> == Opt{0,3}), "static_find_subset_if");
+    CHECK_TRUE((Subset0::at<0> == Opt{0,1}), "static_extract_subset");
+    CHECK_TRUE((Subset0::at<1> == Opt{0,2}), "static_extract_subset");
+    CHECK_TRUE((Subset0::at<2> == Opt{0,3}), "static_extract_subset");
 
-    CHECK_TRUE((Subset1::at<0> == Opt{1,1}), "static_find_subset_if");
-    CHECK_TRUE((Subset1::at<1> == Opt{1,2}), "static_find_subset_if");
+    CHECK_TRUE((Subset1::at<0> == Opt{1,1}), "static_extract_subset");
+    CHECK_TRUE((Subset1::at<1> == Opt{1,2}), "static_extract_subset");
 
-    CHECK_TRUE((Subset2::at<0> == Opt{2,1}), "static_find_subset_if");
-    CHECK_TRUE((Subset2::at<1> == Opt{2,2}), "static_find_subset_if");
+    CHECK_TRUE((Subset2::at<0> == Opt{2,1}), "static_extract_subset");
+    CHECK_TRUE((Subset2::at<1> == Opt{2,2}), "static_extract_subset");
 }
 
 
@@ -133,6 +155,7 @@ try{
     test_variadic_element();
     test_static_array();
     test_static_find_if();
+
 
 }catch(std::exception& e)
 {

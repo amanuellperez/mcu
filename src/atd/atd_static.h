@@ -29,7 +29,7 @@
  *    26/02/2021 Reestructurado. 
  *		 static_variadic_element
  *		 static_array_push_back/front
- *		 static_find_subset_if
+ *		 static_extract_subset
  *
  ****************************************************************************/
 
@@ -63,7 +63,16 @@ static constexpr T static_variadic_element =
  */
 template <typename T, T... args>
 struct static_array{
-    using size_type = std::size_t;
+// Types
+    using value_type	    = T;
+    using pointer	    = T*;
+    using const_pointer	    = const T*;
+    using reference	    = const T&;
+    using const_reference   = const T&;
+    using size_type         = std::size_t;
+    using difference_type   = std::ptrdiff_t;
+    using iterator	    = const T*;
+    using const_iterator    = const T*;
 
     /// Devuelve el elemento i del array.
     template <size_type i>
@@ -72,11 +81,16 @@ struct static_array{
     static constexpr size_type size = sizeof...(args);
     static constexpr T data[size] = {args...};
 
+    static constexpr const_iterator begin() {return &data[size_type(0)];}
+    static constexpr const_iterator end() {return &data[size];}
+
+    // syntax sugar:
     // Este operator no puede ser static como 'at'. Confio en que el
     // compilador optimice todo y no genere nada de código con esta función.
     // Si se quiere garantiar dicha optimización usar 'at'.
     constexpr T operator[](size_type i) const {return data[i];}
 };
+
 
 
 // caso degenerado: size == 0
@@ -118,12 +132,12 @@ using static_array_push_front =
     typename _static_array_push_front<T, SA, first>::type;
 
 /*!
- *  \brief  static_find_subset_if
+ *  \brief  static_extract_subset
  *
  *  Extrae, en tiempo de compilación, el subset que cumple la condición F.
  *
 // */
-//static_array find_subset_if(static_array& x, Function f)
+//static_array find_subset(static_array& x, Function f)
 //{
 //    static_array y{};
 //    while (!empty()){
@@ -134,11 +148,11 @@ using static_array_push_front =
 //}
 
 template <typename Function, typename Static_array>
-struct static_find_subset_if;
+struct _static_extract_subset;
 
 
 template <typename F, typename T, T first, T... args>
-struct static_find_subset_if<F, static_array<T, first, args...>>{
+struct _static_extract_subset<F, static_array<T, first, args...>>{
 
     static constexpr F func{};
 
@@ -146,10 +160,10 @@ struct static_find_subset_if<F, static_array<T, first, args...>>{
 
     using T_true = static_array_push_front<
         T,
-        typename static_find_subset_if<F, next_static_array>::type,
+        typename _static_extract_subset<F, next_static_array>::type,
         first>;
 
-    using T_false = static_find_subset_if<F, next_static_array>::type;
+    using T_false = _static_extract_subset<F, next_static_array>::type;
 
     using type = std::conditional_t<func(first), T_true, T_false>;
 
@@ -157,12 +171,15 @@ struct static_find_subset_if<F, static_array<T, first, args...>>{
 
 
 template <typename F, typename T>
-struct static_find_subset_if<F, static_array<T>>{
+struct _static_extract_subset<F, static_array<T>>{
     using type = static_array<T>;
 
 };
 
 
+template <typename Function, typename Static_array>
+using static_extract_subset = 
+    typename _static_extract_subset<Function, Static_array>::type;
 
 
 }// namespace
