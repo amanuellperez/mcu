@@ -28,12 +28,12 @@
  *  - HISTORIA:
  *    A.Manuel L.Perez
  *    07/01/2020 v0.0 Introduzco codificación de caracteres.
- *    20/02/2021      read
+ *    20/02/2021      scan 
  *
  ****************************************************************************/
 #include "dev_push_button.h"
 
-#include <atd_type_traits.h>
+#include <atd_static.h>
 
 namespace dev{
 /*!
@@ -223,13 +223,13 @@ struct Basic_keyboard{
     //
     //	return null;
     template <uint8_t i = Code::num_keys - 1>
-    static constexpr uint8_t read()
+    static constexpr uint8_t scan()
     {
 	if (Push_button<Code::pin[i]>::is_pressed())
 	    return Code::code[i];
 
 	if constexpr (i >= 1)
-            return read<i-1>();
+            return scan<i-1>();
 
 	return Key_codes::NO_KEY;
     }

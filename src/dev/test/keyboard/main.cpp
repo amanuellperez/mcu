@@ -60,7 +60,7 @@ void test_keyboard()
     }
 }
 
-void test_read()
+void test_scan()
 {
     avr::UART_iostream uart;
 
@@ -69,7 +69,7 @@ void test_read()
     Keyboard keyboard;
     
     while(1){
-	uint8_t c = keyboard.read();
+	uint8_t c = keyboard.scan();
 	switch(c){
 	    case OK_KEY: uart << "ok\n"; break;
 	    case UP_KEY: uart << "up\n"; break;
@@ -94,7 +94,7 @@ int main()
 
     uart << "Menu:\n"
 	    "[1]. Test press functions\n"
-	    "[2]. Test read function\n";
+	    "[2]. Test scan function\n";
 
     char c{};
     uart >> c;
@@ -102,7 +102,7 @@ int main()
     if (c == '1')
 	test_keyboard();
     else
-	test_read();
+	test_scan();
 }
 
 
