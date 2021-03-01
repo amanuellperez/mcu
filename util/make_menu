@@ -1,0 +1,133 @@
+#!/usr/bin/awk -f
+#
+# Copyright (C) 2021 A.Manuel L.Perez <amanuel.lperez@gmail.com>
+# 
+# This file is part of the MCU++ Library.
+# 
+# MCU++ Library is a free library: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#
+#  USAGE: make_menu menu.mnu > menu.h
+#
+#**********************************************************************
+BEGIN{
+    srcfile = ARGV[1]
+    tmpfile = srcfile".tmp"
+    nmenu = 0
+
+    #*****************************************************************
+    #			    LECTURA DEL MENU
+    #*****************************************************************
+    # Leemos el fichero de entrada, convirtiendolo
+    # en formato rígido.
+    FS="[ \t]+"
+    while (getline <srcfile >0){
+	sub(/#.*/, "")	# strip comments
+
+	if ($1 != ""){# empezamos nuevo menu
+	    menu = $1
+	    name_menu[$1] = nmenu
+	    nmenu++
+	    noption = 0
+	}
+	else{# opciones del menu
+	    if ($3 == "show"){
+		print menu "\t" menu noption "\t" $2 "\tnullptr\t" $4 > tmpfile
+	    }
+	    else if ($3 == "execute"){
+		print menu "\t" menu noption "\t" $2 "\t" $4 "\t0" > tmpfile
+	    }
+	    noption++
+	}
+    }
+
+    close(tmpfile)
+
+
+
+    #*****************************************************************
+    #			    GENERACIÓN DEL CÓDIGO
+    #*****************************************************************
+    # header
+    # ------
+print "// Copyright (C) A.Manuel L.Perez <amanuel.lperez@gmail.com>"
+print "//"
+print "// This file is part of the MCU++ Library."
+print "//"
+print "// MCU++ Library is a free library: you can redistribute it and/or modify"
+print "// it under the terms of the GNU General Public License as published by"
+print "// the Free Software Foundation, either version 3 of the License, or"
+print "// (at your option) any later version."
+print "//"
+print "// This library is distributed in the hope that it will be useful,"
+print "// but WITHOUT ANY WARRANTY; without even the implied warranty of"
+print "// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the"
+print "// GNU General Public License for more details."
+print "//"
+print "// You should have received a copy of the GNU General Public License"
+print "// along with this program.  If not, see <https://www.gnu.org/licenses/>."
+
+    print "\n\n// Automatically generated file. To change this menu change .mnu"
+    print "\n#pragma once"
+
+    print "\n#ifndef __MENU_H__"
+    print "#define __MENU_H__"
+
+
+    # menu_str
+    # --------
+    print "constexpr const char* menu_str[] ="
+    printf "{"
+    comma = ""
+    while (getline <tmpfile >0){
+	printf comma $3
+	comma = ","
+    }
+    print "};\n\n"
+    close(tmpfile)
+
+    # ids de las cadenas
+    # ------------------
+    nline = 0
+    while (getline <tmpfile >0){
+	print "constexpr size_t " $2 "= " nline ";"
+	nline++
+    }
+    print "\n\n"
+    close(tmpfile)
+
+
+    # Options
+    # -------
+    print "using Option = dev::Option<Main>;\n"
+    print "using Options = atd::static_array<Option"
+    while (getline <tmpfile >0){
+	printf("\t, Option{")
+	if ($4 == "nullptr"){
+	    printf name_menu[$1] ", " $2  ", "$4 ", " name_menu[$5]
+	}
+	else{
+	    printf name_menu[$1] ", " $2  ", "$4 ", " $5
+	}
+	print "}"
+    }
+    printf("\t>;\n")
+    close(tmpfile)
+    
+    # fin
+    # ---
+    print "#endif"
+
+}
+
+

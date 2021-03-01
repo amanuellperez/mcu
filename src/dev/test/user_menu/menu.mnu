@@ -1,0 +1,19 @@
+# Menu definition.
+# Menu version: 0.0
+menu_a
+    "a1" show menu_b	    
+    "a2" execute &Main::a2
+    "a3" show menu_d
+
+menu_b
+    "b1" execute &Main::b1
+    "b2" show menu_c
+
+menu_c
+    "c1" execute &Main::c1
+    "c2" execute &Main::c2
+    "c3" execute &Main::c3
+
+menu_d
+    "d1" execute &Main::d1
+    "d2" execute &Main::d2
