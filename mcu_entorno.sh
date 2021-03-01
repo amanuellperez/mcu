@@ -4,6 +4,7 @@
 MCU_ROOT=${MY_HOME}/prj/git/mcu		; export MCU_ROOT
 MCU_SRC=${MCU_ROOT}/src			; export MCU_SRC
 MCU_MK=${MCU_ROOT}/mk			; export MCU_MK
+MCU_UTIL=${MCU_ROOT}/util		; export MCU_UTIL
 
 
 # donde distribuimos los archivos
@@ -56,6 +57,7 @@ LIBRARY_PATH=${MCU_LIB}	; export LIBRARY_PATH
 # ----
 # path del avr-g++
 PATH=${PATH}:${MY_HOME}/../bin/avr/bin
+PATH=${PATH}:${MCU_UTIL}
 export PATH
 
 # Alias

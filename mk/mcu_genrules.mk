@@ -1,4 +1,4 @@
-# Copyright (C) 2019-2020 A.Manuel L.Perez <amanuel.lperez@gmail.com>
+# Copyright (C) 2019-2021 A.Manuel L.Perez <amanuel.lperez@gmail.com>
 #
 # This file is part of the MCU++ Library.
 #
@@ -31,6 +31,7 @@
 #     - HISTORIA:
 # 		A.Manuel L.Perez
 # 		21/07/17: Creado a partir del del libro de MAKE.
+# 		01/03/21: tag HEADERS para poder generar automáticamente los menus.
 #
 #***************************************************************************
 include $(MCU_FUSES)
@@ -40,7 +41,8 @@ include $(MCU_FUSES)
 # ----------------
 CC 			?= avr-gcc
 CXX 		?= avr-g++
-MAKE_DEPEND	:= $(CXX) -MM
+MAKE_DEPEND	:= $(CXX) -MM -MG
+MAKE_MENU   := make_menu
 
 OBJCOPY 	:= avr-objcopy
 OBJDUMP 	:= avr-objdump
@@ -155,7 +157,7 @@ $(if $(BIN),,\
 # ----------------------------------------
 ifdef BIN
 .PHONY: all
-all: $(FIC_TAGS) $(BIN).hex 
+all: $(FIC_TAGS) $(HEADERS) $(BIN).hex 
 	@$(PRINTF) "-------------------------------------\n"
 	@$(PRINTF) "Compilados: $(SOURCES) $(ASM_SOURCES)\n"
 	@$(PRINTF) "-------------------------------------\n\n"
@@ -263,6 +265,9 @@ preprocesa:$(SOURCES)
 	$(OBJDUMP) -S $< > $@
 
 
+%.h: %.mnu
+	$(MAKE_MENU) $< > $@
+
 # Optionally create listing file from .elf
 # This creates approximate assembly-language equivalent of your code.
 # Useful for debugging time-sensitive bits, 
@@ -294,7 +299,7 @@ clean:
 
 .PHONY: super_clean
 super_clean:
-	$(RM) *.elf *.hex *.d *.eep *.lst *.lss *.sym *.map *.eeprom *.o *.a tags
+	$(RM) *.elf *.hex *.d *.eep *.lst *.lss *.sym *.map *.eeprom *.o *.a tags *.tmp
 
 
 

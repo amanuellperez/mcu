@@ -1,7 +1,8 @@
 # Menu definition.
 # Menu version: 0.0
 menu_a
-    "a1" show menu_b	    
+    "j1" show menu_b	    
+    "x x1" execute &Main::b1
     "a2" execute &Main::a2
     "a3" show menu_d
 
