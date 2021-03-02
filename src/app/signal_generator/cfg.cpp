@@ -22,12 +22,15 @@ void Main::window_cfg()
 {
     lcd_ << "Timer period:"
             "\n     ";
-    lcd_.width(4);
-    lcd_ << sw_period_ << " us";
+    lcd_ << sw_period_;
+    lcd_.cursor_pos(9, 1);
+    lcd_ << " us";
+
+    lcd_.cursor_pos(5, 1);
 
     wait_release_key();
 
-    uint8_t opt = dev::user_choose_string_circular<4>(
+    uint8_t opt = dev::user_choose_string_lineal<4>(
 			 lcd_.screen(), keyboard_, period_opts)
 			 .pos(5, 1)
 			 .show(period2index(sw_period_));

@@ -28,12 +28,10 @@
  *  \brief  Application.
  *
  */
-class Main {
-public:
+struct Main {
     Main();
     void run();
 
-private:
 // Hardware
     LCD_ostream lcd_;
     Keyboard keyboard_;
@@ -73,17 +71,6 @@ private:
     void next_frequency();
     void previous_frequency();
 
-    // TODO: esto queda confuso, es mejor asociar directamente a cada opción
-    // la función a la que llamar:
-    // menu = {{"SW generator", window_sw_generator},
-    //         {"sweep", window_sweep_menu},
-    //         {"cfg", window_cfg}};
-    static constexpr std::array window_main_menu
-	    { "SW generator", "sweep", "cfg"};
-
-    static constexpr uint8_t sw_generator_opt = 0;
-    static constexpr uint8_t sweep_opt = 1;
-    static constexpr uint8_t cfg_opt = 2;
 
     static constexpr std::array period_opts
     {"1", "8", "64", "256", "1024"};

@@ -90,7 +90,7 @@ void Main::run()
 {
     auto menu = dev::lcd_menu<Options>(this, lcd, keyboard, menu_str);
 
-    while(1){// <-- no es necesario, no sale nunca de show_menu
+    while(1){
 	menu.show_menu(0);
     }
 

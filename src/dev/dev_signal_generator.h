@@ -203,6 +203,12 @@ inline Square_wave_generator<T>::Hertz Square_wave_generator<T>::max_frequency()
     return GT::clock_frequency() * Scalar{2 * (1ul + sizeof(counter_type))};
 }
 
+template <typename T>
+inline Square_wave_generator<T>::Hertz Square_wave_generator<T>::min_frequency()
+{
+    return GT::clock_frequency() * Scalar{2};
+}
+
 
 // square_wave
 // -----------

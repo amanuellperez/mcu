@@ -51,14 +51,35 @@ void Main::turn_off()
 
 void Main::next_frequency()
 {
+    avr::Hertz old = freq_gen_;
     speaker_.next_frequency();
     freq_gen_ = speaker_.frequency();
+
+    if (freq_gen_ - old < avr::Hertz{1}){
+	if (freq_gen_ != speaker_.max_frequency()){
+	    freq_gen_ += avr::Hertz{1};
+	    next_frequency();
+	}
+    }
+
 }
 
+// por culpa del redondeo no decrementa de 1 en 1 cuando
+// los números son pequeños, sino más lentamente.
+// ¿merece la pena cambiarlo?
 void Main::previous_frequency()
 {
+    avr::Hertz old = freq_gen_;
+
     speaker_.previous_frequency();
     freq_gen_ = speaker_.frequency();
+
+    if (old - freq_gen_ < avr::Hertz{1}){
+	if (freq_gen_ != speaker_.min_frequency()){
+	    freq_gen_ -= avr::Hertz{1};
+	    previous_frequency();
+	}
+    }
 }
 
 

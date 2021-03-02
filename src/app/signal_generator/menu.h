@@ -1,4 +1,4 @@
-// Copyright (C) 2021 A.Manuel L.Perez <amanuel.lperez@gmail.com>
+// Copyright (C) A.Manuel L.Perez <amanuel.lperez@gmail.com>
 //
 // This file is part of the MCU++ Library.
 //
@@ -16,16 +16,30 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+// Automatically generated file. To change this menu change .mnu
+
+#pragma once
+
+#ifndef __MENU_H__
+#define __MENU_H__
+
+#include <user_menu.h>
 #include "main.h"
-#include "menu.h"
+constexpr const char* menu_str[] =
+{"SW generator","sweep","cfg"};
 
-void Main::run()
-{
-    auto menu = dev::lcd_menu<Options>(this, lcd_, keyboard_, menu_str);
-    while(1){
-	menu.show_menu(0);
-    }
-}
+
+constexpr size_t menu_main0= 0;
+constexpr size_t menu_main1= 1;
+constexpr size_t menu_main2= 2;
 
 
 
+using Option = dev::Option<Main>;
+
+using Options = atd::static_array<Option
+	, Option{0, menu_main0, &Main::window_sw_generator, 0}
+	, Option{0, menu_main1, &Main::window_sweep_menu, 0}
+	, Option{0, menu_main2, &Main::window_cfg, 0}
+	>;
+#endif

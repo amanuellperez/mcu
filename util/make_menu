@@ -19,6 +19,8 @@
 #
 #  USAGE: make_menu menu.mnu > menu.h
 #
+#  TODO: Está dando por supuesto que la clase que ejecuta este menu es
+#  `Main` y que está en el archivo `main.h`. Pasar esto como parámetro.
 #**********************************************************************
 BEGIN{
     srcfile = ARGV[1]
@@ -88,6 +90,8 @@ print "// along with this program.  If not, see <https://www.gnu.org/licenses/>.
     print "\n#ifndef __MENU_H__"
     print "#define __MENU_H__"
 
+    print "\n#include <user_menu.h>"
+    print "#include \"main.h\""     # TODO: generalizar
 
     # menu_str
     # --------
@@ -114,7 +118,7 @@ print "// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
     # Options
     # -------
-    print "using Option = dev::Option<Main>;\n"
+    print "using Option = dev::Option<Main>;\n" # TODO: depende de Main
     print "using Options = atd::static_array<Option"
     while (getline <tmpfile >0){
 	printf("\t, Option{")

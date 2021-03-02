@@ -35,6 +35,7 @@ INCS= 	dev_BMP280_basic.h			\
 		dev_TWI_memory_type.h		\
 		user_choose_number.h		\
 		user_choose_string.h		\
+		user_menu.h					\
 		user_time.h
 
 #		dev_DHT22.h\
