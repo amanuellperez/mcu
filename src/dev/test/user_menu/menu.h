@@ -23,12 +23,12 @@
 #ifndef __MENU_H__
 #define __MENU_H__
 constexpr const char* menu_str[] =
-{"j1","a2","a3","b1","b2","c1","c2","c3","d1","d2"};
+{"a first option","a second option","a third option","b1 - one","b2 - two","c1 ; 1","c2 ; 2","c3	; 3","d1","d2"};
 
 
 constexpr size_t menu_a0= 0;
-constexpr size_t menu_a2= 1;
-constexpr size_t menu_a3= 2;
+constexpr size_t menu_a1= 1;
+constexpr size_t menu_a2= 2;
 constexpr size_t menu_b0= 3;
 constexpr size_t menu_b1= 4;
 constexpr size_t menu_c0= 5;
@@ -43,8 +43,8 @@ using Option = dev::Option<Main>;
 
 using Options = atd::static_array<Option
 	, Option{0, menu_a0, nullptr, 1}
-	, Option{0, menu_a2, &Main::a2, 0}
-	, Option{0, menu_a3, nullptr, 3}
+	, Option{0, menu_a1, &Main::a2, 0}
+	, Option{0, menu_a2, nullptr, 3}
 	, Option{1, menu_b0, &Main::b1, 0}
 	, Option{1, menu_b1, nullptr, 2}
 	, Option{2, menu_c0, &Main::c1, 0}

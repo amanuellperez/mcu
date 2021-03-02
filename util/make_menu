@@ -41,11 +41,15 @@ BEGIN{
 	    noption = 0
 	}
 	else{# opciones del menu
-	    if ($3 == "show"){
-		print menu "\t" menu noption "\t" $2 "\tnullptr\t" $4 > tmpfile
+	    split($0, arr, "\"")
+	    str = arr[2]
+	    split(arr[3], action, "[ \t]+")
+
+	    if (action[2] == "show"){
+		print menu "|" menu noption "|\"" str "\"|nullptr|" action[3] >tmpfile
 	    }
-	    else if ($3 == "execute"){
-		print menu "\t" menu noption "\t" $2 "\t" $4 "\t0" > tmpfile
+	    else if (action[2] == "execute"){
+		print menu "|" menu noption "|\"" str "\"|" action[3] "|0" >tmpfile
 	    }
 	    noption++
 	}
@@ -58,6 +62,7 @@ BEGIN{
     #*****************************************************************
     #			    GENERACIÓN DEL CÓDIGO
     #*****************************************************************
+    FS="|"
     # header
     # ------
 print "// Copyright (C) A.Manuel L.Perez <amanuel.lperez@gmail.com>"

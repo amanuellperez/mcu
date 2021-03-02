@@ -1,19 +1,18 @@
 # Menu definition.
 # Menu version: 0.0
 menu_a
-    "j1" show menu_b	    
-    "x x1" execute &Main::b1
-    "a2" execute &Main::a2
-    "a3" show menu_d
+    "a first option" show menu_b	    
+    "a second option" execute &Main::a2
+    "a third option" show menu_d
 
 menu_b
-    "b1" execute &Main::b1
-    "b2" show menu_c
+    "b1 - one" execute &Main::b1
+    "b2 - two" show menu_c
 
 menu_c
-    "c1" execute &Main::c1
-    "c2" execute &Main::c2
-    "c3" execute &Main::c3
+    "c1 ; 1" execute &Main::c1
+    "c2 ; 2" execute &Main::c2
+    "c3	; 3" execute &Main::c3
 
 menu_d
     "d1" execute &Main::d1
