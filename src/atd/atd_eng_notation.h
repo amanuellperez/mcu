@@ -145,16 +145,16 @@ inline Magnitude_ENG_notation<U, Rep>& Magnitude_ENG_notation<U, Rep>::operator+
 template <typename U, typename Rep>
 inline Magnitude_ENG_notation<U, Rep> Magnitude_ENG_notation<U, Rep>::operator++(int)
 {
-    Magnitude_ENG_notation<U, Rep> res{*this};
-    ++res;
-    return res;
+    Magnitude_ENG_notation<U, Rep> old{*this};
+    ++(*this);
+    return old;
 }
 
 
 template <typename U, typename Rep>
 Magnitude_ENG_notation<U, Rep>& Magnitude_ENG_notation<U, Rep>::operator--()
 {
-    if (x_ < 2){
+    if (x_ < Rep{2}){
 	x_ *= Rep{1000};
 	exp_ -= 3;
 	--x_;
@@ -170,9 +170,9 @@ Magnitude_ENG_notation<U, Rep>& Magnitude_ENG_notation<U, Rep>::operator--()
 template <typename U, typename Rep>
 inline Magnitude_ENG_notation<U, Rep> Magnitude_ENG_notation<U, Rep>::operator--(int)
 {
-    Magnitude_ENG_notation<U, Rep> res{*this};
-    --res;
-    return res;
+    Magnitude_ENG_notation<U, Rep> old{*this};
+    --(*this);
+    return old;
 }
 
 template <typename U, typename Rep>

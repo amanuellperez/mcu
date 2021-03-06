@@ -16,6 +16,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "../../atd_eng_notation.h"
+#include "../../atd_decimal.h"
 
 #include <alp_test.h>
 #include <iostream>
@@ -23,42 +24,43 @@
 using namespace test;
 
 
+template <typename Rep>
 void test_basic()
 {
     test::interfaz("basic");
 
-    using Meter = atd::Meter<double>;
-    using Kilometer = atd::Kilometer<double>;
+    using Meter = atd::Meter<Rep>;
+    using Kilometer = atd::Kilometer<Rep>;
 
     {
     Meter m0{20000};
     atd::Magnitude_ENG_notation m{m0};
 
-    CHECK_TRUE(m.value() == 20.0, "constructor");
+    CHECK_TRUE(m.value() == Rep{20}, "constructor");
     CHECK_TRUE(m.exponent() == 3, "constructor");
     std::cout << m << '\n';
 
     ++m;
-    CHECK_TRUE(m.value() == 21.0, "operator++");
+    CHECK_TRUE(m.value() == Rep{21}, "operator++");
     CHECK_TRUE(m.exponent() == 3, "operator++");
     std::cout << m << '\n';
 
     --m;
-    CHECK_TRUE(m.value() == 20.0, "constructor");
+    CHECK_TRUE(m.value() == Rep{20}, "constructor");
     CHECK_TRUE(m.exponent() == 3, "constructor");
     std::cout << m << '\n';
 
     Meter m1b{30000};
     atd::Magnitude_ENG_notation m1{m1b};
-    CHECK_TRUE(m1.value() == 30.0, "constructor");
+    CHECK_TRUE(m1.value() == Rep{30}, "constructor");
     CHECK_TRUE(m1.exponent() == 3, "constructor");
     m += m1;
     std::cout << m << '\n';
-    CHECK_TRUE(m.value() == 50.0, "operator+=");
+    CHECK_TRUE(m.value() == Rep{50}, "operator+=");
     CHECK_TRUE(m.exponent() == 3, "operator+=");
     m -= m1;
     std::cout << m << '\n';
-    CHECK_TRUE(m.value() == 20.0, "operator+=");
+    CHECK_TRUE(m.value() == Rep{20}, "operator+=");
     CHECK_TRUE(m.exponent() == 3, "operator+=");
 
     }
@@ -66,37 +68,45 @@ void test_basic()
     Kilometer x0{999};
     atd::Magnitude_ENG_notation x{x0};
     std::cout << x << '\n';
-    CHECK_TRUE(x.value() == 999, "constructor");
+    CHECK_TRUE(x.value() == Rep{999}, "constructor");
     CHECK_TRUE(x.exponent() == 3, "constructor");
 
     ++x;
     std::cout << x << '\n';
-    CHECK_TRUE(x.value() == 1, "operator++");
+    CHECK_TRUE(x.value() == Rep{1}, "operator++");
     CHECK_TRUE(x.exponent() == 6, "operator++");
 
     --x;
     std::cout << x << '\n';
     std::cout << x.value() << '\n';
-    CHECK_TRUE(x.value() == 999, "constructor");
+    CHECK_TRUE(x.value() == Rep{999}, "constructor");
     CHECK_TRUE(x.exponent() == 3, "constructor");
 
     Kilometer x1b{1};
     atd::Magnitude_ENG_notation x1{x1b};
-    CHECK_TRUE(x1.value() == 1, "constructor");
+    CHECK_TRUE(x1.value() == Rep{1}, "constructor");
     CHECK_TRUE(x1.exponent() == 3, "constructor");
 
     x += x1;
     std::cout << x << '\n';
-    CHECK_TRUE(x.value() == 1.0, "constructor");
+    CHECK_TRUE(x.value() == Rep{1}, "constructor");
     CHECK_TRUE(x.exponent() == 6, "constructor");
 
     x -= x1;
     std::cout << x << '\n';
-    CHECK_TRUE(x.value() == 999.0, "constructor");
+    CHECK_TRUE(x.value() == Rep{999}, "constructor");
     CHECK_TRUE(x.exponent() == 3, "constructor");
 
     }
-    {
+}
+
+void test_double()
+{
+    test::interfaz("double");
+
+    using Kilometer = atd::Kilometer<double>;
+
+    {// caso extremo
     Kilometer x0{999.99};
     atd::Magnitude_ENG_notation x{x0};
     std::cout << ":: " << x << '\n';
@@ -167,10 +177,11 @@ void test_symbol()
     }
 }
 
+template <typename Rep>
 void test_order()
 {
-    using Hertz = atd::Hertz<double>;
-    using KiloHertz = atd::KiloHertz<double>;
+    using Hertz = atd::Hertz<Rep>;
+    using KiloHertz = atd::KiloHertz<Rep>;
 
     {
     atd::Magnitude_ENG_notation a{Hertz{100}};
@@ -200,15 +211,23 @@ void test_order()
     }
 }
 
+//void test_decimal()
+//{
+//    test::interfaz("Decimal");
+//    using Pascal = atd::Pascal<atd::Decimal<int, 3>>;
+//
+//}
 
 int main()
 {
 try{
     test::header("atd_eng_notation");
 
-
-    test_basic();
-    test_order();
+    test_basic<double>();
+    test_double();
+    test_basic<atd::Decimal<int,2>>();
+    test_order<double>();
+    test_order<atd::Decimal<int,2>>();
     test_symbol();
 
 }catch(std::exception& e)
