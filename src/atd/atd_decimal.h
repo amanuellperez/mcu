@@ -48,6 +48,7 @@
  *		       la deducción automática (¿culpa del otro constructor de
  *		       tipo template?) así que defino operator+(int, Decimal) 
  *		       (con todo no debería de ser necesario. Revisar!!!)
+ *    06/03/2021       operator++/--
  *
  ****************************************************************************/
 
@@ -175,6 +176,12 @@ public:
 
 
 // Estructura algebraica
+    constexpr Decimal& operator++();
+    constexpr Decimal operator++(int);
+
+    constexpr Decimal& operator--();
+    constexpr Decimal operator--(int);
+
     // Operaciones con decimales
     constexpr Decimal& operator+=(const Decimal& a);
     constexpr Decimal& operator-=(const Decimal& a);
@@ -287,6 +294,36 @@ constexpr inline std::pair<Rep, Rep> Decimal<Rep, n>::value() const
 
 // operaciones con Decimals
 // ------------------------
+template <typename I, int n>
+inline constexpr Decimal<I,n>& Decimal<I,n>::operator++()
+{
+    x_ += ten_to_the_n;
+    return *this;
+}
+
+template <typename I, int n>
+inline constexpr Decimal<I,n> Decimal<I,n>::operator++(int)
+{
+    Decimal<I,n> old{*this};
+    ++(*this);
+    return old;
+}
+
+template <typename I, int n>
+inline constexpr Decimal<I,n>& Decimal<I,n>::operator--()
+{
+    x_ -= ten_to_the_n;
+    return *this;
+}
+
+template <typename I, int n>
+constexpr Decimal<I,n> Decimal<I,n>::operator--(int)
+{
+    Decimal<I,n> old{*this};
+    --(*this);
+    return old;
+}
+
 template <typename I, int n>
 inline constexpr Decimal<I,n>& Decimal<I,n>::operator+=(const Decimal& a)
 {

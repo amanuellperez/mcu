@@ -279,6 +279,25 @@ void test_decimal_arithmetic_decimal()
     using Dec = atd::Decimal<int, 2>;
 
 // arithmetic
+    {
+    Dec x{3,14};
+    ++x;
+    CHECK_TRUE((x == Dec{4,14}), "++x");
+
+    --x;
+    CHECK_TRUE((x == Dec{3,14}), "--x");
+
+    auto y = x++;
+    CHECK_TRUE((x == Dec{4,14}), "x++");
+    CHECK_TRUE((y == Dec{3,14}), "x++");
+
+    auto z = x--;
+    CHECK_TRUE((x == Dec{3,14}), "x--");
+    CHECK_TRUE((z == Dec{4,14}), "x--");
+    
+    
+    }
+
     Dec a{3,14};
     Dec b{2,45};
 
