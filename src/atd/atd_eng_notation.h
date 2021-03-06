@@ -135,7 +135,7 @@ void Magnitude_ENG_notation<U, Rep>::update_representation()
 
 
 template <typename U, typename Rep>
-Magnitude_ENG_notation<U, Rep>& Magnitude_ENG_notation<U, Rep>::operator++()
+inline Magnitude_ENG_notation<U, Rep>& Magnitude_ENG_notation<U, Rep>::operator++()
 {
     ++x_;
     update_representation();
@@ -143,7 +143,7 @@ Magnitude_ENG_notation<U, Rep>& Magnitude_ENG_notation<U, Rep>::operator++()
 }
 
 template <typename U, typename Rep>
-Magnitude_ENG_notation<U, Rep> Magnitude_ENG_notation<U, Rep>::operator++(int)
+inline Magnitude_ENG_notation<U, Rep> Magnitude_ENG_notation<U, Rep>::operator++(int)
 {
     Magnitude_ENG_notation<U, Rep> res{*this};
     ++res;
@@ -168,7 +168,7 @@ Magnitude_ENG_notation<U, Rep>& Magnitude_ENG_notation<U, Rep>::operator--()
 }
 
 template <typename U, typename Rep>
-Magnitude_ENG_notation<U, Rep> Magnitude_ENG_notation<U, Rep>::operator--(int)
+inline Magnitude_ENG_notation<U, Rep> Magnitude_ENG_notation<U, Rep>::operator--(int)
 {
     Magnitude_ENG_notation<U, Rep> res{*this};
     --res;
@@ -283,7 +283,7 @@ void Magnitude_ENG_notation<U, R>::print_exponent(std::ostream& out, int exp)
 
 
 template <typename U, typename R>
-std::ostream& operator<<(std::ostream& out, const Magnitude_ENG_notation<U, R>& m)
+inline std::ostream& operator<<(std::ostream& out, const Magnitude_ENG_notation<U, R>& m)
 {
     m.print(out);
     return out;

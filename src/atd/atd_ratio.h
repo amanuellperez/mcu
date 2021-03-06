@@ -30,7 +30,7 @@
  *    A.Manuel L.Perez
  *    31/03/2020 is_ratio
  *    31/01/2021 ratio_inverse
- *    05/03/2021 is_power_of_ten
+ *    05/03/2021 is_power_of_ten, ratio_exponent_of_power_of_ten
  *
  ****************************************************************************/
 #include <type_traits>
@@ -69,7 +69,19 @@ struct _ratio_is_power_of_ten:
 template <typename q>
 inline constexpr bool ratio_is_power_of_ten = _ratio_is_power_of_ten<q>::value;
 
+// ratio_exponent_of_power_of_ten<10^n>:
+//  return n;
+template <typename q>
+struct _ratio_exponent_of_power_of_ten
+    : public std::integral_constant<int,
+          (q::num == 1? -exponent_of_power_of_ten(q::den):
+          exponent_of_power_of_ten(q::num))> {
+    static_assert(ratio_is_power_of_ten<q>);
+};
 
+template <typename q>
+inline constexpr int ratio_exponent_of_power_of_ten =
+    _ratio_exponent_of_power_of_ten<q>::value;
 
 }// namespace
 
