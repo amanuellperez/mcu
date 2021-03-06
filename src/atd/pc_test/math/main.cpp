@@ -136,12 +136,56 @@ void test_abs()
 
 }
 
+inline void test_is_power_of_ten(int x, bool res)
+{
+    std::cout << x << "; " << atd::is_power_of_ten(x) << '\n';
+    CHECK_TRUE(atd::is_power_of_ten(x) == res, "is_power_of_ten");
+}
+
+
+void test_is_power_of_ten()
+{
+    test::interfaz("is_power_of_ten");
+    
+    test_is_power_of_ten(1, true);
+    test_is_power_of_ten(10, true);
+    test_is_power_of_ten(100, true);
+    test_is_power_of_ten(1000, true);
+    test_is_power_of_ten(10000, true);
+
+    for (int i = 2; i < 9; ++i)
+	test_is_power_of_ten(i, false);
+
+    for (int i = 11; i < 99; ++i)
+	test_is_power_of_ten(i, false);
+
+    constexpr bool res = atd::is_power_of_ten(10);
+    bool x = std::bool_constant<res>::value;
+    CHECK_TRUE(x == true, "is_power_of_ten(static)");
+
+}
+
+
+void test_power_of_ten()
+{
+    test::interfaz("power_of_ten");
+    
+    CHECK_TRUE((atd::exponent_of_power_of_ten(1) == 0), "power_of_ten");
+    CHECK_TRUE((atd::exponent_of_power_of_ten(10) == 1), "power_of_ten");
+    CHECK_TRUE((atd::exponent_of_power_of_ten(100) == 2), "power_of_ten");
+    CHECK_TRUE((atd::exponent_of_power_of_ten(1000) == 3), "power_of_ten");
+    CHECK_TRUE((atd::exponent_of_power_of_ten(10000) == 4), "power_of_ten");
+
+}
+
 
 int main()
 {
 try{
     test::header("atd_math");
     
+    test_is_power_of_ten();
+    test_power_of_ten();
     test_number_of_digits();
     test_ten_to_the();
     test_most_significant_digits();

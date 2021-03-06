@@ -6,6 +6,7 @@ DIRS = algorithm	\
 		cstddef		\
 		cstring		\
 		decimal		\
+		eng_notation\
 		magnitude	\
 		math		\
 		ratio		\

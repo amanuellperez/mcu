@@ -30,10 +30,13 @@
  *    A.Manuel L.Perez
  *    31/03/2020 is_ratio
  *    31/01/2021 ratio_inverse
+ *    05/03/2021 is_power_of_ten
  *
  ****************************************************************************/
 #include <type_traits>
 #include <ratio>
+
+#include "atd_math.h"
 
 namespace atd{
 
@@ -53,6 +56,19 @@ struct is_ratio<std::ratio<N, D>> : std::true_type { };
 // ratio_inverse(num/den) == den/num
 template <typename r>
 using ratio_inverse = std::ratio<r::den, r::num>;
+
+
+// ratio_is_power_of_ten<q>:
+//  if (q == 10^n) return true;
+//  else           return false;
+template <typename q>
+struct _ratio_is_power_of_ten: 
+    public std::bool_constant<(q::num == 1 and is_power_of_ten(q::den))
+		or	 (is_power_of_ten(q::num) and q::den == 1)>{};
+
+template <typename q>
+inline constexpr bool ratio_is_power_of_ten = _ratio_is_power_of_ten<q>::value;
+
 
 
 }// namespace

@@ -28,10 +28,13 @@
  *    07/03/2020 ten_to_the
  *    05/04/2020 number_of_digits, div
  *    14/12/2020 abs
+ *    05/03/2021 is_power_of_ten, exponent_of_power_of_ten
+ *
  *
  ****************************************************************************/
 #include <cstdlib>
 #include <utility>
+#include <type_traits>
 
 namespace atd{
 
@@ -45,6 +48,49 @@ inline constexpr Int ten_to_the(int n)
     else 
 	return Int{10} * ten_to_the<Int>(n - 1);
 }
+
+
+// if (x == 10^n) return true;
+// else           return false;
+//
+// El 1 == 10^0, lo considero una potencia de 10 (lo normal en matemáticas)
+// Las potencias de 10 son números positivos.
+// TODO: de momento solo funciona con n >= 0. Implementar el caso n < 0
+template <typename Int>
+inline constexpr bool is_power_of_ten(Int x)
+{
+    if (x == 1)
+	return true;
+
+    if (!(x % Int{10})){
+	    return is_power_of_ten(x / Int{10});
+    }
+    
+    else
+	return false;
+
+}
+
+/// Devuelve el exponente de una potencia de 10.
+/// precondicion: x == 10^n.
+/// En caso de que x no sea una potencia de 10, devuelve 0.
+template <typename Int>
+inline constexpr int exponent_of_power_of_ten(Int x, int exp = 0)
+{
+    if (x == 1)
+	return exp;
+
+    if (!(x % Int{10})){
+	    return exponent_of_power_of_ten(x / Int{10}, exp + 1);
+    }
+    
+    else
+	return 0;
+
+}
+
+
+
 
 
 /// Devuelve los n most significant digits de x.
@@ -93,6 +139,8 @@ inline constexpr std::pair<Int, Int> div(Int x, Int y)
 template <typename Int>
 inline constexpr Int abs(Int x)
 { return x >= 0? x: -x; }
+
+
 
 
 } // namespace

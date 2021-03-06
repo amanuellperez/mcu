@@ -35,12 +35,46 @@ void test_ratio()
     }
 }
 
+template <int n, int d>
+void test_is_power_of_ten(bool res)
+{
+    using Q = std::ratio<n, d>;
+    CHECK_TRUE(atd::ratio_is_power_of_ten<Q> == res, "ratio_is_power_of_ten");
+}
+
+void test_is_power_of_ten()
+{
+    test::interfaz("is_power_of_ten");
+
+    test_is_power_of_ten<10, 1>(true);
+    test_is_power_of_ten<100, 1>(true);
+    test_is_power_of_ten<1000, 1>(true);
+    test_is_power_of_ten<10000, 1>(true);
+    test_is_power_of_ten<100000, 1>(true);
+    test_is_power_of_ten<1000000, 1>(true);
+
+    test_is_power_of_ten<1, 1>(true);
+    test_is_power_of_ten<1, 10>(true);
+    test_is_power_of_ten<1, 100>(true);
+    test_is_power_of_ten<1, 1000>(true);
+    test_is_power_of_ten<1, 10000>(true);
+    test_is_power_of_ten<1, 100000>(true);
+    test_is_power_of_ten<1, 1000000>(true);
+
+    test_is_power_of_ten<1, 2>(false);
+    test_is_power_of_ten<2, 3>(false);
+
+}
+
+
+
 int main()
 {
 try{
     test::header("atd_ratio");
 
     test_ratio();
+    test_is_power_of_ten();
 
 }catch(std::exception& e)
 {
