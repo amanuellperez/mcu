@@ -520,6 +520,30 @@ void test_to_integer()
 
 }
 
+void test_numerics()
+{
+    {
+	using Int = atd::Decimal<uint8_t, 2>;
+	CHECK_TRUE(Int::min() == Int{0}, "min");
+	CHECK_TRUE((Int::max() == Int{2,55}), "max");
+    }
+    {
+	using Int = atd::Decimal<int8_t, 2>;
+	CHECK_TRUE((Int::min() == Int{-1,28}), "min");
+	CHECK_TRUE((Int::max() == Int{1,27}), "max");
+    }
+    {
+	using Int = atd::Decimal<uint16_t, 2>;
+	CHECK_TRUE(Int::min() == Int{0}, "min");
+	CHECK_TRUE((Int::max() == Int{655,35}), "max");
+    }
+    {
+	using Int = atd::Decimal<int16_t, 2>;
+	CHECK_TRUE((Int::min() == Int{-327,68}), "min");
+	CHECK_TRUE((Int::max() == Int{327,67}), "max");
+    }
+
+}
 
 void test_decimal()
 {
@@ -531,6 +555,7 @@ void test_decimal()
     test_decimal_arithmetic();
     test_decimal_cast();
     test_to_integer();
+    test_numerics();
 
 // operator<<
     {

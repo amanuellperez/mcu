@@ -48,14 +48,14 @@
  *		       la deducción automática (¿culpa del otro constructor de
  *		       tipo template?) así que defino operator+(int, Decimal) 
  *		       (con todo no debería de ser necesario. Revisar!!!)
- *    06/03/2021       operator++/--
+ *    06/03/2021       operator++/--, numeric_limits
  *
  ****************************************************************************/
-
 #include <utility>
 #include <iostream>
 #include <cstdlib>
 #include <cmath>
+#include <limits>
 
 #include "atd_math.h"
 #include "atd_type_traits.h"
@@ -194,6 +194,9 @@ public:
     constexpr Decimal& operator*=(const Rep& s);
     constexpr Decimal& operator/=(const Rep& s);
 
+// traits: valores mínimo y máximo que puede tener el Decimal
+    constexpr static Decimal min();
+    constexpr static Decimal max();
 
 private:
     // Ejemplo: si num_cifras == 2 y value_ = 314, entonces el número decimal
@@ -280,6 +283,14 @@ constexpr Decimal<I,n>::Rep
     return x_;
 }
 
+// (???) Esta función falla si x_ == Rep::min(), ya que en este caso no existe
+//       abs(min()). Internamente todo es correcto, pero el valor que mostrará
+//       será raro. 
+//       ¿Modificar el código para que funcione bien ese caso?
+//       Parece un caso raro, muy raro de hecho. No quiero tener que penalizar 
+//       el caso habitual por culpa de gestionar un caso completamente 
+//       excepcional. Usémoslo y si se presenta ese caso, entonces
+//       incluyámoslo. Si no, olvidémoslo.
 template <typename Rep, int n>
 constexpr inline std::pair<Rep, Rep> Decimal<Rep, n>::value() const
 {
@@ -428,6 +439,32 @@ struct std::common_type<atd::Decimal<Rep1, n1>, atd::Decimal<Rep2, n2>>{
 
 
 namespace atd{
+// Traits
+
+template <typename R, int n>
+inline constexpr atd::Decimal<R,n> atd::Decimal<R,n>::min()
+{ 
+    if constexpr (std::is_signed_v<R>){
+	constexpr R i = std::numeric_limits<R>::min() / ten_to_the_n;
+	constexpr R f = -std::numeric_limits<R>::min() + i*ten_to_the_n;
+	return atd::Decimal<R,n>{i, f};
+    }
+    else
+	return atd::Decimal<R,n>{0};
+
+}
+
+
+template <typename R, int n>
+inline constexpr atd::Decimal<R,n> atd::Decimal<R,n>::max()
+{ 
+    constexpr R i = std::numeric_limits<R>::max() / ten_to_the_n;
+    constexpr R f = std::numeric_limits<R>::max() - i*ten_to_the_n;
+
+    return atd::Decimal<R,n>{i, f};
+}
+
+
 
 // Estructura algebráica de espacio vectorial
 // ------------------------------------------
@@ -598,12 +635,10 @@ bool operator>=(const Decimal<R1, n1>& a, const Decimal<R2, n2>& b)
 
 // Serialización
 // -------------
-template <typename Rep, int ndecimals>
-std::ostream& operator<<(std::ostream& out,
+template <typename Rep, int ndecimals, typename Int>
+std::ostream& __print(std::ostream& out,
                                 const atd::Decimal<Rep, ndecimals>& d)
 {
-    using Int = std::conditional_t<std::is_same_v<Rep,uint8_t>, 
-				   unsigned int, Rep>; // para poder imprimir uint8_t como int
     auto [n0, f0] = d.value();
     Int n = n0;
 
@@ -617,7 +652,26 @@ std::ostream& operator<<(std::ostream& out,
 	out.fill('0');
 	out << std::right << f;
     }
+
     return out;
+}
+
+
+// (RRR) Los int8_t/uint8_t C++ los considera char, con lo que no los imprime
+//	 como números. Por ello esta función gestion aparte estos tipos.
+template <typename Rep, int ndecimals>
+std::ostream& operator<<(std::ostream& out,
+                                const atd::Decimal<Rep, ndecimals>& d)
+{
+    // para poder imprimir uint8_t como int
+    if constexpr (std::is_same_v<Rep, uint8_t>)
+	return __print<Rep, ndecimals, unsigned int>(out, d);
+
+    else if constexpr (std::is_same_v<Rep, int8_t>)
+	return __print<Rep, ndecimals, int>(out, d);
+
+    else 
+	return __print<Rep, ndecimals, Rep>(out, d);
 }
 
 
@@ -636,7 +690,26 @@ constexpr Rep2 to_integer(const Decimal<Rep, N>& d)
 }
 
 
-}// namespace
+}// namespace atd
+
+
+
+// numeric_limits
+// --------------
+template <typename Rep, int N>
+struct std::numeric_limits<atd::Decimal<Rep,N>>{
+    static constexpr bool is_specialized = true;
+    static constexpr bool is_signed      = std::is_signed_v<Rep>;
+    static constexpr bool is_integer     = (N == 0);
+    static constexpr bool is_exact       = false;
+
+    static constexpr atd::Decimal<Rep, N> min() noexcept 
+    {return atd::Decimal<Rep,N>::min();}
+
+    static constexpr atd::Decimal<Rep, N> max() noexcept 
+    {return atd::Decimal<Rep,N>::max();}
+};
+
 
 #endif
 
