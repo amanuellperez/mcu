@@ -35,6 +35,11 @@ namespace atd{
 
 /*!
  *  \brief  Engineering notation for Magnitude
+ * 
+ *  Observar que se trata de una clase independiente de atd::Magnitude.
+ *  Como Magnitude y Magnitude_ENG_notation representan lo mismo puedo pasar
+ *  de una forma a otra (por eso suministro el constructor). Se puede operar
+ *  completamente en Magnitude_ENG_notation olvidándose de Magnitude.
  *
  *  (RRR) ¿Cómo podemos representar un número?
  *	  (1) x*10^n , con x cualquier número (como potencia de 10). 
@@ -59,10 +64,20 @@ class Magnitude_ENG_notation{
 public:
     using Unit = Unit0;
     using Rep  = Rep0;
+    using Exponent = int;
 
 // constructor
+    constexpr Magnitude_ENG_notation() = default;
+
+    constexpr Magnitude_ENG_notation(const Rep& x, Exponent exp)
+	: x_{x}, exp_{exp} {}
+
     template <typename Multiplier, typename D>
     constexpr Magnitude_ENG_notation(
+        const Magnitude<Unit, Rep, Multiplier, D>& m);
+
+    template <typename Multiplier, typename D>
+    constexpr Magnitude_ENG_notation& operator=(
         const Magnitude<Unit, Rep, Multiplier, D>& m);
 
 // algebra
@@ -80,14 +95,22 @@ public:
 
 // observers
     Rep value() const {return x_;}
-    int exponent() const {return exp_;}
+    Exponent exponent() const {return exp_;}
 
 // print
     void print(std::ostream& out) const;
 
+// traits
+    static constexpr Magnitude_ENG_notation min();
+    static constexpr Magnitude_ENG_notation max();
+
 private:
     Rep x_;	// valor númerico
-    int exp_;	// exponente
+    Exponent exp_;	// exponente
+
+// Helpers
+    template <typename Multiplier, typename D>
+    constexpr void init(const Magnitude<Unit, Rep, Multiplier, D>& m);
 
     void update_representation();
 
@@ -100,7 +123,7 @@ private:
 
 template <typename U, typename Rep>
 template <typename Multiplier, typename D>
-constexpr Magnitude_ENG_notation<U, Rep>::Magnitude_ENG_notation(
+constexpr void Magnitude_ENG_notation<U, Rep>::init(
     const Magnitude<U, Rep, Multiplier, D>& m)
 {
     static_assert(ratio_is_power_of_ten<Multiplier>);
@@ -110,6 +133,22 @@ constexpr Magnitude_ENG_notation<U, Rep>::Magnitude_ENG_notation(
     exp_ = ratio_exponent_of_power_of_ten<Multiplier>;
 
     update_representation();
+}
+
+template <typename U, typename Rep>
+template <typename Multiplier, typename D>
+inline constexpr Magnitude_ENG_notation<U, Rep>::Magnitude_ENG_notation(
+    const Magnitude<U, Rep, Multiplier, D>& m)
+{
+    init(m);
+}
+
+template <typename U, typename Rep>
+template <typename Multiplier, typename D>
+inline constexpr Magnitude_ENG_notation<U, Rep>& Magnitude_ENG_notation<U, Rep>::
+operator=(const Magnitude<U, Rep, Multiplier, D>& m)
+{
+    init();
 }
 
 
@@ -262,11 +301,28 @@ void Magnitude_ENG_notation<U, R>::print(std::ostream& out) const
     out << Unit_symbol<Unit>;
 }
 
+// (RRR) ¿Por qué escribir un espacio en caso de exponente 0?
+//       Es una cuestión estética.
+//       Sin espacio, al escribir en el LCD sin hacer clear saldría:
+//		999 Hz  
+//		  1 kHz
+//		999 Hzz  <--- no borra la z de arriba!!!
+//	  
+//	  Al escribir el espacio:
+//	        999  Hz
+//	          1 kHz
+//	        999  Hz  <--- correcto
+//
+//	 Esto es un formato rígido:
+//	        ddd pS
+//	 d = digit  (999)
+//	 p = prefix (k)
+//	 S = symbol (Hz)
 template <typename U, typename R>
 void Magnitude_ENG_notation<U, R>::print_exponent(std::ostream& out, int exp)
 {
     switch (exp){
-	case 0:		  break;
+	case 0:	out << ' '; break;
 	case 3: out << 'k'; break;
 	case 6: out << 'M'; break;
 	case 9: out << 'G'; break;
@@ -280,7 +336,24 @@ void Magnitude_ENG_notation<U, R>::print_exponent(std::ostream& out, int exp)
 
 }
 
+template <typename U, typename R>
+inline constexpr Magnitude_ENG_notation<U, R>
+Magnitude_ENG_notation<U, R>::min()
+{
+    if constexpr (std::is_signed_v<Rep>)
+    return Magnitude_ENG_notation<U, R>{std::numeric_limits<Rep>::min(),
+                                        std::numeric_limits<Exponent>::max()};
+    else
+    return Magnitude_ENG_notation<U, R>{0,0};
+}
 
+template <typename U, typename R>
+inline constexpr Magnitude_ENG_notation<U, R>
+Magnitude_ENG_notation<U, R>::max()
+{
+    return Magnitude_ENG_notation<U, R>{std::numeric_limits<Rep>::max(),
+                                        std::numeric_limits<Exponent>::max()};
+}
 
 template <typename U, typename R>
 inline std::ostream& operator<<(std::ostream& out, const Magnitude_ENG_notation<U, R>& m)
@@ -291,6 +364,23 @@ inline std::ostream& operator<<(std::ostream& out, const Magnitude_ENG_notation<
 
 }// namespace
 
+
+
+// numeric_limits
+// --------------
+template <typename U, typename Rep>
+struct std::numeric_limits<atd::Magnitude_ENG_notation<U,Rep>>{
+    static constexpr bool is_specialized = true;
+    static constexpr bool is_signed      = std::numeric_limits<Rep>::is_signed;
+    static constexpr bool is_integer     = std::numeric_limits<Rep>::is_integer;
+    static constexpr bool is_exact       = false; // exponente puede ser -n
+
+    static constexpr atd::Magnitude_ENG_notation<U, Rep> min() noexcept 
+    {return atd::Magnitude_ENG_notation<U, Rep>::min();}
+
+    static constexpr atd::Magnitude_ENG_notation<U, Rep> max() noexcept
+    { return atd::Magnitude_ENG_notation<U, Rep>::max(); }
+};
 
 #endif
 

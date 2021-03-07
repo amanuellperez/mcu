@@ -18,8 +18,13 @@
 // Conectar el LCD y 3 pulsadores a los pines indicados
 #include "../../user_choose_number.h"
 #include "../../dev_LCD_HD44780.h"
+#include <atd_decimal.h>
+#include <atd_magnitude.h>
+#include <atd_eng_notation.h>
+#include <avr_types.h>
 
 #include <avr_time.h>
+
 
 
 // pines que usamos
@@ -70,11 +75,61 @@ void test_choose_number2()
 	wait_ms(1000);
 
 	lcd.clear();
-	lcd << "PRUEBA LINEAL";
+	lcd << "LINEAL TEST";
 	wait_ms(1000);
 
+//
+{
+    using namespace avr::literals;
 	lcd.clear();
-	lcd << "2 cifras [5,25]";
+	lcd << "ENG Hertz";
+        using ENG_Hertz =
+            atd::Magnitude_ENG_notation<avr::Hertz::Unit, uint16_t>;
+        ENG_Hertz u8 = dev::user_choose_number_lineal<LCD, Keyboard, ENG_Hertz>(
+                           lcd, keyboard)
+                           .pos(3, 1)
+                           .choose4(ENG_Hertz{999, 0});
+
+        lcd.cursor_pos(0,0);
+	lcd << "has elegido: " << u8;
+
+	wait_ms(1000);
+}
+{
+    using namespace avr::literals;
+	lcd.clear();
+	lcd << "Hertz [5,25]";
+	avr::Hertz u8 = dev::user_choose_number_lineal<LCD, Keyboard, avr::Hertz>(
+                         lcd, keyboard)
+                         .pos(3, 1)
+                         .between(5_Hz, 25_Hz)
+                         .choose2(10_Hz);
+
+        lcd.cursor_pos(0,0);
+	lcd << "has elegido: " << u8;
+
+	wait_ms(1000);
+}
+{
+    using Rep = atd::Decimal<uint16_t, 2>;
+	lcd.clear();
+	lcd << "Decimal [5,25]";
+	wait_ms(1000);
+        Rep u8 = dev::user_choose_number_lineal<LCD, Keyboard, Rep>(
+                         lcd, keyboard)
+                         .pos(3, 1)
+                         .between(5, 25)
+                         .choose2(10);
+
+        lcd.cursor_pos(0,0);
+	lcd << "has elegido: " << u8;
+
+	wait_ms(1000);
+}
+//
+
+	lcd.clear();
+	lcd << "2 digits [5,25]";
 	wait_ms(1000);
 	uint8_t u8 =  dev::user_choose_number_lineal(lcd, keyboard).pos(3, 1)
 					     .between(5, 25)
@@ -90,16 +145,16 @@ void test_choose_number2()
 						 .between(2890, 2910)
 						 .choose4(2900);
 	lcd.cursor_pos(0,0);
-	lcd << "has elegido: " << u16;
+	lcd << "elegido : " << u16;
 
 	wait_ms(1000);
 
 	lcd.clear();
-	lcd << "PRUEBA CIRCULAR";
+	lcd << "CIRCULAR TEST";
 	wait_ms(1000);
 
 	lcd.clear();
-	lcd << "2 cifras [5,25]";
+	lcd << "2 digits [5,25]";
 	wait_ms(1000);
 	u8 =  dev::user_choose_number_circular(lcd, keyboard).pos(3, 1)
 					     .between(5, 25)
@@ -115,7 +170,7 @@ void test_choose_number2()
 						 .between(2890, 2910)
 						 .choose4(2900);
 	lcd.cursor_pos(0,0);
-	lcd << "has elegido: " << u16;
+	lcd << "elegido : " << u16;
 
 	wait_ms(1000);
 
