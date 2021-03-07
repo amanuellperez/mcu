@@ -55,12 +55,13 @@
  *
  *    30/01/2021 0.0: añado hertz, period y inverse.
  *    08/02/2021      operator / (entre magnitudes del mismo tipo).
- *    06/03/2021      Unit_symbol
+ *    06/03/2021      Unit_symbol, numeric_limits, operator++/--
  *
  ****************************************************************************/
 #include <ratio>
 #include <type_traits>
 #include <numeric>
+#include <limits>
 
 #include <iostream>
 
@@ -312,6 +313,12 @@ public:
     constexpr Magnitude& operator/=(const Scalar& a);
 
 // Operaciones con magnitudes
+    constexpr Magnitude& operator++();
+    constexpr Magnitude operator++(int);
+
+    constexpr Magnitude& operator--();
+    constexpr Magnitude operator--(int);
+
     constexpr Magnitude& operator+=(const Magnitude& x);
     constexpr Magnitude& operator-=(const Magnitude& x);
 
@@ -323,6 +330,38 @@ private:
 
 // operaciones con magnitudes
 // --------------------------
+template <typename U, typename R, typename M, typename D>
+inline constexpr Magnitude<U,R,M,D>& Magnitude<U,R,M,D>::operator++()
+{
+    ++value_;
+    return *this;
+}
+
+template <typename U, typename R, typename M, typename D>
+inline constexpr Magnitude<U,R,M,D> Magnitude<U,R,M,D>::operator++(int)
+{
+    Magnitude old{*this};
+    ++(*this);
+    return old;
+}
+
+
+template <typename U, typename R, typename M, typename D>
+inline constexpr Magnitude<U,R,M,D>& Magnitude<U,R,M,D>::operator--()
+{
+    --value_;
+    return *this;
+}
+
+
+template <typename U, typename R, typename M, typename D>
+inline constexpr Magnitude<U,R,M,D> Magnitude<U,R,M,D>::operator--(int)
+{
+    Magnitude old{*this};
+    --(*this);
+    return old;
+}
+
 template <typename U, typename R, typename M, typename D>
 inline constexpr Magnitude<U, R, M, D>& 
 	    Magnitude<U, R, M, D>::operator+=(const Magnitude<U, R, M, D>& x)
@@ -774,6 +813,24 @@ using Millipascal = Pressure<Int, std::milli>;
 
 
 }// namespace atd
+
+
+
+// numeric_limits
+// --------------
+template <typename U, typename Rep, typename M, typename D>
+struct std::numeric_limits<atd::Magnitude<U,Rep,M, D>>{
+    static constexpr bool is_specialized = true;
+    static constexpr bool is_signed      = std::numeric_limits<Rep>::is_signed;
+    static constexpr bool is_integer     = std::numeric_limits<Rep>::is_integer;
+    static constexpr bool is_exact       = std::numeric_limits<Rep>::is_exact;
+
+    static constexpr atd::Magnitude<U, Rep, M, D> min() noexcept 
+    {return atd::Magnitude<U, Rep, M, D>{std::numeric_limits<Rep>::min()};}
+
+    static constexpr atd::Magnitude<U, Rep, M, D> max() noexcept 
+    {return atd::Magnitude<U, Rep, M, D>{std::numeric_limits<Rep>::max()};}
+};
 
 
 #endif
