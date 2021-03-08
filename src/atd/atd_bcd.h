@@ -1,4 +1,4 @@
-// Copyright (C) 2020 A.Manuel L.Perez <amanuel.lperez@gmail.com>
+// Copyright (C) 2020-2021 A.Manuel L.Perez <amanuel.lperez@gmail.com>
 //
 // This file is part of the MCU++ Library.
 //
@@ -28,8 +28,10 @@
  *  - HISTORIA:
  *    A.Manuel L.Perez
  *    29/04/2020 v0.0. Versión mínima. Experimental.
+ *    08/03/2021 Counter_BCD2
  *
  ****************************************************************************/
+#include <stdint.h> // uint8_t
 
 namespace atd{
 
@@ -54,6 +56,50 @@ inline Int int2BCD(const Int& x)
 
     return (d << 4) | u;
 }
+
+
+
+/*!
+ *  \brief  Contador BCD.
+ *
+ *  La diferencia con usar un 'int' en lugar de este contador para contar
+ *  números es que un int siempre va de 0 a 9, 10 a 19, ... 90 a 99.
+ *  Este BCD se puede elegir qué números.
+ * 
+ *  El 2 del nombre (Counter_BCD2) es porque es un contador de dos dígitos.
+ *
+ */
+struct __Counter_BCD2{
+    uint8_t d1 : 4;
+    uint8_t d0 : 4;
+
+    uint8_t d1_max : 4;
+    uint8_t d0_max : 4;
+};
+
+
+class Counter_BCD2{
+public:
+    Counter_BCD2(uint8_t d1_max, uint8_t d0_max);
+
+    void reset(uint8_t d1_max, uint8_t d0_max);
+
+    void tick();
+    
+    uint8_t d0() const {return nticks_.d0;}
+    uint8_t d1() const {return nticks_.d1;}
+
+    uint8_t as_uint() const {return nticks_.d1*uint8_t{10} + nticks_.d0;}
+
+private:
+    __Counter_BCD2 nticks_;
+};
+
+
+
+inline Counter_BCD2::Counter_BCD2(uint8_t d1_max, uint8_t d0_max) 
+{ reset(d1_max, d0_max); }
+
 
 
 }// namespace

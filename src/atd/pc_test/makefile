@@ -1,5 +1,6 @@
 DIRS = algorithm	\
 	   ascii		\
+	   bcd			\
 		bit			\
 		buffer		\
 		cast		\

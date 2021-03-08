@@ -1,4 +1,5 @@
-SOURCES= main.cpp 
+SOURCES= main.cpp \
+		 ../../atd_bcd.cpp
 
 BIN = xx
 

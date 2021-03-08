@@ -1,4 +1,5 @@
-SOURCES= atd_cstddef.cpp 	\
+SOURCES= atd_bcd.cpp		\
+		 atd_cstddef.cpp 	\
 		 atd_cstring.cpp	\
 		 atd_time.cpp
 

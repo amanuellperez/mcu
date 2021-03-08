@@ -52,7 +52,31 @@ void test_bcd()
 
 }
 
+void test_counter2()
+{
+    test::interfaz("Counter_BCD2");
 
+{// basic
+    atd::Counter_BCD2 c{2,3}; // max: 23
+
+    for (int d1 = 0; d1 <= 2; ++d1){
+	for (int d0 = 0; d0 <= 3; ++d0){
+	    CHECK_TRUE(c.d0() == d0 and c.d1() == d1, "tick");
+	    CHECK_TRUE(c.as_uint() == (d1*10 + d0), "as_uint");
+	    c.tick();
+	}
+    }
+}
+
+{// caso degenerado
+    atd::Counter_BCD2 c{0,0};
+    CHECK_TRUE(c.d0() == 0 and c.d1() == 0, "Counter_BCD2{0,0}");
+    CHECK_TRUE(c.as_uint() == 0, "as_uint");
+    c.tick();
+    CHECK_TRUE(c.d0() == 0 and c.d1() == 0, "Counter_BCD2{0,0}");
+    CHECK_TRUE(c.as_uint() == 0, "as_uint");
+}
+}
 
 
 int main()
@@ -61,6 +85,7 @@ try{
     test::header("atd_bcd");
 
     test_bcd();
+    test_counter2();
 
 }catch(std::exception& e)
 {
