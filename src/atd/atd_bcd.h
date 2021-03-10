@@ -80,25 +80,36 @@ struct __Counter_BCD2{
 
 class Counter_BCD2{
 public:
+// constructor
     Counter_BCD2(uint8_t d1_max, uint8_t d0_max);
 
-    void reset(uint8_t d1_max, uint8_t d0_max);
+    /// reset sin cambiar los valores máximos de d1d0.
+    void reset();
 
+    /// Añadimos uno al contador.
     void tick();
     
+// cfg
+    /// Definimos valor máximo.
+    void max(uint8_t d1_max, uint8_t d0_max);
+
+// valor del contador
     uint8_t d0() const {return nticks_.d0;}
     uint8_t d1() const {return nticks_.d1;}
 
     uint8_t as_uint() const {return nticks_.d1*uint8_t{10} + nticks_.d0;}
 
-private:
+    bool is_zero() const {return nticks_.d0 == 0 and nticks_.d1 == 0;}
+    bool is_max() const
+    {
+        return nticks_.d0 == nticks_.d0_max and nticks_.d1 == nticks_.d1_max;
+    }
+
+  private:
     __Counter_BCD2 nticks_;
 };
 
 
-
-inline Counter_BCD2::Counter_BCD2(uint8_t d1_max, uint8_t d0_max) 
-{ reset(d1_max, d0_max); }
 
 
 

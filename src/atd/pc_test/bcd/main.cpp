@@ -76,6 +76,21 @@ void test_counter2()
     CHECK_TRUE(c.d0() == 0 and c.d1() == 0, "Counter_BCD2{0,0}");
     CHECK_TRUE(c.as_uint() == 0, "as_uint");
 }
+
+//{
+//    atd::Counter_BCD2 c{2, 4};
+//    
+//    for (int i = 0; i < 30; ++i){
+//	if (c.is_max()){
+//	    std::cout << "max\n";
+//	}
+//	else {
+//	    std::cout << (int) c.as_uint() << '\n';
+//	    c.tick();
+//	}
+//    }
+//}
+
 }
 
 

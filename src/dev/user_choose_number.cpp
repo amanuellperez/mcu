@@ -15,40 +15,39 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "atd_bcd.h"
+#include "user_choose_number.h"
 
-namespace atd{
+namespace dev{
+namespace __user_choose_number{
 
-Counter_BCD2::Counter_BCD2(uint8_t d1_max, uint8_t d0_max) 
+void Counter::reset() 
 { 
-    max(d1_max, d0_max); 
-    reset();
+    counter_.reset();
+    counter_.max(d1_max[0], d0_max[0]); 
+
+    i_ = 0;
 }
 
-void Counter_BCD2::max(uint8_t d1_max, uint8_t d0_max)
-{
-    nticks_.d0_max = d0_max;
-    nticks_.d1_max = d1_max;
-}
 
-void Counter_BCD2::reset()
+void Counter::tick() 
 {
-    nticks_.d0 = 0;
-    nticks_.d1 = 0;
-}
-void Counter_BCD2::tick()
-{
-    if (nticks_.d0 == nticks_.d0_max){
-	nticks_.d0 = 0;
-	
-	if (nticks_.d1 == nticks_.d1_max)
-	    nticks_.d1 = 0;
-	else
-	    ++nticks_.d1;
-    }
-
+    if (counter_.is_max())
+	next_state();
     else
-	++nticks_.d0;
+	counter_.tick();
+
 }
-}// namespace
+
+void Counter::next_state()
+{
+    if (i_ < nstates - 1){
+	++i_;
+	counter_.max(d1_max[i_], d0_max[i_]);
+	counter_.reset();
+    }
+}
+
+}// namespace __user_choose_number
+
+} // namespace dev
 

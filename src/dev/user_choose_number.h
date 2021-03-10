@@ -37,17 +37,59 @@
  *			Magnitude_ENG_notation (para leer frecuencias).
  *
  *			* Mejoro la lectura. Si el usuario quiere pasar de 
- *			  1 Hz a 1 MHz no puede ir de uno en uno.
+ *			  1 Hz a 1 MHz no puede ir de uno en uno. Introduzco
+ *			  Counter.
  *
  *
  ****************************************************************************/
 #include <avr_time.h>
 #include <iomanip>
 #include <limits>
+#include <array>
+
+#include <atd_bcd.h>
 
 #include "dev_keyboard.h"
 
 namespace dev{
+
+namespace __user_choose_number{
+
+class Counter{
+public:
+    Counter() : counter_{d1_max[0], d0_max[0]} , i_{0}
+    {}
+
+    void reset();
+    void tick();
+
+    bool trigger() const { return counter_.d0() == d0_max[i_];}
+
+    bool end() const { return (i_ == nstates - 1) and (counter_.is_max()); }
+
+
+// Observer (for debug)
+    uint8_t as_uint() const {return counter_.as_uint();}
+
+private:
+    atd::Counter_BCD2 counter_;
+
+    uint8_t i_; // indice del state en el que estamos
+
+// Configuración del contador
+//    constexpr static uint8_t nstates = 3;
+//    constexpr static std::array<uint8_t, nstates> d1_max = {2, 4, 9};
+//    constexpr static std::array<uint8_t, nstates> d0_max = {4, 2, 0};
+    constexpr static uint8_t nstates = 2;
+    constexpr static std::array<uint8_t, nstates> d1_max = {2, 9};
+    constexpr static std::array<uint8_t, nstates> d0_max = {2, 0};
+
+// Helper functions
+    void next_state();
+};
+
+
+}// namespace
 
 // Tipos 
 constexpr int user_choose_number_type_lineal   = 0;
@@ -96,7 +138,7 @@ public:
     /// Mostramos el número en el LCD e interaccionamos con el usuario via
     /// el teclado indicado.
     User_choose_number(LCD& lcd, Keyboard3)
-		    :lcd_{lcd} {}
+		    :lcd_{lcd}{}
 
     /// Posición (col, row) del LCD donde mostramos el número a elegir.
     User_choose_number& pos(uint8_t col, uint8_t row);
@@ -121,7 +163,7 @@ public:
     Rep choose4(Rep x0);
 
 private:
-    // pantalla y teclado usados
+// Hardware
     LCD& lcd_;
 
     // keyboard
@@ -135,43 +177,33 @@ private:
     { return Keyboard3::template key<Basic_keyboard_code::down>(); }
 
 
-    // Configuración
+    // Counter
+    __user_choose_number::Counter counter_;
+
+
+// Configuración
     uint8_t col_, row_;	    // posición donde están los 2 números.
     Rep min_ = std::numeric_limits<Rep>::min();
     Rep max_ = std::numeric_limits<Rep>::max();
 
-    // Datos
-    // -----
+// Datos
+// -----
     Rep x_;	    // Dato que mostramos en pantalla
 
+    Rep incr_;	    // lo que incrementamos
 
 
-    // Configuración estática
-    // ----------------------
+// Configuración estática
+// ----------------------
     // Frecuencia de muestreo. Vamos a mirar cada 100 ms el estado
     // del teclado.
     constexpr static uint8_t T_clock = 100; // 100 ms
 
-    // Tiempo que vamos a esperar antes de interactuar con el usuario
-    // para darle tiempo a que haya soltado la tecla 'ok'.
-//    constexpr static uint8_t t_wait  = 300; // ms
-
-    // Al principio incrementamos el número cada 4 ticks de reloj
-    constexpr static uint8_t num_ticks_incr_uno = 5;
-
-    // Cuando el usuario lleva pulsado el pulsador durante 12 pulsos de reloj
-    // lo incrementamos cada pulso de reloj (yendo más rápido)
-    constexpr static uint8_t num_ticks_incr_continuo_ = 10;
-
-
     enum class Tecla_pulsada{ up, down, ok, ninguna };
+
     // ultima tecla que ha pulsado el usuario
     Tecla_pulsada ultima_tecla_pulsada_ = Tecla_pulsada::ninguna;
     
-    uint8_t num_ticks_pulsada_ = 0; // número de ticks de reloj que lleva la 
-				    // tecla pulsada
-
-
 
     // Funciones de ayuda
     // ------------------
@@ -194,10 +226,9 @@ private:
 
 };
 
-
-
 template <typename L, typename T, int t0, typename R>
-inline User_choose_number<L,T, t0,R>& User_choose_number<L,T, t0,R>::pos(uint8_t col, uint8_t row)
+inline User_choose_number<L, T, t0, R>&
+User_choose_number<L, T, t0, R>::pos(uint8_t col, uint8_t row)
 {
     col_ = col;
     row_ = row;
@@ -240,11 +271,12 @@ Rep User_choose_number<L, T, t0,Rep>::choose2(Rep x0)
     char fill_char = lcd_.fill('0');
 
     x_ = x0;
+    incr_ = Rep{1};
 
     lcd_.cursor_on();
 
     ultima_tecla_pulsada_ = Tecla_pulsada::ninguna;
-    num_ticks_pulsada_ = 0;
+    counter_.reset();
 
     print2(x_);
    
@@ -271,14 +303,14 @@ Rep User_choose_number<L, T, t0, Rep>::choose4(Rep x0)
 { 
 
     x_ = x0;
-
+    incr_ = Rep{1};
     lcd_.cursor_on();
 
 // TODO: hacer local ultima_tecla_pulsada_, creo que solo lo necesita esta
 // función (o la equivalente de choose2). Revisar. O mejor mirar la
 // implementación de user_choose_list, he eliminado Tecla_pulsada.
     ultima_tecla_pulsada_ = Tecla_pulsada::ninguna;
-    num_ticks_pulsada_ = 0;
+    counter_.reset();
 
     print4(x_);
     // Hay que garantizar que el usuario haya soltado la tecla ok
@@ -326,19 +358,21 @@ void User_choose_number<L, T, t0,R>::update_ninguna()
 {
 
     if (down_key().is_pressed()){
-	num_ticks_pulsada_    = 0;
+	counter_.reset();
 	ultima_tecla_pulsada_ = Tecla_pulsada::down;
 
 	if (x_ > min_)
-	    --x_;
+	    x_ -= incr_;
+//	    --x_;
     }
 
     else if (up_key().is_pressed()){
-	num_ticks_pulsada_    = 0;
+	counter_.reset();
 	ultima_tecla_pulsada_ = Tecla_pulsada::up;
 
 	if (x_ < max_)
-	    ++x_;
+	    x_ += incr_;
+//	    ++x_;
     }
     else
 	ultima_tecla_pulsada_ = Tecla_pulsada::ninguna;
@@ -352,15 +386,13 @@ void User_choose_number<L, T, t0,R>::update_down()
 {
     if (down_key().is_pressed()){
 
-	++num_ticks_pulsada_;
+	counter_.tick();
 
 	if (x_ > min_){
-	    if (num_ticks_pulsada_ < num_ticks_incr_continuo_){
-		if ((num_ticks_pulsada_ % num_ticks_incr_uno) == 0)
-		    --x_;
-	    }
-	    else
-		--x_;
+	    if (counter_.trigger())
+		x_ -= incr_;
+//		--x_;
+
 	}
 	else{
 	    if constexpr (type == user_choose_number_type_circular){
@@ -379,15 +411,12 @@ void User_choose_number<L, T, t0,R>::update_up()
 {
     if (up_key().is_pressed()){
 
-	++num_ticks_pulsada_;
+	counter_.tick();
 
 	if (x_ < max_){
-	    if (num_ticks_pulsada_ < num_ticks_incr_continuo_){
-		if ((num_ticks_pulsada_ % num_ticks_incr_uno) == 0)
-		    ++x_;
-	    }
-	    else
-		++x_;
+	    if (counter_.trigger())
+		x_ += incr_;
+//		++x_;
 	}
 	else{
 	    if constexpr (type == user_choose_number_type_circular){

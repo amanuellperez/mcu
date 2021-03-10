@@ -1,6 +1,7 @@
 BIN = xx
 
-SOURCES= main.cpp
+SOURCES= main.cpp \
+		 ../../user_choose_number.cpp
 
 
 # para probar
