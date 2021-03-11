@@ -198,15 +198,15 @@ inline Square_wave_generator<T>::Hertz Square_wave_generator<T>::frequency()
 }
 
 template <typename T>
-inline Square_wave_generator<T>::Hertz Square_wave_generator<T>::max_frequency()
+inline Square_wave_generator<T>::Hertz Square_wave_generator<T>::min_frequency()
 {
-    return GT::clock_frequency() * Scalar{2 * (1ul + sizeof(counter_type))};
+    return GT::clock_frequency() / Scalar{2 * (1ul + GT::square_wave_max_top())};
 }
 
 template <typename T>
-inline Square_wave_generator<T>::Hertz Square_wave_generator<T>::min_frequency()
+inline Square_wave_generator<T>::Hertz Square_wave_generator<T>::max_frequency()
 {
-    return GT::clock_frequency() * Scalar{2};
+    return GT::clock_frequency() / Scalar{2 * (1ul + GT::square_wave_min_top())};
 }
 
 

@@ -21,6 +21,7 @@
 #include <avr_time.h>
 #include <avr_types.h>
 #include <avr_UART_iostream.h>
+#include <atd_eng_notation.h>
 
 
 
@@ -65,6 +66,9 @@ struct Main{
     void on();
     void ch1_menu();
     void ch2_menu();
+
+    void info();
+    static void print_info_detail(uint16_t period_in_us);
 
     static uint16_t select_period_1MHz();
     static void timer_on_1MHz(uint16_t period_in_us);
@@ -169,6 +173,50 @@ void Main<T>::timer_on_1MHz(uint16_t period_in_us)
     }
 }
 
+template <typename T>
+void Main<T>::print_info_detail(uint16_t period_in_us)
+{
+    using ENG_notation =
+        atd::Magnitude_ENG_notation<avr::Hertz::Unit, avr::Hertz::Rep>;
+
+    avr::UART_iostream uart;
+
+    uart << period_in_us << "\t|" << 
+	ENG_notation{SW_gen::min_frequency()} << "\t|" << 
+	ENG_notation{SW_gen::max_frequency()} << '\n';
+}
+
+template <typename T>
+void Main<T>::info()
+{
+    avr::UART_iostream uart;
+
+    uart << "\n\nFrecuencias generadas (a 1MHz el micro)\n"
+	        "---------------------------------------\n";
+
+    SW_gen::ch1_off();
+    SW_gen::ch2_off();
+
+
+    uart << "period (in us) |   min freq   | max freq\n";
+    timer_on_1MHz(1);
+    print_info_detail(1);
+    timer_on_1MHz(8);
+    print_info_detail(8);
+    timer_on_1MHz(64);
+    print_info_detail(64);
+    timer_on_1MHz(256);
+    print_info_detail(256);
+    timer_on_1MHz(1024);
+    print_info_detail(1024);
+
+    char c{};
+    uart << "\n\nPress a key to continue\n";
+    uart >> c;
+
+    // lo dejamos como estaba
+    timer_on_1MHz(period_in_us_);
+}
 
 template <typename T>
 void Main<T>::on()
@@ -228,11 +276,16 @@ void Main<T>::run()
 		"[s]elect frequency\n"
 		"ch[1] menu\n"
 		"ch[2] menu\n"
+		"[i]nfo\n"
 		"[b]ack to main menu\n";
 
 	uint32_t num;
 	uart >> c;
 	switch(c){
+	    case 'i':
+		info();
+		break;
+
 	    case 'p':
 		period_in_us_ = select_period_1MHz();
 		SW_gen::off();
