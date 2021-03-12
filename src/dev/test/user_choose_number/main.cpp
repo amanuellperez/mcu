@@ -182,13 +182,28 @@ void test_counter()
     LCD lcd;
     lcd.clear();
 
-    lcd << "Counter test:";
-    lcd.cursor_pos(0, 1);
 
-    wait_ms(1000);
-    lcd.clear();
 
     dev::__user_choose_number::Counter counter;
+
+    lcd.clear();
+    lcd << "Testing velocity";
+    wait_ms(1000);
+    lcd.clear();
+    counter.reset();
+
+    for (uint8_t i = 0; i < 40; ++i) {
+        counter.tick();
+	if (counter.trigger())
+	    lcd << '-';
+
+	wait_ms(T_clock);
+    }
+    wait_ms(1000);
+
+    lcd << "Counter test:";
+    wait_ms(1000);
+    lcd.clear();
 
     for (uint8_t i = 0; i < 40; ++i) {
 	lcd.clear();
@@ -207,27 +222,13 @@ void test_counter()
     }
 
     wait_ms(1000);
-    lcd.clear();
-    lcd << "Testing velocity";
-    wait_ms(1000);
-    lcd.clear();
-    counter.reset();
-
-    for (uint8_t i = 0; i < 40; ++i) {
-        counter.tick();
-	if (counter.trigger())
-	    lcd << '-';
-
-	wait_ms(T_clock);
-    }
-    wait_ms(1000);
 }
 
 
 int main()
 {
     while(1){
-//	test_counter();
+	//test_counter();
 	test_choose_number2();
     }
 }

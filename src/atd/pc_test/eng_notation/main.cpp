@@ -211,12 +211,27 @@ void test_order()
     }
 }
 
-//void test_decimal()
-//{
-//    test::interfaz("Decimal");
-//    using Pascal = atd::Pascal<atd::Decimal<int, 3>>;
-//
-//}
+void test_to_eng_notation()
+{
+    using Hertz0 = atd::Hertz<atd::Decimal<uint16_t, 2>>;
+    using Hertz1 = atd::Hertz<double>;
+
+    using ENG0 = atd::Magnitude_ENG_notation<Hertz0::Unit, uint8_t>;
+
+    Hertz0 f0{Hertz0::Rep{120, 13}};
+    ENG0 e0 = atd::to_eng_notation<uint8_t>(f0);
+    CHECK_TRUE(e0.value() == 120, "to_eng_notation");
+
+    Hertz1 f1{234.67};
+    ENG0 e1 = atd::to_eng_notation<uint8_t>(f1);
+    CHECK_TRUE(e1.value() == 234, "to_eng_notation");
+
+    auto e2 = atd::to_eng_notation(f0);
+    CHECK_TRUE((e2.value() == Hertz0::Rep{120,13}), "to_eng_notation");
+
+
+}
+
 
 int main()
 {
@@ -228,7 +243,9 @@ try{
     test_basic<atd::Decimal<int,2>>();
     test_order<double>();
     test_order<atd::Decimal<int,2>>();
+    test_to_eng_notation();
     test_symbol();
+
 
 }catch(std::exception& e)
 {

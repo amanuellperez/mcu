@@ -548,11 +548,10 @@ void test_magnitude_frequency()
 	Microsecond T0 = atd::inverse(freq);
 	std::cout << "freq = " << freq << " Hz\n";
 	std::cout << "T0 = " << T0 << " us\n";
-	uint32_t T = atd::to_integer(T0.value());
+	uint32_t T = atd::to_integer<uint32_t>(T0.value());
 	std::cout << "T = " << T << " us\n";
         uint32_t top = T / (static_cast<uint32_t>(period_in_us) * uint32_t{2});
 	std::cout << "top = " << top << "\n";
-
     }
 
     {// bug: Magnitude * Decimal ¿qué funcion llamar?

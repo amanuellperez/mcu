@@ -29,6 +29,7 @@
  *    A.Manuel L.Perez
  *	27/08/2019 safe_static_cast
  *	10/11/2019 bounded_cast
+ *	12/03/2021 to_integer
  *
  ****************************************************************************/
 #include <limits>
@@ -88,6 +89,12 @@ inline std::byte to_byte(bool x)
     if (x)  return std::byte{1};
     else    return std::byte{0};
 }
+
+// (RRR) ¿Cómo convertir double en int? ¿y atd::Decimal en int? Necesito un
+// interfaz común. to_integer lo suministra.
+template <typename T>
+inline T to_integer(const T& x) {return x;}
+
 
 }// namespace
 

@@ -676,18 +676,13 @@ std::ostream& operator<<(std::ostream& out,
 
 
 // casting
-template <typename Rep, int N>
-constexpr Rep to_integer(const Decimal<Rep, N>& d)
-{
-    auto [i, f] = d.value();
-    return i;
-}
-
-template <typename Rep2, typename Rep, int N>
+template <typename Rep2, int N, typename Rep = Rep2>
 constexpr Rep2 to_integer(const Decimal<Rep, N>& d)
 {
-    return static_cast<Rep2>(to_integer(d));
+    auto [i, f] = d.value();
+    return static_cast<Rep2>(i);
 }
+
 
 
 }// namespace atd

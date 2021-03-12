@@ -39,7 +39,32 @@
  *			* Mejoro la lectura. Si el usuario quiere pasar de 
  *			  1 Hz a 1 MHz no puede ir de uno en uno. Introduzco
  *			  Counter.
- *
+ *			  FRACASO!!!
+ *			  Pretendía sumar primero 1 al número, luego 10, y por
+ *			  últimmo 100 al número según mantuviese el usuario
+ *			  pulsada la tecla UP/DOWN. El problema es que para
+ *			  ello necesito poder hacer:
+ *				    x_ += incr_;
+ *			  donde incr_ será 1, 10 ó 100. Pero ¿cómo definir 
+ *			  ENG_notation{1}??? ¿Qué significa esto? Lo que
+ *			  quiero es sumarle 1 a x_. Si x_ son kHz quiero
+ *			  entonces incr_ = 1kHz, pero si x_ está en MHz
+ *			  entonces incr_ = 1MHz. 
+ *			  No basta con definir:
+ *				    incr = Rep{1}; ¿qué unidades?
+ *			  Podría definir por defecto 1 en la unidad base de
+ *			  ENG_notation (si son herztios 1 Hz), pero si x_ esta
+ *			  en MHz al sumarle 1 Hz no se va a ver en pantalla el
+ *			  cambio. No serviría para nada.
+ *			  De momento lo dejo así. Si se necesita implementar
+ *			  de verdad el caso de ENG_notation, el tiempo ya lo
+ *			  dirá. (una forma sería dar una implementación
+ *			  user_choose_number_type_lineal particular para
+ *			  el caso ENG_notation; otra intentar ver cómo definir
+ *			  Rep{1} con las mismas unidades de x_:
+ *			  to_integer(1, x_)??? En este último caso habria que
+ *			  definir esta función para todos los ints (se
+ *			  limitaría a hacer un return Rep{1})).
  *
  ****************************************************************************/
 #include <avr_time.h>
@@ -55,6 +80,12 @@ namespace dev{
 
 namespace __user_choose_number{
 
+// Al mantener pulsada la tecla UP, se quiere que al principio los números
+// cambien lentamente pero luego más rápidamente. 
+// El Counter se encarga de esto.
+// La idea es muestrear el teclado cada T_clock. Vamos contando cuántas veces
+// se ha pulsado UP al mirar T_clock y generamos un trigger cada cierto
+// tiempo. (quizás sería mejor llamarlo Metronomo?)
 class Counter{
 public:
     Counter() : counter_{d1_max[0], d0_max[0]} , i_{0}
@@ -190,14 +221,12 @@ private:
 // -----
     Rep x_;	    // Dato que mostramos en pantalla
 
-    Rep incr_;	    // lo que incrementamos
-
 
 // Configuración estática
 // ----------------------
     // Frecuencia de muestreo. Vamos a mirar cada 100 ms el estado
     // del teclado.
-    constexpr static uint8_t T_clock = 100; // 100 ms
+    static constexpr uint8_t T_clock = 100; // 100 ms
 
     enum class Tecla_pulsada{ up, down, ok, ninguna };
 
@@ -271,7 +300,6 @@ Rep User_choose_number<L, T, t0,Rep>::choose2(Rep x0)
     char fill_char = lcd_.fill('0');
 
     x_ = x0;
-    incr_ = Rep{1};
 
     lcd_.cursor_on();
 
@@ -303,7 +331,6 @@ Rep User_choose_number<L, T, t0, Rep>::choose4(Rep x0)
 { 
 
     x_ = x0;
-    incr_ = Rep{1};
     lcd_.cursor_on();
 
 // TODO: hacer local ultima_tecla_pulsada_, creo que solo lo necesita esta
@@ -362,8 +389,7 @@ void User_choose_number<L, T, t0,R>::update_ninguna()
 	ultima_tecla_pulsada_ = Tecla_pulsada::down;
 
 	if (x_ > min_)
-	    x_ -= incr_;
-//	    --x_;
+	    --x_;
     }
 
     else if (up_key().is_pressed()){
@@ -371,8 +397,7 @@ void User_choose_number<L, T, t0,R>::update_ninguna()
 	ultima_tecla_pulsada_ = Tecla_pulsada::up;
 
 	if (x_ < max_)
-	    x_ += incr_;
-//	    ++x_;
+	    ++x_;
     }
     else
 	ultima_tecla_pulsada_ = Tecla_pulsada::ninguna;
@@ -390,8 +415,7 @@ void User_choose_number<L, T, t0,R>::update_down()
 
 	if (x_ > min_){
 	    if (counter_.trigger())
-		x_ -= incr_;
-//		--x_;
+		--x_;
 
 	}
 	else{
@@ -415,8 +439,7 @@ void User_choose_number<L, T, t0,R>::update_up()
 
 	if (x_ < max_){
 	    if (counter_.trigger())
-		x_ += incr_;
-//		++x_;
+		++x_;
 	}
 	else{
 	    if constexpr (type == user_choose_number_type_circular){

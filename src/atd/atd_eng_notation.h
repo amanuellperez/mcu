@@ -27,9 +27,11 @@
  *  - HISTORIA:
  *    A.Manuel L.Perez
  *    04/02/2021 v0.0 Implementación mínima.
+ *    11/03/2021      to_eng_notation 
  *
  ****************************************************************************/
 #include "atd_magnitude.h"
+#include "atd_cast.h"	    // to_integer
 
 namespace atd{
 
@@ -119,6 +121,8 @@ private:
 
     static void print_exponent(std::ostream& out, int exp);
 
+    template <typename Int>
+    void __print(std::ostream& out) const;
 };
 
 template <typename U, typename Rep>
@@ -293,10 +297,26 @@ void Magnitude_ENG_notation<U, Rep>::common_representation(
 }
 
 
-template <typename U, typename R>
-void Magnitude_ENG_notation<U, R>::print(std::ostream& out) const
+template <typename U, typename Rep>
+void Magnitude_ENG_notation<U, Rep>::print(std::ostream& out) const
 {
-    out << x_ << ' ';
+    // para poder imprimir uint8_t como int
+    if constexpr (std::is_same_v<Rep, uint8_t>)
+	__print<unsigned int>(out);
+
+    else if constexpr (std::is_same_v<Rep, int8_t>)
+	__print<int>(out);
+
+    else 
+	__print<Rep>(out);
+
+}
+
+template <typename U, typename R>
+template <typename Int>
+void Magnitude_ENG_notation<U, R>::__print(std::ostream& out) const
+{
+    out << static_cast<Int>(x_) << ' ';
     print_exponent(out, exp_);
     out << Unit_symbol<Unit>;
 }
@@ -361,6 +381,34 @@ inline std::ostream& operator<<(std::ostream& out, const Magnitude_ENG_notation<
     m.print(out);
     return out;
 }
+
+// castings
+// --------
+template <typename Rep1,
+          typename Unit,
+          typename Rep0,
+	  typename Multiplier,
+          typename D>
+inline Magnitude_ENG_notation<Unit, Rep1>
+to_eng_notation(const Magnitude<Unit, Rep0, Multiplier, D>& m)
+{
+    Magnitude_ENG_notation<Unit, Rep0> tmp{m};
+
+    return Magnitude_ENG_notation<Unit, Rep1>{to_integer<Rep1>(tmp.value()),
+                                              tmp.exponent()};
+}
+
+// añado este porque parece sencillo de usar. El tiempo lo dira.
+template <typename Unit,
+          typename Rep,
+          typename Multiplier,
+          typename D>
+inline Magnitude_ENG_notation<Unit, Rep>
+to_eng_notation(const Magnitude<Unit, Rep, Multiplier, D>& m)
+{
+    return Magnitude_ENG_notation<Unit, Rep>{m};
+}
+
 
 }// namespace
 

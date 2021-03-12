@@ -438,7 +438,7 @@ void test_decimal_arithmetic_escalar()
 	Dec a{10};
 	Dec b{2};
 	auto c = a / b - 1;
-	int d = atd::to_integer(c);
+	int d = atd::to_integer<Dec::Rep>(c);
 	CHECK_TRUE(d == 4, "a / b - 1");
 
     }
@@ -514,7 +514,7 @@ void test_to_integer()
     using Dec8_1 = atd::Decimal<uint8_t, 1>;
 
     Dec8_1 d{10,3};
-    CHECK_TRUE(atd::to_integer(d) == 10, "to_integer");
+    CHECK_TRUE(atd::to_integer<uint8_t>(d) == 10, "to_integer");
     CHECK_TRUE(atd::to_integer<long>(d) == 10UL, "to_integer");
 
 
