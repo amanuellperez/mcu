@@ -27,7 +27,7 @@
  *  - HISTORIA:
  *    A.Manuel L.Perez
  *    04/02/2021 v0.0 Implementación mínima.
- *    11/03/2021      to_eng_notation 
+ *    11/03/2021      to_eng_magnitude
  *
  ****************************************************************************/
 #include "atd_magnitude.h"
@@ -384,13 +384,19 @@ inline std::ostream& operator<<(std::ostream& out, const ENG_Magnitude<U, R>& m)
 
 // castings
 // --------
+// (RRR) ¿Por qué no hacer ENG_magnitude{Magnitude}?
+// Cuando se pierda resolución, esto es cuando no se pueda hacer una
+// conversión implícita de la representación usada por Magnitude a la de
+// ENG_magnitude el usuario tiene que ser consciente del casting.
+// Ejemplo: pasar de Magnitude{440.23} Hz  a ENG_magnitude{440} Hz, pierde
+// resolución.
 template <typename Rep1,
           typename Unit,
           typename Rep0,
 	  typename Multiplier,
           typename D>
 inline ENG_Magnitude<Unit, Rep1>
-to_eng_notation(const Magnitude<Unit, Rep0, Multiplier, D>& m)
+to_eng_magnitude(const Magnitude<Unit, Rep0, Multiplier, D>& m)
 {
     ENG_Magnitude<Unit, Rep0> tmp{m};
 
@@ -404,10 +410,21 @@ template <typename Unit,
           typename Multiplier,
           typename D>
 inline ENG_Magnitude<Unit, Rep>
-to_eng_notation(const Magnitude<Unit, Rep, Multiplier, D>& m)
+to_eng_magnitude(const Magnitude<Unit, Rep, Multiplier, D>& m)
 {
     return ENG_Magnitude<Unit, Rep>{m};
 }
+
+
+template <typename Rep, typename Unit, typename ENG_Rep>
+inline Magnitude<Unit, Rep, std::ratio<1>>
+to_magnitude(const ENG_Magnitude<Unit, ENG_Rep>& m)
+{
+    ENG_Rep x = m.value() * ten_to_the<ENG_Rep>(m.exponent());
+    Rep res = static_cast<Rep>(x);
+    return Magnitude<Unit, Rep, std::ratio<1>>{res};
+}
+
 
 // ENG_magnitude por defecto
 // -------------------------

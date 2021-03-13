@@ -211,24 +211,41 @@ void test_order()
     }
 }
 
-void test_to_eng_notation()
+void test_to_eng_magnitude()
 {
     using Hertz0 = atd::Hertz<atd::Decimal<uint16_t, 2>>;
     using Hertz1 = atd::Hertz<double>;
 
-    using ENG_frequency = atd::ENG_frequency<uint8_t>;
+    using ENG_frequency = atd::ENG_frequency<uint16_t>;
 
     Hertz0 f0{Hertz0::Rep{120, 13}};
-    ENG_frequency e0 = atd::to_eng_notation<uint8_t>(f0);
-    CHECK_TRUE(e0.value() == 120, "to_eng_notation");
+    ENG_frequency e0 = atd::to_eng_magnitude<uint16_t>(f0);
+    CHECK_TRUE(e0.value() == 120, "to_eng_magnitude");
 
     Hertz1 f1{234.67};
-    ENG_frequency e1 = atd::to_eng_notation<uint8_t>(f1);
-    CHECK_TRUE(e1.value() == 234, "to_eng_notation");
+    ENG_frequency e1 = atd::to_eng_magnitude<uint16_t>(f1);
+    CHECK_TRUE(e1.value() == 234, "to_eng_magnitude");
 
-    auto e2 = atd::to_eng_notation(f0);
-    CHECK_TRUE((e2.value() == Hertz0::Rep{120,13}), "to_eng_notation");
+    auto e2 = atd::to_eng_magnitude(f0);
+    CHECK_TRUE((e2.value() == Hertz0::Rep{120,13}), "to_eng_magnitude");
+}
 
+void test_to_magnitude()
+{
+    using ENG_frequency = atd::ENG_frequency<double>;
+    ENG_frequency f0{324.23, 3};
+
+    using Hertz0 = atd::Hertz<atd::Decimal<uint32_t, 2>>;
+    Hertz0 h0 = atd::to_magnitude<Hertz0::Rep>(f0);
+    CHECK_TRUE(h0.value() == Hertz0::Rep{324230}, "to_magnitude");
+
+    using Hertz1 = atd::Hertz<uint32_t>;
+    Hertz1 h1 = atd::to_magnitude<Hertz1::Rep>(f0);
+    CHECK_TRUE(h1.value() == Hertz1::Rep{324230}, "to_magnitude");
+
+    using Hertz2 = atd::Hertz<int>;
+    Hertz2 h2 = atd::to_magnitude<Hertz2::Rep>(f0);
+    CHECK_TRUE(h2.value() == Hertz2::Rep{324230}, "to_magnitude");
 
 }
 
@@ -236,14 +253,15 @@ void test_to_eng_notation()
 int main()
 {
 try{
-    test::header("atd_eng_notation");
+    test::header("atd_eng_magnitude");
 
     test_basic<double>();
     test_double();
     test_basic<atd::Decimal<int,2>>();
     test_order<double>();
     test_order<atd::Decimal<int,2>>();
-    test_to_eng_notation();
+    test_to_eng_magnitude();
+    test_to_magnitude();
     test_symbol();
 
 
