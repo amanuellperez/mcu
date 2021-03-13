@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "../../atd_eng_notation.h"
+#include "../../atd_eng_magnitude.h"
 #include "../../atd_decimal.h"
 
 #include <alp_test.h>
@@ -34,7 +34,7 @@ void test_basic()
 
     {
     Meter m0{20000};
-    atd::Magnitude_ENG_notation m{m0};
+    atd::ENG_Magnitude m{m0};
 
     CHECK_TRUE(m.value() == Rep{20}, "constructor");
     CHECK_TRUE(m.exponent() == 3, "constructor");
@@ -51,7 +51,7 @@ void test_basic()
     std::cout << m << '\n';
 
     Meter m1b{30000};
-    atd::Magnitude_ENG_notation m1{m1b};
+    atd::ENG_Magnitude m1{m1b};
     CHECK_TRUE(m1.value() == Rep{30}, "constructor");
     CHECK_TRUE(m1.exponent() == 3, "constructor");
     m += m1;
@@ -66,7 +66,7 @@ void test_basic()
     }
     {
     Kilometer x0{999};
-    atd::Magnitude_ENG_notation x{x0};
+    atd::ENG_Magnitude x{x0};
     std::cout << x << '\n';
     CHECK_TRUE(x.value() == Rep{999}, "constructor");
     CHECK_TRUE(x.exponent() == 3, "constructor");
@@ -83,7 +83,7 @@ void test_basic()
     CHECK_TRUE(x.exponent() == 3, "constructor");
 
     Kilometer x1b{1};
-    atd::Magnitude_ENG_notation x1{x1b};
+    atd::ENG_Magnitude x1{x1b};
     CHECK_TRUE(x1.value() == Rep{1}, "constructor");
     CHECK_TRUE(x1.exponent() == 3, "constructor");
 
@@ -108,7 +108,7 @@ void test_double()
 
     {// caso extremo
     Kilometer x0{999.99};
-    atd::Magnitude_ENG_notation x{x0};
+    atd::ENG_Magnitude x{x0};
     std::cout << ":: " << x << '\n';
     CHECK_TRUE(x.value() == 999.99, "constructor");
     CHECK_TRUE(x.exponent() == 3, "constructor");
@@ -126,7 +126,7 @@ void test_double()
     CHECK_TRUE(x.exponent() == 3, "constructor");
 
     Kilometer x1b{1};
-    atd::Magnitude_ENG_notation x1{x1b};
+    atd::ENG_Magnitude x1{x1b};
     CHECK_TRUE(x1.value() == 1, "constructor");
     CHECK_TRUE(x1.exponent() == 3, "constructor");
 
@@ -143,7 +143,7 @@ void test_double()
 //    { // Esto no tiene que compilar:
 //    using Not_decimal = atd::Magnitude<atd::Units_length, int, std::ratio<1, 2>>;
 //    Not_decimal bad{20};
-//    atd::Magnitude_ENG_notation eng1{bad};
+//    atd::ENG_Magnitude eng1{bad};
 //    }
 }
 
@@ -156,23 +156,23 @@ void test_symbol()
     using Pascal = atd::Pascal<double>;
 
     {
-    atd::Magnitude_ENG_notation x{Kilometer{100}};
+    atd::ENG_Magnitude x{Kilometer{100}};
     CHECK_STDOUT(x, "100 km");
     }
     {
-    atd::Magnitude_ENG_notation x{MegaHertz{100}};
+    atd::ENG_Magnitude x{MegaHertz{100}};
     CHECK_STDOUT(x, "100 MHz");
     }
     {
-    atd::Magnitude_ENG_notation x{Microsecond{100}};
+    atd::ENG_Magnitude x{Microsecond{100}};
     CHECK_STDOUT(x, "100 us");
     }
     {
-    atd::Magnitude_ENG_notation x{Kelvin{100}};
+    atd::ENG_Magnitude x{Kelvin{100}};
     CHECK_STDOUT(x, "100 K");
     }
     {
-    atd::Magnitude_ENG_notation x{Pascal{100}};
+    atd::ENG_Magnitude x{Pascal{100}};
     CHECK_STDOUT(x, "100 Pa");
     }
 }
@@ -184,8 +184,8 @@ void test_order()
     using KiloHertz = atd::KiloHertz<Rep>;
 
     {
-    atd::Magnitude_ENG_notation a{Hertz{100}};
-    atd::Magnitude_ENG_notation b{Hertz{200}};
+    atd::ENG_Magnitude a{Hertz{100}};
+    atd::ENG_Magnitude b{Hertz{200}};
     CHECK_TRUE(a < b, "operator<");
     CHECK_TRUE(a <= b, "operator<=");
     CHECK_TRUE(b >= a, "operator>=");
@@ -193,8 +193,8 @@ void test_order()
     }
 
     {
-    atd::Magnitude_ENG_notation a{Hertz{100}};
-    atd::Magnitude_ENG_notation b{KiloHertz{200}};
+    atd::ENG_Magnitude a{Hertz{100}};
+    atd::ENG_Magnitude b{KiloHertz{200}};
     CHECK_TRUE(a < b, "operator<");
     CHECK_TRUE(a <= b, "operator<=");
     CHECK_TRUE(b >= a, "operator>=");
@@ -202,8 +202,8 @@ void test_order()
     }
 
     {
-    atd::Magnitude_ENG_notation a{Hertz{1000}};
-    atd::Magnitude_ENG_notation b{KiloHertz{1}};
+    atd::ENG_Magnitude a{Hertz{1000}};
+    atd::ENG_Magnitude b{KiloHertz{1}};
     CHECK_TRUE(!(a < b), "operator<");
     CHECK_TRUE(a <= b, "operator<=");
     CHECK_TRUE(b >= a, "operator>=");
@@ -216,14 +216,14 @@ void test_to_eng_notation()
     using Hertz0 = atd::Hertz<atd::Decimal<uint16_t, 2>>;
     using Hertz1 = atd::Hertz<double>;
 
-    using ENG0 = atd::Magnitude_ENG_notation<Hertz0::Unit, uint8_t>;
+    using ENG_frequency = atd::ENG_frequency<uint8_t>;
 
     Hertz0 f0{Hertz0::Rep{120, 13}};
-    ENG0 e0 = atd::to_eng_notation<uint8_t>(f0);
+    ENG_frequency e0 = atd::to_eng_notation<uint8_t>(f0);
     CHECK_TRUE(e0.value() == 120, "to_eng_notation");
 
     Hertz1 f1{234.67};
-    ENG0 e1 = atd::to_eng_notation<uint8_t>(f1);
+    ENG_frequency e1 = atd::to_eng_notation<uint8_t>(f1);
     CHECK_TRUE(e1.value() == 234, "to_eng_notation");
 
     auto e2 = atd::to_eng_notation(f0);

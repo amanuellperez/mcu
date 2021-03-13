@@ -31,6 +31,7 @@
  *
  ****************************************************************************/
 #include <atd_magnitude.h>
+#include <atd_eng_magnitude.h>
 #include <atd_decimal.h>
 
 // (RRR) ¿Podrían ser todos estos tipos genéricos?
@@ -51,11 +52,16 @@ using Hertz     = atd::Hertz<__Freq_Rep>;
 using KiloHertz = atd::KiloHertz<__Freq_Rep>;
 using MegaHertz = atd::MegaHertz<__Freq_Rep>;
 
+using ENG_frequency = atd::ENG_frequency<uint16_t>;
+
 // Period types
 using Second      = atd::Second<__Freq_Rep>;
 using Millisecond = atd::Millisecond<__Freq_Rep>;
 using Microsecond = atd::Microsecond<__Freq_Rep>;
 using Nanosecond  = atd::Nanosecond<__Freq_Rep>;
+
+using ENG_time = atd::ENG_time<uint16_t>;
+
 
 // syntactic sugar
 namespace literals{

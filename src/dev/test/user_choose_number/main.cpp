@@ -20,7 +20,7 @@
 #include "../../dev_LCD_HD44780.h"
 #include <atd_decimal.h>
 #include <atd_magnitude.h>
-#include <atd_eng_notation.h>
+#include <atd_eng_magnitude.h>
 #include <avr_types.h>
 
 #include <avr_time.h>
@@ -81,13 +81,12 @@ void test_choose_number2()
 {
 using namespace avr::literals;
     lcd.clear();
-    lcd << "ENG Hertz";
-    using ENG_Hertz =
-	atd::Magnitude_ENG_notation<avr::Hertz::Unit, uint16_t>;
-    ENG_Hertz u8 = dev::user_choose_number_lineal<LCD, Keyboard, ENG_Hertz>(
+    lcd << "ENG frequency";
+    using ENG_frequency = avr::ENG_frequency;
+    ENG_frequency u8 = dev::user_choose_number_lineal<LCD, Keyboard, ENG_frequency>(
 		       lcd, keyboard)
 		       .pos(3, 1)
-		       .choose4(ENG_Hertz{999, 0});
+		       .choose4(ENG_frequency{999, 0});
 
     lcd.cursor_pos(0,0);
     lcd << "has elegido: " << u8;
