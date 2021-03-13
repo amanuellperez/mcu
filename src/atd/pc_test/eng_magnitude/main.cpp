@@ -24,8 +24,210 @@
 using namespace test;
 
 
-template <typename Rep>
+
+void test_constexpr()
+{
+    test::interfaz("constexpr");
+
+    using Freq = atd::ENG_frequency<int>;
+    
+    constexpr Freq f{321, 3};
+    CHECK_TRUE(f.value() == 321 and f.exponent() == 3, "constexpr");
+
+}
+
 void test_basic()
+{
+    test::interfaz("basic");
+    using Freq = atd::ENG_frequency<double>;
+
+// construction
+    {
+	Freq a{20, 3};
+	CHECK_TRUE(a.value() == 20.0 and a.exponent() == 3, "constructor");
+    }
+    {
+	Freq a{20, -3};
+	CHECK_TRUE(a.value() == 20.0 and a.exponent() == -3, "constructor");
+    }
+    {
+	Freq a0{1, 0};
+	CHECK_TRUE(a0.value() == 1.0 and a0.exponent() == 0, "constructor");
+
+	Freq a1{10, 0};
+	CHECK_TRUE(a1.value() == 10.0 and a1.exponent() == 0, "constructor");
+
+	Freq a2{100, 0};
+	CHECK_TRUE(a2.value() == 100.0 and a2.exponent() == 0, "constructor");
+
+	Freq a3{1000, 0};
+	CHECK_TRUE(a3.value() == 1.0 and a3.exponent() == 3, "constructor");
+
+	Freq a4{10000, 0};
+	CHECK_TRUE(a4.value() == 10.0 and a4.exponent() == 3, "constructor");
+    }
+
+// a + b
+    {
+	Freq a{20,3};
+	Freq b{30,3};
+	Freq c = a + b;
+	CHECK_TRUE(c.value() == 50 and c.exponent() == 3, "operator+");
+    }
+
+    {
+	Freq a{20,0};
+	Freq b{30,3};
+	Freq c = a + b;
+	CHECK_TRUE(c.value() == 30.02 and c.exponent() == 3, "operator+");
+    }
+    {
+	Freq a{20,0};
+	Freq b{30,6};
+	Freq c = a + b;
+	CHECK_TRUE(c.value() == 30.00002 and c.exponent() == 6, "operator+");
+    }
+    {// extremo
+	Freq a{1,0};
+	Freq b{999,0};
+	Freq c = a + b;
+	CHECK_TRUE(c.value() == 1.0 and c.exponent() == 3, "operator+");
+    }
+    {// extremo
+	Freq a{1,0};
+	Freq b{0,0};
+	Freq c = a + b;
+	CHECK_TRUE(c.value() == 1.0 and c.exponent() == 0, "operator+");
+    }
+
+
+
+// a - b
+    {
+	Freq a{30,3};
+	Freq b{20,3};
+	Freq c = a - b;
+	CHECK_TRUE(c.value() == 10 and c.exponent() == 3, "operator-");
+    }
+
+    {
+	Freq a{20,3};
+	Freq b{30,3};
+	Freq c = a - b;
+	CHECK_TRUE(c.value() == -10 and c.exponent() == 3, "operator-");
+    }
+
+    {
+	Freq a{20,0};
+	Freq b{30,3};
+	Freq c = b - a;
+	CHECK_TRUE(c.value() == 29.980 and c.exponent() == 3, "operator-");
+    }
+    {
+	Freq a{20,0};
+	Freq b{30,6};
+	Freq c = b - a;
+	CHECK_TRUE(c.value() == 29.999980 and c.exponent() == 6, "operator-");
+    }
+    {// extremo
+	Freq a{1,0};
+	Freq b{1,3};
+	Freq c = b - a;
+	CHECK_TRUE(c.value() == 999.0 and c.exponent() == 0, "operator-");
+    }
+    {// extremo
+	Freq a{0,0};
+	Freq b{1,3};
+	Freq c = b - a;
+	CHECK_TRUE(c.value() == 1.0 and c.exponent() == 3, "operator-");
+    }
+
+// a*x
+    {
+	Freq a{20,0};
+	Freq c = 2*a;
+	CHECK_TRUE(c.value() == 40.0 and c.exponent() == 0, "operator*");
+    }
+    {
+	Freq a{20,0};
+	Freq c = 1000*a;
+	CHECK_TRUE(c.value() == 20.0 and c.exponent() == 3, "operator*");
+    }
+    {
+	Freq a{900,3};
+	Freq c = a*250;
+	CHECK_TRUE(c.value() == 225.0 and c.exponent() == 6, "operator*");
+    }
+    {// extremo
+	Freq a{20,3};
+	Freq c = a*1;
+	CHECK_TRUE(c.value() == 20.0 and c.exponent() == 3, "operator*");
+    }
+
+// a/x
+    {
+	Freq a{20,0};
+        Freq c = a / 2;
+        CHECK_TRUE(c.value() == 10.0 and c.exponent() == 0, "operator/");
+    }
+    {
+	Freq a{20,0};
+	Freq c = a / 10;
+	CHECK_TRUE(c.value() == 2.0 and c.exponent() == 0, "operator/");
+    }
+
+    {
+	Freq a{20,0};
+	Freq c = a / 100;
+	CHECK_TRUE(c.value() == 200.0 and c.exponent() == -3, "operator/");
+    }
+    {
+        Freq a{20,0};
+	Freq c = a / 1000;
+	CHECK_TRUE(c.value() == 20.0 and c.exponent() == -3, "operator/");
+    }
+    {
+        Freq a{20,0};
+	Freq c = a / 10000;
+	CHECK_TRUE(c.value() == 2.0 and c.exponent() == -3, "operator/");
+    }
+
+    {
+	Freq a{20,0};
+	Freq c = a / 0.1;
+	CHECK_TRUE(c.value() == 200.0 and c.exponent() == 0, "operator/");
+    }
+    {
+	Freq a{20,0};
+	Freq c = a / 0.01;
+	CHECK_TRUE(c.value() == 2.0 and c.exponent() == 3, "operator/");
+    }
+    {
+	Freq a{20,0};
+	Freq c = a / 0.001;
+	CHECK_TRUE(c.value() == 20.0 and c.exponent() == 3, "operator/");
+    }
+
+    {
+	Freq a{2,3};
+	Freq c = a / 10000000;
+	CHECK_TRUE(c.value() == 200.0 and c.exponent() == -6, "operator/");
+    }
+
+    {
+	Freq a{900,3};
+        Freq c = a / 250;
+        CHECK_TRUE(c.value() == 3.6 and c.exponent() == 3, "operator/");
+    }
+    {// extremo
+	Freq a{20,3};
+        Freq c = a / 1;
+        CHECK_TRUE(c.value() == 20.0 and c.exponent() == 3, "operator/");
+    }
+}
+
+template <typename Rep>
+void test_basic_old()
 {
     test::interfaz("basic");
 
@@ -255,9 +457,12 @@ int main()
 try{
     test::header("atd_eng_magnitude");
 
-    test_basic<double>();
+    test_constexpr();
+    test_basic();
+
+    test_basic_old<double>();
     test_double();
-    test_basic<atd::Decimal<int,2>>();
+    test_basic_old<atd::Decimal<int,2>>();
     test_order<double>();
     test_order<atd::Decimal<int,2>>();
     test_to_eng_magnitude();

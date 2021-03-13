@@ -414,14 +414,14 @@ constexpr inline std::common_type_t <
 // hora de multiplicar ya que ¿qué sentido tiene multiplicar dos temperaturas?
 template <typename U1, typename R1, typename M1, typename D,
 	  typename U2, typename R2, typename M2>
-inline constexpr Magnitude<Unit_plus<U1, U2>,
+inline constexpr Magnitude<Unit_multiply<U1, U2>,
 			  std::common_type<R1, R2>,
 			  std::ratio_multiply<M1, M2>,
 			  D>
 operator*(const Magnitude<U1,R1,M1,D>& m1, const Magnitude<U2,R2,M2,D>& m2)
 {
     using Rep = std::common_type<R1, R2>;
-    using CT = Magnitude<Unit_plus<U1, U2>,
+    using CT = Magnitude<Unit_multiply<U1, U2>,
 			  Rep,
 			  std::ratio_multiply<M1, M2>,
 			  D>;

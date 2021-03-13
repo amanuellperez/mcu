@@ -26,25 +26,6 @@
 using namespace test;
 
 
-void test_unit()
-{
-    test::interfaz("Unit");
-    
-    using U1 = atd::Unit<1,2,3,4>;
-    using U2 = atd::Unit<5,6,7,8>;
-
-    using Up = atd::Unit_plus<U1, U2>;
-    CHECK_TRUE(Up::m == U1::m + U2::m and
-	       Up::kg == U1::kg + U2::kg and
-	       Up::s == U1::s + U2::s and
-	       Up::K == U1::K + U2::K, "Unit_plus");
-
-    using Um = atd::Unit_minus<U1, U2>;
-    CHECK_TRUE(Um::m == U1::m - U2::m and
-	       Um::kg == U1::kg - U2::kg and
-	       Um::s == U1::s - U2::s and
-	       Um::K == U1::K - U2::K, "Unit_minus");
-}
 
 // Pruebas básicas con un único tipo de multiplier (EJ: todo en metros)
 void test_magnitude_basic()
@@ -657,7 +638,6 @@ int main()
 try{
     test::header("atd_magnitude");
     
-    test_unit();
     test_magnitude();
     test_usability();
 

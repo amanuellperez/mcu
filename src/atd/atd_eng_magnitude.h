@@ -32,6 +32,7 @@
  ****************************************************************************/
 #include "atd_magnitude.h"
 #include "atd_cast.h"	    // to_integer
+#include "atd_math.h"
 
 namespace atd{
 
@@ -55,29 +56,47 @@ namespace atd{
  *
  *  A simple vista esta clase es más ineficiente que Magnitude, ya que
  *  almacena en memoria el exponente, mientras que Magnitude no (lo gestiona
- *  en tiempo de compilación). Además al suministrar funciones de impresión
+ *  en tiempo de compilación) <--- Resulta que esto es falso. Al medir el
+ *  tamaño de Hertz y ENG_Frequency para los avrs obtengo 4 bytes a ambos.
+ *  ¿Por qué? Para Hertz uso como Rep uint32_t, mientras que ENG_Frequency usa
+ *  uint16_t para Rep y int (que debería de ser 1 byte en avr) para el
+ *  exponente. En la práctica ocupan lo mismo!!!
+ *
+ *  Además al suministrar funciones de impresión
  *  almacena en memoria caracteres que Magnitude no tiene. Por otra parte es
  *  muy cómoda para mostrar magnitudes en un LCD (esta es su finalidad
  *  inicial).
+ *
+ *  Esta clase permite definir Frequency, Time, Pressure y demás, cosa que no
+ *  es posible con Magnitude (hay que definir Hertz, Kilohertz...). Parece
+ *  mucho más cómoda ENG_Magnitude que Magnitude. Probemos.
+ *
  *
  */
 template <typename Unit0, typename Rep0>
 class ENG_Magnitude{
 public:
-    using Unit = Unit0;
-    using Rep  = Rep0;
+    using Unit	   = Unit0;
+    using Rep      = Rep0;
     using Exponent = int;
+    using Scalar   = Rep0;
+    
+    // Rep almacena de -999 a 999 (signed) o de 0 a 999.
+    static_assert (sizeof(Rep) > 1, 
+	    "sizeof(Rep) has to be at least 2 bytes");
 
-// constructor
+    // constructor
     constexpr ENG_Magnitude() = default;
 
     constexpr ENG_Magnitude(const Rep& x, Exponent exp)
-	: x_{x}, exp_{exp} {}
+	: x_{x}, exp_{exp} { update_representation(); }
 
+    // TODO: eliminar a favor de to_magnitude
     template <typename Multiplier, typename D>
     constexpr ENG_Magnitude(
         const Magnitude<Unit, Rep, Multiplier, D>& m);
 
+    // TODO: eliminar a favor de to_magnitude
     template <typename Multiplier, typename D>
     constexpr ENG_Magnitude& operator=(
         const Magnitude<Unit, Rep, Multiplier, D>& m);
@@ -91,6 +110,9 @@ public:
 
     ENG_Magnitude& operator+=(ENG_Magnitude b);
     ENG_Magnitude& operator-=(ENG_Magnitude b);
+
+    ENG_Magnitude& operator*=(const Scalar& a);
+    ENG_Magnitude& operator/=(const Scalar& a);
 
 // order
     bool operator<(const ENG_Magnitude& b) const;
@@ -108,23 +130,22 @@ public:
 
 private:
     Rep x_;	// valor númerico
-    Exponent exp_;	// exponente
+    Exponent exp_;	// exponente: invariante: siempre múltiplo de 3
 
 // Helpers
     template <typename Multiplier, typename D>
     constexpr void init(const Magnitude<Unit, Rep, Multiplier, D>& m);
 
-    void update_representation();
+    constexpr void update_representation();
 
-    static void common_representation(ENG_Magnitude& a,
-                                      ENG_Magnitude& b);
+    static void common_exponent(ENG_Magnitude& a, ENG_Magnitude& b);
 
     static void print_exponent(std::ostream& out, int exp);
 
-    template <typename Int>
-    void __print(std::ostream& out) const;
 };
 
+// Construction
+// ------------
 template <typename U, typename Rep>
 template <typename Multiplier, typename D>
 constexpr void ENG_Magnitude<U, Rep>::init(
@@ -156,27 +177,47 @@ operator=(const Magnitude<U, Rep, Multiplier, D>& m)
 }
 
 
-// n = exponente
 template <typename U, typename Rep>
-void ENG_Magnitude<U, Rep>::update_representation()
+constexpr void ENG_Magnitude<U, Rep>::update_representation()
 {
     while (x_ >= Rep{1000}){
 	x_ /= Rep{10};
 	++exp_;
     }
 
+// update_exponent():
     int r = exp_ % 3;
-    if (r == 1){
-	x_ /= Rep{100};
-	exp_ += 2;
-    }
-    else if (r == 2){
-	x_ /= Rep{10};
-	exp_ += 1;
+    switch (r) {
+        case 1:
+	case -2:
+	    if (x_ >= Rep{100}){
+		x_ /= Rep{100};
+		exp_ += 2;
+	    }
+	    else {
+		x_ *= Rep{10};
+		exp_ -= 1;
+	    }
+            break;
+
+        case 2:
+	case -1:
+	    if (x_ >= Rep{10}){
+		x_ /= Rep{10};
+		exp_ += 1;
+	    }
+	    else{
+		x_ *= Rep{100};
+		exp_ -= 2;
+	    }
+            break;
     }
 }
 
 
+
+// algebra
+// -------
 template <typename U, typename Rep>
 inline ENG_Magnitude<U, Rep>& ENG_Magnitude<U, Rep>::operator++()
 {
@@ -222,7 +263,7 @@ template <typename U, typename Rep>
 ENG_Magnitude<U, Rep>& ENG_Magnitude<U, Rep>::
 operator+=(ENG_Magnitude b)
 {
-    common_representation(*this, b);
+    common_exponent(*this, b);
     x_ += b.x_;
     update_representation();
 
@@ -233,12 +274,100 @@ template <typename U, typename Rep>
 ENG_Magnitude<U, Rep>& ENG_Magnitude<U, Rep>::
 operator-=(ENG_Magnitude b)
 {
-    common_representation(*this, b);
+    common_exponent(*this, b);
     x_ -= b.x_;
     update_representation();
 
     return *this;
 }
+
+
+template <typename U, typename Rep>
+ENG_Magnitude<U, Rep>& ENG_Magnitude<U, Rep>::
+operator*=(const ENG_Magnitude<U, Rep>::Scalar& a)
+{
+    x_ *= a;
+    update_representation();
+
+    return *this;
+}
+
+
+template <typename U, typename Rep>
+ENG_Magnitude<U, Rep>& ENG_Magnitude<U, Rep>::
+operator/=(const ENG_Magnitude<U, Rep>::Scalar& a)
+{
+    if (x_ > a)
+	x_ /= a;
+    else {
+	int n = number_of_digits(a);
+	x_ = (x_ * ten_to_the<Rep>(n) )/ a;
+	exp_ -= n;
+    }
+
+    update_representation();
+
+    return *this;
+}
+
+
+
+template <typename U, typename Rep1, typename Rep2>
+ENG_Magnitude<U, std::common_type_t<Rep1, Rep2>> operator+
+(const ENG_Magnitude<U, Rep1>& a, const ENG_Magnitude<U, Rep2>& b)
+{
+    using Rep = std::common_type_t<Rep1, Rep2>;
+    
+    ENG_Magnitude<U, Rep> x{a.value(), a.exponent()};
+    ENG_Magnitude<U, Rep> y{b.value(), b.exponent()};
+
+    x += y;
+
+    return x;
+}
+
+
+template <typename U, typename Rep1, typename Rep2>
+ENG_Magnitude<U, std::common_type_t<Rep1, Rep2>> operator-
+(const ENG_Magnitude<U, Rep1>& a, const ENG_Magnitude<U, Rep2>& b)
+{
+    using Rep = std::common_type_t<Rep1, Rep2>;
+    
+    ENG_Magnitude<U, Rep> x{a.value(), a.exponent()};
+    ENG_Magnitude<U, Rep> y{b.value(), b.exponent()};
+
+    x -= y;
+
+    return x;
+}
+
+
+template <typename U, typename Rep>
+inline ENG_Magnitude<U, Rep> operator*
+(const typename ENG_Magnitude<U, Rep>::Scalar& a, ENG_Magnitude<U, Rep> x)
+{
+    x *= a;
+
+    return x;
+}
+
+template <typename U, typename Rep>
+inline ENG_Magnitude<U, Rep> operator*
+(const ENG_Magnitude<U, Rep>& x, const typename ENG_Magnitude<U, Rep>::Scalar& a)
+{ return a*x; }
+
+template <typename U, typename Rep>
+inline ENG_Magnitude<U, Rep>
+operator/(ENG_Magnitude<U, Rep> x,
+          const typename ENG_Magnitude<U, Rep>::Scalar& a)
+{
+    x /= a;
+
+    return x;
+}
+
+
+
 
 // order
 // -----
@@ -283,40 +412,25 @@ inline bool operator>=(const ENG_Magnitude<U, R>& a,
 // varios
 // ------
 template <typename U, typename Rep>
-void ENG_Magnitude<U, Rep>::common_representation(
+void ENG_Magnitude<U, Rep>::common_exponent(
     ENG_Magnitude& a, ENG_Magnitude& b)
 {
     if (a.exp_ > b.exp_){
 	a.x_ *= ten_to_the<Rep>(a.exp_ - b.exp_);
+	a.exp_ = b.exp_;
     }
     else if (b.exp_ > a.exp_){
 	b.x_ *= ten_to_the<Rep>(b.exp_ - a.exp_);
+	b.exp_ = a.exp_;
     }
 
-    a.exp_ = b.exp_;
 }
 
 
 template <typename U, typename Rep>
 void ENG_Magnitude<U, Rep>::print(std::ostream& out) const
 {
-    // para poder imprimir uint8_t como int
-    if constexpr (std::is_same_v<Rep, uint8_t>)
-	__print<unsigned int>(out);
-
-    else if constexpr (std::is_same_v<Rep, int8_t>)
-	__print<int>(out);
-
-    else 
-	__print<Rep>(out);
-
-}
-
-template <typename U, typename R>
-template <typename Int>
-void ENG_Magnitude<U, R>::__print(std::ostream& out) const
-{
-    out << static_cast<Int>(x_) << ' ';
+    out << x_ << ' ';
     print_exponent(out, exp_);
     out << Unit_symbol<Unit>;
 }

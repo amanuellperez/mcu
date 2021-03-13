@@ -41,9 +41,9 @@ struct Unit{
 };
 
 // Operations
-// Addition: Unit_plus<U1, U2>
+// Addition: Unit_multiply<U1, U2>
 template <typename U1, typename U2>
-struct __Unit_plus{
+struct __Unit_multiply{
     using type = Unit<U1::m + U2::m,
 		      U1::kg + U2::kg,
 		      U1::s + U2::s,
@@ -52,11 +52,11 @@ struct __Unit_plus{
 };
 
 template <typename U1, typename U2>
-using Unit_plus = typename __Unit_plus<U1, U2>::type;
+using Unit_multiply = typename __Unit_multiply<U1, U2>::type;
 
-// Substraction: Unit_minus<U1, U2>
+// Substraction: Unit_divide<U1, U2>
 template <typename U1, typename U2>
-struct __Unit_minus{
+struct __Unit_divide{
     using type = Unit<U1::m - U2::m,
 		      U1::kg - U2::kg,
 		      U1::s - U2::s,
@@ -65,7 +65,7 @@ struct __Unit_minus{
 };
 
 template <typename U1, typename U2>
-using Unit_minus = typename __Unit_minus<U1, U2>::type;
+using Unit_divide = typename __Unit_divide<U1, U2>::type;
 
 
 // Inverse: Unit_inverse<U>
@@ -79,12 +79,14 @@ using Unit_inverse = typename __Unit_inverse<U>::type;
 
 
 // Different types of units
+using Units_scalar      = Unit<0, 0, 0, 0>;
 using Units_length      = Unit<1, 0, 0, 0>;
 using Units_mass	= Unit<0, 1, 0, 0>;
 using Units_time        = Unit<0, 0, 1, 0>;
 using Units_temperature = Unit<0, 0, 0, 1>;
 using Units_pressure    = Unit<-1, 1, -2, 0>;
 using Units_frequency   = Unit<0, 0, -1, 0>;
+using Units_velocity    = Unit<1, 0, -1, 0>;
 
 
 // Symbols
