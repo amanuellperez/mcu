@@ -274,15 +274,21 @@ template <typename U, typename Rep>
 ENG_Magnitude<U, Rep>& ENG_Magnitude<U, Rep>::
 operator/=(const ENG_Magnitude<U, Rep>::Scalar& a)
 {
-    if (x_ > a)
+
+    if (x_ > a){
 	x_ /= a;
+	write_as_eng(x_, exp_);
+    }
     else {
+	using Int = same_type_with_double_bits<Rep>;
+
 	int n = number_of_digits(a);
-	x_ = (x_ * ten_to_the<Rep>(n) )/ a;
-	exp_ -= n;
+        Int x    = (Int{x_} * ten_to_the<Int>(n)) / Int{a};
+        exp_ -= n;
+	write_as_eng(x, exp_);
+	x_ = to_integer<Rep>(x);
     }
 
-    write_as_eng(x_, exp_);
 
     return *this;
 }

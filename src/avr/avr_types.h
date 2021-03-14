@@ -43,7 +43,7 @@ namespace avr{
 //       Si se usan decimales no entran en uint16_t así que hay que usar un
 //       uint32_t. ¿O será mejor no usar Decimal y directamente uint16_t?
 using Frequency = atd::ENG_frequency<atd::Decimal<uint32_t, 3>>;
-using Time      = atd::ENG_time<uint16_t>;
+using Time      = atd::ENG_time<atd::Decimal<uint32_t, 3>>;
 
 // syntactic sugar
 namespace literals{

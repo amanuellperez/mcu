@@ -517,6 +517,13 @@ void test_to_integer()
     CHECK_TRUE(atd::to_integer<uint8_t>(d) == 10, "to_integer");
     CHECK_TRUE(atd::to_integer<long>(d) == 10UL, "to_integer");
 
+{// bug
+    using Dec1 = atd::Decimal<uint64_t, 3>;
+    using Dec2 = atd::Decimal<uint32_t, 3>;
+    Dec1 from{953, 67};
+    Dec2 to = atd::to_integer<Dec2>(from);
+    std::cout << from << " --> " << to << '\n';
+}
 
 }
 

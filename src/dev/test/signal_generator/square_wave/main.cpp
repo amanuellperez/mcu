@@ -228,7 +228,7 @@ void Main<Timer>::run()
     while(1){
         uart << "\n\nState"
                 "\n-----"
-                "\nTimer: period  = "
+                "\nTimer: period = "
              << Timer::clock_period();
 
         uart << "; frequency  = " << Timer::clock_frequency();
