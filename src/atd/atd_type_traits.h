@@ -28,6 +28,7 @@
  *    A.Manuel L.Perez
  *    27/08/2019 Less_than, Pertenece_al_intervalo_cerrado
  *    12/02/2021 has_same_sign, same_type_with_double_bits
+ *    14/03/2021 same_type_at_least32
  *
  ****************************************************************************/
 #include <type_traits>
@@ -138,6 +139,56 @@ struct same_type_with_double_bits_<int32_t>{
 template <typename T>
 using same_type_with_double_bits =
     typename same_type_with_double_bits_<T>::type;
+
+
+/*!
+ *  \brief  Devuelve el mismo type pero mínimo de 32 bits
+ *
+ *  Integer same_type_at_least32(Integer T)
+ *  {
+ *	switch(T){
+ *	    case uint8_t :
+ *	    case uint16_t:
+ *		return uint32_t;
+ *
+ *	    case int8_t:
+ *	    case int16_t:
+ *		return int32_t;
+ *
+ *	    default:
+ *		return T;
+ *	} 
+ *  }
+ */
+template <typename T>
+struct same_type_at_least32_{
+    using type = T;
+};
+
+template<>
+struct same_type_at_least32_<uint8_t>{
+    using type = uint32_t;
+};
+
+template<>
+struct same_type_at_least32_<uint16_t>{
+    using type = uint32_t;
+};
+
+template<>
+struct same_type_at_least32_<int8_t>{
+    using type = int32_t;
+};
+
+template<>
+struct same_type_at_least32_<int16_t>{
+    using type = int32_t;
+};
+
+template <typename T>
+using same_type_at_least32 =
+    typename same_type_at_least32_<T>::type;
+
 
 }// namespace
 

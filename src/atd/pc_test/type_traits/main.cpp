@@ -122,6 +122,26 @@ void test_same_type_double_bits()
     test_same_type_double_bits<int64_t, int64_t>();
 }
 
+template <typename T, typename U>
+void test_same_type_at_least32()
+{
+    CHECK_TRUE((std::is_same_v<atd::same_type_at_least32<T>, U>),
+               "same_type_at_least32");
+}
+
+void test_same_type_at_least32()
+{
+    test::interfaz("same_type_at_least32");
+    test_same_type_at_least32<uint8_t, uint32_t>();
+    test_same_type_at_least32<uint16_t, uint32_t>();
+    test_same_type_at_least32<uint32_t, uint32_t>();
+    test_same_type_at_least32<uint64_t, uint64_t>();
+
+    test_same_type_at_least32<int8_t, int32_t>();
+    test_same_type_at_least32<int16_t, int32_t>();
+    test_same_type_at_least32<int32_t, int32_t>();
+    test_same_type_at_least32<int64_t, int64_t>();
+}
 
 int main()
 {
@@ -133,6 +153,7 @@ try{
     test_always_false();
     test_has_same_sign();
     test_same_type_double_bits();
+    test_same_type_at_least32();
 
 }catch(std::exception& e)
 {
