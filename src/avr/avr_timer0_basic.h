@@ -105,12 +105,12 @@ public:
     static void set_clock_period_in_us();
 
     template<uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
-    static Microsecond clock_period();
+    static Time clock_period();
 
     /// Frecuencia a la que funciona internamente el timer.
     /// Se cumple que clock_frequency() = 1 / clock_period();
     template <uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
-    static Hertz clock_frequency();
+    static Frequency clock_frequency();
 
 
 // ENCENDIDO/APAGADO DEL TIMER
@@ -200,8 +200,8 @@ private:
     template<uint16_t period>
     static void set_clock_period_in_us_8MHz();
 
-    static Microsecond clock_period_in_us_1MHz();
-    static Hertz clock_frequency_in_Hz_1MHz();
+    static Time clock_period_in_us_1MHz();
+    static Frequency clock_frequency_in_Hz_1MHz();
 
 }; // Timer0
 
@@ -348,23 +348,24 @@ inline void Timer0::set_clock_period_in_us()
 }
 
 // TODO: a .cpp?
-inline Microsecond Timer0::clock_period_in_us_1MHz()
+inline Time Timer0::clock_period_in_us_1MHz()
 {
+    using namespace literals;
     switch(frequency_divisor()){
-	case Frequency_divisor::no_preescaling	: return Microsecond{1u};
-	case Frequency_divisor::divide_by_8	: return Microsecond{8u};
-	case Frequency_divisor::divide_by_64	: return Microsecond{64u};
-	case Frequency_divisor::divide_by_256	: return Microsecond{256u};
-	case Frequency_divisor::divide_by_1024	: return Microsecond{1024u};
-	case Frequency_divisor::undefined	: return Microsecond{0};
+	case Frequency_divisor::no_preescaling	: return 1_us;
+	case Frequency_divisor::divide_by_8	: return 8_us;
+	case Frequency_divisor::divide_by_64	: return 64_us;
+	case Frequency_divisor::divide_by_256	: return 256_us;
+	case Frequency_divisor::divide_by_1024	: return 1024_us;
+	case Frequency_divisor::undefined	: return 0_us;
     }
 
-    return Microsecond{0};
+    return 0_us;
 }
 
 
 template<uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
-inline Microsecond Timer0::clock_period()
+inline Time Timer0::clock_period()
 {
     if constexpr (clock_frequency_in_hz == 1000000UL)
 	return clock_period_in_us_1MHz();
@@ -377,24 +378,25 @@ inline Microsecond Timer0::clock_period()
 
 
 
-inline Hertz Timer0::clock_frequency_in_Hz_1MHz()
+inline Frequency Timer0::clock_frequency_in_Hz_1MHz()
 {
-    using Rep = Hertz::Rep;
+    using namespace literals;
+    using Rep = Frequency::Rep;
     switch(frequency_divisor()){
-	case Frequency_divisor::no_preescaling	: return Hertz{1000000ul};
-	case Frequency_divisor::divide_by_8	: return Hertz{125000ul};
-	case Frequency_divisor::divide_by_64	: return Hertz{15625ul};
-	case Frequency_divisor::divide_by_256	: return Hertz{Rep{3906ul,25ul}};
-	case Frequency_divisor::divide_by_1024	: return Hertz{Rep{976ul,56ul}};
-	case Frequency_divisor::undefined	: return Hertz{0};
+	case Frequency_divisor::no_preescaling	: return 1_MHz;
+	case Frequency_divisor::divide_by_8	: return 125_KHz;
+	case Frequency_divisor::divide_by_64	: return Frequency{15625, 0};
+	case Frequency_divisor::divide_by_256	: return Frequency{Rep{3906ul,25ul}, 0};
+	case Frequency_divisor::divide_by_1024	: return Frequency{Rep{976ul,56ul}, 0};
+	case Frequency_divisor::undefined	: return 0_Hz;
     }
 
-    return Hertz{0};
+    return 0_Hz;
 }
 
 
 template<uint32_t clock_frequency_in_hz>
-inline Hertz Timer0::clock_frequency()
+inline Frequency Timer0::clock_frequency()
 {
     if constexpr (clock_frequency_in_hz == 1000000UL)
 	return clock_frequency_in_Hz_1MHz();

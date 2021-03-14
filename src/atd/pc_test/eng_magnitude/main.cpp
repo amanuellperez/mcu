@@ -47,8 +47,10 @@ void test_basic()
 
     // construction
     {
-	Freq a{20, 3};
+	constexpr Freq a{20, 3};
 	CHECK_TRUE(a.value() == 20.0 and a.exponent() == 3, "constructor");
+	CHECK_TRUE(a == a, "operator==");
+	CHECK_TRUE(!(a != a), "operator!=");
     }
     {
 	Freq a{20, -3};
@@ -395,6 +397,23 @@ void test_basic2()
         Velocity v = s / t;
 	CHECK_TRUE(v.value() == Rep{2} and v.exponent() == 0, "operator/");
     }
+    {// operator freq/freq 
+	Freq f1{1, 6};
+	Freq f2{200, 3};
+	Rep res = f1 / f2 + Rep{1};
+	CHECK_TRUE(res == Rep{6}, "operator/");
+    }
+
+    {// construimos como en avr
+	constexpr unsigned long long int freq = 1000000ul;
+	constexpr Freq f{freq, 0};
+	CHECK_TRUE(f.value() == Rep{1} and f.exponent() == 6, "constructor");
+    }
+    {// construimos como en avr
+	unsigned long long int freq = 8000000ul;
+	Freq f{freq, 0};
+	CHECK_TRUE(f.value() == Rep{8} and f.exponent() == 6, "constructor");
+    }
 }
 
 void test_double()
@@ -473,8 +492,8 @@ void test_order()
     using Freq     = atd::ENG_frequency<Rep>;
 
     {
-    Freq a{100,0};
-    Freq b{200,0};
+    constexpr Freq a{100,0};
+    constexpr Freq b{200,0};
     CHECK_TRUE(a < b, "operator<");
     CHECK_TRUE(a <= b, "operator<=");
     CHECK_TRUE(b >= a, "operator>=");
@@ -498,6 +517,12 @@ void test_order()
     CHECK_TRUE(b >= a, "operator>=");
     CHECK_TRUE(!(b > a), "operator>");
     }
+
+//    {// bug
+//    constexpr Freq f {1,6};
+//    Freq f2 = f / typename Freq::Scalar{2};
+//    std::cout << " -----> " << f << " / 2 = " << f2 << '\n';
+//    }
 }
 
 void test_to_eng_magnitude()
@@ -539,6 +564,23 @@ void test_to_magnitude()
 }
 
 
+void test_bugs()
+{
+
+    test::interfaz("bugs");
+
+    {
+	using Rep = atd::Decimal<uint32_t, 3>;
+	using Freq = atd::ENG_frequency<Rep>;
+
+	Freq f{1,6};
+	Freq f2 = f / Rep{65536};
+
+	std::cout << f2 << '\n';
+
+    }
+}
+
 int main()
 {
 try{
@@ -555,6 +597,8 @@ try{
     test_to_eng_magnitude();
     test_to_magnitude();
     test_symbol();
+
+    test_bugs();
 
 
 }catch(std::exception& e)

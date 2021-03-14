@@ -30,7 +30,6 @@
  *    31/01/2021 v0.0
  *
  ****************************************************************************/
-#include <atd_magnitude.h>
 #include <atd_eng_magnitude.h>
 #include <atd_decimal.h>
 
@@ -40,48 +39,31 @@
 //       en lugar de Decimal (???)
 namespace avr{
 
-// Las frecuencias y los periodos tienen que tener el mismo tipo rep 
-// (mismo número número de decimales). 
-// Con 2 decimales en uint32_t nos entra: 4*10^9 = 4*10^7*10^2, podemos 
-// representar números con 7 cifras en la parte entera (hasta 40*10^6 Hz).
-// TODO: cambiarle el nombre. Scalar? Scalar_type? Scalar_t?
-using __Freq_Rep = atd::Decimal<uint32_t, 2>;
-
-// Frequencies types
-using Hertz     = atd::Hertz<__Freq_Rep>;
-using KiloHertz = atd::KiloHertz<__Freq_Rep>;
-using MegaHertz = atd::MegaHertz<__Freq_Rep>;
-
-using ENG_frequency = atd::ENG_frequency<uint16_t>;
-
-// Period types
-using Second      = atd::Second<__Freq_Rep>;
-using Millisecond = atd::Millisecond<__Freq_Rep>;
-using Microsecond = atd::Microsecond<__Freq_Rep>;
-using Nanosecond  = atd::Nanosecond<__Freq_Rep>;
-
-using ENG_time = atd::ENG_time<uint16_t>;
-
+// (???) ¿Usar o no usar decimales con las frecuencias?
+//       Si se usan decimales no entran en uint16_t así que hay que usar un
+//       uint32_t. ¿O será mejor no usar Decimal y directamente uint16_t?
+using Frequency = atd::ENG_frequency<atd::Decimal<uint32_t, 3>>;
+using Time      = atd::ENG_time<uint16_t>;
 
 // syntactic sugar
 namespace literals{
-constexpr Hertz operator"" _Hz (unsigned long long int freq)
-{return Hertz{freq};}
+constexpr Frequency operator"" _Hz (unsigned long long int freq)
+{return Frequency{freq, 0};}
 
-constexpr KiloHertz operator"" _KHz (unsigned long long int freq)
-{return KiloHertz{freq};}
+constexpr Frequency operator"" _KHz (unsigned long long int freq)
+{return Frequency{freq, 3};}
 
-constexpr MegaHertz operator"" _MHz (unsigned long long int freq)
-{return MegaHertz{freq};}
+constexpr Frequency operator"" _MHz (unsigned long long int freq)
+{return Frequency{freq, 6};}
 
-constexpr Second operator"" _s (unsigned long long int t)
-{return Second{t};}
+constexpr Time operator"" _s (unsigned long long int t)
+{return Time{t, 0};}
 
-constexpr Millisecond operator"" _ms (unsigned long long int t)
-{return Millisecond{t};}
+constexpr Time operator"" _ms (unsigned long long int t)
+{return Time{t, -3};}
 
-constexpr Microsecond operator"" _us (unsigned long long int t)
-{return Microsecond{t};}
+constexpr Time operator"" _us (unsigned long long int t)
+{return Time {t, -6};}
 
 }
 

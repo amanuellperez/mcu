@@ -21,39 +21,10 @@
 #include <avr_time.h>
 #include <avr_types.h>
 #include <avr_UART_iostream.h>
-#include <atd_eng_notation.h>
 
 
 
-
-
-void print(const avr::Microsecond& t)
-{
-    avr::UART_iostream uart;
-    if (t < avr::Microsecond{1000})
-	uart << t << " us";
-
-    else if (t < avr::Millisecond{1000})
-	uart << avr::Millisecond{t} << " ms";
-
-    else 
-	uart << avr::Second{t} << " s";
-
-}
-
-void print(const avr::Hertz& f)
-{
-    avr::UART_iostream uart;
-    if (f < avr::Hertz{1000})
-	uart << f << " Hz";
-
-    else if (f < avr::KiloHertz{1000})
-	uart << avr::KiloHertz{f} << " KHz";
-
-    else 
-	uart << avr::MegaHertz{f} << " MHz";
-}
-
+using namespace avr::literals;
 
 template <typename Timern>
 struct Main{
@@ -74,7 +45,7 @@ struct Main{
     static void timer_on_1MHz(uint16_t period_in_us);
 
 // data
-    avr::Hertz freq_ {100};
+    avr::Frequency freq_ = 100_Hz;
     bool ch1_on_ = false;
     bool ch2_on_ = false;
     uint16_t period_in_us_ = 1;
@@ -176,14 +147,12 @@ void Main<T>::timer_on_1MHz(uint16_t period_in_us)
 template <typename T>
 void Main<T>::print_info_detail(uint16_t period_in_us)
 {
-    using ENG_notation =
-        atd::Magnitude_ENG_notation<avr::Hertz::Unit, avr::Hertz::Rep>;
-
     avr::UART_iostream uart;
 
-    uart << period_in_us << "\t|" << 
-	ENG_notation{SW_gen::min_frequency()} << "\t|" << 
-	ENG_notation{SW_gen::max_frequency()} << '\n';
+    uart << period_in_us << "\t\t|" << 
+	SW_gen::clock_frequency() << "\t|" << 
+	SW_gen::min_frequency() << "\t|" << 
+	SW_gen::max_frequency() << '\n';
 }
 
 template <typename T>
@@ -198,7 +167,7 @@ void Main<T>::info()
     SW_gen::ch2_off();
 
 
-    uart << "period (in us) |   min freq   | max freq\n";
+    uart << "period (in us)\t| freq\t\t| min freq\t| max freq\n";
     timer_on_1MHz(1);
     print_info_detail(1);
     timer_on_1MHz(8);
@@ -224,21 +193,25 @@ void Main<T>::on()
     timer_on_1MHz(period_in_us_);
 }
 
-void debug_freq(avr::Hertz freq_sq)
+template <typename Timer>
+void debug_freq(const avr::Frequency& freq_sq)
 {
+    using Scalar = avr::Frequency::Scalar;
     avr::UART_iostream uart;
     uart << "\ndebug_freq: "
-	    "\nTimer::clock_frequency() / 2*freq_sq - 1ul = ";
-    uart << avr::Timer1::clock_frequency();
-    uart << " / " << freq_sq << " - 1\n\t top = ";
-    avr::Hertz::Scalar two = 2;
-    auto top = (avr::Timer1::clock_frequency() / (two * freq_sq)) - 1ul;
+	    "\ntop = Timer::clock_frequency() / 2*freq_sq - 1ul\n"
+	      "    = ";
+    uart << Timer::clock_frequency();
+    uart << " / " << freq_sq << " - 1\n"
+	    "   = ";
+    Scalar two = 2;
+    auto top = (Timer::clock_frequency() / (two * freq_sq)) - Scalar{1};
     uart << top << '\n';
 
 }
 
-template <typename T>
-void Main<T>::run()
+template <typename Timer>
+void Main<Timer>::run()
 {
     avr::UART_iostream uart;
 
@@ -253,19 +226,17 @@ void Main<T>::run()
 	uart >> c;
 
     while(1){
-	uart << "\n\nState"
-	          "\n-----"
-		"\nTimer: period  = ";
-	print(avr::Timer1::clock_period());
+        uart << "\n\nState"
+                "\n-----"
+                "\nTimer: period  = "
+             << Timer::clock_period();
 
-	uart << "; frequency  = ";
-	print(avr::Timer1::clock_frequency());
+        uart << "; frequency  = " << Timer::clock_frequency();
 
-	uart << "\n\nGenerated signal:"
-	        "\n    frequency  = ";
-	print(SW_gen::frequency());
+        uart << "\n\nGenerated signal:"
+                "\n    frequency  = " << SW_gen::frequency();
 
-	uart << "\n    ch1 " << (ch1_on_? "on": "off") 
+        uart << "\n    ch1 " << (ch1_on_? "on": "off") 
 	     << "\n    ch2 " << (ch2_on_? "on": "off") 
 	     << '\n';
 
@@ -299,13 +270,14 @@ void Main<T>::run()
 		on();
 		break;
 
-	    case 's': 
-		uart << "\nfreq (in Hz, máx " << SW_gen::max_frequency() << ") = ";
-		uart >> num;
+	    case 's':
+                uart << "\nfreq (in Hz, from " << SW_gen::min_frequency()
+                     << " to " << SW_gen::max_frequency() << ") = ";
+                uart >> num;
 		uart << num << '\n';
-		freq_ = avr::Hertz{num};
+		freq_ = avr::Frequency{num, 0};
 		SW_gen::frequency(freq_);
-		debug_freq(freq_);
+		debug_freq<Timer>(freq_);
 		break;
 
 	    case '1':

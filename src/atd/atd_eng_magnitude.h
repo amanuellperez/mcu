@@ -136,6 +136,9 @@ public:
     constexpr ENG_Magnitude(const Rep& x, Exponent exp)
 	: x_{x}, exp_{exp} {write_as_eng(x_, exp_);}
 
+    template <typename Int>
+    constexpr ENG_Magnitude(Int x, Exponent exp);
+
 
 // algebra
     ENG_Magnitude& operator++();
@@ -151,11 +154,11 @@ public:
     ENG_Magnitude& operator/=(const Scalar& a);
 
 // order
-    bool operator<(const ENG_Magnitude& b) const;
+    constexpr bool operator<(const ENG_Magnitude& b) const;
 
 // observers
-    Rep value() const {return x_;}
-    Exponent exponent() const {return exp_;}
+    constexpr Rep value() const {return x_;}
+    constexpr Exponent exponent() const {return exp_;}
 
 // print
     void print(std::ostream& out) const;
@@ -174,6 +177,20 @@ private:
     static void print_exponent(std::ostream& out, int exp);
 
 };
+
+// constructor
+// -----------
+// Observar que es obligatorio inicializar x_, exp_ sino no compila al ser
+// constexpr. ¿Por qué? ???
+template <typename U, typename Rep>
+template <typename Int>
+constexpr ENG_Magnitude<U, Rep>::ENG_Magnitude(Int x, Exponent exp):
+    x_{}, exp_{}
+{
+    write_as_eng(x, exp);
+    x_ = to_integer<Rep>(x);
+    exp_ = exp;
+}
 
 
 // algebra
@@ -372,6 +389,25 @@ operator/(const ENG_Magnitude<Unit1, Rep1>& a,
     return ENG{static_cast<Rep>(y), exp};
 }
 
+// División entre mismo tipo = resultado adimensional.
+template <typename Unit, typename Rep>
+Rep operator/(const ENG_Magnitude<Unit, Rep>& a,
+              const ENG_Magnitude<Unit, Rep>& b)
+{
+    using Int = same_type_at_least32<Rep>;
+    using Exponent = ENG_Magnitude<Unit, Rep>::Exponent;
+
+    Int y = (Int{a.value()} * Int{1000}) /Int{b.value()};
+    Exponent exp = a.exponent() - Exponent{3} - b.exponent();
+
+    write_as_eng(y, exp);
+
+    Int res = y * ten_to_the<Int>(exp);
+
+    return to_integer<Rep>(res);
+}
+
+
 
 // Rep es mínimo un entero donde podemos escribir de 0 a 999. ¿cómo dividir
 // 1/999? Multipliquemos por 1000 el numerador (y restemos 3 al exponente)
@@ -396,7 +432,19 @@ operator/(const Rep& a, const ENG_Magnitude<Unit1, Rep>& x)
 // order
 // -----
 template <typename U, typename Rep>
-bool ENG_Magnitude<U, Rep>::operator<(const ENG_Magnitude& b) const
+constexpr inline bool operator==(const ENG_Magnitude<U, Rep>& a,
+			         const ENG_Magnitude<U, Rep>& b)
+{ return a.value() == b.value() and a.exponent() == b.exponent(); }
+
+template <typename U, typename Rep>
+constexpr inline bool operator!=(const ENG_Magnitude<U, Rep>& a,
+			         const ENG_Magnitude<U, Rep>& b)
+{ return !(a == b); }
+
+
+
+template <typename U, typename Rep>
+constexpr bool ENG_Magnitude<U, Rep>::operator<(const ENG_Magnitude& b) const
 {
     if (exp_ < b.exp_)
 	return true;
@@ -414,20 +462,20 @@ bool ENG_Magnitude<U, Rep>::operator<(const ENG_Magnitude& b) const
 
 
 template <typename U, typename R>
-inline bool operator>(const ENG_Magnitude<U, R>& a, 
+constexpr inline bool operator>(const ENG_Magnitude<U, R>& a, 
 	       const ENG_Magnitude<U, R>& b)
 { return b < a; }
 
 
 template <typename U, typename R>
-inline bool operator<=(const ENG_Magnitude<U, R>& a, 
+constexpr inline bool operator<=(const ENG_Magnitude<U, R>& a, 
 	       const ENG_Magnitude<U, R>& b)
 { 
     return !(b < a);
 }
 
 template <typename U, typename R>
-inline bool operator>=(const ENG_Magnitude<U, R>& a, 
+constexpr inline bool operator>=(const ENG_Magnitude<U, R>& a, 
 	       const ENG_Magnitude<U, R>& b)
 { 
     return !(a < b);

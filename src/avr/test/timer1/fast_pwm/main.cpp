@@ -270,9 +270,9 @@ void print(Mode mode)
 {
     avr::UART_iostream uart;
 
-    avr::Microsecond period;
-    avr::Microsecond T_a;
-    avr::Microsecond T_b;
+    avr::Time period;
+    avr::Time T_a;
+    avr::Time T_b;
 
     switch(mode){
 	case Mode::top_0x00FF:
@@ -308,7 +308,7 @@ void print(Mode mode)
 	    uart << "\npin B desconectado!!! Señal solo se ve en pin A\n";
 	    period = (Timer::output_compare_register_A() + 1)* Timer::clock_period();
 	    T_b= Timer::output_compare_register_B()* Timer::clock_period();
-	    T_a = avr::Microsecond{0};
+	    T_a = 0_us;
 	    break;
     }
 

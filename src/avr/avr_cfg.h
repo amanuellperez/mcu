@@ -53,7 +53,8 @@
     constexpr uint32_t MCU_CLOCK_FREQUENCY_IN_HZ = F_CPU;
 
 namespace avr{
-constexpr Hertz clock_frequency{F_CPU};
+// constexpr Hertz clock_frequency{F_CPU};
+constexpr Frequency clock_frequency{F_CPU, 0};
 
 }// namespace
 

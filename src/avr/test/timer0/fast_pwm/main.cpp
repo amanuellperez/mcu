@@ -260,7 +260,7 @@ int main()
          << '\n';
 
     while(1){
-	avr::Microsecond period{};
+	avr::Time period{};
 	if (mode == Mode::top_0xFF)
 	    period = Timer::clock_period() * (0xFF + 1);
 	else 

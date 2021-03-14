@@ -93,7 +93,7 @@ inline std::byte to_byte(bool x)
 // (RRR) ¿Cómo convertir double en int? ¿y atd::Decimal en int? Necesito un
 // interfaz común. to_integer lo suministra.
 template <typename T>
-inline T to_integer(const T& x) {return x;}
+constexpr inline T to_integer(const T& x) {return x;}
 
 
 }// namespace

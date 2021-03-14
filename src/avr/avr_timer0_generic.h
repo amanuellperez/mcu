@@ -39,11 +39,11 @@ public:
 // types
     using Timer        = avr::Timer0;
     using counter_type = typename Timer::counter_type;
-    using Hertz        = avr::Hertz;
-    using Microsecond  = avr::Microsecond;
-    using Scalar       = Hertz::Scalar; // TODO: es el mismo para Microseconds 
-			    // y Hertz. ¿qué nombre común usar? ponerlo en
-			    // avr_types.h
+    using Frequency    = avr::Frequency;
+    using Time         = avr::Time;
+    using Scalar       = Frequency::Scalar; // TODO: es el mismo para Microseconds
+                                  // y Hertz. ¿qué nombre común usar? ponerlo en
+                                  // avr_types.h
 
     enum class Mode {
         fix_0xFF,
@@ -61,9 +61,9 @@ public:
 
 // Timer características
     template<uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
-    static Microsecond clock_period() {return Timer::clock_period();}
+    static Time clock_period() {return Timer::clock_period();}
 
-    static Hertz clock_frequency() {return Timer::clock_frequency();}
+    static Frequency clock_frequency() {return Timer::clock_frequency();}
 
 
 // Timer on/off
