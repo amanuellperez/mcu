@@ -4,8 +4,7 @@ SOURCES= main.cpp 			\
 		main_run.cpp 		\
 		cfg.cpp 			\
 		signal_generator.cpp \
-		sw_generator.cpp	\
-		sweep.cpp
+		sw_generator.cpp
 
 
 MCU = atmega328p

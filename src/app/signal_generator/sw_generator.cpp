@@ -17,10 +17,11 @@
 
 #include "main.h"
 
+#include <atd_eng_magnitude.h>
 
 void Main::window_sw_generator()
 {
-    show_window_sw_generator();
+    show_first_window_sw_generator();
     wait_release_key();
 
     while(1){
@@ -82,16 +83,30 @@ uint8_t Main::sw_generator_scan_keyboard()
 
 }
 
+void Main::show_first_window_sw_generator()
+{
+    lcd_.clear();
+
+    lcd_.cursor_pos(0,1);
+    lcd_ << atd::to_eng_magnitude<uint16_t>(speaker_.min_frequency())
+         << ", "
+	 << atd::to_eng_magnitude<uint16_t>(speaker_.max_frequency());
+
+    show_window_sw_generator();
+}
 
 
 void Main::show_window_sw_generator()
 {
-    lcd_.clear();
-    lcd_ << freq_gen_ << " Hz\n";
+    lcd_.cursor_pos(0,0);
 
+    lcd_ << freq_gen_ << "   ";
+
+    lcd_.cursor_pos(13, 0);
     if (on_)
-	lcd_ << "ON";
+	lcd_ << "ON ";
     else
 	lcd_ << "OFF";
+
 }
 

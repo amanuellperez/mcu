@@ -26,12 +26,11 @@
 #include <user_menu.h>
 #include "main.h"
 constexpr const char* menu_str[] =
-{"SW generator","sweep","cfg"};
+{"SW generator","cfg"};
 
 
 constexpr size_t menu_main0= 0;
-constexpr size_t menu_main1= 1;
-constexpr size_t menu_main2= 2;
+constexpr size_t menu_main2= 1;
 
 
 
@@ -39,7 +38,6 @@ using Option = dev::Option<Main>;
 
 using Options = atd::static_array<Option
 	, Option{0, menu_main0, &Main::window_sw_generator, 0}
-	, Option{0, menu_main1, &Main::window_sweep_menu, 0}
 	, Option{0, menu_main2, &Main::window_cfg, 0}
 	>;
 #endif

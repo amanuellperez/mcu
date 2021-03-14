@@ -21,14 +21,15 @@
 
 Main::Main()
 {
+// init data
+    freq_gen_ = atd::to_eng_magnitude<ENG_frequency::Rep>(avr::Hertz{998u});
+    on_ = false;
+
 // init_hardware():
     init_lcd();
     init_keyboard();
     init_signal_generator(sw_period_);
 
-// init data
-    freq_gen_ = avr::Hertz{440u};
-    on_ = false;
 }
 
 

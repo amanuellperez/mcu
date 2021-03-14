@@ -2,7 +2,7 @@ DIRS =  clocks 		\
 	   	blink		\
 		POV_toy		\
 		sensor		\
-		signal_generator \
+		audio_signal_gen \
 		util		
 
 

@@ -30,8 +30,8 @@ void Main::init_signal_generator(uint16_t period_in_us)
 
     }
 
-    speaker_.frequency(freq_gen_);
-    freq_gen_ = speaker_.frequency();
+    speaker_.frequency(atd::to_magnitude<avr::Hertz::Rep>(freq_gen_));
+    freq_gen_ = atd::to_eng_magnitude<ENG_frequency::Rep>(speaker_.frequency());
 }
 
 
@@ -51,35 +51,36 @@ void Main::turn_off()
 
 void Main::next_frequency()
 {
-    avr::Hertz old = freq_gen_;
-    speaker_.next_frequency();
-    freq_gen_ = speaker_.frequency();
+    avr::Hertz freq = atd::to_magnitude<avr::Hertz::Rep>(freq_gen_);
+    //avr::Hertz next_freq = freq_gen_ + avr::Hertz{1};
+    avr::Hertz next_freq = freq + avr::Hertz{1};
 
-    if (freq_gen_ - old < avr::Hertz{1}){
-	if (freq_gen_ != speaker_.max_frequency()){
-	    freq_gen_ += avr::Hertz{1};
-	    next_frequency();
-	}
+    if (next_freq > speaker_.max_frequency())
+	return;
+
+    while (freq < next_freq){
+	speaker_.next_frequency();
+	freq = speaker_.frequency();
     }
 
+    freq_gen_ = atd::to_eng_magnitude<ENG_frequency::Rep>(freq);
 }
 
-// por culpa del redondeo no decrementa de 1 en 1 cuando
-// los números son pequeños, sino más lentamente.
-// ¿merece la pena cambiarlo?
 void Main::previous_frequency()
 {
-    avr::Hertz old = freq_gen_;
+    avr::Hertz freq = atd::to_magnitude<avr::Hertz::Rep>(freq_gen_);
+    // avr::Hertz next_freq = freq_gen_ - avr::Hertz{1};
+    avr::Hertz next_freq = freq - avr::Hertz{1};
 
-    speaker_.previous_frequency();
-    freq_gen_ = speaker_.frequency();
+    if (next_freq < speaker_.min_frequency())
+	return;
 
-    if (old - freq_gen_ < avr::Hertz{1}){
-	if (freq_gen_ != speaker_.min_frequency()){
-	    freq_gen_ -= avr::Hertz{1};
-	    previous_frequency();
-	}
+    while (freq > next_freq){
+	speaker_.previous_frequency();
+	freq = speaker_.frequency();
     }
+
+    freq_gen_ = atd::to_eng_magnitude<ENG_frequency::Rep>(freq);
 }
 
 

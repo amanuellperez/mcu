@@ -32,14 +32,17 @@ struct Main {
     Main();
     void run();
 
+    using ENG_frequency = avr::ENG_frequency;
+
 // Hardware
-    LCD_ostream lcd_;
+    LCD lcd_;
     Keyboard keyboard_;
     OK_key ok_key_;
     Square_wave_generator speaker_;
 
 // Data
-    avr::Hertz freq_gen_{440u};
+    // avr::Hertz freq_gen_;
+    ENG_frequency freq_gen_;
     bool on_ = false;	    
     uint16_t sw_period_ = 1; // us
 
@@ -54,12 +57,9 @@ struct Main {
 
 //  sw_generator
     void window_sw_generator();
+    void show_first_window_sw_generator();
     void show_window_sw_generator();
     uint8_t sw_generator_scan_keyboard();
-
-//  sweep
-    void window_sweep_menu();
-    void window_sweep_run();
 
 // cfg
     void window_cfg();
