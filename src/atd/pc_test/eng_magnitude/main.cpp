@@ -36,12 +36,15 @@ void test_constexpr()
 
 }
 
-void test_basic()
+void test_basic_double()
 {
     test::interfaz("basic");
-    using Freq = atd::ENG_frequency<double>;
+    using Freq     = atd::ENG_frequency<double>;
+    using Length   = atd::ENG_length<double>;
+    using Time     = atd::ENG_time<double>;
+    using Velocity = atd::ENG_velocity<double>;
 
-// construction
+    // construction
     {
 	Freq a{20, 3};
 	CHECK_TRUE(a.value() == 20.0 and a.exponent() == 3, "constructor");
@@ -224,6 +227,82 @@ void test_basic()
         Freq c = a / 1;
         CHECK_TRUE(c.value() == 20.0 and c.exponent() == 3, "operator/");
     }
+
+// a*b
+    {
+	Velocity v{30,3};
+	Time t{20,3};
+	Length s = v * t;
+	CHECK_TRUE(s.value() == 600 and s.exponent() == 6, "operator*");
+    }
+    {
+	Velocity v{30,0};
+	Time t{20,3};
+	Length s = v * t;
+	CHECK_TRUE(s.value() == 600 and s.exponent() == 3, "operator*");
+    }
+    {
+	Velocity v{30,0};
+	Time t{20,-3};
+	Length s = v * t;
+	CHECK_TRUE(s.value() == 600 and s.exponent() == -3, "operator*");
+    }
+    {// overflow?
+	Velocity v{999,0};
+	Time t{999,0};
+	Length s = v * t;
+	CHECK_TRUE(s.value() == 998.001 and s.exponent() == 3, "operator*");
+    }
+    {// overflow?
+	Velocity v{-999,0};
+	Time t{-999,0};
+	Length s = v * t;
+	CHECK_TRUE(s.value() == 998.001 and s.exponent() == 3, "operator*");
+    }
+
+// a/b
+    {
+	Length s{60,0};
+	Time t{20,0};
+        Velocity v = s / t;
+        CHECK_TRUE(v.value() == 3 and v.exponent() == 0, "operator/");
+    }
+    {// speed of light
+	Length s{300,-3};
+	Time t{1,-9};
+        Velocity v = s / t;
+        CHECK_TRUE(v.value() == 300 and v.exponent() == 6, "operator/");
+    }
+    {// overflow?
+	Length s{1,3};
+	Time t{50,3};
+        Velocity v = s / t;
+        CHECK_TRUE(v.value() == 20 and v.exponent() == -3, "operator/");
+    }
+    {// overflow?
+	Length s{9,6};
+	Time t{900,3};
+        Velocity v = s / t;
+        CHECK_TRUE(v.value() == 10 and v.exponent() == 0, "operator/");
+    }
+
+// number / a
+    {
+	Freq f{1, 6};
+	Time t = Freq::Scalar{1} / f;
+        CHECK_TRUE(t.value() == 1 and t.exponent() == -6, "operator/");
+    }
+    {
+	Freq f{1, 6};
+	Time t = Freq::Scalar{35} / f;
+        CHECK_TRUE(t.value() == 35 and t.exponent() == -6, "operator/");
+    }
+    {
+	Freq f{900, 6};
+	Time t = Freq::Scalar{9} / f;
+        CHECK_TRUE(t.value() == 10 and t.exponent() == -9, "operator/");
+    }
+
 }
 
 template <typename Rep>
@@ -458,7 +537,7 @@ try{
     test::header("atd_eng_magnitude");
 
     test_constexpr();
-    test_basic();
+    test_basic_double();
 
     test_basic_old<double>();
     test_double();

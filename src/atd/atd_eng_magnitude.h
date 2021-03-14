@@ -33,8 +33,49 @@
 #include "atd_magnitude.h"
 #include "atd_cast.h"	    // to_integer
 #include "atd_math.h"
+#include "atd_type_traits.h"	// same_type_at_least32
 
 namespace atd{
+
+// Convierte el número x*10^exp en x'*10^exp' con x' < 1000 y exp' múltiplo de
+// 3.
+// [x, exp] = son parametros de entrada y salida.
+template <typename Int, typename Exponent>
+constexpr void write_as_eng(Int& x, Exponent& exp)
+{
+    while (x >= Int{1000}){
+	x /= Int{10};
+	++exp;
+    }
+
+// update_exponent():
+    int r = exp % 3;
+    switch (r) {
+        case 1:
+	case -2:
+	    if (x >= Int{100}){
+		x /= Int{100};
+		exp += 2;
+	    }
+	    else {
+		x *= Int{10};
+		exp -= 1;
+	    }
+            break;
+
+        case 2:
+	case -1:
+	    if (x >= Int{10}){
+		x /= Int{10};
+		exp += 1;
+	    }
+	    else{
+		x *= Int{100};
+		exp -= 2;
+	    }
+            break;
+    }
+}
 
 /*!
  *  \brief  Engineering notation for Magnitude
@@ -60,7 +101,11 @@ namespace atd{
  *  tamaño de Hertz y ENG_Frequency para los avrs obtengo 4 bytes a ambos.
  *  ¿Por qué? Para Hertz uso como Rep uint32_t, mientras que ENG_Frequency usa
  *  uint16_t para Rep y int (que debería de ser 1 byte en avr) para el
- *  exponente. En la práctica ocupan lo mismo!!!
+ *  exponente. En la práctica ocupan lo mismo!!! (<--- modifico: cambio
+ *  Exponent a int8_t de tal forma que sea más pequeño. En principio lo había
+ *  dejado como int ya que se supone que es el tipo por defecto a usar, el más
+ *  eficiente, pero esta clase la quiero usar en microcontroladores y el
+ *  espacio es importante. Además son de 8 bits, no de 16).
  *
  *  Además al suministrar funciones de impresión
  *  almacena en memoria caracteres que Magnitude no tiene. Por otra parte es
@@ -78,7 +123,7 @@ class ENG_Magnitude{
 public:
     using Unit	   = Unit0;
     using Rep      = Rep0;
-    using Exponent = int;
+    using Exponent = int8_t;
     using Scalar   = Rep0;
     
     // Rep almacena de -999 a 999 (signed) o de 0 a 999.
@@ -89,7 +134,7 @@ public:
     constexpr ENG_Magnitude() = default;
 
     constexpr ENG_Magnitude(const Rep& x, Exponent exp)
-	: x_{x}, exp_{exp} { update_representation(); }
+	: x_{x}, exp_{exp} {write_as_eng(x_, exp_);}
 
     // TODO: eliminar a favor de to_magnitude
     template <typename Multiplier, typename D>
@@ -136,8 +181,6 @@ private:
     template <typename Multiplier, typename D>
     constexpr void init(const Magnitude<Unit, Rep, Multiplier, D>& m);
 
-    constexpr void update_representation();
-
     static void common_exponent(ENG_Magnitude& a, ENG_Magnitude& b);
 
     static void print_exponent(std::ostream& out, int exp);
@@ -157,7 +200,7 @@ constexpr void ENG_Magnitude<U, Rep>::init(
 
     exp_ = ratio_exponent_of_power_of_ten<Multiplier>;
 
-    update_representation();
+    write_as_eng(x_, exp_);
 }
 
 template <typename U, typename Rep>
@@ -177,42 +220,7 @@ operator=(const Magnitude<U, Rep, Multiplier, D>& m)
 }
 
 
-template <typename U, typename Rep>
-constexpr void ENG_Magnitude<U, Rep>::update_representation()
-{
-    while (x_ >= Rep{1000}){
-	x_ /= Rep{10};
-	++exp_;
-    }
 
-// update_exponent():
-    int r = exp_ % 3;
-    switch (r) {
-        case 1:
-	case -2:
-	    if (x_ >= Rep{100}){
-		x_ /= Rep{100};
-		exp_ += 2;
-	    }
-	    else {
-		x_ *= Rep{10};
-		exp_ -= 1;
-	    }
-            break;
-
-        case 2:
-	case -1:
-	    if (x_ >= Rep{10}){
-		x_ /= Rep{10};
-		exp_ += 1;
-	    }
-	    else{
-		x_ *= Rep{100};
-		exp_ -= 2;
-	    }
-            break;
-    }
-}
 
 
 
@@ -222,7 +230,7 @@ template <typename U, typename Rep>
 inline ENG_Magnitude<U, Rep>& ENG_Magnitude<U, Rep>::operator++()
 {
     ++x_;
-    update_representation();
+    write_as_eng(x_, exp_);
     return *this;
 }
 
@@ -245,7 +253,7 @@ ENG_Magnitude<U, Rep>& ENG_Magnitude<U, Rep>::operator--()
     }
     else {
 	--x_;
-	update_representation();
+	write_as_eng(x_, exp_);
     }
 
     return *this;
@@ -265,7 +273,7 @@ operator+=(ENG_Magnitude b)
 {
     common_exponent(*this, b);
     x_ += b.x_;
-    update_representation();
+    write_as_eng(x_, exp_);
 
     return *this;
 }
@@ -276,7 +284,7 @@ operator-=(ENG_Magnitude b)
 {
     common_exponent(*this, b);
     x_ -= b.x_;
-    update_representation();
+    write_as_eng(x_, exp_);
 
     return *this;
 }
@@ -287,7 +295,7 @@ ENG_Magnitude<U, Rep>& ENG_Magnitude<U, Rep>::
 operator*=(const ENG_Magnitude<U, Rep>::Scalar& a)
 {
     x_ *= a;
-    update_representation();
+    write_as_eng(x_, exp_);
 
     return *this;
 }
@@ -305,7 +313,7 @@ operator/=(const ENG_Magnitude<U, Rep>::Scalar& a)
 	exp_ -= n;
     }
 
-    update_representation();
+    write_as_eng(x_, exp_);
 
     return *this;
 }
@@ -366,8 +374,72 @@ operator/(ENG_Magnitude<U, Rep> x,
     return x;
 }
 
+// El value() va de -999 a 999. Al multiplicar dos números los valores mínimo
+// y máximo que podemos obtener es -998001, +998001 que no entran en un
+// int16_t. Para evitar overflow hacemos las operaciones en un int32_t y luego
+// creamos el ENG_Magnitude. De esa forma evitamos el overflow.
+template <typename Unit1, typename Rep1, typename Unit2, typename Rep2>
+ENG_Magnitude<Unit_multiply<Unit1, Unit2>, std::common_type_t<Rep1, Rep2>>
+operator*(const ENG_Magnitude<Unit1, Rep1>& a,
+          const ENG_Magnitude<Unit2, Rep2>& b)
+{
+    using Unit = Unit_multiply<Unit1, Unit2>;
+    using Rep = std::common_type_t<Rep1, Rep2>;
+    using Int = same_type_at_least32<Rep>;
+
+    using ENG = ENG_Magnitude<Unit, Rep>;
+    using Exponent = ENG::Exponent;
+
+    Int y = Int{a.value()} * Int{b.value()};
+    Exponent exp = a.exponent() + b.exponent();
+
+    write_as_eng(y, exp);
+
+    return ENG{static_cast<Rep>(y), exp};
+}
+
+// Rep es mínimo un entero donde podemos escribir de 0 a 999. ¿cómo dividir
+// 1/999? Multipliquemos por 1000 el numerador (y restemos 3 al exponente)
+template <typename Unit1, typename Rep1, typename Unit2, typename Rep2>
+ENG_Magnitude<Unit_divide<Unit1, Unit2>, std::common_type_t<Rep1, Rep2>>
+operator/(const ENG_Magnitude<Unit1, Rep1>& a,
+          const ENG_Magnitude<Unit2, Rep2>& b)
+{
+    using Unit = Unit_divide<Unit1, Unit2>;
+    using Rep = std::common_type_t<Rep1, Rep2>;
+    using Int = same_type_at_least32<Rep>;
+
+    using ENG = ENG_Magnitude<Unit, Rep>;
+    using Exponent = ENG::Exponent;
+
+    Int y = (Int{a.value()} * Int{1000}) /Int{b.value()};
+    Exponent exp = a.exponent() - Exponent{3} - b.exponent();
+
+    write_as_eng(y, exp);
+
+    return ENG{static_cast<Rep>(y), exp};
+}
 
 
+// Rep es mínimo un entero donde podemos escribir de 0 a 999. ¿cómo dividir
+// 1/999? Multipliquemos por 1000 el numerador (y restemos 3 al exponente)
+template <typename Unit1, typename Rep>
+ENG_Magnitude<Unit_inverse<Unit1>, Rep>
+operator/(const Rep& a, const ENG_Magnitude<Unit1, Rep>& x)
+{
+    using Unit = Unit_inverse<Unit1>;
+    using Int = same_type_at_least32<Rep>;
+
+    using ENG = ENG_Magnitude<Unit, Rep>;
+    using Exponent = ENG::Exponent;
+
+    Int y = (Int{a} * Int{1000}) /Int{x.value()};
+    Exponent exp = - Exponent{3} - x.exponent();
+
+    write_as_eng(y, exp);
+
+    return ENG{static_cast<Rep>(y), exp};
+}
 
 // order
 // -----
@@ -557,7 +629,8 @@ using ENG_temperature = ENG_Magnitude<Units_temperature, Int>;
 template <typename Int>
 using ENG_pressure = ENG_Magnitude<Units_pressure, Int>;
 
-
+template <typename Int>
+using ENG_velocity = ENG_Magnitude<Units_velocity, Int>;
 
 }// namespace
 

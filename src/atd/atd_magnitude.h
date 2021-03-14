@@ -40,9 +40,9 @@
  *	    diferentes unidades. Yo quiero hacer:
  *		    Speed v = 2_km_per_second = Kilometer{2}/Second{1};
  *		    Frequency f1 = 2_Hz;
- *		    Lenght l1 = 3_m;
- *		    Lenght l2 = 2_km;
- *		    Lenght l3 = l1 + l2;
+ *		    Length l1 = 3_m;
+ *		    Length l2 = 2_km;
+ *		    Length l3 = l1 + l2;
  *		    Time t = 3_s; <--- este es std::duration
  *
  *  
@@ -593,7 +593,7 @@ std::ostream& operator<<(std::ostream& out, const Magnitude<U, R, M, D>& m)
 
 // Magnitudes por defecto
 // ----------------------
-// Lenght
+// Length
 // ------
 template <typename Int, typename Multiplier>
 using Length = atd::Magnitude<atd::Units_length, Int, Multiplier>;
