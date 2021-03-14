@@ -136,15 +136,6 @@ public:
     constexpr ENG_Magnitude(const Rep& x, Exponent exp)
 	: x_{x}, exp_{exp} {write_as_eng(x_, exp_);}
 
-    // TODO: eliminar a favor de to_magnitude
-    template <typename Multiplier, typename D>
-    constexpr ENG_Magnitude(
-        const Magnitude<Unit, Rep, Multiplier, D>& m);
-
-    // TODO: eliminar a favor de to_magnitude
-    template <typename Multiplier, typename D>
-    constexpr ENG_Magnitude& operator=(
-        const Magnitude<Unit, Rep, Multiplier, D>& m);
 
 // algebra
     ENG_Magnitude& operator++();
@@ -177,51 +168,12 @@ private:
     Rep x_;	// valor númerico
     Exponent exp_;	// exponente: invariante: siempre múltiplo de 3
 
-// Helpers
-    template <typename Multiplier, typename D>
-    constexpr void init(const Magnitude<Unit, Rep, Multiplier, D>& m);
 
     static void common_exponent(ENG_Magnitude& a, ENG_Magnitude& b);
 
     static void print_exponent(std::ostream& out, int exp);
 
 };
-
-// Construction
-// ------------
-template <typename U, typename Rep>
-template <typename Multiplier, typename D>
-constexpr void ENG_Magnitude<U, Rep>::init(
-    const Magnitude<U, Rep, Multiplier, D>& m)
-{
-    static_assert(ratio_is_power_of_ten<Multiplier>);
-
-    x_ = m.value();
-
-    exp_ = ratio_exponent_of_power_of_ten<Multiplier>;
-
-    write_as_eng(x_, exp_);
-}
-
-template <typename U, typename Rep>
-template <typename Multiplier, typename D>
-inline constexpr ENG_Magnitude<U, Rep>::ENG_Magnitude(
-    const Magnitude<U, Rep, Multiplier, D>& m)
-{
-    init(m);
-}
-
-template <typename U, typename Rep>
-template <typename Multiplier, typename D>
-inline constexpr ENG_Magnitude<U, Rep>& ENG_Magnitude<U, Rep>::
-operator=(const Magnitude<U, Rep, Multiplier, D>& m)
-{
-    init();
-}
-
-
-
-
 
 
 // algebra
@@ -584,10 +536,9 @@ template <typename Rep1,
 inline ENG_Magnitude<Unit, Rep1>
 to_eng_magnitude(const Magnitude<Unit, Rep0, Multiplier, D>& m)
 {
-    ENG_Magnitude<Unit, Rep0> tmp{m};
+    return ENG_Magnitude<Unit, Rep1>{to_integer<Rep1>(m.value()),
+                                  ratio_exponent_of_power_of_ten<Multiplier>};
 
-    return ENG_Magnitude<Unit, Rep1>{to_integer<Rep1>(tmp.value()),
-                                              tmp.exponent()};
 }
 
 // añado este porque parece sencillo de usar. El tiempo lo dira.
@@ -598,7 +549,8 @@ template <typename Unit,
 inline ENG_Magnitude<Unit, Rep>
 to_eng_magnitude(const Magnitude<Unit, Rep, Multiplier, D>& m)
 {
-    return ENG_Magnitude<Unit, Rep>{m};
+    return ENG_Magnitude<Unit, Rep>{m.value(),
+                                  ratio_exponent_of_power_of_ten<Multiplier>};
 }
 
 

@@ -36,13 +36,14 @@ void test_constexpr()
 
 }
 
-void test_basic_double()
+void test_basic()
 {
     test::interfaz("basic");
-    using Freq     = atd::ENG_frequency<double>;
-    using Length   = atd::ENG_length<double>;
-    using Time     = atd::ENG_time<double>;
-    using Velocity = atd::ENG_velocity<double>;
+    using Rep      = double;
+    using Freq     = atd::ENG_frequency<Rep>;
+    using Length   = atd::ENG_length<Rep>;
+    using Time     = atd::ENG_time<Rep>;
+    using Velocity = atd::ENG_velocity<Rep>;
 
     // construction
     {
@@ -82,13 +83,13 @@ void test_basic_double()
 	Freq a{20,0};
 	Freq b{30,3};
 	Freq c = a + b;
-	CHECK_TRUE(c.value() == 30.02 and c.exponent() == 3, "operator+");
+	CHECK_TRUE(c.value() == static_cast<Rep>(30.02) and c.exponent() == 3, "operator+");
     }
     {
 	Freq a{20,0};
 	Freq b{30,6};
 	Freq c = a + b;
-	CHECK_TRUE(c.value() == 30.00002 and c.exponent() == 6, "operator+");
+	CHECK_TRUE(c.value() == (Rep) 30.00002 and c.exponent() == 6, "operator+");
     }
     {// extremo
 	Freq a{1,0};
@@ -124,13 +125,13 @@ void test_basic_double()
 	Freq a{20,0};
 	Freq b{30,3};
 	Freq c = b - a;
-	CHECK_TRUE(c.value() == 29.980 and c.exponent() == 3, "operator-");
+	CHECK_TRUE(c.value() == (Rep) 29.980 and c.exponent() == 3, "operator-");
     }
     {
 	Freq a{20,0};
 	Freq b{30,6};
 	Freq c = b - a;
-	CHECK_TRUE(c.value() == 29.999980 and c.exponent() == 6, "operator-");
+	CHECK_TRUE(c.value() == (Rep) 29.999980 and c.exponent() == 6, "operator-");
     }
     {// extremo
 	Freq a{1,0};
@@ -220,7 +221,7 @@ void test_basic_double()
     {
 	Freq a{900,3};
         Freq c = a / 250;
-        CHECK_TRUE(c.value() == 3.6 and c.exponent() == 3, "operator/");
+        CHECK_TRUE(c.value() == (Rep) 3.6 and c.exponent() == 3, "operator/");
     }
     {// extremo
 	Freq a{20,3};
@@ -251,13 +252,13 @@ void test_basic_double()
 	Velocity v{999,0};
 	Time t{999,0};
 	Length s = v * t;
-	CHECK_TRUE(s.value() == 998.001 and s.exponent() == 3, "operator*");
+	CHECK_TRUE(s.value() == (Rep) 998.001 and s.exponent() == 3, "operator*");
     }
     {// overflow?
 	Velocity v{-999,0};
 	Time t{-999,0};
 	Length s = v * t;
-	CHECK_TRUE(s.value() == 998.001 and s.exponent() == 3, "operator*");
+	CHECK_TRUE(s.value() == (Rep) 998.001 and s.exponent() == 3, "operator*");
     }
 
 // a/b
@@ -289,33 +290,34 @@ void test_basic_double()
 // number / a
     {
 	Freq f{1, 6};
-	Time t = Freq::Scalar{1} / f;
+	Time t = Rep{1} / f;
         CHECK_TRUE(t.value() == 1 and t.exponent() == -6, "operator/");
     }
     {
 	Freq f{1, 6};
-	Time t = Freq::Scalar{35} / f;
+	Time t = Rep{35} / f;
         CHECK_TRUE(t.value() == 35 and t.exponent() == -6, "operator/");
     }
     {
 	Freq f{900, 6};
-	Time t = Freq::Scalar{9} / f;
+	Time t = Rep{9} / f;
         CHECK_TRUE(t.value() == 10 and t.exponent() == -9, "operator/");
     }
 
 }
 
 template <typename Rep>
-void test_basic_old()
+void test_basic2()
 {
     test::interfaz("basic");
 
-    using Meter = atd::Meter<Rep>;
-    using Kilometer = atd::Kilometer<Rep>;
+    using Freq     = atd::ENG_frequency<Rep>;
+    using Length   = atd::ENG_length<Rep>;
+    using Time     = atd::ENG_time<Rep>;
+    using Velocity = atd::ENG_velocity<Rep>;
 
     {
-    Meter m0{20000};
-    atd::ENG_Magnitude m{m0};
+    Length m{20, 3};
 
     CHECK_TRUE(m.value() == Rep{20}, "constructor");
     CHECK_TRUE(m.exponent() == 3, "constructor");
@@ -331,8 +333,7 @@ void test_basic_old()
     CHECK_TRUE(m.exponent() == 3, "constructor");
     std::cout << m << '\n';
 
-    Meter m1b{30000};
-    atd::ENG_Magnitude m1{m1b};
+    Length m1{30, 3};
     CHECK_TRUE(m1.value() == Rep{30}, "constructor");
     CHECK_TRUE(m1.exponent() == 3, "constructor");
     m += m1;
@@ -346,8 +347,7 @@ void test_basic_old()
 
     }
     {
-    Kilometer x0{999};
-    atd::ENG_Magnitude x{x0};
+    Length x{999, 3};
     std::cout << x << '\n';
     CHECK_TRUE(x.value() == Rep{999}, "constructor");
     CHECK_TRUE(x.exponent() == 3, "constructor");
@@ -363,8 +363,7 @@ void test_basic_old()
     CHECK_TRUE(x.value() == Rep{999}, "constructor");
     CHECK_TRUE(x.exponent() == 3, "constructor");
 
-    Kilometer x1b{1};
-    atd::ENG_Magnitude x1{x1b};
+    Length x1{1,3};
     CHECK_TRUE(x1.value() == Rep{1}, "constructor");
     CHECK_TRUE(x1.exponent() == 3, "constructor");
 
@@ -379,17 +378,34 @@ void test_basic_old()
     CHECK_TRUE(x.exponent() == 3, "constructor");
 
     }
+    {
+	Velocity v{20,0};
+	Time t{900, 3};
+        Length s = v * t;
+	CHECK_TRUE(s.value() == Rep{18} and s.exponent() == 6, "operator*");
+    }
+    {
+	Freq f{1,6};
+	Time t = Rep{1} / f;
+	CHECK_TRUE(t.value() == Rep{1} and t.exponent() == -6, "operator/");
+    }
+    {
+	Time t{30,0};
+	Length s{60, 0};
+        Velocity v = s / t;
+	CHECK_TRUE(v.value() == Rep{2} and v.exponent() == 0, "operator/");
+    }
 }
 
 void test_double()
 {
     test::interfaz("double");
 
-    using Kilometer = atd::Kilometer<double>;
+    using Length   = atd::ENG_length<double>;
 
     {// caso extremo
-    Kilometer x0{999.99};
-    atd::ENG_Magnitude x{x0};
+    Length x{999.99, 3};
+    
     std::cout << ":: " << x << '\n';
     CHECK_TRUE(x.value() == 999.99, "constructor");
     CHECK_TRUE(x.exponent() == 3, "constructor");
@@ -406,8 +422,7 @@ void test_double()
     CHECK_TRUE(x.value() == 999.99, "constructor");
     CHECK_TRUE(x.exponent() == 3, "constructor");
 
-    Kilometer x1b{1};
-    atd::ENG_Magnitude x1{x1b};
+    Length x1{1,3};
     CHECK_TRUE(x1.value() == 1, "constructor");
     CHECK_TRUE(x1.exponent() == 3, "constructor");
 
@@ -430,30 +445,24 @@ void test_double()
 
 void test_symbol()
 {
-    using Kilometer = atd::Kilometer<double>;
-    using MegaHertz = atd::MegaHertz<double>;
-    using Microsecond = atd::Microsecond<double>;
-    using Kelvin = atd::Kelvin<double>;
-    using Pascal = atd::Pascal<double>;
-
     {
-    atd::ENG_Magnitude x{Kilometer{100}};
+    atd::ENG_length<int> x{100, 3};
     CHECK_STDOUT(x, "100 km");
     }
     {
-    atd::ENG_Magnitude x{MegaHertz{100}};
+    atd::ENG_frequency<int> x{100, 6};
     CHECK_STDOUT(x, "100 MHz");
     }
     {
-    atd::ENG_Magnitude x{Microsecond{100}};
+    atd::ENG_time<int> x{100, -6};
     CHECK_STDOUT(x, "100 us");
     }
     {
-    atd::ENG_Magnitude x{Kelvin{100}};
+    atd::ENG_temperature<int> x{100, 0};
     CHECK_STDOUT(x, "100 K");
     }
     {
-    atd::ENG_Magnitude x{Pascal{100}};
+    atd::ENG_pressure<int> x{100, 0};
     CHECK_STDOUT(x, "100 Pa");
     }
 }
@@ -461,12 +470,11 @@ void test_symbol()
 template <typename Rep>
 void test_order()
 {
-    using Hertz = atd::Hertz<Rep>;
-    using KiloHertz = atd::KiloHertz<Rep>;
+    using Freq     = atd::ENG_frequency<Rep>;
 
     {
-    atd::ENG_Magnitude a{Hertz{100}};
-    atd::ENG_Magnitude b{Hertz{200}};
+    Freq a{100,0};
+    Freq b{200,0};
     CHECK_TRUE(a < b, "operator<");
     CHECK_TRUE(a <= b, "operator<=");
     CHECK_TRUE(b >= a, "operator>=");
@@ -474,8 +482,8 @@ void test_order()
     }
 
     {
-    atd::ENG_Magnitude a{Hertz{100}};
-    atd::ENG_Magnitude b{KiloHertz{200}};
+    Freq a{100,0};
+    Freq b{200,3};
     CHECK_TRUE(a < b, "operator<");
     CHECK_TRUE(a <= b, "operator<=");
     CHECK_TRUE(b >= a, "operator>=");
@@ -483,8 +491,8 @@ void test_order()
     }
 
     {
-    atd::ENG_Magnitude a{Hertz{1000}};
-    atd::ENG_Magnitude b{KiloHertz{1}};
+    Freq a{1,3};
+    Freq b{1,3};
     CHECK_TRUE(!(a < b), "operator<");
     CHECK_TRUE(a <= b, "operator<=");
     CHECK_TRUE(b >= a, "operator>=");
@@ -537,11 +545,11 @@ try{
     test::header("atd_eng_magnitude");
 
     test_constexpr();
-    test_basic_double();
+    test_basic();
 
-    test_basic_old<double>();
+    test_basic2<double>();
     test_double();
-    test_basic_old<atd::Decimal<int,2>>();
+    test_basic2<atd::Decimal<int,2>>();
     test_order<double>();
     test_order<atd::Decimal<int,2>>();
     test_to_eng_magnitude();
