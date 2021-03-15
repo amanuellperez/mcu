@@ -53,7 +53,7 @@ int main()
 	uart >> t;
 	uart << t << "\n";
 
-	PWM::ch1_duty_cycle(avr::Microsecond{t});
+	PWM::ch1_duty_cycle(avr::Time{t, -6});
 
 	wait_ms(1000);
     }

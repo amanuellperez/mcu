@@ -23,7 +23,7 @@
 #include <avr_time.h>
 
 
-
+using namespace avr::literals;
 using SG = dev::PWM_generator<avr::Timer1>;
 
 constexpr uint16_t period_in_us = 1;
@@ -31,7 +31,7 @@ constexpr uint16_t period_in_us = 1;
 
 int main()
 {
-    avr::Hertz freq{100};
+    avr::Frequency freq = 100_Hz;
     uint16_t duty_cycle = 50;
 
 // init_uart()
@@ -77,7 +77,7 @@ int main()
 		uart << "freq (in Hz) = ";
 		uart >> tmp;
 		uart << tmp << '\n';
-		freq = avr::Hertz{tmp};
+		freq = avr::Frequency{tmp, 0};
 		SG::frequency(freq);
 		break;
 

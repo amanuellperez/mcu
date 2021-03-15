@@ -22,34 +22,7 @@
 #include <avr_types.h>
 #include <avr_UART_iostream.h>
 
-
-void print(const avr::Microsecond& t)
-{
-    avr::UART_iostream uart;
-    if (t < avr::Microsecond{1000})
-	uart << t << " us";
-
-    else if (t < avr::Millisecond{1000})
-	uart << avr::Millisecond{t} << " ms";
-
-    else 
-	uart << avr::Second{t} << " s";
-
-}
-
-void print(const avr::Hertz& f)
-{
-    avr::UART_iostream uart;
-    if (f < avr::Hertz{1000})
-	uart << f << " Hz";
-
-    else if (f < avr::KiloHertz{1000})
-	uart << avr::KiloHertz{f} << " KHz";
-
-    else 
-	uart << avr::MegaHertz{f} << " MHz";
-}
-
+using namespace avr::literals;
 
 template <typename Timern>
 struct Main{
@@ -70,7 +43,7 @@ struct Main{
     void print_mode();
 
 // data
-    avr::Hertz freq_ {100};
+    avr::Frequency freq_ = 100_Hz;
     bool ch1_on_ = false;
     bool ch2_on_ = false;
     uint16_t period_in_us_ = 1;
@@ -191,7 +164,7 @@ void Main<T>::ch1_menu()
 	case 'm':
 	    uart << "duty_cycle  (in microseconds) = ";
 	    uart >> tmp;
-	    PW_gen::ch1_duty_cycle(typename PW_gen::Microsecond{tmp});
+	    PW_gen::ch1_duty_cycle(typename avr::Time{tmp, -6});
 	    break;
 
 
@@ -239,7 +212,7 @@ void Main<T>::ch2_menu()
 	case 'm':
 	    uart << "duty_cycle  (in microseconds) = ";
 	    uart >> tmp;
-	    PW_gen::ch2_duty_cycle(typename PW_gen::Microsecond{tmp});
+	    PW_gen::ch2_duty_cycle(avr::Time{tmp, -6});
 	    break;
 
 	case 'i':
@@ -310,7 +283,7 @@ void Main<T>::on()
     timer_on_1MHz(period_in_us_);
 }
 
-void debug_freq(avr::Hertz freq_sq)
+void debug_freq(avr::Frequency freq_sq)
 {
     avr::UART_iostream uart;
     uart << "\ndebug_freq: "
@@ -341,28 +314,28 @@ void Main<T>::run()
     while(1){
 	uart << "\n\nState"
 	          "\n-----"
-		"\nTimer: period = ";
-	print(PW_gen::clock_period());
-	uart << "; frequency  = ";
-	print(PW_gen::clock_frequency());
+		"\nTimer: period = "
+	<< PW_gen::clock_period();
+	uart << "; frequency  = "
+	<< PW_gen::clock_frequency();
 
 	uart << "\n\nGenerated signal:"
 		"\n    mode = ";
 	print_mode();
-	uart << "\n    frequency = ";
-	print(PW_gen::frequency());
-	uart << "; period = ";
+	uart << "\n    frequency = "
+		<< PW_gen::frequency();
+	uart << "; period = "
+	<< PW_gen::period();
 
-	print(PW_gen::period());
 	uart << "\n\n channel |    on/off    |    duty_cycle"
 	          "\n---------+--------------+-----------------"
 	          "\n   ch1   |     " << (ch1_on_? "on": "off") 
-	     << "       |    ";
-	print(PW_gen::ch1_duty_cycle());
+	     << "       |    "
+	<< PW_gen::ch1_duty_cycle();
 
 	uart << "\n   ch2   |     " << (ch2_on_? "on": "off") 
-	     << "       |    ";
-	print(PW_gen::ch2_duty_cycle());
+	     << "       |    "
+	<< PW_gen::ch2_duty_cycle();
 
 	uart << "\n\n\nMenu:\n"
 	        "[t]imer period\n"
@@ -399,15 +372,15 @@ void Main<T>::run()
 		uart << "\nperiod (in us) = ";
 		uart >> num;
 		uart << num << '\n';
-		PW_gen::period(avr::Microsecond{num});
-		freq_ = atd::inverse(avr::Microsecond{num});
+		PW_gen::period(avr::Time{num, -6});
+		freq_ = avr::Time::Rep{1} / avr::Time{num, -6};
 		break;
 
 	    case 's': 
 		uart << "\nfreq (in Hz) = ";
 		uart >> num;
 		uart << num << '\n';
-		freq_ = avr::Hertz{num};
+		freq_ = avr::Frequency{num, 0};
 		PW_gen::frequency(freq_);
 		//debug_freq(freq_);
 		break;

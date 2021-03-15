@@ -24,6 +24,8 @@
 
 #include <avr_types.h>
 
+using namespace avr::literals;
+
 constexpr uint8_t time_wait_release_key = 100; // in ms
 constexpr uint8_t time_scan_keyboard    = 100; // in ms
 
@@ -31,8 +33,8 @@ constexpr uint8_t CANCEL_KEY  = 'a'; // para evitar conflicto con los
 				     // Keyboard_codes los defino como ascii
 
 // Es para sonido en principio
-constexpr avr::Hertz sweep_min_frequency{20}; // 20 Hz
-constexpr avr::Hertz sweep_max_frequency{20000}; // 20 kHz
+constexpr avr::Frequency sweep_min_frequency = 20_Hz;
+constexpr avr::Frequency sweep_max_frequency = 20_KHz;
 
 #endif
 

@@ -133,14 +133,15 @@ public:
     // constructor
     constexpr ENG_Magnitude() = default;
 
-    constexpr ENG_Magnitude(const Rep& x, Exponent exp)
-	: x_{x}, exp_{exp} {write_as_eng(x_, exp_);}
+//    constexpr ENG_Magnitude(const Rep& x, Exponent exp)
+//	: x_{x}, exp_{exp} {write_as_eng(x_, exp_);}
 
+    // TODO: imponer que solo se pueda llamar a esta función cuando Int sea
+    // convertible a Rep
     template <typename Int>
     constexpr ENG_Magnitude(Int x, Exponent exp);
 
-
-// algebra
+    // algebra
     ENG_Magnitude& operator++();
     ENG_Magnitude operator++(int);
 
@@ -184,12 +185,12 @@ private:
 // constexpr. ¿Por qué? ???
 template <typename U, typename Rep>
 template <typename Int>
-constexpr ENG_Magnitude<U, Rep>::ENG_Magnitude(Int x, Exponent exp):
-    x_{}, exp_{}
+constexpr ENG_Magnitude<U, Rep>::ENG_Magnitude(Int x, Exponent exp)
+    : x_{}, exp_{}
 {
-    write_as_eng(x, exp);
     x_ = to_integer<Rep>(x);
     exp_ = exp;
+    write_as_eng(x_, exp_);
 }
 
 

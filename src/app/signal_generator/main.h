@@ -32,8 +32,6 @@ struct Main {
     Main();
     void run();
 
-    using ENG_frequency = avr::ENG_frequency;
-
 // Hardware
     LCD lcd_;
     Keyboard keyboard_;
@@ -41,8 +39,7 @@ struct Main {
     Square_wave_generator speaker_;
 
 // Data
-    // avr::Hertz freq_gen_;
-    ENG_frequency freq_gen_;
+    avr::Frequency freq_gen_;
     bool on_ = false;	    
     uint16_t sw_period_ = 1; // us
 

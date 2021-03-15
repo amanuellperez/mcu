@@ -77,31 +77,16 @@ void test_choose_number2()
     lcd << "LINEAL TEST";
     wait_ms(1000);
 
-//
 {
 using namespace avr::literals;
     lcd.clear();
-    lcd << "ENG frequency";
-    using ENG_frequency = avr::ENG_frequency;
-    ENG_frequency u8 = dev::user_choose_number_lineal<LCD, Keyboard, ENG_frequency>(
-		       lcd, keyboard)
-		       .pos(3, 1)
-		       .choose4(ENG_frequency{999, 0});
-
-    lcd.cursor_pos(0,0);
-    lcd << "has elegido: " << u8;
-
-    wait_ms(1000);
-}
-{
-using namespace avr::literals;
-    lcd.clear();
-    lcd << "Hertz [5,25]";
-    avr::Hertz u8 = dev::user_choose_number_lineal<LCD, Keyboard, avr::Hertz>(
-		     lcd, keyboard)
-		     .pos(3, 1)
-		     .between(5_Hz, 25_Hz)
-		     .choose2(10_Hz);
+    lcd << "Freq. [5,25]";
+    avr::Frequency u8 =
+        dev::user_choose_number_lineal<LCD, Keyboard, avr::Frequency>(lcd,
+                                                                      keyboard)
+            .pos(3, 1)
+            .between(5_Hz, 25_Hz)
+            .choose2(10_Hz);
 
     lcd.cursor_pos(0,0);
     lcd << "has elegido: " << u8;

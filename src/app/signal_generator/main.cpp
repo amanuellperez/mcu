@@ -22,7 +22,7 @@
 Main::Main()
 {
 // init data
-    freq_gen_ = atd::to_eng_magnitude<ENG_frequency::Rep>(avr::Hertz{998u});
+    freq_gen_ = 998_Hz;
     on_ = false;
 
 // init_hardware():

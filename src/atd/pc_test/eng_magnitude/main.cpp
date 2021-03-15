@@ -570,31 +570,20 @@ void test_bugs()
     test::interfaz("bugs");
 
 {
-	using Rep = atd::Decimal<uint32_t, 2>;
+	using Rep = atd::Decimal<uint32_t, 3>;
 	using Freq = atd::ENG_frequency<Rep>;
+        using Time = atd::ENG_time<Rep>;
 
-    {
-	//Freq f{1,6};
-	Freq f{125,3};
-	Freq f2 = f / Rep{131072};
+        {
+            Freq f{125, 3};
+            Freq f2 = f / Rep{131072};
+            CHECK_TRUE((f2 == Freq{Rep{953, 674}, -3}), "b1");
 
-	Rep d1{12500000};
-	Rep d2{131072};
-	int n = number_of_digits(d2);
-	std::cout << "n = " << n << '\n';
-	Rep d3 = d1 / d2;
-	std::cout << d1 << " / " << d2 << " = " << d3 << '\n';
-	std::cout << f2 << '\n';
-//	CHECK_TRUE((f2 == Freq{Rep{15,258}, 0}), "b1");
+	    Time t{1024, -6};
+	    CHECK_TRUE(t.value() == Rep::from_internal_value(1024)
+			and t.exponent() == -3, "b2");
     }
 
-//    {
-//	Freq f{125, 3};
-//	Freq f{15, 3};
-//	Freq f{Rep{3,906}, 3};
-//	Freq f{Rep{976,56}, 0};
-//
-//    }
 }
 
 }

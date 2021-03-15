@@ -88,9 +88,9 @@ void Main::show_first_window_sw_generator()
     lcd_.clear();
 
     lcd_.cursor_pos(0,1);
-    lcd_ << atd::to_eng_magnitude<uint16_t>(speaker_.min_frequency())
+    lcd_ << speaker_.min_frequency()
          << ", "
-	 << atd::to_eng_magnitude<uint16_t>(speaker_.max_frequency());
+	 << speaker_.max_frequency();
 
     show_window_sw_generator();
 }

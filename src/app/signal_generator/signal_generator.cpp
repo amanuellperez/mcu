@@ -30,8 +30,8 @@ void Main::init_signal_generator(uint16_t period_in_us)
 
     }
 
-    speaker_.frequency(atd::to_magnitude<avr::Hertz::Rep>(freq_gen_));
-    freq_gen_ = atd::to_eng_magnitude<ENG_frequency::Rep>(speaker_.frequency());
+    speaker_.frequency(freq_gen_);
+    freq_gen_ = speaker_.frequency();
 }
 
 
@@ -51,36 +51,29 @@ void Main::turn_off()
 
 void Main::next_frequency()
 {
-    avr::Hertz freq = atd::to_magnitude<avr::Hertz::Rep>(freq_gen_);
-    //avr::Hertz next_freq = freq_gen_ + avr::Hertz{1};
-    avr::Hertz next_freq = freq + avr::Hertz{1};
+    avr::Frequency next_freq = freq_gen_ + 1_Hz;
 
     if (next_freq > speaker_.max_frequency())
 	return;
 
-    while (freq < next_freq){
+    while (freq_gen_ < next_freq){
 	speaker_.next_frequency();
-	freq = speaker_.frequency();
+	freq_gen_ = speaker_.frequency();
     }
-
-    freq_gen_ = atd::to_eng_magnitude<ENG_frequency::Rep>(freq);
 }
 
 void Main::previous_frequency()
 {
-    avr::Hertz freq = atd::to_magnitude<avr::Hertz::Rep>(freq_gen_);
-    // avr::Hertz next_freq = freq_gen_ - avr::Hertz{1};
-    avr::Hertz next_freq = freq - avr::Hertz{1};
+    avr::Frequency next_freq = freq_gen_ - 1_Hz;
 
     if (next_freq < speaker_.min_frequency())
 	return;
 
-    while (freq > next_freq){
+    while (freq_gen_ > next_freq){
 	speaker_.previous_frequency();
-	freq = speaker_.frequency();
+	freq_gen_ = speaker_.frequency();
     }
 
-    freq_gen_ = atd::to_eng_magnitude<ENG_frequency::Rep>(freq);
 }
 
 
