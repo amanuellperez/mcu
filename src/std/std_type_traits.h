@@ -30,6 +30,7 @@
  *    03/11/2019 void_t
  *    08/12/2019 add_rvalue_reference/add_lvalue_reference/is_function
  *		 add_pointer/remove_pointer, ...
+ *    18/03/2021 make_signed/make_unsigned
  *
  ****************************************************************************/
 #include "std_config.h"
@@ -633,6 +634,71 @@ using add_lvalue_reference_t = typename add_lvalue_reference<T>::type;
 //
 //template <typename T>
 //using add_rvalue_reference_t = typename add_rvalue_reference<T>::type;
+
+// ------------------
+// sign modifications
+// ------------------
+// make_signed(T):
+//	switch(T){
+//	    case char: 
+//	    case unsigned char: 
+//		return signed char;
+//	    ...
+//	}
+//  
+// TODO: falta incluir char8_t, char16_t...
+template <typename T>
+struct make_signed { using type = T; };
+
+template<>
+struct make_signed<char> {using type = signed char;};
+
+template<>
+struct make_signed<unsigned char> {using type = signed char;};
+
+template<>
+struct make_signed<unsigned short> {using type = signed short;};
+
+template<>
+struct make_signed<unsigned int> {using type = signed int;};
+
+template<>
+struct make_signed<unsigned long> {using type = signed long;};
+
+template<>
+struct make_signed<unsigned long long> {using type = signed long long;};
+
+template <typename T>
+using make_signed_t = typename make_signed<T>::type;
+
+
+// make_unsigned
+// TODO: falta incluir char8_t, char16_t...
+template <typename T>
+struct make_unsigned { using type = T; };
+
+template<>
+struct make_unsigned<char> {using type = unsigned char;};
+
+template<>
+struct make_unsigned<signed char> {using type = unsigned char;};
+
+template<>
+struct make_unsigned<signed short> {using type = unsigned short;};
+
+template<>
+struct make_unsigned<signed int> {using type = unsigned int;};
+
+template<>
+struct make_unsigned<signed long> {using type = unsigned long;};
+
+template<>
+struct make_unsigned<signed long long> {using type = unsigned long long;};
+
+
+template <typename T>
+using make_unsigned_t = typename make_unsigned<T>::type;
+
 
 // --------------
 // type relations

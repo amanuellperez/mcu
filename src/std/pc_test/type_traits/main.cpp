@@ -690,6 +690,57 @@ void test_common_type()
 //    compilar
 }
 
+template <typename T>
+void test_make_signed(const std::string& name)
+{
+    CHECK_TRUE((std::is_same_v<mtd::make_signed_t<T>, std::make_signed_t<T>>),
+               name);
+}
+
+void test_make_signed()
+{
+    test::interfaz("make_signed");
+
+    test_make_signed<char>("char");
+    test_make_signed<short>("short");
+    test_make_signed<int>("int");
+    test_make_signed<long>("long");
+    test_make_signed<long long>("long long");
+
+    test_make_signed<unsigned char>("unsigned char");
+    test_make_signed<unsigned short>("unsigned short");
+    test_make_signed<unsigned int>("unsigned int");
+    test_make_signed<unsigned long>("unsigned long");
+    test_make_signed<unsigned long long>("unsigned long long");
+
+}
+
+template <typename T>
+void test_make_unsigned(const std::string& name)
+{
+    CHECK_TRUE(
+        (std::is_same_v<mtd::make_unsigned_t<T>, std::make_unsigned_t<T>>),
+        name);
+}
+
+
+
+void test_make_unsigned()
+{
+    test::interfaz("make_unsigned");
+
+    test_make_unsigned<char>("char");
+    test_make_unsigned<short>("short");
+    test_make_unsigned<int>("int");
+    test_make_unsigned<long>("long");
+    test_make_unsigned<long long>("long long");
+
+    test_make_unsigned<unsigned char>("unsigned char");
+    test_make_unsigned<unsigned short>("unsigned short");
+    test_make_unsigned<unsigned int>("unsigned int");
+    test_make_unsigned<unsigned long>("unsigned long");
+    test_make_unsigned<unsigned long long>("unsigned long long");
+}
 
 int main()
 {
@@ -720,6 +771,11 @@ try{
     // -----------------------
     test_remove_reference();
     test_add_lvalue_reference();
+
+    // sign modifications
+    // ------------------
+    test_make_signed();
+    test_make_unsigned();
 
     // type relations
     // --------------
