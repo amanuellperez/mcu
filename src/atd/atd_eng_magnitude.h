@@ -116,6 +116,7 @@ constexpr void write_as_eng(Int& x, Exponent& exp)
  *  es posible con Magnitude (hay que definir Hertz, Kilohertz...). Parece
  *  mucho más cómoda ENG_Magnitude que Magnitude. Probemos.
  *
+ *  Los escalares son `int` ya que eso es lo natural: 1 / freq; 2*freq ...
  *
  */
 template <typename Unit0, typename Rep0>
@@ -124,7 +125,7 @@ public:
     using Unit	   = Unit0;
     using Rep      = Rep0;
     using Exponent = int8_t;
-    using Scalar   = Rep0;
+    using Scalar   = int;
     
     // Rep almacena de -999 a 999 (signed) o de 0 a 999.
     static_assert (sizeof(Rep) > 1, 
@@ -151,8 +152,13 @@ public:
     ENG_Magnitude& operator+=(ENG_Magnitude b);
     ENG_Magnitude& operator-=(ENG_Magnitude b);
 
-    ENG_Magnitude& operator*=(const Scalar& a);
-    ENG_Magnitude& operator/=(const Scalar& a);
+    ENG_Magnitude& operator*=(const Rep& a);
+    ENG_Magnitude& operator/=(const Rep& a);
+
+    // Quiero poder hacer cosas del tipo: 2*freq y 1 / freq independiente de
+    // la representación usada.
+    ENG_Magnitude& operator*=(Scalar a);
+    ENG_Magnitude& operator/=(Scalar a);
 
 // order
     constexpr bool operator<(const ENG_Magnitude& b) const;
@@ -169,14 +175,16 @@ public:
     static constexpr ENG_Magnitude max();
 
 private:
+// Data
     Rep x_;	// valor númerico
     Exponent exp_;	// exponente: invariante: siempre múltiplo de 3
 
-
+// Helpers
     static void common_exponent(ENG_Magnitude& a, ENG_Magnitude& b);
 
     static void print_exponent(std::ostream& out, int exp);
 
+    static Rep to_rep(Scalar x) {return to_integer<Rep>(x);}
 };
 
 // constructor
@@ -262,7 +270,7 @@ operator-=(ENG_Magnitude b)
 
 template <typename U, typename Rep>
 ENG_Magnitude<U, Rep>& ENG_Magnitude<U, Rep>::
-operator*=(const ENG_Magnitude<U, Rep>::Scalar& a)
+operator*=(const Rep& a)
 {
     x_ *= a;
     write_as_eng(x_, exp_);
@@ -273,7 +281,7 @@ operator*=(const ENG_Magnitude<U, Rep>::Scalar& a)
 
 template <typename U, typename Rep>
 ENG_Magnitude<U, Rep>& ENG_Magnitude<U, Rep>::
-operator/=(const ENG_Magnitude<U, Rep>::Scalar& a)
+operator/=(const Rep& a)
 {
 
     if (x_ > a){
@@ -294,6 +302,17 @@ operator/=(const ENG_Magnitude<U, Rep>::Scalar& a)
     return *this;
 }
 
+template <typename U, typename Rep>
+inline ENG_Magnitude<U, Rep>& ENG_Magnitude<U, Rep>::operator*=(int a)
+{
+    return (*this) *= to_rep(a);
+}
+
+template <typename U, typename Rep>
+inline ENG_Magnitude<U, Rep>& ENG_Magnitude<U, Rep>::operator/=(int a)
+{
+    return (*this) /= to_rep(a);
+}
 
 
 template <typename U, typename Rep1, typename Rep2>
@@ -328,7 +347,7 @@ ENG_Magnitude<U, std::common_type_t<Rep1, Rep2>> operator-
 
 template <typename U, typename Rep>
 inline ENG_Magnitude<U, Rep> operator*
-(const typename ENG_Magnitude<U, Rep>::Scalar& a, ENG_Magnitude<U, Rep> x)
+(const Rep& a, ENG_Magnitude<U, Rep> x)
 {
     x *= a;
 
@@ -337,18 +356,39 @@ inline ENG_Magnitude<U, Rep> operator*
 
 template <typename U, typename Rep>
 inline ENG_Magnitude<U, Rep> operator*
-(const ENG_Magnitude<U, Rep>& x, const typename ENG_Magnitude<U, Rep>::Scalar& a)
+(const ENG_Magnitude<U, Rep>& x, const Rep& a)
+{ return a*x; }
+
+template <typename U, typename Rep>
+inline ENG_Magnitude<U, Rep> operator*(int a, ENG_Magnitude<U, Rep> x)
+{ 
+    x *= a;
+    return x; 
+}
+
+template <typename U, typename Rep>
+inline ENG_Magnitude<U, Rep> operator*(const ENG_Magnitude<U, Rep>& x, int a)
 { return a*x; }
 
 template <typename U, typename Rep>
 inline ENG_Magnitude<U, Rep>
-operator/(ENG_Magnitude<U, Rep> x,
-          const typename ENG_Magnitude<U, Rep>::Scalar& a)
+operator/(ENG_Magnitude<U, Rep> x, const Rep& a)
 {
     x /= a;
 
     return x;
 }
+
+
+template <typename U, typename Rep>
+inline ENG_Magnitude<U, Rep> operator/(ENG_Magnitude<U, Rep> x, int a)
+{ 
+    x /= a;
+    return x; 
+}
+
+
+
 
 // El value() va de -999 a 999. Al multiplicar dos números los valores mínimo
 // y máximo que podemos obtener es -998001, +998001 que no entran en un
@@ -435,6 +475,15 @@ operator/(const Rep& a, const ENG_Magnitude<Unit1, Rep>& x)
 
     return ENG{static_cast<Rep>(y), exp};
 }
+
+template <typename Unit1, typename Rep>
+ENG_Magnitude<Unit_inverse<Unit1>, Rep>
+operator/(int a, const ENG_Magnitude<Unit1, Rep>& x)
+{
+    return to_integer<Rep>(a) / x;
+
+}
+
 
 // order
 // -----
@@ -621,14 +670,44 @@ to_magnitude(const ENG_Magnitude<Unit, ENG_Rep>& m)
 
 // ENG_magnitude por defecto
 // -------------------------
+// Frequency
 template <typename Int>
 using ENG_frequency = ENG_Magnitude<Units_frequency, Int>;
 
 template <typename Int>
-using ENG_length= ENG_Magnitude<Units_length, Int>;
+inline ENG_frequency<Int> frequency_in_Hz(const Int& x)
+{ return ENG_frequency<Int>{x, 0}; }
 
 template <typename Int>
+inline ENG_frequency<Int> frequency_in_kHz(const Int& x)
+{ return ENG_frequency<Int>{x, 3}; }
+
+template <typename Int>
+inline ENG_frequency<Int> frequency_in_MHz(const Int& x)
+{ return ENG_frequency<Int>{x, 6}; }
+
+// Time
+template <typename Int>
 using ENG_time= ENG_Magnitude<Units_time, Int>;
+
+template <typename Int>
+inline ENG_time<Int> time_in_s(const Int& x) {return ENG_time<Int>{x, 0};}
+
+template <typename Int>
+inline ENG_time<Int> time_in_ms(const Int& x) {return ENG_time<Int>{x, -3};}
+
+template <typename Int>
+inline ENG_time<Int> time_in_us(const Int& x) {return ENG_time<Int>{x, -6};}
+
+
+
+
+
+// Length
+template <typename Int>
+using ENG_length= ENG_Magnitude<Units_length, Int>;
+
+
 
 template <typename Int>
 using ENG_temperature = ENG_Magnitude<Units_temperature, Int>;
@@ -638,6 +717,8 @@ using ENG_pressure = ENG_Magnitude<Units_pressure, Int>;
 
 template <typename Int>
 using ENG_velocity = ENG_Magnitude<Units_velocity, Int>;
+
+
 
 }// namespace
 

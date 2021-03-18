@@ -292,17 +292,17 @@ void test_basic()
 // number / a
     {
 	Freq f{1, 6};
-	Time t = Rep{1} / f;
+	Time t = 1 / f;
         CHECK_TRUE(t.value() == 1 and t.exponent() == -6, "operator/");
     }
     {
 	Freq f{1, 6};
-	Time t = Rep{35} / f;
+	Time t = 35 / f;
         CHECK_TRUE(t.value() == 35 and t.exponent() == -6, "operator/");
     }
     {
 	Freq f{900, 6};
-	Time t = Rep{9} / f;
+	Time t = 9 / f;
         CHECK_TRUE(t.value() == 10 and t.exponent() == -9, "operator/");
     }
 
@@ -388,7 +388,7 @@ void test_basic2()
     }
     {
 	Freq f{1,6};
-	Time t = Rep{1} / f;
+	Time t = 1 / f;
 	CHECK_TRUE(t.value() == Rep{1} and t.exponent() == -6, "operator/");
     }
     {
@@ -400,10 +400,16 @@ void test_basic2()
     {// operator freq/freq 
 	Freq f1{1, 6};
 	Freq f2{200, 3};
-	Rep res = f1 / f2 + Rep{1};
+	Rep res = f1 / f2 + 1;
 	CHECK_TRUE(res == Rep{6}, "operator/");
     }
 
+// operaciones con números
+    {// 1 / freq
+	Freq f{1,6};
+	Time t = 1 / f;
+	CHECK_TRUE(t.value() == Rep{1} and t.exponent() == -6, "operator/");
+    }
     {// construimos como en avr
 	constexpr unsigned long long int freq = 1000000ul;
 	constexpr Freq f{freq, 0};
