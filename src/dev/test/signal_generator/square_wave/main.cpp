@@ -196,7 +196,7 @@ void Main<T>::on()
 template <typename Timer>
 void debug_freq(const avr::Frequency& freq_sq)
 {
-    using Scalar = avr::Frequency::Scalar;
+    using Rep = avr::Frequency::Rep;
     avr::UART_iostream uart;
     uart << "\ndebug_freq: "
 	    "\ntop = Timer::clock_frequency() / 2*freq_sq - 1ul\n"
@@ -204,8 +204,7 @@ void debug_freq(const avr::Frequency& freq_sq)
     uart << Timer::clock_frequency();
     uart << " / " << freq_sq << " - 1\n"
 	    "   = ";
-    Scalar two = 2;
-    auto top = (Timer::clock_frequency() / (two * freq_sq)) - Scalar{1};
+    auto top = (Timer::clock_frequency() / (2 * freq_sq)) - Rep{1};
     uart << top << '\n';
 
 }

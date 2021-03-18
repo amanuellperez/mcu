@@ -17,13 +17,30 @@
 
 #pragma once
 
-#ifndef __ATD_TYPE_TRAITS_H__
-#define __ATD_TYPE_TRAITS_H__
+#ifndef __TYPE_TRAITS_MORE_H__
+#define __TYPE_TRAITS_MORE_H__
+/****************************************************************************
+ *
+ *  - DESCRIPCION: Traits de tipos no básicos.
+ *
+ *  - HISTORIA:
+ *    A.Manuel L.Perez
+ *    18/03/2021 v0.0
+ *
+ ****************************************************************************/
 
 #include "atd_type_traits_basic.h"
-#include "atd_type_traits_more.h"
+#include "atd_decimal.h"
+
+namespace atd{
+// same_type_with_double_bits_
+template<typename Rep, int N>
+struct same_type_with_double_bits_<Decimal<Rep, N>>{
+    using type = Decimal<same_type_with_double_bits<Rep>, N>;
+};
+}// namespace
+
 
 #endif
-
 
 

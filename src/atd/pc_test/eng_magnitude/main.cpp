@@ -576,18 +576,26 @@ void test_bugs()
     test::interfaz("bugs");
 
 {
-	using Rep = atd::Decimal<uint32_t, 3>;
-	using Freq = atd::ENG_frequency<Rep>;
-        using Time = atd::ENG_time<Rep>;
+    using Rep = atd::Decimal<uint32_t, 3>;
+    using Freq = atd::ENG_frequency<Rep>;
+    using Time = atd::ENG_time<Rep>;
 
-        {
-            Freq f{125, 3};
-            Freq f2 = f / Rep{131072};
-            CHECK_TRUE((f2 == Freq{Rep{953, 674}, -3}), "b1");
+    {
+	Freq f{125, 3};
+	Freq f2 = f / 131072u;
+	CHECK_TRUE((f2 == Freq{Rep{953, 674}, -3}), "b1");
 
-	    Time t{1024, -6};
-	    CHECK_TRUE(t.value() == Rep::from_internal_value(1024)
-			and t.exponent() == -3, "b2");
+	Time t = atd::time_in_us<Rep>(1024);
+	CHECK_TRUE(t.value() == Rep::from_internal_value(1024)
+		    and t.exponent() == -3, "b2");
+    }
+    
+    {
+	Freq f1 = atd::frequency_in_Hz<Rep>(400);
+	Freq f2 = atd::frequency_in_Hz<Rep>(20);
+
+	Freq::Rep res = f1 / (2*f2) - Freq::Rep{1};
+	CHECK_TRUE(res == Freq::Rep{9}, "b3");
     }
 
 }

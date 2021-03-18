@@ -34,6 +34,7 @@
 
 #include <stdint.h> // uint8_t
 #include <atd_type_traits.h>
+#include <atd_cast.h>
 
 namespace dev{
 
@@ -57,7 +58,6 @@ public:
     using counter_type = typename GT::counter_type;
     using Time         = typename GT::Time;
     using Frequency    = typename GT::Frequency;
-    using Scalar       = typename GT::Scalar;
 
     static constexpr uint8_t pin_channel1 = GT::pin_channel1;
     static constexpr uint8_t pin_channel2 = GT::pin_channel2;
@@ -104,12 +104,12 @@ class Square_wave_generator: public Signal_generator_base<Timer_n>{
 public:
     using GT           = gen::Generic_timer<Timer_n>;
     using counter_type = typename GT::counter_type;
-    using Time  = typename GT::Time;
-    using Frequency = typename GT::Frequency;
-    using Scalar       = typename GT::Scalar;
+    using Time         = typename GT::Time;
+    using Frequency    = typename GT::Frequency;
+    using Rep	       = typename GT::Frequency::Rep;
 
-// Frequency
-// ---------
+    // Frequency
+    // ---------
     /// Define la frecuencia que se genera en ch1 y ch2
     static void frequency(const Frequency& freq_sq);
 
@@ -166,9 +166,8 @@ inline void Square_wave_generator<T>::on()
 template <typename T>
 inline void Square_wave_generator<T>::frequency(const Frequency& freq_sq)
 {
-    Scalar two = 2;
-    auto top = (GT::clock_frequency() / (two*freq_sq)) - Scalar{1};
-    GT::square_wave_top(top);
+    Rep top = (GT::clock_frequency() / (2 * freq_sq)) - Rep{1};
+    GT::square_wave_top(atd::to_integer<counter_type>(top));
 }
 
 
@@ -183,7 +182,7 @@ inline void Square_wave_generator<T>::previous_frequency()
 template <typename T>
 inline void Square_wave_generator<T>::next_frequency()
 {
-    auto top = GT::square_wave_top();
+    Rep top = GT::square_wave_top();
     if (top > GT::square_wave_min_top())
 	GT::square_wave_top(top - 1u);
 }
@@ -194,8 +193,8 @@ inline void Square_wave_generator<T>::next_frequency()
 template <typename T>
 inline Square_wave_generator<T>::Frequency Square_wave_generator<T>::frequency()
 {
-    auto top = GT::square_wave_top();
-    return GT::clock_frequency() / Scalar{2*(1u + top)};
+    counter_type top = GT::square_wave_top();
+    return GT::clock_frequency() / (2 * (1u + top));
 }
 
 // CUIDADO: al sumarle 1 al max_top() estamos haciendo overflow. Es
@@ -207,14 +206,14 @@ Square_wave_generator<T>::min_frequency()
 {
     using Int = atd::same_type_with_double_bits<counter_type>;
     Int den = 2 * (Int{1} + Int{GT::square_wave_max_top()});
-    return GT::clock_frequency() / Scalar{den};
+    return GT::clock_frequency() / den;
 }
 
 template <typename T>
 inline Square_wave_generator<T>::Frequency
 Square_wave_generator<T>::max_frequency()
 {
-    return GT::clock_frequency() / Scalar{2 * (1u + GT::square_wave_min_top())};
+    return GT::clock_frequency() / (2 * (1u + GT::square_wave_min_top()));
 }
 
 
@@ -248,8 +247,8 @@ public:
     using GT           = gen::Generic_timer<Timer_n>;
     using counter_type = typename GT::counter_type;
     using Time  = typename GT::Time;
-    using Frequency	       = typename GT::Frequency;
-    using Scalar       = typename GT::Scalar;
+    using Frequency    = typename GT::Frequency;
+    using Rep	       = typename GT::Frequency::Rep;
 
     enum class Mode{
 	inverting, non_inverting
@@ -335,33 +334,33 @@ inline void PWM_generator<T>::on()
 template <typename T>
 inline void PWM_generator<T>::frequency(const Frequency& freq_sq)
 {
-    auto top = (GT::clock_frequency() / freq_sq) - 1ul;
-    GT::PWM_top(top);
+    Rep top = (GT::clock_frequency() / freq_sq) - 1ul;
+    GT::PWM_top(atd::to_integer<counter_type>(top));
 }
 
-// (RRR) ¿por qué definir Scalar el top?
+// (RRR) ¿por qué definir como doble el tipo del top?
 //       Observar que estamos sumandole 1 al top. Si es el Timer0 el top
 //       devuelve un uint8_t igual a 0xFF. Al sumarle 1 pasaría a 0xFF + 1 =
 //       0x00!!!
 template <typename T>
 inline PWM_generator<T>::Frequency PWM_generator<T>::frequency()
 {
-    Scalar top = GT::PWM_top(); 
-    return GT::clock_frequency() / Scalar{1ul + top};
+    atd::same_type_with_double_bits<counter_type> top = GT::PWM_top(); 
+    return GT::clock_frequency() / (1u + top);
 }
 
 /// Define el periodo a generar de la señal generada en ch1 y ch2.
 template <typename T>
 inline void PWM_generator<T>::period(const Time& T_s)
 {
-    auto top = (T_s / GT::clock_period()) - 1ul;
-    GT::PWM_top(top);
+    Rep top = (T_s / GT::clock_period()) - 1ul;
+    GT::PWM_top(atd::to_integer<counter_type>(top));
 }
 
 template <typename Timer_n>
 inline PWM_generator<Timer_n>::Time PWM_generator<Timer_n>::period()
 {
-    auto top = GT::PWM_top();
+    counter_type top = GT::PWM_top();
     Time T = (top + 1) * GT::clock_period();
 
     return T;
@@ -438,17 +437,18 @@ inline void PWM_generator<T>::ch2_off()
 template <typename T>
 inline void PWM_generator<T>::ch1_duty_cycle(uint8_t duty_cycle)
 {// uint32_t clave, para que no haya overflow!!!
-    uint32_t ocr1a = GT::PWM_top();
+    // uint32_t ocr1a = GT::PWM_top();
+    atd::same_type_with_double_bits<counter_type> ocr1a = GT::PWM_top();
     ocr1a = (duty_cycle*ocr1a)/100;
-    GT::PWM_ch1_duty_top(ocr1a);
+    GT::PWM_ch1_duty_top(atd::to_integer<counter_type>(ocr1a));
 }
 
 
 template <typename T>
 inline void PWM_generator<T>::ch1_duty_cycle(const Time& duty_cycle)
 {
-    auto ocr1a = duty_cycle / GT::clock_period();
-    GT::PWM_ch1_duty_top(ocr1a);
+    Rep ocr1a = duty_cycle / GT::clock_period();
+    GT::PWM_ch1_duty_top(atd::to_integer<counter_type>(ocr1a));
 }
 
 template <typename T>
@@ -458,7 +458,8 @@ inline PWM_generator<T>::Time PWM_generator<T>::ch1_duty_cycle()
 template <typename T>
 inline void PWM_generator<T>::ch2_duty_cycle(uint8_t duty_cycle)
 {// uint32_t clave, para que no haya overflow!!!
-    uint32_t ocr1b = GT::PWM_top();
+    // uint32_t ocr1b = GT::PWM_top();
+    atd::same_type_with_double_bits<counter_type> ocr1b = GT::PWM_top();
     ocr1b = (duty_cycle*ocr1b)/100;
     GT::PWM_ch2_duty_top(ocr1b);
 }
@@ -467,8 +468,8 @@ inline void PWM_generator<T>::ch2_duty_cycle(uint8_t duty_cycle)
 template <typename T>
 inline void PWM_generator<T>::ch2_duty_cycle(const Time& duty_cycle)
 {
-    auto ocr1b = duty_cycle / GT::clock_period();
-    GT::PWM_ch2_duty_top(ocr1b);
+    Rep ocr1b = duty_cycle / GT::clock_period();
+    GT::PWM_ch2_duty_top(atd::to_integer<counter_type>(ocr1b));
 }
 
 template <typename T>

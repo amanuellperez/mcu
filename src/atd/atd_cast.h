@@ -34,6 +34,7 @@
  ****************************************************************************/
 #include <limits>
 #include <cstddef>
+#include "atd_decimal.h"
 
 namespace atd{
 /*!
@@ -94,6 +95,23 @@ inline std::byte to_byte(bool x)
 // interfaz común. to_integer lo suministra.
 template <typename T>
 constexpr inline T to_integer(const T& x) {return x;}
+
+
+template <typename Rep2, int N, typename Rep = Rep2>
+constexpr __disable_if_is_decimal<Rep2> to_integer(const Decimal<Rep, N>& d)
+{
+    auto [i, f] = d.value();
+    return static_cast<Rep2>(i);
+}
+
+template <typename To_decimal, typename Rep, int N>
+constexpr __enable_if_is_decimal<To_decimal>
+to_integer(const Decimal<Rep, N>& d)
+{
+    using Rep2 = typename To_decimal::Rep;
+    auto [i, f] = d.value();
+    return To_decimal{static_cast<Rep2>(i), static_cast<Rep2>(f)};
+}
 
 
 }// namespace

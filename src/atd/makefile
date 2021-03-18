@@ -21,6 +21,8 @@ INCS= atd_algorithm.h	\
 	atd_ratio.h			\
 	atd_static.h		\
 	atd_time.h			\
+	atd_type_traits_basic.h\
+	atd_type_traits_more.h\
 	atd_type_traits.h	\
 	atd_units.h
 

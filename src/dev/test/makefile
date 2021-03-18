@@ -9,6 +9,7 @@ DIRS = 	BMP280			\
 		led				\
 		LCD				\
 		push_button		\
+		signal_generator\
 		system_clock	\
 		user_choose_number	\
 		user_choose_string \

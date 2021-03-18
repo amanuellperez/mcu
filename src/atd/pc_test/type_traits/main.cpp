@@ -143,6 +143,68 @@ void test_same_type_at_least32()
     test_same_type_at_least32<int64_t, int64_t>();
 }
 
+template <typename A, typename B, typename Res>
+void test_same_sign_as()
+{
+
+    CHECK_TRUE((std::is_same_v<typename atd::__same_sign_as<A,B>::type, Res>)
+	    , "__same_sign_as");
+}
+
+template <typename A, typename B, typename Res>
+void test_make_type_same_sign_as()
+{
+    using T = atd::make_type<A>::template same_sign_as<B>;
+    CHECK_TRUE( (std::is_same_v<T, Res>),
+        "make_type_same_sign_as");
+}
+
+void test_same_sign_as()
+{
+    test::interfaz("make_type");
+
+    test_same_sign_as<int8_t, int8_t, int8_t>();
+    test_same_sign_as<uint8_t, int8_t, int8_t>();
+    test_same_sign_as<int8_t, uint8_t, uint8_t>();
+    test_same_sign_as<uint8_t, uint8_t, uint8_t>();
+
+    test_same_sign_as<int16_t, int16_t, int16_t>();
+    test_same_sign_as<uint16_t, int16_t, int16_t>();
+    test_same_sign_as<int16_t, uint16_t, uint16_t>();
+    test_same_sign_as<uint16_t, uint16_t, uint16_t>();
+
+    test_same_sign_as<int32_t, int32_t, int32_t>();
+    test_same_sign_as<uint32_t, int32_t, int32_t>();
+    test_same_sign_as<int32_t, uint32_t, uint32_t>();
+    test_same_sign_as<uint32_t, uint32_t, uint32_t>();
+
+    test_same_sign_as<int64_t, int64_t, int64_t>();
+    test_same_sign_as<uint64_t, int64_t, int64_t>();
+    test_same_sign_as<int64_t, uint64_t, uint64_t>();
+    test_same_sign_as<uint64_t, uint64_t, uint64_t>();
+
+// make_type_same_sign_as
+    test_make_type_same_sign_as<int8_t, int8_t, int8_t>();
+    test_make_type_same_sign_as<uint8_t, int8_t, int8_t>();
+    test_make_type_same_sign_as<int8_t, uint8_t, uint8_t>();
+    test_make_type_same_sign_as<uint8_t, uint8_t, uint8_t>();
+
+    test_make_type_same_sign_as<int16_t, int16_t, int16_t>();
+    test_make_type_same_sign_as<uint16_t, int16_t, int16_t>();
+    test_make_type_same_sign_as<int16_t, uint16_t, uint16_t>();
+    test_make_type_same_sign_as<uint16_t, uint16_t, uint16_t>();
+
+    test_make_type_same_sign_as<int32_t, int32_t, int32_t>();
+    test_make_type_same_sign_as<uint32_t, int32_t, int32_t>();
+    test_make_type_same_sign_as<int32_t, uint32_t, uint32_t>();
+    test_make_type_same_sign_as<uint32_t, uint32_t, uint32_t>();
+
+    test_make_type_same_sign_as<int64_t, int64_t, int64_t>();
+    test_make_type_same_sign_as<uint64_t, int64_t, int64_t>();
+    test_make_type_same_sign_as<int64_t, uint64_t, uint64_t>();
+    test_make_type_same_sign_as<uint64_t, uint64_t, uint64_t>();
+}
+
 int main()
 {
 try{
@@ -154,6 +216,7 @@ try{
     test_has_same_sign();
     test_same_type_double_bits();
     test_same_type_at_least32();
+    test_same_sign_as();
 
 }catch(std::exception& e)
 {

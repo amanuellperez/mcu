@@ -16,6 +16,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "../../atd_decimal.h"
+#include "../../atd_type_traits.h"
+#include "../../atd_cast.h"
 
 #include <alp_test.h>
 #include <alp_string.h>
@@ -509,23 +511,23 @@ void test_decimal_cast()
 
 
 
-void test_to_integer()
-{
-    using Dec8_1 = atd::Decimal<uint8_t, 1>;
-
-    Dec8_1 d{10,3};
-    CHECK_TRUE(atd::to_integer<uint8_t>(d) == 10, "to_integer");
-    CHECK_TRUE(atd::to_integer<long>(d) == 10UL, "to_integer");
-
-{// bug
-    using Dec1 = atd::Decimal<uint64_t, 3>;
-    using Dec2 = atd::Decimal<uint32_t, 3>;
-    Dec1 from{953, 67};
-    Dec2 to = atd::to_integer<Dec2>(from);
-    std::cout << from << " --> " << to << '\n';
-}
-
-}
+//void test_to_integer()
+//{
+//    using Dec8_1 = atd::Decimal<uint8_t, 1>;
+//
+//    Dec8_1 d{10,3};
+//    CHECK_TRUE(atd::to_integer<uint8_t>(d) == 10, "to_integer");
+//    CHECK_TRUE(atd::to_integer<long>(d) == 10UL, "to_integer");
+//
+//{// bug
+//    using Dec1 = atd::Decimal<uint64_t, 3>;
+//    using Dec2 = atd::Decimal<uint32_t, 3>;
+//    Dec1 from{953, 67};
+//    Dec2 to = atd::to_integer<Dec2>(from);
+//    std::cout << from << " --> " << to << '\n';
+//}
+//
+//}
 
 void test_numerics()
 {
@@ -552,6 +554,25 @@ void test_numerics()
 
 }
 
+template <typename Rep>
+void test_traits(bool res)
+{
+    CHECK_TRUE((std::is_signed_v<atd::Decimal<Rep, 2>> == res), "is_signed_v");
+}
+void test_traits()
+{
+    test_traits<int8_t>(true);
+    test_traits<int16_t>(true);
+    test_traits<int32_t>(true);
+    test_traits<int64_t>(true);
+
+    test_traits<uint8_t>(false);
+    test_traits<uint16_t>(false);
+    test_traits<uint32_t>(false);
+    test_traits<uint64_t>(false);
+}
+
+
 void test_decimal()
 {
     test::interfaz("Decimal");
@@ -561,8 +582,9 @@ void test_decimal()
     test_decimal_order();
     test_decimal_arithmetic();
     test_decimal_cast();
-    test_to_integer();
+//    test_to_integer();
     test_numerics();
+    test_traits();
 
 // operator<<
     {

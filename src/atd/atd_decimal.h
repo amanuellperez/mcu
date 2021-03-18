@@ -58,7 +58,8 @@
 #include <limits>
 
 #include "atd_math.h"
-#include "atd_type_traits.h"
+#include "atd_type_traits_basic.h"
+
 
 namespace atd{
 
@@ -698,28 +699,28 @@ using __disable_if_is_decimal = std::enable_if_t<!__is_decimal<T>, T>;
 
 // casting
 // -------
-template <typename Rep2, int N, typename Rep = Rep2>
-constexpr __disable_if_is_decimal<Rep2> to_integer(const Decimal<Rep, N>& d)
-{
-    auto [i, f] = d.value();
-    return static_cast<Rep2>(i);
-}
+//template <typename Rep2, int N, typename Rep = Rep2>
+//constexpr __disable_if_is_decimal<Rep2> to_integer(const Decimal<Rep, N>& d)
+//{
+//    auto [i, f] = d.value();
+//    return static_cast<Rep2>(i);
+//}
+//
+//template <typename To_decimal, typename Rep, int N>
+//constexpr __enable_if_is_decimal<To_decimal>
+//to_integer(const Decimal<Rep, N>& d)
+//{
+//    using Rep2 = typename To_decimal::Rep;
+//    auto [i, f] = d.value();
+//    return To_decimal{static_cast<Rep2>(i), static_cast<Rep2>(f)};
+//}
 
-template <typename To_decimal, typename Rep, int N>
-constexpr __enable_if_is_decimal<To_decimal>
-to_integer(const Decimal<Rep, N>& d)
-{
-    using Rep2 = typename To_decimal::Rep;
-    auto [i, f] = d.value();
-    return To_decimal{static_cast<Rep2>(i), static_cast<Rep2>(f)};
-}
-
-// traits
-// ------
-template<typename Rep, int N>
-struct same_type_with_double_bits_<Decimal<Rep, N>>{
-    using type = Decimal<same_type_with_double_bits<Rep>, N>;
-};
+//// traits
+//// ------
+//template<typename Rep, int N>
+//struct same_type_with_double_bits_<Decimal<Rep, N>>{
+//    using type = Decimal<same_type_with_double_bits<Rep>, N>;
+//};
 
 
 }// namespace atd
@@ -742,6 +743,10 @@ struct std::numeric_limits<atd::Decimal<Rep,N>>{
     {return atd::Decimal<Rep,N>::max();}
 };
 
+template <typename Rep, int N>
+struct std::is_signed<atd::Decimal<Rep, N>>
+    : public std::bool_constant<std::is_signed_v<Rep>> {
+};
 
 #endif
 

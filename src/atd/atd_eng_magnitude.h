@@ -125,7 +125,7 @@ public:
     using Unit	   = Unit0;
     using Rep      = Rep0;
     using Exponent = int8_t;
-    using Scalar   = int;
+    using Scalar   = make_type<int>::same_sign_as<Rep>;
     
     // Rep almacena de -999 a 999 (signed) o de 0 a 999.
     static_assert (sizeof(Rep) > 1, 
@@ -303,13 +303,13 @@ operator/=(const Rep& a)
 }
 
 template <typename U, typename Rep>
-inline ENG_Magnitude<U, Rep>& ENG_Magnitude<U, Rep>::operator*=(int a)
+inline ENG_Magnitude<U, Rep>& ENG_Magnitude<U, Rep>::operator*=(Scalar a)
 {
     return (*this) *= to_rep(a);
 }
 
 template <typename U, typename Rep>
-inline ENG_Magnitude<U, Rep>& ENG_Magnitude<U, Rep>::operator/=(int a)
+inline ENG_Magnitude<U, Rep>& ENG_Magnitude<U, Rep>::operator/=(Scalar a)
 {
     return (*this) /= to_rep(a);
 }

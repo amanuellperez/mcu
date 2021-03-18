@@ -59,6 +59,25 @@ void test_safe_static_cast()
 //	<< " OK\n";
 }
 
+void test_to_integer()
+{
+    using Dec8_1 = atd::Decimal<uint8_t, 1>;
+
+    Dec8_1 d{10,3};
+    CHECK_TRUE(atd::to_integer<uint8_t>(d) == 10, "to_integer");
+    CHECK_TRUE(atd::to_integer<long>(d) == 10UL, "to_integer");
+
+{// bug
+    using Dec1 = atd::Decimal<uint64_t, 3>;
+    using Dec2 = atd::Decimal<uint32_t, 3>;
+    Dec1 from{953, 67};
+    Dec2 to = atd::to_integer<Dec2>(from);
+    std::cout << from << " --> " << to << '\n';
+}
+
+}
+
+
 int main()
 {
 try{
@@ -66,6 +85,7 @@ try{
 
     test_bounded_cast();
     test_safe_static_cast();
+    test_to_integer();
 
 }catch(std::exception& e)
 {

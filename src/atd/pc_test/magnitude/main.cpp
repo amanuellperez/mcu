@@ -17,6 +17,7 @@
 
 #include "../../atd_magnitude.h"
 #include "../../atd_decimal.h"
+#include "../../atd_cast.h"
 
 #include <alp_test.h>
 #include <alp_string.h>
