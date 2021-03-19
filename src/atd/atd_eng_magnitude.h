@@ -77,6 +77,33 @@ constexpr void write_as_eng(Int& x, Exponent& exp)
     }
 }
 
+namespace __eng_magnitude{
+//
+// scalar(Int):
+//
+//  if (exist(Int::Scalar))
+//	return Int::Scalar;
+//  else
+//	return Int;
+//
+template <typename Int, typename = std::void_t<>>
+struct scalar_{
+    using type = Int;
+};
+
+template <typename Int>
+struct scalar_<Int, std::void_t<typename Int::Scalar>>{
+    using type = typename Int::Scalar;
+};
+
+template <typename Int>
+using scalar = typename scalar_<Int>::type;
+
+
+}// namespace
+
+
+
 /*!
  *  \brief  Engineering notation for Magnitude
  * 
@@ -125,7 +152,8 @@ public:
     using Unit	   = Unit0;
     using Rep      = Rep0;
     using Exponent = int8_t;
-    using Scalar   = make_type<int>::same_sign_as<Rep>;
+    // using Scalar   = make_type<int>::same_sign_as<Rep>;
+    using Scalar   = __eng_magnitude::scalar<Rep>;
     
     // Rep almacena de -999 a 999 (signed) o de 0 a 999.
     static_assert (sizeof(Rep) > 1, 
@@ -152,13 +180,12 @@ public:
     ENG_Magnitude& operator+=(ENG_Magnitude b);
     ENG_Magnitude& operator-=(ENG_Magnitude b);
 
-    ENG_Magnitude& operator*=(const Rep& a);
-    ENG_Magnitude& operator/=(const Rep& a);
+    template <typename Int>
+    ENG_Magnitude& operator*=(const Int& a);
 
-    // Quiero poder hacer cosas del tipo: 2*freq y 1 / freq independiente de
-    // la representación usada.
-    ENG_Magnitude& operator*=(Scalar a);
-    ENG_Magnitude& operator/=(Scalar a);
+    template <typename Int>
+    ENG_Magnitude& operator/=(const Int& a);
+
 
 // order
     constexpr bool operator<(const ENG_Magnitude& b) const;
@@ -183,6 +210,15 @@ private:
     static void common_exponent(ENG_Magnitude& a, ENG_Magnitude& b);
 
     static void print_exponent(std::ostream& out, int exp);
+
+    // (RRR) Cuando Scalar == Rep no se puede definir multiply(Rep) y
+    //	     multiply(Scalar) ya que estaría duplicado. Por ello se necesitan
+    //	     estas dos funciones.
+    void multiply_rep(const Rep& a);
+    void divide_rep(const Rep& a);
+
+    void multiply_scalar(const Scalar& a);
+    void divide_scalar(const Scalar& a);
 
     static Rep to_rep(Scalar x) {return to_integer<Rep>(x);}
 };
@@ -269,19 +305,47 @@ operator-=(ENG_Magnitude b)
 
 
 template <typename U, typename Rep>
-ENG_Magnitude<U, Rep>& ENG_Magnitude<U, Rep>::
-operator*=(const Rep& a)
+template <typename Int>
+ENG_Magnitude<U, Rep>& ENG_Magnitude<U, Rep>::operator*=(const Int& a)
 {
-    x_ *= a;
-    write_as_eng(x_, exp_);
+    if constexpr (std::is_same_v<Int, Rep>)
+	multiply_rep(a);
+
+    else if constexpr (std::is_same_v<Int, Scalar>)
+	multiply_scalar(a);
+
+    else 
+	static_assert(always_false_v<Int>, "Can't multiply by this type");
 
     return *this;
 }
 
+template <typename U, typename Rep>
+template <typename Int>
+ENG_Magnitude<U, Rep>& ENG_Magnitude<U, Rep>::operator/=(const Int& a)
+{
+    if constexpr (std::is_same_v<Int, Rep>)
+	divide_rep(a);
+
+    else if constexpr (std::is_same_v<Int, Scalar>)
+	divide_scalar(a);
+
+    else 
+	static_assert(always_false_v<Int>, "Can't divide by this type");
+
+    return *this;
+}
 
 template <typename U, typename Rep>
-ENG_Magnitude<U, Rep>& ENG_Magnitude<U, Rep>::
-operator/=(const Rep& a)
+void ENG_Magnitude<U, Rep>::multiply_rep(const Rep& a)
+{
+    x_ *= a;
+    write_as_eng(x_, exp_);
+}
+
+
+template <typename U, typename Rep>
+void ENG_Magnitude<U, Rep>::divide_rep(const Rep& a)
 {
 
     if (x_ > a){
@@ -297,21 +361,16 @@ operator/=(const Rep& a)
 	write_as_eng(x, exp_);
 	x_ = to_integer<Rep>(x);
     }
-
-
-    return *this;
 }
 
 template <typename U, typename Rep>
-inline ENG_Magnitude<U, Rep>& ENG_Magnitude<U, Rep>::operator*=(Scalar a)
-{
-    return (*this) *= to_rep(a);
-}
+inline void ENG_Magnitude<U, Rep>::multiply_scalar(const Scalar& a)
+{ multiply_rep(to_rep(a)); }
 
 template <typename U, typename Rep>
-inline ENG_Magnitude<U, Rep>& ENG_Magnitude<U, Rep>::operator/=(Scalar a)
+inline void ENG_Magnitude<U, Rep>::divide_scalar(const Scalar& a)
 {
-    return (*this) /= to_rep(a);
+    divide_rep(to_rep(a));
 }
 
 
@@ -360,14 +419,15 @@ inline ENG_Magnitude<U, Rep> operator*
 { return a*x; }
 
 template <typename U, typename Rep>
-inline ENG_Magnitude<U, Rep> operator*(int a, ENG_Magnitude<U, Rep> x)
+inline ENG_Magnitude<U, Rep> operator*(typename ENG_Magnitude<U, Rep>::Scalar a,
+                                       ENG_Magnitude<U, Rep> x)
 { 
     x *= a;
     return x; 
 }
 
 template <typename U, typename Rep>
-inline ENG_Magnitude<U, Rep> operator*(const ENG_Magnitude<U, Rep>& x, int a)
+inline ENG_Magnitude<U, Rep> operator*(const ENG_Magnitude<U, Rep>& x, typename ENG_Magnitude<U,Rep>::Scalar a)
 { return a*x; }
 
 template <typename U, typename Rep>
@@ -381,7 +441,7 @@ operator/(ENG_Magnitude<U, Rep> x, const Rep& a)
 
 
 template <typename U, typename Rep>
-inline ENG_Magnitude<U, Rep> operator/(ENG_Magnitude<U, Rep> x, int a)
+inline ENG_Magnitude<U, Rep> operator/(ENG_Magnitude<U, Rep> x, typename ENG_Magnitude<U,Rep>::Scalar a)
 { 
     x /= a;
     return x; 
@@ -476,9 +536,10 @@ operator/(const Rep& a, const ENG_Magnitude<Unit1, Rep>& x)
     return ENG{static_cast<Rep>(y), exp};
 }
 
-template <typename Unit1, typename Rep>
-ENG_Magnitude<Unit_inverse<Unit1>, Rep>
-operator/(int a, const ENG_Magnitude<Unit1, Rep>& x)
+template <typename Unit, typename Rep>
+ENG_Magnitude<Unit_inverse<Unit>, Rep>
+operator/(typename ENG_Magnitude<Unit, Rep>::Scalar a,
+          const ENG_Magnitude<Unit, Rep>& x)
 {
     return to_integer<Rep>(a) / x;
 
@@ -675,15 +736,15 @@ template <typename Int>
 using ENG_frequency = ENG_Magnitude<Units_frequency, Int>;
 
 template <typename Int>
-inline ENG_frequency<Int> frequency_in_Hz(const Int& x)
+constexpr inline ENG_frequency<Int> frequency_in_Hz(const Int& x)
 { return ENG_frequency<Int>{x, 0}; }
 
 template <typename Int>
-inline ENG_frequency<Int> frequency_in_kHz(const Int& x)
+constexpr inline ENG_frequency<Int> frequency_in_kHz(const Int& x)
 { return ENG_frequency<Int>{x, 3}; }
 
 template <typename Int>
-inline ENG_frequency<Int> frequency_in_MHz(const Int& x)
+constexpr inline ENG_frequency<Int> frequency_in_MHz(const Int& x)
 { return ENG_frequency<Int>{x, 6}; }
 
 // Time
@@ -691,13 +752,13 @@ template <typename Int>
 using ENG_time= ENG_Magnitude<Units_time, Int>;
 
 template <typename Int>
-inline ENG_time<Int> time_in_s(const Int& x) {return ENG_time<Int>{x, 0};}
+constexpr inline ENG_time<Int> time_in_s(const Int& x) {return ENG_time<Int>{x, 0};}
 
 template <typename Int>
-inline ENG_time<Int> time_in_ms(const Int& x) {return ENG_time<Int>{x, -3};}
+constexpr inline ENG_time<Int> time_in_ms(const Int& x) {return ENG_time<Int>{x, -3};}
 
 template <typename Int>
-inline ENG_time<Int> time_in_us(const Int& x) {return ENG_time<Int>{x, -6};}
+constexpr inline ENG_time<Int> time_in_us(const Int& x) {return ENG_time<Int>{x, -6};}
 
 
 

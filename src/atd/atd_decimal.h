@@ -129,7 +129,9 @@ template <typename Rep0, int ndecimals0>
 class Decimal{
 public:
 // Types
-    using Rep = Rep0; // representación. Copio la notación de chrono.
+    using Rep    = Rep0; // representación. Copio la notación de chrono.
+    using Scalar = Rep;  
+
     static constexpr int num_decimals = ndecimals0;
 
 // Construction

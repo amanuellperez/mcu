@@ -43,27 +43,50 @@ namespace avr{
 //       Si se usan decimales no entran en uint16_t así que hay que usar un
 //       uint32_t. ¿O será mejor no usar Decimal y directamente uint16_t?
 using Frequency = atd::ENG_frequency<atd::Decimal<uint32_t, 3>>;
+
+inline constexpr Frequency frequency_in_Hz(const Frequency::Rep& x)
+{ return Frequency{x, 0}; }
+
+inline constexpr Frequency frequency_in_kHz(const Frequency::Rep& x)
+{ return Frequency{x, 3}; }
+
+inline constexpr Frequency frequency_in_MHz(const Frequency::Rep& x)
+{ return Frequency{x, 6}; }
+
+// Time
 using Time      = atd::ENG_time<atd::Decimal<uint32_t, 3>>;
+
+inline constexpr Time time_in_s(const Time::Rep& x) {return Time{x, 0};}
+inline constexpr Time time_in_ms(const Time::Rep& x) {return Time{x, -3};}
+inline constexpr Time time_in_us(const Time::Rep& x) {return Time{x, -6};}
+
+
 
 // syntactic sugar
 namespace literals{
 constexpr Frequency operator"" _Hz (unsigned long long int freq)
-{return Frequency{freq, 0};}
+// {return Frequency{freq, 0};}
+{return frequency_in_Hz(freq);}
 
 constexpr Frequency operator"" _KHz (unsigned long long int freq)
-{return Frequency{freq, 3};}
+//{return Frequency{freq, 3};}
+{return frequency_in_kHz(freq);}
 
 constexpr Frequency operator"" _MHz (unsigned long long int freq)
-{return Frequency{freq, 6};}
+//{return Frequency{freq, 6};}
+{return frequency_in_MHz(freq);}
 
 constexpr Time operator"" _s (unsigned long long int t)
-{return Time{t, 0};}
+//{return Time{t, 0};}
+{return time_in_s(t);}
 
 constexpr Time operator"" _ms (unsigned long long int t)
-{return Time{t, -3};}
+//{return Time{t, -3};}
+{return time_in_ms(t);}
 
 constexpr Time operator"" _us (unsigned long long int t)
-{return Time {t, -6};}
+//{return Time {t, -6};}
+{return time_in_us(t);}
 
 }
 

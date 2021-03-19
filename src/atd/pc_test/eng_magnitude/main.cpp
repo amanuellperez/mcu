@@ -589,6 +589,19 @@ void test_bugs()
 	CHECK_TRUE(t.value() == Rep::from_internal_value(1024)
 		    and t.exponent() == -3, "b2");
     }
+    {
+	Freq f{125, 3};
+	uint16_t top = std::numeric_limits<uint16_t>::max();
+	std::cout << "MAX = " << top << '\n';
+	Freq f2 = f / (2 * (1u + top));
+	std::cout << f2 << '\n';
+	CHECK_TRUE((f2 == Freq{Rep{953, 674}, -3}), "b1");
+
+
+	Time t = atd::time_in_us<Rep>(1024);
+	CHECK_TRUE(t.value() == Rep::from_internal_value(1024)
+		    and t.exponent() == -3, "b2");
+    }
     
     {
 	Freq f1 = atd::frequency_in_Hz<Rep>(400);

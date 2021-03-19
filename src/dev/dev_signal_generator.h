@@ -205,7 +205,7 @@ inline Square_wave_generator<T>::Frequency
 Square_wave_generator<T>::min_frequency()
 {
     using Int = atd::same_type_with_double_bits<counter_type>;
-    Int den = 2 * (Int{1} + Int{GT::square_wave_max_top()});
+    Int den = Int{2} * (Int{1} + Int{GT::square_wave_max_top()});
     return GT::clock_frequency() / den;
 }
 
