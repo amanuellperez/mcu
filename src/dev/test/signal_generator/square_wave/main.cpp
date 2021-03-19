@@ -153,16 +153,6 @@ void Main<Timer>::print_info_detail(uint16_t period_in_us)
 	SW_gen::clock_frequency() << "\t|" << 
 	SW_gen::min_frequency() << "\t|" << 
 	SW_gen::max_frequency() << '\n';
-
-    using GT           = gen::Generic_timer<Timer>;
-    uint32_t den = 2u * (1u + uint32_t{GT::square_wave_max_top()});
-    avr::Frequency cf = GT::clock_frequency();
-    avr::Frequency t = GT::clock_frequency() / den;
-    uart << "---> cf = " << cf.value() << "x10^" << cf.exponent() << '\n';
-    uart << "---> min = " << GT::clock_frequency() << " / (2 * (1u + "
-         << GT::square_wave_max_top() << ")) = "
-         << (GT::clock_frequency() / (unsigned int) den)
-	 << "; den = " << den << "; time = " << t << '\n';
 }
 
 template <typename T>

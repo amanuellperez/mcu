@@ -174,7 +174,7 @@ inline void Square_wave_generator<T>::frequency(const Frequency& freq_sq)
 template <typename T>
 inline void Square_wave_generator<T>::previous_frequency()
 {
-    auto top = GT::square_wave_top();
+    counter_type top = GT::square_wave_top();
     if (top < GT::square_wave_max_top())
 	GT::square_wave_top(top + 1u);
 }
@@ -182,7 +182,7 @@ inline void Square_wave_generator<T>::previous_frequency()
 template <typename T>
 inline void Square_wave_generator<T>::next_frequency()
 {
-    Rep top = GT::square_wave_top();
+    counter_type top = GT::square_wave_top();
     if (top > GT::square_wave_min_top())
 	GT::square_wave_top(top - 1u);
 }
@@ -190,10 +190,11 @@ inline void Square_wave_generator<T>::next_frequency()
 
 // info
 // ----
+// CUIDADO: al multiplicar por 2 le podemos hacer overflow al top!!!
 template <typename T>
 inline Square_wave_generator<T>::Frequency Square_wave_generator<T>::frequency()
 {
-    counter_type top = GT::square_wave_top();
+    atd::same_type_with_double_bits<counter_type> top = GT::square_wave_top();
     return GT::clock_frequency() / (2 * (1u + top));
 }
 

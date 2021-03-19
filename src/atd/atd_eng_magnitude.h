@@ -403,10 +403,8 @@ ENG_Magnitude<U, std::common_type_t<Rep1, Rep2>> operator-
     return x;
 }
 
-
 template <typename U, typename Rep>
-inline ENG_Magnitude<U, Rep> operator*
-(const Rep& a, ENG_Magnitude<U, Rep> x)
+inline ENG_Magnitude<U, Rep> operator*(const Rep& a, ENG_Magnitude<U, Rep> x)
 {
     x *= a;
 
@@ -414,8 +412,8 @@ inline ENG_Magnitude<U, Rep> operator*
 }
 
 template <typename U, typename Rep>
-inline ENG_Magnitude<U, Rep> operator*
-(const ENG_Magnitude<U, Rep>& x, const Rep& a)
+inline ENG_Magnitude<U, Rep> operator*(const ENG_Magnitude<U, Rep>& x,
+                                       const Rep& a)
 { return a*x; }
 
 template <typename U, typename Rep>
