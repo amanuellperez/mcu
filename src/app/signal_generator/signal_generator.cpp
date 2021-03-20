@@ -16,17 +16,18 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "main.h"
+#include <atd_eng_magnitude.h>
 
 void Main::init_signal_generator(uint16_t period_in_us)
 {
     sw_period_ = period_in_us;
 
     switch(period_in_us){
-	    case 1: speaker_.on<1>(); break;
-	    case 8: speaker_.on<8>(); break;
-	    case 64: speaker_.on<64>(); break;
-	    case 256: speaker_.on<256>(); break;
-	    case 1024: speaker_.on<1024>(); break;
+	case 1: speaker_.on<1>(); break;
+	case 8: speaker_.on<8>(); break;
+	case 64: speaker_.on<64>(); break;
+	case 256: speaker_.on<256>(); break;
+	case 1024: speaker_.on<1024>(); break;
 
     }
 
@@ -51,7 +52,12 @@ void Main::turn_off()
 
 void Main::next_frequency()
 {
-    avr::Frequency next_freq = freq_gen_ + 1_Hz;
+    avr::Frequency next_freq;
+
+    if (freq_gen_ < 1_kHz)
+	next_freq = freq_gen_ + 1_Hz;
+    else 
+	next_freq = freq_gen_ + 1_kHz;
 
     if (next_freq > speaker_.max_frequency())
 	return;
@@ -64,7 +70,11 @@ void Main::next_frequency()
 
 void Main::previous_frequency()
 {
-    avr::Frequency next_freq = freq_gen_ - 1_Hz;
+    avr::Frequency next_freq;
+    if (freq_gen_ < 1_kHz)
+	next_freq = freq_gen_ - 1_Hz;
+    else 
+	next_freq = freq_gen_ - 1_kHz;
 
     if (next_freq < speaker_.min_frequency())
 	return;
@@ -73,6 +83,13 @@ void Main::previous_frequency()
 	speaker_.previous_frequency();
 	freq_gen_ = speaker_.frequency();
     }
+
+}
+
+void Main::print(std::ostream& out, const avr::Frequency& f)
+{
+    out << atd::to_integer<uint16_t>(f.value());
+    atd::print_unit(out, f);
 
 }
 

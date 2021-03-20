@@ -32,9 +32,6 @@ constexpr uint8_t time_scan_keyboard    = 100; // in ms
 constexpr uint8_t CANCEL_KEY  = 'a'; // para evitar conflicto con los 
 				     // Keyboard_codes los defino como ascii
 
-// Es para sonido en principio
-constexpr avr::Frequency sweep_min_frequency = 20_Hz;
-constexpr avr::Frequency sweep_max_frequency = 20_KHz;
 
 #endif
 

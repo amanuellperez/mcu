@@ -67,6 +67,7 @@ struct Main {
     void turn_off();
     void next_frequency();
     void previous_frequency();
+    void print(std::ostream& out, const avr::Frequency& f);
 
 
     static constexpr std::array period_opts

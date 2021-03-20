@@ -468,29 +468,6 @@ void test_double()
 //    }
 }
 
-void test_symbol()
-{
-    {
-    atd::ENG_length<int> x{100, 3};
-    CHECK_STDOUT(x, "100 km");
-    }
-    {
-    atd::ENG_frequency<int> x{100, 6};
-    CHECK_STDOUT(x, "100 MHz");
-    }
-    {
-    atd::ENG_time<int> x{100, -6};
-    CHECK_STDOUT(x, "100 us");
-    }
-    {
-    atd::ENG_temperature<int> x{100, 0};
-    CHECK_STDOUT(x, "100 K");
-    }
-    {
-    atd::ENG_pressure<int> x{100, 0};
-    CHECK_STDOUT(x, "100 Pa");
-    }
-}
 
 template <typename Rep>
 void test_order()
@@ -612,8 +589,39 @@ void test_bugs()
     }
 
 }
-
 }
+
+template <typename U, typename R>
+void test_print(const atd::ENG_Magnitude<U,R>& m, const std::string& res)
+{
+    std::stringstream out;
+    m.print_unit(out);
+    CHECK_TRUE(out.str() == res, "print_unit");
+}
+
+
+void test_print()
+{
+    test::interfaz("print");
+
+    test_print(atd::ENG_frequency<int>{100,0}, " Hz");
+    test_print(atd::ENG_frequency<int>{100,3}, "kHz");
+    test_print(atd::ENG_frequency<int>{100,6}, "MHz");
+    test_print(atd::ENG_frequency<int>{100,9}, "GHz");
+    test_print(atd::ENG_frequency<int>{100,12}, "THz");
+
+    test_print(atd::ENG_time<int>{100,-3}, "ms");
+    test_print(atd::ENG_time<int>{100,-6}, "us");
+    test_print(atd::ENG_time<int>{100,-9}, "ns");
+    test_print(atd::ENG_time<int>{100,-12}, "ps");
+
+// unidades
+    test_print(atd::ENG_length<int>{100, 3}, "km");
+    test_print(atd::ENG_temperature<int>{100, 3}, "kK");
+    test_print(atd::ENG_pressure<int>{100, 3}, "kPa");
+}
+
+
 
 int main()
 {
@@ -630,7 +638,7 @@ try{
     test_order<atd::Decimal<int,2>>();
     test_to_eng_magnitude();
     test_to_magnitude();
-    test_symbol();
+    test_print();
 
     test_bugs();
 

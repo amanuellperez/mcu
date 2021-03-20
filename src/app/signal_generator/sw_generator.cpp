@@ -88,9 +88,9 @@ void Main::show_first_window_sw_generator()
     lcd_.clear();
 
     lcd_.cursor_pos(0,1);
-    lcd_ << speaker_.min_frequency()
-         << ", "
-	 << speaker_.max_frequency();
+    print(lcd_, speaker_.min_frequency());
+    lcd_ << ",";
+    print(lcd_, speaker_.max_frequency());
 
     show_window_sw_generator();
 }
@@ -100,7 +100,9 @@ void Main::show_window_sw_generator()
 {
     lcd_.cursor_pos(0,0);
 
-    lcd_ << freq_gen_ << "   ";
+    print(lcd_, freq_gen_);
+    // lcd_ << freq_gen_ << "   ";
+    lcd_ << "   ";
 
     lcd_.cursor_pos(13, 0);
     if (on_)

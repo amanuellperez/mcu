@@ -68,7 +68,7 @@ constexpr Frequency operator"" _Hz (unsigned long long int freq)
 // {return Frequency{freq, 0};}
 {return frequency_in_Hz(freq);}
 
-constexpr Frequency operator"" _KHz (unsigned long long int freq)
+constexpr Frequency operator"" _kHz (unsigned long long int freq)
 //{return Frequency{freq, 3};}
 {return frequency_in_kHz(freq);}
 

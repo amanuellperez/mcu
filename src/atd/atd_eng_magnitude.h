@@ -197,6 +197,10 @@ public:
 // print
     void print(std::ostream& out) const;
 
+    // imprime solo la unidad.
+    // EJ: si freq = 23.452 kHz, print_unit(std::cout) imprime 'kHz'
+    void print_unit(std::ostream& out) const;
+
 // traits
     static constexpr ENG_Magnitude min();
     static constexpr ENG_Magnitude max();
@@ -617,10 +621,24 @@ void ENG_Magnitude<U, Rep>::common_exponent(
 template <typename U, typename Rep>
 void ENG_Magnitude<U, Rep>::print(std::ostream& out) const
 {
-    out << x_ << ' ';
-    print_exponent(out, exp_);
+    out << value() << ' ';
+    print_unit(out);
+}
+
+template <typename U, typename Rep>
+void ENG_Magnitude<U, Rep>::print_unit(std::ostream& out) const
+{
+    print_exponent(out, exponent());
     out << Unit_symbol<Unit>;
 }
+
+template <typename U, typename Rep>
+inline void print(std::ostream& out, const ENG_Magnitude<U, Rep>& m)
+{ m.print(out); }
+
+template <typename U, typename Rep>
+inline void print_unit(std::ostream& out, const ENG_Magnitude<U, Rep>& m)
+{ m.print_unit(out); }
 
 // (RRR) ¿Por qué escribir un espacio en caso de exponente 0?
 //       Es una cuestión estética.

@@ -384,7 +384,7 @@ inline Frequency Timer0::clock_frequency_in_Hz_1MHz()
     using Rep = Frequency::Rep;
     switch(frequency_divisor()){
 	case Frequency_divisor::no_preescaling	: return 1_MHz;
-	case Frequency_divisor::divide_by_8	: return 125_KHz;
+	case Frequency_divisor::divide_by_8	: return 125_kHz;
 	case Frequency_divisor::divide_by_64	: return Frequency{15625, 0};
 	case Frequency_divisor::divide_by_256	: return Frequency{Rep{3906ul,25ul}, 0};
 	case Frequency_divisor::divide_by_1024	: return Frequency{Rep{976ul,56ul}, 0};
