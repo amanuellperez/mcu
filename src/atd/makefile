@@ -17,6 +17,7 @@ INCS= atd_algorithm.h	\
 	atd_magnitude.h		\
 	atd_math.h 			\
 	atd_memory.h		\
+	atd_metronome.h		\
 	atd_ostream.h		\
 	atd_ratio.h			\
 	atd_static.h		\

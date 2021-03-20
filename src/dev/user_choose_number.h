@@ -46,21 +46,21 @@
  *			  ello necesito poder hacer:
  *				    x_ += incr_;
  *			  donde incr_ será 1, 10 ó 100. Pero ¿cómo definir 
- *			  ENG_notation{1}??? ¿Qué significa esto? Lo que
+ *			  ENG_magnitude{1}??? ¿Qué significa esto? Lo que
  *			  quiero es sumarle 1 a x_. Si x_ son kHz quiero
  *			  entonces incr_ = 1kHz, pero si x_ está en MHz
  *			  entonces incr_ = 1MHz. 
  *			  No basta con definir:
  *				    incr = Rep{1}; ¿qué unidades?
  *			  Podría definir por defecto 1 en la unidad base de
- *			  ENG_notation (si son herztios 1 Hz), pero si x_ esta
+ *			  ENG_magnitude (si son herztios 1 Hz), pero si x_ esta
  *			  en MHz al sumarle 1 Hz no se va a ver en pantalla el
  *			  cambio. No serviría para nada.
  *			  De momento lo dejo así. Si se necesita implementar
- *			  de verdad el caso de ENG_notation, el tiempo ya lo
+ *			  de verdad el caso de ENG_magnitude , el tiempo ya lo
  *			  dirá. (una forma sería dar una implementación
  *			  user_choose_number_type_lineal particular para
- *			  el caso ENG_notation; otra intentar ver cómo definir
+ *			  el caso ENG_magnitude; otra intentar ver cómo definir
  *			  Rep{1} con las mismas unidades de x_:
  *			  to_integer(1, x_)??? En este último caso habria que
  *			  definir esta función para todos los ints (se
@@ -72,55 +72,12 @@
 #include <limits>
 #include <array>
 
-#include <atd_bcd.h>
+#include <atd_metronome.h>
 
 #include "dev_keyboard.h"
 
 namespace dev{
 
-namespace __user_choose_number{
-
-// Al mantener pulsada la tecla UP, se quiere que al principio los números
-// cambien lentamente pero luego más rápidamente. 
-// El Counter se encarga de esto.
-// La idea es muestrear el teclado cada T_clock. Vamos contando cuántas veces
-// se ha pulsado UP al mirar T_clock y generamos un trigger cada cierto
-// tiempo. (quizás sería mejor llamarlo Metronomo?)
-class Counter{
-public:
-    Counter() : counter_{d1_max[0], d0_max[0]} , i_{0}
-    {}
-
-    void reset();
-    void tick();
-
-    bool trigger() const { return counter_.d0() == d0_max[i_];}
-
-    bool end() const { return (i_ == nstates - 1) and (counter_.is_max()); }
-
-
-// Observer (for debug)
-    uint8_t as_uint() const {return counter_.as_uint();}
-
-private:
-    atd::Counter_BCD2 counter_;
-
-    uint8_t i_; // indice del state en el que estamos
-
-// Configuración del contador
-//    constexpr static uint8_t nstates = 3;
-//    constexpr static std::array<uint8_t, nstates> d1_max = {2, 4, 9};
-//    constexpr static std::array<uint8_t, nstates> d0_max = {4, 2, 0};
-    constexpr static uint8_t nstates = 2;
-    constexpr static std::array<uint8_t, nstates> d1_max = {2, 9};
-    constexpr static std::array<uint8_t, nstates> d0_max = {2, 0};
-
-// Helper functions
-    void next_state();
-};
-
-
-}// namespace
 
 // Tipos 
 constexpr int user_choose_number_type_lineal   = 0;
@@ -208,8 +165,16 @@ private:
     { return Keyboard3::template key<Basic_keyboard_code::down>(); }
 
 
-    // Counter
-    __user_choose_number::Counter counter_;
+// Counter
+    // Al mantener pulsada la tecla UP, se quiere que al principio los números
+    // cambien lentamente pero luego más rápidamente. 
+    // El Metronomo se encarga de esto.
+    // La idea es muestrear el teclado cada T_clock. Vamos contando cuántas veces
+    // se ha pulsado UP al mirar T_clock y generamos un trigger cada cierto
+    // tiempo. 
+    using d1_max = atd::static_array<uint8_t, 2,9>;
+    using d0_max = atd::static_array<uint8_t, 2,0>;
+    atd::Metronome<d1_max, d0_max> counter_;
 
 
 // Configuración
@@ -333,9 +298,6 @@ Rep User_choose_number<L, T, t0, Rep>::choose4(Rep x0)
     x_ = x0;
     lcd_.cursor_on();
 
-// TODO: hacer local ultima_tecla_pulsada_, creo que solo lo necesita esta
-// función (o la equivalente de choose2). Revisar. O mejor mirar la
-// implementación de user_choose_list, he eliminado Tecla_pulsada.
     ultima_tecla_pulsada_ = Tecla_pulsada::ninguna;
     counter_.reset();
 

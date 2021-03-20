@@ -10,6 +10,7 @@ DIRS = algorithm	\
 		eng_magnitude\
 		magnitude	\
 		math		\
+		metronome	\
 		ratio		\
 		static		\
 		time		\

@@ -159,60 +159,10 @@ using Rep = atd::Decimal<uint16_t, 2>;
 }
 
 
-void test_counter()
-{
-    constexpr uint8_t T_clock = 100;
-
-    LCD lcd;
-    lcd.clear();
-
-
-
-    dev::__user_choose_number::Counter counter;
-
-    lcd.clear();
-    lcd << "Testing velocity";
-    wait_ms(1000);
-    lcd.clear();
-    counter.reset();
-
-    for (uint8_t i = 0; i < 40; ++i) {
-        counter.tick();
-	if (counter.trigger())
-	    lcd << '-';
-
-	wait_ms(T_clock);
-    }
-    wait_ms(1000);
-
-    lcd << "Counter test:";
-    wait_ms(1000);
-    lcd.clear();
-
-    for (uint8_t i = 0; i < 40; ++i) {
-	lcd.clear();
-	lcd << (uint16_t) counter.as_uint();
-	if (counter.trigger()){
-	    lcd.cursor_pos(5,0);
-	    lcd << 'T';
-	}
-	if (counter.end()){
-	    lcd.cursor_pos(5,0);
-	    lcd << 'E';
-	}
-
-        counter.tick();
-	wait_ms(500);
-    }
-
-    wait_ms(1000);
-}
-
 
 int main()
 {
     while(1){
-	//test_counter();
 	test_choose_number2();
     }
 }
