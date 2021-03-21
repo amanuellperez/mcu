@@ -18,10 +18,12 @@ Para que pueda compilar con los avrs es necesario imponer que:
 
 Probado con: avr-gcc 9.2.0
 
-### Test
-Al ser código genérico se pueden compilar en el ordenador y probarlo todo sin
-necesidad de cargarlo en el microcontrolador, lo cual es más cómodo y permite
-automatizar las pruebas automáticas.
+### `pc_test`
+Todos los tests son automáticos para ser realizados en el ordenador. Se
+compilan con `gcc` y no con `avr-gcc`.
+
+Depende del paquete `alp` (creo que solo depende de `alp_test.h`, pero no he
+revisado las dependencias, puede que alguna vez haya usado `alp_string.h`).
 
 
 
