@@ -18,18 +18,32 @@
 #include "main.h"
 
 #include <atd_eng_magnitude.h>
+#include "metronome.h"
 
 void Main::window_sw_generator()
 {
     show_first_window_sw_generator();
     wait_release_key();
 
+
+    Metronome<avr::Frequency, metronome_d1, metronome_d0> metronome;
+
+    Key old_key = Key::none;
+
     while(1){
 	bool redraw = true;
 
-	uint8_t c = sw_generator_scan_keyboard();
-	switch (c){
-	    case OK_KEY:
+	Key key = sw_generator_scan_keyboard();
+
+	if (old_key != key)
+	    metronome.reset();
+	else if (key != Key::none)
+	    metronome.tick();
+
+	old_key = key;
+
+	switch (key){
+	    case Key::ok:
 		if (on_)
 		    turn_off();
 		else
@@ -37,15 +51,17 @@ void Main::window_sw_generator()
 
 		break;
 
-	    case UP_KEY:
-		next_frequency();
+	    case Key::up:
+		if (metronome.trigger())
+		    next_frequency(metronome.incr());
 		break;
 
-	    case DOWN_KEY:
-		previous_frequency();
+	    case Key::down:
+		if (metronome.trigger())
+		    previous_frequency(metronome.incr());
 		break;
 
-	    case CANCEL_KEY:
+	    case Key::cancel:
 		turn_off();
 		wait_release_key();
 		return;
@@ -59,27 +75,28 @@ void Main::window_sw_generator()
 	    show_window_sw_generator();
 
 	wait_ms(time_scan_keyboard);
+
     }
 }
 
 
-uint8_t Main::sw_generator_scan_keyboard()
+Main::Key Main::sw_generator_scan_keyboard()
 {
     if (keyboard_.key<OK_KEY>().is_pressed()
 	    and keyboard_.key<DOWN_KEY>().is_pressed()){
-	return CANCEL_KEY;
+	return Key::cancel;
     }
 
     if (ok_key_.is_pressed())
-	return OK_KEY;
+	return Key::ok;
 
     if (keyboard_.key<DOWN_KEY>().is_pressed())
-	return DOWN_KEY;
+	return Key::down;
 
     if (keyboard_.key<UP_KEY>().is_pressed())
-	return UP_KEY;
+	return Key::up;
 
-    return NO_KEY;
+    return Key::none;
 
 }
 
@@ -88,9 +105,9 @@ void Main::show_first_window_sw_generator()
     lcd_.clear();
 
     lcd_.cursor_pos(0,1);
-    print(lcd_, speaker_.min_frequency());
+    print_without_decimals(lcd_, speaker_.min_frequency());
     lcd_ << ",";
-    print(lcd_, speaker_.max_frequency());
+    print_without_decimals(lcd_, speaker_.max_frequency());
 
     show_window_sw_generator();
 }
@@ -101,7 +118,6 @@ void Main::show_window_sw_generator()
     lcd_.cursor_pos(0,0);
 
     print(lcd_, freq_gen_);
-    // lcd_ << freq_gen_ << "   ";
     lcd_ << "   ";
 
     lcd_.cursor_pos(13, 0);

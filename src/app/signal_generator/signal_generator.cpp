@@ -50,14 +50,9 @@ void Main::turn_off()
     speaker_.ch1_off();
 }
 
-void Main::next_frequency()
+void Main::next_frequency(const avr::Frequency& fadd)
 {
-    avr::Frequency next_freq;
-
-    if (freq_gen_ < 1_kHz)
-	next_freq = freq_gen_ + 1_Hz;
-    else 
-	next_freq = freq_gen_ + 1_kHz;
+    avr::Frequency next_freq = freq_gen_ + fadd;
 
     if (next_freq > speaker_.max_frequency())
 	return;
@@ -68,13 +63,13 @@ void Main::next_frequency()
     }
 }
 
-void Main::previous_frequency()
+void Main::previous_frequency(const avr::Frequency& fsubstract)
 {
     avr::Frequency next_freq;
-    if (freq_gen_ < 1_kHz)
-	next_freq = freq_gen_ - 1_Hz;
-    else 
-	next_freq = freq_gen_ - 1_kHz;
+    if (freq_gen_ > fsubstract)
+	next_freq = freq_gen_ - fsubstract;
+    else
+	next_freq = freq_gen_;
 
     if (next_freq < speaker_.min_frequency())
 	return;
@@ -86,10 +81,20 @@ void Main::previous_frequency()
 
 }
 
-void Main::print(std::ostream& out, const avr::Frequency& f)
+
+void Main::print_without_decimals(std::ostream& out, const avr::Frequency& f)
 {
     out << atd::to_integer<uint16_t>(f.value());
     atd::print_unit(out, f);
+
+}
+
+void Main::print(std::ostream& out, const avr::Frequency& f)
+{
+    if (f < 1_kHz)
+	print_without_decimals(out, f);
+    else
+	out << f;
 
 }
 

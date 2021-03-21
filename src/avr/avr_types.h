@@ -65,30 +65,24 @@ inline constexpr Time time_in_us(const Time::Rep& x) {return Time{x, -6};}
 // syntactic sugar
 namespace literals{
 constexpr Frequency operator"" _Hz (unsigned long long int freq)
-// {return Frequency{freq, 0};}
 {return frequency_in_Hz(freq);}
 
 constexpr Frequency operator"" _kHz (unsigned long long int freq)
-//{return Frequency{freq, 3};}
 {return frequency_in_kHz(freq);}
 
 constexpr Frequency operator"" _MHz (unsigned long long int freq)
-//{return Frequency{freq, 6};}
 {return frequency_in_MHz(freq);}
 
 constexpr Time operator"" _s (unsigned long long int t)
-//{return Time{t, 0};}
 {return time_in_s(t);}
 
 constexpr Time operator"" _ms (unsigned long long int t)
-//{return Time{t, -3};}
 {return time_in_ms(t);}
 
 constexpr Time operator"" _us (unsigned long long int t)
-//{return Time {t, -6};}
 {return time_in_us(t);}
 
-}
+}// namespace literals
 
 }// namespace
 

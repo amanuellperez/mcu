@@ -23,6 +23,7 @@
 #include <array>
 
 #include <avr_types.h>
+#include <atd_cast.h>
 
 using namespace avr::literals;
 
@@ -32,6 +33,9 @@ constexpr uint8_t time_scan_keyboard    = 100; // in ms
 constexpr uint8_t CANCEL_KEY  = 'a'; // para evitar conflicto con los 
 				     // Keyboard_codes los defino como ascii
 
+// El 00 indica que la primera pulsación genera trigger.
+using metronome_d1 = atd::static_array<uint8_t, 0, 9, 9>;
+using metronome_d0 = atd::static_array<uint8_t, 0, 1, 0>;
 
 #endif
 

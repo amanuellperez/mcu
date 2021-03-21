@@ -38,6 +38,8 @@ struct Main {
     OK_key ok_key_;
     Square_wave_generator speaker_;
 
+    enum class Key{ ok, up, down, cancel, none };
+
 // Data
     avr::Frequency freq_gen_;
     bool on_ = false;	    
@@ -56,7 +58,7 @@ struct Main {
     void window_sw_generator();
     void show_first_window_sw_generator();
     void show_window_sw_generator();
-    uint8_t sw_generator_scan_keyboard();
+    Key sw_generator_scan_keyboard();
 
 // cfg
     void window_cfg();
@@ -65,8 +67,9 @@ struct Main {
 // Signal generator
     void turn_on();
     void turn_off();
-    void next_frequency();
-    void previous_frequency();
+    void next_frequency(const avr::Frequency& f);
+    void previous_frequency(const avr::Frequency& f);
+    void print_without_decimals(std::ostream& out, const avr::Frequency& f);
     void print(std::ostream& out, const avr::Frequency& f);
 
 

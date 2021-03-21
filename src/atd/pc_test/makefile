@@ -14,6 +14,7 @@ DIRS = algorithm	\
 		ratio		\
 		static		\
 		time		\
+		types		\
 		type_traits	\
 		units
 

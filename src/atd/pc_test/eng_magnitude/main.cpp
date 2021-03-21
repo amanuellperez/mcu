@@ -587,7 +587,12 @@ void test_bugs()
 	Freq::Rep res = f1 / (2*f2) - Freq::Rep{1};
 	CHECK_TRUE(res == Freq::Rep{9}, "b3");
     }
-
+    
+    {
+	Freq f1{1, 3};
+	Freq f2{29, -3};
+	CHECK_TRUE(f2 < f1, "b4");
+    }
 }
 }
 
