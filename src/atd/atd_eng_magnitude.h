@@ -168,7 +168,7 @@ public:
     // TODO: imponer que solo se pueda llamar a esta función cuando Int sea
     // convertible a Rep
     template <typename Int>
-    constexpr ENG_Magnitude(Int x, Exponent exp);
+    constexpr ENG_Magnitude(Int x, Exponent exp = 0);
 
     // algebra
     ENG_Magnitude& operator++();

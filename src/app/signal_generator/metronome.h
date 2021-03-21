@@ -1,0 +1,82 @@
+// Copyright (C) 2021 A.Manuel L.Perez <amanuel.lperez@gmail.com>
+//
+// This file is part of the MCU++ Library.
+//
+// MCU++ Library is a free library: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#pragma once
+
+#ifndef __METRONOME_H__
+#define __METRONOME_H__
+/****************************************************************************
+ *
+ *  - HISTORIA:
+ *    A.Manuel L.Perez
+ *    21/03/2021 v0.0
+ *
+ ****************************************************************************/
+
+#include <atd_metronome.h>
+#include <array>
+
+// Esta clase es completamente genérica. El problema es ¿cómo llamarla?
+// Es un metronomo de incrementos (???) Metronome_incrs? 
+template <typename Incr, typename D1, typename D0>
+class Metronome : public atd::Metronome<D1, D0>{
+public:
+    Metronome() {reset();}
+
+    void reset() 
+    {
+	atd::Metronome<D1,D0>::reset();
+	i_  = 0;
+	incr_ = incrs[i_];
+    }
+
+    void tick()
+    {
+	if (end() and i_ != incrs.size() - 1){
+	    atd::Metronome<D1,D0>::reset();
+	    next_incr();
+	}
+	else 
+	    atd::Metronome<D1,D0>::tick();
+    }
+
+
+    Incr incr() const { return incrs[i_];}
+
+private:
+    // TODO: atd::bounded<uint8_t, 0, incrs.size() - 1> i_;
+    uint8_t i_;
+
+    Incr incr_ = incrs[0];
+    static constexpr std::array<Incr, 3> incrs{Incr{1}, Incr{10}, Incr{100}};
+
+// Helper
+    bool end() const { return atd::Metronome<D1,D0>::end();}
+    void next_incr() 
+    {
+	if (i_ < incrs.size() - 1)
+	    ++i_;
+    }
+
+};
+
+
+
+#endif
+
+
+
