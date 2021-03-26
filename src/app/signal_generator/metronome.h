@@ -27,9 +27,12 @@
  *
  ****************************************************************************/
 
-#include <atd_metronome.h>
 #include <array>
+#include <atd_metronome.h>
+#include <atd_types.h>
 
+// TODO: revisar el Bounded!!! creo que tiene algun error. No funciona esta
+// clase como debiera.
 // Esta clase es completamente genérica. El problema es ¿cómo llamarla?
 // Es un metronomo de incrementos (???) Metronome_incrs? 
 template <typename Incr, typename D1, typename D0>
@@ -46,9 +49,9 @@ public:
 
     void tick()
     {
-	if (end() and i_ != incrs.size() - 1){
+	if (end() and ! i_.max()){
 	    atd::Metronome<D1,D0>::reset();
-	    next_incr();
+	    ++i_;
 	}
 	else 
 	    atd::Metronome<D1,D0>::tick();
@@ -58,19 +61,13 @@ public:
     Incr incr() const { return incrs[i_];}
 
 private:
-    // TODO: atd::bounded<uint8_t, 0, incrs.size() - 1> i_;
-    uint8_t i_;
-
     Incr incr_ = incrs[0];
     static constexpr std::array<Incr, 3> incrs{Incr{1}, Incr{10}, Incr{100}};
 
+    atd::Bounded<size_t, 0, incrs.size() - 1> i_;
+
 // Helper
     bool end() const { return atd::Metronome<D1,D0>::end();}
-    void next_incr() 
-    {
-	if (i_ < incrs.size() - 1)
-	    ++i_;
-    }
 
 };
 

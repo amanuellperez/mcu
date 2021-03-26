@@ -2,7 +2,7 @@
 # Menu version: 0.0
 menu_main
     "SW generator"  execute &Main::window_sw_generator
-#    "sweep"	    execute &Main::window_sweep_menu
+    "Sound generator" execute &Main::sound_main
     "cfg"	    execute &Main::window_cfg
 
 #menu_b

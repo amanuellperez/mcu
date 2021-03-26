@@ -37,6 +37,8 @@ constexpr uint8_t CANCEL_KEY  = 'a'; // para evitar conflicto con los
 using metronome_d1 = atd::static_array<uint8_t, 0, 9, 9>;
 using metronome_d0 = atd::static_array<uint8_t, 0, 1, 0>;
 
+constexpr avr::Frequency sound_generator_freq0 = avr::frequency_in_Hz(440);
+
 #endif
 
 

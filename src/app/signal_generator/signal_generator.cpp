@@ -50,6 +50,23 @@ void Main::turn_off()
     speaker_.ch1_off();
 }
 
+
+void Main::multiply_frequency_by(const Scalar& a)
+{
+    if (a * freq_gen_ < speaker_.max_frequency()){
+	speaker_.frequency(a*freq_gen_);
+	freq_gen_ = speaker_.frequency();
+    }
+}
+
+void Main::divide_frequency_by(const Scalar& a)
+{
+    if (freq_gen_ / a > speaker_.min_frequency()){
+	speaker_.frequency(freq_gen_ / a);
+	freq_gen_ = speaker_.frequency();
+    }
+}
+
 void Main::next_frequency(const avr::Frequency& fadd)
 {
     avr::Frequency next_freq = freq_gen_ + fadd;
