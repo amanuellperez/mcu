@@ -28,8 +28,8 @@ void test_unit()
 {
     test::interfaz("Unit");
     
-    using U1 = atd::Unit<1,2,3,4>;
-    using U2 = atd::Unit<5,6,7,8>;
+    using U1 = atd::Unit<1,2,3,4,0>;
+    using U2 = atd::Unit<5,6,7,8,0>;
 
     using Up = atd::Unit_multiply<U1, U2>;
     CHECK_TRUE(Up::m == U1::m + U2::m and

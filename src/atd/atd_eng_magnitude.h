@@ -768,17 +768,16 @@ template <typename Int>
 using ENG_time= ENG_Magnitude<Units_time, Int>;
 
 template <typename Int>
-constexpr inline ENG_time<Int> time_in_s(const Int& x) {return ENG_time<Int>{x, 0};}
+constexpr inline ENG_time<Int> time_in_s(const Int& x)
+{ return ENG_time<Int>{x, 0}; }
 
 template <typename Int>
-constexpr inline ENG_time<Int> time_in_ms(const Int& x) {return ENG_time<Int>{x, -3};}
+constexpr inline ENG_time<Int> time_in_ms(const Int& x)
+{ return ENG_time<Int>{x, -3}; }
 
 template <typename Int>
-constexpr inline ENG_time<Int> time_in_us(const Int& x) {return ENG_time<Int>{x, -6};}
-
-
-
-
+constexpr inline ENG_time<Int> time_in_us(const Int& x)
+{ return ENG_time<Int>{x, -6}; }
 
 // Length
 template <typename Int>
@@ -795,6 +794,10 @@ using ENG_pressure = ENG_Magnitude<Units_pressure, Int>;
 template <typename Int>
 using ENG_velocity = ENG_Magnitude<Units_velocity, Int>;
 
+
+// Volt
+template <typename Int>
+using ENG_electric_potential = ENG_Magnitude<Units_electric_potential, Int>;
 
 
 }// namespace

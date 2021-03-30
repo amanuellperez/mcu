@@ -29,15 +29,16 @@
  *    A.Manuel L.Perez
  *    13/03/2021 v0.0 Reestructurado. Las 'Units' las necesitan tanto
  *		      atd::Magnitude como atd::ENG_magnitude
+ *    30/03/2021      Volt
  *
  ****************************************************************************/
 
 namespace atd{
 
 /// Unidades en sistema MKS
-template <int M, int Kg, int S, int Kelvin>
+template <int M, int Kg, int S, int Kelvin, int Ampere>
 struct Unit{
-    enum {m = M, kg = Kg, s = S, K = Kelvin};
+    enum {m = M, kg = Kg, s = S, K = Kelvin, A = Ampere};
 };
 
 // Operations
@@ -47,7 +48,8 @@ struct __Unit_multiply{
     using type = Unit<U1::m + U2::m,
 		      U1::kg + U2::kg,
 		      U1::s + U2::s,
-		      U1::K + U2::K
+		      U1::K + U2::K,
+		      U1::A + U2::A
 		     >;
 };
 
@@ -60,7 +62,8 @@ struct __Unit_divide{
     using type = Unit<U1::m - U2::m,
 		      U1::kg - U2::kg,
 		      U1::s - U2::s,
-		      U1::K - U2::K
+		      U1::K - U2::K,
+		      U1::A + U2::A
 		     >;
 };
 
@@ -71,7 +74,7 @@ using Unit_divide = typename __Unit_divide<U1, U2>::type;
 // Inverse: Unit_inverse<U>
 template <typename U>
 struct __Unit_inverse{
-    using type = Unit<-U::m, -U::kg, -U::s, -U::K>;
+    using type = Unit<-U::m, -U::kg, -U::s, -U::K, -U::A>;
 };
 
 template <typename U>
@@ -79,14 +82,15 @@ using Unit_inverse = typename __Unit_inverse<U>::type;
 
 
 // Different types of units
-using Units_scalar      = Unit<0, 0, 0, 0>;
-using Units_length      = Unit<1, 0, 0, 0>;
-using Units_mass	= Unit<0, 1, 0, 0>;
-using Units_time        = Unit<0, 0, 1, 0>;
-using Units_temperature = Unit<0, 0, 0, 1>;
-using Units_pressure    = Unit<-1, 1, -2, 0>;
-using Units_frequency   = Unit<0, 0, -1, 0>;
-using Units_velocity    = Unit<1, 0, -1, 0>;
+using Units_scalar      = Unit<0, 0, 0, 0, 0>;
+using Units_length      = Unit<1, 0, 0, 0, 0>;
+using Units_mass	= Unit<0, 1, 0, 0, 0>;
+using Units_time        = Unit<0, 0, 1, 0, 0>;
+using Units_temperature = Unit<0, 0, 0, 1, 0>;
+using Units_pressure    = Unit<-1, 1, -2, 0, 0>;
+using Units_frequency   = Unit<0, 0, -1, 0, 0>;
+using Units_velocity    = Unit<1, 0, -1, 0, 0>;
+using Units_electric_potential = Unit<2, 1, -3, 0, -1>;
 
 
 // Symbols
@@ -119,6 +123,10 @@ struct __Unit_symbol<Units_pressure>
 template <>
 struct __Unit_symbol<Units_frequency>
 { static constexpr const char* value = "Hz"; };
+
+template <>
+struct __Unit_symbol<Units_electric_potential>
+{ static constexpr const char* value = "V"; };
 
 }// namespace
 
