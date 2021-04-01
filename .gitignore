@@ -16,6 +16,7 @@ xx
 *.hex
 *.map
 *.elf
+bugs
 
 # tags
 tags

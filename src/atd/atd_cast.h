@@ -105,12 +105,10 @@ constexpr __disable_if_is_decimal<Rep2> to_integer(const Decimal<Rep, N>& d)
 }
 
 template <typename To_decimal, typename Rep, int N>
-constexpr __enable_if_is_decimal<To_decimal>
+inline constexpr __enable_if_is_decimal<To_decimal>
 to_integer(const Decimal<Rep, N>& d)
 {
-    using Rep2 = typename To_decimal::Rep;
-    auto [i, f] = d.value();
-    return To_decimal{static_cast<Rep2>(i), static_cast<Rep2>(f)};
+    return decimal_cast<To_decimal>(d);
 }
 
 

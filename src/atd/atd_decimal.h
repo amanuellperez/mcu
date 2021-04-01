@@ -94,6 +94,9 @@ constexpr inline To_decimal decimal_cast(const Decimal<Rep1, n1>& d)
 {
     constexpr int n2 = To_decimal::num_decimals;
 
+    if constexpr (std::is_same_v<Decimal<Rep1, n1>, To_decimal>)
+	return d;
+
     if constexpr (n2 == n1)
 	return To_decimal::from_internal_value(d.internal_value());
 

@@ -594,6 +594,25 @@ void test_bugs()
 	CHECK_TRUE(f2 < f1, "b4");
     }
 }
+
+    {
+	using Potential = atd::ENG_electric_potential<atd::Decimal<uint32_t, 3>>;
+	Potential::Rep res_val = Potential::Rep::from_internal_value(1090);
+	std::cout << "res_val = " << res_val << '\n';
+	std::cout << "res_val (internal) = " << res_val.internal_value() << '\n';
+	Potential res_pot {res_val, 0};
+	std::cout << "res_pot = " << res_pot << '\n';
+	std::cout << "res_pot (internal) = " << res_pot.value().internal_value() << '\n';
+
+	Potential::Exponent exp = 0;
+	write_as_eng(res_val, exp);
+	std::cout << "res_val (despues) = " << res_val << '\n';
+	std::cout << "exp = " << exp << '\n';
+
+	auto xx = atd::to_integer<Potential::Rep>(res_val);
+	std::cout << "xx = " << xx << '\n';
+
+    }
 }
 
 template <typename U, typename R>
