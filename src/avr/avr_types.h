@@ -27,7 +27,8 @@
  *
  *  - HISTORIA:
  *    A.Manuel L.Perez
- *    31/01/2021 v0.0
+ *    31/01/2021 v0.0 Frequency and Time.
+ *    30/03/2021      Potential.
  *
  ****************************************************************************/
 #include <atd_eng_magnitude.h>
@@ -60,10 +61,19 @@ inline constexpr Time time_in_s(const Time::Rep& x) {return Time{x, 0};}
 inline constexpr Time time_in_ms(const Time::Rep& x) {return Time{x, -3};}
 inline constexpr Time time_in_us(const Time::Rep& x) {return Time{x, -6};}
 
+// Electric potential
+using Potential = atd::ENG_electric_potential<atd::Decimal<uint32_t, 3>>;
+inline constexpr Potential potential_in_V(const Potential::Rep& x)
+{ return Potential{x, 0}; }
+
+inline constexpr Potential potential_in_mV(const Potential::Rep& x)
+{ return Potential{x, -3}; }
+
 
 
 // syntactic sugar
 namespace literals{
+// frequency
 constexpr Frequency operator"" _Hz (unsigned long long int freq)
 {return frequency_in_Hz(freq);}
 
@@ -73,6 +83,7 @@ constexpr Frequency operator"" _kHz (unsigned long long int freq)
 constexpr Frequency operator"" _MHz (unsigned long long int freq)
 {return frequency_in_MHz(freq);}
 
+// time
 constexpr Time operator"" _s (unsigned long long int t)
 {return time_in_s(t);}
 
@@ -81,6 +92,13 @@ constexpr Time operator"" _ms (unsigned long long int t)
 
 constexpr Time operator"" _us (unsigned long long int t)
 {return time_in_us(t);}
+
+// potential
+constexpr Potential operator"" _V (unsigned long long int v)
+{return potential_in_V(v);}
+
+constexpr Potential operator"" _mV (unsigned long long int v)
+{return potential_in_mV(v);}
 
 }// namespace literals
 

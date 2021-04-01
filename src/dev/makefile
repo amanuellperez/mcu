@@ -1,7 +1,6 @@
 SOURCES= dev_BMP280_basic.cpp	\
 		 dev_BME280_basic.cpp	\
-		 dev_DS1307_basic.cpp	\
-		 user_choose_number.cpp
+		 dev_DS1307_basic.cpp
 
 
 INCS= 	dev_BMP280_basic.h			\

@@ -2,7 +2,7 @@ SOURCES= avr_SPI.cpp \
 		 avr_sleep.cpp
 
 
-INCS= avr_ADC.h		\
+INCS= avr_ADC_basic.h\
 	avr_atmega328p.h\
 	avr_cfg.h		\
 	avr_interrupt.h	\

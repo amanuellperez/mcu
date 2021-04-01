@@ -15,11 +15,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "../../avr_ADC.h"
+#include "../../avr_ADC_basic.h"
 #include "../../avr_UART.h"
 #include "../../avr_time.h"
 
-using namespace avr;
+using avr::ADC;
+
 // Conectar un divisor de potencial, la salida al pin 28.
 // Con un multimetro ir comparando la salida del multimetro con la que da el
 // ADC.
@@ -49,70 +50,185 @@ using namespace avr;
 //  ejemplo el 7805) la fuente de alimentación. Si no oscila mucho AREF no
 //  sirviendo para nada.
 
+void wait_until_conversion_is_complete()
+{while(!ADC::is_the_conversion_complete()) ;}
 
-// pruebo las funciones de bajo nivel
-void test_single_mode_bajo_nivel()
+
+void print(std::ostream& out, const avr::Potential& v)
+{
+    using namespace avr::literals;
+
+    if (v < 1_V){
+	out << atd::to_integer<uint16_t>(v.value()) << ' ';
+	atd::print_unit(out, v);
+    }
+    else
+	out << v;
+}
+
+
+template <uint8_t npin>
+void test_internal_1_1V()
 {
     avr::UART_iostream uart;
 
-    // ADC::single_mode(ADC::AREF::selection_internal_to_AVCC);
-//    ADC::single_mode(ADC::AREF::selection_external);
-//    constexpr uint16_t AREF_en_mV = 5000;
+    uart << "\n\nSelection internal 1.1 V\n"
+	    "------------------------\n"
+	    "IMPORTANTE: desconectar el pin AREF de VCC\n"
+	    "si no se puede producir un cortocircuito dentro del avr!!!\n";
 
-//OJO: desconectar el pin AREF de Vcc, sino se produce un
-//cortocircuito dentro del avr!!!
-    ADC::single_mode(ADC::AREF::selection_internal_to_1_1V);
+    uart << "\nPulsa una tecla DESPUÉS de desconectar AREF de VCC\n";
+
+    char c{};
+    uart >> c;
+
+    uart << "El potencial máximo a leer es de 1.1 V\n";
+
+    // encendemos el ADC en internal 1.1V a 125kHz
+    ADC::AREF_internal_to_1_1V();
+    ADC::clock_speed_in_kHz<125>();
+    ADC::enable();
+
     constexpr uint16_t AREF_en_mV = 1100;
 
-    ADC::select_pin<28>();
-
-    uart << "single_mode (bajo nivel)\n\r"
-	     "------------------------\n\r";
-
+// seleccionamos pin a leer
+    ADC::select_pin<npin>();
 
     while (1) {
 	ADC::start_conversion();
-	ADC::wait_until_conversion_is_complete();
+	wait_until_conversion_is_complete();
 	
 	auto arefs = ADC::ADC_in_arefs();
 
-	uart << "arefs = " << arefs << "; V(calibrado) = " 
-		<< ADC::tomV<17321u, 348976u>(arefs) << " mV; "
-		<< "V(sin cal.)= " << ADC::tomV<AREF_en_mV>(arefs)<< " mV\n\r";
+	uart << "arefs = " << arefs  << "; V = ";
+	print(uart, ADC::ADC_in_volts<AREF_en_mV>());
+	uart << '\n';
 
-	delay_ms(1000);
+	wait_ms(1000);
     }                                      
 }
 
-// Probamos las funciones de más alto nivel
-void test_single_mode_alto_nivel()
+template <uint8_t npin>
+void test_internal_AVCC()
 {
     avr::UART_iostream uart;
 
-    // ADC::single_mode(ADC::AREF::selection_internal_to_AVCC);
-    ADC::single_mode(ADC::AREF::selection_external);
-    ADC::select_pin<28>();
+    uart << "\n\nSelection internal AVCC\n"
+	    "------------------------\n"
+	    "IMPORTANTE: desconectar el pin AREF de VCC\n"
+	    "si no se puede producir un cortocircuito dentro del avr!!!\n"
+	    "(TODO: revisar este comentario, en este caso no lo tengo claro\n"
+	    "que sea necesario aunque no tiene mucho sentido tenerlo conectado\n"
+	    "si se va a conectar internamente)\n";
 
-    uart << "single_mode (alto nivel)\n\r"
-	     "------------------------\n\r";
+    uart << "\nPulsa una tecla DESPUÉS de desconectar AREF de VCC\n";
+
+    char c{};
+    uart >> c;
+
+    constexpr uint16_t AREF_en_mV = 5000;
+    uart << "El potencial máximo a leer es de 5 V.\n";
+
+    // encendemos el ADC en internal 1.1V a 125kHz
+    ADC::AREF_internal_to_AVCC();
+    ADC::clock_speed_in_kHz<125>();
+    ADC::enable();
+
+
+// seleccionamos pin a leer
+    ADC::select_pin<npin>();
 
     while (1) {
-	auto v = ADC::read_in_arefs();
-	uart << v << "; " << ADC::tomV<4990>(v)<< "\n\r";
+	ADC::start_conversion();
+	wait_until_conversion_is_complete();
+	
+	auto arefs = ADC::ADC_in_arefs();
 
-	delay_ms(1000);
+	uart << "arefs = " << arefs  << "; V = ";
+	print(uart, ADC::ADC_in_volts<AREF_en_mV>());
+	uart << '\n';
+
+	wait_ms(1000);
+    }                                      
+}
+
+
+
+template <uint8_t npin>
+void test_AREF_external()
+{
+    avr::UART_iostream uart;
+
+    uart << "\n\nSelection AREF external\n"
+	        "-----------------------\n"
+		"Conectar el pin AREF a VCC\n";
+
+    uart << "\nPulsa una tecla DESPUÉS de conectar AREF de VCC\n";
+
+    char c{};
+    uart >> c;
+
+    constexpr uint16_t AREF_en_mV = 5000;
+    uart << "El potencial máximo a leer es de 5 V.\n";
+
+    // encendemos el ADC en internal 1.1V a 125kHz
+    ADC::AREF_external();
+    ADC::clock_speed_in_kHz<125>();
+    ADC::enable();
+
+
+// seleccionamos pin a leer
+    ADC::select_pin<npin>();
+
+    while (1) {
+	ADC::start_conversion();
+	wait_until_conversion_is_complete();
+	
+	auto arefs = ADC::ADC_in_arefs();
+
+	uart << "arefs = " << arefs  << "; V = ";
+	print(uart, ADC::ADC_in_volts<AREF_en_mV>());
+	uart << '\n';
+
+	wait_ms(1000);
     }                                      
 }
 
 
 int main() 
 {
+    constexpr uint8_t npin = 28;
+
     avr::UART_iostream uart;
     avr::basic_cfg(uart);
     uart.on();
 
-    test_single_mode_bajo_nivel();
-//    test_single_mode_alto_nivel();
-}
+    while (1) {
+        uart << "\n\nADC test\n"
+                "--------\n"
+		"Recordar conectar AVCC a alimentación.\n"
+		"La alimentación del ADC es independiente de la del micro.\n"
+		"Conectar el pin " << (int) npin << " al potenciómetro.\n"
+                "1. Internal 1.1 V\n"
+                "2. Internal to AVCC\n"
+		"3. External to AREF\n";
 
+        char res{};
+        uart >> res;
+
+        switch (res) {
+            case '1':
+                test_internal_1_1V<npin>();
+                break;
+
+	    case '2':
+                test_internal_AVCC<npin>();
+                break;
+
+	    case '3': 
+		test_AREF_external<npin>();
+		break;
+        }
+    }
+}
 
