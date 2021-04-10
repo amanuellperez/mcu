@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez <amanuel.lperez@gmail.com>
+// Copyright (C) 2019-2021 A.Manuel L.Perez <amanuel.lperez@gmail.com>
 //
 // This file is part of the MCU++ Library.
 //
@@ -17,17 +17,17 @@
 
 #pragma once
 
-#ifndef __AVR_SPI_H__
-#define __AVR_SPI_H__
+#ifndef __AVR_SPI_BASIC_H__
+#define __AVR_SPI_BASIC_H__
 /****************************************************************************
  *
- *  - DESCRIPCION: Driver del SPI del avr.
+ *  - DESCRIPCION: Traductor del SPI.
  *
  *  - COMENTARIOS:
- *	¿Cómo gestionar los errores en el SPI?
+ *	¿Cómo gestionar los errores en el SPI_basic?
  *	En principio da la impresión de que (por lo menos por software) no
- *	podemos. Si el SPI funciona como master, SS, SCK y MOSI son pins de
- *	salida. El SPI escribe ahí. El MISO es el único pin de entrada: nos
+ *	podemos. Si el SPI_basic funciona como master, SS, SCK y MOSI son pins de
+ *	salida. El SPI_basic escribe ahí. El MISO es el único pin de entrada: nos
  *	limitamos a leerlo, nada más. El potencial que haya en ese pin es el
  *	que consideramos que es el byte entrante. ¡Imposible detectar que el
  *	dispositivo no está conectado!
@@ -37,17 +37,12 @@
  *	pido tal cosa, tu me respondes con otra. Si podemos comprobar que la
  *	respuesta es o no la adecuada sabremos si está conectado o no.
  *  
- *  - TEST: Para probar el SPI mirar el programa de prueba del potenciómetro
- *	digital MCP4231. Es un dispositivo muy sencillo de programar y se 
- *	pueden poner varios para probar el SPI.
- *
- *	Ejemplo de driver: ver el potenciómetro MCP4231.
- *
  *  - HISTORIA:
  *    A.Manuel L.Perez
  *	10/04/2018 v0.0
  *	10/07/2019 Reescrito. Comienzo con traductor.
  *	19/10/2019 Lo dejo como un traductor puro.
+ *	10/04/2021 SPI_basic_basic, SPI_master, SPI_slave
  *
  ****************************************************************************/
 #include <stdint.h> // uint8_t
@@ -56,58 +51,47 @@
 #include "avr_pin.h"
 #include <atd_bit.h>
 
-// Functions
 namespace avr{
 
-class SPI{
+class SPI_basic{
 public:
     // No permitimos que se construya este objeto
-    SPI() = delete;
+    SPI_basic() = delete;
 
     // ---------
     // Traductor
     // ---------
-    /// Causes the SPI interrupt to be executed if a serial transmission is
+    /// Causes the SPI_basic interrupt to be executed if a serial transmission is
     /// completed and interrupts are enable.
     static void interrupt_enable() 
     {atd::write_bit<SPIE>::to<1>::in(SPCR);}
-//    { atd::Register{SPCR}.write_one_bit<SPIE>(); }
 
     /// Disable interrupt.
     static void interrupt_disable() 
     {atd::write_bit<SPIE>::to<0>::in(SPCR);}
-//    { atd::Register{SPCR}.write_zero_bit<SPIE>(); }
 
-    /// Enable SPI as master. This must be set to enable SPI operations.
+    /// Enable SPI_basic as master. This must be set to enable SPI_basic operations.
     static void enable_as_a_master() 
     {atd::write_bits<MSTR, SPE>::to<1,1>::in(SPCR);}
-//    { atd::Register{SPCR}.write_one_bit<MSTR, SPE>(); }
 
 
-    /// Enable SPI as a slave. This must be set to enable SPI operations.
+    /// Enable SPI_basic as a slave. This must be set to enable SPI_basic operations.
     static void enable_as_a_slave() 
-    { 
-	atd::write_bits<MSTR, SPE>::to<0,1>::in(SPCR);
-//	atd::Register{SPCR}.write_zero_bit<MSTR>();
-//	atd::Register{SPCR}.write_one_bit<SPE>();
-    }
+    { atd::write_bits<MSTR, SPE>::to<0,1>::in(SPCR); }
 
-    /// Disable SPI.
+    /// Disable SPI_basic.
     static void disable() 
     {atd::write_bit<SPE>::to<0>::in(SPCR);}
-//    { atd::Register{SPCR}.write_zero_bit<SPE>(); }
  
 
-    /// El SPI envia primero el LSB (least significant bit = unidades)
+    /// El SPI_basic envia primero el LSB (least significant bit = unidades)
     static void data_order_LSB() 
     {atd::write_bit<DORD>::to<1>::in(SPCR);}
-//    { return atd::Register{SPCR}.write_one_bit<DORD>(); }
 
 
-    /// El SPI envia primero el MSB (most significant bit)
+    /// El SPI_basic envia primero el MSB (most significant bit)
     static void data_order_MSB() 
     {atd::write_bit<DORD>::to<0>::in(SPCR);}
-//    { return atd::Register{SPCR}.write_zero_bit<DORD>(); }
 
 
     /// Configuramos el modo de operación: la polaridad cpol y la fase cpha
@@ -115,33 +99,31 @@ public:
 
 
     // Selección de la velocidad del reloj
-    static void clock_speed_entre_2();
-    static void clock_speed_entre_4();
-    static void clock_speed_entre_8();
-    static void clock_speed_entre_16();
-    static void clock_speed_entre_32();
-    static void clock_speed_entre_64();
-    static void clock_speed_entre_128();
+    static void clock_speed_divide_by_2();
+    static void clock_speed_divide_by_4();
+    static void clock_speed_divide_by_8();
+    static void clock_speed_divide_by_16();
+    static void clock_speed_divide_by_32();
+    static void clock_speed_divide_by_64();
+    static void clock_speed_divide_by_128();
 
 
-    /// Configuramos la velocidad del reloj del SPI en microsegundos.
-    // La función clock_speed_en_us traduce la forma de hablar del cliente (en
+    /// Configuramos la velocidad del reloj del SPI_basic en microsegundos.
+    // La función clock_speed_in_us traduce la forma de hablar del cliente (en
     // microsegundos) en la forma de hablar del avr (en divisor de frecuencia)
-    template<uint16_t periodo
-	    , uint32_t clock_frecuencia_en_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
-    static void clock_speed_en_us();
+    template<uint16_t period
+	    , uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
+    static void clock_speed_in_us();
 
 
     /// Is a serial transfer complete?
     static bool is_transmission_complete()
     {return atd::is_one_bit<SPIF>::of_register(SPSR);}
-//    { return atd::Register{SPSR}.is_one_bit<SPIF>(); }
 
-    /// The SPI data register was written during data transfer?
-    // To clear this bit first read WCOL, then read SPI data register.
+    /// The SPI_basic data register was written during data transfer?
+    // To clear this bit first read WCOL, then read SPI_basic data register.
     static bool is_a_write_collision()
     {return atd::is_one_bit<WCOL>::of_register(SPSR);}
-//    { return atd::Register{SPSR}.is_one_bit<WCOL>(); }
 
 
     /// Write x in the data register and initiates data transmissioin (si SS
@@ -150,29 +132,28 @@ public:
 
     /// Devuelve el último uint8_t recibido en el último trade.
     static std::byte data_register() {return std::byte{SPDR};}
+};
 
-    /// Configuramos los pines para que el SPI funciones como master.
-    /// Configuramos todos: SCK, MOSI y SS como de salida, y MISO como de
-    /// entrada.
-    static void cfg_pines_as_master();
 
+class SPI_master : public SPI_basic{
+public:
+    SPI_master() = delete;
 
     // --------------------------------
     // Funciones de alto nivel (driver)
     // --------------------------------
-    /// Enciende el SPI como Master. 
+    /// Enciende el SPI_basic como Master. 
     /// La frecuencia del reloj usada será la definida por
-    /// periodo_en_us. Falta definir la polaridad y la phase ya que cada
+    /// period_in_us. Falta definir la polaridad y la phase ya que cada
     /// dispositivo tendrá una polaridad y fase diferente. Esta configuración
-    /// la hara cada dispositivo antes de escribir en SPI.
-    template <uint16_t periodo_en_us>
-    static void on_as_a_master()
+    /// la hara cada dispositivo antes de escribir en SPI_basic.
+    template <uint16_t period_in_us>
+    static void on()
     {
-	cfg_pines_as_master();
-	clock_speed_en_us<periodo_en_us>();
+	init();
+	clock_speed_in_us<period_in_us>();
 	enable_as_a_master();
     }
-
 
 
     // Las transmisiones del SPI nunca van a fallar: al enviar un byte el SPI
@@ -207,85 +188,91 @@ public:
     static std::byte read()
     { return trade_and_wait(std::byte{0}); }
 
+
+private:
+    /// Configuramos los pines para que el SPI_basic funciones como master.
+    /// Configuramos todos: SCK, MOSI y SS como de salida, y MISO como de
+    /// entrada.
+    static void init();
 };
 
 
 
-// reloj del SPI a 1MHz
+// reloj del SPI_basic a 1MHz
 // --------------------
 // a 500 kHz = 2 us
 template<>
-inline void SPI::clock_speed_en_us<2u, 1000000UL>() 
-{clock_speed_entre_2();}
+inline void SPI_basic::clock_speed_in_us<2u, 1000000UL>() 
+{clock_speed_divide_by_2();}
 
 // a 4 us
 template<>
-inline void SPI::clock_speed_en_us<4u, 1000000UL>() 
-{clock_speed_entre_4();}
+inline void SPI_basic::clock_speed_in_us<4u, 1000000UL>() 
+{clock_speed_divide_by_4();}
 
 // a 8 us
 template<>
-inline void SPI::clock_speed_en_us<8u, 1000000UL>() 
-{clock_speed_entre_8();}
+inline void SPI_basic::clock_speed_in_us<8u, 1000000UL>() 
+{clock_speed_divide_by_8();}
 
 // a 16 us
 template<>
-inline void SPI::clock_speed_en_us<16u, 1000000UL>() 
-{clock_speed_entre_16();}
+inline void SPI_basic::clock_speed_in_us<16u, 1000000UL>() 
+{clock_speed_divide_by_16();}
 
 // a 32 us
 template<>
-inline void SPI::clock_speed_en_us<32u, 1000000UL>() 
-{clock_speed_entre_32();}
+inline void SPI_basic::clock_speed_in_us<32u, 1000000UL>() 
+{clock_speed_divide_by_32();}
 
 // a 64 us
 template<>
-inline void SPI::clock_speed_en_us<64u, 1000000UL>() 
-{clock_speed_entre_64();}
+inline void SPI_basic::clock_speed_in_us<64u, 1000000UL>() 
+{clock_speed_divide_by_64();}
 
 // a 128 us
 template<>
-inline void SPI::clock_speed_en_us<128u, 1000000UL>() 
-{clock_speed_entre_128();}
+inline void SPI_basic::clock_speed_in_us<128u, 1000000UL>() 
+{clock_speed_divide_by_128();}
 
 
 
-// reloj del SPI a 8MHz
+// reloj del SPI_basic a 8MHz
 // --------------------
 // a 250 ns
 //template<>
-//inline void SPI::clock_speed_en_ns<250u, 8000000UL>() 
-//{clock_speed_entre_2();}
+//inline void SPI_basic::clock_speed_en_ns<250u, 8000000UL>() 
+//{clock_speed_divide_by_2();}
 
 // a 500 ns
 //template<>
-//inline void SPI::clock_speed_en_ns<500u, 8000000UL>() 
-//{clock_speed_entre_4();}
+//inline void SPI_basic::clock_speed_en_ns<500u, 8000000UL>() 
+//{clock_speed_divide_by_4();}
 
 // a 1 us
 template<>
-inline void SPI::clock_speed_en_us<1u, 8000000UL>() 
-{clock_speed_entre_8();}
+inline void SPI_basic::clock_speed_in_us<1u, 8000000UL>() 
+{clock_speed_divide_by_8();}
 
 // a 2 us
 template<>
-inline void SPI::clock_speed_en_us<2u, 8000000UL>() 
-{clock_speed_entre_16();}
+inline void SPI_basic::clock_speed_in_us<2u, 8000000UL>() 
+{clock_speed_divide_by_16();}
 
 // a 4 us
 template<>
-inline void SPI::clock_speed_en_us<4u, 8000000UL>() 
-{clock_speed_entre_32();}
+inline void SPI_basic::clock_speed_in_us<4u, 8000000UL>() 
+{clock_speed_divide_by_32();}
 
 // a 8 us
 template<>
-inline void SPI::clock_speed_en_us<8u, 8000000UL>() 
-{clock_speed_entre_64();}
+inline void SPI_basic::clock_speed_in_us<8u, 8000000UL>() 
+{clock_speed_divide_by_64();}
 
 // a 16 us
 template<>
-inline void SPI::clock_speed_en_us<16u, 8000000UL>() 
-{clock_speed_entre_128();}
+inline void SPI_basic::clock_speed_in_us<16u, 8000000UL>() 
+{clock_speed_divide_by_128();}
 
 }// namespace avr
 

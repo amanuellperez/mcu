@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "avr_SPI.h"
+#include "avr_SPI_basic.h"
 #include "avr_pin.h"
 
 #include <atd_bit.h>
@@ -25,7 +25,7 @@
 
 namespace avr{
 
-void SPI::cfg_pines_as_master()
+void SPI_master::init()
 {
     // Leer la nota pag 356 del libro de MAKE. Es fundamental poner SS a 1
     // antes que hacer un enable
@@ -41,84 +41,62 @@ void SPI::cfg_pines_as_master()
 }
 
 
-void SPI::spi_mode(bool cpol, bool cpha)
+void SPI_basic::spi_mode(bool cpol, bool cpha)
 {
     if (cpol == 0)
 	atd::write_bit<CPOL>::to<0>::in(SPCR);
-//	Register{SPCR}.write_zero_bit<CPOL>();
     else 
 	atd::write_bit<CPOL>::to<1>::in(SPCR);
-//	Register{SPCR}.write_one_bit<CPOL>();
 
 
     if (cpha == 0)
 	atd::write_bit<CPHA>::to<0>::in(SPCR);
-//	Register{SPCR}.write_zero_bit<CPHA>();
     else
 	atd::write_bit<CPHA>::to<1>::in(SPCR);
-//	Register{SPCR}.write_one_bit<CPHA>();
 }
 
 
 // De acuerdo con la tabla 23-5
-void SPI::clock_speed_entre_2()
+void SPI_basic::clock_speed_divide_by_2()
 {// 100
     atd::write_bit<SPI2X>::to<1>::in(SPSR);
     atd::write_bit<SPR1, SPR0>::to<0,0>::in(SPCR);
-//    Register{SPSR}.write_one_bit<SPI2X>();
-//    Register{SPSR}.write_zero_bit<SPR1, SPR0>(); <-- ERROR!!! no es SPSR
 }
 
-void SPI::clock_speed_entre_4()
+void SPI_basic::clock_speed_divide_by_4()
 {// 000
     atd::write_bit<SPI2X>::to<0>::in(SPSR);
     atd::write_bit<SPR1, SPR0>::to<0,0>::in(SPCR);
-//    Register{SPSR}.write_zero_bit<SPI2X>();
-//    Register{SPSR}.write_zero_bit<SPR1, SPR0>();
 }
 
-void SPI::clock_speed_entre_8()
+void SPI_basic::clock_speed_divide_by_8()
 {// 101
     atd::write_bit<SPI2X>::to<1>::in(SPSR);
     atd::write_bit<SPR1, SPR0>::to<0,1>::in(SPCR);
-//    Register{SPSR}.write_one_bit<SPI2X>();
-//    Register{SPSR}.write_zero_bit<SPR1>();
-//    Register{SPSR}.write_one_bit<SPR0>();
 }
 
-void SPI::clock_speed_entre_16()
+void SPI_basic::clock_speed_divide_by_16()
 {// 001
     atd::write_bit<SPI2X>::to<0>::in(SPSR);
     atd::write_bit<SPR1, SPR0>::to<0,1>::in(SPCR);
-//    Register{SPSR}.write_zero_bit<SPI2X>();
-//    Register{SPSR}.write_zero_bit<SPR1>();
-//    Register{SPSR}.write_one_bit<SPR0>();
 }
 
-void SPI::clock_speed_entre_32()
+void SPI_basic::clock_speed_divide_by_32()
 {// 110
     atd::write_bit<SPI2X>::to<1>::in(SPSR);
     atd::write_bit<SPR1, SPR0>::to<1,0>::in(SPCR);
-//    Register{SPSR}.write_one_bit<SPI2X>();
-//    Register{SPSR}.write_one_bit<SPR1>();
-//    Register{SPSR}.write_zero_bit<SPR0>();
 }
 
-void SPI::clock_speed_entre_64()
+void SPI_basic::clock_speed_divide_by_64()
 {// 010
     atd::write_bit<SPI2X>::to<0>::in(SPSR);
     atd::write_bit<SPR1, SPR0>::to<1,0>::in(SPCR);
-//    Register{SPSR}.write_zero_bit<SPI2X>();
-//    Register{SPSR}.write_one_bit<SPR1>();
-//    Register{SPSR}.write_zero_bit<SPR0>();
 }
 
-void SPI::clock_speed_entre_128()
+void SPI_basic::clock_speed_divide_by_128()
 {// 011
     atd::write_bit<SPI2X>::to<0>::in(SPSR);
     atd::write_bit<SPR1, SPR0>::to<1,1>::in(SPCR);
-//    Register{SPSR}.write_zero_bit<SPI2X>();
-//    Register{SPSR}.write_one_bit<SPR1,SPR0>();
 }
 
 

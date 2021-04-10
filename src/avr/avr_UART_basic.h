@@ -57,7 +57,7 @@ namespace avr{
  *	    
  *		UART::on();	// idioma: todo dispositivo hay que encenderlo
  *		auto usart = UART::as_a_stream();
- *		usart << "frecuencia = [" << f << "]\n\r";
+ *		usart << "frecuencia = [" << f << "]\n";
  *
  */
 class UART_basic{

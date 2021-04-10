@@ -1,11 +1,7 @@
 BIN = xx
 
 SOURCES= main.cpp \
-		 ../../avr_SPI.cpp
-
-#ASM_SOURCES=../../avr_time.S	\
-			../../avr_square_wave.S
-
+		 ../../avr_SPI_basic.cpp
 
 MCU = atmega328p
 

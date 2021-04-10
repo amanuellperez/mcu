@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez <amanuel.lperez@gmail.com>
+// Copyright (C) 2019-2021 A.Manuel L.Perez <amanuel.lperez@gmail.com>
 //
 // This file is part of the MCU++ Library.
 //
@@ -30,11 +30,11 @@
 //  Para este ejemplo no es necesario conectar el pin SS del SPI. Sin embargo,
 //  en la datasheet pone claramente que este pin tiene que estar a 0 para que
 //  haya bit trade. 
-#include "../../avr_SPI.h"
+#include "../../avr_SPI_basic.h"
 #include "../../avr_pin.h"
 
 
-using SPI = avr::SPI;
+using SPI = avr::SPI_master;
 
 constexpr uint8_t num_pin_RCLK = 12;
 constexpr uint16_t periodo_en_us = 2;	// 2 microsegundos!!!
@@ -45,7 +45,7 @@ int main()
 {
     avr::Output_pin<num_pin_no_chip_select> no_CS;
 
-    SPI::on_as_a_master<periodo_en_us>();
+    SPI::on<periodo_en_us>();
     SPI::spi_mode(0,0);
     SPI::data_order_MSB();
 
