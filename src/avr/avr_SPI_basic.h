@@ -50,6 +50,7 @@
 #include "avr_cfg.h"
 #include "avr_pin.h"
 #include <atd_bit.h>
+#include "avr_interrupt.h"
 
 namespace avr{
 
@@ -63,6 +64,7 @@ public:
     // ---------
     /// Causes the SPI_basic interrupt to be executed if a serial transmission is
     /// completed and interrupts are enable.
+    // CUIDADO: recordar llamar enable_all_interrupts!!! 
     static void interrupt_enable() 
     {atd::write_bit<SPIE>::to<1>::in(SPCR);}
 
@@ -135,26 +137,9 @@ public:
 };
 
 
-class SPI_master : public SPI_basic{
+class SPI_base : public SPI_basic{
 public:
-    SPI_master() = delete;
-
-    // --------------------------------
-    // Funciones de alto nivel (driver)
-    // --------------------------------
-    /// Enciende el SPI_basic como Master. 
-    /// La frecuencia del reloj usada será la definida por
-    /// period_in_us. Falta definir la polaridad y la phase ya que cada
-    /// dispositivo tendrá una polaridad y fase diferente. Esta configuración
-    /// la hara cada dispositivo antes de escribir en SPI_basic.
-    template <uint16_t period_in_us>
-    static void on()
-    {
-	init();
-	clock_speed_in_us<period_in_us>();
-	enable_as_a_master();
-    }
-
+    SPI_base() = delete;
 
     // Las transmisiones del SPI nunca van a fallar: al enviar un byte el SPI
     // arranca el reloj, genera 8 pulsos y marca como enviado el byte,
@@ -189,10 +174,53 @@ public:
     { return trade_and_wait(std::byte{0}); }
 
 
+};
+
+
+class SPI_master : public SPI_base {
+public:
+    SPI_master() = delete;
+
+    /// Enciende el SPI_basic como Master. 
+    /// La frecuencia del reloj usada será la definida por
+    /// period_in_us. Falta definir la polaridad y la phase ya que cada
+    /// dispositivo tendrá una polaridad y fase diferente. Esta configuración
+    /// la hara cada dispositivo antes de escribir en SPI_basic.
+    template <uint16_t period_in_us>
+    static void on()
+    {
+	init();
+	clock_speed_in_us<period_in_us>();
+	enable_as_a_master();
+    }
+    
 private:
     /// Configuramos los pines para que el SPI_basic funciones como master.
     /// Configuramos todos: SCK, MOSI y SS como de salida, y MISO como de
     /// entrada.
+    static void init();
+    
+};
+
+
+class SPI_slave : public SPI_base {
+public:
+    SPI_slave() = delete;
+
+    /// Enciende el SPI_basic como Master.
+    /// La frecuencia del reloj usada será la definida por period_in_us.
+//    template <uint16_t period_in_us>
+    static void on()
+    {
+	init();
+	// TODO: quitar, la velocidad la controla el master
+//	clock_speed_in_us<period_in_us>();
+	enable_as_a_slave();
+	enable_all_interrupts();
+	interrupt_enable();
+    }
+    
+private:
     static void init();
 };
 

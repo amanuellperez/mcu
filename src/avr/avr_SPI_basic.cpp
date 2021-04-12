@@ -27,17 +27,27 @@ namespace avr{
 
 void SPI_master::init()
 {
-    // Leer la nota pag 356 del libro de MAKE. Es fundamental poner SS a 1
-    // antes que hacer un enable
     // Configuración de los pins
     Pin<SPI_num_pin_SCK>::as_output();
     Pin<SPI_num_pin_MOSI>::as_output();
-    Pin<SPI_num_pin_MISO>::as_input_with_pullup();// no es necesario (ver table 23-1)
-    Pin<SPI_num_pin_SS>::as_output(); 
+    Pin<SPI_num_pin_MISO>::as_input_without_pullup();
+    Pin<SPI_num_pin_SS>::as_output(); // fundamental para que no sea slave
     
-    // Inicializamos SS
-    // start off not selected (high)
+//    // Inicializamos SS
+// Leer la nota pag 356 del libro de MAKE. Es fundamental poner SS a 1
+// antes que hacer un enable
+//    // start off not selected (high)
     Pin<SPI_num_pin_SS>::write_one();	
+}
+
+
+void SPI_slave::init()
+{
+    // Configuración de los pins (table 23-1). 
+//    Pin<SPI_num_pin_SCK>::as_input_without_pullup();
+//    Pin<SPI_num_pin_MOSI>::as_input_without_pullup();
+    Pin<SPI_num_pin_MISO>::as_output();
+//    Pin<SPI_num_pin_SS>::as_input_without_pullup(); 
 }
 
 

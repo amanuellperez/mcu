@@ -5,11 +5,10 @@ DIRS = ADC	\
 	sleep	\
 	timer0	\
 	timer1	\
+	SPI		\
 	TWI		\
 	USART 
 
-# Revisar: no compilan
-#	SPI
 
 include $(MCU_RECRULES)
 

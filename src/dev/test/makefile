@@ -14,11 +14,11 @@ DIRS = 	BMP280			\
 		user_choose_number	\
 		user_choose_string \
 		user_menu		\
-		user_time
+		user_time	
+#		74HC595
 
 # Revisar
-#74HC595\
-	DHT22\
+#	DHT22\
 	matrix_8x8\
 	matrix_leds_max7219\
 	pololu_A4988\

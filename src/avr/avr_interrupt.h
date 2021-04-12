@@ -161,6 +161,9 @@ private:
 #define ISR_TIMER1_COMPB ISR(TIMER1_COMPB_vect)
 #define ISR_TIMER1_OVF	 ISR(TIMER1_OVF_vect)
 
+#define ISR_SPI_STC  ISR(SPI_STC_vect)
+
+
 // Según página 96 de la datasheet
 template <>
 inline void Interrupt::enable_INT0<Interrupt::Tipo_INT01::when_is_zero>()
