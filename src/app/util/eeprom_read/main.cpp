@@ -59,7 +59,7 @@ void init_UART()
 
 void init_SPI()
 {
-    avr::SPI::on_as_a_master<periodo_en_us>();
+    avr::SPI_master::on<periodo_en_us>();
 }
 
 

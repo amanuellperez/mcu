@@ -22,9 +22,22 @@
 
 using SPI = avr::SPI_master;
 
-constexpr uint16_t periodo_en_us = 2;	
+// OJO: clave periodo a 8 us. Si pongo a 2 us al slave no le da tiempo a leer
+// y se lee basura y pierden datos.
+constexpr uint16_t periodo_en_us = 8;	
 constexpr uint16_t npin_SS = avr::SPI_num_pin_SS;	
 
+void SPI_write(uint8_t x)
+{
+    avr::UART_iostream uart;
+
+    avr::Output_pin<npin_SS> no_SS;
+    no_SS.write_zero();
+    SPI::write(std::byte{x});
+    uart << static_cast<uint16_t>(x) << '\n';
+    no_SS.write_one();
+    wait_ms(1000);
+}
 
 int main() 
 {
@@ -33,12 +46,11 @@ int main()
     avr::basic_cfg(uart);
     uart.on();
 
-    avr::Output_pin<npin_SS> no_SS;
 
 // init_SPI()
     SPI::on<periodo_en_us>();
     SPI::spi_mode(0,0);
-    SPI::data_order_MSB();
+    SPI::data_order_LSB();
 
 
     uart << "\n\nMaster SPI\n"
@@ -50,14 +62,28 @@ int main()
 //        uart >> c;
 //        uart << c;
 
-	for (uint8_t i = 0; i < 255; ++i){
-	    no_SS.write_zero();
-	    // SPI::write(std::byte{c});
-	    //SPI::write(std::byte{0x1F});
-	    uart << int(i) << '\n';
-	    SPI::write(std::byte{i});
-	    no_SS.write_one();
-	    wait_ms(300);
+//	for (uint8_t i = 0; i < 255; ++i){
+//	    no_SS.write_zero();
+//	    // SPI::write(std::byte{c});
+//	    //SPI::write(std::byte{0x1F});
+//	    uart << int(i) << '\n';
+//	    SPI::write(std::byte{i});
+//	    no_SS.write_one();
+//	    wait_ms(300);
+//	}
+	for (uint8_t i = 0; i <= 255; ++i){
+//	    no_SS.write_zero();
+//	    uart << static_cast<uint16_t>(i) << '\n';
+//	    SPI::write(std::byte{i});
+//	    no_SS.write_one();
+	    SPI_write(1);
+	    SPI_write(2);
+	    SPI_write(4);
+	    SPI_write(8);
+	    SPI_write(16);
+	    SPI_write(32);
+	    SPI_write(64);
+	    SPI_write(128);
 	}
     }
 }

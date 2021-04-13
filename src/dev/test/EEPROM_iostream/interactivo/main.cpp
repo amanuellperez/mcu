@@ -135,7 +135,7 @@ MENU_INTERACTIVO[] =  "Elige:\n"
 void test_eeprom_interactiva()
 {
     avr::UART_iostream uart;
-    avr::SPI::on_as_a_master<periodo_en_us>();
+    avr::SPI_master::on<periodo_en_us>();
 
     EEPROM_ostream out;
     out.open(0);

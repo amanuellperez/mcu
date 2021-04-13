@@ -446,7 +446,7 @@ bool test_istream_automatico()
 void test_eeprom_automatico()
 {
     avr::UART_iostream uart;
-    avr::SPI::on_as_a_master<periodo_en_us>();
+    avr::SPI_master::on<periodo_en_us>();
 
     if (test_ostream_automatico())
 	test_istream_automatico();

@@ -113,7 +113,7 @@ void test_uint8_t() {
     avr::basic_cfg(uart);
     uart.on();
 
-    avr::SPI::on_as_a_master<periodo_en_us>();
+    avr::SPI_master::on<periodo_en_us>();
 
     EEPROM eeprom;
     eeprom.cfg_SPI();

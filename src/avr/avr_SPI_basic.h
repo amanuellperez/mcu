@@ -216,8 +216,8 @@ public:
 	// TODO: quitar, la velocidad la controla el master
 //	clock_speed_in_us<period_in_us>();
 	enable_as_a_slave();
-	enable_all_interrupts();
-	interrupt_enable();
+//	enable_all_interrupts();
+//	interrupt_enable();
     }
     
 private:

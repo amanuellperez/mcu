@@ -25,7 +25,6 @@ using SPI = avr::SPI_slave;
 constexpr uint16_t periodo_en_us = 2;	
 constexpr uint16_t npin_SS = avr::SPI_num_pin_SS;	
 
-volatile std::byte data = std::byte{0};
 
 int main() 
 {
@@ -38,7 +37,7 @@ int main()
 // init_SPI()
     SPI::on();
     SPI::spi_mode(0,0);
-    SPI::data_order_MSB();
+    SPI::data_order_LSB();
 
 
     uart << "\n\nSlave SPI\n"
@@ -46,30 +45,34 @@ int main()
 	    "Recibiendo: ";
 
     while (1) {
-	if (data != std::byte{0}){
-	    std::byte ndata{0};
-	    {
-                avr::Interrupts_lock lock;
-                ndata = data;
-                data  = std::byte{0};
-	    }
+	SPI::wait_transmission_complete();
+	std::byte data = SPI::data_register();
+	uart << std::to_integer<uint16_t>(data) << '\n';
 
-//	    if (ndata == std::byte{0x56})
-//		uart << "OK\n";
-//	    else
-//		uart << "ERROR\n";
-//	    uart << "ndata = " << int(ndata) << '\n';
-//	    uart << "'" << std::to_integer<char>(ndata) << "'";
-	    uart << int(ndata) << '\n';
-	}
-//	wait_ms(100);
+//	if (data != std::byte{0}){
+//	    std::byte ndata{0};
+//	    {
+//                avr::Interrupts_lock lock;
+//                ndata = data;
+//                data  = std::byte{0};
+//	    }
+//
+////	    if (ndata == std::byte{0x56})
+////		uart << "OK\n";
+////	    else
+////		uart << "ERROR\n";
+////	    uart << "ndata = " << int(ndata) << '\n';
+////	    uart << "'" << std::to_integer<char>(ndata) << "'";
+//	    uart << static_cast<uint16_t>(ndata) << '\n';
+//	}
+////	wait_ms(100);
 
     }
 }
 
 
-ISR_SPI_STC{
-    data = SPI::data_register();
-}
-
+//ISR_SPI_STC{
+//    data = SPI::data_register();
+//}
+//
 

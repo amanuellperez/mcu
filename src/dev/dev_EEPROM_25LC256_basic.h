@@ -32,7 +32,7 @@
  *
  ****************************************************************************/
 #include <avr_pin.h>
-#include <avr_SPI.h>
+#include <avr_SPI_basic.h>
 #include <cstddef>    // byte
 #include <atd_bit.h>
 
@@ -52,8 +52,8 @@ public:
 
     // Configuración
     // -------------
-    /// Configuramos el SPI para que se comunique con la EEPROM.
-    /// Recordar haber inicializado correctamente el SPI antes.
+    /// Configuramos el SPI_master para que se comunique con la EEPROM.
+    /// Recordar haber inicializado correctamente el SPI_master antes.
     // Observar: la hacemos static indicando de esta forma que esta
     // configuración es la misma para las EEPROMs: basta con
     // llamarla una vez aunque tengamos 2 ó más.
@@ -186,8 +186,8 @@ private:
 
     void write_address(Address address)
     {	// Data order: MSB first, LSB last
-	avr::SPI::write(static_cast<std::byte>(address >> 8));
-	avr::SPI::write(static_cast<std::byte>(address));
+	avr::SPI_master::write(static_cast<std::byte>(address >> 8));
+	avr::SPI_master::write(static_cast<std::byte>(address));
     }
 
     void write_cmd(std::byte cmd);
@@ -197,8 +197,8 @@ private:
 template <uint8_t no_CS, uint8_t no_WP, uint8_t no_HOLD>
 void EEPROM_25LC256<no_CS, no_WP, no_HOLD>::cfg_SPI()
 {
-    avr::SPI::spi_mode(0, 0);
-    avr::SPI::data_order_MSB();
+    avr::SPI_master::spi_mode(0, 0);
+    avr::SPI_master::data_order_MSB();
 }
 
 
@@ -212,10 +212,10 @@ EEPROM_25LC256<no_CS, no_WP, no_HOLD>::read(Address address,
 {
     Select select{*this};
 
-    avr::SPI::write(READ);
+    avr::SPI_master::write(READ);
     write_address(address);
     for (size_type i = 0; i < n; ++i){
-	*buf = avr::SPI::read();
+	*buf = avr::SPI_master::read();
 	++buf;
     }
 
@@ -224,7 +224,7 @@ EEPROM_25LC256<no_CS, no_WP, no_HOLD>::read(Address address,
 
 
 // TODO: ¿cómo gestionar errores?
-//  El problema es que no es posible saber si el SPI funciona o no.
+//  El problema es que no es posible saber si el SPI_master funciona o no.
 //  1.- Una forma sería que después de escribir todo se comprobase que se ha
 //  escrito leyendo la memoria.
 template <uint8_t no_CS, uint8_t no_WP, uint8_t no_HOLD>
@@ -233,12 +233,12 @@ uint8_t EEPROM_25LC256<no_CS, no_WP, no_HOLD>::
 {
     Select select{*this};
 
-    avr::SPI::write(WRITE);
+    avr::SPI_master::write(WRITE);
     write_address(address);
     
     uint8_t i = 0;
     for (; i < n; ++i){
-	avr::SPI::write(*buf);
+	avr::SPI_master::write(*buf);
 	++buf;
     }
 
@@ -250,7 +250,7 @@ template <uint8_t no_CS, uint8_t no_WP, uint8_t no_HOLD>
 void EEPROM_25LC256<no_CS, no_WP, no_HOLD>::write_cmd(std::byte cmd)
 {
     Select select{*this};
-    avr::SPI::write(cmd);
+    avr::SPI_master::write(cmd);
 }
 
 
@@ -259,8 +259,8 @@ std::byte EEPROM_25LC256<no_CS, no_WP, no_HOLD>::
 					read_status_register()
 {
     Select select{*this};
-    avr::SPI::write(RDSR);
-    std::byte status = avr::SPI::read();
+    avr::SPI_master::write(RDSR);
+    std::byte status = avr::SPI_master::read();
 
     return status;
 }

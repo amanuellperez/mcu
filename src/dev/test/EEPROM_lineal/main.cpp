@@ -22,8 +22,7 @@
 #include <atd_cast.h>
 #include <atd_cstddef.h>
 
-using namespace avr;
-
+using SPI = avr::SPI_master;
 
 constexpr uint8_t periodo_en_us = 16;
 
@@ -35,7 +34,7 @@ constexpr uint16_t sz = 300;
 
 void print_buffer(uint16_t addr0, std::byte* buf, uint16_t n)
 {
-    UART_iostream uart;
+    avr::UART_iostream uart;
 
     uint16_t i = 0;
     for (; i < n; ++i){
@@ -49,7 +48,7 @@ void print_buffer(uint16_t addr0, std::byte* buf, uint16_t n)
 
 void read_and_print(EEPROM& eeprom, uint16_t addr0, uint16_t n = sz)
 {
-    UART_iostream uart;
+    avr::UART_iostream uart;
 
     std::byte buf[sz];
 
@@ -70,7 +69,7 @@ void read_and_print(EEPROM& eeprom, uint16_t addr0, uint16_t n = sz)
 
 void check_true(bool ok, const char* msg)
 {
-    UART_iostream uart;
+    avr::UART_iostream uart;
     
     uart << msg << " ... ";
     if (ok)
@@ -83,8 +82,8 @@ void check_true(bool ok, const char* msg)
 
 void test_eeprom_interactiva()
 {
-    UART_iostream uart;
-    SPI::on_as_a_master<periodo_en_us>();
+    avr::UART_iostream uart;
+    SPI::on<periodo_en_us>();
 
     EEPROM eeprom;
 
@@ -146,7 +145,7 @@ void test_eeprom_interactiva()
 // lee n bytes a partir de addr0, comparando el resultado con res[0..n)
 bool check_read(EEPROM& eeprom, uint16_t addr0, std::byte* res, uint8_t n)
 {
-    UART_iostream uart;
+    avr::UART_iostream uart;
 
     std::byte buf_read[sz];
     std::fill_n(buf_read, sz, std::byte{0});
@@ -174,7 +173,7 @@ void test_write(EEPROM& eeprom,
                            uint8_t n0,
                            uint8_t n)
 {
-    UART_iostream uart;
+    avr::UART_iostream uart;
 
     std::byte buf_write[sz];
     for (uint8_t i = 0; i < n; ++i)
@@ -195,7 +194,7 @@ void test_write(EEPROM& eeprom,
 
 void test_fill_n(EEPROM& eeprom)
 {
-    UART_iostream uart;
+    avr::UART_iostream uart;
 
     uint16_t addr0 = 300;
     uint8_t n = 100;
@@ -217,8 +216,8 @@ void test_fill_n(EEPROM& eeprom)
 
 void test_eeprom_automatico()
 {
-    UART_iostream uart;
-    SPI::on_as_a_master<periodo_en_us>();
+    avr::UART_iostream uart;
+    SPI::on<periodo_en_us>();
     EEPROM eeprom;
 
     while(1){
