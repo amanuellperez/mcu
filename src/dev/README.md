@@ -14,6 +14,49 @@ Tested: avr-gcc 9.2.0
 
 Dispositivos a los que accedemos desde el microcontrolador.
 
+A día de hoy están implementados:
+* EEPROM:
+  25LC256
+
+* Sensores:
+  + BME280
+  + BMP280
+  + DHT22 (revisar)
+  + TMP36 (revisar)
+
+* RTC:
+  + DS1307
+
+* Counters:
+  + CD4017B
+
+
+* Pantallas:
+  + LCD: HD44780
+  + Matrix LED: MAX7219
+
+* Potenciómetro digital:
+  + MCP4231
+
+* Registers:
+  + 74HC595: 8-bit serial in, parallel-out shift.
+
+
+A parte de los dispositivos incluyo interfaces genéricos:
+
+
+* Dispositivos genéricos:
+  + `signal_generator`
+  + `system_clock`
+  + `keyboard`
+
+
+* user: interacción con el usuario a través de LCD y Keyboard.
+  + `user_choose_number`
+  + `user_choose_string`
+  + `user_time`
+
+
 La mejor forma de ver cómo funciona es mirar los test.
 
 Como este paquete se basa en avr y avr lo he ido cambiando a medida que voy ganando
