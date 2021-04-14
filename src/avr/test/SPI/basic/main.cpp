@@ -38,18 +38,18 @@
 
 using SPI = avr::SPI_master;
 
-constexpr uint8_t num_pin_RCLK = 12;
+constexpr uint8_t npin_RCLK = 12;
 constexpr uint16_t periodo_en_us = 2;	// 2 microsegundos!!!
-constexpr uint8_t num_pin_no_chip_select = 16;
+constexpr uint8_t npin_no_chip_select = 16;
 
 void test_basic()
 {
-    avr::Output_pin<num_pin_RCLK> pin_vuelca_buffer;
+    avr::Output_pin<npin_RCLK> pin_buffer_flush;
 
     while (1) {
 	for (std::byte p{1}; p != std::byte{0}; p <<= 1){
 	    SPI::write(p);
-	    pin_vuelca_buffer.pulse_of_1us();
+	    pin_buffer_flush.pulse_of_1us();
 	    wait_ms(100);
 	}
   } // while(1)
@@ -58,7 +58,7 @@ void test_basic()
 void test_count()
 {
     avr::UART_iostream uart;
-    avr::Output_pin<num_pin_RCLK> pin_vuelca_buffer;
+    avr::Output_pin<npin_RCLK> pin_buffer_flush;
 
     uart << "Se irán mostrando en los leds todos los números del 0 al 255\n";
 
@@ -66,7 +66,7 @@ void test_count()
 	for (uint8_t i = 0; i <= 255; ++i){
 	    uart << static_cast<uint16_t>(i) << '\n';
 	    SPI::write(std::byte{i});
-	    pin_vuelca_buffer.pulse_of_1us();
+	    pin_buffer_flush.pulse_of_1us();
 	    wait_ms(500);
 	}
 
@@ -75,7 +75,7 @@ void test_count()
 void test_choose()
 {
     avr::UART_iostream uart;
-    avr::Output_pin<num_pin_RCLK> pin_vuelca_buffer;
+    avr::Output_pin<npin_RCLK> pin_buffer_flush;
 
     while (1) {
         uart << "Write a number (less than 256): ";
@@ -84,7 +84,7 @@ void test_choose()
 	uint8_t res = static_cast<uint8_t>(c);
 	uart << (uint16_t)(c) << '\n';
 	SPI::write(std::byte{res});
-	pin_vuelca_buffer.pulse_of_1us();
+	pin_buffer_flush.pulse_of_1us();
 
     }
 }

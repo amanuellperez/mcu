@@ -14,8 +14,8 @@ DIRS = 	BMP280			\
 		user_choose_number	\
 		user_choose_string \
 		user_menu		\
-		user_time	
-#		74HC595
+		user_time		\
+		74HC595			
 
 # Revisar
 #	DHT22\

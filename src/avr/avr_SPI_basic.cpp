@@ -30,14 +30,14 @@ void SPI_master::init()
     // Configuración de los pins
     Pin<SPI_num_pin_SCK>::as_output();
     Pin<SPI_num_pin_MOSI>::as_output();
-    Pin<SPI_num_pin_MISO>::as_input_without_pullup();
+//    Pin<SPI_num_pin_MISO>::as_input_without_pullup();
     Pin<SPI_num_pin_SS>::as_output(); // fundamental para que no sea slave
     
-//    // Inicializamos SS
-// Leer la nota pag 356 del libro de MAKE. Es fundamental poner SS a 1
-// antes que hacer un enable
-//    // start off not selected (high)
-    Pin<SPI_num_pin_SS>::write_one();	
+////    // Inicializamos SS
+//// Leer la nota pag 356 del libro de MAKE. Es fundamental poner SS a 1
+//// antes que hacer un enable
+////    // start off not selected (high)
+//    Pin<SPI_num_pin_SS>::write_one();	
 }
 
 
