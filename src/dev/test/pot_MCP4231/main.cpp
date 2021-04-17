@@ -21,139 +21,240 @@
 #include <avr_time.h>
 #include <atd_cast.h>
 
-using namespace avr;
-using dev::Pot_MCP4231;
+
+// ¿Cómo seleccionamos el dispositivo SPI?
+class Select{
+public:
+    using no_CS = avr::Pin<16>; // es el pin SS
+		// no es necesario definirlo de salida, ya que lo hace SPI
+
+    explicit Select() { no_CS::write_zero(); }
+
+    ~Select() { no_CS::write_one(); }
+
+    Select(const Select&) = delete;
+    Select& operator= (const Select&) = delete;
+};
 
 
-constexpr uint8_t num_pin_no_CS1 = 14;
-constexpr uint8_t num_pin_no_CS2 = 16;
+using SPI = avr::SPI_master;
+using Pot = dev::Pot_MCP4231_basic<Select>;
+
 
 // Funciona hasta con 10 MHz
-constexpr uint8_t periodo_en_us = 2;	
-//constexpr uint8_t periodo_en_us = 16;
-//
-template <uint8_t n>
-void test_pot(Pot_MCP4231<n>& pot, const char* nombre)
+constexpr uint8_t period_in_us = 2;	
+//constexpr uint8_t period_in_us = 16;
+
+void status_register_menu()
 {
-    UART_iostream uart;
+    avr::UART_iostream uart;
 
-    if (pot.is_hardware_shutdown())
-	uart << nombre << " tiene hardware shutdown == 1!!!"
-			  " No debería de funcionar\n\r";
-    uart << "Valor resistencia para " << nombre
-         << " (en tantos por 128) = \r\n";
+    uart << "\nStatus register = " <<
+	std::to_integer<uint16_t>(Pot::status_register()) << "\n\n";
 
-    uint16_t r;
-    uart >> r;
+}
 
-    if (!uart){
-	uart.clear();
-	uart << "Error al leer el valor\r\n";
+void bool2yesno(bool x)
+{
+    avr::UART_iostream uart;
+    if (x)
+	uart << "YES";
+    else 
+	uart << "NO";
+}
+
+void tcon_read()
+{
+    avr::UART_iostream uart;
+    std::byte tcon = Pot::TCON_register();
+
+    uart << "TCON = " << std::to_integer<uint16_t>(tcon) << "\n";
+
+// resistor 0
+    uart << "Resistor0:\n"
+	    "   shutdown = ";
+    bool2yesno(Pot::TCON::resistor0_shutdown(tcon));
+
+    uart << "\n   terminal A CONNECT = ";
+    bool2yesno(Pot::TCON::resistor0_terminalA_connect(tcon));
+
+    uart << "\n   terminal W CONNECT = ";
+    bool2yesno(Pot::TCON::resistor0_terminalW_connect(tcon));
+
+    uart << "\n   terminal B CONNECT = ";
+    bool2yesno(Pot::TCON::resistor0_terminalB_connect(tcon));
+
+
+// resistor 1
+    uart << "\n\nResistor1:\n"
+	    "   shutdown = ";
+    bool2yesno(Pot::TCON::resistor1_shutdown(tcon));
+
+    uart << "\n   terminal A = ";
+    bool2yesno(Pot::TCON::resistor1_terminalA_connect(tcon));
+
+    uart << "\n   terminal W = ";
+    bool2yesno(Pot::TCON::resistor1_terminalW_connect(tcon));
+
+    uart << "\n   terminal B = ";
+    bool2yesno(Pot::TCON::resistor1_terminalB_connect(tcon));
+
+    uart << "\n\n";
+
+
+}
+
+void tcon_write()
+{
+    avr::UART_iostream uart;
+    uart << "\n\nTCON write:\n"
+	    "1. New TCON\n"
+	    "2. Options\n";
+
+    char c{};
+    uart >> c;
+    if (c == '1'){
+	uint16_t tcon{};
+	uart << "New TCON = ";
+	uart >> tcon;
+	Pot::TCON_register(std::byte{static_cast<uint8_t>(tcon)});
 	return;
     }
+
+// options
+    std::byte tcon{0};
+    uart << "\nResistor 0 shutdown: y/n?";
+    uart >> c;
+    Pot::TCON::resistor0_shutdown(tcon, c == 'y' or c == 'Y');
+
+    uart << "\nResistor 0 terminal A connect: y/n?";
+    uart >> c;
+    Pot::TCON::resistor0_terminalA_connect(tcon, c == 'y' or c == 'Y');
+
+    uart << "\nResistor 0 terminal W connect: y/n?";
+    uart >> c;
+    Pot::TCON::resistor0_terminalW_connect(tcon, c == 'y' or c == 'Y');
+
+    uart << "\nResistor 0 terminal B connect: y/n?";
+    uart >> c;
+    Pot::TCON::resistor0_terminalB_connect(tcon, c == 'y' or c == 'Y');
+
+    uart << "\nResistor 1 shutdown: y/n?";
+    uart >> c;
+    Pot::TCON::resistor1_shutdown(tcon, c == 'y' or c == 'Y');
+
+    uart << "\nResistor 1 terminal A connect: y/n?";
+    uart >> c;
+    Pot::TCON::resistor1_terminalA_connect(tcon, c == 'y' or c == 'Y');
+
+    uart << "\nResistor 1 terminal W connect: y/n?";
+    uart >> c;
+    Pot::TCON::resistor1_terminalW_connect(tcon, c == 'y' or c == 'Y');
+
+    uart << "\nResistor 1 terminal B connect: y/n?";
+    uart >> c;
+    Pot::TCON::resistor1_terminalB_connect(tcon, c == 'y' or c == 'Y');
+
+    Pot::TCON_register(tcon);
+}
+
+void tcon_register_menu()
+{
+    avr::UART_iostream uart;
+    uart << "\nTCON register:\n"
+	      "1. read\n"
+	      "2. write\n";
+    char c{};
+    uart >> c;
+    switch(c){
+	case '1':
+	    tcon_read();
+            break;
+
+	case '2':
+	    tcon_write();
+	    break;
+    }
+
+}
+
+template <uint8_t npot>
+void wiper_register_menu()
+{
+    avr::UART_iostream uart;
+    uart << "Write wiper" << npot << " value: ";
+    uint16_t x{};
+    uart >> x;
+    uart << x << '\n';
+
+    uart << "Writing value ... ";
+    Pot::wiper_write_data<npot>(x);
     
-    uart << r << " de 128 en R1\n\r";
-    pot.template write_data<1>(r);
 
-    if (r <= 128u)
-	r = 128u - r;
-    else r = 128u;
-    uart << r << " de 128 en R0\n\r";
-    pot.template write_data<0>(r);
+    uint16_t res = Pot::wiper_read_data<npot>();
+    if (res != x)
+	uart << "ERROR: wiper value = " << res << '\n';
+    else
+	uart << "OK\n";
 }
 
 
-template <uint8_t n>
-void test_incremento(Pot_MCP4231<n>& pot, const char* nombre)
+
+void test_basic()
 {
-    UART_iostream uart;
-    constexpr uint8_t num_incrementos = 8;
+    avr::UART_iostream uart;
+    uart << "\n\nBasic test:\n";
 
-    uart << "¿incremento la resistencia? (s/n)\n\r";
-    char c = 0; // la inicializo para evitar el warning 
-    uart >> c;
-    if (c == 's'){
-	for (uint8_t i = 0; i < num_incrementos; ++i){
-	    pot.template increment_wiper<0>();
-	    pot.template increment_wiper<1>();
-	    uart << "Incrementado " << i << " de " << num_incrementos << "\n\r";
-	    wait_ms(1000);
-	}
-    }
+    while (1) {
+	uart << "\n\nMenu:\n"
+		"1. Status register\n"
+		"2. TCON register\n"
+		"3. Wiper 0 register\n"
+		"4. Wiper 1 register\n";
+		
 
-    uart << "¿decremento la resistencia? (s/n)\n\r";
-    uart >> c;
-    if (c == 's'){
-	for (uint8_t i = 0; i < num_incrementos; ++i){
-	    pot.template decrement_wiper<0>();
-	    pot.template decrement_wiper<1>();
-	    uart << "Derementado " << i << " de " << num_incrementos << "\n\r";
-	    wait_ms(1000);
+	char c{};
+	uart >> c;
+
+	switch(c){
+	    case '1':
+		status_register_menu();
+                break;
+            case '2':
+                tcon_register_menu();
+                break;
+            case '3':
+                wiper_register_menu<0>();
+                break;
+            case '4':
+                wiper_register_menu<1>();
+                break;
+
+	    default:
+		return;
 	}
+
     }
 }
 
 
-template <uint8_t n>
-void test_flags(Pot_MCP4231<n>& pot, const char* nombre)
+
+int main() 
 {
-    UART_iostream uart;
-
-    uart << "resistor 0 in shutdown cfg? ";
-    if (pot.resistor0_shutdown()) uart << "si";
-    else uart << "no";
-    uart << "\n\r";
-	
-
-    uart << "pongo resistor 0 in shutdown cfg? (s/n)";
-    char c = 0;
-    uart >> c;
-    if (c == 's'){
-	pot.resistor0_shutdown(true);
-	uart << "\n\rresistor0 in shutdown\n\r";
-    }else if (c == 'n'){
-	pot.resistor0_shutdown(false);
-	uart << "\n\rresistor0 in shutdown\n\r";
-    }
-
-
-}
-
-
-
-void test() {
+// init_uart()
     avr::UART_iostream uart;
     avr::basic_cfg(uart);
     uart.on();
 
-    SPI::on_as_a_master<periodo_en_us>();
+// init_SPI()
+    SPI::on<period_in_us>();
 
-    Pot_MCP4231<num_pin_no_CS1> pot1;
-    Pot_MCP4231<num_pin_no_CS2> pot2;
-    pot1.cfg_SPI();
-
-
+    uart << "\n\nPotentiometer MCP4231\n"
+	        "---------------------\n";
     while(1){
-	uart << "\r\nPrueba potenciómetro\r\n";
-	uart <<     "--------------------\r\n";
-
-
-	uart << "Potenciómetro pot1\n\r";
-//	test_pot(pot1, "pot1");
-	test_incremento(pot1, "pot1");
-	test_flags(pot1, "pot1");
-
-//	uart << "Potenciómetro pot2\n\r";
-//	test_incremento(pot2, "pot2");
-//	test_pot(pot2, "pot2");
-//	test_flags(pot2, "pot2");
-
+	test_basic();
     }// while
 }
 
 
 
-int main()
-{
-    test();
-}

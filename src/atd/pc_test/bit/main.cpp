@@ -226,6 +226,13 @@ void test_write_bits(int x, int res)
 
 }
 
+template <int pos>
+void test_write_bits2(int x, int res)
+{
+    atd::write_bit<pos>::template to<1>::in(x);
+    CHECK_TRUE(x == res, "write_bit");
+}
+
 void test_write_bits()
 {
     test::interfaz("write_bits");
@@ -251,6 +258,8 @@ void test_write_bits()
     int x = 0;
     atd::write_bit<0>::to<1>::in(x);
     CHECK_TRUE(x == 0x01, "write_bit");
+
+    test_write_bits2<0>(x, 0x01);
 }
 
 template <int i0, int i1, int res>
@@ -300,7 +309,7 @@ void test_read_bits()
     CHECK_TRUE((atd::read_bits<1,7>::of(data) == 0b00000010), "read_bits");
 
 // more
-    CHECK_TRUE((atd::read_bits<0>::of(data)	== 0b00000000), "read_bits");
+    CHECK_TRUE((atd::read_bit<0>::of(data)	== 0b00000000), "read_bits");
     CHECK_TRUE((atd::read_bits<0,1>::of(data)	== 0b00000010), "read_bits");
     CHECK_TRUE((atd::read_bits<0,1,2>::of(data) == 0b00000010), "read_bits");
     CHECK_TRUE((atd::read_bits<0,1,2,3>::of(data)   == 0b00001010), "read_bits");

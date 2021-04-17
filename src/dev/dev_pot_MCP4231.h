@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez <amanuel.lperez@gmail.com>
+// Copyright (C) 2019-2021 A.Manuel L.Perez <amanuel.lperez@gmail.com>
 //
 // This file is part of the MCU++ Library.
 //
@@ -26,91 +26,200 @@
  *  - HISTORIA:
  *    A.Manuel L.Perez
  *	19/10/2019 v0.0: Escrito.
+ *	17/04/2021       Reestructurado.
  *
  ****************************************************************************/
 #include <avr_pin.h>
-#include <avr_SPI.h>
+#include <avr_SPI_basic.h>
 #include <atd_bit.h>
+#include <atd_static.h>
 
 
 namespace dev{
 
+// ---------------------------------------------------------------------------
+// datasheet 4.2.1.2
+// mem <--> struct
+struct __MCP4231_TCON{
+// resistor 0
+//  CUIDADO: esta shutdown cuando este bit es 0!!!
+    static void resistor0_shutdown(std::byte& tcon, bool on)
+    { mask_R0HW(tcon) = std::byte{!on};}
 
+    static bool resistor0_shutdown(std::byte& tcon)
+    { return !atd::to_bool(mask_R0HW(tcon)); }
+
+    static void resistor0_terminalA_connect(std::byte& tcon, bool on)
+    { mask_R0A(tcon) = std::byte{on}; }
+
+    static bool resistor0_terminalA_connect(std::byte& tcon)
+    { return atd::to_bool(mask_R0A(tcon));}
+
+    static void resistor0_terminalW_connect(std::byte& tcon, bool on)
+    { mask_R0W(tcon) = std::byte{on}; }
+
+    static bool resistor0_terminalW_connect(std::byte& tcon)
+    { return atd::to_bool(mask_R0W(tcon));}
+
+    static void resistor0_terminalB_connect(std::byte& tcon, bool on)
+    { mask_R0B(tcon) = std::byte{on}; }
+
+    static bool resistor0_terminalB_connect(std::byte& tcon)
+    { return atd::to_bool(mask_R0B(tcon));}
+
+
+// resistor 1
+//  CUIDADO: esta shutdown cuando este bit es 0!!!
+    static void resistor1_shutdown(std::byte& tcon, bool on)
+    { mask_R1HW(tcon) = std::byte{!on};}
+
+    static bool resistor1_shutdown(std::byte& tcon)
+    { return !atd::to_bool(mask_R1HW(tcon)); }
+
+    static void resistor1_terminalA_connect(std::byte& tcon, bool on)
+    { mask_R1A(tcon) = std::byte{on}; }
+
+    static bool resistor1_terminalA_connect(std::byte& tcon)
+    { return atd::to_bool(mask_R1A(tcon));}
+
+    static void resistor1_terminalW_connect(std::byte& tcon, bool on)
+    { mask_R1W(tcon) = std::byte{on}; }
+
+    static bool resistor1_terminalW_connect(std::byte& tcon)
+    { return atd::to_bool(mask_R1W(tcon));}
+
+    static void resistor1_terminalB_connect(std::byte& tcon, bool on)
+    { mask_R1B(tcon) = std::byte{on}; }
+
+    static bool resistor1_terminalB_connect(std::byte& tcon)
+    { return atd::to_bool(mask_R1B(tcon));}
+
+
+private:
+    static constexpr atd::Range_bitmask<7, 7, std::byte> mask_R1HW{};
+    static constexpr atd::Range_bitmask<6, 6, std::byte> mask_R1A{};
+    static constexpr atd::Range_bitmask<5, 5, std::byte> mask_R1W{};
+    static constexpr atd::Range_bitmask<4, 4, std::byte> mask_R1B{};
+
+    static constexpr atd::Range_bitmask<3, 3, std::byte> mask_R0HW{};
+    static constexpr atd::Range_bitmask<2, 2, std::byte> mask_R0A{};
+    static constexpr atd::Range_bitmask<1, 1, std::byte> mask_R0W{};
+    static constexpr atd::Range_bitmask<0, 0, std::byte> mask_R0B{};
+};
+
+
+
+// ¿Cómo se selecciona el dispositivo? ¿Directamente mediante un pin?
+// ¿Mediante un registro? ¿...? Eso lo decide el cliente, por eso la clase
+// está parametrizada por Select.
+//
 // TODO: añadir pin shutdown. Despues, sacar todo el código fuente de dentro
 // de la clase (ordenarlo un poco todo).
-template <uint8_t num_pin_no_CS>
-class Pot_MCP4231{
+template <typename Select>
+class Pot_MCP4231_basic{
 public:
-    // Construcción
-    Pot_MCP4231() : good_{true} { deselect(); }
+// Types
+    using SPI = avr::SPI_master;
+    using TCON = __MCP4231_TCON;
+
+// Configuration
+    // TODO: comprar otros potenciómetros de 8 bits y usar esta misma clase
+    // para tanto los de 7 como los de 8.
+    constexpr static uint8_t nbits = 7; // Pueden ser 7 ó 8 bits
+
+    constexpr static uint16_t wiper_max_value()
+    {return 128u * (nbits - 7u) + 128u;} // valor[7] = 128, valor[8] = 256
+
 
     // Antes que acceder al potenciometro es necesario configurar el SPI.
     /// Configuramos el SPI para que se comunique con el potenciómetro.
     /// Recordar haber inicializado correctamente el SPI antes.
     /// Es responsabilidad del usuario el inicializar el SPI y configurarlo
     /// antes de acceder al potenciómetro.
-    // Observar: la hacemos static indicando de esta forma que esta
-    // configuración es la misma para todos los potenciometros: basta con
-    // llamarla una vez aunque tengamos 2 ó más.
     static void cfg_SPI();
 
 
-    // Operaciones que admite el chip
-    // -------------------------------
-    /// Escribe el valor x en el potenciometro i (= 0 ó 1).
-    /// Solo los primeros 8/9 bits de x son válidos: 0 <= x <= 128/256.
-    /// x es el tanto por 128(ó 256) (= º/128 ó º/256) del valor total del 
-    /// potenciometro.
-    // x tiene que ser un uint16_t ya que el potenciometro va hasta 256.
-    template <uint8_t i>
-    void write_data(uint16_t x)
+// Wiper Registers
+// ---------------
+    /// Escribe el valor x en el potenciometro npot ( = 0/1)
+    /// El valor de la resistencia será: R = x*Rab/wiper_max_value()
+    /// siendo Rab el valor máximo.
+    template <uint8_t npot>
+    static void wiper_write_data(uint16_t x)
     {
-	if (x > valor_max(num_bits)) x = valor_max(num_bits);	
+        if (x > wiper_max_value())
+            x = wiper_max_value();
 
-	write_cmd(WRITE_DATA[i], x);
+        write_cmd(cmd_wiper_write_data::at<npot>, x);
     }
 
+    template <uint8_t npot>
+    static uint16_t wiper_read_data()
+    { return read_cmd16(cmd_wiper_read_data::at<npot>); }
 
-    template <uint8_t i>
-    uint16_t read_data()
-    { return read_cmd16(READ_DATA[i]); }
+    template <uint8_t npot>
+    static void wiper_increment()
+    { write_cmd(cmd_wiper_increment::at<npot>); }
 
-    template <uint8_t i>
-    void increment_wiper()
-    { write_cmd(INCREMENT_WIPER[i]); }
-
-    template <uint8_t i>
-    void decrement_wiper()
-    { write_cmd(DECREMENT_WIPER[i]); }
+    template <uint8_t npot>
+    static void wiper_decrement()
+    { write_cmd(cmd_wiper_decrement::at<npot>); }
 
 
-    // Estado
-    // ------
-    /// Indica si el potenciómetro está en buen estado y podemos escribir en
-    /// él.
-    // ¿Cuándo se puede producir un error? 
-    //	1.- Por error de programación, se envía un comando inexistente.
-    //	2.- Que haya ruido en la transmisión y el potenciómetro reciba mal los
-    //	datos.
-    bool good() const {return good_;}
+// Status Register
+// ---------------
+    static std::byte status_register()
+    { return read_cmd8(status_register_read_data); }
 
-    /// Deja el potenciómetro en buen estado.
-    void clear() 
-    {
-	good_ = true;
-	// deselect(); <-- no es necesario hacer esto ya que la clase Select
-	// garantiza que siempre se deja el potenciometro desconectado del SPI
-    }
+    // status_register::SHDN = hardware shutdown bit
+    // static bool is_hardware_shutdown() <-- de alto nivel
+    static bool status_register_hardware_shutdown_pin()
+    { return atd::is_one_bit<status_register_no_shdn_bit>::of(status_register()); }
 
-    /// Indicates if the Hardware Shutdown pin (no_SHDN) is low.
-    bool is_hardware_shutdown()
-    { return atd::bit<STATUS_REGISTER_no_SHDN_BIT>::of(status_register()); }
+// TCON Register
+// -------------
+    static void TCON_register(std::byte x)
+    { write_cmd(tcon_register_write_data, std::to_integer<uint16_t>(x)); }
 
-    /// Forces (or not) resistor 0 into the "shutdown" configuration
-    void resistor0_shutdown(bool on) { resistor_shutdown<0>(on);}
+    static std::byte TCON_register()
+    { return read_cmd8(tcon_register_read_data); }
 
-    /// Is resistor 0 into the "shutdown" configuration?
-    bool resistor0_shutdown() { return resistor_shutdown<0>();}
+
+
+
+
+//
+//    template <uint8_t pos>
+//    static void TCON_register_write_bit(bool on)
+//    {
+//	std::byte reg = TCON_register();
+//	if (on) 
+//	    atd::write_bit<pos>::template to<1>::in(reg);
+//	else
+//	    atd::write_bit<pos>::template to<0>::in(reg);
+//
+//	TCON_register(reg);
+//    }
+//
+//    template <uint8_t pos>
+//    static bool TCON_register_bit() 
+//    { 
+//	std::byte reg = TCON_register();
+//	return atd::read_bit<pos>::of(reg) != std::byte{0}; 
+//    }
+//
+
+
+
+
+// State
+// -----
+//
+//    /// Forces (or not) resistor 0 into the "shutdown" configuration
+//    static void resistor0_shutdown(bool on) { resistor_shutdown<0>(on);}
+//
+//    /// Is resistor 0 into the "shutdown" configuration?
+//    static bool resistor0_shutdown() { return resistor_shutdown<0>();}
 
     // TODO: estas funciones deberían de funcionar, pero están sin probar
 //    bool resistor0_connect_terminal_A() 
@@ -132,11 +241,11 @@ public:
 //    { resistor_connect_terminal_B<0>(on); }
 
 
-    /// Forces (or not) resistor 1 into the "shutdown" configuration
-    void resistor1_shutdown(bool on) { resistor_shutdown<1>(on);}
-
-    /// Is resistor 1 into the "shutdown" configuration?
-    bool resistor1_shutdown() { return resistor_shutdown<1>();}
+//    /// Forces (or not) resistor 1 into the "shutdown" configuration
+//    static void resistor1_shutdown(bool on) { resistor_shutdown<1>(on);}
+//
+//    /// Is resistor 1 into the "shutdown" configuration?
+//    static bool resistor1_shutdown() { return resistor_shutdown<1>();}
 
     // TODO: estas funciones deberían de funcionar, pero están sin probar
 //    bool resistor1_connect_terminal_A() 
@@ -159,223 +268,137 @@ public:
 
 
 private:
-    // Datos
-    // -----
-    // Pines del device
-    avr::Output_pin<num_pin_no_CS> no_CS_;
+// Instruction set (table 7-2 datasheet)
+    // Wipers Registers
+    using cmd_wiper_write_data = atd::static_array<uint16_t, 0x0000, 0x1000>;
+    using cmd_wiper_read_data  = atd::static_array<uint8_t, 0x0C, 0x1C>;
+    using cmd_wiper_increment  = atd::static_array<uint8_t, 0x04, 0x14>;
+    using cmd_wiper_decrement  = atd::static_array<uint8_t, 0x08, 0x18>;
 
-    // Estado
-    bool good_;	
+    // TCON Register
+    constexpr static uint16_t tcon_register_write_data = 0x4000;
+    constexpr static uint8_t tcon_register_read_data   = 0x4C;
 
-    // Configuración
-    // TODO: comprar otros potenciómetros de 8 bits y usar esta misma clase
-    // para tanto los de 7 como los de 8.
-    constexpr static uint8_t num_bits = 7; // Pueden ser 7 ó 8 bits
+    // Status Register
+    constexpr static uint8_t status_register_read_data   = 0x5C;
 
-    // Devuelve el valor máximo que puede tomar el potenciómetro dependiendo
-    // del número de bits.
-    constexpr static uint8_t valor_max(uint8_t n)
-    {return 128u*(n - 6u);}  // = 128*(x-7)+128; valor[7] = 128, valor[8] = 256
+    constexpr static uint8_t status_register_no_shdn_bit = 1;
 
-
-    // Instruction set (table 7-2 datasheet)
-    // -------------------------------------
-    constexpr static uint16_t WRITE_DATA[2] = {0x0000, 0x1000};
-
-    constexpr static uint8_t READ_DATA[2]       = {0x0C, 0x1C};
-    constexpr static uint8_t INCREMENT_WIPER[2] = {0x04, 0x14};
-    constexpr static uint8_t DECREMENT_WIPER[2] = {0x08, 0x18};
-
-    constexpr static uint16_t TCON_REGISTER_WRITE_DATA = 0x4000;
-    constexpr static uint8_t TCON_REGISTER_READ_DATA   = 0x4C;
-
-    constexpr static uint8_t STATUS_REGISTER_READ_DATA = 0x5C;
-    
     // Bit de error
     constexpr static uint8_t CMDERR_BIT = 7;    // bit que ocupa CMDERR
 
-    // status register bits
-    constexpr static uint8_t STATUS_REGISTER_no_SHDN_BIT = 1;
-
-    // TCON register bits
-    constexpr static uint8_t TCON_REGISTER_RHW_BIT[2] = {3, 7};
-    constexpr static uint8_t TCON_REGISTER_RA_BIT[2]  = {2, 6};
-    constexpr static uint8_t TCON_REGISTER_RW_BIT[2]  = {1, 5};
-    constexpr static uint8_t TCON_REGISTER_RB_BIT[2]  = {0, 4};
-
-    // Funciones de ayuda
-    // ------------------
-    // Seleccionamos el chip
-    void select() {no_CS_.write_zero();}
-
-    // Lo deseleccionamos
-    void deselect() {no_CS_.write_one();}
-
-    class Select{
-    public:
-	explicit Select(Pot_MCP4231& pot) : pot_{&pot} 
-	{ pot_->select(); }
-
-	~Select() { pot_->deselect(); }
-
-	Select(const Select&) = delete;
-	Select& operator= (const Select&) = delete;
-
-	explicit operator bool() const {return pot_->good();}
-
-    private:
-	Pot_MCP4231* pot_;
-    };
 
 
-    void SPI_write(uint16_t x) 
+
+
+// Funciones de ayuda
+// ------------------
+    // return true = OK, false = ERROR.
+    static bool SPI_write(uint16_t x) 
     { 
-	std::byte res = avr::SPI::write(static_cast<std::byte>(x >> 8)); 
+	std::byte res = SPI::write(static_cast<std::byte>(x >> 8)); 
 
-	if (!atd::bit<CMDERR_BIT>::of(res))
-	    good_ = false;
+	if (atd::is_zero_bit<CMDERR_BIT>::of(res))
+	    return false;
 	
 	// si ha fallado ¿puedo ahorrar esta llamada?
-	avr::SPI::write(static_cast<std::byte>(x)); 
-    }
+	SPI::write(static_cast<std::byte>(x)); 
 
-    // Lectura/escritura del status register
-    // -------------------------------------
-    // El status register solo tiene 1 bit de interes: 
-    // el STATUS_REGISTER_no_SHDN
-    std::byte status_register()
-    {
-	// DUDA: Los bits D5:D8 del status register siempre son 1. Se podria
-	// comprobar esto para ver si hay errores.
-	return read_cmd8(STATUS_REGISTER_READ_DATA);
-    }
-
-    // Lectura/escritura del TCON register
-    // -----------------------------------
-    void TCON_register_write(std::byte x)
-    { write_cmd(TCON_REGISTER_WRITE_DATA, std::to_integer<uint16_t>(x)); }
-
-    std::byte TCON_register_read()
-    { return read_cmd8(TCON_REGISTER_READ_DATA); }
-
-
-    template <uint8_t pos>
-    void TCON_register_write_bit(bool on)
-    {
-	std::byte reg = TCON_register_read();
-	atd::bit<pos>::of(reg) = on;
-	TCON_register_write(reg);
-    }
-
-    template <uint8_t pos>
-    bool TCON_register_read_bit() 
-    { 
-	std::byte reg = TCON_register_read();
-	return atd::bit<pos>::of(reg); 
+	return true;
     }
 
     // Operaciones básicas 
     // -------------------
     // Lee un comando del potenciometro
-    std::byte read_cmd8(uint8_t cmd)
+    static std::byte read_cmd8(uint8_t cmd)
     {
-	Select select{*this};
+	cfg_SPI();
 
-	if (!select)
+	Select select;
+
+	std::byte res = SPI::write(std::byte{cmd});
+
+	if (atd::is_zero_bit<CMDERR_BIT>::of(res))
 	    return std::byte{0};
 
-	std::byte res1 = avr::SPI::write(std::byte{cmd});
-
-	if (!atd::bit<CMDERR_BIT>::of(res1))  
-	    good_ = false;
-
-	return avr::SPI::read();
+	return SPI::read();
     }
 
 
-    uint16_t read_cmd16(uint8_t cmd)
+    static uint16_t read_cmd16(uint8_t cmd)
     {
-	Select select{*this};
+	cfg_SPI();
+	Select select;
 
-	if (!select)
-	    return 0;
+	std::byte res1 = SPI::write(std::byte{cmd});
 
-	std::byte res1 = avr::SPI::write(std::byte{cmd});
+	if (atd::is_zero_bit<CMDERR_BIT>::of(res1))
+	    return uint16_t{0};
 
-	if (!atd::bit<CMDERR_BIT>::of(res1))  
-	    good_ = false;
-
-	std::byte res2 = avr::SPI::read();
+	std::byte res2 = SPI::read();
 
 	return atd::concat_bytes<uint16_t>(res1 & std::byte{0x01}, res2);
     }
 
-    void write_cmd(uint8_t cmd)
+    static void write_cmd(uint8_t cmd)
     {
-	Select select{*this};
+	cfg_SPI();
+	Select select;
 
-	if (!select)
-	    return;
-
-	avr::SPI::write(std::byte{cmd});
+	SPI::write(std::byte{cmd});
     }
 
-    // data = es de 9 bits, por eso tiene que ser un uint16_t.
-    // precondicion: los bits 9-15 de data == 0.
+    // precondition: los bits 9-15 de data == 0.
     // El comando lo definimos de tal manera que sus 9 primeros bits sean 0.
-    void write_cmd(uint16_t cmd, uint16_t data)
+    static void write_cmd(uint16_t cmd, uint16_t data)
     {
-	Select select{*this};
-
-	if (!select)
-	    return;
+	cfg_SPI();
+	Select select;
 
 	SPI_write(cmd | data);
     }
 
 
-
-
-    template <uint8_t i>
-    void resistor_shutdown(bool on)
-    { TCON_register_write_bit<TCON_REGISTER_RHW_BIT[i]>(!on); }
-
-    template <uint8_t i>
-    bool resistor_shutdown() 
-    { return !TCON_register_read_bit<TCON_REGISTER_RHW_BIT[i]>(); }
-
-    template <uint8_t i>
-    void resistor_connect_terminal_A(bool on)
-    { TCON_register_write_bit<TCON_REGISTER_RA_BIT[i]>(on); }
-
-    template <uint8_t i>
-    bool resistor_connect_terminal_A() 
-    { return TCON_register_read_bit<TCON_REGISTER_RA_BIT[i]>(); }
-
-    template <uint8_t i>
-    void resistor_connect_wiper(bool on)
-    { TCON_register_write_bit<TCON_REGISTER_RW_BIT[i]>(on); }
-
-    template <uint8_t i>
-    bool resistor_connect_wiper() 
-    { return TCON_register_read_bit<TCON_REGISTER_RW_BIT[i]>(); }
-
-    template <uint8_t i>
-    void resistor_connect_terminal_B(bool on)
-    { TCON_register_write_bit<TCON_REGISTER_RB_BIT[i]>(on); }
-
-    template <uint8_t i>
-    bool resistor_connect_terminal_B() 
-    { return TCON_register_read_bit<TCON_REGISTER_RB_BIT[i]>(); }
+//    template <uint8_t i>
+//    static void resistor_shutdown(bool on)
+//    { TCON_register_write_bit<TCON_REGISTER_RHW_BIT[i]>(!on); }
+//
+//    template <uint8_t i>
+//    static bool resistor_shutdown() 
+//    { return !TCON_register_bit<TCON_REGISTER_RHW_BIT[i]>(); }
+//
+//    template <uint8_t i>
+//    static void resistor_connect_terminal_A(bool on)
+//    { TCON_register_write_bit<TCON_REGISTER_RA_BIT[i]>(on); }
+//
+//    template <uint8_t i>
+//    static bool resistor_connect_terminal_A() 
+//    { return TCON_register_bit<TCON_REGISTER_RA_BIT[i]>(); }
+//
+//    template <uint8_t i>
+//    static void resistor_connect_wiper(bool on)
+//    { TCON_register_write_bit<TCON_REGISTER_RW_BIT[i]>(on); }
+//
+//    template <uint8_t i>
+//    static bool resistor_connect_wiper() 
+//    { return TCON_register_bit<TCON_REGISTER_RW_BIT[i]>(); }
+//
+//    template <uint8_t i>
+//    static void resistor_connect_terminal_B(bool on)
+//    { TCON_register_write_bit<TCON_REGISTER_RB_BIT[i]>(on); }
+//
+//    template <uint8_t i>
+//    static bool resistor_connect_terminal_B() 
+//    { return TCON_register_bit<TCON_REGISTER_RB_BIT[i]>(); }
 
 };
 
 
-template <uint8_t no_CS>
-void Pot_MCP4231<no_CS>::cfg_SPI()
+template <typename Select>
+void Pot_MCP4231_basic<Select>::cfg_SPI()
 {
-    avr::SPI::spi_mode(0, 0);
-    avr::SPI::data_order_MSB();
+    SPI::spi_mode(0, 0);
+    SPI::data_order_MSB();
 }
 
 

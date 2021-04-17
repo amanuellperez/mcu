@@ -382,7 +382,7 @@ struct is_zero_bit{
  *
  *  Ejemplo:
  *	int x = 0b1001001;
- *	y = atd::read_bits<3,5>(x)
+ *	y = atd::read_bits<3,5>::of(x)
  *	devuelve: y == 0b00001000;
  *
  *  (RRR) En principio hay 2 formas básicas de implementar esta función:
@@ -427,6 +427,10 @@ struct read_bits{
     }
 
 };
+
+
+template <int bitpos>
+using read_bit = read_bits<bitpos>;
 
 
 /*!
