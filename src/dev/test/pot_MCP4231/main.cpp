@@ -38,7 +38,7 @@ public:
 
 
 using SPI = avr::SPI_master;
-using Pot = dev::Pot_MCP4231_basic<Select>;
+using Pot = dev::Pot_MCP4231<Select>;
 
 
 // Funciona hasta con 10 MHz
@@ -156,6 +156,7 @@ void tcon_write()
     Pot::TCON::resistor1_terminalB_connect(tcon, c == 'y' or c == 'Y');
 
     Pot::TCON_register(tcon);
+    
 }
 
 void tcon_register_menu()

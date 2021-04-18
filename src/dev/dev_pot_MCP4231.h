@@ -41,6 +41,21 @@ namespace dev{
 // datasheet 4.2.1.2
 // mem <--> struct
 struct __MCP4231_TCON{
+//    uint8_t _resistor0_shutdown : 1;
+//    uint8_t _resistor0_terminalA_connect : 1;
+//    uint8_t _resistor0_terminalW_connect : 1;
+//    uint8_t _resistor0_terminalB_connect : 1;
+//
+//    uint8_t _resistor1_shutdown : 1;
+//    uint8_t _resistor1_terminalA_connect : 1;
+//    uint8_t _resistor1_terminalW_connect : 1;
+//    uint8_t _resistor1_terminalB_connect : 1;
+//
+//    __MCP4231_TCON() = default;
+//    __MCP4231_TCON(std::byte tcon) {to_struct(std::to_integer<uint8_t>(tcon));}
+//    std::byte to_mem() const;
+
+
 // resistor 0
 //  CUIDADO: esta shutdown cuando este bit es 0!!!
     static void resistor0_shutdown(std::byte& tcon, bool on)
@@ -105,17 +120,62 @@ private:
     static constexpr atd::Range_bitmask<2, 2, std::byte> mask_R0A{};
     static constexpr atd::Range_bitmask<1, 1, std::byte> mask_R0W{};
     static constexpr atd::Range_bitmask<0, 0, std::byte> mask_R0B{};
+
+
+//    void to_struct(uint8_t tcon);
 };
 
-
-
-// ¿Cómo se selecciona el dispositivo? ¿Directamente mediante un pin?
-// ¿Mediante un registro? ¿...? Eso lo decide el cliente, por eso la clase
-// está parametrizada por Select.
+// DUDA: merece la pena hacer esto? Ocupa mucho espacio? Facil de usar?
+//void __MCP4231_TCON::to_struct(uint8_t tcon)
+//{
+//    _resistor0_shutdown  = !atd::to_bool(mask_R0HW(tcon));
+//    _resistor0_terminalA_connect = atd::to_bool(mask_R0A(tcon));
+//    _resistor0_terminalW_connect = atd::to_bool(mask_R0B(tcon)); 
+//    _resistor0_terminalB_connect = atd::to_bool(mask_R0W(tcon)); 
 //
+//    _resistor1_shutdown  = !atd::to_bool(mask_R1HW(tcon));
+//    _resistor1_terminalA_connect = atd::to_bool(mask_R1A(tcon));
+//    _resistor1_terminalW_connect = atd::to_bool(mask_R1B(tcon)); 
+//    _resistor1_terminalB_connect = atd::to_bool(mask_R1W(tcon)); 
+//}
+//
+//
+//std::byte __MCP4231_TCON::to_mem() const
+//{
+//    std::byte tcon{};
+//
+//    mask_R0HW(tcon) = std::byte{(_resistor0_shutdown? 0: 1)};
+//    mask_R0A(tcon) = std::byte{_resistor0_terminalA_connect};
+//    mask_R0W(tcon) = std::byte{_resistor0_terminalW_connect};
+//    mask_R0B(tcon) = std::byte{_resistor0_terminalB_connect};
+//
+//    mask_R1HW(tcon) = std::byte{(_resistor1_shutdown? 0: 1)};
+//    mask_R1A(tcon) = std::byte{_resistor1_terminalA_connect};
+//    mask_R1W(tcon) = std::byte{_resistor1_terminalW_connect};
+//    mask_R1B(tcon) = std::byte{_resistor1_terminalB_connect};
+//
+//
+//    return std::byte{tcon};
+//}
+//
+
+/*!
+ *  \brief  Traductor del MCP4231
+ *
+ *  Esta clase se limita a traducir la datasheet a código.
+ *
+ *  Acceso típico al dispositivo:
+ *
+ *  Pot_MCP4231_basic::cfg_SPI();
+ *  select();
+ *  Pot_MCP4231_basic::cmd1
+ *  Pot_MCP4231_basic::cmd2
+ *  ...
+ *  deselect();
+ *
+ */
 // TODO: añadir pin shutdown. Despues, sacar todo el código fuente de dentro
 // de la clase (ordenarlo un poco todo).
-template <typename Select>
 class Pot_MCP4231_basic{
 public:
 // Types
@@ -186,30 +246,182 @@ public:
 
 
 
+private:
+// Instruction set (table 7-2 datasheet)
+    // Wipers Registers
+    using cmd_wiper_write_data = atd::static_array<uint16_t, 0x0000, 0x1000>;
+    using cmd_wiper_read_data  = atd::static_array<uint8_t, 0x0C, 0x1C>;
+    using cmd_wiper_increment  = atd::static_array<uint8_t, 0x04, 0x14>;
+    using cmd_wiper_decrement  = atd::static_array<uint8_t, 0x08, 0x18>;
+
+    // TCON Register
+    constexpr static uint16_t tcon_register_write_data = 0x4000;
+    constexpr static uint8_t tcon_register_read_data   = 0x4C;
+
+    // Status Register
+    constexpr static uint8_t status_register_read_data   = 0x5C;
+
+    constexpr static uint8_t status_register_no_shdn_bit = 1;
+
+    // Bit de error
+    constexpr static uint8_t CMDERR_BIT = 7;    // bit que ocupa CMDERR
 
 
-//
-//    template <uint8_t pos>
-//    static void TCON_register_write_bit(bool on)
-//    {
-//	std::byte reg = TCON_register();
-//	if (on) 
-//	    atd::write_bit<pos>::template to<1>::in(reg);
-//	else
-//	    atd::write_bit<pos>::template to<0>::in(reg);
-//
-//	TCON_register(reg);
-//    }
-//
-//    template <uint8_t pos>
-//    static bool TCON_register_bit() 
-//    { 
-//	std::byte reg = TCON_register();
-//	return atd::read_bit<pos>::of(reg) != std::byte{0}; 
-//    }
-//
 
 
+
+// Funciones de ayuda
+// ------------------
+    // return true = OK, false = ERROR.
+    static bool SPI_write(uint16_t x) 
+    { 
+	std::byte res = SPI::write(static_cast<std::byte>(x >> 8)); 
+
+	if (atd::is_zero_bit<CMDERR_BIT>::of(res))
+	    return false;
+	
+	// si ha fallado ¿puedo ahorrar esta llamada?
+	SPI::write(static_cast<std::byte>(x)); 
+
+	return true;
+    }
+
+    // Operaciones básicas 
+    // -------------------
+    // Lee un comando del potenciometro
+    static std::byte read_cmd8(uint8_t cmd)
+    {
+//	cfg_SPI();
+//
+//	Select select;
+
+	std::byte res = SPI::write(std::byte{cmd});
+
+	if (atd::is_zero_bit<CMDERR_BIT>::of(res))
+	    return std::byte{0};
+
+	return SPI::read();
+    }
+
+
+    static uint16_t read_cmd16(uint8_t cmd)
+    {
+//	cfg_SPI();
+//	Select select;
+
+	std::byte res1 = SPI::write(std::byte{cmd});
+
+	if (atd::is_zero_bit<CMDERR_BIT>::of(res1))
+	    return uint16_t{0};
+
+	std::byte res2 = SPI::read();
+
+	return atd::concat_bytes<uint16_t>(res1 & std::byte{0x01}, res2);
+    }
+
+    static void write_cmd(uint8_t cmd)
+    {
+//	cfg_SPI();
+//	Select select;
+
+	SPI::write(std::byte{cmd});
+    }
+
+    // precondition: los bits 9-15 de data == 0.
+    // El comando lo definimos de tal manera que sus 9 primeros bits sean 0.
+    static void write_cmd(uint16_t cmd, uint16_t data)
+    {
+//	cfg_SPI();
+//	Select select;
+
+	SPI_write(cmd | data);
+    }
+
+};
+
+
+void Pot_MCP4231_basic::cfg_SPI()
+{
+    SPI::spi_mode(0, 0);
+    SPI::data_order_MSB();
+}
+
+
+/*!
+ *  \brief  Añadimos la gestión automática de cfg_SPI
+ *
+ *  Esta clase simplifica la interacción con el dispositivo. 
+ *
+ */
+// ¿Cómo se selecciona el dispositivo? ¿Directamente mediante un pin?
+// ¿Mediante un registro? ¿...? Eso lo decide el cliente, por eso la clase
+// está parametrizada por Select.
+template <typename Select>
+class Pot_MCP4231 : public Pot_MCP4231_basic{
+public:
+    using Base = Pot_MCP4231_basic;
+
+// Wiper Registers
+// ---------------
+    /// Escribe el valor x en el potenciometro npot ( = 0/1)
+    /// El valor de la resistencia será: R = x*Rab/wiper_max_value()
+    /// siendo Rab el valor máximo.
+    template <uint8_t npot>
+    static void wiper_write_data(uint16_t x)
+    {
+	cfg_SPI();
+	Select select;
+	Base::wiper_write_data<npot>(x);
+    }
+
+    template <uint8_t npot>
+    static uint16_t wiper_read_data()
+    {
+	cfg_SPI();
+	Select select;
+	return Base::wiper_read_data<npot>();
+    }
+
+    template <uint8_t npot>
+    static void wiper_increment()
+    {
+	cfg_SPI();
+	Select select;
+	Base::wiper_increment<npot>();
+    }
+
+    template <uint8_t npot>
+    static void wiper_decrement()
+    {
+	cfg_SPI();
+	Select select;
+	Base::wiper_decrement<npot>();
+    }
+
+
+// Status Register
+    static std::byte status_register()
+    {
+	cfg_SPI();
+	Select select;
+	return Base::status_register();
+    }
+
+
+// TCON register
+    static void TCON_register(std::byte x)
+    {
+	cfg_SPI();
+	Select select;
+	Base::TCON_register(x);
+    }
+
+    static std::byte TCON_register()
+    {
+	cfg_SPI();
+	Select select;
+	return Base::TCON_register();
+    }
 
 
 // State
@@ -267,98 +479,6 @@ public:
 //    { resistor_connect_terminal_B<1>(on); }
 
 
-private:
-// Instruction set (table 7-2 datasheet)
-    // Wipers Registers
-    using cmd_wiper_write_data = atd::static_array<uint16_t, 0x0000, 0x1000>;
-    using cmd_wiper_read_data  = atd::static_array<uint8_t, 0x0C, 0x1C>;
-    using cmd_wiper_increment  = atd::static_array<uint8_t, 0x04, 0x14>;
-    using cmd_wiper_decrement  = atd::static_array<uint8_t, 0x08, 0x18>;
-
-    // TCON Register
-    constexpr static uint16_t tcon_register_write_data = 0x4000;
-    constexpr static uint8_t tcon_register_read_data   = 0x4C;
-
-    // Status Register
-    constexpr static uint8_t status_register_read_data   = 0x5C;
-
-    constexpr static uint8_t status_register_no_shdn_bit = 1;
-
-    // Bit de error
-    constexpr static uint8_t CMDERR_BIT = 7;    // bit que ocupa CMDERR
-
-
-
-
-
-// Funciones de ayuda
-// ------------------
-    // return true = OK, false = ERROR.
-    static bool SPI_write(uint16_t x) 
-    { 
-	std::byte res = SPI::write(static_cast<std::byte>(x >> 8)); 
-
-	if (atd::is_zero_bit<CMDERR_BIT>::of(res))
-	    return false;
-	
-	// si ha fallado ¿puedo ahorrar esta llamada?
-	SPI::write(static_cast<std::byte>(x)); 
-
-	return true;
-    }
-
-    // Operaciones básicas 
-    // -------------------
-    // Lee un comando del potenciometro
-    static std::byte read_cmd8(uint8_t cmd)
-    {
-	cfg_SPI();
-
-	Select select;
-
-	std::byte res = SPI::write(std::byte{cmd});
-
-	if (atd::is_zero_bit<CMDERR_BIT>::of(res))
-	    return std::byte{0};
-
-	return SPI::read();
-    }
-
-
-    static uint16_t read_cmd16(uint8_t cmd)
-    {
-	cfg_SPI();
-	Select select;
-
-	std::byte res1 = SPI::write(std::byte{cmd});
-
-	if (atd::is_zero_bit<CMDERR_BIT>::of(res1))
-	    return uint16_t{0};
-
-	std::byte res2 = SPI::read();
-
-	return atd::concat_bytes<uint16_t>(res1 & std::byte{0x01}, res2);
-    }
-
-    static void write_cmd(uint8_t cmd)
-    {
-	cfg_SPI();
-	Select select;
-
-	SPI::write(std::byte{cmd});
-    }
-
-    // precondition: los bits 9-15 de data == 0.
-    // El comando lo definimos de tal manera que sus 9 primeros bits sean 0.
-    static void write_cmd(uint16_t cmd, uint16_t data)
-    {
-	cfg_SPI();
-	Select select;
-
-	SPI_write(cmd | data);
-    }
-
-
 //    template <uint8_t i>
 //    static void resistor_shutdown(bool on)
 //    { TCON_register_write_bit<TCON_REGISTER_RHW_BIT[i]>(!on); }
@@ -390,18 +510,7 @@ private:
 //    template <uint8_t i>
 //    static bool resistor_connect_terminal_B() 
 //    { return TCON_register_bit<TCON_REGISTER_RB_BIT[i]>(); }
-
 };
-
-
-template <typename Select>
-void Pot_MCP4231_basic<Select>::cfg_SPI()
-{
-    SPI::spi_mode(0, 0);
-    SPI::data_order_MSB();
-}
-
-
 }// namespace
 
 #endif

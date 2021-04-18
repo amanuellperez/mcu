@@ -17,6 +17,7 @@ xx
 *.map
 *.elf
 bugs
+tmp
 
 # tags
 tags
