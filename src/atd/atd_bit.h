@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez <amanuel.lperez@gmail.com>
+// Copyright (C) 2019-2021 A.Manuel L.Perez <amanuel.lperez@gmail.com>
 //
 // This file is part of the MCU++ Library.
 //
@@ -56,6 +56,7 @@
  *	      is_one_bit/is_zero_bit
  *	      write_range_bits
  *  01/02/21: read_bits, zero::with_bits::to
+ *  18/04/21: write_bit
  *
  ****************************************************************************/
 #include <stdint.h> // uint8_t
@@ -293,17 +294,59 @@ struct write_bits{
 }// namespace
 
 
-
-
-
 // Si queremos escribir varios bits, en plural
 template <int... bitpos>
 using write_bits = __atd::write_bits<bitpos...>;
 
-// Si solo queremos escribir 1 bit en singular (syntactic sugar)
-template <int... bitpos>
-using write_bit = __atd::write_bits<bitpos...>;
+//// Si solo queremos escribir 1 bit en singular (syntactic sugar)
+//template <int... bitpos>
+//using write_bit = __atd::write_bits<bitpos...>;
 
+/*!
+ *  \brief  write_bit
+ *
+ *  Escribiendo un programa da la impresión de que al usar write_bits en lugar
+ *  de la instrucción equivalente se genera más código. 
+ *  
+ *  En principio es verdad que write_bits ejecuta `x = (x & ~mask) | res`
+ *  que es 1 operación a más que un 'and' y 2 operaciones más que un 'or'.
+ *
+ *  Como esta es una función de bajo nivel que puede usarse bastante la
+ *  intento optimizar.
+ *
+ *  Al comparar el código en ensamblador que genera:
+ *	(1) x &= ~mask;
+ *	(2) write_bit<3>::to<0>::in(x);
+ *	(3) write_bits<3>::to<0>::in(x);
+ *
+ *  el compilador genera lo mismo. El ejemplo es un ejemplo sencillo. ¿Merece
+ *  la pena escribir write_bit?
+ *
+ */
+template <int bitpos>
+struct write_bit{
+    using positions = static_array<int, bitpos>;
+
+    template <int value_bit>
+    struct to
+    {
+	template <typename Int2>
+	static constexpr void in(Int2& x)
+	{
+	    using Int = std::remove_cv_t<Int2>;
+	    constexpr Int mask = make_bitmask<positions, Int>();
+
+	    if constexpr (value_bit == 0){
+		x &= ~mask;
+	    }
+
+	    else{
+		x |= mask;
+	    }
+	}
+    };
+
+};
 
 
 /*!
