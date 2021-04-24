@@ -291,10 +291,6 @@ private:
     // Lee un comando del potenciometro
     static std::byte read_cmd8(uint8_t cmd)
     {
-//	cfg_SPI();
-//
-//	Select select;
-
 	std::byte res = SPI::write(std::byte{cmd});
 
 	if (atd::is_zero_bit<CMDERR_BIT>::of(res))
@@ -306,9 +302,6 @@ private:
 
     static uint16_t read_cmd16(uint8_t cmd)
     {
-//	cfg_SPI();
-//	Select select;
-
 	std::byte res1 = SPI::write(std::byte{cmd});
 
 	if (atd::is_zero_bit<CMDERR_BIT>::of(res1))
@@ -321,9 +314,6 @@ private:
 
     static void write_cmd(uint8_t cmd)
     {
-//	cfg_SPI();
-//	Select select;
-
 	SPI::write(std::byte{cmd});
     }
 
@@ -331,9 +321,6 @@ private:
     // El comando lo definimos de tal manera que sus 9 primeros bits sean 0.
     static void write_cmd(uint16_t cmd, uint16_t data)
     {
-//	cfg_SPI();
-//	Select select;
-
 	SPI_write(cmd | data);
     }
 

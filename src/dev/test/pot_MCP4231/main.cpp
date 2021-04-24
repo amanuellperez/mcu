@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez <amanuel.lperez@gmail.com>
+// Copyright (C) 2019-2021 A.Manuel L.Perez <amanuel.lperez@gmail.com>
 //
 // This file is part of the MCU++ Library.
 //
@@ -183,7 +183,7 @@ template <uint8_t npot>
 void wiper_register_menu()
 {
     avr::UART_iostream uart;
-    uart << "Write wiper" << npot << " value: ";
+    uart << "Write wiper" << (uint16_t) npot << " value: ";
     uint16_t x{};
     uart >> x;
     uart << x << '\n';
