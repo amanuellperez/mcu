@@ -241,7 +241,7 @@ public:
     static void master_transmit_byte(uint8_t x)
     {
 	TWDR = x;
-	atd::write_bit<TWSTA, TWSTO, TWINT>::to<0,0,1>::in(TWCR);
+	atd::write_bits<TWSTA, TWSTO, TWINT>::to<0,0,1>::in(TWCR);
     }
 
     /// SLA+R/W or data byte will be transmitted.
@@ -290,23 +290,23 @@ public:
     static void slave_transmit_byte_received_NACK(std::byte x)
     {
 	TWDR = std::to_integer<uint8_t>(x);
-	atd::write_bit<TWSTO, TWINT, TWEA>::to<0,1,0>::in(TWCR);
+	atd::write_bits<TWSTO, TWINT, TWEA>::to<0,1,0>::in(TWCR);
     }
 
     /// Data byte will be transmitted and NACK should be received.
     static void slave_transmit_byte_received_ACK(std::byte x)
     {
 	TWDR = std::to_integer<uint8_t>(x);
-	atd::write_bit<TWSTO, TWINT, TWEA>::to<0,1,1>::in(TWCR);
+	atd::write_bits<TWSTO, TWINT, TWEA>::to<0,1,1>::in(TWCR);
     }
 
     /// Data byte will be received and NACK will be returned.
     static void slave_receive_data_with_NACK()
-    { atd::write_bit<TWSTO, TWINT, TWEA>::to<0,1,0>::in(TWCR); }
+    { atd::write_bits<TWSTO, TWINT, TWEA>::to<0,1,0>::in(TWCR); }
 
     /// Data byte will be received and ACK will be returned.
     static void slave_receive_data_with_ACK()
-    { atd::write_bit<TWSTO, TWINT, TWEA>::to<0,1,1>::in(TWCR); }
+    { atd::write_bits<TWSTO, TWINT, TWEA>::to<0,1,1>::in(TWCR); }
 
 //    /// En caso de error, recibir datos no esperados, paramos la transmisión.
 //    // TODO: revisar la implementación. No tengo claro. Es "casi" copia de la
@@ -319,7 +319,7 @@ public:
     // Miscellaneous States (table 26-7)
     // ---------------------------------
     static void recover_from_bus_error()
-    { atd::write_bit<TWSTA, TWSTO, TWINT>::to<0,1,1>::in(TWCR); }
+    { atd::write_bits<TWSTA, TWSTO, TWINT>::to<0,1,1>::in(TWCR); }
 
 
     // Other

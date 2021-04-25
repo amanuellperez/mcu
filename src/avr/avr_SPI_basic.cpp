@@ -70,43 +70,43 @@ void SPI_basic::spi_mode(bool cpol, bool cpha)
 void SPI_basic::clock_speed_divide_by_2()
 {// 100
     atd::write_bit<SPI2X>::to<1>::in(SPSR);
-    atd::write_bit<SPR1, SPR0>::to<0,0>::in(SPCR);
+    atd::write_bits<SPR1, SPR0>::to<0,0>::in(SPCR);
 }
 
 void SPI_basic::clock_speed_divide_by_4()
 {// 000
     atd::write_bit<SPI2X>::to<0>::in(SPSR);
-    atd::write_bit<SPR1, SPR0>::to<0,0>::in(SPCR);
+    atd::write_bits<SPR1, SPR0>::to<0,0>::in(SPCR);
 }
 
 void SPI_basic::clock_speed_divide_by_8()
 {// 101
     atd::write_bit<SPI2X>::to<1>::in(SPSR);
-    atd::write_bit<SPR1, SPR0>::to<0,1>::in(SPCR);
+    atd::write_bits<SPR1, SPR0>::to<0,1>::in(SPCR);
 }
 
 void SPI_basic::clock_speed_divide_by_16()
 {// 001
     atd::write_bit<SPI2X>::to<0>::in(SPSR);
-    atd::write_bit<SPR1, SPR0>::to<0,1>::in(SPCR);
+    atd::write_bits<SPR1, SPR0>::to<0,1>::in(SPCR);
 }
 
 void SPI_basic::clock_speed_divide_by_32()
 {// 110
     atd::write_bit<SPI2X>::to<1>::in(SPSR);
-    atd::write_bit<SPR1, SPR0>::to<1,0>::in(SPCR);
+    atd::write_bits<SPR1, SPR0>::to<1,0>::in(SPCR);
 }
 
 void SPI_basic::clock_speed_divide_by_64()
 {// 010
     atd::write_bit<SPI2X>::to<0>::in(SPSR);
-    atd::write_bit<SPR1, SPR0>::to<1,0>::in(SPCR);
+    atd::write_bits<SPR1, SPR0>::to<1,0>::in(SPCR);
 }
 
 void SPI_basic::clock_speed_divide_by_128()
 {// 011
     atd::write_bit<SPI2X>::to<0>::in(SPSR);
-    atd::write_bit<SPR1, SPR0>::to<1,1>::in(SPCR);
+    atd::write_bits<SPR1, SPR0>::to<1,1>::in(SPCR);
 }
 
 
