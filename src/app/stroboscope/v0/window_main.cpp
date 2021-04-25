@@ -34,11 +34,11 @@ void Main::window_main()
 		break;
 
 	    case Key::down:
-		stroboscope_.freq_minus(1);
+		stroboscope_.freq_minus(10);
 		break;
 
 	    case Key::up:
-		stroboscope_.freq_plus(1);
+		stroboscope_.freq_plus(10);
 		break;
 
 	    case Key::none:

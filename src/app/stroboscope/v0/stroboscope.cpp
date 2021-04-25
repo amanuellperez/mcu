@@ -18,28 +18,53 @@
 #include "stroboscope.h"
 
 // Si el micro está a 1MHz
-void Stroboscope::generate()
+void Stroboscope::generate_1MHz()
 {
+    if constexpr (freq_mcu == 1000000ul){
+
+    Timer::off();
+
     if (freq_ <= 15){
 	uint16_t top  = 15625u / freq_ - 1; // 15625 = 1000000/64;
-	Timer::off();
 	Timer::input_capture_register(top);
 	Timer::output_compare_register_A(8); // 500 us
-	Timer::PWM_pin_A_non_inverting_mode();
-	Timer::on<64>();
+	Timer::set_clock_period_in_us<64>();
     }
     else{
         uint16_t top =
-            static_cast<uint16_t>(uint32_t{1000000u} / uint32_t{freq_}) - 1;
-        Timer::off();
+            static_cast<uint16_t>(freq_mcu / uint32_t{freq_}) - 1;
 	Timer::input_capture_register(top);
 	Timer::output_compare_register_A(500); // 500 us
-	Timer::PWM_pin_A_non_inverting_mode();
-	Timer::on<1>();
+	Timer::set_clock_period_in_us<1>();
     }
-
+    }
 }
 
+void Stroboscope::generate_8MHz()
+{
+    if constexpr (freq_mcu == 8000000ul){
+    Timer::off();
+
+    if (freq_ <= 123){
+	uint16_t top  = 31250 / freq_ - 1; // 31250 = 8000000/256;
+	Timer::input_capture_register(top);
+	Timer::output_compare_register_A(15); // 500 us!!!
+	Timer::set_clock_period_in_us<32>();
+    }
+    else{
+        uint16_t top =
+            static_cast<uint16_t>(uint32_t{8000000ul} / uint32_t{freq_}) - 1;
+	Timer::input_capture_register(top);
+	if (freq_ < 1000)
+	    Timer::output_compare_register_A(4000); // 500 us
+	else
+	    Timer::output_compare_register_A(1280); // 160 us
+
+	Timer::set_clock_period_in_ns<125>();
+    }
+
+    }
+}
 
 void Stroboscope::generate(uint16_t freq)
 {

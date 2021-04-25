@@ -3,6 +3,7 @@ DIRS =  clocks 		\
 		POV_toy		\
 		sensor		\
 		signal_generator \
+		stroboscope	\
 		util		
 
 

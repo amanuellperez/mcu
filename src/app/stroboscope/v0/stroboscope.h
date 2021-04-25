@@ -21,9 +21,30 @@
 
 #include <avr_timer1_basic.h>
 
+template <uint32_t freq_mcu>
+struct __Stroboscope_cfg;
+
+template <>
+struct __Stroboscope_cfg<1000000u>
+{
+    constexpr static uint16_t freq_min = 0;
+    constexpr static uint16_t freq_max = 1000;
+    constexpr static uint16_t freq0 = 15; 
+    constexpr static uint16_t div0 = 64;
+};
+
+
+template <>
+struct __Stroboscope_cfg<8000000u>
+{
+    constexpr static uint16_t freq_min = 0;
+    constexpr static uint16_t freq_max = 3000;
+    constexpr static uint16_t freq0 = 123;
+    constexpr static uint16_t div0 = 256;
+};
+
 class Stroboscope{
 public:
-    static_assert(MCU_CLOCK_FREQUENCY_IN_HZ == 1000000u);
 
     using Timer = avr::Timer1;
 
@@ -49,19 +70,39 @@ public:
     uint16_t freq_ = 500;
     bool on_ = false;
 
+    constexpr static uint32_t freq_mcu = MCU_CLOCK_FREQUENCY_IN_HZ;
 
     // rango de frecuencias que generamos
-    constexpr static uint16_t freq_min = 0;
-    constexpr static uint16_t freq_max = 1000;
+    constexpr static uint16_t freq_min = __Stroboscope_cfg<freq_mcu>::freq_min;
+    constexpr static uint16_t freq_max = __Stroboscope_cfg<freq_mcu>::freq_max;
 
     uint16_t bound(uint16_t freq);
+    void generate_1MHz();
+    void generate_8MHz();
     void generate();
+
+    
 };
 
-inline Stroboscope::Stroboscope() { Timer::mode_fast_PWM_top_ICR1(); }
+inline Stroboscope::Stroboscope() 
+{ 
+    Timer::mode_fast_PWM_top_ICR1(); 
+    Timer::PWM_pin_A_non_inverting_mode();
+}
 
 inline void Stroboscope::on() { on_ = true; generate();}
 inline void Stroboscope::off() { on_ = false; Timer::off(); }
+
+inline void Stroboscope::generate()
+{
+    if constexpr (MCU_CLOCK_FREQUENCY_IN_HZ == 8000000u)
+	generate_8MHz();
+
+    else{    // default:
+	generate_1MHz();
+    }
+
+}
 
 
 

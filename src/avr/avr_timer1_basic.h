@@ -117,7 +117,7 @@ public:
     static Frequency_divisor frequency_divisor();
 
     // Establecemos el divisor de frecuencia a aplicar al reloj del micro.
-    static void clock_speed_no_preescaling();
+    static void clock_frequency_no_preescaling();
     static void clock_frequency_divide_by_8();
     static void clock_frequency_divide_by_64();
     static void clock_frequency_divide_by_256();
@@ -128,6 +128,11 @@ public:
     template<uint16_t period
 	    , uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
     static void set_clock_period_in_us();
+
+    // Si la frecuencia del micro es 8MHz puede funcionar a 125 ns
+    template<uint16_t period
+	    , uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
+    static void set_clock_period_in_ns();
 
     template<uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
     static Time clock_period();
@@ -142,6 +147,9 @@ public:
     /// Enciende el Timer, usando como reloj el reloj de periodo indicado.
     /// 'periodo' es el periodo en microsegundos al que va a funcionar el timer.
     /// clock_frequency_in_hz = es la frecuencia del reloj del AVR.
+    // DUDA: a la hora de usarlo 'on' es confuso. Es mejor llamar directamente
+    // a set_clock_period_in_us. Además encaja mejor si operamos a 8MHz y
+    // queremos llamar a set_clock_period_in_ns. ¿Eliminar esta función?
     template<uint16_t period
 	    , uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
     static void on() {set_clock_period_in_us<period, clock_frequency_in_hz>();}
@@ -294,7 +302,7 @@ inline void Timer1::off()
     atd::write_bits<CS12, CS11, CS10>::to<0,0,0>::in(TCCR1B);
 }
 
-inline void Timer1::clock_speed_no_preescaling()
+inline void Timer1::clock_frequency_no_preescaling()
 { // 001
     atd::write_bits<CS12, CS11, CS10>::to<0,0,1>::in(TCCR1B);
 }
@@ -337,7 +345,7 @@ template<uint16_t period>
 inline void Timer1::set_clock_period_in_us_1MHz() 
 {
     if constexpr (period == 1u)
-	clock_speed_no_preescaling();
+	clock_frequency_no_preescaling();
     
     else if constexpr (period == 8u)
 	clock_frequency_divide_by_8();
@@ -392,9 +400,9 @@ inline Frequency Timer1::clock_frequency_in_Hz_1MHz()
 // avr clock at 8MHz
 // -----------------
 // a 125 ns
-//template<>
-//inline void Timer1::clock_period_in_ns<125u, 8000000UL>() 
-//{clock_frequency_no_prescaling();}
+template<>
+inline void Timer1::set_clock_period_in_ns<125u, 8000000UL>() 
+{clock_frequency_no_preescaling();}
 
 template<uint16_t period>
 inline void Timer1::set_clock_period_in_us_8MHz() 

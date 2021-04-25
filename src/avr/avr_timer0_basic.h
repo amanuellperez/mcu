@@ -81,7 +81,7 @@ public:
 
     // Selección del reloj y de su velocidad (según tabla 19-10)
     // Establecemos el divisor de frecuencia a aplicar al reloj del micro.
-    static void clock_speed_no_preescaling();
+    static void clock_frequency_no_preescaling();
     static void clock_frequency_divide_by_8();
     static void clock_frequency_divide_by_64();
     static void clock_frequency_divide_by_256();
@@ -237,7 +237,7 @@ inline void Timer0::off()
 }
 
 
-inline void Timer0::clock_speed_no_preescaling() 
+inline void Timer0::clock_frequency_no_preescaling() 
 {   // 001
     atd::write_bits<CS02, CS01, CS00>::to<0,0,1>::in(TCCR0B);
 }
@@ -284,7 +284,7 @@ template<uint16_t period>
 inline void Timer0::set_clock_period_in_us_1MHz() 
 {
     if constexpr (period == 1u)
-	clock_speed_no_preescaling();
+	clock_frequency_no_preescaling();
     
     else if constexpr (period == 8u)
 	clock_frequency_divide_by_8();

@@ -28,10 +28,11 @@ using namespace test;
 
 constexpr std::array d = {1,8, 64, 256, 1024};
 constexpr int n_max = 65535;
+// constexpr int fc = 1000000;
+constexpr int fc = 8000000;
 
 void run()
 {
-    int fc = 1000000;
 
     for (int fs = 1; fs < 5000; ++fs){
 	std::cout << fs << ": ";
