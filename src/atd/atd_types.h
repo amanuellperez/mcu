@@ -25,11 +25,16 @@
  *
  *  - HISTORIA:
  *    A.Manuel L.Perez
- *    21//32021 v0.0
+ *    21/03/2021 v0.0 Bounded
+ *    01/05/2021      Empty_struct
+ *
  *
  ****************************************************************************/
 
 namespace atd{
+// Empty_struct
+// ------------
+struct Empty_struct {};
 
 /*!
  *  \brief  Bounded integer.

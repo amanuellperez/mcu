@@ -60,12 +60,29 @@ using LCD_ostream_2004 = dev::LCD_ostream_2004<LCD_HD44780>;
 using LCD = LCD_ostream_1602;
 // using LCD = LCD_ostream_2004;
 
+struct Main{
 
+    LCD lcd;
+
+    void f(uint16_t x)
+    {
+	lcd.cursor_pos(10, 1);
+	lcd << '(' << x;
+	if (x % 2)
+	    lcd << 'i';
+	else
+	    lcd << 'p';
+
+	lcd << ')';
+    }
+};
  
 // Probamos el LCD_stream conectado a 4 pines de datos 
 void test_choose_number2()
 {
-    LCD lcd;
+    Main app;
+
+    LCD& lcd = app.lcd;
 
     Keyboard keyboard;
 
@@ -78,37 +95,19 @@ void test_choose_number2()
     wait_ms(1000);
 
 {
-using namespace avr::literals;
     lcd.clear();
-    lcd << "Freq. [5,25]";
-    avr::Frequency u8 =
-        dev::user_choose_number_lineal<LCD, Keyboard, avr::Frequency>(lcd,
-                                                                      keyboard)
-            .pos(3, 1)
-            .between(5_Hz, 25_Hz)
-            .choose2(10_Hz);
-
+    lcd << "Big number";
+    wait_ms(1000);
+    uint16_t u16  =  dev::user_choose_number_lineal(lcd, keyboard).pos(3, 1)
+					     .between(10, 60000)
+					     .choose4(2900);
     lcd.cursor_pos(0,0);
-    lcd << "has elegido: " << u8;
+    lcd << "elegido : " << u16;
 
     wait_ms(1000);
+
 }
-{
-using Rep = atd::Decimal<uint16_t, 2>;
-    lcd.clear();
-    lcd << "Decimal [5,25]";
-    wait_ms(1000);
-    Rep u8 = dev::user_choose_number_lineal<LCD, Keyboard, Rep>(
-		     lcd, keyboard)
-		     .pos(3, 1)
-		     .between(5, 25)
-		     .choose2(10);
 
-    lcd.cursor_pos(0,0);
-    lcd << "has elegido: " << u8;
-
-    wait_ms(1000);
-}
 //
 
     lcd.clear();
@@ -156,6 +155,55 @@ using Rep = atd::Decimal<uint16_t, 2>;
     lcd << "elegido : " << u16;
 
     wait_ms(1000);
+
+{
+    lcd.clear();
+    lcd << "Callback test";
+    wait_ms(1000);
+    uint16_t u16  =  dev::user_choose_number_lineal(app, lcd, keyboard).pos(3, 1)
+					     .between(10, 30)
+					     .callback(&Main::f)
+					     .choose4(20);
+    lcd.cursor_pos(0,0);
+    lcd << "elegido : " << u16;
+
+    wait_ms(1000);
+
+}
+
+
+{
+using namespace avr::literals;
+    lcd.clear();
+    lcd << "Freq. [5,25]";
+    avr::Frequency u8 =
+        dev::user_choose_number_lineal<LCD, Keyboard, avr::Frequency>
+	     (lcd, keyboard)
+            .pos(3, 1)
+            .between(5_Hz, 25_Hz)
+            .choose2(10_Hz);
+
+    lcd.cursor_pos(0,0);
+    lcd << "has elegido: " << u8;
+
+    wait_ms(1000);
+}
+{
+using Rep = atd::Decimal<uint16_t, 2>;
+    lcd.clear();
+    lcd << "Decimal [5,25]";
+    wait_ms(1000);
+    Rep u8 = dev::user_choose_number_lineal<LCD, Keyboard, Rep>(lcd, keyboard)
+		     .pos(3, 1)
+		     .between(5, 25)
+		     .choose2(10);
+
+    lcd.cursor_pos(0,0);
+    lcd << "has elegido: " << u8;
+
+    wait_ms(1000);
+}
+
 }
 
 

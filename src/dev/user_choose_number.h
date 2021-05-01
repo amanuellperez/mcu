@@ -66,6 +66,23 @@
  *			  definir esta función para todos los ints (se
  *			  limitaría a hacer un return Rep{1})).
  *
+ *	01/05/2021       * Doy soporte para poder ir de 1 a 100.000 de forma
+ *			   rápida (la idea es sumar 1, luego 10, 100 y por
+ *			   ultimo ir de 1000 en 1000).
+ *
+ *			   Tiene un pequeño error: al llegar al número máximo
+ *			   si iba de 1000 en 1000 y llegas a 9100 ya no puede
+ *			   sumar 1000, y empieza a sumarle de 1 en 1. Basta
+ *			   con soltar y volver a pulsar para que empiece a
+ *			   sumar de 1, 10 y 100.
+ *
+ *			 * Añado una callback: cuando se varia el número
+ *			   se llama a esta función. (Ej: en el stroboscope al
+ *			   pulsar el usuario modificando la frecuencia tiene
+ *			   que modificarse la señal generada). En principio la
+ *			   callback será del tipo Main::callback.
+ *
+ *  
  ****************************************************************************/
 #include <avr_time.h>
 #include <iomanip>
@@ -73,6 +90,7 @@
 #include <array>
 
 #include <atd_metronome.h>
+#include <atd_types.h>
 
 #include "dev_keyboard.h"
 
@@ -109,24 +127,43 @@ constexpr int user_choose_number_type_circular = 1;
  *	   los 50 minutos pulsamos down yendo desde 00 -> 59 -> 58 ... -> 55.
  *	   En el modo lineal habría que ir desde 00 -> 01 -> 02 ->... ->55 lo
  *	   cual es más incómodo.
+ *
+ *  DUDAS:
+ *	1. Ahora estoy almacenando dentro de esta clase (d1,d0)_max y
+ *	   (seq_x,seq_y), que supone unos 12 bytes. Se podrían parametrizar y
+ *	   pasarlos en el constructor. Dos formas de hacerlo:
+ *	    I. Como template: esto seguramente sea más ineficiente porque para
+ *	       ahorrar máximo 12 bytes podemos duplicar el código fuente de
+ *	       esta clase (cada template se instancia y genera su código).
+ *	    II. Pasarlo como array de C. Habría que reescribir
+ *	       Sequence_of_steps, funcionaria, pero... ¿ganaríamos espacio?
+ *	   No está claro que eso sea realmente una optimización y puede que
+ *	   por ahorrar un par de bytes se genere bastante más código.
  */
-template <typename LCD, typename Keyboard3, int type0, typename Rep0>
+template <typename LCD, typename Keyboard3, 
+	  int type0, typename Rep0, 
+	  typename Main = atd::Empty_struct>
 class User_choose_number{
 public:
     static_assert(type0 == user_choose_number_type_lineal or 
 		  type0 == user_choose_number_type_circular, 
 		  "incorrect user_choose_number_type");
 
-    using Rep = Rep0;	// tipo de número que mostramos
-
     static constexpr int type = type0; // lineal o circular
+
+    using Rep = Rep0;	// tipo de número que mostramos
+    using Callback = void (Main::*)(Rep);
+
 
     // Configuración
     // -------------
     /// Mostramos el número en el LCD e interaccionamos con el usuario via
     /// el teclado indicado.
+    User_choose_number(Main& app, LCD& lcd, Keyboard3)
+		    :lcd_{lcd}, app_{&app}{}
+
     User_choose_number(LCD& lcd, Keyboard3)
-		    :lcd_{lcd}{}
+		    :lcd_{lcd}, app_{nullptr}{}
 
     /// Posición (col, row) del LCD donde mostramos el número a elegir.
     User_choose_number& pos(uint8_t col, uint8_t row);
@@ -139,6 +176,9 @@ public:
 
     /// Queremos que el número elegido x esté entre m <= x <= M.
     User_choose_number& between(Rep m, Rep M);
+
+    /// Cada vez que varia el número se llama a esta función f.
+    User_choose_number& callback(Callback f);
 
     // Funciones para elegir
     // ---------------------
@@ -176,6 +216,9 @@ private:
     using d0_max = atd::static_array<uint8_t, 2,0>;
     atd::Metronome<d1_max, d0_max> counter_;
 
+    using seq_x = atd::static_array<uint8_t, 0, 10, 20, 30>;
+    using seq_y = atd::static_array<Rep, Rep{1}, Rep{10}, Rep{100}, Rep{1000}>;
+    atd::static_Sequence_of_steps<seq_x, seq_y> incr_;
 
 // Configuración
     uint8_t col_, row_;	    // posición donde están los 2 números.
@@ -185,6 +228,8 @@ private:
 // Datos
 // -----
     Rep x_;	    // Dato que mostramos en pantalla
+    Main* app_; // opcional. Solo lo usamos si se llama a callbacks.
+    Callback callback_ = nullptr;
 
 
 // Configuración estática
@@ -218,11 +263,19 @@ private:
     void update_up();
 
 
+// counter
+    void counter_reset();
+
+    void wait_till_enter_key_is_not_pressed()
+    { while(enter_key().is_pressed()){;}}
+
+    void incr_next();
+
 };
 
-template <typename L, typename T, int t0, typename R>
-inline User_choose_number<L, T, t0, R>&
-User_choose_number<L, T, t0, R>::pos(uint8_t col, uint8_t row)
+template <typename L, typename T, int t0, typename R, typename M>
+inline User_choose_number<L, T, t0, R, M>&
+User_choose_number<L, T, t0, R, M>::pos(uint8_t col, uint8_t row)
 {
     col_ = col;
     row_ = row;
@@ -230,37 +283,45 @@ User_choose_number<L, T, t0, R>::pos(uint8_t col, uint8_t row)
     return *this;
 }
 
-template <typename L, typename T, int t0, typename R>
-inline User_choose_number<L, T, t0, R>&
-User_choose_number<L, T, t0, R>::min(Rep m)
+template <typename L, typename T, int t0, typename R, typename M>
+inline User_choose_number<L, T, t0, R, M>&
+User_choose_number<L, T, t0, R, M>::min(Rep m)
 {
     min_= m;
     return *this;
 }
 
-template <typename L, typename T, int t0, typename R>
-inline User_choose_number<L, T, t0, R>&
-User_choose_number<L, T, t0, R>::max(Rep M)
+template <typename L, typename T, int t0, typename R, typename M>
+inline User_choose_number<L, T, t0, R, M>&
+User_choose_number<L, T, t0, R, M>::max(Rep max0)
 {
-    max_ = M;
+    max_ = max0;
     return *this;
 }
 
-template <typename L, typename T, int t0, typename R>
-inline User_choose_number<L, T, t0,R>&
-User_choose_number<L, T, t0,R>::between(Rep m, Rep M)
+template <typename L, typename T, int t0, typename R, typename M>
+inline User_choose_number<L, T, t0,R, M>&
+User_choose_number<L, T, t0,R, M>::between(Rep m, Rep max0)
 {
     min(m);
-    max(M);
+    max(max0);
 
     return *this;
 }
 
+
+template <typename L, typename T, int t0, typename R, typename M>
+inline User_choose_number<L, T, t0,R, M>&
+User_choose_number<L, T, t0,R, M>::callback(Callback f)
+{
+    callback_ = f;
+    return *this;
+}
 
 
 // El cliente elige un número de 2 cifras
-template <typename L, typename T, int t0, typename Rep>
-Rep User_choose_number<L, T, t0,Rep>::choose2(Rep x0)
+template <typename L, typename T, int t0, typename Rep, typename M>
+Rep User_choose_number<L, T, t0,Rep, M>::choose2(Rep x0)
 { 
     char fill_char = lcd_.fill('0');
 
@@ -269,11 +330,12 @@ Rep User_choose_number<L, T, t0,Rep>::choose2(Rep x0)
     lcd_.cursor_on();
 
     ultima_tecla_pulsada_ = Tecla_pulsada::ninguna;
-    counter_.reset();
+    counter_reset();
+
 
     print2(x_);
    
-    wait_ms(300);// Hay que garantizar que el usuario haya soltado la tecla ok
+    wait_till_enter_key_is_not_pressed();
 
     while(enter_key().is_not_pressed()){
 	if (ultima_tecla_pulsada_ != Tecla_pulsada::ninguna)
@@ -291,19 +353,18 @@ Rep User_choose_number<L, T, t0,Rep>::choose2(Rep x0)
     return x_;
 }
 
-template <typename L, typename T, int t0, typename Rep>
-Rep User_choose_number<L, T, t0, Rep>::choose4(Rep x0)
+template <typename L, typename T, int t0, typename Rep, typename M>
+Rep User_choose_number<L, T, t0, Rep, M>::choose4(Rep x0)
 { 
-
     x_ = x0;
     lcd_.cursor_on();
 
     ultima_tecla_pulsada_ = Tecla_pulsada::ninguna;
-    counter_.reset();
+    counter_reset();
 
     print4(x_);
-    // Hay que garantizar que el usuario haya soltado la tecla ok
-    wait_ms(300);  
+
+    wait_till_enter_key_is_not_pressed();
 
     while(enter_key().is_not_pressed()){
 	if (ultima_tecla_pulsada_ != Tecla_pulsada::ninguna)
@@ -323,8 +384,8 @@ Rep User_choose_number<L, T, t0, Rep>::choose4(Rep x0)
 
 
 
-template <typename L, typename T, int t0, typename R>
-void User_choose_number<L, T, t0,R>::update()
+template <typename L, typename T, int t0, typename R, typename M>
+void User_choose_number<L, T, t0,R, M>::update()
 {
     switch(ultima_tecla_pulsada_){
 	case Tecla_pulsada::down:
@@ -342,24 +403,36 @@ void User_choose_number<L, T, t0,R>::update()
 }
 
 
-template <typename L, typename T, int t0, typename R>
-void User_choose_number<L, T, t0,R>::update_ninguna()
+template <typename L, typename T, int t0, typename R, typename M>
+void User_choose_number<L, T, t0,R, M>::update_ninguna()
 {
 
     if (down_key().is_pressed()){
-	counter_.reset();
+	counter_reset();
 	ultima_tecla_pulsada_ = Tecla_pulsada::down;
 
-	if (x_ > min_)
-	    --x_;
+	if (x_ > min_){
+	    if (x_ > min_ + incr_.value())
+		x_ -= incr_.value();
+	    else
+		--x_;
+
+	    incr_next();
+	}
     }
 
     else if (up_key().is_pressed()){
-	counter_.reset();
+	counter_reset();
 	ultima_tecla_pulsada_ = Tecla_pulsada::up;
 
-	if (x_ < max_)
-	    ++x_;
+	if (x_ < max_){
+	    if (x_ + incr_.value() < max_)
+		x_ += incr_.value();
+	    else
+		++x_;
+
+	    incr_next();
+	}
     }
     else
 	ultima_tecla_pulsada_ = Tecla_pulsada::ninguna;
@@ -368,16 +441,21 @@ void User_choose_number<L, T, t0,R>::update_ninguna()
 
 // La última tecla pulsada fue down. Si la tecla sigue pulsada
 // vamos decrementando el número cada vez más rápidamente.
-template <typename L, typename T, int t0, typename R>
-void User_choose_number<L, T, t0,R>::update_down()
+template <typename L, typename T, int t0, typename R, typename M>
+void User_choose_number<L, T, t0,R, M>::update_down()
 {
     if (down_key().is_pressed()){
 
 	counter_.tick();
 
 	if (x_ > min_){
-	    if (counter_.trigger())
-		--x_;
+	    if (counter_.trigger()){
+		if (x_ > min_ + incr_.value())
+		    x_ -= incr_.value();
+		else
+		    --x_;
+		incr_next();
+	    }
 
 	}
 	else{
@@ -392,16 +470,21 @@ void User_choose_number<L, T, t0,R>::update_down()
 }
 
 
-template <typename L, typename T, int t0, typename R>
-void User_choose_number<L, T, t0,R>::update_up()
+template <typename L, typename T, int t0, typename R, typename M>
+void User_choose_number<L, T, t0,R, M>::update_up()
 {
     if (up_key().is_pressed()){
 
 	counter_.tick();
 
 	if (x_ < max_){
-	    if (counter_.trigger())
-		++x_;
+	    if (counter_.trigger()){
+		if (x_ + incr_.value() < max_)
+		    x_ += incr_.value();
+		else
+		    ++x_;
+		incr_next();
+	    }
 	}
 	else{
 	    if constexpr (type == user_choose_number_type_circular){
@@ -413,16 +496,35 @@ void User_choose_number<L, T, t0,R>::update_up()
 	ultima_tecla_pulsada_ = Tecla_pulsada::ninguna;
 }
 
-template <typename L, typename T, int t0, typename Rep>
-void User_choose_number<L, T, t0, Rep>::print2(Rep x)
+
+template <typename L, typename T, int t0, typename R, typename M>
+inline void User_choose_number<L, T, t0,R, M>::counter_reset()
+{
+    counter_.reset();
+    incr_.reset();
+}
+
+
+template <typename L, typename T, int t0, typename R, typename M>
+inline void User_choose_number<L, T, t0,R, M>::incr_next()
+{
+    if (callback_ != nullptr)
+	(app_->*callback_)(x_);
+
+    incr_.next();
+}
+
+
+template <typename L, typename T, int t0, typename Rep, typename M>
+void User_choose_number<L, T, t0, Rep, M>::print2(Rep x)
 {
     lcd_.cursor_pos(col_, row_);
     lcd_ << std::setw(2) << x; 
     lcd_.cursor_pos(col_ + 1, row_);
 }
 
-template <typename L, typename T, int t0, typename Rep>
-void User_choose_number<L, T, t0, Rep>::print4(Rep x)
+template <typename L, typename T, int t0, typename Rep, typename M>
+void User_choose_number<L, T, t0, Rep, M>::print4(Rep x)
 {
     lcd_.cursor_pos(col_, row_);
     lcd_ << std::setw(4) << x;
@@ -430,15 +532,31 @@ void User_choose_number<L, T, t0, Rep>::print4(Rep x)
 }
 
 // syntactic sugar
+// Para callbacks:
+template <typename M, typename L, typename K, typename R = uint16_t>
+User_choose_number<L, K, user_choose_number_type_lineal, R, M>
+user_choose_number_lineal(M& app, L& lcd,  K k)
+{ return User_choose_number<L, K, user_choose_number_type_lineal,R, M>{app, lcd, k}; }
+
+template <typename M, typename L, typename K, typename R = uint16_t>
+User_choose_number<L, K, user_choose_number_type_circular, R, M>
+user_choose_number_circular(M& app, L& lcd,  K k)
+{ return User_choose_number<L, K, user_choose_number_type_circular,R, M>{app, lcd, k}; }
+
+// Si no se van a usar callbacks
 template <typename L, typename K, typename R = uint16_t>
 User_choose_number<L, K, user_choose_number_type_lineal, R>
 user_choose_number_lineal(L& lcd,  K k)
-{ return User_choose_number<L, K, user_choose_number_type_lineal,R>{lcd, k}; }
+{
+    return User_choose_number<L, K, user_choose_number_type_lineal, R>{lcd, k};
+}
 
 template <typename L, typename K, typename R = uint16_t>
 User_choose_number<L, K, user_choose_number_type_circular, R>
 user_choose_number_circular(L& lcd,  K k)
 { return User_choose_number<L, K, user_choose_number_type_circular,R>{lcd, k}; }
+
+
 
 
 }// namespace

@@ -107,6 +107,102 @@ void Metronome<D1,D0>::next_state()
 	counter_.reset();
     }
 }
+
+
+/*!
+ *  \brief  Sucesión de valores constante a trozos (de ahi el step).
+ *
+ *  (MMM) Cuando un usuario tiene que seleccionar un número de un LCD pulsando
+ *	  únicamente un botón para UP, la idea es que al principio suba 
+ *	  lentamente y luego más rápidamente. 
+ *
+ *	  Una forma de implementarlo es ir marcando tiempo con un reloj (o un
+ *	  metronomo) e irle sumando primero 1, luego 10, luego 100...
+ *
+ *	  Esta sucesión se encarga de definir la sucesión 1, ... , 10, ...,
+ *	  100. Sería el equivalente a la sucesión:
+ *		1,1,1,1,1,1,1,1,1,10,10,10,10,10,100,100,100,...
+ *
+ *
+ *  Definimos la sucesión a trozos dando:
+ *	array_x = 0,  9,  14
+ *	array_y = 1, 10, 100
+ *
+ *  Que es equivalente a definir la siguiente sucesión a trozos:
+ *        /  1   si 0 <= n < 9
+ *        |  
+ *  y_n = |  10  si 9 <= n < 14
+ *        |
+ *        |  100 si 14 <= n 
+ *
+ *  N = número de ramas de la función a trozos (en el ejemplo anterior 3)
+ *  Int = tipo integral usado para los índices (en avr será uint8_t, mientras
+ *	  que en un programa de ordenador int)
+ *  T = Tipo de y_n (puede ser uint16_t, avr::Frequency, ...)
+ */
+template <size_t N, typename Int, typename T>
+class Sequence_of_steps{
+public:
+    using value_type = T;
+
+    constexpr Sequence_of_steps(const std::array<Int, N>& x, 
+				const std::array<T, N>& y)
+	    : array_x_{x}, array_y_{y} { }
+
+    void reset() {i_ = 0; i_array_ = 0;}
+    void next() 
+    { 
+	++i_; 
+	if (i_array_ < N - 1){
+	    if (array_x_[i_array_ + 1] == i_)
+		++i_array_;
+	}
+    }
+
+    value_type value() const
+    { return array_y_[i_array_]; }
+
+private:
+    std::array<Int, N> array_x_;
+    std::array<T, N> array_y_;
+
+    uint8_t i_ = 0;
+    uint8_t i_array_= 0; // posición dentro del array_x
+};
+
+
+// Implementación static:
+template <typename Array_x, typename Array_y>
+class static_Sequence_of_steps{
+public:
+    using value_type = typename Array_y::value_type;
+
+    void reset() {i_ = 0; i_array_ = 0;}
+    void next() 
+    { 
+	++i_; 
+	if (i_array_ < Array_x::size - 1){
+	    if (array_x[i_array_ + 1] == i_)
+		++i_array_;
+	}
+    }
+
+    value_type value() const
+    { return array_y[i_array_]; }
+
+private:
+    static_assert(Array_x::size < std::numeric_limits<uint8_t>::max());
+    static_assert(Array_x::size == Array_y::size);
+
+    constexpr static Array_x array_x{};
+    constexpr static Array_y array_y{};
+
+    uint8_t i_ = 0;
+    uint8_t i_array_= 0; // posición dentro del array_x
+};
+
+
+
 }// namespace
 
 

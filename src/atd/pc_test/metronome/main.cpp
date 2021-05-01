@@ -83,7 +83,37 @@ void test_basic()
 
 }
 
+void test_sequence_of_steps()
+{
+    test::interfaz("static_Sequence_of_steps");
 
+    using array_x = atd::static_array<uint8_t, 0, 2, 5>;
+    using array_y = atd::static_array<uint8_t, 1, 3, 7>;
+
+    using Seq = atd::static_Sequence_of_steps<array_x, array_y>;
+
+    std::array<uint8_t, 20> res = {1,1,3,3,3,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7};
+    Seq seq;
+    for (size_t i = 0; i < 20; ++i){
+	CHECK_TRUE(res[i] == seq.value(), "Sequence_of_steps");
+	seq.next();
+    }
+
+// ------------
+{
+    test::interfaz("Sequence_of_steps");
+
+    std::array<uint8_t, 3> x{0, 2, 5};
+    std::array<uint8_t, 3> y{1, 3, 7};
+
+    atd::Sequence_of_steps seq(x, y);
+    std::array<uint8_t, 20> res = {1,1,3,3,3,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7};
+    for (size_t i = 0; i < 20; ++i){
+	CHECK_TRUE(res[i] == seq.value(), "Sequence_of_steps");
+	seq.next();
+    }
+}
+}
 
 int main()
 {
@@ -91,6 +121,7 @@ try{
     test::header("atd_metronome");
 
     test_basic();
+    test_sequence_of_steps();
 
 }catch(std::exception& e)
 {

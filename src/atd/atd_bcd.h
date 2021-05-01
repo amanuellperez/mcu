@@ -64,9 +64,14 @@ inline Int int2BCD(const Int& x)
  *
  *  La diferencia con usar un 'int' en lugar de este contador para contar
  *  números es que un int siempre va de 0 a 9, 10 a 19, ... 90 a 99.
- *  Este BCD se puede elegir qué números.
+ *  Este BCD se puede elegir qué números. Por ejemplo:
+ *	    00, 01, 02, 03,
+ *	    10, 11, 12, 13,
+ *	    20, 21, 22, 23
+ *  En este ejemplo d1d0_max = 23;
+ *	    
  * 
- *  El 2 del nombre (Counter_BCD2) es porque es un contador de dos dígitos.
+ *  El 2 del nombre (Counter_BCD2) es porque es un contador de dos dígitos: d1d0
  *
  */
 struct __Counter_BCD2{
@@ -94,7 +99,10 @@ public:
     void max(uint8_t d1_max, uint8_t d0_max);
 
 // valor del contador
+    /// Dígit number 0
     uint8_t d0() const {return nticks_.d0;}
+
+    /// Dígit number 2
     uint8_t d1() const {return nticks_.d1;}
 
     uint8_t as_uint() const {return nticks_.d1*uint8_t{10} + nticks_.d0;}
