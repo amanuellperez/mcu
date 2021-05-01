@@ -37,7 +37,7 @@ struct Main {
     Keyboard keyboard_;
     Stroboscope stroboscope_;
 
-    enum class Key{ ok, up, down, none };
+//    enum class Key{ ok, up, down, none };
 
 
 // init: hardware
@@ -46,11 +46,12 @@ struct Main {
     void init_stroboscope() { }
 
 // Keyboard
-    Key scan_keyboard();
+//    Key scan_keyboard();
 
 //  main
     void window_main();
     void show_window_main();
+    void choose_freq(uint16_t freq);
 
 };
 

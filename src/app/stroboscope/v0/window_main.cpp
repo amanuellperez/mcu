@@ -17,51 +17,35 @@
 
 #include "main.h"
 
+#include <user_choose_number.h>
+
 void Main::window_main()
 {
     show_window_main();
 
     while (1){
-	bool update_screen = true;
+	dev::user_choose_number_lineal(*this, lcd_, keyboard_).pos(0, 0)
+				     .between(0, 5000)
+				     .callback(&Main::choose_freq)
+				     .choose4(stroboscope_.freq());
 
-	switch(scan_keyboard()){
-	    case Key::ok:
-		if (stroboscope_.is_on())
-		    stroboscope_.off();
-		else
-		    stroboscope_.on();
+	// Se sale de choose_number cuando se pulsa OK
+	stroboscope_.off();
 
-		break;
-
-	    case Key::down:
-		stroboscope_.freq_minus(10);
-		break;
-
-	    case Key::up:
-		stroboscope_.freq_plus(10);
-		break;
-
-	    case Key::none:
-		update_screen = false;
-		break;
-	}
-
-	if (update_screen)
-	    show_window_main();
-
+	wait_ms(500);
 	wait_release_key();
-    }
+    }	
 }
 
 
 void Main::show_window_main()
 {
-    lcd_.clear();
-    lcd_ << stroboscope_.freq() << " Hz\n";
-    if (stroboscope_.is_on())
-	lcd_ << "ON ";
-    else
-	lcd_ << "OFF";
+    lcd_.cursor_pos(0,0);
+    lcd_ << stroboscope_.freq() << "  Hz\n";
 }
 
 
+void Main::choose_freq(uint16_t freq)
+{
+    stroboscope_.freq(freq);
+}

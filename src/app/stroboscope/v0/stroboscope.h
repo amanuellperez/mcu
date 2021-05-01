@@ -56,6 +56,7 @@ public:
     void on();
     void off();
 
+    void freq(uint16_t x) {generate(x);}
     void freq_plus(uint16_t x);
     void freq_minus(uint16_t x);
 
