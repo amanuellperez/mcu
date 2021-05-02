@@ -21,18 +21,20 @@
 
 void Main::window_main()
 {
-    show_window_main();
-
     while (1){
-	dev::user_choose_number_lineal(*this, lcd_, keyboard_).pos(0, 0)
-				     .between(0, 5000)
-				     .callback(&Main::choose_freq)
-				     .choose4(stroboscope_.freq());
+	show_window_main();
 
-	// Se sale de choose_number cuando se pulsa OK
+        dev::user_choose_number_lineal(*this, lcd_, keyboard_)
+            .pos(0, 0)
+            .between(stroboscope_.freq_min, stroboscope_.freq_max)
+            .callback(&Main::choose_freq)
+            .choose4(stroboscope_.freq());
+
+        // Se sale de choose_number cuando se pulsa OK
 	stroboscope_.off();
 
-	wait_ms(500);
+	//show_window_main_off();
+
 	wait_release_key();
     }	
 }
@@ -41,9 +43,19 @@ void Main::window_main()
 void Main::show_window_main()
 {
     lcd_.cursor_pos(0,0);
-    lcd_ << stroboscope_.freq() << "  Hz\n";
+    lcd_ << std::setw(4) << stroboscope_.freq() << " Hz\n";
+    lcd_.cursor_pos(0,1);
+    lcd_ << "   ";
+
 }
 
+void Main::show_window_main_off()
+{
+    lcd_.cursor_pos(0,0);
+    lcd_ << std::setw(4) << stroboscope_.freq() << " Hz\n";
+    lcd_.cursor_pos(0,1);
+    lcd_ << "OFF";
+}
 
 void Main::choose_freq(uint16_t freq)
 {

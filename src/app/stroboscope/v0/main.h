@@ -51,6 +51,7 @@ struct Main {
 //  main
     void window_main();
     void show_window_main();
+    void show_window_main_off();
     void choose_freq(uint16_t freq);
 
 };

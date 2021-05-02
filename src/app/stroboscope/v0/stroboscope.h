@@ -65,17 +65,17 @@ public:
     bool is_on() const {return on_;}
     bool is_off() const {return !on_;}
 
+    // rango de frecuencias que generamos
+    constexpr static uint32_t freq_mcu = MCU_CLOCK_FREQUENCY_IN_HZ;
+    constexpr static uint16_t freq_min = __Stroboscope_cfg<freq_mcu>::freq_min;
+    constexpr static uint16_t freq_max = __Stroboscope_cfg<freq_mcu>::freq_max;
 
-public:
+private:
 // state
     uint16_t freq_ = 500;
     bool on_ = false;
 
-    constexpr static uint32_t freq_mcu = MCU_CLOCK_FREQUENCY_IN_HZ;
 
-    // rango de frecuencias que generamos
-    constexpr static uint16_t freq_min = __Stroboscope_cfg<freq_mcu>::freq_min;
-    constexpr static uint16_t freq_max = __Stroboscope_cfg<freq_mcu>::freq_max;
 
     uint16_t bound(uint16_t freq);
     void generate_1MHz();
