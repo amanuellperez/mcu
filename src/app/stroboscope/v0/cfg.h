@@ -22,6 +22,7 @@
 #include <stdint.h>
 
 constexpr uint8_t time_wait_release_key = 100; // in ms
+constexpr uint8_t duty_percent = 10; // 10%
 
 
 #endif

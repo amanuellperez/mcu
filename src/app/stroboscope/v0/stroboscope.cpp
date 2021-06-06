@@ -16,29 +16,32 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "stroboscope.h"
+#include "cfg.h"
 
-// Si el micro está a 1MHz
-void Stroboscope::generate_1MHz()
-{
-    if constexpr (freq_mcu == 1000000ul){
-
-    Timer::off();
-
-    if (freq_ <= 15){
-	uint16_t top  = 15625u / freq_ - 1; // 15625 = 1000000/64;
-	Timer::input_capture_register(top);
-	Timer::output_compare_register_A(8); // 500 us
-	Timer::set_clock_period_in_us<64>();
-    }
-    else{
-        uint16_t top =
-            static_cast<uint16_t>(freq_mcu / uint32_t{freq_}) - 1;
-	Timer::input_capture_register(top);
-	Timer::output_compare_register_A(500); // 500 us
-	Timer::set_clock_period_in_us<1>();
-    }
-    }
-}
+//// Si el micro está a 1MHz
+// De momento no voy a dejar esta opción. Al comentar esta función dará un
+// error de compilación si se intenta compilar en 1MHz
+//void Stroboscope::generate_1MHz()
+//{
+//    if constexpr (freq_mcu == 1000000ul){
+//
+//    Timer::off();
+//
+//    if (freq_ <= 15){
+//	uint16_t top  = 15625u / freq_ - 1; // 15625 = 1000000/64;
+//	Timer::input_capture_register(top);
+//	Timer::output_compare_register_A(8); // 500 us
+//	Timer::set_clock_period_in_us<64>();
+//    }
+//    else{
+//        uint16_t top =
+//            static_cast<uint16_t>(freq_mcu / uint32_t{freq_}) - 1;
+//	Timer::input_capture_register(top);
+//	Timer::output_compare_register_A(500); // 500 us
+//	Timer::set_clock_period_in_us<1>();
+//    }
+//    }
+//}
 
 void Stroboscope::generate_8MHz()
 {
@@ -48,17 +51,21 @@ void Stroboscope::generate_8MHz()
     if (freq_ <= 123){
 	uint16_t top  = 31250 / freq_ - 1; // 31250 = 8000000/256;
 	Timer::input_capture_register(top);
-	Timer::output_compare_register_A(15); // 500 us!!!
+	Timer::counter_type ocrA = top / duty_percent;
+	Timer::output_compare_register_A(ocrA);
+	//Timer::output_compare_register_A(15); // 500 us!!!
 	Timer::set_clock_period_in_us<32>();
     }
     else{
         uint16_t top =
             static_cast<uint16_t>(uint32_t{8000000ul} / uint32_t{freq_}) - 1;
 	Timer::input_capture_register(top);
-	if (freq_ < 1000)
-	    Timer::output_compare_register_A(4000); // 500 us
-	else
-	    Timer::output_compare_register_A(1280); // 160 us
+	Timer::counter_type ocrA = top / duty_percent;
+	Timer::output_compare_register_A(ocrA); 
+//	if (freq_ < 1000)
+//	    Timer::output_compare_register_A(4000); // 500 us
+//	else
+//	    Timer::output_compare_register_A(1280); // 160 us
 
 	Timer::set_clock_period_in_ns<125>();
     }
