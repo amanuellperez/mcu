@@ -26,15 +26,13 @@
  *
  *  - HISTORIA:
  *    A.Manuel L.Perez
- *    19/02/2020 v0.0
+ *    16/07/2021 v0.0
  *
  ****************************************************************************/
 #include <stdint.h>
 
 #include <dev_LCD_HD44780.h>
-#include <dev_keyboard.h>
-#include <dev_signal_generator.h>
-#include <avr_timer1_generic.h>
+#include "../keyboard_5x5.h"
 
 
 // pins usados
@@ -50,18 +48,22 @@ constexpr uint8_t LCD_D5_pin = 12;
 constexpr uint8_t LCD_D6_pin = 13;
 constexpr uint8_t LCD_D7_pin = 14;
 
-constexpr uint8_t Speaker_pin = 15; // Timer1
-
-// Not using SPI: available pins 16, 17, 18, 19
+// los coloco al revés porque coinciden enfrente con el keyboard
+// Not using SPI: pins 16, 17, 18, 19
+constexpr uint8_t KB_col4_pin = 15;
+constexpr uint8_t KB_col3_pin = 16;
+constexpr uint8_t KB_col2_pin = 17;
+constexpr uint8_t KB_col1_pin = 18;
+constexpr uint8_t KB_col0_pin = 19;
 
 // Alimentación y AREF: 20, 21, 22
 
-constexpr uint8_t OK_pin = 23;
-using Keyboard_pins = dev::Keyboard_pins<OK_pin, 24, 25>;
-
-// available: 26
-
-// Not using TWI: available pins 27 and 28
+// Not using TWI: pins 27 and 28
+constexpr uint8_t KB_row4_pin = 24;
+constexpr uint8_t KB_row3_pin = 25;
+constexpr uint8_t KB_row2_pin = 26;
+constexpr uint8_t KB_row1_pin = 27;
+constexpr uint8_t KB_row0_pin = 28;
 
 
 
@@ -79,15 +81,19 @@ using LCD = dev::LCD_ostream_1602<dev::LCD_HD44780<LCD_pins>>;
 
 
 // keyboard
-using namespace dev::Key_codes; // UP_KEY, DOWN_KEY
-using Keyboard_codes = dev::Keyboard_codes<OK_KEY, UP_KEY, DOWN_KEY>;
-using Keyboard       = dev::Basic_keyboard<Keyboard_pins, Keyboard_codes>;
-using OK_key         = dev::Push_button_level_change<OK_pin>;
+using KB_rows = Keyboard_5_rows<KB_row0_pin, 
+		             KB_row1_pin, 
+		             KB_row2_pin, 
+		             KB_row3_pin, 
+		             KB_row4_pin>;
 
+using KB_cols = Keyboard_5_cols<KB_col0_pin,
+                             KB_col1_pin,
+                             KB_col2_pin,
+                             KB_col3_pin,
+                             KB_col4_pin>;
 
-// Speaker
-using Square_wave_generator = dev::Square_wave_generator<avr::Timer1>;
-constexpr uint8_t timer_period_in_us = 1;
+using Keyboard = Keyboard_5x5<KB_rows, KB_cols>;
 
 #endif
 

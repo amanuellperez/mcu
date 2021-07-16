@@ -10,7 +10,10 @@
 ### Tutoriales
 * [EEVBlog (youtube)](https://www.youtube.com/c/EevblogDave/featured)
 * [w2aew](https://www.youtube.com/user/w2aew/featured)
-* [Curso sobre soldar](https://www.youtube.com/user/paceworldwide/playlists)
+* Cursos sobre soldar:
+    * [de Paceworldwide](https://www.youtube.com/user/paceworldwide/playlists)
+    * [de EEVBlog](https://youtu.be/J5Sb21qbpEQ)
+
 
 
 ### Consulta de chips

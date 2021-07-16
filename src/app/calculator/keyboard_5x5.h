@@ -19,7 +19,23 @@
 // El teclado es una matriz de pulsadores. En las filas conectamos diodos para
 // evitar cortocircuitos, y en las columnas al conectar los pines los
 // configuramos con pullup resistor.
-#include <avr_UART.h>
+
+#pragma once
+
+#ifndef __KEYBOARD_5X5_H__
+#define __KEYBOARD_5X5_H__
+/****************************************************************************
+ *
+ *  - DESCRIPCION: Keyboard de 5 x 5
+ *    Se trata de una matriz de pulsadores de 5 filas y 5 columnas.
+ *    Las filas las conecto a través de diodos para evitar el cortocircuito.
+ *
+ *
+ *  - HISTORIA:
+ *    A.Manuel L.Perez
+ *    16/07/2021 v0.0
+ *
+ ****************************************************************************/
 #include <avr_pin.h>
 
 
@@ -63,7 +79,6 @@ public:
 // Configuration
     static constexpr uint8_t nrows() {return Rows::nrows;}
     static constexpr uint8_t ncols() {return Cols::ncols;}
-    static constexpr uint8_t debouncing_time = 100; // ms
 
 private:
     avr::Input_pin_with_pullup<Cols::col0> col0;
@@ -92,8 +107,7 @@ private:
 template <typename R, typename C>
 uint8_t Keyboard_5x5<R, C>::getkey()
 {
-    while (scan()  != true)
-	wait_ms(debouncing_time);
+    while (scan()  != true) { }
 
     return last_key();
 }
@@ -227,34 +241,7 @@ bool Keyboard_5x5<R, C>::scan()
 }
 
 
-using Rows = Keyboard_5_rows<28, 27, 26, 25, 24>;
-using Cols = Keyboard_5_cols<19, 18, 17, 16, 15>;
-using Keyboard = Keyboard_5x5<Rows, Cols>;
-
-int main()
-{
-// init_UART();
-    avr::UART_iostream uart;
-    avr::basic_cfg(uart);
-    uart.on();
-    
-    uart << "\n----------\n";
-    uart << "Keyboard " << (int)Keyboard::nrows() << "x"
-         << (int)Keyboard::ncols() << "\n";
-    uart << "------------\n\n";
-    uart << "Press a key\n";
-
-    Keyboard keyboard;
-
-    while(1){
-	while (!keyboard.scan())
-	    wait_ms(100);
-
-	uart << "(" << (int) keyboard.row << ", " << (int) keyboard.col << ") = "
-	    << (int) keyboard.last_key() << '\n';
-	wait_ms(100);
-    }
-}
 
 
+#endif
 

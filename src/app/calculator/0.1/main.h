@@ -1,0 +1,65 @@
+// Copyright (C) 2021 A.Manuel L.Perez <amanuel.lperez@gmail.com>
+//
+// This file is part of the MCU++ Library.
+//
+// MCU++ Library is a free library: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#pragma once
+
+#ifndef __MAIN_H__
+#define __MAIN_H__
+
+#include "dev.h"
+#include <array>
+
+/*!
+ *  \brief  Application.
+ *
+ */
+class Main {
+public:
+    Main();
+    void run();
+
+private:
+// Hardware
+    LCD lcd_;
+    Keyboard keyboard_;
+
+// Data
+    constexpr static std::array<char, 20> key2char = 
+	    {'0', '.', '?', '?', '=',
+	     '1', '2', '3', '+', '-',
+	     '4', '5', '6', 'x', '/',
+	     '7', '8', '9', '?', '?'};
+
+    // almacenamos aquí la entrada del usuario
+    std::array<char, 16> buffer_;
+    uint8_t ibuf_; // índice donde escribir el siguiente elemento
+                       // en el buffer = ibuf_ - 1 contiene el último caracter 
+		       // escrito (si ibuf_ > 0)
+
+// init: hardware
+    void init_lcd();
+    void init_keyboard() { }
+
+// main
+    void getline();
+
+};
+
+
+
+#endif
+
