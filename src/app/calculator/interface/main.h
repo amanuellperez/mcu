@@ -20,13 +20,10 @@
 #ifndef __MAIN_H__
 #define __MAIN_H__
 
-#include "dev.h"
+#include "../dev.h"
 #include <array>
 
-/*!
- *  \brief  Application.
- *
- */
+
 class Main {
 public:
     Main();
@@ -37,18 +34,13 @@ private:
     LCD lcd_;
     Keyboard keyboard_;
 
-// Data
-    constexpr static std::array<char, 20> key2char = 
-	    {'0', '.', '?', '?', '=',
-	     '1', '2', '3', '+', '-',
-	     '4', '5', '6', 'x', '/',
-	     '7', '8', '9', '?', '?'};
 
     // almacenamos aquí la entrada del usuario
     std::array<char, 16> buffer_;
     uint8_t ibuf_; // índice donde escribir el siguiente elemento
                        // en el buffer = ibuf_ - 1 contiene el último caracter 
 		       // escrito (si ibuf_ > 0)
+
 
 // init: hardware
     void init_lcd();

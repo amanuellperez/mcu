@@ -32,7 +32,7 @@
 #include <stdint.h>
 
 #include <dev_LCD_HD44780.h>
-#include "../keyboard_5x5.h"
+#include "keyboard_5x5.h"
 
 
 // pins usados

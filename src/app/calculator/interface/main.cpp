@@ -21,7 +21,7 @@
 // configuramos con pullup resistor.
 // Sacamos la salida por un LCD
 #include "main.h"
-
+#include "../interface.h"
 
 Main::Main()
 {
@@ -44,36 +44,13 @@ void Main::init_lcd()
 void Main::run()
 {
     while(1){
-	getline();
+	Interface interface{lcd_, keyboard_};
+	interface.getline(buffer_, ibuf_);
 	
     }
 }
 
-                     
-
-void Main::getline()
-{
-// init LCD
-    lcd_.clear();
-    lcd_.cursor_on();
-
-// read
-    for (ibuf_ = 0; ibuf_ < buffer_.size(); ++ibuf_){
-	uint8_t i = keyboard_.getkey();
-	lcd_ << key2char[i];
-	buffer_[ibuf_] = key2char[i];
-
-	wait_ms(150);
-    }
-
-    lcd_.cursor_pos(0,1);
-    lcd_ << "FIN"; 
-    wait_ms(1000);
-}
-
-
-
-
+         
 
 int main()
 {

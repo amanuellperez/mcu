@@ -1,6 +1,7 @@
 BIN = xx
 
-SOURCES= main.cpp 
+SOURCES= main.cpp \
+		 ../interface.cpp
 
 
 MCU = atmega328p
