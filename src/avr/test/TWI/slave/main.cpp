@@ -23,7 +23,7 @@
 #include "../../../avr_time.h"
 #include "../../../avr_interrupt.h"
 
-#include <atd_buffer.h>
+#include <atd_iobxtream.h>
 
 
 constexpr uint8_t TWI_buffer_size = 100; // voy a enviarle un tipo de cada: int8, int16, ...

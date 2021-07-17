@@ -4,15 +4,16 @@ SOURCES= atd_bcd.cpp		\
 		 atd_time.cpp
 
 INCS= atd_algorithm.h	\
+	  atd_array.h		\
 	atd_ascii.h			\
 	atd_bcd.h			\
 	atd_bit.h 			\
-	atd_buffer.h		\
 	atd_cast.h			\
 	atd_cstddef.h		\
 	atd_cstring.h		\
 	atd_decimal.h		\
 	atd_eng_magnitude.h	\
+	atd_iobxtream.h		\
 	atd_istream.h		\
 	atd_magnitude.h		\
 	atd_math.h 			\
