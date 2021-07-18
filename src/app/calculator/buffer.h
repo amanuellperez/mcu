@@ -17,39 +17,18 @@
 
 #pragma once
 
-#ifndef __MAIN_H__
-#define __MAIN_H__
+#ifndef __BUFFER_H__
+#define __BUFFER_H__
 
-#include "../dev.h"
-#include "../types.h"
-#include <array>
+#include "dev.h"
+#include "types.h"
 
+void print(LCD& lcd, const Buffer& buf);
 
-class Main {
-public:
-    Main();
-    void run();
-
-private:
-// Hardware
-    LCD lcd_;
-    Keyboard keyboard_;
-
-
-    // almacenamos aquí la entrada del usuario
-    Buffer buffer_;
-
-
-// init: hardware
-    void init_lcd();
-    void init_keyboard() { }
-
-// main
-    void getline();
-
-};
-
+/// Devuelve el número de caracteres añadidos a 'buf'.
+uint8_t push_back(Buffer& buf, const char* p);
 
 
 #endif
+
 

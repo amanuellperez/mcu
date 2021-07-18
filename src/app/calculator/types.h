@@ -17,39 +17,13 @@
 
 #pragma once
 
-#ifndef __MAIN_H__
-#define __MAIN_H__
+#ifndef __TYPES_H__
+#define __TYPES_H__
 
-#include "../dev.h"
-#include "../types.h"
-#include <array>
+#include <atd_buffer.h>
 
-
-class Main {
-public:
-    Main();
-    void run();
-
-private:
-// Hardware
-    LCD lcd_;
-    Keyboard keyboard_;
-
-
-    // almacenamos aquí la entrada del usuario
-    Buffer buffer_;
-
-
-// init: hardware
-    void init_lcd();
-    void init_keyboard() { }
-
-// main
-    void getline();
-
-};
-
-
+using Buffer = atd::Buffer<char, 16>;
 
 #endif
+
 

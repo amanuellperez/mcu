@@ -22,6 +22,7 @@
 // Sacamos la salida por un LCD
 #include "main.h"
 #include "../interface.h"
+#include "../buffer.h"
 
 Main::Main()
 {
@@ -37,16 +38,20 @@ Main::Main()
 // En este caso voy a gestionar el LCD directamente
 void Main::init_lcd()
 {
-//    lcd_.screen().stop_brcorner(true);// I'm not going to use it as a terminal
-//    lcd_.screen().nowrap(); 
+    lcd_.screen().stop_brcorner(true);// I'm not going to use it as a terminal
+    lcd_.screen().nowrap(); 
 }
+
 
 void Main::run()
 {
     while(1){
 	Interface interface{lcd_, keyboard_};
-	interface.getline(buffer_, ibuf_);
-	
+	interface.getline(buffer_);
+	lcd_.clear();
+	lcd_ << "Buffer = \n";
+	print(lcd_, buffer_);
+	wait_ms(1000);
     }
 }
 

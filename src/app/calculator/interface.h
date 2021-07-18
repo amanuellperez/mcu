@@ -30,6 +30,8 @@
  ****************************************************************************/
 
 #include "dev.h"
+#include "types.h"
+
 #include <array>
 
 
@@ -64,7 +66,7 @@ public:
     Interface(LCD& lcd, Keyboard& keyboard)
 	:lcd_{lcd}, keyboard_{keyboard}{}
 
-    void getline(std::array<char, 16>& buffer, uint8_t& ibuf);
+    void getline(Buffer& buf);
 
 private:
 // Data

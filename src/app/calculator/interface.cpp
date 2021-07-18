@@ -21,6 +21,7 @@
 // configuramos con pullup resistor.
 // Sacamos la salida por un LCD
 #include "interface.h"
+#include "buffer.h"
 
 void Interface::DEL_command()
 {
@@ -44,15 +45,16 @@ void Interface::to_the_right_command()
     lcd_ << "to the right cmd";
 }
 
-void Interface::getline(std::array<char, 16>& buffer, uint8_t& ibuf)
+void Interface::getline(Buffer& buffer)
 {
 // init LCD
     lcd_.clear();
     lcd_.cursor_on();
 
 // read
-    
-    for (ibuf = 0; ibuf < buffer.size(); ++ibuf){
+    buffer.clear();
+
+    while (buffer.size() != buffer.max_size()){
 	uint8_t key = keyboard_.getkey();
 	if (key == key_return)
 	    return;
@@ -63,7 +65,7 @@ void Interface::getline(std::array<char, 16>& buffer, uint8_t& ibuf)
 	else {
 	    const char* p = key_strings[key_commands[key].str_id];
 	    lcd_ << p;
-	    //buffer_[ibuf_] = key2char[key];
+	    push_back(buffer, p);
 	}
 
 
