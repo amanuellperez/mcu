@@ -15,25 +15,42 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "buffer.h"
+#pragma once
 
-void print(LCD& lcd, const Buffer& buf)
-{
-    for (auto x: buf)
-	lcd << x;
-}
+#ifndef __MAIN_H__
+#define __MAIN_H__
+
+#include "../dev.h"
+#include "../types.h"
+#include <array>
+
+extern LCD lcd;
+extern Buffer buffer_;
+extern double result;
+
+class Main {
+public:
+    Main();
+    void run();
+
+private:
+// Hardware
+    Keyboard keyboard_;
+
+
+    // almacenamos aquí la entrada del usuario
+
+
+// init: hardware
+    void init_lcd();
+    void init_keyboard() { }
+
+// main
+    void getline();
+
+};
 
 
 
-uint8_t push_back(Buffer& buf, const char* p)
-{
-    uint8_t i = 0;
-    
-    while (*p and buf.size() != buf.max_size()){
-	buf.push_back(*p);
-	++p;
-    }
-
-    return i;
-}
+#endif
 

@@ -1,0 +1,32 @@
+
+%{
+
+#include "main.h"
+#include "lex.h"
+
+%}
+
+%define api.value.type {double}; /* stack type, por defecto es int */
+
+%token NUMBER
+%left '+' '-'	/* left associaive, same precedence */
+%left '*' '/'	/* left associaive, higher precedence */
+
+%%
+
+
+list: /* nothing */
+      | list expr '\n' {result = $2;}
+      ;
+
+expr:   NUMBER		{ $$ = $1; }
+      | expr '+' expr   { $$ = $1 + $3;}
+      | expr '-' expr	{ $$ = $1 - $3;}
+      | expr '*' expr	{ $$ = $1 * $3;}
+      | expr '/' expr	{ $$ = $1 / $3;}
+      | '(' expr ')'	{ $$ = $2; }
+      ;
+
+%%
+
+

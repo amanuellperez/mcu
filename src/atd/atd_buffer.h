@@ -107,7 +107,7 @@ public:
 
 
 
-    // Los datos válidos serán de [0, size())
+    // Los datos válidos serán de [0, size()) = [begin, end)
     constexpr T* data() noexcept
     {return &a[0];}
 

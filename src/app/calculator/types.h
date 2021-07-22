@@ -20,9 +20,9 @@
 #ifndef __TYPES_H__
 #define __TYPES_H__
 
-#include <atd_buffer.h>
+#include "buffer.h"
 
-using Buffer = atd::Buffer<char, 16>;
+using Buffer = Stream_buffer<16>;
 
 #endif
 

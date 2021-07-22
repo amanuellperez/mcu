@@ -20,62 +20,61 @@
 // evitar cortocircuitos, y en las columnas al conectar los pines los
 // configuramos con pullup resistor.
 // Sacamos la salida por un LCD
-#include "interface.h"
-#include "buffer.h"
+#include "main.h"
+#include "../interface.h"
+#include "../buffer.h"
 
-void Interface::DEL_command()
+#include "lex.h"
+#include "calc.tab.hpp"
+
+LCD lcd;
+Buffer buffer_;
+double result;
+
+Main::Main()
 {
-    lcd_ << "DEL!!!";
+// init data
+
+// init_hardware():
+    init_lcd();
+    init_keyboard();
+
 }
 
-void Interface::AC_command()
+
+// En este caso voy a gestionar el LCD directamente
+void Main::init_lcd()
 {
-    lcd_.clear();
-    // buffer_.reset():
-//    ibuf_ = 0;
+    lcd.screen().stop_brcorner(true);// I'm not going to use it as a terminal
+    lcd.screen().nowrap(); 
 }
 
-void Interface::to_the_left_command()
+
+void Main::run()
 {
-    lcd_ << "to the left cmd";
-}
+    while(1){
+	Interface interface{lcd, keyboard_};
+	interface.getline(buffer_);
+	lcd.clear();
+//	lcd << "escrito:\n";
+//	print(lcd, buffer_);
+//	wait_ms(1000);
 
-void Interface::to_the_right_command()
-{
-    lcd_ << "to the right cmd";
-}
-
-void Interface::getline(Buffer& buffer)
-{
-// init LCD
-    lcd_.clear();
-    lcd_.cursor_on();
-
-// read
-    buffer.clear();
-
-    while (buffer.size() != buffer.max_size()){
-	uint8_t key = keyboard_.getkey();
-	if (key == key_return){
-	    buffer.write_endl();
-	    return;
-	}
-
-	if (key_commands[key].is_command())
-	    key_commands[key].execute_command(this);
-
-	else {
-	    const char* p = key_strings[key_commands[key].str_id];
-	    lcd_ << p;
-	    buffer.push_back(p);
-	}
-
-
-	wait_ms(debouncing_time);
+	result = 20;
+	buffer_.reset();
+	yyparse();
+	lcd.clear();
+	lcd << "parse:\n" << (int) result;
+	wait_ms(1000);
     }
-
-    buffer.write_endl();
 }
 
+         
+
+int main()
+{
+    Main app;
+    app.run();
+}
 
 
