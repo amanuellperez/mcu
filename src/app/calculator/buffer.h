@@ -22,11 +22,51 @@
 
 #include "dev.h"
 #include <atd_buffer.h>
-#include <stdio.h> // sscanf 
-
-extern LCD lcd;	// TODO borrame
+#include <ostream>
 
 #undef getchar
+
+
+
+// Devuelve las unidades de x
+inline int units(int x) { return x % 10; }
+
+// TODO: a double.h
+inline std::ostream& operator<<(std::ostream& out, double x)
+{
+    int i = static_cast<int>(x);
+    out << i;
+
+    x -= i;
+    // CUIDADO: la parte entera del double es máximo 2^15 - 1= 32767!!!
+    // TODO: parametrizarlo
+    i = static_cast<int>(x*10000.0); // max. 4 cifras
+
+    // TODO: mejorarlo
+    while (i != 0 and units(i) == 0)
+	i /= 10;
+
+    if (i != 0)
+	out << '.' << i;
+
+    return out;
+}
+// TODO: a double.h? ponerlo en un .cpp
+inline double convert_to_decimal(int x)
+{
+    double y = static_cast<double>(x);
+
+
+    while (y > 0){
+	y /= 10;
+    }
+
+    return y;
+}
+
+
+
+
 
 // DUDA: no hereda las funciones de atd::Buffer, teniendo que volverlas a
 // escribir para darle visibilidad. ¿Por qué?
@@ -45,73 +85,66 @@ public:
     using iterator          = Parent::iterator;
     using const_iterator    = Parent::const_iterator;
 
+    enum class State{good, bad, scanf_error, read_eof};
+
+    constexpr static const char decimal_point = '.';
 
     constexpr Stream_buffer(): Parent{} { init(); }
     constexpr Stream_buffer(std::initializer_list<value_type> v) : Parent{v}
     { init(); }
 
+// Funciones de escritura: 
+//     Escribimos al final del buffer.
     /// Appends the given element to the end of the container.
     /// Es responsabilidad del usuario garantizar que size() != max_size()
     constexpr void push_back(char x) {Parent::push_back(x);}
+
+    /// Devuelve el número de caracteres añadidos a 'buf'.
+    constexpr uint8_t push_back(const char* str);
 
     /// Removes the last element of the container.
     /// Es responsabilidad del usuario garantizar que size() > 0
     constexpr void pop_back() {Parent::pop_back();}
 
+// Funciones de lectura:
+//    Leemos desde el principio (de izda a dcha). Primero el caracter 0, luego
+//    el 1, ... (justo al revés que la escritura).
+
+    /// Extraemos un caracter del buffer.
+    char getchar();
+
+    /// Devolvemos el último caracter leído.
+    void unget_last_char();
+
+    /// Devuelve el número de caracteres extraídos del buffer.
+    uint8_t read(int& x);
+
+    /// Devuelve el número de caracteres extraídos del buffer.
+    uint8_t read(double& x);
+
+// Reset
     /// Erases all elements from the container.
     constexpr void clear() {Parent::clear(); reset();}
 
-    // iterators
-    constexpr iterator begin()  {return Parent::begin();}
+    /// Prepara el buffer para empezar a leerlo.
+    constexpr void reset() { p_ = Parent::begin(); state_ = State::good;}
+
+// Iterators
+    constexpr iterator begin()  {return p_;}
     constexpr iterator end()  {return Parent::end();}
 
-    constexpr const_iterator begin() const  {return Parent::begin();}
+    constexpr const_iterator begin() const  {return p_;}
     constexpr const_iterator end() const  {return Parent::end();}
 
-    char getchar()
-    {
-	if (p_ != pe_)
-	    return *p_++;
-
-	return 0;
-    }
-
-    void unget_last_char()
-    {
-	if (p_ != begin())
-	    --p_;
-    }
     
-    /// Le añade un '\0' al final del buffer, para poderlo leer con sscanf
-    /// o como cadena de C.
-    void write_endl()
-    {
-	if (p_ == pe_)
-	    --p_;
+// state
+    bool eof() const {return p_ == end();}
+    bool good() const {return state_ == State::good;}
+    bool bad() const {return state_ == State::bad;}
+    bool read_error() const {return state_ == State::scanf_error 
+				or state_ == State::read_eof;}
 
-	 *p_ = '\0';
 
-    }
-
-    void read(double* x)
-    {	
-	if (p_ != pe_){
-	    int n = sscanf(p_, "%lf", x); 
-	    if (n != EOF)
-		p_ += n;
-	    // else error() TODO
-	}
-
-	else
-	    *x = 2.222;  // error() TODO
-    }
-
-    uint8_t push_back(const char* str);
-
-    bool eof() const {return p_ == pe_;}
-
-    /// Prepara el buffer para empezar a leerlo o escribirlo
-    void reset() { p_ = begin(); }
 
 
     // capacity:
@@ -124,47 +157,122 @@ public:
     constexpr const_pointer data() const {return Parent::data();}
 
 private:
-    pointer p0_, pe_; // zona de memoria del buffer [p0_, pe_)
+    pointer m0_, me_; // zona de memoria del buffer [m0_, me_)
 		      // CUIDADO: no confundirlo con [begin, end) que ese 
-		      // es el buffer escrito (end != pe_ en general!!!)
+		      // es el buffer escrito (end != me_ en general!!!)
     pointer p_; // posición actual
+
+    // State
+    State state_;
 
     void init()
     {
-	p0_ = data();
-	pe_ = p0_ + max_size();
+	m0_ = data();
+	me_ = m0_ + max_size();
 
 	reset();
 
     }
 
     constexpr void push_back_char(char x) {Parent::push_back(x);}
+
 };
 
 
 template <size_t N>
-void print(LCD& lcd, const Stream_buffer<N>& buf)
+inline std::ostream& operator<<(std::ostream& out, const Stream_buffer<N>& buf)
 {
     for (auto x: buf)
-	lcd << x;
+	out << x;
+
+    return out;
 }
 
 
 
-/// Devuelve el número de caracteres añadidos a 'buf'.
 template <size_t N>
-uint8_t Stream_buffer<N>::push_back(const char* str)
+constexpr uint8_t Stream_buffer<N>::push_back(const char* str)
 {
     uint8_t i = 0;
     
-    while (*str and p_ != pe_){
+    while (*str and size() != max_size()){
 	push_back_char(*str);
 	++str;
-	++p_;
+	++i;
     }
 
     return i;
 }
+
+
+template <size_t N>
+uint8_t Stream_buffer<N>::read(int& x)
+{
+
+    uint8_t n = 0;
+    
+    x = 0;
+
+    while (p_ != end()){
+	int d = static_cast<int>(*p_); // digit
+	if (!isdigit(d))
+	    return n;
+
+	x = 10*x + d - '0';
+
+	++p_;
+    }
+
+    return n;
+}
+
+
+
+
+template <size_t N>
+uint8_t Stream_buffer<N>::read(double& x)
+{	
+    int a; 
+    uint8_t n = read(a);
+
+
+    if (p_ == end()){
+	x = a;
+	return n;
+    }
+
+    if (*p_ != decimal_point)
+	return n;
+    ++p_;
+
+    n += read(a);
+    x += convert_to_decimal(a);
+
+    return n;
+}
+
+
+template <size_t N>
+char Stream_buffer<N>::getchar()
+{
+    if (p_ != end()){
+// return *p_++:
+	char res = *p_;
+	++p_;
+	return res;
+
+    }
+
+    return 0;
+}
+
+template <size_t N>
+inline void Stream_buffer<N>::unget_last_char()
+{
+    if (p_ != m0_)
+	--p_;
+}
+
 
 
 #endif

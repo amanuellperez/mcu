@@ -29,6 +29,7 @@
  *    05/04/2020 number_of_digits, div
  *    14/12/2020 abs
  *    05/03/2021 is_power_of_ten, exponent_of_power_of_ten
+ *    23/07/2021 remove_trailing_zeros
  *
  *
  ****************************************************************************/
@@ -141,6 +142,17 @@ inline constexpr Int abs(Int x)
 { return x >= 0? x: -x; }
 
 
+/// Devuelve x pero sin los 0 a la derecha.
+/// Ejemplo: si x = 12300, devuelve 123.
+template <typename Int>
+inline constexpr Int remove_trailing_zeros(Int x)
+{
+    while (x != 0 and (x % 10) == 0){
+	x /= Int{10};
+    }
+
+    return x;
+}
 
 
 } // namespace

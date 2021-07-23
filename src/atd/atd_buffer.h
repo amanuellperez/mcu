@@ -128,6 +128,8 @@ inline constexpr void Buffer<T,N>::push_back(const T& x)
     ++i_;
 }
 
+
+
 //// deduction guides
 //template <typename T, typename... U>
 //Buffer(T, U...) -> Buffer<std::enable_if_t<(std::is_same_v<T, U> && ...), T>,

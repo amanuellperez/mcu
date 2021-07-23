@@ -179,6 +179,36 @@ void test_power_of_ten()
 }
 
 
+void test_remove_trailing_zeros()
+{
+    test::interfaz("remove_trailing_zeros");
+
+    CHECK_TRUE((atd::remove_trailing_zeros<int>(0) == 0),
+               "remove_trailing_zeros");
+
+    CHECK_TRUE((atd::remove_trailing_zeros<int>(1) == 1),
+               "remove_trailing_zeros");
+
+    CHECK_TRUE((atd::remove_trailing_zeros<int>(10) == 1),
+               "remove_trailing_zeros");
+
+    CHECK_TRUE((atd::remove_trailing_zeros<int>(-10) == -1),
+               "remove_trailing_zeros");
+
+    CHECK_TRUE((atd::remove_trailing_zeros<int>(12300) == 123),
+               "remove_trailing_zeros");
+
+    CHECK_TRUE((atd::remove_trailing_zeros<int>(123) == 123),
+               "remove_trailing_zeros");
+
+    CHECK_TRUE((atd::remove_trailing_zeros<int>(1020300) == 10203),
+               "remove_trailing_zeros");
+
+    CHECK_TRUE((atd::remove_trailing_zeros<uint8_t>(100) == 1),
+               "remove_trailing_zeros");
+}
+
+
 int main()
 {
 try{
@@ -191,6 +221,7 @@ try{
     test_most_significant_digits();
     test_div();
     test_abs();
+    test_remove_trailing_zeros();
 
 }catch(std::exception& e)
 {

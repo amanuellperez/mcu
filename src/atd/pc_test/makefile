@@ -8,6 +8,7 @@ DIRS = algorithm	\
 		cstddef		\
 		cstring		\
 		decimal		\
+		double		\
 		eng_magnitude\
 		iobxtream	\
 		magnitude	\

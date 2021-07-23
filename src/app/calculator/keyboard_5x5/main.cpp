@@ -34,7 +34,7 @@ int main()
     avr::UART_iostream uart;
     avr::basic_cfg(uart);
     uart.on();
-    
+ 
     uart << "\n----------\n";
     uart << "Keyboard " << (int)Keyboard::nrows() << "x"
          << (int)Keyboard::ncols() << "\n";
