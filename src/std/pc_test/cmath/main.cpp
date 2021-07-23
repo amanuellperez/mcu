@@ -18,6 +18,7 @@
 #include "../../std_cmath.h"
 
 #include <alp_test.h>
+#include <alp_string.h>
 #include <iostream>
 
 #include <bit>
@@ -49,12 +50,37 @@ void test_abs()
 
 }
 
+template <typename T>
+void test_modf(T f)
+{
+    double f3{}, sf3{};
+    double f2 = mtd::modf(f, &f3);
+    double sf2 = std::modf(f, &sf3);
+
+    CHECK_TRUE(f2 == sf2 and f3 == sf3, alp::as_str() << "modf(" << f << ")");
+}
+
+void test_modf()
+{
+    test::interfaz("modf");
+    test_modf<float>(0);
+    test_modf<double>(0);
+    test_modf<long double>(0);
+
+    test_modf<float>(123.45);
+    test_modf<double>(123.45);
+    test_modf<long double>(123.45);
+    
+}
+
+
 int main()
 {
 try{
     test::header("cmath");
 
     test_abs();
+    test_modf();
 
 }catch(const std::exception& e){
     std::cerr << e.what() << '\n';

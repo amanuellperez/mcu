@@ -31,6 +31,33 @@
  ****************************************************************************/
 #include "std_config.h"
 
+#include <math.h>
+
+// Eliminamos macros
+#undef abs
+#undef div
+#undef acos
+#undef asin
+#undef atan
+#undef atan2
+#undef ceil
+#undef cos
+#undef cosh
+#undef exp
+#undef fabs
+#undef floor
+#undef fmod
+#undef frexp
+#undef ldexp
+#undef log
+#undef log10
+#undef pow
+#undef sin
+#undef sinh
+#undef sqrt
+#undef tan
+#undef tanh
+
 namespace STD{
 
 inline int abs(int n) { return n >= 0? n: -n; }
@@ -44,6 +71,35 @@ inline long long abs(long long n) { return n >= 0? n: -n; }
 constexpr inline int __abs(int n) { return n >= 0? n: -n; }
 constexpr inline long __abs(long n) { return n >= 0? n: -n; }
 constexpr inline long long __abs(long long n) { return n >= 0? n: -n; }
+
+
+// No tengo claro si estas funciones están definidas como macros. De hecho,
+// g++ internamente usa una función especial para implementarlas. 
+// Como quiero que el código quede independiente de la implementación de g++
+// doy este rodeo para definir todas estas funciones.
+// ----
+// modf
+// ----
+inline float __modf(float x, float* integral_part) 
+{ return modf(x, integral_part); }
+
+inline double __modf(double x, double* integral_part)
+{ return modf(x, integral_part); }
+
+inline long double __modf(long double x, long double* integral_part)
+{ return modf(x, integral_part); }
+
+#undef modf
+
+inline float modf(float x, float* integral_part) 
+{ return __modf(x, integral_part); }
+
+inline double modf(double x, double* integral_part)
+{ return __modf(x, integral_part); }
+
+inline long double modf(long double x, long double* integral_part)
+{ return __modf(x, integral_part); }
+
 
 }// namespace
 
