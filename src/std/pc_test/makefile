@@ -8,6 +8,7 @@ DIRS = algorithm\
 	cstring		\
 	iostream	\
 	iterator	\
+	limits		\
 	numeric		\
 	ratio		\
 	sizeof_txt	\

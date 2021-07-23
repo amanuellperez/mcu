@@ -63,13 +63,13 @@ void test_modf(T f)
 void test_modf()
 {
     test::interfaz("modf");
-    test_modf<float>(0);
+//    test_modf<float>(0);
     test_modf<double>(0);
-    test_modf<long double>(0);
+//   test_modf<long double>(0);
 
-    test_modf<float>(123.45);
+//    test_modf<float>(123.45);
     test_modf<double>(123.45);
-    test_modf<long double>(123.45);
+//    test_modf<long double>(123.45);
     
 }
 

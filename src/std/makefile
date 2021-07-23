@@ -13,6 +13,7 @@ INCS= std_cstdio.h		\
 	std_char_traits.h	\
 	std_chrono.h		\
 	std_config.h		\
+	std_climits.h		\
 	std_cstddef.h		\
 	std_cstdint.h		\
 	std_cstdlib.h		\
@@ -40,6 +41,7 @@ INCS= std_cstdio.h		\
 	array		\
 	bit			\
 	chrono		\
+	climits		\
 	cmath		\
 	cstddef 	\
 	cstdint		\

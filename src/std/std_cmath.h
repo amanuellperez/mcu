@@ -80,25 +80,26 @@ constexpr inline long long __abs(long long n) { return n >= 0? n: -n; }
 // ----
 // modf
 // ----
-inline float __modf(float x, float* integral_part) 
-{ return modf(x, integral_part); }
+// Parece ser que avr-gcc no suministra modf para float y long double
+//inline float __modf(float x, float* integral_part) 
+//{ return modf(x, integral_part); }
 
 inline double __modf(double x, double* integral_part)
 { return modf(x, integral_part); }
 
-inline long double __modf(long double x, long double* integral_part)
-{ return modf(x, integral_part); }
+//inline long double __modf(long double x, long double* integral_part)
+//{ return modf(x, integral_part); }
 
 #undef modf
 
-inline float modf(float x, float* integral_part) 
-{ return __modf(x, integral_part); }
+//inline float modf(float x, float* integral_part) 
+//{ return __modf(x, integral_part); }
 
 inline double modf(double x, double* integral_part)
 { return __modf(x, integral_part); }
 
-inline long double modf(long double x, long double* integral_part)
-{ return __modf(x, integral_part); }
+//inline long double modf(long double x, long double* integral_part)
+//{ return __modf(x, integral_part); }
 
 
 }// namespace
