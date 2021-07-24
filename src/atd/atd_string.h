@@ -17,23 +17,29 @@
 
 #pragma once
 
-#ifndef __ATD_CSTDLIB_H__
-#define __ATD_CSTDLIB_H__
+#ifndef __ATD_STRING_H__
+#define __ATD_STRING_H__
 /****************************************************************************
  *
- *  - DESCRIPCION: Ampliación de cstdlib
+ *  - DESCRIPCION: Algoritmos para manejar cadenas.
  *
  *  - HISTORIA:
  *    A.Manuel L.Perez
- *    24/07/2021 atoi
+ *    24/07/2021 to_int, to_char
  *
  ****************************************************************************/
 
 namespace atd{
 
-// Equivalente a std::atoi pero con 'char' como argumento.
+/// Convierte el dígito c de char a int.
+/// digito = del 0 al 9
 template <typename Int>
-inline Int to_int(char c) {return c - '0';}
+inline Int digit_to_(char c) {return c - '0';}
+
+/// Convierte el char c de int a char.
+/// digito = del 0 al 9
+template <typename Int>
+inline char digit_to_char(Int x) {return x + '0';}
 
 
 }// namespace

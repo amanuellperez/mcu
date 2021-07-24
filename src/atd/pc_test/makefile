@@ -16,6 +16,7 @@ DIRS = algorithm	\
 		metronome	\
 		ratio		\
 		static		\
+		string		\
 		time		\
 		types		\
 		type_traits	\

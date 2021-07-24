@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez <amanuel.lperez@gmail.com>
+// Copyright (C) 2019-2021 A.Manuel L.Perez <amanuel.lperez@gmail.com>
 //
 // This file is part of the MCU++ Library.
 //
@@ -29,9 +29,11 @@
  *    A.Manuel L.Perez
  *	02/11/2019 find_c
  *	22/02/2020 copy	    TODO: especializarlo para punteros (usar memcpy)
+ *	24/07/2021 print
  *
  ****************************************************************************/
 #include <utility>
+#include <ostream>
 
 namespace atd{
 
@@ -93,6 +95,13 @@ std::pair<Input_it, Output_it> copy(Input_it p0, Input_it pe,
     return {p0, q0};
 }
 
+/// Print [p, pe) in out.
+template <typename It>
+void print(std::ostream& out, It p, It pe)
+{
+    for (; p != pe; ++p)
+	out << *p;
+}
 
 
 
