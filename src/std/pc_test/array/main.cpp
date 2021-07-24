@@ -31,8 +31,7 @@ using size_t = uint8_t;
 
 void test_array()
 {
-    std::cout << "Probando mtd::array\n";
-    std::cout << "------------------\n";
+    test::interfaz("mtd::array");
 
     mtd::array<int, 5> a = {4,5,6,7,8};
 
@@ -61,6 +60,15 @@ void test_array()
     // Probamos deducción automática
     mtd::array b = {2,3,4};
     CHECK_TRUE(b[0] == 2, "deducción automática");
+
+{// reverse iterator
+    int i = b.size() - 1;
+    for (auto p = b.rbegin(); p != b.rend(); ++p)
+    {
+	CHECK_TRUE(*p == b[i], "rbegin/rend");
+	--i;
+    }
+}
 }
 
 

@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez <amanuel.lperez@gmail.com>
+// Copyright (C) 2019-2021 A.Manuel L.Perez <amanuel.lperez@gmail.com>
 //
 // This file is part of the MCU++ Library.
 //
@@ -28,6 +28,7 @@
  *  - HISTORIA:
  *    A.Manuel L.Perez
  *	07/02/2019 v0.0
+ *	24/07/2021 rbegin/rend
  *
  ****************************************************************************/
 
@@ -36,15 +37,17 @@
 #include <stdlib.h>   // size_t
 #include <cstddef> // std::ptrdiff_t
 #include "std_type_traits.h"
+#include "std_iterator.h"
 
 namespace STD{
 
 // TODO: faltaría definir una especialización de array<T,0>.
 template<typename T, size_t N>
 struct array{
+// data:
     T a[N];
 
-    // tipos
+// types:
     using value_type	    = T;
     using pointer	    = T*;
     using const_pointer	    = const T*;
@@ -54,9 +57,8 @@ struct array{
     using difference_type   = std::ptrdiff_t;
     using iterator	    = T*;
     using const_iterator    = const T*;
-    // TODO: definir reverse_iterator
-//    using reverse_iterator  = reverse_iterator<iterator>;
-//    using const_reverse_iterator  = reverse_iterator<const_iterator>;
+    using reverse_iterator  = STD::reverse_iterator<iterator>;
+    using const_reverse_iterator  = STD::reverse_iterator<const_iterator>;
 
     void fill(const T& u)
     {
@@ -67,7 +69,8 @@ struct array{
 
     // TODO: swap
 
-    // iterators
+// iterators:
+    // forward
     constexpr iterator begin() noexcept {return &a[size_type(0)];}
     constexpr iterator end() noexcept {return &a[N];}
 
@@ -77,11 +80,33 @@ struct array{
     constexpr const_iterator end() const noexcept 
     {return &a[N];}
 
-    // TODO: rbegin/rend
-    // TODO: cbegin/cend
+    constexpr const_iterator cbegin() const noexcept 
+    {return &a[size_type(0)];}
 
+    constexpr const_iterator cend() const noexcept 
+    {return &a[N];}
+
+
+    // reverse
+    constexpr reverse_iterator rbegin() noexcept
+    {return reverse_iterator{end()};}
+
+    constexpr reverse_iterator rend() noexcept
+    {return reverse_iterator{begin()};}
+
+    constexpr const_reverse_iterator rbegin() const noexcept
+    {return reverse_iterator{end()};}
+
+    constexpr const_reverse_iterator rend() const noexcept
+    {return reverse_iterator{begin()};}
+
+    constexpr const_reverse_iterator crbegin() const noexcept
+    {return reverse_iterator{cend()};}
+
+    constexpr const_reverse_iterator crend() const noexcept
+    {return reverse_iterator{cbegin()};}
     
-    // capacity:
+// capacity:
     constexpr bool empty() const noexcept
     { return size() == size_type(0); }
 
@@ -91,7 +116,7 @@ struct array{
     constexpr size_type max_size() const noexcept 
     {return size();}
 
-    // elemental access:
+// elemental access:
     constexpr reference operator[](size_type n)
     {return a[n];}
 
