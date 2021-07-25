@@ -236,6 +236,58 @@ void test_circular_array()
 }
 
 
+void test_linear_array()
+{
+    test::interfaz("Linear_array");
+
+    {// caso extremo
+    atd::Linear_array<int, 5> buffer;
+    CHECK_TRUE(buffer.size() == 0, "size");
+    }
+
+    {
+    // construction
+    atd::Linear_array<int, 6> buf{10,20,30};
+
+    CHECK_TRUE(buf.size() == 3, "size");
+    CHECK_TRUE(buf.max_size() == 6, "size");
+    CHECK_TRUE(buf[0] = 10, "operator[]");
+    CHECK_TRUE(buf[1] = 20, "operator[]");
+    CHECK_TRUE(buf[2] = 30, "operator[]");
+
+    // back
+    buf.push_back(40);
+
+    CHECK_TRUE(buf.size() == 4, "push_back");
+    CHECK_TRUE(buf[3] = 40, "operator[]");
+
+    buf.pop_back();
+    CHECK_TRUE(buf.size() == 3, "pop_back");
+
+    // front
+    int x = buf.pop_front();
+    CHECK_TRUE(x == 10, "pop_front()");
+    CHECK_TRUE(buf.size() == 2, "pop_front");
+    CHECK_TRUE(buf[0] = 20, "operator[]");
+    CHECK_TRUE(buf[1] = 30, "operator[]");
+
+    x = buf.pop_front();
+    CHECK_TRUE(x == 20, "pop_front()");
+    CHECK_TRUE(buf.size() == 1, "pop_front");
+    CHECK_TRUE(buf[0] = 30, "operator[]");
+    
+    buf.push_front(2);
+    CHECK_TRUE(buf.size() == 2, "push_front");
+    CHECK_TRUE(buf[0] = 20, "operator[]");
+    CHECK_TRUE(buf[0] = 30, "operator[]");
+
+
+    buf.clear();
+    CHECK_TRUE(buf.size() == 0, "clear");
+
+    }
+
+}
 
 
 
@@ -245,6 +297,7 @@ try{
     test::header("atd_array");
 
     test_circular_array();
+    test_linear_array();
 
 }catch(std::exception& e)
 {

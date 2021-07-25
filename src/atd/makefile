@@ -8,7 +8,6 @@ INCS= atd_algorithm.h	\
 	atd_ascii.h			\
 	atd_bcd.h			\
 	atd_bit.h 			\
-	atd_buffer.h		\
 	atd_cast.h			\
 	atd_cstddef.h		\
 	atd_cstring.h		\

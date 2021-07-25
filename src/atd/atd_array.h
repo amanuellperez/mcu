@@ -24,18 +24,44 @@
  *
  *  - HISTORIA:
  *    A.Manuel L.Perez
- *    17/07/2021 v0.0 Reestructurando
+ *    17/07/2021 Reestructurando
+ *		 Tenemos varios tipos de arrays:
+ *		 1. De memoria de longitud fija.
+ *		 2. De memoria de longitud variable.
  *
+ *		 std::array es de longitud fija mientras que std::vector es de
+ *		 longitud variable. Sin embargo hay una diferencia fundamental
+ *		 entre los dos: 
+ *		  * std::vector diferencia entre la memoria disponible y la 
+ *		    memoria usada. [begin, end) = es la memoria usada.
+ *		  * std::array no hace esa diferencia. [begin, end) = es la
+ *		    memoria reservada.
+ *		
+ *		 ¿Cómo llamar al intermedio? ¿A un array que diferencie entre 
+ *		 la memoria reservada y la memoria usada? En principio pensé
+ *		 en llamarlo Linear_array, pero como ya tenía Circular_array que es
+ *		 algo similar, parece que tenga sentido llamarlo Linear_array.
+ *
+ *		 Tenemos los siguientes tipos de arrays:
+ *		 * std::array: memoria local, no gestiona la memoria usada.
+ *		 * atd::Linear_array  : memoria local, gestiona la usada.
+ *		 * atd::Circular_array: idem.
+ *		 * std::vector: memoria dinámica, gestiona la usada.
+ *		
  ****************************************************************************/
 #include <tuple>    // std::tie
 #include <algorithm>
+#include <stdlib.h>   // size_t
+#include <cstddef> // std::ptrdiff_t
+#include <type_traits>
+#include <initializer_list>
 #include "atd_algorithm.h"
 
 namespace atd{
 
-/*!
- *  \brief  Array circular.
- */
+/***************************************************************************
+ *			    CIRCULAR ARRAY
+ ***************************************************************************/
 // DUDA: buffer_size de qué tipo? size_t como std::array? uint8_t por
 // cuestiones de eficiencia? int? La regla es evitar los unsigneds!
 // Parametrizar el tipo y que el usuario elija?
@@ -254,11 +280,156 @@ Circular_array<T, N>::eread(T* b, size_type n)
     return n;
 }
 
+
+/***************************************************************************
+ *				LINEAR ARRAY
+ ***************************************************************************/
+// El interfaz que le voy a dar es similar al de un flujo de entrada/salida.
+// De hecho dudé si llamarlo atd::iostream_buffer ya que es exactamente eso
+// (salvo que en lugar de usar los nombres del estandar de C++, uso los de C 
+// que me resultan más naturales)
+template<typename T, size_t N>
+class Linear_array {
+public:
+// Types
+    using value_type	    = T;
+    using pointer	    = T*;
+    using const_pointer	    = const T*;
+    using reference	    = T&;
+    using const_reference   = const T&;
+    using size_type	    = size_t;
+    using difference_type   = std::ptrdiff_t;
+    using iterator	    = T*;	// Garantizado que sea un puntero.
+    using const_iterator    = const T*;
+ 
+    // Construction
+    constexpr Linear_array() : p0_{m0()}, pe_{m0()} {}
+    constexpr Linear_array(std::initializer_list<T> v)
+    {
+	size_t n = std::min(v.size(), N);
+
+	std::copy_n(v.begin(), n, a);
+	p0_ = m0();
+	pe_ = p0_ + n;
+    }
+
+
+// Funciones de escritura: escribimos siempre al final.
+    /// Appends the given element to the end of the container.
+    /// Es responsabilidad del usuario garantizar que end() != me()
+    constexpr void push_back(const T& x);
+
+    /// Removes the last element of the container.
+    /// Es responsabilidad del usuario garantizar que size() > 0
+    constexpr T pop_back();
+
+// Funciones de lectura: 
+//    Leemos desde el principio (de izda a dcha). Primero el caracter 0, luego
+//    el 1, ... (justo al revés que la escritura).
+    /// Añadimos el elemento x al principio del array.
+    /// Es responsabilidad del usuario garantizar que begin() != m0()
+    constexpr void push_front(const T& x);
+
+    /// Extraemos el primer elemento del array.
+    /// Es responsabilidad del usuario garantizar que size() > 0
+    constexpr T pop_front();
+
+
+
+// Clear:
+    /// Erases all elements from the container.
+    constexpr void clear() {p0_ = m0(); pe_ = p0_;} 
+
+    // iterators
+    constexpr iterator begin()  {return p0_;}
+    constexpr iterator end()  {return pe_;}
+
+    constexpr const_iterator begin() const  
+    {return p0_;}
+
+    constexpr const_iterator end() const  
+    {return pe_;}
+
+    /// Cambiamos el inicio del array. 
+    /// Es responsabilidad del usuario garantizar que p0_ <= pe_
+    // Observar que le paso un puntero y no un iterador. Esta es una clase de
+    // bajo nivel que quiero usar como arrays de C. Por eso se garantiza que
+    // los iteradores son punteros.
+    constexpr void begin(T* p0)  {p0_ = p0;}
+
+    
+    // capacity:
+    constexpr bool empty() const 
+    { return size() == size_type(0); }
+
+    /// Devuelve el tamaño de la memoria usada.
+    constexpr size_type size() const  
+    {return pe_ - p0_;}
+
+    /// Devuelve el tamaño de la memoria reservada.
+    constexpr size_type max_size() const  
+    {return N;}
+
+    // elemental access:
+    constexpr reference operator[](size_type n)
+    {return p0_[n];}
+
+    constexpr const_reference operator[](size_type n) const
+    {return p0_[n];}
+
+
+    // [m0, me) = memoria disponible
+    constexpr T* m0() {return &a[0];}
+    constexpr T* me() {return &a[N];}
+
+    constexpr const T* m0() const {return &a[0];}
+    constexpr const T* me() const {return &a[N];}
+
+private:
+    // memory
+    T a[N];
+
+    // [p0, pe) = memoria usada
+    T* p0_;
+    T* pe_;
+
+
+};
+
+
+template<typename T, size_t N>
+inline constexpr void Linear_array<T,N>::push_back(const T& x)
+{
+    *pe_ = x;
+    ++pe_;
+}
+
+template<typename T, size_t N>
+inline constexpr void Linear_array<T,N>::push_front(const T& x)
+{
+    --p0_;
+    *p0_ = x;
+}
+
+
+template <typename T, size_t N>
+inline constexpr T Linear_array<T, N>::pop_back()
+{
+    --pe_;
+    return *pe_;
+}
+
+template <typename T, size_t N>
+inline constexpr T Linear_array<T, N>::pop_front()
+{
+    return *p0_++;
+}
+
+
+
+
 }// namespace
 
 
-
-
 #endif
-
 
