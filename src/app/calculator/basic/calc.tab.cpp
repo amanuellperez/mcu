@@ -1065,7 +1065,7 @@ yyreduce:
     {
   case 3: /* list: list expr '\n'  */
 #line 19 "calc.ypp"
-                       {result = yyvsp[-1];}
+                       {Main::result = yyvsp[-1];}
 #line 1070 "calc.tab.cpp"
     break;
 

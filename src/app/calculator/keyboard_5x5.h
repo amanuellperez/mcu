@@ -63,6 +63,8 @@ template <typename Rows, typename Cols>
 class Keyboard_5x5 {
 public:
     // Devuelve true si ha encontrado alguna tecla pulsada.
+    // No bloquea la ejecución. Devuelve el control inmediatamente después
+    // del scan.
     bool scan();
 
     // scanea el teclado hasta que se pulsa una tecla. 

@@ -24,21 +24,21 @@
 #include "../types.h"
 #include <array>
 
-extern LCD lcd;
-extern Buffer buffer_;
-extern double result;
 
 class Main {
 public:
     Main();
     void run();
+    
+// global vbles
+    static LCD lcd;  // no admite definirlo inline (???)
+    inline static Buffer buffer;
+    inline static double result;
+    inline static bool error = false;
 
 private:
 // Hardware
     Keyboard keyboard_;
-
-
-    // almacenamos aquí la entrada del usuario
 
 
 // init: hardware

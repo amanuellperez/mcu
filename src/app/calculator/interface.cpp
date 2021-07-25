@@ -47,6 +47,12 @@ void Interface::to_the_right_command()
 
 void Interface::getline(Buffer& buffer)
 {
+    // Esperamos a que se pulse una tecla ignorando el bouncing de '\n'
+    // (última tecla que pulsamos)
+    uint8_t key{};
+    while ((key = keyboard_.getkey()) == key_return)
+    { }
+
 // init LCD
     lcd_.clear();
     lcd_.cursor_on();
@@ -55,11 +61,8 @@ void Interface::getline(Buffer& buffer)
     buffer.clear();
 
     while (buffer.size() != buffer.max_size()){
-	uint8_t key = keyboard_.getkey();
-	if (key == key_return){
-	    buffer.push_back('\n');
-	    return;
-	}
+	if (key == key_return)
+	    break;
 
 	if (key_commands[key].is_command())
 	    key_commands[key].execute_command(this);
@@ -70,11 +73,13 @@ void Interface::getline(Buffer& buffer)
 	    push_back(buffer, p);
 	}
 
-
 	wait_ms(debouncing_time);
+
+	key = keyboard_.getkey();
     }
 
     buffer.push_back('\n');
+    lcd_.cursor_off();
 }
 
 
