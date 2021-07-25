@@ -27,6 +27,9 @@
 #include "lex.h"
 #include "calc.tab.hpp"
 
+
+#include <avr_UART.h> // TODO: borrame
+
 LCD lcd;
 Buffer buffer_;
 double result;
@@ -55,16 +58,16 @@ void Main::run()
     while(1){
 	Interface interface{lcd, keyboard_};
 	interface.getline(buffer_);
-	lcd.clear();
-//	lcd << "escrito:\n";
+//	lcd.clear();
+//	lcd << "escrito:[";
 //	print(lcd, buffer_);
+//	lcd << "]";
 //	wait_ms(1000);
 
 	result = 20;
-	buffer_.reset();
 	yyparse();
-	lcd.clear();
-	lcd << "parse:\n" << (int) result;
+	lcd.cursor_pos(0, 1);
+	lcd << (int) result;
 	wait_ms(1000);
     }
 }
@@ -73,6 +76,31 @@ void Main::run()
 
 int main()
 {
+// init_UART(); TODO: borrar UART es para depurar.
+//    avr::UART_iostream uart;
+//    avr::basic_cfg(uart);
+//    uart.on();
+//    
+//    uart << "\n-----\n";
+//    uart << "hoc1\n";
+//    uart << "------\n\n";
+//
+//    while(1){
+//	buffer_.clear();
+//	push_back(buffer_, "12+34\n");
+//	uart << "buffer_ = [";
+//	print(uart, buffer_);
+//	uart << "]\n";
+//
+//	yyparse();
+//	
+//	uart << "result = [";
+//	atd::print(uart, result);
+//	uart << "]\n";
+//	char c{};
+//	uart >> c;
+//    }
+
     Main app;
     app.run();
 }

@@ -57,7 +57,7 @@ void Interface::getline(Buffer& buffer)
     while (buffer.size() != buffer.max_size()){
 	uint8_t key = keyboard_.getkey();
 	if (key == key_return){
-	    buffer.write_endl();
+	    buffer.push_back('\n');
 	    return;
 	}
 
@@ -67,14 +67,14 @@ void Interface::getline(Buffer& buffer)
 	else {
 	    const char* p = key_strings[key_commands[key].str_id];
 	    lcd_ << p;
-	    buffer.push_back(p);
+	    push_back(buffer, p);
 	}
 
 
 	wait_ms(debouncing_time);
     }
 
-    buffer.write_endl();
+    buffer.push_back('\n');
 }
 
 

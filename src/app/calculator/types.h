@@ -22,7 +22,7 @@
 
 #include "buffer.h"
 
-using Buffer = Stream_buffer<16>;
+using Buffer = Linear_array<16>;
 
 #endif
 
