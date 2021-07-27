@@ -31,8 +31,7 @@ void Interface::DEL_command()
 void Interface::AC_command()
 {
     lcd_.clear();
-    // buffer_.reset():
-//    ibuf_ = 0;
+    buffer_->clear();
 }
 
 void Interface::to_the_left_command()
@@ -45,22 +44,25 @@ void Interface::to_the_right_command()
     lcd_ << "to the right cmd";
 }
 
-void Interface::getline(Buffer& buffer)
+void Interface::getline(Buffer& buffer0)
 {
+    buffer_ = &buffer0;
+
+    // init LCD
+    lcd_.clear();
+    lcd_.cursor_on();
+
     // Esperamos a que se pulse una tecla ignorando el bouncing de '\n'
     // (última tecla que pulsamos)
     uint8_t key{};
     while ((key = keyboard_.getkey()) == key_return)
     { }
 
-// init LCD
-    lcd_.clear();
-    lcd_.cursor_on();
 
 // read
-    buffer.clear();
+    buffer_->clear();
 
-    while (buffer.size() != buffer.max_size()){
+    while (buffer_->size() != buffer_->max_size()){
 	if (key == key_return)
 	    break;
 
@@ -70,7 +72,7 @@ void Interface::getline(Buffer& buffer)
 	else {
 	    const char* p = key_strings[key_commands[key].str_id];
 	    lcd_ << p;
-	    push_back(buffer, p);
+	    push_back(*buffer_, p);
 	}
 
 	wait_ms(debouncing_time);
@@ -78,7 +80,7 @@ void Interface::getline(Buffer& buffer)
 	key = keyboard_.getkey();
     }
 
-    buffer.push_back('\n');
+    buffer_->push_back('\n');
     lcd_.cursor_off();
 }
 

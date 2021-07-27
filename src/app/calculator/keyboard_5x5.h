@@ -28,8 +28,10 @@
  *
  *  - DESCRIPCION: Keyboard de 5 x 5
  *    Se trata de una matriz de pulsadores de 5 filas y 5 columnas.
- *    Las filas las conecto a través de diodos para evitar el cortocircuito.
- *
+ *    Es un teclado pensado para pulsar una tecla cada vez, una después de
+ *    otra. Si se pulsan varias no se produce corto pero se deja undefined el
+ *    resultado de scan().
+ * 
  *
  *  - HISTORIA:
  *    A.Manuel L.Perez
@@ -62,6 +64,8 @@ struct Keyboard_5_cols{
 template <typename Rows, typename Cols>
 class Keyboard_5x5 {
 public:
+    Keyboard_5x5();
+
     // Devuelve true si ha encontrado alguna tecla pulsada.
     // No bloquea la ejecución. Devuelve el control inmediatamente después
     // del scan.
@@ -74,28 +78,34 @@ public:
     // Devuelve como int la última tecla pulsada.
     uint8_t last_key() const;
 
-// last key pressed
-    uint8_t row = null_rcol;
-    uint8_t col = null_rcol;
+    // ultima tecla pulsada
+    uint8_t row() const {return row_;}
+    uint8_t col() const {return col_;}
 
 // Configuration
     static constexpr uint8_t nrows() {return Rows::nrows;}
     static constexpr uint8_t ncols() {return Cols::ncols;}
 
 private:
-    avr::Input_pin_with_pullup<Cols::col0> col0;
-    avr::Input_pin_with_pullup<Cols::col1> col1;
-    avr::Input_pin_with_pullup<Cols::col2> col2;
-    avr::Input_pin_with_pullup<Cols::col3> col3;
-    avr::Input_pin_with_pullup<Cols::col4> col4;
+    avr::Pin<Cols::col0> col0;
+    avr::Pin<Cols::col1> col1;
+    avr::Pin<Cols::col2> col2;
+    avr::Pin<Cols::col3> col3;
+    avr::Pin<Cols::col4> col4;
 
-    avr::Output_pin<Rows::row0> row0;
-    avr::Output_pin<Rows::row1> row1;
-    avr::Output_pin<Rows::row2> row2;
-    avr::Output_pin<Rows::row3> row3;
-    avr::Output_pin<Rows::row4> row4;
+    avr::Pin<Rows::row0> row0;
+    avr::Pin<Rows::row1> row1;
+    avr::Pin<Rows::row2> row2;
+    avr::Pin<Rows::row3> row3;
+    avr::Pin<Rows::row4> row4;
+
+// last key pressed
+    uint8_t row_ = null_rcol;
+    uint8_t col_ = null_rcol;
+
 
 // Helper functions
+    uint8_t scan_rows() const;
     uint8_t scan_cols() const;
     constexpr static uint8_t null_rcol = 100; // null row/col (= incorrect value)
 
@@ -105,6 +115,23 @@ private:
     void scan_row3();
     void scan_row4();
 };
+
+template <typename R, typename C>
+Keyboard_5x5<R, C>::Keyboard_5x5()
+{
+    row0.as_input_with_pullup();
+    row1.as_input_with_pullup();
+    row2.as_input_with_pullup();
+    row3.as_input_with_pullup();
+    row4.as_input_with_pullup();
+
+    col0.as_input_without_pullup();
+    col1.as_input_without_pullup();
+    col2.as_input_without_pullup();
+    col3.as_input_without_pullup();
+    col4.as_input_without_pullup();
+}
+
 
 template <typename R, typename C>
 uint8_t Keyboard_5x5<R, C>::getkey()
@@ -118,128 +145,70 @@ uint8_t Keyboard_5x5<R, C>::getkey()
 template <typename R, typename C>
 inline uint8_t Keyboard_5x5<R, C>::last_key() const
 {
-    return nrows() * row + col;
+    return nrows() * row_ + col_;
 }
 
 template <typename R, typename C>
-uint8_t Keyboard_5x5<R, C>::scan_cols() const
+uint8_t Keyboard_5x5<R, C>::scan_rows() const
 {
-    if (col0.is_zero())
-	return 0;
-    else if (col1.is_zero())
-	return 1;
-    else if (col2.is_zero())
-	return 2;
-    else if (col3.is_zero())
-	return 3;
-    else if (col4.is_zero())
-        return 4;
+    row0.as_input_with_pullup();
+    row1.as_input_with_pullup();
+    row2.as_input_with_pullup();
+    row3.as_input_with_pullup();
+    row4.as_input_with_pullup();
+
+    col0.as_output(); col0.write_zero();
+    col1.as_output(); col1.write_zero();
+    col2.as_output(); col2.write_zero();
+    col3.as_output(); col3.write_zero();
+    col4.as_output(); col4.write_zero();
+
+    if (row0.is_zero()) return 0;
+    if (row1.is_zero()) return 1;
+    if (row2.is_zero()) return 2;
+    if (row3.is_zero()) return 3;
+    if (row4.is_zero()) return 4;
 
     return null_rcol;
 }
 
-template <typename R, typename C>
-inline void Keyboard_5x5<R, C>::scan_row0() 
-{
-    row0.write_zero();
-    row1.write_one();
-    row2.write_one();
-    row3.write_one();
-    row4.write_one();
-}
-
 
 template <typename R, typename C>
-inline void Keyboard_5x5<R, C>::scan_row1() 
+uint8_t Keyboard_5x5<R, C>::scan_cols() const
 {
-    row0.write_one();
-    row1.write_zero();
-    row2.write_one();
-    row3.write_one();
-    row4.write_one();
-}
+    col0.as_input_with_pullup();
+    col1.as_input_with_pullup();
+    col2.as_input_with_pullup();
+    col3.as_input_with_pullup();
+    col4.as_input_with_pullup();
 
+    row0.as_output(); row0.write_zero();
+    row1.as_output(); row1.write_zero();
+    row2.as_output(); row2.write_zero();
+    row3.as_output(); row3.write_zero();
+    row4.as_output(); row4.write_zero();
+    wait_ms(5); // sin este delay falla la tecla (4,0)
+		// es para esperar que alcance equilibrio los pines
 
-template <typename R, typename C>
-inline void Keyboard_5x5<R, C>::scan_row2() 
-{
-    row0.write_one();
-    row1.write_one();
-    row2.write_zero();
-    row3.write_one();
-    row4.write_one();
-}
+    if (col0.is_zero()) return 0;
+    if (col1.is_zero()) return 1;
+    if (col2.is_zero()) return 2;
+    if (col3.is_zero()) return 3;
+    if (col4.is_zero()) return 4;
 
-template <typename R, typename C>
-inline void Keyboard_5x5<R, C>::scan_row3() 
-{
-    row0.write_one();
-    row1.write_one();
-    row2.write_one();
-    row3.write_zero();
-    row4.write_one();
-}
-
-
-template <typename R, typename C>
-inline void Keyboard_5x5<R, C>::scan_row4() 
-{
-    row0.write_one();
-    row1.write_one();
-    row2.write_one();
-    row3.write_one();
-    row4.write_zero();
+    return null_rcol;
 }
 
 
 template <typename R, typename C>
 bool Keyboard_5x5<R, C>::scan()
 {
-    row = null_rcol;
+    row_ = scan_rows();
 
-    scan_row0();
+    if (row_ != null_rcol)
+	col_ = scan_cols();
 
-    col = scan_cols();
-    if (col != null_rcol){
-	row = 0;
-	return true;
-    }
-
-    scan_row1();
-
-    col = scan_cols();
-    if (col != null_rcol){
-	row = 1;
-	return true;
-    }
-
-    scan_row2();
-
-    col = scan_cols();
-    if (col != null_rcol){
-	row = 2;
-	return true;
-    }
-
-
-    scan_row3();
-
-    col = scan_cols();
-    if (col != null_rcol){
-	row = 3;
-	return true;
-    }
-
-    scan_row4();
-
-    col = scan_cols();
-    if (col != null_rcol){
-	row = 4;
-	return true;
-    }
-
-
-    return false;
+    return (row_ != null_rcol and col_ != null_rcol);
 }
 
 

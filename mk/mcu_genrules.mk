@@ -298,8 +298,10 @@ clean:
 	$(OBJECTS) $(BIN) $(LIB_NAME) $(FIC_TAGS)
 
 .PHONY: super_clean
-super_clean:
-	$(RM) *.elf *.hex *.d *.eep *.lst *.lss *.sym *.map *.eeprom *.o *.a tags *.tmp
+super_clean: clean
+	$(RM) *.elf *.hex *.d *.eep *.lst \
+		  *.lss *.sym *.map *.eeprom \
+		  *.o *.a tags *.tmp
 
 
 

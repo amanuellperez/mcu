@@ -51,9 +51,9 @@ struct Key {
     static constexpr Key cmd(Cmd cmd){ return Key{null_id, cmd};}
 
     bool is_command() const {return command != null_command;}
-    void execute_command(Interface* app) const {(app->*command)();}
+    void execute_command(Interface* app) const { (app->*command)(); }
 
-// null
+    // null
     static constexpr uint8_t null_id  = 0xFF;
     static constexpr Cmd null_command = nullptr;
 
@@ -64,7 +64,7 @@ struct Key {
 class Interface{
 public:
     Interface(LCD& lcd, Keyboard& keyboard)
-	:lcd_{lcd}, keyboard_{keyboard}{}
+	:lcd_{lcd}, keyboard_{keyboard}, buffer_{nullptr}{}
 
     void getline(Buffer& buf);
 
@@ -72,6 +72,8 @@ private:
 // Data
     LCD& lcd_;
     Keyboard& keyboard_;
+
+    Buffer* buffer_;
 
 // comandos de edición
     void DEL_command();

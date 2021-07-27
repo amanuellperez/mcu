@@ -16,9 +16,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 // Conectar un teclado de 5 x 5
-// El teclado es una matriz de pulsadores. En las filas conectamos diodos para
-// evitar cortocircuitos, y en las columnas al conectar los pines los
-// configuramos con pullup resistor.
+// El teclado es una matriz de pulsadores.
 // Sacamos la salida por UART
 #include <avr_UART.h>
 #include "../keyboard_5x5.h"
@@ -47,7 +45,7 @@ int main()
 	while (!keyboard.scan())
 	    wait_ms(100);
 
-	uart << "(" << (int) keyboard.row << ", " << (int) keyboard.col << ") = "
+	uart << "(" << (int) keyboard.row() << ", " << (int) keyboard.col() << ") = "
 	    << (int) keyboard.last_key() << '\n';
 	wait_ms(100);
     }
