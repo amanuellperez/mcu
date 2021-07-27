@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez <amanuel.lperez@gmail.com>
+// Copyright (C) 2019-2021 A.Manuel L.Perez <amanuel.lperez@gmail.com>
 //
 // This file is part of the MCU++ Library.
 //
@@ -18,7 +18,6 @@
 #include <iterator>
 
 
-#include <iostream> // para depurar
 #include "../../atd_array.h"
 
 #include <alp_test.h>
@@ -26,9 +25,18 @@
 #include <vector>
 
 #include <cstddef>
+#include <iostream> 
 
 using namespace test;
 
+
+template <typename T, size_t N>
+void print(std::ostream& out, const atd::Linear_array<T,N>& buf)
+{
+    for (auto x: buf)
+	out << x;
+
+}
 
 void test_circular_array()
 {
@@ -284,6 +292,34 @@ void test_linear_array()
 
     buf.clear();
     CHECK_TRUE(buf.size() == 0, "clear");
+
+    }
+    {// insert... normal
+    atd::Linear_array<int, 10> buf{0,1,2,3,4,5};
+    buf.remove(2);
+    CHECK_TRUE(buf.size() == 5, "remove");
+    CHECK_TRUE(buf[0] == 0 and buf[1] == 1 and buf[2] == 3
+	      and buf[3] == 4 and buf[4] == 5, "remove");
+
+    buf.insert(2, 9);
+    CHECK_TRUE(buf.size() == 6, "remove");
+    CHECK_TRUE(buf[0] == 0 and buf[1] == 1 and buf[2] == 9
+	      and buf[3] == 3 and buf[4] == 4 and buf[5] == 5, "insert");
+
+    buf.remove(5);
+    CHECK_TRUE(buf.size() == 5, "remove");
+    CHECK_TRUE(buf[0] == 0 and buf[1] == 1 and buf[2] == 9
+	      and buf[3] == 3 and buf[4] == 4, "insert");
+    }
+
+    {// insert... overflow
+    atd::Linear_array<int, 4> buf{0,1,2,3};
+
+    buf.insert(2, 9);
+    CHECK_TRUE(buf.size() == 4, "insert");
+    print(std::cout, buf); std::cout << '\n';
+    CHECK_TRUE(buf[0] == 0 and buf[1] == 1 and buf[2] == 9
+	      and buf[3] == 2, "insert");
 
     }
 

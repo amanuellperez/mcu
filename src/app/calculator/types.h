@@ -22,7 +22,7 @@
 
 #include "buffer.h"
 
-using Buffer = Linear_array<16>;
+using Buffer = Linear_array<20>;
 
 #endif
 

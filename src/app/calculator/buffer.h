@@ -43,6 +43,7 @@ uint8_t push_back(Linear_array<N>& buf, const char* str)
     while (*str and buf.end() != buf.me()){
 	buf.push_back(*str);
 	++str;
+	++i;
     }
 
     return i;

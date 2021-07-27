@@ -110,7 +110,7 @@ enum yysymbol_kind_t
   YYSYMBOL_5_ = 5,                         /* '-'  */
   YYSYMBOL_6_ = 6,                         /* '*'  */
   YYSYMBOL_7_ = 7,                         /* '/'  */
-  YYSYMBOL_8_n_ = 8,                       /* '\n'  */
+  YYSYMBOL_8_ = 8,                         /* '='  */
   YYSYMBOL_9_x_ = 9,                       /* 'x'  */
   YYSYMBOL_10_ = 10,                       /* '('  */
   YYSYMBOL_11_ = 11,                       /* ')'  */
@@ -453,12 +453,12 @@ union yyalloc
 static const yytype_int8 yytranslate[] =
 {
        0,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       8,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
       10,    11,     6,     4,     2,     5,     2,     7,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     8,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -501,7 +501,7 @@ static const char *yysymbol_name (yysymbol_kind_t yysymbol) YY_ATTRIBUTE_UNUSED;
 static const char *const yytname[] =
 {
   "\"end of file\"", "error", "\"invalid token\"", "NUMBER", "'+'", "'-'",
-  "'*'", "'/'", "'\\n'", "'x'", "'('", "')'", "$accept", "list", "expr", YY_NULLPTR
+  "'*'", "'/'", "'='", "'x'", "'('", "')'", "$accept", "list", "expr", YY_NULLPTR
 };
 
 static const char *
@@ -516,7 +516,7 @@ yysymbol_name (yysymbol_kind_t yysymbol)
    (internal) symbol number NUM (which must be that of a token).  */
 static const yytype_int16 yytoknum[] =
 {
-       0,   256,   257,   258,    43,    45,    42,    47,    10,   120,
+       0,   256,   257,   258,    43,    45,    42,    47,    61,   120,
       40,    41
 };
 #endif
@@ -1063,9 +1063,9 @@ yyreduce:
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
-  case 3: /* list: list expr '\n'  */
+  case 3: /* list: list expr '='  */
 #line 19 "calc.ypp"
-                       {Main::result = yyvsp[-1];}
+                      {Main::result = yyvsp[-1];}
 #line 1070 "calc.tab.cpp"
     break;
 

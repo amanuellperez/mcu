@@ -64,7 +64,7 @@ struct Key {
 class Interface{
 public:
     Interface(LCD& lcd, Keyboard& keyboard)
-	:lcd_{lcd}, keyboard_{keyboard}, buffer_{nullptr}{}
+	:lcd_{lcd}, keyboard_{keyboard}, buffer_{nullptr} {}
 
     void getline(Buffer& buf);
 
@@ -75,11 +75,24 @@ private:
 
     Buffer* buffer_;
 
+// data cursor: (???) Hacer clase Cursor?
+    Buffer::iterator buffer_p_; // caracter que apunta el cursor
+    Buffer::iterator lcd_p0_;	// primer caracter que aparece en el LCD
+
+    uint8_t cursor_x() {return static_cast<uint8_t>(buffer_p_ - lcd_p0_);}
+
+    void redraw_cursor() {lcd_.cursor_pos(cursor_x(), 0);}
+
 // comandos de edición
     void DEL_command();
     void AC_command();
     void to_the_right_command();
     void to_the_left_command();
+
+    void reset();
+    void write(const char* p);
+    void redraw_lcd();
+    void redraw_lcd_from(Buffer::iterator p);
 
 // Data
     static constexpr uint8_t key_return = 4; // '='

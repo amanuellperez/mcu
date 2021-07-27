@@ -23,33 +23,106 @@
 #include "interface.h"
 #include "buffer.h"
 
+void Interface::redraw_lcd_from(Buffer::iterator p)
+{
+    lcd_.cursor_pos(0,0);
+
+    uint8_t i = 0;
+    for (; p != buffer_->end() and i < LCD::cols(); ++p, ++i)
+	lcd_ << *p;
+
+    for (; i < LCD::cols(); ++i)
+	lcd_ << ' ';  // lcd_clear_row(1).from(i);
+
+
+    redraw_cursor();
+}
+
+
+void Interface::redraw_lcd()
+{
+    if (lcd_p0_ > buffer_p_)
+	lcd_p0_ = buffer_p_;
+
+//    else if (lcd_p0_ + LCD::cols() > buffer_p_) { }
+
+    else if (lcd_p0_ + LCD::cols() < buffer_p_)
+	lcd_p0_ = buffer_p_ - LCD::cols();
+
+    redraw_lcd_from(lcd_p0_);
+}
+
+void Interface::reset()
+{
+    lcd_.clear();
+    lcd_p0_ = buffer_->begin();
+
+    buffer_->clear();
+    buffer_p_ = buffer_->begin();
+}
+
+void Interface::write(const char* p)
+{
+    uint8_t n = push_back(*buffer_, p);
+
+    buffer_p_ += n;
+
+    if (cursor_x() < LCD::cols())
+	lcd_ << p;
+
+    else
+	redraw_lcd();
+}
+
+
 void Interface::DEL_command()
 {
-    lcd_ << "DEL!!!";
+    if (buffer_p_ != buffer_->begin()){
+	--buffer_p_;
+	buffer_->remove(buffer_p_);
+	redraw_lcd();
+    }
+
 }
 
 void Interface::AC_command()
 {
-    lcd_.clear();
-    buffer_->clear();
-}
-
-void Interface::to_the_left_command()
-{
-    lcd_ << "to the left cmd";
+    reset();
 }
 
 void Interface::to_the_right_command()
 {
-    lcd_ << "to the right cmd";
+    if (buffer_p_ != buffer_->end()){
+	++buffer_p_;
+
+	if (cursor_x() < LCD::cols())
+	    redraw_cursor();
+
+	else
+	    redraw_lcd();
+    }
+}
+
+void Interface::to_the_left_command()
+{
+    if (buffer_p_ != buffer_->begin()){
+	--buffer_p_;
+
+	if (buffer_p_ > lcd_p0_)
+	    redraw_cursor();
+
+	else
+	    redraw_lcd();
+
+    }
 }
 
 void Interface::getline(Buffer& buffer0)
 {
     buffer_ = &buffer0;
 
-    // init LCD
-    lcd_.clear();
+// init
+    reset();
     lcd_.cursor_on();
 
     // Esperamos a que se pulse una tecla ignorando el bouncing de '\n'
@@ -60,8 +133,6 @@ void Interface::getline(Buffer& buffer0)
 
 
 // read
-    buffer_->clear();
-
     while (buffer_->size() != buffer_->max_size()){
 	if (key == key_return)
 	    break;
@@ -71,17 +142,17 @@ void Interface::getline(Buffer& buffer0)
 
 	else {
 	    const char* p = key_strings[key_commands[key].str_id];
-	    lcd_ << p;
-	    push_back(*buffer_, p);
-	}
+	    write(p);
+
+        }
 
 	wait_ms(debouncing_time);
 
 	key = keyboard_.getkey();
     }
 
-    buffer_->push_back('\n');
     lcd_.cursor_off();
+    lcd_.clear();
 }
 
 

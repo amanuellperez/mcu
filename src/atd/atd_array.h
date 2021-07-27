@@ -335,6 +335,31 @@ public:
     constexpr T pop_front();
 
 
+// Funciones de inserción: 
+    /// Inserta el elemento x en la posición p.
+    /// Ejemplo: array = 12345-----
+    /// al llamar insert(iterator_posicion_3, 9) modifica el array
+    /// como     array = 129345----. Observar que inserta 9 entre 12 y 345.
+    ///
+    /// En caso de que no se pueda copiar la parte derecha, se perderá un
+    /// elemento. Ejemplo: si array = '12345'end, al insertar el 9 como en el
+    /// ejemplo anterior obtenemos array = '12934'end. Como se ve se pierde el
+    /// 5 por no haber memoria donde escribirlo.
+    constexpr void insert(iterator p, const T& x);
+
+    constexpr void insert(size_t i, const T& x) {insert(&p0_[i], x);}
+
+    /// Sinónimo de *p = x.
+    // La doy por consistencia: si hay insert, también hay replace.
+    constexpr void replace(iterator p, const T& x) {*p = x;}
+    
+    // (???) remove or erase? Which name is better?
+    /// Remove element pointed by p.
+    /// Example: if array = '12345---' the call of remove(iterator_of_3)
+    /// returns array = '1245----'
+    constexpr void remove(iterator p);
+
+    constexpr void remove(size_t i) {remove(&p0_[i]);}
 
 // Clear:
     /// Erases all elements from the container.
@@ -426,6 +451,39 @@ inline constexpr T Linear_array<T, N>::pop_front()
 }
 
 
+
+template <typename T, size_t N>
+constexpr void Linear_array<T,N>::insert(iterator p, const T& x)
+{
+    static_assert(N > 0); // --pe_
+
+    if (p != pe_){// move_one_to_the_right_of(p):
+
+	if (pe_ == me()) // garantizamos sea posible hacer ++pe_;
+	    --pe_;
+
+	iterator q = pe_;
+
+	for (; q != p; --q)
+	    *q = q[-1];
+
+    }
+
+    *p = x;
+    ++pe_;
+}
+
+    
+template <typename T, size_t N>
+constexpr void Linear_array<T,N>::remove(iterator p)
+{
+    ++p;
+
+    for(; p != pe_; ++p)
+	p[-1] = *p;
+
+    --pe_;
+}
 
 
 }// namespace

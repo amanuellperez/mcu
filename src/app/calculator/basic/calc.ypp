@@ -16,7 +16,7 @@
 
 
 list: /* nothing */
-      | list expr '\n' {Main::result = $2;}
+      | list expr '=' {Main::result = $2;}
       ;
 
 expr:   NUMBER		{ $$ = $1; }
