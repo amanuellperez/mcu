@@ -274,6 +274,64 @@ void test_shift_left()
 
 }
 
+template <typename T>
+void test_swap(T x, T y)
+{
+    T sx = x;
+    T sy= y;
+
+    mtd::swap(x, y);
+    std::swap(sx, sy);
+    CHECK_TRUE(x == sx and y == sy, "swap");
+    
+}
+
+void test_swap()
+{
+    test::interfaz("swap");
+    test_swap<int>(2, 5);
+    test_swap<std::string>("uno", "dos");
+}
+
+
+void test_reverse(int* x, int* sx, size_t N)
+{
+    mtd::reverse(x, x + N);
+    std::reverse(sx, sx + N);
+
+    CHECK_EQUAL_CONTAINERS(x, x + N, sx, sx + N, "reverse");
+}
+
+
+void test_reverse()
+{
+    test::interfaz("reverse");
+
+{// extreme: 0
+    int* x{};
+    int* sx{};
+    test_reverse(x, sx, 0);
+}
+
+{// extreme: 1
+    int x[1]{2};
+    int sx[1]{2};
+    test_reverse(x, sx, 1);
+}
+
+{// normal: even
+    int x[4] = {1,2,3,4};
+    int sx[4] = {1,2,3,4};
+    test_reverse(x, sx, 4);
+}
+
+{// normal: odd
+    int x[5] = {1,2,3,4,5};
+    int sx[5] = {1,2,3,4,5};
+    test_reverse(x, sx, 5);
+}
+}
+
 
 int main()
 {
@@ -289,6 +347,8 @@ try{
     test_find();
     test_count();
     test_shift_left();
+    test_swap();
+    test_reverse();
 
 }catch(const std::exception& e){
     std::cerr << e.what() << '\n';

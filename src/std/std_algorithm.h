@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez <amanuel.lperez@gmail.com>
+// Copyright (C) 2019-2021 A.Manuel L.Perez <amanuel.lperez@gmail.com>
 //
 // This file is part of the MCU++ Library.
 //
@@ -31,6 +31,7 @@
  *	03/11/2019: find, find_if, find_if_not
  *	16/11/2019: count, count_if
  *	04/02/2020: shift_left
+ *	28/07/2021: swap, reverse
  *
  *   - TODO:
  *	- fill_n: especializarla a memset cuando se trate de arrays.
@@ -39,6 +40,7 @@
 #include "std_config.h"
 
 #include "std_iterator.h"
+#include "std_utility.h"    // std::move
 
 namespace STD{
 // ---------------------------------
@@ -48,8 +50,9 @@ namespace STD{
 
 // for_each
 // --------
-template <typename InputIt, typename UnaryFunction>
-constexpr UnaryFunction for_each(InputIt begin, InputIt end, UnaryFunction f)
+template <typename Input_it, typename Unary_function>
+constexpr Unary_function
+for_each(Input_it begin, Input_it end, Unary_function f)
 {
     for(; begin != end; ++begin)
 	f(*begin);
@@ -58,8 +61,8 @@ constexpr UnaryFunction for_each(InputIt begin, InputIt end, UnaryFunction f)
 }
 
 
-template <typename InputIt, typename Size, typename UnaryFunction>
-constexpr UnaryFunction for_each_n(InputIt begin, Size n, UnaryFunction f)
+template <typename Input_it, typename Size, typename Unary_function>
+constexpr Unary_function for_each_n(Input_it begin, Size n, Unary_function f)
 {
     for(; n != Size{0}; ++begin, --n)
 	f(*begin);
@@ -70,8 +73,8 @@ constexpr UnaryFunction for_each_n(InputIt begin, Size n, UnaryFunction f)
 
 // find
 // ----
-template <typename InputIt, typename T>
-inline constexpr InputIt find(InputIt p0, InputIt pe, const T& value)
+template <typename Input_it, typename T>
+inline constexpr Input_it find(Input_it p0, Input_it pe, const T& value)
 {
     while (p0 != pe and *p0 != value)
 	++p0;
@@ -79,8 +82,8 @@ inline constexpr InputIt find(InputIt p0, InputIt pe, const T& value)
     return p0;
 }
 
-template <typename InputIt, typename UnaryPredicate>
-inline constexpr InputIt find_if(InputIt p0, InputIt pe, UnaryPredicate f)
+template <typename Input_it, typename Unary_predicate>
+inline constexpr Input_it find_if(Input_it p0, Input_it pe, Unary_predicate f)
 {
     while (p0 != pe and !f(*p0))
 	++p0;
@@ -88,8 +91,8 @@ inline constexpr InputIt find_if(InputIt p0, InputIt pe, UnaryPredicate f)
     return p0;
 }
 
-template <typename InputIt, typename UnaryPredicate>
-inline constexpr InputIt find_if_not(InputIt p0, InputIt pe, UnaryPredicate f)
+template <typename Input_it, typename Unary_predicate>
+inline constexpr Input_it find_if_not(Input_it p0, Input_it pe, Unary_predicate f)
 {
     while (p0 != pe and f(*p0))
 	++p0;
@@ -100,11 +103,11 @@ inline constexpr InputIt find_if_not(InputIt p0, InputIt pe, UnaryPredicate f)
 
 // count
 // -----
-template <typename InputIt, typename T>
-constexpr typename iterator_traits<InputIt>::difference_type
-    count (InputIt p0, InputIt pe, const T& value)
+template <typename Input_it, typename T>
+constexpr typename iterator_traits<Input_it>::difference_type
+    count (Input_it p0, Input_it pe, const T& value)
 {
-    typename iterator_traits<InputIt>::difference_type n{0};
+    typename iterator_traits<Input_it>::difference_type n{0};
 
     for (; p0 != pe; ++p0){
 	if (*p0 == value)
@@ -115,11 +118,11 @@ constexpr typename iterator_traits<InputIt>::difference_type
 }
 
 
-template <typename InputIt, typename UnaryPredicate>
-constexpr typename iterator_traits<InputIt>::difference_type
-    count_if (InputIt p0, InputIt pe, UnaryPredicate pred)
+template <typename Input_it, typename Unary_predicate>
+constexpr typename iterator_traits<Input_it>::difference_type
+    count_if (Input_it p0, Input_it pe, Unary_predicate pred)
 {
-    typename iterator_traits<InputIt>::difference_type n{0};
+    typename iterator_traits<Input_it>::difference_type n{0};
 
     for (; p0 != pe; ++p0){
 	if (pred(*p0))
@@ -137,8 +140,8 @@ constexpr typename iterator_traits<InputIt>::difference_type
 
 // fill
 // ----
-template <typename OutputIt, typename T>
-inline constexpr OutputIt fill(OutputIt q, OutputIt qe, const T& value)
+template <typename Output_it, typename T>
+inline constexpr Output_it fill(Output_it q, Output_it qe, const T& value)
 {
     for (; q != qe; ++q)
 	*q = value;
@@ -148,8 +151,8 @@ inline constexpr OutputIt fill(OutputIt q, OutputIt qe, const T& value)
 
 
 
-template <typename OutputIt, typename Size, typename T>
-inline constexpr OutputIt fill_n(OutputIt q, Size n, const T& value)
+template <typename Output_it, typename Size, typename T>
+inline constexpr Output_it fill_n(Output_it q, Size n, const T& value)
 {
     for (; n > 0; ++q, --n)
 	*q = value;
@@ -181,8 +184,10 @@ inline constexpr const T& max(const T& a, const T& b, Compare cmp)
 { return cmp(a, b)? b: a; }
 
 
-template <typename InputIt, typename OutputIt>
-constexpr OutputIt copy(InputIt p, InputIt pe, OutputIt q)
+// copy
+// ----
+template <typename Input_it, typename Output_it>
+constexpr Output_it copy(Input_it p, Input_it pe, Output_it q)
 {
     for (; p != pe; ++p, ++q)
 	*p = *q;
@@ -191,8 +196,8 @@ constexpr OutputIt copy(InputIt p, InputIt pe, OutputIt q)
 }
 
 
-template <typename InputIt, typename Size, typename OutputIt>
-inline constexpr OutputIt copy_n(InputIt p, Size n, OutputIt q)
+template <typename Input_it, typename Size, typename Output_it>
+inline constexpr Output_it copy_n(Input_it p, Size n, Output_it q)
 {
     for (; n > 0; ++p, ++q, --n)
 	*q = *p;
@@ -200,10 +205,11 @@ inline constexpr OutputIt copy_n(InputIt p, Size n, OutputIt q)
     return q;
 }
 
-
-template <typename ForwardIt>
-constexpr ForwardIt shift_left(ForwardIt p0, ForwardIt pe, 
-		typename iterator_traits<ForwardIt>::difference_type n)
+// shift_left
+// ----------
+template <typename Forward_it>
+constexpr Forward_it shift_left(Forward_it p0, Forward_it pe, 
+		typename iterator_traits<Forward_it>::difference_type n)
 {
     if (n <= 0)
 	return pe;
@@ -211,7 +217,7 @@ constexpr ForwardIt shift_left(ForwardIt p0, ForwardIt pe,
     if (n >= distance(p0, pe))
 	return p0;
 
-    ForwardIt q0 = p0;
+    Forward_it q0 = p0;
     advance(p0, n);
 
     for (; p0 != pe; advance(p0, 1), advance(q0, 1))
@@ -222,6 +228,49 @@ constexpr ForwardIt shift_left(ForwardIt p0, ForwardIt pe,
     return q0;
 }
 
+// swap
+// ----
+// ¿por qué pongo STD::move cuando no es necesario STD aqui?
+// En los test de pruebas comparo STD::swap con std::swap. Si pruebo a hacer
+// un swap con std::string el compilador se queja porque no sabe a que move
+// estoy llamando. Por eso lo pongo de forma explícita, para poder probar con
+// std::string.
+template <typename T>
+constexpr void swap(T& a, T& b)
+{
+    T tmp = STD::move(a);
+    a = STD::move(b);
+    b = STD::move(tmp);
+}
+
+
+// reverse
+// -------
+template <typename Bidirectional_it>
+constexpr void reverse(Bidirectional_it p0, Bidirectional_it pe)
+{
+    while (true){
+	if (p0 == pe) return;
+
+	--pe;
+	if (p0 == pe) return;
+
+	swap(*p0, *pe);
+	++p0;
+    }
+
+// Si fuera Random_it se podría implementar:
+//    if (p0 == pe)
+//	return;
+//
+//    --pe; // aquí pe hace las veces de p1
+//
+//    while (p0 < pe){ <--- pero esto no lo tienen los Bidirectional_it!!!
+//	swap(p0, pe);
+//	++p0;
+//	--pe;
+//    }
+}
 
 
 }// namespace
