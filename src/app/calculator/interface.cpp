@@ -46,8 +46,8 @@ void Interface::redraw_lcd()
 
 //    else if (lcd_p0_ + LCD::cols() > buffer_p_) { }
 
-    else if (lcd_p0_ + LCD::cols() < buffer_p_)
-	lcd_p0_ = buffer_p_ - LCD::cols();
+    else if (lcd_p0_ + LCD::cols() <= buffer_p_)
+	lcd_p0_ = buffer_p_ - (LCD::cols() - 1);
 
     redraw_lcd_from(lcd_p0_);
 }
@@ -61,24 +61,27 @@ void Interface::reset()
     buffer_p_ = buffer_->begin();
 }
 
-void Interface::write(const char* p)
+void Interface::write(const char* str)
 {
-    uint8_t n = push_back(*buffer_, p);
+    if (buffer_p_ == buffer_->end()){
+	uint8_t n = push_back(*buffer_, str);
+	buffer_p_ += n;
+    }
 
-    buffer_p_ += n;
+    else{
+	buffer_p_ = insert(*buffer_, buffer_p_, str);
+    }
 
-    if (cursor_x() < LCD::cols())
-	lcd_ << p;
-
-    else
-	redraw_lcd();
+    redraw_lcd();
 }
 
 
 void Interface::DEL_command()
 {
     if (buffer_p_ != buffer_->begin()){
-	--buffer_p_;
+	if (buffer_p_ == buffer_->end())
+	    --buffer_p_;
+
 	buffer_->remove(buffer_p_);
 	redraw_lcd();
     }
@@ -121,7 +124,6 @@ void Interface::getline(Buffer& buffer0)
 {
     buffer_ = &buffer0;
 
-// init
     reset();
     lcd_.cursor_on();
 
@@ -131,29 +133,32 @@ void Interface::getline(Buffer& buffer0)
     while ((key = keyboard_.getkey()) == key_return)
     { }
 
+    read();
 
-// read
-    while (buffer_->size() != buffer_->max_size()){
+    lcd_.cursor_off();
+}
+
+
+
+void Interface::read()
+{
+    while (1) {
+	uint8_t key = keyboard_.getkey();
+
 	if (key == key_return)
-	    break;
+	    return;
 
 	if (key_commands[key].is_command())
 	    key_commands[key].execute_command(this);
 
 	else {
-	    const char* p = key_strings[key_commands[key].str_id];
-	    write(p);
+	    if (buffer_p_ != buffer_->me()){
+		const char* p = key_strings[key_commands[key].str_id];
+		write(p);
+	    }
 
         }
 
 	wait_ms(debouncing_time);
-
-	key = keyboard_.getkey();
     }
-
-    lcd_.cursor_off();
-    lcd_.clear();
 }
-
-
-

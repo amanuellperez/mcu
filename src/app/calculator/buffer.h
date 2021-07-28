@@ -49,6 +49,22 @@ uint8_t push_back(Linear_array<N>& buf, const char* str)
     return i;
 }
 
+
+// Devuelve un iterador a donde continuar insertando elementos.
+template <size_t N>
+typename Linear_array<N>::iterator
+insert(Linear_array<N>& buf, typename Linear_array<N>::iterator p, const char* str)
+{
+    while (*str and p != buf.end()){
+	buf.insert(p, *str);
+	++str;
+	++p;
+    }
+
+    return p;
+}
+
+
 template <size_t N>
 void read(Linear_array<N>& buf, double& x) 
 {

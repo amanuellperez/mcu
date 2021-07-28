@@ -56,10 +56,8 @@ struct Key {
     // null
     static constexpr uint8_t null_id  = 0xFF;
     static constexpr Cmd null_command = nullptr;
-
-
-
 };
+
 
 class Interface{
 public:
@@ -75,7 +73,7 @@ private:
 
     Buffer* buffer_;
 
-// data cursor: (???) Hacer clase Cursor?
+// cursor: (???) Hacer clase Cursor?
     Buffer::iterator buffer_p_; // caracter que apunta el cursor
     Buffer::iterator lcd_p0_;	// primer caracter que aparece en el LCD
 
@@ -94,9 +92,12 @@ private:
     void redraw_lcd();
     void redraw_lcd_from(Buffer::iterator p);
 
+    void read(); // implementacion de getline
+
 // Data
     static constexpr uint8_t key_return = 4; // '='
 
+    // TODO: parametrizarlo
     // los "?" son comandos.
     // TODO: sqrt( ---> por el símbolo de la raíz. 
     static constexpr const char* key_strings[] = 
@@ -114,8 +115,8 @@ private:
 					    Key::cmd(&Interface::DEL_command), 
 					    Key::cmd(&Interface::AC_command),
 	Key::str(20), Key::str(21), Key::str(22), 
-					    Key::cmd(&Interface::to_the_left_command),
-					    Key::cmd(&Interface::to_the_right_command)
+				    Key::cmd(&Interface::to_the_left_command),
+				    Key::cmd(&Interface::to_the_right_command)
     };
     
     static constexpr uint8_t debouncing_time = 200; // ms

@@ -48,8 +48,8 @@ void Main::run()
     while(1){
 	Interface interface{lcd_, keyboard_};
 	interface.getline(buffer_);
-	lcd_.clear();
-	lcd_ << "Buffer = \n";
+	lcd_.cursor_pos(0,1);
+	lcd_ << "Buffer = ";
 	print(lcd_, buffer_);
 	wait_ms(1000);
     }
