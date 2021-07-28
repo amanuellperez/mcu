@@ -1,4 +1,6 @@
-// Copyright (C) 2021 A.Manuel L.Perez <amanuel.lperez@gmail.com>
+// Copyright (C) 2021 A.Manuel L.Perez 
+//           mail: <amanuel.lperez@gmail.com>
+//           https://github.com/amanuellperez/mcu
 //
 // This file is part of the MCU++ Library.
 //
@@ -54,10 +56,9 @@ void Interface::redraw_lcd()
 
 void Interface::reset()
 {
-    lcd_.clear();
-    lcd_p0_ = buffer_->begin();
-
     buffer_->clear();
+
+    lcd_p0_   = buffer_->begin();
     buffer_p_ = buffer_->begin();
 }
 
@@ -125,7 +126,6 @@ void Interface::getline(Buffer& buffer0)
     buffer_ = &buffer0;
 
     reset();
-    lcd_.cursor_on();
 
     // Esperamos a que se pulse una tecla ignorando el bouncing de '\n'
     // (última tecla que pulsamos)
@@ -133,7 +133,10 @@ void Interface::getline(Buffer& buffer0)
     while ((key = keyboard_.getkey()) == key_return)
     { }
 
+    lcd_.cursor_on();
+
     read();
+    buffer_->push_back('='); // caracter de terminación
 
     lcd_.cursor_off();
 }

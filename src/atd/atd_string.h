@@ -1,4 +1,6 @@
-// Copyright (C) 2021 A.Manuel L.Perez <amanuel.lperez@gmail.com>
+// Copyright (C) 2021 A.Manuel L.Perez 
+//           mail: <amanuel.lperez@gmail.com>
+//           https://github.com/amanuellperez/mcu
 //
 // This file is part of the MCU++ Library.
 //
@@ -40,6 +42,38 @@ inline Int digit_to_(char c) {return c - '0';}
 /// digito = del 0 al 9
 template <typename Int>
 inline char digit_to_char(Int x) {return x + '0';}
+
+
+// TODO: se puede llamar to_cstring sin el "int" identificando o bien Int como
+// concept integer, o con metaprogramming.
+// ¿por qué no usar sprintf? Porque sprintf no gestiona el tamaño de la
+// cadena pudiendo generar overflow.
+/// Convierte el entero x en cadena de C guardándolo en [p, sz). Garantiza
+/// que no haya overflow.
+/// Devuelve el número de caracteres ocupados.
+//template <typename Int>
+//size_t int_to_cstring(Int x, const char* p, size_t sz)
+//{
+//    if (x == Int{0}){
+//	*p = '0';
+//	return 1;
+//    }
+////
+////    size_t i = 0;
+////
+////    for (; i < sz - 1; ++i)
+////    {
+////        x *= 10.0;
+////	Int y = static_cast<int>(y);
+////	y /= 10;
+////	str[i] = digit_to_char(y);
+////    }
+////
+////    str[i - 1] = '\0';
+//
+//}
+
+
 
 
 }// namespace

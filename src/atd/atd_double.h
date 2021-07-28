@@ -1,4 +1,6 @@
-// Copyright (C) 2021 A.Manuel L.Perez <amanuel.lperez@gmail.com>
+// Copyright (C) 2021 A.Manuel L.Perez 
+//           mail: <amanuel.lperez@gmail.com>
+//           https://github.com/amanuellperez/mcu
 //
 // This file is part of the MCU++ Library.
 //
@@ -130,8 +132,8 @@ void __print_mantissa(std::ostream& out, const double& x)
 }
 
 
-// TODO: meter en .cpp 
 // ¿cómo imprimir un double en un LCD? Esta función se encarga de ello.
+template <size_t ndigits = 8>
 inline void print(std::ostream& out, double x)
 {
     constexpr char decimal_point = '.'; // TODO: ¿dónde guardarlo? locale?
@@ -142,11 +144,30 @@ inline void print(std::ostream& out, double x)
     
     if (f != 0){
 	out << decimal_point;
-	__print_mantissa(out, f);
+	__print_mantissa<ndigits>(out, f);
     }
 }
 
-
+/// Convierte el double x en una cadena C, guardándola en [p0, sz)
+/// Devuelve el número de caracteres copiados.
+/// ndigits = número de cifras decimales máximo a usar.
+//template <size_t ndigits = 8>
+//size_t to_cstring(const double& x, const char* p0, size_t sz)
+//{
+////    auto [i, f] = modf(x);
+////
+////AQUIII
+////
+////    size_t n = to_string(i, p0, sz);
+////
+////    
+////    if (f != 0){
+////	out << decimal_point;
+////	__print_mantissa<ndigits>(out, f);
+////    }
+////
+//    return n;
+//}
 
 }// namespace
 
