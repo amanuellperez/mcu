@@ -22,6 +22,7 @@
 #include <alp_test.h>
 #include <alp_string.h>
 #include <iostream>
+#include <string>   
 
 
 using namespace test;
@@ -48,18 +49,18 @@ void print(It p, It pe)
 void test_mantissa_to_str(const double& x, const std::string& res)
 {
     std::array<char, 5> str;
-    atd::__mantissa_to_str(x, str);
-    CHECK_TRUE((std::string{str.begin(), str.end()} == res), "__mantissa_to_str");
+    auto [p0, pe] = atd::mantissa_to_str(x, str.begin(), str.end());
+    CHECK_TRUE((std::string{p0, pe} == res), "mantissa_to_str");
 }
 
 void test_mantissa_to_str()
 {
-    test::interfaz("mantissa_to_str0");
+    test::interfaz("mantissa_to_str");
 
-    test_mantissa_to_str(0, "00000");
-    test_mantissa_to_str(0.1234, "12340");
-    test_mantissa_to_str(0.0001, "00010");
-    test_mantissa_to_str(0.0102, "01020");
+    test_mantissa_to_str(0, "0");
+    test_mantissa_to_str(0.1234, "1234");
+    test_mantissa_to_str(0.0001, "0001");
+    test_mantissa_to_str(0.0102, "0102");
     test_mantissa_to_str(0.30045, "30045");
 
 }
@@ -69,11 +70,15 @@ void test_mantissa_to_str()
 void test_modf(double x, double i1, double f1)
 {
     auto [i, f] = atd::modf(x);
+std::cout << x << "->" << i << '@' << f << '\n';
     CHECK_TRUE(equal(i, i1) and equal(f, f1), "modf");
 }
 
 void test_modf()
 {
+    test::interfaz("modf");
+
+
 // normal
     test_modf(2.354, 2, 0.35);
     test_modf(2.354, 2, 0.354);
@@ -84,6 +89,8 @@ void test_modf()
     test_modf(2.354, 2, 0.354);
     test_modf(2.354, 2, 0.354);
     test_modf(2.354, 2, 0.354);
+
+    test_modf(-2.354, -2, -0.354); // CUIDADO con los menos!!!
 }
 
 
@@ -99,8 +106,8 @@ void test_remove_trailing_zeros(char x0, char x1, char x2, char x3,
                                 const std::string& res)
 {
     std::array<char, 4> str{x0, x1, x2, x3};
-    auto pe = atd::__remove_trailing_zeros(str);
-    CHECK_TRUE((std::string{str.begin(), pe} == res), "__remove_trailing_zeros");
+    auto [p0, pe] = atd::__remove_trailing_zeros(str.begin(), str.end());
+    CHECK_TRUE((std::string{p0, pe} == res), "__remove_trailing_zeros");
 }
 
 void test_remove_trailing_zeros()
@@ -116,6 +123,28 @@ void test_remove_trailing_zeros()
     test_remove_trailing_zeros('1', '0', '2', '0', "102");
 }
 
+void test_to_string(double x, const std::string& res)
+{
+    std::array<char, 20> str;
+
+    auto [p0, pe] = atd::to_string(x, str.begin(), str.end());
+// std::cout << x << " --> [" << std::string{p0, pe} << "]\n";
+    CHECK_TRUE((std::string{p0, pe} == res), "to_string");
+}
+
+
+void test_to_string()
+{
+    test::interfaz("to_string");
+
+    test_to_string(1.23, "1.23");
+    test_to_string(-1.03, "-1.03");
+    test_to_string(0.23, "0.23");
+    test_to_string(12.0, "12");
+    test_to_string(23, "23");
+    test_to_string(0, "0");
+
+}
 
 
 int main()
@@ -127,6 +156,7 @@ try{
     test_mantissa_to_str();
     test_modf();
     test_print();
+    test_to_string();
 
 }catch(std::exception& e)
 {

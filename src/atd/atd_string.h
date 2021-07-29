@@ -28,6 +28,7 @@
  *  - HISTORIA:
  *    A.Manuel L.Perez
  *    24/07/2021 to_int, to_char
+ *    29/07/2021 int_to_string
  *
  ****************************************************************************/
 
@@ -44,36 +45,72 @@ template <typename Int>
 inline char digit_to_char(Int x) {return x + '0';}
 
 
-// TODO: se puede llamar to_cstring sin el "int" identificando o bien Int como
-// concept integer, o con metaprogramming.
-// ¿por qué no usar sprintf? Porque sprintf no gestiona el tamaño de la
-// cadena pudiendo generar overflow.
-/// Convierte el entero x en cadena de C guardándolo en [p, sz). Garantiza
-/// que no haya overflow.
-/// Devuelve el número de caracteres ocupados.
-//template <typename Int>
-//size_t int_to_cstring(Int x, const char* p, size_t sz)
-//{
-//    if (x == Int{0}){
-//	*p = '0';
-//	return 1;
-//    }
-////
-////    size_t i = 0;
-////
-////    for (; i < sz - 1; ++i)
-////    {
-////        x *= 10.0;
-////	Int y = static_cast<int>(y);
-////	y /= 10;
-////	str[i] = digit_to_char(y);
-////    }
-////
-////    str[i - 1] = '\0';
-//
-//}
+/// Transforma el entero x en una cadena tipo c, almacenándola en el buffer 
+/// [p0, pe). Devuelve la posición pc en donde EMPIEZA el entero como cadena
+/// El número x como cadena estará almacenado en [pc, pe).
+/// Precondición: x > 0
+/// Es el equivalente a sprintf sin overflow.
+template <typename It, typename Int>
+It __posint_to_string(Int x, It p0, It pe)
+{
+    It pc = pe;
+
+    while (x != 0 and pc != p0){
+	Int r = x % 10;
+	x = (x -  r) / 10;
+	
+	--pc;
+	*pc = digit_to_char(r);
+    }
+
+    return pc;
+}
 
 
+
+/// Transforma el entero x en una cadena tipo c, almacenándola en el buffer 
+/// [p0, pe). Devuelve la posición pc en donde EMPIEZA el entero como cadena
+/// El número x como cadena estará almacenado en [pc, pe).
+///
+/// Si Int es signed esta función falla para el caso en que valga
+/// std::numeric_limits::min() ya que falla el operador -x para este caso.
+/// Es el equivalente a sprintf, salvo que esta función no da overflow (cosa
+/// que sprintf sí que puede generar).
+// Le doy visibilidad a una función de implementación de std no estandar.
+// Observar el convenio de los argumentos: si llamo a la función "to"
+// estamos haciendo x --> [p0, pe), luego el orden tiene que ser primero x y
+// luego [p0, pe).
+// Con todo sería mejor: int(x).to_string(p0, pe); 
+// o mejor:		     x .to_string(p0, pe);
+template <typename It, typename Int>
+It int_to_string(Int x, It p0, It pe)
+{
+    if (p0 == pe)
+	return p0;
+
+    It pc = pe; // = ultima posición donde insertamos una cifra
+    
+    if (x == 0){
+	--pc;
+	*pc = '0';
+	return pc;
+    }
+
+    bool negativo  = false;
+    if (x < 0){
+	negativo = true;
+	x = -x;	// Esta operación falla si x == std::numeric_limits::min()!!!
+    }
+
+    pc = __posint_to_string(x, p0, pe);
+
+    if (negativo and pc != p0){
+	--pc;
+	*pc = '-';
+    }
+
+    return pc;
+}
 
 
 }// namespace

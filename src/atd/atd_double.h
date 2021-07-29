@@ -31,143 +31,135 @@
  *
  *  - HISTORIA:
  *    A.Manuel L.Perez
- *    23/07/2021 modf, print
+ *    23/07/2021 modf, print, 
+ *		 mantissa_to_str_with_zeros, mantissa_to_str,
+ *		 to_string
  *
  ****************************************************************************/
-#include <cmath>
 #include <utility>
-#include <ostream>
 #include <array>
+#include <tuple>    // std::tie
 
-#include "atd_math.h"
-#include "atd_string.h"
 #include "atd_algorithm.h"
-
+#include "atd_string.h"
 
 namespace atd{
 
+constexpr char double_decimal_point = '.'; // TODO: ¿dónde guardarlo? locale?
 
 /// Descompone un double en parte entera y fraccionaria.
 /// Si x = 123.456 devuelve {123, 0.456}. Observar que la parte fraccionaria es
 /// menor que 1.
-inline std::pair<double, double> modf(double x)
-{
-    double integer_part{};
-    double decimal_part = std::modf(x, &integer_part);
+// Lo dejo igual que std::modf, solo cambia la forma de devolver los datos.
+// Esto es, si x = -1.23, devuelve {-1, -0.23}. Observar el signo negativo en
+// la parte fraccionaria (así es como funciona std::modf)
+std::pair<double, double> modf(double x);
 
-    return std::pair{integer_part, decimal_part};
+inline std::pair<double, double> to_integer_and_decimal(double x)
+{
+    auto [i, f] = modf(x);
+    if (f < 0)
+	return {i, -f};
+
+    return {i, f};
 }
 
 
-// No se trata de una función genérica. Sabé que str es un número, y lo que
+// No se trata de una función genérica. Por eso la hago de implementación.
+// Sabé que [p0, pe) es un número, y lo que
 // hace es eliminar todos los ceros a la izquierda. Si el número fuera todo
 // ceros devuelve "0" y no "" que sería lo que haría una función genérica.
-template <size_t N>
-std::array<char, N>::iterator 
-		    __remove_trailing_zeros(std::array<char, N>& str)
-{
-    static_assert(N >= 1); // std::next(begin) ==> minimo 1 elemento.
-
-    auto p = std::find_if(str.rbegin(), str.rend(), 
-			 [](auto x){ return x != '0';});
-
-    if (p == str.rend()) // todo ceros
-	return std::next(str.begin());
-
-    else if (p == str.rbegin())
-	return str.end();
-
-    else
-	return p.base();
-}
+// Devuelve [p0, qe) = cadena que contiene el número sin los ceros al final.
+std::pair<char*, char*> __remove_trailing_zeros(char* p0, char* pe);
 
 
-// Convierte el double 'x' en la cadena de caracteres 'str'.
+// Convierte el double 'x' en cadena almacenándolo en [m0, me).
+// Mantiene los ceros a la izquierda.
+// Ejemplo: si x = 0.123 y [m0, me) son 5 caracteres, devuelve
+//	      [m0, me) = "12300".
+// Precondition: x0 = 0.yyyy (parte entera(x0)  < 1)
+char* mantissa_to_str_with_zeros(const double& x0, char* m0, char* me);
+
+
+// Convierte el double 'x' en la cadena almacenándolo en [m0, me).
 //  Ejemplo: si x = 0.123 y str es de 5 caracteres devuelve str = 12300
 //  No añade '\0' al final, cuidado si se imprime.
 // Precondition: x0 = 0.yyyy (parte entera(x0)  < 1)
-template <size_t N>
-void __mantissa_to_str(const double& x0, std::array<char, N>& str)
-{
-    static_assert(N >= 1); // prev ==> necesita minimo 1 elemento!!!
-    static_assert(N <= 8); // al usar int32_t no puedo almacenar más de 10^8
-                           // si se necesitan más cambiar implementación
-
-    int32_t x = static_cast<int32_t>(x0 * ten_to_the<double>(N));
-
-// to_string:
-    auto p = str.rbegin(); 
-    for (; p != str.rend(); ++p){
-	int y = x % 10;
-	*p = digit_to_char(y);
-	x /= 10;
-    }
-
-    
-// La siguiente implementación no funciona por culpa de que double x = 1.0 no
-// es realmente .0!!!
-//    for (size_t i = 0; i < N - 1; ++i)
-//    {// llenará de 0 str si x = 0
-//        x *= 10.0;
-//	int y = static_cast<int>(y);
-//	y /= 10;
-//	str[i] = digit_to_char(y);
-//	x -= static_cast<double>(y);
-//    }
-//    str[N - 1] = '\0';
-}
+// El número de cifras que se usa es N = size[m0, me) = me - m0
+// Devuelve [p0, pe) = 'x' escrito como cadena de N cifras. En general 
+//	m0 <= p0 <= pe <= me
+std::pair<char*, char*> mantissa_to_str(const double& x0, char* m0, char* me);
 
 
 
 // Precondition: x = +0.yyyy (parte entera = 0)
+// ndigits = número máximo de cifras decimales
 template <size_t ndigits = 8>
 void __print_mantissa(std::ostream& out, const double& x)
 {
     std::array<char, ndigits> str; 
 
-    __mantissa_to_str(x, str);
-    auto pe = __remove_trailing_zeros(str);
+    auto [p0, pe] = mantissa_to_str(x, str.begin(), str.end());
 
-    print(out, str.begin(), pe);
+    print(out, p0, pe);
 }
 
 
 // ¿cómo imprimir un double en un LCD? Esta función se encarga de ello.
 template <size_t ndigits = 8>
-inline void print(std::ostream& out, double x)
+void print(std::ostream& out, double x)
 {
-    constexpr char decimal_point = '.'; // TODO: ¿dónde guardarlo? locale?
 
-    auto [i, f] = modf(x);
+    auto [i, f] = to_integer_and_decimal(x);
     
     out << static_cast<int>(i);
     
     if (f != 0){
-	out << decimal_point;
+	out << double_decimal_point;
 	__print_mantissa<ndigits>(out, f);
     }
 }
 
-/// Convierte el double x en una cadena C, guardándola en [p0, sz)
-/// Devuelve el número de caracteres copiados.
+/// Convierte el double x en una cadena, con ndigits cifras decimales como
+/// máximo, guardándola en [m0, me).
+/// Devuelve el número como cadena [p0, pe). En general:
+///		m0 <= p0 <= pe <= me
+/// En caso de error devuelve {m0, m0}.
 /// ndigits = número de cifras decimales máximo a usar.
-//template <size_t ndigits = 8>
-//size_t to_cstring(const double& x, const char* p0, size_t sz)
-//{
-////    auto [i, f] = modf(x);
-////
-////AQUIII
-////
-////    size_t n = to_string(i, p0, sz);
-////
-////    
-////    if (f != 0){
-////	out << decimal_point;
-////	__print_mantissa<ndigits>(out, f);
-////    }
-////
-//    return n;
-//}
+//// Equivalente a: x.to_cstring(m0, me) [= x --> [m0, me)]
+template <int ndigits = 8>
+std::pair<char*, char*> to_string(const double& x, char* m0, char* me)
+{
+    if (m0 == me)
+	return {m0, m0};
+
+    auto [i, f] = to_integer_and_decimal(x);
+
+    char* p0 = me; 
+    char* pe = me;
+
+    if (f != 0){
+	if (me - m0 < ndigits)
+	    return {m0, m0};	    // error: no hay espacio!!!
+
+	std::tie(p0, pe) = mantissa_to_str(f, me - ndigits, me);
+
+	if (p0 == m0)
+	    return {m0, m0};	    // error: no hay espacio!!!
+
+	--p0;
+	*p0 = double_decimal_point;
+    }
+
+    if (p0 == m0)
+	return {m0, m0};	    // error: no hay espacio!!!
+
+
+    p0 = int_to_string(static_cast<int>(i), m0, p0);
+
+    return {p0, pe};
+}
+
 
 }// namespace
 

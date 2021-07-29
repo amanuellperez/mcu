@@ -15,6 +15,7 @@ INCS= std_cstdio.h		\
 	std_config.h		\
 	std_climits.h		\
 	std_cstddef.h		\
+	std_cstdio.h		\
 	std_cstdint.h		\
 	std_cstdlib.h		\
 	std_ctime.h			\
