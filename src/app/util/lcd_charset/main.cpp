@@ -47,9 +47,9 @@ using LCD_HD44780_screen_1602 = dev::LCD_screen_1602<LCD_HD44780>;
 using LCD_HD44780_screen_2004 = dev::LCD_screen_2004<LCD_HD44780>;
 using LCD_HD44780_screen_4004 = dev::LCD_screen_4004<LCD_HD44780_4004>;
 
-//using LCD = LCD_HD44780_screen_1602;
+using LCD = LCD_HD44780_screen_1602;
 //using LCD = LCD_HD44780_screen_2004;
-using LCD = LCD_HD44780_screen_4004;
+//using LCD = LCD_HD44780_screen_4004;
 
 void print(LCD& lcd, char i)
 {

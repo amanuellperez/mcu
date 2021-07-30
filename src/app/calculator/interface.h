@@ -66,7 +66,11 @@ public:
     Interface(LCD& lcd, Keyboard& keyboard)
 	:lcd_{lcd}, keyboard_{keyboard}, buffer_{nullptr} {}
 
-    void getline(Buffer& buf);
+
+    /// Pantalla inicial que mostramos al encender la calculadora.
+    void initial_screen(); 
+
+    void getline(Buffer& buf, bool error);
 
 private:
 // Data
@@ -96,18 +100,21 @@ private:
 
     void read(); // implementacion de getline
 
+    // Traducimos c en el simbolo a mostrar en pantalla
+    void print_lcd(char c);
+    using symbol = dev::HD44780_charset_A00;
+
 // Data
     static constexpr uint8_t key_return = 4; // '='
 
     // TODO: parametrizarlo
     // los "?" son comandos.
-    // TODO: sqrt( ---> por el símbolo de la raíz. 
     static constexpr const char* key_strings[] = 
-	    {"0", ".", ".", "?", "=",
+	    {"0", ".", "^", "?", "=",
 	     "1", "2", "3", "+", "-",
 	     "4", "5", "6", "x", "/",
 	     "7", "8", "9", "?", "?",
-	     "sqrt(", "(", ")", "?", "?"}; // ultima temporal, para probar
+	     "s"/*=sqrt*/, "(", ")", "?", "?"};
 
     static constexpr std::array<Key, 25> key_commands = {
         Key::str(0) , Key::str(1) , Key::str(2),  Key::str(3),  Key::str(4),  

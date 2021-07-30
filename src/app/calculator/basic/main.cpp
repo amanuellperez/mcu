@@ -28,6 +28,7 @@
 
 #include "lex.h"
 #include "calc.tab.hpp"
+#include "cfg.h"
 
 LCD Main::lcd;
 
@@ -52,16 +53,20 @@ void Main::init_lcd()
 
 void Main::run()
 {
+    error = false;
+    Interface interface{lcd, keyboard_};
+    interface.initial_screen();
+
     while(1){
-	Interface interface{lcd, keyboard_};
-	interface.getline(buffer);
+	interface.getline(buffer, error);
+	error = false;
+
 	yyparse();
-	lcd.cursor_pos(0, 1);
 	if (!error){
-	    atd::print(lcd, result);
+	    lcd.cursor_pos(lcd.cols() - 1, 1);
+	    lcd.screen().print_align_to_the_right<double_ndigits>(result);
 	}
 
-	error = false;
     }
 }
 

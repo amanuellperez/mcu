@@ -21,8 +21,9 @@ int yylex()
 
 void yyerror(const char* s)
 {
+    Main::lcd.screen().clear_row(1);
     Main::lcd.cursor_pos(0,1);
-    Main::lcd << "!" << s;
+    Main::lcd << s;
     Main::error = true;
 }
 

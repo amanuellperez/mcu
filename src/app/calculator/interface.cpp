@@ -25,13 +25,23 @@
 #include "interface.h"
 #include "buffer.h"
 
+void Interface::print_lcd(char c)
+{
+    if (c == 's')
+	lcd_.screen().print(symbol::of("√"));
+    else
+	lcd_ << c;
+
+}
+
 void Interface::redraw_lcd_from(Buffer::iterator p)
 {
     lcd_.cursor_pos(0,0);
 
     uint8_t i = 0;
     for (; p != buffer_->end() and i < LCD::cols(); ++p, ++i)
-	lcd_ << *p;
+	print_lcd(*p);
+//	lcd_ << *p;
 
     for (; i < LCD::cols(); ++i)
 	lcd_ << ' ';  // lcd_clear_row(1).from(i);
@@ -92,6 +102,7 @@ void Interface::DEL_command()
 void Interface::AC_command()
 {
     reset();
+    lcd_.clear();
 }
 
 void Interface::to_the_right_command()
@@ -121,7 +132,19 @@ void Interface::to_the_left_command()
     }
 }
 
-void Interface::getline(Buffer& buffer0)
+void Interface::initial_screen()
+{
+    lcd_.clear();
+    lcd_.cursor_pos(lcd_.cols() - 1, 1);
+    lcd_ << '0';
+    lcd_.cursor_pos(0,0);
+    lcd_.cursor_on();
+
+}
+
+// Hay 2 pantallas: la pantalla normal y la pantalla de error.
+// El parámetro 'error' nos indica en qué pantalla estamos.
+void Interface::getline(Buffer& buffer0, bool error)
 {
     buffer_ = &buffer0;
 
@@ -133,6 +156,9 @@ void Interface::getline(Buffer& buffer0)
     while ((key = keyboard_.getkey()) == key_return)
     { }
 
+    if (error)
+	lcd_.screen().clear_row(1);
+    
     lcd_.cursor_on();
 
     read();
