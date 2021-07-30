@@ -173,6 +173,7 @@ mar de cutres, pero bueno son los primeros y no creo que nadie los vea):
 * [test screen 40 x 04](https://youtu.be/3GiaSXCdTn0)
 
 #### Documentación
+* [Datasheet](datasheet/LCD_HD44780.pdf)
 * app note AN658 de Microchip: [LCD
   Fundamentals](https://www.microchip.com/wwwAppNotes/AppNotes.aspx?appnote=en011075)
 
