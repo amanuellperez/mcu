@@ -4,8 +4,6 @@ Drivers for some devices.
 
 Read the spanish description or look the directory `test`.
 
-TODO: write this in english xD
-
 Tested: avr-gcc 9.2.0
 
 ---
@@ -14,36 +12,54 @@ Tested: avr-gcc 9.2.0
 
 Dispositivos a los que accedemos desde el microcontrolador.
 
-A día de hoy están implementados:
-* EEPROM:
-  25LC256
 
-* Sensores:
-  + BME280
-  + BMP280
-  + DHT22 (revisar)
-  + TMP36 (revisar)
+## EEPROMs
+| Reference | I2C | SPI | 
+|-----------|:---:|:---:|
+| [25LC256](#25LC256)   |     |  x  |
 
-* RTC:
-  + DS1307
+## LCDs
 
-* Counters:
-  + CD4017B
+Driver: [HD44780.](#HD44780)
 
-
-* Pantallas:
-  + LCD: HD44780
-  + Matrix LED: MAX7219
-
-* Potenciómetro digital:
-  + MCP4231
-
-* Registers:
-  + 74HC595: 8-bit serial in, parallel-out shift.
+## Potentiometers (digital)
+| Reference | I2C | SPI |
+|-----------|:---:|:---:|
+|MCP4231    |     |  x  |
 
 
-A parte de los dispositivos incluyo interfaces genéricos:
+## Registers
+| Reference | Comments|
+|-----------| ---- |
+| 54HC595   | 8-bit serial-in, parallel-out shift |
 
+## RTC (Real-Time Clock)
+
+| Reference | I2C | SPI |
+|-----------|:---:|:---:|
+|DS1307	    |  x  |     |
+
+
+## Sensors
+
+| Reference |  T  |  P  |  H  |  G  | I2C | SPI |
+|-----------|:---:|:---:|:---:|:---:|:---:|:---:|
+|BMP280     |  x  |  x  |     |     |  x  |  x  |
+|BME280     |  x  |  x  |  x  |     |  x  |  x  |
+|BME680     |  x  |  x  |  x  |  x  |  x  |  x  |
+|LM75A      |  x  |     |     |     |  x  |     |
+
+
+T = temperature
+
+P = pressure
+
+H = humidity
+
+G = gas
+
+
+## A parte de los dispositivos incluyo interfaces genéricos:
 
 * Dispositivos genéricos:
   + `signal_generator`
@@ -59,13 +75,13 @@ A parte de los dispositivos incluyo interfaces genéricos:
 
 La mejor forma de ver cómo funciona es mirar los test.
 
-Como este paquete se basa en avr y avr lo he ido cambiando a medida que voy ganando
+Como este paquete se basa en `avr` y `avr` lo he ido cambiando a medida que voy ganando
 experiencia los primeros ficheros que hace tiempo que no uso puede que no compilen.
 No los borro ya que con simples cambios seguramente se pueden actualizar.
 
 Los dispositivos que fijo que funcionan (por lo menos a día de hoy) son:
 
-## EEPROM 25LC256
+### <a name="25LC256"></a>EEPROM 25LC256
 
 Formado por varios ficheros:
 
@@ -86,7 +102,7 @@ out.close();
 
 
 
-## LCD HD44780
+### <a name="HD44780">LCD HD44780</a>
 
 Es el típico LCD 16 x 2 ó 20 x 4.
 
@@ -122,7 +138,7 @@ lcd << "hola\n"; // escribo cadenas
 lcd << 25;       // escribo números
 ```
 
-### Tipos de LCDs
+#### Tipos de LCDs
 
 La diferencia fundamental entre los LCDs son:
 1. El driver que usan. De momento el único que tengo implementado es el HD44780.
@@ -135,7 +151,7 @@ La diferencia fundamental entre los LCDs son:
    hay más (ruso por ejemplo).
 
 
-### Algunas referencias:
+#### Algunas referencias:
 * 1602A: el típico que usa la gente de Arduino. Es de 16 x 02. Los hay a 5 V y
   también a 3'3 V.
 * GFC1602M: de 16 x 02, a 5 V, pero reflectante.
@@ -149,14 +165,14 @@ buenos, pero para aprender a manejarlos y jugar con ellos funcionan bien. Son
 bastante más baratos que los que vende Amazon, además que en Amazon no te
 indican ninguna característica con lo que no sabes lo que estas comprando. 
 
-### Vídeos
+#### Vídeos
 Estas son las pruebas de `LCD_screen` (los grabé con el móvil y han quedado la
 mar de cutres, pero bueno son los primeros y no creo que nadie los vea):
 * [test screen 16 x 02](https://youtu.be/Q0Fmtg7nzDE)
 * [test screen 20 x 04](https://youtu.be/garxHAmSEDU) (este se ve fatal)
 * [test screen 40 x 04](https://youtu.be/3GiaSXCdTn0)
 
-### Documentación
+#### Documentación
 * app note AN658 de Microchip: [LCD
   Fundamentals](https://www.microchip.com/wwwAppNotes/AppNotes.aspx?appnote=en011075)
 
