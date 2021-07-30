@@ -34,6 +34,7 @@
  *	06/01/2020 v0.4: Elimino DPin a favor de Pin.
  *	09/01/2021 v0.5: Reestructurado. Lo desvinculo del HD44780.
  *		         Uso Generic_LCD.
+ *	30/07/2021       print_align_to_the_right
  *
  ****************************************************************************/
 #include <stdint.h>
@@ -138,6 +139,25 @@ public:
     /// ancho del lcd.
     void print(const char* c);
 
+
+    /// Imprime la cadena [p0, pe), pero en lugar de escribirla de izda a dcha, 
+    /// como hace print, lo hace de dcha a izda. 
+    /// En principio está pensada para cadenas cortas que entren en una línea
+    /// en el LCD. 
+    void print_align_to_the_right(const char* p0, const char* pe);
+
+    // void print_align_to_the_right(uint8_t x); uint8_t == char!!!!
+    void print_align_to_the_right(uint16_t x);
+    void print_align_to_the_right(const uint32_t& x);
+    void print_align_to_the_right(const uint64_t& x);
+
+    // void print_align_to_the_right(uint8_t x); uint8_t == char!!!!
+    void print_align_to_the_right(int16_t x);
+    void print_align_to_the_right(const int32_t& x);
+    void print_align_to_the_right(const int64_t& x);
+
+    template <int ndigits = 8>
+    void print_align_to_the_right(const double& x);
 
     /// Imprime la línea [p, '\n') escribiendo un máximo de num_max_char
     /// caracteres. Si la línea no entrase en el LCD no hace el wrap sino que la
@@ -315,6 +335,9 @@ private:
     // queda fuera del LCD!!!
     void fill_line(uint8_t n, char c);
 
+    // Implementación para Integers
+    template <typename Int>
+    void print_align_to_the_right_(const Int& x);
 };
 
 template <typename LCD>

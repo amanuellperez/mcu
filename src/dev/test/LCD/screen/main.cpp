@@ -50,9 +50,9 @@ using LCD_HD44780_2004_screen = dev::LCD_screen_2004<LCD_HD44780>;
 using LCD_HD44780_4004_screen = dev::LCD_screen_4004<LCD_HD44780_4004>;
 
 // Choose LCD to test
-//using LCD = LCD_HD44780_1602_screen;
+using LCD = LCD_HD44780_1602_screen;
 //using LCD = LCD_HD44780_2004_screen;
-using LCD = LCD_HD44780_4004_screen;
+//using LCD = LCD_HD44780_4004_screen;
 
 
 // repeat print
@@ -82,6 +82,62 @@ void test_lcd_screen4_1602()
     lcd.print("LCD screen(1602)");
     wait_ms(1000);
 
+// ------
+    {
+    lcd.clear();
+    lcd.cursor_pos(15,0);
+    const char* n = "Align";
+    lcd.print_align_to_the_right(n, n+5);
+    lcd.cursor_pos(4,1);
+    lcd.print_align_to_the_right(n, n+5);
+    wait_ms(1000);
+    }
+
+    lcd.clear();
+    lcd.print("Test align");
+    wait_ms(1000);
+
+    lcd.clear();
+    lcd.print("uint16_t: [123]");
+    lcd.cursor_pos(15, 1);
+    lcd.print_align_to_the_right(uint16_t{123});
+    wait_ms(1000);
+
+    lcd.clear();
+    lcd.print("int16_t: [-123]");
+    lcd.cursor_pos(15, 1);
+    lcd.print_align_to_the_right(int16_t{-123});
+    wait_ms(1000);
+
+    lcd.clear();
+    lcd.print("uint32_t: [123]");
+    lcd.cursor_pos(15, 1);
+    lcd.print_align_to_the_right(uint32_t{123});
+    wait_ms(1000);
+
+    lcd.clear();
+    lcd.print("int32_t: [-123]");
+    lcd.cursor_pos(15, 1);
+    lcd.print_align_to_the_right(int32_t{-123});
+    wait_ms(1000);
+
+    lcd.clear();
+    lcd.print("uint64_t: [123]");
+    lcd.cursor_pos(15, 1);
+    lcd.print_align_to_the_right(uint64_t{123});
+    wait_ms(1000);
+
+    lcd.clear();
+    lcd.print("int64_t: [-123]");
+    lcd.cursor_pos(15, 1);
+    lcd.print_align_to_the_right(int64_t{-123});
+    wait_ms(1000);
+
+    lcd.clear();
+    lcd.print("double: [23.47]");
+    lcd.cursor_pos(15, 1);
+    lcd.print_align_to_the_right<2>(double{23.47});
+    wait_ms(1000);
 
 // ------
     lcd.clear();

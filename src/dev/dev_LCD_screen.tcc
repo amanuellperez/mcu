@@ -1,4 +1,6 @@
-// Copyright (C) 2019-2021 A.Manuel L.Perez
+// Copyright (C) 2019-2021 A.Manuel L.Perez 
+//           mail: <amanuel.lperez@gmail.com>
+//           https://github.com/amanuellperez/mcu
 //
 // This file is part of the MCU++ Library.
 //
@@ -19,11 +21,17 @@
 #ifndef __DEV_LCD_SCREEN_TCC__
 #define __DEV_LCD_SCREEN_TCC__
 
+#include <iterator>	    // std::reverse_iterator
+#include <algorithm>	    // min
+#include <array>
+
 #include <atd_bit.h>
 #include <atd_algorithm.h>
-#include <std_algorithm.h>  // min
+#include <atd_string.h>	    // atd::int_to_string
+#include <atd_double.h>
 
 #include <avr_time.h>
+
 
 namespace dev{
 
@@ -136,6 +144,7 @@ void LCD_screen<num_cols, num_rows, LCD>::print(const char* c)
 	return print_nowrap(c);
 }
 
+
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
 void LCD_screen<num_cols, num_rows, LCD>::print_wrap(const char* c)
 {
@@ -193,6 +202,82 @@ LCD_screen<num_cols, num_rows, LCD>::print_line_nowrap(const char* p,
 
     return p;
 }
+
+template <uint8_t num_cols, uint8_t num_rows, typename LCD>
+void LCD_screen<num_cols, num_rows, LCD>::print_align_to_the_right(
+    const char* p0, const char* pe)
+{
+    if (p0 == pe)
+	return;
+
+    std::reverse_iterator r{pe};
+    std::reverse_iterator re{p0};
+
+    while (x_ > 0 and r != re){
+	lcd_.write_data_to_CG_or_DDRAM(*r);
+	--x_;
+	cursor_pos(x_, y_);
+	++r;
+    }
+
+    if (x_ == 0 and r != re)
+	lcd_.write_data_to_CG_or_DDRAM(*r);
+
+}
+
+
+
+template <uint8_t num_cols, uint8_t num_rows, typename LCD>
+template <typename Int>
+void LCD_screen<num_cols, num_rows, LCD>::print_align_to_the_right_(const Int& x)
+{
+    std::array<char, std::numeric_limits<Int>::digits10 + 1> str;
+    auto p = atd::int_to_string(x, str.begin(), str.end());
+    print_align_to_the_right(p, str.end());
+}
+
+template <uint8_t num_cols, uint8_t num_rows, typename LCD>
+inline void
+LCD_screen<num_cols, num_rows, LCD>::print_align_to_the_right(uint16_t x)
+{ print_align_to_the_right_<uint16_t>(x); }
+
+template <uint8_t num_cols, uint8_t num_rows, typename LCD>
+inline void
+LCD_screen<num_cols, num_rows, LCD>::print_align_to_the_right(const uint32_t& x)
+{ print_align_to_the_right_<uint32_t>(x); }
+
+template <uint8_t num_cols, uint8_t num_rows, typename LCD>
+inline void
+LCD_screen<num_cols, num_rows, LCD>::print_align_to_the_right(const uint64_t& x)
+{ print_align_to_the_right_<uint64_t>(x); }
+
+template <uint8_t num_cols, uint8_t num_rows, typename LCD>
+inline void LCD_screen<num_cols, num_rows, LCD>::print_align_to_the_right(int16_t x)
+{ print_align_to_the_right_<int16_t>(x); }
+
+template <uint8_t num_cols, uint8_t num_rows, typename LCD>
+inline void
+LCD_screen<num_cols, num_rows, LCD>::print_align_to_the_right(const int32_t& x)
+{ print_align_to_the_right_<int32_t>(x); }
+
+template <uint8_t num_cols, uint8_t num_rows, typename LCD>
+inline void
+LCD_screen<num_cols, num_rows, LCD>::print_align_to_the_right(const int64_t& x)
+{ print_align_to_the_right_<int64_t>(x); }
+
+template <uint8_t num_cols, uint8_t num_rows, typename LCD>
+template <int ndigits>
+void
+LCD_screen<num_cols, num_rows, LCD>::print_align_to_the_right(const double& x)
+{
+    constexpr int N = std::numeric_limits<int32_t>::digits10 + 1 + ndigits;
+
+    std::array<char, N> str;
+    auto [p0, pe] = atd::to_string<ndigits>(x, str.begin(), str.end());
+
+    print_align_to_the_right(p0, pe);
+}
+
 
 
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
