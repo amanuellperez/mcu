@@ -10,24 +10,35 @@ ATMEGA328).
 
 This directory contains the following:
 
-* std: (Partial) C++ standard library, without exceptions nor memory allocations.
+* [std](src/std/README.md): (Partial) C++ standard library, 
+  without exceptions nor memory allocations.
  
-* atd: General utilities.
+* [atd](src/atd/README.md): General utilities.
+  Depends on `std`.
   
-* avr: "Drivers" for avr microcontrollers (right now, only for ATMEGA328).
+* [avr](src/avr/README.md): "Drivers" for avr microcontrollers (right now, only for ATMEGA328).
+  Depends on `atd`.
   
-* dev: Devices (LED, LCD, ...)
+* [dev](src/dev/README.md): Devices (LED, LCD, ...)
+  Depends on `avr`.
   
 * debug: Utilities for debug.
   
-* app:           Applications.
+* [app](src/app/README.md): Applications.
+  Depends on `dev`.
   
+
 #### mk: Compilation rules.
 
 #### test and pc_test:
 All the packages has a directory `test` or `pc_test`. The difference between
 them is that `pc_test` are tests to do in the computer (you have to compile
 them with `gcc`) but `test` are tests to do in the microcontroller.
+
+If you want to compile `pc_test` you need some headers files of the 
+[alp](https://github.com/amanuellperez/alp/tree/master/src) project (most
+probably you need to download `alp_test.h`, `alp_test.cpp` and maybe
+`alp_string.h` and `alp_string.cpp`).
 
 
 
@@ -66,6 +77,7 @@ Este directorio lo descompongo de momento en los siguientes:
 
 * [app](src/app/README.md): Aplicaciones.
 
+
 #### mk: Reglas para compilar
 
 #### test y pc_test:
@@ -74,3 +86,7 @@ son test automáticos para realizar en el ordenador. Se compilan con `gcc`
 mientras que `test` son test para realizar en el microcontrolador, compilados
 con `avr-gcc`.
 
+Los `pc_test` necesitan varios ficheros de 
+[alp](https://github.com/amanuellperez/alp/tree/master/src) (otro proyecto).
+Basta con que te descargues `alp_test.h`, `alp_test.cpp`, 
+`alp_string.h` y `alp_string.cpp` para que te compilen.
