@@ -34,7 +34,7 @@
 #include <stdint.h>
 
 #include <dev_LCD_HD44780.h>
-#include <dev_keyboard.h>
+#include <dev_keyrow.h>
 #include <dev_signal_generator.h>
 #include <avr_timer1_generic.h>
 
@@ -59,7 +59,7 @@ constexpr uint8_t Speaker_pin = 15; // Timer1
 // Alimentación y AREF: 20, 21, 22
 
 constexpr uint8_t OK_pin = 23;
-using Keyboard_pins = dev::Keyboard_pins<OK_pin, 24, 25>;
+using Keyrow_pins = dev::Keyrow_pins<OK_pin, 24, 25>;
 
 // available: 26
 
@@ -80,10 +80,10 @@ using LCD_pins = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<LCD_RS_pin>,
 using LCD = dev::LCD_ostream_1602<dev::LCD_HD44780<LCD_pins>>;
 
 
-// keyboard
+// keyrow
 using namespace dev::Key_codes; // UP_KEY, DOWN_KEY
-using Keyboard_codes = dev::Keyboard_codes<OK_KEY, UP_KEY, DOWN_KEY>;
-using Keyboard       = dev::Basic_keyboard<Keyboard_pins, Keyboard_codes>;
+using Keyrow_codes = dev::Keyrow_codes<OK_KEY, UP_KEY, DOWN_KEY>;
+using Keyrow       = dev::Basic_keyrow<Keyrow_pins, Keyrow_codes>;
 using OK_key         = dev::Push_button_level_change<OK_pin>;
 
 

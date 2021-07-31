@@ -61,14 +61,14 @@ G = gas
 ## Keyboards
 
 De momento suministro dos tipos de teclado:
-* `Keyboard`: el nombre está mal elegido ya que es un teclado de una sola fila
-  de pulsadores. De hecho está pensado para que sean 3-4 pulsadores como
+* `Keyrow`: Teclado formado por una fila de pulsadores.
+  Está pensado para que sean 3-4 pulsadores como
   mucho. Cada pulsador está conectado a un pin del microcontrolador.
 
 
 * `Keypad`: es un array de pulsadores colocados en forma de matriz. Lo llamo
   `Keypad` ya que los de Arduino lo llaman así, aunque quizás un nombre más
-  sistemático habría sido `Matrix_key` o algo parecido.
+  sistemático habría sido `Matrix_key`, `Keymatrix` o algo parecido.
 
 
 
@@ -77,7 +77,6 @@ De momento suministro dos tipos de teclado:
 * Dispositivos genéricos:
   + `signal_generator`
   + `system_clock`
-  + `keyboard`
 
 
 * user: interacción con el usuario a través de LCD y Keyboard.

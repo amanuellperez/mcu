@@ -20,7 +20,7 @@
 // Conectar el LCD y 3 pulsadores a los pines indicados
 #include "../../user_choose_string.h"
 #include "../../dev_LCD_HD44780.h"
-#include "../../dev_keyboard.h"
+#include "../../dev_keyrow.h"
 
 #include <atd_cstring.h>    // nstring
 
@@ -36,18 +36,18 @@ using LCD_pins = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<4>,
 				       dev::LCD_HD44780_D4<11,12,13,14>
 				       >;
 
-// keyboard
-using Keyboard_pins  = dev::Keyboard_pins<23, 24, 25>;
+// keyrow
+using Keyrow_pins  = dev::Keyrow_pins<23, 24, 25>;
 
 // código asociado a cada tecla del teclado
 using namespace dev::Key_codes; // OK_KEY, UP_KEY, DOWN_KEY
-using Keyboard_codes  = dev::Keyboard_codes<OK_KEY, UP_KEY, DOWN_KEY>;
+using Keyrow_codes  = dev::Keyrow_codes<OK_KEY, UP_KEY, DOWN_KEY>;
 
 
 
 // dispositivos que conectamos
 // ---------------------------
-using Keyboard = dev::Basic_keyboard<Keyboard_pins, Keyboard_codes>;
+using Keyrow = dev::Basic_keyrow<Keyrow_pins, Keyrow_codes>;
 
 
 using LCD_HD44780 = dev::LCD_HD44780<LCD_pins>;
@@ -72,7 +72,7 @@ void test_lcd_menu()
 {
     LCD lcd;
 
-    Keyboard keyboard;
+    Keyrow keyrow;
 
     constexpr std::array menu ={
 	"0. cero",
@@ -92,7 +92,7 @@ void test_lcd_menu()
 
 	lcd.clear();
 	lcd << "Elige (circular): ";
-	uint8_t day = dev::user_choose_string_circular<1>(lcd.screen(), keyboard, 
+	uint8_t day = dev::user_choose_string_circular<1>(lcd.screen(), keyrow, 
 		    atd::Array_const_nstrings{days, 1})
                          .pos(7, 1)
                          .show(0);
@@ -106,7 +106,7 @@ void test_lcd_menu()
 
 	lcd.clear();
 	lcd << "Elige: (circular) ";
-	uint8_t day2 = dev::user_choose_string_circular<2>(lcd.screen(), keyboard, 
+	uint8_t day2 = dev::user_choose_string_circular<2>(lcd.screen(), keyrow, 
 		    atd::Array_const_nstrings{days2, 2})
                          .pos(7, 1)
                          .show(2);
@@ -118,7 +118,7 @@ void test_lcd_menu()
 
 	lcd.clear();
 	lcd << "Elige: ";
-	uint8_t unidad = dev::user_choose_string_lineal<4>(lcd.screen(), keyboard, menu_unidad_tiempo)
+	uint8_t unidad = dev::user_choose_string_lineal<4>(lcd.screen(), keyrow, menu_unidad_tiempo)
                          .pos(7, 1)
                          .show(1);
 
@@ -129,7 +129,7 @@ void test_lcd_menu()
 	lcd.clear();
 	lcd << "Elige: ";
 	// uint16_t en lugar de uint8_t para poder imprimirlo en lcd <<.
-        uint16_t seleccion = dev::user_choose_string_lineal<4>(lcd.screen(), keyboard, menu)
+        uint16_t seleccion = dev::user_choose_string_lineal<4>(lcd.screen(), keyrow, menu)
                                  .pos(6, 1)
                                  .show();
 
@@ -140,7 +140,7 @@ void test_lcd_menu()
 
 	lcd.clear();
 	lcd << "Elige: xxxx = unidades";
-        seleccion = dev::user_choose_string_lineal<4>(lcd.screen(), keyboard, menu2)
+        seleccion = dev::user_choose_string_lineal<4>(lcd.screen(), keyrow, menu2)
 				 .pos(7,0)
                                  .show();
 
@@ -151,7 +151,7 @@ void test_lcd_menu()
 
 
 	lcd.clear();
-	seleccion = dev::user_choose_string_lineal<10,2>(lcd.screen(), keyboard, menu)
+	seleccion = dev::user_choose_string_lineal<10,2>(lcd.screen(), keyrow, menu)
 			    .pos(0, 1)
 			    .show(3);
 
@@ -163,7 +163,7 @@ void test_lcd_menu()
 	lcd << "Todo bien? ";
 	constexpr std::array sino = {"si", "no"};
         seleccion =
-            dev::user_choose_string_lineal<2,2>(lcd.screen(), keyboard, sino).show(0);
+            dev::user_choose_string_lineal<2,2>(lcd.screen(), keyrow, sino).show(0);
 
         lcd.clear();
 	lcd << "seleccion:\n" << seleccion;
@@ -173,7 +173,7 @@ void test_lcd_menu()
 	lcd.clear();
 	lcd << "Todo bien (2)? ";
         seleccion =
-            dev::user_choose_string_lineal<2>(lcd.screen(), keyboard, sino).show(0);
+            dev::user_choose_string_lineal<2>(lcd.screen(), keyrow, sino).show(0);
 
         lcd.clear();
 	lcd << "seleccion:\n" << seleccion;

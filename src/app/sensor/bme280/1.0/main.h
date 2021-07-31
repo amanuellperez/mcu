@@ -74,7 +74,7 @@ struct Window_main{
     Main* main_;
 
     LCD_ostream& lcd();
-    Keyboard keyboard();
+    Keyrow keyboard();
     RTC& rtc();
     Sensor& sensor();
 
@@ -88,7 +88,7 @@ public:
 
 // Hardware
     LCD_ostream lcd_;
-    Keyboard keyboard_;
+    Keyrow keyboard_;
 
     Sensor sensor_;
     RTC rtc_;
@@ -149,7 +149,7 @@ inline void wait_release_key()
 
 
 inline LCD_ostream& Window_main::lcd() {return main_->lcd_;}
-inline Keyboard Window_main::keyboard() {return main_->keyboard_;}
+inline Keyrow Window_main::keyboard() {return main_->keyboard_;}
 inline RTC& Window_main::rtc() {return main_->rtc_;}
 inline Sensor& Window_main::sensor() {return main_->sensor_;}
 

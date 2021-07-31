@@ -41,7 +41,7 @@ public:
 private:
 // Hardware
     LCD_ostream lcd_;
-    Keyboard keyboard_;
+    Keyrow keyboard_;
     RTC rtc_;
 
 

@@ -36,7 +36,7 @@ struct Main {
 
 // Hardware
     LCD lcd_;
-    Keyboard keyboard_;
+    Keyrow keyboard_;
     OK_key ok_key_;
     Square_wave_generator speaker_;
 

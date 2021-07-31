@@ -94,7 +94,7 @@
 #include <atd_metronome.h>
 #include <atd_types.h>
 
-#include "dev_keyboard.h"
+#include "dev_keyrow.h"
 
 namespace dev{
 
@@ -142,7 +142,7 @@ constexpr int user_choose_number_type_circular = 1;
  *	   No está claro que eso sea realmente una optimización y puede que
  *	   por ahorrar un par de bytes se genere bastante más código.
  */
-template <typename LCD, typename Keyboard3, 
+template <typename LCD, typename Keyrow3, 
 	  int type0, typename Rep0, 
 	  typename Main = atd::Empty_struct>
 class User_choose_number{
@@ -161,10 +161,10 @@ public:
     // -------------
     /// Mostramos el número en el LCD e interaccionamos con el usuario via
     /// el teclado indicado.
-    User_choose_number(Main& app, LCD& lcd, Keyboard3)
+    User_choose_number(Main& app, LCD& lcd, Keyrow3)
 		    :lcd_{lcd}, app_{&app}{}
 
-    User_choose_number(LCD& lcd, Keyboard3)
+    User_choose_number(LCD& lcd, Keyrow3)
 		    :lcd_{lcd}, app_{nullptr}{}
 
     /// Posición (col, row) del LCD donde mostramos el número a elegir.
@@ -196,15 +196,15 @@ private:
 // Hardware
     LCD& lcd_;
 
-    // keyboard
+    // keyrow
     static constexpr auto enter_key()
-    { return Keyboard3::template key<Basic_keyboard_code::enter>(); }
+    { return Keyrow3::template key<Basic_keyrow_code::enter>(); }
 
     static constexpr auto up_key()
-    { return Keyboard3::template key<Basic_keyboard_code::up>(); }
+    { return Keyrow3::template key<Basic_keyrow_code::up>(); }
 
     static constexpr auto down_key()
-    { return Keyboard3::template key<Basic_keyboard_code::down>(); }
+    { return Keyrow3::template key<Basic_keyrow_code::down>(); }
 
 
 // Counter

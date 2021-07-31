@@ -36,7 +36,7 @@ struct Main {
 
 // Hardware
     LCD lcd_;
-    Keyboard keyboard_;
+    Keyrow keyboard_;
     Stroboscope stroboscope_;
 
 //    enum class Key{ ok, up, down, none };

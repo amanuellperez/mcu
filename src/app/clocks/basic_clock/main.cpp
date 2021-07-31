@@ -28,6 +28,7 @@ Main::Main()
 // init_hardware():
     init_lcd();
     init_keyboard();
+
     init_system_clock();
 }
 

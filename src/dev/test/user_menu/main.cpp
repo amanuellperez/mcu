@@ -20,7 +20,7 @@
 // Conectar el LCD y 3 pulsadores a los pines indicados
 #include "../../user_menu.h"
 #include "../../dev_LCD_HD44780.h"
-#include "../../dev_keyboard.h"
+#include "../../dev_keyrow.h"
 
 #include <avr_time.h>
 
@@ -35,18 +35,18 @@ using LCD_pins = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<4>,
 				       dev::LCD_HD44780_D4<11,12,13,14>
 				       >;
 
-// keyboard
-using Keyboard_pins  = dev::Keyboard_pins<23, 24, 25>;
+// keyrow
+using Keyrow_pins  = dev::Keyrow_pins<23, 24, 25>;
 
 // código asociado a cada tecla del teclado
 using namespace dev::Key_codes; // OK_KEY, UP_KEY, DOWN_KEY
-using Keyboard_codes  = dev::Keyboard_codes<OK_KEY, UP_KEY, DOWN_KEY>;
+using Keyrow_codes  = dev::Keyrow_codes<OK_KEY, UP_KEY, DOWN_KEY>;
 
 
 
 // dispositivos que conectamos
 // ---------------------------
-using Keyboard = dev::Basic_keyboard<Keyboard_pins, Keyboard_codes>;
+using Keyrow = dev::Basic_keyrow<Keyrow_pins, Keyrow_codes>;
 
 
 using LCD_HD44780 = dev::LCD_HD44780<LCD_pins>;
@@ -78,7 +78,7 @@ struct Main{
 
 // Hardware
     LCD lcd;
-    Keyboard keyboard;
+    Keyrow keyrow;
 
     void show_menu(uint8_t n);
 
@@ -90,7 +90,7 @@ struct Main{
 
 void Main::run()
 {
-    auto menu = dev::lcd_menu<Options>(this, lcd, keyboard, menu_str);
+    auto menu = dev::lcd_menu<Options>(this, lcd, keyrow, menu_str);
 
     while(1){
 	menu.show_menu(0);

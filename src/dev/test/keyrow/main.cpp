@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez 
+// Copyright (C) 2019-2021 A.Manuel L.Perez 
 //           mail: <amanuel.lperez@gmail.com>
 //           https://github.com/amanuellperez/mcu
 //
@@ -20,43 +20,43 @@
 // Conectar 3 pulsadores a los pines indicados. La salida la mostramos por
 // UART.
 #include <avr_UART.h>
-#include "../../dev_keyboard.h"
+#include "../../dev_keyrow.h"
 
 #include <avr_time.h>
 
 // pines a los que conectamos el teclado
-using Keyboard_2pins = dev::Keyboard_pins<24, 25>;
-using Keyboard_pins  = dev::Keyboard_pins<23, 24, 25>;
+using Keyrow_2pins = dev::Keyrow_pins<24, 25>;
+using Keyrow_pins  = dev::Keyrow_pins<23, 24, 25>;
 
 // código asociado a cada tecla del teclado
 using namespace dev::Key_codes; // OK_KEY, UP_KEY, DOWN_KEY
-using Keyboard_2codes = dev::Keyboard_codes<UP_KEY, DOWN_KEY>;
-using Keyboard_codes  = dev::Keyboard_codes<OK_KEY, UP_KEY, DOWN_KEY>;
+using Keyrow_2codes = dev::Keyrow_codes<UP_KEY, DOWN_KEY>;
+using Keyrow_codes  = dev::Keyrow_codes<OK_KEY, UP_KEY, DOWN_KEY>;
 
 // dispositivos que conectamos
-using Keyboard = dev::Basic_keyboard<Keyboard_pins, Keyboard_codes>;
-//using Keyboard = dev::Basic_keyboard<Keyboard_2pins, Keyboard_2codes>;
+using Keyrow = dev::Basic_keyrow<Keyrow_pins, Keyrow_codes>;
+//using Keyrow = dev::Basic_keyrow<Keyrow_2pins, Keyrow_2codes>;
 
 
-void test_keyboard()
+void test_keyrow()
 {
     avr::UART_iostream uart;
     uart << "\n\nPress test\n";
 
-    Keyboard keyboard;
+    Keyrow keyrow;
 
     while (1){
-	if (Keyboard::key<OK_KEY>().is_pressed())
+	if (Keyrow::key<OK_KEY>().is_pressed())
 	    uart << "enter\n" << std::flush;
 
-	if (keyboard.key<UP_KEY>().is_pressed())
+	if (keyrow.key<UP_KEY>().is_pressed())
 	    uart << "up\n" << std::flush;
 
-	if (keyboard.key<DOWN_KEY>().is_pressed())
+	if (keyrow.key<DOWN_KEY>().is_pressed())
 	    uart << "down\n" << std::flush;
 
 	// CHECK_DONT_COMPILE
-//	if (keyboard.key<100>().is_pressed())
+//	if (keyrow.key<100>().is_pressed())
 //	  uart << "error no tiene que compilar\n" << std::flush;
 	wait_ms(100);
     }
@@ -68,10 +68,10 @@ void test_scan()
 
     uart << "\n\nRead test\n";
 
-    Keyboard keyboard;
+    Keyrow keyrow;
     
     while(1){
-	uint8_t c = keyboard.scan();
+	uint8_t c = keyrow.scan();
 	switch(c){
 	    case OK_KEY: uart << "ok\n"; break;
 	    case UP_KEY: uart << "up\n"; break;
@@ -91,7 +91,7 @@ int main()
     avr::basic_cfg(uart);
     uart.on();
 
-    uart << "\n\nKeyboard test\n"
+    uart << "\n\nKeyrow test\n"
 	        "-------------\n";
 
     uart << "Menu:\n"
@@ -102,7 +102,7 @@ int main()
     uart >> c;
 
     if (c == '1')
-	test_keyboard();
+	test_keyrow();
     else
 	test_scan();
 }

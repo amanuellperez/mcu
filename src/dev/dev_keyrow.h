@@ -20,17 +20,18 @@
 
 #pragma once
 
-#ifndef __DEV_KEYBOARD_H__
-#define __DEV_KEYBOARD_H__
+#ifndef __DEV_KEYROW_H__
+#define __DEV_KEYROW_H__
 
 /****************************************************************************
  *
- *  - DESCRIPCION: Teclado vulgar y corriente.
+ *  - DESCRIPCION: Teclado de una sola fila de pulsadores.
  *
  *  - HISTORIA:
  *    A.Manuel L.Perez
  *    07/01/2020 v0.0 Introduzco codificación de caracteres.
  *    20/02/2021      scan 
+ *    31/07/2021      Rename: Keyrow --> KeyRow
  *
  ****************************************************************************/
 #include "dev_push_button.h"
@@ -39,11 +40,11 @@
 
 namespace dev{
 /*!
-\brief  Códificación de caracteres usadas en las Basic_keyboards
+\brief  Códificación de caracteres usadas en las Basic_keyrows
   
-see: Basic_keyboard3 for rationale.
+see: Basic_keyrow3 for rationale.
  */
-struct Basic_keyboard_code{
+struct Basic_keyrow_code{
     static constexpr uint8_t enter = '\n';
     static constexpr uint8_t up    = 200;
     static constexpr uint8_t down  = 201;
@@ -56,20 +57,20 @@ struct Basic_keyboard_code{
 
 // syntactic sugar
 namespace Key_codes{
-    static constexpr uint8_t NO_KEY = Basic_keyboard_code::null;
-    static constexpr uint8_t OK_KEY = Basic_keyboard_code::enter;
+    static constexpr uint8_t NO_KEY = Basic_keyrow_code::null;
+    static constexpr uint8_t OK_KEY = Basic_keyrow_code::enter;
     static constexpr uint8_t ENTER_KEY = OK_KEY;
-    static constexpr uint8_t UP_KEY = Basic_keyboard_code::up;
-    static constexpr uint8_t DOWN_KEY = Basic_keyboard_code::down;
+    static constexpr uint8_t UP_KEY = Basic_keyrow_code::up;
+    static constexpr uint8_t DOWN_KEY = Basic_keyrow_code::down;
 }
 
 
 
 template <uint8_t... args>
-struct Keyboard_pins : public atd::static_array<uint8_t, args...>{ };
+struct Keyrow_pins : public atd::static_array<uint8_t, args...>{ };
 
 template <uint8_t... args>
-struct Keyboard_codes : public atd::static_array<uint8_t, args...>{ };
+struct Keyrow_codes : public atd::static_array<uint8_t, args...>{ };
 
 
 /*!
@@ -81,10 +82,10 @@ struct Keyboard_codes : public atd::static_array<uint8_t, args...>{ };
 // static_map<uint8_t, uint8_t>!!!
 template <typename Pins,
 	  typename Codes>
-struct Keyboard_code{
+struct Keyrow_code{
     static_assert(Pins::size == Codes::size, "Tienen que ser del mismo tamaño");
 
-    // interfaz genérico necesario para poder hacer el init en Basic_keyboard.
+    // interfaz genérico necesario para poder hacer el init en Basic_keyrow.
     static constexpr uint8_t num_keys = Pins::size;
     // Se supone que en C++17 no es necesario inicializar un static constexpr
     // cuando tiene un constructor por defecto, pero parece ser que la versión
@@ -165,17 +166,17 @@ CODIFICACIÓN
 	En el programa, para ver si se ha pulsado la tecla '\n' escribiremos
 	el siguiente código:
 
-		if (keyboard.key<'\n'>().is_pressed()) ...
+		if (keyrow.key<'\n'>().is_pressed()) ...
   
 	ó directamente:
 
-		if (Keyboard::key<'\n'>().is_pressed()) ...
+		if (Keyrow::key<'\n'>().is_pressed()) ...
   
 	La primera versión me gusta para aplicaciones finales, donde la
 	aplicación tiene un teclado, un LCD, ... Además la ventaja de definir
-	'keyboard' en la primera opción es que el constructor inicializa el
-	teclado de la forma adecuada. Si no se crea un keyboard hay que llamar
-	a la función Keyboard::init() para inicializarlo adecuadamente.
+	'keyrow' en la primera opción es que el constructor inicializa el
+	teclado de la forma adecuada. Si no se crea un keyrow hay que llamar
+	a la función Keyrow::init() para inicializarlo adecuadamente.
 
 	La segunda es mejor para bibliotecas.
 
@@ -187,17 +188,17 @@ PROBLEMA CON LA CODIFICACIÓN
     un montón de "asciis extendidos". 
 
     Solución 1: 
-	crear mis propios códigos. Lo implemento como Basic_keyboard_code.
+	crear mis propios códigos. Lo implemento como Basic_keyrow_code.
 	De esta forma las funciones de biblioteca saben qué teclas tiene el 
 	teclado (up, down and ok) sin necesidad de saber los pines donde están 
 	conectados.
 
  */
 template <typename Pins, typename Codes>
-struct Basic_keyboard{
-    using Code = Keyboard_code<Pins, Codes>;
+struct Basic_keyrow{
+    using Code = Keyrow_code<Pins, Codes>;
 
-    constexpr Basic_keyboard() {init();}
+    constexpr Basic_keyrow() {init();}
 
 //  Se limita a hacer:
 //  for(uint8_t i = 0; i < Code::num_keys; ++i)

@@ -38,19 +38,19 @@ using LCD_pins = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<4>,
 				       dev::LCD_HD44780_D4<11,12,13,14>
 				       >;
 
-// keyboard
+// keyrow
 // pines a los que conectamos el teclado
-using Keyboard_pins  = dev::Keyboard_pins<23, 24, 25>;
+using Keyrow_pins  = dev::Keyrow_pins<23, 24, 25>;
 
 // código asociado a cada tecla del teclado
 using namespace dev::Key_codes; // OK_KEY, UP_KEY, DOWN_KEY
-using Keyboard_codes  = dev::Keyboard_codes<OK_KEY, UP_KEY, DOWN_KEY>;
+using Keyrow_codes  = dev::Keyrow_codes<OK_KEY, UP_KEY, DOWN_KEY>;
 
 
 
 // dispositivos que conectamos
 // ---------------------------
-using Keyboard = dev::Basic_keyboard<Keyboard_pins, Keyboard_codes>;
+using Keyrow = dev::Basic_keyrow<Keyrow_pins, Keyrow_codes>;
 
 using LCD_HD44780 = dev::LCD_HD44780<LCD_pins>;
 
@@ -86,7 +86,7 @@ void test_choose_number2()
 
     LCD& lcd = app.lcd;
 
-    Keyboard keyboard;
+    Keyrow keyrow;
 
     lcd.clear();
     lcd << "Choose number";
@@ -100,7 +100,7 @@ void test_choose_number2()
     lcd.clear();
     lcd << "Big number";
     wait_ms(1000);
-    uint16_t u16  =  dev::user_choose_number_lineal(lcd, keyboard).pos(3, 1)
+    uint16_t u16  =  dev::user_choose_number_lineal(lcd, keyrow).pos(3, 1)
 					     .between(10, 60000)
 					     .choose4(2900);
     lcd.cursor_pos(0,0);
@@ -115,7 +115,7 @@ void test_choose_number2()
     lcd.clear();
     lcd << "2 digits [5,25]";
     wait_ms(1000);
-    uint8_t u8 =  dev::user_choose_number_lineal(lcd, keyboard).pos(3, 1)
+    uint8_t u8 =  dev::user_choose_number_lineal(lcd, keyrow).pos(3, 1)
 					 .between(5, 25)
 					 .choose2(10);
     lcd.cursor_pos(0,0);
@@ -125,7 +125,7 @@ void test_choose_number2()
 
     lcd.clear();
     lcd << "4 [2890, 2910]";
-    uint16_t u16  =  dev::user_choose_number_lineal(lcd, keyboard).pos(3, 1)
+    uint16_t u16  =  dev::user_choose_number_lineal(lcd, keyrow).pos(3, 1)
 					     .between(2890, 2910)
 					     .choose4(2900);
     lcd.cursor_pos(0,0);
@@ -140,7 +140,7 @@ void test_choose_number2()
     lcd.clear();
     lcd << "2 digits [5,25]";
     wait_ms(1000);
-    u8 =  dev::user_choose_number_circular(lcd, keyboard).pos(3, 1)
+    u8 =  dev::user_choose_number_circular(lcd, keyrow).pos(3, 1)
 					 .between(5, 25)
 					 .choose2(10);
     lcd.cursor_pos(0,0);
@@ -150,7 +150,7 @@ void test_choose_number2()
 
     lcd.clear();
     lcd << "4 [2890, 2910]";
-    u16  =  dev::user_choose_number_circular(lcd, keyboard).pos(3, 1)
+    u16  =  dev::user_choose_number_circular(lcd, keyrow).pos(3, 1)
 					     .between(2890, 2910)
 					     .choose4(2900);
     lcd.cursor_pos(0,0);
@@ -162,7 +162,7 @@ void test_choose_number2()
     lcd.clear();
     lcd << "Callback test";
     wait_ms(1000);
-    uint16_t u16  =  dev::user_choose_number_lineal(app, lcd, keyboard).pos(3, 1)
+    uint16_t u16  =  dev::user_choose_number_lineal(app, lcd, keyrow).pos(3, 1)
 					     .between(10, 30)
 					     .callback(&Main::f)
 					     .choose4(20);
@@ -179,8 +179,8 @@ using namespace avr::literals;
     lcd.clear();
     lcd << "Freq. [5,25]";
     avr::Frequency u8 =
-        dev::user_choose_number_lineal<LCD, Keyboard, avr::Frequency>
-	     (lcd, keyboard)
+        dev::user_choose_number_lineal<LCD, Keyrow, avr::Frequency>
+	     (lcd, keyrow)
             .pos(3, 1)
             .between(5_Hz, 25_Hz)
             .choose2(10_Hz);
@@ -195,7 +195,7 @@ using Rep = atd::Decimal<uint16_t, 2>;
     lcd.clear();
     lcd << "Decimal [5,25]";
     wait_ms(1000);
-    Rep u8 = dev::user_choose_number_lineal<LCD, Keyboard, Rep>(lcd, keyboard)
+    Rep u8 = dev::user_choose_number_lineal<LCD, Keyrow, Rep>(lcd, keyrow)
 		     .pos(3, 1)
 		     .between(5, 25)
 		     .choose2(10);

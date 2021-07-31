@@ -37,7 +37,7 @@
 
 #include <atd_cstring.h>
 
-#include "dev_keyboard.h"
+#include "dev_keyrow.h"
 
 namespace dev{
 
@@ -49,11 +49,11 @@ constexpr int user_choose_string_type_circular = 1;
 // En los LCD se suele dar cols x rows (al contrario que en las matrices).
 // Seguiré con esa convención aquí.
 template <typename LCD_t,
-          typename Keyboard3_t,
+          typename Keyrow3_t,
           uint8_t ncols, uint8_t nrows>
 struct User_choose_string_interface {
     using LCD                     = LCD_t;
-    using Keyboard3               = Keyboard3_t;
+    using Keyrow3               = Keyrow3_t;
     static constexpr uint8_t rows = nrows;
     static constexpr uint8_t cols = ncols;
 };
@@ -88,14 +88,14 @@ public:
     static constexpr int type = type0; // lineal o circular
 
     using LCD	    = Interface::LCD;
-    using Keyboard3 = Interface::Keyboard3;
+    using Keyrow3 = Interface::Keyrow3;
 
     using size_type = typename Array::size_type;
 
     /// Mostramos el número en el LCD e interaccionamos con el usuario via
     /// el teclado indicado.
     User_choose_string(LCD& lcd,
-                       Keyboard3,
+                       Keyrow3,
                        const Array& str);
 
     // Dejamos el LCD en el estado en que se encontraba.
@@ -124,15 +124,15 @@ private:
     // Dispositivos a los que conectamos este menu
     LCD& lcd_;	    
 
-    // keyboard
+    // keyrow
     static constexpr auto enter_key()
-    { return Keyboard3::template key<Basic_keyboard_code::enter>(); }
+    { return Keyrow3::template key<Basic_keyrow_code::enter>(); }
 
     static constexpr auto up_key()
-    { return Keyboard3::template key<Basic_keyboard_code::up>(); }
+    { return Keyrow3::template key<Basic_keyrow_code::up>(); }
 
     static constexpr auto down_key()
-    { return Keyboard3::template key<Basic_keyboard_code::down>(); }
+    { return Keyrow3::template key<Basic_keyrow_code::down>(); }
 
 
     // Menu y opciones seleccionadas.
@@ -222,7 +222,7 @@ private:
 
 template <typename I, typename Array, int t>
 inline User_choose_string<I, Array, t>::User_choose_string(
-    LCD& lcd, Keyboard3, const Array& str0)
+    LCD& lcd, Keyrow3, const Array& str0)
     : lcd_{lcd}, str_{str0}, 
       y0_{0}, 
       xm_{lcd.cursor_pos_x()}, ym_{0}, yr_{0}
@@ -419,14 +419,14 @@ typename User_choose_string<I, A, t>::Redraw
 
 // syntactic sugar
 template <uint8_t ncols, uint8_t nrows = 1, 
-	 typename LCD, typename Keyboard3, 
+	 typename LCD, typename Keyrow3, 
 	 typename Array>
-User_choose_string<User_choose_string_interface<LCD, Keyboard3, ncols, nrows>, 
+User_choose_string<User_choose_string_interface<LCD, Keyrow3, ncols, nrows>, 
 		   Array, user_choose_string_type_lineal>
-user_choose_string_lineal(LCD& lcd, Keyboard3 k, const Array& str)
+user_choose_string_lineal(LCD& lcd, Keyrow3 k, const Array& str)
 
 {
-    using Interface = User_choose_string_interface<LCD, Keyboard3,
+    using Interface = User_choose_string_interface<LCD, Keyrow3,
 						   ncols, nrows>;
     return 
 	User_choose_string<Interface, Array, user_choose_string_type_lineal>
@@ -435,14 +435,14 @@ user_choose_string_lineal(LCD& lcd, Keyboard3 k, const Array& str)
 
 
 template <uint8_t ncols, uint8_t nrows = 1, 
-	 typename LCD, typename Keyboard3, 
+	 typename LCD, typename Keyrow3, 
 	 typename Array>
-User_choose_string<User_choose_string_interface<LCD, Keyboard3, ncols, nrows>, 
+User_choose_string<User_choose_string_interface<LCD, Keyrow3, ncols, nrows>, 
 		   Array, user_choose_string_type_circular>
-user_choose_string_circular(LCD& lcd, Keyboard3 k, const Array& str)
+user_choose_string_circular(LCD& lcd, Keyrow3 k, const Array& str)
 
 {
-    using Interface = User_choose_string_interface<LCD, Keyboard3,
+    using Interface = User_choose_string_interface<LCD, Keyrow3,
 						   ncols, nrows>;
     return User_choose_string<Interface,
                               Array,

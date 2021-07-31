@@ -5,8 +5,8 @@ DIRS = 	BMP280			\
 		EEPROM_25LC256	\
 		EEPROM_iostream	\
 		EEPROM_lineal	\
-		keyboard		\
 		keypad			\
+		keyrow			\
 		led				\
 		LCD				\
 		push_button		\

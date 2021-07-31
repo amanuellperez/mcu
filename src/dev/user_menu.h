@@ -141,7 +141,7 @@ private:
  *
  */
 template <typename LCD,
-          typename Keyboard3,
+          typename Keyrow3,
 	  typename Options,
 	  typename Main>
 class LCD_Menu{
@@ -151,7 +151,7 @@ public:
 
     LCD_Menu(Main* main_app,
              LCD& lcd,
-	     Keyboard3& keyboard,
+	     Keyrow3& keyrow,
              const char* const* menu_str)
         : main_{main_app}, lcd_{lcd}, menu_str_{menu_str}
     {}
@@ -162,7 +162,7 @@ public:
 private:
     Main* main_;
     LCD& lcd_;
-    Keyboard3 keyboard_;
+    Keyrow3 keyrow_;
     const char* const* menu_str_; // <-- esto en realidad tiene que
                                   // ser un gestor de memoria,que da acceso a
                                   // memoria RAM o a flash.
@@ -170,16 +170,16 @@ private:
 
 
 template <typename LCD,
-          typename Keyboard3,
+          typename Keyrow3,
 	  typename Options,
 	  typename Main>
-void LCD_Menu<LCD, Keyboard3, Options, Main>::show_menu(uint8_t menu_id)
+void LCD_Menu<LCD, Keyrow3, Options, Main>::show_menu(uint8_t menu_id)
 {
     Menu_number menu{menu_id};
 
     uint8_t res = 
 	dev::user_choose_string_lineal<LCD::cols(), LCD::rows()>(
-		lcd_.screen(), keyboard_,
+		lcd_.screen(), keyrow_,
 		Options_as_array_of_strings(menu, menu_str_))
 		      .pos(0, 0)
 		      .show(0);
@@ -198,14 +198,14 @@ void LCD_Menu<LCD, Keyboard3, Options, Main>::show_menu(uint8_t menu_id)
 
 // syntax sugar
 // ------------
-template <typename Options, typename Main, typename LCD, typename Keyboard3>
-LCD_Menu<LCD, Keyboard3, Options, Main> lcd_menu(Main* main_app,
+template <typename Options, typename Main, typename LCD, typename Keyrow3>
+LCD_Menu<LCD, Keyrow3, Options, Main> lcd_menu(Main* main_app,
                                                  LCD& lcd,
-                                                 Keyboard3 keyboard,
+                                                 Keyrow3 keyrow,
                                                  const char* const* menu_str)
 {
-    return LCD_Menu<LCD, Keyboard3, Options, Main>
-				{main_app, lcd, keyboard, menu_str};
+    return LCD_Menu<LCD, Keyrow3, Options, Main>
+				{main_app, lcd, keyrow, menu_str};
 }
 
 

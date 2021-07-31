@@ -25,7 +25,7 @@
 #include <avr_TWI.h>
 
 #include <dev_LCD_HD44780.h>
-#include <dev_keyboard.h>
+#include <dev_keyrow.h>
 
 #include <dev_BME280_basic.h>
 #include <dev_DS1307_clock.h>
@@ -49,7 +49,7 @@ constexpr uint8_t LCD_D7_pin = 14;
 
 // Alimentación y AREF: 20, 21, 22
 
-using Keyboard_pins = dev::Keyboard_pins<23, 24, 25>;
+using Keyrow_pins = dev::Keyrow_pins<23, 24, 25>;
 
 // available: 26
 
@@ -75,10 +75,10 @@ using LCD_pins = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<LCD_RS_pin>,
 using LCD_ostream = dev::LCD_ostream_1602<dev::LCD_HD44780<LCD_pins>>;
 using lcd_symbol = dev::HD44780_charset_A00;
 
-// keyboard
+// keyrow
 using namespace dev::Key_codes; // OK_KEY, UP_KEY, DOWN_KEY
-using Keyboard_codes = dev::Keyboard_codes<OK_KEY, UP_KEY, DOWN_KEY>;
-using Keyboard       = dev::Basic_keyboard<Keyboard_pins, Keyboard_codes>;
+using Keyrow_codes = dev::Keyrow_codes<OK_KEY, UP_KEY, DOWN_KEY>;
+using Keyrow       = dev::Basic_keyrow<Keyrow_pins, Keyrow_codes>;
 
 
 // Other

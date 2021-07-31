@@ -33,18 +33,18 @@ using LCD_pins = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<4>,
 				       dev::LCD_HD44780_E<6>,
 				       dev::LCD_HD44780_D4<11,12,13,14>
 				       >;
-// keyboard
-using Keyboard_pins  = dev::Keyboard_pins<23, 24, 25>;
+// keyrow
+using Keyrow_pins  = dev::Keyrow_pins<23, 24, 25>;
 
 // código asociado a cada tecla del teclado
 using namespace dev::Key_codes; // OK_KEY, UP_KEY, DOWN_KEY
-using Keyboard_codes  = dev::Keyboard_codes<OK_KEY, UP_KEY, DOWN_KEY>;
+using Keyrow_codes  = dev::Keyrow_codes<OK_KEY, UP_KEY, DOWN_KEY>;
 
 
 
 // dispositivos que conectamos
 // ---------------------------
-using Keyboard = dev::Basic_keyboard<Keyboard_pins, Keyboard_codes>;
+using Keyrow = dev::Basic_keyrow<Keyrow_pins, Keyrow_codes>;
 
 using LCD_HD44780 = dev::LCD_HD44780<LCD_pins>;
 
@@ -77,8 +77,8 @@ tm new_tm()
 constexpr const char* week_days = "DoLuMaMiJuViSa";
 constexpr const uint8_t week_days_length = 2;
 
-template <typename LCD, typename Keyboard, typename T>
-void get_time(LCD& lcd, Keyboard& key, 
+template <typename LCD, typename Keyrow, typename T>
+void get_time(LCD& lcd, Keyrow& key, 
 	      atd::Generic_time<T>& t, 
 	      uint8_t x0, uint8_t y0)
 {
@@ -100,9 +100,9 @@ void get_time(LCD& lcd, Keyboard& key,
 }
 
 
-template <typename LCD, typename Keyboard>
+template <typename LCD, typename Keyrow>
 std::time_t get_time(
-    LCD& lcd, Keyboard& key, const std::time_t& t0, uint8_t x0, uint8_t y0)
+    LCD& lcd, Keyrow& key, const std::time_t& t0, uint8_t x0, uint8_t y0)
 {
     std::tm* mt = std::gmtime(&t0);
     
@@ -116,9 +116,9 @@ std::time_t get_time(
 
 
 
-template <typename LCD, typename Keyboard, typename Clock, typename Duration>
+template <typename LCD, typename Keyrow, typename Clock, typename Duration>
 std::chrono::time_point<Clock, Duration> user_get_datetime(LCD& lcd,
-                                         Keyboard& key,
+                                         Keyrow& key,
                                          const std::chrono::time_point<Clock, Duration>& t0,
                                          uint8_t x0, uint8_t y0)
 {
@@ -128,8 +128,8 @@ std::chrono::time_point<Clock, Duration> user_get_datetime(LCD& lcd,
     return std::chrono::system_clock::from_time_t(t);
 }
 
-template <typename LCD, typename Keyboard, typename T>
-void test_user_time(LCD& lcd, Keyboard key, atd::Generic_time<T> t)
+template <typename LCD, typename Keyrow, typename T>
+void test_user_time(LCD& lcd, Keyrow key, atd::Generic_time<T> t)
 {
     get_time(lcd, key, t, 4, 2);
 
@@ -148,7 +148,7 @@ void test_user_time()
 {
     LCD lcd;
 
-    Keyboard key;
+    Keyrow key;
 
 
     while(1){
