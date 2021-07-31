@@ -58,6 +58,19 @@ H = humidity
 
 G = gas
 
+## Keyboards
+
+De momento suministro dos tipos de teclado:
+* `Keyboard`: el nombre está mal elegido ya que es un teclado de una sola fila
+  de pulsadores. De hecho está pensado para que sean 3-4 pulsadores como
+  mucho. Cada pulsador está conectado a un pin del microcontrolador.
+
+
+* `Keypad`: es un array de pulsadores colocados en forma de matriz. Lo llamo
+  `Keypad` ya que los de Arduino lo llaman así, aunque quizás un nombre más
+  sistemático habría sido `Matrix_key` o algo parecido.
+
+
 
 ## A parte de los dispositivos incluyo interfaces genéricos:
 

@@ -13,6 +13,7 @@ INCS= 	dev_BMP280_basic.h			\
 		dev_EEPROM_iostream.h		\
 		dev_EEPROM_lineal.h			\
 		dev_keyboard.h				\
+		dev_keypad.h				\
 		dev_LCD_generic.h			\
 		dev_LCD_screen.h			\
 		dev_LCD_screen.tcc			\

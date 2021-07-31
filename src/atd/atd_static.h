@@ -165,7 +165,7 @@ struct _static_extract_subset<F, static_array<T, first, args...>>{
         typename _static_extract_subset<F, next_static_array>::type,
         first>;
 
-    using T_false = _static_extract_subset<F, next_static_array>::type;
+    using T_false = typename _static_extract_subset<F, next_static_array>::type;
 
     using type = std::conditional_t<func(first), T_true, T_false>;
 

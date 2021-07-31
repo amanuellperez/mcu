@@ -34,7 +34,7 @@
 #include <stdint.h>
 
 #include <dev_LCD_HD44780.h>
-#include "keyboard_5x5.h"
+#include <dev_keypad.h>
 
 
 // pins usados
@@ -83,19 +83,19 @@ using LCD = dev::LCD_ostream_1602<dev::LCD_HD44780<LCD_pins>>;
 
 
 // keyboard
-using KB_rows = Keyboard_5_rows<KB_row0_pin, 
+using KB_rows = dev::Keypad_rows<KB_row0_pin, 
 		             KB_row1_pin, 
 		             KB_row2_pin, 
 		             KB_row3_pin, 
 		             KB_row4_pin>;
 
-using KB_cols = Keyboard_5_cols<KB_col0_pin,
+using KB_cols = dev::Keypad_cols<KB_col0_pin,
                              KB_col1_pin,
                              KB_col2_pin,
                              KB_col3_pin,
                              KB_col4_pin>;
 
-using Keyboard = Keyboard_5x5<KB_rows, KB_cols>;
+using Keyboard = dev::Keypad<KB_rows, KB_cols>;
 
 #endif
 

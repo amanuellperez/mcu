@@ -21,12 +21,17 @@
 // El teclado es una matriz de pulsadores.
 // Sacamos la salida por UART
 #include <avr_UART.h>
-#include "../keyboard_5x5.h"
+#include "../../dev_keypad.h"
 
+// Este es el keypad barato que venden en internet de 4 x 3
+//using Rows = dev::Keypad_rows<28, 27, 26, 25>;
+//using Cols = dev::Keypad_cols<19, 18, 17>;
 
-using Rows = Keyboard_5_rows<28, 27, 26, 25, 24>;
-using Cols = Keyboard_5_cols<19, 18, 17, 16, 15>;
-using Keyboard = Keyboard_5x5<Rows, Cols>;
+// Keypad de 5 x 5
+using Rows = dev::Keypad_rows<28, 27, 26, 25, 24>;
+using Cols = dev::Keypad_cols<19, 18, 17, 16, 15>;
+
+using Keyboard = dev::Keypad<Rows, Cols>;
 
 int main()
 {
@@ -35,7 +40,7 @@ int main()
     avr::basic_cfg(uart);
     uart.on();
  
-    uart << "\n----------\n";
+    uart << "\n------------\n";
     uart << "Keyboard " << (int)Keyboard::nrows() << "x"
          << (int)Keyboard::ncols() << "\n";
     uart << "------------\n\n";
