@@ -54,7 +54,7 @@ void Main::init_lcd()
 void Main::run()
 {
     error = false;
-    Interface interface{lcd, keyboard_};
+    Interface interface{lcd, keyboard_, key_strings, key_commands};
     interface.initial_screen();
 
     while(1){

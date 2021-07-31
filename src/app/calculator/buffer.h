@@ -22,8 +22,6 @@
 #ifndef __BUFFER_H__
 #define __BUFFER_H__
 
-#include "dev.h"
-
 #include <ostream>
 #include <stdlib.h> // strtod
 

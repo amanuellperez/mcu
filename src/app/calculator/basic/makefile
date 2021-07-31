@@ -2,7 +2,6 @@ BIN = xx
 
 SOURCES= main.cpp 			\
 		 lex.cpp			\
-		 ../interface.cpp	\
 		 calc.tab.cpp	
 
 # Fundamental para que sscanf trabaje con double!!!
