@@ -31,11 +31,13 @@
  *
  *  - HISTORIA:
  *    A.Manuel L.Perez
- *    31/07/2021 v0.0
+ *    31/07/2021 Keypad, Keyboard_keypad
  *
  ****************************************************************************/
 #include <avr_pin.h>
 #include <atd_static.h>
+
+#undef getchar // get rid of macros
 
 namespace dev{
 
@@ -219,6 +221,36 @@ constexpr int Keypad<R, C>::what_pin_is_zero()
 	return what_pin_is_zero<Pin, i+1>();
     }
 }
+
+
+
+/*!
+ *  \brief Capa puesta sobre el keypad que permite traducir las teclas
+ *  pulsadas en el código kascii correspondiente.
+ */
+template <typename Keypad>
+class Keyboard_keypad{
+public:
+    Keyboard_keypad(const uint8_t* ascii_code0): ascii_code_{ascii_code0} {}
+
+    uint8_t getchar();
+
+
+private:
+    Keypad keypad_;
+    const uint8_t* ascii_code_;
+
+    // Traduce la tecla pulsada al código ascii correspondiente
+    uint8_t key_to_ascii(uint8_t c) {return ascii_code_[c];}
+};
+
+
+template <typename K>
+inline uint8_t Keyboard_keypad<K>::getchar()
+{
+    return key_to_ascii(keypad_.getkey());
+}
+
 
 }// namespace
 

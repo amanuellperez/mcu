@@ -59,6 +59,13 @@ struct Keyboard_code_kascii{
     static constexpr uint8_t right = 202;
     static constexpr uint8_t left  = 203;
 
+// Caracteres a ser usados por la aplicación a su gusto
+// Ver test como ejemplo.
+    static constexpr uint8_t give_a_name1 = 251;
+    static constexpr uint8_t give_a_name2 = 252;
+    static constexpr uint8_t give_a_name3 = 253;
+    static constexpr uint8_t give_a_name4 = 254;
+    static constexpr uint8_t give_a_name5 = 255;
 };
 
 

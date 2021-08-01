@@ -22,6 +22,7 @@
 // Sacamos la salida por UART
 #include <avr_UART.h>
 #include "../../dev_keypad.h"
+#include "../../dev_keyboard_code.h"
 
 // Este es el keypad barato que venden en internet de 4 x 3
 //using Rows = dev::Keypad_rows<28, 27, 26, 25>;
@@ -31,7 +32,80 @@
 using Rows = dev::Keypad_rows<28, 27, 26, 25, 24>;
 using Cols = dev::Keypad_cols<19, 18, 17, 16, 15>;
 
-using Keyboard = dev::Keypad<Rows, Cols>;
+using Keypad = dev::Keypad<Rows, Cols>;
+
+
+struct Code: public dev::Keyboard_code_kascii
+{
+    static constexpr uint8_t AC = cancel;
+    static constexpr uint8_t ANS = give_a_name1;
+
+};
+
+// Es el teclado inicial de la calculadora básica
+constexpr uint8_t ascii_code[25] =
+{'0', '.', '^', Code::ANS, '=',
+ '1', '2', '3', '+', '-',
+ '4', '5', '6', 'x', '/',
+ '7', '8', '9', Code::del, Code::AC,
+ 's', '(', ')', Code::left, Code::right
+};
+
+
+using Keyboard = dev::Keyboard_keypad<Keypad>;
+
+
+void test_keypad()
+{
+    avr::UART_iostream uart;
+    
+    uart << "\n-----\n";
+    uart << "Keypad\n";
+    uart << "------\n\n";
+    uart << "Pulsa una tecla:";
+
+    Keypad keypad;
+
+    while(1){
+	while (!keypad.scan())
+	    wait_ms(100);
+
+	uart << "(" << (int) keypad.row() << ", " << (int) keypad.col() << ") = "
+	    << (int) keypad.last_key() << '\n';
+	wait_ms(100);
+    }
+}
+
+void test_keyboard()
+{
+    avr::UART_iostream uart;
+    
+    uart << "\n-----\n";
+    uart << "Keyboard\n";
+    uart << "------\n\n";
+    uart << "Pulsa una tecla:";
+
+    Keyboard keyboard{ascii_code};
+
+    while(1){
+	uint8_t c = keyboard.getchar();
+	switch(c){
+	    case Code::del: uart << "DEL"; break;
+	    case Code::AC: uart << "AC"; break;
+	    case Code::left: uart << "left"; break;
+	    case Code::right: uart << "right"; break;
+	    case Code::ANS: uart << "ANS"; break;
+	    default: uart << c; break;
+	}
+
+	wait_ms(100); // debouncing
+    }
+}
+
+
+
+
+
 
 int main()
 {
@@ -41,21 +115,20 @@ int main()
     uart.on();
  
     uart << "\n------------\n";
-    uart << "Keyboard " << (int)Keyboard::nrows() << "x"
-         << (int)Keyboard::ncols() << "\n";
+    uart << "Keypad" << (int)Keypad::nrows() << "x"
+         << (int)Keypad::ncols() << "\n";
     uart << "------------\n\n";
-    uart << "Press a key\n";
+    uart << "1. Test keypad\n"
+	    "2. Test keyboard_keypad\n";
 
-    Keyboard keyboard;
+    char c{};
+    uart >> c;
+    if (c == '1')
+	test_keypad();
 
-    while(1){
-	while (!keyboard.scan())
-	    wait_ms(100);
+    else
+	test_keyboard();
 
-	uart << "(" << (int) keyboard.row() << ", " << (int) keyboard.col() << ") = "
-	    << (int) keyboard.last_key() << '\n';
-	wait_ms(100);
-    }
 }
 
 
