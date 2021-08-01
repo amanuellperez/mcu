@@ -35,6 +35,7 @@
 
 #include <dev_LCD_HD44780.h>
 #include <dev_keypad.h>
+#include <dev_keyboard_code.h>
 
 #include "interface.h"
 
@@ -85,6 +86,7 @@ using LCD = dev::LCD_ostream_1602<dev::LCD_HD44780<LCD_pins>>;
 
 
 // keyboard
+// --------
 using KB_rows = dev::Keypad_rows<KB_row0_pin, 
 		             KB_row1_pin, 
 		             KB_row2_pin, 
@@ -97,32 +99,29 @@ using KB_cols = dev::Keypad_cols<KB_col0_pin,
                              KB_col3_pin,
                              KB_col4_pin>;
 
-using Keyboard = dev::Keypad<KB_rows, KB_cols>;
+using Keypad = dev::Keypad<KB_rows, KB_cols>;
+
+// particularizamos algunos códigos
+struct Code: public dev::Keyboard_code_kascii
+{
+    static constexpr uint8_t AC = cancel;
+    static constexpr uint8_t ANS = give_a_name1;
+
+};
+
+// Es el teclado inicial de la calculadora básica
+constexpr uint8_t key_code[25] =
+{'0', '.', '^', Code::ANS, '=',
+ '1', '2', '3', '+', '-',
+ '4', '5', '6', 'x', '/',
+ '7', '8', '9', Code::del, Code::AC,
+ 's', '(', ')', Code::left, Code::right
+};
 
 
+using Keyboard = dev::Keyboard_keypad<Keypad, Code>;
 
 using Interface = calc::Interface<LCD, Keyboard>;
-
-// los "?" son comandos.
-// Dejo el array de cadenas separado de los comandos por si se quiere meter en
-// la EEPROM en el futuro.
-static constexpr const char* key_strings[25] = 
-	{"0", ".", "^", "?", "=",
-	 "1", "2", "3", "+", "-",
-	 "4", "5", "6", "x", "/",
-	 "7", "8", "9", "?", "?",
-	 "s"/*=sqrt*/, "(", ")", "?", "?"};
-
-
-static constexpr Key key_commands[25] = {
-    Key::id(0) , Key::id(1) , Key::id(2),  Key::id(3),  Key::id(4),  
-    Key::id(5) , Key::id(6) , Key::id(7),  Key::id(8),  Key::id(9),  
-    Key::id(10), Key::id(11), Key::id(12), Key::id(13), Key::id(14), 
-    Key::id(15), Key::id(16), Key::id(17), Key::cmd(Key::Command::DEL), 
-					   Key::cmd(Key::Command::AC),
-    Key::id(20), Key::id(21), Key::id(22), Key::cmd(Key::Command::to_the_left),
-					   Key::cmd(Key::Command::to_the_right)
-};
 
 #endif
 

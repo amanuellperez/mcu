@@ -52,7 +52,7 @@ constexpr uint8_t ascii_code[25] =
 };
 
 
-using Keyboard = dev::Keyboard_keypad<Keypad>;
+using Keyboard = dev::Keyboard_keypad<Keypad, Code>;
 
 
 void test_keypad()

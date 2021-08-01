@@ -226,29 +226,49 @@ constexpr int Keypad<R, C>::what_pin_is_zero()
 
 /*!
  *  \brief Capa puesta sobre el keypad que permite traducir las teclas
- *  pulsadas en el código kascii correspondiente.
+ *	   pulsadas en el código kascii correspondiente.
+ *
+ *  De momento no es necesario pasarle como parámetro el tipo de 
+ *  codificación usada (tipo Code_t). Sin embargo, se lo paso para que el uso
+ *  sea más sencillo:
+ *      Si una clase quiere usar el Keyboard, necesita conocer el tipo de
+ *      codificación que está usando. Lo lógico es que el Keyboard sepa esa
+ *      codificación y no tener que pasar por una parte el keyboard y por otra
+ *      el Code usado.
+ *
+ *  No confundir Code_t con key_code.
+ *  1. Code_t es la codificación de los caracteres. Ejemplo: 'A' tiene por
+ *  código 65, el comando 'enter' 10, y el comando 'right' 200.
+ *  2. key_code nos dice como mapear las teclas del Keypad. La tecla 0 le
+ *  asocio el código el código 'a', la tecla 1 el código 'right'...
+ *
+ *  key_code es el mapeo de teclas en códigos, mientras que Code_t nos dice
+ *  qué significan esos códigos.
+ *
  */
-template <typename Keypad>
+template <typename Keypad, typename Code_t>
 class Keyboard_keypad{
 public:
-    Keyboard_keypad(const uint8_t* ascii_code0): ascii_code_{ascii_code0} {}
+    using Code = Code_t;
+
+    Keyboard_keypad(const uint8_t* key_code0): key_code_{key_code0} {}
 
     uint8_t getchar();
 
 
 private:
     Keypad keypad_;
-    const uint8_t* ascii_code_;
+    const uint8_t* key_code_;
 
     // Traduce la tecla pulsada al código ascii correspondiente
-    uint8_t key_to_ascii(uint8_t c) {return ascii_code_[c];}
+    uint8_t key_to_code(uint8_t c) {return key_code_[c];}
 };
 
 
-template <typename K>
-inline uint8_t Keyboard_keypad<K>::getchar()
+template <typename K, typename C>
+inline uint8_t Keyboard_keypad<K, C>::getchar()
 {
-    return key_to_ascii(keypad_.getkey());
+    return key_to_code(keypad_.getkey());
 }
 
 

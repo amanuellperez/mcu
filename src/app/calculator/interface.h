@@ -34,41 +34,6 @@
 #include "types.h"
 
 
-// ¿Qué hacer cuando se pulsa una tecla?
-// 1. Mostrar una cadena en pantalla y añadirla al buffer.
-// 2. Ejecutar algún comando de edición (AC, DEL, <-, -> ...)
-//
-// 1. Dejo las str como id para dar la posibilidad de meterlas en la EEPROM las
-// cadenas (aunque sospecho que no merece la pena ya que lo más seguro es que
-// tenga que tener continuamente cargadas en memoria las cadenas de teclado)
-//
-// 2. Quiero poder parametrizar el interfaz cambiando el significado de las
-// teclas. Por ello uso identificadores de comando. El interfaz es quien los
-// suministra (Interface::Command::DEL, o AC,...). De esta forma se podrá
-// cambiar por completo la configuración del teclado sin tener que tocar la
-// implementación de Interface.
-// 
-struct Key {
-// Data
-    enum class Command {null = 0, DEL, AC, to_the_right, to_the_left};
-
-    uint8_t str_id; 
-    Command command;
-
-
-// construction
-    /// Define el indice dentro de un array donde localizar la cadena 
-    /// a mostrar al pulsar esta tecla
-    static constexpr Key id(uint8_t id0){ return Key{id0, Command::null};}
-    static constexpr Key cmd(Command cmd){ return Key{null_id, cmd};}
-
-    bool is_command() const {return command != Command::null;}
-
-    // null
-    static constexpr uint8_t null_id  = 0xFF;
-};
-
-
 // meto Interface dentro de calc, para poder definir Interface en dev.h
 namespace calc{
 
@@ -77,13 +42,11 @@ class Interface{
 public:
     using LCD = LCD_t;
     using Keyboard = Keyboard_t;
+    using Code = typename Keyboard_t::Code;
 
-    Interface(LCD& lcd, Keyboard& keyboard, const char* const* key_strings,
-	    const Key* key_commands)
+    Interface(LCD& lcd, Keyboard& keyboard)
 	:lcd_{lcd}, keyboard_{keyboard}, 
-	 buffer_{nullptr}, 
-	 key_strings_{key_strings},
-	 key_commands_{key_commands}
+	 buffer_{nullptr}
     {}
 
 
@@ -112,9 +75,9 @@ private:
     void AC_command();
     void to_the_right_command();
     void to_the_left_command();
-    void execute_command(Key::Command cmd);
 
     void reset();
+    void write(char c);
     void write(const char* p);
     void redraw_lcd();
     void redraw_lcd_from(Buffer::iterator p);
@@ -126,20 +89,7 @@ private:
     using symbol = dev::HD44780_charset_A00;
 
 // Data
-    static constexpr uint8_t key_return = 4; // '='
-
-    const char* const* key_strings_;
-    const Key* key_commands_;
-    //static constexpr std::array<Key, 25> key_commands = {
-//    static constexpr Key key_commands[25] = {
-//        Key::id(0) , Key::id(1) , Key::id(2),  Key::id(3),  Key::id(4),  
-//	Key::id(5) , Key::id(6) , Key::id(7),  Key::id(8),  Key::id(9),  
-//	Key::id(10), Key::id(11), Key::id(12), Key::id(13), Key::id(14), 
-//	Key::id(15), Key::id(16), Key::id(17), Key::cmd(Key::Command::DEL), 
-//					       Key::cmd(Key::Command::AC),
-//	Key::id(20), Key::id(21), Key::id(22), Key::cmd(Key::Command::to_the_left),
-//					       Key::cmd(Key::Command::to_the_right)
-//    };
+    static constexpr uint8_t key_return = '=';
     
     static constexpr uint8_t debouncing_time = 200; // ms
 };
@@ -193,6 +143,17 @@ void Interface<L, K>::reset()
 
     lcd_p0_   = buffer_->begin();
     buffer_p_ = buffer_->begin();
+}
+
+
+// TODO: ¿mejorarla? De momento, por rapidez, reutilizo const char*
+template <typename L, typename K>
+void Interface<L, K>::write(char c)
+{
+    char tmp[2];
+    tmp[0] = c;
+    tmp[1] = '\0';
+    write(tmp);
 }
 
 template <typename L, typename K>
@@ -283,7 +244,7 @@ void Interface<L, K>::getline(Buffer& buffer0, bool error)
     // Esperamos a que se pulse una tecla ignorando el bouncing de '\n'
     // (última tecla que pulsamos)
     uint8_t key{};
-    while ((key = keyboard_.getkey()) == key_return)
+    while ((key = keyboard_.getchar()) == key_return)
     { }
 
     if (error)
@@ -302,19 +263,19 @@ template <typename L, typename K>
 void Interface<L, K>::read()
 {
     while (1) {
-	uint8_t key = keyboard_.getkey();
+	uint8_t c = keyboard_.getchar();
 
-	if (key == key_return)
-	    return;
-
-	if (key_commands_[key].is_command())
-	    execute_command(key_commands_[key].command);
-
-	else {
-	    if (buffer_p_ != buffer_->me()){
-		const char* p = key_strings_[key_commands_[key].str_id];
-		write(p);
-	    }
+	switch(c){
+	    case key_return: return;
+	    case Code::del: DEL_command(); break;
+            case Code::AC: AC_command(); break;
+            case Code::left: to_the_left_command(); break;
+	    case Code::right: to_the_right_command(); break;
+	    // case Code::ANS: TODO ANS_command();
+	    default: 
+		if (buffer_p_ != buffer_->me())
+		    write(c);
+		break;
 
         }
 
@@ -322,18 +283,6 @@ void Interface<L, K>::read()
     }
 }
 
-template <typename L, typename K>
-void Interface<L, K>::execute_command(Key::Command cmd)
-{
-    switch(cmd){
-	case Key::Command::DEL: DEL_command(); break;
-	case Key::Command::AC: AC_command(); break;
-	case Key::Command::to_the_left: to_the_left_command(); break;
-	case Key::Command::to_the_right: to_the_right_command(); break;
-	case Key::Command::null: break;
-    }
-
-}
 }// namespace
 
 #endif
