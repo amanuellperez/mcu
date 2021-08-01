@@ -28,7 +28,8 @@
  *   - COMENTARIOS: 
  *
  *   - HISTORIA:
- *           alp  - 08/02/2019 Escrito
+ *    A.Manuel L.Perez
+ *    08/02/2019 Escrito
  *
  ****************************************************************************/
 #include <cstddef> // char

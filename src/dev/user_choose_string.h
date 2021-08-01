@@ -126,13 +126,13 @@ private:
 
     // keyrow
     static constexpr auto enter_key()
-    { return Keyrow3::template key<Basic_keyrow_code::enter>(); }
+    { return Keyrow3::template key<Keyboard_code_kascii::enter>(); }
 
     static constexpr auto up_key()
-    { return Keyrow3::template key<Basic_keyrow_code::up>(); }
+    { return Keyrow3::template key<Keyboard_code_kascii::up>(); }
 
     static constexpr auto down_key()
-    { return Keyrow3::template key<Basic_keyrow_code::down>(); }
+    { return Keyrow3::template key<Keyboard_code_kascii::down>(); }
 
 
     // Menu y opciones seleccionadas.

@@ -35,33 +35,19 @@
  *
  ****************************************************************************/
 #include "dev_push_button.h"
+#include "dev_keyboard_code.h"
 
 #include <atd_static.h>
 
 namespace dev{
-/*!
-\brief  Códificación de caracteres usadas en las Basic_keyrows
-  
-see: Basic_keyrow3 for rationale.
- */
-struct Basic_keyrow_code{
-    static constexpr uint8_t enter = '\n';
-    static constexpr uint8_t up    = 200;
-    static constexpr uint8_t down  = 201;
-    static constexpr uint8_t right = 202;
-    static constexpr uint8_t left  = 203;
-
-    static constexpr uint8_t null  = 0;
-};
-
 
 // syntactic sugar
 namespace Key_codes{
-    static constexpr uint8_t NO_KEY = Basic_keyrow_code::null;
-    static constexpr uint8_t OK_KEY = Basic_keyrow_code::enter;
+    static constexpr uint8_t NO_KEY = Keyboard_code_kascii::null;
+    static constexpr uint8_t OK_KEY = Keyboard_code_kascii::enter;
     static constexpr uint8_t ENTER_KEY = OK_KEY;
-    static constexpr uint8_t UP_KEY = Basic_keyrow_code::up;
-    static constexpr uint8_t DOWN_KEY = Basic_keyrow_code::down;
+    static constexpr uint8_t UP_KEY = Keyboard_code_kascii::up;
+    static constexpr uint8_t DOWN_KEY = Keyboard_code_kascii::down;
 }
 
 
@@ -75,7 +61,7 @@ struct Keyrow_codes : public atd::static_array<uint8_t, args...>{ };
 
 /*!
 
-\brief  Códificación del teclado de 3 teclas.
+\brief  Códificación del teclado de n teclas.
 
  */
 // Observar que lo que realmente estamos implementando es un 
