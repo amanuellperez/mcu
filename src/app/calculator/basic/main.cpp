@@ -50,22 +50,60 @@ void Main::init_lcd()
     lcd.screen().nowrap(); 
 }
 
+// para depurar
+void Main::print_buffer()
+{
+    lcd.clear();
+    int i = 0;
+    auto p = buffer.begin();
+    lcd << '[';
+    for (; i < 10 and p != buffer.end(); ++i, ++p)
+	lcd << *p;
+
+    lcd << "]\n";
+    wait_ms(1000);
+}
+
+void Main::print_result()
+{
+    lcd.screen().clear_row(1);
+    lcd.cursor_pos(lcd.cols() - 1, 1);
+    lcd.screen().print_align_to_the_right<double_ndigits>(result);
+}
+
+void Main::print_msg_error()
+{
+    switch(error_){
+	case Error::no: return;
+
+	case Error::yylex_read:
+	    lcd.clear();
+	    lcd << "yylex_read error";
+	    break;
+
+	case Error::yyerror: return; // este se imprime en yyerror()
+				     // lo mantengo para depurar
+    }
+}
 
 void Main::run()
 {
-    error = false;
+    clear_error();
+
     Interface interface{lcd, keyboard_};
     interface.initial_screen();
 
     while(1){
-	interface.getline(buffer, error);
-	error = false;
-
+	interface.getline(buffer, error());
+	clear_error();
+//	print_buffer(); // debug
 	yyparse();
-	if (!error){
-	    lcd.cursor_pos(lcd.cols() - 1, 1);
-	    lcd.screen().print_align_to_the_right<double_ndigits>(result);
-	}
+
+	if (no_error())
+	    print_result();
+
+	else
+	    print_msg_error();
 
     }
 }

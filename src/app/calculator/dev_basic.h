@@ -121,7 +121,7 @@ constexpr uint8_t key_code[25] =
 
 using Keyboard = dev::Keyboard_keypad<Keypad, Code>;
 
-using Interface = calc::Interface<LCD, Keyboard>;
+using Interface = calc::Interface<LCD, Keyboard, 20>;
 
 #endif
 

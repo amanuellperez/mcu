@@ -23,7 +23,6 @@
 #define __MAIN_H__
 
 #include "../dev_basic.h"
-#include "../types.h"
 #include <array>
 
 
@@ -34,13 +33,27 @@ public:
     
 // global vbles
     static LCD lcd;  // no admite definirlo inline (???)
-    inline static Buffer buffer;
+    inline static Interface::Buffer buffer;
     inline static double result;
-    inline static bool error = false;
+
+// gestion de errores
+    enum class Error{no, yylex_read, yyerror};
+
+    static void clear_error() {error_ = Error::no;}
+    static bool no_error() {return error_ == Error::no;}
+    static bool error() {return !no_error();}
+    static void set_yyerror() {error_ = Error::yyerror;}
+    static void set_yylex_read() {error_ = Error::yylex_read;}
+
+
+
+// debug
+    void print_buffer();
 
 private:
 // Hardware
     Keyboard keyboard_;
+    inline static Error error_ = Error::no;
 
 
 // init: hardware
@@ -49,7 +62,9 @@ private:
 
 // main
     void getline();
-
+    
+    void print_result();
+    void print_msg_error();
 };
 
 

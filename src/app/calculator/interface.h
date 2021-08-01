@@ -31,18 +31,19 @@
  *
  ****************************************************************************/
 
-#include "types.h"
+#include "buffer.h"
 
 
 // meto Interface dentro de calc, para poder definir Interface en dev.h
 namespace calc{
 
-template <typename LCD_t, typename Keyboard_t>
+template <typename LCD_t, typename Keyboard_t, size_t N>
 class Interface{
 public:
     using LCD = LCD_t;
     using Keyboard = Keyboard_t;
     using Code = typename Keyboard_t::Code;
+    using Buffer = Linear_array<N>;
 
     Interface(LCD& lcd, Keyboard& keyboard)
 	:lcd_{lcd}, keyboard_{keyboard}, 
@@ -80,7 +81,7 @@ private:
     void write(char c);
     void write(const char* p);
     void redraw_lcd();
-    void redraw_lcd_from(Buffer::iterator p);
+    void redraw_lcd_from(typename Buffer::iterator p);
 
     void read(); // implementacion de getline
 
@@ -95,8 +96,8 @@ private:
 };
 
 
-template <typename L, typename K>
-void Interface<L, K>::print_lcd(char c)
+template <typename L, typename K, size_t N>
+void Interface<L, K, N>::print_lcd(char c)
 {
     if (c == 's')
 	lcd_.screen().print(symbol::of("√"));
@@ -105,8 +106,8 @@ void Interface<L, K>::print_lcd(char c)
 
 }
 
-template <typename L, typename K>
-void Interface<L, K>::redraw_lcd_from(Buffer::iterator p)
+template <typename L, typename K, size_t N>
+void Interface<L, K, N>::redraw_lcd_from(typename Buffer::iterator p)
 {
     lcd_.cursor_pos(0,0);
 
@@ -122,8 +123,8 @@ void Interface<L, K>::redraw_lcd_from(Buffer::iterator p)
     redraw_cursor();
 }
 
-template <typename L, typename K>
-void Interface<L, K>::redraw_lcd()
+template <typename L, typename K, size_t N>
+void Interface<L, K, N>::redraw_lcd()
 {
     if (lcd_p0_ > buffer_p_)
 	lcd_p0_ = buffer_p_;
@@ -136,8 +137,8 @@ void Interface<L, K>::redraw_lcd()
     redraw_lcd_from(lcd_p0_);
 }
 
-template <typename L, typename K>
-void Interface<L, K>::reset()
+template <typename L, typename K, size_t N>
+void Interface<L, K, N>::reset()
 {
     buffer_->clear();
 
@@ -147,8 +148,8 @@ void Interface<L, K>::reset()
 
 
 // TODO: ¿mejorarla? De momento, por rapidez, reutilizo const char*
-template <typename L, typename K>
-void Interface<L, K>::write(char c)
+template <typename L, typename K, size_t N>
+void Interface<L, K, N>::write(char c)
 {
     char tmp[2];
     tmp[0] = c;
@@ -156,8 +157,8 @@ void Interface<L, K>::write(char c)
     write(tmp);
 }
 
-template <typename L, typename K>
-void Interface<L, K>::write(const char* str)
+template <typename L, typename K, size_t N>
+void Interface<L, K, N>::write(const char* str)
 {
     if (buffer_p_ == buffer_->end()){
 	uint8_t n = push_back(*buffer_, str);
@@ -172,8 +173,8 @@ void Interface<L, K>::write(const char* str)
 }
 
 
-template <typename L, typename K>
-void Interface<L, K>::DEL_command()
+template <typename L, typename K, size_t N>
+void Interface<L, K, N>::DEL_command()
 {
     if (buffer_p_ != buffer_->begin()){
 	if (buffer_p_ == buffer_->end())
@@ -185,15 +186,15 @@ void Interface<L, K>::DEL_command()
 
 }
 
-template <typename L, typename K>
-void Interface<L, K>::AC_command()
+template <typename L, typename K, size_t N>
+void Interface<L, K, N>::AC_command()
 {
     reset();
     lcd_.clear();
 }
 
-template <typename L, typename K>
-void Interface<L, K>::to_the_right_command()
+template <typename L, typename K, size_t N>
+void Interface<L, K, N>::to_the_right_command()
 {
     if (buffer_p_ != buffer_->end()){
 	++buffer_p_;
@@ -206,8 +207,8 @@ void Interface<L, K>::to_the_right_command()
     }
 }
 
-template <typename L, typename K>
-void Interface<L, K>::to_the_left_command()
+template <typename L, typename K, size_t N>
+void Interface<L, K, N>::to_the_left_command()
 {
     if (buffer_p_ != buffer_->begin()){
 	--buffer_p_;
@@ -221,8 +222,8 @@ void Interface<L, K>::to_the_left_command()
     }
 }
 
-template <typename L, typename K>
-void Interface<L, K>::initial_screen()
+template <typename L, typename K, size_t N>
+void Interface<L, K, N>::initial_screen()
 {
     lcd_.clear();
     lcd_.cursor_pos(lcd_.cols() - 1, 1);
@@ -234,8 +235,8 @@ void Interface<L, K>::initial_screen()
 
 // Hay 2 pantallas: la pantalla normal y la pantalla de error.
 // El parámetro 'error' nos indica en qué pantalla estamos.
-template <typename L, typename K>
-void Interface<L, K>::getline(Buffer& buffer0, bool error)
+template <typename L, typename K, size_t N>
+void Interface<L, K, N>::getline(Buffer& buffer0, bool error)
 {
     buffer_ = &buffer0;
 
@@ -254,13 +255,14 @@ void Interface<L, K>::getline(Buffer& buffer0, bool error)
 
     read();
     buffer_->push_back('='); // caracter de terminación
+    buffer_->push_back('\0');	// yparse usa cadenas de C!!! Fundamental!!!
 
     lcd_.cursor_off();
 }
 
 
-template <typename L, typename K>
-void Interface<L, K>::read()
+template <typename L, typename K, size_t N>
+void Interface<L, K, N>::read()
 {
     while (1) {
 	uint8_t c = keyboard_.getchar();

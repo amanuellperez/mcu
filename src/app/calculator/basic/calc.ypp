@@ -16,6 +16,7 @@
 
 
 list: /* nothing */
+      | '='	      {Main::result = 0;}
       | list expr '=' {Main::result = $2;}
       ;
 

@@ -52,8 +52,9 @@ uint8_t push_back(Linear_array<N>& buf, const char* str)
 
 // Devuelve un iterador a donde continuar insertando elementos.
 template <size_t N>
-typename Linear_array<N>::iterator
-insert(Linear_array<N>& buf, typename Linear_array<N>::iterator p, const char* str)
+typename Linear_array<N>::iterator insert(Linear_array<N>& buf,
+                                          typename Linear_array<N>::iterator p,
+                                          const char* str)
 {
     while (*str and p != buf.end()){
 	buf.insert(p, *str);
@@ -65,12 +66,18 @@ insert(Linear_array<N>& buf, typename Linear_array<N>::iterator p, const char* s
 }
 
 
+// devuelve: true, todo bien
+//           false, error al hacer la conversion
 template <size_t N>
-void read(Linear_array<N>& buf, double& x) 
+bool read(Linear_array<N>& buf, double& x) 
 {
     char* p{};
     x = strtod(buf.begin(), &p); 
+    if (p == buf.begin())
+	return false;
+
     buf.begin(p);
+    return true;
 }
 
 

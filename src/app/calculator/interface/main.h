@@ -23,7 +23,6 @@
 #define __MAIN_H__
 
 #include "../dev_basic.h"
-#include "../types.h"
 #include <array>
 
 
@@ -39,7 +38,7 @@ private:
 
 
     // almacenamos aquí la entrada del usuario
-    Buffer buffer_;
+    Interface::Buffer buffer_;
 
 
 // init: hardware
