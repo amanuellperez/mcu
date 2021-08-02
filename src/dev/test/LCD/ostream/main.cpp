@@ -23,6 +23,8 @@
 #include <avr_time.h>
 #include <stddef.h>
 
+#include <atd_double.h>
+
 
 // 16 x 02 and 20 x 04
 using LCD_pins = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<4>,
@@ -49,9 +51,9 @@ using LCD_HD44780_ostream_2004 = dev::LCD_ostream_2004<LCD_HD44780>;
 using LCD_HD44780_ostream_4004 = dev::LCD_ostream_4004<LCD_HD44780_4004>;
 
 
-//using LCD_ostream = LCD_HD44780_ostream_1602;
+using LCD_ostream = LCD_HD44780_ostream_1602;
 //using LCD_ostream = LCD_HD44780_ostream_2004;
-using LCD_ostream = LCD_HD44780_ostream_4004;
+//using LCD_ostream = LCD_HD44780_ostream_4004;
 
 void test_lcd_ostream4()
 {
@@ -61,6 +63,7 @@ void test_lcd_ostream4()
 	lcd.clear();
 	lcd << "LCD_HD44780_ostream";
 	wait_ms(1000);
+
 	char c = 'x';
 	lcd << "\nUn caracter (x): [" << c << "]";
 	wait_ms(1000);
@@ -82,6 +85,16 @@ void test_lcd_ostream4()
 	uint32_t u32 = 1000000;
 	lcd << "\nUn uint32_t(1000000): [" << u32 << "]";
 	wait_ms(1000);
+
+    {// double
+	double a = 2;
+	double b = 8;
+	double c = pow(a, b);
+	lcd.clear();
+	lcd << "double\n2^8 = ";
+	atd::print(lcd, c);
+	wait_ms(1000);
+    }
     }
 }
 

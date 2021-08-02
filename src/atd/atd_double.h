@@ -42,6 +42,7 @@
 
 #include "atd_algorithm.h"
 #include "atd_string.h"
+#include "atd_math.h"
 
 namespace atd{
 
@@ -65,100 +66,198 @@ inline std::pair<double, double> to_integer_and_decimal(double x)
 }
 
 
-// No se trata de una función genérica. Por eso la hago de implementación.
-// Sabé que [p0, pe) es un número, y lo que
-// hace es eliminar todos los ceros a la izquierda. Si el número fuera todo
-// ceros devuelve "0" y no "" que sería lo que haría una función genérica.
-// Devuelve [p0, qe) = cadena que contiene el número sin los ceros al final.
-std::pair<char*, char*> __remove_trailing_zeros(char* p0, char* pe);
+//// No se trata de una función genérica. Por eso la hago de implementación.
+//// Sabé que [p0, pe) es un número, y lo que
+//// hace es eliminar todos los ceros a la izquierda. Si el número fuera todo
+//// ceros devuelve "0" y no "" que sería lo que haría una función genérica.
+//// Devuelve [p0, qe) = cadena que contiene el número sin los ceros al final.
+//std::pair<char*, char*> __remove_trailing_zeros(char* p0, char* pe);
+//
+//
+//// Convierte el double 'x' en cadena almacenándolo en [m0, me).
+//// Mantiene los ceros a la izquierda.
+//// Ejemplo: si x = 0.123 y [m0, me) son 5 caracteres, devuelve
+////	      [m0, me) = "12300".
+//// Precondition: x0 = 0.yyyy (parte entera(x0)  < 1)
+//char* mantissa_to_str_with_zeros(const double& x0, char* m0, char* me);
+//
+//
+//// Convierte el double 'x' en la cadena almacenándolo en [m0, me).
+////  Ejemplo: si x = 0.123 y str es de 5 caracteres devuelve str = 12300
+////  No añade '\0' al final, cuidado si se imprime.
+//// Precondition: x0 = 0.yyyy (parte entera(x0)  < 1)
+//// El número de cifras que se usa es N = size[m0, me) = me - m0
+//// Devuelve [p0, pe) = 'x' escrito como cadena de N cifras. En general 
+////	m0 <= p0 <= pe <= me
+//std::pair<char*, char*> mantissa_to_str(const double& x0, char* m0, char* me);
 
 
-// Convierte el double 'x' en cadena almacenándolo en [m0, me).
-// Mantiene los ceros a la izquierda.
-// Ejemplo: si x = 0.123 y [m0, me) son 5 caracteres, devuelve
-//	      [m0, me) = "12300".
-// Precondition: x0 = 0.yyyy (parte entera(x0)  < 1)
-char* mantissa_to_str_with_zeros(const double& x0, char* m0, char* me);
 
 
-// Convierte el double 'x' en la cadena almacenándolo en [m0, me).
-//  Ejemplo: si x = 0.123 y str es de 5 caracteres devuelve str = 12300
-//  No añade '\0' al final, cuidado si se imprime.
-// Precondition: x0 = 0.yyyy (parte entera(x0)  < 1)
-// El número de cifras que se usa es N = size[m0, me) = me - m0
-// Devuelve [p0, pe) = 'x' escrito como cadena de N cifras. En general 
-//	m0 <= p0 <= pe <= me
-std::pair<char*, char*> mantissa_to_str(const double& x0, char* m0, char* me);
-
-
-
-// Precondition: x = +0.yyyy (parte entera = 0)
-// ndigits = número máximo de cifras decimales
-template <size_t ndigits = 8>
-void __print_mantissa(std::ostream& out, const double& x)
+/// Convierte un double en cadena. 
+/// Ejemplo: 
+///    1) x0 = 23.59, y ndecimals = 5, devuelve [p0, me) = "23.59000"
+///	  Mantiene los "000" del final.
+///
+///    2) x0 = 23.99 y ndecimals = 1, devuelve  [p0, me) = "24.0" 
+///       Redondea.
+///
+/// Devuelve el puntero p0 donde EMPIEZA el double.
+template <size_t ndecimals>
+char* to_string_with_zeros(const double& x0, char* m0, char* me)
 {
-    std::array<char, ndigits> str; 
+    int32_t x = static_cast<int32_t>(x0 * ten_to_the<double>(ndecimals + 1));
+    int32_t r{};
+    if ((x % 10) < 5)
+	r = 0;
+    else
+	r = 1;
+    x = x/10 + r; // redondeamos
 
-    auto [p0, pe] = mantissa_to_str(x, str.begin(), str.end());
 
-    print(out, p0, pe);
-}
-
-
-// ¿cómo imprimir un double en un LCD? Esta función se encarga de ello.
-template <size_t ndigits = 8>
-void print(std::ostream& out, double x)
-{
-
-    auto [i, f] = to_integer_and_decimal(x);
-    
-    out << static_cast<int>(i);
-    
-    if (f != 0){
-	out << double_decimal_point;
-	__print_mantissa<ndigits>(out, f);
+    auto p = std::reverse_iterator{me};
+    size_t i = 0;
+    for (; p != std::reverse_iterator{m0} and x >= 1; ++p, ++i){
+	if (i == ndecimals){
+	    *p = double_decimal_point;
+	}
+	else {
+	    int y = x % 10;
+	    *p = digit_to_char(y);
+	    x /= 10;
+	}
     }
+    
+    return p.base();
 }
 
-/// Convierte el double x en una cadena, con ndigits cifras decimales como
+
+
+// Devuelve p0, siendo [p0, me) = el double x0 convetido a cadena.
+// Deja siempre libre el primer caracter m0, para poder escribir el signo +/-
+// si se quiere. Esto es p0 != m0 siempre.
+// En caso de error devuelve me ([me, me) = double x0!!!)
+// precondition: me != m0	==> std::prev(me) válido
+template <size_t ndecimals>
+char* __pos_to_string_without_zeros(const double& x0, char* m0, char* me)
+{
+// Convierto a int y redondeo
+// TODO: revisar que no haya overflow!!!
+    uint64_t x = static_cast<uint64_t>(x0 * ten_to_the<double>(ndecimals + 1));
+
+    if ((x % 10) >= 5)
+	x = x/10 + 1; 
+    else
+	x = x/10;
+
+
+// Eliminamos los ceros a la izquierda en la parte decimal
+    size_t i = 0;
+    while ((x % 10) == 0 and i < ndecimals){
+	x /= 10;
+	++i;
+    }
+
+// Convertimos la parte decimal en str
+    auto p = std::prev(me);
+    if (i < ndecimals){
+	for (; p != m0 and i < ndecimals; --p, ++i){
+	    int y = x % 10;
+	    *p = digit_to_char(y);
+	    x /= 10;
+	}
+
+	if (p == m0) return me; // error
+
+	*p = double_decimal_point;
+
+	--p;
+	if (p == m0) return me; // error
+    }
+    if (x < 1){
+	*p = '0';
+	return p;
+    }
+
+    for (; p != m0 and x >= 1; --p, ++i){
+	int y = x % 10;
+	*p = digit_to_char(y);
+	x /= 10;
+    }
+
+    if (x >= 1) return me; // error
+
+    return std::next(p);
+}
+
+template <size_t ndecimals>
+char* to_string_without_zeros(const double& x0, char* m0, char* me)
+{
+    double x = x0;
+
+    if (x0 < 0){
+	x = -x0;
+    }
+
+    auto p0 = __pos_to_string_without_zeros<ndecimals>(x, m0, me);
+
+    if (x0 < 0){
+	if (p0 != me and p0 != m0){
+	    --p0;
+	    *p0 = '-';
+	}
+	else return me;  // error
+    }
+
+    return p0;
+}
+
+
+
+/// Convierte el double x en una cadena, con ndecimals cifras decimales como
 /// máximo, guardándola en [m0, me).
 /// Devuelve el número como cadena [p0, pe). En general:
 ///		m0 <= p0 <= pe <= me
 /// En caso de error devuelve {m0, m0}.
-/// ndigits = número de cifras decimales máximo a usar.
+/// ndecimals = número de cifras decimales máximo a usar.
 //// Equivalente a: x.to_cstring(m0, me) [= x --> [m0, me)]
-template <int ndigits = 8>
+template <int ndecimals = 8>
 std::pair<char*, char*> to_string(const double& x, char* m0, char* me)
 {
     if (m0 == me)
 	return {m0, m0};
 
-    auto [i, f] = to_integer_and_decimal(x);
+    auto p0 = to_string_without_zeros<ndecimals>(x, m0, me);
 
-    char* p0 = me; 
-    char* pe = me;
-
-    if (f != 0){
-	if (me - m0 < ndigits)
-	    return {m0, m0};	    // error: no hay espacio!!!
-
-	std::tie(p0, pe) = mantissa_to_str(f, me - ndigits, me);
-
-	if (p0 == m0)
-	    return {m0, m0};	    // error: no hay espacio!!!
-
-	--p0;
-	*p0 = double_decimal_point;
-    }
-
-    if (p0 == m0)
-	return {m0, m0};	    // error: no hay espacio!!!
-
-
-    p0 = int_to_string(static_cast<int>(i), m0, p0);
-
-    return {p0, pe};
+    return {p0, me};
 }
+
+
+
+//// Precondition: x = +0.yyyy (parte entera = 0)
+//// ndecimals = número máximo de cifras decimales
+//template <size_t ndecimals = 8>
+//void __print_mantissa(std::ostream& out, const double& x)
+//{
+//    std::array<char, ndecimals> str; 
+//
+//    auto [p0, pe] = mantissa_to_str(x, str.begin(), str.end());
+//
+//    print(out, p0, pe);
+//}
+
+
+// ¿cómo imprimir un double en un LCD? Esta función se encarga de ello.
+template <size_t ndecimals = 8>
+void print(std::ostream& out, double x)
+{
+    std::array<char, 20> str;
+    auto [p0, pe] = to_string(x, str.begin(), str.end());
+    for (; p0 != pe; ++p0)
+	out << *p0;
+}
+
+
 
 
 }// namespace

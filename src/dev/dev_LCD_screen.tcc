@@ -229,7 +229,8 @@ void LCD_screen<num_cols, num_rows, LCD>::print_align_to_the_right(
 
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
 template <typename Int>
-void LCD_screen<num_cols, num_rows, LCD>::print_align_to_the_right_(const Int& x)
+void LCD_screen<num_cols, num_rows, LCD>::
+					print_align_to_the_right_(const Int& x)
 {
     std::array<char, std::numeric_limits<Int>::digits10 + 1> str;
     auto p = atd::int_to_string(x, str.begin(), str.end());

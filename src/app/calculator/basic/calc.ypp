@@ -6,7 +6,7 @@
 
 %}
 
-%define api.value.type {double}; /* stack type, por defecto es int */
+%define api.value.type {double}; /* stack type, by default is int */
 
 %token NUMBER
 %left '+' '-'	/* left associaive, same precedence */

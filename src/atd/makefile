@@ -1,7 +1,7 @@
 SOURCES= atd_bcd.cpp		\
 		 atd_cstddef.cpp 	\
 		 atd_cstring.cpp	\
-		 atd_double.cpp 	\
+		 atd_double.cpp		\
 		 atd_time.cpp
 
 INCS= atd_algorithm.h	\
