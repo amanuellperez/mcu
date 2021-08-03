@@ -1,4 +1,4 @@
-// Copyright (C) 2021 A.Manuel L.Perez 
+//// Copyright (C) 2021 A.Manuel L.Perez 
 //           mail: <amanuel.lperez@gmail.com>
 //           https://github.com/amanuellperez/mcu
 //
@@ -107,9 +107,9 @@ void test_print()
     atd::print(std::cout, 8);
     std::cout << " =? 8\n\tValor real = [" << std::setprecision(20) << 8 << "]\n";
 
-    {// bug
-	double a = 2;
-	double b = 8;
+    {// bug: esto funciona bien en g++, pero falla en avr-g++!!!
+	volatile double a = 2;
+	volatile double b = 8;
 	double c = pow(a, b);
 	atd::print(std::cout, c);
         std::cout << " =? 256\n\tValor real = [" << std::setprecision(20) << c
@@ -142,7 +142,7 @@ void test_to_string(double x, const std::string& res)
 {
     std::array<char, 20> str;
 
-    auto [p0, pe] = atd::to_string(x, str.begin(), str.end());
+    auto [p0, pe] = atd::to_string<10>(x, str.begin(), str.end());
     CHECK_TRUE((std::string{p0, pe} == res), "to_string");
 }
 

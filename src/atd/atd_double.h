@@ -39,6 +39,7 @@
 #include <utility>
 #include <array>
 #include <tuple>    // std::tie
+#include <stdio.h>  // snprintf
 
 #include "atd_algorithm.h"
 #include "atd_string.h"
@@ -221,7 +222,7 @@ char* to_string_without_zeros(const double& x0, char* m0, char* me)
 /// En caso de error devuelve {m0, m0}.
 /// ndecimals = número de cifras decimales máximo a usar.
 //// Equivalente a: x.to_cstring(m0, me) [= x --> [m0, me)]
-template <int ndecimals = 8>
+template <int ndecimals>
 std::pair<char*, char*> to_string(const double& x, char* m0, char* me)
 {
     if (m0 == me)
@@ -250,11 +251,22 @@ std::pair<char*, char*> to_string(const double& x, char* m0, char* me)
 // ¿cómo imprimir un double en un LCD? Esta función se encarga de ello.
 template <size_t ndecimals = 8>
 void print(std::ostream& out, double x)
+//inline void print(std::ostream& out, double x)
 {
     std::array<char, 20> str;
-    auto [p0, pe] = to_string(x, str.begin(), str.end());
+    auto [p0, pe] = to_string<ndecimals>(x, str.begin(), str.end());
     for (; p0 != pe; ++p0)
 	out << *p0;
+//    constexpr int N = 20;
+//    char str[N];
+//
+//    int n = snprintf(str, N, "%f", x);
+//    if (n < N){
+//	    out << str;
+//    }
+//    else {
+//	out << "error print double";
+//    }
 }
 
 

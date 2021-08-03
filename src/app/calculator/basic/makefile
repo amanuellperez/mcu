@@ -5,7 +5,10 @@ SOURCES= main.cpp 			\
 		 calc.tab.cpp	
 
 # Fundamental para que sscanf trabaje con double!!!
-USER_LDFLAGS=-Wl,-u,vfscanf -lscanf_flt
+# Aumenta 2K al enlazarlo con esta biblioteca
+#USER_LDFLAGS=-Wl,-u,vfscanf -lscanf_flt -Wl,-u,vfprintf -lprint_flt -lm
+#USER_LDFLAGS=-Wl,-u,vfprintf -lprintf_flt -lm
+USER_LDFLAGS=-lm
 
 
 MCU = atmega328p
