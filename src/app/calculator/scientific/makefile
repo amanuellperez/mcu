@@ -2,11 +2,10 @@ BIN = xx
 
 SOURCES= main.cpp 			\
 		 lex.cpp			\
-		 error.cpp			\
-		 calc.tab.cpp	
+		 calc.tab.cpp		\
+		 calc_math.cpp		\
+		 error.cpp
 
-
-# Fundamental para que sscanf trabaje con double!!!
 # Aumenta 2K al enlazarlo con esta biblioteca
 #USER_LDFLAGS=-Wl,-u,vfscanf -lscanf_flt -Wl,-u,vfprintf -lprint_flt -lm
 #USER_LDFLAGS=-Wl,-u,vfprintf -lprintf_flt -lm

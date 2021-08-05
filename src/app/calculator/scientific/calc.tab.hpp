@@ -50,13 +50,27 @@ extern int yydebug;
   enum yytokentype
   {
     NUMBER = 258,
-    UNARYMINUS = 259
+    CONSTANT = 259,
+    VARIABLE = 260,
+    BUILTIN = 261,
+    UNDEF = 262,
+    UNARYMINUS = 263
   };
 #endif
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef double YYSTYPE;
+union YYSTYPE
+{
+#line 9 "calc.ypp"
+		// stack type
+    double value;	// actual value
+    Symbol* symbol; // symbol table pointer
+
+#line 71 "calc.tab.hpp"
+
+};
+typedef union YYSTYPE YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
 #endif

@@ -4,6 +4,7 @@
 #include "lex.h"
 #include "calc.tab.hpp"
 #include "../buffer.h"	// read
+#include "error.h"
 
 int yylex()
 {
@@ -14,23 +15,16 @@ int yylex()
 	if (!read(Main::buffer, yylval))
 	    Main::set_yylex_read();
 
-//Main::lcd.clear();
-//atd::print(Main::lcd, yylval);
-//wait_ms(500);
 	return NUMBER;
     }
 
-//Main::lcd.clear();
-//Main::lcd << (char) c;
-//wait_ms(500);
     return c;
 }
 
-void yyerror(const char* s)
+void yyerror(const char* msg)
 {
-    Main::lcd.screen().clear_row(1);
-    Main::lcd.cursor_pos(0,1);
-    Main::lcd << s;
+    msg_error(msg);
+
     if (Main::no_error())
 	Main::set_yyerror();
 }

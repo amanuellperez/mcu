@@ -90,7 +90,7 @@ private:
     using symbol = dev::HD44780_charset_A00;
 
 // Data
-    static constexpr uint8_t key_return = '=';
+    static constexpr uint8_t key_return = '\n';
     
     static constexpr uint8_t debouncing_time = 200; // ms
 };
@@ -254,7 +254,7 @@ void Interface<L, K, N>::getline(Buffer& buffer0, bool error)
     lcd_.cursor_on();
 
     read();
-    buffer_->push_back('='); // caracter de terminación
+    buffer_->push_back(key_return); // caracter de terminación
     buffer_->push_back('\0');	// yparse usa cadenas de C!!! Fundamental!!!
 
     lcd_.cursor_off();
