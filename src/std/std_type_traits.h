@@ -33,6 +33,8 @@
  *    08/12/2019 add_rvalue_reference/add_lvalue_reference/is_function
  *		 add_pointer/remove_pointer, ...
  *    18/03/2021 make_signed/make_unsigned
+ *    14/08/2021 Completando implementación de common_type.
+ *               Es copia de cppreference. TODO: reescribirla.
  *
  ****************************************************************************/
 #include "std_config.h"
@@ -949,6 +951,26 @@ template <bool b, typename T>
 using enable_if_t = typename enable_if<b, T>::type;
 
 
+// conditional
+// -----------
+template <bool B, typename True, typename False>
+struct conditional
+{ using type = True; };
+
+
+template <typename True, typename False>
+struct conditional<false, True, False>
+{ using type = False; };
+
+
+template <bool B, typename T, typename F>
+using conditional_t = typename conditional<B, T, F>::type;
+
+template <typename...>
+using void_t = void;
+
+
+
 // common_type
 // -----------
 // if (sizeof...(T) == 0) 
@@ -977,10 +999,12 @@ using enable_if_t = typename enable_if<b, T>::type;
 // implementación? Esta es muy sencilla de entender.
 // gcc tiene una implementación diferente.
 template <typename... T>
-struct common_type;
+struct common_type {};
 
 template <typename... T> 
 using common_type_t = typename common_type<T...>::type;
+
+
 
 // sizeof...(T) == 0
 template<>
@@ -993,27 +1017,46 @@ struct common_type<T> {
 };
 
 // sizeof...(T) == 2
-template <typename T1, typename T2,
-	  bool = !is_same_v<T1, decay_t<T1>> or !is_same_v<T2, decay_t<T2>>>
-struct __common_type_switch;
+// TODO: esta implementación es copia de la que hay en cppreference.
+// Preferiría hacerla con un switch pero el problema es cómo hacerlo cuando no
+// `type` no queda definido. Por eso se usa la herencia.
+namespace detail {
 
-template <typename T1, typename T2>
-struct __common_type_switch<T1, T2, true>{
-    using type = common_type_t<decay_t<T1>, decay_t<T2>>;
+// La expresión "false? decl..." no compila si T1 y T2 no son del mismo tipo
+// (?)
+template<typename T1, typename T2>
+using common_declval_T1_T2 = decltype(false ? declval<T1>() : declval<T2>());
+ 
+template<typename, typename, typename = void>
+struct decay_conditional_result {};
+
+template<typename T1, typename T2>
+struct decay_conditional_result<T1, T2, void_t<common_declval_T1_T2 <T1, T2>>>
+{
+    using type = decay_t<common_declval_T1_T2<T1, T2>>;
 };
-
-// TODO: else if (!there_is_specialization_of(common_type_t<D1, D2>))
+ 
+template<typename T1, typename T2, typename = void>
+struct common_type_2_impl : decay_conditional_result<const T1&, const T2&> {};
+ 
+ 
+template<typename T1, typename T2>
+struct common_type_2_impl<T1, T2, void_t<common_declval_T1_T2<T1, T2>>>
+    : decay_conditional_result<T1, T2> {};
+}
+ 
 template <typename T1, typename T2>
-struct __common_type_switch<T1, T2, false>{
-    using type = decay_t<decltype(false ? declval<T1>(): declval<T2>())>;
-};
-
-template <typename T1, typename T2>
-struct common_type<T1, T2> {
-    using type = typename __common_type_switch<T1, T2>::type;
-};
+struct common_type<T1, T2> 
+    : conditional<is_same<T1, typename decay<T1>::type>::value &&
+                       is_same<T2, typename decay<T2>::type>::value,
+                       detail::common_type_2_impl<T1, T2>,
+                       common_type<typename decay<T2>::type,
+                                   typename decay<T2>::type>>::type {};
 
 
+
+
+// sizeof...(T) > 2
 // C(t1, t2, t3, ..., tn) = C( C(t1, t2), t3, ..., tn);
 template <typename T1, typename T2, typename... Tail>
 struct common_type <T1, T2, Tail...>{
@@ -1021,25 +1064,6 @@ struct common_type <T1, T2, Tail...>{
 };
 
 
-
-
-// conditional
-// -----------
-template <bool B, typename True, typename False>
-struct conditional
-{ using type = True; };
-
-
-template <typename True, typename False>
-struct conditional<false, True, False>
-{ using type = False; };
-
-
-template <bool B, typename T, typename F>
-using conditional_t = typename conditional<B, T, F>::type;
-
-template <typename...>
-using void_t = void;
 
 }// namespace
 
