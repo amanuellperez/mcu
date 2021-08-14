@@ -21,8 +21,6 @@
 #include "../../avr_UART.h"
 #include "../../avr_time.h"
 
-using avr::ADC;
-
 // Conectar un divisor de potencial, la salida al pin 28.
 // Con un multimetro ir comparando la salida del multimetro con la que da el
 // ADC.
@@ -53,7 +51,7 @@ using avr::ADC;
 //  sirviendo para nada.
 
 void wait_until_conversion_is_complete()
-{while(!ADC::is_the_conversion_complete()) ;}
+{while(!avr::ADC::is_the_conversion_complete()) ;}
 
 
 void print(std::ostream& out, const avr::Potential& v)
@@ -87,23 +85,23 @@ void test_internal_1_1V()
     uart << "El potencial máximo a leer es de 1.1 V\n";
 
     // encendemos el ADC en internal 1.1V a 125kHz
-    ADC::AREF_internal_to_1_1V();
-    ADC::clock_speed_in_kHz<125>();
-    ADC::enable();
+    avr::ADC::AREF_internal_to_1_1V();
+    avr::ADC::clock_speed_in_kHz<125>();
+    avr::ADC::enable();
 
     constexpr uint16_t AREF_en_mV = 1100;
 
 // seleccionamos pin a leer
-    ADC::select_pin<npin>();
+    avr::ADC::select_pin<npin>();
 
     while (1) {
-	ADC::start_conversion();
+	avr::ADC::start_conversion();
 	wait_until_conversion_is_complete();
 	
-	auto arefs = ADC::ADC_in_arefs();
+	auto arefs = avr::ADC::ADC_in_arefs();
 
 	uart << "arefs = " << arefs  << "; V = ";
-	print(uart, ADC::ADC_in_volts<AREF_en_mV>());
+	print(uart, avr::ADC::ADC_in_volts<AREF_en_mV>());
 	uart << '\n';
 
 	wait_ms(1000);
@@ -132,22 +130,22 @@ void test_internal_AVCC()
     uart << "El potencial máximo a leer es de 5 V.\n";
 
     // encendemos el ADC en internal 1.1V a 125kHz
-    ADC::AREF_internal_to_AVCC();
-    ADC::clock_speed_in_kHz<125>();
-    ADC::enable();
+    avr::ADC::AREF_internal_to_AVCC();
+    avr::ADC::clock_speed_in_kHz<125>();
+    avr::ADC::enable();
 
 
 // seleccionamos pin a leer
-    ADC::select_pin<npin>();
+    avr::ADC::select_pin<npin>();
 
     while (1) {
-	ADC::start_conversion();
+	avr::ADC::start_conversion();
 	wait_until_conversion_is_complete();
 	
-	auto arefs = ADC::ADC_in_arefs();
+	auto arefs = avr::ADC::ADC_in_arefs();
 
 	uart << "arefs = " << arefs  << "; V = ";
-	print(uart, ADC::ADC_in_volts<AREF_en_mV>());
+	print(uart, avr::ADC::ADC_in_volts<AREF_en_mV>());
 	uart << '\n';
 
 	wait_ms(1000);
@@ -174,22 +172,22 @@ void test_AREF_external()
     uart << "El potencial máximo a leer es de 5 V.\n";
 
     // encendemos el ADC en internal 1.1V a 125kHz
-    ADC::AREF_external();
-    ADC::clock_speed_in_kHz<125>();
-    ADC::enable();
+    avr::ADC::AREF_external();
+    avr::ADC::clock_speed_in_kHz<125>();
+    avr::ADC::enable();
 
 
 // seleccionamos pin a leer
-    ADC::select_pin<npin>();
+    avr::ADC::select_pin<npin>();
 
     while (1) {
-	ADC::start_conversion();
+	avr::ADC::start_conversion();
 	wait_until_conversion_is_complete();
 	
-	auto arefs = ADC::ADC_in_arefs();
+	auto arefs = avr::ADC::ADC_in_arefs();
 
 	uart << "arefs = " << arefs  << "; V = ";
-	print(uart, ADC::ADC_in_volts<AREF_en_mV>());
+	print(uart, avr::ADC::ADC_in_volts<AREF_en_mV>());
 	uart << '\n';
 
 	wait_ms(1000);

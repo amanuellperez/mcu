@@ -590,11 +590,26 @@ void test_decimal()
 
 // operator<<
     {
-    atd::Decimal<int, 2> a{922,06};
+    atd::Decimal<int, 2> a{922,6}; // <--- ESTO ES CONFUSO!!!
     CHECK_STDOUT(a, "922.06");
 
     atd::Decimal<int, 0> b{876};
     CHECK_STDOUT(b, "876");
+    }
+
+// bugs
+    {
+	// CHECK_DONT_COMPILE:
+//	atd::Decimal<uint8_t, 1> a{12, 3};
+//	uint16_t x = 100;
+//	auto b = a* x;
+//	std::cout << b << '\n';
+
+	atd::Decimal<uint32_t, 1> a{12, 3};
+	uint16_t x = 100;
+	auto b = a* x;
+	std::cout << b << '\n';
+
     }
 }
 

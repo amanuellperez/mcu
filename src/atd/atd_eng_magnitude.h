@@ -111,8 +111,7 @@ using scalar = typename scalar_<Int>::type;
  * 
  *  Observar que se trata de una clase independiente de atd::Magnitude.
  *  Como Magnitude y ENG_Magnitude representan lo mismo puedo pasar
- *  de una forma a otra (por eso suministro el constructor). Se puede operar
- *  completamente en ENG_Magnitude olvidándose de Magnitude.
+ *  de una forma a otra (por eso suministro to_magnitude).
  *
  *  (RRR) ¿Cómo podemos representar un número?
  *	  (1) x*10^n , con x cualquier número (como potencia de 10). 
@@ -167,10 +166,10 @@ public:
 //    constexpr ENG_Magnitude(const Rep& x, Exponent exp)
 //	: x_{x}, exp_{exp} {write_as_eng(x_, exp_);}
 
-    // TODO: imponer que solo se pueda llamar a esta función cuando Int sea
+    // Solo se pueda llamar a esta función cuando Int sea
     // convertible a Rep
-    template <typename Int>
-    constexpr ENG_Magnitude(Int x, Exponent exp = 0);
+    template <typename Int, typename CRep = std::common_type_t<Int, Rep>>
+    explicit constexpr ENG_Magnitude(Int x, Exponent exp = 0);
 
     // algebra
     ENG_Magnitude& operator++();
@@ -234,7 +233,7 @@ private:
 // Observar que es obligatorio inicializar x_, exp_ sino no compila al ser
 // constexpr. ¿Por qué? ???
 template <typename U, typename Rep>
-template <typename Int>
+template <typename Int, typename CRep>
 constexpr ENG_Magnitude<U, Rep>::ENG_Magnitude(Int x, Exponent exp)
     : x_{}, exp_{}
 {

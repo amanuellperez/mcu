@@ -615,6 +615,18 @@ void test_bugs()
 	std::cout << "xx = " << xx << '\n';
 
     }
+
+
+{
+// Time
+using avr_Time      = atd::ENG_time<atd::Decimal<uint32_t, 3>>;
+using avr_Frequency = atd::ENG_frequency<atd::Decimal<uint32_t, 3>>;
+uint32_t n = 100;
+avr_Frequency x{};
+x = avr_Time::Rep{1} / avr_Time{n, -6};
+std::cout << "x = " << x << '\n';
+
+}
 }
 
 template <typename U, typename R>

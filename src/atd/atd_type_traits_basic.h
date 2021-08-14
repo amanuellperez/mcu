@@ -32,6 +32,7 @@
  *    12/02/2021 has_same_sign, same_type_with_double_bits
  *    14/03/2021 same_type_at_least32
  *    18/03/2021 make_type<A>::template same_sign_as<B>
+ *    13/08/2021 common_type_if_convertible_t
  *
  ****************************************************************************/
 #include <type_traits>
@@ -238,6 +239,19 @@ template <typename T>
 using same_type_at_least32 =
     typename same_type_at_least32_<T>::type;
 
+
+
+// SFINAE helper to obtain common_type<Rep1, Rep2> only if Rep2
+// is implicitly convertible to it.
+// if (is_convertible_v<const Rep2&, common_type_t<Rep1, Rep2>>)
+//	return common_type_t<Rep1, Rep2>;
+// else
+//	compile_error();
+template <typename Rep1,
+          typename Rep2,
+          typename CRep = std::common_type_t<Rep1, Rep2>>
+using common_type_if_convertible_t =
+    std::enable_if_t<std::is_convertible_v<const Rep2&, CRep>, CRep>;
 
 }// namespace
 

@@ -51,6 +51,8 @@
  *		       tipo template?) así que defino operator+(int, Decimal) 
  *		       (con todo no debería de ser necesario. Revisar!!!)
  *    06/03/2021       operator++/--, numeric_limits
+ *    14/08/2021       se permite operar con escalares que sean convertibles
+ *                     a Rep.
  *
  ****************************************************************************/
 #include <utility>
@@ -544,48 +546,55 @@ constexpr inline std::common_type_t<Decimal<R1, n1>, Decimal<R2, n2>>
 
 // operaciones con escalares
 // -------------------------
-template <typename R, int n>
-constexpr inline Decimal<R, n> operator+(Decimal<R,n> a, const R& b)
+template <typename R1, typename R2, int n>
+constexpr inline Decimal<common_type_if_convertible_t<R1, R2>, n>
+operator+(Decimal<R1,n> a, const R2& b)
 { return a += b; }
 
-template <typename R, int n>
-constexpr inline Decimal<R, n> operator+(const R& a, const Decimal<R,n>& b)
+template <typename R1, typename R2, int n>
+constexpr inline Decimal<common_type_if_convertible_t<R1, R2>, n>
+operator+(const R2& a, const Decimal<R1,n>& b)
 { return b + a;}
 
-template <typename R, int n>
-constexpr inline Decimal<R, n> operator-(Decimal<R,n> a, const R& b)
+template <typename R1, typename R2, int n>
+constexpr inline Decimal<common_type_if_convertible_t<R1, R2>, n>
+operator-(Decimal<R1,n> a, const R2& b)
 { return a -= b; }
 
-template <typename R, int n>
-constexpr inline Decimal<R, n> operator-(const R& a, const Decimal<R,n>& b)
-{ return (Decimal<R,n>{a} - b);}
+template <typename R1, typename R2, int n>
+constexpr inline Decimal<common_type_if_convertible_t<R1, R2>, n>
+operator-(const R2& a, const Decimal<R1,n>& b)
+{ return (Decimal<R1,n>{a} - b);}
 
-
-template <typename R, int n>
-constexpr inline Decimal<R, n> operator*(const R& a, Decimal<R, n> v)
+template <typename R1, typename R2, int n>
+constexpr inline Decimal<common_type_if_convertible_t<R1, R2>, n>
+operator*(const R2& a, Decimal<R1, n> v)
 {
     v *= a;
     return v;
 }
 
-template <typename R, int n>
-constexpr inline Decimal<R, n> operator*(Decimal<R, n> v, const R& a)
+template <typename R1, typename R2, int n>
+constexpr inline Decimal<common_type_if_convertible_t<R1, R2>, n>
+operator*(Decimal<R1, n> v, const R2& a)
 {
     return a*v;
 }
 
 // solo si R2 es convertible a R1.
-template <typename R, int n>
-constexpr inline Decimal<R, n> operator/(Decimal<R, n> v, const R& a)
+template <typename R1, typename R2, int n>
+constexpr inline Decimal<common_type_if_convertible_t<R1, R2>, n>
+operator/(Decimal<R1, n> v, const R2& a)
 {
     v /= a;
     return v;
 }
 
 
-template <typename R, int n>
-constexpr inline Decimal<R, n> operator/(const R& a, const Decimal<R,n>& b)
-{ return Decimal<R,n>::from_internal_value(a * ten_to_the<R>(n)) / b; }
+template <typename R1, typename R2, int n>
+constexpr inline Decimal<common_type_if_convertible_t<R1, R2>, n>
+operator/(const R2& a, const Decimal<R1,n>& b)
+{ return Decimal<R1,n>::from_internal_value(a * ten_to_the<R1>(n)) / b; }
 
 
 
