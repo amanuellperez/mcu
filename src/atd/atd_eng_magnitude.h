@@ -30,6 +30,7 @@
  *    A.Manuel L.Perez
  *    04/02/2021 v0.0 Implementación mínima.
  *    11/03/2021      to_eng_magnitude
+ *    15/08/2021      millivalue
  *
  ****************************************************************************/
 #include "atd_magnitude.h"
@@ -192,8 +193,21 @@ public:
     constexpr bool operator<(const ENG_Magnitude& b) const;
 
 // observers
-    constexpr Rep value() const {return x_;}
+    // Un ENG es un número de la forma value() * 10^exponent();
+    constexpr Rep internal_value() const {return x_;}
     constexpr Exponent exponent() const {return exp_;}
+
+    /// Devuelve el ENG en unidades de mili.
+    /// Ejemplo: si la magnitud es Voltio devuelve milivoltios;
+    ///          si la unidad es Seconds devuelve miliseconds...
+    /// El comportamiento está undefined si el valor del ENG en milivalues 
+    /// genera overflow en Rep.
+    // TODO: si resulta ser práctica esta función añadir 
+    //		kilovalue(), Megavalue(), Gigavalue(), Teravalue(),
+    //		microvalue(), nanovalue() ...
+    //		value() = value en las unidades básicas (por ejemplo
+    //			  en segundos, o en voltios...).
+    constexpr Rep millivalue() const;
 
 // print
     void print(std::ostream& out) const;
@@ -240,6 +254,15 @@ constexpr ENG_Magnitude<U, Rep>::ENG_Magnitude(Int x, Exponent exp)
     x_ = to_integer<Rep>(x);
     exp_ = exp;
     write_as_eng(x_, exp_);
+}
+
+
+// observers
+// ---------
+template <typename U, typename R>
+inline constexpr ENG_Magnitude<U,R>::Rep ENG_Magnitude<U,R>::millivalue() const
+{
+    return x_ * ten_to_the<Rep>(exp_ + 3);
 }
 
 
@@ -385,8 +408,8 @@ ENG_Magnitude<U, std::common_type_t<Rep1, Rep2>> operator+
 {
     using Rep = std::common_type_t<Rep1, Rep2>;
     
-    ENG_Magnitude<U, Rep> x{a.value(), a.exponent()};
-    ENG_Magnitude<U, Rep> y{b.value(), b.exponent()};
+    ENG_Magnitude<U, Rep> x{a.internal_value(), a.exponent()};
+    ENG_Magnitude<U, Rep> y{b.internal_value(), b.exponent()};
 
     x += y;
 
@@ -400,8 +423,8 @@ ENG_Magnitude<U, std::common_type_t<Rep1, Rep2>> operator-
 {
     using Rep = std::common_type_t<Rep1, Rep2>;
     
-    ENG_Magnitude<U, Rep> x{a.value(), a.exponent()};
-    ENG_Magnitude<U, Rep> y{b.value(), b.exponent()};
+    ENG_Magnitude<U, Rep> x{a.internal_value(), a.exponent()};
+    ENG_Magnitude<U, Rep> y{b.internal_value(), b.exponent()};
 
     x -= y;
 
@@ -469,7 +492,7 @@ operator*(const ENG_Magnitude<Unit1, Rep1>& a,
     using ENG = ENG_Magnitude<Unit, Rep>;
     using Exponent = ENG::Exponent;
 
-    Int y = Int{a.value()} * Int{b.value()};
+    Int y = Int{a.internal_value()} * Int{b.internal_value()};
     Exponent exp = a.exponent() + b.exponent();
 
     write_as_eng(y, exp);
@@ -491,7 +514,7 @@ operator/(const ENG_Magnitude<Unit1, Rep1>& a,
     using ENG = ENG_Magnitude<Unit, Rep>;
     using Exponent = ENG::Exponent;
 
-    Int y = (Int{a.value()} * Int{1000}) /Int{b.value()};
+    Int y = (Int{a.internal_value()} * Int{1000}) /Int{b.internal_value()};
     Exponent exp = a.exponent() - Exponent{3} - b.exponent();
 
     write_as_eng(y, exp);
@@ -507,7 +530,7 @@ Rep operator/(const ENG_Magnitude<Unit, Rep>& a,
     using Int = same_type_at_least32<Rep>;
     using Exponent = ENG_Magnitude<Unit, Rep>::Exponent;
 
-    Int y = (Int{a.value()} * Int{1000}) /Int{b.value()};
+    Int y = (Int{a.internal_value()} * Int{1000}) /Int{b.internal_value()};
     Exponent exp = a.exponent() - Exponent{3} - b.exponent();
 
     write_as_eng(y, exp);
@@ -531,7 +554,7 @@ operator/(const Rep& a, const ENG_Magnitude<Unit1, Rep>& x)
     using ENG = ENG_Magnitude<Unit, Rep>;
     using Exponent = ENG::Exponent;
 
-    Int y = (Int{a} * Int{1000}) /Int{x.value()};
+    Int y = (Int{a} * Int{1000}) /Int{x.internal_value()};
     Exponent exp = - Exponent{3} - x.exponent();
 
     write_as_eng(y, exp);
@@ -554,7 +577,7 @@ operator/(typename ENG_Magnitude<Unit, Rep>::Scalar a,
 template <typename U, typename Rep>
 constexpr inline bool operator==(const ENG_Magnitude<U, Rep>& a,
 			         const ENG_Magnitude<U, Rep>& b)
-{ return a.value() == b.value() and a.exponent() == b.exponent(); }
+{ return a.internal_value() == b.internal_value() and a.exponent() == b.exponent(); }
 
 template <typename U, typename Rep>
 constexpr inline bool operator!=(const ENG_Magnitude<U, Rep>& a,
@@ -622,7 +645,7 @@ void ENG_Magnitude<U, Rep>::common_exponent(
 template <typename U, typename Rep>
 void ENG_Magnitude<U, Rep>::print(std::ostream& out) const
 {
-    out << value() << ' ';
+    out << internal_value() << ' ';
     print_unit(out);
 }
 
@@ -675,6 +698,9 @@ void ENG_Magnitude<U, R>::print_exponent(std::ostream& out, int exp)
     }
 
 }
+
+
+
 
 template <typename U, typename R>
 inline constexpr ENG_Magnitude<U, R>
@@ -740,7 +766,7 @@ template <typename Rep, typename Unit, typename ENG_Rep>
 inline Magnitude<Unit, Rep, std::ratio<1>>
 to_magnitude(const ENG_Magnitude<Unit, ENG_Rep>& m)
 {
-    ENG_Rep x = m.value() * ten_to_the<ENG_Rep>(m.exponent());
+    ENG_Rep x = m.internal_value() * ten_to_the<ENG_Rep>(m.exponent());
     Rep res = static_cast<Rep>(x);
     return Magnitude<Unit, Rep, std::ratio<1>>{res};
 }

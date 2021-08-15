@@ -103,7 +103,7 @@ void Main::previous_frequency(const avr::Frequency& fsubstract)
 
 void Main::print_without_decimals(std::ostream& out, const avr::Frequency& f)
 {
-    out << atd::to_integer<uint16_t>(f.value());
+    out << atd::to_integer<uint16_t>(f.internal_value());
     atd::print_unit(out, f);
 
 }

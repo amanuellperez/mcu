@@ -25,6 +25,15 @@
 
 using namespace test;
 
+bool equal(const double& a, const double& b)
+{
+    if (a <= b)
+	return (b - a) < 0.01;
+
+    else
+	return (a - b) < 0.01;
+
+}
 
 
 void test_constexpr()
@@ -34,7 +43,7 @@ void test_constexpr()
     using Freq = atd::ENG_frequency<int>;
     
     constexpr Freq f{321, 3};
-    CHECK_TRUE(f.value() == 321 and f.exponent() == 3, "constexpr");
+    CHECK_TRUE(f.internal_value() == 321 and f.exponent() == 3, "constexpr");
 
 }
 
@@ -50,29 +59,29 @@ void test_basic()
     // construction
     {
 	constexpr Freq a{20, 3};
-	CHECK_TRUE(a.value() == 20.0 and a.exponent() == 3, "constructor");
+	CHECK_TRUE(a.internal_value() == 20.0 and a.exponent() == 3, "constructor");
 	CHECK_TRUE(a == a, "operator==");
 	CHECK_TRUE(!(a != a), "operator!=");
     }
     {
 	Freq a{20, -3};
-	CHECK_TRUE(a.value() == 20.0 and a.exponent() == -3, "constructor");
+	CHECK_TRUE(a.internal_value() == 20.0 and a.exponent() == -3, "constructor");
     }
     {
 	Freq a0{1, 0};
-	CHECK_TRUE(a0.value() == 1.0 and a0.exponent() == 0, "constructor");
+	CHECK_TRUE(a0.internal_value() == 1.0 and a0.exponent() == 0, "constructor");
 
 	Freq a1{10, 0};
-	CHECK_TRUE(a1.value() == 10.0 and a1.exponent() == 0, "constructor");
+	CHECK_TRUE(a1.internal_value() == 10.0 and a1.exponent() == 0, "constructor");
 
 	Freq a2{100, 0};
-	CHECK_TRUE(a2.value() == 100.0 and a2.exponent() == 0, "constructor");
+	CHECK_TRUE(a2.internal_value() == 100.0 and a2.exponent() == 0, "constructor");
 
 	Freq a3{1000, 0};
-	CHECK_TRUE(a3.value() == 1.0 and a3.exponent() == 3, "constructor");
+	CHECK_TRUE(a3.internal_value() == 1.0 and a3.exponent() == 3, "constructor");
 
 	Freq a4{10000, 0};
-	CHECK_TRUE(a4.value() == 10.0 and a4.exponent() == 3, "constructor");
+	CHECK_TRUE(a4.internal_value() == 10.0 and a4.exponent() == 3, "constructor");
     }
 
 // a + b
@@ -80,32 +89,32 @@ void test_basic()
 	Freq a{20,3};
 	Freq b{30,3};
 	Freq c = a + b;
-	CHECK_TRUE(c.value() == 50 and c.exponent() == 3, "operator+");
+	CHECK_TRUE(c.internal_value() == 50 and c.exponent() == 3, "operator+");
     }
 
     {
 	Freq a{20,0};
 	Freq b{30,3};
 	Freq c = a + b;
-	CHECK_TRUE(c.value() == static_cast<Rep>(30.02) and c.exponent() == 3, "operator+");
+	CHECK_TRUE(c.internal_value() == static_cast<Rep>(30.02) and c.exponent() == 3, "operator+");
     }
     {
 	Freq a{20,0};
 	Freq b{30,6};
 	Freq c = a + b;
-	CHECK_TRUE(c.value() == (Rep) 30.00002 and c.exponent() == 6, "operator+");
+	CHECK_TRUE(c.internal_value() == (Rep) 30.00002 and c.exponent() == 6, "operator+");
     }
     {// extremo
 	Freq a{1,0};
 	Freq b{999,0};
 	Freq c = a + b;
-	CHECK_TRUE(c.value() == 1.0 and c.exponent() == 3, "operator+");
+	CHECK_TRUE(c.internal_value() == 1.0 and c.exponent() == 3, "operator+");
     }
     {// extremo
 	Freq a{1,0};
 	Freq b{0,0};
 	Freq c = a + b;
-	CHECK_TRUE(c.value() == 1.0 and c.exponent() == 0, "operator+");
+	CHECK_TRUE(c.internal_value() == 1.0 and c.exponent() == 0, "operator+");
     }
 
 
@@ -115,122 +124,122 @@ void test_basic()
 	Freq a{30,3};
 	Freq b{20,3};
 	Freq c = a - b;
-	CHECK_TRUE(c.value() == 10 and c.exponent() == 3, "operator-");
+	CHECK_TRUE(c.internal_value() == 10 and c.exponent() == 3, "operator-");
     }
 
     {
 	Freq a{20,3};
 	Freq b{30,3};
 	Freq c = a - b;
-	CHECK_TRUE(c.value() == -10 and c.exponent() == 3, "operator-");
+	CHECK_TRUE(c.internal_value() == -10 and c.exponent() == 3, "operator-");
     }
 
     {
 	Freq a{20,0};
 	Freq b{30,3};
 	Freq c = b - a;
-	CHECK_TRUE(c.value() == (Rep) 29.980 and c.exponent() == 3, "operator-");
+	CHECK_TRUE(c.internal_value() == (Rep) 29.980 and c.exponent() == 3, "operator-");
     }
     {
 	Freq a{20,0};
 	Freq b{30,6};
 	Freq c = b - a;
-	CHECK_TRUE(c.value() == (Rep) 29.999980 and c.exponent() == 6, "operator-");
+	CHECK_TRUE(c.internal_value() == (Rep) 29.999980 and c.exponent() == 6, "operator-");
     }
     {// extremo
 	Freq a{1,0};
 	Freq b{1,3};
 	Freq c = b - a;
-	CHECK_TRUE(c.value() == 999.0 and c.exponent() == 0, "operator-");
+	CHECK_TRUE(c.internal_value() == 999.0 and c.exponent() == 0, "operator-");
     }
     {// extremo
 	Freq a{0,0};
 	Freq b{1,3};
 	Freq c = b - a;
-	CHECK_TRUE(c.value() == 1.0 and c.exponent() == 3, "operator-");
+	CHECK_TRUE(c.internal_value() == 1.0 and c.exponent() == 3, "operator-");
     }
 
 // a*x
     {
 	Freq a{20,0};
 	Freq c = 2*a;
-	CHECK_TRUE(c.value() == 40.0 and c.exponent() == 0, "operator*");
+	CHECK_TRUE(c.internal_value() == 40.0 and c.exponent() == 0, "operator*");
     }
     {
 	Freq a{20,0};
 	Freq c = 1000*a;
-	CHECK_TRUE(c.value() == 20.0 and c.exponent() == 3, "operator*");
+	CHECK_TRUE(c.internal_value() == 20.0 and c.exponent() == 3, "operator*");
     }
     {
 	Freq a{900,3};
 	Freq c = a*250;
-	CHECK_TRUE(c.value() == 225.0 and c.exponent() == 6, "operator*");
+	CHECK_TRUE(c.internal_value() == 225.0 and c.exponent() == 6, "operator*");
     }
     {// extremo
 	Freq a{20,3};
 	Freq c = a*1;
-	CHECK_TRUE(c.value() == 20.0 and c.exponent() == 3, "operator*");
+	CHECK_TRUE(c.internal_value() == 20.0 and c.exponent() == 3, "operator*");
     }
 
 // a/x
     {
 	Freq a{20,0};
         Freq c = a / 2;
-        CHECK_TRUE(c.value() == 10.0 and c.exponent() == 0, "operator/");
+        CHECK_TRUE(c.internal_value() == 10.0 and c.exponent() == 0, "operator/");
     }
     {
 	Freq a{20,0};
 	Freq c = a / 10;
-	CHECK_TRUE(c.value() == 2.0 and c.exponent() == 0, "operator/");
+	CHECK_TRUE(c.internal_value() == 2.0 and c.exponent() == 0, "operator/");
     }
 
     {
 	Freq a{20,0};
 	Freq c = a / 100;
-	CHECK_TRUE(c.value() == 200.0 and c.exponent() == -3, "operator/");
+	CHECK_TRUE(c.internal_value() == 200.0 and c.exponent() == -3, "operator/");
     }
     {
         Freq a{20,0};
 	Freq c = a / 1000;
-	CHECK_TRUE(c.value() == 20.0 and c.exponent() == -3, "operator/");
+	CHECK_TRUE(c.internal_value() == 20.0 and c.exponent() == -3, "operator/");
     }
     {
         Freq a{20,0};
 	Freq c = a / 10000;
-	CHECK_TRUE(c.value() == 2.0 and c.exponent() == -3, "operator/");
+	CHECK_TRUE(c.internal_value() == 2.0 and c.exponent() == -3, "operator/");
     }
 
     {
 	Freq a{20,0};
 	Freq c = a / 0.1;
-	CHECK_TRUE(c.value() == 200.0 and c.exponent() == 0, "operator/");
+	CHECK_TRUE(c.internal_value() == 200.0 and c.exponent() == 0, "operator/");
     }
     {
 	Freq a{20,0};
 	Freq c = a / 0.01;
-	CHECK_TRUE(c.value() == 2.0 and c.exponent() == 3, "operator/");
+	CHECK_TRUE(c.internal_value() == 2.0 and c.exponent() == 3, "operator/");
     }
     {
 	Freq a{20,0};
 	Freq c = a / 0.001;
-	CHECK_TRUE(c.value() == 20.0 and c.exponent() == 3, "operator/");
+	CHECK_TRUE(c.internal_value() == 20.0 and c.exponent() == 3, "operator/");
     }
 
     {
 	Freq a{2,3};
 	Freq c = a / 10000000;
-	CHECK_TRUE(c.value() == 200.0 and c.exponent() == -6, "operator/");
+	CHECK_TRUE(c.internal_value() == 200.0 and c.exponent() == -6, "operator/");
     }
 
     {
 	Freq a{900,3};
         Freq c = a / 250;
-        CHECK_TRUE(c.value() == (Rep) 3.6 and c.exponent() == 3, "operator/");
+        CHECK_TRUE(c.internal_value() == (Rep) 3.6 and c.exponent() == 3, "operator/");
     }
     {// extremo
 	Freq a{20,3};
         Freq c = a / 1;
-        CHECK_TRUE(c.value() == 20.0 and c.exponent() == 3, "operator/");
+        CHECK_TRUE(c.internal_value() == 20.0 and c.exponent() == 3, "operator/");
     }
 
 // a*b
@@ -238,31 +247,31 @@ void test_basic()
 	Velocity v{30,3};
 	Time t{20,3};
 	Length s = v * t;
-	CHECK_TRUE(s.value() == 600 and s.exponent() == 6, "operator*");
+	CHECK_TRUE(s.internal_value() == 600 and s.exponent() == 6, "operator*");
     }
     {
 	Velocity v{30,0};
 	Time t{20,3};
 	Length s = v * t;
-	CHECK_TRUE(s.value() == 600 and s.exponent() == 3, "operator*");
+	CHECK_TRUE(s.internal_value() == 600 and s.exponent() == 3, "operator*");
     }
     {
 	Velocity v{30,0};
 	Time t{20,-3};
 	Length s = v * t;
-	CHECK_TRUE(s.value() == 600 and s.exponent() == -3, "operator*");
+	CHECK_TRUE(s.internal_value() == 600 and s.exponent() == -3, "operator*");
     }
     {// overflow?
 	Velocity v{999,0};
 	Time t{999,0};
 	Length s = v * t;
-	CHECK_TRUE(s.value() == (Rep) 998.001 and s.exponent() == 3, "operator*");
+	CHECK_TRUE(s.internal_value() == (Rep) 998.001 and s.exponent() == 3, "operator*");
     }
     {// overflow?
 	Velocity v{-999,0};
 	Time t{-999,0};
 	Length s = v * t;
-	CHECK_TRUE(s.value() == (Rep) 998.001 and s.exponent() == 3, "operator*");
+	CHECK_TRUE(s.internal_value() == (Rep) 998.001 and s.exponent() == 3, "operator*");
     }
 
 // a/b
@@ -270,42 +279,42 @@ void test_basic()
 	Length s{60,0};
 	Time t{20,0};
         Velocity v = s / t;
-        CHECK_TRUE(v.value() == 3 and v.exponent() == 0, "operator/");
+        CHECK_TRUE(v.internal_value() == 3 and v.exponent() == 0, "operator/");
     }
     {// speed of light
 	Length s{300,-3};
 	Time t{1,-9};
         Velocity v = s / t;
-        CHECK_TRUE(v.value() == 300 and v.exponent() == 6, "operator/");
+        CHECK_TRUE(v.internal_value() == 300 and v.exponent() == 6, "operator/");
     }
     {// overflow?
 	Length s{1,3};
 	Time t{50,3};
         Velocity v = s / t;
-        CHECK_TRUE(v.value() == 20 and v.exponent() == -3, "operator/");
+        CHECK_TRUE(v.internal_value() == 20 and v.exponent() == -3, "operator/");
     }
     {// overflow?
 	Length s{9,6};
 	Time t{900,3};
         Velocity v = s / t;
-        CHECK_TRUE(v.value() == 10 and v.exponent() == 0, "operator/");
+        CHECK_TRUE(v.internal_value() == 10 and v.exponent() == 0, "operator/");
     }
 
 // number / a
     {
 	Freq f{1, 6};
 	Time t = 1 / f;
-        CHECK_TRUE(t.value() == 1 and t.exponent() == -6, "operator/");
+        CHECK_TRUE(t.internal_value() == 1 and t.exponent() == -6, "operator/");
     }
     {
 	Freq f{1, 6};
 	Time t = 35 / f;
-        CHECK_TRUE(t.value() == 35 and t.exponent() == -6, "operator/");
+        CHECK_TRUE(t.internal_value() == 35 and t.exponent() == -6, "operator/");
     }
     {
 	Freq f{900, 6};
 	Time t = 9 / f;
-        CHECK_TRUE(t.value() == 10 and t.exponent() == -9, "operator/");
+        CHECK_TRUE(t.internal_value() == 10 and t.exponent() == -9, "operator/");
     }
 
 }
@@ -323,62 +332,62 @@ void test_basic2()
     {
     Length m{20, 3};
 
-    CHECK_TRUE(m.value() == Rep{20}, "constructor");
+    CHECK_TRUE(m.internal_value() == Rep{20}, "constructor");
     CHECK_TRUE(m.exponent() == 3, "constructor");
     std::cout << m << '\n';
 
     ++m;
-    CHECK_TRUE(m.value() == Rep{21}, "operator++");
+    CHECK_TRUE(m.internal_value() == Rep{21}, "operator++");
     CHECK_TRUE(m.exponent() == 3, "operator++");
     std::cout << m << '\n';
 
     --m;
-    CHECK_TRUE(m.value() == Rep{20}, "constructor");
+    CHECK_TRUE(m.internal_value() == Rep{20}, "constructor");
     CHECK_TRUE(m.exponent() == 3, "constructor");
     std::cout << m << '\n';
 
     Length m1{30, 3};
-    CHECK_TRUE(m1.value() == Rep{30}, "constructor");
+    CHECK_TRUE(m1.internal_value() == Rep{30}, "constructor");
     CHECK_TRUE(m1.exponent() == 3, "constructor");
     m += m1;
     std::cout << m << '\n';
-    CHECK_TRUE(m.value() == Rep{50}, "operator+=");
+    CHECK_TRUE(m.internal_value() == Rep{50}, "operator+=");
     CHECK_TRUE(m.exponent() == 3, "operator+=");
     m -= m1;
     std::cout << m << '\n';
-    CHECK_TRUE(m.value() == Rep{20}, "operator+=");
+    CHECK_TRUE(m.internal_value() == Rep{20}, "operator+=");
     CHECK_TRUE(m.exponent() == 3, "operator+=");
 
     }
     {
     Length x{999, 3};
     std::cout << x << '\n';
-    CHECK_TRUE(x.value() == Rep{999}, "constructor");
+    CHECK_TRUE(x.internal_value() == Rep{999}, "constructor");
     CHECK_TRUE(x.exponent() == 3, "constructor");
 
     ++x;
     std::cout << x << '\n';
-    CHECK_TRUE(x.value() == Rep{1}, "operator++");
+    CHECK_TRUE(x.internal_value() == Rep{1}, "operator++");
     CHECK_TRUE(x.exponent() == 6, "operator++");
 
     --x;
     std::cout << x << '\n';
-    std::cout << x.value() << '\n';
-    CHECK_TRUE(x.value() == Rep{999}, "constructor");
+    std::cout << x.internal_value() << '\n';
+    CHECK_TRUE(x.internal_value() == Rep{999}, "constructor");
     CHECK_TRUE(x.exponent() == 3, "constructor");
 
     Length x1{1,3};
-    CHECK_TRUE(x1.value() == Rep{1}, "constructor");
+    CHECK_TRUE(x1.internal_value() == Rep{1}, "constructor");
     CHECK_TRUE(x1.exponent() == 3, "constructor");
 
     x += x1;
     std::cout << x << '\n';
-    CHECK_TRUE(x.value() == Rep{1}, "constructor");
+    CHECK_TRUE(x.internal_value() == Rep{1}, "constructor");
     CHECK_TRUE(x.exponent() == 6, "constructor");
 
     x -= x1;
     std::cout << x << '\n';
-    CHECK_TRUE(x.value() == Rep{999}, "constructor");
+    CHECK_TRUE(x.internal_value() == Rep{999}, "constructor");
     CHECK_TRUE(x.exponent() == 3, "constructor");
 
     }
@@ -386,18 +395,18 @@ void test_basic2()
 	Velocity v{20,0};
 	Time t{900, 3};
         Length s = v * t;
-	CHECK_TRUE(s.value() == Rep{18} and s.exponent() == 6, "operator*");
+	CHECK_TRUE(s.internal_value() == Rep{18} and s.exponent() == 6, "operator*");
     }
     {
 	Freq f{1,6};
 	Time t = 1 / f;
-	CHECK_TRUE(t.value() == Rep{1} and t.exponent() == -6, "operator/");
+	CHECK_TRUE(t.internal_value() == Rep{1} and t.exponent() == -6, "operator/");
     }
     {
 	Time t{30,0};
 	Length s{60, 0};
         Velocity v = s / t;
-	CHECK_TRUE(v.value() == Rep{2} and v.exponent() == 0, "operator/");
+	CHECK_TRUE(v.internal_value() == Rep{2} and v.exponent() == 0, "operator/");
     }
     {// operator freq/freq 
 	Freq f1{1, 6};
@@ -410,18 +419,55 @@ void test_basic2()
     {// 1 / freq
 	Freq f{1,6};
 	Time t = 1 / f;
-	CHECK_TRUE(t.value() == Rep{1} and t.exponent() == -6, "operator/");
+	CHECK_TRUE(t.internal_value() == Rep{1} and t.exponent() == -6, "operator/");
     }
     {// construimos como en avr
 	constexpr unsigned long long int freq = 1000000ul;
 	constexpr Freq f{freq, 0};
-	CHECK_TRUE(f.value() == Rep{1} and f.exponent() == 6, "constructor");
+	CHECK_TRUE(f.internal_value() == Rep{1} and f.exponent() == 6, "constructor");
     }
     {// construimos como en avr
 	unsigned long long int freq = 8000000ul;
 	Freq f{freq, 0};
-	CHECK_TRUE(f.value() == Rep{8} and f.exponent() == 6, "constructor");
+	CHECK_TRUE(f.internal_value() == Rep{8} and f.exponent() == 6, "constructor");
     }
+}
+
+
+void test_observers()
+{
+    test::interfaz("observers");
+
+    using Potential = atd::ENG_electric_potential<double>;
+    {
+	Potential V{1};
+	CHECK_TRUE(V.millivalue() == 1000, "millivalue");
+    }
+    {
+	Potential V{1.234};
+	CHECK_TRUE(V.millivalue() == 1234, "millivalue");
+    }
+    {
+	Potential V{1.23456};
+	CHECK_TRUE((equal(V.millivalue(), 1234.56)), "millivalue");
+    }
+    {
+	Potential V{0.00456};
+	CHECK_TRUE((equal(V.millivalue(), 4.56)), "millivalue");
+    }
+    {
+	Potential V{123,6};
+	CHECK_TRUE((equal(V.millivalue(), 123000000000)), "millivalue");
+    }
+
+    {
+	using Rep = atd::Decimal<uint32_t, 3>;
+	using DPotential = atd::ENG_electric_potential<Rep>;
+	DPotential V{Rep{1,234}};
+	CHECK_TRUE(V.millivalue() == Rep{1234}, "millivalue");
+
+    }
+
 }
 
 void test_double()
@@ -434,33 +480,33 @@ void test_double()
     Length x{999.99, 3};
     
     std::cout << ":: " << x << '\n';
-    CHECK_TRUE(x.value() == 999.99, "constructor");
+    CHECK_TRUE(x.internal_value() == 999.99, "constructor");
     CHECK_TRUE(x.exponent() == 3, "constructor");
 
     ++x;
     std::cout << x << '\n';
-    CHECK_TRUE(x.value() == 1.00099, "operator++");
+    CHECK_TRUE(x.internal_value() == 1.00099, "operator++");
     CHECK_TRUE(x.exponent() == 6, "operator++");
 
-    std::cout << "antes= " << x.value() << '\n';
+    std::cout << "antes= " << x.internal_value() << '\n';
     --x;
     std::cout << x << '\n';
-    std::cout << x.value() << '\n';
-    CHECK_TRUE(x.value() == 999.99, "constructor");
+    std::cout << x.internal_value() << '\n';
+    CHECK_TRUE(x.internal_value() == 999.99, "constructor");
     CHECK_TRUE(x.exponent() == 3, "constructor");
 
     Length x1{1,3};
-    CHECK_TRUE(x1.value() == 1, "constructor");
+    CHECK_TRUE(x1.internal_value() == 1, "constructor");
     CHECK_TRUE(x1.exponent() == 3, "constructor");
 
     x += x1;
     std::cout << x << '\n';
-    CHECK_TRUE(x.value() == 1.00099, "constructor");
+    CHECK_TRUE(x.internal_value() == 1.00099, "constructor");
     CHECK_TRUE(x.exponent() == 6, "constructor");
 
     x -= x1;
     std::cout << x << '\n';
-    CHECK_TRUE(x.value() == 999.99, "constructor");
+    CHECK_TRUE(x.internal_value() == 999.99, "constructor");
     CHECK_TRUE(x.exponent() == 3, "constructor");
     }
 //    { // Esto no tiene que compilar:
@@ -474,6 +520,8 @@ void test_double()
 template <typename Rep>
 void test_order()
 {
+    test::interfaz("order");
+
     using Freq     = atd::ENG_frequency<Rep>;
 
     {
@@ -519,14 +567,14 @@ void test_to_eng_magnitude()
 
     Hertz0 f0{Hertz0::Rep{120, 13}};
     ENG_frequency e0 = atd::to_eng_magnitude<uint16_t>(f0);
-    CHECK_TRUE(e0.value() == 120, "to_eng_magnitude");
+    CHECK_TRUE(e0.internal_value() == 120, "to_eng_magnitude");
 
     Hertz1 f1{234.67};
     ENG_frequency e1 = atd::to_eng_magnitude<uint16_t>(f1);
-    CHECK_TRUE(e1.value() == 234, "to_eng_magnitude");
+    CHECK_TRUE(e1.internal_value() == 234, "to_eng_magnitude");
 
     auto e2 = atd::to_eng_magnitude(f0);
-    CHECK_TRUE((e2.value() == Hertz0::Rep{120,13}), "to_eng_magnitude");
+    CHECK_TRUE((e2.internal_value() == Hertz0::Rep{120,13}), "to_eng_magnitude");
 }
 
 void test_to_magnitude()
@@ -565,7 +613,7 @@ void test_bugs()
 	CHECK_TRUE((f2 == Freq{Rep{953, 674}, -3}), "b1");
 
 	Time t = atd::time_in_us<Rep>(1024);
-	CHECK_TRUE(t.value() == Rep::from_internal_value(1024)
+	CHECK_TRUE(t.internal_value() == Rep::from_internal_value(1024)
 		    and t.exponent() == -3, "b2");
     }
     {
@@ -578,7 +626,7 @@ void test_bugs()
 
 
 	Time t = atd::time_in_us<Rep>(1024);
-	CHECK_TRUE(t.value() == Rep::from_internal_value(1024)
+	CHECK_TRUE(t.internal_value() == Rep::from_internal_value(1024)
 		    and t.exponent() == -3, "b2");
     }
     
@@ -604,7 +652,7 @@ void test_bugs()
 	std::cout << "res_val (internal) = " << res_val.internal_value() << '\n';
 	Potential res_pot {res_val, 0};
 	std::cout << "res_pot = " << res_pot << '\n';
-	std::cout << "res_pot (internal) = " << res_pot.value().internal_value() << '\n';
+	std::cout << "res_pot (internal) = " << res_pot.internal_value().internal_value() << '\n';
 
 	Potential::Exponent exp = 0;
 	write_as_eng(res_val, exp);
@@ -672,6 +720,7 @@ try{
     test_basic2<double>();
     test_double();
     test_basic2<atd::Decimal<int,2>>();
+    test_observers();
     test_order<double>();
     test_order<atd::Decimal<int,2>>();
     test_to_eng_magnitude();

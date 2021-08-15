@@ -59,7 +59,7 @@ void print(std::ostream& out, const avr::Potential& v)
     using namespace avr::literals;
 
     if (v < 1_V){
-	out << atd::to_integer<uint16_t>(v.value()) << ' ';
+	out << atd::to_integer<uint16_t>(v.internal_value()) << ' ';
 	atd::print_unit(out, v);
     }
     else
