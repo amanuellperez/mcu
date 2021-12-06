@@ -199,7 +199,6 @@ mar de cutres, pero bueno son los primeros y no creo que nadie los vea):
 
 #### Documentación
 * [Datasheet](datasheet/LCD_HD44780.pdf)
-* app note AN658 de Microchip: [LCD
-  Fundamentals](https://www.microchip.com/wwwAppNotes/AppNotes.aspx?appnote=en011075)
+* app note AN658 de Microchip: LCD Fundamentals
 
 Probado con: avr-gcc 9.2.0
