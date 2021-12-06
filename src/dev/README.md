@@ -14,39 +14,40 @@ Dispositivos a los que accedemos desde el microcontrolador.
 
 
 ## EEPROMs
-| Reference | I2C | SPI | 
-|-----------|:---:|:---:|
-| [25LC256](#25LC256)   |     |  x  |
+| Reference | I2C | SPI | datasheet |
+|-----------|:---:|:---:|:---:|
+| [25LC256](#25LC256)   |     |  x  |[datasheet](datasheet/EEPROM_25LC256.pdf)
 
 ## LCDs
 
-Driver: [HD44780.](#HD44780)
+Driver: [HD44780](#HD44780)
 
 ## Potentiometers (digital)
-| Reference | I2C | SPI |
-|-----------|:---:|:---:|
-|MCP4231    |     |  x  |
+| Reference | I2C | SPI | datasheet |
+|-----------|:---:|:---:|:---:|
+|MCP4231    |     |  x  |[datasheet](datasheet/MCP4231.pdf)
 
 
 ## Registers
-| Reference | Comments|
-|-----------| ---- |
-| 54HC595   | 8-bit serial-in, parallel-out shift |
+| Reference | Comments| datasheet |
+|-----------| ---- |:---:|
+| 74HC595   | 8-bit serial-in, parallel-out shift |[datasheet](datasheet/SN74HC595.pdf)
+
 
 ## RTC (Real-Time Clock)
 
-| Reference | I2C | SPI |
-|-----------|:---:|:---:|
-|DS1307	    |  x  |     |
+| Reference | I2C | SPI | datasheet |
+|-----------|:---:|:---:|:---:|
+|DS1307	    |  x  |     |[datasheet](datasheet/DS1307.pdf)
 
 
 ## Sensors
 
-| Reference |  T  |  P  |  H  |  G  | I2C | SPI |
-|-----------|:---:|:---:|:---:|:---:|:---:|:---:|
-|BMP280     |  x  |  x  |     |     |  x  |  x  |
-|BME280     |  x  |  x  |  x  |     |  x  |  x  |
-|BME680     |  x  |  x  |  x  |  x  |  x  |  x  |
+| Reference |  T  |  P  |  H  |  G  | I2C | SPI | datasheet |
+|-----------|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+|BMP280     |  x  |  x  |     |     |  x  |  x  |[datasheet](datasheet/BMP280.pdf)
+|BME280     |  x  |  x  |  x  |     |  x  |  x  |[datasheet](datasheet/BME280.pdf)
+|BME680     |  x  |  x  |  x  |  x  |  x  |  x  |[datasheet](datasheet/BME680.pdf)
 |LM75A      |  x  |     |     |     |  x  |     |
 
 

@@ -70,6 +70,8 @@ inline auto ADC_macro() {return ADC;}
  */
 class ADC{
 public:
+    using Aref_type = uint16_t;
+
     // a 125 kHz funcionamos por defecto
     constexpr static uint16_t default_frequency = 125;
 
@@ -465,6 +467,12 @@ constexpr Potential ADC::aref2potential(uint32_t x)
     return res;
 }
 
+
+/***************************************************************************
+ *		     FUNCIONES DE MÁS ALTO NIVEL
+ ***************************************************************************/
+inline void wait_until_conversion_is_complete()
+{while(!ADC::is_the_conversion_complete()) ;}
 
 }// namespace
 

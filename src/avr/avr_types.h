@@ -71,6 +71,8 @@ inline constexpr Potential potential_in_V(const Potential::Rep& x)
 inline constexpr Potential potential_in_mV(const Potential::Rep& x)
 { return Potential{x, -3}; }
 
+inline constexpr Potential::Rep in_mV(const Potential& x)
+{ return x.millivalue(); }
 
 
 // syntactic sugar
