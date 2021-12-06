@@ -78,7 +78,7 @@ De momento suministro dos tipos de teclado:
   pero no tengo programador en paralelo). Una forma de resolver es hacer 
   un keyboard
   analógico: pulsar una tecla se traduce en un cierto potencial que medimos
-  con el ADC. Aunque da la impresión de que puede funcionar a día de hoy,
+  con el ADC. Aunque da la impresión de que puede funcionar, a día de hoy
   todavía no he conseguido que funcione de forma segura 
   (garantizado su funcionamiento) ya que depende de la temperatura (basta con
   tocar con un dedo el transistor para que varien todos los potenciales). Lo
