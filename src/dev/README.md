@@ -71,6 +71,18 @@ De momento suministro dos tipos de teclado:
   `Keypad` ya que los de Arduino lo llaman así, aunque quizás un nombre más
   sistemático habría sido `Matrix_key`, `Keymatrix` o algo parecido.
 
+* `Keyboard_ADC`: no funciona. El problema con `keypad` es que si se quiere
+  hacer un teclado para una calculadora científica, de 64 teclas mínimo, se
+  necesitan demasiados pines. No se puede conectar un keypad tan grande y un
+  LCD a la vez a un atmega32 (falta 1 pin!!! se podía usar el pin de reset
+  pero no tengo programador en paralelo). Una forma de resolver es hacer 
+  un keyboard
+  analógico: pulsar una tecla se traduce en un cierto potencial que medimos
+  con el ADC. Aunque da la impresión de que puede funcionar a día de hoy,
+  todavía no he conseguido que funcione de forma segura 
+  (garantizado su funcionamiento) ya que depende de la temperatura (basta con
+  tocar con un dedo el transistor para que varien todos los potenciales). Lo
+  dejo señalado aquí para tener presente mejorarlo para futuros proyectos.
 
 
 ## A parte de los dispositivos incluyo interfaces genéricos:
