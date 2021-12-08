@@ -1,12 +1,7 @@
-BIN = xx
+DIRS = master01	\
+	master02	\
+	slave
 
-SOURCES= main.cpp \
-		 ../../../avr_SPI_basic.cpp
-
-MCU = atmega328p
-
-include $(AVR_GENRULES)
-
-
+include $(MCU_RECRULES)
 
 

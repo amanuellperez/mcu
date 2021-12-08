@@ -1,6 +1,6 @@
 DIRS = basic	\
-		master	\
-		slave
+	basic_interrupt \
+	basic_master
 
 include $(MCU_RECRULES)
 

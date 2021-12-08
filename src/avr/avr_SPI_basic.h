@@ -212,8 +212,10 @@ public:
     /// Enciende el SPI como Master.
     /// La frecuencia del reloj usada será la definida por period_in_us.
     // CUIDADO: parece ser que si se quieren conectar 2 avrs la frecuencia del
-    // master tiene que ser 4 veces más lenta que la del slave.
-//    template <uint16_t period_in_us>
+    // master tiene que ser 4 veces más lenta que la del slave:
+    // Datasheet, 23.5.2. SPI Status register: 
+    // When the SPI is configured as Slave, the SPI is only guaranteed 
+    // to work at fosc/4 or lower
     static void on()
     {
 	init();

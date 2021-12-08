@@ -17,9 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "../../../avr_SPI_basic.h"
-#include "../../../avr_interrupt.h"
-#include "../../../avr_UART_iostream.h"
+#include "../../../../avr_SPI_basic.h"
+#include "../../../../avr_interrupt.h"
+#include "../../../../avr_UART_iostream.h"
 
 
 using SPI = avr::SPI_slave;
