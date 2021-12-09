@@ -65,5 +65,35 @@ modificando a mi gusto.
    al no estar probada es poco robusta, aunque como esto es un proyecto de
    aprendizaje resulta interesante escribirla).
 
+3. La idea era poder usar la misma calculadora básica y científica. Sin
+   embargo, al intentar implementar la científica tengo problema con el
+   teclado. ¿Cómo conectar un teclado de 64 teclas mínimo a un atmega32?
+
+   Posibles soluciones:
+   * No usar un atmega32 sino un micro con más pines. El problema es que creo
+     (?) que no son DIP con lo que habría que soldarlos y prepararlos. Como
+     esto es nuevo, esta opción de momento la dejamos para el futuro.
+
+   * En lugar de conectar el keyboard como una matriz de teclas, usar un
+     keyboard analógico. Solo se necesitaría 1 pin (en lugar de 16 para el
+     teclado de 64 teclas). Esta opción promete, pero de momento no me ha
+     funcionado (el transistor depende mucho de la temperatura y me varía la
+     lectura). Hay que seguir pensándola.
+
+   * Completar el teclado con más hardware para ahorrar pines: se puede usar
+     un registro para ir haciendo el escáneado, puertas OR para detectar si
+     hay alguna tecla pulsada, ... Esta opción tiene el problema de ser muy
+     específica (más programación, más diseño de hardware) y al tener más
+     componentes más cara (??? esto habría que calcularlo).
+
+   * Usar otro micro usándolo como driver del teclado y comunicarlo con el
+     micro de la calculadora via SPI, TWI, UART... Aunque esta opción al
+     principio no parecía muy buena opción (usar otro micro para un
+     teclado???) es posible que sea una de las más prácticas. Es económica:
+     solo se necesita un micro, y sencilla de implementar (solo hay un
+     componente más que soldar y fácil de programar ya que puedo usar
+     `dev::Keypad`). Esta opción es fácil de ampliar y de dotar más
+     funcionalidad al teclado.
+
 
 
