@@ -33,7 +33,12 @@ void SPI_master::init()
     Pin<SPI_num_pin_SCK>::as_output();
     Pin<SPI_num_pin_MOSI>::as_output();
 //    Pin<SPI_num_pin_MISO>::as_input_without_pullup();
-    Pin<SPI_num_pin_SS>::as_output(); // fundamental para que no sea slave
+    Pin<SPI_num_pin_SS>::as_output(); // fundamental para que no sea slave:
+				     // punto 23.3.2: leer este punto. Indica
+				     // que si se define como entrada tiene
+				     // que mantenerse high, si cambia a low
+				     // cambia el modo del SPI a slave!!!
+
     
 ////    // Inicializamos SS
 //// Leer la nota pag 356 del libro de MAKE. Es fundamental poner SS a 1

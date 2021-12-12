@@ -29,40 +29,7 @@
 // El teclado es una matriz de pulsadores.
 // Sacamos la salida por UART
 #include <avr_UART.h>
-#include <dev_keypad.h>
-#include <dev_keyboard_code.h>
-
-// Keypad de 5 x 5
-// No usar: UART (pines 2, 3) y SPI (pines 16-19)
-using Rows = dev::Keypad_rows<6, 15, 14, 13, 12, 11, 10, 9>;
-using Cols = dev::Keypad_cols<28, 27, 26, 25, 24, 23, 4, 5>;
-
-using Keypad = dev::Keypad<Rows, Cols>;
-
-
-struct Code: public dev::Keyboard_code_kascii
-{
-    static constexpr uint8_t AC = cancel;
-    static constexpr uint8_t ANS = give_a_name1;
-
-};
-
-// Es el teclado inicial de la calculadora básica
-constexpr uint8_t ascii_code[64] =
-{
-'1','2','3','4','5','6','7','8',
-'9','0','a','b','c','d','e','f',
-'g','h','i','j','k','l','m','n',
-'o','p','q','r','s','t','u','v',
-'w','x','y','z','A','B','C','D', 
-'E','F','G','H','I','J','K','L',
-'M','N','O','P','Q','R','S','T',
-Code::ANS, Code::del, Code::AC, Code::left, Code::right
-,'(', ')', '+'
-};
-
-
-using Keyboard = dev::Keyboard_keypad<Keypad, Code>;
+#include "../dev.h"
 
 
 void test_keypad()
@@ -95,7 +62,7 @@ void test_keyboard()
     uart << "------\n\n";
     uart << "Pulsa una tecla:";
 
-    Keyboard keyboard{ascii_code};
+    Keyboard keyboard{key_code};
 
     while(1){
 	uint8_t c = keyboard.getchar();

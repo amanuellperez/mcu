@@ -24,7 +24,6 @@
 
 using SPI = avr::SPI_slave;
 
-constexpr uint16_t periodo_en_us = 2;	
 constexpr uint16_t npin_SS = avr::SPI_num_pin_SS;	
 
 static volatile std::byte data {0};
@@ -67,6 +66,9 @@ int main()
 }
 
 
+// ----------
+// Interrupts
+// ----------
 ISR_SPI_STC{
     data = SPI::data_register();
 }

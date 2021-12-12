@@ -115,6 +115,11 @@ public:
     /// Configuramos la velocidad del reloj del SPI en microsegundos.
     // La función clock_speed_in_us traduce la forma de hablar del cliente (en
     // microsegundos) en la forma de hablar del avr (en divisor de frecuencia)
+    // CUIDADO: parece ser que si se quieren conectar 2 avrs la frecuencia del
+    // master tiene que ser 4 veces más lenta que la del slave:
+    // Datasheet, 23.5.2. SPI Status register: 
+    // When the SPI is configured as Slave, the SPI is only guaranteed 
+    // to work at fosc/4 or lower
     template<uint16_t period
 	    , uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
     static void clock_speed_in_us();
@@ -209,13 +214,7 @@ class SPI_slave : public SPI_base {
 public:
     SPI_slave() = delete;
 
-    /// Enciende el SPI como Master.
-    /// La frecuencia del reloj usada será la definida por period_in_us.
-    // CUIDADO: parece ser que si se quieren conectar 2 avrs la frecuencia del
-    // master tiene que ser 4 veces más lenta que la del slave:
-    // Datasheet, 23.5.2. SPI Status register: 
-    // When the SPI is configured as Slave, the SPI is only guaranteed 
-    // to work at fosc/4 or lower
+    /// Enciende el SPI como slave.
     static void on()
     {
 	init();

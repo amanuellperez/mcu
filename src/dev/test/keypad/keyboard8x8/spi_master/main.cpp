@@ -1,0 +1,93 @@
+// Copyright (C) 2021 A.Manuel L.Perez 
+//           mail: <amanuel.lperez@gmail.com>
+//           https://github.com/amanuellperez/mcu
+//
+// This file is part of the MCU++ Library.
+//
+// MCU++ Library is a free library: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+/****************************************************************************
+ *
+ *  - DESCRIPCION: Master para probar el driver de teclado
+ *
+ *  - HISTORIA:
+ *    A.Manuel L.Perez
+ *    12/12/2021 v0.0
+ *
+ ****************************************************************************/
+#include <avr_SPI_basic.h>
+#include <avr_pin.h>
+#include <avr_UART_iostream.h>
+#include "../dev.h"
+
+using SPI = avr::SPI_master;
+
+// La frecuencia del master tiene que ser 4 veces más lenta que la del slave.
+// El slave lo tenemos a 1MHz, luego el periodo máximo debe ser 4 us.
+// De hecho, al principio probe con 2 us y no funcionaba bien.
+// Con 4 funciona bien, garanticemos 8 us.
+constexpr uint16_t periodo_en_us = 8;	
+
+
+void print_code(uint8_t code)
+{
+    avr::UART_iostream uart;
+
+    switch(code){
+	break; case Code::del: uart << "DEL"; 
+	break; case Code::AC: uart << "AC";
+	break; case Code::left: uart << "left";
+	break; case Code::right: uart << "right"; 
+	break; case Code::ANS: uart << "ANS"; 
+	break; default: uart << code; 
+    }
+}
+
+void test_keyboard()
+{
+
+    avr::Output_pin<SPI_SS_pin> no_SS;
+
+    while (1) {
+	no_SS.write_zero();
+	std::byte res = SPI::write(std::byte{0});
+	no_SS.write_one();
+
+	if (res != std::byte{0})
+	    print_code(static_cast<char>(res));
+
+	wait_ms(100);
+    }
+}
+
+
+int main() 
+{
+// init_uart()
+    avr::UART_iostream uart;
+    avr::basic_cfg(uart);
+    uart.on();
+
+// init_SPI()
+    SPI::on<periodo_en_us>();
+    SPI::spi_mode(0,0);
+    SPI::data_order_LSB();
+
+    uart << "\n\nTest driver keyboard\n"
+	        "--------------------\n";
+
+    test_keyboard();
+}
+
+
+

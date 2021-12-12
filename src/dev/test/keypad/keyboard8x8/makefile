@@ -1,5 +1,6 @@
 DIRS = basic	\
-	keyboard8x8
+	spi_master	\
+	spi_slave
 
 include $(MCU_RECRULES)
 

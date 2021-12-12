@@ -21,8 +21,8 @@
 // El teclado es una matriz de pulsadores.
 // Sacamos la salida por UART
 #include <avr_UART.h>
-#include "../../dev_keypad.h"
-#include "../../dev_keyboard_code.h"
+#include "../../../dev_keypad.h"
+#include "../../../dev_keyboard_code.h"
 
 // Este es el keypad barato que venden en internet de 4 x 3
 //using Rows = dev::Keypad_rows<28, 27, 26, 25>;

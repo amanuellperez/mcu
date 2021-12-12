@@ -37,6 +37,7 @@
 #include "../../../avr_pin.h"
 #include "../../../avr_UART_iostream.h"
 
+// TODO: revisar. No se está seleccionando explícitamente el slave!!!
 
 using SPI = avr::SPI_master;
 
@@ -116,17 +117,9 @@ int main()
         char c{};
         uart >> c;
         switch (c) {
-            case '1':
-                test_basic();
-                break;
-
-	    case '2':
-		test_count();
-		break;
-
-	    case '3':
-		test_choose();
-		break;
+            break; case '1': test_basic();
+	    break; case '2': test_count();
+	    break; case '3': test_choose();
         }
     }
 }
