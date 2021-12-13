@@ -41,7 +41,7 @@
  *		
  *		 ¿Cómo llamar al intermedio? ¿A un array que diferencie entre 
  *		 la memoria reservada y la memoria usada? En principio pensé
- *		 en llamarlo Linear_array, pero como ya tenía Circular_array que es
+ *		 en llamarlo Buffer, pero como ya tenía Circular_array que es
  *		 algo similar, parece que tenga sentido llamarlo Linear_array.
  *
  *		 Tenemos los siguientes tipos de arrays:
