@@ -97,6 +97,7 @@ using KB_cols = dev::Keypad_cols<KB_col0_pin,
 using Keypad = dev::Keypad<KB_rows, KB_cols>;
 
 
+using Code = Sci_code;
 
 // Es el teclado inicial de la calculadora básica
 constexpr uint8_t key_code[64] =

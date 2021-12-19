@@ -20,40 +20,40 @@
 
 #include "keycodes.h"
 
-void Code::print(std::ostream& out, uint8_t code)
+void Sci_code::print(std::ostream& out, uint8_t code)
 {
     switch(code){
-	break; case Code::ac: out << "ac";
-	break; case Code::ans: out << "ans";
-	break; case Code::del: out << "del";
-	break; case Code::up: out << "up";
-	break; case Code::down: out << "down";
-	break; case Code::right: out << "right";
-	break; case Code::left: out << "left";
-	break; case Code::ten_x: out << "ten_x";
-	break; case Code::m_plus: out << "m_plus";
-	break; case Code::s2d: out << "s2d";
-	break; case Code::eng: out << "eng";
-	break; case Code::rcl: out << "rcl";
-	break; case Code::sin: out << "sin";
-	break; case Code::cos: out << "cos";
-	break; case Code::tan: out << "tan";
-	break; case Code::hyp: out << "hyp";
-	break; case Code::sexa: out << "sexa";
-	break; case Code::minus: out << "minus";
-	break; case Code::ln: out << "ln";
-	break; case Code::log: out << "log";
-	break; case Code::pow: out << "pow";
-	break; case Code::square: out << "square";
-	break; case Code::root: out << "root";
-	break; case Code::frac: out << "frac";
-	break; case Code::inverse: out << "inverse";
-	break; case Code::calc: out << "calc";
-	break; case Code::shift: out << "shift";
-	break; case Code::alpha: out << "alpha";
-	break; case Code::mode: out << "mode";
-	break; case Code::sqrt: out << "sqrt";
-	break; case Code::unknown: out << "unknown";
+	break; case Sci_code::ac: out << "ac";
+	break; case Sci_code::ans: out << "ans";
+	break; case Sci_code::del: out << "del";
+	break; case Sci_code::up: out << "up";
+	break; case Sci_code::down: out << "down";
+	break; case Sci_code::right: out << "right";
+	break; case Sci_code::left: out << "left";
+	break; case Sci_code::ten_x: out << "ten_x";
+	break; case Sci_code::m_plus: out << "m_plus";
+	break; case Sci_code::s2d: out << "s2d";
+	break; case Sci_code::eng: out << "eng";
+	break; case Sci_code::rcl: out << "rcl";
+	break; case Sci_code::sin: out << "sin";
+	break; case Sci_code::cos: out << "cos";
+	break; case Sci_code::tan: out << "tan";
+	break; case Sci_code::hyp: out << "hyp";
+	break; case Sci_code::sexa: out << "sexa";
+	break; case Sci_code::minus: out << "minus";
+	break; case Sci_code::ln: out << "ln";
+	break; case Sci_code::log: out << "log";
+	break; case Sci_code::pow: out << "pow";
+	break; case Sci_code::square: out << "square";
+	break; case Sci_code::root: out << "root";
+	break; case Sci_code::frac: out << "frac";
+	break; case Sci_code::inverse: out << "inverse";
+	break; case Sci_code::calc: out << "calc";
+	break; case Sci_code::shift: out << "shift";
+	break; case Sci_code::alpha: out << "alpha";
+	break; case Sci_code::mode: out << "mode";
+	break; case Sci_code::sqrt: out << "sqrt";
+	break; case Sci_code::unknown: out << "unknown";
 	break; default: out << code;
     }
 

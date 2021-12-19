@@ -36,7 +36,7 @@ using SPI = avr::SPI_master;
 // El slave lo tenemos a 1MHz, luego el periodo máximo debe ser 4 us.
 // De hecho, al principio probe con 2 us y no funcionaba bien.
 // Con 4 funciona bien, garanticemos 8 us.
-constexpr uint16_t periodo_en_us = 8;	
+constexpr uint16_t period_in_us = 8;	
 
 
 void print_code(uint8_t code)
@@ -79,7 +79,7 @@ int main()
     uart.on();
 
 // init_SPI()
-    SPI::on<periodo_en_us>();
+    SPI::on<period_in_us>();
     SPI::spi_mode(0,0);
     SPI::data_order_LSB();
 

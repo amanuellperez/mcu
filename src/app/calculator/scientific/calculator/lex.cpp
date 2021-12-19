@@ -26,7 +26,7 @@
 #include "calc.tab.hpp"
 #include "main.h"
 #include "error.h"
-#include "../buffer.h"	// read
+#include "../../buffer.h"	// read
 
 int yylex()
 {

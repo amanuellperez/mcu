@@ -61,11 +61,32 @@ G = gas
 
 ## Keyboards
 
+### Notación
+Tengo 2 tipos de teclados:
+
+1. Teclado básico: es un array o matriz de teclas. Las teclas quedan
+   identificadas por sus coordenadas `(row, col)` o por la posición que ocupan
+   (empezamos a numerar la primera tecla (0,0) como 0, luego 1, 2, 3, ...). La
+   función básica que tendrá este teclado es `getkey()` que nos devolverá la
+   tecla pulsada.
+
+   Los llamaré `Keyrow` y `Keymatrix` (o `Keypad`).
+
+2. Teclados: asignan un significado a cada tecla. La tecla `(0,0)`es la `a`.
+   La tecla `(0,1)` la `b`, ... La función básica de este teclado es
+   `getchar()` que nos devuelve el código ASCII (o el usado por la aplicación)
+   con el significado de la tecla. De esta forma el programador al usar este
+   teclado no sabe nada de la disposición de las teclas. 
+
+   A estos teclados los llamaré `Keyboards`.
+
+
+
+### Tipos suministrados
 De momento suministro dos tipos de teclado:
 * `Keyrow`: Teclado formado por una fila de pulsadores.
   Está pensado para que sean 3-4 pulsadores como
   mucho. Cada pulsador está conectado a un pin del microcontrolador.
-
 
 * `Keypad`: es un array de pulsadores colocados en forma de matriz. Lo llamo
   `Keypad` ya que los de Arduino lo llaman así, aunque quizás un nombre más

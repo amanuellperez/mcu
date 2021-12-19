@@ -22,7 +22,7 @@
 #ifndef __MAIN_H__
 #define __MAIN_H__
 
-#include "../dev_basic.h"
+#include "dev.h"
 #include <array>
 
 

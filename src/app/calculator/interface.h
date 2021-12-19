@@ -270,7 +270,7 @@ void Interface<L, K, N>::read()
 	switch(c){
 	    case key_return: return;
 	    case Code::del: DEL_command(); break;
-            case Code::AC: AC_command(); break;
+            case Code::ac: AC_command(); break;
             case Code::left: to_the_left_command(); break;
 	    case Code::right: to_the_right_command(); break;
 	    // case Code::ANS: TODO ANS_command();

@@ -31,7 +31,7 @@
  *    05/08/2021 v0.0
  *
  ****************************************************************************/
-#include "../dev_scientific.h"
+#include "dev.h"
 #include <array>
 
 #include "cfg.h"
@@ -86,6 +86,7 @@ private:
 
 
 // init: hardware
+    void init_SPI();
     void init_lcd();
     void init_keyboard() { }
 

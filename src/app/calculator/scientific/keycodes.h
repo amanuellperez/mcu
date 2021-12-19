@@ -36,7 +36,7 @@
 
 // No heredo de Keyboard_code_kascii ya que tengo muchas teclas especiales.
 // Creo un teclado especial para la calculadora
-struct Code
+struct Sci_code
 {
     static constexpr uint8_t ac     = 128;
     static constexpr uint8_t ans    = 129;

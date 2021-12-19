@@ -23,8 +23,8 @@
 // configuramos con pullup resistor.
 // Sacamos la salida por un LCD
 #include "main.h"
-#include "../interface.h"
-#include "../buffer.h"
+#include "../../interface.h"
+#include "../../buffer.h"
 
 #include "lex.h"
 #include "calc.tab.hpp"
@@ -33,7 +33,7 @@
 LCD Main::lcd;
 Main::Symbols Main::symbol {BUILTIN, CONSTANT, VARIABLE};
 
-Main::Main():keyboard_{key_code},
+Main::Main():keyboard_{},
     builtins_{builtins0},
     constants_{constants0},
     variables_{variables0}
@@ -42,9 +42,18 @@ Main::Main():keyboard_{key_code},
     symbol.init(builtins_, constants_, variables_);
 
 // init_hardware():
+    init_SPI();
     init_lcd();
     init_keyboard();
 
+}
+
+// Solo voy a usar 1 dispositivo SPI (el keyboard), por eso puedo configurar
+// de una sola vez SPI, en vez de tener que configurarlo cada vez que quiera
+// conectarme con el dispositivo (que sería lo habitual)
+void Main::init_SPI()
+{
+    keyboard_.init_SPI();
 }
 
 

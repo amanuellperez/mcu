@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __DEV_SCIENTIFIC_H__
-#define __DEV_SCIENTIFIC_H__
+#ifndef __DEV_BASIC_H__
+#define __DEV_BASIC_H__
 
 /****************************************************************************
  *
@@ -28,7 +28,7 @@
  *
  *  - HISTORIA:
  *    A.Manuel L.Perez
- *    05/08/2021 v0.0
+ *    16/07/2021 v0.0
  *
  ****************************************************************************/
 #include <stdint.h>
@@ -37,7 +37,7 @@
 #include <dev_keypad.h>
 #include <dev_keyboard_code.h>
 
-#include "interface.h"
+#include "../interface.h"
 
 
 // pins usados

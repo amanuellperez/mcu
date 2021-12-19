@@ -28,7 +28,8 @@
  *   - COMENTARIOS: Incluye std::byte
  *
  *   - HISTORIA:
- *	A.Manuel L.Perez Perez - 06/02/2019 byte
+ *	A.Manuel L.Perez 
+ *	06/02/2019 byte
  *
  ****************************************************************************/
 #include "std_config.h"
