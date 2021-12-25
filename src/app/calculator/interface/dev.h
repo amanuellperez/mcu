@@ -104,24 +104,24 @@ using Keypad = dev::Keypad<KB_rows, KB_cols>;
 // particularizamos algunos códigos
 struct Code: public dev::Keyboard_code_kascii
 {
-    static constexpr uint8_t AC = cancel;
-    static constexpr uint8_t ANS = give_a_name1;
+    static constexpr uint8_t ac = cancel;
+    static constexpr uint8_t ans = give_a_name1;
 
 };
 
 // Es el teclado inicial de la calculadora básica
 constexpr uint8_t key_code[25] =
-{'0', '.', '^', Code::ANS, '\n',
+{'0', '.', '^', Code::ans, '\n',
  '1', '2', '3', '+', '-',
  '4', '5', '6', '*', '/',
- '7', '8', '9', Code::del, Code::AC,
+ '7', '8', '9', Code::del, Code::ac,
  's', '(', ')', Code::left, Code::right
 };
 
 
-using Keyboard = dev::Keyboard_keypad<Keypad, Code>;
+using Keyboard = dev::Keyboard_keypad<Keypad>;
 
-using Interface = calc::Interface<LCD, Keyboard, 20>;
+using Interface = calc::Interface<LCD, Keyboard, Code, 20>;
 
 #endif
 

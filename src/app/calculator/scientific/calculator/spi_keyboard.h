@@ -35,11 +35,10 @@
  ****************************************************************************/
 #include <avr_SPI_basic.h>
 
-template <typename SPI_select0, typename Code0, uint16_t period_in_us0>
+template <typename SPI_select0, uint16_t period_in_us0>
 class SPI_Keyboard{
 public:
     using SPI_select = SPI_select0;
-    using Code	     = Code0;
 
     void init_SPI();
     uint8_t getchar();
@@ -50,16 +49,16 @@ private:
 };
 
 
-template <typename S, typename C, uint16_t T>
-void SPI_Keyboard<S, C, T>::init_SPI()
+template <typename S, uint16_t T>
+void SPI_Keyboard<S, T>::init_SPI()
 {
     SPI::on<SPI_period_in_us>();
     SPI::spi_mode(0,0);
     SPI::data_order_LSB();
 }
 
-template <typename S, typename C, uint16_t T>
-uint8_t SPI_Keyboard<S, C, T>::getchar()
+template <typename S, uint16_t T>
+uint8_t SPI_Keyboard<S, T>::getchar()
 {
     SPI_select select;
 //    no_SS.write_zero();

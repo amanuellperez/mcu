@@ -119,7 +119,7 @@ Code::ANS, Code::del, Code::AC, Code::left, Code::right
 };
 
 
-using Keyboard = dev::Keyboard_keypad<Keypad, Code>;
+using Keyboard = dev::Keyboard_keypad<Keypad>;
 
 
 #endif

@@ -40,6 +40,9 @@ struct Sci_code
 {
     static constexpr uint8_t null   = 0;
 
+// Caracteres: corresponden a los códigos ASCII
+
+// Instrucciones de edición:
     static constexpr uint8_t ac     = 128;
     static constexpr uint8_t ans    = 129;
     static constexpr uint8_t del    = 130;
@@ -47,6 +50,8 @@ struct Sci_code
     static constexpr uint8_t down   = 132;
     static constexpr uint8_t right  = 133;
     static constexpr uint8_t left   = 134;
+
+// Abreviaturas:
     static constexpr uint8_t ten_x  = 135; // 10^x
     static constexpr uint8_t m_plus = 136; // M+
     static constexpr uint8_t s2d    = 137; // S <=> D
