@@ -37,13 +37,15 @@
 // meto Interface dentro de calc, para poder definir Interface en dev.h
 namespace calc{
 
-template <typename LCD_t, typename Keyboard_t, size_t N>
+template <typename LCD_t, typename Keyboard_t, size_t N,
+	    uint8_t key_return0 = '\n',
+	    uint8_t debouncing_time0 = 200 /* ms */>
 class Interface{
 public:
-    using LCD = LCD_t;
+    using LCD	   = LCD_t;
     using Keyboard = Keyboard_t;
-    using Code = typename Keyboard_t::Code;
-    using Buffer = Linear_array<N>;
+    using Code     = typename Keyboard_t::Code;
+    using Buffer   = Linear_array<N>;
 
     Interface(LCD& lcd, Keyboard& keyboard)
 	:lcd_{lcd}, keyboard_{keyboard}, 
@@ -90,14 +92,14 @@ private:
     using symbol = dev::HD44780_charset_A00;
 
 // Data
-    static constexpr uint8_t key_return = '\n';
+    static constexpr uint8_t key_return = key_return0;
     
-    static constexpr uint8_t debouncing_time = 200; // ms
+    static constexpr uint8_t debouncing_time = debouncing_time0; // ms
 };
 
 
-template <typename L, typename K, size_t N>
-void Interface<L, K, N>::print_lcd(char c)
+template <typename L, typename K, size_t N, uint8_t kr, uint8_t dt>
+void Interface<L, K, N, kr, dt>::print_lcd(char c)
 {
     if (c == 's')
 	lcd_.screen().print(symbol::of("√"));
@@ -106,8 +108,8 @@ void Interface<L, K, N>::print_lcd(char c)
 
 }
 
-template <typename L, typename K, size_t N>
-void Interface<L, K, N>::redraw_lcd_from(typename Buffer::iterator p)
+template <typename L, typename K, size_t N, uint8_t kr, uint8_t dt>
+void Interface<L, K, N, kr, dt>::redraw_lcd_from(typename Buffer::iterator p)
 {
     lcd_.cursor_pos(0,0);
 
@@ -123,8 +125,8 @@ void Interface<L, K, N>::redraw_lcd_from(typename Buffer::iterator p)
     redraw_cursor();
 }
 
-template <typename L, typename K, size_t N>
-void Interface<L, K, N>::redraw_lcd()
+template <typename L, typename K, size_t N, uint8_t kr, uint8_t dt>
+void Interface<L, K, N, kr, dt>::redraw_lcd()
 {
     if (lcd_p0_ > buffer_p_)
 	lcd_p0_ = buffer_p_;
@@ -137,8 +139,8 @@ void Interface<L, K, N>::redraw_lcd()
     redraw_lcd_from(lcd_p0_);
 }
 
-template <typename L, typename K, size_t N>
-void Interface<L, K, N>::reset()
+template <typename L, typename K, size_t N, uint8_t kr, uint8_t dt>
+void Interface<L, K, N, kr, dt>::reset()
 {
     buffer_->clear();
 
@@ -148,8 +150,8 @@ void Interface<L, K, N>::reset()
 
 
 // TODO: ¿mejorarla? De momento, por rapidez, reutilizo const char*
-template <typename L, typename K, size_t N>
-void Interface<L, K, N>::write(char c)
+template <typename L, typename K, size_t N, uint8_t kr, uint8_t dt>
+void Interface<L, K, N, kr, dt>::write(char c)
 {
     char tmp[2];
     tmp[0] = c;
@@ -157,8 +159,8 @@ void Interface<L, K, N>::write(char c)
     write(tmp);
 }
 
-template <typename L, typename K, size_t N>
-void Interface<L, K, N>::write(const char* str)
+template <typename L, typename K, size_t N, uint8_t kr, uint8_t dt>
+void Interface<L, K, N, kr, dt>::write(const char* str)
 {
     if (buffer_p_ == buffer_->end()){
 	uint8_t n = push_back(*buffer_, str);
@@ -173,8 +175,8 @@ void Interface<L, K, N>::write(const char* str)
 }
 
 
-template <typename L, typename K, size_t N>
-void Interface<L, K, N>::DEL_command()
+template <typename L, typename K, size_t N, uint8_t kr, uint8_t dt>
+void Interface<L, K, N, kr, dt>::DEL_command()
 {
     if (buffer_p_ != buffer_->begin()){
 	if (buffer_p_ == buffer_->end())
@@ -186,15 +188,15 @@ void Interface<L, K, N>::DEL_command()
 
 }
 
-template <typename L, typename K, size_t N>
-void Interface<L, K, N>::AC_command()
+template <typename L, typename K, size_t N, uint8_t kr, uint8_t dt>
+void Interface<L, K, N, kr, dt>::AC_command()
 {
     reset();
     lcd_.clear();
 }
 
-template <typename L, typename K, size_t N>
-void Interface<L, K, N>::to_the_right_command()
+template <typename L, typename K, size_t N, uint8_t kr, uint8_t dt>
+void Interface<L, K, N, kr, dt>::to_the_right_command()
 {
     if (buffer_p_ != buffer_->end()){
 	++buffer_p_;
@@ -207,8 +209,8 @@ void Interface<L, K, N>::to_the_right_command()
     }
 }
 
-template <typename L, typename K, size_t N>
-void Interface<L, K, N>::to_the_left_command()
+template <typename L, typename K, size_t N, uint8_t kr, uint8_t dt>
+void Interface<L, K, N, kr, dt>::to_the_left_command()
 {
     if (buffer_p_ != buffer_->begin()){
 	--buffer_p_;
@@ -222,8 +224,8 @@ void Interface<L, K, N>::to_the_left_command()
     }
 }
 
-template <typename L, typename K, size_t N>
-void Interface<L, K, N>::initial_screen()
+template <typename L, typename K, size_t N, uint8_t kr, uint8_t dt>
+void Interface<L, K, N, kr, dt>::initial_screen()
 {
     lcd_.clear();
     lcd_.cursor_pos(lcd_.cols() - 1, 1);
@@ -235,8 +237,8 @@ void Interface<L, K, N>::initial_screen()
 
 // Hay 2 pantallas: la pantalla normal y la pantalla de error.
 // El parámetro 'error' nos indica en qué pantalla estamos.
-template <typename L, typename K, size_t N>
-void Interface<L, K, N>::getline(Buffer& buffer0, bool error)
+template <typename L, typename K, size_t N, uint8_t kr, uint8_t dt>
+void Interface<L, K, N, kr, dt>::getline(Buffer& buffer0, bool error)
 {
     buffer_ = &buffer0;
 
@@ -261,8 +263,8 @@ void Interface<L, K, N>::getline(Buffer& buffer0, bool error)
 }
 
 
-template <typename L, typename K, size_t N>
-void Interface<L, K, N>::read()
+template <typename L, typename K, size_t N, uint8_t kr, uint8_t dt>
+void Interface<L, K, N, kr, dt>::read()
 {
     while (1) {
 	uint8_t c = keyboard_.getchar();
@@ -281,7 +283,9 @@ void Interface<L, K, N>::read()
 
         }
 
-	wait_ms(debouncing_time);
+	if constexpr (debouncing_time){
+	    wait_ms(debouncing_time);
+	}
     }
 }
 

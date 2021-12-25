@@ -23,6 +23,7 @@
 void Sci_code::print(std::ostream& out, uint8_t code)
 {
     switch(code){
+	break; case Sci_code::null: out << "null";
 	break; case Sci_code::ac: out << "ac";
 	break; case Sci_code::ans: out << "ans";
 	break; case Sci_code::del: out << "del";

@@ -60,24 +60,43 @@ using SPI = avr::SPI_slave;
 
 volatile uint8_t data = 0;
 
+
 void test_keyboard()
 {
     avr::UART_iostream uart;
     
     uart << "\n-------------------\n";
-    uart <<   "Driver keyboard " << (int)Keypad::nrows() << "x"
-         << (int)Keypad::ncols() << "\n";
+    uart <<   "Driver keyboard " << (int)Keyboard::nrows() << "x"
+         << (int)Keyboard::ncols() << "\n";
     uart << "-------------------\n\n";
 
-    Keyboard keyboard{key_code};
+    Keyboard keyboard;
     SPI::data_register(std::byte{0});
 
-    while(1){
-	data = keyboard.getchar();
+    uint8_t last_key = 0; 
 
-	Code::print(uart, data);
-	    
-	wait_ms(100); // debouncing
+    while(1){
+	uint8_t key = 0;
+
+	if (keyboard.scan())
+	    key = key_to_code(keyboard.last_key());
+
+	if (key != last_key){
+	    data = key;
+	    last_key = key;
+	}
+
+//	uart << "key = ";
+//	Code::print(uart, key);
+//	uart << "; last_key = ";
+//	Code::print(uart, last_key);
+//	uart << "; data = ";
+//	Code::print(uart, data);
+//	uart << '\n';
+
+	// Dejando este wait se nota un ligero retraso a la hora de pulsar las
+	// teclas.
+//	wait_ms(100); // frecuencia de muestreo del teclado = 100 ms
     }
 }
 

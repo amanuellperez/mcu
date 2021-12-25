@@ -96,7 +96,7 @@ using LCD_pins = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<LCD_RS_pin>,
 // ---------
 using LCD       = dev::LCD_ostream_1602<dev::LCD_HD44780<LCD_pins>>;
 using Keyboard  = SPI_Keyboard<SPI_select, Sci_code, period_in_us>;
-using Interface = calc::Interface<LCD, Keyboard, 20>;
+using Interface = calc::Interface<LCD, Keyboard, 20, '=', 0>;
 
 #endif
 

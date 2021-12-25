@@ -94,26 +94,25 @@ using KB_cols = dev::Keypad_cols<KB_col0_pin,
                              KB_col7_pin
 			     >;
 
-using Keypad = dev::Keypad<KB_rows, KB_cols>;
+using Keyboard = dev::Keypad<KB_rows, KB_cols>;
 
 
 using Code = Sci_code;
 
-// Es el teclado inicial de la calculadora básica
-constexpr uint8_t key_code[64] =
+// Mapeo que nos indica qué código enviamos al pulsar una tecla concreta.
+constexpr uint8_t keymap[64] =
 {
-Code::shift, Code::alpha,'?','?','?',Code::inverse,Code::mode,'?',
-'?','?',Code::frac,Code::sqrt,Code::square,Code::pow,Code::log,Code::ln,
-'?','?',Code::minus,Code::sexa,Code::hyp,Code::sin,Code::cos,Code::tan,
-'?','?',Code::rcl,Code::eng,'(',')',Code::s2d,Code::m_plus,
-'?','?','?',			'7','8','9',Code::del,Code::ac, 
-'?',Code::up,'?',		'4','5','6','x','/',
-Code::left,'?',Code::right,	'1','2','3','+','-',
-'?', Code::down, '?',		'0', '.', Code::ten_x, Code::ans, '='
+Code::shift ,Code::alpha,Code::null ,Code::null	,Code::null	,Code::inverse,Code::mode,Code::null,
+Code::null  ,Code::null	,Code::frac ,Code::sqrt	,Code::square	,Code::pow,Code::log,Code::ln,
+Code::null  ,Code::null	,Code::minus,Code::sexa	,Code::hyp	,Code::sin,Code::cos,Code::tan,
+Code::null  ,Code::null	,Code::rcl  ,Code::eng	,	'('	,')',Code::s2d,Code::m_plus,
+Code::null  ,Code::null	,Code::null ,	'7'	,	'8'	,'9',Code::del,Code::ac, 
+Code::null  ,Code::up	,Code::null ,	'4'	,	'5'	,'6','x','/',
+Code::left  ,Code::null	,Code::right,	'1'	,	'2'	,'3','+','-',
+Code::null  ,Code::down	,Code::null ,	'0'	,	'.'	,Code::ten_x, Code::ans, '='
 };
 
-
-using Keyboard = dev::Keyboard_keypad<Keypad, Code>;
+inline uint8_t key_to_code(uint8_t k) { return keymap[k]; }
 
 
 #endif

@@ -38,6 +38,8 @@
 // Creo un teclado especial para la calculadora
 struct Sci_code
 {
+    static constexpr uint8_t null   = 0;
+
     static constexpr uint8_t ac     = 128;
     static constexpr uint8_t ans    = 129;
     static constexpr uint8_t del    = 130;
