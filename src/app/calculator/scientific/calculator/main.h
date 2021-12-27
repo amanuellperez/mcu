@@ -91,10 +91,14 @@ private:
     void init_keyboard() { }
 
 // main
-    void getline();
+    void msg_error();
     
+// pantalla de salida
     void print_result();
     void print_msg_error();
+
+    void clear_screen() {lcd.clear();}
+    void clear_output_screen();
 };
 
 

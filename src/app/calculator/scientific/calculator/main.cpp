@@ -71,16 +71,22 @@ void Main::print_buffer()
     int i = 0;
     auto p = buffer.begin();
     lcd << '[';
-    for (; i < 10 and p != buffer.end() and *p != '\n'; ++i, ++p)
+    for (; i < 10 and p != buffer.end() and *p != '\0'; ++i, ++p)
 	lcd << *p;
 
     lcd << "]\n";
     wait_ms(1000);
 }
 
-void Main::print_result()
+void Main::clear_output_screen()
 {
     lcd.screen().clear_row(1);
+}
+
+
+void Main::print_result()
+{
+    lcd.screen().clear_row(1); // clear_output();
     lcd.cursor_pos(lcd.cols() - 1, 1);
     lcd.screen().print_align_to_the_right<double_ndigits>(result);
 }
@@ -95,10 +101,31 @@ void Main::print_msg_error()
 	    lcd << "yylex_read error";
 	    break;
 
-	case Error::yyerror: return; // este se imprime en yyerror()
+	case Error::yyerror:
+//	    lcd.clear();
+//	    lcd << "error desconocido";
+	    return; // este se imprime en yyerror()
 				     // lo mantengo para depurar
     }
 }
+
+
+void Main::msg_error()
+{
+    print_msg_error();
+    while (1){
+	uint8_t c = keyboard_.getchar();
+	if (c == Code::ac){
+	    clear_error();
+	    clear_output_screen();
+	    return;
+	}
+
+	wait_ms(Tclock_error);
+    }
+}
+
+
 
 void Main::run()
 {
@@ -108,16 +135,16 @@ void Main::run()
     interface.initial_screen();
 
     while(1){
-	interface.getline(buffer, error());
+	interface.getline(buffer);
 	clear_error();
-//	print_buffer(); // debug
+// print_buffer(); // debug
 	yyparse();
 
 	if (no_error())
 	    print_result();
 
 	else
-	    print_msg_error();
+	    msg_error();
 
     }
 }

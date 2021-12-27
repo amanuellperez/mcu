@@ -31,6 +31,9 @@
 // Resolución de la calculadora
 constexpr int double_ndigits = 4;
 
+// Frecuencias (realmente periodos en ms) de muestreo
+constexpr int Tclock_error = 100; // si hay error miramos el teclado cada 100ms
+
 
 // Constantes, variables y funciones
 // ---------------------------------

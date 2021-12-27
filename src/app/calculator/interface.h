@@ -24,6 +24,15 @@
 /****************************************************************************
  *
  *  - DESCRIPCION: Gestionamos la interacción con el usuario.
+ *	En esta primera versión de la calculadora, la pantalla la voy a
+ *	dividir en dos (filas):
+ *	    1. muestra la entrada del usuario.
+ *	    2. muestra la salida.
+ *
+ *	Interface es responsable de la entrada de las operaciones que quiere
+ *	hacer el usuario (sumar, restar...), no de la salida,
+ *	luego es propietaria de la pantalla de entrada. No debe de tocar la de
+ *	salida.
  *
  *  - HISTORIA:
  *    A.Manuel L.Perez
@@ -71,9 +80,8 @@ public:
 
 
     /// Pantalla inicial que mostramos al encender la calculadora.
-    void initial_screen(); 
-
-    void getline(Buffer& buf, bool error);
+    void initial_screen();  // TODO: esta es del main!!! Moverla al main!
+    void getline(Buffer& buf);
 
 private:
 // Data
@@ -83,7 +91,7 @@ private:
     Buffer* buffer_;
 
 // cursor: (???) Hacer clase Cursor?
-    Buffer::iterator buffer_p_; // caracter que apunta el cursor
+    Buffer::iterator buffer_p_; // caracter que apunta el cursor dentro del buffer
     Buffer::iterator lcd_p0_;	// primer caracter que aparece en el LCD
 
     uint8_t cursor_x() {return static_cast<uint8_t>(buffer_p_ - lcd_p0_);}
@@ -96,9 +104,20 @@ private:
     void to_the_right_command();
     void to_the_left_command();
 
-    void reset();
+// construcción/destrucción en getline
+    void buffer_init(Buffer& buffer);
+    void buffer_init();
+    void buffer_end();
+
+    void lcd_init();
+    void lcd_end(){ lcd_.cursor_off();}
+
+// escritura
     void write(char c);
-    void write(const char* p);
+
+    void write_buffer(char c);
+    void write_buffer(const char* p);
+
     void redraw_lcd();
     void redraw_lcd_from(typename Buffer::iterator p);
 
@@ -108,11 +127,25 @@ private:
     void print_lcd(char c);
     using symbol = dev::HD44780_charset_A00;
 
+// screen: es la pantalla donde escribimos. 
+//         Estas son las funciones que conocen las dimensiones de la ventana
+//         del LCD donde escribimos.
+    void clear_screen() {lcd_.screen().clear_row(0);}
+    void cursor_on(uint8_t x, uint8_t y);
+
 // Data
     static constexpr uint8_t key_return = key_return0;
     
-    static constexpr uint8_t debouncing_time = debouncing_time0; // ms
+// Frecuencia (realmente periodo) de muestreo del teclado
+    static constexpr uint8_t Tclock_keyboard = debouncing_time0; // ms
 };
+
+template <typename L, typename K, typename KC, size_t N, uint8_t kr, uint8_t dt>
+void Interface<L, K, KC, N, kr, dt>::cursor_on(uint8_t x, uint8_t y)
+{
+    lcd_.cursor_on();
+    lcd_.cursor_pos(x, y);
+}
 
 
 template <typename L, typename K, typename KC, size_t N, uint8_t kr, uint8_t dt>
@@ -126,7 +159,8 @@ void Interface<L, K, KC, N, kr, dt>::print_lcd(char c)
 }
 
 template <typename L, typename K, typename KC, size_t N, uint8_t kr, uint8_t dt>
-void Interface<L, K, KC, N, kr, dt>::redraw_lcd_from(typename Buffer::iterator p)
+void Interface<L, K, KC, N, kr, dt>::redraw_lcd_from(
+    typename Buffer::iterator p)
 {
     lcd_.cursor_pos(0,0);
 
@@ -157,7 +191,15 @@ void Interface<L, K, KC, N, kr, dt>::redraw_lcd()
 }
 
 template <typename L, typename K, typename KC, size_t N, uint8_t kr, uint8_t dt>
-void Interface<L, K, KC, N, kr, dt>::reset()
+void Interface<L, K, KC, N, kr, dt>::buffer_init(Buffer& buffer0)
+{
+    buffer_ = &buffer0;
+    buffer_init();
+}
+
+
+template <typename L, typename K, typename KC, size_t N, uint8_t kr, uint8_t dt>
+void Interface<L, K, KC, N, kr, dt>::buffer_init()
 {
     buffer_->clear();
 
@@ -165,19 +207,28 @@ void Interface<L, K, KC, N, kr, dt>::reset()
     buffer_p_ = buffer_->begin();
 }
 
+template <typename L, typename K, typename KC, size_t N, uint8_t kr, uint8_t dt>
+void Interface<L, K, KC, N, kr, dt>::write(char c)
+{
+    if (buffer_p_ != buffer_->me()){
+	write_buffer(c);
+	redraw_lcd();
+    }
+}
+
 
 // TODO: ¿mejorarla? De momento, por rapidez, reutilizo const char*
 template <typename L, typename K, typename KC, size_t N, uint8_t kr, uint8_t dt>
-void Interface<L, K, KC, N, kr, dt>::write(char c)
+void Interface<L, K, KC, N, kr, dt>::write_buffer(char c)
 {
     char tmp[2];
     tmp[0] = c;
     tmp[1] = '\0';
-    write(tmp);
+    write_buffer(tmp);
 }
 
 template <typename L, typename K, typename KC, size_t N, uint8_t kr, uint8_t dt>
-void Interface<L, K, KC, N, kr, dt>::write(const char* str)
+void Interface<L, K, KC, N, kr, dt>::write_buffer(const char* str)
 {
     if (buffer_p_ == buffer_->end()){
 	uint8_t n = push_back(*buffer_, str);
@@ -188,7 +239,6 @@ void Interface<L, K, KC, N, kr, dt>::write(const char* str)
 	buffer_p_ = insert(*buffer_, buffer_p_, str);
     }
 
-    redraw_lcd();
 }
 
 
@@ -208,7 +258,7 @@ void Interface<L, K, KC, N, kr, dt>::DEL_command()
 template <typename L, typename K, typename KC, size_t N, uint8_t kr, uint8_t dt>
 void Interface<L, K, KC, N, kr, dt>::AC_command()
 {
-    reset();
+    buffer_init();
     lcd_.clear();
 }
 
@@ -252,33 +302,45 @@ void Interface<L, K, KC, N, kr, dt>::initial_screen()
 
 }
 
-// Hay 2 pantallas: la pantalla normal y la pantalla de error.
-// El parámetro 'error' nos indica en qué pantalla estamos.
 template <typename L, typename K, typename KC, size_t N, uint8_t kr, uint8_t dt>
-void Interface<L, K, KC, N, kr, dt>::getline(Buffer& buffer0, bool error)
+void Interface<L, K, KC, N, kr, dt>::lcd_init()
 {
-    buffer_ = &buffer0;
+    lcd_.cursor_on();
+    lcd_.cursor_pos(0,0);
+}
 
-    reset();
 
+template <typename L, typename K, typename KC, size_t N, uint8_t kr, uint8_t dt>
+void Interface<L, K, KC, N, kr, dt>::getline(Buffer& buffer0)
+{
     // Esperamos a que se pulse una tecla ignorando el bouncing de '\n'
     // (última tecla que pulsamos)
     uint8_t key{};
     while ((key = keyboard_.getchar()) == key_return)
     { }
 
-    if (error)
-	lcd_.screen().clear_row(1);
-    
-    lcd_.cursor_on();
+    buffer_init(buffer0);
+    lcd_init();
 
     read();
-    buffer_->push_back(key_return); // caracter de terminación
-    buffer_->push_back('\0');	// yparse usa cadenas de C!!! Fundamental!!!
 
-    lcd_.cursor_off();
+    buffer_end();
+    lcd_end();
 }
 
+
+template <typename L, typename K, typename KC, size_t N, uint8_t kr, uint8_t dt>
+void Interface<L, K, KC, N, kr, dt>::buffer_end()
+{
+    if (buffer_->size() + 2 > buffer_->max_size()){
+	buffer_->clear();
+	push_back(*buffer_, "E01: error");  // TODO: numerar errores ???
+    }
+    else{
+	buffer_->push_back(key_return); // caracter de terminación
+	buffer_->push_back('\0');	// yparse usa cadenas de C!!! Fundamental!!!
+    }
+}
 
 template <typename L, typename K, typename KC, size_t N, uint8_t kr, uint8_t dt>
 void Interface<L, K, KC, N, kr, dt>::read()
@@ -294,16 +356,10 @@ void Interface<L, K, KC, N, kr, dt>::read()
             break; case Code::left: to_the_left_command(); 
 	    break; case Code::right: to_the_right_command();
 	    // case Code::ANS: TODO ANS_command();
-	    break; default: 
-		if (buffer_p_ != buffer_->me())
-		    write(c);
-		break;
-
+	    break; default: write(c);
         }
 
-	if constexpr (debouncing_time){
-	    wait_ms(debouncing_time);
-	}
+	wait_ms(Tclock_keyboard);
     }
 }
 

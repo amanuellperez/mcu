@@ -107,7 +107,7 @@ Code::null  ,Code::null	,Code::frac ,Code::sqrt	,Code::square	,Code::pow,Code::l
 Code::null  ,Code::null	,Code::minus,Code::sexa	,Code::hyp	,Code::sin,Code::cos,Code::tan,
 Code::null  ,Code::null	,Code::rcl  ,Code::eng	,	'('	,')',Code::s2d,Code::m_plus,
 Code::null  ,Code::null	,Code::null ,	'7'	,	'8'	,'9',Code::del,Code::ac, 
-Code::null  ,Code::up	,Code::null ,	'4'	,	'5'	,'6','x','/',
+Code::null  ,Code::up	,Code::null ,	'4'	,	'5'	,'6','*','/',
 Code::left  ,Code::null	,Code::right,	'1'	,	'2'	,'3','+','-',
 Code::null  ,Code::down	,Code::null ,	'0'	,	'.'	,Code::ten_x, Code::ans, '='
 };

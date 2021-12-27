@@ -29,10 +29,11 @@
 
 
 list: /* nothing */
-      | list '\n'	
-      | list asgn '\n'
-      | list expr '\n'	{Main::result = $2;}
-      | list error '\n' {yyerrok;}
+      | '='            {Main::result = 15;}
+      | list '='	
+      | list asgn '='
+      | list expr '='	{Main::result = $2;}
+      | list error '=' {yyerrok;}
       ;
 
 asgn:	VARIABLE '=' expr	{ $$ = $1->u.value = $3; }
