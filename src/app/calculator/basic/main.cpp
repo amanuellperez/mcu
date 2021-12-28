@@ -94,7 +94,7 @@ void Main::run()
     interface.initial_screen();
 
     while(1){
-	interface.getline(buffer, error());
+	interface.getline(buffer);
 	clear_error();
 //	print_buffer(); // debug
 	yyparse();

@@ -114,6 +114,7 @@ private:
 
 // escritura
     void write(char c);
+    void write(const char* c);
 
     void write_buffer(char c);
     void write_buffer(const char* p);
@@ -170,7 +171,7 @@ void Interface<L, K, KC, N, kr, dt>::redraw_lcd_from(
 //	lcd_ << *p;
 
     for (; i < LCD::cols(); ++i)
-	lcd_ << ' ';  // lcd_clear_row(1).from(i);
+	lcd_ << ' ';  // lcd_clear_row(0).from(i);
 
 
     redraw_cursor();
@@ -210,11 +211,19 @@ void Interface<L, K, KC, N, kr, dt>::buffer_init()
 template <typename L, typename K, typename KC, size_t N, uint8_t kr, uint8_t dt>
 void Interface<L, K, KC, N, kr, dt>::write(char c)
 {
-    if (buffer_p_ != buffer_->me()){
+    if (buffer_p_ != buffer_->me())
 	write_buffer(c);
-	redraw_lcd();
-    }
 }
+
+
+//template <typename L, typename K, typename KC, size_t N, uint8_t kr, uint8_t dt>
+//void Interface<L, K, KC, N, kr, dt>::write(const char* c)
+//{
+//    if (buffer_p_ != buffer_->me()){
+//	write_buffer(c);
+//	redraw_lcd();
+//    }
+//}
 
 
 // TODO: ¿mejorarla? De momento, por rapidez, reutilizo const char*
@@ -250,7 +259,6 @@ void Interface<L, K, KC, N, kr, dt>::DEL_command()
 	    --buffer_p_;
 
 	buffer_->remove(buffer_p_);
-	redraw_lcd();
     }
 
 }
@@ -265,30 +273,15 @@ void Interface<L, K, KC, N, kr, dt>::AC_command()
 template <typename L, typename K, typename KC, size_t N, uint8_t kr, uint8_t dt>
 void Interface<L, K, KC, N, kr, dt>::to_the_right_command()
 {
-    if (buffer_p_ != buffer_->end()){
+    if (buffer_p_ != buffer_->end())
 	++buffer_p_;
-
-	if (cursor_x() < LCD::cols())
-	    redraw_cursor();
-
-	else
-	    redraw_lcd();
-    }
 }
 
 template <typename L, typename K, typename KC, size_t N, uint8_t kr, uint8_t dt>
 void Interface<L, K, KC, N, kr, dt>::to_the_left_command()
 {
-    if (buffer_p_ != buffer_->begin()){
+    if (buffer_p_ != buffer_->begin())
 	--buffer_p_;
-
-	if (buffer_p_ > lcd_p0_)
-	    redraw_cursor();
-
-	else
-	    redraw_lcd();
-
-    }
 }
 
 template <typename L, typename K, typename KC, size_t N, uint8_t kr, uint8_t dt>
@@ -351,14 +344,21 @@ void Interface<L, K, KC, N, kr, dt>::read()
 	switch(c){
 	    break; case Code::null: break;
 	    break; case key_return: return;
+
+// comandos de edición
 	    break; case Code::del : DEL_command(); 
             break; case Code::ac  : AC_command();
             break; case Code::left: to_the_left_command(); 
 	    break; case Code::right: to_the_right_command();
-	    // case Code::ANS: TODO ANS_command();
+
+// abreviaturas (pulsas una tecla, pero escribes "ANS" ó "sin(" ...)
+//	    break; case Code::ans: write("ans");
+
+// caracteres
 	    break; default: write(c);
         }
 
+	redraw_lcd();
 	wait_ms(Tclock_keyboard);
     }
 }

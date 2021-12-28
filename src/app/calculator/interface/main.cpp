@@ -49,7 +49,7 @@ void Main::run()
 {
     while(1){
 	Interface interface{lcd_, keyboard_};
-	interface.getline(buffer_, false);
+	interface.getline(buffer_);
 	lcd_.cursor_pos(0,1);
 	lcd_ << "Buffer = ";
 	print(lcd_, buffer_);
