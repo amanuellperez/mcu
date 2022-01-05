@@ -264,6 +264,17 @@ void test_cgram4()
     wait_ms(2000);
 
     show_glyphs(lcd,
+                pacman,
+		pacman_phantom,
+                exponent2,
+                exponent3,
+                cuberoot,
+                speaker_right,
+                plug,
+                musical_note);
+    wait_ms(2000);
+
+    show_glyphs(lcd,
                 heart_full,
                 heart_empty,
                 padlock_close,
@@ -271,7 +282,7 @@ void test_cgram4()
                 battery_empty,
                 battery_half,
                 battery_full,
-                musical_note);
+                exponent2);
 
     for (uint8_t i = 0; i < 10; ++i)
     {

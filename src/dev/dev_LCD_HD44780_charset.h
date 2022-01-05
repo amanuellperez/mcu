@@ -355,6 +355,63 @@ constexpr const char plug[8] =
 			    0b0001110,
 			    0b0000100,
 			    0b0000100 };
+
+
+// Al principio lo llamé 'square', pero eso entra en conflicto con la
+// función square de C. Además, se pueden crear símbolos 3, 4, ... cuyos
+// nombres serían exponent3, exponent4, ... 
+constexpr const char exponent2[8] = 
+			  { 0b0000110,
+			    0b0001001,
+			    0b0000010,
+			    0b0000100,
+			    0b0001111,
+			    0b0000000,
+			    0b0000000,
+			    0b0000000 };
+
+
+constexpr const char exponent3[8] = 
+			  { 0b0000110,
+			    0b0000001,
+			    0b0000010,
+			    0b0000001,
+			    0b0000110,
+			    0b0000000,
+			    0b0000000,
+			    0b0000000 };
+
+
+constexpr const char cuberoot[8] = 
+			  { 0b0011011,
+			    0b0000110,
+			    0b0001010,
+			    0b0000110,
+			    0b0011010,
+			    0b0000010,
+			    0b0000110,
+			    0b0000010 };
+
+constexpr const char pacman[8] = 
+			  { 0b0000000,
+			    0b0001110,
+			    0b0011011,
+			    0b0011110,
+			    0b0011100,
+			    0b0011110,
+			    0b0011111,
+			    0b0001110 };
+
+constexpr const char pacman_phantom[8] = 
+			  { 0b0000000,
+			    0b0001110,
+			    0b0011111,
+			    0b0010101,
+			    0b0011111,
+			    0b0011111,
+			    0b0011111,
+			    0b0010101 };
+
 }// namespace
 }// namespace
 
