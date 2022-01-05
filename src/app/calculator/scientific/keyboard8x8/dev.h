@@ -35,7 +35,7 @@
 
 #include <dev_keypad.h>
 
-#include "../keycodes.h"
+#include "../instcodes.h"
 
 
 // pins usados

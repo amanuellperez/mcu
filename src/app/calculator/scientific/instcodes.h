@@ -1,4 +1,4 @@
-// Copyright (C) 2021 A.Manuel L.Perez 
+// Copyright (C) 2021-2022 A.Manuel L.Perez 
 //           mail: <amanuel.lperez@gmail.com>
 //           https://github.com/amanuellperez/mcu
 //
@@ -18,15 +18,19 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #pragma once
 
-#ifndef __KEYCODES_H__
-#define __KEYCODES_H__
+#ifndef __INSTCODES_H__
+#define __INSTCODES_H__
 
 /****************************************************************************
  *
- *  - DESCRIPCION: Extensión del código ASCII que voy a usar en la
- *  calculadora.
+ *  - DESCRIPCION: Códigos de instrucción.
+ *
+ *    Un error de concepción es concebir los códigos ASCII como códigos de
+ *    caracter. Los códigos ASCII realmente son códigos de instrucciones. 
+ *    El ascii 'a' significa 'imprime la letra a'. Con esta filosofía defino
+ *    los siguientes códigos de instrucción.
  *	
- *	Fundamental: para simplificar el código es fundamental que
+ *    Fundamental: para simplificar el código es fundamental que
  *	las abreviaturas estén ordenadas. De esa forma se puede traducir la
  *	key en str:
  *	    if (first_abb <= key <= last_abb)
@@ -83,10 +87,16 @@ struct Sci_code
 // Symbols
     static constexpr uint8_t first_symbol = 180;
     static constexpr uint8_t sqrt         = 180;
-    static constexpr uint8_t square       = 181; // x^2
-    static constexpr uint8_t frac         = 182; // a/b
-    static constexpr uint8_t inverse      = 183; // x^{-1}
-    static constexpr uint8_t last_symbol  = 183;
+    static constexpr uint8_t frac         = 181; // a/b
+    static constexpr uint8_t inverse      = 182; // x^{-1}
+    static constexpr uint8_t last_symbol  = 182;
+
+// New symbols: el LCD trae una charset por defecto, pudiendo añadir
+// 8 símbolos más. Los 'new symbols' son estos símbolos más.
+    static constexpr uint8_t first_new_symbol = 190;
+    static constexpr uint8_t square           = 190; // x^2
+    static constexpr uint8_t last_new_symbol  = 190;
+
 
 // Instrucciones a la calculadora
     static constexpr uint8_t mode   = 200;

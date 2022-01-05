@@ -33,10 +33,11 @@
  ****************************************************************************/
 #include <stdint.h>
 
-#include <dev_LCD_HD44780.h>
+//#include <dev_LCD_HD44780.h>
 #include <dev_keypad.h>
-#include <dev_keyboard_code.h>
+//#include <dev_keyboard_code.h>
 
+#include "lcd.h"
 #include "../interface.h"
 
 
@@ -82,8 +83,8 @@ using LCD_pins = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<LCD_RS_pin>,
 							    LCD_D6_pin, 
 							    LCD_D7_pin>>;
 
-using LCD = dev::LCD_ostream_1602<dev::LCD_HD44780<LCD_pins>>;
-
+//using LCD = dev::LCD_ostream_1602<dev::LCD_HD44780<LCD_pins>>;
+using LCD = LCD_calculator<LCD_pins>;
 
 // keyboard
 // --------
@@ -100,38 +101,6 @@ using KB_cols = dev::Keypad_cols<KB_col0_pin,
                              KB_col4_pin>;
 
 using Keypad = dev::Keypad<KB_rows, KB_cols>;
-
-// particularizamos algunos códigos
-struct Code
-{
-    static constexpr uint8_t null     = 0;
-    static constexpr uint8_t unknown  = 255;
-
-// Command edition
-    static constexpr uint8_t first_cmd = 128;
-    static constexpr uint8_t ac     = 128;
-    static constexpr uint8_t del    = 130;
-    static constexpr uint8_t up     = 131;
-    static constexpr uint8_t down   = 132;
-    static constexpr uint8_t right  = 133;
-    static constexpr uint8_t left   = 134;
-    static constexpr uint8_t last_cmd = 134;
-
-
-// Abbrevations
-    static constexpr uint8_t first_abb = 200;
-    static constexpr uint8_t ans       = 200;
-    static constexpr uint8_t last_abb = 200;
-
-// symbols
-    static constexpr uint8_t first_symbol = 210;
-    static constexpr uint8_t sqrt	  = 210;
-    static constexpr uint8_t last_symbol  = 210;
-    
-
-};
-
-constexpr const char* abb2str[] = {"ANS"};
 
 
 // Es el teclado inicial de la calculadora básica

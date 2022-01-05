@@ -39,6 +39,8 @@
 #include <utility>
 #include <type_traits>
 
+#undef abs
+
 namespace atd{
 
 /// Devuelve 10^n

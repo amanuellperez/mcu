@@ -1,4 +1,4 @@
-// Copyright (C) 2021 A.Manuel L.Perez 
+// Copyright (C) 2021-2022 A.Manuel L.Perez 
 //           mail: <amanuel.lperez@gmail.com>
 //           https://github.com/amanuellperez/mcu
 //
@@ -29,6 +29,7 @@
 #include "lex.h"
 #include "calc.tab.hpp"
 #include "cfg.h"
+#include "lcd.h"
 
 LCD Main::lcd;
 Main::Symbols Main::symbol {BUILTIN, CONSTANT, VARIABLE};
@@ -60,8 +61,9 @@ void Main::init_SPI()
 // En este caso voy a gestionar el LCD directamente
 void Main::init_lcd()
 {
-    lcd.screen().stop_brcorner(true);// I'm not going to use it as a terminal
-    lcd.screen().nowrap(); 
+    lcd.init();
+//    lcd.screen().stop_brcorner(true);// I'm not going to use it as a terminal
+//    lcd.screen().nowrap(); 
 }
 
 // para depurar
@@ -137,7 +139,7 @@ void Main::run()
     while(1){
 	interface.getline(buffer);
 	clear_error();
-// print_buffer(); // debug
+//print_buffer(); // debug
 	yyparse();
 
 	if (no_error())

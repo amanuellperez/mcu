@@ -1,4 +1,4 @@
-// Copyright (C) 2021 A.Manuel L.Perez 
+// Copyright (C) 2021-2022 A.Manuel L.Perez 
 //           mail: <amanuel.lperez@gmail.com>
 //           https://github.com/amanuellperez/mcu
 //
@@ -42,6 +42,7 @@
  ****************************************************************************/
 
 #include "buffer.h"
+#include <avr_time.h>
 
 
 // meto Interface dentro de calc, para poder definir Interface en dev.h
@@ -135,10 +136,6 @@ private:
 
     void read(); // implementacion de getline
 
-    // Traducimos c en el simbolo a mostrar en pantalla
-    void print_lcd(char c);
-    void print_lcd_symbol(char c);
-    using symbol = dev::HD44780_charset_A00;
 
 // screen: es la pantalla donde escribimos. 
 //         Estas son las funciones que conocen las dimensiones de la ventana
@@ -161,23 +158,7 @@ void Interface<L, K, KC, N, kr, dt>::cursor_on(uint8_t x, uint8_t y)
 }
 
 
-template <typename L, typename K, typename KC, size_t N, uint8_t kr, uint8_t dt>
-void Interface<L, K, KC, N, kr, dt>::print_lcd(char c)
-{
-    if (Code::first_symbol <= c and c <= Code::last_symbol)
-	print_lcd_symbol(c);
-    else
-	lcd_ << c;
 
-}
-template <typename L, typename K, typename KC, size_t N, uint8_t kr, uint8_t dt>
-void Interface<L, K, KC, N, kr, dt>::print_lcd_symbol(char c)
-{
-    switch(c){
-	break; case Code::sqrt: lcd_.screen().print(symbol::of("√"));
-	break; default: lcd_ << '?';
-    }
-}
 template <typename L, typename K, typename KC, size_t N, uint8_t kr, uint8_t dt>
 void Interface<L, K, KC, N, kr, dt>::redraw_lcd_from(
     typename Buffer::iterator p)
@@ -186,7 +167,7 @@ void Interface<L, K, KC, N, kr, dt>::redraw_lcd_from(
 
     uint8_t i = 0;
     for (; p != buffer_->end() and i < LCD::cols(); ++p, ++i)
-	print_lcd(*p);
+	lcd_.print(*p);
 //	lcd_ << *p;
 
     for (; i < LCD::cols(); ++i)
