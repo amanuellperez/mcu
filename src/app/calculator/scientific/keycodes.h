@@ -25,6 +25,17 @@
  *
  *  - DESCRIPCION: Extensión del código ASCII que voy a usar en la
  *  calculadora.
+ *	
+ *	Fundamental: para simplificar el código es fundamental que
+ *	las abreviaturas estén ordenadas. De esa forma se puede traducir la
+ *	key en str:
+ *	    if (first_abb <= key <= last_abb)
+ *		write(abb2str[key - first_abb]);
+ *
+ *	Además permite generalizar el código ya que de esta forma el programa
+ *	no tiene ni idea de las abreviaturas que está usando (otra forma de
+ *	implementarlo sería como con los comandos, con un switch, en cuyo caso
+ *	el programa tendría que saber qué abreviaturas usa la calculadora).
  *
  *  - HISTORIA:
  *    A.Manuel L.Perez
@@ -38,50 +49,75 @@
 // Creo un teclado especial para la calculadora
 struct Sci_code
 {
-    static constexpr uint8_t null   = 0;
+// Caracteres especiales
+    static constexpr uint8_t null    = 0;
+    static constexpr uint8_t unknown = 255;
 
 // Caracteres: corresponden a los códigos ASCII
 
-// Instrucciones de edición:
-    static constexpr uint8_t ac     = 128;
-    static constexpr uint8_t ans    = 129;
-    static constexpr uint8_t del    = 130;
-    static constexpr uint8_t up     = 131;
-    static constexpr uint8_t down   = 132;
-    static constexpr uint8_t right  = 133;
-    static constexpr uint8_t left   = 134;
+// Command edition
+    static constexpr uint8_t first_cmd = 128;
+    static constexpr uint8_t ac        = 128;
+    static constexpr uint8_t del       = 129;
+    static constexpr uint8_t up        = 130;
+    static constexpr uint8_t down      = 131;
+    static constexpr uint8_t right     = 132;
+    static constexpr uint8_t left      = 133;
+    static constexpr uint8_t last_cmd  = 134;
 
-// Abreviaturas:
-    static constexpr uint8_t ten_x  = 135; // 10^x
-    static constexpr uint8_t m_plus = 136; // M+
-    static constexpr uint8_t s2d    = 137; // S <=> D
-    static constexpr uint8_t eng    = 138;
-    static constexpr uint8_t rcl    = 139;
-    static constexpr uint8_t sin    = 140;
-    static constexpr uint8_t cos    = 141;
-    static constexpr uint8_t tan    = 142;
-    static constexpr uint8_t hyp    = 143;
-    static constexpr uint8_t sexa   = 144; // º ' ''
-    static constexpr uint8_t minus  = 145; //(-)
-    static constexpr uint8_t ln     = 146;
-    static constexpr uint8_t log    = 147;
-    static constexpr uint8_t pow    = 148; // x^
-    static constexpr uint8_t square = 149; // x^2
-    static constexpr uint8_t root   = 150;
-    static constexpr uint8_t frac   = 151; // a/b 
-    static constexpr uint8_t inverse= 152; // x^{-1}
-    static constexpr uint8_t calc   = 153;
-    static constexpr uint8_t shift  = 154;
-    static constexpr uint8_t alpha  = 155;
-    static constexpr uint8_t mode   = 156;
-    static constexpr uint8_t sqrt   = 157;
-    
-    static constexpr uint8_t unknown = 255;
+// Abbrevations
+    static constexpr uint8_t first_abb = 151;
+    static constexpr uint8_t ans    = 151;
+    static constexpr uint8_t ten_x  = 152; // 10^x
+    static constexpr uint8_t sin    = 153;
+    static constexpr uint8_t cos    = 154;
+    static constexpr uint8_t tan    = 155;
+    static constexpr uint8_t sexa   = 156; // º ' ''
+    static constexpr uint8_t minus  = 157; //(-)
+    static constexpr uint8_t ln     = 158;
+    static constexpr uint8_t log    = 159;
+    static constexpr uint8_t pow    = 160; // x^
+    static constexpr uint8_t last_abb = 160;
+ 
+
+// Symbols
+    static constexpr uint8_t first_symbol = 180;
+    static constexpr uint8_t sqrt         = 180;
+    static constexpr uint8_t square       = 181; // x^2
+    static constexpr uint8_t frac         = 182; // a/b
+    static constexpr uint8_t inverse      = 183; // x^{-1}
+    static constexpr uint8_t last_symbol  = 183;
+
+// Instrucciones a la calculadora
+    static constexpr uint8_t mode   = 200;
+    static constexpr uint8_t m_plus = 201; // M+
+    static constexpr uint8_t s2d    = 202; // S <=> D
+    static constexpr uint8_t eng    = 203;
+    static constexpr uint8_t rcl    = 204;
+    static constexpr uint8_t calc   = 205;
+    static constexpr uint8_t hyp    = 206;
+
+// Teclas de cambio de significado:
+    static constexpr uint8_t shift  = 220;
+    static constexpr uint8_t alpha  = 221;
 
     // imprime como cadena el código correspondiente
+    // (para depurar)
     static void print(std::ostream& out, uint8_t code);
 };
 
+inline constexpr const char* abb2str[] = {
+    "Ans",
+    "x10",
+    "sin(",
+    "cos(",
+    "tan(",
+    "º",
+    "-",
+    "ln(",
+    "log(",
+    "^",
+};
 
 #endif
 

@@ -36,7 +36,8 @@
  *
  *  - HISTORIA:
  *    A.Manuel L.Perez
- *    17/07/2021 v0.0
+ *    17/07/2021 v0.0 Escrito
+ *    29/12/2021      Reestructurado y mejorado.
  *
  ****************************************************************************/
 
@@ -60,6 +61,14 @@ namespace calc{
 //	llamo caracteres sino códigos (sería mejor Bytecode? A fin de cuentas
 //	es lo que es, el Key es para recordar que es una codificación
 //	sugerida por al teclado).
+//
+//  abb2str: contiene un array con la expansión de las abreviaturas ("ANS",
+//  "sin", "cos", ...) De momento es un array vulgar y corriente en memoria,
+//  pero más adelante se podría guardar toda esta información en la EEPROM. En
+//  este caso en lugar de pasar const char* abb2str, se parametrizaría T
+//  abb2str, donde T podría ser 'const char*' u otro tipo donde el operador
+//  abb2str[i] accediera a la EEPROM.
+//
 template <typename LCD_t, typename Keyboard_t, 
 	 typename Keycode,
 	    size_t N, // tamaño del buffer
@@ -73,9 +82,9 @@ public:
     using Keyboard = Keyboard_t;
     using Buffer   = Linear_array<N>;
 
-    Interface(LCD& lcd, Keyboard& keyboard)
+    Interface(LCD& lcd, Keyboard& keyboard, const char* const* abb2str)
 	:lcd_{lcd}, keyboard_{keyboard}, 
-	 buffer_{nullptr}
+	 buffer_{nullptr}, abb2str_{abb2str}
     {}
 
 
@@ -89,6 +98,7 @@ private:
     Keyboard& keyboard_;
 
     Buffer* buffer_;
+    const char* const* abb2str_;
 
 // cursor: (???) Hacer clase Cursor?
     Buffer::iterator buffer_p_; // caracter que apunta el cursor dentro del buffer
@@ -114,7 +124,8 @@ private:
 
 // escritura
     void write(char c);
-    void write(const char* c);
+    void write_abbrevation(char key) {write(abb2str_[key - Code::first_abb]);}
+    void write(const char* str);
 
     void write_buffer(char c);
     void write_buffer(const char* p);
@@ -126,6 +137,7 @@ private:
 
     // Traducimos c en el simbolo a mostrar en pantalla
     void print_lcd(char c);
+    void print_lcd_symbol(char c);
     using symbol = dev::HD44780_charset_A00;
 
 // screen: es la pantalla donde escribimos. 
@@ -152,13 +164,20 @@ void Interface<L, K, KC, N, kr, dt>::cursor_on(uint8_t x, uint8_t y)
 template <typename L, typename K, typename KC, size_t N, uint8_t kr, uint8_t dt>
 void Interface<L, K, KC, N, kr, dt>::print_lcd(char c)
 {
-    if (c == 's')
-	lcd_.screen().print(symbol::of("√"));
+    if (Code::first_symbol <= c and c <= Code::last_symbol)
+	print_lcd_symbol(c);
     else
 	lcd_ << c;
 
 }
-
+template <typename L, typename K, typename KC, size_t N, uint8_t kr, uint8_t dt>
+void Interface<L, K, KC, N, kr, dt>::print_lcd_symbol(char c)
+{
+    switch(c){
+	break; case Code::sqrt: lcd_.screen().print(symbol::of("√"));
+	break; default: lcd_ << '?';
+    }
+}
 template <typename L, typename K, typename KC, size_t N, uint8_t kr, uint8_t dt>
 void Interface<L, K, KC, N, kr, dt>::redraw_lcd_from(
     typename Buffer::iterator p)
@@ -216,14 +235,12 @@ void Interface<L, K, KC, N, kr, dt>::write(char c)
 }
 
 
-//template <typename L, typename K, typename KC, size_t N, uint8_t kr, uint8_t dt>
-//void Interface<L, K, KC, N, kr, dt>::write(const char* c)
-//{
-//    if (buffer_p_ != buffer_->me()){
-//	write_buffer(c);
-//	redraw_lcd();
-//    }
-//}
+template <typename L, typename K, typename KC, size_t N, uint8_t kr, uint8_t dt>
+void Interface<L, K, KC, N, kr, dt>::write(const char* str)
+{
+    if (buffer_p_ != buffer_->me())
+	write_buffer(str);
+}
 
 
 // TODO: ¿mejorarla? De momento, por rapidez, reutilizo const char*
@@ -339,24 +356,28 @@ template <typename L, typename K, typename KC, size_t N, uint8_t kr, uint8_t dt>
 void Interface<L, K, KC, N, kr, dt>::read()
 {
     while (1) {
-	uint8_t c = keyboard_.getchar();
-
-	switch(c){
-	    break; case Code::null: break;
-	    break; case key_return: return;
-
-// comandos de edición
-	    break; case Code::del : DEL_command(); 
-            break; case Code::ac  : AC_command();
-            break; case Code::left: to_the_left_command(); 
-	    break; case Code::right: to_the_right_command();
+	uint8_t key = keyboard_.getchar();
 
 // abreviaturas (pulsas una tecla, pero escribes "ANS" ó "sin(" ...)
-//	    break; case Code::ans: write("ans");
+	if (Code::first_abb <= key and key <= Code::last_abb)
+	    write_abbrevation(key);
+
+	else {
+	    switch(key){
+		break; case Code::null: break;
+		break; case key_return: return;
+
+// comandos de edición
+		break; case Code::del : DEL_command(); 
+		break; case Code::ac  : AC_command();
+		break; case Code::left: to_the_left_command(); 
+		break; case Code::right: to_the_right_command();
+
 
 // caracteres
-	    break; default: write(c);
-        }
+		break; default: write(key);
+	    }
+	}
 
 	redraw_lcd();
 	wait_ms(Tclock_keyboard);

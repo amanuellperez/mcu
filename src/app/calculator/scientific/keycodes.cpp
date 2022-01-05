@@ -46,7 +46,6 @@ void Sci_code::print(std::ostream& out, uint8_t code)
 	break; case Sci_code::log: out << "log";
 	break; case Sci_code::pow: out << "pow";
 	break; case Sci_code::square: out << "square";
-	break; case Sci_code::root: out << "root";
 	break; case Sci_code::frac: out << "frac";
 	break; case Sci_code::inverse: out << "inverse";
 	break; case Sci_code::calc: out << "calc";

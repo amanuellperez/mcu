@@ -90,7 +90,7 @@ void Main::run()
 {
     clear_error();
 
-    Interface interface{lcd, keyboard_};
+    Interface interface{lcd, keyboard_, abb2str};
     interface.initial_screen();
 
     while(1){

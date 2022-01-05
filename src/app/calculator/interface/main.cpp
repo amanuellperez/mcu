@@ -48,7 +48,7 @@ void Main::init_lcd()
 void Main::run()
 {
     while(1){
-	Interface interface{lcd_, keyboard_};
+	Interface interface{lcd_, keyboard_, abb2str};
 	interface.getline(buffer_);
 	lcd_.cursor_pos(0,1);
 	lcd_ << "Buffer = ";

@@ -102,12 +102,35 @@ using KB_cols = dev::Keypad_cols<KB_col0_pin,
 using Keypad = dev::Keypad<KB_rows, KB_cols>;
 
 // particularizamos algunos códigos
-struct Code: public dev::Keyboard_code_kascii
+struct Code
 {
-    static constexpr uint8_t ac = cancel;
-    static constexpr uint8_t ans = give_a_name1;
+    static constexpr uint8_t null     = 0;
+    static constexpr uint8_t unknown  = 255;
 
+// Command edition
+    static constexpr uint8_t first_cmd = 128;
+    static constexpr uint8_t ac     = 128;
+    static constexpr uint8_t del    = 130;
+    static constexpr uint8_t up     = 131;
+    static constexpr uint8_t down   = 132;
+    static constexpr uint8_t right  = 133;
+    static constexpr uint8_t left   = 134;
+    static constexpr uint8_t last_cmd = 134;
+
+
+// Abbrevations
+    static constexpr uint8_t first_abb = 200;
+    static constexpr uint8_t ans       = 200;
+    static constexpr uint8_t last_abb = 200;
+
+// symbols
+    static constexpr uint8_t first_symbol = 210;
+    static constexpr uint8_t sqrt	  = 210;
+    static constexpr uint8_t last_symbol  = 210;
 };
+
+constexpr const char* abb2str[] = {"ANS"};
+
 
 // Es el teclado inicial de la calculadora básica
 constexpr uint8_t key_code[25] =
