@@ -39,6 +39,8 @@ Main::Main():keyboard_{},
     constants_{constants0},
     variables_{variables0}
 {
+    init_traces();
+
 // init data
     symbol.init(builtins_, constants_, variables_);
 
@@ -67,18 +69,30 @@ void Main::init_lcd()
 }
 
 // para depurar
-void Main::print_buffer()
+//void Main::print_buffer()
+//{
+//    lcd.clear();
+//    int i = 0;
+//    auto p = buffer.begin();
+//    lcd << '[';
+//    for (; i < 10 and p != buffer.end() and *p != '\0'; ++i, ++p)
+//	lcd << *p;
+//
+//    lcd << "]\n";
+//    wait_ms(1000);
+//}
+
+void Main::trace_buffer()
 {
-    lcd.clear();
     int i = 0;
     auto p = buffer.begin();
-    lcd << '[';
+    ctrace << '[';
     for (; i < 10 and p != buffer.end() and *p != '\0'; ++i, ++p)
-	lcd << *p;
+	ctrace << *p;
 
-    lcd << "]\n";
-    wait_ms(1000);
+    ctrace << "]\n";
 }
+
 
 void Main::clear_output_screen()
 {
@@ -139,7 +153,7 @@ void Main::run()
     while(1){
 	interface.getline(buffer);
 	clear_error();
-//print_buffer(); // debug
+//trace_buffer(); // debug
 	yyparse();
 
 	if (no_error())

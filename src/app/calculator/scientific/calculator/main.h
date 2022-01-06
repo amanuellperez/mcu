@@ -36,6 +36,7 @@
 
 #include "cfg.h"
 #include "symbol.h"
+#include "trace.h"
 
 class Main {
 public:
@@ -65,7 +66,7 @@ public:
 
 
 // debug
-    void print_buffer();
+    void trace_buffer();
 
 private:
 // Hardware

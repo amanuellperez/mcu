@@ -4,7 +4,10 @@ SOURCES= main.cpp 			\
 		 lex.cpp			\
 		 calc.tab.cpp		\
 		 calc_math.cpp		\
+		 trace.cpp			\
 		 error.cpp
+
+#USER_CXXFLAGS=-DTRACES_ON
 
 # Aumenta 2K al enlazarlo con esta biblioteca
 #USER_LDFLAGS=-Wl,-u,vfscanf -lscanf_flt -Wl,-u,vfprintf -lprint_flt -lm
