@@ -6,6 +6,7 @@ INCS= avr_ADC_basic.h\
 	avr_atmega328p.h\
 	avr_cfg.h		\
 	avr_interrupt.h	\
+	avr_memory.h	\
 	avr_pin.h		\
 	avr_port.h		\
 	avr_sleep.h		\
