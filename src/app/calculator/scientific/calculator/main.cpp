@@ -22,6 +22,8 @@
 // evitar cortocircuitos, y en las columnas al conectar los pines los
 // configuramos con pullup resistor.
 // Sacamos la salida por un LCD
+#include <avr_memory.h>
+
 #include "main.h"
 #include "../../interface.h"
 #include "../../buffer.h"
@@ -42,7 +44,7 @@ Main::Main():keyboard_{},
     init_traces();
 
 // init data
-    symbol.init(builtins_, constants_, variables_);
+   symbol.init(builtins_, constants_, variables_);
 
 // init_hardware():
     init_SPI();
@@ -82,16 +84,6 @@ void Main::init_lcd()
 //    wait_ms(1000);
 //}
 
-void Main::trace_buffer()
-{
-    int i = 0;
-    auto p = buffer.begin();
-    ctrace << '[';
-    for (; i < 10 and p != buffer.end() and *p != '\0'; ++i, ++p)
-	ctrace << *p;
-
-    ctrace << "]\n";
-}
 
 
 void Main::clear_output_screen()
@@ -145,6 +137,8 @@ void Main::msg_error()
 
 void Main::run()
 {
+ctrace << "run: free ram=  [" << bytes_of_free_ram() << "] bytes\n";
+
     clear_error();
 
     Interface interface{lcd, keyboard_, abb2str};
@@ -153,7 +147,7 @@ void Main::run()
     while(1){
 	interface.getline(buffer);
 	clear_error();
-//trace_buffer(); // debug
+//trace(buffer); // debug
 	yyparse();
 
 	if (no_error())

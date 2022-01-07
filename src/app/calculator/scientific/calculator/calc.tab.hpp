@@ -62,7 +62,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 9 "calc.ypp"
+#line 15 "calc.ypp"
 		// stack type
     double value;	// actual value
     Symbol* symbol; // symbol table pointer

@@ -4,6 +4,8 @@
 #include "main.h"
 #include "lex.h"
 
+#define YYMAXDEPTH 20
+#define YYINITDEPTH 100
 %}
 
 %define api.value.type {double}; /* stack type, by default is int */

@@ -116,18 +116,20 @@ struct Sci_code
     static void print(std::ostream& out, uint8_t code);
 };
 
-inline constexpr const char* abb2str[] = {
-    "Ans",
-    "x10",
-    "sin(",
-    "cos(",
-    "tan(",
-    "º",
-    "-",
-    "ln(",
-    "log(",
-    "^",
-};
+extern const char* abb2str[];
+
+//constexpr const char* abb2str[] = {
+//    "Ans",
+//    "x10",
+//    "sin(",
+//    "cos(",
+//    "tan(",
+//    "º",
+//    "-",
+//    "ln(",
+//    "log(",
+//    "^",
+//};
 
 #endif
 

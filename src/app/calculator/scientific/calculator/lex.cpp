@@ -28,45 +28,58 @@
 #include "error.h"
 #include "../../buffer.h"	// read
 
+#include <avr_memory.h>
+
 int yylex()
 {
+    ctrace << ">>> yylex: buffer = ";
+    ctrace << "run: free ram =  [" << bytes_of_free_ram() << "] bytes\n";
+    trace(Main::buffer);
+
     int c = static_cast<int>(Main::buffer.pop_front());
 
+    ctrace << "ylex(" << (char) c << ") ... ";
     if (c == '.' || isdigit(c)){ /* number */
 	Main::buffer.push_front(c);
 	if (!read(Main::buffer, yylval.value))
 	    Main::set_yylex_read();
 
+	ctrace << "NUMBER = [" << (int) yylval.value << "]\n";
+	ctrace << "<<< yylex: buffer = ";
+	trace(Main::buffer);
 	return NUMBER;
     }
 
 
-    if (isalpha(c)){
-// pop_front_alnumstring(buffer, string):
-	
-	Main::buffer.push_front(c);
-	char str[100]; // TODO: parametrizar
-	char* p = str;
-	while (!Main::buffer.empty() and isalpha(Main::buffer[0])){
-	    *p++ = Main::buffer.pop_front();
-	}
-	*p = '\0';
+//    if (isalpha(c)){
+//// pop_front_alnumstring(buffer, string):
+//	
+//	Main::buffer.push_front(c);
+//	char str[100]; // TODO: parametrizar
+//	char* p = str;
+//	while (!Main::buffer.empty() and isalpha(Main::buffer[0])){
+//	    *p++ = Main::buffer.pop_front();
+//	}
+//	*p = '\0';
+//
+//	Symbol* s = Main::symbol[str];
+//	if (s == nullptr)
+//	    return UNDEF;
+//
+//	yylval.symbol = s;
+//
+//	return s->type;
+//    }
 
-	Symbol* s = Main::symbol[str];
-	if (s == nullptr)
-	    return UNDEF;
-
-	yylval.symbol = s;
-
-	return s->type;
-    }
-
+ctrace << "[" << (char) c << "]?\n";
     return c;
+
 }
 
 
 void yyerror(const char* msg)
 {
+ctrace << "yyerror(" << msg << ")\n";
     msg_error(msg);
 
     if (Main::no_error())

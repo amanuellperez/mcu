@@ -34,6 +34,7 @@ ATD_GENRULES=${MCU_MK}/atd.mk	; export ATD_GENRULES
 AVR_GENRULES=${MCU_MK}/avr.mk	; export AVR_GENRULES
 DEV_GENRULES=${MCU_MK}/dev.mk	; export DEV_GENRULES
 DEBUG_GENRULES=${MCU_MK}/debug.mk	; export DEBUG_GENRULES
+APPLIB_GENRULES=${MCU_MK}/app_lib.mk	; export APPLIB_GENRULES
 APP_GENRULES=${MCU_MK}/app.mk	; export APP_GENRULES
 
 # ------------------------------

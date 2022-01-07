@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __TRACE_H__
-#define __TRACE_H__
+#ifndef __APP_TRACE_H__
+#define __APP_TRACE_H__
 /****************************************************************************
  *
  *  - DESCRIPCION: Depuremos la calculadora
@@ -29,20 +29,48 @@
  *
  *  - HISTORIA:
  *    A.Manuel L.Perez
- *    06/01/2022 Escrito
+ *    07/01/2022 Escrito
  *
  ****************************************************************************/
-#include <app_trace.h>
-#include "dev.h"
-
 #ifdef TRACES_ON
-void trace(const Buffer& buffer);
+#include <avr_UART.h>
+
+inline void init_traces()
+{
+    avr::UART_iostream uart;
+    avr::basic_cfg(uart);
+    uart.on();
+
+    uart << "\nTrazas on\n"
+	    "---------\n";
+}
+
+
+struct Trace{
+    template <typename T>
+    Trace& operator<<(const T& a) 
+    { 
+	avr::UART_iostream uart;
+	uart << a;
+	return *this; 
+    }
+
+};
+
 
 #else
 
-inline void trace(const Buffer& buffer){}
+struct Trace{
+    template <typename T>
+    Trace& operator<<(const T& a) { return *this; }
+
+};
+
+inline void init_traces() {}
 
 #endif
+
+extern Trace ctrace;
 
 
 

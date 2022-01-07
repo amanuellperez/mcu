@@ -45,7 +45,7 @@ public:
     
 // global vbles
     static LCD lcd;  // no admite definirlo inline (???)
-    inline static Interface::Buffer buffer;
+    inline static Buffer buffer;
     inline static double result;
 
 
@@ -65,8 +65,6 @@ public:
     static void set_yylex_read() {error_ = Error::yylex_read;}
 
 
-// debug
-    void trace_buffer();
 
 private:
 // Hardware

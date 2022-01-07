@@ -20,6 +20,19 @@
 
 #include "trace.h"
 
-Trace ctrace;
+
+#ifdef TRACES_ON
+void trace(const Buffer& buffer)
+{
+    int i = 0;
+    auto p = buffer.begin();
+    ctrace << '[';
+    for (; i < 10 and p != buffer.end() and *p != '\0'; ++i, ++p)
+	ctrace << *p;
+
+    ctrace << "]\n";
+}
+#endif
+
 
 

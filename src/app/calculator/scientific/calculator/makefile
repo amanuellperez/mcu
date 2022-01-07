@@ -5,7 +5,8 @@ SOURCES= main.cpp 			\
 		 calc.tab.cpp		\
 		 calc_math.cpp		\
 		 trace.cpp			\
-		 error.cpp
+		 error.cpp			\
+		 ../instcodes.cpp
 
 #USER_CXXFLAGS=-DTRACES_ON
 

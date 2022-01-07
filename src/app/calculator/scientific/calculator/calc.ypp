@@ -4,6 +4,12 @@
 #include "error.h"
 #include "calc_math.h"
 #include "main.h"
+
+// Fundamental: al principio desborde la pila. Si se ve que la calculadora
+// hace algo raro activar las trazas para ver el número de bytes libres de
+// RAM.
+#define YYMAXDEPTH 20
+#define YYINITDEPTH 100
 %}
 
 %union{		// stack type

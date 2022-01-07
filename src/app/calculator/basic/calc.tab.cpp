@@ -72,8 +72,10 @@
 #include "main.h"
 #include "lex.h"
 
+#define YYMAXDEPTH 20
+#define YYINITDEPTH 100
 
-#line 77 "calc.tab.cpp"
+#line 79 "calc.tab.cpp"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -500,8 +502,8 @@ static const yytype_int8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int8 yyrline[] =
 {
-       0,    21,    21,    22,    23,    26,    27,    28,    29,    30,
-      31,    32,    33,    34
+       0,    23,    23,    24,    25,    28,    29,    30,    31,    32,
+      33,    34,    35,    36
 };
 #endif
 
@@ -1304,73 +1306,73 @@ yyreduce:
   switch (yyn)
     {
   case 3:
-#line 22 "calc.ypp"
+#line 24 "calc.ypp"
                       {Main::result = 0;}
-#line 1310 "calc.tab.cpp"
+#line 1312 "calc.tab.cpp"
     break;
 
   case 4:
-#line 23 "calc.ypp"
+#line 25 "calc.ypp"
                        {Main::result = yyvsp[-1];}
-#line 1316 "calc.tab.cpp"
+#line 1318 "calc.tab.cpp"
     break;
 
   case 5:
-#line 26 "calc.ypp"
+#line 28 "calc.ypp"
                         { yyval = yyvsp[0]; }
-#line 1322 "calc.tab.cpp"
+#line 1324 "calc.tab.cpp"
     break;
 
   case 6:
-#line 27 "calc.ypp"
+#line 29 "calc.ypp"
                         { yyval = yyvsp[-2] + yyvsp[0];}
-#line 1328 "calc.tab.cpp"
+#line 1330 "calc.tab.cpp"
     break;
 
   case 7:
-#line 28 "calc.ypp"
+#line 30 "calc.ypp"
                         { yyval = yyvsp[-2] - yyvsp[0];}
-#line 1334 "calc.tab.cpp"
+#line 1336 "calc.tab.cpp"
     break;
 
   case 8:
-#line 29 "calc.ypp"
+#line 31 "calc.ypp"
                         { yyval = yyvsp[-2] * yyvsp[0];}
-#line 1340 "calc.tab.cpp"
+#line 1342 "calc.tab.cpp"
     break;
 
   case 9:
-#line 30 "calc.ypp"
+#line 32 "calc.ypp"
                         { yyval = yyvsp[-2] / yyvsp[0];}
-#line 1346 "calc.tab.cpp"
+#line 1348 "calc.tab.cpp"
     break;
 
   case 10:
-#line 31 "calc.ypp"
+#line 33 "calc.ypp"
                         { yyval = yyvsp[-1]; }
-#line 1352 "calc.tab.cpp"
+#line 1354 "calc.tab.cpp"
     break;
 
   case 11:
-#line 32 "calc.ypp"
+#line 34 "calc.ypp"
                         { yyval = sqrt(yyvsp[0]); }
-#line 1358 "calc.tab.cpp"
+#line 1360 "calc.tab.cpp"
     break;
 
   case 12:
-#line 33 "calc.ypp"
+#line 35 "calc.ypp"
                         { yyval = pow(yyvsp[-2], yyvsp[0]); }
-#line 1364 "calc.tab.cpp"
+#line 1366 "calc.tab.cpp"
     break;
 
   case 13:
-#line 34 "calc.ypp"
+#line 36 "calc.ypp"
                                   {yyval = -yyvsp[0];}
-#line 1370 "calc.tab.cpp"
+#line 1372 "calc.tab.cpp"
     break;
 
 
-#line 1374 "calc.tab.cpp"
+#line 1376 "calc.tab.cpp"
 
       default: break;
     }
@@ -1602,7 +1604,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 37 "calc.ypp"
+#line 39 "calc.ypp"
 
 
 

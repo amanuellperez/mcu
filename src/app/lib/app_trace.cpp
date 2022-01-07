@@ -17,36 +17,11 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#pragma once
 
-#ifndef __TRACE_H__
-#define __TRACE_H__
-/****************************************************************************
- *
- *  - DESCRIPCION: Depuremos la calculadora
- *    En caso de estar definida TRACES_ON se va llevando un log de lo que va
- *    haciendo la calculadora vía UART.
- *
- *  - HISTORIA:
- *    A.Manuel L.Perez
- *    06/01/2022 Escrito
- *
- ****************************************************************************/
-#include <app_trace.h>
-#include "dev.h"
+#include "app_trace.h"
 
-#ifdef TRACES_ON
-void trace(const Buffer& buffer);
-
-#else
-
-inline void trace(const Buffer& buffer){}
-
-#endif
+Trace ctrace;
 
 
-
-
-#endif
 
 

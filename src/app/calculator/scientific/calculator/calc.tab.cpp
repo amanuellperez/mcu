@@ -74,7 +74,13 @@
 #include "calc_math.h"
 #include "main.h"
 
-#line 78 "calc.tab.cpp"
+// Fundamental: al principio desborde la pila. Si se ve que la calculadora
+// hace algo raro activar las trazas para ver el número de bytes libres de
+// RAM.
+#define YYMAXDEPTH 20
+#define YYINITDEPTH 100
+
+#line 84 "calc.tab.cpp"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -135,12 +141,12 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 9 "calc.ypp"
+#line 15 "calc.ypp"
 		// stack type
     double value;	// actual value
     Symbol* symbol; // symbol table pointer
 
-#line 144 "calc.tab.cpp"
+#line 150 "calc.tab.cpp"
 
 };
 typedef union YYSTYPE YYSTYPE;
@@ -516,9 +522,9 @@ static const yytype_int8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int8 yyrline[] =
 {
-       0,    31,    31,    32,    33,    34,    35,    36,    39,    41,
-      42,    43,    47,    48,    49,    50,    51,    52,    53,    58,
-      59,    60
+       0,    37,    37,    38,    39,    40,    41,    42,    45,    47,
+      48,    49,    53,    54,    55,    56,    57,    58,    59,    64,
+      65,    66
 };
 #endif
 
@@ -1332,110 +1338,110 @@ yyreduce:
   switch (yyn)
     {
   case 3:
-#line 32 "calc.ypp"
+#line 38 "calc.ypp"
                        {Main::result = 15;}
-#line 1338 "calc.tab.cpp"
-    break;
-
-  case 6:
-#line 35 "calc.ypp"
-                        {Main::result = (yyvsp[-1].value);}
 #line 1344 "calc.tab.cpp"
     break;
 
-  case 7:
-#line 36 "calc.ypp"
-                       {yyerrok;}
+  case 6:
+#line 41 "calc.ypp"
+                        {Main::result = (yyvsp[-1].value);}
 #line 1350 "calc.tab.cpp"
     break;
 
-  case 8:
-#line 39 "calc.ypp"
-                                { (yyval.value) = (yyvsp[-2].symbol)->u.value = (yyvsp[0].value); }
+  case 7:
+#line 42 "calc.ypp"
+                       {yyerrok;}
 #line 1356 "calc.tab.cpp"
     break;
 
-  case 9:
-#line 41 "calc.ypp"
-                        { (yyval.value) = (yyvsp[0].value); }
+  case 8:
+#line 45 "calc.ypp"
+                                { (yyval.value) = (yyvsp[-2].symbol)->u.value = (yyvsp[0].value); }
 #line 1362 "calc.tab.cpp"
     break;
 
-  case 10:
-#line 42 "calc.ypp"
-                        { (yyval.value) = (yyvsp[0].symbol)->u.value; }
+  case 9:
+#line 47 "calc.ypp"
+                        { (yyval.value) = (yyvsp[0].value); }
 #line 1368 "calc.tab.cpp"
     break;
 
+  case 10:
+#line 48 "calc.ypp"
+                        { (yyval.value) = (yyvsp[0].symbol)->u.value; }
+#line 1374 "calc.tab.cpp"
+    break;
+
   case 11:
-#line 43 "calc.ypp"
+#line 49 "calc.ypp"
                         { if ((yyvsp[0].symbol)->type == UNDEF)
 			    msg_error("undefine variable");
 
 			(yyval.value) = (yyvsp[0].symbol)->u.value; }
-#line 1377 "calc.tab.cpp"
-    break;
-
-  case 13:
-#line 48 "calc.ypp"
-                       { (yyval.value) = (*((yyvsp[-1].symbol)->u.ptr))((yyvsp[0].value));}
 #line 1383 "calc.tab.cpp"
     break;
 
-  case 14:
-#line 49 "calc.ypp"
-                             { (yyval.value) = (*((yyvsp[-3].symbol)->u.ptr))((yyvsp[-1].value));}
+  case 13:
+#line 54 "calc.ypp"
+                       { (yyval.value) = (*((yyvsp[-1].symbol)->u.ptr))((yyvsp[0].value));}
 #line 1389 "calc.tab.cpp"
     break;
 
-  case 15:
-#line 50 "calc.ypp"
-                        { (yyval.value) = (yyvsp[-2].value) + (yyvsp[0].value);}
+  case 14:
+#line 55 "calc.ypp"
+                             { (yyval.value) = (*((yyvsp[-3].symbol)->u.ptr))((yyvsp[-1].value));}
 #line 1395 "calc.tab.cpp"
     break;
 
-  case 16:
-#line 51 "calc.ypp"
-                        { (yyval.value) = (yyvsp[-2].value) - (yyvsp[0].value);}
+  case 15:
+#line 56 "calc.ypp"
+                        { (yyval.value) = (yyvsp[-2].value) + (yyvsp[0].value);}
 #line 1401 "calc.tab.cpp"
     break;
 
-  case 17:
-#line 52 "calc.ypp"
-                        { (yyval.value) = (yyvsp[-2].value) * (yyvsp[0].value);}
+  case 16:
+#line 57 "calc.ypp"
+                        { (yyval.value) = (yyvsp[-2].value) - (yyvsp[0].value);}
 #line 1407 "calc.tab.cpp"
     break;
 
+  case 17:
+#line 58 "calc.ypp"
+                        { (yyval.value) = (yyvsp[-2].value) * (yyvsp[0].value);}
+#line 1413 "calc.tab.cpp"
+    break;
+
   case 18:
-#line 53 "calc.ypp"
+#line 59 "calc.ypp"
                         { 
 		if ((yyvsp[0].value) == 0.0)
 		    msg_error("division by zero");
 
 		(yyval.value) = (yyvsp[-2].value) / (yyvsp[0].value); }
-#line 1417 "calc.tab.cpp"
-    break;
-
-  case 19:
-#line 58 "calc.ypp"
-                        { (yyval.value) = Pow((yyvsp[-2].value), (yyvsp[0].value)); }
 #line 1423 "calc.tab.cpp"
     break;
 
-  case 20:
-#line 59 "calc.ypp"
-                        { (yyval.value) = (yyvsp[-1].value); }
+  case 19:
+#line 64 "calc.ypp"
+                        { (yyval.value) = Pow((yyvsp[-2].value), (yyvsp[0].value)); }
 #line 1429 "calc.tab.cpp"
     break;
 
-  case 21:
-#line 60 "calc.ypp"
-                                  {(yyval.value) = -(yyvsp[0].value);}
+  case 20:
+#line 65 "calc.ypp"
+                        { (yyval.value) = (yyvsp[-1].value); }
 #line 1435 "calc.tab.cpp"
     break;
 
+  case 21:
+#line 66 "calc.ypp"
+                                  {(yyval.value) = -(yyvsp[0].value);}
+#line 1441 "calc.tab.cpp"
+    break;
 
-#line 1439 "calc.tab.cpp"
+
+#line 1445 "calc.tab.cpp"
 
       default: break;
     }
@@ -1667,7 +1673,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 63 "calc.ypp"
+#line 69 "calc.ypp"
 
 
 
