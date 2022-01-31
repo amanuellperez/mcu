@@ -30,10 +30,10 @@ constexpr uint8_t u8 PROGMEM = 14;
 constexpr uint16_t u16 PROGMEM = 27;
 
 // arrays de cadenas
-const char str1[] PROGMEM = "one";
-const char str2[] PROGMEM = "two";
-const char str3[] PROGMEM = "three";
-const char* const str_array[] PROGMEM = {
+constexpr const char str1[] PROGMEM = "one";
+constexpr const char str2[] PROGMEM = "two";
+constexpr const char str3[] PROGMEM = "three";
+constexpr const char* const str_array[] PROGMEM = {
     str1, str2, str3
 };
 

@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021 A.Manuel L.Perez 
+// Copyright (C) 2019-2022 A.Manuel L.Perez 
 //           mail: <amanuel.lperez@gmail.com>
 //           https://github.com/amanuellperez/mcu
 //
@@ -34,6 +34,7 @@
  *	16/11/2019: count, count_if
  *	04/02/2020: shift_left
  *	28/07/2021: swap, reverse
+ *	31/01/2022: max_element/min_element
  *
  *   - TODO:
  *	- fill_n: especializarla a memset cuando se trate de arrays.
@@ -184,6 +185,84 @@ inline constexpr const T& min(const T& a, const T& b, Compare cmp)
 template <typename T, typename Compare>
 inline constexpr const T& max(const T& a, const T& b, Compare cmp)
 { return cmp(a, b)? b: a; }
+
+
+
+
+// max_element
+// -----------
+// ¿Se pueden fusionar las 4 implementaciones en una sola? El problema esta en
+// que a max_element se le pasa std::less y no std::greater.
+template<typename Forward_it>
+constexpr Forward_it min_element(Forward_it p, Forward_it pe)
+{
+    if (p == pe) return pe;
+
+    Forward_it res =  p;
+    ++p;
+
+    for (; p != pe; ++p){
+	if (*p < *res)
+	    res = p;
+    }
+
+    return res;
+}
+
+
+template<typename Forward_it, typename Cmp>
+constexpr Forward_it min_element(Forward_it p, Forward_it pe, Cmp cmp)
+{
+    if (p == pe) return pe;
+
+    Forward_it res =  p;
+    ++p;
+
+    for (; p != pe; ++p){
+	if (cmp(*p, *res))
+	    res = p;
+    }
+
+    return res;
+}
+
+
+
+template<typename Forward_it>
+constexpr Forward_it max_element(Forward_it p, Forward_it pe)
+{
+    if (p == pe) return pe;
+
+    Forward_it res =  p;
+    ++p;
+
+    for (; p != pe; ++p){
+	if (*p > *res)
+	    res = p;
+    }
+
+    return res;
+}
+
+
+// Cmp = returns true if the first argument is less (!!!) than the second
+template<typename Forward_it, typename Cmp>
+constexpr Forward_it max_element(Forward_it p, Forward_it pe, Cmp cmp)
+{
+    if (p == pe) return pe;
+
+    Forward_it res =  p;
+    ++p;
+
+    for (; p != pe; ++p){
+	if (cmp(*res, *p)) // cuidado: orden!! cmp es "menor que"
+	    res = p;
+    }
+
+    return res;
+}
+
+
 
 
 // copy

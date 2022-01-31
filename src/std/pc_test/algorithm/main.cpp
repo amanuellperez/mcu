@@ -18,10 +18,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "../../std_algorithm.h"
+#include "../../std_functional.h"
 
 #include <alp_test.h>
 #include <iostream>
 #include <vector>
+#include <functional>
 #include <algorithm>
 
 using namespace test;
@@ -62,6 +64,61 @@ void test_minmax()
     CHECK_TRUE(mtd::max(-7, -4) == -4, "max(-7,-4)");
 
 
+}
+
+
+void test_minmax_element()
+{
+    test::interfaz("min/max_element");
+
+{// caso normal
+    std::vector<int> v {2, 7, 1, 8, 3, 1, 4, 1, 5};
+
+    CHECK_TRUE((mtd::min_element(v.begin(), v.end()) == 
+		std::min_element(v.begin(), v.end())), "min_element(...)");
+
+    CHECK_TRUE((mtd::min_element(v.begin(), v.end(), mtd::less<int>{}) == 
+		std::min_element(v.begin(), v.end(), std::less<int>{})), "min_element(...)");
+
+    CHECK_TRUE((mtd::max_element(v.begin(), v.end()) == 
+		std::max_element(v.begin(), v.end())), "max_element(...)");
+
+    CHECK_TRUE((mtd::max_element(v.begin(), v.end(), mtd::less<int>{}) == 
+		std::max_element(v.begin(), v.end(), std::less<int>{})), "max_element(...)");
+}
+
+{ // caso extremo
+    std::vector<int> v {};
+
+    CHECK_TRUE((mtd::min_element(v.begin(), v.end()) == 
+		std::min_element(v.begin(), v.end())), "min_element(...)");
+
+    CHECK_TRUE((mtd::min_element(v.begin(), v.end(), mtd::less<int>{}) == 
+		std::min_element(v.begin(), v.end(), std::less<int>{})), "min_element(...)");
+
+    CHECK_TRUE((mtd::max_element(v.begin(), v.end()) == 
+		std::max_element(v.begin(), v.end())), "max_element(...)");
+
+    CHECK_TRUE((mtd::max_element(v.begin(), v.end(), mtd::less<int>{}) == 
+		std::max_element(v.begin(), v.end(), std::less<int>{})), "max_element(...)");
+}
+
+
+{ // caso todo constante
+    std::vector<int> v {3,3,3,3,3,3,3};
+
+    CHECK_TRUE((mtd::min_element(v.begin(), v.end()) == 
+		std::min_element(v.begin(), v.end())), "min_element(...)");
+
+    CHECK_TRUE((mtd::min_element(v.begin(), v.end(), mtd::less<int>{}) == 
+		std::min_element(v.begin(), v.end(), std::less<int>{})), "min_element(...)");
+
+    CHECK_TRUE((mtd::max_element(v.begin(), v.end()) == 
+		std::max_element(v.begin(), v.end())), "max_element(...)");
+
+    CHECK_TRUE((mtd::max_element(v.begin(), v.end(), mtd::less<int>{}) == 
+		std::max_element(v.begin(), v.end(), std::less<int>{})), "max_element(...)");
+}
 }
 
 
@@ -342,6 +399,7 @@ try{
 
     test_for_each();
     test_minmax();
+    test_minmax_element();
     test_copy();
     test_copy_n();
     test_fill();

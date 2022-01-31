@@ -116,8 +116,25 @@ struct Sci_code
     static void print(std::ostream& out, uint8_t code);
 };
 
-extern const char* abb2str[];
+constexpr const char abb1[] PROGMEM = "Ans";
+constexpr const char abb2[] PROGMEM = "x10";
+constexpr const char abb3[] PROGMEM = "sin(";
+constexpr const char abb4[] PROGMEM = "cos(";
+constexpr const char abb5[] PROGMEM = "tan(";
+constexpr const char abb6[] PROGMEM = "º";
+constexpr const char abb7[] PROGMEM = "-";
+constexpr const char abb8[] PROGMEM = "ln(";
+constexpr const char abb9[] PROGMEM = "log(";
+constexpr const char abb10[] PROGMEM = "^";
 
+constexpr avr::Progmem_string_array<Sci_code::last_abb - Sci_code::first_abb + 1> 
+abb2str PROGMEM = {
+    abb1, abb2, abb3, abb4, abb5,
+    abb6, abb7, abb8, abb9, abb10
+    };
+
+
+//extern const char* abb2str[];
 //constexpr const char* abb2str[] = {
 //    "Ans",
 //    "x10",

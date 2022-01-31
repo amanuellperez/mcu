@@ -137,7 +137,7 @@ void Main::msg_error()
 
 void Main::run()
 {
-ctrace << "run: free ram=  [" << bytes_of_free_ram() << "] bytes\n";
+ctrace << "run: free ram=  [" << avr::bytes_of_free_ram() << "] bytes\n";
 
     clear_error();
 

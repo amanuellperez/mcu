@@ -59,15 +59,15 @@ void Sci_code::print(std::ostream& out, uint8_t code)
 
 }
 
-const char* abb2str[] = {
-    "Ans",
-    "x10",
-    "sin(",
-    "cos(",
-    "tan(",
-    "º",
-    "-",
-    "ln(",
-    "log(",
-    "^",
-};
+//const char* abb2str[] = {
+//    "Ans",
+//    "x10",
+//    "sin(",
+//    "cos(",
+//    "tan(",
+//    "º",
+//    "-",
+//    "ln(",
+//    "log(",
+//    "^",
+//};
