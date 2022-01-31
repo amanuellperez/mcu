@@ -19,6 +19,7 @@ INCS= std_cstdio.h		\
 	std_cstdint.h		\
 	std_cstdlib.h		\
 	std_ctime.h			\
+	std_functional.h	\
 	std_initializer_list.h	\
 	std_ios_base.h		\
 	std_ios.h			\
@@ -49,6 +50,7 @@ INCS= std_cstdio.h		\
 	cstdlib		\
 	cstring		\
 	ctime		\
+	functional	\
 	initializer_list	\
 	iomanip		\
 	ios			\

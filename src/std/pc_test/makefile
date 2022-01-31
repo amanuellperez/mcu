@@ -6,6 +6,7 @@ DIRS = algorithm\
 	cstddef		\
 	cstdio		\
 	cstring		\
+	functional	\
 	iostream	\
 	iterator	\
 	limits		\
