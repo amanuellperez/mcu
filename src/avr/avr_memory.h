@@ -119,6 +119,8 @@ public:
 };
 
 
+template <size_t N>
+struct Element_progmem_string_array;
 
 // Para manejar arrays de cadenas.
 template <size_t N>
@@ -132,15 +134,49 @@ public:
     template<typename T2>
     Progmem_string_array& operator=(const T2&) = delete;
 
-    char* strcpy(char* dst, size_type i) const
-    { return strcpy_P(dst, (PGM_P) pgm_read_word(&(data[i]))); }
+    Element_progmem_string_array<N> operator[](size_type i) const;
 
     const char* const data[N];
-
 };
 
 
+// ¿Por qué no definir Progmem_string_array::Element?
+// Al principio lo intenté hacer así pero genera un problema con la deducción
+// automática de tipos al llamar strcpy. Por eso lo dejo fuera.
+// Como en principio es una clase "privada" le pongo un nombre largo: nadie
+// debería de usarla.
+template <size_t N>
+struct Element_progmem_string_array
+{
+    Element_progmem_string_array(const Progmem_string_array<N>& arr0, size_t i0)
+        : arr{arr0}, i{i0}
+    { }
 
+    const Progmem_string_array<N>& arr;
+    size_t i; 
+};
+
+
+template <size_t N>
+Element_progmem_string_array<N> Progmem_string_array<N>::operator[](size_type i) const
+{return Element_progmem_string_array<N>{*this, i};}
+
+
+// Manejamos el array como memoria normal y corriente
+template <size_t N>
+inline char* strcpy(char* dst, const Element_progmem_string_array<N>& src)
+{ return strcpy_P(dst, (PGM_P) pgm_read_word(&(src.arr.data[src.i]))); }
+
+// Es más eficiente y segura strlcpy que strncpy
+template <size_t N>
+inline char*
+strncpy(char* dst, const Element_progmem_string_array<N>& src, size_t n)
+{ return strncpy_P(dst, (PGM_P) pgm_read_word(&(src.arr.data[src.i])), n); }
+
+template <size_t N>
+inline size_t
+strlcpy(char* dst, const Element_progmem_string_array<N>& src, size_t n)
+{ return strlcpy_P(dst, (PGM_P) pgm_read_word(&(src.arr.data[src.i])), n); }
 
 }// namespace
 #endif

@@ -30,8 +30,8 @@ constexpr uint8_t u8 PROGMEM = 14;
 constexpr uint16_t u16 PROGMEM = 27;
 
 // arrays de cadenas
-constexpr const char str1[] PROGMEM = "one";
-constexpr const char str2[] PROGMEM = "two";
+constexpr const char str1[] PROGMEM = "zero";
+constexpr const char str2[] PROGMEM = "one";
 constexpr const char str3[] PROGMEM = "three";
 constexpr const char* const str_array[] PROGMEM = {
     str1, str2, str3
@@ -115,11 +115,35 @@ void test_progmem()
     {
 	char buffer[10];
 	for (size_t i = 0; i < parray_str.size(); ++i){
-//	    avr::strcpy(buffer, parray_str[i]);
-	    parray_str.strcpy(buffer, i);
+	    avr::strcpy(buffer, parray_str[i]);
 	    uart << "str[" << (int) i << "] = " << buffer << '\n';
 	}
     }
+
+    uart << "Escribiendo solo 3 caracters del array de " << parray_str.size()
+         << " cadenas (test strncpy):\n";
+    // Arrays de cadenas
+    {
+	char buffer[4];
+	for (size_t i = 0; i < parray_str.size(); ++i){
+	    avr::strncpy(buffer, parray_str[i], 4);
+	    buffer[3] = '\0'; // garantizamos que acaba bien
+	    uart << "str[" << (int) i << "] = " << buffer << '\n';
+	}
+    }
+
+    uart << "Escribiendo solo 4 caracters del array de " << parray_str.size()
+         << " cadenas (test strlcpy):\n";
+    // Arrays de cadenas
+    {
+	char buffer[4];
+	for (size_t i = 0; i < parray_str.size(); ++i){
+	    size_t n = avr::strlcpy(buffer, parray_str[i], 4);
+	    uart << "cadena original tiene [" << n << "] --> [" << (int) i << "] = " << buffer << '\n';
+	}
+    }
+
+
 	wait_ms(1000);
     }
 
