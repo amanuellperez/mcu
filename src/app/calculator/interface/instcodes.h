@@ -17,6 +17,13 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#pragma once
+
+#ifndef __INSTCODES_H__
+#define __INSTCODES_H__
+
+
+#include <avr_memory.h>
 
 
 struct Instructions_code
@@ -46,6 +53,27 @@ struct Instructions_code
     static constexpr uint8_t last_symbol  = 210;
 };
 
-constexpr const char* abb2str[] = {"ANS"};
+namespace __progmem{
+using Abb2str_array = 
+avr::Progmem_string_array<Instructions_code::last_abb -
+                                    Instructions_code::first_abb + 1>;
+
+constexpr const char abb1[] PROGMEM = "ANS";
+constexpr Abb2str_array abb2str PROGMEM = {
+        abb1
+};
+}// namespace
+
+// Es el casi-equivalente a `const char*` (¿`const char* const`?) pero
+// almacenando la memoria en PROGMEM
+struct Abb2str{
+    avr::Element_progmem_string_array<__progmem::Abb2str_array::size()> 
+	    operator[](size_t i) const { return __progmem::abb2str[i];}
+
+    // Devuelve la longitud máxima de las cadenas almacenadas
+    // TODO: ¿cómo calcularla automáticamente?
+    static constexpr uint8_t max_size() {return  10;}
+};
 
 
+#endif

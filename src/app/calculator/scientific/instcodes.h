@@ -49,6 +49,8 @@
 #include <stdint.h> // uint8_t 
 #include <ostream>
 
+#include <avr_memory.h>
+
 // No heredo de Keyboard_code_kascii ya que tengo muchas teclas especiales.
 // Creo un teclado especial para la calculadora
 struct Sci_code
@@ -116,6 +118,8 @@ struct Sci_code
     static void print(std::ostream& out, uint8_t code);
 };
 
+namespace __progmem{
+
 constexpr const char abb1[] PROGMEM = "Ans";
 constexpr const char abb2[] PROGMEM = "x10";
 constexpr const char abb3[] PROGMEM = "sin(";
@@ -127,11 +131,26 @@ constexpr const char abb8[] PROGMEM = "ln(";
 constexpr const char abb9[] PROGMEM = "log(";
 constexpr const char abb10[] PROGMEM = "^";
 
-constexpr avr::Progmem_string_array<Sci_code::last_abb - Sci_code::first_abb + 1> 
-abb2str PROGMEM = {
+using Abb2str_array = 
+avr::Progmem_string_array<Sci_code::last_abb - Sci_code::first_abb + 1>;
+
+constexpr Abb2str_array abb2str PROGMEM = {
     abb1, abb2, abb3, abb4, abb5,
     abb6, abb7, abb8, abb9, abb10
-    };
+};
+}// namespace
+
+// Es el casi-equivalente a `const char*` (¿`const char* const`?) pero
+// almacenando la memoria en PROGMEM
+struct Abb2str{
+    avr::Element_progmem_string_array<__progmem::Abb2str_array::size()> 
+	    operator[](size_t i) const { return __progmem::abb2str[i];}
+
+    // Devuelve la longitud máxima de las cadenas almacenadas
+    // TODO: ¿cómo calcularla automáticamente?
+    static constexpr uint8_t max_size() {return  10;}
+};
+
 
 
 //extern const char* abb2str[];

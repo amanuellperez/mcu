@@ -53,6 +53,51 @@ inline int bytes_of_free_ram()
 
 /***************************************************************************
  *				PROGMEM
+ *
+ *  Objetivo: que a la hora de programar no tengas que saber si tienes
+ *  almacenada la memoria en RAM o Flash (o donde sea). 
+ *
+ *  Problemas: los arrays de strings dejan mucho que desear para conseguir ese
+ *  objetivo. 
+ *	+ Para definirlas hay que definir las cadenas por un lado y por otro
+ *	  el array:
+ *
+ *		constexpr const char str1[] PROGMEM = "zero";
+ *		constexpr const char str2[] PROGMEM = "one";
+ *		constexpr const char str3[] PROGMEM = "two";
+ *		constexpr avr::Progmem_string_array<3> parray_str PROGMEM = {
+ *		       str1, str2, str3
+ *	        };
+ *
+ *	  ¿Por qué hay que especificar PROGMEM si ya debería de venir incluido
+ *	  en el tipo? 
+ *
+ *	  Lo ideal sería poder definirlas:
+ *		constexpr avr::Progmem_string_array<3> str = {
+ *		    "zero, "one", "two"
+ *	        };
+ *
+ *	        y luego poder usarlas:
+ *		    for (size_t i = 0; i < str.size(); ++i)
+ *			uart << str[i] << '\n';
+ *
+ *	  (???) Posible implementación (opción 1)(???)
+ *	  Quizás una forma de hacerlo sería almacenar en la PROGMEM todas las
+ *	  cadenas seguidas: {"zero", "one", "two"} lo almacenamos realmente
+ *	  como "zeroonetwo" sin los '\0' de C. Para ello necesitaría poder
+ *	  extraer en tiempo de compilación el número de cadenas que hay y
+ *	  los tamaños que tienen cada una de ellas guardando toda esta
+ *	  información en un array constexpr (que no exista durante la
+ *	  ejecución del programa y no ocupe espacio). De esta forma no
+ *	  almacenamos un array sino un solo puntero, que sería el único que
+ *	  hay que definir como PROGMEM. El operador `str[i]` lo que haría
+ *	  sería calcular en tiempo de compilación las posiciones [begin, end)
+ *	  de la cadena a la que se quiere acceder y... ¿qué hacer? ¿copiar el
+ *	  contenido en un buffer[] interno? El problema con eso es que 
+ *	  probablemente sería error-prone.
+ *	  Esta opción no está nada clara ni cómo implementarla ni el interfaz.
+ *
+ *
  ***************************************************************************/
 template <typename Int>
 class Progmem{
@@ -91,8 +136,7 @@ public:
     // TODO: implementar otros tipos
     static_assert(std::is_same_v<T, uint8_t> or std::is_same_v<T, uint16_t>);
 
-    constexpr size_type size() const noexcept 
-    {return N;}
+    constexpr static size_type size() {return N;}
 
     T operator[](size_type i) const
     {   
@@ -128,8 +172,13 @@ class Progmem_string_array{
 public:
     using size_type = size_t;
 
-    constexpr size_type size() const noexcept 
-    {return N;}
+    constexpr static size_type size() {return N;}
+
+// No parece que tenga mucho sentido copiar un progmem. De hecho, si se hace
+// en tiempo de ejecución funciona mal. Conviene marcar como 'delete' el copy
+// constructor, pero si se hace se elimina el constructor por defecto
+// necesario para inicializar `data`.
+//    Progmem_string_array(const Progmem_string_array&) = delete;
 
     template<typename T2>
     Progmem_string_array& operator=(const T2&) = delete;

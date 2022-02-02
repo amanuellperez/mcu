@@ -91,11 +91,33 @@ constexpr avr::Progmem_string_array<3> parray_str PROGMEM = {
     str1, str2, str3
     };
 
+template <size_t N>
+void f(const avr::Progmem_string_array<N>& str0)
+{
+    avr::UART_iostream uart;
+    avr::Progmem_string_array<3> str = str0; // <-- esto genera error en 
+					    // tiempo de ejecución
+
+    uart << "Dentro de f\n";
+    // Arrays de cadenas
+    {
+	char buffer[10];
+	for (size_t i = 0; i < str.size(); ++i){
+	    avr::strcpy(buffer, str[i]);
+	    uart << "str[" << (int) i << "] = " << buffer << '\n';
+	}
+    }
+    uart << "-----------\n";
+}
+
+
+
 void test_progmem()
 {
     avr::UART_iostream uart;
 
     while(1){
+
 	uart << "\n\n";
 	uint8_t x8 = pu8;
 	uart << "u8 = [" << (int) x8 << "]\n";
@@ -110,6 +132,8 @@ void test_progmem()
 	    uart << "u8[" << i << "] = " << (int) parray_u8[i] << '\n';
     }
 	
+    // f(parray_str); <-- no debería de compilar
+
     uart << "Escribiendo array de " << parray_str.size() << " cadenas:\n";
     // Arrays de cadenas
     {

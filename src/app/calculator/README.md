@@ -3,7 +3,7 @@
 Este es un proyecto básico para aprender a programar micros.
 
 A nivel de hardware las calculadoras son muy sencillas: tienen un teclado y
-una pantalla, nada más. Con todo esto da lugar a diferentes elecciones:
+una pantalla, nada más. Con todo, esto da lugar a diferentes elecciones:
 
 * ¿Qué tipo de teclado?
 * ¿Qué tipo de pantalla? ¿Un LCD básico? ¿Una matriz de puntos?
@@ -32,10 +32,10 @@ principio seguiré el libro bastante aunque según vaya aprendiendo lo iré
 modificando a mi gusto.
 
 
-## Vídeo
+## Vídeos
 [Calculadora básica](https://youtu.be/5mxkGtWMyUA)
 
-### Problemas encontrados:
+## Problemas encontrados:
 
 1. La calculadora no sabe calcular `2^8`. En lugar de dar 256 da 255.9999.
    Resulta que el problema lo tiene la función `pow` que suministra `avrlibC`.
@@ -70,9 +70,9 @@ modificando a mi gusto.
    teclado. ¿Cómo conectar un teclado de 64 teclas mínimo a un atmega32?
 
    Posibles soluciones:
-   * No usar un atmega32 sino un micro con más pines. El problema es que creo
-     (?) que no son DIP con lo que habría que soldarlos y prepararlos. Como
-     esto es nuevo, esta opción de momento la dejamos para el futuro.
+   * No usar un atmega32 sino un micro con más pines. Cotilleando Mouser he
+     encontrado el chip ATMEGA4809-PF, tiene 48 pins y es DIP (con lo que es
+     sencillo jugar con él).
 
    * En lugar de conectar el keyboard como una matriz de teclas, usar un
      keyboard analógico. Solo se necesitaría 1 pin (en lugar de 16 para el
@@ -95,5 +95,22 @@ modificando a mi gusto.
      `dev::Keypad`). Esta opción es fácil de ampliar y de dotar más
      funcionalidad al teclado.
 
+     La he implementado: es sencilla y fácil de ampliar. Serviría para hacer
+     teclados más elaborados.
+
+
+4. Problemas de memoria: me generó un stackoverflow la calculadora científica.
+   Es culpa de `yacc` que usaba mucha memoria por defecto. 
+
+   Posibles soluciones:
+   * Configurar `yacc` para que consuma menos memoria. Lo hice y empezó a
+     funcionar correctamente.
+
+   * Meter todos las cadenas de texto en memoria flash en lugar de en RAM.
+     Hice la prueba con las cadenas de abreviaturas. Al meter las abreviaturas
+     en memoria flash el programa total aumentó 40 bytes, pero el data paso de
+     970 a 912 bytes (ahorré unos 60 bytes de memoria RAM). ¿Merece la pena
+     hacerlo? 
+   
 
 

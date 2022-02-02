@@ -44,46 +44,57 @@
 #include "buffer.h"
 #include <avr_time.h>
 
+#include <avr_memory.h>
 
 // meto Interface dentro de calc, para poder definir Interface en dev.h
 namespace calc{
 
+template <typename LCD_t, typename Keyboard_t, 
+	 typename Code_t,
+	    size_t N, // tamaño del buffer
+	    typename Abb2str_t,
+	    uint8_t key_return0 = '\n',
+	    uint8_t debouncing_time0 = 200 /* ms */>
+struct Interface_cfg{
+    using Code              = Code_t;
+
+    using LCD               = LCD_t;
+    using Keyboard          = Keyboard_t;
+    using Buffer            = Linear_array<N>;
+    using Abb2str	    = Abb2str_t;
+
+    static constexpr uint8_t key_return      = key_return0;
+    static constexpr uint8_t debouncing_time = debouncing_time0;
+};
+
+
 // Keycode: 
-//	El usuario de la calculador aal pulsar una tecla busca:
+//	El usuario de la calculadora al pulsar una tecla busca:
 //	1. imprimir un número o caracter (+, -, x, /)
 //	2. ejecutar instrucción de edicion (mover el cursor, borrar
 //	   pantalla...)
 //	3. pulsa una abreviatura: tecla 'sin' imprime 'sin(', ...
 //	4. ejecutar instrucción en la calculadora (tecla mode)
 //	Al pulsar una tecla almacenamos lo que quiere hacer el usuario en un
-//	byte cuyo significado lo marca Keycode. Es similar al código ASCII
-//	pero hay un error de concepción en ASCII: se habla de caracteres de
-//	control y caracteres imprimibles lo cual es un absurdo. Por eso no los
-//	llamo caracteres sino códigos (sería mejor Bytecode? A fin de cuentas
-//	es lo que es, el Key es para recordar que es una codificación
-//	sugerida por al teclado).
+//	byte cuyo significado lo marca Code. Es similar al código ASCII.
+//	Sin embargo, hay un error de concepción en ASCII: se habla de caracteres 
+//	de control y caracteres imprimibles lo cual es absurdo. Por eso no 
+//	los llamo caracteres sino códigos.
 //
 //  abb2str: contiene un array con la expansión de las abreviaturas ("ANS",
-//  "sin", "cos", ...) De momento es un array vulgar y corriente en memoria,
-//  pero más adelante se podría guardar toda esta información en la EEPROM. En
-//  este caso en lugar de pasar const char* abb2str, se parametrizaría T
-//  abb2str, donde T podría ser 'const char*' u otro tipo donde el operador
-//  abb2str[i] accediera a la EEPROM.
-//
-template <typename LCD_t, typename Keyboard_t, 
-	 typename Keycode,
-	    size_t N, // tamaño del buffer
-	    uint8_t key_return0 = '\n',
-	    uint8_t debouncing_time0 = 200 /* ms */>
+//  "sin", "cos", ...). En principio está pensado para que este array de
+//  cadenas esté en memoria flash. 
+template < typename Cfg>
 class Interface{
 public:
-    using Code     = Keycode;
+    using Code     = Cfg::Code;
 
-    using LCD	   = LCD_t;
-    using Keyboard = Keyboard_t;
-    using Buffer   = Linear_array<N>;
+    using LCD	   = Cfg::LCD;
+    using Keyboard = Cfg::Keyboard;
+    using Buffer   = Cfg::Buffer;
+    using Abb2str = Cfg::Abb2str;
 
-    Interface(LCD& lcd, Keyboard& keyboard, const char* const* abb2str)
+    Interface(LCD& lcd, Keyboard& keyboard, Abb2str abb2str)
 	:lcd_{lcd}, keyboard_{keyboard}, 
 	 buffer_{nullptr}, abb2str_{abb2str}
     {}
@@ -99,7 +110,7 @@ private:
     Keyboard& keyboard_;
 
     Buffer* buffer_;
-    const char* const* abb2str_;
+    Abb2str abb2str_;
 
 // cursor: (???) Hacer clase Cursor?
     Buffer::iterator buffer_p_; // caracter que apunta el cursor dentro del buffer
@@ -125,7 +136,13 @@ private:
 
 // escritura
     void write(char c);
-    void write_abbrevation(char key) {write(abb2str_[key - Code::first_abb]);}
+    void write_abbrevation(char key) 
+    {
+	char tmp[abb2str_.max_size()]; 
+	avr::strlcpy(tmp, abb2str_[key - Code::first_abb], abb2str_.max_size());
+	write(tmp);
+    }
+
     void write(const char* str);
 
     void write_buffer(char c);
@@ -144,14 +161,15 @@ private:
     void cursor_on(uint8_t x, uint8_t y);
 
 // Data
-    static constexpr uint8_t key_return = key_return0;
+    static constexpr uint8_t key_return = Cfg::key_return;
     
 // Frecuencia (realmente periodo) de muestreo del teclado
-    static constexpr uint8_t Tclock_keyboard = debouncing_time0; // ms
+    static constexpr uint8_t Tclock_keyboard = Cfg::debouncing_time; // ms
 };
 
-template <typename L, typename K, typename KC, size_t N, uint8_t kr, uint8_t dt>
-void Interface<L, K, KC, N, kr, dt>::cursor_on(uint8_t x, uint8_t y)
+
+template <typename Cfg>
+void Interface<Cfg>::cursor_on(uint8_t x, uint8_t y)
 {
     lcd_.cursor_on();
     lcd_.cursor_pos(x, y);
@@ -159,8 +177,8 @@ void Interface<L, K, KC, N, kr, dt>::cursor_on(uint8_t x, uint8_t y)
 
 
 
-template <typename L, typename K, typename KC, size_t N, uint8_t kr, uint8_t dt>
-void Interface<L, K, KC, N, kr, dt>::redraw_lcd_from(
+template <typename Cfg>
+void Interface<Cfg>::redraw_lcd_from(
     typename Buffer::iterator p)
 {
     lcd_.cursor_pos(0,0);
@@ -177,8 +195,8 @@ void Interface<L, K, KC, N, kr, dt>::redraw_lcd_from(
     redraw_cursor();
 }
 
-template <typename L, typename K, typename KC, size_t N, uint8_t kr, uint8_t dt>
-void Interface<L, K, KC, N, kr, dt>::redraw_lcd()
+template <typename Cfg>
+void Interface<Cfg>::redraw_lcd()
 {
     if (lcd_p0_ > buffer_p_)
 	lcd_p0_ = buffer_p_;
@@ -191,16 +209,16 @@ void Interface<L, K, KC, N, kr, dt>::redraw_lcd()
     redraw_lcd_from(lcd_p0_);
 }
 
-template <typename L, typename K, typename KC, size_t N, uint8_t kr, uint8_t dt>
-void Interface<L, K, KC, N, kr, dt>::buffer_init(Buffer& buffer0)
+template <typename Cfg>
+void Interface<Cfg>::buffer_init(Buffer& buffer0)
 {
     buffer_ = &buffer0;
     buffer_init();
 }
 
 
-template <typename L, typename K, typename KC, size_t N, uint8_t kr, uint8_t dt>
-void Interface<L, K, KC, N, kr, dt>::buffer_init()
+template <typename Cfg>
+void Interface<Cfg>::buffer_init()
 {
     buffer_->clear();
 
@@ -208,16 +226,16 @@ void Interface<L, K, KC, N, kr, dt>::buffer_init()
     buffer_p_ = buffer_->begin();
 }
 
-template <typename L, typename K, typename KC, size_t N, uint8_t kr, uint8_t dt>
-void Interface<L, K, KC, N, kr, dt>::write(char c)
+template <typename Cfg>
+void Interface<Cfg>::write(char c)
 {
     if (buffer_p_ != buffer_->me())
 	write_buffer(c);
 }
 
 
-template <typename L, typename K, typename KC, size_t N, uint8_t kr, uint8_t dt>
-void Interface<L, K, KC, N, kr, dt>::write(const char* str)
+template <typename Cfg>
+void Interface<Cfg>::write(const char* str)
 {
     if (buffer_p_ != buffer_->me())
 	write_buffer(str);
@@ -225,8 +243,8 @@ void Interface<L, K, KC, N, kr, dt>::write(const char* str)
 
 
 // TODO: ¿mejorarla? De momento, por rapidez, reutilizo const char*
-template <typename L, typename K, typename KC, size_t N, uint8_t kr, uint8_t dt>
-void Interface<L, K, KC, N, kr, dt>::write_buffer(char c)
+template <typename Cfg>
+void Interface<Cfg>::write_buffer(char c)
 {
     char tmp[2];
     tmp[0] = c;
@@ -234,8 +252,8 @@ void Interface<L, K, KC, N, kr, dt>::write_buffer(char c)
     write_buffer(tmp);
 }
 
-template <typename L, typename K, typename KC, size_t N, uint8_t kr, uint8_t dt>
-void Interface<L, K, KC, N, kr, dt>::write_buffer(const char* str)
+template <typename Cfg>
+void Interface<Cfg>::write_buffer(const char* str)
 {
     if (buffer_p_ == buffer_->end()){
 	uint8_t n = push_back(*buffer_, str);
@@ -249,8 +267,8 @@ void Interface<L, K, KC, N, kr, dt>::write_buffer(const char* str)
 }
 
 
-template <typename L, typename K, typename KC, size_t N, uint8_t kr, uint8_t dt>
-void Interface<L, K, KC, N, kr, dt>::DEL_command()
+template <typename Cfg>
+void Interface<Cfg>::DEL_command()
 {
     if (buffer_p_ != buffer_->begin()){
 	if (buffer_p_ == buffer_->end())
@@ -261,29 +279,29 @@ void Interface<L, K, KC, N, kr, dt>::DEL_command()
 
 }
 
-template <typename L, typename K, typename KC, size_t N, uint8_t kr, uint8_t dt>
-void Interface<L, K, KC, N, kr, dt>::AC_command()
+template <typename Cfg>
+void Interface<Cfg>::AC_command()
 {
     buffer_init();
     lcd_.clear();
 }
 
-template <typename L, typename K, typename KC, size_t N, uint8_t kr, uint8_t dt>
-void Interface<L, K, KC, N, kr, dt>::to_the_right_command()
+template <typename Cfg>
+void Interface<Cfg>::to_the_right_command()
 {
     if (buffer_p_ != buffer_->end())
 	++buffer_p_;
 }
 
-template <typename L, typename K, typename KC, size_t N, uint8_t kr, uint8_t dt>
-void Interface<L, K, KC, N, kr, dt>::to_the_left_command()
+template <typename Cfg>
+void Interface<Cfg>::to_the_left_command()
 {
     if (buffer_p_ != buffer_->begin())
 	--buffer_p_;
 }
 
-template <typename L, typename K, typename KC, size_t N, uint8_t kr, uint8_t dt>
-void Interface<L, K, KC, N, kr, dt>::initial_screen()
+template <typename Cfg>
+void Interface<Cfg>::initial_screen()
 {
     lcd_.clear();
     lcd_.cursor_pos(lcd_.cols() - 1, 1);
@@ -293,16 +311,16 @@ void Interface<L, K, KC, N, kr, dt>::initial_screen()
 
 }
 
-template <typename L, typename K, typename KC, size_t N, uint8_t kr, uint8_t dt>
-void Interface<L, K, KC, N, kr, dt>::lcd_init()
+template <typename Cfg>
+void Interface<Cfg>::lcd_init()
 {
     lcd_.cursor_on();
     lcd_.cursor_pos(0,0);
 }
 
 
-template <typename L, typename K, typename KC, size_t N, uint8_t kr, uint8_t dt>
-void Interface<L, K, KC, N, kr, dt>::getline(Buffer& buffer0)
+template <typename Cfg>
+void Interface<Cfg>::getline(Buffer& buffer0)
 {
     // Esperamos a que se pulse una tecla ignorando el bouncing de '\n'
     // (última tecla que pulsamos)
@@ -320,8 +338,8 @@ void Interface<L, K, KC, N, kr, dt>::getline(Buffer& buffer0)
 }
 
 
-template <typename L, typename K, typename KC, size_t N, uint8_t kr, uint8_t dt>
-void Interface<L, K, KC, N, kr, dt>::buffer_end()
+template <typename Cfg>
+void Interface<Cfg>::buffer_end()
 {
     if (buffer_->size() + 2 > buffer_->max_size()){
 	buffer_->clear();
@@ -333,8 +351,8 @@ void Interface<L, K, KC, N, kr, dt>::buffer_end()
     }
 }
 
-template <typename L, typename K, typename KC, size_t N, uint8_t kr, uint8_t dt>
-void Interface<L, K, KC, N, kr, dt>::read()
+template <typename Cfg>
+void Interface<Cfg>::read()
 {
     while (1) {
 	uint8_t key = keyboard_.getchar();

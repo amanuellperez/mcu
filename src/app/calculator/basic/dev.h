@@ -33,14 +33,12 @@
  ****************************************************************************/
 #include <stdint.h>
 
-//#include <dev_LCD_HD44780.h>
 #include <dev_keypad.h>
 #include <dev_keyboard_code.h>
 
 #include "lcd.h"
 
 #include "../interface.h"
-
 
 // pins usados
 // ------------
@@ -118,7 +116,8 @@ constexpr uint8_t key_code[25] =
 
 using Keyboard = dev::Keyboard_keypad<Keypad>;
 
-using Interface = calc::Interface<LCD, Keyboard, Code, 20>;
+using Interface_cfg = calc::Interface_cfg<LCD, Keyboard, Code, 20, Abb2str>;
+using Interface = calc::Interface<Interface_cfg>;
 
 #endif
 
