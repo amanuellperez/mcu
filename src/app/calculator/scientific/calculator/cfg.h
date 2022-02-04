@@ -50,8 +50,8 @@ inline static constexpr std::array<Built_in_function, 8> builtins0 = {
     "sin", sin,
     "cos", cos,
     "tan", tan,
-    "log", Log,		// checks argument
-    "log10", Log10,	// checks argument
+    "ln", Log,		// checks argument
+    "log", Log10,	// checks argument
     "exp", Exp,		// checks argument
     "s", Sqrt,	// checks argument
     "int", integer,

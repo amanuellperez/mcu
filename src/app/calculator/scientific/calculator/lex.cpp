@@ -51,27 +51,27 @@ int yylex()
     }
 
 
-//    if (isalpha(c)){
-//// pop_front_alnumstring(buffer, string):
-//	
-//	Main::buffer.push_front(c);
-//	char str[100]; // TODO: parametrizar
-//	char* p = str;
-//	while (!Main::buffer.empty() and isalpha(Main::buffer[0])){
-//	    *p++ = Main::buffer.pop_front();
-//	}
-//	*p = '\0';
-//
-//	Symbol* s = Main::symbol[str];
-//	if (s == nullptr)
-//	    return UNDEF;
-//
-//	yylval.symbol = s;
-//
-//	return s->type;
-//    }
+    if (isalpha(c)){
+// pop_front_alnumstring(buffer, string):
+	
+	Main::buffer.push_front(c);
+	char str[100]; // TODO: parametrizar
+	char* p = str;
+	while (!Main::buffer.empty() and isalpha(Main::buffer[0])){
+	    *p++ = Main::buffer.pop_front();
+	}
+	*p = '\0';
 
-ctrace << "[" << (char) c << "]?\n";
+	Symbol* s = Main::symbol[str];
+	if (s == nullptr)
+	    return UNDEF;
+
+	yylval.symbol = s;
+
+	return s->type;
+    }
+
+    ctrace << "[" << (char) c << "]?\n";
     return c;
 
 }

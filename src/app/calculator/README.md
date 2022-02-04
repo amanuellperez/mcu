@@ -34,6 +34,8 @@ modificando a mi gusto.
 
 ## Vídeos
 [Calculadora básica](https://youtu.be/5mxkGtWMyUA)
+[Calculadora científica](https://youtu.be/_x9jF84GR6A)
+[Desmontandolas](https://youtu.be/Ngfcy57okbw)
 
 ## Problemas encontrados:
 
@@ -112,5 +114,44 @@ modificando a mi gusto.
      970 a 912 bytes (ahorré unos 60 bytes de memoria RAM). ¿Merece la pena
      hacerlo? 
    
+
+## TODO
+De momento paro el proyecto. Faltan varias cosas básicas:
+
+1. La tecla ANS no funciona. 
+
+2. No uso las constantes (pi, ...)
+
+3. El seno, coseno y tangente funciona con ángulos escritos solo en radianes.
+   Tendría que poder funcionar en radianes y grados.
+
+4. Aunque está implementado que se muestre la raíz cuadrada y otros símbolos,
+   la calculadora da syntax error si se intentan usar. Una forma de
+   implementarlo es que `Interfaz` traduzca estos símbolos a una cadena:
+   convierte el código de la raíz cuadrada en la cadena sqrt(...) y eso es lo
+   que procesa la calculadora. Esta solución sería genérica para cualquier
+   símbolo.
+
+5. No funcionan las teclas SHIFT/ALPHA. Basta con modificar el teclado.
+
+6. Conviene mejorar facilidad de manejo. Por ejemplo, `sen(30` da error porque
+   no se ha cerrado el paréntesis. Sin embargo, en muchas calculadoras el
+   último paréntesis se puede omitir.
+
+7. En la calculadora científica estoy duplicando symbols, ocupando más memoria
+   de la necesaria. Convendría no hacerlo.
+
+8. En la basic (y por tanto supongo también en la científica) no funciona si
+   se intenta calcular sqrt(25) + 3.
+
+9. Y, aunque ya lo he comentado, no funciona bien con floats. Hay que cambiar
+   de micro para implementar una real.
+
+## Conclusiones (de la primera versión, versión 0.0)
+Es un buen proyecto de aprendizaje. Se manejan floats; interesante hacer un
+teclado analógico (que no me funcionó), otro conectando 2 avrs vía SPI; se
+maneja yacc (dando un stackoverflow); manejo por primera vez la memoria flash;
+y supongo que alguna cosa más.
+
 
 
