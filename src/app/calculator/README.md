@@ -33,9 +33,9 @@ modificando a mi gusto.
 
 
 ## Vídeos
-[Calculadora básica](https://youtu.be/5mxkGtWMyUA)
-[Calculadora científica](https://youtu.be/_x9jF84GR6A)
-[Desmontandolas](https://youtu.be/Ngfcy57okbw)
+* [Calculadora básica](https://youtu.be/5mxkGtWMyUA)
+* [Calculadora científica](https://youtu.be/_x9jF84GR6A)
+* [Desmontandolas](https://youtu.be/Ngfcy57okbw)
 
 ## Problemas encontrados:
 
