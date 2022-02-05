@@ -21,6 +21,7 @@
 #ifndef __INSTCODES_H__
 #define __INSTCODES_H__
 
+#include <avr_memory.h>
 
 struct Instructions_code
 {

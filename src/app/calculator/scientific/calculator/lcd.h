@@ -69,7 +69,7 @@ void LCD_calculator<P>::new_glyph(const char glyph[8])
 template <typename P>
 void LCD_calculator<P>::save_new_glyphs()
 {
-    using namespace dev::character_glyphs_basic;
+    using namespace dev::character_glyphs8_basic;
 
     LCD::set_cgram_address(0x00);
     new_glyph(exponent2); // mismo orden que en keycodes.h!!!

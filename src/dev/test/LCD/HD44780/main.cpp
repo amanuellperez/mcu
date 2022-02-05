@@ -248,7 +248,7 @@ void show_glyphs(LCD& lcd,
 
 void test_cgram4()
 {
-    using namespace dev::character_glyphs_basic;
+    using namespace dev::character_glyphs8_basic;
 
     LCD lcd;
     show_glyphs(lcd,
@@ -300,12 +300,50 @@ void test_cgram4()
 }
 
 
+void test_glyphs()
+{
+    using namespace dev::character_glyphs8_basic;
+
+    LCD lcd;
+
+    dev::new_glyph8(lcd, 0, bell);
+    dev::new_glyph8(lcd, 1, arrow_up);
+    dev::new_glyph8(lcd, 2, arrow_down);
+    dev::new_glyph8(lcd, 3, man);
+    dev::new_glyph8(lcd, 4, skull);
+    dev::new_glyph8(lcd, 5, speaker_right);
+    dev::new_glyph8(lcd, 6, plug);
+    dev::new_glyph8(lcd, 7, musical_note);
+
+    print(lcd, "First: ");
+    for (uint8_t i = 0; i < 8; ++i)
+	dev::print_glyph8(lcd, i);
+    wait_ms(2000);
+
+    dev::new_glyphs8(lcd, bell
+		, arrow_up
+		, arrow_down
+		, man
+		, skull
+		, speaker_right
+		, plug
+		, musical_note);
+
+    print(lcd, "Second: ");
+    for (uint8_t i = 0; i < 8; ++i)
+	dev::print_glyph8(lcd, i);
+
+
+    wait_ms(2000);
+}
+
 int main()
 {
     while(1){
 	test_static();
 	test_lcd4();
 	test_cgram4();
+	test_glyphs();
     }
 }
 

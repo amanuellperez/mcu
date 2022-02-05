@@ -291,7 +291,7 @@ void show_glyphs(LCD& lcd,
 
 void test_cgram4(LCD& lcd)
 {
-    using namespace dev::character_glyphs_basic;
+    using namespace dev::character_glyphs8_basic;
 
     show_glyphs(lcd,
                 bell,

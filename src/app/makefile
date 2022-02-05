@@ -1,4 +1,5 @@
-DIRS =  clocks 		\
+DIRS =  calculator	\
+		clocks 		\
 	   	blink		\
 		POV_toy		\
 		sensor		\

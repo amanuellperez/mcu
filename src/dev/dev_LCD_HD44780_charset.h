@@ -200,8 +200,13 @@ static constexpr char of(const char* str) noexcept
 /***************************************************************************
  *		ALGUNOS 'CARACTERES' QUE PUEDEN SER ÚTILES
  ***************************************************************************/
-namespace character_glyphs_basic{
-constexpr const char bell[8] = 
+// DUDA: ¿Podríamos hablar de Glyph en general, sin mencionar el LCD? 
+// Hay caracteres de 5 x 8 y también de 5 x 10. De momento para distinguir
+// entre los dos uso el nombre.
+using LCD_glyph8 = const char [8];
+
+namespace character_glyphs8_basic{
+constexpr LCD_glyph8 bell = 
 			  { 0b0000000,
 			    0b0000100,
 			    0b0001110,
@@ -211,7 +216,7 @@ constexpr const char bell[8] =
 			    0b0000100,
 			    0b0000000 };
 
-constexpr const char arrow_up[8] = 
+constexpr LCD_glyph8 arrow_up = 
 			  { 0b0000000,
 			    0b0000100,
 			    0b0001110,
@@ -222,7 +227,7 @@ constexpr const char arrow_up[8] =
 			    0b0000000 };
 
 
-constexpr const char arrow_down[8] = 
+constexpr LCD_glyph8 arrow_down = 
 			  { 0b0000000,
 			    0b0000100,
 			    0b0000100,
@@ -232,7 +237,7 @@ constexpr const char arrow_down[8] =
 			    0b0000100,
 			    0b0000000};
 
-constexpr const char heart_full[8] = 
+constexpr LCD_glyph8 heart_full = 
 			  { 0b0000000,
 			    0b0001010,
 			    0b0011111,
@@ -242,7 +247,7 @@ constexpr const char heart_full[8] =
 			    0b0000000,
 			    0b0000000};
 
-constexpr const char heart_empty[8] = 
+constexpr LCD_glyph8 heart_empty = 
 			  { 0b0000000,
 			    0b0001010,
 			    0b0010101,
@@ -253,7 +258,7 @@ constexpr const char heart_empty[8] =
 			    0b0000000};
 
 
-constexpr const char battery_empty[8] = 
+constexpr LCD_glyph8 battery_empty = 
 			  { 0b0001110,
 			    0b0011011,
 			    0b0010001,
@@ -263,7 +268,7 @@ constexpr const char battery_empty[8] =
 			    0b0010001,
 			    0b0011111 };
 
-constexpr const char battery_half[8] = 
+constexpr LCD_glyph8 battery_half = 
 			  { 0b0001110,
 			    0b0011011,
 			    0b0010001,
@@ -273,7 +278,7 @@ constexpr const char battery_half[8] =
 			    0b0011111,
 			    0b0011111 };
 
-constexpr const char battery_full[8] = 
+constexpr LCD_glyph8 battery_full = 
 			  { 0b0001110,
 			    0b0011111,
 			    0b0011111,
@@ -283,7 +288,7 @@ constexpr const char battery_full[8] =
 			    0b0011111,
 			    0b0011111 };
 
-constexpr const char musical_note[8] = 
+constexpr LCD_glyph8 musical_note = 
 			  { 0b0000000,
 			    0b0000011,
 			    0b0001101,
@@ -294,7 +299,7 @@ constexpr const char musical_note[8] =
 			    0b0000000 };
 
 
-constexpr const char padlock_close[8] = 
+constexpr LCD_glyph8 padlock_close = 
 			  { 0b0000000,
 			    0b0001110,
 			    0b0010001,
@@ -304,7 +309,7 @@ constexpr const char padlock_close[8] =
 			    0b0011011,
 			    0b0011111 };
 
-constexpr const char padlock_open[8] = 
+constexpr LCD_glyph8 padlock_open = 
 			  { 0b0000000,
 			    0b0001110,
 			    0b0010000,
@@ -314,7 +319,7 @@ constexpr const char padlock_open[8] =
 			    0b0011011,
 			    0b0011111 };
 
-constexpr const char man[8] = 
+constexpr LCD_glyph8 man = 
 			  { 0b0001110,
 			    0b0001110,
 			    0b0000100,
@@ -324,7 +329,7 @@ constexpr const char man[8] =
 			    0b0001010,
 			    0b0010001 };
 
-constexpr const char skull[8] = 
+constexpr LCD_glyph8 skull = 
 			  { 0b0000000,
 			    0b0001110,
 			    0b0010101,
@@ -335,7 +340,7 @@ constexpr const char skull[8] =
 			    0b0000000 };
 
 
-constexpr const char speaker_right[8] = 
+constexpr LCD_glyph8 speaker_right = 
 			  { 0b0000001,
 			    0b0000011,
 			    0b0001111,
@@ -346,7 +351,7 @@ constexpr const char speaker_right[8] =
 			    0b0000000 };
 
 
-constexpr const char plug[8] = 
+constexpr LCD_glyph8 plug = 
 			  { 0b0001010,
 			    0b0001010,
 			    0b0011111,
@@ -360,7 +365,7 @@ constexpr const char plug[8] =
 // Al principio lo llamé 'square', pero eso entra en conflicto con la
 // función square de C. Además, se pueden crear símbolos 3, 4, ... cuyos
 // nombres serían exponent3, exponent4, ... 
-constexpr const char exponent2[8] = 
+constexpr LCD_glyph8 exponent2 = 
 			  { 0b0000110,
 			    0b0001001,
 			    0b0000010,
@@ -371,7 +376,7 @@ constexpr const char exponent2[8] =
 			    0b0000000 };
 
 
-constexpr const char exponent3[8] = 
+constexpr LCD_glyph8 exponent3 = 
 			  { 0b0000110,
 			    0b0000001,
 			    0b0000010,
@@ -382,7 +387,7 @@ constexpr const char exponent3[8] =
 			    0b0000000 };
 
 
-constexpr const char cuberoot[8] = 
+constexpr LCD_glyph8 cuberoot = 
 			  { 0b0011011,
 			    0b0000110,
 			    0b0001010,
@@ -392,7 +397,7 @@ constexpr const char cuberoot[8] =
 			    0b0000110,
 			    0b0000010 };
 
-constexpr const char pacman[8] = 
+constexpr LCD_glyph8 pacman = 
 			  { 0b0000000,
 			    0b0001110,
 			    0b0011011,
@@ -402,7 +407,7 @@ constexpr const char pacman[8] =
 			    0b0011111,
 			    0b0001110 };
 
-constexpr const char pacman_phantom[8] = 
+constexpr LCD_glyph8 pacman_phantom = 
 			  { 0b0000000,
 			    0b0001110,
 			    0b0011111,
@@ -412,7 +417,66 @@ constexpr const char pacman_phantom[8] =
 			    0b0011111,
 			    0b0010101 };
 
+
+
 }// namespace
+
+
+// Busco generalidad, que el código funcione con cualquier tipo de LCD. Por
+// eso uso templates.
+// Escribe el glyph en la posición i.
+// Paso i como segundo parámetro para que quede bien tabulado todo al llamar a
+// esta función varias veces. Mirar test. (en general, esta función no debería
+// de llamarse nunca, sino la equivalente new_glyphs)
+template <typename LCD>
+void new_glyph8(LCD& lcd, uint8_t i, LCD_glyph8 glyph)
+{
+    lcd.set_cgram_address(i*8);
+
+    for (uint8_t j  = 0; j < 8; ++j)
+	lcd.write_data_to_CG_or_DDRAM(glyph[j]);
+
+    lcd.set_ddram_address(0x00); // ¿dejar el cursor donde estaba?
+}
+
+template <typename LCD>
+void __new_glyph8(LCD& lcd, LCD_glyph8 glyph)
+{
+    for (uint8_t j  = 0; j < 8; ++j)
+	lcd.write_data_to_CG_or_DDRAM(glyph[j]);
+}
+
+template <typename LCD>
+void new_glyphs8(LCD& lcd,
+	LCD_glyph8 g1, 
+	LCD_glyph8 g2, 
+	LCD_glyph8 g3, 
+	LCD_glyph8 g4, 
+	LCD_glyph8 g5, 
+	LCD_glyph8 g6, 
+	LCD_glyph8 g7, 
+	LCD_glyph8 g8)
+{
+    lcd.set_cgram_address(0x00);
+    __new_glyph8(lcd, g1);
+    __new_glyph8(lcd, g2);
+    __new_glyph8(lcd, g3);
+    __new_glyph8(lcd, g4);
+    __new_glyph8(lcd, g5);
+    __new_glyph8(lcd, g6);
+    __new_glyph8(lcd, g7);
+    __new_glyph8(lcd, g8);
+    lcd.set_ddram_address(0x00);
+}
+
+
+template <typename LCD>
+inline void print_glyph8(LCD& lcd, char i)
+{
+    lcd.write_data_to_CG_or_DDRAM(i);
+}
+
+
 }// namespace
 
 
