@@ -22,8 +22,12 @@
 #ifndef __DEV_LCD_HD4780_H__
 #define __DEV_LCD_HD4780_H__
 
+// Cuando un usuario quiera usar este LCD basta con que incluya este archivo
+// de cabecera sin tener que recordar qué archivos necesita.
 #include "dev_LCD_HD44780_basic.h"
+#include "dev_LCD_HD44780_generic.h"
 #include "dev_LCD_HD44780_charset.h"
+#include "dev_LCD_screen.h"
 #include "dev_LCD_ostream.h"
 
 #endif

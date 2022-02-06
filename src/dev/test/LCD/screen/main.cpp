@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez 
+// Copyright (C) 2019-2022 A.Manuel L.Perez 
 //           mail: <amanuel.lperez@gmail.com>
 //           https://github.com/amanuellperez/mcu
 //
@@ -19,40 +19,46 @@
 
 
 #include "../../../dev_LCD_screen.h"
-#include "../../../dev_LCD_HD44780_basic.h"
+#include "../../../dev_LCD_HD44780_generic.h"
 #include <avr_time.h>
 #include <stddef.h>
 
 
-// 16 x 02 and 20 x 04
-using LCD_pins = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<4>,
+// Conexiones
+using LCD_pins_1602 = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<4>,
 				       dev::LCD_HD44780_RW<5>,
 				       dev::LCD_HD44780_E<6>,
 				       dev::LCD_HD44780_D4<11,12,13,14>
 				       >;
+using LCD_pins_2004 = LCD_pins_1602;
 
-using LCD_HD44780 = dev::LCD_HD44780<LCD_pins>;
 
 
-// 40 x 04
-using LCD_4004_pins = dev::LCD_HD44780_4004_pins4<dev::LCD_HD44780_RS<4>,
+using LCD_pins_4004 = dev::LCD_HD44780_4004_pins4<dev::LCD_HD44780_RS<4>,
 				       dev::LCD_HD44780_RW<5>,
 				       dev::LCD_HD44780_4004_E<6, 10>,
 				       dev::LCD_HD44780_D4<11,12,13,14>
 				       >;
 
-using LCD_HD44780_4004 = dev::LCD_HD44780_4004<LCD_4004_pins>;
+// Dispositivos reales conectados
+using LCD_1602 = dev::LCD_HD44780_1602<LCD_pins_1602>;
+using LCD_2004 = dev::LCD_HD44780_2004<LCD_pins_2004>;
+using LCD_4004 = dev::LCD_HD44780_4004<LCD_pins_4004>;
 
+// Generic devices
+using Generic_LCD_1602 = dev::Generic_LCD<LCD_1602>;
+using Generic_LCD_2004 = dev::Generic_LCD<LCD_2004>;
+using Generic_LCD_4004 = dev::Generic_LCD<LCD_4004>;
 
-// Tipos de LCD screen probados
-using LCD_HD44780_1602_screen = dev::LCD_screen_1602<LCD_HD44780>;
-using LCD_HD44780_2004_screen = dev::LCD_screen_2004<LCD_HD44780>;
-using LCD_HD44780_4004_screen = dev::LCD_screen_4004<LCD_HD44780_4004>;
+// Screens
+using Screen_1602 = dev::LCD_screen_1602<Generic_LCD_1602>;
+using Screen_2004 = dev::LCD_screen_2004<Generic_LCD_2004>;
+using Screen_4004 = dev::LCD_screen_4004<Generic_LCD_4004>;
 
 // Choose LCD to test
-using LCD = LCD_HD44780_1602_screen;
-//using LCD = LCD_HD44780_2004_screen;
-//using LCD = LCD_HD44780_4004_screen;
+//using LCD = Screen_1602;
+using LCD = Screen_2004;
+//using LCD = Screen_4004;
 
 
 // repeat print

@@ -333,6 +333,8 @@ void test_glyphs()
     for (uint8_t i = 0; i < 8; ++i)
 	dev::print_glyph8(lcd, i);
 
+    print(lcd, " end");
+
 
     wait_ms(2000);
 }
@@ -340,9 +342,9 @@ void test_glyphs()
 int main()
 {
     while(1){
-	test_static();
-	test_lcd4();
-	test_cgram4();
+//	test_static();
+//	test_lcd4();
+//	test_cgram4();
 	test_glyphs();
     }
 }

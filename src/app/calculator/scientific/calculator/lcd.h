@@ -28,8 +28,11 @@
 
 using Code      = Sci_code;
 
+// TODO: esto lo escribí antes de mejorar la gestión de los glyphs de los
+// LCDs. Reestructurarlo (algo parecido a lo hecho en la calculadora basic).
 template <typename LCD_pins>
-class LCD_calculator : public dev::LCD_ostream_1602<dev::LCD_HD44780<LCD_pins>>
+class LCD_calculator : 
+    public dev::LCD_ostream_1602<dev::Generic_LCD<dev::LCD_HD44780<LCD_pins>>>
 {
 public:
     void init();
@@ -43,7 +46,8 @@ private:
     using symbol = dev::HD44780_charset_A00;
     void print_lcd_symbol(char c);
 
-    using Parent  = dev::LCD_ostream_1602<dev::LCD_HD44780<LCD_pins>>;
+    using Parent  = 
+	dev::LCD_ostream_1602<dev::Generic_LCD<dev::LCD_HD44780<LCD_pins>>>;
     using LCD = dev::LCD_HD44780<LCD_pins>;
 };
 

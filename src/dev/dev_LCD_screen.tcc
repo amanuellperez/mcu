@@ -39,29 +39,29 @@ namespace dev{
  *			    LCD_screen
  ***************************************************************************/
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
-uint8_t LCD_screen<num_cols, num_rows, LCD>::read_byte(uint8_t x, uint8_t y)
+uint8_t LCD_screen<num_cols, num_rows, LCD>::read(uint8_t x, uint8_t y)
 {
     cursor_pos(x, y);
-    uint8_t c = lcd_.read_data_from_CG_or_DDRAM();
+    uint8_t c = lcd_.read();
     cursor_pos(x_, y_);
     return c;
 }
 
 // OJO: no mantiene la posición del cursor
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
-void LCD_screen<num_cols, num_rows, LCD>::copia_esta_fila_en_la_fila_anterior(uint8_t i)
+void LCD_screen<num_cols, num_rows, LCD>::copy_this_row_in_row_above(uint8_t i)
 {
     cursor_pos(0, i);
     
     uint8_t buf[cols()];
     for (uint8_t j = 0; j < cols(); ++j)
-	buf[j] = lcd_.read_data_from_CG_or_DDRAM();
+	buf[j] = lcd_.read();
 
     cursor_pos(0, i-1);
     for (uint8_t j = 0; j < cols(); ++j)
-	lcd_.write_data_to_CG_or_DDRAM(buf[j]);
-
+	lcd_.print(buf[j]);
 }
+
 
 
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
@@ -69,7 +69,7 @@ void LCD_screen<num_cols, num_rows, LCD>::clear_row(uint8_t i)
 {
     cursor_pos(0, i);
     for (uint8_t j = 0; j < cols(); ++j)
-	lcd_.write_data_to_CG_or_DDRAM(' ');
+	lcd_.print(' ');
 }
 
 
@@ -79,7 +79,7 @@ void LCD_screen<num_cols, num_rows, LCD>::scroll_text_up()
     uint8_t x0 = x_, y0 = y_;
 
     for (uint8_t i = 1; i < rows(); ++i)
-	copia_esta_fila_en_la_fila_anterior(i);
+	copy_this_row_in_row_above(i);
 
     clear_row(rows() - 1);
 
@@ -103,7 +103,7 @@ void LCD_screen<num_cols, num_rows, LCD>::cursor_move()
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
 void LCD_screen<num_cols, num_rows, LCD>::print_imprimible_char(char c)
 {
-    lcd_.write_data_to_CG_or_DDRAM(c);
+    lcd_.print(c);
     cursor_move();
 }
 
@@ -187,9 +187,8 @@ LCD_screen<num_cols, num_rows, LCD>::print_line_nowrap(const char* p,
     uint8_t x_end = x_ + std::min<uint8_t>(num_max_char, cols() - x_);
 
     for(;*p != '\0' and *p != '\n' and x_ < x_end; ++p){
-	lcd_.write_data_to_CG_or_DDRAM(*p);
+	lcd_.print(*p);
 	++x_;
-//	cursor_pos(x_, y_); // write_data_to_CG_or_DDRAM actualiza el cursor.
     }
 
     if (x_ == x_end)
@@ -214,14 +213,14 @@ void LCD_screen<num_cols, num_rows, LCD>::print_align_to_the_right(
     std::reverse_iterator re{p0};
 
     while (x_ > 0 and r != re){
-	lcd_.write_data_to_CG_or_DDRAM(*r);
+	lcd_.print(*r);
 	--x_;
 	cursor_pos(x_, y_);
 	++r;
     }
 
     if (x_ == 0 and r != re)
-	lcd_.write_data_to_CG_or_DDRAM(*r);
+	lcd_.print(*r);
 
 }
 
@@ -287,7 +286,7 @@ void LCD_screen<num_cols, num_rows, LCD>::fill_line(uint8_t n, char c)
     n = x_ + std::min<uint8_t>(n, cols() - x_);
 
     for(;x_ < n; ++x_)
-	lcd_.write_data_to_CG_or_DDRAM(c);
+	lcd_.print(c);
 }
 
 

@@ -52,11 +52,17 @@ using Keyrow_codes  = dev::Keyrow_codes<OK_KEY, UP_KEY, DOWN_KEY>;
 // ---------------------------
 using Keyrow = dev::Basic_keyrow<Keyrow_pins, Keyrow_codes>;
 
-using LCD_HD44780 = dev::LCD_HD44780<LCD_pins>;
+// Dispositivos reales conectados
+using LCD_1602 = dev::LCD_HD44780_1602<LCD_pins>;
+using LCD_2004 = dev::LCD_HD44780_2004<LCD_pins>;
 
-// Tipos de LCDs probados
-using LCD_ostream_1602 = dev::LCD_ostream_1602<LCD_HD44780>;
-using LCD_ostream_2004 = dev::LCD_ostream_2004<LCD_HD44780>;
+// Generic devices
+using Generic_LCD_1602 = dev::Generic_LCD<LCD_1602>;
+using Generic_LCD_2004 = dev::Generic_LCD<LCD_2004>;
+
+// ostreams
+using LCD_ostream_1602 = dev::LCD_ostream_1602<Generic_LCD_1602>;
+using LCD_ostream_2004 = dev::LCD_ostream_2004<Generic_LCD_2004>;
 
 // Choose LCD to test
 using LCD = LCD_ostream_1602;

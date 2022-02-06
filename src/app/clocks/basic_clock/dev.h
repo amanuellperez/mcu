@@ -75,15 +75,22 @@ using LCD_pins = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<LCD_RS_pin>,
 							    LCD_D6_pin, 
 							    LCD_D7_pin>>;
 
-using LCD_ostream = dev::LCD_ostream_1602<dev::LCD_HD44780<LCD_pins>>;
+// LCD
+// ---
+using LCD_1602         = dev::LCD_HD44780_1602<LCD_pins>;
+using Generic_LCD_1602 = dev::Generic_LCD<LCD_1602>;
+using LCD_ostream      = dev::LCD_ostream_1602<Generic_LCD_1602>;
 
 
 // keyrow
+// ------
 using namespace dev::Key_codes; // OK_KEY, UP_KEY, DOWN_KEY
 using Keyrow_codes = dev::Keyrow_codes<OK_KEY, UP_KEY, DOWN_KEY>;
 using Keyrow       = dev::Basic_keyrow<Keyrow_pins, Keyrow_codes>;
 
+
 // system_clock
+// ------------
 using System_clock = dev::System_clock<avr::Timer1>;
 constexpr static uint16_t system_clock_timer_period_in_us = 64u;
 

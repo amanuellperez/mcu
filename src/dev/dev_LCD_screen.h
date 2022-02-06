@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021 A.Manuel L.Perez 
+// Copyright (C) 2019-2022 A.Manuel L.Perez 
 //           mail: <amanuel.lperez@gmail.com>
 //           https://github.com/amanuellperez/mcu
 //
@@ -26,7 +26,7 @@
  *  - DESCRIPCION: Interfaz al display HD44780
  *  
  *  - HISTORIA:
- *    A. Manuel López
+ *    A. Manuel L.Perez
  *	11/07/2017 v0.0
  *	29/07/2019 v0.1: Creo traductor.
  *	26/09/2019 v0.2: LCD_ostream y cambios menores.
@@ -35,10 +35,11 @@
  *	09/01/2021 v0.5: Reestructurado. Lo desvinculo del HD44780.
  *		         Uso Generic_LCD.
  *	30/07/2021       print_align_to_the_right
+ *	06/02/2022 v0.6: Basado en el concept 'Generic_LCD'
  *
  ****************************************************************************/
 #include <stdint.h>
-#include "dev_LCD_HD44780_generic.h" // TODO: dejar solo generic
+
 
 namespace dev{
 
@@ -77,7 +78,6 @@ inline constexpr bool operator!=(_LCD_screen_flags a, int b)
 {return !(a == b);}
 
 
-
 /*!
  *  \brief  Concebimos el LCD como una terminal normal y corriente.
  *
@@ -103,8 +103,16 @@ inline constexpr bool operator!=(_LCD_screen_flags a, int b)
  *  using LCD_HD44780 = dev::LCD_HD44780<LCD_pins>;
  *  using LCD_HD44780_1602_screen = dev::LCD_HD44780_1602_screen<LCD_HD44780>;
  *  using LCD_HD44780_2004_screen = dev::LCD_HD44780_2004_screen<LCD_HD44780>;
+ *
+ *  Notas
+ *  -----
+ *  (1) En principio da la impresión de que num_cols y num_rows es información 
+ *      redundante, ya que esa información tenía que estar en
+ *      Generic_LCD_type. Sin embargo, curiosamente los traductores de los
+ *      HD44780 no necesitan (num_cols, num_rows) para nada, no teniendo dicha
+ *      información. Por eso es necesario pasarla aquí como parámetro.
  */
-template <uint8_t num_cols, uint8_t num_rows, typename LCD_type>
+template <uint8_t num_cols, uint8_t num_rows, typename Generic_LCD_type>
 class LCD_screen{
 public:
 // Init
@@ -129,6 +137,7 @@ public:
     // Esta es la función básica de impresión. Todas las demás funciones
     // se basan en esta.
     bool print(char c);
+
 
     /// Imprime una cadena.
     /// Por defecto, wrap() == true, con lo que si llega al final de una línea
@@ -228,13 +237,9 @@ public:
 
 
 
-// ACCESO A LA RAM DEL DISPLAY
-    /// Lee un byte de la memoria RAM del dispositivo. En principio, 
-    /// la memoria RAM de este dispositivo la voy a concebir como 4 filas de
-    /// 20 bytes cada una (tiene 80 bytes) de forma que coincida con las filas
-    /// del display 4 x 20.
-    uint8_t read_byte(uint8_t x, uint8_t y);
-
+// ACCESO A LA INFORMACIÓN MOSTRADA EN EL DISPLAY
+    /// Devuelve el caracter mostrado en la posición (x, y)
+    uint8_t read(uint8_t x, uint8_t y); 
 
 
 // CONFIGURACIÓN DEL LCD
@@ -265,7 +270,7 @@ public:
     
 private:
 // Hardware al que está conectado
-    Generic_LCD<LCD_type> lcd_;
+    Generic_LCD_type lcd_;
 
 // Data
     // Invariante: el cursor siempre está en una posición válida de escritura.
@@ -311,7 +316,7 @@ private:
     
     void cursor_move();
     void scroll_text_up();
-    void copia_esta_fila_en_la_fila_anterior(uint8_t i);
+    void copy_this_row_in_row_above(uint8_t i);
     void print_return();
     void print_imprimible_char(char c);
 

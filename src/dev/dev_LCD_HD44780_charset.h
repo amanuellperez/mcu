@@ -202,7 +202,9 @@ static constexpr char of(const char* str) noexcept
  ***************************************************************************/
 // DUDA: ¿Podríamos hablar de Glyph en general, sin mencionar el LCD? 
 // Hay caracteres de 5 x 8 y también de 5 x 10. De momento para distinguir
-// entre los dos uso el nombre.
+// entre los dos uso el nombre. (¿por qué no usar Glyph<8>? no tengo claro
+// como interaccionan las templates y PROGMEM y la idea es meter todo esto  en
+// PROGMEM en el futuro)
 using LCD_glyph8 = const char [8];
 
 namespace character_glyphs8_basic{

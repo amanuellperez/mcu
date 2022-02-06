@@ -18,7 +18,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-#include "../../../dev_LCD_HD44780.h"
+#include "../../../dev_LCD_HD44780_generic.h"
 #include "../../../dev_LCD_ostream.h"
 #include <avr_time.h>
 #include <stddef.h>
@@ -26,34 +26,43 @@
 #include <atd_double.h>
 
 
-// 16 x 02 and 20 x 04
-using LCD_pins = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<4>,
+// pins
+using LCD_pins_1602 = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<4>,
 				       dev::LCD_HD44780_RW<5>,
 				       dev::LCD_HD44780_E<6>,
 				       dev::LCD_HD44780_D4<11,12,13,14>
 				       >;
 
-using LCD_HD44780 = dev::LCD_HD44780<LCD_pins>;
+using LCD_pins_2004 = LCD_pins_1602;
 
 
-// 40 x 04
-using LCD_4004_pins = dev::LCD_HD44780_4004_pins4<dev::LCD_HD44780_RS<4>,
+using LCD_pins_4004 = dev::LCD_HD44780_4004_pins4<dev::LCD_HD44780_RS<4>,
 				       dev::LCD_HD44780_RW<5>,
 				       dev::LCD_HD44780_4004_E<6, 10>,
 				       dev::LCD_HD44780_D4<11,12,13,14>
 				       >;
 
-using LCD_HD44780_4004 = dev::LCD_HD44780_4004<LCD_4004_pins>;
+
+// Dispositivos reales conectados
+using LCD_1602 = dev::LCD_HD44780_1602<LCD_pins_1602>;
+using LCD_2004 = dev::LCD_HD44780_2004<LCD_pins_2004>;
+using LCD_4004 = dev::LCD_HD44780_4004<LCD_pins_4004>;
+
+// Generic devices
+using Generic_LCD_1602 = dev::Generic_LCD<LCD_1602>;
+using Generic_LCD_2004 = dev::Generic_LCD<LCD_2004>;
+using Generic_LCD_4004 = dev::Generic_LCD<LCD_4004>;
+
 
 // ostreams
-using LCD_HD44780_ostream_1602 = dev::LCD_ostream_1602<LCD_HD44780>;
-using LCD_HD44780_ostream_2004 = dev::LCD_ostream_2004<LCD_HD44780>;
-using LCD_HD44780_ostream_4004 = dev::LCD_ostream_4004<LCD_HD44780_4004>;
+using LCD_ostream_1602 = dev::LCD_ostream_1602<Generic_LCD_1602>;
+using LCD_ostream_2004 = dev::LCD_ostream_2004<Generic_LCD_2004>;
+using LCD_ostream_4004 = dev::LCD_ostream_4004<Generic_LCD_4004>;
 
 
-using LCD_ostream = LCD_HD44780_ostream_1602;
-//using LCD_ostream = LCD_HD44780_ostream_2004;
-//using LCD_ostream = LCD_HD44780_ostream_4004;
+//using LCD_ostream = LCD_ostream_1602;
+using LCD_ostream = LCD_ostream_2004;
+//using LCD_ostream = LCD_ostream_4004;
 
 void test_lcd_ostream4()
 {

@@ -40,6 +40,10 @@
  *  - HISTORIA:
  *    A.Manuel L.Perez
  *    09/01/2021 v0.0
+ *    06/02/2022 v0.1: Generalizo creando el concept de Generic_LCD. La 
+ *                     idea es no tener que volver a usar un LCD concreto a
+ *                     partir de ahora y poder usar siempre Generic_LCD
+ *                     (o mejor LCD_screen/ostream).
  *
  ****************************************************************************/
 #include "dev_LCD_generic.h"
@@ -156,17 +160,18 @@ public:
     static void cursor_pos(uint8_t x, uint8_t y);
 
 
-    /// Write data to CG or DDRAM.
-    /// To write into CG or DDRAM is determined by previous specification of
-    /// the CGRAM or DDRAM address setting.
-    // TODO: mejor llamarlo write(data)???? y otra para write_CGRAM(data)???
-    static void write_data_to_CG_or_DDRAM(char data)
-    {LCD::write_data_to_CG_or_DDRAM(data);}
+    /// Imprime el caracter c en el display.
+    static void print(char c)
+    {LCD::write_data_to_CG_or_DDRAM(c);}
 
-    /// Read data from CG or DDRAM.
-    /// Before entering this read instruction, either CGRAM or DDRAM address
-    /// set instruction must be executed.
-    static uint8_t read_data_from_CG_or_DDRAM()
+    /// Imprime el caracter extendido c en el display.
+    static void print_extended(char c) {print(c);}
+
+    /// Lee el caracter mostrado en el display.
+    // El modo normal de trabajo es leer/escribir en el display (la DDRAM).
+    // Por defecto dejaremos la DDRAM seleccionada. Por eso, el usuario no
+    // tiene que saber nada de esta selección. 
+    static uint8_t read()
     {return LCD::read_data_from_CG_or_DDRAM();}
 
 private:
@@ -324,17 +329,16 @@ public:
     /// Coloca el cursor en la posición (x,y), con  x = col; y = row.
     void cursor_pos(uint8_t x, uint8_t y);
 
-    /// Write data to CG or DDRAM.
-    /// To write into CG or DDRAM is determined by previous specification of
-    /// the CGRAM or DDRAM address setting.
-    // TODO: mejor llamarlo write(data)???? y otra para write_CGRAM(data)???
-    void write_data_to_CG_or_DDRAM(char data);
+    /// Imprime el caracter c en el display.
+    static void print(char c);
 
+    /// Imprime el caracter extendido c en el display.
+    static void print_extended(char c) {print(c);}
 
     /// Read data from CG or DDRAM.
     /// Before entering this read instruction, either CGRAM or DDRAM address
     /// set instruction must be executed.
-    uint8_t read_data_from_CG_or_DDRAM();
+    static uint8_t read();
 
 private:
 
@@ -514,7 +518,7 @@ void Generic_LCD<LCD_HD44780_4004<pin>>::cursor_no_blink()
 
 
 template <typename pin>
-void Generic_LCD<LCD_HD44780_4004<pin>>::write_data_to_CG_or_DDRAM(char data)
+void Generic_LCD<LCD_HD44780_4004<pin>>::print(char data)
 {
     if (E1_pin())
 	LCD::write_data_to_CG_or_DDRAM1(data);
@@ -524,7 +528,7 @@ void Generic_LCD<LCD_HD44780_4004<pin>>::write_data_to_CG_or_DDRAM(char data)
 
 
 template <typename pin>
-uint8_t Generic_LCD<LCD_HD44780_4004<pin>>::read_data_from_CG_or_DDRAM()
+uint8_t Generic_LCD<LCD_HD44780_4004<pin>>::read()
 {
     if (E1_pin())
 	return LCD::read_data_from_CG_or_DDRAM1();

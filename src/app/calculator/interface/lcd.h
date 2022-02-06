@@ -29,8 +29,8 @@
 
 using Code = Instructions_code;
 
-template <typename LCD_pins>
-class LCD_calculator : public dev::LCD_ostream_1602<dev::LCD_HD44780<LCD_pins>>
+template <typename Generic_LCD_t>
+class LCD_calculator : public dev::LCD_ostream_1602<Generic_LCD_t>
 {
 public:
     void init();
@@ -44,8 +44,8 @@ private:
     using symbol = dev::HD44780_charset_A00;
     void print_lcd_symbol(char c);
 
-    using Parent  = dev::LCD_ostream_1602<dev::LCD_HD44780<LCD_pins>>;
-    using LCD = dev::LCD_HD44780<LCD_pins>;
+    using Parent = dev::LCD_ostream_1602<Generic_LCD_t>;
+    //using LCD = dev::LCD_HD44780<LCD_pins>;
 };
 
 

@@ -32,7 +32,7 @@
  *    el futuro se quiere usar el interfaz de 8 bits.
  *
  *  - HISTORIA:
- *     A. Manuel López:
+ *     A. Manuel L.Perez
  *	    11/07/2017 v0.0
  *	    29/07/2019 v0.1: Creo traductor.
  *	    26/09/2019 v0.2: LCD_ostream y cambios menores.
@@ -40,6 +40,7 @@
  *	    06/01/2020 v0.4: Elimino DPin a favor de Pin.
  *	    07/01/2021       set_cgram_address
  *	    08/01/2021 v0.5: Reestructuro para poder usar LCD 40 x 04.
+ *	    06/02/2022       alias LCD_HD44780_1602 y LCD_HD44780_2004
  *
  ****************************************************************************/
 #include <avr_pin.h>
@@ -624,6 +625,14 @@ private:
 };
 
 
+// Una de las características fundamentales de los LCDs son sus dimensiones.
+// Al definir el hardware en un programa quiero que se pueda leer que estoy
+// usando un LCD de 16x02, de 20x04 ó de 40x04. Por eso defino estos alias.
+template <typename pin>
+using LCD_HD44780_1602 = LCD_HD44780<pin>;
+
+template <typename pin>
+using LCD_HD44780_2004 = LCD_HD44780<pin>;
 
 }// namespace
 
