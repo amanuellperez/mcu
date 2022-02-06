@@ -135,6 +135,19 @@ bool LCD_screen<num_cols, num_rows, LCD>::print(char c)
 
 
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
+bool LCD_screen<num_cols, num_rows, LCD>::print_extended(char c) 
+{
+    static_assert(sizeof(char) == sizeof(uint8_t)
+		 , "sizeof(char) != 1 byte!!!");
+
+    lcd_.print(c);
+    cursor_move();
+
+    return true;
+}
+
+
+template <uint8_t num_cols, uint8_t num_rows, typename LCD>
 void LCD_screen<num_cols, num_rows, LCD>::print(const char* c)
 {
     if (flag(wrap_bit))
@@ -302,7 +315,13 @@ void LCD_screen<num_cols, num_rows, LCD>::cursor_pos(uint8_t col, uint8_t row)
     y_ = row;
 }
 
-
+template <uint8_t num_cols, uint8_t num_rows, typename LCD>
+void LCD_screen<num_cols, num_rows, LCD>::new_extended_char(uint8_t c,
+                                                            const char glyph[8])
+{
+    lcd_.new_extended_char(c, glyph);
+    cursor_pos(x_, y_);
+}
 
 
 

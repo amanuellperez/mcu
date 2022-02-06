@@ -86,6 +86,10 @@ inline constexpr bool operator!=(_LCD_screen_flags a, int b)
  *  carro, mientras que si llegamos al final del LCD sube todo lo escrito
  *  hacia arriba.
  *
+ *  El LCD en el que se basa es un LCD genérico, con dos páginas de
+ *  caracteres: la normal, que trae por defecto, y la definida por el usuario,
+ *  que llamaré 'la extendida'. 
+ *
  *  Además suministra funciones de acceso aleatorio para escribir en cualquier
  *  posición.
  *
@@ -138,6 +142,12 @@ public:
     // se basan en esta.
     bool print(char c);
 
+    /// Imprime un caracter extendido, un caracter definido por el usuario.
+    /// Returns: true si imprime el caracter, false si no.
+    // La idea es concebir la página extendida, con los caracteres definidos
+    // por el usuario, como un array lineal: del 0-n. 'c' nos da el índice
+    // dentro de este array.
+    bool print_extended(char c);
 
     /// Imprime una cadena.
     /// Por defecto, wrap() == true, con lo que si llega al final de una línea
@@ -262,6 +272,11 @@ public:
 
     /// Hace que el cursor no parpadee.
     void cursor_no_blink()  {lcd_.cursor_no_blink();}
+
+
+// PÁGINA DE MEMORIA EXTENDIDA
+    /// Crea un nuevo caracter 'c' de 8 filas en la página de memoria extendida.
+    void new_extended_char(uint8_t c, const char glyph[8]);
 
 // DATOS DEL LCD
     constexpr static uint8_t rows() {return num_rows;}

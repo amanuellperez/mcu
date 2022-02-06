@@ -19,7 +19,7 @@
 
 
 #include "../../../dev_LCD_HD44780_basic.h"
-#include "../../../dev_LCD_HD44780_charset.h"
+#include "../../../dev_glyphs.h"
 #include <avr_time.h>
 #include <cstring>
 
@@ -32,6 +32,7 @@ using LCD_pins = dev::LCD_HD44780_4004_pins4<dev::LCD_HD44780_RS<4>,
 
 using LCD = dev::LCD_HD44780_4004<LCD_pins>;
 
+namespace gl = dev::glyphs_5x8;
 
 void print1(LCD& lcd, const char* c)
 {
@@ -291,29 +292,28 @@ void show_glyphs(LCD& lcd,
 
 void test_cgram4(LCD& lcd)
 {
-    using namespace dev::character_glyphs8_basic;
 
     show_glyphs(lcd,
-                bell,
-                arrow_up,
-                arrow_down,
-                man,
-                skull,
-                speaker_right,
-                plug,
-                musical_note);
+                gl::bell,
+                gl::arrow_up,
+                gl::arrow_down,
+                gl::man,
+                gl::skull,
+                gl::speaker_right,
+                gl::plug,
+                gl::musical_note);
 
     wait_ms(2000);
 
     show_glyphs(lcd,
-                heart_full,
-                heart_empty,
-                padlock_close,
-                padlock_open,
-                battery_empty,
-                battery_half,
-                battery_full,
-                musical_note);
+                gl::heart_full,
+                gl::heart_empty,
+                gl::padlock_close,
+                gl::padlock_open,
+                gl::battery_empty,
+                gl::battery_half,
+                gl::battery_full,
+                gl::musical_note);
 
     for (uint8_t i = 0; i < 10; ++i)
     {

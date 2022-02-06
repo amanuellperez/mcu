@@ -22,6 +22,8 @@
 #define __DEV_COLS_GLYPHS_H__
 
 // Glyphs de las letras escritos por columnas
+// Estos glyphs los he usado para las matrices de leds de 8 x 8. Funcionan
+// bien. TODO: Fusionarlos con dev_glyphs.h
 
 #include <avr/pgmspace.h>
 
@@ -165,22 +167,22 @@ private:
  *  Observar que es fácil modificar esta clase para que pueda imprimir también
  *  UTF-8.
  */
-class Glyphs{
-public:
-    // Devuelve el glyph del caracter cuyo código ASCII es c
-    static Glyph glyph(uint8_t c)
-    {
-	// le quitamos 32, ya que iniciamos la tabla ascii en el ascii 32
-	if (c > 31 and c < 128)
-	    return Glyph{static_cast<uint8_t>(c - 32)};
-
-	return Glyph{glyphs_letras_size - 1};
-    }
-
-    // Devuelve el glyph del caracter cuyo código ASCII es c
-    Glyph operator[](uint8_t c) const { return glyph(c); }
-    
-};
+//class Glyphs{
+//public:
+//    // Devuelve el glyph del caracter cuyo código ASCII es c
+//    static Glyph glyph(uint8_t c)
+//    {
+//	// le quitamos 32, ya que iniciamos la tabla ascii en el ascii 32
+//	if (c > 31 and c < 128)
+//	    return Glyph{static_cast<uint8_t>(c - 32)};
+//
+//	return Glyph{glyphs_letras_size - 1};
+//    }
+//
+//    // Devuelve el glyph del caracter cuyo código ASCII es c
+//    Glyph operator[](uint8_t c) const { return glyph(c); }
+//    
+//};
 
 }// namespace
 

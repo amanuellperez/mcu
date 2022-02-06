@@ -17,7 +17,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-
 #include "../../../dev_LCD_screen.h"
 #include "../../../dev_LCD_HD44780_generic.h"
 #include <avr_time.h>
@@ -61,6 +60,28 @@ using LCD = Screen_2004;
 //using LCD = Screen_4004;
 
 
+
+// glyph de una campana
+constexpr const char bell[8] = 
+			  { 0b0000000,
+			    0b0000100,
+			    0b0001110,
+			    0b0001110,
+			    0b0001110,
+			    0b0011111,
+			    0b0000100,
+			    0b0000000 };
+
+constexpr const char heart_full[8] = 
+			  { 0b0000000,
+			    0b0001010,
+			    0b0011111,
+			    0b0011111,
+			    0b0001110,
+			    0b0000100,
+			    0b0000000,
+			    0b0000000};
+
 // repeat print
 void rprint(LCD& lcd, const char* msg)
 {
@@ -78,6 +99,21 @@ const char long_msg[] = "En un lugar de La Mancha, de cuyo nombre"
                         "astillero, adarga antigua, rocin flaco y"
 			"galgo corredor. Don Quijote (Cervantes)";
 
+void test_extended_chars(LCD& lcd)
+{
+    lcd.new_extended_char(0, bell);
+    lcd.new_extended_char(3, heart_full);
+
+    lcd.clear();
+    lcd.print("A bell: [");
+    lcd.print_extended(0);
+    lcd.print("]\n");
+
+    lcd.print("A heart: [");
+    lcd.print_extended(3);
+    lcd.print("]\n");
+    wait_ms(1000);
+}
 
 void test_lcd_screen4_1602()
 {
@@ -326,6 +362,8 @@ void test_lcd_screen4_1602()
     lcd.print("cursor no blink");
     lcd.cursor_no_blink();
     wait_ms(1000);
+
+    test_extended_chars(lcd);
 }
 
 
@@ -527,6 +565,8 @@ void test_lcd_screen4_2004()
     lcd.print("cursor no blink");
     lcd.cursor_no_blink();
     wait_ms(1000);
+
+    test_extended_chars(lcd);
 }
 
 
@@ -738,7 +778,7 @@ void test_lcd_screen4_4004()
     lcd.cursor_no_blink();
     wait_ms(1000);
 
-
+    test_extended_chars(lcd);
 }
 
 void test_lcd_screen4_basico()

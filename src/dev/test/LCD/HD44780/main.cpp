@@ -19,7 +19,8 @@
 
 
 #include "../../../dev_LCD_HD44780_basic.h"
-#include "../../../dev_LCD_HD44780_charset.h"
+#include "../../../dev_glyphs.h"
+//#include "../../../dev_LCD_HD44780_charset.h"
 #include <avr_time.h>
 
 
@@ -32,6 +33,7 @@ using LCD_pins = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<4>,
 
 using LCD = dev::LCD_HD44780<LCD_pins>;
 
+namespace gl = dev::glyphs_5x8;
 
 void print(LCD& lcd, const char* c)
 {
@@ -248,41 +250,39 @@ void show_glyphs(LCD& lcd,
 
 void test_cgram4()
 {
-    using namespace dev::character_glyphs8_basic;
-
     LCD lcd;
     show_glyphs(lcd,
-                bell,
-                arrow_up,
-                arrow_down,
-                man,
-                skull,
-                speaker_right,
-                plug,
-                musical_note);
+                gl::bell,
+                gl::arrow_up,
+                gl::arrow_down,
+                gl::man,
+                gl::skull,
+                gl::speaker_right,
+                gl::plug,
+                gl::musical_note);
 
     wait_ms(2000);
 
     show_glyphs(lcd,
-                pacman,
-		pacman_phantom,
-                exponent2,
-                exponent3,
-                cuberoot,
-                speaker_right,
-                plug,
-                musical_note);
+                gl::pacman,
+		gl::pacman_phantom,
+                gl::exponent2,
+                gl::exponent3,
+                gl::cuberoot,
+                gl::speaker_right,
+                gl::plug,
+                gl::musical_note);
     wait_ms(2000);
 
     show_glyphs(lcd,
-                heart_full,
-                heart_empty,
-                padlock_close,
-                padlock_open,
-                battery_empty,
-                battery_half,
-                battery_full,
-                exponent2);
+                gl::heart_full,
+                gl::heart_empty,
+                gl::padlock_close,
+                gl::padlock_open,
+                gl::battery_empty,
+                gl::battery_half,
+                gl::battery_full,
+                gl::exponent2);
 
     for (uint8_t i = 0; i < 10; ++i)
     {
@@ -300,52 +300,12 @@ void test_cgram4()
 }
 
 
-void test_glyphs()
-{
-    using namespace dev::character_glyphs8_basic;
-
-    LCD lcd;
-
-    dev::new_glyph8(lcd, 0, bell);
-    dev::new_glyph8(lcd, 1, arrow_up);
-    dev::new_glyph8(lcd, 2, arrow_down);
-    dev::new_glyph8(lcd, 3, man);
-    dev::new_glyph8(lcd, 4, skull);
-    dev::new_glyph8(lcd, 5, speaker_right);
-    dev::new_glyph8(lcd, 6, plug);
-    dev::new_glyph8(lcd, 7, musical_note);
-
-    print(lcd, "First: ");
-    for (uint8_t i = 0; i < 8; ++i)
-	dev::print_glyph8(lcd, i);
-    wait_ms(2000);
-
-    dev::new_glyphs8(lcd, bell
-		, arrow_up
-		, arrow_down
-		, man
-		, skull
-		, speaker_right
-		, plug
-		, musical_note);
-
-    print(lcd, "Second: ");
-    for (uint8_t i = 0; i < 8; ++i)
-	dev::print_glyph8(lcd, i);
-
-    print(lcd, " end");
-
-
-    wait_ms(2000);
-}
-
 int main()
 {
     while(1){
-//	test_static();
-//	test_lcd4();
-//	test_cgram4();
-	test_glyphs();
+	test_static();
+	test_lcd4();
+	test_cgram4();
     }
 }
 

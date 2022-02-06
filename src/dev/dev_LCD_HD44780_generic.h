@@ -159,7 +159,6 @@ public:
     /// Coloca el cursor en la posición (x,y), con  x = col; y = row.
     static void cursor_pos(uint8_t x, uint8_t y);
 
-
     /// Imprime el caracter c en el display.
     static void print(char c)
     {LCD::write_data_to_CG_or_DDRAM(c);}
@@ -173,6 +172,11 @@ public:
     // tiene que saber nada de esta selección. 
     static uint8_t read()
     {return LCD::read_data_from_CG_or_DDRAM();}
+
+    /// Crea un nuevo caracter 'c' de 8 filas en la página de memoria extendida.
+    /// Deja el cursor en la posición inicial.
+    /// Precondition: 0 <= c < 7
+    static void new_extended_char(uint8_t c, const char glyph[8]);
 
 private:
     using Flags = _LCD_HD44780_generic_flags;
@@ -281,6 +285,18 @@ void Generic_LCD<LCD_HD44780<pin>>::cursor_blink(bool yes)
 			 flag(cursor_blink_bit));
 }
 
+template <typename pin>
+void Generic_LCD<LCD_HD44780<pin>>::new_extended_char(uint8_t c,
+                                                      const char glyph[8])
+{
+    LCD::set_cgram_address(c*8);
+
+    for (uint8_t j  = 0; j < 8; ++j)
+	LCD::write_data_to_CG_or_DDRAM(glyph[j]);
+
+    LCD::set_ddram_address(0x00); 
+}
+
 
 
 /*!
@@ -339,6 +355,11 @@ public:
     /// Before entering this read instruction, either CGRAM or DDRAM address
     /// set instruction must be executed.
     static uint8_t read();
+
+    /// Crea un nuevo caracter 'c' de 8 filas en la página de memoria extendida.
+    /// Deja el cursor en la posición inicial.
+    /// Precondition: 0 <= c < 7
+    static void new_extended_char(uint8_t c, const char glyph[8]);
 
 private:
 
@@ -558,6 +579,18 @@ void Generic_LCD<LCD_HD44780_4004<pin>>::display_control_1_or_2()
 			  flag(cursor_on_bit), flag(cursor_blink_bit));
 }
 
+
+template <typename pin>
+void Generic_LCD<LCD_HD44780_4004<pin>>::new_extended_char(uint8_t c,
+                                                      const char glyph[8])
+{
+    LCD::set_cgram_address(c*8);
+
+    for (uint8_t j  = 0; j < 8; ++j)
+	LCD::write_data_to_CG_or_DDRAM(glyph[j]);
+
+    LCD::set_ddram_address(0x00); 
+}
 
 
 }// namespace
