@@ -87,9 +87,12 @@ constexpr avr::Progmem<uint16_t> pu16 PROGMEM = 200;
 // constexpr Progmem<uint32_t> pu32 PROGMEM = 200;
 
 constexpr avr::Progmem_array<uint8_t, 4> parray_u8 PROGMEM = {10,20,30,40};
+constexpr avr::Progmem_string<5> pstr PROGMEM{"hola"};
+
 constexpr avr::Progmem_string_array<3> parray_str PROGMEM = {
     str1, str2, str3
     };
+
 
 template <size_t N>
 void f(const avr::Progmem_string_array<N>& str0)
@@ -132,6 +135,13 @@ void test_progmem()
 	    uart << "u8[" << i << "] = " << (int) parray_u8[i] << '\n';
     }
 	
+    {// Progmem_string
+
+	uart << "pstr = [";
+	for (size_t i = 0; i < pstr.size(); ++i)
+	    uart << pstr[i];
+	uart << "]\n";
+    }
     // f(parray_str); <-- no debería de compilar
 
     uart << "Escribiendo array de " << parray_str.size() << " cadenas:\n";

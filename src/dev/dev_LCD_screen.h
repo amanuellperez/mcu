@@ -39,7 +39,7 @@
  *
  ****************************************************************************/
 #include <stdint.h>
-
+#include <avr_memory.h>	// Progmem
 
 namespace dev{
 
@@ -277,8 +277,10 @@ public:
 // PÁGINA DE MEMORIA EXTENDIDA
     /// Crea un nuevo caracter 'c' de 8 filas en la página de memoria extendida.
     void new_extended_char(uint8_t c, const char glyph[8]);
+    void new_extended_char(uint8_t c,
+                           const avr::Progmem_array<uint8_t, 8>& glyph);
 
-// DATOS DEL LCD
+    // DATOS DEL LCD
     constexpr static uint8_t rows() {return num_rows;}
     constexpr static uint8_t cols() {return num_cols;}
 

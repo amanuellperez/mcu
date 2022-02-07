@@ -46,6 +46,8 @@
  *                     (o mejor LCD_screen/ostream).
  *
  ****************************************************************************/
+#include <avr_memory.h>	// Progmem
+
 #include "dev_LCD_generic.h"
 #include "dev_LCD_HD44780_basic.h" 
 
@@ -177,8 +179,10 @@ public:
     /// Deja el cursor en la posición inicial.
     /// Precondition: 0 <= c < 7
     static void new_extended_char(uint8_t c, const char glyph[8]);
+    static void new_extended_char(uint8_t c,
+                                  const avr::Progmem_array<uint8_t, 8>& glyph);
 
-private:
+  private:
     using Flags = _LCD_HD44780_generic_flags;
 
     // Flags que necesito para desacoplar las responsabilidades
@@ -297,6 +301,17 @@ void Generic_LCD<LCD_HD44780<pin>>::new_extended_char(uint8_t c,
     LCD::set_ddram_address(0x00); 
 }
 
+template <typename pin>
+void Generic_LCD<LCD_HD44780<pin>>::new_extended_char(uint8_t c,
+                                  const avr::Progmem_array<uint8_t, 8>& glyph)
+{
+    LCD::set_cgram_address(c*8);
+
+    for (uint8_t j  = 0; j < 8; ++j)
+	LCD::write_data_to_CG_or_DDRAM(glyph[j]);
+
+    LCD::set_ddram_address(0x00); 
+}
 
 
 /*!
@@ -360,6 +375,8 @@ public:
     /// Deja el cursor en la posición inicial.
     /// Precondition: 0 <= c < 7
     static void new_extended_char(uint8_t c, const char glyph[8]);
+    static void new_extended_char(uint8_t c,
+                                  const avr::Progmem_array<uint8_t, 8>& glyph);
 
 private:
 
@@ -592,6 +609,18 @@ void Generic_LCD<LCD_HD44780_4004<pin>>::new_extended_char(uint8_t c,
     LCD::set_ddram_address(0x00); 
 }
 
+
+template <typename pin>
+void Generic_LCD<LCD_HD44780_4004<pin>>::new_extended_char(uint8_t c,
+                                  const avr::Progmem_array<uint8_t, 8>& glyph)
+{
+    LCD::set_cgram_address(c*8);
+
+    for (uint8_t j  = 0; j < 8; ++j)
+	LCD::write_data_to_CG_or_DDRAM(glyph[j]);
+
+    LCD::set_ddram_address(0x00); 
+}
 
 }// namespace
 

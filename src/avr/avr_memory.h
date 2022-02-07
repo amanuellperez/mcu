@@ -127,6 +127,8 @@ private:
 };
 
 
+// Arrays
+// ------
 template <typename T, size_t N>
 class Progmem_array{
 public:
@@ -163,6 +165,30 @@ public:
 };
 
 
+template <size_t N>
+class Progmem_string{
+public:
+    using size_type = size_t;
+
+    constexpr static size_type size() {return N;}
+
+    char operator[](size_type i) const
+    {   return pgm_read_byte(&data[i]); }
+
+    template<typename T2>
+    Progmem_string& operator=(const T2&) = delete;
+
+    // Al principio iba a definir data como 'private'. Sin embargo, si se
+    // define como private da error al compilar (ya que no inicializa por
+    // defecto el data). Definiéndolo como const evito el problema de
+    // escritura. El usuario tiene que saber que no debe de leer directamente
+    // 'data'.
+    const char data[N];
+};
+
+
+// Arrays de cadenas
+// ----------------
 template <size_t N>
 struct Element_progmem_string_array;
 

@@ -35,6 +35,7 @@
  *    06/02/2022 Escrito
  *
  ****************************************************************************/
+#include <avr_memory.h>
 
 namespace dev{
 
@@ -43,7 +44,7 @@ namespace dev{
 // El nombre del namespace clasifica el tipo de glyphs. 
 // Siempre estarán alineados a la derecha.
 namespace glyphs_5x8{
-constexpr const char bell[8] = 
+constexpr const avr::Progmem_array<uint8_t, 8> bell PROGMEM = 
 			  { 0b0000000,
 			    0b0000100,
 			    0b0001110,
@@ -53,7 +54,7 @@ constexpr const char bell[8] =
 			    0b0000100,
 			    0b0000000 };
 
-constexpr const char arrow_up[8] = 
+constexpr const avr::Progmem_array<uint8_t, 8> arrow_up PROGMEM = 
 			  { 0b0000000,
 			    0b0000100,
 			    0b0001110,
@@ -64,7 +65,7 @@ constexpr const char arrow_up[8] =
 			    0b0000000 };
 
 
-constexpr const char arrow_down[8] = 
+constexpr const avr::Progmem_array<uint8_t, 8> arrow_down PROGMEM = 
 			  { 0b0000000,
 			    0b0000100,
 			    0b0000100,
@@ -74,7 +75,7 @@ constexpr const char arrow_down[8] =
 			    0b0000100,
 			    0b0000000};
 
-constexpr const char heart_full[8] = 
+constexpr const avr::Progmem_array<uint8_t, 8> heart_full PROGMEM = 
 			  { 0b0000000,
 			    0b0001010,
 			    0b0011111,
@@ -84,7 +85,7 @@ constexpr const char heart_full[8] =
 			    0b0000000,
 			    0b0000000};
 
-constexpr const char heart_empty[8] = 
+constexpr const avr::Progmem_array<uint8_t, 8> heart_empty PROGMEM = 
 			  { 0b0000000,
 			    0b0001010,
 			    0b0010101,
@@ -95,7 +96,7 @@ constexpr const char heart_empty[8] =
 			    0b0000000};
 
 
-constexpr const char battery_empty[8] = 
+constexpr const avr::Progmem_array<uint8_t, 8> battery_empty PROGMEM = 
 			  { 0b0001110,
 			    0b0011011,
 			    0b0010001,
@@ -105,7 +106,7 @@ constexpr const char battery_empty[8] =
 			    0b0010001,
 			    0b0011111 };
 
-constexpr const char battery_half[8] = 
+constexpr const avr::Progmem_array<uint8_t, 8> battery_half PROGMEM = 
 			  { 0b0001110,
 			    0b0011011,
 			    0b0010001,
@@ -115,7 +116,7 @@ constexpr const char battery_half[8] =
 			    0b0011111,
 			    0b0011111 };
 
-constexpr const char battery_full[8] = 
+constexpr const avr::Progmem_array<uint8_t, 8> battery_full PROGMEM = 
 			  { 0b0001110,
 			    0b0011111,
 			    0b0011111,
@@ -125,7 +126,7 @@ constexpr const char battery_full[8] =
 			    0b0011111,
 			    0b0011111 };
 
-constexpr const char musical_note[8] = 
+constexpr const avr::Progmem_array<uint8_t, 8> musical_note PROGMEM = 
 			  { 0b0000000,
 			    0b0000011,
 			    0b0001101,
@@ -136,7 +137,7 @@ constexpr const char musical_note[8] =
 			    0b0000000 };
 
 
-constexpr const char padlock_close[8] = 
+constexpr const avr::Progmem_array<uint8_t, 8> padlock_close PROGMEM = 
 			  { 0b0000000,
 			    0b0001110,
 			    0b0010001,
@@ -146,7 +147,7 @@ constexpr const char padlock_close[8] =
 			    0b0011011,
 			    0b0011111 };
 
-constexpr const char padlock_open[8] = 
+constexpr const avr::Progmem_array<uint8_t, 8> padlock_open PROGMEM = 
 			  { 0b0000000,
 			    0b0001110,
 			    0b0010000,
@@ -156,7 +157,7 @@ constexpr const char padlock_open[8] =
 			    0b0011011,
 			    0b0011111 };
 
-constexpr const char man[8] = 
+constexpr const avr::Progmem_array<uint8_t, 8> man PROGMEM = 
 			  { 0b0001110,
 			    0b0001110,
 			    0b0000100,
@@ -166,7 +167,7 @@ constexpr const char man[8] =
 			    0b0001010,
 			    0b0010001 };
 
-constexpr const char skull[8] = 
+constexpr const avr::Progmem_array<uint8_t, 8> skull PROGMEM = 
 			  { 0b0000000,
 			    0b0001110,
 			    0b0010101,
@@ -177,7 +178,7 @@ constexpr const char skull[8] =
 			    0b0000000 };
 
 
-constexpr const char speaker_right[8] = 
+constexpr const avr::Progmem_array<uint8_t, 8> speaker_right PROGMEM = 
 			  { 0b0000001,
 			    0b0000011,
 			    0b0001111,
@@ -188,7 +189,7 @@ constexpr const char speaker_right[8] =
 			    0b0000000 };
 
 
-constexpr const char plug[8] = 
+constexpr const avr::Progmem_array<uint8_t, 8> plug PROGMEM = 
 			  { 0b0001010,
 			    0b0001010,
 			    0b0011111,
@@ -202,7 +203,7 @@ constexpr const char plug[8] =
 // Al principio lo llamé 'square', pero eso entra en conflicto con la
 // función square de C. Además, se pueden crear símbolos 3, 4, ... cuyos
 // nombres serían exponent3, exponent4, ... 
-constexpr const char exponent2[8] = 
+constexpr const avr::Progmem_array<uint8_t, 8> exponent2 PROGMEM = 
 			  { 0b0000110,
 			    0b0001001,
 			    0b0000010,
@@ -213,7 +214,7 @@ constexpr const char exponent2[8] =
 			    0b0000000 };
 
 
-constexpr const char exponent3[8] = 
+constexpr const avr::Progmem_array<uint8_t, 8> exponent3 PROGMEM = 
 			  { 0b0000110,
 			    0b0000001,
 			    0b0000010,
@@ -224,7 +225,7 @@ constexpr const char exponent3[8] =
 			    0b0000000 };
 
 
-constexpr const char cuberoot[8] = 
+constexpr const avr::Progmem_array<uint8_t, 8> cuberoot PROGMEM = 
 			  { 0b0011011,
 			    0b0000110,
 			    0b0001010,
@@ -234,7 +235,7 @@ constexpr const char cuberoot[8] =
 			    0b0000110,
 			    0b0000010 };
 
-constexpr const char pacman[8] = 
+constexpr const avr::Progmem_array<uint8_t, 8> pacman PROGMEM = 
 			  { 0b0000000,
 			    0b0001110,
 			    0b0011011,
@@ -244,7 +245,7 @@ constexpr const char pacman[8] =
 			    0b0011111,
 			    0b0001110 };
 
-constexpr const char pacman_phantom[8] = 
+constexpr const avr::Progmem_array<uint8_t, 8> pacman_phantom PROGMEM = 
 			  { 0b0000000,
 			    0b0001110,
 			    0b0011111,

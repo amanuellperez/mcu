@@ -41,7 +41,7 @@ public:
     void print(char c);
 
 private:
-    void new_glyph(const char glyph[8]);
+    void new_glyph(const avr::Progmem_array<uint8_t, 8> glyph);
     void save_new_glyphs();
 
     void print_lcd_new_symbol(char c);
@@ -65,7 +65,7 @@ void LCD_calculator<P>::init()
 
 
 template <typename P>
-void LCD_calculator<P>::new_glyph(const char glyph[8])
+void LCD_calculator<P>::new_glyph(const avr::Progmem_array<uint8_t, 8> glyph)
 {
     for (uint8_t i  = 0; i < 8; ++i)
 	LCD::write_data_to_CG_or_DDRAM(glyph[i]);

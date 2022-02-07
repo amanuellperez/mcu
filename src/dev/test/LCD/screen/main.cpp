@@ -82,6 +82,34 @@ constexpr const char heart_full[8] =
 			    0b0000000,
 			    0b0000000};
 
+// Probar a cambiar la definición y ver cómo varia el tamaño del programa.
+// Curiosamente, al usar PROGMEM aumenta el tamaño del programa. Es culpa
+// (creo, y de acuerdo con el manual de avr-libc) de llamar a las funciones
+// pgm_read_byte que ocupan código. 
+constexpr const avr::Progmem_array<uint8_t, 8> arrow_up PROGMEM = 
+//constexpr const char arrow_up[8] = 
+			  { 0b0000000,
+			    0b0000100,
+			    0b0001110,
+			    0b0010101,
+			    0b0000100,
+			    0b0000100,
+			    0b0000100,
+			    0b0000000 };
+
+
+constexpr const avr::Progmem_array<uint8_t, 8> arrow_down PROGMEM = 
+//constexpr const char arrow_down[8] = 
+			  { 0b0000000,
+			    0b0000100,
+			    0b0000100,
+			    0b0000100,
+			    0b0010101,
+			    0b0001110,
+			    0b0000100,
+			    0b0000000};
+
+
 // repeat print
 void rprint(LCD& lcd, const char* msg)
 {
@@ -102,7 +130,9 @@ const char long_msg[] = "En un lugar de La Mancha, de cuyo nombre"
 void test_extended_chars(LCD& lcd)
 {
     lcd.new_extended_char(0, bell);
-    lcd.new_extended_char(3, heart_full);
+    lcd.new_extended_char(1, heart_full);
+    lcd.new_extended_char(2, arrow_up);
+    lcd.new_extended_char(3, arrow_down);
 
     lcd.clear();
     lcd.print("A bell: [");
@@ -110,9 +140,17 @@ void test_extended_chars(LCD& lcd)
     lcd.print("]\n");
 
     lcd.print("A heart: [");
+    lcd.print_extended(1);
+    lcd.print("]\n");
+
+    lcd.print("Arrows: [");
+    lcd.print_extended(2);
     lcd.print_extended(3);
     lcd.print("]\n");
+
     wait_ms(1000);
+
+
 }
 
 void test_lcd_screen4_1602()
