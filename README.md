@@ -31,7 +31,7 @@ This directory contains the following:
 #### mk: Compilation rules.
 
 #### test and pc_test:
-All the packages has a directory `test` or `pc_test`. The difference between
+All the packages have a directory `test` or `pc_test`. The difference between
 them is that `pc_test` are tests to do in the computer (you have to compile
 them with `gcc`) but `test` are tests to do in the microcontroller.
 
@@ -88,5 +88,5 @@ con `avr-gcc`.
 
 Los `pc_test` necesitan varios ficheros de 
 [alp](https://github.com/amanuellperez/alp/tree/master/src) (otro proyecto).
-Basta con que te descargues `alp_test.h`, `alp_test.cpp`, 
-`alp_string.h` y `alp_string.cpp` para que te compilen.
+Basta con que descargarse `alp_test.h`, `alp_test.cpp`, 
+`alp_string.h` y `alp_string.cpp` para que compilen.
