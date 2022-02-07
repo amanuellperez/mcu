@@ -3,7 +3,8 @@ DIRS = 	HD44780 	\
 		glyphs		\
 	   	charset 	\
 		ostream		\
-		screen
+		screen		\
+		big_digits
 
 
 include $(MCU_RECRULES)
