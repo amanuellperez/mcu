@@ -41,6 +41,18 @@ constexpr const char* const str_array[] PROGMEM = {
 // arrays en general
 constexpr uint8_t array_u8[] PROGMEM = {10,20,30,40};
 
+// bidimensional
+constexpr static uint8_t barray_rows = 6;
+constexpr static uint8_t barray_cols = 3;
+constexpr uint8_t barray_u8[barray_rows][barray_cols] PROGMEM = {
+    {1,2,3},
+    {4,5,6},
+    {7,8,9},
+    {10, 11, 12},
+    {13, 14, 15},
+    {16, 17, 18}
+};
+
 
 void test_basic()
 {
@@ -183,6 +195,29 @@ void test_progmem()
 
 }
 
+void test_progmem_view()
+{
+    avr::UART_iostream uart;
+
+    avr::Progmem_biarray_view<uint8_t, barray_rows, barray_cols> a{barray_u8};
+
+    uart << "\n\nProgram view test\n"
+	    "-----------------\n";
+
+    while(1){
+	uart << "Progmem_biarray_view:\n";
+	for (uint8_t i = 0; i < barray_rows; ++i){
+	    for (uint8_t j = 0; j < barray_cols; ++j){
+                uart << (int)a[i][j] << ' ';
+            }
+	    uart << '\n';
+	}
+
+	uart << "\n\n";
+	wait_ms(2000);
+    }
+}
+
 
 int main()
 {
@@ -195,6 +230,7 @@ int main()
 	      "------------\n";
 
    //test_basic();
-   test_progmem();
+   // test_progmem();
+   test_progmem_view();
 }
 
