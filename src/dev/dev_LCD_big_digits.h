@@ -32,9 +32,11 @@
  *
  ****************************************************************************/
 
-#include "dev_LCD_HD44780_charset.h"
+#include <avr_memory.h>
+#include "dev_LCD_HD44780_charset.h" // symbol
 
 namespace dev{
+
 
 namespace big_digits{
 constexpr const uint8_t char_full = 255;
@@ -43,7 +45,7 @@ constexpr const uint8_t char_space = 254;
 // TODO: meterlo en progmem
 // Para el display de 4 filas (cada digit es de 3 x 3)
 constexpr uint8_t bricks3x3_v1_size = 8;
-constexpr const char bricks3x3_v1[8][bricks3x3_v1_size] /* PROGMEM */ = {
+constexpr const uint8_t _bricks3x3_v1[8][bricks3x3_v1_size] PROGMEM = {
     { 0b00000011,
       0b00000111,
       0b00001111,
@@ -117,6 +119,13 @@ constexpr const char bricks3x3_v1[8][bricks3x3_v1_size] /* PROGMEM */ = {
       0b00000000 },
 };
 
+static inline avr::Progmem_biarray_view<uint8_t, 8, bricks3x3_v1_size> 
+						bricks3x3_v1{_bricks3x3_v1};
+
+// DUDA: ¿merece la pena meter esto en PROGMEM? 
+// Mientras que los brick solo se usan una vez, cuando se cargan en el LCD,
+// los digits se van a estar leyendo continuamente, cada vez que se quiera
+// dibujar un digit. 
 constexpr const uint8_t digits3x3_v1[10][9] /* PROGMEM */ = {
     // 0
     { 4, 6, 5,	

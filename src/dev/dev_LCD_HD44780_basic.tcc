@@ -496,7 +496,7 @@ bool LCD_HD44780_base<P>::is_busy()
 
 template <typename P>
 template <typename pin_E>
-void LCD_HD44780_base<P>::write_data_to_CG_or_DDRAM(char data)
+void LCD_HD44780_base<P>::write_data_to_CG_or_DDRAM(uint8_t data)
 {
     wait_to_be_available<pin_E>(); 
     write_d<pin_E>(1,0,data);

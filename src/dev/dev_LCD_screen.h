@@ -276,9 +276,12 @@ public:
 
 // PÁGINA DE MEMORIA EXTENDIDA
     /// Crea un nuevo caracter 'c' de 8 filas en la página de memoria extendida.
-    void new_extended_char(uint8_t c, const char glyph[8]);
+    // TODO: limpiar. Dejar una sola de estas funciones
+    void new_extended_char(uint8_t c, const uint8_t glyph[8]);
     void new_extended_char(uint8_t c,
                            const avr::Progmem_array<uint8_t, 8>& glyph);
+    void new_extended_char(uint8_t c,
+                           const avr::Progmem_array_view<uint8_t, 8>& glyph);
 
     // DATOS DEL LCD
     constexpr static uint8_t rows() {return num_rows;}

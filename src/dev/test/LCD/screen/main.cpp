@@ -62,7 +62,7 @@ using LCD = Screen_2004;
 
 
 // glyph de una campana
-constexpr const char bell[8] = 
+constexpr const uint8_t bell[8] = 
 			  { 0b0000000,
 			    0b0000100,
 			    0b0001110,
@@ -72,7 +72,7 @@ constexpr const char bell[8] =
 			    0b0000100,
 			    0b0000000 };
 
-constexpr const char heart_full[8] = 
+constexpr const uint8_t heart_full[8] = 
 			  { 0b0000000,
 			    0b0001010,
 			    0b0011111,

@@ -187,7 +187,7 @@ protected:
     /// To write into CG or DDRAM is determined by previous specification of
     /// the CGRAM or DDRAM address setting.
     template <typename pin_E>
-    static void write_data_to_CG_or_DDRAM(char data);
+    static void write_data_to_CG_or_DDRAM(uint8_t data);
 
     /// Read data from CG or DDRAM.
     /// Before entering this read instruction, either CGRAM or DDRAM address
@@ -419,7 +419,7 @@ public:
     /// Write data to CG or DDRAM.
     /// To write into CG or DDRAM is determined by previous specification of
     /// the CGRAM or DDRAM address setting.
-    static void write_data_to_CG_or_DDRAM(char data)
+    static void write_data_to_CG_or_DDRAM(uint8_t data)
     {Base::template write_data_to_CG_or_DDRAM<E>(data);}
 
     /// Read data from CG or DDRAM.

@@ -317,7 +317,7 @@ void LCD_screen<num_cols, num_rows, LCD>::cursor_pos(uint8_t col, uint8_t row)
 
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
 void LCD_screen<num_cols, num_rows, LCD>::new_extended_char(uint8_t c,
-                                                            const char glyph[8])
+                                                            const uint8_t glyph[8])
 {
     lcd_.new_extended_char(c, glyph);
     cursor_pos(x_, y_);
@@ -328,6 +328,14 @@ void LCD_screen<num_cols, num_rows, LCD>::new_extended_char(uint8_t c,
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
 void LCD_screen<num_cols, num_rows, LCD>::new_extended_char(uint8_t c
 				, const avr::Progmem_array<uint8_t, 8>& glyph)
+{
+    lcd_.new_extended_char(c, glyph);
+    cursor_pos(x_, y_);
+}
+
+template <uint8_t num_cols, uint8_t num_rows, typename LCD>
+void LCD_screen<num_cols, num_rows, LCD>::new_extended_char(uint8_t c
+				, const avr::Progmem_array_view<uint8_t, 8>& glyph)
 {
     lcd_.new_extended_char(c, glyph);
     cursor_pos(x_, y_);
