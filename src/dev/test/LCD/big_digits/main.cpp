@@ -21,7 +21,7 @@
 
 #include "../../../dev_LCD_screen.h"
 #include "../../../dev_LCD_HD44780_generic.h"
-#include "../../../dev_LCD_big_digits.h"
+#include "../../../dev_LCD_font_t1.h"
 #include "../../../dev_LCD_HD44780_charset.h"
 #include <avr_time.h>
 #include <stddef.h>
@@ -64,13 +64,13 @@ using LCD = Screen_2004;
 //using LCD = Screen_4004;
 
 
-using Big_digit = dev::Big_digit_3x3<LCD>; 
+using Big_digit = dev::Big_digit_t1_3x3<LCD>; 
 
 // Mostramos los bricks cargados en memoria
 void show_bricks()
 {
     LCD lcd;
-
+    
     Big_digit::init(lcd);
     lcd.clear();
     for (uint8_t i = 0; i < 8; ++i)

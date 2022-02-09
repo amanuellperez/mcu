@@ -28,164 +28,18 @@
  *
  *  - HISTORIA:
  *    A.Manuel L.Perez
- *    05/02/2022 v0.0
+ *    05/02/2022 Escrito
  *
  ****************************************************************************/
-
-#include <avr_memory.h>
 #include "dev_LCD_HD44780_charset.h" // symbol
 
 namespace dev{
 
-
-namespace big_digits{
-constexpr const uint8_t char_full = 255;
-constexpr const uint8_t char_space = 254;
-
-// TODO: meterlo en progmem
-// Para el display de 4 filas (cada digit es de 3 x 3)
-constexpr uint8_t bricks3x3_v1_size = 8;
-constexpr const uint8_t _bricks3x3_v1[8][bricks3x3_v1_size] PROGMEM = {
-    { 0b00000011,
-      0b00000111,
-      0b00001111,
-      0b00011111,
-      0b00000000,
-      0b00000000,
-      0b00000000,
-      0b00000000 },
-
-    { 0b00011000,
-      0b00011100,
-      0b00011110,
-      0b00011111,
-      0b00000000,
-      0b00000000,
-      0b00000000,
-      0b00000000 },
-    
-    { 0b00011111,
-      0b00001111,
-      0b00000111,
-      0b00000011,
-      0b00000000,
-      0b00000000,
-      0b00000000,
-      0b00000000 },
-
-    { 0b00011111,
-      0b00011110,
-      0b00011100,
-      0b00011000,
-      0b00000000,
-      0b00000000,
-      0b00000000,
-      0b00000000 },
-
-    { 0b00000011,
-      0b00000111,
-      0b00001111,
-      0b00011111,
-      0b00011111,
-      0b00011111,
-      0b00011111,
-      0b00011111 },
-
-    { 0b00011000,
-      0b00011100,
-      0b00011110,
-      0b00011111,
-      0b00011111,
-      0b00011111,
-      0b00011111,
-      0b00011111 },
-
-    { 0b00011111,
-      0b00011111,
-      0b00011111,
-      0b00011111,
-      0b00000000,
-      0b00000000,
-      0b00000000,
-      0b00000000 },
-
-    { 0b00001110,  // decimal point
-      0b00001110,
-      0b00001110,
-      0b00000000,
-      0b00000000,
-      0b00000000,
-      0b00000000,
-      0b00000000 },
-};
-
-static inline avr::Progmem_biarray_view<uint8_t, 8, bricks3x3_v1_size> 
-						bricks3x3_v1{_bricks3x3_v1};
-
-// DUDA: ¿merece la pena meter esto en PROGMEM? 
-// Mientras que los brick solo se usan una vez, cuando se cargan en el LCD,
-// los digits se van a estar leyendo continuamente, cada vez que se quiera
-// dibujar un digit. 
-constexpr const uint8_t digits3x3_v1[10][9] /* PROGMEM */ = {
-    // 0
-    { 4, 6, 5,	
-      char_full, char_space, char_full, 
-      2, 6, 3 },
-
-    // 1
-    { 0, char_full, char_space,
-      char_space, char_full, char_space,
-      6, 6, 6 },
-
-    // 2
-    { 0, 6, 5,
-      4, 6, 3, 
-      6, 6, 6},
-
-    // 3
-    { 6, 6, 5,
-      char_space, 6, char_full,
-      6 , 6, 3},
-
-    // 4
-    { char_full, char_space, char_full,
-      2, 6, char_full, 
-      char_space, char_space, 6},
-
-    // 5
-    { char_full, 6, 6,
-      2, 6, 5,
-      2, 6, 3 },
-
-    // 6
-    { 4, 6, 1, 
-      char_full, 6, 5,
-      2, 6, 3 },
-
-    // 7
-    { 6, 6, char_full,
-      char_space, 4, 3,
-      char_space, 6, char_space},
-
-    // 8
-    { 4, 6, 5,
-      char_full, 6, char_full,
-      2, 6, 3},
-
-    // 9
-    { 4, 6, 5,
-      2, 6, char_full,
-      2, 6, 3}
-};
-
-
-} // namespace big_digits
-
-
-template <typename LCD_screen>
-class Big_digit_3x3{
+template <typename LCD_screen, typename Font_t>
+class Big_digit{
 public:
     using Screen = LCD_screen;
+    using Font   = Font_t;
 
     static void init(Screen& lcd);
 
@@ -198,11 +52,11 @@ private:
     static void print_3bricks(Screen& lcd, uint8_t j0, uint8_t i);
 };
 
-template <typename S>
-void Big_digit_3x3<S>::init(Screen& lcd)
+template <typename S, typename F>
+void Big_digit<S, F>::init(Screen& lcd)
 {
-    for (uint8_t i = 0; i < big_digits::bricks3x3_v1_size; ++i)
-	lcd.new_extended_char(i, big_digits::bricks3x3_v1[i]);
+    for (uint8_t i = 0; i < Font::nbricks; ++i)
+	lcd.new_extended_char(i, Font::brick(i));
 }
 
 
@@ -210,39 +64,37 @@ void Big_digit_3x3<S>::init(Screen& lcd)
 //       Lo bueno de symbol es que esta función no hay que tocarla aunque
 //       cambiemos de LCD. symbol se encarga de saber qué código corresponde
 //       al símbolo correspondiente. De esta forma es código genérico.
-template <typename S>
-void Big_digit_3x3<S>::print_3bricks(Screen& lcd, uint8_t j0, uint8_t i)
+template <typename S, typename F>
+void Big_digit<S, F>::print_3bricks(Screen& lcd, uint8_t j0, uint8_t i)
 {
     using symbol = dev::HD44780_charset_A00;
 
-    for (uint8_t j = j0; j < j0 + 3; ++j)
+    for (uint8_t j = j0; j < j0 + Font::cols; ++j)
     {
-	if ( big_digits::digits3x3_v1[i][j] == big_digits::char_full)
+	if ( Font::is_digit_char_full(i, j))
 	    lcd.print(symbol::of("█"));
-	else if ( big_digits::digits3x3_v1[i][j] == big_digits::char_space)
+
+	else if ( Font::is_digit_char_space(i, j))
 	    lcd.print(' ');
+
 	else
-	    lcd.print_extended(big_digits::digits3x3_v1[i][j]);
+	    lcd.print_extended(Font::digit(i,j));
     }
 }
 
-template <typename S>
-void Big_digit_3x3<S>::print(Screen& lcd, uint8_t i)
+template <typename S, typename F>
+void Big_digit<S, F>::print(Screen& lcd, uint8_t i)
 {
     uint8_t x = lcd.cursor_pos_x();
     uint8_t y = lcd.cursor_pos_y();
 
-    print_3bricks(lcd, 0, i);
+    for (uint8_t k = 0; k < Font::rows; ++k){
+        print_3bricks(lcd, k * Font::cols, i);
+        lcd.cursor_pos(x, y + k + 1);
+    }
 
-    lcd.cursor_pos(x, y + 1);
-    print_3bricks(lcd, 3, i);
-
-    lcd.cursor_pos(x, y + 2);
-    print_3bricks(lcd, 6, i);
-
-    lcd.cursor_pos(x+3, y);
+    lcd.cursor_pos(x + Font::cols, y);
 }
-
 
 
 } // namespace dev

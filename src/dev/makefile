@@ -17,6 +17,7 @@ INCS= 	dev_BMP280_basic.h			\
 		dev_keypad.h				\
 		dev_keyrow.h				\
 		dev_LCD_big_digit.h			\
+		dev_LCD_font_t1.h			\
 		dev_LCD_generic.h			\
 		dev_LCD_screen.h			\
 		dev_LCD_screen.tcc			\
