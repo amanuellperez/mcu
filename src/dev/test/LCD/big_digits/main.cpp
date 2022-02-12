@@ -64,14 +64,15 @@ using LCD = Screen_2004;
 //using LCD = Screen_4004;
 
 
-using Big_digit = dev::Big_digit_t1_3x3<LCD>; 
+using Big_digit_t11_2x1 = dev::Big_digit_t11_2x1<LCD>; 
+using Big_digit_t1_3x3 = dev::Big_digit_t1_3x3<LCD>; 
 
 // Mostramos los bricks cargados en memoria
 void show_bricks()
 {
     LCD lcd;
     
-    Big_digit::init(lcd);
+    Big_digit_t1_3x3::init(lcd);
     lcd.clear();
     for (uint8_t i = 0; i < 8; ++i)
 	lcd.print_extended(i);
@@ -80,36 +81,53 @@ void show_bricks()
 }
 
 
-void test_big_digits()
+template <typename BD> // BD = Big_digit
+void test_big_digits(LCD& lcd)
 {
-    LCD lcd;
-    Big_digit::init(lcd);
+    BD::init(lcd);
     lcd.clear();
-    while (1){
-	lcd.cursor_pos(0,0);
-	Big_digit::print(lcd, 0);
-	Big_digit::print(lcd, 1);
-	Big_digit::print(lcd, 2);
-	Big_digit::print(lcd, 3);
-	Big_digit::print(lcd, 4);
-	Big_digit::print(lcd, 5);
-	wait_ms(2000);
-	lcd.clear();
-	Big_digit::print(lcd, 6);
-	Big_digit::print(lcd, 7);
-	Big_digit::print(lcd, 8);
-	Big_digit::print(lcd, 9);
-	wait_ms(2000);
+    lcd.cursor_pos(0,0);
+    BD::print(lcd, 0);
+    BD::print(lcd, 1);
+    BD::print(lcd, 2);
+    BD::print(lcd, 3);
+    BD::print(lcd, 4);
+    BD::print(lcd, 5);
+    wait_ms(2000);
+    lcd.clear();
+    BD::print(lcd, 6);
+    BD::print(lcd, 7);
+    BD::print(lcd, 8);
+    BD::print(lcd, 9);
+    wait_ms(2000);
 
-	lcd.clear();
-	for (uint8_t i = 0; i <= 9; ++i){
-	    lcd.cursor_pos(0,0);
-	    Big_digit::print(lcd, i);
-	    wait_ms(300);
-	}
+    lcd.clear();
+    for (uint8_t i = 0; i <= 9; ++i){
+	lcd.cursor_pos(0,0);
+	BD::print(lcd, i);
+	wait_ms(500);
     }
 }
 
+void test_big_digits()
+{
+    LCD lcd;
+
+    while (1){
+	lcd.clear();
+	lcd.print("Big digit  t1.1 2x1");
+	wait_ms(1000);
+
+	test_big_digits<Big_digit_t11_2x1>(lcd);
+
+	lcd.clear();
+	lcd.print("Big digit  t1 3x3");
+	wait_ms(1000);
+
+	test_big_digits<Big_digit_t1_3x3>(lcd);
+
+    }
+}
 
 int main()
 {
