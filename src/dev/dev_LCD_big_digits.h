@@ -97,6 +97,12 @@ void Big_digit<S, F>::print(Screen& lcd, uint8_t i)
 }
 
 
+// Caracteres genéricos que usamos en todas las fuentes
+namespace big_digits{
+constexpr const uint8_t char_full = 255;
+constexpr const uint8_t char_space = 254;
+}// namespace
+
 } // namespace dev
 #endif
 

@@ -21,7 +21,9 @@
 
 #include "../../../dev_LCD_screen.h"
 #include "../../../dev_LCD_HD44780_generic.h"
-#include "../../../dev_LCD_font_t1.h"
+#include "../../../dev_LCD_big_digit_2x1.h"
+#include "../../../dev_LCD_big_digit_2x2.h"
+#include "../../../dev_LCD_big_digit_3x3.h"
 #include "../../../dev_LCD_HD44780_charset.h"
 #include <avr_time.h>
 #include <stddef.h>
@@ -64,15 +66,16 @@ using LCD = Screen_2004;
 //using LCD = Screen_4004;
 
 
-using Big_digit_t11_2x1 = dev::Big_digit_t11_2x1<LCD>; 
-using Big_digit_t1_3x3 = dev::Big_digit_t1_3x3<LCD>; 
+using Big_digit_2x1_t1 = dev::Big_digit_2x1_t1<LCD>; 
+using Big_digit_2x2_t1 = dev::Big_digit_2x2_t1<LCD>; 
+using Big_digit_3x3_t1 = dev::Big_digit_3x3_t1<LCD>; 
 
 // Mostramos los bricks cargados en memoria
 void show_bricks()
 {
     LCD lcd;
     
-    Big_digit_t1_3x3::init(lcd);
+    Big_digit_3x3_t1::init(lcd);
     lcd.clear();
     for (uint8_t i = 0; i < 8; ++i)
 	lcd.print_extended(i);
@@ -82,7 +85,7 @@ void show_bricks()
 
 
 template <typename BD> // BD = Big_digit
-void test_big_digits(LCD& lcd)
+void test_big_digits(LCD& lcd, bool stop = false)
 {
     BD::init(lcd);
     lcd.clear();
@@ -93,8 +96,12 @@ void test_big_digits(LCD& lcd)
     BD::print(lcd, 3);
     BD::print(lcd, 4);
     BD::print(lcd, 5);
-    wait_ms(2000);
-    lcd.clear();
+
+    if (stop){
+	wait_ms(2000);
+	lcd.clear();
+    }
+
     BD::print(lcd, 6);
     BD::print(lcd, 7);
     BD::print(lcd, 8);
@@ -115,16 +122,23 @@ void test_big_digits()
 
     while (1){
 	lcd.clear();
-	lcd.print("Big digit  t1.1 2x1");
+	lcd.print("Big digit 2x1 t1");
 	wait_ms(1000);
 
-	test_big_digits<Big_digit_t11_2x1>(lcd);
+	test_big_digits<Big_digit_2x1_t1>(lcd);
+
 
 	lcd.clear();
-	lcd.print("Big digit  t1 3x3");
+	lcd.print("Big digit 2x2 t1");
 	wait_ms(1000);
 
-	test_big_digits<Big_digit_t1_3x3>(lcd);
+	test_big_digits<Big_digit_2x2_t1>(lcd);
+
+	lcd.clear();
+	lcd.print("Big digit 3x3 t1");
+	wait_ms(1000);
+
+	test_big_digits<Big_digit_3x3_t1>(lcd, true);
 
     }
 }
