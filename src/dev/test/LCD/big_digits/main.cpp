@@ -23,7 +23,9 @@
 #include "../../../dev_LCD_HD44780_generic.h"
 #include "../../../dev_LCD_big_digit_2x1.h"
 #include "../../../dev_LCD_big_digit_2x2.h"
+#include "../../../dev_LCD_big_digit_2x3.h"
 #include "../../../dev_LCD_big_digit_3x3.h"
+#include "../../../dev_LCD_big_digit_4x3.h"
 #include "../../../dev_LCD_HD44780_charset.h"
 #include <avr_time.h>
 #include <stddef.h>
@@ -61,14 +63,16 @@ using Screen_2004 = dev::LCD_screen_2004<Generic_LCD_2004>;
 using Screen_4004 = dev::LCD_screen_4004<Generic_LCD_4004>;
 
 // Choose LCD to test
-//using LCD = Screen_1602;
+//using LCD = Screen_1602; <-- ESTE NO MUESTRA LAS LETRAS DE 3 y 4 FILAS!!!
 using LCD = Screen_2004;
 //using LCD = Screen_4004;
 
 
 using Big_digit_2x1_t1 = dev::Big_digit_2x1_t1<LCD>; 
 using Big_digit_2x2_t1 = dev::Big_digit_2x2_t1<LCD>; 
+using Big_digit_2x3_t1 = dev::Big_digit_2x3_t1<LCD>; 
 using Big_digit_3x3_t1 = dev::Big_digit_3x3_t1<LCD>; 
+using Big_digit_4x3_t1 = dev::Big_digit_4x3_t1<LCD>; 
 
 // Mostramos los bricks cargados en memoria
 void show_bricks()
@@ -124,21 +128,29 @@ void test_big_digits()
 	lcd.clear();
 	lcd.print("Big digit 2x1 t1");
 	wait_ms(1000);
-
 	test_big_digits<Big_digit_2x1_t1>(lcd);
 
 
 	lcd.clear();
 	lcd.print("Big digit 2x2 t1");
 	wait_ms(1000);
-
 	test_big_digits<Big_digit_2x2_t1>(lcd);
+
+	lcd.clear();
+	lcd.print("Big digit 2x3 t1");
+	wait_ms(1000);
+	test_big_digits<Big_digit_2x3_t1>(lcd, true);
+
 
 	lcd.clear();
 	lcd.print("Big digit 3x3 t1");
 	wait_ms(1000);
-
 	test_big_digits<Big_digit_3x3_t1>(lcd, true);
+
+	lcd.clear();
+	lcd.print("Big digit 4x3 t1");
+	wait_ms(1000);
+	test_big_digits<Big_digit_4x3_t1>(lcd, true);
 
     }
 }
