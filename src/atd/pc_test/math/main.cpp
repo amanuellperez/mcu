@@ -211,6 +211,56 @@ void test_remove_trailing_zeros()
 }
 
 
+template <size_t N>
+void test_digits_of(int x, const std::array<int, N>& res)
+{
+std::cout << "x = [" << x << "]\n";
+    atd::Digits_of d{x};
+    
+    CHECK_TRUE(d.begin() != d.end(), "Digits_of");
+
+    int i = 0;
+    for (auto p = d.begin(); p != d.end(); ++p, ++i){
+        CHECK_TRUE(*p == res[i],
+                   alp::as_str() << "Digits_of[" << i << "]");
+    }
+    CHECK_TRUE(N == i, "Digits_of::size");
+}
+
+void test_digits_of()
+{
+    test::interfaz("Digits_of");
+    {std::array<int, 1> res = {0}; test_digits_of(0, res);}
+    {std::array<int, 1> res = {2}; test_digits_of(2, res);}
+    {std::array<int, 2> res = {7, 3}; test_digits_of(37, res);}
+    {std::array<int, 3> res = {0, 9, 8}; test_digits_of(890, res);}
+    {std::array<int, 4> res = {7, 4, 9, 2}; test_digits_of(2947, res);}
+}
+
+void test_digits_in_reverse_order_of(int x, int res[])
+{
+    atd::Digits_in_reverse_order_of d{x};
+    
+    CHECK_TRUE(d.begin() != d.end(), "Digits_in_reverse_order_of");
+
+    int i = 0;
+    for (auto p = d.begin(); p != d.end(); ++p, ++i){
+        CHECK_TRUE(*p == res[i],
+                   alp::as_str() << "Digits_in_reverse_order_of[" << i << "]");
+    }
+}
+
+void test_digits_in_reverse_order_of()
+{
+    test::interfaz("Digits_in_reverse_order_of");
+    {int res[] = {0}; test_digits_in_reverse_order_of(0, res);}
+    {int res[] = {2}; test_digits_in_reverse_order_of(2, res);}
+    {int res[] = {3, 7}; test_digits_in_reverse_order_of(37, res);}
+    {int res[] = {8, 9, 0}; test_digits_in_reverse_order_of(890, res);}
+    {int res[] = {2, 9, 4, 7}; test_digits_in_reverse_order_of(2947, res);}
+}
+
+
 int main()
 {
 try{
@@ -224,6 +274,8 @@ try{
     test_div();
     test_abs();
     test_remove_trailing_zeros();
+    test_digits_of();
+    test_digits_in_reverse_order_of();
 
 }catch(std::exception& e)
 {

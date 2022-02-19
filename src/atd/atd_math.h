@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez 
+// Copyright (C) 2019-2022 A.Manuel L.Perez 
 //           mail: <amanuel.lperez@gmail.com>
 //           https://github.com/amanuellperez/mcu
 //
@@ -32,12 +32,14 @@
  *    14/12/2020 abs
  *    05/03/2021 is_power_of_ten, exponent_of_power_of_ten
  *    23/07/2021 remove_trailing_zeros
+ *    19/02/2022 Digits_of, Digits_in_reverse_order_of
  *
  *
  ****************************************************************************/
 #include <cstdlib>
 #include <utility>
 #include <type_traits>
+#include <limits>
 
 #undef abs
 
@@ -157,6 +159,172 @@ inline constexpr Int remove_trailing_zeros(Int x)
 
     return x;
 }
+
+
+// Digits_of 
+// ---------
+// Devuelve los digitos de un número leyéndolo de dcha a izda (unidades,
+// decenas, ...).
+// Ejemplo: el número 1234 devuelve al iterar 4, 3, 2, 1.
+// Voy a implementar un iterador mínimo. Quizás sería interesante traer
+// alp_iterator.h y usar esa clase.
+// Es un forward iterator.
+template <typename Int>
+class Iterator_digits_of{
+public:
+//    // Es regular
+//    Iterator_digits_of(): x_{0}, divisor_{0} {}
+
+    Iterator_digits_of(Int x)
+        : x_{x}
+    { }
+
+    static Iterator_digits_of end()
+    {return Iterator_digits_of{std::numeric_limits<Int>::max()};}
+
+    Int operator*() {return digit();}
+
+    Iterator_digits_of& operator++()
+    {
+        next();
+        return *this;
+    }
+
+
+    Iterator_digits_of operator++(int)
+    {
+        Iterator_digits_of tmp = *this;
+        ++*this;
+        return tmp;
+    }
+
+    friend bool operator==(const Iterator_digits_of& a,
+                           const Iterator_digits_of& b)
+    {return a.x_ == b.x_;} 
+
+    friend bool operator!=(const Iterator_digits_of& a,
+                           const Iterator_digits_of& b)
+    {return !(a == b);}
+
+
+private:
+    Int x_;
+
+    void next() 
+    { 
+	// x_ = (x_ - digit()) / Int{10}; 
+	x_  /= Int{10}; 
+	if (x_ == 0)
+	    x_ = std::numeric_limits<Int>::max(); // = end
+    }
+
+    Int digit() { return x_ % Int{10}; }
+
+};
+
+
+// Si el número es negativo, no devuelve el signo.
+template <typename Int>
+class Digits_of{
+public:
+    Digits_of(Int x) : x_{abs(x)} { }
+    
+    Iterator_digits_of<Int> begin() const
+    { return Iterator_digits_of<Int>{x_}; }
+
+    Iterator_digits_of<Int> end() const
+    { return Iterator_digits_of<Int>::end(); }
+
+private:
+    Int x_;
+};
+
+
+
+// Digits_in_reverse_order_of
+// --------------------------
+// Devuelve los digitos de un número leyéndolo de izda a dcha.
+// Ejemplo: el número 1234 devuelve al iterar 1, 2, 3, 4.
+// Voy a implementar un iterador mínimo. Quizás sería interesante traer
+// alp_iterator.h y usar esa clase.
+// Es un forward iterator.
+template <typename Int>
+class Iterator_digits_in_reverse_order{
+public:
+//    // Es regular
+//    Iterator_digits_in_reverse_order(): x_{0}, divisor_{0} {}
+
+    Iterator_digits_in_reverse_order(Int x, Int divisor)
+        : x_{x}, divisor_{divisor}
+    { }
+
+    static Iterator_digits_in_reverse_order end()
+    {return Iterator_digits_in_reverse_order{0, 0};}
+
+    Int operator*() {return x_ / divisor_;}
+
+    Iterator_digits_in_reverse_order& operator++()
+    {
+        next();
+        return *this;
+    }
+
+
+    Iterator_digits_in_reverse_order operator++(int)
+    {
+        Iterator_digits_in_reverse_order tmp = *this;
+        ++*this;
+        return tmp;
+    }
+
+    friend bool operator==(const Iterator_digits_in_reverse_order& a,
+                           const Iterator_digits_in_reverse_order& b)
+    {return a.x_ == b.x_ and a.divisor_ == b.divisor_;} 
+
+    friend bool operator!=(const Iterator_digits_in_reverse_order& a,
+                           const Iterator_digits_in_reverse_order& b)
+    {return !(a == b);}
+
+
+private:
+    Int x_;
+    Int divisor_;
+
+    void next() 
+    {
+	Int digit = x_ / divisor_;
+
+	x_ -= digit * divisor_;
+	divisor_ /= Int{10};
+
+	if (x_ == 0 and divisor_ == 1)
+	    divisor_ = 0;
+    }
+
+};
+
+
+// Si el número es negativo, no devuelve el signo.
+template <typename Int>
+class Digits_in_reverse_order_of{
+public:
+    Digits_in_reverse_order_of(Int x) : x_{abs(x)} { }
+    
+    Iterator_digits_in_reverse_order<Int> begin() const
+    {
+	Int divisor = 1;
+	while (x_ > divisor * Int{10})
+	    divisor *= Int{10};
+
+	return Iterator_digits_in_reverse_order<Int>{x_, divisor};
+    }
+
+    Iterator_digits_in_reverse_order<Int> end() const
+    { return Iterator_digits_in_reverse_order<Int>::end(); }
+
+private:
+    Int x_;
+};
 
 
 } // namespace
