@@ -69,6 +69,7 @@ using LCD = Screen_2004;
 
 
 using Big_digit_2x1_t1 = dev::Big_digit_2x1_t1<LCD>; 
+using Big_digit_2x1_t2 = dev::Big_digit_2x1_t2<LCD>; 
 using Big_digit_2x2_t1 = dev::Big_digit_2x2_t1<LCD>; 
 using Big_digit_2x3_t1 = dev::Big_digit_2x3_t1<LCD>; 
 using Big_digit_3x3_t1 = dev::Big_digit_3x3_t1<LCD>; 
@@ -120,38 +121,73 @@ void test_big_digits(LCD& lcd, bool stop = false)
     }
 }
 
+template <typename Digit>
+void test_big_digits(LCD& lcd, const char* name, bool stop = false)
+{
+    lcd.clear();
+    lcd.print(name);
+    wait_ms(1000);
+    test_big_digits<Digit>(lcd, stop);
+}
+
+void test_big_digits_fonts(LCD& lcd)
+{
+    test_big_digits<Big_digit_2x1_t1>(lcd, "Big digit 2x1 t1");
+    test_big_digits<Big_digit_2x1_t2>(lcd, "Big digit 2x1 t2");
+    test_big_digits<Big_digit_2x2_t1>(lcd, "Big digit 2x2 t1");
+    test_big_digits<Big_digit_2x3_t1>(lcd, "Big digit 2x3 t1", true);
+    test_big_digits<Big_digit_3x3_t1>(lcd, "Big digit 3x3 t1", true);
+    test_big_digits<Big_digit_4x3_t1>(lcd, "Big digit 4x3 t1", true);
+}
+
+template <typename BD> // BD = Big_digit
+void test_big_digits_print(LCD& lcd, uint8_t width = 0)
+{
+    BD::init(lcd);
+    lcd.clear();
+    for (uint8_t i = 0; i < 20; ++i){
+	lcd.cursor_pos(0,0);
+	BD::print_number(lcd, i, width);
+	wait_ms(100);
+    }
+
+    lcd.cursor_pos(0,0);
+    BD::print_number(lcd, 237);
+    wait_ms(500);
+
+}
+
+void test_big_digits_print(LCD& lcd)
+{
+    lcd.clear();
+    lcd.print("Counting without padding");
+    wait_ms(1000);
+    test_big_digits_print<Big_digit_2x1_t1>(lcd);
+    test_big_digits_print<Big_digit_2x1_t2>(lcd);
+    test_big_digits_print<Big_digit_2x2_t1>(lcd);
+    test_big_digits_print<Big_digit_2x3_t1>(lcd);
+    test_big_digits_print<Big_digit_3x3_t1>(lcd);
+    test_big_digits_print<Big_digit_4x3_t1>(lcd);
+
+    lcd.clear();
+    lcd.print("Counting with padding");
+    wait_ms(1000);
+    test_big_digits_print<Big_digit_2x1_t1>(lcd, 3);
+    test_big_digits_print<Big_digit_2x1_t2>(lcd, 3);
+    test_big_digits_print<Big_digit_2x2_t1>(lcd, 3);
+    test_big_digits_print<Big_digit_2x3_t1>(lcd, 3);
+    test_big_digits_print<Big_digit_3x3_t1>(lcd, 3);
+    test_big_digits_print<Big_digit_4x3_t1>(lcd, 3);
+}
+
+
 void test_big_digits()
 {
     LCD lcd;
 
     while (1){
-	lcd.clear();
-	lcd.print("Big digit 2x1 t1");
-	wait_ms(1000);
-	test_big_digits<Big_digit_2x1_t1>(lcd);
-
-
-	lcd.clear();
-	lcd.print("Big digit 2x2 t1");
-	wait_ms(1000);
-	test_big_digits<Big_digit_2x2_t1>(lcd);
-
-	lcd.clear();
-	lcd.print("Big digit 2x3 t1");
-	wait_ms(1000);
-	test_big_digits<Big_digit_2x3_t1>(lcd, true);
-
-
-	lcd.clear();
-	lcd.print("Big digit 3x3 t1");
-	wait_ms(1000);
-	test_big_digits<Big_digit_3x3_t1>(lcd, true);
-
-	lcd.clear();
-	lcd.print("Big digit 4x3 t1");
-	wait_ms(1000);
-	test_big_digits<Big_digit_4x3_t1>(lcd, true);
-
+	test_big_digits_fonts(lcd);
+	test_big_digits_print(lcd);
     }
 }
 

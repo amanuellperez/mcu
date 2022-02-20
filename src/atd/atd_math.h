@@ -32,7 +32,7 @@
  *    14/12/2020 abs
  *    05/03/2021 is_power_of_ten, exponent_of_power_of_ten
  *    23/07/2021 remove_trailing_zeros
- *    19/02/2022 Digits_of, Digits_in_reverse_order_of
+ *    19/02/2022 Digits_of, Digits_from_left_to_right
  *
  *
  ****************************************************************************/
@@ -40,6 +40,7 @@
 #include <utility>
 #include <type_traits>
 #include <limits>
+#include <algorithm> 
 
 #undef abs
 
@@ -241,7 +242,7 @@ private:
 
 
 
-// Digits_in_reverse_order_of
+// Digits_from_left_to_right
 // --------------------------
 // Devuelve los digitos de un número leyéndolo de izda a dcha.
 // Ejemplo: el número 1234 devuelve al iterar 1, 2, 3, 4.
@@ -292,12 +293,14 @@ private:
 
     void next() 
     {
+	bool last = (divisor_ == 1? true: false);
+
 	Int digit = x_ / divisor_;
 
 	x_ -= digit * divisor_;
 	divisor_ /= Int{10};
 
-	if (x_ == 0 and divisor_ == 1)
+	if (last)
 	    divisor_ = 0;
     }
 
@@ -306,15 +309,22 @@ private:
 
 // Si el número es negativo, no devuelve el signo.
 template <typename Int>
-class Digits_in_reverse_order_of{
+class Digits_from_left_to_right{
 public:
-    Digits_in_reverse_order_of(Int x) : x_{abs(x)} { }
+    // ndigits = número mínimo de cifras a devolver.
+    // Si el número tiene menos cifras añade ceros a la izda.
+    // Si se pasa ndigits = 0, no añade ceros.
+    Digits_from_left_to_right(Int x, int ndigits = 0) 
+	: x_{abs(x)}, ndigits_{ndigits} { }
     
     Iterator_digits_in_reverse_order<Int> begin() const
     {
 	Int divisor = 1;
-	while (x_ > divisor * Int{10})
+	while (x_ >= divisor * Int{10})
 	    divisor *= Int{10};
+	
+	if (ndigits_ > 0)
+	    divisor = std::max(divisor, ten_to_the<Int>(ndigits_ - 1));
 
 	return Iterator_digits_in_reverse_order<Int>{x_, divisor};
     }
@@ -324,6 +334,7 @@ public:
 
 private:
     Int x_;
+    int ndigits_;
 };
 
 

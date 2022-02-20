@@ -214,7 +214,6 @@ void test_remove_trailing_zeros()
 template <size_t N>
 void test_digits_of(int x, const std::array<int, N>& res)
 {
-std::cout << "x = [" << x << "]\n";
     atd::Digits_of d{x};
     
     CHECK_TRUE(d.begin() != d.end(), "Digits_of");
@@ -237,28 +236,48 @@ void test_digits_of()
     {std::array<int, 4> res = {7, 4, 9, 2}; test_digits_of(2947, res);}
 }
 
-void test_digits_in_reverse_order_of(int x, int res[])
+
+template <size_t N>
+void test_digits_from_left_to_right(int x, const std::array<int, N>& res, int ndigits = 0)
 {
-    atd::Digits_in_reverse_order_of d{x};
+    atd::Digits_from_left_to_right d{x, ndigits};
     
-    CHECK_TRUE(d.begin() != d.end(), "Digits_in_reverse_order_of");
+    CHECK_TRUE(d.begin() != d.end(), "Digits_from_left_to_right");
 
     int i = 0;
     for (auto p = d.begin(); p != d.end(); ++p, ++i){
         CHECK_TRUE(*p == res[i],
-                   alp::as_str() << "Digits_in_reverse_order_of[" << i << "]");
+                   alp::as_str() << "Digits_from_left_to_right[" << i << "]");
     }
+    CHECK_TRUE(N == i, "Digits_from_left_to_right::size");
 }
 
-void test_digits_in_reverse_order_of()
+void test_digits_from_left_to_right()
 {
-    test::interfaz("Digits_in_reverse_order_of");
-    {int res[] = {0}; test_digits_in_reverse_order_of(0, res);}
-    {int res[] = {2}; test_digits_in_reverse_order_of(2, res);}
-    {int res[] = {3, 7}; test_digits_in_reverse_order_of(37, res);}
-    {int res[] = {8, 9, 0}; test_digits_in_reverse_order_of(890, res);}
-    {int res[] = {2, 9, 4, 7}; test_digits_in_reverse_order_of(2947, res);}
+    test::interfaz("Digits_from_left_to_right");
+
+// sin ceros a la izda
+    {std::array<int,1> res = {0}; test_digits_from_left_to_right(0, res);}
+    {std::array<int,2> res = {1, 0}; test_digits_from_left_to_right(10, res);}
+    {std::array<int,3> res = {1, 0, 0}; test_digits_from_left_to_right(100, res);}
+    {std::array<int,4> res = {1, 0, 0, 0}; test_digits_from_left_to_right(1000, res);}
+    {std::array<int,1> res = {2}; test_digits_from_left_to_right(2, res);}
+    {std::array<int,2> res = {3, 7}; test_digits_from_left_to_right(37, res);}
+    {std::array<int,3> res = {8, 9, 0}; test_digits_from_left_to_right(890, res);}
+    {std::array<int,4> res = {2, 9, 4, 7}; test_digits_from_left_to_right(2947, res);}
+
+// con ceros a la izda
+    {std::array<int,3> res = {0, 0, 0}; test_digits_from_left_to_right(0, res, 3);}
+    {std::array<int,3> res = {0, 1, 0}; test_digits_from_left_to_right(10, res, 3);}
+    {std::array<int,3> res = {1, 0, 0}; test_digits_from_left_to_right(100, res, 3);}
+    {std::array<int,4> res = {1, 0, 0, 0}; test_digits_from_left_to_right(1000, res, 3);}
+    {std::array<int,4> res = {0, 0, 0, 2}; test_digits_from_left_to_right(2, res, 4);}
+    {std::array<int,4> res = {0, 0, 3, 7}; test_digits_from_left_to_right(37, res, 4);}
+    {std::array<int,3> res = {8, 9, 0}; test_digits_from_left_to_right(890, res, 3);}
+    {std::array<int,4> res = {2, 9, 4, 7}; test_digits_from_left_to_right(2947, res, 2);}
+
 }
+
 
 
 int main()
@@ -275,7 +294,7 @@ try{
     test_abs();
     test_remove_trailing_zeros();
     test_digits_of();
-    test_digits_in_reverse_order_of();
+    test_digits_from_left_to_right();
 
 }catch(std::exception& e)
 {

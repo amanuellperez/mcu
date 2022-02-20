@@ -32,6 +32,7 @@
  *
  ****************************************************************************/
 #include "dev_LCD_HD44780_charset.h" // symbol
+#include <atd_math.h>	// Digits_of
 
 namespace dev{
 
@@ -46,6 +47,13 @@ public:
     /// Imprime el digit i (de 0 a 9). 
     // CUIDADO: no imprime números, sino digits!!!
     static void print(Screen& lcd, uint8_t i);
+
+    /// Imprime el número 'n'.
+    // La diferencia con print es que print imprime números de 1 cifra,
+    // mientras que esta función imprime todas las cifras de n.
+    // Si width es distinto de cero, indica el número mínimo de cifras que se
+    // imprimen. En caso de ser menos de width se llenan con '0'.
+    static void print_number(Screen& lcd, uint8_t n, uint8_t width = 0);
 
 private:
     // Imprime los dígitos [j0, j0 + 3) del digit i
@@ -94,6 +102,16 @@ void Big_digit<S, F>::print(Screen& lcd, uint8_t i)
     }
 
     lcd.cursor_pos(x + Font::cols, y);
+}
+
+
+template <typename S, typename F>
+void Big_digit<S, F>::print_number(Screen& lcd, uint8_t n, uint8_t width)
+{
+    atd::Digits_from_left_to_right d{n, width};
+
+    for (auto p = d.begin(); p != d.end(); ++p)
+	print(lcd, *p);
 }
 
 
