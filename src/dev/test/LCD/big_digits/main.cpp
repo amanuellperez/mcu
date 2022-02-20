@@ -68,12 +68,12 @@ using LCD = Screen_2004;
 //using LCD = Screen_4004;
 
 
-using Big_digit_2x1_t1 = dev::Big_digit_2x1_t1<LCD>; 
-using Big_digit_2x1_t2 = dev::Big_digit_2x1_t2<LCD>; 
-using Big_digit_2x2_t1 = dev::Big_digit_2x2_t1<LCD>; 
-using Big_digit_2x3_t1 = dev::Big_digit_2x3_t1<LCD>; 
-using Big_digit_3x3_t1 = dev::Big_digit_3x3_t1<LCD>; 
-using Big_digit_4x3_t1 = dev::Big_digit_4x3_t1<LCD>; 
+using Big_digit_2x1_t1 = dev::Big_digit_2x1_t1; 
+using Big_digit_2x1_t2 = dev::Big_digit_2x1_t2; 
+using Big_digit_2x2_t1 = dev::Big_digit_2x2_t1; 
+using Big_digit_2x3_t1 = dev::Big_digit_2x3_t1; 
+using Big_digit_3x3_t1 = dev::Big_digit_3x3_t1; 
+using Big_digit_4x3_t1 = dev::Big_digit_4x3_t1; 
 
 // Mostramos los bricks cargados en memoria
 void show_bricks()

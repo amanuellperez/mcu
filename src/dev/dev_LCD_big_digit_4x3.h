@@ -218,8 +218,7 @@ struct Font_big_digit_4x3_t1{
 
 
 // Alias
-template <typename Screen>
-using Big_digit_4x3_t1 = Big_digit<Screen, Font_big_digit_4x3_t1>;
+using Big_digit_4x3_t1 = Big_digit<Font_big_digit_4x3_t1>;
 
 } //namespace
 #endif

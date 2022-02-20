@@ -36,16 +36,17 @@
 
 namespace dev{
 
-template <typename LCD_screen, typename Font_t>
+template <typename Font_t>
 class Big_digit{
 public:
-    using Screen = LCD_screen;
     using Font   = Font_t;
 
+    template <typename Screen>
     static void init(Screen& lcd);
 
     /// Imprime el digit i (de 0 a 9). 
     // CUIDADO: no imprime números, sino digits!!!
+    template <typename Screen>
     static void print(Screen& lcd, uint8_t i);
 
     /// Imprime el número 'n'.
@@ -53,15 +54,18 @@ public:
     // mientras que esta función imprime todas las cifras de n.
     // Si width es distinto de cero, indica el número mínimo de cifras que se
     // imprimen. En caso de ser menos de width se llenan con '0'.
+    template <typename Screen>
     static void print_number(Screen& lcd, uint8_t n, uint8_t width = 0);
 
 private:
     // Imprime los dígitos [j0, j0 + 3) del digit i
+    template <typename Screen>
     static void print_3bricks(Screen& lcd, uint8_t j0, uint8_t i);
 };
 
-template <typename S, typename F>
-void Big_digit<S, F>::init(Screen& lcd)
+template <typename F>
+template <typename Screen>
+void Big_digit<F>::init(Screen& lcd)
 {
     for (uint8_t i = 0; i < Font::nbricks; ++i)
 	lcd.new_extended_char(i, Font::brick(i));
@@ -72,8 +76,9 @@ void Big_digit<S, F>::init(Screen& lcd)
 //       Lo bueno de symbol es que esta función no hay que tocarla aunque
 //       cambiemos de LCD. symbol se encarga de saber qué código corresponde
 //       al símbolo correspondiente. De esta forma es código genérico.
-template <typename S, typename F>
-void Big_digit<S, F>::print_3bricks(Screen& lcd, uint8_t j0, uint8_t i)
+template <typename F>
+template <typename Screen>
+void Big_digit<F>::print_3bricks(Screen& lcd, uint8_t j0, uint8_t i)
 {
     using symbol = dev::HD44780_charset_A00;
 
@@ -90,8 +95,9 @@ void Big_digit<S, F>::print_3bricks(Screen& lcd, uint8_t j0, uint8_t i)
     }
 }
 
-template <typename S, typename F>
-void Big_digit<S, F>::print(Screen& lcd, uint8_t i)
+template <typename F>
+template <typename Screen>
+void Big_digit<F>::print(Screen& lcd, uint8_t i)
 {
     uint8_t x = lcd.cursor_pos_x();
     uint8_t y = lcd.cursor_pos_y();
@@ -105,8 +111,9 @@ void Big_digit<S, F>::print(Screen& lcd, uint8_t i)
 }
 
 
-template <typename S, typename F>
-void Big_digit<S, F>::print_number(Screen& lcd, uint8_t n, uint8_t width)
+template <typename F>
+template <typename Screen>
+void Big_digit<F>::print_number(Screen& lcd, uint8_t n, uint8_t width)
 {
     atd::Digits_from_left_to_right d{n, width};
 
