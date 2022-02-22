@@ -22,6 +22,17 @@
 
 #ifndef __DEV_SYSTEM_CLOCK_H__
 #define __DEV_SYSTEM_CLOCK_H__
+/****************************************************************************
+ *
+ *  - DESCRIPCION: Reloj de sistema. Cuenta segundos.
+ *
+ *
+ *  - HISTORIA:
+ *    A.Manuel L.Perez
+ *    ??/??/2020 Escrito
+ *    21/02/2021 Basado en Generic_timer
+ *
+ ****************************************************************************/
 
 #include <chrono>
 
