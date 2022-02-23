@@ -363,7 +363,8 @@ inline void Timer1::set_clock_period_in_us_1MHz()
 
     else
 	static_assert(atd::always_false_v<int>,
-		    "Incorrect Timer1 period. Try another one.");
+		    "Incorrect Timer1 period. Try another one. "
+		    "Valid ones: 1, 8, 64, 256 or 1024.");
 }
 
 // TODO: a .cpp???
@@ -423,7 +424,8 @@ inline void Timer1::set_clock_period_in_us_8MHz()
  
     else
 	static_assert(atd::always_false_v<int>,
-		    "Incorrect Timer1 period. Try another one.");
+		    "Incorrect Timer1 period. Try another one. "
+		    "Valid ones: 1, 8, 32 or 128.");
 }
 
 

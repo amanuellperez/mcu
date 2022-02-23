@@ -111,6 +111,7 @@ public:
     static counter_type timer_counter_top()
     { return Timer::output_compare_register_A(); }
 
+    /// Valor máximo que puede tener el top.
     static constexpr counter_type timer_counter_max_top()
     { return Timer::max(); }
 
