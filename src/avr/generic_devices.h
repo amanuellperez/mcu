@@ -19,10 +19,19 @@
 
 #pragma once
 
-#ifndef __GEN_TYPES_H__
-#define __GEN_TYPES_H__
+#ifndef __GENERIC_DEVICES_H__
+#define __GENERIC_DEVICES_H__
 
-namespace gen{
+// ¿En qué namespace meter a todo lo genérico?
+//   1. Podrían meterse en 'mcu', de microcontrolador. Pero luego tengo el
+//      Generic_LCD que no está dentro del microcontrolador.
+//   2. Además, podría pensar que tengo un Timer independiente del micro, en
+//      cuyo caso no tendría mucho sentido que estuviera dentro de mcu, sino
+//      en dev. 
+//
+//   Probemos con 'dev': serán todos disposivitos genéricos (ya estén dentro
+//   del microcontrolador o fuera).
+namespace dev{
 
 template <typename Timer>
 class Generic_timer;

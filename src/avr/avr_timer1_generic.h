@@ -1,4 +1,4 @@
-// Copyright (C) 2021 A.Manuel L.Perez 
+// Copyright (C) 2021-2022 A.Manuel L.Perez 
 //           mail: <amanuel.lperez@gmail.com>
 //           https://github.com/amanuellperez/mcu
 //
@@ -27,13 +27,14 @@
  *    
  *  - HISTORIA:
  *    A.Manuel L.Perez
- *    15/02/2021 v0.0
+ *    15/02/2021 v0.0: Escrito
+ *    26/02/2022       timer_counter
  *
  ****************************************************************************/
 #include "avr_timer1_basic.h"
-#include "gen_types.h"
+#include "generic_devices.h"
 
-namespace gen{
+namespace dev{
 
 template <>
 class Generic_timer<avr::Timer1>{
@@ -77,6 +78,46 @@ public:
 
     /// Apagamos el generador de señales.
     static void off() { Timer::off(); }
+
+
+// Counter mode
+// ------------
+// Si el timer se puede conectar a una señal de entrada (ICP) este modo
+// serviría para contar el número de ticks. En este caso se cuentan ticks, no
+// tiempo, por eso este 'counter mode' es diferente del 'timer counter mode'
+// que cuenta tiempo.
+
+
+// Timer counter mode
+// ------------------
+// En este modo el timer se limita a contar tiempo. 
+    /// Modo de funcionamiento: contador normal y corriente.
+    static void mode_timer_counter(counter_type top = timer_counter_max_top()) 
+    { 
+	Timer::mode_CTC_top_OCR1A();
+	timer_counter_reset();
+	timer_counter_top(top);
+	Timer::enable_output_compare_A_match_interrupt();
+    }
+
+    /// Devuelve el valor del contador en ticks.
+    static counter_type timer_counter() 
+    { return Timer::counter(); }
+    
+    /// Hace que el counter = 0.
+    static void timer_counter_reset() { Timer::counter(0); }
+
+    /// Define el top del counter.
+    static void timer_counter_top(counter_type top)
+    {Timer::output_compare_register_A(top);}
+
+    /// Valor del top
+    static counter_type timer_counter_top()
+    { return Timer::output_compare_register_A(); }
+
+    /// Valor máximo que puede tener el top.
+    static constexpr counter_type timer_counter_max_top()
+    { return Timer::max(); }
 
 
 

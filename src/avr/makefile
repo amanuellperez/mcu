@@ -26,7 +26,7 @@ INCS= avr_ADC_basic.h\
 	avr_UART_basic.h		\
 	avr_UART_baud_rate.h	\
 	avr_UART_iostream.h		\
-	gen_types.h				\
+	generic_devices.h		\
 	mcu_cfg.h
 
 

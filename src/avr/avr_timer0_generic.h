@@ -1,4 +1,4 @@
-// Copyright (C) 2021 A.Manuel L.Perez 
+// Copyright (C) 2021-2022 A.Manuel L.Perez 
 //           mail: <amanuel.lperez@gmail.com>
 //           https://github.com/amanuellperez/mcu
 //
@@ -27,13 +27,14 @@
  *    
  *  - HISTORIA:
  *    A.Manuel L.Perez
- *    15/02/2021 v0.0
+ *    15/02/2021 v0.0: Escrito
+ *    26/02/2022       timer_counter
  *
  ****************************************************************************/
 #include "avr_timer0_basic.h"
-#include "gen_types.h"
+#include "generic_devices.h"
 
-namespace gen{
+namespace dev{
 
 template <>
 class Generic_timer<avr::Timer0>{

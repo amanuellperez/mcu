@@ -17,9 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-// Ejemplo básico de uso del Timer como contador
 #include "../../avr_UART.h"
 #include "../../avr_timer0_generic.h"
+#include "../../avr_timer1_generic.h"
 #include "../../avr_time.h"
 #include <atd_test.h>
 
@@ -27,17 +27,26 @@
 #include <stdlib.h>
 #include <std_type_traits.h>
 
-using Timer = gen::Generic_timer<avr::Timer0>;
+//#define ISR_TIMER_INTERRUPT ISR_TIMER0_COMPA
+//using Timer = gen::Generic_timer<avr::Timer0>;
+#define ISR_TIMER_INTERRUPT ISR_TIMER1_COMPA
+using Timer = dev::Generic_timer<avr::Timer1>;
 using time_t = uint32_t;
 
 constexpr uint16_t period_in_us = 1024;
 // constexpr uint16_t period_in_us = 256;
-// constexpr uint16_t period_in_us = 10; <-- no compila
+// DONT_COMPILE(constexpr uint16_t period_in_us = 10);
 constexpr Timer::counter_type top_counter = 99;
 
 volatile time_t contador = 0;
 
-ISR_TIMER0_COMPA
+// TODO: quedaría mejor algo del tipo
+// ISR_TIMER_INTERRUPT(avr::Timer0) or
+// ISR_TIMER_INTERRUPT(avr::Timer1) 
+// Pasándole como parámetro el Timer que usamos se elige la interrupción.
+// Pero ¿cómo hacerlo sin usar macros?
+//ISR_TIMER0_COMPA
+ISR_TIMER_INTERRUPT
 {
     ++contador;
 }

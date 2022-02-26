@@ -21,10 +21,13 @@
 #include <avr_interrupt.h>
 #include <avr_UART.h>
 #include <avr_time.h>
-#include <avr_timer1_basic.h>
+#include <avr_timer1_generic.h>
 #include <atd_time.h>
 
-using System_clock = dev::System_clock<avr::Timer1>;
+// Con el Timer0 no funciona ya que el counter del timer0 es de 8 bits y no de
+// 16 bits.
+using Timer = dev::Generic_timer<avr::Timer1>;
+using System_clock = dev::System_clock<Timer>;
 
 // Dependiendo del valor de F_CPU hay que pasar un periodo diferente.
 // El compilador tiene que mostrar mensajes adecuados a cada error.

@@ -32,7 +32,7 @@
  *
  ****************************************************************************/
 #include <stdint.h>
-#include <avr_timer1_basic.h>
+#include <avr_timer1_generic.h>
 
 #include <dev_LCD_HD44780.h>
 #include <dev_keyrow.h>
@@ -91,7 +91,8 @@ using Keyrow       = dev::Basic_keyrow<Keyrow_pins, Keyrow_codes>;
 
 // system_clock
 // ------------
-using System_clock = dev::System_clock<avr::Timer1>;
+using Timer = dev::Generic_timer<avr::Timer1>;
+using System_clock = dev::System_clock<Timer>;
 constexpr static uint16_t system_clock_timer_period_in_us = 64u;
 
 

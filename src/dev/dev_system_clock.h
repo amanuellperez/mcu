@@ -30,7 +30,7 @@
  *  - HISTORIA:
  *    A.Manuel L.Perez
  *    ??/??/2020 Escrito
- *    21/02/2021 Basado en Generic_timer
+ *    26/02/2021 Basado en Generic_timer
  *
  ****************************************************************************/
 
@@ -48,35 +48,23 @@ constexpr inline typename Timer::counter_type __system_clock_top()
     constexpr uint32_t one_second_in_us = 1000000u;
     constexpr uint32_t top = one_second_in_us/timer_period_in_us;
 
-    static_assert(top < Timer::max(),
+    static_assert(top < Timer::timer_counter_max_top(),
                   "Top too great for this timer. Try another period or choose "
                   "a different F_CPU.");
     return atd::safe_static_cast<typename Timer::counter_type, uint32_t, top>();
 }
 
 
-// Timer requirements:
-//	Timer::on<period_in_us>   - enables timer with period = period_in_us
-//	Timer::enable_output_compare_A_match_interrupt
-//	Timer::top_OCRA
-//
-// TODO: What is a timer? What concept? 
-// This class has to work with ANY timer (avr timer, pic timer...). Which are
-// the correct names for the timer requirements? 
-//
+// Timer: es un Generic_timer.
 template <typename Timer>
 struct System_clock : public std::chrono::system_clock {
 
     template <uint16_t timer_period_in_us>
     constexpr static void init()
     {
+	Timer::mode_timer_counter(
+			    __system_clock_top<Timer, timer_period_in_us>());
         Timer::template on<timer_period_in_us>();
-
-	Timer::enable_output_compare_A_match_interrupt();
-
-	Timer::mode_CTC_top_OCR1A();
-        Timer::output_compare_register_A(
-            __system_clock_top<Timer, timer_period_in_us>());
     }
 
     /// Ponemos en hora el reloj.
