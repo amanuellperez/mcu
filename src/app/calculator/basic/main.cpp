@@ -46,8 +46,8 @@ Main::Main():keyboard_{key_code}
 // En este caso voy a gestionar el LCD directamente
 void Main::init_lcd()
 {
-    lcd.screen().stop_brcorner(true);// I'm not going to use it as a terminal
-    lcd.screen().nowrap(); 
+    lcd.terminal().stop_brcorner(true);// I'm not going to use it as a terminal
+    lcd.terminal().nowrap(); 
 }
 
 // para depurar
@@ -66,9 +66,9 @@ void Main::print_buffer()
 
 void Main::print_result()
 {
-    lcd.screen().clear_row(1);
+    lcd.terminal().clear_row(1);
     lcd.cursor_pos(lcd.cols() - 1, 1);
-    lcd.screen().print_align_to_the_right<double_ndigits>(result);
+    lcd.terminal().print_align_to_the_right<double_ndigits>(result);
 }
 
 void Main::print_msg_error()

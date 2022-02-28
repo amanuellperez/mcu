@@ -157,7 +157,7 @@ private:
 // screen: es la pantalla donde escribimos. 
 //         Estas son las funciones que conocen las dimensiones de la ventana
 //         del LCD donde escribimos.
-    void clear_screen() {lcd_.screen().clear_row(0);}
+    void clear_screen() {lcd_.terminal().clear_row(0);}
     void cursor_on(uint8_t x, uint8_t y);
 
 // Data

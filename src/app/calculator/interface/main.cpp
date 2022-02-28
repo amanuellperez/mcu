@@ -40,8 +40,8 @@ Main::Main():keyboard_{key_code}
 // En este caso voy a gestionar el LCD directamente
 void Main::init_lcd()
 {
-    lcd_.screen().stop_brcorner(true);// I'm not going to use it as a terminal
-    lcd_.screen().nowrap(); 
+    lcd_.terminal().stop_brcorner(true);// I'm not going to use it as a terminal
+    lcd_.terminal().nowrap(); 
 }
 
 

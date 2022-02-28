@@ -66,8 +66,8 @@ void Main::init_SPI()
 void Main::init_lcd()
 {
     lcd.init();
-//    lcd.screen().stop_brcorner(true);// I'm not going to use it as a terminal
-//    lcd.screen().nowrap(); 
+//    lcd.terminal().stop_brcorner(true);// I'm not going to use it as a terminal
+//    lcd.terminal().nowrap(); 
 }
 
 // para depurar
@@ -88,15 +88,15 @@ void Main::init_lcd()
 
 void Main::clear_output_screen()
 {
-    lcd.screen().clear_row(1);
+    lcd.terminal().clear_row(1);
 }
 
 
 void Main::print_result()
 {
-    lcd.screen().clear_row(1); // clear_output();
+    lcd.terminal().clear_row(1); // clear_output();
     lcd.cursor_pos(lcd.cols() - 1, 1);
-    lcd.screen().print_align_to_the_right<double_ndigits>(result);
+    lcd.terminal().print_align_to_the_right<double_ndigits>(result);
 }
 
 void Main::print_msg_error()

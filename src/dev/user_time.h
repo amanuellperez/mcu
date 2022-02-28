@@ -51,7 +51,7 @@ void user_get_weekday(LCD& lcd,
                    uint8_t x0, uint8_t y0,
 		   const char* names_weekday)
 {
-    t.weekday(user_choose_string_circular<names_length>(lcd.screen(), key, 
+    t.weekday(user_choose_string_circular<names_length>(lcd.terminal(), key, 
 			atd::Array_const_nstrings{names_weekday, names_length})
 		.pos(x0, y0)
 		.show(t.weekday()));

@@ -80,7 +80,7 @@ void show_bricks()
 {
     LCD lcd;
     
-    Big_digit_3x3_t1::init(lcd);
+    Big_digit_3x3_t1::load(lcd);
     lcd.clear();
     for (uint8_t i = 0; i < 8; ++i)
 	lcd.print_extended(i);
@@ -92,7 +92,7 @@ void show_bricks()
 template <typename BD> // BD = Big_digit
 void test_big_digits(LCD& lcd, bool stop = false)
 {
-    BD::init(lcd);
+    BD::load(lcd);
     lcd.clear();
     lcd.cursor_pos(0,0);
     BD::print(lcd, 0);
@@ -143,7 +143,7 @@ void test_big_digits_fonts(LCD& lcd)
 template <typename BD> // BD = Big_digit
 void test_big_digits_print(LCD& lcd, uint8_t width = 0)
 {
-    BD::init(lcd);
+    BD::load(lcd);
     lcd.clear();
     for (uint8_t i = 0; i < 20; ++i){
 	lcd.cursor_pos(0,0);

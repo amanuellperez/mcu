@@ -23,7 +23,7 @@
 // quiero entrar en conflicto con ella.
 void msg_error(const char* msg)
 {
-    Main::lcd.screen().clear_row(1);
+    Main::lcd.terminal().clear_row(1);
     Main::lcd.cursor_pos(0,1);
     Main::lcd << msg;
 }

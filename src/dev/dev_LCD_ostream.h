@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez 
+// Copyright (C) 2019-2022 A.Manuel L.Perez 
 //           mail: <amanuel.lperez@gmail.com>
 //           https://github.com/amanuellperez/mcu
 //
@@ -31,20 +31,23 @@
  *	29/07/2019 v0.1: Creo traductor.
  *	26/09/2019 v0.2: LCD_ostream y cambios menores.
  *	06/01/2020 v0.3: Elimino DPin a favor de Pin.
+ *	28/02/2022	 Desdoblo Terminal en Terminal y Terminal.
+ *	                 De momento, Terminal es copia de lo que era Terminal.
+ *	                 En el futuro se irán alejando.
  *
  ****************************************************************************/
 #include <ostream>
-#include "dev_LCD_screen.h"
+#include "dev_LCD_terminal.h"
 
 namespace dev{
 
 template <uint8_t cols, uint8_t rows, typename  LCD>
 class LCD_streambuf : public std::streambuf{
 public:
-    using Screen = LCD_screen<cols, rows, LCD>;
+    using Terminal = LCD_terminal<cols, rows, LCD>;
 
-    Screen& screen() {return lcd_;}
-    const Screen& screen() const {return lcd_;}
+    Terminal& terminal() {return lcd_;}
+    const Terminal& terminal() const {return lcd_;}
 
 
 protected:
@@ -66,7 +69,7 @@ protected:
 
 
 private:
-    Screen lcd_;   
+    Terminal lcd_;   
 };
 
 
@@ -74,39 +77,39 @@ private:
 template <uint8_t cols0, uint8_t rows0, typename LCD>
 class LCD_ostream: public std::ostream{
 public:
-    using Screen = LCD_screen<cols0, rows0, LCD>;
+    using Terminal = LCD_terminal<cols0, rows0, LCD>;
 
     explicit LCD_ostream() : std::ostream{&sb_} {}
 
     /// Borra la pantalla.
-    void clear() {sb_.screen().clear();}
+    void clear() {sb_.terminal().clear();}
 
 
     /// Define la posición del cursor.
     void cursor_pos(uint8_t col, uint8_t row)
-    {sb_.screen().cursor_pos(col, row);}
+    {sb_.terminal().cursor_pos(col, row);}
 
     /// Enciende el LCD.
-    void display_on(){sb_.screen().display_on();}
+    void display_on(){sb_.terminal().display_on();}
 
     /// Apaga el LCD.
-    void display_off(){sb_.screen().display_off();}
+    void display_off(){sb_.terminal().display_off();}
 
     /// Muestra el cursor.
-    void cursor_on()	{sb_.screen().cursor_on();}
+    void cursor_on()	{sb_.terminal().cursor_on();}
 
     /// No muestra el cursor.
-    void cursor_off()	{sb_.screen().cursor_off();}
+    void cursor_off()	{sb_.terminal().cursor_off();}
 
     /// Hace que el cursor parpadee.
-    void cursor_blink()	    {sb_.screen().cursor_blink();}
+    void cursor_blink()	    {sb_.terminal().cursor_blink();}
 
     /// Hace que el cursor no parpadee.
-    void cursor_no_blink()  {sb_.screen().cursor_no_blink();}
+    void cursor_no_blink()  {sb_.terminal().cursor_no_blink();}
 
-    /// Acceso a la screen.
-    Screen& screen() {return sb_.screen();}
-    const Screen& screen() const {return sb_.screen();}
+    /// Acceso al terminal
+    Terminal& terminal() {return sb_.terminal();}
+    const Terminal& terminal() const {return sb_.terminal();}
 
     /// Número de filas del LCD
     static constexpr uint8_t rows() {return rows0;}

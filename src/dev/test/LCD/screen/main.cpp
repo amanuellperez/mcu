@@ -54,10 +54,10 @@ using Screen_1602 = dev::LCD_screen_1602<Generic_LCD_1602>;
 using Screen_2004 = dev::LCD_screen_2004<Generic_LCD_2004>;
 using Screen_4004 = dev::LCD_screen_4004<Generic_LCD_4004>;
 
-// Choose LCD to test
-//using LCD = Screen_1602;
-using LCD = Screen_2004;
-//using LCD = Screen_4004;
+// Choose Screen to test
+//using Screen = Screen_1602;
+using Screen = Screen_2004;
+//using Screen = Screen_4004;
 
 
 
@@ -111,11 +111,11 @@ constexpr const avr::Progmem_array<uint8_t, 8> arrow_down PROGMEM =
 
 
 // repeat print
-void rprint(LCD& lcd, const char* msg)
+void rprint(Screen& scr, const char* msg)
 {
-    for (uint8_t i = 0; i < lcd.rows(); ++i){
-	lcd.cursor_pos(0, i);
-	lcd.print(msg);
+    for (uint8_t i = 0; i < scr.rows(); ++i){
+	scr.cursor_pos(0, i);
+	scr.print(msg);
     }
     
 
@@ -127,26 +127,26 @@ const char long_msg[] = "En un lugar de La Mancha, de cuyo nombre"
                         "astillero, adarga antigua, rocin flaco y"
 			"galgo corredor. Don Quijote (Cervantes)";
 
-void test_extended_chars(LCD& lcd)
+void test_extended_chars(Screen& scr)
 {
-    lcd.new_extended_char(0, bell);
-    lcd.new_extended_char(1, heart_full);
-    lcd.new_extended_char(2, arrow_up);
-    lcd.new_extended_char(3, arrow_down);
+    scr.new_extended_char(0, bell);
+    scr.new_extended_char(1, heart_full);
+    scr.new_extended_char(2, arrow_up);
+    scr.new_extended_char(3, arrow_down);
 
-    lcd.clear();
-    lcd.print("A bell: [");
-    lcd.print_extended(0);
-    lcd.print("]\n");
+    scr.clear();
+    scr.print("A bell: [");
+    scr.print_extended(0);
+    scr.print("]\n");
 
-    lcd.print("A heart: [");
-    lcd.print_extended(1);
-    lcd.print("]\n");
+    scr.print("A heart: [");
+    scr.print_extended(1);
+    scr.print("]\n");
 
-    lcd.print("Arrows: [");
-    lcd.print_extended(2);
-    lcd.print_extended(3);
-    lcd.print("]\n");
+    scr.print("Arrows: [");
+    scr.print_extended(2);
+    scr.print_extended(3);
+    scr.print("]\n");
 
     wait_ms(1000);
 
@@ -155,683 +155,361 @@ void test_extended_chars(LCD& lcd)
 
 void test_lcd_screen4_1602()
 {
-    LCD lcd;
+    Screen scr;
 
 // ------
-    lcd.clear();
-    lcd.print("LCD screen(1602)");
-    wait_ms(1000);
-
-// ------
-    {
-    lcd.clear();
-    lcd.cursor_pos(15,0);
-    const char* n = "Align";
-    lcd.print_align_to_the_right(n, n+5);
-    lcd.cursor_pos(4,1);
-    lcd.print_align_to_the_right(n, n+5);
-    wait_ms(1000);
-    }
-
-    lcd.clear();
-    lcd.print("Test align");
-    wait_ms(1000);
-
-    lcd.clear();
-    lcd.print("uint16_t: [123]");
-    lcd.cursor_pos(15, 1);
-    lcd.print_align_to_the_right(uint16_t{123});
-    wait_ms(1000);
-
-    lcd.clear();
-    lcd.print("int16_t: [-123]");
-    lcd.cursor_pos(15, 1);
-    lcd.print_align_to_the_right(int16_t{-123});
-    wait_ms(1000);
-
-    lcd.clear();
-    lcd.print("uint32_t: [123]");
-    lcd.cursor_pos(15, 1);
-    lcd.print_align_to_the_right(uint32_t{123});
-    wait_ms(1000);
-
-    lcd.clear();
-    lcd.print("int32_t: [-123]");
-    lcd.cursor_pos(15, 1);
-    lcd.print_align_to_the_right(int32_t{-123});
-    wait_ms(1000);
-
-    lcd.clear();
-    lcd.print("uint64_t: [123]");
-    lcd.cursor_pos(15, 1);
-    lcd.print_align_to_the_right(uint64_t{123});
-    wait_ms(1000);
-
-    lcd.clear();
-    lcd.print("int64_t: [-123]");
-    lcd.cursor_pos(15, 1);
-    lcd.print_align_to_the_right(int64_t{-123});
-    wait_ms(1000);
-
-    lcd.clear();
-    lcd.print("double: [23.47]");
-    lcd.cursor_pos(15, 1);
-    lcd.print_align_to_the_right<2>(double{23.47});
+    scr.clear();
+    scr.print("LCD Screen (1602)");
     wait_ms(1000);
 
 // ------
-    lcd.clear();
-    rprint(lcd, "clear test");
+    scr.clear();
+    rprint(scr, "clear test");
     wait_ms(1000);
-    lcd.clear();
+    scr.clear();
     wait_ms(1000);
 
 
 // ------
-    lcd.clear();
-    lcd.print("This is written in 2 lines");
+    scr.clear();
+    scr.print("This is written in 2 lines");
 
     wait_ms(2000);
     
     
 // ------
-    lcd.clear();
-    lcd.print("print_return\n");
-    lcd.print("Am I in 2 row?");
+    scr.clear();
+    scr.print("print_return\n");
+    scr.print("Am I in 2 row?");
     wait_ms(2000);
 
 // ------
-    lcd.clear();
-    lcd.print("Erase this\n");
-    lcd.print("But don't this");
+    scr.clear();
+    scr.print("Erase this\n");
+    scr.print("But don't this");
     wait_ms(1000);
-    lcd.clear_row(0);
-    wait_ms(1000);
-
-// ------
-    lcd.clear();
-    lcd.print("No delete this\n");
-    lcd.print("Erase this line");
-    wait_ms(1000);
-    lcd.clear_row(1);
+    scr.clear_row(0);
     wait_ms(1000);
 
 // ------
-    lcd.clear();
-    lcd.stop_brcorner(false);
-    lcd.print("scroll up? yes\n");
-    lcd.print("12345678901234");
+    scr.clear();
+    scr.print("No delete this\n");
+    scr.print("Erase this line");
     wait_ms(1000);
-    lcd.print('5');
-    wait_ms(1000);
-    lcd.print('6');
-    wait_ms(1000);
-
-// ------
-    lcd.clear();
-    lcd.stop_brcorner(true);
-    lcd.print("scroll up? no\n");
-    lcd.print("12345678901234");
-    wait_ms(1000);
-    lcd.print('5');
-    wait_ms(1000);
-    lcd.print('6');
-    wait_ms(1000);
-    lcd.stop_brcorner(false);
-
-// ------
-    lcd.clear();
-    lcd.print("Testing scroll");
-    lcd.print("\none");
-    wait_ms(1000);
-    lcd.print('\n');
-    lcd.print("two");
-    wait_ms(1000);
-    lcd.print("\nthree");
-    wait_ms(1000);
-    lcd.print("\nfour");
-    wait_ms(1000);
-
-// -----
-    const char menu[] = "First option, is very long";
-    lcd.clear();
-    lcd.nowrap();
-    lcd.print("nowrap true");
-    wait_ms(1000);
-    lcd.clear();
-    lcd.print(menu);
-    wait_ms(3000);
-    lcd.wrap();
-
-// -----
-    lcd.clear();
-    lcd.wrap();
-    lcd.print("wrap true");
-    wait_ms(1000);
-    lcd.clear();
-    lcd.print(menu);
-    wait_ms(3000);
-    lcd.wrap();
-
-// -----
-    lcd.clear();
-    lcd.print("print4chars(1)");
-    lcd.cursor_pos(4, 1);
-    const char* p = lcd.print_line_nowrap("1.one\n2.two", 4);
-    wait_ms(1000);
-
-// -----
-    lcd.cursor_pos(0,0);
-    lcd.print("print4chars(2)");
-    lcd.cursor_pos(4, 1);
-    p = lcd.print_line_nowrap(p, 4);
+    scr.clear_row(1);
     wait_ms(1000);
 
 
 // -----
-    lcd.cursor_pos(0,0);
-    lcd.print("print4chars'1'");
-    lcd.cursor_pos(4, 1);
-    lcd.print_line_nowrap("1", 4);
+    scr.clear();
+    scr.print("cursor_pos");
     wait_ms(1000);
-
-
-
-// -----
-    lcd.clear();
-    p = long_msg;
-    while (*p){
-	lcd.print(*p);
-	wait_ms(40);
-	++p;
-    }
-    wait_ms(1000);
-
-
-// -----
-    lcd.clear();
-    lcd.print("cursor_pos");
-    wait_ms(1000);
-    lcd.clear();
-    lcd.cursor_pos(3,0);
-    lcd.print('3');
+    scr.clear();
+    scr.cursor_pos(3,0);
+    scr.print('3');
     wait_ms(500);
-    lcd.cursor_pos(6,1);
-    lcd.print('6');
+    scr.cursor_pos(6,1);
+    scr.print('6');
     wait_ms(500);
-    lcd.cursor_pos(15,0);
-    lcd.print('X');
+    scr.cursor_pos(15,0);
+    scr.print('X');
     wait_ms(500);
-    lcd.cursor_pos(0,1);
-    lcd.print('Y');
+    scr.cursor_pos(0,1);
+    scr.print('Y');
     wait_ms(500);
-    lcd.stop_brcorner(true);    // impido que haga el scroll en (15,1)
-    lcd.cursor_pos(15,1);
-    lcd.print('Z');
-    lcd.stop_brcorner(false);
+    scr.cursor_pos(15,1);
+    scr.print('Z');
     wait_ms(1000);
 
 
 // -----
-    lcd.clear();
-    lcd.print("Turn off for 1 second");
+    scr.clear();
+    scr.print("Turn off for 1 second");
     wait_ms(1000);
-    lcd.display_off();
+    scr.display_off();
     wait_ms(1000);
-    lcd.display_on();
-    lcd.clear();
-    lcd.print("On?");
+    scr.display_on();
+    scr.clear();
+    scr.print("On?");
     wait_ms(1000);
 
 // -----
-    lcd.clear();
-    lcd.print("cursor on");
-    lcd.cursor_on();
+    scr.clear();
+    scr.print("cursor on");
+    scr.cursor_on();
     wait_ms(1000);
-    lcd.clear();
-    lcd.print("cursor off");
-    lcd.cursor_off();
+    scr.clear();
+    scr.print("cursor off");
+    scr.cursor_off();
     wait_ms(1000);
-    lcd.clear();
-    lcd.print("cursor blink");
-    lcd.cursor_blink();
+    scr.clear();
+    scr.print("cursor blink");
+    scr.cursor_blink();
     wait_ms(1000);
-    lcd.clear();
-    lcd.print("cursor no blink");
-    lcd.cursor_no_blink();
+    scr.clear();
+    scr.print("cursor no blink");
+    scr.cursor_no_blink();
     wait_ms(1000);
 
-    test_extended_chars(lcd);
+    test_extended_chars(scr);
 }
 
 
 void test_lcd_screen4_2004()
 {
-    LCD lcd;
+    Screen scr;
 
 // ------
-    lcd.clear();
-    lcd.print("LCD screen (20 x 04)");
+    scr.clear();
+    scr.print("LCD Screen (20 x 04)");
     wait_ms(1000);
 
-
-// ------
-    lcd.clear();
-    rprint(lcd, "clear test");
-    wait_ms(1000);
-    lcd.clear();
+// -----
+    scr.clear();
+    scr.print("wrap sentences?\n");
+    scr.print("too long: this is a very long sentence");
     wait_ms(1000);
 
-
-// ------
-    lcd.clear();
-    lcd.print("This sentence has to"
-              "be written in 4 line"
-              "s. If not, it means "
-              "that print is wrong");
+// -----
+// El '\n' del primer print no lo lee, con lo que deja el cursor
+// en (cols(), 0). Cualquier intento de escribir va a fallar (print devuelve
+// 0)
+    scr.clear();
+    scr.print("I can't write 5 rows\n");
+    scr.print("2 row\n"); 
+    scr.print("3 row\n");
+    scr.print("4 row\n");
+    scr.print("5 row\n");
     wait_ms(2000);
-    
-    
-// ------
-    lcd.clear();
-    lcd.print("print_return\n");
-    lcd.print("Am I in 2 row?\n");
-    lcd.print("in 3 row?\n");
-    lcd.print("in 4 row?");
+ 
+// En la última fila aparecerá 5 row en vez de 4 row, ya que el '\n' de 4 row
+// devuelve el cursor al principio de la fila.
+    scr.clear();
+    scr.print("Second try:\n");
+    scr.print("2 row\n");
+    scr.print("3 row\n");
+    scr.print("4 row\n");
+    scr.print("5 row\n");
     wait_ms(2000);
 
 // ------
-    lcd.clear();
-    lcd.print("Erase this\n");
-    lcd.print("But don't this\n");
-    lcd.print("Erase this\n");
-    lcd.print("But don't this");
+    scr.clear();
+    rprint(scr, "clear test");
     wait_ms(1000);
-    lcd.clear_row(0);
-    lcd.clear_row(2);
+    scr.clear();
+    wait_ms(1000);
+
+
+// ------
+    scr.clear();
+    scr.print("print_return\n");
+    scr.print("Am I in 2 row?\n");
+    scr.print("in 3 row?\n");
+    scr.print("in 4 row?");
+    wait_ms(2000);
+
+// ------
+    scr.clear();
+    scr.print("Erase this\n");
+    scr.print("But don't this\n");
+    scr.print("Erase this\n");
+    scr.print("But don't this");
+    wait_ms(1000);
+    scr.clear_row(0);
+    scr.clear_row(2);
     wait_ms(1000);
 
 // ------
-    lcd.clear();
-    lcd.print("Don't delete this\n");
-    lcd.print("Erase this line\n");
-    lcd.print("Don't delete this\n");
-    lcd.print("Erase this line");
+    scr.clear();
+    scr.print("Don't delete this\n");
+    scr.print("Erase this line\n");
+    scr.print("Don't delete this\n");
+    scr.print("Erase this line");
     wait_ms(1000);
-    lcd.clear_row(1);
-    lcd.clear_row(3);
-    wait_ms(1000);
-
-// ------
-    lcd.clear();
-    lcd.stop_brcorner(false);
-    lcd.print("\n\nscroll up? yes\n");
-    lcd.print("123456789012345678");
-    wait_ms(1000);
-    lcd.print('9');
-    wait_ms(1000);
-    lcd.print('0');
-    wait_ms(1000);
-
-// ------
-    lcd.clear();
-    lcd.stop_brcorner(true);
-    lcd.print("\n\nscroll up? no\n");
-    lcd.print("123456789012345678");
-    wait_ms(1000);
-    lcd.print('9');
-    wait_ms(1000);
-    lcd.print('0');
-    wait_ms(1000);
-    lcd.stop_brcorner(false);
-
-// ------
-    lcd.clear();
-    lcd.print("Testing scroll");
-    lcd.print("\none");
-    wait_ms(1000);
-    lcd.print('\n');
-    lcd.print("two");
-    wait_ms(1000);
-    lcd.print("\nthree");
-    wait_ms(1000);
-    lcd.print("\nfour");
-    wait_ms(1000);
-    lcd.print("\nfive");
-    wait_ms(1000);
-
-// -----
-    const char menu[] = "First option, is very long\n"
-                        "Second option\n"
-                        "Third";
-    lcd.clear();
-    lcd.nowrap();
-    lcd.print("nowrap true");
-    wait_ms(1000);
-    lcd.clear();
-    lcd.print(menu);
-    wait_ms(3000);
-    lcd.wrap();
-
-// -----
-    lcd.clear();
-    lcd.wrap();
-    lcd.print("wrap true");
-    wait_ms(1000);
-    lcd.clear();
-    lcd.print(menu);
-    wait_ms(3000);
-    lcd.wrap();
-
-// -----
-    constexpr const char wrap_msg[] = "1.first line\n2.second line";
-    lcd.clear();
-    lcd.print("print_line_nowrap");
-    wait_ms(1000);
-    lcd.clear();
-    lcd.print("Result: '1.firs'?");
-    lcd.cursor_pos(0, 1);
-    const char* p = lcd.print_line_nowrap(wrap_msg, 6);
-    lcd.cursor_pos(0, 2);
-    lcd.print("Res:'2.second line'?");
-    lcd.cursor_pos(0, 3);
-    p = lcd.print_line_nowrap(p, 20);
-    wait_ms(3000);
-
-
-
-// -----
-    lcd.clear();
-    p = long_msg;
-    while (*p){
-	lcd.print(*p);
-	wait_ms(50);
-	++p;
-    }
+    scr.clear_row(1);
+    scr.clear_row(3);
     wait_ms(1000);
 
 
 // -----
-    lcd.clear();
-    lcd.print("cursor_pos");
+    scr.clear();
+    scr.print("cursor_pos");
     wait_ms(1000);
-    lcd.clear();
-    lcd.cursor_pos(3,0);
-    lcd.print('3');
+    scr.clear();
+    scr.cursor_pos(3,0);
+    scr.print('3');
     wait_ms(500);
-    lcd.cursor_pos(6,1);
-    lcd.print('6');
+    scr.cursor_pos(6,1);
+    scr.print('6');
     wait_ms(500);
-    lcd.cursor_pos(lcd.cols()-1,0);
-    lcd.print('X');
+    scr.cursor_pos(scr.cols()-1,0);
+    scr.print('X');
     wait_ms(500);
-    lcd.cursor_pos(0,1);
-    lcd.print('Y');
+    scr.cursor_pos(0,1);
+    scr.print('Y');
     wait_ms(500);
-    lcd.stop_brcorner(true);    // impido que haga el scroll en la esquina
-    lcd.cursor_pos(lcd.cols()-1,lcd.rows()-1);
-    lcd.print('Z');
-    lcd.stop_brcorner(false);
+    scr.cursor_pos(scr.cols()-1,scr.rows()-1);
+    scr.print('Z');
     wait_ms(1000);
 
 
 // -----
-    lcd.clear();
-    lcd.print("Turn off for 1 second");
+    scr.clear();
+    scr.print("Turn off for 1 second");
     wait_ms(1000);
-    lcd.display_off();
+    scr.display_off();
     wait_ms(1000);
-    lcd.display_on();
-    lcd.clear();
-    lcd.print("On?");
+    scr.display_on();
+    scr.clear();
+    scr.print("On?");
     wait_ms(1000);
 
 // -----
-    lcd.clear();
-    lcd.print("cursor on");
-    lcd.cursor_on();
+    scr.clear();
+    scr.print("cursor on");
+    scr.cursor_on();
     wait_ms(1000);
-    lcd.clear();
-    lcd.print("cursor off");
-    lcd.cursor_off();
+    scr.clear();
+    scr.print("cursor off");
+    scr.cursor_off();
     wait_ms(1000);
-    lcd.clear();
-    lcd.print("cursor blink");
-    lcd.cursor_blink();
+    scr.clear();
+    scr.print("cursor blink");
+    scr.cursor_blink();
     wait_ms(1000);
-    lcd.clear();
-    lcd.print("cursor no blink");
-    lcd.cursor_no_blink();
+    scr.clear();
+    scr.print("cursor no blink");
+    scr.cursor_no_blink();
     wait_ms(1000);
 
-    test_extended_chars(lcd);
+    test_extended_chars(scr);
 }
 
 
 void test_lcd_screen4_4004()
 {
-    LCD lcd;
+    Screen scr;
 
 // ------
-    lcd.clear();
-    lcd.print("LCD screen (40 x 04)");
+    scr.clear();
+    scr.print("LCD screen (40 x 04)");
     wait_ms(1000);
 
 
 // ------
-    lcd.clear();
-    rprint(lcd, "clear test");
+    scr.clear();
+    rprint(scr, "clear test");
     wait_ms(1000);
-    lcd.clear();
+    scr.clear();
     wait_ms(1000);
 
 
 // ------
-    lcd.clear();
-    lcd.print("This sentence has to be written in a dis"
-              "play of 40 columns by 4 rows. It is long"
-              "because I want to test the print functio"
-              "n. Is it ok? ------------------ the end");
-
-    wait_ms(5000);
-    
-    
-// ------
-    lcd.clear();
-    lcd.print("print_return\n");
-    lcd.print("Am I in 2 row?\n");
-    lcd.print("in 3 row?\n");
-    lcd.print("in 4 row?");
+    scr.clear();
+    scr.print("print_return\n");
+    scr.print("Am I in 2 row?\n");
+    scr.print("in 3 row?\n");
+    scr.print("in 4 row?");
     wait_ms(2000);
 
 // ------
-    lcd.clear();
-    lcd.print("Erase this\n");
-    lcd.print("But don't this\n");
-    lcd.print("Erase this\n");
-    lcd.print("But don't this");
+    scr.clear();
+    scr.print("Erase this\n");
+    scr.print("But don't this\n");
+    scr.print("Erase this\n");
+    scr.print("But don't this");
     wait_ms(1000);
-    lcd.clear_row(0);
-    lcd.clear_row(2);
-    wait_ms(1000);
-
-// ------
-    lcd.clear();
-    lcd.print("Don't delete this\n");
-    lcd.print("Erase this line\n");
-    lcd.print("Don't delete this\n");
-    lcd.print("Erase this line");
-    wait_ms(1000);
-    lcd.clear_row(1);
-    lcd.clear_row(3);
+    scr.clear_row(0);
+    scr.clear_row(2);
     wait_ms(1000);
 
 // ------
-    lcd.clear();
-    lcd.stop_brcorner(false);
-    lcd.print("\n\nscroll up? yes\n");
-    lcd.print("12345678901234567890123456789012345678");
+    scr.clear();
+    scr.print("Don't delete this\n");
+    scr.print("Erase this line\n");
+    scr.print("Don't delete this\n");
+    scr.print("Erase this line");
     wait_ms(1000);
-    lcd.print('9');
-    wait_ms(1000);
-    lcd.print('0');
-    wait_ms(1000);
-
-// ------
-    lcd.clear();
-    lcd.stop_brcorner(true);
-    lcd.print("\n\nscroll up? no\n");
-    lcd.print("12345678901234567890123456789012345678");
-    wait_ms(1000);
-    lcd.print('9');
-    wait_ms(1000);
-    lcd.print('0');
-    wait_ms(1000);
-    lcd.stop_brcorner(false);
-
-// ------
-    lcd.clear();
-    lcd.print("Testing scroll");
-    lcd.print("\none");
-    wait_ms(1000);
-    lcd.print('\n');
-    lcd.print("two");
-    wait_ms(1000);
-    lcd.print("\nthree");
-    wait_ms(1000);
-    lcd.print("\nfour");
-    wait_ms(1000);
-    lcd.print("\nfive");
-    wait_ms(1000);
-
-// -----
-    const char menu[] = "The First option, is a very very long sentence\n"
-                        "Second option\n"
-                        "Third";
-    lcd.clear();
-    lcd.nowrap();
-    lcd.print("nowrap true");
-    wait_ms(1000);
-    lcd.clear();
-    lcd.print(menu);
-    wait_ms(2000);
-    lcd.wrap();
-
-// -----
-    lcd.clear();
-    lcd.wrap();
-    lcd.print("wrap true");
-    wait_ms(1000);
-    lcd.clear();
-    lcd.print(menu);
-    wait_ms(2000);
-    lcd.wrap();
-
-// -----
-    constexpr const char wrap_msg[] = "1.first line\n2.second line";
-    lcd.clear();
-    lcd.print("print_line_nowrap");
-    wait_ms(1000);
-    lcd.clear();
-    lcd.print("Result: '1.firs'?");
-    lcd.cursor_pos(0, 1);
-    const char* p = lcd.print_line_nowrap(wrap_msg, 6);
-    lcd.cursor_pos(0, 2);
-    lcd.print("Res:'2.second line'?");
-    lcd.cursor_pos(0, 3);
-    p = lcd.print_line_nowrap(p, 20);
-    wait_ms(3000);
-
-
-
-// -----
-    lcd.clear();
-    p = long_msg;
-    while (*p){
-	lcd.print(*p);
-	wait_ms(50);
-	++p;
-    }
+    scr.clear_row(1);
+    scr.clear_row(3);
     wait_ms(1000);
 
 
 // -----
-    lcd.clear();
-    lcd.print("cursor_pos");
+    scr.clear();
+    scr.print("cursor_pos");
     wait_ms(1000);
-    lcd.clear();
-    lcd.cursor_pos(3,0);
-    lcd.print('3');
+    scr.clear();
+    scr.cursor_pos(3,0);
+    scr.print('3');
     wait_ms(500);
-    lcd.cursor_pos(6,1);
-    lcd.print('6');
+    scr.cursor_pos(6,1);
+    scr.print('6');
     wait_ms(500);
-    lcd.cursor_pos(lcd.cols()-1,0);
-    lcd.print('X');
+    scr.cursor_pos(scr.cols()-1,0);
+    scr.print('X');
     wait_ms(500);
-    lcd.cursor_pos(0,1);
-    lcd.print('Y');
+    scr.cursor_pos(0,1);
+    scr.print('Y');
     wait_ms(500);
-    lcd.stop_brcorner(true);    // impido que haga el scroll en la esquina
-    lcd.cursor_pos(lcd.cols()-1,lcd.rows()-1);
-    lcd.print('Z');
-    lcd.stop_brcorner(false);
+    scr.cursor_pos(scr.cols()-1,scr.rows()-1);
+    scr.print('Z');
     wait_ms(1000);
 
 
 // -----
-    lcd.clear();
-    lcd.print("Turn off for 1 second");
+    scr.clear();
+    scr.print("Turn off for 1 second");
     wait_ms(1000);
-    lcd.display_off();
+    scr.display_off();
     wait_ms(1000);
-    lcd.display_on();
-    lcd.clear();
-    lcd.print("On?");
+    scr.display_on();
+    scr.clear();
+    scr.print("On?");
     wait_ms(1000);
 
 // -----
-    lcd.clear();
-    //lcd.print("cursor on");
-    rprint(lcd, "cursor on");
-    lcd.cursor_on();
-    lcd.cursor_pos(9, 0);
+    scr.clear();
+    //scr.print("cursor on");
+    rprint(scr, "cursor on");
+    scr.cursor_on();
+    scr.cursor_pos(9, 0);
     wait_ms(1000);
-    lcd.cursor_pos(9, 1);
+    scr.cursor_pos(9, 1);
     wait_ms(1000);
-    lcd.cursor_pos(9, 2);
+    scr.cursor_pos(9, 2);
     wait_ms(1000);
-    lcd.cursor_pos(9, 3);
+    scr.cursor_pos(9, 3);
     wait_ms(1000);
-    lcd.clear();
-    lcd.print("cursor off");
-    lcd.cursor_off();
+    scr.clear();
+    scr.print("cursor off");
+    scr.cursor_off();
     wait_ms(1000);
-    lcd.clear();
-    lcd.print("cursor blink");
-    lcd.cursor_blink();
+    scr.clear();
+    scr.print("cursor blink");
+    scr.cursor_blink();
     wait_ms(1000);
-    lcd.clear();
-    lcd.print("cursor no blink");
-    lcd.cursor_no_blink();
+    scr.clear();
+    scr.print("cursor no blink");
+    scr.cursor_no_blink();
     wait_ms(1000);
 
-    test_extended_chars(lcd);
+    test_extended_chars(scr);
 }
 
 void test_lcd_screen4_basico()
 {
-    LCD lcd;
+    Screen scr;
 
-    lcd.clear();
-    lcd.print("Hola");
+    scr.clear();
+    scr.print("Hola");
     wait_ms(1000);
 }
 
 
 void test_lcd_screen4()
 {
-    switch(LCD::cols()){
+    switch(Screen::cols()){
 	case 16: test_lcd_screen4_1602(); break;
 	case 20: test_lcd_screen4_2004(); break;
 	case 40: test_lcd_screen4_4004(); break;

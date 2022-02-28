@@ -32,7 +32,7 @@
  *    30/01/2021 v0.0
  *
  ****************************************************************************/
-#include "gen_types.h"
+#include "generic_devices.h"
 
 #include <stdint.h> // uint8_t
 #include <atd_type_traits.h>
@@ -56,7 +56,7 @@ namespace dev{
 template <typename Timer_n>
 class Signal_generator_base{
 public:
-    using GT           = gen::Generic_timer<Timer_n>;
+    using GT           = dev::Generic_timer<Timer_n>;
     using counter_type = typename GT::counter_type;
     using Time         = typename GT::Time;
     using Frequency    = typename GT::Frequency;
@@ -104,7 +104,7 @@ protected:
 template <typename Timer_n>
 class Square_wave_generator: public Signal_generator_base<Timer_n>{
 public:
-    using GT           = gen::Generic_timer<Timer_n>;
+    using GT           = dev::Generic_timer<Timer_n>;
     using counter_type = typename GT::counter_type;
     using Time         = typename GT::Time;
     using Frequency    = typename GT::Frequency;
@@ -247,7 +247,7 @@ inline void Square_wave_generator<T>::ch2_off()
 template <typename Timer_n>
 class PWM_generator : public Signal_generator_base<Timer_n>{
 public:
-    using GT           = gen::Generic_timer<Timer_n>;
+    using GT           = dev::Generic_timer<Timer_n>;
     using counter_type = typename GT::counter_type;
     using Time  = typename GT::Time;
     using Frequency    = typename GT::Frequency;

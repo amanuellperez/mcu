@@ -25,6 +25,8 @@ INCS= 	dev_BMP280_basic.h			\
 		dev_LCD_generic.h			\
 		dev_LCD_screen.h			\
 		dev_LCD_screen.tcc			\
+		dev_LCD_terminal.h			\
+		dev_LCD_terminal.tcc		\
 		dev_LCD_ostream.h			\
 		dev_LCD_HD44780.h			\
 		dev_LCD_HD44780_basic.h		\

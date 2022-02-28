@@ -23,7 +23,7 @@
 // quiero entrar en conflicto con ella.
 void msg_error(const char* msg)
 {
-    Main::lcd.screen().clear_row(1);
+    Main::lcd.terminal().clear_row(1);
     Main::lcd.cursor_pos(0,1);
     Main::lcd << msg;
 }
@@ -32,7 +32,7 @@ void msg_error(const char* msg)
 // show: 'function_name: details'
 void msg_error(const char* function_name, const char* details)
 {
-    Main::lcd.screen().clear_row(1);
+    Main::lcd.terminal().clear_row(1);
     Main::lcd.cursor_pos(0,1);
     Main::lcd << function_name << ':' << details;
 }

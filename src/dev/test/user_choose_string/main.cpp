@@ -96,7 +96,7 @@ void test_lcd_menu()
 
 	lcd.clear();
 	lcd << "Elige (circular): ";
-	uint8_t day = dev::user_choose_string_circular<1>(lcd.screen(), keyrow, 
+	uint8_t day = dev::user_choose_string_circular<1>(lcd.terminal(), keyrow, 
 		    atd::Array_const_nstrings{days, 1})
                          .pos(7, 1)
                          .show(0);
@@ -110,7 +110,7 @@ void test_lcd_menu()
 
 	lcd.clear();
 	lcd << "Elige: (circular) ";
-	uint8_t day2 = dev::user_choose_string_circular<2>(lcd.screen(), keyrow, 
+	uint8_t day2 = dev::user_choose_string_circular<2>(lcd.terminal(), keyrow, 
 		    atd::Array_const_nstrings{days2, 2})
                          .pos(7, 1)
                          .show(2);
@@ -122,7 +122,7 @@ void test_lcd_menu()
 
 	lcd.clear();
 	lcd << "Elige: ";
-	uint8_t unidad = dev::user_choose_string_lineal<4>(lcd.screen(), keyrow, menu_unidad_tiempo)
+	uint8_t unidad = dev::user_choose_string_lineal<4>(lcd.terminal(), keyrow, menu_unidad_tiempo)
                          .pos(7, 1)
                          .show(1);
 
@@ -133,7 +133,7 @@ void test_lcd_menu()
 	lcd.clear();
 	lcd << "Elige: ";
 	// uint16_t en lugar de uint8_t para poder imprimirlo en lcd <<.
-        uint16_t seleccion = dev::user_choose_string_lineal<4>(lcd.screen(), keyrow, menu)
+        uint16_t seleccion = dev::user_choose_string_lineal<4>(lcd.terminal(), keyrow, menu)
                                  .pos(6, 1)
                                  .show();
 
@@ -144,7 +144,7 @@ void test_lcd_menu()
 
 	lcd.clear();
 	lcd << "Elige: xxxx = unidades";
-        seleccion = dev::user_choose_string_lineal<4>(lcd.screen(), keyrow, menu2)
+        seleccion = dev::user_choose_string_lineal<4>(lcd.terminal(), keyrow, menu2)
 				 .pos(7,0)
                                  .show();
 
@@ -155,7 +155,7 @@ void test_lcd_menu()
 
 
 	lcd.clear();
-	seleccion = dev::user_choose_string_lineal<10,2>(lcd.screen(), keyrow, menu)
+	seleccion = dev::user_choose_string_lineal<10,2>(lcd.terminal(), keyrow, menu)
 			    .pos(0, 1)
 			    .show(3);
 
@@ -167,7 +167,7 @@ void test_lcd_menu()
 	lcd << "Todo bien? ";
 	constexpr std::array sino = {"si", "no"};
         seleccion =
-            dev::user_choose_string_lineal<2,2>(lcd.screen(), keyrow, sino).show(0);
+            dev::user_choose_string_lineal<2,2>(lcd.terminal(), keyrow, sino).show(0);
 
         lcd.clear();
 	lcd << "seleccion:\n" << seleccion;
@@ -177,7 +177,7 @@ void test_lcd_menu()
 	lcd.clear();
 	lcd << "Todo bien (2)? ";
         seleccion =
-            dev::user_choose_string_lineal<2>(lcd.screen(), keyrow, sino).show(0);
+            dev::user_choose_string_lineal<2>(lcd.terminal(), keyrow, sino).show(0);
 
         lcd.clear();
 	lcd << "seleccion:\n" << seleccion;

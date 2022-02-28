@@ -201,7 +201,6 @@ void print4(LCD& lcd)
 void test_symbols()
 {
     LCD lcd;
-    lcd.stop_brcorner(true);
 
     print1(lcd);
     wait_ms(5000);

@@ -79,7 +79,6 @@ void print(LCD& lcd, char i)
 void show_charset()
 {
     LCD lcd;
-    lcd.stop_brcorner(true);
 
     while(1){
 	for (char i = 0; i < 8; ++i){

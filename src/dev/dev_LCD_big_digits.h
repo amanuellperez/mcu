@@ -41,8 +41,9 @@ class Big_digit{
 public:
     using Font   = Font_t;
 
+    /// Carga en memoria los bricks para poder dibujar los big_digits.
     template <typename Screen>
-    static void init(Screen& lcd);
+    static void load(Screen& lcd);
 
     /// Imprime el digit i (de 0 a 9). 
     // CUIDADO: no imprime números, sino digits!!!
@@ -65,7 +66,7 @@ private:
 
 template <typename F>
 template <typename Screen>
-void Big_digit<F>::init(Screen& lcd)
+void Big_digit<F>::load(Screen& lcd)
 {
     for (uint8_t i = 0; i < Font::nbricks; ++i)
 	lcd.new_extended_char(i, Font::brick(i));

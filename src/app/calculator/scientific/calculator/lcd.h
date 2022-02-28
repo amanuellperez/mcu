@@ -57,8 +57,8 @@ private:
 template <typename P>
 void LCD_calculator<P>::init()
 {
-    Parent::screen().stop_brcorner(true);// I'm not going to use it as a terminal
-    Parent::screen().nowrap(); 
+    Parent::terminal().stop_brcorner(true);// I'm not going to use it as a terminal
+    Parent::terminal().nowrap(); 
     save_new_glyphs();
 }
 
@@ -118,9 +118,9 @@ template <typename P>
 void LCD_calculator<P>::print_lcd_symbol(char c)
 {
     switch(c){
-	break; case Code::sqrt: Parent::screen().print(symbol::of("√"));
-	break; case Code::frac :  Parent::screen().print(symbol::of("｣"));
-	break; case Code::inverse: Parent::screen().print(symbol::of("-1"));
+	break; case Code::sqrt: Parent::terminal().print(symbol::of("√"));
+	break; case Code::frac :  Parent::terminal().print(symbol::of("｣"));
+	break; case Code::inverse: Parent::terminal().print(symbol::of("-1"));
 	break; default: *this << '?';
     }
 }

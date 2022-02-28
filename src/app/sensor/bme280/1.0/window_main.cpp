@@ -136,7 +136,7 @@ void Window_main::scroll_down()
 
 void Window_main::lcd_fill_blank()
 {
-    auto screen = lcd().screen();
+    auto screen = lcd().terminal();
 
     // OJO: -1!! el cursor no lo voy a borrar, ya que si no parpadea.
     for (uint8_t x = screen.cursor_pos_x(); x < screen.cols() - 1; ++x)
