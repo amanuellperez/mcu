@@ -149,6 +149,23 @@ void test_bounded()
 }
 
 
+void f(const atd::Width<short>& x)
+{
+    CHECK_STDOUT((short) x, "20");
+}
+
+void test_width()
+{
+    test::interfaz("Width");
+
+    atd::Width<int> x{10};
+    CHECK_TRUE(x == int{10}, "Width<int>");
+
+    short s = 20;
+    f(s); // para ver que funciona conversión implícita
+    f(atd::width(s));
+}
+
 
 int main()
 {
@@ -156,6 +173,7 @@ try{
     test::header("atd_types");
 
     test_bounded();
+    test_width();
 
 }catch(std::exception& e)
 {
