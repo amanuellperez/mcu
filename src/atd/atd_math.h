@@ -320,7 +320,8 @@ public:
     Iterator_digits_in_reverse_order<Int> begin() const
     {
 	Int divisor = 1;
-	while (x_ >= divisor * Int{10})
+	// while (x_ >= divisor * Int{10}) OJO: posible overflow al multiplicar x 10
+	while (x_ / Int{10} >= divisor)
 	    divisor *= Int{10};
 	
 	if (ndigits_ > 0)
