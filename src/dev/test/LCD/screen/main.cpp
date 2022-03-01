@@ -264,6 +264,73 @@ void test_lcd_screen4_2004()
     scr.print("LCD Screen (20 x 04)");
     wait_ms(1000);
 
+// -------
+    scr.clear();
+    scr.print("Test print int");
+    wait_ms(1000);
+
+    scr.clear();
+    scr.print("(u16) 002 =?"
+	   "\n      ");
+    scr.print(uint16_t{2}, 3);
+    wait_ms(1000);
+
+
+
+// -------
+    scr.clear();
+    scr.print("Test print int\n");
+    scr.print("(u16) 61234 =?"
+	   "\n      ");
+    scr.print(uint16_t{61234});
+    wait_ms(1000);
+    scr.clear();
+    scr.print("(u32) 123456 =?"
+	   "\n      ");
+    scr.print(uint32_t{123456});
+    wait_ms(1000);
+    scr.clear();
+    scr.print("(u64) 123456789 =?"
+	   "\n      ");
+    scr.print(uint64_t{123456789});
+    wait_ms(1000);
+
+    scr.clear();
+    scr.print("(s16) -31234 =?"
+	   "\n      ");
+    scr.print(int16_t{-31234});
+    wait_ms(1000);
+
+    scr.clear();
+    scr.print("(s16) 31234 =?"
+	   "\n      ");
+    scr.print(int16_t{31234});
+    wait_ms(1000);
+
+    scr.clear();
+    scr.print("(s32) -23456 =?"
+	   "\n      ");
+    scr.print(int32_t{-23456});
+    wait_ms(1000);
+
+    scr.clear();
+    scr.print("(s32) 23456 =?"
+	   "\n      ");
+    scr.print(int32_t{23456});
+    wait_ms(1000);
+
+    scr.clear();
+    scr.print("(s64) -123456789 =?"
+	   "\n      ");
+    scr.print(int64_t{-123456789});
+    wait_ms(1000);
+
+    scr.clear();
+    scr.print("(s64) 123456789 =?"
+	   "\n      ");
+    scr.print(int64_t{123456789});
+    wait_ms(1000);
+
 // -----
     scr.clear();
     scr.print("wrap sentences?\n");

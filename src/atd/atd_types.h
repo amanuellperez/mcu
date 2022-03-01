@@ -55,10 +55,6 @@ struct Width{
 };
 
 
-template <typename Int>
-inline Width<Int> width(const Int& x)
-{return Width<Int>{x};} 
-
 
 /*!
  *  \brief  Bounded integer.

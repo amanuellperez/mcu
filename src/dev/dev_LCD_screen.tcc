@@ -21,16 +21,18 @@
 #ifndef __DEV_LCD_SCREEN_TCC__
 #define __DEV_LCD_SCREEN_TCC__
 
-#include <iterator>	    // std::reverse_iterator
-#include <algorithm>	    // min
-#include <array>
+//#include <iterator>	    // std::reverse_iterator
+//#include <algorithm>	    // min
+//#include <array>
 
-#include <atd_bit.h>
-#include <atd_algorithm.h>
-#include <atd_string.h>	    // atd::int_to_string
-#include <atd_double.h>
+//#include <atd_bit.h>
+//#include <atd_algorithm.h>
+//#include <atd_string.h>	    // atd::int_to_string
+//#include <atd_double.h>
+//#include <avr_time.h>
 
-#include <avr_time.h>
+#include <atd_math.h>	    // Digits_of
+
 
 
 namespace dev{
@@ -110,7 +112,7 @@ bool LCD_screen<num_cols, num_rows, LCD>::print_extended(char c)
 		 , "sizeof(char) != 1 byte!!!");
 
     lcd_.print(c);
-//    cursor_move();
+    cursor_move();
 
     return true;
 }
@@ -131,7 +133,76 @@ uint8_t LCD_screen<num_cols, num_rows, LCD>::print(const char* c)
 }
 
 
-// Voy a concebir el LCD como con 4 filas
+// TODO: cambiar '0' + *p por una función. Está atd::digit_to_ascii, pero no
+// me gusta el nombre.
+template <uint8_t num_cols, uint8_t num_rows, typename LCD>
+template <typename Int>
+bool LCD_screen<num_cols, num_rows, LCD>::print_unsigned_number(const Int& n,
+                                                                int ndigits)
+{
+    atd::Digits_from_left_to_right d{n, ndigits};
+
+    for (auto p = d.begin(); p != d.end(); ++p){
+	if (!print(static_cast<char>('0' + *p)))
+	    return false;
+    }
+    
+    return true;
+}
+
+template <uint8_t num_cols, uint8_t num_rows, typename LCD>
+template <typename Int>
+bool LCD_screen<num_cols, num_rows, LCD>::print_signed_number(const Int& n,
+                                                              int ndigits)
+{
+    atd::Digits_from_left_to_right d{n, ndigits};
+
+    if (n < 0){
+	print('-');
+	return print_unsigned_number(-n);
+    }
+
+    else 
+	return print_unsigned_number(n);
+}
+
+
+template <uint8_t num_cols, uint8_t num_rows, typename LCD>
+inline bool LCD_screen<num_cols, num_rows, LCD>::print(uint16_t n)
+{ return print_unsigned_number(n); }
+
+template <uint8_t num_cols, uint8_t num_rows, typename LCD>
+inline bool LCD_screen<num_cols, num_rows, LCD>::print(const uint32_t& n)
+{ return print_unsigned_number(n); }
+
+
+template <uint8_t num_cols, uint8_t num_rows, typename LCD>
+inline bool LCD_screen<num_cols, num_rows, LCD>::print(const uint64_t& n)
+{ return print_unsigned_number(n); }
+
+
+template <uint8_t num_cols, uint8_t num_rows, typename LCD>
+inline bool LCD_screen<num_cols, num_rows, LCD>::print(int16_t n)
+{ return print_signed_number(n); }
+
+template <uint8_t num_cols, uint8_t num_rows, typename LCD>
+inline bool LCD_screen<num_cols, num_rows, LCD>::print(const int32_t& n)
+{ return print_signed_number(n); }
+
+
+template <uint8_t num_cols, uint8_t num_rows, typename LCD>
+inline bool LCD_screen<num_cols, num_rows, LCD>::print(const int64_t& n)
+{ return print_signed_number(n); }
+
+
+
+template <uint8_t num_cols, uint8_t num_rows, typename LCD>
+inline bool LCD_screen<num_cols, num_rows, LCD>::print(uint16_t n
+    , const atd::Width<uint8_t>& w)
+{ return print_unsigned_number(n, w); }
+
+
+
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
 void LCD_screen<num_cols, num_rows, LCD>::cursor_pos(uint8_t col, uint8_t row)
 {

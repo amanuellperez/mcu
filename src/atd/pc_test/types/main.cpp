@@ -158,12 +158,12 @@ void test_width()
 {
     test::interfaz("Width");
 
-    atd::Width<int> x{10};
+    atd::Width x{10};
     CHECK_TRUE(x == int{10}, "Width<int>");
 
     short s = 20;
     f(s); // para ver que funciona conversión implícita
-    f(atd::width(s));
+    f(atd::Width{s});
 }
 
 

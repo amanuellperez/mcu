@@ -41,6 +41,7 @@
  ****************************************************************************/
 #include <stdint.h>
 #include <avr_memory.h>	// Progmem
+#include <atd_types.h>	// Width
 
 namespace dev{
 /*!
@@ -100,6 +101,26 @@ public:
     // Return: el número de caracteres escritos.
     uint8_t print(const char* c);
 
+    /// Imprime el número indicado.
+    /// return: true si lo ha impreso entero. 
+    ///         false, si solo parcialmente o ha fallado.
+    // (RRR) ¿por qué llamar print_number(uint8_t)? 
+    //       Porque uint8_t es un tipo char y por tanto se confunde
+    //       print(char) con print(uint8_t).
+    bool print_number(uint8_t x);
+    bool print(uint16_t x);
+    bool print(const uint32_t& x);
+    bool print(const uint64_t& x);
+
+    bool print_number(int8_t x);
+    bool print(int16_t x);
+    bool print(const int32_t& x);
+    bool print(const int64_t& x);
+
+    // Impresión de números con diferentes fuentes.
+    // Todas estas funciones escriben los números con ceros a la izquierda de
+    // tamaño Width
+    bool print(uint16_t x, const atd::Width<uint8_t>& w);
 
 // MOVIMIENTO DEL CURSOR
     /// Define la posición del cursor. En caso de pasarle una fila no 
@@ -175,6 +196,15 @@ private:
     void cursor_move();
     void print_return();
     void print_printable_char(char c);
+
+    // return: true si lo ha impreso entero. 
+    //         false, si solo parcialmente o ha fallado.
+    template <typename Int>
+    bool print_unsigned_number(const Int& x, int ndigits = 0);
+
+    template <typename Int>
+    bool print_signed_number(const Int& x, int ndigits = 0);
+
 };
 
 template <typename LCD>
