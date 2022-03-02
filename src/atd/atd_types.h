@@ -51,6 +51,10 @@ template <typename Int>
 struct Width{
     Int x;
     Width(const Int& x0) : x{x0} { }
+
+    template <typename Int2>
+    Width(const Int2& x0) : x{x0} { }
+
     operator Int() const {return x;}
 };
 

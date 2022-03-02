@@ -37,6 +37,24 @@
  *	30/07/2021       print_align_to_the_right
  *	06/02/2022 v0.6: Basado en el concept 'Generic_LCD'
  *	28/02/2022     : Divido Screen en dos clases, Screen y Terminal.
+ *			 print(int)	    : imprime un número
+ *			 print(int, Width)  : idem pero fija un ancho mínimo.
+ *			   Dudas: 
+ *			   1. ¿Cómo colocar el signo si fijamos Width?
+ *			      print(2, Width{2}) ---> '02'
+ *			      print(-2,Width{2}) ---> '-2'
+ *			      ¿En lugar de '02' mejor imprimir '+2'? ¿ó ' 2'?
+ *			   2. ¿Qué hacer si el número tiene un ancho mayor?
+ *			      Si es el ancho mínimo lo imprimimos (es lo que
+ *			      implemento ahora). Pero ¿sería interesante poner
+ *			      un ancho fijo en lugar de mínimo?
+ *			   Como desconozco qué queda mejor implemento una
+ *			   solución y el uso marcará si hay que modificarla.
+ *			   3. Se podría implementar el no añadir los '0' a la 
+ *			      izda. Pero como es experimental implemento la
+ *			      opción más sencilla (con ceros). De momento esto
+ *			      lo estoy pensando en usar en un reloj, donde
+ *			      necesito los '0' a la izda.
  *
  ****************************************************************************/
 #include <stdint.h>
@@ -120,7 +138,15 @@ public:
     // Impresión de números con diferentes fuentes.
     // Todas estas funciones escriben los números con ceros a la izquierda de
     // tamaño Width
-    bool print(uint16_t x, const atd::Width<uint8_t>& w);
+    bool print_number(uint8_t x, const atd::Width<int>& w);
+    bool print(uint16_t x, const atd::Width<int>& w);
+    bool print(uint32_t x, const atd::Width<int>& w);
+    bool print(uint64_t x, const atd::Width<int>& w);
+
+    bool print_number(int8_t x, const atd::Width<int>& w);
+    bool print(int16_t x, const atd::Width<int>& w);
+    bool print(int32_t x, const atd::Width<int>& w);
+    bool print(int64_t x, const atd::Width<int>& w);
 
 // MOVIMIENTO DEL CURSOR
     /// Define la posición del cursor. En caso de pasarle una fila no 

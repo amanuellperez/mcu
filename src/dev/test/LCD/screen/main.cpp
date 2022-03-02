@@ -55,6 +55,7 @@ using Screen_2004 = dev::LCD_screen_2004<Generic_LCD_2004>;
 using Screen_4004 = dev::LCD_screen_4004<Generic_LCD_4004>;
 
 // Choose Screen to test
+// TODO: copiar las pruebas del 2004 al 1602 y 4004
 //using Screen = Screen_1602;
 using Screen = Screen_2004;
 //using Screen = Screen_4004;
@@ -265,17 +266,84 @@ void test_lcd_screen4_2004()
     wait_ms(1000);
 
 // -------
+// Probamos print(int) de ancho fijo
     scr.clear();
     scr.print("Test print int");
     wait_ms(1000);
 
     scr.clear();
-    scr.print("(u16) 002 =?"
-	   "\n      ");
-    scr.print(uint16_t{2}, 3);
+    scr.print("(u8) 009 =?"
+	    "\n     ");
+    scr.print_number(uint8_t{9}, atd::Width{3});
     wait_ms(1000);
 
 
+    scr.clear();
+    scr.print("(u16) 002 =?"
+	    "\n      ");
+    // scr.print(uint16_t{2}, 3); <-- tambien funciona, pero es más claro:
+    scr.print(uint16_t{2}, atd::Width{3});
+    wait_ms(1000);
+
+    scr.clear();
+    scr.print("(u32) 008 =?"
+	   "\n      ");
+    scr.print(uint32_t{8}, atd::Width{3});
+    wait_ms(1000);
+
+    scr.clear();
+    scr.print("(u64) 072 =?"
+	   "\n      ");
+    scr.print(uint64_t{72}, atd::Width{3});
+    wait_ms(1000);
+
+    scr.clear();
+    scr.print("(s8) 009 =?"
+	    "\n     ");
+    scr.print_number(int8_t{9}, atd::Width{3});
+    wait_ms(1000);
+
+    scr.clear();
+    scr.print("(s8) -05 =?"
+	    "\n     ");
+    scr.print_number(int8_t{-5}, atd::Width{3});
+    wait_ms(1000);
+
+    scr.clear();
+    scr.print("(s16) 002 =?"
+	   "\n      ");
+    scr.print(int16_t{2}, atd::Width{3});
+    wait_ms(1000);
+
+    scr.clear();
+    scr.print("(s16) -02 =?"
+	   "\n      ");
+    scr.print(int16_t{-2}, atd::Width{3});
+    wait_ms(1000);
+
+    scr.clear();
+    scr.print("(u32) 003 =?"
+	   "\n      ");
+    scr.print(int32_t{3}, atd::Width{3});
+    wait_ms(1000);
+
+    scr.clear();
+    scr.print("(s32) -08 =?"
+	   "\n      ");
+    scr.print(int32_t{-8}, atd::Width{3});
+    wait_ms(1000);
+
+    scr.clear();
+    scr.print("(s64) 072 =?"
+	   "\n      ");
+    scr.print(int64_t{72}, atd::Width{3});
+    wait_ms(1000);
+
+    scr.clear();
+    scr.print("(s64) -05 =?"
+	   "\n      ");
+    scr.print(int64_t{-5}, atd::Width{3});
+    wait_ms(1000);
 
 // -------
     scr.clear();

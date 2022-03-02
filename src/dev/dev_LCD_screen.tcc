@@ -158,12 +158,15 @@ bool LCD_screen<num_cols, num_rows, LCD>::print_signed_number(const Int& n,
     atd::Digits_from_left_to_right d{n, ndigits};
 
     if (n < 0){
+	if (ndigits > 0)
+	    --ndigits;
+
 	print('-');
-	return print_unsigned_number(-n);
+	return print_unsigned_number(-n, ndigits);
     }
 
     else 
-	return print_unsigned_number(n);
+	return print_unsigned_number(n, ndigits);
 }
 
 
@@ -195,11 +198,49 @@ inline bool LCD_screen<num_cols, num_rows, LCD>::print(const int64_t& n)
 { return print_signed_number(n); }
 
 
+template <uint8_t num_cols, uint8_t num_rows, typename LCD>
+inline bool LCD_screen<num_cols, num_rows, LCD>::print_number(uint8_t n
+    , const atd::Width<int>& w)
+{ return print_unsigned_number(n, w); }
 
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
 inline bool LCD_screen<num_cols, num_rows, LCD>::print(uint16_t n
-    , const atd::Width<uint8_t>& w)
+    , const atd::Width<int>& w)
 { return print_unsigned_number(n, w); }
+
+template <uint8_t num_cols, uint8_t num_rows, typename LCD>
+inline bool LCD_screen<num_cols, num_rows, LCD>::print(uint32_t n
+    , const atd::Width<int>& w)
+{ return print_unsigned_number(n, w); }
+
+
+template <uint8_t num_cols, uint8_t num_rows, typename LCD>
+inline bool LCD_screen<num_cols, num_rows, LCD>::print(uint64_t n
+    , const atd::Width<int>& w)
+{ return print_unsigned_number(n, w); }
+
+
+
+template <uint8_t num_cols, uint8_t num_rows, typename LCD>
+inline bool LCD_screen<num_cols, num_rows, LCD>::print_number(int8_t n
+    , const atd::Width<int>& w)
+{ return print_signed_number(n, w); }
+
+template <uint8_t num_cols, uint8_t num_rows, typename LCD>
+inline bool LCD_screen<num_cols, num_rows, LCD>::print(int16_t n
+    , const atd::Width<int>& w)
+{ return print_signed_number(n, w); }
+
+template <uint8_t num_cols, uint8_t num_rows, typename LCD>
+inline bool LCD_screen<num_cols, num_rows, LCD>::print(int32_t n
+    , const atd::Width<int>& w)
+{ return print_signed_number(n, w); }
+
+
+template <uint8_t num_cols, uint8_t num_rows, typename LCD>
+inline bool LCD_screen<num_cols, num_rows, LCD>::print(int64_t n
+    , const atd::Width<int>& w)
+{ return print_signed_number(n, w); }
 
 
 
