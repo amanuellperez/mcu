@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __DEV_LCD_BIG_DIGIT_2X1_H__
-#define __DEV_LCD_BIG_DIGIT_2X1_H__
+#ifndef __DEV_LCD_FONT_2X1_H__
+#define __DEV_LCD_FONT_2X1_H__
 /****************************************************************************
  *
  *  - DESCRIPCION: Big digits de 2 x 1
@@ -164,7 +164,7 @@ constexpr const uint8_t digits2x1_t1[10][2] /* PROGMEM */ = {
 /***************************************************************************
  *		     INTERFAZ DE ACCESO A LAS FONTS
  ***************************************************************************/
-struct Font_big_digit_2x1_t1{
+struct _Font_digit_2x1_t1{
     static constexpr uint8_t rows = 2;
     static constexpr uint8_t cols = 1;
     static constexpr uint8_t nbricks = big_digits::bricks2x1_t1_size;
@@ -184,7 +184,7 @@ struct Font_big_digit_2x1_t1{
 
 
 // Alias
-using Big_digit_2x1_t1= Big_digit<Font_big_digit_2x1_t1>;
+using Font_digit_2x1_t1= Big_digit<_Font_digit_2x1_t1>;
 
 
 /***************************************************************************
@@ -315,7 +315,7 @@ constexpr const uint8_t digits2x1_t2[10][2] /* PROGMEM */ = {
 /***************************************************************************
  *		     INTERFAZ DE ACCESO A LAS FONTS
  ***************************************************************************/
-struct Font_big_digit_2x1_t2{
+struct _Font_digit_2x1_t2{
     static constexpr uint8_t rows = 2;
     static constexpr uint8_t cols = 1;
     static constexpr uint8_t nbricks = big_digits::bricks2x1_t2_size;
@@ -335,7 +335,7 @@ struct Font_big_digit_2x1_t2{
 
 
 // Alias
-using Big_digit_2x1_t2= Big_digit<Font_big_digit_2x1_t2>;
+using Font_digit_2x1_t2= Big_digit<_Font_digit_2x1_t2>;
 
 }// namespace
 

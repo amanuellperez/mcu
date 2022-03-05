@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __DEV_LCD_BIG_DIGIT_1X3_H__
-#define __DEV_LCD_BIG_DIGIT_2X3_H__
+#ifndef __DEV_LCD_FONT_1X3_H__
+#define __DEV_LCD_FONT_2X3_H__
 /****************************************************************************
  *
  *  - DESCRIPCION: Fuentes de 2 x 3
@@ -177,7 +177,7 @@ constexpr const uint8_t digits2x3_t1[10][6] /* PROGMEM */ = {
 /***************************************************************************
  *		     INTERFAZ DE ACCESO A LAS FONTS
  ***************************************************************************/
-struct Font_big_digit_2x3_t1{
+struct _Font_digit_2x3_t1{
     static constexpr uint8_t rows = 2;
     static constexpr uint8_t cols = 3;
     static constexpr uint8_t nbricks = big_digits::bricks2x3_t1_size;
@@ -197,7 +197,7 @@ struct Font_big_digit_2x3_t1{
 
 
 // Alias
-using Big_digit_2x3_t1 = Big_digit<Font_big_digit_2x3_t1>;
+using Font_digit_2x3_t1 = Big_digit<_Font_digit_2x3_t1>;
 
 } //namespace
 #endif

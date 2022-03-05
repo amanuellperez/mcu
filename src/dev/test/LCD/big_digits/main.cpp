@@ -21,11 +21,11 @@
 
 #include "../../../dev_LCD_screen.h"
 #include "../../../dev_LCD_HD44780_generic.h"
-#include "../../../dev_LCD_big_digit_2x1.h"
-#include "../../../dev_LCD_big_digit_2x2.h"
-#include "../../../dev_LCD_big_digit_2x3.h"
-#include "../../../dev_LCD_big_digit_3x3.h"
-#include "../../../dev_LCD_big_digit_4x3.h"
+#include "../../../dev_LCD_font_2x1.h"
+#include "../../../dev_LCD_font_2x2.h"
+#include "../../../dev_LCD_font_2x3.h"
+#include "../../../dev_LCD_font_3x3.h"
+#include "../../../dev_LCD_font_4x3.h"
 #include "../../../dev_LCD_HD44780_charset.h"
 #include <avr_time.h>
 #include <stddef.h>
@@ -69,19 +69,19 @@ using LCD = Screen_2004;
 
 // Estas son las fuentes que vamos a usar.
 // DUDA: ¿mejor llamarlas Font_BD2x1_t1? ¿o Digits_font_2x1_t1?
-using Big_digit_2x1_t1 = dev::Big_digit_2x1_t1; 
-using Big_digit_2x1_t2 = dev::Big_digit_2x1_t2; 
-using Big_digit_2x2_t1 = dev::Big_digit_2x2_t1; 
-using Big_digit_2x3_t1 = dev::Big_digit_2x3_t1; 
-using Big_digit_3x3_t1 = dev::Big_digit_3x3_t1; 
-using Big_digit_4x3_t1 = dev::Big_digit_4x3_t1; 
+using Font_digit_2x1_t1 = dev::Font_digit_2x1_t1; 
+using Font_digit_2x1_t2 = dev::Font_digit_2x1_t2; 
+using Font_digit_2x2_t1 = dev::Font_digit_2x2_t1; 
+using Font_digit_2x3_t1 = dev::Font_digit_2x3_t1; 
+using Font_digit_3x3_t1 = dev::Font_digit_3x3_t1; 
+using Font_digit_4x3_t1 = dev::Font_digit_4x3_t1; 
 
 // Mostramos los bricks cargados en memoria
 void show_bricks()
 {
     LCD lcd;
     
-    Big_digit_3x3_t1::load(lcd);
+    Font_digit_3x3_t1::load(lcd);
     lcd.clear();
     for (uint8_t i = 0; i < 8; ++i)
 	lcd.print_extended(i);
@@ -90,7 +90,7 @@ void show_bricks()
 }
 
 
-template <typename BD> // BD = Big_digit
+template <typename BD> // BD = Font_digit
 void test_big_digits(LCD& lcd, bool stop = false)
 {
     BD::load(lcd);
@@ -133,15 +133,15 @@ void test_big_digits(LCD& lcd, const char* name, bool stop = false)
 
 void test_big_digits_fonts(LCD& lcd)
 {
-    test_big_digits<Big_digit_2x1_t1>(lcd, "Big digit 2x1 t1");
-    test_big_digits<Big_digit_2x1_t2>(lcd, "Big digit 2x1 t2");
-    test_big_digits<Big_digit_2x2_t1>(lcd, "Big digit 2x2 t1");
-    test_big_digits<Big_digit_2x3_t1>(lcd, "Big digit 2x3 t1", true);
-    test_big_digits<Big_digit_3x3_t1>(lcd, "Big digit 3x3 t1", true);
-    test_big_digits<Big_digit_4x3_t1>(lcd, "Big digit 4x3 t1", true);
+    test_big_digits<Font_digit_2x1_t1>(lcd, "Big digit 2x1 t1");
+    test_big_digits<Font_digit_2x1_t2>(lcd, "Big digit 2x1 t2");
+    test_big_digits<Font_digit_2x2_t1>(lcd, "Big digit 2x2 t1");
+    test_big_digits<Font_digit_2x3_t1>(lcd, "Big digit 2x3 t1", true);
+    test_big_digits<Font_digit_3x3_t1>(lcd, "Big digit 3x3 t1", true);
+    test_big_digits<Font_digit_4x3_t1>(lcd, "Big digit 4x3 t1", true);
 }
 
-template <typename BD> // BD = Big_digit
+template <typename BD> // BD = Font_digit
 void test_big_digits_print(LCD& lcd, const atd::Width<int>& width = 0)
 {
     BD::load(lcd);
@@ -163,22 +163,22 @@ void test_big_digits_print(LCD& lcd)
     lcd.clear();
     lcd.print("Counting without padding");
     wait_ms(1000);
-    test_big_digits_print<Big_digit_2x1_t1>(lcd);
-    test_big_digits_print<Big_digit_2x1_t2>(lcd);
-    test_big_digits_print<Big_digit_2x2_t1>(lcd);
-    test_big_digits_print<Big_digit_2x3_t1>(lcd);
-    test_big_digits_print<Big_digit_3x3_t1>(lcd);
-    test_big_digits_print<Big_digit_4x3_t1>(lcd);
+    test_big_digits_print<Font_digit_2x1_t1>(lcd);
+    test_big_digits_print<Font_digit_2x1_t2>(lcd);
+    test_big_digits_print<Font_digit_2x2_t1>(lcd);
+    test_big_digits_print<Font_digit_2x3_t1>(lcd);
+    test_big_digits_print<Font_digit_3x3_t1>(lcd);
+    test_big_digits_print<Font_digit_4x3_t1>(lcd);
 
     lcd.clear();
     lcd.print("Counting with padding");
     wait_ms(1000);
-    test_big_digits_print<Big_digit_2x1_t1>(lcd, 3);
-    test_big_digits_print<Big_digit_2x1_t2>(lcd, 3);
-    test_big_digits_print<Big_digit_2x2_t1>(lcd, 3);
-    test_big_digits_print<Big_digit_2x3_t1>(lcd, 3);
-    test_big_digits_print<Big_digit_3x3_t1>(lcd, 3);
-    test_big_digits_print<Big_digit_4x3_t1>(lcd, 3);
+    test_big_digits_print<Font_digit_2x1_t1>(lcd, 3);
+    test_big_digits_print<Font_digit_2x1_t2>(lcd, 3);
+    test_big_digits_print<Font_digit_2x2_t1>(lcd, 3);
+    test_big_digits_print<Font_digit_2x3_t1>(lcd, 3);
+    test_big_digits_print<Font_digit_3x3_t1>(lcd, 3);
+    test_big_digits_print<Font_digit_4x3_t1>(lcd, 3);
 }
 
 

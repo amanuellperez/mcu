@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __DEV_LCD_BIG_DIGIT_3X3_H__
-#define __DEV_LCD_BIG_DIGIT_3X3_H__
+#ifndef __DEV_LCD_FONT_3X3_H__
+#define __DEV_LCD_FONT_3X3_H__
 /****************************************************************************
  *
  *  - DESCRIPCION: Fuente tipo 1 para el LCD.
@@ -199,7 +199,7 @@ constexpr const uint8_t digits3x3_t1[10][9] /* PROGMEM */ = {
 //          la definí).
 //       2. Encapsular cómo se almacenan los bricks y los digits. ¿en RAM? ¿en
 //          PROGMEM?
-struct Font_big_digit_3x3_t1{
+struct _Font_digit_3x3_t1{
     static constexpr uint8_t rows = 3;
     static constexpr uint8_t cols = 3;
     static constexpr uint8_t nbricks = big_digits::bricks3x3_t1_size;
@@ -219,7 +219,7 @@ struct Font_big_digit_3x3_t1{
 
 
 // Alias
-using Big_digit_3x3_t1 = Big_digit<Font_big_digit_3x3_t1>;
+using Font_digit_3x3_t1 = Big_digit<_Font_digit_3x3_t1>;
 
 } //namespace
 #endif

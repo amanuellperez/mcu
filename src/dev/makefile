@@ -16,11 +16,11 @@ INCS= 	dev_BMP280_basic.h			\
 		dev_keyboard_code.h			\
 		dev_keypad.h				\
 		dev_keyrow.h				\
-		dev_LCD_big_digit_2x1.h		\
-		dev_LCD_big_digit_2x2.h		\
-		dev_LCD_big_digit_2x3.h		\
-		dev_LCD_big_digit_3x3.h		\
-		dev_LCD_big_digit_4x3.h		\
+		dev_LCD_font_2x1.h		\
+		dev_LCD_font_2x2.h		\
+		dev_LCD_font_2x3.h		\
+		dev_LCD_font_3x3.h		\
+		dev_LCD_font_4x3.h		\
 		dev_LCD_big_digits.h		\
 		dev_LCD_generic.h			\
 		dev_LCD_screen.h			\

@@ -20,11 +20,11 @@
 #include "../../../dev_LCD_screen.h"
 #include "../../../dev_LCD_HD44780_generic.h"
 
-#include "../../../dev_LCD_big_digit_2x1.h"
-#include "../../../dev_LCD_big_digit_2x2.h"
-#include "../../../dev_LCD_big_digit_2x3.h"
-#include "../../../dev_LCD_big_digit_3x3.h"
-#include "../../../dev_LCD_big_digit_4x3.h"
+#include "../../../dev_LCD_font_2x1.h"
+#include "../../../dev_LCD_font_2x2.h"
+#include "../../../dev_LCD_font_2x3.h"
+#include "../../../dev_LCD_font_3x3.h"
+#include "../../../dev_LCD_font_4x3.h"
 
 #include <avr_time.h>
 #include <stddef.h>
@@ -68,12 +68,12 @@ using Screen = Screen_2004;
 //using Screen = Screen_4004;
 
 // Fonts
-using Font_digit_2x1_t1 = dev::Big_digit_2x1_t1; 
-using Font_digit_2x1_t2 = dev::Big_digit_2x1_t2; 
-using Font_digit_2x2_t1 = dev::Big_digit_2x2_t1; 
-using Font_digit_2x3_t1 = dev::Big_digit_2x3_t1; 
-using Font_digit_3x3_t1 = dev::Big_digit_3x3_t1; 
-using Font_digit_4x3_t1 = dev::Big_digit_4x3_t1; 
+using Font_digit_2x1_t1 = dev::Font_digit_2x1_t1; 
+using Font_digit_2x1_t2 = dev::Font_digit_2x1_t2; 
+using Font_digit_2x2_t1 = dev::Font_digit_2x2_t1; 
+using Font_digit_2x3_t1 = dev::Font_digit_2x3_t1; 
+using Font_digit_3x3_t1 = dev::Font_digit_3x3_t1; 
+using Font_digit_4x3_t1 = dev::Font_digit_4x3_t1; 
 
 // glyph de una campana
 constexpr const uint8_t bell[8] = 
