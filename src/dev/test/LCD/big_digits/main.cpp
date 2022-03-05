@@ -67,7 +67,8 @@ using Screen_4004 = dev::LCD_screen_4004<Generic_LCD_4004>;
 using LCD = Screen_2004;
 //using LCD = Screen_4004;
 
-
+// Estas son las fuentes que vamos a usar.
+// DUDA: ¿mejor llamarlas Font_BD2x1_t1? ¿o Digits_font_2x1_t1?
 using Big_digit_2x1_t1 = dev::Big_digit_2x1_t1; 
 using Big_digit_2x1_t2 = dev::Big_digit_2x1_t2; 
 using Big_digit_2x2_t1 = dev::Big_digit_2x2_t1; 
@@ -141,7 +142,7 @@ void test_big_digits_fonts(LCD& lcd)
 }
 
 template <typename BD> // BD = Big_digit
-void test_big_digits_print(LCD& lcd, uint8_t width = 0)
+void test_big_digits_print(LCD& lcd, const atd::Width<int>& width = 0)
 {
     BD::load(lcd);
     lcd.clear();

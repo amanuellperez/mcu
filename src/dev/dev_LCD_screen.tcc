@@ -41,6 +41,13 @@ namespace dev{
  *			    LCD_screen
  ***************************************************************************/
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
+template <typename Font>
+inline void LCD_screen<num_cols, num_rows, LCD>::load()
+{ Font::load(*this); }
+
+
+
+template <uint8_t num_cols, uint8_t num_rows, typename LCD>
 uint8_t LCD_screen<num_cols, num_rows, LCD>::read(uint8_t x, uint8_t y)
 {
     cursor_pos(x, y);
@@ -137,111 +144,119 @@ uint8_t LCD_screen<num_cols, num_rows, LCD>::print(const char* c)
 // me gusta el nombre.
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
 template <typename Int>
-bool LCD_screen<num_cols, num_rows, LCD>::print_unsigned_number(const Int& n,
+uint8_t LCD_screen<num_cols, num_rows, LCD>::print_unsigned_number(const Int& x,
                                                                 int ndigits)
 {
-    atd::Digits_from_left_to_right d{n, ndigits};
+    atd::Digits_from_left_to_right d{x, ndigits};
 
-    for (auto p = d.begin(); p != d.end(); ++p){
+    uint8_t n = 0; 
+    for (auto p = d.begin(); p != d.end(); ++p, ++n){
 	if (!print(static_cast<char>('0' + *p)))
-	    return false;
+	    return n;
     }
     
-    return true;
+    return n;
 }
 
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
 template <typename Int>
-bool LCD_screen<num_cols, num_rows, LCD>::print_signed_number(const Int& n,
+uint8_t LCD_screen<num_cols, num_rows, LCD>::print_signed_number(const Int& x,
                                                               int ndigits)
 {
-    atd::Digits_from_left_to_right d{n, ndigits};
+    atd::Digits_from_left_to_right d{x, ndigits};
 
-    if (n < 0){
+    if (x < 0){
 	if (ndigits > 0)
 	    --ndigits;
 
-	print('-');
-	return print_unsigned_number(-n, ndigits);
+	if (!print('-'))
+	    return 0;
+
+	return print_unsigned_number(-x, ndigits) + 1;
     }
 
     else 
-	return print_unsigned_number(n, ndigits);
+	return print_unsigned_number(x, ndigits);
 }
 
 
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
-inline bool LCD_screen<num_cols, num_rows, LCD>::print(uint16_t n)
+inline uint8_t LCD_screen<num_cols, num_rows, LCD>::print(uint16_t n)
 { return print_unsigned_number(n); }
 
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
-inline bool LCD_screen<num_cols, num_rows, LCD>::print(const uint32_t& n)
-{ return print_unsigned_number(n); }
-
-
-template <uint8_t num_cols, uint8_t num_rows, typename LCD>
-inline bool LCD_screen<num_cols, num_rows, LCD>::print(const uint64_t& n)
+inline uint8_t LCD_screen<num_cols, num_rows, LCD>::print(const uint32_t& n)
 { return print_unsigned_number(n); }
 
 
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
-inline bool LCD_screen<num_cols, num_rows, LCD>::print(int16_t n)
+inline uint8_t LCD_screen<num_cols, num_rows, LCD>::print(const uint64_t& n)
+{ return print_unsigned_number(n); }
+
+
+template <uint8_t num_cols, uint8_t num_rows, typename LCD>
+inline uint8_t LCD_screen<num_cols, num_rows, LCD>::print(int16_t n)
 { return print_signed_number(n); }
 
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
-inline bool LCD_screen<num_cols, num_rows, LCD>::print(const int32_t& n)
+inline uint8_t LCD_screen<num_cols, num_rows, LCD>::print(const int32_t& n)
 { return print_signed_number(n); }
 
 
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
-inline bool LCD_screen<num_cols, num_rows, LCD>::print(const int64_t& n)
+inline uint8_t LCD_screen<num_cols, num_rows, LCD>::print(const int64_t& n)
 { return print_signed_number(n); }
 
 
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
-inline bool LCD_screen<num_cols, num_rows, LCD>::print_number(uint8_t n
+inline uint8_t LCD_screen<num_cols, num_rows, LCD>::print_number(uint8_t n
     , const atd::Width<int>& w)
 { return print_unsigned_number(n, w); }
 
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
-inline bool LCD_screen<num_cols, num_rows, LCD>::print(uint16_t n
+inline uint8_t LCD_screen<num_cols, num_rows, LCD>::print(uint16_t n
     , const atd::Width<int>& w)
 { return print_unsigned_number(n, w); }
 
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
-inline bool LCD_screen<num_cols, num_rows, LCD>::print(uint32_t n
+inline uint8_t LCD_screen<num_cols, num_rows, LCD>::print(uint32_t n
     , const atd::Width<int>& w)
 { return print_unsigned_number(n, w); }
 
 
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
-inline bool LCD_screen<num_cols, num_rows, LCD>::print(uint64_t n
+inline uint8_t LCD_screen<num_cols, num_rows, LCD>::print(uint64_t n
     , const atd::Width<int>& w)
 { return print_unsigned_number(n, w); }
 
 
 
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
-inline bool LCD_screen<num_cols, num_rows, LCD>::print_number(int8_t n
+inline uint8_t LCD_screen<num_cols, num_rows, LCD>::print_number(int8_t n
     , const atd::Width<int>& w)
 { return print_signed_number(n, w); }
 
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
-inline bool LCD_screen<num_cols, num_rows, LCD>::print(int16_t n
+inline uint8_t LCD_screen<num_cols, num_rows, LCD>::print(int16_t n
     , const atd::Width<int>& w)
 { return print_signed_number(n, w); }
 
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
-inline bool LCD_screen<num_cols, num_rows, LCD>::print(int32_t n
+inline uint8_t LCD_screen<num_cols, num_rows, LCD>::print(int32_t n
     , const atd::Width<int>& w)
 { return print_signed_number(n, w); }
 
 
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
-inline bool LCD_screen<num_cols, num_rows, LCD>::print(int64_t n
+inline uint8_t LCD_screen<num_cols, num_rows, LCD>::print(int64_t n
     , const atd::Width<int>& w)
 { return print_signed_number(n, w); }
 
+template <uint8_t num_cols, uint8_t num_rows, typename LCD>
+template <typename Font>
+inline uint8_t LCD_screen<num_cols, num_rows, LCD>::print_number(uint8_t n, 
+		const atd::Width<int>& w)
+{ return Font::print_number(*this, n, w);}
 
 
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>

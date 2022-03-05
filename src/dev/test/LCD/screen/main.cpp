@@ -19,6 +19,13 @@
 
 #include "../../../dev_LCD_screen.h"
 #include "../../../dev_LCD_HD44780_generic.h"
+
+#include "../../../dev_LCD_big_digit_2x1.h"
+#include "../../../dev_LCD_big_digit_2x2.h"
+#include "../../../dev_LCD_big_digit_2x3.h"
+#include "../../../dev_LCD_big_digit_3x3.h"
+#include "../../../dev_LCD_big_digit_4x3.h"
+
 #include <avr_time.h>
 #include <stddef.h>
 
@@ -60,7 +67,13 @@ using Screen_4004 = dev::LCD_screen_4004<Generic_LCD_4004>;
 using Screen = Screen_2004;
 //using Screen = Screen_4004;
 
-
+// Fonts
+using Font_digit_2x1_t1 = dev::Big_digit_2x1_t1; 
+using Font_digit_2x1_t2 = dev::Big_digit_2x1_t2; 
+using Font_digit_2x2_t1 = dev::Big_digit_2x2_t1; 
+using Font_digit_2x3_t1 = dev::Big_digit_2x3_t1; 
+using Font_digit_3x3_t1 = dev::Big_digit_3x3_t1; 
+using Font_digit_4x3_t1 = dev::Big_digit_4x3_t1; 
 
 // glyph de una campana
 constexpr const uint8_t bell[8] = 
@@ -259,10 +272,43 @@ void test_lcd_screen4_1602()
 void test_lcd_screen4_2004()
 {
     Screen scr;
+// TODO: ordenar las pruebas
 
 // ------
     scr.clear();
     scr.print("LCD Screen (20 x 04)");
+    wait_ms(1000);
+
+// -------
+// Probamos diferentes fonts
+    scr.clear();
+    scr.print("Test print fonts");
+    scr.clear();
+    scr.load<Font_digit_2x1_t1>();
+    scr.print_number<Font_digit_2x1_t1>(2, atd::Width{3});
+    wait_ms(1000);
+
+    scr.clear();
+    scr.load<Font_digit_2x2_t1>();
+    scr.print_number<Font_digit_2x2_t1>(123, atd::Width{3});
+    wait_ms(1000);
+
+    scr.clear();
+    scr.load<Font_digit_2x3_t1>();
+    scr.print_number<Font_digit_2x3_t1>(35, atd::Width{3});
+    scr.print(" =? 035");
+    wait_ms(1000);
+
+    scr.clear();
+    scr.load<Font_digit_3x3_t1>();
+    scr.print_number<Font_digit_3x3_t1>(74, atd::Width{3});
+    scr.print(" =? 074");
+    wait_ms(1000);
+
+    scr.clear();
+    scr.load<Font_digit_4x3_t1>();
+    scr.print_number<Font_digit_4x3_t1>(12, atd::Width{3});
+    scr.print(" =? 012");
     wait_ms(1000);
 
 // -------

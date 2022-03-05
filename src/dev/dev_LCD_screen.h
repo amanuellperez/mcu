@@ -120,33 +120,40 @@ public:
     uint8_t print(const char* c);
 
     /// Imprime el número indicado.
-    /// return: true si lo ha impreso entero. 
-    ///         false, si solo parcialmente o ha fallado.
+    /// return: número de cifras escritas
     // (RRR) ¿por qué llamar print_number(uint8_t)? 
     //       Porque uint8_t es un tipo char y por tanto se confunde
     //       print(char) con print(uint8_t).
-    bool print_number(uint8_t x);
-    bool print(uint16_t x);
-    bool print(const uint32_t& x);
-    bool print(const uint64_t& x);
+    uint8_t print_number(uint8_t x);
+    uint8_t print(uint16_t x);
+    uint8_t print(const uint32_t& x);
+    uint8_t print(const uint64_t& x);
 
-    bool print_number(int8_t x);
-    bool print(int16_t x);
-    bool print(const int32_t& x);
-    bool print(const int64_t& x);
+    uint8_t print_number(int8_t x);
+    uint8_t print(int16_t x);
+    uint8_t print(const int32_t& x);
+    uint8_t print(const int64_t& x);
 
     // Impresión de números con diferentes fuentes.
     // Todas estas funciones escriben los números con ceros a la izquierda de
     // tamaño Width
-    bool print_number(uint8_t x, const atd::Width<int>& w);
-    bool print(uint16_t x, const atd::Width<int>& w);
-    bool print(uint32_t x, const atd::Width<int>& w);
-    bool print(uint64_t x, const atd::Width<int>& w);
+    uint8_t print_number(uint8_t x, const atd::Width<int>& w);
+    uint8_t print(uint16_t x, const atd::Width<int>& w);
+    uint8_t print(uint32_t x, const atd::Width<int>& w);
+    uint8_t print(uint64_t x, const atd::Width<int>& w);
 
-    bool print_number(int8_t x, const atd::Width<int>& w);
-    bool print(int16_t x, const atd::Width<int>& w);
-    bool print(int32_t x, const atd::Width<int>& w);
-    bool print(int64_t x, const atd::Width<int>& w);
+    uint8_t print_number(int8_t x, const atd::Width<int>& w);
+    uint8_t print(int16_t x, const atd::Width<int>& w);
+    uint8_t print(int32_t x, const atd::Width<int>& w);
+    uint8_t print(int64_t x, const atd::Width<int>& w);
+
+
+    template <typename Font>
+    uint8_t print_number(uint8_t x, const atd::Width<int>& w);
+
+// MANEJO DE FUENTES
+    template <typename Font>
+    void load();
 
 // MOVIMIENTO DEL CURSOR
     /// Define la posición del cursor. En caso de pasarle una fila no 
@@ -226,10 +233,10 @@ private:
     // return: true si lo ha impreso entero. 
     //         false, si solo parcialmente o ha fallado.
     template <typename Int>
-    bool print_unsigned_number(const Int& x, int ndigits = 0);
+    uint8_t print_unsigned_number(const Int& x, int ndigits = 0);
 
     template <typename Int>
-    bool print_signed_number(const Int& x, int ndigits = 0);
+    uint8_t print_signed_number(const Int& x, int ndigits = 0);
 
 };
 
