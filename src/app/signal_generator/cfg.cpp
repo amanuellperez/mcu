@@ -33,7 +33,7 @@ void Main::window_cfg()
     wait_release_key();
 
     uint8_t opt = dev::user_choose_string_lineal<4>(
-			 lcd_.terminal(), keyboard_, period_opts)
+			 lcd_, keyboard_, period_opts)
 			 .pos(5, 1)
 			 .show(period2index(sw_period_));
 

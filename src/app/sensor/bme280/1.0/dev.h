@@ -22,11 +22,12 @@
 #ifndef __SENSOR_DEV_H__
 #define __SENSOR_DEV_H__
 
-#include <avr_TWI.h>
 
+#include <dev_LCD_screen.h>
 #include <dev_LCD_HD44780.h>
 #include <dev_keyrow.h>
 
+#include <avr_TWI.h>
 #include <dev_BME280_basic.h>
 #include <dev_DS1307_clock.h>
 
@@ -76,8 +77,9 @@ using LCD_pins = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<LCD_RS_pin>,
 // ---
 using LCD_1602         = dev::LCD_HD44780_1602<LCD_pins>;
 using Generic_LCD_1602 = dev::Generic_LCD<LCD_1602>;
-using LCD_ostream      = dev::LCD_ostream_1602<Generic_LCD_1602>;
-using lcd_symbol = dev::HD44780_charset_A00;
+using Screen_1602      = dev::LCD_screen_1602<Generic_LCD_1602>;
+using LCD              = Screen_1602;
+using lcd_symbol       = dev::HD44780_charset_A00;
 
 // keyrow
 using namespace dev::Key_codes; // OK_KEY, UP_KEY, DOWN_KEY

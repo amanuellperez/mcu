@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez 
+// Copyright (C) 2019-2022 A.Manuel L.Perez 
 //           mail: <amanuel.lperez@gmail.com>
 //           https://github.com/amanuellperez/mcu
 //
@@ -57,14 +57,13 @@ using LCD_2004 = dev::LCD_HD44780_2004<LCD_pins>;
 using Generic_LCD_1602 = dev::Generic_LCD<LCD_1602>;
 using Generic_LCD_2004 = dev::Generic_LCD<LCD_2004>;
 
-// ostreams
-using LCD_ostream_1602 = dev::LCD_ostream_1602<Generic_LCD_1602>;
-using LCD_ostream_2004 = dev::LCD_ostream_2004<Generic_LCD_2004>;
+// Screens
+using Screen_1602 = dev::LCD_screen_1602<Generic_LCD_1602>;
+using Screen_2004 = dev::LCD_screen_2004<Generic_LCD_2004>;
 
 // Choose LCD to test
-// using LCD = LCD_ostream_1602;
-using LCD = LCD_ostream_2004;
-
+//using LCD = Screen_1602;
+using LCD = Screen_2004;
 
 
 constexpr std::array menu_unidad_tiempo = {"hora", "min", "seg"};
@@ -96,7 +95,7 @@ void test_lcd_menu()
 
 	lcd.clear();
 	lcd << "Elige (circular): ";
-	uint8_t day = dev::user_choose_string_circular<1>(lcd.terminal(), keyrow, 
+	uint8_t day = dev::user_choose_string_circular<1>(lcd, keyrow, 
 		    atd::Array_const_nstrings{days, 1})
                          .pos(7, 1)
                          .show(0);
@@ -110,7 +109,7 @@ void test_lcd_menu()
 
 	lcd.clear();
 	lcd << "Elige: (circular) ";
-	uint8_t day2 = dev::user_choose_string_circular<2>(lcd.terminal(), keyrow, 
+	uint8_t day2 = dev::user_choose_string_circular<2>(lcd, keyrow, 
 		    atd::Array_const_nstrings{days2, 2})
                          .pos(7, 1)
                          .show(2);
@@ -122,7 +121,7 @@ void test_lcd_menu()
 
 	lcd.clear();
 	lcd << "Elige: ";
-	uint8_t unidad = dev::user_choose_string_lineal<4>(lcd.terminal(), keyrow, menu_unidad_tiempo)
+	uint8_t unidad = dev::user_choose_string_lineal<4>(lcd, keyrow, menu_unidad_tiempo)
                          .pos(7, 1)
                          .show(1);
 
@@ -133,7 +132,7 @@ void test_lcd_menu()
 	lcd.clear();
 	lcd << "Elige: ";
 	// uint16_t en lugar de uint8_t para poder imprimirlo en lcd <<.
-        uint16_t seleccion = dev::user_choose_string_lineal<4>(lcd.terminal(), keyrow, menu)
+        uint16_t seleccion = dev::user_choose_string_lineal<4>(lcd, keyrow, menu)
                                  .pos(6, 1)
                                  .show();
 
@@ -144,7 +143,7 @@ void test_lcd_menu()
 
 	lcd.clear();
 	lcd << "Elige: xxxx = unidades";
-        seleccion = dev::user_choose_string_lineal<4>(lcd.terminal(), keyrow, menu2)
+        seleccion = dev::user_choose_string_lineal<4>(lcd, keyrow, menu2)
 				 .pos(7,0)
                                  .show();
 
@@ -155,7 +154,7 @@ void test_lcd_menu()
 
 
 	lcd.clear();
-	seleccion = dev::user_choose_string_lineal<10,2>(lcd.terminal(), keyrow, menu)
+	seleccion = dev::user_choose_string_lineal<10,2>(lcd, keyrow, menu)
 			    .pos(0, 1)
 			    .show(3);
 
@@ -167,7 +166,7 @@ void test_lcd_menu()
 	lcd << "Todo bien? ";
 	constexpr std::array sino = {"si", "no"};
         seleccion =
-            dev::user_choose_string_lineal<2,2>(lcd.terminal(), keyrow, sino).show(0);
+            dev::user_choose_string_lineal<2,2>(lcd, keyrow, sino).show(0);
 
         lcd.clear();
 	lcd << "seleccion:\n" << seleccion;
@@ -177,7 +176,7 @@ void test_lcd_menu()
 	lcd.clear();
 	lcd << "Todo bien (2)? ";
         seleccion =
-            dev::user_choose_string_lineal<2>(lcd.terminal(), keyrow, sino).show(0);
+            dev::user_choose_string_lineal<2>(lcd, keyrow, sino).show(0);
 
         lcd.clear();
 	lcd << "seleccion:\n" << seleccion;

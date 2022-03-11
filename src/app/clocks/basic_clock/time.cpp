@@ -21,7 +21,7 @@
 #include "cfg.h"
 
 
-void Main::print(atd::Generic_time<std::tm> t, uint8_t x0, uint8_t y0)
+void Main::print(atd::Generic_time_view<std::tm> t, uint8_t x0, uint8_t y0)
 {
     lcd_.cursor_pos(x0, y0);
     atd::print_date(lcd_, t);
@@ -40,12 +40,12 @@ void Main::print(const System_clock::time_point& t0)
     std::tm t;
     ::gmtime_r(&sec, &t);
 
-    print(atd::Generic_time{t}, 0, 0);
+    print(atd::Generic_time_view{t}, 0, 0);
 }
 
 
 // Decidimos cómo mostrar la fecha y la hora al usuario
-void Main::user_get_time(atd::Generic_time<std::tm> t, 
+void Main::user_get_time(atd::Generic_time_view<std::tm> t, 
 	      uint8_t x0, uint8_t y0)
 {
     print(t, x0, y0);	
@@ -63,7 +63,7 @@ std::time_t Main::user_get_time(const std::time_t& t0, uint8_t x0, uint8_t y0)
     std::tm mt;
     ::gmtime_r(&t0, &mt);
     
-    atd::Generic_time<std::tm> t{mt};
+    atd::Generic_time_view<std::tm> t{mt};
 
     user_get_time(t, x0, y0);
 

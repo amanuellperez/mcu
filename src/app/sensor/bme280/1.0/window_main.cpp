@@ -136,20 +136,22 @@ void Window_main::scroll_down()
 
 void Window_main::lcd_fill_blank()
 {
-    auto screen = lcd().terminal();
-
     // OJO: -1!! el cursor no lo voy a borrar, ya que si no parpadea.
-    for (uint8_t x = screen.cursor_pos_x(); x < screen.cols() - 1; ++x)
-	screen.print(' ');
+    for (uint8_t x = lcd().cursor_pos_x(); x < lcd().cols() - 1; ++x)
+	lcd().print(' ');
 }
 
 void Window_main::print_date(uint8_t row, const RTC::Time_point& t0)
 {
-    atd::const_Generic_time<RTC::Time_point> t{t0};
+    atd::const_Generic_time_view<RTC::Time_point> t{t0};
     lcd().cursor_pos(0, row);
-    lcd() << std::setw(2) << t.day() << '/'
-	<< std::setw(2) << t.month() << '/'
-			<< t.year() << ' ';
+    atd::print(lcd(), t.day(), nm::Width{2});
+    lcd() << '/';
+    atd::print(lcd(), t.month(), nm::Width{2});
+    lcd() << '/' << t.year() << ' ';
+//    lcd() << std::setw(2) << t.day() << '/'
+//	<< std::setw(2) << t.month() << '/'
+//			<< t.year() << ' ';
 
     atd::print_weekday<week_days_length>(lcd(), t, week_days);
 
@@ -158,11 +160,16 @@ void Window_main::print_date(uint8_t row, const RTC::Time_point& t0)
 
 void Window_main::print_time(uint8_t row, const RTC::Time_point& t0)
 {
-    atd::const_Generic_time<RTC::Time_point> t{t0};
+    atd::const_Generic_time_view<RTC::Time_point> t{t0};
     lcd().cursor_pos(0, row);
-    lcd() << std::setw(2) << t.hours() << ':'
-	<< std::setw(2) << t.minutes() << ':'
-	<< std::setw(2) << t.seconds();
+    atd::print(lcd(), t.hours(), nm::Width{2});
+    lcd() << ':';
+    atd::print(lcd(), t.minutes(), nm::Width{2});
+    lcd() << ':';
+    atd::print(lcd(), t.seconds(), nm::Width{2});
+//    lcd() << std::setw(2) << t.hours() << ':'
+//	<< std::setw(2) << t.minutes() << ':'
+//	<< std::setw(2) << t.seconds();
 
     lcd_fill_blank();
 }

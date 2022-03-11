@@ -23,7 +23,6 @@
 #define __ATD_TYPE_TRAITS_H__
 
 #include "atd_type_traits_basic.h"
-#include "atd_type_traits_more.h"
 
 #endif
 

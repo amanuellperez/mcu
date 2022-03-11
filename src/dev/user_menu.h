@@ -179,7 +179,7 @@ void LCD_Menu<LCD, Keyrow3, Options, Main>::show_menu(uint8_t menu_id)
 
     uint8_t res = 
 	dev::user_choose_string_lineal<LCD::cols(), LCD::rows()>(
-		lcd_.terminal(), keyrow_,
+		lcd_, keyrow_,
 		Options_as_array_of_strings(menu, menu_str_))
 		      .pos(0, 0)
 		      .show(0);

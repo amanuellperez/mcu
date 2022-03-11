@@ -36,7 +36,7 @@ void test_ostream()
 
     std::tm t;
 
-    atd::Generic_time<std::tm> gt{t};
+    atd::Generic_time_view<std::tm> gt{t};
     gt.day(25);
     gt.month(10);
     gt.year(2112);
@@ -58,6 +58,7 @@ void test_ostream()
 
     {
     std::stringstream str;
+    std::cerr << atd::only_time(gt);
     str << atd::only_time(gt);
     CHECK_TRUE(str.str() == "08:16:02", "<< only_time");
     }
@@ -155,7 +156,7 @@ void test_generic_time()
     t.tm_year = 6;
     t.tm_wday = 3;
 
-    atd::Generic_time<std::tm> gt{t};
+    atd::Generic_time_view<std::tm> gt{t};
     CHECK_TRUE(gt.seconds() == 1, "seconds");
     CHECK_TRUE(gt.minutes() == 2, "minutes");
     CHECK_TRUE(gt.hours() == 3, "hours");

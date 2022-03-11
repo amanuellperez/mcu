@@ -21,15 +21,6 @@
 #ifndef __DEV_LCD_SCREEN_TCC__
 #define __DEV_LCD_SCREEN_TCC__
 
-//#include <iterator>	    // std::reverse_iterator
-//#include <algorithm>	    // min
-//#include <array>
-
-//#include <atd_bit.h>
-//#include <atd_algorithm.h>
-//#include <atd_string.h>	    // atd::int_to_string
-//#include <atd_double.h>
-//#include <avr_time.h>
 
 #include <atd_math.h>	    // Digits_of
 
@@ -179,6 +170,9 @@ uint8_t LCD_screen<num_cols, num_rows, LCD>::print_signed_number(const Int& x,
 	return print_unsigned_number(x, ndigits);
 }
 
+template <uint8_t num_cols, uint8_t num_rows, typename LCD>
+inline uint8_t LCD_screen<num_cols, num_rows, LCD>::print_number(uint8_t n)
+{ return print_unsigned_number(n); }
 
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
 inline uint8_t LCD_screen<num_cols, num_rows, LCD>::print(uint16_t n)
@@ -193,6 +187,10 @@ template <uint8_t num_cols, uint8_t num_rows, typename LCD>
 inline uint8_t LCD_screen<num_cols, num_rows, LCD>::print(const uint64_t& n)
 { return print_unsigned_number(n); }
 
+
+template <uint8_t num_cols, uint8_t num_rows, typename LCD>
+inline uint8_t LCD_screen<num_cols, num_rows, LCD>::print_number(int8_t n)
+{ return print_signed_number(n); }
 
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
 inline uint8_t LCD_screen<num_cols, num_rows, LCD>::print(int16_t n)
@@ -210,53 +208,77 @@ inline uint8_t LCD_screen<num_cols, num_rows, LCD>::print(const int64_t& n)
 
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
 inline uint8_t LCD_screen<num_cols, num_rows, LCD>::print_number(uint8_t n
-    , const atd::Width<int>& w)
+    , const nm::Width<int>& w)
 { return print_unsigned_number(n, w); }
 
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
 inline uint8_t LCD_screen<num_cols, num_rows, LCD>::print(uint16_t n
-    , const atd::Width<int>& w)
+    , const nm::Width<int>& w)
 { return print_unsigned_number(n, w); }
 
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
-inline uint8_t LCD_screen<num_cols, num_rows, LCD>::print(uint32_t n
-    , const atd::Width<int>& w)
+inline uint8_t LCD_screen<num_cols, num_rows, LCD>::print(const uint32_t& n
+    , const nm::Width<int>& w)
 { return print_unsigned_number(n, w); }
 
 
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
-inline uint8_t LCD_screen<num_cols, num_rows, LCD>::print(uint64_t n
-    , const atd::Width<int>& w)
+inline uint8_t LCD_screen<num_cols, num_rows, LCD>::print(const uint64_t& n
+    , const nm::Width<int>& w)
 { return print_unsigned_number(n, w); }
 
 
 
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
 inline uint8_t LCD_screen<num_cols, num_rows, LCD>::print_number(int8_t n
-    , const atd::Width<int>& w)
+    , const nm::Width<int>& w)
 { return print_signed_number(n, w); }
 
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
 inline uint8_t LCD_screen<num_cols, num_rows, LCD>::print(int16_t n
-    , const atd::Width<int>& w)
+    , const nm::Width<int>& w)
 { return print_signed_number(n, w); }
 
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
-inline uint8_t LCD_screen<num_cols, num_rows, LCD>::print(int32_t n
-    , const atd::Width<int>& w)
+inline uint8_t LCD_screen<num_cols, num_rows, LCD>::print(const int32_t& n
+    , const nm::Width<int>& w)
 { return print_signed_number(n, w); }
 
 
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
-inline uint8_t LCD_screen<num_cols, num_rows, LCD>::print(int64_t n
-    , const atd::Width<int>& w)
+inline uint8_t LCD_screen<num_cols, num_rows, LCD>::print(const int64_t& n
+    , const nm::Width<int>& w)
 { return print_signed_number(n, w); }
 
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
 template <typename Font>
 inline uint8_t LCD_screen<num_cols, num_rows, LCD>::print_number(uint8_t n, 
-		const atd::Width<int>& w)
+		const nm::Width<int>& w)
 { return Font::print_number(*this, n, w);}
+
+
+template <uint8_t num_cols, uint8_t num_rows, typename LCD>
+void LCD_screen<num_cols, num_rows, LCD>::
+print(nm::Row<int> y, nm::From<int> x0, nm::To<int> x1,
+		  const char* p)
+{
+    cursor_pos(x0, y);
+
+    uint8_t n = x0;
+    while (*p and n <= x1){
+	print(*p);
+	++p;
+	++n;
+    }
+    
+    while (n <= x1){
+	print(' ');
+	++n;
+    }
+}
+
+
+
 
 
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
@@ -294,8 +316,198 @@ void LCD_screen<num_cols, num_rows, LCD>::new_extended_char(uint8_t c
     cursor_pos(x_, y_);
 }
 
-}// namespace
+}// namespace dev
 
+/***************************************************************************
+ *			FUNCIONES DE IMPRESIÓN
+ ***************************************************************************/
+// Todas las funciones de impresión en el namespace atd. 
+namespace atd{
+// (RRR) ¿por qué no definir una template que incluya todos los casos?
+//       Se definiría print(LCD, T). Problema: que luego al definir una
+//       función como print(Out, time) que se basaría en las funciones de
+//       impresión de tipos básicos (las que a continuación defino) al llamar
+//       a print(LCD, time) el compilador no sabría a cuál de las 2 funciones
+//       llamar generando un error. Por eso hay que definirlas explícitamente.
+template <uint8_t cols, uint8_t rows, typename LCD>
+inline uint8_t print_number(dev::LCD_screen<cols, rows, LCD>& out, short x)
+{ return  out.print_number(x);}
+
+template <uint8_t cols, uint8_t rows, typename LCD>
+inline uint8_t print(dev::LCD_screen<cols, rows, LCD>& out, int x)
+{ return  out.print(x);}
+
+template <uint8_t cols, uint8_t rows, typename LCD>
+inline uint8_t print(dev::LCD_screen<cols, rows, LCD>& out, const long& x)
+{ return  out.print(x);}
+
+template <uint8_t cols, uint8_t rows, typename LCD>
+inline uint8_t print(dev::LCD_screen<cols, rows, LCD>& out, const long long& x)
+{ return  out.print(x);}
+
+
+template <uint8_t cols, uint8_t rows, typename LCD>
+inline uint8_t print_number(dev::LCD_screen<cols, rows, LCD>& out, unsigned short x)
+{ return  out.print_number(x);}
+
+template <uint8_t cols, uint8_t rows, typename LCD>
+inline uint8_t print(dev::LCD_screen<cols, rows, LCD>& out, unsigned int x)
+{ return  out.print(x);}
+
+template <uint8_t cols, uint8_t rows, typename LCD>
+inline uint8_t print(dev::LCD_screen<cols, rows, LCD>& out, const unsigned long& x)
+{ return  out.print(x);}
+
+template <uint8_t cols, uint8_t rows, typename LCD>
+inline uint8_t print(dev::LCD_screen<cols, rows, LCD>& out, const unsigned long long& x)
+{ return  out.print(x);}
+
+
+template <uint8_t cols, uint8_t rows, typename LCD>
+inline bool print(dev::LCD_screen<cols, rows, LCD>& out, char x)
+{ return  out.print(x);}
+
+template <uint8_t cols, uint8_t rows, typename LCD>
+inline uint8_t print(dev::LCD_screen<cols, rows, LCD>& out, const char* x)
+{ return  out.print(x);}
+
+// Impresión con anchura
+// ---------------------
+template <uint8_t cols, uint8_t rows, typename LCD>
+inline uint8_t print_number(dev::LCD_screen<cols, rows, LCD>& out,
+                            uint8_t x,
+                            const nm::Width<int>& w)
+{ return out.print(x, w); }
+
+template <uint8_t cols, uint8_t rows, typename LCD>
+inline uint8_t
+print(dev::LCD_screen<cols, rows, LCD>& out, uint16_t x, const nm::Width<int>& w)
+{ return out.print(x, w); }
+
+template <uint8_t cols, uint8_t rows, typename LCD>
+inline uint8_t print(dev::LCD_screen<cols, rows, LCD>& out,
+                     const uint32_t& x,
+                     const nm::Width<int>& w)
+{ return out.print(x, w); }
+
+template <uint8_t cols, uint8_t rows, typename LCD>
+inline uint8_t print(dev::LCD_screen<cols, rows, LCD>& out,
+                     const uint64_t& x,
+                     const nm::Width<int>& w)
+{ return out.print(x, w); }
+
+
+template <uint8_t cols, uint8_t rows, typename LCD>
+inline uint8_t print_number(dev::LCD_screen<cols, rows, LCD>& out,
+                            int8_t x,
+                            const nm::Width<int>& w)
+{ return out.print(x, w); }
+
+template <uint8_t cols, uint8_t rows, typename LCD>
+inline uint8_t
+print(dev::LCD_screen<cols, rows, LCD>& out, int16_t x, const nm::Width<int>& w)
+{ return out.print(x, w); }
+
+template <uint8_t cols, uint8_t rows, typename LCD>
+inline uint8_t print(dev::LCD_screen<cols, rows, LCD>& out,
+                     const int32_t& x,
+                     const nm::Width<int>& w)
+{ return out.print(x, w); }
+
+template <uint8_t cols, uint8_t rows, typename LCD>
+inline uint8_t print(dev::LCD_screen<cols, rows, LCD>& out,
+                     const int64_t& x,
+                     const nm::Width<int>& w)
+{ return out.print(x, w); }
+} // namespace atd
+
+/***************************************************************************
+ *			FUNCIONES IMPRESIÓN operator<<
+ ***************************************************************************/
+// Sin embargo los operator<< tienen que ir definidos dentro de dev
+namespace dev{
+// Es muy cómodo usar el operator<< para escribir tipos básicos.
+// Aunque no es un flujo de caracteres, una vez fijado el cursor puedo
+// escribir tipos básicos como usando <<.
+template <uint8_t cols, uint8_t rows, typename LCD>
+inline LCD_screen<cols, rows, LCD>& operator<<(LCD_screen<cols, rows, LCD>& out,
+                                               const uint8_t& x)
+{
+    out.print(x);
+    return out;
+}
+
+template <uint8_t cols, uint8_t rows, typename LCD>
+inline LCD_screen<cols, rows, LCD>& operator<<(LCD_screen<cols, rows, LCD>& out,
+                                               const uint16_t& x)
+{
+    out.print(x);
+    return out;
+}
+template <uint8_t cols, uint8_t rows, typename LCD>
+inline LCD_screen<cols, rows, LCD>& operator<<(LCD_screen<cols, rows, LCD>& out,
+                                               const uint32_t& x)
+{
+    out.print(x);
+    return out;
+}
+template <uint8_t cols, uint8_t rows, typename LCD>
+inline LCD_screen<cols, rows, LCD>& operator<<(LCD_screen<cols, rows, LCD>& out,
+                                               const uint64_t& x)
+{
+    out.print(x);
+    return out;
+}
+template <uint8_t cols, uint8_t rows, typename LCD>
+inline LCD_screen<cols, rows, LCD>& operator<<(LCD_screen<cols, rows, LCD>& out,
+                                               const int8_t& x)
+{
+    out.print(x);
+    return out;
+}
+
+template <uint8_t cols, uint8_t rows, typename LCD>
+inline LCD_screen<cols, rows, LCD>& operator<<(LCD_screen<cols, rows, LCD>& out,
+                                               const int16_t& x)
+{
+    out.print(x);
+    return out;
+}
+
+
+template <uint8_t cols, uint8_t rows, typename LCD>
+inline LCD_screen<cols, rows, LCD>& operator<<(LCD_screen<cols, rows, LCD>& out,
+                                               const int32_t& x)
+{
+    out.print(x);
+    return out;
+}
+
+
+template <uint8_t cols, uint8_t rows, typename LCD>
+inline LCD_screen<cols, rows, LCD>& operator<<(LCD_screen<cols, rows, LCD>& out,
+                                               const int64_t& x)
+{
+    out.print(x);
+    return out;
+}
+
+template <uint8_t cols, uint8_t rows, typename LCD>
+inline LCD_screen<cols, rows, LCD>& operator<<(LCD_screen<cols, rows, LCD>& out,
+                                               char x)
+{
+    out.print(x);
+    return out;
+}
+
+template <uint8_t cols, uint8_t rows, typename LCD>
+inline LCD_screen<cols, rows, LCD>& operator<<(LCD_screen<cols, rows, LCD>& out,
+                                               const char* const x)
+{
+    out.print(x);
+    return out;
+}
+}// namespace dev
 
 #endif
 

@@ -1,4 +1,4 @@
-// Copyright (C) 2020-2021 A.Manuel L.Perez 
+// Copyright (C) 2020-2022 A.Manuel L.Perez 
 //           mail: <amanuel.lperez@gmail.com>
 //           https://github.com/amanuellperez/mcu
 //
@@ -58,6 +58,7 @@
  *    30/01/2021 0.0: añado hertz, period y inverse.
  *    08/02/2021      operator / (entre magnitudes del mismo tipo).
  *    06/03/2021      Unit_symbol, numeric_limits, operator++/--
+ *    10/03/2022      print
  *
  ****************************************************************************/
 
@@ -70,6 +71,7 @@
 
 #include "atd_units.h"
 #include "atd_ratio.h"
+#include "atd_ostream.h"    // print
 
 namespace atd{
 
@@ -587,10 +589,12 @@ constexpr inline bool operator>=(
 
 
 // operator << 
-template <typename U, typename R, typename M, typename D>
-std::ostream& operator<<(std::ostream& out, const Magnitude<U, R, M, D>& m)
-{ return out << m.value(); }
-
+template <typename Out, typename U, typename R, typename M, typename D>
+inline Out& operator<<(Out& out, const Magnitude<U, R, M, D>& m)
+{
+    print(out, m.value());
+    return out;
+}
 
 
 // Magnitudes por defecto

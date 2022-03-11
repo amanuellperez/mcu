@@ -84,8 +84,8 @@ struct Main {
     void divide_frequency_by(const Scalar& a);
     void next_frequency(const avr::Frequency& f);
     void previous_frequency(const avr::Frequency& f);
-    void print_without_decimals(std::ostream& out, const avr::Frequency& f);
-    void print(std::ostream& out, const avr::Frequency& f);
+    void print_without_decimals(LCD& out, const avr::Frequency& f);
+    void print(LCD& out, const avr::Frequency& f);
 
 
     static constexpr std::array period_opts

@@ -36,8 +36,6 @@ Main::Main()
 
 void Main::init_lcd()
 {
-    lcd_.terminal().stop_brcorner(true);// I'm not going to use it as a terminal
-    lcd_.terminal().nowrap(); 
 }
 
 
@@ -46,7 +44,7 @@ std::time_t Main::init_time_t()
     std::tm mt;
     std::memset(&mt, 0, sizeof(std::tm)); // fundamental inicializarlo todo
 
-    atd::Generic_time<std::tm> gt{mt};
+    atd::Generic_time_view<std::tm> gt{mt};
 
     gt.day(1);
     gt.month(1);

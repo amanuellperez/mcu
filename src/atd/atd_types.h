@@ -29,8 +29,6 @@
  *    A.Manuel L.Perez
  *    21/03/2021 v0.0 Bounded
  *    01/05/2021      Empty_struct
- *    28/02/2022      Width
- *
  *
  ****************************************************************************/
 
@@ -38,25 +36,6 @@ namespace atd{
 // Empty_struct
 // ------------
 struct Empty_struct {};
-
-// Números con significados
-// ------------------------
-// Las siguientes clases las defino para darle un significado a un número. 
-// Ej: Cambiamos 'print(2, 3)' por 'print(2, atd::width(3))'. 
-// Queda más claro que el 3 es un ancho y que el 2 es el número que queremos 
-// imprimir.
-
-// Width = es un número que significa un ancho
-template <typename Int>
-struct Width{
-    Int x;
-    Width(const Int& x0) : x{x0} { }
-
-    template <typename Int2>
-    Width(const Int2& x0) : x{x0} { }
-
-    operator Int() const {return x;}
-};
 
 
 

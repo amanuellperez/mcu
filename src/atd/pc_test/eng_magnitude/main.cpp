@@ -25,6 +25,7 @@
 
 using namespace test;
 
+
 bool equal(const double& a, const double& b)
 {
     if (a <= b)
@@ -681,7 +682,7 @@ template <typename U, typename R>
 void test_print(const atd::ENG_Magnitude<U,R>& m, const std::string& res)
 {
     std::stringstream out;
-    m.print_unit(out);
+    print_unit(out, m);
     CHECK_TRUE(out.str() == res, "print_unit");
 }
 

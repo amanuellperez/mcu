@@ -33,7 +33,7 @@
  ****************************************************************************/
 #include "dev_LCD_HD44780_charset.h" // symbol
 #include <atd_math.h>	// Digits_of
-#include <atd_types.h>	// Width
+#include <atd_names.h>	// Width
 
 namespace dev{
 
@@ -59,7 +59,7 @@ public:
     // imprimen. En caso de ser menos de width se llenan con '0'.
     template <typename Screen>
     static uint8_t print_number(Screen& lcd, uint8_t n, 
-			    const atd::Width<int>& width = 0);
+			    const nm::Width<int>& width = 0);
 
 private:
     // Imprime los dígitos [j0, j0 + 3) del digit i
@@ -137,7 +137,7 @@ template <typename F>
 template <typename Screen>
 uint8_t Big_digit<F>::print_number(Screen& lcd,
                                 uint8_t x,
-                                const atd::Width<int>& w)
+                                const nm::Width<int>& w)
 {
     atd::Digits_from_left_to_right d{x, w};
 

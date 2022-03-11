@@ -142,7 +142,7 @@ void test_big_digits_fonts(LCD& lcd)
 }
 
 template <typename BD> // BD = Font_digit
-void test_big_digits_print(LCD& lcd, const atd::Width<int>& width = 0)
+void test_big_digits_print(LCD& lcd, const nm::Width<int>& width = 0)
 {
     BD::load(lcd);
     lcd.clear();

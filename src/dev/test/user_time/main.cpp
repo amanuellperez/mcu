@@ -18,6 +18,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 // Conectar el LCD y 3 pulsadores a los pines indicados
+#include "../../dev_LCD_screen.h"   // OJO: antes de user_time para definir print!!!
+				    // TODO: ¿cómo evitar tener que recordar
+				    // orden?
 #include "../../user_time.h"
 #include "../../dev_LCD_HD44780.h"
 #include "../../dev_push_button.h"
@@ -52,10 +55,12 @@ using Keyrow = dev::Basic_keyrow<Keyrow_pins, Keyrow_codes>;
 // NO USAR EL DE 16 x 02. USAR SOLO EL DE 20x04 para que se vea bien.
 using LCD_2004 = dev::LCD_HD44780_2004<LCD_pins>;
 using Generic_LCD_2004 = dev::Generic_LCD<LCD_2004>;
-using LCD_ostream_2004 = dev::LCD_ostream_1602<Generic_LCD_2004>;
+using Screen_2004 = dev::LCD_screen_2004<Generic_LCD_2004>;
+//using LCD_ostream_2004 = dev::LCD_ostream_1602<Generic_LCD_2004>;
 
 // Choose LCD to test
-using LCD = LCD_ostream_2004;
+//using LCD = LCD_ostream_2004;
+using LCD = Screen_2004;
 
 
 tm new_tm() 
@@ -81,7 +86,7 @@ constexpr const uint8_t week_days_length = 2;
 
 template <typename LCD, typename Keyrow, typename T>
 void get_time(LCD& lcd, Keyrow& key, 
-	      atd::Generic_time<T>& t, 
+	      atd::Generic_time_view<T>& t, 
 	      uint8_t x0, uint8_t y0)
 {
     lcd.cursor_pos(x0, y0);
@@ -108,7 +113,7 @@ std::time_t get_time(
 {
     std::tm* mt = std::gmtime(&t0);
     
-    atd::Generic_time<std::tm> t{*mt};
+    atd::Generic_time_view<std::tm> t{*mt};
 
     get_time(lcd, key, t, x0, y0);
 
@@ -131,14 +136,18 @@ std::chrono::time_point<Clock, Duration> user_get_datetime(LCD& lcd,
 }
 
 template <typename LCD, typename Keyrow, typename T>
-void test_user_time(LCD& lcd, Keyrow key, atd::Generic_time<T> t)
+void test_user_time(LCD& lcd, Keyrow key, atd::Generic_time_view<T> t)
 {
     get_time(lcd, key, t, 4, 2);
 
     lcd.cursor_pos(0,0);
 
-    lcd << "Escrito: " << atd::only_date(t)
-	<< ' ' << atd::only_time(t) << ' ';
+//    lcd << "Escrito: " << atd::only_date(t)
+//	<< ' ' << atd::only_time(t) << ' ';
+    lcd << "Escrito: ";
+    atd::print_date(lcd,  t);
+    lcd.print(' ');
+    atd::print_time(lcd, t);
     atd::print_weekday<week_days_length>(lcd, t, week_days);
     
 
@@ -163,7 +172,7 @@ void test_user_time()
 	std::time_t time0 = 630152224; // 20/12/2019 10:17:04
 	std::tm* t0 = std::gmtime(&time0);
 
-	test_user_time(lcd, key, atd::Generic_time<std::tm>{*t0});
+	test_user_time(lcd, key, atd::Generic_time_view<std::tm>{*t0});
 
 
 	{
@@ -176,11 +185,15 @@ void test_user_time()
 	    t = std::chrono::system_clock::to_time_t(td);
             std::tm* t0 = std::gmtime(&t);
             lcd.cursor_pos(0, 0);
-            lcd << "Escrito:" << atd::only_date(*t0) << ' '
-                << atd::only_time(*t0)
-		<< " xx";
+//            lcd << "Escrito:" << atd::only_date(*t0) << ' '
+//                << atd::only_time(*t0)
+	    lcd.print("Escrito:");
+	    atd::print_date(lcd, atd::Generic_time_view{*t0});
+	    lcd.print(' ');
+	    atd::print_time(lcd, atd::Generic_time_view{*t0});
+	    lcd.print(" xx");
 //            atd::print_weekday<week_days_length>(
-//                lcd, atd::Generic_time<std::tm>{*t0}, week_days);
+//                lcd, atd::Generic_time_view<std::tm>{*t0}, week_days);
             wait_ms(4000);
         }
 

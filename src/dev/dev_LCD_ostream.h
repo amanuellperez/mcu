@@ -33,7 +33,8 @@
  *	06/01/2020 v0.3: Elimino DPin a favor de Pin.
  *	28/02/2022	 Desdoblo Terminal en Terminal y Terminal.
  *	                 De momento, Terminal es copia de lo que era Terminal.
- *	                 En el futuro se irán alejando.
+ *	                 En el futuro se irán alejando. De hecho, Terminal es
+ *	                 la implementación de este LCD ostream!!!
  *
  ****************************************************************************/
 #include <ostream>

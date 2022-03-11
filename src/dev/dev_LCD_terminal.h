@@ -37,6 +37,7 @@
  *	30/07/2021       print_align_to_the_right
  *	06/02/2022 v0.6: Basado en el concept 'Generic_LCD'
  *	28/02/2022       Divido Screen en dos clases: Screen y Terminal
+ *			 La clase Terminal realmente es un ostream!!!
  *
  ****************************************************************************/
 #include <stdint.h>
@@ -284,11 +285,15 @@ public:
     void new_extended_char(uint8_t c,
                            const avr::Progmem_array_view<uint8_t, 8>& glyph);
 
-    // DATOS DEL LCD
+// DATOS DEL LCD
     constexpr static uint8_t rows() {return num_rows;}
     constexpr static uint8_t cols() {return num_cols;}
 
-    
+
+// ACCESO AL LCD
+    Generic_LCD_type& lcd() {return lcd_;}
+    const Generic_LCD_type& lcd() const{return lcd_;}
+
 private:
 // Hardware al que está conectado
     Generic_LCD_type lcd_;

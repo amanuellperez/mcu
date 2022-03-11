@@ -13,6 +13,8 @@ DIRS = algorithm	\
 		magnitude	\
 		math		\
 		metronome	\
+		names		\
+		ostream		\
 		ratio		\
 		static		\
 		string		\

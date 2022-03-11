@@ -20,6 +20,7 @@
 // Conectar el LCD y 3 pulsadores a los pines indicados
 #include "../../user_menu.h"
 #include "../../dev_LCD_HD44780.h"
+#include "../../dev_LCD_screen.h"
 #include "../../dev_keyrow.h"
 
 #include <avr_time.h>
@@ -57,13 +58,19 @@ using Generic_LCD_1602 = dev::Generic_LCD<LCD_1602>;
 using Generic_LCD_2004 = dev::Generic_LCD<LCD_2004>;
 
 // ostreams
-using LCD_ostream_1602 = dev::LCD_ostream_1602<Generic_LCD_1602>;
-using LCD_ostream_2004 = dev::LCD_ostream_2004<Generic_LCD_2004>;
+//using LCD_ostream_1602 = dev::LCD_ostream_1602<Generic_LCD_1602>;
+//using LCD_ostream_2004 = dev::LCD_ostream_2004<Generic_LCD_2004>;
 
 // Choose LCD to test
-using LCD = LCD_ostream_1602;
-//using LCD = LCD_ostream_2004;
+//using LCD = LCD_ostream_1602;
+////using LCD = LCD_ostream_2004;
 
+// Screens
+using Screen_1602 = dev::LCD_screen_1602<Generic_LCD_1602>;
+using Screen_2004 = dev::LCD_screen_2004<Generic_LCD_2004>;
+
+//using LCD = Screen_1602;
+using LCD = Screen_2004;
 
 
 

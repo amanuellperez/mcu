@@ -24,7 +24,7 @@
 
 /****************************************************************************
  *
- *  - DESCRIPCION: Interfaz para elegir un número en un LCD vía un teclado.
+ *  - DESCRIPCION: Interfaz para elegir un número en un Screen vía un teclado.
  *
  *  - COMENTARIOS: 
  *	Observar que todo el código de aquí no depende para nada de que sea un
@@ -84,7 +84,8 @@
  *			   que modificarse la señal generada). En principio la
  *			   callback será del tipo Main::callback.
  *
- *  
+ *	05/02/2022	* Generalizo choose2 y choose4 en choose(width).
+ *
  ****************************************************************************/
 #include <avr_time.h>
 #include <iomanip>
@@ -93,6 +94,7 @@
 
 #include <atd_metronome.h>
 #include <atd_types.h>
+#include <atd_names.h>
 
 #include "dev_keyrow.h"
 
@@ -142,7 +144,7 @@ constexpr int user_choose_number_type_circular = 1;
  *	   No está claro que eso sea realmente una optimización y puede que
  *	   por ahorrar un par de bytes se genere bastante más código.
  */
-template <typename LCD, typename Keyrow3, 
+template <typename Screen, typename Keyrow3, 
 	  int type0, typename Rep0, 
 	  typename Main = atd::Empty_struct>
 class User_choose_number{
@@ -159,15 +161,15 @@ public:
 
     // Configuración
     // -------------
-    /// Mostramos el número en el LCD e interaccionamos con el usuario via
+    /// Mostramos el número en el Screen e interaccionamos con el usuario via
     /// el teclado indicado.
-    User_choose_number(Main& app, LCD& lcd, Keyrow3)
-		    :lcd_{lcd}, app_{&app}{}
+    User_choose_number(Main& app, Screen& lcd, Keyrow3)
+		    :scr_{lcd}, app_{&app}{}
 
-    User_choose_number(LCD& lcd, Keyrow3)
-		    :lcd_{lcd}, app_{nullptr}{}
+    User_choose_number(Screen& lcd, Keyrow3)
+		    :scr_{lcd}, app_{nullptr}{}
 
-    /// Posición (col, row) del LCD donde mostramos el número a elegir.
+    /// Posición (col, row) del Screen donde mostramos el número a elegir.
     User_choose_number& pos(uint8_t col, uint8_t row);
     
     /// Valor mínimo que puede tomar el número a elegir.
@@ -184,17 +186,22 @@ public:
 
     // Funciones para elegir
     // ---------------------
+    /// Choose a number of width w
+    /// Returns: number choosen
+    Rep choose(Rep x0, const nm::Width<int>& w);
+
     /// Elegimos un número de 2 cifras.
     /// Returns: valor elegido.
-    Rep choose2(Rep x0);
+    Rep choose2(Rep x0) {return choose(x0, 2);}
 
     /// Elegimos un número de 4 cifras.
     /// Returns: valor elegido.
-    Rep choose4(Rep x0);
+    Rep choose4(Rep x0) {return choose(x0, 4);}
+
 
 private:
 // Hardware
-    LCD& lcd_;
+    Screen& scr_;
 
     // keyrow
     static constexpr auto enter_key()
@@ -240,16 +247,15 @@ private:
     // del teclado.
     static constexpr uint8_t T_clock = 100; // 100 ms
 
-    enum class Tecla_pulsada{ up, down, ok, ninguna };
+    enum class Key_pressed{ up, down, ok, none };
 
     // ultima tecla que ha pulsado el usuario
-    Tecla_pulsada ultima_tecla_pulsada_ = Tecla_pulsada::ninguna;
+    Key_pressed last_key_pressed_ = Key_pressed::none;
     
 
     // Funciones de ayuda
     // ------------------
-    void print2(Rep x);
-    void print4(Rep x);
+    void print(Rep x, const nm::Width<int>& w);
 
     // Mira a ver si el usuario quiere actualizar x0, y en caso de ser 
     // así, lo actualiza de acuerdo a las pulsaciones del usuario.
@@ -257,7 +263,7 @@ private:
     //	Garantiza que x0 esté en el rango [0, max_].
     //
     void update();
-    void update_ninguna();
+    void update_none();
 
     // La última tecla pulsada fue down. Si la tecla sigue pulsada
     // vamos decrementando el número cada vez más rápidamente.
@@ -323,25 +329,24 @@ User_choose_number<L, T, t0,R, M>::callback(Callback f)
 
 // El cliente elige un número de 2 cifras
 template <typename L, typename T, int t0, typename Rep, typename M>
-Rep User_choose_number<L, T, t0,Rep, M>::choose2(Rep x0)
+Rep User_choose_number<L, T, t0, Rep, M>::choose(Rep x0,
+                                                 const nm::Width<int>& w)
 { 
-    char fill_char = lcd_.fill('0');
-
     x_ = x0;
 
-    lcd_.cursor_on();
+    scr_.cursor_on();
 
-    ultima_tecla_pulsada_ = Tecla_pulsada::ninguna;
+    last_key_pressed_ = Key_pressed::none;
     counter_reset();
 
 
-    print2(x_);
+    print(x_, w);
    
     wait_till_enter_key_is_not_pressed();
 
     while(enter_key().is_not_pressed()){
-	if (ultima_tecla_pulsada_ != Tecla_pulsada::ninguna)
-	    print2(x_);
+	if (last_key_pressed_ != Key_pressed::none)
+	    print(x_, w);
 
 	update();
 
@@ -349,69 +354,38 @@ Rep User_choose_number<L, T, t0,Rep, M>::choose2(Rep x0)
     }
 
 
-    lcd_.cursor_off();
-    lcd_.fill(fill_char);
+    scr_.cursor_off();
 
     return x_;
 }
-
-template <typename L, typename T, int t0, typename Rep, typename M>
-Rep User_choose_number<L, T, t0, Rep, M>::choose4(Rep x0)
-{ 
-    x_ = x0;
-    lcd_.cursor_on();
-
-    ultima_tecla_pulsada_ = Tecla_pulsada::ninguna;
-    counter_reset();
-
-    print4(x_);
-
-    wait_till_enter_key_is_not_pressed();
-
-    while(enter_key().is_not_pressed()){
-	if (ultima_tecla_pulsada_ != Tecla_pulsada::ninguna)
-	    print4(x_);
-
-	update();
-
-	wait_ms(T_clock);
-    }
-
-
-    lcd_.cursor_off();
-
-    return x_;
-}
-
-
 
 
 template <typename L, typename T, int t0, typename R, typename M>
 void User_choose_number<L, T, t0,R, M>::update()
 {
-    switch(ultima_tecla_pulsada_){
-	case Tecla_pulsada::down:
+    switch(last_key_pressed_){
+	case Key_pressed::down:
 	    update_down();
 	    break;
 
-	case Tecla_pulsada::up:
+	case Key_pressed::up:
 	    update_up();
 	    break;
 
 	default:
-	    update_ninguna();
+	    update_none();
 	    break;
     }
 }
 
 
 template <typename L, typename T, int t0, typename R, typename M>
-void User_choose_number<L, T, t0,R, M>::update_ninguna()
+void User_choose_number<L, T, t0,R, M>::update_none()
 {
 
     if (down_key().is_pressed()){
 	counter_reset();
-	ultima_tecla_pulsada_ = Tecla_pulsada::down;
+	last_key_pressed_ = Key_pressed::down;
 
 	if (x_ > min_){
 	    if (x_ > min_ + incr_.value())
@@ -425,7 +399,7 @@ void User_choose_number<L, T, t0,R, M>::update_ninguna()
 
     else if (up_key().is_pressed()){
 	counter_reset();
-	ultima_tecla_pulsada_ = Tecla_pulsada::up;
+	last_key_pressed_ = Key_pressed::up;
 
 	if (x_ < max_){
 	    if (x_ + incr_.value() < max_)
@@ -437,7 +411,7 @@ void User_choose_number<L, T, t0,R, M>::update_ninguna()
 	}
     }
     else
-	ultima_tecla_pulsada_ = Tecla_pulsada::ninguna;
+	last_key_pressed_ = Key_pressed::none;
 }
 
 
@@ -468,7 +442,7 @@ void User_choose_number<L, T, t0,R, M>::update_down()
 
     }
     else 
-	ultima_tecla_pulsada_ = Tecla_pulsada::ninguna;
+	last_key_pressed_ = Key_pressed::none;
 }
 
 
@@ -495,7 +469,7 @@ void User_choose_number<L, T, t0,R, M>::update_up()
 	}
     }
     else 
-	ultima_tecla_pulsada_ = Tecla_pulsada::ninguna;
+	last_key_pressed_ = Key_pressed::none;
 }
 
 
@@ -516,22 +490,16 @@ inline void User_choose_number<L, T, t0,R, M>::incr_next()
     incr_.next();
 }
 
-
 template <typename L, typename T, int t0, typename Rep, typename M>
-void User_choose_number<L, T, t0, Rep, M>::print2(Rep x)
+void User_choose_number<L, T, t0, Rep, M>::print(Rep x,
+                                                 const nm::Width<int>& w)
 {
-    lcd_.cursor_pos(col_, row_);
-    lcd_ << std::setw(2) << x; 
-    lcd_.cursor_pos(col_ + 1, row_);
+    scr_.cursor_pos(col_, row_);
+    scr_.print(x, w);
+    scr_.cursor_pos(col_ + w - 1, row_);
 }
 
-template <typename L, typename T, int t0, typename Rep, typename M>
-void User_choose_number<L, T, t0, Rep, M>::print4(Rep x)
-{
-    lcd_.cursor_pos(col_, row_);
-    lcd_ << std::setw(4) << x;
-    lcd_.cursor_pos(col_ + 3, row_);
-}
+
 
 // syntactic sugar
 // Para callbacks:

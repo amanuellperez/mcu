@@ -55,8 +55,8 @@ struct Window_main{
     bool redraw();
 
     // window rows
-    static constexpr uint8_t wrows_ = LCD_ostream::rows();
-    static constexpr uint8_t wcols_ = LCD_ostream::cols();
+    static constexpr uint8_t wrows_ = LCD::rows();
+    static constexpr uint8_t wcols_ = LCD::cols();
 
     // scroll rows
     static constexpr uint8_t srows_ = 4;
@@ -73,7 +73,7 @@ struct Window_main{
 // (RRR) Necesito acceder a todo el hardware y a funciones de main.
     Main* main_;
 
-    LCD_ostream& lcd();
+    LCD& lcd();
     Keyrow keyboard();
     RTC& rtc();
     Sensor& sensor();
@@ -87,7 +87,7 @@ public:
     void run();
 
 // Hardware
-    LCD_ostream lcd_;
+    LCD lcd_;
     Keyrow keyboard_;
 
     Sensor sensor_;
@@ -119,8 +119,8 @@ private:
 
 // time
     void init_time(RTC::Time_point& t);
-    void print_datetime(atd::Generic_time<RTC::Time_point> t, uint8_t x0, uint8_t y0);
-    void user_get_datetime(atd::Generic_time<RTC::Time_point> t, uint8_t x0, uint8_t y0);
+    void print_datetime(atd::Generic_time_view<RTC::Time_point> t, uint8_t x0, uint8_t y0);
+    void user_get_datetime(atd::Generic_time_view<RTC::Time_point> t, uint8_t x0, uint8_t y0);
 
 // sensor
     void print_sensor();
@@ -148,7 +148,7 @@ inline void wait_release_key()
 
 
 
-inline LCD_ostream& Window_main::lcd() {return main_->lcd_;}
+inline LCD& Window_main::lcd() {return main_->lcd_;}
 inline Keyrow Window_main::keyboard() {return main_->keyboard_;}
 inline RTC& Window_main::rtc() {return main_->rtc_;}
 inline Sensor& Window_main::sensor() {return main_->sensor_;}

@@ -47,11 +47,11 @@ namespace dev{
 template <uint8_t names_length, typename LCD, typename Keyboard, typename Date_time>
 void user_get_weekday(LCD& lcd,
                    Keyboard& key,
-                   atd::Generic_time<Date_time>& t,
+                   atd::Generic_time_view<Date_time>& t,
                    uint8_t x0, uint8_t y0,
 		   const char* names_weekday)
 {
-    t.weekday(user_choose_string_circular<names_length>(lcd.terminal(), key, 
+    t.weekday(user_choose_string_circular<names_length>(lcd, key, 
 			atd::Array_const_nstrings{names_weekday, names_length})
 		.pos(x0, y0)
 		.show(t.weekday()));
@@ -62,7 +62,7 @@ void user_get_weekday(LCD& lcd,
 template <typename LCD, typename Keyboard, typename Date_time>
 void user_get_date(LCD& lcd,
                    Keyboard& key,
-                   atd::Generic_time<Date_time>& t,
+                   atd::Generic_time_view<Date_time>& t,
                    uint8_t x0, uint8_t y0)
 {
     t.day(user_choose_number_circular(lcd, key).pos(x0, y0)
@@ -81,7 +81,7 @@ void user_get_date(LCD& lcd,
 template <typename LCD, typename Keyboard, typename Date_time>
 void user_get_time(LCD& lcd,
                    Keyboard& key,
-                   atd::Generic_time<Date_time>& t,
+                   atd::Generic_time_view<Date_time>& t,
                    uint8_t x0, uint8_t y0)
 {
     t.hours(user_choose_number_circular(lcd, key).pos(x0, y0)

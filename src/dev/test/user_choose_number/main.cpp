@@ -20,6 +20,7 @@
 // Conectar el LCD y 3 pulsadores a los pines indicados
 #include "../../user_choose_number.h"
 #include "../../dev_LCD_HD44780.h"
+#include "../../dev_LCD_screen.h"
 #include <atd_decimal.h>
 #include <atd_magnitude.h>
 #include <atd_eng_magnitude.h>
@@ -66,28 +67,29 @@ using Screen_2004 = dev::LCD_screen_2004<Generic_LCD_2004>;
 
 
 // ostreams
-using LCD_ostream_1602 = dev::LCD_ostream_1602<Generic_LCD_1602>;
-using LCD_ostream_2004 = dev::LCD_ostream_2004<Generic_LCD_2004>;
+//using LCD_ostream_1602 = dev::LCD_ostream_1602<Generic_LCD_1602>;
+//using LCD_ostream_2004 = dev::LCD_ostream_2004<Generic_LCD_2004>;
 
 // Choose LCD to test
-//using LCD = Screen_1602;
-using LCD = LCD_ostream_1602;
+using LCD = Screen_1602;
+//using LCD = LCD_ostream_1602;
 // using LCD = LCD_ostream_2004;
 
 struct Main{
 
-    LCD lcd;
+    LCD scr;
 
     void f(uint16_t x)
     {
-	lcd.cursor_pos(10, 1);
-	lcd << '(' << x;
+	scr.cursor_pos(10, 1);
+	scr.print('(');
+	scr.print(x);
 	if (x % 2)
-	    lcd << 'i';
+	    scr.print('i');
 	else
-	    lcd << 'p';
+	    scr.print('p');
 
-	lcd << ')';
+	scr.print(')');
     }
 };
  
@@ -96,27 +98,28 @@ void test_choose_number2()
 {
     Main app;
 
-    LCD& lcd = app.lcd;
+    LCD& scr = app.scr;
 
     Keyrow keyrow;
 
-    lcd.clear();
-    lcd << "Choose number";
+    scr.clear();
+    scr.print("Choose number");
     wait_ms(1000);
 
-    lcd.clear();
-    lcd << "LINEAL TEST";
+    scr.clear();
+    scr.print("LINEAL TEST");
     wait_ms(1000);
 
 {
-    lcd.clear();
-    lcd << "Big number";
+    scr.clear();
+    scr.print("Big number");
     wait_ms(1000);
-    uint16_t u16  =  dev::user_choose_number_lineal(lcd, keyrow).pos(3, 1)
-					     .between(10, 60000)
-					     .choose4(2900);
-    lcd.cursor_pos(0,0);
-    lcd << "elegido : " << u16;
+    uint16_t u16  =  dev::user_choose_number_lineal(scr, keyrow).pos(3, 1)
+					     .between(0, 60000)
+					     .choose4(2900u);
+    scr.cursor_pos(0,0);
+    scr.print("elegido : ");
+    scr.print(u16);
 
     wait_ms(1000);
 
@@ -124,62 +127,68 @@ void test_choose_number2()
 
 //
 
-    lcd.clear();
-    lcd << "2 digits [5,25]";
+    scr.clear();
+    scr.print("2 digits [5,25]");
     wait_ms(1000);
-    uint8_t u8 =  dev::user_choose_number_lineal(lcd, keyrow).pos(3, 1)
+    uint8_t u8 =  dev::user_choose_number_lineal(scr, keyrow).pos(3, 1)
 					 .between(5, 25)
 					 .choose2(10);
-    lcd.cursor_pos(0,0);
-    lcd << "has elegido: " << static_cast<uint16_t>(u8);
+    scr.cursor_pos(0,0);
+    scr.print("has elegido: ");
+    scr.print_number(u8);
+
 
     wait_ms(1000);
 
-    lcd.clear();
-    lcd << "4 [2890, 2910]";
-    uint16_t u16  =  dev::user_choose_number_lineal(lcd, keyrow).pos(3, 1)
+    scr.clear();
+    scr.print("4 [2890, 2910]");
+    uint16_t u16  =  dev::user_choose_number_lineal(scr, keyrow).pos(3, 1)
 					     .between(2890, 2910)
 					     .choose4(2900);
-    lcd.cursor_pos(0,0);
-    lcd << "elegido : " << u16;
+    scr.cursor_pos(0,0);
+    scr.print("elegido : ");
+    scr.print(u16);
 
     wait_ms(1000);
 
-    lcd.clear();
-    lcd << "CIRCULAR TEST";
+    scr.clear();
+    scr.print("CIRCULAR TEST");
     wait_ms(1000);
 
-    lcd.clear();
-    lcd << "2 digits [5,25]";
+    scr.clear();
+    scr.print("2 digits [5,25]");
     wait_ms(1000);
-    u8 =  dev::user_choose_number_circular(lcd, keyrow).pos(3, 1)
+    u8 =  dev::user_choose_number_circular(scr, keyrow).pos(3, 1)
 					 .between(5, 25)
 					 .choose2(10);
-    lcd.cursor_pos(0,0);
-    lcd << "has elegido: " << static_cast<uint16_t>(u8);
+    scr.cursor_pos(0,0);
+    scr.print("has elegido: ");
+    scr.print_number(u8);
 
     wait_ms(1000);
 
-    lcd.clear();
-    lcd << "4 [2890, 2910]";
-    u16  =  dev::user_choose_number_circular(lcd, keyrow).pos(3, 1)
+    scr.clear();
+    scr.print("4 [2890, 2910]");
+    u16  =  dev::user_choose_number_circular(scr, keyrow).pos(3, 1)
 					     .between(2890, 2910)
 					     .choose4(2900);
-    lcd.cursor_pos(0,0);
-    lcd << "elegido : " << u16;
+    scr.cursor_pos(0,0);
+    scr.print("elegido : ");
+    scr.print(u16);
 
     wait_ms(1000);
 
 {
-    lcd.clear();
-    lcd << "Callback test";
+    scr.clear();
+    scr.print("Callback test");
     wait_ms(1000);
-    uint16_t u16  =  dev::user_choose_number_lineal(app, lcd, keyrow).pos(3, 1)
+    uint16_t u16  =  dev::user_choose_number_lineal(app, scr, keyrow).pos(3, 1)
 					     .between(10, 30)
 					     .callback(&Main::f)
 					     .choose4(20);
-    lcd.cursor_pos(0,0);
-    lcd << "elegido : " << u16;
+    scr.cursor_pos(0,0);
+    scr.print("elegido : ");
+    scr.print(u16);
 
     wait_ms(1000);
 
@@ -188,34 +197,38 @@ void test_choose_number2()
 
 {
 using namespace avr::literals;
-    lcd.clear();
-    lcd << "Freq. [5,25]";
-    avr::Frequency u8 =
-        dev::user_choose_number_lineal<LCD, Keyrow, avr::Frequency>
-	     (lcd, keyrow)
-            .pos(3, 1)
-            .between(5_Hz, 25_Hz)
-            .choose2(10_Hz);
-
-    lcd.cursor_pos(0,0);
-    lcd << "has elegido: " << u8;
+    scr.clear();
+    scr.print("Freq. [5,25]");
+    scr.print("\nTODO!!!");
+//    avr::Frequency u8 =
+//        dev::user_choose_number_lineal<LCD, Keyrow, avr::Frequency>
+//	     (scr, keyrow)
+//            .pos(3, 1)
+//            .between(5_Hz, 25_Hz)
+//            .choose2(10_Hz);
+//
+//    scr.cursor_pos(0,0);
+//    scr.print("has elegido: ");
+//    u8.print(scr); <-- ¿cómo implementar esto?
 
     wait_ms(1000);
 }
 {
-using Rep = atd::Decimal<uint16_t, 2>;
-    lcd.clear();
-    lcd << "Decimal [5,25]";
+//using Rep = atd::Decimal<uint16_t, 2>; TODO
+    scr.clear();
+    scr.print("Decimal [5,25]");
+    scr.print("\nTODO!!!");
     wait_ms(1000);
-    Rep u8 = dev::user_choose_number_lineal<LCD, Keyrow, Rep>(lcd, keyrow)
-		     .pos(3, 1)
-		     .between(5, 25)
-		     .choose2(10);
-
-    lcd.cursor_pos(0,0);
-    lcd << "has elegido: " << u8;
-
-    wait_ms(1000);
+//    Rep u8 = dev::user_choose_number_lineal<LCD, Keyrow, Rep>(scr, keyrow)
+//		     .pos(3, 1)
+//		     .between(5, 25)
+//		     .choose2(10);
+//
+//    scr.cursor_pos(0,0);
+//    scr.print("has elegido: ");
+//    scr.print_number(u8); <-- ¿cómo implementar esto?
+//
+//    wait_ms(1000);
 }
 
 }

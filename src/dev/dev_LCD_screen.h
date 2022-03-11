@@ -59,7 +59,7 @@
  ****************************************************************************/
 #include <stdint.h>
 #include <avr_memory.h>	// Progmem
-#include <atd_types.h>	// Width
+#include <atd_names.h>	// Width
 
 namespace dev{
 /*!
@@ -101,6 +101,7 @@ public:
     /// Borra la fila i.
     void clear_row(uint8_t i);
 
+// IMPRESIÓN DE CARACTERES
     /// Imprime un caracter donde estuviese el cursor colocado.
     /// Returns: true si imprime el caracter, false si no.
     // Esta es la función básica de impresión. Todas las demás funciones
@@ -119,6 +120,7 @@ public:
     // Return: el número de caracteres escritos.
     uint8_t print(const char* c);
 
+// IMPRESIÓN DE NÚMEROS
     /// Imprime el número indicado.
     /// return: número de cifras escritas
     // (RRR) ¿por qué llamar print_number(uint8_t)? 
@@ -134,22 +136,41 @@ public:
     uint8_t print(const int32_t& x);
     uint8_t print(const int64_t& x);
 
-    // Impresión de números con diferentes fuentes.
     // Todas estas funciones escriben los números con ceros a la izquierda de
     // tamaño Width
-    uint8_t print_number(uint8_t x, const atd::Width<int>& w);
-    uint8_t print(uint16_t x, const atd::Width<int>& w);
-    uint8_t print(uint32_t x, const atd::Width<int>& w);
-    uint8_t print(uint64_t x, const atd::Width<int>& w);
+    uint8_t print_number(uint8_t x, const nm::Width<int>& w);
+    uint8_t print(uint16_t x, const nm::Width<int>& w);
+    uint8_t print(const uint32_t& x, const nm::Width<int>& w);
+    uint8_t print(const uint64_t& x, const nm::Width<int>& w);
 
-    uint8_t print_number(int8_t x, const atd::Width<int>& w);
-    uint8_t print(int16_t x, const atd::Width<int>& w);
-    uint8_t print(int32_t x, const atd::Width<int>& w);
-    uint8_t print(int64_t x, const atd::Width<int>& w);
+    uint8_t print_number(int8_t x, const nm::Width<int>& w);
+    uint8_t print(int16_t x, const nm::Width<int>& w);
+    uint8_t print(const int32_t& x, const nm::Width<int>& w);
+    uint8_t print(const int64_t& x, const nm::Width<int>& w);
 
 
+    /// Impresión de números con diferentes fuentes.
     template <typename Font>
-    uint8_t print_number(uint8_t x, const atd::Width<int>& w);
+    uint8_t print_number(uint8_t x, const nm::Width<int>& w);
+
+// IMPRESIÓN BÁSICA PARA MANEJAR VENTANAS
+    /// Imprime la cadena `str` en la fila `y` empezando en la posición `x0`.
+    /// Imprime un máximo de x1 - x0 + 1 caracteres (de x0 hasta x1
+    /// inclusive). 
+    /// Si la cadena es más larga la trunca, y si es más corta el resto lo
+    /// rellena de espacios, borrando así lo que hubiese escrito con
+    /// anterioridad.
+    // No devuelve el número de caracteres escritos ya que siempre escribe los
+    // mismos: x1 - x0 + 1.
+    void print(nm::Row<int> y, 
+		  nm::From<int> x0, nm::To<int> x1,
+		  const char* str);
+
+    /// Equivalente a print(Row{y}, From{x0}, To{x0 + n - 1}, str);
+    void print(nm::Row<int> y, 
+		  nm::From<int> x0, nm::Size<int> n,
+		  const char* str)
+    {print(y, x0, nm::To{x0 + n - 1}, str);}
 
 // MANEJO DE FUENTES
     template <typename Font>
@@ -239,6 +260,8 @@ private:
     uint8_t print_signed_number(const Int& x, int ndigits = 0);
 
 };
+
+
 
 template <typename LCD>
 using LCD_screen_1602 = LCD_screen<16,2, LCD>;

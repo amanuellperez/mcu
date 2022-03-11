@@ -23,7 +23,7 @@
 
 void Main::init_time(RTC::Time_point& t)
 {
-    atd::Generic_time<RTC::Time_point> gt{t};
+    atd::Generic_time_view<RTC::Time_point> gt{t};
 
     gt.day(1);
     gt.month(1);
@@ -68,7 +68,7 @@ void Main::window_set_time()
 
 void Main::window_set_time(RTC::Time_point& t)
 {
-    atd::Generic_time<RTC::Time_point> gt{t};
+    atd::Generic_time_view<RTC::Time_point> gt{t};
 
     lcd_.clear();
 
@@ -83,7 +83,7 @@ void Main::window_set_time(RTC::Time_point& t)
 
 
 
-void Main::print_datetime(atd::Generic_time<RTC::Time_point> t, uint8_t x0, uint8_t y0)
+void Main::print_datetime(atd::Generic_time_view<RTC::Time_point> t, uint8_t x0, uint8_t y0)
 {
     lcd_.cursor_pos(x0, y0);
     atd::print_date(lcd_, t);
@@ -97,7 +97,7 @@ void Main::print_datetime(atd::Generic_time<RTC::Time_point> t, uint8_t x0, uint
 
 
 // Decidimos cómo mostrar la fecha y la hora al usuario
-void Main::user_get_datetime(atd::Generic_time<RTC::Time_point> t, uint8_t x0, uint8_t y0)
+void Main::user_get_datetime(atd::Generic_time_view<RTC::Time_point> t, uint8_t x0, uint8_t y0)
 {
     dev::user_get_date(lcd_, keyboard_, t, x0, y0);
     dev::user_get_weekday<week_days_length>(lcd_, keyboard_, t, 

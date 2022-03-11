@@ -45,7 +45,9 @@ void Main::window_main()
 void Main::show_window_main()
 {
     lcd_.cursor_pos(0,0);
-    lcd_ << std::setw(4) << stroboscope_.freq() << " Hz\n";
+    atd::print(lcd_, stroboscope_.freq(), nm::Width{4});
+    lcd_ << " Hz\n";
+    //lcd_ << std::setw(4) << stroboscope_.freq() << " Hz\n";
     lcd_.cursor_pos(0,1);
     lcd_ << "   ";
 
@@ -54,7 +56,9 @@ void Main::show_window_main()
 void Main::show_window_main_off()
 {
     lcd_.cursor_pos(0,0);
-    lcd_ << std::setw(4) << stroboscope_.freq() << " Hz\n";
+    atd::print(lcd_, stroboscope_.freq(), nm::Width{4});
+    lcd_ << " Hz\n";
+    //lcd_ << std::setw(4) << stroboscope_.freq() << " Hz\n";
     lcd_.cursor_pos(0,1);
     lcd_ << "OFF";
 }

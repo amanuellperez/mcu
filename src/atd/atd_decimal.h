@@ -1,4 +1,4 @@
-// Copyright (C) 2020 A.Manuel L.Perez 
+// Copyright (C) 2020-2022 A.Manuel L.Perez 
 //           mail: <amanuel.lperez@gmail.com>
 //           https://github.com/amanuellperez/mcu
 //
@@ -53,6 +53,7 @@
  *    06/03/2021       operator++/--, numeric_limits
  *    14/08/2021       se permite operar con escalares que sean convertibles
  *                     a Rep.
+ *    06/03/2022       print(out, decimal)
  *
  ****************************************************************************/
 #include <utility>
@@ -63,7 +64,8 @@
 
 #include "atd_math.h"
 #include "atd_type_traits_basic.h"
-
+#include "atd_names.h" // nm::Width
+#include "atd_ostream.h"
 
 namespace atd{
 
@@ -652,43 +654,47 @@ bool operator>=(const Decimal<R1, n1>& a, const Decimal<R2, n2>& b)
 
 // Serialización
 // -------------
-template <typename Rep, int ndecimals, typename Int>
-std::ostream& __print(std::ostream& out,
-                                const atd::Decimal<Rep, ndecimals>& d)
+template <typename Out, typename Rep, int ndecimals, typename Int>
+Out& __print(Out& out, const atd::Decimal<Rep, ndecimals>& d)
+
 {
     auto [n0, f0] = d.value();
     Int n = n0;
 
-    out << n;
+    print(out, n);
 
     if constexpr (ndecimals > 0){
 	Int f = f0;
-	out << '.';
-
-	out.width(ndecimals);
-	out.fill('0');
-	out << std::right << f;
+	print(out, '.');
+	print(out, f, nm::Width{ndecimals});
     }
 
     return out;
 }
 
 
+
 // (RRR) Los int8_t/uint8_t C++ los considera char, con lo que no los imprime
 //	 como números. Por ello esta función gestion aparte estos tipos.
-template <typename Rep, int ndecimals>
-std::ostream& operator<<(std::ostream& out,
-                                const atd::Decimal<Rep, ndecimals>& d)
+template <typename Out, typename Rep, int ndecimals>
+Out& print(Out& out, const atd::Decimal<Rep, ndecimals>& d)
 {
     // para poder imprimir uint8_t como int
     if constexpr (std::is_same_v<Rep, uint8_t>)
-	return __print<Rep, ndecimals, unsigned int>(out, d);
+	return __print<Out, Rep, ndecimals, unsigned int>(out, d);
 
     else if constexpr (std::is_same_v<Rep, int8_t>)
-	return __print<Rep, ndecimals, int>(out, d);
+	return __print<Out, Rep, ndecimals, int>(out, d);
 
     else 
-	return __print<Rep, ndecimals, Rep>(out, d);
+	return __print<Out, Rep, ndecimals, Rep>(out, d);
+}
+
+template <typename Out, typename Rep, int ndecimals>
+//std::ostream& operator<<(std::ostream& out,
+Out& operator<<(Out& out, const atd::Decimal<Rep, ndecimals>& d)
+{
+    return print(out, d);
 }
 
 
@@ -731,12 +737,13 @@ using __disable_if_is_decimal = std::enable_if_t<!__is_decimal<T>, T>;
 //    return To_decimal{static_cast<Rep2>(i), static_cast<Rep2>(f)};
 //}
 
-//// traits
-//// ------
-//template<typename Rep, int N>
-//struct same_type_with_double_bits_<Decimal<Rep, N>>{
-//    using type = Decimal<same_type_with_double_bits<Rep>, N>;
-//};
+// traits
+// ------
+// same_type_with_double_bits_
+template<typename Rep, int N>
+struct same_type_with_double_bits_<Decimal<Rep, N>>{
+    using type = Decimal<same_type_with_double_bits<Rep>, N>;
+};
 
 
 }// namespace atd
@@ -763,6 +770,8 @@ template <typename Rep, int N>
 struct std::is_signed<atd::Decimal<Rep, N>>
     : public std::bool_constant<std::is_signed_v<Rep>> {
 };
+
+
 
 #endif
 

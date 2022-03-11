@@ -21,6 +21,7 @@ INCS= atd_algorithm.h	\
 	atd_math.h 			\
 	atd_memory.h		\
 	atd_metronome.h		\
+	atd_names.h			\
 	atd_ostream.h		\
 	atd_ratio.h			\
 	atd_static.h		\
@@ -29,7 +30,6 @@ INCS= atd_algorithm.h	\
 	atd_time.h			\
 	atd_types.h			\
 	atd_type_traits_basic.h\
-	atd_type_traits_more.h\
 	atd_type_traits.h	\
 	atd_units.h
 

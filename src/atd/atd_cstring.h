@@ -31,11 +31,13 @@
  *    A.Manuel L.Perez
  *	16/11/2019 length, line_count, const_cstring
  *	03/01/2020 const_nstring
+ *	06/03/2022 print(out, const_nstring)
  *
  ****************************************************************************/
 
 #include <cstddef>		// ptrdiff_t
 #include <iostream>
+#include "atd_ostream.h" // print(ostream)
 
 namespace atd{
 
@@ -160,13 +162,25 @@ public:
 	: const_cstring_base(str, n) { }
 };
 
-inline std::ostream& operator<<(std::ostream& out, const const_nstring& s)
-{ 
+
+template <typename Out>
+inline Out& print(Out& out, const const_nstring& s)
+{
     for (auto x: s)
-	out << x;
+	print(out, x);
 
     return out;
 }
+
+inline std::ostream& operator<<(std::ostream& out, const const_nstring& s)
+{ 
+    return print(out, s);
+//    for (auto x: s)
+//	out << x;
+//
+//    return out;
+}
+
 
 
 /*!

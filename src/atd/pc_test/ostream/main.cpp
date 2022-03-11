@@ -1,4 +1,4 @@
-// Copyright (C) 2021 A.Manuel L.Perez 
+// Copyright (C) 2022 A.Manuel L.Perez 
 //           mail: <amanuel.lperez@gmail.com>
 //           https://github.com/amanuellperez/mcu
 //
@@ -17,32 +17,45 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#pragma once
+#include "../../atd_ostream.h"
 
-#ifndef __TYPE_TRAITS_MORE_H__
-#define __TYPE_TRAITS_MORE_H__
-/****************************************************************************
- *
- *  - DESCRIPCION: Traits de tipos no básicos.
- *
- *  - HISTORIA:
- *    A.Manuel L.Perez
- *    18/03/2021 v0.0
- *
- ****************************************************************************/
-
-#include "atd_type_traits_basic.h"
-#include "atd_decimal.h"
-
-namespace atd{
-// same_type_with_double_bits_
-template<typename Rep, int N>
-struct same_type_with_double_bits_<Decimal<Rep, N>>{
-    using type = Decimal<same_type_with_double_bits<Rep>, N>;
-};
-}// namespace
+#include <alp_test.h>
+#include <iostream>
 
 
-#endif
+
+using namespace test;
+
+
+#define CHECK_WIDTH(number, w, res_ok)	\
+    {std::cout << "check[" << __FILE__ << '-' << __LINE__ <<"]: ";  \
+	std::cout << '[';   \
+	 atd::print(std::cout, number, nm::Width{w});	    \
+	std::cout << "] =? [" << res_ok << "]\n";}
+
+void test_print()
+{
+    test::interfaz("print");
+    CHECK_WIDTH(2, 3, "  2");
+    CHECK_WIDTH(34, 5, "   34");
+}
+
+
+int main()
+{
+try{
+    test::header("atd_ostream");
+
+    test_print();
+
+}catch(std::exception& e)
+{
+    std::cerr << e.what() << '\n';
+    return 1;
+}
+}
+
+
+
 
 

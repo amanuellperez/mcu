@@ -41,14 +41,12 @@ void Main::init_TWI()
 
 void Main::init_lcd()
 {
-    lcd_.terminal().stop_brcorner(true);// I'm not going to use it as a terminal
-    lcd_.terminal().nowrap(); 
 }
 
 
 void Main::init_time(RTC::Time_point& t)
 {
-    atd::Generic_time<RTC::Time_point> gt{t};
+    atd::Generic_time_view<RTC::Time_point> gt{t};
 
     gt.day(1);
     gt.month(1);
@@ -94,7 +92,7 @@ void Main::window_set_time()
 
 void Main::window_set_time(RTC::Time_point& t)
 {
-    atd::Generic_time<RTC::Time_point> gt{t};
+    atd::Generic_time_view<RTC::Time_point> gt{t};
 
     lcd_.clear();
 

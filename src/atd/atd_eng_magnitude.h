@@ -31,8 +31,10 @@
  *    04/02/2021 v0.0 Implementación mínima.
  *    11/03/2021      to_eng_magnitude
  *    15/08/2021      millivalue
+ *    06/03/2022      print
  *
  ****************************************************************************/
+#include "atd_ostream.h"    // atd::print(std::ostream, T)
 #include "atd_magnitude.h"
 #include "atd_cast.h"	    // to_integer
 #include "atd_math.h"
@@ -210,11 +212,10 @@ public:
     constexpr Rep millivalue() const;
 
 // print
-    void print(std::ostream& out) const;
-
     // imprime solo la unidad.
-    // EJ: si freq = 23.452 kHz, print_unit(std::cout) imprime 'kHz'
-    void print_unit(std::ostream& out) const;
+//    // EJ: si freq = 23.452 kHz, print_unit(std::cout) imprime 'kHz'
+    template <typename Out, typename U, typename Rep>
+    friend void print_unit(Out& out, const ENG_Magnitude<U, Rep>& m);
 
 // traits
     static constexpr ENG_Magnitude min();
@@ -228,7 +229,8 @@ private:
 // Helpers
     static void common_exponent(ENG_Magnitude& a, ENG_Magnitude& b);
 
-    static void print_exponent(std::ostream& out, int exp);
+    template <typename Out>
+    static void print_exponent(Out& out, int exp);
 
     // (RRR) Cuando Scalar == Rep no se puede definir multiply(Rep) y
     //	     multiply(Scalar) ya que estaría duplicado. Por ello se necesitan
@@ -642,27 +644,23 @@ void ENG_Magnitude<U, Rep>::common_exponent(
 }
 
 
-template <typename U, typename Rep>
-void ENG_Magnitude<U, Rep>::print(std::ostream& out) const
+template <typename Out, typename U, typename Rep>
+inline void print(Out& out, const ENG_Magnitude<U, Rep>& m)
 {
-    out << internal_value() << ' ';
-    print_unit(out);
+    print(out, m.internal_value());
+    print(out, ' ');
+    print_unit(out, m);
 }
 
-template <typename U, typename Rep>
-void ENG_Magnitude<U, Rep>::print_unit(std::ostream& out) const
+
+template <typename Out, typename U, typename Rep>
+void print_unit(Out& out, const ENG_Magnitude<U, Rep>& m)
 {
-    print_exponent(out, exponent());
-    out << Unit_symbol<Unit>;
+    using Unit = ENG_Magnitude<U, Rep>::Unit;
+
+    ENG_Magnitude<U, Rep>::print_exponent(out, m.exponent());
+    print(out, Unit_symbol<Unit>);
 }
-
-template <typename U, typename Rep>
-inline void print(std::ostream& out, const ENG_Magnitude<U, Rep>& m)
-{ m.print(out); }
-
-template <typename U, typename Rep>
-inline void print_unit(std::ostream& out, const ENG_Magnitude<U, Rep>& m)
-{ m.print_unit(out); }
 
 // (RRR) ¿Por qué escribir un espacio en caso de exponente 0?
 //       Es una cuestión estética.
@@ -682,19 +680,20 @@ inline void print_unit(std::ostream& out, const ENG_Magnitude<U, Rep>& m)
 //	 p = prefix (k)
 //	 S = symbol (Hz)
 template <typename U, typename R>
-void ENG_Magnitude<U, R>::print_exponent(std::ostream& out, int exp)
+template <typename Out>
+void ENG_Magnitude<U, R>::print_exponent(Out& out, int exp)
 {
     switch (exp){
-	case 0:	out << ' '; break;
-	case 3: out << 'k'; break;
-	case 6: out << 'M'; break;
-	case 9: out << 'G'; break;
-	case 12: out << 'T'; break;
-	case -3: out << 'm'; break;
-	case -6: out << 'u'; break;
-	case -9: out << 'n'; break;
-	case -12: out << 'p'; break;
-	default: out << '?'; break;
+	case 0:	print(out, ' '); break;
+	case 3: print(out, 'k'); break;
+	case 6: print(out, 'M'); break;
+	case 9: print(out, 'G'); break;
+	case 12: print(out, 'T'); break;
+	case -3: print(out, 'm'); break;
+	case -6: print(out, 'u'); break;
+	case -9: print(out, 'n'); break;
+	case -12: print(out, 'p'); break;
+	default: print(out, '?'); break;
     }
 
 }
@@ -721,12 +720,13 @@ ENG_Magnitude<U, R>::max()
                                         std::numeric_limits<Exponent>::max()};
 }
 
-template <typename U, typename R>
-inline std::ostream& operator<<(std::ostream& out, const ENG_Magnitude<U, R>& m)
+template <typename Out, typename U, typename R>
+inline Out& operator<<(Out& out, const ENG_Magnitude<U, R>& m)
 {
-    m.print(out);
+    print(out, m);
     return out;
 }
+
 
 // castings
 // --------

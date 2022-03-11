@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021 A.Manuel L.Perez 
+// Copyright (C) 2019-2022 A.Manuel L.Perez 
 //           mail: <amanuel.lperez@gmail.com>
 //           https://github.com/amanuellperez/mcu
 //
@@ -23,7 +23,7 @@
 #define __USER_CHOOSE_STRING_H__
 /****************************************************************************
  *
- *  - DESCRIPCION: Funciones para mostrar un menu en un LCD.
+ *  - DESCRIPCION: Funciones para mostrar un menu en un Screen.
  *
  *  - COMENTARIOS: 
  *
@@ -31,6 +31,7 @@
  *    A.Manuel L.Perez
  *	02/11/2019 v0.0
  *	02/01/2020 v0.1 Reescrito.
+ *	07/03/2022      Screen en vez de LCD.
  *
  ****************************************************************************/
 #include <avr_time.h>
@@ -46,22 +47,26 @@ namespace dev{
 constexpr int user_choose_string_type_lineal   = 0;
 constexpr int user_choose_string_type_circular = 1;
 
-// En los LCD se suele dar cols x rows (al contrario que en las matrices).
+// En los Screen se suele dar cols x rows (al contrario que en las matrices).
 // Seguiré con esa convención aquí.
-template <typename LCD_t,
+template <typename Screen_t,
           typename Keyrow3_t,
           uint8_t ncols, uint8_t nrows>
 struct User_choose_string_interface {
-    using LCD                     = LCD_t;
-    using Keyrow3               = Keyrow3_t;
+    using Screen                     = Screen_t;
+    using Keyrow3                 = Keyrow3_t;
     static constexpr uint8_t rows = nrows;
     static constexpr uint8_t cols = ncols;
 };
 
 
 /*!
- *  \brief  Muestra un menu en el LCD y permite seleccionar una opción via 
+ *  \brief  Muestra un menu en el Screen y permite seleccionar una opción via 
  *  \brief  teclado.
+ *
+ *  La idea es mostrar un combobox de un tamaño fijo, por ejemplo, se muestran
+ *  3 opciones de 20 caracteres máximo. La ventana del combobox es de tamaño
+ *  fijo (ej: 3 filas x 20 columnas).
  *
  *  El teclado tiene 3 teclas: 
  *	up, down: equivalentes a decrementar, incrementar
@@ -87,27 +92,27 @@ public:
 
     static constexpr int type = type0; // lineal o circular
 
-    using LCD	    = Interface::LCD;
-    using Keyrow3 = Interface::Keyrow3;
+    using Screen    = Interface::Screen;
+    using Keyrow3   = Interface::Keyrow3;
 
     using size_type = typename Array::size_type;
 
-    /// Mostramos el número en el LCD e interaccionamos con el usuario via
+    /// Mostramos el número en el Screen e interaccionamos con el usuario via
     /// el teclado indicado.
-    User_choose_string(LCD& lcd,
+    User_choose_string(Screen& lcd,
                        Keyrow3,
                        const Array& str);
 
-    // Dejamos el LCD en el estado en que se encontraba.
+    // Dejamos el Screen en el estado en que se encontraba.
     ~User_choose_string();
 
-    /// Número de filas del menú que mostramos en el LCD.
+    /// Número de filas del menú que mostramos en el Screen.
     constexpr uint8_t rows()  const {return rows_;}
 
-    /// Número de columnas del menú que mostramos en el LCD.
+    /// Número de columnas del menú que mostramos en el Screen.
     constexpr uint8_t cols()  const {return cols_;}
 
-    /// Posición dentro del LCD en el que empieza el menú.
+    /// Posición dentro del Screen en el que empieza el menú.
     /// (x,y) = esquina superior izquierda donde empieza el menú.
     User_choose_string& pos(uint8_t x, uint8_t y);
 
@@ -122,7 +127,7 @@ private:
 // Data
 // -----
     // Dispositivos a los que conectamos este menu
-    LCD& lcd_;	    
+    Screen& lcd_;	    
 
     // keyrow
     static constexpr auto enter_key()
@@ -144,7 +149,7 @@ private:
 
     // Posición del menu: (xm_, ym_)
     // -----------------------------
-    // Posición dentro del LCD de la esquina superior izda donde
+    // Posición dentro del Screen de la esquina superior izda donde
     // empezamos a dibujar el menu.
     uint8_t xm_;    // Posición x del cursor. Nos dice a partir de qué posición 
 		    // vamos a escribir las opciones.
@@ -154,17 +159,17 @@ private:
     // -------------------------------------
     uint8_t yr_;    // Posición relativa a ym_ del cursor.
 
-    // Dimensiones del menú en el LCD (son las dimensiones de la ventana_menu)
+    // Dimensiones del menú en el Screen (son las dimensiones de la ventana_menu)
     // -----------------------------------------------------------------------
-    // número de filas que mostramos en el LCD <= lcd_.rows()
+    // número de filas que mostramos en el Screen <= lcd_.rows()
     // Mostraremos las filas ym_, ym_ + 1, ..., ym_ + rows_ - 1
     static constexpr uint8_t rows_ = Interface::rows;
     static constexpr uint8_t cols_ = Interface::cols;
 
 
-    // Estado del LCD antes
+    // Estado del Screen antes
     bool lcd_cursor_on_;
-    bool lcd_wrap_on_;
+//    bool lcd_wrap_on_;
 
     // Configuración
     // -------------
@@ -178,23 +183,23 @@ private:
 // ------------------
     // Memoriza el estado del lcd que vamos a cambiar, para que al destruir el
     // objeto dejar el lcd en el estado que estaba antes.
-    void init_LCD() 
+    void init_Screen() 
     {
-        lcd_wrap_on_   = lcd_.nowrap();
+//        lcd_wrap_on_   = lcd_.nowrap();
         lcd_cursor_on_ = lcd_.cursor_on();
     }
 
-    // Muestra en el LCD el menu [p0, '\0'), colocando el cursor en (xm_, yr_)
+    // Muestra en el Screen el menu [p0, '\0'), colocando el cursor en (xm_, yr_)
     void show_option(size_type i0);
 
-    // Muestra por primera vez el menu en el LCD. Se encarga de inicializar
+    // Muestra por primera vez el menu en el Screen. Se encarga de inicializar
     // todas las variables de este objeto.
     void show_str_first_time(uint8_t first_option);
 
 
     enum class Redraw {no, cursor, all};
 
-    // Redibuja el LCD de acuerdo a redraw: puede no redraw nada, o solo
+    // Redibuja el Screen de acuerdo a redraw: puede no redraw nada, o solo
     // recolocar el cursor, o redrawlo todo.
     void redraw(Redraw type);
 
@@ -214,21 +219,21 @@ private:
 
     // Los arrays de caracteres y los de cadenas los imprimimos 
     // de forma diferente. La función print fusiona el interfaz.
-    void print(const char* p, uint8_t n);
-    void print(char p, uint8_t);
-    void print(const atd::const_nstring&, uint8_t);
+    void print(uint8_t x, uint8_t y, const char* p, uint8_t n);
+    void print(uint8_t x, uint8_t y, char p, uint8_t);
+    void print(uint8_t x, uint8_t y, const atd::const_nstring&, uint8_t);
 
 };
 
 template <typename I, typename Array, int t>
 inline User_choose_string<I, Array, t>::User_choose_string(
-    LCD& lcd, Keyrow3, const Array& str0)
+    Screen& lcd, Keyrow3, const Array& str0)
     : lcd_{lcd}, str_{str0}, 
       y0_{0}, 
       xm_{lcd.cursor_pos_x()}, ym_{0}, yr_{0}
 {
 
-    init_LCD();
+    init_Screen();
 }
 
 
@@ -238,8 +243,8 @@ User_choose_string<I, A, t>::~User_choose_string()
     if (!lcd_cursor_on_)
 	lcd_.cursor_off();
 
-    if (!lcd_wrap_on_)
-	lcd_.nowrap();
+//    if (!lcd_wrap_on_)
+//	lcd_.nowrap();
 }
 
 
@@ -339,23 +344,40 @@ void User_choose_string<I, A, t>::redraw(Redraw type)
 }
 
 template <typename I, typename A, int t>
-inline void User_choose_string<I, A, t>::print(const char* p, uint8_t n)
-{ lcd_.print_line_nowrap(p, cols()); }
+inline void User_choose_string<I, A, t>::print(uint8_t x, uint8_t y,
+					       const char* p, uint8_t n)
+{
+    lcd_.print(nm::Row<int>{y},
+               nm::From<int>{x},
+               nm::Size<int>{static_cast<int>(cols())},
+               p);
+}
 
 template <typename I, typename A, int t>
-inline void User_choose_string<I, A, t>::print(char c, uint8_t)
-{ lcd_.print(c); }
+inline void User_choose_string<I, A, t>::print(uint8_t x, uint8_t y, 
+					       char c, uint8_t)
+{
+    lcd_.cursor_pos(x, y);
+    lcd_.print(c);
+}
 
 template <typename I, typename A, int t>
-inline void User_choose_string<I, A, t>::print(const atd::const_nstring& str, uint8_t)
-{ lcd_.print_line_nowrap(str.data(), str.size()); }
+inline void User_choose_string<I, A, t>::print(
+			    uint8_t x, uint8_t y,
+			    const atd::const_nstring& str,
+                                               uint8_t)
+{
+    lcd_.print(nm::Row<int>{y},
+               nm::From<int>{x},
+               nm::Size<int>{static_cast<int>(str.size())},
+               str.data());
+}
 
 template <typename I, typename A, int t>
 void User_choose_string<I, A, t>::show_option(size_type i0)
 {
     for (size_type i = 0; i < rows() and (i + i0 < str_.size()); ++i){
-	lcd_.cursor_pos(xm_, ym_ + i);
-	print(str_[i + i0], cols());
+	print(xm_, ym_ + i, str_[i + i0], cols());
     }
 
     lcd_.cursor_pos(xm_, ym_ + yr_);
@@ -419,14 +441,14 @@ typename User_choose_string<I, A, t>::Redraw
 
 // syntactic sugar
 template <uint8_t ncols, uint8_t nrows = 1, 
-	 typename LCD, typename Keyrow3, 
+	 typename Screen, typename Keyrow3, 
 	 typename Array>
-User_choose_string<User_choose_string_interface<LCD, Keyrow3, ncols, nrows>, 
+User_choose_string<User_choose_string_interface<Screen, Keyrow3, ncols, nrows>, 
 		   Array, user_choose_string_type_lineal>
-user_choose_string_lineal(LCD& lcd, Keyrow3 k, const Array& str)
+user_choose_string_lineal(Screen& lcd, Keyrow3 k, const Array& str)
 
 {
-    using Interface = User_choose_string_interface<LCD, Keyrow3,
+    using Interface = User_choose_string_interface<Screen, Keyrow3,
 						   ncols, nrows>;
     return 
 	User_choose_string<Interface, Array, user_choose_string_type_lineal>
@@ -435,14 +457,14 @@ user_choose_string_lineal(LCD& lcd, Keyrow3 k, const Array& str)
 
 
 template <uint8_t ncols, uint8_t nrows = 1, 
-	 typename LCD, typename Keyrow3, 
+	 typename Screen, typename Keyrow3, 
 	 typename Array>
-User_choose_string<User_choose_string_interface<LCD, Keyrow3, ncols, nrows>, 
+User_choose_string<User_choose_string_interface<Screen, Keyrow3, ncols, nrows>, 
 		   Array, user_choose_string_type_circular>
-user_choose_string_circular(LCD& lcd, Keyrow3 k, const Array& str)
+user_choose_string_circular(Screen& lcd, Keyrow3 k, const Array& str)
 
 {
-    using Interface = User_choose_string_interface<LCD, Keyrow3,
+    using Interface = User_choose_string_interface<Screen, Keyrow3,
 						   ncols, nrows>;
     return User_choose_string<Interface,
                               Array,

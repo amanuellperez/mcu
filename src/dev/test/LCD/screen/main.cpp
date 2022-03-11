@@ -276,8 +276,32 @@ void test_lcd_screen4_2004()
 
 // ------
     scr.clear();
-    scr.print("LCD Screen (20 x 04)");
+//    scr.print("LCD Screen (20 x 04)");
+    scr << "LCD Screen(20 x 04)\n";
+    scr << 'a' << 21 << "?\notra?"; // probamos operator<<
     wait_ms(1000);
+
+// -------
+// print
+    scr.clear();
+    scr.print("print [from, to]"); scr.cursor_pos(0, 1);
+    scr.print("xx|xxxxx|xxxxxxxxxxx"); scr.cursor_pos(0, 2);
+    scr.print("xx|xxxxxxxx|xxxxxxxx"); scr.cursor_pos(0, 3);
+    scr.print("xx|xxx|xxxxxxxxxxxxx");
+    scr.print(nm::Row{1}, nm::From{3}, nm::To{7}, "print");
+    scr.print(nm::Row{2}, nm::From{3}, nm::To{10}, "print");
+    scr.print(nm::Row{3}, nm::From{3}, nm::To{5}, "print");
+    wait_ms(3000);
+
+    scr.clear();
+    scr.print("print [from, n]"); scr.cursor_pos(0, 1);
+    scr.print("xx|xxxxx|xxxxxxxxxxx"); scr.cursor_pos(0, 2);
+    scr.print("xx|xxxxxxxx|xxxxxxxx"); scr.cursor_pos(0, 3);
+    scr.print("xx|xxx|xxxxxxxxxxxxx");
+    scr.print(nm::Row{1}, nm::From{3}, nm::Size{5}, "print");
+    scr.print(nm::Row{2}, nm::From{3}, nm::Size{8}, "print");
+    scr.print(nm::Row{3}, nm::From{3}, nm::Size{3}, "print");
+    wait_ms(3000);
 
 // -------
 // Probamos diferentes fonts
@@ -285,29 +309,29 @@ void test_lcd_screen4_2004()
     scr.print("Test print fonts");
     scr.clear();
     scr.load<Font_digit_2x1_t1>();
-    scr.print_number<Font_digit_2x1_t1>(2, atd::Width{3});
+    scr.print_number<Font_digit_2x1_t1>(2, nm::Width{3});
     wait_ms(1000);
 
     scr.clear();
     scr.load<Font_digit_2x2_t1>();
-    scr.print_number<Font_digit_2x2_t1>(123, atd::Width{3});
+    scr.print_number<Font_digit_2x2_t1>(123, nm::Width{3});
     wait_ms(1000);
 
     scr.clear();
     scr.load<Font_digit_2x3_t1>();
-    scr.print_number<Font_digit_2x3_t1>(35, atd::Width{3});
+    scr.print_number<Font_digit_2x3_t1>(35, nm::Width{3});
     scr.print(" =? 035");
     wait_ms(1000);
 
     scr.clear();
     scr.load<Font_digit_3x3_t1>();
-    scr.print_number<Font_digit_3x3_t1>(74, atd::Width{3});
+    scr.print_number<Font_digit_3x3_t1>(74, nm::Width{3});
     scr.print(" =? 074");
     wait_ms(1000);
 
     scr.clear();
     scr.load<Font_digit_4x3_t1>();
-    scr.print_number<Font_digit_4x3_t1>(12, atd::Width{3});
+    scr.print_number<Font_digit_4x3_t1>(12, nm::Width{3});
     scr.print(" =? 012");
     wait_ms(1000);
 
@@ -320,7 +344,7 @@ void test_lcd_screen4_2004()
     scr.clear();
     scr.print("(u8) 009 =?"
 	    "\n     ");
-    scr.print_number(uint8_t{9}, atd::Width{3});
+    scr.print_number(uint8_t{9}, nm::Width{3});
     wait_ms(1000);
 
 
@@ -328,67 +352,67 @@ void test_lcd_screen4_2004()
     scr.print("(u16) 002 =?"
 	    "\n      ");
     // scr.print(uint16_t{2}, 3); <-- tambien funciona, pero es más claro:
-    scr.print(uint16_t{2}, atd::Width{3});
+    scr.print(uint16_t{2}, nm::Width{3});
     wait_ms(1000);
 
     scr.clear();
     scr.print("(u32) 008 =?"
 	   "\n      ");
-    scr.print(uint32_t{8}, atd::Width{3});
+    scr.print(uint32_t{8}, nm::Width{3});
     wait_ms(1000);
 
     scr.clear();
     scr.print("(u64) 072 =?"
 	   "\n      ");
-    scr.print(uint64_t{72}, atd::Width{3});
+    scr.print(uint64_t{72}, nm::Width{3});
     wait_ms(1000);
 
     scr.clear();
     scr.print("(s8) 009 =?"
 	    "\n     ");
-    scr.print_number(int8_t{9}, atd::Width{3});
+    scr.print_number(int8_t{9}, nm::Width{3});
     wait_ms(1000);
 
     scr.clear();
     scr.print("(s8) -05 =?"
 	    "\n     ");
-    scr.print_number(int8_t{-5}, atd::Width{3});
+    scr.print_number(int8_t{-5}, nm::Width{3});
     wait_ms(1000);
 
     scr.clear();
     scr.print("(s16) 002 =?"
 	   "\n      ");
-    scr.print(int16_t{2}, atd::Width{3});
+    scr.print(int16_t{2}, nm::Width{3});
     wait_ms(1000);
 
     scr.clear();
     scr.print("(s16) -02 =?"
 	   "\n      ");
-    scr.print(int16_t{-2}, atd::Width{3});
+    scr.print(int16_t{-2}, nm::Width{3});
     wait_ms(1000);
 
     scr.clear();
     scr.print("(u32) 003 =?"
 	   "\n      ");
-    scr.print(int32_t{3}, atd::Width{3});
+    scr.print(int32_t{3}, nm::Width{3});
     wait_ms(1000);
 
     scr.clear();
     scr.print("(s32) -08 =?"
 	   "\n      ");
-    scr.print(int32_t{-8}, atd::Width{3});
+    scr.print(int32_t{-8}, nm::Width{3});
     wait_ms(1000);
 
     scr.clear();
     scr.print("(s64) 072 =?"
 	   "\n      ");
-    scr.print(int64_t{72}, atd::Width{3});
+    scr.print(int64_t{72}, nm::Width{3});
     wait_ms(1000);
 
     scr.clear();
     scr.print("(s64) -05 =?"
 	   "\n      ");
-    scr.print(int64_t{-5}, atd::Width{3});
+    scr.print(int64_t{-5}, nm::Width{3});
     wait_ms(1000);
 
 // -------

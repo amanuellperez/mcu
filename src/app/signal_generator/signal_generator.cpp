@@ -101,14 +101,14 @@ void Main::previous_frequency(const avr::Frequency& fsubstract)
 }
 
 
-void Main::print_without_decimals(std::ostream& out, const avr::Frequency& f)
+void Main::print_without_decimals(LCD& out, const avr::Frequency& f)
 {
     out << atd::to_integer<uint16_t>(f.internal_value());
     atd::print_unit(out, f);
 
 }
 
-void Main::print(std::ostream& out, const avr::Frequency& f)
+void Main::print(LCD& out, const avr::Frequency& f)
 {
     if (f < 1_kHz)
 	print_without_decimals(out, f);
