@@ -18,15 +18,15 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 // Conectar el LCD y 3 pulsadores a los pines indicados
-#include "../../user_choose_number.h"
-#include "../../dev_LCD_HD44780.h"
 #include "../../dev_LCD_screen.h"
+#include "../../dev_LCD_HD44780.h"
 #include <atd_decimal.h>
 #include <atd_magnitude.h>
 #include <atd_eng_magnitude.h>
 #include <avr_types.h>
 
 #include <avr_time.h>
+#include "../../user_choose_number.h"
 
 
 
@@ -199,36 +199,35 @@ void test_choose_number2()
 using namespace avr::literals;
     scr.clear();
     scr.print("Freq. [5,25]");
-    scr.print("\nTODO!!!");
-//    avr::Frequency u8 =
-//        dev::user_choose_number_lineal<LCD, Keyrow, avr::Frequency>
-//	     (scr, keyrow)
-//            .pos(3, 1)
-//            .between(5_Hz, 25_Hz)
-//            .choose2(10_Hz);
-//
-//    scr.cursor_pos(0,0);
-//    scr.print("has elegido: ");
-//    u8.print(scr); <-- ¿cómo implementar esto?
+
+    avr::Frequency u8 =
+        dev::user_choose_number_lineal<LCD, Keyrow, avr::Frequency>
+	     (scr, keyrow)
+            .pos(3, 1)
+            .between(5_Hz, 25_Hz)
+            .choose2(10_Hz);
+
+    scr.cursor_pos(0,0);
+    scr.print("has elegido: ");
+    atd::print(scr, u8);
 
     wait_ms(1000);
 }
 {
-//using Rep = atd::Decimal<uint16_t, 2>; TODO
+    using Rep = atd::Decimal<uint16_t, 2>;
     scr.clear();
     scr.print("Decimal [5,25]");
-    scr.print("\nTODO!!!");
     wait_ms(1000);
-//    Rep u8 = dev::user_choose_number_lineal<LCD, Keyrow, Rep>(scr, keyrow)
-//		     .pos(3, 1)
-//		     .between(5, 25)
-//		     .choose2(10);
-//
-//    scr.cursor_pos(0,0);
-//    scr.print("has elegido: ");
-//    scr.print_number(u8); <-- ¿cómo implementar esto?
-//
-//    wait_ms(1000);
+    Rep u8 = dev::user_choose_number_lineal<LCD, Keyrow, Rep>(scr, keyrow)
+		     .pos(3, 1)
+		     .between(5, 25)
+		     .choose2(10);
+
+    scr.cursor_pos(0,0);
+    scr.print("has elegido: ");
+    atd::print(scr, u8);
+
+    wait_ms(1000);
 }
 
 }

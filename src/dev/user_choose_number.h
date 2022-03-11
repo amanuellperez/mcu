@@ -495,7 +495,7 @@ void User_choose_number<L, T, t0, Rep, M>::print(Rep x,
                                                  const nm::Width<int>& w)
 {
     scr_.cursor_pos(col_, row_);
-    scr_.print(x, w);
+    atd::print(scr_, x, w);
     scr_.cursor_pos(col_ + w - 1, row_);
 }
 

@@ -39,6 +39,7 @@
 #include "atd_cast.h"	    // to_integer
 #include "atd_math.h"
 #include "atd_type_traits.h"	// same_type_at_least32
+#include "atd_names.h" // nm::Width
 
 namespace atd{
 
@@ -643,9 +644,19 @@ void ENG_Magnitude<U, Rep>::common_exponent(
 
 }
 
-
 template <typename Out, typename U, typename Rep>
 inline void print(Out& out, const ENG_Magnitude<U, Rep>& m)
+{
+    print(out, m.internal_value());
+    print(out, ' ');
+    print_unit(out, m);
+}
+
+// TODO: falta implementar esta función. De momento hace un print vulgar y
+// corriente.
+template <typename Out, typename U, typename Rep>
+inline void
+print(Out& out, const ENG_Magnitude<U, Rep>& m, const nm::Width<int>& w)
 {
     print(out, m.internal_value());
     print(out, ' ');

@@ -690,6 +690,15 @@ Out& print(Out& out, const atd::Decimal<Rep, ndecimals>& d)
 	return __print<Out, Rep, ndecimals, Rep>(out, d);
 }
 
+// TODO: falta implementarla. De momento hago un print.
+template <typename Out, typename Rep, int ndecimals>
+Out& print(Out& out,
+           const atd::Decimal<Rep, ndecimals>& d,
+           const nm::Width<int>& w)
+{
+    return print(out, d);
+}
+
 template <typename Out, typename Rep, int ndecimals>
 //std::ostream& operator<<(std::ostream& out,
 Out& operator<<(Out& out, const atd::Decimal<Rep, ndecimals>& d)

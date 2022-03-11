@@ -147,7 +147,8 @@ template <typename LCD,
 class LCD_Menu{
 public:
     using Menu_number = _Menu_number<Options, Main>;
-    using Options_as_array_of_strings = _Options_as_array_of_strings<Options, Main>;
+    using Options_as_array_of_strings =
+				_Options_as_array_of_strings<Options, Main>;
 
     LCD_Menu(Main* main_app,
              LCD& lcd,

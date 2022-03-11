@@ -168,7 +168,7 @@ void test_user_time()
 	wait_ms(1000);
 
 	lcd.clear();
-	lcd << "Primera prueba: time_t";
+	lcd << "First test: time_t";
 	std::time_t time0 = 630152224; // 20/12/2019 10:17:04
 	std::tm* t0 = std::gmtime(&time0);
 
@@ -177,7 +177,7 @@ void test_user_time()
 
 	{
             lcd.clear();
-            lcd << "Segunda prueba: duration";
+            lcd << "Second test:duration";
             std::time_t t = 630152224; // 20/12/2019 10:17:04
             auto td        = std::chrono::system_clock::from_time_t(t);
 	    td = user_get_datetime(lcd, key, td, 4, 2);
