@@ -25,7 +25,7 @@
 #ifndef __MENU_H__
 #define __MENU_H__
 constexpr const char* menu_str[] =
-{"a first option","a second option","a third option","b1 - one","b2 - two","c1 ; 1","c2 ; 2","c3	; 3","d1","d2"};
+{"a first option","a second option","a third option","b1 - one","b2 - two","c1 ; 1","c2 ; 2","c3 ; 3","d1","d2"};
 
 
 constexpr size_t menu_a0= 0;

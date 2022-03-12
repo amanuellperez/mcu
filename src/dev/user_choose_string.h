@@ -149,6 +149,8 @@ private:
 
     // Posición del menu: (xm_, ym_)
     // -----------------------------
+    // El menu lo mostramos en una ventana del Screen. ¿Merece la pena definir
+    // Screen_window? Quedaría más limpio la implementación de esta clase.
     // Posición dentro del Screen de la esquina superior izda donde
     // empezamos a dibujar el menu.
     uint8_t xm_;    // Posición x del cursor. Nos dice a partir de qué posición 
@@ -169,7 +171,6 @@ private:
 
     // Estado del Screen antes
     bool lcd_cursor_on_;
-//    bool lcd_wrap_on_;
 
     // Configuración
     // -------------
@@ -185,7 +186,6 @@ private:
     // objeto dejar el lcd en el estado que estaba antes.
     void init_Screen() 
     {
-//        lcd_wrap_on_   = lcd_.nowrap();
         lcd_cursor_on_ = lcd_.cursor_on();
     }
 
@@ -223,6 +223,8 @@ private:
     void print(uint8_t x, uint8_t y, char p, uint8_t);
     void print(uint8_t x, uint8_t y, const atd::const_nstring&, uint8_t);
 
+    // Borramos la ventana
+    void clear();
 };
 
 template <typename I, typename Array, int t>
@@ -242,9 +244,6 @@ User_choose_string<I, A, t>::~User_choose_string()
 {
     if (!lcd_cursor_on_)
 	lcd_.cursor_off();
-
-//    if (!lcd_wrap_on_)
-//	lcd_.nowrap();
 }
 
 
@@ -320,6 +319,8 @@ template <typename I, typename A, int t>
 uint8_t User_choose_string<I, A, t>::show(uint8_t first_option)
 {
     wait_ms(T_clock);	// Le damos tiempo al usuario a que suelte enter.
+
+    clear();
 
     show_str_first_time(first_option);
 
@@ -437,6 +438,18 @@ typename User_choose_string<I, A, t>::Redraw
 
 }
 
+
+template <typename I, typename A, int t>
+void User_choose_string<I, A, t>::clear()
+{
+    for (uint8_t r = 0; r < rows(); ++r){
+	lcd_.cursor_pos(xm_, ym_ + r);
+
+	for (uint8_t c = 0; c < cols(); ++c)
+	    lcd_.print(' ');
+    }
+
+}
 
 
 // syntactic sugar

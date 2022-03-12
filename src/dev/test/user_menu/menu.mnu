@@ -12,7 +12,7 @@ menu_b
 menu_c
     "c1 ; 1" execute &Main::c1
     "c2 ; 2" execute &Main::c2
-    "c3	; 3" execute &Main::c3
+    "c3 ; 3" execute &Main::c3
 
 menu_d
     "d1" execute &Main::d1

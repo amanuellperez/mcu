@@ -69,6 +69,20 @@ using LCD = Screen_2004;
 constexpr std::array menu_unidad_tiempo = {"hora", "min", "seg"};
 
 
+// (RRR) Relleno el lcd con puntos para ver si el menu rellena su ventana
+//       correctamente.
+void lcd_clear(LCD& lcd)
+{
+    lcd.clear();
+    for (uint8_t r = 0; r < lcd.rows(); ++r){
+	lcd.cursor_pos(0, r);
+	for (uint8_t c = 0; c < lcd.cols(); ++c)
+	    lcd.print('.');
+    }
+    
+    lcd.cursor_pos(0,0);
+}
+
  
 // Probamos el LCD_stream conectado a 4 pines de datos 
 void test_lcd_menu()
@@ -93,7 +107,8 @@ void test_lcd_menu()
 //	constexpr std::array days ={'D', 'L', 'M', 'X', 'J', 'V', 'S'};
 	constexpr const char* days = "DLMXJVS";
 
-	lcd.clear();
+	lcd_clear(lcd);
+//	lcd.clear();
 	lcd << "Elige (circular): ";
 	uint8_t day = dev::user_choose_string_circular<1>(lcd, keyrow, 
 		    atd::Array_const_nstrings{days, 1})
@@ -107,7 +122,8 @@ void test_lcd_menu()
 //	constexpr std::array days2 ={"Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sa"};
 	constexpr const char* days2 = "DoLuMaMiJuViSa";
 
-	lcd.clear();
+//	lcd.clear();
+	lcd_clear(lcd);
 	lcd << "Elige: (circular) ";
 	uint8_t day2 = dev::user_choose_string_circular<2>(lcd, keyrow, 
 		    atd::Array_const_nstrings{days2, 2})
@@ -115,11 +131,13 @@ void test_lcd_menu()
                          .show(2);
 
 	lcd.clear();
+	lcd_clear(lcd);
 	lcd << "Seleccion: " << static_cast<uint16_t>(day2);
 	wait_ms(1000);
 
 
-	lcd.clear();
+//	lcd.clear();
+	lcd_clear(lcd);
 	lcd << "Elige: ";
 	uint8_t unidad = dev::user_choose_string_lineal<4>(lcd, keyrow, menu_unidad_tiempo)
                          .pos(7, 1)
@@ -129,7 +147,8 @@ void test_lcd_menu()
 	lcd << "Seleccion: " << static_cast<uint16_t>(unidad);
 	wait_ms(1000);
 
-	lcd.clear();
+//	lcd.clear();
+	lcd_clear(lcd);
 	lcd << "Elige: ";
 	// uint16_t en lugar de uint8_t para poder imprimirlo en lcd <<.
         uint16_t seleccion = dev::user_choose_string_lineal<4>(lcd, keyrow, menu)
@@ -141,7 +160,7 @@ void test_lcd_menu()
 
 	wait_ms(1000);
 
-	lcd.clear();
+	lcd_clear(lcd);
 	lcd << "Elige: xxxx = unidades";
         seleccion = dev::user_choose_string_lineal<4>(lcd, keyrow, menu2)
 				 .pos(7,0)
@@ -153,7 +172,7 @@ void test_lcd_menu()
 	wait_ms(1000);
 
 
-	lcd.clear();
+	lcd_clear(lcd);
 	seleccion = dev::user_choose_string_lineal<10,2>(lcd, keyrow, menu)
 			    .pos(0, 1)
 			    .show(3);
@@ -162,7 +181,7 @@ void test_lcd_menu()
 	lcd << "seleccion:\n" << seleccion;
 	wait_ms(1000);
 
-	lcd.clear();
+	lcd_clear(lcd);
 	lcd << "Todo bien? ";
 	constexpr std::array sino = {"si", "no"};
         seleccion =
@@ -173,7 +192,7 @@ void test_lcd_menu()
 
 	wait_ms(1000);
 
-	lcd.clear();
+	lcd_clear(lcd);
 	lcd << "Todo bien (2)? ";
         seleccion =
             dev::user_choose_string_lineal<2>(lcd, keyrow, sino).show(0);
