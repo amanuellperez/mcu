@@ -31,7 +31,7 @@
  *	29/07/2019 v0.1: Creo traductor.
  *	26/09/2019 v0.2: LCD_ostream y cambios menores.
  *	06/01/2020 v0.3: Elimino DPin a favor de Pin.
- *	28/02/2022	 Desdoblo Terminal en Terminal y Terminal.
+ *	28/02/2022	 Desdoblo Terminal en Screen y Terminal.
  *	                 De momento, Terminal es copia de lo que era Terminal.
  *	                 En el futuro se irán alejando. De hecho, Terminal es
  *	                 la implementación de este LCD ostream!!!

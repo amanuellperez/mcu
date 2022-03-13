@@ -38,6 +38,10 @@
  *	06/02/2022 v0.6: Basado en el concept 'Generic_LCD'
  *	28/02/2022       Divido Screen en dos clases: Screen y Terminal
  *			 La clase Terminal realmente es un ostream!!!
+ *			 TODO: este Terminal no es más que la implementación
+ *			 de LCD_streambuf!!! Fusionarlas eliminando esta clase
+ *			 Terminal, dejando solo LCD_ostream.
+ *
  *
  ****************************************************************************/
 #include <stdint.h>

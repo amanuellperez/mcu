@@ -17,8 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-// Conectar el LCD y 3 pulsadores a los pines indicados
-#include "../../dev_LCD_screen.h"
+#include "../../dev_LCD_screen.h"  // TODO: hay que ponerlo primero, antes que 
+				// atd::decimal. print(screen, decimal)
+				// depende de este header.
 #include "../../dev_LCD_HD44780.h"
 #include <atd_decimal.h>
 #include <atd_magnitude.h>
@@ -27,6 +28,11 @@
 
 #include <avr_time.h>
 #include "../../user_choose_number.h"
+#include "../../dev_LCD_font_2x1.h"
+#include "../../dev_LCD_font_2x2.h"
+#include "../../dev_LCD_font_2x3.h"
+#include "../../dev_LCD_font_3x3.h"
+#include "../../dev_LCD_font_4x3.h"
 
 
 
@@ -71,9 +77,16 @@ using Screen_2004 = dev::LCD_screen_2004<Generic_LCD_2004>;
 //using LCD_ostream_2004 = dev::LCD_ostream_2004<Generic_LCD_2004>;
 
 // Choose LCD to test
-using LCD = Screen_1602;
-//using LCD = LCD_ostream_1602;
-// using LCD = LCD_ostream_2004;
+//using LCD = Screen_1602;
+using LCD = Screen_2004;
+
+// Fonts
+using Font_digit_2x1_t1 = dev::Font_digit_2x1_t1; 
+using Font_digit_2x1_t2 = dev::Font_digit_2x1_t2; 
+using Font_digit_2x2_t1 = dev::Font_digit_2x2_t1; 
+using Font_digit_2x3_t1 = dev::Font_digit_2x3_t1; 
+using Font_digit_3x3_t1 = dev::Font_digit_3x3_t1; 
+using Font_digit_4x3_t1 = dev::Font_digit_4x3_t1; 
 
 struct Main{
 
@@ -112,6 +125,24 @@ void test_choose_number2()
 
 {
     scr.clear();
+    scr.print("Big font: [10, 40]");
+    wait_ms(1000);
+    scr.load<Font_digit_3x3_t1>();
+    uint8_t u8  =  dev::user_choose_number_lineal(scr, keyrow).pos(3, 1)
+					     .between(10u, 40u)
+					     .choose2<Font_digit_3x3_t1>(30u);
+    scr.cursor_pos(0,0);
+    scr.print("elegido : ");
+    scr.print<Font_digit_3x3_t1>(u8, nm::Width{2});
+
+    wait_ms(1000);
+
+}
+
+
+
+{
+    scr.clear();
     scr.print("Big number");
     wait_ms(1000);
     uint16_t u16  =  dev::user_choose_number_lineal(scr, keyrow).pos(3, 1)
@@ -135,7 +166,7 @@ void test_choose_number2()
 					 .choose2(10);
     scr.cursor_pos(0,0);
     scr.print("has elegido: ");
-    scr.print_number(u8);
+    scr.print(u8);
 
 
     wait_ms(1000);
@@ -163,7 +194,7 @@ void test_choose_number2()
 					 .choose2(10);
     scr.cursor_pos(0,0);
     scr.print("has elegido: ");
-    scr.print_number(u8);
+    scr.print(u8);
 
     wait_ms(1000);
 

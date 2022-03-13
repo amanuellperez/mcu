@@ -60,6 +60,7 @@
 #include <stdint.h>
 #include <avr_memory.h>	// Progmem
 #include <atd_names.h>	// Width
+#include "dev_LCD_big_digits.h"	// Font_digit_default
 
 namespace dev{
 /*!
@@ -126,32 +127,41 @@ public:
     // (RRR) ¿por qué llamar print_number(uint8_t)? 
     //       Porque uint8_t es un tipo char y por tanto se confunde
     //       print(char) con print(uint8_t).
-    uint8_t print_number(uint8_t x);
+    uint8_t print(uint8_t x);
     uint8_t print(uint16_t x);
     uint8_t print(const uint32_t& x);
     uint8_t print(const uint64_t& x);
 
-    uint8_t print_number(int8_t x);
+    uint8_t print(int8_t x);
     uint8_t print(int16_t x);
     uint8_t print(const int32_t& x);
     uint8_t print(const int64_t& x);
 
     // Todas estas funciones escriben los números con ceros a la izquierda de
     // tamaño Width
-    uint8_t print_number(uint8_t x, const nm::Width<int>& w);
+    // De momento solo implemento diferentes tipos de Font para print_number.
+    // En principio si se usa una letra de 4 x 3 lo más seguro es que no entre
+    // más de un uint8_t en el display. No merece la pena implementar el
+    // resto.
+    template <typename Font = Font_digit_default>
+    uint8_t print(uint8_t x, const nm::Width<int>& w);
+
+    template <typename Font = Font_digit_default>
     uint8_t print(uint16_t x, const nm::Width<int>& w);
+
     uint8_t print(const uint32_t& x, const nm::Width<int>& w);
     uint8_t print(const uint64_t& x, const nm::Width<int>& w);
 
-    uint8_t print_number(int8_t x, const nm::Width<int>& w);
+    template <typename Font = Font_digit_default>
+    uint8_t print(int8_t x, const nm::Width<int>& w);
+
+    template <typename Font = Font_digit_default>
     uint8_t print(int16_t x, const nm::Width<int>& w);
+
     uint8_t print(const int32_t& x, const nm::Width<int>& w);
     uint8_t print(const int64_t& x, const nm::Width<int>& w);
 
 
-    /// Impresión de números con diferentes fuentes.
-    template <typename Font>
-    uint8_t print_number(uint8_t x, const nm::Width<int>& w);
 
 // IMPRESIÓN BÁSICA PARA MANEJAR VENTANAS
     /// Imprime la cadena `str` en la fila `y` empezando en la posición `x0`.
@@ -253,12 +263,14 @@ private:
 
     // return: true si lo ha impreso entero. 
     //         false, si solo parcialmente o ha fallado.
-    template <typename Int>
+    template <typename Int, typename Font = Font_digit_default>
     uint8_t print_unsigned_number(const Int& x, int ndigits = 0);
 
-    template <typename Int>
+    template <typename Int, typename Font = Font_digit_default>
     uint8_t print_signed_number(const Int& x, int ndigits = 0);
 
+    template <typename Int>
+    uint8_t print_unsigned_number_default_font(const Int& x, int ndigits = 0);
 };
 
 

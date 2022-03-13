@@ -308,30 +308,34 @@ void test_lcd_screen4_2004()
     scr.clear();
     scr.print("Test print fonts");
     scr.clear();
+    scr.print(uint8_t{25}, nm::Width{3});
+    wait_ms(1000);
+
+    scr.clear();
     scr.load<Font_digit_2x1_t1>();
-    scr.print_number<Font_digit_2x1_t1>(2, nm::Width{3});
+    scr.print<Font_digit_2x1_t1>(uint8_t{2}, nm::Width{3});
     wait_ms(1000);
 
     scr.clear();
     scr.load<Font_digit_2x2_t1>();
-    scr.print_number<Font_digit_2x2_t1>(123, nm::Width{3});
+    scr.print<Font_digit_2x2_t1>(uint8_t{123}, nm::Width{3});
     wait_ms(1000);
 
     scr.clear();
     scr.load<Font_digit_2x3_t1>();
-    scr.print_number<Font_digit_2x3_t1>(35, nm::Width{3});
+    scr.print<Font_digit_2x3_t1>(uint8_t{35}, nm::Width{3});
     scr.print(" =? 035");
     wait_ms(1000);
 
     scr.clear();
     scr.load<Font_digit_3x3_t1>();
-    scr.print_number<Font_digit_3x3_t1>(74, nm::Width{3});
+    scr.print<Font_digit_3x3_t1>(uint8_t{74}, nm::Width{3});
     scr.print(" =? 074");
     wait_ms(1000);
 
     scr.clear();
     scr.load<Font_digit_4x3_t1>();
-    scr.print_number<Font_digit_4x3_t1>(12, nm::Width{3});
+    scr.print<Font_digit_4x3_t1>(uint8_t{12}, nm::Width{3});
     scr.print(" =? 012");
     wait_ms(1000);
 
@@ -344,7 +348,7 @@ void test_lcd_screen4_2004()
     scr.clear();
     scr.print("(u8) 009 =?"
 	    "\n     ");
-    scr.print_number(uint8_t{9}, nm::Width{3});
+    scr.print(uint8_t{9}, nm::Width{3});
     wait_ms(1000);
 
 
@@ -370,13 +374,13 @@ void test_lcd_screen4_2004()
     scr.clear();
     scr.print("(s8) 009 =?"
 	    "\n     ");
-    scr.print_number(int8_t{9}, nm::Width{3});
+    scr.print(int8_t{9}, nm::Width{3});
     wait_ms(1000);
 
     scr.clear();
     scr.print("(s8) -05 =?"
 	    "\n     ");
-    scr.print_number(int8_t{-5}, nm::Width{3});
+    scr.print(int8_t{-5}, nm::Width{3});
     wait_ms(1000);
 
     scr.clear();

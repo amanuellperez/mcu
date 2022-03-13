@@ -69,6 +69,7 @@ using LCD = Screen_2004;
 
 // Estas son las fuentes que vamos a usar.
 // DUDA: ¿mejor llamarlas Font_BD2x1_t1? ¿o Digits_font_2x1_t1?
+using Font_digit_default = dev::Font_digit_default;
 using Font_digit_2x1_t1 = dev::Font_digit_2x1_t1; 
 using Font_digit_2x1_t2 = dev::Font_digit_2x1_t2; 
 using Font_digit_2x2_t1 = dev::Font_digit_2x2_t1; 
@@ -133,6 +134,7 @@ void test_big_digits(LCD& lcd, const char* name, bool stop = false)
 
 void test_big_digits_fonts(LCD& lcd)
 {
+    test_big_digits<Font_digit_default>(lcd, "Default digit");
     test_big_digits<Font_digit_2x1_t1>(lcd, "Big digit 2x1 t1");
     test_big_digits<Font_digit_2x1_t2>(lcd, "Big digit 2x1 t2");
     test_big_digits<Font_digit_2x2_t1>(lcd, "Big digit 2x2 t1");
@@ -163,6 +165,7 @@ void test_big_digits_print(LCD& lcd)
     lcd.clear();
     lcd.print("Counting without padding");
     wait_ms(1000);
+    test_big_digits_print<Font_digit_default>(lcd);
     test_big_digits_print<Font_digit_2x1_t1>(lcd);
     test_big_digits_print<Font_digit_2x1_t2>(lcd);
     test_big_digits_print<Font_digit_2x2_t1>(lcd);

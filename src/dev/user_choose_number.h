@@ -85,6 +85,7 @@
  *			   callback será del tipo Main::callback.
  *
  *	05/02/2022	* Generalizo choose2 y choose4 en choose(width).
+ *	12/03/2022	* Funciona con diferentes tipos de fuentes (big digits)
  *
  ****************************************************************************/
 #include <avr_time.h>
@@ -97,6 +98,7 @@
 #include <atd_names.h>
 
 #include "dev_keyrow.h"
+#include "dev_LCD_big_digits.h"	// Digit fonts
 
 namespace dev{
 
@@ -188,15 +190,18 @@ public:
     // ---------------------
     /// Choose a number of width w
     /// Returns: number choosen
+    template <typename Font = Font_digit_default>
     Rep choose(Rep x0, const nm::Width<int>& w);
 
     /// Elegimos un número de 2 cifras.
     /// Returns: valor elegido.
-    Rep choose2(Rep x0) {return choose(x0, 2);}
+    template <typename Font = Font_digit_default>
+    Rep choose2(Rep x0) {return choose<Font>(x0, 2);}
 
     /// Elegimos un número de 4 cifras.
     /// Returns: valor elegido.
-    Rep choose4(Rep x0) {return choose(x0, 4);}
+    template <typename Font = Font_digit_default>
+    Rep choose4(Rep x0) {return choose<Font>(x0, 4);}
 
 
 private:
@@ -255,6 +260,7 @@ private:
 
     // Funciones de ayuda
     // ------------------
+    template <typename Font = Font_digit_default>
     void print(Rep x, const nm::Width<int>& w);
 
     // Mira a ver si el usuario quiere actualizar x0, y en caso de ser 
@@ -329,6 +335,7 @@ User_choose_number<L, T, t0,R, M>::callback(Callback f)
 
 // El cliente elige un número de 2 cifras
 template <typename L, typename T, int t0, typename Rep, typename M>
+template <typename Font>
 Rep User_choose_number<L, T, t0, Rep, M>::choose(Rep x0,
                                                  const nm::Width<int>& w)
 { 
@@ -340,13 +347,13 @@ Rep User_choose_number<L, T, t0, Rep, M>::choose(Rep x0,
     counter_reset();
 
 
-    print(x_, w);
+    print<Font>(x_, w);
    
     wait_till_enter_key_is_not_pressed();
 
     while(enter_key().is_not_pressed()){
 	if (last_key_pressed_ != Key_pressed::none)
-	    print(x_, w);
+	    print<Font>(x_, w);
 
 	update();
 
@@ -490,12 +497,21 @@ inline void User_choose_number<L, T, t0,R, M>::incr_next()
     incr_.next();
 }
 
+// De momento solo admito diferentes Fonts para uint8_t y uint16_t
+// No admito int8_t y int16_t porque no tengo implementado el signo - en
+// grande.
 template <typename L, typename T, int t0, typename Rep, typename M>
+template <typename Font>
 void User_choose_number<L, T, t0, Rep, M>::print(Rep x,
                                                  const nm::Width<int>& w)
 {
     scr_.cursor_pos(col_, row_);
-    atd::print(scr_, x, w);
+    if constexpr (std::is_same_v<Rep, uint8_t> or std::is_same_v<Rep, uint16_t>)
+	scr_.template print<Font>(x, w);
+
+    else
+	atd::print(scr_, x, w);
+
     scr_.cursor_pos(col_ + w - 1, row_);
 }
 
@@ -506,12 +522,18 @@ void User_choose_number<L, T, t0, Rep, M>::print(Rep x,
 template <typename M, typename L, typename K, typename R = uint16_t>
 User_choose_number<L, K, user_choose_number_type_lineal, R, M>
 user_choose_number_lineal(M& app, L& lcd,  K k)
-{ return User_choose_number<L, K, user_choose_number_type_lineal,R, M>{app, lcd, k}; }
+{
+    return 
+    User_choose_number<L, K, user_choose_number_type_lineal, R, M>{app, lcd, k};
+}
 
 template <typename M, typename L, typename K, typename R = uint16_t>
 User_choose_number<L, K, user_choose_number_type_circular, R, M>
 user_choose_number_circular(M& app, L& lcd,  K k)
-{ return User_choose_number<L, K, user_choose_number_type_circular,R, M>{app, lcd, k}; }
+{ 
+  return 
+  User_choose_number<L, K, user_choose_number_type_circular,R, M>{app, lcd, k}; 
+}
 
 // Si no se van a usar callbacks
 template <typename L, typename K, typename R = uint16_t>

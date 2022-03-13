@@ -134,9 +134,26 @@ uint8_t LCD_screen<num_cols, num_rows, LCD>::print(const char* c)
 // TODO: cambiar '0' + *p por una función. Está atd::digit_to_ascii, pero no
 // me gusta el nombre.
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
-template <typename Int>
+template <typename Int, typename Font>
 uint8_t LCD_screen<num_cols, num_rows, LCD>::print_unsigned_number(const Int& x,
                                                                 int ndigits)
+{
+    if constexpr (std::is_same_v<Font, Font_digit_default>)
+	return print_unsigned_number_default_font(x, ndigits);
+
+    else {
+        static_assert(std::is_same_v<Int, uint8_t> or
+                          std::is_same_v<Int, uint16_t>,
+                      "Only fonts with uint8/16_t tested");
+        return Font::print_number(*this, x, ndigits);
+    }
+}
+
+
+template <uint8_t num_cols, uint8_t num_rows, typename LCD>
+template <typename Int>
+uint8_t LCD_screen<num_cols, num_rows, LCD>::print_unsigned_number_default_font(
+    const Int& x, int ndigits)
 {
     atd::Digits_from_left_to_right d{x, ndigits};
 
@@ -150,7 +167,7 @@ uint8_t LCD_screen<num_cols, num_rows, LCD>::print_unsigned_number(const Int& x,
 }
 
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
-template <typename Int>
+template <typename Int, typename Font>
 uint8_t LCD_screen<num_cols, num_rows, LCD>::print_signed_number(const Int& x,
                                                               int ndigits)
 {
@@ -163,15 +180,15 @@ uint8_t LCD_screen<num_cols, num_rows, LCD>::print_signed_number(const Int& x,
 	if (!print('-'))
 	    return 0;
 
-	return print_unsigned_number(-x, ndigits) + 1;
+	return print_unsigned_number<Int, Font>(-x, ndigits) + 1;
     }
 
     else 
-	return print_unsigned_number(x, ndigits);
+	return print_unsigned_number<Int, Font>(x, ndigits);
 }
 
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
-inline uint8_t LCD_screen<num_cols, num_rows, LCD>::print_number(uint8_t n)
+inline uint8_t LCD_screen<num_cols, num_rows, LCD>::print(uint8_t n)
 { return print_unsigned_number(n); }
 
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
@@ -189,7 +206,7 @@ inline uint8_t LCD_screen<num_cols, num_rows, LCD>::print(const uint64_t& n)
 
 
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
-inline uint8_t LCD_screen<num_cols, num_rows, LCD>::print_number(int8_t n)
+inline uint8_t LCD_screen<num_cols, num_rows, LCD>::print(int8_t n)
 { return print_signed_number(n); }
 
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
@@ -207,54 +224,53 @@ inline uint8_t LCD_screen<num_cols, num_rows, LCD>::print(const int64_t& n)
 
 
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
-inline uint8_t LCD_screen<num_cols, num_rows, LCD>::print_number(uint8_t n
+template <typename Font>
+inline uint8_t LCD_screen<num_cols, num_rows, LCD>::print(uint8_t n
     , const nm::Width<int>& w)
-{ return print_unsigned_number(n, w); }
+{ return print_unsigned_number<uint8_t, Font>(n, w); }
 
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
+template <typename Font>
 inline uint8_t LCD_screen<num_cols, num_rows, LCD>::print(uint16_t n
     , const nm::Width<int>& w)
-{ return print_unsigned_number(n, w); }
+{ return print_unsigned_number<uint16_t, Font>(n, w); }
 
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
 inline uint8_t LCD_screen<num_cols, num_rows, LCD>::print(const uint32_t& n
     , const nm::Width<int>& w)
-{ return print_unsigned_number(n, w); }
+{ return print_unsigned_number<uint32_t, Font_digit_default>(n, w); }
 
 
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
 inline uint8_t LCD_screen<num_cols, num_rows, LCD>::print(const uint64_t& n
     , const nm::Width<int>& w)
-{ return print_unsigned_number(n, w); }
+{ return print_unsigned_number<uint64_t, Font_digit_default>(n, w); }
 
 
 
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
-inline uint8_t LCD_screen<num_cols, num_rows, LCD>::print_number(int8_t n
+template <typename Font>
+inline uint8_t LCD_screen<num_cols, num_rows, LCD>::print(int8_t n
     , const nm::Width<int>& w)
-{ return print_signed_number(n, w); }
+{ return print_signed_number<int8_t, Font>(n, w); }
 
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
+template <typename Font>
 inline uint8_t LCD_screen<num_cols, num_rows, LCD>::print(int16_t n
     , const nm::Width<int>& w)
-{ return print_signed_number(n, w); }
+{ return print_signed_number<int16_t, Font>(n, w); }
 
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
 inline uint8_t LCD_screen<num_cols, num_rows, LCD>::print(const int32_t& n
     , const nm::Width<int>& w)
-{ return print_signed_number(n, w); }
+{ return print_signed_number<int32_t, Font_digit_default>(n, w); }
 
 
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
 inline uint8_t LCD_screen<num_cols, num_rows, LCD>::print(const int64_t& n
     , const nm::Width<int>& w)
-{ return print_signed_number(n, w); }
+{ return print_signed_number<int64_t, Font_digit_default>(n, w); }
 
-template <uint8_t num_cols, uint8_t num_rows, typename LCD>
-template <typename Font>
-inline uint8_t LCD_screen<num_cols, num_rows, LCD>::print_number(uint8_t n, 
-		const nm::Width<int>& w)
-{ return Font::print_number(*this, n, w);}
 
 
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
@@ -330,8 +346,8 @@ namespace atd{
 //       a print(LCD, time) el compilador no sabría a cuál de las 2 funciones
 //       llamar generando un error. Por eso hay que definirlas explícitamente.
 template <uint8_t cols, uint8_t rows, typename LCD>
-inline uint8_t print_number(dev::LCD_screen<cols, rows, LCD>& out, short x)
-{ return  out.print_number(x);}
+inline uint8_t print(dev::LCD_screen<cols, rows, LCD>& out, short x)
+{ return  out.print(x);}
 
 template <uint8_t cols, uint8_t rows, typename LCD>
 inline uint8_t print(dev::LCD_screen<cols, rows, LCD>& out, int x)
@@ -347,8 +363,8 @@ inline uint8_t print(dev::LCD_screen<cols, rows, LCD>& out, const long long& x)
 
 
 template <uint8_t cols, uint8_t rows, typename LCD>
-inline uint8_t print_number(dev::LCD_screen<cols, rows, LCD>& out, unsigned short x)
-{ return  out.print_number(x);}
+inline uint8_t print(dev::LCD_screen<cols, rows, LCD>& out, unsigned short x)
+{ return  out.print(x);}
 
 template <uint8_t cols, uint8_t rows, typename LCD>
 inline uint8_t print(dev::LCD_screen<cols, rows, LCD>& out, unsigned int x)
@@ -374,7 +390,7 @@ inline uint8_t print(dev::LCD_screen<cols, rows, LCD>& out, const char* x)
 // Impresión con anchura
 // ---------------------
 template <uint8_t cols, uint8_t rows, typename LCD>
-inline uint8_t print_number(dev::LCD_screen<cols, rows, LCD>& out,
+inline uint8_t print(dev::LCD_screen<cols, rows, LCD>& out,
                             uint8_t x,
                             const nm::Width<int>& w)
 { return out.print(x, w); }
@@ -398,7 +414,7 @@ inline uint8_t print(dev::LCD_screen<cols, rows, LCD>& out,
 
 
 template <uint8_t cols, uint8_t rows, typename LCD>
-inline uint8_t print_number(dev::LCD_screen<cols, rows, LCD>& out,
+inline uint8_t print(dev::LCD_screen<cols, rows, LCD>& out,
                             int8_t x,
                             const nm::Width<int>& w)
 { return out.print(x, w); }
