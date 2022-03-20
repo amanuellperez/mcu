@@ -185,6 +185,32 @@ void test_big_digits_print(LCD& lcd)
 }
 
 
+template <typename BD> // BD = Font_digit
+void test_big_digits_colon(LCD& lcd)
+{
+    BD::load(lcd);
+    lcd.clear();
+    BD::print_number(lcd, 12);
+    BD::print_colon(lcd);
+    BD::print_number(lcd, 34);
+    wait_ms(2000);
+
+}
+
+void test_big_digits_colon(LCD& lcd)
+{
+    lcd.clear();
+    lcd.print("Testing colon");
+    wait_ms(1000);
+    test_big_digits_colon<Font_digit_default>(lcd);
+    test_big_digits_colon<Font_digit_2x1_t1>(lcd);
+    test_big_digits_colon<Font_digit_2x1_t2>(lcd);
+    test_big_digits_colon<Font_digit_2x2_t1>(lcd);
+    test_big_digits_colon<Font_digit_2x3_t1>(lcd);
+    test_big_digits_colon<Font_digit_3x3_t1>(lcd);
+    test_big_digits_colon<Font_digit_4x3_t1>(lcd);
+}
+
 void test_big_digits()
 {
     LCD lcd;
@@ -192,6 +218,7 @@ void test_big_digits()
     while (1){
 	test_big_digits_fonts(lcd);
 	test_big_digits_print(lcd);
+	test_big_digits_colon(lcd);
     }
 }
 

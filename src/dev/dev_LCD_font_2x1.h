@@ -331,6 +331,7 @@ struct _Font_digit_2x1_t2{
     // is_digit(i,j).char_space()?
     static bool is_digit_char_space(uint8_t i, uint8_t j)
     {return digit(i, j) == big_digits::char_space;}
+
 };
 
 

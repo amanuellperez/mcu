@@ -63,6 +63,10 @@ public:
     static uint8_t print_number(Screen& scr, Int n, 
 			    const nm::Width<int>& w = 0);
 
+    /// Imprime ':'
+    template <typename Screen>
+    static void print_colon(Screen& scr);
+
 private:
     // Imprime los dígitos [j0, j0 + 3) del digit i
     // return: true si todo va bien.
@@ -154,6 +158,51 @@ uint8_t Big_digit<F>::print_number(Screen& scr,
 }
 
 
+// Esta implementación es la implementación por defecto. 
+// MEJORA: que detecte si Font::print_colon está definido en cuyo caso se
+// llamaría a esa implementación permitiendo a cada font definir su propio
+// ':'
+template <typename F>
+template <typename Screen>
+void Big_digit<F>::print_colon(Screen& scr)
+{
+    using symbol = dev::HD44780_charset_A00;
+
+    if constexpr (Font::rows== 1){
+	scr.print(':');
+    }
+    else{
+	uint8_t x = scr.cursor_pos_x();
+	uint8_t y = scr.cursor_pos_y();
+
+	if constexpr (Font::rows== 2){
+	    scr.print(symbol::of("･"));
+	    scr.cursor_pos(x, y + 1);
+	    scr.print(symbol::of("･"));
+	}
+
+	else if constexpr (Font::rows == 3){
+	    scr.print(symbol::of("｡"));
+	    scr.cursor_pos(x, y + 1);
+	    scr.print(symbol::of("｡"));
+	    //scr.print(symbol::of("º"));
+	}
+	else if constexpr (Font::rows == 4){
+	    scr.cursor_pos(x, y + 1);
+	    scr.print('.');
+	    scr.cursor_pos(x, y + 2);
+	    scr.print('.');
+	}
+	else{
+	    static_assert(atd::always_false_v<F>, "Case not implemented");
+	}
+
+	scr.cursor_pos(x+1, y);
+    }
+	
+
+}
+
 // Caracteres genéricos que usamos en todas las fuentes
 namespace big_digits{
 constexpr const uint8_t char_full = 255;
@@ -194,8 +243,11 @@ public:
 			    const nm::Width<int>& w = 0)
     { return scr.print(n, w);}
 
-
+    template <typename Screen>
+    static void print_colon(Screen& scr)
+    { scr.print(':');}
 };
+
 
 using Font_digit_default = Big_digit<Font_default>;
 
