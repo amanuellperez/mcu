@@ -287,7 +287,7 @@ void test_bugs()
 int main()
 {
     while(1){
-	test_bugs();
+//	test_bugs();
 	test_choose_number2();
     }
 }
