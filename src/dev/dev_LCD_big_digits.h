@@ -42,6 +42,9 @@ class Big_digit{
 public:
     using Font   = Font_t;
 
+    static constexpr uint8_t rows = Font::rows;
+    static constexpr uint8_t cols = Font::cols;
+
     /// Carga en memoria los bricks para poder dibujar los big_digits.
     template <typename Screen>
     static void load(Screen& scr);

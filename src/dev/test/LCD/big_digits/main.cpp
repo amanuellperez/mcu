@@ -211,11 +211,42 @@ void test_big_digits_colon(LCD& lcd)
     test_big_digits_colon<Font_digit_4x3_t1>(lcd);
 }
 
+template <typename Font, typename Rep>
+void test_bugs(
+    LCD& lcd, Rep x, const nm::Width<int>& w, uint8_t col, uint8_t row)
+{
+    lcd.clear();
+//    lcd.cursor_pos(col, row);
+//    lcd.template print<Font>(x, w);
+    lcd.cursor_pos(3, 1);
+    lcd.template print<Font>(8u, nm::Width{4});
+}
+
+void test_bugs(LCD& lcd)
+{
+    lcd.clear();
+    lcd.print("Bugs");
+    wait_ms(400);
+    {
+    using Font = Font_digit_2x2_t1;
+    Font::load(lcd);
+    lcd.clear();
+    uint16_t x = 11;
+    nm::Width w = 2;
+    uint8_t col = 3;
+    uint8_t row = 1;
+    test_bugs<Font, uint16_t>(lcd, x, w, col, row);
+    wait_ms(2000);
+    }
+}
+
+
 void test_big_digits()
 {
     LCD lcd;
 
     while (1){
+//	test_bugs(lcd);
 	test_big_digits_fonts(lcd);
 	test_big_digits_print(lcd);
 	test_big_digits_colon(lcd);

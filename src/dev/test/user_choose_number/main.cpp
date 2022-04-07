@@ -27,12 +27,12 @@
 #include <avr_types.h>
 
 #include <avr_time.h>
-#include "../../user_choose_number.h"
 #include "../../dev_LCD_font_2x1.h"
 #include "../../dev_LCD_font_2x2.h"
 #include "../../dev_LCD_font_2x3.h"
 #include "../../dev_LCD_font_3x3.h"
 #include "../../dev_LCD_font_4x3.h"
+#include "../../user_choose_number.h"
 
 
 
@@ -70,11 +70,6 @@ using Generic_LCD_2004 = dev::Generic_LCD<LCD_2004>;
 // Screens
 using Screen_1602 = dev::LCD_screen_1602<Generic_LCD_1602>;
 using Screen_2004 = dev::LCD_screen_2004<Generic_LCD_2004>;
-
-
-// ostreams
-//using LCD_ostream_1602 = dev::LCD_ostream_1602<Generic_LCD_1602>;
-//using LCD_ostream_2004 = dev::LCD_ostream_2004<Generic_LCD_2004>;
 
 // Choose LCD to test
 //using LCD = Screen_1602;
@@ -121,16 +116,18 @@ void test_choose_number2()
 
     scr.clear();
     scr.print("LINEAL TEST");
-    wait_ms(1000);
+    wait_ms(700);
 
 {
     scr.clear();
-    scr.print("Big font: [10, 40]");
-    wait_ms(1000);
+    scr.print("Big font: [5, 40]");
+    wait_ms(700);
     scr.load<Font_digit_3x3_t1>();
+
+
     uint8_t u8  =  dev::user_choose_number_lineal(scr, keyrow).pos(3, 1)
-					     .between(10u, 40u)
-					     .choose2<Font_digit_3x3_t1>(30u);
+					     .between(5u, 40u)
+					     .choose2<Font_digit_3x3_t1>(8u);
     scr.cursor_pos(0,0);
     scr.print("elegido : ");
     scr.print<Font_digit_3x3_t1>(u8, nm::Width{2});

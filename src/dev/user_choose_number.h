@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021 A.Manuel L.Perez 
+// Copyright (C) 2019-2022 A.Manuel L.Perez 
 //           mail: <amanuel.lperez@gmail.com>
 //           https://github.com/amanuellperez/mcu
 //
@@ -166,10 +166,10 @@ public:
     /// Mostramos el número en el Screen e interaccionamos con el usuario via
     /// el teclado indicado.
     User_choose_number(Main& app, Screen& lcd, Keyrow3)
-		    :scr_{lcd}, app_{&app}{}
+		    :scr_{lcd}, app_{&app}{ }
 
     User_choose_number(Screen& lcd, Keyrow3)
-		    :scr_{lcd}, app_{nullptr}{}
+		    :scr_{lcd}, app_{nullptr}{ }
 
     /// Posición (col, row) del Screen donde mostramos el número a elegir.
     User_choose_number& pos(uint8_t col, uint8_t row);
@@ -341,11 +341,12 @@ Rep User_choose_number<L, T, t0, Rep, M>::choose(Rep x0,
 { 
     x_ = x0;
 
-    scr_.cursor_on();
+    // better: if (has_cursor<Font>): 
+    if (std::is_same_v<Font, Font_digit_default>)
+	scr_.cursor_on(); 
 
     last_key_pressed_ = Key_pressed::none;
     counter_reset();
-
 
     print<Font>(x_, w);
    
@@ -507,7 +508,8 @@ void User_choose_number<L, T, t0, Rep, M>::print(Rep x,
 {
     scr_.cursor_pos(col_, row_);
     if constexpr (std::is_same_v<Rep, uint8_t> or std::is_same_v<Rep, uint16_t>)
-	scr_.template print<Font>(x, w);
+    { scr_.template print<Font>(x, w); }
+
 
     else
 	atd::print(scr_, x, w);

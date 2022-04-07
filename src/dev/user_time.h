@@ -44,14 +44,17 @@
 
 namespace dev{
 
-template <uint8_t names_length, typename LCD, typename Keyboard, typename Date_time>
-void user_get_weekday(LCD& lcd,
-                   Keyboard& key,
-                   atd::Generic_time_view<Date_time>& t,
-                   uint8_t x0, uint8_t y0,
-		   const char* names_weekday)
+template <uint8_t names_length,
+          typename Screen, typename Keyboard,
+          typename Date_time>
+void user_get_weekday(Screen& scr,
+                      Keyboard& key,
+                      atd::Generic_time_view<Date_time>& t,
+                      uint8_t x0,
+                      uint8_t y0,
+                      const char* names_weekday)
 {
-    t.weekday(user_choose_string_circular<names_length>(lcd, key, 
+    t.weekday(user_choose_string_circular<names_length>(scr, key, 
 			atd::Array_const_nstrings{names_weekday, names_length})
 		.pos(x0, y0)
 		.show(t.weekday()));
@@ -59,45 +62,73 @@ void user_get_weekday(LCD& lcd,
 
 
 
-template <typename LCD, typename Keyboard, typename Date_time>
-void user_get_date(LCD& lcd,
+template <typename Font, typename Screen, typename Keyboard, typename Date_time>
+void user_get_date(Screen& scr,
                    Keyboard& key,
                    atd::Generic_time_view<Date_time>& t,
                    uint8_t x0, uint8_t y0)
 {
-    t.day(user_choose_number_circular(lcd, key).pos(x0, y0)
+    t.day(user_choose_number_circular(scr, key).pos(x0, y0)
 					.between(1, 31)
-					.choose2(t.day()));
+					.template choose2<Font>(t.day()));
 
-    t.month(user_choose_number_circular(lcd, key).pos(x0 + 3, y0)
+    t.month(user_choose_number_circular(scr, key).pos(x0 + 3, y0)
 				       .between(1, 12)
-				       .choose2(t.month()));
+				       .template choose2<Font>(t.month()));
 
-    t.year(user_choose_number_circular(lcd, key).pos(x0 + 6, y0)
-					.choose4(t.year()));
+    t.year(user_choose_number_circular(scr, key).pos(x0 + 6, y0)
+					.template choose4<Font>(t.year()));
 }
 
-
-template <typename LCD, typename Keyboard, typename Date_time>
-void user_get_time(LCD& lcd,
+template <typename Font, typename Screen, typename Keyboard,
+          typename Date_time>
+void user_get_time(Screen& scr,
                    Keyboard& key,
                    atd::Generic_time_view<Date_time>& t,
                    uint8_t x0, uint8_t y0)
 {
-    t.hours(user_choose_number_circular(lcd, key).pos(x0, y0)
+    t.hours(user_choose_number_circular(scr, key).pos(x0, y0)
 					.max(23)
-					.choose2(t.hours()));
+					.template choose2<Font>(t.hours()));
 
-    t.minutes(user_choose_number_circular(lcd, key).pos(x0 + 3, y0)
-					.max(59)
-					.choose2(t.minutes()));
+    // +1 por los ':'
+    t.minutes(user_choose_number_circular(scr, key)
+                  .pos(x0 + 2 * Font::cols + 1, y0)
+                  .max(59)
+                  .template choose2<Font>(t.minutes()));
 
-    t.seconds(user_choose_number_circular(lcd, key).pos(x0 + 6, y0)
-					.max(59)
-					.choose2(t.seconds()));
-
+    t.seconds(user_choose_number_circular(scr, key)
+                  .pos(x0 + 4 * Font::cols  + 2, y0)
+                  .max(59)
+                  .template choose2<Font>(t.seconds()));
 }
 
+template <typename Font, typename Screen, typename Date_time>
+void print_time(Screen& scr,
+               atd::Generic_time_view<Date_time>& t,
+               uint8_t x0, uint8_t y0)
+{
+    scr.cursor_pos(x0, y0);
+    Font::print_number(scr, t.hours(), nm::Width{2});
+    Font::print_colon(scr);
+    Font::print_number(scr, t.minutes(), nm::Width{2});
+    Font::print_colon(scr);
+    Font::print_number(scr, t.seconds(), nm::Width{2});
+}
+
+
+template <typename Font, typename Screen, typename Date_time>
+void print_date(Screen& scr,
+               atd::Generic_time_view<Date_time>& t,
+               uint8_t x0, uint8_t y0)
+{
+    scr.cursor_pos(x0, y0);
+    Font::print_number(scr, t.day(), nm::Width{2});
+    Font::print_colon(scr);
+    Font::print_number(scr, t.month(), nm::Width{2});
+    Font::print_colon(scr);
+    Font::print_number(scr, t.year(), nm::Width{4});
+}
 
 }// namespace
 

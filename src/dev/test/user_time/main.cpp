@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez 
+// Copyright (C) 2019-2022 A.Manuel L.Perez 
 //           mail: <amanuel.lperez@gmail.com>
 //           https://github.com/amanuellperez/mcu
 //
@@ -24,6 +24,11 @@
 #include "../../user_time.h"
 #include "../../dev_LCD_HD44780.h"
 #include "../../dev_push_button.h"
+#include "../../dev_LCD_font_2x1.h"
+#include "../../dev_LCD_font_2x2.h"
+#include "../../dev_LCD_font_2x3.h"
+#include "../../dev_LCD_font_3x3.h"
+#include "../../dev_LCD_font_4x3.h"
 
 #include <avr_time.h>
 
@@ -59,8 +64,15 @@ using Screen_2004 = dev::LCD_screen_2004<Generic_LCD_2004>;
 //using LCD_ostream_2004 = dev::LCD_ostream_1602<Generic_LCD_2004>;
 
 // Choose LCD to test
-//using LCD = LCD_ostream_2004;
 using LCD = Screen_2004;
+
+using Font_digit_default = dev::Font_digit_default;
+using Font_digit_2x1_t1 = dev::Font_digit_2x1_t1; 
+using Font_digit_2x1_t2 = dev::Font_digit_2x1_t2; 
+using Font_digit_2x2_t1 = dev::Font_digit_2x2_t1; 
+using Font_digit_2x3_t1 = dev::Font_digit_2x3_t1; 
+using Font_digit_3x3_t1 = dev::Font_digit_3x3_t1; 
+using Font_digit_4x3_t1 = dev::Font_digit_4x3_t1; 
 
 
 tm new_tm() 
@@ -84,22 +96,21 @@ tm new_tm()
 constexpr const char* week_days = "DoLuMaMiJuViSa";
 constexpr const uint8_t week_days_length = 2;
 
-template <typename LCD, typename Keyrow, typename T>
+template <typename Font, typename LCD, typename Keyrow, typename T>
 void get_time(LCD& lcd, Keyrow& key, 
 	      atd::Generic_time_view<T>& t, 
 	      uint8_t x0, uint8_t y0)
 {
     lcd.cursor_pos(x0, y0);
-    atd::print_date(lcd, t);
 
-    lcd.cursor_pos(x0, y0 + 1);
-    atd::print_time(lcd, t);
+    dev::print_time<Font>(lcd, t, x0, y0);
+    dev::user_get_time<Font>(lcd, key, t, x0, y0);
 
-    lcd.cursor_pos(x0 + 9, y0+1);
+    lcd.clear();
+    dev::print_date<Font>(lcd, t, x0, y0);
     atd::print_weekday<week_days_length>(lcd, t, week_days);
 
-    dev::user_get_date(lcd, key, t, x0, y0);
-    dev::user_get_time(lcd, key, t, x0, y0 + 1);
+    dev::user_get_date<Font>(lcd, key, t, x0, y0);
     dev::user_get_weekday<week_days_length>(lcd, key, t, 
 					    x0 + 9, y0 + 1,
 					    week_days);
@@ -107,7 +118,7 @@ void get_time(LCD& lcd, Keyrow& key,
 }
 
 
-template <typename LCD, typename Keyrow>
+template <typename Font, typename LCD, typename Keyrow>
 std::time_t get_time(
     LCD& lcd, Keyrow& key, const std::time_t& t0, uint8_t x0, uint8_t y0)
 {
@@ -115,38 +126,37 @@ std::time_t get_time(
     
     atd::Generic_time_view<std::tm> t{*mt};
 
-    get_time(lcd, key, t, x0, y0);
+    get_time<Font>(lcd, key, t, x0, y0);
 
     return std::mktime(mt);
 }
 
-
-
-
-template <typename LCD, typename Keyrow, typename Clock, typename Duration>
-std::chrono::time_point<Clock, Duration> user_get_datetime(LCD& lcd,
-                                         Keyrow& key,
-                                         const std::chrono::time_point<Clock, Duration>& t0,
-                                         uint8_t x0, uint8_t y0)
+template <typename Font, 
+	 typename LCD, typename Keyrow,
+          typename Clock, typename Duration>
+std::chrono::time_point<Clock, Duration>
+user_get_datetime(LCD& lcd,
+                  Keyrow& key,
+                  const std::chrono::time_point<Clock, Duration>& t0,
+                  uint8_t x0,
+                  uint8_t y0)
 {
     time_t t = std::chrono::system_clock::to_time_t(t0);
-    t = get_time(lcd, key, t, x0, y0);
+    t = get_time<Font>(lcd, key, t, x0, y0);
 
     return std::chrono::system_clock::from_time_t(t);
 }
 
-template <typename LCD, typename Keyrow, typename T>
+template <typename Font,typename LCD, typename Keyrow, typename T>
 void test_user_time(LCD& lcd, Keyrow key, atd::Generic_time_view<T> t)
 {
-    get_time(lcd, key, t, 4, 2);
+    get_time<Font>(lcd, key, t, 0, 0);
 
     lcd.cursor_pos(0,0);
 
-//    lcd << "Escrito: " << atd::only_date(t)
-//	<< ' ' << atd::only_time(t) << ' ';
-    lcd << "Escrito: ";
+    lcd << "Escrito:";
     atd::print_date(lcd,  t);
-    lcd.print(' ');
+    lcd.print('\n');
     atd::print_time(lcd, t);
     atd::print_weekday<week_days_length>(lcd, t, week_days);
     
@@ -154,6 +164,14 @@ void test_user_time(LCD& lcd, Keyrow key, atd::Generic_time_view<T> t)
     wait_ms(4000);
 }
 
+
+void title(LCD& lcd, const char* str)
+{
+    lcd.clear();
+    lcd << str;
+    wait_ms(500);
+    lcd.clear();
+}
 
 void test_user_time()
 {
@@ -164,36 +182,38 @@ void test_user_time()
 
     while(1){
 	lcd.clear();
-	lcd << "Probarlo con un LCD de 20 x 4!";
+	lcd << "Probarlo con un";
+	lcd.cursor_pos(0,1);
+	lcd << "LCD de 20 x 4!";
 	wait_ms(1000);
 
-	lcd.clear();
-	lcd << "First test: time_t";
+	{
+	using Font = Font_digit_2x3_t1;
+//	using Font = Font_digit_4x3_t1;
+	Font::load(lcd);
+
+	title(lcd,  "First test: time_t");
+
 	std::time_t time0 = 630152224; // 20/12/2019 10:17:04
 	std::tm* t0 = std::gmtime(&time0);
 
-	test_user_time(lcd, key, atd::Generic_time_view<std::tm>{*t0});
-
+        test_user_time<Font>( lcd, key, atd::Generic_time_view<std::tm>{*t0});
+        }
 
 	{
-            lcd.clear();
-            lcd << "Second test:duration";
+            title(lcd,  "Second test:duration");
+
             std::time_t t = 630152224; // 20/12/2019 10:17:04
             auto td        = std::chrono::system_clock::from_time_t(t);
-	    td = user_get_datetime(lcd, key, td, 4, 2);
+	    td = user_get_datetime<Font_digit_4x3_t1>(lcd, key, td, 4, 2);
 
 	    t = std::chrono::system_clock::to_time_t(td);
             std::tm* t0 = std::gmtime(&t);
             lcd.cursor_pos(0, 0);
-//            lcd << "Escrito:" << atd::only_date(*t0) << ' '
-//                << atd::only_time(*t0)
 	    lcd.print("Escrito:");
 	    atd::print_date(lcd, atd::Generic_time_view{*t0});
-	    lcd.print(' ');
+	    lcd.print('\n');
 	    atd::print_time(lcd, atd::Generic_time_view{*t0});
-	    lcd.print(" xx");
-//            atd::print_weekday<week_days_length>(
-//                lcd, atd::Generic_time_view<std::tm>{*t0}, week_days);
             wait_ms(4000);
         }
 
