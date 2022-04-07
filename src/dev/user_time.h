@@ -60,32 +60,37 @@ void user_get_weekday(Screen& scr,
 		.show(t.weekday()));
 }
 
-
-
-template <typename Font, typename Screen, typename Keyboard, typename Date_time>
+template <typename Font = Font_digit_default,
+          typename Screen, typename Keyboard,
+          typename Date_time>
 void user_get_date(Screen& scr,
                    Keyboard& key,
                    atd::Generic_time_view<Date_time>& t,
-                   uint8_t x0, uint8_t y0)
+                   uint8_t x0,
+                   uint8_t y0)
 {
     t.day(user_choose_number_circular(scr, key).pos(x0, y0)
 					.between(1, 31)
 					.template choose2<Font>(t.day()));
 
-    t.month(user_choose_number_circular(scr, key).pos(x0 + 3, y0)
-				       .between(1, 12)
-				       .template choose2<Font>(t.month()));
+    t.month(user_choose_number_circular(scr, key)
+                .pos(x0 + 2 * Font::cols + 1, y0)
+                .between(1, 12)
+                .template choose2<Font>(t.month()));
 
-    t.year(user_choose_number_circular(scr, key).pos(x0 + 6, y0)
-					.template choose4<Font>(t.year()));
+    t.year(user_choose_number_circular(scr, key)
+               .pos(x0 + 4 * Font::cols + 2, y0)
+               .template choose4<Font>(t.year()));
 }
 
-template <typename Font, typename Screen, typename Keyboard,
+template <typename Font = Font_digit_default,
+          typename Screen, typename Keyboard,
           typename Date_time>
 void user_get_time(Screen& scr,
                    Keyboard& key,
                    atd::Generic_time_view<Date_time>& t,
-                   uint8_t x0, uint8_t y0)
+                   uint8_t x0,
+                   uint8_t y0)
 {
     t.hours(user_choose_number_circular(scr, key).pos(x0, y0)
 					.max(23)
@@ -103,10 +108,13 @@ void user_get_time(Screen& scr,
                   .template choose2<Font>(t.seconds()));
 }
 
-template <typename Font, typename Screen, typename Date_time>
+template <typename Font = Font_digit_default,
+          typename Screen,
+          typename Date_time>
 void print_time(Screen& scr,
-               atd::Generic_time_view<Date_time>& t,
-               uint8_t x0, uint8_t y0)
+                atd::Generic_time_view<Date_time>& t,
+                uint8_t x0,
+                uint8_t y0)
 {
     scr.cursor_pos(x0, y0);
     Font::print_number(scr, t.hours(), nm::Width{2});
@@ -116,17 +124,19 @@ void print_time(Screen& scr,
     Font::print_number(scr, t.seconds(), nm::Width{2});
 }
 
-
-template <typename Font, typename Screen, typename Date_time>
+template <typename Font = Font_digit_default,
+          typename Screen,
+          typename Date_time>
 void print_date(Screen& scr,
-               atd::Generic_time_view<Date_time>& t,
-               uint8_t x0, uint8_t y0)
+                atd::Generic_time_view<Date_time>& t,
+                uint8_t x0,
+                uint8_t y0)
 {
     scr.cursor_pos(x0, y0);
     Font::print_number(scr, t.day(), nm::Width{2});
-    Font::print_colon(scr);
+    Font::print_colon(scr); // TODO: print_slash (con big_digit dificil)
     Font::print_number(scr, t.month(), nm::Width{2});
-    Font::print_colon(scr);
+    Font::print_colon(scr); // TODO: print_slash
     Font::print_number(scr, t.year(), nm::Width{4});
 }
 

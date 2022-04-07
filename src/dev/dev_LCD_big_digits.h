@@ -229,6 +229,9 @@ class Big_digit<Font_default>{
 public:
     using Font = Font_default;
 
+    static constexpr uint8_t rows = 1;
+    static constexpr uint8_t cols = 1;
+
     template <typename Screen>
     static void load(Screen& scr) {}
 

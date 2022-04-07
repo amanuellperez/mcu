@@ -234,20 +234,20 @@ private:
     using seq_y = atd::static_array<Rep, Rep{1}, Rep{10}, Rep{100}, Rep{1000}>;
     atd::static_Sequence_of_steps<seq_x, seq_y> incr_;
 
-// Configuración
+// Configuration
     uint8_t col_, row_;	    // posición donde están los 2 números.
     Rep min_ = std::numeric_limits<Rep>::min();
     Rep max_ = std::numeric_limits<Rep>::max();
 
-// Datos
-// -----
+// Data
+// ----
     Rep x_;	    // Dato que mostramos en pantalla
     Main* app_; // opcional. Solo lo usamos si se llama a callbacks.
     Callback callback_ = nullptr;
 
 
-// Configuración estática
-// ----------------------
+// Static configuration
+// --------------------
     // Frecuencia de muestreo. Vamos a mirar cada 100 ms el estado
     // del teclado.
     static constexpr uint8_t T_clock = 100; // 100 ms
@@ -258,8 +258,8 @@ private:
     Key_pressed last_key_pressed_ = Key_pressed::none;
     
 
-    // Funciones de ayuda
-    // ------------------
+    // Helpers
+    // -------
     template <typename Font = Font_digit_default>
     void print(Rep x, const nm::Width<int>& w);
 
@@ -269,12 +269,14 @@ private:
     //	Garantiza que x0 esté en el rango [0, max_].
     //
     void update();
-    void update_none();
+	// La última tecla pulsada fue down. Si la tecla sigue pulsada
+	// vamos decrementando el número cada vez más rápidamente.
+	void update_down();
+	void update_up();
+	void update_none();
+	    void update_none_down_pressed();
+	    void update_none_up_pressed();
 
-    // La última tecla pulsada fue down. Si la tecla sigue pulsada
-    // vamos decrementando el número cada vez más rápidamente.
-    void update_down();
-    void update_up();
 
 
 // counter
@@ -391,35 +393,58 @@ template <typename L, typename T, int t0, typename R, typename M>
 void User_choose_number<L, T, t0,R, M>::update_none()
 {
 
-    if (down_key().is_pressed()){
-	counter_reset();
-	last_key_pressed_ = Key_pressed::down;
+    if (down_key().is_pressed())
+	update_none_down_pressed();
 
-	if (x_ > min_){
-	    if (x_ > min_ + incr_.value())
-		x_ -= incr_.value();
-	    else
-		--x_;
+    else if (up_key().is_pressed())
+	update_none_up_pressed();
 
-	    incr_next();
-	}
-    }
-
-    else if (up_key().is_pressed()){
-	counter_reset();
-	last_key_pressed_ = Key_pressed::up;
-
-	if (x_ < max_){
-	    if (x_ + incr_.value() < max_)
-		x_ += incr_.value();
-	    else
-		++x_;
-
-	    incr_next();
-	}
-    }
     else
 	last_key_pressed_ = Key_pressed::none;
+}
+
+
+template <typename L, typename T, int t0, typename R, typename M>
+void User_choose_number<L, T, t0,R, M>::update_none_down_pressed()
+{
+    counter_reset();
+    last_key_pressed_ = Key_pressed::down;
+
+    if (x_ > min_){
+	if (x_ > min_ + incr_.value())
+	    x_ -= incr_.value();
+	else
+	    --x_;
+
+	incr_next();
+    }
+    else{
+	if constexpr (type == user_choose_number_type_circular){
+	    x_ = max_;
+	}
+    }
+}
+
+
+template <typename L, typename T, int t0, typename R, typename M>
+void User_choose_number<L, T, t0,R, M>::update_none_up_pressed()
+{
+    counter_reset();
+    last_key_pressed_ = Key_pressed::up;
+
+    if (x_ < max_){
+	if (x_ + incr_.value() < max_)
+	    x_ += incr_.value();
+	else
+	    ++x_;
+
+	incr_next();
+    }
+    else {
+	if constexpr (type == user_choose_number_type_circular){
+	    x_ = min_;
+	}
+    }
 }
 
 

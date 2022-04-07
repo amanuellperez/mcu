@@ -112,7 +112,7 @@ void test_choose_number2()
 
     scr.clear();
     scr.print("Choose number");
-    wait_ms(1000);
+    wait_ms(700);
 
     scr.clear();
     scr.print("LINEAL TEST");
@@ -260,11 +260,34 @@ using namespace avr::literals;
 
 }
 
+void test_bugs()
+{
+    Main app;
+
+    LCD& scr = app.scr;
+
+    Keyrow keyrow;
+
+    scr.clear();
+    scr.print("Bugs");
+    wait_ms(700);
+
+{
+    scr.clear();
+    // Bug: Hay que pulsar varias veces para que pase de 12 a 1.
+    scr.print("circular 12->1");
+    dev::user_choose_number_circular(scr, keyrow).pos(3, 1)
+					     .between(1, 12)
+					     .choose2(12);
+}
+}
+
 
 
 int main()
 {
     while(1){
+	test_bugs();
 	test_choose_number2();
     }
 }

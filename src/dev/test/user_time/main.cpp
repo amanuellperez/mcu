@@ -106,6 +106,13 @@ void get_time(LCD& lcd, Keyrow& key,
     dev::print_time<Font>(lcd, t, x0, y0);
     dev::user_get_time<Font>(lcd, key, t, x0, y0);
 
+}
+
+template <typename Font, typename LCD, typename Keyrow, typename T>
+void get_date(LCD& lcd, Keyrow& key, 
+	      atd::Generic_time_view<T>& t, 
+	      uint8_t x0, uint8_t y0)
+{
     lcd.clear();
     dev::print_date<Font>(lcd, t, x0, y0);
     atd::print_weekday<week_days_length>(lcd, t, week_days);
@@ -114,12 +121,11 @@ void get_time(LCD& lcd, Keyrow& key,
     dev::user_get_weekday<week_days_length>(lcd, key, t, 
 					    x0 + 9, y0 + 1,
 					    week_days);
-
 }
 
 
 template <typename Font, typename LCD, typename Keyrow>
-std::time_t get_time(
+std::time_t get_datetime(
     LCD& lcd, Keyrow& key, const std::time_t& t0, uint8_t x0, uint8_t y0)
 {
     std::tm* mt = std::gmtime(&t0);
@@ -127,13 +133,13 @@ std::time_t get_time(
     atd::Generic_time_view<std::tm> t{*mt};
 
     get_time<Font>(lcd, key, t, x0, y0);
+    get_date<Font>(lcd, key, t, x0, y0);
 
     return std::mktime(mt);
 }
 
-template <typename Font, 
-	 typename LCD, typename Keyrow,
-          typename Clock, typename Duration>
+template <typename LCD, typename Keyrow,
+          typename Clock, typename Duration, typename Font = Font_digit_default>
 std::chrono::time_point<Clock, Duration>
 user_get_datetime(LCD& lcd,
                   Keyrow& key,
@@ -142,7 +148,7 @@ user_get_datetime(LCD& lcd,
                   uint8_t y0)
 {
     time_t t = std::chrono::system_clock::to_time_t(t0);
-    t = get_time<Font>(lcd, key, t, x0, y0);
+    t = get_datetime<Font>(lcd, key, t, x0, y0);
 
     return std::chrono::system_clock::from_time_t(t);
 }
@@ -151,10 +157,11 @@ template <typename Font,typename LCD, typename Keyrow, typename T>
 void test_user_time(LCD& lcd, Keyrow key, atd::Generic_time_view<T> t)
 {
     get_time<Font>(lcd, key, t, 0, 0);
+    get_date<Font>(lcd, key, t, 0, 0);
 
     lcd.cursor_pos(0,0);
 
-    lcd << "Escrito:";
+    lcd << "Choosen:";
     atd::print_date(lcd,  t);
     lcd.print('\n');
     atd::print_time(lcd, t);
@@ -182,9 +189,9 @@ void test_user_time()
 
     while(1){
 	lcd.clear();
-	lcd << "Probarlo con un";
+	lcd << "Test with";
 	lcd.cursor_pos(0,1);
-	lcd << "LCD de 20 x 4!";
+	lcd << "LCD of 20 x 4!";
 	wait_ms(1000);
 
 	{
@@ -192,7 +199,7 @@ void test_user_time()
 //	using Font = Font_digit_4x3_t1;
 	Font::load(lcd);
 
-	title(lcd,  "First test: time_t");
+	title(lcd,  "Test: time_t");
 
 	std::time_t time0 = 630152224; // 20/12/2019 10:17:04
 	std::tm* t0 = std::gmtime(&time0);
@@ -201,11 +208,11 @@ void test_user_time()
         }
 
 	{
-            title(lcd,  "Second test:duration");
+            title(lcd,  "Test:duration");
 
             std::time_t t = 630152224; // 20/12/2019 10:17:04
             auto td        = std::chrono::system_clock::from_time_t(t);
-	    td = user_get_datetime<Font_digit_4x3_t1>(lcd, key, td, 4, 2);
+	    td = user_get_datetime(lcd, key, td, 4, 2);
 
 	    t = std::chrono::system_clock::to_time_t(td);
             std::tm* t0 = std::gmtime(&t);
