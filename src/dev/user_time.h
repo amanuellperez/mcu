@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez 
+// Copyright (C) 2019-2022 A.Manuel L.Perez 
 //           mail: <amanuel.lperez@gmail.com>
 //           https://github.com/amanuellperez/mcu
 //
@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __USER_TIME_H__
-#define __USER_TIME_H__
+#ifndef __DEV_USER_TIME_H__
+#define __DEV_USER_TIME_H__
 /****************************************************************************
  *
  * - DESCRIPCION: Funciones para gestionar time.h mediante dispositivos.
@@ -33,6 +33,10 @@
  *	27/12/2020 Generalizando para poder usarlo con RTC.
  *	30/12/2020 Hacemos la elección de los números circular (pasamos de 00
  *	           a 59 segundos)
+ *	07/04/2022 Que funcione que Fonts.
+ *	           NOTA: este archivo sobra. Es mejor que cada aplicación
+ *	           concreta implemente todas estas funciones ya que hay muchas
+ *	           formas de hacerlo.
  *
  ****************************************************************************/
 #include <cstdint>

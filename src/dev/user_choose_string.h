@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __USER_CHOOSE_STRING_H__
-#define __USER_CHOOSE_STRING_H__
+#ifndef __DEV_USER_CHOOSE_STRING_H__
+#define __DEV_USER_CHOOSE_STRING_H__
 /****************************************************************************
  *
  *  - DESCRIPCION: Funciones para mostrar un menu en un Screen.

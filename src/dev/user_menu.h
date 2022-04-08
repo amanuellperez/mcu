@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __USER_MENU_H__
-#define __USER_MENU_H__
+#ifndef __DEV_USER_MENU_H__
+#define __DEV_USER_MENU_H__
 /****************************************************************************
  *
  *  - DESCRIPCION: Gestión automática de menus en LCDs.
