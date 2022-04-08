@@ -14,12 +14,15 @@ No tengo fotos del que hice en su día. Si lo vuelvo a hacer, ya subo alguna.
 ## Relojes implementados
 
 * [Basic clock](basic_clock/README.md)
+
   Reloj muy básico. El primero a implementar para practicar.
 
 * [Basic clock (big font)](basic_clock02)
+
   Es un reloj muy básico. La diferencia con el anterior es que este usa
   fuentes grandes.
 
 * [RTC clock](rtc_clock/README.md)
+
   Usamos un RTC en lugar del timer del avr.
 
