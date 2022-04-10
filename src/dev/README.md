@@ -12,6 +12,37 @@ Tested: avr-gcc 9.2.0
 
 Dispositivos a los que accedemos desde el microcontrolador.
 
+En principio, distingo los siguientes tipos:
+
+* Dispositivos reales: un LCD, una EEPROM, ...
+
+  De estos dispositivos suministro un traductor. El traductor (ficheros
+  `_basic`) tiene que ser un traductor de la datasheet. No puede introducir
+  ningún tipo de ineficiencia. Lo único que hacen es escribir en código la
+  datasheet. Son eficientes, pero no tienen por qué ser sencillos de manejar
+  ya que tienen muchos detalles de bajo nivel.
+
+  Como traducen la datasheet suministran todas las funciones que tiene el
+  dispositivo.
+
+
+* Dispositivos genéricos: `Generic_LCD<HD44780>`,
+  `system_clock<Generic_timer>`, ...
+
+  Se podían llamar también dispositivos virtuales, ya que lo que hacen es
+  ocultar los detalles reales del hardware suministrando un interfaz común a
+  todos los mismos tipos de dispositivos. 
+
+  Ventaja: al ser genéricos se pueden programar sin saber realmente qué
+  dispositivo real está conectado. Esto simplifica mucho la programación de
+  aplicaciones.
+
+  Desventaja: al ser genéricos no se suministran todas las funciones que tiene
+  un dispositivo concreto. Si se necesitarán usar esas funciones en lugar de
+  estos dispositivos habría que usar los traductores.
+
+
+
 
 ## EEPROMs
 | Reference | I2C | SPI | datasheet |
@@ -106,11 +137,53 @@ De momento suministro dos tipos de teclado:
   dejo señalado aquí para tener presente mejorarlo para futuros proyectos.
 
 
+## Clocks
+Se tratan de dispositivos genéricos usados para medir tiempo, basados en
+`Generic_timer`.
+
+###¿Qué tipos de relojes podemos tener?
+
+Una característica fundamental de un reloj es su resolución: en segundos, 
+milisegundos, microsegundos, ... Además, pueden medir el tiempo hacia adelante
+o hacia atrás. Algunos se pueden parar, otros no.
+
+Ejemplos de relojes que podemos tener son:
+
+* Reloj normal: 
+
+  su resolución son segundos. Va hacia adelante. No se puede parar, 
+  como mucho ponerlo en hora. Podríamos distinguir entre un reloj muy básico,
+  que solo mide hasta horas, o un reloj normal que también lleva control de la
+  fecha (esto serviría para implementar una alarma).
+
+* Stopwatch:
+
+  sirve para medir tiempo. Es el típico cronómetro. Dependiendo de lo que se
+  quiera medir la resolución variará. Si quieres medir una carrera, con
+  segundos valdrá. Si quieres hacer experimentos de física mejor milisegundos.
+  ¿Merecerá hacer uno que mida microsegundos? ¿Se podrá hacer con el timer del
+  avr?
+
+  Los stopwatch se pueden: encender, parar. El tiempo va hacia adelante y
+  empiezan en cero.
+
+* Timer: 
+
+  resolución en segundos. Va hacia atrás. Lo primero que hay que hacer es
+  ponerlo en hora. Se enciende. Se para automáticamente al llegar a 0. Mide
+  como mucho hasta horas. 
+
+
+###Implementación
+  + `system_clock`: 
+
+    reloj de sistema básico. Suministro este por consistencia con el standard `std`.
+
+
 ## A parte de los dispositivos incluyo interfaces genéricos:
 
 * Dispositivos genéricos:
   + `signal_generator`
-  + `system_clock`
 
 
 * user: interacción con el usuario a través de LCD y Keyboard.
