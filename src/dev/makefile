@@ -1,10 +1,12 @@
 SOURCES= dev_BMP280_basic.cpp	\
 		 dev_BME280_basic.cpp	\
-		 dev_DS1307_basic.cpp
+		 dev_clocks.cpp			\
+		 dev_DS1307_basic.cpp	
 
 
 INCS= 	dev_BMP280_basic.h			\
 		dev_BME280_basic.h			\
+		dev_clocks.h				\
 		dev_cols_glyphs.h			\
 		dev_counter_CD4017B.h		\
 		dev_DS1307_basic.h			\
@@ -41,7 +43,6 @@ INCS= 	dev_BMP280_basic.h			\
 		dev_register_74HC595_SPI.h	\
 		dev_signal_generator.h		\
 		dev_speaker.h				\
-		dev_system_clock.h			\
 		dev_TMP36.h					\
 		dev_TWI_memory_type.h		\
 		user_choose_number.h		\

@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez 
+// Copyright (C) 2019-2022 A.Manuel L.Perez 
 //           mail: <amanuel.lperez@gmail.com>
 //           https://github.com/amanuellperez/mcu
 //
@@ -17,7 +17,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "../../dev_system_clock.h"
+#include "../../../dev_clocks.h"
 #include <avr_interrupt.h>
 #include <avr_UART.h>
 #include <avr_time.h>
@@ -59,6 +59,8 @@ void test_system_clock()
 {
     avr::UART_iostream uart;
 
+    uart << "\n\nsystem_clock test\n"
+	        "-----------------\n";
     while(1){
 	uart << System_clock::now() << '\n';
 

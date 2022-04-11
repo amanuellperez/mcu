@@ -1,4 +1,4 @@
-// Copyright (C) 2021 A.Manuel L.Perez 
+// Copyright (C) 2021-2022 A.Manuel L.Perez 
 //           mail: <amanuel.lperez@gmail.com>
 //           https://github.com/amanuellperez/mcu
 //
@@ -22,7 +22,7 @@
 
 namespace dev{
 
-__Chronometer_sexagesimal_ms::__Chronometer_sexagesimal_ms(int32_t t)
+Converter_ms_sexagesimal::Converter_ms_sexagesimal(int32_t t)
 {
     int32_t tmp;
     std::tie(tmp, milliseconds) = atd::div<int32_t>(t, 1000);
@@ -31,7 +31,7 @@ __Chronometer_sexagesimal_ms::__Chronometer_sexagesimal_ms(int32_t t)
 }
 
 
-int32_t __Chronometer_sexagesimal_ms::to_milliseconds() const
+int32_t Converter_ms_sexagesimal::to_milliseconds() const
 {
     int32_t res = milliseconds;
     res += seconds*1000;

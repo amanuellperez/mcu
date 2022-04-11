@@ -1,4 +1,4 @@
-// Copyright (C) 2021 A.Manuel L.Perez 
+// Copyright (C) 2019-2022 A.Manuel L.Perez 
 //           mail: <amanuel.lperez@gmail.com>
 //           https://github.com/amanuellperez/mcu
 //
@@ -17,44 +17,101 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+
 #pragma once
 
-#ifndef __CHRONOMETER_H__
-#define __CHRONOMETER_H__
+#ifndef __DEV_CLOCKS_H__
+#define __DEV_CLOCKS_H__
 /****************************************************************************
  *
- *  - DESCRIPCION: Cronómetro básico
+ *  - DESCRIPCION: Differents clocks:
+ *	
+ *	+ system_clock: reloj de sistema (similar a std::system_clock).
+ *	+ Chronometer_ms: reloj que mide el tiempo en milisegundos.
+ *
  *
  *  - HISTORIA:
  *    A.Manuel L.Perez
- *    30/01/2021 v0.0
+ *    ??/??/2020 Escrito
+ *    26/02/2021 Basado en Generic_timer
+ *    11/04/2022 Reestructurado. Chronometer_ms
  *
  ****************************************************************************/
+
 #include <chrono>
+
+#include <ctime>
+#include <time.h>
 #include <atd_cast.h>
-#include <atd_math.h> // div
-#include <tuple>	// tie
 
 namespace dev{
 
-// De momento voy a usar el chronometro para medir tiempos. La diferencia con
-// un reloj es su resolución: capaz de medir los milisegundos.
-// Observar que no es más que una std::duration representada en sexagesimal.
-// (???) Esta clase realmente es sexagesimal_milliseconds, esto es, un número
-//       de milisegundos dados en sexagesimal. ¿Por qué no definirla en
-//       general? Por la resolución. En el chronometro incluyo hasta el número
-//       de horas, pero se podría contar también el dia, mes y año. ¿cómo
-//       hacerlo genérico? ¿Merece la pena?
-struct __Chronometer_sexagesimal_ms{
+/***************************************************************************
+ *			    SYSTEM_CLOCK
+ ***************************************************************************/
+template <typename Timer, uint16_t timer_period_in_us>
+constexpr inline typename Timer::counter_type __system_clock_top()
+{
+    constexpr uint32_t one_second_in_us = 1000000u;
+    constexpr uint32_t top = one_second_in_us/timer_period_in_us;
+
+    static_assert(top < Timer::timer_counter_max_top(),
+                  "Top too great for this timer. Try another period or choose "
+                  "a different F_CPU.");
+    return atd::safe_static_cast<typename Timer::counter_type, uint32_t, top>();
+}
+
+
+// Timer: es un Generic_timer.
+template <typename Timer>
+struct System_clock : public std::chrono::system_clock {
+
+    template <uint16_t timer_period_in_us>
+    constexpr static void init()
+    {
+	Timer::mode_timer_counter(
+			    __system_clock_top<Timer, timer_period_in_us>());
+        Timer::template on<timer_period_in_us>();
+    }
+
+    /// Ponemos en hora el reloj.
+    static void set(const time_point& t0) { ::set_system_time(to_time_t(t0)); }
+
+    /// Damos un tick al clock.
+    static void tick() {::system_tick();}
+
+};
+
+
+
+/***************************************************************************
+ *			    CHRONOMETER_MS
+ ***************************************************************************/
+
+/// El tiempo lo podemos medir en milisegundos o escribirlo como
+/// hh:mm::ss::ms.
+/// Ejemplo: 2h 3min 4s 25ms = 7384025 ms
+/// Esta clase es responsable de pasar de una representación a otra.
+//
+// ¿Por qué devolver las horas? ¿Por qué no devolver también días?
+// La resolución la marca el tipo usado para representar los milisegundos.
+// Si usamos int32_t podemos representar hasta 2^31 - 1 ms = que vienen a ser
+// unas 600 horas. 
+// Si en lugar de int32_t se usara int64_t podríamos representar hastsa
+// 2^63 - 1 ms = con lo que se podría representar años perfectamente.
+// En principio la idea es hacer stopwatch y timers no necesitando en la
+// práctica  medir hasta las horas (usar un int16_t no serviría ya que solo se
+// podrían representar hasta 30 segundos, demasiado poco tiempo).
+struct _Sexagesimal_ms{
     int16_t milliseconds; // 00-999
     int8_t seconds;// 00-59
     int8_t minutes;// 00-59
     int8_t hours;  // 00-23
 
-    __Chronometer_sexagesimal_ms() {}
+    _Sexagesimal_ms() {}
 
     // conversión de ms a sexagesimal
-    __Chronometer_sexagesimal_ms(int32_t ms);
+    _Sexagesimal_ms(int32_t ms);
 
     // conversión de sexagesimal a ms
     int32_t to_milliseconds() const;
@@ -67,8 +124,8 @@ struct __Chronometer_sexagesimal_ms{
 
 
 
-inline bool operator==(const __Chronometer_sexagesimal_ms& a,
-	               const __Chronometer_sexagesimal_ms& b)
+inline bool operator==(const _Sexagesimal_ms& a,
+	               const _Sexagesimal_ms& b)
 {
     return a.milliseconds == b.milliseconds
 	and a.seconds == b.seconds
@@ -76,8 +133,8 @@ inline bool operator==(const __Chronometer_sexagesimal_ms& a,
 	and a.hours == b.hours;
 }
 
-inline bool operator!=(const __Chronometer_sexagesimal_ms& a,
-	               const __Chronometer_sexagesimal_ms& b)
+inline bool operator!=(const _Sexagesimal_ms& a,
+	               const _Sexagesimal_ms& b)
 {
     return !(a == b);
 }
@@ -100,7 +157,7 @@ constexpr inline typename Timer::counter_type __Chronometer_ms_top()
     constexpr uint32_t one_millisecond_in_us = 1000u;
     constexpr uint32_t top = one_millisecond_in_us/timer_period_in_us;
 
-    static_assert(top < Timer::max(),
+    static_assert(top < Timer::timer_counter_max_top(),
                   "Top too great for this timer. Try another period or choose "
                   "a different F_CPU.");
     return atd::safe_static_cast<typename Timer::counter_type, uint32_t, top>();
@@ -116,38 +173,35 @@ constexpr inline typename Timer::counter_type __Chronometer_ms_top()
 // * mejoras (???): parametrizarlo con la representación y el ratio, de esta
 //   forma se puede elegir que sea un chronometro que funcione en ms ó us.
 //   ¿Merece la pena hacerlo?
-template <typename Timer, uint16_t timer_period_in_us, bool tick_up = true>
-struct Chronometer_ms{
+template <typename Timer,   // = Generic_timer
+	 uint16_t timer_period_in_us, 
+	 bool tick_up = true // up or down?
+	 > 
+struct Chronometer_ms {
     using duration   = std::chrono::duration<int32_t, std::milli>;
     using rep        = duration::rep;
     using period     = duration::period;
     using time_point = std::chrono::time_point<Chronometer_ms, duration>;
 
     // milliseconds in sexagesimal representation
-    using Sexagesimal_ms = __Chronometer_sexagesimal_ms;
+    using Sexagesimal_ms = _Sexagesimal_ms;
 
 
-    /// init chronometer
-    //TODO: usar Generic_timer
+    /// init chronometer. Lo ponemos a 0.
     constexpr static void init()
     {
-	Timer::enable_output_compare_A_match_interrupt();
-
-	Timer::mode_CTC_top_OCR1A();
-        Timer::output_compare_register_A(
-            __Chronometer_ms_top<Timer, timer_period_in_us>());
+	Timer::mode_timer_counter(
+			    __Chronometer_ms_top<Timer, timer_period_in_us>());
 
         reset();
     }
 
-    /// Reinicia el cronómetro y lo enciende.
-    static void start()
-    {
-        Timer::template on<timer_period_in_us>();
-    }
+    /// Enciende el cronometro. Recordar definir el tiempo antes.
+    static void on()
+    { Timer::template on<timer_period_in_us>(); }
 
     /// Para el cronómetro sin borrar el tiempo actual.
-    static void stop() { Timer::off(); }
+    static void off() { Timer::off(); }
 
 
 // Lectura
@@ -161,10 +215,16 @@ struct Chronometer_ms{
     static Sexagesimal_ms sexagesimal_count() 
     { return Sexagesimal_ms{milliseconds_}; }
 
+
 // Escritura
+    static void reset() 
+    { 
+	milliseconds_ = 0; 
+	Timer::timer_counter_reset();
+    }
+
     static void count(const Sexagesimal_ms& sexag)
     { milliseconds_ = sexag.count(); }
-
 
 
     // precondition: state == stop
@@ -202,15 +262,7 @@ private:
     // duration (sus operators no son volatiles)
     inline static volatile rep milliseconds_;
 
-    static void reset() 
-    { 
-	milliseconds_ = 0; 
-	Timer::counter(0);
-    }
-
 };
-
-
 
 }// dev
 

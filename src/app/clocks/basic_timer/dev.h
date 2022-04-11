@@ -22,23 +22,12 @@
 #ifndef __CHRONO_DEV_H__
 #define __CHRONO_DEV_H__
 
-/****************************************************************************
- *
- *  - DESCRIPCION: Hardware connections
- *
- *  - HISTORIA:
- *    A.Manuel L.Perez
- *    25/01/2021 v0.0
- *
- ****************************************************************************/
 #include <stdint.h>
-#include <avr_timer1_basic.h>
+#include <avr_timer1_generic.h>
 
 #include <dev_LCD_HD44780.h>
 #include <dev_keyrow.h>
-#include <dev_system_clock.h>
-
-#include "chronometer.h"
+#include <dev_clocks.h>
 
 // pins usados
 // ------------
@@ -81,17 +70,22 @@ using LCD_pins = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<LCD_RS_pin>,
 // ---
 using LCD_1602         = dev::LCD_HD44780_1602<LCD_pins>;
 using Generic_LCD_1602 = dev::Generic_LCD<LCD_1602>;
-using LCD_ostream      = dev::LCD_ostream_1602<Generic_LCD_1602>;
+using Screen_1602      = dev::LCD_screen_1602<Generic_LCD_1602>;
+using LCD              = Screen_1602;
 
 
 // keyrow
 using namespace dev::Key_codes; // OK_KEY, UP_KEY, DOWN_KEY
 using Keyrow_codes = dev::Keyrow_codes<OK_KEY, UP_KEY, DOWN_KEY>;
-using Keyrow       = dev::Basic_keyrow<Keyrow_pins, Keyrow_codes>;
+using Keyboard	   = dev::Basic_keyrow<Keyrow_pins, Keyrow_codes>;
 
+
+// Chronometer
+// -----------
+using Timer = dev::Generic_timer<avr::Timer1>;
 constexpr static uint16_t chronometer_timer_period_in_us = 64u;
 using Chronometer                                        = dev::
-    Chronometer_ms<avr::Timer1, chronometer_timer_period_in_us, false>;
+    Chronometer_ms<Timer, chronometer_timer_period_in_us, false>;
 
 #endif
 

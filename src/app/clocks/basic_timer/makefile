@@ -1,7 +1,6 @@
 BIN = xx
 
 SOURCES= main.cpp			\
-		 chronometer.cpp	\
 		 keyboard.cpp		\
 		 timer1.cpp			\
 		 window_main.cpp

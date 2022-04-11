@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez 
+// Copyright (C) 2022 A.Manuel L.Perez 
 //           mail: <amanuel.lperez@gmail.com>
 //           https://github.com/amanuellperez/mcu
 //
@@ -17,51 +17,30 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#include "dev_clocks.h"
+#include <tuple>	// tie
 
-#include "main.h"
-#include <dev_clocks.h>
-#include <atd_time.h>
 
-void Main::run()
+namespace dev{
+
+_Sexagesimal_ms::_Sexagesimal_ms(int32_t t)
 {
-    while(1){
-	if (rtc_.error())
-	    error();
-	else 
-	    window_main();
-
-	wait_ms(100); // ¿se puede poner 500 ms? No, dejaría de funcionar el
-		      // teclado ya que solo se miraría cada 500 ms si se
-		      // ha pulsado una tecla o no.
-    }
+    int32_t tmp;
+    std::tie(tmp, milliseconds) = atd::div<int32_t>(t, 1000);
+    std::tie(tmp, seconds) = atd::div<int32_t>(tmp, 60);
+    std::tie(hours, minutes) = atd::div<int32_t>(tmp, 60);
 }
 
 
-
-
-void Main::window_main()
+int32_t _Sexagesimal_ms::to_milliseconds() const
 {
-    show_window_main();
+    int32_t res = milliseconds;
+    res += seconds*1000;
+    res += minutes*60*1000;
+    res += hours*60*60*1000;
 
-    if (user_press_change_time())
-    {
-	wait_user_release_change_time();
-	window_set_time();
-    }
+    return res;
 }
 
+}// namespace
 
-void Main::show_window_main()
-{
-    RTC::Time_point t;
-    rtc_.read(t);
-    print_time(atd::Generic_time_view<RTC::Time_point>{t}, 0, 0);
-}
-
-
-
-void Main::error()
-{
-    lcd_.clear();
-    lcd_ << "RTC error";
-}

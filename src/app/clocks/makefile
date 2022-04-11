@@ -1,5 +1,6 @@
 DIRS =  basic_clock	\
-		chrono		\
+		basic_clock02 \
+		basic_timer 		\
 		rtc_clock
 
 

@@ -36,7 +36,7 @@
 
 #include <dev_LCD_HD44780.h>
 #include <dev_keyrow.h>
-#include <dev_system_clock.h>
+#include <dev_clocks.h>
 
 // pins usados
 // ------------
@@ -87,7 +87,7 @@ using LCD              = Screen_1602;
 // ------
 using namespace dev::Key_codes; // OK_KEY, UP_KEY, DOWN_KEY
 using Keyrow_codes = dev::Keyrow_codes<OK_KEY, UP_KEY, DOWN_KEY>;
-using Keyrow       = dev::Basic_keyrow<Keyrow_pins, Keyrow_codes>;
+using Keyboard     = dev::Basic_keyrow<Keyrow_pins, Keyrow_codes>;
 
 
 // system_clock

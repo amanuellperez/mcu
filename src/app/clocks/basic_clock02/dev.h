@@ -37,7 +37,7 @@
 #include <dev_LCD_HD44780.h>
 #include <dev_LCD_font_4x3.h>
 #include <dev_keyrow.h>
-#include <dev_system_clock.h>
+#include <dev_clocks.h>
 
 // pins usados
 // ------------

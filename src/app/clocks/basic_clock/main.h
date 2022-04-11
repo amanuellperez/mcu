@@ -25,7 +25,7 @@
 
 #include "dev.h"
 #include "cfg.h"
-#include <dev_system_clock.h>
+#include <dev_clocks.h>
 #include <avr_time.h>
 #include <user_time.h>
 
@@ -41,7 +41,7 @@ public:
 private:
 // Hardware
     LCD lcd_;
-    Keyrow keyboard_;
+    Keyboard keyboard_;
 
 
 // init: hardware

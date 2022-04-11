@@ -51,8 +51,8 @@ public:
 
 private:
 // Hardware
-    LCD_ostream lcd_;
-    Keyrow keyboard_;
+    LCD lcd_;
+    Keyboard keyboard_;
 
 // state: pasarlo a flags si se usan más de 1 flag.
     enum class State {stop, running, alarm };

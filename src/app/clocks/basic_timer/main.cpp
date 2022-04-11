@@ -31,9 +31,6 @@ Main::Main()
 
 void Main::init_lcd()
 {
-    lcd_.terminal().stop_brcorner(true);// I'm not going to use it as a terminal
-    lcd_.terminal().nowrap(); 
-    lcd_.fill('0');
 }
 
 void Main::init_chronometer()
