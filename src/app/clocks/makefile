@@ -1,6 +1,7 @@
-DIRS =  basic_clock	\
-		basic_clock02 \
-		basic_timer 		\
+DIRS =  basic_clock		\
+		basic_clock02 	\
+		basic_stopwatch	\
+		basic_timer 	\
 		rtc_clock
 
 

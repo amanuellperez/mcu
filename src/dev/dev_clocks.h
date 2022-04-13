@@ -191,6 +191,9 @@ struct Chronometer_ms {
     // milliseconds in sexagesimal representation
     using Sexagesimal_ms = _Sexagesimal_ms;
 
+    // Para recordar que solo hay un Chronometer_ms por aplicación no permito
+    // construir objetos. 
+    Chronometer_ms() = delete;
 
     /// init chronometer. Lo ponemos a 0.
     constexpr static void init()

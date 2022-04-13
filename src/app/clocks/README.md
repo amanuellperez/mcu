@@ -22,6 +22,15 @@ No tengo fotos del que hice en su día. Si lo vuelvo a hacer, ya subo alguna.
   Es un reloj muy básico. La diferencia con el anterior es que este usa
   fuentes grandes.
 
+* [Basic timer](basic_timer)
+
+  Es un timer básico. Se programa un tiempo y cuenta hacia atrás. Resolución:
+  segundos.
+
+* [Basic stopwatch](basic_stopwatch)
+
+  Stopwatch básico. Es un cronómetro que cuenta en milisegundos.
+
 * [RTC clock](rtc_clock/README.md)
 
   Usamos un RTC en lugar del timer del avr.
