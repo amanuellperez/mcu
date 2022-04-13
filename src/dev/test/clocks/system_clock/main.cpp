@@ -24,17 +24,18 @@
 #include <avr_timer1_generic.h>
 #include <atd_time.h>
 
-// Con el Timer0 no funciona ya que el counter del timer0 es de 8 bits y no de
-// 16 bits.
-using Timer = dev::Generic_timer<avr::Timer1>;
-using System_clock = dev::System_clock<Timer>;
 
 // Dependiendo del valor de F_CPU hay que pasar un periodo diferente.
 // El compilador tiene que mostrar mensajes adecuados a cada error.
 // Probar con diferentes periodos y F_CPU.
 //constexpr static uint16_t system_clock_timer_period_in_us = 8u;
 //constexpr static uint16_t system_clock_timer_period_in_us = 32u;
-constexpr static uint16_t system_clock_timer_period_in_us = 64u;
+constexpr static uint16_t clock_timer_period_in_us = 64u;
+
+// Con el Timer0 no funciona ya que el counter del timer0 es de 8 bits y no de
+// 16 bits.
+using Timer = dev::Generic_timer<avr::Timer1>;
+using System_clock = dev::System_clock<Timer, clock_timer_period_in_us>;
 
 
 // Definimos el reloj del sistema
@@ -79,7 +80,7 @@ void init_uart()
 
 void init_timer()
 {
-    System_clock::init<system_clock_timer_period_in_us>();
+    System_clock::init();
 }
 
 

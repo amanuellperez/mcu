@@ -63,10 +63,15 @@ constexpr inline typename Timer::counter_type __system_clock_top()
 
 
 // Timer: es un Generic_timer.
-template <typename Timer>
+// (RRR) timer_period_in_us solo lo necesito en init. ¿Por qué parametrizar
+//       todo el System_clock con timer_period_in_us cuando no es necesario?
+//       Para simplificar el uso. En el archivo 'dev.h' se define el
+//       System_clock, y el resto del programa no necesita recordar que el
+//       init tienes que pasarle el timer_period_in_us. Queda más claro el
+//       código (y posiblemente más portable)
+template <typename Timer, uint16_t timer_period_in_us>
 struct System_clock : public std::chrono::system_clock {
 
-    template <uint16_t timer_period_in_us>
     constexpr static void init()
     {
 	Timer::mode_timer_counter(

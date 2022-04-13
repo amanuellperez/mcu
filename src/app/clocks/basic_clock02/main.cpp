@@ -64,7 +64,7 @@ std::time_t Main::init_time_t()
 
 void Main::init_system_clock()
 {
-    System_clock::init<system_clock_timer_period_in_us>();
+    System_clock::init();
 
     time_t t0 = init_time_t();
     System_clock::time_point t = std::chrono::system_clock::from_time_t(t0);
