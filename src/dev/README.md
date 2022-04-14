@@ -141,7 +141,7 @@ De momento suministro dos tipos de teclado:
 Se tratan de dispositivos genéricos usados para medir tiempo, basados en
 `Generic_timer`.
 
-###¿Qué tipos de relojes podemos tener?
+### ¿Qué tipos de relojes podemos tener?
 
 **Relojes que miden ticks = Tickers**
 
@@ -202,7 +202,7 @@ Ejemplos de relojes que podemos tener son:
   como mucho hasta horas. 
 
 
-###Implementación
+### Implementación
   + `system_clock`: 
 
     reloj de sistema básico. Suministro este por consistencia con el standard `std`.
