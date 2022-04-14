@@ -21,6 +21,8 @@ No tengo fotos del que hice en su día. Si lo vuelvo a hacer, ya subo alguna.
 
   Es un reloj muy básico. La diferencia con el anterior es que este usa
   fuentes grandes.
+  
+  [Vídeo](https://youtu.be/fIAfMMv4U9g)
 
 * [Basic timer](basic_timer)
 
@@ -30,6 +32,13 @@ No tengo fotos del que hice en su día. Si lo vuelvo a hacer, ya subo alguna.
 * [Basic stopwatch](basic_stopwatch)
 
   Stopwatch básico. Es un cronómetro que cuenta en milisegundos.
+
+  Nota: es fundamental gestionar bien el bouncing del teclado con el
+  cronómetro. Si no, al pulsar el botón para pararlo no lo para.
+
+  [Vídeo 01](https://youtu.be/Vh1viQgFdyk)
+  [Vídeo 02](https://youtu.be/dDlk_Ot5fTA)
+
 
 * [RTC clock](rtc_clock/README.md)
 

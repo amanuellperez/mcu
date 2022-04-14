@@ -19,7 +19,7 @@
 
 #include "main.h"
 
-Main::Main() : keyboard_clock_{keyboard_clock_imax}, mclock_{keyboard_clock_}
+Main::Main() : ktimer_{keyboard_clock_imax}
 {
 // init_hardware():
     init_lcd();
@@ -27,6 +27,11 @@ Main::Main() : keyboard_clock_{keyboard_clock_imax}, mclock_{keyboard_clock_}
     init_stopwatch();
 }
 
+
+void Main::init_keyboard()
+{
+    ktimer_.off();
+}
 
 
 void Main::init_lcd()
@@ -49,11 +54,8 @@ void Main::run()
 //	else 
 	    window_main();
 
-	mclock_.wait();
-//	wait_ms(50);
-//	wait_ms(10); // es un cronometro que funciona a 1 ms. 
-//		    // Actualizo el LCD cada 1 ms (si se elimina este wait_ms
-//		    // el LCD se actualiza tan rápido que no se ve nada)
+	wait_ms(period_main_clock_ms);
+	ktimer_.tick();
     }
 }
 

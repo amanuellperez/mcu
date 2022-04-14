@@ -39,52 +39,29 @@
 #include <avr_time.h>
 #include <user_time.h>
 
-// Experimento: utilización de estos 'Clocks' para controlar el bouncing del
-// teclado.
-class Clock{
+// Experimento: mejoremos el bouncing.
+// Timer que cuenta ticks. Implementación mínima para la aplicación.
+class Timer_ticks{
 public:
-    Clock(uint8_t n)
-    {
-        if (n == 0)
-            imax_ = 0;
-        else 
-	    imax_ = n - 1;
-    }
+    Timer_ticks(uint8_t imax) : imax_{imax}
+    { i_ = 0; } // empezamos en off
 
-    void reset() {i_ = 0;}
+    void on() {i_ = imax_;}
+    void off() { i_ = 0; }
+
+    bool is_off() {return i_ == 0;}
+
     void tick() 
-    {
-	if (i_ < imax_)
-	    ++i_;
-	else 
-	    i_ = 0;
+    { 
+	if (i_ > 0)
+	    --i_; 
     }
-
-    uint8_t count() {return i_;}
-
-    // Al usar '0' al empezar empieza sonando.
-    // El reloj suena cada vez que da una vuelta
-    bool ring() {return i_ == 0;}
 
 private:
-    uint8_t i_  = 0;
+    uint8_t i_;	// i_ = 0, está en off. i_ != 0, en on.
     uint8_t imax_;
 };
 
-template <uint16_t time_in_ms>
-class Main_clock{
-public:
-    Main_clock(Clock& clock) : clock_{&clock} { }
-
-    void wait()
-    {
-	wait_ms(time_in_ms);// CUIDADO: wait_ms es una macro!!!
-	clock_->tick();
-    }
-
-private:
-   Clock* clock_; 
-};
 
 
 
@@ -104,7 +81,7 @@ private:
 
 // init: hardware
     void init_lcd();
-    void init_keyboard() { }
+    void init_keyboard();
     void init_stopwatch();
 
 
@@ -120,15 +97,10 @@ private:
     constexpr static uint8_t keyboard_clock_imax = 2; // 2 * 50 = 100
     constexpr static uint16_t period_main_clock_ms = 50;
 
-    Clock keyboard_clock_;
-    Main_clock<period_main_clock_ms> mclock_; // main_clock
+    Timer_ticks ktimer_; // keyboard_timer
 };
 
 
-inline void wait_release_key()
-{
-    wait_ms(time_wait_release_key);
-}
 
 
 

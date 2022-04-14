@@ -77,9 +77,9 @@ using Generic_LCD_1602 = dev::Generic_LCD<LCD_1602>;
 using Screen_1602      = dev::LCD_screen_1602<Generic_LCD_1602>;
 using Screen	       = Screen_1602;
 // Choose font to use:
-//using Font             = dev::Font_digit_2x2_t1; 
-using Font             = dev::Font_digit_2x3_t1; 
-//using Font             = dev::Font_digit_4x3_t1;  <-- esta fallando. 
+using Font             = dev::Font_digit_2x2_t1; 
+//using Font             = dev::Font_digit_2x3_t1; 
+//using Font             = dev::Font_digit_4x3_t1;  //<-- esta fallando. 
 //							hay que depurar esta
 //							fuente
 

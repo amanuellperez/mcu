@@ -24,7 +24,15 @@
 
 #include <stdint.h>
 
-constexpr uint8_t time_wait_release_key = 100; // in ms
+// periodo, en ms, en el que tardamos en repetir un bucle main
+// (realmente es el tiempo de espera entre una iteración del main y la
+// siguiente)
+constexpr static uint16_t period_main_clock_ms = 50;
+
+// Divisor de la frecuencia del main para esperar a que acabe el bouncing.
+// Esto es, esperamos keyboard_clock_imax * period_main_clock_ms milisegundos
+// hasta mirar de nuevo el teclado después de haber pulsado una tecla.
+constexpr static uint8_t keyboard_clock_imax = 2; // 2 * 50 = 100
 
 
 #endif

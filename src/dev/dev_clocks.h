@@ -177,7 +177,8 @@ constexpr inline typename Timer::counter_type __Chronometer_ms_top()
 //
 // * mejoras (???): parametrizarlo con la representación y el ratio, de esta
 //   forma se puede elegir que sea un chronometro que funcione en ms ó us.
-//   ¿Merece la pena hacerlo?
+//   ¿Merece la pena hacerlo? En lugar de contar milisegundos lo que cuenta
+//   son ticks. Los ticks podrán ser ms o us.
 template <typename Timer,   // = Generic_timer
 	 uint16_t timer_period_in_us, 
 	 bool tick_up = true // up or down?

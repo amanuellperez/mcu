@@ -36,7 +36,7 @@ uint8_t Main::scan_keyboard()
 void Main::window_main()
 {
     
-    if (keyboard_clock_.ring()){
+    if (ktimer_.is_off()){
 	uint8_t c = scan_keyboard();
 
 	switch(c){
@@ -44,11 +44,8 @@ void Main::window_main()
 	    break; case STOP_KEY : Stopwatch::stop();
 	}
 
-//    if (keyboard_.key<START_KEY>().is_pressed())
-//	Stopwatch::start();
-//
-//    else if (keyboard_.key<STOP_KEY>().is_pressed())
-//	Stopwatch::stop();
+	if (c != NO_KEY) // si se ha pulsado una tecla esperemos el bouncing
+	    ktimer_.on();
     }
 
     print_time();
