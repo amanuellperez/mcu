@@ -1,4 +1,4 @@
-// Copyright (C) 2021 A.Manuel L.Perez 
+// Copyright (C) 2021-2022 A.Manuel L.Perez 
 //           mail: <amanuel.lperez@gmail.com>
 //           https://github.com/amanuellperez/mcu
 //
@@ -143,6 +143,25 @@ void test_bounded()
     CHECK_TRUE(a == -4, "--");
     }
 
+{// bucle básico
+    atd::Bounded<int, 0, 4> a = 4;
+    for (int i = 4; i > 0; --i, --a){
+	CHECK_TRUE(a == i, "basic loop decreasing");
+    }
+    CHECK_TRUE(a == 0, "basic loop decreasing");
+    --a;
+    CHECK_TRUE(a == 0, "basic loop decreasing");
+
+
+    a = 0;
+    for (int i = 0;  i < 4; ++i, ++a){
+	CHECK_TRUE(a == i, "basic loop increasing");
+    }
+    CHECK_TRUE(a == 4, "basic loop increasing");
+    ++a;
+    CHECK_TRUE(a == 4, "basic loop increasing");
+
+}
 }
 
 
