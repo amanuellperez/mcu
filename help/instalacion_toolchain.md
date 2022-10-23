@@ -21,13 +21,27 @@ buena referencia para saber cómo instalar la toolchain por defecto. Explica
 cómo instalarlo en Linux, Windows y Mac.
 
 ### Instalación
-Para instalar la toolchain en linux:
+Para instalar la toolchain en linux (versión que suele estar muy anticuada,
+así que mejor no la instales):
 
 ```
 $ sudo apt install avrdude avrdude-doc binutils-avr avr-libc gcc-avr gdb-avr
 ```
 
 
+## <a name="descargar_toolchain">DESCARGAR LA TOOLCHAIN</a>
+* [GNU Binutils](https://ftp.gnu.org/gnu/binutils/)
+* [GCC](https://ftp.gnu.org/gnu/gcc/)
+* [avr-libc](https://github.com/avrdudes/avr-libc)
+
+Para verificar los downloads del FTP de GNU, descargar la
+[key](https://ftp.gnu.org/gnu/gnu-keyring.gpg) y ejecutar
+```
+$ gpg --verify --keyring ./gnu-keyring.gpg gcc-11.3.0.tar.xz.sig
+```
+
+(solo tiene el problema de que si el FTP ha sido hackeado la key va a ser
+consistente con el programa descargado ... )
 
 ## <a name="compilar_toolchain">COMPILAR LA TOOLCHAIN</a>
 
@@ -249,6 +263,10 @@ Este es el más sencillo de compilar. No genera problemas.
    $ make install
    ```
 
+   Puede que falle el `./configure` indicando que no encuentra `avr-gcc`. Es
+   porque al compilar `avr-gcc` se habrá generado el fichero `avr-gcc-11.3.0`
+   en vez de `avr-gcc`. Crear `avr-gcc` como link de `avr-gcc-11.3.0`.
+
 ### avrdude
 
 `avrdude` es el programa que usamos para cargar nuestro programa en el `avr`.
@@ -256,7 +274,7 @@ Este es el más sencillo de compilar. No genera problemas.
 Para instalarlo basta con escribir:
 
 ```
-$sudo apt install avrdude avrdude-doc
+$ sudo apt install avrdude avrdude-doc
 ```
 
 ### Configuración de la toolchain

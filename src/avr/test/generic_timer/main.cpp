@@ -48,7 +48,8 @@ volatile time_t contador = 0;
 //ISR_TIMER0_COMPA
 ISR_TIMER_INTERRUPT
 {
-    ++contador;
+    // ++contador;
+    contador = contador + 1;
 }
 
  

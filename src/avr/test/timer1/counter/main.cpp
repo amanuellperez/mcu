@@ -35,7 +35,8 @@ volatile uint32_t contador = 0;
 
 ISR_TIMER1_OVF
 {
-    ++contador;
+    // ++contador;
+    contador = contador + 1;
 }
 
  

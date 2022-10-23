@@ -240,7 +240,8 @@ struct Chronometer_ms {
     static void add(duration incr_t0) 
     {
 	duration incr_t{incr_t0};
-	milliseconds_ += incr_t.count();
+	// milliseconds_ += incr_t.count();
+	milliseconds_ = milliseconds_ + incr_t.count();
     }
  
 
@@ -249,7 +250,8 @@ struct Chronometer_ms {
     {
 	duration incr_t{incr_t0};
 	if (milliseconds_ > incr_t.count())
-	    milliseconds_ -= incr_t.count();
+	    // milliseconds_ -= incr_t.count();
+	    milliseconds_ = milliseconds_ - incr_t.count();
 	else 
 	    milliseconds_ = 0;
     }
@@ -260,9 +262,11 @@ struct Chronometer_ms {
     static void tick() 
     {
 	if constexpr (tick_up)
-	    ++milliseconds_;
+	    //++milliseconds_;
+	    milliseconds_ = milliseconds_ + 1;
 	else
-	    --milliseconds_;
+	    // --milliseconds_;
+	    milliseconds_ = milliseconds_ - 1;
     }
 
 

@@ -63,21 +63,26 @@ public:
     /// Definimos el pin de salida
     static void as_output() 
     {
-	(*DDR[n]) |= BIT_MASK[n];
+	// (*DDR[n]) |= BIT_MASK[n]; <-- deprecated with volatile
+	(*DDR[n]) = (*DDR[n]) | BIT_MASK[n];
     }
 
     /// Definimos el pin como de entrada con la pull-up resistor
     static void as_input_with_pullup() 
     {
-	(*DDR[n]) &= ~BIT_MASK[n];	// de entrada
-	(*PORT[n]) |= BIT_MASK[n];	// enables pull-up resistor
+//	(*DDR[n]) &= ~BIT_MASK[n];	// de entrada
+//	(*PORT[n]) |= BIT_MASK[n];	// enables pull-up resistor
+	(*DDR[n]) = (*DDR[n]) & ~BIT_MASK[n];	// de entrada
+	(*PORT[n]) = (*PORT[n]) | BIT_MASK[n];	// enables pull-up resistor
     }
 
     /// Definimos el pin como de entrada sin la pull-up resistor
     static void as_input_without_pullup() 
     {
-	(*DDR[n]) &= ~BIT_MASK[n];	// de entrada
-	(*PORT[n]) &= ~BIT_MASK[n];	// disabel pull-up resistor
+//	(*DDR[n]) &= ~BIT_MASK[n];	// de entrada
+//	(*PORT[n]) &= ~BIT_MASK[n];	// disabel pull-up resistor
+	(*DDR[n]) = (*DDR[n]) & ~BIT_MASK[n];	// de entrada
+	(*PORT[n]) = (*PORT[n]) & ~BIT_MASK[n];	// disabel pull-up resistor
     }
 
 
@@ -95,11 +100,13 @@ public:
 // FUNCIONES DE ESCRITURA
     /// Escribimos un 1
     static void write_one()	
-    {(*PORT[n]) |= BIT_MASK[n];}
+    //{(*PORT[n]) |= BIT_MASK[n];}
+    {(*PORT[n]) = (*PORT[n]) | BIT_MASK[n];}
 
     /// Escribimos un 0
     static void write_zero()	
-    {(*PORT[n]) &= ~BIT_MASK[n];}
+    // {(*PORT[n]) &= ~BIT_MASK[n];}
+    {(*PORT[n]) = (*PORT[n]) & ~BIT_MASK[n];}
 
 //    /// Cambiamos el valor del pin (de 0 a 1 ó de 1 a 0).
 //    TODO: 27/01/19 - borrarlo si no se usa

@@ -37,7 +37,8 @@ volatile time_t contador = 0;
 
 ISR_TIMER0_OVF
 {
-    ++contador;
+//    ++contador;
+    contador = contador + 1;
 }
 
  

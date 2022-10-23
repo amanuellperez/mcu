@@ -103,7 +103,8 @@ private:
 	// Habilitamos las interrupciones INT0
 	// TODO: OJO: la datasheet dice que "the 1-bit in de SREG is set", 
 	// aunque el libro de MAKE lo ignora. (???) (pag. 97)
-	EIMSK |= (1 << INT0);
+	// EIMSK |= (1 << INT0);
+	EIMSK = EIMSK | (1 << INT0);
 
 	enable_all_interrupts();
     }

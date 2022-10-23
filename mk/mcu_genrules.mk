@@ -157,7 +157,7 @@ $(if $(BIN),,\
 # ----------------------------------------
 ifdef BIN
 .PHONY: all
-all: $(FIC_TAGS) $(HEADERS) $(BIN).hex 
+all: $(HEADERS) $(BIN).hex 
 	@$(PRINTF) "-------------------------------------\n"
 	@$(PRINTF) "Compilados: $(SOURCES) $(ASM_SOURCES)\n"
 	@$(PRINTF) "-------------------------------------\n\n"
@@ -183,7 +183,7 @@ ifdef LIB
 LIB_NAME := lib$(LIB).a
 
 .PHONY: all
-all: $(DIR_DEPENDS) $(DIR_OBJECTS) $(FIC_TAGS) $(LIB_NAME)
+all: $(DIR_DEPENDS) $(DIR_OBJECTS) $(LIB_NAME)
 
 .PHONY: dist
 dist: $(INCS) $(LIB_NAME)
@@ -379,7 +379,7 @@ debug:
 	@$(PRINTF) "----------------\n"
 	@$(PRINTF) "CXX         = [$(CXX)]\n"
 	@$(PRINTF) "MAKE_DEPEND = [$(MAKE_DEPEND)]\n"
-	@$(PRINTF) "CTAGS       = [$(CTAGS)]\n"
+#	@$(PRINTF) "CTAGS       = [$(CTAGS)]\n"
 
 	@$(PRINTF) "\nDirectorios de búsqueda\n"
 	@$(PRINTF)   "-----------------------\n"

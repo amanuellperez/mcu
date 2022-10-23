@@ -339,11 +339,13 @@ struct write_bit{
 	    constexpr Int mask = make_bitmask<positions, Int>();
 
 	    if constexpr (value_bit == 0){
-		x &= ~mask;
+		// x &= ~mask; <-- deprecated with volatile
+		x = x & ~mask;
 	    }
 
 	    else{
-		x |= mask;
+		// x |= mask; <-- deprecated with volatile
+		x = x | mask;
 	    }
 	}
     };
@@ -384,7 +386,7 @@ struct write_range_bits{
  *
  *  DUDA: is_one_bit<1>::of_register(x) vs is_one_bit<1>::of(x)???
  *  El primero al usarlo me resulta más dificil de leer. Es mejor lo criptico,
- *  pero la regla es evisa ser criptico!!! Pruebo con of!! 
+ *  pero la regla es evita ser criptico!!! Pruebo con of!! 
  *  Pero me gusta también of_register!!! Que el tiempo y el uso elija.
  */
 template <int pos>
@@ -444,13 +446,6 @@ struct is_zero_bit{
  *	      ¿cómo hacer el shift? ¿los colapso? Devuelvo 101 (eliminando el
  *	      0 en la posición del bit 0) o devuelvo 11 (que sería el valor de
  *	      los bits).
- *
- *	 Quizás solo leer bits sin hacer el shift sea mejor llamarlo como hago
- *	 ahora read_bits, y si se quiere hacer un shift llamarlo
- *	 read_range_bits ya que se va a leer un rango. ¿Merece la pena
- *	 hacerlo? ¿Generará un lío el shift? De momento pruebo con esta.
- *	 Devuelvo 101 (eliminando el 0 en la posición del bit 0) o devuelvo 11
- *	 (que sería el valor de los bits).
  *
  *   Quizás solo leer bits sin hacer el shift sea mejor llamarlo como hago
  *   ahora read_bits, y si se quiere hacer un shift llamarlo read_range_bits
