@@ -18,17 +18,17 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 // Conectar el LCD y 3 pulsadores a los pines indicados
-#include "../../dev_LCD_screen.h"   // OJO: antes de user_time para definir print!!!
+#include <dev_LCD_screen.h>   // OJO: antes de user_time para definir print!!!
 				    // TODO: ¿cómo evitar tener que recordar
 				    // orden?
 #include "../../user_time.h"
-#include "../../dev_LCD_HD44780.h"
-#include "../../dev_push_button.h"
-#include "../../dev_LCD_font_2x1.h"
-#include "../../dev_LCD_font_2x2.h"
-#include "../../dev_LCD_font_2x3.h"
-#include "../../dev_LCD_font_3x3.h"
-#include "../../dev_LCD_font_4x3.h"
+#include <dev_LCD_HD44780.h>
+#include <dev_push_button.h>
+#include <dev_LCD_font_2x1.h>
+#include <dev_LCD_font_2x2.h>
+#include <dev_LCD_font_2x3.h>
+#include <dev_LCD_font_3x3.h>
+#include <dev_LCD_font_4x3.h>
 
 #include <avr_time.h>
 

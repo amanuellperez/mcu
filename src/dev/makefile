@@ -1,12 +1,10 @@
 SOURCES= dev_BMP280_basic.cpp	\
 		 dev_BME280_basic.cpp	\
-		 dev_clocks.cpp			\
 		 dev_DS1307_basic.cpp	
 
 
 INCS= 	dev_BMP280_basic.h			\
 		dev_BME280_basic.h			\
-		dev_clocks.h				\
 		dev_cols_glyphs.h			\
 		dev_counter_CD4017B.h		\
 		dev_DS1307_basic.h			\
@@ -44,11 +42,7 @@ INCS= 	dev_BMP280_basic.h			\
 		dev_signal_generator.h		\
 		dev_speaker.h				\
 		dev_TMP36.h					\
-		dev_TWI_memory_type.h		\
-		user_choose_number.h		\
-		user_choose_string.h		\
-		user_menu.h					\
-		user_time.h
+		dev_TWI_memory_type.h	
 
 #		dev_DHT22.h\
 

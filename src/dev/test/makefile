@@ -1,6 +1,5 @@
 DIRS = 	BMP280			\
 		BME280			\
-		clocks			\
 		CD4017B			\
 		DS1307			\
 		EEPROM_25LC256	\
@@ -12,10 +11,6 @@ DIRS = 	BMP280			\
 		LCD				\
 		push_button		\
 		signal_generator\
-		user_choose_number	\
-		user_choose_string \
-		user_menu		\
-		user_time		\
 		74HC595			
 
 # Revisar

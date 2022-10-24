@@ -1,9 +1,13 @@
-Cosas comunes a todas las aplicaciones.
+## Biblioteca de aplicación
 
-Son cosas concretas donde hago ciertas elecciones. Así, por ejemplo, el
-sistema de trazas que uso no es genérico puesto que se trata de un flujo UART
+Aquí no hay ni un solo driver, ni traductor, ... Todo el código escrito aquí
+se basa en los drivers `dev_` y en el microcontrolador `mcu_`.
+
+Idealmente todo el código debería de basarse en dispositivos genéricos, para
+que se pueda usar con cualquier tipo de microcontrolador, sensor, ...
+
+En algunos casos, como en la biblioteca de trazas, hago ciertas elecciones:
+uso un flujo UART
 conectado con la configuración por defecto que estoy usando en todas las
 aplicaciones. 
 
-En principio no las voy a meter en ningún namespace, ya que esta biblioteca
-realmente forma parte de las aplicaciones.

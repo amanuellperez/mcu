@@ -17,21 +17,21 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "../../dev_LCD_screen.h"  // TODO: hay que ponerlo primero, antes que 
+#include <dev_LCD_screen.h>  // TODO: hay que ponerlo primero, antes que 
 				// atd::decimal. print(screen, decimal)
 				// depende de este header.
-#include "../../dev_LCD_HD44780.h"
+#include <dev_LCD_HD44780.h>
 #include <atd_decimal.h>
 #include <atd_magnitude.h>
 #include <atd_eng_magnitude.h>
 #include <avr_types.h>
 
 #include <avr_time.h>
-#include "../../dev_LCD_font_2x1.h"
-#include "../../dev_LCD_font_2x2.h"
-#include "../../dev_LCD_font_2x3.h"
-#include "../../dev_LCD_font_3x3.h"
-#include "../../dev_LCD_font_4x3.h"
+#include <dev_LCD_font_2x1.h>
+#include <dev_LCD_font_2x2.h>
+#include <dev_LCD_font_2x3.h>
+#include <dev_LCD_font_3x3.h>
+#include <dev_LCD_font_4x3.h>
 #include "../../user_choose_number.h"
 
 
