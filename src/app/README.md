@@ -1,7 +1,7 @@
 ## Biblioteca de aplicación
 
-Aquí no hay ni un solo driver, ni traductor, ... Todo el código escrito aquí
-se basa en los drivers `dev_` y en el microcontrolador `mcu_`.
+Todo el código escrito aquí tiene que ser genérico, no depender del hardware.
+Aquí no hay ni un solo driver, ni traductor, ... 
 
 Idealmente todo el código debería de basarse en dispositivos genéricos, para
 que se pueda usar con cualquier tipo de microcontrolador, sensor, ...

@@ -39,8 +39,6 @@ INCS= 	dev_BMP280_basic.h			\
 		dev_pot_MCP4231.h			\
 		dev_push_button.h			\
 		dev_register_74HC595_SPI.h	\
-		dev_signal_generator.h		\
-		dev_speaker.h				\
 		dev_TMP36.h					\
 		dev_TWI_memory_type.h	
 
