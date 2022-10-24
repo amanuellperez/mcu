@@ -1,13 +1,13 @@
-DIRS =  calculator	\
-		clocks 		\
-	   	blink		\
-		POV_toy		\
-		sensor		\
-		signal_generator \
-		stroboscope	\
-		util		
+SOURCES= app_trace.cpp
 
 
-include $(MCU_RECRULES)
+INCS= 	app_trace.h
+
+LIB=app_$(F_CPU)
+INSTALL_INC=$(MCU_INCLUDE)
+
+include $(DEV_GENRULES)
+
+
 
 

@@ -4,7 +4,10 @@ MCU++ library
 Libraries and applications for microcontrollers (right now, only for
 ATMEGA328).
 
-#### Directories:
+#### Compiler
+`avr-g++ 11.3.0`
+
+#### Directories
 
 ##### src: source code.
 
@@ -24,9 +27,11 @@ This directory contains the following:
   
 * debug: Utilities for debug.
   
-* [app](src/app/README.md): Applications.
+* [app](src/app/README.md): Application libraries.
   Depends on `dev`.
   
+* [prj](src/app/README.md): Proyects.
+  Depends on `app`.
 
 #### mk: Compilation rules.
 
@@ -45,6 +50,19 @@ probably you need to download `alp_test.h`, `alp_test.cpp` and maybe
 ---
 Bibliotecas y aplicaciones para microcontroladores (en principio solo el
 ATMEGA328).
+
+### Compilador
+`avr-g++ 11.3.0`
+
+Voy a empezar a probar las nuevas características de C++20 en este proyecto
+según vaya aprendiendo a manejarlas. Por ello este rama dejara en unos meses
+dejará de compilar en compiladores anteriores. 
+
+Creo una `branch` en github llamada `gcc9.2.0` que compila con ese compilador.
+No es mi intención mantener esa rama.
+
+Si nunca has compilado la toolchain puede que
+[este](help/instalacion_toolchain.md) documento te pueda ayudar.
 
 
 ### Estructura de directorios
@@ -75,7 +93,9 @@ Este directorio lo descompongo de momento en los siguientes:
 
 * debug: Funciones para depurar los dispositivos. Compilarlo detrás de dev.
 
-* [app](src/app/README.md): Aplicaciones.
+* [app](src/app/README.md): Bibliotecas de aplicación.
+
+* [prj](src/prj/README.md): Proyectos.
 
 
 #### mk: Reglas para compilar
