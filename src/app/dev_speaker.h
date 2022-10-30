@@ -1,4 +1,4 @@
-// Copyright (C) 2021 A.Manuel L.Perez 
+// Copyright (C) 2021-2022 A.Manuel L.Perez 
 //           mail: <amanuel.lperez@gmail.com>
 //           https://github.com/amanuellperez/mcu
 //
@@ -30,27 +30,37 @@
  *  - HISTORIA:
  *    A.Manuel L.Perez
  *    16/02/2021 v0.0
+ *    29/10/2022 v0.1 Reescrito
  *
  ****************************************************************************/
-
 #include "dev_signal_generator.h"
-
 
 namespace dev{
 /*!
  *  \brief  Funciones básicas para manejar un altavoz.
  *
  */
+
+template <typename Timer_n>
 class Speaker{
 public:
-    void play_note(uint16_t nota, uint16_t duracion_en_ms);
+    using SG         = Square_wave_generator<Timer_n>;
+    using Time       = typename SG::Time;
+    using Frequency  = typename SG::Frequency;
 
+    // square para recordar que no generamos una señal sinusoidal, sino
+    // cuadrada.
+    void play_square(const Frequency& freq);
 
+    void off() { Timer::off(); }
 };
 
 
-inline void Speaker::play_note(uint16_t nota, uint16_t duracion /* en ms */) 
+template <typename T>
+inline void Speaker<T>::play_note(uint16_t nota, uint16_t duracion /* en ms */) 
 {
+    Timer::mode_square_wave();
+
     avr::Timer1::reset();
     avr::Timer1::comparador1(nota);
 

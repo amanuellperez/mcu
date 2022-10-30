@@ -33,8 +33,16 @@
 //   del microcontrolador o fuera).
 namespace dev{
 
+// TODO: eliminar Generic_timer a favor de 
+//	    Generic_counter
+//	    Generic_timer_counter
+//	    Generic_square_wave_generator
+//	    Generic_PWM_generator
 template <typename Timer>
 class Generic_timer;
+
+template <typename Timer>
+class Generic_timer_counter;
 
 }// namespace
 

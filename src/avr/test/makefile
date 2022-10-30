@@ -1,6 +1,7 @@
 DIRS = ADC	\
 	cfg		\
-	generic_timer	\
+	generic_timer			\
+	generic_timer_counter	\
 	interrupt\
 	memory	\
 	pin		\

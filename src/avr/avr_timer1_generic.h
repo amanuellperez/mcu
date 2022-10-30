@@ -29,12 +29,65 @@
  *    A.Manuel L.Perez
  *    15/02/2021 v0.0: Escrito
  *    26/02/2022       timer_counter
+ *    30/10/2022       Generic_timer_counter
  *
  ****************************************************************************/
 #include "avr_timer1_basic.h"
 #include "generic_devices.h"
 
 namespace dev{
+
+/// Un Timer_counter se limita a contar microsegundos o milisegundos. Su rango
+/// de valores será max_top, no más. No sirve para contar tiempo, pero son
+/// ideales para medir/generar pulsos de electrónica. No lanza interrupciones
+/// cuando genera overflow. Por eso hay que usarlo con cuidado: para medir
+/// tiempos que sepas que están por debajo del max_top.
+template <>
+class Generic_timer_counter<avr::Timer1>{
+public:
+// types
+    using Timer        = avr::Timer1;
+    using counter_type = typename Timer::counter_type;
+
+/// Modo de funcionamiento: contador normal y corriente.
+    static void init(counter_type top0 = max_top()) 
+    { 
+	Timer::mode_CTC_top_OCR1A();
+	reset();
+	top(top0);
+    }
+
+
+// Timer on/off
+// ------------
+    template<uint16_t period
+	    , uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
+    static void on() {Timer::template on<period, clock_frequency_in_hz>();}
+
+    /// Apagamos el generador de señales.
+    static void off() { Timer::off(); }
+
+
+    /// Devuelve el valor del contador en ticks.
+    static counter_type value() 
+    { return Timer::counter(); }
+    
+    /// Hace que el counter = 0.
+    static void reset() { Timer::counter(0); }
+
+    /// Define el top del counter.
+    static void top(counter_type top)
+    {Timer::output_compare_register_A(top);}
+
+    /// Valor del top
+    static counter_type top()
+    { return Timer::output_compare_register_A(); }
+
+    /// Valor máximo que puede tener el top.
+    static constexpr counter_type max_top()
+    { return Timer::max(); }
+};
+
 
 template <>
 class Generic_timer<avr::Timer1>{
