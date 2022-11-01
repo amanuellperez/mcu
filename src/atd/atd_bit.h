@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021 A.Manuel L.Perez 
+// Copyright (C) 2019-2022 A.Manuel L.Perez 
 //           mail: <amanuel.lperez@gmail.com>
 //           https://github.com/amanuellperez/mcu
 //
@@ -59,6 +59,7 @@
  *	      write_range_bits
  *  01/02/21: read_bits, zero::with_bits::to
  *  18/04/21: write_bit
+ *  01/11/22: write_zero/write_one
  *
  ****************************************************************************/
 #include <stdint.h> // uint8_t
@@ -524,7 +525,18 @@ struct zero{
 
 };
 
+/***************************************************************************
+ *			    VERSIONES DINÁMICAS
+ ***************************************************************************/
+/// Escribe un 0 en el bit que ocupa la posición `pos` de `x`
+template <typename Int>
+inline void write_zero(Int& x, uint8_t pos)
+{ x = x & ~(Int{1} << pos); }
 
+/// Escribe un 1 en el bit que ocupa la posición `pos` de `x`
+template <typename Int>
+inline void write_one(Int& x, uint8_t pos)
+{ x = x | (Int{1} << pos); }
 
 // Ejemplo (para ver como hacer un for en metaprogramming)
 //template<int... pos, typename Int>

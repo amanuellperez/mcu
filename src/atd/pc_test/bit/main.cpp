@@ -343,6 +343,64 @@ void test_zero_with_bits()
 }
 
 
+void test_dynamic_write()
+{
+    test::interfaz("write_zero");
+
+    uint8_t x = 0xFF;
+
+    atd::write_zero(x, 0);
+    CHECK_TRUE(x == 0b11111110, "write_zero");
+
+    atd::write_zero(x, 1);
+    CHECK_TRUE(x == 0b11111100, "write_zero");
+
+    atd::write_zero(x, 2);
+    CHECK_TRUE(x == 0b11111000, "write_zero");
+
+    atd::write_zero(x, 3);
+    CHECK_TRUE(x == 0b11110000, "write_zero");
+
+    atd::write_zero(x, 4);
+    CHECK_TRUE(x == 0b11100000, "write_zero");
+
+    atd::write_zero(x, 5);
+    CHECK_TRUE(x == 0b11000000, "write_zero");
+
+    atd::write_zero(x, 6);
+    CHECK_TRUE(x == 0b10000000, "write_zero");
+
+    atd::write_zero(x, 7);
+    CHECK_TRUE(x == 0b00000000, "write_zero");
+
+// write_one
+    atd::write_one(x, 0);
+    CHECK_TRUE(x == 0b00000001, "write_one");
+
+    atd::write_one(x, 1);
+    CHECK_TRUE(x == 0b00000011, "write_one");
+
+    atd::write_one(x, 2);
+    CHECK_TRUE(x == 0b00000111, "write_one");
+
+    atd::write_one(x, 3);
+    CHECK_TRUE(x == 0b00001111, "write_one");
+
+    atd::write_one(x, 4);
+    CHECK_TRUE(x == 0b00011111, "write_one");
+
+    atd::write_one(x, 5);
+    CHECK_TRUE(x == 0b00111111, "write_one");
+
+    atd::write_one(x, 6);
+    CHECK_TRUE(x == 0b01111111, "write_one");
+
+    atd::write_one(x, 7);
+    CHECK_TRUE(x == 0b11111111, "write_one");
+
+}
+
+
 int main()
 {
 try{
@@ -357,6 +415,7 @@ try{
     test_write_range_bits();
     test_read_bits();
     test_zero_with_bits();
+    test_dynamic_write();
 
 }catch(std::exception& e)
 {

@@ -19,30 +19,6 @@
 
 #include <iterator>
 
-namespace std{ // A día de hoy gcc no suministra shift_left.
-template <typename ForwardIt>
-constexpr ForwardIt shift_left(ForwardIt p0, ForwardIt pe, 
-		typename iterator_traits<ForwardIt>::difference_type n)
-{
-    if (n <= 0)
-	return pe;
-
-    if (n >= distance(p0, pe))
-	return p0;
-
-    ForwardIt q0 = p0;
-    advance(p0, n);
-
-    for (; p0 != pe; advance(p0, 1), advance(q0, 1))
-    {
-	*q0 = *p0;
-    }
-
-    return q0;
-}
-}
-
-
 #include <iostream> // para depurar
 #include "../../atd_iobxtream.h"
 

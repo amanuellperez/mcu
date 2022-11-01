@@ -32,6 +32,8 @@
  ****************************************************************************/
 #include "atd_bcd.h"
 #include <array>
+#include <cstddef>  // size_t
+#include <limits>
 
 namespace atd{
 /*!
