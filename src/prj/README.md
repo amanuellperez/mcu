@@ -25,6 +25,13 @@ Algunas aplicaciones.
   aplicación muestra en la pantalla del LCD todos los caracteres que trae en
   la ROM, así se puede saber si es 'inglés/japonés', 'inglés/europeo' u otros.
 
+* [oscilloscope](util/oscilloscope): Si quieres programar un mando de TV lo
+  primero que tienes que hacer es aprender el protocolo con el que se
+  comunican el emisor/receptor de IR. Si bien es fácil de ver la señal
+  generada por el receptor en un osciloscopio ¿cómo verla en el
+  microcontrolador? Este pequeño programa sirve para medir los pulsos
+  generados por el receptor (o cualquier otro dispositivo).
+
 ## Un poco más elaboradas
 * [clocks](clocks/README.md): Diferentes tipos de relojes.
 

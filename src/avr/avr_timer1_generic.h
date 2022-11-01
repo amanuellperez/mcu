@@ -39,9 +39,7 @@ namespace dev{
 
 /// Un Timer_counter se limita a contar microsegundos o milisegundos. Su rango
 /// de valores será max_top, no más. No sirve para contar tiempo, pero son
-/// ideales para medir/generar pulsos de electrónica. No lanza interrupciones
-/// cuando genera overflow. Por eso hay que usarlo con cuidado: para medir
-/// tiempos que sepas que están por debajo del max_top.
+/// ideales para medir/generar pulsos de electrónica. 
 template <>
 class Generic_timer_counter<avr::Timer1>{
 public:
@@ -56,6 +54,15 @@ public:
 	reset();
 	top(top0);
     }
+
+    /// Hay veces que puede ser interesante controlar cuándo el contador hace
+    /// overflow. El único problema es que hay que definir la interrupción
+    /// ISR_TIMER1_OVF que depende del Timer1 y no es genérico.
+    // ¿Cómo independizarlo del avr este ISR_TIMER1_OVF? <-- En el dev.h
+    // al seleccionar el Generic_timer<Timer1> se puede definir
+    // ISR_GENERIC_TIMER_OVF = ISR_TIMER1_OVF.
+    static void enable_overflow_interrupt()
+    { Timer::enable_overflow_interrupt();}
 
 
 // Timer on/off
