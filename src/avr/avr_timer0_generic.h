@@ -64,6 +64,9 @@ public:
     using Timer        = avr::Timer0;
     using counter_type = typename Timer::counter_type;
 
+/// De momento el interfaz es static. Prohibo su construcción.
+    Generic_timer_counter() = delete;
+
 /// Modo de funcionamiento: contador normal y corriente.
     static void init(counter_type top0 = max_top()) 
     { 
@@ -75,9 +78,9 @@ public:
 
 // Timer on/off
 // ------------
-    template<uint16_t period
+    template<uint16_t period_in_us
 	    , uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
-    static void on() {Timer::template on<period, clock_frequency_in_hz>();}
+    static void on() {Timer::template on<period_in_us, clock_frequency_in_hz>();}
 
     /// Apagamos el generador de señales.
     static void off() { Timer::off(); }

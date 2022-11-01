@@ -2,6 +2,7 @@ DIRS = 	BMP280			\
 		BME280			\
 		CD4017B			\
 		DS1307			\
+		DHT11			\
 		EEPROM_25LC256	\
 		EEPROM_iostream	\
 		EEPROM_lineal	\

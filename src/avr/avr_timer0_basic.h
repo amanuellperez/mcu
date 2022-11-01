@@ -119,6 +119,10 @@ public:
     /// Enciende el Timer, usando como reloj el reloj de periodo indicado.
     /// 'periodo' es el periodo en microsegundos al que va a funcionar el timer.
     /// clock_frequency_in_hz = es la frecuencia del reloj del AVR.
+    // Esta función se limita a escribir el registro adecuado para fijar el
+    // divisor de frecuencia, lo que hace que se encienda el Timer. No hace
+    // nada más: es totalmente eficiente (y tiene que ser así, esto es un
+    // traductor).
     template<uint16_t period
 	    , uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
     static void on() {set_clock_period_in_us<period, clock_frequency_in_hz>();}
