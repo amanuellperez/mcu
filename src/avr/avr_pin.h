@@ -191,7 +191,11 @@ template<uint8_t n>
 class Input_pin_with_pullup{
 public:
     Input_pin_with_pullup()
+    {init();}
+
+    static void init()
     {Pin<n>::as_input_with_pullup();}
+
 
     Input_pin_with_pullup& operator=(const Input_pin_with_pullup&) = delete;
 
@@ -215,6 +219,9 @@ template<uint8_t n>
 class Input_pin_without_pullup{
 public:
     Input_pin_without_pullup()
+    {init();}
+
+    static void init()
     {Pin<n>::as_input_without_pullup();}
 
     Input_pin_without_pullup& operator=(const Input_pin_without_pullup&)	= delete;

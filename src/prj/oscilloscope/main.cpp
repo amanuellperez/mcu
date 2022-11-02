@@ -76,6 +76,10 @@ int main()
     avr::basic_cfg(uart);
     uart.on();
 
+// init_pins
+    Pin::init(); // <-- al usar su interfaz static, hay
+		// que inicializarlo, ya que no llamamos al constructor.
+
     avr::enable_all_interrupts();
     Timer::enable_overflow_interrupt();
 
