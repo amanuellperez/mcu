@@ -45,29 +45,25 @@ private:
 
 
 // Data
+    enum class Work_mode{ receive_data, transmit_data};
+
     // Última lectura realizada
     Timer::counter_type data[max_num_data];
     int8_t num_data = 0; // número de datos válidos en el array data
-		
+    Work_mode mode = Work_mode::receive_data;
 
     void init_uart();
 
+    void print_instructions();
     void read_data();
-    void print_data();
-    void print_nec_protocol();
-    void print_raw_data();
+    void choose_mode_operation();
 
+    void print_data() const;
+    void transmit_data();
+
+// RAW (When we don't know the protocol)
+    void print_raw_data() const;
 };
-
-// Devuelve true si a = b +- 20%
-// Esto es, si b - 20% <= a <= b + 20%
-// (cojo el 20% ya que:
-//	1. El clock del avr tiene un 10% de incertidumbre
-//	2. Doy un 10% más de margen de error
-// )
-template <typename Int1, typename Int2>
-inline bool is_equal(const Int1& a, const Int2& b)
-{ return (b*0.8 <= a and a <= b*1.2); }
 
 
 

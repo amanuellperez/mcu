@@ -2,6 +2,9 @@ BIN = xx
 
 SOURCES= main.cpp 		\
 		read_data.cpp	\
+		print_data.cpp	\
+		transmit_data.cpp		\
+		IR_NEC_protocol.cpp		\
 		run.cpp
 
 

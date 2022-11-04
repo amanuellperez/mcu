@@ -19,48 +19,9 @@
 
 #include "main.h"
 
-void Main::run()
-{
-    print_instructions();
-
-    while (1){
-	read_data();
-	choose_mode_operation();
-	switch(mode){
-	    break; case Work_mode::receive_data: print_data();
-	    break; case Work_mode::transmit_data: transmit_data();
-	}
-	
-    }
-}
-
-void Main::print_instructions()
+void Main::transmit_data()
 {
     avr::UART_iostream uart;
-
-    uart << "\n\nConnect the IR receiver to pin " << (int) sensor_pin 
-	 << ", point the TV remote to it and read the data.\n";
-
-    uart << "Menu\n"
-	    "----\n"
-	    "1. Receive data (default)\n"
-	    "2. Transmit data\n\n";
-}
-
-
-void Main::choose_mode_operation()
-{
-    if (avr::UART_basic::are_there_data_unread()){
-	avr::UART_iostream uart;
-
-	char c{};
-	uart >> c;
-
-	if (c == '2')
-	    mode = Work_mode::transmit_data;
-	else
-	    mode = Work_mode::receive_data;
-
-    }
+    uart << "TODO...";
 }
 

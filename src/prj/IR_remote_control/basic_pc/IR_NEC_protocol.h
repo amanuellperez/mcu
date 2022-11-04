@@ -17,50 +17,24 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "main.h"
+#include <cstdint>
+#include <iostream>
 
-void Main::run()
-{
-    print_instructions();
-
-    while (1){
-	read_data();
-	choose_mode_operation();
-	switch(mode){
-	    break; case Work_mode::receive_data: print_data();
-	    break; case Work_mode::transmit_data: transmit_data();
-	}
-	
-    }
-}
-
-void Main::print_instructions()
-{
-    avr::UART_iostream uart;
-
-    uart << "\n\nConnect the IR receiver to pin " << (int) sensor_pin 
-	 << ", point the TV remote to it and read the data.\n";
-
-    uart << "Menu\n"
-	    "----\n"
-	    "1. Receive data (default)\n"
-	    "2. Transmit data\n\n";
-}
+// message[0..n) = secuencia de tiempos en los que el pin está LOW-HIGH
+bool is_NEC_protocol(const uint16_t* message, uint8_t n);
+bool print_NEC_protocol(std::ostream& out, const uint16_t* message, uint8_t n);
 
 
-void Main::choose_mode_operation()
-{
-    if (avr::UART_basic::are_there_data_unread()){
-	avr::UART_iostream uart;
 
-	char c{};
-	uart >> c;
+// Devuelve true si a = b +- 20%
+// Esto es, si b - 20% <= a <= b + 20%
+// (cojo el 20% ya que:
+//	1. El clock del avr tiene un 10% de incertidumbre
+//	2. Doy un 10% más de margen de error
+// )
+template <typename Int1, typename Int2>
+inline bool is_equal(const Int1& a, const Int2& b)
+{ return (b*0.8 <= a and a <= b*1.2); }
 
-	if (c == '2')
-	    mode = Work_mode::transmit_data;
-	else
-	    mode = Work_mode::receive_data;
 
-    }
-}
 
