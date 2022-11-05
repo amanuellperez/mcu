@@ -50,6 +50,17 @@
  *		 * atd::Circular_array: idem.
  *		 * std::vector: memoria dinámica, gestiona la usada.
  *		
+ *   05/11/2022 CArray_view
+ *		Al intentar usar atd::Linear_array me encuentro con el
+ *		problema de que al ser una template estás obligado a conocer
+ *		el número máximo de elementos o definir toda la función que
+ *		usa el Linear_array como template en un .h. Sin embargo, para
+ *		manejar interrupciones me resulta más sencillo de programar
+ *		definir las funciones dentro de los .cpp y no en los .h, no
+ *		pudiendo usar Linear_array. Por eso creo este CArray. 
+ *		Como siempre, es experimental. El uso marcará qué arrays son
+ *		los útiles.
+ *
  ****************************************************************************/
 #include <tuple>    // std::tie
 #include <algorithm>
@@ -487,6 +498,43 @@ constexpr void Linear_array<T,N>::remove(iterator p)
     --pe_;
 }
 
+
+
+/***************************************************************************
+ *				CARRAY
+ ***************************************************************************/
+// (RRR) ¿Por qué llamarlo _view? 
+//	 Porque es una view. No tiene propiedad del array. El array hay que
+//	 definirlo en otro sitio.
+//
+//	 CArray_view es un array básico de C con max_size elementos (número de
+//	 elementos reservados en memoria). El problema con los arrays de C es
+//	 que no se saben cuántos elementos de esos están ocupados. La variable
+//	 `size` nos dice el número de elementos usados.
+//
+//	 Ejemplos:
+//	    int x[4];
+//	    x[0] = 20;
+//	    x[1] = 30;
+//
+//	    CArray_view view{x, 2, 4};
+//	    view = es una view del array x, contenedor de 4 elementos, de los
+//	    cuales solo 2 están ocupados.
+//
+template <typename T>
+struct CArray_view{
+// Methods
+    CArray_view(T* p0, size_t sz, size_t max_sz)
+	: ptr{p0}, size{sz}, max_size{max_sz} { }
+
+
+    T& operator[] (size_t i) const {return ptr[i];}
+
+// Data
+    T* ptr;
+    size_t size;	
+    size_t max_size; // = memory_size
+};
 
 }// namespace
 

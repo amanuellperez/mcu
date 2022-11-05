@@ -328,6 +328,38 @@ void test_linear_array()
 }
 
 
+void test_carray_view()
+{
+    test::interfaz("CArray_view");
+
+    {// caso extremo
+    int x[4];
+    atd::CArray_view<int> view{x, 0, 4};
+    CHECK_TRUE(view.size == 0, "size");
+    CHECK_TRUE(view.max_size == 4, "max_size");
+    }
+
+    {// caso normal
+    int x[4];
+    x[0] = 20;
+    x[1] = 30;
+    atd::CArray_view<int> view{x, 2, 4};
+    CHECK_TRUE(view.size == 2, "size");
+    CHECK_TRUE(view.max_size == 4, "max_size");
+    CHECK_TRUE(view[0] == x[0], "operator[]");
+    CHECK_TRUE(view[1] == x[1], "operator[]");
+
+    view[2] = 87;
+    ++view.size;
+    CHECK_TRUE(view.size == 3, "size");
+    CHECK_TRUE(x[2] == 87, "operator[]");
+    CHECK_TRUE(view[2] == 87, "operator[]");
+
+
+    }
+
+}
+
 
 int main()
 {
@@ -336,6 +368,7 @@ try{
 
     test_circular_array();
     test_linear_array();
+    test_carray_view();
 
 }catch(std::exception& e)
 {
