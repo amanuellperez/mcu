@@ -530,6 +530,9 @@ struct CArray_view{
 
     T& operator[] (size_t i) const {return ptr[i];}
 
+    bool empty() const {return size == 0;}
+    bool full () const {return size == max_size;}
+
 // Data
     T* ptr;
     size_t size;	

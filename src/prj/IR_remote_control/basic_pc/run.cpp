@@ -24,7 +24,7 @@ void Main::run()
     print_instructions();
 
     while (1){
-	read_data();
+	::read_pulses(pulse);
 	choose_mode_operation();
 	switch(mode){
 	    break; case Work_mode::receive_data: print_data();

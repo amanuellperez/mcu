@@ -16,55 +16,21 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#pragma once
 
-#include "main.h"
-#include <algorithm>
+#ifndef __PULSE_H__
+#define __PULSE_H__
 
-static volatile Timer::counter_type buffer[Main::max_num_data];
-static volatile int8_t i = -1;
-static volatile bool end_of_reading = false;
+#include <atd_array.h>
 
-static void reset_data()
-{
-    i = -1;
-    end_of_reading = false;
-}
+struct Pulse{
+    uint16_t time_low;
+    uint16_t time_high;
 
-void Main::read_data()
-{
-    reset_data();
+    uint16_t period() const {return time_low + time_high;}
+};
 
-    avr::enable_all_interrupts();
-    Timer::enable_overflow_interrupt();
-    avr::Interrupt::enable_pin<sensor_pin>();
-
-    Timer::on<1>();	    // leemos microsegundos
-    
-    while (end_of_reading == false and i < max_num_data)
-    { ; }
-
-    avr::disable_all_interrupts();
-
-    Timer::off(); 
-
-    num_data = i;
-    std::copy_n(buffer, num_data, data);
-}
+void read_pulses(atd::CArray_view<Pulse>& pulse);
 
 
-ISR_SENSOR_PIN {
-    if (i >= 0)
-	buffer[i] = Timer::value();
-
-    Timer::reset();
-    i = i + 1;
-}
-
-
-
-ISR_TIMER_OVF {
-    if (i != -1)
-	end_of_reading = true;
-}
-
-
+#endif

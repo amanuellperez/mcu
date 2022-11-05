@@ -25,15 +25,15 @@ void Main::print_data() const
 {
     avr::UART_iostream uart;
     
-    if (num_data < 2){
+    if (pulse.size == 0){
 	uart << "No se han recibido datos.\n";
 	return;
     }
 
     bool res = false;
 
-    if (is_NEC_protocol(data, num_data))
-	res = print_NEC_protocol(uart, data, num_data);
+    if (is_NEC_protocol(pulse))
+	res = print_NEC_protocol(uart, pulse);
 
     if (res == false)
 	print_raw_data();
@@ -49,27 +49,24 @@ void Main::print_raw_data() const
 
     uart << "------------------------------\n"
 	 << "RAW data:\n"
-	 << "num_data = " << num_data << '\n';
+	 << "num pulses = " << pulse.size << '\n';
 
-    if (num_data == max_num_data)
+    if (pulse.full())
 	uart << "ERROR: se ha llenado el buffer de datos.\n"
 	     << "Modificar el programa aumentando `max_num_data`.\n";
 
 
 
-    for (int8_t i = 0; i < num_data; ++i){
-	if (i % 2)
-	    uart <<  data[i] << "); ";
-	else {
-	    uart << "(" << data[i] << ", ";
-	}
+    for (size_t i = 0; i < pulse.size; ++i){
+	uart <<  '(' << pulse[i].time_high 
+	     << pulse[i].time_low << "); ";
 
 	if (i != 0 and (i % 7) == 0)
 	    uart << '\n';
     }
     uart << '\n';
 
-    uart << "Total number of pulses: " << num_data / 2 << '\n'
+    uart << "Total number of pulses: " << pulse.size << '\n'
 	 << "------------------------------\n";
 }
 

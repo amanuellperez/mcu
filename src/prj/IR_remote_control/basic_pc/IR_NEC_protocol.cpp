@@ -19,12 +19,13 @@
 
 #include "IR_NEC_protocol.h"
 
-bool is_NEC_protocol(const uint16_t* msg, uint8_t n)
+bool is_NEC_protocol(const atd::CArray_view<Pulse>& pulse)
 {
-    if (n < 2)
+    if (pulse.size < 1)
 	return false;
 
-    return (is_equal(msg[0], 9000) and is_equal(msg[1], 4500));
+    return (is_equal(pulse[0].time_low, 9000) 
+			and is_equal(pulse[0].time_high, 4500));
 }
 
 
@@ -50,13 +51,13 @@ static char NEC_pulse_to_bit(const uint16_t T)
 // La ventaja de imprimir es que permite averiguar errores en el formato
 // recibido: imprimirá '?' si el pulso enviado es diferente del esperado, o
 // 'x' si el burst no es de la longitud esperada.
-static void print_NEC_byte(std::ostream& out, const uint16_t* p)
+static void print_NEC_byte(std::ostream& out, const Pulse* p)
 {
     out << "0b";
     for (int8_t i = 7; i >= 0; --i){
 
-	if (is_equal(p[2*i], 562))
-	    out << NEC_pulse_to_bit(p[2*i] + p[2*i + 1]);
+	if (is_equal(p[i].time_low, 562))
+	    out << NEC_pulse_to_bit(p[i].period());
 
 	else 
 	    out << 'x';
@@ -76,32 +77,33 @@ static void print_NEC_byte(std::ostream& out, const uint16_t* p)
 //	a final 562.5 us burst to signify the end fo message transmission
 //
 //  
-bool print_NEC_protocol(std::ostream& out, const uint16_t* msg, uint8_t n)
+bool print_NEC_protocol(std::ostream& out, const atd::CArray_view<Pulse>& pulse)
+// bool print_NEC_protocol(std::ostream& out, const uint16_t* msg, uint8_t n)
 {
     out << "\nNEC\n"
 	    "---\n";
 
     // 33 bits = 1 bit preambulo + 4 bytes (32 bits)
-    if (n < 33*2 + 1){
+    if (pulse.size < 33){
 	out << "Error: no se han recibido todos los bytes\n";
 	return false;
     }
 
 // msg[0] = 9000 us; msg[1] = 4500 us
     out <<   "Address         : ";
-    print_NEC_byte(out, &msg[2]);
+    print_NEC_byte(out, &pulse[1]);
 
     out << "\nInverted address: ";
-    print_NEC_byte(out, &msg[2 + 16*1]);	// 16 = 2 * 8 bits que tiene 1 byte
+    print_NEC_byte(out, &pulse[1 + 8*1]);
 
     out << "\nCommand         : ";
-    print_NEC_byte(out, &msg[2 + 16*2]);
+    print_NEC_byte(out, &pulse[1 + 8*2]);
 
     out << "\nInverted command: ";
-    print_NEC_byte(out, &msg[2 + 16*3]);
+    print_NEC_byte(out, &pulse[1 + 8*3]);
     out << '\n';
 
-//    check_end_NEC(&msg[2 + 16*4]);
+//    check_end_NEC(&pulse[1 + 8*4]);
     return true;
 }
 

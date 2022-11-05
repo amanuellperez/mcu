@@ -30,13 +30,16 @@
  *
  ****************************************************************************/
 #include "dev.h"
+#include "cfg.h"
+
+#include "pulse.h"
 
 class Main{
 public:
     Main();
     void run();
     
-    static constexpr int8_t max_num_data = 100;
+//    static constexpr int8_t max_num_data = 1000;
 
 private:
 // Hardware: 
@@ -44,18 +47,25 @@ private:
     Sensor sensor;
 
 
+
 // Data
     enum class Work_mode{ receive_data, transmit_data};
 
     // Última lectura realizada
-    Timer::counter_type data[max_num_data];
-    int8_t num_data = 0; // número de datos válidos en el array data
+//    Timer::counter_type data[max_num_data];
+//    int8_t num_data = 0; // número de datos válidos en el array data
+    // Le doy un nombre tan feo pulse_container para recordar NO usarlo
+    // directamente. 
+    Pulse pulse_container[num_max_pulses];
+    atd::CArray_view<Pulse> pulse{pulse_container, 0, num_max_pulses};
+    
+
     Work_mode mode = Work_mode::receive_data;
 
     void init_uart();
 
     void print_instructions();
-    void read_data();
+    void read_pulses();
     void choose_mode_operation();
 
     void print_data() const;
