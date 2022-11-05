@@ -26,7 +26,7 @@ void Main::receive_data() const
     avr::UART_iostream uart;
     
     if (pulse.size == 0){
-	uart << "No se han recibido datos.\n";
+	uart << "No data received.\n";
 	return;
     }
 
@@ -35,15 +35,31 @@ void Main::receive_data() const
     if (res == false)
 	print_raw_data();
 
-
 }
 
+
+void Main::receive_min_data() const
+{
+    avr::UART_iostream uart;
+    
+    if (pulse.size == 0){
+	uart << "No data received.\n";
+	return;
+    }
+
+    bool res = print_min_NEC_protocol(uart, pulse);
+
+    if (res == false)
+	uart << "???\n";
+
+
+}
 void Main::receive_raw_data() const
 {
     avr::UART_iostream uart;
     
     if (pulse.size == 0){
-	uart << "No se han recibido datos.\n";
+	uart << "No data received.\n";
 	return;
     }
 

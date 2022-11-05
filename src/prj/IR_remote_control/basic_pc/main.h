@@ -49,7 +49,8 @@ private:
 
 
 // Data
-    enum class Work_mode{ receive_data, receive_raw_data, transmit_data};
+    enum class Work_mode{ help, receive_data, receive_min_data, 
+			  receive_raw_data, transmit_data};
 
     // Última lectura realizada
 //    Timer::counter_type data[max_num_data];
@@ -69,6 +70,7 @@ private:
     void choose_mode_operation();
 
     void receive_data() const;
+    void receive_min_data() const;
     void receive_raw_data() const;
     void transmit_data();
 

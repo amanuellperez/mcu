@@ -29,6 +29,7 @@
  *    A.Manuel L.Perez
  *    24/07/2021 to_int, to_char
  *    29/07/2021 int_to_string
+ *    05/11/2022 binary_char_to
  *
  ****************************************************************************/
 
@@ -111,6 +112,28 @@ It int_to_string(Int x, It p0, It pe)
 
     return pc;
 }
+
+
+// Convierte un entero escrito en binario como cadena de C en entero.
+// Ejemplo: *str = "10101010" ==> return = uint8_t x = 0b10101010;
+// Observar que no le pasamos el "0b" en la cadena. DUDA: ¿que admita 0b?
+//
+// Precondition: *str es una cadena de C de 0 y 1.
+template <typename Int>
+Int binary_char_to(const char* str)
+{
+    Int res{0};
+
+    for (; *str != '\0'; ++str){
+	res *= Int{2};
+
+	if (*str == '1')
+	    res += Int{1};
+    }
+
+    return res;
+}
+
 
 
 }// namespace

@@ -65,6 +65,27 @@ void test_digit_to_char()
 }
 
 
+void test_binary_char_to()
+{
+    test::interfaz("binary_char_to");
+
+    {
+	CHECK_TRUE(0b10101010 == atd::binary_char_to<uint8_t>("10101010"), 
+							"binary_char_to");
+
+	CHECK_TRUE(0b00000001 == atd::binary_char_to<uint8_t>("00000001"), 
+							"binary_char_to");
+
+	CHECK_TRUE(0b10010001 == atd::binary_char_to<uint8_t>("10010001"), 
+							"binary_char_to");
+
+	CHECK_TRUE(0b00000000 == atd::binary_char_to<uint8_t>("00000000"), 
+							"binary_char_to");
+	CHECK_TRUE(0b11111111 == atd::binary_char_to<uint8_t>("11111111"), 
+							"binary_char_to");
+    }
+}
+
 int main()
 {
 try{
@@ -72,6 +93,7 @@ try{
 
     test_digit_to_int();
     test_digit_to_char();
+    test_binary_char_to();
 
 }catch(std::exception& e)
 {

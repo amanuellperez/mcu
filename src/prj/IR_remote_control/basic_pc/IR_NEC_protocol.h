@@ -25,6 +25,7 @@
 // Un mensaje es un array de pulsos
 bool is_NEC_protocol(const atd::CArray_view<Pulse>& pulses);
 bool print_NEC_protocol(std::ostream& out, const atd::CArray_view<Pulse>& pulses);
+bool print_min_NEC_protocol(std::ostream& out, const atd::CArray_view<Pulse>& pulses);
 
 
 // Devuelve true si a = b +- 20%

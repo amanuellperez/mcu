@@ -18,6 +18,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "IR_NEC_protocol.h"
+#include <atd_string.h>	    // binary_char_to
+#include <atd_ostream.h>    // print_int_as_hex
 
 using Message_it = atd::CArray_view<Pulse>::iterator;
 
@@ -62,12 +64,8 @@ static char NEC_pulse_to_bit(const uint16_t T)
 	return '?';
 }
 
-
-// The 4 bytes of data bits are each sent least significant bit first.
-// La ventaja de imprimir es que permite averiguar errores en el formato
-// recibido: imprimirá '?' si el pulso enviado es diferente del esperado, o
-// 'x' si el burst no es de la longitud esperada.
-static Message_it print_NEC_byte(std::ostream& out, Message_it p, Message_it pe)
+static Message_it print_NEC_byte_in_binary(std::ostream& out, 
+					Message_it p, Message_it pe)
 {
     out << "0b";
     for (int8_t i = 7; i >= 0 and p != pe; --i, ++p){
@@ -78,6 +76,46 @@ static Message_it print_NEC_byte(std::ostream& out, Message_it p, Message_it pe)
 	else 
 	    out << 'x';
     }
+
+    return p;
+}
+
+static Message_it print_NEC_byte_in_hex(std::ostream& out, 
+					Message_it p, Message_it pe)
+{
+    char res[9];
+    res[8] = '\0';
+    for (uint8_t i = 0; i < 8 and p != pe; ++i, ++p){
+	if (is_equal(p->time_low, 562))
+	    res[i] = NEC_pulse_to_bit(p->period());
+	
+	else
+	    res[8] = 'x';
+    }
+
+    if (res [8] == '\0'){
+	atd::print_int_as_hex(out, atd::binary_char_to<uint8_t>(res));
+	return p;
+    }
+    else {
+	out << "0x????";
+	return pe;
+    }
+
+}
+
+// The 4 bytes of data bits are each sent least significant bit first.
+// La ventaja de imprimir es que permite averiguar errores en el formato
+// recibido: imprimirá '?' si el pulso enviado es diferente del esperado, o
+// 'x' si el burst no es de la longitud esperada.
+static Message_it print_NEC_byte(std::ostream& out,
+					    Message_it p0, Message_it pe)
+{
+    auto p = print_NEC_byte_in_binary(out, p0, pe);
+
+    out << '\t';
+
+    print_NEC_byte_in_hex(out, p0, pe);
 
     return p;
 }
@@ -153,3 +191,52 @@ bool print_NEC_protocol(std::ostream& out, const atd::CArray_view<Pulse>& pulse)
 }
 
 
+bool print_min_NEC_protocol(std::ostream& out, const atd::CArray_view<Pulse>& pulse)
+{
+    auto pe = pulse.end();
+    auto p = NEC_look_for_start(pulse.begin(), pe);
+
+    if (p == pe)
+	return false;
+
+    out << "NEC: ";
+
+
+    ++p;    // quitamos el start pulse
+    p = print_NEC_byte_in_hex(out, p, pe);
+
+    if (p == pe){
+	out << '\n';
+	return true; // es NEC
+    }
+
+    out << ' ';
+    p = print_NEC_byte_in_hex(out, p, pe);
+
+    if (p == pe){
+	out << '\n';
+	return true; // es NEC
+    }
+
+    out << ' ';
+    p = print_NEC_byte_in_hex(out, p, pe);
+
+    if (p == pe){
+	out << '\n';
+	return true; // es NEC
+    }
+
+    out << ' ';
+    p = print_NEC_byte_in_hex(out, p, pe);
+
+    if (p == pe){
+	out << '\n';
+	return true; // es NEC
+    }
+
+    out << '\n';
+
+// DUDA: miramos si quedan más bytes para imprimir?
+
+    return true;
+}
