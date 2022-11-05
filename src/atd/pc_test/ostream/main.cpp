@@ -36,10 +36,38 @@ using namespace test;
 void test_print()
 {
     test::interfaz("print");
+
     CHECK_WIDTH(2, 3, "  2");
     CHECK_WIDTH(34, 5, "   34");
 }
 
+void test_print_int_as_hex()
+{
+    test::interfaz("print_int_as_hex");
+
+    std::cout << "TODO: hacerlas automáticas\n";
+
+    for (uint8_t i = 0; i < 250; i += 10){
+	std::cout << std::hex << (int) i << " -> ";
+	atd::print_int_as_hex(std::cout, i);
+	std::cout << '\n';
+    }
+
+    for (uint16_t i = 10000; i < 30000; i += 1000){
+	std::cout << std::hex << i << " -> ";
+	atd::print_int_as_hex(std::cout, i);
+	std::cout << '\n';
+    }
+
+
+    for (int16_t i = -30000; i < -10000; i += 1000){
+	std::cout << std::hex << i << " -> ";
+	atd::print_int_as_hex(std::cout, i);
+	std::cout << '\n';
+    }
+
+
+}
 
 int main()
 {
@@ -47,6 +75,7 @@ try{
     test::header("atd_ostream");
 
     test_print();
+    test_print_int_as_hex();
 
 }catch(std::exception& e)
 {

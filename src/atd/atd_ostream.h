@@ -31,6 +31,7 @@
  *    A.Manuel L.Perez
  *	09/11/2019 write_as_int
  *	06/03/2022 print(ostream, T)
+ *	05/11/2022 print_as_hex
  *
  ****************************************************************************/
 #include <ostream>
@@ -154,6 +155,58 @@ inline std::ostream& print(std::ostream& out, char x) { return out << x; }
 inline std::ostream& print(std::ostream& out, unsigned char x) { return out << x; }
 inline std::ostream& print(std::ostream& out, signed char x) { return out << x; }
 inline std::ostream& print(std::ostream& out, const char* x) { return out << x; }
+
+
+
+/***************************************************************************
+ *			    FORMATS
+ ***************************************************************************/
+template <typename Int>
+char nibble2hex(Int x)
+{
+    switch(x){
+	break; case 0x00: return '0';
+	break; case 0x01: return '1';
+	break; case 0x02: return '2';
+	break; case 0x03: return '3';
+	break; case 0x04: return '4';
+	break; case 0x05: return '5';
+	break; case 0x06: return '6';
+	break; case 0x07: return '7';
+	break; case 0x08: return '8';
+	break; case 0x09: return '9';
+	break; case 0x0A: return 'A';
+	break; case 0x0B: return 'B';
+	break; case 0x0C: return 'C';
+	break; case 0x0D: return 'D';
+	break; case 0x0E: return 'E';
+	break; case 0x0F: return 'F';
+    }
+
+    return '?';
+}
+
+// No he implementado la salida en hexadecimal en std::ostream, así que
+// suministro esta. Esto quedará obsoleto cuando implemente ios_base::hex
+template <typename Int>
+std::ostream& print_int_as_hex(std::ostream& out, Int x)
+{
+    out << "0x";
+
+    for (size_t i = sizeof(Int); i > 0; --i){
+	Int b = (x >> (i - 1) * 8);
+	Int b1 = (b >> 4) & 0x0F;
+	Int b0 = (b & 0x0F);
+
+	out << nibble2hex(b1);
+	out << nibble2hex(b0);
+
+    }
+
+    return out;
+}
+
+
 
 }// namespace
 
