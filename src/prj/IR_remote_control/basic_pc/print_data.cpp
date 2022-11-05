@@ -21,7 +21,7 @@
 #include "IR_NEC_protocol.h"
 
 
-void Main::print_data() const
+void Main::receive_data() const
 {
     avr::UART_iostream uart;
     
@@ -30,10 +30,7 @@ void Main::print_data() const
 	return;
     }
 
-    bool res = false;
-
-    if (is_NEC_protocol(pulse))
-	res = print_NEC_protocol(uart, pulse);
+    bool res = print_NEC_protocol(uart, pulse);
 
     if (res == false)
 	print_raw_data();
@@ -41,14 +38,27 @@ void Main::print_data() const
 
 }
 
+void Main::receive_raw_data() const
+{
+    avr::UART_iostream uart;
+    
+    if (pulse.size == 0){
+	uart << "No se han recibido datos.\n";
+	return;
+    }
+
+    print_raw_data();
+}
+
+
 
 
 void Main::print_raw_data() const
 {
     avr::UART_iostream uart;
 
-    uart << "------------------------------\n"
-	 << "RAW data:\n"
+    uart << "\n\n------------------------------\n"
+	 << "RAW data: (time_low, time_high) = period\n"
 	 << "num pulses = " << pulse.size << '\n';
 
     if (pulse.full())
@@ -58,15 +68,20 @@ void Main::print_raw_data() const
 
 
     for (size_t i = 0; i < pulse.size; ++i){
-	uart <<  '(' << pulse[i].time_high 
-	     << pulse[i].time_low << "); ";
+	uart <<  '(' << pulse[i].time_low << ", "
+	     << pulse[i].time_high << ") =  " << pulse[i].period();
 
-	if (i != 0 and (i % 7) == 0)
+	if (i % 2)
+	    uart << '\t';
+	else
 	    uart << '\n';
+
+
+
     }
     uart << '\n';
 
-    uart << "Total number of pulses: " << pulse.size << '\n'
+    uart << "\nTotal number of pulses: " << pulse.size << '\n'
 	 << "------------------------------\n";
 }
 

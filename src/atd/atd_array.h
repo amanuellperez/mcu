@@ -523,6 +523,11 @@ constexpr void Linear_array<T,N>::remove(iterator p)
 //
 template <typename T>
 struct CArray_view{
+// Types
+    using value_type = T;
+    using pointer    = T*;
+    using iterator   = T*;
+
 // Methods
     CArray_view(T* p0, size_t sz, size_t max_sz)
 	: ptr{p0}, size{sz}, max_size{max_sz} { }
@@ -532,6 +537,10 @@ struct CArray_view{
 
     bool empty() const {return size == 0;}
     bool full () const {return size == max_size;}
+
+// Iterators
+    T* begin() const {return ptr;}
+    T* end() const  {return ptr + size;}
 
 // Data
     T* ptr;

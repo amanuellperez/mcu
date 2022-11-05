@@ -55,11 +55,11 @@ ATMEGA328).
 `avr-g++ 11.3.0`
 
 Voy a empezar a probar las nuevas características de C++20 en este proyecto
-según vaya aprendiendo a manejarlas. Por ello este rama dejara en unos meses
+según vaya aprendiendo a manejarlas. Por ello esta rama en unos meses
 dejará de compilar en compiladores anteriores. 
 
 Creo una `branch` en github llamada `gcc9.2.0` que compila con ese compilador.
-No es mi intención mantener esa rama.
+No tengo intención de mantenerla.
 
 Si nunca has compilado la toolchain puede que
 [este](help/instalacion_toolchain.md) documento te pueda ayudar.

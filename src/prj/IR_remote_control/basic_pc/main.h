@@ -43,13 +43,13 @@ public:
 
 private:
 // Hardware: 
-    Timer timer;
-    Sensor sensor;
+//    Timer timer; <-- no lo uso 
+    Sensor sensor;  // no lo uso, solo uso su constructor, no lo puedo comentar
 
 
 
 // Data
-    enum class Work_mode{ receive_data, transmit_data};
+    enum class Work_mode{ receive_data, receive_raw_data, transmit_data};
 
     // Última lectura realizada
 //    Timer::counter_type data[max_num_data];
@@ -68,7 +68,8 @@ private:
     void read_pulses();
     void choose_mode_operation();
 
-    void print_data() const;
+    void receive_data() const;
+    void receive_raw_data() const;
     void transmit_data();
 
 // RAW (When we don't know the protocol)

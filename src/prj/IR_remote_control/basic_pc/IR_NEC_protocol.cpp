@@ -19,14 +19,30 @@
 
 #include "IR_NEC_protocol.h"
 
-bool is_NEC_protocol(const atd::CArray_view<Pulse>& pulse)
-{
-    if (pulse.size < 1)
-	return false;
+using Message_it = atd::CArray_view<Pulse>::iterator;
 
-    return (is_equal(pulse[0].time_low, 9000) 
-			and is_equal(pulse[0].time_high, 4500));
+// Aunque la especificación del NEC indica que el pulso de start tiene que ser
+// 9ms low seguido de 4'5 ms high, tengo un mando que envía 4'5 ms low y luego
+// 4'5 ms high. De momento lo implemento así.
+bool NEC_is_start_pulse(const Pulse& pulse)
+{
+    if (!(is_equal(pulse.time_low, 9000) or is_equal(pulse.time_low, 4500)))
+	    return false;
+
+    return is_equal(pulse.time_high, 4500);
 }
+
+
+Message_it NEC_look_for_start(Message_it p, Message_it pe)
+{
+    for (; p != pe; ++p){
+	if (NEC_is_start_pulse(*p))
+	    return p;
+    }
+
+    return pe;
+}
+
 
 
 // NEC bit format (pulse distance encoding):
@@ -51,19 +67,23 @@ static char NEC_pulse_to_bit(const uint16_t T)
 // La ventaja de imprimir es que permite averiguar errores en el formato
 // recibido: imprimirá '?' si el pulso enviado es diferente del esperado, o
 // 'x' si el burst no es de la longitud esperada.
-static void print_NEC_byte(std::ostream& out, const Pulse* p)
+static Message_it print_NEC_byte(std::ostream& out, Message_it p, Message_it pe)
 {
     out << "0b";
-    for (int8_t i = 7; i >= 0; --i){
+    for (int8_t i = 7; i >= 0 and p != pe; --i, ++p){
 
-	if (is_equal(p[i].time_low, 562))
-	    out << NEC_pulse_to_bit(p[i].period());
+	if (is_equal(p->time_low, 562))
+	    out << NEC_pulse_to_bit(p->period());
 
 	else 
 	    out << 'x';
     }
 
+    return p;
 }
+
+
+
 
 
 // precondition: sabemos que msg[0] == 9000, y msg[1] == 4500
@@ -78,32 +98,57 @@ static void print_NEC_byte(std::ostream& out, const Pulse* p)
 //
 //  
 bool print_NEC_protocol(std::ostream& out, const atd::CArray_view<Pulse>& pulse)
-// bool print_NEC_protocol(std::ostream& out, const uint16_t* msg, uint8_t n)
 {
+    auto pe = pulse.end();
+    auto p = NEC_look_for_start(pulse.begin(), pe);
+
+    if (p == pe)
+	return false;
+
     out << "\nNEC\n"
 	    "---\n";
 
-    // 33 bits = 1 bit preambulo + 4 bytes (32 bits)
-    if (pulse.size < 33){
-	out << "Error: no se han recibido todos los bytes\n";
-	return false;
+
+    ++p;    // quitamos el start pulse
+    out <<   "Address         : ";
+    p = print_NEC_byte(out, p, pe);
+
+    if (p == pe){
+	out << '\n';
+	return true; // es NEC
     }
 
-// msg[0] = 9000 us; msg[1] = 4500 us
-    out <<   "Address         : ";
-    print_NEC_byte(out, &pulse[1]);
 
     out << "\nInverted address: ";
-    print_NEC_byte(out, &pulse[1 + 8*1]);
+    p = print_NEC_byte(out, p, pe);
+
+    if (p == pe){
+	out << '\n';
+	return true; // es NEC
+    }
+
 
     out << "\nCommand         : ";
-    print_NEC_byte(out, &pulse[1 + 8*2]);
+    p = print_NEC_byte(out, p, pe);
+
+    if (p == pe){
+	out << '\n';
+	return true; // es NEC
+    }
+
 
     out << "\nInverted command: ";
-    print_NEC_byte(out, &pulse[1 + 8*3]);
+    p = print_NEC_byte(out, p, pe);
+
+    if (p == pe){
+	out << '\n';
+	return true; // es NEC
+    }
+
     out << '\n';
 
-//    check_end_NEC(&pulse[1 + 8*4]);
+// DUDA: miramos si quedan más bytes para imprimir?
+
     return true;
 }
 

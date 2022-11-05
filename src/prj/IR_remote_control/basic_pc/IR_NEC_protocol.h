@@ -22,10 +22,6 @@
 #include <atd_array.h>
 #include "pulse.h"
 
-// message[0..n) = secuencia de tiempos en los que el pin está LOW-HIGH
-//bool is_NEC_protocol(const uint16_t* message, uint8_t n);
-//bool print_NEC_protocol(std::ostream& out, const uint16_t* message, uint8_t n);
-
 // Un mensaje es un array de pulsos
 bool is_NEC_protocol(const atd::CArray_view<Pulse>& pulses);
 bool print_NEC_protocol(std::ostream& out, const atd::CArray_view<Pulse>& pulses);

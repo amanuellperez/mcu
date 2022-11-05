@@ -26,28 +26,46 @@
 /***************************************************************************
  *			    FUNCIONES AUXILIARES
  ***************************************************************************/
-// src = array de 'n' elementos conteniendo alternativamente la duracion de
-// los pulsos low-high-low-high...
-static void copy(volatile uint16_t* src, int8_t n, atd::CArray_view<Pulse>& dst)
+// src = tiempo de duración del pulso
+// is_one  = indica si el tiempo mide un pulso high or low
+// El array que devolvemos es un array de pulsos: low-high (y no high-low).
+static void copy(volatile uint16_t* src, volatile bool* is_one, int16_t n
+		, atd::CArray_view<Pulse>& dst)
 {
-    if (n < 0){
+    if (n <= 0){
 	dst.size = 0;
 	return;
     }
 
     size_t N = static_cast<size_t>(n);
+    auto p = dst.ptr;
+    size_t i = 0;
+    if (is_one[0] == true){ // esto no es de esperar, el primer pulso debería ser low
+	p->time_low  =  0;
+	p->time_high = src[0];
+	++i;
+	++p;
+    }
+
     dst.size = N / 2;
-    for (size_t i = 0; i < dst.size * 2; i += 2){
-	dst[i / 2].time_low  = src[i];
-	dst[i / 2].time_high = src[i+1];
+    for (; i  + 1 < N; i += 2){
+	if (is_one[i] == false and is_one[i+1] == true){
+	    p->time_low  = src[i];
+	    p->time_high = src[i+1];
+	}
+	else{
+	    p->time_low  = 0;
+	    p->time_high = 0;
+	}
+	++p;
     }
 
     // Caso en que el último pulso leido sea LOW 
-    if (dst.size * 2 == N - 1){
+    if (i < N){
 	++dst.size;
 
-	dst [dst.size - 1].time_low = src[N - 1];
-	dst [dst.size - 1].time_high = 0; // <-- 0 para indicar que está sin leer
+	p->time_low = src[i];
+	p->time_high = 0; // <-- 0 para indicar que está sin leer
     }
 }
 
@@ -66,9 +84,12 @@ static void copy(volatile uint16_t* src, int8_t n, atd::CArray_view<Pulse>& dst)
 //  2. De software: (en cfg.h)
 //	+ num_max_pulses
 
+
 // static volatile Timer::counter_type buffer[Main::max_num_data];
-static volatile uint16_t buffer[num_max_pulses*2];
-static volatile int8_t i = -1;
+static constexpr int16_t buffer_size = num_max_pulses * 2;
+static volatile uint16_t buffer[buffer_size];
+static volatile bool is_high[buffer_size];
+static volatile int16_t i = -1;
 static volatile bool end_of_reading = false;
 
 static void reset_data()
@@ -89,21 +110,32 @@ void read_pulses(atd::CArray_view<Pulse>& pulse)
 
     Timer::on<1>();	    // leemos microsegundos
     
-    while (end_of_reading == false and i < 2 * num_max_pulses)
+    while (end_of_reading == false and i < buffer_size)
     { ; }
 
     avr::disable_all_interrupts();
 
     Timer::off(); 
 
-    copy(buffer, i, pulse);
+    copy(buffer, is_high, i, pulse);
 
 }
 
-
+// (RRR) ¿por qué is_high[i]?
+//	 Al principio no llevaba control de si es HIGH o no, dando por
+//	 supuesto que siempre empezaba en LOW. Pero al probarlo resultó no ser
+//	 así: a veces empieza en HIGH, otras en LOW, no funcionando bien.
+//	 Intenté garantizar que el pin del sensor fuera HIGH, pero no me
+//	 funcionó (¿cometí algún error? probable). Así que al final anoto el
+//	 tipo de pulso que es.
+//
+//	 Si Sensor::is_one() quiere decir que el pin estaba en zero, luego NO
+//	 era HIGH ==> is_high = false.
 ISR_SENSOR_PIN {
-    if (i >= 0)
+    if (i >= 0){
 	buffer[i] = Timer::value();
+	is_high[i] = !Sensor::is_one();
+    }
 
     Timer::reset();
     i = i + 1;

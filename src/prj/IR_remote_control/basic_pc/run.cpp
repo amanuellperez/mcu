@@ -27,7 +27,8 @@ void Main::run()
 	::read_pulses(pulse);
 	choose_mode_operation();
 	switch(mode){
-	    break; case Work_mode::receive_data: print_data();
+	    break; case Work_mode::receive_data: receive_data();
+	    break; case Work_mode::receive_raw_data: receive_raw_data();
 	    break; case Work_mode::transmit_data: transmit_data();
 	}
 	
@@ -44,7 +45,8 @@ void Main::print_instructions()
     uart << "Menu\n"
 	    "----\n"
 	    "1. Receive data (default)\n"
-	    "2. Transmit data\n\n";
+	    "2. Receive and print RAW data\n"
+	    "3. Transmit data\n\n";
 }
 
 
@@ -57,7 +59,11 @@ void Main::choose_mode_operation()
 	uart >> c;
 
 	if (c == '2')
+	    mode = Work_mode::receive_raw_data;
+
+	else if (c == '3')
 	    mode = Work_mode::transmit_data;
+
 	else
 	    mode = Work_mode::receive_data;
 
