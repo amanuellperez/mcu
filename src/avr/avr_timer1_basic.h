@@ -288,6 +288,9 @@ private:
     static Time clock_period_in_us_1MHz();
     static Frequency clock_frequency_in_Hz_1MHz();
 
+    static Time clock_period_in_us_8MHz();
+    static Frequency clock_frequency_in_Hz_8MHz();
+
 }; // Timer1
 
 
@@ -444,12 +447,49 @@ inline void Timer1::set_clock_period_in_us_8MHz()
 }
 
 
+inline Time Timer1::clock_period_in_us_8MHz()
+{
+    using namespace literals;
+    switch(frequency_divisor()){
+	case Frequency_divisor::no_preescaling	: return 0_us;
+	case Frequency_divisor::divide_by_8	: return 1_us;
+	case Frequency_divisor::divide_by_64	: return 8_us;
+	case Frequency_divisor::divide_by_256	: return 32_us;
+	case Frequency_divisor::divide_by_1024	: return 128_us;
+	case Frequency_divisor::undefined	: return 0_us;
+    }
+
+    return 0_us;
+}
+
+inline Frequency Timer1::clock_frequency_in_Hz_8MHz()
+{
+    using namespace literals;
+    using Rep = Frequency::Rep;
+    switch(frequency_divisor()){
+	case Frequency_divisor::no_preescaling	: return 0_MHz;
+	case Frequency_divisor::divide_by_8	: return 1_MHz;
+	case Frequency_divisor::divide_by_64	: return 125_kHz;
+	case Frequency_divisor::divide_by_256	: return Frequency{Rep{31250ul,0ul}, 0};
+	case Frequency_divisor::divide_by_1024	: return Frequency{Rep{7812ul,5ul}, 0};
+	case Frequency_divisor::undefined	: return 0_Hz;
+    }
+
+    return 0_Hz;
+}
+
+
+
+
 
 template<uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
 inline Time Timer1::clock_period()
 {
     if constexpr (clock_frequency_in_hz == 1000000UL)
 	return clock_period_in_us_1MHz();
+
+    else if constexpr (clock_frequency_in_hz == 8000000UL)
+	return clock_period_in_us_8MHz();
 
     else
         static_assert(atd::always_false_v<int>,
@@ -481,6 +521,9 @@ inline Frequency Timer1::clock_frequency()
 {
     if constexpr (clock_frequency_in_hz == 1000000UL)
 	return clock_frequency_in_Hz_1MHz();
+
+    else if constexpr (clock_frequency_in_hz == 8000000UL)
+	return clock_frequency_in_Hz_8MHz();
 
     else
         static_assert(atd::always_false_v<int>,

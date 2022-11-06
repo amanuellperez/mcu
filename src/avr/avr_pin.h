@@ -32,6 +32,7 @@
  *	27/01/2019 Reescrito, paso a usar templates.
  *	09/06/2019 Output_pin<0> y pulso_1us. 
  *	05/01/2020 Migrado a inglés.
+ *	06/11/2022 toggle
  *
  ****************************************************************************/
 #include "avr_cfg.h"
@@ -108,10 +109,10 @@ public:
     // {(*PORT[n]) &= ~BIT_MASK[n];}
     {(*PORT[n]) = (*PORT[n]) & ~BIT_MASK[n];}
 
-//    /// Cambiamos el valor del pin (de 0 a 1 ó de 1 a 0).
-//    TODO: 27/01/19 - borrarlo si no se usa
-//    static void flip_bit() 
-//    { (*PORT[n]) ^= BIT_MASK[n]; }
+    /// Cambiamos el valor del pin (de 0 a 1 ó de 1 a 0).
+    static void toggle()  
+    //{ (*PORT[n]) ^= BIT_MASK[n]; }
+    { (*PORT[n]) = (*PORT[n]) ^ BIT_MASK[n]; }
 
     /// Escribimos en el pin. Un valor distinto de cero es 1.
     static void write(uint8_t x)
@@ -156,7 +157,7 @@ public:
     constexpr static void write_one()	{Pin<n>::write_one();}
     constexpr static void write_zero()	{Pin<n>::write_zero();}
     constexpr static void write(uint8_t x) {Pin<n>::write(x);}
-    // static void flip_bit()	{Pin<n>::flip_bit();}
+    constexpr static void toggle()	{Pin<n>::toggle();}
 
 
     // Funciones de ayuda

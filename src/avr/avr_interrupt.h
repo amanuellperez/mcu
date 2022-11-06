@@ -30,22 +30,14 @@
  *	eficiente usar templates que funciones (y si está bien hecho, podemos
  *	detectar errores en tiempo de compilación).
  *  
- *   - TODO: Ahora cada vez que llamo a una función enable, 
- *	    internamente se llama a enable_all_interrupts().
- *	    Esta función llama a sei(). Si sei() tarda tiempo en ejecutarse
- *	    esto parece ser una perdida de tiempo. Se puede tener un flag
- *	    static que marque si se han habilitado las interrupciones (de
- *	    hecho este flag lo tiene el avr, asi que podemos consultarlo)
- *	    y si se han habilitado no se llamaría a sei(). Ahora bien, si sei
- *	    se limita a escribir en este flag, no merece la pena perder
- *	    tiempo. Para ver si merece la pena implementar esto hay que medir
- *	    tiempo. De momento lo dejo así.
- *	    
  *
  *   - HISTORIA:
  *    A.Manuel L.Perez
  *    27/07/2017 Pruebas iniciales.
  *    22/01/2019 La migro a templates y defino macros.
+ *    06/11/2022 Quito la llamada de enable_all_interrupts(). Esto no
+ *	         pertenece al traductor. Si usas el AVR tienes que saber que
+ *	         tienes que llamar a enable_all_interrupts().
  *
  ****************************************************************************/
 #include <avr/interrupt.h>
@@ -106,7 +98,7 @@ private:
 	// EIMSK |= (1 << INT0);
 	EIMSK = EIMSK | (1 << INT0);
 
-	enable_all_interrupts();
+	//enable_all_interrupts();
     }
 };
 
@@ -229,7 +221,7 @@ inline void Interrupt::enable_pin<2>()
     atd::write_bit<PCIE2>::to<1>::in(PCICR);
     atd::write_bit<PCINT16>::to<1>::in(PCMSK2);
 
-    enable_all_interrupts();
+    //enable_all_interrupts();
 }
 
 template<>
@@ -238,7 +230,7 @@ inline void Interrupt::enable_pin<3>()
     atd::write_bit<PCIE2>::to<1>::in(PCICR);
     atd::write_bit<PCINT17>::to<1>::in(PCMSK2);
 
-    enable_all_interrupts();
+    //enable_all_interrupts();
 }
 
 template<>
@@ -247,7 +239,7 @@ inline void Interrupt::enable_pin<4>()
     atd::write_bit<PCIE2>::to<1>::in(PCICR);
     atd::write_bit<PCINT18>::to<1>::in(PCMSK2);
 
-    enable_all_interrupts();
+    //enable_all_interrupts();
 }
 
 template<>
@@ -256,7 +248,7 @@ inline void Interrupt::enable_pin<5>()
     atd::write_bit<PCIE2>::to<1>::in(PCICR);
     atd::write_bit<PCINT19>::to<1>::in(PCMSK2);
 
-    enable_all_interrupts();
+    //enable_all_interrupts();
 }
 
 template<>
@@ -265,7 +257,7 @@ inline void Interrupt::enable_pin<6>()
     atd::write_bit<PCIE2>::to<1>::in(PCICR);
     atd::write_bit<PCINT20>::to<1>::in(PCMSK2);
 
-    enable_all_interrupts();
+    //enable_all_interrupts();
 }
 
 template<>
@@ -274,7 +266,7 @@ inline void Interrupt::enable_pin<9>()
     atd::write_bit<PCIE0>::to<1>::in(PCICR);
     atd::write_bit<PCINT6>::to<1>::in(PCMSK0);
 
-    enable_all_interrupts();
+    //enable_all_interrupts();
 }
 
 template<>
@@ -282,7 +274,7 @@ inline void Interrupt::enable_pin<10>()
 {
     atd::write_bit<PCIE0>::to<1>::in(PCICR);
     atd::write_bit<PCINT7>::to<1>::in(PCMSK0);
-    enable_all_interrupts();
+    //enable_all_interrupts();
 }
 
 template<>
@@ -290,7 +282,7 @@ inline void Interrupt::enable_pin<11>()
 {
     atd::write_bit<PCIE2>::to<1>::in(PCICR);
     atd::write_bit<PCINT21>::to<1>::in(PCMSK2);
-    enable_all_interrupts();
+    //enable_all_interrupts();
 }
 
 template<>
@@ -298,7 +290,7 @@ inline void Interrupt::enable_pin<12>()
 {
     atd::write_bit<PCIE2>::to<1>::in(PCICR);
     atd::write_bit<PCINT22>::to<1>::in(PCMSK2);
-    enable_all_interrupts();
+    //enable_all_interrupts();
 }
 
 template<>
@@ -306,7 +298,7 @@ inline void Interrupt::enable_pin<13>()
 {
     atd::write_bit<PCIE2>::to<1>::in(PCICR);
     atd::write_bit<PCINT23>::to<1>::in(PCMSK2);
-    enable_all_interrupts();
+    //enable_all_interrupts();
 }
 
 template<>
@@ -314,7 +306,7 @@ inline void Interrupt::enable_pin<14>()
 {
     atd::write_bit<PCIE0>::to<1>::in(PCICR);
     atd::write_bit<PCINT0>::to<1>::in(PCMSK0);
-    enable_all_interrupts();
+    //enable_all_interrupts();
 }
 
 template<>
@@ -323,7 +315,7 @@ inline void Interrupt::enable_pin<15>()
     atd::write_bit<PCIE0>::to<1>::in(PCICR);
     atd::write_bit<PCINT1>::to<1>::in(PCMSK0);
 
-    enable_all_interrupts();
+    //enable_all_interrupts();
 }
 
 template<>
@@ -331,7 +323,7 @@ inline void Interrupt::enable_pin<16>()
 {
     atd::write_bit<PCIE0>::to<1>::in(PCICR);
     atd::write_bit<PCINT2>::to<1>::in(PCMSK0);
-    enable_all_interrupts();
+    //enable_all_interrupts();
 }
 
 template<>
@@ -339,7 +331,7 @@ inline void Interrupt::enable_pin<17>()
 {
     atd::write_bit<PCIE0>::to<1>::in(PCICR);
     atd::write_bit<PCINT3>::to<1>::in(PCMSK0);
-    enable_all_interrupts();
+    //enable_all_interrupts();
 }
 
 template<>
@@ -347,7 +339,7 @@ inline void Interrupt::enable_pin<18>()
 {
     atd::write_bit<PCIE0>::to<1>::in(PCICR);
     atd::write_bit<PCINT4>::to<1>::in(PCMSK0);
-    enable_all_interrupts();
+    //enable_all_interrupts();
 }
 
 template<>
@@ -355,7 +347,7 @@ inline void Interrupt::enable_pin<19>()
 {
     atd::write_bit<PCIE0>::to<1>::in(PCICR);
     atd::write_bit<PCINT5>::to<1>::in(PCMSK0);
-    enable_all_interrupts();
+    //enable_all_interrupts();
 }
 
 template<>
@@ -363,7 +355,7 @@ inline void Interrupt::enable_pin<23>()
 {
     atd::write_bit<PCIE1>::to<1>::in(PCICR);
     atd::write_bit<PCINT8>::to<1>::in(PCMSK1);
-    enable_all_interrupts();
+    //enable_all_interrupts();
 }
 
 template<>
@@ -371,7 +363,7 @@ inline void Interrupt::enable_pin<24>()
 {
     atd::write_bit<PCIE1>::to<1>::in(PCICR);
     atd::write_bit<PCINT9>::to<1>::in(PCMSK1);
-    enable_all_interrupts();
+    //enable_all_interrupts();
 }
 
 template<>
@@ -379,7 +371,7 @@ inline void Interrupt::enable_pin<25>()
 {
     atd::write_bit<PCIE1>::to<1>::in(PCICR);
     atd::write_bit<PCINT10>::to<1>::in(PCMSK1);
-    enable_all_interrupts();
+    //enable_all_interrupts();
 }
 
 template<>
@@ -387,7 +379,7 @@ inline void Interrupt::enable_pin<26>()
 {
     atd::write_bit<PCIE1>::to<1>::in(PCICR);
     atd::write_bit<PCINT11>::to<1>::in(PCMSK1);
-    enable_all_interrupts();
+    //enable_all_interrupts();
 }
 
 template<>
@@ -395,7 +387,7 @@ inline void Interrupt::enable_pin<27>()
 {
     atd::write_bit<PCIE1>::to<1>::in(PCICR);
     atd::write_bit<PCINT12>::to<1>::in(PCMSK1);
-    enable_all_interrupts();
+    //enable_all_interrupts();
 }
 
 template<>
@@ -403,7 +395,7 @@ inline void Interrupt::enable_pin<28>()
 {
     atd::write_bit<PCIE1>::to<1>::in(PCICR);
     atd::write_bit<PCINT13>::to<1>::in(PCMSK1);
-    enable_all_interrupts();
+    //enable_all_interrupts();
 }
 
 
@@ -416,6 +408,7 @@ inline void Interrupt::enable_pin<28>()
  *  las deja como estaban.
  *
  */
+// TODO: esta clase es genérica. Sacarla de aquí, esto es un traductor.
 // Ejemplo de bloqueo en la datasheet: ver pag. 153 por ejemplo.
 class Interrupts_lock{
 public:
@@ -427,7 +420,7 @@ public:
 
     ~Interrupts_lock()
     {
-	SREG = sreg_;	// Restor global interrupt flag
+	SREG = sreg_;	// Restore global interrupt flag
     }
 
 
