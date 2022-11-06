@@ -47,6 +47,9 @@ public:
     using Timer        = avr::Timer1;
     using counter_type = typename Timer::counter_type;
 
+/// De momento el interfaz es static. Prohibo su construcción.
+    Generic_timer_counter() = delete;
+
 /// Modo de funcionamiento: contador normal y corriente.
     static void init(counter_type top0 = max_top()) 
     { 
@@ -61,12 +64,21 @@ public:
     // ¿Cómo independizarlo del avr este ISR_TIMER1_OVF? <-- En el dev.h
     // al seleccionar el Generic_timer<Timer1> se puede definir
     // ISR_GENERIC_TIMER_OVF = ISR_TIMER1_OVF.
-    static void enable_overflow_interrupt()
+    // Genera una interrupción al alcanzar el max_top (overflow).
+    // Se captura con ISR_TIMER1_OVF
+    static void enable_max_top_interrupt()
     { Timer::enable_overflow_interrupt();}
 
-    static void disable_overflow_interrupt()
+    static void disable_max_top_interrupt()
     { Timer::disable_overflow_interrupt();}
 
+    // Genera una interrupción al alcanzar el top.
+    /// Se captura con ISR_TIMER1_COMPA
+    static void enable_top_interrupt()
+    { Timer::enable_output_compare_A_match_interrupt();}
+
+    static void disable_top_interrupt()
+    { Timer::disable_output_compare_A_match_interrupt();}
 
 // Timer on/off
 // ------------

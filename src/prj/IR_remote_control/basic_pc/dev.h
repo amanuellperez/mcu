@@ -23,11 +23,16 @@
 #ifndef __DEV_H__
 #define __DEV_H__
 
+#if F_CPU==8000000UL
+#pragma GCC warning "Micro in 8MHz: remember to execute `make set_fast_fuse`"
+#endif
+
 // En dev.h metemos todas las dependencias con el hardware.
 // El resto del programa NO tiene que saber qué dispositivos concretos usamos. 
 // Lo ideal es usar dispositivos genéricos en el resto, de esa forma se puede
 // cambiar el hardware sin tocar el software.
 #include <avr_interrupt.h>
+#include <avr_timer0_generic.h>
 #include <avr_timer1_generic.h>
 #include <avr_UART_iostream.h>
 
@@ -36,9 +41,11 @@
 // using UART: pins 2 and 3
 // available: 4-6
 // VCC and GND: 7, 8
-// available: 9-14
-constexpr uint8_t sensor_pin = 15;
-#define ISR_SENSOR_PIN ISR_PCINT_PIN15
+// available: 9-13
+constexpr uint8_t ir_transmitter_pin = 14;
+
+constexpr uint8_t ir_receiver_pin = 15;
+#define ISR_RECEIVER_PIN ISR_PCINT_PIN15
 
 // Not using SPI: available pins 16, 17, 18, 19
 
@@ -50,12 +57,18 @@ constexpr uint8_t sensor_pin = 15;
 
 // Hardware connections
 // --------------------
-// Voy a llamar Timer para saber que la interrupción del overflow es
-// ISR_TIMER1_OVF (<-- ¿cómo generalizar esto? El problema son las macros!!!)
-using Timer = dev::Generic_timer_counter<avr::Timer1>;
-#define ISR_TIMER_OVF ISR_TIMER1_OVF
+// Necesito contar tiempos hasta 2300 us, por eso no vale el Timer0.
+using Receiver_timer = dev::Generic_timer_counter<avr::Timer1>;
+#define ISR_RECEIVER_TIMER_OVF ISR_TIMER1_OVF
 
-using Sensor= avr::Input_pin_without_pullup<sensor_pin>;
+// Necesitamos generar una señal de 38kHz con este timer, lo que supone un
+// semiperiodo de 13 us, menor del valor máximo de 255 us de este timer.
+// NOTA: se puede usar el timer1 ya que usamos interrupciones distintas.
+using Transmit_timer = dev::Generic_timer_counter<avr::Timer0>;
+#define ISR_TRANSMIT_TIMER_OVF ISR_TIMER0_COMPA
+
+using IR_receiver    = avr::Input_pin_without_pullup<ir_receiver_pin>;
+using IR_transmitter = avr::Output_pin<ir_transmitter_pin>;
 
 
 #endif

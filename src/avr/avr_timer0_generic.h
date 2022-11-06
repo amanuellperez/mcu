@@ -79,12 +79,22 @@ public:
     // ¿Cómo independizarlo del avr este ISR_TIMER0_OVF? <-- En el dev.h
     // al seleccionar el Generic_timer<Timer0> se puede definir
     // ISR_GENERIC_TIMER_OVF = ISR_TIMER0_OVF.
-    static void enable_overflow_interrupt()
+    // Genera una interrupción cuando llega al max_top (hace overflow)
+    // Capturarla con ISR_TIMER0_OVF
+    static void enable_max_top_interrupt()
     { Timer::enable_overflow_interrupt();}
 
-    static void disable_overflow_interrupt()
+    static void disable_max_top_interrupt()
     { Timer::disable_overflow_interrupt();}
 
+    // Genera una interrupción cuando llega al top.
+    // Capturarla con ISR_TIMER0_COMPA
+    static void enable_top_interrupt()
+    { Timer::enable_output_compare_A_match_interrupt();}
+
+    static void disable_top_interrupt()
+    { Timer::disable_output_compare_A_match_interrupt();}
+    
 // Timer on/off
 // ------------
     template<uint16_t period_in_us

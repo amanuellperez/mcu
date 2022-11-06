@@ -22,6 +22,7 @@
 void Main::transmit_data()
 {
     avr::UART_iostream uart;
-    uart << "TODO...";
+    uart << "transmit_data\n";
+    transmit_pulses(pulse);
 }
 

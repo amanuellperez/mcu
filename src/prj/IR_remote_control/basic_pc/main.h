@@ -43,8 +43,10 @@ public:
 
 private:
 // Hardware: 
-//    Timer timer; <-- no lo uso 
-    Sensor sensor;  // no lo uso, solo uso su constructor, no lo puedo comentar
+//    Timers timer;    <-- ahora no tiene constructor. ¿lo defino para init
+//    automático?
+    IR_receiver receiver;  // no lo uso, solo uso su constructor, no lo puedo comentar
+    IR_transmitter transmitter;  //    idem que receiver
 
 
 

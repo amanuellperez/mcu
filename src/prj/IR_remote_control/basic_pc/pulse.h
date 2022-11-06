@@ -30,7 +30,9 @@ struct Pulse{
     uint16_t period() const {return time_low + time_high;}
 };
 
-void read_pulses(atd::CArray_view<Pulse>& pulse);
+void receive_pulses(atd::CArray_view<Pulse>& pulse);
+void transmit_pulses(atd::CArray_view<Pulse>& pulse);
+
 
 
 #endif

@@ -24,7 +24,7 @@ void Main::run()
     print_instructions();
 
     while (1){
-	::read_pulses(pulse);
+	::receive_pulses(pulse);
 	choose_mode_operation();
 	switch(mode){
 	    break; case Work_mode::help: print_instructions();
@@ -41,7 +41,7 @@ void Main::print_instructions()
 {
     avr::UART_iostream uart;
 
-    uart << "\n\nConnect the IR receiver to pin " << (int) sensor_pin 
+    uart << "\n\nConnect the IR receiver to pin " << (int) ir_receiver_pin 
 	 << ", point the TV remote to it and read the data.\n";
 
     uart << "Menu\n"

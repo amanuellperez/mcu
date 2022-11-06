@@ -30,6 +30,8 @@ void Main::init_uart()
 Main::Main()
 {
     init_uart();
+    Receiver_timer::init();
+    Transmit_timer::init();
 }
 
 

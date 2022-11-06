@@ -76,16 +76,16 @@ static void copy(volatile uint16_t* src, volatile bool* is_one, int16_t n
 // Dependencias
 // ------------
 //  1. De hardware: (en dev.h)
-//	+ sensor_pin
+//	+ ir_receiver_pin
 //	+ avr	!
 //		 => esto es el hardware necesario para programar esto.
-//	+ Timer /
+//	+ Receiver_timer /
 //
 //  2. De software: (en cfg.h)
 //	+ num_max_pulses
 
 
-// static volatile Timer::counter_type buffer[Main::max_num_data];
+// static volatile Receiver_timer::counter_type buffer[Main::max_num_data];
 static constexpr int16_t buffer_size = num_max_pulses * 2;
 static volatile uint16_t buffer[buffer_size];
 static volatile bool is_high[buffer_size];
@@ -100,22 +100,25 @@ static void reset_data()
 
 
 
-void read_pulses(atd::CArray_view<Pulse>& pulse)
+void receive_pulses(atd::CArray_view<Pulse>& pulse)
 {
     reset_data();
 
-    avr::enable_all_interrupts();
-    Timer::enable_overflow_interrupt();
-    avr::Interrupt::enable_pin<sensor_pin>();
+    Receiver_timer::enable_max_top_interrupt();
+    avr::Interrupt::enable_pin<ir_receiver_pin>();
 
-    Timer::on<1>();	    // leemos microsegundos
+    Receiver_timer::on<1>();	    // leemos microsegundos
     
+    avr::enable_all_interrupts();
+
     while (end_of_reading == false and i < buffer_size)
     { ; }
 
     avr::disable_all_interrupts();
 
-    Timer::off(); 
+    Receiver_timer::off(); 
+    Receiver_timer::disable_max_top_interrupt();
+//    avr::Interrupt::disable_pin<ir_receiver_pin>(); <-- TODO: definir
 
     copy(buffer, is_high, i, pulse);
 
@@ -129,24 +132,24 @@ void read_pulses(atd::CArray_view<Pulse>& pulse)
 //	 funcionó (¿cometí algún error? probable). Así que al final anoto el
 //	 tipo de pulso que es.
 //
-//	 Si Sensor::is_one() quiere decir que el pin estaba en zero, luego NO
+//	 Si IR_receiver::is_one() quiere decir que el pin estaba en zero, luego NO
 //	 era HIGH ==> is_high = false.
-ISR_SENSOR_PIN {
+ISR_RECEIVER_PIN {
     if (i >= 0){
-	buffer[i] = Timer::value();
-	is_high[i] = !Sensor::is_one();
+	buffer[i]  = Receiver_timer::value();
+	is_high[i] = !IR_receiver::is_one();
     }
 
-    Timer::reset();
+    Receiver_timer::reset();
     i = i + 1;
 }
 
 
 
-ISR_TIMER_OVF {
+ISR_RECEIVER_TIMER_OVF {
     if (i != -1){
 	end_of_reading = true;
-	buffer[i] = Timer::top();   // acabo leyendo el pulso HIGH
+	buffer[i] = Receiver_timer::top();   // acabo leyendo el pulso HIGH
 	i = i + 1;
     }
 }
