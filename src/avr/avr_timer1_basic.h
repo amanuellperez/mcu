@@ -42,6 +42,15 @@
  *                implementar: basta leer la datasheet e ir traduciéndola a
  *                código.
  *                
+ *    17/11/2022  disable_..._interrupt()
+ *		  Y no era un traductor puro, ya que al activar las
+ *		  interrupciones también activaba las interrupciones
+ *		  del avr, cosa que no viene en la datasheet. Recordar
+ *		  que un traductor se limita a traducir la datasheet
+ *		  sin añadir/quitar nada (no cierto del todo ya que
+ *		  aquí estoy añadiendo la posibilidad de pasar la
+ *		  frecuencia de trabajo del Timer en lugar de usar los
+ *		  divisores de frecuencia).
  *	
  *  DUDA: meter todas las funciones dentro de un .cpp (???)
  *
@@ -250,18 +259,24 @@ public:
 
 
 // INTERRUPCIONES
+//  Recordar llamar a avr::enable_all_interrupts para que funcionen.
+
     /// Cuando se produce un overflow generamos la interrupción
     /// correspondiente. Se captura con ISR_TIMER1_OVF
     static void enable_overflow_interrupt();
+    static void disable_overflow_interrupt();
 
     /// Se captura con ISR_TIMER1_CAPT
     static void enable_input_capture_interrupt();
+    static void disable_input_capture_interrupt();
 
     /// Se captura con ISR_TIMER1_COMPA
     static void enable_output_compare_A_match_interrupt();
+    static void disable_output_compare_A_match_interrupt();
 
     /// Se captura con ISR_TIMER1_COMPB
     static void enable_output_compare_B_match_interrupt();
+    static void disable_output_compare_B_match_interrupt();
 
 private:
     template<uint16_t period>
@@ -542,30 +557,28 @@ inline void Timer1::input_capture_register(Timer1::counter_type x)
 
 
 inline void Timer1::enable_overflow_interrupt()
-{
-    atd::write_bits<TOIE1>::to<1>::in(TIMSK1);
-    avr::enable_all_interrupts();
-}
+{ atd::write_bits<TOIE1>::to<1>::in(TIMSK1); }
+
+inline void Timer1::disable_overflow_interrupt()
+{ atd::write_bits<TOIE1>::to<0>::in(TIMSK1); }
 
 inline void Timer1::enable_input_capture_interrupt()
-{
-    atd::write_bits<ICIE1>::to<1>::in(TIMSK1);
-    avr::enable_all_interrupts();
-}
+{ atd::write_bits<ICIE1>::to<1>::in(TIMSK1); }
 
+inline void Timer1::disable_input_capture_interrupt()
+{ atd::write_bits<ICIE1>::to<0>::in(TIMSK1); }
 
 inline void Timer1::enable_output_compare_A_match_interrupt()
-{
-    atd::write_bits<OCIE1A>::to<1>::in(TIMSK1);
-    avr::enable_all_interrupts();
-}
+{ atd::write_bits<OCIE1A>::to<1>::in(TIMSK1); }
 
+inline void Timer1::disable_output_compare_A_match_interrupt()
+{ atd::write_bits<OCIE1A>::to<0>::in(TIMSK1); }
 
 inline void Timer1::enable_output_compare_B_match_interrupt()
-{
-    atd::write_bits<OCIE1B>::to<1>::in(TIMSK1);
-    avr::enable_all_interrupts();
-}
+{ atd::write_bits<OCIE1B>::to<1>::in(TIMSK1); }
+
+inline void Timer1::disable_output_compare_B_match_interrupt()
+{ atd::write_bits<OCIE1B>::to<0>::in(TIMSK1); }
 
 
 // Modos de funcionamiento

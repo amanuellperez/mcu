@@ -33,9 +33,17 @@
  *      18/07/2019 v0.1: Reescrito.
  *      04/01/2020       Creado traductor.
  *      14/02/2021 v0.2: Convertido en traductor puro.
+ *      17/11/2022       disable_..._interrupt()
+ *		         Y no era un traductor puro, ya que al activar las
+ *		         interrupciones también activaba las interrupciones
+ *		         del avr, cosa que no viene en la datasheet. Recordar
+ *		         que un traductor se limita a traducir la datasheet
+ *		         sin añadir/quitar nada (no cierto del todo ya que
+ *		         aquí estoy añadiendo la posibilidad de pasar la
+ *		         frecuencia de trabajo del Timer en lugar de usar los
+ *		         divisores de frecuencia).
  *
  ****************************************************************************/
-
 #include <atd_bit.h>
 #include <atd_type_traits.h>
 
@@ -189,14 +197,19 @@ public:
 
 
 // INTERRUPCIONES
+//  Recordar que hay que llamar a avr::enable_all_interrupts(); para que
+//  se puedan usar las interrupciones.
     /// Se captura con ISR_TIMER0_OVF
     static void enable_overflow_interrupt();
+    static void disable_overflow_interrupt();
 
     /// Se captura con ISR_TIMER0_COMPA
     static void enable_output_compare_A_match_interrupt();
+    static void disable_output_compare_A_match_interrupt();
 
     /// Se captura con ISR_TIMER0_COMPB
     static void enable_output_compare_B_match_interrupt();
+    static void disable_output_compare_B_match_interrupt();
 
 
 private:
@@ -614,24 +627,22 @@ inline void Timer0::PWM_pin_A_toggle_on_compare_match()
 // Interrupciones
 // --------------
 inline void Timer0::enable_overflow_interrupt()
-{
-    atd::write_bits<TOIE0>::to<1>::in(TIMSK0);
-    avr::enable_all_interrupts();
-}
+{ atd::write_bits<TOIE0>::to<1>::in(TIMSK0); }
 
+inline void Timer0::disable_overflow_interrupt()
+{ atd::write_bits<TOIE0>::to<0>::in(TIMSK0); }
 
 inline void Timer0::enable_output_compare_A_match_interrupt()
-{
-    atd::write_bits<OCIE0A>::to<1>::in(TIMSK0);
-    avr::enable_all_interrupts();
-}
+{ atd::write_bits<OCIE0A>::to<1>::in(TIMSK0); }
 
+inline void Timer0::disable_output_compare_A_match_interrupt()
+{ atd::write_bits<OCIE0A>::to<0>::in(TIMSK0); }
 
 inline void Timer0::enable_output_compare_B_match_interrupt()
-{
-    atd::write_bits<OCIE0B>::to<1>::in(TIMSK0);
-    avr::enable_all_interrupts();
-}
+{ atd::write_bits<OCIE0B>::to<1>::in(TIMSK0); }
+
+inline void Timer0::disable_output_compare_B_match_interrupt()
+{ atd::write_bits<OCIE0B>::to<0>::in(TIMSK0); }
 
 
 }// namespace avr

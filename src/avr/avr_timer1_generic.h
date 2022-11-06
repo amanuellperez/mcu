@@ -64,6 +64,9 @@ public:
     static void enable_overflow_interrupt()
     { Timer::enable_overflow_interrupt();}
 
+    static void disable_overflow_interrupt()
+    { Timer::disable_overflow_interrupt();}
+
 
 // Timer on/off
 // ------------
