@@ -128,6 +128,8 @@ public:
 
 
 
+// TODO: eliminar Generic_timer a favor de clases particulares.
+// Ver comentarios en avr_timer1_generic.h
 template <>
 class Generic_timer<avr::Timer0>{
 public:

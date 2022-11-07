@@ -111,6 +111,33 @@ public:
 };
 
 
+// TODO: eliminar Generic_timer a favor de clases particulares.
+// La parte de onda cuadrada y PWM hay que revisarla entera. Un fallo de este
+// primer intento es que no se da la duración de la onda cuadrada, solo se
+// enciende o se apaga, pero ¿por cuánto tiempo? No se indica.
+// De momento se me ocurren 3 formas de generar una onda cuadrada:
+//	square_wave<Timer, num_pin>(frecuencia, duracion);
+//	    Genera la onda midiendo el tiempo usando el Timer sin usar
+//	    interrupciones.
+//	    Pros : Se genera en cualquier pin.
+//	           Es código genérico.
+//	          
+//	    Cons : No funciona para frecuencias altas.
+//
+//	square_wave_con_interrupciones<Timer, num_pin(freq, duracion);
+//	    Pros : Genera frecuencias más altas que la versión anterior, en
+//	           cualquier pin.
+//	    Cons : Usa interrupciones, con lo que no es código genérico.
+//	    
+//
+//	gen::Square_wave_generator<Timer1>(canal1 y/o 2, freq, duracion)
+//	    Pros : genera la onda cuadrada por hardware, la mejor que se puede
+//	           generar.
+//	    Cons : solo se puede usar en los pines a los que está conectado el
+//	           Timer: canal1 o 2
+//	           Al usar interrupciones no es código genérico.
+//
+//	    
 template <>
 class Generic_timer<avr::Timer1>{
 public:
