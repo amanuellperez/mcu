@@ -37,8 +37,8 @@ void select_frequency(const uint16_t freq)
     if (freq <= 15){
 	uint16_t top  = 15625u / freq - 1; // 15625 = 1000000/64;
 	Timer::off();
-	Timer::input_capture_register(top);
-	Timer::output_compare_register_A(8); // 500 us
+	Timer::unsafe_input_capture_register(top);
+	Timer::unsafe_output_compare_register_A(8); // 500 us
 	Timer::PWM_pin_A_non_inverting_mode();
 	Timer::on<64>();
     }
@@ -46,8 +46,8 @@ void select_frequency(const uint16_t freq)
         uint16_t top =
             static_cast<uint16_t>(uint32_t{1000000u} / uint32_t{freq}) - 1;
         Timer::off();
-	Timer::input_capture_register(top);
-	Timer::output_compare_register_A(500); // 500 us
+	Timer::unsafe_input_capture_register(top);
+	Timer::unsafe_output_compare_register_A(500); // 500 us
 	Timer::PWM_pin_A_non_inverting_mode();
 	Timer::on<1>();
     }

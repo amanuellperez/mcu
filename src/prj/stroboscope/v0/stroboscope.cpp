@@ -52,18 +52,18 @@ void Stroboscope::generate_8MHz()
 
     if (freq_ <= 123){
 	uint16_t top  = 31250 / freq_ - 1; // 31250 = 8000000/256;
-	Timer::input_capture_register(top);
+	Timer::unsafe_input_capture_register(top);
 	Timer::counter_type ocrA = top / duty_percent;
-	Timer::output_compare_register_A(ocrA);
+	Timer::unsafe_output_compare_register_A(ocrA);
 	//Timer::output_compare_register_A(15); // 500 us!!!
 	Timer::set_clock_period_in_us<32>();
     }
     else{
         uint16_t top =
             static_cast<uint16_t>(uint32_t{8000000ul} / uint32_t{freq_}) - 1;
-	Timer::input_capture_register(top);
+	Timer::unsafe_input_capture_register(top);
 	Timer::counter_type ocrA = top / duty_percent;
-	Timer::output_compare_register_A(ocrA); 
+	Timer::unsafe_output_compare_register_A(ocrA); 
 //	if (freq_ < 1000)
 //	    Timer::output_compare_register_A(4000); // 500 us
 //	else

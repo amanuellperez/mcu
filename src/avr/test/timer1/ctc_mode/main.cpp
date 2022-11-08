@@ -19,6 +19,7 @@
 
 #include "../../../avr_timer1_basic.h"
 #include "../../../avr_time.h"
+#include "../../../avr_interrupt.h"
 #include "../../../avr_UART_iostream.h"
 
 
@@ -237,7 +238,7 @@ int main()
     //Timer::mode_CTC_top_OCR1A();
     //Timer::output_compare_register_A(top);
     Timer::mode_CTC_top_ICR1();
-    Timer::input_capture_register(top);
+    { avr::Interrupts_lock l; Timer::unsafe_input_capture_register(top);}
     Timer::CTC_pin_A_toggle_on_compare_match(); // para que se vea algo al ppio
     Timer::CTC_pin_B_toggle_on_compare_match();
     timer_on(period_in_us);
@@ -301,7 +302,8 @@ int main()
 		uart >> top;
 		uart << top << '\n';
 		//Timer::output_compare_register_A(top);
-		Timer::input_capture_register(top);
+		{ avr::Interrupts_lock l; 
+		  Timer::unsafe_input_capture_register(top);}
 		break;
 
 	    default:

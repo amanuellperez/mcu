@@ -163,7 +163,7 @@ void oca_menu()
 	    uart << "OCR1A = ";
 	    uart >> tmp;
 	    uart << tmp << '\n';
-	    Timer::output_compare_register_A(tmp);
+	    Timer::unsafe_output_compare_register_A(tmp);
 	    break;
 
 	case 'd':
@@ -206,7 +206,7 @@ void ocb_menu()
 	    uart << "OCR1B = ";
 	    uart >> tmp;
 	    uart << tmp << '\n';
-	    Timer::output_compare_register_B(tmp);
+	    Timer::unsafe_output_compare_register_B(tmp);
 	    break;
 	case 'd':
 	    Timer::pin_B_disconnected();
@@ -280,36 +280,36 @@ void print(Mode mode)
 	case Mode::top_0x00FF:
 	    uart << "\nmode = top_0x00FF";
 	    period = (uint32_t{0x00FF} + 1)* Timer::clock_period();
-	    T_a= Timer::output_compare_register_A()* Timer::clock_period();
-	    T_b= Timer::output_compare_register_B()* Timer::clock_period();
+	    T_a= Timer::unsafe_output_compare_register_A()* Timer::clock_period();
+	    T_b= Timer::unsafe_output_compare_register_B()* Timer::clock_period();
 	    break;
 
 	case Mode::top_0x01FF:
 	    uart << "\nmode = top_0x01FF";
 	    period = (uint32_t{0x01FF} + 1)* Timer::clock_period();
-	    T_a= Timer::output_compare_register_A()* Timer::clock_period();
-	    T_b= Timer::output_compare_register_B()* Timer::clock_period();
+	    T_a= Timer::unsafe_output_compare_register_A()* Timer::clock_period();
+	    T_b= Timer::unsafe_output_compare_register_B()* Timer::clock_period();
 	    break;
 
 	case Mode::top_0x03FF:
 	    uart << "\nmode = top_0x03FF";
 	    period = (uint32_t{0x03FF} + 1)* Timer::clock_period();
-	    T_a= Timer::output_compare_register_A()* Timer::clock_period();
-	    T_b= Timer::output_compare_register_B()* Timer::clock_period();
+	    T_a= Timer::unsafe_output_compare_register_A()* Timer::clock_period();
+	    T_b= Timer::unsafe_output_compare_register_B()* Timer::clock_period();
 	    break;
 
 	case Mode::top_ICR1:
 	    uart << "\nmode = top_ICR1";
-	    period = (Timer::input_capture_register() + 1)* Timer::clock_period();
-	    T_a= Timer::output_compare_register_A()* Timer::clock_period();
-	    T_b= Timer::output_compare_register_B()* Timer::clock_period();
+	    period = (Timer::unsafe_input_capture_register() + 1)* Timer::clock_period();
+	    T_a= Timer::unsafe_output_compare_register_A()* Timer::clock_period();
+	    T_b= Timer::unsafe_output_compare_register_B()* Timer::clock_period();
 	    break;
 
 	case Mode::top_OCR1A:
 	    uart << "\nmode = top_OCR1A";
 	    uart << "\npin B desconectado!!! Señal solo se ve en pin A\n";
-	    period = (Timer::output_compare_register_A() + 1)* Timer::clock_period();
-	    T_b= Timer::output_compare_register_B()* Timer::clock_period();
+	    period = (Timer::unsafe_output_compare_register_A() + 1)* Timer::clock_period();
+	    T_b= Timer::unsafe_output_compare_register_B()* Timer::clock_period();
 	    T_a = 0_us;
 	    break;
     }
@@ -335,9 +335,9 @@ int main()
 
     // configuración inicial, para que se vea algo en el osciloscopio
     Timer::mode_fast_PWM_top_ICR1();
-    Timer::input_capture_register(1000);
-    Timer::output_compare_register_A(500);
-    Timer::output_compare_register_B(200);
+    Timer::unsafe_input_capture_register(1000);
+    Timer::unsafe_output_compare_register_A(500);
+    Timer::unsafe_output_compare_register_B(200);
     Timer::PWM_pin_A_non_inverting_mode();
     Timer::PWM_pin_B_inverting_mode();
     timer_on(period_in_us);
@@ -353,9 +353,9 @@ int main()
 	          "\n-----";
 	print(mode);
 
-	uart <<  "\nICR1 = " << Timer::input_capture_register() <<
-		 "\nOCRA = " << Timer::output_compare_register_A() << 
-		 "\nOCRB = " << Timer::output_compare_register_B() << 
+	uart <<  "\nICR1 = " << Timer::unsafe_input_capture_register() <<
+		 "\nOCRA = " << Timer::unsafe_output_compare_register_A() << 
+		 "\nOCRB = " << Timer::unsafe_output_compare_register_B() << 
 		 "\nTimer::clock_period() = " << Timer::clock_period() << '\n';
 
 	uart << "\nMenu\n"
@@ -406,7 +406,7 @@ int main()
 		uart << "\nICR1 (max " << Timer::max() << ") = ";
 		uart >> top;
 		uart << top << '\n';
-		Timer::input_capture_register(top);
+		Timer::unsafe_input_capture_register(top);
 		break;
 
 	    default:

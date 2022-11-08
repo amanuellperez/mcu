@@ -34,6 +34,7 @@
  ****************************************************************************/
 #include "avr_timer1_basic.h"
 #include "generic_devices.h"
+#include "avr_interrupt.h"
 
 namespace dev{
 
@@ -51,11 +52,20 @@ public:
     Generic_timer_counter() = delete;
 
 /// Modo de funcionamiento: contador normal y corriente.
-    static void init(counter_type top0 = max_top()) 
+    static void unsafe_init(counter_type top0 = max_top()) 
     { 
 	Timer::mode_CTC_top_OCR1A();
-	reset();
-	top(top0);
+	unsafe_reset();
+	unsafe_top(top0);
+    }
+
+    static void safe_init(counter_type top0 = max_top()) 
+    { 
+	avr::Interrupts_lock l;
+
+	Timer::mode_CTC_top_OCR1A();
+	unsafe_reset();
+	unsafe_top(top0);
     }
 
     /// Hay veces que puede ser interesante controlar cuándo el contador hace
@@ -91,24 +101,55 @@ public:
 
 
     /// Devuelve el valor del contador en ticks.
-    static counter_type value() 
-    { return Timer::counter(); }
+    /// Versión fast: no bloquea las interrupciones. El usuario es responsable
+    /// de bloquear las interrupciones antes de llamar a esta función.
+    /// Ejemplo: si se llama dentro de una ISR el mcu bloquea las
+    /// interrupciones por defecto, luego es mejor llamar esta versión fast
+    static counter_type unsafe_value()
+    { return Timer::unsafe_counter(); }
     
+    /// Devuelve el valor del contador en ticks.
+    /// Esta versión bloquea las interrupciones: fácil de usar, pero más
+    /// lento.
+    static counter_type safe_value()
+    {  
+	avr::Interrupts_lock l;
+	return unsafe_value();
+    }
+
     /// Hace que el counter = 0.
-    static void reset() { Timer::counter(0); }
+    static void unsafe_reset() { Timer::unsafe_counter(0); }
+    static void safe_reset() 
+    { 
+	avr::Interrupts_lock l;
+	unsafe_reset();
+    }
 
     /// Define el top del counter.
-    static void top(counter_type top)
-    {Timer::output_compare_register_A(top);}
+    static void unsafe_top(counter_type top)
+    {Timer::unsafe_output_compare_register_A(top);}
+
+    static void safe_top(counter_type top)
+    {
+	avr::Interrupts_lock l;
+	unsafe_top(top);
+    }
 
     /// Valor del top
-    static counter_type top()
-    { return Timer::output_compare_register_A(); }
+    static counter_type unsafe_top()
+    { return Timer::unsafe_output_compare_register_A(); }
+
+    static counter_type safe_top()
+    { 
+	avr::Interrupts_lock l;
+	return Timer::unsafe_output_compare_register_A(); 
+    }
 
     /// Valor máximo que puede tener el top.
     static constexpr counter_type max_top()
     { return Timer::max(); }
 };
+
 
 
 // TODO: eliminar Generic_timer a favor de clases particulares.
@@ -138,6 +179,8 @@ public:
 //	           Al usar interrupciones no es código genérico.
 //
 //	    
+//  TODO: irlo migrando poco a poco. Lo dejo como ejemplo.
+//  Cuando ya esté todo migrado eliminarlo.
 template <>
 class Generic_timer<avr::Timer1>{
 public:
@@ -190,6 +233,8 @@ public:
 // que cuenta tiempo.
 
 
+// TODO: Obsoleto: usar Generic_timer_counter 
+//       A día de hoy lo uso en Clock. Reescribir.
 // Timer counter mode
 // ------------------
 // En este modo el timer se limita a contar tiempo. 
@@ -204,18 +249,26 @@ public:
 
     /// Devuelve el valor del contador en ticks.
     static counter_type timer_counter() 
-    { return Timer::counter(); }
+    {
+	avr::Interrupts_lock l; // TODO: safe/unsafe
+	return Timer::unsafe_counter(); }
     
     /// Hace que el counter = 0.
-    static void timer_counter_reset() { Timer::counter(0); }
+    static void timer_counter_reset() { 
+	avr::Interrupts_lock l; // TODO: safe/unsafe
+	Timer::unsafe_counter(0); }
 
     /// Define el top del counter.
     static void timer_counter_top(counter_type top)
-    {Timer::output_compare_register_A(top);}
+    {
+	avr::Interrupts_lock l; // TODO: safe/unsafe
+	Timer::unsafe_output_compare_register_A(top);}
 
     /// Valor del top
     static counter_type timer_counter_top()
-    { return Timer::output_compare_register_A(); }
+    { 
+	avr::Interrupts_lock l; // TODO: safe/unsafe
+	return Timer::unsafe_output_compare_register_A(); }
 
     /// Valor máximo que puede tener el top.
     static constexpr counter_type timer_counter_max_top()
@@ -227,8 +280,11 @@ public:
 // ----------------
     static void mode_square_wave(){ Timer::mode_CTC_top_ICR1();}
 
+    // TODO: cambiar a safe/unsafe
     static void square_wave_top(Scalar x)
-    { Timer::input_capture_register(atd::to_integer<counter_type>(x));}
+    { 
+	avr::Interrupts_lock l;
+	Timer::unsafe_input_capture_register(atd::to_integer<counter_type>(x));}
 
     /// Devuelve el valor mínimo que puede tomar el top
     static constexpr counter_type square_wave_min_top()
@@ -238,8 +294,11 @@ public:
     static constexpr counter_type square_wave_max_top()
     { return Timer::max();}
 
+    // TODO: cambiar a safe/unsafe
     static counter_type square_wave_top()
-    { return Timer::input_capture_register();}
+    {
+	avr::Interrupts_lock l;
+	return Timer::unsafe_input_capture_register();}
     
     static void square_wave_ch1_on()
     { Timer::CTC_pin_A_toggle_on_compare_match(); }
@@ -297,14 +356,15 @@ public:
     // configuración
     static void PWM_top(Scalar top)
     { 
+	avr::Interrupts_lock l; // TODO: safe/unsafe
 	switch(mode_){
 	    case Mode::only_channel2:
-                Timer::output_compare_register_A(
+                Timer::unsafe_output_compare_register_A(
 					atd::to_integer<counter_type>(top));
                 break;
 
 	    case Mode::both_channels:
-                Timer::input_capture_register(
+                Timer::unsafe_input_capture_register(
 					atd::to_integer<counter_type>(top));
                 break;
 
@@ -327,12 +387,13 @@ public:
 
     static counter_type PWM_top() 
     {
+	avr::Interrupts_lock l; // TODO: safe/unsafe
 	switch(mode_){
 	    case Mode::only_channel2:
-		return Timer::output_compare_register_A();
+		return Timer::unsafe_output_compare_register_A();
 
 	    case Mode::both_channels:
-		return Timer::input_capture_register();
+		return Timer::unsafe_input_capture_register();
 
 	    case Mode::fix_0x00FF:
 		return counter_type{0x00FF};
@@ -349,12 +410,13 @@ public:
 
     static void PWM_ch1_duty_top(Scalar duty_top)
     {
+	avr::Interrupts_lock l; // TODO: safe/unsafe
 	switch(mode_){
 	    case Mode::both_channels:
 	    case Mode::fix_0x00FF:
 	    case Mode::fix_0x01FF:
 	    case Mode::fix_0x03FF:
-		Timer::output_compare_register_A(
+		Timer::unsafe_output_compare_register_A(
 				    atd::to_integer<counter_type>(duty_top));
 		break;
 
@@ -366,12 +428,13 @@ public:
 
     static counter_type PWM_ch1_duty_top()
     {
+	avr::Interrupts_lock l; // TODO: safe/unsafe
 	switch(mode_){
 	    case Mode::both_channels:
 	    case Mode::fix_0x00FF:
 	    case Mode::fix_0x01FF:
 	    case Mode::fix_0x03FF:
-		return Timer::output_compare_register_A();
+		return Timer::unsafe_output_compare_register_A();
 
 	    case Mode::only_channel2:
 		// ERROR: en only_channel2 no tiene sentido duty_top
@@ -384,12 +447,15 @@ public:
     // En todos los modos de funcionamiento OCRB contiene el duty_top
     static void PWM_ch2_duty_top(Scalar duty_top)
     {
-        Timer::output_compare_register_B(
+	avr::Interrupts_lock l; // TODO: safe/unsafe
+        Timer::unsafe_output_compare_register_B(
 				    atd::to_integer<counter_type>(duty_top));
     }
 
     static counter_type PWM_ch2_duty_top()
-    {return Timer::output_compare_register_B();}
+    {
+	avr::Interrupts_lock l; // TODO: safe/unsafe
+	return Timer::unsafe_output_compare_register_B();}
 
 
     // modos de funcionamiento

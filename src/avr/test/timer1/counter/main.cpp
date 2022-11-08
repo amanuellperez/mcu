@@ -21,6 +21,8 @@
 #include "../../../avr_UART.h"
 #include "../../../avr_timer1_basic.h"
 #include "../../../avr_time.h"
+#include "../../../avr_interrupt.h"
+
 
 #include <atd_ostream.h>
 #include <stdlib.h>
@@ -110,7 +112,7 @@ int main()
 	uint32_t c;
 	{// lo más atómico posible
 	    avr::Interrupts_lock l;
-	    v = Timer::counter();
+	    v = Timer::unsafe_counter();
 	    c = contador;
 	}
 	

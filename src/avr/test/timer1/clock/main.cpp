@@ -21,6 +21,7 @@
 #include "../../../avr_UART.h"
 #include "../../../avr_timer1_basic.h"
 #include "../../../avr_time.h"
+#include "../../../avr_interrupt.h"
 
 #include <time.h>
 
@@ -86,7 +87,10 @@ int main()
 
 
     Timer::mode_CTC_top_OCR1A();
-    Timer::output_compare_register_A(ocr1a);
+    {
+	avr::Interrupts_lock l;
+	Timer::unsafe_output_compare_register_A(ocr1a);
+    }
 
     init_time();
     Timer::on<period_in_us>();

@@ -42,7 +42,7 @@
  *                implementar: basta leer la datasheet e ir traduciéndola a
  *                código.
  *                
- *    17/11/2022  disable_..._interrupt()
+ *    07/11/2022  disable_..._interrupt()
  *		  Y no era un traductor puro, ya que al activar las
  *		  interrupciones también activaba las interrupciones
  *		  del avr, cosa que no viene en la datasheet. Recordar
@@ -51,6 +51,17 @@
  *		  aquí estoy añadiendo la posibilidad de pasar la
  *		  frecuencia de trabajo del Timer en lugar de usar los
  *		  divisores de frecuencia).
+ *
+ *    08/11/2022  Lo dejo como traductor puro. 
+ *		  Para simplificar el uso estaba bloqueando las
+ *		  interrupciones al acceder a los registros de 16 bits.
+ *		  Sin embargo, eso hace que la lectura se ralentice, afectando
+ *		  la eficiencia del programa. Además, en la datasheet habla de
+ *		  que hay que bloquear las interrupciones: esto es un
+ *		  traductor, NO tiene que cambiar la funcionalidad. Da la
+ *		  impresión de que es mejor bloquear las interrupciones en el
+ *		  Generic_timer.
+ *
  *	
  *  DUDA: meter todas las funciones dentro de un .cpp (???)
  *
@@ -60,7 +71,6 @@
 #include <atd_bit.h>
 #include <atd_type_traits.h>
 
-#include "avr_interrupt.h"
 #include "avr_cfg.h"
 #include "avr_pin.h"
 
@@ -178,17 +188,30 @@ public:
 
 
 // ACCESO A REGISTROS
-    static counter_type counter();		/// Lectura del counter.
-    static void counter(counter_type x);	/// Escritura del counter.
+// (RRR) ¿Por qué llamarlos unsafe_?
+//       Por una parte quiero que sea un traductor puro ==> no debo de
+//       bloquear las interrupciones cuando lea los registros de 16 bits.
+//       Por otra parte dentro de 6 meses cuando quiera usar este Timer no voy
+//       a recordar en qué funciones tengo que bloquear las interrupciones
+//       antes de llamarlas: necesito marcar todas estas funciones. Por ello,
+//       pruebo a llamarlas `unsafe_` para saber que tengo que bloquear las
+//       interrupciones obligatoriamente antes de llamarlas.
+    /// Importante: según la datasheet, pag. 153,  al leer los uint16_t 
+    /// hay que bloquear las interrupciones. Recordar bloquearlos!!!
+    static counter_type unsafe_counter();		/// Lectura del counter.
+    static void unsafe_counter(counter_type x);	/// Escritura del counter.
 
-    static counter_type output_compare_register_A();      /// read OCRA
-    static void output_compare_register_A(counter_type x);/// write OCRA
+    // Bloquear las interrupciones antes de leer/escribir estos registros
+    static counter_type unsafe_output_compare_register_A();      /// read OCRA
+    static void unsafe_output_compare_register_A(counter_type x);/// write OCRA
 
-    static counter_type output_compare_register_B();      /// read OCRB
-    static void output_compare_register_B(counter_type x);/// write OCRB
+    // Bloquear las interrupciones antes de leer/escribir estos registros
+    static counter_type unsafe_output_compare_register_B();      /// read OCRB
+    static void unsafe_output_compare_register_B(counter_type x);/// write OCRB
 
-    static counter_type input_capture_register();	 /// Lectura del ICR.
-    static void input_capture_register(counter_type x);/// Escritura del ICR.
+    // Bloquear las interrupciones antes de leer/escribir estos registros
+    static counter_type unsafe_input_capture_register();	 /// Lectura del ICR.
+    static void unsafe_input_capture_register(counter_type x);/// Escritura del ICR.
 
 // WAVEFORM GENERATION MODES (table 20-6)
 // normal mode
@@ -536,65 +559,70 @@ inline Frequency Timer1::clock_frequency()
 // Devuelve el valor del contador.
 // Importante: según la datasheet, pag. 153,  al leer los uint16_t 
 // hay que bloquear las interrupciones. Por eso el lock.  
-inline Timer1::counter_type Timer1::counter() 
+inline Timer1::counter_type Timer1::unsafe_counter() 
 {
-    Interrupts_lock l;
-    auto res = TCNT1;
-
-    return res;
+//    Interrupts_lock l;
+//    auto res = TCNT1;
+//
+//    return res;
+    return TCNT1;
 }
 
-inline void Timer1::counter(Timer1::counter_type x) 
+inline void Timer1::unsafe_counter(Timer1::counter_type x) 
 {
-    Interrupts_lock l;
+//    Interrupts_lock l;
     TCNT1 = x;
 }
 
 
-inline Timer1::counter_type Timer1::output_compare_register_A() 
+inline Timer1::counter_type Timer1::unsafe_output_compare_register_A() 
 {
-    Interrupts_lock l;
-    auto res = OCR1A;
-
-    return res;
+//    Interrupts_lock l;
+//    auto res = OCR1A;
+//
+//    return res;
+    return OCR1A;
 }
 
 // Escribimos x en el comparador A
-inline void Timer1::output_compare_register_A(Timer1::counter_type x)
+inline void Timer1::unsafe_output_compare_register_A(Timer1::counter_type x)
 {
-    Interrupts_lock l;
+//    Interrupts_lock l;
     OCR1A = x;
 }
 
 
-inline Timer1::counter_type Timer1::output_compare_register_B() 
+inline Timer1::counter_type Timer1::unsafe_output_compare_register_B() 
 {
-    Interrupts_lock l;
-    auto res = OCR1B;
+//    Interrupts_lock l;
+//    auto res = OCR1B;
+//
+//    return res;
 
-    return res;
+    return OCR1B;
 }
 
 // Escribimos x en el comparador B
-inline void Timer1::output_compare_register_B(Timer1::counter_type x)
+inline void Timer1::unsafe_output_compare_register_B(Timer1::counter_type x)
 {
-    Interrupts_lock l;
+//    Interrupts_lock l;
     OCR1B = x;
 }
 
 
-inline Timer1::counter_type Timer1::input_capture_register() 
+inline Timer1::counter_type Timer1::unsafe_input_capture_register() 
 {
-    Interrupts_lock l;
-    auto res = ICR1;
-
-    return res;
+//    Interrupts_lock l;
+//    auto res = ICR1;
+//
+//    return res;
+    return ICR1;
 }
 
 // Escribimos x en el comparador B
-inline void Timer1::input_capture_register(Timer1::counter_type x)
+inline void Timer1::unsafe_input_capture_register(Timer1::counter_type x)
 {
-    Interrupts_lock l;
+//    Interrupts_lock l;
     ICR1 = x;
 }
 
