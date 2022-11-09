@@ -303,7 +303,9 @@ ningún problema.
     
    Para darle los permisos correspondientes:
 
-   `$ sudo usermod -a -G dialout alp`
+   `$ sudo usermod -a -G dialout <tu_userid>`
+
+    (<tu_userid> es el resultado de ejecutar `whoami`)
 
    No olvidar reiniciar el ordendador.
 

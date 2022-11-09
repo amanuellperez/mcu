@@ -228,17 +228,29 @@ public:
     static constexpr counter_type square_wave_max_top()
     { return Timer::max();}
     
-    static void square_wave_ch1_on()
+    //static void square_wave_ch1_on() <-- TODO: borrarlo cuando actualize
+                                             //  Timer1
+    static void square_wave_connect_ch1()
     { Timer::CTC_pin_A_toggle_on_compare_match(); }
 
-    static void square_wave_ch2_on()
+    static void square_wave_connect_ch2()
     { Timer::CTC_pin_B_toggle_on_compare_match(); }
 
-    static void square_wave_ch1_off()
-    { Timer::pin_A_disconnected(); }
+    /// Desconecta el pin ch1 del Timer, sin apagarlo.
+    // La operatividad será: 
+    //	    1. configuras el Square_wave_generator
+    //	    2. conectas el Timer al canal 1 (y/o 2)
+    //	    3. enciendes el Timer
+    //	    ...
+    //	    Puedes desconectar los pines al Timer como quieras
+    static void square_wave_disconnect_ch1()
+    { Timer::pin_A_disconnected();}
 
-    static void square_wave_ch2_off()
+
+    /// Desconecta el pin ch2 del Timer, sin apagarlo.
+    static void square_wave_disconnect_ch2()
     { Timer::pin_B_disconnected(); }
+
 
 
 // PWM mode
