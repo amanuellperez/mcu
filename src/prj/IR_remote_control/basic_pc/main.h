@@ -39,14 +39,12 @@ public:
     Main();
     void run();
     
-//    static constexpr int8_t max_num_data = 1000;
 
 private:
 // Hardware: 
 //    Timers timer;    <-- ahora no tiene constructor. ¿lo defino para init
 //    automático?
     IR_receiver receiver;  // no lo uso, solo uso su constructor, no lo puedo comentar
-    IR_transmitter transmitter;  //    idem que receiver
 
 
 

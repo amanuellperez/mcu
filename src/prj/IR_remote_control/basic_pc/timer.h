@@ -16,36 +16,24 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#pragma once
 
-#include "main.h"
+#ifndef __TIMER_H__
+#define __TIMER_H__
 
-// ¿Dónde poner este warning? Si lo pongo en dev.h se genera el warning al
-// compilar todos los ficheros, lo cual ocultaría warnings reales. De momento
-// lo dejo aquí.
-#if F_CPU==8000000UL
-#pragma GCC warning "Micro in 8MHz: remember to execute `make set_fast_fuse`"
+#include "dev.h"
+
+#undef wait_ms
+#undef wait_us
+
+// TODO: Esto es Clock_us (de 0 a max_top): migrarlo a clase y generalizarlo
+//	 Parametrizarlo con el timer.
+//	 Si introduzco la interrupción, generamos un clock con mayor
+//	 resolución.
+void timer_on();
+void timer_wait_us(Timer::counter_type t);
+inline void timer_off(){ Timer::off(); }
+
+
+
 #endif
-
-void Main::init_uart()
-{
-    avr::UART_iostream uart;
-    avr::basic_cfg(uart);
-    uart.on();
-}
-
-
-Main::Main()
-{
-    init_uart();
-    Timer::safe_init();
-}
-
-
-int main()
-{
-    Main app;
-    app.run();
-}
-
-
-

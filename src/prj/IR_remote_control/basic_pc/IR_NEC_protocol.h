@@ -21,12 +21,22 @@
 #include <iostream>
 #include <atd_array.h>
 #include "pulse.h"
+#include "dev.h"    // Timer::counter_type
 
 // Un mensaje es un array de pulsos
 bool is_NEC_protocol(const atd::CArray_view<Pulse>& pulses);
 bool print_NEC_protocol(std::ostream& out, const atd::CArray_view<Pulse>& pulses);
 bool print_min_NEC_protocol(std::ostream& out, const atd::CArray_view<Pulse>& pulses);
 
+struct NEC_message{
+    uint8_t address;
+    uint8_t inv_address;
+    uint8_t command;
+    uint8_t inv_command;
+};
+
+void transmit(Timer::counter_type time_first_burst_in_us
+	     , const NEC_message& msg);
 
 // Devuelve true si a = b +- 20%
 // Esto es, si b - 20% <= a <= b + 20%

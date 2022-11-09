@@ -18,11 +18,23 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "main.h"
+#include "IR_NEC_protocol.h"
 
 void Main::transmit_data()
 {
     avr::UART_iostream uart;
-    uart << "transmit_data\n";
-    transmit_pulses(pulse);
+    uart << "Transmit_data\n";
+
+    // NEC_message msg{0xFF, 0xFF, 0xFF, 0xFF};
+    // NEC_message msg{0xE0, 0xE0, 0xD0, 0x2F}; // bajar volumen
+//    NEC_message msg{0xE0, 0xE0, 0xE0, 0x1F}; // subir volumen
+    NEC_message msg{0x00, 0x30, 0x0D, 0xF2}; // bajar volumen
+
+    while(true){
+	uart << "Envio\n";
+    transmit(9000, msg); // pasar la longitud del primer burst
+    wait_ms(1000);
+
+    }
 }
 

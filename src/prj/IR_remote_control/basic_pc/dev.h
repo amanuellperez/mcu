@@ -23,9 +23,6 @@
 #ifndef __DEV_H__
 #define __DEV_H__
 
-#if F_CPU==8000000UL
-#pragma GCC warning "Micro in 8MHz: remember to execute `make set_fast_fuse`"
-#endif
 
 // En dev.h metemos todas las dependencias con el hardware.
 // El resto del programa NO tiene que saber qué dispositivos concretos usamos. 
@@ -41,9 +38,10 @@
 // using UART: pins 2 and 3
 // available: 4-6
 // VCC and GND: 7, 8
-// available: 9-13
-constexpr uint8_t ir_transmitter_pin = 14;
-
+// available: 9-11
+constexpr uint8_t ir_transmitter_pin = 12; // Timer0::OCA
+					   
+// available: 13-14
 constexpr uint8_t ir_receiver_pin = 15;
 #define ISR_RECEIVER_PIN ISR_PCINT_PIN15
 
@@ -57,18 +55,16 @@ constexpr uint8_t ir_receiver_pin = 15;
 
 // Hardware connections
 // --------------------
-// Necesito contar tiempos hasta 2300 us, por eso no vale el Timer0.
-using Receiver_timer = dev::Generic_timer_counter<avr::Timer1>;
-#define ISR_RECEIVER_TIMER_OVF ISR_TIMER1_OVF
+// Voy a usar el Timer1 para medir tiempo < Timer1::max(). Dos funciones:
+//	1. Esperar: wait_ms/wait_us 
+//	2. Generar un time_out.	    
+using Timer = dev::Generic_timer_counter<avr::Timer1>;
 
-// Necesitamos generar una señal de 38kHz con este timer, lo que supone un
-// semiperiodo de 13 us, menor del valor máximo de 255 us de este timer.
-// NOTA: se puede usar el timer1 ya que usamos interrupciones distintas.
-using Transmit_timer = dev::Generic_timer_counter<avr::Timer0>;
-#define ISR_TRANSMIT_TIMER_OVF ISR_TIMER0_COMPA
+// El Timer0 lo uso para generar la señal de 38kHz.
+using Transmit_timer = dev::Generic_timer<avr::Timer0>;
+
 
 using IR_receiver    = avr::Input_pin_without_pullup<ir_receiver_pin>;
-using IR_transmitter = avr::Output_pin<ir_transmitter_pin>;
 
 
 #endif

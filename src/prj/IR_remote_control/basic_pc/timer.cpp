@@ -16,35 +16,23 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#include "timer.h"
 
-#include "main.h"
-
-// ¿Dónde poner este warning? Si lo pongo en dev.h se genera el warning al
-// compilar todos los ficheros, lo cual ocultaría warnings reales. De momento
-// lo dejo aquí.
-#if F_CPU==8000000UL
-#pragma GCC warning "Micro in 8MHz: remember to execute `make set_fast_fuse`"
-#endif
-
-void Main::init_uart()
+void timer_on()
 {
-    avr::UART_iostream uart;
-    avr::basic_cfg(uart);
-    uart.on();
+    Timer::safe_top(Timer::max_top());
+    Timer::on<1>();
 }
 
-
-Main::Main()
+void timer_wait_us(Timer::counter_type t)
 {
-    init_uart();
-    Timer::safe_init();
-}
+    avr::Interrupts_lock lock;
 
+    Timer::unsafe_reset();
+    
+    while (Timer::unsafe_value() < t)
+    { ; }
 
-int main()
-{
-    Main app;
-    app.run();
 }
 
 

@@ -27,11 +27,11 @@ void Main::run()
 	::receive_pulses(pulse);
 	choose_mode_operation();
 	switch(mode){
-	    break; case Work_mode::help: print_instructions();
-	    break; case Work_mode::receive_data: receive_data();
-	    break; case Work_mode::receive_min_data: receive_min_data();
-	    break; case Work_mode::receive_raw_data: receive_raw_data();
-	    break; case Work_mode::transmit_data: transmit_data();
+	    break; case Work_mode::help		    : print_instructions();
+	    break; case Work_mode::receive_data	    : receive_data();
+	    break; case Work_mode::receive_min_data : receive_min_data();
+	    break; case Work_mode::receive_raw_data : receive_raw_data();
+	    break; case Work_mode::transmit_data    : transmit_data();
 	}
 	
     }
