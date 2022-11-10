@@ -85,10 +85,10 @@ void Main::print_raw_data() const
 
     for (size_t i = 0; i < pulse.size; ++i){
 	uart <<  '(' << pulse[i].time_low << ", "
-	     << pulse[i].time_high << ") =  " << pulse[i].period();
+	     << pulse[i].time_high << ")\t= " << pulse[i].period();
 
 	if (i % 2)
-	    uart << '\t';
+	    uart << "\t\t";
 	else
 	    uart << '\n';
 

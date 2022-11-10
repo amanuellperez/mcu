@@ -154,7 +154,9 @@ bool print_NEC_protocol(std::ostream& out, const atd::CArray_view<Pulse>& pulse)
 	    "---\n";
 
 
-    ++p;    // quitamos el start pulse
+    out <<   "First pulse     : (" << p->time_low << ", " << p->time_high << ") us\n";
+    ++p;   
+
     out <<   "Address         : ";
     p = print_NEC_byte(out, p, pe);
 
@@ -207,7 +209,7 @@ bool print_min_NEC_protocol(std::ostream& out
     if (p == pe)
 	return false;
 
-    out << "NEC: ";
+    out << "NEC(" << p->time_low << "): ";
 
 
     ++p;    // quitamos el start pulse

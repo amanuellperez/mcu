@@ -2,9 +2,9 @@ BIN = xx
 
 SOURCES= main.cpp 			\
 		receive_pulses.cpp	\
-		print_data.cpp		\
-		timer.cpp			\
+		receive_data.cpp	\
 		transmit_data.cpp	\
+		timer.cpp			\
 		IR_NEC_print.cpp	\
 		IR_NEC_transmit.cpp	\
 		run.cpp

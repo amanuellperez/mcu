@@ -26,10 +26,57 @@
 /***************************************************************************
  *			    FUNCIONES AUXILIARES
  ***************************************************************************/
-// src = tiempo de duración del pulso
-// is_one  = indica si el tiempo mide un pulso high or low
-// El array que devolvemos es un array de pulsos: low-high (y no high-low).
-static void copy(volatile uint16_t* src, volatile bool* is_one, int16_t n
+// Comprueba que la sucesión de niveles es alternada: 0,1,0,1,...
+static bool check(bool polarity, volatile bool* level, int16_t n)
+{ 
+    if (n <= 0)
+	return true;
+
+    bool last_level = polarity;
+
+    for (int16_t i = 0; i < n; ++i){
+	if (level[i] == last_level)
+	    return false;
+
+	last_level = level[i];
+    }
+
+    return true;
+}
+
+
+// precondition: n > 0
+// Observar que en caso de que se haya recibido mal el último pulso, no lo
+// anotamos.
+static void copy_polarity1(volatile uint16_t* src, int16_t n
+		, atd::CArray_view<Pulse>& dst)
+{
+    dst.size = std::min(static_cast<size_t>(n) / 2u, dst.max_size);
+
+    for (uint16_t i = 0; i < dst.size; ++i){
+	dst[i].time_low  = src[2*i];
+	dst[i].time_high = src[2*i + 1];
+    }
+}
+
+
+// precondition: n > 0
+// Observar que en caso de que se haya recibido mal el último pulso, no lo
+// anotamos.
+static void copy_polarity0(volatile uint16_t* src, int16_t n
+		, atd::CArray_view<Pulse>& dst)
+{
+    dst.size = std::min(static_cast<size_t>(n) / 2u, dst.max_size);
+
+    for (uint16_t i = 0; i < dst.size; ++i){
+	dst[i].time_high = src[2*i];
+	dst[i].time_low  = src[2*i + 1];
+    }
+}
+
+
+static void copy( bool polarity
+		, volatile uint16_t* src, int16_t n
 		, atd::CArray_view<Pulse>& dst)
 {
     if (n <= 0){
@@ -37,70 +84,28 @@ static void copy(volatile uint16_t* src, volatile bool* is_one, int16_t n
 	return;
     }
 
-    size_t N = static_cast<size_t>(n);
-    auto p = dst.ptr;
-    size_t i = 0;
-    if (is_one[0] == true){ // esto no es de esperar, el primer pulso debería ser low
-	p->time_low  =  0;
-	p->time_high = src[0];
-	++i;
-	++p;
-    }
-
-    dst.size = N / 2;
-    for (; i  + 1 < N; i += 2){
-	if (is_one[i] == false and is_one[i+1] == true){
-	    p->time_low  = src[i];
-	    p->time_high = src[i+1];
-	}
-	else{
-	    p->time_low  = 0;
-	    p->time_high = 0;
-	}
-	++p;
-    }
-
-    // Caso en que el último pulso leido sea LOW 
-    if (i < N){
-	++dst.size;
-
-	p->time_low = src[i];
-	p->time_high = 0; // <-- 0 para indicar que está sin leer
-    }
+    if (polarity)
+	copy_polarity1(src, n, dst);
+    else
+	copy_polarity0(src, n, dst);
 }
+
 
 
 /***************************************************************************
  *			    IMPLEMENTACIÓN
  ***************************************************************************/
-// Dependencias
-// ------------
-//  1. De hardware: (en dev.h)
-//	+ ir_receiver_pin
-//	+ avr	!
-//		 => esto es el hardware necesario para programar esto.
-//	+ Timer /
-//
-//  2. De software: (en cfg.h)
-//	+ num_max_pulses
+static constexpr int16_t buffer__size = num_max_pulses * 2;
+static volatile uint16_t buffer_[buffer__size];
+static volatile bool level_[buffer__size];
+static volatile int16_t nsemipulse_ = -1;
 
 
-// static volatile Timer::counter_type buffer[Main::max_num_data];
-static constexpr int16_t buffer_size = num_max_pulses * 2;
-static volatile uint16_t buffer[buffer_size];
-static volatile bool is_high[buffer_size];
-static volatile int16_t i = -1;
-
-static void reset_data()
+static void receive_semipulses()
 {
-    i = -1;
-}
+    static constexpr Timer::counter_type time_out{60000};
 
-
-
-void receive_pulses(atd::CArray_view<Pulse>& pulse)
-{
-    reset_data();
+    nsemipulse_ = -1;
 
     avr::Interrupt::enable_pin<ir_receiver_pin>();
 
@@ -108,11 +113,11 @@ void receive_pulses(atd::CArray_view<Pulse>& pulse)
     
     avr::enable_all_interrupts();
 
-    while (i < 0) { ; }	// esperamos a recibir algo
+    while (nsemipulse_ < 0) { ; }	// esperamos a recibir algo
 
     // while (Timer::safe_value() < Timer::max_top() <-- esto lo ralentiza (???)
-    while (Timer::safe_value() < Timer::counter_type{60000}
-		and i < buffer_size)
+    while (Timer::safe_value() < time_out
+		and nsemipulse_ < buffer__size)
     { ; }
 
 
@@ -122,11 +127,35 @@ void receive_pulses(atd::CArray_view<Pulse>& pulse)
 
     avr::Interrupt::disable_pin<ir_receiver_pin>();
 
-    copy(buffer, is_high, i, pulse);
+// anotamos el último semiperiodo
+    buffer_[nsemipulse_] = time_out;
+    level_ [nsemipulse_] = IR_receiver::is_one();
+    nsemipulse_ = nsemipulse_ + 1;
+
 
 }
 
-// (RRR) ¿por qué is_high[i]?
+// Generalicemos:
+//	Inicialmente la señal puede estar en 0 ó en 1. En el caso del IR
+//	estará en 1. A este valor lo llamo como en SPI la polarity.
+bool receive_pulses(atd::CArray_view<Pulse>& pulse)
+{
+    bool polarity = IR_receiver::is_one();
+
+    receive_semipulses();
+
+    if (!check(polarity, level_, nsemipulse_)){
+	pulse.size = 0;
+	return false;	// sin significado.
+    }
+
+    copy(polarity, buffer_, nsemipulse_, pulse);
+
+    return polarity;
+}
+
+
+// (RRR) ¿por qué level_[nsemipulse_]?
 //	 Al principio no llevaba control de si es HIGH o no, dando por
 //	 supuesto que siempre empezaba en LOW. Pero al probarlo resultó no ser
 //	 así: a veces empieza en HIGH, otras en LOW, no funcionando bien.
@@ -135,15 +164,15 @@ void receive_pulses(atd::CArray_view<Pulse>& pulse)
 //	 tipo de pulso que es.
 //
 //	 Si IR_receiver::is_one() quiere decir que el pin estaba en zero, luego NO
-//	 era HIGH ==> is_high = false.
+//	 era HIGH ==> level_ = false.
 ISR_RECEIVER_PIN {
-    if (i >= 0){
-	buffer[i]  = Timer::unsafe_value();
-	is_high[i] = !IR_receiver::is_one();
+    if (nsemipulse_ >= 0){
+	buffer_[nsemipulse_] = Timer::unsafe_value();
+	level_ [nsemipulse_] = !IR_receiver::is_one();
     }
 
     Timer::unsafe_reset();
-    i = i + 1;
+    nsemipulse_ = nsemipulse_ + 1;
 }
 
 
