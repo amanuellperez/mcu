@@ -10,6 +10,7 @@ DIRS = algorithm	\
 		double		\
 		eng_magnitude\
 		iobxtream	\
+		istream		\
 		magnitude	\
 		math		\
 		metronome	\

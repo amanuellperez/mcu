@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez 
+// Copyright (C) 2019-2022 A.Manuel L.Perez 
 //           mail: <amanuel.lperez@gmail.com>
 //           https://github.com/amanuellperez/mcu
 //
@@ -30,6 +30,7 @@
  *  - HISTORIA:
  *    A.Manuel L.Perez
  *	10/11/2019 read_as_int8_t
+ *	15/11/2022 read_int_as_hex
  *
  ****************************************************************************/
 #include <istream>
@@ -76,6 +77,65 @@ inline std::istream& operator>>(std::istream& in, _Read_as_int8_t x)
     return in;
 }
 
+
+
+/***************************************************************************
+ *				FORMATS
+ ***************************************************************************/
+static constexpr int hex2nibble_error__ = 0x10;
+
+template <typename Int>
+Int hex2nibble__(char c)
+{
+    switch(c){
+	break; case '0': return 0x00;
+	break; case '1': return 0x01;
+	break; case '2': return 0x02;
+	break; case '3': return 0x03;
+	break; case '4': return 0x04;
+	break; case '5': return 0x05;
+	break; case '6': return 0x06;
+	break; case '7': return 0x07;
+	break; case '8': return 0x08;
+	break; case '9': return 0x09;
+	break; case 'A': case 'a': return 0x0A;
+	break; case 'B': case 'b': return 0x0B;
+	break; case 'C': case 'c': return 0x0C;
+	break; case 'D': case 'd': return 0x0D;
+	break; case 'E': case 'e': return 0x0E;
+	break; case 'F': case 'f': return 0x0F;
+	break; default : return Int{hex2nibble_error__};
+    }
+
+}
+
+// Esta es la inversa a print_int_as_hex
+// Lee una cadena de caracteres de istream que representa un número en
+// hexadecimal y la convierte a Int
+// El número tiene que empezar con '0x'
+template <typename Int>
+std::istream& read_int_as_hex(std::istream& in, Int& x)
+{
+    x = Int{0};
+
+    char c{};
+    if (in.get(c) and c == '0'){
+	if (in.get(c) and c == 'x'){
+	    while (in.get(c)){
+		Int d = hex2nibble__<Int>(c);
+		if (d == Int{hex2nibble_error__})
+		    return in;
+
+		x = x*Int{16} + d;
+	    }
+
+	    return in;
+	}
+    }
+
+    in.setstate(std::ios_base::failbit);
+    return in;
+}
 
 
 }// namespace
