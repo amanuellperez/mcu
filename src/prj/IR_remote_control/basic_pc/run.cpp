@@ -18,8 +18,42 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "main.h"
+#include "square_wave.h"
 
 void Main::run()
+{
+    while (1){
+	avr::UART_iostream uart;
+	uart << "Menu\n"
+		"----\n"
+		"1. Generate 38kHz on pin " << ir_transmitter_pin << '\n'
+	     << "2. Transmit data\n"
+		"3. Receive data\n";
+	
+	char c{};
+	uart >> c;
+	switch (c){
+	    break; case '1' : generate_38kHz();
+	    break; case '2' : transmit_data();
+	    break; default: receive_data_menu();
+	}
+    }
+}
+
+void Main::generate_38kHz()
+{
+    generate_38kHz_on<Transmit_timer>();
+
+    avr::UART_iostream uart;
+    uart << "Generating 38kHz. Press a key to stop.\n";
+    char c{};
+    uart >> c;
+
+    generate_38kHz_off<Transmit_timer>();
+}
+
+
+void Main::receive_data_menu()
 {
     print_instructions();
 
@@ -31,7 +65,6 @@ void Main::run()
 	    break; case Work_mode::receive_data	    : receive_data();
 	    break; case Work_mode::receive_min_data : receive_min_data();
 	    break; case Work_mode::receive_raw_data : receive_raw_data();
-	    break; case Work_mode::transmit_data    : transmit_data();
 	}
 	
     }
@@ -49,8 +82,7 @@ void Main::print_instructions()
 	    "h. Show this menu\n"
 	    "1. Receive data (default)\n"
 	    "2. Receive data (minimal version)\n"
-	    "3. Receive and print RAW data\n"
-	    "4. Transmit data\n\n";
+	    "3. Receive and print RAW data\n\n";
 
     mode = Work_mode::receive_data;
 }
@@ -67,7 +99,6 @@ void Main::choose_mode_operation()
 	switch(c){
 	    break; case '2': mode = Work_mode::receive_min_data;
 	    break; case '3': mode = Work_mode::receive_raw_data;
-	    break; case '4': mode = Work_mode::transmit_data;
 	    break; case 'h': mode = Work_mode::help;
 	    break; default : mode = Work_mode::receive_data;
 	}

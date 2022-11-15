@@ -50,7 +50,7 @@ private:
 
 // Data
     enum class Work_mode{ help, receive_data, receive_min_data, 
-			  receive_raw_data, transmit_data};
+			  receive_raw_data};
 
     // Última lectura realizada
 //    Timer::counter_type data[max_num_data];
@@ -69,6 +69,7 @@ private:
     void read_pulses();
     void choose_mode_operation();
 
+    void receive_data_menu();
     void receive_data() const;
     void receive_min_data() const;
     void receive_raw_data() const;
@@ -76,6 +77,9 @@ private:
 
 // RAW (When we don't know the protocol)
     void print_raw_data() const;
+
+    void generate_38kHz();
+    void normal_operation();
 };
 
 

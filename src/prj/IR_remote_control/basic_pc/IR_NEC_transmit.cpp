@@ -24,14 +24,14 @@
 #include "pulse.h"
 #include "timer.h"
 #include "IR_NEC_protocol.h"
-
-
+#include "square_wave.h"
 
 
 void burst_38kHz_of(Timer::counter_type time_in_us)
 {
     using Square_wave = Transmit_timer;
-    constexpr Square_wave::counter_type T = 1000 / 38; // freq = 38kHz
+    // constexpr Square_wave::counter_type T = 1000 / (38 * 2); // freq = 38kHz
+    constexpr Square_wave::counter_type T = freq_in_kHz_to_top<Square_wave>(38);
 
     Square_wave::mode_square_wave();
     Square_wave::square_wave_top(T); 
@@ -82,6 +82,7 @@ static void transmit_one(Timer::counter_type time_first_burst_in_us,
     NEC_transmit_byte(msg.command);
     NEC_transmit_byte(msg.inv_command);
 
+    burst_38kHz_of(562);
 
 }
 
@@ -90,10 +91,10 @@ void transmit(Timer::counter_type time_first_burst_in_us,
 	      const NEC_message& msg)
 {
     timer_on();
-    for (uint8_t i = 0; i < 3; ++i){
+//    for (uint8_t i = 0; i < 3; ++i){
 	transmit_one(time_first_burst_in_us,  msg);
-	timer_wait_us(30000);
-    }
+//	timer_wait_us(30000);
+//    }
     timer_off();
 }
 

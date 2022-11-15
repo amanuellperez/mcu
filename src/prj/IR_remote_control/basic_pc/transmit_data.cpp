@@ -23,16 +23,39 @@
 void Main::transmit_data()
 {
     avr::UART_iostream uart;
-    uart << "Transmit_data\n";
+    uart << "Transmit data\n"
+	    "-------------\n";
+
+    uart << "Protocol:\n"
+	    "(1) NEC (now the only option)\n\n";
+
+    uart << "Length of first burst:\n"
+	    "(1) 9.0 ms\n"
+	    "(2) 4.5 ms\n";
+
+    char res{};
+    uart >> res;
+    Timer::counter_type time_first_burst_in_us = 9000;
+
+    if (res == '2')
+	time_first_burst_in_us = 4500;
+
+    uart << "Message (write everything in hexadecimal):\n"
+	    "Address: ";
+
+//    NEC_message msg{0x00, 0x30, 0x0D, 0xF2}; // bajar volumen
+//    uart >> msg.address;
+//    uart << "Has escrito [" << msg.address << "]\n";
 
     // NEC_message msg{0xFF, 0xFF, 0xFF, 0xFF};
-    // NEC_message msg{0xE0, 0xE0, 0xD0, 0x2F}; // bajar volumen
-//    NEC_message msg{0xE0, 0xE0, 0xE0, 0x1F}; // subir volumen
-    NEC_message msg{0x00, 0x30, 0x0D, 0xF2}; // bajar volumen
+    NEC_message msg_down{0x07, 0x07, 0x0B, 0xF4}; // bajar volumen
+    NEC_message msg_up{0x07, 0x07, 0x07, 0xF8}; // subir volumen
 
     while(true){
 	uart << "Envio\n";
-    transmit(9000, msg); // pasar la longitud del primer burst
+    transmit(time_first_burst_in_us, msg_down); // pasar la longitud del primer burst
+    wait_ms(1000);
+    transmit(time_first_burst_in_us, msg_up); // pasar la longitud del primer burst
     wait_ms(1000);
 
     }
