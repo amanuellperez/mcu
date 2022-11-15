@@ -19,6 +19,32 @@
 
 #include "main.h"
 #include "IR_NEC_protocol.h"
+#include <atd_istream.h>    // read_int_as_hex
+#include <atd_ostream.h>    // print_int_as_hex
+
+static void read_NEC_message(NEC_message& msg)
+{
+    avr::UART_iostream uart;
+
+    uart << "Message (write everything in hexadecimal 0x...):\n";
+
+    uart << "Address: ";
+    atd::read_int_as_hex(uart, msg.address);
+    atd::print_int_as_hex(uart, msg.address);
+
+    uart << "\nInverted address: ";
+    atd::read_int_as_hex(uart, msg.inv_address);
+    atd::print_int_as_hex(uart, msg.inv_address);
+
+    uart << "\nCommand: ";
+    atd::read_int_as_hex(uart, msg.command);
+    atd::print_int_as_hex(uart, msg.command);
+
+    uart << "\nInverted command: ";
+    atd::read_int_as_hex(uart, msg.inv_command);
+    atd::print_int_as_hex(uart, msg.inv_command);
+}
+
 
 void Main::transmit_data()
 {
@@ -40,24 +66,11 @@ void Main::transmit_data()
     if (res == '2')
 	time_first_burst_in_us = 4500;
 
-    uart << "Message (write everything in hexadecimal):\n"
-	    "Address: ";
-
-//    NEC_message msg{0x00, 0x30, 0x0D, 0xF2}; // bajar volumen
-//    uart >> msg.address;
-//    uart << "Has escrito [" << msg.address << "]\n";
-
-    // NEC_message msg{0xFF, 0xFF, 0xFF, 0xFF};
-    NEC_message msg_down{0x07, 0x07, 0x0B, 0xF4}; // bajar volumen
-    NEC_message msg_up{0x07, 0x07, 0x07, 0xF8}; // subir volumen
-
-    while(true){
-	uart << "Envio\n";
-    transmit(time_first_burst_in_us, msg_down); // pasar la longitud del primer burst
-    wait_ms(1000);
-    transmit(time_first_burst_in_us, msg_up); // pasar la longitud del primer burst
-    wait_ms(1000);
-
-    }
+    NEC_message msg{0xFF, 0xFF, 0xFF, 0xFF};
+    read_NEC_message(msg);
+    
+    uart << "Sending: ";
+    uart << msg << '\n'; // si se pone a continuación del const char* da error!!!
+    transmit(time_first_burst_in_us, msg); // pasar la longitud del primer burst
 }
 

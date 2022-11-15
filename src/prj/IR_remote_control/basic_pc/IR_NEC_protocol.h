@@ -35,6 +35,9 @@ struct NEC_message{
     uint8_t inv_command;
 };
 
+std::ostream& operator<<(std::ostream& out, const NEC_message& msg);
+//std::ostream& operator<<(avr::UART_iostream& out, const NEC_message& msg);
+
 void transmit(Timer::counter_type time_first_burst_in_us
 	     , const NEC_message& msg);
 
