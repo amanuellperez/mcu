@@ -52,14 +52,8 @@ private:
     enum class Work_mode{ help, receive_data, receive_min_data, 
 			  receive_raw_data};
 
-    // Última lectura realizada
-//    Timer::counter_type data[max_num_data];
-//    int8_t num_data = 0; // número de datos válidos en el array data
-    // Le doy un nombre tan feo pulse_container para recordar NO usarlo
-    // directamente. 
-    Pulse pulse_container[num_max_pulses];
-    atd::CArray_view<Pulse> pulse{pulse_container, 0, num_max_pulses};
-    
+    // Última tren de pulsos leidos:
+    Train_of_pulses<num_max_pulses> pulse;
 
     Work_mode mode = Work_mode::receive_data;
 

@@ -543,6 +543,10 @@ public:
     bool empty() const {return ie_ == 0;}
     bool full () const {return ie_ == N;}
 
+    // Si se maneja el array como array de C se tiene que poder definir
+    // el número de elementos usados.
+    void size(size_type n) {ie_ = n;}
+
     size_type size() const {return ie_;}
     size_type capacity() const {return N;}
 
@@ -551,6 +555,10 @@ public:
 
     /// Borra el último elemento añadido.
     void pop_back();
+
+    /// Direct access to the underlying array
+    pointer data() { return ptr_; }
+    const_pointer data() const {return ptr_;}
 
 // Iterators
     iterator begin() {return ptr_;}
@@ -625,6 +633,8 @@ public:
     CArray_view(T* p0, size_type sz, size_type max_sz)
 	: ptr_{p0}, size_{sz}, max_size_{max_sz} { }
 
+    template <size_t N>
+    CArray_view(CArray<T, N>& x) : CArray_view{x.data(), x.size(), N} { }
 
     reference operator[] (size_type i) {return ptr_[i];}
     const_reference operator[] (size_type i) const {return ptr_[i];}

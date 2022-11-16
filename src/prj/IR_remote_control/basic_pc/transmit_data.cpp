@@ -69,7 +69,7 @@ void Main::transmit_data()
     NEC_message msg{0xFF, 0xFF, 0xFF, 0xFF};
     read_NEC_message(msg);
     
-    uart << "Sending: ";
+    uart << "\nSending: ";
     uart << msg << '\n'; // si se pone a continuación del const char* da error!!!
     transmit(time_first_burst_in_us, msg); // pasar la longitud del primer burst
 }

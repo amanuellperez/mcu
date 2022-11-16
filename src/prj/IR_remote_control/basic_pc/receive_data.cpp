@@ -25,7 +25,7 @@ void Main::receive_data() const
 {
     avr::UART_iostream uart;
     
-    if (pulse.size == 0){
+    if (pulse.empty()){
 	uart << "No data received.\n";
 	return;
     }
@@ -42,7 +42,7 @@ void Main::receive_min_data() const
 {
     avr::UART_iostream uart;
     
-    if (pulse.size == 0){
+    if (pulse.empty()){
 	uart << "No data received.\n";
 	return;
     }
@@ -58,7 +58,7 @@ void Main::receive_raw_data() const
 {
     avr::UART_iostream uart;
     
-    if (pulse.size == 0){
+    if (pulse.empty()){
 	uart << "No data received.\n";
 	return;
     }
@@ -75,7 +75,7 @@ void Main::print_raw_data() const
 
     uart << "\n\n------------------------------\n"
 	 << "RAW data: (time_low, time_high) = period\n"
-	 << "num pulses = " << pulse.size << '\n';
+	 << "num pulses = " << pulse.size() << '\n';
 
     if (pulse.full())
 	uart << "ERROR: se ha llenado el buffer de datos.\n"
@@ -83,7 +83,9 @@ void Main::print_raw_data() const
 
 
 
-    for (size_t i = 0; i < pulse.size; ++i){
+    uart << "Polarity = " << (int) pulse.polarity() << '\n';
+
+    for (size_t i = 0; i < pulse.size(); ++i){
 	uart <<  '(' << pulse[i].time_low << ", "
 	     << pulse[i].time_high << ")\t= " << pulse[i].period();
 
@@ -97,7 +99,7 @@ void Main::print_raw_data() const
     }
     uart << '\n';
 
-    uart << "\nTotal number of pulses: " << pulse.size << '\n'
+    uart << "\nTotal number of pulses: " << pulse.size() << '\n'
 	 << "------------------------------\n";
 }
 

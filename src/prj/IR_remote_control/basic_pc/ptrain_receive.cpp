@@ -17,6 +17,11 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+// ptrain: train of pulses
+//	   Recibimos un tren de pulsos
+//
+// Este módulo está parametrizado por:
+//		Timer e ir_receiver_pin
 #include <algorithm>
 
 #include "dev.h"
@@ -27,7 +32,7 @@
  *			    FUNCIONES AUXILIARES
  ***************************************************************************/
 // Comprueba que la sucesión de niveles es alternada: 0,1,0,1,...
-static bool check(bool polarity, volatile bool* level, int16_t n)
+static bool check(uint8_t polarity, volatile bool* level, int16_t n)
 { 
     if (n <= 0)
 	return true;
@@ -48,46 +53,49 @@ static bool check(bool polarity, volatile bool* level, int16_t n)
 // precondition: n > 0
 // Observar que en caso de que se haya recibido mal el último pulso, no lo
 // anotamos.
-static void copy_polarity1(volatile uint16_t* src, int16_t n
-		, atd::CArray_view<Pulse>& dst)
+static uint16_t copy_polarity1(volatile uint16_t* src, int16_t n
+		, Pulse* dst, uint16_t N)
 {
-    dst.size = std::min(static_cast<size_t>(n) / 2u, dst.max_size);
+    uint16_t size = std::min(static_cast<size_t>(n) / 2u, N);
 
-    for (uint16_t i = 0; i < dst.size; ++i){
+    for (uint16_t i = 0; i < size; ++i){
 	dst[i].time_low  = src[2*i];
 	dst[i].time_high = src[2*i + 1];
     }
+
+    return size;
 }
 
 
 // precondition: n > 0
 // Observar que en caso de que se haya recibido mal el último pulso, no lo
 // anotamos.
-static void copy_polarity0(volatile uint16_t* src, int16_t n
-		, atd::CArray_view<Pulse>& dst)
+static uint16_t copy_polarity0(volatile uint16_t* src, int16_t n
+		, Pulse* dst, uint16_t N)
 {
-    dst.size = std::min(static_cast<size_t>(n) / 2u, dst.max_size);
+    uint16_t size = std::min(static_cast<size_t>(n) / 2u, N);
 
-    for (uint16_t i = 0; i < dst.size; ++i){
+    for (uint16_t i = 0; i < size; ++i){
 	dst[i].time_high = src[2*i];
 	dst[i].time_low  = src[2*i + 1];
     }
+
+    return size;
 }
 
 
-static void copy( bool polarity
+static uint16_t copy( uint8_t polarity
 		, volatile uint16_t* src, int16_t n
-		, atd::CArray_view<Pulse>& dst)
+		, Pulse* dst, uint16_t N)
 {
-    if (n <= 0){
-	dst.size = 0;
-	return;
-    }
+    if (n <= 0)
+	return 0;
 
     if (polarity)
-	copy_polarity1(src, n, dst);
+	return copy_polarity1(src, n, dst, N);
+
     else
-	copy_polarity0(src, n, dst);
+	return copy_polarity0(src, n, dst, N);
 }
 
 
@@ -95,9 +103,9 @@ static void copy( bool polarity
 /***************************************************************************
  *			    IMPLEMENTACIÓN
  ***************************************************************************/
-static constexpr int16_t buffer__size = num_max_pulses * 2;
-static volatile uint16_t buffer_[buffer__size];
-static volatile bool level_[buffer__size];
+static constexpr int16_t buffer_size = num_max_pulses * 2;
+static volatile uint16_t buffer_[buffer_size];
+static volatile bool level_[buffer_size];
 static volatile int16_t nsemipulse_ = -1;
 
 
@@ -117,7 +125,7 @@ static void receive_semipulses()
 
     // while (Timer::safe_value() < Timer::max_top() <-- esto lo ralentiza (???)
     while (Timer::safe_value() < time_out
-		and nsemipulse_ < buffer__size)
+		and nsemipulse_ < buffer_size)
     { ; }
 
 
@@ -138,20 +146,16 @@ static void receive_semipulses()
 // Generalicemos:
 //	Inicialmente la señal puede estar en 0 ó en 1. En el caso del IR
 //	estará en 1. A este valor lo llamo como en SPI la polarity.
-bool receive_pulses(atd::CArray_view<Pulse>& pulse)
+uint16_t receive_train_of_pulses(Pulse* pulse, uint16_t N, uint8_t& polarity)
 {
-    bool polarity = IR_receiver::is_one();
+    polarity = IR_receiver::is_one();
 
     receive_semipulses();
 
-    if (!check(polarity, level_, nsemipulse_)){
-	pulse.size = 0;
-	return false;	// sin significado.
-    }
+    if (!check(polarity, level_, nsemipulse_))
+	return 0;
 
-    copy(polarity, buffer_, nsemipulse_, pulse);
-
-    return polarity;
+    return copy(polarity, buffer_, nsemipulse_, pulse, N);
 }
 
 

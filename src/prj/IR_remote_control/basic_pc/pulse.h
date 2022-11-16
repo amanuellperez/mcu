@@ -23,6 +23,8 @@
 
 #include <atd_array.h>
 
+#include "dev.h" // BORRAME
+		 //
 struct Pulse{
     uint16_t time_low;
     uint16_t time_high;
@@ -30,7 +32,72 @@ struct Pulse{
     uint16_t period() const {return time_low + time_high;}
 };
 
-bool receive_pulses(atd::CArray_view<Pulse>& pulse);
+
+// Problema: El Train_of_pulses como su nombre indica es un tren de pulsos, no
+// es un Train_of_pulses_view: contiene los pulsos. Pero contenerolos supone
+// que necesito conocer su tamaño N. Por ello lo tengo que definir como
+// template (y definirlo aquí). 
+// Sin embargo la recepción la hago al estilo de C. Por ello necesito esta
+// función receive_train_of_pulses que es la que implementa la recepción.
+// DUDA: ¿cómo mejorar esto? ¿Merece la pena generalizarlo?
+uint16_t receive_train_of_pulses(Pulse* pulse, uint16_t N, uint8_t& polarity);
+
+
+template <size_t N>
+class Train_of_pulses{
+public:
+    Train_of_pulses();
+//    Train_of_pulses(Pulse* pulse_container, size_t max_sz);
+
+// pulses
+    Pulse& operator[](size_t i) { return pulse_[i];} 
+    const Pulse& operator[](size_t i) const { return pulse_[i];} 
+
+    size_t size() const  { return pulse_.size(); }
+    size_t capacity() const { return pulse_.capacity(); }
+    
+    bool empty() const {return pulse_.empty(); }
+    bool full() const { return pulse_.full(); }
+
+    Pulse* begin() { return pulse_.begin(); }
+    Pulse* end() { return pulse_.end(); }
+
+    const Pulse* begin() const { return pulse_.begin(); }
+    const Pulse* end() const { return pulse_.end(); }
+
+// polarity
+    uint8_t polarity() const { return polarity_; }
+
+// operations
+    void receive();
+
+private:
+// Data
+    uint8_t polarity_; // 0 or 1
+    atd::CArray<Pulse, N> pulse_;
+};
+
+
+//inline Train_of_pulses::Train_of_pulses(Pulse* pulse_container, size_t max_sz)
+template <size_t N>
+inline Train_of_pulses<N>::Train_of_pulses()
+    : polarity_{0xFF}
+{}
+
+
+// Generalicemos:
+//	Inicialmente la señal puede estar en 0 ó en 1. En el caso del IR
+//	estará en 1. A este valor lo llamo como en SPI la polarity.
+// bool receive_train_of_pulses(atd::CArray_view<Pulse>& pulse)
+template <size_t N>
+void Train_of_pulses<N>::receive()
+{
+    uint8_t n = receive_train_of_pulses(pulse_.data(), pulse_.capacity()
+	    , polarity_);
+
+    pulse_.size(n);
+
+}
 
 
 

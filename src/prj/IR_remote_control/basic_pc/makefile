@@ -1,7 +1,7 @@
 BIN = xx
 
 SOURCES= main.cpp 			\
-		receive_pulses.cpp	\
+		ptrain_receive.cpp	\
 		receive_data.cpp	\
 		transmit_data.cpp	\
 		timer.cpp			\

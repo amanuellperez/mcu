@@ -24,7 +24,7 @@ void Main::run()
 {
     while (1){
 	avr::UART_iostream uart;
-	uart << "Menu\n"
+	uart << "\nMenu\n"
 		"----\n"
 		"1. Generate 38kHz on pin " << ir_transmitter_pin << '\n'
 	     << "2. Transmit data\n"
@@ -58,7 +58,7 @@ void Main::receive_data_menu()
     print_instructions();
 
     while (1){
-	::receive_pulses(pulse);
+	pulse.receive();
 	choose_mode_operation();
 	switch(mode){
 	    break; case Work_mode::help		    : print_instructions();
@@ -77,7 +77,7 @@ void Main::print_instructions()
     uart << "\n\nConnect the IR receiver to pin " << (int) ir_receiver_pin 
 	 << ", point the TV remote to it and read the data.\n";
 
-    uart << "Menu\n"
+    uart << "\nMenu\n"
 	    "----\n"
 	    "h. Show this menu\n"
 	    "1. Receive data (default)\n"
