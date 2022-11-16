@@ -46,7 +46,13 @@
  *
  *		 Tenemos los siguientes tipos de arrays:
  *		 * std::array: memoria local, no gestiona la memoria usada.
+ *		 * atd::CArray : memoria local, gestiona la usada. 
+ *			         Distingue entre x[0..N) memoria reservada, de
+ *			         x[0..size()) memoria usada.
  *		 * atd::Linear_array  : memoria local, gestiona la usada.
+ *				Es más elaborada que CArray: x[0..N) es la
+ *				memoria reservada, pero [p0, pe) es la memoria
+ *				usada (donde p0 puede ser distinto de x[0]!!!)
  *		 * atd::Circular_array: idem.
  *		 * std::vector: memoria dinámica, gestiona la usada.
  *		
@@ -60,6 +66,8 @@
  *		pudiendo usar Linear_array. Por eso creo este CArray. 
  *		Como siempre, es experimental. El uso marcará qué arrays son
  *		los útiles.
+ *
+ *   16/11/2022 CArray
  *
  ****************************************************************************/
 #include <tuple>    // std::tie
@@ -503,6 +511,83 @@ constexpr void Linear_array<T,N>::remove(iterator p)
 /***************************************************************************
  *				CARRAY
  ***************************************************************************/
+// CArray es un array de C con gestión del número de elementos que contienen
+// datos. Distinguimos entre:
+//	    CArray<T, 10> x;
+//	    x[0..10) = memoria reservada. Es la que se reserva al hacer
+//						    T x[10];
+//	    x[0..size()) = memoria ocupada. Esto es lo que aporta esta clase.
+//
+// CArray es una clase más sencilla que Linear_array.
+template <typename T, size_t N>
+class CArray{
+public:
+// Types
+    using value_type	    = T;
+    using pointer	    = T*;
+    using const_pointer	    = const T*;
+    using reference	    = T&;
+    using const_reference   = const T&;
+    using size_type	    = size_t;
+    using difference_type   = std::ptrdiff_t;
+    using iterator	    = T*;	
+    using const_iterator    = const T*;
+
+
+// Methods
+    CArray() : ie_{0} { }
+
+    reference operator[] (size_type i) {return ptr_[i];}
+    const_reference operator[] (size_type i) const {return ptr_[i];}
+
+    bool empty() const {return ie_ == 0;}
+    bool full () const {return ie_ == N;}
+
+    size_type size() const {return ie_;}
+    size_type capacity() const {return N;}
+
+    /// Añade un elemento al final del array.
+    void push_back(const_reference x);
+
+    /// Borra el último elemento añadido.
+    void pop_back();
+
+// Iterators
+    iterator begin() {return ptr_;}
+    iterator end() {return ptr_ + ie_;}
+
+    const_iterator begin() const {return ptr_;}
+    const_iterator end() const  {return ptr_ + ie_;}
+
+private:
+// Data
+    T ptr_[N];
+    size_type ie_;  // índice del último elemento
+		    // ptr_[0..ie_) = contiene los datos
+		    // ptr_[0..N)   = memoria reservada
+};
+
+
+// DUDA: validar size_ < max_size_??? Solo es un condicional y evitamos
+// problemas de memoria.
+template <typename T, size_t N>
+void CArray<T, N>::push_back(const_reference x)
+{
+    if (ie_ < N){
+	ptr_[ie_] = x;
+	++ie_;
+    }
+}
+
+template <typename T, size_t N>
+inline void CArray<T, N>::pop_back()
+{
+    if (ie_ > 0) 
+	--ie_;
+}
+
+
+
 // (RRR) ¿Por qué llamarlo _view? 
 //	 Porque es una view. No tiene propiedad del array. El array hay que
 //	 definirlo en otro sitio.
@@ -522,31 +607,74 @@ constexpr void Linear_array<T,N>::remove(iterator p)
 //	    cuales solo 2 están ocupados.
 //
 template <typename T>
-struct CArray_view{
+class CArray_view{
+public:
 // Types
-    using value_type = T;
-    using pointer    = T*;
-    using iterator   = T*;
+    using value_type	    = T;
+    using pointer	    = T*;
+    using const_pointer	    = const T*;
+    using reference	    = T&;
+    using const_reference   = const T&;
+    using size_type	    = size_t;
+    using difference_type   = std::ptrdiff_t;
+    using iterator	    = T*;	
+    using const_iterator    = const T*;
+
 
 // Methods
-    CArray_view(T* p0, size_t sz, size_t max_sz)
-	: ptr{p0}, size{sz}, max_size{max_sz} { }
+    CArray_view(T* p0, size_type sz, size_type max_sz)
+	: ptr_{p0}, size_{sz}, max_size_{max_sz} { }
 
 
-    T& operator[] (size_t i) const {return ptr[i];}
+    reference operator[] (size_type i) {return ptr_[i];}
+    const_reference operator[] (size_type i) const {return ptr_[i];}
 
-    bool empty() const {return size == 0;}
-    bool full () const {return size == max_size;}
+    bool empty() const {return size_ == 0;}
+    bool full () const {return size_ == max_size_;}
+
+    size_type size() const {return size_;}
+    size_type capacity() const {return max_size_;}
+
+    /// Añade un elemento al final del array.
+    void push_back(const_reference x);
+
+    /// Borra el último elemento añadido.
+    void pop_back();
 
 // Iterators
-    T* begin() const {return ptr;}
-    T* end() const  {return ptr + size;}
+    iterator begin() {return ptr_;}
+    iterator end() {return ptr_ + size_;}
 
+    const_iterator begin() const {return ptr_;}
+    const_iterator end() const  {return ptr_ + size_;}
+
+private:
 // Data
-    T* ptr;
-    size_t size;	
-    size_t max_size; // = memory_size
+    T* ptr_;
+    size_type size_;	
+    size_type max_size_; // = memory_size
 };
+
+
+// DUDA: validar size_ < max_size_??? Solo es un condicional y evitamos
+// problemas de memoria.
+template <typename T>
+void CArray_view<T>::push_back(const_reference x)
+{
+    if (size_ < max_size_){
+	ptr_[size_] = x;
+	++size_;
+    }
+}
+
+template <typename T>
+inline void CArray_view<T>::pop_back()
+{
+    if (size_ > 0) 
+	--size_;
+}
+
+
 
 }// namespace
 

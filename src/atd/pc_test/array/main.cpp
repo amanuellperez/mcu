@@ -328,6 +328,58 @@ void test_linear_array()
 }
 
 
+void test_carray()
+{
+    test::interfaz("CArray");
+
+    {
+	atd::CArray<int, 4> x;
+	CHECK_TRUE(x.size() == 0, "size");
+	CHECK_TRUE(x.empty(), "empty");
+	CHECK_TRUE(!x.full(), "full");
+	CHECK_TRUE(x.capacity() == 4, "capacity");
+
+	x.push_back(34);
+	CHECK_TRUE(x.size() == 1, "size");
+	CHECK_TRUE(!x.empty(), "empty");
+	CHECK_TRUE(!x.full(), "full");
+	CHECK_TRUE(x.capacity() == 4, "capacity");
+	CHECK_TRUE(x[0] == 34, "operator[]");
+	
+	x.pop_back();
+	CHECK_TRUE(x.size() == 0, "size");
+	CHECK_TRUE(x.empty(), "empty");
+	CHECK_TRUE(!x.full(), "full");
+	CHECK_TRUE(x.capacity() == 4, "capacity");
+
+	x.pop_back(); // intento fallido
+	CHECK_TRUE(x.size() == 0, "size");
+	CHECK_TRUE(x.empty(), "empty");
+	CHECK_TRUE(!x.full(), "full");
+	CHECK_TRUE(x.capacity() == 4, "capacity");
+
+	x.push_back(10);
+	x.push_back(20);
+	x.push_back(30);
+	x.push_back(40);
+	CHECK_TRUE(x.size() == 4, "size");
+	CHECK_TRUE(!x.empty(), "empty");
+	CHECK_TRUE(x.full(), "full");
+	CHECK_TRUE(x.capacity() == 4, "capacity");
+	CHECK_TRUE(x[0] == 10 and x[1] == 20 and x[2] == 30 and x[3] == 40
+		  , "operator[]");
+
+	x.push_back(50); // intento fallido
+	CHECK_TRUE(x.size() == 4, "size");
+	CHECK_TRUE(!x.empty(), "empty");
+	CHECK_TRUE(x.full(), "full");
+	CHECK_TRUE(x.capacity() == 4, "capacity");
+	CHECK_TRUE(x[0] == 10 and x[1] == 20 and x[2] == 30 and x[3] == 40
+		  , "operator[]");
+    }
+}
+
+
 void test_carray_view()
 {
     test::interfaz("CArray_view");
@@ -335,8 +387,8 @@ void test_carray_view()
     {// caso extremo
     int x[4];
     atd::CArray_view<int> view{x, 0, 4};
-    CHECK_TRUE(view.size == 0, "size");
-    CHECK_TRUE(view.max_size == 4, "max_size");
+    CHECK_TRUE(view.size() == 0, "size");
+    CHECK_TRUE(view.capacity() == 4, "capacity");
     }
 
     {// caso normal
@@ -344,14 +396,13 @@ void test_carray_view()
     x[0] = 20;
     x[1] = 30;
     atd::CArray_view<int> view{x, 2, 4};
-    CHECK_TRUE(view.size == 2, "size");
-    CHECK_TRUE(view.max_size == 4, "max_size");
+    CHECK_TRUE(view.size() == 2, "size");
+    CHECK_TRUE(view.capacity() == 4, "capacity");
     CHECK_TRUE(view[0] == x[0], "operator[]");
     CHECK_TRUE(view[1] == x[1], "operator[]");
 
-    view[2] = 87;
-    ++view.size;
-    CHECK_TRUE(view.size == 3, "size");
+    view.push_back(87);
+    CHECK_TRUE(view.size() == 3, "size");
     CHECK_TRUE(x[2] == 87, "operator[]");
     CHECK_TRUE(view[2] == 87, "operator[]");
 
@@ -368,6 +419,7 @@ try{
 
     test_circular_array();
     test_linear_array();
+    test_carray();
     test_carray_view();
 
 }catch(std::exception& e)
