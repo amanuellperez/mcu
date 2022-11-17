@@ -33,6 +33,8 @@
 #include <avr_timer1_generic.h>
 #include <avr_UART_iostream.h>
 
+#include "clock_us.h"
+
 // pins usados
 // ------------
 // using UART: pins 2 and 3
@@ -58,7 +60,8 @@ constexpr uint8_t ir_receiver_pin = 15;
 // Voy a usar el Timer1 para medir tiempo < Timer1::max(). Dos funciones:
 //	1. Esperar: wait_ms/wait_us 
 //	2. Generar un time_out.	    
-using Timer = dev::Generic_timer_counter<avr::Timer1>;
+using Timer_clock_us = dev::Generic_timer_counter<avr::Timer1>;
+using Clock_us = dev::Clock_us<Timer_clock_us>;
 
 // El Timer0 lo uso para generar la señal de 38kHz.
 using Transmit_timer = dev::Generic_timer<avr::Timer0>;

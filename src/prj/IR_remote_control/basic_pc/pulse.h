@@ -23,8 +23,9 @@
 
 #include <atd_array.h>
 
-#include "dev.h" // BORRAME
-		 //
+/***************************************************************************
+ *				PULSE
+ ***************************************************************************/
 struct Pulse{
     uint16_t time_low;
     uint16_t time_high;
@@ -33,6 +34,9 @@ struct Pulse{
 };
 
 
+/***************************************************************************
+ *			    TRAIN OF PULSES
+ ***************************************************************************/
 // Problema: El Train_of_pulses como su nombre indica es un tren de pulsos, no
 // es un Train_of_pulses_view: contiene los pulsos. Pero contenerolos supone
 // que necesito conocer su tamaño N. Por ello lo tengo que definir como
@@ -85,10 +89,8 @@ inline Train_of_pulses<N>::Train_of_pulses()
 {}
 
 
-// Generalicemos:
-//	Inicialmente la señal puede estar en 0 ó en 1. En el caso del IR
-//	estará en 1. A este valor lo llamo como en SPI la polarity.
-// bool receive_train_of_pulses(atd::CArray_view<Pulse>& pulse)
+// Inicialmente la señal puede estar en 0 ó en 1. En el caso del IR
+// estará en 1. A este valor lo llamo como en SPI la polarity.
 template <size_t N>
 void Train_of_pulses<N>::receive()
 {
@@ -99,6 +101,35 @@ void Train_of_pulses<N>::receive()
 
 }
 
-
+// AQUI: hacer el replay
+//template <size_t N>
+//void Train_of_pulses<N>::transmit()
+//{
+//    if (polarity_)
+//	transmit1();
+//    else
+//	transmit0();
+//}
+//
+//
+//template <size_t N>
+//void Train_of_pulses<N>::transmit0()
+//{
+//    avr::UART_iostream uart;
+//    uart << "Not implemented!!!\n";
+//}
+//
+//template <size_t N>
+//void Train_of_pulses<N>::transmit1()
+//{
+//    timer_on();
+//
+//    for (auto p = begin(); p != end(); ++p){
+//	burst_38kHz_of(p->time_low);
+//	timer_wait_us(p->time_high);
+//    }
+//
+//    timer_off();
+//}
 
 #endif

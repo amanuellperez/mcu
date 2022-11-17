@@ -16,24 +16,30 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#pragma once
 
-#ifndef __TIMER_H__
-#define __TIMER_H__
+#include "transmit.h"
 
-#include "dev.h"
+void burst_38kHz_of(Clock_us::counter_type time_in_us)
+{
+    using Square_wave = Transmit_timer;
+    // constexpr Square_wave::counter_type T = 1000 / (38 * 2); // freq = 38kHz
+    constexpr Square_wave::counter_type T = freq_in_kHz_to_top<Square_wave>(38);
 
-#undef wait_ms
-#undef wait_us
+    Square_wave::mode_square_wave();
+    Square_wave::square_wave_top(T); 
+    Square_wave::square_wave_connect_ch1(); 
+    Square_wave::on<1>();		
 
-// TODO: Esto es Clock_us (de 0 a max_top): migrarlo a clase y generalizarlo
-//	 Parametrizarlo con el timer.
-//	 Si introduzco la interrupción, generamos un clock con mayor
-//	 resolución.
-void timer_on();
-void timer_wait_us(Timer::counter_type t);
-inline void timer_off(){ Timer::off(); }
+    // timer_wait_us<Timer>(time_in_us);
+    Clock_us::wait_us(time_in_us);
+
+    Square_wave::off();
+    Square_wave::square_wave_disconnect_ch1();
+
+    // Garantizamos que acabe en cero
+    avr::Pin<Square_wave::pin_channel1>::as_output();
+    avr::Pin<Square_wave::pin_channel1>::write_zero();
+
+}
 
 
-
-#endif

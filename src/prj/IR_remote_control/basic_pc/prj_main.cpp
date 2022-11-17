@@ -17,7 +17,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "main.h"
+#include "prj_main.h"
 
 // ¿Dónde poner este warning? Si lo pongo en dev.h se genera el warning al
 // compilar todos los ficheros, lo cual ocultaría warnings reales. De momento
@@ -37,7 +37,7 @@ void Main::init_uart()
 Main::Main()
 {
     init_uart();
-    Timer::safe_init();
+    Clock_us::init();
 }
 
 

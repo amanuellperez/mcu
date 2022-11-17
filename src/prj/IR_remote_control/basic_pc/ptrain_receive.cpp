@@ -111,27 +111,30 @@ static volatile int16_t nsemipulse_ = -1;
 
 static void receive_semipulses()
 {
-    static constexpr Timer::counter_type time_out{60000};
+    static constexpr Clock_us::counter_type time_out{60000};
 
     nsemipulse_ = -1;
 
     avr::Interrupt::enable_pin<ir_receiver_pin>();
 
-    Timer::on<1>();	    // leemos microsegundos
+    Clock_us::on();
+//    Timer::on<1>();	    // leemos microsegundos
     
     avr::enable_all_interrupts();
 
     while (nsemipulse_ < 0) { ; }	// esperamos a recibir algo
 
     // while (Timer::safe_value() < Timer::max_top() <-- esto lo ralentiza (???)
-    while (Timer::safe_value() < time_out
+    //while (Timer::safe_value() < time_out
+    while (Clock_us::safe_value() < time_out
 		and nsemipulse_ < buffer_size)
     { ; }
 
 
     avr::disable_all_interrupts();
 
-    Timer::off(); 
+    //Timer::off(); 
+    Clock_us::off(); 
 
     avr::Interrupt::disable_pin<ir_receiver_pin>();
 
@@ -171,11 +174,11 @@ uint16_t receive_train_of_pulses(Pulse* pulse, uint16_t N, uint8_t& polarity)
 //	 era HIGH ==> level_ = false.
 ISR_RECEIVER_PIN {
     if (nsemipulse_ >= 0){
-	buffer_[nsemipulse_] = Timer::unsafe_value();
+	buffer_[nsemipulse_] = Clock_us::unsafe_value();
 	level_ [nsemipulse_] = !IR_receiver::is_one();
     }
 
-    Timer::unsafe_reset();
+    Clock_us::unsafe_reset();
     nsemipulse_ = nsemipulse_ + 1;
 }
 

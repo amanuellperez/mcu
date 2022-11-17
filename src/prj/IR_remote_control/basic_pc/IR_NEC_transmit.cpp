@@ -22,35 +22,9 @@
 #include <avr_interrupt.h>
 
 #include "pulse.h"
-#include "timer.h"
 #include "IR_NEC_protocol.h"
 #include "square_wave.h"
-
-
-void burst_38kHz_of(Timer::counter_type time_in_us)
-{
-    using Square_wave = Transmit_timer;
-    // constexpr Square_wave::counter_type T = 1000 / (38 * 2); // freq = 38kHz
-    constexpr Square_wave::counter_type T = freq_in_kHz_to_top<Square_wave>(38);
-
-    Square_wave::mode_square_wave();
-    Square_wave::square_wave_top(T); 
-    Square_wave::square_wave_connect_ch1(); 
-    Square_wave::on<1>();		
-
-    timer_wait_us(time_in_us);
-
-    Square_wave::off();
-    Square_wave::square_wave_disconnect_ch1();
-
-    // Garantizamos que acabe en cero
-    avr::Pin<Square_wave::pin_channel1>::as_output();
-    avr::Pin<Square_wave::pin_channel1>::write_zero();
-
-}
-
-
-
+#include "transmit.h"
 
 
 // inline porque no se si es suficientemente eficiente
@@ -59,23 +33,22 @@ inline static void NEC_transmit_byte(uint8_t b)
     for (uint8_t i = 0; i < 8; ++i){
 	if (b & 0x01){
 	    burst_38kHz_of(562);
-	    timer_wait_us(562 * 3);
+	    Clock_us::wait_us(562 * 3);
 	}
 	else{
 	    burst_38kHz_of(562);
-	    timer_wait_us(562);
+	    Clock_us::wait_us(562);
 	}
 
 	b >>= 1;
     }
 }
 
-static void transmit_one(Timer::counter_type time_first_burst_in_us, 
+static void transmit_one(Clock_us::counter_type time_first_burst_in_us, 
 	      const NEC_message& msg)
 {
-
     burst_38kHz_of(time_first_burst_in_us);
-    timer_wait_us(4500);
+    Clock_us::wait_us(4500);
 
     NEC_transmit_byte(msg.address);
     NEC_transmit_byte(msg.inv_address);
@@ -87,15 +60,15 @@ static void transmit_one(Timer::counter_type time_first_burst_in_us,
 }
 
 
-void transmit(Timer::counter_type time_first_burst_in_us, 
+void transmit(Clock_us::counter_type time_first_burst_in_us, 
 	      const NEC_message& msg)
 {
-    timer_on();
+    Clock_us::on();
 //    for (uint8_t i = 0; i < 3; ++i){
 	transmit_one(time_first_burst_in_us,  msg);
 //	timer_wait_us(30000);
 //    }
-    timer_off();
+    Clock_us::off();
 }
 
 

@@ -17,7 +17,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "main.h"
+#include "prj_main.h"
 #include "square_wave.h"
 
 void Main::run()
@@ -42,14 +42,14 @@ void Main::run()
 
 void Main::generate_38kHz()
 {
-    generate_38kHz_on<Transmit_timer>();
+    generate_38kHz_on<Transmit_timer, ir_transmitter_pin>();
 
     avr::UART_iostream uart;
     uart << "Generating 38kHz. Press a key to stop.\n";
     char c{};
     uart >> c;
 
-    generate_38kHz_off<Transmit_timer>();
+    generate_38kHz_off<Transmit_timer, ir_transmitter_pin>();
 }
 
 

@@ -18,8 +18,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #pragma once
 
-#ifndef __MAIN_H__
-#define __MAIN_H__
+#ifndef __PRJ_MAIN_H__
+#define __PRJ_MAIN_H__
 /****************************************************************************
  *
  *  - DESCRIPCION: Programa para averiguar el protocolo usado por un mando.

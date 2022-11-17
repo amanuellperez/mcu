@@ -16,24 +16,17 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#include "timer.h"
 
-void timer_on()
-{
-    Timer::safe_top(Timer::max_top());
-    Timer::on<1>();
-}
+#pragma once
 
-void timer_wait_us(Timer::counter_type t)
-{
-    avr::Interrupts_lock lock;
+#ifndef __TRANSMIT_H__
+#define __TRANSMIT_H__
 
-    Timer::unsafe_reset();
-    
-    while (Timer::unsafe_value() < t)
-    { ; }
+#include "square_wave.h"
+#include "dev.h"
 
-}
+void burst_38kHz_of(Clock_us::counter_type time_in_us);
 
+#endif
 
 

@@ -17,7 +17,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "main.h"
+#include "prj_main.h"
 #include "IR_NEC_protocol.h"
 #include <atd_istream.h>    // read_int_as_hex
 #include <atd_ostream.h>    // print_int_as_hex
@@ -61,7 +61,7 @@ void Main::transmit_data()
 
     char res{};
     uart >> res;
-    Timer::counter_type time_first_burst_in_us = 9000;
+    Clock_us::counter_type time_first_burst_in_us = 9000;
 
     if (res == '2')
 	time_first_burst_in_us = 4500;

@@ -29,7 +29,7 @@
 #include <atd_ostream.h>    // print_int_as_hex
 			    
 #include "pulse.h"
-#include "dev.h"    // Timer::counter_type
+#include "dev.h"    // Clock_us::counter_type
 
 
 struct NEC_message{
@@ -42,7 +42,7 @@ struct NEC_message{
 std::ostream& operator<<(std::ostream& out, const NEC_message& msg);
 //std::ostream& operator<<(avr::UART_iostream& out, const NEC_message& msg);
 
-void transmit(Timer::counter_type time_first_burst_in_us
+void transmit(Clock_us::counter_type time_first_burst_in_us
 	     , const NEC_message& msg);
 
 // Devuelve true si a = b +- 20%

@@ -21,33 +21,40 @@
 #ifndef __SQUARE_WAVE_H__
 #define __SQUARE_WAVE_H__
 
+#include <avr_pin.h>
+
 // TODO: que admita Frequency directamente.
-template <typename Square_wave>
-inline constexpr typename Square_wave::counter_type 
-    freq_in_kHz_to_top(const typename Square_wave::counter_type& freq)
+template <typename Timer>
+inline constexpr typename Timer::counter_type 
+    freq_in_kHz_to_top(const typename Timer::counter_type& freq)
 { return 1000 / (freq * 2); }
 
 
-template <typename Square_wave>
+template <typename Timer, uint8_t npin>
 void generate_38kHz_on()
 {
-    // constexpr Square_wave::counter_type T = 1000 / (38 * 2); // freq = 38kHz
-    constexpr typename Square_wave::counter_type T = freq_in_kHz_to_top<Square_wave>(38);
+    static_assert(npin == Timer::pin_channel1);
 
-    Square_wave::mode_square_wave();
-    Square_wave::square_wave_top(T); 
-    Square_wave::square_wave_connect_ch1(); 
-    Square_wave::template on<1>();		
+    // constexpr Timer::counter_type T = 1000 / (38 * 2); // freq = 38kHz
+    constexpr typename Timer::counter_type T = freq_in_kHz_to_top<Timer>(38);
+
+    Timer::mode_square_wave();
+    Timer::square_wave_top(T); 
+    Timer::square_wave_connect_ch1(); 
+    Timer::template on<1>();		
 }
 
-template <typename Square_wave>
+template <typename Timer, uint8_t npin>
 void generate_38kHz_off()
 {
-    Square_wave::off();
-    Square_wave::square_wave_disconnect_ch1();
+    static_assert(npin == Timer::pin_channel1);
+
+    Timer::off();
+    Timer::square_wave_disconnect_ch1();
 
     // Garantizamos que acabe en cero
-    avr::Pin<Square_wave::pin_channel1>::write_zero();
+    avr::Pin<Timer::pin_channel1>::as_output();
+    avr::Pin<Timer::pin_channel1>::write_zero();
 
 }
 

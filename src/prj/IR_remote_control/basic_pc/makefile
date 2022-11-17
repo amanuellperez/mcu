@@ -1,14 +1,14 @@
 BIN = xx
 
-SOURCES= main.cpp 			\
+SOURCES= prj_main.cpp 		\
+		prj_receive.cpp		\
+		prj_transmit.cpp	\
+		prj_run.cpp			\
 		ptrain_receive.cpp	\
-		receive_data.cpp	\
-		transmit_data.cpp	\
-		timer.cpp			\
+		transmit.cpp		\
 		IR_NEC_protocol.cpp	\
 		IR_NEC_print.cpp	\
-		IR_NEC_transmit.cpp	\
-		run.cpp
+		IR_NEC_transmit.cpp	
 
 
 MCU = atmega328p
