@@ -34,6 +34,8 @@
 #include <avr_UART_iostream.h>
 
 #include "clock_us.h"
+#include "square_wave.h"
+
 
 // pins usados
 // ------------
@@ -65,6 +67,10 @@ using Clock_us = dev::Clock_us<Timer_clock_us>;
 
 // El Timer0 lo uso para generar la señal de 38kHz.
 using Transmit_timer = dev::Generic_timer<avr::Timer0>;
+
+// Notación: 2 tipos de señales SW (square wave) y PWM.
+using SWG = 
+    dev::Square_wave_generator<Transmit_timer, ir_transmitter_pin, Clock_us>;
 
 
 using IR_receiver    = avr::Input_pin_without_pullup<ir_receiver_pin>;

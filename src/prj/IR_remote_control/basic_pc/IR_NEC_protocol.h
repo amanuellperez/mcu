@@ -151,7 +151,7 @@ Message_it print_NEC_byte(std::ostream& out,
 //	a final 562.5 us burst to signify the end fo message transmission
 //
 template <size_t N>
-bool print_NEC_protocol(std::ostream& out, const Train_of_pulses<N>& pulse)
+bool print_NEC_protocol(std::ostream& out, const dev::Train_of_pulses<N>& pulse)
 {
     auto pe = pulse.end();
     auto p = NEC_look_for_start(pulse.begin(), pe);
@@ -211,7 +211,7 @@ bool print_NEC_protocol(std::ostream& out, const Train_of_pulses<N>& pulse)
 
 template <size_t N>
 bool print_min_NEC_protocol(std::ostream& out
-			    , const Train_of_pulses<N>& pulse)
+			    , const dev::Train_of_pulses<N>& pulse)
 {
     auto pe = pulse.end();
     auto p = NEC_look_for_start(pulse.begin(), pe);

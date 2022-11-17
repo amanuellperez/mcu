@@ -22,7 +22,7 @@
 #include <atd_istream.h>    // read_int_as_hex
 #include <atd_ostream.h>    // print_int_as_hex
 
-static void read_NEC_message(NEC_message& msg)
+static void ask_NEC_message(NEC_message& msg)
 {
     avr::UART_iostream uart;
 
@@ -67,7 +67,7 @@ void Main::transmit_data()
 	time_first_burst_in_us = 4500;
 
     NEC_message msg{0xFF, 0xFF, 0xFF, 0xFF};
-    read_NEC_message(msg);
+    ask_NEC_message(msg);
     
     uart << "\nSending: ";
     uart << msg << '\n'; // si se pone a continuación del const char* da error!!!

@@ -53,7 +53,7 @@ private:
 			  receive_raw_data};
 
     // Última tren de pulsos leidos:
-    Train_of_pulses<num_max_pulses> pulse;
+    dev::Train_of_pulses<num_max_pulses> pulse;
 
     Work_mode mode = Work_mode::receive_data;
 
@@ -68,6 +68,7 @@ private:
     void receive_min_data() const;
     void receive_raw_data() const;
     void transmit_data();
+    void replay();
 
 // RAW (When we don't know the protocol)
     void print_raw_data() const;

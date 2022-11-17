@@ -23,8 +23,6 @@
 
 #include "pulse.h"
 #include "IR_NEC_protocol.h"
-#include "square_wave.h"
-#include "transmit.h"
 
 
 // inline porque no se si es suficientemente eficiente
@@ -32,11 +30,11 @@ inline static void NEC_transmit_byte(uint8_t b)
 {
     for (uint8_t i = 0; i < 8; ++i){
 	if (b & 0x01){
-	    burst_38kHz_of(562);
-	    Clock_us::wait_us(562 * 3);
+	    SWG::burst_38kHz_of(562);
+	    SWG::wait_us(562 * 3);
 	}
 	else{
-	    burst_38kHz_of(562);
+	    SWG::burst_38kHz_of(562);
 	    Clock_us::wait_us(562);
 	}
 
@@ -47,7 +45,7 @@ inline static void NEC_transmit_byte(uint8_t b)
 static void transmit_one(Clock_us::counter_type time_first_burst_in_us, 
 	      const NEC_message& msg)
 {
-    burst_38kHz_of(time_first_burst_in_us);
+    SWG::burst_38kHz_of(time_first_burst_in_us);
     Clock_us::wait_us(4500);
 
     NEC_transmit_byte(msg.address);
@@ -55,7 +53,7 @@ static void transmit_one(Clock_us::counter_type time_first_burst_in_us,
     NEC_transmit_byte(msg.command);
     NEC_transmit_byte(msg.inv_command);
 
-    burst_38kHz_of(562);
+    SWG::burst_38kHz_of(562);
 
 }
 

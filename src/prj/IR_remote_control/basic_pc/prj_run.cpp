@@ -28,28 +28,30 @@ void Main::run()
 		"----\n"
 		"1. Generate 38kHz on pin " << ir_transmitter_pin << '\n'
 	     << "2. Transmit data\n"
-		"3. Receive data\n";
+		"3. Replay\n"
+		"4. Receive data\n";
 	
 	char c{};
 	uart >> c;
 	switch (c){
 	    break; case '1' : generate_38kHz();
 	    break; case '2' : transmit_data();
-	    break; default: receive_data_menu();
+	    break; case '3' : replay();
+	    break; default  : receive_data_menu();
 	}
     }
 }
 
 void Main::generate_38kHz()
 {
-    generate_38kHz_on<Transmit_timer, ir_transmitter_pin>();
+    SWG::generate_38kHz_on();
 
     avr::UART_iostream uart;
     uart << "Generating 38kHz. Press a key to stop.\n";
     char c{};
     uart >> c;
 
-    generate_38kHz_off<Transmit_timer, ir_transmitter_pin>();
+    SWG::generate_38kHz_off();
 }
 
 
@@ -105,5 +107,34 @@ void Main::choose_mode_operation()
 
 
     }
+}
+
+
+void Main::replay()
+{
+    avr::UART_iostream uart;
+    uart << "\nReplay\n";
+//	    "------\n"
+//	    "Press a button of your remote control ... ";
+
+    pulse.receive();
+
+    if (pulse.empty()){
+	uart << "FAIL. No data received.\n";
+	return;
+    }
+
+    print_raw_data();
+    uart << "OK\n"
+	    "Press a key to replay ... ";
+
+    char c{};
+    uart >> c;
+    if (SWG::transmit(pulse))
+	uart << "OK\n";
+
+    else
+	uart << "FAIL\n";
+
 }
 

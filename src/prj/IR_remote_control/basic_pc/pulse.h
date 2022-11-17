@@ -46,6 +46,7 @@ struct Pulse{
 // DUDA: ¿cómo mejorar esto? ¿Merece la pena generalizarlo?
 uint16_t receive_train_of_pulses(Pulse* pulse, uint16_t N, uint8_t& polarity);
 
+namespace dev{
 
 template <size_t N>
 class Train_of_pulses{
@@ -101,35 +102,7 @@ void Train_of_pulses<N>::receive()
 
 }
 
-// AQUI: hacer el replay
-//template <size_t N>
-//void Train_of_pulses<N>::transmit()
-//{
-//    if (polarity_)
-//	transmit1();
-//    else
-//	transmit0();
-//}
-//
-//
-//template <size_t N>
-//void Train_of_pulses<N>::transmit0()
-//{
-//    avr::UART_iostream uart;
-//    uart << "Not implemented!!!\n";
-//}
-//
-//template <size_t N>
-//void Train_of_pulses<N>::transmit1()
-//{
-//    timer_on();
-//
-//    for (auto p = begin(); p != end(); ++p){
-//	burst_38kHz_of(p->time_low);
-//	timer_wait_us(p->time_high);
-//    }
-//
-//    timer_off();
-//}
 
+}// namespace
+ 
 #endif
