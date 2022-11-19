@@ -22,7 +22,124 @@
 #ifndef __CFG_H__
 #define __CFG_H__
 
+#include <avr_memory.h>
+
 constexpr uint8_t num_max_pulses = 100;
+
+
+/***************************************************************************
+ *				STRINGS
+ ***************************************************************************/
+// (RRR) Al dejar todos los menús en RAM el size del programa era:
+//	    avr-size xx.elf
+//		text	   data	    bss	    dec	    hex	filename
+//		8534	   1184	    600	  10318	   284e	xx.elf
+//
+//	    avr-size xx.elf
+//		text	   data	    bss	    dec	    hex	filename
+//		10498	    364	    600	  11462	   2cc6	xx.elf
+//
+//        Observar que el data ha bajado de 1184 a 364!!! De hecho, me empezó
+//        a funcionar mal el programa por culpa (creo) de un stackoverflow.
+//
+//
+//constexpr avr::Progmem_string<1> msg_return <-- lo probé y no parece 
+//    PROGMEM{"\n"};				  disminuir la memoria RAM
+
+constexpr avr::Progmem_string<37> msg_run_menu1 
+    PROGMEM{"\nMenu\n"
+	    "----\n"
+	    "1. Generate 38kHz on pin "};
+
+constexpr avr::Progmem_string<46> msg_run_menu2 
+    PROGMEM{"\n2. Transmit data\n"
+	    "3. Replay\n"
+	    "4. Receive data\n"};
+
+constexpr avr::Progmem_string<40> msg_generate_38kHz_on_msg 
+    PROGMEM{"Generating 38kHz. Press a key to stop.\n"};
+
+
+constexpr avr::Progmem_string<34> msg_receive_data_menu1 
+    PROGMEM{"\n\nConnect the IR receiver to pin "};
+
+constexpr avr::Progmem_string<174> msg_receive_data_menu2 
+    PROGMEM{", point the TV remote to it and read the data.\n"
+	    "\nMenu\n"
+	    "----\n"
+	    "h. Show this menu\n"
+	    "1. Receive data (default)\n"
+	    "2. Receive data (minimal version)\n"
+	    "3. Receive and print RAW data\n\n"};
+
+
+constexpr avr::Progmem_string<2> msg_ok 
+    PROGMEM{"OK"};
+
+constexpr avr::Progmem_string<4> msg_fail 
+    PROGMEM{"FAIL"};
+
+constexpr avr::Progmem_string<3> msg_unknown
+    PROGMEM{"???"};
+
+constexpr avr::Progmem_string<60> msg_menu_replay
+    PROGMEM{"\nReplay\n" 
+	    "------\n"
+	    "Press a button of your remote control ... "};
+
+constexpr avr::Progmem_string<27> msg_press_a_key_to_replay 
+    PROGMEM{"Press a key to replay ... "};
+
+constexpr avr::Progmem_string<18> msg_no_data_received 
+    PROGMEM{"No data received.\n"};
+
+constexpr avr::Progmem_string<92> msg_error_buffer_full
+    PROGMEM{"ERROR: se ha llenado el buffer de datos.\n"
+	    "Modificar el programa aumentando `max_num_data`.\n"};
+
+constexpr avr::Progmem_string<32> msg_line
+    PROGMEM{"------------------------------\n"};
+
+constexpr avr::Progmem_string<26> msg_total_number_of_pulses
+    PROGMEM{"\nTotal number of pulses: "};
+
+constexpr avr::Progmem_string<56> msg_print_raw_data_header1
+    PROGMEM{"RAW data: (time_low, time_high) = period\n"
+	    "num pulses = "};
+
+constexpr avr::Progmem_string<12> msg_polarity
+    PROGMEM{"Polarity = "};
+
+constexpr avr::Progmem_string<50> msg_ask_NEC_message
+    PROGMEM{"Message (write everything in hexadecimal 0x...):\n"};
+
+constexpr avr::Progmem_string<10> msg_address
+    PROGMEM{"Address: "};
+
+constexpr avr::Progmem_string<19> msg_inverted_address
+    PROGMEM{"Inverted address: "};
+
+constexpr avr::Progmem_string<10> msg_command
+    PROGMEM{"Command: "};
+
+constexpr avr::Progmem_string<19> msg_inverted_command
+    PROGMEM{"Inverted command: "};
+
+constexpr avr::Progmem_string<30> msg_transmit_data
+    PROGMEM{"Transmit data\n"
+	    "-------------\n"};
+
+constexpr avr::Progmem_string<41> msg_transmit_data_menu_protocol
+    PROGMEM{"Protocol:\n"
+	    "(1) NEC (now the only option)\n"};
+
+constexpr avr::Progmem_string<46> msg_transmit_data_menu_first_burst
+    PROGMEM{"Length of first burst:\n"
+	    "(1) 9.0 ms\n"
+	    "(2) 4.5 ms\n"};
+
+constexpr avr::Progmem_string<10> msg_sending
+    PROGMEM{"Sending: "};
 
 #endif
 

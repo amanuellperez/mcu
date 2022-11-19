@@ -25,22 +25,24 @@
 static void ask_NEC_message(NEC_message& msg)
 {
     avr::UART_iostream uart;
+    atd::print(uart, msg_ask_NEC_message);
 
-    uart << "Message (write everything in hexadecimal 0x...):\n";
-
-    uart << "Address: ";
+    atd::print(uart, msg_address);
     atd::read_int_as_hex(uart, msg.address);
     atd::print_int_as_hex(uart, msg.address);
 
-    uart << "\nInverted address: ";
+    uart << '\n';
+    atd::print(uart, msg_inverted_address);
     atd::read_int_as_hex(uart, msg.inv_address);
     atd::print_int_as_hex(uart, msg.inv_address);
 
-    uart << "\nCommand: ";
+    uart << '\n';
+    atd::print(uart, msg_command);
     atd::read_int_as_hex(uart, msg.command);
     atd::print_int_as_hex(uart, msg.command);
 
-    uart << "\nInverted command: ";
+    uart << '\n';
+    atd::print(uart, msg_inverted_command);
     atd::read_int_as_hex(uart, msg.inv_command);
     atd::print_int_as_hex(uart, msg.inv_command);
 }
@@ -49,15 +51,12 @@ static void ask_NEC_message(NEC_message& msg)
 void Main::transmit_data()
 {
     avr::UART_iostream uart;
-    uart << "Transmit data\n"
-	    "-------------\n";
+    atd::print(uart, msg_transmit_data);
 
-    uart << "Protocol:\n"
-	    "(1) NEC (now the only option)\n\n";
+    atd::print(uart, msg_transmit_data_menu_protocol);
+    uart << '\n';
 
-    uart << "Length of first burst:\n"
-	    "(1) 9.0 ms\n"
-	    "(2) 4.5 ms\n";
+    atd::print(uart, msg_transmit_data_menu_first_burst);
 
     char res{};
     uart >> res;
@@ -69,7 +68,8 @@ void Main::transmit_data()
     NEC_message msg{0xFF, 0xFF, 0xFF, 0xFF};
     ask_NEC_message(msg);
     
-    uart << "\nSending: ";
+    uart << '\n';
+    atd::print(uart, msg_sending);
     uart << msg << '\n'; // si se pone a continuación del const char* da error!!!
     transmit(time_first_burst_in_us, msg); // pasar la longitud del primer burst
 }

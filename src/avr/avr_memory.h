@@ -32,6 +32,8 @@
  *                    1. Uno es contenedor ("propietario" de la memoria)
  *                    2. El otro es una view.
  *
+ *    19/11/2022 atd::print
+ *
  ****************************************************************************/
 #include <avr/pgmspace.h>   
 
@@ -150,7 +152,7 @@ public:
 
     constexpr static size_type size() {return N;}
 
-    T operator[](size_type i) const
+    const T operator[](size_type i) const
     {   
 	if constexpr (std::is_same_v<T, uint8_t>)
 	    return pgm_read_byte(&data[i]);
@@ -182,7 +184,7 @@ public:
 
     constexpr static size_type size() {return N;}
 
-    char operator[](size_type i) const
+    const char operator[](size_type i) const
     {   return pgm_read_byte(&data[i]); }
 
     template<typename T2>
@@ -193,7 +195,8 @@ public:
     // defecto el data). Definiéndolo como const evito el problema de
     // escritura. El usuario tiene que saber que no debe de leer directamente
     // 'data'.
-    const char data[N];
+    // El +1 ya que se trata de una cadena de C que acaba en \0
+    const char data[N + 1];
 };
 
 
@@ -329,7 +332,32 @@ private:
 };
 
 
+
+/***************************************************************************
+ *			    FUNCTIONS
+ ***************************************************************************/
+
+
 }// namespace
+
+// Las funciones `print` dentro de `atd`.
+namespace atd{
+// (RRR) Cuando empiezo a usar menus en mis programas me encuentro con que 
+//       rápidamente uso los 2kB de RAM en las cadenas de los menus, dando un
+//       stackoverflow (me ha dado ya 2 veces). Para evitarlos, creo esta
+//       función: observar que `print` NO carga la cadena en memoria sino solo
+//       1 caracter. Es más lento que cargar toda la memoria a la vez (???)
+//       pero apenas uso memoria RAM, que es el objetivo.
+template <size_t N>
+std::ostream& print(std::ostream& out, const avr::Progmem_string<N>& str)
+{
+    for (size_t i = 0; i < str.size(); ++i)
+	out << str[i];
+
+    return out;
+}
+}// namespace
+
 #endif
 
 

@@ -59,6 +59,8 @@ private:
 
     void init_uart();
 
+    void print_run_menu();
+
     void print_instructions();
     void read_pulses();
     void choose_mode_operation();

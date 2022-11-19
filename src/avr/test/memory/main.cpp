@@ -219,6 +219,9 @@ void test_progmem_view()
 }
 
 
+constexpr avr::Progmem_string<28> menu PROGMEM{"\nProgmem test\n"
+	                                       "------------\n"};
+
 int main()
 {
 // init_UART();
@@ -226,8 +229,11 @@ int main()
     avr::basic_cfg(uart);
     uart.on();
 
-    uart << "\nProgmem test\n"
-	      "------------\n";
+//    uart << "\nProgmem test\n"
+//	      "------------\n";
+
+    atd::print(uart, menu);
+
 
    //test_basic();
    // test_progmem();

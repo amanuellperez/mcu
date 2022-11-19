@@ -20,17 +20,21 @@
 #include "prj_main.h"
 #include "square_wave.h"
 
+void Main::print_run_menu()
+{
+    avr::UART_iostream uart;
+    atd::print(uart, msg_run_menu1);
+    uart << (int) ir_transmitter_pin;
+    atd::print(uart, msg_run_menu2);
+}
+
+
 void Main::run()
 {
     while (1){
-	avr::UART_iostream uart;
-	uart << "\nMenu\n"
-		"----\n"
-		"1. Generate 38kHz on pin " << ir_transmitter_pin << '\n'
-	     << "2. Transmit data\n"
-		"3. Replay\n"
-		"4. Receive data\n";
+	print_run_menu();
 	
+	avr::UART_iostream uart;
 	char c{};
 	uart >> c;
 	switch (c){
@@ -47,7 +51,7 @@ void Main::generate_38kHz()
     SWG::generate_38kHz_on();
 
     avr::UART_iostream uart;
-    uart << "Generating 38kHz. Press a key to stop.\n";
+    atd::print(uart, msg_generate_38kHz_on_msg);
     char c{};
     uart >> c;
 
@@ -76,15 +80,9 @@ void Main::print_instructions()
 {
     avr::UART_iostream uart;
 
-    uart << "\n\nConnect the IR receiver to pin " << (int) ir_receiver_pin 
-	 << ", point the TV remote to it and read the data.\n";
-
-    uart << "\nMenu\n"
-	    "----\n"
-	    "h. Show this menu\n"
-	    "1. Receive data (default)\n"
-	    "2. Receive data (minimal version)\n"
-	    "3. Receive and print RAW data\n\n";
+    atd::print(uart, msg_receive_data_menu1);
+    uart << (int) ir_receiver_pin;
+    atd::print(uart, msg_receive_data_menu2);
 
     mode = Work_mode::receive_data;
 }
@@ -113,28 +111,31 @@ void Main::choose_mode_operation()
 void Main::replay()
 {
     avr::UART_iostream uart;
-    uart << "\nReplay\n";
-//	    "------\n"
-//	    "Press a button of your remote control ... ";
+    atd::print(uart, msg_menu_replay);
 
     pulse.receive();
 
     if (pulse.empty()){
-	uart << "FAIL. No data received.\n";
+	atd::print(uart, msg_fail);
+	uart << ". ";
+	atd::print(uart, msg_no_data_received);
 	return;
     }
 
     print_raw_data();
-    uart << "OK\n"
-	    "Press a key to replay ... ";
+    atd::print(uart, msg_ok);
+    uart << '\n';
+    atd::print(uart, msg_press_a_key_to_replay);
 
     char c{};
     uart >> c;
     if (SWG::transmit(pulse))
-	uart << "OK\n";
+	atd::print(uart, msg_ok);
 
     else
-	uart << "FAIL\n";
+	atd::print(uart, msg_fail);
+
+    uart << '\n';
 
 }
 

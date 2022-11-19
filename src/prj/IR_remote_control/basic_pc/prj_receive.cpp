@@ -26,7 +26,7 @@ void Main::receive_data() const
     avr::UART_iostream uart;
     
     if (pulse.empty()){
-	uart << "No data received.\n";
+	atd::print(uart, msg_no_data_received);
 	return;
     }
 
@@ -43,14 +43,14 @@ void Main::receive_min_data() const
     avr::UART_iostream uart;
     
     if (pulse.empty()){
-	uart << "No data received.\n";
+	atd::print(uart, msg_no_data_received);
 	return;
     }
 
     bool res = print_min_NEC_protocol(uart, pulse);
 
     if (res == false)
-	uart << "???\n";
+	atd::print(uart, msg_unknown);
 
 
 }
@@ -59,7 +59,7 @@ void Main::receive_raw_data() const
     avr::UART_iostream uart;
     
     if (pulse.empty()){
-	uart << "No data received.\n";
+	atd::print(uart, msg_no_data_received);
 	return;
     }
 
@@ -73,17 +73,16 @@ void Main::print_raw_data() const
 {
     avr::UART_iostream uart;
 
-    uart << "\n\n------------------------------\n"
-	 << "RAW data: (time_low, time_high) = period\n"
-	 << "num pulses = " << pulse.size() << '\n';
+    uart << '\n';
+    atd::print(uart, msg_line);
+    atd::print(uart, msg_print_raw_data_header1);
+    uart << pulse.size() << '\n';
 
     if (pulse.full())
-	uart << "ERROR: se ha llenado el buffer de datos.\n"
-	     << "Modificar el programa aumentando `max_num_data`.\n";
+	atd::print(uart, msg_error_buffer_full);
 
-
-
-    uart << "Polarity = " << (int) pulse.polarity() << '\n';
+    atd::print(uart, msg_polarity);
+    uart << (int) pulse.polarity() << '\n';
 
     for (size_t i = 0; i < pulse.size(); ++i){
 	uart <<  '(' << pulse[i].time_low << ", "
@@ -94,12 +93,11 @@ void Main::print_raw_data() const
 	else
 	    uart << '\n';
 
-
-
     }
     uart << '\n';
 
-    uart << "\nTotal number of pulses: " << pulse.size() << '\n'
-	 << "------------------------------\n";
+    atd::print(uart, msg_total_number_of_pulses);
+    uart << pulse.size() << '\n';
+    atd::print(uart, msg_line);
 }
 
