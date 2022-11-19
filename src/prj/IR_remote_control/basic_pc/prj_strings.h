@@ -19,12 +19,10 @@
 
 #pragma once
 
-#ifndef __CFG_H__
-#define __CFG_H__
+#ifndef __PRJ_STRINGS__
+#define __PRJ_STRINGS__
 
 #include <avr_memory.h>
-
-constexpr uint8_t num_max_pulses = 100;
 
 
 /***************************************************************************
@@ -51,10 +49,11 @@ constexpr avr::Progmem_string<37> msg_run_menu1
 	    "----\n"
 	    "1. Generate 38kHz on pin "};
 
-constexpr avr::Progmem_string<46> msg_run_menu2 
+constexpr avr::Progmem_string<72> msg_run_menu2 
     PROGMEM{"\n2. Transmit data\n"
 	    "3. Replay\n"
-	    "4. Receive data\n"};
+	    "4. Research remote control\n"
+	    "5. Receive data\n"};
 
 constexpr avr::Progmem_string<40> msg_generate_38kHz_on_msg 
     PROGMEM{"Generating 38kHz. Press a key to stop.\n"};
@@ -141,6 +140,14 @@ constexpr avr::Progmem_string<46> msg_transmit_data_menu_first_burst
 constexpr avr::Progmem_string<10> msg_sending
     PROGMEM{"Sending: "};
 
+constexpr avr::Progmem_string<146> msg_research_remote_control_help
+    PROGMEM{"Research remote control\n"
+	    "-----------------------\n"
+	    "Write the name of the button and press the key in the remote control.\n"
+	    "Write a blank line to end.\n\n"};
+
+constexpr avr::Progmem_string<21> msg_error_reading_line
+    PROGMEM{"Error reading line.\n"};
 #endif
 
 

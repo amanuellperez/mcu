@@ -24,8 +24,8 @@
 //		Timer e ir_receiver_pin
 #include <algorithm>
 
-#include "dev.h"
-#include "cfg.h"
+#include "prj_dev.h"
+#include "prj_cfg.h"
 #include "pulse.h"
 
 /***************************************************************************

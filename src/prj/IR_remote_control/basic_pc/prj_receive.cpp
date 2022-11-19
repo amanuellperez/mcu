@@ -21,7 +21,7 @@
 #include "IR_NEC_protocol.h"
 
 
-void Main::receive_data() const
+void Main::print_pulses() const
 {
     avr::UART_iostream uart;
     
@@ -38,7 +38,7 @@ void Main::receive_data() const
 }
 
 
-void Main::receive_min_data() const
+void Main::print_pulses_min() const
 {
     avr::UART_iostream uart;
     
@@ -54,7 +54,7 @@ void Main::receive_min_data() const
 
 
 }
-void Main::receive_raw_data() const
+void Main::print_pulses_raw() const
 {
     avr::UART_iostream uart;
     

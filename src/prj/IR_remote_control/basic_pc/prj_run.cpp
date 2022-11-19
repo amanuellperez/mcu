@@ -41,6 +41,7 @@ void Main::run()
 	    break; case '1' : generate_38kHz();
 	    break; case '2' : transmit_data();
 	    break; case '3' : replay();
+	    break; case '4' : research_remote_control();
 	    break; default  : receive_data_menu();
 	}
     }
@@ -68,9 +69,9 @@ void Main::receive_data_menu()
 	choose_mode_operation();
 	switch(mode){
 	    break; case Work_mode::help		    : print_instructions();
-	    break; case Work_mode::receive_data	    : receive_data();
-	    break; case Work_mode::receive_min_data : receive_min_data();
-	    break; case Work_mode::receive_raw_data : receive_raw_data();
+	    break; case Work_mode::print_pulses	    : print_pulses();
+	    break; case Work_mode::print_pulses_min : print_pulses_min();
+	    break; case Work_mode::print_pulses_raw : print_pulses_raw();
 	}
 	
     }
@@ -84,7 +85,7 @@ void Main::print_instructions()
     uart << (int) ir_receiver_pin;
     atd::print(uart, msg_receive_data_menu2);
 
-    mode = Work_mode::receive_data;
+    mode = Work_mode::print_pulses;
 }
 
 
@@ -97,10 +98,10 @@ void Main::choose_mode_operation()
 	uart >> c;
 
 	switch(c){
-	    break; case '2': mode = Work_mode::receive_min_data;
-	    break; case '3': mode = Work_mode::receive_raw_data;
+	    break; case '2': mode = Work_mode::print_pulses_min;
+	    break; case '3': mode = Work_mode::print_pulses_raw;
 	    break; case 'h': mode = Work_mode::help;
-	    break; default : mode = Work_mode::receive_data;
+	    break; default : mode = Work_mode::print_pulses;
 	}
 
 

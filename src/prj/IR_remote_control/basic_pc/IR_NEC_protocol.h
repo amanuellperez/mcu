@@ -29,7 +29,7 @@
 #include <atd_ostream.h>    // print_int_as_hex
 			    
 #include "pulse.h"
-#include "dev.h"    // Clock_us::counter_type
+#include "prj_dev.h"    // Clock_us::counter_type
 
 
 struct NEC_message{

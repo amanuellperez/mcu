@@ -29,8 +29,9 @@
  *    02/11/2022 v0.0
  *
  ****************************************************************************/
-#include "dev.h"
-#include "cfg.h"
+#include "prj_dev.h"
+#include "prj_cfg.h"
+#include "prj_strings.h"
 
 #include "pulse.h"
 
@@ -49,13 +50,13 @@ private:
 
 
 // Data
-    enum class Work_mode{ help, receive_data, receive_min_data, 
-			  receive_raw_data};
+    enum class Work_mode{ help, print_pulses, print_pulses_min, 
+			  print_pulses_raw};
 
     // Última tren de pulsos leidos:
     dev::Train_of_pulses<num_max_pulses> pulse;
 
-    Work_mode mode = Work_mode::receive_data;
+    Work_mode mode = Work_mode::print_pulses;
 
     void init_uart();
 
@@ -66,11 +67,13 @@ private:
     void choose_mode_operation();
 
     void receive_data_menu();
-    void receive_data() const;
-    void receive_min_data() const;
-    void receive_raw_data() const;
+    void print_pulses() const;
+    void print_pulses_min() const;
+    void print_pulses_raw() const;
     void transmit_data();
     void replay();
+    void research_remote_control();
+    void research_remote_control_read(char* cmd);
 
 // RAW (When we don't know the protocol)
     void print_raw_data() const;

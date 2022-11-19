@@ -167,6 +167,9 @@ void test_iostream()
 	char str[11];
 	// CUIDADO: con screen necesito '' en lugar de '\n' como fin de
 	// linea.
+	// El '\r' es necesario si se usa `screen` terminal, que es el que yo
+	// estoy usando. Parece ser (???) que el protocolo TTY es enviar \r en
+	// lugar de \n.
 	if (uart.getline(str, 11, '\r'))
 	    uart << "Has escrito: [" << str << "]\n";
 	else {

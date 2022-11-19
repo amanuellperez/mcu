@@ -3,6 +3,7 @@ BIN = xx
 SOURCES= prj_main.cpp 		\
 		prj_receive.cpp		\
 		prj_transmit.cpp	\
+		prj_research.cpp	\
 		prj_run.cpp			\
 		ptrain_receive.cpp	\
 		IR_NEC_protocol.cpp	\

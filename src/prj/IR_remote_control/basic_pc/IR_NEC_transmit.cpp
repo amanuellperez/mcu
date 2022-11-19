@@ -17,8 +17,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "dev.h"
-#include "cfg.h"
+#include "prj_dev.h"
+#include "prj_cfg.h"
 #include <avr_interrupt.h>
 
 #include "pulse.h"
