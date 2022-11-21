@@ -66,11 +66,11 @@ private:
     void read_pulses();
     void choose_mode_operation();
 
-    void receive_data_menu();
+    void receive_menu();
     void print_pulses() const;
     void print_pulses_min() const;
     void print_pulses_raw() const;
-    void transmit_data();
+    void send_message();
     void replay();
     void research_remote_control();
     void research_remote_control_read(char* cmd);

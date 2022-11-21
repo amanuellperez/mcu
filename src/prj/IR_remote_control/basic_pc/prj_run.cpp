@@ -39,10 +39,10 @@ void Main::run()
 	uart >> c;
 	switch (c){
 	    break; case '1' : generate_38kHz();
-	    break; case '2' : transmit_data();
+	    break; case '2' : send_message();
 	    break; case '3' : replay();
 	    break; case '4' : research_remote_control();
-	    break; default  : receive_data_menu();
+	    break; default  : receive_menu();
 	}
     }
 }
@@ -60,7 +60,7 @@ void Main::generate_38kHz()
 }
 
 
-void Main::receive_data_menu()
+void Main::receive_menu()
 {
     print_instructions();
 

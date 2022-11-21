@@ -42,8 +42,6 @@ struct NEC_message{
 std::ostream& operator<<(std::ostream& out, const NEC_message& msg);
 //std::ostream& operator<<(avr::UART_iostream& out, const NEC_message& msg);
 
-void transmit(Clock_us::counter_type time_first_burst_in_us
-	     , const NEC_message& msg);
 
 // Devuelve true si a = b +- 20%
 // Esto es, si b - 20% <= a <= b + 20%
@@ -60,7 +58,7 @@ inline bool is_equal(const Int1& a, const Int2& b)
 
 
 // Un mensaje es un array de pulsos
-bool NEC_is_start_pulse(const Pulse& pulse);
+bool NEC_is_start_pulse(const Cycle& pulse);
 char NEC_pulse_to_bit(const uint16_t T);
 
 
@@ -261,5 +259,7 @@ bool print_min_NEC_protocol(std::ostream& out
     return true;
 }
 
+
+#include "IR_NEC_transmit.tcc"
 
 #endif

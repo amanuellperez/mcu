@@ -49,11 +49,11 @@ constexpr avr::Progmem_string<37> msg_run_menu1
 	    "----\n"
 	    "1. Generate 38kHz on pin "};
 
-constexpr avr::Progmem_string<72> msg_run_menu2 
-    PROGMEM{"\n2. Transmit data\n"
+constexpr avr::Progmem_string<78> msg_run_menu2 
+    PROGMEM{"\n2. Send message\n"
 	    "3. Replay\n"
 	    "4. Research remote control\n"
-	    "5. Receive data\n"};
+	    "5. Receive messages\n"};
 
 constexpr avr::Progmem_string<40> msg_generate_38kHz_on_msg 
     PROGMEM{"Generating 38kHz. Press a key to stop.\n"};
@@ -62,14 +62,14 @@ constexpr avr::Progmem_string<40> msg_generate_38kHz_on_msg
 constexpr avr::Progmem_string<34> msg_receive_data_menu1 
     PROGMEM{"\n\nConnect the IR receiver to pin "};
 
-constexpr avr::Progmem_string<174> msg_receive_data_menu2 
+constexpr avr::Progmem_string<183> msg_receive_data_menu2 
     PROGMEM{", point the TV remote to it and read the data.\n"
 	    "\nMenu\n"
 	    "----\n"
 	    "h. Show this menu\n"
-	    "1. Receive data (default)\n"
-	    "2. Receive data (minimal version)\n"
-	    "3. Receive and print RAW data\n\n"};
+	    "1. Receive message (default)\n"
+	    "2. Receive message (minimal version)\n"
+	    "3. Receive and print RAW message\n\n"};
 
 
 constexpr avr::Progmem_string<2> msg_ok 

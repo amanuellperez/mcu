@@ -24,7 +24,7 @@
 // Aunque la especificación del NEC indica que el pulso de start tiene que ser
 // 9ms low seguido de 4'5 ms high, tengo un mando que envía 4'5 ms low y luego
 // 4'5 ms high. De momento lo implemento así.
-bool NEC_is_start_pulse(const Pulse& pulse)
+bool NEC_is_start_pulse(const Cycle& pulse)
 {
     if (!(is_equal(pulse.time_low, 9000) or is_equal(pulse.time_low, 4500)))
 	    return false;

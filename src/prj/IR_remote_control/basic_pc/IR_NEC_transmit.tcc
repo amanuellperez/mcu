@@ -17,16 +17,34 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "prj_dev.h"
-#include "prj_cfg.h"
-#include <avr_interrupt.h>
+#pragma once
 
-#include "pulse.h"
+#ifndef __IR_NEC_TRANSMIT_TCC__
+#define __IR_NEC_TRANSMIT_TCC__
+
+
 #include "IR_NEC_protocol.h"
 
 
+template <typename Clock_us0, typename SWG0>
+class NEC_transmitter{
+public:
+    using Clock_us = Clock_us0;
+    using SWG      = SWG0;
+
+    void transmit(Clock_us::counter_type time_first_burst_in_us, 
+		 const NEC_message& msg);
+
+private:
+    void transmit_byte(uint8_t b);
+    void transmit_one(Clock_us::counter_type time_first_burst_in_us, 
+	      const NEC_message& msg);
+};
+
+
 // inline porque no se si es suficientemente eficiente
-inline static void NEC_transmit_byte(uint8_t b)
+template <typename C, typename S>
+inline void NEC_transmitter<C, S>::transmit_byte(uint8_t b)
 {
     for (uint8_t i = 0; i < 8; ++i){
 	if (b & 0x01){
@@ -42,24 +60,29 @@ inline static void NEC_transmit_byte(uint8_t b)
     }
 }
 
-static void transmit_one(Clock_us::counter_type time_first_burst_in_us, 
-	      const NEC_message& msg)
+
+template <typename C, typename S>
+void NEC_transmitter<C, S>::
+	transmit_one(Clock_us::counter_type time_first_burst_in_us, 
+		     const NEC_message& msg)
 {
     SWG::burst_38kHz_of(time_first_burst_in_us);
     Clock_us::wait_us(4500);
 
-    NEC_transmit_byte(msg.address);
-    NEC_transmit_byte(msg.inv_address);
-    NEC_transmit_byte(msg.command);
-    NEC_transmit_byte(msg.inv_command);
+    transmit_byte(msg.address);
+    transmit_byte(msg.inv_address);
+    transmit_byte(msg.command);
+    transmit_byte(msg.inv_command);
 
     SWG::burst_38kHz_of(562);
 
 }
 
 
-void transmit(Clock_us::counter_type time_first_burst_in_us, 
-	      const NEC_message& msg)
+template <typename C, typename S>
+void NEC_transmitter<C,S>::transmit
+		(Clock_us::counter_type time_first_burst_in_us, 
+		 const NEC_message& msg)
 {
     Clock_us::on();
 //    for (uint8_t i = 0; i < 3; ++i){
@@ -71,5 +94,9 @@ void transmit(Clock_us::counter_type time_first_burst_in_us,
 
 
 
+
+
+
+#endif
 
 

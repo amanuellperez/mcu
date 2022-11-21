@@ -54,7 +54,7 @@ static bool check(uint8_t polarity, volatile bool* level, int16_t n)
 // Observar que en caso de que se haya recibido mal el último pulso, no lo
 // anotamos.
 static uint16_t copy_polarity1(volatile uint16_t* src, int16_t n
-		, Pulse* dst, uint16_t N)
+		, Cycle* dst, uint16_t N)
 {
     uint16_t size = std::min(static_cast<size_t>(n) / 2u, N);
 
@@ -71,7 +71,7 @@ static uint16_t copy_polarity1(volatile uint16_t* src, int16_t n
 // Observar que en caso de que se haya recibido mal el último pulso, no lo
 // anotamos.
 static uint16_t copy_polarity0(volatile uint16_t* src, int16_t n
-		, Pulse* dst, uint16_t N)
+		, Cycle* dst, uint16_t N)
 {
     uint16_t size = std::min(static_cast<size_t>(n) / 2u, N);
 
@@ -86,7 +86,7 @@ static uint16_t copy_polarity0(volatile uint16_t* src, int16_t n
 
 static uint16_t copy( uint8_t polarity
 		, volatile uint16_t* src, int16_t n
-		, Pulse* dst, uint16_t N)
+		, Cycle* dst, uint16_t N)
 {
     if (n <= 0)
 	return 0;
@@ -149,7 +149,7 @@ static void receive_semipulses()
 // Generalicemos:
 //	Inicialmente la señal puede estar en 0 ó en 1. En el caso del IR
 //	estará en 1. A este valor lo llamo como en SPI la polarity.
-uint16_t receive_train_of_pulses(Pulse* pulse, uint16_t N, uint8_t& polarity)
+uint16_t receive_train_of_pulses(Cycle* pulse, uint16_t N, uint8_t& polarity)
 {
     polarity = IR_receiver::is_one();
 

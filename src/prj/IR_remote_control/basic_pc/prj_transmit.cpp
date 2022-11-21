@@ -48,7 +48,7 @@ static void ask_NEC_message(NEC_message& msg)
 }
 
 
-void Main::transmit_data()
+void Main::send_message()
 {
     avr::UART_iostream uart;
     atd::print(uart, msg_transmit_data);
@@ -71,6 +71,8 @@ void Main::transmit_data()
     uart << '\n';
     atd::print(uart, msg_sending);
     uart << msg << '\n'; // si se pone a continuación del const char* da error!!!
-    transmit(time_first_burst_in_us, msg); // pasar la longitud del primer burst
+					   //
+    NEC_transmitter<Clock_us, SWG> transmitter;
+    transmitter.transmit(time_first_burst_in_us, msg);
 }
 
