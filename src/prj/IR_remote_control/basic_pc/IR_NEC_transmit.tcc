@@ -22,6 +22,8 @@
 #ifndef __IR_NEC_TRANSMIT_TCC__
 #define __IR_NEC_TRANSMIT_TCC__
 
+// OK: I have a problem with my english. Which one is better: transmit or send
+// an IR message? Now it sounds better `send`, but I don't know.
 
 #include "IR_NEC_protocol.h"
 
@@ -32,12 +34,12 @@ public:
     using Clock_us = Clock_us0;
     using SWG      = SWG0;
 
-    void transmit(Clock_us::counter_type time_first_burst_in_us, 
+    static void transmit(Clock_us::counter_type time_first_burst_in_us, 
 		 const NEC_message& msg);
 
 private:
-    void transmit_byte(uint8_t b);
-    void transmit_one(Clock_us::counter_type time_first_burst_in_us, 
+    static void transmit_byte(uint8_t b);
+    static void transmit_one(Clock_us::counter_type time_first_burst_in_us, 
 	      const NEC_message& msg);
 };
 

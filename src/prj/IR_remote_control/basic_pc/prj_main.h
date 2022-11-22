@@ -72,8 +72,11 @@ private:
     void print_pulses_raw() const;
     void send_message();
     void replay();
+
     void research_remote_control();
     void research_remote_control_read(char* cmd);
+
+    void test_remote_control();
 
 // RAW (When we don't know the protocol)
     void print_raw_data() const;

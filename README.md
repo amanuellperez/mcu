@@ -30,7 +30,7 @@ This directory contains the following:
 * [app](src/app/README.md): Application libraries.
   Depends on `dev`.
   
-* [prj](src/app/README.md): Proyects.
+* [prj](src/app/README.md): Projects.
   Depends on `app`.
 
 #### mk: Compilation rules.

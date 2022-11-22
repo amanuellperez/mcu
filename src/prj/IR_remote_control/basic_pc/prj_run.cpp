@@ -42,6 +42,7 @@ void Main::run()
 	    break; case '2' : send_message();
 	    break; case '3' : replay();
 	    break; case '4' : research_remote_control();
+	    break; case '5' : test_remote_control();
 	    break; default  : receive_menu();
 	}
     }
