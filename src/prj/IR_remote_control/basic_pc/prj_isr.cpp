@@ -17,15 +17,18 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#include "pulse.h"
+#include "prj_dev.h"
+#include "prj_cfg.h"
 
-#pragma once
+ISR_RECEIVER_PIN {
+    // TODO: definir Train_of_pulses_receiver_cfg en dev.h
+    using Cfg =
+	dev::Train_of_pulses_receiver_cfg<Clock_us, ir_receiver_pin, num_max_pulses>;
+    dev::Train_of_pulses_receiver<Cfg>::interrupt_callback();
+}
 
-#ifndef __PRJ_CFG_H__
-#define __PRJ_CFG_H__
 
-#include <avr_memory.h>
 
-constexpr uint8_t num_max_pulses = 100;
 
-#endif
 

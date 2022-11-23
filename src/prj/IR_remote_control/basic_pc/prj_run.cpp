@@ -66,7 +66,7 @@ void Main::receive_menu()
     print_instructions();
 
     while (1){
-	pulse.receive();
+	pulse.receive<Clock_us, ir_receiver_pin, num_max_pulses>();
 	choose_mode_operation();
 	switch(mode){
 	    break; case Work_mode::help		    : print_instructions();
@@ -115,7 +115,7 @@ void Main::replay()
     avr::UART_iostream uart;
     atd::print(uart, msg_menu_replay);
 
-    pulse.receive();
+    pulse.receive<Clock_us, ir_receiver_pin, num_max_pulses>();
 
     if (pulse.empty()){
 	atd::print(uart, msg_fail);
