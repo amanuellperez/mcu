@@ -29,7 +29,7 @@
 
 
 template <typename Clock_us0, typename SWG0>
-class NEC_transmitter{
+class NEC_transmitter_{
 public:
     using Clock_us = Clock_us0;
     using SWG      = SWG0;
@@ -46,7 +46,7 @@ private:
 
 // inline porque no se si es suficientemente eficiente
 template <typename C, typename S>
-inline void NEC_transmitter<C, S>::transmit_byte(uint8_t b)
+inline void NEC_transmitter_<C, S>::transmit_byte(uint8_t b)
 {
     for (uint8_t i = 0; i < 8; ++i){
 	if (b & 0x01){
@@ -64,7 +64,7 @@ inline void NEC_transmitter<C, S>::transmit_byte(uint8_t b)
 
 
 template <typename C, typename S>
-void NEC_transmitter<C, S>::
+void NEC_transmitter_<C, S>::
 	transmit_one(Clock_us::counter_type time_first_burst_in_us, 
 		     const NEC_message& msg)
 {
@@ -82,7 +82,7 @@ void NEC_transmitter<C, S>::
 
 
 template <typename C, typename S>
-void NEC_transmitter<C,S>::transmit
+void NEC_transmitter_<C,S>::transmit
 		(Clock_us::counter_type time_first_burst_in_us, 
 		 const NEC_message& msg)
 {
@@ -94,6 +94,13 @@ void NEC_transmitter<C,S>::transmit
     Clock_us::off();
 }
 
+
+template <typename Clock_us, typename SWG>
+void NEC_protocol::transmit (typename Clock_us::counter_type time_first_burst_in_us, 
+			const NEC_message& msg)
+{
+    NEC_transmitter_<Clock_us, SWG>::transmit(time_first_burst_in_us, msg);
+}
 
 
 

@@ -30,7 +30,7 @@ void Main::print_pulses() const
 	return;
     }
 
-    bool res = print_NEC_protocol(uart, pulse);
+    bool res = NEC_protocol::print_verbose(uart, pulse);
 
     if (res == false)
 	print_raw_data();
@@ -47,7 +47,7 @@ void Main::print_pulses_min() const
 	return;
     }
 
-    bool res = print_min_NEC_protocol(uart, pulse);
+    bool res = NEC_protocol::print(uart, pulse);
 
     if (res == false)
 	atd::print(uart, msg_unknown);

@@ -84,19 +84,20 @@ void Main::test_remote_control()
     //	    los comandos y demás. Sería muy sencillo de usar.
     uart << "Comandos entre " << (int) RC::first << " y " << (int) RC::last << '\n';
 
-    RC::index_type i = RC::error;
+    RC::index_type i = RC::null;
     uart >> i;
 
 
-    while(i != RC){
+    while(i != RC::null){
 	uart << "cmd escrito = " << i << '\n';
 	if (RC::first <= i and i <= RC::last){
 	    uart << "OK\n";
-	    NEC_transmitter<Clock_us, SWG>::transmit(RC::first_burst, RC::cmd[i]);
+	    NEC_protocol::transmit<Clock_us, SWG>(RC::first_burst, RC::cmd[i]);
 	}
 	else 
 	    uart << "Error cmd\n"; // TODO: progmem
-	i = 0xFF;
+				   
+	i = RC::null;
 	uart >> i;
     }
 }
