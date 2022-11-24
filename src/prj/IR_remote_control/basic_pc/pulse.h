@@ -24,6 +24,8 @@
 #include <atd_array.h>
 #include <avr_pin.h>	    // TODO: esto depende del avr. Generic_pin???
 #include <avr_interrupt.h>  // Generic_interrupt??? Mejor: mcu::enable_interrupt...
+			    // Si uso mcu como clase la puedo pasar como
+			    // parámetro.
 
 // TODO: estoy duplicando la memoria. Al implementar Train_of_pulses_receiver
 //       puedo usar la memoria alojada en él para Train_of_pulses.
@@ -324,6 +326,7 @@ uint16_t Train_of_pulses_receiver<C>::
 //	 Si IR_receiver::is_one() quiere decir que el pin estaba en zero, luego NO
 //	 era HIGH ==> level_ = false.
 template <typename C>
+inline  // inline ya que quiero que sea lo más eficiente posible la ISR.
 void Train_of_pulses_receiver<C>::interrupt_callback()
 {
     if (nsemipulse_ >= 0){

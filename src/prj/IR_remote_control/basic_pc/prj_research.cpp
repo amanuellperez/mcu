@@ -18,7 +18,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "prj_main.h"
-#include "IR_NEC_data.h"
+#include "IR_NEC_remote.h"
 
 constexpr uint8_t cmd_length_ = 20;
 
@@ -75,29 +75,28 @@ void Main::test_remote_control()
     uart << '\n';
     atd::print(uart, msg_test_remote_control);
 
-    using RC = Remote_control<Elegoo>;
+    using RC = Remote_control_Elegoo;
+    RC rc;
 
     // TODO: a progmem. Dar opción de elegir el control remoto a probar.
     // TODO: Mejor que NEC_transmitter quedaría:
     //	    Remote_control<Clock_us, SWG>::transmit(index);
     //	    y ya el Remote_control sabe si el protocolo a usar es NEC o RC5,
     //	    los comandos y demás. Sería muy sencillo de usar.
-    uart << "Comandos entre " << (int) RC::first << " y " << (int) RC::last << '\n';
+    uart << "Comandos entre " << (int) rc.first << " y " << (int) rc.last << '\n';
 
-    RC::index_type i = RC::null;
+    RC::Command_type i = rc.null;
     uart >> i;
 
 
-    while(i != RC::null){
+    while(i != rc.null){
 	uart << "cmd escrito = " << i << '\n';
-	if (RC::first <= i and i <= RC::last){
+	if (rc.transmit<Clock_us, SWG>(i))
 	    uart << "OK\n";
-	    NEC_protocol::transmit<Clock_us, SWG>(RC::first_burst, RC::cmd[i]);
-	}
 	else 
-	    uart << "Error cmd\n"; // TODO: progmem
+	    uart << "ERROR\n"; // TODO: progmem
 				   
-	i = RC::null;
+	i = rc.null;
 	uart >> i;
     }
 }
