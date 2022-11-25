@@ -89,6 +89,29 @@ void test_to_integer()
 
 }
 
+struct A{
+    int x;
+};
+
+struct B{
+    int y;
+};
+
+bool convert_x_into_y(const A& a, B& b)
+{
+    b.y = a.x + 2;
+    return true;
+}
+
+
+void test_convert_into()
+{
+    A a;
+    a.x = 10;
+    B b;
+    atd::convert(a).into(b);
+    CHECK_TRUE(b.y == a.x + 2, "convert.into");
+}
 
 int main()
 {
@@ -98,6 +121,7 @@ try{
     test_bounded_cast();
     test_safe_static_cast();
     test_to_integer();
+    test_convert_into();
 
 }catch(std::exception& e)
 {

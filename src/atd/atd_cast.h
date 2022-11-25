@@ -32,6 +32,7 @@
  *	27/08/2019 safe_static_cast
  *	10/11/2019 bounded_cast
  *	12/03/2021 to_integer
+ *	25/11/2022 convert(a).into(b);
  *
  ****************************************************************************/
 #include <limits>
@@ -113,6 +114,33 @@ to_integer(const Decimal<Rep, N>& d)
     return decimal_cast<To_decimal>(d);
 }
 
+
+// convert(a).into(b)
+// ------------------
+// Uno de los problemas cuando se pasan dos parámetros es que no queda claro
+// quién es quién. Ejemplo:
+//
+//		copy(a, b): esto es `a->b` or `b = a`???
+//
+// Es más claro escribir `copy(a).to(b)`, aqui no hay lugar a dudas.
+//
+// Sin embargo C++ no da soporte directo para escribir estas cosas, pero es
+// fácil de emularlo con estructuras. 
+// Esto es un experimento. Puede (hay que medir) que introduzca una ligera
+// ineficiencia, pero gano mucho en claridad.
+//
+// Para usarlo es necesario implementar convert_x_into_y, que devolverá true
+// en caso de que la conversión se haga con éxito, y false si no.
+template <typename X>
+struct convert{
+    convert(const X& x): x_{x} {}
+
+    template <typename Y>
+    bool into(Y& y)
+    { return convert_x_into_y(x_, y); }
+
+    const X& x_;
+};
 
 }// namespace
 
