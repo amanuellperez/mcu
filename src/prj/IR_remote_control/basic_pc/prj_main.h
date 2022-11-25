@@ -33,7 +33,7 @@
 #include "prj_cfg.h"
 #include "prj_strings.h"
 
-#include "pulse.h"
+#include "dev_train_of_pulses.h"
 
 class Main{
 public:

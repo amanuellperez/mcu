@@ -21,35 +21,7 @@
 #ifndef __IR_NEC_PROTOCOL_H__
 #define __IR_NEC_PROTOCOL_H__
 
-
-#include <cstdint>
-#include <iostream>
-#include <atd_array.h>
-#include <atd_string.h>	    // binary_char_to
-#include <atd_ostream.h>    // print_int_as_hex
-			    
-#include "pulse.h"
-
-
-struct NEC_message{
-    uint8_t address;
-    uint8_t inv_address;
-    uint8_t command;
-    uint8_t inv_command;
-};
-
-std::ostream& operator<<(std::ostream& out, const NEC_message& msg);
-
-
-// Devuelve true si a = b +- 20%
-// Esto es, si b - 20% <= a <= b + 20%
-// (cojo el 20% ya que:
-//	1. El clock del avr tiene un 10% de incertidumbre
-//	2. Doy un 10% más de margen de error
-// )
-template <typename Int1, typename Int2>
-inline bool is_equal(const Int1& a, const Int2& b)
-{ return (b*0.8 <= a and a <= b*1.2); }
+#include "IR_NEC_message.h"
 
 
 // Observar la asimetría al transmitir y recibir:
@@ -90,7 +62,7 @@ public:
     
 private:
     // Un mensaje es un array de pulsos
-    static bool is_start_pulse(const Cycle& pulse);
+    static bool is_start_pulse(const dev::Cycle& pulse);
     static char pulse_to_bit(const uint16_t T);
 
     template <typename Message_it>

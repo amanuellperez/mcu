@@ -18,8 +18,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #pragma once
 
-#ifndef __CLOCK_US_H__
-#define __CLOCK_US_H__
+#ifndef __DEV_CLOCK_US_H__
+#define __DEV_CLOCK_US_H__
 
 
 

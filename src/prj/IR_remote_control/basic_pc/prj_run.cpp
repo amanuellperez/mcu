@@ -18,7 +18,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "prj_main.h"
-#include "square_wave.h"
+#include "dev_square_wave.h"
 
 void Main::print_run_menu()
 {

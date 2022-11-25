@@ -18,13 +18,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "IR_NEC_protocol.h"
-#include <atd_string.h>	    // binary_char_to
-#include <atd_ostream.h>    // print_int_as_hex
 
 // Aunque la especificación del NEC indica que el pulso de start tiene que ser
 // 9ms low seguido de 4'5 ms high, tengo un mando que envía 4'5 ms low y luego
 // 4'5 ms high. De momento lo implemento así.
-bool NEC_protocol::is_start_pulse(const Cycle& pulse)
+bool NEC_protocol::is_start_pulse(const dev::Cycle& pulse)
 {
     if (!(is_equal(pulse.time_low, 9000) or is_equal(pulse.time_low, 4500)))
 	    return false;

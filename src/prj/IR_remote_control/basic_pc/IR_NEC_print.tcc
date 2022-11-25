@@ -21,6 +21,7 @@
 #ifndef __IR_NEC_PRINT_TCC__
 #define __IR_NEC_PRINT_TCC__
 
+#include <atd_string.h>	    // binary_char_to
 
 template <typename Message_it>
 Message_it NEC_protocol::look_for_start(Message_it p, Message_it pe)

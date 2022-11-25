@@ -33,8 +33,8 @@
 #include <avr_timer1_generic.h>
 #include <avr_UART_iostream.h>
 
-#include "clock_us.h"
-#include "square_wave.h"
+#include "dev_clock_us.h"
+#include "dev_square_wave.h"
 
 
 // pins usados

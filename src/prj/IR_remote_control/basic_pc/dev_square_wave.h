@@ -18,12 +18,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #pragma once
 
-#ifndef __SQUARE_WAVE_H__
-#define __SQUARE_WAVE_H__
+#ifndef __DEV_SQUARE_WAVE_H__
+#define __DEV_SQUARE_WAVE_H__
 
 #include <avr_pin.h>	// TODO: particular del avr ¿Generic_pin?
-		
-#include "pulse.h"
+	
+#include "dev_train_of_pulses.h"
 
 namespace dev{
 
@@ -72,6 +72,8 @@ public:
     static void burst_38kHz_of(Clock_us::counter_type time_in_us);
     static void wait_us(Clock_us::counter_type time_in_us);
 
+    // TODO: esta función no genera una onda cuadrada sino un tren de
+    // bursts!!! ¿por qué está dentro de esta clase?
     template <size_t N>
     static bool transmit(const Train_of_pulses<N>& pulse);
 

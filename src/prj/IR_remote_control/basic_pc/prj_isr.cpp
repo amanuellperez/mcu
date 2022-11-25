@@ -17,7 +17,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "pulse.h"
 #include "prj_dev.h"
 #include "prj_cfg.h"
 
