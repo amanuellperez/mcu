@@ -330,10 +330,10 @@ void test_linear_array()
 
 void test_carray()
 {
-    test::interfaz("CArray");
+    test::interfaz("Array");
 
     {
-	atd::CArray<int, 4> x;
+	atd::Array<int, 4> x;
 	CHECK_TRUE(x.size() == 0, "size");
 	CHECK_TRUE(x.empty(), "empty");
 	CHECK_TRUE(!x.full(), "full");
@@ -382,11 +382,11 @@ void test_carray()
 
 void test_carray_view()
 {
-    test::interfaz("CArray_view");
+    test::interfaz("Array_view");
 
     {// caso extremo
     int x[4];
-    atd::CArray_view<int> view{x, 0, 4};
+    atd::Array_view<int> view{x, 0, 4};
     CHECK_TRUE(view.size() == 0, "size");
     CHECK_TRUE(view.capacity() == 4, "capacity");
     }
@@ -395,7 +395,7 @@ void test_carray_view()
     int x[4];
     x[0] = 20;
     x[1] = 30;
-    atd::CArray_view<int> view{x, 2, 4};
+    atd::Array_view<int> view{x, 2, 4};
     CHECK_TRUE(view.size() == 2, "size");
     CHECK_TRUE(view.capacity() == 4, "capacity");
     CHECK_TRUE(view[0] == x[0], "operator[]");

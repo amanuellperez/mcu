@@ -46,28 +46,28 @@
  *
  *		 Tenemos los siguientes tipos de arrays:
  *		 * std::array: memoria local, no gestiona la memoria usada.
- *		 * atd::CArray : memoria local, gestiona la usada. 
+ *		 * atd::Array : memoria local, gestiona la usada. 
  *			         Distingue entre x[0..N) memoria reservada, de
  *			         x[0..size()) memoria usada.
  *		 * atd::Linear_array  : memoria local, gestiona la usada.
- *				Es más elaborada que CArray: x[0..N) es la
+ *				Es más elaborada que Array: x[0..N) es la
  *				memoria reservada, pero [p0, pe) es la memoria
  *				usada (donde p0 puede ser distinto de x[0]!!!)
  *		 * atd::Circular_array: idem.
  *		 * std::vector: memoria dinámica, gestiona la usada.
  *		
- *   05/11/2022 CArray_view
+ *   05/11/2022 Array_view
  *		Al intentar usar atd::Linear_array me encuentro con el
  *		problema de que al ser una template estás obligado a conocer
  *		el número máximo de elementos o definir toda la función que
  *		usa el Linear_array como template en un .h. Sin embargo, para
  *		manejar interrupciones me resulta más sencillo de programar
  *		definir las funciones dentro de los .cpp y no en los .h, no
- *		pudiendo usar Linear_array. Por eso creo este CArray. 
+ *		pudiendo usar Linear_array. Por eso creo este Array. 
  *		Como siempre, es experimental. El uso marcará qué arrays son
  *		los útiles.
  *
- *   16/11/2022 CArray
+ *   16/11/2022 Array
  *
  ****************************************************************************/
 #include <tuple>    // std::tie
@@ -509,18 +509,21 @@ constexpr void Linear_array<T,N>::remove(iterator p)
 
 
 /***************************************************************************
- *				CARRAY
+ *				ARRAY
  ***************************************************************************/
-// CArray es un array de C con gestión del número de elementos que contienen
-// datos. Distinguimos entre:
-//	    CArray<T, 10> x;
+// En un array tenemos que distinguir dos cosas: la memoria reservada y la
+// memoria usada (con datos). El problema con los arrays clásicos es que no
+// gestionan la memoria usada, cosa que tampoco lo hace std::array. atd::Array
+// gestiona esa memoria.
+// Distinguimos entre:
+//	    Array<T, 10> x;
 //	    x[0..10) = memoria reservada. Es la que se reserva al hacer
 //						    T x[10];
-//	    x[0..size()) = memoria ocupada. Esto es lo que aporta esta clase.
+//	    x[0..size()) = memoria usada. Esto es lo que aporta esta clase.
 //
-// CArray es una clase más sencilla que Linear_array.
+// Array es una clase más sencilla que Linear_array.
 template <typename T, size_t N>
-class CArray{
+class Array{
 public:
 // Types
     using value_type	    = T;
@@ -535,7 +538,7 @@ public:
 
 
 // Methods
-    CArray() : ie_{0} { }
+    Array() : ie_{0} { }
 
     reference operator[] (size_type i) {return ptr_[i];}
     const_reference operator[] (size_type i) const {return ptr_[i];}
@@ -579,7 +582,7 @@ private:
 // DUDA: validar size_ < max_size_??? Solo es un condicional y evitamos
 // problemas de memoria.
 template <typename T, size_t N>
-void CArray<T, N>::push_back(const_reference x)
+void Array<T, N>::push_back(const_reference x)
 {
     if (ie_ < N){
 	ptr_[ie_] = x;
@@ -588,7 +591,7 @@ void CArray<T, N>::push_back(const_reference x)
 }
 
 template <typename T, size_t N>
-inline void CArray<T, N>::pop_back()
+inline void Array<T, N>::pop_back()
 {
     if (ie_ > 0) 
 	--ie_;
@@ -600,7 +603,7 @@ inline void CArray<T, N>::pop_back()
 //	 Porque es una view. No tiene propiedad del array. El array hay que
 //	 definirlo en otro sitio.
 //
-//	 CArray_view es un array básico de C con max_size elementos (número de
+//	 Array_view es un array básico de C con max_size elementos (número de
 //	 elementos reservados en memoria). El problema con los arrays de C es
 //	 que no se saben cuántos elementos de esos están ocupados. La variable
 //	 `size` nos dice el número de elementos usados.
@@ -610,12 +613,12 @@ inline void CArray<T, N>::pop_back()
 //	    x[0] = 20;
 //	    x[1] = 30;
 //
-//	    CArray_view view{x, 2, 4};
+//	    Array_view view{x, 2, 4};
 //	    view = es una view del array x, contenedor de 4 elementos, de los
 //	    cuales solo 2 están ocupados.
 //
 template <typename T>
-class CArray_view{
+class Array_view{
 public:
 // Types
     using value_type	    = T;
@@ -630,11 +633,11 @@ public:
 
 
 // Methods
-    CArray_view(T* p0, size_type sz, size_type max_sz)
+    Array_view(T* p0, size_type sz, size_type max_sz)
 	: ptr_{p0}, size_{sz}, max_size_{max_sz} { }
 
     template <size_t N>
-    CArray_view(CArray<T, N>& x) : CArray_view{x.data(), x.size(), N} { }
+    Array_view(Array<T, N>& x) : Array_view{x.data(), x.size(), N} { }
 
     reference operator[] (size_type i) {return ptr_[i];}
     const_reference operator[] (size_type i) const {return ptr_[i];}
@@ -669,7 +672,7 @@ private:
 // DUDA: validar size_ < max_size_??? Solo es un condicional y evitamos
 // problemas de memoria.
 template <typename T>
-void CArray_view<T>::push_back(const_reference x)
+void Array_view<T>::push_back(const_reference x)
 {
     if (size_ < max_size_){
 	ptr_[size_] = x;
@@ -678,7 +681,7 @@ void CArray_view<T>::push_back(const_reference x)
 }
 
 template <typename T>
-inline void CArray_view<T>::pop_back()
+inline void Array_view<T>::pop_back()
 {
     if (size_ > 0) 
 	--size_;

@@ -69,7 +69,7 @@ public:
 private:
 // Data
     uint8_t polarity_; // 0 or 1
-    atd::CArray<Cycle, N> cycle_;
+    atd::Array<Cycle, N> cycle_;
 };
 
 
