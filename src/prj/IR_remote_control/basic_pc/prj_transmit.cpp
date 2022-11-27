@@ -65,7 +65,7 @@ void Main::send_message()
     if (res == '2')
 	time_first_burst_in_us = 4500;
 
-    NEC_message msg{0xFF, 0xFF, 0xFF, 0xFF};
+    NEC_message msg{9000, 0xFF, 0xFF, 0xFF, 0xFF};
     ask_NEC_message(msg);
     
     uart << '\n';

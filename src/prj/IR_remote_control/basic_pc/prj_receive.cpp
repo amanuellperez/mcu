@@ -32,6 +32,12 @@ void Main::print_pulses() const
 
     bool res = NEC_protocol::print_verbose(uart, pulse);
 
+    if (res){
+	NEC_message msg;
+	atd::convert(pulse).into(msg);
+	uart << "convert: " << msg << '\n';
+    }
+
     if (res == false)
 	print_raw_data();
 

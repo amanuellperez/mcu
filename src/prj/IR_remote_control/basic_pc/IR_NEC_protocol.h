@@ -22,7 +22,7 @@
 #define __IR_NEC_PROTOCOL_H__
 
 #include "IR_NEC_message.h"
-
+#include "dev_train_of_pulses.h"
 
 // Observar la asimetría al transmitir y recibir:
 //  transmito directamente el mensaje NEC (= ptrain codificado) mientras que
@@ -48,6 +48,13 @@ public:
     void transmit (typename Clock_us::counter_type time_first_burst_in_us, 
 			    const NEC_message& msg);
 
+    /// Convierte el tren de pulsos en el msg NEC. 
+    /// NO llamar a esta función directamente. Forma de uso:
+    ///		    atd::convert(pulse).into(msg);
+    template <size_t N>
+    static bool convert_x_into_y(const dev::Train_of_pulses<N>& pulse, 
+						    NEC_message& msg);
+
     /// Si el ptrain codifica un mensaje NEC lo imprime en out, devolviendo
     /// true. En caso contrario no hace nada devolviendo false.
     /// Versión verbose: detalla todos los campos.
@@ -61,6 +68,7 @@ public:
 				, const dev::Train_of_pulses<N>& pulse);
     
 private:
+// Funciones comunes
     // Un mensaje es un array de pulsos
     static bool is_start_pulse(const dev::Cycle& pulse);
     static char pulse_to_bit(const uint16_t T);
@@ -68,6 +76,13 @@ private:
     template <typename Message_it>
     static Message_it look_for_start(Message_it p, Message_it pe);
     
+
+// convert implementation
+    template <typename Message_it>
+    static Message_it convert_byte(uint8_t& y, Message_it p, Message_it pe);
+
+
+// print implementation
     template <typename Message_it>
     static Message_it print_byte_in_binary(std::ostream& out, 
 					    Message_it p, Message_it pe);
@@ -83,6 +98,7 @@ private:
 
 
 
+#include "IR_NEC_convert.tcc"
 #include "IR_NEC_print.tcc"
 #include "IR_NEC_transmit.tcc"
 

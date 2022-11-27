@@ -169,6 +169,12 @@ bool NEC_protocol::print_verbose(std::ostream& out,
 }
 
 
+// NO CAMBIAR!!!
+//	Aunque podemos escribir esta función convirtiendo el tren de pulsos
+//	primero en un msg NEC, no hacerlo. Esta función print añade
+//	funcionalidad: en caso de que no entienda algún bit lo imprime como
+//	'x' ó '?' cosa que no haríamos si la implementamos usando primero
+//	`convert(ptrain).into(msg)` y luego imprimiendo el mensaje.
 template <size_t N>
 bool NEC_protocol::print(std::ostream& out
 			    , const dev::Train_of_pulses<N>& pulse)
