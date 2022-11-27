@@ -19,10 +19,10 @@
 
 #pragma once
 
-#ifndef __IR_NEC_REMOTE_H__
-#define __IR_NEC_REMOTE_H__
+#ifndef __NEC_REMOTE_H__
+#define __NEC_REMOTE_H__
 
-#include "IR_NEC_protocol.h"
+#include "NEC_protocol.h"
 
 
 // DUDA: Tengo 2 comandos similares, uno de Elegoo y otro de Nisupa cada uno
@@ -103,8 +103,12 @@ template <typename Clock_us, typename SWG>
 bool Remote_control_Elegoo::transmit(Command_type i)
 { 
     if (first <= i and i <= last){
-	NEC_message msg{address_, inv_address_, cmd[i].cmd, cmd[i].inv_cmd};
-	NEC_protocol::transmit<Clock_us, SWG>(first_burst_in_us, msg); 
+	dev::NEC_message msg{first_burst_in_us, 
+			     address_, inv_address_, 
+			     cmd[i].cmd, cmd[i].inv_cmd};
+
+	dev::NEC_protocol::transmit<Clock_us, SWG>(msg); 
+
 	return true;
     }
 

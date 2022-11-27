@@ -36,7 +36,6 @@
 #include "dev_clock_us.h"
 #include "dev_square_wave.h"
 
-
 // pins usados
 // ------------
 // using UART: pins 2 and 3

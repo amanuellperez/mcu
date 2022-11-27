@@ -6,8 +6,7 @@ SOURCES= prj_main.cpp 		\
 		prj_research.cpp	\
 		prj_run.cpp			\
 		prj_isr.cpp			\
-		IR_NEC_protocol.cpp	\
-		IR_NEC_print.cpp
+		NEC_protocol.cpp
 
 
 MCU = atmega328p

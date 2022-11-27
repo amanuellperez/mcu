@@ -18,10 +18,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #pragma once
 
-#ifndef __IR_NEC_PRINT_TCC__
-#define __IR_NEC_PRINT_TCC__
+#ifndef __NEC_PRINT_TCC__
+#define __NEC_PRINT_TCC__
 
 #include <atd_string.h>	    // binary_char_to
+
+namespace dev{
 
 template <typename Message_it>
 Message_it NEC_protocol::look_for_start(Message_it p, Message_it pe)
@@ -49,8 +51,8 @@ Message_it NEC_protocol::print_byte_in_binary(std::ostream& out,
 
     for (int8_t i = 7; i >= 0; --i){
 
-	if (is_equal(p[i].time_low, 562))
-	    out << pulse_to_bit(p[i].period());
+	if (is_equal(p[i].time_low, t_burst))
+	    out << decode_period_as_char(p[i].period());
 
 	else 
 	    out << 'x';
@@ -67,8 +69,8 @@ Message_it NEC_protocol::print_byte_in_hex( std::ostream& out
     char res[9];
     res[8] = '\0';
     for (int8_t i = 7; i >= 0 and p != pe; --i, ++p){
-	if (is_equal(p->time_low, 562))
-	    res[i] = pulse_to_bit(p->period());
+	if (is_equal(p->time_low, t_burst))
+	    res[i] = decode_period_as_char(p->period());
 	
 	else
 	    res[8] = 'x';
@@ -227,4 +229,6 @@ bool NEC_protocol::print(std::ostream& out
     return true;
 }
 
+}// namespace
+ 
 #endif

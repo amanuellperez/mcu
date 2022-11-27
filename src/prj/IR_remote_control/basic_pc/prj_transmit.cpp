@@ -18,13 +18,24 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "prj_main.h"
-#include "IR_NEC_protocol.h"
+#include "NEC_protocol.h"
 #include <atd_istream.h>    // read_int_as_hex
 #include <atd_ostream.h>    // print_int_as_hex
 
-static void ask_NEC_message(NEC_message& msg)
+static void ask_NEC_message(dev::NEC_message& msg)
 {
     avr::UART_iostream uart;
+
+    atd::print(uart, msg_transmit_data_menu_first_burst);
+
+    char res{};
+    uart >> res;
+
+    msg.time_first_pulse = 9000;
+
+    if (res == '2')
+	msg.time_first_pulse = 4500;
+
     atd::print(uart, msg_ask_NEC_message);
 
     atd::print(uart, msg_address);
@@ -56,22 +67,14 @@ void Main::send_message()
     atd::print(uart, msg_transmit_data_menu_protocol);
     uart << '\n';
 
-    atd::print(uart, msg_transmit_data_menu_first_burst);
 
-    char res{};
-    uart >> res;
-    Clock_us::counter_type time_first_burst_in_us = 9000;
-
-    if (res == '2')
-	time_first_burst_in_us = 4500;
-
-    NEC_message msg{9000, 0xFF, 0xFF, 0xFF, 0xFF};
+    dev::NEC_message msg{9000, 0xFF, 0xFF, 0xFF, 0xFF};
     ask_NEC_message(msg);
     
     uart << '\n';
     atd::print(uart, msg_sending);
     uart << msg << '\n'; // si se pone a continuación del const char* da error!!!
 					   //
-    NEC_protocol::transmit<Clock_us, SWG>(time_first_burst_in_us, msg);
+    dev::NEC_protocol::transmit<Clock_us, SWG>(msg);
 }
 

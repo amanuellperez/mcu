@@ -18,7 +18,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "prj_main.h"
-#include "IR_NEC_remote.h"
+#include "NEC_remote.h"
 
 constexpr uint8_t cmd_length_ = 20;
 

@@ -18,7 +18,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "prj_main.h"
-#include "IR_NEC_protocol.h"
+#include "NEC_protocol.h"
 
 
 void Main::print_pulses() const
@@ -30,10 +30,10 @@ void Main::print_pulses() const
 	return;
     }
 
-    bool res = NEC_protocol::print_verbose(uart, pulse);
+    bool res = dev::NEC_protocol::print_verbose(uart, pulse);
 
     if (res){
-	NEC_message msg;
+	dev::NEC_message msg;
 	atd::convert(pulse).into(msg);
 	uart << "convert: " << msg << '\n';
     }
@@ -53,7 +53,7 @@ void Main::print_pulses_min() const
 	return;
     }
 
-    bool res = NEC_protocol::print(uart, pulse);
+    bool res = dev::NEC_protocol::print(uart, pulse);
 
     if (res == false)
 	atd::print(uart, msg_unknown);

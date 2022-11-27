@@ -19,13 +19,15 @@
 
 #pragma once
 
-#ifndef __IR_NEC_CONVERT_TCC__
-#define __IR_NEC_CONVERT_TCC__
+#ifndef __NEC_CONVERT_TCC__
+#define __NEC_CONVERT_TCC__
 
-#include "IR_NEC_protocol.h"
+#include "NEC_protocol.h"
 
 #include <atd_cast.h>	// convert(x).into(y)
 #include <atd_bit.h>	// write_one/zero
+
+namespace dev{
 
 // Se envia el least significant bit first, por eso hay que cambiar el orden.
 template <typename Message_it>
@@ -36,13 +38,13 @@ Message_it NEC_protocol::convert_byte(uint8_t& y,
 	return pe;
 
     for (int8_t i = 0; i < 8; ++i){
-	if (is_equal(p[i].time_low, 562)){
+	if (is_equal(p[i].time_low, t_burst_0)){
 	    uint16_t T = p[i].period();
 
-	    if (is_equal(T, 1125))
+	    if (is_equal(T, t_period_0))
 		atd::write_zero(y, i);
 
-	    else if (is_equal(T, 2250))
+	    else if (is_equal(T, t_period_1))
 		atd::write_one(y, i);
 
 	    else
@@ -58,8 +60,7 @@ Message_it NEC_protocol::convert_byte(uint8_t& y,
 
 
 template <size_t N>
-bool 
-NEC_protocol::convert_x_into_y(const dev::Train_of_pulses<N>& pulse, 
+bool NEC_protocol::convert_x_into_y(const dev::Train_of_pulses<N>& pulse, 
 						    NEC_message& msg)
 {
     auto pe = pulse.end();
@@ -110,4 +111,7 @@ bool convert_x_into_y(const dev::Train_of_pulses<N>& ptrain,
 }
 
 
+
+}// namespace
+ 
 #endif

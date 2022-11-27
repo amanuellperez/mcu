@@ -18,17 +18,64 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #pragma once
 
-#ifndef __IR_NEC_PROTOCOL_H__
-#define __IR_NEC_PROTOCOL_H__
+#ifndef __NEC_PROTOCOL_H__
+#define __NEC_PROTOCOL_H__
 
-#include "IR_NEC_message.h"
+#include <cstdint>
+#include <ostream>
+
 #include "dev_train_of_pulses.h"
 
+
+
+namespace dev{
+
+// Devuelve true si a = b +- 20%
+// Esto es, si b - 20% <= a <= b + 20%
+// (cojo el 20% ya que:
+//	1. El clock del avr tiene un 10% de incertidumbre
+//	2. Doy un 10% más de margen de error
+// )
+template <typename Int1, typename Int2>
+inline bool is_equal(const Int1& a, const Int2& b)
+{ return (b*0.8 <= a and a <= b*1.2); }
+
+/***************************************************************************
+ *			    NEC_message
+ ***************************************************************************/
+struct NEC_message{
+// Header
+    uint16_t time_first_pulse; // in us
+		
+// Payload
+    uint8_t address;
+    uint8_t inv_address;
+    uint8_t command;
+    uint8_t inv_command;
+
+// Tail (???)
+};
+
+
+
+std::ostream& operator<<(std::ostream& out, const NEC_message& msg);
+
+
+/***************************************************************************
+ *			    NEC_protocol
+ ***************************************************************************/
 // Observar la asimetría al transmitir y recibir:
 //  transmito directamente el mensaje NEC (= ptrain codificado) mientras que
 //  para recibir recibo un ptrain y luego lo imprimo.
 //  TODO: 
 //	    print(NEC_message{ptrain});
+//
+// (RRR) ¿Por qué configuro esta clase con los tiempos que dura un 0 y un 1 si
+//       en NEC estos tiempos están definidos?
+//
+//       NEC envia los datos usando pulse distance encoding lo cual es algo
+//       genérico. Voy preparando esta clase para generalizarla.
+//
 class NEC_protocol{
 public:
     // TODO: 
@@ -45,8 +92,7 @@ public:
     //			uint8_t address, uint8_t inv_address, uint8_t command);
     template <typename Clock_us, typename SWG>
     static 
-    void transmit (typename Clock_us::counter_type time_first_burst_in_us, 
-			    const NEC_message& msg);
+    void transmit (const NEC_message& msg);
 
     /// Convierte el tren de pulsos en el msg NEC. 
     /// NO llamar a esta función directamente. Forma de uso:
@@ -68,10 +114,24 @@ public:
 				, const dev::Train_of_pulses<N>& pulse);
     
 private:
+// Cfg
+    static constexpr uint16_t t_burst   = 562;
+
+    // Duración de un 'logical 0'
+    static constexpr uint16_t t_burst_0 = t_burst;
+    static constexpr uint16_t t_space_0 = 562;
+    static constexpr uint16_t t_period_0= t_burst + t_space_0;
+
+    // Duración de un 'logical 1'
+    static constexpr uint16_t t_burst_1 = t_burst;
+    static constexpr uint16_t t_space_1 = 1688;
+    static constexpr uint16_t t_period_1= t_burst + t_space_1;
+
+
 // Funciones comunes
     // Un mensaje es un array de pulsos
     static bool is_start_pulse(const dev::Cycle& pulse);
-    static char pulse_to_bit(const uint16_t T);
+    static char decode_period_as_char(const uint16_t T);
 
     template <typename Message_it>
     static Message_it look_for_start(Message_it p, Message_it pe);
@@ -97,10 +157,42 @@ private:
 };
 
 
+//// Aunque la especificación del NEC indica que el pulso de start tiene que ser
+//// 9ms low seguido de 4'5 ms high, tengo un mando que envía 4'5 ms low y luego
+//// 4'5 ms high. De momento lo implemento así.
+//bool NEC_protocol::is_start_pulse(const dev::Cycle& pulse)
+//{
+//    if (!(is_equal(pulse.time_low, 9000) or is_equal(pulse.time_low, 4500)))
+//	    return false;
+//
+//    return is_equal(pulse.time_high, 4500);
+//}
+//
+//
+//
+//// NEC bit format (pulse distance encoding):
+////	* logical '0': a 562.5us pulse burst followed by 562.us space, with
+////	               a total transmit time of 1.125 ms.
+////	* logical '1': a 562.5us pulse burst followed by a 1.678 ms space,
+////	               with a total transmit time of 2.25 ms.
+//char NEC_protocol::pulse_to_bit(const uint16_t T)
+//{
+//    if (is_equal(T, 1125))
+//	return '0';
+//
+//    else if (is_equal(T, 2250))
+//	return '1';
+//
+//    else 
+//	return '?';
+//}
+//
 
-#include "IR_NEC_convert.tcc"
-#include "IR_NEC_print.tcc"
-#include "IR_NEC_transmit.tcc"
+}// namespace
+
+#include "NEC_convert.tcc"
+#include "NEC_print.tcc"
+#include "NEC_transmit.tcc"
 
 
 
