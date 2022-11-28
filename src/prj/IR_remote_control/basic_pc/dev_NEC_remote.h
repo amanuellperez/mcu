@@ -19,13 +19,17 @@
 
 #pragma once
 
-#ifndef __NEC_REMOTE_H__
-#define __NEC_REMOTE_H__
+#ifndef __DEV_NEC_REMOTE_H__
+#define __DEV_NEC_REMOTE_H__
 
-#include "NEC_protocol.h"
+#include "dev_NEC_protocol.h"
 
+namespace dev{
 
-// DUDA: Tengo 2 comandos similares, uno de Elegoo y otro de Nisupa cada uno
+/***************************************************************************
+ *				    ELEGOO
+ ***************************************************************************/
+// DUDA: Tengo 2 mandos similares, uno de Elegoo y otro de Nisupa cada uno
 // de ellos con comandos diferentes. ¿No hay nada estandar???
 class Remote_control_Elegoo{
 public:
@@ -62,32 +66,29 @@ private:
     uint8_t inv_address_; 
     
 // static data
-    constexpr static uint16_t first_burst_in_us = 9000;
-    constexpr static uint8_t default_address    = 0x00;
+    constexpr static uint16_t time_first_pulse = 9000;
+    constexpr static uint8_t default_address   = 0x00;
 
-    struct Cmd {uint8_t cmd; uint8_t inv_cmd;};
-
-    // TODO: inv_cmd == ~cmd??? <-- sí? almacenar solo cmd.
     // TODO: a PROGMEM
-    constexpr static Cmd cmd[] =
+    constexpr static uint8_t cmd[] =
     {
-	{0x52, 0xAD},	// 0
-	{0x16, 0xE9},	// 1
-	{0x19, 0xE6},	// 2
-	{0x0D, 0xF2},	// 3
-	{0x0C, 0xF3},	// 4
-	{0x18, 0xE7},	// 5
-	{0x5E, 0xA1},	// 6
-	{0x08, 0xF7},	// 7
-	{0x1C, 0xE3},	// 8
-	{0x5A, 0xA5},	// 9
-	{0x46, 0xB9},	// up
-	{0x15, 0xEA},	// down
-	{0x44, 0xBB},	// left
-	{0x43, 0xBC},	// right
-	{0x42, 0xBD},	// asterisk
-	{0x4A, 0xB5},	// hashtag
-	{0x40, 0xBF}	// ok
+	0x52, // 0
+	0x16, // 1
+	0x19, // 2
+	0x0D, // 3
+	0x0C, // 4
+	0x18, // 5
+	0x5E, // 6
+	0x08, // 7
+	0x1C, // 8
+	0x5A, // 9
+	0x46, // up
+	0x15, // down
+	0x44, // left
+	0x43, // right
+	0x42, // asterisk
+	0x4A, // hashtag
+	0x40  // ok
     };
 };
 
@@ -103,11 +104,15 @@ template <typename Clock_us, typename SWG>
 bool Remote_control_Elegoo::transmit(Command_type i)
 { 
     if (first <= i and i <= last){
-	dev::NEC_message msg{first_burst_in_us, 
-			     address_, inv_address_, 
-			     cmd[i].cmd, cmd[i].inv_cmd};
+	dev::NEC_message msg;
 
-	dev::NEC_protocol::transmit<Clock_us, SWG>(msg); 
+	msg.time_first_pulse	= time_first_pulse;
+	msg.address		= address_;
+	msg.inv_address		= inv_address_;
+	msg.command		= cmd[i];
+	msg.inv_command		= ~(cmd[i]);
+
+	NEC_protocol::transmit<Clock_us, SWG>(msg); 
 
 	return true;
     }
@@ -115,6 +120,8 @@ bool Remote_control_Elegoo::transmit(Command_type i)
     return false;
 }
 
+}// namespace 
+ 
 #endif
 
 

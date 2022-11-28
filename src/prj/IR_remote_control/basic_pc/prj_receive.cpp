@@ -18,7 +18,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "prj_main.h"
-#include "NEC_protocol.h"
+#include "dev_NEC_protocol.h"
 
 
 void Main::print_pulses() const

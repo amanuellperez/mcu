@@ -18,8 +18,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #pragma once
 
-#ifndef __NEC_PROTOCOL_H__
-#define __NEC_PROTOCOL_H__
+#ifndef __DEV_NEC_PROTOCOL_H__
+#define __DEV_NEC_PROTOCOL_H__
 
 #include <cstdint>
 #include <ostream>
@@ -190,9 +190,9 @@ private:
 
 }// namespace
 
-#include "NEC_convert.tcc"
-#include "NEC_print.tcc"
-#include "NEC_transmit.tcc"
+#include "dev_NEC_convert.tcc"
+#include "dev_NEC_print.tcc"
+#include "dev_NEC_transmit.tcc"
 
 
 

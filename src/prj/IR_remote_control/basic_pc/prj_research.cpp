@@ -18,7 +18,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "prj_main.h"
-#include "NEC_remote.h"
+#include "dev_NEC_remote.h"
 
 constexpr uint8_t cmd_length_ = 20;
 
@@ -75,14 +75,10 @@ void Main::test_remote_control()
     uart << '\n';
     atd::print(uart, msg_test_remote_control);
 
-    using RC = Remote_control_Elegoo;
+    using RC = dev::Remote_control_Elegoo;
     RC rc;
 
     // TODO: a progmem. Dar opción de elegir el control remoto a probar.
-    // TODO: Mejor que NEC_transmitter quedaría:
-    //	    Remote_control<Clock_us, SWG>::transmit(index);
-    //	    y ya el Remote_control sabe si el protocolo a usar es NEC o RC5,
-    //	    los comandos y demás. Sería muy sencillo de usar.
     uart << "Comandos entre " << (int) rc.first << " y " << (int) rc.last << '\n';
 
     RC::Command_type i = rc.null;

@@ -22,7 +22,7 @@
 #ifndef __NEC_CONVERT_TCC__
 #define __NEC_CONVERT_TCC__
 
-#include "NEC_protocol.h"
+#include "dev_NEC_protocol.h"
 
 #include <atd_cast.h>	// convert(x).into(y)
 #include <atd_bit.h>	// write_one/zero

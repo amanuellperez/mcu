@@ -25,7 +25,7 @@
 // OK: I have a problem with my english. Which one is better: transmit or send
 // an IR message? Now it sounds better `send`, but I don't know.
 
-#include "NEC_protocol.h"
+#include "dev_NEC_protocol.h"
 
 namespace dev{
 
