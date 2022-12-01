@@ -99,8 +99,7 @@ class Train_of_pulses_receiver{
 public:
     Train_of_pulses_receiver() = delete;
 
-    static uint16_t receive(Cycle* pulse, uint16_t N, 
-							uint8_t& polarity);
+    static uint16_t receive(Cycle* pulse, uint16_t N, uint8_t& polarity);
     
     static void interrupt_callback();
 
@@ -114,7 +113,7 @@ private:
 
 // Cfg
     static constexpr uint8_t ir_receiver_pin = Cfg::ir_receiver_pin;
-    using IR_receiver_pin = avr::Pin<ir_receiver_pin>;
+    using Receiver_pin = avr::Pin<ir_receiver_pin>;
     using Clock_us = Cfg::Clock_us;
 
 // Functions
@@ -143,8 +142,7 @@ void Train_of_pulses<N>::receive()
 {
     using Cfg = Train_of_pulses_receiver_cfg<Clock_us, receiver_pin, num_max_pulses>;
     uint8_t n = Train_of_pulses_receiver<Cfg>::
-		    receive(cycle_.data(), cycle_.capacity()
-	    , polarity_);
+		    receive(cycle_.data(), cycle_.capacity(), polarity_);
 
     cycle_.size(n);
 
@@ -235,7 +233,7 @@ void Train_of_pulses_receiver<C>::receive_semipulses()
     static constexpr counter_type time_out{60000};
 
     nsemipulse_ = -1;
-    IR_receiver_pin::as_input_without_pullup();
+    Receiver_pin::as_input_without_pullup();
 
     avr::Interrupt::enable_pin<ir_receiver_pin>();
 
@@ -260,7 +258,7 @@ void Train_of_pulses_receiver<C>::receive_semipulses()
 
 // anotamos el último semiperiodo
     buffer_[nsemipulse_] = time_out;
-    level_ [nsemipulse_] = IR_receiver_pin::is_one();
+    level_ [nsemipulse_] = Receiver_pin::is_one();
     nsemipulse_ = nsemipulse_ + 1;
 
 
@@ -273,7 +271,7 @@ template <typename C>
 uint16_t Train_of_pulses_receiver<C>::
 	    receive(Cycle* pulse, uint16_t N, uint8_t& polarity)
 {
-    polarity = IR_receiver_pin::is_one();
+    polarity = Receiver_pin::is_one();
 
     receive_semipulses();
 
@@ -299,7 +297,7 @@ void Train_of_pulses_receiver<C>::interrupt_callback()
 {
     if (nsemipulse_ >= 0){
 	buffer_[nsemipulse_] = Clock_us::unsafe_value();
-	level_ [nsemipulse_] = !IR_receiver_pin::is_one();
+	level_ [nsemipulse_] = !Receiver_pin::is_one();
     }
 
     Clock_us::unsafe_reset();

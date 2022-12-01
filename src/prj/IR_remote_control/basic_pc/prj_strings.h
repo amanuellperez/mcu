@@ -49,12 +49,13 @@ constexpr avr::Progmem_string<37> msg_run_menu1
 	    "----\n"
 	    "1. Generate 38kHz on pin "};
 
-constexpr avr::Progmem_string<98> msg_run_menu2 
+constexpr avr::Progmem_string<107> msg_run_menu2 
     PROGMEM{"\n2. Send message\n"
 	    "3. Replay\n"
 	    "4. Research remote control\n"
-	    "5. Test remote control\n"
-	    "6. Receive messages\n"};
+	    "5. Clone\n"
+	    "6. Test remote control\n"
+	    "7. Receive messages\n"};
 
 constexpr avr::Progmem_string<40> msg_generate_38kHz_on_msg 
     PROGMEM{"Generating 38kHz. Press a key to stop.\n"};
@@ -153,6 +154,12 @@ constexpr avr::Progmem_string<21> msg_error_reading_line
 constexpr avr::Progmem_string<41> msg_test_remote_control
     PROGMEM{"Test remote control\n"
 	    "-------------------\n"};
+
+constexpr avr::Progmem_string<43> msg_clone_remote_control
+    PROGMEM{"Clone remote control\n"
+	    "--------------------\n"};
+
+
 
 #endif
 

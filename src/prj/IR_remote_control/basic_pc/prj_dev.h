@@ -36,6 +36,8 @@
 #include "dev_clock_us.h"
 #include "dev_square_wave.h"
 
+#include "prj_cfg.h"
+
 // pins usados
 // ------------
 // using UART: pins 2 and 3
@@ -70,6 +72,13 @@ using Transmit_timer = dev::Generic_timer<avr::Timer0>;
 // Notación: 2 tipos de señales SW (square wave) y PWM.
 using SWG = 
     dev::Square_wave_generator<Transmit_timer, ir_transmitter_pin, Clock_us>;
+
+// Train of pulses receiver
+// ------------------------
+using Train_cfg =
+    dev::Train_of_pulses_receiver_cfg<Clock_us, ir_receiver_pin, num_max_pulses>;
+using Train_of_pulses_receiver 
+		= dev::Train_of_pulses_receiver<Train_cfg>;
 
 
 using IR_receiver    = avr::Input_pin_without_pullup<ir_receiver_pin>;

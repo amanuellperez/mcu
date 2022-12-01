@@ -26,9 +26,10 @@
  *
  * - HISTORIA:
  *   AManuel Lopez Perez
- *	26/07/2017 v0.0 - Escrito.
- *	27/08/2019 v0.1 - Modifico el calculo de UBBR.
- *	13/10/2019 v0.2 - Creo uart_iostream dejando UART como traductor puro.
+ *	26/07/2017 Escrito.
+ *	27/08/2019 Modifico el calculo de UBBR.
+ *	13/10/2019 Creo uart_iostream dejando UART como traductor puro.
+ *	01/12/2022 enable_interrupt_.../disable_interrupt_...
  *
  ****************************************************************************/
 #include <avr/io.h>
@@ -134,12 +135,37 @@ public:
     static void multiprocessor_communication_mode()
     { atd::write_bit<MPCM0>::to<1>::in(UCSR0A);}
 
+    /// Enable interrupt on the RXC0 flag
+    /// Remember to define ISR_USART_RX
+    static void enable_interrupt_unread_data()
+    { atd::write_bit<RXCIE0>::to<1>::in(UCSR0B);}
 
-    // TODO: faltan los bits de interrupciones: 
-    // RXCIE0
-    // TXCIE0
-    // UDRIE0
-    // y el 9 bit (con frames de 9 bits)
+    /// Disable interrupt on the RXC0 flag
+    static void disable_interrupt_unread_data()
+    { atd::write_bit<RXCIE0>::to<0>::in(UCSR0B);}
+
+    /// Enable interrupt on the TXC0 flag
+    /// Remember to define ISR_USART_TX
+    // TODO: sin probar
+    static void enable_interrupt_transmit_complete()
+    { atd::write_bit<TXCIE0>::to<1>::in(UCSR0B);}
+
+    /// Disable interrupt on the TXC0 flag
+    static void disable_interrupt_transmit_complete()
+    { atd::write_bit<TXCIE0>::to<0>::in(UCSR0B);}
+
+    /// Enable interrupt on the UDR0 flag
+    /// Remember to define ISR_USART_UDRE
+    // TODO: sin probar
+    static void enable_interrupt_transmit_buffer_empty()
+    { atd::write_bit<UDRIE0>::to<1>::in(UCSR0B);}
+
+    /// Disable interrupt on the UDR0 flag
+    static void disable_interrupt_transmit_buffer_empty()
+    { atd::write_bit<UDRIE0>::to<0>::in(UCSR0B);}
+
+
+    // TODO: interrupt el 9 bit (con frames de 9 bits)
     // TXB80 y RXB80
 
     /// Enable receiver.

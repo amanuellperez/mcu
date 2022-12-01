@@ -22,6 +22,7 @@
 // al microcontrolador que lo devuelve, con lo que lo vemos en pantalla.
 #include "../../../avr_UART_iostream.h"
 #include "../../../avr_time.h"
+#include "../../../avr_interrupt.h" // To test interrupts
 
 #include <atd_istream.h>
 #include <atd_ostream.h>
@@ -88,6 +89,32 @@ void test_int(avr::UART_iostream& uart, const char* tipo)
     uart.clear();
 }
 
+volatile bool time_out = false;
+
+void test_interrupt_receive()
+{
+    avr::UART_iostream uart;
+    time_out = false;
+
+    avr::enable_all_interrupts();
+    avr::UART_basic::enable_interrupt_unread_data();
+
+    uart << "Testing interrupt unread_data()\n"
+	    "\tPress a key to throw the interrupt\n";
+
+    while (!time_out)
+    { ; }
+
+
+    uart << "\tOutside interrupt\n";
+
+    avr::disable_all_interrupts();
+    avr::UART_basic::disable_interrupt_unread_data();
+
+    char c{};
+    uart >> c;
+    uart << "\tYou have written [" << c << "]\n";
+}
 
 void test_iostream()
 {
@@ -95,22 +122,24 @@ void test_iostream()
     avr::basic_cfg(uart);
     uart.on();
 
-    uart << "\n---------------\n";
-    uart << "Probando UART!\n";
-    uart << "---------------\n";
+    uart << "\n----------\n";
+    uart << "UART test!\n";
+    uart << "----------\n";
 
     while (1) {
-	char c;
-	uart << "\n\nPulsa una tecla para continuar\n\n";
+	test_interrupt_receive();
 
-	uart << "Un retorno de carro";
+	char c;
+	uart << "\n\nPress a key to continue\n\n";
+
+	uart << "A new line with a carriage return";
 	uart << '\n';
 
 	uart.get(c);
-	uart << "\nHas escrito [" << c << "]\n";
+	uart << "\nYou have written [" << c << "]\n";
 
-	uart << "\nProbando operator<<\n";
-	uart << "-------------------\n";
+	uart << "\nTesting operator<<\n";
+	uart << "--------------------\n";
 	uart << "123u        =? ";
 	uint8_t x8 = 123;
 	uart << atd::write_as_uint8_t(x8);
@@ -136,16 +165,16 @@ void test_iostream()
         uart << s32;
 
 
-	uart << "\n\nProbando funciones receive\n";
+	uart << "\n\nTesting receive functions\n";
 	
-	uart << "\nLectura de un uint8_t\n";
-	uart << "\n---------------------\n";
+	uart << "\nReading uint8_t\n";
+	uart << "\n---------------\n";
 	while(uart){
-	    uart << "Escribe un número menor de 255 (o enter para fin): ";
+	    uart << "Write a number less than 255 (or enter to end): ";
 
 	    uint8_t x = 0;  // = 0 para evitar warning compilador
 	    uart >> atd::read_as_uint8_t(x);
-            uart << "\nHas escrito el número: [" << atd::write_as_uint8_t(x)
+            uart << "\nYou have written: [" << atd::write_as_uint8_t(x)
                  << "]\n";
         }
 
@@ -160,9 +189,9 @@ void test_iostream()
 	test_int<uint64_t>(uart, "uint64_t");
 	test_int<int64_t>(uart, "int64_t");
 
-	uart << "\nLectura de un línea\n";
-	uart << "-------------------\n";
-	uart << "Escribe una línea de texto (fin = '\r') (máximo de 10 caracteres)\n";
+	uart << "\nReading a line\n";
+	uart << "-----------------\n";
+	uart << "Write a text line (end = '\r') (maximum number of characters: 10)\n";
 
 	char str[11];
 	// CUIDADO: con screen necesito '' en lugar de '\n' como fin de
@@ -171,15 +200,15 @@ void test_iostream()
 	// estoy usando. Parece ser (???) que el protocolo TTY es enviar \r en
 	// lugar de \n.
 	if (uart.getline(str, 11, '\r'))
-	    uart << "Has escrito: [" << str << "]\n";
+	    uart << "You have written: [" << str << "]\n";
 	else {
 	    uart.clear();
-	    uart << "Error al leer la linea\n";
+	    uart << "Error reading the line\n";
 	}
 
-	uart << "\n\nProbando que lo que escribes se transimte bien\n";
-	uart << "----------------------------------------------\n";
-	uart << "Escribe lo que quieras, tienes que verlo en pantalla:\n";
+	uart << "\n\nTesting transmission\n";
+	uart << "--------------------\n";
+	uart << "Write whatever you like. You have to see it on your screen:\n";
 
 	while(1){
 	    char c;
@@ -203,5 +232,26 @@ int main()
 {
 //    test_streambuf();
     test_iostream();
+}
+
+
+ISR_USART_RX{
+    avr::UART_iostream uart;
+
+// Es obligatorio o bien vaciar el buffer o desactivar la interrupción para
+// evitar que se relance.
+// Método 1
+// --------
+//    char c;
+//    uart >> c;
+//
+// Método 2
+// --------
+    avr::UART_basic::disable_interrupt_unread_data();
+
+    uart << "\n\tInterruption: Inside ISR_USART_RX\n\n";
+
+    time_out = true;
+
 }
 

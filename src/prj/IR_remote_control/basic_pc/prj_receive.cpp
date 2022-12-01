@@ -21,6 +21,57 @@
 #include "dev_NEC_protocol.h"
 
 
+void Main::receive_menu()
+{
+    print_instructions();
+
+    while (1){
+	// TODO: este receive está parametrizado por lo mismo que tiene que
+	// estasr Train_of_pulses_receiver. Fusionarlo!!!
+	pulse.receive<Clock_us, ir_receiver_pin, num_max_pulses>();
+	choose_mode_operation();
+	switch(mode){
+	    break; case Work_mode::help		    : print_instructions();
+	    break; case Work_mode::print_pulses	    : print_pulses();
+	    break; case Work_mode::print_pulses_min : print_pulses_min();
+	    break; case Work_mode::print_pulses_raw : print_pulses_raw();
+	}
+	
+    }
+}
+
+void Main::print_instructions()
+{
+    avr::UART_iostream uart;
+
+    atd::print(uart, msg_receive_data_menu1);
+    uart << (int) ir_receiver_pin;
+    atd::print(uart, msg_receive_data_menu2);
+
+    mode = Work_mode::print_pulses;
+}
+
+
+void Main::choose_mode_operation()
+{
+    if (avr::UART_basic::are_there_data_unread()){
+	avr::UART_iostream uart;
+
+	char c{};
+	uart >> c;
+
+	switch(c){
+	    break; case '2': mode = Work_mode::print_pulses_min;
+	    break; case '3': mode = Work_mode::print_pulses_raw;
+	    break; case 'h': mode = Work_mode::help;
+	    break; default : mode = Work_mode::print_pulses;
+	}
+
+
+    }
+}
+
+
 void Main::print_pulses() const
 {
     avr::UART_iostream uart;

@@ -107,14 +107,18 @@ private:
 
 
 /// Recordar definir la ISR correspondiente:
-// TODO: esto es posible que sea específico del atmega328p y algún otro?
-// Si es así, hay que meterlo en el archivo de cabecera del atmega. De hecho
-// eso parece lo lógico ya que mapeo número de pins.
+// Esto es posible que sea específico del atmega328p y algún otro? 
+//
+// Respuesta: No. Definir una interrupt_generic o algo asi? o mejor 
+//	      mcu::interrupt?
+//
+// Antiguo: Si es así, hay que meterlo en el archivo de cabecera del atmega. 
+//	De hecho eso parece lo lógico ya que mapeo número de pins.
 //		ISR(PCINT0_vect) para pines 9, 10, 14, 15, 16, 17, 18, 19
 //		ISR(PCINT1_vect) para pines 1, 23, 24, 25, 26, 27, 28
 //		ISR(PCINT2_vect) para pines 2,  3,  4,  5,  6, 11, 12, 13
-// Defino todas estas macros para no tener que recordar este mapeo. 
-// Es más natural usar el número de pin.
+//	Defino todas estas macros para no tener que recordar este mapeo. 
+//	Es más natural usar el número de pin.
 //
 // Cuidado al usar las interrupciones: si se usa USART no se pueden usar los
 // pines 2 y 3.
@@ -159,7 +163,15 @@ private:
 #define ISR_TIMER1_COMPB ISR(TIMER1_COMPB_vect)
 #define ISR_TIMER1_OVF	 ISR(TIMER1_OVF_vect)
 
+// ISR de SPI
 #define ISR_SPI_STC  ISR(SPI_STC_vect)
+
+// ISR de USART
+#define ISR_USART_RX	ISR(USART_RX_vect)
+#define ISR_USART_UDRE	ISR(USART_UDRE_vect)
+#define ISR_USART_TX	ISR(USART_TX_vect)
+
+
 
 
 // Según página 96 de la datasheet

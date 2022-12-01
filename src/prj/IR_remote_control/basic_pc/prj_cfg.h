@@ -23,8 +23,6 @@
 #ifndef __PRJ_CFG_H__
 #define __PRJ_CFG_H__
 
-#include <avr_memory.h>
-
 constexpr uint8_t num_max_pulses = 100;
 
 #endif

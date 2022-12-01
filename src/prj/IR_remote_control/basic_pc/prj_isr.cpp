@@ -21,10 +21,10 @@
 #include "prj_cfg.h"
 
 ISR_RECEIVER_PIN {
-    // TODO: definir Train_of_pulses_receiver_cfg en dev.h
-    using Cfg =
-	dev::Train_of_pulses_receiver_cfg<Clock_us, ir_receiver_pin, num_max_pulses>;
-    dev::Train_of_pulses_receiver<Cfg>::interrupt_callback();
+//    using Cfg =
+//	dev::Train_of_pulses_receiver_cfg<Clock_us, ir_receiver_pin, num_max_pulses>;
+//    dev::Train_of_pulses_receiver<Cfg>::interrupt_callback();
+    Train_of_pulses_receiver::interrupt_callback();
 }
 
 

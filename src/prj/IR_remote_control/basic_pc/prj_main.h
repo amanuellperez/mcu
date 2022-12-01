@@ -76,6 +76,8 @@ private:
     void research_remote_control();
     void research_remote_control_read(char* cmd);
 
+    void clone_remote_control();
+
     void test_remote_control();
 
 // RAW (When we don't know the protocol)

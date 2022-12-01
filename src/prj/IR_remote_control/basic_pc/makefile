@@ -1,6 +1,7 @@
 BIN = xx
 
 SOURCES= prj_main.cpp 		\
+		 prj_clone.cpp		\
 		prj_receive.cpp		\
 		prj_transmit.cpp	\
 		prj_research.cpp	\
