@@ -20,15 +20,30 @@
 #include "prj_main.h"
 #include "dev_NEC_protocol.h"
 
+bool Main::receive()
+{
+// TODO: Enable_interrupt
+// TODO: ¿cómo ordenar las interrupciones?
+    avr::UART_basic::enable_interrupt_unread_data();
+    Main::user_abort = false;
+
+    bool res = pulse.receive<Train_cfg>(Main::user_abort);
+
+    avr::UART_basic::disable_interrupt_unread_data();
+
+    return res;
+}
+
 
 void Main::receive_menu()
 {
     print_instructions();
 
     while (1){
-	// TODO: este receive está parametrizado por lo mismo que tiene que
-	// estasr Train_of_pulses_receiver. Fusionarlo!!!
-	pulse.receive<Clock_us, ir_receiver_pin, num_max_pulses>();
+	// if (pulse.receive<Train_cfg>() == 0)
+	if (!receive())
+	    return;
+
 	choose_mode_operation();
 	switch(mode){
 	    break; case Work_mode::help		    : print_instructions();

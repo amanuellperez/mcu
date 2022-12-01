@@ -53,7 +53,10 @@ void Main::research_remote_control_read(char* cmd)
 
 	uart << cmd << '\t'; // DUDA: ¿mejor hacer echo en el terminal que use?
 			     
-	pulse.receive<Clock_us, ir_receiver_pin, num_max_pulses>();
+	// pulse.receive<Train_cfg>();
+	if (!receive())
+	    return; 
+
 	print_pulses_min();
     }
 

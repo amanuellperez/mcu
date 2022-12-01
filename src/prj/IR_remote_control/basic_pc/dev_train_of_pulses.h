@@ -63,8 +63,8 @@ public:
     uint8_t polarity() const { return polarity_; }
 
 // operations
-    template <typename Clock_us, uint8_t receiver_pin, int16_t num_max_pulses>
-    void receive();
+    template <typename Cfg>
+    uint8_t receive(volatile bool& timeout);
 
 private:
 // Data
@@ -99,7 +99,9 @@ class Train_of_pulses_receiver{
 public:
     Train_of_pulses_receiver() = delete;
 
-    static uint16_t receive(Cycle* pulse, uint16_t N, uint8_t& polarity);
+    static uint16_t receive( Cycle* pulse, uint16_t N
+			    , uint8_t& polarity
+			    , volatile bool& timeout); 
     
     static void interrupt_callback();
 
@@ -125,11 +127,12 @@ private:
     static uint16_t copy_polarity0(volatile uint16_t* src, int16_t n
 		    , Cycle* dst, uint16_t N);
 
+    // Devuelve el número de ciclos copiados
     static uint16_t copy( uint8_t polarity
 		, volatile uint16_t* src, int16_t n
 		, Cycle* dst, uint16_t N);
 
-    static void receive_semipulses();
+    static void receive_semipulses(volatile bool& timeout);
     
 };
 
@@ -137,14 +140,17 @@ private:
 // Inicialmente la señal puede estar en 0 ó en 1. En el caso del IR
 // estará en 1. A este valor lo llamo como en SPI la polarity.
 template <size_t N>
-template <typename Clock_us, uint8_t receiver_pin, int16_t num_max_pulses>
-void Train_of_pulses<N>::receive()
+template <typename Cfg>
+uint8_t Train_of_pulses<N>::receive(volatile bool& timeout)
 {
-    using Cfg = Train_of_pulses_receiver_cfg<Clock_us, receiver_pin, num_max_pulses>;
     uint8_t n = Train_of_pulses_receiver<Cfg>::
-		    receive(cycle_.data(), cycle_.capacity(), polarity_);
+		    receive(  cycle_.data(), cycle_.capacity()
+			    , polarity_
+			    , timeout);
 
     cycle_.size(n);
+
+    return n;
 
 }
 
@@ -227,10 +233,10 @@ uint16_t Train_of_pulses_receiver<C>::copy( uint8_t polarity
  *			    IMPLEMENTACIÓN
  ***************************************************************************/
 template <typename C>
-void Train_of_pulses_receiver<C>::receive_semipulses()
+void Train_of_pulses_receiver<C>::receive_semipulses(volatile bool& timeout)
 {
     using counter_type = typename Clock_us::counter_type;
-    static constexpr counter_type time_out{60000};
+    static constexpr counter_type time_overflow{60000};
 
     nsemipulse_ = -1;
     Receiver_pin::as_input_without_pullup();
@@ -239,25 +245,26 @@ void Train_of_pulses_receiver<C>::receive_semipulses()
 
     Clock_us::on();
     
-    avr::enable_all_interrupts();
+    avr::enable_all_interrupts(); // TODO: Interrupt_unlock (opuesto a _lock)
+				  // or Enable_interrupt???
 
-    while (nsemipulse_ < 0) { ; }	// esperamos a recibir algo
+    while (nsemipulse_ < 0 and !timeout) { ; }	// esperamos a recibir algo
 
-    // while (Timer::safe_value() < Timer::max_top() <-- esto lo ralentiza (???)
-    //while (Timer::safe_value() < time_out
-    while (Clock_us::safe_value() < time_out
-		and nsemipulse_ < buffer_size)
-    { ; }
+    if (!timeout){
+	// while (Timer::safe_value() < Timer::max_top() <-- esto lo ralentiza (???)
+	while (Clock_us::safe_value() < time_overflow
+		    and nsemipulse_ < buffer_size)
+	{ ; }
+    }
 
-
-    avr::disable_all_interrupts();
+    avr::disable_all_interrupts(); 
 
     Clock_us::off(); 
 
     avr::Interrupt::disable_pin<ir_receiver_pin>();
 
 // anotamos el último semiperiodo
-    buffer_[nsemipulse_] = time_out;
+    buffer_[nsemipulse_] = time_overflow;
     level_ [nsemipulse_] = Receiver_pin::is_one();
     nsemipulse_ = nsemipulse_ + 1;
 
@@ -269,11 +276,13 @@ void Train_of_pulses_receiver<C>::receive_semipulses()
 //	estará en 1. A este valor lo llamo como en SPI la polarity.
 template <typename C>
 uint16_t Train_of_pulses_receiver<C>::
-	    receive(Cycle* pulse, uint16_t N, uint8_t& polarity)
+	    receive( Cycle* pulse, uint16_t N
+		    , uint8_t& polarity
+		    , volatile bool& timeout)
 {
     polarity = Receiver_pin::is_one();
 
-    receive_semipulses();
+    receive_semipulses(timeout);
 
     if (!check(polarity, level_, nsemipulse_))
 	return 0;

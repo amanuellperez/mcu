@@ -69,7 +69,9 @@ void Main::replay()
     avr::UART_iostream uart;
     atd::print(uart, msg_menu_replay);
 
-    pulse.receive<Clock_us, ir_receiver_pin, num_max_pulses>();
+    // pulse.receive<Train_cfg>();
+    if (!receive())
+	return; 
 
     if (pulse.empty()){
 	atd::print(uart, msg_fail);

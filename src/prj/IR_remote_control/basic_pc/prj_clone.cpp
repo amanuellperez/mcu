@@ -17,31 +17,13 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "prj_dev.h"
-#include "prj_cfg.h"
 #include "prj_main.h"
 
-ISR_RECEIVER_PIN {
-//    using Cfg =
-//	dev::Train_of_pulses_receiver_cfg<Clock_us, ir_receiver_pin, num_max_pulses>;
-//    dev::Train_of_pulses_receiver<Cfg>::interrupt_callback();
-    Train_of_pulses_receiver::interrupt_callback();
-}
-
-
-// De momento solo activo esta interrupción para cuando el usuario quiera
-// abortar la ejecución de un receive.
-ISR_USART_RX{
-
-    avr::UART_basic::disable_interrupt_unread_data();
+void Main::clone_remote_control()
+{
     avr::UART_iostream uart;
-    char c{};
-    uart >> c;
-    if (c == 'e' or c == 'E')
-	Main::user_abort = true;
-
+    atd::print(uart, msg_clone_remote_control);
+// TODO:    
 }
-
-
 
 

@@ -40,6 +40,7 @@ public:
     Main();
     void run();
     
+    inline static volatile bool user_abort;
 
 private:
 // Hardware: 
@@ -67,6 +68,8 @@ private:
     void choose_mode_operation();
 
     void receive_menu();
+    bool receive();
+
     void print_pulses() const;
     void print_pulses_min() const;
     void print_pulses_raw() const;
