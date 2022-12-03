@@ -81,6 +81,9 @@ constexpr mcu::Progmem_string<2> msg_ok
 constexpr mcu::Progmem_string<4> msg_fail 
     PROGMEM{"FAIL"};
 
+constexpr mcu::Progmem_string<5> msg_error
+    PROGMEM{"ERROR"};
+
 constexpr mcu::Progmem_string<3> msg_unknown
     PROGMEM{"???"};
 
@@ -156,10 +159,15 @@ constexpr mcu::Progmem_string<41> msg_test_remote_control
     PROGMEM{"Test remote control\n"
 	    "-------------------\n"};
 
-constexpr mcu::Progmem_string<43> msg_clone_remote_control
+constexpr mcu::Progmem_string<71> msg_clone_remote_control
     PROGMEM{"Clone remote control\n"
-	    "--------------------\n"};
+	    "--------------------\n"
+	    "[c] Clear buffer\n"
+	    "[e] Return\n"};
 
+constexpr mcu::Progmem_string<60> msg_clone_msg_full
+    PROGMEM{"Buffer full. Can't add more elements. "
+	    "Please clear buffer.\n"};
 
 
 #endif

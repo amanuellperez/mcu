@@ -18,12 +18,45 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "prj_main.h"
+#include "dev_NEC_protocol.h"
 
 void Main::clone_remote_control()
 {
     UART uart;
+    uart << '\n';
     atd::print(uart, msg_clone_remote_control);
-// TODO:    
+
+    while (1){
+	if (receive())
+	    clone_pulses();
+
+// TODO
+//	else if (!clone_read_uart())
+//	    return;
+
+    }
+
+}
+
+void Main::clone_pulses()
+{
+    UART uart;
+
+    if (msg.full()){
+	atd::print(uart, msg_clone_msg_full);
+	return;
+    }
+
+    dev::NEC_message tmp;
+    if (!atd::convert(pulse).into(tmp)){
+	atd::print(uart, msg_error);
+	return;
+    }
+
+    msg.push_back(tmp);
+
+    uart << msg.size() << '\t' << tmp << '\n';
+
 }
 
 

@@ -77,15 +77,21 @@ using SWG =
 
 // Train of pulses receiver
 // ------------------------
-using Train_cfg =
+using Train_cfg_ =
     dev::Train_of_pulses_receiver_cfg<Clock_us, ir_receiver_pin, num_max_pulses>;
 using Train_of_pulses_receiver 
-		= dev::Train_of_pulses_receiver<Train_cfg>;
+		= dev::Train_of_pulses_receiver<Train_cfg_>;
 
+namespace os{
 
-using IR_receiver    = mcu::Input_pin_without_pullup<ir_receiver_pin>;
+template <size_t N>
+inline 
+bool receive(dev::Train_of_pulses<N>& pulse, volatile bool& user_abort)
+{ return pulse.template receive<Train_cfg_>(user_abort); }
 
+}// namespace
 
+  
 
 // UART
 // ----

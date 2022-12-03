@@ -34,6 +34,7 @@
 #include "prj_strings.h"
 
 #include "dev_train_of_pulses.h"
+#include "dev_NEC_protocol.h"	// NEC_message
 
 class Main{
 public:
@@ -43,11 +44,7 @@ public:
     inline static volatile bool user_abort;
 
 private:
-// Hardware: 
-//    Timers timer;    <-- ahora no tiene constructor. ¿lo defino para init
-//    automático?
-    IR_receiver receiver;  // no lo uso, solo uso su constructor, no lo puedo comentar
-
+// Hardware
 
 
 // Data
@@ -59,6 +56,9 @@ private:
 
     Receive_cfg mode = Receive_cfg::print_pulses;
 
+    atd::Array<dev::NEC_message, num_max_NEC_messages> msg;
+
+// Functions
     void init_uart();
 
     void print_run_menu();
@@ -81,14 +81,15 @@ private:
     void research_remote_control_read(char* cmd);
 
     void clone_remote_control();
+    void clone_pulses();
 
     void test_remote_control();
 
 // RAW (When we don't know the protocol)
     void print_raw_data() const;
 
+// To test
     void generate_38kHz();
-    void normal_operation();
 };
 
 

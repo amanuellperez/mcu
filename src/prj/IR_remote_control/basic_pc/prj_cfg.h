@@ -23,7 +23,8 @@
 #ifndef __PRJ_CFG_H__
 #define __PRJ_CFG_H__
 
-constexpr uint8_t num_max_pulses = 100;
+constexpr uint8_t num_max_pulses       = 100;
+constexpr uint8_t num_max_NEC_messages = 20;
 
 #endif
 

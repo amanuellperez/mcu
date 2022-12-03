@@ -7,7 +7,7 @@ SOURCES= prj_main.cpp 		\
 		prj_research.cpp	\
 		prj_run.cpp			\
 		prj_isr.cpp			\
-		os_uart.cpp			\
+		os.cpp				\
 		dev_NEC_protocol.cpp
 
 

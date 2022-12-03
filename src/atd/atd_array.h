@@ -554,9 +554,12 @@ public:
     size_type capacity() const {return N;}
 
     /// Añade un elemento al final del array.
+    /// Garantiza que no haya overflow. En caso de que no haya espacio
+    /// no hace nada.
     void push_back(const_reference x);
 
     /// Borra el último elemento añadido.
+    /// Garantiza que no haya underflow.
     void pop_back();
 
     /// Direct access to the underlying array
@@ -579,8 +582,6 @@ private:
 };
 
 
-// DUDA: validar size_ < max_size_??? Solo es un condicional y evitamos
-// problemas de memoria.
 template <typename T, size_t N>
 void Array<T, N>::push_back(const_reference x)
 {

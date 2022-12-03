@@ -27,7 +27,7 @@ bool Main::receive()
     UART::enable_interrupt_unread_data();
     Main::user_abort = false;
 
-    bool res = pulse.receive<Train_cfg>(Main::user_abort);
+    bool res = os::receive(pulse, Main::user_abort);
 
     UART::disable_interrupt_unread_data();
 
@@ -45,8 +45,7 @@ void Main::receive_menu()
 	if (receive())
 	    receive_print();
 
-	else 
-	    if (!receive_read_uart())
+	else if (!receive_read_uart())
 		return;
 
     }
