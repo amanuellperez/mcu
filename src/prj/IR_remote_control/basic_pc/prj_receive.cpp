@@ -22,8 +22,8 @@
 
 bool Main::receive()
 {
-// TODO: Enable_interrupt
-// TODO: ¿cómo ordenar las interrupciones?
+    avr::Enable_interrupts lock;
+
     avr::UART_basic::enable_interrupt_unread_data();
     Main::user_abort = false;
 
@@ -37,25 +37,31 @@ bool Main::receive()
 
 void Main::receive_menu()
 {
-    print_instructions();
+    mode = Receive_cfg::print_pulses;
+
+    receive_print_help();
 
     while (1){
-	// if (pulse.receive<Train_cfg>() == 0)
-	if (!receive())
-	    return;
+	if (receive())
+	    receive_print();
 
-	choose_mode_operation();
-	switch(mode){
-	    break; case Work_mode::help		    : print_instructions();
-	    break; case Work_mode::print_pulses	    : print_pulses();
-	    break; case Work_mode::print_pulses_min : print_pulses_min();
-	    break; case Work_mode::print_pulses_raw : print_pulses_raw();
-	}
-	
+	else 
+	    if (!receive_read_uart())
+		return;
+
     }
 }
 
-void Main::print_instructions()
+void Main::receive_print()
+{
+    switch(mode){
+	break; case Receive_cfg::print_pulses	    : print_pulses();
+	break; case Receive_cfg::print_pulses_min  : print_pulses_min();
+	break; case Receive_cfg::print_pulses_raw  : print_pulses_raw();
+    }
+}
+
+void Main::receive_print_help()
 {
     avr::UART_iostream uart;
 
@@ -63,27 +69,30 @@ void Main::print_instructions()
     uart << (int) ir_receiver_pin;
     atd::print(uart, msg_receive_data_menu2);
 
-    mode = Work_mode::print_pulses;
 }
 
 
-void Main::choose_mode_operation()
+bool Main::receive_read_uart()
 {
-    if (avr::UART_basic::are_there_data_unread()){
-	avr::UART_iostream uart;
+    if (!avr::UART_basic::are_there_data_unread())
+	return false;	// error de lógica
 
-	char c{};
-	uart >> c;
+    avr::UART_iostream uart;
 
-	switch(c){
-	    break; case '2': mode = Work_mode::print_pulses_min;
-	    break; case '3': mode = Work_mode::print_pulses_raw;
-	    break; case 'h': mode = Work_mode::help;
-	    break; default : mode = Work_mode::print_pulses;
-	}
+    char c{};
+    uart >> c;
 
+    switch(c){
+	break; case '2': mode = Receive_cfg::print_pulses_min;
+	break; case '3': mode = Receive_cfg::print_pulses_raw;
 
+	break; case 'h': case 'H': receive_print_help();
+	break; case 'e': case 'E': return false;
+
+	break; default : mode = Receive_cfg::print_pulses;
     }
+
+    return true;
 }
 
 

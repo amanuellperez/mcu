@@ -51,24 +51,25 @@ private:
 
 
 // Data
-    enum class Work_mode{ help, print_pulses, print_pulses_min, 
+    enum class Receive_cfg{ print_pulses, print_pulses_min, 
 			  print_pulses_raw};
 
     // Última tren de pulsos leidos:
     dev::Train_of_pulses<num_max_pulses> pulse;
 
-    Work_mode mode = Work_mode::print_pulses;
+    Receive_cfg mode = Receive_cfg::print_pulses;
 
     void init_uart();
 
     void print_run_menu();
 
-    void print_instructions();
     void read_pulses();
-    void choose_mode_operation();
 
     void receive_menu();
     bool receive();
+    void receive_print();
+    void receive_print_help();
+    bool receive_read_uart();
 
     void print_pulses() const;
     void print_pulses_min() const;

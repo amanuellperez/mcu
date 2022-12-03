@@ -34,11 +34,7 @@ ISR_RECEIVER_PIN {
 ISR_USART_RX{
 
     avr::UART_basic::disable_interrupt_unread_data();
-    avr::UART_iostream uart;
-    char c{};
-    uart >> c;
-    if (c == 'e' or c == 'E')
-	Main::user_abort = true;
+    Main::user_abort = true;
 
 }
 

@@ -63,8 +63,9 @@ public:
     uint8_t polarity() const { return polarity_; }
 
 // operations
+    // Devuelve el número de ciclos recibidos
     template <typename Cfg>
-    uint8_t receive(volatile bool& timeout);
+    uint8_t receive(volatile bool& abort);
 
 private:
 // Data
@@ -101,7 +102,7 @@ public:
 
     static uint16_t receive( Cycle* pulse, uint16_t N
 			    , uint8_t& polarity
-			    , volatile bool& timeout); 
+			    , volatile bool& abort); 
     
     static void interrupt_callback();
 
@@ -132,7 +133,7 @@ private:
 		, volatile uint16_t* src, int16_t n
 		, Cycle* dst, uint16_t N);
 
-    static void receive_semipulses(volatile bool& timeout);
+    static void receive_semipulses(volatile bool& abort);
     
 };
 
@@ -141,12 +142,12 @@ private:
 // estará en 1. A este valor lo llamo como en SPI la polarity.
 template <size_t N>
 template <typename Cfg>
-uint8_t Train_of_pulses<N>::receive(volatile bool& timeout)
+uint8_t Train_of_pulses<N>::receive(volatile bool& abort)
 {
     uint8_t n = Train_of_pulses_receiver<Cfg>::
 		    receive(  cycle_.data(), cycle_.capacity()
 			    , polarity_
-			    , timeout);
+			    , abort);
 
     cycle_.size(n);
 
@@ -233,7 +234,7 @@ uint16_t Train_of_pulses_receiver<C>::copy( uint8_t polarity
  *			    IMPLEMENTACIÓN
  ***************************************************************************/
 template <typename C>
-void Train_of_pulses_receiver<C>::receive_semipulses(volatile bool& timeout)
+void Train_of_pulses_receiver<C>::receive_semipulses(volatile bool& abort)
 {
     using counter_type = typename Clock_us::counter_type;
     static constexpr counter_type time_overflow{60000};
@@ -245,19 +246,19 @@ void Train_of_pulses_receiver<C>::receive_semipulses(volatile bool& timeout)
 
     Clock_us::on();
     
-    avr::enable_interrupts(); // TODO: Interrupt_unlock (opuesto a _lock)
-				  // or Enable_interrupt???
+    {// TODO: meter esto en una función. nombre?
+	avr::Enable_interrupts lock;
 
-    while (nsemipulse_ < 0 and !timeout) { ; }	// esperamos a recibir algo
+	while (nsemipulse_ < 0 and !abort) { ; }	// esperamos a recibir algo
 
-    if (!timeout){
-	// while (Timer::safe_value() < Timer::max_top() <-- esto lo ralentiza (???)
-	while (Clock_us::safe_value() < time_overflow
-		    and nsemipulse_ < buffer_size)
-	{ ; }
-    }
+	if (!abort){
+	    // while (Timer::safe_value() < Timer::max_top() <-- esto lo ralentiza (???)
+	    while (Clock_us::safe_value() < time_overflow
+			and nsemipulse_ < buffer_size)
+	    { ; }
+	}
 
-    avr::disable_interrupts(); 
+    }// ~Enable_interrupt
 
     Clock_us::off(); 
 
@@ -278,11 +279,11 @@ template <typename C>
 uint16_t Train_of_pulses_receiver<C>::
 	    receive( Cycle* pulse, uint16_t N
 		    , uint8_t& polarity
-		    , volatile bool& timeout)
+		    , volatile bool& abort)
 {
     polarity = Receiver_pin::is_one();
 
-    receive_semipulses(timeout);
+    receive_semipulses(abort);
 
     if (!check(polarity, level_, nsemipulse_))
 	return 0;
