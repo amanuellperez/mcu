@@ -245,7 +245,7 @@ void Train_of_pulses_receiver<C>::receive_semipulses(volatile bool& timeout)
 
     Clock_us::on();
     
-    avr::enable_all_interrupts(); // TODO: Interrupt_unlock (opuesto a _lock)
+    avr::enable_interrupts(); // TODO: Interrupt_unlock (opuesto a _lock)
 				  // or Enable_interrupt???
 
     while (nsemipulse_ < 0 and !timeout) { ; }	// esperamos a recibir algo
@@ -257,7 +257,7 @@ void Train_of_pulses_receiver<C>::receive_semipulses(volatile bool& timeout)
 	{ ; }
     }
 
-    avr::disable_all_interrupts(); 
+    avr::disable_interrupts(); 
 
     Clock_us::off(); 
 

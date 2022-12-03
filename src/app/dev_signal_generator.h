@@ -224,20 +224,24 @@ Square_wave_generator<T>::max_frequency()
 // -----------
 template <typename T>
 inline void Square_wave_generator<T>::ch1_on()
-{ GT::square_wave_ch1_on(); }
+//{ GT::square_wave_ch1_on(); }
+{ GT::square_wave_connect_ch1(); }
 
 template <typename T>
 inline void Square_wave_generator<T>::ch1_off()
-{ GT::square_wave_ch1_off(); }
+//{ GT::square_wave_ch1_off(); }
+{ GT::square_wave_disconect_ch1(); }
 
 
 template <typename T>
 inline void Square_wave_generator<T>::ch2_on()
-{ GT::square_wave_ch2_on(); }
+//{ GT::square_wave_ch2_on(); }
+{ GT::square_wave_connect_ch2(); }
 
 template <typename T>
 inline void Square_wave_generator<T>::ch2_off()
-{ GT::square_wave_ch2_off(); }
+// { GT::square_wave_ch2_off(); }
+{ GT::square_wave_disconect_ch2(); }
 
 
 

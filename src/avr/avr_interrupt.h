@@ -41,6 +41,11 @@
  *
  *	         disable_pin
  *
+ *    03/12/2022 Rename: enable_all_interrupts -> enable_interrupts (es más
+ *		         corto y se entiende bien)
+ *
+ *		 Enable_interrupt
+ *
  ****************************************************************************/
 #include <avr/interrupt.h>
 #include <atd_bit.h>
@@ -49,10 +54,10 @@
 namespace avr{
 /// Habilita el uso de interrupciones. Además, recordar habilitar
 /// cada interrupción por separado.
-inline void enable_all_interrupts() {sei();}
+inline void enable_interrupts() {sei();}
 
 /// Deshabilita el uso de interrupciones
-inline void disable_all_interrupts() {cli();}
+inline void disable_interrupts() {cli();}
 
 /*!
  *  \brief  Interfaz para manejar interrupciones
@@ -513,6 +518,44 @@ public:
     }
 
     ~Interrupts_lock()
+    {
+	SREG = sreg_;	// Restore global interrupt flag
+    }
+
+
+private:
+    unsigned char sreg_;
+};
+
+// DUDA: Interrupts_lock y Disable_interrupt es la misma clase. ¿Qué nombre es
+// mejor? Disable_interrupts encaja mejor con Enable_interrupts
+class Disable_interrupts{
+public:
+    Disable_interrupts()
+    {
+	sreg_ = SREG;	// Save global interrupt flag
+	cli();		// Disable interrupts
+    }
+
+    ~Disable_interrupts()
+    {
+	SREG = sreg_;	// Restore global interrupt flag
+    }
+
+
+private:
+    unsigned char sreg_;
+};
+
+class Enable_interrupts{
+public:
+    Enable_interrupts()
+    {
+	sreg_ = SREG;	// Save global interrupt flag
+	sei();		// Enable interrupts
+    }
+
+    ~Enable_interrupts()
     {
 	SREG = sreg_;	// Restore global interrupt flag
     }

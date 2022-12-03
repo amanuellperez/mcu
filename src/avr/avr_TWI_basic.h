@@ -202,7 +202,7 @@ public:
 
     /// The TWI interrupt request will be activated.
     // OJO: hay que definir globalmente las interrupciones para que esto
-    // funcione: Interrupt::enable_all_interrupts();
+    // funcione: Interrupt::enable_interrupts();
     // Observar que hay que escribir un 0 en TWINT. Si no se escribe, no se
     // por qué pero se hace un clear de TWINT (ojo: tal como está ahora
     // implementado write_bit es normal ya que write_bits reescribe TWCR y 

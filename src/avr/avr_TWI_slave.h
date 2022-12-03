@@ -130,7 +130,7 @@ public:
     template <uint8_t TWI_slave_address>
     static void on()
     {
-	avr::enable_all_interrupts();
+	avr::enable_interrupts();
 	TWI::template slave_init<TWI_slave_address,1>(); // 1 = TWI::interrupt_enable()
 
 	reset();

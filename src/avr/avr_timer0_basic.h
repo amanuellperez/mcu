@@ -197,7 +197,7 @@ public:
 
 
 // INTERRUPCIONES
-//  Recordar que hay que llamar a avr::enable_all_interrupts(); para que
+//  Recordar que hay que llamar a avr::enable_interrupts(); para que
 //  se puedan usar las interrupciones.
     /// Se captura con ISR_TIMER0_OVF
     static void enable_overflow_interrupt();

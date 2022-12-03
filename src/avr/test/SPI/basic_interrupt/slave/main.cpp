@@ -41,7 +41,7 @@ int main()
     SPI::spi_mode(0,0);
     SPI::data_order_LSB();
     SPI::interrupt_enable();
-    avr::enable_all_interrupts();
+    avr::enable_interrupts();
 
     uart << "\n\nSlave SPI\n"
 	    "----------\n"

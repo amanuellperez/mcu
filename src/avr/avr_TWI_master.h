@@ -169,7 +169,7 @@ public:
     static void on()
     {
 	TWI::template SCL_frequency_in_kHz<f_scl, f_clock>();
-	avr::enable_all_interrupts();
+	avr::enable_interrupts();
 
 	init();
     }

@@ -66,7 +66,7 @@ public:
     // ---------
     /// Causes the SPI interrupt to be executed if a serial transmission is
     /// completed and interrupts are enable.
-    // CUIDADO: recordar llamar enable_all_interrupts!!! 
+    // CUIDADO: recordar llamar enable_interrupts!!! 
     static void interrupt_enable() 
     {atd::write_bit<SPIE>::to<1>::in(SPCR);}
 

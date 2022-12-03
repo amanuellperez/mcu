@@ -3,10 +3,10 @@ DIRS =  calculator	\
 	   	blink		\
 		POV_toy		\
 		sensor		\
-		signal_generator \
 		stroboscope	\
 		util		
 
+#		signal_generator \
 
 include $(MCU_RECRULES)
 

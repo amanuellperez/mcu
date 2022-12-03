@@ -282,7 +282,7 @@ public:
 
 
 // INTERRUPCIONES
-//  Recordar llamar a avr::enable_all_interrupts para que funcionen.
+//  Recordar llamar a avr::enable_interrupts para que funcionen.
 
     /// Cuando se produce un overflow generamos la interrupción
     /// correspondiente. Se captura con ISR_TIMER1_OVF

@@ -112,7 +112,7 @@ int main()
     test::init(uart);
 
 
-    avr::enable_all_interrupts();
+    avr::enable_interrupts();
 
     Timer::mode_timer_counter(top_counter);
     Timer::on<period_in_us>();

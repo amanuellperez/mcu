@@ -35,6 +35,7 @@
  *    19/11/2022 atd::print
  *
  ****************************************************************************/
+#include <ostream>  // std::ostream
 #include <avr/pgmspace.h>   
 
 #include <type_traits>

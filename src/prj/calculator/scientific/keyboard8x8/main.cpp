@@ -115,7 +115,7 @@ int main()
     SPI::data_order_LSB();
     SPI::interrupt_enable();
     avr::Interrupt::enable_pin<SPI_SS_pin>();
-    avr::enable_all_interrupts();
+    avr::enable_interrupts();
 
 
     test_keyboard();

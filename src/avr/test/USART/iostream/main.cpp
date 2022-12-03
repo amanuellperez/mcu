@@ -96,7 +96,7 @@ void test_interrupt_receive()
     avr::UART_iostream uart;
     time_out = false;
 
-    avr::enable_all_interrupts();
+    avr::enable_interrupts();
     avr::UART_basic::enable_interrupt_unread_data();
 
     uart << "Testing interrupt unread_data()\n"
@@ -108,7 +108,7 @@ void test_interrupt_receive()
 
     uart << "\tOutside interrupt\n";
 
-    avr::disable_all_interrupts();
+    avr::disable_interrupts();
     avr::UART_basic::disable_interrupt_unread_data();
 
     char c{};
