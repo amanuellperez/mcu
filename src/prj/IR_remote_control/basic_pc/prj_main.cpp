@@ -28,9 +28,7 @@
 
 void Main::init_uart()
 {
-    avr::UART_iostream uart;
-    avr::basic_cfg(uart);
-    uart.on();
+    UART::init();
 }
 
 

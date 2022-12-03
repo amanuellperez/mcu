@@ -22,7 +22,7 @@
 
 void Main::print_run_menu()
 {
-    avr::UART_iostream uart;
+    UART uart;
     atd::print(uart, msg_run_menu1);
     uart << (int) ir_transmitter_pin;
     atd::print(uart, msg_run_menu2);
@@ -34,7 +34,7 @@ void Main::run()
     while (1){
 	print_run_menu();
 	
-	avr::UART_iostream uart;
+	UART uart;
 	char c{};
 	uart >> c;
 	switch (c){
@@ -53,7 +53,7 @@ void Main::generate_38kHz()
 {
     SWG::generate_38kHz_on();
 
-    avr::UART_iostream uart;
+    UART uart;
     atd::print(uart, msg_generate_38kHz_on_msg);
     char c{};
     uart >> c;
@@ -66,7 +66,7 @@ void Main::generate_38kHz()
 
 void Main::replay()
 {
-    avr::UART_iostream uart;
+    UART uart;
     atd::print(uart, msg_menu_replay);
 
     // pulse.receive<Train_cfg>();

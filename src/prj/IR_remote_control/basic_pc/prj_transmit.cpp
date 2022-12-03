@@ -24,7 +24,7 @@
 
 static void ask_NEC_message(dev::NEC_message& msg)
 {
-    avr::UART_iostream uart;
+    UART uart;
 
     atd::print(uart, msg_transmit_data_menu_first_burst);
 
@@ -61,7 +61,7 @@ static void ask_NEC_message(dev::NEC_message& msg)
 
 void Main::send_message()
 {
-    avr::UART_iostream uart;
+    UART uart;
     atd::print(uart, msg_transmit_data);
 
     atd::print(uart, msg_transmit_data_menu_protocol);

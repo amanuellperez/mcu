@@ -31,6 +31,8 @@
  *      13/01/2019 v0.0
  *
  ****************************************************************************/
+#include <cstdint>  // uint8_t
+#include <avr/io.h> // registros: DDRB... PORT...
 
 namespace avr{
 

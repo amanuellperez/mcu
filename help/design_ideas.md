@@ -11,11 +11,58 @@
    inglés. (Los comentarios los dejaré en español-inglés dependiendo del día.)
    
 
-   *TODO: A día de hoy hay spanglish. Traducir todo el código al inglés.*
-   
-
 2. El hardware se conoce en tiempo de compilación. Configurar los dispositivos
    en tiempo de compilación (uso de `templates`).
+
+
+## Diseño por capas
+
+Según voy programando van apareciendo las siguientes capas (esto es temporal,
+lo iré modificando según vaya ganando experiencia):
+
+1. Capa física: traductores.
+		Esta capa la programa alguien que domina el dispositivo
+		hardware. Los traductores son muy sencillos de escribir ya que 
+		literalmente traducen la datasheet.
+
+		En esta capa aparecen claramente dos tipos de componentes: 
+
+		* los microcontroladores: atmega, attiny, esp8266, ...
+		  (de momento está todo dentro de `avr`)
+
+		* dispositivos: RTC, LCD, EEPROM, ...
+		  (esto de momento está todo dentro de `dev`)
+
+2. Capa lógica (o física virtual?): dispositivos genéricos.
+		El problema con la capa física es que cada dispositivo tiene
+		un interfaz diferente. Esta capa unifica todos los interfaces
+		en el mismo.
+
+		Esta capa la programa la misma persona que programa la capa
+		física. Los traductores y los dispositivos genéricos se
+		suministrarán juntos, ya que para programarlos se necesita
+		conocer la estructura interna del dispositivo.
+
+
+4. Capa del sistema operativo (o del ingeniero eléctrico = hardwador): (???)
+		Cuando voy a implementar una aplicación el hardwador (= si
+		programador es el que programa, el que monta el circuito lo
+		puedo llamar hardwador? es más corto que ingeniero eléctrico
+		xD) es el responsable de elegir los dispositivos reales que se
+		conectan y escribir un interfaz para que el programador de la
+		aplicación pueda desconocer por completo el hardware,
+		programando en general. De esta, se puede cambiar el circuito
+		sin necesidad de cambiar la aplicación, desvinculando una de
+		la otra.
+
+		Ejemplo: imaginar que se quiere dormir la aplicación. Para
+		ello el hardwador escribe una función `sleep()` que duerme no
+		solo el micro sino también dispositivos externos. El
+		programador cuando quiera dormir la aplicación llama a `sleep()`
+		pudiendo desconocer qué dispositivos son los que está
+		durmiendo realmente.
+
+5. Capa de aplicación: es el programa (???)
 
 
 ## Traductores (paquete avr)

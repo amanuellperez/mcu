@@ -247,7 +247,7 @@ void Train_of_pulses_receiver<C>::receive_semipulses(volatile bool& abort)
     Clock_us::on();
     
     {// TODO: meter esto en una función. nombre?
-	avr::Enable_interrupts lock;
+	avr::Enable_interrupts lock;	// TODO: esto no es genérico
 
 	while (nsemipulse_ < 0 and !abort) { ; }	// esperamos a recibir algo
 

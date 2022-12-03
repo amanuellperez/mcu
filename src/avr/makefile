@@ -3,7 +3,8 @@ SOURCES= avr_SPI_basic.cpp \
 
 
 INCS= avr_ADC_basic.h\
-	avr_atmega328p.h\
+	avr_atmega328p_cfg.h\
+	avr_atmega.h	\
 	avr_cfg.h		\
 	avr_interrupt.h	\
 	avr_memory.h	\

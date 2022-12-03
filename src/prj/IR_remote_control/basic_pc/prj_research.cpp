@@ -28,7 +28,7 @@ constexpr uint8_t cmd_length_ = 20;
  ***************************************************************************/
 void Main::research_remote_control()
 {
-    avr::UART_iostream uart;
+    UART uart;
 
     uart << '\n';
     atd::print(uart, msg_research_remote_control_help);
@@ -43,7 +43,7 @@ void Main::research_remote_control()
 
 void Main::research_remote_control_read(char* cmd)
 {
-    avr::UART_iostream uart;
+    UART uart;
 
     cmd[0] = '\0'; // getline no inicializa a 0 en caso de no recibir nada
 		   
@@ -74,7 +74,7 @@ void Main::research_remote_control_read(char* cmd)
  ***************************************************************************/
 void Main::test_remote_control()
 {
-    avr::UART_iostream uart;
+    UART uart;
     uart << '\n';
     atd::print(uart, msg_test_remote_control);
 

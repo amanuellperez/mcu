@@ -21,7 +21,7 @@
 
 void Main::clone_remote_control()
 {
-    avr::UART_iostream uart;
+    UART uart;
     atd::print(uart, msg_clone_remote_control);
 // TODO:    
 }

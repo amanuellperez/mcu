@@ -22,14 +22,14 @@
 
 bool Main::receive()
 {
-    avr::Enable_interrupts lock;
+    mcu::Enable_interrupts lock;
 
-    avr::UART_basic::enable_interrupt_unread_data();
+    UART::enable_interrupt_unread_data();
     Main::user_abort = false;
 
     bool res = pulse.receive<Train_cfg>(Main::user_abort);
 
-    avr::UART_basic::disable_interrupt_unread_data();
+    UART::disable_interrupt_unread_data();
 
     return res;
 }
@@ -63,7 +63,7 @@ void Main::receive_print()
 
 void Main::receive_print_help()
 {
-    avr::UART_iostream uart;
+    UART uart;
 
     atd::print(uart, msg_receive_data_menu1);
     uart << (int) ir_receiver_pin;
@@ -74,10 +74,11 @@ void Main::receive_print_help()
 
 bool Main::receive_read_uart()
 {
-    if (!avr::UART_basic::are_there_data_unread())
+    if (!UART::are_there_data_unread())
 	return false;	// error de lógica
 
-    avr::UART_iostream uart;
+    UART uart;
+
 
     char c{};
     uart >> c;
@@ -98,7 +99,7 @@ bool Main::receive_read_uart()
 
 void Main::print_pulses() const
 {
-    avr::UART_iostream uart;
+    UART uart;
     
     if (pulse.empty()){
 	atd::print(uart, msg_no_data_received);
@@ -107,10 +108,10 @@ void Main::print_pulses() const
 
     bool res = dev::NEC_protocol::print_verbose(uart, pulse);
 
-    if (res){
+    if (res){// para depurar convert. Borrarlo ??? Queda bien en pequeño también
 	dev::NEC_message msg;
 	atd::convert(pulse).into(msg);
-	uart << "convert: " << msg << '\n';
+	uart << msg << '\n';
     }
 
     if (res == false)
@@ -121,7 +122,7 @@ void Main::print_pulses() const
 
 void Main::print_pulses_min() const
 {
-    avr::UART_iostream uart;
+    UART uart;
     
     if (pulse.empty()){
 	atd::print(uart, msg_no_data_received);
@@ -137,7 +138,7 @@ void Main::print_pulses_min() const
 }
 void Main::print_pulses_raw() const
 {
-    avr::UART_iostream uart;
+    UART uart;
     
     if (pulse.empty()){
 	atd::print(uart, msg_no_data_received);
@@ -152,7 +153,7 @@ void Main::print_pulses_raw() const
 
 void Main::print_raw_data() const
 {
-    avr::UART_iostream uart;
+    UART uart;
 
     uart << '\n';
     atd::print(uart, msg_line);

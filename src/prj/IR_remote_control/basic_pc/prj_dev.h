@@ -28,18 +28,19 @@
 // El resto del programa NO tiene que saber qué dispositivos concretos usamos. 
 // Lo ideal es usar dispositivos genéricos en el resto, de esa forma se puede
 // cambiar el hardware sin tocar el software.
-#include <avr_interrupt.h>
-#include <avr_timer0_generic.h>
-#include <avr_timer1_generic.h>
-#include <avr_UART_iostream.h>
+#include <avr_atmega.h>
 
 #include "dev_clock_us.h"
 #include "dev_square_wave.h"
 
 #include "prj_cfg.h"
 
-// pins usados
-// ------------
+// microcontroller
+// ---------------
+namespace mcu = avr; //atmega;
+
+// pin connections
+// ---------------
 // using UART: pins 2 and 3
 // available: 4-6
 // VCC and GND: 7, 8
@@ -58,16 +59,17 @@ constexpr uint8_t ir_receiver_pin = 15;
 // Not using TWI: available pins 27 and 28
 
 
-// Hardware connections
-// --------------------
+// Devices
+// -------
+
 // Voy a usar el Timer1 para medir tiempo < Timer1::max(). Dos funciones:
 //	1. Esperar: wait_ms/wait_us 
 //	2. Generar un time_out.	    
-using Timer_clock_us = dev::Generic_timer_counter<avr::Timer1>;
+using Timer_clock_us = dev::Generic_timer_counter<mcu::Timer1>;
 using Clock_us = dev::Clock_us<Timer_clock_us>;
 
 // El Timer0 lo uso para generar la señal de 38kHz.
-using Transmit_timer = dev::Generic_timer<avr::Timer0>;
+using Transmit_timer = dev::Generic_timer<mcu::Timer0>;
 
 // Notación: 2 tipos de señales SW (square wave) y PWM.
 using SWG = 
@@ -81,8 +83,30 @@ using Train_of_pulses_receiver
 		= dev::Train_of_pulses_receiver<Train_cfg>;
 
 
-using IR_receiver    = avr::Input_pin_without_pullup<ir_receiver_pin>;
+using IR_receiver    = mcu::Input_pin_without_pullup<ir_receiver_pin>;
 
+
+
+// UART
+// ----
+// Interfaz static para leer/escribir en UART
+// Como vamos a llamar a funciones del traductor `UART_basic`
+// hay que implementarlo como una clase. Si no habría valido con un
+// using UART = mcu::UART_iostream;
+class UART : public mcu::UART_iostream {
+public:
+    static void init();
+
+    static bool are_there_data_unread()
+    { return mcu::UART_basic::are_there_data_unread();}
+
+    static void enable_interrupt_unread_data()
+    {mcu::UART_basic::enable_interrupt_unread_data();}
+
+    static void disable_interrupt_unread_data()
+    {mcu::UART_basic::disable_interrupt_unread_data();}
+
+};
 
 #endif
 

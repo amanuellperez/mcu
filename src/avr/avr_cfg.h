@@ -42,7 +42,7 @@
 
 
 #if MCU == atmega328p
-#include "avr_atmega328p.h"
+#include "avr_atmega328p_cfg.h"
 
 #else
 #error "No se han definido los pines de este microcontrolador"
