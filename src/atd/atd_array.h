@@ -546,6 +546,9 @@ public:
     bool empty() const {return ie_ == 0;}
     bool full () const {return ie_ == N;}
 
+    /// Erases all elements from the container.
+    void clear() {ie_ = 0;}
+
     // Si se maneja el array como array de C se tiene que poder definir
     // el número de elementos usados.
     void size(size_type n) {ie_ = n;}

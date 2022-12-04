@@ -328,7 +328,7 @@ void test_linear_array()
 }
 
 
-void test_carray()
+void test_array()
 {
     test::interfaz("Array");
 
@@ -376,11 +376,18 @@ void test_carray()
 	CHECK_TRUE(x.capacity() == 4, "capacity");
 	CHECK_TRUE(x[0] == 10 and x[1] == 20 and x[2] == 30 and x[3] == 40
 		  , "operator[]");
+
+	x.clear();
+	CHECK_TRUE(x.size() == 0, "size");
+	CHECK_TRUE(x.empty(), "empty");
+	CHECK_TRUE(!x.full(), "full");
+	CHECK_TRUE(x.capacity() == 4, "capacity");
+
     }
 }
 
 
-void test_carray_view()
+void test_array_view()
 {
     test::interfaz("Array_view");
 
@@ -419,8 +426,8 @@ try{
 
     test_circular_array();
     test_linear_array();
-    test_carray();
-    test_carray_view();
+    test_array();
+    test_array_view();
 
 }catch(std::exception& e)
 {
