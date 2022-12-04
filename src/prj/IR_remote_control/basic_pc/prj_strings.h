@@ -169,6 +169,8 @@ constexpr mcu::Progmem_string<60> msg_clone_msg_full
     PROGMEM{"Buffer full. Can't add more elements. "
 	    "Please clear buffer.\n"};
 
+constexpr mcu::Progmem_string<15> msg_clone_msg_clear
+    PROGMEM{"Buffer empty.\n"};
 
 #endif
 

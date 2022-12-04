@@ -30,9 +30,8 @@ void Main::clone_remote_control()
 	if (receive())
 	    clone_pulses();
 
-// TODO
-//	else if (!clone_read_uart())
-//	    return;
+	else if (!clone_read_uart())
+	    return;
 
     }
 
@@ -55,8 +54,39 @@ void Main::clone_pulses()
 
     msg.push_back(tmp);
 
-    uart << msg.size() << '\t' << tmp << '\n';
+    uart << (msg.size() - 1) << '\t' << tmp << '\n';
 
 }
+
+bool Main::clone_read_uart()
+{
+    if (!UART::are_there_data_unread())
+	return false;
+
+    UART uart;
+
+    char c{};
+    uart >> c;
+
+    switch(c){
+	break; case 'c': 
+	       case 'C': clone_msg_clear();
+				
+	break; case 'e': 
+	       case 'E': return false;
+
+    }
+
+    return true;
+}
+
+void Main::clone_msg_clear()
+{
+    msg.clear();
+
+    UART uart;
+    atd::print(uart, msg_clone_msg_clear);
+}
+
 
 

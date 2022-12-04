@@ -81,7 +81,9 @@ private:
     void research_remote_control_read(char* cmd);
 
     void clone_remote_control();
-    void clone_pulses();
+	void clone_pulses();
+	bool clone_read_uart();
+	void clone_msg_clear();
 
     void test_remote_control();
 
