@@ -128,8 +128,9 @@ public:
 
 
 
-// TODO: eliminar Generic_timer a favor de clases particulares.
-// Ver comentarios en avr_timer1_generic.h
+// DUDA: eliminar Generic_timer a favor de clases particulares. <-- NO lo
+// tengo tan claro. A veces creo que es buena idea, otras no.
+// Mejor esperar a implementar otros micros y comparar los  timers.
 template <>
 class Generic_timer<avr::Timer0>{
 public:
@@ -147,12 +148,16 @@ public:
         only_channel2
     };
 
+    // Indica qué canales se conectan a la hora de generar SW
+    enum class Connect{
+	only_channel1, only_channel2, channel1_and_2
+    };
+
 // pines 
     static constexpr uint8_t pin_channel1 = Timer::OCA_pin();
     static constexpr uint8_t pin_channel2 = Timer::OCB_pin();
 
-    /// Constante que nos indica si los dos canales funcionan siempre a la
-    /// misma frecuencia.
+    /// ¿los dos canales funcionan siempre a la misma frecuencia?
     static constexpr bool ch1_and_ch2_same_frequency = true;
 
 
@@ -171,6 +176,7 @@ public:
 
     /// Apagamos el generador de señales.
     static void off() { Timer::off(); }
+
 
 // Counter mode
 // ------------
@@ -212,6 +218,9 @@ public:
 
 // Square wave mode
 // ----------------
+    /// Genera la frecuencia indicada conectándola a los canales indicados.
+    static void square_wave_generate(uint32_t freq_in_Hz, Connect);
+
     static void mode_square_wave(){ Timer::mode_CTC();}
 
     static void square_wave_top(Scalar x)
@@ -360,7 +369,63 @@ public:
 
 private:
     inline static Mode mode_;
+
+// Funciones no genéricas: conocen cómo funciona el Timer0
+    /// Devuelve la frecuencia, en Hz,  que se genera dados 
+    /// el prescaler factor d (divisor de frecuencia) y el top M. 
+    /// (pag 132 datasheet)
+    template <uint32_t f_clock_in_Hz = MCU_CLOCK_FREQUENCY_IN_HZ>
+    static constexpr 
+    uint32_t prescaler_top_to_frequency_in_Hz(uint32_t d, uint32_t M)
+    { return avr::timer_::
+	    timer_prescaler_top_to_frequency_in_Hz<f_clock_in_Hz>(d, M);}
+
+    /// Función inversa a la prescaler_top_to_frequency_in_Hz:
+    /// Devuelve el par (prescaler factor, top) necesario para generar la
+    /// frecuencia freq_in_Hz.
+    template <uint32_t f_clock_in_Hz = MCU_CLOCK_FREQUENCY_IN_HZ>
+    static constexpr 
+    std::pair<uint32_t, uint32_t> 
+    frequency_in_Hz_to_prescaler_top(uint32_t freq_in_Hz)
+    { return avr::timer_::
+    timer_frequency_in_Hz_to_prescaler_top<Timer, f_clock_in_Hz>(freq_in_Hz); 
+    }
+
+    static constexpr void square_wave_connect_to(Connect connection);
+
 };
+
+
+constexpr void Generic_timer<avr::Timer0>::
+square_wave_connect_to(Connect connection)
+{
+    switch (connection){
+	break; case Connect::only_channel1:
+	    square_wave_connect_ch1();
+	    square_wave_disconnect_ch2();
+
+	break; case Connect::only_channel2:
+	    square_wave_disconnect_ch1();
+	    square_wave_connect_ch2();
+
+	break; case Connect::channel1_and_2:
+	    square_wave_connect_ch1();
+	    square_wave_connect_ch2();
+    }
+}
+
+
+void Generic_timer<avr::Timer0>::
+square_wave_generate(uint32_t freq_in_Hz, Connect connection)
+{
+    auto [d, t] = frequency_in_Hz_to_prescaler_top(freq_in_Hz);
+
+    mode_square_wave();
+    square_wave_top(t); 
+    square_wave_connect_to(connection);
+    Timer::clock_frequency(d); // esto enciende el Timer
+}
+
 
 }// namespace 
 

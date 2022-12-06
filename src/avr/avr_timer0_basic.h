@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021 A.Manuel L.Perez 
+// Copyright (C) 2019-2022 A.Manuel L.Perez 
 //           mail: <amanuel.lperez@gmail.com>
 //           https://github.com/amanuellperez/mcu
 //
@@ -44,12 +44,16 @@
  *		         divisores de frecuencia).
  *
  ****************************************************************************/
+#include "avr_timern_basic.h"
+
 #include <atd_bit.h>
 #include <atd_type_traits.h>
 
 #include "avr_interrupt.h"
 #include "avr_cfg.h"
 #include "avr_pin.h"
+
+#include <array>
 
 namespace avr{
 
@@ -59,7 +63,7 @@ class Timer0{
 
 public:
 // CARACTERÍSTICAS DEL TIMER
-    using counter_type = TIMER0::counter_type;
+    using counter_type = cfg::timer0::counter_type;
 
     /// The counter reaches the bottom when it becomes zero.
     static constexpr counter_type bottom() {return counter_type{0};}
@@ -70,14 +74,25 @@ public:
 
     // Devuelve el número de pin al que está conectado la salida A del 
     // generador de ondas.
-    static constexpr counter_type OCA_pin() {return TIMER0::OCA_pin; }
+    static constexpr counter_type OCA_pin() {return cfg::timer0::OCA_pin; }
 
     // Devuelve el número de pin al que está conectado la salida B del 
     // generador de ondas.
-    static constexpr counter_type OCB_pin() {return TIMER0::OCB_pin;}
+    static constexpr counter_type OCB_pin() {return cfg::timer0::OCB_pin;}
 
 
 // CONFIGURACIÓN DEL RELOJ
+    // (RRR) ¿por qué definir explícitamente aquí los prescaler_factor?
+    //       Los podía definir en cfg::timer0, pero la implementación de esta
+    //       clase conoce los prescalers en las funciones
+    //       clock_frequency_no_preescaling, ... O se generalizan esas
+    //       funciones metiendolas en cfg::timer0 o no mejor hacerlo todo
+    //       concreto.
+    //
+    // Array con los posibles prescaler factors del timer.
+    static constexpr std::array<uint16_t, 5> 
+				prescaler_factor = {1, 8, 64, 256, 1024};
+
     enum class Frequency_divisor{
 		    undefined,    
 		    no_preescaling,
@@ -97,6 +112,7 @@ public:
     static void clock_frequency_divide_by_256();
     static void clock_frequency_divide_by_1024();
 
+
     // El timer lo que cuenta es tiempo, cuenta microsegundos.
     // De hecho si el avr funciona a 1MHz, el timer en normal mode solo puede
     // contar tiempos de 1us, 8us, 64us, 256us y 1024us. Es natural hablar de
@@ -111,29 +127,38 @@ public:
     // La función clock_period_in_us traduce la forma de hablar del cliente (en
     // microsegundos) en la forma de hablar del avr (en divisor de frecuencia)
     template<uint16_t period
-	    , uint32_t clock_frecuencia_en_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
+	    , uint32_t f_clock_in_Hz = MCU_CLOCK_FREQUENCY_IN_HZ>
     static void set_clock_period_in_us();
 
-    template<uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
+    template<uint32_t clock_frequency_in_Hz = MCU_CLOCK_FREQUENCY_IN_HZ>
     static Time clock_period();
+
+    /// Seleccionamos la frecuencia a la que funciona el timer usando el
+    /// divisor de frecuencias (prescaler_factor)
+    /// Enciende el timer (si prescaler_factor != 0) o lo apaga (si es == 0)
+    static constexpr void clock_frequency(uint32_t prescaler_factor);
 
     /// Frecuencia a la que funciona internamente el timer.
     /// Se cumple que clock_frequency() = 1 / clock_period();
-    template <uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
+    template <uint32_t clock_frequency_in_Hz = MCU_CLOCK_FREQUENCY_IN_HZ>
     static Frequency clock_frequency();
 
 
 // ENCENDIDO/APAGADO DEL TIMER
     /// Enciende el Timer, usando como reloj el reloj de periodo indicado.
     /// 'periodo' es el periodo en microsegundos al que va a funcionar el timer.
-    /// clock_frequency_in_hz = es la frecuencia del reloj del AVR.
+    /// clock_frequency_in_Hz = es la frecuencia del reloj del AVR.
     // Esta función se limita a escribir el registro adecuado para fijar el
     // divisor de frecuencia, lo que hace que se encienda el Timer. No hace
     // nada más: es totalmente eficiente (y tiene que ser así, esto es un
     // traductor).
+    // TODO: (o DUDA) borrar esto de aquí, dejarlo como mucho en Generic?
+    // La datasheet no razona con el periodo sino con la frecuencia y
+    // divisores de frecuencias. Si esto es un traductor no debe de introducir
+    // ideas ajenas a la datasheet. Esto encaja mejor en Generic_timer.
     template<uint16_t period
-	    , uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
-    static void on() {set_clock_period_in_us<period, clock_frequency_in_hz>();}
+	    , uint32_t clock_frequency_in_Hz = MCU_CLOCK_FREQUENCY_IN_HZ>
+    static void on() {set_clock_period_in_us<period, clock_frequency_in_Hz>();}
 
     /// Paramos el timer.
     static void off();
@@ -219,6 +244,10 @@ private:
     template<uint16_t period>
     static void set_clock_period_in_us_8MHz();
 
+// DUDA: aunque queda muy bien que devuelvan Time y Frequency esto es un
+// traductor y es de bajo nivel. Time y Frequency generan un montón de
+// dependencias que no deben de tener los traductores. ¿Cambiarlo a uint32_t y
+// que todo sea en microsegundos y herzios?
     static Time clock_period_in_us_1MHz();
     static Frequency clock_frequency_in_Hz_1MHz();
 
@@ -288,6 +317,19 @@ inline void Timer0::clock_frequency_divide_by_1024()
     atd::write_bits<CS02, CS01, CS00>::to<1,0,1>::in(TCCR0B);
 }
 
+// DUDA: ¿cómo gestionar los errores de programación?
+inline constexpr void Timer0::clock_frequency(uint32_t prescaler_factor)
+{
+    switch (prescaler_factor){
+	break; case 8   : clock_frequency_divide_by_8();
+	break; case 64  : clock_frequency_divide_by_64();
+	break; case 256 : clock_frequency_divide_by_256();
+	break; case 1024: clock_frequency_divide_by_1024();
+	break; default  : clock_frequency_no_preescaling();
+    }
+}
+
+
 
 inline void Timer0::external_clock_falling_edge()
 {// 110
@@ -356,13 +398,13 @@ inline void Timer0::set_clock_period_in_us_8MHz()
 
 
 template<uint16_t period
-	, uint32_t clock_frequency_in_hz>
+	, uint32_t clock_frequency_in_Hz>
 inline void Timer0::set_clock_period_in_us()
 {
-    if constexpr (clock_frequency_in_hz == 1000000UL)
+    if constexpr (clock_frequency_in_Hz == 1000000UL)
 	set_clock_period_in_us_1MHz<period>();
 
-    else if constexpr (clock_frequency_in_hz == 8000000UL)
+    else if constexpr (clock_frequency_in_Hz == 8000000UL)
 	set_clock_period_in_us_8MHz<period>();
 
     else
@@ -404,13 +446,13 @@ inline Time Timer0::clock_period_in_us_8MHz()
 }
 
 
-template<uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
+template<uint32_t clock_frequency_in_Hz = MCU_CLOCK_FREQUENCY_IN_HZ>
 inline Time Timer0::clock_period()
 {
-    if constexpr (clock_frequency_in_hz == 1000000UL)
+    if constexpr (clock_frequency_in_Hz == 1000000UL)
 	return clock_period_in_us_1MHz();
 
-    else if constexpr (clock_frequency_in_hz == 8000000UL)
+    else if constexpr (clock_frequency_in_Hz == 8000000UL)
 	return clock_period_in_us_8MHz();
 
     else
@@ -455,13 +497,13 @@ inline Frequency Timer0::clock_frequency_in_Hz_8MHz()
 }
 
 
-template<uint32_t clock_frequency_in_hz>
+template<uint32_t clock_frequency_in_Hz>
 inline Frequency Timer0::clock_frequency()
 {
-    if constexpr (clock_frequency_in_hz == 1000000UL)
+    if constexpr (clock_frequency_in_Hz == 1000000UL)
 	return clock_frequency_in_Hz_1MHz();
 
-    else if constexpr (clock_frequency_in_hz == 8000000UL)
+    else if constexpr (clock_frequency_in_Hz == 8000000UL)
 	return clock_frequency_in_Hz_8MHz();
 
     else

@@ -95,7 +95,6 @@
 #include <avr_TWI_slave.h>
 #include <avr_TWI_master_ioxtream.h>
 
-#include <mcu_cfg.h> // TODO: borrarlo
 
 #endif
 

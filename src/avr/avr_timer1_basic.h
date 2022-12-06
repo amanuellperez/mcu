@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez 
+// Copyright (C) 2019-2022 A.Manuel L.Perez 
 //           mail: <amanuel.lperez@gmail.com>
 //           https://github.com/amanuellperez/mcu
 //
@@ -106,7 +106,7 @@ namespace avr{
 class Timer1{
 public:
 // CARACTERÍSTICAS DEL TIMER
-    using counter_type = TIMER1::counter_type;
+    using counter_type = cfg::timer1::counter_type;
 
     /// The counter reaches the bottom when it becomes zero.
     static constexpr counter_type bottom()
@@ -118,11 +118,11 @@ public:
 
     // Devuelve el número de pin al que está conectado la salida A del 
     // generador de ondas.
-    static constexpr uint8_t OCA_pin() {return TIMER1::OCA_pin; }
+    static constexpr uint8_t OCA_pin() {return cfg::timer1::OCA_pin; }
 
     // Devuelve el número de pin al que está conectado la salida B del 
     // generador de ondas.
-    static constexpr uint8_t OCB_pin() {return TIMER1::OCB_pin;}
+    static constexpr uint8_t OCB_pin() {return cfg::timer1::OCB_pin;}
 
 
 // CONFIGURACIÓN DEL RELOJ
@@ -560,71 +560,34 @@ inline Frequency Timer1::clock_frequency()
 // Importante: según la datasheet, pag. 153,  al leer los uint16_t 
 // hay que bloquear las interrupciones. Por eso el lock.  
 inline Timer1::counter_type Timer1::unsafe_counter() 
-{
-//    Interrupts_lock l;
-//    auto res = TCNT1;
-//
-//    return res;
-    return TCNT1;
-}
+{ return TCNT1; }
 
 inline void Timer1::unsafe_counter(Timer1::counter_type x) 
-{
-//    Interrupts_lock l;
-    TCNT1 = x;
-}
+{ TCNT1 = x; }
 
 
 inline Timer1::counter_type Timer1::unsafe_output_compare_register_A() 
-{
-//    Interrupts_lock l;
-//    auto res = OCR1A;
-//
-//    return res;
-    return OCR1A;
-}
+{ return OCR1A; }
 
 // Escribimos x en el comparador A
 inline void Timer1::unsafe_output_compare_register_A(Timer1::counter_type x)
-{
-//    Interrupts_lock l;
-    OCR1A = x;
-}
+{ OCR1A = x; }
 
 
 inline Timer1::counter_type Timer1::unsafe_output_compare_register_B() 
-{
-//    Interrupts_lock l;
-//    auto res = OCR1B;
-//
-//    return res;
-
-    return OCR1B;
-}
+{ return OCR1B; }
 
 // Escribimos x en el comparador B
 inline void Timer1::unsafe_output_compare_register_B(Timer1::counter_type x)
-{
-//    Interrupts_lock l;
-    OCR1B = x;
-}
+{ OCR1B = x; }
 
 
 inline Timer1::counter_type Timer1::unsafe_input_capture_register() 
-{
-//    Interrupts_lock l;
-//    auto res = ICR1;
-//
-//    return res;
-    return ICR1;
-}
+{ return ICR1; }
 
 // Escribimos x en el comparador B
 inline void Timer1::unsafe_input_capture_register(Timer1::counter_type x)
-{
-//    Interrupts_lock l;
-    ICR1 = x;
-}
+{ ICR1 = x; }
 
 
 inline void Timer1::enable_overflow_interrupt()

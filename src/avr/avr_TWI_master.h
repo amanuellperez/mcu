@@ -58,7 +58,7 @@
  *
  ****************************************************************************/
 #include "avr_interrupt.h" 
-#include "mcu_cfg.h"
+#include "avr_cfg.h"
 
 #include <atd_iobxtream.h>
 

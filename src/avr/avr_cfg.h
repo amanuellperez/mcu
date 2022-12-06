@@ -36,7 +36,6 @@
  *
  ****************************************************************************/
 
-#include <avr/io.h> // registros: DDRB... PORT...
 #include "avr_types.h"
 
 
@@ -45,8 +44,7 @@
 #include "avr_atmega328p_cfg.h"
 
 #else
-#error "No se han definido los pines de este microcontrolador"
-#error "Escribirlos en el fichero avr_pins.h"
+#error "Unknown microcontroller. Someone needs to write the code."
 #endif
 
 

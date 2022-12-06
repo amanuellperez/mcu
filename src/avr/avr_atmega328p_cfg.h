@@ -23,7 +23,7 @@
 #define __AVR_ATMEGA328P_H__
 /****************************************************************************
  *
- *   - DESCRIPCION: Pines del ATMEGA328P
+ *   - DESCRIPCION: ATMEGA328P configuration
  *
  *
  *   - HISTORIA:
@@ -35,6 +35,7 @@
 #include <avr/io.h> // registros: DDRB... PORT...
 
 namespace avr{
+// TODO: meterlo todo dentro de cfg
 
 // CONFIGURACIÓN DE LOS PINES
 // --------------------------
@@ -89,25 +90,28 @@ constexpr uint8_t BIT_MASK[29] = {
     constexpr uint8_t SPI_num_pin_MOSI = 17u;
     constexpr uint8_t SPI_num_pin_SS   = 16u;
 
+namespace cfg{ // ir incluyendo el resto según vaya reescribiendo codigo
 
-
-// CONFIGURACIÓN DE LOS TIMERS
-    // Timer0
-    struct TIMER0{
+// Timer0
+// ------
+    struct timer0{
         using counter_type                 = uint8_t;
         static constexpr uint8_t OCA_pin   = 12u;
         static constexpr uint8_t OCB_pin   = 11u;
 	//constexpr uint16_t resolution= 256u;
     };
 
-    // Timer1
-    struct TIMER1{
+ 
+// Timer1
+// ------
+    struct timer1{
         using counter_type                 = uint16_t;
         static constexpr uint8_t OCA_pin   = 15u;
         static constexpr uint8_t OCB_pin   = 16u;
 	// constexpr uint32_t resolution= 65536u;
     };
 
+}// namespace cfg
 
 
 // CONFIGURACIÓN DEL ADC
