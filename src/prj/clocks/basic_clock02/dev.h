@@ -97,7 +97,7 @@ using Keyboard     = dev::Basic_keyrow<Keyrow_pins, Keyrow_codes>;
 // system_clock
 // ------------
 constexpr static uint16_t clock_timer_period_in_us = 64u;
-using Timer = dev::Generic_timer<avr::Timer1>;
+using Timer = avr::Generic_timer1;
 using System_clock = dev::System_clock<Timer, clock_timer_period_in_us>;
 
 

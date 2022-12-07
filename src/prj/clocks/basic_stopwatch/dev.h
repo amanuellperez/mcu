@@ -95,7 +95,7 @@ using Keyboard	   = dev::Basic_keyrow<Keyrow_pins, Keyrow_codes>;
 
 // Stopwatch
 // ---------
-using Timer = dev::Generic_timer<avr::Timer1>;
+using Timer = avr::Generic_timer1;
 constexpr static uint16_t timer_period_in_us = 64u;
 using Stopwatch = my::Stopwatch<Timer, timer_period_in_us>;
 

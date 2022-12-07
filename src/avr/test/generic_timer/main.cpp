@@ -27,10 +27,10 @@
 #include <stdlib.h>
 #include <std_type_traits.h>
 
-#define ISR_TIMER_INTERRUPT ISR_TIMER0_COMPA
-using Timer = dev::Generic_timer<avr::Timer0>;
-//#define ISR_TIMER_INTERRUPT ISR_TIMER1_COMPA
-//using Timer = dev::Generic_timer<avr::Timer1>;
+//#define ISR_TIMER_INTERRUPT ISR_TIMER0_COMPA
+//using Timer = avr::Generic_timer0;
+#define ISR_TIMER_INTERRUPT ISR_TIMER1_COMPA
+using Timer = avr::Generic_timer1;
 using time_t = uint32_t;
 
 constexpr uint16_t period_in_us = 1024;

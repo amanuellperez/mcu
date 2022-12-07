@@ -26,7 +26,7 @@
 #include <atd_bit.h>
 
 constexpr uint8_t sensor_pin = 15;
-using Counter = dev::Generic_timer_counter<avr::Timer0>;
+using Counter = avr::Generic_timer_counter0;
 using Pin = avr::Pin<sensor_pin>;
 
 

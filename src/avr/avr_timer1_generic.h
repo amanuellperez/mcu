@@ -30,26 +30,28 @@
  *    15/02/2021 v0.0: Escrito
  *    26/02/2022       timer_counter
  *    30/10/2022       Generic_timer_counter
+ *    07/12/2022       dev::Generic_timer<Timer0> --> avr::Generic_timer0
+ *		       ¿Por qué lo había definido como template?
+ *		       Lo que quiero definir es un timer que obedece al
+ *		       concept "timer". No necesito usar templates para nada.
  *
  ****************************************************************************/
 #include "avr_timer1_basic.h"
-#include "generic_devices.h"
 #include "avr_interrupt.h"
 
-namespace dev{
+namespace avr{
 
 /// Un Timer_counter se limita a contar microsegundos o milisegundos. Su rango
 /// de valores será max_top, no más. No sirve para contar tiempo, pero son
 /// ideales para medir/generar pulsos de electrónica. 
-template <>
-class Generic_timer_counter<avr::Timer1>{
+class Generic_timer_counter1{
 public:
 // types
     using Timer        = avr::Timer1;
     using counter_type = typename Timer::counter_type;
 
 /// De momento el interfaz es static. Prohibo su construcción.
-    Generic_timer_counter() = delete;
+    Generic_timer_counter1() = delete;
 
 /// Modo de funcionamiento: contador normal y corriente.
     static void unsafe_init(counter_type top0 = max_top()) 
@@ -181,8 +183,7 @@ public:
 //	    
 //  TODO: irlo migrando poco a poco. Lo dejo como ejemplo.
 //  Cuando ya esté todo migrado eliminarlo.
-template <>
-class Generic_timer<avr::Timer1>{
+class Generic_timer1{
 public:
 // types
     using Timer        = avr::Timer1;

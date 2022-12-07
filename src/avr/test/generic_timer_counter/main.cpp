@@ -24,7 +24,7 @@
 // Para probarlo conectar el pin 15 al osciloscopio y medir la señal generada.
 
 constexpr uint8_t num_pin = 15;
-using Counter = dev::Generic_timer_counter<avr::Timer0>;
+using Counter = avr::Generic_timer_counter0;
 //using Counter = dev::Generic_timer_counter<avr::Timer1>;
 
 //constexpr uint16_t period_in_us = 1u; 
