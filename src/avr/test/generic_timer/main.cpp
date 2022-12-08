@@ -28,9 +28,9 @@
 #include <std_type_traits.h>
 
 //#define ISR_TIMER_INTERRUPT ISR_TIMER0_COMPA
-//using Timer = avr::Generic_timer0;
+//using Timer = avr::Timer0_generic;
 #define ISR_TIMER_INTERRUPT ISR_TIMER1_COMPA
-using Timer = avr::Generic_timer1;
+using Timer = avr::Timer1_generic;
 using time_t = uint32_t;
 
 constexpr uint16_t period_in_us = 1024;

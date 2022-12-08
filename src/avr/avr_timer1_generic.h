@@ -23,14 +23,14 @@
 #define __AVR_TIMER1_GENERIC_H__
 /****************************************************************************
  *
- *  - DESCRIPCION: Generic_timer<Timer1>
+ *  - DESCRIPCION: Timer1_generic
  *    
  *  - HISTORIA:
  *    A.Manuel L.Perez
  *    15/02/2021 v0.0: Escrito
  *    26/02/2022       timer_counter
  *    30/10/2022       Generic_timer_counter
- *    07/12/2022       dev::Generic_timer<Timer0> --> avr::Generic_timer0
+ *    07/12/2022       dev::Generic_timer<Timer0> --> avr::Timer1_generic
  *		       ¿Por qué lo había definido como template?
  *		       Lo que quiero definir es un timer que obedece al
  *		       concept "timer". No necesito usar templates para nada.
@@ -44,14 +44,14 @@ namespace avr{
 /// Un Timer_counter se limita a contar microsegundos o milisegundos. Su rango
 /// de valores será max_top, no más. No sirve para contar tiempo, pero son
 /// ideales para medir/generar pulsos de electrónica. 
-class Generic_timer_counter1{
+class Timer1_generic_counter{
 public:
 // types
     using Timer        = avr::Timer1;
     using counter_type = typename Timer::counter_type;
 
 /// De momento el interfaz es static. Prohibo su construcción.
-    Generic_timer_counter1() = delete;
+    Timer1_generic_counter() = delete;
 
 /// Modo de funcionamiento: contador normal y corriente.
     static void unsafe_init(counter_type top0 = max_top()) 
@@ -154,7 +154,7 @@ public:
 
 
 
-// TODO: eliminar Generic_timer a favor de clases particulares.
+// DUDA: eliminar Generic_timer a favor de clases particulares.
 // La parte de onda cuadrada y PWM hay que revisarla entera. Un fallo de este
 // primer intento es que no se da la duración de la onda cuadrada, solo se
 // enciende o se apaga, pero ¿por cuánto tiempo? No se indica.
@@ -183,7 +183,7 @@ public:
 //	    
 //  TODO: irlo migrando poco a poco. Lo dejo como ejemplo.
 //  Cuando ya esté todo migrado eliminarlo.
-class Generic_timer1{
+class Timer1_generic{
 public:
 // types
     using Timer        = avr::Timer1;
@@ -234,7 +234,7 @@ public:
 // que cuenta tiempo.
 
 
-// TODO: Obsoleto: usar Generic_timer_counter 
+// TODO: Obsoleto: usar Timer1_generic_counter
 //       A día de hoy lo uso en Clock. Reescribir.
 // Timer counter mode
 // ------------------

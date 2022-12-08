@@ -35,7 +35,7 @@ constexpr static uint16_t clock_timer_period_in_us = 64u;
 
 // Con el Timer0 no funciona ya que el counter del timer0 es de 8 bits y no de
 // 16 bits.
-using Timer = avr::Generic_timer1;
+using Timer = avr::Timer1_generic;
 using Chronometer_ms = dev::Chronometer_ms<Timer, clock_timer_period_in_us>;
 
 
