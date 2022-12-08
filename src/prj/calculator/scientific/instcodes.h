@@ -49,7 +49,7 @@
 #include <stdint.h> // uint8_t 
 #include <ostream>
 
-#include <avr_memory.h>
+#include <avr_atmega.h>
 
 // No heredo de Keyboard_code_kascii ya que tengo muchas teclas especiales.
 // Creo un teclado especial para la calculadora

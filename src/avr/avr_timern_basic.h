@@ -34,7 +34,7 @@
 #include <array>
 #include <cstdint>
 
-namespace avr{
+namespace avr_{
 
 namespace timer_{ // private. Don't use them 
 

@@ -22,7 +22,7 @@
 #include <avr/sleep.h>
 #include <avr/interrupt.h>
 
-namespace avr{
+namespace avr_{
 
 // De acuerdo al manual de avr-libc y a 
 // https://onlinedocs.microchip.com/pr/GUID-78362176-487F-41B9-95C7-B478A9A186EB-en-US-2/index.html?GUID-5A2B94D6-356F-4107-A130-8F8F983903BC

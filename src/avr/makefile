@@ -9,7 +9,7 @@ INCS= avr_ADC_basic.h	\
 	avr_interrupt.h		\
 	avr_memory.h		\
 	avr_pin.h			\
-	avr_port.h			\
+	avr_port_basic.h	\
 	avr_sleep.h			\
 	avr_SPI_basic.h		\
 	avr_time.h			\

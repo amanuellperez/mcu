@@ -18,16 +18,13 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 // Conectar el puerto B a 8 leds. Hacemos el coche fantástico.
-#include "../../../avr_port.h"
+#include "../../../avr_port_basic.h"
 #include "../../../avr_time.h"
-
-
-using namespace avr;
 
 
 int main()
 {
-    PuertoB_de_salida portB;
+    avr_::Output_portB portB;
 
     while(1){
 	uint8_t v = 0b00000001;

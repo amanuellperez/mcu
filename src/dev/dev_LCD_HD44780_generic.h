@@ -181,9 +181,9 @@ public:
     // TODO: limpiar. Dejar solo una de las 3 funciones.
     static void new_extended_char(uint8_t c, const uint8_t glyph[8]);
     static void new_extended_char(uint8_t c,
-                                  const avr::Progmem_array<uint8_t, 8>& glyph);
+                                  const not_generic::Progmem_array<uint8_t, 8>& glyph);
     static void new_extended_char(uint8_t c,
-                                  const avr::Progmem_array_view<uint8_t, 8>& glyph);
+                                  const not_generic::Progmem_array_view<uint8_t, 8>& glyph);
 
   private:
     using Flags = _LCD_HD44780_generic_flags;
@@ -306,7 +306,7 @@ void Generic_LCD<LCD_HD44780<pin>>::new_extended_char(uint8_t c,
 
 template <typename pin>
 void Generic_LCD<LCD_HD44780<pin>>::new_extended_char(uint8_t c,
-                                  const avr::Progmem_array<uint8_t, 8>& glyph)
+                                  const not_generic::Progmem_array<uint8_t, 8>& glyph)
 {
     LCD::set_cgram_address(c*8);
 
@@ -318,7 +318,7 @@ void Generic_LCD<LCD_HD44780<pin>>::new_extended_char(uint8_t c,
 
 template <typename pin>
 void Generic_LCD<LCD_HD44780<pin>>::new_extended_char(uint8_t c,
-                                  const avr::Progmem_array_view<uint8_t, 8>& glyph)
+                                  const not_generic::Progmem_array_view<uint8_t, 8>& glyph)
 {
     LCD::set_cgram_address(c*8);
 
@@ -390,9 +390,9 @@ public:
     /// Precondition: 0 <= c < 7
     static void new_extended_char(uint8_t c, const uint8_t glyph[8]);
     static void new_extended_char(uint8_t c,
-                                  const avr::Progmem_array<uint8_t, 8>& glyph);
+                                  const not_generic::Progmem_array<uint8_t, 8>& glyph);
     static void new_extended_char(uint8_t c,
-                                  const avr::Progmem_array_view<uint8_t, 8>& glyph);
+                                  const not_generic::Progmem_array_view<uint8_t, 8>& glyph);
 
 private:
 
@@ -628,7 +628,7 @@ void Generic_LCD<LCD_HD44780_4004<pin>>::new_extended_char(uint8_t c,
 
 template <typename pin>
 void Generic_LCD<LCD_HD44780_4004<pin>>::new_extended_char(uint8_t c,
-                                  const avr::Progmem_array<uint8_t, 8>& glyph)
+                                  const not_generic::Progmem_array<uint8_t, 8>& glyph)
 {
     LCD::set_cgram_address(c*8);
 
@@ -640,7 +640,7 @@ void Generic_LCD<LCD_HD44780_4004<pin>>::new_extended_char(uint8_t c,
 
 template <typename pin>
 void Generic_LCD<LCD_HD44780_4004<pin>>::new_extended_char(uint8_t c,
-                                  const avr::Progmem_array_view<uint8_t, 8>& glyph)
+                                  const not_generic::Progmem_array_view<uint8_t, 8>& glyph)
 {
     LCD::set_cgram_address(c*8);
 

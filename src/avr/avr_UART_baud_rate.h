@@ -44,7 +44,7 @@
 #include <cstdint>
 #include <utility>
 
-namespace avr{
+namespace avr_{
 // Modos de funcionamento del UART
 enum class UART_mode{
     normal, 

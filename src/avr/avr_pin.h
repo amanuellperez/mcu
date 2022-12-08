@@ -39,7 +39,7 @@
 #include "avr_time.h"
 
 
-namespace avr{
+namespace avr_{
 /*!
  *  \brief  Clase para manejar pins
  *

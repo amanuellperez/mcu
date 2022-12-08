@@ -171,7 +171,7 @@ constexpr void Keypad<R, C>::pin_as_inputs_without_pullup()
 
     if constexpr (i != Pin::size){
 	constexpr int npin = Pin::template at<i>;
-	avr::Pin<npin>::as_input_without_pullup();
+	not_generic::Pin<npin>::as_input_without_pullup();
 	pin_as_inputs_without_pullup<Pin, i+1>();
     }
 }
@@ -185,7 +185,7 @@ constexpr void Keypad<R, C>::pin_as_inputs_with_pullup()
 
     if constexpr (i != Pin::size){
 	constexpr int npin = Pin::template at<i>;
-	avr::Pin<npin>::as_input_with_pullup();
+	not_generic::Pin<npin>::as_input_with_pullup();
 	pin_as_inputs_with_pullup<Pin, i+1>();
     }
 }
@@ -199,8 +199,8 @@ constexpr void Keypad<R, C>::pin_as_output_and_write_zero()
 
     if constexpr (i != Pin::size){
 	constexpr int npin = Pin::template at<i>;
-	avr::Pin<npin>::as_output();
-	avr::Pin<npin>::write_zero();
+	not_generic::Pin<npin>::as_output();
+	not_generic::Pin<npin>::write_zero();
 	pin_as_output_and_write_zero<Pin, i+1>();
     }
 }
@@ -215,7 +215,7 @@ constexpr int Keypad<R, C>::what_pin_is_zero()
 
     if constexpr (i != Pin::size){
 	constexpr int npin = Pin::template at<i>;
-	if (avr::Pin<npin>::is_zero())
+	if (not_generic::Pin<npin>::is_zero())
 	    return i;
 
 	return what_pin_is_zero<Pin, i+1>();

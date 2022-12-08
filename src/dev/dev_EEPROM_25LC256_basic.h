@@ -127,9 +127,9 @@ private:
     // Pines del device
     // ----------------
     // Usamos los mismos nombres que la datasheet
-    avr::Output_pin<num_pin_no_chip_select> no_CS_;
-    avr::Output_pin<num_pin_no_write_protect> no_WP_;
-    avr::Output_pin<num_pin_no_hold> no_HOLD_;
+    not_generic::Output_pin<num_pin_no_chip_select> no_CS_;
+    not_generic::Output_pin<num_pin_no_write_protect> no_WP_;
+    not_generic::Output_pin<num_pin_no_hold> no_HOLD_;
 
 
     // Instruction Set
@@ -188,8 +188,8 @@ private:
 
     void write_address(Address address)
     {	// Data order: MSB first, LSB last
-	avr::SPI_master::write(static_cast<std::byte>(address >> 8));
-	avr::SPI_master::write(static_cast<std::byte>(address));
+	not_generic::SPI_master::write(static_cast<std::byte>(address >> 8));
+	not_generic::SPI_master::write(static_cast<std::byte>(address));
     }
 
     void write_cmd(std::byte cmd);
@@ -199,8 +199,8 @@ private:
 template <uint8_t no_CS, uint8_t no_WP, uint8_t no_HOLD>
 void EEPROM_25LC256<no_CS, no_WP, no_HOLD>::cfg_SPI()
 {
-    avr::SPI_master::spi_mode(0, 0);
-    avr::SPI_master::data_order_MSB();
+    not_generic::SPI_master::spi_mode(0, 0);
+    not_generic::SPI_master::data_order_MSB();
 }
 
 
@@ -214,10 +214,10 @@ EEPROM_25LC256<no_CS, no_WP, no_HOLD>::read(Address address,
 {
     Select select{*this};
 
-    avr::SPI_master::write(READ);
+    not_generic::SPI_master::write(READ);
     write_address(address);
     for (size_type i = 0; i < n; ++i){
-	*buf = avr::SPI_master::read();
+	*buf = not_generic::SPI_master::read();
 	++buf;
     }
 
@@ -235,12 +235,12 @@ uint8_t EEPROM_25LC256<no_CS, no_WP, no_HOLD>::
 {
     Select select{*this};
 
-    avr::SPI_master::write(WRITE);
+    not_generic::SPI_master::write(WRITE);
     write_address(address);
     
     uint8_t i = 0;
     for (; i < n; ++i){
-	avr::SPI_master::write(*buf);
+	not_generic::SPI_master::write(*buf);
 	++buf;
     }
 
@@ -252,7 +252,7 @@ template <uint8_t no_CS, uint8_t no_WP, uint8_t no_HOLD>
 void EEPROM_25LC256<no_CS, no_WP, no_HOLD>::write_cmd(std::byte cmd)
 {
     Select select{*this};
-    avr::SPI_master::write(cmd);
+    not_generic::SPI_master::write(cmd);
 }
 
 
@@ -261,8 +261,8 @@ std::byte EEPROM_25LC256<no_CS, no_WP, no_HOLD>::
 					read_status_register()
 {
     Select select{*this};
-    avr::SPI_master::write(RDSR);
-    std::byte status = avr::SPI_master::read();
+    not_generic::SPI_master::write(RDSR);
+    std::byte status = not_generic::SPI_master::read();
 
     return status;
 }

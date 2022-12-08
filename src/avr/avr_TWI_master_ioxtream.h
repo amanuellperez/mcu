@@ -54,7 +54,7 @@
 #include "avr_TWI_master.h"
 
 
-namespace avr{
+namespace avr_{
 /*!
  *  \brief  Concebimos TWI como ioxtream.
  * 

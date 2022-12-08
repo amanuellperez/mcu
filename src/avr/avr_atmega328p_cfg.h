@@ -24,7 +24,10 @@
 /****************************************************************************
  *
  *   - DESCRIPCION: ATMEGA328P configuration
- *
+ *  
+ *	DUDA: La configuración de todos los atmega328 es la misma? Si es así,
+ *	sobra el P al final del 328P. Como ahora no lo se, mantengo la P. En
+ *	el futuro, si se programan más micros ir cambiando nombres.
  *
  *   - HISTORIA:
  *    A.Manuel L.Perez
@@ -34,8 +37,7 @@
 #include <cstdint>  // uint8_t
 #include <avr/io.h> // registros: DDRB... PORT...
 
-namespace avr{
-// TODO: meterlo todo dentro de cfg
+namespace avr_{
 
 // CONFIGURACIÓN DE LOS PINES
 // --------------------------
@@ -290,6 +292,31 @@ namespace cfg{ // ir incluyendo el resto según vaya reescribiendo codigo
 
 
 }// namespace
+
+
+/***************************************************************************
+ *		    BUILT-IN DEVICES FOR ATMEGA
+ ***************************************************************************/
+namespace avr{ // TODO: change to atmega
+//namespace atmega{
+//    using Timer0 = avr::Timer0;
+//    using Timer1 = avr::Timer1;
+//}// namespace
+using namespace avr_;
+
+}// namespace
+ 
+// TODO: Como esto lo he ido desarrollando poco a poco, a medida que he ido
+// aprendiendo la mayoria de los dispositivos acceden directamente a las
+// funciones del atmega (que al principio defini como avr). Para identificar
+// bien aquellas partes que no son genéricas voy a marcarlas como
+// `not_generic` para saber que las tengo que ir reescribiendo.
+// Cuando en los devices haya eliminado por completo este namespace,
+// eliminarlo.
+namespace not_generic{
+using namespace avr;
+}
+
 
 #endif
 

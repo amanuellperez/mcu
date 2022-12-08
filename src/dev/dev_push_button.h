@@ -69,11 +69,11 @@ public:
     constexpr Push_button() {init();}
 
     /// Inicializamos el pulsador.
-    static constexpr void init() { avr::Pin<n>::as_input_with_pullup(); }
+    static constexpr void init() { not_generic::Pin<n>::as_input_with_pullup(); }
 
     /// ¿está pulsado?
     static constexpr bool is_pressed()
-    {return avr::Pin<n>::is_zero();}
+    {return not_generic::Pin<n>::is_zero();}
 
     /// ¿no está pulsado?
     static constexpr bool is_not_pressed()
@@ -102,7 +102,7 @@ public:
     constexpr Push_button_level_change() {init();}
 
     /// Inicializamos el pulsador.
-    static constexpr void init() { avr::Pin<n>::as_input_with_pullup(); }
+    static constexpr void init() { not_generic::Pin<n>::as_input_with_pullup(); }
 
     /// ¿está pulsado?
     static bool is_pressed();
@@ -120,7 +120,7 @@ private:
 template <uint8_t n>
 bool Push_button_level_change<n>::is_pressed()
 {
-    if (avr::Pin<n>::is_zero()){
+    if (not_generic::Pin<n>::is_zero()){
 	if (look_){
 	    look_ = false;
 	    return true;

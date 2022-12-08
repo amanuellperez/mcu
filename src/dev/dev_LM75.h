@@ -99,20 +99,20 @@ private:
 template <uint8_t addr>
 uint8_t Thermometer_LM75<addr>::refresh() volatile
 {
-    avr::TWI::Start start;
+    not_generic::TWI::Start start;
     if (!start)
 	return Error::start_fail;
 
     // Seleccionamos el registro de temperatura
-    if (avr::TWI::send(address, temperature_reg) != 1)
+    if (not_generic::TWI::send(address, temperature_reg) != 1)
 	return Error::select_temperature_reg_fail;
 
     // Reenviamos otro start (vamos a leer)
-    avr::TWI::send_repeated_start();
-    if (avr::TWI::send_repeated_start_fail())
+    not_generic::TWI::send_repeated_start();
+    if (not_generic::TWI::send_repeated_start_fail())
 	return Error::repeated_start_fail;
 
-    if (avr::TWI::receive(address, reinterpret_cast<volatile std::byte*>(temp_), 2) != 2u)
+    if (not_generic::TWI::receive(address, reinterpret_cast<volatile std::byte*>(temp_), 2) != 2u)
 	return Error::receive_temperature_fail;
     
     return 0;	// ok

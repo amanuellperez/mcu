@@ -45,7 +45,7 @@
 #include <atd_bit.h>
 #include "avr_cfg.h"
 
-namespace avr{
+namespace avr_{
 
 // Al definir avr la macro ADC, no me deja crear la clase ADC, así que lo
 // primero que hay que hacer es eliminar ADC. El problema es que necesito esta

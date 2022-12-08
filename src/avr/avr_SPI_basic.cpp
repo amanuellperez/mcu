@@ -25,7 +25,7 @@
 // Observar que todas son funciones de configuración que se ejecutan una sola
 // vez. No es imprescindible que sean las más eficientes.
 
-namespace avr{
+namespace avr_{
 
 void SPI_master::init()
 {

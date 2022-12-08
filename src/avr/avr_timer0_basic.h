@@ -55,7 +55,7 @@
 
 #include <array>
 
-namespace avr{
+namespace avr_{
 
 // La creo como clase para luego poderla pasar como parámetro a templates
 // (por ejemplo, a Contador). Si la defino como namespace no puedo hacerlo.

@@ -51,7 +51,7 @@
 #include <atd_bit.h>
 
 
-namespace avr{
+namespace avr_{
 /// Habilita el uso de interrupciones. Además, recordar habilitar
 /// cada interrupción por separado.
 inline void enable_interrupts() {sei();}

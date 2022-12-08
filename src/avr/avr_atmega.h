@@ -64,15 +64,9 @@
 #include <avr_memory.h>
 
 #include <avr_pin.h>
-#include <avr_port.h>
+#include <avr_port_basic.h>
 #include <avr_sleep.h>
 #include <avr_time.h>
-
-// Ejemplo:
-//namespace atmega{
-//    using Timer0 = avr::Timer0;
-//    using Timer1 = avr::Timer1;
-//}// namespace
 
 
 // Dispositivos genéricos

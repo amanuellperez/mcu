@@ -64,7 +64,7 @@
 
 
 
-namespace avr{
+namespace avr_{
 
 enum class __TWI_master_state : uint8_t {
 // group of states: gg (2 bits)
@@ -169,7 +169,7 @@ public:
     static void on()
     {
 	TWI::template SCL_frequency_in_kHz<f_scl, f_clock>();
-	avr::enable_interrupts();
+	avr_::enable_interrupts();
 
 	init();
     }

@@ -74,7 +74,7 @@
 #include "avr_cfg.h"
 #include "avr_pin.h"
 
-namespace avr{
+namespace avr_{
 /*!
  *  \brief  Funciones genéricas del Timer1.
  *

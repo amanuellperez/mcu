@@ -54,7 +54,7 @@
 
 
 
-namespace avr{
+namespace avr_{
 
 
 enum class __TWI_slave_state{
@@ -130,7 +130,7 @@ public:
     template <uint8_t TWI_slave_address>
     static void on()
     {
-	avr::enable_interrupts();
+	avr_::enable_interrupts();
 	TWI::template slave_init<TWI_slave_address,1>(); // 1 = TWI::interrupt_enable()
 
 	reset();
@@ -375,7 +375,7 @@ TWI_slave<TWI, bsz>::write_buffer(const std::byte* buf, streamsize n)
 template <typename TWI, uint8_t bsz>
 void TWI_slave<TWI, bsz>::stop_transmission()
 {
-    avr::Interrupts_lock lock;   // garantizo control del flujo.
+    avr_::Interrupts_lock lock;   // garantizo control del flujo.
     reset();
 }
 

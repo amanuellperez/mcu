@@ -19,20 +19,21 @@
 
 #pragma once
 
-#ifndef __AVR_PORT_H__
-#define __AVR_PORT_H__
+#ifndef __AVR_PORT_BASIC_H__
+#define __AVR_PORT_BASIC_H__
 /****************************************************************************
  *
  *   - DESCRIPCION: Clases para manejar los puertos enteros
  *
  *
  *   - HISTORIA:
- *           A.Manuel L.Perez- 03/06/2019 Escrito
+ *    A.Manuel L.Perez
+ *    03/06/2019 Escrito
  *
  ****************************************************************************/
 #include <avr/io.h>
 
-namespace avr{
+namespace avr_{
 
 /*!
  *  \brief  Es el puerto B con todos los pines definidos como salida.
@@ -41,9 +42,9 @@ namespace avr{
  *  hay que recordar inicializar el puerto como salida, ya que es automático.
  *
  */
-struct PuertoB_de_salida{
-    PuertoB_de_salida() {DDRB = 0xFF;}
-    PuertoB_de_salida& operator=(uint8_t x)
+struct Output_portB{
+    Output_portB() {DDRB = 0xFF;}
+    Output_portB& operator=(uint8_t x)
     {
         PORTB = x;
         return *this;
@@ -57,9 +58,9 @@ struct PuertoB_de_salida{
  *  hay que recordar inicializar el puerto como salida, ya que es automático.
  *
  */
-struct PuertoD_de_salida{
-    PuertoD_de_salida() {DDRD = 0xFF;}
-    PuertoD_de_salida& operator=(uint8_t x)
+struct Output_portD{
+    Output_portD() {DDRD = 0xFF;}
+    Output_portD& operator=(uint8_t x)
     {
         PORTD = x;
         return *this;

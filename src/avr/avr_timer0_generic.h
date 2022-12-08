@@ -38,7 +38,7 @@
  ****************************************************************************/
 #include "avr_timer0_basic.h"
 
-namespace avr{
+namespace avr_{
 
 // Un Timer_counter es un contador de tiempo.
 // Los periodos ha usar serían:
@@ -64,7 +64,7 @@ namespace avr{
 class Timer0_generic_counter{
 public:
 // types
-    using Timer        = avr::Timer0;
+    using Timer        = avr_::Timer0;
     using counter_type = typename Timer::counter_type;
 
 /// De momento el interfaz es static. Prohibo su construcción.
@@ -139,10 +139,10 @@ public:
 class Timer0_generic{
 public:
 // types
-    using Timer        = avr::Timer0;
+    using Timer        = avr_::Timer0;
     using counter_type = typename Timer::counter_type;
-    using Frequency    = avr::Frequency;
-    using Time         = avr::Time;
+    using Frequency    = avr_::Frequency;
+    using Time         = avr_::Time;
     using Scalar       = Frequency::Scalar; // TODO: es el mismo para Microseconds
                                   // y Hertz. ¿qué nombre común usar? ponerlo en
                                   // avr_types.h
@@ -381,7 +381,7 @@ private:
     template <uint32_t f_clock_in_Hz = MCU_CLOCK_FREQUENCY_IN_HZ>
     static constexpr 
     uint32_t prescaler_top_to_frequency_in_Hz(uint32_t d, uint32_t M)
-    { return avr::timer_::
+    { return avr_::timer_::
 	    timer_prescaler_top_to_frequency_in_Hz<f_clock_in_Hz>(d, M);}
 
     /// Función inversa a la prescaler_top_to_frequency_in_Hz:
@@ -391,7 +391,7 @@ private:
     static constexpr 
     std::pair<uint32_t, uint32_t> 
     frequency_in_Hz_to_prescaler_top(uint32_t freq_in_Hz)
-    { return avr::timer_::
+    { return avr_::timer_::
     timer_frequency_in_Hz_to_prescaler_top<Timer, f_clock_in_Hz>(freq_in_Hz); 
     }
 
@@ -400,7 +400,9 @@ private:
 };
 
 
-constexpr void Timer0_generic::
+// TODO: a .cpp
+// ¿es genérico o depende del Timer0?
+inline constexpr void Timer0_generic::
 square_wave_connect_to(Connect connection)
 {
     switch (connection){
@@ -419,7 +421,9 @@ square_wave_connect_to(Connect connection)
 }
 
 
-void Timer0_generic::
+// TODO: a .cpp
+// ¿es genérico o depende del Timer0?
+inline void Timer0_generic::
 square_wave_generate(uint32_t freq_in_Hz, Connect connection)
 {
     auto [d, t] = frequency_in_Hz_to_prescaler_top(freq_in_Hz);

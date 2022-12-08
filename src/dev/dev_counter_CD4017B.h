@@ -62,9 +62,9 @@ public:
     void disable() {clock_inhibit_.write_one();}
 
 private:
-    avr::Output_pin<num_pin_clock> clock_;
-    avr::Output_pin<num_pin_reset> reset_;
-    avr::Output_pin<num_pin_clock_inhibit> clock_inhibit_;
+    not_generic::Output_pin<num_pin_clock> clock_;
+    not_generic::Output_pin<num_pin_reset> reset_;
+    not_generic::Output_pin<num_pin_clock_inhibit> clock_inhibit_;
 };
 
 

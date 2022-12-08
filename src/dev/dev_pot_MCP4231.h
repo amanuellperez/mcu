@@ -181,7 +181,7 @@ private:
 class Pot_MCP4231_basic{
 public:
 // Types
-    using SPI = avr::SPI_master;
+    using SPI = not_generic::SPI_master;
     using TCON = __MCP4231_TCON;
 
 // Configuration

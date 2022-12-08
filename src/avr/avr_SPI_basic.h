@@ -54,7 +54,7 @@
 #include <atd_bit.h>
 #include "avr_interrupt.h"
 
-namespace avr{
+namespace avr_{
 
 class SPI_basic{
 public:

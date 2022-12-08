@@ -101,7 +101,7 @@ template <typename TWI_master, typename TWI_master::Address slave_address>
 struct TWI_memory_type {
 
 // Configuración de la conexión con el dispositivo
-    using TWI     = avr::TWI_master_ioxtream<TWI_master>;
+    using TWI     = not_generic::TWI_master_ioxtream<TWI_master>;
     using Slave_address = TWI_master::Address;
     using iostate = typename TWI::iostate;
 

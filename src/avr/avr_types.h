@@ -40,7 +40,7 @@
 //       Creo que no. Hay micros que no usan double como el atmega32, pero
 //       otros que puede que si los usen. En ese caso sería mejor usar double
 //       en lugar de Decimal (???)
-namespace avr{
+namespace avr_{
 
 // (???) ¿Usar o no usar decimales con las frecuencias?
 //       Si se usan decimales no entran en uint16_t así que hay que usar un

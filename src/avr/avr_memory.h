@@ -42,7 +42,7 @@
 #include <initializer_list>
 #include <atd_type_traits.h>
 
-namespace avr{
+namespace avr_{
 
 // Indica el número de bytes de RAM libres (para ver si se está usando
 // demasiada memoria).
@@ -350,7 +350,7 @@ namespace atd{
 //       1 caracter. Es más lento que cargar toda la memoria a la vez (???)
 //       pero apenas uso memoria RAM, que es el objetivo.
 template <size_t N>
-std::ostream& print(std::ostream& out, const avr::Progmem_string<N>& str)
+std::ostream& print(std::ostream& out, const avr_::Progmem_string<N>& str)
 {
     for (size_t i = 0; i < str.size(); ++i)
 	out << str[i];

@@ -106,7 +106,7 @@ struct Keyboard_ADC0_npin{
     static constexpr uint8_t npin = npin0;
 };
 
-// ¿por qué uint16_t? Porque los arefs de avr::ADC son uint16_t
+// ¿por qué uint16_t? Porque los arefs de not_generic::ADC son uint16_t
 template <uint16_t aref00, uint16_t nrow0, uint16_t ncol0>
 struct Keyboard_ADC0_voltages{
     static constexpr uint16_t aref0 = aref00;
@@ -181,11 +181,11 @@ private:
 
     static uint16_t arefs_()
     {
-	avr::ADC::select_pin<npin>();
-	avr::ADC::start_conversion();
-	avr::wait_until_conversion_is_complete();
+	not_generic::ADC::select_pin<npin>();
+	not_generic::ADC::start_conversion();
+	not_generic::wait_until_conversion_is_complete();
 	
-	return avr::ADC::ADC_in_arefs();
+	return not_generic::ADC::ADC_in_arefs();
     }
  
 };

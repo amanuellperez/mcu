@@ -40,13 +40,13 @@ namespace dev{
 template <uint8_t n>
 class LED{
 public:
-    LED() {avr::Pin<n>::as_output(); }
+    LED() {not_generic::Pin<n>::as_output(); }
 
     /// Encendemos el led
-    static void on() {avr::Pin<n>::write_one();}
+    static void on() {not_generic::Pin<n>::write_one();}
 
     /// Apagamos el led
-    static void off() {avr::Pin<n>::write_zero();}
+    static void off() {not_generic::Pin<n>::write_zero();}
 };
 
 

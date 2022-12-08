@@ -124,7 +124,7 @@ constexpr const uint8_t _bricks3x3_t1[8][bricks3x3_t1_size] PROGMEM = {
 
 // DUDA: el definir static esta variable hace que al hacer un avr-size
 // se generen 2 bytes en memoria no inicializada (sección .bss) ¿por qué?
-static inline avr::Progmem_biarray_view<uint8_t, 8, big_digits::bricks3x3_t1_size> 
+static inline not_generic::Progmem_biarray_view<uint8_t, 8, big_digits::bricks3x3_t1_size> 
 				    bricks3x3_t1{big_digits::_bricks3x3_t1};
 
 

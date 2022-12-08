@@ -217,19 +217,19 @@ private:
 // PINS
     static constexpr uint8_t num_D_pins = pin::num_D_pins;
 
-    using RS = avr::Pin<pin::RS>;
-    using RW = avr::Pin<pin::RW>;
-//    using E = avr::Pin<pin::E>;
+    using RS = not_generic::Pin<pin::RS>;
+    using RW = not_generic::Pin<pin::RW>;
+//    using E = not_generic::Pin<pin::E>;
 
     // Si solo usamos 4 pines, serán D<4>-D<7>
-    using D0 = avr::Pin<pin::D0>;
-    using D1 = avr::Pin<pin::D1>;
-    using D2 = avr::Pin<pin::D2>;
-    using D3 = avr::Pin<pin::D3>;
-    using D4 = avr::Pin<pin::D4>;
-    using D5 = avr::Pin<pin::D5>;
-    using D6 = avr::Pin<pin::D6>;
-    using D7 = avr::Pin<pin::D7>;
+    using D0 = not_generic::Pin<pin::D0>;
+    using D1 = not_generic::Pin<pin::D1>;
+    using D2 = not_generic::Pin<pin::D2>;
+    using D3 = not_generic::Pin<pin::D3>;
+    using D4 = not_generic::Pin<pin::D4>;
+    using D5 = not_generic::Pin<pin::D5>;
+    using D6 = not_generic::Pin<pin::D6>;
+    using D7 = not_generic::Pin<pin::D7>;
 
 
 
@@ -429,7 +429,7 @@ public:
     {return Base::template read_data_from_CG_or_DDRAM<E>();}
 
 private:
-    using E = avr::Pin<pin::E>;
+    using E = not_generic::Pin<pin::E>;
 
 
     static void setup_pins() { E::as_output(); }
@@ -613,8 +613,8 @@ public:
     {return Base::template read_data_from_CG_or_DDRAM<E2>();}
 
 private:
-    using E1 = avr::Pin<pin::E1>;
-    using E2 = avr::Pin<pin::E2>;
+    using E1 = not_generic::Pin<pin::E1>;
+    using E2 = not_generic::Pin<pin::E2>;
 
     static void setup_pins() 
     { 

@@ -76,7 +76,7 @@ class Register_74HC595_SPI{
 public:
     Register_74HC595_SPI() 
     { 
-	avr::SPI_master::data_order_LSB();
+	not_generic::SPI_master::data_order_LSB();
 	NO_SRCLR_.write_one(); 
     }
 
@@ -84,7 +84,7 @@ public:
     /// hasta no acabar de escribir.
     // Observar que esta función se puede definir como const. Sin embargo,
     // el cliente supondrá que es no const. La dejo con el prototipo esperado.
-    void buffer_write(uint8_t x) { avr::SPI_master::write(std::byte{x}); }
+    void buffer_write(uint8_t x) { not_generic::SPI_master::write(std::byte{x}); }
 
     void buffer_clear() { NO_SRCLR_.negative_pulse_of_1us(); }
 
@@ -107,8 +107,8 @@ public:
     }
 
 private:
-    avr::Output_pin<pin::RCLK> RCLK_;	
-    avr::Output_pin<pin::NO_SRCLR> NO_SRCLR_;
+    not_generic::Output_pin<pin::RCLK> RCLK_;	
+    not_generic::Output_pin<pin::NO_SRCLR> NO_SRCLR_;
 };
 
 

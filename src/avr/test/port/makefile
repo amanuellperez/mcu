@@ -1,4 +1,4 @@
-DIRS = coche_fantastico	\
+DIRS = knight_rider \
 	POV_toy
 
 include $(MCU_RECRULES)

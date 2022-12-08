@@ -38,7 +38,7 @@
 
 #include "avr_cfg.h"
 
-namespace avr{
+namespace avr_{
 
 
 /*!

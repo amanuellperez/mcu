@@ -121,7 +121,7 @@ constexpr const uint8_t _bricks2x1_t1_size[8][bricks2x1_t1_size] PROGMEM = {
 };
 
 
-static inline avr::Progmem_biarray_view<uint8_t, 8, big_digits::bricks2x1_t1_size> 
+static inline not_generic::Progmem_biarray_view<uint8_t, 8, big_digits::bricks2x1_t1_size> 
 				    bricks2x1_t1{big_digits::_bricks2x1_t1_size};
 
 // Cada digit está construido de una serie de bricks. Aquí indicamos qué
@@ -272,7 +272,7 @@ constexpr const uint8_t _bricks2x1_t2_size[8][bricks2x1_t2_size] PROGMEM = {
 };
 
 
-static inline avr::Progmem_biarray_view<uint8_t, 8, big_digits::bricks2x1_t2_size> 
+static inline not_generic::Progmem_biarray_view<uint8_t, 8, big_digits::bricks2x1_t2_size> 
 				    bricks2x1_t2{big_digits::_bricks2x1_t2_size};
 
 // Cada digit está construido de una serie de bricks. Aquí indicamos qué

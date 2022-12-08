@@ -33,7 +33,7 @@
 #include <avr/sleep.h>
 
 
-namespace avr{
+namespace avr_{
 // ----------------
 // Traductor básico 
 // ----------------

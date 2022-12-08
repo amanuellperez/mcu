@@ -46,7 +46,7 @@
 #include <iomanip>
 
 
-namespace avr{
+namespace avr_{
 /// Espera t microsegundos. t solo puede ser un número (no vale variable)
 /// t tiene que ser una constante en tiempo de compilación.
 #define delay_us(t) _delay_us(t)
