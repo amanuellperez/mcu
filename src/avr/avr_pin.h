@@ -35,9 +35,9 @@
  *	06/11/2022 toggle
  *
  ****************************************************************************/
-#include "avr_cfg.h"
+#include <avr/io.h> // registros: DDRB... PORT...
 #include "avr_time.h"
-
+#include "avr_not_generic.h"
 
 namespace avr_{
 /*!

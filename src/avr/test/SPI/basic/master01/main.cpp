@@ -17,6 +17,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#include "../../../../avr_atmega328p_cfg.h"
 #include "../../../../avr_SPI_basic.h"
 #include "../../../../avr_pin.h"
 #include "../../../../avr_UART_iostream.h"

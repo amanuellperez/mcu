@@ -57,10 +57,13 @@
  *    14/02/2020 v0.0
  *
  ****************************************************************************/
+#include <avr/io.h> // registros: DDRB... PORT...
 #include "avr_interrupt.h" 
-#include "avr_cfg.h"
-
 #include <atd_iobxtream.h>
+
+#include "avr_cfg.h"	// MCU_CLOCK_FREQUENCY_IN_HZ
+#include "avr_not_generic.h"
+
 
 
 
@@ -679,7 +682,7 @@ inline void TWI_master<TWI, bsz>::send_stop()
 template <typename TWI, typename TWI::streamsize bsz>
 void TWI_master<TWI, bsz>::handle_interrupt()
 {
-    using TWI_iostate = TWI_basic_iostate;
+    using TWI_iostate = TWI_basic_iostate; // not_generic!!!
     using MM = TWI_iostate::master_mode;
     using MRM = TWI_basic_iostate::master_receiver_mode;
     using MTM = TWI_basic_iostate::master_transmitter_mode;

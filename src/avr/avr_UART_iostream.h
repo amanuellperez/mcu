@@ -33,6 +33,7 @@
  ****************************************************************************/
 
 #include "avr_UART_basic.h"
+#include "avr_cfg.h"	// MCU_CLOCK_FREQUENCY_IN_HZ
 
 #include <iostream>
 #include <streambuf>

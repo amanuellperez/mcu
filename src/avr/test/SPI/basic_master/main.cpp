@@ -33,6 +33,7 @@
 //  Para este ejemplo no es necesario conectar el pin SS del SPI. Sin embargo,
 //  en la datasheet pone claramente que este pin tiene que estar a 0 para que
 //  haya bit trade. 
+#include "../../../avr_atmega328p_cfg.h"
 #include "../../../avr_SPI_basic.h"
 #include "../../../avr_pin.h"
 #include "../../../avr_UART_iostream.h"

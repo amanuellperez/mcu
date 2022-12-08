@@ -18,6 +18,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 // Reloj de sistema básico. Me baso en time.h
+#include "../../../avr_atmega328p_cfg.h"
 #include "../../../avr_UART.h"
 #include "../../../avr_timer1_basic.h"
 #include "../../../avr_time.h"

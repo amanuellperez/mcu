@@ -22,6 +22,7 @@
 // volviendo a iluminarse.
 // Para ver que cualquier pin puede despertar al avr, defino 2 interrupciones.
 // Funciona con los 2 pines correctamente. Probar a descomentar el pin2.
+#include "../../../avr_atmega328p_cfg.h"
 #include "../../../avr_sleep.h"
 #include "../../../avr_interrupt.h"
 #include "../../../avr_pin.h"

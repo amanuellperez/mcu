@@ -38,6 +38,7 @@
 #include "dev_keyboard_code.h"
 
 #include <atd_static.h>
+#include <atd_type_traits.h>
 
 namespace dev{
 

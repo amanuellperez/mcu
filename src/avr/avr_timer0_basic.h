@@ -44,14 +44,15 @@
  *		         divisores de frecuencia).
  *
  ****************************************************************************/
+#include <avr/io.h> // registros: DDRB... PORT...
 #include "avr_timern_basic.h"
 
 #include <atd_bit.h>
 #include <atd_type_traits.h>
 
 #include "avr_interrupt.h"
-#include "avr_cfg.h"
 #include "avr_pin.h"
+#include "avr_cfg.h"	// MCU_CLOCK_FREQUENCY_IN_HZ
 
 #include <array>
 

@@ -19,6 +19,7 @@
 
 // Este microcontrolador dialoga con el test/TWI/master
 
+#include "../../../avr_atmega328p_cfg.h"
 #include "../../../avr_UART.h" // cambiar de sitio
 #include "../../../avr_TWI_basic.h"
 #include "../../../avr_TWI_slave.h"

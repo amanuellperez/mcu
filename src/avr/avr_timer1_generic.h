@@ -38,6 +38,7 @@
  ****************************************************************************/
 #include "avr_timer1_basic.h"
 #include "avr_interrupt.h"
+#include "avr_cfg.h"	// MCU_CLOCK_FREQUENCY_IN_HZ
 
 namespace avr_{
 

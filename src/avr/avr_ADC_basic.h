@@ -43,8 +43,9 @@
  ****************************************************************************/
 
 #include <atd_bit.h>
-#include "avr_cfg.h"
-
+#include <avr/io.h> // registros: DDRB... PORT...
+#include "avr_cfg.h"	// MCU_CLOCK_FREQUENCY_IN_HZ
+			
 namespace avr_{
 
 // Al definir avr la macro ADC, no me deja crear la clase ADC, así que lo

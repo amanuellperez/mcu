@@ -28,7 +28,8 @@ INCS= avr_ADC_basic.h	\
 	avr_UART.h				\
 	avr_UART_basic.h		\
 	avr_UART_baud_rate.h	\
-	avr_UART_iostream.h	
+	avr_UART_iostream.h		\
+	avr_not_generic.h	
 
 
 LIB=avr_$(F_CPU)

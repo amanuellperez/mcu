@@ -35,18 +35,14 @@
  *    27/01/2020 v0.0
  *
  ****************************************************************************/
-
+// TODO: este archivo seguramente haya que recolocarlo.
+// Porque ¿avr_cfg == configuración de CUALQUIER avr?
+// Dudo mucho que todos los avr se puedan configurar de igual forma.
+// De hecho los avr_types.h están pensados para un microcontrolador de 8 bits
+// que no dispone de coprocesador de floating-point numbers. Si fuera de 16
+// bits o hubiese coprocesador de floats se definirían de otra forma.
+// ¿Llamarlo avr_types8.h? ¿Para indicar que es de 8 bits?
 #include "avr_types.h"
-
-
-
-#if MCU == atmega328p
-#include "avr_atmega328p_cfg.h"
-
-#else
-#error "Unknown microcontroller. Someone needs to write the code."
-#endif
-
 
 // CONFIGURACIÓN DEL RELOJ
 // TODO: eliminar esta a favor de clock_frequency!!!

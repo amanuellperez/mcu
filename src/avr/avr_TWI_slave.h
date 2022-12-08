@@ -48,7 +48,7 @@
  *
  ****************************************************************************/
 #include "avr_interrupt.h" 
-#include "avr_cfg.h"
+#include <avr/io.h> // registros: DDRB... PORT...
 
 #include <atd_iobxtream.h>
 

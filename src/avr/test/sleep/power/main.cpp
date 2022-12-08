@@ -20,6 +20,7 @@
 // Hacemos que parpadee un led. Cuando se pulsa un pulsador se duerme el avr,
 // con lo que el led deja de iluminarse. Al soltar el pulsador, despierta,
 // volviendo a iluminarse.
+#include "../../../avr_atmega328p_cfg.h"
 #include "../../../avr_sleep.h"
 #include "../../../avr_interrupt.h"
 #include "../../../avr_pin.h"

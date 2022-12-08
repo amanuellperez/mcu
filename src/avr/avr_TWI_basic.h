@@ -35,8 +35,9 @@
 
 #include <cstddef>    // std::byte
 #include <atd_bit.h>
-
-#include "avr_cfg.h"
+#include <avr/io.h> // registros: DDRB... PORT...
+#include "avr_cfg.h"	// MCU_CLOCK_FREQUENCY_IN_HZ
+#include "avr_not_generic.h"
 
 namespace avr_{
 

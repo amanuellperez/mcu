@@ -34,7 +34,6 @@
  ****************************************************************************/
 #include <avr/io.h>
 
-#include "avr_cfg.h"	
 #include <atd_bit.h>
 
 #include "avr_UART_baud_rate.h"

@@ -20,6 +20,7 @@
 // Conectar un led al pin 14, y un pulsador
 // entre resistencias al pin 4
 
+#include "../../avr_atmega328p_cfg.h"
 #include "../../avr_pin.h"
 #include "../../avr_time.h"
 

@@ -30,14 +30,11 @@
  *      08/12/2022 Escrito
  *
  ****************************************************************************/
+#include "avr_cfg.h"	// MCU_CLOCK_FREQUENCY_IN_HZ
+			
 /***************************************************************************
- *		    BUILT-IN DEVICES FOR ATMEGA
+ *			BUILT-IN DEVICES FOR ATMEGA
  ***************************************************************************/
-//namespace avr{ // TODO: change to atmega
-//using namespace avr_;
-//
-//}// namespace
-
 // (RRR) ¿por qué no definir todas estas clases directamente dentro del
 //	 namespace atmega?
 //
