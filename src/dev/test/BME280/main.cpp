@@ -18,12 +18,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "../../dev_BME280_basic.h"
-#include <avr_time.h>
-#include <avr_UART.h>	
-#include <atd_ostream.h>
 #include <cstddef>
+#include <atd_ostream.h>
 #include <atd_cstddef.h>
-#include <avr_TWI_basic.h>
+#include <avr_atmega.h>
 
 // pines que usamos
 // ----------------
@@ -33,11 +31,11 @@
 // ---------------------------
 // Dispositivo TWI al que conectamos
 static constexpr uint8_t TWI_buffer_size = 100; 
-using TWI_master = avr::TWI_master<avr::TWI_basic, TWI_buffer_size>;
+using TWI_master = atmega::TWI_master<atmega::TWI_basic, TWI_buffer_size>;
 
 
 // Dispositivos
-using TWI = avr::TWI_master_ioxtream<TWI_master>;
+using TWI = atmega::TWI_master_ioxtream<TWI_master>;
 using Sensor = dev::BME280_TWI<TWI_master, 0x76>;
 
 // En el breakout de adafruit la dirección la determina la conexión del pin
@@ -51,7 +49,7 @@ static constexpr uint8_t slave_address = 0x76;
 
 void twi_print_state(TWI::iostate st)
 {
-    avr::UART_iostream uart;
+    atmega::UART_iostream uart;
     uart << "state = ";
 
     switch(st){
@@ -134,7 +132,7 @@ void bme280_read_all_mem(std::byte addr, std::byte* mem, uint8_t n)
     twi.close();
 
     if (twi.error()){
-	avr::UART_iostream uart;
+	atmega::UART_iostream uart;
 	uart << "ERROR (bme280_read_all_mem): ";
 	twi_print_state(TWI::state());
     }
@@ -330,7 +328,7 @@ void print_cfg(std::ostream& out, dev::__BME280_config& cfg)
 //
 //void init(Sensor& sensor)
 //{
-//    avr::UART_iostream uart;
+//    atmega::UART_iostream uart;
 //    uart << "init ... ";
 //    sensor.init();
 //    if (sensor.error()){
@@ -428,8 +426,8 @@ void print_params(std::iostream& uart, Sensor& sensor)
 //void test_bme280()
 //{
 //// init_UART();
-//    avr::UART_iostream uart;
-//    avr::basic_cfg(uart);
+//    atmega::UART_iostream uart;
+//    atmega::basic_cfg(uart);
 //    uart.on();
 //
 //    uart << "----------------------------------------\n"
@@ -472,8 +470,8 @@ void print_params(std::iostream& uart, Sensor& sensor)
 void test_basic()
 {
 // init_UART();
-    avr::UART_iostream uart;
-    avr::basic_cfg(uart);
+    atmega::UART_iostream uart;
+    atmega::basic_cfg(uart);
     uart.on();
 
     uart << "----------------------------------------\n"
@@ -515,8 +513,8 @@ void test_basic()
 void test_calib()
 {
 // init_UART();
-    avr::UART_iostream uart;
-    avr::basic_cfg(uart);
+    atmega::UART_iostream uart;
+    atmega::basic_cfg(uart);
     uart.on();
 
     uart << "----------------------------------------\n"
@@ -550,8 +548,8 @@ void test_calib()
 void test_config()
 {
 // init_UART();
-    avr::UART_iostream uart;
-    avr::basic_cfg(uart);
+    atmega::UART_iostream uart;
+    atmega::basic_cfg(uart);
     uart.on();
 
     uart << "----------------------------------------\n"
@@ -608,8 +606,8 @@ void test_config()
 void test_uncompensated()
 {
 // init_UART();
-    avr::UART_iostream uart;
-    avr::basic_cfg(uart);
+    atmega::UART_iostream uart;
+    atmega::basic_cfg(uart);
     uart.on();
 
     uart << "----------------------------------------\n"
@@ -677,8 +675,8 @@ void test_uncompensated()
 void test_t_p_h()
 {
 // init_UART();
-    avr::UART_iostream uart;
-    avr::basic_cfg(uart);
+    atmega::UART_iostream uart;
+    atmega::basic_cfg(uart);
     uart.on();
 
     uart << "----------------------------------------\n"

@@ -25,21 +25,21 @@
 
 
 constexpr uint8_t TWI_buffer_size = 10;
-using TWI = avr::TWI_master<avr::TWI_basic, TWI_buffer_size>;
+using TWI = avr_::TWI_master<avr_::TWI_basic, TWI_buffer_size>;
 
 constexpr uint8_t slave_address = 0x10;
 
 inline void traza_twcr()
 {
     auto tmp = TWCR;
-    avr::UART_iostream uart;
+    avr_::UART_iostream uart;
     uart << "TWCR = " << static_cast<uint16_t>(tmp) << '\n';
 }
 
 
 void twi_print_error()
 {
-    avr::UART_iostream uart;
+    avr_::UART_iostream uart;
 
     if (TWI::no_response())
 	uart << "Slave no responde.\n";
@@ -56,7 +56,7 @@ void twi_print_error()
 
 void twi_print_state()
 {
-    avr::UART_iostream uart;
+    avr_::UART_iostream uart;
 
     if (TWI::error())
 	uart << "state == error()\n";
@@ -89,7 +89,7 @@ void twi_print_state()
 
 void twi_print_state(TWI::iostate st)
 {
-    avr::UART_iostream uart;
+    avr_::UART_iostream uart;
 
     switch(st){
     case TWI::iostate::ok:
@@ -161,7 +161,7 @@ void twi_print_state(TWI::iostate st)
 
 void send_service1()
 {
-    avr::UART_iostream uart;
+    avr_::UART_iostream uart;
     uart << "\n\n=================\n";
     uart << "Service1:\n";
 
@@ -284,7 +284,7 @@ void send_service1()
 
 void send_service2()
 {
-    avr::UART_iostream uart;
+    avr_::UART_iostream uart;
     uart << "\n\n=================\n";
     uart << "Service2:\n";
 
@@ -317,7 +317,7 @@ void send_service2()
 
 void send_service3()
 {
-    avr::UART_iostream uart;
+    avr_::UART_iostream uart;
     uart << "\n\n=================\n";
     uart << "Service3:\n";
 
@@ -456,8 +456,8 @@ void test_master()
 
 int main() 
 {
-    avr::UART_iostream uart;
-    avr::basic_cfg(uart);
+    avr_::UART_iostream uart;
+    avr_::basic_cfg(uart);
     uart.on();
 
     uart << "Empezando como MASTER\n";

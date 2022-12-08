@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez 
+// Copyright (C) 2022 A.Manuel L.Perez 
 //           mail: <amanuel.lperez@gmail.com>
 //           https://github.com/amanuellperez/mcu
 //
@@ -19,39 +19,29 @@
 
 #pragma once
 
-#ifndef __DEV_LED_H__
-#define __DEV_LED_H__
+#ifndef __NOT_GENERIC_H__
+#define __NOT_GENERIC_H__
 /****************************************************************************
  *
- *   - DESCRIPCION: LED
+ *  - DESCRIPCION: Fichero temporal para ir desvinculando del namespace
+ *	inicial avr. 
  *
- *   - HISTORIA:
- *           A.Manuel L.Perez - 24/07/2017 Escrito
+ *  - HISTORIA:
+ *    A.Manuel L.Perez
+ *    08/12/2022 Escrito
  *
  ****************************************************************************/
-#include <avr_pin.h>
-#include "not_generic.h"
-
-namespace dev{
-
-/*!
- *  \brief  Es un led vulgar y corriente.
- *
- */
-template <uint8_t n>
-class LED{
-public:
-    LED() {not_generic::Pin<n>::as_output(); }
-
-    /// Encendemos el led
-    static void on() {not_generic::Pin<n>::write_one();}
-
-    /// Apagamos el led
-    static void off() {not_generic::Pin<n>::write_zero();}
-};
-
-
-
-}// namespace
+// TODO: Como esto lo he ido desarrollando poco a poco, a medida que he ido
+// aprendiendo la mayoria de los dispositivos acceden directamente a las
+// funciones del atmega (que al principio defini como avr). Para identificar
+// bien aquellas partes que no son genéricas voy a marcarlas como
+// `not_generic` para saber que las tengo que ir reescribiendo.
+// Cuando en los devices haya eliminado por completo este namespace,
+// eliminarlo.
+namespace not_generic{
+using namespace avr_;
+}
 
 #endif
+
+

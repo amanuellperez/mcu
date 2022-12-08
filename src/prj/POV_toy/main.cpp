@@ -20,12 +20,7 @@
 // Es más eficiente y más sencillo de implementar usando los puertos
 // (ver ejemplo de port/POV_toy). Sin embargo, es más fácil soldar con estas
 // conexiones.
-#include <avr_pin.h>
-#include <avr_time.h>
-
-
-using namespace avr;
-
+#include <avr_atmega.h>
 
 
 class Main_app{
@@ -33,14 +28,14 @@ public:
     void run();
 
 private:
-    Output_pin<15> p1_;
-    Output_pin<16> p2_;
-    Output_pin<17> p3_;
-    Output_pin<18> p4_;
-    Output_pin<19> p5_;
-    Output_pin<23> p6_;
-    Output_pin<24> p7_;
-    Output_pin<25> p8_;
+    atmega::Output_pin<15> p1_;
+    atmega::Output_pin<16> p2_;
+    atmega::Output_pin<17> p3_;
+    atmega::Output_pin<18> p4_;
+    atmega::Output_pin<19> p5_;
+    atmega::Output_pin<23> p6_;
+    atmega::Output_pin<24> p7_;
+    atmega::Output_pin<25> p8_;
 
     void POVDisplay(uint8_t fila_glyph);
     void clear();

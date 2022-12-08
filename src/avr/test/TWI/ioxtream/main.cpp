@@ -25,10 +25,10 @@
 
 
 constexpr uint8_t TWI_buffer_size = 100;
-using TWI_master = avr::TWI_master<avr::TWI_basic, TWI_buffer_size>;
+using TWI_master = avr_::TWI_master<avr_::TWI_basic, TWI_buffer_size>;
 
-//using TWI = avr::TWI_master_ioxtream<avr::TWI_basic, TWI_buffer_size>;
-using TWI = avr::TWI_master_ioxtream<TWI_master>;
+//using TWI = avr_::TWI_master_ioxtream<avr_::TWI_basic, TWI_buffer_size>;
+using TWI = avr_::TWI_master_ioxtream<TWI_master>;
 
 constexpr uint8_t slave_address = 0x10;
 
@@ -36,7 +36,7 @@ constexpr uint8_t slave_address = 0x10;
 
 void twi_print_state()
 {
-    avr::UART_iostream uart;
+    avr_::UART_iostream uart;
 
     if (TWI::error())
 	uart << "state == error()\n";
@@ -69,7 +69,7 @@ void twi_print_state()
 
 void twi_print_error()
 {
-    avr::UART_iostream uart;
+    avr_::UART_iostream uart;
 
     if (TWI::no_response())
 	uart << "Slave no responde.\n";
@@ -98,7 +98,7 @@ void twi_print_error()
 
 void send_service1()
 {
-    avr::UART_iostream uart;
+    avr_::UART_iostream uart;
     uart << "\n==============================\n";
     uart << "Service1:\n";
 
@@ -153,7 +153,7 @@ void send_service1()
 
 void send_service2()
 {
-    avr::UART_iostream uart;
+    avr_::UART_iostream uart;
     uart << "\n==============================\n";
     uart << "Service2: ";
 
@@ -177,20 +177,20 @@ void send_service2()
 template <typename T>
 void uart_print(const T& x)
 {
-    avr::UART_iostream uart;
+    avr_::UART_iostream uart;
     uart << x;
 }
 
 void uart_print(std::byte b)
 {
-    avr::UART_iostream uart;
+    avr_::UART_iostream uart;
     uart << (int) b;
 }
 
 template <typename Int>
 void send_type(const Int& x0, const char* tname)
 {
-    avr::UART_iostream uart;
+    avr_::UART_iostream uart;
     uart << "\n==============================\n";
     uart << "Enviando un " << tname << ": ";
 
@@ -231,7 +231,7 @@ void send_type(const Int& x0, const char* tname)
 
 void send_service4()
 {
-    avr::UART_iostream uart;
+    avr_::UART_iostream uart;
     uart << "\n==============================\n";
     uart << "Service4: \n";
 
@@ -323,7 +323,7 @@ Ostream& operator<<(Ostream& out, const Data& d)
 
 void service(const Data& in, Data& out)
 {
-    avr::UART_iostream uart;
+    avr_::UART_iostream uart;
 
     TWI twi;
     twi.open(slave_address);
@@ -348,7 +348,7 @@ void service(const Data& in, Data& out)
 
 void test_typical_service()
 {
-    avr::UART_iostream uart;
+    avr_::UART_iostream uart;
     uart << "\n==============================\n";
     uart << "typical_service: ";
 
@@ -368,7 +368,7 @@ void test_n()
     constexpr int data_size = 3;
     std::byte data[3] = {std::byte{10}, std::byte{20}, std::byte{30}};
 
-    avr::UART_iostream uart;
+    avr_::UART_iostream uart;
     uart << "\n==============================\n";
     uart << "Probando read(q,n) y write(q, n): ";
     TWI twi;
@@ -424,8 +424,8 @@ void test_master()
 
 int main() 
 {
-    avr::UART_iostream uart;
-    avr::basic_cfg(uart);
+    avr_::UART_iostream uart;
+    avr_::basic_cfg(uart);
     uart.on();
 
     uart << "\n\n\n* * * * * * * * * * * * * * * * * * * * * * * * * * * *\n";

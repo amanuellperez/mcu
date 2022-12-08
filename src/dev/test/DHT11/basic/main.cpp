@@ -20,14 +20,12 @@
 // Este programa es para probar el Generic_timer_counter, aunque pone la base
 // para programar el DHT11.
 
-#include <avr_UART.h>
-#include <avr_pin.h>
-#include <avr_timer0_generic.h>
 #include <atd_bit.h>
+#include <avr_atmega.h>
 
 constexpr uint8_t sensor_pin = 15;
-using Counter = avr::Timer0_generic_counter;
-using Pin = avr::Pin<sensor_pin>;
+using Counter = atmega::Timer0_generic_counter;
+using Pin = atmega::Pin<sensor_pin>;
 
 
 // Esperamos de 0 a 255 ms
@@ -43,7 +41,7 @@ void wait(const Counter::counter_type& t)
 
 bool read()
 {
-    avr::UART_iostream uart;
+    atmega::UART_iostream uart;
 
 // 1. Pulso mínimo de 18 ms
     Pin::as_output();
@@ -163,8 +161,8 @@ bool read()
 
 int main()
 {
-    avr::UART_iostream uart;
-    avr::basic_cfg(uart);
+    atmega::UART_iostream uart;
+    atmega::basic_cfg(uart);
     uart.on();
 
     Counter::init();

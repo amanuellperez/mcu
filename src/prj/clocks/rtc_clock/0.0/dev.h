@@ -63,7 +63,7 @@ using Keyrow_pins = dev::Keyrow_pins<23, 24, 25>;
 
 // using TWI: pins 27 and 28
 static constexpr uint8_t TWI_buffer_size = 70; 
-using TWI = avr::TWI_master<avr::TWI_basic, TWI_buffer_size>;
+using TWI = atmega::TWI_master<atmega::TWI_basic, TWI_buffer_size>;
 static constexpr int TWI_frecuency = 50; // kHz
 
 

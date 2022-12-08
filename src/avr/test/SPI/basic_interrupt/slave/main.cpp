@@ -22,17 +22,17 @@
 #include "../../../../avr_UART_iostream.h"
 
 
-using SPI = avr::SPI_slave;
+using SPI = avr_::SPI_slave;
 
-constexpr uint16_t npin_SS = avr::SPI_num_pin_SS;	
+constexpr uint16_t npin_SS = avr_::SPI_num_pin_SS;	
 
 static volatile std::byte data {0};
 
 int main() 
 {
 // init_uart()
-    avr::UART_iostream uart;
-    avr::basic_cfg(uart);
+    avr_::UART_iostream uart;
+    avr_::basic_cfg(uart);
     uart.on();
 
 
@@ -41,7 +41,7 @@ int main()
     SPI::spi_mode(0,0);
     SPI::data_order_LSB();
     SPI::interrupt_enable();
-    avr::enable_interrupts();
+    avr_::enable_interrupts();
 
     uart << "\n\nSlave SPI\n"
 	    "----------\n"
@@ -55,7 +55,7 @@ int main()
 	if (data != std::byte{0}){
 	    std::byte ndata{0};
 	    {
-                avr::Interrupts_lock lock;
+                avr_::Interrupts_lock lock;
                 ndata = data;
                 data  = std::byte{0};
 	    }

@@ -38,7 +38,7 @@
 #include <streambuf>
 #include <atd_ascii.h>
 
-namespace avr{
+namespace avr_{
 
 class UART_streambuf_unbuffered : public std::streambuf {
 public:
@@ -262,14 +262,10 @@ private:
 
 };
 
-
-
-// El parámetro lo usamos para sobrecargar: quiero que configures el flujo
-// con la configuración básica.
 template <uint32_t baud_rate = 9600u,
 	  uint32_t f_clock   = MCU_CLOCK_FREQUENCY_IN_HZ,
 	  uint32_t tolerance = 2>
-void basic_cfg(UART_iostream&) 
+void UART_iostream_basic_cfg()
 {                                
     using UART = UART_basic;
 
@@ -281,6 +277,16 @@ void basic_cfg(UART_iostream&)
     UART::character_size_8();
 }
 
+
+
+// TODO: borrar esta función. No se usa.
+// El parámetro lo usamos para sobrecargar: quiero que configures el flujo
+// con la configuración básica.
+template <uint32_t baud_rate = 9600u,
+	  uint32_t f_clock   = MCU_CLOCK_FREQUENCY_IN_HZ,
+	  uint32_t tolerance = 2>
+inline void basic_cfg(UART_iostream&) 
+{ UART_iostream_basic_cfg<baud_rate, f_clock, tolerance>();}
 
 
 }// namespace

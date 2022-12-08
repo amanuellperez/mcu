@@ -51,12 +51,12 @@
 //  sirviendo para nada.
 
 void wait_until_conversion_is_complete()
-{while(!avr::ADC::is_the_conversion_complete()) ;}
+{while(!avr_::ADC::is_the_conversion_complete()) ;}
 
 
-void print(std::ostream& out, const avr::Potential& v)
+void print(std::ostream& out, const avr_::Potential& v)
 {
-    using namespace avr::literals;
+    using namespace avr_::literals;
 
     if (v < 1_V){
 	out << atd::to_integer<uint16_t>(v.internal_value()) << ' ';
@@ -70,7 +70,7 @@ void print(std::ostream& out, const avr::Potential& v)
 template <uint8_t npin>
 void test_internal_1_1V()
 {
-    avr::UART_iostream uart;
+    avr_::UART_iostream uart;
 
     uart << "\n\nSelection internal 1.1 V\n"
 	    "------------------------\n"
@@ -85,23 +85,23 @@ void test_internal_1_1V()
     uart << "El potencial máximo a leer es de 1.1 V\n";
 
     // encendemos el ADC en internal 1.1V a 125kHz
-    avr::ADC::AREF_internal_to_1_1V();
-    avr::ADC::clock_speed_in_kHz<125>();
-    avr::ADC::enable();
+    avr_::ADC::AREF_internal_to_1_1V();
+    avr_::ADC::clock_speed_in_kHz<125>();
+    avr_::ADC::enable();
 
     constexpr uint16_t AREF_en_mV = 1100;
 
 // seleccionamos pin a leer
-    avr::ADC::select_pin<npin>();
+    avr_::ADC::select_pin<npin>();
 
     while (1) {
-	avr::ADC::start_conversion();
+	avr_::ADC::start_conversion();
 	wait_until_conversion_is_complete();
 	
-	auto arefs = avr::ADC::ADC_in_arefs();
+	auto arefs = avr_::ADC::ADC_in_arefs();
 
 	uart << "arefs = " << arefs  << "; V = ";
-	print(uart, avr::ADC::ADC_in_volts<AREF_en_mV>());
+	print(uart, avr_::ADC::ADC_in_volts<AREF_en_mV>());
 	uart << '\n';
 
 	wait_ms(1000);
@@ -111,7 +111,7 @@ void test_internal_1_1V()
 template <uint8_t npin>
 void test_internal_AVCC()
 {
-    avr::UART_iostream uart;
+    avr_::UART_iostream uart;
 
     uart << "\n\nSelection internal AVCC\n"
 	    "------------------------\n"
@@ -130,22 +130,22 @@ void test_internal_AVCC()
     uart << "El potencial máximo a leer es de 5 V.\n";
 
     // encendemos el ADC en internal 1.1V a 125kHz
-    avr::ADC::AREF_internal_to_AVCC();
-    avr::ADC::clock_speed_in_kHz<125>();
-    avr::ADC::enable();
+    avr_::ADC::AREF_internal_to_AVCC();
+    avr_::ADC::clock_speed_in_kHz<125>();
+    avr_::ADC::enable();
 
 
 // seleccionamos pin a leer
-    avr::ADC::select_pin<npin>();
+    avr_::ADC::select_pin<npin>();
 
     while (1) {
-	avr::ADC::start_conversion();
+	avr_::ADC::start_conversion();
 	wait_until_conversion_is_complete();
 	
-	auto arefs = avr::ADC::ADC_in_arefs();
+	auto arefs = avr_::ADC::ADC_in_arefs();
 
 	uart << "arefs = " << arefs  << "; V = ";
-	print(uart, avr::ADC::ADC_in_volts<AREF_en_mV>());
+	print(uart, avr_::ADC::ADC_in_volts<AREF_en_mV>());
 	uart << '\n';
 
 	wait_ms(1000);
@@ -157,7 +157,7 @@ void test_internal_AVCC()
 template <uint8_t npin>
 void test_AREF_external()
 {
-    avr::UART_iostream uart;
+    avr_::UART_iostream uart;
 
     uart << "\n\nSelection AREF external\n"
 	        "-----------------------\n"
@@ -172,22 +172,22 @@ void test_AREF_external()
     uart << "El potencial máximo a leer es de 5 V.\n";
 
     // encendemos el ADC en internal 1.1V a 125kHz
-    avr::ADC::AREF_external();
-    avr::ADC::clock_speed_in_kHz<125>();
-    avr::ADC::enable();
+    avr_::ADC::AREF_external();
+    avr_::ADC::clock_speed_in_kHz<125>();
+    avr_::ADC::enable();
 
 
 // seleccionamos pin a leer
-    avr::ADC::select_pin<npin>();
+    avr_::ADC::select_pin<npin>();
 
     while (1) {
-	avr::ADC::start_conversion();
+	avr_::ADC::start_conversion();
 	wait_until_conversion_is_complete();
 	
-	auto arefs = avr::ADC::ADC_in_arefs();
+	auto arefs = avr_::ADC::ADC_in_arefs();
 
 	uart << "arefs = " << arefs  << "; V = ";
-	print(uart, avr::ADC::ADC_in_volts<AREF_en_mV>());
+	print(uart, avr_::ADC::ADC_in_volts<AREF_en_mV>());
 	uart << '\n';
 
 	wait_ms(1000);
@@ -199,8 +199,8 @@ int main()
 {
     constexpr uint8_t npin = 28;
 
-    avr::UART_iostream uart;
-    avr::basic_cfg(uart);
+    avr_::UART_iostream uart;
+    avr_::basic_cfg(uart);
     uart.on();
 
     while (1) {

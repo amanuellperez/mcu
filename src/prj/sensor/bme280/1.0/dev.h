@@ -22,12 +22,11 @@
 #ifndef __SENSOR_DEV_H__
 #define __SENSOR_DEV_H__
 
+#include <avr_atmega.h>
 
 #include <dev_LCD_screen.h>
 #include <dev_LCD_HD44780.h>
 #include <dev_keyrow.h>
-
-#include <avr_TWI.h>
 #include <dev_BME280_basic.h>
 #include <dev_DS1307_clock.h>
 
@@ -56,7 +55,7 @@ using Keyrow_pins = dev::Keyrow_pins<23, 24, 25>;
 
 // using TWI: pins 27 and 28
 static constexpr uint8_t TWI_buffer_size = 100; 
-using TWI = avr::TWI_master<avr::TWI_basic, TWI_buffer_size>;
+using TWI = atmega::TWI_master<atmega::TWI_basic, TWI_buffer_size>;
 static constexpr int TWI_frecuency = 50; // kHz
 static constexpr TWI::Address twi_sensor_address = 0x77;
 // twi_RTC_address = 0x68 (fijo)

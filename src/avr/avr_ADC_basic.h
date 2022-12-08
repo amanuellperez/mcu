@@ -460,7 +460,7 @@ inline void ADC::clock_speed_in_kHz<62u, 1000000UL>()
 template<uint16_t AREF>
 constexpr Potential ADC::aref2potential(uint32_t x)
 {
-    avr::Potential res = avr::potential_in_mV(uint32_t{AREF});
+    avr_::Potential res = avr_::potential_in_mV(uint32_t{AREF});
     res *= x;
     res /= uint32_t{1024};
 

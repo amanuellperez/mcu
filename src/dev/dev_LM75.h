@@ -39,6 +39,7 @@
 #include <atd_bit.h>
 
 #include <avr_TWI.h>
+#include "not_generic.h"
 
 namespace dev{
 

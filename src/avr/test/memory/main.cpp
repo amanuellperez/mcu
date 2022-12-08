@@ -56,7 +56,7 @@ constexpr uint8_t barray_u8[barray_rows][barray_cols] PROGMEM = {
 
 void test_basic()
 {
-    avr::UART_iostream uart;
+    avr_::UART_iostream uart;
 
     while(1){
     // Tipos básicos
@@ -93,24 +93,24 @@ void test_basic()
 
 
 
-constexpr avr::Progmem<uint8_t> pu8 PROGMEM = 12;
-constexpr avr::Progmem<uint16_t> pu16 PROGMEM = 200;
+constexpr avr_::Progmem<uint8_t> pu8 PROGMEM = 12;
+constexpr avr_::Progmem<uint16_t> pu16 PROGMEM = 200;
 // Este no tiene que compilar:
 // constexpr Progmem<uint32_t> pu32 PROGMEM = 200;
 
-constexpr avr::Progmem_array<uint8_t, 4> parray_u8 PROGMEM = {10,20,30,40};
-constexpr avr::Progmem_string<5> pstr PROGMEM{"hola"};
+constexpr avr_::Progmem_array<uint8_t, 4> parray_u8 PROGMEM = {10,20,30,40};
+constexpr avr_::Progmem_string<5> pstr PROGMEM{"hola"};
 
-constexpr avr::Progmem_string_array<3> parray_str PROGMEM = {
+constexpr avr_::Progmem_string_array<3> parray_str PROGMEM = {
     str1, str2, str3
     };
 
 
 template <size_t N>
-void f(const avr::Progmem_string_array<N>& str0)
+void f(const avr_::Progmem_string_array<N>& str0)
 {
-    avr::UART_iostream uart;
-    avr::Progmem_string_array<3> str = str0; // <-- esto genera error en 
+    avr_::UART_iostream uart;
+    avr_::Progmem_string_array<3> str = str0; // <-- esto genera error en 
 					    // tiempo de ejecución
 
     uart << "Dentro de f\n";
@@ -118,7 +118,7 @@ void f(const avr::Progmem_string_array<N>& str0)
     {
 	char buffer[10];
 	for (size_t i = 0; i < str.size(); ++i){
-	    avr::strcpy(buffer, str[i]);
+	    avr_::strcpy(buffer, str[i]);
 	    uart << "str[" << (int) i << "] = " << buffer << '\n';
 	}
     }
@@ -129,7 +129,7 @@ void f(const avr::Progmem_string_array<N>& str0)
 
 void test_progmem()
 {
-    avr::UART_iostream uart;
+    avr_::UART_iostream uart;
 
     while(1){
 
@@ -161,7 +161,7 @@ void test_progmem()
     {
 	char buffer[10];
 	for (size_t i = 0; i < parray_str.size(); ++i){
-	    avr::strcpy(buffer, parray_str[i]);
+	    avr_::strcpy(buffer, parray_str[i]);
 	    uart << "str[" << (int) i << "] = " << buffer << '\n';
 	}
     }
@@ -172,7 +172,7 @@ void test_progmem()
     {
 	char buffer[4];
 	for (size_t i = 0; i < parray_str.size(); ++i){
-	    avr::strncpy(buffer, parray_str[i], 4);
+	    avr_::strncpy(buffer, parray_str[i], 4);
 	    buffer[3] = '\0'; // garantizamos que acaba bien
 	    uart << "str[" << (int) i << "] = " << buffer << '\n';
 	}
@@ -184,7 +184,7 @@ void test_progmem()
     {
 	char buffer[4];
 	for (size_t i = 0; i < parray_str.size(); ++i){
-	    size_t n = avr::strlcpy(buffer, parray_str[i], 4);
+	    size_t n = avr_::strlcpy(buffer, parray_str[i], 4);
 	    uart << "cadena original tiene [" << n << "] --> [" << (int) i << "] = " << buffer << '\n';
 	}
     }
@@ -197,9 +197,9 @@ void test_progmem()
 
 void test_progmem_view()
 {
-    avr::UART_iostream uart;
+    avr_::UART_iostream uart;
 
-    avr::Progmem_biarray_view<uint8_t, barray_rows, barray_cols> a{barray_u8};
+    avr_::Progmem_biarray_view<uint8_t, barray_rows, barray_cols> a{barray_u8};
 
     uart << "\n\nProgram view test\n"
 	    "-----------------\n";
@@ -219,14 +219,14 @@ void test_progmem_view()
 }
 
 
-constexpr avr::Progmem_string<28> menu PROGMEM{"\nProgmem test\n"
+constexpr avr_::Progmem_string<28> menu PROGMEM{"\nProgmem test\n"
 	                                       "------------\n"};
 
 int main()
 {
 // init_UART();
-    avr::UART_iostream uart;
-    avr::basic_cfg(uart);
+    avr_::UART_iostream uart;
+    avr_::basic_cfg(uart);
     uart.on();
 
 //    uart << "\nProgmem test\n"

@@ -1,4 +1,4 @@
-### WARNING: This library is unstable. Maybe version 0.1???
+## WARNING: This library is unstable. Maybe version 0.1???
 
 Translators for avr.
 
@@ -93,17 +93,25 @@ character streams, but `ioxtreams` are bytes streams. I want to send `uint16_t x
 Tested: avr-gcc 9.2.0
     
 ---
-### ADVERTENCIA: Esta biblioteca es inestable. ¿Podría ser la versión 0.1?
+# ADVERTENCIA: Esta biblioteca es inestable. ¿Podría ser la versión 0.1?
 
-Traductores del avr.
+## Problemas al programar los microcontroladores
 
+### Dificultad de leer el código
 Uno de los problemas que te encuentras cuando empiezas a programar el microcontrolador
 es que tienes que conocer perfectamente la arquitectura del hardware. Continuamente tienes
 que estar leyendo la datasheet para recordar que bit tienes que poner a 1 para hacer
 algo. Ese estilo de programar es propenso a errores. 
 
-Para evitarlo creo los traductores:
-en lugar de recordar que para mirar si UART está listo para transmitir tengo que mirar
+Para evitarlo creo los traductores: se limitan a traducir la datasheet a
+código, nada más. No añaden ni funcionalidad y no introducen ineficiencias.
+Es un interfaz de funciones, cuyo nombre viene definido por la datasheet (no
+lo elige el que escribe el traductor) y se limitan a hacer el set o clear de
+un bit en el registro indicado por la datasheet. 
+
+El código escrito usando los traductores es mucho más fácil de leer que el
+código tradicional que se encuentra escrito en C.  En lugar de recordar que 
+para mirar si UART está listo para transmitir tengo que mirar
 si el bit `UDRE0` del registro `UCSR0A` es 1, basta con escribir 
 
      if (UART::is_ready_to_transmit()) { haz_algo(); }
@@ -112,6 +120,56 @@ Es mucho más legible, menos propenso a error y más fácil de portar. Además, 
 son muy sencillos de escribir: basta con leer la datasheet y escribir las funciones correspondientes.
 La propia datasheet te da la mayoría de las veces el nombre de la función que tienes que escribir.
 
+
+### Dependencia del microcontrolador
+Si escribes código para un avr particular puede que no te sirva para otro
+diferente, pero fijo no te va a servir para un PIC o cualquier otro
+microcontrolador de otro fabricante.
+
+Yo no quiero escribir aplicaciones que dependan de los dispositivos concretos
+de hardware que estoy usando. Prefiero escribir mi código para unos
+dispositivos genéricos. Solo la configuración de la aplicación elegirá qué
+dispositivos concretos voy a usar. 
+
+Esto lleva a querer definir todos los dispositivos genéricos. Mientras que el
+traductor traduce la datasheet a código, el conceptuador (<-- mmm, es el
+primer nombre que se me ha ocurrido, es porque escribe concepts de tipo C++)
+traduce el traductor a un dispositivo genérico, un interfaz común para todos
+los dispositivos del mismo tipo. 
+
+Ejemplo: mi aplicación necesita un Timer, el cual es un dispositivo con el que
+puedo realizar ciertas operaciones. El timer concreto puede ser
+atmega::Timer0_generic, o attiny::Timer0_generic, o PIC::Timer0_generic, 
+o ESP::Timer0_generic, pero sea cual sea el elegido todos representan el mismo
+dispositivo lógico (el mismo concept de C++). La ventaja de esto es que mi
+programa funcionará independientemente del Timer real elegido. La desventaja
+es que al usar un interfaz genérico puede que no pueda incluir algunas
+características particulares del Timer real que estoy usando. Pero si
+necesitara usar esas características en lugar de usar atmega::Timer0_generic
+usaría atmega::Timer0_basic (el traductor que suministra todas las funciones
+del dispositivo).
+
+### Notación
+
+De momento pruebo con la siguiente notación:
+
+* `atmega_timer0_basic.h`: contiene el traductor del `Timer0` del `atmega`
+
+* `atmega_timer0_generic.h`: contiene el dispositivo genérico correspondiente.
+
+Al dispositivo generic lo llamaré `atmega::Timer0_generic`. El nombre del
+traductor no lo tengo claro: ¿`atmega::Timer0` o `atmega::Timer0_basic`?
+
+De momento optó más por el segundo estilo, ya que entre `atmega::Pin` y
+`atmega::Pin_basic` el segundo no me gusta nada. Además que es bastante claro
+que si escribes `atmega::Timer0` es porque vas a usar el `Timer0` y no un
+dispositivo genérico.
+
+
+
+
+
+## Algunos ejemplos
 ### `UART` como flujo
 Además de los traductores suministro también algunas clases de más alto nivel. Por ejemplo, 
 un flujo normal y corriente para acceder a UART. 

@@ -21,7 +21,7 @@
 #ifndef __STROBOSCOPE_STROBOSCOPE_H__
 #define __STROBOSCOPE_STROBOSCOPE_H__
 
-#include <avr_timer1_basic.h>
+#include <avr_atmega.h>
 
 template <uint32_t freq_mcu>
 struct __Stroboscope_cfg;
@@ -48,7 +48,7 @@ struct __Stroboscope_cfg<8000000u>
 class Stroboscope{
 public:
 
-    using Timer = avr::Timer1;
+    using Timer = atmega::Timer1;
 
     Stroboscope();
 

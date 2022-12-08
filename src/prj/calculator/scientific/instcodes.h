@@ -132,7 +132,7 @@ constexpr const char abb9[] PROGMEM = "log(";
 constexpr const char abb10[] PROGMEM = "^";
 
 using Abb2str_array = 
-avr::Progmem_string_array<Sci_code::last_abb - Sci_code::first_abb + 1>;
+atmega::Progmem_string_array<Sci_code::last_abb - Sci_code::first_abb + 1>;
 
 constexpr Abb2str_array abb2str PROGMEM = {
     abb1, abb2, abb3, abb4, abb5,
@@ -143,7 +143,7 @@ constexpr Abb2str_array abb2str PROGMEM = {
 // Es el casi-equivalente a `const char*` (¿`const char* const`?) pero
 // almacenando la memoria en PROGMEM
 struct Abb2str{
-    avr::Element_progmem_string_array<__progmem::Abb2str_array::size()> 
+    atmega::Element_progmem_string_array<__progmem::Abb2str_array::size()> 
 	    operator[](size_t i) const { return __progmem::abb2str[i];}
 
     // Devuelve la longitud máxima de las cadenas almacenadas

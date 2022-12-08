@@ -58,7 +58,10 @@
  *
  ****************************************************************************/
 #include <stdint.h>
+
 #include <avr_atmega.h>	// Progmem <-- NOT GENERIC. TODO: remove
+#include "not_generic.h"
+
 #include <atd_names.h>	// Width
 #include "dev_LCD_big_digits.h"	// Font_digit_default
 

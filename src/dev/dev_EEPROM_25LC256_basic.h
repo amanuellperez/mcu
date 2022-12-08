@@ -35,6 +35,8 @@
  ****************************************************************************/
 #include <avr_pin.h>
 #include <avr_SPI_basic.h>
+#include "not_generic.h"
+
 #include <cstddef>    // byte
 #include <atd_bit.h>
 

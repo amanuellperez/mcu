@@ -35,6 +35,8 @@
  *
  ****************************************************************************/
 #include <avr_pin.h>
+#include "not_generic.h"
+
 #include <atd_static.h>
 
 #undef getchar // get rid of macros

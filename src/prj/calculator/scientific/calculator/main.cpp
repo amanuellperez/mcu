@@ -22,7 +22,7 @@
 // evitar cortocircuitos, y en las columnas al conectar los pines los
 // configuramos con pullup resistor.
 // Sacamos la salida por un LCD
-#include <avr_memory.h>
+#include <avr_atmega.h>
 
 #include "main.h"
 #include "../../interface.h"
@@ -137,7 +137,7 @@ void Main::msg_error()
 
 void Main::run()
 {
-ctrace << "run: free ram=  [" << avr::bytes_of_free_ram() << "] bytes\n";
+ctrace << "run: free ram=  [" << atmega::bytes_of_free_ram() << "] bytes\n";
 
     clear_error();
 

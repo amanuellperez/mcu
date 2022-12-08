@@ -29,8 +29,7 @@
 
 #include <atd_time.h>
 
-#include <avr_UART.h>
-#include <avr_time.h>
+#include <avr_atmega.h>
 #include <atd_cast.h>
 #include <atd_cstddef.h>
 #include <std_iomanip.h>
@@ -68,7 +67,7 @@ void check_buffer()
 	return;
     comprobado = true;
 
-    avr::UART_iostream uart;
+    atmega::UART_iostream uart;
     for (uint16_t i = 0; i < sz; ++i){
 	if (buf[i] != std::byte{0x55})
 	    uart << ">>> " << ERROR << "stack overflow!!! buffer corrupto\n";
@@ -81,7 +80,7 @@ void check_buffer()
 // Inicializa a 0 los bytes [address, address + n)
 void reset_eeprom(EEPROM_lineal& eeprom, uint16_t address, uint16_t n)
 {
-    avr::UART_iostream uart;
+    atmega::UART_iostream uart;
 
     std::byte buffer[sz];
     n = std::min<uint16_t>(n, sz);
@@ -99,7 +98,7 @@ bool check(EEPROM_lineal& eeprom,
            char* res, uint8_t n,
            const char* msg)
 {
-    avr::UART_iostream uart;
+    atmega::UART_iostream uart;
     uart << msg << " ... ";
 
     std::byte buf[sz];
@@ -125,7 +124,7 @@ bool check(EEPROM_lineal& eeprom,
 
 bool test_only_tm()
 {
-    avr::UART_iostream uart;
+    atmega::UART_iostream uart;
 
     constexpr uint8_t APP_ID = 0x1F;
     tm t0;
@@ -191,7 +190,7 @@ bool test_only_tm()
 bool test(uint16_t addr0)
 {
     EEPROM_ostream out;
-    avr::UART_iostream uart;
+    atmega::UART_iostream uart;
 
     reset_eeprom(out.eeprom(), addr0, 10);
     uart << "Pruebas básicas de escritura. Dirección: " << addr0 << "\n";
@@ -236,7 +235,7 @@ bool test(uint16_t addr0)
 bool test_ostream_automatico()
 {
     EEPROM_ostream out;
-    avr::UART_iostream uart;
+    atmega::UART_iostream uart;
 
     uart << "\n\nEEPROM ostream (automático)\n"
 	 << "---------------------------\n";
@@ -380,7 +379,7 @@ bool test_ostream_automatico()
 
 bool test_istream_automatico()
 {
-    avr::UART_iostream uart;
+    atmega::UART_iostream uart;
     uart << "EEPROM istream (automático)\n";
     const char msg[] =
 	"En un lugar de la mancha,\nde cuyo nombre no quiero "
@@ -447,8 +446,8 @@ bool test_istream_automatico()
 
 void test_eeprom_automatico()
 {
-    avr::UART_iostream uart;
-    avr::SPI_master::on<periodo_en_us>();
+    atmega::UART_iostream uart;
+    atmega::SPI_master::on<periodo_en_us>();
 
     if (test_ostream_automatico())
 	test_istream_automatico();
@@ -456,8 +455,8 @@ void test_eeprom_automatico()
 
 int main()
 {
-    avr::UART_iostream uart;
-    avr::basic_cfg(uart);
+    atmega::UART_iostream uart;
+    atmega::basic_cfg(uart);
     uart.on();
 
     while(1){

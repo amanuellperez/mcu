@@ -18,12 +18,13 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "../../../dev_DS1307_basic.h"
-#include <avr_time.h>
-#include <avr_UART.h>
-#include <atd_ostream.h>
+
 #include <cstddef>
 #include <numeric>
 #include <atd_cstddef.h>
+#include <atd_ostream.h>
+
+#include <avr_atmega.h>
 
 // pines que usamos
 // ----------------
@@ -33,14 +34,14 @@
 // ---------------------------
 // Dispositivo TWI al que conectamos
 static constexpr uint8_t TWI_buffer_size = 70; 
-using TWI = avr::TWI_master<avr::TWI_basic, TWI_buffer_size>;
+using TWI = atmega::TWI_master<atmega::TWI_basic, TWI_buffer_size>;
 
 using RTC = dev::DS1307_basic<TWI>;
 
 
 void twi_print_state()
 {
-    avr::UART_iostream uart;
+    atmega::UART_iostream uart;
 
     if (TWI::error())
 	uart << "state == error()\n";
@@ -73,7 +74,7 @@ void twi_print_state()
 
 void twi_print_error()
 {
-    avr::UART_iostream uart;
+    atmega::UART_iostream uart;
 
     if (TWI::no_response())
 	uart << "Slave no responde.\n";
@@ -103,7 +104,7 @@ void twi_print_error()
 // del DS1307.h!!! ¿por qué? Debería de coger la función más especializada.
 // Con todo con concepts este problema debería de desaparecer ya que la
 // template quedaría sobrecargada solo para IOxtreams.
-avr::UART_iostream& operator<<(avr::UART_iostream& out,
+atmega::UART_iostream& operator<<(atmega::UART_iostream& out,
                                const dev::__DS1307_timekeeper& t)
 {
     if (t.clock_on){
@@ -133,7 +134,7 @@ avr::UART_iostream& operator<<(avr::UART_iostream& out,
 
 void test_clock()
 {
-    avr::UART_iostream uart;
+    atmega::UART_iostream uart;
 
     uart << "\nProbando clock\n"
 	 <<   "==============\n";
@@ -187,7 +188,7 @@ void test_clock()
 
 void test_bateria()
 {
-    avr::UART_iostream uart;
+    atmega::UART_iostream uart;
 
     uart << "\nProbando la batería auxiliar\n"
 	 << "Prueba a desconectar el reloj de la batería principal y "
@@ -236,7 +237,7 @@ void test_bateria()
 
 void test_ram()
 {
-    avr::UART_iostream uart;
+    atmega::UART_iostream uart;
 
     uart << "----------------------------------------\n"
 	 << "Probando la RAM\n"
@@ -300,7 +301,7 @@ void test_ram()
 
 void test_output()
 {
-    avr::UART_iostream uart;
+    atmega::UART_iostream uart;
 
     uart <<  "Probando output\n"
 	 << "Conectar el osciloscopio al pin 7 y recordar haber puesto\n"
@@ -355,8 +356,8 @@ void test_output()
 int main()
 {
 // init_UART();
-    avr::UART_iostream uart;
-    avr::basic_cfg(uart);
+    atmega::UART_iostream uart;
+    atmega::basic_cfg(uart);
     uart.on();
 
 // init_TWI();

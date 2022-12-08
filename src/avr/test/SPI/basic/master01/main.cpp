@@ -22,18 +22,18 @@
 #include "../../../../avr_UART_iostream.h"
 
 
-using SPI = avr::SPI_master;
+using SPI = avr_::SPI_master;
 
 // OJO: clave periodo a 8 us. Si pongo a 2 us al slave no le da tiempo a leer
 // y se lee basura y pierden datos.
 constexpr uint16_t periodo_en_us = 8;	
-constexpr uint16_t npin_SS = avr::SPI_num_pin_SS;	
+constexpr uint16_t npin_SS = avr_::SPI_num_pin_SS;	
 
 void SPI_write(uint8_t x)
 {
-    avr::UART_iostream uart;
+    avr_::UART_iostream uart;
 
-    avr::Output_pin<npin_SS> no_SS;
+    avr_::Output_pin<npin_SS> no_SS;
     no_SS.write_zero();
     SPI::write(std::byte{x});
     uart << static_cast<uint16_t>(x) << '\n';
@@ -44,8 +44,8 @@ void SPI_write(uint8_t x)
 int main() 
 {
 // init_uart()
-    avr::UART_iostream uart;
-    avr::basic_cfg(uart);
+    avr_::UART_iostream uart;
+    avr_::basic_cfg(uart);
     uart.on();
 
 

@@ -18,11 +18,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "../../dev_EEPROM_25LC256_basic.h"
-#include <avr_UART.h>
-#include <avr_time.h>
 #include <atd_cast.h>
 
-#include <std_algorithm.h>
+#include <algorithm>
+
+#include <avr_atmega.h>
 
 using namespace dev;
 
@@ -34,7 +34,7 @@ using EEPROM  = EEPROM_25LC256<num_pin_chip_select>;
 
 void print_table(EEPROM& eeprom)
 {
-    avr::UART_iostream uart;
+    atmega::UART_iostream uart;
 
     uart << "Address value\r\n";
     std::byte r[10];
@@ -48,7 +48,7 @@ void print_table(EEPROM& eeprom)
 
 void print_eeprom(EEPROM& eeprom)
 {
-    avr::UART_iostream uart;
+    atmega::UART_iostream uart;
     
     constexpr uint16_t sz = EEPROM::page_size() * 2;
 
@@ -69,7 +69,7 @@ void print_eeprom(EEPROM& eeprom)
     uart << "\r\n";
 }
 
-uint8_t read_uint8_t(const char* msg, avr::UART_iostream& uart)
+uint8_t read_uint8_t(const char* msg, atmega::UART_iostream& uart)
 {
     uart << msg;
 
@@ -85,7 +85,7 @@ uint8_t read_uint8_t(const char* msg, avr::UART_iostream& uart)
 
 void test_write(EEPROM& eeprom)
 {
-    avr::UART_iostream uart;
+    atmega::UART_iostream uart;
 
     uart << "¿A partir de qué dirección quieres escribir?\r\n";
     uint16_t address;
@@ -111,11 +111,11 @@ void test_write(EEPROM& eeprom)
 
 
 void test_uint8_t() {
-    avr::UART_iostream uart;
-    avr::basic_cfg(uart);
+    atmega::UART_iostream uart;
+    atmega::basic_cfg(uart);
     uart.on();
 
-    avr::SPI_master::on<periodo_en_us>();
+    atmega::SPI_master::on<periodo_en_us>();
 
     EEPROM eeprom;
     eeprom.cfg_SPI();

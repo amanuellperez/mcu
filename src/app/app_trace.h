@@ -33,12 +33,12 @@
  *
  ****************************************************************************/
 #ifdef TRACES_ON
-#include <avr_UART.h>
+#include <avr_atmega.h>
 
 inline void init_traces()
 {
-    avr::UART_iostream uart;
-    avr::basic_cfg(uart);
+    atmega::UART_iostream uart;
+    atmega::basic_cfg(uart);
     uart.on();
 
     uart << "\nTrazas on\n"
@@ -50,7 +50,7 @@ struct Trace{
     template <typename T>
     Trace& operator<<(const T& a) 
     { 
-	avr::UART_iostream uart;
+	atmega::UART_iostream uart;
 	uart << a;
 	return *this; 
     }

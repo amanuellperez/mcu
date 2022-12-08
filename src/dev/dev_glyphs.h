@@ -36,6 +36,7 @@
  *
  ****************************************************************************/
 #include <avr_memory.h>
+#include "not_generic.h"
 
 namespace dev{
 

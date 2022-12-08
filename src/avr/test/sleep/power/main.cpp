@@ -33,30 +33,30 @@ constexpr uint8_t led_pin = 14;
 #define ISR_PCINT1  ISR_PCINT_PIN4
 
 ISR_PCINT1 {
-    if (avr::Pin<push_button_pin1>::is_zero())
-	avr::Power::turn_off_next_time();
+    if (avr_::Pin<push_button_pin1>::is_zero())
+	avr_::Power::turn_off_next_time();
     else
-	avr::Power::turn_on_next_time();
+	avr_::Power::turn_on_next_time();
 }
 
 
 
 int main()
 {
-    avr::Pin<led_pin>::as_output();
-    avr::Pin<push_button_pin1>::as_input_with_pullup();
-    avr::Interrupt::enable_pin<push_button_pin1>();
+    avr_::Pin<led_pin>::as_output();
+    avr_::Pin<push_button_pin1>::as_input_with_pullup();
+    avr_::Interrupt::enable_pin<push_button_pin1>();
 
-    avr::Power::init();
+    avr_::Power::init();
 
     while(1){
-	avr::Pin<led_pin>::write_one();
+	avr_::Pin<led_pin>::write_one();
 	wait_ms(500);
 
-	avr::Pin<led_pin>::write_zero();
+	avr_::Pin<led_pin>::write_zero();
 	wait_ms(500);
 
-	avr::Power::turn_off_if();
+	avr_::Power::turn_off_if();
     }
 }
 

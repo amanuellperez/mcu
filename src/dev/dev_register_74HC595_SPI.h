@@ -38,6 +38,7 @@
 #include <avr_pin.h>
 #include <avr_time.h>
 #include <avr_SPI_basic.h>
+#include "not_generic.h"
 
 namespace dev{
 

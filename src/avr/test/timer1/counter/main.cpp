@@ -28,7 +28,7 @@
 #include <stdlib.h>
 #include <std_type_traits.h>
 
-using Timer = avr::Timer1;
+using Timer = avr_::Timer1;
 
 constexpr uint16_t period_in_us = 1024;
 //constexpr uint16_t period_in_us = 256;
@@ -88,7 +88,7 @@ std::ostream& operator<<(std::ostream& out, const time_in_days& t)
 
 void print(uint64_t time_en_us)
 {
-    avr::UART_iostream uart;
+    avr_::UART_iostream uart;
     uart << us_to_time_in_days(time_en_us) << "\n\r";
 }
 
@@ -96,8 +96,8 @@ void print(uint64_t time_en_us)
 int main()
 {
 // init_uart();
-    avr::UART_iostream uart;
-    avr::basic_cfg(uart);
+    avr_::UART_iostream uart;
+    avr_::basic_cfg(uart);
     uart.on();
 
 // init_timer();
@@ -111,7 +111,7 @@ int main()
 	Timer::counter_type v;
 	uint32_t c;
 	{// lo más atómico posible
-	    avr::Interrupts_lock l;
+	    avr_::Interrupts_lock l;
 	    v = Timer::unsafe_counter();
 	    c = contador;
 	}

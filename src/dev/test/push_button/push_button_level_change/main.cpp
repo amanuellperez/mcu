@@ -18,8 +18,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "../../../dev_push_button.h"
-#include <avr_time.h>
-#include <avr_UART_iostream.h>
+#include <avr_atmega.h>
 
 
 
@@ -28,8 +27,8 @@
 int main()
 {
 // init_uart()
-    avr::UART_iostream uart;
-    avr::basic_cfg(uart);
+    atmega::UART_iostream uart;
+    atmega::basic_cfg(uart);
     uart.on();
 
     dev::Push_button_level_change<23> push_button;

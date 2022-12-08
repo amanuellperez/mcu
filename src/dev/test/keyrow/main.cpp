@@ -19,10 +19,9 @@
 
 // Conectar 3 pulsadores a los pines indicados. La salida la mostramos por
 // UART.
-#include <avr_UART.h>
 #include "../../dev_keyrow.h"
 
-#include <avr_time.h>
+#include <avr_atmega.h>
 
 // pines a los que conectamos el teclado
 using Keyrow_2pins = dev::Keyrow_pins<24, 25>;
@@ -40,7 +39,7 @@ using Keyrow = dev::Basic_keyrow<Keyrow_pins, Keyrow_codes>;
 
 void test_keyrow()
 {
-    avr::UART_iostream uart;
+    atmega::UART_iostream uart;
     uart << "\n\nPress test\n";
 
     Keyrow keyrow;
@@ -64,7 +63,7 @@ void test_keyrow()
 
 void test_scan()
 {
-    avr::UART_iostream uart;
+    atmega::UART_iostream uart;
 
     uart << "\n\nRead test\n";
 
@@ -87,8 +86,8 @@ void test_scan()
 int main()
 {
 // init_uart():
-    avr::UART_iostream uart;
-    avr::basic_cfg(uart);
+    atmega::UART_iostream uart;
+    atmega::basic_cfg(uart);
     uart.on();
 
     uart << "\n\nKeyrow test\n"

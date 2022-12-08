@@ -33,7 +33,7 @@
  *    19/12/2021 v0.0
  *
  ****************************************************************************/
-#include <avr_SPI_basic.h>
+#include <avr_atmega.h>
 
 template <typename SPI_select0, uint16_t period_in_us0>
 class SPI_Keyboard{
@@ -44,7 +44,7 @@ public:
     uint8_t getchar();
 
 private:
-    using SPI = avr::SPI_master;
+    using SPI = atmega::SPI_master;
     static constexpr uint16_t SPI_period_in_us = period_in_us0;
 };
 

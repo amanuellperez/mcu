@@ -294,28 +294,6 @@ namespace cfg{ // ir incluyendo el resto según vaya reescribiendo codigo
 }// namespace
 
 
-/***************************************************************************
- *		    BUILT-IN DEVICES FOR ATMEGA
- ***************************************************************************/
-namespace avr{ // TODO: change to atmega
-//namespace atmega{
-//    using Timer0 = avr::Timer0;
-//    using Timer1 = avr::Timer1;
-//}// namespace
-using namespace avr_;
-
-}// namespace
- 
-// TODO: Como esto lo he ido desarrollando poco a poco, a medida que he ido
-// aprendiendo la mayoria de los dispositivos acceden directamente a las
-// funciones del atmega (que al principio defini como avr). Para identificar
-// bien aquellas partes que no son genéricas voy a marcarlas como
-// `not_generic` para saber que las tengo que ir reescribiendo.
-// Cuando en los devices haya eliminado por completo este namespace,
-// eliminarlo.
-namespace not_generic{
-using namespace avr;
-}
 
 
 #endif

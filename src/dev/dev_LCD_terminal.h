@@ -45,7 +45,9 @@
  *
  ****************************************************************************/
 #include <stdint.h>
+
 #include <avr_atmega.h>	// Progmem TODO: remove. Not generic
+#include "not_generic.h"
 
 namespace dev{
 

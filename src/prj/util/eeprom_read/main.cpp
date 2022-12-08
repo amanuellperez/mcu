@@ -29,8 +29,9 @@
 #include <dev_EEPROM_iostream.h>
 #include <dev_EEPROM_lineal.h>
 #include <dev_EEPROM_25LC256_basic.h>
-#include <avr_UART.h>
-#include <avr_time.h>
+
+#include <avr_atmega.h>
+
 #include <atd_cstddef.h>
 #include <atd_istream.h>
 #include <atd_ostream.h>
@@ -54,20 +55,20 @@ constexpr uint8_t sz = 255;
 
 void init_UART()
 {
-    avr::UART_iostream uart;
-    avr::basic_cfg(uart);
+    atmega::UART_iostream uart;
+    atmega::basic_cfg(uart);
     uart.on();
 }
 
 void init_SPI()
 {
-    avr::SPI_master::on<periodo_en_us>();
+    atmega::SPI_master::on<periodo_en_us>();
 }
 
 
 void presentacion(const char title[])
 {
-    avr::UART_iostream uart;
+    atmega::UART_iostream uart;
 
     uart << '\n' << title << '\n';
     uart <<     "-----------\n";
@@ -79,7 +80,7 @@ void presentacion(const char title[])
 
 std::pair<uint16_t, uint8_t> user_read_peticion()
 {
-    avr::UART_iostream uart;
+    atmega::UART_iostream uart;
 
     uint16_t addr = 0;
     uart << "\n¿Dirección a partir de la que leer? (0 por defecto)\n";
@@ -109,7 +110,7 @@ void run()
     auto [addr, n] = user_read_peticion();
 
     EEPROM_lineal eeprom;
-    avr::UART_iostream uart;
+    atmega::UART_iostream uart;
     dev::EEPROM_debug::send(eeprom, uart, addr, n);
 }
 

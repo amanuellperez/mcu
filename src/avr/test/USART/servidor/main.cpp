@@ -26,7 +26,7 @@
 #include "../../../avr_UART_iostream.h"
 #include <atd_ascii.h>
 
-using namespace avr;
+using namespace avr_;
 using atd::ASCII;
 
 
@@ -52,7 +52,7 @@ bool get_ack(UART_iostream& uart)
 int main() 
 {
     UART_iostream uart;
-    avr::basic_cfg(uart);
+    avr_::basic_cfg(uart);
     uart.on();
 
 

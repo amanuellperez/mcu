@@ -32,7 +32,7 @@
  *
  ****************************************************************************/
 #include <stdint.h>
-#include <avr_timer1_generic.h>
+#include <avr_atmega.h>
 
 #include <dev_LCD_HD44780.h>
 #include <dev_keyrow.h>
@@ -93,7 +93,7 @@ using Keyboard     = dev::Basic_keyrow<Keyrow_pins, Keyrow_codes>;
 // system_clock
 // ------------
 constexpr static uint16_t clock_timer_period_in_us = 64u;
-using Timer = avr::Timer1_generic;
+using Timer = atmega::Timer1_generic;
 using System_clock = dev::System_clock<Timer, clock_timer_period_in_us>;
 
 

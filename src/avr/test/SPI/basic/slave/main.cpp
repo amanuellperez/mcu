@@ -22,17 +22,17 @@
 #include "../../../../avr_UART_iostream.h"
 
 
-using SPI = avr::SPI_slave;
+using SPI = avr_::SPI_slave;
 
 constexpr uint16_t periodo_en_us = 2;	
-constexpr uint16_t npin_SS = avr::SPI_num_pin_SS;	
+constexpr uint16_t npin_SS = avr_::SPI_num_pin_SS;	
 
 
 int main() 
 {
 // init_uart()
-    avr::UART_iostream uart;
-    avr::basic_cfg(uart);
+    avr_::UART_iostream uart;
+    avr_::basic_cfg(uart);
     uart.on();
 
 
@@ -54,7 +54,7 @@ int main()
 //	if (data != std::byte{0}){
 //	    std::byte ndata{0};
 //	    {
-//                avr::Interrupts_lock lock;
+//                avr_::Interrupts_lock lock;
 //                ndata = data;
 //                data  = std::byte{0};
 //	    }

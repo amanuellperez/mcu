@@ -19,7 +19,7 @@
 
 // Probamos buffer
 // Sacamos la salida por UART
-#include <avr_UART.h>
+#include <avr_atmega.h>
 #include "../buffer.h"
 
 using Buffer = Linear_array<20>;
@@ -33,8 +33,8 @@ inline std::ostream& operator<<(std::ostream& out, const Buffer& buf)
 int main()
 {
 // init_UART();
-    avr::UART_iostream uart;
-    avr::basic_cfg(uart);
+    atmega::UART_iostream uart;
+    atmega::basic_cfg(uart);
     uart.on();
     
     uart << "\n-----\n";

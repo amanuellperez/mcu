@@ -40,7 +40,8 @@ INCS= 	dev_BMP280_basic.h			\
 		dev_push_button.h			\
 		dev_register_74HC595_SPI.h	\
 		dev_TMP36.h					\
-		dev_TWI_memory_type.h	
+		dev_TWI_memory_type.h		\
+		not_generic.h
 
 #		dev_DHT22.h\
 

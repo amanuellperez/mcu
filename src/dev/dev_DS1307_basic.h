@@ -36,7 +36,10 @@
 #include <stdint.h> // uint8_t...
 #include <atd_memory.h>	// Memory_type
 #include <atd_bcd.h>
+
 #include <avr_TWI.h>
+#include "not_generic.h"
+
 #include <atd_bit.h>
 #include "dev_TWI_memory_type.h"
 

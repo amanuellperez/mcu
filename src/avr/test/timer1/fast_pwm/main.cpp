@@ -22,14 +22,14 @@
 #include "../../../avr_UART_iostream.h"
 
 
-using Timer = avr::Timer1;
-using namespace avr::literals;
+using Timer = avr_::Timer1;
+using namespace avr_::literals;
 
 
 void timer_on_1MHz(uint16_t period_in_us)
 {
-    if constexpr (avr::clock_frequency == 1_MHz){
-	avr::UART_iostream uart;
+    if constexpr (avr_::clock_frequency == 1_MHz){
+	avr_::UART_iostream uart;
 
 	switch(period_in_us){
 	    case 1: Timer::on<1>(); break;
@@ -47,9 +47,9 @@ void timer_on_1MHz(uint16_t period_in_us)
 
 void timer_on_8MHz(uint16_t period_in_us)
 {
-    if constexpr (avr::clock_frequency == 8_MHz){// si no se pone aunque no se llame a 
+    if constexpr (avr_::clock_frequency == 8_MHz){// si no se pone aunque no se llame a 
 	    // timer_on_8MHz (por ser a 1MHz) la compila, generando error!!!
-	avr::UART_iostream uart;
+	avr_::UART_iostream uart;
 
 	switch(period_in_us){
 	    case 1: Timer::on<1>(); break;
@@ -68,17 +68,17 @@ void timer_on_8MHz(uint16_t period_in_us)
 
 void timer_on(uint16_t period_in_us)
 {
-    if constexpr (avr::clock_frequency == 1_MHz)
+    if constexpr (avr_::clock_frequency == 1_MHz)
 	timer_on_1MHz(period_in_us);
 
-    else if constexpr (avr::clock_frequency == 8_MHz)
+    else if constexpr (avr_::clock_frequency == 8_MHz)
 	timer_on_8MHz(period_in_us);
 
 }
 
 uint16_t select_period_1MHz()
 {
-    avr::UART_iostream uart;
+    avr_::UART_iostream uart;
 
     uart << "\n\nperiod_in_us (avr a 1MHz):\n"
 	    "1\n"
@@ -103,7 +103,7 @@ uint16_t select_period_1MHz()
 
 uint16_t select_period_8MHz()
 {
-    avr::UART_iostream uart;
+    avr_::UART_iostream uart;
 
     uart << "\n\nperiod_in_us (avr a 8MHz):\n"
 	    "1\n"
@@ -129,14 +129,14 @@ uint16_t select_period_8MHz()
 
 uint16_t select_period()
 {
-    if constexpr (avr::clock_frequency == 1_MHz)
+    if constexpr (avr_::clock_frequency == 1_MHz)
 	return select_period_1MHz();
 
-    else if constexpr (avr::clock_frequency == 8_MHz)
+    else if constexpr (avr_::clock_frequency == 8_MHz)
 	return select_period_8MHz();
 
     else{
-	avr::UART_iostream uart;
+	avr_::UART_iostream uart;
 	uart << "ERROR: select_period(), frecuencia desconocida\n";
 	return 1;
     }
@@ -145,7 +145,7 @@ uint16_t select_period()
 
 void oca_menu()
 {
-    avr::UART_iostream uart;
+    avr_::UART_iostream uart;
 
     uart << "\nOCA menu:\n"
 	    "[c]hange value of ocr1a\n"
@@ -188,7 +188,7 @@ void oca_menu()
 
 void ocb_menu()
 {
-    avr::UART_iostream uart;
+    avr_::UART_iostream uart;
 
     uart << "\nOCB menu:\n"
 	    "[c]hange value of ocr1b\n"
@@ -232,7 +232,7 @@ enum class Mode{
 
 Mode mode_menu()
 {
-    avr::UART_iostream uart;
+    avr_::UART_iostream uart;
     uart << "Select mode:\n"
 	    "[1] top 0x00FF\n"
 	    "[2] top 0x01FF\n"
@@ -270,11 +270,11 @@ Mode mode_menu()
 
 void print(Mode mode)
 {
-    avr::UART_iostream uart;
+    avr_::UART_iostream uart;
 
-    avr::Time period;
-    avr::Time T_a;
-    avr::Time T_b;
+    avr_::Time period;
+    avr_::Time T_a;
+    avr_::Time T_b;
 
     switch(mode){
 	case Mode::top_0x00FF:
@@ -323,8 +323,8 @@ void print(Mode mode)
 int main()
 {
 // init_uart()
-    avr::UART_iostream uart;
-    avr::basic_cfg(uart);
+    avr_::UART_iostream uart;
+    avr_::basic_cfg(uart);
     uart.on();
 
 // init_timer()

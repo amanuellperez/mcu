@@ -18,13 +18,13 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 // ¿Qué tamaños tienen los distintos tipos básicos en avr-gcc?
-#include <avr_UART_iostream.h>
+#include <avr_atmega.h>
 #include <bit>
 
 void show_sizes_types()
 {
-    avr::UART_iostream uart;
-    avr::basic_cfg(uart);
+    atmega::UART_iostream uart;
+    atmega::basic_cfg(uart);
     uart.on();
 
     while(1){

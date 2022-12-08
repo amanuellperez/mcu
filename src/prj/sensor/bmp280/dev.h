@@ -22,8 +22,8 @@
 #ifndef __SENSOR_DEV_H__
 #define __SENSOR_DEV_H__
 
+#include <avr_atmega.h>
 #include <dev_LCD_HD44780.h>
-#include <avr_TWI.h>
 #include <dev_BMP280_basic.h>
 
 // pins usados
@@ -49,7 +49,7 @@ constexpr uint8_t LCD_D7_pin = 14;
 
 // using TWI: pins 27 and 28
 static constexpr uint8_t TWI_buffer_size = 100; 
-using TWI = avr::TWI_master<avr::TWI_basic, TWI_buffer_size>;
+using TWI = atmega::TWI_master<atmega::TWI_basic, TWI_buffer_size>;
 static constexpr int TWI_frecuency = 50; // kHz
 static constexpr TWI::Address twi_sensor_address = 0x77;
 

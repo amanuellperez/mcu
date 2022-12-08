@@ -18,28 +18,28 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "../../dev_BMP280_basic.h"
-#include <avr_time.h>
-#include <avr_UART.h>	
-#include <atd_ostream.h>
+
 #include <cstddef>
+#include <atd_ostream.h>
 #include <atd_cstddef.h>
+
+#include <avr_atmega.h>	
 
 // pines que usamos
 // ----------------
-
 
 // dispositivos que conectamos
 // ---------------------------
 // Dispositivo TWI al que conectamos
 static constexpr uint8_t TWI_buffer_size = 100; 
-using TWI_master = avr::TWI_master<avr::TWI_basic, TWI_buffer_size>;
+using TWI_master = atmega::TWI_master<atmega::TWI_basic, TWI_buffer_size>;
 // 50 kHz es la unica frecuencia de TWI que va a 1MHz.
 // 100 kHz a 8 MHz
 static constexpr int TWI_frecuency = 50; // kHz
 
 
 // Dispositivos
-using TWI = avr::TWI_master_ioxtream<TWI_master>;
+using TWI = atmega::TWI_master_ioxtream<TWI_master>;
 
 static constexpr TWI::Address sensor_twi_address = 0x77;
 using Sensor = dev::BMP280_TWI<TWI_master, sensor_twi_address>;
@@ -55,7 +55,7 @@ static constexpr uint8_t slave_address = 0x77;
 
 void twi_print_state(TWI::iostate st)
 {
-    avr::UART_iostream uart;
+    atmega::UART_iostream uart;
     uart << "state = ";
 
     switch(st){
@@ -136,7 +136,7 @@ void bmp280_read_all_mem(std::byte addr, std::byte* mem, uint8_t n)
     twi.close();
 
     if (twi.error()){
-	avr::UART_iostream uart;
+	atmega::UART_iostream uart;
 	uart << "ERROR (bmp280_read_all_mem): ";
 	twi_print_state(TWI::state());
     }
@@ -332,7 +332,7 @@ void print_cfg(std::ostream& out, dev::__BMP280_config& cfg)
 
 void init(Sensor& sensor)
 {
-    avr::UART_iostream uart;
+    atmega::UART_iostream uart;
     uart << "init ... ";
     sensor.init();
     if (sensor.error()){
@@ -419,8 +419,8 @@ void debug(std::ostream& out, Sensor& sensor)
 void test_bmp280()
 {
 // init_UART();
-    avr::UART_iostream uart;
-    avr::basic_cfg(uart);
+    atmega::UART_iostream uart;
+    atmega::basic_cfg(uart);
     uart.on();
 
     uart << "----------------------------------------\n"

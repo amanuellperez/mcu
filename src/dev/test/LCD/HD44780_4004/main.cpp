@@ -20,7 +20,7 @@
 
 #include "../../../dev_LCD_HD44780_basic.h"
 #include "../../../dev_glyphs.h"
-#include <avr_time.h>
+#include <avr_atmega.h>
 #include <cstring>
 
 // Si lo conectamos solo a 4 pins de datos
@@ -250,7 +250,7 @@ void test_lcd4(LCD& lcd)
 
 
 
-void new_glyph(LCD& lcd, const avr::Progmem_array<uint8_t, 8>& glyph)
+void new_glyph(LCD& lcd, const atmega::Progmem_array<uint8_t, 8>& glyph)
 {
     for (uint8_t i  = 0; i < 8; ++i)
 	lcd.write_data_to_CG_or_DDRAM1(glyph[i]);
@@ -259,14 +259,14 @@ void new_glyph(LCD& lcd, const avr::Progmem_array<uint8_t, 8>& glyph)
 
 
 void show_glyphs(LCD& lcd,
-	const avr::Progmem_array<uint8_t, 8>& g1, 
-	const avr::Progmem_array<uint8_t, 8>& g2, 
-	const avr::Progmem_array<uint8_t, 8>& g3, 
-	const avr::Progmem_array<uint8_t, 8>& g4, 
-	const avr::Progmem_array<uint8_t, 8>& g5, 
-	const avr::Progmem_array<uint8_t, 8>& g6, 
-	const avr::Progmem_array<uint8_t, 8>& g7, 
-	const avr::Progmem_array<uint8_t, 8>& g8)
+	const atmega::Progmem_array<uint8_t, 8>& g1, 
+	const atmega::Progmem_array<uint8_t, 8>& g2, 
+	const atmega::Progmem_array<uint8_t, 8>& g3, 
+	const atmega::Progmem_array<uint8_t, 8>& g4, 
+	const atmega::Progmem_array<uint8_t, 8>& g5, 
+	const atmega::Progmem_array<uint8_t, 8>& g6, 
+	const atmega::Progmem_array<uint8_t, 8>& g7, 
+	const atmega::Progmem_array<uint8_t, 8>& g8)
 {
     lcd.set_cgram_address1(0x00);
     new_glyph(lcd, g1);

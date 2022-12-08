@@ -30,8 +30,8 @@
 
 void test_cfg()
 {
-    avr::UART_iostream uart;
-    avr::basic_cfg(uart);
+    avr_::UART_iostream uart;
+    avr_::basic_cfg(uart);
     uart.on();
 
     while(1){
@@ -39,7 +39,7 @@ void test_cfg()
 	uart << "Variables cfg!\n";
 	uart << "---------------\n";
 
-	uart << "clock_frequency = " << avr::clock_frequency << '\n';
+	uart << "clock_frequency = " << avr_::clock_frequency << '\n';
 	char c{};
 	uart >> c;
     }

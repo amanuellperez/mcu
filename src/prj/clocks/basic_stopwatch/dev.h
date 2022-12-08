@@ -23,7 +23,7 @@
 #define __DEV_H__
 
 #include <stdint.h>
-#include <avr_timer1_generic.h>
+#include <avr_atmega.h>
 
 #include <dev_LCD_HD44780.h>
 #include <dev_LCD_font_2x2.h>
@@ -95,7 +95,7 @@ using Keyboard	   = dev::Basic_keyrow<Keyrow_pins, Keyrow_codes>;
 
 // Stopwatch
 // ---------
-using Timer = avr::Timer1_generic;
+using Timer = atmega::Timer1_generic;
 constexpr static uint16_t timer_period_in_us = 64u;
 using Stopwatch = my::Stopwatch<Timer, timer_period_in_us>;
 

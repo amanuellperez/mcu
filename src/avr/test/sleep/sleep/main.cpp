@@ -41,33 +41,33 @@ volatile bool a_dormir = false;
 
 
 ISR_PCINT1 {
-    a_dormir = avr::Pin<push_button_pin1>::is_zero();
+    a_dormir = avr_::Pin<push_button_pin1>::is_zero();
 }
 
 //ISR_PCINT2 {
-//    a_dormir = avr::Pin<push_button_pin2>::is_zero();
+//    a_dormir = avr_::Pin<push_button_pin2>::is_zero();
 //}
 
 
 int main()
 {
-    avr::Pin<led_pin>::as_output();
-    avr::Pin<push_button_pin1>::as_input_with_pullup();
-    avr::Interrupt::enable_pin<push_button_pin1>();
+    avr_::Pin<led_pin>::as_output();
+    avr_::Pin<push_button_pin1>::as_input_with_pullup();
+    avr_::Interrupt::enable_pin<push_button_pin1>();
 
-//    avr::Pin<push_button_pin2>::as_input_with_pullup();
-//    avr::Interrupt::enable_pin<push_button_pin2>();
+//    avr_::Pin<push_button_pin2>::as_input_with_pullup();
+//    avr_::Interrupt::enable_pin<push_button_pin2>();
     
-    avr::Sleep::set_mode_power_down();
+    avr_::Sleep::set_mode_power_down();
 
     while(1){
-	avr::Pin<led_pin>::write_one();
+	avr_::Pin<led_pin>::write_one();
 	wait_ms(500);
 
-	avr::Pin<led_pin>::write_zero();
+	avr_::Pin<led_pin>::write_zero();
 	wait_ms(500);
 
-	avr::sleep_if(a_dormir);
+	avr_::sleep_if(a_dormir);
 
     }
 }

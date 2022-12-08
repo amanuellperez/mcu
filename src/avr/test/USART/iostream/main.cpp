@@ -35,8 +35,8 @@ using traits = std::char_traits<char>;
 
 void test_streambuf()
 { 
-    avr::UART_iostream uart;
-    avr::basic_cfg(uart);
+    avr_::UART_iostream uart;
+    avr_::basic_cfg(uart);
     uart.on();
 
     uart << "\n---------------\n";
@@ -56,7 +56,7 @@ void test_streambuf()
 }
 
 template <typename Int>
-void test_int(avr::UART_iostream& uart, const char* tipo)
+void test_int(avr_::UART_iostream& uart, const char* tipo)
 {
     uart << "\n\nLectura de un " << tipo << "\n";
     uart << "----------------------\n";
@@ -93,11 +93,11 @@ volatile bool time_out = false;
 
 void test_interrupt_receive()
 {
-    avr::UART_iostream uart;
+    avr_::UART_iostream uart;
     time_out = false;
 
-    avr::enable_interrupts();
-    avr::UART_basic::enable_interrupt_unread_data();
+    avr_::enable_interrupts();
+    avr_::UART_basic::enable_interrupt_unread_data();
 
     uart << "Testing interrupt unread_data()\n"
 	    "\tPress a key to throw the interrupt\n";
@@ -108,8 +108,8 @@ void test_interrupt_receive()
 
     uart << "\tOutside interrupt\n";
 
-    avr::disable_interrupts();
-    avr::UART_basic::disable_interrupt_unread_data();
+    avr_::disable_interrupts();
+    avr_::UART_basic::disable_interrupt_unread_data();
 
     char c{};
     uart >> c;
@@ -118,8 +118,8 @@ void test_interrupt_receive()
 
 void test_iostream()
 {
-    avr::UART_iostream uart;
-    avr::basic_cfg(uart);
+    avr_::UART_iostream uart;
+    avr_::basic_cfg(uart);
     uart.on();
 
     uart << "\n----------\n";
@@ -236,7 +236,7 @@ int main()
 
 
 ISR_USART_RX{
-    avr::UART_iostream uart;
+    avr_::UART_iostream uart;
 
 // Es obligatorio o bien vaciar el buffer o desactivar la interrupción para
 // evitar que se relance.
@@ -247,7 +247,7 @@ ISR_USART_RX{
 //
 // Método 2
 // --------
-    avr::UART_basic::disable_interrupt_unread_data();
+    avr_::UART_basic::disable_interrupt_unread_data();
 
     uart << "\n\tInterruption: Inside ISR_USART_RX\n\n";
 

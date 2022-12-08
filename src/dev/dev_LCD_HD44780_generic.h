@@ -47,6 +47,7 @@
  *
  ****************************************************************************/
 #include <avr_memory.h>	// Progmem
+#include "not_generic.h"
 
 #include "dev_LCD_generic.h"
 #include "dev_LCD_HD44780_basic.h" 

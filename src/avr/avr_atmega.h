@@ -39,8 +39,7 @@
  *
  *  - HISTORIA:
  *    A.Manuel L.Perez
- *    03/12/2022 Escrito: es un experimento.
- *    TODO: cambiarlo probandolo con diferentes micros. No cambiarlo antes!!!
+ *    03/12/2022 Escrito
  *
  ****************************************************************************/
 // Configuración del micro
@@ -89,6 +88,8 @@
 #include <avr_TWI_slave.h>
 #include <avr_TWI_master_ioxtream.h>
 
+// Built-in devices for atmega
+#include <avr_atmega_dev.h>
 
 #endif
 

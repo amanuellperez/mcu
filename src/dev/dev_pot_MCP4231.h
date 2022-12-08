@@ -33,6 +33,8 @@
  ****************************************************************************/
 #include <avr_pin.h>
 #include <avr_SPI_basic.h>
+#include "not_generic.h"
+
 #include <atd_bit.h>
 #include <atd_static.h>
 

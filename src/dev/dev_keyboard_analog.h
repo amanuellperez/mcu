@@ -40,6 +40,8 @@
  ****************************************************************************/
 
 #include <avr_ADC_basic.h>
+#include "not_generic.h"
+
 #include <tuple>    // std::tie
 
 

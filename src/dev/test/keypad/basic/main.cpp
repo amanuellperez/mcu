@@ -20,9 +20,10 @@
 // Conectar un teclado de 5 x 5
 // El teclado es una matriz de pulsadores.
 // Sacamos la salida por UART
-#include <avr_UART.h>
 #include "../../../dev_keypad.h"
 #include "../../../dev_keyboard_code.h"
+
+#include <avr_atmega.h>
 
 // Este es el keypad barato que venden en internet de 4 x 3
 //using Rows = dev::Keypad_rows<28, 27, 26, 25>;
@@ -57,7 +58,7 @@ using Keyboard = dev::Keyboard_keypad<Keypad>;
 
 void test_keypad()
 {
-    avr::UART_iostream uart;
+    atmega::UART_iostream uart;
     
     uart << "\n-----\n";
     uart << "Keypad\n";
@@ -78,7 +79,7 @@ void test_keypad()
 
 void test_keyboard()
 {
-    avr::UART_iostream uart;
+    atmega::UART_iostream uart;
     
     uart << "\n-----\n";
     uart << "Keyboard\n";
@@ -110,8 +111,8 @@ void test_keyboard()
 int main()
 {
 // init_UART();
-    avr::UART_iostream uart;
-    avr::basic_cfg(uart);
+    atmega::UART_iostream uart;
+    atmega::basic_cfg(uart);
     uart.on();
  
     uart << "\n------------\n";

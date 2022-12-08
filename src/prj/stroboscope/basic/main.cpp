@@ -17,13 +17,11 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include <avr_timer1_basic.h>
-#include <avr_time.h>
-#include <avr_UART_iostream.h>
+#include <avr_atmega.h>
 
 
-using Timer = avr::Timer1;
-using namespace avr::literals;
+using Timer = atmega::Timer1;
+using namespace atmega::literals;
 
 
 // fg = ft / (1 + top); 
@@ -59,8 +57,8 @@ void select_frequency(const uint16_t freq)
 int main()
 {
 // init_uart()
-    avr::UART_iostream uart;
-    avr::basic_cfg(uart);
+    atmega::UART_iostream uart;
+    atmega::basic_cfg(uart);
     uart.on();
 
 // data

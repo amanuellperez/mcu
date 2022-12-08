@@ -27,13 +27,12 @@
 #include "../../../dev_EEPROM_25LC256_basic.h"
 #include "../../../dev_EEPROM_lineal.h"
 
+#include <iomanip>
 #include <atd_time.h>
-
-#include <avr_UART.h>
-#include <avr_time.h>
 #include <atd_cast.h>
 #include <atd_cstddef.h>
-#include <std_iomanip.h>
+
+#include <avr_atmega.h>
 
 constexpr uint8_t periodo_en_us = 16;
 
@@ -52,7 +51,7 @@ constexpr const char ERROR[] = "ERROR: ";
 
 void print_buffer(uint16_t addr0, std::byte* buf, uint8_t n)
 {
-    avr::UART_iostream uart;
+    atmega::UART_iostream uart;
 
     std::byte* pe = buf + n;
 
@@ -98,7 +97,7 @@ void check_buffer()
 	return;
     comprobado = true;
 
-    avr::UART_iostream uart;
+    atmega::UART_iostream uart;
     for (uint16_t i = 0; i < sz; ++i){
 	if (buf[i] != std::byte{0x55})
 	    uart << ">>> " << ERROR << "stack overflow!!! buffer corrupto\n";
@@ -109,7 +108,7 @@ void check_buffer()
 void read_and_print(EEPROM_lineal& eeprom, uint16_t addr0, uint8_t n = sz)
 {
     check_buffer();
-    avr::UART_iostream uart;
+    atmega::UART_iostream uart;
 
     if (!eeprom.good()) {
 	uart << ERROR << "eeprom en mal estado!\n";
@@ -136,8 +135,8 @@ MENU_INTERACTIVO[] =  "Elige:\n"
 
 void test_eeprom_interactiva()
 {
-    avr::UART_iostream uart;
-    avr::SPI_master::on<periodo_en_us>();
+    atmega::UART_iostream uart;
+    atmega::SPI_master::on<periodo_en_us>();
 
     EEPROM_ostream out;
     out.open(0);
@@ -277,8 +276,8 @@ void test_eeprom_interactiva()
 
 int main()
 {
-    avr::UART_iostream uart;
-    avr::basic_cfg(uart);
+    atmega::UART_iostream uart;
+    atmega::basic_cfg(uart);
     uart.on();
 
     while(1){

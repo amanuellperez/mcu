@@ -23,7 +23,7 @@
 #define __CHRONO_DEV_H__
 
 #include <stdint.h>
-#include <avr_timer1_generic.h>
+#include <avr_atmega.h>
 
 #include <dev_LCD_HD44780.h>
 #include <dev_keyrow.h>
@@ -82,7 +82,7 @@ using Keyboard	   = dev::Basic_keyrow<Keyrow_pins, Keyrow_codes>;
 
 // Chronometer
 // -----------
-using Timer = avr::Timer1_generic;
+using Timer = atmega::Timer1_generic;
 constexpr static uint16_t chronometer_timer_period_in_us = 64u;
 using Chronometer                                        = dev::
     Chronometer_ms<Timer, chronometer_timer_period_in_us, false>;

@@ -28,9 +28,9 @@
 #include <std_type_traits.h>
 
 //#define ISR_TIMER_INTERRUPT ISR_TIMER0_COMPA
-//using Timer = avr::Timer0_generic;
+//using Timer = avr_::Timer0_generic;
 #define ISR_TIMER_INTERRUPT ISR_TIMER1_COMPA
-using Timer = avr::Timer1_generic;
+using Timer = avr_::Timer1_generic;
 using time_t = uint32_t;
 
 constexpr uint16_t period_in_us = 1024;
@@ -41,8 +41,8 @@ constexpr Timer::counter_type top_counter = 99;
 volatile time_t contador = 0;
 
 // TODO: quedaría mejor algo del tipo
-// ISR_TIMER_INTERRUPT(avr::Timer0) or
-// ISR_TIMER_INTERRUPT(avr::Timer1) 
+// ISR_TIMER_INTERRUPT(avr_::Timer0) or
+// ISR_TIMER_INTERRUPT(avr_::Timer1) 
 // Pasándole como parámetro el Timer que usamos se elige la interrupción.
 // Pero ¿cómo hacerlo sin usar macros?
 //ISR_TIMER0_COMPA
@@ -99,20 +99,20 @@ std::ostream& operator<<(std::ostream& out, const time_in_days& t)
 
 void print(uint64_t time_en_us)
 {
-    avr::UART_iostream uart;
+    avr_::UART_iostream uart;
     uart << us_to_time_in_days(time_en_us) << "\n\r";
 }
 
 
 int main()
 {
-    avr::UART_iostream uart;
-    avr::basic_cfg(uart);
+    avr_::UART_iostream uart;
+    avr_::basic_cfg(uart);
     uart.on();
     test::init(uart);
 
 
-    avr::enable_interrupts();
+    avr_::enable_interrupts();
 
     Timer::mode_timer_counter(top_counter);
     Timer::on<period_in_us>();
@@ -128,7 +128,7 @@ int main()
 	time_t c;
 	Timer::counter_type v;
 	{
-	    avr::Interrupts_lock l;
+	    avr_::Interrupts_lock l;
 	    v = Timer::timer_counter();
 	    c = contador;
 	}

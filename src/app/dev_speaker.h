@@ -61,8 +61,8 @@ inline void Speaker<T>::play_note(uint16_t nota, uint16_t duracion /* en ms */)
 {
     Timer::mode_square_wave();
 
-    avr::Timer1::reset();
-    avr::Timer1::comparador1(nota);
+    not_generic::Timer1::reset();
+    not_generic::Timer1::comparador1(nota);
 
     // conectamos el speaker al timer0
     pin_.as_output();
@@ -143,7 +143,7 @@ inline void Speaker<T>::play_note(uint16_t nota, uint16_t duracion /* en ms */)
 //inline void alarma01(Speaker& speaker, uint16_t frecuencia, uint16_t duracion)
 //{
 //    speaker.play_note(Speaker::nota(frecuencia), duracion);
-//    avr::wait_ms(duracion);
+//    not_generic::wait_ms(duracion);
 //}
 //
 

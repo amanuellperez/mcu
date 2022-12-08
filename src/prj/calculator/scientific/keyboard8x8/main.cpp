@@ -50,20 +50,18 @@
 // Conectar un teclado de 8 x 8
 // El teclado es una matriz de pulsadores.
 // Sacamos la salida por UART
-#include <avr_UART.h>
-#include <avr_SPI_basic.h>
-#include <avr_interrupt.h>
+#include <avr_atmega.h>
 
 #include "dev.h"
 
-using SPI = avr::SPI_slave;
+using SPI = atmega::SPI_slave;
 
 volatile uint8_t data = 0;
 
 
 void test_keyboard()
 {
-    avr::UART_iostream uart;
+    atmega::UART_iostream uart;
     
     uart << "\n-------------------\n";
     uart <<   "Driver keyboard " << (int)Keyboard::nrows() << "x"
@@ -105,8 +103,8 @@ void test_keyboard()
 int main()
 {
 // init_UART();
-    avr::UART_iostream uart;
-    avr::basic_cfg(uart);
+    atmega::UART_iostream uart;
+    atmega::basic_cfg(uart);
     uart.on();
  
 // init_SPI()
@@ -114,8 +112,8 @@ int main()
     SPI::spi_mode(0,0);
     SPI::data_order_LSB();
     SPI::interrupt_enable();
-    avr::Interrupt::enable_pin<SPI_SS_pin>();
-    avr::enable_interrupts();
+    atmega::Interrupt::enable_pin<SPI_SS_pin>();
+    atmega::enable_interrupts();
 
 
     test_keyboard();
@@ -135,7 +133,7 @@ ISR_SPI_STC{
 
 
 ISR_PCINT_PIN_SS{
-    if (avr::Pin<SPI_SS_pin>::is_one()){
+    if (atmega::Pin<SPI_SS_pin>::is_one()){
 	SPI::data_register(std::byte{data});
 	data = 0; // escrito
     }

@@ -18,10 +18,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "../../../dev_clocks.h"
-#include <avr_interrupt.h>
-#include <avr_UART.h>
-#include <avr_time.h>
-#include <avr_timer1_generic.h>
+#include <avr_atmega.h>
 #include <atd_time.h>
 
 
@@ -34,7 +31,7 @@ constexpr static uint16_t clock_timer_period_in_us = 64u;
 
 // Con el Timer0 no funciona ya que el counter del timer0 es de 8 bits y no de
 // 16 bits.
-using Timer = avr::Timer1_generic;
+using Timer = atmega::Timer1_generic;
 using System_clock = dev::System_clock<Timer, clock_timer_period_in_us>;
 
 
@@ -58,7 +55,7 @@ std::ostream& operator<<(std::ostream& out, const System_clock::time_point& t0)
 
 void test_system_clock()
 {
-    avr::UART_iostream uart;
+    atmega::UART_iostream uart;
 
     uart << "\n\nsystem_clock test\n"
 	        "-----------------\n";
@@ -72,8 +69,8 @@ void test_system_clock()
 
 void init_uart()
 {
-    avr::UART_iostream uart;
-    avr::basic_cfg(uart);
+    atmega::UART_iostream uart;
+    atmega::basic_cfg(uart);
     uart.on();
 }
 

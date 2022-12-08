@@ -18,11 +18,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "../../dev_register_74HC595_SPI.h"
-
+#include <avr_atmega.h>
 
 // dev
 constexpr uint16_t period_in_us = 2;	
-using SPI = avr::SPI_master;
+using SPI = atmega::SPI_master;
 
 using Register_pins =
     dev::Register_74HC595_pins<dev::Register_74HC595_RCLK<12>,

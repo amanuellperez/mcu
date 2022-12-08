@@ -39,7 +39,7 @@
 
 // TODO: revisar. No se está seleccionando explícitamente el slave!!!
 
-using SPI = avr::SPI_master;
+using SPI = avr_::SPI_master;
 
 constexpr uint8_t npin_RCLK = 12;
 constexpr uint16_t periodo_en_us = 2;	// 2 microsegundos!!!
@@ -47,7 +47,7 @@ constexpr uint8_t npin_no_chip_select = 16;
 
 void test_basic()
 {
-    avr::Output_pin<npin_RCLK> pin_buffer_flush;
+    avr_::Output_pin<npin_RCLK> pin_buffer_flush;
 
     while (1) {
 	for (std::byte p{1}; p != std::byte{0}; p <<= 1){
@@ -60,8 +60,8 @@ void test_basic()
 
 void test_count()
 {
-    avr::UART_iostream uart;
-    avr::Output_pin<npin_RCLK> pin_buffer_flush;
+    avr_::UART_iostream uart;
+    avr_::Output_pin<npin_RCLK> pin_buffer_flush;
 
     uart << "Se irán mostrando en los leds todos los números del 0 al 255\n";
 
@@ -77,8 +77,8 @@ void test_count()
 }
 void test_choose()
 {
-    avr::UART_iostream uart;
-    avr::Output_pin<npin_RCLK> pin_buffer_flush;
+    avr_::UART_iostream uart;
+    avr_::Output_pin<npin_RCLK> pin_buffer_flush;
 
     while (1) {
         uart << "Write a number (less than 256): ";
@@ -96,8 +96,8 @@ void test_choose()
 int main() 
 {
 // init_uart()
-    avr::UART_iostream uart;
-    avr::basic_cfg(uart);
+    avr_::UART_iostream uart;
+    avr_::basic_cfg(uart);
     uart.on();
 
 // init_SPI()

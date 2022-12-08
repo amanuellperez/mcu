@@ -28,12 +28,12 @@
 #include "error.h"
 #include "../../buffer.h"	// read
 
-#include <avr_memory.h>
+#include <avr_atmega.h>
 
 int yylex()
 {
     ctrace << ">>> yylex: buffer = ";
-    ctrace << "run: free ram =  [" << avr::bytes_of_free_ram() << "] bytes\n";
+    ctrace << "run: free ram =  [" << atmega::bytes_of_free_ram() << "] bytes\n";
     trace(Main::buffer);
 
     int c = static_cast<int>(Main::buffer.pop_front());

@@ -18,10 +18,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "../../../dev_clocks.h"
-#include <avr_interrupt.h>
-#include <avr_UART.h>
-#include <avr_time.h>
-#include <avr_timer1_generic.h>
+#include <avr_atmega.h>
 #include <atd_time.h>
 
 
@@ -35,7 +32,7 @@ constexpr static uint16_t clock_timer_period_in_us = 64u;
 
 // Con el Timer0 no funciona ya que el counter del timer0 es de 8 bits y no de
 // 16 bits.
-using Timer = avr::Timer1_generic;
+using Timer = atmega::Timer1_generic;
 using Chronometer_ms = dev::Chronometer_ms<Timer, clock_timer_period_in_us>;
 
 
@@ -49,7 +46,7 @@ ISR_TIMER1_COMPA
 
 
 
-void print_time(avr::UART_iostream& uart, const Chronometer_ms::Sexagesimal_ms& s)
+void print_time(atmega::UART_iostream& uart, const Chronometer_ms::Sexagesimal_ms& s)
 {
     uart << std::setw(2) << s.hours << ':'
 	 << std::setw(2) << s.minutes << ':'
@@ -60,7 +57,7 @@ void print_time(avr::UART_iostream& uart, const Chronometer_ms::Sexagesimal_ms& 
 
 void halt()
 {
-    avr::UART_iostream uart;
+    atmega::UART_iostream uart;
     Chronometer_ms::off();
 
     uart << "\n[s]top (default)\n"
@@ -85,7 +82,7 @@ void halt()
 
 void print_menu()
 {
-    avr::UART_iostream uart;
+    atmega::UART_iostream uart;
 
     uart << "Press 'h' to halt\n";
 }
@@ -95,8 +92,8 @@ void print_menu()
 // Para ello necesito poder mirar si uart ha recibido alguna
 void test_chronometer_clock()
 {
-    avr::UART_iostream uart;
-    using UART = avr::UART_basic;
+    atmega::UART_iostream uart;
+    using UART = atmega::UART_basic;
 
     uart << "\n\nChronometer_ms test\n"
 	        "-------------------\n";
@@ -123,8 +120,8 @@ void test_chronometer_clock()
 
 void init_uart()
 {
-    avr::UART_iostream uart;
-    avr::basic_cfg(uart);
+    atmega::UART_iostream uart;
+    atmega::basic_cfg(uart);
     uart.on();
 }
 

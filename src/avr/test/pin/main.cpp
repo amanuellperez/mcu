@@ -23,13 +23,12 @@
 #include "../../avr_pin.h"
 #include "../../avr_time.h"
 
-using namespace avr;
 constexpr uint8_t num_pin = 14;
 
 
 void test_pin()
 {
-    Pin<num_pin> pin;
+    avr_::Pin<num_pin> pin;
     pin.as_output();
 
     while(1){
@@ -44,7 +43,7 @@ void test_pin()
 
 void test_pin_de_salida()
 {
-    Output_pin<num_pin> pin;
+    avr_::Output_pin<num_pin> pin;
 
     while(1){
 	pin.write_one();

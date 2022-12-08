@@ -23,7 +23,7 @@
 #define __INSTCODES_H__
 
 
-#include <avr_memory.h>
+#include <avr_atmega.h>
 
 
 struct Instructions_code
@@ -55,7 +55,7 @@ struct Instructions_code
 
 namespace __progmem{
 using Abb2str_array = 
-avr::Progmem_string_array<Instructions_code::last_abb -
+atmega::Progmem_string_array<Instructions_code::last_abb -
                                     Instructions_code::first_abb + 1>;
 
 constexpr const char abb1[] PROGMEM = "ANS";
@@ -67,7 +67,7 @@ constexpr Abb2str_array abb2str PROGMEM = {
 // Es el casi-equivalente a `const char*` (¿`const char* const`?) pero
 // almacenando la memoria en PROGMEM
 struct Abb2str{
-    avr::Element_progmem_string_array<__progmem::Abb2str_array::size()> 
+    atmega::Element_progmem_string_array<__progmem::Abb2str_array::size()> 
 	    operator[](size_t i) const { return __progmem::abb2str[i];}
 
     // Devuelve la longitud máxima de las cadenas almacenadas

@@ -18,14 +18,13 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "../../../dev_DS1307_clock.h"
-#include <avr_time.h>
-#include <avr_UART.h>
 #include <atd_ostream.h>
 #include <cstddef>
 #include <numeric>
 #include <atd_cstddef.h>
 #include <atd_time.h>
 
+#include <avr_atmega.h>
 // pines que usamos
 // ----------------
 
@@ -34,7 +33,7 @@
 // ---------------------------
 // Dispositivo TWI al que conectamos
 static constexpr uint8_t TWI_buffer_size = 70; 
-using TWI = avr::TWI_master<avr::TWI_basic, TWI_buffer_size>;
+using TWI = atmega::TWI_master<atmega::TWI_basic, TWI_buffer_size>;
 
 using RTC = dev::DS1307_clock<TWI>;
 
@@ -47,7 +46,7 @@ using RTC = dev::DS1307_clock<TWI>;
 // del DS1307.h!!! ¿por qué? Debería de coger la función más especializada.
 // Con todo con concepts este problema debería de desaparecer ya que la
 // template quedaría sobrecargada solo para IOxtreams.
-avr::UART_iostream& print(avr::UART_iostream& out, const RTC::Time_point& t)
+atmega::UART_iostream& print(atmega::UART_iostream& out, const RTC::Time_point& t)
 {
     if (t.clock_on){
 	out << "Encendido: "
@@ -87,7 +86,7 @@ std::ostream& operator<<(std::ostream& out, const RTC::time_point& t0)
 
 void test_clock()
 {
-    avr::UART_iostream uart;
+    atmega::UART_iostream uart;
 
     uart << "\nProbando clock\n"
 	 <<   "==============\n";
@@ -141,8 +140,8 @@ void test_clock()
 int main()
 {
 // init_UART();
-    avr::UART_iostream uart;
-    avr::basic_cfg(uart);
+    atmega::UART_iostream uart;
+    atmega::basic_cfg(uart);
     uart.on();
 
 // init_TWI();

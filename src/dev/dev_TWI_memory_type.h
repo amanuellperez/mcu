@@ -34,7 +34,9 @@
 
 #include <atd_memory.h>
 #include <cstddef>  // std::byte
+		    
 #include <avr_TWI_master_ioxtream.h>
+#include "not_generic.h"
 
 namespace dev{
 

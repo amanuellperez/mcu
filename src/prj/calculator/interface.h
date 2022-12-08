@@ -42,9 +42,8 @@
  ****************************************************************************/
 
 #include "buffer.h"
-#include <avr_time.h>
+#include <avr_atmega.h>
 
-#include <avr_memory.h>
 
 // meto Interface dentro de calc, para poder definir Interface en dev.h
 namespace calc{
@@ -139,7 +138,7 @@ private:
     void write_abbrevation(char key) 
     {
 	char tmp[abb2str_.max_size()]; 
-	avr::strlcpy(tmp, abb2str_[key - Code::first_abb], abb2str_.max_size());
+	atmega::strlcpy(tmp, abb2str_[key - Code::first_abb], abb2str_.max_size());
 	write(tmp);
     }
 
