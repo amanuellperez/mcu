@@ -35,6 +35,8 @@
  *		       Lo que quiero definir es un timer que obedece al
  *		       concept "timer". No necesito usar templates para nada.
  *
+ *		       square_wave_generate
+ *
  ****************************************************************************/
 #include "avr_timer0_basic.h"
 #include "avr_cfg.h"	// MCU_CLOCK_FREQUENCY_IN_HZ
@@ -148,6 +150,7 @@ public:
                                   // y Hertz. ¿qué nombre común usar? ponerlo en
                                   // avr_types.h
 
+    // PWM configuration 
     enum class Mode {
         fix_0xFF,
         only_channel2
@@ -224,6 +227,8 @@ public:
 // Square wave mode
 // ----------------
     /// Genera la frecuencia indicada conectándola a los canales indicados.
+    /// La frecuencia pasada tiene que estar en herzios.
+    // DUDA: usar Frequency en lugar de uint32_t? Sería lo mejor...
     static void square_wave_generate(uint32_t freq_in_Hz, Connect);
 
     static void mode_square_wave(){ Timer::mode_CTC();}
@@ -400,40 +405,6 @@ private:
 
 };
 
-
-// TODO: a .cpp
-// ¿es genérico o depende del Timer0?
-inline constexpr void Timer0_generic::
-square_wave_connect_to(Connect connection)
-{
-    switch (connection){
-	break; case Connect::only_channel1:
-	    square_wave_connect_ch1();
-	    square_wave_disconnect_ch2();
-
-	break; case Connect::only_channel2:
-	    square_wave_disconnect_ch1();
-	    square_wave_connect_ch2();
-
-	break; case Connect::channel1_and_2:
-	    square_wave_connect_ch1();
-	    square_wave_connect_ch2();
-    }
-}
-
-
-// TODO: a .cpp
-// ¿es genérico o depende del Timer0?
-inline void Timer0_generic::
-square_wave_generate(uint32_t freq_in_Hz, Connect connection)
-{
-    auto [d, t] = frequency_in_Hz_to_prescaler_top(freq_in_Hz);
-
-    mode_square_wave();
-    square_wave_top(t); 
-    square_wave_connect_to(connection);
-    Timer::clock_frequency(d); // esto enciende el Timer
-}
 
 
 }// namespace 

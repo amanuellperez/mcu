@@ -1,12 +1,8 @@
-BIN = xx
-
-SOURCES= main.cpp 
-
-
-MCU = atmega328p
-
-include $(AVR_GENRULES)
+DIRS = counter	\
+	   square_wave
 
 
+
+include $(MCU_RECRULES)
 
 

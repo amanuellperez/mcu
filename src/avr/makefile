@@ -1,5 +1,6 @@
 SOURCES= avr_SPI_basic.cpp \
-		 avr_sleep.cpp
+		 avr_sleep.cpp		\
+		 avr_timer0_generic.cpp
 
 
 INCS= avr_ADC_basic.h	\
