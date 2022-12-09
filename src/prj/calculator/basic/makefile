@@ -15,7 +15,7 @@ USER_LDFLAGS=-lm
 
 MCU = atmega328p
 
-include $(APP_GENRULES)
+include $(PRJ_GENRULES)
 
 
 calc.tab.hpp: calc.ypp

@@ -6,4 +6,4 @@ MCU = atmega328p
 
 #F_CPU=1000000UL
 
-include $(APP_GENRULES)
+include $(PRJ_GENRULES)

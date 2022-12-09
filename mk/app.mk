@@ -1,4 +1,6 @@
-# Copyright (C) 2019-2020 A.Manuel L.Perez
+# Copyright (C) 2022 A.Manuel L.Perez 
+#           mail: <amanuel.lperez@gmail.com>
+#           https://github.com/amanuellperez/mcu
 #
 # This file is part of the MCU++ Library.
 #
@@ -15,7 +17,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-# Reglas para compilar la librería avr
+
+# Reglas para compilar la librería app
 
 include $(MCU_COMRULES)
 
@@ -27,7 +30,8 @@ PROJ_CXXFLAGS=
 # 	poner las librerías que dependen de otras antes.
 # 	Ejemplo: A depende de B. Luego escribir '-lA -lB' y no al revés
 # 	ya que no compilaría.
-PROJ_LDFLAGS=-L$(MCU_LIB) -lapp_$(F_CPU) -ldebug_$(F_CPU) -ldev_$(F_CPU) -lavr_$(F_CPU) -latd -lstd
+PROJ_LDFLAGS=-L$(MCU_LIB) -ldebug_$(F_CPU) \
+			 -ldev1_$(F_CPU) -ldev0_$(F_CPU) -lavr_$(F_CPU) -latd -lstd
 
 include $(MCU_GENRULES)
 

@@ -7,7 +7,7 @@ SOURCES= main.cpp			\
 
 MCU = atmega328p
 
-include $(APP_GENRULES)
+include $(PRJ_GENRULES)
 
 
 

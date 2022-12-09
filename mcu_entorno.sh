@@ -32,10 +32,11 @@ MCU_COMRULES=${MCU_MK}/com.mk		; export MCU_COMRULES
 STD_GENRULES=${MCU_MK}/std.mk	; export STD_GENRULES
 ATD_GENRULES=${MCU_MK}/atd.mk	; export ATD_GENRULES
 AVR_GENRULES=${MCU_MK}/avr.mk	; export AVR_GENRULES
-DEV_GENRULES=${MCU_MK}/dev.mk	; export DEV_GENRULES
+DEV0_GENRULES=${MCU_MK}/dev0.mk	; export DEV0_GENRULES
+DEV1_GENRULES=${MCU_MK}/dev1.mk	; export DEV1_GENRULES
 DEBUG_GENRULES=${MCU_MK}/debug.mk	; export DEBUG_GENRULES
-APPLIB_GENRULES=${MCU_MK}/app_lib.mk	; export APPLIB_GENRULES
 APP_GENRULES=${MCU_MK}/app.mk	; export APP_GENRULES
+PRJ_GENRULES=${MCU_MK}/prj.mk	; export PRJ_GENRULES
 
 # ------------------------------
 # Variables usadas para compilar

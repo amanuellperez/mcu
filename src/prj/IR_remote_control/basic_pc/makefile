@@ -16,7 +16,7 @@ MCU = atmega328p
 # Funciona bien a 1 MHz
 #F_CPU=8000000UL
 
-include $(APP_GENRULES)
+include $(PRJ_GENRULES)
 
 
 
