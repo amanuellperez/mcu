@@ -121,8 +121,8 @@ Se puede organizar el código en diferentes niveles:
 	partir de concepts, no sabiendo el dispositivo real que hay por
 	debajo. 
 
-	El programador no conoce la datasheet ya que desconoce el chip real al
-	que accede. Lo que conoce son los diferents concepts.
+      El programador no conoce la datasheet ya que desconoce el chip real al
+      que accede. Lo que conoce son los diferents concepts.
 
     * debug: Funciones para depurar los dispositivos. Esto no sé qué es. Hay
       que revisarlo y posiblemente recolocarlo.
