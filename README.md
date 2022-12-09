@@ -104,8 +104,8 @@ Se puede organizar el código en diferentes niveles:
 	 En lugar de tener que recordar qué bit hay que escribir, 
 	 usamos nombres.
 
-	 Quien programa este directorio tiene que conocer cómo funciona el
-	 microcontrolador. Necesita leer la datasheet.
+      Quien programa este directorio tiene que conocer cómo funciona el
+      microcontrolador. Necesita leer la datasheet.
 
     * [dev0](src/dev0/README.md): Built-in devices
 	Cada dispositivo físico, cada chip, necesita un driver. Aquí es donde
@@ -113,8 +113,8 @@ Se puede organizar el código en diferentes niveles:
 	`_basic` que contiene el traductor y el `_generic` que contiene el
 	conceptuador.
 
-	Quien programa aquí conoce los detalles del chip, necesitando leer la
-	datasheet.
+      Quien programa aquí conoce los detalles del chip, necesitando leer la
+      datasheet.
 
     * [dev1](src/dev1/README.md): User-defined devices
 	Los dispositivos que aparecen aquí son dispositivos construidos a
