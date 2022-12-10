@@ -114,7 +114,10 @@ namespace atmega{
 
 
 // MCU UTILITIES
-    using Interrupt = avr_::Interrupt;
+    using Interrupt          = avr_::Interrupt;
+    using Enable_interrupts  = avr_::Enable_interrupts;
+    using Disable_interrupts = avr_::Disable_interrupts;
+
     using Power     = avr_::Power;
 
 

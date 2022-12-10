@@ -112,8 +112,8 @@ void Square_wave_generator<T,N,C>::generate_38kHz_off()
     Timer::square_wave_disconnect_ch1();
 
     // Garantizamos que acabe en cero
-    avr::Pin<Timer::pin_channel1>::as_output();
-    avr::Pin<Timer::pin_channel1>::write_zero();
+    atmega::Pin<Timer::pin_channel1>::as_output();
+    atmega::Pin<Timer::pin_channel1>::write_zero();
 
 }
 

@@ -22,7 +22,7 @@
 namespace dev{
 
 std::ostream& operator<<(std::ostream& out, const NEC_message& msg)
-//std::ostream& operator<<(avr::UART_iostream& out, const NEC_message& msg)
+//std::ostream& operator<<(atmega::UART_iostream& out, const NEC_message& msg)
 {
     out << "NEC(" << msg.time_first_pulse << "): ";
     atd::print_int_as_hex(out, msg.address);

@@ -63,7 +63,7 @@ void Clock_us<Timer>::on()
 template <typename Timer>
 void Clock_us<Timer>::wait_us(Timer::counter_type t)
 {
-    avr::Interrupts_lock lock;	// TODO: esto no es genérico
+    atmega::Disable_interrupts lock;	// TODO: esto no es genérico
 
     Timer::unsafe_reset();
     

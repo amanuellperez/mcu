@@ -24,10 +24,7 @@
 #include "dev_cycle.h"
 
 #include <atd_array.h>
-#include <avr_pin.h>	    // TODO: esto depende del avr. Generic_pin???
-#include <avr_interrupt.h>  // Generic_interrupt??? Mejor: mcu::enable_interrupt...
-			    // Si uso mcu como clase la puedo pasar como
-			    // parámetro.
+#include <avr_atmega.h>	    // TODO: esto depende del avr. Generic_pin???
 
 // TODO: estoy duplicando la memoria. Al implementar Train_of_pulses_receiver
 //       puedo usar la memoria alojada en él para Train_of_pulses.
@@ -116,7 +113,7 @@ private:
 
 // Cfg
     static constexpr uint8_t ir_receiver_pin = Cfg::ir_receiver_pin;
-    using Receiver_pin = avr::Pin<ir_receiver_pin>;
+    using Receiver_pin = atmega::Pin<ir_receiver_pin>;
     using Clock_us = Cfg::Clock_us;
 
 // Functions
@@ -242,12 +239,12 @@ void Train_of_pulses_receiver<C>::receive_semipulses(volatile bool& abort)
     nsemipulse_ = -1;
     Receiver_pin::as_input_without_pullup();
 
-    avr::Interrupt::enable_pin<ir_receiver_pin>();
+    atmega::Interrupt::enable_pin<ir_receiver_pin>();
 
     Clock_us::on();
     
     {// TODO: meter esto en una función. nombre?
-	avr::Enable_interrupts lock;	// TODO: esto no es genérico
+	atmega::Enable_interrupts lock;	// TODO: esto no es genérico
 
 	while (nsemipulse_ < 0 and !abort) { ; }	// esperamos a recibir algo
 
@@ -262,7 +259,7 @@ void Train_of_pulses_receiver<C>::receive_semipulses(volatile bool& abort)
 
     Clock_us::off(); 
 
-    avr::Interrupt::disable_pin<ir_receiver_pin>();
+    atmega::Interrupt::disable_pin<ir_receiver_pin>();
 
 // anotamos el último semiperiodo
     buffer_[nsemipulse_] = time_overflow;
