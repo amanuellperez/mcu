@@ -6,7 +6,7 @@ SOURCES= main.cpp
 
 MCU = atmega328p
 
-include $(APP_GENRULES)
+include $(DEV1_GENRULES)
 
 
 

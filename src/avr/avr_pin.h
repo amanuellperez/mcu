@@ -22,17 +22,19 @@
 #ifndef __AVR_PIN_H__
 /****************************************************************************
  *
- *   - DESCRIPCION: Clases para manejar pines del AVR
+ * DESCRIPCION
+ *	Clases para manejar pines del AVR
  *
- *   - COMENTARIOS: 
- *
- *   - HISTORIA:
+ * HISTORIA
  *    A.Manuel L.Perez
  *      24/07/2017 Escrito
  *	27/01/2019 Reescrito, paso a usar templates.
  *	09/06/2019 Output_pin<0> y pulso_1us. 
  *	05/01/2020 Migrado a inglés.
  *	06/11/2022 toggle
+ *	10/12/2022 number: lo necesito para depurar. Puedo poner cosas del
+ *			     tipo "conectar osciloscopio al pin " <<
+ *			     pin.number;
  *
  ****************************************************************************/
 #include <avr/io.h> // registros: DDRB... PORT...
@@ -60,6 +62,9 @@ public:
     Pin(const Pin&)		= delete;
     Pin& operator=(const Pin&)	= delete;
 
+// INFO
+    static constexpr uint8_t number = n;
+
 // CONFIGURAMOS EL PIN
     /// Definimos el pin de salida
     static void as_output() 
@@ -71,8 +76,6 @@ public:
     /// Definimos el pin como de entrada con la pull-up resistor
     static void as_input_with_pullup() 
     {
-//	(*DDR[n]) &= ~BIT_MASK[n];	// de entrada
-//	(*PORT[n]) |= BIT_MASK[n];	// enables pull-up resistor
 	(*DDR[n]) = (*DDR[n]) & ~BIT_MASK[n];	// de entrada
 	(*PORT[n]) = (*PORT[n]) | BIT_MASK[n];	// enables pull-up resistor
     }
@@ -80,8 +83,6 @@ public:
     /// Definimos el pin como de entrada sin la pull-up resistor
     static void as_input_without_pullup() 
     {
-//	(*DDR[n]) &= ~BIT_MASK[n];	// de entrada
-//	(*PORT[n]) &= ~BIT_MASK[n];	// disabel pull-up resistor
 	(*DDR[n]) = (*DDR[n]) & ~BIT_MASK[n];	// de entrada
 	(*PORT[n]) = (*PORT[n]) & ~BIT_MASK[n];	// disabel pull-up resistor
     }
@@ -101,17 +102,14 @@ public:
 // FUNCIONES DE ESCRITURA
     /// Escribimos un 1
     static void write_one()	
-    //{(*PORT[n]) |= BIT_MASK[n];}
     {(*PORT[n]) = (*PORT[n]) | BIT_MASK[n];}
 
     /// Escribimos un 0
     static void write_zero()	
-    // {(*PORT[n]) &= ~BIT_MASK[n];}
     {(*PORT[n]) = (*PORT[n]) & ~BIT_MASK[n];}
 
     /// Cambiamos el valor del pin (de 0 a 1 ó de 1 a 0).
     static void toggle()  
-    //{ (*PORT[n]) ^= BIT_MASK[n]; }
     { (*PORT[n]) = (*PORT[n]) ^ BIT_MASK[n]; }
 
     /// Escribimos en el pin. Un valor distinto de cero es 1.
@@ -122,6 +120,7 @@ public:
     }
     
 // FUNCIONES DE AYUDA
+// TODO: esto no pertenece al traductor. Quitarlo de aquí!!!
     static void pulse_of_1us()
     {
 	write_one();
@@ -149,8 +148,10 @@ public:
 template<uint8_t n>
 class Output_pin{
 public:
-   constexpr Output_pin()
-   { Pin<n>::as_output(); }
+    static constexpr uint8_t number = n;
+
+    constexpr Output_pin()
+    { Pin<n>::as_output(); }
 
     Output_pin& operator=(const Output_pin&)	= delete;
 
@@ -171,6 +172,8 @@ public:
 template<>
 class Output_pin<0>{
 public:
+    static constexpr uint8_t number = 0;
+
     constexpr Output_pin(){}
     Output_pin& operator=(const Output_pin&)	= delete;
 
@@ -191,6 +194,8 @@ public:
 template<uint8_t n>
 class Input_pin_with_pullup{
 public:
+    static constexpr uint8_t number = n;
+
     Input_pin_with_pullup()
     {init();}
 
@@ -219,6 +224,8 @@ public:
 template<uint8_t n>
 class Input_pin_without_pullup{
 public:
+    static constexpr uint8_t number = n;
+
     Input_pin_without_pullup()
     {init();}
 

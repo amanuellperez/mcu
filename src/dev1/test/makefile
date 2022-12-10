@@ -1,6 +1,8 @@
-DIRS = 	EEPROM_iostream	\
+DIRS = 	clocks			\
+		EEPROM_iostream	\
 		EEPROM_lineal	\
-		LCD
+		LCD				\
+		miniclocks	
 
 include $(MCU_RECRULES)
 
