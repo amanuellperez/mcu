@@ -3,7 +3,8 @@ SOURCES= avr_SPI_basic.cpp \
 		 avr_timer0_generic.cpp
 
 
-INCS= avr_ADC_basic.h	\
+INCS= dev_concepts.h	\
+	avr_ADC_basic.h		\
 	avr_atmega328p_cfg.h\
 	avr_atmega_dev.h	\
 	avr_atmega.h		\

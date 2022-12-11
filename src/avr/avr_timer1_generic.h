@@ -47,6 +47,13 @@ namespace avr_{
 /// ideales para medir/generar pulsos de electrónica. 
 class Timer1_generic_counter{
 public:
+// Tipo de tipo
+//  DUDA: ¿existe alguna función que tengan todos los dispositivos con doble
+//  interfaz unsafe_/safe_ que se pueda usar para definir el concept
+//  Unsafe_device? Como de momento no lo se, uso temporalmente (???)
+//  is_unsafe para indicar el doble interfaz.
+    static constexpr bool is_unsafe = true;
+
 // types
     using Timer        = avr_::Timer1;
     using counter_type = typename Timer::counter_type;
@@ -62,6 +69,13 @@ public:
 	unsafe_top(top0);
     }
 
+
+    // DUDA: Creo que la forma más sencilla de hablar es usar funciones 
+    // unsafe_init/init; unsafe_value/value, ... en lugar de usar las
+    // correspondientes safe_init, safe_value, ...
+    // TODO: Después de usar esta clase si veo que no uso el interfaz safe_
+    // borrarlo a favor del mismo sin safe_ (o al contrario, dejar safe_ si es
+    // el que se usa y borrar el otro)
     static void safe_init(counter_type top0 = max_top()) 
     { 
 	avr_::Interrupts_lock l;
@@ -70,6 +84,9 @@ public:
 	unsafe_reset();
 	unsafe_top(top0);
     }
+
+    static void init(counter_type top0 = max_top()) 
+    { safe_init(top0); }
 
     /// Hay veces que puede ser interesante controlar cuándo el contador hace
     /// overflow. El único problema es que hay que definir la interrupción
@@ -120,6 +137,8 @@ public:
 	return unsafe_value();
     }
 
+    static counter_type value() {return safe_value();}
+
     /// Hace que el counter = 0.
     static void unsafe_reset() { Timer::unsafe_counter(0); }
     static void safe_reset() 
@@ -127,6 +146,7 @@ public:
 	avr_::Interrupts_lock l;
 	unsafe_reset();
     }
+    static void reset()  {safe_reset();}
 
     /// Define el top del counter.
     static void unsafe_top(counter_type top)
@@ -138,6 +158,8 @@ public:
 	unsafe_top(top);
     }
 
+    static void top(counter_type top0) {safe_top(top0);}
+
     /// Valor del top
     static counter_type unsafe_top()
     { return Timer::unsafe_output_compare_register_A(); }
@@ -147,6 +169,8 @@ public:
 	avr_::Interrupts_lock l;
 	return Timer::unsafe_output_compare_register_A(); 
     }
+
+    static counter_type top() {return safe_top();}
 
     /// Valor máximo que puede tener el top.
     static constexpr counter_type max_top()

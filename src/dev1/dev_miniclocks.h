@@ -78,6 +78,7 @@
  *    10/12/2022 Miniclock_ms
  *
  ****************************************************************************/
+#include <dev_concepts.h>
 
 namespace dev{
 /***************************************************************************
@@ -115,6 +116,9 @@ public:
     /// Devuelve el valor máximo que puede alcanzar el counter sin dar
     /// overflow: counter_max() + 1 == 0
     static counter_type counter_max();
+
+private:
+    static constexpr bool is_safe = !Unsafe_device<Timer>;
 };
 
 
@@ -150,6 +154,7 @@ inline Miniclock<T, p>::counter_type Miniclock<T, p>::counter_max()
     return Timer::max_top(); 
 }
 }// namespace dev_
+
 
 // Miniclocks
 // ----------

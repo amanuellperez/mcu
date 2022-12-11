@@ -31,9 +31,15 @@ using Pin = mcu::Output_pin<test_pin>;
 using Miniclock0_us = dev::Miniclock_us<mcu::Timer0_generic_counter>;
 using Miniclock0_ms = dev::Miniclock_ms<mcu::Timer0_generic_counter>;
 
+using Miniclock1_us = dev::Miniclock_us<mcu::Timer1_generic_counter>;
+using Miniclock1_ms = dev::Miniclock_ms<mcu::Timer1_generic_counter>;
+
 // Functions
 // ---------
-enum class Cfg{ miniclock0_us, miniclock0_ms};
+enum class Cfg{ 
+    miniclock0_us, miniclock0_ms,
+    miniclock1_us, miniclock1_ms
+};
 
 void init_uart()
 {
@@ -43,11 +49,12 @@ void init_uart()
 }
 
 
-void generate_square_wave0_us(Pin& pin, uint16_t time_us)
+template <typename Miniclock_us>
+void generate_square_wave_us(Pin& pin, uint16_t time_us)
 {
     while (1){
-	Miniclock0_us::start();
-	while (Miniclock0_us::read() < time_us){
+	Miniclock_us::start();
+	while (Miniclock_us::read() < time_us){
 	    // This takes a lot of time ==> this function can't generate
 	    // a square wave of microseconds!!!
 	    if (mcu::UART_basic::are_there_data_unread())
@@ -57,11 +64,12 @@ void generate_square_wave0_us(Pin& pin, uint16_t time_us)
     }
 }
 
-void generate_square_wave0_ms(Pin& pin, uint16_t time_ms)
+template <typename Miniclock_ms>
+void generate_square_wave_ms(Pin& pin, uint16_t time_ms)
 {
     while (1){
-	Miniclock0_ms::start();
-	while (Miniclock0_ms::read() < time_ms){
+	Miniclock_ms::start();
+	while (Miniclock_ms::read() < time_ms){
 	    if (mcu::UART_basic::are_there_data_unread())
 		return;
 	}
@@ -74,8 +82,10 @@ void print_menu()
 {
     mcu::UART_iostream uart;
 
-    uart << "[u] Miniclock0_us\n"
-	    "[m] Miniclock0_ms\n"
+    uart << "1. Miniclock0_us\n"
+	    "2. Miniclock0_ms\n"
+	    "3. Miniclock1_us\n"
+	    "4. Miniclock1_ms\n"
 	    "Other key to continue\n";
 }
 
@@ -87,41 +97,45 @@ void ask_clock(Cfg& cfg)
     uart >> c;
     
     switch(c){
-	break; case 'u': case 'U':  cfg = Cfg::miniclock0_us;
-	break; case 'm': case 'M':  cfg = Cfg::miniclock0_ms;
+	break; case '1':  cfg = Cfg::miniclock0_us;
+	break; case '2':  cfg = Cfg::miniclock0_ms;
+	break; case '3':  cfg = Cfg::miniclock1_us;
+	break; case '4':  cfg = Cfg::miniclock1_ms;
     }
 }
 
 
-void generate0_ms(Pin& pin)
+template <typename Miniclock_ms>
+void generate_ms(Pin& pin)
 {
     mcu::UART_iostream uart;
     uint16_t time_ms;
 
     uart << "Write semiperiod, in ms, of square wave to generate:\n"
-	    "(max value of " << (int) Miniclock0_ms::counter_max() << ')';
+	    "(max value of " << (uint32_t) Miniclock_ms::counter_max() << ')';
     uart >> time_ms;
     uart << "\nGenerating a square wave of " << (2*time_ms) << " ms\n";
     print_menu();
 
-    generate_square_wave0_ms(pin, time_ms);
+    generate_square_wave_ms<Miniclock_ms>(pin, time_ms);
 }
 
 
-void generate0_us(Pin& pin)
+template <typename Miniclock_us>
+void generate_us(Pin& pin)
 {
     mcu::UART_iostream uart;
     uint16_t time_us;
 
-    uart << "WARNING: in microseconds this test doesn't work correctly\n"
-	    "(which is normal, look at the code)\n";
+    uart << "\nWARNING: in microseconds this test doesn't work correctly\n"
+	    "(which is normal, look at the code)\n\n";
     uart << "Write semiperiod, in us, of square wave to generate:\n"
-	    "(max value of " << (int) Miniclock0_us::counter_max() << ')';
+	    "(max value of " << (uint32_t) Miniclock_us::counter_max() << ')';
     uart >> time_us;
-    uart << "\nGenerating a square wave of " << (2*time_us) << " ms\n";
+    uart << "\nGenerating a square wave of " << (2*time_us) << " us\n";
     print_menu();
 
-    generate_square_wave0_us(pin, time_us);
+    generate_square_wave_us<Miniclock_us>(pin, time_us);
 }
 
 int main()
@@ -142,8 +156,10 @@ int main()
 	ask_clock(cfg);
 
 	switch(cfg){
-	    break; case Cfg::miniclock0_us: generate0_us(pin);
-	    break; case Cfg::miniclock0_ms: generate0_ms(pin);
+	    break; case Cfg::miniclock0_us: generate_us<Miniclock0_us>(pin);
+	    break; case Cfg::miniclock0_ms: generate_ms<Miniclock0_ms>(pin);
+	    break; case Cfg::miniclock1_us: generate_us<Miniclock1_us>(pin);
+	    break; case Cfg::miniclock1_ms: generate_ms<Miniclock1_ms>(pin);
 	}
     }
 }
