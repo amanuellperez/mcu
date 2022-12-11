@@ -49,9 +49,9 @@ void Main::run()
 //	else 
 	    window_main();
 
-	wait_ms(100); // es un reloj de horno. Miro el teclado cada 100 ms
-//	wait_ms(10); // es un cronometro que funciona a 1 ms. 
-//		    // Actualizo el LCD cada 1 ms (si se elimina este wait_ms
+	mcu::wait_ms(100); // es un reloj de horno. Miro el teclado cada 100 ms
+//	mcu::wait_ms(10); // es un cronometro que funciona a 1 ms. 
+//		    // Actualizo el LCD cada 1 ms (si se elimina este mcu::wait_ms
 //		    // el LCD se actualiza tan rápido que no se ve nada)
     }
 }

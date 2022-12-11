@@ -1,6 +1,4 @@
-// Copyright (C) 2021 A.Manuel L.Perez 
-//           mail: <amanuel.lperez@gmail.com>
-//           https://github.com/amanuellperez/mcu
+// Copyright (C) 2022 A.Manuel L.Perez
 //
 // This file is part of the MCU++ Library.
 //
@@ -17,35 +15,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "main.h"
+#pragma once
+
+#include <std_concepts.h>
 
 
-void Main::init_sensor()
-{
-    sensor_.init();
-    sensor_.indoor_navigation();
-
-    if (sensor_.error()) {
-	lcd_.clear();
-	lcd_ << "Sensor no responde";
-	mcu::wait_ms(1000);
-    }
-}
-
-void Main::print_sensor()
-{
-    Sensor::Celsius T;
-    Sensor::Pascal P;
-    Sensor::Relative_humidity H;
-    sensor_.T_and_P_and_H(T, P, H);
-    Sensor::Hectopascal hP{P};
-
-    lcd_.cursor_pos(0, 0);
-    lcd_ << T << ' ' << lcd_symbol::of("º") << 'C';
-    lcd_ << "  " << H << "%";
-    lcd_.cursor_pos(0, 1);
-    lcd_ << hP << " hPa";
-}
-
-
+// vim:ft=cpp
 

@@ -64,7 +64,7 @@ void test_keyboard()
 	if (res != std::byte{0})
 	    print_code(static_cast<char>(res));
 
-	wait_ms(100);
+	atmega::wait_ms(100);
     }
 }
 

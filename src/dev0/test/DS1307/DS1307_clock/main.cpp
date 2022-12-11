@@ -132,7 +132,7 @@ void test_clock()
 	if (rtc.error())
 	    uart << "Error: error en el rtc!!!\n";
 
-        wait_ms(1000);
+	atmega::wait_ms(1000);
 
     }
 }

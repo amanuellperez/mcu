@@ -7,7 +7,7 @@ DIRS = 	BMP280			\
 		keypad			\
 		keyrow			\
 		led				\
-		LCD				\
+		HD44780			\
 		push_button		\
 		74HC595			
 

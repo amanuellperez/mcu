@@ -144,7 +144,7 @@ int main()
 	print (t_us);
 //	uart << t_us << '\n';
 
-	wait_ms(1000);
+	avr_::wait_ms(1000);
     }
 }
 

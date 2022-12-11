@@ -175,7 +175,7 @@ void test_clock()
 	if (rtc.error())
 	    uart << "Error: error en el rtc!!!\n";
 
-        wait_ms(1000);
+	atmega::wait_ms(1000);
 	++n;
 	if (!(n % 10)){
 	    t.clock_on = !t.clock_on;
@@ -229,7 +229,7 @@ void test_bateria()
 	if (rtc.error())
 	    uart << "Error: error en el rtc!!!\n";
 
-        wait_ms(1000);
+	atmega::wait_ms(1000);
 
     }
 }
@@ -293,7 +293,7 @@ void test_ram()
 	for (uint8_t i = 0; i < N; ++i)
 	    uart << std::to_integer<int>(res[i]) << ", ";
 
-        wait_ms(5000);
+	atmega::wait_ms(5000);
     }
 }
 

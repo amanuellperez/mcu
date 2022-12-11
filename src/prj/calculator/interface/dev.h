@@ -34,9 +34,14 @@
 #include <stdint.h>
 
 #include <dev_keypad.h>
+
+#include <avr_atmega.h>
+
 #include "lcd.h"
+
 #include "../interface.h"
 
+namespace mcu = atmega;
 
 // pins usados
 // ------------

@@ -47,7 +47,7 @@ int main()
     avr_::Interrupt::enable_pin<push_button_pin>();
 
     while(1){
-	wait_ms(1000);
+	avr_::wait_ms(1000);
     }
 }
 

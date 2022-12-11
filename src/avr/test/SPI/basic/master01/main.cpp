@@ -39,7 +39,7 @@ void SPI_write(uint8_t x)
     SPI::write(std::byte{x});
     uart << static_cast<uint16_t>(x) << '\n';
     no_SS.write_one();
-    wait_ms(1000);
+    avr_::wait_ms(1000);
 }
 
 int main() 

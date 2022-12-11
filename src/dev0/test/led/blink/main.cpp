@@ -34,10 +34,10 @@ int main()
 
     while(1){
 	led.on();
-	wait_ms(time);
+	atmega::wait_ms(time);
 
 	led.off();
-	wait_ms(time);
+	atmega::wait_ms(time);
     }
 }
 

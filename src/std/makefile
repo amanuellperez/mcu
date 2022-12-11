@@ -5,6 +5,7 @@ SOURCES= std_basic_ios.cpp 	\
 
 INCS= std_cstdio.h		\
 	std_cmath.h			\
+	std_concepts.h		\
 	std_sizeof_txt.h	\
 	std_algorithm.h		\
 	std_array.h			\
@@ -45,6 +46,7 @@ INCS= std_cstdio.h		\
 	chrono		\
 	climits		\
 	cmath		\
+	concepts	\
 	cstddef 	\
 	cstdint		\
 	cstdlib		\

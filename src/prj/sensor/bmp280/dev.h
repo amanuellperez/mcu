@@ -26,6 +26,8 @@
 #include <dev_LCD_HD44780.h>
 #include <dev_BMP280_basic.h>
 
+namespace mcu = atmega;
+
 // pins usados
 // ------------
 // UART for debugging purpose: pins 2 and 3

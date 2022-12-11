@@ -438,11 +438,11 @@ void send_service3()
 void test_write()
 {
     send_service1();
-    wait_ms(500);
+    avr_::wait_ms(500);
     send_service2();
-    wait_ms(500);
+    avr_::wait_ms(500);
     send_service3();
-    wait_ms(500);
+    avr_::wait_ms(500);
 
 }
 

@@ -37,6 +37,7 @@
  *  - HISTORIA:
  *    A.Manuel López
  *	27/01/2019 Reestructurado.
+ *	11/12/2022 Encapsulamos macros en funciones de C++
  *
  ****************************************************************************/
 #include <util/delay.h>
@@ -44,25 +45,29 @@
 #include <ostream>
 #include <istream>
 #include <iomanip>
-
+#include <concepts>
 
 namespace avr_{
-/// Espera t microsegundos. t solo puede ser un número (no vale variable)
-/// t tiene que ser una constante en tiempo de compilación.
-#define delay_us(t) _delay_us(t)
-
-/// Espera t milisegundos. t solo puede ser un número (no vale variable)
-/// t tiene que ser una constante en tiempo de compilación.
-#define delay_ms(t) _delay_ms(t)
-
 /// Espera t microsegundos
 /// t tiene que ser una constante en tiempo de compilación.
-#define wait_us(t)  _delay_us(t)
+//#define wait_us(t)  _delay_us(t)
+template <std::integral Int>
+inline constexpr void wait_us(Int t)
+{
+    _delay_us(t);
+}
 
 /// Espera t milisegundos.
 /// t tiene que ser una constante en tiempo de compilación.
-#define wait_ms(t) _delay_ms(t)
+//#define wait_ms(t) _delay_ms(t)
+template <std::integral Int>
+inline constexpr void wait_ms(Int t)
+{
+    _delay_ms(t);
+}
 
+#undef _delay_us
+#undef _delay_ms
 
 }// namespace
 

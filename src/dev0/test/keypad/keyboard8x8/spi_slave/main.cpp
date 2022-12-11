@@ -82,7 +82,7 @@ void test_keyboard()
 	    break; default: uart << data; 
 	}
 
-	wait_ms(100); // debouncing
+	atmega::wait_ms(100); // debouncing
     }
 }
 

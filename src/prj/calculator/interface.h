@@ -378,7 +378,7 @@ void Interface<Cfg>::read()
 	}
 
 	redraw_lcd();
-	wait_ms(Tclock_keyboard);
+	atmega::wait_ms(Tclock_keyboard);
     }
 }
 

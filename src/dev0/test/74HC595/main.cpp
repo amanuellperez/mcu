@@ -20,6 +20,8 @@
 #include "../../dev_register_74HC595_SPI.h"
 #include <avr_atmega.h>
 
+namespace mcu = atmega;
+
 // dev
 constexpr uint16_t period_in_us = 2;	
 using SPI = atmega::SPI_master;
@@ -36,10 +38,10 @@ void sweep(Register& reg)
 {
     for (uint8_t p = 1; p != 0; p <<= 1){
 	reg.write(p);
-	wait_ms(100);
+	mcu::wait_ms(100);
     }
 
-    wait_ms(100);
+    mcu::wait_ms(100);
     reg.clear();
 }
 
@@ -48,11 +50,11 @@ void counter(Register& reg)
 {
     for (uint8_t i = 0; i < 255; ++i){
 	reg.write(i);
-	wait_ms(500);
+	mcu::wait_ms(500);
     }
 
     reg.write(255);
-    wait_ms(500);
+    mcu::wait_ms(500);
 
 }
 

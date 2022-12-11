@@ -122,7 +122,7 @@ int main()
              << period_in_us << " = " << t_us << " us = ";
 
         print (t_us);
-	wait_ms(1000);
+	avr_::wait_ms(1000);
     }
 }
 

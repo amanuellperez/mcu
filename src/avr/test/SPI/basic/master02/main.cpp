@@ -60,7 +60,7 @@ int main()
 	uart << static_cast<char>(res) << '\n';
 
 	no_SS.write_one();
-	wait_ms(1000);
+	avr_::wait_ms(1000);
 
     }
 }

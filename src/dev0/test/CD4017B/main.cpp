@@ -19,6 +19,8 @@
 
 #include "../../dev_counter_CD4017B.h"
 
+#include <avr_atmega.h>
+
 using namespace dev;
 
 
@@ -34,28 +36,28 @@ int main()
 	// probamos que cuente
 	for (uint8_t i = 0; i < 15; ++i){
 	    counter.next();
-	    wait_ms(100);
+	    atmega::wait_ms(100);
 	}
 
 	counter.disable();
 	for (uint8_t i = 0; i < 15; ++i){
 	    counter.next();
-	    wait_ms(200);
+	    atmega::wait_ms(200);
 	}
 
 	counter.enable();
 	for (uint8_t i = 0; i < 10; ++i){
 	    counter.next();
-	    wait_ms(200);
+	    atmega::wait_ms(200);
 	}
 
 	for (uint8_t i = 0; i < 10; ++i){
 	    counter.reset();
-	    wait_ms(200);
+	    atmega::wait_ms(200);
 	    counter.next();
-	    wait_ms(200);
+	    atmega::wait_ms(200);
 	    counter.next();
-	    wait_ms(200);
+	    atmega::wait_ms(200);
 	}
 
     }

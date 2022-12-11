@@ -23,6 +23,7 @@
 #include <avr_atmega.h>
 #include <stddef.h>
 
+namespace mcu = atmega;
 
 // Conexiones
 using LCD_pins_1602 = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<4>,
@@ -105,7 +106,7 @@ void test_extended_chars(LCD& lcd)
     lcd.print("First:[");
     print_extended(lcd);
     lcd.print("]");
-    wait_ms(2000);
+    mcu::wait_ms(2000);
 
     new_extended_char(lcd,
                 gl::pacman,
@@ -121,7 +122,7 @@ void test_extended_chars(LCD& lcd)
     lcd.print("Second:[");
     print_extended(lcd);
     lcd.print("]");
-    wait_ms(2000);
+    mcu::wait_ms(2000);
 
     new_extended_char(lcd,
                 gl::heart_full,
@@ -139,11 +140,11 @@ void test_extended_chars(LCD& lcd)
 	lcd.cursor_pos(0,0);
 	lcd.print_extended(0);
 	lcd.print_extended(2);
-	wait_ms(500);
+	mcu::wait_ms(500);
 	lcd.cursor_pos(0,0);
 	lcd.print_extended(1);
 	lcd.print_extended(3);
-	wait_ms(500);
+	mcu::wait_ms(500);
     }
 
 }
@@ -155,7 +156,7 @@ void test_lcd_screen4_1602()
 // ------
     lcd.clear();
     lcd.print("LCD screen(1602)");
-    wait_ms(1000);
+    mcu::wait_ms(1000);
 
 // ------
     test_extended_chars(lcd);
@@ -169,7 +170,7 @@ void test_lcd_screen4_2004()
 // ------
     lcd.clear();
     lcd.print("LCD screen (20 x 04)");
-    wait_ms(1000);
+    mcu::wait_ms(1000);
 
 
     test_extended_chars(lcd);
@@ -183,7 +184,7 @@ void test_lcd_screen4_4004()
 // ------
     lcd.clear();
     lcd.print("LCD screen (40 x 04)");
-    wait_ms(1000);
+    mcu::wait_ms(1000);
 
 
     test_extended_chars(lcd);

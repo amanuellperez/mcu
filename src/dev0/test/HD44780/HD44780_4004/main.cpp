@@ -23,6 +23,8 @@
 #include <avr_atmega.h>
 #include <cstring>
 
+namespace mcu = atmega;
+
 // Si lo conectamos solo a 4 pins de datos
 using LCD_pins = dev::LCD_HD44780_4004_pins4<dev::LCD_HD44780_RS<4>,
 				       dev::LCD_HD44780_RW<5>,
@@ -56,7 +58,7 @@ void test_lcd4(LCD& lcd)
     lcd.write_data_to_CG_or_DDRAM1('O');
     lcd.write_data_to_CG_or_DDRAM1('K');
     lcd.write_data_to_CG_or_DDRAM1('?');
-    wait_ms(1000);
+    mcu::wait_ms(1000);
 
 
 // -----
@@ -75,25 +77,25 @@ void test_lcd4(LCD& lcd)
 
 	lcd.set_ddram_address2(0x40 + x);
 	lcd.write_data_to_CG_or_DDRAM2(c);
-	wait_ms(100);
+	mcu::wait_ms(100);
     }
-    wait_ms(1000);
+    mcu::wait_ms(1000);
 
 
 // -----
     lcd.clear_display();
     print1(lcd, "clear_display: is clear the display? ");
-    wait_ms(2000);
+    mcu::wait_ms(2000);
 
 // -----
     lcd.clear_display();
     print1(lcd, "Testing return_home");
     print2(lcd, "Testing return_home");
-    wait_ms(1000);
+    mcu::wait_ms(1000);
     lcd.return_home();
     print1(lcd, "At the begining (1)?");
     print2(lcd, "At the begining (2)?");
-    wait_ms(1500);
+    mcu::wait_ms(1500);
 
 // -----
     const char left_shift[] = "This is a very long left shift.";
@@ -102,15 +104,15 @@ void test_lcd4(LCD& lcd)
     print1(lcd, "Shift to the left.");
     print2(lcd, "Shift to the left.");
     lcd.entry_mode1(true, true);
-    wait_ms(500);
+    mcu::wait_ms(500);
     const char* p = &left_shift[0];
     while (*p){
 	lcd.write_data_to_CG_or_DDRAM1(*p);
 	lcd.write_data_to_CG_or_DDRAM2(*p);
-	wait_ms(500);
+	mcu::wait_ms(500);
 	++p;
     }
-    wait_ms(1000);
+    mcu::wait_ms(1000);
 
 // -----
     const char right_shift[] = "very long right shift";
@@ -119,17 +121,17 @@ void test_lcd4(LCD& lcd)
     lcd.entry_mode1(true, false);	// recordar dejar shift = false
     print1(lcd, "Shift to the right.");
     print2(lcd, "Shift to the right.");
-    wait_ms(1000);
+    mcu::wait_ms(1000);
     lcd.entry_mode1(false, true);
-    wait_ms(500);
+    mcu::wait_ms(500);
     p = &right_shift[0];
     while (*p){
 	lcd.write_data_to_CG_or_DDRAM1(*p);
 	lcd.write_data_to_CG_or_DDRAM2(*p);
-	wait_ms(500);
+	mcu::wait_ms(500);
 	++p;
     }
-    wait_ms(1000);
+    mcu::wait_ms(1000);
     lcd.entry_mode1(true, false);	// recordar dejar shift = false
 
 // -----
@@ -138,17 +140,17 @@ void test_lcd4(LCD& lcd)
     print2(lcd, "Turn off 1 second");
     lcd.display_control1(true, false, false);
     lcd.display_control2(true, false, false);
-    wait_ms(1000);
+    mcu::wait_ms(1000);
     lcd.display_control1(false, false, false);
     lcd.display_control2(false, false, false);
-    wait_ms(1000);
+    mcu::wait_ms(1000);
     lcd.display_control1(true, false, false);
     lcd.display_control2(true, false, false);
-    wait_ms(1000);
+    mcu::wait_ms(1000);
     lcd.clear_display();
     print1(lcd, "On?");
     print2(lcd, "On?");
-    wait_ms(1000);
+    mcu::wait_ms(1000);
 
 // -----
     lcd.clear_display();
@@ -156,25 +158,25 @@ void test_lcd4(LCD& lcd)
     print2(lcd, "Cursor on");
     lcd.display_control1(true, true, false);
     lcd.display_control2(true, true, false);
-    wait_ms(1000);
+    mcu::wait_ms(1000);
     lcd.clear_display();
     print1(lcd, "Cursor off");
     print2(lcd, "Cursor off");
     lcd.display_control1(true, false, false);
     lcd.display_control2(true, false, false);
-    wait_ms(2000);
+    mcu::wait_ms(2000);
     lcd.clear_display();
     print1(lcd, "Cursor blink on");
     print2(lcd, "Cursor blink on");
     lcd.display_control1(true, false, true);
     lcd.display_control2(true, false, true);
-    wait_ms(3000);
+    mcu::wait_ms(3000);
     lcd.clear_display();
     print1(lcd, "Cursor blink off");
     print2(lcd, "Cursor blink off");
     lcd.display_control1(true, false, false);
     lcd.display_control2(true, false, false);
-    wait_ms(1000);
+    mcu::wait_ms(1000);
     // Lo dejamos sin cursor
     lcd.display_control1(true, false, false);
     lcd.display_control2(true, false, false);
@@ -189,7 +191,7 @@ void test_lcd4(LCD& lcd)
     print2(lcd, left_shift);
     for (uint8_t i = 0; i < 40; ++i){
 	lcd.cursor_or_display_shift1(true, false);
-	wait_ms(200);
+	mcu::wait_ms(200);
     }
     // Lo dejamos como estaba
     lcd.return_home();
@@ -199,7 +201,7 @@ void test_lcd4(LCD& lcd)
     print2(lcd, right_shift);
     for (uint8_t i = 0; i < 40; ++i){
 	lcd.cursor_or_display_shift1(true, true);
-	wait_ms(200);
+	mcu::wait_ms(200);
     }
     // Lo dejamos como estaba
     lcd.return_home();
@@ -209,7 +211,7 @@ void test_lcd4(LCD& lcd)
     print2(lcd, "Move cursor to the left");
     for (uint8_t i = 0; i < 15; ++i){
 	lcd.cursor_or_display_shift1(false, false);
-	wait_ms(300);
+	mcu::wait_ms(300);
     }
 
 // -----
@@ -220,7 +222,7 @@ void test_lcd4(LCD& lcd)
     lcd.set_ddram_address2(0); // coloco el cursor al principio
     for (uint8_t i = 0; i < 15; ++i){
 	lcd.cursor_or_display_shift1(false, true);
-	wait_ms(300);
+	mcu::wait_ms(300);
     }
 
     // Lo dejamos sin cursor
@@ -232,7 +234,7 @@ void test_lcd4(LCD& lcd)
     lcd.clear_display();
     lcd.set_ddram_address1(3);
     print1(lcd, "from x = 3");
-    wait_ms(1000);
+    mcu::wait_ms(1000);
 
     lcd.clear_display();
     lcd.set_ddram_address1(0x00);
@@ -243,7 +245,7 @@ void test_lcd4(LCD& lcd)
     print2(lcd, "Third row");
     lcd.set_ddram_address2(0x40);
     print2(lcd, "Fourth row");
-    wait_ms(1000);
+    mcu::wait_ms(1000);
 
     lcd.clear_display();
 }
@@ -303,7 +305,7 @@ void test_cgram4(LCD& lcd)
                 gl::plug,
                 gl::musical_note);
 
-    wait_ms(2000);
+    mcu::wait_ms(2000);
 
     show_glyphs(lcd,
                 gl::heart_full,
@@ -320,11 +322,11 @@ void test_cgram4(LCD& lcd)
 	lcd.set_ddram_address1(0x40);
 	lcd.write_data_to_CG_or_DDRAM1(0x00);
 	lcd.write_data_to_CG_or_DDRAM1(0x02);
-	wait_ms(500);
+	mcu::wait_ms(500);
 	lcd.set_ddram_address1(0x40);
 	lcd.write_data_to_CG_or_DDRAM1(0x01);
 	lcd.write_data_to_CG_or_DDRAM1(0x03);
-	wait_ms(500);
+	mcu::wait_ms(500);
     }
 
 

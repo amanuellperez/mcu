@@ -27,6 +27,8 @@
 #include <avr_time.h>
 #include <array>
 
+namespace mcu = atmega;
+
 // pines que usamos
 // ----------------
 // LCD
@@ -117,7 +119,7 @@ void test_lcd_menu()
 
 	lcd.clear();
 	lcd << "Seleccion: " << static_cast<uint16_t>(day);
-	wait_ms(1000);
+	mcu::wait_ms(1000);
 
 //	constexpr std::array days2 ={"Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sa"};
 	constexpr const char* days2 = "DoLuMaMiJuViSa";
@@ -133,7 +135,7 @@ void test_lcd_menu()
 	lcd.clear();
 	lcd_clear(lcd);
 	lcd << "Seleccion: " << static_cast<uint16_t>(day2);
-	wait_ms(1000);
+	mcu::wait_ms(1000);
 
 
 //	lcd.clear();
@@ -145,7 +147,7 @@ void test_lcd_menu()
 
 	lcd.clear();
 	lcd << "Seleccion: " << static_cast<uint16_t>(unidad);
-	wait_ms(1000);
+	mcu::wait_ms(1000);
 
 //	lcd.clear();
 	lcd_clear(lcd);
@@ -158,7 +160,7 @@ void test_lcd_menu()
         lcd.clear();
 	lcd << "seleccion:\n" << seleccion;
 
-	wait_ms(1000);
+	mcu::wait_ms(1000);
 
 	lcd_clear(lcd);
 	lcd << "Elige: xxxx = unidades";
@@ -169,7 +171,7 @@ void test_lcd_menu()
         lcd.clear();
 	lcd << "seleccion:\n" << seleccion;
 
-	wait_ms(1000);
+	mcu::wait_ms(1000);
 
 
 	lcd_clear(lcd);
@@ -179,7 +181,7 @@ void test_lcd_menu()
 
 	lcd.clear();
 	lcd << "seleccion:\n" << seleccion;
-	wait_ms(1000);
+	mcu::wait_ms(1000);
 
 	lcd_clear(lcd);
 	lcd << "Todo bien? ";
@@ -190,7 +192,7 @@ void test_lcd_menu()
         lcd.clear();
 	lcd << "seleccion:\n" << seleccion;
 
-	wait_ms(1000);
+	mcu::wait_ms(1000);
 
 	lcd_clear(lcd);
 	lcd << "Todo bien (2)? ";
@@ -200,7 +202,7 @@ void test_lcd_menu()
         lcd.clear();
 	lcd << "seleccion:\n" << seleccion;
 
-	wait_ms(1000);
+	mcu::wait_ms(1000);
     }
 
 }

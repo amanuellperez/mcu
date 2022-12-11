@@ -3,6 +3,7 @@ DIRS = algorithm\
 	bit			\
 	char_traits	\
 	cmath		\
+	concepts	\
 	cstddef		\
 	cstdio		\
 	cstring		\

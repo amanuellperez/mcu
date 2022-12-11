@@ -119,7 +119,7 @@ int main()
         print (t_us);
 	uart << ".";
 
-	wait_ms(1000);
+	avr_::wait_ms(1000);
     }
 }
 

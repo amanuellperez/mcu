@@ -19,8 +19,9 @@
 
 #include "../../../dev_push_button.h"
 #include "../../../dev_led.h"
-#include <avr_time.h>
+#include <avr_atmega.h>
 
+namespace mcu = atmega;
 
 // Conectar un led al pin 15 y un pulsador al pin 23
 // Al pulsar el pulsador se enciende el led y al soltarlo se apaga
@@ -35,7 +36,7 @@ int main()
 	else 
 	    led.off();
 
-	wait_ms(100);
+	mcu::wait_ms(100);
 
     }
 }

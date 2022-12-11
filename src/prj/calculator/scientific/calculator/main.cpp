@@ -81,7 +81,7 @@ void Main::init_lcd()
 //	lcd << *p;
 //
 //    lcd << "]\n";
-//    wait_ms(1000);
+//    mcu::wait_ms(1000);
 //}
 
 
@@ -129,7 +129,7 @@ void Main::msg_error()
 	    return;
 	}
 
-	wait_ms(Tclock_error);
+	mcu::wait_ms(Tclock_error);
     }
 }
 

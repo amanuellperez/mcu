@@ -504,7 +504,7 @@ void test_basic()
 	else
 	    uart << "OK. Sensor BME280 conectado.\n";
 
-	wait_ms(1000);
+	atmega::wait_ms(1000);
 
     }
 }
@@ -540,7 +540,7 @@ void test_calib()
 	    print_params(uart, sensor);
 	}
 
-	wait_ms(5000);
+	atmega::wait_ms(5000);
     }
 }
 
@@ -597,7 +597,7 @@ void test_config()
 	    print_cfg(uart, cfg1);
 	}
 
-	wait_ms(5000);
+	atmega::wait_ms(5000);
 
     }
 }
@@ -666,7 +666,7 @@ void test_uncompensated()
 		 << "uhumidity    = " << data.uhumidity << '\n';
 	}
 
-	wait_ms(3000);
+	atmega::wait_ms(3000);
 
     }
 }
@@ -739,7 +739,7 @@ void test_t_p_h()
 	}
 
 
-	wait_ms(3000);
+	atmega::wait_ms(3000);
 
     }
 }

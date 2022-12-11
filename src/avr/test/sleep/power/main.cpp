@@ -52,10 +52,10 @@ int main()
 
     while(1){
 	avr_::Pin<led_pin>::write_one();
-	wait_ms(500);
+	avr_::wait_ms(500);
 
 	avr_::Pin<led_pin>::write_zero();
-	wait_ms(500);
+	avr_::wait_ms(500);
 
 	avr_::Power::turn_off_if();
     }

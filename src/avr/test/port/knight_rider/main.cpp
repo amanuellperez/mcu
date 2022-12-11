@@ -30,7 +30,7 @@ int main()
 	uint8_t v = 0b00000001;
 	for (uint8_t i = 0; i < 8; ++i){
 	    portB = v;
-	    wait_ms(200);
+	    avr_::wait_ms(200);
 	    v <<= 1;
 	}
     }

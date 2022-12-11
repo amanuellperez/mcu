@@ -21,6 +21,7 @@
 #include <avr_atmega.h>
 #include <atd_time.h>
 
+namespace mcu = atmega;
 
 // Dependiendo del valor de F_CPU hay que pasar un periodo diferente.
 // El compilador tiene que mostrar mensajes adecuados a cada error.
@@ -62,7 +63,7 @@ void test_system_clock()
     while(1){
 	uart << System_clock::now() << '\n';
 
-	wait_ms(1000);
+	mcu::wait_ms(1000);
     }
 }
 

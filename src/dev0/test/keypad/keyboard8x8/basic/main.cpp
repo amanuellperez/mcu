@@ -45,11 +45,11 @@ void test_keypad()
 
     while(1){
 	while (!keypad.scan())
-	    wait_ms(100);
+	    atmega::wait_ms(100);
 
 	uart << "(" << (int) keypad.row() << ", " << (int) keypad.col() << ") = "
 	    << (int) keypad.last_key() << '\n';
-	wait_ms(100);
+	atmega::wait_ms(100);
     }
 }
 
@@ -75,7 +75,7 @@ void test_keyboard()
 	    default: uart << c; break;
 	}
 
-	wait_ms(100); // debouncing
+	atmega::wait_ms(100); // debouncing
     }
 }
 

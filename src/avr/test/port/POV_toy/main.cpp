@@ -26,7 +26,7 @@
 void POVDisplay(uint8_t fila_glyph)
 {
     PORTB = fila_glyph;
-    wait_ms(2);
+    avr_::wait_ms(2);
 }
 
 int main()
@@ -47,7 +47,7 @@ int main()
 	POVDisplay(0b00001110);
 
 	portB = 0;
-	wait_ms(10);
+	avr_::wait_ms(10);
     }
 }
 

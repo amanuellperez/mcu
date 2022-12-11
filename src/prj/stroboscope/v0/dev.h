@@ -38,6 +38,8 @@
 #include <dev_keyrow.h>
 #include "stroboscope.h"
 
+#include <avr_atmega.h>
+namespace mcu = atmega;
 
 // pins usados
 // ------------

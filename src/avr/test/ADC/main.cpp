@@ -1,6 +1,6 @@
 // Copyright (C) 2019-2020 A.Manuel L.Perez 
 //           mail: <amanuel.lperez@gmail.com>
-//           https://github.com/amanuellperez/mcu
+//           https://github.com/amanuellperez/avr_
 //
 // This file is part of the MCU++ Library.
 //
@@ -21,6 +21,7 @@
 #include "../../avr_ADC_basic.h"
 #include "../../avr_UART.h"
 #include "../../avr_time.h"
+
 
 // Conectar un divisor de potencial, la salida al pin 28.
 // Con un multimetro ir comparando la salida del multimetro con la que da el
@@ -105,7 +106,7 @@ void test_internal_1_1V()
 	print(uart, avr_::ADC::ADC_in_volts<AREF_en_mV>());
 	uart << '\n';
 
-	wait_ms(1000);
+	avr_::wait_ms(1000);
     }                                      
 }
 
@@ -149,7 +150,7 @@ void test_internal_AVCC()
 	print(uart, avr_::ADC::ADC_in_volts<AREF_en_mV>());
 	uart << '\n';
 
-	wait_ms(1000);
+	avr_::wait_ms(1000);
     }                                      
 }
 
@@ -191,7 +192,7 @@ void test_AREF_external()
 	print(uart, avr_::ADC::ADC_in_volts<AREF_en_mV>());
 	uart << '\n';
 
-	wait_ms(1000);
+	avr_::wait_ms(1000);
     }                                      
 }
 

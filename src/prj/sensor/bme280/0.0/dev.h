@@ -22,9 +22,11 @@
 #ifndef __SENSOR_DEV_H__
 #define __SENSOR_DEV_H__
 
-#include <avr_atmega.h>
 #include <dev_LCD_HD44780.h>
 #include <dev_BME280_basic.h>
+
+#include <avr_atmega.h>
+namespace mcu = atmega;
 
 // pins usados
 // ------------

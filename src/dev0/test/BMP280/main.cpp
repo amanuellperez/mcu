@@ -453,7 +453,7 @@ void test_bmp280()
 	if (sensor.error())
 	    uart << "Error: error en el sensor!!!\n";
 
-        wait_ms(4000);
+	atmega::wait_ms(4000);
     }
 }
 

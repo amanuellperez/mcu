@@ -360,7 +360,7 @@ Rep User_choose_number<L, T, t0, Rep, M>::choose(Rep x0,
 
 	update();
 
-	wait_ms(T_clock);
+	not_generic::wait_ms(T_clock);
     }
 
 

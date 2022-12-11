@@ -21,6 +21,7 @@
 #include <avr_atmega.h>
 #include <atd_time.h>
 
+namespace mcu = atmega;
 
 // Dependiendo del valor de F_CPU hay que pasar un periodo diferente.
 // El compilador tiene que mostrar mensajes adecuados a cada error.
@@ -104,7 +105,7 @@ void test_chronometer_clock()
     while(1){
 	print_time(uart, Chronometer_ms::sexagesimal_count());
 
-	wait_ms(100);
+	mcu::wait_ms(100);
 
 	if(UART::are_there_data_unread()){
 	    char ans = static_cast<char>(UART::data_register());

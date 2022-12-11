@@ -71,7 +71,7 @@ private:
 
 inline void wait_release_key()
 {
-    wait_ms(time_wait_release_key);
+    mcu::wait_ms(time_wait_release_key);
 }
 
 

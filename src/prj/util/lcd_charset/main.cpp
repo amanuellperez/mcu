@@ -22,6 +22,9 @@
 
 #include <algorithm>
 
+#include <avr_atmega.h>
+namespace mcu = atmega;
+
 // pins
 using LCD_pins_1602 = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<4>,
 				       dev::LCD_HD44780_RW<5>,
@@ -83,7 +86,7 @@ void show_charset()
     while(1){
 	for (char i = 0; i < 8; ++i){
 	    print(lcd, 32*i);
-	    wait_ms(3000);
+	    mcu::wait_ms(3000);
 	}
     }
 }

@@ -15,10 +15,24 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-
+/****************************************************************************
+ *
+ * DESCRIPCION
+ *	Implementación de HD44780_basic
+ *
+ * HISTORIA
+ *    A.Manuel L.Perez
+ *    11/12/2022 Cambio el uso de las macros delay_us/ms por funciones de C++.
+ *		 CUIDADO: no borrar los comentados delays hasta no haber
+ *		 comprobado que funciona todo bien. Es necesario que el
+ *		 compilador haga el inline de las funciones delay_us(1), sino
+ *		 el delay será más de 1 microsegundo, no sabiendo si
+ *		 funcionará.
+ *
+ ****************************************************************************/
 #include <atd_bit.h>
 #include <avr_time.h>
-
+#include "not_generic.h"
 
 namespace dev{
 
@@ -180,12 +194,14 @@ bool LCD_HD44780_base<P>::is_busy4()
 
     RS::write_zero();
     RW::write_one();
-    _delay_us(1);
+    //_delay_us(1);
+    not_generic::wait_us(1);
 
     bool res = false;
 
     pin_E::write_one();
-    _delay_us(1); 
+    //_delay_us(1); 
+    not_generic::wait_us(1);
 		
     // Fundamental: leer D[7] cuando E = 1 (pag. 32, datasheet)
     if(D7::is_one()) 
@@ -195,7 +211,8 @@ bool LCD_HD44780_base<P>::is_busy4()
     // Enviamos otro pulso a E para descartar el resto de los datos D0-D4
     // (que se envían en el segundo paquete)
     pin_E::write_one();
-    _delay_us(1);
+    //_delay_us(1);
+    not_generic::wait_us(1);
     pin_E::write_zero();
 
     // Dejamos los pines como estaban
@@ -221,7 +238,8 @@ uint8_t LCD_HD44780_base<P>::read_d4()
     uint8_t res = 0x00;
 
     pin_E::write_one();
-    _delay_us(1);
+    //_delay_us(1);
+    not_generic::wait_us(1);
 
     if (D7::is_one()) atd::write_bit<7>::to<1>::in(res);
     if (D6::is_one()) atd::write_bit<6>::to<1>::in(res);
@@ -229,9 +247,11 @@ uint8_t LCD_HD44780_base<P>::read_d4()
     if (D4::is_one()) atd::write_bit<4>::to<1>::in(res);
 
     pin_E::write_zero();
-    _delay_us(1);
+    //_delay_us(1);
+    not_generic::wait_us(1);
     pin_E::write_one();
-    _delay_us(1);
+    //_delay_us(1);
+    not_generic::wait_us(1);
     
     if (D7::is_one()) atd::write_bit<3>::to<1>::in(res);
     if (D6::is_one()) atd::write_bit<2>::to<1>::in(res);
@@ -313,20 +333,26 @@ template <typename P>
 template <typename pin_E>
 void LCD_HD44780_base<P>::init4()
 {
-    delay_ms(50);   // wait for more than 40 ms after Vcc rises to 2.7V
+    //delay_ms(50);   // wait for more than 40 ms after Vcc rises to 2.7V
+    not_generic::wait_ms(50);
 
     // 8 bit mode
     // this is according to the hitachi HD44780 datasheet
     // figure 23, pg 46
     write_d4_d7<pin_E>(0,0, 0x30);	// Function set: Interface is 8 bits long
-    delay_us(4500);		// wait min 4.1ms
+// NO BORRAR: los delay_us hasta que no esté suficientemente probado.
+// No me fio de que el compilador haga inline de todos los wait_us
+//    delay_us(4500);		// wait min 4.1ms
+    not_generic::wait_us(4500);
 
     write_d4_d7<pin_E>(0,0, 0x30); // Function set: Interface is 8 bits long
-    delay_us(4500);	    // wait min 100us <--- TODO? solo 100us no 4500!!
+    //delay_us(4500);	    // wait min 100us <--- TODO? solo 100us no 4500!!
+    not_generic::wait_us(4500);
 
     
     write_d4_d7<pin_E>(0,0, 0x30); // Function set: Interface is 8 bits long
-    delay_us(150);	    // Aquí la datasheet no pone que esperes. (TODO?)
+    //delay_us(150);	    // Aquí la datasheet no pone que esperes. (TODO?)
+    not_generic::wait_us(150);
  
     // TODO: la datasheet pone que ya se puede mirar BF. Si no se mira
     // entonces the waiting time between instructions is longer than the
@@ -334,29 +360,34 @@ void LCD_HD44780_base<P>::init4()
     // de momento le añado un delay de 100 us.
     // Function set: Interface is 4 bits long
     write_d4_d7<pin_E>(0,0, 0x20);
-    delay_us(100);
+    //delay_us(100);
+    not_generic::wait_us(100);
 
     // definimos display 16 x 2 
     // function_set(true, true, true);
     write_d4_d7<pin_E>(0,0, 0x20);
     write_d4_d7<pin_E>(0,0, 0x80);
-    delay_us(100);
+    //delay_us(100);
+    not_generic::wait_us(100);
 
     // display_on();
     write_d4_d7<pin_E>(0,0, 0x00);
     write_d4_d7<pin_E>(0,0, 0xC0);
-    delay_us(100);
+    //delay_us(100);
+    not_generic::wait_us(100);
 
     // clear();
     write_d4_d7<pin_E>(0,0, 0x00);
     write_d4_d7<pin_E>(0,0, 0x10);
-    delay_us(100);
+    //delay_us(100);
+    not_generic::wait_us(100);
 
     // entry mode set
     // entry_mode(incrementa_cursor_, shift_display_);
     write_d4_d7<pin_E>(0,0, 0x00);
     write_d4_d7<pin_E>(0,0, 0x60);
-    delay_us(100);
+    //delay_us(100);
+    not_generic::wait_us(100);
 }
 
 template <typename P>
@@ -385,7 +416,10 @@ template <typename pin_E>
 void LCD_HD44780_base<P>::pulse_E()
 {
     pin_E::write_one();
-    delay_us(1);   // OJO: esto antes tenía que ponerlo a delay_ms(1)???
+    // NO BORRAR delay_us hasta que no se haya probado lo suficiente.
+    // Si el compilador hace inline de todo debería de funcionar
+    //delay_us(1);   // OJO: esto antes tenía que ponerlo a delay_ms(1)???
+    not_generic::wait_us(1);
     pin_E::write_zero();
 }
 

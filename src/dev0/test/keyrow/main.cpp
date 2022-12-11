@@ -57,7 +57,7 @@ void test_keyrow()
 	// CHECK_DONT_COMPILE
 //	if (keyrow.key<100>().is_pressed())
 //	  uart << "error no tiene que compilar\n" << std::flush;
-	wait_ms(100);
+	atmega::wait_ms(100);
     }
 }
 
@@ -77,7 +77,7 @@ void test_scan()
 	    case DOWN_KEY: uart << "down\n"; break;
 	    case NO_KEY: uart << "none\n"; break;
 	}
-	wait_ms(100);
+	atmega::wait_ms(100);
     }
 
 }

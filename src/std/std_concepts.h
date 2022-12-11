@@ -1,4 +1,4 @@
-// Copyright (C) 2021 A.Manuel L.Perez 
+// Copyright (C) 2022 A.Manuel L.Perez 
 //           mail: <amanuel.lperez@gmail.com>
 //           https://github.com/amanuellperez/mcu
 //
@@ -17,35 +17,32 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "main.h"
+#pragma once
 
+#pragma once
 
-void Main::init_sensor()
-{
-    sensor_.init();
-    sensor_.indoor_navigation();
+#ifndef __MCU_STD_CONCEPTS_H__
+#define __MCU_STD_CONCEPTS_H__
+/****************************************************************************
+ *
+ * DESCRIPCION
+ *	El correspondiente a <concepts>
+ *
+ * HISTORIA
+ *    A.Manuel L.Perez
+ *    11/12/2022 Escrito
+ *
+ ****************************************************************************/
+#include "std_config.h"
+#include "std_type_traits.h"
 
-    if (sensor_.error()) {
-	lcd_.clear();
-	lcd_ << "Sensor no responde";
-	mcu::wait_ms(1000);
-    }
-}
+namespace STD{
 
-void Main::print_sensor()
-{
-    Sensor::Celsius T;
-    Sensor::Pascal P;
-    Sensor::Relative_humidity H;
-    sensor_.T_and_P_and_H(T, P, H);
-    Sensor::Hectopascal hP{P};
+template <typename T>
+concept integral = is_integral_v<T>;
 
-    lcd_.cursor_pos(0, 0);
-    lcd_ << T << ' ' << lcd_symbol::of("º") << 'C';
-    lcd_ << "  " << H << "%";
-    lcd_.cursor_pos(0, 1);
-    lcd_ << hP << " hPa";
-}
+}// namespace
 
+#endif
 
 

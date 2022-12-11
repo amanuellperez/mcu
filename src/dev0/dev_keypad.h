@@ -145,7 +145,7 @@ uint8_t Keypad<R, C>::scan_cols() const
     pin_as_inputs_with_pullup<Cols>();
 
     pin_as_output_and_write_zero<Rows>();
-    wait_ms(5); // sin este delay falla la tecla (4,0)
+    not_generic::wait_ms(5); // sin este delay falla la tecla (4,0)
 		// es para esperar que alcance equilibrio los pines
 
     return what_pin_is_zero<Cols>();

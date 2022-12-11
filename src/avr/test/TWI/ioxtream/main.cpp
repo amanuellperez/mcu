@@ -410,14 +410,14 @@ void test_master()
 {
     while (1) {
 	send_service1();
-	wait_ms(500);
+	avr_::wait_ms(500);
 	send_service2();
-	wait_ms(500);
+	avr_::wait_ms(500);
 	test_all_send_type();
-	wait_ms(500);
+	avr_::wait_ms(500);
 	send_service4();
 	test_typical_service();
-	wait_ms(200);
+	avr_::wait_ms(200);
 	test_n();
     }
 }

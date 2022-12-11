@@ -23,9 +23,9 @@
 #include <dev_LCD_screen.h>
 #include <dev_keyrow.h>
 
-#include <avr_time.h>
+#include <avr_atmega.h>
 
-
+namespace mcu = atmega;
 
 // pines que usamos
 // ----------------
@@ -67,13 +67,13 @@ using LCD = Screen_2004;
 
 
 struct Main{
-    void a2() {lcd.clear(); lcd << "ejecutando a2"; wait_ms(500);}
-    void b1() {lcd.clear(); lcd << "ejecutando b1"; wait_ms(500);}
-    void c1() {lcd.clear(); lcd << "ejecutando c1"; wait_ms(500);}
-    void c2() {lcd.clear(); lcd << "ejecutando c2"; wait_ms(500);}
-    void c3() {lcd.clear(); lcd << "ejecutando c3"; wait_ms(500);}
-    void d1() {lcd.clear(); lcd << "ejecutando d1"; wait_ms(500);}
-    void d2() {lcd.clear(); lcd << "ejecutando d2"; wait_ms(500);}
+    void a2() {lcd.clear(); lcd << "ejecutando a2"; mcu::wait_ms(500);}
+    void b1() {lcd.clear(); lcd << "ejecutando b1"; mcu::wait_ms(500);}
+    void c1() {lcd.clear(); lcd << "ejecutando c1"; mcu::wait_ms(500);}
+    void c2() {lcd.clear(); lcd << "ejecutando c2"; mcu::wait_ms(500);}
+    void c3() {lcd.clear(); lcd << "ejecutando c3"; mcu::wait_ms(500);}
+    void d1() {lcd.clear(); lcd << "ejecutando d1"; mcu::wait_ms(500);}
+    void d2() {lcd.clear(); lcd << "ejecutando d2"; mcu::wait_ms(500);}
     
 
     void run();

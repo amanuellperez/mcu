@@ -53,7 +53,7 @@ void Main::run()
 	lcd_.cursor_pos(0,1);
 	lcd_ << "Buffer = ";
 	print(lcd_, buffer_);
-	wait_ms(1000);
+	mcu::wait_ms(1000);
     }
 }
 

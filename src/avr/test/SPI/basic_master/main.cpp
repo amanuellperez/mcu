@@ -54,7 +54,7 @@ void test_basic()
 	for (std::byte p{1}; p != std::byte{0}; p <<= 1){
 	    SPI::write(p);
 	    pin_buffer_flush.pulse_of_1us();
-	    wait_ms(100);
+	    avr_::wait_ms(100);
 	}
   } // while(1)
 }
@@ -71,7 +71,7 @@ void test_count()
 	    uart << static_cast<uint16_t>(i) << '\n';
 	    SPI::write(std::byte{i});
 	    pin_buffer_flush.pulse_of_1us();
-	    wait_ms(500);
+	    avr_::wait_ms(500);
 	}
 
     }

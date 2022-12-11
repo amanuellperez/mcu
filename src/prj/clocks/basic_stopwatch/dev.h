@@ -32,6 +32,8 @@
 #include <dev_keyrow.h>
 #include "stopwatch.h"
 
+namespace mcu = atmega;
+
 // pins usados
 // ------------
 // UART for debugging purpose: pins 2 and 3

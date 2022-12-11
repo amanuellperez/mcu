@@ -86,7 +86,7 @@ void test_basic()
     }
 
 
-	wait_ms(1000);
+	avr_::wait_ms(1000);
     }
 
 }
@@ -190,7 +190,7 @@ void test_progmem()
     }
 
 
-	wait_ms(1000);
+    avr_::wait_ms(1000);
     }
 
 }
@@ -214,7 +214,7 @@ void test_progmem_view()
 	}
 
 	uart << "\n\n";
-	wait_ms(2000);
+	avr_::wait_ms(2000);
     }
 }
 

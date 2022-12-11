@@ -38,6 +38,10 @@
 
 #include "lcd.h"
 
+#include <avr_atmega.h>
+
+namespace mcu = atmega;
+
 #include "../interface.h"
 
 // pins usados

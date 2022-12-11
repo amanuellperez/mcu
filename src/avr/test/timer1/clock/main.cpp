@@ -97,7 +97,7 @@ int main()
     Timer::on<period_in_us>();
 
     while(1){
-	wait_ms(1000);
+	avr_::wait_ms(1000);
 	print_time();
     }
 }

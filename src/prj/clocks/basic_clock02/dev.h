@@ -39,6 +39,8 @@
 #include <dev_keyrow.h>
 #include <dev_clocks.h>
 
+namespace mcu = atmega;
+
 // pins usados
 // ------------
 // UART for debugging purpose: pins 2 and 3

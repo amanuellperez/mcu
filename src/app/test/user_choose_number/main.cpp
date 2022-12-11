@@ -35,6 +35,7 @@
 #include "../../user_choose_number.h"
 
 
+namespace mcu = atmega;
 
 // pines que usamos
 // ----------------
@@ -112,16 +113,16 @@ void test_choose_number2()
 
     scr.clear();
     scr.print("Choose number");
-    wait_ms(700);
+    mcu::wait_ms(700);
 
     scr.clear();
     scr.print("LINEAL TEST");
-    wait_ms(700);
+    mcu::wait_ms(700);
 
 {
     scr.clear();
     scr.print("Big font: [5, 40]");
-    wait_ms(700);
+    mcu::wait_ms(700);
     scr.load<Font_digit_3x3_t1>();
 
 
@@ -132,7 +133,7 @@ void test_choose_number2()
     scr.print("elegido : ");
     scr.print<Font_digit_3x3_t1>(u8, nm::Width{2});
 
-    wait_ms(1000);
+    mcu::wait_ms(1000);
 
 }
 
@@ -141,7 +142,7 @@ void test_choose_number2()
 {
     scr.clear();
     scr.print("Big number");
-    wait_ms(1000);
+    mcu::wait_ms(1000);
     uint16_t u16  =  dev::user_choose_number_lineal(scr, keyrow).pos(3, 1)
 					     .between(0, 60000)
 					     .choose4(2900u);
@@ -149,7 +150,7 @@ void test_choose_number2()
     scr.print("elegido : ");
     scr.print(u16);
 
-    wait_ms(1000);
+    mcu::wait_ms(1000);
 
 }
 
@@ -157,7 +158,7 @@ void test_choose_number2()
 
     scr.clear();
     scr.print("2 digits [5,25]");
-    wait_ms(1000);
+    mcu::wait_ms(1000);
     uint8_t u8 =  dev::user_choose_number_lineal(scr, keyrow).pos(3, 1)
 					 .between(5, 25)
 					 .choose2(10);
@@ -166,7 +167,7 @@ void test_choose_number2()
     scr.print(u8);
 
 
-    wait_ms(1000);
+    mcu::wait_ms(1000);
 
     scr.clear();
     scr.print("4 [2890, 2910]");
@@ -177,15 +178,15 @@ void test_choose_number2()
     scr.print("elegido : ");
     scr.print(u16);
 
-    wait_ms(1000);
+    mcu::wait_ms(1000);
 
     scr.clear();
     scr.print("CIRCULAR TEST");
-    wait_ms(1000);
+    mcu::wait_ms(1000);
 
     scr.clear();
     scr.print("2 digits [5,25]");
-    wait_ms(1000);
+    mcu::wait_ms(1000);
     u8 =  dev::user_choose_number_circular(scr, keyrow).pos(3, 1)
 					 .between(5, 25)
 					 .choose2(10);
@@ -193,7 +194,7 @@ void test_choose_number2()
     scr.print("has elegido: ");
     scr.print(u8);
 
-    wait_ms(1000);
+    mcu::wait_ms(1000);
 
     scr.clear();
     scr.print("4 [2890, 2910]");
@@ -204,12 +205,12 @@ void test_choose_number2()
     scr.print("elegido : ");
     scr.print(u16);
 
-    wait_ms(1000);
+    mcu::wait_ms(1000);
 
 {
     scr.clear();
     scr.print("Callback test");
-    wait_ms(1000);
+    mcu::wait_ms(1000);
     uint16_t u16  =  dev::user_choose_number_lineal(app, scr, keyrow).pos(3, 1)
 					     .between(10, 30)
 					     .callback(&Main::f)
@@ -218,7 +219,7 @@ void test_choose_number2()
     scr.print("elegido : ");
     scr.print(u16);
 
-    wait_ms(1000);
+    mcu::wait_ms(1000);
 
 }
 
@@ -239,13 +240,13 @@ void test_choose_number2()
 //    scr.print("has elegido: ");
 //    atd::print(scr, u8);
 //
-//    wait_ms(1000);
+//    mcu::wait_ms(1000);
 //}
 //{TODO: al migrar al compilador avr-g++ 11.3.0 esto dejó de funcionar.Revisar!!
 //    using Rep = atd::Decimal<uint16_t, 2>;
 //    scr.clear();
 //    scr.print("Decimal [5,25]");
-//    wait_ms(1000);
+//    mcu::wait_ms(1000);
 //    Rep u8 = dev::user_choose_number_lineal<LCD, Keyrow, Rep>(scr, keyrow)
 //		     .pos(3, 1)
 //		     .between(5, 25)
@@ -255,7 +256,7 @@ void test_choose_number2()
 //    scr.print("has elegido: ");
 //    atd::print(scr, u8);
 //
-//    wait_ms(1000);
+//    mcu::wait_ms(1000);
 //}
 
 }
@@ -270,7 +271,7 @@ void test_bugs()
 
     scr.clear();
     scr.print("Bugs");
-    wait_ms(700);
+    mcu::wait_ms(700);
 
 {
     scr.clear();

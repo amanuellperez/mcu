@@ -66,6 +66,5 @@ export PATH
 alias s='cd ${MCU_SRC}'   
 alias mf='make flash'
 alias mc='make super_clean'
-alias vm="vi prj_main.cpp"
 
 cd ${MCU_SRC}

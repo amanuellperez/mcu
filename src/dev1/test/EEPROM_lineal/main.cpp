@@ -23,6 +23,8 @@
 #include <atd_cast.h>
 #include <atd_cstddef.h>
 
+namespace mcu = atmega;
+
 using SPI = atmega::SPI_master;
 
 constexpr uint8_t periodo_en_us = 16;
@@ -60,7 +62,7 @@ void read_and_print(EEPROM& eeprom, uint16_t addr0, uint16_t n = sz)
 	uart << "ERROR: no se han podido leer " << n<< " bytes\n";
 	if (eeprom.no_response()){
 	    uart << "Error: la EEPROM no responde. Revisar las conexiones\n";
-	    wait_ms(1000);
+	    mcu::wait_ms(1000);
 	    eeprom.clear();
 	}
     }
@@ -134,7 +136,7 @@ void test_eeprom_interactiva()
 	}
 	else if (eeprom.no_response()){
 	    uart << "Error: la EEPROM no responde. Revisar las conexiones\n";
-	    wait_ms(5000);
+	    mcu::wait_ms(5000);
 	    eeprom.clear();
 	}
 

@@ -38,6 +38,10 @@
 #include "../../interface.h"
 #include "spi_keyboard.h"
 
+#include <avr_atmega.h>
+
+namespace mcu = atmega;
+
 // pins usados
 // ------------
 // UART for debugging purpose: pins 2 and 3

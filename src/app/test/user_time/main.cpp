@@ -30,8 +30,9 @@
 #include <dev_LCD_font_3x3.h>
 #include <dev_LCD_font_4x3.h>
 
-#include <avr_time.h>
+#include <avr_atmega.h>
 
+namespace mcu = atmega;
 
 // pines que usamos
 // ----------------
@@ -168,7 +169,7 @@ void test_user_time(LCD& lcd, Keyrow key, atd::Generic_time_view<T> t)
     atd::print_weekday<week_days_length>(lcd, t, week_days);
     
 
-    wait_ms(4000);
+    mcu::wait_ms(4000);
 }
 
 
@@ -176,7 +177,7 @@ void title(LCD& lcd, const char* str)
 {
     lcd.clear();
     lcd << str;
-    wait_ms(500);
+    mcu::wait_ms(500);
     lcd.clear();
 }
 
@@ -192,7 +193,7 @@ void test_user_time()
 	lcd << "Test with";
 	lcd.cursor_pos(0,1);
 	lcd << "LCD of 20 x 4!";
-	wait_ms(1000);
+	mcu::wait_ms(1000);
 
 	{
 	using Font = Font_digit_2x3_t1;
@@ -221,7 +222,7 @@ void test_user_time()
 	    atd::print_date(lcd, atd::Generic_time_view{*t0});
 	    lcd.print('\n');
 	    atd::print_time(lcd, atd::Generic_time_view{*t0});
-            wait_ms(4000);
+            mcu::wait_ms(4000);
         }
 
     }

@@ -85,7 +85,7 @@ void Main::run()
 //	else 
 	    window_main();
 
-	wait_ms(100);
+	mcu::wait_ms(100);
     }
 }
 

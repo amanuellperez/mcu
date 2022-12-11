@@ -175,7 +175,7 @@ void service1(const std::array<std::byte, TWI_buffer_size>& params_in,
     uart << "Esperamos a que esté wrt_be\n";
     while (!TWI::wrt_be())
     { 
-	wait_ms(100);
+	avr_::wait_ms(100);
 	print_TWI_state();
 	
     }
@@ -223,7 +223,7 @@ void service_unknown(const std::array<std::byte, TWI_buffer_size>& params_in,
     uart << "Esperamos a que esté wrt_be\n";
     while (!TWI::wrt_be())
     { 
-	wait_ms(100);
+	avr_::wait_ms(100);
 	uart << "Tendría que estar en state == wrt_be, pero está en: ";
 	print_TWI_state();
 	
@@ -345,7 +345,7 @@ void test_read()
 
 	uart << "\n\n------------------------\n";
 	
-	wait_ms(100);
+	avr_::wait_ms(100);
 
     }// while(1)
 

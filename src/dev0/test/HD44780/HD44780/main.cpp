@@ -50,7 +50,7 @@ void test_static()
     LCD::write_data_to_CG_or_DDRAM('O');
     LCD::write_data_to_CG_or_DDRAM('K');
     LCD::write_data_to_CG_or_DDRAM('?');
-    wait_ms(1000);
+    atmega::wait_ms(1000);
 }
 
 
@@ -67,7 +67,7 @@ void test_lcd4()
     lcd.write_data_to_CG_or_DDRAM('O');
     lcd.write_data_to_CG_or_DDRAM('K');
     lcd.write_data_to_CG_or_DDRAM('?');
-    wait_ms(1000);
+    atmega::wait_ms(1000);
 
 
     lcd.clear_display();
@@ -78,79 +78,79 @@ void test_lcd4()
 	uint8_t c = lcd.read_data_from_CG_or_DDRAM();
 	lcd.set_ddram_address(0x40 + x);
 	lcd.write_data_to_CG_or_DDRAM(c);
-	wait_ms(100);
+	atmega::wait_ms(100);
     }
-    wait_ms(1000);
+    atmega::wait_ms(1000);
 
 
     lcd.clear_display();
     print(lcd, "Probando clear");
-    wait_ms(1000);
+    atmega::wait_ms(1000);
 
     lcd.clear_display();
-    wait_ms(1000);
+    atmega::wait_ms(1000);
 
     print(lcd, "Pruebo return_home");
-    wait_ms(1000);
+    atmega::wait_ms(1000);
     lcd.return_home();
     print(lcd, "VUELVO!!!");
-    wait_ms(1500);
+    atmega::wait_ms(1500);
 
     lcd.clear_display();
     print(lcd, "Shift izda:");
     lcd.entry_mode(true, true);
-    wait_ms(500);
+    atmega::wait_ms(500);
     const char* p = &shift_izda[0];
     while (*p){
 	lcd.write_data_to_CG_or_DDRAM(*p);
-	wait_ms(500);
+	atmega::wait_ms(500);
 	++p;
     }
-    wait_ms(1000);
+    atmega::wait_ms(1000);
 
     lcd.entry_mode(true, false);	// recordar dejar shift = false
     lcd.clear_display();
     print(lcd, "Shift dcha");
-    wait_ms(1000);
+    atmega::wait_ms(1000);
     lcd.entry_mode(false, true);
-    wait_ms(500);
+    atmega::wait_ms(500);
     p = &shift_dcha[0];
     while (*p){
 	lcd.write_data_to_CG_or_DDRAM(*p);
-	wait_ms(500);
+	atmega::wait_ms(500);
 	++p;
     }
-    wait_ms(1000);
+    atmega::wait_ms(1000);
     lcd.entry_mode(true, false);	// recordar dejar shift = false
 
     lcd.clear_display();
     print(lcd, "Apago por 1 segundo");
     lcd.display_control(true, false, false);
-    wait_ms(1000);
+    atmega::wait_ms(1000);
     lcd.display_control(false, false, false);
-    wait_ms(1000);
+    atmega::wait_ms(1000);
     lcd.display_control(true, false, false);
-    wait_ms(1000);
+    atmega::wait_ms(1000);
     lcd.clear_display();
     print(lcd, "Encendido?");
-    wait_ms(1000);
+    atmega::wait_ms(1000);
 
     lcd.clear_display();
     print(lcd, "Cursor on");
     lcd.display_control(true, true, false);
-    wait_ms(1000);
+    atmega::wait_ms(1000);
     lcd.clear_display();
     print(lcd, "Cursor off");
     lcd.display_control(true, false, false);
-    wait_ms(2000);
+    atmega::wait_ms(2000);
     lcd.clear_display();
     print(lcd, "Cursor blink on");
     lcd.display_control(true, false, true);
-    wait_ms(3000);
+    atmega::wait_ms(3000);
     lcd.clear_display();
     print(lcd, "Cursor blink off");
     lcd.display_control(true, false, false);
-    wait_ms(1000);
+    atmega::wait_ms(1000);
     // Lo dejamos sin cursor
     lcd.display_control(true, false, false);
 
@@ -160,7 +160,7 @@ void test_lcd4()
     print(lcd, "Esta fila hace un shift a la izda");
     for (uint8_t i = 0; i < 40; ++i){
 	lcd.cursor_or_display_shift(true, false);
-	wait_ms(200);
+	atmega::wait_ms(200);
     }
     // Lo dejamos como estaba
     lcd.return_home();
@@ -169,7 +169,7 @@ void test_lcd4()
     print(lcd, "Esta fila hace un shift a la dcha");
     for (uint8_t i = 0; i < 40; ++i){
 	lcd.cursor_or_display_shift(true, true);
-	wait_ms(200);
+	atmega::wait_ms(200);
     }
     // Lo dejamos como estaba
     lcd.return_home();
@@ -178,7 +178,7 @@ void test_lcd4()
     print(lcd, "Move cursor izda");
     for (uint8_t i = 0; i < 15; ++i){
 	lcd.cursor_or_display_shift(false, false);
-	wait_ms(300);
+	atmega::wait_ms(300);
     }
 
     lcd.clear_display();
@@ -186,7 +186,7 @@ void test_lcd4()
     lcd.set_ddram_address(0); // coloco el cursor al principio
     for (uint8_t i = 0; i < 15; ++i){
 	lcd.cursor_or_display_shift(false, true);
-	wait_ms(300);
+	atmega::wait_ms(300);
     }
 
 
@@ -194,14 +194,14 @@ void test_lcd4()
     lcd.clear_display();
     lcd.set_ddram_address(3);
     print(lcd, "a partir 3");
-    wait_ms(1000);
+    atmega::wait_ms(1000);
 
     lcd.clear_display();
     lcd.set_ddram_address(0x00);
     print(lcd, "Segunda fila");
     lcd.set_ddram_address(0x40);
     print(lcd, "Primera fila");
-    wait_ms(1000);
+    atmega::wait_ms(1000);
 
     lcd.clear_display();
 
@@ -261,7 +261,7 @@ void test_cgram4()
                 gl::plug,
                 gl::musical_note);
 
-    wait_ms(2000);
+    atmega::wait_ms(2000);
 
     show_glyphs(lcd,
                 gl::pacman,
@@ -272,7 +272,7 @@ void test_cgram4()
                 gl::speaker_right,
                 gl::plug,
                 gl::musical_note);
-    wait_ms(2000);
+    atmega::wait_ms(2000);
 
     show_glyphs(lcd,
                 gl::heart_full,
@@ -289,11 +289,11 @@ void test_cgram4()
 	lcd.set_ddram_address(0x40);
 	lcd.write_data_to_CG_or_DDRAM(0x00);
 	lcd.write_data_to_CG_or_DDRAM(0x02);
-	wait_ms(500);
+	atmega::wait_ms(500);
 	lcd.set_ddram_address(0x40);
 	lcd.write_data_to_CG_or_DDRAM(0x01);
 	lcd.write_data_to_CG_or_DDRAM(0x03);
-	wait_ms(500);
+	atmega::wait_ms(500);
     }
 
 

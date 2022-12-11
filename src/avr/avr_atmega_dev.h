@@ -149,6 +149,12 @@ namespace atmega{
 /***************************************************************************
  *			    FUNCTIONS
  ***************************************************************************/
+    template <std::integral Int>
+    inline constexpr void wait_us(Int t) {avr_::wait_us(t);}
+
+    template <std::integral Int>
+    inline constexpr void wait_ms(Int t) {avr_::wait_ms(t);}
+
     // El parámetro lo usamos para sobrecargar: quiero que configures el flujo
     // con la configuración básica.
     template <uint32_t baud_rate = 9600u,

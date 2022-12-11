@@ -22,6 +22,7 @@
 // conexiones.
 #include <avr_atmega.h>
 
+namespace mcu = atmega;
 
 class Main_app{
 public:
@@ -52,7 +53,7 @@ void Main_app::POVDisplay(uint8_t fila_glyph)
     p7_.write(fila_glyph & 0b01000000);
     p8_.write(fila_glyph & 0b10000000);
 
-    wait_ms(2);
+    mcu::wait_ms(2);
 }
 
 
@@ -86,7 +87,7 @@ void Main_app::run()
 	POVDisplay(0b00001110);
 
 	clear();
-	wait_ms(10);
+	mcu::wait_ms(10);
     }
 }
 

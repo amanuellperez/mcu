@@ -318,7 +318,7 @@ void User_choose_string<I, A, t>::lcd_move_backwards()
 template <typename I, typename A, int t>
 uint8_t User_choose_string<I, A, t>::show(uint8_t first_option)
 {
-    wait_ms(T_clock);	// Le damos tiempo al usuario a que suelte enter.
+    not_generic::wait_ms(T_clock);	// Le damos tiempo al usuario a que suelte enter.
 
     clear();
 
@@ -327,7 +327,7 @@ uint8_t User_choose_string<I, A, t>::show(uint8_t first_option)
     while (enter_key().is_not_pressed()){
 	lcd_move();
 
-	wait_ms(T_clock);
+	not_generic::wait_ms(T_clock);
     }
     
     return y0_ + yr_; // = seleccion
