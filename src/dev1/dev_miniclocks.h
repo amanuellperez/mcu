@@ -75,11 +75,12 @@
  *
  *  HISTORIA
  *    A.Manuel L.Perez
- *    10/12/2022 Miniclock_ms
+ *    10/12/2022 Miniclock_ms/us
  *
  ****************************************************************************/
 #include <dev_concepts.h>
-
+#include <avr_atmega.h>	    // TODO: borrame. No genérico
+			    
 namespace dev{
 /***************************************************************************
  *			    MINICLOCK_MS
@@ -112,13 +113,20 @@ public:
     /// Devuelve el número de milisegundos transcurridos desde start()
     static counter_type read(); // DUDA: mejor time()??? time_in_ms()???
 
+
+    /// Espera t ticks de reloj. Si el tick son microsegundos, espera t
+    /// microsegundos. Si el tick son milisegundos, t milisegundos.
+    static void wait(const counter_type& t)
+	    requires Unsafe_device<Timer>;
+
+    static void wait(const counter_type& t)
+	    requires Safe_device<Timer>;
+
 // Info
     /// Devuelve el valor máximo que puede alcanzar el counter sin dar
     /// overflow: counter_max() + 1 == 0
     static counter_type counter_max();
 
-private:
-    static constexpr bool is_safe = !Unsafe_device<Timer>;
 };
 
 
@@ -145,6 +153,31 @@ template <typename T, int p>
 inline Miniclock<T, p>::counter_type Miniclock<T, p>::read()
 {
     return Timer::value();
+}
+
+
+template <typename T, int p>
+void Miniclock<T, p>::wait(const counter_type& t)
+	    requires Unsafe_device<Timer>
+
+{
+    atmega::Disable_interrupts lock;	// TODO: esto no es genérico
+
+    Timer::unsafe_reset();
+    
+    while (Timer::unsafe_value() < t)
+    { ; }
+}
+
+
+template <typename T, int p>
+void Miniclock<T, p>::wait(const counter_type& t)
+	    requires Safe_device<Timer>
+{
+    Timer::reset();
+    
+    while (Timer::value() < t)
+    { ; }
 }
 
 

@@ -67,6 +67,10 @@ template <typename T>
 concept Unsafe_device = requires(T a){
     {T::is_unsafe};	// prueba: usemos init como marcador
 };
+
+template <typename T>
+concept Safe_device = (!Unsafe_device<T>);
+
 }
 
 
