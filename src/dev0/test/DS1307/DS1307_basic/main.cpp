@@ -26,6 +26,8 @@
 
 #include <avr_atmega.h>
 
+namespace mcu = atmega;
+
 // pines que usamos
 // ----------------
 
@@ -34,14 +36,14 @@
 // ---------------------------
 // Dispositivo TWI al que conectamos
 static constexpr uint8_t TWI_buffer_size = 70; 
-using TWI = atmega::TWI_master<atmega::TWI_basic, TWI_buffer_size>;
+using TWI = mcu::TWI_master<mcu::TWI_basic, TWI_buffer_size>;
 
 using RTC = dev::DS1307_basic<TWI>;
 
 
 void twi_print_state()
 {
-    atmega::UART_iostream uart;
+    mcu::UART_iostream uart;
 
     if (TWI::error())
 	uart << "state == error()\n";
@@ -74,7 +76,7 @@ void twi_print_state()
 
 void twi_print_error()
 {
-    atmega::UART_iostream uart;
+    mcu::UART_iostream uart;
 
     if (TWI::no_response())
 	uart << "Slave no responde.\n";
@@ -104,7 +106,7 @@ void twi_print_error()
 // del DS1307.h!!! ¿por qué? Debería de coger la función más especializada.
 // Con todo con concepts este problema debería de desaparecer ya que la
 // template quedaría sobrecargada solo para IOxtreams.
-atmega::UART_iostream& operator<<(atmega::UART_iostream& out,
+mcu::UART_iostream& operator<<(mcu::UART_iostream& out,
                                const dev::__DS1307_timekeeper& t)
 {
     if (t.clock_on){
@@ -134,7 +136,7 @@ atmega::UART_iostream& operator<<(atmega::UART_iostream& out,
 
 void test_clock()
 {
-    atmega::UART_iostream uart;
+    mcu::UART_iostream uart;
 
     uart << "\nProbando clock\n"
 	 <<   "==============\n";
@@ -175,7 +177,7 @@ void test_clock()
 	if (rtc.error())
 	    uart << "Error: error en el rtc!!!\n";
 
-	atmega::wait_ms(1000);
+	mcu::Micro::wait_ms(1000);
 	++n;
 	if (!(n % 10)){
 	    t.clock_on = !t.clock_on;
@@ -188,7 +190,7 @@ void test_clock()
 
 void test_bateria()
 {
-    atmega::UART_iostream uart;
+    mcu::UART_iostream uart;
 
     uart << "\nProbando la batería auxiliar\n"
 	 << "Prueba a desconectar el reloj de la batería principal y "
@@ -229,7 +231,7 @@ void test_bateria()
 	if (rtc.error())
 	    uart << "Error: error en el rtc!!!\n";
 
-	atmega::wait_ms(1000);
+	mcu::Micro::wait_ms(1000);
 
     }
 }
@@ -237,7 +239,7 @@ void test_bateria()
 
 void test_ram()
 {
-    atmega::UART_iostream uart;
+    mcu::UART_iostream uart;
 
     uart << "----------------------------------------\n"
 	 << "Probando la RAM\n"
@@ -293,7 +295,7 @@ void test_ram()
 	for (uint8_t i = 0; i < N; ++i)
 	    uart << std::to_integer<int>(res[i]) << ", ";
 
-	atmega::wait_ms(5000);
+	mcu::Micro::wait_ms(5000);
     }
 }
 
@@ -301,7 +303,7 @@ void test_ram()
 
 void test_output()
 {
-    atmega::UART_iostream uart;
+    mcu::UART_iostream uart;
 
     uart <<  "Probando output\n"
 	 << "Conectar el osciloscopio al pin 7 y recordar haber puesto\n"
@@ -356,8 +358,8 @@ void test_output()
 int main()
 {
 // init_UART();
-    atmega::UART_iostream uart;
-    atmega::basic_cfg(uart);
+    mcu::UART_iostream uart;
+    mcu::basic_cfg(uart);
     uart.on();
 
 // init_TWI();

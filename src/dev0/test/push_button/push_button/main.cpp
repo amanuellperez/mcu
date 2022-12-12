@@ -36,7 +36,7 @@ int main()
 	else 
 	    led.off();
 
-	mcu::wait_ms(100);
+	mcu::Micro::wait_ms(100);
 
     }
 }

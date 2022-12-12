@@ -63,7 +63,7 @@ void test_system_clock()
     while(1){
 	uart << System_clock::now() << '\n';
 
-	mcu::wait_ms(1000);
+	mcu::Micro::wait_ms(1000);
     }
 }
 

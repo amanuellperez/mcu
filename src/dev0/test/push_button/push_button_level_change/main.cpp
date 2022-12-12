@@ -39,7 +39,7 @@ int main()
 	else 
 	    uart << "not press\n";
 
-	mcu::wait_ms(500);
+	mcu::Micro::wait_ms(500);
 
     }
 }

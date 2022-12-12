@@ -82,13 +82,13 @@ inline void Main::wait_user_release_change_time()
 {
     while (keyboard_.key<OK_KEY>().is_pressed()
 	 or keyboard_.key<DOWN_KEY>().is_pressed())
-	mcu::wait_ms(100);
+	mcu::Micro::wait_ms(100);
 }
 
 
 inline void wait_release_key()
 {
-    mcu::wait_ms(time_wait_release_key);
+    mcu::Micro::wait_ms(time_wait_release_key);
 }
 
 

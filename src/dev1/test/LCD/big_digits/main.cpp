@@ -88,7 +88,7 @@ void show_bricks()
     for (uint8_t i = 0; i < 8; ++i)
 	lcd.print_extended(i);
 
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 }
 
 
@@ -106,7 +106,7 @@ void test_big_digits(LCD& lcd, bool stop = false)
     BD::print(lcd, 5);
 
     if (stop){
-	mcu::wait_ms(2000);
+	mcu::Micro::wait_ms(2000);
 	lcd.clear();
     }
 
@@ -114,13 +114,13 @@ void test_big_digits(LCD& lcd, bool stop = false)
     BD::print(lcd, 7);
     BD::print(lcd, 8);
     BD::print(lcd, 9);
-    mcu::wait_ms(2000);
+    mcu::Micro::wait_ms(2000);
 
     lcd.clear();
     for (uint8_t i = 0; i <= 9; ++i){
 	lcd.cursor_pos(0,0);
 	BD::print(lcd, i);
-	mcu::wait_ms(500);
+	mcu::Micro::wait_ms(500);
     }
 }
 
@@ -129,7 +129,7 @@ void test_big_digits(LCD& lcd, const char* name, bool stop = false)
 {
     lcd.clear();
     lcd.print(name);
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
     test_big_digits<Digit>(lcd, stop);
 }
 
@@ -152,12 +152,12 @@ void test_big_digits_print(LCD& lcd, const nm::Width<int>& width = 0)
     for (uint8_t i = 0; i < 20; ++i){
 	lcd.cursor_pos(0,0);
 	BD::print_number(lcd, i, width);
-	mcu::wait_ms(100);
+	mcu::Micro::wait_ms(100);
     }
 
     lcd.cursor_pos(0,0);
     BD::print_number(lcd, 237);
-    mcu::wait_ms(500);
+    mcu::Micro::wait_ms(500);
 
 }
 
@@ -165,7 +165,7 @@ void test_big_digits_print(LCD& lcd)
 {
     lcd.clear();
     lcd.print("Counting without padding");
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
     test_big_digits_print<Font_digit_default>(lcd);
     test_big_digits_print<Font_digit_2x1_t1>(lcd);
     test_big_digits_print<Font_digit_2x1_t2>(lcd);
@@ -176,7 +176,7 @@ void test_big_digits_print(LCD& lcd)
 
     lcd.clear();
     lcd.print("Counting with padding");
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
     test_big_digits_print<Font_digit_2x1_t1>(lcd, 3);
     test_big_digits_print<Font_digit_2x1_t2>(lcd, 3);
     test_big_digits_print<Font_digit_2x2_t1>(lcd, 3);
@@ -194,7 +194,7 @@ void test_big_digits_colon(LCD& lcd)
     BD::print_number(lcd, 12);
     BD::print_colon(lcd);
     BD::print_number(lcd, 34);
-    mcu::wait_ms(2000);
+    mcu::Micro::wait_ms(2000);
 
 }
 
@@ -202,7 +202,7 @@ void test_big_digits_colon(LCD& lcd)
 {
     lcd.clear();
     lcd.print("Testing colon");
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
     test_big_digits_colon<Font_digit_default>(lcd);
     test_big_digits_colon<Font_digit_2x1_t1>(lcd);
     test_big_digits_colon<Font_digit_2x1_t2>(lcd);
@@ -227,7 +227,7 @@ void test_bugs(LCD& lcd)
 {
     lcd.clear();
     lcd.print("Bugs");
-    mcu::wait_ms(400);
+    mcu::Micro::wait_ms(400);
     {
     using Font = Font_digit_2x2_t1;
     Font::load(lcd);
@@ -237,7 +237,7 @@ void test_bugs(LCD& lcd)
     uint8_t col = 3;
     uint8_t row = 1;
     test_bugs<Font, uint16_t>(lcd, x, w, col, row);
-    mcu::wait_ms(2000);
+    mcu::Micro::wait_ms(2000);
     }
 }
 

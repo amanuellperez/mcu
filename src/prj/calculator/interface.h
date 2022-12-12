@@ -138,7 +138,7 @@ private:
     void write_abbrevation(char key) 
     {
 	char tmp[abb2str_.max_size()]; 
-	atmega::strlcpy(tmp, abb2str_[key - Code::first_abb], abb2str_.max_size());
+	atmega::Micro::strlcpy(tmp, abb2str_[key - Code::first_abb], abb2str_.max_size());
 	write(tmp);
     }
 
@@ -378,7 +378,7 @@ void Interface<Cfg>::read()
 	}
 
 	redraw_lcd();
-	atmega::wait_ms(Tclock_keyboard);
+	atmega::Micro::wait_ms(Tclock_keyboard);
     }
 }
 

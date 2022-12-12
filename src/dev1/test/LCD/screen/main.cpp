@@ -163,7 +163,7 @@ void test_extended_chars(Screen& scr)
     scr.print_extended(3);
     scr.print("]\n");
 
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
 
 }
@@ -175,96 +175,96 @@ void test_lcd_screen4_1602()
 // ------
     scr.clear();
     scr.print("LCD Screen (1602)");
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
 // ------
     scr.clear();
     rprint(scr, "clear test");
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
     scr.clear();
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
 
 // ------
     scr.clear();
     scr.print("This is written in 2 lines");
 
-    mcu::wait_ms(2000);
+    mcu::Micro::wait_ms(2000);
     
     
 // ------
     scr.clear();
     scr.print("print_return\n");
     scr.print("Am I in 2 row?");
-    mcu::wait_ms(2000);
+    mcu::Micro::wait_ms(2000);
 
 // ------
     scr.clear();
     scr.print("Erase this\n");
     scr.print("But don't this");
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
     scr.clear_row(0);
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
 // ------
     scr.clear();
     scr.print("No delete this\n");
     scr.print("Erase this line");
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
     scr.clear_row(1);
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
 
 // -----
     scr.clear();
     scr.print("cursor_pos");
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
     scr.clear();
     scr.cursor_pos(3,0);
     scr.print('3');
-    mcu::wait_ms(500);
+    mcu::Micro::wait_ms(500);
     scr.cursor_pos(6,1);
     scr.print('6');
-    mcu::wait_ms(500);
+    mcu::Micro::wait_ms(500);
     scr.cursor_pos(15,0);
     scr.print('X');
-    mcu::wait_ms(500);
+    mcu::Micro::wait_ms(500);
     scr.cursor_pos(0,1);
     scr.print('Y');
-    mcu::wait_ms(500);
+    mcu::Micro::wait_ms(500);
     scr.cursor_pos(15,1);
     scr.print('Z');
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
 
 // -----
     scr.clear();
     scr.print("Turn off for 1 second");
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
     scr.display_off();
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
     scr.display_on();
     scr.clear();
     scr.print("On?");
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
 // -----
     scr.clear();
     scr.print("cursor on");
     scr.cursor_on();
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
     scr.clear();
     scr.print("cursor off");
     scr.cursor_off();
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
     scr.clear();
     scr.print("cursor blink");
     scr.cursor_blink();
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
     scr.clear();
     scr.print("cursor no blink");
     scr.cursor_no_blink();
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
     test_extended_chars(scr);
 }
@@ -280,7 +280,7 @@ void test_lcd_screen4_2004()
 //    scr.print("LCD Screen (20 x 04)");
     scr << "LCD Screen(20 x 04)\n";
     scr << 'a' << 21 << "?\notra?"; // probamos operator<<
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
 // -------
 // print
@@ -292,7 +292,7 @@ void test_lcd_screen4_2004()
     scr.print(nm::Row{1}, nm::From{3}, nm::To{7}, "print");
     scr.print(nm::Row{2}, nm::From{3}, nm::To{10}, "print");
     scr.print(nm::Row{3}, nm::From{3}, nm::To{5}, "print");
-    mcu::wait_ms(3000);
+    mcu::Micro::wait_ms(3000);
 
     scr.clear();
     scr.print("print [from, n]"); scr.cursor_pos(0, 1);
@@ -302,7 +302,7 @@ void test_lcd_screen4_2004()
     scr.print(nm::Row{1}, nm::From{3}, nm::Size{5}, "print");
     scr.print(nm::Row{2}, nm::From{3}, nm::Size{8}, "print");
     scr.print(nm::Row{3}, nm::From{3}, nm::Size{3}, "print");
-    mcu::wait_ms(3000);
+    mcu::Micro::wait_ms(3000);
 
 // -------
 // Probamos diferentes fonts
@@ -310,47 +310,47 @@ void test_lcd_screen4_2004()
     scr.print("Test print fonts");
     scr.clear();
     scr.print(uint8_t{25}, nm::Width{3});
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
     scr.clear();
     scr.load<Font_digit_2x1_t1>();
     scr.print<Font_digit_2x1_t1>(uint8_t{2}, nm::Width{3});
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
     scr.clear();
     scr.load<Font_digit_2x2_t1>();
     scr.print<Font_digit_2x2_t1>(uint8_t{123}, nm::Width{3});
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
     scr.clear();
     scr.load<Font_digit_2x3_t1>();
     scr.print<Font_digit_2x3_t1>(uint8_t{35}, nm::Width{3});
     scr.print(" =? 035");
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
     scr.clear();
     scr.load<Font_digit_3x3_t1>();
     scr.print<Font_digit_3x3_t1>(uint8_t{74}, nm::Width{3});
     scr.print(" =? 074");
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
     scr.clear();
     scr.load<Font_digit_4x3_t1>();
     scr.print<Font_digit_4x3_t1>(uint8_t{12}, nm::Width{3});
     scr.print(" =? 012");
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
 // -------
 // Probamos print(int) de ancho fijo
     scr.clear();
     scr.print("Test print int");
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
     scr.clear();
     scr.print("(u8) 009 =?"
 	    "\n     ");
     scr.print(uint8_t{9}, nm::Width{3});
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
 
     scr.clear();
@@ -358,67 +358,67 @@ void test_lcd_screen4_2004()
 	    "\n      ");
     // scr.print(uint16_t{2}, 3); <-- tambien funciona, pero es más claro:
     scr.print(uint16_t{2}, nm::Width{3});
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
     scr.clear();
     scr.print("(u32) 008 =?"
 	   "\n      ");
     scr.print(uint32_t{8}, nm::Width{3});
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
     scr.clear();
     scr.print("(u64) 072 =?"
 	   "\n      ");
     scr.print(uint64_t{72}, nm::Width{3});
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
     scr.clear();
     scr.print("(s8) 009 =?"
 	    "\n     ");
     scr.print(int8_t{9}, nm::Width{3});
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
     scr.clear();
     scr.print("(s8) -05 =?"
 	    "\n     ");
     scr.print(int8_t{-5}, nm::Width{3});
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
     scr.clear();
     scr.print("(s16) 002 =?"
 	   "\n      ");
     scr.print(int16_t{2}, nm::Width{3});
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
     scr.clear();
     scr.print("(s16) -02 =?"
 	   "\n      ");
     scr.print(int16_t{-2}, nm::Width{3});
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
     scr.clear();
     scr.print("(u32) 003 =?"
 	   "\n      ");
     scr.print(int32_t{3}, nm::Width{3});
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
     scr.clear();
     scr.print("(s32) -08 =?"
 	   "\n      ");
     scr.print(int32_t{-8}, nm::Width{3});
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
     scr.clear();
     scr.print("(s64) 072 =?"
 	   "\n      ");
     scr.print(int64_t{72}, nm::Width{3});
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
     scr.clear();
     scr.print("(s64) -05 =?"
 	   "\n      ");
     scr.print(int64_t{-5}, nm::Width{3});
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
 // -------
     scr.clear();
@@ -426,59 +426,59 @@ void test_lcd_screen4_2004()
     scr.print("(u16) 61234 =?"
 	   "\n      ");
     scr.print(uint16_t{61234});
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
     scr.clear();
     scr.print("(u32) 123456 =?"
 	   "\n      ");
     scr.print(uint32_t{123456});
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
     scr.clear();
     scr.print("(u64) 123456789 =?"
 	   "\n      ");
     scr.print(uint64_t{123456789});
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
     scr.clear();
     scr.print("(s16) -31234 =?"
 	   "\n      ");
     scr.print(int16_t{-31234});
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
     scr.clear();
     scr.print("(s16) 31234 =?"
 	   "\n      ");
     scr.print(int16_t{31234});
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
     scr.clear();
     scr.print("(s32) -23456 =?"
 	   "\n      ");
     scr.print(int32_t{-23456});
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
     scr.clear();
     scr.print("(s32) 23456 =?"
 	   "\n      ");
     scr.print(int32_t{23456});
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
     scr.clear();
     scr.print("(s64) -123456789 =?"
 	   "\n      ");
     scr.print(int64_t{-123456789});
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
     scr.clear();
     scr.print("(s64) 123456789 =?"
 	   "\n      ");
     scr.print(int64_t{123456789});
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
 // -----
     scr.clear();
     scr.print("wrap sentences?\n");
     scr.print("too long: this is a very long sentence");
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
 // -----
 // El '\n' del primer print no lo lee, con lo que deja el cursor
@@ -490,7 +490,7 @@ void test_lcd_screen4_2004()
     scr.print("3 row\n");
     scr.print("4 row\n");
     scr.print("5 row\n");
-    mcu::wait_ms(2000);
+    mcu::Micro::wait_ms(2000);
  
 // En la última fila aparecerá 5 row en vez de 4 row, ya que el '\n' de 4 row
 // devuelve el cursor al principio de la fila.
@@ -500,14 +500,14 @@ void test_lcd_screen4_2004()
     scr.print("3 row\n");
     scr.print("4 row\n");
     scr.print("5 row\n");
-    mcu::wait_ms(2000);
+    mcu::Micro::wait_ms(2000);
 
 // ------
     scr.clear();
     rprint(scr, "clear test");
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
     scr.clear();
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
 
 // ------
@@ -516,7 +516,7 @@ void test_lcd_screen4_2004()
     scr.print("Am I in 2 row?\n");
     scr.print("in 3 row?\n");
     scr.print("in 4 row?");
-    mcu::wait_ms(2000);
+    mcu::Micro::wait_ms(2000);
 
 // ------
     scr.clear();
@@ -524,10 +524,10 @@ void test_lcd_screen4_2004()
     scr.print("But don't this\n");
     scr.print("Erase this\n");
     scr.print("But don't this");
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
     scr.clear_row(0);
     scr.clear_row(2);
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
 // ------
     scr.clear();
@@ -535,62 +535,62 @@ void test_lcd_screen4_2004()
     scr.print("Erase this line\n");
     scr.print("Don't delete this\n");
     scr.print("Erase this line");
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
     scr.clear_row(1);
     scr.clear_row(3);
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
 
 // -----
     scr.clear();
     scr.print("cursor_pos");
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
     scr.clear();
     scr.cursor_pos(3,0);
     scr.print('3');
-    mcu::wait_ms(500);
+    mcu::Micro::wait_ms(500);
     scr.cursor_pos(6,1);
     scr.print('6');
-    mcu::wait_ms(500);
+    mcu::Micro::wait_ms(500);
     scr.cursor_pos(scr.cols()-1,0);
     scr.print('X');
-    mcu::wait_ms(500);
+    mcu::Micro::wait_ms(500);
     scr.cursor_pos(0,1);
     scr.print('Y');
-    mcu::wait_ms(500);
+    mcu::Micro::wait_ms(500);
     scr.cursor_pos(scr.cols()-1,scr.rows()-1);
     scr.print('Z');
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
 
 // -----
     scr.clear();
     scr.print("Turn off for 1 second");
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
     scr.display_off();
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
     scr.display_on();
     scr.clear();
     scr.print("On?");
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
 // -----
     scr.clear();
     scr.print("cursor on");
     scr.cursor_on();
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
     scr.clear();
     scr.print("cursor off");
     scr.cursor_off();
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
     scr.clear();
     scr.print("cursor blink");
     scr.cursor_blink();
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
     scr.clear();
     scr.print("cursor no blink");
     scr.cursor_no_blink();
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
     test_extended_chars(scr);
 }
@@ -603,15 +603,15 @@ void test_lcd_screen4_4004()
 // ------
     scr.clear();
     scr.print("LCD screen (40 x 04)");
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
 
 // ------
     scr.clear();
     rprint(scr, "clear test");
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
     scr.clear();
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
 
 // ------
@@ -620,7 +620,7 @@ void test_lcd_screen4_4004()
     scr.print("Am I in 2 row?\n");
     scr.print("in 3 row?\n");
     scr.print("in 4 row?");
-    mcu::wait_ms(2000);
+    mcu::Micro::wait_ms(2000);
 
 // ------
     scr.clear();
@@ -628,10 +628,10 @@ void test_lcd_screen4_4004()
     scr.print("But don't this\n");
     scr.print("Erase this\n");
     scr.print("But don't this");
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
     scr.clear_row(0);
     scr.clear_row(2);
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
 // ------
     scr.clear();
@@ -639,44 +639,44 @@ void test_lcd_screen4_4004()
     scr.print("Erase this line\n");
     scr.print("Don't delete this\n");
     scr.print("Erase this line");
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
     scr.clear_row(1);
     scr.clear_row(3);
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
 
 // -----
     scr.clear();
     scr.print("cursor_pos");
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
     scr.clear();
     scr.cursor_pos(3,0);
     scr.print('3');
-    mcu::wait_ms(500);
+    mcu::Micro::wait_ms(500);
     scr.cursor_pos(6,1);
     scr.print('6');
-    mcu::wait_ms(500);
+    mcu::Micro::wait_ms(500);
     scr.cursor_pos(scr.cols()-1,0);
     scr.print('X');
-    mcu::wait_ms(500);
+    mcu::Micro::wait_ms(500);
     scr.cursor_pos(0,1);
     scr.print('Y');
-    mcu::wait_ms(500);
+    mcu::Micro::wait_ms(500);
     scr.cursor_pos(scr.cols()-1,scr.rows()-1);
     scr.print('Z');
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
 
 // -----
     scr.clear();
     scr.print("Turn off for 1 second");
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
     scr.display_off();
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
     scr.display_on();
     scr.clear();
     scr.print("On?");
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
 // -----
     scr.clear();
@@ -684,25 +684,25 @@ void test_lcd_screen4_4004()
     rprint(scr, "cursor on");
     scr.cursor_on();
     scr.cursor_pos(9, 0);
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
     scr.cursor_pos(9, 1);
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
     scr.cursor_pos(9, 2);
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
     scr.cursor_pos(9, 3);
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
     scr.clear();
     scr.print("cursor off");
     scr.cursor_off();
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
     scr.clear();
     scr.print("cursor blink");
     scr.cursor_blink();
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
     scr.clear();
     scr.print("cursor no blink");
     scr.cursor_no_blink();
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
     test_extended_chars(scr);
 }
@@ -713,7 +713,7 @@ void test_lcd_screen4_basico()
 
     scr.clear();
     scr.print("Hola");
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 }
 
 

@@ -62,7 +62,7 @@ void read_and_print(EEPROM& eeprom, uint16_t addr0, uint16_t n = sz)
 	uart << "ERROR: no se han podido leer " << n<< " bytes\n";
 	if (eeprom.no_response()){
 	    uart << "Error: la EEPROM no responde. Revisar las conexiones\n";
-	    mcu::wait_ms(1000);
+	    mcu::Micro::wait_ms(1000);
 	    eeprom.clear();
 	}
     }
@@ -136,7 +136,7 @@ void test_eeprom_interactiva()
 	}
 	else if (eeprom.no_response()){
 	    uart << "Error: la EEPROM no responde. Revisar las conexiones\n";
-	    mcu::wait_ms(5000);
+	    mcu::Micro::wait_ms(5000);
 	    eeprom.clear();
 	}
 

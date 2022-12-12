@@ -169,7 +169,7 @@ void test_user_time(LCD& lcd, Keyrow key, atd::Generic_time_view<T> t)
     atd::print_weekday<week_days_length>(lcd, t, week_days);
     
 
-    mcu::wait_ms(4000);
+    mcu::Micro::wait_ms(4000);
 }
 
 
@@ -177,7 +177,7 @@ void title(LCD& lcd, const char* str)
 {
     lcd.clear();
     lcd << str;
-    mcu::wait_ms(500);
+    mcu::Micro::wait_ms(500);
     lcd.clear();
 }
 
@@ -193,7 +193,7 @@ void test_user_time()
 	lcd << "Test with";
 	lcd.cursor_pos(0,1);
 	lcd << "LCD of 20 x 4!";
-	mcu::wait_ms(1000);
+	mcu::Micro::wait_ms(1000);
 
 	{
 	using Font = Font_digit_2x3_t1;
@@ -222,7 +222,7 @@ void test_user_time()
 	    atd::print_date(lcd, atd::Generic_time_view{*t0});
 	    lcd.print('\n');
 	    atd::print_time(lcd, atd::Generic_time_view{*t0});
-            mcu::wait_ms(4000);
+            mcu::Micro::wait_ms(4000);
         }
 
     }

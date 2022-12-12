@@ -105,7 +105,7 @@ void test_chronometer_clock()
     while(1){
 	print_time(uart, Chronometer_ms::sexagesimal_count());
 
-	mcu::wait_ms(100);
+	mcu::Micro::wait_ms(100);
 
 	if(UART::are_there_data_unread()){
 	    char ans = static_cast<char>(UART::data_register());

@@ -81,7 +81,7 @@ void Main::init_lcd()
 //	lcd << *p;
 //
 //    lcd << "]\n";
-//    mcu::wait_ms(1000);
+//    mcu::Micro::wait_ms(1000);
 //}
 
 
@@ -129,7 +129,7 @@ void Main::msg_error()
 	    return;
 	}
 
-	mcu::wait_ms(Tclock_error);
+	mcu::Micro::wait_ms(Tclock_error);
     }
 }
 
@@ -137,7 +137,7 @@ void Main::msg_error()
 
 void Main::run()
 {
-ctrace << "run: free ram=  [" << atmega::bytes_of_free_ram() << "] bytes\n";
+ctrace << "run: free ram=  [" << atmega::Micro::bytes_of_free_ram() << "] bytes\n";
 
     clear_error();
 

@@ -119,7 +119,7 @@ void test_lcd_menu()
 
 	lcd.clear();
 	lcd << "Seleccion: " << static_cast<uint16_t>(day);
-	mcu::wait_ms(1000);
+	mcu::Micro::wait_ms(1000);
 
 //	constexpr std::array days2 ={"Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sa"};
 	constexpr const char* days2 = "DoLuMaMiJuViSa";
@@ -135,7 +135,7 @@ void test_lcd_menu()
 	lcd.clear();
 	lcd_clear(lcd);
 	lcd << "Seleccion: " << static_cast<uint16_t>(day2);
-	mcu::wait_ms(1000);
+	mcu::Micro::wait_ms(1000);
 
 
 //	lcd.clear();
@@ -147,7 +147,7 @@ void test_lcd_menu()
 
 	lcd.clear();
 	lcd << "Seleccion: " << static_cast<uint16_t>(unidad);
-	mcu::wait_ms(1000);
+	mcu::Micro::wait_ms(1000);
 
 //	lcd.clear();
 	lcd_clear(lcd);
@@ -160,7 +160,7 @@ void test_lcd_menu()
         lcd.clear();
 	lcd << "seleccion:\n" << seleccion;
 
-	mcu::wait_ms(1000);
+	mcu::Micro::wait_ms(1000);
 
 	lcd_clear(lcd);
 	lcd << "Elige: xxxx = unidades";
@@ -171,7 +171,7 @@ void test_lcd_menu()
         lcd.clear();
 	lcd << "seleccion:\n" << seleccion;
 
-	mcu::wait_ms(1000);
+	mcu::Micro::wait_ms(1000);
 
 
 	lcd_clear(lcd);
@@ -181,7 +181,7 @@ void test_lcd_menu()
 
 	lcd.clear();
 	lcd << "seleccion:\n" << seleccion;
-	mcu::wait_ms(1000);
+	mcu::Micro::wait_ms(1000);
 
 	lcd_clear(lcd);
 	lcd << "Todo bien? ";
@@ -192,7 +192,7 @@ void test_lcd_menu()
         lcd.clear();
 	lcd << "seleccion:\n" << seleccion;
 
-	mcu::wait_ms(1000);
+	mcu::Micro::wait_ms(1000);
 
 	lcd_clear(lcd);
 	lcd << "Todo bien (2)? ";
@@ -202,7 +202,7 @@ void test_lcd_menu()
         lcd.clear();
 	lcd << "seleccion:\n" << seleccion;
 
-	mcu::wait_ms(1000);
+	mcu::Micro::wait_ms(1000);
     }
 
 }

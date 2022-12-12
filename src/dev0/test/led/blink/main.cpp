@@ -22,22 +22,22 @@
 #include "../../../dev_led.h"
 #include <avr_atmega.h>
 
-using namespace dev;
+namespace mcu = atmega;
 
 
 int main() 
 {
     // ponemos un LED en el pin 14
-    LED<14> led;
+    dev::LED<14> led;
 
     uint16_t time = 500; // probar con 10: ¡no parpadea!!!
 
     while(1){
 	led.on();
-	atmega::wait_ms(time);
+	mcu::Micro::wait_ms(time);
 
 	led.off();
-	atmega::wait_ms(time);
+	mcu::Micro::wait_ms(time);
     }
 }
 

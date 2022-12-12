@@ -147,50 +147,64 @@ namespace atmega{
     namespace literals{ using namespace avr_::literals; }
 
 /***************************************************************************
- *			    FUNCTIONS
+ *			    MICRO
  ***************************************************************************/
-    template <std::integral Int>
-    inline constexpr void wait_us(Int t) {avr_::wait_us(t);}
+// (RRR) ¿por qué meter todas estas funciones en una clase?
+//       Para poder parametrizar los devices con LCD<Micro, ...>. De esta
+//       forma el código será genérico.
+struct Micro{
+    // interfaz static
+    Micro() = delete;
 
     template <std::integral Int>
-    inline constexpr void wait_ms(Int t) {avr_::wait_ms(t);}
+    inline static constexpr void wait_us(Int t) {avr_::wait_us(t);}
 
-    // El parámetro lo usamos para sobrecargar: quiero que configures el flujo
-    // con la configuración básica.
-    template <uint32_t baud_rate = 9600u,
-	      uint32_t f_clock   = MCU_CLOCK_FREQUENCY_IN_HZ,
-	      uint32_t tolerance = 2>
-    inline void basic_cfg(avr_::UART_iostream&) 
-    { return avr_::UART_iostream_basic_cfg<baud_rate, f_clock, tolerance>(); }
+    template <std::integral Int>
+    inline static constexpr void wait_ms(Int t) {avr_::wait_ms(t);}
+
 
 
     /// Habilita el uso de interrupciones. Además, recordar habilitar
     /// cada interrupción por separado.
-    inline void enable_interrupts() {sei();}
+    inline static void enable_interrupts() {sei();}
 
     /// Deshabilita el uso de interrupciones
-    inline void disable_interrupts() {cli();}
+    inline static void disable_interrupts() {cli();}
 
 
     // TODO: ¿cómo importar directamente estas funciones?
     // using ... ???
     // Manejamos el array como memoria normal y corriente
     template <size_t N>
-    inline char* strcpy(char* dst, const Element_progmem_string_array<N>& src)
+    inline static char* strcpy(char* dst, const Element_progmem_string_array<N>& src)
     { return avr_::strcpy(dst, src); }
 
     // Es más eficiente y segura strlcpy que strncpy
     template <size_t N>
-    inline char*
+    inline static char*
     strncpy(char* dst, const Element_progmem_string_array<N>& src, size_t n)
     { return avr_::strncpy(dst, src, n); }
 
     template <size_t N>
-    inline size_t
+    inline static size_t
     strlcpy(char* dst, const Element_progmem_string_array<N>& src, size_t n)
     { return avr_::strlcpy(dst, src, n); }
 
-    inline int bytes_of_free_ram()  {return avr_::bytes_of_free_ram(); }
+    inline static int bytes_of_free_ram()  {return avr_::bytes_of_free_ram(); }
+};// Micro
+ 
+
+/***************************************************************************
+ *			FUNCIONES AUXILIARES
+ ***************************************************************************/
+// ¿dónde meter esto? ¿qué son?
+    // El parámetro lo usamos para sobrecargar: quiero que configures el flujo
+    // con la configuración básica.
+    template <uint32_t baud_rate = 9600u,
+	      uint32_t f_clock   = MCU_CLOCK_FREQUENCY_IN_HZ,
+	      uint32_t tolerance = 2>
+    inline static void basic_cfg(avr_::UART_iostream&) 
+    { return avr_::UART_iostream_basic_cfg<baud_rate, f_clock, tolerance>(); }
 
 }// namespace
 

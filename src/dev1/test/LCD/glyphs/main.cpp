@@ -106,7 +106,7 @@ void test_extended_chars(LCD& lcd)
     lcd.print("First:[");
     print_extended(lcd);
     lcd.print("]");
-    mcu::wait_ms(2000);
+    mcu::Micro::wait_ms(2000);
 
     new_extended_char(lcd,
                 gl::pacman,
@@ -122,7 +122,7 @@ void test_extended_chars(LCD& lcd)
     lcd.print("Second:[");
     print_extended(lcd);
     lcd.print("]");
-    mcu::wait_ms(2000);
+    mcu::Micro::wait_ms(2000);
 
     new_extended_char(lcd,
                 gl::heart_full,
@@ -140,11 +140,11 @@ void test_extended_chars(LCD& lcd)
 	lcd.cursor_pos(0,0);
 	lcd.print_extended(0);
 	lcd.print_extended(2);
-	mcu::wait_ms(500);
+	mcu::Micro::wait_ms(500);
 	lcd.cursor_pos(0,0);
 	lcd.print_extended(1);
 	lcd.print_extended(3);
-	mcu::wait_ms(500);
+	mcu::Micro::wait_ms(500);
     }
 
 }
@@ -156,7 +156,7 @@ void test_lcd_screen4_1602()
 // ------
     lcd.clear();
     lcd.print("LCD screen(1602)");
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
 // ------
     test_extended_chars(lcd);
@@ -170,7 +170,7 @@ void test_lcd_screen4_2004()
 // ------
     lcd.clear();
     lcd.print("LCD screen (20 x 04)");
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
 
     test_extended_chars(lcd);
@@ -184,7 +184,7 @@ void test_lcd_screen4_4004()
 // ------
     lcd.clear();
     lcd.print("LCD screen (40 x 04)");
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
 
     test_extended_chars(lcd);

@@ -54,7 +54,7 @@ void Main::run()
 //	else 
 	    window_main();
 
-	mcu::wait_ms(period_main_clock_ms);
+	mcu::Micro::wait_ms(period_main_clock_ms);
 	ktimer_.tick();
     }
 }

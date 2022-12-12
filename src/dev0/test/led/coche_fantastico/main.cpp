@@ -21,6 +21,8 @@
 #include "../../../dev_led.h"
 #include <avr_atmega.h>
 
+namespace mcu = atmega;
+
 using namespace dev;
 
 struct LEDS{
@@ -96,7 +98,7 @@ void Main_app::hacia_adelante()
 {
     for (uint8_t i = 0; i < 8; ++i){
 	led.on(i);
-	atmega::wait_ms(80);
+	mcu::Micro::wait_ms(80);
 	led.off(i);
     }
 }
@@ -105,7 +107,7 @@ void Main_app::hacia_atras()
 {
     for (uint8_t i = 8; i > 0; --i){
 	led.on(i-1);
-	atmega::wait_ms(80);
+	mcu::Micro::wait_ms(80);
 	led.off(i-1);
     }
 }
@@ -141,9 +143,9 @@ void Main_app::cayendo(uint8_t n)
 {
     for (uint8_t i = 0; i < n; ++i){
 	todos_off();
-	atmega::wait_ms(200);
+	mcu::Micro::wait_ms(200);
 	cayendo();
-	atmega::wait_ms(200);
+	mcu::Micro::wait_ms(200);
     }
 
     todos_off();
@@ -159,7 +161,7 @@ void Main_app::cae_hasta_piso(uint8_t p)
 {
     for (uint8_t i = 7; i > p; --i){
 	led.on(i);
-	atmega::wait_ms(100);
+	mcu::Micro::wait_ms(100);
 	led.off(i);
     }
 
@@ -175,9 +177,9 @@ void Main_app::parpadea(uint8_t n)
 void Main_app::parpadea()
 {
     todos_on();
-    atmega::wait_ms(100);
+    mcu::Micro::wait_ms(100);
     todos_off();
-    atmega::wait_ms(100);
+    mcu::Micro::wait_ms(100);
 }
 
 // Cae desde el piso superior s hasta el inferior i, dejando i encendido
@@ -186,7 +188,7 @@ void Main_app::cae_desde_hasta(uint8_t s, uint8_t i)
 {
     while (s > i){
 	led.on(s);
-	atmega::wait_ms(100);
+	mcu::Micro::wait_ms(100);
 	led.off(s);
 	--s;
     }
@@ -200,7 +202,7 @@ void Main_app::sube_desde_hasta(uint8_t i, uint8_t s)
 {
     while (i < s){
 	led.on(i);
-	atmega::wait_ms(100);
+	mcu::Micro::wait_ms(100);
 	led.off(i);
 	++i;
     }
@@ -224,7 +226,7 @@ void Main_app::rellena_rebotando(uint8_t n)
 {
     for (uint8_t i = 0; i < n; ++i){
 	rellena_rebotando();
-	atmega::wait_ms(500);
+	mcu::Micro::wait_ms(500);
     }
 }
 

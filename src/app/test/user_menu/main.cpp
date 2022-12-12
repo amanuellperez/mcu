@@ -67,13 +67,13 @@ using LCD = Screen_2004;
 
 
 struct Main{
-    void a2() {lcd.clear(); lcd << "ejecutando a2"; mcu::wait_ms(500);}
-    void b1() {lcd.clear(); lcd << "ejecutando b1"; mcu::wait_ms(500);}
-    void c1() {lcd.clear(); lcd << "ejecutando c1"; mcu::wait_ms(500);}
-    void c2() {lcd.clear(); lcd << "ejecutando c2"; mcu::wait_ms(500);}
-    void c3() {lcd.clear(); lcd << "ejecutando c3"; mcu::wait_ms(500);}
-    void d1() {lcd.clear(); lcd << "ejecutando d1"; mcu::wait_ms(500);}
-    void d2() {lcd.clear(); lcd << "ejecutando d2"; mcu::wait_ms(500);}
+    void a2() {lcd.clear(); lcd << "ejecutando a2"; mcu::Micro::wait_ms(500);}
+    void b1() {lcd.clear(); lcd << "ejecutando b1"; mcu::Micro::wait_ms(500);}
+    void c1() {lcd.clear(); lcd << "ejecutando c1"; mcu::Micro::wait_ms(500);}
+    void c2() {lcd.clear(); lcd << "ejecutando c2"; mcu::Micro::wait_ms(500);}
+    void c3() {lcd.clear(); lcd << "ejecutando c3"; mcu::Micro::wait_ms(500);}
+    void d1() {lcd.clear(); lcd << "ejecutando d1"; mcu::Micro::wait_ms(500);}
+    void d2() {lcd.clear(); lcd << "ejecutando d2"; mcu::Micro::wait_ms(500);}
     
 
     void run();

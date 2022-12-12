@@ -113,7 +113,7 @@ int main()
     SPI::data_order_LSB();
     SPI::interrupt_enable();
     atmega::Interrupt::enable_pin<SPI_SS_pin>();
-    atmega::enable_interrupts();
+    atmega::Micro::enable_interrupts();
 
 
     test_keyboard();

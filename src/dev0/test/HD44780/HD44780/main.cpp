@@ -23,6 +23,7 @@
 //#include "../../../dev_LCD_HD44780_charset.h"
 #include <avr_atmega.h>
 
+namespace mcu = atmega;
 
 // Si lo conectamos solo a 4 pins de datos
 using LCD_pins = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<4>,
@@ -50,7 +51,7 @@ void test_static()
     LCD::write_data_to_CG_or_DDRAM('O');
     LCD::write_data_to_CG_or_DDRAM('K');
     LCD::write_data_to_CG_or_DDRAM('?');
-    atmega::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 }
 
 
@@ -67,7 +68,7 @@ void test_lcd4()
     lcd.write_data_to_CG_or_DDRAM('O');
     lcd.write_data_to_CG_or_DDRAM('K');
     lcd.write_data_to_CG_or_DDRAM('?');
-    atmega::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
 
     lcd.clear_display();
@@ -78,79 +79,79 @@ void test_lcd4()
 	uint8_t c = lcd.read_data_from_CG_or_DDRAM();
 	lcd.set_ddram_address(0x40 + x);
 	lcd.write_data_to_CG_or_DDRAM(c);
-	atmega::wait_ms(100);
+	mcu::Micro::wait_ms(100);
     }
-    atmega::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
 
     lcd.clear_display();
     print(lcd, "Probando clear");
-    atmega::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
     lcd.clear_display();
-    atmega::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
     print(lcd, "Pruebo return_home");
-    atmega::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
     lcd.return_home();
     print(lcd, "VUELVO!!!");
-    atmega::wait_ms(1500);
+    mcu::Micro::wait_ms(1500);
 
     lcd.clear_display();
     print(lcd, "Shift izda:");
     lcd.entry_mode(true, true);
-    atmega::wait_ms(500);
+    mcu::Micro::wait_ms(500);
     const char* p = &shift_izda[0];
     while (*p){
 	lcd.write_data_to_CG_or_DDRAM(*p);
-	atmega::wait_ms(500);
+	mcu::Micro::wait_ms(500);
 	++p;
     }
-    atmega::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
     lcd.entry_mode(true, false);	// recordar dejar shift = false
     lcd.clear_display();
     print(lcd, "Shift dcha");
-    atmega::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
     lcd.entry_mode(false, true);
-    atmega::wait_ms(500);
+    mcu::Micro::wait_ms(500);
     p = &shift_dcha[0];
     while (*p){
 	lcd.write_data_to_CG_or_DDRAM(*p);
-	atmega::wait_ms(500);
+	mcu::Micro::wait_ms(500);
 	++p;
     }
-    atmega::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
     lcd.entry_mode(true, false);	// recordar dejar shift = false
 
     lcd.clear_display();
     print(lcd, "Apago por 1 segundo");
     lcd.display_control(true, false, false);
-    atmega::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
     lcd.display_control(false, false, false);
-    atmega::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
     lcd.display_control(true, false, false);
-    atmega::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
     lcd.clear_display();
     print(lcd, "Encendido?");
-    atmega::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
     lcd.clear_display();
     print(lcd, "Cursor on");
     lcd.display_control(true, true, false);
-    atmega::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
     lcd.clear_display();
     print(lcd, "Cursor off");
     lcd.display_control(true, false, false);
-    atmega::wait_ms(2000);
+    mcu::Micro::wait_ms(2000);
     lcd.clear_display();
     print(lcd, "Cursor blink on");
     lcd.display_control(true, false, true);
-    atmega::wait_ms(3000);
+    mcu::Micro::wait_ms(3000);
     lcd.clear_display();
     print(lcd, "Cursor blink off");
     lcd.display_control(true, false, false);
-    atmega::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
     // Lo dejamos sin cursor
     lcd.display_control(true, false, false);
 
@@ -160,7 +161,7 @@ void test_lcd4()
     print(lcd, "Esta fila hace un shift a la izda");
     for (uint8_t i = 0; i < 40; ++i){
 	lcd.cursor_or_display_shift(true, false);
-	atmega::wait_ms(200);
+	mcu::Micro::wait_ms(200);
     }
     // Lo dejamos como estaba
     lcd.return_home();
@@ -169,7 +170,7 @@ void test_lcd4()
     print(lcd, "Esta fila hace un shift a la dcha");
     for (uint8_t i = 0; i < 40; ++i){
 	lcd.cursor_or_display_shift(true, true);
-	atmega::wait_ms(200);
+	mcu::Micro::wait_ms(200);
     }
     // Lo dejamos como estaba
     lcd.return_home();
@@ -178,7 +179,7 @@ void test_lcd4()
     print(lcd, "Move cursor izda");
     for (uint8_t i = 0; i < 15; ++i){
 	lcd.cursor_or_display_shift(false, false);
-	atmega::wait_ms(300);
+	mcu::Micro::wait_ms(300);
     }
 
     lcd.clear_display();
@@ -186,7 +187,7 @@ void test_lcd4()
     lcd.set_ddram_address(0); // coloco el cursor al principio
     for (uint8_t i = 0; i < 15; ++i){
 	lcd.cursor_or_display_shift(false, true);
-	atmega::wait_ms(300);
+	mcu::Micro::wait_ms(300);
     }
 
 
@@ -194,21 +195,21 @@ void test_lcd4()
     lcd.clear_display();
     lcd.set_ddram_address(3);
     print(lcd, "a partir 3");
-    atmega::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
     lcd.clear_display();
     lcd.set_ddram_address(0x00);
     print(lcd, "Segunda fila");
     lcd.set_ddram_address(0x40);
     print(lcd, "Primera fila");
-    atmega::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 
     lcd.clear_display();
 
 }
 
 
-void new_glyph(LCD& lcd, const atmega::Progmem_array<uint8_t, 8>& glyph)
+void new_glyph(LCD& lcd, const mcu::Progmem_array<uint8_t, 8>& glyph)
 {
     for (uint8_t i  = 0; i < 8; ++i)
 	lcd.write_data_to_CG_or_DDRAM(glyph[i]);
@@ -217,14 +218,14 @@ void new_glyph(LCD& lcd, const atmega::Progmem_array<uint8_t, 8>& glyph)
 
 
 void show_glyphs(LCD& lcd,
-	const atmega::Progmem_array<uint8_t, 8>& g1, 
-	const atmega::Progmem_array<uint8_t, 8>& g2, 
-	const atmega::Progmem_array<uint8_t, 8>& g3, 
-	const atmega::Progmem_array<uint8_t, 8>& g4, 
-	const atmega::Progmem_array<uint8_t, 8>& g5, 
-	const atmega::Progmem_array<uint8_t, 8>& g6, 
-	const atmega::Progmem_array<uint8_t, 8>& g7, 
-	const atmega::Progmem_array<uint8_t, 8>& g8)
+	const mcu::Progmem_array<uint8_t, 8>& g1, 
+	const mcu::Progmem_array<uint8_t, 8>& g2, 
+	const mcu::Progmem_array<uint8_t, 8>& g3, 
+	const mcu::Progmem_array<uint8_t, 8>& g4, 
+	const mcu::Progmem_array<uint8_t, 8>& g5, 
+	const mcu::Progmem_array<uint8_t, 8>& g6, 
+	const mcu::Progmem_array<uint8_t, 8>& g7, 
+	const mcu::Progmem_array<uint8_t, 8>& g8)
 {
     lcd.set_cgram_address(0x00);
     new_glyph(lcd, g1);
@@ -261,7 +262,7 @@ void test_cgram4()
                 gl::plug,
                 gl::musical_note);
 
-    atmega::wait_ms(2000);
+    mcu::Micro::wait_ms(2000);
 
     show_glyphs(lcd,
                 gl::pacman,
@@ -272,7 +273,7 @@ void test_cgram4()
                 gl::speaker_right,
                 gl::plug,
                 gl::musical_note);
-    atmega::wait_ms(2000);
+    mcu::Micro::wait_ms(2000);
 
     show_glyphs(lcd,
                 gl::heart_full,
@@ -289,11 +290,11 @@ void test_cgram4()
 	lcd.set_ddram_address(0x40);
 	lcd.write_data_to_CG_or_DDRAM(0x00);
 	lcd.write_data_to_CG_or_DDRAM(0x02);
-	atmega::wait_ms(500);
+	mcu::Micro::wait_ms(500);
 	lcd.set_ddram_address(0x40);
 	lcd.write_data_to_CG_or_DDRAM(0x01);
 	lcd.write_data_to_CG_or_DDRAM(0x03);
-	atmega::wait_ms(500);
+	mcu::Micro::wait_ms(500);
     }
 
 

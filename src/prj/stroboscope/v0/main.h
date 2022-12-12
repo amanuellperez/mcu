@@ -61,7 +61,7 @@ struct Main {
 
 inline void wait_release_key()
 {
-    mcu::wait_ms(time_wait_release_key);
+    mcu::Micro::wait_ms(time_wait_release_key);
 }
 
 

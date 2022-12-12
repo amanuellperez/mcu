@@ -61,7 +61,7 @@ void Main::print_buffer()
 	lcd << *p;
 
     lcd << "]\n";
-    mcu::wait_ms(1000);
+    mcu::Micro::wait_ms(1000);
 }
 
 void Main::print_result()

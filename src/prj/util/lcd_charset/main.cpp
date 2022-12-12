@@ -86,7 +86,7 @@ void show_charset()
     while(1){
 	for (char i = 0; i < 8; ++i){
 	    print(lcd, 32*i);
-	    mcu::wait_ms(3000);
+	    mcu::Micro::wait_ms(3000);
 	}
     }
 }
