@@ -51,6 +51,8 @@
 #include <avr/io.h> // registros: DDRB... PORT...
 
 #include <atd_iobxtream.h>
+#include "dev_interrupt.h"
+#include "avr_micro.h"
 
 
 
@@ -375,7 +377,7 @@ TWI_slave<TWI, bsz>::write_buffer(const std::byte* buf, streamsize n)
 template <typename TWI, uint8_t bsz>
 void TWI_slave<TWI, bsz>::stop_transmission()
 {
-    avr_::Interrupts_lock lock;   // garantizo control del flujo.
+    dev::Disable_interrupts<Micro> lock;   // garantizo control del flujo.
     reset();
 }
 

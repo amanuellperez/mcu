@@ -21,6 +21,8 @@
 #include "../../../../avr_SPI_basic.h"
 #include "../../../../avr_interrupt.h"
 #include "../../../../avr_UART_iostream.h"
+#include "../../../../dev_interrupt.h"
+#include "../../../../avr_micro.h"
 
 
 using SPI = avr_::SPI_slave;
@@ -56,7 +58,7 @@ int main()
 	if (data != std::byte{0}){
 	    std::byte ndata{0};
 	    {
-                avr_::Interrupts_lock lock;
+                dev::Disable_interrupts<avr_::Micro> lock;
                 ndata = data;
                 data  = std::byte{0};
 	    }

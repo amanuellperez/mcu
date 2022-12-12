@@ -115,8 +115,6 @@ namespace atmega{
 
 // MCU UTILITIES
     using Interrupt          = avr_::Interrupt;
-    using Enable_interrupts  = avr_::Enable_interrupts;
-    using Disable_interrupts = avr_::Disable_interrupts;
 
     using Power     = avr_::Power;
 
@@ -146,53 +144,10 @@ namespace atmega{
 
     namespace literals{ using namespace avr_::literals; }
 
-/***************************************************************************
- *			    MICRO
- ***************************************************************************/
-// (RRR) ¿por qué meter todas estas funciones en una clase?
-//       Para poder parametrizar los devices con LCD<Micro, ...>. De esta
-//       forma el código será genérico.
-struct Micro{
-    // interfaz static
-    Micro() = delete;
+// micro
+// -----
+    using Micro = avr_::Micro;
 
-    template <std::integral Int>
-    inline static constexpr void wait_us(Int t) {avr_::wait_us(t);}
-
-    template <std::integral Int>
-    inline static constexpr void wait_ms(Int t) {avr_::wait_ms(t);}
-
-
-
-    /// Habilita el uso de interrupciones. Además, recordar habilitar
-    /// cada interrupción por separado.
-    inline static void enable_interrupts() {sei();}
-
-    /// Deshabilita el uso de interrupciones
-    inline static void disable_interrupts() {cli();}
-
-
-    // TODO: ¿cómo importar directamente estas funciones?
-    // using ... ???
-    // Manejamos el array como memoria normal y corriente
-    template <size_t N>
-    inline static char* strcpy(char* dst, const Element_progmem_string_array<N>& src)
-    { return avr_::strcpy(dst, src); }
-
-    // Es más eficiente y segura strlcpy que strncpy
-    template <size_t N>
-    inline static char*
-    strncpy(char* dst, const Element_progmem_string_array<N>& src, size_t n)
-    { return avr_::strncpy(dst, src, n); }
-
-    template <size_t N>
-    inline static size_t
-    strlcpy(char* dst, const Element_progmem_string_array<N>& src, size_t n)
-    { return avr_::strlcpy(dst, src, n); }
-
-    inline static int bytes_of_free_ram()  {return avr_::bytes_of_free_ram(); }
-};// Micro
- 
 
 /***************************************************************************
  *			FUNCIONES AUXILIARES

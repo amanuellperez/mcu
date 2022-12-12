@@ -4,6 +4,7 @@ SOURCES= avr_SPI_basic.cpp \
 
 
 INCS= dev_concepts.h	\
+	  dev_interrupt.h	\
 	avr_ADC_basic.h		\
 	avr_atmega328p_cfg.h\
 	avr_atmega_dev.h	\
@@ -11,6 +12,7 @@ INCS= dev_concepts.h	\
 	avr_cfg.h			\
 	avr_interrupt.h		\
 	avr_memory.h		\
+	avr_micro.h			\
 	avr_pin.h			\
 	avr_port_basic.h	\
 	avr_sleep.h			\

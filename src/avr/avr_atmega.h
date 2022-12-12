@@ -47,6 +47,10 @@
 #include <avr_atmega328p_cfg.h>
 #include <avr_types.h>
 
+// Micro
+// -----
+#include <avr_micro.h>
+
 // Traductores
 // -----------
 #include <avr_UART_basic.h>

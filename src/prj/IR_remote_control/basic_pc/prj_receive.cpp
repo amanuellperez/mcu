@@ -22,7 +22,7 @@
 
 bool Main::receive()
 {
-    mcu::Enable_interrupts lock;
+    dev::Enable_interrupts<mcu::Micro> lock;
 
     UART::enable_interrupt_unread_data();
     Main::user_abort = false;

@@ -23,6 +23,8 @@
 #include "../../../avr_timer1_basic.h"
 #include "../../../avr_time.h"
 #include "../../../avr_interrupt.h"
+#include "../../../avr_micro.h"
+#include "../../../dev_interrupt.h"
 
 
 #include <atd_ostream.h>
@@ -112,7 +114,7 @@ int main()
 	Timer::counter_type v;
 	uint32_t c;
 	{// lo más atómico posible
-	    avr_::Interrupts_lock l;
+	    dev::Disable_interrupts<avr_::Micro> l;
 	    v = Timer::unsafe_counter();
 	    c = contador;
 	}

@@ -42,6 +42,24 @@ constexpr Timer::counter_type top_counter = 99;
 
 volatile time_t contador = 0;
 
+class Disable_interrupts{
+public:
+    Disable_interrupts()
+    {
+	sreg_ = SREG;	// Save global interrupt flag
+	cli();		// Disable interrupts
+    }
+
+    ~Disable_interrupts()
+    {
+	SREG = sreg_;	// Restore global interrupt flag
+    }
+
+
+private:
+    unsigned char sreg_;
+};
+
 // TODO: quedaría mejor algo del tipo
 // ISR_TIMER_INTERRUPT(avr_::Timer0) or
 // ISR_TIMER_INTERRUPT(avr_::Timer1) 
@@ -130,7 +148,7 @@ int main()
 	time_t c;
 	Timer::counter_type v;
 	{
-	    avr_::Interrupts_lock l;
+	    Disable_interrupts l;
 	    v = Timer::timer_counter();
 	    c = contador;
 	}

@@ -45,6 +45,7 @@
  *		         corto y se entiende bien)
  *
  *		 Enable_interrupt
+ *    12/12/2022 Enable_interrupts/Disable_interrupts a dev_interrupt.h
  *
  ****************************************************************************/
 #include <avr/interrupt.h>
@@ -507,64 +508,63 @@ inline void Interrupt::disable_pin<28>()
  *  las deja como estaban.
  *
  */
-// TODO: esta clase es genérica. Sacarla de aquí, esto es un traductor.
-// Ejemplo de bloqueo en la datasheet: ver pag. 153 por ejemplo.
-class Interrupts_lock{
-public:
-    Interrupts_lock()
-    {
-	sreg_ = SREG;	// Save global interrupt flag
-	cli();		// Disable interrupts
-    }
+//// TODO: esta clase es genérica. Sacarla de aquí, esto es un traductor.
+//// Ejemplo de bloqueo en la datasheet: ver pag. 153 por ejemplo.
+//class Interrupts_lock{
+//public:
+//    Interrupts_lock()
+//    {
+//	sreg_ = SREG;	// Save global interrupt flag
+//	cli();		// Disable interrupts
+//    }
+//
+//    ~Interrupts_lock()
+//    {
+//	SREG = sreg_;	// Restore global interrupt flag
+//    }
+//
+//
+//private:
+//    unsigned char sreg_;
+//};
 
-    ~Interrupts_lock()
-    {
-	SREG = sreg_;	// Restore global interrupt flag
-    }
-
-
-private:
-    unsigned char sreg_;
-};
-
-// DUDA: Interrupts_lock y Disable_interrupt es la misma clase. ¿Qué nombre es
-// mejor? Disable_interrupts encaja mejor con Enable_interrupts
-class Disable_interrupts{
-public:
-    Disable_interrupts()
-    {
-	sreg_ = SREG;	// Save global interrupt flag
-	cli();		// Disable interrupts
-    }
-
-    ~Disable_interrupts()
-    {
-	SREG = sreg_;	// Restore global interrupt flag
-    }
-
-
-private:
-    unsigned char sreg_;
-};
-
-class Enable_interrupts{
-public:
-    Enable_interrupts()
-    {
-	sreg_ = SREG;	// Save global interrupt flag
-	sei();		// Enable interrupts
-    }
-
-    ~Enable_interrupts()
-    {
-	SREG = sreg_;	// Restore global interrupt flag
-    }
-
-
-private:
-    unsigned char sreg_;
-};
-
+//// Ejemplo de bloqueo en la datasheet: ver pag. 153 por ejemplo.
+//class Disable_interrupts{
+//public:
+//    Disable_interrupts()
+//    {
+//	sreg_ = SREG;	// Save global interrupt flag
+//	cli();		// Disable interrupts
+//    }
+//
+//    ~Disable_interrupts()
+//    {
+//	SREG = sreg_;	// Restore global interrupt flag
+//    }
+//
+//
+//private:
+//    unsigned char sreg_;
+//};
+//
+//class Enable_interrupts{
+//public:
+//    Enable_interrupts()
+//    {
+//	sreg_ = SREG;	// Save global interrupt flag
+//	sei();		// Enable interrupts
+//    }
+//
+//    ~Enable_interrupts()
+//    {
+//	SREG = sreg_;	// Restore global interrupt flag
+//    }
+//
+//
+//private:
+//    unsigned char sreg_;
+//};
+//
 
 }// namespace
 
