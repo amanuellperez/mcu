@@ -17,8 +17,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "../../dev_miniclocks.h"
 #include <avr_atmega.h>
+#include "../../dev_miniclocks.h"
 
 // Devices
 // -------
@@ -33,6 +33,7 @@ using Miniclock0_ms = dev::Miniclock_ms<mcu::Micro, mcu::Timer0_generic_counter>
 
 using Miniclock1_us = dev::Miniclock_us<mcu::Micro, mcu::Timer1_generic_counter>;
 using Miniclock1_ms = dev::Miniclock_ms<mcu::Micro, mcu::Timer1_generic_counter>;
+
 
 // Functions
 // ---------
@@ -49,13 +50,17 @@ void init_uart()
 }
 
 
-template <typename Miniclock_us>
-void generate_square_wave_us(Pin& pin, uint16_t time_us)
+template <typename Miniclock>
+void generate_square_wave_no_use_wait(Pin& pin, 
+				    typename Miniclock::counter_type time_ms_or_us)
 {
+    mcu::UART_iostream uart;
+    uart << "Not using Miniclock::wait() function\n";
+
     while (1){
-	Miniclock_us::start();
-	while (Miniclock_us::read() < time_us){
-	    // This takes a lot of time ==> this function can't generate
+	Miniclock::start();
+	while (Miniclock::read() < time_ms_or_us){
+	    // This takes a lot of time in us ==> this function can't generate
 	    // a square wave of microseconds!!!
 	    if (mcu::UART_basic::are_there_data_unread())
 		return;
@@ -64,32 +69,42 @@ void generate_square_wave_us(Pin& pin, uint16_t time_us)
     }
 }
 
-template <typename Miniclock_ms>
-void generate_square_wave_ms(Pin& pin, uint16_t time_ms)
+
+
+template <typename Miniclock>
+void generate_square_wave_use_wait(Pin& pin,
+				    typename Miniclock::counter_type time_ms_or_us)
 {
+    mcu::UART_iostream uart;
+    uart << "Using Miniclock::wait() function\n";
+
     while (1){
-	Miniclock_ms::start();
-	while (Miniclock_ms::read() < time_ms){
-	    if (mcu::UART_basic::are_there_data_unread())
-		return;
-	}
+	Miniclock::start();
+	Miniclock::wait(time_ms_or_us);
 	pin.toggle();
+
+	if (mcu::UART_basic::are_there_data_unread())
+	    return;
     }
 }
+
 
 
 void print_menu()
 {
     mcu::UART_iostream uart;
 
-    uart << "1. Miniclock0_us\n"
+    uart << "\n----------------\n"
+	    "1. Miniclock0_us\n"
 	    "2. Miniclock0_ms\n"
 	    "3. Miniclock1_us\n"
 	    "4. Miniclock1_ms\n"
-	    "Other key to continue\n";
+	    "5. Use/don't use wait function\n"
+	    "Other key to continue\n"
+	    "----------------\n\n";
 }
 
-void ask_clock(Cfg& cfg)
+void ask_clock(Cfg& cfg, bool& use_wait)
 {
     mcu::UART_iostream uart;
 
@@ -101,28 +116,35 @@ void ask_clock(Cfg& cfg)
 	break; case '2':  cfg = Cfg::miniclock0_ms;
 	break; case '3':  cfg = Cfg::miniclock1_us;
 	break; case '4':  cfg = Cfg::miniclock1_ms;
+	break; case '5':  use_wait = !use_wait;
     }
 }
 
 
 template <typename Miniclock_ms>
-void generate_ms(Pin& pin)
+void generate_ms(Pin& pin, bool use_wait)
 {
     mcu::UART_iostream uart;
     uint16_t time_ms;
 
-    uart << "Write semiperiod, in ms, of square wave to generate:\n"
+    uart << "\nWrite semiperiod, in ms, of square wave to generate:\n"
 	    "(max value of " << (uint32_t) Miniclock_ms::counter_max() << ')';
     uart >> time_ms;
     uart << "\nGenerating a square wave of " << (2*time_ms) << " ms\n";
+
+
     print_menu();
 
-    generate_square_wave_ms<Miniclock_ms>(pin, time_ms);
+    if (use_wait)
+	generate_square_wave_no_use_wait<Miniclock_ms>(pin, time_ms);
+
+    else
+	generate_square_wave_use_wait<Miniclock_ms>(pin, time_ms);
 }
 
 
 template <typename Miniclock_us>
-void generate_us(Pin& pin)
+void generate_us(Pin& pin, bool use_wait)
 {
     mcu::UART_iostream uart;
     uint16_t time_us;
@@ -133,9 +155,14 @@ void generate_us(Pin& pin)
 	    "(max value of " << (uint32_t) Miniclock_us::counter_max() << ')';
     uart >> time_us;
     uart << "\nGenerating a square wave of " << (2*time_us) << " us\n";
+
     print_menu();
 
-    generate_square_wave_us<Miniclock_us>(pin, time_us);
+    if (use_wait)
+	generate_square_wave_no_use_wait<Miniclock_us>(pin, time_us);
+
+    else
+	generate_square_wave_use_wait<Miniclock_us>(pin, time_us);
 }
 
 int main()
@@ -147,19 +174,27 @@ int main()
 
     mcu::UART_iostream uart;
     Cfg cfg = Cfg::miniclock0_ms;
+    bool use_wait = false;
 
     uart << "\n\nMiniclock test\n"
 	        "--------------\n"
 		"Connect oscilloscope to pin " << (int) pin.number << '\n';
     while(1){
 	print_menu();
-	ask_clock(cfg);
+	ask_clock(cfg, use_wait);
 
 	switch(cfg){
-	    break; case Cfg::miniclock0_us: generate_us<Miniclock0_us>(pin);
-	    break; case Cfg::miniclock0_ms: generate_ms<Miniclock0_ms>(pin);
-	    break; case Cfg::miniclock1_us: generate_us<Miniclock1_us>(pin);
-	    break; case Cfg::miniclock1_ms: generate_ms<Miniclock1_ms>(pin);
+	    break; case Cfg::miniclock0_us: 
+			generate_us<Miniclock0_us>(pin, use_wait);
+
+	    break; case Cfg::miniclock0_ms: 
+			generate_ms<Miniclock0_ms>(pin, use_wait);
+
+	    break; case Cfg::miniclock1_us: 
+			generate_us<Miniclock1_us>(pin, use_wait);
+
+	    break; case Cfg::miniclock1_ms: 
+			generate_ms<Miniclock1_ms>(pin, use_wait);
 	}
     }
 }
