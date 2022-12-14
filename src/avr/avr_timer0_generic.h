@@ -62,16 +62,16 @@ namespace avr_{
 /// de valores será 255, no más. No sirve para contar tiempo, pero son
 /// ideales para medir/generar pulsos de electrónica. 
 // DUDA: Timer0_counter_generic?
-//	 Timer_counter0_generic?
-//	 Timer0_generic_counter?
-class Timer0_generic_counter{
+//	 Time_counter0_generic?
+//	 Time_counter0_generic?
+class Time_counter0_generic{
 public:
 // types
     using Timer        = avr_::Timer0;
     using counter_type = typename Timer::counter_type;
 
 /// De momento el interfaz es static. Prohibo su construcción.
-    Timer0_generic_counter() = delete;
+    Time_counter0_generic() = delete;
 
 /// Modo de funcionamiento: contador normal y corriente.
     static void init(counter_type top0 = max_top()) 
@@ -157,6 +157,8 @@ public:
     };
 
     // Indica qué canales se conectan a la hora de generar SW
+    // TODO: cambiar. Esto no es genérico. ¿Y si el SWG tiene 3 pines? ¿y 4?
+    // Mejor usar numeros.
     enum class Connect{
 	only_channel1, only_channel2, channel1_and_2
     };
@@ -193,36 +195,36 @@ public:
 // tiempo, por eso este 'counter mode' es diferente del 'timer counter mode'
 // que cuenta tiempo.
 
-// Timer counter mode
+// Timer counter mode: TODO: borrar esto
 // ------------------
 // En este modo el timer se limita a contar tiempo. 
     /// Modo de funcionamiento: contador normal y corriente.
-    static void mode_timer_counter(counter_type top = timer_counter_max_top()) 
-    { 
-	Timer::mode_CTC();
-	timer_counter_reset();
-	timer_counter_top(top);
-	Timer::enable_output_compare_A_match_interrupt();
-    }
-
-    /// Devuelve el valor del contador en ticks.
-    static counter_type timer_counter() 
-    { return Timer::counter(); }
-    
-    /// Hace que el counter = 0.
-    static void timer_counter_reset() { Timer::counter(0); }
-
-    /// Define el top del counter.
-    static void timer_counter_top(counter_type top)
-    {Timer::output_compare_register_A(top);}
-
-    /// Valor del top
-    static counter_type timer_counter_top()
-    { return Timer::output_compare_register_A(); }
-
-    /// Valor máximo que puede tener el top.
-    static constexpr counter_type timer_counter_max_top()
-    { return Timer::max(); }
+//    static void mode_timer_counter(counter_type top = timer_counter_max_top()) 
+//    { 
+//	Timer::mode_CTC();
+//	timer_counter_reset();
+//	timer_counter_top(top);
+//	Timer::enable_output_compare_A_match_interrupt();
+//    }
+//
+//    /// Devuelve el valor del contador en ticks.
+//    static counter_type timer_counter() 
+//    { return Timer::counter(); }
+//    
+//    /// Hace que el counter = 0.
+//    static void timer_counter_reset() { Timer::counter(0); }
+//
+//    /// Define el top del counter.
+//    static void timer_counter_top(counter_type top)
+//    {Timer::output_compare_register_A(top);}
+//
+//    /// Valor del top
+//    static counter_type timer_counter_top()
+//    { return Timer::output_compare_register_A(); }
+//
+//    /// Valor máximo que puede tener el top.
+//    static constexpr counter_type timer_counter_max_top()
+//    { return Timer::max(); }
 
 // Square wave mode
 // ----------------
@@ -406,6 +408,10 @@ private:
 };
 
 
+// Alias
+// -----
+// DUDA: usar _g como dispositivos genéricos. Es más corto y se entiende bien
+using Time_counter0_g = Time_counter0_generic;
 
 }// namespace 
 

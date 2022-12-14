@@ -47,7 +47,7 @@ namespace avr_{
 /// Un Timer_counter se limita a contar microsegundos o milisegundos. Su rango
 /// de valores será max_top, no más. No sirve para contar tiempo, pero son
 /// ideales para medir/generar pulsos de electrónica. 
-class Timer1_generic_counter{
+class Time_counter1_generic{
 public:
 // Tipo de tipo
 //  DUDA: ¿existe alguna función que tengan todos los dispositivos con doble
@@ -62,7 +62,7 @@ public:
     using Disable_interrupts = dev::Disable_interrupts<Micro>;
 
 /// De momento el interfaz es static. Prohibo su construcción.
-    Timer1_generic_counter() = delete;
+    Time_counter1_generic() = delete;
 
 /// Modo de funcionamiento: contador normal y corriente.
     static void unsafe_init(counter_type top0 = max_top()) 
@@ -264,46 +264,46 @@ public:
 // que cuenta tiempo.
 
 
-// TODO: Obsoleto: usar Timer1_generic_counter
+// TODO: Obsoleto: usar Time_counter1_generic
 //       A día de hoy lo uso en Clock. Reescribir.
 // Timer counter mode
 // ------------------
-// En este modo el timer se limita a contar tiempo. 
-    /// Modo de funcionamiento: contador normal y corriente.
-    static void mode_timer_counter(counter_type top = timer_counter_max_top()) 
-    { 
-	Timer::mode_CTC_top_OCR1A();
-	timer_counter_reset();
-	timer_counter_top(top);
-	Timer::enable_output_compare_A_match_interrupt();
-    }
-
-    /// Devuelve el valor del contador en ticks.
-    static counter_type timer_counter() 
-    {
-	Disable_interrupts l; // TODO: safe/unsafe
-	return Timer::unsafe_counter(); }
-    
-    /// Hace que el counter = 0.
-    static void timer_counter_reset() { 
-	Disable_interrupts l; // TODO: safe/unsafe
-	Timer::unsafe_counter(0); }
-
-    /// Define el top del counter.
-    static void timer_counter_top(counter_type top)
-    {
-	Disable_interrupts l; // TODO: safe/unsafe
-	Timer::unsafe_output_compare_register_A(top);}
-
-    /// Valor del top
-    static counter_type timer_counter_top()
-    { 
-	Disable_interrupts l; // TODO: safe/unsafe
-	return Timer::unsafe_output_compare_register_A(); }
-
-    /// Valor máximo que puede tener el top.
-    static constexpr counter_type timer_counter_max_top()
-    { return Timer::max(); }
+//// En este modo el timer se limita a contar tiempo. 
+//    /// Modo de funcionamiento: contador normal y corriente.
+//    static void mode_timer_counter(counter_type top = timer_counter_max_top()) 
+//    { 
+//	Timer::mode_CTC_top_OCR1A();
+//	timer_counter_reset();
+//	timer_counter_top(top);
+//	Timer::enable_output_compare_A_match_interrupt();
+//    }
+//
+//    /// Devuelve el valor del contador en ticks.
+//    static counter_type timer_counter() 
+//    {
+//	Disable_interrupts l; // TODO: safe/unsafe
+//	return Timer::unsafe_counter(); }
+//    
+//    /// Hace que el counter = 0.
+//    static void timer_counter_reset() { 
+//	Disable_interrupts l; // TODO: safe/unsafe
+//	Timer::unsafe_counter(0); }
+//
+//    /// Define el top del counter.
+//    static void timer_counter_top(counter_type top)
+//    {
+//	Disable_interrupts l; // TODO: safe/unsafe
+//	Timer::unsafe_output_compare_register_A(top);}
+//
+//    /// Valor del top
+//    static counter_type timer_counter_top()
+//    { 
+//	Disable_interrupts l; // TODO: safe/unsafe
+//	return Timer::unsafe_output_compare_register_A(); }
+//
+//    /// Valor máximo que puede tener el top.
+//    static constexpr counter_type timer_counter_max_top()
+//    { return Timer::max(); }
 
 
 
@@ -513,6 +513,13 @@ private:
     inline static Mode mode_;
 
 };
+
+
+
+// Alias
+// -----
+// DUDA: usar _g como dispositivos genéricos. Es más corto y se entiende bien
+using Time_counter1_g = Time_counter1_generic;
 
 }// namespace 
 

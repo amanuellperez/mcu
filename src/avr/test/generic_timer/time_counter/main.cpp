@@ -17,16 +17,16 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "../../avr_atmega328p_cfg.h"
-#include "../../avr_pin.h"
-#include "../../avr_timer0_generic.h"
-//#include "../../avr_timer1_generic.h"
+#include "../../../avr_atmega328p_cfg.h"
+#include "../../../avr_pin.h"
+#include "../../../avr_timer0_generic.h"
+#include "../../../avr_timer1_generic.h"
 
 // Para probarlo conectar el pin 15 al osciloscopio y medir la señal generada.
 
 constexpr uint8_t num_pin = 15;
-using Counter = avr_::Timer0_generic_counter;
-// using Counter = avr_::Timer1_generic_counter;
+using Counter = avr_::Time_counter0_g;
+using Counter1 = avr_::Time_counter1_g;
 
 //constexpr uint16_t period_in_us = 1u; 
 constexpr uint16_t period_in_us = 8u; 

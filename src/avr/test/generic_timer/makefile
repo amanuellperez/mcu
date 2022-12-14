@@ -1,4 +1,4 @@
-DIRS = counter	\
+DIRS = time_counter \
 	   square_wave
 
 

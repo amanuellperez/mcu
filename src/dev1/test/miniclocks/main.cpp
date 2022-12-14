@@ -28,11 +28,11 @@ constexpr uint8_t test_pin = 14;
 
 using Pin = mcu::Output_pin<test_pin>;
 
-using Miniclock0_us = dev::Miniclock_us<mcu::Micro, mcu::Timer0_generic_counter>;
-using Miniclock0_ms = dev::Miniclock_ms<mcu::Micro, mcu::Timer0_generic_counter>;
+using Miniclock0_us = dev::Miniclock_us<mcu::Micro, mcu::Time_counter0_generic>;
+using Miniclock0_ms = dev::Miniclock_ms<mcu::Micro, mcu::Time_counter0_generic>;
 
-using Miniclock1_us = dev::Miniclock_us<mcu::Micro, mcu::Timer1_generic_counter>;
-using Miniclock1_ms = dev::Miniclock_ms<mcu::Micro, mcu::Timer1_generic_counter>;
+using Miniclock1_us = dev::Miniclock_us<mcu::Micro, mcu::Time_counter1_generic>;
+using Miniclock1_ms = dev::Miniclock_ms<mcu::Micro, mcu::Time_counter1_generic>;
 
 
 // Functions

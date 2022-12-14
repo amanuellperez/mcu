@@ -84,10 +84,9 @@ using Keyboard	   = dev::Basic_keyrow<Keyrow_pins, Keyrow_codes>;
 
 // Chronometer
 // -----------
-using Timer = atmega::Timer1_generic;
 constexpr static uint16_t chronometer_timer_period_in_us = 64u;
 using Chronometer                                        = dev::
-    Chronometer_ms<Timer, chronometer_timer_period_in_us, false>;
+    Chronometer_ms<mcu::Time_counter1_g, chronometer_timer_period_in_us, false>;
 
 #endif
 

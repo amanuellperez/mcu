@@ -99,8 +99,8 @@ using Keyboard     = dev::Basic_keyrow<Keyrow_pins, Keyrow_codes>;
 // system_clock
 // ------------
 constexpr static uint16_t clock_timer_period_in_us = 64u;
-using Timer = atmega::Timer1_generic;
-using System_clock = dev::System_clock<Timer, clock_timer_period_in_us>;
+using System_clock = 
+	dev::System_clock<mcu::Time_counter1_g, clock_timer_period_in_us>;
 
 
 

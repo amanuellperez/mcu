@@ -22,6 +22,7 @@
 #define __DEV_CLOCK_US_H__
 
 
+// TODO: eliminar esta clase a favor de dev::Miniclock_us
 
 #undef wait_ms
 #undef wait_us

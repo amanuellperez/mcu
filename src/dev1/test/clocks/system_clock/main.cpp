@@ -32,8 +32,8 @@ constexpr static uint16_t clock_timer_period_in_us = 64u;
 
 // Con el Timer0 no funciona ya que el counter del timer0 es de 8 bits y no de
 // 16 bits.
-using Timer = atmega::Timer1_generic;
-using System_clock = dev::System_clock<Timer, clock_timer_period_in_us>;
+using System_clock = 
+	    dev::System_clock<mcu::Time_counter1_g, clock_timer_period_in_us>;
 
 
 // Definimos el reloj del sistema

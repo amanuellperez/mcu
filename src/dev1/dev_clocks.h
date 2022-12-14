@@ -24,13 +24,27 @@
 #define __DEV_CLOCKS_H__
 /****************************************************************************
  *
- *  - DESCRIPCION: Differents clocks:
- *	
+ * DESCRIPCION
+ *
+ *  Concebimos un `Time_counter` como `Clock`. Para ello:
+ *	(1) Elegimos la unidad del tick del `Time_counter` como milisegundo,
+ *	    en el `Clock_ms`, o como segundo en el `Clock_s`.
+ *	    (si no se puede elegir directamente lo emulamos)
+ *
+ *	(2) Ampliamos la resolución del `Time_counter`.
+ *	    Ejemplo: 
+ *		Clock_ms<Time_counter, uint32_t> clock;
+ *
+ *		La resolución del clock es `uint32_t.Time_counter::counter`
+ *
+ *  Ver dev_miniclocks.h para más documentación.
+ *
+ * CLOCKS
  *	+ system_clock: reloj de sistema (similar a std::system_clock).
  *	+ Chronometer_ms: reloj que mide el tiempo en milisegundos.
  *
  *
- *  - HISTORIA:
+ * HISTORIA
  *    A.Manuel L.Perez
  *    ??/??/2020 Escrito
  *    26/02/2021 Basado en Generic_timer
@@ -49,34 +63,34 @@ namespace dev{
 /***************************************************************************
  *			    SYSTEM_CLOCK
  ***************************************************************************/
-template <typename Timer, uint16_t timer_period_in_us>
-constexpr inline typename Timer::counter_type __system_clock_top()
+template <typename Time_counter, uint16_t timer_period_in_us>
+constexpr inline typename Time_counter::counter_type __system_clock_top()
 {
     constexpr uint32_t one_second_in_us = 1000000u;
     constexpr uint32_t top = one_second_in_us/timer_period_in_us;
 
-    static_assert(top < Timer::timer_counter_max_top(),
+    static_assert(top < Time_counter::max_top(),
                   "Top too great for this timer. Try another period or choose "
                   "a different F_CPU.");
-    return atd::safe_static_cast<typename Timer::counter_type, uint32_t, top>();
+    return atd::safe_static_cast<typename Time_counter::counter_type, uint32_t, top>();
 }
 
 
-// Timer: es un Generic_timer.
+// Time_counter: es un Generic_timer.
 // (RRR) timer_period_in_us solo lo necesito en init. ¿Por qué parametrizar
 //       todo el System_clock con timer_period_in_us cuando no es necesario?
 //       Para simplificar el uso. En el archivo 'dev.h' se define el
 //       System_clock, y el resto del programa no necesita recordar que el
 //       init tienes que pasarle el timer_period_in_us. Queda más claro el
 //       código (y posiblemente más portable)
-template <typename Timer, uint16_t timer_period_in_us>
+template <typename Time_counter, uint16_t timer_period_in_us>
 struct System_clock : public std::chrono::system_clock {
 
     constexpr static void init()
     {
-	Timer::mode_timer_counter(
-			    __system_clock_top<Timer, timer_period_in_us>());
-        Timer::template on<timer_period_in_us>();
+	Time_counter::
+	    init(__system_clock_top<Time_counter, timer_period_in_us>());
+        Time_counter::template on<timer_period_in_us>();
     }
 
     /// Ponemos en hora el reloj.
@@ -156,16 +170,16 @@ inline bool operator!=(const _Sexagesimal_ms& a,
 //	         preescaler, un divisor 'd' que hace que T_timer = d*T_clock.
 //  3. T_interrupt = frecuencia a la que se genera la interrupción. 
 //               DUDA: T_int = top * T_timer ó T_int = (top + 1)*T_timer???
-template <typename Timer, uint16_t timer_period_in_us>
-constexpr inline typename Timer::counter_type __Chronometer_ms_top()
+template <typename Time_counter, uint16_t timer_period_in_us>
+constexpr inline typename Time_counter::counter_type __Chronometer_ms_top()
 {
     constexpr uint32_t one_millisecond_in_us = 1000u;
     constexpr uint32_t top = one_millisecond_in_us/timer_period_in_us;
 
-    static_assert(top < Timer::timer_counter_max_top(),
+    static_assert(top < Time_counter::max_top(),
                   "Top too great for this timer. Try another period or choose "
                   "a different F_CPU.");
-    return atd::safe_static_cast<typename Timer::counter_type, uint32_t, top>();
+    return atd::safe_static_cast<typename Time_counter::counter_type, uint32_t, top>();
 }
 
 
@@ -179,7 +193,7 @@ constexpr inline typename Timer::counter_type __Chronometer_ms_top()
 //   forma se puede elegir que sea un chronometro que funcione en ms ó us.
 //   ¿Merece la pena hacerlo? En lugar de contar milisegundos lo que cuenta
 //   son ticks. Los ticks podrán ser ms o us.
-template <typename Timer,   // = Generic_timer
+template <typename Time_counter,   // = Generic_timer
 	 uint16_t timer_period_in_us, 
 	 bool tick_up = true // up or down?
 	 > 
@@ -199,18 +213,18 @@ struct Chronometer_ms {
     /// init chronometer. Lo ponemos a 0.
     constexpr static void init()
     {
-	Timer::mode_timer_counter(
-			    __Chronometer_ms_top<Timer, timer_period_in_us>());
+	Time_counter::
+	    init(__Chronometer_ms_top<Time_counter, timer_period_in_us>());
 
         reset();
     }
 
     /// Enciende el cronometro. Recordar definir el tiempo antes.
     static void on()
-    { Timer::template on<timer_period_in_us>(); }
+    { Time_counter::template on<timer_period_in_us>(); }
 
     /// Para el cronómetro sin borrar el tiempo actual.
-    static void off() { Timer::off(); }
+    static void off() { Time_counter::off(); }
 
 
 // Lectura
@@ -229,7 +243,7 @@ struct Chronometer_ms {
     static void reset() 
     { 
 	milliseconds_ = 0; 
-	Timer::timer_counter_reset();
+	Time_counter::reset();
     }
 
     static void count(const Sexagesimal_ms& sexag)
