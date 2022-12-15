@@ -67,6 +67,7 @@
  *
  ****************************************************************************/
 #include <limits>
+#include <array>
 
 #include <atd_bit.h>
 #include <atd_type_traits.h>
@@ -127,6 +128,17 @@ public:
 
 
 // CONFIGURACIÓN DEL RELOJ
+    // (RRR) ¿por qué definir explícitamente aquí los prescaler_factor?
+    //       Los podía definir en cfg::timer0, pero la implementación de esta
+    //       clase conoce los prescalers en las funciones
+    //       clock_frequency_no_preescaling, ... O se generalizan esas
+    //       funciones metiendolas en cfg::timer0 o no mejor hacerlo todo
+    //       concreto.
+    //
+    // Array con los posibles prescaler factors del timer.
+    static constexpr std::array<uint16_t, 5> 
+				prescaler_factor = {1, 8, 64, 256, 1024};
+
     enum class Frequency_divisor{
 		    undefined,    
 		    no_preescaling,
@@ -158,6 +170,11 @@ public:
 
     template<uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
     static Time clock_period();
+
+    /// Seleccionamos la frecuencia a la que funciona el timer usando el
+    /// divisor de frecuencias (prescaler_factor)
+    /// Enciende el timer (si prescaler_factor != 0) o lo apaga (si es == 0)
+    static constexpr void clock_frequency(uint32_t prescaler_factor);
 
     /// Frecuencia a la que funciona internamente el timer.
     /// Se cumple que clock_frequency() = 1 / clock_period();
@@ -370,6 +387,19 @@ inline void Timer1::clock_frequency_divide_by_1024()
 {// 101
     atd::write_bits<CS12, CS11, CS10>::to<1,0,1>::in(TCCR1B);
 }
+
+// DUDA: ¿cómo gestionar los errores de programación?
+inline constexpr void Timer1::clock_frequency(uint32_t prescaler_factor)
+{
+    switch (prescaler_factor){
+	break; case 8   : clock_frequency_divide_by_8();
+	break; case 64  : clock_frequency_divide_by_64();
+	break; case 256 : clock_frequency_divide_by_256();
+	break; case 1024: clock_frequency_divide_by_1024();
+	break; default  : clock_frequency_no_preescaling();
+    }
+}
+
 
 inline void Timer1::external_clock_falling_edge()
 {// 110

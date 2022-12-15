@@ -27,22 +27,28 @@
  *    
  *  - HISTORIA:
  *    A.Manuel L.Perez
- *    15/02/2021 v0.0: Escrito
- *    26/02/2022       timer_counter
- *    30/10/2022       Generic_timer_counter
- *    07/12/2022       dev::Generic_timer<Timer0> --> avr::Timer0_generic
- *		       ¿Por qué lo había definido como template?
- *		       Lo que quiero definir es un timer que obedece al
- *		       concept "timer". No necesito usar templates para nada.
+ *    15/02/2021 Escrito
+ *    26/02/2022 timer_counter
+ *    30/10/2022 Generic_timer_counter
+ *    07/12/2022 dev::Generic_timer<Timer0> --> avr::Timer0_generic
+ *		 ¿Por qué lo había definido como template?
+ *		 Lo que quiero definir es un timer que obedece al
+ *		 concept "timer". No necesito usar templates para nada.
  *
- *		       square_wave_generate
+ *		 square_wave_generate
+ *    15/12/2022 Square_wave_generator0_g
  *
  ****************************************************************************/
 #include "avr_timer0_basic.h"
 #include "avr_cfg.h"	// MCU_CLOCK_FREQUENCY_IN_HZ
 
+#include <atd_type_traits.h>
+
 namespace avr_{
 
+/***************************************************************************
+ *			    Timer0_counter_g
+ ***************************************************************************/
 // Un Timer_counter es un contador de tiempo.
 // Los periodos ha usar serían:
 //	si freq_mcu = 1 MHz, period = 1    = 1 microsegundo
@@ -134,6 +140,150 @@ public:
 };
 
 
+/***************************************************************************
+ *			Square_wave_generator0_g
+ ***************************************************************************/
+class Square_wave_generator0_g{
+public:
+// Types
+    using Timer        = avr_::Timer0;
+
+// Interfaz static
+    Square_wave_generator0_g() = delete;
+
+
+// Características del Timer
+    static constexpr uint8_t number_of_pins = cfg::timer0::number_of_pins;
+    static constexpr uint8_t pin[] = {Timer::OCA_pin(), Timer::OCB_pin()};
+
+    /// Apagamos el generador de señales.
+    // DUDA: stop() or off()??? Hoy me suena mejor stop: generate/stop
+    static void stop() { Timer::off(); }
+
+
+// Static interface
+// ----------------
+    /// Genera la frecuencia indicada en el pin indicado.
+    /// La frecuencia pasada tiene que estar en herzios.
+    // DUDA: usar Frequency en lugar de uint32_t? Sería lo mejor...
+    template <uint8_t npin>
+    static void generate(uint32_t freq_in_Hz);
+
+    template <int npin>
+    static void connect_pin();
+
+    template <int npin>
+    static void disconnect_pin();
+
+
+// Dynamic interface
+// -----------------
+    /// Genera la frecuencia indicada en el pin indicado.
+    /// La frecuencia pasada tiene que estar en herzios.
+    // DUDA: usar Frequency en lugar de uint32_t? Sería lo mejor...
+    static void generate(uint32_t freq_in_Hz, uint8_t npin);
+
+    static void connect_pin(uint8_t npin);
+
+    static void disconnect_pin(uint8_t npin);
+
+    static void disconnect_all_pins();
+
+private:
+    using counter_type = typename Timer::counter_type;
+
+// Funciones de ayuda
+    static void init(){ Timer::mode_CTC();}
+
+    template<uint16_t period
+	    , uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
+    static void on() {Timer::template on<period, clock_frequency_in_hz>();}
+
+    static void top(counter_type x)
+    { Timer::output_compare_register_A(x);}
+
+    static counter_type top()
+    { return Timer::output_compare_register_A();}
+
+//    /// Devuelve el valor mínimo que puede tomar el top
+//    static constexpr counter_type min_top()
+//    { return Timer::bottom();}
+//
+//    /// Devuelve el valor máximo que puede tomar el top
+//    static constexpr counter_type max_top()
+//    { return Timer::max();}
+
+// Funciones no genéricas: conocen cómo funciona el Timer0
+//    /// Devuelve la frecuencia, en Hz,  que se genera dados 
+//    /// el prescaler factor d (divisor de frecuencia) y el top M. 
+//    /// (pag 132 datasheet)
+//    template <uint32_t f_clock_in_Hz = MCU_CLOCK_FREQUENCY_IN_HZ>
+//    static constexpr 
+//    uint32_t prescaler_top_to_frequency_in_Hz(uint32_t d, uint32_t M)
+//    { return avr_::timer_::
+//	    timer_prescaler_top_to_frequency_in_Hz<f_clock_in_Hz>(d, M);}
+
+    /// Función inversa a la prescaler_top_to_frequency_in_Hz:
+    /// Devuelve el par (prescaler factor, top) necesario para generar la
+    /// frecuencia freq_in_Hz.
+    template <uint32_t f_clock_in_Hz = MCU_CLOCK_FREQUENCY_IN_HZ>
+    static constexpr 
+    std::pair<uint32_t, uint32_t> 
+    frequency_in_Hz_to_prescaler_top(uint32_t freq_in_Hz)
+    { return avr_::timer_::
+    timer_frequency_in_Hz_to_prescaler_top<Timer, f_clock_in_Hz>(freq_in_Hz); 
+    }
+};
+
+
+template <int npin>
+inline void Square_wave_generator0_g::connect_pin()
+{
+    if constexpr (npin == 0)
+    { Timer::CTC_pin_A_toggle_on_compare_match(); }
+
+    else if constexpr (npin == 1)
+    { Timer::CTC_pin_B_toggle_on_compare_match(); }
+
+    else
+    {static_assert(atd::always_false_v<int>, "npin out of range");}
+
+}
+
+
+template <int npin>
+inline void Square_wave_generator0_g::disconnect_pin()
+{
+    if constexpr (npin == 0)
+    { Timer::pin_A_disconnected();}
+
+    else if constexpr (npin == 1)
+    { Timer::pin_B_disconnected(); }
+
+    else
+    {static_assert(atd::always_false_v<int>, "npin out of range");}
+
+}
+
+inline void Square_wave_generator0_g::connect_pin(uint8_t nchannel)
+{
+    if      (nchannel == 0) connect_pin<0>();
+    else if (nchannel == 1) connect_pin<1>();
+}
+
+inline void Square_wave_generator0_g::disconnect_pin(uint8_t nchannel)
+{
+    if      (nchannel == 0) disconnect_pin<0>();
+    else if (nchannel == 1) disconnect_pin<1>();
+}
+
+inline void Square_wave_generator0_g::disconnect_all_pins()
+{
+    disconnect_pin<0>();
+    disconnect_pin<1>();
+}
+
+
 
 
 // DUDA: eliminar Generic_timer a favor de clases particulares. <-- NO lo
@@ -156,12 +306,12 @@ public:
         only_channel2
     };
 
-    // Indica qué canales se conectan a la hora de generar SW
-    // TODO: cambiar. Esto no es genérico. ¿Y si el SWG tiene 3 pines? ¿y 4?
-    // Mejor usar numeros.
-    enum class Connect{
-	only_channel1, only_channel2, channel1_and_2
-    };
+//    // Indica qué canales se conectan a la hora de generar SW
+//    // TODO: cambiar. Esto no es genérico. ¿Y si el SWG tiene 3 pines? ¿y 4?
+//    // Mejor usar numeros.
+//    enum class Connect{
+//	only_channel1, only_channel2, channel1_and_2
+//    };
 
 // pines 
     static constexpr uint8_t pin_channel1 = Timer::OCA_pin();
@@ -228,49 +378,49 @@ public:
 
 // Square wave mode
 // ----------------
-    /// Genera la frecuencia indicada conectándola a los canales indicados.
-    /// La frecuencia pasada tiene que estar en herzios.
-    // DUDA: usar Frequency en lugar de uint32_t? Sería lo mejor...
-    static void square_wave_generate(uint32_t freq_in_Hz, Connect);
-
-    static void mode_square_wave(){ Timer::mode_CTC();}
-
-    static void square_wave_top(Scalar x)
-    { Timer::output_compare_register_A(atd::to_integer<counter_type>(x));}
-
-    static counter_type square_wave_top()
-    { return Timer::output_compare_register_A();}
-
-    /// Devuelve el valor mínimo que puede tomar el top
-    static constexpr counter_type square_wave_min_top()
-    { return Timer::bottom();}
-
-    /// Devuelve el valor máximo que puede tomar el top
-    static constexpr counter_type square_wave_max_top()
-    { return Timer::max();}
-    
-    //static void square_wave_ch1_on() <-- TODO: borrarlo cuando actualize
-                                             //  Timer1
-    static void square_wave_connect_ch1()
-    { Timer::CTC_pin_A_toggle_on_compare_match(); }
-
-    static void square_wave_connect_ch2()
-    { Timer::CTC_pin_B_toggle_on_compare_match(); }
-
-    /// Desconecta el pin ch1 del Timer, sin apagarlo.
-    // La operatividad será: 
-    //	    1. configuras el Square_wave_generator
-    //	    2. conectas el Timer al canal 1 (y/o 2)
-    //	    3. enciendes el Timer
-    //	    ...
-    //	    Puedes desconectar los pines al Timer como quieras
-    static void square_wave_disconnect_ch1()
-    { Timer::pin_A_disconnected();}
-
-
-    /// Desconecta el pin ch2 del Timer, sin apagarlo.
-    static void square_wave_disconnect_ch2()
-    { Timer::pin_B_disconnected(); }
+//    /// Genera la frecuencia indicada conectándola a los canales indicados.
+//    /// La frecuencia pasada tiene que estar en herzios.
+//    // DUDA: usar Frequency en lugar de uint32_t? Sería lo mejor...
+//    static void square_wave_generate(uint32_t freq_in_Hz, Connect);
+//
+//    static void mode_square_wave(){ Timer::mode_CTC();}
+//
+//    static void square_wave_top(Scalar x)
+//    { Timer::output_compare_register_A(atd::to_integer<counter_type>(x));}
+//
+//    static counter_type square_wave_top()
+//    { return Timer::output_compare_register_A();}
+//
+//    /// Devuelve el valor mínimo que puede tomar el top
+//    static constexpr counter_type square_wave_min_top()
+//    { return Timer::bottom();}
+//
+//    /// Devuelve el valor máximo que puede tomar el top
+//    static constexpr counter_type square_wave_max_top()
+//    { return Timer::max();}
+//    
+//    //static void square_wave_ch1_on() <-- TODO: borrarlo cuando actualize
+//                                             //  Timer1
+//    static void square_wave_connect_ch1()
+//    { Timer::CTC_pin_A_toggle_on_compare_match(); }
+//
+//    static void square_wave_connect_ch2()
+//    { Timer::CTC_pin_B_toggle_on_compare_match(); }
+//
+//    /// Desconecta el pin ch1 del Timer, sin apagarlo.
+//    // La operatividad será: 
+//    //	    1. configuras el Square_wave_generator
+//    //	    2. conectas el Timer al canal 1 (y/o 2)
+//    //	    3. enciendes el Timer
+//    //	    ...
+//    //	    Puedes desconectar los pines al Timer como quieras
+//    static void square_wave_disconnect_ch1()
+//    { Timer::pin_A_disconnected();}
+//
+//
+//    /// Desconecta el pin ch2 del Timer, sin apagarlo.
+//    static void square_wave_disconnect_ch2()
+//    { Timer::pin_B_disconnected(); }
 
 
 
@@ -382,28 +532,26 @@ public:
 private:
     inline static Mode mode_;
 
-// Funciones no genéricas: conocen cómo funciona el Timer0
-    /// Devuelve la frecuencia, en Hz,  que se genera dados 
-    /// el prescaler factor d (divisor de frecuencia) y el top M. 
-    /// (pag 132 datasheet)
-    template <uint32_t f_clock_in_Hz = MCU_CLOCK_FREQUENCY_IN_HZ>
-    static constexpr 
-    uint32_t prescaler_top_to_frequency_in_Hz(uint32_t d, uint32_t M)
-    { return avr_::timer_::
-	    timer_prescaler_top_to_frequency_in_Hz<f_clock_in_Hz>(d, M);}
-
-    /// Función inversa a la prescaler_top_to_frequency_in_Hz:
-    /// Devuelve el par (prescaler factor, top) necesario para generar la
-    /// frecuencia freq_in_Hz.
-    template <uint32_t f_clock_in_Hz = MCU_CLOCK_FREQUENCY_IN_HZ>
-    static constexpr 
-    std::pair<uint32_t, uint32_t> 
-    frequency_in_Hz_to_prescaler_top(uint32_t freq_in_Hz)
-    { return avr_::timer_::
-    timer_frequency_in_Hz_to_prescaler_top<Timer, f_clock_in_Hz>(freq_in_Hz); 
-    }
-
-    static constexpr void square_wave_connect_to(Connect connection);
+//// Funciones no genéricas: conocen cómo funciona el Timer0
+//    /// Devuelve la frecuencia, en Hz,  que se genera dados 
+//    /// el prescaler factor d (divisor de frecuencia) y el top M. 
+//    /// (pag 132 datasheet)
+//    template <uint32_t f_clock_in_Hz = MCU_CLOCK_FREQUENCY_IN_HZ>
+//    static constexpr 
+//    uint32_t prescaler_top_to_frequency_in_Hz(uint32_t d, uint32_t M)
+//    { return avr_::timer_::
+//	    timer_prescaler_top_to_frequency_in_Hz<f_clock_in_Hz>(d, M);}
+//
+//    /// Función inversa a la prescaler_top_to_frequency_in_Hz:
+//    /// Devuelve el par (prescaler factor, top) necesario para generar la
+//    /// frecuencia freq_in_Hz.
+//    template <uint32_t f_clock_in_Hz = MCU_CLOCK_FREQUENCY_IN_HZ>
+//    static constexpr 
+//    std::pair<uint32_t, uint32_t> 
+//    frequency_in_Hz_to_prescaler_top(uint32_t freq_in_Hz)
+//    { return avr_::timer_::
+//    timer_frequency_in_Hz_to_prescaler_top<Timer, f_clock_in_Hz>(freq_in_Hz); 
+//    }
 
 };
 

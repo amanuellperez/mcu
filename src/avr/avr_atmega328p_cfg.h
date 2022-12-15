@@ -98,6 +98,7 @@ namespace cfg{ // ir incluyendo el resto según vaya reescribiendo codigo
 // ------
     struct timer0{
         using counter_type                 = uint8_t;
+	static constexpr uint8_t number_of_pins = 2;
         static constexpr uint8_t OCA_pin   = 12u;
         static constexpr uint8_t OCB_pin   = 11u;
 	//constexpr uint16_t resolution= 256u;
@@ -108,6 +109,7 @@ namespace cfg{ // ir incluyendo el resto según vaya reescribiendo codigo
 // ------
     struct timer1{
         using counter_type                 = uint16_t;
+	static constexpr uint8_t number_of_pins = 2;
         static constexpr uint8_t OCA_pin   = 15u;
         static constexpr uint8_t OCB_pin   = 16u;
 	// constexpr uint32_t resolution= 65536u;

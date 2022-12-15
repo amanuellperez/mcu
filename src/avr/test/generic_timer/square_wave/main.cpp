@@ -20,67 +20,69 @@
 #include "../../../avr_atmega328p_cfg.h"
 #include "../../../avr_UART.h"
 #include "../../../avr_timer0_generic.h"
-//#include "../../../avr_timer1_generic.h"
-#include "../../../avr_time.h"
+#include "../../../avr_timer1_generic.h"
 
-using Timer = avr_::Timer0_generic;
+namespace mcu = avr_;
 
+using SWG0 = mcu::Square_wave_generator0_g;
+using SWG1 = mcu::Square_wave_generator1_g;
 
-void print_msg(const uint32_t& freq, Timer::Connect connect)
-{
-    avr_::UART_iostream uart;
-
-    uart << "\nGenerating " << freq << " Hz in pin ";
-    switch (connect){
-	break; case Timer::Connect::only_channel1:
-		uart << (int) Timer::pin_channel1;
-
-	break; case Timer::Connect::only_channel2:
-		uart << (int) Timer::pin_channel2;
-
-	break; case Timer::Connect::channel1_and_2:
-		uart << (int) Timer::pin_channel1 
-		     << " and " << (int) Timer::pin_channel2;
-    }
-
-    uart << '\n';
-}
-
+enum class Use_timer{zero, one };
 
 int main()
 {
-    avr_::UART_iostream uart;
-    avr_::basic_cfg(uart);
+    mcu::UART_iostream uart;
+    mcu::basic_cfg(uart);
     uart.on();
 
     uart << "\n\nSquare wave test\n"
 	        "----------------\n";
 
-    Timer::Connect connect = Timer::Connect::only_channel1;
+    uint8_t npin = 0;
+    auto use_timer = Use_timer::zero;
+
 
     while(1){
-	uart << "Frequency in Hz to generate (0 to choose channel): ";
+    // select_pin();
+	uart << "\nChoose pin to generate wave:\n"
+		"[0] in pin " << (int) SWG0::pin[0] << " (Timer0)\n"
+		"[1] in pin " << (int) SWG0::pin[1] << " (Timer0)\n"
+		"[2] in pin " << (int) SWG1::pin[0] << " (Timer1)\n"
+		"[3] in pin " << (int) SWG1::pin[1] << " (Timer1)\n";
+
+	char c{};
+	uart >> c;
+	switch (c){
+	    break; case '0': npin = 0; use_timer = Use_timer::zero;
+	    break; case '1': npin = 1; use_timer = Use_timer::zero;
+	    break; case '2': npin = 0; use_timer = Use_timer::one;
+	    break; case '3': npin = 1; use_timer = Use_timer::one;
+	}
+
+    // select_frequency();
+	uart << "\nFrequency in Hz to generate: ";
 	uint32_t freq;
 	uart >> freq;
 	if (freq > 0){
-	    Timer::off();
-	    Timer::square_wave_generate(freq, connect);
-	    print_msg(freq, connect);
-	}
-	
-	else{
-	    uart << "\nChoose channel to generate wave:\n"
-		    "1. channel one\n"
-		    "2. channel two\n"
-		    "b. both channels\n";
+	    SWG0::stop();
+	    SWG1::stop();
 
-	    char c{};
-	    uart >> c;
-	    switch (c){
-		break; case '1': connect = Timer::Connect::only_channel1;
-		break; case '2': connect = Timer::Connect::only_channel2;
-		break; default : connect = Timer::Connect::channel1_and_2;
+	    switch(use_timer){
+		break; case Use_timer::zero: SWG0::generate(freq, npin);
+		break; case Use_timer::one : SWG1::generate(freq, npin);
 	    }
+
+	    uart << "\nGenerating " << freq << " Hz in pin ";
+	    if (use_timer == Use_timer::zero)
+		uart << (int) SWG0::pin[npin];
+	    else 
+		uart << (int) SWG1::pin[npin];
+
+	    uart << '\n';
+
+	}
+	else {
+	    uart << "Invalid frequency\n";
 	}
 
     }

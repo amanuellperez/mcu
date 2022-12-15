@@ -23,20 +23,23 @@
 #define __AVR_TIMER1_GENERIC_H__
 /****************************************************************************
  *
- *  - DESCRIPCION: Timer1_generic
- *    
- *  - HISTORIA:
+ *  DESCRIPCION
+ *	Diferentes formas de usar el Timer1
+ *
+ *  HISTORIA
  *    A.Manuel L.Perez
- *    15/02/2021 v0.0: Escrito
- *    26/02/2022       timer_counter
- *    30/10/2022       Generic_timer_counter
- *    07/12/2022       dev::Generic_timer<Timer0> --> avr::Timer1_generic
- *		       ¿Por qué lo había definido como template?
- *		       Lo que quiero definir es un timer que obedece al
- *		       concept "timer". No necesito usar templates para nada.
+ *    15/02/2021 Escrito
+ *    26/02/2022 timer_counter
+ *    30/10/2022 Generic_timer_counter
+ *    07/12/2022 dev::Generic_timer<Timer0> --> avr::Timer1_generic
+ *		 ¿Por qué lo había definido como template?
+ *		 Lo que quiero definir es un timer que obedece al
+ *		 concept "timer". No necesito usar templates para nada.
+ *    15/12/2022 Square_wave_generator0_g
  *
  ****************************************************************************/
 #include "avr_timer1_basic.h"
+#include "avr_timern_basic.h"
 #include "avr_interrupt.h"
 #include "avr_cfg.h"	// MCU_CLOCK_FREQUENCY_IN_HZ
 #include "avr_micro.h"
@@ -44,6 +47,9 @@
 
 namespace avr_{
 
+/***************************************************************************
+ *			    Time_counter1_g
+ ***************************************************************************/
 /// Un Timer_counter se limita a contar microsegundos o milisegundos. Su rango
 /// de valores será max_top, no más. No sirve para contar tiempo, pero son
 /// ideales para medir/generar pulsos de electrónica. 
@@ -181,6 +187,157 @@ public:
 };
 
 
+/***************************************************************************
+ *			Square_wave_generator1_g
+ ***************************************************************************/
+class Square_wave_generator1_g{
+public:
+// Types
+    using Timer        = avr_::Timer1;
+
+// Interfaz static
+    Square_wave_generator1_g() = delete;
+
+// Características del Timer
+    static constexpr uint8_t number_of_pins = cfg::timer1::number_of_pins;
+    static constexpr uint8_t pin[] = {Timer::OCA_pin(), Timer::OCB_pin()};
+
+    /// Apagamos el generador de señales.
+    // DUDA: stop() or off()??? Hoy me suena mejor stop: generate/stop
+    static void stop() { Timer::off(); }
+
+
+// Static interface
+// ----------------
+    /// Genera la frecuencia indicada en el pin indicado.
+    /// La frecuencia pasada tiene que estar en herzios.
+    // DUDA: usar Frequency en lugar de uint32_t? Sería lo mejor...
+    template <uint8_t npin>
+    static void generate(uint32_t freq_in_Hz);
+
+    template <int npin>
+    static void connect_pin();
+
+    template <int npin>
+    static void disconnect_pin();
+
+
+// Dynamic interface
+// -----------------
+    /// Genera la frecuencia indicada en el pin indicado.
+    /// La frecuencia pasada tiene que estar en herzios.
+    // DUDA: usar Frequency en lugar de uint32_t? Sería lo mejor...
+    static void generate(uint32_t freq_in_Hz, uint8_t npin);
+
+    static void connect_pin(uint8_t npin);
+
+    static void disconnect_pin(uint8_t npin);
+
+    static void disconnect_all_pins();
+
+private:
+    using counter_type = typename Timer::counter_type;
+    using Disable_interrupts = dev::Disable_interrupts<Micro>;
+
+// Funciones de ayuda
+    static void init(){ Timer::mode_CTC_top_ICR1();}
+
+    template<uint16_t period
+	    , uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
+    static void on() {Timer::template on<period, clock_frequency_in_hz>();}
+
+    static void top(counter_type x)
+    { 
+	Disable_interrupts l;
+	Timer::unsafe_input_capture_register(atd::to_integer<counter_type>(x));
+    }
+
+    static counter_type top() // = safe_top()
+    {
+	Disable_interrupts l;
+	return Timer::unsafe_input_capture_register();
+    }
+
+    /// Devuelve el valor mínimo que puede tomar el top
+    static constexpr counter_type min_top()
+    { return Timer::bottom();}
+
+    /// Devuelve el valor máximo que puede tomar el top
+    static constexpr counter_type max_top()
+    { return Timer::max();}
+
+// Funciones no genéricas: conocen cómo funciona el Timer0
+    /// Devuelve la frecuencia, en Hz,  que se genera dados 
+    /// el prescaler factor d (divisor de frecuencia) y el top M. 
+    /// (pag 132 datasheet)
+    template <uint32_t f_clock_in_Hz = MCU_CLOCK_FREQUENCY_IN_HZ>
+    static constexpr 
+    uint32_t prescaler_top_to_frequency_in_Hz(uint32_t d, uint32_t M)
+    { return avr_::timer_::
+	    timer_prescaler_top_to_frequency_in_Hz<f_clock_in_Hz>(d, M);}
+
+    /// Función inversa a la prescaler_top_to_frequency_in_Hz:
+    /// Devuelve el par (prescaler factor, top) necesario para generar la
+    /// frecuencia freq_in_Hz.
+    template <uint32_t f_clock_in_Hz = MCU_CLOCK_FREQUENCY_IN_HZ>
+    static constexpr 
+    std::pair<uint32_t, uint32_t> 
+    frequency_in_Hz_to_prescaler_top(uint32_t freq_in_Hz)
+    { return avr_::timer_::
+    timer_frequency_in_Hz_to_prescaler_top<Timer, f_clock_in_Hz>(freq_in_Hz); 
+    }
+};
+
+
+template <int npin>
+inline void Square_wave_generator1_g::connect_pin()
+{
+    if constexpr (npin == 0)
+    { Timer::CTC_pin_A_toggle_on_compare_match(); }
+
+    else if constexpr (npin == 1)
+    { Timer::CTC_pin_B_toggle_on_compare_match(); }
+
+    else
+    {static_assert(atd::always_false_v<int>, "npin out of range");}
+
+}
+
+
+template <int npin>
+inline void Square_wave_generator1_g::disconnect_pin()
+{
+    if constexpr (npin == 0)
+    { Timer::pin_A_disconnected();}
+
+    else if constexpr (npin == 1)
+    { Timer::pin_B_disconnected(); }
+
+    else
+    {static_assert(atd::always_false_v<int>, "npin out of range");}
+
+}
+
+inline void Square_wave_generator1_g::connect_pin(uint8_t nchannel)
+{
+    if      (nchannel == 0) connect_pin<0>();
+    else if (nchannel == 1) connect_pin<1>();
+}
+
+inline void Square_wave_generator1_g::disconnect_pin(uint8_t nchannel)
+{
+    if      (nchannel == 0) disconnect_pin<0>();
+    else if (nchannel == 1) disconnect_pin<1>();
+}
+
+inline void Square_wave_generator1_g::disconnect_all_pins()
+{
+    disconnect_pin<0>();
+    disconnect_pin<1>();
+}
+
+
+
 
 // DUDA: eliminar Generic_timer a favor de clases particulares.
 // La parte de onda cuadrada y PWM hay que revisarla entera. Un fallo de este
@@ -306,42 +463,44 @@ public:
 //    { return Timer::max(); }
 
 
-
-// Square wave mode
-// ----------------
-    static void mode_square_wave(){ Timer::mode_CTC_top_ICR1();}
-
-    // TODO: cambiar a safe/unsafe
-    static void square_wave_top(Scalar x)
-    { 
-	Disable_interrupts l;
-	Timer::unsafe_input_capture_register(atd::to_integer<counter_type>(x));}
-
-    /// Devuelve el valor mínimo que puede tomar el top
-    static constexpr counter_type square_wave_min_top()
-    { return Timer::bottom();}
-
-    /// Devuelve el valor máximo que puede tomar el top
-    static constexpr counter_type square_wave_max_top()
-    { return Timer::max();}
-
-    // TODO: cambiar a safe/unsafe
-    static counter_type square_wave_top()
-    {
-	Disable_interrupts l;
-	return Timer::unsafe_input_capture_register();}
-    
-    static void square_wave_ch1_on()
-    { Timer::CTC_pin_A_toggle_on_compare_match(); }
-
-    static void square_wave_ch2_on()
-    { Timer::CTC_pin_B_toggle_on_compare_match(); }
-
-    static void square_wave_ch1_off()
-    { Timer::pin_A_disconnected(); }
-
-    static void square_wave_ch2_off()
-    { Timer::pin_B_disconnected(); }
+//
+//// Square wave mode
+//// ----------------
+//    static void mode_square_wave(){ Timer::mode_CTC_top_ICR1();}
+//
+//    // TODO: cambiar a safe/unsafe
+//    static void square_wave_top(Scalar x)
+//    { 
+//	Disable_interrupts l;
+//	Timer::unsafe_input_capture_register(atd::to_integer<counter_type>(x));
+//    }
+//
+//    /// Devuelve el valor mínimo que puede tomar el top
+//    static constexpr counter_type square_wave_min_top()
+//    { return Timer::bottom();}
+//
+//    /// Devuelve el valor máximo que puede tomar el top
+//    static constexpr counter_type square_wave_max_top()
+//    { return Timer::max();}
+//
+//    // TODO: cambiar a safe/unsafe
+//    static counter_type square_wave_top()
+//    {
+//	Disable_interrupts l;
+//	return Timer::unsafe_input_capture_register();
+//    }
+//    
+//    static void square_wave_ch1_on()
+//    { Timer::CTC_pin_A_toggle_on_compare_match(); }
+//
+//    static void square_wave_ch2_on()
+//    { Timer::CTC_pin_B_toggle_on_compare_match(); }
+//
+//    static void square_wave_ch1_off()
+//    { Timer::pin_A_disconnected(); }
+//
+//    static void square_wave_ch2_off()
+//    { Timer::pin_B_disconnected(); }
 
 
 // PWM mode

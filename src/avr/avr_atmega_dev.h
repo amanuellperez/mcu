@@ -87,12 +87,14 @@ namespace atmega{
     using Timer0_g	 = Timer0_generic;
     using Time_counter0_generic = avr_::Time_counter0_generic;
     using Time_counter0_g       = Time_counter0_generic;
+    using Square_wave_generator0_g = avr_::Square_wave_generator0_g;
 
     using Timer1         = avr_::Timer1;
     using Timer1_generic = avr_::Timer1_generic;
     using Timer1_g	 = Timer1_generic;
     using Time_counter1_generic = avr_::Time_counter1_generic;
     using Time_counter1_g	= Time_counter1_generic;
+    using Square_wave_generator1_g = avr_::Square_wave_generator1_g;
 
 
 // PROTOCOLS

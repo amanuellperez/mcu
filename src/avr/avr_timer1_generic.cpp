@@ -17,14 +17,14 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "avr_timer0_generic.h"
+#include "avr_timer1_generic.h"
 
 namespace avr_{
 
 // ¿es genérico o depende del Timer0?
 // Por culpa de frequency_in_Hz_to_prescaler_top que conoce la implementación
 // del Timer esta función no es genérica.
-void Square_wave_generator0_g::generate(uint32_t freq_in_Hz, uint8_t npin)
+void Square_wave_generator1_g::generate(uint32_t freq_in_Hz, uint8_t npin)
 {
     auto [d, t] = frequency_in_Hz_to_prescaler_top(freq_in_Hz);
 
