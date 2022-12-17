@@ -89,22 +89,24 @@ namespace dev_{
 // De momento no suministro funciones write/reset/resume porque no parece que
 // tenga mucho sentido. Si se necesita en el futuro añadirlas.
 template <typename Micro_t,   // micro que estamos usando
-	 typename Timer_counter, int period>
+	 typename Timer_counter0, int period0>
 class Miniclock{
 public:
 // Types
     using Micro	       = Micro_t;
-    using Timer        = Timer_counter;
+    using Timer	       = Timer_counter0::Timer; // Timer usado internamente
+    using Timer_counter= Timer_counter0;
     // DUDA: counter_type o value_type???
     // Estamos contando milisegundos: counter_type tiene sentido.
-    using counter_type = Timer::counter_type;
+    using counter_type = Timer_counter::counter_type;
 
 // Operations
     // static interface
     Miniclock() = delete;
 
-    /// Construye el reloj
-    static void init(); // ¿init o cfg?
+    /// Configura este device para poder usarlo.
+    /// Configura el Time_counter interno
+    static void cfg(); 
 
     /// Enciende el reloj desde 0.
     static void start();
@@ -119,66 +121,70 @@ public:
     /// Espera t ticks de reloj. Si el tick son microsegundos, espera t
     /// microsegundos. Si el tick son milisegundos, t milisegundos.
     static void wait(const counter_type& t)
-	    requires Unsafe_device<Timer>;
+	    requires Unsafe_device<Timer_counter>;
 
     static void wait(const counter_type& t)
-	    requires Safe_device<Timer>;
+	    requires Safe_device<Timer_counter>;
 
 // Info
     /// Devuelve el valor máximo que puede alcanzar el counter sin dar
     /// overflow: counter_max() + 1 == 0
     static counter_type counter_max();
 
+private:
+    static constexpr int period = period0;
 };
 
 
 template <typename M, typename T, int p>
-inline void Miniclock<M, T, p>::init()
+inline void Miniclock<M, T, p>::cfg()
 {
-    Timer::init();
+    Timer_counter::init();
 }
 
 template <typename M, typename T, int period>
 void Miniclock<M, T, period>::start()
 {
-    Timer::reset();
-    Timer::template on<period>(); // 1024 us = 1000 +- 10% = 1 ms
+    Timer_counter::reset();
+    Timer_counter::template on<period>(); // 1024 us = 1000 +- 10% = 1 ms
 }
 
 template <typename M, typename T, int p>
 inline void Miniclock<M, T, p>::stop()
 {
-    Timer::off();
+    Timer_counter::off();
 }
 
 template <typename M, typename T, int p>
 inline Miniclock<M, T, p>::counter_type Miniclock<M, T, p>::read()
 {
-    return Timer::value();
+    return Timer_counter::value();
 }
 
 
 template <typename M, typename T, int p>
 void Miniclock<M, T, p>::wait(const counter_type& t)
-	    requires Unsafe_device<Timer>
+	    requires Unsafe_device<Timer_counter>
 
 {
     dev::Disable_interrupts<Micro> lock;	
 
-    Timer::unsafe_reset();
+    Timer_counter::unsafe_reset();
+    Timer_counter::template on<period>();
     
-    while (Timer::unsafe_value() < t)
+    while (Timer_counter::unsafe_value() < t)
     { ; }
 }
 
 
 template <typename M, typename T, int p>
 void Miniclock<M, T, p>::wait(const counter_type& t)
-	    requires Safe_device<Timer>
+	    requires Safe_device<Timer_counter>
 {
-    Timer::reset();
+    Timer_counter::reset();
+    Timer_counter::template on<period>();
     
-    while (Timer::value() < t)
+    while (Timer_counter::value() < t)
     { ; }
 }
 
@@ -186,7 +192,7 @@ void Miniclock<M, T, p>::wait(const counter_type& t)
 template <typename M, typename T, int p>
 inline Miniclock<M, T, p>::counter_type Miniclock<M, T, p>::counter_max()
 { 
-    return Timer::max_top(); 
+    return Timer_counter::max_top(); 
 }
 }// namespace dev_
 

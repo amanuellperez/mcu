@@ -35,7 +35,7 @@
  *		 ¿Por qué lo había definido como template?
  *		 Lo que quiero definir es un timer que obedece al
  *		 concept "timer". No necesito usar templates para nada.
- *    15/12/2022 Square_wave_generator0_g
+ *    15/12/2022 Square_wave_generator1_g
  *
  ****************************************************************************/
 #include "avr_timer1_basic.h"
@@ -192,7 +192,7 @@ public:
  ***************************************************************************/
 class Square_wave_generator1_g{
 public:
-// Types
+// Hardware device
     using Timer        = avr_::Timer1;
 
 // Interfaz static
@@ -201,10 +201,12 @@ public:
 // Características del Timer
     static constexpr uint8_t number_of_pins = cfg::timer1::number_of_pins;
     static constexpr uint8_t pin[] = {Timer::OCA_pin(), Timer::OCB_pin()};
+    static constexpr bool is_pin(uint8_t n) 
+    { return (n == pin[0] or n == pin[1]);}
 
     /// Apagamos el generador de señales.
     // DUDA: stop() or off()??? Hoy me suena mejor stop: generate/stop
-    static void stop() { Timer::off(); }
+    static void stop();
 
 
 // Static interface
@@ -288,14 +290,19 @@ private:
     }
 };
 
+inline void Square_wave_generator1_g::stop()
+{ 
+    Timer::off(); 
+    disconnect_all_pins();
+}
 
 template <int npin>
 inline void Square_wave_generator1_g::connect_pin()
 {
-    if constexpr (npin == 0)
+    if constexpr (npin == pin[0])
     { Timer::CTC_pin_A_toggle_on_compare_match(); }
 
-    else if constexpr (npin == 1)
+    else if constexpr (npin == pin[1])
     { Timer::CTC_pin_B_toggle_on_compare_match(); }
 
     else
@@ -307,10 +314,10 @@ inline void Square_wave_generator1_g::connect_pin()
 template <int npin>
 inline void Square_wave_generator1_g::disconnect_pin()
 {
-    if constexpr (npin == 0)
+    if constexpr (npin == pin[0])
     { Timer::pin_A_disconnected();}
 
-    else if constexpr (npin == 1)
+    else if constexpr (npin == pin[1])
     { Timer::pin_B_disconnected(); }
 
     else
@@ -318,22 +325,22 @@ inline void Square_wave_generator1_g::disconnect_pin()
 
 }
 
-inline void Square_wave_generator1_g::connect_pin(uint8_t nchannel)
+inline void Square_wave_generator1_g::connect_pin(uint8_t npin)
 {
-    if      (nchannel == 0) connect_pin<0>();
-    else if (nchannel == 1) connect_pin<1>();
+    if      (npin == pin[0]) connect_pin<pin[0]>();
+    else if (npin == pin[1]) connect_pin<pin[1]>();
 }
 
-inline void Square_wave_generator1_g::disconnect_pin(uint8_t nchannel)
+inline void Square_wave_generator1_g::disconnect_pin(uint8_t npin)
 {
-    if      (nchannel == 0) disconnect_pin<0>();
-    else if (nchannel == 1) disconnect_pin<1>();
+    if      (npin == pin[0]) disconnect_pin<pin[0]>();
+    else if (npin == pin[1]) disconnect_pin<pin[1]>();
 }
 
 inline void Square_wave_generator1_g::disconnect_all_pins()
 {
-    disconnect_pin<0>();
-    disconnect_pin<1>();
+    disconnect_pin<pin[0]>();
+    disconnect_pin<pin[1]>();
 }
 
 

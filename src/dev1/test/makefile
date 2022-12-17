@@ -2,7 +2,8 @@ DIRS = clocks			\
 		EEPROM_iostream	\
 		EEPROM_lineal	\
 		LCD				\
-		miniclocks	
+		miniclocks		\
+		square_wave
 
 
 

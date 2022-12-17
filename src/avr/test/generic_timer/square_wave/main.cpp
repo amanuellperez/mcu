@@ -29,6 +29,13 @@ using SWG1 = mcu::Square_wave_generator1_g;
 
 enum class Use_timer{zero, one };
 
+static_assert(SWG0::is_pin(11));
+static_assert(SWG0::is_pin(12));
+//DONT_COMPILE(static_assert(SWG0::is_pin(13)));
+static_assert(SWG1::is_pin(15));
+static_assert(SWG1::is_pin(16));
+//DONT_COMPILE(static_assert(SWG1::is_pin(17)));
+
 int main()
 {
     mcu::UART_iostream uart;
@@ -68,8 +75,8 @@ int main()
 	    SWG1::stop();
 
 	    switch(use_timer){
-		break; case Use_timer::zero: SWG0::generate(freq, npin);
-		break; case Use_timer::one : SWG1::generate(freq, npin);
+		break; case Use_timer::zero: SWG0::generate(freq, SWG0::pin[npin]);
+		break; case Use_timer::one : SWG1::generate(freq, SWG1::pin[npin]);
 	    }
 
 	    uart << "\nGenerating " << freq << " Hz in pin ";
