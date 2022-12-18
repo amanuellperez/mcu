@@ -18,7 +18,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <avr_atmega.h>
-#include "../../dev_miniclocks.h"
+#include "../../dev_miniclock.h"
 
 // Devices
 // -------

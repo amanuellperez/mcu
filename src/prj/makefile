@@ -1,6 +1,7 @@
 DIRS =  calculator	\
 		clocks 		\
 	   	blink		\
+		music		\
 		POV_toy		\
 		sensor		\
 		stroboscope	\

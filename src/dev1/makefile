@@ -14,7 +14,9 @@ INCS= 	dev_cols_glyphs.h		\
 		dev_LCD_screen.h		\
 		dev_LCD_screen.tcc		\
 		dev_LCD_terminal.h		\
-		dev_LCD_terminal.tcc
+		dev_LCD_terminal.tcc	\
+		dev_miniclock.h			\
+		dev_square_wave.h
 
 
 LIB=dev1_$(F_CPU)

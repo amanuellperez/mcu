@@ -18,7 +18,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "../../dev_square_wave.h"
-#include "../../dev_miniclocks.h"
+#include "../../dev_miniclock.h"
 #include <avr_atmega.h>
 
 // DUDA: ¿cómo medir bien esto? No tengo claro como medir la señal generada.

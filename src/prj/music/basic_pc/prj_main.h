@@ -1,0 +1,65 @@
+// Copyright (C) 2022 A.Manuel L.Perez 
+//           mail: <amanuel.lperez@gmail.com>
+//           https://github.com/amanuellperez/mcu
+//
+// This file is part of the MCU++ Library.
+//
+// MCU++ Library is a free library: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#pragma once
+
+#ifndef __PRJ_MAIN_H__
+#define __PRJ_MAIN_H__
+/****************************************************************************
+ *
+ *  - DESCRIPCION: Órgano de juguete
+ *
+ *  - HISTORIA:
+ *    A.Manuel L.Perez
+ *    18/12/2022 v0.0
+ *
+ ****************************************************************************/
+#include "prj_dev.h"
+//#include "prj_cfg.h"
+//#include "prj_strings.h"
+
+#include "mus_musician.h"
+
+class Main{
+public:
+    Main();
+    void run();
+    
+private:
+// Hardware
+    using Musician = music::Musician<SWG1_ms>;
+    using Octave   = music::Octave;
+    using Note	   = music::Note;
+
+// Data
+
+
+// Functions
+    void init_uart();
+
+    void musical_scale(Octave octave, uint16_t t);
+    void musical_scale_all();
+    void musical_scale_one_line();
+};
+
+
+
+
+#endif
+
+

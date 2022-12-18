@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __DEV_MINICLOCKS_H__
-#define __DEV_MINICLOCKS_H__
+#ifndef __DEV_MINICLOCK_H__
+#define __DEV_MINICLOCK_H__
 /****************************************************************************
  *
  *  DESCRIPCION

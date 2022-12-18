@@ -29,16 +29,15 @@
 // Lo ideal es usar dispositivos genéricos en el resto, de esa forma se puede
 // cambiar el hardware sin tocar el software.
 #include <avr_atmega.h>
+#include <dev_miniclock.h>
+#include <dev_square_wave.h>
 
-#include "dev_clock_us.h"
-#include "dev_square_wave.h"
-
-#include "prj_cfg.h"
 
 // microcontroller
 // ---------------
 namespace mcu = atmega;
 using Micro = mcu::Micro;
+
 
 // pin connections
 // ---------------
@@ -46,11 +45,9 @@ using Micro = mcu::Micro;
 // available: 4-6
 // VCC and GND: 7, 8
 // available: 9-11
-constexpr uint8_t ir_transmitter_pin = 12; // Timer0::OCA
-					   
-// available: 13-14
-constexpr uint8_t ir_receiver_pin = 15;
-#define ISR_RECEIVER_PIN ISR_PCINT_PIN15
+constexpr uint8_t speaker_pin = 12;
+
+// available: 13-15
 
 // Not using SPI: available pins 16, 17, 18, 19
 
@@ -62,37 +59,14 @@ constexpr uint8_t ir_receiver_pin = 15;
 
 // Devices
 // -------
+// Uso: Timer0 como SWG0_g
+//	Timer1 como Miniclock
+using Miniclock1_ms = dev::Miniclock_ms<mcu::Micro, mcu::Time_counter1_generic>;
 
-// Voy a usar el Timer1 para medir tiempo < Timer1::max(). Dos funciones:
-//	1. Esperar: wait_ms/wait_us 
-//	2. Generar un time_out.	    
-using Timer_clock_us = mcu::Time_counter1_g;
-using Clock_us = dev::Clock_us<Timer_clock_us>;
+using SWG1_ms = dev::Square_wave_generator< mcu::Square_wave_generator0_g
+					  , mcu::Output_pin<speaker_pin>
+					  , Miniclock1_ms>;
 
-// El Timer0 lo uso para generar la señal de 38kHz.
-using Transmit_timer = mcu::Timer0_generic;
-
-// Notación: 2 tipos de señales SW (square wave) y PWM.
-using SWG = 
-    dev::Square_wave_generator<Transmit_timer, ir_transmitter_pin, Clock_us>;
-
-// Train of pulses receiver
-// ------------------------
-using Train_cfg_ =
-    dev::Train_of_pulses_receiver_cfg<Clock_us, ir_receiver_pin, num_max_pulses>;
-using Train_of_pulses_receiver 
-		= dev::Train_of_pulses_receiver<Train_cfg_>;
-
-namespace os{
-
-template <size_t N>
-inline 
-bool receive(dev::Train_of_pulses<N>& pulse, volatile bool& user_abort)
-{ return pulse.template receive<Train_cfg_>(user_abort); }
-
-}// namespace
-
-  
 
 // UART
 // ----
