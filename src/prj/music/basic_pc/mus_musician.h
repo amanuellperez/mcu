@@ -50,12 +50,21 @@ public:
     /// configuramos el musician
     static void cfg();
 
-    /// Toca la nota indicada
+    /// Toca la nota indicada. Devuelve el control inmediatamente, sin
+    /// bloquear. Para dejar de tocar esa nota, tocar otra nota o llamar a
+    /// `silence`
+    static void play(Octave, Note);
+    static void silence();
+
+    /// Toca la nota indicada por la duración indicada.
+    /// Bloquea: no devuelve control hasta que no pasan duration_in_ms
     static void play(Octave, Note, uint16_t duration_in_ms);
+
     // TODO: static void play(Sheet_music);
 
 private:
     static void play(uint32_t freq, uint16_t duration_in_ms);
+    static void play(uint32_t freq);
     
 };
 
@@ -65,11 +74,29 @@ inline void Musician<I>::play(Octave octave, Note note, uint16_t duration_in_ms)
     play(note_to_frequency(octave, note), duration_in_ms); 
 }
 
+template <typename I>
+inline void Musician<I>::play(Octave octave, Note note)
+{ 
+    play(note_to_frequency(octave, note)); 
+}
+
 
 template <typename I>
 inline void Musician<I>::play(uint32_t freq, uint16_t duration_in_ms)
 {
     Instrument::burst(freq, duration_in_ms);
+}
+
+template <typename I>
+inline void Musician<I>::play(uint32_t freq)
+{
+    Instrument::generate(freq);
+}
+
+template <typename I>
+inline void Musician<I>::silence()
+{
+    Instrument::stop();
 }
 
 template <typename I>

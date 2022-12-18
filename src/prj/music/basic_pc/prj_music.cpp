@@ -80,5 +80,100 @@ void Main::musical_scale(Octave octave, uint16_t t)
     Musician::play(octave, Note::Si, t);
 }
 
+bool Main::organ_toy_UART_are_data_unread(const uint16_t& counter)
+{
+    if (UART::are_there_data_unread())
+	return true;
+    
+    if (counter > 1){
+	Micro::wait_ms(50);
+	return UART::are_there_data_unread();
+    }
 
+    for (uint8_t i = 0; i < 8; ++i){
+	Micro::wait_ms(50);
+	if (UART::are_there_data_unread())
+		return true;
+    }
+
+    return false;
+}
+
+// (RRR) ¿por qué complicarlo con max_counter?
+//       Resulta que mi teclado (? o es el sistema operativo? o es el terminal
+//       que uso?) cuando presionas una tecla y la mantienes presionada hasta
+//       envía a pulsos la tecla pulsada.
+//       Esto es, si mantengo pulsada la tecla 's' en UART aparece:
+//       t = 0: 's'
+//       t = 500 ms más menos: 's'
+//       t = ??? ms (menor que 500 ms) resto de 's'
+//       El driver del teclado (o quien sea) va muestreando el teclado: si
+//       presionas una vez, muestrea la siguiente vez por la misma tecla 500
+//       ms después; si lo mantienes pulsado sin soltar la muestrea más
+//       rápidamente (a velocidad constante).
+//       Si se cambia y presiona otra tecla inmediatamente aparece en
+//       pantalla.
+//
+//       No funciona del todo bien (cuando sueltas una tecla se queda sonando
+//       500 ms, tal como está programado), pero funciona suficientemente
+//       bien. Total esto es una prueba. 
+//
+//       No sirve para tocar "La cucaracha" :( por culpa de la permanencia de
+//       los 500 ms; ni tampoco el "Oda a la alegría" por el mismo motivo. Es
+//       un vulgar PoC :(
+//
+//       Con todo a partir de esto es muy facil añadirle teclas y crear un
+//       órgano de juguete que funcione correctamente.
+void Main::organ_toy()
+{
+    UART uart;
+    uart << "Organ toy\n"
+	    "(This layout is for a spanish keyboard)\n"
+	    "One line octave:\n\n"
+	    "     Do#(E)  Re#(R)        Fa#(Y)   Sol#(U)  La#(I)\n"
+	    "Do(S)   Re(D)   Mi(F) Fa(G)   Sol(H)    La(J)   Si(K)\n\n"
+	    "Press a note or '1' to return to menu\n";
+
+
+    constexpr uint16_t max_counter = 500;
+    uint16_t counter = 0;
+    while (1){
+	char note{};
+	if (counter >= max_counter){
+	    Musician::silence();
+	    counter = 0;
+	}
+
+	if (!UART::are_there_data_unread()){
+	    ++counter;
+	    Micro::wait_ms(1);
+	}
+	else{
+	    uart >> note;
+	    counter = 0;
+
+	    if (note == '1'){
+		Musician::silence();
+		return;
+	    }
+
+	    switch(note){
+	    break; case 'S': case 's': Musician::play(Octave::one_line, Note::Do);
+	    break; case 'E': case 'e': Musician::play(Octave::one_line, Note::DoS);
+	    break; case 'D': case 'd': Musician::play(Octave::one_line, Note::Re);
+	    break; case 'R': case 'r': Musician::play(Octave::one_line, Note::ReS);
+	    break; case 'F': case 'f': Musician::play(Octave::one_line, Note::Mi);
+	    break; case 'G': case 'g': Musician::play(Octave::one_line, Note::Fa);
+	    break; case 'Y': case 'y': Musician::play(Octave::one_line, Note::FaS);
+	    break; case 'H': case 'h': Musician::play(Octave::one_line, Note::Sol);
+	    break; case 'U': case 'u': Musician::play(Octave::one_line, Note::SolS);
+	    break; case 'J': case 'j': Musician::play(Octave::one_line, Note::La);
+	    break; case 'I': case 'i': Musician::play(Octave::one_line, Note::LaS);
+	    break; case 'K': case 'k': Musician::play(Octave::one_line, Note::Si);
+	    }
+	}
+
+    }
+
+}
 

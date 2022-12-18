@@ -52,9 +52,12 @@ private:
 // Functions
     void init_uart();
 
-    void musical_scale(Octave octave, uint16_t t);
     void musical_scale_all();
     void musical_scale_one_line();
+	void musical_scale(Octave octave, uint16_t t);
+
+    void organ_toy();
+	bool organ_toy_UART_are_data_unread(const uint16_t& counter);
 };
 
 

@@ -28,14 +28,18 @@ void Main::run()
     while (1){
 	uart << "\n-----------------------\n"
 		"1. Music scale (normal)\n"
-	        "2. Music scale (all)\n";
+	        "2. Music scale (all)\n"
+		"3. Organ toy (basic piano? :)\n";
 
 	char ans{};
 	uart >> ans;
 	switch(ans){
 	    break; case '1': musical_scale_one_line();
 	    break; case '2': musical_scale_all();
+	    break; case '3': organ_toy();
 	}
 
     }
 }
+
+
