@@ -14,6 +14,7 @@ DIRS = algorithm\
 	numeric		\
 	ratio		\
 	sizeof_txt	\
+	span		\
 	type_traits	\
 	tuple		\
 	utility

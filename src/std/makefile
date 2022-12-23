@@ -33,6 +33,7 @@ INCS= std_cstdio.h		\
 	std_limits.h		\
 	std_numeric.h		\
 	std_ostream.h		\
+	std_span.h			\
 	std_ratio.h			\
 	std_streambuf.h		\
 	std_cstring.h		\
@@ -63,6 +64,7 @@ INCS= std_cstdio.h		\
 	limits		\
 	numeric		\
 	ostream		\
+	span		\
 	ratio		\
 	streambuf	\
 	tuple		\
