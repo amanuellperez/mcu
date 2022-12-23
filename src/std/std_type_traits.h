@@ -35,6 +35,7 @@
  *    18/03/2021 make_signed/make_unsigned
  *    14/08/2021 Completando implementación de common_type.
  *               Es copia de cppreference. TODO: reescribirla.
+ *    23/12/2022 type_identity
  *
  ****************************************************************************/
 #include "std_config.h"
@@ -1063,6 +1064,16 @@ struct common_type <T1, T2, Tail...>{
     using type = common_type_t<common_type_t<T1, T2>, Tail...>;
 };
 
+
+// type_identity
+// -------------
+template <typename T>
+struct type_identity {
+    using type = T;
+};
+
+template <typename T>
+using type_identity_t = typename type_identity<T>::type;
 
 
 }// namespace
