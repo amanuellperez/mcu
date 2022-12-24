@@ -22,6 +22,9 @@
 #include "../../avr_UART_iostream.h"
 #include "../../avr_memory.h"
 
+
+namespace mcu = avr_;
+
 /***************************************************************************
  *			    TEST BÁSICO 
  ***************************************************************************/
@@ -56,9 +59,8 @@ constexpr uint8_t barray_u8[barray_rows][barray_cols] PROGMEM = {
 
 void test_basic()
 {
-    avr_::UART_iostream uart;
+    mcu::UART_iostream uart;
 
-    while(1){
     // Tipos básicos
     {
 	uint8_t x8 = pgm_read_byte(&u8);
@@ -85,32 +87,31 @@ void test_basic()
 	}
     }
 
-
-	avr_::wait_ms(1000);
-    }
-
 }
 
 
-
-constexpr avr_::Progmem<uint8_t> pu8 PROGMEM = 12;
-constexpr avr_::Progmem<uint16_t> pu16 PROGMEM = 200;
+constexpr uint8_t nu8 = 12;
+constexpr uint16_t nu16 = 47;
+constexpr mcu::Progmem<uint8_t> pu8 PROGMEM = nu8;
+constexpr mcu::Progmem<uint16_t> pu16 PROGMEM = nu16;
 // Este no tiene que compilar:
 // constexpr Progmem<uint32_t> pu32 PROGMEM = 200;
 
-constexpr avr_::Progmem_array<uint8_t, 4> parray_u8 PROGMEM = {10,20,30,40};
-constexpr avr_::Progmem_string<5> pstr PROGMEM{"hola"};
+static constexpr uint8_t narray_u8[4] = {10, 20, 30, 40};
+constexpr mcu::Progmem_array<uint8_t, 4> parray_u8 PROGMEM = 
+	        {narray_u8[0], narray_u8[1], narray_u8[2], narray_u8[3]};
+constexpr mcu::Progmem_string<6> pstr PROGMEM{"hello"};
 
-constexpr avr_::Progmem_string_array<3> parray_str PROGMEM = {
+constexpr mcu::Progmem_string_array<3> parray_str PROGMEM = {
     str1, str2, str3
     };
 
 
 template <size_t N>
-void f(const avr_::Progmem_string_array<N>& str0)
+void f(const mcu::Progmem_string_array<N>& str0)
 {
-    avr_::UART_iostream uart;
-    avr_::Progmem_string_array<3> str = str0; // <-- esto genera error en 
+    mcu::UART_iostream uart;
+    mcu::Progmem_string_array<3> str = str0; // <-- esto genera error en 
 					    // tiempo de ejecución
 
     uart << "Dentro de f\n";
@@ -118,7 +119,7 @@ void f(const avr_::Progmem_string_array<N>& str0)
     {
 	char buffer[10];
 	for (size_t i = 0; i < str.size(); ++i){
-	    avr_::strcpy(buffer, str[i]);
+	    mcu::strcpy(buffer, str[i]);
 	    uart << "str[" << (int) i << "] = " << buffer << '\n';
 	}
     }
@@ -129,22 +130,31 @@ void f(const avr_::Progmem_string_array<N>& str0)
 
 void test_progmem()
 {
-    avr_::UART_iostream uart;
+    mcu::UART_iostream uart;
 
-    while(1){
-
-	uart << "\n\n";
-	uint8_t x8 = pu8;
-	uart << "u8 = [" << (int) x8 << "]\n";
-	
+    uart << "\n\n";
+    uint8_t x8 = pu8;
+    uart << "u8:\t[" << (int) x8 << "] =? [" << (int) nu8 << "]\n";
+    
 //	pu8 = 7;  // no compila
+    uint16_t x16 = pu16;
+    uart << "u16:\t[" << x16 << "] =? [" << nu16 << "]\n";
 
     {// Arrays
-	uint16_t x16 = pu16;
-	uart << "u16 = [" << (int) x16 << "]\n";
+     // TODO: ¿por qué no lo imprime bien?
+//	for (size_t i = 0; i < 4; ++i)
+//	    uart << narray_u8[i] << ", ";
+//	uart << '\n';
 
+	uart << "Array of uint8_t: ";
 	for (size_t i = 0; i < parray_u8.size(); ++i)
-	    uart << "u8[" << i << "] = " << (int) parray_u8[i] << '\n';
+	    uart << (int) parray_u8[i] << ' ';
+	uart << '\n';
+	
+	uart << "range for       : ";
+	for (const auto& x: parray_u8)
+	    uart << (int) x << ' ';
+	uart << '\n';
     }
 	
     {// Progmem_string
@@ -152,91 +162,94 @@ void test_progmem()
 	uart << "pstr = [";
 	for (size_t i = 0; i < pstr.size(); ++i)
 	    uart << pstr[i];
-	uart << "]\n";
+	uart << "] =? [hello]\n";
     }
     // f(parray_str); <-- no debería de compilar
 
-    uart << "Escribiendo array de " << parray_str.size() << " cadenas:\n";
+    uart << "Array of " << parray_str.size() << " strings:\n";
     // Arrays de cadenas
     {
 	char buffer[10];
 	for (size_t i = 0; i < parray_str.size(); ++i){
-	    avr_::strcpy(buffer, parray_str[i]);
+	    mcu::strcpy(buffer, parray_str[i]);
 	    uart << "str[" << (int) i << "] = " << buffer << '\n';
 	}
     }
 
-    uart << "Escribiendo solo 3 caracters del array de " << parray_str.size()
-         << " cadenas (test strncpy):\n";
+    uart << "Writting only 3 characters of an array of " << parray_str.size()
+         << " strings (test strncpy):\n";
     // Arrays de cadenas
     {
 	char buffer[4];
 	for (size_t i = 0; i < parray_str.size(); ++i){
-	    avr_::strncpy(buffer, parray_str[i], 4);
+	    mcu::strncpy(buffer, parray_str[i], 4);
 	    buffer[3] = '\0'; // garantizamos que acaba bien
 	    uart << "str[" << (int) i << "] = " << buffer << '\n';
 	}
     }
 
-    uart << "Escribiendo solo 4 caracters del array de " << parray_str.size()
-         << " cadenas (test strlcpy):\n";
+    uart << "Writting only 4 characters of an array of " << parray_str.size()
+         << " strings (test strlcpy):\n";
     // Arrays de cadenas
     {
 	char buffer[4];
 	for (size_t i = 0; i < parray_str.size(); ++i){
-	    size_t n = avr_::strlcpy(buffer, parray_str[i], 4);
-	    uart << "cadena original tiene [" << n << "] --> [" << (int) i << "] = " << buffer << '\n';
+	    size_t n = mcu::strlcpy(buffer, parray_str[i], 4);
+	    uart << "original string has [" << n << "] --> [" 
+			    << (int) i << "] = " << buffer << '\n';
 	}
-    }
-
-
-    avr_::wait_ms(1000);
     }
 
 }
 
 void test_progmem_view()
 {
-    avr_::UART_iostream uart;
+    mcu::UART_iostream uart;
 
-    avr_::Progmem_biarray_view<uint8_t, barray_rows, barray_cols> a{barray_u8};
+    mcu::Progmem_biarray_view<uint8_t, barray_rows, barray_cols> a{barray_u8};
 
     uart << "\n\nProgram view test\n"
 	    "-----------------\n";
 
-    while(1){
-	uart << "Progmem_biarray_view:\n";
-	for (uint8_t i = 0; i < barray_rows; ++i){
-	    for (uint8_t j = 0; j < barray_cols; ++j){
-                uart << (int)a[i][j] << ' ';
-            }
-	    uart << '\n';
+    uart << "Progmem_biarray_view:\n";
+    for (uint8_t i = 0; i < barray_rows; ++i){
+	for (uint8_t j = 0; j < barray_cols; ++j){
+	    uart << (int)a[i][j] << ' ';
 	}
-
-	uart << "\n\n";
-	avr_::wait_ms(2000);
+	uart << '\n';
     }
+
+    uart << "\n\n";
 }
 
 
-constexpr avr_::Progmem_string<28> menu PROGMEM{"\nProgmem test\n"
-	                                       "------------\n"};
+constexpr mcu::Progmem_string<15> menu PROGMEM{"\n\nProgmem test\n"};
 
 int main()
 {
 // init_UART();
-    avr_::UART_iostream uart;
-    avr_::basic_cfg(uart);
+    mcu::UART_iostream uart;
+    mcu::basic_cfg(uart);
     uart.on();
-
-//    uart << "\nProgmem test\n"
-//	      "------------\n";
 
     atd::print(uart, menu);
 
+    while (1){
+	uart << "---------------\n"
+		"1. Basic functions\n"
+		"2. Progmem\n"
+		"3. Progmem_view\n";
 
-   //test_basic();
-   // test_progmem();
-   test_progmem_view();
+	char ans{};
+	uart >> ans;
+
+	switch (ans){
+	    break; case '1': test_basic();
+	    break; case '2': test_progmem();
+	    break; case '3': test_progmem_view();
+	}
+
+    }
+
 }
 

@@ -553,7 +553,11 @@ public:
     // el número de elementos usados.
     void size(size_type n) {ie_ = n;}
 
+    /// Número de elementos almacenados en el array.
+    // size() <= capacity()
     size_type size() const {return ie_;}
+
+    /// Tamaño máximo del array (= memoria reservada)
     size_type capacity() const {return N;}
 
     /// Añade un elemento al final del array.
@@ -621,6 +625,9 @@ inline void Array<T, N>::pop_back()
 //	    view = es una view del array x, contenedor de 4 elementos, de los
 //	    cuales solo 2 están ocupados.
 //
+//  Se trata de una generalización de std::span. Aunque de momento no está
+//  implementado como std::span tendría que ser un std::span al que le
+//  añadimos el distinguir entre la capacity() del array y el size().
 template <typename T>
 class Array_view{
 public:
@@ -636,21 +643,16 @@ public:
     using const_iterator    = const T*;
 
 
-// Methods
+// Constructors
     Array_view(T* p0, size_type sz, size_type max_sz)
-	: ptr_{p0}, size_{sz}, max_size_{max_sz} { }
+	: ptr_{p0}, size_{sz}, mem_size_{max_sz} { }
 
     template <size_t N>
     Array_view(Array<T, N>& x) : Array_view{x.data(), x.size(), N} { }
 
+// Element access
     reference operator[] (size_type i) {return ptr_[i];}
     const_reference operator[] (size_type i) const {return ptr_[i];}
-
-    bool empty() const {return size_ == 0;}
-    bool full () const {return size_ == max_size_;}
-
-    size_type size() const {return size_;}
-    size_type capacity() const {return max_size_;}
 
     /// Añade un elemento al final del array.
     void push_back(const_reference x);
@@ -658,27 +660,35 @@ public:
     /// Borra el último elemento añadido.
     void pop_back();
 
+// Observers
+    bool empty() const {return size() == 0;}
+    bool full () const {return size() == capacity();}
+
+    size_type size() const {return size_;}
+    size_type capacity() const {return mem_size_;}
+
+
 // Iterators
     iterator begin() {return ptr_;}
-    iterator end() {return ptr_ + size_;}
+    iterator end() {return ptr_ + size();}
 
     const_iterator begin() const {return ptr_;}
-    const_iterator end() const  {return ptr_ + size_;}
+    const_iterator end() const  {return ptr_ + size();}
 
 private:
 // Data
     T* ptr_;
     size_type size_;	
-    size_type max_size_; // = memory_size
+    size_type mem_size_; // = memory_size
 };
 
 
-// DUDA: validar size_ < max_size_??? Solo es un condicional y evitamos
+// DUDA: validar size_ < mem_size_??? Solo es un condicional y evitamos
 // problemas de memoria.
 template <typename T>
 void Array_view<T>::push_back(const_reference x)
 {
-    if (size_ < max_size_){
+    if (size_ < mem_size_){
 	ptr_[size_] = x;
 	++size_;
     }

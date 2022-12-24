@@ -17,6 +17,7 @@ INCS= atd_algorithm.h	\
 	atd_eng_magnitude.h	\
 	atd_iobxtream.h		\
 	atd_istream.h		\
+	atd_iterator.h		\
 	atd_magnitude.h		\
 	atd_math.h 			\
 	atd_memory.h		\

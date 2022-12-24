@@ -33,6 +33,7 @@
  *                    2. El otro es una view.
  *
  *    19/11/2022 atd::print
+ *    23/12/2022 begin/end
  *
  ****************************************************************************/
 #include <ostream>  // std::ostream
@@ -41,6 +42,7 @@
 #include <type_traits>
 #include <initializer_list>
 #include <atd_type_traits.h>
+#include <atd_iterator.h>
 
 namespace avr_{
 
@@ -145,14 +147,29 @@ private:
 template <typename T, size_t N>
 class Progmem_array{
 public:
-    using size_type = size_t;
-
-
+// Preconditions
     // TODO: implementar otros tipos
     static_assert(std::is_same_v<T, uint8_t> or std::is_same_v<T, uint16_t>);
 
-    constexpr static size_type size() {return N;}
+// Types
+    using value_type = T;
+    using size_type  = size_t;
+    using iterator   = atd::Progmem_iterator<Progmem_array>;
 
+// Constructos
+    template<typename T2>
+    Progmem_array& operator=(const T2&) = delete;
+
+
+// Observers
+    constexpr static size_type size() {return N;}
+    constexpr static size_type capacity() {return size();}
+
+    constexpr static bool empty() {return size() == 0;}
+    constexpr static bool full () {return size() == capacity();}
+
+
+// Element access
     const T operator[](size_type i) const
     {   
 	if constexpr (std::is_same_v<T, uint8_t>)
@@ -166,9 +183,12 @@ public:
 
     }
 
-    template<typename T2>
-    Progmem_array& operator=(const T2&) = delete;
+// Iterators
+    iterator begin() const {return iterator{*this, 0};}
+    iterator end() const {return iterator{*this, size()};}
+    
 
+// Data
     // Al principio iba a definir data como 'private'. Sin embargo, si se
     // define como private da error al compilar (ya que no inicializa por
     // defecto el data). Definiéndolo como const evito el problema de
