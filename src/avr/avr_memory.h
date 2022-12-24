@@ -114,43 +114,49 @@ inline int bytes_of_free_ram()
  *      global? 
  *
  ***************************************************************************/
-template <typename Int>
+
+
+// progmem_read(basic types)
+// -------------------------
+uint8_t progmem_read(const uint8_t& x) { return pgm_read_byte(&x); }
+uint16_t progmem_read(const uint16_t& x) { return pgm_read_word(&x); }
+
+// Concept
+// -------
+// La función que nos va a permitir leer cualquier tipo, built-in or
+// user-define, de progmem es progmem_read(a); De esta forma se puede meter en
+// Progmem cualquier tipo.
+// (???) Tengo que definirlo despues de progmem_read(uint8/16_t). ¿Por qué?
+//	 ¿Problemas con las macros?
+template <typename T>
+concept Progmem_readable =
+    requires (T a)
+    { progmem_read(a); };
+
+
+// One element
+// -----------
+template <typename T>
+    requires Progmem_readable<T>
 class Progmem{
 public:
-    // TODO: implementar otros tipos (lo marca la función pgm_read_xxx)
-    static_assert(std::is_same_v<Int, uint8_t> or std::is_same_v<Int, uint16_t>);
+    constexpr Progmem(const T& x): x_{x} { }
+    operator T() const { return progmem_read(x_); }
 
-    constexpr Progmem(const Int& x): x_{x} { }
-    operator Int() const
-    {   
-	if constexpr (std::is_same_v<Int, uint8_t>)
-	    return pgm_read_byte(&x_);
-
-	else if constexpr (std::is_same_v<Int, uint16_t>)
-	    return pgm_read_word(&x_);
-
-	else
-	    static_assert(atd::always_false_v<int>, "error");
-
-    }
-
-    template<typename Int2>
-    Progmem& operator=(const Int2&) = delete;
+    template<typename T2>
+    Progmem& operator=(const T2&) = delete;
 
 private:
-    const Int x_;
+    const T x_;
 };
 
 
 // Arrays
 // ------
 template <typename T, size_t N>
+    requires Progmem_readable<T>
 class Progmem_array{
 public:
-// Preconditions
-    // TODO: implementar otros tipos
-    static_assert(std::is_same_v<T, uint8_t> or std::is_same_v<T, uint16_t>);
-
 // Types
     using value_type = T;
     using size_type  = size_t;
@@ -170,18 +176,7 @@ public:
 
 
 // Element access
-    const T operator[](size_type i) const
-    {   
-	if constexpr (std::is_same_v<T, uint8_t>)
-	    return pgm_read_byte(&data[i]);
-
-	else if constexpr (std::is_same_v<T, uint16_t>)
-	    return pgm_read_word(&data[i]);
-
-	else
-	    static_assert(atd::always_false_v<int>, "error");
-
-    }
+    const T operator[](size_type i) const { return progmem_read(data[i]); }
 
 // Iterators
     iterator begin() const {return iterator{*this, 0};}
@@ -198,6 +193,8 @@ public:
 };
 
 
+// Strings
+// -------
 template <size_t N>
 class Progmem_string{
 public:

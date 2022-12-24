@@ -28,6 +28,7 @@ namespace mcu = avr_;
 /***************************************************************************
  *			    TEST BÁSICO 
  ***************************************************************************/
+
 // tipos básicos
 constexpr uint8_t u8 PROGMEM = 14;
 constexpr uint16_t u16 PROGMEM = 27;
@@ -56,6 +57,24 @@ constexpr uint8_t barray_u8[barray_rows][barray_cols] PROGMEM = {
     {16, 17, 18}
 };
 
+// User define types
+struct My_struct{
+    uint8_t u8;
+    uint16_t u16;
+};
+
+// Esta es la función a definir si se quiere meter My_struct en PROGMEM
+// DUDA: necesito el atributo PROGMEM en el prototipo??? Ni idea.
+// My_struct progmem_read(const My_struct& x PROGMEM)
+My_struct progmem_read(const My_struct& x)
+{
+    My_struct s;
+    s.u8 = pgm_read_byte(&x.u8);
+    s.u16 = pgm_read_word(&x.u16);
+    return s;
+}
+
+constexpr static My_struct struct1 PROGMEM = {100, 200};
 
 void test_basic()
 {
@@ -87,6 +106,17 @@ void test_basic()
 	}
     }
 
+    {// structs
+	uart << "Struct = {";
+	uint8_t u8 = pgm_read_byte(&struct1.u8);
+	uart << (int) u8 << ", ";
+	uint16_t u16 = pgm_read_word(&struct1.u16);
+	uart << u16 << "}\n";
+
+	auto res = progmem_read(struct1);
+	uart << "same   = {" << (int) res.u8 << ", " << res.u16 << "}\n";
+    }
+
 }
 
 
@@ -96,10 +126,15 @@ constexpr mcu::Progmem<uint8_t> pu8 PROGMEM = nu8;
 constexpr mcu::Progmem<uint16_t> pu16 PROGMEM = nu16;
 // Este no tiene que compilar:
 // constexpr Progmem<uint32_t> pu32 PROGMEM = 200;
+constexpr mcu::Progmem<My_struct> pstruct PROGMEM = My_struct{111, 222};
 
 static constexpr uint8_t narray_u8[4] = {10, 20, 30, 40};
 constexpr mcu::Progmem_array<uint8_t, 4> parray_u8 PROGMEM = 
 	        {narray_u8[0], narray_u8[1], narray_u8[2], narray_u8[3]};
+
+constexpr mcu::Progmem_array<My_struct, 3> parray_struct PROGMEM 
+	= {My_struct{11, 22}, My_struct{33, 44}, My_struct{55, 66}};
+
 constexpr mcu::Progmem_string<6> pstr PROGMEM{"hello"};
 
 constexpr mcu::Progmem_string_array<3> parray_str PROGMEM = {
@@ -140,6 +175,9 @@ void test_progmem()
     uint16_t x16 = pu16;
     uart << "u16:\t[" << x16 << "] =? [" << nu16 << "]\n";
 
+    My_struct str1 = pstruct;
+    uart << "My_struct = {" << (int) str1.u8 << ", " << str1.u16 << "}\n";
+
     {// Arrays
      // TODO: ¿por qué no lo imprime bien?
 //	for (size_t i = 0; i < 4; ++i)
@@ -154,6 +192,13 @@ void test_progmem()
 	uart << "range for       : ";
 	for (const auto& x: parray_u8)
 	    uart << (int) x << ' ';
+	uart << '\n';
+
+	uart << "Array of structs: ";
+	for (size_t i = 0; i < parray_struct.size(); ++i){
+	    auto str1 = parray_struct[i];
+	    uart << "{" << (int) str1.u8 << ", " << str1.u16 << "}; ";
+	}
 	uart << '\n';
     }
 	
