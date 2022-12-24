@@ -128,6 +128,19 @@ uint16_t progmem_read(const uint16_t& x) { return pgm_read_word(&x); }
 // Progmem cualquier tipo.
 // (???) Tengo que definirlo despues de progmem_read(uint8/16_t). ¿Por qué?
 //	 ¿Problemas con las macros?
+// (???) Según la GSL (T.20) esta sería una mala definición de `concept` ya
+//       que no tiene un significado semántico (¿qué es eso? @_@) sino solo
+//       sintáctico. Sin embargo queda muy bien el error que da si no está
+//       definido `progmem_read`. Los errores de las templates son horribles y
+//       esto simplifica la detección de errores por parte del usuario.
+//       ¿A lo mejor el concept debería ser Memory? Los `devices` encajan
+//       muy bien con los concepts (aunque puede que ese no sea su idea
+//       original).  De todas formas los ejemplos que he visto en la GSL son
+//       todo estructuras algebraícas matemáticas, para nada piensan en
+//       `devices`. (De hecho T.22 habla explicitamente de la estructura
+//       algebráica de anillo).
+//       Sin embargo luego en cppreference se puede encontrar los requirements
+//       for Container.
 template <typename T>
 concept Progmem_readable =
     requires (T a)
@@ -168,6 +181,10 @@ public:
 
 
 // Observers
+// DUDA: este es un array clásico, siempre está lleno. Sería un Full_array
+//	 o Array_full. No necesito capacity(), ni empty() ni full(). ¿Dejarlas
+//	 o quitarlas? A favor de dejarlas: mismo interfaz para todos los
+//	 arrays full o no. En contra: interfaz más sencillo si se eliminan.
     constexpr static size_type size() {return N;}
     constexpr static size_type capacity() {return size();}
 

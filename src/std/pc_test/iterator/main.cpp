@@ -74,7 +74,20 @@ void test_advance()
     // No puedo usar std::list ya que su tipo no es un mtd::bidirectional_it.
 }
 
+void test_begin_end_size()
+{
+    test::interfaz("begin/end/size");
 
+    int a[3] = {10, 20, 30};
+    CHECK_TRUE(mtd::begin(a) == std::begin(a), "begin");
+    CHECK_TRUE(mtd::end(a) == std::end(a), "end");
+    CHECK_TRUE(mtd::size(a) == std::size(a), "size");
+
+    std::array<int, 3> b{5, 6, 7};
+    CHECK_TRUE(mtd::begin(b) == std::begin(b), "begin");
+    CHECK_TRUE(mtd::end(b) == std::end(b), "end");
+    CHECK_TRUE(mtd::size(b) == std::size(b), "size");
+}
 
 int main()
 {
@@ -83,7 +96,7 @@ try{
 
     test_reverse_iterator();
     test_advance();
-
+    test_begin_end_size();
 
 }catch(const std::exception& e){
     std::cerr << e.what() << '\n';

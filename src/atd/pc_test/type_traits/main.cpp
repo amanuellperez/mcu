@@ -207,6 +207,55 @@ void test_same_sign_as()
     test_make_type_same_sign_as<uint64_t, uint64_t, uint64_t>();
 }
 
+struct A {
+    using value_type = long;
+    using size_type  = unsigned long;
+    using iterator   = double;
+};
+
+template <typename T, typename V>
+void test_value_type_t(const std::string& name)
+{
+    CHECK_TRUE((std::is_same_v<atd::value_type_t<T>, V>), name);
+}
+
+
+
+void test_value_type_t()
+{
+    test::interfaz("value_type_t");
+    test_value_type_t<int[10], int>("int[10]");
+    test_value_type_t<A, long>("A::value_type");
+}
+
+template <typename T, typename V>
+void test_size_type_t(const std::string& name)
+{
+    CHECK_TRUE((std::is_same_v<atd::size_type_t<T>, V>), name);
+}
+
+void test_size_type_t()
+{
+    test::interfaz("size_type_t");
+    test_size_type_t<int[10], int>("int[10]");
+    test_size_type_t<A, unsigned long>("A::size_type");
+}
+
+
+template <typename T, typename V>
+void test_iterator_type_t(const std::string& name)
+{
+    CHECK_TRUE((std::is_same_v<atd::iterator_type_t<T>, V>), name);
+}
+
+void test_iterator_type_t()
+{
+    test::interfaz("iterator_type_t");
+    test_iterator_type_t<int[10], int*>("int[10]");
+    test_iterator_type_t<A, double>("A::iterator_type");
+}
+
+
 int main()
 {
 try{
@@ -219,6 +268,9 @@ try{
     test_same_type_double_bits();
     test_same_type_at_least32();
     test_same_sign_as();
+    test_value_type_t();
+    test_size_type_t();
+    test_iterator_type_t();
 
 }catch(std::exception& e)
 {

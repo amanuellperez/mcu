@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez 
+// Copyright (C) 2019-2022 A.Manuel L.Perez 
 //           mail: <amanuel.lperez@gmail.com>
 //           https://github.com/amanuellperez/mcu
 //
@@ -22,14 +22,14 @@
 #define __MCU_STD_ITERATOR_H__
 /****************************************************************************
  *
- *  - DESCRIPCION: Equivalente a <iterator>
+ *  DESCRIPCION
+ *	Equivalente a <iterator>
  *
- *  - COMENTARIOS: 
- *
- *  - HISTORIA:
+ *  HISTORIA
  *    A.Manuel L.Perez
  *	03/11/2019: iterator_traits, reverse_iterator
  *	04/02/2020: advance, next, prev, distance
+ *	23/12/2022: begin()/end()/size()
  *
  ****************************************************************************/
 #include "std_config.h"
@@ -321,6 +321,46 @@ inline constexpr reverse_iterator<It> make_reverse_iterator(It i)
 {return reverse_iterator<It>{i};}
 
 
+
+// begin()
+// -------
+template <typename Container>
+inline constexpr auto begin(Container& c) -> decltype(c.begin())
+{ return c.begin(); }
+
+template <typename Container>
+constexpr auto begin(const Container& c) -> decltype(c.begin())
+{ return c.begin(); }
+
+template <typename T, size_t N>
+inline constexpr T* begin(T (&c)[N]) noexcept 
+{ return c; }
+
+
+// end()
+// -----
+template <typename Container>
+inline constexpr auto end(Container& c) -> decltype(c.end())
+{ return c.end(); }
+
+template <typename Container>
+constexpr auto end(const Container& c) -> decltype(c.end())
+{ return c.end(); }
+
+template <typename T, size_t N>
+inline constexpr T* end(T (&c)[N]) noexcept 
+{ return c + N; }
+
+
+// size()
+// ------
+template <typename Container>
+constexpr auto size(const Container& c) -> decltype(c.size())
+{ return c.size(); }
+
+template <typename T, size_t N>
+inline constexpr size_t size(T (&c)[N]) noexcept 
+{ return N; }
 
 
 }// namespace

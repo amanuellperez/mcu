@@ -23,21 +23,23 @@
 #define __ATD_TYPE_TRAITS_BASIC_H__
 /****************************************************************************
  *
- *   - DESCRIPCION: Ampliación de type_traits.h
+ *  DESCRIPCION
+ *	Ampliación de type_traits.h
  *
  *
- *   - HISTORIA:
+ *  HISTORIA
  *    A.Manuel L.Perez
  *    27/08/2019 Less_than, Pertenece_al_intervalo_cerrado
  *    12/02/2021 has_same_sign, same_type_with_double_bits
  *    14/03/2021 same_type_at_least32
  *    18/03/2021 make_type<A>::template same_sign_as<B>
  *    13/08/2021 common_type_if_convertible_t
+ *    23/12/2022 value_type_t<T>/size_type<T>/iterator_type<T>
  *
  ****************************************************************************/
 #include <type_traits>
 #include <stdint.h> // uint8_t ...
-
+#include <cstddef>
 namespace atd{
 
 
@@ -252,6 +254,79 @@ template <typename Rep1,
           typename CRep = std::common_type_t<Rep1, Rep2>>
 using common_type_if_convertible_t =
     std::enable_if_t<std::is_convertible_v<const Rep2&, CRep>, CRep>;
+
+
+// value_type_t
+// ------------
+// type value_type<typename T>
+// {
+//	if (is_array(T == T[N]))
+//	    return T;
+//
+//	else 
+//	    return T::value_type;
+// }
+template <typename T>
+struct value_type{
+    using type = typename T::value_type;
+};
+
+template <typename T, size_t N>
+struct value_type<T[N]>{
+    using type = T;
+};
+
+template <typename T>
+using value_type_t = typename value_type<T>::type;
+
+
+// size_type_t
+// ------------
+// type size_type<typename T>
+// {
+//	if (is_array(T == T[N]))
+//	    return size_t;
+//
+//	else 
+//	    return T::size_type;
+// }
+template <typename T>
+struct size_type{
+    using type = typename T::size_type;
+};
+
+template <typename T, size_t N>
+struct size_type<T[N]>{
+    using type = T;
+};
+
+template <typename T>
+using size_type_t = typename size_type<T>::type;
+
+
+// iterator_type_t
+// ---------------
+// type iterator_type<typename T>
+// {
+//	if (is_array(T == T[N]))
+//	    return T*;
+//
+//	else 
+//	    return T::iterator_type;
+// }
+template <typename T>
+struct iterator_type{
+    using type = typename T::iterator;
+};
+
+template <typename T, size_t N>
+struct iterator_type<T[N]>{
+    using type = T*;
+};
+
+template <typename T>
+using iterator_type_t = typename iterator_type<T>::type;
+
 
 }// namespace
 
