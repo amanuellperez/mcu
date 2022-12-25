@@ -38,11 +38,23 @@
  ****************************************************************************/
 #include <ostream>  // std::ostream
 #include <avr/pgmspace.h>   
-
 #include <type_traits>
 #include <initializer_list>
 #include <atd_type_traits.h>
 #include <atd_iterator.h>
+
+namespace atd{
+// pgm_read_xxx son macros, no se pueden escribir como avr_::pgm_read_byte
+inline uint8_t progmem_read(const uint8_t& x) { return pgm_read_byte(&x); }
+inline uint16_t progmem_read(const uint16_t& x) { return pgm_read_word(&x); }
+// Si los undef no funciona el test. Modificar el test y hacer el undef.
+//#undef pgm_read_byte
+//#undef pgm_read_word
+} // namespace
+
+// Es fundamental definir la función progmem_read para built-in types antes de
+// los concepts. Por ello este orden no se puede cambiar.
+#include <atd_memory.h>
 
 namespace avr_{
 
@@ -58,6 +70,7 @@ inline int bytes_of_free_ram()
   int v; 
   return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval); 
 }
+}// namespace
 
 /***************************************************************************
  *				PROGMEM
@@ -116,99 +129,8 @@ inline int bytes_of_free_ram()
  ***************************************************************************/
 
 
-// progmem_read(basic types)
-// -------------------------
-uint8_t progmem_read(const uint8_t& x) { return pgm_read_byte(&x); }
-uint16_t progmem_read(const uint16_t& x) { return pgm_read_word(&x); }
 
-// Concept
-// -------
-// La función que nos va a permitir leer cualquier tipo, built-in or
-// user-define, de progmem es progmem_read(a); De esta forma se puede meter en
-// Progmem cualquier tipo.
-// (???) Tengo que definirlo despues de progmem_read(uint8/16_t). ¿Por qué?
-//	 ¿Problemas con las macros?
-// (???) Según la GSL (T.20) esta sería una mala definición de `concept` ya
-//       que no tiene un significado semántico (¿qué es eso? @_@) sino solo
-//       sintáctico. Sin embargo queda muy bien el error que da si no está
-//       definido `progmem_read`. Los errores de las templates son horribles y
-//       esto simplifica la detección de errores por parte del usuario.
-//       ¿A lo mejor el concept debería ser Memory? Los `devices` encajan
-//       muy bien con los concepts (aunque puede que ese no sea su idea
-//       original).  De todas formas los ejemplos que he visto en la GSL son
-//       todo estructuras algebraícas matemáticas, para nada piensan en
-//       `devices`. (De hecho T.22 habla explicitamente de la estructura
-//       algebráica de anillo).
-//       Sin embargo luego en cppreference se puede encontrar los requirements
-//       for Container.
-template <typename T>
-concept Progmem_readable =
-    requires (T a)
-    { progmem_read(a); };
-
-
-// One element
-// -----------
-template <typename T>
-    requires Progmem_readable<T>
-class Progmem{
-public:
-    constexpr Progmem(const T& x): x_{x} { }
-    operator T() const { return progmem_read(x_); }
-
-    template<typename T2>
-    Progmem& operator=(const T2&) = delete;
-
-private:
-    const T x_;
-};
-
-
-// Arrays
-// ------
-template <typename T, size_t N>
-    requires Progmem_readable<T>
-class Progmem_array{
-public:
-// Types
-    using value_type = T;
-    using size_type  = size_t;
-    using iterator   = atd::Progmem_iterator<Progmem_array>;
-
-// Constructos
-    template<typename T2>
-    Progmem_array& operator=(const T2&) = delete;
-
-
-// Observers
-// DUDA: este es un array clásico, siempre está lleno. Sería un Full_array
-//	 o Array_full. No necesito capacity(), ni empty() ni full(). ¿Dejarlas
-//	 o quitarlas? A favor de dejarlas: mismo interfaz para todos los
-//	 arrays full o no. En contra: interfaz más sencillo si se eliminan.
-    constexpr static size_type size() {return N;}
-    constexpr static size_type capacity() {return size();}
-
-    constexpr static bool empty() {return size() == 0;}
-    constexpr static bool full () {return size() == capacity();}
-
-
-// Element access
-    const T operator[](size_type i) const { return progmem_read(data[i]); }
-
-// Iterators
-    iterator begin() const {return iterator{*this, 0};}
-    iterator end() const {return iterator{*this, size()};}
-    
-
-// Data
-    // Al principio iba a definir data como 'private'. Sin embargo, si se
-    // define como private da error al compilar (ya que no inicializa por
-    // defecto el data). Definiéndolo como const evito el problema de
-    // escritura. El usuario tiene que saber que no debe de leer directamente
-    // 'data'.
-    const T data[N];
-};
-
+namespace avr_{
 
 // Strings
 // -------
@@ -304,7 +226,6 @@ strlcpy(char* dst, const Element_progmem_string_array<N>& src, size_t n)
 
 
 
-
 /***************************************************************************
  *				VIEWS
  *
@@ -312,7 +233,8 @@ strlcpy(char* dst, const Element_progmem_string_array<N>& src, size_t n)
  *  Aunque me gusta más la forma anterior voy a probar a crear views de las
  *  progmems. Las views se limitan a suministrar un interfaz más cómodo de
  *  acceso a la PROGMEM.
- *
+ *  
+ *  TODO: eliminarlo. Lo uso en el LCD
  ***************************************************************************/
 // Se trata de un array en progmem. Como no es propietario de los datos sería 
 // un Progmem_array_view????

@@ -252,7 +252,7 @@ void test_lcd4(LCD& lcd)
 
 
 
-void new_glyph(LCD& lcd, const mcu::Progmem_array<uint8_t, 8>& glyph)
+void new_glyph(LCD& lcd, const atd::Progmem_array<uint8_t, 8>& glyph)
 {
     for (uint8_t i  = 0; i < 8; ++i)
 	lcd.write_data_to_CG_or_DDRAM1(glyph[i]);
@@ -261,14 +261,14 @@ void new_glyph(LCD& lcd, const mcu::Progmem_array<uint8_t, 8>& glyph)
 
 
 void show_glyphs(LCD& lcd,
-	const mcu::Progmem_array<uint8_t, 8>& g1, 
-	const mcu::Progmem_array<uint8_t, 8>& g2, 
-	const mcu::Progmem_array<uint8_t, 8>& g3, 
-	const mcu::Progmem_array<uint8_t, 8>& g4, 
-	const mcu::Progmem_array<uint8_t, 8>& g5, 
-	const mcu::Progmem_array<uint8_t, 8>& g6, 
-	const mcu::Progmem_array<uint8_t, 8>& g7, 
-	const mcu::Progmem_array<uint8_t, 8>& g8)
+	const atd::Progmem_array<uint8_t, 8>& g1, 
+	const atd::Progmem_array<uint8_t, 8>& g2, 
+	const atd::Progmem_array<uint8_t, 8>& g3, 
+	const atd::Progmem_array<uint8_t, 8>& g4, 
+	const atd::Progmem_array<uint8_t, 8>& g5, 
+	const atd::Progmem_array<uint8_t, 8>& g6, 
+	const atd::Progmem_array<uint8_t, 8>& g7, 
+	const atd::Progmem_array<uint8_t, 8>& g8)
 {
     lcd.set_cgram_address1(0x00);
     new_glyph(lcd, g1);

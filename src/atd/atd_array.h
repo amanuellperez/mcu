@@ -68,7 +68,6 @@
  *		los útiles.
  *
  *   16/11/2022 Array
- *   23/12/2022 const_Container_view
  *
  ****************************************************************************/
 #include <tuple>    // std::tie
@@ -704,83 +703,86 @@ inline void Array_view<T>::pop_back()
 	--size_;
 }
 
-/***************************************************************************
- *			const_Container_view
- ***************************************************************************/
-// (RRR) ¿Por qué definir otra Array_view?
-//	 Tengo dos tipos de arrays:
-//	    (1) Normales  : std::array<int, 4> a{...};
-//	    (2) en PROGMEM: mcu::Progmem_array<int, 4> a{...};
+///***************************************************************************
+// *			const_Container_view
+// ***************************************************************************/
+//// (RRR) ¿Por qué definir otra Array_view?
+////	 Tengo dos tipos de arrays:
+////	    (1) Normales  : std::array<int, 4> a{...};
+////	    (2) en PROGMEM: mcu::Progmem_array<int, 4> a{...};
+////
+////	 La diferencia entre std::array y mcu::Progmem_array es que mientras
+////	 que en std::array puedo hablar del puntero al primer elemento eso no
+////	 puedo hacerlo en Progmem_array. 
+////
+////	 Todas las implementaciones de Array_view (o std::span, ...) dan por
+////	 supuesto de que el array que contiene los elementos se puede acceder
+////	 via un puntero al primer elemento, lo cual no lo puedo usar con
+////	 Progmem_array.
+////
+////	 ¿Cómo resolver este problema?
+////	 (1) Reescribir Array_view (o mejor std::span) para que no se base en
+////	     esa suposición. 
+////	 (2) Crear una nueva view: Container_view.
+////
+////	 Opto por la segunda (std::span no solo tiene pointer, sino reference,
+////	 ...) ya que parece la más sencilla de implementar y sobre todo en un
+////	 Container no vamos a dar por supuesto que esté implementado usando un
+////	 puntero al primer elemento.
+//// 
+//// FINALIDAD
+////
+////	Quiero que los programas desconozcan si estoy almacenando los arrays
+////  en RAM o en PROGMEM. Necesito esta View para que otras clases puedan
+////  tenerla dentro.
+////
+////	Ejemplo: al escribir una partitura de música quiero poder tener las
+////	notas almacenadas en RAM, o en PROGMEM o en un fichero en disco duro.
+////	La partitura tendrá dentro una view del contenedor con todas las
+////	notas. El usuario de la partitura decidirá cómo almacenarla:
 //
-//	 La diferencia entre std::array y mcu::Progmem_array es que mientras
-//	 que en std::array puedo hablar del puntero al primer elemento eso no
-//	 puedo hacerlo en Progmem_array. 
+//  TODO: borrar. Si todas las funciones se limitan a llamar a la función del
+//  Container ¿para qué necesito esto?
 //
-//	 Todas las implementaciones de Array_view (o std::span, ...) dan por
-//	 supuesto de que el array que contiene los elementos se puede acceder
-//	 via un puntero al primer elemento, lo cual no lo puedo usar con
-//	 Progmem_array.
+//// Al ser const_ no tenemos funciones del tipo push_back, ...
+//// Observar que lo parametrizo por el Container
+//template <typename Container>
+//class const_Container_view{
+//public:
+//// Types (basados en std::span)
+//    using value_type	= value_type_t<Container>;
+//    using size_type	= size_type_t<Container>;
+////    using difference_type   = std::ptrdiff_t;
+//// con PROGMEM no quiero usar punteros ni referencias
+////     using pointer	= T*; 
+////    using const_pointer	= const T*;
+////    using reference	= T&;
+////    using const_reference   = const T&;
+//    using iterator	= iterator_type_t<Container>;
 //
-//	 ¿Cómo resolver este problema?
-//	 (1) Reescribir Array_view (o mejor std::span) para que no se base en
-//	     esa suposición. 
-//	 (2) Crear una nueva view: Container_view.
+//// Constructos
+//// (???) Regular type?
+////    const_Container_view () : con_{nullptr} { }
 //
-//	 Opto por la segunda (std::span no solo tiene pointer, sino reference,
-//	 ...) ya que parece la más sencilla de implementar y sobre todo en un
-//	 Container no vamos a dar por supuesto que esté implementado usando un
-//	 puntero al primer elemento.
-// 
-// FINALIDAD
+//    explicit const_Container_view(Container& con) : con_{&con} { }
 //
-//	Quiero que los programas desconozcan si estoy almacenando los arrays
-//  en RAM o en PROGMEM. Necesito esta View para que otras clases puedan
-//  tenerla dentro.
+//// Observers
+//    size_type size() {return std::size(*con_);}
 //
-//	Ejemplo: al escribir una partitura de música quiero poder tener las
-//	notas almacenadas en RAM, o en PROGMEM o en un fichero en disco duro.
-//	La partitura tendrá dentro una view del contenedor con todas las
-//	notas. El usuario de la partitura decidirá cómo almacenarla:
-
-// Al ser const_ no tenemos funciones del tipo push_back, ...
-// Observar que lo parametrizo por el Container
-template <typename Container>
-class const_Container_view{
-public:
-// Types (basados en std::span)
-    using value_type	= value_type_t<Container>;
-    using size_type	= size_type_t<Container>;
-//    using difference_type   = std::ptrdiff_t;
-// con PROGMEM no quiero usar punteros ni referencias
-//     using pointer	= T*; 
-//    using const_pointer	= const T*;
-//    using reference	= T&;
-//    using const_reference   = const T&;
-    using iterator	= iterator_type_t<Container>;
-
-// Constructos
-// (???) Regular type?
-//    const_Container_view () : con_{nullptr} { }
-
-    explicit const_Container_view(Container& con) : con_{&con} { }
-
-// Observers
-    size_type size() {return std::size(*con_);}
-
-// Element access
-    const value_type operator[](size_type i) const { return (*con_)[i]; }
-
-// Iterators
-    iterator begin() const {return std::begin(*con_); }
-    iterator end() const {return std::end(*con_); }
-
-private:
-    Container* con_;
-};
-
-template <typename Container>
-const_Container_view<Container> const_container_view(Container& con)
-{ return const_Container_view<Container>(con); }
+//// Element access
+//    const value_type operator[](size_type i) const { return (*con_)[i]; }
+//
+//// Iterators
+//    iterator begin() const {return std::begin(*con_); }
+//    iterator end() const {return std::end(*con_); }
+//
+//private:
+//    Container* con_;
+//};
+//
+//template <typename Container>
+//const_Container_view<Container> const_container_view(Container& con)
+//{ return const_Container_view<Container>(con); }
 
 }// namespace
 

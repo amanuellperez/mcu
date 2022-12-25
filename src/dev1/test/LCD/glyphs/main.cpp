@@ -65,14 +65,14 @@ namespace gl = dev::glyphs_5x8;
 
 
 void new_extended_char(LCD& lcd,
-	const atmega::Progmem_array<uint8_t, 8>& g1, 
-	const atmega::Progmem_array<uint8_t, 8>& g2, 
-	const atmega::Progmem_array<uint8_t, 8>& g3, 
-	const atmega::Progmem_array<uint8_t, 8>& g4, 
-	const atmega::Progmem_array<uint8_t, 8>& g5, 
-	const atmega::Progmem_array<uint8_t, 8>& g6, 
-	const atmega::Progmem_array<uint8_t, 8>& g7, 
-	const atmega::Progmem_array<uint8_t, 8>& g8)
+	const atd::Progmem_array<uint8_t, 8>& g1, 
+	const atd::Progmem_array<uint8_t, 8>& g2, 
+	const atd::Progmem_array<uint8_t, 8>& g3, 
+	const atd::Progmem_array<uint8_t, 8>& g4, 
+	const atd::Progmem_array<uint8_t, 8>& g5, 
+	const atd::Progmem_array<uint8_t, 8>& g6, 
+	const atd::Progmem_array<uint8_t, 8>& g7, 
+	const atd::Progmem_array<uint8_t, 8>& g8)
 {
     lcd.new_extended_char(0, g1);
     lcd.new_extended_char(1, g2);

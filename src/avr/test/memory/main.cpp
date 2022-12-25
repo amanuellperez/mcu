@@ -57,10 +57,14 @@ constexpr uint8_t barray_u8[barray_rows][barray_cols] PROGMEM = {
     {16, 17, 18}
 };
 
+namespace my{
+enum class Enum :uint8_t {a = 10, b, c};
+
 // User define types
 struct My_struct{
     uint8_t u8;
     uint16_t u16;
+    Enum en;
 };
 
 // Esta es la función a definir si se quiere meter My_struct en PROGMEM
@@ -71,10 +75,13 @@ My_struct progmem_read(const My_struct& x)
     My_struct s;
     s.u8 = pgm_read_byte(&x.u8);
     s.u16 = pgm_read_word(&x.u16);
+    s.en = Enum{pgm_read_byte(&x.en)};
     return s;
 }
 
-constexpr static My_struct struct1 PROGMEM = {100, 200};
+}
+
+constexpr static my::My_struct struct1 PROGMEM = {100, 200};
 
 void test_basic()
 {
@@ -122,18 +129,21 @@ void test_basic()
 
 constexpr uint8_t nu8 = 12;
 constexpr uint16_t nu16 = 47;
-constexpr mcu::Progmem<uint8_t> pu8 PROGMEM = nu8;
-constexpr mcu::Progmem<uint16_t> pu16 PROGMEM = nu16;
+constexpr atd::Progmem<uint8_t> pu8 PROGMEM = nu8;
+constexpr atd::Progmem<uint16_t> pu16 PROGMEM = nu16;
 // Este no tiene que compilar:
 // constexpr Progmem<uint32_t> pu32 PROGMEM = 200;
-constexpr mcu::Progmem<My_struct> pstruct PROGMEM = My_struct{111, 222};
+constexpr atd::Progmem<my::My_struct> pstruct PROGMEM 
+			    = my::My_struct{111, 222, my::Enum::b};
 
 static constexpr uint8_t narray_u8[4] = {10, 20, 30, 40};
-constexpr mcu::Progmem_array<uint8_t, 4> parray_u8 PROGMEM = 
+constexpr atd::Progmem_array<uint8_t, 4> parray_u8 PROGMEM = 
 	        {narray_u8[0], narray_u8[1], narray_u8[2], narray_u8[3]};
 
-constexpr mcu::Progmem_array<My_struct, 3> parray_struct PROGMEM 
-	= {My_struct{11, 22}, My_struct{33, 44}, My_struct{55, 66}};
+constexpr atd::Progmem_array<my::My_struct, 3> parray_struct PROGMEM 
+	= {my::My_struct{11, 22, my::Enum::a}, 
+	   my::My_struct{33, 44, my::Enum::b}, 
+	   my::My_struct{55, 66, my::Enum::c}};
 
 constexpr mcu::Progmem_string<6> pstr PROGMEM{"hello"};
 
@@ -175,8 +185,9 @@ void test_progmem()
     uint16_t x16 = pu16;
     uart << "u16:\t[" << x16 << "] =? [" << nu16 << "]\n";
 
-    My_struct str1 = pstruct;
-    uart << "My_struct = {" << (int) str1.u8 << ", " << str1.u16 << "}\n";
+    my::My_struct str1 = pstruct;
+    uart << "My_struct = {" << (int) str1.u8 << ", " << str1.u16 
+	 << ", " << (int) str1.en << "}\n";
 
     {// Arrays
      // TODO: ¿por qué no lo imprime bien?
@@ -197,7 +208,8 @@ void test_progmem()
 	uart << "Array of structs: ";
 	for (size_t i = 0; i < parray_struct.size(); ++i){
 	    auto str1 = parray_struct[i];
-	    uart << "{" << (int) str1.u8 << ", " << str1.u16 << "}; ";
+	    uart << "{" << (int) str1.u8 << ", " << str1.u16 
+		 << ", " << (int) str1.en << "}; ";
 	}
 	uart << '\n';
     }
@@ -247,25 +259,25 @@ void test_progmem()
 
 }
 
-void test_progmem_view()
-{
-    mcu::UART_iostream uart;
-
-    mcu::Progmem_biarray_view<uint8_t, barray_rows, barray_cols> a{barray_u8};
-
-    uart << "\n\nProgram view test\n"
-	    "-----------------\n";
-
-    uart << "Progmem_biarray_view:\n";
-    for (uint8_t i = 0; i < barray_rows; ++i){
-	for (uint8_t j = 0; j < barray_cols; ++j){
-	    uart << (int)a[i][j] << ' ';
-	}
-	uart << '\n';
-    }
-
-    uart << "\n\n";
-}
+//void test_progmem_view()
+//{
+//    mcu::UART_iostream uart;
+//
+//    mcu::Progmem_biarray_view<uint8_t, barray_rows, barray_cols> a{barray_u8};
+//
+//    uart << "\n\nProgram view test\n"
+//	    "-----------------\n";
+//
+//    uart << "Progmem_biarray_view:\n";
+//    for (uint8_t i = 0; i < barray_rows; ++i){
+//	for (uint8_t j = 0; j < barray_cols; ++j){
+//	    uart << (int)a[i][j] << ' ';
+//	}
+//	uart << '\n';
+//    }
+//
+//    uart << "\n\n";
+//}
 
 
 constexpr mcu::Progmem_string<15> menu PROGMEM{"\n\nProgmem test\n"};
@@ -282,8 +294,8 @@ int main()
     while (1){
 	uart << "---------------\n"
 		"1. Basic functions\n"
-		"2. Progmem\n"
-		"3. Progmem_view\n";
+		"2. Progmem\n";
+//		"3. Progmem_view\n";
 
 	char ans{};
 	uart >> ans;
@@ -291,7 +303,7 @@ int main()
 	switch (ans){
 	    break; case '1': test_basic();
 	    break; case '2': test_progmem();
-	    break; case '3': test_progmem_view();
+//	    break; case '3': test_progmem_view();
 	}
 
     }

@@ -37,7 +37,7 @@
  *  TODO: moverlo a dev1
  ****************************************************************************/
 #include <avr_memory.h>
-#include "not_generic.h"
+#include <atd_memory.h>
 
 namespace dev{
 
@@ -46,7 +46,7 @@ namespace dev{
 // El nombre del namespace clasifica el tipo de glyphs. 
 // Siempre estarán alineados a la derecha.
 namespace glyphs_5x8{
-constexpr const not_generic::Progmem_array<uint8_t, 8> bell PROGMEM = 
+constexpr const atd::Progmem_array<uint8_t, 8> bell PROGMEM = 
 			  { 0b0000000,
 			    0b0000100,
 			    0b0001110,
@@ -56,7 +56,7 @@ constexpr const not_generic::Progmem_array<uint8_t, 8> bell PROGMEM =
 			    0b0000100,
 			    0b0000000 };
 
-constexpr const not_generic::Progmem_array<uint8_t, 8> arrow_up PROGMEM = 
+constexpr const atd::Progmem_array<uint8_t, 8> arrow_up PROGMEM = 
 			  { 0b0000000,
 			    0b0000100,
 			    0b0001110,
@@ -67,7 +67,7 @@ constexpr const not_generic::Progmem_array<uint8_t, 8> arrow_up PROGMEM =
 			    0b0000000 };
 
 
-constexpr const not_generic::Progmem_array<uint8_t, 8> arrow_down PROGMEM = 
+constexpr const atd::Progmem_array<uint8_t, 8> arrow_down PROGMEM = 
 			  { 0b0000000,
 			    0b0000100,
 			    0b0000100,
@@ -77,7 +77,7 @@ constexpr const not_generic::Progmem_array<uint8_t, 8> arrow_down PROGMEM =
 			    0b0000100,
 			    0b0000000};
 
-constexpr const not_generic::Progmem_array<uint8_t, 8> heart_full PROGMEM = 
+constexpr const atd::Progmem_array<uint8_t, 8> heart_full PROGMEM = 
 			  { 0b0000000,
 			    0b0001010,
 			    0b0011111,
@@ -87,7 +87,7 @@ constexpr const not_generic::Progmem_array<uint8_t, 8> heart_full PROGMEM =
 			    0b0000000,
 			    0b0000000};
 
-constexpr const not_generic::Progmem_array<uint8_t, 8> heart_empty PROGMEM = 
+constexpr const atd::Progmem_array<uint8_t, 8> heart_empty PROGMEM = 
 			  { 0b0000000,
 			    0b0001010,
 			    0b0010101,
@@ -98,7 +98,7 @@ constexpr const not_generic::Progmem_array<uint8_t, 8> heart_empty PROGMEM =
 			    0b0000000};
 
 
-constexpr const not_generic::Progmem_array<uint8_t, 8> battery_empty PROGMEM = 
+constexpr const atd::Progmem_array<uint8_t, 8> battery_empty PROGMEM = 
 			  { 0b0001110,
 			    0b0011011,
 			    0b0010001,
@@ -108,7 +108,7 @@ constexpr const not_generic::Progmem_array<uint8_t, 8> battery_empty PROGMEM =
 			    0b0010001,
 			    0b0011111 };
 
-constexpr const not_generic::Progmem_array<uint8_t, 8> battery_half PROGMEM = 
+constexpr const atd::Progmem_array<uint8_t, 8> battery_half PROGMEM = 
 			  { 0b0001110,
 			    0b0011011,
 			    0b0010001,
@@ -118,7 +118,7 @@ constexpr const not_generic::Progmem_array<uint8_t, 8> battery_half PROGMEM =
 			    0b0011111,
 			    0b0011111 };
 
-constexpr const not_generic::Progmem_array<uint8_t, 8> battery_full PROGMEM = 
+constexpr const atd::Progmem_array<uint8_t, 8> battery_full PROGMEM = 
 			  { 0b0001110,
 			    0b0011111,
 			    0b0011111,
@@ -128,7 +128,7 @@ constexpr const not_generic::Progmem_array<uint8_t, 8> battery_full PROGMEM =
 			    0b0011111,
 			    0b0011111 };
 
-constexpr const not_generic::Progmem_array<uint8_t, 8> musical_note PROGMEM = 
+constexpr const atd::Progmem_array<uint8_t, 8> musical_note PROGMEM = 
 			  { 0b0000000,
 			    0b0000011,
 			    0b0001101,
@@ -139,7 +139,7 @@ constexpr const not_generic::Progmem_array<uint8_t, 8> musical_note PROGMEM =
 			    0b0000000 };
 
 
-constexpr const not_generic::Progmem_array<uint8_t, 8> padlock_close PROGMEM = 
+constexpr const atd::Progmem_array<uint8_t, 8> padlock_close PROGMEM = 
 			  { 0b0000000,
 			    0b0001110,
 			    0b0010001,
@@ -149,7 +149,7 @@ constexpr const not_generic::Progmem_array<uint8_t, 8> padlock_close PROGMEM =
 			    0b0011011,
 			    0b0011111 };
 
-constexpr const not_generic::Progmem_array<uint8_t, 8> padlock_open PROGMEM = 
+constexpr const atd::Progmem_array<uint8_t, 8> padlock_open PROGMEM = 
 			  { 0b0000000,
 			    0b0001110,
 			    0b0010000,
@@ -159,7 +159,7 @@ constexpr const not_generic::Progmem_array<uint8_t, 8> padlock_open PROGMEM =
 			    0b0011011,
 			    0b0011111 };
 
-constexpr const not_generic::Progmem_array<uint8_t, 8> man PROGMEM = 
+constexpr const atd::Progmem_array<uint8_t, 8> man PROGMEM = 
 			  { 0b0001110,
 			    0b0001110,
 			    0b0000100,
@@ -169,7 +169,7 @@ constexpr const not_generic::Progmem_array<uint8_t, 8> man PROGMEM =
 			    0b0001010,
 			    0b0010001 };
 
-constexpr const not_generic::Progmem_array<uint8_t, 8> skull PROGMEM = 
+constexpr const atd::Progmem_array<uint8_t, 8> skull PROGMEM = 
 			  { 0b0000000,
 			    0b0001110,
 			    0b0010101,
@@ -180,7 +180,7 @@ constexpr const not_generic::Progmem_array<uint8_t, 8> skull PROGMEM =
 			    0b0000000 };
 
 
-constexpr const not_generic::Progmem_array<uint8_t, 8> speaker_right PROGMEM = 
+constexpr const atd::Progmem_array<uint8_t, 8> speaker_right PROGMEM = 
 			  { 0b0000001,
 			    0b0000011,
 			    0b0001111,
@@ -191,7 +191,7 @@ constexpr const not_generic::Progmem_array<uint8_t, 8> speaker_right PROGMEM =
 			    0b0000000 };
 
 
-constexpr const not_generic::Progmem_array<uint8_t, 8> plug PROGMEM = 
+constexpr const atd::Progmem_array<uint8_t, 8> plug PROGMEM = 
 			  { 0b0001010,
 			    0b0001010,
 			    0b0011111,
@@ -205,7 +205,7 @@ constexpr const not_generic::Progmem_array<uint8_t, 8> plug PROGMEM =
 // Al principio lo llamé 'square', pero eso entra en conflicto con la
 // función square de C. Además, se pueden crear símbolos 3, 4, ... cuyos
 // nombres serían exponent3, exponent4, ... 
-constexpr const not_generic::Progmem_array<uint8_t, 8> exponent2 PROGMEM = 
+constexpr const atd::Progmem_array<uint8_t, 8> exponent2 PROGMEM = 
 			  { 0b0000110,
 			    0b0001001,
 			    0b0000010,
@@ -216,7 +216,7 @@ constexpr const not_generic::Progmem_array<uint8_t, 8> exponent2 PROGMEM =
 			    0b0000000 };
 
 
-constexpr const not_generic::Progmem_array<uint8_t, 8> exponent3 PROGMEM = 
+constexpr const atd::Progmem_array<uint8_t, 8> exponent3 PROGMEM = 
 			  { 0b0000110,
 			    0b0000001,
 			    0b0000010,
@@ -227,7 +227,7 @@ constexpr const not_generic::Progmem_array<uint8_t, 8> exponent3 PROGMEM =
 			    0b0000000 };
 
 
-constexpr const not_generic::Progmem_array<uint8_t, 8> cuberoot PROGMEM = 
+constexpr const atd::Progmem_array<uint8_t, 8> cuberoot PROGMEM = 
 			  { 0b0011011,
 			    0b0000110,
 			    0b0001010,
@@ -237,7 +237,7 @@ constexpr const not_generic::Progmem_array<uint8_t, 8> cuberoot PROGMEM =
 			    0b0000110,
 			    0b0000010 };
 
-constexpr const not_generic::Progmem_array<uint8_t, 8> pacman PROGMEM = 
+constexpr const atd::Progmem_array<uint8_t, 8> pacman PROGMEM = 
 			  { 0b0000000,
 			    0b0001110,
 			    0b0011011,
@@ -247,7 +247,7 @@ constexpr const not_generic::Progmem_array<uint8_t, 8> pacman PROGMEM =
 			    0b0011111,
 			    0b0001110 };
 
-constexpr const not_generic::Progmem_array<uint8_t, 8> pacman_phantom PROGMEM = 
+constexpr const atd::Progmem_array<uint8_t, 8> pacman_phantom PROGMEM = 
 			  { 0b0000000,
 			    0b0001110,
 			    0b0011111,

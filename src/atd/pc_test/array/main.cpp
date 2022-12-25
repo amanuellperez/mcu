@@ -420,29 +420,29 @@ void test_array_view()
 
 
 
-void test_container_view()
-{
-    test::interfaz("const_Container_view");
-
-    {// array
-    int x[2];
-    x[0] = 20;
-    x[1] = 30;
-    auto view = atd::const_container_view(x);
-    CHECK_TRUE(view.size() == 2, "size");
-    CHECK_TRUE(view[0] == x[0], "operator[]");
-    CHECK_TRUE(view[1] == x[1], "operator[]");
-    }
-
-    {// std::array
-    std::array<int,2> x = {11, 22};
-    auto view = atd::const_container_view(x);
-    CHECK_TRUE(view.size() == x.size(), "size");
-    CHECK_TRUE(view[0] == x[0], "operator[]");
-    CHECK_TRUE(view[1] == x[1], "operator[]");
-    }
-
-}
+//void test_container_view()
+//{
+//    test::interfaz("const_Container_view");
+//
+//    {// array
+//    int x[2];
+//    x[0] = 20;
+//    x[1] = 30;
+//    auto view = atd::const_container_view(x);
+//    CHECK_TRUE(view.size() == 2, "size");
+//    CHECK_TRUE(view[0] == x[0], "operator[]");
+//    CHECK_TRUE(view[1] == x[1], "operator[]");
+//    }
+//
+//    {// std::array
+//    std::array<int,2> x = {11, 22};
+//    auto view = atd::const_container_view(x);
+//    CHECK_TRUE(view.size() == x.size(), "size");
+//    CHECK_TRUE(view[0] == x[0], "operator[]");
+//    CHECK_TRUE(view[1] == x[1], "operator[]");
+//    }
+//
+//}
 
 int main()
 {
@@ -453,7 +453,7 @@ try{
     test_linear_array();
     test_array();
     test_array_view();
-    test_container_view();
+//    test_container_view();
 
 }catch(std::exception& e)
 {

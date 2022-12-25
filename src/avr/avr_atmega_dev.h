@@ -126,12 +126,6 @@ namespace atmega{
 
 
 // PROGMEM
-    template <typename Int>
-    using Progmem = avr_::Progmem<Int>;
-
-    template <typename T, size_t N>
-    using Progmem_array = avr_::Progmem_array<T, N>;
-
     template <size_t N>
     using Progmem_string = avr_::Progmem_string<N>;
 
@@ -142,8 +136,7 @@ namespace atmega{
     using Progmem_string_array = avr_::Progmem_string_array<N>;
 
     template <typename T, size_t N>
-    using Progmem_array_view = avr_::Progmem_array_view<T,N>;
-
+    using Progmem_array_view = avr_::Progmem_array_view<T, N>;
 
     template <typename T, size_t nrows, size_t ncols>
     using Progmem_biarray_view = avr_::Progmem_biarray_view<T, nrows, ncols>;

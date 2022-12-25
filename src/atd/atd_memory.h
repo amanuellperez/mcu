@@ -1,4 +1,4 @@
-// Copyright (C) 2020 A.Manuel L.Perez 
+// Copyright (C) 2020-2022 A.Manuel L.Perez 
 //           mail: <amanuel.lperez@gmail.com>
 //           https://github.com/amanuellperez/mcu
 //
@@ -23,15 +23,17 @@
 
 /****************************************************************************
  *
- *  - DESCRIPCION: Cosas relacionadas con memoria.
+ *  DESCRIPCION
+ *	Cosas relacionadas con memoria.
  *
- *  - COMENTARIOS: 
- *
- *  - HISTORIA:
+ *  HISTORIA:
  *    A.Manuel L.Perez
  *    08/04/2020 Memory_type
+ *    25/12/2022 Progmem and Progmem_array
  *
  ****************************************************************************/
+#include "atd_iterator.h"
+#include <cstddef>
 
 namespace atd{
 
@@ -57,6 +59,160 @@ inline constexpr bool is_writeable(atd::Memory_type mem)
            mem == atd::Memory_type::read_and_write;
 }
 
+
+/***************************************************************************
+ *				PROGMEM
+ *  
+ *  La Harvard architecture tiene dos zonas de memoria: la de datos y la de
+ *  programa. Como los de avr llaman a esta progmem llámemosla así.
+ *
+ *  Al implementar estas clases en avr me encontré varios problemas:
+ *	(1) El concept no funciona, ya que busca progmem_read(a) en el
+ *	    namespace avr_ y no en el namespace que esté usando el cliente.
+ *
+ *	(2) El operator[] de Progmem_array tampoco funciona ya que busca la
+ *	    función avr_::progmem_read!!! 
+ *
+ *  Como se ve, todo es un problema con los namespaces. 
+ *
+ *  La forma que propongo ahora de resolver esto es generalizarlo. Al revisar
+ *  el código resulta que la única función externa que uso es progmem_read
+ *  siendo esa la única función que tiene que definir el cliente.
+ *
+ *  Dos formas de pasarla a la clase Progmem_array:
+ *	(1) Parametrizándola con un Driver, que tendría funciones read/write
+ *	    en memoria. 
+ *
+ *	(2) Meter las funciones que tiene que definir el cliente en el
+ *	    namespace atd.
+ *
+ *  Entre las dos puede que quede mejor la (2): Progmem<Micro>. El problema e
+ *  que para implementarla ahora hay que incluir el Micro en todos los devices
+ *  implementados que usen Progmem. Aunque a partir de ahora voy a ir
+ *  añadiendo Device<Micro> en todos los devices hasta que no lo tenga
+ *  reescrito no tengo acceso al Micro. Por ello, opto por implementar (1) y
+ *  en el futuro, si se ve que queda mejor (2) que (1), migrarlo a (2).
+ *
+ ***************************************************************************/
+// Concept
+// -------
+// La función que nos va a permitir leer cualquier tipo, built-in or
+// user-define, de progmem es progmem_read(a); De esta forma se puede meter en
+// Progmem cualquier tipo.
+// + Tengo que definirlo despues de progmem_read(uint8/16_t). ¿Por qué?
+//   Motivo: parece ser que con los built-in tipos el compilador no busca la
+//   función correspondiente. Con los user-define tipos no hay problema.
+//
+// (???) Según la GSL (T.20) esta sería una mala definición de `concept` ya
+//       que no tiene un significado semántico (¿qué es eso? @_@) sino solo
+//       sintáctico. Sin embargo queda muy bien el error que da si no está
+//       definido `progmem_read`. Los errores de las templates son horribles y
+//       esto simplifica la detección de errores por parte del usuario.
+//       ¿A lo mejor el concept debería ser Memory? Los `devices` encajan
+//       muy bien con los concepts (aunque puede que ese no sea su idea
+//       original).  De todas formas los ejemplos que he visto en la GSL son
+//       todo estructuras algebraícas matemáticas, para nada piensan en
+//       `devices`. (De hecho T.22 habla explicitamente de la estructura
+//       algebráica de anillo).
+//       Sin embargo luego en cppreference se puede encontrar los requirements
+//       for Container.
+//
+// 
+// Ejemplo mínimo de uso de concepts:
+//	namespace atd{
+//
+//	void f(int x) {}    <-- int = built-int type, definirlo antes del
+//				      concept!!!
+//
+//	template <typename T>
+//	concept Concept =
+//	    requires (T a)
+//	    { f(a); };
+//	}
+//	namespace atd{
+//	    template <typename T>
+//		requires Concept<T>
+//	    struct A { };
+//	}
+//
+//
+//	namespace b{
+//	    struct B{};
+//	    void f(B x) { }
+//	}
+//
+//	int main(){
+//	    atd::A<b::B> a;
+//	}
+// Parece ser que los concepts se miran dentro del namespace que estén. Luego
+// el requires Progmem_readable obliga a tener definido atd::progmem_read
+template <typename T>
+concept Progmem_readable =
+    requires (T a)
+    { progmem_read(a); };
+
+
+// One element
+// -----------
+template <typename T>
+    requires Progmem_readable<T>
+class Progmem{
+public:
+    constexpr Progmem(const T& x): x_{x} { }
+    operator T() const { return progmem_read(x_); }
+
+    template<typename T2>
+    Progmem& operator=(const T2&) = delete;
+
+private:
+    const T x_;
+};
+
+
+// Arrays
+// ------
+template <typename T, size_t N>
+    requires Progmem_readable<T>
+class Progmem_array{
+public:
+// Types
+    using value_type = T;
+    using size_type  = size_t;
+    using iterator   = Progmem_iterator<Progmem_array>;
+
+// Constructos
+    template<typename T2>
+    Progmem_array& operator=(const T2&) = delete;
+
+
+// Observers
+// DUDA: este es un array clásico, siempre está lleno. Sería un Full_array
+//	 o Array_full. No necesito capacity(), ni empty() ni full(). ¿Dejarlas
+//	 o quitarlas? A favor de dejarlas: mismo interfaz para todos los
+//	 arrays full o no. En contra: interfaz más sencillo si se eliminan.
+    constexpr static size_type size() {return N;}
+    constexpr static size_type capacity() {return size();}
+
+    constexpr static bool empty() {return size() == 0;}
+    constexpr static bool full () {return size() == capacity();}
+
+
+// Element access
+    const T operator[](size_type i) const { return progmem_read(data[i]); }
+
+// Iterators
+    iterator begin() const {return iterator{*this, 0};}
+    iterator end() const {return iterator{*this, size()};}
+    
+
+// Data
+    // Al principio iba a definir data como 'private'. Sin embargo, si se
+    // define como private da error al compilar (ya que no inicializa por
+    // defecto el data). Definiéndolo como const evito el problema de
+    // escritura. El usuario tiene que saber que no debe de leer directamente
+    // 'data'.
+    const T data[N];
+};
 
 
 }// namespace

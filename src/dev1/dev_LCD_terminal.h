@@ -48,6 +48,7 @@
 
 #include <avr_atmega.h>	// Progmem TODO: remove. Not generic
 #include "not_generic.h"
+#include <atd_memory.h>
 
 namespace dev{
 
@@ -287,7 +288,7 @@ public:
     // TODO: limpiar. Dejar una sola de estas funciones
     void new_extended_char(uint8_t c, const uint8_t glyph[8]);
     void new_extended_char(uint8_t c,
-                           const not_generic::Progmem_array<uint8_t, 8>& glyph);
+                           const atd::Progmem_array<uint8_t, 8>& glyph);
     void new_extended_char(uint8_t c,
                            const not_generic::Progmem_array_view<uint8_t, 8>& glyph);
 
