@@ -38,6 +38,7 @@
  *
  ****************************************************************************/
 #include <cstdint>
+ #include <ostream>
 
 namespace music{
 
@@ -113,8 +114,8 @@ static constexpr uint16_t note2freq[note2freq_size] = {
 
 }// namespace priv_
 
-
-enum class Note : uint8_t{
+using Note_type = uint8_t;
+enum class Note : Note_type{
     Do = 0, DoS,
     Re, ReS,
     Mi,
@@ -124,8 +125,14 @@ enum class Note : uint8_t{
     Si
 };
 
-enum class Octave: uint8_t{
-    great = 0, small, one_line, two_line, three_line
+// Aunque el orden de las octavas es:
+//	great, small, one line, two line and three line
+// empiezo a contar one_line = 1, para que coincidan 1, 2 y 3 con one, two and
+// three. Eso hace que great = 4 y small = 5.
+using Octave_type = uint8_t;
+enum class Octave: Octave_type{
+    one_line = 1, two_line, three_line,
+    great, small
 };
 
 
@@ -145,6 +152,42 @@ inline uint32_t note_to_frequency(uint16_t n)
 inline uint32_t note_to_frequency(Octave octave, Note note)
 { return note_to_frequency(static_cast<uint8_t>(octave)*12u + static_cast<uint8_t>(note));}
 
+
+// Para depurar
+inline std::ostream& operator<<(std::ostream& out, Note note)
+{
+    out << "note(" << static_cast<uint16_t>(note) << "):";
+    switch(note){
+	break; case Note::Do: out << "Do";
+	break; case Note::DoS: out << "DoS";
+	break; case Note::Re: out << "Re";
+	break; case Note::ReS: out << "ReS";
+	break; case Note::Mi: out << "Mi";
+	break; case Note::Fa: out << "Fa";
+	break; case Note::FaS: out << "FaS";
+	break; case Note::Sol: out << "Sol";
+	break; case Note::SolS: out << "SolS";
+	break; case Note::La: out << "La";
+	break; case Note::LaS: out << "LaS";
+	break; case Note::Si: out << "Si";
+    }
+
+    return out;
+}
+
+inline std::ostream& operator<<(std::ostream& out, Octave octave)
+{
+    out << "octave(" << static_cast<uint16_t>(octave) << "):";
+    switch(octave){
+	break; case Octave::one_line: out << "one_line";
+	break; case Octave::two_line: out << "two_line";
+	break; case Octave::three_line: out << "three_line";
+	break; case Octave::great: out << "great";
+	break; case Octave::small: out << "small";
+    }
+
+    return out;
+}
 
 
 }// namespace music

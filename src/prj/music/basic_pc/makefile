@@ -3,6 +3,7 @@ BIN = xx
 SOURCES= prj_main.cpp 		\
 		prj_run.cpp			\
 		prj_music.cpp		\
+		mus_musician.cpp	\
 		os.cpp
 
 MCU = atmega328p

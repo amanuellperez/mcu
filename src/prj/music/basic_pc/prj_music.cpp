@@ -18,7 +18,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "prj_main.h"
-
+#include "prj_songs.h"
 
 void Main::musical_scale_one_line()
 {
@@ -177,3 +177,20 @@ void Main::organ_toy()
 
 }
 
+
+void Main::play_song()
+{
+    UART uart;
+    uart << "Play song\n";
+
+    music::Song song{25, ode_to_joy};
+    Musician::play(song);
+
+// depurar:
+//    for (size_t i = 0; i < song.size(); ++i){
+//	auto note = song.note(i); 
+//	uart << (int) note.octave << ", " 
+//	     <<  (int) note.note << ", " << song.duration_of(note) << '\n';
+//    }
+    
+}

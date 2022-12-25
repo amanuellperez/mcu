@@ -32,7 +32,6 @@
 #include <dev_miniclock.h>
 #include <dev_square_wave.h>
 
-
 // microcontroller
 // ---------------
 namespace mcu = atmega;

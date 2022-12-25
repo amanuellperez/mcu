@@ -1,13 +1,13 @@
 DIRS =  calculator	\
 		clocks 		\
 	   	blink		\
+		music		\
 		POV_toy		\
 		sensor		\
 		stroboscope	\
 		util		
 
 # Revisar:
-#		music		\
 # IR_remote_control	\
 
 #		signal_generator \

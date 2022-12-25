@@ -58,6 +58,8 @@ private:
 
     void organ_toy();
 	bool organ_toy_UART_are_data_unread(const uint16_t& counter);
+
+    void play_song();
 };
 
 

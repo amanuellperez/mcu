@@ -17,31 +17,28 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "prj_main.h"
+#include "mus_musician.h"
+#include <atd_memory.h>
+#include <avr_memory.h>	// macro pgm_read_byte!!! 
 
+namespace music{
 
-void Main::run()
+// TODO: No funciona leer directamente la enum. Tengo que usar la macro
+// pgm_read_byte para que funcione. ¿por qué? 
+//	Sospecha: atd::progmem_read está definida para (uint8_t/uint16_t)
+//	pero no para la enum Octave/Note. El compilador debería de generar un
+//	error indicando que no la encuentra, pero no lo genera. ???
+Song_note progmem_read(const Song_note& x)
 {
-    UART uart;
-    uart << "\n\nTesting music functions";
+    Song_note res;
+//    res.octave = Octave{atd::progmem_read(x.octave)};
+//    res.note   = Note{atd::progmem_read(x.note)};
+    res.octave = Octave{pgm_read_byte(&x.octave)};
+    res.note   = Note{pgm_read_byte(&x.note)};
+    res.ticks  = atd::progmem_read(x.ticks);
 
-    while (1){
-	uart << "\n-----------------------\n"
-		"1. Music scale (normal)\n"
-	        "2. Music scale (all)\n"
-		"3. Organ toy (basic piano? :)\n"
-		"4. Play a song\n";
-
-	char ans{};
-	uart >> ans;
-	switch(ans){
-	    break; case '1': musical_scale_one_line();
-	    break; case '2': musical_scale_all();
-	    break; case '3': organ_toy();
-	    break; case '4': play_song();
-	}
-
-    }
+    return res;
 }
 
-
+}// namespace
+ 
