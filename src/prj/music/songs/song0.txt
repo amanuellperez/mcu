@@ -1,0 +1,76 @@
+# Himno de la alegría
+# -------------------
+# 1
+# Octava Nota Duración 
+one Mi negra 
+one Mi negra 
+one Fa negra 
+one Sol negra 
+one Sol negra 
+one Fa negra 
+one Mi negra 
+one Re negra 
+one Do negra 
+one Do negra 
+one Re negra 
+one Mi negra 
+one Mi negra_punto 
+one Re corchea 
+one Re blanca 
+
+
+# 2
+one Mi negra 
+one Mi negra 
+one Fa negra 
+one Sol negra 
+one Sol negra 
+one Fa negra 
+one Mi negra 
+one Re negra 
+one Do negra 
+one Do negra 
+one Re negra 
+one Mi negra 
+one Re negra_punto 
+one Do corchea 
+one Do blanca 
+
+
+# 3
+one Re negra 
+one Re negra 
+one Mi negra 
+one Do negra 
+one Re negra 
+one Mi corchea 
+one Fa corchea 
+one Mi negra 
+one Do negra 
+one Re negra 
+one Mi corchea 
+one Fa corchea 
+one Mi negra 
+one Re negra 
+one Do negra 
+one Re negra 
+small Si blanca 
+
+
+# 4
+one Mi negra 
+one Mi negra 
+one Fa negra 
+one Sol negra 
+one Sol negra 
+one Fa negra 
+one Mi negra 
+one Re negra 
+one Do negra 
+one Do negra 
+one Re negra 
+one Mi negra 
+one Re negra_punto 
+one Do corchea 
+one Do blanca 
+
