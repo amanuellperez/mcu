@@ -55,7 +55,7 @@ Song_note progmem_read(const Song_note& x);
 
 // PARTITURAS (notación en español)
 //
-//	Una partitura es la forma de escribie una canción. Cada símbolo de 
+//	Una partitura es la forma de escribir una canción. Cada símbolo de 
 //  la partitura indica la nota a tocar (octava y nota) y la duración. La
 //  duración viene codificada en el dibujo:
 //		nombre		= duración relativa
@@ -68,7 +68,7 @@ Song_note progmem_read(const Song_note& x);
 //		fusa		= 1/32
 //		semifusa	= 1/64
 //
-//  Creo (???) la semifusa es la nota más corta pudiéndola tomar como base
+//  Creo (???) que la semifusa es la nota más corta pudiéndola tomar como base
 //  para nuestro reloj. Midiendo el tiempo en semifusas en lugar de en blancas
 //  obtenemos:
 //
@@ -82,6 +82,8 @@ Song_note progmem_read(const Song_note& x);
 //		fusa		= 2
 //		semifusa	= 1
 //
+// OJO: Array realmente es un Input_stream. Si la canción está almacenada en
+// disco duro claramente sería un Input_stream.
 template <typename Array>
 class Song{
 public:

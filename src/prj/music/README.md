@@ -47,7 +47,17 @@ tocar. ¿Cómo extraer esa información?
 5. ¿Puedes hacerlo de otra forma? 
 
 
+## Songs
 
+En la carpeta songs voy a meter partituras descargadas de internet. Son sobre
+todo para hacer pruebas. Los ficheros musicxml los he descargado de
+[musicxml.com](https://www.musicxml.com/music-in-musicxml/example-set/). La música de
+Beethoven y demás es de dominio público no teniendo derechos de autor. Lo
+único que podría tener derecho de autor es el haberlo pasado al ordenador,
+pero en la página dan a entender que lo ponen gratuitamente. Si tuviesen
+derechos de autor y no se puediesen usar ruego me lo hagan saber para
+borrarlos. Solo las quiero para probar el programa que funcione correctamente
+y ver qué puedo hacer con él. 
 
 
 
