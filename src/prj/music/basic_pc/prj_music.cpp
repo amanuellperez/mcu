@@ -29,7 +29,7 @@ void Main::musical_scale_one_line()
     musical_scale(Octave::one_line, t);
 
     uart << "Do\n"; 
-    Musician::play(Octave::two_line, Note::Do, t);
+    Musician::play(Octave::two_line, Step::Do, t);
 }
 
 
@@ -59,25 +59,25 @@ void Main::musical_scale(Octave octave, uint16_t t)
 {
     UART uart;
     uart << "\tDo "; 
-    Musician::play(octave, Note::Do, t);
+    Musician::play(octave, Step::Do, t);
 
     uart << "Re "; 
-    Musician::play(octave, Note::Re, t);
+    Musician::play(octave, Step::Re, t);
 
     uart << "Mi "; 
-    Musician::play(octave, Note::Mi, t);
+    Musician::play(octave, Step::Mi, t);
 
     uart << "Fa "; 
-    Musician::play(octave, Note::Fa, t);
+    Musician::play(octave, Step::Fa, t);
 
     uart << "Sol "; 
-    Musician::play(octave, Note::Sol, t);
+    Musician::play(octave, Step::Sol, t);
 
     uart << "La "; 
-    Musician::play(octave, Note::La, t);
+    Musician::play(octave, Step::La, t);
 
     uart << "Si "; 
-    Musician::play(octave, Note::Si, t);
+    Musician::play(octave, Step::Si, t);
 }
 
 bool Main::organ_toy_UART_are_data_unread(const uint16_t& counter)
@@ -158,18 +158,18 @@ void Main::organ_toy()
 	    }
 
 	    switch(note){
-	    break; case 'S': case 's': Musician::play(Octave::one_line, Note::Do);
-	    break; case 'E': case 'e': Musician::play(Octave::one_line, Note::DoS);
-	    break; case 'D': case 'd': Musician::play(Octave::one_line, Note::Re);
-	    break; case 'R': case 'r': Musician::play(Octave::one_line, Note::ReS);
-	    break; case 'F': case 'f': Musician::play(Octave::one_line, Note::Mi);
-	    break; case 'G': case 'g': Musician::play(Octave::one_line, Note::Fa);
-	    break; case 'Y': case 'y': Musician::play(Octave::one_line, Note::FaS);
-	    break; case 'H': case 'h': Musician::play(Octave::one_line, Note::Sol);
-	    break; case 'U': case 'u': Musician::play(Octave::one_line, Note::SolS);
-	    break; case 'J': case 'j': Musician::play(Octave::one_line, Note::La);
-	    break; case 'I': case 'i': Musician::play(Octave::one_line, Note::LaS);
-	    break; case 'K': case 'k': Musician::play(Octave::one_line, Note::Si);
+	    break; case 'S': case 's': Musician::play(Octave::one_line, Step::Do);
+	    break; case 'E': case 'e': Musician::play(Octave::one_line, Step::DoS);
+	    break; case 'D': case 'd': Musician::play(Octave::one_line, Step::Re);
+	    break; case 'R': case 'r': Musician::play(Octave::one_line, Step::ReS);
+	    break; case 'F': case 'f': Musician::play(Octave::one_line, Step::Mi);
+	    break; case 'G': case 'g': Musician::play(Octave::one_line, Step::Fa);
+	    break; case 'Y': case 'y': Musician::play(Octave::one_line, Step::FaS);
+	    break; case 'H': case 'h': Musician::play(Octave::one_line, Step::Sol);
+	    break; case 'U': case 'u': Musician::play(Octave::one_line, Step::SolS);
+	    break; case 'J': case 'j': Musician::play(Octave::one_line, Step::La);
+	    break; case 'I': case 'i': Musician::play(Octave::one_line, Step::LaS);
+	    break; case 'K': case 'k': Musician::play(Octave::one_line, Step::Si);
 	    }
 	}
 

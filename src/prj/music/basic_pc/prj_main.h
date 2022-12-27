@@ -44,7 +44,7 @@ private:
 // Hardware
     using Musician = music::Musician<SWG1_ms>;
     using Octave   = music::Octave;
-    using Note	   = music::Note;
+    using Step	   = music::Step;
 
 // Data
 

@@ -82,15 +82,23 @@ namespace music{
 //	    One line octave: corresponde a la clave de Sol
 //	    Two line octave
 //	    Three line octave
+//
+//	Voy a usar la notación usada en musicxml: una nota está formada por un
+//	pitch (la frecuencia) y una duración. El pitch los músicos lo
+//	codifican en la partitura como (Octava, step), donde el step es lo que
+//	habitualmente los que no sabemos música llamamos nota. Tiene sentido
+//	llamarlo step: imaginar 5 pentagramas, uno encima de otro. Cada
+//	línea/hueco representa una frecuencia. Tu vas subiendo por cada línea
+//	a pasitos (a stepitos? @_@) de ahi, supongo, el nombre.
 
 namespace priv_{
 
 // TODO: meterlo en PROGMEM?
 //	 Si se mete al tocar una canción cargarlo en RAM (???)
-static constexpr uint8_t note2freq_size = 5 * 12;
+static constexpr uint8_t step2freq_size = 5 * 12;
 
 // Frecuencias en Hz de cada una de las notas de la escala musical
-static constexpr uint16_t note2freq[note2freq_size] = {
+static constexpr uint16_t step2freq[step2freq_size] = {
 // Great Octave
 // do, doS re reS mi fa faS sol solS la laS si
    65, 69, 73, 78, 82, 87, 92, 98, 104, 110, 117, 123,
@@ -114,8 +122,8 @@ static constexpr uint16_t note2freq[note2freq_size] = {
 
 }// namespace priv_
 
-using Note_type = uint8_t;
-enum class Note : Note_type{
+using Step_type = uint8_t;
+enum class Step : Step_type{
     Do = 0, DoS,
     Re, ReS,
     Mi,
@@ -136,40 +144,40 @@ enum class Octave: Octave_type{
 };
 
 
-// Mantener oculta la forma de guardar note2freq para poder elegir en el
+// Mantener oculta la forma de guardar step2freq para poder elegir en el
 // futuro si meterla en PROGMEM o no.
-inline uint32_t note_to_frequency(uint16_t n)
-{ return priv_::note2freq[n];}
+inline uint32_t step_to_frequency(uint16_t n)
+{ return priv_::step2freq[n];}
 
 
 // Esta función es para facilitar la vida del programandor, aunque es posible
 // que no sea necesaria (puede que en el organ_toy). Con ella podemos
 // escribir:  
 //
-//	    note_to_frequency(Octave::one_line, Note::Mi) 
+//	    step_to_frequency(Octave::one_line, Step::Mi) 
 //
 // para obtener la frecuencia de la nota Mi en la clave de Sol.
-inline uint32_t note_to_frequency(Octave octave, Note note)
-{ return note_to_frequency(static_cast<uint8_t>(octave)*12u + static_cast<uint8_t>(note));}
+inline uint32_t step_to_frequency(Octave octave, Step step)
+{ return step_to_frequency(static_cast<uint8_t>(octave)*12u + static_cast<uint8_t>(step));}
 
 
 // Para depurar
-inline std::ostream& operator<<(std::ostream& out, Note note)
+inline std::ostream& operator<<(std::ostream& out, Step step)
 {
-    out << "note(" << static_cast<uint16_t>(note) << "):";
-    switch(note){
-	break; case Note::Do: out << "Do";
-	break; case Note::DoS: out << "DoS";
-	break; case Note::Re: out << "Re";
-	break; case Note::ReS: out << "ReS";
-	break; case Note::Mi: out << "Mi";
-	break; case Note::Fa: out << "Fa";
-	break; case Note::FaS: out << "FaS";
-	break; case Note::Sol: out << "Sol";
-	break; case Note::SolS: out << "SolS";
-	break; case Note::La: out << "La";
-	break; case Note::LaS: out << "LaS";
-	break; case Note::Si: out << "Si";
+    out << "step(" << static_cast<uint16_t>(step) << "):";
+    switch(step){
+	break; case Step::Do: out << "Do";
+	break; case Step::DoS: out << "DoS";
+	break; case Step::Re: out << "Re";
+	break; case Step::ReS: out << "ReS";
+	break; case Step::Mi: out << "Mi";
+	break; case Step::Fa: out << "Fa";
+	break; case Step::FaS: out << "FaS";
+	break; case Step::Sol: out << "Sol";
+	break; case Step::SolS: out << "SolS";
+	break; case Step::La: out << "La";
+	break; case Step::LaS: out << "LaS";
+	break; case Step::Si: out << "Si";
     }
 
     return out;

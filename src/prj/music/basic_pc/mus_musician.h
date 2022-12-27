@@ -36,21 +36,18 @@
 
 namespace music{
 
-// DUDA: nombre? ¿cómo se llama a las notas escritas en una partitura? ¿Nota?
-// Pero son notas con duración.
-// De hecho ¿qué es una nota? Una nota es Octave::Note, luego no parece que
-// esté bien llamado Note. ¿No debería de ser:
-//  Note {Octave; basic_note???;} ???
-struct Song_note 
+
+struct Note 
 {
+    // Pitch = {octave, step}
     Octave octave;
-    Note note;
+    Step step;
     uint8_t ticks;  // 1, 2, 4, 8, ..., 64 ticks. Dependiendo del reloj
 		    // que usemos la duración de la nota será mayor o menor
 };
 
 
-Song_note progmem_read(const Song_note& x);
+Note progmem_read(const Note& x);
 
 
 // PARTITURAS (notación en español)
@@ -82,31 +79,32 @@ Song_note progmem_read(const Song_note& x);
 //		fusa		= 2
 //		semifusa	= 1
 //
-// OJO: Array realmente es un Input_stream. Si la canción está almacenada en
-// disco duro claramente sería un Input_stream.
-template <typename Array>
+// Song_notes = array (o mejor view) de las notas que forman una canción.
+// La canción puede estar en RAM, en PROGMEM, en disco duro, ... No suponer
+// cómo se almacena.
+template <typename Song_notes>
 class Song{
 public:
-    Song(uint16_t period_clock_in_ms0, const Array& song0)
+    Song(uint16_t period_clock_in_ms0, const Song_notes& song0)
 	: period_clock_in_ms_{period_clock_in_ms0}
-	, song_note{song0}
+	, note_{song0}
     { }
 	
 
     // DUDA: devolver por valor o por referencia?
     // Si la memoria está en PROGMEM seguramente sea haya que devolver por
     // valor.
-    Song_note note(size_t i) const {return song_note[i];}
+    Note step(size_t i) const {return note_[i];}
 
-    size_t size() const {return song_note.size(); }
+    size_t size() const {return note_.size(); }
 
-    uint16_t duration_of(const Song_note& note) const
+    uint16_t duration_of(const Note& note) const
     { return period_clock_in_ms_ * note.ticks; }
 	
 
 private:
     uint16_t period_clock_in_ms_;    // = tiempo de duración de la semifusa
-    const Array& song_note;	// Notas a tocar
+    const Song_notes& note_;	// Notas a tocar
 };
 
 
@@ -127,12 +125,12 @@ public:
     /// Toca la nota indicada. Devuelve el control inmediatamente, sin
     /// bloquear. Para dejar de tocar esa nota, tocar otra nota o llamar a
     /// `silence`
-    static void play(Octave, Note);
+    static void play(Octave, Step);
     static void silence();
 
     /// Toca la nota indicada por la duración indicada.
     /// Bloquea: no devuelve control hasta que no pasan duration_in_ms
-    static void play(Octave, Note, uint16_t duration_in_ms);
+    static void play(Octave, Step, uint16_t duration_in_ms);
 
     /// Toquemos una partitura
     template <typename A>
@@ -145,15 +143,15 @@ private:
 };
 
 template <typename I>
-inline void Musician<I>::play(Octave octave, Note note, uint16_t duration_in_ms)
+inline void Musician<I>::play(Octave octave, Step step, uint16_t duration_in_ms)
 { 
-    play(note_to_frequency(octave, note), duration_in_ms); 
+    play(step_to_frequency(octave, step), duration_in_ms); 
 }
 
 template <typename I>
-inline void Musician<I>::play(Octave octave, Note note)
+inline void Musician<I>::play(Octave octave, Step step)
 { 
-    play(note_to_frequency(octave, note)); 
+    play(step_to_frequency(octave, step)); 
 }
 
 
@@ -187,8 +185,8 @@ template <typename AV>
 void Musician<I>::play(const Song<AV>& song)
 {
     for (size_t i = 0; i < song.size(); ++i){
-	auto note = song.note(i); // <-- TODO: nombre??? note es incorrecto!!!
-	play(note.octave, note.note, song.duration_of(note));
+	auto note = song.step(i); 
+	play(note.octave, note.step, song.duration_of(note));
     }
 }
 
