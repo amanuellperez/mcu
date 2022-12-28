@@ -62,6 +62,45 @@ y ver qué puedo hacer con él.
 
 
 
+## Futuro
+
+¿Qué más cosas se pueden hacer?
+
++ A partir de los ficheros `musicxml` se puede extraer las notas que hay que
+  pulsar. Una vez que se saben las notas se podría hacer un "pianista" que
+  toque una partitura. 
+
+  Varias formas se me ocurren de hacer el pianista:
+    1.  Un robot con 2 manos, simulando a una persona. De hecho no es necesari
+	hacer cuerpo ni nada, con dos manos que se muevan por el teclado vale.
+	Literalmente sería una especie de impresiora con 2 cabezales cada
+	cabezal con 4 (?) dedos.
+
+    2. Un robot con 5 manos (una para cada octava) (básicamente es ponerle una
+       tapa encima del teclado con stepper motors que muevan un "dedo"
+       presionando una tecla o no). 
+
+    3. La evolución de (2) es el piano automático que sale en la charla de la
+       Royal Institution sobre el sonido: las teclas se tocan ellas solas. Es
+       menos visual que (1) y que (2) pero seguramente sea más sencillo de
+       fabricar (¿reles en cada tecla?)
+
++ Otra forma sería tener 4-5 altavoces conectados al microcontrolador y que
+  cada altavoz genere la señal correspondiente. De esta forma no tenemos
+  partes mecánicas. Es menos visual que el anterior, pero seguramente más sencillo.
+
++ ¿Y para qué necesito 5 altavoces pudiendo usar uno? Total, un altavoz es
+  capaz de generar toda la música que quieras. A partir de la partitura habría
+  que generar la mezcla de las señales en el ordenador; estas se grabarían en
+  un fichero mp3 que se reproduciría en el altavoz. 
+
+  El reto luego sería ver cómo conseguir generar las notas del piano, las del
+  violin, ... 
+
+
+Por supuesto que a la hora de implementar lo anterior surgirán un montón de
+problemas prácticos pudiendo llevar mucho tiempo hacer algo que funcione.
+
 
 
 
