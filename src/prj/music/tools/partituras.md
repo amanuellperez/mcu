@@ -22,7 +22,7 @@ Para ello necesito:
 
 Resulta que mínimo existe un standard: el formato `musicxml`. Es xml y viene
 documentado en la página 
-[musicxml.com](https://www.musicxml.com/music-in-musicxml/example-set/). 
+[musicxml.com](https://w3c.github.io/musicxml/)
 
 El siguiente paso es aprender yo a leer una partitura. El problema cuando he
 empezado a leer cosas en internet sobre "Teoría de la música" (<-- por favor,
