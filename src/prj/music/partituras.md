@@ -3,6 +3,8 @@
 No soy músico y no se nada de música. Así que lo que está escrito aquí puede
 ser totalmente incorrecto. Si lo lees, te lo aprendes, y está mal es tu problema. 
 
+Lo explicado aquí corresponde a la *Chromatic scale* que es la que necesito. 
+
 ## El problema
 
 Quiero probar la función `play(Song)` con diferentes canciones. En la primera
@@ -44,10 +46,11 @@ de lo que he leído para que así dentro de unos meses (o años) cuando retome
 este proyecto parta de aquí, no teniendo que empezar de cero.
 
 
-## Lo que realmente hacemos
+## La sucesión de frecuencias que tocamos
 Un piano tiene un número finito de teclas, y una guitarra un número finito de
 cuerdas. De hecho cualquier instrumento es capaz de generar un número FINITO
-de sonidos.
+de sonidos. Lo que vamos a hacer es tocar sonidos de unas determinadas
+frecuencias. 
 
 ### Frecuencia fundamental
 Cuando tocamos una cuerda la cuerda vibra. Aunque la vibración está compuesta
@@ -88,6 +91,11 @@ Antes he indicado que supongo que el nombre de octava viene de que de `Do` a
 `Do` hay 8 notas, luego uno que es ingenuo por naturaleza, da por supuesto que
 hay 8 notas en cada octava. Lo cual es FALSO!!! Resulta que en cada octava hay
 12 notas.
+
+*NOTA: Parece ser que hay un montón diferentes de escalas musicales basadas en
+el número de notas que tienen: la Chromatic tiene 12 notas, la Nonatonic 9,
+... pero sospecho (???) que todas estas diferentes escalas no son más que
+subconjuntos de la escala cromática.*
 
 
 ### Sucesión de frecuencias en música
@@ -137,6 +145,18 @@ En la página de la
 se puede ver una tabla con todas las frecuencias clasificadas por octavas muy
 visual.
 
+Como solamente oímos de 20 Hz hasta 20 kHz la frecuencia mayor que podemos
+escuchar es `f[135] = 20 kHz` no teniendo necesidad de números MIDI mayores de
+135. De hecho, la página anterior de la wikipedia para estos números en 127
+para que entren todos en 7 bits. 
+
+A la hora práctica basta con almacenar la frecuencia como un número MIDI en un
+`uint8_t` ahorrando espacio (en la primera implementación que he hecho de esto
+usaba 2 `uint8_t` para representar el pitch = {octave, step}, lo cual es
+desperdiciar un byte).
+
+
+## De cómo los músicos hablan de las frecuencias
 
 ### Numeración de las octavas
 A la primera octava que contiene notas audibles se le asigna el número 0; a la
@@ -159,9 +179,88 @@ Clásicamente se han llamado:
 |     6       | Three line   |
     
 
+Las octavas audibles son de la 1 a la 10, aunque es posible que tanto la
+primera como la décima octava no se escuchen.
+
+### Notación: semitonos, steps
+
+* Cuando un músico quiere pasar de una frecuencia `f[n]` a la siguiente
+  `f[n+1]` dice que *aumenta un semitono*. El símbolo usado para indicar
+  *aumenta un semitono* es el *sostenido (sharp en inglés)* que es parecido a
+  la almohadilla # pero con las líneas no horizontales sino inclinadas (buscar
+  en internet: hashtag vs sharp, mirar las imágenes)
+
+* Si en lugar de subir un semitono lo bajamos el músico lo indica con un
+  *bemol (flat en inglés)*
+
+* Un *step* son 2 semitonos.
 
 
-## La finalidad de la partitura
+### Escala musical
+
+La sucesión de frecuencia sonoras `f[n]` la vamos a clasificar en octavas: las
+agrupamos en grupos de 12 en 12 (y sí, todavía me chirría el hecho de que una
+octava tenga 12 y no 8 notas). Cada grupo de octava lo numeramos empezando por
+el 0 (realmente empieza en -1, pero esas son frecuencias no sonoras así que
+podemos ignorarlas en música) y llegan hasta 10. En cada octava podemos
+numerar las notas del 0 a la 11 (estos serían los índices relativos a la
+octava).
+
+Al hablar de las notas de cada octava un músico no usa los números del 0 al 11
+sino que usa las notas de la escala musical. En español son
+
+`Do`, `Do#`, `Re`, `Re#`, `Mi`, `Fa`, `Fa#`, `Sol`, `Sol#`, `La`, `La#`,
+`Si`
+
+
+Una de las cosas que llama mucho la atención al principio es observar que la
+escala que se enseña en el colegio: 
+
+`Do`, `Re`, `Mi`, `Fa`, `Sol`, `La`, `Si`
+
+no corresponden a frecuencias seguidas `f[0]`, `f[1]`, `f[2]`, ... sino a las
+frecuencias `f[0]`, `f[2]`, `f[4]`, `f[5]`, `f[7]`, `f[9]` y `f[11]` (y el
+siguiente `Do` sería `f[12]`), donde los índices que uso aquí son los índices
+relativos a la octava.
+
+A esta escala la llaman *The major scale*. Básicamente es un subconjunto de
+las 12 notas de una octava elegidas de una determinada manera. En internet
+para caracterizar a esta escala se fijan en los steps o half-step (semitone)
+que hay que dar para pasar de una nota a la siguiente. En esta escala sería:
+step-step-semitone, step-step-step-semitone. 
+
+En el teclado de un piano se ve
+muy bien esta clasificación: las teclas blancas son las teclas que generan la
+frecuencia de las notas sin sostenido (`Do`, `Re`, `Mi`, `Fa`, `Sol`, `La`, `Si`, ...)
+mientras que las negras son las que tienen sostenido. 
+
+
+
+### Notación: chromatic and heptatonic scale
+La escala con 12 notas se llama *Chromatic scale* mientras que la de 7 notas
+*Heptatonic scale*. Como se ve la segunda es un subconjunto de la primera
+usando la misma sucesión de frecuencias `f[n]`.
+
+
+### Escala en inglés
+
+En inglés the major scale se escribe como:
+
+`C`, `C#`, `D`, `D#`, `E`, `F`, `F#`, `G`, `G#`, `A`, `A#`, `B`
+
+*Sí, para que sea sencillo al principio empieza en la letra C y después de la G
+viene la A (todo muy lógico y natural).*
+
+Se puede escribir usando bemoles en lugar de sostenidos. En este caso quedaría
+
+`C`, `Db`, `D`, `Eb`, `E`, `F`, `Gb`, `Ab`, `A`, `Bb`
+
+
+
+
+## Partituras
+
+### La finalidad de la partitura
 Un pianista lo que hace es tocar una o varias teclas durante un tiempo. Un
 guitarrista toca una cuerda de una determinada forma (¿hay diferentes formas
 de tocar una cuerda?) por un determinado tiempo.
@@ -170,13 +269,41 @@ Las partituras son instrucciones concretas que dicen al pianista qué teclas
 del teclado tocar en un momento dado y por cuánto tiempo. Nada más, así de
 sencillo (espero que no lea esto un músico).
 
+Tenemos 2 problemas diferentes: 
 
+1. ¿Cómo decirle al músico qué nota tiene que tocar? 
+
+2. ¿Cómo decirle la duración de la nota?
+
+
+### Notas
+TODO
 * Las partituras son una ventana sobre la sucesión de frecuencias, pero una
   ventana discontinua (se tapan algunas de las frecuencias)
 
 * ¿cómo se especifica la ventana? La clave.
-* ¿cómo se especifica la duración? El tiempo
-* step = 2 semitonos
-* semitono = f[n] - f[n-1] = intervalo
 
+### Duración
+TODO
+
+* ¿cómo se especifica la duración? El tiempo
+
+
+
+
+## ¿Por qué es un lío?
+
+* Una octava en lugar de 8 notas tiene 12.
+
+* La traducción de la escala Do, Re, Mi, Fa, Sol, La, Si en inglés es C, D, E,
+  F, G, A, B. ¡Se empieza en la C y la posición de las notas está cambiada!
+
+* La escala normal Do, Re, ... no corresponde al intervalo `[f[n], f[n+8])`,
+  sino que son 8 frecuencias del intervalo `[f[n], f[n+12])` donde se omiten
+  `f[n+1]`, `f[n+3]`, `f[n+6]`, `f[n+8]` y `f[n+10]`.
+
+
+* En internet se encuentran muchas incorrecciones. Ejemplo: dicen que un step
+  es la diferencia de frecuencia entre dos notas consecutivas lo cual es
+  falso. Eso es el semitono. 
 
