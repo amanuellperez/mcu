@@ -87,7 +87,9 @@ y ver qué puedo hacer con él.
 
 + Otra forma sería tener 4-5 altavoces conectados al microcontrolador y que
   cada altavoz genere la señal correspondiente. De esta forma no tenemos
-  partes mecánicas. Es menos visual que el anterior, pero seguramente más sencillo.
+  partes mecánicas. Es menos visual que el anterior, 
+  pero seguramente más sencillo. (MIDI???)
+
 
 + ¿Y para qué necesito 5 altavoces pudiendo usar uno? Total, un altavoz es
   capaz de generar toda la música que quieras. A partir de la partitura habría

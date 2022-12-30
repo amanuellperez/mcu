@@ -5,6 +5,11 @@ ser totalmente incorrecto. Si lo lees, te lo aprendes, y está mal es tu problem
 
 Lo explicado aquí corresponde a la *Chromatic scale* que es la que necesito. 
 
+Esta sin acabar: son unas primeras notas para ir viendo cómo transformar la
+partitura en la sucesión {frequencia, duración} que es la que tocamos. Ese es
+el problema. 
+
+
 ## El problema
 
 Quiero probar la función `play(Song)` con diferentes canciones. En la primera
@@ -46,11 +51,16 @@ de lo que he leído para que así dentro de unos meses (o años) cuando retome
 este proyecto parta de aquí, no teniendo que empezar de cero.
 
 
-## La sucesión de frecuencias que tocamos
+## La sucesión de frecuencias musical (frecuencias que tocamos)
 Un piano tiene un número finito de teclas, y una guitarra un número finito de
 cuerdas. De hecho cualquier instrumento es capaz de generar un número FINITO
 de sonidos. Lo que vamos a hacer es tocar sonidos de unas determinadas
-frecuencias. 
+frecuencias. A la sucesión de las frecuencias que puede tocar un músico las
+llamaré sucesión de frecuencias musical (no he encontrado en internet ningún
+nombre).
+
+El primer problema que tenemos es elegir esta sucesión. Veamos cómo se ha
+hecho.
 
 ### Frecuencia fundamental
 Cuando tocamos una cuerda la cuerda vibra. Aunque la vibración está compuesta
@@ -136,7 +146,7 @@ Tomando `f[0] = 16 Hz` hace que la nota de `La` de 440 Hz ocupe la posición
 
 A esta sistema de numeración de las frecuencias se llama `MIDI note number`
 (<-- este es el nombre del número, supongo, ¿cómo se llama el sistema? MIDI
-sysmtem note number? (???)). 
+system note number? (???)). 
 
 Podemos decir que el MIDI note number del `La` es 69.
 
@@ -276,12 +286,108 @@ Tenemos 2 problemas diferentes:
 2. ¿Cómo decirle la duración de la nota?
 
 
+### Pentagrama
+
+Imagina un piano inmenso donde cada tecla genere una de las frecuencias de
+nuestra sucesión `f[n]`. Coloquémoslo horizontalmente. Es un teclado que tiene
+más de 100 teclas, algo imposible de manejar para una persona (aunque un
+ordenador sí que podría manejarlo).
+
+Como este teclado es demasiado grande tapémoslo todo quedándonos con una
+pequeña parte quedándonos con un instrumento de un poco más de 12 teclas. Eso
+básicamente es el pentagrama.
+
+Desde un punto de vista de programación lo que hacemos es solo ver una ventana
+de un poco más de 12 teclas. En lugar de tener la sucesión `f[n]`, nos
+centramos en el intervalo `[f[n], f[n + t]]`.
+
+Imagina ahora que para que se vean mejor las teclas de nuestro instrumento las
+pintamos negro, blanco, negro, blanco... Las instrucciones para tocar una
+canción consistiría en dibujar un dedo (un círculo, ovalo, ...) sobre la tecla
+correspondiente. Hacerlo así tiene un problema: el dibujo del dedo no se vería
+sobre la tecla negra, así que lo que hacemos es disminuir el grosor de las 
+teclas negras hasta que se convierten en una línea. El  dibujo obtenido es lo
+que llamamos pentagrama.
+
+
+### Major scale
+Una de las cosas que mas me ha llamado la atención al empezar a aprender sobre
+esto es que en el pentagrama las notas no están seguidas. 
+
+El orden que se enseña en el colegio de las notas en el pentagrama es: 
+
+`Do`, `Re`, `Mi`, `Fa`, `Sol`, `La`, `Si`
+
+que corresponden a frecuencias cuyas diferencias son
+
+step, step, semitone, step, step, step, semitone
+
+que en la wikipedia lo escriben como
+
+whole, whole, half, whole, whole, whole, half
+
+donde "whole" significa "whole step" y "half", "half step = semitone" (uno de
+los problemas al principio al mirar esto es la cantidad de formas distintas
+que usan para hablar de lo mismo).
+
+
+
+### Selección de la ventana  (o de dónde colocar la mano)
+
+Puede concebir el pentagrama como una ventana sobre la sucesión musical
+`f[n]`. La forma de indicar dónde colocar la ventana es mediante la clave que
+se escribe al principio.
+
+TODO
+[Ver esto](https://en.wikipedia.org/wiki/Key_signature) ir al apartado `Table`
+
+
+### Accidentals: sharp, flat and natural
+
+Una nota en el pentagrama representa la frecuencia `f[n]`. Como en un
+pentagrama hay notas que no vamos a poder dibujar ya que en la major scale
+cada vez que subimos un step en el pentagrama equivale a pasar de `f[n]` a
+`f[n+2]` necesitamos alguna forma de indicarle al músico "toca `f[n+1]`".
+
+Para ello se usan 3 modificadores ("alteradores" según los músicos, o 
+accidentals en inglés):
+
+* sharp (sostenido): la nota representa `f[n+1]` en lugar de `f[n]`
+* flat (bemol): la nota representa `f[n-1]` en lugar de `f[n]`
+* natural: cancela previos modificadores (accidentals). 
+
+
+Parece ser que hay dos sistemas de aplicar los modificadores:
+
+* Que sean *sticky* usando la forma de hablar de C++. El modificador modifica
+  todas las notas de la misma measure. Al llegar al fin de la measure deja de
+  aplicarse.
+
+* Que no sean *sticky*, en cuyo caso solo afectan a la nota que preceden.
+
+Ver: [la wikipedia](https://en.wikipedia.org/wiki/Accidental_(music))
+
+
+
+*NOTA: el 'natural' es el nombre en inglés. En español, según la wikipedia,
+se llama
+'becuadro'. Este modificador lo que hace es que la nota suene de forma
+NATURAL. ¿a quién se le ocurrió llamarlo becuadro? @_@*
+
+
+
 ### Notas
+
 TODO
 * Las partituras son una ventana sobre la sucesión de frecuencias, pero una
   ventana discontinua (se tapan algunas de las frecuencias)
 
 * ¿cómo se especifica la ventana? La clave.
+
+* Pentagrama: sistema posicional y simbólico. La posición nos indica la
+  frecuencia, el dibujo (símbolo) la duración. Por supuesto: hay que
+  especificar la clave y el tiempo.
+
 
 ### Duración
 TODO
@@ -293,10 +399,20 @@ TODO
 
 ## ¿Por qué es un lío?
 
+* Se suele usar *nota* como sinónimo
+  de *una de las frecuencias de mi sucesión de frecuencias musical*. Pero en
+  otros sitios se usa nota como el par (frecuencia, duración). Las notas
+  dibujadas en una partitura tienen una duración.
+
 * Una octava en lugar de 8 notas tiene 12.
 
+* Da la impresión (???) de que la frecuencia de sonidos definida aquí son las
+  frecuencias que se usan en música sea cual sea el sistema musical (???). La
+  diferencia entre los distintos sistemas es la selección de la escala, que no
+  es más que un subconjunto de la escala cromática de 12 notas.
+
 * La traducción de la escala Do, Re, Mi, Fa, Sol, La, Si en inglés es C, D, E,
-  F, G, A, B. ¡Se empieza en la C y la posición de las notas está cambiada!
+  F, G, A, B. ¡Se empieza en la C y después de la G viene una A!
 
 * La escala normal Do, Re, ... no corresponde al intervalo `[f[n], f[n+8])`,
   sino que son 8 frecuencias del intervalo `[f[n], f[n+12])` donde se omiten
@@ -306,4 +422,26 @@ TODO
 * En internet se encuentran muchas incorrecciones. Ejemplo: dicen que un step
   es la diferencia de frecuencia entre dos notas consecutivas lo cual es
   falso. Eso es el semitono. 
+
+* La explicación de la wikipedia es un ejemplo de explicación circular. Un
+  buen ejemplo de cómo no se debe de explicar algo.
+
+
+## Alguna conclusión
+
+Es interesante comparar la diferencia entre un ingeniero y un músico. Si yo
+quiero saber cómo funciona un chip basta con mirar la datasheet. Ahí lo
+encuentras todo (sí que es verdad que a veces la redacción de la datasheet
+es... pero bueno, esta todo detallado). 
+
+Las partituras es algo similar: son instrucciones muy precisas que tiene que
+ejecutar el músico. Lo curioso es que no encuentras una "datasheet" o un
+documento que te explique cómo funciona. Y mira que la música lleva siglos y
+hay un montón de músicos. ¿Por qué no hay un standard de cómo escribir
+/leer partituras? Si total, en una partitura lo único que está escrito es:
+pulsa estas teclas del piano durante x tiempo; luego pulsa estas otras, ...
+
+
+
+
 
