@@ -3,7 +3,6 @@ SOURCES= app_trace.cpp
 
 INCS= 	app_trace.h					\
 		dev_signal_generator.h		\
-		dev_speaker.h				\
 		user_choose_number.h		\
 		user_choose_string.h		\
 		user_menu.h					\

@@ -188,12 +188,12 @@ inline constexpr uint8_t octave_step2midi_number(Octave octave,  Step step)
 // Mantener oculta la forma de guardar step2freq para poder elegir en el
 // futuro si meterla en PROGMEM o no.
 // n = MIDI note number
-inline constexpr uint32_t step_to_frequency(uint8_t n)
+inline constexpr uint16_t step_to_frequency(uint8_t n)
 { return priv_::step2freq[n - priv_::step2freq_index_min];}
 
 
 
-inline constexpr uint32_t step_to_frequency(uint8_t octave, uint8_t step)
+inline constexpr uint16_t step_to_frequency(uint8_t octave, uint8_t step)
 {
     return step_to_frequency(octave_step2midi_number(octave, step));
 }
@@ -206,7 +206,7 @@ inline constexpr uint32_t step_to_frequency(uint8_t octave, uint8_t step)
 //	    step_to_frequency(Octave::one_line, Step::Mi) 
 //
 // para obtener la frecuencia de la nota Mi en la clave de Sol.
-inline constexpr uint32_t step_to_frequency(Octave octave, Step step)
+inline constexpr uint16_t step_to_frequency(Octave octave, Step step)
 { 
     return step_to_frequency(
 		    static_cast<uint8_t>(octave), static_cast<uint8_t>(step));

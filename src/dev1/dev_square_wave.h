@@ -84,6 +84,9 @@ public:
     /// Para el generador. Es la opuesta a `generate`.
     static void stop();
 
+    /// Espera, bloqueando, a que pasen los ticks indicados.
+    static void wait(const counter_type& ticks);
+    
 // Interface: burst
     /// Genera un burst de una onda cuadrada de frecuencia `freq` que dura
     /// `ticks`. Si es Miniclock_us, ticks serán microsegundos.
@@ -127,7 +130,6 @@ void Square_wave_generator<S, OP, MC, ci>::cfg()
 //	Al redactar esto y observar que necesito los 2 interfaces optó por
 //	parametrizarlo con `call_cfg` y así que el cliente elija qué interfaz
 //	usar.
-
 template <typename S, typename OP, typename MC, bool ci>
 void Square_wave_generator<S, OP, MC, ci>::
     burst(uint32_t freq, const counter_type& ticks)
@@ -135,13 +137,12 @@ void Square_wave_generator<S, OP, MC, ci>::
     if constexpr (call_cfg)
 	cfg(); 
 	    
-//    // Pin::write_zero(); <-- ¿necesario?
-//    SWG::generate(freq, Pin::number);
+//  Pin::write_zero(); <-- ¿necesario?
     generate(freq);
-    Miniclock::wait(ticks);
+    // Miniclock::wait(ticks);
+    wait(ticks);
     stop();
-//    SWG::stop();
-//    Pin::write_zero(); // lo dejamos en cero
+//  Pin::write_zero(); // lo dejamos en cero
 }
 
 template <typename S, typename OP, typename MC, bool ci>
@@ -157,6 +158,16 @@ inline void Square_wave_generator<S, OP, MC, ci>::stop()
     SWG::stop();
     Pin::write_zero(); // lo dejamos en cero
 }
+
+
+
+
+template <typename S, typename OP, typename MC, bool ci>
+inline void Square_wave_generator<S, OP, MC, ci>::wait(const counter_type& ticks)
+{
+    Miniclock::wait(ticks);
+}
+
 
 
 }// namespace

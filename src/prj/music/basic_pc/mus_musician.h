@@ -34,6 +34,7 @@
 #include "mus_scale.h"
 #include <array>
 
+
 namespace music{
 
 
@@ -126,6 +127,11 @@ private:
 // Un músico es el responsable de tocar un instrumento musical
 // El instrumento musical realmente será un SWG (square wave generator) o algo
 // parecido (sinus wave generator???)
+//
+// DUDA: para reutilizar la clase voy a dejar publica la función play_freq, de
+// esta forma el músico podrá tocar CUALQUIER frecuencia. Observar que esto es
+// una generalización de un músico. Un músico está limitado a las frecuencias
+// musicales (teclas del piano).
 template <typename Instrument0>
 class Musician{
 public:
@@ -140,53 +146,62 @@ public:
     /// Toca la nota indicada. Devuelve el control inmediatamente, sin
     /// bloquear. Para dejar de tocar esa nota, tocar otra nota o llamar a
     /// `silence`
-    static void play(Octave, Step);
     static void silence();
+    static void play_freq(uint16_t freq);
+    static void play(Octave, Step);
 
     /// Toca la nota indicada por la duración indicada.
     /// Bloquea: no devuelve control hasta que no pasan duration_in_ms
     // La versión Octave:step, es más útil para programar un órgano: el
     // usuario selecciona la octava y el step.
+    static void silence(uint16_t duration_in_ms);
     static void play(Octave, Step, uint16_t duration_in_ms);
-    static void play(uint8_t midi_number, uint16_t duration_in_ms);
+
+    // Observar que al no usar Midi_number and Frequency tengo que
+    // 'sobrecargar' las funciones con el nombre.
+    static void play_midi(uint8_t midi_number, uint16_t duration_in_ms);
+    static void play_freq(uint16_t freq, uint16_t duration_in_ms);
 
     /// Toquemos una partitura
     template <typename A>
     static void play(const Mononote_song<A>&);
 
+    // TODO: la función play bloquea, lo cual no es buena idea. Se necesita
+    // usar un flag que marque el cliente para en caso de que se quiera
+    // abortar devolviendo el control.
+//    template <typename A>
+//    static void play(const Mononote_song<A>&, volatile& user_abort);
 private:
-    static void play(uint32_t freq, uint16_t duration_in_ms);
-    static void play(uint32_t freq);
     
 };
 
 template <typename I>
 inline void Musician<I>::play(Octave octave, Step step, uint16_t duration_in_ms)
 { 
-    play(step_to_frequency(octave, step), duration_in_ms); 
+    play_freq(step_to_frequency(octave, step), duration_in_ms); 
 }
 
 template <typename I>
-inline void Musician<I>::play(uint8_t midi_number, uint16_t duration_in_ms)
+inline void Musician<I>::play_midi(uint8_t midi_number, uint16_t duration_in_ms)
 { 
-    play(step_to_frequency(midi_number), duration_in_ms); 
+    play_freq(step_to_frequency(midi_number), duration_in_ms); 
 }
 
 template <typename I>
 inline void Musician<I>::play(Octave octave, Step step)
 { 
-    play(step_to_frequency(octave, step)); 
+    play_freq(step_to_frequency(octave, step)); 
 }
 
 
 template <typename I>
-inline void Musician<I>::play(uint32_t freq, uint16_t duration_in_ms)
+inline void Musician<I>::play_freq(uint16_t freq, uint16_t duration_in_ms)
 {
     Instrument::burst(freq, duration_in_ms);
 }
 
 template <typename I>
-inline void Musician<I>::play(uint32_t freq)
+inline void Musician<I>::play_freq(uint16_t freq)
 {
     Instrument::generate(freq);
 }
@@ -196,6 +211,14 @@ inline void Musician<I>::silence()
 {
     Instrument::stop();
 }
+
+template <typename I>
+inline void Musician<I>::silence(uint16_t duration_in_ms)
+{
+    silence();
+    Instrument::wait(duration_in_ms);
+}
+
 
 template <typename I>
 inline void Musician<I>::cfg()
@@ -210,7 +233,7 @@ void Musician<I>::play(const Mononote_song<AV>& song)
 {
     for (size_t i = 0; i < song.size(); ++i){
 	auto note = song.step(i); 
-	play(note.midi_number, song.duration_of(note));
+	play_midi(note.midi_number, song.duration_of(note));
     }
 }
 

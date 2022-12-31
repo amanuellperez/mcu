@@ -19,10 +19,11 @@
 
 #include "prj_main.h"
 #include "prj_songs.h"
+#include "mus_sounds.h"
 
 void Main::musical_scale_one_line()
 {
-    constexpr uint16_t t = 800;
+    constexpr uint16_t t = 400;
 
     UART uart;
     uart << "\nOne line octave\n";
@@ -35,7 +36,7 @@ void Main::musical_scale_one_line()
 
 void Main::musical_scale_all()
 {
-    constexpr uint16_t t = 800;
+    constexpr uint16_t t = 400;
 
     UART uart;
     uart << "\nGreat octave\n";
@@ -193,4 +194,40 @@ void Main::play_song()
 //	     <<  (int) note.note << ", " << song.duration_of(note) << '\n';
 //    }
     
+}
+
+
+void Main::play_siren()
+{
+    UART uart;
+    uart << "\n\nPlay siren\n"
+	        "----------\n"
+	    "Some of the sounds sounds better with a speaker instead of a buzzer\n"
+	    "1. Siren 1 (speaker)\n"
+	    "2. Siren 2.1\n"
+	    "3. Siren 2.2\n"
+	    "4. Alarm 1 (speaker)\n";
+
+    char ans{};
+    uart >> ans;
+
+    switch(ans){
+	break; case '1': 
+		for (uint8_t i = 0; i < 2; ++i)
+		    music::siren01<Musician>(2000, 4000, 10);
+
+	break; case '2': 
+		for (uint8_t i = 0; i < 5; ++i)
+		    music::siren02<Musician>(400, 800, 500);
+
+	break; case '3': 
+		for (uint8_t i = 0; i < 10; ++i)
+		    music::siren02<Musician>(2000, 4000, 10);
+
+	break; case '4':
+		for (uint8_t i = 0; i < 10; ++i)
+		    music::alarm01<Musician>(3000, 50);
+		
+    }
+  
 }

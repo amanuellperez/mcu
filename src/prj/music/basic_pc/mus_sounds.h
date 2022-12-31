@@ -17,34 +17,43 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "prj_main.h"
+#pragma once
 
+#ifndef __MUS_SOUNDS_H__
+#define __MUS_SOUNDS_H__
+namespace music{
 
-void Main::run()
+// Ejemplos de sirenas
+// TODO: darle nombre adecuados: ambulancia? policia? bomberos?
+template <typename Musician>
+void siren01(uint16_t freq1, uint16_t freq2, uint16_t duration_in_ms)
 {
-    UART uart;
-    uart << "\n\nTesting music functions\n"
-	    "Connect a buzzer (or speaker) to pin " << speaker_pin;
+    for (auto f = freq1; f <= freq2; f += 10)
+	Musician::play_freq(f, duration_in_ms);
 
-    while (1){
-	uart << "\n-----------------------\n"
-		"1. Music scale (normal)\n"
-	        "2. Music scale (all)\n"
-		"3. Organ toy (basic piano? :)\n"
-		"4. Play a song\n"
-		"5. Sirens\n";
-
-	char ans{};
-	uart >> ans;
-	switch(ans){
-	    break; case '1': musical_scale_one_line();
-	    break; case '2': musical_scale_all();
-	    break; case '3': organ_toy();
-	    break; case '4': play_song();
-	    break; case '5': play_siren();
-	}
-
-    }
+    for (auto f = freq2; f >= freq1; f -= 10)
+	Musician::play_freq(f, duration_in_ms);
 }
+
+template <typename Musician>
+void siren02(uint16_t freq1, uint16_t freq2, uint16_t duration_in_ms)
+{
+    Musician::play_freq(freq1, duration_in_ms);
+    Musician::play_freq(freq2, duration_in_ms);
+}
+
+
+template <typename Musician>
+void alarm01(uint16_t freq, uint16_t duration_in_ms)
+{
+    Musician::play_freq(freq, duration_in_ms);
+    Musician::silence(duration_in_ms);
+}
+
+
+
+}// namespace
+
+#endif
 
 
