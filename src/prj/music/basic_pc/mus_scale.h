@@ -97,6 +97,11 @@ namespace priv_{
 //	 Si se mete al tocar una canción cargarlo en RAM (???)
 static constexpr uint8_t step2freq_size = 5 * 12;
 
+// Observar que los números midi que estoy implementando van del 36 al 96
+// ambos inclusive.
+static constexpr uint8_t step2freq_index_min = 36;
+static constexpr uint8_t step2freq_index_max = 96;
+
 // Frecuencias en Hz de cada una de las notas de la escala musical
 static constexpr uint16_t step2freq[step2freq_size] = {
 // Great Octave
@@ -120,7 +125,9 @@ static constexpr uint16_t step2freq[step2freq_size] = {
  1046, 1109, 1175, 1244, 1318, 1397, 1480, 1568, 1661, 1760, 1865, 1976
 };
 
+
 }// namespace priv_
+
 
 using Step_type = uint8_t;
 enum class Step : Step_type{
@@ -130,24 +137,66 @@ enum class Step : Step_type{
     Fa, FaS,
     Sol, SolS,
     La, LaS,
-    Si
+    Si,
+
+    C = Do,
+    Db = DoS,	// No sé cómo se escribe C# por eso uso Db == C#
+    D = Re,
+    Eb = ReS,
+    E = Mi,
+    F = Fa,
+    Gb = FaS,
+    G = Sol,
+    Ab = SolS,
+    A = La,
+    Bb = LaS,
+    B = Si
+
 };
 
-// Aunque el orden de las octavas es:
-//	great, small, one line, two line and three line
-// empiezo a contar one_line = 1, para que coincidan 1, 2 y 3 con one, two and
-// three. Eso hace que great = 4 y small = 5.
+
+// Ordeno las octavas como en la Scientific pitch notation
 using Octave_type = uint8_t;
 enum class Octave: Octave_type{
-    one_line = 1, two_line, three_line,
-    great, small
+    great = 2, small = 3, 
+    one_line = 4, two_line = 5, three_line = 6
 };
+
+
+// Dos formas de indexar las frecuencias:
+//  1. mediante el MIDI note number: [0, 127]
+//  2. mediante el par (octave, step)
+//     octave: [-1, 10]
+//     step  : [ 0, 11]
+//
+// Las siguientes funciones nos permiten convertir de una representación a la
+// otra
+inline constexpr uint8_t octave_step2midi_number(uint8_t octave, uint8_t step)
+{
+    return (octave + 1) * 12 + step;
+}
+
+
+inline constexpr uint8_t octave_step2midi_number(Octave octave,  Step step)
+{
+    return octave_step2midi_number( static_cast<uint8_t>(octave)
+				  , static_cast<uint8_t>(step));
+}
+
 
 
 // Mantener oculta la forma de guardar step2freq para poder elegir en el
 // futuro si meterla en PROGMEM o no.
-inline uint32_t step_to_frequency(uint16_t n)
-{ return priv_::step2freq[n];}
+// n = MIDI note number
+inline constexpr uint32_t step_to_frequency(uint8_t n)
+{ return priv_::step2freq[n - priv_::step2freq_index_min];}
+
+
+
+inline constexpr uint32_t step_to_frequency(uint8_t octave, uint8_t step)
+{
+    return step_to_frequency(octave_step2midi_number(octave, step));
+}
 
 
 // Esta función es para facilitar la vida del programandor, aunque es posible
@@ -157,8 +206,11 @@ inline uint32_t step_to_frequency(uint16_t n)
 //	    step_to_frequency(Octave::one_line, Step::Mi) 
 //
 // para obtener la frecuencia de la nota Mi en la clave de Sol.
-inline uint32_t step_to_frequency(Octave octave, Step step)
-{ return step_to_frequency(static_cast<uint8_t>(octave)*12u + static_cast<uint8_t>(step));}
+inline constexpr uint32_t step_to_frequency(Octave octave, Step step)
+{ 
+    return step_to_frequency(
+		    static_cast<uint8_t>(octave), static_cast<uint8_t>(step));
+}
 
 
 // Para depurar

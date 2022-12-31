@@ -23,21 +23,12 @@
 
 namespace music{
 
-// TODO: No funciona leer directamente la enum. Tengo que usar la macro
-// pgm_read_byte para que funcione. ¿por qué? 
-//	Sospecha: atd::progmem_read está definida para (uint8_t/uint16_t)
-//	pero no para la enum Octave/Step. El compilador debería de generar un
-//	error indicando que no la encuentra, pero no lo genera. ???
 Note progmem_read(const Note& x)
 {
-    Note res;
-//    res.octave = Octave{atd::progmem_read(x.octave)};
-//    res.step   = Step{atd::progmem_read(x.step)};
-    res.octave = Octave{pgm_read_byte(&x.octave)};
-    res.step   = Step{pgm_read_byte(&x.step)};
-    res.ticks  = atd::progmem_read(x.ticks);
+    uint8_t midi_number = atd::progmem_read(x.midi_number);
+    uint8_t ticks       = atd::progmem_read(x.ticks);
 
-    return res;
+    return Note{midi_number, ticks};
 }
 
 }// namespace

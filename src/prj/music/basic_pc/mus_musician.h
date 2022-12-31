@@ -39,11 +39,16 @@ namespace music{
 
 struct Note 
 {
-    // Pitch = {octave, step}
-    Octave octave;
-    Step step;
+    uint8_t midi_number; // codifica el pitch = {octave, step}
     uint8_t ticks;  // 1, 2, 4, 8, ..., 64 ticks. Dependiendo del reloj
 		    // que usemos la duración de la nota será mayor o menor
+
+    constexpr Note(uint8_t midi_number0, uint8_t ticks0)
+	    : midi_number{ midi_number0}, ticks{ticks0} { }
+
+    constexpr Note(Octave octave, Step step, uint8_t ticks0)
+	    : midi_number{octave_step2midi_number(octave, step)}
+	    , ticks{ticks0} { }
 };
 
 
@@ -82,10 +87,20 @@ Note progmem_read(const Note& x);
 // Song_notes = array (o mejor view) de las notas que forman una canción.
 // La canción puede estar en RAM, en PROGMEM, en disco duro, ... No suponer
 // cómo se almacena.
+//
+// (RRR) ¿Por qué llamarla Mononote_song?
+//	 En una partitura normal se encuentra con que el pianista tiene que
+//	 tocar varias notas a la vez. De momento empiezo con la restricción de
+//	 que solo se puede tocar una nota a la vez. De esta forma si en el
+//	 futuro esto evoluciona la clase `Song` representará una canción real,
+//	 no como Mononote_song.
+//
+//	 Otra forma de concebirlo es imaginando a un pianista con un solo
+//	 dedo. Las canciones que puede tocar son las Mononote_song.
 template <typename Song_notes>
-class Song{
+class Mononote_song{
 public:
-    Song(uint16_t period_clock_in_ms0, const Song_notes& song0)
+    Mononote_song(uint16_t period_clock_in_ms0, const Song_notes& song0)
 	: period_clock_in_ms_{period_clock_in_ms0}
 	, note_{song0}
     { }
@@ -130,11 +145,14 @@ public:
 
     /// Toca la nota indicada por la duración indicada.
     /// Bloquea: no devuelve control hasta que no pasan duration_in_ms
+    // La versión Octave:step, es más útil para programar un órgano: el
+    // usuario selecciona la octava y el step.
     static void play(Octave, Step, uint16_t duration_in_ms);
+    static void play(uint8_t midi_number, uint16_t duration_in_ms);
 
     /// Toquemos una partitura
     template <typename A>
-    static void play(const Song<A>&);
+    static void play(const Mononote_song<A>&);
 
 private:
     static void play(uint32_t freq, uint16_t duration_in_ms);
@@ -146,6 +164,12 @@ template <typename I>
 inline void Musician<I>::play(Octave octave, Step step, uint16_t duration_in_ms)
 { 
     play(step_to_frequency(octave, step), duration_in_ms); 
+}
+
+template <typename I>
+inline void Musician<I>::play(uint8_t midi_number, uint16_t duration_in_ms)
+{ 
+    play(step_to_frequency(midi_number), duration_in_ms); 
 }
 
 template <typename I>
@@ -182,11 +206,11 @@ inline void Musician<I>::cfg()
 
 template <typename I>
 template <typename AV>
-void Musician<I>::play(const Song<AV>& song)
+void Musician<I>::play(const Mononote_song<AV>& song)
 {
     for (size_t i = 0; i < song.size(); ++i){
 	auto note = song.step(i); 
-	play(note.octave, note.step, song.duration_of(note));
+	play(note.midi_number, song.duration_of(note));
     }
 }
 

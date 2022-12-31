@@ -28,6 +28,8 @@
 #    26/12/2022 Escrito
 #   
 # TODO
+#   SIN ACABAR!!!
+#
 #   Este script solo funciona con partituras en las que se toque una nota cada
 #   vez. Si hay que tocar varias notas a la vez (y da la impresión de ser lo
 #   habitual) no funciona, amén de que habría que ver cómo implementar eso en

@@ -183,7 +183,7 @@ void Main::play_song()
     UART uart;
     uart << "Play song\n";
 
-    music::Song song{25, ode_to_joy};
+    music::Mononote_song song{25, ode_to_joy};
     Musician::play(song);
 
 // depurar:
