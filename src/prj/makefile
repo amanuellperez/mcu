@@ -1,16 +1,18 @@
-DIRS =  calculator	\
+DIRS =  blink		\
+		calculator	\
 		clocks 		\
-	   	blink		\
+		IR_remote_control	\
 		music		\
 		POV_toy		\
 		sensor		\
-		stroboscope	\
 		util		
 
-# Revisar:
-# IR_remote_control	\
 
+
+# Revisar:
 #		signal_generator \
+		stroboscope	\
+		oscilloscope
 
 include $(MCU_RECRULES)
 

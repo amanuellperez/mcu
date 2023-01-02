@@ -31,10 +31,11 @@
 #include <stdlib.h>
 #include <std_type_traits.h>
 
-using Timer = avr_::Timer1;
+namespace mcu = avr_;
+
+using Timer = mcu::Timer1;
 
 constexpr uint16_t period_in_us = 1024;
-//constexpr uint16_t period_in_us = 256;
 
 volatile uint32_t contador = 0;
 
@@ -91,7 +92,7 @@ std::ostream& operator<<(std::ostream& out, const time_in_days& t)
 
 void print(uint64_t time_en_us)
 {
-    avr_::UART_iostream uart;
+    mcu::UART_iostream uart;
     uart << us_to_time_in_days(time_en_us) << "\n\r";
 }
 
@@ -99,22 +100,23 @@ void print(uint64_t time_en_us)
 int main()
 {
 // init_uart();
-    avr_::UART_iostream uart;
-    avr_::basic_cfg(uart);
+    mcu::UART_iostream uart;
+    mcu::basic_cfg(uart);
     uart.on();
 
 // init_timer();
     Timer::mode_normal();
     Timer::pin_A_disconnected(); // (???) creo que es innecesario 
     Timer::pin_B_disconnected();
-    Timer::on<period_in_us>();
+    Timer::clock_frequency_divide_by_1024();
     Timer::enable_overflow_interrupt();
+    mcu::enable_interrupts();
 
     while(1){
 	Timer::counter_type v;
 	uint32_t c;
 	{// lo más atómico posible
-	    dev::Disable_interrupts<avr_::Micro> l;
+	    dev::Disable_interrupts<mcu::Micro> l;
 	    v = Timer::unsafe_counter();
 	    c = contador;
 	}
@@ -124,7 +126,7 @@ int main()
              << period_in_us << " = " << t_us << " us = ";
 
         print (t_us);
-	avr_::wait_ms(1000);
+	mcu::wait_ms(1000);
     }
 }
 

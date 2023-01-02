@@ -47,6 +47,184 @@
 
 namespace avr_{
 
+namespace timer1_{
+
+// avr clock at 1MHz
+// -----------------
+template<uint16_t period>
+inline void set_clock_period_in_us_1MHz() 
+{
+    if constexpr (period == 1u)
+	Timer1::clock_frequency_no_preescaling();
+    
+    else if constexpr (period == 8u)
+	Timer1::clock_frequency_divide_by_8();
+
+    else if constexpr (period == 64u)
+	Timer1::clock_frequency_divide_by_64();
+
+    else if constexpr (period == 256u)
+	Timer1::clock_frequency_divide_by_256();
+
+    else if constexpr (period == 1024u)
+	Timer1::clock_frequency_divide_by_1024();
+
+    else
+	static_assert(atd::always_false_v<int>,
+		    "Incorrect Timer1 period. Try another one. "
+		    "Valid ones: 1, 8, 64, 256 or 1024.");
+}
+
+// TODO: a .cpp???
+inline Time clock_period_in_us_1MHz()
+{
+    using namespace literals;
+    switch(Timer1::frequency_divisor()){
+	case Timer1::Frequency_divisor::no_preescaling	: return 1_us;
+	case Timer1::Frequency_divisor::divide_by_8	: return 8_us;
+	case Timer1::Frequency_divisor::divide_by_64	: return 64_us;
+	case Timer1::Frequency_divisor::divide_by_256	: return 256_us;
+	case Timer1::Frequency_divisor::divide_by_1024	: return 1024_us;
+	case Timer1::Frequency_divisor::undefined	: return 0_us;
+    }
+
+    return 0_us;
+}
+
+inline Frequency clock_frequency_in_Hz_1MHz()
+{
+    using namespace literals;
+    using Rep = Frequency::Rep;
+    switch(Timer1::frequency_divisor()){
+	case Timer1::Frequency_divisor::no_preescaling	: return 1_MHz;
+	case Timer1::Frequency_divisor::divide_by_8	: return 125_kHz;
+	case Timer1::Frequency_divisor::divide_by_64	: return Frequency{15625ul, 0};
+	case Timer1::Frequency_divisor::divide_by_256	: return Frequency{Rep{3906ul,25ul}, 0};
+	case Timer1::Frequency_divisor::divide_by_1024	: return Frequency{Rep{976ul,56ul}, 0};
+	case Timer1::Frequency_divisor::undefined	: return 0_Hz;
+    }
+
+    return 0_Hz;
+}
+
+
+// avr clock at 8MHz
+// -----------------
+//// a 125 ns
+//template<>
+//inline void set_clock_period_in_ns<125u, 8000000UL>() 
+//{Timer1::clock_frequency_no_preescaling();}
+
+template<uint16_t period>
+inline void set_clock_period_in_us_8MHz() 
+{
+    if constexpr (period == 1u)
+	Timer1::clock_frequency_divide_by_8();
+
+    else if constexpr (period == 8u)
+	Timer1::clock_frequency_divide_by_64();
+
+    else if constexpr (period == 32u)
+	Timer1::clock_frequency_divide_by_256();
+ 
+    else if constexpr (period == 128u)
+	Timer1::clock_frequency_divide_by_1024();
+ 
+    else
+	static_assert(atd::always_false_v<int>,
+		    "Incorrect Timer1 period. Try another one. "
+		    "Valid ones: 1, 8, 32 or 128.");
+}
+
+
+inline Time clock_period_in_us_8MHz()
+{
+    using namespace literals;
+    switch(Timer1::frequency_divisor()){
+	case Timer1::Frequency_divisor::no_preescaling	: return 0_us;
+	case Timer1::Frequency_divisor::divide_by_8	: return 1_us;
+	case Timer1::Frequency_divisor::divide_by_64	: return 8_us;
+	case Timer1::Frequency_divisor::divide_by_256	: return 32_us;
+	case Timer1::Frequency_divisor::divide_by_1024	: return 128_us;
+	case Timer1::Frequency_divisor::undefined	: return 0_us;
+    }
+
+    return 0_us;
+}
+
+inline Frequency clock_frequency_in_Hz_8MHz()
+{
+    using namespace literals;
+    using Rep = Frequency::Rep;
+    switch(Timer1::frequency_divisor()){
+	case Timer1::Frequency_divisor::no_preescaling	: return 0_MHz;
+	case Timer1::Frequency_divisor::divide_by_8	: return 1_MHz;
+	case Timer1::Frequency_divisor::divide_by_64	: return 125_kHz;
+	case Timer1::Frequency_divisor::divide_by_256	: return Frequency{Rep{31250ul,0ul}, 0};
+	case Timer1::Frequency_divisor::divide_by_1024	: return Frequency{Rep{7812ul,5ul}, 0};
+	case Timer1::Frequency_divisor::undefined	: return 0_Hz;
+    }
+
+    return 0_Hz;
+}
+
+
+
+
+
+template<uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
+inline Time clock_period()
+{
+    if constexpr (clock_frequency_in_hz == 1000000UL)
+	return clock_period_in_us_1MHz();
+
+    else if constexpr (clock_frequency_in_hz == 8000000UL)
+	return clock_period_in_us_8MHz();
+
+    else
+        static_assert(atd::always_false_v<int>,
+                      "clock_period: I'm lazy. I haven't implemented "
+                      "that frequency. Please implement it.");
+}
+
+
+template<uint16_t period
+	, uint32_t clock_frequency_in_hz>
+inline void set_clock_period_in_us()
+{
+    if constexpr (clock_frequency_in_hz == 1000000UL)
+	set_clock_period_in_us_1MHz<period>();
+
+    else if constexpr (clock_frequency_in_hz == 8000000UL)
+	set_clock_period_in_us_8MHz<period>();
+
+    else
+        static_assert(atd::always_false_v<int>,
+                      "set_clock_period_in_us: I'm lazy. I haven't implemented "
+                      "that frequency. Please implement it.");
+}
+
+
+
+template<uint32_t clock_frequency_in_hz>
+inline Frequency clock_frequency()
+{
+    if constexpr (clock_frequency_in_hz == 1000000UL)
+	return clock_frequency_in_Hz_1MHz();
+
+    else if constexpr (clock_frequency_in_hz == 8000000UL)
+	return clock_frequency_in_Hz_8MHz();
+
+    else
+        static_assert(atd::always_false_v<int>,
+                      "clock_frequency: I'm lazy. I haven't implemented "
+                      "that frequency. Please implement it.");
+}
+
+}// namespace
+
+
+
 /***************************************************************************
  *			    Time_counter1_g
  ***************************************************************************/
@@ -123,7 +301,8 @@ public:
 // ------------
     template<uint16_t period
 	    , uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
-    static void on() {Timer::template on<period, clock_frequency_in_hz>();}
+    static void on() 
+    {timer1_::set_clock_period_in_us<period, clock_frequency_in_hz>();}
 
     /// Apagamos el generador de señales.
     static void off() { Timer::off(); }
@@ -248,7 +427,8 @@ private:
 
     template<uint16_t period
 	    , uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
-    static void on() {Timer::template on<period, clock_frequency_in_hz>();}
+    static void on()
+    {timer1_::set_clock_period_in_us<period, clock_frequency_in_hz>();}
 
     static void top(counter_type x)
     { 
@@ -348,8 +528,8 @@ inline void Square_wave_generator1_g::disconnect_all_pins()
 
 
 
-// DUDA: eliminar Generic_timer a favor de clases particulares.
-// La parte de onda cuadrada y PWM hay que revisarla entera. Un fallo de este
+// TODO: eliminar Generic_timer a favor de clases particulares.
+// PWM hay que revisarla entera. Un fallo de este
 // primer intento es que no se da la duración de la onda cuadrada, solo se
 // enciende o se apaga, pero ¿por cuánto tiempo? No se indica.
 // De momento se me ocurren 3 formas de generar una onda cuadrada:
@@ -407,7 +587,7 @@ public:
 
 // Timer características
     template<uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
-    static Time clock_period() {return Timer::clock_period();}
+    static Time clock_period() {return timer1_::clock_period();}
 
     static Frequency clock_frequency() {return Timer::clock_frequency();}
 
@@ -416,100 +596,12 @@ public:
 // ------------
     template<uint16_t period
 	    , uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
-    static void on() {Timer::template on<period, clock_frequency_in_hz>();}
+    static void on()
+    {timer1_::set_clock_period_in_us<period, clock_frequency_in_hz>();}
 
     /// Apagamos el generador de señales.
     static void off() { Timer::off(); }
 
-
-// Counter mode
-// ------------
-// Si el timer se puede conectar a una señal de entrada (ICP) este modo
-// serviría para contar el número de ticks. En este caso se cuentan ticks, no
-// tiempo, por eso este 'counter mode' es diferente del 'timer counter mode'
-// que cuenta tiempo.
-
-
-// TODO: Obsoleto: usar Time_counter1_generic
-//       A día de hoy lo uso en Clock. Reescribir.
-// Timer counter mode
-// ------------------
-//// En este modo el timer se limita a contar tiempo. 
-//    /// Modo de funcionamiento: contador normal y corriente.
-//    static void mode_timer_counter(counter_type top = timer_counter_max_top()) 
-//    { 
-//	Timer::mode_CTC_top_OCR1A();
-//	timer_counter_reset();
-//	timer_counter_top(top);
-//	Timer::enable_output_compare_A_match_interrupt();
-//    }
-//
-//    /// Devuelve el valor del contador en ticks.
-//    static counter_type timer_counter() 
-//    {
-//	Disable_interrupts l; // TODO: safe/unsafe
-//	return Timer::unsafe_counter(); }
-//    
-//    /// Hace que el counter = 0.
-//    static void timer_counter_reset() { 
-//	Disable_interrupts l; // TODO: safe/unsafe
-//	Timer::unsafe_counter(0); }
-//
-//    /// Define el top del counter.
-//    static void timer_counter_top(counter_type top)
-//    {
-//	Disable_interrupts l; // TODO: safe/unsafe
-//	Timer::unsafe_output_compare_register_A(top);}
-//
-//    /// Valor del top
-//    static counter_type timer_counter_top()
-//    { 
-//	Disable_interrupts l; // TODO: safe/unsafe
-//	return Timer::unsafe_output_compare_register_A(); }
-//
-//    /// Valor máximo que puede tener el top.
-//    static constexpr counter_type timer_counter_max_top()
-//    { return Timer::max(); }
-
-
-//
-//// Square wave mode
-//// ----------------
-//    static void mode_square_wave(){ Timer::mode_CTC_top_ICR1();}
-//
-//    // TODO: cambiar a safe/unsafe
-//    static void square_wave_top(Scalar x)
-//    { 
-//	Disable_interrupts l;
-//	Timer::unsafe_input_capture_register(atd::to_integer<counter_type>(x));
-//    }
-//
-//    /// Devuelve el valor mínimo que puede tomar el top
-//    static constexpr counter_type square_wave_min_top()
-//    { return Timer::bottom();}
-//
-//    /// Devuelve el valor máximo que puede tomar el top
-//    static constexpr counter_type square_wave_max_top()
-//    { return Timer::max();}
-//
-//    // TODO: cambiar a safe/unsafe
-//    static counter_type square_wave_top()
-//    {
-//	Disable_interrupts l;
-//	return Timer::unsafe_input_capture_register();
-//    }
-//    
-//    static void square_wave_ch1_on()
-//    { Timer::CTC_pin_A_toggle_on_compare_match(); }
-//
-//    static void square_wave_ch2_on()
-//    { Timer::CTC_pin_B_toggle_on_compare_match(); }
-//
-//    static void square_wave_ch1_off()
-//    { Timer::pin_A_disconnected(); }
-//
-//    static void square_wave_ch2_off()
-//    { Timer::pin_B_disconnected(); }
 
 
 // PWM mode

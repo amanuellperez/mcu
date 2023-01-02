@@ -1,6 +1,8 @@
 DIRS = counter  \
-	ctc_mode	\
-	fast_pwm
+	ctc_mode	
+
+# Revisar
+#	fast_pwm
 
 include $(MCU_RECRULES)
 

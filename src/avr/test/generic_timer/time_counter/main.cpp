@@ -21,19 +21,14 @@
 #include "../../../avr_pin.h"
 #include "../../../avr_timer0_generic.h"
 #include "../../../avr_timer1_generic.h"
+#include "../../../avr_UART.h"
 
-// Para probarlo conectar el pin 15 al osciloscopio y medir la señal generada.
+namespace mcu = avr_;
 
-constexpr uint8_t num_pin = 15;
-using Counter = avr_::Time_counter0_g;
-using Counter1 = avr_::Time_counter1_g;
+constexpr uint8_t pin_test = 15;
 
-//constexpr uint16_t period_in_us = 1u; 
-constexpr uint16_t period_in_us = 8u; 
-//constexpr uint16_t period_in_us = 64u; 
-//constexpr uint16_t period_in_us = 256u; 
-//constexpr uint16_t period_in_us = 1024u; 
-constexpr Counter::counter_type max_value = 1;
+using Counter0  = mcu::Time_counter0_g;
+using Counter1 = mcu::Time_counter1_g;
 
 // CUIDADO: hay mucha diferencia entre tener el reloj del micro a 1MHz o a 8
 // MHz. Para tiempos precisos (del orden de 50 us (???)) usar 8MHz. Para el
@@ -64,14 +59,29 @@ constexpr Counter::counter_type max_value = 1;
 //	        < 10 =>   = 20.70 ms :)
 //
 
-int main()
+template <typename Counter, uint16_t period_in_us>
+void generate(const typename Counter::counter_type& max_value, uint16_t nrep)
 {
-    avr_::Output_pin<num_pin> pin;
+    mcu::UART_iostream uart;
+    uart << "\n----------------------------\n"
+	    "Generating " << nrep << " times from 0 to " << (int) max_value << "\n"
+	    "\tTimer period in us = " << period_in_us << '\n';
+
+    if constexpr (std::is_same_v<Counter, Counter0>)
+	uart << "\tTimer 0";
+
+    else
+	uart << "\tTimer 1";
+
+    auto T = 2*(period_in_us * max_value);
+    uart << "\tPeriod of the signal generate =? " << T << '\n';
+
+    mcu::Output_pin<pin_test> pin;
+
     Counter::init();
-    Counter::on<period_in_us>();
+    Counter::template on<period_in_us>();
 
-    while(1){
-
+    for (uint16_t i = 0; i < nrep; ++i){
 	Counter::reset();   // DUDA: 1º el reset y luego el write o al revés?
 	pin.write_zero();
 	while (Counter::value() < max_value) { ; }
@@ -79,6 +89,64 @@ int main()
 	Counter::reset();
 	pin.write_one();
 	while (Counter::value() < max_value) { ; }
+    }
+
+    uart << "DONE\n";
+    pin.write_zero();
+}
+
+
+int main()
+{
+    mcu::UART_iostream uart;
+    mcu::basic_cfg(uart);
+    uart.on();
+
+    uart << "\n\nTime counter test\n"
+	        "----------------\n"
+		"Connect oscilloscope to pin " << (int) pin_test << '\n';
+
+
+constexpr Counter1::counter_type max_value = 1;
+    uint16_t nrep = 10000;
+    while(1){
+	uart << "--------------------------\n"
+	        "0. Timer 0\n"
+		"1. Timer 1\n";
+
+	char timer{};
+	uart >> timer;
+    
+	uart << "\nPeriod:\n"
+	        "[1]    1 us\n"
+		"[2]    8 us\n"
+		"[3]   64 us\n"
+		"[4]  256 us\n"
+		"[5] 1024 us\n";
+
+	char period{};
+	uart >> period;
+
+	if (timer == '0')
+	    switch(period){
+		break; case '1': generate<Counter0, 1>(max_value, nrep);
+		break; case '2': generate<Counter0, 8>(max_value, nrep);
+		break; case '3': generate<Counter0, 64>(max_value, nrep);
+		break; case '4': generate<Counter0, 256>(max_value, nrep);
+		break; case '5': generate<Counter0, 1024>(max_value, nrep);
+		break; default: generate<Counter0, 1>(max_value, nrep);
+	    }
+
+	else
+	    switch(period){
+		break; case '1': generate<Counter1, 1>(max_value, nrep);
+		break; case '2': generate<Counter1, 8>(max_value, nrep);
+		break; case '3': generate<Counter1, 64>(max_value, nrep);
+		break; case '4': generate<Counter1, 256>(max_value, nrep);
+		break; case '5': generate<Counter1, 1024>(max_value, nrep);
+		break; default: generate<Counter1, 1>(max_value, nrep);
+	    }
+	
 
     }
 }

@@ -23,8 +23,10 @@
 #include "../../../avr_UART_iostream.h"
 
 
-using namespace avr_::literals;
-using Timer = avr_::Timer0;
+namespace mcu = avr_;
+
+using namespace mcu::literals;
+using Timer = mcu::Timer0;
 
 // Probar cada periodo con diferentes frecuencias: 1 MHz y 8 MHz.
 // Para los 8 MHz hay que definir el fuse correspondiente y F_CPU en el
@@ -37,15 +39,15 @@ using Timer = avr_::Timer0;
 
 void timer_on_1MHz(uint16_t period_in_us)
 {
-    if constexpr (avr_::clock_frequency == 1_MHz){
-	avr_::UART_iostream uart;
+    if constexpr (mcu::clock_frequency == 1_MHz){
+	mcu::UART_iostream uart;
 
 	switch(period_in_us){
-	    case 1: Timer::on<1>(); break;
-	    case 8: Timer::on<8>(); break;
-	    case 64: Timer::on<64>(); break;
-	    case 256: Timer::on<256>(); break;
-	    case 1024: Timer::on<1024>(); break;
+	    case 1: Timer::clock_frequency_no_preescaling(); break;
+	    case 8: Timer::clock_frequency_divide_by_8(); break;
+	    case 64: Timer::clock_frequency_divide_by_64(); break;
+	    case 256: Timer::clock_frequency_divide_by_256(); break;
+	    case 1024: Timer::clock_frequency_divide_by_1024(); break;
 	    default:
 		uart << "period_in_us [" << period_in_us << "] no válido\n";
 		break;
@@ -56,16 +58,15 @@ void timer_on_1MHz(uint16_t period_in_us)
 
 void timer_on_8MHz(uint16_t period_in_us)
 {
-    if constexpr (avr_::clock_frequency == 8_MHz){// si no se pone aunque no se llame a 
+    if constexpr (mcu::clock_frequency == 8_MHz){// si no se pone aunque no se llame a 
 	    // timer_on_8MHz (por ser a 1MHz) la compila, generando error!!!
-	avr_::UART_iostream uart;
+	mcu::UART_iostream uart;
 
 	switch(period_in_us){
-	    case 1: Timer::on<1>(); break;
-	    case 8: Timer::on<8>(); break;
-	    case 32: Timer::on<32>(); break;
-	    case 128: Timer::on<128>(); break;
-	    case 1024: Timer::on<1024>(); break;
+	    case 1: Timer::clock_frequency_divide_by_8(); break;
+	    case 8: Timer::clock_frequency_divide_by_64(); break;
+	    case 32: Timer::clock_frequency_divide_by_256(); break;
+	    case 128: Timer::clock_frequency_divide_by_1024(); break;
 	    default:
 		uart << "period_in_us [" << period_in_us << "] no válido\n";
 		break;
@@ -77,17 +78,17 @@ void timer_on_8MHz(uint16_t period_in_us)
 
 void timer_on(uint16_t period_in_us)
 {
-    if constexpr (avr_::clock_frequency == 1_MHz)
+    if constexpr (mcu::clock_frequency == 1_MHz)
 	timer_on_1MHz(period_in_us);
 
-    else if constexpr (avr_::clock_frequency == 8_MHz)
+    else if constexpr (mcu::clock_frequency == 8_MHz)
 	timer_on_8MHz(period_in_us);
 
 }
 
 uint16_t select_period_1MHz()
 {
-    avr_::UART_iostream uart;
+    mcu::UART_iostream uart;
 
     uart << "\n\nperiod_in_us (avr a 1MHz):\n"
 	    "1\n"
@@ -112,7 +113,7 @@ uint16_t select_period_1MHz()
 
 uint16_t select_period_8MHz()
 {
-    avr_::UART_iostream uart;
+    mcu::UART_iostream uart;
 
     uart << "\n\nperiod_in_us (avr a 8MHz):\n"
 	    "1\n"
@@ -138,14 +139,14 @@ uint16_t select_period_8MHz()
 
 uint16_t select_period()
 {
-    if constexpr (avr_::clock_frequency == 1_MHz)
+    if constexpr (mcu::clock_frequency == 1_MHz)
 	return select_period_1MHz();
 
-    else if constexpr (avr_::clock_frequency == 8_MHz)
+    else if constexpr (mcu::clock_frequency == 8_MHz)
 	return select_period_8MHz();
 
     else{
-	avr_::UART_iostream uart;
+	mcu::UART_iostream uart;
 	uart << "ERROR: select_period(), frecuencia desconocida\n";
 	return 1;
     }
@@ -155,7 +156,7 @@ uint16_t select_period()
 
 void oca_menu()
 {
-    avr_::UART_iostream uart;
+    mcu::UART_iostream uart;
 
     uart << "\nOCA menu:\n"
 	    "[d]isconnect\n"
@@ -190,7 +191,7 @@ void oca_menu()
 
 void ocb_menu()
 {
-    avr_::UART_iostream uart;
+    mcu::UART_iostream uart;
 
     uart << "\nOCB menu:\n"
 	    "[d]isconnect\n"
@@ -227,8 +228,8 @@ void ocb_menu()
 int main()
 {
 // init_uart()
-    avr_::UART_iostream uart;
-    avr_::basic_cfg(uart);
+    mcu::UART_iostream uart;
+    mcu::basic_cfg(uart);
     uart.on();
 
 // init_timer()
@@ -254,7 +255,7 @@ int main()
 		    "-----\n"
 	        "top = " << (int) top <<
 		"\nperiod_in_us                = " << period_in_us <<
-		"\nTimer::clock_period() = " << Timer::clock_period() <<
+//		"\nTimer::clock_period() = " << Timer0::clock_period() <<
                 "\nPeriodo a ver en el osciloscopio: " <<
 		period << " us +- error ("
                 "2*(top + 1)*period_in_us)\n";

@@ -29,7 +29,9 @@
 #include <stdlib.h>
 #include <std_type_traits.h>
 
-using Timer = avr_::Timer0;
+namespace mcu = avr_;
+
+using Timer = mcu::Timer0;
 using time_t = uint32_t;
 
 constexpr uint16_t period_in_us = 1024;
@@ -38,11 +40,6 @@ constexpr uint16_t period_in_us = 1024;
 
 volatile time_t contador = 0;
 
-ISR_TIMER0_OVF
-{
-//    ++contador;
-    contador = contador + 1;
-}
 
  
 struct time_in_days{
@@ -91,25 +88,28 @@ std::ostream& operator<<(std::ostream& out, const time_in_days& t)
 
 void print(uint64_t time_en_us)
 {
-    avr_::UART_iostream uart;
+    mcu::UART_iostream uart;
     uart << us_to_time_in_days(time_en_us) << "\n\r";
 }
 
 
 int main()
 {
-    avr_::UART_iostream uart;
-    avr_::basic_cfg(uart);
+// UART_init();
+    mcu::UART_iostream uart;
+    mcu::basic_cfg(uart);
     uart.on();
 
-    Timer::on<period_in_us>();
-    Timer::enable_overflow_interrupt();
+// clock_init();
+    Timer::clock_frequency_divide_by_1024();
+    Timer::enable_overflow_interrupt(); 
+    mcu::enable_interrupts();
 
     while(1){
 	Timer::counter_type v;
 	time_t c;
-	{// lo más atómico posible
-	    dev::Disable_interrupts<avr_::Micro> l;
+	{// lo más atómico posible (esto creo que sobra con el Timer0!!!)
+	    dev::Disable_interrupts<mcu::Micro> l;
 	    v = Timer::counter();
 	    c = contador;
 	}
@@ -121,9 +121,15 @@ int main()
         print (t_us);
 	uart << ".";
 
-	avr_::wait_ms(1000);
+	mcu::wait_ms(1000);
     }
 }
 
+
+
+ISR_TIMER0_OVF
+{
+    contador = contador + 1;
+}
 
 

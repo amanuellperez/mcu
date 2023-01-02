@@ -1,8 +1,8 @@
 DIRS = counter\
 	ctc_mode\
-	fast_pwm\
 	clock
 
+#	fast_pwm\
 
 include $(MCU_RECRULES)
 

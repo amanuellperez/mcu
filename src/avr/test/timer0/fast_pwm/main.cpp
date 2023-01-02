@@ -41,11 +41,11 @@ void timer_on_1MHz(uint16_t period_in_us)
 	avr_::UART_iostream uart;
 
 	switch(period_in_us){
-	    case 1: Timer::on<1>(); break;
-	    case 8: Timer::on<8>(); break;
-	    case 64: Timer::on<64>(); break;
-	    case 256: Timer::on<256>(); break;
-	    case 1024: Timer::on<1024>(); break;
+	    case 1: Timer::clock_frequency_no_preescaling(); break;
+	    case 8: Timer::clock_frequency_divide_by_8(); break;
+	    case 64: Timer::clock_frequency_divide_by_64(); break;
+	    case 256: Timer::clock_frequency_divide_by_256(); break;
+	    case 1024: Timer::clock_frequency_divide_by_1024(); break;
 	    default:
 		uart << "period_in_us [" << period_in_us << "] no válido\n";
 		break;
@@ -61,11 +61,10 @@ void timer_on_8MHz(uint16_t period_in_us)
 	avr_::UART_iostream uart;
 
 	switch(period_in_us){
-	    case 1: Timer::on<1>(); break;
-	    case 8: Timer::on<8>(); break;
-	    case 32: Timer::on<32>(); break;
-	    case 128: Timer::on<128>(); break;
-	    case 1024: Timer::on<1024>(); break;
+	    case 1: Timer::clock_frequency_divide_by_8(); break;
+	    case 8: Timer::clock_frequency_divide_by_64(); break;
+	    case 32: Timer::clock_frequency_divide_by_256(); break;
+	    case 128: Timer::clock_frequency_divide_by_1024(); break;
 	    default:
 		uart << "period_in_us [" << period_in_us << "] no válido\n";
 		break;
