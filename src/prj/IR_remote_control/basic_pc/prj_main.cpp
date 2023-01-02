@@ -35,7 +35,7 @@ void Main::init_uart()
 Main::Main()
 {
     init_uart();
-    Clock_us::init();
+    Miniclock_us::cfg();
 }
 
 

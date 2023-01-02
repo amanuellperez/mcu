@@ -197,7 +197,7 @@ inline void Musician<I>::play(Octave octave, Step step)
 template <typename I>
 inline void Musician<I>::play_freq(uint16_t freq, uint16_t duration_in_ms)
 {
-    Instrument::burst(freq, duration_in_ms);
+    Instrument::generate(freq, duration_in_ms);
 }
 
 template <typename I>

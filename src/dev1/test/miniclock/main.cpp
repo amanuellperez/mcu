@@ -59,7 +59,7 @@ void generate_square_wave_no_use_wait(Pin& pin,
 
     while (1){
 	Miniclock::start();
-	while (Miniclock::read() < time_ms_or_us){
+	while (Miniclock::time() < time_ms_or_us){
 	    // This takes a lot of time in us ==> this function can't generate
 	    // a square wave of microseconds!!!
 	    if (mcu::UART_basic::are_there_data_unread())

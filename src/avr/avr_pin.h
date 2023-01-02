@@ -144,6 +144,13 @@ public:
  *  
  *  Observar que para que sea un pin de salida es necesario crear un objeto
  *  de este tipo.
+ *
+ *  (RRR) ¿Por qué necesito cfg()? 
+ *        Si se usa como parámetro de template (y sospecho que es así como lo
+ *        estoy usando casi siempre) necesito inicializarlo. Aquí todavía
+ *        tengo dudas de si llamar a esta función init() o cfg() (???)
+ *        Usándolo me resulta más natural llamarlo `as_output` ya que de esa
+ *        forma se muestra la intención del código.
  */
 template<uint8_t n>
 class Output_pin{
@@ -155,6 +162,8 @@ public:
 
     Output_pin& operator=(const Output_pin&)	= delete;
 
+    // constexpr static void cfg()         { Pin<n>::as_output(); }
+    constexpr static void as_output()   { Pin<n>::as_output(); }
     constexpr static void write_one()	{Pin<n>::write_one();}
     constexpr static void write_zero()	{Pin<n>::write_zero();}
     constexpr static void write(uint8_t x) {Pin<n>::write(x);}

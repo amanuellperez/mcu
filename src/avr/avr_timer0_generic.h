@@ -37,13 +37,15 @@
  *
  *		 square_wave_generate
  *    15/12/2022 Square_wave_generator0_g
+ *    02/01/2023 Square_wave_burst_generator0_g
  *
  ****************************************************************************/
 #include "avr_timer0_basic.h"
 #include "avr_cfg.h"	// MCU_CLOCK_FREQUENCY_IN_HZ
 
 #include <atd_type_traits.h>
-
+#include <tuple>    // std::tie
+		    
 namespace avr_{
 
 /***************************************************************************
@@ -145,14 +147,10 @@ public:
 /***************************************************************************
  *			Square_wave_generator0_g
  ***************************************************************************/
-class Square_wave_generator0_g{
+class Square_wave_generator0_g_base{
 public:
 // Types
     using Timer        = avr_::Timer0;
-
-// Interfaz static
-    Square_wave_generator0_g() = delete;
-
 
 // Características del Timer
     static constexpr uint8_t number_of_pins = cfg::timer0::number_of_pins;
@@ -167,12 +165,6 @@ public:
 
 // Static interface
 // ----------------
-    /// Genera la frecuencia indicada en el pin indicado.
-    /// La frecuencia pasada tiene que estar en herzios.
-    // DUDA: usar Frequency en lugar de uint32_t? Sería lo mejor...
-    template <uint8_t npin>
-    static void generate(uint32_t freq_in_Hz);
-
     template <int npin>
     static void connect_pin();
 
@@ -182,19 +174,19 @@ public:
 
 // Dynamic interface
 // -----------------
-    /// Genera la frecuencia indicada en el pin indicado.
-    /// La frecuencia pasada tiene que estar en herzios.
-    // DUDA: usar Frequency en lugar de uint32_t? Sería lo mejor...
-    static void generate(uint32_t freq_in_Hz, uint8_t npin);
-
+// TODO: eliminar estos connect. Solo pueden generar errores de programación.
+// Se sabe en tiempo de compilación las conexiones hardware.
     static void connect_pin(uint8_t npin);
 
     static void disconnect_pin(uint8_t npin);
 
     static void disconnect_all_pins();
 
-private:
+protected:
     using counter_type = typename Timer::counter_type;
+
+    // Implementation class 
+    Square_wave_generator0_g_base() {}
 
 // Funciones de ayuda
     static void init(){ Timer::mode_CTC();}
@@ -209,24 +201,6 @@ private:
     static counter_type top()
     { return Timer::output_compare_register_A();}
 
-//    /// Devuelve el valor mínimo que puede tomar el top
-//    static constexpr counter_type min_top()
-//    { return Timer::bottom();}
-//
-//    /// Devuelve el valor máximo que puede tomar el top
-//    static constexpr counter_type max_top()
-//    { return Timer::max();}
-
-// Funciones no genéricas: conocen cómo funciona el Timer0
-//    /// Devuelve la frecuencia, en Hz,  que se genera dados 
-//    /// el prescaler factor d (divisor de frecuencia) y el top M. 
-//    /// (pag 132 datasheet)
-//    template <uint32_t f_clock_in_Hz = MCU_CLOCK_FREQUENCY_IN_HZ>
-//    static constexpr 
-//    uint32_t prescaler_top_to_frequency_in_Hz(uint32_t d, uint32_t M)
-//    { return avr_::timer_::
-//	    timer_prescaler_top_to_frequency_in_Hz<f_clock_in_Hz>(d, M);}
-
     /// Función inversa a la prescaler_top_to_frequency_in_Hz:
     /// Devuelve el par (prescaler factor, top) necesario para generar la
     /// frecuencia freq_in_Hz.
@@ -239,7 +213,7 @@ private:
     }
 };
 
-inline void Square_wave_generator0_g::stop() 
+inline void Square_wave_generator0_g_base::stop() 
 { 
     Timer::off(); 
     disconnect_all_pins(); // fundamental: para que el cliente pueda asignar
@@ -248,7 +222,7 @@ inline void Square_wave_generator0_g::stop()
 
 
 template <int npin>
-inline void Square_wave_generator0_g::connect_pin()
+inline void Square_wave_generator0_g_base::connect_pin()
 {
     if constexpr (npin == pin[0])
     { Timer::CTC_pin_A_toggle_on_compare_match(); }
@@ -263,7 +237,7 @@ inline void Square_wave_generator0_g::connect_pin()
 
 
 template <int npin>
-inline void Square_wave_generator0_g::disconnect_pin()
+inline void Square_wave_generator0_g_base::disconnect_pin()
 {
     if constexpr (npin == pin[0])
     { Timer::pin_A_disconnected();}
@@ -276,27 +250,102 @@ inline void Square_wave_generator0_g::disconnect_pin()
 
 }
 
-inline void Square_wave_generator0_g::connect_pin(uint8_t npin)
+inline void Square_wave_generator0_g_base::connect_pin(uint8_t npin)
 {
     if      (npin == pin[0]) connect_pin<pin[0]>();
     else if (npin == pin[1]) connect_pin<pin[1]>();
 }
 
-inline void Square_wave_generator0_g::disconnect_pin(uint8_t npin)
+inline void Square_wave_generator0_g_base::disconnect_pin(uint8_t npin)
 {
     if      (npin == pin[0]) disconnect_pin<pin[0]>();
     else if (npin == pin[1]) disconnect_pin<pin[1]>();
 }
 
-inline void Square_wave_generator0_g::disconnect_all_pins()
+inline void Square_wave_generator0_g_base::disconnect_all_pins()
 {
     disconnect_pin<pin[0]>();
     disconnect_pin<pin[1]>();
 }
 
+// (RRR) ¿Por qué Square_wave_generator0_g y Square_wave_burst_generator0_g?
+//
+//  De momento necesito dos formas de generar ondas cuadradas:
+//  (1) En música: generamos ondas cada vez de una frecuencia distinta mínimo
+//      de 250 ms de largo. 
+//
+//  (2) En IR remote control: generamos burst de 38kHz de 500 us de longitud.
+//
+//  En (1) generamos muchas frecuencias sin importarnos la eficiencia (250 ms
+//  para un micro a 1 MHz es una eternidad). En (2) fijamos la frecuencia pero
+//  es fundamental que sea eficiente.
+//
+//  Square_wave_generator es responsable de generar frecuencias distintas.
+//  Como cada vez que se llama a `generate` se tiene que calcular la
+//  configuración del Timer se introduce en torno a 1 ms de retraso desde que
+//  se llama a `generate` hasta que empieza a generarse la señal. Ventaja: muy
+//  sencilla de usar. Desventaja: no funciona para generar tren de pulsos (de
+//  hecho, al intentar usar esta clase en el IR Remote Control y ver que no
+//  funcionaba es cuando he detectado el problema).
+//
+//  Square_wave_burst_generator es una clase con estado. Se calcula primero la
+//  configuración que tiene que tener el Timer para generar la frecuencia
+//  deseada (tarda 1 ms) y una vez calculado ya no es necesario recalcularlo
+//  con lo que se pueden generar los burst de 500 us (sin el delay de 1 ms que
+//  introduce Square_wave_generator).
+class Square_wave_generator0_g : public Square_wave_generator0_g_base{
+public:
+// Interfaz static
+    Square_wave_generator0_g() = delete;
+
+// Static interface
+// ----------------
+//    /// Genera la frecuencia indicada en el pin indicado.
+//    /// La frecuencia pasada tiene que estar en herzios.
+//    // DUDA: usar Frequency en lugar de uint32_t? Sería lo mejor...
+//    template <uint8_t npin>
+//    static void generate(uint32_t freq_in_Hz);
+
+// Dynamic interface
+// -----------------
+    // Generación de una onda cuadrada
+    // -------------------------------
+    /// Genera la frecuencia indicada en el pin indicado.
+    /// La frecuencia pasada tiene que estar en herzios.
+    // DUDA: usar Frequency en lugar de uint32_t? Sería lo mejor...
+    static void generate(uint32_t freq_in_Hz, uint8_t npin);
+
+};
+
+// Square_wave_burst_generator0_g
+// ------------------------------
+class Square_wave_burst_generator0_g: public Square_wave_generator0_g_base{
+public:
+    Square_wave_burst_generator0_g(uint32_t freq_in_Hz);
+
+    template <uint8_t npin>
+    void generate_burst();
+
+private:
+    uint32_t prescaler_factor_;
+    counter_type top_;
+};
 
 
 
+// (RRR) inline para que sea lo más eficiente posible.
+template <uint8_t npin>
+inline void Square_wave_burst_generator0_g::generate_burst()
+{
+    connect_pin<npin>();
+    top(top_); 
+    Timer::clock_frequency(prescaler_factor_); // esto enciende el Timer
+}
+
+
+/***************************************************************************
+ *				Timer0_generic
+ ***************************************************************************/
 // DUDA: eliminar Generic_timer a favor de clases particulares. <-- NO lo
 // tengo tan claro. A veces creo que es buena idea, otras no.
 // Mejor esperar a implementar otros micros y comparar los  timers.

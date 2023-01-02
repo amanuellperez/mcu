@@ -1,5 +1,5 @@
 // Copyright (C) 2022 A.Manuel L.Perez 
-//           mail: <amanuel.lperez@gmail.com>
+////           mail: <amanuel.lperez@gmail.com>
 //           https://github.com/amanuellperez/mcu
 //
 // This file is part of the MCU++ Library.
@@ -17,9 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "../../dev_square_wave.h"
-#include "../../dev_miniclock.h"
 #include <avr_atmega.h>
+#include "../../../dev_square_wave.h"
+#include "../../../dev_miniclock.h"
 
 // DUDA: ¿cómo medir bien esto? No tengo claro como medir la señal generada.
 
@@ -34,12 +34,12 @@ using Pin = mcu::Output_pin<test_pin>;
 using Miniclock1_us = dev::Miniclock_us<mcu::Micro, mcu::Time_counter1_generic>;
 using Miniclock1_ms = dev::Miniclock_ms<mcu::Micro, mcu::Time_counter1_generic>;
 
-using SWG1_us = dev::Square_wave_generator< mcu::Square_wave_generator0_g
+using SWG_us = dev::Square_wave_generator< mcu::Square_wave_generator0_g
 					  , Pin
 					  , Miniclock1_us
 					  , false>;
 
-using SWG1_ms = dev::Square_wave_generator< mcu::Square_wave_generator0_g
+using SWG_ms = dev::Square_wave_generator< mcu::Square_wave_generator0_g
 					  , Pin
 					  , Miniclock1_ms
 					  , false>;
@@ -76,28 +76,39 @@ void ask_cfg(Cfg& cfg)
     }
 }
 
-void generate(const Cfg& cfg, const uint32_t& freq, const uint16_t& t)
+template <typename SWG>
+void generate(const uint32_t& freq, const uint16_t& t)
 {
-    constexpr uint8_t nburst = 10;
+    constexpr uint16_t nburst = 400;
 
     mcu::UART_iostream uart;
     uart << "Generating " << (int) nburst << " burst of " 
-	 << freq << " of " << t;
-    switch(cfg){
-	    break; case Cfg::in_us: uart << " us\n";
-	    break; case Cfg::in_ms: uart << " ms\n";
+	 << freq << " Hz of " << t;
+
+    if constexpr (std::is_same_v<SWG, SWG_us>)
+	uart << " us\n";
+
+    else
+	uart << " ms\n";
+
+    SWG::cfg();
+
+    dev::Disable_interrupts<Micro> lock;	
+    for (uint16_t i = 0; i < nburst; ++i){
+	SWG::generate(freq, t);
+	SWG::wait(t);
     }
 
-    for (uint8_t i = 0; i < nburst; ++i){
-	switch(cfg){
-	    break; case Cfg::in_us: SWG1_us::burst(freq, t);
-	    break; case Cfg::in_ms: SWG1_ms::burst(freq, t);
-	}
-
-	Miniclock1_ms::wait(t);// para que se vea mejor en el osciloscopio
-    }
 }
 
+
+void generate(const Cfg& cfg, const uint32_t& freq, const uint16_t& t)
+{
+    switch(cfg){
+	break; case Cfg::in_us: generate<SWG_us>(freq, t);
+	break; case Cfg::in_ms: generate<SWG_ms>(freq, t);
+    }
+}
 
 int main()
 {
@@ -109,7 +120,6 @@ int main()
 	        "----------------\n"
 		"Connect oscilloscope to pin " << (int) test_pin << '\n';
 
-    SWG1_ms::cfg();
 
     uint32_t freq = 0;
     uint16_t t = 320;

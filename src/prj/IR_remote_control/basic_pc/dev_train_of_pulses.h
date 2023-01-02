@@ -82,16 +82,15 @@ inline Train_of_pulses<N>::Train_of_pulses()
 /***************************************************************************
  *			    Train_of_pulses_receiver
  ***************************************************************************/
-template <typename Clock_us0, uint8_t ir_receiver_pin0, int16_t num_max_pulses>
+template <typename Miniclock_us0, uint8_t ir_receiver_pin0, int16_t num_max_pulses>
 struct Train_of_pulses_receiver_cfg{
     static constexpr uint8_t ir_receiver_pin = ir_receiver_pin0;
     static constexpr int16_t buffer_size = 2 * num_max_pulses;
-    using Clock_us = Clock_us0;
+    using Miniclock_us = Miniclock_us0;
 
 };
 
 // Por culpa de la callback tengo que definirlo todo como static.
-// La otra alternativa sería definirlo 
 template <typename Cfg>
 class Train_of_pulses_receiver{
 public:
@@ -114,7 +113,7 @@ private:
 // Cfg
     static constexpr uint8_t ir_receiver_pin = Cfg::ir_receiver_pin;
     using Receiver_pin = atmega::Pin<ir_receiver_pin>;
-    using Clock_us = Cfg::Clock_us;
+    using Miniclock_us = Cfg::Miniclock_us;
 
 // Functions
     static bool check(uint8_t polarity, volatile bool* level, int16_t n);
@@ -233,7 +232,7 @@ uint16_t Train_of_pulses_receiver<C>::copy( uint8_t polarity
 template <typename C>
 void Train_of_pulses_receiver<C>::receive_semipulses(volatile bool& abort)
 {
-    using counter_type = typename Clock_us::counter_type;
+    using counter_type = typename Miniclock_us::counter_type;
     static constexpr counter_type time_overflow{60000};
 
     nsemipulse_ = -1;
@@ -241,7 +240,7 @@ void Train_of_pulses_receiver<C>::receive_semipulses(volatile bool& abort)
 
     atmega::Interrupt::enable_pin<ir_receiver_pin>();
 
-    Clock_us::on();
+    Miniclock_us::start();
     
     {// TODO: meter esto en una función. nombre?
 	dev::Enable_interrupts<atmega::Micro> lock; // TODO: esto no es genérico
@@ -250,14 +249,14 @@ void Train_of_pulses_receiver<C>::receive_semipulses(volatile bool& abort)
 
 	if (!abort){
 	    // while (Timer::safe_value() < Timer::max_top() <-- esto lo ralentiza (???)
-	    while (Clock_us::safe_value() < time_overflow
+	    while (Miniclock_us::time() < time_overflow
 			and nsemipulse_ < buffer_size)
 	    { ; }
 	}
 
     }// ~Enable_interrupt
 
-    Clock_us::off(); 
+    Miniclock_us::stop(); 
 
     atmega::Interrupt::disable_pin<ir_receiver_pin>();
 
@@ -303,13 +302,40 @@ inline  // inline ya que quiero que sea lo más eficiente posible la ISR.
 void Train_of_pulses_receiver<C>::interrupt_callback()
 {
     if (nsemipulse_ >= 0){
-	buffer_[nsemipulse_] = Clock_us::unsafe_value();
+	buffer_[nsemipulse_] = Miniclock_us::unsafe_time();
 	level_ [nsemipulse_] = !Receiver_pin::is_one();
     }
 
-    Clock_us::unsafe_reset();
+    Miniclock_us::unsafe_reset();
     nsemipulse_ = nsemipulse_ + 1;
 }
+
+
+/***************************************************************************
+ *			Transmitimos un tren de pulsos
+ ***************************************************************************/
+template <typename SWG_us, typename Miniclock_us, size_t N>
+bool transmit(const Train_of_pulses<N>& pulse)
+{
+    constexpr uint16_t frequency = 38000; // 38 kHz
+					  
+    if(!pulse.polarity())
+	return false;
+
+    Miniclock_us::start();
+    
+    SWG_us swg{frequency};
+
+    for (auto p = pulse.begin(); p != pulse.end(); ++p){
+	swg.generate_burst(p->time_low);	
+	Miniclock_us::wait(p->time_high);
+    }
+
+    Miniclock_us::stop();
+
+    return true;
+}
+
 
 
 }// namespace

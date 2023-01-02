@@ -42,7 +42,7 @@ public:
     
 private:
 // Hardware
-    using Musician = music::Musician<SWG1_ms>;
+    using Musician = music::Musician<SWG0_ms>;
     using Octave   = music::Octave;
     using Step	   = music::Step;
 

@@ -37,4 +37,14 @@ void Square_wave_generator0_g::generate(uint32_t freq_in_Hz, uint8_t npin)
     Timer::clock_frequency(d); // esto enciende el Timer
 }
 
+
+Square_wave_burst_generator0_g::
+		    Square_wave_burst_generator0_g(uint32_t freq_in_Hz)
+{
+    std::tie(prescaler_factor_, top_) = 
+				frequency_in_Hz_to_prescaler_top(freq_in_Hz);
+    init();
+    disconnect_all_pins();
+}
+
 }// namespace

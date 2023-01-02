@@ -29,12 +29,12 @@
 
 namespace dev{
 
-template <typename Clock_us0,
+template <typename Miniclock_us0,
 	  typename SWG0,
 	  uint16_t t_burst_00, uint16_t t_space_00,
 	  uint16_t t_burst_10, uint16_t t_space_10>
 struct NEC_transmitter_cfg_{
-    using Clock_us = Clock_us0;
+    using Miniclock_us = Miniclock_us0;
     using SWG      = SWG0;
 
     static constexpr uint16_t t_burst_0 = t_burst_00;
@@ -49,8 +49,8 @@ struct NEC_transmitter_cfg_{
 template <typename Cfg>
 class NEC_transmitter_{
 public:
-    using Clock_us = Cfg::Clock_us;
-    using SWG      = Cfg::SWG;
+    using Miniclock_us = Cfg::Miniclock_us;
+    using SWG          = Cfg::SWG;
 
     static void transmit(const NEC_message& msg);
 
@@ -65,45 +65,52 @@ private:
     static constexpr uint16_t t_space_1 = Cfg::t_space_1;
 
 // Functions
-    static void transmit_byte(uint8_t b);
+    static void transmit_byte(SWG& swg, uint8_t b);
     static void transmit_one(const NEC_message& msg);
+
+    static constexpr uint16_t frequency = 38000; // 38 kHz
 };
 
 
 // inline porque no se si es suficientemente eficiente
 template <typename Cfg>
-inline void NEC_transmitter_<Cfg>::transmit_byte(uint8_t b)
+inline void NEC_transmitter_<Cfg>::transmit_byte(SWG& swg, uint8_t b)
 {
+
     for (uint8_t i = 0; i < 8; ++i){
 	if (b & 0x01){
-	    SWG::burst_38kHz_of(t_burst_1);
-	    SWG::wait_us(t_space_1);
+	    swg.generate_burst(t_burst_1);
+	    Miniclock_us::wait(t_space_1);
 	}
 	else{
-	    SWG::burst_38kHz_of(t_burst_0);
-	    Clock_us::wait_us(t_space_0);
+	    swg.generate_burst(t_burst_0);
+	    Miniclock_us::wait(t_space_0);
 	}
 
 	b >>= 1;
     }
 }
 
-
+// Transmite 1 solo mensaje. 
+// En general puede que sea interesante retransmitir el mismo mensaje varias
+// veces seguidas, de ahí la diferencia entre transmit y transmit_one
 template <typename Cfg>
 void NEC_transmitter_<Cfg>::transmit_one(const NEC_message& msg)
 {
+    SWG swg{frequency};
+
 // Header
-    SWG::burst_38kHz_of(msg.time_first_pulse);
-    Clock_us::wait_us(4500);
+    swg.generate_burst(msg.time_first_pulse);
+    Miniclock_us::wait(4500);
 
 // Payload
-    transmit_byte(msg.address);
-    transmit_byte(msg.inv_address);
-    transmit_byte(msg.command);
-    transmit_byte(msg.inv_command);
+    transmit_byte(swg, msg.address);
+    transmit_byte(swg, msg.inv_address);
+    transmit_byte(swg, msg.command);
+    transmit_byte(swg, msg.inv_command);
 
 // Tail
-    SWG::burst_38kHz_of(562);
+    swg.generate_burst(562);
 
 }
 
@@ -111,19 +118,19 @@ void NEC_transmitter_<Cfg>::transmit_one(const NEC_message& msg)
 template <typename Cfg>
 void NEC_transmitter_<Cfg>::transmit(const NEC_message& msg)
 {
-    Clock_us::on();
+    Miniclock_us::start();
 //    for (uint8_t i = 0; i < 3; ++i){
 	transmit_one(msg);
 //	timer_wait_us(30000);
 //    }
-    Clock_us::off();
+    Miniclock_us::stop();
 }
 
 
-template <typename Clock_us, typename SWG>
+template <typename Miniclock_us, typename SWG>
 void NEC_protocol::transmit(const NEC_message& msg)
 {
-    using Cfg = NEC_transmitter_cfg_<Clock_us, SWG, 
+    using Cfg = NEC_transmitter_cfg_<Miniclock_us, SWG, 
 				     t_burst_0, t_space_0, 
 				     t_burst_1, t_space_1>;
 

@@ -62,7 +62,7 @@ constexpr uint8_t speaker_pin = 12;
 //	Timer1 como Miniclock
 using Miniclock1_ms = dev::Miniclock_ms<mcu::Micro, mcu::Time_counter1_generic>;
 
-using SWG1_ms = dev::Square_wave_generator< mcu::Square_wave_generator0_g
+using SWG0_ms = dev::Square_wave_generator< mcu::Square_wave_generator0_g
 					  , mcu::Output_pin<speaker_pin>
 					  , Miniclock1_ms>;
 

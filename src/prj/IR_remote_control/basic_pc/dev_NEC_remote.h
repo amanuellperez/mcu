@@ -56,7 +56,7 @@ public:
     /// Enviamos todos los comandos a esta dirección.
     Remote_control_Elegoo(uint8_t address = default_address);
 
-    template <typename Clock_us, typename SWG>
+    template <typename Miniclock_us, typename SWG>
     bool transmit(Command_type i);
 
 
@@ -100,7 +100,7 @@ inline Remote_control_Elegoo::Remote_control_Elegoo(uint8_t address)
 }
  
 
-template <typename Clock_us, typename SWG>
+template <typename Miniclock_us, typename SWG>
 bool Remote_control_Elegoo::transmit(Command_type i)
 { 
     if (first <= i and i <= last){
@@ -112,7 +112,7 @@ bool Remote_control_Elegoo::transmit(Command_type i)
 	msg.command		= cmd[i];
 	msg.inv_command		= ~(cmd[i]);
 
-	NEC_protocol::transmit<Clock_us, SWG>(msg); 
+	NEC_protocol::transmit<Miniclock_us, SWG>(msg); 
 
 	return true;
     }

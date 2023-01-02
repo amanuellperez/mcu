@@ -75,6 +75,6 @@ void Main::send_message()
     atd::print(uart, msg_sending);
     uart << msg << '\n'; // si se pone a continuación del const char* da error!!!
 					   //
-    dev::NEC_protocol::transmit<Clock_us, SWG>(msg);
+    dev::NEC_protocol::transmit<Miniclock_us, SWG>(msg);
 }
 

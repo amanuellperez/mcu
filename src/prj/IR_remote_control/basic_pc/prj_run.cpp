@@ -18,7 +18,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "prj_main.h"
-#include "dev_square_wave.h"
 
 void Main::print_run_menu()
 {
@@ -51,14 +50,16 @@ void Main::run()
 
 void Main::generate_38kHz()
 {
-    SWG::generate_38kHz_on();
+    static constexpr uint16_t frequency = 38000;
+    SWG swg{frequency};
+    swg.generate_burst();
 
     UART uart;
     atd::print(uart, msg_generate_38kHz_on_msg);
     char c{};
     uart >> c;
 
-    SWG::generate_38kHz_off();
+    swg.stop();
 }
 
 
@@ -87,7 +88,7 @@ void Main::replay()
 
     char c{};
     uart >> c;
-    if (SWG::transmit(pulse))
+    if (transmit<SWG, Miniclock_us>(pulse))
 	atd::print(uart, msg_ok);
 
     else

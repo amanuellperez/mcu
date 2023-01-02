@@ -1,4 +1,4 @@
-# Copyright (C) 2019-2021 A.Manuel L.Perez <amanuel.lperez@gmail.com>
+# Copyright (C) 2019-2023 A.Manuel L.Perez <amanuel.lperez@gmail.com>
 #
 # This file is part of the MCU++ Library.
 #
@@ -301,7 +301,8 @@ clean:
 super_clean: clean
 	$(RM) *.elf *.hex *.d *.eep *.lst \
 		  *.lss *.sym *.map *.eeprom \
-		  *.o *.a tags *.tmp
+		  *.o *.a tags *.tmp \
+		  *.ii *.s
 
 
 
@@ -344,7 +345,7 @@ help:
 	@$(PRINTF) "help	: Muestra esta ayuda.\n"
 	@$(PRINTF) "debug	: Muestra las variables usadas para compilar.\n"
 	@$(PRINTF) "          Si se quiere ver el código asm que genera,\n"
-	@$(PRINTF) "          compilar con la opción -save-temps.\n"
+	@$(PRINTF) "          añadir 'USER_CXXFLAGS=-save-temps -fverbose-asm' al makefile.\n"
 	@$(PRINTF) "\nFUSES:\n"
 	@$(PRINTF) "------\n"
 	@$(PRINTF) "show_fuses       : Muestra los fuses.\n"

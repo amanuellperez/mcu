@@ -89,7 +89,7 @@ void Main::test_remote_control()
 
     while(i != rc.null){
 	uart << "cmd escrito = " << i << '\n';
-	if (rc.transmit<Clock_us, SWG>(i))
+	if (rc.transmit<Miniclock_us, SWG>(i))
 	    uart << "OK\n";
 	else 
 	    uart << "ERROR\n"; // TODO: progmem

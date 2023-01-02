@@ -1,4 +1,4 @@
-// Copyright (C) 2022 A.Manuel L.Perez 
+// Copyright (C) 2022-2023 A.Manuel L.Perez 
 //           mail: <amanuel.lperez@gmail.com>
 //           https://github.com/amanuellperez/mcu
 //
@@ -29,6 +29,19 @@
  * HISTORIA
  *    A.Manuel L.Perez
  *    13/12/2022 Square_wave_generator
+ *		 PRO : Fácil de generar una señal de una frecuencia cualquiera.
+ *		 CONS: Introduce un delay por culpa de tener que configurar el
+ *		       Timer para generar esa frecuencia.
+ *
+ *		 Uso: generar música.
+ *
+ *    02/01/2023 Square_wave_burst_generator
+ *		 PRO : No introduce delays ya que se configura el Timer en el
+ *		       constructor de la clase.
+ *		 CONS: No se puede cambiar la frecuencia fácilmente. Hay que 
+ *		       construir un nuevo objeto.
+ *
+ *		 Uso: generar tren de pulsos de IR remote control.
  *
  ****************************************************************************/
 #include <type_traits>
@@ -37,7 +50,7 @@
 namespace dev{
 
 // Generamos ondas cuadradas en el pin npin del timer Timer_t.
-// Controlamos la duración de los bursts usando Miniclock_t.
+// Controlamos la duración de los generates usando Miniclock_t.
 // Basamos el Square_wave_generator en dos dispositivos genéricos:
 //	(1) Un Square_wave_generator_g: este suministra la función
 //		    generate(frequency)
@@ -45,18 +58,18 @@ namespace dev{
 //	    señal, sin controlar el tiempo.
 //
 //	(2) Un Miniclock: que nos permite controlar el tiempo que dura el
-//	    burst
+//	    generate
 //
 //  Básicamente lo que hace es ampliar la capacidad del SWG0 de 
 //	generate(frequency) a generate(frequency, time)
 //
 //  DUDA: nombres? Estoy duplicando el nombre de Square_wave_generator aquí y
-//  el que suministra el atmega. ¿Llamar a este Square_burst_generator?
+//  el que suministra el atmega. ¿Llamar a este Square_generate_generator?
 //  ¿o al del avr Basic_square_wave_generator? @_@
 template < typename SWG0	// Square_wave_generator_g
 	 , typename Output_pin0	// pin donde generar la señal
 	 , typename Miniclock0	
-	 , bool call_cfg0 = true> // ver comentarios en burst()
+	 , bool call_cfg0 = true> // ver comentarios en generate()
 class Square_wave_generator{
 public:
 // Internal devices
@@ -87,12 +100,12 @@ public:
     /// Espera, bloqueando, a que pasen los ticks indicados.
     static void wait(const counter_type& ticks);
     
-// Interface: burst
-    /// Genera un burst de una onda cuadrada de frecuencia `freq` que dura
+// Interface: generate
+    /// Genera un generate de una onda cuadrada de frecuencia `freq` que dura
     /// `ticks`. Si es Miniclock_us, ticks serán microsegundos.
     /// Si es Miniclock_ms, ticks serán milisegundos.
     /// Bloquea: no devuelve el control hasta después de que pasen los ticks.
-    static void burst(uint32_t freq, const counter_type& ticks);
+    static void generate(uint32_t freq, const counter_type& ticks);
 
 private:
 // Cfg
@@ -104,42 +117,43 @@ template <typename S, typename OP, typename MC, bool ci>
 void Square_wave_generator<S, OP, MC, ci>::cfg()
 {
     Miniclock::cfg();
+    Miniclock::start();	// Es necesario encender el reloj!!!
     // SWG no tiene cfg
 }
 
 
 // (RRR) ¿llamar o no llamar a `cfg()` aquí?
-//       Pros: Muy sencillo de usar. Si se quiere generar un burst llamas a
+//       Pros: Muy sencillo de usar. Si se quiere generar un generate llamas a
 //       esta función y todo funciona.
 //
 //       Cons: 
 //	    (1) Es un pelín más ineficiente. Si quiero generar una onda IR
-//	        para un mando de TV tengo que generar un montón de burst de 38
+//	        para un mando de TV tengo que generar un montón de generate de 38
 //	        kHz seguidos. Llamar a `cfg` ralentizará la generación del
 //	        tren de pulsos pudiendo no funcionar.
 //
 //	    (2) Suministro 2 formas de manejar esta clase:
 //		[2.1] Si solo quieres llamar ocasionalmente a esta función, 
-//		      llamas a `burst`.
+//		      llamas a `generate`.
 //
 //		[2.2] Para generar un tren de pulsos haré:
 //		      cfg();
 //		      for (...)
-//			burst(...)
+//			generate(...)
 //
 //	Al redactar esto y observar que necesito los 2 interfaces optó por
 //	parametrizarlo con `call_cfg` y así que el cliente elija qué interfaz
 //	usar.
 template <typename S, typename OP, typename MC, bool ci>
 void Square_wave_generator<S, OP, MC, ci>::
-    burst(uint32_t freq, const counter_type& ticks)
+    generate(uint32_t freq, const counter_type& ticks)
 {
     if constexpr (call_cfg)
 	cfg(); 
 	    
 //  Pin::write_zero(); <-- ¿necesario?
     generate(freq);
-    // Miniclock::wait(ticks);
+    //Miniclock::wait(ticks);
     wait(ticks);
     stop();
 //  Pin::write_zero(); // lo dejamos en cero
@@ -156,7 +170,10 @@ template <typename S, typename OP, typename MC, bool ci>
 inline void Square_wave_generator<S, OP, MC, ci>::stop()
 {
     SWG::stop();
-    Pin::write_zero(); // lo dejamos en cero
+
+    // Garantizamos que acabe en cero
+    Pin::as_output();	// OJO: el pin está conectado al SWG no al GPIO
+    Pin::write_zero(); 
 }
 
 
@@ -168,6 +185,108 @@ inline void Square_wave_generator<S, OP, MC, ci>::wait(const counter_type& ticks
     Miniclock::wait(ticks);
 }
 
+
+/***************************************************************************
+ *			Square_wave_burst_generator
+ *
+ *  Clase pensada para generar burst de una misma frecuencia pero donde sea
+ *  muy importante la eficiencia.
+ *
+ *  Ejemplo: generar el tren de pulsos de un IR remote control.
+ *
+ ***************************************************************************/
+template < typename SWG0	// Square_wave_burst_generator_g
+	 , typename Output_pin0	// pin donde generar la señal
+	 , typename Miniclock0>
+class Square_wave_burst_generator{
+public:
+// Internal devices
+    using SWG				= SWG0;
+    using Pin				= Output_pin0;
+    using Miniclock			= Miniclock0;
+    using counter_type			= typename Miniclock::counter_type;
+
+// Preconditions
+    static_assert(SWG::is_pin(Pin::number), "Incorrect pin. "
+				     "Doesn't belong to Square_wave_g");
+
+    static_assert(!std::is_same_v<typename SWG0::Timer, typename Miniclock::Timer>,
+		  "Timers for SWG and Miniclock have to be differents");
+
+// Constructor
+    // Configura y enciende el miniclock para poder usarlo.
+    Square_wave_burst_generator(uint32_t freq_in_Hz);
+
+// Interface: generate/stop
+    /// Genera una onda de la frecuencia indicada. 
+    /// No bloquea, devolviendo el control inmediatamente.
+    void generate_burst();
+
+    /// Para el generador. Es la opuesta a `generate`.
+    void stop();
+
+    /// Espera, bloqueando, a que pasen los ticks indicados.
+    void wait(const counter_type& ticks);
+    
+// Interface: generate_burst
+    /// Genera un generate de una onda cuadrada de frecuencia `freq` que dura
+    /// `ticks`. Si es Miniclock_us, ticks serán microsegundos.
+    /// Si es Miniclock_ms, ticks serán milisegundos.
+    /// Bloquea: no devuelve el control hasta después de que pasen los ticks.
+   void generate_burst(const counter_type& ticks);
+
+private:
+    SWG swg_;
+
+};
+
+
+template <typename S, typename OP, typename MC>
+inline Square_wave_burst_generator<S, OP, MC>::
+    Square_wave_burst_generator(uint32_t freq_in_Hz) 
+	: swg_{freq_in_Hz} 
+{ 
+    Miniclock::cfg();
+    Miniclock::start();
+}
+
+
+template <typename S, typename OP, typename MC>
+inline 
+void Square_wave_burst_generator<S, OP, MC>::
+				    generate_burst(const counter_type& ticks) 
+{ 
+    generate_burst();
+    wait(ticks);
+    stop();
+}
+
+
+
+template <typename S, typename OP, typename MC>
+inline 
+void Square_wave_burst_generator<S, OP, MC>::generate_burst() 
+{ 
+    swg_.template generate_burst<Pin::number>(); 
+}
+
+
+template <typename S, typename OP, typename MC>
+inline void Square_wave_burst_generator<S, OP, MC>::stop()
+{
+    SWG::stop();
+
+    // Garantizamos que acabe en cero
+    Pin::as_output();	// OJO: el pin está conectado al SWG no al GPIO
+    Pin::write_zero(); 
+}
+
+template <typename S, typename OP, typename MC>
+inline 
+void Square_wave_burst_generator<S, OP, MC>::wait(const counter_type& ticks)
+{
+    Miniclock::wait(ticks);
+}
 
 
 }// namespace

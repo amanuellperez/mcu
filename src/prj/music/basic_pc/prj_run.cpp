@@ -24,7 +24,7 @@ void Main::run()
 {
     UART uart;
     uart << "\n\nTesting music functions\n"
-	    "Connect a buzzer (or speaker) to pin " << speaker_pin;
+	    "Connect a buzzer (or speaker) to pin " << (int) speaker_pin;
 
     while (1){
 	uart << "\n-----------------------\n"

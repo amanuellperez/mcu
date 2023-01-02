@@ -76,6 +76,7 @@
  *  HISTORIA
  *    A.Manuel L.Perez
  *    10/12/2022 Miniclock_ms/us
+ *    31/12/2022 unsafe_time/unsafe_reset
  *
  ****************************************************************************/
 #include <dev_concepts.h>
@@ -83,11 +84,21 @@
 			    
 namespace dev{
 /***************************************************************************
- *			    MINICLOCK_MS
+ *			    MINICLOCK_XX
  ***************************************************************************/
 namespace dev_{
 // De momento no suministro funciones write/reset/resume porque no parece que
 // tenga mucho sentido. Si se necesita en el futuro añadirlas.
+//
+//
+// (RRR) Es responsabilidad del cliente llamar explicitamente a `start` para
+//       que funcione el reloj. Si se llama a Miniclock::wait() sin haber
+//       llamado a `start` no hará nada.
+//
+//       ¿Por qué? El Miniclock_us está pensado para medir microsegundos. Si
+//       cada vez que llamo a wait tengo que perder tiempo encendiéndolo
+//       estámos perdiendo mucho tiempo. Esta pretende ser una clase eficiente
+//       de bajo nivel.
 template <typename Micro_t,   // micro que estamos usando
 	 typename Timer_counter0, int period0>
 class Miniclock{
@@ -96,8 +107,6 @@ public:
     using Micro	       = Micro_t;
     using Timer	       = Timer_counter0::Timer; // Timer usado internamente
     using Timer_counter= Timer_counter0;
-    // DUDA: counter_type o value_type???
-    // Estamos contando milisegundos: counter_type tiene sentido.
     using counter_type = Timer_counter::counter_type;
 
 // Operations
@@ -108,15 +117,25 @@ public:
     /// Configura el Time_counter interno
     static void cfg(); 
 
-    /// Enciende el reloj desde 0.
+    /// Enciende el reloj desde 0. 
     static void start();
 
     /// Para el reloj sin borrar el valor que estuviese mostrando.
     static void stop();
     
+    // time
+    // ----
     /// Devuelve el número de milisegundos transcurridos desde start()
-    static counter_type read(); // DUDA: mejor time()??? time_in_ms()???
+    static counter_type time();
 
+    // Cuando se quiera eficiencia, deshabilitar las interrupciones (como
+    // ocurre por defecto dentro de una ISR) y usar las funciones unsafe.
+    // Serán un pelín más eficientes.
+    static counter_type unsafe_time()
+	    requires Unsafe_device<Timer_counter>;
+
+    static counter_type unsafe_time()
+	    requires Safe_device<Timer_counter>;
 
     /// Espera t ticks de reloj. Si el tick son microsegundos, espera t
     /// microsegundos. Si el tick son milisegundos, t milisegundos.
@@ -124,6 +143,17 @@ public:
 	    requires Unsafe_device<Timer_counter>;
 
     static void wait(const counter_type& t)
+	    requires Safe_device<Timer_counter>;
+
+    // reset
+    // -----
+    /// Pone el contador a cero. No enciende el timer como start.
+    static void reset();
+
+    static void unsafe_reset()
+	    requires Unsafe_device<Timer_counter>;
+
+    static void unsafe_reset()
 	    requires Safe_device<Timer_counter>;
 
 // Info
@@ -136,6 +166,8 @@ private:
 };
 
 
+// Defino todo el interfaz como inline ya que en el Miniclock_us busco que sea
+// lo más eficiente posible. No podemos perder tiempo llamando a funciones.
 template <typename M, typename T, int p>
 inline void Miniclock<M, T, p>::cfg()
 {
@@ -143,7 +175,7 @@ inline void Miniclock<M, T, p>::cfg()
 }
 
 template <typename M, typename T, int period>
-void Miniclock<M, T, period>::start()
+inline void Miniclock<M, T, period>::start()
 {
     Timer_counter::reset();
     Timer_counter::template on<period>(); // 1024 us = 1000 +- 10% = 1 ms
@@ -156,21 +188,34 @@ inline void Miniclock<M, T, p>::stop()
 }
 
 template <typename M, typename T, int p>
-inline Miniclock<M, T, p>::counter_type Miniclock<M, T, p>::read()
+inline Miniclock<M, T, p>::counter_type Miniclock<M, T, p>::time()
 {
     return Timer_counter::value();
 }
 
+template <typename M, typename T, int p>
+inline Miniclock<M, T, p>::counter_type Miniclock<M, T, p>::unsafe_time()
+	    requires Unsafe_device<Timer_counter>
+{
+    return Timer_counter::unsafe_value();
+}
 
 template <typename M, typename T, int p>
-void Miniclock<M, T, p>::wait(const counter_type& t)
+inline Miniclock<M, T, p>::counter_type Miniclock<M, T, p>::unsafe_time()
+	    requires Safe_device<Timer_counter>
+{
+    return Timer_counter::safe_value();
+}
+
+
+template <typename M, typename T, int p>
+inline void Miniclock<M, T, p>::wait(const counter_type& t)
 	    requires Unsafe_device<Timer_counter>
 
 {
     dev::Disable_interrupts<Micro> lock;	
 
     Timer_counter::unsafe_reset();
-    Timer_counter::template on<period>();
     
     while (Timer_counter::unsafe_value() < t)
     { ; }
@@ -178,14 +223,35 @@ void Miniclock<M, T, p>::wait(const counter_type& t)
 
 
 template <typename M, typename T, int p>
-void Miniclock<M, T, p>::wait(const counter_type& t)
+inline void Miniclock<M, T, p>::wait(const counter_type& t)
 	    requires Safe_device<Timer_counter>
 {
     Timer_counter::reset();
-    Timer_counter::template on<period>();
     
     while (Timer_counter::value() < t)
     { ; }
+}
+
+
+
+template <typename M, typename T, int p>
+inline void Miniclock<M, T, p>::reset()
+{
+    Timer_counter::reset();
+}
+
+template <typename M, typename T, int p>
+inline void Miniclock<M, T, p>::unsafe_reset()
+	requires Unsafe_device<Timer_counter>
+{
+    Timer_counter::unsafe_reset();
+}
+
+template <typename M, typename T, int p>
+inline void Miniclock<M, T, p>::unsafe_reset()
+	requires Safe_device<Timer_counter>
+{
+    Timer_counter::reset();
 }
 
 

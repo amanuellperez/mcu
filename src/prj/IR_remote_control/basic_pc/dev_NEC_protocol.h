@@ -86,11 +86,11 @@ public:
     //	    transmit(compon_NEC_message{addr, cmd});
     //	    transmit(compon_NEC_message{addr, inv_addr, cmd});
     //	y de esa forma solo damos una versión de transmit.
-    // void transmit (typename Clock_us::counter_type time_first_burst_in_us, 
+    // void transmit (typename Miniclock_us::counter_type time_first_burst_in_us, 
     //			uint8_t address, uint8_t command);
-    // void transmit (typename Clock_us::counter_type time_first_burst_in_us, 
+    // void transmit (typename Miniclock_us::counter_type time_first_burst_in_us, 
     //			uint8_t address, uint8_t inv_address, uint8_t command);
-    template <typename Clock_us, typename SWG>
+    template <typename Miniclock_us, typename SWG>
     static 
     void transmit (const NEC_message& msg);
 
