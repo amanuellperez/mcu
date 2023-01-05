@@ -201,6 +201,31 @@ void test_generic_time()
 }
 
 
+void test_const_generic_time()
+{
+    test::interfaz("const_Generic_time");
+
+    std::tm t;
+
+    t.tm_sec = 1;
+    t.tm_min = 2;
+    t.tm_hour = 3;
+    t.tm_mday = 4;
+    t.tm_mon = 5;
+    t.tm_year = 6;
+    t.tm_wday = 3;
+
+    atd::Generic_time_view<const std::tm> gt{t};
+    CHECK_TRUE(gt.seconds() == 1, "seconds");
+    CHECK_TRUE(gt.minutes() == 2, "minutes");
+    CHECK_TRUE(gt.hours() == 3, "hours");
+    CHECK_TRUE(gt.day() == 4, "day");
+    CHECK_TRUE(gt.month() == 6, "month");
+    CHECK_TRUE(gt.year() == 1906, "year");
+    CHECK_TRUE(gt.weekday() == 3, "weekday");
+}
+
+
 int main()
 {
 try{
@@ -208,6 +233,7 @@ try{
     test_ostream();
     test_istream();
     test_generic_time();
+    test_const_generic_time();
 }catch(const std::exception& e){
     std::cerr << e.what() << '\n';
     return 1;

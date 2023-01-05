@@ -1,5 +1,5 @@
 DIRS = chronometer_ms	\
-		system_clock
+		clock_s
 
 include $(MCU_RECRULES)
 

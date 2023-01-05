@@ -299,10 +299,33 @@ public:
 
 // Timer on/off
 // ------------
-    template<uint16_t period
+    /// Enciende el contador. El periodo interno del timer es el indicado por
+    /// period_in_us. 
+    /// Ejemplo: si period_in_us = 1, el contador avanzará 1 cada
+    /// microsegundo.
+    ///
+    /// Esta función será la típica usada en los Miniclocks que miden el
+    /// tiempo directamente del contador.
+    template<uint16_t period_in_us
 	    , uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
     static void on() 
-    {timer1_::set_clock_period_in_us<period, clock_frequency_in_hz>();}
+    {timer1_::set_clock_period_in_us<period_in_us, clock_frequency_in_hz>();}
+
+
+    /// Enciende el contador configurándolo de tal manera que genera un
+    /// overflow cada segundo.
+    /// 
+    /// Esta función es típica para que la llame Clock_s que tiene que
+    /// capturar la interrupción ISR_TIMER1_COMPA cada 1 segundo. El cliente
+    /// llama a esta función y garantiza que el timer queda correctamente
+    /// configurado para generar esas interrupciones. 
+    /// Recordar que el cliente es responsable de llamar a
+    /// `enable_interrupts()` para que funcione.
+    // TODO: ¿cómo poder guardar aquí la ISR que tiene que llamar el cliente y
+    // que sea eficiente? ¿Algo del tipo: Time_counter1_g::ISR{ ... } ???
+    // Claramente no puede ser una macro.
+    template <uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
+    static void on_with_overflow_every_1s();
 
     /// Apagamos el generador de señales.
     static void off() { Timer::off(); }
@@ -364,6 +387,27 @@ public:
     static constexpr counter_type max_top()
     { return Timer::max(); }
 };
+
+
+// (RRR) Números mágicos:
+//	 Para 1 MHz: 15.625 * 64 us = 1.000.000 us = 1 s
+template <uint32_t clock_frequency_in_hz>
+inline void Time_counter1_generic::on_with_overflow_every_1s()
+{
+// cfg_overflow_every_1s();
+    if constexpr (clock_frequency_in_hz == 1'000'000ul){
+	init(15'625);
+	Timer::clock_frequency_divide_by_64();
+    }
+
+    else
+        static_assert(atd::always_false_v<int>,
+                      "on_with_overflow_every_1s: I'm lazy. I haven't implemented "
+                      "that frequency. Please implement it.");
+
+    enable_top_interrupt();
+
+}
 
 
 using Timer_counter1_g = Time_counter1_generic;

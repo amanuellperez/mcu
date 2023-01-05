@@ -166,16 +166,16 @@ struct duration_values{
  *  tick to the next).
  *  Tenemos que: num_segundos = count() * period;
  */
-template <typename Rep, typename Period>
+template <typename Rep, typename Period0>
 struct duration{
-    // preconditions. TODO: con concepts esto se puede simplificar.
-    static_assert(__is_ratio<Period>::value,
-                  "period must be a specialization of ratio");
-    static_assert(Period::num > 0, "period must be positive");
-
 public:
     using rep    = Rep;
-    using period = typename Period::type;
+    using period = typename Period0::type;
+
+    // preconditions. TODO: con concepts esto se puede simplificar.
+    static_assert(__is_ratio<period>::value,
+                  "period must be a specialization of ratio");
+    static_assert(period::num > 0, "period must be positive");
 
 // construction
     constexpr duration() = default;

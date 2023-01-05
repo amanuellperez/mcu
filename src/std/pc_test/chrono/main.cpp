@@ -59,6 +59,13 @@ struct Std_clock{
 
 
 
+void test_asserts()
+{
+    static_assert(!mtd::chrono::__is_ratio<int>::value);
+    static_assert(mtd::chrono::__is_ratio<mtd::ratio<1>>::value);
+    static_assert(mtd::chrono::__is_ratio<mtd::ratio<1,2>>::value);
+}
+
 
 void test_duration()
 {
@@ -286,6 +293,7 @@ int main()
 try{
     test::header("chrono");
 
+    test_asserts();
     test_duration();
     test_time_point();
     test_clocks();

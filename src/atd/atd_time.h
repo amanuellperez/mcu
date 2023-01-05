@@ -33,6 +33,7 @@
  *	31/10/2019 Manipuladores de tiempo std::tm.
  *	27/12/2020 Generic_time_view
  *	08/03/2022 Generic_time_view (temporal hasta reescribir Generic_time_view)
+ *	05/01/2023 Simplifico implementación Generic_time_view con requires
  *
  ****************************************************************************/
 #include <ctime>
@@ -131,40 +132,14 @@ struct Generic_time_traits{
 // Generic_time_translator es el interfaz que suministra cada reloj indicando
 // cómo traducir de su idioma al idioma de Generic_time_view. Ver
 // Generic_time_translator<std::tm> para ver ejemplo de implementación.
-// (RRR) El problema está en definir dos versiones de Generic_time_view: const y no
-//       const. Si se deja hacer esto a quien implementa la clase de reloj le
-//       toca implementar las dos versiones. El Generic_time_translator
+// (RRR) El problema está en definir dos versiones de Generic_time_view: const 
+//	 y no const. Si se deja hacer esto a quien implementa la clase de reloj 
+//	 le toca implementar las dos versiones. El Generic_time_translator
 //       es una forma de implementar Generic_time_view y const_Generic_time_view en
 //       general y que solo sea necesario implementar Generic_time_translator
 //       una sola vez.
 template <typename T>
 struct Generic_time_translator;
-
-
-// versión const
-template <typename T>
-class const_Generic_time_view{
-public:
-    using GT = Generic_time_translator<T>;
-
-// constructor
-    const_Generic_time_view(const T& t):t_{t} {}
-
-// members
-    int seconds() const { return GT::seconds(t_); }
-    int minutes() const { return GT::minutes(t_); }
-    int hours() const   { return GT::hours(t_); }
-
-    int day() const   { return GT::day(t_); }
-    int month() const { return GT::month(t_); }
-    int year() const  { return GT::year(t_);}
-
-    // weekday = [0..6]
-    int weekday() const {return GT::weekday(t_);}
-
-private:
-    const T& t_;
-};
 
 
 // Observar que al internamente solo almacenar una referncia se puede pasar
@@ -173,39 +148,60 @@ private:
 template <typename T>
 class Generic_time_view{
 public:
-    using GT = Generic_time_translator<T>;
+    using Time = std::remove_cv_t<T>;
+    using GT = Generic_time_translator<Time>;
 
 // constructor
     Generic_time_view(T& t):t_{t} {}
 
 // Conversión implícita: no const a const (es lo de esperar)
-    operator const_Generic_time_view<T>() const { return const_Generic_time_view{t_};}
+    operator Generic_time_view<const Time>() const 
+	requires (!std::is_const_v<T>)
+	{ return Generic_time_view<const Time>{t_};}
 
 // members
     int seconds() const { return GT::seconds(t_); }
-    void seconds(int s) { GT::seconds(t_, s); }
+    void seconds(int s)
+	requires (!std::is_const_v<T>)
+	{ GT::seconds(t_, s); }
 
     int minutes() const { return GT::minutes(t_); }
-    void minutes(int m) { GT::minutes(t_, m); }
+    void minutes(int m) 
+	requires (!std::is_const_v<T>)
+	{ GT::minutes(t_, m); }
 
     int hours() const { return GT::hours(t_); }
-    void hours(int h) { GT::hours(t_, h); }
+    void hours(int h) 
+	requires (!std::is_const_v<T>)
+	{ GT::hours(t_, h); }
 
     int day() const { return GT::day(t_); }
-    void day(int d) { GT::day(t_, d); }
+    void day(int d) 
+	requires (!std::is_const_v<T>)
+	{ GT::day(t_, d); }
 
     int month() const { return GT::month(t_); }
-    void month(int m) { GT::month(t_, m);}
+    void month(int m) 
+	requires (!std::is_const_v<T>)
+	{ GT::month(t_, m);}
 
     int year() const { return GT::year(t_);}
-    void year(int y) { GT::year(t_, y);}
+    void year(int y) 
+	requires (!std::is_const_v<T>)
+	{ GT::year(t_, y);}
 
     int weekday() const {return GT::weekday(t_);}
-    void weekday(int wd) {GT::weekday(t_, wd);}
+    void weekday(int wd) 
+	requires (!std::is_const_v<T>)
+	{GT::weekday(t_, wd);}
 
 private:
     T& t_;
 };
+
+
+template <typename T>
+using const_Generic_time_view = Generic_time_view<T>;
 
 
 // Funciones de impresión
@@ -274,43 +270,6 @@ std::ostream& print_weekday(std::ostream& out,
 { return print_weekday<weekdays_length, std::ostream, T>(out, t, weekdays); }
 
 
-// Versiones no const.
-// TODO: estas versiones sobran. Deberían de poder convertirse directamente el
-// Generic_time_view a const_Generic_time_view. Sin embargo, falla la deducción
-// automática. ¿Por qué???
-template <typename Out, typename T>
-inline Out& print_time(Out& out, const Generic_time_view<T>& t, char sep = ':')
-{ return print_time(out, const_Generic_time_view<T>{t}, sep); }
-
-template <typename Out, typename T>
-inline Out& print_date(Out& out, const Generic_time_view<T>& t, char sep = '/')
-{ return print_date(out, const_Generic_time_view<T>{t}, sep); }
-
-template <size_t weekdays_length, typename Out, typename T>
-Out& print_weekday(Out& out, const Generic_time_view<T>& t, const char* weekdays)
-{
-    return print_weekday<weekdays_length, Out, T>(
-				    out, const_Generic_time_view<T>{t}, weekdays);
-}
-
-template <typename T>
-inline std::ostream&
-print_time(std::ostream& out, const Generic_time_view<T>& t, char sep = ':')
-{ return print_time(out, const_Generic_time_view<T>{t}, sep); }
-
-template <typename T>
-inline std::ostream&
-print_date(std::ostream& out, const Generic_time_view<T>& t, char sep = '/')
-{ return print_date(out, const_Generic_time_view<T>{t}, sep); }
-
-template <size_t weekdays_length, typename T>
-std::ostream&
-print_weekday(std::ostream& out, const Generic_time_view<T>& t, const char* weekdays)
-{
-    return 
-	print_weekday<weekdays_length>(out, const_Generic_time_view<T>{t}, weekdays);
-}
-
 
 // Manipuladores de impresión
 // --------------------------
@@ -329,10 +288,6 @@ template <typename T>
 inline _Only_time<Generic_time_view<T>> only_time(Generic_time_view<T> t, char sep = ':')
 { return _Only_time<Generic_time_view<T>>{t, sep}; }
 
-template <typename T>
-inline _Only_time<const_Generic_time_view<T>> only_time(const_Generic_time_view<T> t,
-                                                   char sep = ':')
-{ return _Only_time<const_Generic_time_view<T>>{t, sep}; }
 
 template <typename T>
 inline std::ostream& operator<<(std::ostream& out, _Only_time<T> ot)
@@ -354,11 +309,6 @@ struct _Only_date{
 template <typename T>
 inline _Only_date<Generic_time_view<T>> only_date(Generic_time_view<T> t, char sep = '/')
 { return _Only_date<Generic_time_view<T>>{t, sep}; }
-
-template <typename T>
-inline _Only_date<const_Generic_time_view<T>> only_date(const_Generic_time_view<T> t,
-                                                   char sep = '/')
-{ return _Only_date<const_Generic_time_view<T>>{t, sep}; }
 
 
 template <typename T>

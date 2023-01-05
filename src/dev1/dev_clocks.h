@@ -61,46 +61,83 @@
 namespace dev{
 
 /***************************************************************************
- *			    SYSTEM_CLOCK
+ *				CLOCK_S
  ***************************************************************************/
-template <typename Time_counter, uint16_t timer_period_in_us>
-constexpr inline typename Time_counter::counter_type __system_clock_top()
+// Si se quieren operar con los time_points hacer Rep_t signed.
+// Voy a seguir el estilo de std::system_clock
+template <typename Time_counter_g>
+class Clock_s
 {
-    constexpr uint32_t one_second_in_us = 1000000u;
-    constexpr uint32_t top = one_second_in_us/timer_period_in_us;
+public:
+    using Time_counter	= Time_counter_g;
+    using duration	= std::chrono::seconds;
+    using rep		= duration::rep;
+    using period	= duration::period;
+    using time_point	= std::chrono::time_point<Clock_s, duration>;
+    static constexpr bool is_steady = true;
 
-    static_assert(top < Time_counter::max_top(),
-                  "Top too great for this timer. Try another period or choose "
-                  "a different F_CPU.");
-    return atd::safe_static_cast<typename Time_counter::counter_type, uint32_t, top>();
+    // DUDA: como siempre la duda con los nombres:
+    //	    on/off???, start/stop???, xxx/yyy???
+    // En un cronómetro me suena mejor start/stop, pero en un reloj que lo
+    // normal es que lo enciendas y no lo apagues, ahora me suena mejor on/off
+    // (problema: apostamos a que en unos días me suena mejor otra cosa? @_@)
+    static void on();
+
+//    /// Ponemos en hora el reloj.
+//    Vamos a dar por supuesto que es un reloj Unix. La epoch empieza el
+//    01/01/1970, luego no hay que almacenarla en ningún sitio. Cuando se
+//    quiera poner en hora se llamará a la función set(Generic_time_view t),
+//    que llamara a set(tm):
+//    donde a partir de t se calculará counter (= mktime(tm);)
+//    static void set(rep counter0) { counter_ = counter0; }
+
+//    static void set
+//    static void set(const tm& t);
+
+    static time_point now() noexcept;
+
+    /// Damos un tick al clock.
+    static void tick() {counter_ = counter_ + 1;}
+
+    // Map to C API
+    static time_t to_time_t(const time_point& t) noexcept;
+    static time_point from_time_t(time_t t) noexcept;
+
+private:
+    inline static volatile rep counter_;
+};
+
+
+template <typename TC>
+void Clock_s<TC>::on()
+{
+    counter_ = 0;
+    Time_counter::on_with_overflow_every_1s();
 }
 
 
-// Time_counter: es un Generic_timer.
-// (RRR) timer_period_in_us solo lo necesito en init. ¿Por qué parametrizar
-//       todo el System_clock con timer_period_in_us cuando no es necesario?
-//       Para simplificar el uso. En el archivo 'dev.h' se define el
-//       System_clock, y el resto del programa no necesita recordar que el
-//       init tienes que pasarle el timer_period_in_us. Queda más claro el
-//       código (y posiblemente más portable)
-template <typename Time_counter, uint16_t timer_period_in_us>
-struct System_clock : public std::chrono::system_clock {
+template <typename TC>
+inline Clock_s<TC>::time_point Clock_s<TC>::now() noexcept
+{
+    return time_point{duration{counter_}};
+}
 
-    constexpr static void init()
-    {
-	Time_counter::
-	    init(__system_clock_top<Time_counter, timer_period_in_us>());
-        Time_counter::template on<timer_period_in_us>();
-    }
 
-    /// Ponemos en hora el reloj.
-    static void set(const time_point& t0) { ::set_system_time(to_time_t(t0)); }
+// en avr-libc, time_t está definido como uint32_t, time_point está usando
+// seconds que tiene int64_t como representación. Como se ve con avr-libc no
+// se pueden manejar time_t negativos (aunque sí time_points negativos).
+template <typename TC>
+inline time_t Clock_s<TC>::to_time_t(const time_point& t) noexcept
+{
+    return static_cast<time_t>(t.time_since_epoch().count());
+}
 
-    /// Damos un tick al clock.
-    static void tick() {::system_tick();}
 
-};
-
+template <typename TC>
+inline Clock_s<TC>::time_point Clock_s<TC>::from_time_t(time_t t) noexcept
+{
+    return time_point{duration{t}};
+}
 
 
 /***************************************************************************
