@@ -99,7 +99,7 @@ constexpr const uint8_t week_days_length = 2;
 
 template <typename Font, typename LCD, typename Keyrow, typename T>
 void get_time(LCD& lcd, Keyrow& key, 
-	      atd::Generic_time_view<T>& t, 
+	      atd::Time_view<T>& t, 
 	      uint8_t x0, uint8_t y0)
 {
     lcd.cursor_pos(x0, y0);
@@ -111,7 +111,7 @@ void get_time(LCD& lcd, Keyrow& key,
 
 template <typename Font, typename LCD, typename Keyrow, typename T>
 void get_date(LCD& lcd, Keyrow& key, 
-	      atd::Generic_time_view<T>& t, 
+	      atd::Time_view<T>& t, 
 	      uint8_t x0, uint8_t y0)
 {
     lcd.clear();
@@ -131,7 +131,7 @@ std::time_t get_datetime(
 {
     std::tm* mt = std::gmtime(&t0);
     
-    atd::Generic_time_view<std::tm> t{*mt};
+    atd::Time_view<std::tm> t{*mt};
 
     get_time<Font>(lcd, key, t, x0, y0);
     get_date<Font>(lcd, key, t, x0, y0);
@@ -155,7 +155,7 @@ user_get_datetime(LCD& lcd,
 }
 
 template <typename Font,typename LCD, typename Keyrow, typename T>
-void test_user_time(LCD& lcd, Keyrow key, atd::Generic_time_view<T> t)
+void test_user_time(LCD& lcd, Keyrow key, atd::Time_view<T> t)
 {
     get_time<Font>(lcd, key, t, 0, 0);
     get_date<Font>(lcd, key, t, 0, 0);
@@ -205,7 +205,7 @@ void test_user_time()
 	std::time_t time0 = 630152224; // 20/12/2019 10:17:04
 	std::tm* t0 = std::gmtime(&time0);
 
-        test_user_time<Font>( lcd, key, atd::Generic_time_view<std::tm>{*t0});
+        test_user_time<Font>( lcd, key, atd::Time_view<std::tm>{*t0});
         }
 
 	{
@@ -219,9 +219,9 @@ void test_user_time()
             std::tm* t0 = std::gmtime(&t);
             lcd.cursor_pos(0, 0);
 	    lcd.print("Escrito:");
-	    atd::print_date(lcd, atd::Generic_time_view{*t0});
+	    atd::print_date(lcd, atd::Time_view{*t0});
 	    lcd.print('\n');
-	    atd::print_time(lcd, atd::Generic_time_view{*t0});
+	    atd::print_time(lcd, atd::Time_view{*t0});
             mcu::Micro::wait_ms(4000);
         }
 

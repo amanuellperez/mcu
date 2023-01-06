@@ -49,122 +49,58 @@
  *    ??/??/2020 Escrito
  *    26/02/2021 Basado en Generic_timer
  *    11/04/2022 Reestructurado. Chronometer_ms
- *    06/01/2023 Clock_s
  *
  ****************************************************************************/
 
 #include <chrono>
 
+#include <ctime>
 #include <time.h>
 #include <atd_cast.h>
-#include <dev_interrupt.h>
 
 namespace dev{
 
 /***************************************************************************
- *				CLOCK_S
+ *			    SYSTEM_CLOCK
  ***************************************************************************/
-// Si se quieren operar con los time_points hacer Rep_t signed.
-// Voy a seguir el estilo de std::system_clock
-template <typename Micro, typename Time_counter_g>
-class Clock_s
+template <typename Time_counter, uint16_t timer_period_in_us>
+constexpr inline typename Time_counter::counter_type __system_clock_top()
 {
-public:
-    using Disable_interrupts = dev::Disable_interrupts<Micro>;
-    using Time_counter	= Time_counter_g;
-    using duration	= std::chrono::seconds;
-    using rep		= duration::rep;
-    using period	= duration::period;
-    using time_point	= std::chrono::time_point<Clock_s, duration>;
-    static constexpr bool is_steady = true;
+    constexpr uint32_t one_second_in_us = 1000000u;
+    constexpr uint32_t top = one_second_in_us/timer_period_in_us;
 
-    // DUDA: como siempre la duda con los nombres:
-    //	    on/off???, start/stop???, xxx/yyy???
-    // En un cronómetro me suena mejor start/stop, pero en un reloj que lo
-    // normal es que lo enciendas y no lo apagues, ahora me suena mejor on/off
-    // (problema: apostamos a que en unos días me suena mejor otra cosa? @_@)
-    /// on() enciende el reloj desde 0. Recordar ponerlo en hora con set()
-    static void on();
+    static_assert(top < Time_counter::max_top(),
+                  "Top too great for this timer. Try another period or choose "
+                  "a different F_CPU.");
+    return atd::safe_static_cast<typename Time_counter::counter_type, uint32_t, top>();
+}
 
-    /// Apaga el reloj reiniciar el contador.
-    static void off();
+
+// Time_counter: es un Generic_timer.
+// (RRR) timer_period_in_us solo lo necesito en init. ¿Por qué parametrizar
+//       todo el System_clock con timer_period_in_us cuando no es necesario?
+//       Para simplificar el uso. En el archivo 'dev.h' se define el
+//       System_clock, y el resto del programa no necesita recordar que el
+//       init tienes que pasarle el timer_period_in_us. Queda más claro el
+//       código (y posiblemente más portable)
+template <typename Time_counter, uint16_t timer_period_in_us>
+struct System_clock : public std::chrono::system_clock {
+
+    constexpr static void init()
+    {
+	Time_counter::
+	    init(__system_clock_top<Time_counter, timer_period_in_us>());
+        Time_counter::template on<timer_period_in_us>();
+    }
 
     /// Ponemos en hora el reloj.
-    /// Devuelve true si todo va bien, false si `t` no contiene una fecha
-    /// correcta.
-    static bool set(tm& t);
-
-    static time_point now() noexcept;
+    static void set(const time_point& t0) { ::set_system_time(to_time_t(t0)); }
 
     /// Damos un tick al clock.
-    static void tick() {counter_ = counter_ + 1;}
-
-    // Map to C API
-    static time_t to_time_t(const time_point& t) noexcept;
-    static time_point from_time_t(time_t t) noexcept;
-
-private:
-    inline static volatile rep counter_;
+    static void tick() {::system_tick();}
 
 };
 
-template <typename M, typename TC>
-void Clock_s<M, TC>::on()
-{
-    Disable_interrupts lock{};
-
-    counter_ = 0;
-    Time_counter::on_with_overflow_every_1s();
-}
-
-template <typename M, typename TC>
-inline void Clock_s<M, TC>::off()
-{
-    Time_counter::off();
-}
-
-
-template <typename M, typename TC>
-inline Clock_s<M, TC>::time_point Clock_s<M, TC>::now() noexcept
-{
-    Disable_interrupts lock{};
-
-    return time_point{duration{counter_}};
-}
-
-
-template <typename M, typename TC>
-bool Clock_s<M, TC>::set(tm& t)
-{
-    Disable_interrupts lock{}; 
-
-    time_t sec = ::mktime(&t);
-
-//    if (sec == -1) { // avrlibc time_t es unsigned!!!
-//	counter_ = 0;
-//	return false;
-//    }
-//
-    counter_ = static_cast<volatile rep>(sec);
-    return true;
-}
-
-
-// en avr-libc, time_t está definido como uint32_t, time_point está usando
-// seconds que tiene int64_t como representación. Como se ve con avr-libc no
-// se pueden manejar time_t negativos (aunque sí time_points negativos).
-template <typename M, typename TC>
-inline time_t Clock_s<M, TC>::to_time_t(const time_point& t) noexcept
-{
-    return static_cast<time_t>(t.time_since_epoch().count());
-}
-
-
-template <typename M, typename TC>
-inline Clock_s<M, TC>::time_point Clock_s<M, TC>::from_time_t(time_t t) noexcept
-{
-    return time_point{duration{t}};
-}
 
 
 /***************************************************************************

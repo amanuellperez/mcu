@@ -115,7 +115,7 @@ void test_clock()
 
 
     while (1){
-	atd::Generic_time_view<RTC::Time_point> gt{t};
+	atd::Time_view<RTC::Time_point> gt{t};
 
 	rtc.read(t);
 	print(uart, t)  << '\n';

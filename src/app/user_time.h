@@ -53,7 +53,7 @@ template <uint8_t names_length,
           typename Date_time>
 void user_get_weekday(Screen& scr,
                       Keyboard& key,
-                      atd::Generic_time_view<Date_time>& t,
+                      atd::Time_view<Date_time>& t,
                       uint8_t x0,
                       uint8_t y0,
                       const char* names_weekday)
@@ -69,7 +69,7 @@ template <typename Font = Font_digit_default,
           typename Date_time>
 void user_get_date(Screen& scr,
                    Keyboard& key,
-                   atd::Generic_time_view<Date_time>& t,
+                   atd::Time_view<Date_time>& t,
                    uint8_t x0,
                    uint8_t y0)
 {
@@ -92,7 +92,7 @@ template <typename Font = Font_digit_default,
           typename Date_time>
 void user_get_time(Screen& scr,
                    Keyboard& key,
-                   atd::Generic_time_view<Date_time>& t,
+                   atd::Time_view<Date_time>& t,
                    uint8_t x0,
                    uint8_t y0)
 {
@@ -116,7 +116,7 @@ template <typename Font = Font_digit_default,
           typename Screen,
           typename Date_time>
 void print_time(Screen& scr,
-                atd::Generic_time_view<Date_time>& t,
+                atd::Time_view<Date_time>& t,
                 uint8_t x0,
                 uint8_t y0)
 {
@@ -132,7 +132,7 @@ template <typename Font = Font_digit_default,
           typename Screen,
           typename Date_time>
 void print_date(Screen& scr,
-                atd::Generic_time_view<Date_time>& t,
+                atd::Time_view<Date_time>& t,
                 uint8_t x0,
                 uint8_t y0)
 {

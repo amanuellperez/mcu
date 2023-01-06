@@ -34,6 +34,7 @@
  *	27/12/2020 Generic_time_view
  *	08/03/2022 Generic_time_view (temporal hasta reescribir Generic_time_view)
  *	05/01/2023 Simplifico implementación Generic_time_view con requires
+ *		   y renombro a Time_view
  *
  ****************************************************************************/
 #include <ctime>
@@ -73,7 +74,7 @@ inline bool is_valid_time(const std::tm& t)
 
 
 /*!
- *  \brief  Generic_time_view
+ *  \brief  Time_view
  *
  *  Un RTC guarda la fecha en un formato, mientras que system_clock la guarda
  *  en otro. ¿Cómo poder usar funciones genéricas como user_get_time con
@@ -103,7 +104,7 @@ inline bool is_valid_time(const std::tm& t)
  *	    está en que std::tm y DS1307::Clock tienen nombres diferentes: el
  *	    año en tm es tm_year, mientras que en Clock es year. Necesito
  *	    "fusionar" estas diferentes formas de hablar. Esta struct
- *	    Generic_time_view es lo que hace.
+ *	    Time_view es lo que hace.
  */
 
 struct Generic_time_traits{
@@ -130,12 +131,12 @@ struct Generic_time_traits{
 
 // DUDA: ¿cómo llamarlo?
 // Generic_time_translator es el interfaz que suministra cada reloj indicando
-// cómo traducir de su idioma al idioma de Generic_time_view. Ver
+// cómo traducir de su idioma al idioma de Time_view. Ver
 // Generic_time_translator<std::tm> para ver ejemplo de implementación.
-// (RRR) El problema está en definir dos versiones de Generic_time_view: const 
+// (RRR) El problema está en definir dos versiones de Time_view: const 
 //	 y no const. Si se deja hacer esto a quien implementa la clase de reloj 
 //	 le toca implementar las dos versiones. El Generic_time_translator
-//       es una forma de implementar Generic_time_view y const_Generic_time_view en
+//       es una forma de implementar Time_view y const_Time_view en
 //       general y que solo sea necesario implementar Generic_time_translator
 //       una sola vez.
 template <typename T>
@@ -146,18 +147,18 @@ struct Generic_time_translator;
 // por valor.
 // versión no const
 template <typename T>
-class Generic_time_view{
+class Time_view{
 public:
     using Time = std::remove_cv_t<T>;
     using GT = Generic_time_translator<Time>;
 
 // constructor
-    Generic_time_view(T& t):t_{t} {}
+    Time_view(T& t):t_{t} {}
 
 // Conversión implícita: no const a const (es lo de esperar)
-    operator Generic_time_view<const Time>() const 
+    operator Time_view<const Time>() const 
 	requires (!std::is_const_v<T>)
-	{ return Generic_time_view<const Time>{t_};}
+	{ return Time_view<const Time>{t_};}
 
 // members
     int seconds() const { return GT::seconds(t_); }
@@ -201,7 +202,7 @@ private:
 
 
 template <typename T>
-using const_Generic_time_view = Generic_time_view<T>;
+using const_Time_view = Time_view<T>;
 
 
 // Funciones de impresión
@@ -212,7 +213,7 @@ using const_Generic_time_view = Generic_time_view<T>;
 
 template <typename Out, typename T>
 Out&
-print_time(Out& out, const const_Generic_time_view<T>& t, char sep = ':')
+print_time(Out& out, const const_Time_view<T>& t, char sep = ':')
 { 
 //    char f = out.fill('0');
     print(out, t.hours(), nm::Width{2});
@@ -227,11 +228,11 @@ print_time(Out& out, const const_Generic_time_view<T>& t, char sep = ':')
 
 template <typename T>
 inline std::ostream&
-print_time(std::ostream& out, const const_Generic_time_view<T>& t, char sep = ':')
+print_time(std::ostream& out, const const_Time_view<T>& t, char sep = ':')
 { return print_time<std::ostream, T>(out, t, sep); }
 
 template <typename Out, typename T>
-Out& print_date(Out& out, const const_Generic_time_view<T>& t, char sep = '/')
+Out& print_date(Out& out, const const_Time_view<T>& t, char sep = '/')
 {
 //    char f = out.fill('0');
 
@@ -248,13 +249,13 @@ Out& print_date(Out& out, const const_Generic_time_view<T>& t, char sep = '/')
 
 template <typename T>
 inline std::ostream&
-print_date(std::ostream& out, const const_Generic_time_view<T>& t, char sep = '/')
+print_date(std::ostream& out, const const_Time_view<T>& t, char sep = '/')
 { return print_date<std::ostream, T>(out, t, sep); }
 
 // Paso Out como segundo parámetro para que funcione la deducción automática
 // al llamar a print_weekday<weekdays_length>
 template <size_t weekdays_length, typename Out, typename T>
-Out& print_weekday(Out& out, const const_Generic_time_view<T>& t,
+Out& print_weekday(Out& out, const const_Time_view<T>& t,
                              const char* weekdays)
 {
     atd::Array_const_nstrings day{weekdays, weekdays_length};
@@ -265,7 +266,7 @@ Out& print_weekday(Out& out, const const_Generic_time_view<T>& t,
 
 template <size_t weekdays_length, typename T>
 std::ostream& print_weekday(std::ostream& out,
-                            const const_Generic_time_view<T>& t,
+                            const const_Time_view<T>& t,
                             const char* weekdays)
 { return print_weekday<weekdays_length, std::ostream, T>(out, t, weekdays); }
 
@@ -282,11 +283,11 @@ struct _Only_time{
     char sep;
 };
 
-// Bastaría con la versión const_Generic_time_view, pero no convierte de forma
-// automática Generic_time_view en const_Generic_time_view (???)
+// Bastaría con la versión const_Time_view, pero no convierte de forma
+// automática Time_view en const_Time_view (???)
 template <typename T>
-inline _Only_time<Generic_time_view<T>> only_time(Generic_time_view<T> t, char sep = ':')
-{ return _Only_time<Generic_time_view<T>>{t, sep}; }
+inline _Only_time<Time_view<T>> only_time(Time_view<T> t, char sep = ':')
+{ return _Only_time<Time_view<T>>{t, sep}; }
 
 
 template <typename T>
@@ -307,8 +308,8 @@ struct _Only_date{
 };
 
 template <typename T>
-inline _Only_date<Generic_time_view<T>> only_date(Generic_time_view<T> t, char sep = '/')
-{ return _Only_date<Generic_time_view<T>>{t, sep}; }
+inline _Only_date<Time_view<T>> only_date(Time_view<T> t, char sep = '/')
+{ return _Only_date<Time_view<T>>{t, sep}; }
 
 
 template <typename T>
@@ -352,9 +353,9 @@ struct Generic_time_translator<std::tm>{
 
 };
 
-// TODO: eliminar este a favor del manipulador de Generic_time_view.
+// TODO: eliminar este a favor del manipulador de Time_view.
 //       Para poder eliminarlo faltaría crear los operadores >> en
-//       Generic_time_view. ¿Merece la pena? ¿Los he usado alguna vez?
+//       Time_view. ¿Merece la pena? ¿Los he usado alguna vez?
 // ---------------------
 // Manipulador only_date
 // ---------------------

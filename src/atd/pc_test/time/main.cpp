@@ -36,7 +36,7 @@ void test_ostream()
 
     std::tm t;
 
-    atd::Generic_time_view<std::tm> gt{t};
+    atd::Time_view<std::tm> gt{t};
     gt.day(25);
     gt.month(10);
     gt.year(2112);
@@ -156,7 +156,7 @@ void test_generic_time()
     t.tm_year = 6;
     t.tm_wday = 3;
 
-    atd::Generic_time_view<std::tm> gt{t};
+    atd::Time_view<std::tm> gt{t};
     CHECK_TRUE(gt.seconds() == 1, "seconds");
     CHECK_TRUE(gt.minutes() == 2, "minutes");
     CHECK_TRUE(gt.hours() == 3, "hours");
@@ -165,28 +165,28 @@ void test_generic_time()
     CHECK_TRUE(gt.year() == 1906, "year");
     CHECK_TRUE(gt.weekday() == 3, "weekday");
 
-    gt.seconds(9);
-    gt.minutes(8);
-    gt.hours(7);
-    gt.day(10);
-    gt.month(12);
-    gt.year(2020);
+    gt.seconds(42);
+    gt.minutes(59);
+    gt.hours(23);
+    gt.day(28);
+    gt.month(2);
+    gt.year(2001);
     gt.weekday(2);
 
-    CHECK_TRUE(gt.seconds() == 9, "seconds");
-    CHECK_TRUE(gt.minutes() == 8, "minutes");
-    CHECK_TRUE(gt.hours() == 7, "hours");
-    CHECK_TRUE(gt.day() == 10, "day");
-    CHECK_TRUE(gt.month() == 12, "month");
-    CHECK_TRUE(gt.year() == 2020, "year");
+    CHECK_TRUE(gt.seconds() == 42, "seconds");
+    CHECK_TRUE(gt.minutes() == 59, "minutes");
+    CHECK_TRUE(gt.hours() == 23, "hours");
+    CHECK_TRUE(gt.day() == 28, "day");
+    CHECK_TRUE(gt.month() == 2, "month");
+    CHECK_TRUE(gt.year() == 2001, "year");
     CHECK_TRUE(gt.weekday() == 2, "weekday");
 
-    CHECK_TRUE(t.tm_sec == 9, "tm_sec");
-    CHECK_TRUE(t.tm_min == 8, "tm_min");
-    CHECK_TRUE(t.tm_hour == 7, "tm_hour");
-    CHECK_TRUE(t.tm_mday == 10, "tm_mday");
-    CHECK_TRUE(t.tm_mon == 11, "tm_mon");
-    CHECK_TRUE(t.tm_year == 2020 - 1900, "tm_year");
+    CHECK_TRUE(t.tm_sec == 42, "tm_sec");
+    CHECK_TRUE(t.tm_min == 59, "tm_min");
+    CHECK_TRUE(t.tm_hour == 23, "tm_hour");
+    CHECK_TRUE(t.tm_mday == 28, "tm_mday");
+    CHECK_TRUE(t.tm_mon == 2 - 1, "tm_mon");
+    CHECK_TRUE(t.tm_year == 2001 - 1900, "tm_year");
     CHECK_TRUE(t.tm_wday == 2, "tm_wday");
 
     std::cout << "check[";
@@ -215,7 +215,7 @@ void test_const_generic_time()
     t.tm_year = 6;
     t.tm_wday = 3;
 
-    atd::Generic_time_view<const std::tm> gt{t};
+    atd::Time_view<const std::tm> gt{t};
     CHECK_TRUE(gt.seconds() == 1, "seconds");
     CHECK_TRUE(gt.minutes() == 2, "minutes");
     CHECK_TRUE(gt.hours() == 3, "hours");
@@ -230,10 +230,12 @@ int main()
 {
 try{
     test::header("atd_time");
+
     test_ostream();
     test_istream();
     test_generic_time();
     test_const_generic_time();
+
 }catch(const std::exception& e){
     std::cerr << e.what() << '\n';
     return 1;
