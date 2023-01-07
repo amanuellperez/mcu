@@ -30,7 +30,7 @@ void Main::run()
 //	else 
 	    window_main();
 
-	mcu::Micro::wait_ms(100);
+	Micro::wait_ms(100);
     }
 }
 
@@ -40,13 +40,13 @@ void Main::window_main()
     show_window_main();
 
     if (keyboard_.key<OK_KEY>().is_pressed())
-	window_set_time(System_clock::now());
+	window_set_time();
 }
 
 
 void Main::show_window_main()
 {
-    print(System_clock::now());
+    print(System_clock::now_as_date_time());
 }
 
 

@@ -23,9 +23,10 @@
 #define __DEV_USER_TIME_H__
 /****************************************************************************
  *
- * - DESCRIPCION: Funciones para gestionar time.h mediante dispositivos.
+ * DESCRIPCION
+ *	Funciones para gestionar time.h mediante dispositivos.
  *
- * - HISTORIA:
+ * HISTORIA
  *  A.Manuel L.Perez
  *	01/09/2019 v0.0
  *	21/12/2019 Cambio interfaz (elimino tm por time_t).
@@ -33,10 +34,13 @@
  *	27/12/2020 Generalizando para poder usarlo con RTC.
  *	30/12/2020 Hacemos la elección de los números circular (pasamos de 00
  *	           a 59 segundos)
- *	07/04/2022 Que funcione que Fonts.
+ *	07/04/2022 Que funcione con Fonts.
  *	           NOTA: este archivo sobra. Es mejor que cada aplicación
  *	           concreta implemente todas estas funciones ya que hay muchas
  *	           formas de hacerlo.
+ *
+ *	07/01/2023 En lugar de trabajar con Date_time_view<T> uso el interfaz
+ *		   genérico definido por la clase atd::Date_time 
  *
  ****************************************************************************/
 #include <cstdint>
@@ -53,7 +57,8 @@ template <uint8_t names_length,
           typename Date_time>
 void user_get_weekday(Screen& scr,
                       Keyboard& key,
-                      atd::Time_view<Date_time>& t,
+                      //atd::Date_time_view<Date_time>& t,
+		      Date_time& t,
                       uint8_t x0,
                       uint8_t y0,
                       const char* names_weekday)
@@ -69,7 +74,8 @@ template <typename Font = Font_digit_default,
           typename Date_time>
 void user_get_date(Screen& scr,
                    Keyboard& key,
-                   atd::Time_view<Date_time>& t,
+                   //atd::Date_time_view<Date_time>& t,
+		   Date_time& t,
                    uint8_t x0,
                    uint8_t y0)
 {
@@ -92,7 +98,8 @@ template <typename Font = Font_digit_default,
           typename Date_time>
 void user_get_time(Screen& scr,
                    Keyboard& key,
-                   atd::Time_view<Date_time>& t,
+                   //atd::Date_time_view<Date_time>& t,
+		   Date_time& t,
                    uint8_t x0,
                    uint8_t y0)
 {
@@ -116,7 +123,8 @@ template <typename Font = Font_digit_default,
           typename Screen,
           typename Date_time>
 void print_time(Screen& scr,
-                atd::Time_view<Date_time>& t,
+                //atd::Date_time_view<Date_time>& t,
+                Date_time& t,
                 uint8_t x0,
                 uint8_t y0)
 {
@@ -132,7 +140,8 @@ template <typename Font = Font_digit_default,
           typename Screen,
           typename Date_time>
 void print_date(Screen& scr,
-                atd::Time_view<Date_time>& t,
+                //atd::Date_time_view<Date_time>& t,
+                Date_time& t,
                 uint8_t x0,
                 uint8_t y0)
 {

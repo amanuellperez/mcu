@@ -33,13 +33,21 @@ ISR_TIMER1_COMPA
 
 
 
-std::ostream& operator<<(std::ostream& out, const Clock::time_point& t0)
+std::ostream& operator<<(std::ostream& out, const Clock::Date_time& t)
 {
-    std::time_t sec = Clock::to_time_t(t0);
-    std::tm t;
-    ::gmtime_r(&sec, &t);
+    
+    atd::print(out, t.day(), nm::Width{2});
+    out << '/';
+    atd::print(out, t.month(), nm::Width{2});
+    out << '/';
+    atd::print(out, t.year(), nm::Width{2});
+    out << ' ';
 
-    out << atd::only_date(t) << ' ' << atd::only_time(t);
+    atd::print(out, t.hours(), nm::Width{2});
+    out << ':';
+    atd::print(out, t.minutes(), nm::Width{2});
+    out << ':';
+    atd::print(out, t.seconds(), nm::Width{2});
 
     return out;
 }
@@ -51,7 +59,7 @@ void run_test()
 	if (!(i % 5))
 	    uart << "-------------------\n";
 
-	uart << Clock::now() << '\n';
+	uart << Clock::now_as_date_time() << '\n';
 	Micro::wait_ms(1000);
     }
 }
@@ -62,16 +70,15 @@ void test_leap_year()
 
     uart << "\n\nTest leap year\n";
 
-    tm t;
-    auto tv = atd::Time_view{t};
-    tv.day(28);
-    tv.month(2);
-    tv.year(2000); // es bisiesto!!!
-    tv.hours(23);
-    tv.minutes(59);
-    tv.seconds(55); 
+    Clock::Date_time dt;
+    dt.day(28);
+    dt.month(2);
+    dt.year(2000); // es bisiesto!!!
+    dt.hours(23);
+    dt.minutes(59);
+    dt.seconds(55); 
 
-    Clock::set(t);
+    Clock::set(dt);
 
     run_test();
 }
@@ -83,16 +90,15 @@ void test_not_leap_year()
 
     uart << "\n\nTest not leap year\n";
 
-    tm t;
-    auto tv = atd::Time_view{t};
-    tv.day(28);
-    tv.month(2);
-    tv.year(2001); // no es bisiesto!!!
-    tv.hours(23);
-    tv.minutes(59);
-    tv.seconds(55); 
+    Clock::Date_time dt;
+    dt.day(28);
+    dt.month(2);
+    dt.year(2001); // no es bisiesto!!!
+    dt.hours(23);
+    dt.minutes(59);
+    dt.seconds(55); 
 
-    Clock::set(t);
+    Clock::set(dt);
 
     run_test();
 }
@@ -104,16 +110,15 @@ void test_end_year()
 
     uart << "\n\nTest end year\n";
 
-    tm t;
-    auto tv = atd::Time_view{t};
-    tv.day(31);
-    tv.month(12);
-    tv.year(2022); // es bisiesto!!!
-    tv.hours(23);
-    tv.minutes(59);
-    tv.seconds(55); 
+    Clock::Date_time dt;
+    dt.day(31);
+    dt.month(12);
+    dt.year(2022); // es bisiesto!!!
+    dt.hours(23);
+    dt.minutes(59);
+    dt.seconds(55); 
 
-    Clock::set(t);
+    Clock::set(dt);
 
     run_test();
 

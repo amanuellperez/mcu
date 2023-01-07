@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022 A.Manuel L.Perez 
+// Copyright (C) 2019-2023 A.Manuel L.Perez 
 //           mail: <amanuel.lperez@gmail.com>
 //           https://github.com/amanuellperez/mcu
 //
@@ -55,7 +55,7 @@
 
 #include <chrono>
 
-#include <time.h>
+#include <atd_time.h>
 #include <atd_cast.h>
 #include <dev_interrupt.h>
 
@@ -66,6 +66,24 @@ namespace dev{
  ***************************************************************************/
 // Si se quieren operar con los time_points hacer Rep_t signed.
 // Voy a seguir el estilo de std::system_clock
+//
+// Observar que hay 2 tipos de Clock_s:
+//  1) Un medidor de segundos: han pasado 300.000 segundos desde que
+//     arrancaste el microcontrolador (o desde la hora que pusiste).
+//
+//  2) Un calendario, que nos da la fecha y la hora. 
+//     En este caso 300.000 segundos no se muestra como 300.000 segundos sino
+//     que se calcula la fecha correpondiente, cálculo para el que hay que
+//     tener en cuenta los años bisiestos (respecto de la epoch) y que cada 
+//     mes tiene un número diferente de días.
+//
+//  La diferencia entre un reloj y otro no es el funcionamiento interno sino
+//  cómo se presentan los datos al usuario 
+//
+//		¿300 000 segundos vs 20/02/2022 13:52:47?
+//
+// Voy a suministrar un doble interfaz (manejar solo segundos, o manejar
+// fechas) para que sea el usuario el que elija.
 template <typename Micro, typename Time_counter_g>
 class Clock_s
 {
@@ -75,7 +93,10 @@ public:
     using duration	= std::chrono::seconds;
     using rep		= duration::rep;
     using period	= duration::period;
+
     using time_point	= std::chrono::time_point<Clock_s, duration>;
+    using Date_time     = atd::Date_time;
+
     static constexpr bool is_steady = true;
 
     // DUDA: como siempre la duda con los nombres:
@@ -89,19 +110,23 @@ public:
     /// Apaga el reloj reiniciar el contador.
     static void off();
 
-    /// Ponemos en hora el reloj.
-    /// Devuelve true si todo va bien, false si `t` no contiene una fecha
-    /// correcta.
-    static bool set(tm& t);
+    /// Ponemos en hora el reloj, pasándo el número de segundos que marca el
+    /// reloj.
+    // (???) en lugar de set se podía llamar `now`. 
+    static void set(const rep& nseconds);
+
+    /// Ponemos en hora el reloj, pasándo la Date_time correspondiente.
+    static void set(const Date_time& t);
 
     static time_point now() noexcept;
+
+    static Date_time now_as_date_time();
 
     /// Damos un tick al clock.
     static void tick() {counter_ = counter_ + 1;}
 
-    // Map to C API
-    static time_t to_time_t(const time_point& t) noexcept;
-    static time_point from_time_t(time_t t) noexcept;
+    /// Convertimos el time_point a Date_time 
+    static Date_time as_date_time(const time_point& t);
 
 private:
     inline static volatile rep counter_;
@@ -115,6 +140,9 @@ void Clock_s<M, TC>::on()
 
     counter_ = 0;
     Time_counter::on_with_overflow_every_1s();
+
+    // (???) aqui enable_interrupts o que lo defina el cliente 
+    // Micro::enable_interrupts();
 }
 
 template <typename M, typename TC>
@@ -132,39 +160,36 @@ inline Clock_s<M, TC>::time_point Clock_s<M, TC>::now() noexcept
     return time_point{duration{counter_}};
 }
 
+template <typename M, typename TC>
+inline Clock_s<M, TC>::Date_time Clock_s<M, TC>::now_as_date_time()
+{
+    return as_date_time(now());
+}
+
 
 template <typename M, typename TC>
-bool Clock_s<M, TC>::set(tm& t)
+void Clock_s<M, TC>::set(const rep& nseconds)
 {
     Disable_interrupts lock{}; 
-
-    time_t sec = ::mktime(&t);
-
-//    if (sec == -1) { // avrlibc time_t es unsigned!!!
-//	counter_ = 0;
-//	return false;
-//    }
-//
-    counter_ = static_cast<volatile rep>(sec);
-    return true;
+    counter_ = static_cast<volatile rep>(nseconds);
 }
 
-
-// en avr-libc, time_t está definido como uint32_t, time_point está usando
-// seconds que tiene int64_t como representación. Como se ve con avr-libc no
-// se pueden manejar time_t negativos (aunque sí time_points negativos).
 template <typename M, typename TC>
-inline time_t Clock_s<M, TC>::to_time_t(const time_point& t) noexcept
+inline void Clock_s<M, TC>::set(const Date_time& t)
 {
-    return static_cast<time_t>(t.time_since_epoch().count());
+    set(t.to_time_t());
 }
 
 
 template <typename M, typename TC>
-inline Clock_s<M, TC>::time_point Clock_s<M, TC>::from_time_t(time_t t) noexcept
+Clock_s<M, TC>::Date_time Clock_s<M, TC>::as_date_time(const time_point& t)
 {
-    return time_point{duration{t}};
+    Date_time dt;
+    dt.from_time_t(static_cast<std::time_t>(counter_));
+
+    return dt;
 }
+
 
 
 /***************************************************************************

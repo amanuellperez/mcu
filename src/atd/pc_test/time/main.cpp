@@ -191,9 +191,9 @@ void test_generic_time()
 
     std::cout << "check[";
     print_time(std::cout, gt);
-    std::cout << "]: 07:08:09\n";
+    std::cout << "]: 23:59:42\n";
 
-    std::cout << "check["; print_date(std::cout, gt); std::cout << "]: 10/02/2020\n";
+    std::cout << "check["; print_date(std::cout, gt); std::cout << "]: 28/02/2001\n";
     std::cout << "check["; print_weekday<1>(std::cout, gt, weekday_as_str1);
     std::cout << "]: M\n";
     std::cout << "check["; print_weekday<2>(std::cout, gt, weekday_as_str2);

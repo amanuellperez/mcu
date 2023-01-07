@@ -117,9 +117,11 @@ public:
 // Machine form
     // CUIDADO: la inversa de mktime es localtime_r!!!
     void from_time_t(const std::time_t& t) { ::localtime_r(&t, &tm_); }
-    // mktime modifica tm_, por eso no puedo hacerlo const, aunque lo lógico
-    // es que fuera const @_@
-    std::time_t to_time_t() /* const */ { return ::mktime(&tm_);}
+    // (RRR) Esta función es de consulta, tiene que ser const. El problema es
+    //	     que mktime modifica tm_. Aunque al principio intenté dejarla como
+    //	     no const, eso se propaga por el resto del código generando código
+    //	     muy raro. Tiene que ser const!!!
+    std::time_t to_time_t() const { return ::mktime(&((tm&)tm_));}
 
 // Human form
     int seconds() const { return tm_.tm_sec; }
@@ -318,8 +320,8 @@ print_date(std::ostream& out, const const_Time_view<T>& t, char sep = '/')
 
 // Paso Out como segundo parámetro para que funcione la deducción automática
 // al llamar a print_weekday<weekdays_length>
-template <size_t weekdays_length, typename Out, typename T>
-Out& print_weekday(Out& out, const const_Time_view<T>& t,
+template <size_t weekdays_length, typename Out, typename Date_time_t>
+Out& print_weekday(Out& out, const Date_time_t& t,
                              const char* weekdays)
 {
     atd::Array_const_nstrings day{weekdays, weekdays_length};
@@ -328,12 +330,31 @@ Out& print_weekday(Out& out, const const_Time_view<T>& t,
     return out;
 }
 
-template <size_t weekdays_length, typename T>
+template <size_t weekdays_length, typename Date_time_t>
 std::ostream& print_weekday(std::ostream& out,
-                            const const_Time_view<T>& t,
+                            const Date_time_t& t,
                             const char* weekdays)
-{ return print_weekday<weekdays_length, std::ostream, T>(out, t, weekdays); }
+{ return print_weekday<weekdays_length, std::ostream, Date_time_t>(out, t, weekdays); }
 
+
+// >>> DELETE
+//template <size_t weekdays_length, typename Out, typename T>
+//Out& print_weekday(Out& out, const const_Time_view<T>& t,
+//                             const char* weekdays)
+//{
+//    atd::Array_const_nstrings day{weekdays, weekdays_length};
+//    print(out, day[t.weekday()]);
+//
+//    return out;
+//}
+//
+//template <size_t weekdays_length, typename T>
+//std::ostream& print_weekday(std::ostream& out,
+//                            const const_Time_view<T>& t,
+//                            const char* weekdays)
+//{ return print_weekday<weekdays_length, std::ostream, T>(out, t, weekdays); }
+//
+// <<< DELETE
 
 
 // Manipuladores de impresión
