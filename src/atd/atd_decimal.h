@@ -268,7 +268,7 @@ Decimal<I,n> Decimal<I,n>::from_internal_value(Rep x)
 
 
 template <typename I, int n>
-constexpr Decimal<I,n>::Rep 
+constexpr typename Decimal<I,n>::Rep 
 	    Decimal<I,n>::construct(Rep integer_part, Rep fractional_part)
 {
     if constexpr (n != 0){

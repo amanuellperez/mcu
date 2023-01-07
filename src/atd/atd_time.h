@@ -24,17 +24,22 @@
 
 /****************************************************************************
  *
- *  - DESCRIPCION: Funciones para manejo de tiempos
+ *  DESCRIPCION
+ *	Funciones para manejo de tiempos
  *
- *  - COMENTARIOS:
+ *  TODO
+ *	Si se actualiza std::chrono a C++20 seguramente se pueda eliminar todo
+ *	este fichero. (???)
  *
- *  - HISTORIA:
+ *  HISTORIA
  *    A.Manuel López
  *	31/10/2019 Manipuladores de tiempo std::tm.
  *	27/12/2020 Generic_time_view
  *	08/03/2022 Generic_time_view (temporal hasta reescribir Generic_time_view)
  *	05/01/2023 Simplifico implementación Generic_time_view con requires
- *		   y renombro a Time_view
+ *		   y renombro a Date_time_view
+ *	07/01/2023 Date_time
+ *
  *
  ****************************************************************************/
 #include <ctime>
@@ -50,6 +55,7 @@ namespace atd{
 // ------------
 /// Inicializa la estructura std::tm a 0, salvo el campo del año que lo inicializa
 /// al 2019.
+//TODO: mover a Date_time o eliminar
 void reset(std::tm& t);
 
 
@@ -58,6 +64,7 @@ void reset(std::tm& t);
 // ---------------------------------
 /// Indica si son válidos los campos tm_mday y tm_mon. No miro el año ya que
 /// en principio puede valer cualquier número.
+//TODO: mover a Date_time o eliminar (nombre: ok()?)
 inline bool is_valid_date(const std::tm& t)
 {
     return (1 <= t.tm_mday and t.tm_mday <= 31) and
@@ -65,6 +72,7 @@ inline bool is_valid_date(const std::tm& t)
 }
 
 /// Indica si el tiempo tm_hour:tm_min:tm_sec esta en el dominio de tiempos.
+//TODO: mover a Date_time o eliminar (nombre: ok()?)
 inline bool is_valid_time(const std::tm& t)
 {
     return (0 <= t.tm_hour and t.tm_hour <= 23) and
@@ -72,9 +80,85 @@ inline bool is_valid_time(const std::tm& t)
            (0 <= t.tm_sec and t.tm_sec <= 59);
 }
 
+/***************************************************************************
+ *			    Date_time
+ ***************************************************************************/
+struct Generic_time_traits{
+    static constexpr int seconds_min = 0;
+    static constexpr int seconds_max = 59;
 
+    static constexpr int minutes_min = 0;
+    static constexpr int minutes_max = 59;
+
+    static constexpr int hours_min = 0;
+    static constexpr int hours_max = 23;
+
+    static constexpr int day_min = 1;
+    static constexpr int day_max = 31;
+
+    static constexpr int month_min = 1;
+    static constexpr int month_max = 12;
+
+    // (RRR) Empezamos en 0 para poder usar el array weekday_as_str
+    static constexpr int weekday_min = 0; // Sunday
+    static constexpr int weekday_max = 6;
+};
+
+// Unifico el interfaz de std::tm a mi interfaz genérico.
+// (RRR) Quiero poder poner en hora los relojes Clock_s, ... y sinceramente
+//	 me resulta un lío recordar el interfaz de funciones de C para manejar
+//	 std::tm. Por eso creo este interfaz: porque me resulta muy sencillo
+//	 de manejar.
+class Date_time{
+public:
+    Date_time() {tm_.tm_isdst = -1; } // -1 = desconozco su valor
+				     //	     Que lo calcule mktime cuando se
+				     //	     llame.
+// Machine form
+    // CUIDADO: la inversa de mktime es localtime_r!!!
+    void from_time_t(const std::time_t& t) { ::localtime_r(&t, &tm_); }
+    // mktime modifica tm_, por eso no puedo hacerlo const, aunque lo lógico
+    // es que fuera const @_@
+    std::time_t to_time_t() /* const */ { return ::mktime(&tm_);}
+
+// Human form
+    int seconds() const { return tm_.tm_sec; }
+    void seconds(int s) { tm_.tm_sec = s; }
+
+    int minutes() const { return tm_.tm_min; }
+    void minutes(int m) { tm_.tm_min = m; }
+
+    int hours() const { return tm_.tm_hour; }
+    void hours(int h) { tm_.tm_hour = h; }
+
+    int day() const { return tm_.tm_mday; }
+    void day(int d) { tm_.tm_mday = d; }
+
+    // Devuelve el mes de [1, 12]
+    int month() const { return tm_.tm_mon + 1; }
+    void month(int m) {tm_.tm_mon = m - 1;}
+
+    // Devuelve el año con los 4 dígitos (el año).
+    int year() const {return tm_.tm_year + 1900;}
+    void year(int y) {tm_.tm_year = y - 1900;}
+
+    /* tm_wday = weekday */
+    int weekday() const {return tm_.tm_wday;}
+    void weekday(int wd) {tm_.tm_wday = wd;}
+    
+private:
+    std::tm tm_;   
+};
+
+
+
+
+
+/***************************************************************************
+ *			    Date_time_view
+ ***************************************************************************/
 /*!
- *  \brief  Time_view
+ *  \brief  Date_time_view
  *
  *  Un RTC guarda la fecha en un formato, mientras que system_clock la guarda
  *  en otro. ¿Cómo poder usar funciones genéricas como user_get_time con
@@ -104,39 +188,19 @@ inline bool is_valid_time(const std::tm& t)
  *	    está en que std::tm y DS1307::Clock tienen nombres diferentes: el
  *	    año en tm es tm_year, mientras que en Clock es year. Necesito
  *	    "fusionar" estas diferentes formas de hablar. Esta struct
- *	    Time_view es lo que hace.
+ *	    Date_time_view es lo que hace.
  */
 
-struct Generic_time_traits{
-    static constexpr int seconds_min = 0;
-    static constexpr int seconds_max = 59;
-
-    static constexpr int minutes_min = 0;
-    static constexpr int minutes_max = 59;
-
-    static constexpr int hours_min = 0;
-    static constexpr int hours_max = 23;
-
-    static constexpr int day_min = 1;
-    static constexpr int day_max = 31;
-
-    static constexpr int month_min = 1;
-    static constexpr int month_max = 12;
-
-    // (RRR) Empezamos en 0 para poder usar el array weekday_as_str
-    static constexpr int weekday_min = 0;
-    static constexpr int weekday_max = 6;
-};
 
 
 // DUDA: ¿cómo llamarlo?
 // Generic_time_translator es el interfaz que suministra cada reloj indicando
-// cómo traducir de su idioma al idioma de Time_view. Ver
+// cómo traducir de su idioma al idioma de Date_time_view. Ver
 // Generic_time_translator<std::tm> para ver ejemplo de implementación.
-// (RRR) El problema está en definir dos versiones de Time_view: const 
+// (RRR) El problema está en definir dos versiones de Date_time_view: const 
 //	 y no const. Si se deja hacer esto a quien implementa la clase de reloj 
 //	 le toca implementar las dos versiones. El Generic_time_translator
-//       es una forma de implementar Time_view y const_Time_view en
+//       es una forma de implementar Date_time_view y const_Time_view en
 //       general y que solo sea necesario implementar Generic_time_translator
 //       una sola vez.
 template <typename T>
@@ -147,18 +211,18 @@ struct Generic_time_translator;
 // por valor.
 // versión no const
 template <typename T>
-class Time_view{
+class Date_time_view{
 public:
     using Time = std::remove_cv_t<T>;
     using GT = Generic_time_translator<Time>;
 
 // constructor
-    Time_view(T& t):t_{t} {}
+    Date_time_view(T& t):t_{t} {}
 
 // Conversión implícita: no const a const (es lo de esperar)
-    operator Time_view<const Time>() const 
+    operator Date_time_view<const Time>() const 
 	requires (!std::is_const_v<T>)
-	{ return Time_view<const Time>{t_};}
+	{ return Date_time_view<const Time>{t_};}
 
 // members
     int seconds() const { return GT::seconds(t_); }
@@ -202,7 +266,7 @@ private:
 
 
 template <typename T>
-using const_Time_view = Time_view<T>;
+using const_Time_view = Date_time_view<T>;
 
 
 // Funciones de impresión
@@ -284,10 +348,10 @@ struct _Only_time{
 };
 
 // Bastaría con la versión const_Time_view, pero no convierte de forma
-// automática Time_view en const_Time_view (???)
+// automática Date_time_view en const_Time_view (???)
 template <typename T>
-inline _Only_time<Time_view<T>> only_time(Time_view<T> t, char sep = ':')
-{ return _Only_time<Time_view<T>>{t, sep}; }
+inline _Only_time<Date_time_view<T>> only_time(Date_time_view<T> t, char sep = ':')
+{ return _Only_time<Date_time_view<T>>{t, sep}; }
 
 
 template <typename T>
@@ -308,8 +372,8 @@ struct _Only_date{
 };
 
 template <typename T>
-inline _Only_date<Time_view<T>> only_date(Time_view<T> t, char sep = '/')
-{ return _Only_date<Time_view<T>>{t, sep}; }
+inline _Only_date<Date_time_view<T>> only_date(Date_time_view<T> t, char sep = '/')
+{ return _Only_date<Date_time_view<T>>{t, sep}; }
 
 
 template <typename T>
@@ -353,9 +417,9 @@ struct Generic_time_translator<std::tm>{
 
 };
 
-// TODO: eliminar este a favor del manipulador de Time_view.
+// TODO: eliminar este a favor del manipulador de Date_time_view.
 //       Para poder eliminarlo faltaría crear los operadores >> en
-//       Time_view. ¿Merece la pena? ¿Los he usado alguna vez?
+//       Date_time_view. ¿Merece la pena? ¿Los he usado alguna vez?
 // ---------------------
 // Manipulador only_date
 // ---------------------

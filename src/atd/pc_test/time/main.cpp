@@ -36,7 +36,7 @@ void test_ostream()
 
     std::tm t;
 
-    atd::Time_view<std::tm> gt{t};
+    atd::Date_time_view<std::tm> gt{t};
     gt.day(25);
     gt.month(10);
     gt.year(2112);
@@ -156,7 +156,7 @@ void test_generic_time()
     t.tm_year = 6;
     t.tm_wday = 3;
 
-    atd::Time_view<std::tm> gt{t};
+    atd::Date_time_view<std::tm> gt{t};
     CHECK_TRUE(gt.seconds() == 1, "seconds");
     CHECK_TRUE(gt.minutes() == 2, "minutes");
     CHECK_TRUE(gt.hours() == 3, "hours");
@@ -215,7 +215,7 @@ void test_const_generic_time()
     t.tm_year = 6;
     t.tm_wday = 3;
 
-    atd::Time_view<const std::tm> gt{t};
+    atd::Date_time_view<const std::tm> gt{t};
     CHECK_TRUE(gt.seconds() == 1, "seconds");
     CHECK_TRUE(gt.minutes() == 2, "minutes");
     CHECK_TRUE(gt.hours() == 3, "hours");
@@ -226,6 +226,55 @@ void test_const_generic_time()
 }
 
 
+void print_date(const atd::Date_time& t)
+{
+std::cout << t.day() << '/'
+	  << t.month() << '/'
+	  << t.year()  << ' '
+	  << t.hours() << ':'
+	  << t.minutes() << ':'
+	  << t.seconds() <<  '\n';
+}
+
+void test_date_time()
+{
+    test::interfaz("Date_time");
+
+    atd::Date_time t;
+    t.day(6);
+    t.month(1);
+    t.year(2023);
+    t.weekday(5);
+
+    t.hours(00);
+    t.minutes(22);
+    t.seconds(32);
+
+    CHECK_TRUE(t.day() == 6, "day");
+    CHECK_TRUE(t.month() == 1, "month");
+    CHECK_TRUE(t.year() == 2023, "year");
+    CHECK_TRUE(t.weekday() == 5, "weekday");
+
+    CHECK_TRUE(t.hours() == 00, "hours");
+    CHECK_TRUE(t.minutes() == 22, "minutes");
+    CHECK_TRUE(t.seconds() == 32, "seconds");
+
+    std::time_t t0 = t.to_time_t();
+    t0 += 24*3600; // 1 dia
+    t.from_time_t(t0);
+
+
+    CHECK_TRUE(t.day() == 7, "day");
+    CHECK_TRUE(t.month() == 1, "month");
+    CHECK_TRUE(t.year() == 2023, "year");
+    CHECK_TRUE(t.weekday() == 6, "weekday");
+
+    CHECK_TRUE(t.hours() == 00, "hours");
+    CHECK_TRUE(t.minutes() == 22, "minutes");
+    CHECK_TRUE(t.seconds() == 32, "seconds");
+
+}
+
 int main()
 {
 try{
@@ -235,6 +284,7 @@ try{
     test_istream();
     test_generic_time();
     test_const_generic_time();
+    test_date_time();
 
 }catch(const std::exception& e){
     std::cerr << e.what() << '\n';
