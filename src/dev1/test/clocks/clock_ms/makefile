@@ -1,7 +1,6 @@
 BIN = xx
 
-SOURCES= main.cpp	\
-		 ../../../dev_clocks.cpp
+SOURCES= main.cpp	
 
 #F_CPU = 8000000UL
 

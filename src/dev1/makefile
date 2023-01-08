@@ -1,4 +1,4 @@
-SOURCES= dev_clocks.cpp	
+SOURCES= 
 
 INCS= 	dev_cols_glyphs.h		\
 		dev_clocks.h			\

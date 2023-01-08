@@ -327,6 +327,9 @@ public:
     template <uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
     static void on_with_overflow_every_1s();
 
+    template <uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
+    static void on_with_overflow_every_1ms();
+
     /// Apagamos el generador de señales.
     static void off() { Timer::off(); }
 
@@ -398,6 +401,27 @@ inline void Time_counter1_generic::on_with_overflow_every_1s()
     if constexpr (clock_frequency_in_hz == 1'000'000ul){
 	init(15'625);
 	Timer::clock_frequency_divide_by_64();
+    }
+
+    else
+        static_assert(atd::always_false_v<int>,
+                      "on_with_overflow_every_1s: I'm lazy. I haven't implemented "
+                      "that frequency. Please implement it.");
+
+    enable_top_interrupt();
+
+}
+
+
+// (RRR) Números mágicos:
+//	 Para 1 MHz: 125 * 8 us = 1.000 us = 1 ms
+template <uint32_t clock_frequency_in_hz>
+inline void Time_counter1_generic::on_with_overflow_every_1ms()
+{
+// cfg_overflow_every_1s();
+    if constexpr (clock_frequency_in_hz == 1'000'000ul){
+	init(125);
+	Timer::clock_frequency_divide_by_8();
     }
 
     else
