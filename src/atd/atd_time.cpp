@@ -24,6 +24,24 @@
 
 namespace atd{
 
+Time_ms::Time_ms(const std::chrono::milliseconds& t0)
+{
+    auto t = t0.count();
+
+    milliseconds = t % 1000u;
+    t /= 1000u;
+
+    seconds = t % 60u;
+    t /= 60u;
+
+    minutes = t % 60u;
+    t /= 60u;
+
+    hours = t;
+}
+
+
+
 void reset(tm& t) 
 {
     t.tm_sec = 0;

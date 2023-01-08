@@ -275,6 +275,45 @@ void test_date_time()
 
 }
 
+std::ostream& operator<<(std::ostream& out, const atd::Time_ms& t)
+{
+    return out  << (int) t.hours << ':'
+		<< (int) t.minutes << ':'
+		<< (int) t.seconds << ' '
+		<< t.milliseconds << " ms";
+}
+
+
+void test_time_ms()
+{
+    test::interfaz("Time_ms");
+
+    {// normal
+    std::chrono::milliseconds ms{7427259};
+    atd::Time_ms t{ms};
+//    std::cout << t << '\n';
+
+    CHECK_TRUE(t.hours == 2, "hours");
+    CHECK_TRUE(t.minutes == 3, "minutes");
+    CHECK_TRUE(t.seconds == 47, "seconds");
+    CHECK_TRUE(t.milliseconds == 259, "milliseconds");
+
+    CHECK_TRUE(t.as_milliseconds() == ms, "as_milliseconds");
+    }
+    {// 0
+    atd::Time_ms t;
+//    std::cout << t << '\n';
+
+    CHECK_TRUE(t.hours == 0, "hours");
+    CHECK_TRUE(t.minutes == 0, "minutes");
+    CHECK_TRUE(t.seconds == 0, "seconds");
+    CHECK_TRUE(t.milliseconds == 0, "milliseconds");
+
+    CHECK_TRUE(t.as_milliseconds() == std::chrono::milliseconds{0}, "as_milliseconds");
+    }
+}
+
+
 int main()
 {
 try{
@@ -285,6 +324,7 @@ try{
     test_generic_time();
     test_const_generic_time();
     test_date_time();
+    test_time_ms();
 
 }catch(const std::exception& e){
     std::cerr << e.what() << '\n';

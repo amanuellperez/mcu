@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022 A.Manuel L.Perez 
+// Copyright (C) 2019-2023 A.Manuel L.Perez 
 //           mail: <amanuel.lperez@gmail.com>
 //           https://github.com/amanuellperez/mcu
 //
@@ -38,7 +38,7 @@
  *	08/03/2022 Generic_time_view (temporal hasta reescribir Generic_time_view)
  *	05/01/2023 Simplifico implementación Generic_time_view con requires
  *		   y renombro a Date_time_view
- *	07/01/2023 Date_time
+ *	07/01/2023 Date_time/Time_ms
  *
  *
  ****************************************************************************/
@@ -46,11 +46,72 @@
 #include <ostream>
 #include <istream>
 #include <iomanip>
+#include <chrono>
 
 #include "atd_cstring.h"    // const_nstring
 #include "atd_ostream.h"
 
 namespace atd{
+
+// TIME
+//  A la hora de hablar hablamos de fechas (date) y qué hora es (time).
+//  Cuando preguntamos la hora solemos responder (horas, minutos).
+//
+//	Ejemplo: 
+//	    ¿qué hora es?  Las 12:45
+//
+//  La resolución con la que medimos el tiempo es con minutos. Sin embargo, la
+//  resolución de un reloj típica es de segundos. Esto sugiere que podemos
+//  medir el tiempo con diferentes resoluciones:
+//
+//	Time	: mide hasta segundos.
+//	Time_ms	: mide milisegundos.
+//	Time_us	: mide microsegundos.
+//
+//  Estas clases representan la hora en sexagesimal. Para representarla en
+//  decimal tenemos std::chrono::seconds/milliseconds/microseconds.
+//
+//  Los programas funcionarán con la clase de chrono, pero a la hora de
+//  presentársela al usuario final lo normal es presentarla en sexagesimal
+//  (std::chrono en C++20 creo que suministra funciones para hacer esto,
+//  pero... hay que leerlo, implementarlo... Si se hace se podrá eliminar este
+//  fichero)
+//
+
+/***************************************************************************
+ *			    Time_ms
+ ***************************************************************************/
+// Como no tengo que tener en cuenta años bisiestos ni la epoch inicial en
+// Time_ms puedo implementarlo como un vulgar interfaz de conversión de
+// Time_ms a milliseconds y viceversa.
+/// Time_ms representa la hora medida con una resolución de hasta el
+/// milisegundo.
+struct Time_ms{
+    Time_ms() {} // inicializa a 0
+
+    explicit Time_ms(const std::chrono::milliseconds&);
+    std::chrono::milliseconds as_milliseconds() const;
+
+    uint8_t hours = 0;		// [0, 255)	<-- observar que no se limita a 1 dia
+    uint8_t minutes = 0;	// [0, 60)
+    uint8_t seconds = 0;	// [0, 60)
+    uint16_t milliseconds = 0;  // [0, 1000)
+};
+
+
+inline std::chrono::milliseconds Time_ms::as_milliseconds() const
+{
+    std::chrono::milliseconds::rep t = 
+	((hours * 60 + minutes) * 60 + seconds) * 1000 + milliseconds;
+
+    return std::chrono::milliseconds{t};
+}
+
+
+
+/***************************************************************************
+ *			    Date_time
+ ***************************************************************************/
 // Construcción
 // ------------
 /// Inicializa la estructura std::tm a 0, salvo el campo del año que lo inicializa
@@ -80,9 +141,6 @@ inline bool is_valid_time(const std::tm& t)
            (0 <= t.tm_sec and t.tm_sec <= 59);
 }
 
-/***************************************************************************
- *			    Date_time
- ***************************************************************************/
 struct Generic_time_traits{
     static constexpr int seconds_min = 0;
     static constexpr int seconds_max = 59;
