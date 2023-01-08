@@ -150,4 +150,48 @@ Los `pc_test` necesitan varios ficheros de
 Basta con que descargarse `alp_test.h`, `alp_test.cpp`, 
 `alp_string.h` y `alp_string.cpp` para que compilen.
 
+## Vídeos
+
+Había creado un canal en YouTube para ir subiendo algún vídeo de algunos de los
+circuitos que estaba implementando. Sin embargo voy a abandonarlo, ya que
+voy a ir eliminando sistemáticamente el producto de Google de mi vida. Los
+motivos los siguientes:
+
+* En septiembre o así escribí un curso de arduino en español para
+  principiantes y como quería que cada alumno fuese a su ritmo hice un montón
+  de vídeos cortos (de 1 minuto como mucho) que subí en un nuevo canal de
+  YouTube. Por motivos que desconozco uno de los vídeos en menos de 24 horas
+  tenía más de 600 visitas. Ignoro si fue por culpa de este vídeo o por culpa
+  de que estuve subiendo el máximo de vídeos que deja YouTube por día pero al
+  cuarto-quinto día los de Google me dijeron que "mi canal violaba su
+  política" y que o me identificaba dándoles mi teléfono o cerraban el
+  canal. Hice lo que cualquier persona sensata haría: no darle mis datos.
+
+
+* Llevo con otro canal desde hace más de 7 años, teniendo alguno de los videos
+  del orden de 1 millón de visitas. Acabo de intentar entrar y me encuentro
+  con un mensaje del tipo: "la reciente actividad del canal es muy sospechosa,
+  identificate si quieres acceder al canal", pidiéndome de nuevo el número de
+  teléfono. Por suerte nunca he monetizado dicho canal con lo que me trae sin
+  cuidado si lo bloquean o no. 
+
+  Es interesante observar el comportamiento de los de Google: 
+  mientras que el canal de arduino, que no tenía seguidores, lo cerraron
+  este último canal tiene un mínimo de 
+  unas 50.000 visitas al mes por las que yo no saco nada de dinero mientras
+  que los de YouTube sí. Y este canal no lo cierran sino que lo bloquean al
+  que ha creado el contenido.
+
+  Recuerda: Google, Meta, Amazon, ... se queda con todo tu trabajo. 
+
+
+Espero en unos meses haber eliminado por completo todas las cuentas de Google
+y actualizar github con el nuevo mail (esto lo escribo el 08/01/2023). Si por
+lo que fuera los de github deciden bloquearme migraré el proyecto a otro
+sitio. El problema es que no podré poner aquí dónde (estaré bloqueado xD). Si
+alguien quisiera localizarme que use el nuevo mail (todavía dudo si migrarme a
+Proton o a Tutanota).
+
+
+
 
