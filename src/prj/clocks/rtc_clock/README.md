@@ -19,15 +19,15 @@ este reloj ya se observa que en todo proyecto vamos a tener que tener que
 hacer mínimo 2 prototipos:
 
 1. [Prototipo breadboard](0.0/rtc_clock_breadboard_v00.jpg):
-   Conectamos todo en la breadboard todo y vamos probando y programando todo.
+   Montamos todo en la breadboard y probamos que el código funcione bien.
 
 2. [Prototipo modular](0.0/rtc_clock_proto_v00.jpg):
    La idea es hacer un prototipo con el que poder experimentar. En este caso,
    como es un reloj, lo que quiero es dejar el reloj días o meses funcionando 
-   para ver si retrasa o adelante. Si fuera un cambio un sensor para medir la
+   para ver si retrasa o adelante. Si fuera en cambio un sensor para medir la
    altura a la que me encuentro, quiero poder llevarlo en el bolsillo para
    poder probarlo. Pero no busco un prototipo definitivo ya que puede tener
-   errores de diseño (total, todavía es la versión 0.0 = versión de
+   errores de diseño (todavía es la versión 0.0 = versión de
    aprendizaje). Por ello voy a construirlo con partes modulares que pueda
    reutilizar en otros proyectos (en la foto se ve que el LCD con los 3
    botones lo puedo usar en otros proyectos).

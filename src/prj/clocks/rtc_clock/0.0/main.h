@@ -61,8 +61,8 @@ private:
     void window_set_time(RTC::Time_point& t);
 
 // Helping functions
-    void print_time(atd::Generic_time_view<RTC::Time_point> t, uint8_t x0, uint8_t y0);
-    void user_get_time(atd::Generic_time_view<RTC::Time_point> t, uint8_t x0, uint8_t y0);
+    void print_time(atd::Date_time_view<RTC::Time_point> t, uint8_t x0, uint8_t y0);
+    void user_get_time(atd::Date_time_view<RTC::Time_point> t, uint8_t x0, uint8_t y0);
 
     bool user_press_change_time();
     void wait_user_release_change_time();

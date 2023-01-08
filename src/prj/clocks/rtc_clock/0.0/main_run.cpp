@@ -55,7 +55,7 @@ void Main::show_window_main()
 {
     RTC::Time_point t;
     rtc_.read(t);
-    print_time(atd::Generic_time_view<RTC::Time_point>{t}, 0, 0);
+    print_time(atd::Date_time_view<RTC::Time_point>{t}, 0, 0);
 }
 
 

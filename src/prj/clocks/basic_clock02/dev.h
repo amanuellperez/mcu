@@ -40,6 +40,7 @@
 #include <dev_clocks.h>
 
 namespace mcu = atmega;
+using  Micro  = mcu::Micro;
 
 // pins usados
 // ------------
@@ -98,10 +99,8 @@ using Keyboard     = dev::Basic_keyrow<Keyrow_pins, Keyrow_codes>;
 
 // system_clock
 // ------------
-constexpr static uint16_t clock_timer_period_in_us = 64u;
 using System_clock = 
-	dev::System_clock<mcu::Time_counter1_g, clock_timer_period_in_us>;
-
+	dev::Clock_s<Micro, mcu::Time_counter1_g>;
 
 
 #endif

@@ -30,7 +30,8 @@
 
 template <typename Font, typename Screen>
 void print(Screen& scr,
-           atd::Generic_time_view<std::tm> t,
+           //atd::Generic_time_view<std::tm> t,
+           const atd::Date_time& t,
            uint8_t x0, uint8_t y0)
 {
     scr.cursor_pos(x0, y0);
@@ -44,7 +45,8 @@ void print(Screen& scr,
 
 template <typename Font, typename Screen, typename Keyboard>
 void user_get_time(Screen& scr, Keyboard& key, 
-                   atd::Generic_time_view<std::tm> t,
+                   // atd::Generic_time_view<std::tm> t,
+		   atd::Date_time& t,
                    uint8_t x0, uint8_t y0)
 {
     print<Font>(scr, t, x0, y0);	

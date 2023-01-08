@@ -46,7 +46,7 @@ void Main::init_lcd()
 
 void Main::init_time(RTC::Time_point& t)
 {
-    atd::Generic_time_view<RTC::Time_point> gt{t};
+    atd::Date_time_view<RTC::Time_point> gt{t};
 
     gt.day(1);
     gt.month(1);
@@ -92,7 +92,7 @@ void Main::window_set_time()
 
 void Main::window_set_time(RTC::Time_point& t)
 {
-    atd::Generic_time_view<RTC::Time_point> gt{t};
+    atd::Date_time_view<RTC::Time_point> gt{t};
 
     lcd_.clear();
 

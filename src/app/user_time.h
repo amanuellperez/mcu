@@ -124,7 +124,7 @@ template <typename Font = Font_digit_default,
           typename Date_time>
 void print_time(Screen& scr,
                 //atd::Date_time_view<Date_time>& t,
-                Date_time& t,
+                const Date_time& t,
                 uint8_t x0,
                 uint8_t y0)
 {
@@ -141,7 +141,7 @@ template <typename Font = Font_digit_default,
           typename Date_time>
 void print_date(Screen& scr,
                 //atd::Date_time_view<Date_time>& t,
-                Date_time& t,
+                const Date_time& t,
                 uint8_t x0,
                 uint8_t y0)
 {

@@ -33,6 +33,8 @@ Main::Main()
     init_keyboard();
 
     init_system_clock();
+
+    Micro::enable_interrupts();
 }
 
 
@@ -43,33 +45,26 @@ void Main::init_lcd()
 }
 
 
-std::time_t Main::init_time_t()
+void Main::reset(Date_time& t)
 {
-    std::tm mt;
-    std::memset(&mt, 0, sizeof(std::tm)); // fundamental inicializarlo todo
+    t.day(1);
+    t.month(1);
+    t.year(2021);
 
-    atd::Generic_time_view<std::tm> gt{mt};
-
-    gt.day(1);
-    gt.month(1);
-    gt.year(2021);
-
-    gt.hours(12);
-    gt.minutes(0);
-    gt.seconds(0);
-
-    return std::mktime(&mt);
+    t.hours(12);
+    t.minutes(0);
+    t.seconds(0);
 }
 
 
 void Main::init_system_clock()
 {
-    System_clock::init();
+    System_clock::on();
+    Date_time t;
+    reset(t);
+    System_clock::set(t);
 
-    time_t t0 = init_time_t();
-    System_clock::time_point t = std::chrono::system_clock::from_time_t(t0);
-
-    window_set_time(t);
+    window_set_time();
 }
 
 
@@ -85,7 +80,7 @@ void Main::run()
 //	else 
 	    window_main();
 
-	mcu::Micro::wait_ms(100);
+	Micro::wait_ms(100);
     }
 }
 

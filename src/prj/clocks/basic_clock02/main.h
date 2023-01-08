@@ -39,6 +39,9 @@ public:
     void run();
 
 private:
+// Types
+    using Date_time = System_clock::Date_time;
+
 // Hardware
     Screen scr_;
     Keyboard keyboard_;
@@ -48,22 +51,23 @@ private:
     void init_lcd();
     void init_keyboard() { }
     void init_system_clock();
-    std::time_t init_time_t();
+    void reset(Date_time&);
 
 // Window: main
     void window_main();
     void show_window_main();
 
 // Window : set_time
-    void window_set_time(System_clock::time_point t0);
+    void window_set_time();
 
 // print_time
-    void print(const System_clock::time_point& t0, uint8_t x0, uint8_t y0);
+    void print(const Date_time& t, uint8_t x0, uint8_t y0);
 
 // get_time
-    std::time_t user_get_time(const std::time_t& t0, uint8_t x0, uint8_t y0);
-    System_clock::time_point user_get_time(const System_clock::time_point& t0,
-              uint8_t x0, uint8_t y0);
+    void user_get_time(Date_time& t, uint8_t x0, uint8_t y0);
+//    std::time_t user_get_time(const std::time_t& t0, uint8_t x0, uint8_t y0);
+//    System_clock::time_point user_get_time(const System_clock::time_point& t0,
+//              uint8_t x0, uint8_t y0);
 };
 
 
