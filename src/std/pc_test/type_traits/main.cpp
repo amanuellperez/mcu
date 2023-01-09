@@ -44,160 +44,160 @@ void test_integral_constant()
     using four_t = mtd::integral_constant<int, 4>;
 
 
-    check_true(two_t::value == 2, "integral_constant::value");
-    check_true(two_t::value * 2 == four_t::value, "varios");   
+    CHECK_TRUE(two_t::value == 2, "integral_constant::value");
+    CHECK_TRUE(two_t::value * 2 == four_t::value, "varios");   
 
     two_t two;
-    check_true(two() == 2, "operator()");
+    CHECK_TRUE(two() == 2, "operator()");
     int x = two;
-    check_true(x == 2, "operator value_type()");
+    CHECK_TRUE(x == 2, "operator value_type()");
 
 
-    check_true(mtd::true_type::value == true, "true_type");
-    check_true(mtd::false_type::value == false, "false_type");
+    CHECK_TRUE(mtd::true_type::value == true, "true_type");
+    CHECK_TRUE(mtd::false_type::value == false, "false_type");
 
 
     // is_same
-    check_true(mtd::is_same<int, int>::value == true, "is_same(true)");
-    check_true(mtd::is_same<int, float>::value == false, "is_same(false)");
+    CHECK_TRUE(mtd::is_same<int, int>::value == true, "is_same(true)");
+    CHECK_TRUE(mtd::is_same<int, float>::value == false, "is_same(false)");
 
-    check_true(mtd::is_same_v<char, char> == true, "is_same_v(true)");
-    check_true(mtd::is_same_v<int, float> == false, "is_same_v(false)");
+    CHECK_TRUE(mtd::is_same_v<char, char> == true, "is_same_v(true)");
+    CHECK_TRUE(mtd::is_same_v<int, float> == false, "is_same_v(false)");
 
     // remove_const
-    check_true(mtd::is_same_v<typename mtd::remove_const<int>::type, int> == true
+    CHECK_TRUE(mtd::is_same_v<typename mtd::remove_const<int>::type, int> == true
 		, "remove_const(int)");
-    check_true(mtd::is_same_v<typename mtd::remove_const<const int>::type, int> == true
+    CHECK_TRUE(mtd::is_same_v<typename mtd::remove_const<const int>::type, int> == true
 		, "remove_const(const int)");
 
-    check_true(mtd::is_same_v<mtd::remove_const_t<int>, int> == true
+    CHECK_TRUE(mtd::is_same_v<mtd::remove_const_t<int>, int> == true
 		, "remove_const_t(int)");
-    check_true(mtd::is_same_v<mtd::remove_const_t<const int>, int> == true
+    CHECK_TRUE(mtd::is_same_v<mtd::remove_const_t<const int>, int> == true
 		, "remove_const_t(const int)");
 
-    check_true(mtd::is_same_v<typename mtd::remove_volatile<int>::type, int> == true
+    CHECK_TRUE(mtd::is_same_v<typename mtd::remove_volatile<int>::type, int> == true
 		, "remove_volatile(int)");
-    check_true(mtd::is_same_v<typename mtd::remove_volatile<volatile int>::type, int> == true
+    CHECK_TRUE(mtd::is_same_v<typename mtd::remove_volatile<volatile int>::type, int> == true
 		, "remove_volatile(volatile int)");
 
-    check_true(mtd::is_same_v<mtd::remove_volatile_t<int>, int> == true
+    CHECK_TRUE(mtd::is_same_v<mtd::remove_volatile_t<int>, int> == true
 		, "remove_volatile_t(int)");
-    check_true(mtd::is_same_v<mtd::remove_volatile_t<volatile int>, int> == true
+    CHECK_TRUE(mtd::is_same_v<mtd::remove_volatile_t<volatile int>, int> == true
 		, "remove_volatile_t(volatile int)");
 
 
-    check_true(mtd::is_same_v<typename mtd::remove_cv<int>::type, int> == true
+    CHECK_TRUE(mtd::is_same_v<typename mtd::remove_cv<int>::type, int> == true
 		, "remove_cv(int)");
-    check_true(mtd::is_same_v<typename mtd::remove_cv<const int>::type, int> == true
+    CHECK_TRUE(mtd::is_same_v<typename mtd::remove_cv<const int>::type, int> == true
 		, "remove_cv(const int)");
-    check_true(mtd::is_same_v<typename mtd::remove_cv<volatile int>::type, int> == true
+    CHECK_TRUE(mtd::is_same_v<typename mtd::remove_cv<volatile int>::type, int> == true
 		, "remove_cv(volatile int)");
 
-    check_true((mtd::is_same_v<mtd::remove_cv_t<int>, int> == true)
+    CHECK_TRUE((mtd::is_same_v<mtd::remove_cv_t<int>, int> == true)
 		, "remove_cv_t(int)");
-    check_true((mtd::is_same_v<mtd::remove_cv_t<const int>, int> == true)
+    CHECK_TRUE((mtd::is_same_v<mtd::remove_cv_t<const int>, int> == true)
 		, "remove_cv_t(const int)");
-    check_true((mtd::is_same_v<mtd::remove_cv_t<volatile int>, int> == true)
+    CHECK_TRUE((mtd::is_same_v<mtd::remove_cv_t<volatile int>, int> == true)
 		, "remove_cv_t(volatile int)");
 
     // is_integral
-    check_true(mtd::is_integral<bool>::value == true, "is_integral<bool>");
-    check_true(mtd::is_integral<const bool>::value == true, "is_integral<const bool>");
-    check_true(mtd::is_integral<volatile bool>::value == true, "is_integral<volatile bool>");
-    check_true(mtd::is_integral<char>::value == true, "is_integral<char>");
-    check_true(mtd::is_integral<const char>::value == true, "is_integral<const char>");
-    check_true(mtd::is_integral<volatile char>::value == true, "is_integral<volatile char>");
-    check_true(mtd::is_integral<signed char>::value == true, "is_integral<signed char>");
-    check_true(mtd::is_integral<const signed char>::value == true, "is_integral<const signed char>");
-    check_true(mtd::is_integral<volatile signed char>::value == true, "is_integral<volatile signed char>");
-    check_true(mtd::is_integral<unsigned char>::value == true, "is_integral<unsigned char>");
-    check_true(mtd::is_integral<const unsigned char>::value == true, "is_integral<const unsigned char>");
-    check_true(mtd::is_integral<volatile unsigned char>::value == true, "is_integral<volatile unsigned char>");
-    check_true(mtd::is_integral<char16_t>::value == true, "is_integral<char16_t>");
-    check_true(mtd::is_integral<const char16_t>::value == true, "is_integral<const char16_t>");
-    check_true(mtd::is_integral<volatile char16_t>::value == true, "is_integral<volatile char16_t>");
-    check_true(mtd::is_integral<char32_t>::value == true, "is_integral<char32_t>");
-    check_true(mtd::is_integral<const char32_t>::value == true, "is_integral<const char32_t>");
-    check_true(mtd::is_integral<volatile char32_t>::value == true, "is_integral<volatile char32_t>");
-    check_true(mtd::is_integral<short>::value == true, "is_integral<short>");
-    check_true(mtd::is_integral<const short>::value == true, "is_integral<const short>");
-    check_true(mtd::is_integral<volatile short>::value == true, "is_integral<volatile short>");
-    check_true(mtd::is_integral<unsigned short>::value == true, "is_integral<unsigned short>");
-    check_true(mtd::is_integral<const unsigned short>::value == true, "is_integral<const unsigned short>");
-    check_true(mtd::is_integral<volatile unsigned short>::value == true, "is_integral<volatile unsigned short>");
-    check_true(mtd::is_integral<int>::value == true, "is_integral<int>");
-    check_true(mtd::is_integral<const int>::value == true, "is_integral<const int>");
-    check_true(mtd::is_integral<volatile int>::value == true, "is_integral<volatile int>");
-    check_true(mtd::is_integral<unsigned int>::value == true, "is_integral<unsigned int>");
-    check_true(mtd::is_integral<const unsigned int>::value == true, "is_integral<const unsigned int>");
-    check_true(mtd::is_integral<volatile unsigned int>::value == true, "is_integral<volatile unsigned int>");
-    check_true(mtd::is_integral<long>::value == true, "is_integral<long>");
-    check_true(mtd::is_integral<const long>::value == true, "is_integral<const long>");
-    check_true(mtd::is_integral<volatile long>::value == true, "is_integral<volatile long>");
-    check_true(mtd::is_integral<unsigned long>::value == true, "is_integral<unsigned long>");
-    check_true(mtd::is_integral<const unsigned long>::value == true, "is_integral<const unsigned long>");
-    check_true(mtd::is_integral<volatile unsigned long>::value == true, "is_integral<volatile unsigned long>");
-    check_true(mtd::is_integral<long long>::value == true, "is_integral<long long>");
-    check_true(mtd::is_integral<const long long>::value == true, "is_integral<const long long>");
-    check_true(mtd::is_integral<volatile long long>::value == true, "is_integral<volatile long long>");
-    check_true(mtd::is_integral<unsigned long long>::value == true, "is_integral<unsigned long long>");
-    check_true(mtd::is_integral<const unsigned long long>::value == true, "is_integral<const unsigned long long>");
-    check_true(mtd::is_integral<volatile unsigned long long>::value == true, "is_integral<volatile unsigned long long>");
+    CHECK_TRUE(mtd::is_integral<bool>::value == true, "is_integral<bool>");
+    CHECK_TRUE(mtd::is_integral<const bool>::value == true, "is_integral<const bool>");
+    CHECK_TRUE(mtd::is_integral<volatile bool>::value == true, "is_integral<volatile bool>");
+    CHECK_TRUE(mtd::is_integral<char>::value == true, "is_integral<char>");
+    CHECK_TRUE(mtd::is_integral<const char>::value == true, "is_integral<const char>");
+    CHECK_TRUE(mtd::is_integral<volatile char>::value == true, "is_integral<volatile char>");
+    CHECK_TRUE(mtd::is_integral<signed char>::value == true, "is_integral<signed char>");
+    CHECK_TRUE(mtd::is_integral<const signed char>::value == true, "is_integral<const signed char>");
+    CHECK_TRUE(mtd::is_integral<volatile signed char>::value == true, "is_integral<volatile signed char>");
+    CHECK_TRUE(mtd::is_integral<unsigned char>::value == true, "is_integral<unsigned char>");
+    CHECK_TRUE(mtd::is_integral<const unsigned char>::value == true, "is_integral<const unsigned char>");
+    CHECK_TRUE(mtd::is_integral<volatile unsigned char>::value == true, "is_integral<volatile unsigned char>");
+    CHECK_TRUE(mtd::is_integral<char16_t>::value == true, "is_integral<char16_t>");
+    CHECK_TRUE(mtd::is_integral<const char16_t>::value == true, "is_integral<const char16_t>");
+    CHECK_TRUE(mtd::is_integral<volatile char16_t>::value == true, "is_integral<volatile char16_t>");
+    CHECK_TRUE(mtd::is_integral<char32_t>::value == true, "is_integral<char32_t>");
+    CHECK_TRUE(mtd::is_integral<const char32_t>::value == true, "is_integral<const char32_t>");
+    CHECK_TRUE(mtd::is_integral<volatile char32_t>::value == true, "is_integral<volatile char32_t>");
+    CHECK_TRUE(mtd::is_integral<short>::value == true, "is_integral<short>");
+    CHECK_TRUE(mtd::is_integral<const short>::value == true, "is_integral<const short>");
+    CHECK_TRUE(mtd::is_integral<volatile short>::value == true, "is_integral<volatile short>");
+    CHECK_TRUE(mtd::is_integral<unsigned short>::value == true, "is_integral<unsigned short>");
+    CHECK_TRUE(mtd::is_integral<const unsigned short>::value == true, "is_integral<const unsigned short>");
+    CHECK_TRUE(mtd::is_integral<volatile unsigned short>::value == true, "is_integral<volatile unsigned short>");
+    CHECK_TRUE(mtd::is_integral<int>::value == true, "is_integral<int>");
+    CHECK_TRUE(mtd::is_integral<const int>::value == true, "is_integral<const int>");
+    CHECK_TRUE(mtd::is_integral<volatile int>::value == true, "is_integral<volatile int>");
+    CHECK_TRUE(mtd::is_integral<unsigned int>::value == true, "is_integral<unsigned int>");
+    CHECK_TRUE(mtd::is_integral<const unsigned int>::value == true, "is_integral<const unsigned int>");
+    CHECK_TRUE(mtd::is_integral<volatile unsigned int>::value == true, "is_integral<volatile unsigned int>");
+    CHECK_TRUE(mtd::is_integral<long>::value == true, "is_integral<long>");
+    CHECK_TRUE(mtd::is_integral<const long>::value == true, "is_integral<const long>");
+    CHECK_TRUE(mtd::is_integral<volatile long>::value == true, "is_integral<volatile long>");
+    CHECK_TRUE(mtd::is_integral<unsigned long>::value == true, "is_integral<unsigned long>");
+    CHECK_TRUE(mtd::is_integral<const unsigned long>::value == true, "is_integral<const unsigned long>");
+    CHECK_TRUE(mtd::is_integral<volatile unsigned long>::value == true, "is_integral<volatile unsigned long>");
+    CHECK_TRUE(mtd::is_integral<long long>::value == true, "is_integral<long long>");
+    CHECK_TRUE(mtd::is_integral<const long long>::value == true, "is_integral<const long long>");
+    CHECK_TRUE(mtd::is_integral<volatile long long>::value == true, "is_integral<volatile long long>");
+    CHECK_TRUE(mtd::is_integral<unsigned long long>::value == true, "is_integral<unsigned long long>");
+    CHECK_TRUE(mtd::is_integral<const unsigned long long>::value == true, "is_integral<const unsigned long long>");
+    CHECK_TRUE(mtd::is_integral<volatile unsigned long long>::value == true, "is_integral<volatile unsigned long long>");
 
-    check_true(mtd::is_integral<float>::value == false, "is_integral<float>");
-    check_true(mtd::is_integral<const float>::value == false, "is_integral<const float>");
-    check_true(mtd::is_integral<volatile float>::value == false, "is_integral<volatile float>");
-    check_true(mtd::is_integral<double>::value == false, "is_integral<double>");
-    check_true(mtd::is_integral<const double>::value == false, "is_integral<const double>");
-    check_true(mtd::is_integral<volatile double>::value == false, "is_integral<volatile double>");
-    check_true(mtd::is_integral<Prueba>::value == false, "is_integral<Prueba>");
-    check_true(mtd::is_integral<const Prueba>::value == false, "is_integral<const Prueba>");
-    check_true(mtd::is_integral<volatile Prueba>::value == false, "is_integral<volatile Prueba>");
+    CHECK_TRUE(mtd::is_integral<float>::value == false, "is_integral<float>");
+    CHECK_TRUE(mtd::is_integral<const float>::value == false, "is_integral<const float>");
+    CHECK_TRUE(mtd::is_integral<volatile float>::value == false, "is_integral<volatile float>");
+    CHECK_TRUE(mtd::is_integral<double>::value == false, "is_integral<double>");
+    CHECK_TRUE(mtd::is_integral<const double>::value == false, "is_integral<const double>");
+    CHECK_TRUE(mtd::is_integral<volatile double>::value == false, "is_integral<volatile double>");
+    CHECK_TRUE(mtd::is_integral<Prueba>::value == false, "is_integral<Prueba>");
+    CHECK_TRUE(mtd::is_integral<const Prueba>::value == false, "is_integral<const Prueba>");
+    CHECK_TRUE(mtd::is_integral<volatile Prueba>::value == false, "is_integral<volatile Prueba>");
 
-    check_true(mtd::is_integral_v<int> == true, "is_integral_v<int>");
-    check_true(mtd::is_integral_v<Prueba> == false, "is_integral_v<Prueba>");
+    CHECK_TRUE(mtd::is_integral_v<int> == true, "is_integral_v<int>");
+    CHECK_TRUE(mtd::is_integral_v<Prueba> == false, "is_integral_v<Prueba>");
 
-    check_true(mtd::is_floating_point<float>::value == true, "is_floating_point<float>");
-    check_true(mtd::is_floating_point<const float>::value == true, "is_floating_point<const float>");
-    check_true(mtd::is_floating_point<volatile float>::value == true, "is_floating_point<volatile float>");
-    check_true(mtd::is_floating_point<double>::value == true, "is_floating_point<double>");
-    check_true(mtd::is_floating_point<const double>::value == true, "is_floating_point<const double>");
-    check_true(mtd::is_floating_point<volatile double>::value == true, "is_floating_point<volatile double>");
-    check_true(mtd::is_floating_point<long double>::value == true, "is_floating_point<long double>");
-    check_true(mtd::is_floating_point<const long double>::value == true, "is_floating_point<const long double>");
-    check_true(mtd::is_floating_point<volatile long double>::value == true, "is_floating_point<volatile long double>");
+    CHECK_TRUE(mtd::is_floating_point<float>::value == true, "is_floating_point<float>");
+    CHECK_TRUE(mtd::is_floating_point<const float>::value == true, "is_floating_point<const float>");
+    CHECK_TRUE(mtd::is_floating_point<volatile float>::value == true, "is_floating_point<volatile float>");
+    CHECK_TRUE(mtd::is_floating_point<double>::value == true, "is_floating_point<double>");
+    CHECK_TRUE(mtd::is_floating_point<const double>::value == true, "is_floating_point<const double>");
+    CHECK_TRUE(mtd::is_floating_point<volatile double>::value == true, "is_floating_point<volatile double>");
+    CHECK_TRUE(mtd::is_floating_point<long double>::value == true, "is_floating_point<long double>");
+    CHECK_TRUE(mtd::is_floating_point<const long double>::value == true, "is_floating_point<const long double>");
+    CHECK_TRUE(mtd::is_floating_point<volatile long double>::value == true, "is_floating_point<volatile long double>");
 
-    check_true(mtd::is_floating_point<int>::value == false, "is_floating_point<int>");
-    check_true(mtd::is_floating_point<Prueba>::value == false, "is_floating_point<Prueba>");
+    CHECK_TRUE(mtd::is_floating_point<int>::value == false, "is_floating_point<int>");
+    CHECK_TRUE(mtd::is_floating_point<Prueba>::value == false, "is_floating_point<Prueba>");
 
-    check_true(mtd::is_floating_point_v<long double> == true, "is_floating_point_v<long double>");
-    check_true(mtd::is_floating_point_v<char> == false, "is_floating_point_v<char>");
+    CHECK_TRUE(mtd::is_floating_point_v<long double> == true, "is_floating_point_v<long double>");
+    CHECK_TRUE(mtd::is_floating_point_v<char> == false, "is_floating_point_v<char>");
 
 
     // is_arithmetic
-    check_true(mtd::is_arithmetic<Prueba>::value == false, "is_arithmetic<Prueba>");
-    check_true(mtd::is_arithmetic<int>::value == true , "is_arithmetic<int>");
-    check_true(mtd::is_arithmetic<int&>::value == false, "is_arithmetic<int&>");
-    check_true(mtd::is_arithmetic<int*>::value == false, "is_arithmetic<int*>");
-    check_true(mtd::is_arithmetic<float>::value == true, "is_arithmetic<float>");
-    check_true(mtd::is_arithmetic<float&>::value == false, "is_arithmetic<float&>");
-    check_true(mtd::is_arithmetic<float*>::value == false, "is_arithmetic<float*>");
+    CHECK_TRUE(mtd::is_arithmetic<Prueba>::value == false, "is_arithmetic<Prueba>");
+    CHECK_TRUE(mtd::is_arithmetic<int>::value == true , "is_arithmetic<int>");
+    CHECK_TRUE(mtd::is_arithmetic<int&>::value == false, "is_arithmetic<int&>");
+    CHECK_TRUE(mtd::is_arithmetic<int*>::value == false, "is_arithmetic<int*>");
+    CHECK_TRUE(mtd::is_arithmetic<float>::value == true, "is_arithmetic<float>");
+    CHECK_TRUE(mtd::is_arithmetic<float&>::value == false, "is_arithmetic<float&>");
+    CHECK_TRUE(mtd::is_arithmetic<float*>::value == false, "is_arithmetic<float*>");
 
-    check_true(mtd::is_arithmetic_v<float> == true, "is_arithmetic_v<float>");
-    check_true(mtd::is_arithmetic_v<float*> == false, "is_arithmetic_v<float*>");
+    CHECK_TRUE(mtd::is_arithmetic_v<float> == true, "is_arithmetic_v<float>");
+    CHECK_TRUE(mtd::is_arithmetic_v<float*> == false, "is_arithmetic_v<float*>");
 
     // is_signed
-    check_true(mtd::is_signed<signed int>::value == true, "is_signed<signed int>");
-    check_true(mtd::is_signed<unsigned int>::value == false, "is_signed<unsigned int>");
+    CHECK_TRUE(mtd::is_signed<signed int>::value == true, "is_signed<signed int>");
+    CHECK_TRUE(mtd::is_signed<unsigned int>::value == false, "is_signed<unsigned int>");
 
-    check_true(mtd::is_signed_v<signed int> == true, "is_signed_v<signed int>");
-    check_true(mtd::is_signed_v<unsigned int> == false, "is_signed_v<unsigned int>");
+    CHECK_TRUE(mtd::is_signed_v<signed int> == true, "is_signed_v<signed int>");
+    CHECK_TRUE(mtd::is_signed_v<unsigned int> == false, "is_signed_v<unsigned int>");
 
-    check_true(mtd::is_unsigned<signed int>::value == false, "is_unsigned<signed int>");
-    check_true(mtd::is_unsigned<unsigned int>::value == true, "is_unsigned<unsigned int>");
+    CHECK_TRUE(mtd::is_unsigned<signed int>::value == false, "is_unsigned<signed int>");
+    CHECK_TRUE(mtd::is_unsigned<unsigned int>::value == true, "is_unsigned<unsigned int>");
 
-    check_true(mtd::is_unsigned_v<signed int> == false, "is_unsigned_v<signed int>");
-    check_true(mtd::is_unsigned_v<unsigned int> == true, "is_unsigned_v<unsigned int>");
+    CHECK_TRUE(mtd::is_unsigned_v<signed int> == false, "is_unsigned_v<signed int>");
+    CHECK_TRUE(mtd::is_unsigned_v<unsigned int> == true, "is_unsigned_v<unsigned int>");
 
 }
 

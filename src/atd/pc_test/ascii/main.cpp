@@ -23,22 +23,20 @@
 #include <iostream>
 #include <vector>
 
-using namespace std;
 using namespace test;
 
-using namespace atd;
 
 void tst()
 {    
-    check_true(digit_to_ascii(5) == '5', "digit_to_ascii");
+    CHECK_TRUE(atd::digit_to_ascii(5) == '5', "digit_to_ascii");
     
-    check_true(ascii_to_digit('5') == 5, "digit_to_ascii");
+    CHECK_TRUE(atd::ascii_to_digit('5') == 5, "digit_to_ascii");
 
-    vector<char> v = {1, 2, 3, 4};
-    vector<char> res = {'1', '2', '3', '4'};
+    std::vector<char> v = {1, 2, 3, 4};
+    std::vector<char> res = {'1', '2', '3', '4'};
  
-    transform_digit_to_ascii(v.begin(), v.end());
-    check_equal_containers(v.begin(), v.end(), res.begin(), res.end()
+    atd::transform_digit_to_ascii(v.begin(), v.end());
+    CHECK_EQUAL_CONTAINERS(v.begin(), v.end(), res.begin(), res.end()
 			    , "transform_digit_to_ascii");
 
 }

@@ -22,6 +22,7 @@
 #include <alp_test.h>
 #include <iostream>
 #include <cstring>
+#include <limits>
 
 using namespace test;
 

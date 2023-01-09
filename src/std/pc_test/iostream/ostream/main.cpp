@@ -26,6 +26,7 @@
 #include <iostream>
 #include <vector>
 #include <cstring>
+#include <limits>
 
 using namespace test;
 

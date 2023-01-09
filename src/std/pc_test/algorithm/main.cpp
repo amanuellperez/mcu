@@ -37,7 +37,7 @@ void test_for_each()
 
     mtd::for_each (v.begin(), v.end(), [](int& x){++x;});
     
-    check_equal_containers  ( v.begin(), v.end()
+    CHECK_EQUAL_CONTAINERS  ( v.begin(), v.end()
 			    , res.begin(), res.end(), "for_each");
     }
 
@@ -45,7 +45,7 @@ void test_for_each()
     std::vector v = {1, 2, 3, 4};
     std::vector res = {2, 3, 4, 5};
     mtd::for_each_n (v.begin(), v.size(), [](int& x){++x;});
-    check_equal_containers  ( v.begin(), v.end()
+    CHECK_EQUAL_CONTAINERS  ( v.begin(), v.end()
 			    , res.begin(), res.end(), "for_each_n");
     }
 }
