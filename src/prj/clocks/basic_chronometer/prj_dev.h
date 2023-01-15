@@ -1,4 +1,4 @@
-// Copyright (C) 2021 A.Manuel L.Perez 
+// Copyright (C) 2021-2023 A.Manuel L.Perez 
 //           mail: <amanuel.lperez@gmail.com>
 //           https://github.com/amanuellperez/mcu
 //
@@ -19,9 +19,13 @@
 
 #pragma once
 
-#ifndef __CHRONO_DEV_H__
-#define __CHRONO_DEV_H__
+#ifndef __PRJ_DEV_H__
+#define __PRJ_DEV_H__
 
+// En prj_dev.h metemos todas las dependencias con el hardware.
+// El resto del programa NO tiene que saber qué dispositivos concretos usamos. 
+// Lo ideal es usar dispositivos genéricos en el resto, de esa forma se puede
+// cambiar el hardware sin tocar el software.
 #include <stdint.h>
 #include <avr_atmega.h>
 
@@ -34,8 +38,8 @@
 namespace mcu = atmega;
 using  Micro  = mcu::Micro;
 
-// pins usados
-// ------------
+// pins connections
+// ----------------
 // UART for debugging purpose: pins 2 and 3
 constexpr uint8_t LCD_RS_pin = 4;
 constexpr uint8_t LCD_RW_pin = 5;
@@ -62,8 +66,8 @@ using Keyrow_pins = dev::Keyrow_pins<23>;
 
 
 
-// Hardware connections
-// --------------------
+// Devices
+// -------
 using LCD_pins = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<LCD_RS_pin>,
 					dev::LCD_HD44780_RW<LCD_RW_pin>,
 					dev::LCD_HD44780_E<LCD_E_pin>,

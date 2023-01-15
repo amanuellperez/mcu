@@ -21,8 +21,7 @@
 
 #include <user_choose_number.h>
 
-
-void Main::window_stop()
+void Main::wait_press_key()
 {
     wait_release_key();
 
@@ -31,19 +30,22 @@ void Main::window_stop()
     while (keyboard_.key<OK_KEY>().is_not_pressed()){
 	Micro::wait_ms(100);	// ¿por qué 100 ms?
     }
+}
 
+
+void Main::window_stop()
+{
+    wait_press_key();
+
+}
+
+
+void Main::window_reset()
+{
     Chronometer::reset();
     print_time();
 
-// repetimos --> TODO: funcion!!
-    wait_release_key();
-
-    // Aquí sería mejor dormir el micro y despertarlo solo cuando se pulse la
-    // tecla correspondiente. Habría que usar interrupciones con el keyboard_.
-    while (keyboard_.key<OK_KEY>().is_not_pressed()){
-	Micro::wait_ms(100);	// ¿por qué 100 ms?
-    }
-
+    wait_press_key();
 }
 
 
@@ -56,7 +58,7 @@ void Main::window_running()
 
     while(!keyboard_.key<OK_KEY>().is_pressed()){
 	print_time();
-//	Micro::wait_ms(100); // TODO: cfg.h
+//	Micro::wait_ms(100); // si se descomenta va mas despacio el lcd
     }
 
     Chronometer::off();

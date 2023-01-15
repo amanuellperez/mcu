@@ -20,10 +20,6 @@
 
 #include "prj_dev.h"
 
-#include <avr_interrupt.h>
-
-
-// Definimos el reloj del sistema
 ISR_TIMER1_COMPA
 {
     Chronometer::tick();

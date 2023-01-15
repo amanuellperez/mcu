@@ -21,11 +21,12 @@
 
 void Main::run()
 {
-    print_time();   // window_first()??? 
+    window_reset();
 
     while(1){
-	window_stop();
 	window_running();
+	window_stop();
+	window_reset();
     }
 }
 

@@ -63,8 +63,11 @@ private:
 
 // Window: main
     void window_stop();	    // cronómetro parado
+    void window_reset();
     void window_running();  //      "     encendido
 
+// Functions
+    void wait_press_key();
     void print_time();
 };
 
