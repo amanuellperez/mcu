@@ -26,7 +26,10 @@
 
 class Keyboard_time_to_wait{
 public:
+    Keyboard_time_to_wait() : n{0} { }
+
     void reset() {n = 0;}
+
     int16_t time_up();
     int16_t time_down();
 

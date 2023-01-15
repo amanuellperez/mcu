@@ -24,46 +24,21 @@
 
 /****************************************************************************
  *
- *  - DESCRIPCION: Reloj de horno
+ *  - DESCRIPCION: Cronómetro
  *
  *  - COMENTARIOS: 
  *
  *  - HISTORIA:
  *    A.Manuel L.Perez
- *    30/01/2021 v0.0
+ *    30/01/2021 Escrito
+ *    15/01/2022 Reescrito
  *
  ****************************************************************************/
-#include "dev.h"
-#include "cfg.h"
+#include "prj_dev.h"
+#include "prj_cfg.h"
 
 #include <avr_time.h>
 #include <user_time.h>
-
-// Experimento: mejoremos el bouncing.
-// Timer que cuenta ticks. Implementación mínima para la aplicación.
-class Timer_ticks{
-public:
-    Timer_ticks(uint8_t imax) : imax_{imax}
-    { i_ = 0; } // empezamos en off
-
-    void on() {i_ = imax_;}
-    void off() { i_ = 0; }
-
-    bool is_off() {return i_ == 0;}
-
-    void tick() 
-    { 
-	if (i_ > 0)
-	    --i_; 
-    }
-
-private:
-    uint8_t i_;	// i_ = 0, está en off. i_ != 0, en on.
-    uint8_t imax_;
-};
-
-
-
 
 /*!
  *  \brief  Application.
@@ -75,32 +50,29 @@ public:
     void run();
 
 private:
-// Hardware
-    Screen scr_;
+// Logical devices
+    LCD lcd_;
     Keyboard keyboard_;
 
-// init: hardware
+
+// init_hardware()
     void init_lcd();
-    void init_keyboard();
-    void init_stopwatch();
+    void init_keyboard() { }
+    void init_chronometer();
 
 
 // Window: main
-    void window_main();
+    void window_stop();	    // cronómetro parado
+    void window_running();  //      "     encendido
 
     void print_time();
-
-
-// keyboard
-    uint8_t scan_keyboard();
-
-    constexpr static uint8_t keyboard_clock_imax = 2; // 2 * 50 = 100
-    constexpr static uint16_t period_main_clock_ms = 50;
-
-    Timer_ticks ktimer_; // keyboard_timer
 };
 
 
+inline void wait_release_key()
+{
+    Micro::wait_ms(time_wait_release_key);
+}
 
 
 

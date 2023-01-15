@@ -17,64 +17,50 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "main.h"
-#include "keyboard.h"
+#include "prj_main.h"
 
 #include <user_choose_number.h>
 
-void Main::window_main()
+
+void Main::window_stop()
 {
-    switch(state_){
-	case State::stop    : window_state_stop(); break;
-	case State::running : window_state_running(); break;
-    }
-
-}
-
-
-
-void Main::window_state_stop()
-{
-    Keyboard_time_to_wait wait;
-
-    while (keyboard_.key<OK_KEY>().is_not_pressed()){
-	if (keyboard_.key<UP_KEY>().is_pressed()){
-	    auto d = Chronometer::now_as_duration() 
-				    + std::chrono::seconds{wait.time_up()};
-	    Chronometer::set(d);
-	    print_time();
-	}
-
-	else if (keyboard_.key<DOWN_KEY>().is_pressed()){
-	    auto d = Chronometer::now_as_duration() 
-				    + std::chrono::seconds{wait.time_down()};
-	    Chronometer::set(d);
-	    print_time();
-	}
-	else
-	    wait.reset();
-
-	wait_release_key();
-    }
-
-
-    Chronometer::resume();
-
-    state_ = State::running;
-
     wait_release_key();
-}
 
-
-void Main::window_state_running()
-{
-    if (keyboard_.key<OK_KEY>().is_pressed()){
-	Chronometer::off();
-	state_ = State::stop;
+    // Aquí sería mejor dormir el micro y despertarlo solo cuando se pulse la
+    // tecla correspondiente. Habría que usar interrupciones con el keyboard_.
+    while (keyboard_.key<OK_KEY>().is_not_pressed()){
+	Micro::wait_ms(100);	// ¿por qué 100 ms?
     }
 
+    Chronometer::reset();
     print_time();
 
+// repetimos --> TODO: funcion!!
+    wait_release_key();
+
+    // Aquí sería mejor dormir el micro y despertarlo solo cuando se pulse la
+    // tecla correspondiente. Habría que usar interrupciones con el keyboard_.
+    while (keyboard_.key<OK_KEY>().is_not_pressed()){
+	Micro::wait_ms(100);	// ¿por qué 100 ms?
+    }
+
+}
+
+
+void Main::window_running()
+{
+    Chronometer::start();
+    print_time();
+
+    wait_release_key();
+
+    while(!keyboard_.key<OK_KEY>().is_pressed()){
+	print_time();
+//	Micro::wait_ms(100); // TODO: cfg.h
+    }
+
+    Chronometer::off();
+    Micro::wait_ms(200);
 }
 
 
@@ -91,7 +77,7 @@ void Main::print_time()
     lcd_.print(':');
     lcd_.print(t.seconds, nm::Width{2});
     lcd_.print(':');
-    lcd_.print(t.milliseconds, nm::Width{2});
+    lcd_.print(t.milliseconds, nm::Width{3});
 }
 
 

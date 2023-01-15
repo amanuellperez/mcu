@@ -29,7 +29,10 @@
 #include <dev_keyrow.h>
 #include <dev_clocks.h>
 
+// micro
+// -----
 namespace mcu = atmega;
+using  Micro  = mcu::Micro;
 
 // pins usados
 // ------------
@@ -84,9 +87,8 @@ using Keyboard	   = dev::Basic_keyrow<Keyrow_pins, Keyrow_codes>;
 
 // Chronometer
 // -----------
-constexpr static uint16_t chronometer_timer_period_in_us = 64u;
-using Chronometer                                        = dev::
-    Chronometer_ms<mcu::Time_counter1_g, chronometer_timer_period_in_us, false>;
+using Chronometer= 
+	dev::Clock_ms<Micro, mcu::Time_counter1_g>;
 
 #endif
 

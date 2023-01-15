@@ -36,16 +36,18 @@ void Main::window_main()
 
 void Main::window_state_stop()
 {
+    alarm_time -= Chronometer::now_as_duration();
+
     Keyboard_time_to_wait wait;
 
     while (keyboard_.key<OK_KEY>().is_not_pressed()){
 	if (keyboard_.key<UP_KEY>().is_pressed()){
-	    Chronometer::add(std::chrono::seconds{wait.time_up()});
+	    alarm_time += std::chrono::seconds{wait.time_up()};
 	    print_time();
 	}
 
 	else if (keyboard_.key<DOWN_KEY>().is_pressed()){
-	    Chronometer::substract(std::chrono::seconds{wait.time_down()});
+	    alarm_time -= std::chrono::seconds{wait.time_down()};
 	    print_time();
 	}
 	else
@@ -54,7 +56,9 @@ void Main::window_state_stop()
 	wait_release_key();
     }
 
-    Chronometer::on();
+
+    Chronometer::start();
+
     state_ = State::running;
 
     wait_release_key();
@@ -68,8 +72,7 @@ void Main::window_state_running()
 	state_ = State::stop;
     }
 
-    else if (std::chrono::seconds{Chronometer::now().time_since_epoch()} ==
-             std::chrono::seconds{0}) {
+    else if (Chronometer::now_as_duration() >= alarm_time) {
 	Chronometer::off();
 	state_ = State::alarm;
     }
@@ -88,14 +91,17 @@ void Main::window_state_alarm()
 void Main::print_time()
 {
     lcd_.cursor_pos(0,0);
-    auto sexag = Chronometer::sexagesimal_count();
-    lcd_.print(sexag.hours, nm::Width{2});
+
+    auto d = alarm_time - Chronometer::now_as_duration();
+    Chronometer::Time t{d};
+
+    lcd_.print(t.hours, nm::Width{2});
     lcd_.print(':');
-    lcd_.print(sexag.minutes, nm::Width{2});
+    lcd_.print(t.minutes, nm::Width{2});
     lcd_.print(':');
-    lcd_.print(sexag.seconds, nm::Width{2});
+    lcd_.print(t.seconds, nm::Width{2});
     lcd_.print(':');
-    lcd_.print(sexag.milliseconds, nm::Width{2});
+    lcd_.print(t.milliseconds, nm::Width{2});
 }
 
 

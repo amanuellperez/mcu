@@ -17,24 +17,18 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#pragma once
 
-#ifndef __CHRONO_KEYBOARD_H__
-#define __CHRONO_KEYBOARD_H__
+#include "prj_dev.h"
 
-#include <stdint.h>
+#include <avr_interrupt.h>
 
-class Keyboard_time_to_wait{
-public:
-    Keyboard_time_to_wait() : n{0} { }
 
-    void reset() {n = 0;}
+// Definimos el reloj del sistema
+ISR_TIMER1_COMPA
+{
+    Chronometer::tick();
+}
 
-    int16_t time_up();
-    int16_t time_down();
 
-private:
-    int8_t n = 0;
-};
 
-#endif
+

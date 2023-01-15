@@ -53,9 +53,12 @@ void test_clock()
 //    using UART = mcu::UART_basic;
 
     uart << "\n\nClock test\n"
-	        "----------\n";
+	        "----------\n"
+		"Starting in 2 seconds:\n";
 
     Clock::on();
+
+    Clock::set(std::chrono::seconds{2});
 
     while(1){
 	print_time(uart, Clock::now_as_time());

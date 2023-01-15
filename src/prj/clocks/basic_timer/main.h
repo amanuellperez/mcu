@@ -57,8 +57,10 @@ private:
 // state: pasarlo a flags si se usan más de 1 flag.
     enum class State {stop, running, alarm };
 
+// Data
     State state_ = State::stop;
-
+    Chronometer::duration alarm_time; // Tiempo en el que lanzamos la alarma   
+    
 // init: hardware
     void init_lcd();
     void init_keyboard() { }

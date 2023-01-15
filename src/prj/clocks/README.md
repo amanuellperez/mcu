@@ -29,9 +29,9 @@ No tengo fotos del que hice en su día. Si lo vuelvo a hacer, ya subo alguna.
   Es un timer básico. Se programa un tiempo y cuenta hacia atrás. Resolución:
   segundos.
 
-* [Basic stopwatch](basic_stopwatch)
+* [Basic crhonometer](basic_chronometer)
 
-  Stopwatch básico. Es un cronómetro que cuenta en milisegundos.
+  Cronómeetro básico. Es un cronómetro que mide en milisegundos.
 
   Nota: es fundamental gestionar bien el bouncing del teclado con el
   cronómetro. Si no, al pulsar el botón para pararlo no lo para.

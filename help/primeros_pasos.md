@@ -135,5 +135,5 @@ uso los siguientes programadores:
 
 
 ---
-A.Manuel L.Perez (https://github.com/amanuellperez/mcu)
+Manuel Perez (https://github.com/amanuellperez/mcu)
 

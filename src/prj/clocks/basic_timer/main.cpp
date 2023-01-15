@@ -21,10 +21,15 @@
 
 Main::Main()
 {
-// init_hardware():
+// init_hardware();
     init_lcd();
     init_keyboard();
     init_chronometer();
+
+    Micro::enable_interrupts();
+
+// init_data();
+    alarm_time = std::chrono::minutes{0};
 }
 
 
@@ -35,7 +40,7 @@ void Main::init_lcd()
 
 void Main::init_chronometer()
 {
-    Chronometer::init();
+//    Chronometer::start(); // No tiene sentido que empiece encendido!!!
 }
 
 
@@ -49,8 +54,8 @@ void Main::run()
 //	else 
 	    window_main();
 
-	mcu::Micro::wait_ms(100); // es un reloj de horno. Miro el teclado cada 100 ms
-//	mcu::Micro::wait_ms(10); // es un cronometro que funciona a 1 ms. 
+	Micro::wait_ms(100); // es un reloj de horno. Miro el teclado cada 100 ms
+//	Micro::wait_ms(10); // es un cronometro que funciona a 1 ms. 
 //		    // Actualizo el LCD cada 1 ms (si se elimina este mcu::Micro::wait_ms
 //		    // el LCD se actualiza tan rápido que no se ve nada)
     }

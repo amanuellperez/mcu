@@ -1,4 +1,4 @@
-// Copyright (C) 2022 A.Manuel L.Perez 
+// Copyright (C) 2021 A.Manuel L.Perez 
 //           mail: <amanuel.lperez@gmail.com>
 //           https://github.com/amanuellperez/mcu
 //
@@ -19,20 +19,20 @@
 
 #pragma once
 
-#ifndef __DEV_H__
-#define __DEV_H__
+#ifndef __CHRONO_DEV_H__
+#define __CHRONO_DEV_H__
 
 #include <stdint.h>
 #include <avr_atmega.h>
 
 #include <dev_LCD_HD44780.h>
-#include <dev_LCD_font_2x2.h>
-#include <dev_LCD_font_2x3.h>
-#include <dev_LCD_font_4x3.h>
 #include <dev_keyrow.h>
-#include "stopwatch.h"
+#include <dev_clocks.h>
 
+// micro
+// -----
 namespace mcu = atmega;
+using  Micro  = mcu::Micro;
 
 // pins usados
 // ------------
@@ -53,8 +53,8 @@ constexpr uint8_t LCD_D7_pin = 14;
 
 // Alimentación y AREF: 20, 21, 22
 
-// available: 23
-using Keyrow_pins = dev::Keyrow_pins<24, 25>;
+//using Keyrow_pins = dev::Keyrow_pins<23, 24, 25>;
+using Keyrow_pins = dev::Keyrow_pins<23>;
 
 // available: 26
 
@@ -77,29 +77,19 @@ using LCD_pins = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<LCD_RS_pin>,
 using LCD_1602         = dev::LCD_HD44780_1602<LCD_pins>;
 using Generic_LCD_1602 = dev::Generic_LCD<LCD_1602>;
 using Screen_1602      = dev::LCD_screen_1602<Generic_LCD_1602>;
-using Screen	       = Screen_1602;
-// Choose font to use:
-using Font             = dev::Font_digit_2x2_t1; 
-//using Font             = dev::Font_digit_2x3_t1; 
-//using Font             = dev::Font_digit_4x3_t1;  //<-- esta fallando. 
-//							hay que depurar esta
-//							fuente
+using LCD              = Screen_1602;
 
 
 // keyrow
-// ------
-static constexpr uint8_t NO_KEY    = 0;
-static constexpr uint8_t STOP_KEY  = 1;
-static constexpr uint8_t START_KEY = 2;
-using Keyrow_codes = dev::Keyrow_codes<START_KEY, STOP_KEY>;
+using namespace dev::Key_codes; // OK_KEY, UP_KEY, DOWN_KEY
+//using Keyrow_codes = dev::Keyrow_codes<OK_KEY, UP_KEY, DOWN_KEY>;
+using Keyrow_codes = dev::Keyrow_codes<OK_KEY>;
 using Keyboard	   = dev::Basic_keyrow<Keyrow_pins, Keyrow_codes>;
 
 
-// Stopwatch
-// ---------
-constexpr static uint16_t timer_period_in_us = 64u;
-using Stopwatch = my::Stopwatch<mcu::Time_counter1_g, timer_period_in_us>;
-
+// Chronometer
+// -----------
+using Chronometer = dev::Clock_ms<Micro, mcu::Time_counter1_g>;
 
 #endif
 

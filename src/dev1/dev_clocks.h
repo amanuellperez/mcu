@@ -256,25 +256,53 @@ public:
     // En un cronómetro me suena mejor start/stop, pero en un reloj que lo
     // normal es que lo enciendas y no lo apagues, ahora me suena mejor on/off
     // (problema: apostamos a que en unos días me suena mejor otra cosa? @_@)
-    /// on() enciende el reloj desde 0. Recordar ponerlo en hora con set()
+    /// on() enciende el reloj desde 0. 
     static void on();
+
+    // Lo dicho: ahora me suena mejor `start`. Motivo? `on` suena a
+    // `enciendete` pero no refleja el hecho de que empezamos desde '0',
+    // mientras que `start` indica 'empieza', lo cual si da una idea de que
+    // empezamos desde 0.
+    static void start() {on();}
+
+    /// Enciende el reloj sin reinicializar el counter.
+    static void resume();
 
     /// Apaga el reloj reiniciar el contador.
     static void off();
 
-    /// Ponemos en hora el reloj, pasándo el número de milisegundos que marca el
-    /// reloj.
-    // (???) en lugar de set se podía llamar `now`. 
-    static void set(const rep& nmilliseconds);
+    static void stop() {off();}
 
+
+    // Todas las funciones set/reset no encienden/apagan el Clock_ms. Si
+    // estaba encendido sigue encendido, si apagado, apagado. Lo que modifican
+    // es el contador del Clock_ms.
     // Aunque tiene más sentido este set, pasarle el std::chrono::milliseconds
     // directamente, puede que sea más sencillo de usar el set(rep) ???
     static void set(const duration& nmilliseconds);
 
+    template <typename Rep, typename Period>
+    static void set(const std::chrono::duration<Rep, Period>& d)
+    { set(std::chrono::duration_cast<duration>(d)); }
+
     /// Ponemos en hora el reloj, pasándo la Time correspondiente.
     static void set(const Time& t);
 
+    /// Pone el contador a 0 (sin alterar su estado: si estaba encendido,
+    /// sigue encendido)
+    static void reset() {set(rep{0});}
+
+    // TODO: Hay demasiadas funciones now():
+    //	1) La del time_point está inspirada en std pero no la veo práctica
+    //	   aquí.
+    //	2) now_as_duration() da la impresión de ser más práctica que 1)
+    //	3) now_as_time() es para mostrar la duración directamente en formato
+    //	   humano que es algo que tienen que hacerse siempre.
+    //	Conclusión: no tengo claro cómo hacer esto. Que el uso marque el
+    //	camino.
     static time_point now() noexcept;
+
+    static duration now_as_duration() noexcept;
 
     static Time now_as_time();
 
@@ -285,6 +313,11 @@ private:
     inline static volatile rep nmilliseconds_; // = nmilliseconds
 
     static rep now_() noexcept;
+
+    /// Ponemos en hora el reloj, pasándo el número de milisegundos que marca el
+    /// reloj.
+    // (???) en lugar de set se podía llamar `now`. 
+    static void set(const rep& nmilliseconds);
 };
 
 template <typename M, typename TC>
@@ -295,9 +328,18 @@ void Clock_ms<M, TC>::on()
     nmilliseconds_ = 0;
     Time_counter::on_with_overflow_every_1ms();
 
+    resume();
+
     // (???) aqui enable_interrupts o que lo defina el cliente 
     // Micro::enable_interrupts();
 }
+
+template <typename M, typename TC>
+inline void Clock_ms<M, TC>::resume()
+{
+    Time_counter::on_with_overflow_every_1ms();
+}
+
 
 template <typename M, typename TC>
 inline void Clock_ms<M, TC>::off()
@@ -313,11 +355,16 @@ inline Clock_ms<M, TC>::rep Clock_ms<M, TC>::now_() noexcept
     return nmilliseconds_;
 }
 
+template <typename M, typename TC>
+inline Clock_ms<M, TC>::duration Clock_ms<M, TC>::now_as_duration() noexcept
+{
+    return duration{now_()};
+}
 
 template <typename M, typename TC>
 inline Clock_ms<M, TC>::time_point Clock_ms<M, TC>::now() noexcept
 {
-    return time_point{duration{now_()}};
+    return time_point{now_as_duration()};
 }
 
 template <typename M, typename TC>

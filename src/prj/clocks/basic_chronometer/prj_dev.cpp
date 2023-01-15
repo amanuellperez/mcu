@@ -1,4 +1,4 @@
-// Copyright (C) 2021 A.Manuel L.Perez 
+// Copyright (C) 2023 A.Manuel L.Perez 
 //           mail: <amanuel.lperez@gmail.com>
 //           https://github.com/amanuellperez/mcu
 //
@@ -17,54 +17,28 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "main.h"
+#include "prj_main.h"
 
-Main::Main() : ktimer_{keyboard_clock_imax}
+
+Main::Main()
 {
-// init_hardware():
+// init_hardware();
     init_lcd();
     init_keyboard();
-    init_stopwatch();
-}
+    init_chronometer();
 
+    Micro::enable_interrupts();
 
-void Main::init_keyboard()
-{
-    ktimer_.off();
 }
 
 
 void Main::init_lcd()
 {
-    Font::load(scr_);
 }
 
-void Main::init_stopwatch()
+void Main::init_chronometer()
 {
-    Stopwatch::init();
-}
-
-void Main::run()
-{
-    print_time();
-
-    while(1){
-//	if (errno_)
-//	    error();
-//	else 
-	    window_main();
-
-	mcu::Micro::wait_ms(period_main_clock_ms);
-	ktimer_.tick();
-    }
-}
-
-
-
-int main()
-{
-    Main app;
-    app.run();
+    Chronometer::reset();
 }
 
 

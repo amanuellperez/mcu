@@ -38,6 +38,9 @@
 #include <dev_keyrow.h>
 #include <dev_clocks.h>
 
+
+// micro
+// -----
 namespace mcu = atmega;
 using  Micro  = mcu::Micro;
 

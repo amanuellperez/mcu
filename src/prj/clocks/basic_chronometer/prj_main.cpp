@@ -17,16 +17,24 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#include "prj_main.h"
 
-#include "dev.h"
-
-#include <avr_interrupt.h>
-
-
-// Definimos el reloj del sistema
-ISR_TIMER1_COMPA
+void Main::run()
 {
-    Chronometer::tick();
+    print_time();   // window_first()??? 
+
+    while(1){
+	window_stop();
+	window_running();
+    }
+}
+
+
+
+int main()
+{
+    Main app;
+    app.run();
 }
 
 
