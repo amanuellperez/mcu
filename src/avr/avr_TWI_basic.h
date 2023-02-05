@@ -1,5 +1,5 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez 
-//           mail: <amanuel.lperez@gmail.com>
+// Copyright (C) 2019-2020 Manuel Perez 
+//           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
 // This file is part of the MCU++ Library.
@@ -27,7 +27,7 @@
  *
  *
  *   - HISTORIA:
- *    A.Manuel L.Perez
+ *    Manuel Perez
  *    24/08/2019 v0.0
  *    27/01/2020 Reescribo todo.
  *

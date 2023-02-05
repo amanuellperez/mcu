@@ -1,5 +1,5 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez 
-//           mail: <amanuel.lperez@gmail.com>
+// Copyright (C) 2019-2020 Manuel Perez 
+//           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
 // This file is part of the MCU++ Library.
@@ -26,7 +26,7 @@
  *	Clases para manejar pines del AVR
  *
  * HISTORIA
- *    A.Manuel L.Perez
+ *    Manuel Perez
  *      24/07/2017 Escrito
  *	27/01/2019 Reescrito, paso a usar templates.
  *	09/06/2019 Output_pin<0> y pulso_1us. 

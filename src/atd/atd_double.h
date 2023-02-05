@@ -1,5 +1,5 @@
-// Copyright (C) 2021 A.Manuel L.Perez 
-//           mail: <amanuel.lperez@gmail.com>
+// Copyright (C) 2021 Manuel Perez 
+//           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
 // This file is part of the MCU++ Library.
@@ -30,7 +30,7 @@
  *    hacer la calculadora voy a experimentar usando 'double'.
  *
  *  - HISTORIA:
- *    A.Manuel L.Perez
+ *    Manuel Perez
  *    23/07/2021 modf, print, 
  *		 mantissa_to_str_with_zeros, mantissa_to_str,
  *		 to_string

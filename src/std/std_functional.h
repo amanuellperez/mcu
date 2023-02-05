@@ -1,5 +1,5 @@
-// Copyright (C) 2022 A.Manuel L.Perez 
-//           mail: <amanuel.lperez@gmail.com>
+// Copyright (C) 2022 Manuel Perez 
+//           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
 // This file is part of the MCU++ Library.
@@ -28,7 +28,7 @@
  *  - COMENTARIOS: 
  *
  *  - HISTORIA:
- *    A.Manuel L.Perez
+ *    Manuel Perez
  *	31/01/2022 std::less, less_equal, greater, greater_equal, 
  *		   equal_to, not_equal_to. (TODO: faltan especializaciones
  *		   tipo std::less<void>).

@@ -1,5 +1,5 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez 
-//           mail: <amanuel.lperez@gmail.com>
+// Copyright (C) 2019-2020 Manuel Perez 
+//           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
 // This file is part of the MCU++ Library.
@@ -26,7 +26,7 @@
  *  - DESCRIPCION: Implementación del flujo uart.
  *
  *  - HISTORIA:
- *    A.Manuel L.Perez
+ *    Manuel Perez
  *	07/10/2019 v0.0
  *	25/10/2019 '\n' --> se transforma en "\r\n". Es mucho más cómodo.
  *

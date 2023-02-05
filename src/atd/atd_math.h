@@ -1,5 +1,5 @@
-// Copyright (C) 2019-2022 A.Manuel L.Perez 
-//           mail: <amanuel.lperez@gmail.com>
+// Copyright (C) 2019-2022 Manuel Perez 
+//           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
 // This file is part of the MCU++ Library.
@@ -26,7 +26,7 @@
  *  - DESCRIPCION: Funciones matemáticas.
  *
  *  - HISTORIA:
- *    A.Manuel L.Perez
+ *    Manuel Perez
  *    07/03/2020 ten_to_the
  *    05/04/2020 number_of_digits, div
  *    14/12/2020 abs

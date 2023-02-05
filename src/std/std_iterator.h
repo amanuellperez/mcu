@@ -1,5 +1,5 @@
-// Copyright (C) 2019-2022 A.Manuel L.Perez 
-//           mail: <amanuel.lperez@gmail.com>
+// Copyright (C) 2019-2022 Manuel Perez 
+//           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
 // This file is part of the MCU++ Library.
@@ -26,7 +26,7 @@
  *	Equivalente a <iterator>
  *
  *  HISTORIA
- *    A.Manuel L.Perez
+ *    Manuel Perez
  *	03/11/2019: iterator_traits, reverse_iterator
  *	04/02/2020: advance, next, prev, distance
  *	23/12/2022: begin()/end()/size()

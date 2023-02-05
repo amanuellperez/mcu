@@ -1,5 +1,5 @@
-// Copyright (C) 2022-2023 A.Manuel L.Perez 
-//           mail: <amanuel.lperez@gmail.com>
+// Copyright (C) 2022-2023 Manuel Perez 
+//           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
 // This file is part of the MCU++ Library.
@@ -27,7 +27,7 @@
  *	Generadores de ondas cuadradas.
  *
  * HISTORIA
- *    A.Manuel L.Perez
+ *    Manuel Perez
  *    13/12/2022 Square_wave_generator
  *		 PRO : Fácil de generar una señal de una frecuencia cualquiera.
  *		 CONS: Introduce un delay por culpa de tener que configurar el

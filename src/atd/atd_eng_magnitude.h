@@ -1,5 +1,5 @@
-// Copyright (C) 2021 A.Manuel L.Perez 
-//           mail: <amanuel.lperez@gmail.com>
+// Copyright (C) 2021 Manuel Perez 
+//           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
 // This file is part of the MCU++ Library.
@@ -27,7 +27,7 @@
  *  - DESCRIPCION: Engineering notation for Magnitude
  *
  *  - HISTORIA:
- *    A.Manuel L.Perez
+ *    Manuel Perez
  *    04/02/2021 v0.0 Implementación mínima.
  *    11/03/2021      to_eng_magnitude
  *    15/08/2021      millivalue

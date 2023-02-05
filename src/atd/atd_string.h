@@ -1,5 +1,5 @@
-// Copyright (C) 2021 A.Manuel L.Perez 
-//           mail: <amanuel.lperez@gmail.com>
+// Copyright (C) 2021 Manuel Perez 
+//           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
 // This file is part of the MCU++ Library.
@@ -26,7 +26,7 @@
  *  - DESCRIPCION: Algoritmos para manejar cadenas.
  *
  *  - HISTORIA:
- *    A.Manuel L.Perez
+ *    Manuel Perez
  *    24/07/2021 to_int, to_char
  *    29/07/2021 int_to_string
  *    05/11/2022 binary_char_to

@@ -1,5 +1,5 @@
-// Copyright (C) 2019-2022 A.Manuel L.Perez 
-//           mail: <amanuel.lperez@gmail.com>
+// Copyright (C) 2019-2022 Manuel Perez 
+//           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
 // This file is part of the MCU++ Library.
@@ -26,7 +26,7 @@
  *  - DESCRIPCION: Traductor del timer 1 del AVR. 
  *   
  *  - HISTORIA:
- *   A.Manuel L.Perez
+ *   Manuel Perez
  *     05/08/2017 Escrita v0.0
  *     18/07/2019 v0.1 Reescrito.
  *     03/01/2020 Que de un mensaje legible el compilador 

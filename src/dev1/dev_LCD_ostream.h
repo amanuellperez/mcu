@@ -1,5 +1,5 @@
-// Copyright (C) 2019-2022 A.Manuel L.Perez 
-//           mail: <amanuel.lperez@gmail.com>
+// Copyright (C) 2019-2022 Manuel Perez 
+//           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
 // This file is part of the MCU++ Library.
@@ -26,7 +26,7 @@
  *   - DESCRIPCION: Interfaz al display HD44780
  *  
  *   - HISTORIA:
- *      A.Manuel L.Perez: 
+ *      Manuel Perez: 
  *      11/07/2017 v0.0
  *	29/07/2019 v0.1: Creo traductor.
  *	26/09/2019 v0.2: LCD_ostream y cambios menores.

@@ -1,6 +1,6 @@
 #!/usr/bin/awk -f
 #
-# Copyright (C) 2021 A.Manuel L.Perez <amanuel.lperez@gmail.com>
+# Copyright (C) 2021 Manuel Perez <manuel2perez@proton.me>
 # 
 # This file is part of the MCU++ Library.
 # 
@@ -67,7 +67,7 @@ BEGIN{
     FS="|"
     # header
     # ------
-print "// Copyright (C) A.Manuel L.Perez <amanuel.lperez@gmail.com>"
+print "// Copyright (C) Manuel Perez <manuel2perez@proton.me>"
 print "//"
 print "// This file is part of the MCU++ Library."
 print "//"

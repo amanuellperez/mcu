@@ -1,5 +1,5 @@
-// Copyright (C) 2020 A.Manuel L.Perez 
-//           mail: <amanuel.lperez@gmail.com>
+// Copyright (C) 2020 Manuel Perez 
+//           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
 // This file is part of the MCU++ Library.
@@ -26,7 +26,7 @@
  * - DESCRIPCION: El equivalente a <cmath>
  *
  * - HISTORIA:
- *  A.Manuel L.Perez 
+ *  Manuel Perez 
  *	31/03/2020 abs
  *
  *

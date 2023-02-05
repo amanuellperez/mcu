@@ -1,5 +1,5 @@
-// Copyright (C) 2020 A.Manuel L.Perez 
-//           mail: <amanuel.lperez@gmail.com>
+// Copyright (C) 2020 Manuel Perez 
+//           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
 // This file is part of the MCU++ Library.
@@ -47,7 +47,7 @@
  *  vez que se saque TWI_master/slave).
  *
  *  - HISTORIA:
- *    A.Manuel L.Perez
+ *    Manuel Perez
  *    24/02/2020 v0.0
  *
  ****************************************************************************/

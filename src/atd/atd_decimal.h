@@ -1,5 +1,5 @@
-// Copyright (C) 2020-2022 A.Manuel L.Perez 
-//           mail: <amanuel.lperez@gmail.com>
+// Copyright (C) 2020-2022 Manuel Perez 
+//           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
 // This file is part of the MCU++ Library.
@@ -37,7 +37,7 @@
  *    problema. 
  *
  *  - HISTORIA:
- *    A.Manuel L.Perez
+ *    Manuel Perez
  *    04/03/2020 v0.0: Versión mínima (muy limitada, para probarla).
  *    05/02/2021       to_integer.
  *    08/02/2021       Había definido explicit el constructor. Sin embargo,

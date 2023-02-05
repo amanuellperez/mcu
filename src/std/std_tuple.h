@@ -1,5 +1,5 @@
-// Copyright (C) 2020 A.Manuel L.Perez 
-//           mail: <amanuel.lperez@gmail.com>
+// Copyright (C) 2020 Manuel Perez 
+//           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
 // This file is part of the MCU++ Library.
@@ -26,7 +26,7 @@
  *  - DESCRIPCION: El equivalente a <tuple>
  *
  *  - HISTORIA:
- *    A.Manuel L.Perez 
+ *    Manuel Perez 
  *	22/02/2020: ignore, implementación MINIMA de tuple para que funcione
  *		    std::tie. 
  *		    TODO: implementar tuple. De hecho conviene revisar todos

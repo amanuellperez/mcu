@@ -1,6 +1,6 @@
 #!/bin/bash
-# Copyright (C) 2022 A.Manuel L.Perez 
-#           mail: <amanuel.lperez@gmail.com>
+# Copyright (C) 2022 Manuel Perez 
+#           mail: <manuel2perez@proton.me>
 #           https://github.com/amanuellperez/mcu
 #
 # This file is part of the MCU++ Library.
@@ -25,7 +25,7 @@
 #   abreviaturas y luego usar este script para generar el .h correspondiente.
 #
 # HISTORIA
-#    A.Manuel L.Perez
+#    Manuel Perez
 #    26/12/2022 Escrito
 #   
 # ------------------------------------------------------------------------

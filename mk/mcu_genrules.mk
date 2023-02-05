@@ -1,4 +1,4 @@
-# Copyright (C) 2019-2023 A.Manuel L.Perez <amanuel.lperez@gmail.com>
+# Copyright (C) 2019-2023 Manuel Perez <manuel2perez@proton.me>
 #
 # This file is part of the MCU++ Library.
 #
@@ -29,7 +29,7 @@
 #		-save-temps
 #
 #     - HISTORIA:
-# 		A.Manuel L.Perez
+# 		Manuel Perez
 # 		21/07/17: Creado a partir del del libro de MAKE.
 # 		01/03/21: tag HEADERS para poder generar automáticamente los menus.
 #

@@ -1,5 +1,5 @@
-// Copyright (C) 2022 A.Manuel L.Perez 
-//           mail: <amanuel.lperez@gmail.com>
+// Copyright (C) 2022 Manuel Perez 
+//           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
 // This file is part of the MCU++ Library.
@@ -26,7 +26,7 @@
  *  - DESCRIPCION: Funciones para acceder a la memoria: RAM, flash, eeprom
  *
  *  - HISTORIA:
- *    A.Manuel L.Perez
+ *    Manuel Perez
  *    16/01/2022 v0.0 Experimental.
  *                    Suministro dos interfaces:
  *                    1. Uno es contenedor ("propietario" de la memoria)

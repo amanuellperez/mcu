@@ -1,5 +1,5 @@
-// Copyright (C) 2022 A.Manuel L.Perez 
-//           mail: <amanuel.lperez@gmail.com>
+// Copyright (C) 2022 Manuel Perez 
+//           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
 // This file is part of the MCU++ Library.
@@ -38,7 +38,7 @@
  *	descomponiendo en `atmega16...`, `atmega32...`.
  *
  *  - HISTORIA:
- *    A.Manuel L.Perez
+ *    Manuel Perez
  *    03/12/2022 Escrito
  *
  ****************************************************************************/

@@ -1,5 +1,5 @@
-// Copyright (C) 2021 A.Manuel L.Perez 
-//           mail: <amanuel.lperez@gmail.com>
+// Copyright (C) 2021 Manuel Perez 
+//           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
 // This file is part of the MCU++ Library.
@@ -32,7 +32,7 @@
  *	    Recordar conectar siempre el AVCC.
  *
  *   - HISTORIA:
- *    A.Manuel L.Perez
+ *    Manuel Perez
  *	26/07/2017 Escrito v0.0
  *	29/01/2018 v0.1
  *	05/08/2019 Acabo el traductor. Faltan probarlo todo. ¿cómo?

@@ -1,5 +1,5 @@
-// Copyright (C) 2019-2023 A.Manuel L.Perez 
-//           mail: <amanuel.lperez@gmail.com>
+// Copyright (C) 2019-2023 Manuel Perez 
+//           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
 // This file is part of the MCU++ Library.
@@ -32,7 +32,7 @@
  *	este fichero. (???)
  *
  *  HISTORIA
- *    A.Manuel López
+ *    Manuel Perez
  *	31/10/2019 Manipuladores de tiempo std::tm.
  *	27/12/2020 Generic_time_view
  *	08/03/2022 Generic_time_view (temporal hasta reescribir Generic_time_view)

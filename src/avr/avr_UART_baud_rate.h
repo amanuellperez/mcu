@@ -1,5 +1,5 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez 
-//           mail: <amanuel.lperez@gmail.com>
+// Copyright (C) 2019-2020 Manuel Perez 
+//           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
 // This file is part of the MCU++ Library.
@@ -36,7 +36,7 @@
  *	    configurar el UART.
  *
  *   - HISTORIA:
- *           A.Manuel L.Perez- 27/08/2019 v0.0
+ *           Manuel Perez- 27/08/2019 v0.0
  *
  ****************************************************************************/
 #include <atd_cast.h>

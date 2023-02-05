@@ -1,5 +1,5 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez 
-//           mail: <amanuel.lperez@gmail.com>
+// Copyright (C) 2019-2020 Manuel Perez 
+//           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
 // This file is part of the MCU++ Library.
@@ -28,7 +28,7 @@
  *   - COMENTARIOS: 
  *
  *   - HISTORIA:
- *    A.Manuel L.Perez
+ *    Manuel Perez
  *    26/08/2019 Version de pair básica (no incluye
  *					todo lo indicado por el estandar)
  *    23/02/2020 tuple_element, move, forward.

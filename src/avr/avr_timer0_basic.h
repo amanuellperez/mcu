@@ -1,5 +1,5 @@
-// Copyright (C) 2019-2023 A.Manuel L.Perez 
-//           mail: <amanuel.lperez@gmail.com>
+// Copyright (C) 2019-2023 Manuel Perez 
+//           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
 // This file is part of the MCU++ Library.
@@ -27,7 +27,7 @@
  *  - DESCRIPCION: Traductor del timer 0 del AVR. Es un timer de 8 bits.
  *
  *  - HISTORIA:
- *    A.Manuel L.Perez
+ *    Manuel Perez
  *
  *      06/08/2017 v0.0: Escrito.
  *      18/07/2019 v0.1: Reescrito.

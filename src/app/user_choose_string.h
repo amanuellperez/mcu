@@ -1,5 +1,5 @@
-// Copyright (C) 2019-2022 A.Manuel L.Perez 
-//           mail: <amanuel.lperez@gmail.com>
+// Copyright (C) 2019-2022 Manuel Perez 
+//           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
 // This file is part of the MCU++ Library.
@@ -28,7 +28,7 @@
  *  - COMENTARIOS: 
  *
  *  - HISTORIA:
- *    A.Manuel L.Perez
+ *    Manuel Perez
  *	02/11/2019 v0.0
  *	02/01/2020 v0.1 Reescrito.
  *	07/03/2022      Screen en vez de LCD.

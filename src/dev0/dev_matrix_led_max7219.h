@@ -1,5 +1,5 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez 
-//           mail: <amanuel.lperez@gmail.com>
+// Copyright (C) 2019-2020 Manuel Perez 
+//           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
 // This file is part of the MCU++ Library.
@@ -31,7 +31,7 @@
  *		/scrolling-text-on-the-8x8-led-matrix-with-max7219-drivers/
  *
  *   - HISTORIA:
- *           A.Manuel L.Perez - 31/12/2018 Escrito
+ *           Manuel Perez - 31/12/2018 Escrito
  *
  ****************************************************************************/
 

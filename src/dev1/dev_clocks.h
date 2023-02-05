@@ -1,5 +1,5 @@
-// Copyright (C) 2019-2023 A.Manuel L.Perez 
-//           mail: <amanuel.lperez@gmail.com>
+// Copyright (C) 2019-2023 Manuel Perez 
+//           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
 // This file is part of the MCU++ Library.
@@ -45,7 +45,7 @@
  *
  *
  * HISTORIA
- *    A.Manuel L.Perez
+ *    Manuel Perez
  *    ??/??/2020 Escrito
  *    26/02/2021 Basado en Generic_timer
  *    11/04/2022 Reestructurado. Chronometer_ms

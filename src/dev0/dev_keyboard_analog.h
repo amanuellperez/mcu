@@ -1,5 +1,5 @@
-// Copyright (C) 2021 A.Manuel L.Perez 
-//           mail: <amanuel.lperez@gmail.com>
+// Copyright (C) 2021 Manuel Perez 
+//           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
 // This file is part of the MCU++ Library.
@@ -33,7 +33,7 @@
  *    Midiendo el número de arefs, obtenemos la tecla pulsada.
  *
  *  - HISTORIA:
- *    A.Manuel L.Perez
+ *    Manuel Perez
  *    25/08/2021 Keyboard_ADC0 <-- NO FUNCIONA BIEN. Problemas con dependencia
  *    de la temperatura!!! Modificarlo en el futuro o borrarlo.
  *

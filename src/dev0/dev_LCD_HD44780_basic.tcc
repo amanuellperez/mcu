@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez <amanuel.lperez@gmail.com>
+// Copyright (C) 2019-2020 Manuel Perez <manuel2perez@proton.me>
 //
 // This file is part of the MCU++ Library.
 //
@@ -21,7 +21,7 @@
  *	Implementación de HD44780_basic
  *
  * HISTORIA
- *    A.Manuel L.Perez
+ *    Manuel Perez
  *    11/12/2022 Cambio el uso de las macros delay_us/ms por funciones de C++.
  *		 CUIDADO: no borrar los comentados delays hasta no haber
  *		 comprobado que funciona todo bien. Es necesario que el

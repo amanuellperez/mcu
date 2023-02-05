@@ -1,5 +1,5 @@
-// Copyright (C) 2019-2021 A.Manuel L.Perez 
-//           mail: <amanuel.lperez@gmail.com>
+// Copyright (C) 2019-2021 Manuel Perez 
+//           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
 // This file is part of the MCU++ Library.
@@ -28,7 +28,7 @@
  *
  *
  *  HISTORIA
- *    A.Manuel L.Perez
+ *    Manuel Perez
  *    27/08/2019 Less_than, Pertenece_al_intervalo_cerrado
  *    12/02/2021 has_same_sign, same_type_with_double_bits
  *    14/03/2021 same_type_at_least32

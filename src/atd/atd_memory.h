@@ -1,5 +1,5 @@
-// Copyright (C) 2020-2022 A.Manuel L.Perez 
-//           mail: <amanuel.lperez@gmail.com>
+// Copyright (C) 2020-2022 Manuel Perez 
+//           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
 // This file is part of the MCU++ Library.
@@ -27,7 +27,7 @@
  *	Cosas relacionadas con memoria.
  *
  *  HISTORIA:
- *    A.Manuel L.Perez
+ *    Manuel Perez
  *    08/04/2020 Memory_type
  *    25/12/2022 Progmem and Progmem_array
  *

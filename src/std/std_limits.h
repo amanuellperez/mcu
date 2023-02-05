@@ -1,5 +1,5 @@
-// Copyright (C) 2019-2021 A.Manuel L.Perez 
-//           mail: <amanuel.lperez@gmail.com>
+// Copyright (C) 2019-2021 Manuel Perez 
+//           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
 // This file is part of the MCU++ Library.
@@ -27,7 +27,7 @@
  * - DESCRIPCION: El equivalente a <limits>
  *
  * - HISTORIA:
- *  A.Manuel L.Perez 
+ *  Manuel Perez 
  *	30/09/2019 Lo más básico.
  *	09/12/2019 lowest
  *	23/07/2021 radix, digits, digits10

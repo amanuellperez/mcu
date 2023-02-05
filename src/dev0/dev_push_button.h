@@ -1,5 +1,5 @@
-// Copyright (C) 2019-2021 A.Manuel L.Perez 
-//           mail: <amanuel.lperez@gmail.com>
+// Copyright (C) 2019-2021 Manuel Perez 
+//           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
 // This file is part of the MCU++ Library.
@@ -26,7 +26,7 @@
  *   - DESCRIPCION: Push_button
  *
  *   - HISTORIA:
- *    A.Manuel L.Perez
+ *    Manuel Perez
  *    24/07/2017 Push_button v0.0
  *    19/02/2021 Push_button_level_change v0.0
  *

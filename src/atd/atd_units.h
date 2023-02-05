@@ -1,5 +1,5 @@
-// Copyright (C) 2021 A.Manuel L.Perez 
-//           mail: <amanuel.lperez@gmail.com>
+// Copyright (C) 2021 Manuel Perez 
+//           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
 // This file is part of the MCU++ Library.
@@ -28,7 +28,7 @@
  *  - DESCRIPCION: Unidades en el S.I.
  *
  *  - HISTORIA:
- *    A.Manuel L.Perez
+ *    Manuel Perez
  *    13/03/2021 v0.0 Reestructurado. Las 'Units' las necesitan tanto
  *		      atd::Magnitude como atd::ENG_magnitude
  *    30/03/2021      Volt

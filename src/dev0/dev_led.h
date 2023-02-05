@@ -1,5 +1,5 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez 
-//           mail: <amanuel.lperez@gmail.com>
+// Copyright (C) 2019-2020 Manuel Perez 
+//           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
 // This file is part of the MCU++ Library.
@@ -26,7 +26,7 @@
  *   - DESCRIPCION: LED
  *
  *   - HISTORIA:
- *           A.Manuel L.Perez - 24/07/2017 Escrito
+ *           Manuel Perez - 24/07/2017 Escrito
  *
  ****************************************************************************/
 #include <avr_pin.h>

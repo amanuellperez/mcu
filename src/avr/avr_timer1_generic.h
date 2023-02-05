@@ -1,5 +1,5 @@
-// Copyright (C) 2021-2022 A.Manuel L.Perez 
-//           mail: <amanuel.lperez@gmail.com>
+// Copyright (C) 2021-2022 Manuel Perez 
+//           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
 // This file is part of the MCU++ Library.
@@ -27,7 +27,7 @@
  *	Diferentes formas de usar el Timer1
  *
  *  HISTORIA
- *    A.Manuel L.Perez
+ *    Manuel Perez
  *    15/02/2021 Escrito
  *    26/02/2022 timer_counter
  *    30/10/2022 Generic_timer_counter

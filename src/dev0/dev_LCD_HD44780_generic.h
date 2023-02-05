@@ -1,5 +1,5 @@
-// Copyright (C) 2021 A.Manuel L.Perez 
-//           mail: <amanuel.lperez@gmail.com>
+// Copyright (C) 2021 Manuel Perez 
+//           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
 // This file is part of the MCU++ Library.
@@ -38,7 +38,7 @@
  *
  *
  *  - HISTORIA:
- *    A.Manuel L.Perez
+ *    Manuel Perez
  *    09/01/2021 v0.0
  *    06/02/2022 v0.1: Generalizo creando el concept de Generic_LCD. La 
  *                     idea es no tener que volver a usar un LCD concreto a

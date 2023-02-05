@@ -1,5 +1,5 @@
-// Copyright (C) 2021-2022 A.Manuel L.Perez 
-//           mail: <amanuel.lperez@gmail.com>
+// Copyright (C) 2021-2022 Manuel Perez 
+//           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
 // This file is part of the MCU++ Library.
@@ -42,7 +42,7 @@
  *	el programa tendría que saber qué abreviaturas usa la calculadora).
  *
  *  - HISTORIA:
- *    A.Manuel L.Perez
+ *    Manuel Perez
  *    13/12/2021 v0.0
  *
  ****************************************************************************/

@@ -1,5 +1,5 @@
-// Copyright (C) 2019-2022 A.Manuel L.Perez 
-//           mail: <amanuel.lperez@gmail.com>
+// Copyright (C) 2019-2022 Manuel Perez 
+//           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
 // This file is part of the MCU++ Library.
@@ -26,7 +26,7 @@
  *  - DESCRIPCION: El equivalente a <algorithm>
  *
  *  - HISTORIA:
- *    A.Manuel L.Perez 
+ *    Manuel Perez 
  *	08/02/2019: for_each, for_each_n
  *	16/07/2019: min/max
  *	19/09/2019: copy, copy_n, fill, fill_n

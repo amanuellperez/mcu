@@ -1,5 +1,5 @@
-// Copyright (C) 2019-2022 A.Manuel L.Perez 
-//           mail: <amanuel.lperez@gmail.com>
+// Copyright (C) 2019-2022 Manuel Perez 
+//           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
 // This file is part of the MCU++ Library.
@@ -31,7 +31,7 @@
  *  avr, un pic u otro micro.
  *
  *  - HISTORIA:
- *    A.Manuel L.Perez
+ *    Manuel Perez
  *	30/08/2019 v0.0
  *	30/12/2020      Dos tipos: lineal y circular.
  *	07/03/2021      * Parametrizamos por el tipo de número que queremos

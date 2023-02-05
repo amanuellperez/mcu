@@ -1,5 +1,5 @@
-// Copyright (C) 2022 A.Manuel L.Perez 
-//           mail: <amanuel.lperez@gmail.com>
+// Copyright (C) 2022 Manuel Perez 
+//           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
 // This file is part of the MCU++ Library.
@@ -32,7 +32,7 @@
  *    ¿Alguien sabe su nombre? ¿Para bautizarla así en lugar de 't1'?
  *  
  *  - HISTORIA:
- *    A.Manuel L.Perez
+ *    Manuel Perez
  *    09/02/2022 Big_digit_3x3_t1: el formato lo baso en uno visto en internet.
  *
  ****************************************************************************/

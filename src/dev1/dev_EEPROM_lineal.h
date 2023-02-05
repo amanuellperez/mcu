@@ -1,5 +1,5 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez 
-//           mail: <amanuel.lperez@gmail.com>
+// Copyright (C) 2019-2020 Manuel Perez 
+//           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
 // This file is part of the MCU++ Library.
@@ -52,7 +52,7 @@
  *	eficiente!!!) Cambiar write e iostreams para que funcione así.
  *
  * - HISTORIA:
- *   A.Manuel L.Perez:
+ *   Manuel Perez:
  *    16/07/2019 v0.1: Linearizo la EEPROM.
  *    19/09/2019 v0.2: Añado el buffer interno de escritura.		    
  *    14/10/2019 v0.3: Descompongo la clase en EEPROM_lineal y

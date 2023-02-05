@@ -1,5 +1,5 @@
-// Copyright (C) 2019-2021 A.Manuel L.Perez 
-//           mail: <amanuel.lperez@gmail.com>
+// Copyright (C) 2019-2021 Manuel Perez 
+//           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
 // This file is part of the MCU++ Library.
@@ -32,7 +32,7 @@
  *  
  *
  *   - HISTORIA:
- *    A.Manuel L.Perez
+ *    Manuel Perez
  *    27/07/2017 Pruebas iniciales.
  *    22/01/2019 La migro a templates y defino macros.
  *    06/11/2022 Quito la llamada de enable_all_interrupts(). Esto no

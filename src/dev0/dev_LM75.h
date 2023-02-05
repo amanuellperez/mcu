@@ -1,5 +1,5 @@
-// Copyright (C) 2019-2020 A.Manuel L.Perez 
-//           mail: <amanuel.lperez@gmail.com>
+// Copyright (C) 2019-2020 Manuel Perez 
+//           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
 // This file is part of the MCU++ Library.
@@ -28,7 +28,7 @@
  *   - COMENTARIOS: 
  *
  *   - HISTORIA:
- *	    A.Manuel L.Perez- 29/08/2019 v0.0
+ *	    Manuel Perez- 29/08/2019 v0.0
  *
  *	    TODO: lo interesante de este termómetro es la salida O.S. que
  *	    ahora no programo. Añadir esto (ver datasheet para ejemplos
