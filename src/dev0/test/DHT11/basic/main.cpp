@@ -24,7 +24,7 @@
 #include <avr_atmega.h>
 
 constexpr uint8_t sensor_pin = 15;
-using Counter = atmega::Time_counter0_generic;
+using Counter = atmega::Time_counter0_g;
 using Pin = atmega::Pin<sensor_pin>;
 
 

@@ -184,8 +184,7 @@ Espero en unos meses haber eliminado por completo todas las cuentas de Google
 y actualizar github con el nuevo mail (esto lo escribo el 08/01/2023). Si por
 lo que fuera los de github deciden bloquearme migraré el proyecto a otro
 sitio. El problema es que no podré poner aquí dónde (estaré bloqueado xD). Si
-alguien quisiera localizarme que use el nuevo mail (todavía dudo si migrarme a
-Proton o a Tutanota).
+alguien quisiera localizarme que use el nuevo mail (manuel2perez@proton.me).
 
 
 

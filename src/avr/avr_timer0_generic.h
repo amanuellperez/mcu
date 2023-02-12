@@ -31,7 +31,7 @@
  *    15/02/2021 Escrito
  *    26/02/2022 timer_counter
  *    30/10/2022 Generic_timer_counter
- *    07/12/2022 dev::Generic_timer<Timer0> --> avr::Timer0_generic
+ *    07/12/2022 dev::Generic_timer<Timer0> --> avr::Timer0_g
  *		 ¿Por qué lo había definido como template?
  *		 Lo que quiero definir es un timer que obedece al
  *		 concept "timer". No necesito usar templates para nada.
@@ -251,17 +251,14 @@ inline Frequency clock_frequency()
 /// Un Timer_counter se limita a contar microsegundos o milisegundos. Su rango
 /// de valores será 255, no más. No sirve para contar tiempo, pero son
 /// ideales para medir/generar pulsos de electrónica. 
-// DUDA: Timer0_counter_generic?
-//	 Time_counter0_generic?
-//	 Time_counter0_generic?
-class Time_counter0_generic{
+class Time_counter0_g{
 public:
 // types
     using Timer        = avr_::Timer0;
     using counter_type = typename Timer::counter_type;
 
 /// De momento el interfaz es static. Prohibo su construcción.
-    Time_counter0_generic() = delete;
+    Time_counter0_g() = delete;
 
 /// Modo de funcionamiento: contador normal y corriente.
 //TODO: rename to cfg. Realmente está configurando este dispositivo para poder
@@ -528,10 +525,10 @@ inline void Square_wave_burst_generator0_g::generate_burst()
 
 
 /***************************************************************************
- *				Timer0_generic
+ *				Timer0_g
  ***************************************************************************/
 // TODO: eliminar Generic_timer a favor de clases particulares. 
-class Timer0_generic{
+class Timer0_g{
 public:
 // types
     using Timer        = avr_::Timer0;
@@ -712,12 +709,6 @@ private:
 //    }
 
 };
-
-
-// Alias
-// -----
-// DUDA: usar _g como dispositivos genéricos. Es más corto y se entiende bien
-using Time_counter0_g = Time_counter0_generic;
 
 }// namespace 
 

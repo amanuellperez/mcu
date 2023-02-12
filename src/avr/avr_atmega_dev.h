@@ -83,18 +83,14 @@ namespace atmega{
 
 // TIMERS
     using Timer0         = avr_::Timer0;
-    using Timer0_generic = avr_::Timer0_generic;
-    using Timer0_g	 = Timer0_generic;
-    using Time_counter0_generic = avr_::Time_counter0_generic;
-    using Time_counter0_g       = Time_counter0_generic;
+    using Timer0_g	 = avr_::Timer0_g;
+    using Time_counter0_g= avr_::Time_counter0_g;
     using Square_wave_generator0_g = avr_::Square_wave_generator0_g;
     using Square_wave_burst_generator0_g = avr_::Square_wave_burst_generator0_g;
 
     using Timer1         = avr_::Timer1;
-    using Timer1_generic = avr_::Timer1_generic;
-    using Timer1_g	 = Timer1_generic;
-    using Time_counter1_generic = avr_::Time_counter1_generic;
-    using Time_counter1_g	= Time_counter1_generic;
+    using Timer1_g	 = avr_::Timer1_g;
+    using Time_counter1_g= avr_::Time_counter1_g;
     using Square_wave_generator1_g = avr_::Square_wave_generator1_g;
 
 

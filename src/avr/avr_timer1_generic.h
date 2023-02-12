@@ -31,7 +31,7 @@
  *    15/02/2021 Escrito
  *    26/02/2022 timer_counter
  *    30/10/2022 Generic_timer_counter
- *    07/12/2022 dev::Generic_timer<Timer0> --> avr::Timer1_generic
+ *    07/12/2022 dev::Generic_timer<Timer0> --> avr::Timer1_g
  *		 ¿Por qué lo había definido como template?
  *		 Lo que quiero definir es un timer que obedece al
  *		 concept "timer". No necesito usar templates para nada.
@@ -231,7 +231,7 @@ inline Frequency clock_frequency()
 /// Un Timer_counter se limita a contar microsegundos o milisegundos. Su rango
 /// de valores será max_top, no más. No sirve para contar tiempo, pero son
 /// ideales para medir/generar pulsos de electrónica. 
-class Time_counter1_generic{
+class Time_counter1_g{
 public:
 // Tipo de tipo
 //  DUDA: ¿existe alguna función que tengan todos los dispositivos con doble
@@ -246,7 +246,7 @@ public:
     using Disable_interrupts = dev::Disable_interrupts<Micro>;
 
 /// De momento el interfaz es static. Prohibo su construcción.
-    Time_counter1_generic() = delete;
+    Time_counter1_g() = delete;
 
 /// Modo de funcionamiento: contador normal y corriente.
     static void unsafe_init(counter_type top0 = max_top()) 
@@ -395,7 +395,7 @@ public:
 // (RRR) Números mágicos:
 //	 Para 1 MHz: 15.625 * 64 us = 1.000.000 us = 1 s
 template <uint32_t clock_frequency_in_hz>
-inline void Time_counter1_generic::on_with_overflow_every_1s()
+inline void Time_counter1_g::on_with_overflow_every_1s()
 {
 // cfg_overflow_every_1s();
     if constexpr (clock_frequency_in_hz == 1'000'000ul){
@@ -416,7 +416,7 @@ inline void Time_counter1_generic::on_with_overflow_every_1s()
 // (RRR) Números mágicos:
 //	 Para 1 MHz: 125 * 8 us = 1.000 us = 1 ms
 template <uint32_t clock_frequency_in_hz>
-inline void Time_counter1_generic::on_with_overflow_every_1ms()
+inline void Time_counter1_g::on_with_overflow_every_1ms()
 {
 // cfg_overflow_every_1s();
     if constexpr (clock_frequency_in_hz == 1'000'000ul){
@@ -434,7 +434,7 @@ inline void Time_counter1_generic::on_with_overflow_every_1ms()
 }
 
 
-using Timer_counter1_g = Time_counter1_generic;
+using Timer_counter1_g = Time_counter1_g;
 
 /***************************************************************************
  *			Square_wave_generator1_g
@@ -625,7 +625,7 @@ inline void Square_wave_generator1_g::disconnect_all_pins()
 //	    
 //  TODO: irlo migrando poco a poco. Lo dejo como ejemplo.
 //  Cuando ya esté todo migrado eliminarlo.
-class Timer1_generic{
+class Timer1_g{
 public:
 // types
     using Timer        = avr_::Timer1;
@@ -841,13 +841,6 @@ private:
     inline static Mode mode_;
 
 };
-
-
-
-// Alias
-// -----
-// DUDA: usar _g como dispositivos genéricos. Es más corto y se entiende bien
-using Time_counter1_g = Time_counter1_generic;
 
 }// namespace 
 

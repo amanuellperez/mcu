@@ -139,13 +139,13 @@ los dispositivos del mismo tipo.
 
 Ejemplo: mi aplicación necesita un Timer, el cual es un dispositivo con el que
 puedo realizar ciertas operaciones. El timer concreto puede ser
-atmega::Timer0_generic, o attiny::Timer0_generic, o PIC::Timer0_generic, 
-o ESP::Timer0_generic, pero sea cual sea el elegido todos representan el mismo
+atmega::Timer0_g, o attiny::Timer0_g, o PIC::Timer0_g, 
+o ESP::Timer0_g, pero sea cual sea el elegido todos representan el mismo
 dispositivo lógico (el mismo concept de C++). La ventaja de esto es que mi
 programa funcionará independientemente del Timer real elegido. La desventaja
 es que al usar un interfaz genérico puede que no pueda incluir algunas
 características particulares del Timer real que estoy usando. Pero si
-necesitara usar esas características en lugar de usar atmega::Timer0_generic
+necesitara usar esas características en lugar de usar atmega::Timer0_g
 usaría atmega::Timer0_basic (el traductor que suministra todas las funciones
 del dispositivo).
 
@@ -155,9 +155,9 @@ De momento pruebo con la siguiente notación:
 
 * `atmega_timer0_basic.h`: contiene el traductor del `Timer0` del `atmega`
 
-* `atmega_timer0_generic.h`: contiene el dispositivo genérico correspondiente.
+* `atmega_timer0_g.h`: contiene el dispositivo genérico correspondiente.
 
-Al dispositivo generic lo llamaré `atmega::Timer0_generic`. El nombre del
+Al dispositivo generic lo llamaré `atmega::Timer0_g`. El nombre del
 traductor no lo tengo claro: ¿`atmega::Timer0` o `atmega::Timer0_basic`?
 
 De momento optó más por el segundo estilo, ya que entre `atmega::Pin` y
