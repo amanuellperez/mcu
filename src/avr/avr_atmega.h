@@ -60,7 +60,6 @@
 #include <avr_timer0_basic.h>
 #include <avr_timer1_basic.h>
 
- 
 #include <avr_ADC_basic.h>
 
 #include <avr_cfg.h>
@@ -75,6 +74,8 @@
 
 // Dispositivos genéricos
 // ----------------------
+#include <avr_SPI_generic.h>
+
 #include <avr_timer0_generic.h>
 #include <avr_timer1_generic.h>
 

@@ -148,90 +148,6 @@ public:
     static uint8_t data_register() {return SPDR;}
 };
 
-
-class SPI_base : public SPI_basic{
-public:
-    SPI_base() = delete;
-
-    // Las transmisiones del SPI nunca van a fallar: al enviar un byte el SPI
-    // arranca el reloj, genera 8 pulsos y marca como enviado el byte,
-    // independientemente de si lo ha enviado o no, ya que el avr no tiene
-    // forma de saberlo.
-    /// Espera hasta que el SPI ha enviado/recibido el último byte.
-    // En la practica el SPI es tan rapido que el avr no tiene que esperar.
-    static void wait_transmission_complete()
-    {
-	while (!is_transmission_complete())
-	{; }
-    }
-
-    /// Enviamos el byte x y esperamos hasta que lo haya enviado.
-    /// Devuelve el valor recibido.
-    static uint8_t trade_and_wait(uint8_t x)
-    {
-	data_register(x);	// escribimos x y lo enviamos
-	wait_transmission_complete();
-
-        return data_register();// valor recibido
-    }
-
-    /// Enviamos el byte x y esperamos hasta que lo haya enviado.
-    /// Devuelve el valor recibido.
-    static uint8_t write(uint8_t x)
-    { return trade_and_wait(x); }
-
-
-    /// Lee un byte. Espera hasta que haya leido el byte.
-    static uint8_t read()
-    { return trade_and_wait(uint8_t{0}); }
-
-
-};
-
-
-class SPI_master : public SPI_base {
-public:
-    SPI_master() = delete;
-
-    /// Enciende el SPI como Master. 
-    /// La frecuencia del reloj usada será la definida por
-    /// period_in_us. Falta definir la polaridad y la phase ya que cada
-    /// dispositivo tendrá una polaridad y fase diferente. Esta configuración
-    /// la hara cada dispositivo antes de escribir en SPI.
-    template <uint16_t period_in_us>
-    static void on()
-    {
-	init();
-	clock_speed_in_us<period_in_us>();
-	enable_as_a_master();
-    }
-    
-private:
-    /// Configuramos los pines para que el SPI funciones como master.
-    /// Configuramos todos: SCK, MOSI y SS como de salida, y MISO como de
-    /// entrada.
-    static void init();
-    
-};
-
-
-class SPI_slave : public SPI_base {
-public:
-    SPI_slave() = delete;
-
-    /// Enciende el SPI como slave.
-    static void on()
-    {
-	init();
-	enable_as_a_slave();
-    }
-    
-private:
-    static void init();
-};
-
-
-
 // reloj del SPI a 1MHz
 // --------------------
 // a 500 kHz = 2 us
@@ -307,6 +223,7 @@ inline void SPI_basic::clock_speed_in_us<8u, 8000000UL>()
 template<>
 inline void SPI_basic::clock_speed_in_us<16u, 8000000UL>() 
 {clock_speed_divide_by_128();}
+
 
 }// namespace avr
 

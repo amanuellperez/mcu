@@ -1,0 +1,60 @@
+// Copyright (C) 2019-2020 Manuel Perez 
+//           mail: <manuel2perez@proton.me>
+//           https://github.com/amanuellperez/mcu
+//
+// This file is part of the MCU++ Library.
+//
+// MCU++ Library is a free library: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#include "avr_SPI_generic.h"
+#include "avr_pin.h"
+
+// Observar que todas son funciones de configuración que se ejecutan una sola
+// vez. No es imprescindible que sean las más eficientes.
+
+namespace avr_{
+
+void SPI_master_g::init()
+{
+    // Configuración de los pins
+    Pin<SPI_num_pin_SCK>::as_output();
+    Pin<SPI_num_pin_MOSI>::as_output();
+//    Pin<SPI_num_pin_MISO>::as_input_without_pullup();
+    Pin<SPI_num_pin_SS>::as_output(); // fundamental para que no sea slave:
+				     // punto 23.3.2: leer este punto. Indica
+				     // que si se define como entrada tiene
+				     // que mantenerse high, si cambia a low
+				     // cambia el modo del SPI a slave!!!
+
+    
+////    // Inicializamos SS
+//// Leer la nota pag 356 del libro de MAKE. Es fundamental poner SS a 1
+//// antes que hacer un enable
+////    // start off not selected (high)
+//    Pin<SPI_num_pin_SS>::write_one();	
+}
+
+
+void SPI_slave_g::init()
+{
+    // Configuración de los pins (table 23-1). 
+//    Pin<SPI_num_pin_SCK>::as_input_without_pullup();
+//    Pin<SPI_num_pin_MOSI>::as_input_without_pullup();
+    Pin<SPI_num_pin_MISO>::as_output();
+//    Pin<SPI_num_pin_SS>::as_input_without_pullup(); 
+}
+
+
+
+} // namespace

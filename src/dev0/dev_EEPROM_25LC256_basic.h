@@ -33,8 +33,7 @@
  *	2.- ¿otros errores?
  *
  ****************************************************************************/
-#include <avr_pin.h>
-#include <avr_SPI_basic.h>
+#include <avr_atmega.h> // TODO: parametrizar SPI en la EEPROM
 #include "not_generic.h"
 
 #include <cstddef>    // byte
@@ -56,8 +55,8 @@ public:
 
     // Configuración
     // -------------
-    /// Configuramos el SPI_master para que se comunique con la EEPROM.
-    /// Recordar haber inicializado correctamente el SPI_master antes.
+    /// Configuramos el SPI_master_g para que se comunique con la EEPROM.
+    /// Recordar haber inicializado correctamente el SPI_master_g antes.
     // Observar: la hacemos static indicando de esta forma que esta
     // configuración es la misma para las EEPROMs: basta con
     // llamarla una vez aunque tengamos 2 ó más.
@@ -190,8 +189,8 @@ private:
 
     void write_address(Address address)
     {	// Data order: MSB first, LSB last
-	not_generic::SPI_master::write(static_cast<uint8_t>(address >> 8));
-	not_generic::SPI_master::write(static_cast<uint8_t>(address));
+	not_generic::SPI_master_g::write(static_cast<uint8_t>(address >> 8));
+	not_generic::SPI_master_g::write(static_cast<uint8_t>(address));
     }
 
     void write_cmd(uint8_t cmd);
@@ -201,8 +200,8 @@ private:
 template <uint8_t no_CS, uint8_t no_WP, uint8_t no_HOLD>
 void EEPROM_25LC256<no_CS, no_WP, no_HOLD>::cfg_SPI()
 {
-    not_generic::SPI_master::spi_mode(0, 0);
-    not_generic::SPI_master::data_order_MSB();
+    not_generic::SPI_master_g::spi_mode(0, 0);
+    not_generic::SPI_master_g::data_order_MSB();
 }
 
 
@@ -216,10 +215,10 @@ EEPROM_25LC256<no_CS, no_WP, no_HOLD>::read(Address address,
 {
     Select select{*this};
 
-    not_generic::SPI_master::write(READ);
+    not_generic::SPI_master_g::write(READ);
     write_address(address);
     for (size_type i = 0; i < n; ++i){
-	*buf = not_generic::SPI_master::read();
+	*buf = not_generic::SPI_master_g::read();
 	++buf;
     }
 
@@ -228,7 +227,7 @@ EEPROM_25LC256<no_CS, no_WP, no_HOLD>::read(Address address,
 
 
 // TODO: ¿cómo gestionar errores?
-//  El problema es que no es posible saber si el SPI_master funciona o no.
+//  El problema es que no es posible saber si el SPI_master_g funciona o no.
 //  1.- Una forma sería que después de escribir todo se comprobase que se ha
 //  escrito leyendo la memoria.
 template <uint8_t no_CS, uint8_t no_WP, uint8_t no_HOLD>
@@ -237,12 +236,12 @@ uint8_t EEPROM_25LC256<no_CS, no_WP, no_HOLD>::
 {
     Select select{*this};
 
-    not_generic::SPI_master::write(WRITE);
+    not_generic::SPI_master_g::write(WRITE);
     write_address(address);
     
     uint8_t i = 0;
     for (; i < n; ++i){
-	not_generic::SPI_master::write(*buf);
+	not_generic::SPI_master_g::write(*buf);
 	++buf;
     }
 
@@ -254,7 +253,7 @@ template <uint8_t no_CS, uint8_t no_WP, uint8_t no_HOLD>
 void EEPROM_25LC256<no_CS, no_WP, no_HOLD>::write_cmd(uint8_t cmd)
 {
     Select select{*this};
-    not_generic::SPI_master::write(cmd);
+    not_generic::SPI_master_g::write(cmd);
 }
 
 
@@ -263,8 +262,8 @@ uint8_t EEPROM_25LC256<no_CS, no_WP, no_HOLD>::
 					read_status_register()
 {
     Select select{*this};
-    not_generic::SPI_master::write(RDSR);
-    uint8_t status = not_generic::SPI_master::read();
+    not_generic::SPI_master_g::write(RDSR);
+    uint8_t status = not_generic::SPI_master_g::read();
 
     return status;
 }

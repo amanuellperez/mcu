@@ -18,12 +18,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "../../../../avr_atmega328p_cfg.h"
-#include "../../../../avr_SPI_basic.h"
+#include "../../../../avr_SPI_generic.h"
 #include "../../../../avr_interrupt.h"
 #include "../../../../avr_UART_iostream.h"
 
 
-using SPI = avr_::SPI_slave;
+using SPI = avr_::SPI_slave_g;
 
 constexpr uint16_t periodo_en_us = 2;	
 constexpr uint16_t npin_SS = avr_::SPI_num_pin_SS;	

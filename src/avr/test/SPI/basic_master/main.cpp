@@ -34,13 +34,13 @@
 //  en la datasheet pone claramente que este pin tiene que estar a 0 para que
 //  haya bit trade. 
 #include "../../../avr_atmega328p_cfg.h"
-#include "../../../avr_SPI_basic.h"
+#include "../../../avr_SPI_generic.h"
 #include "../../../avr_pin.h"
 #include "../../../avr_UART_iostream.h"
 
 // TODO: revisar. No se está seleccionando explícitamente el slave!!!
 
-using SPI = avr_::SPI_master;
+using SPI = avr_::SPI_master_g;
 
 constexpr uint8_t npin_RCLK = 12;
 constexpr uint16_t periodo_en_us = 2;	// 2 microsegundos!!!

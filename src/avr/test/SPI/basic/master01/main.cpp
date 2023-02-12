@@ -18,12 +18,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "../../../../avr_atmega328p_cfg.h"
-#include "../../../../avr_SPI_basic.h"
+#include "../../../../avr_SPI_generic.h"
 #include "../../../../avr_pin.h"
 #include "../../../../avr_UART_iostream.h"
 
 
-using SPI = avr_::SPI_master;
+using SPI = avr_::SPI_master_g;
 
 // OJO: clave periodo a 8 us. Si pongo a 2 us al slave no le da tiempo a leer
 // y se lee basura y pierden datos.

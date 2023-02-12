@@ -17,9 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "avr_not_generic.h"
+//#include "avr_not_generic.h"
 #include "avr_SPI_basic.h"
-#include "avr_pin.h"
+//#include "avr_pin.h"
 
 #include <atd_bit.h>
 
@@ -27,36 +27,6 @@
 // vez. No es imprescindible que sean las más eficientes.
 
 namespace avr_{
-
-void SPI_master::init()
-{
-    // Configuración de los pins
-    Pin<SPI_num_pin_SCK>::as_output();
-    Pin<SPI_num_pin_MOSI>::as_output();
-//    Pin<SPI_num_pin_MISO>::as_input_without_pullup();
-    Pin<SPI_num_pin_SS>::as_output(); // fundamental para que no sea slave:
-				     // punto 23.3.2: leer este punto. Indica
-				     // que si se define como entrada tiene
-				     // que mantenerse high, si cambia a low
-				     // cambia el modo del SPI a slave!!!
-
-    
-////    // Inicializamos SS
-//// Leer la nota pag 356 del libro de MAKE. Es fundamental poner SS a 1
-//// antes que hacer un enable
-////    // start off not selected (high)
-//    Pin<SPI_num_pin_SS>::write_one();	
-}
-
-
-void SPI_slave::init()
-{
-    // Configuración de los pins (table 23-1). 
-//    Pin<SPI_num_pin_SCK>::as_input_without_pullup();
-//    Pin<SPI_num_pin_MOSI>::as_input_without_pullup();
-    Pin<SPI_num_pin_MISO>::as_output();
-//    Pin<SPI_num_pin_SS>::as_input_without_pullup(); 
-}
 
 
 void SPI_basic::spi_mode(bool cpol, bool cpha)

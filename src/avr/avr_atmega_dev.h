@@ -98,8 +98,9 @@ namespace atmega{
     using UART_basic = avr_::UART_basic;
     using UART_iostream = avr_::UART_iostream;
 
-    using SPI_master = avr_::SPI_master;
-    using SPI_slave  = avr_::SPI_slave;
+    using SPI        = avr_::SPI_basic;
+    using SPI_master = avr_::SPI_master_g;
+    using SPI_slave  = avr_::SPI_slave_g;
 
     using TWI_basic  = avr_::TWI_basic;
 
