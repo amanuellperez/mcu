@@ -27,7 +27,7 @@ namespace mcu = atmega;
 
 using SPI = atmega::SPI_master;
 
-constexpr uint8_t periodo_en_us = 16;
+constexpr uint8_t period_in_us = 16;
 
 constexpr uint8_t num_pin_chip_select = 16;
 using EEPROM = dev::EEPROM_lineal<dev::EEPROM_25LC256<num_pin_chip_select>>;
@@ -86,7 +86,8 @@ void check_true(bool ok, const char* msg)
 void test_eeprom_interactiva()
 {
     atmega::UART_iostream uart;
-    SPI::on<periodo_en_us>();
+    SPI::clock_period_in_us<period_in_us>();
+    SPI::on();
 
     EEPROM eeprom;
 
@@ -220,7 +221,8 @@ void test_fill_n(EEPROM& eeprom)
 void test_eeprom_automatico()
 {
     atmega::UART_iostream uart;
-    SPI::on<periodo_en_us>();
+    SPI::clock_period_in_us<period_in_us>();
+    SPI::on();
     EEPROM eeprom;
 
     while(1){

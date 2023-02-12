@@ -62,9 +62,10 @@ void counter(Register& reg)
 int main() 
 {
 // init_SPI()
-    SPI::on<period_in_us>();
     SPI::spi_mode(0,0);
     SPI::data_order_LSB();
+    SPI::clock_period_in_us<period_in_us>();
+    SPI::on();
 
 //    select_register();
 

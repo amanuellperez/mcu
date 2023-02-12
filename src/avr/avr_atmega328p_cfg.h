@@ -86,13 +86,16 @@ constexpr uint8_t BIT_MASK[29] = {
 
 
 
-// CONFIGURACIÓN DEL SPI
-    constexpr uint8_t SPI_num_pin_SCK  = 19u;
-    constexpr uint8_t SPI_num_pin_MISO = 18u;
-    constexpr uint8_t SPI_num_pin_MOSI = 17u;
-    constexpr uint8_t SPI_num_pin_SS   = 16u;
 
 namespace cfg{ // ir incluyendo el resto según vaya reescribiendo codigo
+
+// CONFIGURACIÓN DEL SPI
+    struct spi{
+	static constexpr uint8_t SCK_pin_number  = 19u;
+	static constexpr uint8_t MISO_pin_number = 18u;
+	static constexpr uint8_t MOSI_pin_number= 17u;
+	static constexpr uint8_t SS_pin_number = 16u;
+    };
 
 // Timer0
 // ------

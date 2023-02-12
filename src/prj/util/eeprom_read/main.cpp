@@ -38,7 +38,7 @@
 
 #include "dev_debug_eeprom.h"
 
-constexpr uint8_t periodo_en_us = 16;
+constexpr uint8_t period_in_us = 16;
 
 constexpr uint8_t num_pin_chip_select = 16;
 
@@ -62,7 +62,8 @@ void init_UART()
 
 void init_SPI()
 {
-    atmega::SPI_master::on<periodo_en_us>();
+    atmega::SPI_master::clock_period_in_us<period_in_us>();
+    atmega::SPI_master::on();
 }
 
 

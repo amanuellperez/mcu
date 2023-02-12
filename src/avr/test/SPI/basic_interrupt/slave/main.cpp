@@ -27,7 +27,6 @@
 
 using SPI = avr_::SPI_slave_g;
 
-constexpr uint16_t npin_SS = avr_::SPI_num_pin_SS;	
 
 static volatile uint8_t data {0};
 

@@ -26,7 +26,6 @@
 using SPI = avr_::SPI_slave_g;
 
 constexpr uint16_t periodo_en_us = 2;	
-constexpr uint16_t npin_SS = avr_::SPI_num_pin_SS;	
 
 
 int main() 

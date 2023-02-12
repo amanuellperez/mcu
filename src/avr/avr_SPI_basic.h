@@ -62,6 +62,18 @@ namespace avr_{
 
 class SPI_basic{
 public:
+// CARACTERÍSTICAS DEL SPI
+    // Slave select
+    static constexpr uint8_t SS_pin_number = cfg::spi::SS_pin_number;
+
+    // Chip select: el atmega tiene la característica de que cuando se usa
+    // como master este pin obligatoriamente tiene que estar como output:
+    // usémoslo como chip select!!! (esto será genérico? qué hacen otros
+    // micros?)
+    static constexpr uint8_t CS_pin_number = cfg::spi::SS_pin_number;
+
+
+// CONSTRUCTOR
     // No permitimos que se construya este objeto
     SPI_basic() = delete;
 
@@ -106,28 +118,16 @@ public:
     static void spi_mode(bool cpol, bool cpha);
 
 
-    // Selección de la velocidad del reloj
-    static void clock_speed_divide_by_2();
-    static void clock_speed_divide_by_4();
-    static void clock_speed_divide_by_8();
-    static void clock_speed_divide_by_16();
-    static void clock_speed_divide_by_32();
-    static void clock_speed_divide_by_64();
-    static void clock_speed_divide_by_128();
-
-
-    /// Configuramos la velocidad del reloj del SPI en microsegundos.
-    // La función clock_speed_in_us traduce la forma de hablar del cliente (en
-    // microsegundos) en la forma de hablar del avr (en divisor de frecuencia)
-    // CUIDADO: parece ser que si se quieren conectar 2 avrs la frecuencia del
-    // master tiene que ser 4 veces más lenta que la del slave:
-    // Datasheet, 23.5.2. SPI Status register: 
-    // When the SPI is configured as Slave, the SPI is only guaranteed 
-    // to work at fosc/4 or lower
-    // TODO: esto no pertenece al traductor, pasarlo al dispositivo generico.
-    template<uint16_t period
-	    , uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
-    static void clock_speed_in_us();
+    // Selección de la velocidad del reloj.
+    // Solo funciona oara el master. No tiene efecto en el slave (ver
+    // datasheet)
+    static void clock_frequency_divide_by_2();
+    static void clock_frequency_divide_by_4();
+    static void clock_frequency_divide_by_8();
+    static void clock_frequency_divide_by_16();
+    static void clock_frequency_divide_by_32();
+    static void clock_frequency_divide_by_64();
+    static void clock_frequency_divide_by_128();
 
 
     /// Is a serial transfer complete?
@@ -148,81 +148,6 @@ public:
     static uint8_t data_register() {return SPDR;}
 };
 
-// reloj del SPI a 1MHz
-// --------------------
-// a 500 kHz = 2 us
-template<>
-inline void SPI_basic::clock_speed_in_us<2u, 1000000UL>() 
-{clock_speed_divide_by_2();}
-
-// a 4 us
-template<>
-inline void SPI_basic::clock_speed_in_us<4u, 1000000UL>() 
-{clock_speed_divide_by_4();}
-
-// a 8 us
-template<>
-inline void SPI_basic::clock_speed_in_us<8u, 1000000UL>() 
-{clock_speed_divide_by_8();}
-
-// a 16 us
-template<>
-inline void SPI_basic::clock_speed_in_us<16u, 1000000UL>() 
-{clock_speed_divide_by_16();}
-
-// a 32 us
-template<>
-inline void SPI_basic::clock_speed_in_us<32u, 1000000UL>() 
-{clock_speed_divide_by_32();}
-
-// a 64 us
-template<>
-inline void SPI_basic::clock_speed_in_us<64u, 1000000UL>() 
-{clock_speed_divide_by_64();}
-
-// a 128 us
-template<>
-inline void SPI_basic::clock_speed_in_us<128u, 1000000UL>() 
-{clock_speed_divide_by_128();}
-
-
-
-// reloj del SPI a 8MHz
-// --------------------
-// a 250 ns
-//template<>
-//inline void SPI_basic::clock_speed_en_ns<250u, 8000000UL>() 
-//{clock_speed_divide_by_2();}
-
-// a 500 ns
-//template<>
-//inline void SPI_basic::clock_speed_en_ns<500u, 8000000UL>() 
-//{clock_speed_divide_by_4();}
-
-// a 1 us
-template<>
-inline void SPI_basic::clock_speed_in_us<1u, 8000000UL>() 
-{clock_speed_divide_by_8();}
-
-// a 2 us
-template<>
-inline void SPI_basic::clock_speed_in_us<2u, 8000000UL>() 
-{clock_speed_divide_by_16();}
-
-// a 4 us
-template<>
-inline void SPI_basic::clock_speed_in_us<4u, 8000000UL>() 
-{clock_speed_divide_by_32();}
-
-// a 8 us
-template<>
-inline void SPI_basic::clock_speed_in_us<8u, 8000000UL>() 
-{clock_speed_divide_by_64();}
-
-// a 16 us
-template<>
-inline void SPI_basic::clock_speed_in_us<16u, 8000000UL>() 
-{clock_speed_divide_by_128();}
 
 
 }// namespace avr

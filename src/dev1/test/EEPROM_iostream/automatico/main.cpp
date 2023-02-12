@@ -34,7 +34,7 @@
 #include <atd_cstddef.h>
 #include <std_iomanip.h>
 
-constexpr uint8_t periodo_en_us = 16;
+constexpr uint8_t period_in_us = 16;
 
 constexpr uint8_t num_pin_chip_select = 16;
 constexpr uint8_t buffer_size = 2;
@@ -447,7 +447,8 @@ bool test_istream_automatico()
 void test_eeprom_automatico()
 {
     atmega::UART_iostream uart;
-    atmega::SPI_master::on<periodo_en_us>();
+    atmega::SPI_master::clock_period_in_us<period_in_us>();
+    atmega::SPI_master::on();
 
     if (test_ostream_automatico())
 	test_istream_automatico();

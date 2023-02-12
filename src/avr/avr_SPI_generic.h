@@ -35,9 +35,26 @@
 
 namespace avr_{
 
+
 class SPI_base_g : public SPI_basic{
 public:
     SPI_base_g() = delete;
+
+    /// Configuramos la velocidad del reloj del SPI en microsegundos.
+    // La función clock_period_in_us traduce la forma de hablar del cliente (en
+    // microsegundos) en la forma de hablar del avr (en divisor de frecuencia)
+    // CUIDADO: parece ser que si se quieren conectar 2 avrs la frecuencia del
+    // master tiene que ser 4 veces más lenta que la del slave:
+    // Datasheet, 23.5.2. SPI Status register: 
+    // When the SPI is configured as Slave, the SPI is only guaranteed 
+    // to work at fosc/4 or lower
+    template<uint16_t period
+	    , uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
+    static void clock_period_in_us();
+
+    template<uint32_t frequency
+	    , uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
+    static void clock_frequency_in_hz();
 
     // Las transmisiones del SPI nunca van a fallar: al enviar un byte el SPI
     // arranca el reloj, genera 8 pulsos y marca como enviado el byte,
@@ -82,24 +99,29 @@ class SPI_master_g : public SPI_base_g {
 public:
     SPI_master_g() = delete;
 
-    /// Enciende el SPI como Master. 
+    /// Configuramos los pines para que el SPI funciones como master.
+    /// Configuramos todos: SCK, MOSI y SS como de salida, y MISO como de
+    /// entrada.
+    static void cfg_pins();
+
+    /// Enciende el SPI como Master, configurándolo todo.
     /// La frecuencia del reloj usada será la definida por
     /// period_in_us. Falta definir la polaridad y la phase ya que cada
     /// dispositivo tendrá una polaridad y fase diferente. Esta configuración
     /// la hara cada dispositivo antes de escribir en SPI.
-    template <uint16_t period_in_us>
+//    template <uint16_t period_in_us>
+//    static void on()
+//    {
+//	cfg_pins();
+//	clock_period_in_us<period_in_us>();
+//	enable_as_a_master();
+//    }
+    // Recordar llamar antes a clock_period_in_us/clock_frequency_in_hz
     static void on()
     {
-	init();
-	clock_speed_in_us<period_in_us>();
+	cfg_pins();
 	enable_as_a_master();
     }
-    
-private:
-    /// Configuramos los pines para que el SPI funciones como master.
-    /// Configuramos todos: SCK, MOSI y SS como de salida, y MISO como de
-    /// entrada.
-    static void init();
     
 };
 
@@ -120,6 +142,116 @@ private:
 };
 
 
+// reloj del SPI a 1MHz
+// --------------------
+// a 500 kHz = 2 us
+template<>
+inline void SPI_base_g::clock_period_in_us<2u, 1000000UL>() 
+{clock_frequency_divide_by_2();}
+
+// a 4 us
+template<>
+inline void SPI_base_g::clock_period_in_us<4u, 1000000UL>() 
+{clock_frequency_divide_by_4();}
+
+// a 8 us
+template<>
+inline void SPI_base_g::clock_period_in_us<8u, 1000000UL>() 
+{clock_frequency_divide_by_8();}
+
+// a 16 us
+template<>
+inline void SPI_base_g::clock_period_in_us<16u, 1000000UL>() 
+{clock_frequency_divide_by_16();}
+
+// a 32 us
+template<>
+inline void SPI_base_g::clock_period_in_us<32u, 1000000UL>() 
+{clock_frequency_divide_by_32();}
+
+// a 64 us
+template<>
+inline void SPI_base_g::clock_period_in_us<64u, 1000000UL>() 
+{clock_frequency_divide_by_64();}
+
+// a 128 us
+template<>
+inline void SPI_base_g::clock_period_in_us<128u, 1000000UL>() 
+{clock_frequency_divide_by_128();}
+
+
+// a 500 kHz
+template<>
+inline void SPI_base_g::clock_frequency_in_hz<500'000UL, 1'000'000UL>()
+{ clock_frequency_divide_by_2(); }
+
+// a 250 kHz
+template<>
+inline void SPI_base_g::clock_frequency_in_hz<250'000UL, 1'000'000UL>()
+{ clock_frequency_divide_by_4(); }
+
+// a 125 kHz
+template<>
+inline void SPI_base_g::clock_frequency_in_hz<125'000UL, 1'000'000UL>()
+{ clock_frequency_divide_by_8(); }
+
+// a 62.5 kHz
+template<>
+inline void SPI_base_g::clock_frequency_in_hz<62'500UL, 1'000'000UL>()
+{ clock_frequency_divide_by_16(); }
+
+// a 31.25 kHz
+template<>
+inline void SPI_base_g::clock_frequency_in_hz<31'250UL, 1'000'000UL>()
+{ clock_frequency_divide_by_32(); }
+
+// a 15.625 kHz
+template<>
+inline void SPI_base_g::clock_frequency_in_hz<15'625UL, 1'000'000UL>()
+{ clock_frequency_divide_by_64(); }
+
+// a 7812 Hz
+template<>
+inline void SPI_base_g::clock_frequency_in_hz<7'812UL, 1'000'000UL>()
+{ clock_frequency_divide_by_128(); }
+
+
+// reloj del SPI a 8MHz
+// --------------------
+// a 250 ns
+//template<>
+//inline void SPI_base_g::clock_frequency_en_ns<250u, 8000000UL>() 
+//{clock_frequency_divide_by_2();}
+
+// a 500 ns
+//template<>
+//inline void SPI_base_g::clock_frequency_en_ns<500u, 8000000UL>() 
+//{clock_frequency_divide_by_4();}
+
+// a 1 us
+template<>
+inline void SPI_base_g::clock_period_in_us<1u, 8000000UL>() 
+{clock_frequency_divide_by_8();}
+
+// a 2 us
+template<>
+inline void SPI_base_g::clock_period_in_us<2u, 8000000UL>() 
+{clock_frequency_divide_by_16();}
+
+// a 4 us
+template<>
+inline void SPI_base_g::clock_period_in_us<4u, 8000000UL>() 
+{clock_frequency_divide_by_32();}
+
+// a 8 us
+template<>
+inline void SPI_base_g::clock_period_in_us<8u, 8000000UL>() 
+{clock_frequency_divide_by_64();}
+
+// a 16 us
+template<>
+inline void SPI_base_g::clock_period_in_us<16u, 8000000UL>() 
+{clock_frequency_divide_by_128();}
 
 }// namespace avr
 

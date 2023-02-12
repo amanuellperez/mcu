@@ -34,7 +34,7 @@
 
 #include <avr_atmega.h>
 
-constexpr uint8_t periodo_en_us = 16;
+constexpr uint8_t period_in_us = 16;
 
 constexpr uint8_t num_pin_chip_select = 16;
 constexpr uint8_t buffer_size = 2;
@@ -43,6 +43,8 @@ using EEPROM_lineal =
 
 using EEPROM_ostream = dev::EEPROM_ostream<EEPROM_lineal, buffer_size>;
 using EEPROM_istream = dev::EEPROM_istream<EEPROM_lineal, buffer_size>;
+
+using SPI = atmega::SPI_master;
 
 constexpr int sz = 80;
 
@@ -136,7 +138,8 @@ MENU_INTERACTIVO[] =  "Elige:\n"
 void test_eeprom_interactiva()
 {
     atmega::UART_iostream uart;
-    atmega::SPI_master::on<periodo_en_us>();
+    SPI::clock_period_in_us<period_in_us>();
+    SPI::on();
 
     EEPROM_ostream out;
     out.open(0);

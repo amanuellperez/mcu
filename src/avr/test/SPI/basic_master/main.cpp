@@ -102,9 +102,10 @@ int main()
     uart.on();
 
 // init_SPI()
-    SPI::on<periodo_en_us>();
     SPI::spi_mode(0,0);
     SPI::data_order_LSB();
+    SPI::clock_period_in_us<periodo_en_us>();
+    SPI::on();
 
     uart << "\n\nSPI test\n"
 	        "--------\n";

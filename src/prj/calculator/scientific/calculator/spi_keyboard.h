@@ -52,9 +52,10 @@ private:
 template <typename S, uint16_t T>
 void SPI_Keyboard<S, T>::init_SPI()
 {
-    SPI::on<SPI_period_in_us>();
     SPI::spi_mode(0,0);
     SPI::data_order_LSB();
+    SPI::clock_period_in_us<SPI_period_in_us>();
+    SPI::on();
 }
 
 template <typename S, uint16_t T>

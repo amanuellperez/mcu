@@ -25,13 +25,13 @@
 
 namespace avr_{
 
-void SPI_master_g::init()
+void SPI_master_g::cfg_pins()
 {
     // Configuración de los pins
-    Pin<SPI_num_pin_SCK>::as_output();
-    Pin<SPI_num_pin_MOSI>::as_output();
+    Pin<cfg::spi::SCK_pin_number>::as_output();
+    Pin<cfg::spi::MOSI_pin_number>::as_output();
 //    Pin<SPI_num_pin_MISO>::as_input_without_pullup();
-    Pin<SPI_num_pin_SS>::as_output(); // fundamental para que no sea slave:
+    Pin<cfg::spi::SS_pin_number>::as_output(); // fundamental para que no sea slave:
 				     // punto 23.3.2: leer este punto. Indica
 				     // que si se define como entrada tiene
 				     // que mantenerse high, si cambia a low
@@ -51,7 +51,7 @@ void SPI_slave_g::init()
     // Configuración de los pins (table 23-1). 
 //    Pin<SPI_num_pin_SCK>::as_input_without_pullup();
 //    Pin<SPI_num_pin_MOSI>::as_input_without_pullup();
-    Pin<SPI_num_pin_MISO>::as_output();
+    Pin<cfg::spi::MISO_pin_number>::as_output();
 //    Pin<SPI_num_pin_SS>::as_input_without_pullup(); 
 }
 
