@@ -217,8 +217,8 @@ int EEPROM_streambuf<E, P>::sync_put_area()
     if (pptr() == pbase())
 	return 0;
 
-    std::byte* pb = reinterpret_cast<std::byte*>(pbase());
-    std::byte* pp = reinterpret_cast<std::byte*>(pptr());
+    uint8_t* pb = reinterpret_cast<uint8_t*>(pbase());
+    uint8_t* pp = reinterpret_cast<uint8_t*>(pptr());
 
     size_type n0 = static_cast<size_type>(pp - pb);
     size_type n = eeprom_.write(address_, pb, n0);
@@ -275,7 +275,7 @@ int EEPROM_streambuf<E, P>::sync_get_area()
     if (gptr() != egptr())
 	return (egptr() - gptr());
 
-    std::byte* eb = reinterpret_cast<std::byte*>(eback());
+    uint8_t* eb = reinterpret_cast<uint8_t*>(eback());
 
     size_type n = eeprom_.read(address_, eb, buffer_size());
 

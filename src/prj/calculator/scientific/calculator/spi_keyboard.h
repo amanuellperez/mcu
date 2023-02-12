@@ -62,10 +62,10 @@ uint8_t SPI_Keyboard<S, T>::getchar()
 {
     SPI_select select;
 //    no_SS.write_zero();
-    std::byte res = SPI::write(std::byte{0});
+    uint8_t res = SPI::write(uint8_t{0});
 //   no_SS.write_one();
 
-    return std::to_integer<uint8_t>(res);
+    return res;
 }
 
 

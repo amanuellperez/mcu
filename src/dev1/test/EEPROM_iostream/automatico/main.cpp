@@ -49,12 +49,12 @@ constexpr int sz = 80;
 // necesito ahorrar memoria
 constexpr const char ERROR[] = "ERROR: ";
 
-std::byte buf[sz];
+uint8_t buf[sz];
 
 void init_buffer()
 {
     for (uint16_t i = 0; i < sz; ++i)
-	buf[i] = std::byte{0x55};
+	buf[i] = uint8_t{0x55};
 }
 
 // Solo hago el check la primera vez, ya que después voy a escribir en el
@@ -69,7 +69,7 @@ void check_buffer()
 
     atmega::UART_iostream uart;
     for (uint16_t i = 0; i < sz; ++i){
-	if (buf[i] != std::byte{0x55})
+	if (buf[i] != uint8_t{0x55})
 	    uart << ">>> " << ERROR << "stack overflow!!! buffer corrupto\n";
     }
 }
@@ -82,10 +82,10 @@ void reset_eeprom(EEPROM_lineal& eeprom, uint16_t address, uint16_t n)
 {
     atmega::UART_iostream uart;
 
-    std::byte buffer[sz];
+    uint8_t buffer[sz];
     n = std::min<uint16_t>(n, sz);
 
-    std::fill_n(buffer, n, std::byte{0});
+    std::fill_n(buffer, n, uint8_t{0});
     
     eeprom.write(address, buffer, n);
     if (!eeprom.good())
@@ -101,15 +101,15 @@ bool check(EEPROM_lineal& eeprom,
     atmega::UART_iostream uart;
     uart << msg << " ... ";
 
-    std::byte buf[sz];
+    uint8_t buf[sz];
     auto leidos = eeprom.read(addr0, buf, n);
     if (leidos != n)
 	uart << ERROR << "no se han podido leer " << n<< " bytes\n";
 
     for (uint8_t i = 0; i < n; ++i){
-	if (buf[i] != std::byte{static_cast<uint8_t>(res[i])}){
+	if (buf[i] != uint8_t{static_cast<uint8_t>(res[i])}){
             uart << ERROR << "i = " << i << "; buf("
-                 << std::to_integer<uint16_t>(buf[i]) << ") != res("
+                 << static_cast<uint16_t>(buf[i]) << ") != res("
                  << static_cast<int16_t>(res[i]) << ")\n";
 
 	    return false;

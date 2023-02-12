@@ -60,10 +60,10 @@ void test_keyboard()
 
     while (1) {
 	no_SS.write_zero();
-	std::byte res = SPI::write(std::byte{0});
+	uint8_t res = SPI::write(uint8_t{0});
 	no_SS.write_one();
 
-	if (res != std::byte{0})
+	if (res != uint8_t{0})
 	    print_code(static_cast<char>(res));
 
 	mcu::Micro::wait_ms(100);

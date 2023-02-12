@@ -85,7 +85,7 @@ public:
     /// hasta no acabar de escribir.
     // Observar que esta función se puede definir como const. Sin embargo,
     // el cliente supondrá que es no const. La dejo con el prototipo esperado.
-    void buffer_write(uint8_t x) { not_generic::SPI_master::write(std::byte{x}); }
+    void buffer_write(uint8_t x) { not_generic::SPI_master::write(uint8_t{x}); }
 
     void buffer_clear() { NO_SRCLR_.negative_pulse_of_1us(); }
 

@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021 Manuel Perez 
+// Copyright (C) 2019-2023 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -45,10 +45,13 @@
  *	10/07/2019 Reescrito. Comienzo con traductor.
  *	19/10/2019 Lo dejo como un traductor puro.
  *	10/04/2021 SPI_basic_basic, SPI_master, SPI_slave
+ *	12/02/2023 Elimino uint8_t a favor de uint8_t. Usar uint8_t obliga
+ *		   a tener que estar haciendo castings todo el rato. Puede que
+ *		   no sepa usarlo. De momento me quedo con uint8_t para
+ *		   representar los bytes.
  *
  ****************************************************************************/
 #include <stdint.h> // uint8_t
-#include <cstddef>    // byte
 #include <avr/io.h> // registros: DDRB... PORT...
 #include <atd_bit.h>
 #include "avr_pin.h"
@@ -121,6 +124,7 @@ public:
     // Datasheet, 23.5.2. SPI Status register: 
     // When the SPI is configured as Slave, the SPI is only guaranteed 
     // to work at fosc/4 or lower
+    // TODO: esto no pertenece al traductor, pasarlo al dispositivo generico.
     template<uint16_t period
 	    , uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
     static void clock_speed_in_us();
@@ -138,10 +142,10 @@ public:
 
     /// Write x in the data register and initiates data transmissioin (si SS
     /// está seleccionado).
-    static void data_register(std::byte x) {SPDR = std::to_integer<uint8_t>(x);}  
+    static void data_register(uint8_t x) {SPDR = x;}  
 
     /// Devuelve el último uint8_t recibido en el último trade.
-    static std::byte data_register() {return std::byte{SPDR};}
+    static uint8_t data_register() {return SPDR;}
 };
 
 
@@ -163,7 +167,7 @@ public:
 
     /// Enviamos el byte x y esperamos hasta que lo haya enviado.
     /// Devuelve el valor recibido.
-    static std::byte trade_and_wait(std::byte x)
+    static uint8_t trade_and_wait(uint8_t x)
     {
 	data_register(x);	// escribimos x y lo enviamos
 	wait_transmission_complete();
@@ -173,13 +177,13 @@ public:
 
     /// Enviamos el byte x y esperamos hasta que lo haya enviado.
     /// Devuelve el valor recibido.
-    static std::byte write(std::byte x)
+    static uint8_t write(uint8_t x)
     { return trade_and_wait(x); }
 
 
     /// Lee un byte. Espera hasta que haya leido el byte.
-    static std::byte read()
-    { return trade_and_wait(std::byte{0}); }
+    static uint8_t read()
+    { return trade_and_wait(uint8_t{0}); }
 
 
 };

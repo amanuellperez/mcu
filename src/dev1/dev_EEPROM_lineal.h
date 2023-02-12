@@ -138,7 +138,7 @@ public:
     /// Lee como máximo n bytes de la dirección de memoria address, 
     /// guardando el resultado en buf. 
     /// Devuelve el número de bytes leídos.
-    size_type read(const Address& address, std::byte* buf, size_type n);
+    size_type read(const Address& address, uint8_t* buf, size_type n);
 
 
     /// Intenta escribir los n bytes del buffer buf, a partir de la dirección 
@@ -159,13 +159,13 @@ public:
     // Opto por elegir la segunda opción. A fin de cuentas, si el usuario
     // quiere escribir los datos parece mejor opción escribir todo lo que se
     // pueda ya que de perder datos así se perderían los menos posible.
-    size_type write(Address address, std::byte* buf, size_type n);
+    size_type write(Address address, uint8_t* buf, size_type n);
 
 
     /// Hace eeprom[address... address + n) = value.
     /// Esta es la versión unbuffered de fill_n: no usa un buffer intermedio
     /// donde escribir value, sino que escribe directamente en la eeprom.
-    size_type fill_n(const Address& address, size_type n, std::byte value);
+    size_type fill_n(const Address& address, size_type n, uint8_t value);
 
 
     // Acceso al State
@@ -218,7 +218,7 @@ private:
     // Precondición: [address, address + n) están dentro de una misma página.
     // Devuelve true si todo va bien, false en caso de que la memoria no
     // responde. En este caso también marca el bit no_responsebit del state_.
-    bool write_page(Address address, std::byte* buf, size_type n);
+    bool write_page(Address address, uint8_t* buf, size_type n);
 
     // Primer intento de controlar si la memoria responde o no. Básicamente
     // espero un número de ciclos determinado como mucho. Si no responde en
@@ -243,7 +243,7 @@ private:
 	return true;
     }
 
-    size_type write_unguarded(Address address, std::byte* buf, size_type n);
+    size_type write_unguarded(Address address, uint8_t* buf, size_type n);
 
     void setstate(State state) {state_ |= state;}
 };
@@ -252,7 +252,7 @@ private:
 
 template <typename E>
 typename EEPROM_lineal<E>::size_type 
-EEPROM_lineal<E>::read(const Address& address, std::byte* buf, size_type n)
+EEPROM_lineal<E>::read(const Address& address, uint8_t* buf, size_type n)
 {
     if (!good())
 	return 0;
@@ -272,7 +272,7 @@ EEPROM_lineal<E>::read(const Address& address, std::byte* buf, size_type n)
 
 
 template <typename E>
-bool EEPROM_lineal<E>::write_page(Address address, std::byte* buf, size_type n)
+bool EEPROM_lineal<E>::write_page(Address address, uint8_t* buf, size_type n)
 {
     if (!wait_until_write_in_process_end()){
 	setstate(State::no_responsebit);
@@ -288,7 +288,7 @@ bool EEPROM_lineal<E>::write_page(Address address, std::byte* buf, size_type n)
 
 template <typename E>
 typename EEPROM_lineal<E>::size_type 
-EEPROM_lineal<E>::write(Address address, std::byte* buf0, size_type N)
+EEPROM_lineal<E>::write(Address address, uint8_t* buf0, size_type N)
 {
     if (!good())
 	return 0;
@@ -315,11 +315,11 @@ EEPROM_lineal<E>::write(Address address, std::byte* buf0, size_type N)
 // precondition: address + N <= eeprom_.max_address() + 1
 template <typename E>
 typename EEPROM_lineal<E>::size_type EEPROM_lineal<E>::write_unguarded(
-    Address address, std::byte* buf0, size_type N)
+    Address address, uint8_t* buf0, size_type N)
 {
 
     // 1.- Escribimos lo que queda en la pagina actual
-    std::byte* buf = buf0;
+    uint8_t* buf = buf0;
     size_type n = std::min(N, eeprom_.page_size() - pos_page(address));
     
     if (!write_page(address, buf, n))
@@ -356,13 +356,14 @@ typename EEPROM_lineal<E>::size_type EEPROM_lineal<E>::write_unguarded(
 template <typename EEPROM>
 typename EEPROM_lineal<EEPROM>::size_type 
 EEPROM_lineal<EEPROM>::
-	fill_n(const Address& address, size_type n, std::byte value)
+	fill_n(const Address& address, size_type n, uint8_t value)
 {
     if (!good())
 	return 0;
 
+// TODO: ¿qué pasa si n > buf_size??? overflow!!! Corregir!!!
     constexpr uint8_t buf_size = std::min(EEPROM::page_size(), SIZE_BUF_MAX);
-    std::byte buf[buf_size];
+    uint8_t buf[buf_size];
     std::fill_n(buf, n, value);
     return write(address, buf, n);
 }

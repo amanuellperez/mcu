@@ -56,7 +56,7 @@ int main()
 
 	avr_::Output_pin<npin_SS> no_SS;
 	no_SS.write_zero();
-	std::byte res = SPI::write(std::byte{c});
+	uint8_t res = SPI::write(uint8_t{c});
 	uart << static_cast<char>(res) << '\n';
 
 	no_SS.write_one();

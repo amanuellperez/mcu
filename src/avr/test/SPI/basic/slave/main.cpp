@@ -49,18 +49,18 @@ int main()
 
     while (1) {
 	SPI::wait_transmission_complete();
-	std::byte data = SPI::data_register();
-	uart << std::to_integer<uint16_t>(data) << '\n';
+	uint8_t data = SPI::data_register();
+	uart << static_cast<uint16_t>(data) << '\n';
 
-//	if (data != std::byte{0}){
-//	    std::byte ndata{0};
+//	if (data != uint8_t{0}){
+//	    uint8_t ndata{0};
 //	    {
 //                avr_::Interrupts_lock lock;
 //                ndata = data;
-//                data  = std::byte{0};
+//                data  = uint8_t{0};
 //	    }
 //
-////	    if (ndata == std::byte{0x56})
+////	    if (ndata == uint8_t{0x56})
 ////		uart << "OK\n";
 ////	    else
 ////		uart << "ERROR\n";

@@ -36,7 +36,7 @@ void SPI_write(uint8_t x)
 
     avr_::Output_pin<npin_SS> no_SS;
     no_SS.write_zero();
-    SPI::write(std::byte{x});
+    SPI::write(uint8_t{x});
     uart << static_cast<uint16_t>(x) << '\n';
     no_SS.write_one();
     avr_::wait_ms(1000);
@@ -67,17 +67,17 @@ int main()
 
 //	for (uint8_t i = 0; i < 255; ++i){
 //	    no_SS.write_zero();
-//	    // SPI::write(std::byte{c});
-//	    //SPI::write(std::byte{0x1F});
+//	    // SPI::write(uint8_t{c});
+//	    //SPI::write(uint8_t{0x1F});
 //	    uart << int(i) << '\n';
-//	    SPI::write(std::byte{i});
+//	    SPI::write(uint8_t{i});
 //	    no_SS.write_one();
 //	    wait_ms(300);
 //	}
 	for (uint8_t i = 0; i <= 255; ++i){
 //	    no_SS.write_zero();
 //	    uart << static_cast<uint16_t>(i) << '\n';
-//	    SPI::write(std::byte{i});
+//	    SPI::write(uint8_t{i});
 //	    no_SS.write_one();
 	    SPI_write(1);
 	    SPI_write(2);

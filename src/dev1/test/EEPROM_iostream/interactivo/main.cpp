@@ -49,25 +49,25 @@ constexpr int sz = 80;
 // necesito ahorrar memoria
 constexpr const char ERROR[] = "ERROR: ";
 
-void print_buffer(uint16_t addr0, std::byte* buf, uint8_t n)
+void print_buffer(uint16_t addr0, uint8_t* buf, uint8_t n)
 {
     atmega::UART_iostream uart;
 
-    std::byte* pe = buf + n;
+    uint8_t* pe = buf + n;
 
     for (uint8_t i = 0; i < n; ){
 	uart << std::setw(3) << std::right << addr0 + i << " | ";
 	uart << std::left;
-	std::byte* p = &buf[i];
+	uint8_t* p = &buf[i];
 	for (uint8_t j = 0; p != pe and j < 10; ++p, ++j){
-	    atd::print_in_hex(uart, *p);    // TODO: uart << std::hex << *p;
+	    atd::print_in_hex(uart, std::byte{*p});    // TODO: uart << std::hex << *p;
 	    //uart << std::to_integer<char>(*p) << "  ";
 	    uart << ' ';
 	    // uart << std::to_integer<uint16_t>(buf[i]) << " ";
 	}
 	uart << "  |";
 	for (uint8_t j = 0; j < 10 and i < n; ++j, ++i){
-	    char c = std::to_integer<char>(buf[i]);
+	    char c = static_cast<char>(buf[i]);
 	    if (c != '\n')
 		uart << c;
 	    else
@@ -79,12 +79,12 @@ void print_buffer(uint16_t addr0, std::byte* buf, uint8_t n)
 
 }
 
-std::byte buf[sz];
+uint8_t buf[sz];
 
 void init_buffer()
 {
     for (uint16_t i = 0; i < sz; ++i)
-	buf[i] = std::byte{0x55};
+	buf[i] = uint8_t{0x55};
 }
 
 // Solo hago el check la primera vez, ya que después voy a escribir en el
@@ -99,7 +99,7 @@ void check_buffer()
 
     atmega::UART_iostream uart;
     for (uint16_t i = 0; i < sz; ++i){
-	if (buf[i] != std::byte{0x55})
+	if (buf[i] != uint8_t{0x55})
 	    uart << ">>> " << ERROR << "stack overflow!!! buffer corrupto\n";
     }
 }
@@ -115,7 +115,7 @@ void read_and_print(EEPROM_lineal& eeprom, uint16_t addr0, uint8_t n = sz)
 	return;
     }
 
-//    std::byte buf[sz];
+//    uint8_t buf[sz];
     auto leidos = eeprom.read(addr0, buf, n);
     if (leidos != n)
 	uart << ERROR << "no se han podido leer " << n<< " bytes\n";

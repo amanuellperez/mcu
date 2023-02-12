@@ -71,7 +71,7 @@ public:
     /// memoria, continua leyendo desde la dirección 0.
     /// CUIDADO: Antes de llamar a esta función hay que garantizar que 
     /// se haya finalizado de escribir, si no fallaría.
-    size_type read(Address address, std::byte* buf, size_type n);
+    size_type read(Address address, uint8_t* buf, size_type n);
 
 
     /// Escribe n bytes en la dirección de memoria indicada. 
@@ -81,7 +81,7 @@ public:
     /// FUNDAMENTAL: para que write funcione es necesario haber llamado
     /// antes a write_enable(). En caso contrario, esta función no escribirá
     /// nada.
-    uint8_t write(Address address, std::byte* buf, uint8_t n);
+    uint8_t write(Address address, uint8_t* buf, uint8_t n);
 
     /// Set the write enable latch.
     void write_enable() { write_cmd(WREN); }
@@ -89,14 +89,14 @@ public:
     /// Reset the write enable latch.
     void write_disable() { write_cmd(WRDI); }
 
-    std::byte read_status_register();
+    uint8_t read_status_register();
 //  void write_status_register(uint8_t);<--- TODO: solo se pueden escribir 2 bits.
 
     // Funciones de estado
     // -------------------
     /// Devuelve el valor del bit Write-In-Process del status register.
     /// Indica si el chip está ocupado con una operación de escritura.
-    static bool write_in_process(std::byte status_reg) 
+    static bool write_in_process(uint8_t status_reg) 
     //{return atd::bit<WRITE_IN_PROCESS>::of(status_reg);}
     {return atd::is_one_bit<WRITE_IN_PROCESS>::of(status_reg);}
 
@@ -104,7 +104,7 @@ public:
     /// Indica el chip está habilitado para escribir o no. Este bit es el 
     /// que activa la instrucción write_enable() y lo desactiva
     /// write_disable().
-    static bool write_enable_latch(std::byte status_reg)
+    static bool write_enable_latch(uint8_t status_reg)
     //{return atd::bit<WRITE_ENABLE_LATCH>::of(status_reg);}
     {return atd::is_one_bit<WRITE_ENABLE_LATCH>::of(status_reg);}
 
@@ -136,14 +136,14 @@ private:
 
     // Instruction Set
     // ---------------
-    constexpr static std::byte READ  {0b00000011}; /* read memory */
-    constexpr static std::byte WRITE {0b00000010}; /* write to memory */
+    constexpr static uint8_t READ  {0b00000011}; /* read memory */
+    constexpr static uint8_t WRITE {0b00000010}; /* write to memory */
 
-    constexpr static std::byte WRDI {0b00000100}; /* write disable */
-    constexpr static std::byte WREN {0b00000110}; /* write enable */
+    constexpr static uint8_t WRDI {0b00000100}; /* write disable */
+    constexpr static uint8_t WREN {0b00000110}; /* write enable */
 
-    constexpr static std::byte RDSR {0b00000101}; /* read status register */
-    constexpr static std::byte WRSR {0b00000001}; /* write status register */
+    constexpr static uint8_t RDSR {0b00000101}; /* read status register */
+    constexpr static uint8_t WRSR {0b00000001}; /* write status register */
 
 
     // EEPROM Status Register Bits
@@ -190,11 +190,11 @@ private:
 
     void write_address(Address address)
     {	// Data order: MSB first, LSB last
-	not_generic::SPI_master::write(static_cast<std::byte>(address >> 8));
-	not_generic::SPI_master::write(static_cast<std::byte>(address));
+	not_generic::SPI_master::write(static_cast<uint8_t>(address >> 8));
+	not_generic::SPI_master::write(static_cast<uint8_t>(address));
     }
 
-    void write_cmd(std::byte cmd);
+    void write_cmd(uint8_t cmd);
 
 };
 
@@ -211,7 +211,7 @@ void EEPROM_25LC256<no_CS, no_WP, no_HOLD>::cfg_SPI()
 template <uint8_t no_CS, uint8_t no_WP, uint8_t no_HOLD>
 typename EEPROM_25LC256<no_CS, no_WP, no_HOLD>::size_type
 EEPROM_25LC256<no_CS, no_WP, no_HOLD>::read(Address address,
-                                            std::byte* buf,
+                                            uint8_t* buf,
                                             size_type n)
 {
     Select select{*this};
@@ -233,7 +233,7 @@ EEPROM_25LC256<no_CS, no_WP, no_HOLD>::read(Address address,
 //  escrito leyendo la memoria.
 template <uint8_t no_CS, uint8_t no_WP, uint8_t no_HOLD>
 uint8_t EEPROM_25LC256<no_CS, no_WP, no_HOLD>::
-			    write(Address address, std::byte* buf, uint8_t n)
+			    write(Address address, uint8_t* buf, uint8_t n)
 {
     Select select{*this};
 
@@ -251,7 +251,7 @@ uint8_t EEPROM_25LC256<no_CS, no_WP, no_HOLD>::
 
 
 template <uint8_t no_CS, uint8_t no_WP, uint8_t no_HOLD>
-void EEPROM_25LC256<no_CS, no_WP, no_HOLD>::write_cmd(std::byte cmd)
+void EEPROM_25LC256<no_CS, no_WP, no_HOLD>::write_cmd(uint8_t cmd)
 {
     Select select{*this};
     not_generic::SPI_master::write(cmd);
@@ -259,12 +259,12 @@ void EEPROM_25LC256<no_CS, no_WP, no_HOLD>::write_cmd(std::byte cmd)
 
 
 template <uint8_t no_CS, uint8_t no_WP, uint8_t no_HOLD>
-std::byte EEPROM_25LC256<no_CS, no_WP, no_HOLD>::
+uint8_t EEPROM_25LC256<no_CS, no_WP, no_HOLD>::
 					read_status_register()
 {
     Select select{*this};
     not_generic::SPI_master::write(RDSR);
-    std::byte status = not_generic::SPI_master::read();
+    uint8_t status = not_generic::SPI_master::read();
 
     return status;
 }

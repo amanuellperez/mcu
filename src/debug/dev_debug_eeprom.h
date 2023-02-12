@@ -34,7 +34,7 @@
  ****************************************************************************/
 
 #include <ctype.h>	    // isalnum
-#include <cstddef>    // std::byte
+#include <cstddef>    // uint8_t
 #include <stdint.h>
 #include <ostream>
 
@@ -57,7 +57,7 @@ send(EEPROM& eeprom, std::ostream& out, uint16_t addr, uint8_t n)
 {
     constexpr uint8_t sz = 255; // n <= 255 ya que es uint8_t
 
-    std::byte buf[sz];
+    uint8_t buf[sz];
 
     uint16_t leidos = eeprom.read(addr, buf, n);
     dump_buffer_fmt(out, addr, buf, leidos);
@@ -68,7 +68,7 @@ send(EEPROM& eeprom, std::ostream& out, uint16_t addr, uint8_t n)
 private:
 // Vuelca el contenido del buffer buf con formato
 static void dump_buffer_fmt(std::ostream& out, 
-		uint16_t addr0, const std::byte* buf, uint8_t n);
+		uint16_t addr0, const uint8_t* buf, uint8_t n);
 };// EEPROM_debug
 
 

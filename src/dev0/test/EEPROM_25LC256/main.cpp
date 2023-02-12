@@ -37,12 +37,12 @@ void print_table(EEPROM& eeprom)
     atmega::UART_iostream uart;
 
     uart << "Address value\r\n";
-    std::byte r[10];
+    uint8_t r[10];
     for (uint8_t i = 0; i < 10; ++i)
 	eeprom.read(10*i, &r[i], 1);
 
     for (uint8_t i = 0; i < 10; ++i)
-	uart << "   " << 10 * i << "   " << std::to_integer<uint8_t>(r[i])
+	uart << "   " << 10 * i << "   " << r[i]
 	     << "\r\n";
 }
 
@@ -52,7 +52,7 @@ void print_eeprom(EEPROM& eeprom)
     
     constexpr uint16_t sz = EEPROM::page_size() * 2;
 
-    std::byte r[sz];
+    uint8_t r[sz];
 
     EEPROM::size_type n = eeprom.read(0, r, sz);
     if (n != sz)
@@ -63,7 +63,7 @@ void print_eeprom(EEPROM& eeprom)
 	if (!(i % 10)){
 	    uart << "\n\r" << i << " |";
 	}
-	uart << "  " << std::to_integer<uint8_t>(r[i]);
+	uart << "  " << r[i];
     }
 
     uart << "\r\n";
@@ -94,10 +94,10 @@ void test_write(EEPROM& eeprom)
     uint8_t n0 = read_uint8_t("¿A partir de qué número escribimos?\n\r", uart);
     uint8_t n = read_uint8_t("¿Cuántos números escribimos?\n\r", uart);
 
-    std::byte b[255];
+    uint8_t b[255];
     uint8_t sz = std::min<uint8_t>(n, 255);
     for (uint8_t i  = 0; i < sz; ++i)
-	b[i] = std::byte{static_cast<uint8_t>(n0 + i)};
+	b[i] = uint8_t{static_cast<uint8_t>(n0 + i)};
 
     while (eeprom.write_in_process(eeprom.read_status_register()))
     {;}

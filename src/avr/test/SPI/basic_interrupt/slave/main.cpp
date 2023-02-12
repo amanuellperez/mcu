@@ -29,7 +29,7 @@ using SPI = avr_::SPI_slave;
 
 constexpr uint16_t npin_SS = avr_::SPI_num_pin_SS;	
 
-static volatile std::byte data {0};
+static volatile uint8_t data {0};
 
 int main() 
 {
@@ -55,12 +55,12 @@ int main()
 	    "Recibiendo: ";
 
     while (1) {
-	if (data != std::byte{0}){
-	    std::byte ndata{0};
+	if (data != uint8_t{0}){
+	    uint8_t ndata{0};
 	    {
                 dev::Disable_interrupts<avr_::Micro> lock;
                 ndata = data;
-                data  = std::byte{0};
+                data  = uint8_t{0};
 	    }
 
 	    uart << static_cast<uint16_t>(ndata) << '\n';

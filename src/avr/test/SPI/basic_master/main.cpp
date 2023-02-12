@@ -51,7 +51,7 @@ void test_basic()
     avr_::Output_pin<npin_RCLK> pin_buffer_flush;
 
     while (1) {
-	for (std::byte p{1}; p != std::byte{0}; p <<= 1){
+	for (uint8_t p{1}; p != uint8_t{0}; p <<= 1){
 	    SPI::write(p);
 	    pin_buffer_flush.pulse_of_1us();
 	    avr_::wait_ms(100);
@@ -69,7 +69,7 @@ void test_count()
     while (1) {
 	for (uint8_t i = 0; i <= 255; ++i){
 	    uart << static_cast<uint16_t>(i) << '\n';
-	    SPI::write(std::byte{i});
+	    SPI::write(uint8_t{i});
 	    pin_buffer_flush.pulse_of_1us();
 	    avr_::wait_ms(500);
 	}
@@ -87,7 +87,7 @@ void test_choose()
 	uart >> c;
 	uint8_t res = static_cast<uint8_t>(c);
 	uart << (uint16_t)(c) << '\n';
-	SPI::write(std::byte{res});
+	SPI::write(uint8_t{res});
 	pin_buffer_flush.pulse_of_1us();
 
     }

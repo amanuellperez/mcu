@@ -35,7 +35,7 @@ using EEPROM = dev::EEPROM_lineal<dev::EEPROM_25LC256<num_pin_chip_select>>;
 constexpr uint16_t sz = 300;
 
 
-void print_buffer(uint16_t addr0, std::byte* buf, uint16_t n)
+void print_buffer(uint16_t addr0, uint8_t* buf, uint16_t n)
 {
     atmega::UART_iostream uart;
 
@@ -44,7 +44,7 @@ void print_buffer(uint16_t addr0, std::byte* buf, uint16_t n)
 	if (!(i % 10))
 	    uart << "\n" << addr0 + i << " | ";
 	// uart << std::to_integer<uint8_t>(buf[i]) << "  ";
-	uart << std::to_integer<uint16_t>(buf[i]) << "  ";
+	uart << static_cast<uint16_t>(buf[i]) << "  ";
 	// atd::print_in_hex(uart, buf[i]); uart << "  ";
     }
 }
@@ -53,7 +53,7 @@ void read_and_print(EEPROM& eeprom, uint16_t addr0, uint16_t n = sz)
 {
     atmega::UART_iostream uart;
 
-    std::byte buf[sz];
+    uint8_t buf[sz];
 
     auto leidos = eeprom.read(addr0, buf, n);
 
@@ -121,9 +121,9 @@ void test_eeprom_interactiva()
 	    n = sz;
 	}
 
-	std::byte buf[sz];
+	uint8_t buf[sz];
 	for (uint16_t i = 0; i < n; ++i)
-	    buf[i] = std::byte{static_cast<uint8_t>(n0 + i)};
+	    buf[i] = uint8_t{static_cast<uint8_t>(n0 + i)};
 
 	auto escritos = eeprom.write(address, buf, n);
 	uart << "escritos = " << escritos << "\n";
@@ -146,12 +146,12 @@ void test_eeprom_interactiva()
 
 
 // lee n bytes a partir de addr0, comparando el resultado con res[0..n)
-bool check_read(EEPROM& eeprom, uint16_t addr0, std::byte* res, uint8_t n)
+bool check_read(EEPROM& eeprom, uint16_t addr0, uint8_t* res, uint8_t n)
 {
     atmega::UART_iostream uart;
 
-    std::byte buf_read[sz];
-    std::fill_n(buf_read, sz, std::byte{0});
+    uint8_t buf_read[sz];
+    std::fill_n(buf_read, sz, uint8_t{0});
 
     auto leidos = eeprom.read(addr0, buf_read, n);
     if (leidos != n){
@@ -161,8 +161,8 @@ bool check_read(EEPROM& eeprom, uint16_t addr0, std::byte* res, uint8_t n)
     for (uint8_t i = 0; i < n; ++i){
 	if (buf_read[i] != res[i]){
 	    uart << " FAIL (buf_read[" << i << "] != res)\n";
-	    uart << "      (" << std::to_integer<uint8_t>(buf_read[i])
-		 << " != " << std::to_integer<uint8_t>(res[i]) << ")\n";
+	    uart << "      (" << buf_read[i]
+		 << " != " << res[i] << ")\n";
 	    return false;
 	}
     }
@@ -178,9 +178,9 @@ void test_write(EEPROM& eeprom,
 {
     atmega::UART_iostream uart;
 
-    std::byte buf_write[sz];
+    uint8_t buf_write[sz];
     for (uint8_t i = 0; i < n; ++i)
-	buf_write[i] = std::byte{static_cast<uint8_t>(n0 + i)};
+	buf_write[i] = uint8_t{static_cast<uint8_t>(n0 + i)};
 
     uart << "write(" << address << ", " << n << ") ... ";
     auto escritos = eeprom.write(address, buf_write, n);
@@ -203,13 +203,13 @@ void test_fill_n(EEPROM& eeprom)
     uint8_t n = 100;
 
     uart << "fill_n ... ";
-    auto escritos = eeprom.fill_n(addr0, n, std::byte{4});
+    auto escritos = eeprom.fill_n(addr0, n, uint8_t{4});
 
     if (escritos != n){
 	uart << " FAIL (escritos != n)\n";
     }else{
-	std::byte res[sz];
-	std::fill_n(res, n, std::byte{4});
+	uint8_t res[sz];
+	std::fill_n(res, n, uint8_t{4});
 	if (check_read(eeprom, addr0, res, n) )
 	    uart << " OK\n";
     }

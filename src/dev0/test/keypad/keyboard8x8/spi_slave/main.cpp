@@ -70,7 +70,7 @@ void test_keyboard()
     uart << "-------------------\n\n";
 
     Keyboard keyboard{key_code};
-    SPI::data_register(std::byte{0});
+    SPI::data_register(uint8_t{0});
 
     while(1){
 	data = keyboard.getchar();
@@ -124,7 +124,7 @@ ISR_SPI_STC{
 
 ISR_PCINT_PIN_SS{
     if (mcu::Pin<SPI_SS_pin>::is_one()){
-	SPI::data_register(std::byte{data});
+	SPI::data_register(uint8_t{data});
 	data = 0; // escrito
     }
 }

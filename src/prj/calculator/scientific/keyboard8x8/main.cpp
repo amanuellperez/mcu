@@ -69,7 +69,7 @@ void test_keyboard()
     uart << "-------------------\n\n";
 
     Keyboard keyboard;
-    SPI::data_register(std::byte{0});
+    SPI::data_register(uint8_t{0});
 
     uint8_t last_key = 0; 
 
@@ -134,7 +134,7 @@ ISR_SPI_STC{
 
 ISR_PCINT_PIN_SS{
     if (atmega::Pin<SPI_SS_pin>::is_one()){
-	SPI::data_register(std::byte{data});
+	SPI::data_register(uint8_t{data});
 	data = 0; // escrito
     }
 }

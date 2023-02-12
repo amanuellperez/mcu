@@ -25,23 +25,23 @@
 namespace dev{
 
 void EEPROM_debug::dump_buffer_fmt(std::ostream& out, 
-		uint16_t addr0, const std::byte* buf, uint8_t n)
+		uint16_t addr0, const uint8_t* buf, uint8_t n)
 {
-    const std::byte* pe = buf + n;
+    const uint8_t* pe = buf + n;
 
     for (uint8_t i = 0; i < n; ){
 	out << std::setw(3) << std::right << addr0 + i << " | ";
 	out << std::left;
-	const std::byte* p = &buf[i];
+	const uint8_t* p = &buf[i];
 	for (uint8_t j = 0; p != pe and j < 10; ++p, ++j){
-	    atd::print_in_hex(out, *p);    // TODO: out << std::hex << *p;
+	    atd::print_in_hex(out, std::byte{*p});    // TODO: out << std::hex << *p;
 	    //out << std::to_integer<char>(*p) << "  ";
 	    out << ' ';
 	    // out << std::to_integer<uint16_t>(buf[i]) << " ";
 	}
 	out << "  |";
 	for (uint8_t j = 0; j < 10 and i < n; ++j, ++i){
-	    char c = std::to_integer<char>(buf[i]);
+	    char c = static_cast<char>(buf[i]);
 	    if (c != '\n'){
 		if (isprint(c))
 		    out << c;
