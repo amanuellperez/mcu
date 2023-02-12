@@ -32,8 +32,6 @@ This directory contains the following:
 
     * [dev1](src/dev1/README.md): User-defined devices.
     
-
-    * debug: Utilities for debug. (<--- what is this???)
   
 3. Algorithms with meaning (application level?)
     * [app](src/app/README.md): Application libraries.
@@ -126,9 +124,6 @@ Se puede organizar el código en diferentes niveles:
 
       El programador no conoce la datasheet ya que desconoce el chip real al
       que accede. Lo que conoce son los diferents concepts.
-
-    * debug: Funciones para depurar los dispositivos. Esto no sé qué es. Hay
-      que revisarlo y posiblemente recolocarlo.
 
 3. Algoritmos con significado (application level?)
     * [app](src/app/README.md)

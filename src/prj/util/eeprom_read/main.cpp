@@ -36,7 +36,7 @@
 #include <atd_istream.h>
 #include <atd_ostream.h>
 
-#include <dev_debug_eeprom.h>
+#include "dev_debug_eeprom.h"
 
 constexpr uint8_t periodo_en_us = 16;
 

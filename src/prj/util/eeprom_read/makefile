@@ -1,7 +1,7 @@
 BIN = xx
 
-SOURCES= main.cpp
-
+SOURCES= main.cpp	\
+	dev_debug_eeprom.cpp
 
 #ASM_SOURCES=../../avr_time.S	\
 			../../avr_square_wave.S
