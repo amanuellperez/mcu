@@ -389,6 +389,8 @@ struct write_range_bits{
  *  El primero al usarlo me resulta más dificil de leer. Es mejor lo criptico,
  *  pero la regla es evita ser criptico!!! Pruebo con of!! 
  *  Pero me gusta también of_register!!! Que el tiempo y el uso elija.
+ *
+ *  Elimino of_register ya que `x` NO tiene por qué ser un register!!!
  */
 template <int pos>
 struct is_one_bit{
@@ -397,10 +399,10 @@ struct is_one_bit{
 	return static_cast<bool>(x & (Int{1} << pos));
     }
 
-    template <typename Int>
-    static bool of_register(const Int& x){
-	return of(x);
-    }
+//    template <typename Int>
+//    static bool of_register(const Int& x){
+//	return of(x);
+//    }
 };
 
 
@@ -409,6 +411,7 @@ struct is_one_bit{
  *
  *  DUDA: mejor solo 'of' o 'of_register'. En código ahora me gusta más la
  *  segunda opción. Que la experiencia lo elija.
+ *  Elimino of_register ya que `x` NO tiene por qué ser un register!!!
  */
 template <int pos>
 struct is_zero_bit{
@@ -417,10 +420,10 @@ struct is_zero_bit{
 	return !static_cast<bool>(x & (Int{1} << pos));
     }
 
-    template <typename Int>
-    static bool of_register(const Int& x){
-	return of(x);
-    }
+//    template <typename Int>
+//    static bool of_register(const Int& x){
+//	return of(x);
+//    }
 };
 
 

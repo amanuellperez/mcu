@@ -25,6 +25,14 @@
 
 namespace avr_{
 
+// En la appnote "AVR151: Setup And use of the SPI", indican que:
+// The MISO, MOSI, and SCK lines of all the other slaves are tristated 
+// (configured as input pins of a high impedance with no pullup resistors
+// enabled). 
+// ==> Conclusión: no tienen pull-up resistor.
+// Pero en el momento en el que haces el chip_select conectas el registro del
+// SPI del master con el registro del SPI del slave formando un circuito
+// cerrado. Da la impresión de no necesitar pull-up resistors (???)
 void SPI_master_g::cfg_pins()
 {
     // Configuración de los pins

@@ -252,5 +252,18 @@ clásicos de C++ son flujos de caracteres, mientras que un `ioxtream` es un fluj
 de bytes (en TWI, SPI... son precisamente estos flujos los que nos interesan).
 
 
+## SPI
+
+### In-System Programming
+Al conectar por primera vez una SD card al SPI el programador falla. ¿Por qué?
+El avr se programa usando SPI con lo que se puede generar un SPI driver
+contention entre el programador y la SD card. La application note AVR910 da la
+solución: para evitar este problema conectar poner una resistencia en serie
+entre las líneas SCK/MISO/MOSI de la SD card y el avr. Al probar con 10k
+funciona.
+
+Si se quiere dejar el producto final con la posibilidad de reprogramarlo hay
+que dejar esas resistencias. 
+
  Probado con: avr-gcc 9.2.0
  

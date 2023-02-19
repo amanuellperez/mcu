@@ -72,18 +72,18 @@ public:
     /// Enviamos el byte x y esperamos hasta que lo haya enviado.
     /// Devuelve el valor recibido.
     static uint8_t write(uint8_t x)
-    { return trade_and_wait(x); }
+    { return transfer(x); }
 
 
     /// Lee un byte. Espera hasta que haya leido el byte.
     static uint8_t read()
-    { return trade_and_wait(uint8_t{0}); }
+    { return transfer(uint8_t{0}); }
 
 
 private:
     /// Enviamos el byte x y esperamos hasta que lo haya enviado.
     /// Devuelve el valor recibido.
-    static uint8_t trade_and_wait(uint8_t x)
+    static uint8_t transfer(uint8_t x)
     {
 	data_register(x);	// escribimos x y lo enviamos
 	wait_transmission_complete();

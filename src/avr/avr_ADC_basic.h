@@ -167,7 +167,7 @@ public:
     // En single mode: ADCSRA.ADSC será 1 mientras la conversión esté en
     // progreso. Pasará a 1 cuando acabe.
     static bool is_the_conversion_complete()
-    {return atd::is_zero_bit<ADSC>::of_register(ADCSRA);}
+    {return atd::is_zero_bit<ADSC>::of(ADCSRA);}
 
     /// Auto-trigger enable. 
     /// The ADC will start a conversion on a positive edge of the selected 

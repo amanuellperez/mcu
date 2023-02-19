@@ -132,12 +132,12 @@ public:
 
     /// Is a serial transfer complete?
     static bool is_transmission_complete()
-    {return atd::is_one_bit<SPIF>::of_register(SPSR);}
+    {return atd::is_one_bit<SPIF>::of(SPSR);}
 
     /// The SPI data register was written during data transfer?
     // To clear this bit first read WCOL, then read SPI data register.
     static bool is_a_write_collision()
-    {return atd::is_one_bit<WCOL>::of_register(SPSR);}
+    {return atd::is_one_bit<WCOL>::of(SPSR);}
 
 
     /// Write x in the data register and initiates data transmissioin (si SS
