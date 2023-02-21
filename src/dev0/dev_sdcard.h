@@ -116,6 +116,74 @@ struct SDCard_basic_R1_response{
     { return 0xFF; }
 };
 
+// Referencias
+//	5.1@physical_layer
+//	7.3.2.4@physical_layer
+//
+// TODO: de momento no implemento los bits UHS... 
+struct SDCard_basic_R3_response{ 
+    enum class Type{ SDSC, SDHC_or_SDXC };
+
+    SDCard_basic_R1_response r1;
+
+    uint8_t OCR[4];
+    template <typename SPI>
+    void read(){
+	OCR[0] = SPI::read();	// MSByte
+	OCR[1] = SPI::read();	
+	OCR[2] = SPI::read();
+	OCR[3] = SPI::read();
+    }
+
+
+    bool card_has_finished_power_up() const
+    { return atd::is_one_bit<7>::of(OCR[0]); }
+
+    // Sólo válido si card_has_finished_power_up() == true
+    bool card_capacity_status() const
+    { return atd::is_one_bit<6>::of(OCR[0]); }
+
+    // suministro este sinónimo de `card_capacity_status`, tiene más
+    // significado. Este es el traductor: traduzco bits a significado.
+    Type card_type() const
+    { 
+	if (card_capacity_status())
+	    return Type::SDHC_or_SDXC;
+
+	else
+	    return Type::SDSC;
+    }
+
+
+    // supports 3.5-3.6V ???
+    bool support_3_5_3_6V() const
+    { return atd::is_one_bit<7>::of(OCR[1]); }
+
+    bool support_3_4_3_5V() const
+    { return atd::is_one_bit<6>::of(OCR[1]); }
+
+    bool support_3_3_3_4V() const
+    { return atd::is_one_bit<5>::of(OCR[1]); }
+
+    bool support_3_2_3_3V() const
+    { return atd::is_one_bit<4>::of(OCR[1]); }
+
+    bool support_3_1_3_2V() const
+    { return atd::is_one_bit<3>::of(OCR[1]); }
+
+    bool support_3_0_3_1V() const
+    { return atd::is_one_bit<2>::of(OCR[1]); }
+
+    bool support_2_9_3_0V() const
+    { return atd::is_one_bit<1>::of(OCR[1]); }
+
+    bool support_2_8_2_9V() const
+    { return atd::is_one_bit<0>::of(OCR[1]); }
+
+    bool support_2_7_2_8V() const
+    { return atd::is_one_bit<7>::of(OCR[2]); }
+};
+
 
 // Referencias:
 //  7.3.2.6@physical_layer
@@ -162,6 +230,8 @@ struct SDCard_basic_R7_response{
 
 };
 
+
+
 // Documentos que uso:
 //	"Part 1 - physical layer simplified specivication ver9.0"
 //
@@ -177,6 +247,7 @@ public:
     
 // Types
     using R1 = SDCard_basic_R1_response;
+    using R3 = SDCard_basic_R3_response;
     using R7 = SDCard_basic_R7_response;
 
 // Constructor
@@ -197,6 +268,7 @@ public:
 	return R1{read_R1()};
     }
 
+    // return: r7
     static void send_if_cond(R7& r7)
     {
 	// TODO: estoy repitiendo la configuracion del SPI!!! Ordenar esto
@@ -210,8 +282,58 @@ public:
     }
 
 
+    // return: r3
+    static void read_ocr(R3& r3)
+    {
+	// TODO: estoy repitiendo la configuracion del SPI!!! Ordenar esto
+	SPI_cfg_init();
+
+	Select_chip select{};
+
+	send(58u);
+
+	read_R3(r3);
+    }
+
+
+    // 7.2.1@physical_layer
+    // HCS: High capacity support?
+    //	    por defecto considero que todas las tarjetas son mayores de > 2GB
+    static R1 sd_send_op_cond(bool HCS = true)
+    {
+	// Devolverá in_idle_state mientras no haya inicializado. La datasheet
+	// indica que hay que reintentar ACMD41 hasta que finalice la
+	// inicialización.
+	uint8_t r1{0};
+
+	for (uint8_t i = 0; i < max_retries; ++i){
+	    transfer_app_cmd__();
+
+	    if (r1 > 1)
+		return R1{r1};
+
+	    r1 = transfer_sd_send_op_cond__(HCS);
+
+	    if (r1 != 0x01) // 0x01 == in_idle_state sin error
+		return R1{r1};
+
+	}
+    
+	return R1{r1};
+
+    }
+
+
 
 private:
+// NOTACIÓN
+// + transfer_: seleccionan el chip y lo deseleccionan,
+//              completando por completo la transferencia del comando.
+//
+// + send_    : no seleccionan el chip. Serán llamadas dentro de otra
+//              función responsable de ello.
+//
+    
 // CFG
     // DUDA: ¿qué valor para max_retries? Los de Arduino indican que hay
     // mínimo de de 1 a 8 bytes antes de que responda la SD card. No he
@@ -315,6 +437,38 @@ private:
 	send(8u, arg, crc);
     }
 
+    // Comando interno: los comandos son o de 1 byte, o de 2 bytes empezando
+    // por {cmd55, ...}. CMD55 lo llaman app_cmd
+    // return: R1 response
+    static uint8_t transfer_app_cmd__()
+    {
+	// TODO: estoy repitiendo la configuracion del SPI!!! Ordenar esto
+	SPI_cfg_init();
+
+	Select_chip select{};
+
+	send(55u);
+
+	return read_R1();
+    }
+
+    // Esta es la segunda parte del comando {CMD55, ACMD41}
+    // Solo hay que enviar HCS en el 
+    // return: R1 response
+    static uint8_t transfer_sd_send_op_cond__(bool HCS = false)
+    {
+	// TODO: estoy repitiendo la configuracion del SPI!!! Ordenar esto
+	SPI_cfg_init();
+
+	Select_chip select{};
+	uint32_t arg{0};
+	if (HCS) 
+	    atd::write_bit<30>::to<1>::in(arg);
+
+	send(41u, arg);
+
+	return read_R1();
+    }
 
     // Envia un comando con argumentos
     static void send(uint8_t cmd, uint32_t arg, uint8_t crc = 0x00);
@@ -326,6 +480,7 @@ private:
     //	Return: R1 si todo va bien (bit<7>::of(R1) == 0)
     //		0xFF en caso de error.
     static uint8_t read_R1();
+    static void read_R3(R3& r3);
 
 
     // Args: (supply_voltage, pattern0) son los pasados a CMD8
@@ -385,6 +540,20 @@ uint8_t SDCard_basic<Cfg>::read_R1()
     return R1::invalid_value();
 }
 
+
+template <typename Cfg>
+void SDCard_basic<Cfg>::read_R3(R3& r3)
+{
+    // Leemos R1
+    uint8_t r = read_R1(); 
+    r3.r1 = R1{r};
+
+    if (r > 1) // if (r != 0x00 and r != 0x01)
+	return;
+
+    // Leemos los 4 bytes restantes
+    r3.read<SPI>();
+}
 
 
 //
