@@ -1,6 +1,7 @@
 DIRS = master01	\
 	master02	\
-	slave
+	slave		\
+	oscilloscope
 
 include $(MCU_RECRULES)
 

@@ -35,49 +35,158 @@
 
 namespace dev{
 
-// Clase por defecto para seleccionar la SDCard
+// Clase por defecto para seleccionar la SDCard_basic
 // El `Selector_SPI` lo define en general el cliente. Es el que diseña el
 // hardware de la aplicación el que sabe cómo va a conectar los diferentes
 // dispositivos SPI. `SDCard_select` es el selector más básico: usa un pin
 // (que por defecto será el que SPI::CS_pin_number).
 // TODO: Generalizar esta clase. Se puede meter en mcu_SPI.h ya que no depende
 // del micro concreto a usar ni de los dispositivos. Se basa en un pin.
-template <typename Output_pin>
+template <typename Output_pin, typename SPI>
 class SDCard_select{
 public:
     static void init() {Output_pin::as_output();}
 
     static void select()
-    { Output_pin::write_zero(); }
+    { 
+//	SPI::write(0xFF);   // hacemos MOSI = 1
+	Output_pin::write_zero(); 
+//	SPI::write(0xFF);   // hacemos MOSI = 1
+    }
 
     static void deselect()
-    {Output_pin::write_one();}
+    {
+//	SPI::write(0xFF);   // hacemos MOSI = 1
+	Output_pin::write_one();
+//	SPI::write(0xFF);   // hacemos MOSI = 1
+    }
 
     SDCard_select() {select();}
     ~SDCard_select() {deselect();}
 };
 
+
+// Response R1
+// -----------
+// Traductor del mapa de bits R1 en funciones
+struct SDCard_basic_R1_response{
+    uint8_t r1;
+
+// State
+    bool is_ready() const
+    { return r1 == 0x00;} 
+
+    bool is_in_idle_state()  const
+    { return r1 == 0x01;}
+
+    // r1 contiene un valor válido? mejor is_ok()?
+    bool is_valid() const
+    { return atd::is_zero_bit<7>::of(r1);}
+
+    bool is_an_error() const
+    { return r1 > 0x01; }
+
+// Flags
+//  DUDA: quedaría mejor llamarla in_idle_state(), pero sería muy facil
+//  confundirla con is_in_idle_state(). Por eso opto por dejar el _flag.
+//  ¿Nombre?
+    bool in_idle_state_flag() const
+    { return atd::is_one_bit<0>::of(r1);}
+
+    bool erase_reset_flag() const
+    { return atd::is_one_bit<1>::of(r1);}
+
+    bool illegal_command_flag() const
+    { return atd::is_one_bit<2>::of(r1);}
+
+    bool communication_CRC_error_flag() const
+    { return atd::is_one_bit<3>::of(r1);}
+
+    bool erase_sequence_error_flag() const
+    { return atd::is_one_bit<4>::of(r1);}
+
+    bool address_error_flag() const
+    { return atd::is_one_bit<5>::of(r1);}
+
+    bool parameter_error_flag() const
+    { return atd::is_one_bit<6>::of(r1);}
+
+// Helpers
+    static uint8_t invalid_value()
+    { return 0xFF; }
+};
+
+
+// Referencias:
+//  7.3.2.6@physical_layer
+//	command version : bits[28,31]
+//	voltage accepted: bits[8, 11]
+//	pattern         : bits[0, 7]
+//
+//  4.3.13@physical_layer
+//	Table 4-18 muestra los valores posibles del `voltage accepted`
+struct SDCard_basic_R7_response{ 
+    SDCard_basic_R1_response r1;
+
+    uint8_t data[4];
+
+    template <typename SPI>
+    void read(){
+	data[0] = SPI::read();		
+	data[1] = SPI::read();	
+	data[2] = SPI::read();
+	data[3] = SPI::read();
+    }
+
+    enum class Voltage{
+	not_defined, 
+	v2_7_to_3_6_V, // de 2.7 a 3.6 V
+	low_voltage, 
+	reserved
+    };
+
+    // TODO: poner esto como atd::nibble...???
+    uint8_t version() const {return ((data[0] & 0xF0) >> 4);}
+    uint8_t pattern() const {return data[3];}
+
+    // 4.3.13/table 4-18
+    Voltage voltage() const {
+	switch ((data[2] & 0x0F)){
+	    break; case 0x01: return Voltage::v2_7_to_3_6_V;
+	    break; case 0x02: return Voltage::low_voltage;
+	    break; case 0x04: return Voltage::reserved;
+	    break; case 0x08: return Voltage::reserved;
+	    break; default  : return Voltage::not_defined;
+	}
+    }
+
+};
+
 // Documentos que uso:
 //	"Part 1 - physical layer simplified specivication ver9.0"
 //
-// TODO: en la respuesta del cmd0 hace un bucle if (res == 0xFF )
-//  y sale transcurrido un tiempo. Según el foro de arduino algunas SD cards
-//  tiene el MISO en open collector during the init sequence. Por eso es
-//  fundamental que se salga del bucle y se siga. Con todo CONFIRMAR ESTO!!!
+// Este es el documento que voy a traducir aquí en código.
 //
-//  El interfaz es static ya que solo vamos a tener una única SDCard que se
-//  selecciona con el `Select_chip`. Esta clase es única para cada SDCard que
-//  conectemos.
-class SDCard{
+template <typename Cfg>
+class SDCard_basic{
 public:
 // TODO: parametrizar todo esto
     using Micro	      = mcu::Micro;
     using SPI	      = mcu::SPI_master;
-    using Select_chip = SDCard_select<mcu::Output_pin<SPI::CS_pin_number>>;
+    using Select_chip = SDCard_select<mcu::Output_pin<SPI::CS_pin_number>, SPI>;
     
+// Types
+    using R1 = SDCard_basic_R1_response;
+    using R7 = SDCard_basic_R7_response;
+
+// Constructor
+    // Interfaz static. Solo hay una SDCard de este tipo porque el Select_chip
+    // es unico. (probemos así, el uso marcará si esto es útil)
+    SDCard_basic() = delete;
+
 // Commands
     // Devuelve response R1. Si todo va bien r1_is_in_idle_state(R1) == true
-    static uint8_t go_idle_state()
+    static R1 go_idle_state()
     {
 	SPI_cfg_init();
 	initialization_sequence();
@@ -85,46 +194,37 @@ public:
 	Select_chip select{};
 
 	send_cmd0();
-	return read_R1();
+	return R1{read_R1()};
+    }
+
+    static void send_if_cond(R7& r7)
+    {
+	// TODO: estoy repitiendo la configuracion del SPI!!! Ordenar esto
+	SPI_cfg_init();
+
+	Select_chip select{};
+
+	send_cmd8(cmd8_supply_voltage, cmd8_pattern, cmd8_crc);
+
+	read_R7(cmd8_supply_voltage, cmd8_pattern, r7);
     }
 
 
-    // Significado de los bits de R1
-    // Estas funciones no son más que meros traductores. ¿Merece la pena
-    // implementarlo como struct? ¿cómo enum? 
-    // Notación: los _flag miran el bit correspondiente. 
-    static bool r1_is_in_idle_state(uint8_t r1) 
-    { return r1 == 0x01;}
-
-    static bool r1_in_idle_state_flag(uint8_t r1) 
-    { return atd::is_one_bit<0>::of(r1);}
-
-    static bool r1_erase_reset_flag(uint8_t r1)   
-    { return atd::is_one_bit<1>::of(r1);}
-
-    static bool r1_ilegal_command_flag(uint8_t r1)
-    { return atd::is_one_bit<2>::of(r1);}
-
-    static bool r1_communication_CRC_error_flag(uint8_t r1)
-    { return atd::is_one_bit<3>::of(r1);}
-
-    static bool r1_erase_sequence_error_flag(uint8_t r1)
-    { return atd::is_one_bit<4>::of(r1);}
-
-    static bool r1_address_error_flag(uint8_t r1)  
-    { return atd::is_one_bit<5>::of(r1);}
-
-    static bool r1_parameter_error_flag(uint8_t r1)
-    { return atd::is_one_bit<6>::of(r1);}
 
 private:
 // CFG
     // DUDA: ¿qué valor para max_retries? Los de Arduino indican que hay
     // mínimo de de 1 a 8 bytes antes de que responda la SD card. No he
-    // encontrado en la especificación del SDCard los tiempos de respuesta
+    // encontrado en la especificación del SDCard_basic los tiempos de respuesta
     // (???). Arduino usa 10, usemos 10 de momento.
     static constexpr uint8_t max_retries = 10;
     static constexpr uint32_t init_frequency = 250'000; // 250 kHz
+							
+
+    // CMD8 data:
+    static constexpr uint32_t cmd8_supply_voltage = 0x01;
+    static constexpr uint32_t cmd8_pattern = 0xAA;
+    static constexpr uint8_t cmd8_crc = 0x86;//TODO: calcularlo dentro de send_cmd8
 							
 
     // 7.3.1.1@physical_layer: 
@@ -139,16 +239,22 @@ private:
 	SPI::cfg_pins();
 	SPI::spi_mode(0,0);
 	SPI::data_order_MSB();
+	SPI::default_transfer_value(0xFF); // 0xFF sería un error de R1
+					   // al tener el bit[7] == '1'
+					   // ¿Servirá para detectar errores
+					   // si la SD card no responde?
     }
 
-    static void SPI_cfg_init()
+    template<uint32_t frequency>
+    static void SPI_cfg()
     {
 	SPI_cfg__();
-	SPI::clock_frequency_in_hz<init_frequency>();
+	SPI::clock_frequency_in_hz<frequency>();
 	SPI::on();
     }
 
-
+    static void SPI_cfg_init()
+    { SPI_cfg<init_frequency>(); }
     
     // 6.4.1@physical_layer
     // + A device shall be ready to accept the first command within 1ms 
@@ -177,99 +283,226 @@ private:
     // cmd0 es constante = 0x40 00 00 00 00 95
     static void send_cmd0() { send(0x40, 0x00, 0x95); }
 
-    // 7.3.1@physical_layer
-    // Todos los comandos son de 6 bytes. 
-    // bits [47:46] = '10'
-    // bits [45:40] = cmd (6 bits)
-    // bits [39:8]  = arg (32 bits)
-    // bits [7:1]   = CRC7
-    // bit  [0]     = '1'
+    // 7.2.1@physical_layer
+    //	    "The argument format of CMD8 is the same as defined in SD mode and
+    //	    the response format is define in section 7.3.2.6"
     //
-    // Básicamente: '10cmd'- arg - 'crc1'
+    //	4.3.13@physical_layer
+    //	    La table 4-18 "format of CMD8" indica que para el supply_voltage
+    //	    solo hay un único posible valor = 0001b (2.7-3.6V) luego en la
+    //	    práctica no podemos elegirlo.
     //
-    // CUIDADO: uso el (arg & 0x00FF0000) >> 16 ... para no tener que pensar
-    // en la endianess.
-    //
-    // 7.2.2@physical_layer:
-    // The SPI interface is initialized in the CRC OFF mode in default. El
-    // único comando que requiere CRC es el CMD0, los demás no es necesario
-    // (salvo que configuremos CRC ON). Salvo en el CMD0 el valor del CRC
-    // puede ser cualquiera (por eso por defecto 0x00).
-    static void send(uint8_t cmd, uint32_t arg, uint8_t crc = 0x00)
+    //	Respecto del check_pattern parece ser que en la versión 2.00 de la
+    //	physical_layer indicaba que recomendaban usar 10101010b (=0xAA) como
+    //	check_pattern aunque esto ha desaparecido. Como en principio da la
+    //	impresión de que da lo mismo este valor elijamos ese valor
+    //	recomendado, de forma que podemos calcular en tiempo de compilación 
+    //	el CRC (CMD8 necesita un CRC)
+    // static void send_cmd8(uint8_t supply_voltage, uint8_t pattern) <-- esta
+    // función sería más genérica. Habría que calcular el CRC dinámicamente.
+    // En la práctica lo conozco todo en tiempo de compilación. De momento
+    // pruebo con la más sencilla:
+    static void send_cmd8(uint8_t supply_voltage, uint8_t pattern, uint8_t crc)
     {
-	SPI::write(cmd | 0x40);	
-
-	SPI::write(static_cast<uint8_t>((arg & 0xFF000000) >> 24));
-	SPI::write(static_cast<uint8_t>((arg & 0x00FF0000) >> 16));
-	SPI::write(static_cast<uint8_t>((arg & 0x0000FF00) >> 8));
-	SPI::write(static_cast<uint8_t>((arg & 0x000000FF)));
-
-	SPI::write(crc | 0x01);
+	// 7.3.1.3@physical_layer
+	// formato cmd8 
+	//	[31:12] reserved|[11:8]supply_voltage|[7:0]check_pattern
+	// arg=      00 00 0    |        1           |       AA
+	uint32_t arg 
+	    = atd::concat_bytes<uint32_t>
+				(0x00, 0x00, supply_voltage, pattern);
+	// cmd8_crc = CRC7(8, arg);
+	send(8u, arg, crc);
     }
 
-    // 7.3.1.3@physical_layer
-    //   If a command does not require an argument, the value of 
-    //   this field should be set to zero.
-    static void send(uint8_t cmd)
-    {
-	SPI::write(cmd | 0x40);	   
 
-	SPI::write(0x00);
-	SPI::write(0x00);
-	SPI::write(0x00);
-	SPI::write(0x00);
+    // Envia un comando con argumentos
+    static void send(uint8_t cmd, uint32_t arg, uint8_t crc = 0x00);
 
-	SPI::write(0x01);
-    }
+    // Envia un comando que no tiene argumentos
+    static void send(uint8_t cmd);
 
-    // 7.2.8@physical_layer
-    // + in the SPI mode the card will always respond to a command.
-    // + A command may be rejected in, entre otros casos, "it is sent while
-    //   the card is in Busy".
-    //
-    //   Luego si la SDCard esta ocupada responderá con error.
-    //
-    // 7.3.2.1@physical_layer
-    //   +  El bit '7' tiene que ser igual a '0'.
-    //
-    //   Pero no indica que si es igual a '1' sea un error (aunque sería lo de
-    //   esperar). Esto puede que lo aclare el punto 5.2.3.1@sdcard-scandisk, 
-    //   indica:
-    //
-    //   "the MSB is always set to zero and the other bits are error 
-    //    indications. A ‘1’ signals error." 
-    //    
-    //    El problema es que no queda claro si cuando el bit 7 de R1 es 1 
-    //    quiere decir que hay un error o si se refiere a los demás flags de
-    //    R1.
-    //   
-    // ¿Cómo implementar un `time_out`? 
-    //	Intentandolo `max_retries` como mucho.
-    //
+
     //	Return: R1 si todo va bien (bit<7>::of(R1) == 0)
     //		0xFF en caso de error.
-    static uint8_t read_R1()
-    {
-	// SPI::read(); //TODO: descomentar si falla. Los de Arduino descartan
-	// el primer byte "to avoid MISO pull-up problem" (???) Aunque tal
-	// como está conectado SPI al tener la SD card seleccionada no tendría
-	// que existir ningún problema (???)
-	for (uint8_t i = 0; i < max_retries; ++i){
-
-	    uint8_t r1 = SPI::read();
-
-	    if (atd::is_zero_bit<7>::of(r1))
-		return r1;
-	}
-
-	return 0xFF;
-    }
+    static uint8_t read_R1();
 
 
-
+    // Args: (supply_voltage, pattern0) son los pasados a CMD8
+    // return: {R7, byte que genera el error}
+    //
+    // ¿por qué devuelve el byte que genera el error? En principio no es
+    // necesario. R7 traduce la respuesta. Lo devuelvo para depurar.
+    // En principio no tengo claro que haya leido bien la datasheet ni tampoco
+    // que vaya a funcionar correctamente. Necesito poder depurar esta
+    // clase. 
+    // return: R7
+    static void read_R7(uint8_t supply_voltage, uint8_t pattern0, R7& r7);
 
 };
 
+// 7.2.8@physical_layer
+// + in the SPI mode the card will always respond to a command.
+// + A command may be rejected in, entre otros casos, "it is sent while
+//   the card is in Busy".
+//
+//   Luego si la SDCard_basic esta ocupada responderá con error.
+//
+// 7.3.2.1@physical_layer
+//   +  El bit '7' tiene que ser igual a '0'.
+//
+//   Pero no indica que si es igual a '1' sea un error (aunque sería lo de
+//   esperar). Esto puede que lo aclare el punto 5.2.3.1@sdcard-scandisk, 
+//   indica:
+//
+//   "the MSB is always set to zero and the other bits are error 
+//    indications. A ‘1’ signals error." 
+//    
+//    El problema es que no queda claro si cuando el bit 7 de R1 es 1 
+//    quiere decir que hay un error o si se refiere a los demás flags de
+//    R1.
+//   
+// ¿Cómo implementar un `time_out`? 
+//	Intentandolo `max_retries` como mucho.
+//
+//	Return: R1 si todo va bien (bit<7>::of(R1) == 0)
+//		0xFF en caso de error.
+template <typename Cfg>
+uint8_t SDCard_basic<Cfg>::read_R1()
+{
+    // SPI::read(); //TODO: descomentar si falla. Los de Arduino descartan
+    // el primer byte "to avoid MISO pull-up problem" (???) Aunque tal
+    // como está conectado SPI al tener la SD card seleccionada no tendría
+    // que existir ningún problema (???)
+    for (uint8_t i = 0; i < max_retries; ++i){
+
+	uint8_t r1 = SPI::read();
+
+	if (atd::is_zero_bit<7>::of(r1))
+	    return r1;
+    }
+
+    return R1::invalid_value();
+}
+
+
+
+//
+// R7 es la respuesta del cmd8. No hay ningún otro comando que tenga esta
+// respuesta.
+//
+// 7.2.1@physical_layer
+//	+ "If the card indicates an illegal command, the card is legacy and does
+//	   not support CMD8"
+//
+//	+ "If the card supports CMD8 and can operate on the supplied voltage,
+//	   the response echoes back the supply voltage and the check pattern 
+//	   that were set in the command argument."
+//
+//  + "If the card supports CMD8 and can operate on the supplied voltage,
+//     the response echoes back the supply voltage and the check pattern 
+//     that were set in the command argument."
+//
+//  + "If VCA in the response is set to 0, the card cannot operate on the
+//     supplied voltage."
+//
+//  + "If check pattern is not matched, CMD8 communication is not valid.
+//     In this case, it is recommended to retry CMD8 sequence."
+//
+// Y esto se detalla en 7.3.1.4@physical_layer:
+//	+ "In SPI mode, the card always returns response"
+//	+ La table 7-5 muestra la respuesta. Puede ser:
+//	    * R1 == 0x09: el CRC es erróneo. La respuesta en este caso consta
+//	                  solo de R1, es 1 byte y no 5 bytes.
+//
+//	    * R1 = 0x01 y pattern == check_pattern (el enviado). 
+//	      Dos posibles respuestas:
+//		1) Si VCA == 0 there is mismatch. Según 7.2.1 la tarjeta no
+//		   puede operar en el supplied voltage.
+//
+//		2) Si VCA == check_pattern todo correcto.
+//
+//	    * R1 == 0b1xx...x ??? En 7.2.1. indica que si the card is legacy
+//	      devuelve un illegal command. En este caso la respuesta será de 1
+//	      byte como el caso R1 == 0x09.
+//
+// Args: (supply_voltage, pattern0) son los pasados a CMD8
+// return: R7
+//
+template <typename Cfg>
+void SDCard_basic<Cfg>::read_R7(uint8_t supply_voltage, uint8_t pattern0,
+				    R7& r7)
+{
+    // Leemos R1
+    uint8_t r = read_R1(); 
+    r7.r1 = R1{r};
+
+    if (r == 0x09)
+	return;
+
+    // Al principio puse: `if(r != 0x01)` pero fallaba ya que la SDcard
+    // devolvía '0'!!!
+    if (r > 1) // if (r != 0x00 and r != 0x01)
+	return;
+
+    // Leemos los 4 bytes restantes
+    r7.read<SPI>();
+}
+
+
+
+
+
+// 7.3.1@physical_layer
+// Todos los comandos son de 6 bytes. 
+// bits [47:46] = '10'
+// bits [45:40] = cmd (6 bits)
+// bits [39:8]  = arg (32 bits)
+// bits [7:1]   = CRC7
+// bit  [0]     = '1'
+//
+// Básicamente: '10cmd'- arg - 'crc1'
+//
+// CUIDADO: uso el (arg & 0x00FF0000) >> 16 ... para no tener que pensar
+// en la endianess.
+//
+// 7.2.2@physical_layer:
+// The SPI interface is initialized in the CRC OFF mode in default. El
+// único comando que requiere CRC es el CMD0, los demás no es necesario
+// (salvo que configuremos CRC ON). Salvo en el CMD0 el valor del CRC
+// puede ser cualquiera (por eso por defecto 0x00).
+template<typename Cfg>
+void SDCard_basic<Cfg>::send(uint8_t cmd, uint32_t arg, uint8_t crc)
+{
+    SPI::write(cmd | 0x40);	
+
+    // TODO: generalizar. Esto es SPI::write<uint32_t>(arg) escribiendo
+    // primero el MSByte first (otra forma de hacerlo será con el LSByte
+    // first) (endianness, ¿por qué lo llaman Big & little endian cuando
+    // realmente es most/least significant byte??? @_@)
+    SPI::write(static_cast<uint8_t>((arg & 0xFF000000) >> 24));
+    SPI::write(static_cast<uint8_t>((arg & 0x00FF0000) >> 16));
+    SPI::write(static_cast<uint8_t>((arg & 0x0000FF00) >> 8));
+    SPI::write(static_cast<uint8_t>((arg & 0x000000FF)));
+
+    SPI::write(crc | 0x01);
+}
+
+// 7.3.1.3@physical_layer
+//   If a command does not require an argument, the value of 
+//   this field should be set to zero.
+template<typename Cfg>
+void SDCard_basic<Cfg>::send(uint8_t cmd)
+{
+    SPI::write(cmd | 0x40);	   
+
+    SPI::write(0x00);
+    SPI::write(0x00);
+    SPI::write(0x00);
+    SPI::write(0x00);
+
+    SPI::write(0x01);
+}
 
 }// namespace
 

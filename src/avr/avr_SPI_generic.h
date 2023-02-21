@@ -77,12 +77,34 @@ public:
 
     /// Lee un byte. Espera hasta que haya leido el byte.
     static uint8_t read()
-    { return transfer(uint8_t{0}); }
+    //{ return transfer(uint8_t{0}); }
+    { return transfer(transfer_value_); }
 
+
+    // En SPI no existen funciones de read/write sino que realmente siempre se
+    // realiza un transfer: enviamos un byte y recibimos otro. 
+    // Sin embargo, en código quiero que se muestre la intención:
+    // `SPI::read()` muestra claramente que queremos leer. ¿Qué valor por
+    // defecto enviar?
+    //
+    // ¿Qué ocurre si el dispositivo con el que hablamos no actualiza su
+    // byte SPI? Al leer leeremos el último byte que escribimos. Si escribo
+    // 0x00 por defecto y este es el valor que escribe el dispositivo cuando
+    // todo va bien no voy a poder detectar el error. Si escribo 0xFF y este
+    // es un valor que NUNCA va a responder el dispositivo, en la segunda
+    // lectura SPI::read() obtendré un 0xFF sabiendo que el dispositivo no
+    // está respondiendo realmente. ¿Servirá para algo esto? Que el uso nos lo
+    // diga.
+    static void default_transfer_value(uint8_t x)
+    { transfer_value_ = x;}
 
 private:
-    /// Enviamos el byte x y esperamos hasta que lo haya enviado.
-    /// Devuelve el valor recibido.
+// Cfg
+    inline static uint8_t transfer_value_ = 0;
+
+// Functions
+    // Enviamos el byte x y esperamos hasta que lo haya enviado.
+    // Devuelve el valor recibido.
     static uint8_t transfer(uint8_t x)
     {
 	data_register(x);	// escribimos x y lo enviamos

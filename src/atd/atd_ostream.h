@@ -189,9 +189,10 @@ char nibble2hex(Int x)
 // No he implementado la salida en hexadecimal en std::ostream, así que
 // suministro esta. Esto quedará obsoleto cuando implemente ios_base::hex
 template <typename Int>
-std::ostream& print_int_as_hex(std::ostream& out, Int x)
+std::ostream& print_int_as_hex(std::ostream& out, Int x, bool write_0x = true)
 {
-    out << "0x";
+    if (write_0x)
+	out << "0x";
 
     for (size_t i = sizeof(Int); i > 0; --i){
 	Int b = (x >> (i - 1) * 8);
