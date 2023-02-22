@@ -45,7 +45,7 @@ void print(std::ostream& out, const SDCard::R1& r1)
 {
     out << "R1 response\n";
     out << "\tR1 : ";
-    atd::print_int_as_hex(out, r1.r1);
+    atd::print_int_as_hex(out, r1.data);
     out << '\n';
 
     if (!r1.is_valid()){
@@ -85,7 +85,7 @@ void print_if_error_r1(std::ostream& out, const SDCard::R1& r1)
     if (!(r1.is_valid() or r1.is_ready() or r1.is_in_idle_state())
 	or r1.is_an_error()){
 	out << "\tr1[";
-	atd::print_int_as_hex(out, r1.r1); // r1.r1?? TODO: ordenar
+	atd::print_int_as_hex(out, r1.data);
 	out << "] ERROR:\n";
 	print(out, r1);
 	return;
@@ -238,22 +238,46 @@ void print(std::ostream& out, const SDCard::R7& r7)
     out << '\n';
 }
 
-
-int main()
+void automatic_init()
 {
-// init_UART();
+    using Init = SDCard::Init_return;
+
     mcu::UART_iostream uart;
-    mcu::basic_cfg(uart);
-    uart.on();
+    uart << "\nSDCard::init() ...\n";
+    switch (SDCard::init()){
+	break; case Init::cmd0_fail	: 
+		    uart << "CMD0 error\n";
 
-    uart << "----------------------------------------\n"
-	 << "SDCard\n"
-	 << "----------------------------------------\n\n";
+	break; case Init::cmd8_crc_error: 
+		    uart << "CMD8 CRC error\n";
 
+	break; case Init::voltage_mismatch: 
+		    uart << "ERROR: voltage mismatch\n";
 
-    Selector_SPI::init();
+	break; case Init::cmd8_echo_fail: 
+		    uart << "CMD8 echo error\n";
 
-    uart << "go_idle_state (cmd0) ... \n";
+	break; case Init::acmd41_in_idle_state: 
+		    uart << "ACMD41 fail: card still in idle state\n";
+
+	break; case Init::card_no_power_up: 
+		    uart << "CMD58 fail: card still no power up\n";
+
+	break; case Init::init_SDSC_card_ok:
+		    uart << "Init OK: SDSC card type\n";
+
+	break; case Init::init_SDHC_or_SDXC_ok:
+		    uart << "Init OK: SDHC or SDXC card type\n";
+    }
+
+}
+
+void step_by_step_init()
+{
+    mcu::UART_iostream uart;
+
+    SDCard::SPI_cfg_init();
+    uart << "go_idle_state (cmd0) ... = entering SPI mode\n";
     SDCard::R1 r1 = SDCard::go_idle_state();
     print(uart, r1);
 
@@ -262,8 +286,24 @@ int main()
     SDCard::send_if_cond(r7);
     print(uart, r7);
 
-    // TODO: 2 posibilidades: legacy (illegal command ==> abort) o no. 
-    // Si no es legacy: ok o no soporta voltage o error pattern (retry)
+    // Posibles respuestas con significado (ver 7.3.1.4)
+    if (r7.r1.is_illegal_command())
+	uart << "\tLegacy card\n";
+
+    // TODO: si se pasa el supply_voltage y pattern a send_if_cond se puede
+    // comprobar que todo sea correcto: hay que comprobar que en R7 haya hecho
+    // el echo correspondiente (ver 7.3.1.4)
+    else if (r7.r1.data == 0x09)
+	uart << "\tCMD8 CRC error\n";
+
+    else {
+	if (r7.VCA() == 0)
+	    uart << "\tVCA mismatch\n";
+
+	else // TODO: esto es falso!!! No hemos comprobado que el pattern sea el correcto
+	    uart << "\tCMD8 ok\n";
+    }
+
 
     // Enviamos CMD58 (opcional) para averiguar qué potenciales es a los que
     // trabaja la tarjeta. Si nuestro hardware no trabaja con esos potenciales
@@ -283,6 +323,37 @@ int main()
     uart << "\nread_ocr (cmd58) ... = is SDSC or SDHC/SDXC card? \n";
     SDCard::read_ocr(r3);
     print_type_card(uart, r3);
+}
+
+
+
+int main()
+{
+// init_UART();
+    mcu::UART_iostream uart;
+    mcu::basic_cfg(uart);
+    uart.on();
+
+    Selector_SPI::init();
+
+    uart << "----------------------------------------\n"
+	 << "SDCard\n"
+	 << "----------------------------------------\n\n";
+
+    uart << "Menu\n"
+	    "----\n"
+	    "Choose type of initialization:\n"
+	    "\t1. Step by step\n"
+	    "\t2. Automatic\n";
+
+    char ans{};
+    uart >> ans;
+
+    if (ans == '1')
+	step_by_step_init();
+
+    else
+	automatic_init();
 
     while(1){
     }

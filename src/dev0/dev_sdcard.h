@@ -70,46 +70,49 @@ public:
 // -----------
 // Traductor del mapa de bits R1 en funciones
 struct SDCard_basic_R1_response{
-    uint8_t r1;
+    uint8_t data;
 
 // State
     bool is_ready() const
-    { return r1 == 0x00;} 
+    { return data == 0x00;} 
 
     bool is_in_idle_state()  const
-    { return r1 == 0x01;}
+    { return data == 0x01;}
 
-    // r1 contiene un valor válido? mejor is_ok()?
+    // data contiene un valor válido? mejor is_ok()?
     bool is_valid() const
-    { return atd::is_zero_bit<7>::of(r1);}
+    { return atd::is_zero_bit<7>::of(data);}
+
+    bool is_illegal_command() const // así habla figure 7-2
+    { return !is_valid(); }
 
     bool is_an_error() const
-    { return r1 > 0x01; }
+    { return data > 0x01; }
 
 // Flags
 //  DUDA: quedaría mejor llamarla in_idle_state(), pero sería muy facil
 //  confundirla con is_in_idle_state(). Por eso opto por dejar el _flag.
 //  ¿Nombre?
     bool in_idle_state_flag() const
-    { return atd::is_one_bit<0>::of(r1);}
+    { return atd::is_one_bit<0>::of(data);}
 
     bool erase_reset_flag() const
-    { return atd::is_one_bit<1>::of(r1);}
+    { return atd::is_one_bit<1>::of(data);}
 
     bool illegal_command_flag() const
-    { return atd::is_one_bit<2>::of(r1);}
+    { return atd::is_one_bit<2>::of(data);}
 
     bool communication_CRC_error_flag() const
-    { return atd::is_one_bit<3>::of(r1);}
+    { return atd::is_one_bit<3>::of(data);}
 
     bool erase_sequence_error_flag() const
-    { return atd::is_one_bit<4>::of(r1);}
+    { return atd::is_one_bit<4>::of(data);}
 
     bool address_error_flag() const
-    { return atd::is_one_bit<5>::of(r1);}
+    { return atd::is_one_bit<5>::of(data);}
 
     bool parameter_error_flag() const
-    { return atd::is_one_bit<6>::of(r1);}
+    { return atd::is_one_bit<6>::of(data);}
 
 // Helpers
     static uint8_t invalid_value()
@@ -213,9 +216,9 @@ struct SDCard_basic_R7_response{
 	reserved
     };
 
-    // TODO: poner esto como atd::nibble...???
     uint8_t version() const {return ((data[0] & 0xF0) >> 4);}
     uint8_t pattern() const {return data[3];}
+    uint8_t VCA()     const {return data[2] & 0x0F;}
 
     // 4.3.13/table 4-18
     Voltage voltage() const {
@@ -255,11 +258,37 @@ public:
     // es unico. (probemos así, el uso marcará si esto es útil)
     SDCard_basic() = delete;
 
-// Commands
+
+    enum class Init_return{ cmd0_fail, 
+			    cmd8_crc_error, voltage_mismatch, cmd8_echo_fail,
+			    acmd41_in_idle_state, // retry sd_send_op_cond()
+			    card_no_power_up, // retry read_ocr()
+			    init_SDSC_card_ok, 
+			    init_SDHC_or_SDXC_ok
+    };
+
+// COMMANDS
+
+    // Inicializa la SDCard en SPI mode, dejándola preparada para funcionar
+    static Init_return init(uint8_t nretries = max_retries_acmd41_command, 
+			    bool HCS = true);
+
+// BRICK COMMANDS (mejor no llamarlos directamente)
+// (RRR) ¿por qué dejo public los brick commands?
+//	 (1) Son comandos de la datasheet. Esto es un traductor, tiene que ser
+//	     visible todo lo que hay en la datasheet.
+//
+//	 (2) Sirven para depurar esta clase.
+//
+    // Cfg SPI para ejecutar la inicialización de la tarjeta
+    static void SPI_cfg_init()
+    { SPI_cfg<init_frequency>(); }
+
+
     // Devuelve response R1. Si todo va bien r1_is_in_idle_state(R1) == true
     static R1 go_idle_state()
     {
-	SPI_cfg_init();
+//	SPI_cfg_init(); <-- Lo llama init
 	initialization_sequence();
 
 	Select_chip select{};
@@ -271,11 +300,11 @@ public:
     // return: r7
     static void send_if_cond(R7& r7)
     {
-	// TODO: estoy repitiendo la configuracion del SPI!!! Ordenar esto
-	SPI_cfg_init();
-
+//	SPI_cfg_init();
 	Select_chip select{};
 
+	// TODO: pasar como argumentos supply_voltage y pattern. Para ello
+	// necesito escribir primero la funcion de CRC7.
 	send_cmd8(cmd8_supply_voltage, cmd8_pattern, cmd8_crc);
 
 	read_R7(cmd8_supply_voltage, cmd8_pattern, r7);
@@ -285,9 +314,7 @@ public:
     // return: r3
     static void read_ocr(R3& r3)
     {
-	// TODO: estoy repitiendo la configuracion del SPI!!! Ordenar esto
-	SPI_cfg_init();
-
+//	SPI_cfg_init();
 	Select_chip select{};
 
 	send(58u);
@@ -299,14 +326,19 @@ public:
     // 7.2.1@physical_layer
     // HCS: High capacity support?
     //	    por defecto considero que todas las tarjetas son mayores de > 2GB
-    static R1 sd_send_op_cond(bool HCS = true)
+    // nretries: es el número de veces que reintentamos el comando ACMD41.
+    //     La datasheet indica que hay que reintentarlo hasta que devuelva
+    //     `in_idle_state == 0`. Solo si la tarjeta es SDUC, que no soporta
+    //     SPI mode, no se inicializará.
+    static R1 sd_send_op_cond(uint8_t nretries = max_retries_acmd41_command,
+			    bool HCS = true)
     {
 	// Devolverá in_idle_state mientras no haya inicializado. La datasheet
 	// indica que hay que reintentar ACMD41 hasta que finalice la
 	// inicialización.
 	uint8_t r1{0};
 
-	for (uint8_t i = 0; i < max_retries; ++i){
+	for (uint8_t i = 0; i < nretries; ++i){
 	    transfer_app_cmd__();
 
 	    if (r1 > 1)
@@ -340,6 +372,7 @@ private:
     // encontrado en la especificación del SDCard_basic los tiempos de respuesta
     // (???). Arduino usa 10, usemos 10 de momento.
     static constexpr uint8_t max_retries = 10;
+    static constexpr uint8_t max_retries_acmd41_command = 100;
     static constexpr uint32_t init_frequency = 250'000; // 250 kHz
 							
 
@@ -375,8 +408,6 @@ private:
 	SPI::on();
     }
 
-    static void SPI_cfg_init()
-    { SPI_cfg<init_frequency>(); }
     
     // 6.4.1@physical_layer
     // + A device shall be ready to accept the first command within 1ms 
@@ -442,9 +473,7 @@ private:
     // return: R1 response
     static uint8_t transfer_app_cmd__()
     {
-	// TODO: estoy repitiendo la configuracion del SPI!!! Ordenar esto
-	SPI_cfg_init();
-
+//	SPI_cfg_init();
 	Select_chip select{};
 
 	send(55u);
@@ -457,9 +486,7 @@ private:
     // return: R1 response
     static uint8_t transfer_sd_send_op_cond__(bool HCS = false)
     {
-	// TODO: estoy repitiendo la configuracion del SPI!!! Ordenar esto
-	SPI_cfg_init();
-
+//	SPI_cfg_init();
 	Select_chip select{};
 	uint32_t arg{0};
 	if (HCS) 
@@ -671,6 +698,68 @@ void SDCard_basic<Cfg>::send(uint8_t cmd)
     SPI::write(0x00);
 
     SPI::write(0x01);
+}
+
+template<typename Cfg>
+SDCard_basic<Cfg>::Init_return SDCard_basic<Cfg>::
+					init(uint8_t nretries, bool HCS)
+{
+    SPI_cfg_init();
+
+    R1 r1 = go_idle_state();
+    if (r1.is_illegal_command())
+	return Init_return::cmd0_fail;
+
+    R7 r7;
+    send_if_cond(r7);
+
+
+    // Posibles respuestas con significado (ver 7.3.1.4)
+    // Si devuelve is_illegal_command() el flujo sigue correctamente,
+    // devolviendo al final SDSC card (???)
+//    if (r7.r1.is_illegal_command())
+//	res = Init_return::card_version1;
+//
+//    else {
+	if (r7.r1.data == 0x09)
+	    return Init_return::cmd8_crc_error;
+
+	if (r7.VCA() == 0) 
+	    return Init_return::voltage_mismatch;
+
+	// Si llega aquí debería de ser falso el siguiente if
+	// TODO: pasar como parámetro a init(supply_voltage, pattern)
+	  // 1º necesito implementar CRC7
+	if (!(r7.VCA() == cmd8_supply_voltage
+		and r7.pattern() == cmd8_pattern))
+	    return Init_return::cmd8_echo_fail;
+	    
+//    }
+
+
+//    // Enviamos CMD58 (opcional) para averiguar qué potenciales es a los que
+//    // trabaja la tarjeta. Si nuestro hardware no trabaja con esos potenciales
+//    // tendríamos que considerarla no válida y acabar.
+//    // En este caso la tarjeta devolverá que está `busy`, sin inicializar. Es
+//    // normal (ver 7.2.1@physical_layer)
+    R3 r3;
+    read_ocr(r3);
+
+    r1 = sd_send_op_cond(nretries, HCS);
+    if (r1.is_in_idle_state())
+	return Init_return::acmd41_in_idle_state;
+
+//    R3 r3;
+    read_ocr(r3);
+
+    if (!r3.card_has_finished_power_up())
+	return Init_return::card_no_power_up;
+
+    if (r3.card_type() == R3::Type::SDSC)
+	return Init_return::init_SDSC_card_ok;
+
+    // else
+    return Init_return::init_SDHC_or_SDXC_ok;
 }
 
 }// namespace

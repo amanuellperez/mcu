@@ -62,7 +62,7 @@ lo iré modificando según vaya ganando experiencia):
 		pudiendo desconocer qué dispositivos son los que está
 		durmiendo realmente.
 
-5. Capa de aplicación: es el programa (???)
+5. Capa de aplicación (del programador): es el programa (???)
 
 
 ## Traductores (paquete avr)
@@ -169,4 +169,37 @@ De los dos métodos parece más práctico el segundo por 2 motivos:
 DUDAS
 
 (???) ¿Razones en contra? ¿Existe otra forma mejor de nombrar los archivos?
+
+
+## SPI devices
+
+¿Cómo conectar diferentes dispositivos SPI al mismo microcontrolador?
+
+Algunas preguntas que hay que responder:
+
++ ¿Quién es responsable de encender/apagar el SPI del micro?
+  Cada dispositivo encenderá el SPI, mientras que el programa principal podrá
+  apagarlo si ve que no lo necesita. 
+
+  ¿Por qué cada dispositivo es responsable de encenderlo? Si por cualquier
+  motivo el programa desconecta el SPI no quiero, como programador, tener que
+  estar recordando que si quiero abrir un  fichero primero tengo que conectar
+  SPI. 
+
+
++ ¿Quién configura el dispositivo SPI?
+  El driver del dispositivo ya que es el driver el que sabe a qué frecuencia
+  conectarlo, cuál es la polaridad y la fase que usa el dispositivo, si
+  primero va el MSB o no... Todas esas cosas dependen del dispositivo.
+
+
++ ¿Quién es responsable de diseñar cómo se seleccionan los diferentes
+  dispositivos de la aplicación? El hardwador es el que sabe cómo va a
+  conectarlos. Él será el responsable de escribir la clase `Select_SPI` y de
+  inicializarla correctamente en la aplicación de tal manera que el
+  programador pueda ignorar por completo el cómo realmente se conecta a una
+  tarjeta SD, o a una EEPROM, ...
+
+
+
 
