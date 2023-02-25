@@ -60,6 +60,7 @@
  *  01/02/21: read_bits, zero::with_bits::to
  *  18/04/21: write_bit
  *  01/11/22: write_zero/write_one
+ *  25/02/23: is_one_most_significant_bit_of
  *
  ****************************************************************************/
 #include <stdint.h> // uint8_t
@@ -549,6 +550,54 @@ inline void write_one(Int& x, uint8_t pos)
 //    expand{0,
 //	    ((i |= (Int{1} << pos)), 0)...};
 //}
+
+
+// is_one_most_significant_bit_of
+// --------------------
+// (RRR) Creo que podia usar make_bitmask pero solo serviría para complicar el
+//       código. Con _Mask_is_one_most_significant_bit_of queda muy sencillo.
+template <typename Int>
+struct _Mask_is_one_most_significant_bit_of{ };
+
+template <>
+struct _Mask_is_one_most_significant_bit_of<uint8_t>{
+    static constexpr uint8_t mask = 0x80;
+};
+
+
+template <>
+struct _Mask_is_one_most_significant_bit_of<uint16_t>{
+    static constexpr uint16_t mask = 0x8000;
+};
+
+
+template <>
+struct _Mask_is_one_most_significant_bit_of<uint32_t>{
+    static constexpr uint32_t mask = 0x80000000;
+};
+
+
+template <>
+struct _Mask_is_one_most_significant_bit_of<uint64_t>{
+    static constexpr uint64_t mask = 0x8000000000000000;
+};
+
+
+// (RRR) ¿el nombre es muy largo?
+//	 Si lo que se busca es un nombre críptico mejor usar directamente:
+//
+//		if (x & 0x80) ...
+//
+//	La idea del nombre es que después de 1 año de haber escrito el código
+//	no tenga que romperme los cuernos 1 hora averiguando qué hace.
+//
+//	    if (is_one_most_significant_bit_of(x)) ...
+//
+//	Ese if se entiende bien ya que se muestra la intención.
+//
+template <typename Int>
+inline bool is_one_most_significant_bit_of(const Int& x)
+{ return (x & _Mask_is_one_most_significant_bit_of<Int>::mask); }
 
 }// namespace
 

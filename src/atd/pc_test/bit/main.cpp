@@ -400,6 +400,83 @@ void test_dynamic_write()
 
 }
 
+void test_is_one_most_significant_bit_of()
+{
+    test::interfaz("is_one_most_significant_bit_of");
+
+// Hago un test exhaustivo
+// uint8_t
+    std::cout << "uint8_t ... ";
+    for (uint8_t n = 0; n < 0x80; ++n)
+	if (atd::is_one_most_significant_bit_of(n)){
+	    std::cerr << "ERROR: is_one_most_significant_bit_of(0x" 
+				    << std::hex << (int) n << ") is true!\n";
+	    throw std::logic_error{"is_one_most_significant_bit_of"};
+	}
+
+    for (uint8_t n = 0x80; n < 0xFF; ++n)
+	if (!atd::is_one_most_significant_bit_of(n)){
+	    std::cerr << "ERROR: is_one_most_significant_bit_of(0x" 
+				    << std::hex << (int) n << ") is false!\n";
+	    throw std::logic_error{"is_one_most_significant_bit_of"};
+	}
+    std::cout << "OK\n";
+
+// uint16_t
+    std::cout << "uint16_t ... ";
+    for (uint16_t n = 0; n < 0x8000; ++n)
+	if (atd::is_one_most_significant_bit_of(n)){
+	    std::cerr << "ERROR: is_one_most_significant_bit_of(0x" 
+				    << std::hex << n << ") is true!\n";
+	    throw std::logic_error{"is_one_most_significant_bit_of"};
+	}
+
+    for (uint16_t n = 0x8000; n < 0xFFFF; ++n)
+	if (!atd::is_one_most_significant_bit_of(n)){
+	    std::cerr << "ERROR: is_one_most_significant_bit_of(0x" 
+				    << std::hex << n << ") is false!\n";
+	    throw std::logic_error{"is_one_most_significant_bit_of"};
+	}
+    std::cout << "OK\n";
+
+// uint32_t
+    std::cout << "uint32_t ... ";
+    for (uint32_t n = 0; n < 0x80000000; ++n)
+	if (atd::is_one_most_significant_bit_of(n)){
+	    std::cerr << "ERROR: is_one_most_significant_bit_of(0x" 
+				    << std::hex << n << ") is true!\n";
+	    throw std::logic_error{"is_one_most_significant_bit_of"};
+	}
+
+    for (uint32_t n = 0x80000000; n < 0xFFFFFFFF; ++n)
+	if (!atd::is_one_most_significant_bit_of(n)){
+	    std::cerr << "ERROR: is_one_most_significant_bit_of(0x" 
+				    << std::hex << n << ") is false!\n";
+	    throw std::logic_error{"is_one_most_significant_bit_of"};
+	}
+    std::cout << "OK\n";
+
+
+
+// uint64_t
+    std::cout << "uint64_t ... ";
+    for (uint64_t n = 0; n < 0x8000000000000000; ++n)
+	if (atd::is_one_most_significant_bit_of(n)){
+	    std::cerr << "ERROR: is_one_most_significant_bit_of(0x" 
+				    << std::hex << n << ") is true!\n";
+	    throw std::logic_error{"is_one_most_significant_bit_of"};
+	}
+
+    for (uint64_t n = 0x8000000000000000; n < 0xFFFFFFFFFFFFFFFF; ++n)
+	if (!atd::is_one_most_significant_bit_of(n)){
+	    std::cerr << "ERROR: is_one_most_significant_bit_of(0x" 
+				    << std::hex << n << ") is false!\n";
+	    throw std::logic_error{"is_one_most_significant_bit_of"};
+	}
+    std::cout << "OK\n";
+
+}
+
 
 int main()
 {
@@ -416,6 +493,7 @@ try{
     test_read_bits();
     test_zero_with_bits();
     test_dynamic_write();
+    test_is_one_most_significant_bit_of();
 
 }catch(std::exception& e)
 {
