@@ -30,7 +30,6 @@ INCS= atd_algorithm.h	\
 	atd_test.h			\
 	atd_time.h			\
 	atd_types.h			\
-	atd_type_traits_basic.h\
 	atd_type_traits.h	\
 	atd_units.h
 

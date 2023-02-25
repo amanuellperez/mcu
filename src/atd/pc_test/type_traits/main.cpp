@@ -255,6 +255,28 @@ void test_iterator_type_t()
     test_iterator_type_t<A, double>("A::iterator_type");
 }
 
+template <size_t n>
+void test_size_in_bits_of_constexpr()
+{
+    CHECK_TRUE(true, "size_in_bits_of is constexpr");
+}
+
+void test_size_in_bits_of()
+{
+    test::interfaz("size_in_bits_of");
+
+    CHECK_TRUE(atd::size_in_bits_of<uint8_t>() == 8, "size_in_bits_of");
+    CHECK_TRUE(atd::size_in_bits_of<int8_t>() == 8, "size_in_bits_of");
+    CHECK_TRUE(atd::size_in_bits_of<uint16_t>() == 16, "size_in_bits_of");
+    CHECK_TRUE(atd::size_in_bits_of<int16_t>() == 16, "size_in_bits_of");
+    CHECK_TRUE(atd::size_in_bits_of<uint32_t>() == 32, "size_in_bits_of");
+    CHECK_TRUE(atd::size_in_bits_of<int32_t>() == 32, "size_in_bits_of");
+    CHECK_TRUE(atd::size_in_bits_of<uint64_t>() == 64, "size_in_bits_of");
+    CHECK_TRUE(atd::size_in_bits_of<int64_t>() == 64, "size_in_bits_of");
+
+    test_size_in_bits_of_constexpr<atd::size_in_bits_of<uint8_t>()>();
+}
+
 
 int main()
 {
@@ -271,6 +293,7 @@ try{
     test_value_type_t();
     test_size_type_t();
     test_iterator_type_t();
+    test_size_in_bits_of();
 
 }catch(std::exception& e)
 {

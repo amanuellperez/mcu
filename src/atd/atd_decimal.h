@@ -63,7 +63,7 @@
 #include <limits>
 
 #include "atd_math.h"
-#include "atd_type_traits_basic.h"
+#include "atd_type_traits.h"
 #include "atd_names.h" // nm::Width
 #include "atd_ostream.h"
 
