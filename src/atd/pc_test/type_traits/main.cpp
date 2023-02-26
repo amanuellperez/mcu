@@ -256,25 +256,25 @@ void test_iterator_type_t()
 }
 
 template <size_t n>
-void test_size_in_bits_of_constexpr()
+void test_sizeof_in_bits_constexpr()
 {
-    CHECK_TRUE(true, "size_in_bits_of is constexpr");
+    CHECK_TRUE(true, "sizeof_in_bits is constexpr");
 }
 
-void test_size_in_bits_of()
+void test_sizeof_in_bits()
 {
-    test::interfaz("size_in_bits_of");
+    test::interfaz("sizeof_in_bits");
 
-    CHECK_TRUE(atd::size_in_bits_of<uint8_t>() == 8, "size_in_bits_of");
-    CHECK_TRUE(atd::size_in_bits_of<int8_t>() == 8, "size_in_bits_of");
-    CHECK_TRUE(atd::size_in_bits_of<uint16_t>() == 16, "size_in_bits_of");
-    CHECK_TRUE(atd::size_in_bits_of<int16_t>() == 16, "size_in_bits_of");
-    CHECK_TRUE(atd::size_in_bits_of<uint32_t>() == 32, "size_in_bits_of");
-    CHECK_TRUE(atd::size_in_bits_of<int32_t>() == 32, "size_in_bits_of");
-    CHECK_TRUE(atd::size_in_bits_of<uint64_t>() == 64, "size_in_bits_of");
-    CHECK_TRUE(atd::size_in_bits_of<int64_t>() == 64, "size_in_bits_of");
+    CHECK_TRUE(atd::sizeof_in_bits<uint8_t>() == 8, "sizeof_in_bits");
+    CHECK_TRUE(atd::sizeof_in_bits<int8_t>() == 8, "sizeof_in_bits");
+    CHECK_TRUE(atd::sizeof_in_bits<uint16_t>() == 16, "sizeof_in_bits");
+    CHECK_TRUE(atd::sizeof_in_bits<int16_t>() == 16, "sizeof_in_bits");
+    CHECK_TRUE(atd::sizeof_in_bits<uint32_t>() == 32, "sizeof_in_bits");
+    CHECK_TRUE(atd::sizeof_in_bits<int32_t>() == 32, "sizeof_in_bits");
+    CHECK_TRUE(atd::sizeof_in_bits<uint64_t>() == 64, "sizeof_in_bits");
+    CHECK_TRUE(atd::sizeof_in_bits<int64_t>() == 64, "sizeof_in_bits");
 
-    test_size_in_bits_of_constexpr<atd::size_in_bits_of<uint8_t>()>();
+    test_sizeof_in_bits_constexpr<atd::sizeof_in_bits<uint8_t>()>();
 }
 
 
@@ -293,7 +293,7 @@ try{
     test_value_type_t();
     test_size_type_t();
     test_iterator_type_t();
-    test_size_in_bits_of();
+    test_sizeof_in_bits();
 
 }catch(std::exception& e)
 {

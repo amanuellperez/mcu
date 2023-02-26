@@ -464,7 +464,8 @@ private:
 	uint32_t arg 
 	    = atd::concat_bytes<uint32_t>
 				(0x00, 0x00, supply_voltage, pattern);
-	// cmd8_crc = CRC7(8, arg);
+	// cmd8_crc = CRC7(8 | 0x40, arg); TODO: que sea send quien calcule el
+	// crc
 	send(8u, arg, crc);
     }
 
