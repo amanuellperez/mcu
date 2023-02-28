@@ -35,7 +35,7 @@
  *    18/03/2021 make_type<A>::template same_sign_as<B>
  *    13/08/2021 common_type_if_convertible_t
  *    23/12/2022 value_type_t<T>/size_type<T>/iterator_type<T>
- *    25/02/2023 sizeof_in_bits<T>
+ *    25/02/2023 sizeof_in_bits<T>/size_of_in_bytes<T>
  *
  ****************************************************************************/
 #include <type_traits>
@@ -329,8 +329,20 @@ template <typename T>
 using iterator_type_t = typename iterator_type<T>::type;
 
 
-// sizeof_in_bits
-// ---------------
+// sizeof
+// ------
+// Uno de los problemas con sizeof es que devuelve el tamaño en chars, que no
+// se garantiza que sean bytes.
+// sizeof devuelve size_t ==> sizeof_in_bits devuelve size_t
+template <typename T>
+inline constexpr size_t sizeof_in_bytes()
+{
+    // garantizamos que sizeof devuelva el número de bytes = 8 bits
+    static_assert(sizeof(uint8_t) == sizeof(char));
+
+    return sizeof(T);
+}
+
 // sizeof devuelve size_t ==> sizeof_in_bits devuelve size_t
 template <typename T>
 inline constexpr size_t sizeof_in_bits()

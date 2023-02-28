@@ -51,7 +51,7 @@ void print_bit(std::ostream& out, Int x)
 
 void print_in_binary(std::ostream& out, std::byte b);
 
-constexpr char nibble[16] = {
+constexpr char nibble__[16] = {
     '0', '1', '2', '3', '4',
     '5', '6', '7', '8', '9',
     'A', 'B', 'C', 'D', 'E',
@@ -59,7 +59,7 @@ constexpr char nibble[16] = {
 };
 
 inline void print_nibble(std::ostream& out, std::byte b)
-{ out << nibble[std::to_integer<uint8_t>(b)]; }
+{ out << nibble__[std::to_integer<uint8_t>(b)]; }
 
 void print_in_hex(std::ostream& out, std::byte b);
 

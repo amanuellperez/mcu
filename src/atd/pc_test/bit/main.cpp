@@ -478,6 +478,103 @@ void test_is_one_most_significant_bit_of()
 }
 
 
+void test_byte()
+{
+    test::interfaz("byte<>()");
+
+    std::cout << "uint8_t ... ";
+    for (uint8_t n = 0; n < 0xFF; ++n)
+	if (atd::byte<0>(n) != n){
+	    std::cerr << "ERROR: byte<0>(" << n << ") == " << atd::byte<0>(n) << "???";
+	    throw std::logic_error{"byte<>()"};
+	}
+    std::cout << "OK\n";
+
+// DONT_HAVE_TO_COMPILE(uint8_t y = atd::byte<1>(uint8_t{0xAB}));
+    
+    {
+    uint16_t x = 0xABCD;
+    CHECK_TRUE(atd::byte<0>(x) == 0xCD, "byte<0>(uint16_t)");
+    CHECK_TRUE(atd::byte<1>(x) == 0xAB, "byte<1>(uint16_t)");
+    }
+
+    {
+    uint32_t x = 0xABCDEF12;
+    CHECK_TRUE(atd::byte<0>(x) == 0x12, "byte<0>(uint32_t)");
+    CHECK_TRUE(atd::byte<1>(x) == 0xEF, "byte<1>(uint32_t)");
+    CHECK_TRUE(atd::byte<2>(x) == 0xCD, "byte<2>(uint32_t)");
+    CHECK_TRUE(atd::byte<3>(x) == 0xAB, "byte<3>(uint32_t)");
+    }
+
+    {
+    uint64_t x = 0xABCDEF1234567890;
+    CHECK_TRUE(atd::byte<0>(x) == 0x90, "byte<0>(uint64_t)");
+    CHECK_TRUE(atd::byte<1>(x) == 0x78, "byte<1>(uint64_t)");
+    CHECK_TRUE(atd::byte<2>(x) == 0x56, "byte<2>(uint64_t)");
+    CHECK_TRUE(atd::byte<3>(x) == 0x34, "byte<3>(uint64_t)");
+    CHECK_TRUE(atd::byte<4>(x) == 0x12, "byte<4>(uint64_t)");
+    CHECK_TRUE(atd::byte<5>(x) == 0xEF, "byte<5>(uint64_t)");
+    CHECK_TRUE(atd::byte<6>(x) == 0xCD, "byte<6>(uint64_t)");
+    CHECK_TRUE(atd::byte<7>(x) == 0xAB, "byte<7>(uint64_t)");
+    }
+
+}
+
+void test_nibble()
+{
+    test::interfaz("nibble<>()");
+
+
+    {
+    uint8_t x = 0xEF;
+    CHECK_TRUE(atd::nibble<0>(x) == 0x0F, "nibble<0>(uint8_t)");
+    CHECK_TRUE(atd::nibble<1>(x) == 0x0E, "nibble<1>(uint8_t)");
+    }
+
+//    DONT_HAVE_TO_COMPILE(uint8_t y = atd::nibble<2>(uint8_t{0xAB}));
+    
+    {
+    uint16_t x = 0xABCD;
+    CHECK_TRUE(atd::nibble<0>(x) == 0x0D, "nibble<0>(uint16_t)");
+    CHECK_TRUE(atd::nibble<1>(x) == 0x0C, "nibble<1>(uint16_t)");
+    CHECK_TRUE(atd::nibble<2>(x) == 0x0B, "nibble<2>(uint16_t)");
+    CHECK_TRUE(atd::nibble<3>(x) == 0x0A, "nibble<3>(uint16_t)");
+    }
+
+    {
+    uint32_t x = 0xABCDEF12;
+    CHECK_TRUE(atd::nibble<0>(x) == 0x02, "nibble<0>(uint32_t)");
+    CHECK_TRUE(atd::nibble<1>(x) == 0x01, "nibble<1>(uint32_t)");
+    CHECK_TRUE(atd::nibble<2>(x) == 0x0F, "nibble<2>(uint32_t)");
+    CHECK_TRUE(atd::nibble<3>(x) == 0x0E, "nibble<3>(uint32_t)");
+    CHECK_TRUE(atd::nibble<4>(x) == 0x0D, "nibble<4>(uint32_t)");
+    CHECK_TRUE(atd::nibble<5>(x) == 0x0C, "nibble<5>(uint32_t)");
+    CHECK_TRUE(atd::nibble<6>(x) == 0x0B, "nibble<6>(uint32_t)");
+    CHECK_TRUE(atd::nibble<7>(x) == 0x0A, "nibble<7>(uint32_t)");
+    }
+
+    {
+    uint64_t x = 0xABCDEF1234567890;
+    CHECK_TRUE(atd::nibble<0>(x) == 0x00, "nibble<0>(uint64_t)");
+    CHECK_TRUE(atd::nibble<1>(x) == 0x09, "nibble<1>(uint64_t)");
+    CHECK_TRUE(atd::nibble<2>(x) == 0x08, "nibble<2>(uint64_t)");
+    CHECK_TRUE(atd::nibble<3>(x) == 0x07, "nibble<3>(uint64_t)");
+    CHECK_TRUE(atd::nibble<4>(x) == 0x06, "nibble<4>(uint64_t)");
+    CHECK_TRUE(atd::nibble<5>(x) == 0x05, "nibble<5>(uint64_t)");
+    CHECK_TRUE(atd::nibble<6>(x) == 0x04, "nibble<6>(uint64_t)");
+    CHECK_TRUE(atd::nibble<7>(x) == 0x03, "nibble<7>(uint64_t)");
+    CHECK_TRUE(atd::nibble<8>(x) == 0x02, "nibble<8>(uint64_t)");
+    CHECK_TRUE(atd::nibble<9>(x) == 0x01, "nibble<9>(uint64_t)");
+    CHECK_TRUE(atd::nibble<10>(x) == 0x0F, "nibble<10>(uint64_t)");
+    CHECK_TRUE(atd::nibble<11>(x) == 0x0E, "nibble<11>(uint64_t)");
+    CHECK_TRUE(atd::nibble<12>(x) == 0x0D, "nibble<12>(uint64_t)");
+    CHECK_TRUE(atd::nibble<13>(x) == 0x0C, "nibble<13>(uint64_t)");
+    CHECK_TRUE(atd::nibble<14>(x) == 0x0B, "nibble<14>(uint64_t)");
+    CHECK_TRUE(atd::nibble<15>(x) == 0x0A, "nibble<15>(uint64_t)");
+    }
+
+}
+
 int main()
 {
 try{
@@ -494,6 +591,8 @@ try{
     test_zero_with_bits();
     test_dynamic_write();
     test_is_one_most_significant_bit_of();
+    test_byte();
+    test_nibble();
 
 }catch(std::exception& e)
 {

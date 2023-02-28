@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022 Manuel Perez 
+// Copyright (C) 2019-2023 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -61,13 +61,15 @@
  *  18/04/21: write_bit
  *  01/11/22: write_zero/write_one
  *  25/02/23: is_one_most_significant_bit_of
+ *  28/02/23: nibble<n>(); byte<n>();
  *
  ****************************************************************************/
 #include <stdint.h> // uint8_t
 #include <cstddef>
 #include <type_traits>
 #include "atd_static.h"	// static_array
-
+#include "atd_type_traits.h"	// sizeof_in_bytes
+				
 // avr define bit
 #undef bit
 
@@ -598,6 +600,30 @@ struct _Mask_is_one_most_significant_bit_of<uint64_t>{
 template <typename Int>
 inline bool is_one_most_significant_bit_of(const Int& x)
 { return (x & _Mask_is_one_most_significant_bit_of<Int>::mask); }
+
+
+
+// byte
+// ----
+template <size_t n, typename T>
+inline uint8_t byte(T x)
+{
+    static_assert(sizeof_in_bytes<T>() > n, "Index overflow");
+
+    x >>= 8*n;
+    return static_cast<uint8_t>(T{0xFF} & x);
+}
+
+// nibble 
+// ------
+template <size_t n, typename T>
+inline uint8_t nibble(T x)
+{
+    static_assert(2*sizeof_in_bytes<T>() > n, "Index overflow");
+
+    x >>= 4*n;
+    return static_cast<uint8_t>(T{0x0F} & x);
+}
 
 }// namespace
 
