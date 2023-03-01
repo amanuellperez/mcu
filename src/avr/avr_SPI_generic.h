@@ -28,7 +28,9 @@
  *
  *  HISTORIA
  *    Manuel Perez
- *	12/02/23 Separando traductor de dispositivo genérico.
+ *	12/02/2023 Separando traductor de dispositivo genérico.
+ *	01/03/2023 clock_frequency_in_hz da error en tiempo de compilación
+ *		   para frecuencias no soportadas.
  *
  ****************************************************************************/
 #include "avr_SPI_basic.h"
@@ -163,6 +165,13 @@ private:
     static void init();
 };
 
+// En caso de que se pase una frecuencia no soportada, el compilador
+// tiene que decirlo.
+template<uint32_t frequency
+	    , uint32_t clock_frequency_in_hz>
+inline void SPI_base_g::clock_frequency_in_hz()
+{static_assert(atd::always_false_v<int>, "Frequency not supported");}
+
 
 // reloj del SPI a 1MHz
 // --------------------
@@ -200,42 +209,6 @@ inline void SPI_base_g::clock_period_in_us<64u, 1000000UL>()
 template<>
 inline void SPI_base_g::clock_period_in_us<128u, 1000000UL>() 
 {clock_frequency_divide_by_128();}
-
-
-// a 500 kHz
-template<>
-inline void SPI_base_g::clock_frequency_in_hz<500'000UL, 1'000'000UL>()
-{ clock_frequency_divide_by_2(); }
-
-// a 250 kHz
-template<>
-inline void SPI_base_g::clock_frequency_in_hz<250'000UL, 1'000'000UL>()
-{ clock_frequency_divide_by_4(); }
-
-// a 125 kHz
-template<>
-inline void SPI_base_g::clock_frequency_in_hz<125'000UL, 1'000'000UL>()
-{ clock_frequency_divide_by_8(); }
-
-// a 62.5 kHz
-template<>
-inline void SPI_base_g::clock_frequency_in_hz<62'500UL, 1'000'000UL>()
-{ clock_frequency_divide_by_16(); }
-
-// a 31.25 kHz
-template<>
-inline void SPI_base_g::clock_frequency_in_hz<31'250UL, 1'000'000UL>()
-{ clock_frequency_divide_by_32(); }
-
-// a 15.625 kHz
-template<>
-inline void SPI_base_g::clock_frequency_in_hz<15'625UL, 1'000'000UL>()
-{ clock_frequency_divide_by_64(); }
-
-// a 7812 Hz
-template<>
-inline void SPI_base_g::clock_frequency_in_hz<7'812UL, 1'000'000UL>()
-{ clock_frequency_divide_by_128(); }
 
 
 // reloj del SPI a 8MHz
