@@ -355,7 +355,38 @@ int main()
     else
 	automatic_init();
 
+    uart << "Read:\n"
+	    "-----\n";
+    uart << "block_size = " << (int) SDCard::block_size << '\n';
+
+    // CUIDADO!!! Ya está empezando a hacer cosas raras si le añado algún
+    // `uart << ...`. El motivo es que el atmega32 solo tiene 2kB de RAM y el
+    // block_size es 1/2 kB!!!
+    uint8_t data[SDCard::block_size];
+// DONT_HAVE_TO_COMPILE(uint8_t data[10]);
+
+    SDCard::Address addr = 0;
+
     while(1){
+	
+	auto r = SDCard::read(addr, data);
+	if (r.ok()){
+	    uart << "read OK:\n";
+	    uart << "-------------------------------\n";
+	    for (uint16_t i = 0; i < SDCard::block_size; ++i){
+		if (i % 15 == 0)
+		    uart << '\n';
+		atd::print_int_as_hex(uart, data[i], false);
+		uart << ' ';
+	    }
+	    uart << "-------------------------------\n";
+	}
+
+	uart << "Press a key to continue\n";
+	char c{};
+	uart >> c;
+	++addr;
+
     }
 }
 
