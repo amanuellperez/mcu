@@ -1,6 +1,7 @@
 BIN = xx
 
-SOURCES= main.cpp
+SOURCES= main.cpp	\
+		 print.cpp
 
 # para probar
 #F_CPU = 8000000UL

@@ -33,6 +33,8 @@
 //		text	   data	    bss	    dec	    hex	filename
 //		8534	   1184	    600	  10318	   284e	xx.elf
 //
+//	 Al meter todas las strings en PROGMEM quedó:
+//
 //	    mcu-size xx.elf
 //		text	   data	    bss	    dec	    hex	filename
 //		10498	    364	    600	  11462	   2cc6	xx.elf

@@ -286,7 +286,8 @@ size:  $(BIN).elf
 # pero al instalar gcc 7 ó ubuntu 18 (no se cuál de los dos influyó o si es
 # otro programa) dejó de funcionar la opción -C y --mcu
 #	$(AVRSIZE) -C --mcu=$(MCU) $(BIN).elf
-	$(AVRSIZE) $(BIN).elf
+#	$(AVRSIZE) $(BIN).elf	# la berkeley ha dejado de funcionar
+	$(AVRSIZE) -G $(BIN).elf
 
 
 .PHONY: clean

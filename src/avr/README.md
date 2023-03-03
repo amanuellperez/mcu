@@ -258,7 +258,7 @@ de bytes (en TWI, SPI... son precisamente estos flujos los que nos interesan).
 Al conectar por primera vez una SD card al SPI el programador falla. ¿Por qué?
 El avr se programa usando SPI con lo que se puede generar un SPI driver
 contention entre el programador y la SD card. La application note AVR910 da la
-solución: para evitar este problema conectar poner una resistencia en serie
+solución: para evitar este problema poner una resistencia en serie
 entre las líneas SCK/MISO/MOSI de la SD card y el avr. Al probar con 10k
 funciona.
 
