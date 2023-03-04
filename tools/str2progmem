@@ -136,8 +136,6 @@ echo -e $header	 > $output_file
 paste $tmp1 $tmp2 |awk -f $awk_file >> $output_file
 echo -e $tail    >> $output_file
 
-cp $tmp1 zz1
-cp $tmp2 zz2
 
 # destructor
 # ----------

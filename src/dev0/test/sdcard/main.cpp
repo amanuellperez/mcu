@@ -21,6 +21,7 @@
 
 #include "dev.h"
 #include "print.h"
+#include "strings.h"
 
 
 void automatic_init()
@@ -31,28 +32,28 @@ void automatic_init()
     uart << "\nSDCard::init() ...\n";
     switch (SDCard::init()){
 	break; case Init::cmd0_fail	: 
-		    uart << "CMD0 error\n";
+		    atd::print(uart, msg_cmd0_fail);
 
 	break; case Init::cmd8_crc_error: 
-		    uart << "CMD8 CRC error\n";
+		    atd::print(uart, msg_cmd8_crc_error);
 
 	break; case Init::voltage_mismatch: 
-		    uart << "ERROR: voltage mismatch\n";
+		    atd::print(uart, msg_voltage_mismatch);
 
 	break; case Init::cmd8_echo_fail: 
-		    uart << "CMD8 echo error\n";
+		    atd::print(uart, msg_cmd8_echo_fail);
 
 	break; case Init::acmd41_in_idle_state: 
-		    uart << "ACMD41 fail: card still in idle state\n";
+		    atd::print(uart, msg_acmd41_in_idle_state);
 
 	break; case Init::card_no_power_up: 
-		    uart << "CMD58 fail: card still no power up\n";
+		    atd::print(uart, msg_card_no_power_up);
 
 	break; case Init::init_SDSC_card_ok:
-		    uart << "Init OK: SDSC card type\n";
+		    atd::print(uart, msg_init_SDSC_card_ok);
 
 	break; case Init::init_SDHC_or_SDXC_ok:
-		    uart << "Init OK: SDHC or SDXC card type\n";
+		    atd::print(uart, msg_init_SDHC_or_SDXC_ok);
     }
 
 }
@@ -62,31 +63,33 @@ void step_by_step_init()
     mcu::UART_iostream uart;
 
     SDCard::SPI_cfg_init();
-    uart << "go_idle_state (cmd0) ... = entering SPI mode\n";
+    atd::print(uart, msg_go_idle_state);
     SDCard::R1 r1 = SDCard::go_idle_state();
     print(uart, r1);
 
-    uart << "\nsend_if_cond (cmd8) ... \n";
+    atd::print(uart, msg_send_if_cond);
     SDCard::R7 r7;
     SDCard::send_if_cond(r7);
     print(uart, r7);
 
     // Posibles respuestas con significado (ver 7.3.1.4)
     if (r7.r1.is_illegal_command())
-	uart << "\tLegacy card\n";
+	atd::print(uart, msg_legacy_card);
 
     // TODO: si se pasa el supply_voltage y pattern a send_if_cond se puede
     // comprobar que todo sea correcto: hay que comprobar que en R7 haya hecho
     // el echo correspondiente (ver 7.3.1.4)
-    else if (r7.r1.data == 0x09)
-	uart << "\tCMD8 CRC error\n";
+    else if (r7.r1.data == 0x09){
+	uart << '\t';
+	atd::print(uart, msg_cmd8_crc_error);
+    }
 
     else {
 	if (r7.VCA() == 0)
-	    uart << "\tVCA mismatch\n";
+	    atd::print(uart, msg_vca_mismatch);
 
 	else // TODO: esto es falso!!! No hemos comprobado que el pattern sea el correcto
-	    uart << "\tCMD8 ok\n";
+	    atd::print(uart, msg_cmd8_ok);
     }
 
 
@@ -95,17 +98,17 @@ void step_by_step_init()
     // tendríamos que considerarla no válida y acabar.
     // En este caso la tarjeta devolverá que está `busy`, sin inicializar. Es
     // normal (ver 7.2.1@physical_layer)
-    uart << "\nread_ocr (cmd58) ... = supported voltages?\n";
+    atd::print(uart, msg_read_ocr1);
     SDCard::R3 r3;
     SDCard::read_ocr(r3);
     print(uart, r3);
 
-    uart << "\nsd_send_op_cond (acmd41) ... \n";
+    atd::print(uart, msg_send_op_cond);
     r1 = SDCard::sd_send_op_cond();
     print(uart, r1);
     // TODO: si falla retry???
 
-    uart << "\nread_ocr (cmd58) ... = is SDSC or SDHC/SDXC card? \n";
+    atd::print(uart, msg_read_ocr2);
     SDCard::read_ocr(r3);
     print_type_card(uart, r3);
 }
@@ -121,15 +124,8 @@ int main()
 
     Selector_SPI::init();
 
-    uart << "----------------------------------------\n"
-	 << "SDCard\n"
-	 << "----------------------------------------\n\n";
-
-    uart << "Menu\n"
-	    "----\n"
-	    "Choose type of initialization:\n"
-	    "\t1. Step by step\n"
-	    "\t2. Automatic\n";
+    atd::print(uart, msg_hello);
+    atd::print(uart, msg_main_menu);
 
     char ans{};
     uart >> ans;
@@ -140,9 +136,10 @@ int main()
     else
 	automatic_init();
 
-    uart << "Read:\n"
-	    "-----\n";
-    uart << "block_size = " << (int) SDCard::block_size << '\n';
+    Micro::wait_ms(2000); // TODO: vaciar el buffer del uart
+
+    atd::print(uart, msg_main_read);
+    uart << (int) SDCard::block_size << '\n';
 
     // CUIDADO!!! Ya está empezando a hacer cosas raras si le añado algún
     // `uart << ...`. El motivo es que el atmega32 solo tiene 2kB de RAM y el
@@ -157,18 +154,18 @@ int main()
 	
 	auto r = SDCard::read(addr, data);
 	if (r.ok()){
-	    uart << "read OK:\n";
-	    uart << "-------------------------------\n";
+	    atd::print(uart, msg_read_ok);
+	    atd::print(uart, msg_line);
 	    for (uint16_t i = 0; i < SDCard::block_size; ++i){
 		if (i % 15 == 0)
 		    uart << '\n';
 		atd::print_int_as_hex(uart, data[i], false);
 		uart << ' ';
 	    }
-	    uart << "-------------------------------\n";
 	}
 
-	uart << "Press a key to continue\n";
+	Micro::wait_ms(100);
+	atd::print(uart, msg_press_key_to_continue);
 	char c{};
 	uart >> c;
 	++addr;
