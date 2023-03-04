@@ -35,6 +35,16 @@
 
 #include <span>
 
+/***************************************************************************
+ *  SDCARD
+ *
+ *  * La memoria en las tarjetas modernas están paginadas en páginas de 512
+ *    bloques.
+ *  * La dirección que se le pasa a la tarjeta es una de esas páginas, siendo
+ *    imposible (escribir) un byte de forma individual. Se escribe toda la
+ *    página.
+ *
+ ***************************************************************************/
 namespace dev{
 
 // Clase por defecto para seleccionar la SDCard_basic
@@ -68,10 +78,21 @@ public:
 };
 
 
+namespace SDCard_types{
+
+enum class Init_return{ cmd0_fail, 
+			cmd8_crc_error, voltage_mismatch, cmd8_echo_fail,
+			acmd41_in_idle_state, // retry sd_send_op_cond()
+			card_no_power_up, // retry read_ocr()
+			init_SDSC_card_ok, 
+			init_SDHC_or_SDXC_ok
+};
+
+
 // Response R1
 // -----------
 // Traductor del mapa de bits R1 en funciones
-struct SDCard_basic_R1_response{
+struct R1_response{
     uint8_t data;
 
 // State
@@ -126,10 +147,10 @@ struct SDCard_basic_R1_response{
 //	7.3.2.4@physical_layer
 //
 // TODO: de momento no implemento los bits UHS... 
-struct SDCard_basic_R3_response{ 
+struct R3_response{ 
     enum class Type{ SDSC, SDHC_or_SDXC };
 
-    SDCard_basic_R1_response r1;
+    R1_response r1;
 
     uint8_t OCR[4];
     template <typename SPI>
@@ -198,8 +219,8 @@ struct SDCard_basic_R3_response{
 //
 //  4.3.13@physical_layer
 //	Table 4-18 muestra los valores posibles del `voltage accepted`
-struct SDCard_basic_R7_response{ 
-    SDCard_basic_R1_response r1;
+struct R7_response{ 
+    R1_response r1;
 
     uint8_t data[4];
 
@@ -236,9 +257,9 @@ struct SDCard_basic_R7_response{
 };
 
 
-class SDCard_basic_read_return{
+class Read_return{
 public:
-    using R1 = SDCard_basic_R1_response;
+    using R1 = R1_response;
 
     bool ok() const { return (!r1_.is_an_error() and det_ == 0); }
     bool timeout() const {return atd::is_one_bit<7>::of(det_);}
@@ -254,23 +275,23 @@ public:
 
 
 // Constructors
-    static SDCard_basic_read_return r1_error(const R1& r1) 
+    static Read_return r1_error(const R1& r1) 
     { 
-	SDCard_basic_read_return err;
+	Read_return err;
 	err.r1_ = r1; 
 	return err;
     }
 
-    static SDCard_basic_read_return time_out_error() 
+    static Read_return time_out_error() 
     { 
-	SDCard_basic_read_return err;
+	Read_return err;
 	atd::write_bit<7>::to<1>::in(err.det_); 
 	return err;
     }
 
-    static SDCard_basic_read_return data_error_token(uint8_t det) 
+    static Read_return data_error_token(uint8_t det) 
     {
-	SDCard_basic_read_return err;
+	Read_return err;
 	err.det_ = det;
 	return err;
     }
@@ -286,7 +307,7 @@ private:
 };
 
 
-
+} // namespace SDCard_types
 
 // Documentos que uso:
 //	"Part 1 - physical layer simplified specivication ver9.0"
@@ -302,29 +323,22 @@ public:
     using Select_chip = SDCard_select<mcu::Output_pin<SPI::CS_pin_number>, SPI>;
     
 // Types
-    using R1 = SDCard_basic_R1_response;
-    using R3 = SDCard_basic_R3_response;
-    using R7 = SDCard_basic_R7_response;
-    using Read_return = SDCard_basic_read_return;
+    using Init_return = SDCard_types::Init_return;
+
+    using R1 = SDCard_types::R1_response;
+    using R3 = SDCard_types::R3_response;
+    using R7 = SDCard_types::R7_response;
+    using Read_return = SDCard_types::Read_return;
 
     using Address = uint32_t;	// para cards SDHC/SDXC
     static constexpr uint16_t block_size = 512;
     using Block   = std::span<uint8_t, block_size>; 
 
-    // TODO: sacar esta enum fuera
-    enum class Init_return{ cmd0_fail, 
-			    cmd8_crc_error, voltage_mismatch, cmd8_echo_fail,
-			    acmd41_in_idle_state, // retry sd_send_op_cond()
-			    card_no_power_up, // retry read_ocr()
-			    init_SDSC_card_ok, 
-			    init_SDHC_or_SDXC_ok
-    };
+
 // Constructor
     // Interfaz static. Solo hay una SDCard de este tipo porque el Select_chip
     // es unico. (probemos así, el uso marcará si esto es útil)
     SDCard_basic() = delete;
-
-
 
 
 // COMMANDS
@@ -339,6 +353,24 @@ public:
     //	       Read_return  = resultado de la operación
     static Read_return read(const Address&, Block);
 
+    // TODO: de momento no implemento multiple_read ya que el micro que estoy
+    // usando es el ATMEGA32 y solo tiene 2kB de RAM: ya va mal leyendo 1
+    // block.
+    // static Read_return multiple_read(const Address&, Block);
+
+    // Escribe el bloque en la dirección indicada
+    //	    Block	= array con los datos a escribir
+    //
+    // return:	
+    //	    Write_return = resultado de la operación
+    // static Write_return write(const Address&, const Block);
+
+    // TODO: mismo comentario que multiple_read
+    // static Write_return multiple_write(const Address&, const Block);
+
+    // TODO:
+    // erase_and_write_protect_management: 7.2.5
+
 
 
 // BRICK COMMANDS (mejor no llamarlos directamente)
@@ -351,10 +383,10 @@ public:
 //
     // Cfg SPI para ejecutar la inicialización de la tarjeta
     static void SPI_cfg_init()
-    { SPI_cfg_<SPI_init_frequency>(); }
+    { SPI_turn_on<SPI_init_frequency>(); }
 
     static void SPI_cfg()
-    { SPI_cfg_<SPI_frequency>(); }
+    { SPI_turn_on<SPI_frequency>(); }
 
     // Devuelve response R1. Si todo va bien r1_is_in_idle_state(R1) == true
     static R1 go_idle_state();
@@ -400,8 +432,7 @@ private:
     static constexpr uint32_t SPI_frequency      = 500'000; // 500 kHz
     
     template <uint32_t time_in_ms>
-    static constexpr 
-	uint16_t time_as_number_of_transfers()
+    static constexpr uint16_t time_as_number_of_transfers()
 	{ return (time_in_ms*SPI_frequency) / 8000u; }
     
 							
@@ -419,25 +450,10 @@ private:
     //   Esto es: MSB first en los comandos.
     //
     // 7.3.2@physical_layer: All responses are transmitted MSB first.
-    static void SPI_cfg__()
-    {
-	SPI::cfg_pins();
-	SPI::spi_mode(0,0);
-	SPI::data_order_MSB();
-	SPI::default_transfer_value(0xFF); // 0xFF sería un error de R1
-					   // al tener el bit[7] == '1'
-					   // ¿Servirá para detectar errores
-					   // si la SD card no responde?
-    }
+    static void SPI_cfg__();
 
-    // TODO: names!!! SPI_cfg_, SPI_cfg__ @_@
     template<uint32_t frequency>
-    static void SPI_cfg_()
-    {
-	SPI_cfg__();
-	SPI::clock_frequency_in_hz<frequency>();
-	SPI::on();
-    }
+    static void SPI_turn_on();
 
     
     // 6.4.1@physical_layer
@@ -446,22 +462,7 @@ private:
     // + Device may use up to 74 clocks for preparation before receiving 
     //   the first command.
     // + In case of SPI mode, CS shall be held to high during 74 clock cycles.
-    static void initialization_sequence()
-    {
-	Select_chip::deselect();    // CS shall be held high!!!
-
-	Micro::wait_ms(1); // power up time
-
-	// send 80 (> 74) clock cycles to synchronize 
-	for (uint8_t i = 0; i < 10; ++i)
-	    SPI::write(0xFF);
-
-
-	// ¿por qué hay que enviar un byte cuando se ha deseleccionado 
-	// la SD?
-	// TODO: si no funciona descomentar esto
-	// SPI::write(0xFF);
-    }
+    static void initialization_sequence();
 
     // 7.2.2@physical_layer
     // cmd0 es constante = 0x40 00 00 00 00 95
@@ -486,48 +487,17 @@ private:
     // función sería más genérica. Habría que calcular el CRC dinámicamente.
     // En la práctica lo conozco todo en tiempo de compilación. De momento
     // pruebo con la más sencilla:
-    static void send_cmd8(uint8_t supply_voltage, uint8_t pattern, uint8_t crc)
-    {
-	// 7.3.1.3@physical_layer
-	// formato cmd8 
-	//	[31:12] reserved|[11:8]supply_voltage|[7:0]check_pattern
-	// arg=      00 00 0    |        1           |       AA
-	uint32_t arg 
-	    = atd::concat_bytes<uint32_t>
-				(0x00, 0x00, supply_voltage, pattern);
-	// cmd8_crc = CRC7(8 | 0x40, arg); TODO: que sea send quien calcule el
-	// crc
-	send(8u, arg, crc);
-    }
+    static void send_cmd8(uint8_t supply_voltage, uint8_t pattern, uint8_t crc);
 
     // Comando interno: los comandos son o de 1 byte, o de 2 bytes empezando
     // por {cmd55, ...}. CMD55 lo llaman app_cmd
     // return: R1 response
-    static uint8_t transfer_app_cmd__()
-    {
-//	SPI_cfg_init();
-	Select_chip select{};
-
-	send(55u);
-
-	return read_R1();
-    }
+    static uint8_t transfer_app_cmd__();
 
     // Esta es la segunda parte del comando {CMD55, ACMD41}
     // Solo hay que enviar HCS en el 
     // return: R1 response
-    static uint8_t transfer_sd_send_op_cond__(bool HCS = false)
-    {
-//	SPI_cfg_init();
-	Select_chip select{};
-	uint32_t arg{0};
-	if (HCS) 
-	    atd::write_bit<30>::to<1>::in(arg);
-
-	send(41u, arg);
-
-	return read_R1();
-    }
+    static uint8_t transfer_sd_send_op_cond__(bool HCS = false);
 
     // Envia un comando con argumentos
     // TODO: si se calcula el CRC desdoblar esta función en 2:
@@ -630,6 +600,113 @@ inline void SDCard_basic<Cfg>::SPI_write_uint32_t(const uint32_t& x)
     SPI::write(atd::byte<2>(x));
     SPI::write(atd::byte<1>(x));
     SPI::write(atd::byte<0>(x));
+}
+
+
+template <typename Cfg>
+void SDCard_basic<Cfg>::SPI_cfg__()
+{
+    SPI::cfg_pins();
+    SPI::spi_mode(0,0);
+    SPI::data_order_MSB();
+    SPI::default_transfer_value(0xFF); // 0xFF sería un error de R1
+				       // al tener el bit[7] == '1'
+				       // ¿Servirá para detectar errores
+				       // si la SD card no responde?
+}
+
+template <typename Cfg>
+    template<uint32_t frequency>
+void SDCard_basic<Cfg>::SPI_turn_on()
+{
+    SPI_cfg__();
+    SPI::clock_frequency_in_hz<frequency>();
+    SPI::on();
+}
+
+
+template <typename Cfg>
+void SDCard_basic<Cfg>::initialization_sequence()
+{
+    Select_chip::deselect();    // CS shall be held high!!!
+
+    Micro::wait_ms(1); // power up time
+
+    // send 80 (> 74) clock cycles to synchronize 
+    for (uint8_t i = 0; i < 10; ++i)
+	SPI::write(0xFF);
+
+
+    // ¿por qué hay que enviar un byte cuando se ha deseleccionado 
+    // la SD?
+    // TODO: si no funciona descomentar esto
+    // SPI::write(0xFF);
+}
+
+// 7.2.1@physical_layer
+//	    "The argument format of CMD8 is the same as defined in SD mode and
+//	    the response format is define in section 7.3.2.6"
+//
+//	4.3.13@physical_layer
+//	    La table 4-18 "format of CMD8" indica que para el supply_voltage
+//	    solo hay un único posible valor = 0001b (2.7-3.6V) luego en la
+//	    práctica no podemos elegirlo.
+//
+//	Respecto del check_pattern parece ser que en la versión 2.00 de la
+//	physical_layer indicaba que recomendaban usar 10101010b (=0xAA) como
+//	check_pattern aunque esto ha desaparecido. Como en principio da la
+//	impresión de que da lo mismo este valor elijamos ese valor
+//	recomendado, de forma que podemos calcular en tiempo de compilación 
+//	el CRC (CMD8 necesita un CRC)
+// static void send_cmd8(uint8_t supply_voltage, uint8_t pattern) <-- esta
+// función sería más genérica. Habría que calcular el CRC dinámicamente.
+// En la práctica lo conozco todo en tiempo de compilación. De momento
+// pruebo con la más sencilla:
+template <typename Cfg>
+inline void SDCard_basic<Cfg>::
+	send_cmd8(uint8_t supply_voltage, uint8_t pattern, uint8_t crc)
+{
+    // 7.3.1.3@physical_layer
+    // formato cmd8 
+    //	[31:12] reserved|[11:8]supply_voltage|[7:0]check_pattern
+    // arg=      00 00 0    |        1           |       AA
+    uint32_t arg 
+	= atd::concat_bytes<uint32_t>
+			    (0x00, 0x00, supply_voltage, pattern);
+    // cmd8_crc = CRC7(8 | 0x40, arg); TODO: que sea send quien calcule el
+    // crc
+    send(8u, arg, crc);
+}
+
+// Comando interno: los comandos son o de 1 byte, o de 2 bytes empezando
+// por {cmd55, ...}. CMD55 lo llaman app_cmd
+// return: R1 response
+template <typename Cfg>
+uint8_t SDCard_basic<Cfg>::transfer_app_cmd__()
+{
+//	SPI_cfg_init();
+    Select_chip select{};
+
+    send(55u);
+
+    return read_R1();
+}
+
+// Esta es la segunda parte del comando {CMD55, ACMD41}
+// Solo hay que enviar HCS en el 
+// return: R1 response
+template <typename Cfg>
+uint8_t SDCard_basic<Cfg>::transfer_sd_send_op_cond__(bool HCS)
+{
+//	SPI_cfg_init();
+    Select_chip select{};
+    uint32_t arg{0};
+    if (HCS) 
+	atd::write_bit<30>::to<1>::in(arg);
+
+    send(41u, arg);
+
+    return read_R1();
 }
 
 
