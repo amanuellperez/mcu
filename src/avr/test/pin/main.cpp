@@ -22,44 +22,91 @@
 
 #include "../../avr_atmega328p_cfg.h"
 #include "../../avr_pin.h"
-#include "../../avr_time.h"
+#include "../../avr_micro.h"
+#include "../../avr_UART_iostream.h"
 
-constexpr uint8_t num_pin = 14;
+namespace mcu = avr_;
+using Micro = mcu::Micro;
+
+constexpr uint8_t num_pin = 15;
 
 
-void test_pin()
+void blink()
 {
-    avr_::Pin<num_pin> pin;
+    mcu::Pin<num_pin> pin;
     pin.as_output();
 
-    while(1){
+    mcu::UART_iostream uart;
+    for (uint8_t i = 0; i < 10; ++i){
+	uart << '.';
+
 	pin.write_one();
-	_delay_ms(1000);
+	Micro::wait_ms(500);
 
 	pin.write_zero();
-	_delay_ms(1000);
+	Micro::wait_ms(500);
     }
+    uart << " DONE\n";
 }
 
 
-void test_pin_de_salida()
+void test_output_pin()
 {
-    avr_::Output_pin<num_pin> pin;
+    mcu::UART_iostream uart;
+    uart << "Output_pin test\n";
+
+    mcu::Output_pin<num_pin> pin;
+
+    uart << "\n---------------\n"
+	    "0. Write zero\n"
+	    "1. Write one\n"
+	    "2. Read value\n"
+	    "3. return\n";
 
     while(1){
-	pin.write_one();
-	_delay_ms(500);
+	char ans{};
+	uart >> ans;
+	switch(ans){
+	    break; case '0': pin.write_zero();
+	    break; case '1': pin.write_one();
+	    break; case '2': 
+		    uart << "\nRead:"
+			    "\n\tpin.is_zero() = " << (int) pin.is_zero()
+			 << "\n\tpin.is_one() = " << (int) pin.is_one()
+			 << "\n\tpin.read() = " << (int) pin.read() 
+			 << '\n';
 
-	pin.write_zero();
-	_delay_ms(500);
+	    break; case '3': return;
+	}
     }
+
 }
 
 
 int main()
 {
-    test_pin();
-    // test_pin_de_salida();
+// uart_init();
+    mcu::UART_iostream uart;
+    mcu::basic_cfg(uart);
+    uart.on();
+
+// menu
+    uart << "\n--------\n"
+	      "Pin test\n"
+	      "--------\n";
+
+    while (1){
+	uart << "\nMenu\n"
+		"1. Blink LED pin number " << (int) num_pin << '\n' <<
+		"2. Test Output_pin\n\n";
+
+	char ans{};
+	uart >> ans;
+	switch(ans){
+	    break; case '2'	: test_output_pin();
+	    break; default	: blink();
+	}
+    }
 }
 
 

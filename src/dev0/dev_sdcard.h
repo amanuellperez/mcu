@@ -57,15 +57,16 @@ namespace dev{
 template <typename Output_pin, typename SPI>
 class SDCard_select{
 public:
-    static void init() {Output_pin::as_output();}
-
-    static void select()
-    { 
-//	SPI::write(0xFF);   // hacemos MOSI = 1
-	Output_pin::write_zero(); 
-//	SPI::write(0xFF);   // hacemos MOSI = 1
+    static void init() 
+    {
+	Output_pin::as_output();
+	deselect();
     }
 
+    // En general el usuario no debería de llamar a esta clase.
+    // Sin embargo, SDCard::initialization_sequence necesita garantizar que
+    // el chip no esté seleccionado (¿podría omitir eso?) Por ello dejo
+    // público esta función.
     static void deselect()
     {
 //	SPI::write(0xFF);   // hacemos MOSI = 1
@@ -73,8 +74,32 @@ public:
 //	SPI::write(0xFF);   // hacemos MOSI = 1
     }
 
-    SDCard_select() {select();}
-    ~SDCard_select() {deselect();}
+    SDCard_select() 
+    {
+	selected = Output_pin::is_one();
+	select();
+    }
+
+    ~SDCard_select() 
+    {
+	if (!selected)
+	    deselect();
+    }
+
+private:
+    // selected permite llamar de forma anidada SDCard_select{}
+    // Esto evitará muchos errores a la hora de mantener el código. Si no se
+    // hace así, hay que llevar un control total de cuándo se ha seleccionado
+    // o no el Chip. No seleccionarlo o deseleccionarlo generaría un error que
+    // seguro lleva bastante tiempo encontrar. 
+    bool selected = false;
+
+    static void select()
+    { 
+//	SPI::write(0xFF);   // hacemos MOSI = 1
+	Output_pin::write_zero(); 
+//	SPI::write(0xFF);   // hacemos MOSI = 1
+    }
 };
 
 
@@ -371,6 +396,8 @@ public:
     // TODO:
     // erase_and_write_protect_management: 7.2.5
 
+    // Returns the status register of the card
+//    static void send_status(R2& r2);
 
 
 // BRICK COMMANDS (mejor no llamarlos directamente)
@@ -381,12 +408,13 @@ public:
 //
 //	 (2) Sirven para depurar esta clase.
 //
+    static void SPI_cfg()
+    { SPI_turn_on<SPI_frequency>(); }
+
+// Implementation of init() function
     // Cfg SPI para ejecutar la inicialización de la tarjeta
     static void SPI_cfg_init()
     { SPI_turn_on<SPI_init_frequency>(); }
-
-    static void SPI_cfg()
-    { SPI_turn_on<SPI_frequency>(); }
 
     // Devuelve response R1. Si todo va bien r1_is_in_idle_state(R1) == true
     static R1 go_idle_state();
@@ -396,6 +424,7 @@ public:
 
     // return: r3
     static void read_ocr(R3& r3);
+
 
 
     // 7.2.1@physical_layer
@@ -464,6 +493,7 @@ private:
     // + In case of SPI mode, CS shall be held to high during 74 clock cycles.
     static void initialization_sequence();
 
+// SEND COMMAND
     // 7.2.2@physical_layer
     // cmd0 es constante = 0x40 00 00 00 00 95
     static void send_cmd0() { send(0x40, 0x00, 0x95); }
@@ -510,28 +540,24 @@ private:
     static void send(uint8_t cmd);
 
 
+// READ RESPONSE
     //	Return: R1 si todo va bien (bit<7>::of(R1) == 0)
     //		0xFF en caso de error.
     static uint8_t read_R1();
+    // TODO: static uint8_t read_R1b();
+    // static void read_R2(R2& r2);
     static void read_R3(R3& r3);
 
-
     // Args: (supply_voltage, pattern0) son los pasados a CMD8
-    // return: {R7, byte que genera el error}
-    //
-    // ¿por qué devuelve el byte que genera el error? En principio no es
-    // necesario. R7 traduce la respuesta. Lo devuelvo para depurar.
-    // En principio no tengo claro que haya leido bien la datasheet ni tampoco
-    // que vaya a funcionar correctamente. Necesito poder depurar esta
-    // clase. 
     // return: R7
     static void read_R7(uint8_t supply_voltage, uint8_t pattern0, R7& r7);
 
 
-    // Implementación de read():
+// Implementation of read function
     static Read_return read_data_block(Block b);
     static uint8_t read_start_block_token();
     static uint8_t send_read_single_block(const Address& addr);
+
 
 // Helpers
     template <typename T>
@@ -602,7 +628,13 @@ inline void SDCard_basic<Cfg>::SPI_write_uint32_t(const uint32_t& x)
     SPI::write(atd::byte<0>(x));
 }
 
-
+// 7.3.1.1@physical_layer: 
+//   All the SD Memory Card commands are 6 bytes long. 
+//   The command transmission always starts with the left most bit 
+//   of the bit string corresponding to the command codeword.
+//   Esto es: MSB first en los comandos.
+//
+// 7.3.2@physical_layer: All responses are transmitted MSB first.
 template <typename Cfg>
 void SDCard_basic<Cfg>::SPI_cfg__()
 {
@@ -625,6 +657,12 @@ void SDCard_basic<Cfg>::SPI_turn_on()
 }
 
 
+// 6.4.1@physical_layer
+// + A device shall be ready to accept the first command within 1ms 
+//   from detecting VDD min.  
+// + Device may use up to 74 clocks for preparation before receiving 
+//   the first command.
+// + In case of SPI mode, CS shall be held to high during 74 clock cycles.
 template <typename Cfg>
 void SDCard_basic<Cfg>::initialization_sequence()
 {
@@ -1084,6 +1122,12 @@ SDCard_basic<Cfg>::Read_return
 
     return read_data_block(b);
 }
+
+//template<typename Cfg>
+//void SDCard_basic<Cfg>::send_status(R2& r2)
+//{
+//AQUII
+//}
 
 
 }// namespace

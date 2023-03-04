@@ -158,20 +158,31 @@ class Output_pin{
 public:
     static constexpr uint8_t number = n;
 
+// Constructor
     constexpr Output_pin()
     { Pin<n>::as_output(); }
 
     Output_pin& operator=(const Output_pin&)	= delete;
 
-    // constexpr static void cfg()         { Pin<n>::as_output(); }
-    constexpr static void as_output()   { Pin<n>::as_output(); }
-    constexpr static void write_one()	{Pin<n>::write_one();}
-    constexpr static void write_zero()	{Pin<n>::write_zero();}
-    constexpr static void write(uint8_t x) {Pin<n>::write(x);}
-    constexpr static void toggle()	{Pin<n>::toggle();}
+    // static void cfg()         { Pin<n>::as_output(); }
+    static void as_output()   { Pin<n>::as_output(); }
 
+// Write pin
+    static void write_one()	{Pin<n>::write_one();}
+    static void write_zero()	{Pin<n>::write_zero();}
+    static void write(uint8_t x) {Pin<n>::write(x);}
+    static void toggle()	{Pin<n>::toggle();}
 
-    // Funciones de ayuda
+// Read pin
+    static uint8_t read() {return Pin<n>::read();}
+
+    /// Devuelve si el bit es 0 o no. 
+    static bool is_zero() {return Pin<n>::is_zero();}
+
+    /// Devuelve si el bit es 1 o no. 
+    static bool is_one() {return Pin<n>::is_one();}
+
+// Helpers
     constexpr static void pulse_of_1us() { Pin<n>::pulse_of_1us(); }
     constexpr static void negative_pulse_of_1us() {Pin<n>::negative_pulse_of_1us();}
 };
