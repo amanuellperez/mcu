@@ -1,6 +1,24 @@
 #include "print.h"
 #include "strings.h"
 
+template <typename String>
+void print_question(std::ostream& out, const String& str)
+{
+    out << '\t';
+    atd::print(out, str);
+    out << "? ";
+}
+
+void print_bool_as_yes_no(std::ostream& out, bool x)
+{
+    if (x)
+        atd::print(out, msg_yes);
+    else
+        atd::print(out, msg_no);
+
+    out << '\n';
+}
+
 void print(std::ostream& out, const SDCard::R1& r1)
 {
     atd::print(out, msg_r1_response);
@@ -88,15 +106,6 @@ void print_type_card(std::ostream& out, const SDCard::R3& r3)
         atd::print(out, msg_no);
 }
 
-void print_bool_as_yes_no(std::ostream& out, bool x)
-{
-    if (x)
-        atd::print(out, msg_no);
-    else
-        atd::print(out, msg_no);
-
-    out << '\n';
-}
 
 
 void print(std::ostream& out, const SDCard::R3& r3)
@@ -122,31 +131,32 @@ void print(std::ostream& out, const SDCard::R3& r3)
 
     print_type_card(out, r3);
 
-    atd::print(out, msg_support_3_5_3_6V);
+    out << '\n';
+    print_question(out, msg_support_3_5_3_6V);
     print_bool_as_yes_no(out, r3.support_3_5_3_6V());
 
-    atd::print(out, msg_support_3_4_3_5V);
+    print_question(out, msg_support_3_4_3_5V);
     print_bool_as_yes_no(out, r3.support_3_4_3_5V());
 
-    atd::print(out, msg_support_3_3_3_4V);
+    print_question(out, msg_support_3_3_3_4V);
     print_bool_as_yes_no(out, r3.support_3_3_3_4V());
 
-    atd::print(out, msg_support_3_2_3_3V);
+    print_question(out, msg_support_3_2_3_3V);
     print_bool_as_yes_no(out, r3.support_3_2_3_3V());
 
-    atd::print(out, msg_support_3_1_3_2V);
+    print_question(out, msg_support_3_1_3_2V);
     print_bool_as_yes_no(out, r3.support_3_1_3_2V());
 
-    atd::print(out, msg_support_3_0_3_1V);
+    print_question(out, msg_support_3_0_3_1V);
     print_bool_as_yes_no(out, r3.support_3_0_3_1V());
 
-    atd::print(out, msg_support_2_9_3_0V);
+    print_question(out, msg_support_2_9_3_0V);
     print_bool_as_yes_no(out, r3.support_2_9_3_0V());
 
-    atd::print(out, msg_support_2_8_2_9V);
+    print_question(out, msg_support_2_8_2_9V);
     print_bool_as_yes_no(out, r3.support_2_8_2_9V());
 
-    atd::print(out, msg_support_2_7_2_8V);
+    print_question(out, msg_support_2_7_2_8V);
     print_bool_as_yes_no(out, r3.support_2_7_2_8V());
 
 }
@@ -192,4 +202,34 @@ void print(std::ostream& out, const SDCard::R7& r7)
     out << '\n';
 }
 
+
+void print(std::ostream& out, const SDCard::Read_return& r)
+{
+    atd::print(out, msg_read_return_response);
+
+    print_question(out, msg_ok);
+    print_bool_as_yes_no(out, r.ok());
+
+    print_question(out, msg_timeout);
+    print_bool_as_yes_no(out, r.timeout());
+
+    print_question(out, msg_r1_ok);
+    print_bool_as_yes_no(out, !r.r1_fail());
+    if (r.r1_fail()){
+	print(out, r.r1());
+	return;
+    }
+
+    print_question(out, msg_error);
+    print_bool_as_yes_no(out, r.error());
+
+    print_question(out, msg_CC_error);
+    print_bool_as_yes_no(out, r.CC_error());
+
+    print_question(out, msg_card_ECC_failed);
+    print_bool_as_yes_no(out, r.card_ECC_failed());
+
+    print_question(out, msg_out_of_range);
+    print_bool_as_yes_no(out, r.out_of_range());
+}
 

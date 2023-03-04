@@ -31,6 +31,9 @@ constexpr mcu::Progmem_string<3> msg_yes
 constexpr mcu::Progmem_string<2> msg_no	
 	PROGMEM{"no"};
 
+constexpr mcu::Progmem_string<2> msg_ok	
+	PROGMEM{"ok"};
+
 constexpr mcu::Progmem_string<11> msg_cmd0_fail		
 	PROGMEM{"CMD0 error\n"};
 
@@ -151,32 +154,32 @@ constexpr mcu::Progmem_string<4> msg_SDSC
 constexpr mcu::Progmem_string<12> msg_SDHC_or_SDXC    
 	PROGMEM{"SDHC or SDXC"};
 
-constexpr mcu::Progmem_string<22> msg_support_3_5_3_6V 
-	PROGMEM{"\tsupport 3.5-3-6V()? "};
+constexpr mcu::Progmem_string<18> msg_support_3_5_3_6V 
+	PROGMEM{"support 3.5-3-6V()"};
 
-constexpr mcu::Progmem_string<22> msg_support_3_4_3_5V 
-	PROGMEM{"\tsupport 3.4-3-5V()? "};
+constexpr mcu::Progmem_string<18> msg_support_3_4_3_5V 
+	PROGMEM{"support 3.4-3-5V()"};
 
-constexpr mcu::Progmem_string<22> msg_support_3_3_3_4V 
-	PROGMEM{"\tsupport 3.3-3-4V()? "};
+constexpr mcu::Progmem_string<18> msg_support_3_3_3_4V 
+	PROGMEM{"support 3.3-3-4V()"};
 
-constexpr mcu::Progmem_string<22> msg_support_3_2_3_3V 
-	PROGMEM{"\tsupport 3.2-3-3V()? "};
+constexpr mcu::Progmem_string<18> msg_support_3_2_3_3V 
+	PROGMEM{"support 3.2-3-3V()"};
 
-constexpr mcu::Progmem_string<22> msg_support_3_1_3_2V 
-	PROGMEM{"\tsupport 3.1-3-2V()? "};
+constexpr mcu::Progmem_string<18> msg_support_3_1_3_2V 
+	PROGMEM{"support 3.1-3-2V()"};
 
-constexpr mcu::Progmem_string<22> msg_support_3_0_3_1V 
-	PROGMEM{"\tsupport 3.0-3-1V()? "};
+constexpr mcu::Progmem_string<18> msg_support_3_0_3_1V 
+	PROGMEM{"support 3.0-3-1V()"};
 
-constexpr mcu::Progmem_string<22> msg_support_2_9_3_0V 
-	PROGMEM{"\tsupport 2.9-3-0V()? "};
+constexpr mcu::Progmem_string<18> msg_support_2_9_3_0V 
+	PROGMEM{"support 2.9-3-0V()"};
 
-constexpr mcu::Progmem_string<22> msg_support_2_8_2_9V 
-	PROGMEM{"\tsupport 2.8-2-9V()? "};
+constexpr mcu::Progmem_string<18> msg_support_2_8_2_9V 
+	PROGMEM{"support 2.8-2-9V()"};
 
-constexpr mcu::Progmem_string<22> msg_support_2_7_2_8V 
-	PROGMEM{"\tsupport 2.7-2-8V()? "};
+constexpr mcu::Progmem_string<18> msg_support_2_7_2_8V 
+	PROGMEM{"support 2.7-2-8V()"};
 
 constexpr mcu::Progmem_string<12> msg_r7_response 
 	PROGMEM{"R7 response\n"};
@@ -204,6 +207,27 @@ constexpr mcu::Progmem_string<8> msg_reserved
 
 constexpr mcu::Progmem_string<11> msg_pattern	    
 	PROGMEM{"\tPattern: "};
+
+constexpr mcu::Progmem_string<14> msg_read_return_response 
+	PROGMEM{"Read response\n"};
+
+constexpr mcu::Progmem_string<8> msg_timeout	
+	PROGMEM{"time out"};
+
+constexpr mcu::Progmem_string<5> msg_r1_ok	
+	PROGMEM{"R1 ok"};
+
+constexpr mcu::Progmem_string<5> msg_error	
+	PROGMEM{"error"};
+
+constexpr mcu::Progmem_string<8> msg_CC_error    
+	PROGMEM{"CC error"};
+
+constexpr mcu::Progmem_string<15> msg_card_ECC_failed   
+	PROGMEM{"card ECC failed"};
+
+constexpr mcu::Progmem_string<12> msg_out_of_range    
+	PROGMEM{"out of range"};
 
 
  

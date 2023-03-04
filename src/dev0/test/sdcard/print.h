@@ -30,6 +30,7 @@ void print_raw_R3(std::ostream& out, const SDCard::R3& r3);
 void print_type_card(std::ostream& out, const SDCard::R3& r3);
 void print(std::ostream& out, const SDCard::R3& r3);
 void print(std::ostream& out, const SDCard::R7& r7);
+void print(std::ostream& out, const SDCard::Read_return& r);
 
 
 

@@ -15,6 +15,7 @@
 # Generic msgs
 msg_yes	"yes"
 msg_no	"no"
+msg_ok	"ok"
 
 # msgs automatic_init
 msg_cmd0_fail		"CMD0 error\n"
@@ -87,15 +88,15 @@ msg_SDSC	    "SDSC"
 msg_SDHC_or_SDXC    "SDHC or SDXC"
 
 # print(R3)
-msg_support_3_5_3_6V "\tsupport 3.5-3-6V()? "
-msg_support_3_4_3_5V "\tsupport 3.4-3-5V()? "
-msg_support_3_3_3_4V "\tsupport 3.3-3-4V()? "
-msg_support_3_2_3_3V "\tsupport 3.2-3-3V()? "
-msg_support_3_1_3_2V "\tsupport 3.1-3-2V()? "
-msg_support_3_0_3_1V "\tsupport 3.0-3-1V()? "
-msg_support_2_9_3_0V "\tsupport 2.9-3-0V()? "
-msg_support_2_8_2_9V "\tsupport 2.8-2-9V()? "
-msg_support_2_7_2_8V "\tsupport 2.7-2-8V()? "
+msg_support_3_5_3_6V "support 3.5-3-6V()"
+msg_support_3_4_3_5V "support 3.4-3-5V()"
+msg_support_3_3_3_4V "support 3.3-3-4V()"
+msg_support_3_2_3_3V "support 3.2-3-3V()"
+msg_support_3_1_3_2V "support 3.1-3-2V()"
+msg_support_3_0_3_1V "support 3.0-3-1V()"
+msg_support_2_9_3_0V "support 2.9-3-0V()"
+msg_support_2_8_2_9V "support 2.8-2-9V()"
+msg_support_2_7_2_8V "support 2.7-2-8V()"
 
 # print(R7)
 msg_r7_response "R7 response\n"
@@ -109,6 +110,15 @@ msg_from_2_7_to_3_6V "from 2.7 to 3.6V"
 msg_low_voltage	    "low voltage"
 msg_reserved	    "reserved"
 msg_pattern	    "\tPattern: "
+
+# print(Read_return)
+msg_read_return_response "Read response\n"
+msg_timeout	"time out"
+msg_r1_ok	"R1 ok"
+msg_error	"error"
+msg_CC_error    "CC error"
+msg_card_ECC_failed   "card ECC failed"
+msg_out_of_range    "out of range"
 
 
 

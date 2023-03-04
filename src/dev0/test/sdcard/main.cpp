@@ -23,6 +23,39 @@
 #include "print.h"
 #include "strings.h"
 
+void press_key_to_continue()
+{
+    mcu::UART_iostream uart;
+    uart << '\n';
+    atd::print(uart, msg_press_key_to_continue);
+    char c{};
+    uart >> c;
+}
+
+void print_block(std::ostream& out, SDCard::Block data)
+{
+    atd::print(out, msg_read_ok);
+    atd::print(out, msg_line);
+    for (uint16_t i = 0; i < SDCard::block_size; ++i){
+	if (i % 20 == 0 and i != 0)
+	    out << '\n';
+	atd::print_int_as_hex(out, data[i], false);
+	out << ' ';
+    }
+}
+
+void read_block(SDCard::Address addr)
+{
+    mcu::UART_iostream uart;
+
+    uint8_t data[SDCard::block_size];
+
+    auto r = SDCard::read(addr, data);
+    print(uart, r);
+
+    if (r.ok())
+	print_block(uart, data);
+}
 
 void automatic_init()
 {
@@ -136,7 +169,8 @@ int main()
     else
 	automatic_init();
 
-    Micro::wait_ms(2000); // TODO: vaciar el buffer del uart
+    
+    press_key_to_continue();
 
     atd::print(uart, msg_main_read);
     uart << (int) SDCard::block_size << '\n';
@@ -145,31 +179,15 @@ int main()
     // `uart << ...`. El motivo es que el atmega32 solo tiene 2kB de RAM y el
     // block_size es 1/2 kB!!! Sin el array `data`, `make size` marca 1.4k de
     // RAM usados!!! Estoy al límite!!!
-    uint8_t data[SDCard::block_size];
 // DONT_HAVE_TO_COMPILE(uint8_t data[10]);
 
     SDCard::Address addr = 0;
 
     while(1){
-	
-	auto r = SDCard::read(addr, data);
-	if (r.ok()){
-	    atd::print(uart, msg_read_ok);
-	    atd::print(uart, msg_line);
-	    for (uint16_t i = 0; i < SDCard::block_size; ++i){
-		if (i % 15 == 0)
-		    uart << '\n';
-		atd::print_int_as_hex(uart, data[i], false);
-		uart << ' ';
-	    }
-	}
+	read_block(addr);
 
-	Micro::wait_ms(100);
-	atd::print(uart, msg_press_key_to_continue);
-	char c{};
-	uart >> c;
+	press_key_to_continue();
 	++addr;
-
     }
 }
 
