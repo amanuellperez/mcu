@@ -42,6 +42,43 @@ void read_status()
     print(uart, r2);
 }
 
+void ask_modify_block(SDCard::Block data)
+{
+    // TODO: preguntar
+    data[0] = 0xAB;
+    data[1] = 0xCD;
+    data[2] = 0xEF;
+}
+
+void write_block()
+{
+    mcu::UART_iostream uart;
+
+    atd::print(uart, msg_main_write);
+    print_question(uart, msg_address, false);
+
+    SDCard::Address add;
+    uart >> add;
+    uart << add << '\n';
+
+    uint8_t data[SDCard::block_size];
+    if (read_block(add, data)){
+	ask_modify_block(data);
+	auto res = SDCard::write(add, data);
+	print(uart, res);
+	press_key_to_continue();
+	// TODO: write devuelve dando timeout.
+	// Revisar:
+	//	1) Estoy marcando bien los flags?
+	//	2) trazar el timeout
+	//
+//	atd::print(uart, msg_line);
+//	// leemos de nuevo el block para ver si se ha modificado
+//	read_block(add, data);
+    }
+
+    
+}
 
 
 int main()
@@ -73,6 +110,7 @@ int main()
 	switch(ans){
 	    break; case '1': read_status();
 	    break; case '2': read_block();
+	    break; case '3': write_block();
 	}
     }
 }

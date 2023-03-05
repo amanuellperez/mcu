@@ -31,13 +31,12 @@ void print_block(std::ostream& out, SDCard::Block data)
 	atd::print_int_as_hex(out, data[i], false);
 	out << ' ';
     }
+    out << '\n';
 }
 
-void read_block(SDCard::Address addr)
+bool read_block(SDCard::Address addr, SDCard::Block data)
 {
     mcu::UART_iostream uart;
-
-    uint8_t data[SDCard::block_size];
 
     auto r = SDCard::read(addr, data);
     print(uart, r);
@@ -48,7 +47,10 @@ void read_block(SDCard::Address addr)
 	atd::print(uart, msg_address);
 	uart << ' ' << addr << '\n';
 	print_block(uart, data);
+	return true;
     }
+
+    return false;
 }
 
 void read_block()
@@ -63,7 +65,8 @@ void read_block()
     uart >> add;
     uart << add << '\n';
 
-    read_block(add);
+    uint8_t data[SDCard::block_size];
+    read_block(add, data);
 }
 
 

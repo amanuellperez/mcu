@@ -26,7 +26,7 @@
 #include "dev.h"
 
 void print_block(std::ostream& out, SDCard::Block data);
-void read_block(SDCard::Address addr);
+bool read_block(SDCard::Address addr, SDCard::Block data);
 void read_block();
 
 #endif

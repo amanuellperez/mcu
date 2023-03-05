@@ -26,6 +26,23 @@
  * DESCRIPCION
  *	Traductor del interfaz SPI de la SD card.
  *
+ * COMENTARIOS IMPLEMENTACIÓN
+ *	Observar que estoy usando muchos números mágicos. ¿Por qué?
+ *	Estoy implementando un traductor: voy leyendo la datasheet y la
+ *	traduzco en código. 
+ *	Ejemplo: al escrribir la función write() la datasheet pone que tengo
+ *	que enviar el start token que es 0xFE. Usando números mágicos el
+ *
+ *	código queda:
+ *	    SPI::write(0xFE);
+ *	que corresponde a lo que leo en la datasheet.
+ *
+ *	Si uso constantes quedará
+ *	    SPI::write(write_start_token);
+ *	y para comprobar que está bien tendré que ir a ver la definición de
+ *	write_start_token lo cual es incómodo.
+ *
+ *
  * HISTORIA
  *    Manuel Perez
  *    11/02/2023 Escrito.
@@ -127,7 +144,7 @@ struct R1_response{
     bool is_in_idle_state()  const
     { return data == 0x01;}
 
-    // data contiene un valor válido? mejor is_ok()?
+    // data contiene un valor válido? 
     bool is_valid() const
     { return atd::is_zero_bit<7>::of(data);}
 
@@ -136,6 +153,9 @@ struct R1_response{
 
     bool is_an_error() const
     { return data > 0x01; }
+
+    // ok? == todo ha ido bien? Se ha recibido R1 y recibimos ok?
+    bool ok() const {return !is_an_error();}
 
 // Flags
 //  DUDA: quedaría mejor llamarla in_idle_state(), pero sería muy facil
@@ -181,6 +201,9 @@ struct R2_response{
     }
 
 // Traducimos los flags
+    bool ok() const 
+    { return r2 == 0x00; }
+
     bool card_is_locked() const
     { return atd::is_one_bit<0>::of(r2); }
 
@@ -376,6 +399,114 @@ private:
 		 
 };
 
+// 7.3.3.1@physical_layer
+//	Valores posibles: xxx0___1 = válido
+//	Valores que puede tomar:
+//	    xxx00101 : data accepted
+//	    xxx01011 : data rejected due to CRC error
+//	    xxx01101 : data rejected due to write error
+//
+//	Internamente garantizo que los xxx sean 000. De tal manera que
+//	    xxx00101 -> 0x05 (accepted)
+//	    xxx01011 -> 0x0B (CRC error)
+//	    xxx01101 -> 0x0D (write error)
+//
+//	y añado:
+//	    0xFF -> no válido
+//	    0xF0 -> timeout
+//		
+class Data_response_token{
+public:
+// Data
+    // data contiene un valor válido? 
+    bool is_valid() const { return data != 0xFF;}
+
+    bool data_accepted() const { return data == 0x05; }
+    bool data_rejected_CRC_error() const {return data == 0x0B; }
+    bool data_rejected_write_error() const {return data == 0x0D; }
+    bool timeout() const {return data == 0xF0; }
+
+    bool ok() const {return data_accepted(); }
+    bool is_an_error() const {return !ok(); }
+
+
+// Constructors
+    static Data_response_token valid(uint8_t x)
+    {	
+	x &= 0x0F;
+	return Data_response_token{x}; 
+    }
+
+    static Data_response_token timeout_error() 
+    { return Data_response_token{0xF0}; }
+
+    static Data_response_token invalid()
+    { return Data_response_token{0xFF};}
+
+// Consulta
+    static bool is_valid(uint8_t x)
+    { return (atd::is_zero_bit<4>::of(x) and atd::is_one_bit<1>::of(x)); }
+
+
+private:
+    Data_response_token(uint8_t d) : data{d} { }
+
+    uint8_t data;
+};
+
+
+class Write_return{
+public:
+    using R1 = R1_response;
+    using R2 = R2_response;
+
+    // todo ha ido bien?
+    bool ok() const { return (r1_.ok() and dt_.ok() and r2_.ok()); }
+
+    // si ha habido algun error consultamos lo ocurrido:
+    R1 r1() const {return r1_;}
+    Data_response_token data_response_token() const {return dt_;}
+    R2 r2() const {return r2_;}
+
+
+// Constructors (internos)
+    static Write_return r1_error(const R1& r1)
+    { 
+	Write_return err;
+	err.r1_ = r1; 
+	return err;
+    }
+
+    static Write_return dt_error(const R1& r1, const Data_response_token& dt)
+    { 
+	Write_return err;
+	err.r1_ = r1;  
+	err.dt_ = dt;
+	return err;
+    }
+
+    // este será el caso en el que todo vaya bien (o falle R2)
+    static Write_return send_status(const R1& r1, 
+				    const Data_response_token& dt,
+				    const R2& r2)
+    { 
+	Write_return err;
+	err.r1_ = r1;  
+	err.dt_ = dt;
+	err.r2_ = r2;
+	
+	return err;
+    }
+
+
+    
+private:
+// data
+    R1 r1_ {0};
+    Data_response_token dt_ {Data_response_token::invalid()};
+    R2 r2_ {0};
+
+};
 
 } // namespace SDCard_types
 
@@ -400,7 +531,10 @@ public:
     using R2 = SDCard_types::R2_response;
     using R3 = SDCard_types::R3_response;
     using R7 = SDCard_types::R7_response;
+
     using Read_return = SDCard_types::Read_return;
+    using Write_return= SDCard_types::Write_return;
+    using Data_response_token = SDCard_types::Data_response_token;
 
     using Address = uint32_t;	// para cards SDHC/SDXC
     static constexpr uint16_t block_size = 512;
@@ -435,7 +569,7 @@ public:
     //
     // return:	
     //	    Write_return = resultado de la operación
-    // static Write_return write(const Address&, const Block);
+    static Write_return write(const Address&, const Block);
 
     // TODO: mismo comentario que multiple_read
     // static Write_return multiple_write(const Address&, const Block);
@@ -506,6 +640,10 @@ private:
     // funcionar exactamente a esta frecuencia.
     static constexpr uint32_t SPI_init_frequency = 250'000; // 250 kHz
     static constexpr uint32_t SPI_frequency      = 500'000; // 500 kHz
+
+    // ¿Cuánto tiempo debemos de esperar a que finalice de escribir el bloque
+    // enviado? 4.6.2.2@physical_layer: máximo 250 ms
+    static constexpr uint16_t timeout_write_busy = 250; // ms
     
     template <uint32_t time_in_ms>
     static constexpr uint16_t time_as_number_of_transfers()
@@ -599,11 +737,17 @@ private:
     // return: R7
     static void read_R7(uint8_t supply_voltage, uint8_t pattern0, R7& r7);
 
+    static Data_response_token read_data_response_token();
 
 // Implementation of read function
+    static uint8_t send_read_single_block(const Address& addr);
     static Read_return read_data_block(Block b);
     static uint8_t read_start_block_token();
-    static uint8_t send_read_single_block(const Address& addr);
+
+// Implementation of write function
+    static uint8_t send_write_single_block(const Address& addr);
+    static void send_data_block(const Block b);
+    static Data_response_token read_response_send_data_block();
 
 
 // Helpers
@@ -986,6 +1130,21 @@ void SDCard_basic<Cfg>::read_R7(uint8_t supply_voltage, uint8_t pattern0,
 }
 
 
+template <typename Cfg>
+SDCard_basic<Cfg>::Data_response_token 
+		SDCard_basic<Cfg>::read_data_response_token()
+{
+    constexpr uint16_t n = time_as_number_of_transfers<timeout_write_busy>();
+
+    for (uint16_t i = 0; i < n; ++i){
+	uint8_t r = SPI::read();
+
+	if (Data_response_token::is_valid(r))
+	    return Data_response_token::valid(r);
+    }
+
+    return Data_response_token::timeout_error();
+}
 
 
 
@@ -1122,7 +1281,9 @@ SDCard_basic<Cfg>::R1
 
 }
 
-
+/***************************************************************************
+ *				READ
+ ***************************************************************************/
 template<typename Cfg>
 uint8_t SDCard_basic<Cfg>::send_read_single_block(const Address& addr)
 {
@@ -1168,7 +1329,7 @@ SDCard_basic<Cfg>::Read_return
 	return Read_return::data_error_token(r);
 
 
-    for (uint16_t i = 0; i < block_size; ++i)
+    for (Block::size_type i = 0; i < block_size; ++i)
 	b[i] = SPI::read();
 
     uint16_t crc = SPI_read_uint16_t();
@@ -1196,6 +1357,65 @@ SDCard_basic<Cfg>::Read_return
 
 
     return read_data_block(b);
+}
+
+/***************************************************************************
+ *				WRITE
+ ***************************************************************************/
+template<typename Cfg>
+uint8_t SDCard_basic<Cfg>::send_write_single_block(const Address& addr)
+{
+    send(24u, addr);
+    return read_R1();
+}
+
+// 7.2.4@physical_layer
+template<typename Cfg>
+SDCard_basic<Cfg>::Write_return
+	SDCard_basic<Cfg>::write(const Address& addr, const Block b)
+{
+    SPI_cfg();
+
+    Select_chip select{};
+
+    R1 r1{send_write_single_block(addr)};
+    if (r1.is_an_error())
+	return Write_return::r1_error(r1); 
+
+    send_data_block(b);
+    Data_response_token dt = read_response_send_data_block();
+    if (dt.is_an_error())
+	return Write_return::dt_error(r1, dt);
+
+    R2 r2 = send_status();
+    return Write_return::send_status(r1, dt, r2);
+
+}
+
+
+template<typename Cfg>
+SDCard_basic<Cfg>::Data_response_token
+    SDCard_basic<Cfg>::read_response_send_data_block()
+{
+    Data_response_token dt = read_data_response_token();
+    if (!dt.data_accepted())
+	return dt;
+
+    constexpr uint16_t n = time_as_number_of_transfers<timeout_write_busy>();
+    for (uint16_t i = 0; i < n; ++i) {
+	if (SPI::read() != 0x00) // busy_token == 0x00!!!
+	    return dt;
+    }
+    return Data_response_token::timeout_error();
+}
+
+
+template<typename Cfg>
+void SDCard_basic<Cfg>::send_data_block(const Block b)
+{
+    SPI::write(0xFE); // start block token
+    for (Block::size_type i = 0; i < b.size(); ++i)
+	SPI::write(b[i]);
 }
 
 

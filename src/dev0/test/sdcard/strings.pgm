@@ -54,15 +54,20 @@ msg_main_menu	"Menu\n"
 msg_main_menu2	"\n----\n"
 		"1. Read status register\n"
 		"2. Read block\n"
+		"3. Write block\n"
 
 
 # read block
-msg_main_read	"Read:\n"
-		"-----\n"
+msg_main_read	"Read\n"
+		"----\n"
 		"block_size = "
 msg_address	"Address"
 
 msg_read_ok "read OK."
+
+# write block
+msg_main_write  "Write\n"
+		"-----\n"
 
 # print(R1)
 msg_r1_response	"R1 response\n"
@@ -137,4 +142,14 @@ msg_write_protect_violation "write protect violation"
 msg_erase_param		    "erase param"
 #msg_out_of_range
 
+# print(Write_return)
+msg_write_return_response   "Write_return response\n"
+msg_write_ok	"Write ok"
 
+# print(Data_response_token)
+msg_data_response_token	"Data response token\n"
+msg_is_valid		"valid"
+msg_data_accepted	"data accepted"
+msg_data_rejected_CRC_error	"data rejected, CRC error"
+msg_data_rejected_write_error	"data rejected, write error"
+#msg_timeout		"time out"

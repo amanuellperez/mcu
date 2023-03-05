@@ -258,3 +258,47 @@ void print(std::ostream& out, const SDCard::R2& r)
 
 }
 
+void print(std::ostream& out, const SDCard::Data_response_token& r)
+{
+    atd::print(out, msg_data_response_token);
+
+    print_question(out, msg_is_valid);
+    print_bool_as_yes_no(out, r.is_valid());
+
+    print_question(out, msg_data_accepted);
+    print_bool_as_yes_no(out, r.data_accepted());
+
+    print_question(out, msg_data_rejected_CRC_error);
+    print_bool_as_yes_no(out, r.data_rejected_CRC_error());
+
+    print_question(out, msg_data_rejected_write_error);
+    print_bool_as_yes_no(out, r.data_rejected_write_error());
+
+    print_question(out, msg_timeout);
+    print_bool_as_yes_no(out, r.timeout());
+}
+
+
+void print(std::ostream& out, const SDCard::Write_return& r)
+{
+    atd::print(out, msg_write_return_response);
+
+    if (r.ok()){
+	atd::print(out, msg_write_ok);
+	return;
+    }
+
+    if (!r.r1().ok()){
+	print(out, r.r1());
+	return;
+    }
+
+    if (!r.data_response_token().ok()){
+	print(out, r.data_response_token());
+	return;
+    }
+
+// si llega aquí es porque R2 es el que ha fallado
+    print(out, r.r2());
+}
+

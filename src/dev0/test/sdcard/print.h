@@ -32,6 +32,8 @@ void print(std::ostream& out, const SDCard::R3& r3);
 void print(std::ostream& out, const SDCard::R7& r7);
 void print(std::ostream& out, const SDCard::Read_return& r);
 void print(std::ostream& out, const SDCard::R2& r);
+void print(std::ostream& out, const SDCard::Write_return& r);
+void print(std::ostream& out, const SDCard::Data_response_token& r);
 
 
 template <typename String>

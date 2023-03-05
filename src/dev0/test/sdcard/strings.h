@@ -94,17 +94,20 @@ constexpr mcu::Progmem_string<90> msg_hello
 constexpr mcu::Progmem_string<74> msg_main_menu	
 	PROGMEM{"Menu\n----\nChoose type of initialization:\n\t1. Step by step\n\t2. Automatic\n"};
 
-constexpr mcu::Progmem_string<44> msg_main_menu2	
-	PROGMEM{"\n----\n1. Read status register\n2. Read block\n"};
+constexpr mcu::Progmem_string<59> msg_main_menu2	
+	PROGMEM{"\n----\n1. Read status register\n2. Read block\n3. Write block\n"};
 
-constexpr mcu::Progmem_string<25> msg_main_read	
-	PROGMEM{"Read:\n-----\nblock_size = "};
+constexpr mcu::Progmem_string<23> msg_main_read	
+	PROGMEM{"Read\n----\nblock_size = "};
 
 constexpr mcu::Progmem_string<7> msg_address	
 	PROGMEM{"Address"};
 
 constexpr mcu::Progmem_string<8> msg_read_ok 
 	PROGMEM{"read OK."};
+
+constexpr mcu::Progmem_string<12> msg_main_write  
+	PROGMEM{"Write\n-----\n"};
 
 constexpr mcu::Progmem_string<19> msg_r1_response	
 	PROGMEM{"R1 response\n\tR1 : "};
@@ -249,6 +252,27 @@ constexpr mcu::Progmem_string<23> msg_write_protect_violation
 
 constexpr mcu::Progmem_string<11> msg_erase_param		    
 	PROGMEM{"erase param"};
+
+constexpr mcu::Progmem_string<22> msg_write_return_response   
+	PROGMEM{"Write_return response\n"};
+
+constexpr mcu::Progmem_string<8> msg_write_ok	
+	PROGMEM{"Write ok"};
+
+constexpr mcu::Progmem_string<20> msg_data_response_token	
+	PROGMEM{"Data response token\n"};
+
+constexpr mcu::Progmem_string<5> msg_is_valid		
+	PROGMEM{"valid"};
+
+constexpr mcu::Progmem_string<13> msg_data_accepted	
+	PROGMEM{"data accepted"};
+
+constexpr mcu::Progmem_string<24> msg_data_rejected_CRC_error	
+	PROGMEM{"data rejected, CRC error"};
+
+constexpr mcu::Progmem_string<26> msg_data_rejected_write_error	
+	PROGMEM{"data rejected, write error"};
 
 
  
