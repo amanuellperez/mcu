@@ -34,6 +34,12 @@ constexpr mcu::Progmem_string<2> msg_no
 constexpr mcu::Progmem_string<2> msg_ok	
 	PROGMEM{"ok"};
 
+constexpr mcu::Progmem_string<24> msg_press_key_to_continue   
+	PROGMEM{"Press a key to continue\n"};
+
+constexpr mcu::Progmem_string<32> msg_line    
+	PROGMEM{"-------------------------------\n"};
+
 constexpr mcu::Progmem_string<11> msg_cmd0_fail		
 	PROGMEM{"CMD0 error\n"};
 
@@ -88,17 +94,17 @@ constexpr mcu::Progmem_string<90> msg_hello
 constexpr mcu::Progmem_string<74> msg_main_menu	
 	PROGMEM{"Menu\n----\nChoose type of initialization:\n\t1. Step by step\n\t2. Automatic\n"};
 
+constexpr mcu::Progmem_string<44> msg_main_menu2	
+	PROGMEM{"\n----\n1. Read status register\n2. Read block\n"};
+
 constexpr mcu::Progmem_string<25> msg_main_read	
 	PROGMEM{"Read:\n-----\nblock_size = "};
 
-constexpr mcu::Progmem_string<9> msg_read_ok 
-	PROGMEM{"read OK:\n"};
+constexpr mcu::Progmem_string<7> msg_address	
+	PROGMEM{"Address"};
 
-constexpr mcu::Progmem_string<32> msg_line    
-	PROGMEM{"-------------------------------\n"};
-
-constexpr mcu::Progmem_string<24> msg_press_key_to_continue   
-	PROGMEM{"Press a key to continue\n"};
+constexpr mcu::Progmem_string<8> msg_read_ok 
+	PROGMEM{"read OK."};
 
 constexpr mcu::Progmem_string<19> msg_r1_response	
 	PROGMEM{"R1 response\n\tR1 : "};
@@ -228,6 +234,21 @@ constexpr mcu::Progmem_string<15> msg_card_ECC_failed
 
 constexpr mcu::Progmem_string<12> msg_out_of_range    
 	PROGMEM{"out of range"};
+
+constexpr mcu::Progmem_string<12> msg_r2_response	    
+	PROGMEM{"R2 response\n"};
+
+constexpr mcu::Progmem_string<14> msg_card_is_locked  
+	PROGMEM{"card is locked"};
+
+constexpr mcu::Progmem_string<23> msg_write_protect_erase_skip	
+	PROGMEM{"write protec erase skip"};
+
+constexpr mcu::Progmem_string<23> msg_write_protect_violation 
+	PROGMEM{"write protect violation"};
+
+constexpr mcu::Progmem_string<11> msg_erase_param		    
+	PROGMEM{"erase param"};
 
 
  

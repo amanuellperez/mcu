@@ -63,7 +63,7 @@ public:
 	deselect();
     }
 
-    // En general el usuario no debería de llamar a esta clase.
+    // En general el usuario no debería de llamar a esta función.
     // Sin embargo, SDCard::initialization_sequence necesita garantizar que
     // el chip no esté seleccionado (¿podría omitir eso?) Por ello dejo
     // público esta función.
@@ -167,6 +167,46 @@ struct R1_response{
     { return 0xFF; }
 };
 
+// 7.3.2.3@physical_layer
+// Traductor del mapa de bits R1 en funciones
+struct R2_response{ 
+// Data
+    R1_response r1;
+    uint8_t r2;
+
+// Helper
+    template <typename SPI>
+    void read(){
+	r2 = SPI::read();
+    }
+
+// Traducimos los flags
+    bool card_is_locked() const
+    { return atd::is_one_bit<0>::of(r2); }
+
+    bool write_protect_erase_skip() const
+    { return atd::is_one_bit<1>::of(r2); }
+
+    bool error() const
+    { return atd::is_one_bit<2>::of(r2); }
+
+    bool CC_error() const
+    { return atd::is_one_bit<3>::of(r2); }
+
+    bool card_ECC_failed() const
+    { return atd::is_one_bit<4>::of(r2); }
+
+    bool write_protect_violation() const
+    { return atd::is_one_bit<5>::of(r2); }
+
+    bool erase_param() const
+    { return atd::is_one_bit<6>::of(r2); }
+
+    bool out_of_range() const
+    { return atd::is_one_bit<7>::of(r2); }
+
+};
+
 // Referencias
 //	5.1@physical_layer
 //	7.3.2.4@physical_layer
@@ -175,9 +215,11 @@ struct R1_response{
 struct R3_response{ 
     enum class Type{ SDSC, SDHC_or_SDXC };
 
+// Data
     R1_response r1;
-
     uint8_t OCR[4];
+
+// Helper
     template <typename SPI>
     void read(){
 	OCR[0] = SPI::read();	// MSByte
@@ -187,6 +229,7 @@ struct R3_response{
     }
 
 
+// Traducimos los flags
     bool card_has_finished_power_up() const
     { return atd::is_one_bit<7>::of(OCR[0]); }
 
@@ -245,10 +288,11 @@ struct R3_response{
 //  4.3.13@physical_layer
 //	Table 4-18 muestra los valores posibles del `voltage accepted`
 struct R7_response{ 
+// Data
     R1_response r1;
-
     uint8_t data[4];
 
+// Helper
     template <typename SPI>
     void read(){
 	data[0] = SPI::read();		
@@ -264,6 +308,7 @@ struct R7_response{
 	reserved
     };
 
+// Traducimos los flags
     uint8_t version() const {return ((data[0] & 0xF0) >> 4);}
     uint8_t pattern() const {return data[3];}
     uint8_t VCA()     const {return data[2] & 0x0F;}
@@ -351,6 +396,8 @@ public:
     using Init_return = SDCard_types::Init_return;
 
     using R1 = SDCard_types::R1_response;
+    // TODO: using R1b = SDCard_types::R1b_response;
+    using R2 = SDCard_types::R2_response;
     using R3 = SDCard_types::R3_response;
     using R7 = SDCard_types::R7_response;
     using Read_return = SDCard_types::Read_return;
@@ -396,8 +443,8 @@ public:
     // TODO:
     // erase_and_write_protect_management: 7.2.5
 
-    // Returns the status register of the card
-//    static void send_status(R2& r2);
+    // Returns the status register of the card (= R2 response)
+    static R2 send_status();
 
 
 // BRICK COMMANDS (mejor no llamarlos directamente)
@@ -545,7 +592,7 @@ private:
     //		0xFF en caso de error.
     static uint8_t read_R1();
     // TODO: static uint8_t read_R1b();
-    // static void read_R2(R2& r2);
+    static R2 read_R2();
     static void read_R3(R3& r3);
 
     // Args: (supply_voltage, pattern0) son los pasados a CMD8
@@ -788,6 +835,21 @@ void SDCard_basic<Cfg>::read_ocr(R3& r3)
     read_R3(r3);
 }
 
+
+// return: r2
+template <typename Cfg>
+SDCard_basic<Cfg>::R2 SDCard_basic<Cfg>::send_status()
+{
+//	SPI_cfg();
+    Select_chip select{};
+
+    send(13u);
+
+    return read_R2();
+}
+
+
+
 // 7.2.8@physical_layer
 // + in the SPI mode the card will always respond to a command.
 // + A command may be rejected in, entre otros casos, "it is sent while
@@ -830,6 +892,19 @@ uint8_t SDCard_basic<Cfg>::read_R1()
     }
 
     return R1::invalid_value();
+}
+
+
+template <typename Cfg>
+inline SDCard_basic<Cfg>::R2 SDCard_basic<Cfg>::read_R2()
+{
+    uint8_t r = read_R1(); 
+
+    R2 r2;
+    r2.r1 = R1{r};
+    r2.read<SPI>();
+
+    return r2;
 }
 
 
@@ -1123,11 +1198,6 @@ SDCard_basic<Cfg>::Read_return
     return read_data_block(b);
 }
 
-//template<typename Cfg>
-//void SDCard_basic<Cfg>::send_status(R2& r2)
-//{
-//AQUII
-//}
 
 
 }// namespace

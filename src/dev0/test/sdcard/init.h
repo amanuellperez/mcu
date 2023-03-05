@@ -19,30 +19,11 @@
 
 #pragma once
 
-#ifndef __PRINT_H__
-#define __PRINT_H__
+#ifndef __INIT_H__
+#define __INIT_H__
 
-#include "dev.h"
-
-void print(std::ostream& out, const SDCard::R1& r1);
-void print_if_error_r1(std::ostream& out, const SDCard::R1& r1);
-void print_raw_R3(std::ostream& out, const SDCard::R3& r3);
-void print_type_card(std::ostream& out, const SDCard::R3& r3);
-void print(std::ostream& out, const SDCard::R3& r3);
-void print(std::ostream& out, const SDCard::R7& r7);
-void print(std::ostream& out, const SDCard::Read_return& r);
-void print(std::ostream& out, const SDCard::R2& r);
-
-
-template <typename String>
-void print_question(std::ostream& out, const String& str, bool with_tab = true)
-{
-    if (with_tab)
-	out << '\t';
-
-    atd::print(out, str);
-    out << "? ";
-}
+void automatic_init();
+void step_by_step_init();
 
 #endif
 

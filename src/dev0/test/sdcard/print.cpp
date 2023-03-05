@@ -1,13 +1,6 @@
 #include "print.h"
 #include "strings.h"
 
-template <typename String>
-void print_question(std::ostream& out, const String& str)
-{
-    out << '\t';
-    atd::print(out, str);
-    out << "? ";
-}
 
 void print_bool_as_yes_no(std::ostream& out, bool x)
 {
@@ -231,5 +224,37 @@ void print(std::ostream& out, const SDCard::Read_return& r)
 
     print_question(out, msg_out_of_range);
     print_bool_as_yes_no(out, r.out_of_range());
+}
+
+
+void print(std::ostream& out, const SDCard::R2& r)
+{
+    print(out, r.r1);
+
+    atd::print(out, msg_r2_response);
+    print_question(out, msg_card_is_locked);
+    print_bool_as_yes_no(out, r.card_is_locked());
+
+    print_question(out, msg_write_protect_erase_skip);
+    print_bool_as_yes_no(out, r.write_protect_erase_skip());
+
+    print_question(out, msg_error);
+    print_bool_as_yes_no(out, r.error());
+
+    print_question(out, msg_CC_error);
+    print_bool_as_yes_no(out, r.CC_error());
+
+    print_question(out, msg_card_ECC_failed);
+    print_bool_as_yes_no(out, r.card_ECC_failed());
+
+    print_question(out, msg_write_protect_violation);
+    print_bool_as_yes_no(out, r.write_protect_violation());
+
+    print_question(out, msg_erase_param);
+    print_bool_as_yes_no(out, r.erase_param());
+
+    print_question(out, msg_out_of_range);
+    print_bool_as_yes_no(out, r.out_of_range());
+
 }
 

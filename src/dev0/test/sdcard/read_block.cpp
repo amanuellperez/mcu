@@ -17,67 +17,53 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include <atd_ostream.h>
 
-#include "dev.h"
-#include "init.h"
-#include "print.h"
-#include "strings.h"
 #include "read_block.h"
+#include "strings.h"
+#include "print.h"
 
-void press_key_to_continue()
+void print_block(std::ostream& out, SDCard::Block data)
 {
-    mcu::UART_iostream uart;
-    uart << '\n';
-    atd::print(uart, msg_press_key_to_continue);
-    char c{};
-    uart >> c;
-}
-
-void read_status()
-{
-    mcu::UART_iostream uart;
-
-    auto r2 = SDCard::send_status();
-    print(uart, r2);
-}
-
-
-
-int main()
-{
-// init_UART();
-    mcu::UART_iostream uart;
-    mcu::basic_cfg(uart);
-    uart.on();
-
-    Selector_SPI::init();
-
-    atd::print(uart, msg_hello);
-    atd::print(uart, msg_main_menu);
-
-    char ans{};
-    uart >> ans;
-
-    if (ans == '1')
-	step_by_step_init();
-
-    else
-	automatic_init();
-
-    
-    while(1){
-	atd::print(uart, msg_main_menu2);
-	uart >> ans;
-
-	switch(ans){
-	    break; case '1': read_status();
-	    break; case '2': read_block();
-	}
+    atd::print(out, msg_line);
+    for (uint16_t i = 0; i < SDCard::block_size; ++i){
+	if (i % 20 == 0 and i != 0)
+	    out << '\n';
+	atd::print_int_as_hex(out, data[i], false);
+	out << ' ';
     }
 }
 
+void read_block(SDCard::Address addr)
+{
+    mcu::UART_iostream uart;
 
+    uint8_t data[SDCard::block_size];
 
+    auto r = SDCard::read(addr, data);
+    print(uart, r);
+
+    if (r.ok()){
+	atd::print(uart, msg_read_ok);
+
+	atd::print(uart, msg_address);
+	uart << ' ' << addr << '\n';
+	print_block(uart, data);
+    }
+}
+
+void read_block()
+{
+    mcu::UART_iostream uart;
+
+    atd::print(uart, msg_main_read);
+    uart << (int) SDCard::block_size << '\n';
+
+    print_question(uart, msg_address, false);
+    SDCard::Address add;
+    uart >> add;
+    uart << add << '\n';
+
+    read_block(add);
+}
 
 

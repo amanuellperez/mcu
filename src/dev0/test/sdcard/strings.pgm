@@ -16,6 +16,8 @@
 msg_yes	"yes"
 msg_no	"no"
 msg_ok	"ok"
+msg_press_key_to_continue   "Press a key to continue\n"
+msg_line    "-------------------------------\n"
 
 # msgs automatic_init
 msg_cmd0_fail		"CMD0 error\n"
@@ -49,14 +51,18 @@ msg_main_menu	"Menu\n"
 		"\t1. Step by step\n"
 		"\t2. Automatic\n"
 
+msg_main_menu2	"\n----\n"
+		"1. Read status register\n"
+		"2. Read block\n"
 
+
+# read block
 msg_main_read	"Read:\n"
 		"-----\n"
 		"block_size = "
+msg_address	"Address"
 
-msg_read_ok "read OK:\n"
-msg_line    "-------------------------------\n"
-msg_press_key_to_continue   "Press a key to continue\n"
+msg_read_ok "read OK."
 
 # print(R1)
 msg_r1_response	"R1 response\n"
@@ -120,5 +126,15 @@ msg_CC_error    "CC error"
 msg_card_ECC_failed   "card ECC failed"
 msg_out_of_range    "out of range"
 
+# print(R2)
+msg_r2_response	    "R2 response\n"
+msg_card_is_locked  "card is locked"
+msg_write_protect_erase_skip	"write protec erase skip"
+#msg_error		    "error"
+#msg_CC_error		    
+#msg_card_ECC_failed 
+msg_write_protect_violation "write protect violation"
+msg_erase_param		    "erase param"
+#msg_out_of_range
 
 
