@@ -144,7 +144,7 @@ msg_erase_param		    "erase param"
 
 # print(Write_return)
 msg_write_return_response   "Write_return response\n"
-msg_write_ok	"Write ok"
+msg_write_ok	"\tWrite OK"
 
 # print(Data_response_token)
 msg_data_response_token	"Data response token\n"

@@ -66,15 +66,6 @@ void write_block()
 	ask_modify_block(data);
 	auto res = SDCard::write(add, data);
 	print(uart, res);
-	press_key_to_continue();
-	// TODO: write devuelve dando timeout.
-	// Revisar:
-	//	1) Estoy marcando bien los flags?
-	//	2) trazar el timeout
-	//
-//	atd::print(uart, msg_line);
-//	// leemos de nuevo el block para ver si se ha modificado
-//	read_block(add, data);
     }
 
     

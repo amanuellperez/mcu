@@ -256,8 +256,8 @@ constexpr mcu::Progmem_string<11> msg_erase_param
 constexpr mcu::Progmem_string<22> msg_write_return_response   
 	PROGMEM{"Write_return response\n"};
 
-constexpr mcu::Progmem_string<8> msg_write_ok	
-	PROGMEM{"Write ok"};
+constexpr mcu::Progmem_string<10> msg_write_ok	
+	PROGMEM{"\tWrite OK"};
 
 constexpr mcu::Progmem_string<20> msg_data_response_token	
 	PROGMEM{"Data response token\n"};

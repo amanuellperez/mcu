@@ -445,7 +445,7 @@ public:
 
 // Consulta
     static bool is_valid(uint8_t x)
-    { return (atd::is_zero_bit<4>::of(x) and atd::is_one_bit<1>::of(x)); }
+    { return (atd::is_zero_bit<4>::of(x) and atd::is_one_bit<0>::of(x)); }
 
 
 private:
@@ -758,6 +758,7 @@ private:
     static uint32_t SPI_read_uint32_t();
 
     static void SPI_write_uint8_t(uint8_t x) { SPI::write(x); }
+    static void SPI_write_uint16_t(uint16_t x);
     static void SPI_write_uint32_t(const uint32_t& x);
 
 };
@@ -811,6 +812,13 @@ inline uint32_t SDCard_basic<Cfg>::SPI_read_uint32_t()
 // first) (endianness, ¿por qué lo llaman Big & little endian cuando
 // realmente es most/least significant byte??? @_@)
 template <typename Cfg>
+inline void SDCard_basic<Cfg>::SPI_write_uint16_t(uint16_t x)
+{
+    SPI::write(atd::byte<1>(x));
+    SPI::write(atd::byte<0>(x));
+}
+
+template <typename Cfg>
 inline void SDCard_basic<Cfg>::SPI_write_uint32_t(const uint32_t& x)
 {
     SPI::write(atd::byte<3>(x));
@@ -818,6 +826,7 @@ inline void SDCard_basic<Cfg>::SPI_write_uint32_t(const uint32_t& x)
     SPI::write(atd::byte<1>(x));
     SPI::write(atd::byte<0>(x));
 }
+
 
 // 7.3.1.1@physical_layer: 
 //   All the SD Memory Card commands are 6 bytes long. 
@@ -1130,6 +1139,18 @@ void SDCard_basic<Cfg>::read_R7(uint8_t supply_voltage, uint8_t pattern0,
 }
 
 
+// 7.2.4@physical_layer
+// Da la impresión, y así lo indican en la página de elm-chan, que el primer
+// byte después de enviar el Block a escribir tiene que ser el `data response
+// token`. Sin embargo no lo indican explicitamente en la datasheet. 
+// En otra página de internet comentaban que había que esperar 250 ms. El
+// punto 4.6.2.2 indica que no tardará más de 250 ms la operación de write. 
+// La biblioteca de arduino considera que el siguiente token a recibir después
+// de enviar el Block tiene que ser el `data response`. Como no estorba el
+// bucle for, ya que si la sd card responde inmediatamente saldrá del bucle en
+// la primera iteración, lo dejo de momento. 
+// Si en el futuro encuentro la referencia en la datasheet correspondiente
+// modificaré el codigo de acuerdo.
 template <typename Cfg>
 SDCard_basic<Cfg>::Data_response_token 
 		SDCard_basic<Cfg>::read_data_response_token()
@@ -1377,7 +1398,6 @@ SDCard_basic<Cfg>::Write_return
     SPI_cfg();
 
     Select_chip select{};
-
     R1 r1{send_write_single_block(addr)};
     if (r1.is_an_error())
 	return Write_return::r1_error(r1); 
@@ -1406,16 +1426,24 @@ SDCard_basic<Cfg>::Data_response_token
 	if (SPI::read() != 0x00) // busy_token == 0x00!!!
 	    return dt;
     }
+
     return Data_response_token::timeout_error();
 }
 
 
+// 7.3.3.2@physical_layer
 template<typename Cfg>
 void SDCard_basic<Cfg>::send_data_block(const Block b)
 {
     SPI::write(0xFE); // start block token
+		      
     for (Block::size_type i = 0; i < b.size(); ++i)
 	SPI::write(b[i]);
+
+    SPI_write_uint16_t(0xFFFF); // CRC 
+				// Da lo mismo su valor, ya que está configurado 
+				// para no enviarlo CRC. Los de arduino envian
+				// 0xFFFF, hagamos lo mismo.
 }
 
 
