@@ -9,7 +9,8 @@ DIRS = 	BMP280			\
 		led				\
 		HD44780			\
 		push_button		\
-		74HC595			
+		74HC595			\
+		sdcard
 
 # Revisar
 #	DHT22\

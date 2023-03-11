@@ -79,7 +79,7 @@ int main()
     mcu::basic_cfg(uart);
     uart.on();
 
-    Selector_SPI::init();
+    Chip_select::init();
 
     atd::print(uart, msg_hello);
     atd::print(uart, msg_main_menu);

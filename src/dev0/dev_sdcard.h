@@ -30,9 +30,9 @@
  *	Observar que estoy usando muchos números mágicos. ¿Por qué?
  *	Estoy implementando un traductor: voy leyendo la datasheet y la
  *	traduzco en código. 
+ *
  *	Ejemplo: al escrribir la función write() la datasheet pone que tengo
  *	que enviar el start token que es 0xFE. Usando números mágicos el
- *
  *	código queda:
  *	    SPI::write(0xFE);
  *	que corresponde a lo que leo en la datasheet.
@@ -510,6 +510,26 @@ private:
 
 } // namespace SDCard_types
 
+// Configuración de SDCard_basic
+template <typename Micro_t,	    // ¿a qué micro conectamos la SD card?
+	  typename SPI_master,	    // driver de SPI que usamos
+	  typename Chip_select_t,    // ¿cómo seleccionamos el chip?
+	  uint32_t SPI_init_frequency0 = 250'000, // 250 kHz <= 400 kHz
+	  uint32_t SPI_frequency0      = 500'000  // 500 kHz
+	  >
+struct SDCard_cfg{
+    using Micro	      = Micro_t;
+    using SPI	      = SPI_master;
+    using Chip_select = Chip_select_t;
+
+    static constexpr uint32_t SPI_init_frequency = SPI_init_frequency0;
+    static_assert(SPI_init_frequency <= 400'000, 
+		"SD card SPI init frequency must be at most 400'000 Hz");
+
+    static constexpr uint32_t SPI_frequency      = SPI_frequency0;
+};
+
+
 // Documentos que uso:
 //	"Part 1 - physical layer simplified specivication ver9.0"
 //
@@ -518,10 +538,9 @@ private:
 template <typename Cfg>
 class SDCard_basic{
 public:
-// TODO: parametrizar todo esto
-    using Micro	      = mcu::Micro;
-    using SPI	      = mcu::SPI_master;
-    using Select_chip = SDCard_select<mcu::Output_pin<SPI::CS_pin_number>, SPI>;
+    using Micro	      = typename Cfg::Micro;
+    using SPI	      = typename Cfg::SPI;
+    using Select_chip = typename Cfg::Chip_select;
     
 // Types
     using Init_return = SDCard_types::Init_return;
@@ -636,10 +655,8 @@ private:
     // (???). Arduino usa 10, usemos 10 de momento.
     static constexpr uint8_t max_retries = 10;
     static constexpr uint8_t max_retries_acmd41_command = 100;
-    // TODO: 250 kHz tiene que ser un parámetro. El SPI no tiene por qué
-    // funcionar exactamente a esta frecuencia.
-    static constexpr uint32_t SPI_init_frequency = 250'000; // 250 kHz
-    static constexpr uint32_t SPI_frequency      = 500'000; // 500 kHz
+    static constexpr uint32_t SPI_init_frequency = Cfg::SPI_init_frequency;
+    static constexpr uint32_t SPI_frequency      = Cfg::SPI_frequency;
 
     // ¿Cuánto tiempo debemos de esperar a que finalice de escribir el bloque
     // enviado? 4.6.2.2@physical_layer: máximo 250 ms
@@ -852,7 +869,7 @@ template <typename Cfg>
 void SDCard_basic<Cfg>::SPI_turn_on()
 {
     SPI_cfg__();
-    SPI::clock_frequency_in_hz<frequency>();
+    SPI::template clock_frequency_in_hz<frequency>();
     SPI::on();
 }
 

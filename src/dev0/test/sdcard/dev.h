@@ -40,9 +40,11 @@ using Micro   = mcu::Micro;
 // dispositivos que conectamos
 // ---------------------------
 // Dispositivos SPI
-using Selector_SPI = 
+using Chip_select = 
     dev::SDCard_select<mcu::Output_pin<mcu::SPI::CS_pin_number>, mcu::SPI_master>;
-struct SDCard_cfg{};
+
+using SDCard_cfg = dev::SDCard_cfg<mcu::Micro, mcu::SPI_master, Chip_select>;
+
 using SDCard = dev::SDCard_basic<SDCard_cfg>;
 
 
