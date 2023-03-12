@@ -1,5 +1,7 @@
 MCU++ library
 =============
+(If you understand spanish read better the spanish version of the readme
+(scroll down this document))
 
 Libraries and applications for microcontrollers (right now, only for
 ATMEGA328).
@@ -59,7 +61,13 @@ probably you need to download `alp_test.h`, `alp_test.cpp` and maybe
 Bibliotecas y aplicaciones para microcontroladores (en principio solo el
 ATMEGA328).
 
-# Compilador
+# Índice
+* [Compilador y toolchain](#compilador)
+* [Estructura de directorios](#directorios)
+* [GPL](#licencia)
+* [Vídeos](#videos)
+
+## <a name="compilador"></a>Compilador y toolchain
 `avr-g++ 11.3.0`
 
 Voy a empezar a probar las nuevas características de C++20 en este proyecto
@@ -73,9 +81,9 @@ Si nunca has compilado la toolchain puede que
 [este](help/instalacion_toolchain.md) documento te pueda ayudar.
 
 
-# Estructura de directorios
+## <a name="directorios"></a>Estructura de directorios
 
-## src: Todo el código fuente. 
+### src: Todo el código fuente. 
 
 Se puede organizar el código en diferentes niveles:
 
@@ -132,9 +140,9 @@ Se puede organizar el código en diferentes niveles:
     * [prj](src/prj/README.md): Proyectos.
 
 
-## mk: Reglas para compilar
+### mk: Reglas para compilar
 
-## test y pc_test:
+### test y pc_test:
 En cada directorio suministro directorios `test` o `pc_test`. Los `pc_test`
 son test automáticos para realizar en el ordenador. Se compilan con `gcc`
 mientras que `test` son test para realizar en el microcontrolador, compilados
@@ -145,7 +153,51 @@ Los `pc_test` necesitan varios ficheros de
 Basta con que descargarse `alp_test.h`, `alp_test.cpp`, 
 `alp_string.h` y `alp_string.cpp` para que compilen.
 
-## Vídeos
+## <a name="licencia"></a>GPL
+
+¿Qué licencia ponerle a este proyecto? Al mirar las diferentes licencias que
+hay, y desconocer por completo el tema, uno se pierde. ¿Por qué elegí la GPL
+3? Simplemente por ser última versión de la GPL (= traducción: no tengo ningún
+criterio real de por qué elegir la GPL, básicamente la he puesto por moda y
+desconocimiento. Espero que la decisión no haya sido un error).
+
+¿Cuáles son las que (creo) que son las características de esta licencia?
+
+1. El código que pongo es libre: lo puedes usar como quieras. Yo no tengo
+   ningún problema en que lo uses en un proyecto particular, o incluso que lo
+   uses en un proyecto comercial (aunque aquí no me ha quedado claro si la GPL
+   3 prohibe esto).
+
+2. Si usas mi código tienes que darme el crédito correspondiente (a mi o a
+   quien lo desarrolle). Parece lo correcto, ¿no?
+
+3. El código no tienen ningún tipo de garantía. Aunque por supuesto intento
+   programarlo bien, muchas de las partes son realmente proyectos de
+   aprendizaje y conviene recordar que siempre que se hace por primera vez una
+   cosa lo más seguro es que no se haga de la mejor manera.
+
+4. Al tratarse de un proyecto de aprendizaje puede ser inestable, sobre todo
+   las partes nuevas. Salvo el esandar `std` que no lo defino yo y por tanto
+   el interfaz es estable, lo demás puede que lo cambie según vaya ganando
+   experiencia. Con todo, código que se vea que tiene años y se está usando
+   sistemáticamente es de esperar que ya vaya siendo semiestable.
+
+5. Si mejoras el código tienes que darme una copia de todas las mejoras, de
+   esa forma yo también puedo beneficiarme.
+
+6. Estoy subiendo datasheets o referencias que no tienen GPL ni tampoco he
+   redactado yo. No tengo claro si puedo subirlas. Todas están públicas en 
+   internet.
+   Las subo para que sea más sencillo revisar las implementaciones de los
+   traductores. Si por lo que sea alguno de los documentos tiene licencia y no
+   se puede subir agradecería me lo indicasen para eliminarlo inmediatamente.
+
+
+
+
+
+
+## <a name="videos"></a>Vídeos
 
 Había creado un canal en YouTube para ir subiendo algún vídeo de algunos de los
 circuitos que estaba implementando. Sin embargo voy a abandonarlo, ya que
