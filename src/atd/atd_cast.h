@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 Manuel Perez 
+// Copyright (C) 2019-2023 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -33,10 +33,13 @@
  *	10/11/2019 bounded_cast
  *	12/03/2021 to_integer
  *	25/11/2022 convert(a).into(b);
+ *	13/03/2023 little_endian_to<>/big_endian_to<>
  *
  ****************************************************************************/
 #include <limits>
 #include <cstddef>
+#include <span>
+
 #include "atd_decimal.h"
 
 namespace atd{
@@ -141,6 +144,42 @@ struct convert{
 
     const X& x_;
 };
+
+
+// little_endian_to
+// ----------------
+// Convierte el array de bytes data[0], data[1], ... en el tipo Int indicado
+// La codificación es little endian: LSByte == data[0]
+template <typename Int>
+inline Int little_endian_to(std::span<uint8_t> data)
+{
+    Int res{0};
+
+    for (uint8_t i = 0; i < data.size(); ++i){
+	res |= (Int{data[i]} << i * 8);
+    }
+
+    return res;
+}
+
+
+// big_endian_to
+// ----------------
+// Convierte el array de bytes data[0], data[1], ... en el tipo Int indicado
+// La codificación es little endian: MSByte == data[0]
+template <typename Int>
+inline Int big_endian_to(std::span<uint8_t> data)
+{
+    Int res{0};
+
+    auto n = data.size();
+    for (uint8_t i = 0; i < n; ++i){
+	res |= (Int{data[n - 1 - i]} << i * 8);
+    }
+
+    return res;
+}
+
 
 }// namespace
 

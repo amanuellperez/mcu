@@ -113,6 +113,117 @@ void test_convert_into()
     CHECK_TRUE(b.y == a.x + 2, "convert.into");
 }
 
+void test_little_endian()
+{
+    test::interface("little_endian_to");
+
+{// Basic test
+    uint8_t d[2];
+    d[0] = 0xCD;
+    d[1] = 0xAB;
+    CHECK_TRUE(atd::little_endian_to<uint16_t>(d) == 0xABCD, "0xABCD");
+
+    // CUIDADO al operar con ints!!! puede haber overflow. De hecho 
+    // el siguiente test falla si se quita el casting de C.
+    // Probar a sustituirlo por `int16_t{0xABCD}`. Da error.
+    CHECK_TRUE(atd::little_endian_to<int16_t>(d) == (int16_t) 0xABCD, "0xABCD");
+}
+{// Basic test 2
+    uint8_t d[4];
+    d[0] = 0xCD;
+    d[1] = 0xAB;
+    d[2] = 0xEF;
+    d[3] = 0x89;
+    CHECK_TRUE(atd::little_endian_to<uint32_t>(d) == 0x89EFABCD, "0x89EFABCD");
+
+    // CUIDADO al operar con ints!!! puede haber overflow. De hecho 
+    // el siguiente test falla si se quita el casting de C.
+    // Probar a sustituirlo por `int16_t{0xABCD}`. Da error.
+    CHECK_TRUE(atd::little_endian_to<int32_t>(d) == (int32_t) 0x89EFABCD, "0x89EFABCD");
+}
+
+    // uint8_t
+    for (uint8_t i = 0; i < 255; ++i){
+	uint8_t d[1];
+	d[0] = i;
+	CHECK_TRUE(atd::little_endian_to<uint8_t>(d) == i, "little_endian_to<uint8_t>");
+    }
+
+    // uint16_t
+    for (uint8_t b1 = 0; b1 < 255; ++b1){
+	for (uint8_t b0 = 0; b0 < 255; ++b0){
+	    uint8_t d[2];
+	    d[0] = b0;
+	    d[1] = b1;
+	    uint16_t res = 256*b1 + b0;
+//	    std::cout << "256 * " << (int) b1 << " + " << (int) b0 << " = " 
+//		      << res << " =? " << 
+//	    atd::little_endian_to<uint16_t>(d) << '\n';
+
+	    CHECK_TRUE(atd::little_endian_to<uint16_t>(d) == res,
+					    "little_endian_to<uint16_t>");
+	}
+    }
+
+
+}
+
+void test_big_endian()
+{
+    test::interface("big_endian_to");
+
+{// Basic test
+    uint8_t d[2];
+    d[0] = 0xCD;
+    d[1] = 0xAB;
+    CHECK_TRUE(atd::big_endian_to<uint16_t>(d) == 0xCDAB, "0xCDAB");
+
+    // CUIDADO al operar con ints!!! puede haber overflow. De hecho 
+    // el siguiente test falla si se quita el casting de C.
+    // Probar a sustituirlo por `int16_t{0xABCD}`. Da error.
+    CHECK_TRUE(atd::big_endian_to<int16_t>(d) == (int16_t) 0xCDAB, "0xCDAB");
+}
+{// Basic test 2
+    uint8_t d[4];
+    d[0] = 0xCD;
+    d[1] = 0xAB;
+    d[2] = 0xEF;
+    d[3] = 0x89;
+    CHECK_TRUE(atd::big_endian_to<uint32_t>(d) == 0xCDABEF89, "0xCDABEF89");
+
+    // CUIDADO al operar con ints!!! puede haber overflow. De hecho 
+    // el siguiente test falla si se quita el casting de C.
+    // Probar a sustituirlo por `int16_t{0xABCD}`. Da error.
+    CHECK_TRUE(atd::big_endian_to<int32_t>(d) == (int32_t) 0xCDABEF89, "0xCDABEF89");
+}
+
+    // uint8_t
+    for (uint8_t i = 0; i < 255; ++i){
+	uint8_t d[1];
+	d[0] = i;
+	CHECK_TRUE(atd::big_endian_to<uint8_t>(d) == i, "big_endian_to<uint8_t>");
+    }
+
+    // uint16_t
+    for (uint8_t b1 = 0; b1 < 255; ++b1){
+	for (uint8_t b0 = 0; b0 < 255; ++b0){
+	    uint8_t d[2];
+	    d[0] = b1;
+	    d[1] = b0;
+	    uint16_t res = 256*b1 + b0;
+//	    std::cout << "256 * " << (int) b1 << " + " << (int) b0 << " = " 
+//		      << res << " =? " << 
+//	    atd::big_endian_to<uint16_t>(d) << '\n';
+
+	    CHECK_TRUE(atd::big_endian_to<uint16_t>(d) == res,
+					    "big_endian_to<uint16_t>");
+	}
+    }
+
+
+}
+
+
 int main()
 {
 try{
@@ -122,6 +233,8 @@ try{
     test_safe_static_cast();
     test_to_integer();
     test_convert_into();
+    test_little_endian();
+    test_big_endian();
 
 }catch(std::exception& e)
 {

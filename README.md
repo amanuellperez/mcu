@@ -177,7 +177,7 @@ desconocimiento. Espero que la decisión no haya sido un error).
    cosa lo más seguro es que no se haga de la mejor manera.
 
 4. Al tratarse de un proyecto de aprendizaje puede ser inestable, sobre todo
-   las partes nuevas. Salvo el esandar `std` que no lo defino yo y por tanto
+   las partes nuevas. Salvo el estandar `std` que no lo defino yo y por tanto
    el interfaz es estable, lo demás puede que lo cambie según vaya ganando
    experiencia. Con todo, código que se vea que tiene años y se está usando
    sistemáticamente es de esperar que ya vaya siendo semiestable.
