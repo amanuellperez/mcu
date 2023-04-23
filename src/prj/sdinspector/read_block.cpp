@@ -34,20 +34,19 @@ void print_block(std::ostream& out, SDCard::Block data)
     out << '\n';
 }
 
+// Esta función la usan write_block y read_block
 bool read_block(SDCard::Address addr, SDCard::Block data)
 {
     mcu::UART_iostream uart;
 
     auto r = SDCard::read(addr, data);
-    print(uart, r);
 
     if (r.ok()){
-	atd::print(uart, msg_read_ok);
-
-	atd::print(uart, msg_address);
-	uart << ' ' << addr << '\n';
-	print_block(uart, data);
 	return true;
+    }
+    else {
+	// TODO: poner "error!!!: DETALLES"
+	print(uart, r);
     }
 
     return false;
@@ -65,8 +64,12 @@ void read_block()
     uart >> add;
     uart << add << '\n';
 
-    uint8_t data[SDCard::block_size];
-    read_block(add, data);
+    Sector sector; // TODO: a Main
+    if (read_block(add, sector)){
+	sector.address = add;
+	sector.print(uart);
+    }
+
 }
 
 

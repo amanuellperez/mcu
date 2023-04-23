@@ -278,6 +278,19 @@ void test_digits_from_left_to_right()
 
 }
 
+void test_is_even()
+{
+    test::interfaz("is_even/is_odd");
+    for (uint8_t i = 0; i < 10; i += 2){
+	CHECK_TRUE(atd::is_even(i), "is_even");
+	CHECK_TRUE(!atd::is_odd(i), "is_odd");
+    }
+
+    for (uint8_t i = 1; i < 10; i += 2){
+	CHECK_TRUE(!atd::is_even(i), "is_even");
+	CHECK_TRUE(atd::is_odd(i), "is_odd");
+    }
+}
 
 
 int main()
@@ -295,6 +308,7 @@ try{
     test_remove_trailing_zeros();
     test_digits_of();
     test_digits_from_left_to_right();
+    test_is_even();
 
 }catch(std::exception& e)
 {

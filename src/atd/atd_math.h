@@ -33,6 +33,7 @@
  *    05/03/2021 is_power_of_ten, exponent_of_power_of_ten
  *    23/07/2021 remove_trailing_zeros
  *    19/02/2022 Digits_of, Digits_from_left_to_right
+ *    23/04/2023 is_even/is_odd
  *
  *
  ****************************************************************************/
@@ -338,6 +339,14 @@ private:
     int ndigits_;
 };
 
+
+// is_even/is_odd
+// --------------
+template <typename Int>
+inline bool is_even(const Int& x) {return !(x % 2); }
+
+template <typename Int>
+inline bool is_odd(const Int& x) {return (x % 2); }
 
 } // namespace
 

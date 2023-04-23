@@ -25,6 +25,8 @@
 #include <avr_atmega.h>
 #include <avr_SPI_generic.h>
 
+#include "dev_sector.h"
+
 // microcontroller
 // ---------------
 namespace mcu = atmega;
@@ -47,5 +49,7 @@ using SDCard_cfg = dev::SDCard_cfg<mcu::Micro, mcu::SPI_master, Chip_select>;
 
 using SDCard = dev::SDCard_basic<SDCard_cfg>;
 
+using Sector_cfg = dev::Sector_cfg<SDCard::block_size>;
+using Sector     = dev::Sector<Sector_cfg>;
 
 #endif
