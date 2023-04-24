@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __SECTOR_H__
-#define __SECTOR_H__
+#ifndef __DEV_SECTOR_H__
+#define __DEV_SECTOR_H__
 
 #include <array>
 #include <ostream>

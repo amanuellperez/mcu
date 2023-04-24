@@ -1,0 +1,10 @@
+# strings genéricas que se pueden reutilizar en otros programas.
+# Para generar el fichero .h: 
+#	$ str2progmem strings.pgm
+
+# Generic msgs
+msg_yes	"yes"
+msg_no	"no"
+msg_ok	"ok"
+msg_press_key_to_continue   "Press a key to continue\n"
+msg_line    "-------------------------------\n"

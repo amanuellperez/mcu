@@ -1,23 +1,7 @@
-# strings necesarias para el programa
+# strings para imprimir los mensajes asociados a la SD Card
 # Para generar el fichero .h: 
-#	$ str2progmem strings.pgm
+#	$ str2progmem sdcard_strings.pgm
 #
-# El `make size` antes de usar este fichero:
-#      text       data        bss      total filename
-#      6326       1424          1       7751 xx.elf
-#
-# Después de crear este fichero la salida de `make size` es:
-#      text       data        bss      total filename
-#      8808        164          1       8973 xx.elf
-#
-# Pasa de 1424 a 164 bytes!!!
-
-# Generic msgs
-msg_yes	"yes"
-msg_no	"no"
-msg_ok	"ok"
-msg_press_key_to_continue   "Press a key to continue\n"
-msg_line    "-------------------------------\n"
 
 # msgs automatic_init
 msg_cmd0_fail		"CMD0 error\n"
@@ -40,34 +24,7 @@ msg_read_ocr1	    "\nread_ocr (cmd58) ... = supported voltages?\n"
 msg_send_op_cond    "\nsd_send_op_cond (acmd41) ... \n"
 msg_read_ocr2	    "\nread_ocr (cmd58) ... = is SDSC or SDHC/SDXC card? \n"
 
-# main
-msg_hello   "----------------------------------------\n"
-	    "SDCard\n"
-	    "----------------------------------------\n\n"
 
-#msg_main_menu	"Menu\n"
-#		"----\n"
-#		"Choose type of initialization:\n"
-#		"\t1. Step by step\n"
-#		"\t2. Automatic\n"
-
-msg_main_menu	"\n----\n"
-		"1. Read status register\n"
-		"2. Read block\n"
-		"3. Write block\n"
-
-
-# read block
-msg_main_read	"Read\n"
-		"----\n"
-		"block_size = "
-msg_address	"Address"
-
-msg_read_ok "read OK."
-
-# write block
-msg_main_write  "Write\n"
-		"-----\n"
 
 # print(R1)
 msg_r1_response	"R1 response\n"

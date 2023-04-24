@@ -17,32 +17,13 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#include "prj_main.h"
 #include <atd_ostream.h>
 
-#include "dev.h"
-#include "init.h"
-#include "print.h"
-#include "strings.h"
-#include "read_block.h"
+#include "sdc_print.h"
+#include "dev_print.h"
 
-void press_key_to_continue()
-{
-    mcu::UART_iostream uart;
-    uart << '\n';
-    atd::print(uart, msg_press_key_to_continue);
-    char c{};
-    uart >> c;
-}
-
-void read_status()
-{
-    mcu::UART_iostream uart;
-
-    auto r2 = SDCard::send_status();
-    print(uart, r2);
-}
-
-void ask_modify_block(SDCard::Block data)
+void Main::ask_modify_block(SDCard::Block data)
 {
     // TODO: preguntar
     data[0] = 0xAB;
@@ -50,7 +31,7 @@ void ask_modify_block(SDCard::Block data)
     data[2] = 0xEF;
 }
 
-void write_block()
+void Main::write_block()
 {
     mcu::UART_iostream uart;
 
@@ -62,7 +43,7 @@ void write_block()
     uart << add << '\n';
 
     uint8_t data[SDCard::block_size];
-    if (read_block(add, data)){
+    if (read_sector(add, data)){
 	ask_modify_block(data);
 	auto res = SDCard::write(add, data);
 	print(uart, res);
@@ -70,36 +51,3 @@ void write_block()
 
     
 }
-
-
-int main()
-{
-// init_UART();
-    mcu::UART_iostream uart;
-    mcu::basic_cfg(uart);
-    uart.on();
-
-    Chip_select::init();
-
-    atd::print(uart, msg_hello);
-
-    sdcard_init();
-
-    
-    while(1){
-	char ans{};
-	atd::print(uart, msg_main_menu);
-	uart >> ans;
-
-	switch(ans){
-	    break; case '1': read_status();
-	    break; case '2': read_block();
-	    break; case '3': write_block();
-	}
-    }
-}
-
-
-
-
-

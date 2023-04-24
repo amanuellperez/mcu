@@ -16,9 +16,10 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#include "dev.h"
-#include "strings.h"
-#include "print.h"
+#include "prj_dev.h"
+#include "prj_strings.h"
+#include "dev_print.h"
+#include "sdc_print.h"
 
 bool sdcard_init()
 {

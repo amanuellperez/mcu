@@ -19,11 +19,22 @@
 
 #pragma once
 
-#ifndef __PRINT_H__
-#define __PRINT_H__
+#ifndef __SDC_PRINT_H__
+#define __SDC_PRINT_H__
 
-#include "dev.h"
-
+// Funciones que solo dependen de la SD Card y de los mensajes.
+#include "prj_dev.h"	// OBLIGATORIO PONERLO.
+			// Tal como está hecho ahora, las `strings` usan 
+			// mcu::Progmem <-- necesitan saber el micro `mcu` que
+			// se usa!!! ¿Cómo parametrizarlo? ¿Se pueden hacer
+			// estos mensajes genéricos de tal manera que si no se
+			// llaman no se guarde nada en PROGMEM?
+#include "sdc_strings.h"
+		     
+// Convenio (v0.0):
+//  + Funciones `print` se limitan a imprimir un mensaje.
+//  + Funciones `ask` imprimen un mensaje y devuelven una respuesta (sería el
+//    análogo a `scanf` de C)
 void print(std::ostream& out, const SDCard::R1& r1);
 void print_if_error_r1(std::ostream& out, const SDCard::R1& r1);
 void print_raw_R3(std::ostream& out, const SDCard::R3& r3);
@@ -36,15 +47,6 @@ void print(std::ostream& out, const SDCard::Write_return& r);
 void print(std::ostream& out, const SDCard::Data_response_token& r);
 
 
-template <typename String>
-void print_question(std::ostream& out, const String& str, bool with_tab = true)
-{
-    if (with_tab)
-	out << '\t';
-
-    atd::print(out, str);
-    out << "? ";
-}
 
 #endif
 

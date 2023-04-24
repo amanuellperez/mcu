@@ -17,18 +17,52 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#pragma once
+#include <atd_ostream.h>
 
-#ifndef __READ_BLOCK_H__
-#define __READ_BLOCK_H__
+#include "prj_main.h"
+#include "prj_dev.h"
+#include "prj_init.h"
+#include "prj_strings.h"
+#include "sdc_print.h"
+#include "dev_print.h"
 
-#include <iostream>
-#include "dev.h"
 
-void print_block(std::ostream& out, SDCard::Block data);
-bool read_block(SDCard::Address addr, SDCard::Block data);
-void read_block();
+void Main::read_status()
+{
+    mcu::UART_iostream uart;
 
-#endif
+    auto r2 = SDCard::send_status();
+    print(uart, r2);
+}
+
+
+void Main::init_uart()
+{
+    mcu::UART_iostream uart;
+    mcu::basic_cfg(uart);
+    uart.on();
+}
+
+Main::Main()
+{
+    init_uart();
+
+    mcu::UART_iostream uart;
+    atd::print(uart, msg_hello);
+
+    Chip_select::init();
+    sdcard_init();
+}
+
+
+int main()
+{
+    Main app;
+    app.run();
+}
+
+
+
+
 
 

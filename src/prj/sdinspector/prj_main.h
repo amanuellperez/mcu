@@ -19,37 +19,49 @@
 
 #pragma once
 
-#ifndef __DEV_H__
-#define __DEV_H__
-
-#include <avr_atmega.h>
-#include <avr_SPI_generic.h>
-
-#include "dev_sector.h"
-
-// microcontroller
-// ---------------
-namespace mcu = atmega;
-using Micro   = mcu::Micro;
-			
-#include <dev_sdcard.h>
-
-
-// pines que usamos
-// ----------------
+#ifndef __PRJ_MAIN_H__
+#define __PRJ_MAIN_H__
+/****************************************************************************
+ *
+ * DESCRIPCION
+ *	Inspector de SD cards
+ *
+ * HISTORIA
+ *    Manuel Perez
+ *    24/04/2023 Escrito
+ *
+ ****************************************************************************/
+#include "prj_dev.h"
+//#include "prj_cfg.h"
+#include "prj_strings.h"
 
 
-// dispositivos que conectamos
-// ---------------------------
-// Dispositivos SPI
-using Chip_select = 
-    dev::SDCard_select<mcu::Output_pin<mcu::SPI::CS_pin_number>, mcu::SPI_master>;
+class Main{
+public:
+    Main();
+    void run();
+    
+private:
+// Hardware
 
-using SDCard_cfg = dev::SDCard_cfg<mcu::Micro, mcu::SPI_master, Chip_select>;
+// Data
+    // Último sector leído. En caso de no haberse leido nada contendrá basura.
+    Sector sector; 
 
-using SDCard = dev::SDCard_basic<SDCard_cfg>;
 
-using Sector_cfg = dev::Sector_cfg<SDCard::block_size>;
-using Sector     = dev::Sector<Sector_cfg>;
+// Functions
+    void init_uart();
+
+    void read_status();
+
+    void write_block();
+    void ask_modify_block(SDCard::Block data);
+
+    void read_sector();
+    bool read_sector(SDCard::Address addr, SDCard::Block data);
+};
+
 
 #endif
+
+

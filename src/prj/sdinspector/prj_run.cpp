@@ -16,14 +16,23 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#include "prj_main.h"
 
-#pragma once
+void Main::run()
+{
+    mcu::UART_iostream uart;
 
-#ifndef __INIT_H__
-#define __INIT_H__
+    while(1){
+	char ans{};
+	atd::print(uart, msg_main_menu);
+	uart >> ans;
 
-bool sdcard_init();
-
-#endif
+	switch(ans){
+	    break; case '1': read_status();
+	    break; case '2': read_sector();
+	    break; case '3': write_block();
+	}
+    }
+}
 
 

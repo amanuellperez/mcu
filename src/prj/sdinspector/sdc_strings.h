@@ -21,24 +21,9 @@
  
 #pragma once 
  
-#ifndef __STRINGS_H__ 
-#define __STRINGS_H__ 
+#ifndef __SDC_STRINGS_H__ 
+#define __SDC_STRINGS_H__ 
 
-
-constexpr mcu::Progmem_string<3> msg_yes	
-	PROGMEM{"yes"};
-
-constexpr mcu::Progmem_string<2> msg_no	
-	PROGMEM{"no"};
-
-constexpr mcu::Progmem_string<2> msg_ok	
-	PROGMEM{"ok"};
-
-constexpr mcu::Progmem_string<24> msg_press_key_to_continue   
-	PROGMEM{"Press a key to continue\n"};
-
-constexpr mcu::Progmem_string<32> msg_line    
-	PROGMEM{"-------------------------------\n"};
 
 constexpr mcu::Progmem_string<11> msg_cmd0_fail		
 	PROGMEM{"CMD0 error\n"};
@@ -87,24 +72,6 @@ constexpr mcu::Progmem_string<31> msg_send_op_cond
 
 constexpr mcu::Progmem_string<52> msg_read_ocr2	    
 	PROGMEM{"\nread_ocr (cmd58) ... = is SDSC or SDHC/SDXC card? \n"};
-
-constexpr mcu::Progmem_string<90> msg_hello   
-	PROGMEM{"----------------------------------------\nSDCard\n----------------------------------------\n\n"};
-
-constexpr mcu::Progmem_string<59> msg_main_menu	
-	PROGMEM{"\n----\n1. Read status register\n2. Read block\n3. Write block\n"};
-
-constexpr mcu::Progmem_string<23> msg_main_read	
-	PROGMEM{"Read\n----\nblock_size = "};
-
-constexpr mcu::Progmem_string<7> msg_address	
-	PROGMEM{"Address"};
-
-constexpr mcu::Progmem_string<8> msg_read_ok 
-	PROGMEM{"read OK."};
-
-constexpr mcu::Progmem_string<12> msg_main_write  
-	PROGMEM{"Write\n-----\n"};
 
 constexpr mcu::Progmem_string<19> msg_r1_response	
 	PROGMEM{"R1 response\n\tR1 : "};
