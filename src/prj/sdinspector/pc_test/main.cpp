@@ -2,11 +2,11 @@
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 
+#include <iostream>
 #include "../dev_sector.h"
 
 
 #include <alp_test.h>
-#include <iostream>
 
 using namespace test;
 
@@ -35,9 +35,19 @@ void test_sector()
     std::cout << '\n';
 
 
-    std::cout << "\nOutput:\n"
+    std::cout << "\nOutput (sector):\n"
 		   "------------\n";
     sector.print(std::cout);
+    std::cout << "------------\n\n";
+
+    std::cout << "\nOutput (one line):\n"
+		   "------------\n";
+    sector.print(std::cout, 3, 6);
+    std::cout << "------------\n\n";
+
+    std::cout << "\nOutput (two line):\n"
+		   "------------\n";
+    sector.print(std::cout, 3, 8);
     std::cout << "------------\n\n";
 }
 

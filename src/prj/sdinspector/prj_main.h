@@ -52,13 +52,23 @@ private:
 // Functions
     void init_uart();
 
+    // Cargamos en memoria `sector`
+    bool load_sector();
+
+// Main menu
+    char main_menu();
+    void run_command(char cmd);
+
+// User commands:
     void read_status();
 
     void write_block();
     void ask_modify_block(SDCard::Block data);
 
     void read_sector();
-    bool read_sector(SDCard::Address addr, SDCard::Block data);
+
+    void read_sector_fromto();
+	bool read_sector_fromto_ask(Sector::Address& from, size_t& sz);
 };
 
 

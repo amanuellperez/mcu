@@ -25,41 +25,56 @@
 #include "prj_main.h"
 
 
-// Esta función la usan write_block y read_block
-bool Main::read_sector(SDCard::Address addr, SDCard::Block data)
-{
-    mcu::UART_iostream uart;
-
-    auto r = SDCard::read(addr, data);
-
-    if (r.ok()){
-	return true;
-    }
-    else {
-	// TODO: poner "error!!!: DETALLES"
-	print(uart, r);
-    }
-
-    return false;
-}
-
 void Main::read_sector()
 {
     mcu::UART_iostream uart;
 
-    atd::print(uart, msg_main_read);
-    uart << (int) SDCard::block_size << '\n';
-
-    print_question(uart, msg_address, false);
-    SDCard::Address add;
-    uart >> add;
-    uart << add << '\n';
-
-    if (read_sector(add, sector)){
-	sector.address = add;
+    if (load_sector()){
 	sector.print(uart);
     }
 
 }
 
+bool Main::read_sector_fromto_ask(Sector::Address& from, size_t& sz)
+{
+    mcu::UART_iostream uart;
+
+    print_question(uart, msg_read_sector_from);
+    uart >> from;
+    if (from > Sector::sector_size){
+	atd::print(uart, msg_read_sector_from_to_big);
+	uart << Sector::sector_size << '\n';
+	return false;
+    }
+
+    uart << '\n';
+    print_question(uart, msg_read_sector_size);
+    uart >> sz;
+    if (from + sz > Sector::sector_size){
+	atd::print(uart, msg_read_sector_size_to_big);
+	uart << '\n';
+	return false;
+    }
+
+    uart << '\n';
+
+    return true;
+}
+
+
+void Main::read_sector_fromto()
+{
+    mcu::UART_iostream uart;
+
+    if (!load_sector())
+	return;
+
+    Sector::Address from{};
+    size_t sz{};
+    if (!read_sector_fromto_ask(from, sz))
+	return;
+
+    sector.print(uart, from, sz);
+
+}
 

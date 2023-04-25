@@ -26,6 +26,7 @@
 #include <ostream>
 #include <atd_ostream.h>
 #include <atd_math.h>
+#include <limits>
 
 namespace dev{
 
@@ -49,17 +50,31 @@ struct Sector: std::array<uint8_t, Cfg::sector_size>{
 
 // Data
 // uint8_t data[sector_size]; <-- implícito al heredar de std::array
-    Address address;  // me suena mejor 'number' que 'address' (???)
+    // me suena mejor 'number' que 'address' (???)
+    // Si address == max ==> el sector consideramos que no está cargado en
+    // memoria.
+    Address address = std::numeric_limits<Address>::max(); 
 
+    bool is_valid() const { return !is_invalid(); }
+    bool is_invalid() const 
+		{return address == std::numeric_limits<Address>::max();}
+
+// printing
+// --------
     // TODO: comprobar que el tamaño del sector >= SDCard::block_size
+    // ???: de momento cargo el sector directamente en el programa. Si se
+    // quiere generalizar esto habría que definir esta función.
     // Carga en memoria el sector indicado (número Address)
 //    static error read_from(SDCard, SDCard::Address);
-
 
     // Muestra en el flujo indicado el sector cargado en memoria.
     // De momento es responsabilidad del usuario garantizar que se haya
     // cargado el sector correspondiente.
-    void print(std::ostream&) const;
+    void print(std::ostream& out) const { print(out, 0, sector_size); }
+
+    // Muestra en el flujo indicado el sector cargado en memoria, los bytes
+    // [i0, i0 + N).
+    void print(std::ostream&, size_t i0, size_t N) const;
 
 private:
 
@@ -70,17 +85,16 @@ private:
 
 
 template <typename Cfg>
-void Sector<Cfg>::print(std::ostream& out) const
+void Sector<Cfg>::print(std::ostream& out, size_t i0, size_t sz) const
 {
     out << "Sector: " << address << '\n';
 
-
-    size_t i = 0;
-    for (; i + nbytes_per_line < sector_size; i += nbytes_per_line){
-	print_line(out, i, nbytes_per_line);
+    size_t ie = i0 + sz; // [i0, ie) intervalo a imprimir
+    for (; ie - i0 > nbytes_per_line; i0 += nbytes_per_line){
+	print_line(out, i0, nbytes_per_line);
     }
 
-    print_line(out, i, sector_size - i);
+    print_line(out, i0, ie - i0);
 
 }
 

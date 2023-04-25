@@ -28,8 +28,14 @@
 constexpr mcu::Progmem_string<90> msg_hello   
 	PROGMEM{"----------------------------------------\nSDCard\n----------------------------------------\n\n"};
 
-constexpr mcu::Progmem_string<61> msg_main_menu	
-	PROGMEM{"\n----\n1. Read status register\n2. Read sector\n3. Write sector\n"};
+constexpr mcu::Progmem_string<19> msg_main_no_sector_load 
+	PROGMEM{"No sector in memory"};
+
+constexpr mcu::Progmem_string<27> msg_main_sector_load 
+	PROGMEM{"Sector in memory. Address: "};
+
+constexpr mcu::Progmem_string<86> msg_main_menu	
+	PROGMEM{"\n----\n1. Read status register\n2. Read sector\n3. Read sector in [a, b]\n4. Write sector\n"};
 
 constexpr mcu::Progmem_string<23> msg_main_read	
 	PROGMEM{"Read\n----\nblock_size = "};
@@ -39,6 +45,18 @@ constexpr mcu::Progmem_string<7> msg_address
 
 constexpr mcu::Progmem_string<8> msg_read_ok 
 	PROGMEM{"read OK."};
+
+constexpr mcu::Progmem_string<18> msg_read_sector_from 
+	PROGMEM{"first byte to show"};
+
+constexpr mcu::Progmem_string<23> msg_read_sector_size 
+	PROGMEM{"number of bytes to show"};
+
+constexpr mcu::Progmem_string<38> msg_read_sector_from_to_big 
+	PROGMEM{"Error: first byte has to be less than "};
+
+constexpr mcu::Progmem_string<18> msg_read_sector_size_to_big 
+	PROGMEM{"Error: size to big"};
 
 constexpr mcu::Progmem_string<12> msg_main_write  
 	PROGMEM{"Write\n-----\n"};

@@ -17,38 +17,34 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "prj_main.h"
-#include <atd_ostream.h>
-
-#include "sdc_print.h"
+#include "prj_dev.h"
+#include "prj_strings.h"
 #include "dev_print.h"
+#include "sdc_print.h"
+#include "prj_main.h"
 
-void Main::ask_modify_block(SDCard::Block data)
-{
-//    // TODO: preguntar
-//    data[0] = 0xAB;
-//    data[1] = 0xCD;
-//    data[2] = 0xEF;
-}
 
-void Main::write_block()
+bool Main::load_sector()
 {
     mcu::UART_iostream uart;
-    uart << "TODO\n";
 
-//    atd::print(uart, msg_main_write);
-//    print_question(uart, msg_address, false);
-//
-//    SDCard::Address add;
-//    uart >> add;
-//    uart << add << '\n';
-//
-//    uint8_t data[SDCard::block_size];
-//    if (load_sector(add, data)){
-//	ask_modify_block(data);
-//	auto res = SDCard::write(add, data);
-//	print(uart, res);
-//    }
-//
-    
+    atd::print(uart, msg_main_read);
+
+    print_question(uart, msg_address, false);
+    SDCard::Address add;
+    uart >> add;
+    uart << add << '\n';
+
+    auto r = SDCard::read(add, sector);
+
+    if (r.ok()){
+	sector.address = add;
+	return true;
+    }
+    else{
+	// TODO: poner "error!!!: DETALLES"
+	print(uart, r);
+	return false;
+    }
 }
+

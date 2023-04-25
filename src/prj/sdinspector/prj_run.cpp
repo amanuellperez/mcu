@@ -18,20 +18,44 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "prj_main.h"
 
-void Main::run()
+char Main::main_menu()
 {
     mcu::UART_iostream uart;
 
-    while(1){
-	char ans{};
-	atd::print(uart, msg_main_menu);
-	uart >> ans;
+    if (sector.is_invalid())
+	atd::print(uart, msg_main_no_sector_load);
 
-	switch(ans){
-	    break; case '1': read_status();
-	    break; case '2': read_sector();
-	    break; case '3': write_block();
-	}
+    else {
+	atd::print(uart, msg_main_sector_load);
+	uart << sector.address;
+    }
+
+    uart << '\n';
+
+    char ans{};
+    atd::print(uart, msg_main_menu);
+    uart >> ans;
+
+    return ans;
+}
+
+void Main::run_command(char cmd)
+{
+    switch(cmd){
+	break; case '1': read_status();
+	break; case '2': read_sector();
+	break; case '3': read_sector_fromto();
+	break; case '4': write_block();
+    }
+}
+
+void Main::run()
+{
+
+    while(1){
+	char cmd = main_menu();
+	run_command(cmd);
+
     }
 }
 

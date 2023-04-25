@@ -1,12 +1,13 @@
 BIN = xx
 
-SOURCES= prj_main.cpp	\
+SOURCES= dev_print.cpp	\
+		 sdc_print.cpp	\
+		 prj_main.cpp	\
 		 prj_run.cpp	\
 		 prj_init.cpp	\
-		 dev_print.cpp	\
-		 sdc_print.cpp	\
 		 prj_write_sector.cpp	\
-		 prj_read_sector.cpp
+		 prj_read_sector.cpp	\
+		 prj_load_sector.cpp	
 
 # para probar
 #F_CPU = 8000000UL
