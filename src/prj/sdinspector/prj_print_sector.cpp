@@ -25,33 +25,34 @@
 #include "prj_main.h"
 
 
-void Main::read_sector()
+void Main::print_sector()
 {
     mcu::UART_iostream uart;
-
-    if (load_sector()){
-	sector.print(uart);
-    }
+    print_line(uart);
+    sector.print(uart);
 
 }
 
-bool Main::read_sector_fromto_ask(Sector::Address& from, size_t& sz)
+bool Main::print_sector_fromto_ask(Sector::Address& from, size_t& sz)
 {
     mcu::UART_iostream uart;
 
-    print_question(uart, msg_read_sector_from);
+    uart << '\n';
+    print_line(uart);
+
+    print_question(uart, msg_print_sector_from, false);
     uart >> from;
     if (from > Sector::sector_size){
-	atd::print(uart, msg_read_sector_from_to_big);
+	atd::print(uart, msg_print_sector_from_to_big);
 	uart << Sector::sector_size << '\n';
 	return false;
     }
 
     uart << '\n';
-    print_question(uart, msg_read_sector_size);
+    print_question(uart, msg_print_sector_size, false);
     uart >> sz;
     if (from + sz > Sector::sector_size){
-	atd::print(uart, msg_read_sector_size_to_big);
+	atd::print(uart, msg_print_sector_size_to_big);
 	uart << '\n';
 	return false;
     }
@@ -62,18 +63,16 @@ bool Main::read_sector_fromto_ask(Sector::Address& from, size_t& sz)
 }
 
 
-void Main::read_sector_fromto()
+void Main::print_sector_fromto()
 {
     mcu::UART_iostream uart;
 
-    if (!load_sector())
-	return;
-
     Sector::Address from{};
     size_t sz{};
-    if (!read_sector_fromto_ask(from, sz))
+    if (!print_sector_fromto_ask(from, sz))
 	return;
 
+    print_line(uart);
     sector.print(uart, from, sz);
 
 }

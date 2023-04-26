@@ -26,7 +26,6 @@ bool sdcard_init()
     using Init = SDCard::Init_return;
 
     mcu::UART_iostream uart;
-    uart << "SDCard::init() ...\n";
     switch (SDCard::init()){
 	break; case Init::cmd0_fail	: 
 		    atd::print(uart, msg_cmd0_fail);

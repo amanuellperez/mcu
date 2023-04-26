@@ -62,13 +62,15 @@ private:
 // User commands:
     void read_status();
 
-    void write_block();
-    void ask_modify_block(SDCard::Block data);
+    void flush_sector();
 
-    void read_sector();
+    void edit_sector();
+    void edit_sector_from(Sector::Address);
 
-    void read_sector_fromto();
-	bool read_sector_fromto_ask(Sector::Address& from, size_t& sz);
+    void print_sector();
+
+    void print_sector_fromto();
+	bool print_sector_fromto_ask(Sector::Address& from, size_t& sz);
 };
 
 

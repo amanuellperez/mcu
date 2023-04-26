@@ -17,11 +17,14 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "prj_main.h"
-
+#include "dev_print.h"	// print_line
+			
 char Main::main_menu()
 {
     mcu::UART_iostream uart;
 
+    uart << '\n';
+    print_line(uart);
     if (sector.is_invalid())
 	atd::print(uart, msg_main_no_sector_load);
 
@@ -31,10 +34,15 @@ char Main::main_menu()
     }
 
     uart << '\n';
+    print_line(uart);
+
+    atd::print(uart, msg_main_menu);
+    if (sector.is_valid())
+	atd::print(uart, msg_main_menu2);
 
     char ans{};
-    atd::print(uart, msg_main_menu);
     uart >> ans;
+
 
     return ans;
 }
@@ -43,9 +51,11 @@ void Main::run_command(char cmd)
 {
     switch(cmd){
 	break; case '1': read_status();
-	break; case '2': read_sector();
-	break; case '3': read_sector_fromto();
-	break; case '4': write_block();
+	break; case '2': load_sector();
+	break; case '3': print_sector();
+	break; case '4': print_sector_fromto();
+	break; case '5': edit_sector();
+	break; case '6': flush_sector();
     }
 }
 

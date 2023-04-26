@@ -4,35 +4,35 @@
 #
 
 # main
-msg_hello   "----------------------------------------\n"
-	    "SDCard\n"
+msg_hello   "\n\n----------------------------------------\n"
+	    "SDCard inspector\n"
 	    "----------------------------------------\n\n"
 
 msg_main_no_sector_load "No sector in memory"
 msg_main_sector_load "Sector in memory. Address: "
 
-msg_main_menu	"\n----\n"
-		"1. Read status register\n"
-		"2. Read sector\n"
-		"3. Read sector in [a, b]\n"
-		"4. Write sector\n"
+msg_main_menu	"1. Read status register\n"
+		"2. Load sector\n"
+
+msg_main_menu2	"3. Print sector\n"
+		"4. Print sector bytes from a to b\n"
+		"5. Edit sector\n"
+		"6. Flush sector\n"
 
 
-# read block
-msg_main_read	"Read\n"
-		"----\n"
-		"block_size = "
-msg_address	"Address"
 
-msg_read_ok "read OK."
+# load sector
+msg_sector_address	"Sector address: "
 
-# read_sector_fromto
-msg_read_sector_from "first byte to show"
-msg_read_sector_size "number of bytes to show"
+# print_sector_fromto
+msg_print_sector_from "Print sector from byte number"
+msg_print_sector_size "Number of bytes to print"
 
-msg_read_sector_from_to_big "Error: first byte has to be less than "
-msg_read_sector_size_to_big "Error: size to big"
+msg_print_sector_from_to_big "\nError: first byte has to be less than "
+msg_print_sector_size_to_big "\nError: size to big"
 
-# write block
-msg_main_write  "Write\n"
-		"-----\n"
+# edit_sector
+msg_edit_sector_instructions "Write all modifications in hexadecimal without "
+			     "0x.\nPress return to end.\n"
+
+msg_edit_sector_from "First byte to edit"

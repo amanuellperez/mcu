@@ -23,32 +23,36 @@
 #include "sdc_print.h"
 #include "dev_print.h"
 
-void Main::ask_modify_block(SDCard::Block data)
-{
-//    // TODO: preguntar
-//    data[0] = 0xAB;
-//    data[1] = 0xCD;
-//    data[2] = 0xEF;
-}
-
-void Main::write_block()
+void Main::edit_sector()
 {
     mcu::UART_iostream uart;
-    uart << "TODO\n";
 
-//    atd::print(uart, msg_main_write);
-//    print_question(uart, msg_address, false);
-//
-//    SDCard::Address add;
-//    uart >> add;
-//    uart << add << '\n';
-//
-//    uint8_t data[SDCard::block_size];
-//    if (load_sector(add, data)){
-//	ask_modify_block(data);
-//	auto res = SDCard::write(add, data);
-//	print(uart, res);
-//    }
-//
+    uart << '\n';
+    print_line(uart);
+    atd::print(uart, msg_edit_sector_instructions);
+    print_question(uart, msg_edit_sector_from, false);
+
+    Sector::Address addr;
+    uart >> addr;
+    uart << '\n';
+
+    edit_sector_from(addr);
     
 }
+
+void Main::edit_sector_from(Sector::Address addr)
+{
+    mcu::UART_iostream uart;
+
+    uart.fill('0');
+    uart.width(3);
+    uart << addr << ':';
+    atd::print_int_as_hex(uart, sector[addr], false);
+    uart << " -> ";
+
+    uart << "TODO: read number of 2 digits as hexadecimal and "
+	" save into sector[addr];";
+
+
+}
+

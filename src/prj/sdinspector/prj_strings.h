@@ -25,8 +25,8 @@
 #define __PRJ_STRINGS_H__ 
 
 
-constexpr mcu::Progmem_string<90> msg_hello   
-	PROGMEM{"----------------------------------------\nSDCard\n----------------------------------------\n\n"};
+constexpr mcu::Progmem_string<102> msg_hello   
+	PROGMEM{"\n\n----------------------------------------\nSDCard inspector\n----------------------------------------\n\n"};
 
 constexpr mcu::Progmem_string<19> msg_main_no_sector_load 
 	PROGMEM{"No sector in memory"};
@@ -34,32 +34,32 @@ constexpr mcu::Progmem_string<19> msg_main_no_sector_load
 constexpr mcu::Progmem_string<27> msg_main_sector_load 
 	PROGMEM{"Sector in memory. Address: "};
 
-constexpr mcu::Progmem_string<86> msg_main_menu	
-	PROGMEM{"\n----\n1. Read status register\n2. Read sector\n3. Read sector in [a, b]\n4. Write sector\n"};
+constexpr mcu::Progmem_string<39> msg_main_menu	
+	PROGMEM{"1. Read status register\n2. Load sector\n"};
 
-constexpr mcu::Progmem_string<23> msg_main_read	
-	PROGMEM{"Read\n----\nblock_size = "};
+constexpr mcu::Progmem_string<81> msg_main_menu2	
+	PROGMEM{"3. Print sector\n4. Print sector bytes from a to b\n5. Edit sector\n6. Flush sector\n"};
 
-constexpr mcu::Progmem_string<7> msg_address	
-	PROGMEM{"Address"};
+constexpr mcu::Progmem_string<16> msg_sector_address	
+	PROGMEM{"Sector address: "};
 
-constexpr mcu::Progmem_string<8> msg_read_ok 
-	PROGMEM{"read OK."};
+constexpr mcu::Progmem_string<29> msg_print_sector_from 
+	PROGMEM{"Print sector from byte number"};
 
-constexpr mcu::Progmem_string<18> msg_read_sector_from 
-	PROGMEM{"first byte to show"};
+constexpr mcu::Progmem_string<24> msg_print_sector_size 
+	PROGMEM{"Number of bytes to print"};
 
-constexpr mcu::Progmem_string<23> msg_read_sector_size 
-	PROGMEM{"number of bytes to show"};
+constexpr mcu::Progmem_string<39> msg_print_sector_from_to_big 
+	PROGMEM{"\nError: first byte has to be less than "};
 
-constexpr mcu::Progmem_string<38> msg_read_sector_from_to_big 
-	PROGMEM{"Error: first byte has to be less than "};
+constexpr mcu::Progmem_string<19> msg_print_sector_size_to_big 
+	PROGMEM{"\nError: size to big"};
 
-constexpr mcu::Progmem_string<18> msg_read_sector_size_to_big 
-	PROGMEM{"Error: size to big"};
+constexpr mcu::Progmem_string<72> msg_edit_sector_instructions 
+	PROGMEM{"Write all modifications in hexadecimal without 0x.\nPress return to end.\n"};
 
-constexpr mcu::Progmem_string<12> msg_main_write  
-	PROGMEM{"Write\n-----\n"};
+constexpr mcu::Progmem_string<18> msg_edit_sector_from 
+	PROGMEM{"First byte to edit"};
 
 
  

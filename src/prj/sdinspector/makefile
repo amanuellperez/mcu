@@ -5,8 +5,9 @@ SOURCES= dev_print.cpp	\
 		 prj_main.cpp	\
 		 prj_run.cpp	\
 		 prj_init.cpp	\
-		 prj_write_sector.cpp	\
-		 prj_read_sector.cpp	\
+		 prj_flush_sector.cpp	\
+		 prj_edit_sector.cpp	\
+		 prj_print_sector.cpp	\
 		 prj_load_sector.cpp	
 
 # para probar
