@@ -27,12 +27,16 @@
 
 using namespace test;
 
-void test_read_int_as_hex(int x0)
+void test_read_int_as_hex(int x0, bool with_0x)
 {
     std::stringstream s;
-    s << "0x" << std::hex << x0;
+    if (with_0x)
+	s << "0x";
+
+    s << std::hex << x0;
+
     int x;
-    atd::read_int_as_hex(s, x);
+    atd::read_int_as_hex(s, x, with_0x);
 //    CHECK_TRUE(s.good() or s.eof(), "good");
     CHECK_TRUE(x == x0, alp::as_str() << x);
 }
@@ -52,9 +56,12 @@ void test_read_int_as_hex()
     test::interfaz("read_int_as_hex");
 
     for (int i = 0; i < 100000; ++i)
-	test_read_int_as_hex(i);
+	test_read_int_as_hex(i, true);
 
     test_read_int_as_hex_fail();
+
+    for (int i = 0; i < 100000; ++i)
+	test_read_int_as_hex(i, false);
 }
 
 

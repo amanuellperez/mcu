@@ -31,6 +31,7 @@
  *    Manuel Perez
  *	10/11/2019 read_as_int8_t
  *	15/11/2022 read_int_as_hex
+ *	20/05/2023 read_int_as_hex(start_with_0x = true)
  *
  ****************************************************************************/
 #include <istream>
@@ -109,33 +110,48 @@ Int hex2nibble__(char c)
 
 }
 
+// Lee el siguiente caracter del flujo comprobando que vale 'res'
+// Lo llamo `read` porque consume el caracter. Otra opción sería no consumir
+// el caracter en caso de que no valga `res` (pero como siempre: ¿cómo llamar
+// a esa función?)
+// Return: true si el caracter leido es igual a res
+//	   false en caso contrario
+inline bool read_next_char(std::istream& in, char res)
+{
+    char c{};
+    in.get(c);
+    return c == res;
+}
+
 // Esta es la inversa a print_int_as_hex
 // Lee una cadena de caracteres de istream que representa un número en
 // hexadecimal y la convierte a Int
-// El número tiene que empezar con '0x'
+// Si start_with_0x  == true, el número tiene que empezar con '0x'.
 template <typename Int>
-std::istream& read_int_as_hex(std::istream& in, Int& x)
+std::istream& read_int_as_hex(std::istream& in, Int& x, 
+						bool start_with_0x = true)
 {
-    x = Int{0};
-
-    char c{};
-    if (in.get(c) and c == '0'){
-	if (in.get(c) and c == 'x'){
-	    while (in.get(c)){
-		Int d = hex2nibble__<Int>(c);
-		if (d == Int{hex2nibble_error__})
-		    return in;
-
-		x = x*Int{16} + d;
-	    }
-
+    if (start_with_0x == true){
+	if (!(read_next_char(in, '0') and read_next_char(in, 'x'))){
+	    in.setstate(std::ios_base::failbit);
 	    return in;
 	}
     }
 
-    in.setstate(std::ios_base::failbit);
+    x = Int{0};
+    char c{};
+    while (in.get(c)){
+	Int d = hex2nibble__<Int>(c);
+	if (d == Int{hex2nibble_error__})
+	    return in;
+
+	x = x*Int{16} + d;
+    }
+
     return in;
+
 }
+
 
 
 }// namespace
