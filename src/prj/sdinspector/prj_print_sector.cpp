@@ -54,6 +54,7 @@ bool Main::print_sector_fromto_ask(Sector::Address& from, size_t& sz)
     uart >> sz; // TODO: si se da retorno de carro modifica 'sz' ????
 		// De hecho hace cosas raras. Para no depurarlo le indico al
 		// usuario que escriba explícitamente '0'. TODO: depurarlo!!!
+		// Al rato ha empezado a funcionar bien (???)
 
     if (sz == 0)    // imprimimos hasta el final
 	sz = Sector::sector_size - from;
@@ -79,6 +80,7 @@ void Main::print_sector_fromto()
     if (!print_sector_fromto_ask(from, sz))
 	return;
 
+    uart << '\n';
     print_line(uart);
     sector.print(uart, from, sz);
 

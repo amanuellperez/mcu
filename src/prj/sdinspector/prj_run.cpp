@@ -47,7 +47,15 @@ char Main::main_menu()
     return ans;
 }
 
-void Main::run_command(char cmd)
+void Main::run_command_invalid_sector(char cmd)
+{
+    switch(cmd){
+	break; case '1': read_status();
+	break; case '2': load_sector();
+    }
+}
+
+void Main::run_command_valid_sector(char cmd)
 {
     switch(cmd){
 	break; case '1': read_status();
@@ -59,13 +67,22 @@ void Main::run_command(char cmd)
     }
 }
 
+// (RRR) Como el menu es pequeño hago un mix para reutilizar código.
+//       Si fuera un poco más liado sería mejor crear dos menus diferentes y
+//       que el código quedara más claro:
+//	    if (sector.is_invalid())
+//		main_menu_invalid_sector();
+//	    else
+//		main_menu_valid_sector();
 void Main::run()
 {
-
     while(1){
 	char cmd = main_menu();
-	run_command(cmd);
+	if (sector.is_invalid())
+	    run_command_invalid_sector(cmd);
 
+	else
+	    run_command_valid_sector(cmd);
     }
 }
 

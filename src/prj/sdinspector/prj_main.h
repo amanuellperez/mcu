@@ -57,7 +57,8 @@ private:
 
 // Main menu
     char main_menu();
-    void run_command(char cmd);
+    void run_command_invalid_sector(char cmd);
+    void run_command_valid_sector(char cmd);
 
 // User commands:
     void read_status();
