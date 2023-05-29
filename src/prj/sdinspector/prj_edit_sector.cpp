@@ -19,6 +19,7 @@
 
 #include "prj_main.h"
 #include <atd_ostream.h>
+#include <atd_istream.h>
 
 #include "sdc_print.h"
 #include "dev_print.h"
@@ -44,15 +45,25 @@ void Main::edit_sector_from(Sector::Address addr)
 {
     mcu::UART_iostream uart;
 
-    uart.fill('0');
-    uart.width(3);
-    uart << addr << ':';
-    atd::print_int_as_hex(uart, sector[addr], false);
-    uart << " -> ";
+    while (addr < sector.size()) {
+	uart.fill('0');
+	uart.width(3);
+	uart << addr << ':';
+	atd::print_int_as_hex(uart, sector[addr], false);
+	uart << " -> ";
 
-    uart << "TODO: read number of 2 digits as hexadecimal and "
-	" save into sector[addr];";
+	uint8_t data{}; 
+	if (atd::read_int_as_hex(uart, data, false) == 0)
+	    return;
 
+	atd::print_int_as_hex(uart, data, false); // echo
+
+
+	sector[addr] = data;
+
+	++addr;
+	uart << '\n';
+    }
 
 }
 

@@ -26,7 +26,7 @@ msg_sector_address	"Sector address: "
 
 # print_sector_fromto
 msg_print_sector_from "Print sector from byte number"
-msg_print_sector_size "Number of bytes to print"
+msg_print_sector_size "Number of bytes to print (0 to the end)"
 
 msg_print_sector_from_to_big "\nError: first byte has to be less than "
 msg_print_sector_size_to_big "\nError: size to big"
@@ -36,3 +36,4 @@ msg_edit_sector_instructions "Write all modifications in hexadecimal without "
 			     "0x.\nPress return to end.\n"
 
 msg_edit_sector_from "First byte to edit"
+msg_edit_sector_from_error "Error reading"

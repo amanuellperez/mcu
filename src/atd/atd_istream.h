@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022 Manuel Perez 
+// Copyright (C) 2019-2023 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -35,6 +35,7 @@
  *
  ****************************************************************************/
 #include <istream>
+#include <ctype.h>
 #include "atd_cast.h"
 
 namespace atd{
@@ -127,28 +128,36 @@ inline bool read_next_char(std::istream& in, char res)
 // Lee una cadena de caracteres de istream que representa un número en
 // hexadecimal y la convierte a Int
 // Si start_with_0x  == true, el número tiene que empezar con '0x'.
+// Devuelve el número de digitos leídos, si todo va bien.
+// Si ha leido correctamente y de repente encuentra un dígito no válido
+// devuelve 0.
+// DUDA: ¿qué pasa si hay overflow? De momento no hago nada.
 template <typename Int>
-std::istream& read_int_as_hex(std::istream& in, Int& x, 
-						bool start_with_0x = true)
+uint8_t read_int_as_hex(std::istream& in, Int& x, bool start_with_0x = true)
 {
     if (start_with_0x == true){
 	if (!(read_next_char(in, '0') and read_next_char(in, 'x'))){
 	    in.setstate(std::ios_base::failbit);
-	    return in;
+	    return false;
 	}
     }
 
     x = Int{0};
-    char c{};
+    uint8_t n = 0;
+    char c = '\0';
     while (in.get(c)){
+	if (isspace(c)) 
+	    return n;
+
 	Int d = hex2nibble__<Int>(c);
 	if (d == Int{hex2nibble_error__})
-	    return in;
+	    return 0; // error
 
-	x = x*Int{16} + d;
+	x = x*Int{16} + d; 
+	++n;
     }
 
-    return in;
+    return n;
 
 }
 

@@ -50,8 +50,15 @@ bool Main::print_sector_fromto_ask(Sector::Address& from, size_t& sz)
 
     uart << '\n';
     print_question(uart, msg_print_sector_size, false);
-    uart >> sz;
-    if (from + sz > Sector::sector_size){
+    sz = 0;
+    uart >> sz; // TODO: si se da retorno de carro modifica 'sz' ????
+		// De hecho hace cosas raras. Para no depurarlo le indico al
+		// usuario que escriba explícitamente '0'. TODO: depurarlo!!!
+
+    if (sz == 0)    // imprimimos hasta el final
+	sz = Sector::sector_size - from;
+
+    else if (from + sz > Sector::sector_size){
 	atd::print(uart, msg_print_sector_size_to_big);
 	uart << '\n';
 	return false;

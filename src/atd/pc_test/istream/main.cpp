@@ -41,6 +41,19 @@ void test_read_int_as_hex(int x0, bool with_0x)
     CHECK_TRUE(x == x0, alp::as_str() << x);
 }
 
+void test_read_int_as_hex_space(int x0, bool with_0x, char space)
+{
+    std::stringstream s;
+    if (with_0x)
+	s << "0x";
+
+    s << std::hex << x0 << space << "jklmn";
+
+    int x;
+    int res = atd::read_int_as_hex(s, x, with_0x);
+    CHECK_TRUE(x == x0 and res != 0, alp::as_str() << x);
+}
+
 
 void test_read_int_as_hex_fail()
 {
@@ -62,6 +75,12 @@ void test_read_int_as_hex()
 
     for (int i = 0; i < 100000; ++i)
 	test_read_int_as_hex(i, false);
+
+    test_read_int_as_hex_space(23, false, '\n');
+    test_read_int_as_hex_space(23, false, '\t');
+    test_read_int_as_hex_space(23, false, '\r');
+    test_read_int_as_hex_space(23, false, ' ');
+//     test_read_int_as_hex_space(23, false, 'r'); <-- esta tiene que fallar
 }
 
 

@@ -12,6 +12,7 @@ INCS= std_cstdio.h		\
 	std_basic_ios.h		\
 	std_bit.h			\
 	std_char_traits.h	\
+	std_cctype.h		\
 	std_chrono.h		\
 	std_config.h		\
 	std_climits.h		\
@@ -44,6 +45,7 @@ INCS= std_cstdio.h		\
 	algorithm	\
 	array		\
 	bit			\
+	cctype		\
 	chrono		\
 	climits		\
 	cmath		\

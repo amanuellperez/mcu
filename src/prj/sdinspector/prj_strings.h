@@ -46,8 +46,8 @@ constexpr mcu::Progmem_string<16> msg_sector_address
 constexpr mcu::Progmem_string<29> msg_print_sector_from 
 	PROGMEM{"Print sector from byte number"};
 
-constexpr mcu::Progmem_string<24> msg_print_sector_size 
-	PROGMEM{"Number of bytes to print"};
+constexpr mcu::Progmem_string<39> msg_print_sector_size 
+	PROGMEM{"Number of bytes to print (0 to the end)"};
 
 constexpr mcu::Progmem_string<39> msg_print_sector_from_to_big 
 	PROGMEM{"\nError: first byte has to be less than "};
@@ -60,6 +60,9 @@ constexpr mcu::Progmem_string<72> msg_edit_sector_instructions
 
 constexpr mcu::Progmem_string<18> msg_edit_sector_from 
 	PROGMEM{"First byte to edit"};
+
+constexpr mcu::Progmem_string<13> msg_edit_sector_from_error 
+	PROGMEM{"Error reading"};
 
 
  
