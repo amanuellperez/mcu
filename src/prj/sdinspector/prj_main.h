@@ -65,8 +65,9 @@ private:
 
     void flush_sector();
 
-    void edit_sector();
-    void edit_sector_from(Sector::Address);
+    void edit_sector(bool in_hexadecimal);
+    void edit_sector_from_in_hexadecimal(Sector::Address);
+    void edit_sector_from_with_chars(Sector::Address);
 
     void print_sector();
 

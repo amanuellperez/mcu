@@ -62,8 +62,9 @@ void Main::run_command_valid_sector(char cmd)
 	break; case '2': load_sector();
 	break; case '3': print_sector();
 	break; case '4': print_sector_fromto();
-	break; case '5': edit_sector();
-	break; case '6': flush_sector();
+	break; case '5': edit_sector(true);
+	break; case '6': edit_sector(false);
+	break; case '7': flush_sector();
     }
 }
 

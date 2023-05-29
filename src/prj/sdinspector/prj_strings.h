@@ -37,8 +37,8 @@ constexpr mcu::Progmem_string<27> msg_main_sector_load
 constexpr mcu::Progmem_string<39> msg_main_menu	
 	PROGMEM{"1. Read status register\n2. Load sector\n"};
 
-constexpr mcu::Progmem_string<81> msg_main_menu2	
-	PROGMEM{"3. Print sector\n4. Print sector bytes from a to b\n5. Edit sector\n6. Flush sector\n"};
+constexpr mcu::Progmem_string<122> msg_main_menu2	
+	PROGMEM{"3. Print sector\n4. Print sector bytes from a to b\n5. Edit sector in hexadecimal\n6. Edit sector with chars\n7. Flush sector\n"};
 
 constexpr mcu::Progmem_string<16> msg_sector_address	
 	PROGMEM{"Sector address: "};
@@ -55,8 +55,11 @@ constexpr mcu::Progmem_string<39> msg_print_sector_from_to_big
 constexpr mcu::Progmem_string<19> msg_print_sector_size_to_big 
 	PROGMEM{"\nError: size to big"};
 
-constexpr mcu::Progmem_string<72> msg_edit_sector_instructions 
+constexpr mcu::Progmem_string<72> msg_edit_sector_instructions_in_hex 
 	PROGMEM{"Write all modifications in hexadecimal without 0x.\nPress return to end.\n"};
+
+constexpr mcu::Progmem_string<55> msg_edit_sector_instructions_in_char 
+	PROGMEM{"Write all modifications in chars.\nPress return to end.\n"};
 
 constexpr mcu::Progmem_string<18> msg_edit_sector_from 
 	PROGMEM{"First byte to edit"};
