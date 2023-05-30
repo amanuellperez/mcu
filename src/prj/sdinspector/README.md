@@ -1,9 +1,5 @@
 ## SD Inspector
 
-En principio es una copia del test realizado para probar el traductor de la
-SD Card. Sin embargo la idea es que poco a poco vaya evolucionando y le vaya
-añadiendo funcionalidad.
-
 ## Finalidad inicial
 ¿Por qué esta aplicación?
 
@@ -32,3 +28,4 @@ Posibles formas de implementarlo:
 
 De momento lo implemento usando la opción 1, por ser la más rápida de
 implementar (pero la menos portable, más dificil de mantener, ...)
+

@@ -4,6 +4,7 @@ DIRS =  blink		\
 		IR_remote_control	\
 		music		\
 		POV_toy		\
+		sdinspector	\
 		sensor		\
 		util		
 

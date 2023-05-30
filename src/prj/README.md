@@ -32,7 +32,21 @@ Algunas aplicaciones.
   microcontrolador? Este pequeño programa sirve para medir los pulsos
   generados por el receptor (o cualquier otro dispositivo).
 
+
 ## Un poco más elaboradas
 * [clocks](clocks/README.md): Diferentes tipos de relojes.
+
+* [calculator](calculator/README.md): Implementación de una calculadora
+  básica.
+
+* [IR_remote_control](IR_remote_control/README.md): Investigando el protocolo
+  de los control remotos (por ejemplo, el mando de la tele).
+
+* [music](music/README.md): jugando a tocar diferentes tonos en un altavoz. 
+
+* [sdinspector](sdinspector/README.md): programa para ver el contenido de una
+  SD-card (es un editor de bajo nivel de una SD-card)
+
+
 
 
