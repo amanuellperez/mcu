@@ -40,7 +40,7 @@ This directory contains the following:
   
 
 4. Projects: 
-    * [prj](src/app/README.md): Projects.
+    * [prj](src/prj/README.md): Projects.
 
 
 # mk: Compilation rules.
