@@ -39,8 +39,16 @@
 namespace atd{
 
 // Calcula el CRC7 asociado a los bytes del array `data`
+// Generador: g(x) = x^7 + x^3 + 1
+// data = array con los bytes del número a calcular. data[0] = MSB
+// (big-endian)
 uint8_t CRC7(std::span<uint8_t> data);
 
+// Calcula el CRC8 asociado a los bytes del array `data`
+// Generador: g(x) = x^8 + x^5 + x^4 + 1
+// data = array con los bytes del número a calcular. data[0] = MSB
+// (big-endian)
+uint8_t CRC8_Maxim(std::span<uint8_t> data);
 
 }// namespace
 

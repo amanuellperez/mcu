@@ -62,6 +62,7 @@
  *  01/11/22: write_zero/write_one
  *  25/02/23: is_one_most_significant_bit_of
  *  28/02/23: nibble<n>(); byte<n>();
+ *  21/08/23: reverse_bits
  *
  ****************************************************************************/
 #include <stdint.h> // uint8_t
@@ -624,6 +625,61 @@ inline uint8_t nibble(T x)
     x >>= 4*n;
     return static_cast<uint8_t>(T{0x0F} & x);
 }
+
+
+
+// reverse_bits
+// ------------
+// No suministro funciones para int ya que estoy manipulando bits directamente
+// (descarto usar `std::byte` porque luego hay que hacer un montón de
+// castings)
+// Devuelve el número con los bits en reverse order.
+// Implementación básica: (muy sencilla de entender)
+//inline uint8_t reverse_bits(uint8_t x)
+//{
+//    return ((x & 0x01) << 7) |
+//	   ((x & 0x02) << 5) |
+//	   ((x & 0x04) << 3) |
+//	   ((x & 0x08) << 1) |
+//	   ((x & 0x10) >> 1) |
+//	   ((x & 0x20) >> 3) |
+//	   ((x & 0x40) >> 5) |
+//	   ((x & 0x80) >> 7);
+//}
+
+// Esta es una optimización de la versión anterior. La idea es usar divide &
+// conquer. 
+// Source: https://stackoverflow.com/questions/2602823/in-c-c-whats-the-simplest-way-to-reverse-the-order-of-bits-in-a-byte
+// Si se prueba a compilar la versión anterior y esta en goldbolt (con -O2) se
+// ve claramente que esta es más eficiente.
+inline uint8_t reverse_bits(uint8_t x)
+{
+    x = ((x & 0xF0) >> 4) | ((x & 0x0F) << 4);
+    x = ((x & 0xCC) >> 2) | ((x & 0x33) << 2);
+    x = ((x & 0xAA) >> 1) | ((x & 0x55) << 1);
+
+    return x;
+}
+
+
+// (RRR) ¿por qué no usar concat_bytes?  
+//       Quiero que sea eficiente y no tengo claro si concat_bytes introduce
+//       ineficiencias gratuitas. No debiera pero no he medido.
+inline uint16_t reverse_bits(uint16_t x)
+{
+//  std::span<uint8_t> u = view_as_bytes(x);
+    uint8_t u0 = (x & 0xFF00) >> 8;
+    uint8_t u1 = (x & 0x00FF);
+
+    u0 = reverse_bits(u0);
+    u1 = reverse_bits(u1);
+
+// return concat_bytes(u1, u0);
+    return ((u1 << 8) | u0); 
+
+}
+
+
 
 }// namespace
 

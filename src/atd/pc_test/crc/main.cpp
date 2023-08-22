@@ -38,12 +38,29 @@ void test_crc7()
     
 }
 
+void test_crc8_Maxim()
+{
+    test::interface("CRC8");
+
+    //uint8_t msg[] = {0x40, 0x38, 0x1D, 0x80, 0x00, 0x00, 0x00};
+    //uint8_t msg[] = {0x00, 0x00, 0x00, 0x01, 0xB8, 0x1C, 0x02};
+//    uint8_t msg[] = {0x0F};
+//    uint8_t res = 0x2E;
+    uint8_t msg[] = {0x02};
+    uint8_t res = 0xBC;
+    std::cerr << "crc8 = [0x" << (uint16_t) atd::CRC8_Maxim(msg) << std::hex << "]\n;";
+    CHECK_TRUE(atd::CRC8_Maxim(msg) == res, "atd::CRC8");
+    
+}
+
+
 int main()
 {
 try{
     test::header("CRC");
     
     test_crc7();
+    test_crc8_Maxim();
 
 }catch(std::exception& e)
 {
