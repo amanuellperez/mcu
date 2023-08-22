@@ -35,7 +35,7 @@ void check_span(std::span<int> sp, mtd::span<int> mp)
     for (size_t i = 0; i < sp.size(); ++i)
 	CHECK_TRUE(sp[i] == mp[i], "operator[]");
 
-    {
+    {// begin/end
 	auto si = sp.begin();
 	auto mi = mp.begin();
 	
@@ -45,6 +45,17 @@ void check_span(std::span<int> sp, mtd::span<int> mp)
 	    ++mi;
 	}
 	CHECK_TRUE(mi == mp.end(), "end");
+    }
+    {// rbegin/rend
+	auto si = sp.rbegin();
+	auto mi = mp.rbegin();
+	
+	while (si != sp.rend()){
+	    CHECK_TRUE(*si == *mi, "reverse_iterator");
+	    ++si;
+	    ++mi;
+	}
+	CHECK_TRUE(mi == mp.rend(), "end");
 
     }
 }
@@ -60,6 +71,7 @@ void test_span()
     mtd::array ma = {3, 6, 9};
 
     check_span(sa, ma);
+
 
 }
 

@@ -29,6 +29,7 @@
  * HISTORIA
  *    Manuel Perez
  *    23/12/2022 Versión mínima
+ *    22/08/2023 rbegin/rend
  *
  ****************************************************************************/
 #include "std_config.h"
@@ -114,7 +115,7 @@ public:
     using reference	= T&;
     using const_reference   = const T&;
     using iterator	= T*;
-//  using reverse_iterator
+    using reverse_iterator = STD::reverse_iterator<T*>;
 
 // Member constant
     static constexpr size_t extent = size0;
@@ -142,6 +143,12 @@ public:
     constexpr iterator begin() const noexcept {return ptr_; }
     constexpr iterator end() const noexcept { return ptr_ + size(); }
     
+    constexpr reverse_iterator rbegin() const noexcept 
+				{return reverse_iterator{ptr_ + size()}; }
+
+    constexpr reverse_iterator rend() const noexcept 
+				{ return reverse_iterator{ptr_}; }
+
 // Element access
     constexpr reference operator[](size_type i) const { return ptr_[i]; }
     constexpr pointer data() const noexcept { return ptr_; }
