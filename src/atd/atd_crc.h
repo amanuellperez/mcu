@@ -35,6 +35,8 @@
 
 #include <cstdint>
 #include <span>
+#include <iterator>
+
 #include "atd_bit.h"
 
 namespace atd{
@@ -49,7 +51,7 @@ uint8_t CRC7(std::span<uint8_t> data);
 template <uint8_t g, 
 	  bool reverse_data_bits, 
 	  bool reverse_crc_bits,
-	  typename It>
+	  std::forward_iterator It>
 inline uint8_t CRC8_(It p, It pe)
 {
     uint8_t crc = 0;

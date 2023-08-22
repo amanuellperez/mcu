@@ -31,6 +31,7 @@ INCS= std_cstdio.h		\
 	std_iomanip.h		\
 	std_istream.h		\
 	std_iterator.h		\
+	std_iterator_concepts.h		\
 	std_limits.h		\
 	std_numeric.h		\
 	std_ostream.h		\

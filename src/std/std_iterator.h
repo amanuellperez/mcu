@@ -365,6 +365,8 @@ inline constexpr size_t size(T (&c)[N]) noexcept
 
 }// namespace
 
+#include "std_iterator_concepts.h"
+
 #endif
 
 
