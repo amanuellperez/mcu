@@ -1,7 +1,6 @@
 SOURCES= 
 
 INCS= 	dev_cols_glyphs.h		\
-		dev_clocks.h			\
 		dev_EEPROM_iostream.h	\
 		dev_EEPROM_lineal.h		\
 		dev_LCD_big_digits.h	\
@@ -15,7 +14,6 @@ INCS= 	dev_cols_glyphs.h		\
 		dev_LCD_screen.tcc		\
 		dev_LCD_terminal.h		\
 		dev_LCD_terminal.tcc	\
-		dev_miniclock.h			\
 		dev_square_wave.h
 
 

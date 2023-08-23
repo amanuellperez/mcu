@@ -28,6 +28,8 @@ This directory contains the following:
     * [avr](src/avr/README.md): "Drivers" for avr microcontrollers 
 	(right now, only for ATMEGA328). 
       
+    * [mcu1](src/mcu1/README.md): Generic microcontrollers components.
+
     * [dev0](src/dev0/README.md): Built-in devices.
       To program here you have to know your chip, 
       you need to read the datasheet.
@@ -113,6 +115,12 @@ Se puede organizar el código en diferentes niveles:
 
       Quien programa este directorio tiene que conocer cómo funciona el
       microcontrolador. Necesita leer la datasheet.
+
+    * [mcu1](src/mcu1/README.md): Componentes genéricos de los
+      microcontroladores.
+
+      Son todos aquellos componentes que se implementan usando exclusivamente
+      hardware encontrado en los microcontroladores (timers, pins, ...)
 
     * [dev0](src/dev0/README.md): Built-in devices
 

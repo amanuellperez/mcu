@@ -19,7 +19,8 @@
 
 #include <avr_atmega.h>
 #include "../../../dev_square_wave.h"
-#include "../../../dev_miniclock.h"
+#include <dev_miniclock.h>
+
 
 // DUDA: ¿cómo medir bien esto? No tengo claro como medir la señal generada.
 

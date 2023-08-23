@@ -1,12 +1,12 @@
 BIN = xx
 
-SOURCES= main.cpp	
+SOURCES= main.cpp
 
 #F_CPU = 8000000UL
 
 MCU = atmega328p
 
-include $(DEV1_GENRULES)
+include $(MCU1_GENRULES)
 
 
 

@@ -28,9 +28,9 @@ PROJ_CXXFLAGS=
 # 	Ejemplo: A depende de B. Luego escribir '-lA -lB' y no al revés
 # 	ya que no compilaría.
 PROJ_LDFLAGS=-L$(MCU_LIB) -lapp_$(F_CPU) \
-			 -ldebug_$(F_CPU) 	\
 			 -ldev1_$(F_CPU) -ldev0_$(F_CPU) \
-			 -lavr_$(F_CPU) -latd -lstd
+			 -lmcu1_$(F_CPU) -lavr_$(F_CPU) \
+			 -latd -lstd
 
 include $(MCU_GENRULES)
 

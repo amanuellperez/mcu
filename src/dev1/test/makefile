@@ -1,8 +1,6 @@
-DIRS = clocks			\
-		EEPROM_iostream	\
+DIRS = EEPROM_iostream	\
 		EEPROM_lineal	\
 		LCD				\
-		miniclock		\
 		square_wave
 
 
