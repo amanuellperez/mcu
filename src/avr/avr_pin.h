@@ -85,7 +85,7 @@ public:
     static void as_input_without_pullup() 
     {
 	(*DDR[n]) = (*DDR[n]) & ~BIT_MASK[n];	// de entrada
-	(*PORT[n]) = (*PORT[n]) & ~BIT_MASK[n];	// disabel pull-up resistor
+	(*PORT[n]) = (*PORT[n]) & ~BIT_MASK[n];	// disable pull-up resistor
     }
 
 

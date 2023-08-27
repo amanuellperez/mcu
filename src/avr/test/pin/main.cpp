@@ -28,59 +28,26 @@
 namespace mcu = avr_;
 using Micro = mcu::Micro;
 
-constexpr uint8_t num_pin = 15;
-
+constexpr uint8_t npin = 15;
+using Pin = mcu::Pin<npin>;
 
 void blink()
 {
-    mcu::Pin<num_pin> pin;
-    pin.as_output();
+    Pin::as_output();
 
     mcu::UART_iostream uart;
     for (uint8_t i = 0; i < 10; ++i){
 	uart << '.';
 
-	pin.write_one();
+	Pin::write_one();
 	Micro::wait_ms(500);
 
-	pin.write_zero();
+	Pin::write_zero();
 	Micro::wait_ms(500);
     }
     uart << " DONE\n";
 }
 
-
-void test_output_pin()
-{
-    mcu::UART_iostream uart;
-    uart << "Output_pin test\n";
-
-    mcu::Output_pin<num_pin> pin;
-
-    uart << "\n---------------\n"
-	    "0. Write zero\n"
-	    "1. Write one\n"
-	    "2. Read value\n"
-	    "3. return\n";
-
-    while(1){
-	char ans{};
-	uart >> ans;
-	switch(ans){
-	    break; case '0': pin.write_zero();
-	    break; case '1': pin.write_one();
-	    break; case '2': 
-		    uart << "\nRead:"
-			    "\n\tpin.is_zero() = " << (int) pin.is_zero()
-			 << "\n\tpin.is_one() = " << (int) pin.is_one()
-			 << "\n\tpin.read() = " << (int) pin.read() 
-			 << '\n';
-
-	    break; case '3': return;
-	}
-    }
-
-}
 
 
 int main()
@@ -97,14 +64,31 @@ int main()
 
     while (1){
 	uart << "\nMenu\n"
-		"1. Blink LED pin number " << (int) num_pin << '\n' <<
-		"2. Test Output_pin\n\n";
+		"1. Blink LED pin number " << (int) npin << '\n' <<
+		"2. As output\n"
+		"3. As input with pullup\n"
+		"4. As input without pullup\n"
+		"5. Read value pin\n"
+		"6. Write zero\n"
+		"7. Write one\n\n";
 
 	char ans{};
 	uart >> ans;
 	switch(ans){
-	    break; case '2'	: test_output_pin();
+	    break; case '2'	: Pin::as_output();
+	    break; case '3'	: Pin::as_input_with_pullup();
+	    break; case '4'	: Pin::as_input_without_pullup();
+	    break; case '5': 
+		    uart << "\nRead:"
+			    "\n\tpin.is_zero() = " << (int) Pin::is_zero()
+			 << "\n\tpin.is_one() = " << (int) Pin::is_one()
+			 << "\n\tpin.read() = " << (int) Pin::read() 
+			 << '\n';
+
+	    break; case '6': Pin::write_zero();
+	    break; case '7': Pin::write_one();
 	    break; default	: blink();
+
 	}
     }
 }

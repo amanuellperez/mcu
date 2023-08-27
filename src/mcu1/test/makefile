@@ -1,5 +1,6 @@
 DIRS = clocks		\
-		miniclock
+		miniclock	\
+		onewire
 
 
 include $(MCU_RECRULES)
