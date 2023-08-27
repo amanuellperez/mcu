@@ -26,6 +26,11 @@
  * DESCRIPCION
  *	El correspondiente a <span>
  *
+ * TODO
+ *  Esta clase al ser de C++20 tiene un montón de requires que de momento no
+ *  implemento. Tampoco implemento las precondiciones que lanzan excepciones.
+ *  Hay que revisarlo.
+ *
  * HISTORIA
  *    Manuel Perez
  *    23/12/2022 Versión mínima
@@ -35,6 +40,7 @@
 #include "std_config.h"
 #include "std_type_traits.h"
 #include "std_array.h"
+#include "std_memory.h"	// to_address
 
 #include <cstddef>
 
@@ -125,7 +131,10 @@ public:
 	requires (extent == 0 || extent == dynamic_extent)
 	: ptr_{nullptr}, size_{0} { }
 
-
+    template <typename It>
+    explicit (extent != dynamic_extent)
+    constexpr span(It p0, size_type N) 
+	    : ptr_{to_address(p0)}, size_{N} { }
     template <size_type N>
 	requires (extent == dynamic_extent || N == extent)
 	// TODO: require remove_pointer_t <...>
@@ -161,6 +170,25 @@ public:
     }
 
     [[nodiscard]] constexpr bool empty() const noexcept{ return size() == 0; }
+
+// Subviews
+    template <size_t N>
+    constexpr span<element_type, N> first() const
+    { 
+//	static_assert(N <= size_);
+	return span<element_type, N>{ptr_, N}; 
+    }
+
+//    constexpr span<element_type, dynamic_extent> first(size_type N) const;
+
+    template <size_t N>
+    constexpr span<element_type, N> last() const
+    { 
+	return span<element_type, N>{data()+ (size() - N), N}; 
+    }
+
+//    constexpr span<element_type, dynamic_extent> last(size_type N) const;
+
 
 private:
    pointer ptr_;

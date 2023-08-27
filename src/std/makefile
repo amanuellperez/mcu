@@ -33,6 +33,7 @@ INCS= std_cstdio.h		\
 	std_iterator.h		\
 	std_iterator_concepts.h		\
 	std_limits.h		\
+	std_memory.h		\
 	std_numeric.h		\
 	std_ostream.h		\
 	std_span.h			\
@@ -65,6 +66,7 @@ INCS= std_cstdio.h		\
 	istream		\
 	iterator	\
 	limits		\
+	memory		\
 	numeric		\
 	ostream		\
 	span		\

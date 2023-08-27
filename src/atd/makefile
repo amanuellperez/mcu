@@ -10,6 +10,7 @@ INCS= atd_algorithm.h	\
 	atd_bcd.h			\
 	atd_bit.h 			\
 	atd_cast.h			\
+	atd_crc.h			\
 	atd_cstddef.h		\
 	atd_cstring.h		\
 	atd_decimal.h		\

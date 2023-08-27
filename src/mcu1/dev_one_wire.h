@@ -46,7 +46,7 @@
 
 #include <stdint.h>	    // uint8_t
 #include <dev_interrupt.h>  // Disable_interrupts
-
+#include <atd_crc.h>	    // CRC8_Maxim
 
 namespace dev{
 
@@ -73,8 +73,8 @@ public:
     static bool reset();
 
 // Step 2: ROM Commands
-//// quién está conectado? 
-//    search_rom
+// quién está conectado? 
+//    search_rom: implementado como iteradores.
 //
 //// dime tú nombre (address)? (cuando solo hay un slave conectado)
 //    read_rom
@@ -394,13 +394,17 @@ public:
 
     bool begin_search();
     bool next_search() {return search();}
-    const uint8_t* value() const {return &ROM[0];}
+    const uint8_t* ROM_code() const {return &ROM[0];}
 
+    
+    // Valida que el CRC de la ROM sea correcto.
+    static bool verify_CRC(const uint8_t* ROM);
+	
 // Iteradores
     static One_wire_search begin();
     static One_wire_search_end end() {return One_wire_search_end{};}
     void operator++();
-    const uint8_t* operator*() const {return value();}
+    const uint8_t* operator*() const {return ROM_code();}
 
 // Posibles errores de búsqueda
     bool last_device() const  {return end_ != End_type::no; }
@@ -491,6 +495,21 @@ inline bool operator==(const One_wire_search<C>& a, const One_wire_search_end&)
 template <typename C>
 inline bool operator!=(const One_wire_search<C>& a, const One_wire_search_end& b)
 { return !(a == b); }
+
+
+// Verify CRC
+// ----------
+// El caso ROM[0] = 0x00 es cuando todavía no se ha llamado a search
+template <typename C>
+bool One_wire_search<C>::verify_CRC(const uint8_t* ROM)
+{
+    if (ROM[0] == 0x00)
+	return false;
+
+    uint8_t crc = atd::CRC8_Maxim(std::span<uint8_t>{ROM, 7});
+    
+    return (crc == ROM[8]);
+}
 
 
 // search algorithm

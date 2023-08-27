@@ -142,7 +142,7 @@ void search_test()
     Search search;
     if (search.begin_search()){
 	uart << "Device found\n";
-	const uint8_t* ROM = search.value();
+	const uint8_t* ROM = search.ROM_code();
 
 	for (uint8_t i = 0; i < Search::ROM_size; ++i){
 	    atd::print_int_as_hex(uart, ROM[i]);
@@ -174,6 +174,8 @@ void search_iterator_test()
 	    atd::print_int_as_hex(uart, ROM[i]);
 	    uart << ' ';
 	}
+
+	Search::verify_CRC(p.ROM_code());
 
 	uart << " (press key)\n";
 	char c{};
