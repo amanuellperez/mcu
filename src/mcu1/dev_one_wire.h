@@ -363,13 +363,11 @@ uint8_t One_wire<C>::read()
 
 }
 
-
-// One_wire_search
-// ---------------
-// TODO: clase temporal para probar el search. Convertirla en iteradores
-// normales: 
-//	for (auto p = One_wire::begin_search(); p != end_search(); ++p)
-//	    ROM[i] = *p;
+/***************************************************************************
+ *			    ONE WIRE SEARCH ALGORITHM
+ ***************************************************************************/
+// Helper class usada para definir el iterador al end
+class One_wire_search_end{};
 
 // (RRR) ¿por qué no implementarla como una vulgar función One_wire::search()?
 //	 1. Para poder descomponer el algoritmo en partes.
@@ -391,15 +389,29 @@ public:
     using One_wire = dev::One_wire<Cfg>;
     static constexpr uint8_t ROM_size = One_wire::ROM_size;
 
-    // Find the first devices on the 1-wire bus
-    bool begin();
-    bool next() {return search();}
+// Interfaz básico
+    bool search();
 
+    bool begin_search();
+    bool next_search() {return search();}
     const uint8_t* value() const {return &ROM[0];}
+
+// Iteradores
+    static One_wire_search begin();
+    static One_wire_search_end end() {return One_wire_search_end{};}
+    void operator++();
+    const uint8_t* operator*() const {return value();}
+
+// Posibles errores de búsqueda
+    bool last_device() const  {return end_ != End_type::no; }
+    bool device_found() const {return !no_device_found;}
+
+    template <typename C>
+    friend bool operator==(const One_wire_search<C>& a, const One_wire_search_end&);
 
 private:
 
-
+// STATE
     // valor de la ROM del dispositivo que encontramos en la última llamada a
     // `search`
     uint8_t ROM[ROM_size]; 
@@ -414,15 +426,32 @@ private:
     // CUIDADO: i_last_discrepancy = 0 ==> no hay discrepancias.
     uint8_t i_last_discrepancy;
     
-    // indica si hemos llegado al último dispositivo (ya no hay más
-    // dispositivos conectados al 1-wire)
-    bool last_device;
+    // Cuando iteramos sobre los distintos dispositivos la función `search` es
+    // capaz de saber si la siguiente búsqueda no va a dar más dispositivos.
+    // En ese caso el algoritmo de Maxim marca el flag last_device = true.
+    // Eso quiere decir que este iterador apuntaría a p1 (con la notación
+    // habitual que uso [p0, p1] son los devices, y [p0, pe) sería el primero
+    // y el último + 1). Para poder marcar el `end` necesito poder incrementar
+    // el iterador cuando last_device = true. Para ello distingo entre dos
+    // tipos de ends: last, que corresponde a p1, y end correspondiente a pe.
+    enum class End_type{ no,		// si se llama a search devolverá mas devices
+			 last,		// estamos en p1
+			 end };		// estamos en pe
 
-// HELPER data
+    // indica si hemos llegado al último dispositivo (ya no hay más
+    // dispositivos conectados al 1-wire). 
+    End_type end_;
+
+    // indica que en la búsqueda no se encontro device
+    bool no_device_found;
+
+// HELPER data 
+// (no forman parte del estado; son variables que pasamos de
+// función a función. Para no tener que andarlas pasando las dejo aquí, ya que
+// esta clase es de implementación de algoritmo).
     uint8_t i_last_zero_;
 
 // HELPER FUNCTIONS
-    bool search();
     bool search_device();
     bool read_rom();
     bool read_bit_rom(uint8_t i, uint8_t i_rom, uint8_t rom_mask);
@@ -435,19 +464,50 @@ private:
     void reset_state();
 };
 
+// iterators
+// ---------
+template <typename C>
+inline One_wire_search<C> One_wire_search<C>::begin()
+{
+    One_wire_search search;
+    search.begin_search();
+    return search;
+}
 
+template <typename C>
+inline void One_wire_search<C>::operator++()
+{
+    if (end_ == End_type::no)
+	next_search();
+
+    else if (end_ == End_type::last)
+	end_ = End_type::end;
+}
+
+template <typename C>
+inline bool operator==(const One_wire_search<C>& a, const One_wire_search_end&)
+{ return a.end_ == One_wire_search<C>::End_type::end;}
+
+template <typename C>
+inline bool operator!=(const One_wire_search<C>& a, const One_wire_search_end& b)
+{ return !(a == b); }
+
+
+// search algorithm
+// ----------------
 template <typename C>
 void One_wire_search<C>::reset_state()
 {
     i_last_discrepancy = 0;
-    last_device = false;
+    end_ = End_type::no;
+    no_device_found = false;
 
     for (uint8_t i = 0; i < ROM_size; ++i)
 	ROM[i] = 0;
 }
 
 template <typename C>
-bool One_wire_search<C>::begin()
+bool One_wire_search<C>::begin_search()
 {
     reset_state();
 
@@ -455,20 +515,26 @@ bool One_wire_search<C>::begin()
 }
 
 
+// Devuelve true en caso de encontrar un device nuevo.
+// false en caso contrario 
+// (a día de hoy devolvera false si:
+//     1.- es el último device
+//     2.- si no ha encontrado device, en este caso marca no_device_found = true
+// )
 template <typename C>
 bool One_wire_search<C>::search()
 {
     bool search_result = false;	// se encontro device?
     i_last_zero_ = 0;
 				
-    if (!last_device)
+    if (end_ == End_type::no)
 	search_result = search_device();
 
     if (search_result){ // actualizamos el state
 	i_last_discrepancy = i_last_zero_;
 
 	if (i_last_discrepancy == 0)
-	    last_device = true;
+	    end_ = End_type::last;
     }
 
     if (!search_result or !ROM[0]){ // ¿por qué miran también ROM[0]???
@@ -542,7 +608,9 @@ bool One_wire_search<C>::read_bit_rom(uint8_t i,
 	break; case 0x00: next_bit = calculate_next_bit(i, i_rom, rom_mask);
 	break; case 0x01: next_bit = 0;
 	break; case 0x10: next_bit = 1;
-	break; case 0x11: return false;
+	break; case 0x11: 
+		    no_device_found = true;
+		    return false;
     }
 
     ROM_write(i_rom, rom_mask, next_bit);
