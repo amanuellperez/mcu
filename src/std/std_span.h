@@ -135,6 +135,7 @@ public:
     explicit (extent != dynamic_extent)
     constexpr span(It p0, size_type N) 
 	    : ptr_{to_address(p0)}, size_{N} { }
+
     template <size_type N>
 	requires (extent == dynamic_extent || N == extent)
 	// TODO: require remove_pointer_t <...>
@@ -179,15 +180,17 @@ public:
 	return span<element_type, N>{ptr_, N}; 
     }
 
-//    constexpr span<element_type, dynamic_extent> first(size_type N) const;
+    constexpr span<element_type, dynamic_extent> first(size_type N) const
+    // precondition: N <= size() is true
+    { return {data(), N}; }
+
 
     template <size_t N>
     constexpr span<element_type, N> last() const
-    { 
-	return span<element_type, N>{data()+ (size() - N), N}; 
-    }
+    { return span<element_type, N>{data()+ (size() - N), N}; }
 
-//    constexpr span<element_type, dynamic_extent> last(size_type N) const;
+    constexpr span<element_type, dynamic_extent> last(size_type N) const
+    { return {data() + (size() - N), N}; }
 
 
 private:

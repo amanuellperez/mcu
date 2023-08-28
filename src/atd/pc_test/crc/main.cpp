@@ -39,21 +39,46 @@ void test_crc7()
     
 }
 
-void test_crc8_Maxim(std::span<uint8_t> msg, uint8_t res)
+void test_crc8_Maxim(std::span<const uint8_t> msg, uint8_t res)
 {
     CHECK_TRUE(atd::CRC8_Maxim(msg) == res, "atd::CRC8_Maxim");
+}
+
+void test_crc8_Maxim(const uint8_t* msg, size_t N, uint8_t res)
+{
+    CHECK_TRUE(atd::CRC8_Maxim(msg, N) == res, "atd::CRC8_Maxim");
 }
 
 void test_crc8_Maxim()
 {
     test::interface("CRC8");
 
-    {uint8_t msg[] = {0x01}; test_crc8_Maxim(msg, 0x5E);}
-    {uint8_t msg[] = {0x02}; test_crc8_Maxim(msg, 0xBC);}
-    {uint8_t msg[] = {0x0F}; test_crc8_Maxim(msg, 0x41);}
     {
-	uint8_t msg[] = {0x00, 0x00, 0x00, 0x01, 0xB8, 0x1C, 0x02};
+	uint8_t msg[] = {0x01}; 
+	test_crc8_Maxim(msg, 0x5E);
+	test_crc8_Maxim(msg, 1, 0x5E);
+    }
+    {
+	uint8_t msg[] = {0x02}; 
+	test_crc8_Maxim(msg, 0xBC);
+	test_crc8_Maxim(msg, 1, 0xBC);
+    }
+    {
+	uint8_t msg[] = {0x0F}; 
+	test_crc8_Maxim(msg, 0x41);
+	test_crc8_Maxim(msg, 1, 0x41);
+    }
+    {
+	// uint8_t msg[] = {0x00, 0x00, 0x00, 0x01, 0xB8, 0x1C, 0x02};
+	uint8_t msg[] = {0x02, 0x1C, 0xB8, 0x01, 0x00, 0x00, 0x00};
 	test_crc8_Maxim(msg, 0xA2);
+	test_crc8_Maxim(msg, 7, 0xA2);
+    }
+    {
+	// uint8_t msg[] = {0x05, 0x17, 0x02, 0x6E, 0x6E, 0xFF, 0x28};
+	uint8_t msg[] = {0x28, 0xFF, 0x6E, 0x6E, 0x02, 0x17, 0x05};
+	test_crc8_Maxim(msg, 0x8C);
+	test_crc8_Maxim(msg, 7, 0x8C);
     }
     
 }

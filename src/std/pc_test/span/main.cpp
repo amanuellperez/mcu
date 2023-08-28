@@ -64,25 +64,6 @@ void check_span0(std::span<int> sp, mtd::span<int> mp)
 
     }
 
-//    {// first
-//	//auto si = sp.first<2>();
-//	auto mi = mp.first<2>();
-//
-////	CHECK_TRUE(si.size() == mi.size(), "first(size)");
-////
-////	for (size_t i = 0; i < si.size(); ++i)
-////	    CHECK_TRUE(sp[i] == mp[i], "first");
-//    }
-////
-////    {// last
-////	auto si = sp.last<2>();
-////	auto mi = mp.last<2>();
-////
-////	CHECK_TRUE(si.size() == mi.size(), "last(size)");
-////
-////	for (size_t i = 0; i < si.size(); ++i)
-////	    CHECK_TRUE(sp[i] == mp[i], "last");
-////    }
 }
 
 template <size_t sz>
@@ -126,6 +107,25 @@ void check_span(std::span<int, sz> sp, mtd::span<int, sz> mp)
 
 }
 
+void test_conversion_from_array(std::span<int> s, mtd::span<int> m, size_t sz)
+{
+    CHECK_TRUE(s.size() == m.size(), "size");
+    CHECK_TRUE(s.extent == m.extent, "extent");
+    CHECK_TRUE(m.size() == sz, "size");
+
+    // Observar que como pasamos std::span<int> el extent es dinámico.
+    // ¿por qué? No debería de ser static? A fin de cuentas estoy pasando un
+    // array de C por debajo (en el caso de a[9])
+    std::cout << "std.extent =\t\t\t" << s.extent
+	      << "\nmtd.extent =\t\t\t" << m.extent 
+	      << "\nstatic_cast<size_t>(-1) =\t" << static_cast<size_t>(-1) << '\n';
+
+    std::cout << "std.size () = " << s.size()
+	      << "\nmtd.size() = " << m.size() << '\n';
+}
+
+
+
 
 void test_span()
 {
@@ -135,6 +135,9 @@ void test_span()
 
     std::array sa = {3, 6, 9};
     mtd::array ma = {3, 6, 9};
+
+    test_conversion_from_array(a, a, 9);
+    test_conversion_from_array(sa, ma, 3);
 
     check_span0(sa, ma);
 
@@ -147,20 +150,30 @@ void test_span()
 	std::span<int, 4> sb{a, 4};
 	mtd::span<int, 4> mb{a, 4};
 
-	auto sc = sb.first<2>();
-	auto mc = mb.first<2>();
-	check_equal(sc, mc);
+	auto sc1 = sb.first<2>();
+	auto mc1 = mb.first<2>();
+	check_equal(sc1, mc1);
 
+	auto sc2 = sb.first(2);
+	auto mc2 = mb.first(2);
+	check_equal(sc2, mc2);
     }
+
     {// last
 	std::span<int, 4> sb{a, 4};
 	mtd::span<int, 4> mb{a, 4};
 
-	auto sc = sb.last<2>();
-	auto mc = mb.last<2>();
-	check_equal(sc, mc);
+	auto sc1 = sb.last<2>();
+	auto mc1 = mb.last<2>();
+	check_equal(sc1, mc1);
+
+	auto sc2 = sb.last(2);
+	auto mc2 = mb.last(2);
+	check_equal(sc2, mc2);
 
     }
+
+
 
 }
 

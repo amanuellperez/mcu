@@ -45,7 +45,7 @@ namespace atd{
 // Generador: g(x) = x^7 + x^3 + 1
 // data = array con los bytes del número a calcular. data[0] = MSB
 // (big-endian)
-uint8_t CRC7(std::span<uint8_t> data);
+uint8_t CRC7(std::span<const uint8_t> data);
 
 
 template <uint8_t g, 
@@ -99,7 +99,7 @@ template <uint8_t g, // función generadora
 	  bool reverse_data_bits, 
 	  bool reverse_crc_bits,
 	  bool data_is_big_endian = true> // dice que data[0] = MSB
-uint8_t CRC8(std::span<uint8_t> data)
+uint8_t CRC8(std::span<const uint8_t> data)
 {
     if (data.empty())
 	return 0;
@@ -119,8 +119,14 @@ uint8_t CRC8(std::span<uint8_t> data)
 // Generador: g(x) = x^8 + x^5 + x^4 + 1
 // data = array con los bytes del número a calcular. data[0] = MSB
 // (big-endian)
-inline uint8_t CRC8_Maxim(std::span<uint8_t> data)
-{ return CRC8<0x31, true, true, false>(data); }
+inline uint8_t CRC8_Maxim(std::span<const uint8_t> data)
+{ return CRC8<0x31, true, true, true>(data); }
+
+inline uint8_t CRC8_Maxim(const uint8_t* data, size_t N)
+{ 
+    std::span<const uint8_t> d{data, N};
+    return CRC8<0x31, true, true, true>(d.first(N)); 
+}
 
 }// namespace
 

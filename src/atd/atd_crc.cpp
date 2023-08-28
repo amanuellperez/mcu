@@ -36,7 +36,7 @@
 
 namespace atd{
 
-uint8_t CRC7(std::span<uint8_t> data)
+uint8_t CRC7(std::span<const uint8_t> data)
 {
     // g(x) = x^7 + x^3 + 1 = 0b10001001 = 0x89
     constexpr uint8_t g = 0x89; 

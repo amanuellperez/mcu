@@ -506,9 +506,9 @@ bool One_wire_search<C>::verify_CRC(const uint8_t* ROM)
     if (ROM[0] == 0x00)
 	return false;
 
-    uint8_t crc = atd::CRC8_Maxim(std::span<uint8_t>{ROM, 7});
-    
-    return (crc == ROM[8]);
+    uint8_t crc = atd::CRC8_Maxim(ROM, 7);
+
+    return (crc == ROM[7]);
 }
 
 

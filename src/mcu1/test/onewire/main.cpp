@@ -57,6 +57,15 @@ void print_menu()
 
 }
 
+void print_family_name(uint8_t code)
+{
+    mcu::UART_iostream uart;
+    switch (code){
+	break; case 0x28: uart << "DS18B20";
+	break; default:  uart << "Unknown or wrong";
+    }
+}
+
 void DS18B20_test()
 {
     mcu::UART_iostream uart;
@@ -167,7 +176,9 @@ void search_iterator_test()
     uint8_t i = 0;
     for (auto p = Search::begin(); 
 	      p != Search::end(); ++p, ++i){
-	uart << "Device found: ROM[" << (int) i << "] = ";
+	uart << "Device " << (int) i << " found\n";
+	
+	uart << "  ROM   : ";
 
 	const uint8_t* ROM = *p;
 	for (uint8_t i = 0; i < Search::ROM_size; ++i){
@@ -175,9 +186,19 @@ void search_iterator_test()
 	    uart << ' ';
 	}
 
-	Search::verify_CRC(p.ROM_code());
+	uart << "\n  Family: ";
+	print_family_name(ROM[0]);
+	uart << '\n';
 
-	uart << " (press key)\n";
+	uart << "  CRC   : ";
+	if (Search::verify_CRC(p.ROM_code()))
+	    uart << "OK";
+	else
+	    uart << "WRONG";
+
+
+
+	uart << "\nPress key to continue\n";
 	char c{};
 	uart >> c;
     }
