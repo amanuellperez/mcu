@@ -32,6 +32,7 @@ using Pin = mcu::Pin<test_pin>;
 using Cfg = dev::One_wire_cfg<mcu::Micro, Pin>;
 
 using One_wire = dev::One_wire<Cfg>;
+using One_wire_device = dev::One_wire_device;
 using Search = dev::One_wire_search<Cfg>;
 
 
@@ -57,14 +58,6 @@ void print_menu()
 
 }
 
-void print_family_name(uint8_t code)
-{
-    mcu::UART_iostream uart;
-    switch (code){
-	break; case 0x28: uart << "DS18B20";
-	break; default:  uart << "Unknown or wrong";
-    }
-}
 
 void DS18B20_test()
 {
@@ -141,29 +134,6 @@ void basic_test()
 
 }
 
-void search_test()
-{
-    mcu::UART_iostream uart;
-
-    uart << "\nSearch test\n"
-	      "-----------\n";
-
-    Search search;
-    if (search.begin_search()){
-	uart << "Device found\n";
-	const uint8_t* ROM = search.ROM_code();
-
-	for (uint8_t i = 0; i < Search::ROM_size; ++i){
-	    atd::print_int_as_hex(uart, ROM[i]);
-	    uart << ' ';
-	}
-	uart << '\n';
-    }
-
-    else
-	uart << "No device found\n";
-
-}
 
 void search_iterator_test()
 {
@@ -180,18 +150,18 @@ void search_iterator_test()
 	
 	uart << "  ROM   : ";
 
-	const uint8_t* ROM = *p;
-	for (uint8_t i = 0; i < Search::ROM_size; ++i){
-	    atd::print_int_as_hex(uart, ROM[i]);
+	auto device = *p;
+	for (uint8_t i = 0; i < One_wire_device::ROM_size; ++i){
+	    atd::print_int_as_hex(uart, device.ROM[i]);
 	    uart << ' ';
 	}
 
 	uart << "\n  Family: ";
-	print_family_name(ROM[0]);
+	print_family_name(uart, device);
 	uart << '\n';
 
 	uart << "  CRC   : ";
-	if (Search::verify_CRC(p.ROM_code()))
+	if (device.is_ok_CRC())
 	    uart << "OK";
 	else
 	    uart << "WRONG";
@@ -224,7 +194,6 @@ int main()
     while(1){
 //	print_menu();
 	// basic_test();
-//	search_test();
 	search_iterator_test();
 	// DS18B20_test();
     }

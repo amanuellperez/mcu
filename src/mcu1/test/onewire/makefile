@@ -1,6 +1,7 @@
 BIN = xx
 
-SOURCES= main.cpp
+SOURCES= main.cpp	\
+		 ../../dev_one_wire.cpp
 
 #F_CPU = 8000000UL
 

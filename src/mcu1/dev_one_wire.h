@@ -45,12 +45,80 @@
  ****************************************************************************/
 
 #include <stdint.h>	    // uint8_t
+#include <iostream>
+
 #include <dev_interrupt.h>  // Disable_interrupts
 #include <atd_crc.h>	    // CRC8_Maxim
+			    
 
 namespace dev{
 
+/***************************************************************************
+ *			    ONE WIRE DEVICE
+ ***************************************************************************/
+struct One_wire_device{
+    static constexpr uint8_t ROM_size = 8;
 
+    One_wire_device() {reset();}
+
+    // DUDA: En vez de reset() mejor `make_no_valid()`. A fin de cuentas es
+    // lo que realmente estamos haciendo.
+    void reset();
+
+// Accessing ROM
+    // i    = número de byte de la ROM al que queremos acceder
+    // mask = máscara a poner para acceder a ese bit
+    // Devuelve ROM[i,mask]
+    uint8_t ROM_bit(uint8_t i, uint8_t mask);
+
+    // ROM[i, mask] = bit
+    void ROM_write(uint8_t i, uint8_t mask, uint8_t bit);
+
+// Meaning of ROM code
+    uint8_t CRC() const {return ROM[7];}   
+
+// Checking
+    bool is_ok_CRC() const;
+
+// Data
+    uint8_t ROM[ROM_size]; 
+};
+
+
+inline void One_wire_device::reset()
+{
+    for (uint8_t i = 0; i < ROM_size; ++i)
+	ROM[i] = 0;
+}
+
+inline uint8_t One_wire_device::ROM_bit(uint8_t i, uint8_t mask)
+{
+    if (ROM[i] & mask)
+	return 1;
+
+    return 0;
+}
+
+// ROM[i, mask] = bit
+inline void One_wire_device::ROM_write(uint8_t i, uint8_t mask, uint8_t bit)
+{
+    if (bit)
+	ROM[i] |= mask;
+
+    else 
+	ROM[i] &=~ mask;
+}
+
+// TODO: esta función ocupa demasiado memoria (cuando esté implementada con
+// todas las familias) ya que las cadenas con los nombres no se están
+// almacenando en la PROGMEM. Almacenarlas en la progmem pero de forma
+// genérica (que sirva con cualquier microcontrolador) 
+void print_family_name(std::ostream& out, const One_wire_device& dev);
+
+
+/***************************************************************************
+ *			    ONE WIRE PROTOCOL
+ ***************************************************************************/
 template <typename Micro0,
 	  typename Pin0>
 struct One_wire_cfg{
@@ -64,33 +132,36 @@ template <typename Cfg>
 class One_wire{
 public:
     using Micro	    = typename Cfg::Micro;
-//    using Miniclock = typename Cfg::Miniclock;
-    static constexpr uint8_t ROM_size = 8;
+    using Device    = One_wire_device;
 
 // Transaction sequence
 // Step 1: Initializacion
     // Devuelve true si ha detectado slave presentes, false en caso contrario.
     static bool reset();
 
-// Step 2: ROM Commands
-// quién está conectado? 
-//    search_rom: implementado como iteradores.
+//// Step 2: ROM Commands
+////  search_rom: Iteramos sobre los dispositivos conectados
+//    static One_wire_search<Cfg> begin_search();
+//    static One_wire_search<Cfg> end_search();
 //
+////// quién tiene el `alarm flag` set?
+////  alarm_search: Iteramos sobre los dispositivos with the alarm flag set
+//    static One_wire_search<Cfg> begin_alarm_search();
+//    static One_wire_search<Cfg> end_alarm_search();
+
+
 //// dime tú nombre (address)? (cuando solo hay un slave conectado)
 //    read_rom
 //
 //// Atención: quiero hablar con 
-    static void match_rom(const uint8_t ROM[ROM_size]);
+    static void match_rom(const Device& dev);
 
     // La datasheet lo llama match_rom, pero un nombre más natural es el de
     // `select`
-    static void select(const uint8_t ROM[ROM_size]) { match_rom(ROM); }
+    static void select(const Device& dev) { match_rom(dev); }
 //
 //// Atención todo el mundo!
     static void skip_rom() {write(0xCC);}
-//
-//// quién tiene el `alarm flag` set?
-//    alarm_search
 //
 
 // Step 3: Function Commands
@@ -241,12 +312,12 @@ bool One_wire<C>::reset()
 
 
 template <typename C>
-void One_wire<C>::match_rom(const uint8_t ROM[8])
+void One_wire<C>::match_rom(const Device& dev)
 {
     write(0x55);
 
     for (uint8_t i = 0; i < 8; ++i)
-	write(ROM[i]);
+	write(dev.ROM[i]);
 }
 
 
@@ -363,6 +434,7 @@ uint8_t One_wire<C>::read()
 
 }
 
+
 /***************************************************************************
  *			    ONE WIRE SEARCH ALGORITHM
  ***************************************************************************/
@@ -387,24 +459,23 @@ template <typename Cfg>
 class One_wire_search{
 public:
     using One_wire = dev::One_wire<Cfg>;
-    static constexpr uint8_t ROM_size = One_wire::ROM_size;
+    using Device   = One_wire_device;
+    static constexpr uint8_t ROM_size = Device::ROM_size;
+
+// Tipo de búsqueda
+    void alarm_search() {normal_search_ = false;}
 
 // Interfaz básico
     bool search();
 
     bool begin_search();
     bool next_search() {return search();}
-    const uint8_t* ROM_code() const {return &ROM[0];}
 
-    
-    // Valida que el CRC de la ROM sea correcto.
-    static bool verify_CRC(const uint8_t* ROM);
-	
 // Iteradores
     static One_wire_search begin();
     static One_wire_search_end end() {return One_wire_search_end{};}
     void operator++();
-    const uint8_t* operator*() const {return ROM_code();}
+    const Device& operator*() const {return device_;}
 
 // Posibles errores de búsqueda
     bool last_device() const  {return end_ != End_type::no; }
@@ -414,12 +485,18 @@ public:
     friend bool operator==(const One_wire_search<C>& a, const One_wire_search_end&);
 
 private:
+// CFG
+    // Type of search
+    bool normal_search_ = true; // si true, hace normal search, 
+				// en caso contrario alarm search.
+
 
 // STATE
     // valor de la ROM del dispositivo que encontramos en la última llamada a
     // `search`
-    uint8_t ROM[ROM_size]; 
-	    
+    Device device_;
+
+
     // Indica la posición en que encontramos la última discrepancia igual a 0.
     // Cuando recorremos el diagrama de árbol cuando encontremos una
     // discrepancia (un nodo del árbol) vamos a seguir primero el camino
@@ -461,8 +538,6 @@ private:
     bool read_bit_rom(uint8_t i, uint8_t i_rom, uint8_t rom_mask);
     uint8_t read_two_bits();
     uint8_t calculate_next_bit(uint8_t i, uint8_t i_rom, uint8_t rom_mask);
-    uint8_t ROM_bit(uint8_t i, uint8_t mask); 
-    void ROM_write(uint8_t i, uint8_t mask, uint8_t bit);
 
     
     void reset_state();
@@ -470,6 +545,7 @@ private:
 
 // iterators
 // ---------
+// CUIDADO: estoy devolviendo by value un objeto de más de 8 bytes.
 template <typename C>
 inline One_wire_search<C> One_wire_search<C>::begin()
 {
@@ -497,21 +573,6 @@ inline bool operator!=(const One_wire_search<C>& a, const One_wire_search_end& b
 { return !(a == b); }
 
 
-// Verify CRC
-// ----------
-// El caso ROM[0] = 0x00 es cuando todavía no se ha llamado a search
-template <typename C>
-bool One_wire_search<C>::verify_CRC(const uint8_t* ROM)
-{
-    if (ROM[0] == 0x00)
-	return false;
-
-    uint8_t crc = atd::CRC8_Maxim(ROM, 7);
-
-    return (crc == ROM[7]);
-}
-
-
 // search algorithm
 // ----------------
 template <typename C>
@@ -521,8 +582,7 @@ void One_wire_search<C>::reset_state()
     end_ = End_type::no;
     no_device_found = false;
 
-    for (uint8_t i = 0; i < ROM_size; ++i)
-	ROM[i] = 0;
+    device_.reset();
 }
 
 template <typename C>
@@ -556,7 +616,7 @@ bool One_wire_search<C>::search()
 	    end_ = End_type::last;
     }
 
-    if (!search_result or !ROM[0]){ // ¿por qué miran también ROM[0]???
+    if (!search_result or !device_.ROM[0]){ // ¿por qué miran también ROM[0]???
 	reset_state();
 	search_result = false;
     }
@@ -574,7 +634,12 @@ bool One_wire_search<C>::search_device()
 	return false; 
     }
 
-    One_wire::write(0xF0);	// search command
+    if (normal_search_)
+	One_wire::write(0xF0);	// search command
+    
+    else
+	One_wire::write(0xEC);	// alarm search command
+
 
     return read_rom();
 }
@@ -632,7 +697,7 @@ bool One_wire_search<C>::read_bit_rom(uint8_t i,
 		    return false;
     }
 
-    ROM_write(i_rom, rom_mask, next_bit);
+    device_.ROM_write(i_rom, rom_mask, next_bit);
     One_wire::write_bit(next_bit);
 
     return true;
@@ -667,7 +732,7 @@ uint8_t One_wire_search<C>::calculate_next_bit(uint8_t i,
     uint8_t next_bit{};
 
     if (i < i_last_discrepancy){
-	next_bit = ROM_bit(i_rom, rom_mask);
+	next_bit = device_.ROM_bit(i_rom, rom_mask);
     }
 
     else if (i == i_last_discrepancy)
@@ -683,27 +748,6 @@ uint8_t One_wire_search<C>::calculate_next_bit(uint8_t i,
 }
 
 
-// Devuelve el bit ROM[i, mask]
-template <typename C>
-inline uint8_t One_wire_search<C>::ROM_bit(uint8_t i, uint8_t mask)
-{
-    if (ROM[i] & mask)
-	return 1;
-
-    return 0;
-}
-
-// ROM[i, mask] = bit
-template <typename C>
-inline void One_wire_search<C>::ROM_write(uint8_t i, uint8_t mask,
-					  uint8_t bit)
-{
-    if (bit)
-	ROM[i] |= mask;
-
-    else 
-	ROM[i] &=~ mask;
-}
 
 
 }// namespace
