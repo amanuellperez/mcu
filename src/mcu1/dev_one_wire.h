@@ -328,7 +328,7 @@ void One_wire<C>::match_rom(const Device& dev)
 {
     write(0x55);
 
-    for (uint8_t i = 0; i < 8; ++i)
+    for (uint8_t i = 0; i < Device::ROM_size; ++i)
 	write(dev.ROM[i]);
 }
 

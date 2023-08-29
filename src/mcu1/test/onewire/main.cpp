@@ -17,11 +17,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include <avr_atmega.h>	// TODO: orden!!!
-namespace mcu = atmega; // TODO: orden
-using Micro = mcu::Micro;
-#include <atd_ostream.h>
 #include "../../dev_one_wire.h"
+
+#include <atd_ostream.h>
+#include <avr_atmega.h>	
+namespace mcu = atmega; 
+using Micro = mcu::Micro;
 
 // Devices
 // -------

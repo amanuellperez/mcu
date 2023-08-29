@@ -74,12 +74,13 @@ Driver: [HD44780](#HD44780)
 
 ## Sensors
 
-| Reference |  T  |  P  |  H  |  G  | I2C | SPI | datasheet |
-|-----------|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-|BMP280     |  x  |  x  |     |     |  x  |  x  |[datasheet](datasheet/BMP280.pdf)
-|BME280     |  x  |  x  |  x  |     |  x  |  x  |[datasheet](datasheet/BME280.pdf)
-|BME680     |  x  |  x  |  x  |  x  |  x  |  x  |[datasheet](datasheet/BME680.pdf)
-|LM75A      |  x  |     |     |     |  x  |     |
+| Reference |  T  |  P  |  H  |  G  | I2C | SPI | 1WIRE |datasheet |
+|-----------|:---:|:---:|:---:|:---:|:---:|:---:|:-----:|:--------:|
+|BMP280     |  x  |  x  |     |     |  x  |  x  |       |[datasheet](datasheet/BMP280.pdf)
+|BME280     |  x  |  x  |  x  |     |  x  |  x  |       |[datasheet](datasheet/BME280.pdf)
+|BME680     |  x  |  x  |  x  |  x  |  x  |  x  |       |[datasheet](datasheet/BME680.pdf)
+|LM75A      |  x  |     |     |     |  x  |     |       |
+|DS18B20    |  x  |     |     |     |     |     |   x   |[datasheet](datasheet/DS18B20.pdf)
 
 
 T = temperature
