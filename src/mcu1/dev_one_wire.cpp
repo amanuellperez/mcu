@@ -28,10 +28,11 @@
  *
  ****************************************************************************/
 #include "dev_one_wire.h"
+#include <atd_ostream.h>
 
 namespace dev{
 
-bool One_wire_device::is_ok_CRC() const
+bool One_wire_device::is_CRC_ok() const
 {
     if (ROM[0] == 0x00)
 	return false;
@@ -45,6 +46,14 @@ void print_family_name(std::ostream& out, const One_wire_device& dev)
     switch (dev.ROM[0]){
 	break; case 0x28: out << "DS18B20";
 	break; default  : out << "Unknown or wrong";
+    }
+}
+
+void print_rom_as_hex(std::ostream& out, const One_wire_device& dev)
+{
+    for (uint8_t i = 0; i < One_wire_device::ROM_size; ++i){
+	atd::print_int_as_hex(out, dev.ROM[i]);
+	out << ' ';
     }
 }
 

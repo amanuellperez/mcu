@@ -52,12 +52,131 @@ void print_menu()
 {
     mcu::UART_iostream uart;
 
-    uart << "\n----------------\n";
+    uart << "\n----------------\n"
+	    "[b]asic test\n"
+	    "[r]ead rom (only one device connected to the 1-wire)\n"
+	    "[s]earch command\n"
+	    "[D]S1820 test\n"
+            "----------------\n";
+
 
     
 
 }
 
+void print_device_found(const Device& dev)
+{
+    mcu::UART_iostream uart;
+
+    uart << "Device found\n";
+    
+    uart << "  ROM   : ";
+
+    print_rom_as_hex(uart, dev);
+
+    uart << "\n  Family: ";
+    print_family_name(uart, dev);
+    uart << '\n';
+
+    uart << "  CRC   : ";
+    if (dev.is_CRC_ok())
+	uart << "OK";
+    else
+	uart << "WRONG";
+}
+
+void DS18B20_convert_T()
+{
+    mcu::UART_iostream uart;
+
+    One_wire::reset();
+    One_wire::write(0xCC); // Skip ROM command to select a single device
+
+    uart << "Convert T command ... ";
+    One_wire::write(0x44);
+
+    uint16_t time_out = 0;
+    while (One_wire::read_bit() == 0) {
+	Micro::wait_ms(1);
+	++time_out;
+	if (time_out > 3000){ // esperamos 3 segundos máximo
+	    uart << "TIME OUT\n";
+	    return;
+	}
+    }
+
+    uart << "OK\n";
+}
+
+void DS18B20_print_T(uint8_t T0, uint8_t T1)
+{
+    int8_t T = ((T0 & 0xF0) >> 4) | ((T1 & 0x0F) << 4);
+    if (T1 & 0xF0)
+	T = -T;
+    
+    uint8_t T_dec = (T0 & 0x0F);
+
+    mcu::UART_iostream uart;
+    uart << (int) T << '.' << (int) T_dec;
+}
+
+
+void DS18B20_print_scratchpad(const uint8_t* scratchpad)
+{
+    mcu::UART_iostream uart;
+
+    uart << "Scratchpad\n"
+	    "\tTemperature (LSB MSB = 0x50 0x05)= ";
+
+    atd::print_int_as_hex(uart, scratchpad[0]);
+    uart << ' ';
+    atd::print_int_as_hex(uart, scratchpad[1]);
+    uart << " ---> ";
+    DS18B20_print_T(scratchpad[0], scratchpad[1]);
+
+    uart << "\n\tTH = ";
+    atd::print_int_as_hex(uart, scratchpad[3]);
+    uart << "\n\tTL = ";
+    atd::print_int_as_hex(uart, scratchpad[4]);
+    uart << "\n\tReserved (0xFF 0x?? 0x10) = ";
+    atd::print_int_as_hex(uart, scratchpad[5]);
+    uart << ' ';
+    atd::print_int_as_hex(uart, scratchpad[6]);
+    uart << ' ';
+    atd::print_int_as_hex(uart, scratchpad[7]);
+    uart << "\n\tCRC = ";
+    atd::print_int_as_hex(uart, scratchpad[8]);
+    uart << " (";
+    if (scratchpad[8] == atd::CRC8_Maxim(scratchpad, 8))
+	uart << "OK";
+    else
+	uart << "WRONG";
+
+    uart << ")\n";
+}
+
+
+void DS18B20_read_scratchpad()
+{
+    mcu::UART_iostream uart;
+
+    static constexpr uint8_t scratchpad_size = 9;
+    uint8_t scratchpad[scratchpad_size];
+
+    if (!One_wire::reset()){
+	uart << "NO devices found!!!\n";
+	return;
+    }
+    else
+	uart << "Device detected\n";
+
+    One_wire::skip_rom();
+    One_wire::write(0xBE);
+    for (uint8_t i = 0; i < scratchpad_size; ++i)
+	scratchpad[i] = One_wire::read();
+
+    DS18B20_print_scratchpad(scratchpad);
+}
 
 void DS18B20_test()
 {
@@ -71,41 +190,9 @@ void DS18B20_test()
     char ans{};
     uart >> ans;
 
-
-
-    // Read the contents of the scratchpad
-    static constexpr uint8_t scratchpad_size = 9;
-    uint8_t scratchpad[scratchpad_size];
-
-    if (!One_wire::reset()){
-	uart << "NO devices found!!!\n";
-	return;
-    }
-    else
-	uart << "Device detected\n";
-
-    One_wire::skip_rom();
-    One_wire::write(0xBE);
-    for (uint8_t i = 0; i < scratchpad_size; ++i){
-	scratchpad[i] = One_wire::read();
-	atd::print_int_as_hex(uart, scratchpad[i]);
-	uart << ' ';
-    }
-
-    uart << '\n';
-
-    
-    One_wire::reset();
-    One_wire::write(0xCC); // Skip ROM command to select a single device
-
-    uart << "Convert T command ... ";
-    One_wire::write(0x44);
-    while (One_wire::read_bit() == 0)
-	uart << '.';
-
-    uart << "OK\n";
-
-
+    DS18B20_read_scratchpad();
+    DS18B20_convert_T();
+    DS18B20_read_scratchpad();
 }
 
 
@@ -146,24 +233,7 @@ void search_test(Search::Type type)
     while (search(dev)){
 	++n; 
 
-	uart << "Device " << (int) n << " found\n";
-	
-	uart << "  ROM   : ";
-
-	for (uint8_t i = 0; i < Device::ROM_size; ++i){
-	    atd::print_int_as_hex(uart, dev.ROM[i]);
-	    uart << ' ';
-	}
-
-	uart << "\n  Family: ";
-	print_family_name(uart, dev);
-	uart << '\n';
-
-	uart << "  CRC   : ";
-	if (dev.is_ok_CRC())
-	    uart << "OK";
-	else
-	    uart << "WRONG";
+	print_device_found(dev);
 
 
 	uart << "\nPress key to continue\n";
@@ -199,6 +269,24 @@ void search_test()
     }
 }
 
+void read_rom_test()
+{
+    mcu::UART_iostream uart;
+    uart << "Read rom command\n";
+
+    if (!One_wire::reset()){
+	uart << "No device found\n";
+	return;
+    }
+
+    Device dev;
+    One_wire::read_rom(dev);
+
+    print_device_found(dev);
+
+
+}
+
 	      
 
 int main()
@@ -216,10 +304,28 @@ int main()
 
 
     while(1){
-//	print_menu();
-	// basic_test();
-	search_test();
-	// DS18B20_test();
+	print_menu();
+
+	char ans{};
+	uart >> ans;
+
+	switch(ans){
+	    break; case 'b':
+		   case 'B': basic_test();
+
+	    break; case 'd':
+		   case 'D': DS18B20_test();
+
+
+	    break; case 'r':
+		   case 'R': read_rom_test();
+
+	    break; case 's':
+		   case 'S': search_test();
+
+	    break; default: uart << "Unknown option\n";
+	}
+
     }
 }
 

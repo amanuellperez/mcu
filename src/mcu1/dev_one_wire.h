@@ -56,6 +56,8 @@ namespace dev{
 /***************************************************************************
  *			    ONE WIRE DEVICE
  ***************************************************************************/
+// DUDA: ¿cómo llamarlo? Device? Slave? Las datasheet de Maxim usan las dos
+// terminologías.
 struct One_wire_device{
     static constexpr uint8_t ROM_size = 8;
 
@@ -65,7 +67,7 @@ struct One_wire_device{
     // lo que realmente estamos haciendo.
     void reset();
 
-// Accessing ROM
+// Accessing ROM bits
     // i    = número de byte de la ROM al que queremos acceder
     // mask = máscara a poner para acceder a ese bit
     // Devuelve ROM[i,mask]
@@ -78,7 +80,7 @@ struct One_wire_device{
     uint8_t CRC() const {return ROM[7];}   
 
 // Checking
-    bool is_ok_CRC() const;
+    bool is_CRC_ok() const;
 
 // Data
     uint8_t ROM[ROM_size]; 
@@ -109,6 +111,9 @@ inline void One_wire_device::ROM_write_bit(uint8_t i, uint8_t mask, uint8_t bit)
 	ROM[i] &=~ mask;
 }
 
+
+void print_rom_as_hex(std::ostream& out, const One_wire_device& dev);
+
 // TODO: esta función ocupa demasiado memoria (cuando esté implementada con
 // todas las familias) ya que las cadenas con los nombres no se están
 // almacenando en la PROGMEM. Almacenarlas en la progmem pero de forma
@@ -131,41 +136,46 @@ struct One_wire_cfg{
 template <typename Cfg>
 class One_wire{
 public:
+// Types
     using Micro	    = typename Cfg::Micro;
     using Device    = One_wire_device;
 
 // Transaction sequence
+// --------------------
 // Step 1: Initializacion
     // Devuelve true si ha detectado slave presentes, false en caso contrario.
     static bool reset();
 
-//// Step 2: ROM Commands
-////  search_rom: Iteramos sobre los dispositivos conectados
-//    static One_wire_search<Cfg> begin_search();
-//    static One_wire_search<Cfg> end_search();
-//
-////// quién tiene el `alarm flag` set?
-////  alarm_search: Iteramos sobre los dispositivos with the alarm flag set
-//    static One_wire_search<Cfg> begin_alarm_search();
-//    static One_wire_search<Cfg> end_alarm_search();
+// Step 2: ROM Commands
 
-
-//// dime tú nombre (address)? (cuando solo hay un slave conectado)
-//    read_rom
+// Comandos de búsqueda de dispositivos conectados
+// (1) Buscamos todos los dispositivos:
+//  search_rom: usar One_wire_search
 //
-//// Atención: quiero hablar con 
+// (2) Buscamos solo los dispositivos que tienen el alarm flag set
+//  alarm_search: Usar One_wire_search
+
+// (3) Caso particular: solo un dispositivo conectado. Preguntamos su ROM.
+//     Solo válida cuando hay un único device conectado. En caso de llamarla
+//     cuando hay varios, se producirá data collision
+    static void read_rom(Device& dev);
+
+// Comandos para hablar con un dispositivo
+// (1) Queremos hablar con un dispositivo concreto
     static void match_rom(const Device& dev);
 
     // La datasheet lo llama match_rom, pero un nombre más natural es el de
     // `select`
     static void select(const Device& dev) { match_rom(dev); }
-//
-//// Atención todo el mundo!
+
+// (2) Queremos hablar con todos los dispositivos a la vez.
+//     (en caso de que solo haya un dispositivo este comando sirve también
+//      para seleccionarlo)
     static void skip_rom() {write(0xCC);}
-//
 
-// Step 3: Function Commands
 
+// Basics functions
+// ----------------
 // Funciones de escritura/lectura de bits
     // Escribe 0 si x == 0, 1 en caso contrario.
     static void write_bit(uint8_t x);
@@ -179,14 +189,6 @@ public:
 // Funciones de escritura/lectura de bytes
     static void write(uint8_t x);
     static uint8_t read();	    // devuelve el byte leido
-
-// Los del DS18B20 son
-// convert_T
-// write_scratchpad
-// read_scratchpad
-// copy_scratchpad
-// recall_e2
-// read_power_supply
 
     
 private:
@@ -287,7 +289,7 @@ inline bool One_wire<Cfg>::pin_is_one()
 //
 // DUDA: los de Arduino están continuamente activando/desactivando las
 // interrupciones. Por ejemplo, cuando tienen que esperar los 480 us los
-// espeeran con las interrupciones desactivadas. Tiene la ventaja de que si
+// esperan con las interrupciones desactivadas. Tiene la ventaja de que si
 // salta una interrupción se le atiende inmediatamente. ¿Mejor hacerlo así?
 // Como es la primera implementación voy a lo más básico y me olvido de esto.
 template <typename C>
@@ -307,6 +309,16 @@ bool One_wire<C>::reset()
     Micro::wait_us(J_us); 
 
     return res;
+
+}
+
+template <typename C>
+void One_wire<C>::read_rom(Device& dev)
+{
+    write(0x33);
+
+    for (uint8_t i = 0; i < Device::ROM_size; ++i)
+	dev.ROM[i] = read();
 
 }
 
