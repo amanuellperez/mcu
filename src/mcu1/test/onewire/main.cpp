@@ -32,7 +32,7 @@ using Pin = mcu::Pin<test_pin>;
 using Cfg = dev::One_wire_cfg<mcu::Micro, Pin>;
 
 using One_wire = dev::One_wire<Cfg>;
-using One_wire_device = dev::One_wire_device;
+using Device = dev::One_wire_device;
 using Search = dev::One_wire_search<Cfg>;
 
 
@@ -134,38 +134,36 @@ void basic_test()
 
 }
 
-
-void search_iterator_test()
+void search_test(Search::Type type)
 {
     mcu::UART_iostream uart;
 
-    uart << "\nSearch iterators test\n"
-	      "---------------------\n";
-	      
+    uint8_t n = 0;
 
-    uint8_t i = 0;
-    for (auto p = Search::begin(); 
-	      p != Search::end(); ++p, ++i){
-	uart << "Device " << (int) i << " found\n";
+    Search search{type};
+    Device dev;
+
+    while (search(dev)){
+	++n; 
+
+	uart << "Device " << (int) n << " found\n";
 	
 	uart << "  ROM   : ";
 
-	auto device = *p;
-	for (uint8_t i = 0; i < One_wire_device::ROM_size; ++i){
-	    atd::print_int_as_hex(uart, device.ROM[i]);
+	for (uint8_t i = 0; i < Device::ROM_size; ++i){
+	    atd::print_int_as_hex(uart, dev.ROM[i]);
 	    uart << ' ';
 	}
 
 	uart << "\n  Family: ";
-	print_family_name(uart, device);
+	print_family_name(uart, dev);
 	uart << '\n';
 
 	uart << "  CRC   : ";
-	if (device.is_ok_CRC())
+	if (dev.is_ok_CRC())
 	    uart << "OK";
 	else
 	    uart << "WRONG";
-
 
 
 	uart << "\nPress key to continue\n";
@@ -173,9 +171,35 @@ void search_iterator_test()
 	uart >> c;
     }
 
-    uart << "\nTotal devices found: " << (int) i << '\n';
+    uart << "\nTotal devices found: " << (int) n << '\n';
 
 }
+
+
+void search_test()
+{
+    mcu::UART_iostream uart;
+
+    uart << "\nSearch test\n"
+	      "-----------\n"
+	      "1. Normal search\n"
+	      "2. Alarm search\n";
+
+    char ans{};
+    uart >> ans;
+
+    if (ans == '2'){
+	uart << "\nAlarm search\n";
+	search_test(Search::Type::alarm_search);
+    }
+
+    else{
+	uart << "\nNormal search\n";
+	search_test(Search::Type::normal_search);
+    }
+}
+
+	      
 
 int main()
 {
@@ -194,7 +218,7 @@ int main()
     while(1){
 //	print_menu();
 	// basic_test();
-	search_iterator_test();
+	search_test();
 	// DS18B20_test();
     }
 }

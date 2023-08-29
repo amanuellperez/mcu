@@ -72,7 +72,7 @@ struct One_wire_device{
     uint8_t ROM_bit(uint8_t i, uint8_t mask);
 
     // ROM[i, mask] = bit
-    void ROM_write(uint8_t i, uint8_t mask, uint8_t bit);
+    void ROM_write_bit(uint8_t i, uint8_t mask, uint8_t bit);
 
 // Meaning of ROM code
     uint8_t CRC() const {return ROM[7];}   
@@ -100,7 +100,7 @@ inline uint8_t One_wire_device::ROM_bit(uint8_t i, uint8_t mask)
 }
 
 // ROM[i, mask] = bit
-inline void One_wire_device::ROM_write(uint8_t i, uint8_t mask, uint8_t bit)
+inline void One_wire_device::ROM_write_bit(uint8_t i, uint8_t mask, uint8_t bit)
 {
     if (bit)
 	ROM[i] |= mask;
@@ -443,10 +443,14 @@ class One_wire_search_end{};
 
 // (RRR) ¿por qué no implementarla como una vulgar función One_wire::search()?
 //	 1. Para poder descomponer el algoritmo en partes.
-//	 2. Tiene estado, y el estado son más de 8 bytes. Esta función se
+//	 2. (OLD) Tiene estado, y el estado son más de 8 bytes. Esta función se
 //	    llama de año en año: esos bytes de estado solo deben de quedar
 //	    reservados mientras se ejecuta search, después se tiene que
 //	    liberar la memoria.
+//	    (NEW) He separado el Device del Search de forma que es el cliente
+//	    el responsable de reservar la memoria de la ROM. De esta forma el
+//	    cliente gestiona la memoria. Esta clase Search solo tiene como
+//	    datos internos el state necesario para continuar con la búsqueda.
 //
 // Baso la implementación en el algoritmo dado en la app note 187 (es la misma
 // implementación pero reestructurada)
@@ -460,42 +464,33 @@ class One_wire_search{
 public:
     using One_wire = dev::One_wire<Cfg>;
     using Device   = One_wire_device;
-    static constexpr uint8_t ROM_size = Device::ROM_size;
 
-// Tipo de búsqueda
-    void alarm_search() {normal_search_ = false;}
+    enum class Type{normal_search, alarm_search};
+
+// Constructor
+    One_wire_search(Type type = Type::normal_search);
 
 // Interfaz básico
-    bool search();
+    // Ejecuta la búsqueda
+    bool operator()(Device& dev);
 
-    bool begin_search();
-    bool next_search() {return search();}
+    // Reinicia la búsqueda. 
+    void reset();
 
-// Iteradores
-    static One_wire_search begin();
-    static One_wire_search_end end() {return One_wire_search_end{};}
-    void operator++();
-    const Device& operator*() const {return device_;}
-
-// Posibles errores de búsqueda
+// State
     bool last_device() const  {return end_ != End_type::no; }
     bool device_found() const {return !no_device_found;}
-
-    template <typename C>
-    friend bool operator==(const One_wire_search<C>& a, const One_wire_search_end&);
 
 private:
 // CFG
     // Type of search
-    bool normal_search_ = true; // si true, hace normal search, 
-				// en caso contrario alarm search.
+    Type type_of_search;
 
 
 // STATE
     // valor de la ROM del dispositivo que encontramos en la última llamada a
     // `search`
-    Device device_;
-
+    Device* device_;
 
     // Indica la posición en que encontramos la última discrepancia igual a 0.
     // Cuando recorremos el diagrama de árbol cuando encontremos una
@@ -533,6 +528,7 @@ private:
     uint8_t i_last_zero_;
 
 // HELPER FUNCTIONS
+    bool search();
     bool search_device();
     bool read_rom();
     bool read_bit_rom(uint8_t i, uint8_t i_rom, uint8_t rom_mask);
@@ -540,58 +536,31 @@ private:
     uint8_t calculate_next_bit(uint8_t i, uint8_t i_rom, uint8_t rom_mask);
 
     
-    void reset_state();
 };
 
-// iterators
-// ---------
-// CUIDADO: estoy devolviendo by value un objeto de más de 8 bytes.
 template <typename C>
-inline One_wire_search<C> One_wire_search<C>::begin()
-{
-    One_wire_search search;
-    search.begin_search();
-    return search;
+inline One_wire_search<C>::One_wire_search(Type type)
+    : type_of_search{type}
+{ reset(); }
+
+template <typename C>
+inline bool One_wire_search<C>::operator()(Device& dev)
+{ 
+    device_ = &dev;
+    return search(); 
 }
-
-template <typename C>
-inline void One_wire_search<C>::operator++()
-{
-    if (end_ == End_type::no)
-	next_search();
-
-    else if (end_ == End_type::last)
-	end_ = End_type::end;
-}
-
-template <typename C>
-inline bool operator==(const One_wire_search<C>& a, const One_wire_search_end&)
-{ return a.end_ == One_wire_search<C>::End_type::end;}
-
-template <typename C>
-inline bool operator!=(const One_wire_search<C>& a, const One_wire_search_end& b)
-{ return !(a == b); }
 
 
 // search algorithm
 // ----------------
 template <typename C>
-void One_wire_search<C>::reset_state()
+void One_wire_search<C>::reset()
 {
     i_last_discrepancy = 0;
     end_ = End_type::no;
     no_device_found = false;
-
-    device_.reset();
 }
 
-template <typename C>
-bool One_wire_search<C>::begin_search()
-{
-    reset_state();
-
-    return search();
-}
 
 
 // Devuelve true en caso de encontrar un device nuevo.
@@ -616,8 +585,8 @@ bool One_wire_search<C>::search()
 	    end_ = End_type::last;
     }
 
-    if (!search_result or !device_.ROM[0]){ // ¿por qué miran también ROM[0]???
-	reset_state();
+    if (!search_result or !device_->ROM[0]){ // ¿por qué miran también ROM[0]???
+	reset();
 	search_result = false;
     }
 
@@ -630,13 +599,12 @@ template <typename C>
 bool One_wire_search<C>::search_device()
 {
     if (!One_wire::reset()){
-	reset_state();
+	reset();
 	return false; 
     }
 
-    if (normal_search_)
+    if (type_of_search == Type::normal_search)
 	One_wire::write(0xF0);	// search command
-    
     else
 	One_wire::write(0xEC);	// alarm search command
 
@@ -670,7 +638,7 @@ template <typename C>
 bool One_wire_search<C>::read_rom()
 {
     uint8_t i = 0;
-    for (uint8_t i_rom = 0; i_rom < ROM_size; ++i_rom)
+    for (uint8_t i_rom = 0; i_rom < Device::ROM_size; ++i_rom)
 	for (uint8_t rom_mask = 0x01; rom_mask != 0; rom_mask <<= 1){
 	    ++i;
 	    if (!read_bit_rom(i, i_rom, rom_mask))
@@ -697,7 +665,7 @@ bool One_wire_search<C>::read_bit_rom(uint8_t i,
 		    return false;
     }
 
-    device_.ROM_write(i_rom, rom_mask, next_bit);
+    device_->ROM_write_bit(i_rom, rom_mask, next_bit);
     One_wire::write_bit(next_bit);
 
     return true;
@@ -732,7 +700,7 @@ uint8_t One_wire_search<C>::calculate_next_bit(uint8_t i,
     uint8_t next_bit{};
 
     if (i < i_last_discrepancy){
-	next_bit = device_.ROM_bit(i_rom, rom_mask);
+	next_bit = device_->ROM_bit(i_rom, rom_mask);
     }
 
     else if (i == i_last_discrepancy)
