@@ -1,4 +1,4 @@
-SOURCES= 
+SOURCES= dev_one_wire.cpp
 
 INCS= 	dev_clocks.h	\
 		dev_miniclock.h	\
