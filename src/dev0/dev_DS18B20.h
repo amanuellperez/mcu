@@ -45,6 +45,12 @@
 
 namespace dev{
 
+// La Scratchpad es:
+//  + desde un punto de vista de hardware un array de bytes: data[8]
+//  + desde el punto de vista del programador una estructura.
+//
+// Esta clase es responsable de pasar del array de bytes a la estructura y
+// viceversa.
 struct _Scratchpad{
     // Damos la temperatura en Celsius. 
     // DUDA: mejor llamarlo T_celsius? Con Celsius queda claro que es una T
@@ -71,6 +77,7 @@ struct _Scratchpad{
 
 // Interfaz static
     static Celsius temperature(uint8_t T0, uint8_t T1, Resolution res);
+    static uint8_t to_cfg_register(Resolution res);
 
 private:
 // Data
@@ -84,49 +91,9 @@ private:
     static int32_t decimal_part_of_T(uint8_t T0, Resolution res);
 };
 
-// TODO: meter en .cpp
-_Scratchpad::Celsius _Scratchpad::temperature(uint8_t T0, uint8_t T1,
-								Resolution res)
-{
-    int32_t T = ((T0 & 0xF0) >> 4) | ((T1 & 0x0F) << 4);
-    if (T1 & 0xF0)
-	T = -T;
-    
-    int32_t T_dec = decimal_part_of_T(T0, res);
-
-    auto rep = Celsius::Rep{T, T_dec};
-    return Celsius{rep};
-}
 
 inline _Scratchpad::Celsius _Scratchpad::temperature() const 
 {return temperature(data[0], data[1], resolution());}
-
-
-int32_t _Scratchpad::decimal_part_of_T(uint8_t T0, Resolution res)
-{
-    switch (res){
-	break; case Resolution::bits_9 : return ((T0 & 0x0F) >> 3) * 5;
-	break; case Resolution::bits_10: return ((T0 & 0x0F) >> 2) * 25; 
-	break; case Resolution::bits_11: return ((T0 & 0x0F) >> 1) * 125;
-	break; case Resolution::bits_12: return ((T0 & 0x0F) >> 0) * 625;
-    }
-
-    // El compilador da un warning si no pongo este return (???)
-    return 1;
-}
-
-_Scratchpad::Resolution _Scratchpad::resolution() const
-{
-    switch (mask_cfg(data[4])){
-	break; case 0: return Resolution::bits_9;
-	break; case 1: return Resolution::bits_10;
-	break; case 2: return Resolution::bits_11;
-	break; case 3: return Resolution::bits_12;
-    }
-
-    // Aqui nunca puede llegar
-    return Resolution::bits_12;
-}
 
 inline bool _Scratchpad::is_CRC_ok() const
 { return (data[8] == atd::CRC8_Maxim(data, 8)); }
@@ -155,6 +122,7 @@ public:
 
 // CFG
     using Scratchpad = _Scratchpad;
+    using Resolution = Scratchpad::Resolution;
     using Celsius    = Scratchpad::Celsius;
 
     // Es el errno clásico pero en vez de ser global es local a esta clase
@@ -179,7 +147,7 @@ public:
     // realizado la conversión. En caso de realizarla en ese tiempo devuelve
     Errno convert_T(uint16_t time_out_ms = 0) const;
 
-    Errno write_scratchpad(uint8_t TH, uint8_t TL, uint8_t cfg_register) const;
+    Errno write_scratchpad(int8_t TH, int8_t TL, Resolution res) const;
 
     // Lee la scratchpad guardándola en el array pasado
     // DUDA: Necesito pasarlo como referencia? No debiera ser necesario ya que
@@ -240,14 +208,14 @@ DS18B20<M,OW>::Errno DS18B20<M,OW>::convert_T(uint16_t time_out_ms) const
 
 template <typename M, typename OW>
 DS18B20<M,OW>::Errno DS18B20<M,OW>::
-	write_scratchpad(uint8_t TH, uint8_t TL, uint8_t cfg_register) const
+	write_scratchpad(int8_t TH, int8_t TL, Resolution res) const
 {
     if (!send_command(0x4E))
 	return Errno::not_found;
 
-    One_wire::write(TH);
-    One_wire::write(TL);
-    One_wire::write(cfg_register);
+    One_wire::write(static_cast<uint8_t>(TH));
+    One_wire::write(static_cast<uint8_t>(TL));
+    One_wire::write(Scratchpad::to_cfg_register(res));
 
     return Errno::ok;
 }

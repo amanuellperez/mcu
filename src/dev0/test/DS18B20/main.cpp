@@ -142,6 +142,11 @@ private:
     void bind_device();
     void convert_T() const;
     void read_scratchpad() const;
+    void write_scratchpad() const;
+    void copy_scratchpad() const;
+    void recall_e2() const;
+
+    static constexpr uint16_t time_out_max = 3000;
 };
 
 
@@ -194,7 +199,7 @@ void Main::convert_T() const
     mcu::UART_iostream uart;
     
     uart << "Sending convert_T cmd ... ";
-    auto errno = sensor_.convert_T(3000);
+    auto errno = sensor_.convert_T(time_out_max);
     
     if (!is_return_cmd_ok(errno))
 	return;
@@ -223,6 +228,78 @@ void Main::read_scratchpad() const
 	uart << "WRONG CRC\n";
 }
 
+void Main::write_scratchpad() const
+{
+    mcu::UART_iostream uart;
+    
+    uart << "Write to scratchpad:\n"
+	    "\tTH = ";
+
+    int16_t TH = 0;
+    uart >> TH;
+
+    uart << "\n\tTL = ";
+    int16_t TL = 0;
+    uart >> TL;
+
+    uart << "\n\tResolution: choose 9, 10, 11 or 12 bits: ";
+    uint16_t ures = 0;
+    uart >> ures;
+
+    using Resolution = Sensor::Resolution;
+    Resolution res;
+
+    switch(ures){
+	break; case 9: res = Resolution::bits_9;
+	break; case 10: res = Resolution::bits_10;
+	break; case 11: res = Resolution::bits_11;
+	break; case 12: res = Resolution::bits_12;
+	break; default: return;
+    }
+
+    uart << "\nSending write_scratchpad(" << TH 
+				  << ", " << TL 
+				  << ", " << (int) ures << ") ... ";
+    
+    auto errno = sensor_.write_scratchpad((uint8_t)TH, (uint8_t)TL, res);
+
+    if (!is_return_cmd_ok(errno))
+	return;
+
+    uart << "OK\n";
+    
+}
+
+
+void Main::copy_scratchpad() const
+{
+    mcu::UART_iostream uart;
+    
+    uart << "Sending `copy scractpad` cmd ... ";
+
+    auto errno = sensor_.copy_scratchpad();
+
+    if (!is_return_cmd_ok(errno))
+	return;
+
+    uart << "OK\n";
+
+}
+
+void Main::recall_e2() const
+{
+    mcu::UART_iostream uart;
+    
+    uart << "Sending `recall2` cmd ... ";
+    
+    auto errno = sensor_.recall_e2(time_out_max); 
+
+    if (!is_return_cmd_ok(errno))
+	return;
+
+    uart << "OK\n";
+
+}
 
 Main::Main()
 {
@@ -259,7 +336,10 @@ void Main::run()
 	else if (all_options){
 	    switch(ans){
 		break; case '1': convert_T();
+		break; case '2': write_scratchpad();
 		break; case '3': read_scratchpad();
+		break; case '4': copy_scratchpad();
+		break; case '5': recall_e2();
 
 		break; default: uart << "Unknown option\n";
 	    }

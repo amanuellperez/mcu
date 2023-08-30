@@ -1,6 +1,7 @@
 BIN = xx
 
-SOURCES= main.cpp	
+SOURCES= main.cpp	\
+		 ../../dev_DS18B20.cpp
 
 #F_CPU = 8000000UL
 

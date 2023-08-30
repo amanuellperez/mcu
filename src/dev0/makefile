@@ -1,6 +1,7 @@
 SOURCES= dev_BMP280_basic.cpp	\
 		 dev_BME280_basic.cpp	\
-		 dev_DS1307_basic.cpp	
+		 dev_DS1307_basic.cpp	\
+		 dev_DS18B20.cpp
 
 
 INCS= 	dev_BME280_basic.h		\
@@ -8,6 +9,7 @@ INCS= 	dev_BME280_basic.h		\
 		dev_counter_CD4017B.h	\
 		dev_DS1307_basic.h		\
 		dev_DS1307_clock.h		\
+		dev_DS18B20.h			\
 		dev_EEPROM_25LC256_basic.h	\
 		dev_glyphs.h			\
 		dev_keyboard_analog.h	\
