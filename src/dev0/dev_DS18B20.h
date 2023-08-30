@@ -38,8 +38,100 @@
  *
  ****************************************************************************/
 #include <stdint.h> 
+#include <atd_crc.h>
+#include <atd_decimal.h>
+#include <atd_magnitude.h>
+#include <atd_bit.h>
 
 namespace dev{
+
+struct _Scratchpad{
+    // Damos la temperatura en Celsius. 
+    // DUDA: mejor llamarlo T_celsius? Con Celsius queda claro que es una T
+    // Resolución: parte entera de 3 dígitos máximo (mide de -55ºC a +125ºC);
+    // parte decimal 4 decimales (con 12 bits mide 0.0625). Total 7 dígitos.
+    // Entran en int32_t.
+    using Celsius  = atd::Celsius<atd::Decimal<int32_t, 4>>;
+
+    enum class Resolution{ bits_9, bits_10, bits_11, bits_12 };
+
+// Data como struct
+    Celsius temperature() const;
+    int8_t TH() const {return static_cast<int8_t>(data[2]);}
+    int8_t TL() const {return static_cast<int8_t>(data[3]);}
+    Resolution resolution() const;
+
+    uint8_t CRC() const {return data[8];}
+    bool is_CRC_ok() const;
+
+// Data como array
+    uint8_t& operator[](uint8_t i) { return data[i]; }
+    uint8_t operator[](uint8_t i) const { return data[i]; }
+    static constexpr uint8_t size() { return size_;}
+
+// Interfaz static
+    static Celsius temperature(uint8_t T0, uint8_t T1, Resolution res);
+
+private:
+// Data
+    static constexpr uint8_t size_ = 9;
+    uint8_t data[size_];
+
+// Configuration register
+    static constexpr atd::Range_bitmask<5, 6, uint8_t> mask_cfg{};
+
+// Calculo de T
+    static int32_t decimal_part_of_T(uint8_t T0, Resolution res);
+};
+
+// TODO: meter en .cpp
+_Scratchpad::Celsius _Scratchpad::temperature(uint8_t T0, uint8_t T1,
+								Resolution res)
+{
+    int32_t T = ((T0 & 0xF0) >> 4) | ((T1 & 0x0F) << 4);
+    if (T1 & 0xF0)
+	T = -T;
+    
+    int32_t T_dec = decimal_part_of_T(T0, res);
+
+    auto rep = Celsius::Rep{T, T_dec};
+    return Celsius{rep};
+}
+
+inline _Scratchpad::Celsius _Scratchpad::temperature() const 
+{return temperature(data[0], data[1], resolution());}
+
+
+int32_t _Scratchpad::decimal_part_of_T(uint8_t T0, Resolution res)
+{
+    switch (res){
+	break; case Resolution::bits_9 : return ((T0 & 0x0F) >> 3) * 5;
+	break; case Resolution::bits_10: return ((T0 & 0x0F) >> 2) * 25; 
+	break; case Resolution::bits_11: return ((T0 & 0x0F) >> 1) * 125;
+	break; case Resolution::bits_12: return ((T0 & 0x0F) >> 0) * 625;
+    }
+
+    // El compilador da un warning si no pongo este return (???)
+    return 1;
+}
+
+_Scratchpad::Resolution _Scratchpad::resolution() const
+{
+    switch (mask_cfg(data[4])){
+	break; case 0: return Resolution::bits_9;
+	break; case 1: return Resolution::bits_10;
+	break; case 2: return Resolution::bits_11;
+	break; case 3: return Resolution::bits_12;
+    }
+
+    // Aqui nunca puede llegar
+    return Resolution::bits_12;
+}
+
+inline bool _Scratchpad::is_CRC_ok() const
+{ return (data[8] == atd::CRC8_Maxim(data, 8)); }
+
+
 
 // SIGNIFICADO DE LA TEMPLATE
 //     DS18B20<Atmega, One_wire> = Es el sensor DS18B20 conectado al 
@@ -62,7 +154,8 @@ public:
     using Device   = typename One_wire::Device;
 
 // CFG
-    static constexpr uint8_t scratchpad_size = 9;
+    using Scratchpad = _Scratchpad;
+    using Celsius    = Scratchpad::Celsius;
 
     // Es el errno clásico pero en vez de ser global es local a esta clase
     // y que en lugar de usarlo como state lo uso como valor return
@@ -73,6 +166,8 @@ public:
     };
 
 
+// One wire
+// --------
     void bind(const Device& dev);
 
 // Function commands
@@ -87,7 +182,9 @@ public:
     Errno write_scratchpad(uint8_t TH, uint8_t TL, uint8_t cfg_register) const;
 
     // Lee la scratchpad guardándola en el array pasado
-    Errno read_scratchpad(uint8_t scratchpad[scratchpad_size]) const;
+    // DUDA: Necesito pasarlo como referencia? No debiera ser necesario ya que
+    // Scratchpad es un array, luego es un puntero.
+    Errno read_scratchpad(Scratchpad& s) const;
 
     Errno copy_scratchpad() const;
 
@@ -99,7 +196,6 @@ public:
     // TODO
     // static Errno read_power_supply();
     
-
 private:
 // Data
     Device dev_;
@@ -113,6 +209,11 @@ private:
     // devuelve Errno::time_out. ¿cómo llamar a esta función?
     Errno wait_until(uint16_t time_out_ms) const;
 };
+
+template <typename M, typename OW>
+inline void DS18B20<M,OW>::bind(const Device& dev)
+{ dev_ = dev; }
+
 
 template <typename M, typename OW>
 bool DS18B20<M,OW>::send_command(uint8_t cmd) const
@@ -153,16 +254,17 @@ DS18B20<M,OW>::Errno DS18B20<M,OW>::
 
 template <typename M, typename OW>
 DS18B20<M,OW>::Errno
-DS18B20<M,OW>::read_scratchpad(uint8_t scratchpad[scratchpad_size]) const
+DS18B20<M,OW>::read_scratchpad(Scratchpad& scratchpad) const
 {
     if (!send_command(0xBE))
 	return Errno::not_found;
 
-    for (uint8_t i = 0; i < scratchpad_size; ++i)
+    for (uint8_t i = 0; i < Scratchpad::size(); ++i)
 	scratchpad[i] = One_wire::read();
 
     return Errno::ok;
 }
+
 
 template <typename M, typename OW>
 DS18B20<M,OW>::Errno DS18B20<M,OW>::copy_scratchpad() const
@@ -201,6 +303,7 @@ DS18B20<M,OW>::Errno DS18B20<M,OW>::wait_until(uint16_t time_out_ms) const
 
     return Errno::ok;
 }
+
 
 }// namespace
 

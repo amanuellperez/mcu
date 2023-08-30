@@ -17,14 +17,13 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#include <iostream>
 #include "../../atd_decimal.h"
 #include "../../atd_type_traits.h"
 #include "../../atd_cast.h"
 
 #include <alp_test.h>
 #include <alp_string.h>
-#include <iostream>
-#include <vector>
 
 #include <cstddef>
 
@@ -597,7 +596,8 @@ void test_decimal()
     CHECK_STDOUT(b, "876");
     }
 
-// bugs
+// BUGS
+// ----
     {
 	// CHECK_DONT_COMPILE:
 //	atd::Decimal<uint8_t, 1> a{12, 3};
@@ -609,7 +609,6 @@ void test_decimal()
 	uint16_t x = 100;
 	auto b = a* x;
 	std::cout << b << '\n';
-
     }
 }
 

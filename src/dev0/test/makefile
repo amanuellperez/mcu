@@ -2,6 +2,7 @@ DIRS = 	BMP280			\
 		BME280			\
 		CD4017B			\
 		DS1307			\
+		DS18B20			\
 		DHT11			\
 		EEPROM_25LC256	\
 		keypad			\

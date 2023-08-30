@@ -189,8 +189,17 @@ inline bool to_bool(const __Range_bitmask<i0, i1, Int>& r)
  *  Example:
  *	constexpr atd::Range_bitmask<2,6, uint8_t> mask; // mask bits 2-6
  *	uint8_t x = 0x35;
+ *
+ *	// Hacemos el shift, de tal manera que los bits del 0 al 4 de mask(x)
+ *	// sean igual a los bits del 2 al 6 de x:
+ *	//      x  = 0b0   0110101
+ *	//                 --- - 
+ *      // mask(x) = 0b000 01101  <-- observar cómo el bit 2 lo colocamos en
+ *      //                            el 0
  *	uint8_t res = mask(x); // = get_bits_2_to_6_of(x);
  *
+ *	// Al escribir en cambio escribimos directamente los bits del 2 al 6
+ *	// con el valor pasado 0x16
  *	mask(x) = uint8_t{0x16}; // = set_bits_2_to_6_of(x)_equal_to(0x16);
  *
  */

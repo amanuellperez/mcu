@@ -62,6 +62,7 @@ struct One_wire_device{
     static constexpr uint8_t ROM_size = 8;
 
     One_wire_device() {reset();}
+    One_wire_device& operator=(const One_wire_device& a);
 
     // DUDA: En vez de reset() mejor `make_no_valid()`. A fin de cuentas es
     // lo que realmente estamos haciendo.
@@ -86,6 +87,13 @@ struct One_wire_device{
     uint8_t ROM[ROM_size]; 
 };
 
+inline One_wire_device& One_wire_device::operator=(const One_wire_device& a)
+{
+    for (uint8_t i = 0; i < ROM_size; ++i)
+	ROM[i] = a.ROM[i];
+
+    return *this;
+}
 
 inline void One_wire_device::reset()
 {
@@ -322,7 +330,7 @@ void One_wire<C>::read_rom(Device& dev)
 
 }
 
-
+// How to know if this command fails? 
 template <typename C>
 void One_wire<C>::match_rom(const Device& dev)
 {
