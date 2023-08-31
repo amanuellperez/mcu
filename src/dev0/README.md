@@ -1,4 +1,4 @@
-# WARNING: unstable library. Some of the files may not compile.
+# HARDWARE DEVICES
 
 Drivers for some devices. 
 
@@ -8,71 +8,138 @@ Tested: avr-gcc 9.2.0
 
 ---
 
-# ADVERTENCIA: Es inestable. Algunos de los ficheros puede que ni compilen.
-
+# DISPOSITIVOS REALES
 Dispositivos a los que accedemos desde el microcontrolador.
 
+## Índice
+* [Clasificación](#T-tipos)
+* [Escritura de drivers](T-drivers)
+* [Drivers suministrados](T-suministrados)
+
+## <a name="T-tipos"></a>Clasificación
 En principio, distingo los siguientes tipos:
 
-* Dispositivos reales: un LCD, una EEPROM, ...
+* Dispositivos reales: un LCD, una EEPROM, un ADC, un Timer, ...
 
-  De estos dispositivos suministro un traductor. El traductor (ficheros
-  `_basic`) tiene que ser un traductor de la datasheet. No puede introducir
-  ningún tipo de ineficiencia. Lo único que hacen es escribir en código la
-  datasheet. Son eficientes, pero no tienen por qué ser sencillos de manejar
-  ya que tienen muchos detalles de bajo nivel.
-
-  Como traducen la datasheet suministran todas las funciones que tiene el
-  dispositivo.
+  Este tipo de dispositivos pueden estar implementados dentro del
+  microcontrolador, como por ejemplo los timers del avr, o ser externos al
+  micro (un LCD, un DAC, ...).
 
 
-* Dispositivos genéricos: `Generic_LCD<HD44780>`,
-  `system_clock<Generic_timer>`, ...
+## <a name="T-drivers"></a>Escritura de drivers
 
-  Se podían llamar también dispositivos virtuales, ya que lo que hacen es
-  ocultar los detalles reales del hardware suministrando un interfaz común a
-  todos los mismos tipos de dispositivos. 
+¿Cómo escribir un driver? Mi propuesta (a día de hoy) es la siguiente:
 
-  Ventaja: al ser genéricos se pueden programar sin saber realmente qué
-  dispositivo real está conectado. Esto simplifica mucho la programación de
-  aplicaciones.
+### 1. Escribir el traductor
 
-  Desventaja: al ser genéricos no se suministran todas las funciones que tiene
-  un dispositivo concreto. Si se necesitarán usar esas funciones en lugar de
-  estos dispositivos habría que usar los traductores.
+Cuando quieres programar un nuevo dispositivo lo primero que tienes que hacer
+es leer la datasheet, y escribir un traductor. El traductor es una clase que
+se limita a traducir la datasheet a código. No debe de tener más funcionalidad
+que la suministrada que aparece en la datasheet y se usará la misma notación
+de la datasheet.
+
+Hacerlo de esta forma tiene la ventaja de que es muy sencillo de escribir y
+mantener. Para escribir basta con escribir una función por cada función que
+aparezca en la datasheet y limitarse a hacer lo que dice. Mantenerlo es igual
+de sencillo: para ver si una función tiene un error basta con leer la
+datasheet y ver si el código realmente hace lo que dice la datasheet.
+
+#### Nombre
+A falta de nombre he decidido poner el subfijo `_basic` a todas las clases que
+representan traductores puros. Ejemplo: `DS18B20_basic` es el traductor del
+sensor de temperatura `DS18B20`
+
+
+#### Test
+¿Cómo probar un traductor? Una forma que me resulta muy práctica es escribir
+un programa que muestre un menu con todas (?) las funciones suministradas por
+el dispositivo. Consigo varias cosas:
+
+1. Pruebo todas las funciones de forma interactiva.
+
+2. Aprendo a manejar el dispositivo.
+
+3. Queda un programa escrito para probar si un dispositivo funciona o no. Por
+   ejemplo, si mañana compro un nuevo sensor de temperatura `DS18B20`, y
+   sospecho que no me funciona, tengo un programa que puedo usar para probar
+   todas sus funciones.
+
+
+
+### 2. Escribir el driver
+
+El driver se encarga de ampliar la funcionalidad del traductor, simplificando
+la vida del programador.
+
+La idea es suministrar un interfaz más sencillo de usar, donde puedas
+desconocer los detalles de la datasheet que si usas el traductor estas
+obligado a conocer. 
+
+Por ejemplo: idealmente el driver del sensor de temperatur `DS18B20` lo único
+que debería de tener es una función `read_temperature()` o simplemente
+`read()`. De esa forma quien usa este sensor en este programa no tiene que
+recordar el protocolo marcado por la datasheet. 
+
+
+### 3. Suministrar una interfaz genérica 
+
+Cuando yo programo un proyecto (o aplicación) yo lo que quiero es definir en
+un archivo `dev.h` los dispositivos de hardware que voy a usar y olvidarme por
+completo en el resto del programa si se trata de un sensor de temperatura
+`DS18B20`, o un `LM75A` o el que sea. Yo, como programador de aplicaciones, lo
+único que quiero saber es que tengo un `sensor` y que puedo llamar a una
+función `read()` que me devuelve la temperatura, independientemente del sensor
+real que haya por debajo.
+
+Observar que esto es lo que se hace al programar un ordenador: yo cuando
+imprimo en pantalla no tengo ni idea de si la pantalla es la referencia xxxx
+del fabricante xxxx, o es la yyyy del fabricante yyyy. Como programador lo que
+tengo es una pantalla.
+
+El interfaz genérico suministra precisamente eso: es un wrapper sobre el
+el driver que traduce los nombres de las funciones concretas de ese
+dispositivo a nombres genéricos que tienen todos los dispositivos de esa
+clase. 
+
+Lo ideal sería tener `concepts` definido para un sensor de temperatura, para
+un LCD, ... y que ese interfaz sea el que se implemente en el interfaz
+genérico.
 
 
 
 
-## EEPROMs
+
+## <a name="T-suministrados"></a>Drivers suministrados 
+
+### EEPROMs
 | Reference | I2C | SPI | datasheet |
 |-----------|:---:|:---:|:---:|
 | [25LC256](#25LC256)   |     |  x  |[datasheet](datasheet/EEPROM_25LC256.pdf)
 
-## LCDs
+### LCDs
 
 Driver: [HD44780](#HD44780)
 
-## Potentiometers (digital)
+### Potentiometers (digital)
 | Reference | I2C | SPI | datasheet |
 |-----------|:---:|:---:|:---:|
 |MCP4231    |     |  x  |[datasheet](datasheet/MCP4231.pdf)
 
 
-## Registers
+### Registers
 | Reference | Comments| datasheet |
 |-----------| ---- |:---:|
 | 74HC595   | 8-bit serial-in, parallel-out shift |[datasheet](datasheet/SN74HC595.pdf)
 
 
-## RTC (Real-Time Clock)
+### RTC (Real-Time Clock)
 
 | Reference | I2C | SPI | datasheet |
 |-----------|:---:|:---:|:---:|
 |DS1307	    |  x  |     |[datasheet](datasheet/DS1307.pdf)
 
 
-## Sensors
+### Sensors
 
 | Reference |  T  |  P  |  H  |  G  | I2C | SPI | 1WIRE |datasheet |
 |-----------|:---:|:---:|:---:|:---:|:---:|:---:|:-----:|:--------:|
@@ -91,9 +158,9 @@ H = humidity
 
 G = gas
 
-## Keyboards
+### Keyboards
 
-### Notación
+#### Notación
 Tengo 2 tipos de teclados:
 
 1. Teclado básico: es un array o matriz de teclas. Las teclas quedan
@@ -114,7 +181,7 @@ Tengo 2 tipos de teclados:
 
 
 
-### Tipos suministrados
+#### Tipos suministrados
 De momento suministro dos tipos de teclado:
 * `Keyrow`: Teclado formado por una fila de pulsadores.
   Está pensado para que sean 3-4 pulsadores como
@@ -138,11 +205,11 @@ De momento suministro dos tipos de teclado:
   dejo señalado aquí para tener presente mejorarlo para futuros proyectos.
 
 
-## Clocks
+### Clocks
 Se tratan de dispositivos genéricos usados para medir tiempo, basados en
 `Generic_timer`.
 
-### ¿Qué tipos de relojes podemos tener?
+#### ¿Qué tipos de relojes podemos tener?
 
 **Relojes que miden ticks = Tickers**
 
@@ -203,13 +270,13 @@ Ejemplos de relojes que podemos tener son:
   como mucho hasta horas. 
 
 
-### Implementación
+#### Implementación
   + `system_clock`: 
 
     reloj de sistema básico. Suministro este por consistencia con el standard `std`.
 
 
-## A parte de los dispositivos incluyo interfaces genéricos:
+### A parte de los dispositivos incluyo interfaces genéricos:
 
 * Dispositivos genéricos:
   + `signal_generator`
@@ -229,7 +296,7 @@ No los borro ya que con simples cambios seguramente se pueden actualizar.
 
 Los dispositivos que fijo que funcionan (por lo menos a día de hoy) son:
 
-### <a name="25LC256"></a>EEPROM 25LC256
+#### <a name="25LC256"></a>EEPROM 25LC256
 
 Formado por varios ficheros:
 
@@ -250,7 +317,7 @@ out.close();
 
 
 
-### <a name="HD44780">LCD HD44780</a>
+#### <a name="HD44780">LCD HD44780</a>
 
 Es el típico LCD 16 x 2 ó 20 x 4.
 
@@ -286,7 +353,7 @@ lcd << "hola\n"; // escribo cadenas
 lcd << 25;       // escribo números
 ```
 
-#### Tipos de LCDs
+##### Tipos de LCDs
 
 La diferencia fundamental entre los LCDs son:
 1. El driver que usan. De momento el único que tengo implementado es el HD44780.
@@ -299,7 +366,7 @@ La diferencia fundamental entre los LCDs son:
    hay más (ruso por ejemplo).
 
 
-#### Algunas referencias:
+##### Algunas referencias:
 * 1602A: el típico que usa la gente de Arduino. Es de 16 x 02. Los hay a 5 V y
   también a 3'3 V.
 * GFC1602M: de 16 x 02, a 5 V, pero reflectante.
@@ -313,7 +380,7 @@ buenos, pero para aprender a manejarlos y jugar con ellos funcionan bien. Son
 bastante más baratos que los que vende Amazon, además que en Amazon no te
 indican ninguna característica con lo que no sabes lo que estas comprando. 
 
-#### Vídeos
+##### Vídeos
 Estas son las pruebas de `LCD_screen` (los grabé con el móvil y han quedado la
 mar de cutres, pero bueno son los primeros y no creo que nadie los vea):
 * [test screen 16 x 02](https://youtu.be/Q0Fmtg7nzDE)
@@ -323,7 +390,7 @@ mar de cutres, pero bueno son los primeros y no creo que nadie los vea):
 Otros vídeos:
 * [test big digits](https://youtu.be/GvXpkpzUbeE)
 
-#### Documentación
+##### Documentación
 * [Datasheet](datasheet/LCD_HD44780.pdf)
 * app note AN658 de Microchip: LCD Fundamentals
 
