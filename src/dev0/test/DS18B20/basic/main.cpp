@@ -17,7 +17,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "../../dev_DS18B20.h"
+#include "../../../dev_DS18B20.h"
 
 #include <avr_atmega.h>	
 #include <dev_one_wire.h>
@@ -41,7 +41,7 @@ using Search = dev::One_wire_search<Cfg>;
 
 // Hwd Devices
 // -----------
-using Sensor = dev::DS18B20<Micro, One_wire>;
+using Sensor = dev::DS18B20_basic<Micro, One_wire>;
 
 
 
@@ -70,6 +70,9 @@ bool is_return_cmd_ok(Sensor::Errno error)
 
 	break; case Errno::time_out:
 			uart << "TIMEOUT\n";
+
+	break; case Errno::wrong_CRC:
+			uart << "WRONG CRC\n";
     }
 
     return false;
@@ -312,8 +315,8 @@ void Main::run()
 {
     mcu::UART_iostream uart;
 
-    uart << "\n\nOne wire test\n"
-	        "-------------\n"
+    uart << "\nDS18B20 basic test\n"
+	        "-----------------\n"
 		"1. Connect devices to pin" << (int) one_wire_pin 
 		<< " with a pull-up resistor of 4'7k\n"
 		"2. Connect all devices to power supply\n"

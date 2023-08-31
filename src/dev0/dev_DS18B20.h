@@ -45,6 +45,9 @@
 
 namespace dev{
 
+/***************************************************************************
+ *			TRADUCTOR DEL DS18B20
+ ***************************************************************************/
 // La Scratchpad es:
 //  + desde un punto de vista de hardware un array de bytes: data[8]
 //  + desde el punto de vista del programador una estructura.
@@ -113,7 +116,7 @@ inline bool _Scratchpad::is_CRC_ok() const
 //    + one-wire es el medio de comunicación entre el micro y
 //      el sensor. El medio podría ser otro: TWI, SPI, UART, ...
 template <typename Micro0, typename One_wire0>
-class DS18B20{
+class DS18B20_basic{
 public:
 // Types
     using Micro    = Micro0;
@@ -130,7 +133,8 @@ public:
     enum class Errno{
 	ok = 0,	    // todo bien
 	not_found,  // falla la llamada de One_wire::reset()
-	time_out
+	time_out,
+	wrong_CRC
     };
 
 
@@ -145,7 +149,9 @@ public:
     // Si time_out_ms != 0 en lugar de devolver el control nada más enviar
     // el comando espera un máximo de time_out_ms milisegundos a ver si ha
     // realizado la conversión. En caso de realizarla en ese tiempo devuelve
-    Errno convert_T(uint16_t time_out_ms = 0) const;
+    // Si time_out_ms != 0 esta función bloquea el micro, si es cero devuelve
+    // inmendiatamente el control.
+    Errno convert_T(const uint16_t& time_out_ms = 0) const;
 
     Errno write_scratchpad(int8_t TH, int8_t TL, Resolution res) const;
 
@@ -156,10 +162,10 @@ public:
 
     Errno copy_scratchpad() const;
 
-    Errno recall_e2(uint16_t time_out_ms = 0) const;
+    Errno recall_e2(const uint16_t& time_out_ms = 0) const;
 
     // CUIDADO: esta función no habla con este sensor concreto sino con todos
-    // los DS18B20, preguntándo si alguno de los sensores DS18B20 está
+    // los DS18B20_basic, preguntándo si alguno de los sensores DS18B20_basic está
     // usando parasite power.
     // TODO
     // static Errno read_power_supply();
@@ -172,19 +178,19 @@ private:
     bool send_command(uint8_t cmd) const;
 
     // TODO: nombre mal puesto. Esta función lo que hace es esperar a que el
-    // DS18B20 haya acabado de ejecutar el comando solicitado. Si lo acaba
+    // DS18B20_basic haya acabado de ejecutar el comando solicitado. Si lo acaba
     // antes de `time_out_ms` milisegundos devuelve Errno::ok. Si no lo acaba
     // devuelve Errno::time_out. ¿cómo llamar a esta función?
-    Errno wait_until(uint16_t time_out_ms) const;
+    Errno wait_until(const uint16_t& time_out_ms) const;
 };
 
 template <typename M, typename OW>
-inline void DS18B20<M,OW>::bind(const Device& dev)
+inline void DS18B20_basic<M,OW>::bind(const Device& dev)
 { dev_ = dev; }
 
 
 template <typename M, typename OW>
-bool DS18B20<M,OW>::send_command(uint8_t cmd) const
+bool DS18B20_basic<M,OW>::send_command(uint8_t cmd) const
 {
     if (!One_wire::reset())
 	return false;
@@ -197,7 +203,8 @@ bool DS18B20<M,OW>::send_command(uint8_t cmd) const
 
 
 template <typename M, typename OW>
-DS18B20<M,OW>::Errno DS18B20<M,OW>::convert_T(uint16_t time_out_ms) const
+DS18B20_basic<M,OW>::Errno 
+	    DS18B20_basic<M,OW>::convert_T(const uint16_t& time_out_ms) const
 {
     if (!send_command(0x44))
 	return Errno::not_found;
@@ -207,7 +214,7 @@ DS18B20<M,OW>::Errno DS18B20<M,OW>::convert_T(uint16_t time_out_ms) const
 
 
 template <typename M, typename OW>
-DS18B20<M,OW>::Errno DS18B20<M,OW>::
+DS18B20_basic<M,OW>::Errno DS18B20_basic<M,OW>::
 	write_scratchpad(int8_t TH, int8_t TL, Resolution res) const
 {
     if (!send_command(0x4E))
@@ -221,8 +228,8 @@ DS18B20<M,OW>::Errno DS18B20<M,OW>::
 }
 
 template <typename M, typename OW>
-DS18B20<M,OW>::Errno
-DS18B20<M,OW>::read_scratchpad(Scratchpad& scratchpad) const
+DS18B20_basic<M,OW>::Errno
+DS18B20_basic<M,OW>::read_scratchpad(Scratchpad& scratchpad) const
 {
     if (!send_command(0xBE))
 	return Errno::not_found;
@@ -235,7 +242,7 @@ DS18B20<M,OW>::read_scratchpad(Scratchpad& scratchpad) const
 
 
 template <typename M, typename OW>
-DS18B20<M,OW>::Errno DS18B20<M,OW>::copy_scratchpad() const
+DS18B20_basic<M,OW>::Errno DS18B20_basic<M,OW>::copy_scratchpad() const
 {
     if (!send_command(0x48))
 	return Errno::not_found;
@@ -245,7 +252,8 @@ DS18B20<M,OW>::Errno DS18B20<M,OW>::copy_scratchpad() const
 
 
 template <typename M, typename OW>
-DS18B20<M,OW>::Errno DS18B20<M,OW>::recall_e2(uint16_t time_out_ms) const
+DS18B20_basic<M,OW>::Errno 
+DS18B20_basic<M,OW>::recall_e2(const uint16_t& time_out_ms) const
 {
     if (!send_command(0xB8))
 	return Errno::not_found;
@@ -254,7 +262,8 @@ DS18B20<M,OW>::Errno DS18B20<M,OW>::recall_e2(uint16_t time_out_ms) const
 }
 
 template <typename M, typename OW>
-DS18B20<M,OW>::Errno DS18B20<M,OW>::wait_until(uint16_t time_out_ms) const
+DS18B20_basic<M,OW>::Errno 
+DS18B20_basic<M,OW>::wait_until(const uint16_t& time_out_ms) const
 {
     if (time_out_ms == 0)
 	return Errno::ok;
@@ -271,6 +280,70 @@ DS18B20<M,OW>::Errno DS18B20<M,OW>::wait_until(uint16_t time_out_ms) const
 
     return Errno::ok;
 }
+
+/***************************************************************************
+ *			    DS18B20 DRIVER
+ ***************************************************************************/
+// (RRR) ¿por qué tengo que definir el tipo `Base`?
+//       Si no lo defino al llamar a las funciones de Base dentro de esta
+//       clase derivada el compilador no las va a encontrar, ya que lo que
+//       busca son las funciones en el global namespace. 
+//       Para verlo probar a quitar el `Base::` de las llamadas a función
+//       dentro de read_temperature. 
+//       Otra forma de hacerlo, para no tener que usar Base es llamar a las
+//       funciones como `this->convert_T`. De esa forma el compilador sabe que
+//       no nos referimos a una función global. 
+//       Personalmente me gusta mas el `Base` (hoy, mañana...)
+template <typename Micro0, typename One_wire0>
+class DS18B20 : public DS18B20_basic<Micro0, One_wire0>{
+public:
+// Types
+    using Base     = DS18B20_basic<Micro0, One_wire0>;
+
+    using Micro    = Micro0;
+    using One_wire = One_wire0;
+    using Device   = typename One_wire::Device;
+    using Errno    = Base::Errno;
+
+// CFG
+    using Scratchpad = _Scratchpad;
+    using Resolution = Scratchpad::Resolution;
+    using Celsius    = Scratchpad::Celsius;
+
+    // Leemos la temperatura. Esta función no devuelve el control hasta que:
+    //	1) El sensor devuelve una temperatura válida
+    //	2) Han transcurrido time_out_ms milisegundos
+    Celsius read_temperature(const uint16_t& time_out_ms);
+
+    // Devuelve el errno de la ultima función llamada 
+    Errno errno() const {return errno_;}
+
+private:
+    Errno errno_;
+};
+
+
+template <typename M, typename OW>
+DS18B20<M, OW>::Celsius 
+DS18B20<M, OW>::read_temperature(const uint16_t& time_out_ms)
+{
+    errno_ = Base::convert_T(time_out_ms);
+    if (errno_ != Errno::ok)
+	return Celsius{-1};
+
+    Scratchpad s;
+    errno_ = Base::read_scratchpad(s);
+    if (errno_ != Errno::ok)
+	return Celsius{-1};
+
+    if (!s.is_CRC_ok()){
+	errno_ = Errno::wrong_CRC;
+	return Celsius{-1};
+    }
+    
+    return s.temperature();
+}
+
 
 
 }// namespace
