@@ -8,7 +8,7 @@ Tested: avr-gcc 9.2.0
 
 ---
 
-# DISPOSITIVOS REALES
+# HARDWARE DEVICES
 Dispositivos a los que accedemos desde el microcontrolador.
 
 ## Índice
@@ -19,7 +19,9 @@ Dispositivos a los que accedemos desde el microcontrolador.
 ## <a name="T-tipos"></a>Clasificación
 En principio, distingo los siguientes tipos:
 
-* Dispositivos reales: un LCD, una EEPROM, un ADC, un Timer, ...
+* Built-in devices:
+
+  Son los dispositivos reales: un LCD, una EEPROM, un ADC, un Timer, ...
 
   Este tipo de dispositivos pueden estar implementados dentro del
   microcontrolador, como por ejemplo los timers del avr, o ser externos al
@@ -27,15 +29,20 @@ En principio, distingo los siguientes tipos:
 
   De estos dispositivos se suministra un driver para programarlos.
 
-* Dispositivos ... (nombre???)
- 
-  Un LCD lo podemos ver como un ostream, o como una screen. 
+* User defined devices:
+  
+  Son devices que creamos a partir de los built-in devices. 
 
-  Una EEPROM paginada la podemos ver como una EEPROM lineal, y esta a su vez
+  Ejemplos:
+ 
+  * Un LCD lo podemos ver como un ostream, o como una screen. 
+
+  * Una EEPROM paginada la podemos ver como una EEPROM lineal, y esta a su vez
   la podemos ver como un iostream.
 
-  El concebir un dispositivo de otra forma es lo que llamo "dispositivos ...
-  (elegir nombre)". Estos dispositivos los guardo en `dev1`
+  El concebir un dispositivo de otra forma es lo que llamo user-defined
+  devices. Estos devices de momento los guardo en `dev1`.
+
 
 
 ## <a name="T-drivers"></a>Escritura de drivers
