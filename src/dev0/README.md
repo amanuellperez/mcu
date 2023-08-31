@@ -1,14 +1,4 @@
 # HARDWARE DEVICES
-
-Drivers for some devices. 
-
-Read the spanish description or look the directory `test`.
-
-Tested: avr-gcc 9.2.0
-
----
-
-# HARDWARE DEVICES
 Dispositivos a los que accedemos desde el microcontrolador.
 
 ## Índice
@@ -68,7 +58,7 @@ A falta de nombre he decidido poner el subfijo `_basic` a todas las clases que
 representan traductores puros. Ejemplo: `DS18B20_basic` es el traductor del
 sensor de temperatura `DS18B20`
 
-### Parámetros
+#### Parámetros
 Un device se conecta al micro usando un determinado protocolo (pins, SPI,
 1-wire, 2-wire, ...). Todos los devices irán parametrizados por el Micro
 (opcional???) y el protocolo usado.
