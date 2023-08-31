@@ -13,8 +13,8 @@ Dispositivos a los que accedemos desde el microcontrolador.
 
 ## Índice
 * [Clasificación](#T-tipos)
-* [Escritura de drivers](T-drivers)
-* [Drivers suministrados](T-suministrados)
+* [Escritura de drivers](#T-drivers)
+* [Drivers suministrados](#T-suministrados)
 
 ## <a name="T-tipos"></a>Clasificación
 En principio, distingo los siguientes tipos:
@@ -24,6 +24,18 @@ En principio, distingo los siguientes tipos:
   Este tipo de dispositivos pueden estar implementados dentro del
   microcontrolador, como por ejemplo los timers del avr, o ser externos al
   micro (un LCD, un DAC, ...).
+
+  De estos dispositivos se suministra un driver para programarlos.
+
+* Dispositivos ... (nombre???)
+ 
+  Un LCD lo podemos ver como un ostream, o como una screen. 
+
+  Una EEPROM paginada la podemos ver como una EEPROM lineal, y esta a su vez
+  la podemos ver como un iostream.
+
+  El concebir un dispositivo de otra forma es lo que llamo "dispositivos ...
+  (elegir nombre)". Estos dispositivos los guardo en `dev1`
 
 
 ## <a name="T-drivers"></a>Escritura de drivers
@@ -48,6 +60,19 @@ datasheet y ver si el código realmente hace lo que dice la datasheet.
 A falta de nombre he decidido poner el subfijo `_basic` a todas las clases que
 representan traductores puros. Ejemplo: `DS18B20_basic` es el traductor del
 sensor de temperatura `DS18B20`
+
+### Parámetros
+Un device se conecta al micro usando un determinado protocolo (pins, SPI,
+1-wire, 2-wire, ...). Todos los devices irán parametrizados por el Micro
+(opcional???) y el protocolo usado.
+
+Ejemplo: 
+```
+template <typename Micro, typename Protocol>
+class Device_basic{
+...
+};
+```
 
 
 #### Test
