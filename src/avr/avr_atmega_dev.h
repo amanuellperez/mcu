@@ -118,9 +118,6 @@ namespace atmega{
 
 
 // MCU UTILITIES
-    using Interrupt          = avr_::Interrupt;
-
-    using Power     = avr_::Power;
 
 
 // PROGMEM

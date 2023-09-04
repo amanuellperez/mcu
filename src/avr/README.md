@@ -90,7 +90,7 @@ character streams, but `ioxtreams` are bytes streams. I want to send `uint16_t x
 = 500` as two byts '0x01F4` and not as 3 characters '5', '0', '0'.
 
 
-Tested: avr-gcc 9.2.0
+Tested: avr-gcc 11.3.0
     
 ---
 # ADVERTENCIA: Esta biblioteca es inestable. ¿Podría ser la versión 0.1?
@@ -167,6 +167,15 @@ dispositivo genérico.
 
 
 
+## ¿Qué implementar lo primero?
+
+Para poder depurar un programa se necesita una forma de trazarlo. En el caso
+del atmega conviene programar cuanto antes el traductor del UART ya que una
+vez definido ese traductor automáticamente deberíamos de tener `UART_iostream`
+(desconozco si se puede hacer pero quedaría bastante bien poder programar un
+`UART_iostream` parametrizado por un `UART_generic`. Una vez programado el
+traductor `UART_basic`, con escribir `UART_generic` podríamos definir `using
+atmega::UART_iostream = generic::UART_iostream<UART_generic>`).
 
 
 ## Algunos ejemplos
@@ -265,5 +274,5 @@ funciona.
 Si se quiere dejar el producto final con la posibilidad de reprogramarlo hay
 que dejar esas resistencias. 
 
- Probado con: avr-gcc 9.2.0
+ Probado con: avr-gcc 11.3.0
  

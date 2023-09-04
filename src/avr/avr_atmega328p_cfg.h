@@ -36,9 +36,12 @@
  ****************************************************************************/
 #include <cstdint>  // uint8_t
 #include <avr/io.h> // registros: DDRB... PORT...
+#include <atd_static.h>
+#include <atd_type_traits.h>	// atd::always_false_v
 
 namespace avr_{
 
+namespace cfg{ // ir incluyendo el resto según vaya reescribiendo codigo
 // CONFIGURACIÓN DE LOS PINES
 // --------------------------
 // La idea es numerar los pines de acuerdo a su posición en el chip
@@ -76,6 +79,9 @@ constexpr volatile uint8_t* PIN[29] = {
     , 0    , &PINC, &PINC, &PINC, &PINC, &PINC, &PINC};
 
 
+// TODO: ver si se puede pasar esto a static_array como he hecho con INT_POS
+// Es más sencillo de definir. ¿podrá dar un error de compilación si se
+// intenta usar un pin no valido?
 constexpr uint8_t BIT_MASK[29] = {
     0
     , 1 << PC6, 1 << PD0, 1 << PD1, 1 << PD2, 1 << PD3, 1 << PD4, 0
@@ -85,11 +91,51 @@ constexpr uint8_t BIT_MASK[29] = {
     };
 
 
+// Interrupciones INT0, INT1, ...
+// -------------------------------
+// EXPERIMENTO: un avr puede tener varias INTx. Probemos a dejar el código
+// independiente del número de interrupciones que tenga. Para ello necesito
+// definir todas las posiciones de los bits como arrays. (y seguramente que
+// haya que definir también los registros a los que acceder como array pero de
+// momento no lo necesito)
+// External Interrupt Control Register A:
+// Buscamos que ISC0<0>, ISC1<0> == sean los ISC de INT0, por ello esta forma
+// de definirlo:
+    using ISC0 = atd::static_array<uint8_t, ISC00, ISC10>; 
+    using ISC1 = atd::static_array<uint8_t, ISC01, ISC11>;
 
+// External Interrupt Mask Register:
+    using INT_POS = atd::static_array<uint8_t, INT0, INT1>;
+constexpr uint8_t INT_number = INT_POS::size;
 
-namespace cfg{ // ir incluyendo el resto según vaya reescribiendo codigo
+// Quiero definir INT0, INT1 como templates INT<0>, INT<1>, templates que
+// asociaré a los pines correspondientes:
+//	    Al Pin<4>::INT = INT<0>
+//	    Al Pin<5>::INT = INT<1>
+//
+// Si se intenta acceder a Pin<n>::INT, con n distinto de 4 ó 5 debe de dar un
+// error de compilación. 
+//
+// Para implementar esto necesito asociar al pin el número de INT que le
+// corresponde. La siguiente clase hace eso:
+// (realmente es un static_map que asocia 4->0, y 5->1.
+template <uint8_t n>
+inline constexpr int8_t nINT_of_pin()
+{
+    if constexpr (n == 4)
+	return 0;
+
+    else if constexpr (n == 5)
+	return 1;
+
+    // se especializa INT<-1> como clase vacía para que de error de compilación
+    else 
+	return -1;
+}
+
 
 // CONFIGURACIÓN DEL SPI
+// ---------------------
     struct spi{
 	static constexpr uint8_t SCK_pin_number  = 19u;
 	static constexpr uint8_t MISO_pin_number = 18u;
@@ -121,6 +167,8 @@ namespace cfg{ // ir incluyendo el resto según vaya reescribiendo codigo
 }// namespace cfg
 
 
+// namespace cfg{ ir incluyendo el resto según vaya reescribiendo codigo
+// --------------
 // CONFIGURACIÓN DEL ADC
     // Devuelve el número de pin dentro del ADC que le corresponde al num_pin
     // del avr

@@ -1,5 +1,5 @@
-DIRS = sleep \
-		power
+DIRS = sleep 
+#		power
 
 include $(MCU_RECRULES)
 

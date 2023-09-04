@@ -1,7 +1,8 @@
-BIN = xx
+DIRS = basic \
+	   interrupts
 
-SOURCES= main.cpp
 
-MCU = atmega328p
 
-include $(AVR_GENRULES)
+include $(MCU_RECRULES)
+
+

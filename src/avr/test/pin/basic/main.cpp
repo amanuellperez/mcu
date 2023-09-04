@@ -20,10 +20,10 @@
 // Conectar un led al pin 14, y un pulsador
 // entre resistencias al pin 4
 
-#include "../../avr_atmega328p_cfg.h"
-#include "../../avr_pin.h"
-#include "../../avr_micro.h"
-#include "../../avr_UART_iostream.h"
+#include "../../../avr_atmega328p_cfg.h"
+#include "../../../avr_pin.h"
+#include "../../../avr_micro.h"
+#include "../../../avr_UART_iostream.h"
 
 namespace mcu = avr_;
 using Micro = mcu::Micro;

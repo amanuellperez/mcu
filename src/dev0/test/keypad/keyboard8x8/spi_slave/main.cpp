@@ -102,7 +102,8 @@ int main()
     SPI::spi_mode(0,0);
     SPI::data_order_LSB();
     SPI::interrupt_enable();
-    mcu::Interrupt::enable_pin<SPI_SS_pin>();
+    //mcu::Interrupt::enable_pin<SPI_SS_pin>();
+    mcu::Pin<SPI_SS_pin>::enable_change_level_interrupt();
     mcu::Micro::enable_interrupts();
 
 

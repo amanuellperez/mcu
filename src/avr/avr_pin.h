@@ -36,13 +36,106 @@
  *	10/12/2022 number: lo necesito para depurar. Puedo poner cosas del
  *			     tipo "conectar osciloscopio al pin " <<
  *			     pin.number;
+ *	03/09/2023 Introduzco la gestión de interrupciones de los pines dentro
+ *	           de la clase Pin. Es más natural.
  *
  ****************************************************************************/
-#include <avr/io.h> // registros: DDRB... PORT...
+#include <avr/io.h> // registros: cfg::DDRB... cfg::PORT...
 #include "avr_time.h"
 #include "avr_not_generic.h"
+#include <atd_bit.h>
 
 namespace avr_{
+
+// Traductor de las interrupciones INT0, INT1, ...
+//
+// (RRR) ¿Por qué parametrizarlo por el número de la INT en lugar de escribir
+//       clases particulares INT0 e INT1?
+//       ¿por qué INT__<0> en lugar de INT0? ¿e INT__<1> en lugar de INT1?
+//
+//       Porque el número de interrupciones INTx depende del microcontrolador.
+//       El atmega32 tiene 2, pero el atmega2560 tiene más. 
+//       
+template <int8_t n>
+class INT__{
+public:
+    static void enable_change_level();
+    static void enable_when_falling_edge();
+    static void enable_when_rising_edge();
+    static void enable_when_is_zero();
+    static void disable();
+
+private:
+    static void enable_interrupt()
+    {
+	constexpr uint8_t i = cfg::INT_POS::at<n>;
+	//atd::write_bit<cfg::INT_POS::at<n> >::template to<1>::in(EIMSK);
+	atd::write_bit<i>::template to<1>::in(EIMSK);
+    }
+
+};
+
+
+template <int8_t n>
+void INT__<n>::enable_when_is_zero()
+{
+    constexpr uint8_t ISC1 = cfg::ISC1::at<n>; // = ISCn1
+    constexpr uint8_t ISC0 = cfg::ISC0::at<n>; // = ISCn0
+
+    atd::write_bits<ISC1, ISC0>::template to<0,0>::in(EICRA);
+    //atd::write_bits<ISC01, ISC00>::to<0,0>::in(EICRA);
+    enable_interrupt();
+}
+
+template <int8_t n>
+void INT__<n>::enable_change_level()
+{
+    constexpr uint8_t ISC1 = cfg::ISC1::at<n>; // = ISCn1
+    constexpr uint8_t ISC0 = cfg::ISC0::at<n>; // = ISCn0
+
+    atd::write_bits<ISC1, ISC0>::template to<0,1>::in(EICRA);
+    // atd::write_bits<ISC01, ISC00>::to<0,1>::in(EICRA);
+    enable_interrupt();
+}
+
+
+template <int8_t n>
+void INT__<n>::enable_when_falling_edge()
+{
+    constexpr uint8_t ISC1 = cfg::ISC1::at<n>; // = ISCn1
+    constexpr uint8_t ISC0 = cfg::ISC0::at<n>; // = ISCn0
+
+    atd::write_bits<ISC1, ISC0>::template to<1,0>::in(EICRA);
+    // atd::write_bits<ISC01, ISC00>::to<1,0>::in(EICRA);
+    enable_interrupt();
+}
+
+template <int8_t n>
+void INT__<n>::enable_when_rising_edge()
+{
+    constexpr uint8_t ISC1 = cfg::ISC1::at<n>; // = ISCn1
+    constexpr uint8_t ISC0 = cfg::ISC0::at<n>; // = ISCn0
+
+    atd::write_bits<ISC1, ISC0>::template to<1,1>::in(EICRA);
+    // atd::write_bits<ISC01, ISC00>::to<1,1>::in(EICRA);
+    enable_interrupt();
+}
+
+
+template <int8_t n>
+inline void INT__<n>::disable()
+{
+    constexpr uint8_t i = cfg::INT_POS::at<n>;
+    atd::write_bit<i>::template to<0>::in(EIMSK);
+    //atd::write_bit<cfg::INT_POS::at<n> >::template to<0>::in(EIMSK);
+}
+
+// Especialización para que de error al compilar si 
+// se intenta generar una INTx en un pin no válido
+template <>
+class INT__<-1>{ };
+
+
 /*!
  *  \brief  Clase para manejar pins
  *
@@ -66,60 +159,46 @@ public:
 // INFO
     static constexpr uint8_t number = n;
 
-// CONFIGURAMOS EL PIN
-    /// Definimos el pin de salida
-    static void as_output() 
-    {
-	// (*DDR[n]) |= BIT_MASK[n]; <-- deprecated with volatile
-	(*DDR[n]) = (*DDR[n]) | BIT_MASK[n];
-    }
-
-    /// Definimos el pin como de entrada con la pull-up resistor
-    static void as_input_with_pullup() 
-    {
-	(*DDR[n]) = (*DDR[n]) & ~BIT_MASK[n];	// de entrada
-	(*PORT[n]) = (*PORT[n]) | BIT_MASK[n];	// enables pull-up resistor
-    }
-
-    /// Definimos el pin como de entrada sin la pull-up resistor
-    static void as_input_without_pullup() 
-    {
-	(*DDR[n]) = (*DDR[n]) & ~BIT_MASK[n];	// de entrada
-	(*PORT[n]) = (*PORT[n]) & ~BIT_MASK[n];	// disable pull-up resistor
-    }
+// CONFIGURAMOS EL cfg::PIN
+    static void as_output();
+    static void as_input_with_pullup();
+    static void as_input_without_pullup();
 
 
 // FUNCIONES DE LECTURA
-    /// Leemos el valor del pin (0 ó 1)
-    static uint8_t read()
-    {return (*PIN[n]) & BIT_MASK[n];}
+    // Si el bit es '1' devuelve un número distinto de cero.
+    // Si el bit es '0' devuelve cero.
+    static uint8_t read();
 
     /// Devuelve si el bit es 0 o no. 
-    static bool is_zero() {return !read();}
+    static bool is_zero();
 
     /// Devuelve si el bit es 1 o no. 
-    static bool is_one() {return read();}
+    static bool is_one();
 
 // FUNCIONES DE ESCRITURA
-    /// Escribimos un 1
-    static void write_one()	
-    {(*PORT[n]) = (*PORT[n]) | BIT_MASK[n];}
-
-    /// Escribimos un 0
-    static void write_zero()	
-    {(*PORT[n]) = (*PORT[n]) & ~BIT_MASK[n];}
+    static void write_one();
+    static void write_zero();
 
     /// Cambiamos el valor del pin (de 0 a 1 ó de 1 a 0).
-    static void toggle()  
-    { (*PORT[n]) = (*PORT[n]) ^ BIT_MASK[n]; }
+    static void toggle();
 
     /// Escribimos en el pin. Un valor distinto de cero es 1.
-    static void write(uint8_t x)
-    {
-	if(x) write_one();
-	else  write_zero();
-    }
+    static void write(uint8_t x);
     
+
+// INTERRUPTS
+    // PCINT interrupts
+    // ----------------
+    // Genera una interrupción cada vez que el pin cambia de 0->1 ó de 1->0
+    static void enable_change_level_interrupt();
+    static void disable_change_level_interrupt();
+
+    using INT = INT__<cfg::nINT_of_pin<n>()>;
+
+
+
+
 // FUNCIONES DE AYUDA
 // TODO: esto no pertenece al traductor. Quitarlo de aquí!!!
     static void pulse_of_1us()
@@ -138,8 +217,328 @@ public:
 };
 
 
+// Implementación
+// --------------
+template <uint8_t n>
+inline void Pin<n>::as_output() 
+{
+    // (*cfg::DDR[n]) |= cfg::BIT_MASK[n]; <-- deprecated with volatile
+    (*cfg::DDR[n]) = (*cfg::DDR[n]) | cfg::BIT_MASK[n];
+}
+
+template <uint8_t n>
+inline void Pin<n>::as_input_with_pullup() 
+{
+    (*cfg::DDR[n]) = (*cfg::DDR[n]) & ~cfg::BIT_MASK[n];	// de entrada
+    (*cfg::PORT[n]) = (*cfg::PORT[n]) | cfg::BIT_MASK[n];	// enables pull-up resistor
+}
+
+template <uint8_t n>
+inline void Pin<n>::as_input_without_pullup() 
+{
+    (*cfg::DDR[n]) = (*cfg::DDR[n]) & ~cfg::BIT_MASK[n];	// de entrada
+    (*cfg::PORT[n]) = (*cfg::PORT[n]) & ~cfg::BIT_MASK[n];	// disable pull-up resistor
+}
 
 
+template <uint8_t n>
+inline uint8_t Pin<n>::read()
+{return (*cfg::PIN[n]) & cfg::BIT_MASK[n];}
+
+template <uint8_t n>
+inline bool Pin<n>::is_zero() {return !read();}
+
+template <uint8_t n>
+inline bool Pin<n>::is_one() {return read();}
+
+template <uint8_t n>
+inline void Pin<n>::write_one()	
+{(*cfg::PORT[n]) = (*cfg::PORT[n]) | cfg::BIT_MASK[n];}
+
+template <uint8_t n>
+inline void Pin<n>::write_zero()	
+{(*cfg::PORT[n]) = (*cfg::PORT[n]) & ~cfg::BIT_MASK[n];}
+
+template <uint8_t n>
+inline void Pin<n>::toggle()  
+{ (*cfg::PORT[n]) = (*cfg::PORT[n]) ^ cfg::BIT_MASK[n]; }
+
+template <uint8_t n>
+inline void Pin<n>::write(uint8_t x)
+{
+    if(x) write_one();
+    else  write_zero();
+}
+
+
+// Interrupts
+// ----------
+template<>
+inline void Pin<2>::enable_change_level_interrupt()
+{
+    atd::write_bit<PCIE2>::to<1>::in(PCICR);
+    atd::write_bit<PCINT16>::to<1>::in(PCMSK2);
+}
+
+template<>
+inline void Pin<2>::disable_change_level_interrupt()
+{ atd::write_bit<PCINT16>::to<0>::in(PCMSK2); }
+
+
+template<>
+inline void Pin<3>::enable_change_level_interrupt()
+{
+    atd::write_bit<PCIE2>::to<1>::in(PCICR);
+    atd::write_bit<PCINT17>::to<1>::in(PCMSK2);
+}
+
+template<>
+inline void Pin<3>::disable_change_level_interrupt()
+{ atd::write_bit<PCINT17>::to<0>::in(PCMSK2); }
+
+
+template<>
+inline void Pin<4>::enable_change_level_interrupt()
+{
+    atd::write_bit<PCIE2>::to<1>::in(PCICR);
+    atd::write_bit<PCINT18>::to<1>::in(PCMSK2);
+}
+
+template<>
+inline void Pin<4>::disable_change_level_interrupt()
+{ atd::write_bit<PCINT18>::to<0>::in(PCMSK2); }
+
+
+template<>
+inline void Pin<5>::enable_change_level_interrupt()
+{
+    atd::write_bit<PCIE2>::to<1>::in(PCICR);
+    atd::write_bit<PCINT19>::to<1>::in(PCMSK2);
+}
+
+template<>
+inline void Pin<5>::disable_change_level_interrupt()
+{ atd::write_bit<PCINT19>::to<0>::in(PCMSK2); }
+
+
+template<>
+inline void Pin<6>::enable_change_level_interrupt()
+{
+    atd::write_bit<PCIE2>::to<1>::in(PCICR);
+    atd::write_bit<PCINT20>::to<1>::in(PCMSK2);
+}
+
+template<>
+inline void Pin<6>::disable_change_level_interrupt()
+{ atd::write_bit<PCINT20>::to<0>::in(PCMSK2); }
+
+
+template<>
+inline void Pin<9>::enable_change_level_interrupt()
+{
+    atd::write_bit<PCIE0>::to<1>::in(PCICR);
+    atd::write_bit<PCINT6>::to<1>::in(PCMSK0);
+}
+
+template<>
+inline void Pin<9>::disable_change_level_interrupt()
+{ atd::write_bit<PCINT6>::to<0>::in(PCMSK0); }
+
+
+template<>
+inline void Pin<10>::enable_change_level_interrupt()
+{
+    atd::write_bit<PCIE0>::to<1>::in(PCICR);
+    atd::write_bit<PCINT7>::to<1>::in(PCMSK0);
+}
+
+template<>
+inline void Pin<10>::disable_change_level_interrupt()
+{ atd::write_bit<PCINT7>::to<0>::in(PCMSK0); }
+
+
+template<>
+inline void Pin<11>::enable_change_level_interrupt()
+{
+    atd::write_bit<PCIE2>::to<1>::in(PCICR);
+    atd::write_bit<PCINT21>::to<1>::in(PCMSK2);
+}
+
+template<>
+inline void Pin<11>::disable_change_level_interrupt()
+{ atd::write_bit<PCINT21>::to<0>::in(PCMSK2); }
+
+
+template<>
+inline void Pin<12>::enable_change_level_interrupt()
+{
+    atd::write_bit<PCIE2>::to<1>::in(PCICR);
+    atd::write_bit<PCINT22>::to<1>::in(PCMSK2);
+}
+
+template<>
+inline void Pin<12>::disable_change_level_interrupt()
+{ atd::write_bit<PCINT22>::to<0>::in(PCMSK2); }
+
+
+template<>
+inline void Pin<13>::enable_change_level_interrupt()
+{
+    atd::write_bit<PCIE2>::to<1>::in(PCICR);
+    atd::write_bit<PCINT23>::to<1>::in(PCMSK2);
+}
+
+template<>
+inline void Pin<13>::disable_change_level_interrupt()
+{ atd::write_bit<PCINT23>::to<0>::in(PCMSK2); }
+
+
+template<>
+inline void Pin<14>::enable_change_level_interrupt()
+{
+    atd::write_bit<PCIE0>::to<1>::in(PCICR);
+    atd::write_bit<PCINT0>::to<1>::in(PCMSK0);
+}
+
+template<>
+inline void Pin<14>::disable_change_level_interrupt()
+{ atd::write_bit<PCINT0>::to<0>::in(PCMSK0); }
+
+
+template<>
+inline void Pin<15>::enable_change_level_interrupt()
+{
+    atd::write_bit<PCIE0>::to<1>::in(PCICR);
+    atd::write_bit<PCINT1>::to<1>::in(PCMSK0);
+}
+
+template<>
+inline void Pin<15>::disable_change_level_interrupt()
+{ atd::write_bit<PCINT1>::to<0>::in(PCMSK0); }
+
+
+template<>
+inline void Pin<16>::enable_change_level_interrupt()
+{
+    atd::write_bit<PCIE0>::to<1>::in(PCICR);
+    atd::write_bit<PCINT2>::to<1>::in(PCMSK0);
+}
+
+template<>
+inline void Pin<16>::disable_change_level_interrupt()
+{ atd::write_bit<PCINT2>::to<0>::in(PCMSK0); }
+
+
+template<>
+inline void Pin<17>::enable_change_level_interrupt()
+{
+    atd::write_bit<PCIE0>::to<1>::in(PCICR);
+    atd::write_bit<PCINT3>::to<1>::in(PCMSK0);
+}
+
+template<>
+inline void Pin<17>::disable_change_level_interrupt()
+{ atd::write_bit<PCINT3>::to<0>::in(PCMSK0); }
+
+
+template<>
+inline void Pin<18>::enable_change_level_interrupt()
+{
+    atd::write_bit<PCIE0>::to<1>::in(PCICR);
+    atd::write_bit<PCINT4>::to<1>::in(PCMSK0);
+}
+
+template<>
+inline void Pin<18>::disable_change_level_interrupt()
+{ atd::write_bit<PCINT4>::to<0>::in(PCMSK0); }
+
+
+template<>
+inline void Pin<19>::enable_change_level_interrupt()
+{
+    atd::write_bit<PCIE0>::to<1>::in(PCICR);
+    atd::write_bit<PCINT5>::to<1>::in(PCMSK0);
+}
+
+template<>
+inline void Pin<19>::disable_change_level_interrupt()
+{ atd::write_bit<PCINT5>::to<0>::in(PCMSK0); }
+
+
+template<>
+inline void Pin<23>::enable_change_level_interrupt()
+{
+    atd::write_bit<PCIE1>::to<1>::in(PCICR);
+    atd::write_bit<PCINT8>::to<1>::in(PCMSK1);
+}
+
+template<>
+inline void Pin<23>::disable_change_level_interrupt()
+{ atd::write_bit<PCINT8>::to<0>::in(PCMSK1); }
+
+
+template<>
+inline void Pin<24>::enable_change_level_interrupt()
+{
+    atd::write_bit<PCIE1>::to<1>::in(PCICR);
+    atd::write_bit<PCINT9>::to<1>::in(PCMSK1);
+}
+
+template<>
+inline void Pin<24>::disable_change_level_interrupt()
+{ atd::write_bit<PCINT9>::to<0>::in(PCMSK1); }
+
+
+template<>
+inline void Pin<25>::enable_change_level_interrupt()
+{
+    atd::write_bit<PCIE1>::to<1>::in(PCICR);
+    atd::write_bit<PCINT10>::to<1>::in(PCMSK1);
+}
+
+template<>
+inline void Pin<25>::disable_change_level_interrupt()
+{ atd::write_bit<PCINT10>::to<0>::in(PCMSK1); }
+
+
+template<>
+inline void Pin<26>::enable_change_level_interrupt()
+{
+    atd::write_bit<PCIE1>::to<1>::in(PCICR);
+    atd::write_bit<PCINT11>::to<1>::in(PCMSK1);
+}
+
+template<>
+inline void Pin<26>::disable_change_level_interrupt()
+{ atd::write_bit<PCINT11>::to<0>::in(PCMSK1); }
+
+
+template<>
+inline void Pin<27>::enable_change_level_interrupt()
+{
+    atd::write_bit<PCIE1>::to<1>::in(PCICR);
+    atd::write_bit<PCINT12>::to<1>::in(PCMSK1);
+}
+
+template<>
+inline void Pin<27>::disable_change_level_interrupt()
+{ atd::write_bit<PCINT12>::to<0>::in(PCMSK1); }
+
+
+template<>
+inline void Pin<28>::enable_change_level_interrupt()
+{
+    atd::write_bit<PCIE1>::to<1>::in(PCICR);
+    atd::write_bit<PCINT13>::to<1>::in(PCMSK1);
+}
+
+template<>
+inline void Pin<28>::disable_change_level_interrupt()
+{ atd::write_bit<PCINT13>::to<0>::in(PCMSK1); }
+
+/***************************************************************************
+ *			    OUTPUT cfg::PIN
+ ***************************************************************************/
 /*!
  *  \brief  Creamos un pin que es de salida
  *  
@@ -207,7 +606,9 @@ public:
 };
 
 
-
+/***************************************************************************
+ *			    INPUT cfg::PIN WITH PULLUP
+ ***************************************************************************/
 /*!
  *  \brief  Creamos un pin de entrada con pull-up
  *
@@ -238,6 +639,10 @@ public:
 };
 
 
+
+/***************************************************************************
+ *			INPUT cfg::PIN WITHOUT PULLUP
+ ***************************************************************************/
 /*!
  *  \brief  Creamos un pin de entrada sin pull-up
  *

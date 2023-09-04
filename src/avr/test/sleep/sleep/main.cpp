@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 Manuel Perez 
+// Copyright (C) 2019-2023 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -27,51 +27,133 @@
 #include "../../../avr_interrupt.h"
 #include "../../../avr_pin.h"
 #include "../../../avr_time.h"
+#include "../../../avr_UART_iostream.h"
 
 
-// cfg
-constexpr uint8_t push_button_pin1 = 4;
-//constexpr uint8_t push_button_pin2 = 9;
-constexpr uint8_t led_pin = 14;
+// Micro
+// -----
+namespace mcu = avr_;
+//using Micro = mcu::Micro;
 
-#define ISR_PCINT1  ISR_PCINT_PIN4
-//#define ISR_PCINT2  ISR_PCINT_PIN9
+// Pins
+// ----
+constexpr uint8_t npin    = 4;
+
+// Interrupts
+// ----------
+#define ISR_PIN ISR_PCINT_PIN4
+
+// Hwd Devices
+// -----------
+using Pin     = mcu::Pin<npin>;
 
 
-volatile bool a_dormir = false;
+void init_uart()
+{
+    mcu::UART_iostream uart;
+    basic_cfg(uart);
+    uart.on();
 
-
-ISR_PCINT1 {
-    a_dormir = avr_::Pin<push_button_pin1>::is_zero();
 }
 
-//ISR_PCINT2 {
-//    a_dormir = avr_::Pin<push_button_pin2>::is_zero();
-//}
+void init()
+{
+    init_uart();
+
+    mcu::enable_interrupts();
+
+    Pin::as_input_with_pullup();
+}
+
+void print_menu()
+{
+    mcu::UART_iostream uart;
+    uart <<  "\n\nMenu\n"
+	         "----\n"
+	     "1. Select sleep mode\n"
+             "2. Sleep\n";
+}
+
+void select_mode()
+{
+    mcu::UART_iostream uart;
+
+    uart << "\nSelect mode\n"
+	      "-----------\n"
+	    "1. idle mode\n"
+	    "2. ADC noise reduction mode\n"
+	    "3. power down mode\n"
+	    "4. power save mode (to use with Timer2)\n";
+    // los standby mode son para usarlos con cristal externo. 
+    // TODO: al probarlos escribir las opciones de menu.
+
+    char ans{};
+    uart >> ans;
+
+    switch(ans){
+	break; case '1': mcu::Sleep::idle_mode();
+	break; case '2': mcu::Sleep::ADC_noise_reduction_mode();
+	break; case '3': mcu::Sleep::power_down_mode();
+	break; case '4': mcu::Sleep::power_save_mode();
+	break; default : uart << "Unknown option\n";
+    }
+}
+
+void test_sleep()
+{
+    mcu::UART_iostream uart;
+
+    uart << "\nSleeping ... (press a key to awake me)\n";
+
+    mcu::UART_basic::enable_interrupt_unread_data();
+    mcu::Interrupt::enable_pin<npin>();
+
+// >>> sleep()
+    mcu::Sleep::enable();
+    mcu::Sleep::instruction();
+    mcu::Sleep::disable();
+// <<< sleep()
+
+    mcu::UART_basic::disable_interrupt_unread_data();
+    mcu::Interrupt::disable_pin<npin>();
+
+    char ans{};
+    uart >> ans; // vaciamos el buffer para que no vuelva a saltar la interrupcion
+
+    uart << "AWAKE again\n";
+}
 
 
 int main()
 {
-    avr_::Pin<led_pin>::as_output();
-    avr_::Pin<push_button_pin1>::as_input_with_pullup();
-    avr_::Interrupt::enable_pin<push_button_pin1>();
-
-//    avr_::Pin<push_button_pin2>::as_input_with_pullup();
-//    avr_::Interrupt::enable_pin<push_button_pin2>();
-    
-    avr_::Sleep::set_mode_power_down();
+    init();
+    mcu::UART_iostream uart;
+    uart << "\nSleep teset\n"
+	      "-----------\n";
 
     while(1){
-	avr_::Pin<led_pin>::write_one();
-	avr_::wait_ms(500);
+	print_menu();
 
-	avr_::Pin<led_pin>::write_zero();
-	avr_::wait_ms(500);
+	char ans{};
+	uart >> ans;
 
-	avr_::sleep_if(a_dormir);
+	switch(ans){
+	    break; case '1': select_mode();
+	    break; case '2': test_sleep();
+	    break; default: uart << "Unknown option\n";
+	}
+
 
     }
 }
 
 
 
+ISR_PIN{
+    mcu::UART_iostream uart;
+    uart << "HOL disable\n";
+
+}
+
+ISR_USART_RX {
+}

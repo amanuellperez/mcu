@@ -112,7 +112,8 @@ int main()
     SPI::spi_mode(0,0);
     SPI::data_order_LSB();
     SPI::interrupt_enable();
-    atmega::Interrupt::enable_pin<SPI_SS_pin>();
+    //atmega::Interrupt::enable_pin<SPI_SS_pin>();
+    atmega::Pin<SPI_SS_pin>::enable_change_level_interrupt();
     atmega::Micro::enable_interrupts();
 
 
