@@ -55,6 +55,13 @@ namespace avr_{
 
 // De momento defino este interfaz para no tener que usar abreviaturas
 struct Sleep{
+// Types
+    enum class Mode{idle, 
+		ADC_noise_reduction, 
+		power_down, power_save,
+		standby, extended_standby
+    };
+
 // MODOS DE OPERACION
     static void idle_mode()
     {atd::write_bits<SM2, SM1, SM0>::to<0,0,0>::in(SMCR);}
@@ -115,42 +122,14 @@ struct Sleep{
 
 };
 
-
-///*!
-// *  \brief  Gestiona el encendido apagado del avr (sleep or not to sleep)
-// *
-// *  v0.0: Nunca he manejado esto. Voy a suponer (???) que una aplicación solo
-// *  tiene una forma de gestionar cómo dormir el avr: o duermes solo una parte,
-// *  o duermes todo... Por ello voy a probar a definir interfaces que gestionen
-// *  de una única forma el modo de sleep, ocultando toda la gestión al cliente
-// *  de tal forma que no tenga que preocuparse de nada.
-// *
-// *  Como siempre, si el usuario quiere hacer una gestión diferente, puede
-// *  llamar directamente a Sleep, e incluso a las funciones de avrlibc.
-// *
-// */
-//class Power {
-//public:
-//    static void init() { Sleep::set_mode_power_down(); }
-//    static void turn_off_next_time() {to_sleep_ = true;}
-//    static void turn_on_next_time() {to_sleep_ = false;}
+// Función para no tener que pensar:
+// Si se quiere dormir el micro las formas más habituales serán llamar a:
+//	`sleep()`   : duerme el micro en idle_mode
+//	`sleep(Sleep::Mode::power_down)
 //
-//    // turn off if neccesary: 
-//    // Esto es, si se ha llamado turn_off_next_time, esta función apaga el
-//    // avr.
-//    // Devuelve si el avr se ha dormido o no. En caso de haberse dormido, 
-//    // puede que haya que reinicializar algún periférico (ejemplo: un LCD si
-//    // se desconecta de corriente al dormirse el avr, hay que
-//    // reinicializarlo).
-//    static bool turn_off_if() {return sleep_if(to_sleep_);}
-//
-//private:
-//    // ¿quiero dormirme?
-//    // Tiene que ser static ya que queremos acceder a ella desde ISR.
-//    // De esta forma evitamos definirla como variable global. (es global pero
-//    // metida dentro del scope Power).
-//    static volatile bool to_sleep_;
-//};
+// Si se quiere ganar un pelín en eficiencia mejor usar directamente el
+// traductor. Ver como ejemplo el test.
+void sleep(Sleep::Mode mode = Sleep::Mode::idle);
 
 
 }// namespace

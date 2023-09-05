@@ -22,12 +22,12 @@
 // volviendo a iluminarse.
 // Para ver que cualquier pin puede despertar al avr, defino 2 interrupciones.
 // Funciona con los 2 pines correctamente. Probar a descomentar el pin2.
-#include "../../../avr_atmega328p_cfg.h"
-#include "../../../avr_sleep.h"
-#include "../../../avr_interrupt.h"
-#include "../../../avr_pin.h"
-#include "../../../avr_time.h"
-#include "../../../avr_UART_iostream.h"
+#include "../../avr_atmega328p_cfg.h"
+#include "../../avr_sleep.h"
+#include "../../avr_interrupt.h"
+#include "../../avr_pin.h"
+#include "../../avr_time.h"
+#include "../../avr_UART_iostream.h"
 
 
 // Micro
@@ -37,11 +37,11 @@ namespace mcu = avr_;
 
 // Pins
 // ----
-constexpr uint8_t npin    = 4;
+constexpr uint8_t npin    = 14;
 
 // Interrupts
 // ----------
-#define ISR_PIN ISR_PCINT_PIN4
+#define ISR_PIN ISR_PCINT_PIN14
 
 // Hwd Devices
 // -----------
@@ -65,14 +65,6 @@ void init()
     Pin::as_input_with_pullup();
 }
 
-void print_menu()
-{
-    mcu::UART_iostream uart;
-    uart <<  "\n\nMenu\n"
-	         "----\n"
-	     "1. Select sleep mode\n"
-             "2. Sleep\n";
-}
 
 void select_mode()
 {
@@ -103,10 +95,13 @@ void test_sleep()
 {
     mcu::UART_iostream uart;
 
-    uart << "\nSleeping ... (press a key to awake me)\n";
+    uart << "\nSleeping ... \n"
+	    "To wake me up:\n"
+	    "\t1. press a key (only sleep idle mode)\n"
+	    "\t2. change level in pin number " << (int) Pin::number << "\n";
 
     mcu::UART_basic::enable_interrupt_unread_data();
-    mcu::Interrupt::enable_pin<npin>();
+    Pin::enable_change_level_interrupt();
 
 // >>> sleep()
     mcu::Sleep::enable();
@@ -115,10 +110,13 @@ void test_sleep()
 // <<< sleep()
 
     mcu::UART_basic::disable_interrupt_unread_data();
-    mcu::Interrupt::disable_pin<npin>();
+    Pin::disable_change_level_interrupt();
 
-    char ans{};
-    uart >> ans; // vaciamos el buffer para que no vuelva a saltar la interrupcion
+    // vaciamos el buffer para que no vuelva a saltar la interrupcion
+    while (mcu::UART_basic::are_there_data_unread()){
+	char ans{};
+	uart >> ans; 
+    }
 
     uart << "AWAKE again\n";
 }
@@ -127,12 +125,16 @@ void test_sleep()
 int main()
 {
     init();
+
     mcu::UART_iostream uart;
     uart << "\nSleep teset\n"
 	      "-----------\n";
 
     while(1){
-	print_menu();
+	uart <<  "\n\nMenu\n"
+		     "----\n"
+		 "1. Select sleep mode\n"
+		 "2. Sleep\n";
 
 	char ans{};
 	uart >> ans;
@@ -147,11 +149,9 @@ int main()
     }
 }
 
-
-
 ISR_PIN{
     mcu::UART_iostream uart;
-    uart << "HOL disable\n";
+    uart << "Inside ISR_PIN!\n";
 
 }
 

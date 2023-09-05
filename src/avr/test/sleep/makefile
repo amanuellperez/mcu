@@ -1,6 +1,12 @@
-DIRS = sleep 
-#		power
+BIN = xx
 
-include $(MCU_RECRULES)
+SOURCES= main.cpp
+
+
+MCU = atmega328p
+
+include $(AVR_GENRULES)
+
+
 
 
