@@ -21,34 +21,38 @@
 
 namespace avr_{
 
-static void sleep_mode(Sleep::Mode mode)
+void sleep_mode(Sleep::mode mode)
 {
     switch (mode){
-	break; case Sleep::Mode::idle: 
+	break; case Sleep::mode::idle: 
 			    Sleep::idle_mode();
 
-	break; case Sleep::Mode::ADC_noise_reduction: 
+	break; case Sleep::mode::ADC_noise_reduction: 
 			    Sleep::ADC_noise_reduction_mode();
 
-	break; case Sleep::Mode::power_down: 
+	break; case Sleep::mode::power_down: 
 			    Sleep::power_down_mode();
 
-	break; case Sleep::Mode::power_save: 
+	break; case Sleep::mode::power_save: 
 			    Sleep::power_save_mode();
 
-	break; case Sleep::Mode::standby: 
+	break; case Sleep::mode::standby: 
 			    Sleep::standby_mode();
 
-	break; case Sleep::Mode::extended_standby: 
+	break; case Sleep::mode::extended_standby: 
 			    Sleep::extended_standby_mode();
     }
     
 }
 
-void sleep(Sleep::Mode mode)
+void sleep(Sleep::mode mode)
 {
     sleep_mode(mode);
+    sleep();
+}
 
+void sleep()
+{
     Sleep::enable();
     Sleep::instruction();
     Sleep::disable();

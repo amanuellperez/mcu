@@ -56,7 +56,9 @@ namespace avr_{
 // De momento defino este interfaz para no tener que usar abreviaturas
 struct Sleep{
 // Types
-    enum class Mode{idle, 
+    // (RRR) Mode vs mode: 
+    //	     Se lee mejor `Sleep::mode::idle` que `Sleep::Mode::idle`
+    enum class mode {idle, 
 		ADC_noise_reduction, 
 		power_down, power_save,
 		standby, extended_standby
@@ -122,15 +124,18 @@ struct Sleep{
 
 };
 
-// Función para no tener que pensar:
-// Si se quiere dormir el micro las formas más habituales serán llamar a:
-//	`sleep()`   : duerme el micro en idle_mode
-//	`sleep(Sleep::Mode::power_down)
-//
-// Si se quiere ganar un pelín en eficiencia mejor usar directamente el
-// traductor. Ver como ejemplo el test.
-void sleep(Sleep::Mode mode = Sleep::Mode::idle);
 
+// Definimos el modo del sleep
+void sleep_mode(Sleep::mode mode);
+
+// Dormimos. 
+// Precondicion: haber definido el modo con `sleep_mode`.
+void sleep();
+
+// Equivalente a:
+//	    sleep_mode(mode);
+//	    sleep();
+void sleep(Sleep::mode mode);
 
 }// namespace
 
