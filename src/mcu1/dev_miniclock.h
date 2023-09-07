@@ -80,7 +80,6 @@
  *
  ****************************************************************************/
 #include <dev_concepts.h>
-#include <dev_interrupt.h>
 			    
 namespace dev{
 /***************************************************************************
@@ -213,7 +212,8 @@ inline void Miniclock<M, T, p>::wait(const counter_type& t)
 	    requires Unsafe_device<Timer_counter>
 
 {
-    dev::Disable_interrupts<Micro> lock;	
+    using Disable_interrupts = Micro::Disable_interrupts;
+    Disable_interrupts lock;	
 
     Timer_counter::unsafe_reset();
     

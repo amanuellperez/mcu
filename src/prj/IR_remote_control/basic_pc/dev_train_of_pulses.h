@@ -244,7 +244,7 @@ void Train_of_pulses_receiver<C>::receive_semipulses(volatile bool& abort)
     Miniclock_us::start();
     
     {// TODO: meter esto en una función. nombre?
-	dev::Enable_interrupts<atmega::Micro> lock; // TODO: esto no es genérico
+	atmega::Micro::Enable_interrupts lock; // NO GENERIC!!
 
 	while (nsemipulse_ < 0 and !abort) { ; }	// esperamos a recibir algo
 

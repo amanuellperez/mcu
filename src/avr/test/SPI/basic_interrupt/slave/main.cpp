@@ -21,7 +21,6 @@
 #include "../../../../avr_SPI_generic.h"
 #include "../../../../avr_interrupt.h"
 #include "../../../../avr_UART_iostream.h"
-#include "../../../../dev_interrupt.h"
 #include "../../../../avr_micro.h"
 
 
@@ -57,7 +56,7 @@ int main()
 	if (data != uint8_t{0}){
 	    uint8_t ndata{0};
 	    {
-                dev::Disable_interrupts<avr_::Micro> lock;
+                avr_::Disable_interrupts lock;
                 ndata = data;
                 data  = uint8_t{0};
 	    }

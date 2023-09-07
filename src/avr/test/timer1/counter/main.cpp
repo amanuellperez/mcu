@@ -24,7 +24,6 @@
 #include "../../../avr_time.h"
 #include "../../../avr_interrupt.h"
 #include "../../../avr_micro.h"
-#include "../../../dev_interrupt.h"
 
 
 #include <atd_ostream.h>
@@ -116,7 +115,7 @@ int main()
 	Timer::counter_type v;
 	uint32_t c;
 	{// lo más atómico posible
-	    dev::Disable_interrupts<mcu::Micro> l;
+	    mcu::Disable_interrupts l;
 	    v = Timer::unsafe_counter();
 	    c = contador;
 	}

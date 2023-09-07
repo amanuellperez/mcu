@@ -6,7 +6,6 @@ SOURCES= avr_sleep.cpp	\
 
 
 INCS= dev_concepts.h	\
-	  dev_interrupt.h	\
 	avr_ADC_basic.h		\
 	avr_atmega328p_cfg.h\
 	avr_atmega_dev.h	\

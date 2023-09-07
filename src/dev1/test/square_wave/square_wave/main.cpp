@@ -93,7 +93,7 @@ void generate(const uint32_t& freq, const uint16_t& t)
 
     SWG::cfg();
 
-    dev::Disable_interrupts<Micro> lock;	
+    Micro::Disable_interrupts lock;	
     for (uint16_t i = 0; i < nburst; ++i){
 	SWG::generate(freq, t);
 	SWG::wait(t);

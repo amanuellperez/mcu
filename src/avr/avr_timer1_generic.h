@@ -43,7 +43,6 @@
 #include "avr_interrupt.h"
 #include "avr_cfg.h"	// MCU_CLOCK_FREQUENCY_IN_HZ
 #include "avr_micro.h"
-#include "dev_interrupt.h"
 
 namespace avr_{
 
@@ -243,7 +242,7 @@ public:
 // types
     using Timer        = avr_::Timer1;
     using counter_type = typename Timer::counter_type;
-    using Disable_interrupts = dev::Disable_interrupts<Micro>;
+    using Disable_interrupts = avr_::Disable_interrupts;
 
 /// De momento el interfaz es static. Prohibo su construcción.
     Time_counter1_g() = delete;
@@ -488,7 +487,7 @@ public:
 
 private:
     using counter_type = typename Timer::counter_type;
-    using Disable_interrupts = dev::Disable_interrupts<Micro>;
+    using Disable_interrupts = avr_::Disable_interrupts;
 
 // Funciones de ayuda
     static void init(){ Timer::mode_CTC_top_ICR1();}
@@ -636,7 +635,7 @@ public:
                                       // y Hertz. ¿qué nombre común usar?
                                       // ponerlo en avr_types.h
 
-    using Disable_interrupts = dev::Disable_interrupts<Micro>;
+    using Disable_interrupts = avr_::Disable_interrupts;
 
     enum class Mode {
         fix_0x00FF, fix_0x01FF, fix_0x03FF,

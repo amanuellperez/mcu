@@ -24,7 +24,6 @@
 #include "../../../avr_time.h"
 #include "../../../avr_interrupt.h"
 #include "../../../avr_micro.h"
-#include "../../../dev_interrupt.h"
 
 #include <time.h>
 
@@ -92,7 +91,7 @@ int main()
 
     Timer::mode_CTC_top_OCR1A();
     {
-	dev::Disable_interrupts<mcu::Micro> l;
+	mcu::Disable_interrupts l;
 	Timer::unsafe_output_compare_register_A(ocr1a);
     }
 

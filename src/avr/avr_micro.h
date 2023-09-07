@@ -60,23 +60,14 @@ struct Micro{
 // ----------
     /// Habilita el uso de interrupciones. Además, recordar habilitar
     /// cada interrupción por separado.
-    inline static void enable_interrupts() {sei();}
+    inline static void enable_interrupts() {avr_::enable_interrupts();}
 
     /// Deshabilita el uso de interrupciones
-    inline static void disable_interrupts() {cli();}
+    inline static void disable_interrupts() {avr_::disable_interrupts();}
 
+    using Enable_interrupts  = avr_::Enable_interrupts;
+    using Disable_interrupts = avr_::Disable_interrupts;
 
-    // El global_flag_interrupt lo necesito para gestionar
-    // Enable_interrupts/Disable_interrupts. 
-    using Global_flag_interrupt = unsigned char;
-
-    inline static 
-	void global_flag_interrupt(const Global_flag_interrupt& sreg)
-    { SREG = sreg; }
-
-    inline static 
-	Global_flag_interrupt global_flag_interrupt()
-    { return SREG; }
 
 // Progmem
 // -------

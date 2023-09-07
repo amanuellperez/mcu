@@ -63,7 +63,6 @@
 
 #include "avr_cfg.h"	// MCU_CLOCK_FREQUENCY_IN_HZ
 #include "avr_not_generic.h"
-#include "dev_interrupt.h"
 #include "avr_micro.h"
 
 
@@ -572,7 +571,7 @@ template <typename TWI, typename TWI::streamsize bsz>
 TWI_master<TWI, bsz>::streamsize TWI_master<TWI, bsz>::
     write(const std::byte* buf, streamsize n)
 {
-    dev::Disable_interrupts<Micro> lock;// fundamental, ya que se llamará desde 'busy'
+    Micro::Disable_interrupts lock;// fundamental, ya que se llamará desde 'busy'
 
     // OJO: el micro funciona mucho más rápido que TWI, por eso si se llama
     // a write_to(q,n), y  a continuación a write(q,n) puede que todavía no le

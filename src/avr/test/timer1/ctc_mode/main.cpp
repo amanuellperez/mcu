@@ -23,7 +23,6 @@
 #include "../../../avr_interrupt.h"
 #include "../../../avr_UART_iostream.h"
 #include "../../../avr_micro.h"
-#include "../../../dev_interrupt.h"
 
 
 using namespace avr_::literals;
@@ -240,7 +239,7 @@ int main()
     //Timer::mode_CTC_top_OCR1A();
     //Timer::output_compare_register_A(top);
     Timer::mode_CTC_top_ICR1();
-    { dev::Disable_interrupts<avr_::Micro> l; Timer::unsafe_input_capture_register(top);}
+    { avr_::Disable_interrupts l; Timer::unsafe_input_capture_register(top);}
     Timer::CTC_pin_A_toggle_on_compare_match(); // para que se vea algo al ppio
     Timer::CTC_pin_B_toggle_on_compare_match();
     timer_on(period_in_us);
@@ -304,7 +303,7 @@ int main()
 		uart >> top;
 		uart << top << '\n';
 		//Timer::output_compare_register_A(top);
-		{ dev::Disable_interrupts<avr_::Micro> l; 
+		{ avr_::Disable_interrupts l; 
 		  Timer::unsafe_input_capture_register(top);}
 		break;
 

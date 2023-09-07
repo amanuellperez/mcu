@@ -46,6 +46,7 @@
  *
  *		 Enable_interrupt
  *    12/12/2022 Enable_interrupts/Disable_interrupts a dev_interrupt.h
+ *    07/09/2023 Vuelvo a meter Enable_interrupts/Disable_interrupts en avr_.
  *
  ****************************************************************************/
 #include <avr/interrupt.h>
@@ -53,6 +54,9 @@
 
 
 namespace avr_{
+/***************************************************************************
+ *			    INTERRUPTS
+ ***************************************************************************/
 /// Habilita el uso de interrupciones. Además, recordar habilitar
 /// cada interrupción por separado.
 inline void enable_interrupts() {sei();}
@@ -61,6 +65,43 @@ inline void enable_interrupts() {sei();}
 inline void disable_interrupts() {cli();}
 
 
+class Disable_interrupts{
+public:
+    Disable_interrupts()
+    {
+	sreg_ = SREG;
+	disable_interrupts();
+    }
+
+    ~Disable_interrupts()
+    { SREG = sreg_; }
+
+
+private:
+    unsigned char sreg_;
+};
+
+
+class Enable_interrupts{
+public:
+    Enable_interrupts()
+    {
+	sreg_ = SREG;
+	enable_interrupts();
+    }
+
+    ~Enable_interrupts()
+    { SREG = sreg_; }
+
+
+private:
+    unsigned char sreg_;
+};
+
+
+/***************************************************************************
+ *				ISR
+ ***************************************************************************/
 /// Recordar definir la ISR correspondiente:
 // Esto es posible que sea específico del atmega328p y algún otro? 
 //
@@ -132,6 +173,9 @@ inline void disable_interrupts() {cli();}
 
 // Voy a usar los nombres dados a las interrupciones en la datasheet (tabla
 // 16.1). gcc les añade el _vect (???)
+// ISR del watchdog
+#define ISR_WDT		ISR(WDT_vect)
+
 // ISR de los timers
 #define ISR_TIMER0_COMPA ISR(TIMER0_COMPA_vect)
 #define ISR_TIMER0_COMPB ISR(TIMER0_COMPB_vect)

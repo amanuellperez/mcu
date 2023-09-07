@@ -47,7 +47,6 @@
 #include <stdint.h>	    // uint8_t
 #include <iostream>
 
-#include <dev_interrupt.h>  // Disable_interrupts
 #include <atd_crc.h>	    // CRC8_Maxim
 			    
 
@@ -146,6 +145,7 @@ class One_wire{
 public:
 // Types
     using Micro	    = typename Cfg::Micro;
+    using Disable_interrupts = typename Micro::Disable_interrupts;
     using Device    = One_wire_device;
 
 // Transaction sequence
@@ -303,7 +303,7 @@ inline bool One_wire<Cfg>::pin_is_one()
 template <typename C>
 bool One_wire<C>::reset()
 {
-    Disable_interrupts<Micro> lock;
+    Disable_interrupts lock;
 
     Micro::wait_us(G_us);
     pin_write_zero();
@@ -346,7 +346,7 @@ void One_wire<C>::match_rom(const Device& dev)
 template <typename C>
 void One_wire<C>::write_bit_one()
 {
-    Disable_interrupts<Micro> lock;
+    Disable_interrupts lock;
 
     pin_write_zero();
     Micro::wait_us(A_us);
@@ -363,7 +363,7 @@ void One_wire<C>::write_bit_one()
 template <typename C>
 void One_wire<C>::write_bit_zero()
 {
-    Disable_interrupts<Micro> lock;
+    Disable_interrupts lock;
 
     pin_write_zero();
     Micro::wait_us(C_us);
@@ -399,7 +399,7 @@ inline void One_wire<C>::write_bit(uint8_t x)
 template <typename C>
 uint8_t One_wire<C>::read_bit()
 {
-    Disable_interrupts<Micro> lock;
+    Disable_interrupts lock;
 
     pin_write_zero();
     

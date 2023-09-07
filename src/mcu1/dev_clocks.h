@@ -57,7 +57,6 @@
 
 #include <atd_time.h>
 #include <atd_cast.h>
-#include <dev_interrupt.h>
 
 namespace dev{
 
@@ -129,7 +128,7 @@ template <typename Micro, typename Time_counter_g>
 class Clock_s
 {
 public:
-    using Disable_interrupts = dev::Disable_interrupts<Micro>;
+    using Disable_interrupts = Micro::Disable_interrupts;
     using Time_counter	= Time_counter_g;
     using duration	= std::chrono::seconds;
     using rep		= duration::rep;
@@ -240,7 +239,7 @@ template <typename Micro, typename Time_counter_g>
 class Clock_ms
 {
 public:
-    using Disable_interrupts = dev::Disable_interrupts<Micro>;
+    using Disable_interrupts = Micro::Disable_interrupts;
     using Time_counter	= Time_counter_g;
     using duration	= std::chrono::milliseconds;
     using rep		= duration::rep;
