@@ -45,7 +45,7 @@ using Watchdog = mcu::Watchdog;
  ***************************************************************************/
 // Global vbles
 // ------------
-volatile uint32_t counter;
+volatile bool counter;
 
 // Functions
 // ---------
@@ -60,27 +60,65 @@ void init_uart()
 int main()
 {
     init_uart();
-    counter = 0;
+    counter = false;
 
 // menu
     mcu::UART_iostream uart;
     uart << "\n\nWatchdog test\n"
-	        "-------------\n";
+	        "-------------\n"
+		"Connect oscilloscope to pin " << (int) Pin::number << "\n"
+		"(my test, at 5V, show an error from 16 to 20% of the generated period)\n";
 
-    Watchdog::interrupt_mode<Watchdog::Period::T1_s>();
-    Micro::enable_interrupts();
 
     while (1){
-	    ;
+	uart << "\nInterrupt mode test\n"
+	          "-------------------\n"
+		"Change pin every:\n"
+		"\t1. 16 ms\n"
+		"\t2. 32 ms\n"
+		"\t3. 64 ms\n"
+		"\t4. 125 ms\n"
+		"\t5. 250 ms\n"
+		"\t6. 500 ms\n"
+		"\t7. 1 s\n"
+		"\t8. 2 s\n"
+		"\t9. 4 s\n"
+		"\tA. 8 s\n";
+	
+	char opt{};
+	uart >> opt;
+	switch(opt){
+	    break; case '1': Watchdog::interrupt_mode<Watchdog::Period::T16_ms>();
+	    break; case '2': Watchdog::interrupt_mode<Watchdog::Period::T32_ms>();
+	    break; case '3': Watchdog::interrupt_mode<Watchdog::Period::T64_ms>();
+	    break; case '4': Watchdog::interrupt_mode<Watchdog::Period::T125_ms>();
+	    break; case '5': Watchdog::interrupt_mode<Watchdog::Period::T250_ms>();
+	    break; case '6': Watchdog::interrupt_mode<Watchdog::Period::T500_ms>();
+	    break; case '7': Watchdog::interrupt_mode<Watchdog::Period::T1_s>();
+	    break; case '8': Watchdog::interrupt_mode<Watchdog::Period::T2_s>();
+	    break; case '9': Watchdog::interrupt_mode<Watchdog::Period::T4_s>();
+	    break; case 'a':
+		   case 'A': Watchdog::interrupt_mode<Watchdog::Period::T8_s>();
+	    break; default:  Watchdog::interrupt_mode<Watchdog::Period::T1_s>();
+	}
+
+	Micro::enable_interrupts();
+
+	uart << "Press a key to stop the watchdog\n";
+	uart >> opt;
+	Watchdog::stop();
 	}
 
 }
 
 
 ISR_WDT{
-    counter = counter + 1;
-    mcu::UART_iostream uart;
-    uart << counter << '\n';
+    if (counter)
+	Pin::write_zero();
+    else
+	Pin::write_one();
+
+    counter = !counter;
 
 }
 

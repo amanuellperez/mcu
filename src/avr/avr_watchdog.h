@@ -46,29 +46,17 @@ class Watchdog{
 public:
 // TYPES
     // Table 15-2
-    enum Frequency 
-    { f2_kHz = 0x00,
-      f4_kHz = 0x01,
-      f8_kHz = 0x02,
-      f16_kHz = 0x03,
-      f32_kHz = 0x04,
-      f64_kHz = 0x05,
-      f128_kHz = 0x06,
-      f256_kHz = 0x07,
-      f512_kHz = 0x20,
-      f1024_kHz = 0x21};
-
     enum Period
-    { T16_ms = f2_kHz,
-      T32_ms = f4_kHz,
-      T64_ms = f8_kHz,
-      T125_ms = f16_kHz,
-      T250_ms = f32_kHz,
-      T500_ms = f64_kHz,
-      T1_s   = f128_kHz,
-      T2_s   = f256_kHz,
-      T4_s   = f512_kHz,
-      T8_s   =f1024_kHz};
+    { T16_ms = 0x00,
+      T32_ms = 0x01,
+      T64_ms = 0x02,
+      T125_ms = 0x03,
+      T250_ms = 0x04,
+      T500_ms = 0x05,
+      T1_s   = 0x06,
+      T2_s   = 0x07,
+      T4_s   = 0x20,
+      T8_s   = 0x21};
 
 
 // MODES

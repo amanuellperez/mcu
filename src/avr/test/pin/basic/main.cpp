@@ -17,9 +17,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-// Conectar un led al pin 14, y un pulsador
-// entre resistencias al pin 4
-
 #include "../../../avr_atmega328p_cfg.h"
 #include "../../../avr_pin.h"
 #include "../../../avr_micro.h"
