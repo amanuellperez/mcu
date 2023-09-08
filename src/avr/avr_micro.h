@@ -34,6 +34,7 @@
 #include "avr_time.h"
 #include "avr_interrupt.h"
 #include "avr_memory.h"
+#include "avr_sleep.h"
 
 namespace avr_{
 
@@ -68,6 +69,19 @@ struct Micro{
     using Enable_interrupts  = avr_::Enable_interrupts;
     using Disable_interrupts = avr_::Disable_interrupts;
 
+// Sleep
+// -----
+    // Definimos el modo del sleep
+    static void sleep_mode(Sleep::mode mode) {avr_::sleep_mode(mode);}
+
+    // Dormimos. 
+    // Precondicion: haber definido el modo con `sleep_mode`.
+    static void sleep() {avr_::sleep();}
+
+    // Equivalente a:
+    //	    sleep_mode(mode);
+    //	    sleep();
+    static void sleep(Sleep::mode mode) {avr_::sleep(mode);}
 
 // Progmem
 // -------

@@ -35,6 +35,7 @@ INCS= dev_concepts.h	\
 	avr_UART_basic.h		\
 	avr_UART_baud_rate.h	\
 	avr_UART_iostream.h		\
+	avr_watchdog.h			\
 	avr_not_generic.h	
 
 

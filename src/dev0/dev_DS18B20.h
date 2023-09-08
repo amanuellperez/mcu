@@ -318,6 +318,8 @@ public:
     // Devuelve el errno de la ultima función llamada 
     Errno errno() const {return errno_;}
 
+    bool is_ok() const {return errno_ == Errno::ok;}
+
 private:
     Errno errno_;
 };

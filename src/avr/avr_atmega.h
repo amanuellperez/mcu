@@ -70,6 +70,7 @@
 #include <avr_port_basic.h>
 #include <avr_sleep.h>
 #include <avr_time.h>
+#include <avr_watchdog.h>
 
 
 // Dispositivos genéricos

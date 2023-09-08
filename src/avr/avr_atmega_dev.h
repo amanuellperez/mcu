@@ -118,7 +118,8 @@ namespace atmega{
 
 
 // MCU UTILITIES
-
+    using Sleep    = avr_::Sleep;
+    using Watchdog = avr_::Watchdog;
 
 // PROGMEM
     template <size_t N>
