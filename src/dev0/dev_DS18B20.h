@@ -146,12 +146,9 @@ public:
 // -----------------
 // La descripción de lo que hace cada comando se puede encontrar en la
 // datasheet.
-    // Si time_out_ms != 0 en lugar de devolver el control nada más enviar
-    // el comando espera un máximo de time_out_ms milisegundos a ver si ha
-    // realizado la conversión. En caso de realizarla en ese tiempo devuelve
-    // Si time_out_ms != 0 esta función bloquea el micro, si es cero devuelve
-    // inmendiatamente el control.
-    Errno convert_T(const uint16_t& time_out_ms = 0) const;
+    // Para esperar a que acabe de realizar la conversión llamar a
+    // `wait_until(time_out)
+    Errno convert_T() const;
 
     Errno write_scratchpad(int8_t TH, int8_t TL, Resolution res) const;
 
@@ -162,7 +159,9 @@ public:
 
     Errno copy_scratchpad() const;
 
-    Errno recall_e2(const uint16_t& time_out_ms = 0) const;
+    // Para esperar a que acabe de realizar la operación llamar a
+    // `wait_until(time_out)
+    Errno recall_e2() const;
 
     // CUIDADO: esta función no habla con este sensor concreto sino con todos
     // los DS18B20_basic, preguntándo si alguno de los sensores DS18B20_basic está
@@ -170,6 +169,15 @@ public:
     // TODO
     // static Errno read_power_supply();
     
+
+    // TODO: nombre mal puesto. Esta función lo que hace es esperar a que el
+    // DS18B20_basic haya acabado de ejecutar el comando solicitado. Si lo acaba
+    // antes de `time_out_ms` milisegundos devuelve Errno::ok. Si no lo acaba
+    // devuelve Errno::time_out. ¿cómo llamar a esta función?
+    // Función a llamar despues de convert_T o recall_e2 para ver si el sensor
+    // ha acabado la operación solicitada.
+    Errno wait_until(const uint16_t& time_out_ms) const;
+
 private:
 // Data
     Device dev_;
@@ -177,11 +185,6 @@ private:
 // Helper functions
     bool send_command(uint8_t cmd) const;
 
-    // TODO: nombre mal puesto. Esta función lo que hace es esperar a que el
-    // DS18B20_basic haya acabado de ejecutar el comando solicitado. Si lo acaba
-    // antes de `time_out_ms` milisegundos devuelve Errno::ok. Si no lo acaba
-    // devuelve Errno::time_out. ¿cómo llamar a esta función?
-    Errno wait_until(const uint16_t& time_out_ms) const;
 };
 
 template <typename M, typename OW>
@@ -204,12 +207,14 @@ bool DS18B20_basic<M,OW>::send_command(uint8_t cmd) const
 
 template <typename M, typename OW>
 DS18B20_basic<M,OW>::Errno 
-	    DS18B20_basic<M,OW>::convert_T(const uint16_t& time_out_ms) const
+	    //DS18B20_basic<M,OW>::convert_T(const uint16_t& time_out_ms) const
+	    DS18B20_basic<M,OW>::convert_T() const
 {
     if (!send_command(0x44))
 	return Errno::not_found;
-
-    return wait_until(time_out_ms);
+    
+    return Errno::ok;
+//    return wait_until(time_out_ms);
 }
 
 
@@ -253,12 +258,13 @@ DS18B20_basic<M,OW>::Errno DS18B20_basic<M,OW>::copy_scratchpad() const
 
 template <typename M, typename OW>
 DS18B20_basic<M,OW>::Errno 
-DS18B20_basic<M,OW>::recall_e2(const uint16_t& time_out_ms) const
+DS18B20_basic<M,OW>::recall_e2() const
 {
     if (!send_command(0xB8))
 	return Errno::not_found;
 
-    return wait_until(time_out_ms);
+    return Errno::ok;
+//    return wait_until(time_out_ms);
 }
 
 template <typename M, typename OW>
@@ -266,7 +272,7 @@ DS18B20_basic<M,OW>::Errno
 DS18B20_basic<M,OW>::wait_until(const uint16_t& time_out_ms) const
 {
     if (time_out_ms == 0)
-	return Errno::ok;
+	return Errno::time_out;
 
     uint16_t t = 0;
 
@@ -329,9 +335,11 @@ template <typename M, typename OW>
 DS18B20<M, OW>::Celsius 
 DS18B20<M, OW>::read_temperature(const uint16_t& time_out_ms)
 {
-    errno_ = Base::convert_T(time_out_ms);
+    errno_ = Base::convert_T();
     if (errno_ != Errno::ok)
 	return Celsius{-1};
+
+    errno_ = Base::wait_until(time_out_ms);
 
     Scratchpad s;
     errno_ = Base::read_scratchpad(s);

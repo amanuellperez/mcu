@@ -202,8 +202,13 @@ void Main::convert_T() const
     mcu::UART_iostream uart;
     
     uart << "Sending convert_T cmd ... ";
-    auto errno = sensor_.convert_T(time_out_max);
+    auto errno = sensor_.convert_T();
     
+    if (!is_return_cmd_ok(errno))
+	return;
+
+    errno = sensor_.wait_until(time_out_max);
+
     if (!is_return_cmd_ok(errno))
 	return;
 
@@ -295,7 +300,12 @@ void Main::recall_e2() const
     
     uart << "Sending `recall2` cmd ... ";
     
-    auto errno = sensor_.recall_e2(time_out_max); 
+    auto errno = sensor_.recall_e2(); 
+
+    if (!is_return_cmd_ok(errno))
+	return;
+
+    errno = sensor_.wait_until(time_out_max);
 
     if (!is_return_cmd_ok(errno))
 	return;
