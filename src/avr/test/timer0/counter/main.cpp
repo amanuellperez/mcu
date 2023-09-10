@@ -22,7 +22,6 @@
 #include "../../../avr_UART.h"
 #include "../../../avr_timer0_basic.h"
 #include "../../../avr_time.h"
-#include "../../../avr_micro.h"
 
 #include <atd_ostream.h>
 #include <stdlib.h>

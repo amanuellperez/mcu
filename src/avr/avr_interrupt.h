@@ -186,6 +186,10 @@ private:
 #define ISR_TIMER1_COMPB ISR(TIMER1_COMPB_vect)
 #define ISR_TIMER1_OVF	 ISR(TIMER1_OVF_vect)
 
+#define ISR_TIMER2_COMPA ISR(TIMER2_COMPA_vect)
+#define ISR_TIMER2_COMPB ISR(TIMER2_COMPB_vect)
+#define ISR_TIMER2_OVF   ISR(TIMER2_OVF_vect)
+
 // ISR de SPI
 #define ISR_SPI_STC  ISR(SPI_STC_vect)
 

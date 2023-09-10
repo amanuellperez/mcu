@@ -164,6 +164,17 @@ inline constexpr int8_t nINT_of_pin()
 	// constexpr uint32_t resolution= 65536u;
     };
 
+
+// Timer2
+// ------
+    struct timer2{
+        using counter_type                 = uint8_t;
+	static constexpr uint8_t number_of_pins = 2;
+        static constexpr uint8_t OCA_pin   = 17u;
+        static constexpr uint8_t OCB_pin   = 11u; // usa OCB0!!!
+	//constexpr uint16_t resolution= 256u;
+    };
+
 }// namespace cfg
 
 

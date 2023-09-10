@@ -203,6 +203,11 @@ public:
     static void enable_output_compare_B_match_interrupt();
     static void disable_output_compare_B_match_interrupt();
 
+    static void clear_pending_interrupts();
+
+// TODO
+    // Faltan FOC0A/FOC0B
+    
 }; // Timer0
 
 
@@ -465,6 +470,8 @@ inline void Timer0::enable_output_compare_B_match_interrupt()
 inline void Timer0::disable_output_compare_B_match_interrupt()
 { atd::write_bits<OCIE0B>::to<0>::in(TIMSK0); }
 
+inline void Timer0::clear_pending_interrupts()
+{ atd::write_bits<OCF0B, OCF0A, TOV0>::to<0,0,0>::in(TIFR0); }
 
 }// namespace avr
 
