@@ -196,24 +196,6 @@ public:
 
     using INT = INT__<cfg::nINT_of_pin<n>()>;
 
-
-
-
-// FUNCIONES DE AYUDA
-// TODO: esto no pertenece al traductor. Quitarlo de aquí!!!
-    static void pulse_of_1us()
-    {
-	write_one();
-	wait_us(1);  
-	write_zero();
-    }
-
-    static void negative_pulse_of_1us()
-    {
-	write_zero();
-	wait_us(1);  
-	write_one();
-    }
 };
 
 
@@ -580,10 +562,6 @@ public:
 
     /// Devuelve si el bit es 1 o no. 
     static bool is_one() {return Pin<n>::is_one();}
-
-// Helpers
-    constexpr static void pulse_of_1us() { Pin<n>::pulse_of_1us(); }
-    constexpr static void negative_pulse_of_1us() {Pin<n>::negative_pulse_of_1us();}
 };
 
 
@@ -599,10 +577,6 @@ public:
 
     constexpr static void write_one()	{}
     constexpr static void write_zero()	{}
-
-    // Funciones de ayuda
-    constexpr static void pulse_of_1us() {}
-    constexpr static void negative_pulse_of_1us() {}
 };
 
 

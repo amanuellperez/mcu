@@ -36,6 +36,9 @@
 
 namespace dev{
 
+// TODO: parametrizarlo por 
+//  opción 1: <Micro, num_pins>
+//  opción 2: <Micro, Pin_clock, Pin_reset, ...>
 template <uint8_t num_pin_clock,
           uint8_t num_pin_reset = 0,	// = 0 no conectado al mcu
           uint8_t num_pin_clock_inhibit = 0>
@@ -50,11 +53,23 @@ public:
 
     /// Pasa al siguiente estado. Cuenta uno más.
     void next() {
-	clock_.pulse_of_1us();
+//	clock_.pulse_of_1us();
+	clock_.write_one();
+	//Micro::wait_us(1);  
+	not_generic::wait_us(1);  
+	clock_.write_zero();
     }
 
     /// Reset el contador, volviendo a encender el pin 0.
-    void reset() {reset_.pulse_of_1us();}
+    void reset() 
+    {
+	//reset_.pulse_of_1us();
+	reset_.write_one();
+	//Micro::wait_us(1);  
+	not_generic::wait_us(1);  
+	reset_.write_zero();
+
+    }
 
     /// Enable el contador.
     void enable() {clock_inhibit_.write_zero();}
@@ -63,6 +78,11 @@ public:
     void disable() {clock_inhibit_.write_one();}
 
 private:
+    // TODO: cambiarlo por:
+    //	    Micro::Output_pin<num_pin_clock> clock_;
+    //	    Aunque, mejor usar el interfaz static?
+    //		    using Clock_pin = Micro::Pin<num_pin_clock>;
+    //	    y en el constructor definirlo como salida??? 
     not_generic::Output_pin<num_pin_clock> clock_;
     not_generic::Output_pin<num_pin_reset> reset_;
     not_generic::Output_pin<num_pin_clock_inhibit> clock_inhibit_;

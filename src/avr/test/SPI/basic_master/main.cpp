@@ -46,6 +46,16 @@ constexpr uint8_t npin_RCLK = 12;
 constexpr uint16_t periodo_en_us = 2;	// 2 microsegundos!!!
 constexpr uint8_t npin_no_chip_select = 16;
 
+
+template <uint8_t n>
+void pulse_of_1us(avr_::Output_pin<n>&)
+{
+    using Pin = avr_::Output_pin<n>;
+    Pin::write_one();
+    avr_::wait_us(1);  
+    Pin::write_zero();
+}
+
 void test_basic()
 {
     avr_::Output_pin<npin_RCLK> pin_buffer_flush;
@@ -53,7 +63,8 @@ void test_basic()
     while (1) {
 	for (uint8_t p{1}; p != uint8_t{0}; p <<= 1){
 	    SPI::write(p);
-	    pin_buffer_flush.pulse_of_1us();
+	    // pin_buffer_flush.pulse_of_1us();
+	    pulse_of_1us(pin_buffer_flush);
 	    avr_::wait_ms(100);
 	}
   } // while(1)
@@ -70,7 +81,8 @@ void test_count()
 	for (uint8_t i = 0; i <= 255; ++i){
 	    uart << static_cast<uint16_t>(i) << '\n';
 	    SPI::write(uint8_t{i});
-	    pin_buffer_flush.pulse_of_1us();
+	    //pin_buffer_flush.pulse_of_1us();
+	    pulse_of_1us(pin_buffer_flush);
 	    avr_::wait_ms(500);
 	}
 
@@ -88,7 +100,8 @@ void test_choose()
 	uint8_t res = static_cast<uint8_t>(c);
 	uart << (uint16_t)(c) << '\n';
 	SPI::write(uint8_t{res});
-	pin_buffer_flush.pulse_of_1us();
+	//pin_buffer_flush.pulse_of_1us();
+	pulse_of_1us(pin_buffer_flush);
 
     }
 }

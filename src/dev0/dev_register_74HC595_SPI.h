@@ -70,6 +70,8 @@ struct Register_74HC595_pins{
 /// hacer un shift de 1 bit puede que esto sea ineficiente (sería mejor
 /// escribir el 1, enviar un pulso, escribir 0 y enviar pulsos sucesivos sin 
 /// necesidad de escribir todo el Registro cada vez que movemos 1 bit).
+//
+// TODO: parametrizarlo por <Micro, SPI>
 template <typename pin>
 class Register_74HC595_SPI{
 public:
@@ -85,10 +87,24 @@ public:
     // el cliente supondrá que es no const. La dejo con el prototipo esperado.
     void buffer_write(uint8_t x) { not_generic::SPI_master_g::write(uint8_t{x}); }
 
-    void buffer_clear() { NO_SRCLR_.negative_pulse_of_1us(); }
+    void buffer_clear() 
+    { 
+	// NO_SRCLR_.negative_pulse_of_1us(); 
+	NO_SRCLR_.write_zero();
+	//Micro::wait_us(1);  
+	not_generic::wait_us(1);  
+	NO_SRCLR_.write_one();
+    }
 
     /// Vuelca el buffer en el registro de salida.
-    void flush(){ RCLK_.pulse_of_1us(); }
+    void flush()
+    { 
+	// RCLK_.pulse_of_1us(); 
+	RCLK_.write_one();
+	//Micro::wait_us(1);  
+	not_generic::wait_us(1);  
+	RCLK_.write_zero();
+    }
 
 
     /// Escribimos en la salida el byte x

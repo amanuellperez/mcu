@@ -117,7 +117,9 @@ int main()
     uart << "\nTimer2 counter test\n"
 	      "-------------------\n"
 	      "Connect a crystal of 32kHz to pins TOSC1, TOSC2\n"
-	      "with 2 capacitors 18 pF (datasheet reference??? )\n";
+	      "without capacitors, directly to pins TOSC1 and TOSC2\n";
+// Al principio le conectaba 2 condensadores de 20 pF, pero no son necesarios.
+//	      "with 2 capacitors 18 pF (datasheet reference??? )\n";
 
 
     timer_init_asynchronous_mode();
