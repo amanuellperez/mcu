@@ -11,6 +11,7 @@ DIRS = ADC	\
 	SPI		\
 	timer0	\
 	timer1	\
+	timer2	\
 	TWI		\
 	USART 
 

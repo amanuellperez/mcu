@@ -120,6 +120,9 @@ public:
 
     /// Paramos el timer.
     static void off();
+    static void stop() {off();} // Hoy me gusta más stop que off @_@
+				// Que el uso decida una u otra forma de
+				// hablar
 
 
 // SELECCIÓN DE RELOJ EXTERNO
@@ -196,14 +199,20 @@ public:
     static void enable_output_compare_B_match_interrupt();
     static void disable_output_compare_B_match_interrupt();
 
+    // DUDA: disable_interrupts vs disable_all_interrupts!!!
+    static void disable_interrupts();
+
     static void clear_pending_interrupts();
 
 // ASYNCHRONOUS MODE
     // CUIDADO: Según la datasheet
     //	    This should be done before asynchronous operation is selected 
-    static void enable_external_asynchronous_clock();
-    static void disable_external_asynchronous_clock();
+    // ¿Qué es esto? 
+//    static void enable_external_asynchronous_clock();
+//    static void disable_external_asynchronous_clock();
 
+    // CUIDADO: hay que seguir un protocolo a la hora de habilitar este modo.
+    // Leer la datasheet al respecto o ver test.
     static void enable_asynchronous_mode();
     static void disable_asynchronous_mode();
 
@@ -472,17 +481,22 @@ inline void Timer2::enable_output_compare_B_match_interrupt()
 inline void Timer2::disable_output_compare_B_match_interrupt()
 { atd::write_bits<OCIE2B>::to<0>::in(TIMSK2); }
 
+inline void Timer2::disable_interrupts()
+{ atd::write_bits<OCIE2B, OCIE2A, TOIE2>::to<0,0,0>::in(TIMSK2); }
+
+// CUIDADO. La datasheet dice:
+//	Alternatively, OCFB is cleared by writing a logic one to the flag.
 inline void Timer2::clear_pending_interrupts()
-{ atd::write_bits<OCF2B, OCF2A, TOV2>::to<0,0,0>::in(TIFR2); }
+{ atd::write_bits<OCF2B, OCF2A, TOV2>::to<1,1,1>::in(TIFR2); }
 
 
 // ASYNCHRONOUS MODE
 // -----------------
-inline void Timer2::enable_external_asynchronous_clock()
-{ atd::write_bit<EXCLK>::to<1>::in(ASSR); }
-
-inline void Timer2::disable_external_asynchronous_clock()
-{ atd::write_bit<EXCLK>::to<0>::in(ASSR); }
+//inline void Timer2::enable_external_asynchronous_clock()
+//{ atd::write_bit<EXCLK>::to<1>::in(ASSR); }
+//
+//inline void Timer2::disable_external_asynchronous_clock()
+//{ atd::write_bit<EXCLK>::to<0>::in(ASSR); }
 
 inline void Timer2::enable_asynchronous_mode()
 { atd::write_bit<AS2>::to<1>::in(ASSR); }
@@ -491,10 +505,11 @@ inline void Timer2::disable_asynchronous_mode()
 { atd::write_bit<AS2>::to<0>::in(ASSR); }
 
 inline bool Timer2::are_registers_ready()
-{ return atd::read_bits<TCN2UB, OCR2AUB, OCR2BUB, TCR2AUB, TCR2BUB>::of(ASSR); }
+{ return 
+    (atd::read_bits<TCN2UB, OCR2AUB, OCR2BUB, TCR2AUB, TCR2BUB>::of(ASSR) == 0); }
 
 inline void Timer2::wait_till_registers_are_ready()
-{ while (are_registers_ready()) 
+{ while (!are_registers_ready()) 
     { ; } // do nothing, wait
 }
 

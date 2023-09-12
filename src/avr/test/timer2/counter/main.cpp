@@ -17,6 +17,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+// Ejemplo básico de uso del Timer como contador
 #include "../../../avr_atmega328p_cfg.h"
 #include "../../../avr_UART.h"
 #include "../../../avr_timer2_basic.h"
@@ -36,7 +37,7 @@ using Timer = mcu::Timer2;
 
 // Cfg
 // ---
-constexpr uint16_t period_in_us = 128;
+constexpr uint16_t period_in_us = 1024;
 
 // Global variables
 // ----------------
@@ -55,7 +56,7 @@ void init_uart()
 void print_register(const char* name, uint8_t value)
 {
     mcu::UART_iostream uart;
-    uart << '\t' << name << "\t= ";
+    uart << name << "\t= ";
     atd::print_int_as_hex(uart, value);
     uart << '\n';
 }
@@ -63,7 +64,6 @@ void print_register(const char* name, uint8_t value)
 void print_registers()
 {
     mcu::UART_iostream uart;
-    uart << "\nRegisters values:\n";
     print_register("TCCR2A", TCCR2A);
     print_register("TCCR2B", TCCR2B);
     print_register("TCNT2", TCNT2);
@@ -74,39 +74,9 @@ void print_registers()
     print_register("ASSR", ASSR);
     print_register("GTCCR", GTCCR);
 
-//    uart << "\nPress a key to continue\n";
-//    char c{};
-//    uart >> c;
-}
-
-// Este es el protocolo a seguir para inicializar el timer en modo asíncrono
-// (ver punto "22.9 Asynchronous Operation of Timer/Counter2" de la datasheet)
-void timer_init_asynchronous_mode()
-{
-    mcu::UART_iostream uart;
-
-    Timer::disable_interrupts();
-    Timer::enable_asynchronous_mode();
-    Timer::mode_normal();
-    Timer::clock_frequency_divide_by_128();  // arranca el timer
-					      //
-
-    uart << "wait_till_registers_are_ready ...\n"
-	    "ASSR values = ";
-//    Timer::wait_till_registers_are_ready(); <-- FUNDAMENTAL LLAMARLA!!!
-//    No llamo a wait_till_registers_are_ready para ver el proceso de
-//    arranque. En la práctica no escribir este bucle while, mejor llamar a
-//    wait_till_registers_are_ready
-    while (!Timer::are_registers_ready()){
-
-	atd::print_int_as_hex(uart, ASSR);
-	uart << " ";
-	mcu::wait_ms(400);
-    }
-    uart << "OK\n";
-
-    Timer::clear_pending_interrupts();
-    Timer::enable_overflow_interrupt(); 
+    uart << "\nPress a key to continue\n";
+    char c{};
+    uart >> c;
 }
 
 int main()
@@ -115,12 +85,12 @@ int main()
 
     mcu::UART_iostream uart;
     uart << "\nTimer2 counter test\n"
-	      "-------------------\n"
-	      "Connect a crystal of 32kHz to pins TOSC1, TOSC2\n"
-	      "with 2 capacitors 18 pF (datasheet reference??? )\n";
+	      "-------------------\n";
 
-
-    timer_init_asynchronous_mode();
+// clock_init();
+    Timer::enable_overflow_interrupt(); 
+    Timer::mode_normal();
+    Timer::clock_frequency_divide_by_1024();  // arranca el timer
     print_registers();
 
 // start:
@@ -129,10 +99,17 @@ int main()
 
 
     while(1){
-	{// atomic
+	Timer::counter_type v;
+	uint32_t c{};
+	{
 	    mcu::Disable_interrupts di;
-	    uart << (int) counter << " s\n";
+	    v = Timer::counter();
+	    c = counter;
 	}
+
+	uint64_t t_us = (c*(Timer::max() + 1)+ v)*period_in_us;
+	uint64_t t_s = t_us / uint64_t{1'000'000};
+	uart << t_s << " s\n";
 
 	mcu::wait_ms(1000);
     }
