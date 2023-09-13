@@ -57,8 +57,7 @@ donde inicializa todos los dispositivos.
 
 *  ¿Por qué cada dispositivo es responsable de encenderlo? 
 
-  Si por cualquier
-  motivo el programa desconecta el SPI no quiero, como programador, tener que
+  Si por cualquier motivo el programa desconecta el SPI no quiero, como programador, tener que
   estar recordando que si quiero abrir un  fichero primero tengo que conectar
   SPI. 
 
