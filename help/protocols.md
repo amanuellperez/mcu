@@ -55,7 +55,7 @@ donde inicializa todos los dispositivos.
   Cada dispositivo encenderá el SPI, mientras que el programa principal podrá
   apagarlo si ve que no lo necesita. 
 
-*  ¿Por qué cada dispositivo es responsable de encenderlo? 
++ ¿Por qué cada dispositivo es responsable de encenderlo? 
 
   Si por cualquier motivo el programa desconecta el SPI no quiero, como programador, tener que
   estar recordando que si quiero abrir un  fichero primero tengo que conectar
