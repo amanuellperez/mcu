@@ -231,9 +231,9 @@ inline Frequency clock_frequency()
 
 
 /***************************************************************************
- *			    Timer0_counter_g
+ *			    Time_counter0_g
  ***************************************************************************/
-// Un Timer_counter es un contador de tiempo.
+// Un Time_counter es un contador de tiempo (vamos, un reloj).
 // Los periodos ha usar serían:
 //	si freq_mcu = 1 MHz, period = 1    = 1 microsegundo
 //			or   period = 1024 = 1 milisegundo
@@ -276,13 +276,16 @@ public:
     // ¿Cómo independizarlo del avr este ISR_TIMER0_OVF? <-- En el dev.h
     // al seleccionar el Generic_timer<Timer0> se puede definir
     // ISR_GENERIC_TIMER_OVF = ISR_TIMER0_OVF.
+    //
+// DUDA: ¿por qué habilitar 2 tipos de interrupciones? No tiene sentido
+// Borrar este enable_max_top_interrupt en unos días (hoy 13/09/2023)
     // Genera una interrupción cuando llega al max_top (hace overflow)
     // Capturarla con ISR_TIMER0_OVF
-    static void enable_max_top_interrupt()
-    { Timer::enable_overflow_interrupt();}
-
-    static void disable_max_top_interrupt()
-    { Timer::disable_overflow_interrupt();}
+//    static void enable_max_top_interrupt()
+//    { Timer::enable_overflow_interrupt();}
+//
+//    static void disable_max_top_interrupt()
+//    { Timer::disable_overflow_interrupt();}
 
     // Genera una interrupción cuando llega al top.
     // Capturarla con ISR_TIMER0_COMPA
