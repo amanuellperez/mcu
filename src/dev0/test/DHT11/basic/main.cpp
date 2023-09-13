@@ -32,7 +32,7 @@ using Pin = atmega::Pin<sensor_pin>;
 void wait(const Counter::counter_type& t)
 {
     Counter::reset();
-    Counter::on<1024>();
+    Counter::turn_on_with_clock_period_of<1024>::us();
 
     while (Counter::value() < t)
     { ; }
@@ -45,7 +45,7 @@ bool read()
 
 // 1. Pulso mínimo de 18 ms
     Pin::as_output();
-    Counter::on<1024>(); // T_tick = 1024 us
+    Counter::turn_on_with_clock_period_of<1024>::us(); // T_tick = 1024 us
     Counter::reset();
     Pin::write_zero();
 
@@ -57,7 +57,7 @@ bool read()
 
 
 // 2. Leemos la respuesta del sensor
-    Counter::on<1>();	// T_tick = 1 us
+    Counter::turn_on_with_clock_period_of<1>::us();	// T_tick = 1 us
     Counter::reset();
 
     // El sensor mantiene HIGH durante 20-40 us
@@ -71,7 +71,8 @@ bool read()
 
 // Preambulo: pulso de 160 us (80 us LOW y 80 us HIGH)
 // ---------------------------------------------------
-    Counter::on<1>(); // todo lo que sigue lo medimos en microsegundos
+    // todo lo que sigue lo medimos en microsegundos
+    Counter::turn_on_with_clock_period_of<1>::us();
 
     Counter::reset();
     while (Pin::is_zero()){ // 80 +- 10% us = de 72 a 88 us

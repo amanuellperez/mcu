@@ -79,7 +79,7 @@ void generate(const typename Counter::counter_type& max_value, uint16_t nrep)
     mcu::Output_pin<pin_test> pin;
 
     Counter::init();
-    Counter::template on<period_in_us>();
+    Counter::template turn_on_with_clock_period_of<period_in_us>::us();
 
     for (uint16_t i = 0; i < nrep; ++i){
 	Counter::reset();   // DUDA: 1º el reset y luego el write o al revés?

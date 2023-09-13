@@ -43,7 +43,8 @@ int main()
 
 
     Timer::init();
-    Timer::on<1>(); // 1 us
+    Timer::turn_on_with_clock_period_of<1>::us(); // 1 us
+    Timer::turn_on_with_clock_period_of<1>::us();
 		
     SWG swg{frequency}; // <--- FUNDAMENTAL QUE ESTÉ FUERA DEL BUCLE!!!
     while(1){

@@ -177,13 +177,15 @@ template <typename M, typename T, int period>
 inline void Miniclock<M, T, period>::start()
 {
     Timer_counter::reset();
-    Timer_counter::template on<period>(); // 1024 us = 1000 +- 10% = 1 ms
+    Timer_counter::template 
+		turn_on_with_clock_period_of<period>::us();
+					    // 1024 us = 1000 +- 10% = 1 ms
 }
 
 template <typename M, typename T, int p>
 inline void Miniclock<M, T, p>::stop()
 {
-    Timer_counter::off();
+    Timer_counter::turn_off();
 }
 
 template <typename M, typename T, int p>

@@ -320,10 +320,13 @@ public:
     ///
     /// Esta función será la típica usada en los Miniclocks que miden el
     /// tiempo directamente del contador.
+    // Leer notas en Time_counter0_g
     template<uint16_t period_in_us
 	    , uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
-    static void on() 
-    {timer1_::set_clock_period_in_us<period_in_us, clock_frequency_in_hz>();}
+    struct turn_on_with_clock_period_of{
+	static void us()
+	{timer1_::set_clock_period_in_us<period_in_us, clock_frequency_in_hz>();}
+    };
 
 
     /// Enciende el contador configurándolo de tal manera que genera un
@@ -339,13 +342,13 @@ public:
     // que sea eficiente? ¿Algo del tipo: Time_counter1_g::ISR{ ... } ???
     // Claramente no puede ser una macro.
     template <uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
-    static void on_with_overflow_every_1s();
+    static void turn_on_with_overflow_every_1s();
 
     template <uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
-    static void on_with_overflow_every_1ms();
+    static void turn_on_with_overflow_every_1ms();
 
     /// Apagamos el contador
-    static void off() { Timer::off(); }
+    static void turn_off() { Timer::off(); }
 
 
 // Value
@@ -416,7 +419,7 @@ public:
 // (RRR) Números mágicos:
 //	 Para 1 MHz: 15.625 * 64 us = 1.000.000 us = 1 s
 template <uint32_t clock_frequency_in_hz>
-inline void Time_counter1_g::on_with_overflow_every_1s()
+inline void Time_counter1_g::turn_on_with_overflow_every_1s()
 {
 // cfg_overflow_every_1s();
     if constexpr (clock_frequency_in_hz == 1'000'000ul){
@@ -426,7 +429,7 @@ inline void Time_counter1_g::on_with_overflow_every_1s()
 
     else
         static_assert(atd::always_false_v<int>,
-                      "on_with_overflow_every_1s: I'm lazy. I haven't implemented "
+                      "turn_on_with_overflow_every_1s: I'm lazy. I haven't implemented "
                       "that frequency. Please implement it.");
 
     enable_top_interrupt();
@@ -437,7 +440,7 @@ inline void Time_counter1_g::on_with_overflow_every_1s()
 // (RRR) Números mágicos:
 //	 Para 1 MHz: 125 * 8 us = 1.000 us = 1 ms
 template <uint32_t clock_frequency_in_hz>
-inline void Time_counter1_g::on_with_overflow_every_1ms()
+inline void Time_counter1_g::turn_on_with_overflow_every_1ms()
 {
 // cfg_overflow_every_1s();
     if constexpr (clock_frequency_in_hz == 1'000'000ul){
@@ -447,7 +450,7 @@ inline void Time_counter1_g::on_with_overflow_every_1ms()
 
     else
         static_assert(atd::always_false_v<int>,
-                      "on_with_overflow_every_1s: I'm lazy. I haven't implemented "
+                      "turn_on_with_overflow_every_1s: I'm lazy. I haven't implemented "
                       "that frequency. Please implement it.");
 
     enable_top_interrupt();
@@ -489,6 +492,10 @@ public:
 // ----
     /// Apagamos el generador de señales.
     // DUDA: stop() or off()??? Hoy me suena mejor stop: generate/stop
+    //       Pero ¿qué es lo que haces? Paras el dispositivo pero lo dejas
+    //       encendio, o lo apagas? El primer caso sería `stop`, el segundo
+    //       sería `turn_off` (DUDA2: ¿es correcto en inglés `turn on/off a
+    //       timer? 
     static void stop();
 
 
@@ -529,7 +536,7 @@ private:
 
     template<uint16_t period
 	    , uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
-    static void on()
+    static void turn_on()
     {timer1_::set_clock_period_in_us<period, clock_frequency_in_hz>();}
 
     static void top(counter_type x)
@@ -698,11 +705,11 @@ public:
 // ------------
     template<uint16_t period
 	    , uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
-    static void on()
+    static void turn_on()
     {timer1_::set_clock_period_in_us<period, clock_frequency_in_hz>();}
 
     /// Apagamos el generador de señales.
-    static void off() { Timer::off(); }
+    static void turn_off() { Timer::off(); }
 
 
 

@@ -179,7 +179,7 @@ void Clock_s<M, TC>::on()
     Disable_interrupts lock{};
 
     counter_ = 0;
-    Time_counter::on_with_overflow_every_1s();
+    Time_counter::turn_on_with_overflow_every_1s();
 
     // (???) aqui enable_interrupts o que lo defina el cliente 
     // Micro::enable_interrupts();
@@ -325,7 +325,7 @@ void Clock_ms<M, TC>::on()
     Disable_interrupts lock{};
 
     nmilliseconds_ = 0;
-    Time_counter::on_with_overflow_every_1ms();
+    Time_counter::turn_on_with_overflow_every_1ms();
 
     resume();
 
@@ -336,14 +336,14 @@ void Clock_ms<M, TC>::on()
 template <typename M, typename TC>
 inline void Clock_ms<M, TC>::resume()
 {
-    Time_counter::on_with_overflow_every_1ms();
+    Time_counter::turn_on_with_overflow_every_1ms();
 }
 
 
 template <typename M, typename TC>
 inline void Clock_ms<M, TC>::off()
 {
-    Time_counter::off();
+    Time_counter::turn_off();
 }
 
 template <typename M, typename TC>

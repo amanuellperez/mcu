@@ -182,17 +182,7 @@ public:
     static Frequency clock_frequency();
 
 
-//// ENCENDIDO/APAGADO DEL TIMER
-//    /// Enciende el Timer, usando como reloj el reloj de periodo indicado.
-//    /// 'periodo' es el periodo en microsegundos al que va a funcionar el timer.
-//    /// clock_frequency_in_hz = es la frecuencia del reloj del AVR.
-//    // DUDA: a la hora de usarlo 'on' es confuso. Es mejor llamar directamente
-//    // a set_clock_period_in_us. Además encaja mejor si operamos a 8MHz y
-//    // queremos llamar a set_clock_period_in_ns. ¿Eliminar esta función?
-//    template<uint16_t period
-//	    , uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
-//    static void on() {set_clock_period_in_us<period, clock_frequency_in_hz>();}
-//
+// ENCENDIDO/APAGADO DEL TIMER
     /// Paramos el timer.
     static void off();
 

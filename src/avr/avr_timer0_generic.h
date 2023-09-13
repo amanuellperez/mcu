@@ -297,13 +297,33 @@ public:
     
 // Timer on/off
 // ------------
+    // (RRR) Cuando se configura el preescaler del timer del avr, este se
+    //       enciende ==> configurar el periodo del reloj del timer equivale a
+    //       encenderlo.
+    //
+    //       Podía haber llamado a esta función:
+    //		    `Time_counter::cfg<1>()`
+    //	    pero no reflejaría el hecho de que lo arranca.
+    //
+    //	    Opté por llamarla `Time_counter::on<1>();` pero el código resulta
+    //	    ilegible. ¿Qué significa ese 1 que se le pasa como parámetro?
+    //
+    //	    Para que el código sea legible implemento esta estructura. Voy a
+    //	    probar a escribir para encender el timer:
+    //		    `Time_counter::turn_on_with_clock_period_of<1>::us();`
+    //
+    //	    Largo pero totalmente legible.
+    //		
+    // Time_counter::turn_on_with_period_of<1>::us(); 
     template<uint16_t period_in_us
 	    , uint32_t clock_frequency_in_Hz = MCU_CLOCK_FREQUENCY_IN_HZ>
-    static void on() 
-    {timer0_::set_clock_period_in_us<period_in_us, clock_frequency_in_Hz>();}
+    struct turn_on_with_clock_period_of{
+	static void us()
+	{timer0_::set_clock_period_in_us<period_in_us, clock_frequency_in_Hz>();}
+    };
 
     /// Apagamos el generador de señales.
-    static void off() { Timer::off(); }
+    static void turn_off() { Timer::off(); }
 
 
     /// Devuelve el valor del contador en ticks.
@@ -376,7 +396,7 @@ protected:
 
     template<uint16_t period_in_us
 	    , uint32_t clock_frequency_in_Hz = MCU_CLOCK_FREQUENCY_IN_HZ>
-    static void on()
+    static void turn_on()
     {timer0_::set_clock_period_in_us<period_in_us, clock_frequency_in_Hz>();}
 
     static void top(counter_type x)
@@ -574,11 +594,11 @@ public:
 // ------------
     template<uint16_t period_in_us
 	    , uint32_t clock_frequency_in_Hz = MCU_CLOCK_FREQUENCY_IN_HZ>
-    static void on()
+    static void turn_on()
     {timer0_::set_clock_period_in_us<period_in_us, clock_frequency_in_Hz>();}
 
     /// Apagamos el generador de señales.
-    static void off() { Timer::off(); }
+    static void turn_off() { Timer::off(); }
 
 
 
