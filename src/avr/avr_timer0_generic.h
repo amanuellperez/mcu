@@ -265,7 +265,7 @@ public:
 //      usarlo.  init suena a inicializar, a poner valores iniciales
     static void init(counter_type top0 = max_top()) 
     { 
-	Timer::mode_CTC();
+	Timer::CTC_mode();
 	reset();
 	top(top0);
     }
@@ -369,7 +369,7 @@ protected:
     Square_wave_generator0_g_base() {}
 
 // Funciones de ayuda
-    static void init(){ Timer::mode_CTC();}
+    static void init(){ Timer::CTC_mode();}
 
     template<uint16_t period_in_us
 	    , uint32_t clock_frequency_in_Hz = MCU_CLOCK_FREQUENCY_IN_HZ>
@@ -584,13 +584,13 @@ public:
     template <uint32_t top>
     static void PWM_mode_fix_frequency() 
     {
-	Timer::mode_fast_PWM_top_0xFF();
+	Timer::fast_PWM_mode_top_0xFF();
 	mode_ = Mode::fix_0xFF;
     }
     
     static void PWM_mode_variable_pwm_only_channel2()
     { 
-	Timer::mode_fast_PWM_top_OCRA();
+	Timer::fast_PWM_mode_top_OCRA();
 	mode_ = Mode::only_channel2;
     }
 

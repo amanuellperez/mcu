@@ -238,7 +238,7 @@ int main()
 
     //Timer::mode_CTC_top_OCR1A();
     //Timer::output_compare_register_A(top);
-    Timer::mode_CTC_top_ICR1();
+    Timer::CTC_mode_top_ICR1();
     { avr_::Disable_interrupts l; Timer::unsafe_input_capture_register(top);}
     Timer::CTC_pin_A_toggle_on_compare_match(); // para que se vea algo al ppio
     Timer::CTC_pin_B_toggle_on_compare_match();

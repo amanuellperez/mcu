@@ -250,7 +250,7 @@ public:
 /// Modo de funcionamiento: contador normal y corriente.
     static void unsafe_init(counter_type top0 = max_top()) 
     { 
-	Timer::mode_CTC_top_OCR1A();
+	Timer::CTC_mode_top_OCR1A();
 	unsafe_reset();
 	unsafe_top(top0);
     }
@@ -266,7 +266,7 @@ public:
     { 
 	Disable_interrupts l;
 
-	Timer::mode_CTC_top_OCR1A();
+	Timer::CTC_mode_top_OCR1A();
 	unsafe_reset();
 	unsafe_top(top0);
     }
@@ -490,7 +490,7 @@ private:
     using Disable_interrupts = avr_::Disable_interrupts;
 
 // Funciones de ayuda
-    static void init(){ Timer::mode_CTC_top_ICR1();}
+    static void init(){ Timer::CTC_mode_top_ICR1();}
 
     template<uint16_t period
 	    , uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
@@ -677,17 +677,17 @@ public:
     static void PWM_mode_fix_frequency()
     {
 	if constexpr (top == 0x00FF){
-	    Timer::mode_fast_PWM_top_0x00FF();
+	    Timer::fast_PWM_mode_top_0x00FF();
 	    mode_ = Mode::fix_0x00FF;
 	}
 
 	else if constexpr (top == 0x01FF){
-	    Timer::mode_fast_PWM_top_0x01FF();
+	    Timer::fast_PWM_mode_top_0x01FF();
 	    mode_ = Mode::fix_0x01FF;
 	}
 
 	else if constexpr (top == 0x03FF){
-	    Timer::mode_fast_PWM_top_0x03FF();
+	    Timer::fast_PWM_mode_top_0x03FF();
 	    mode_ = Mode::fix_0x03FF;
 	}
 
@@ -700,13 +700,13 @@ public:
 
     static void PWM_mode_variable_pwm_only_channel2()
     { 
-	Timer::mode_fast_PWM_top_OCR1A();
+	Timer::fast_PWM_mode_top_OCR1A();
 	mode_ = Mode::only_channel2;
     }
 
     static void PWM_mode_variable_pwm_both_channels()
     { 
-	Timer::mode_fast_PWM_top_ICR1();
+	Timer::fast_PWM_mode_top_ICR1();
 	mode_ = Mode::both_channels;
     }
 

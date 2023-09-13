@@ -236,7 +236,7 @@ int main()
     uint16_t period_in_us = 1;
     Timer::counter_type top = 200;
 
-    Timer::mode_CTC();
+    Timer::CTC_mode();
     Timer::output_compare_register_A(top);
     Timer::CTC_pin_A_toggle_on_compare_match(); // para que se vea algo al ppio
     Timer::CTC_pin_B_toggle_on_compare_match();

@@ -89,7 +89,7 @@ int main()
 
 // clock_init();
     Timer::enable_overflow_interrupt(); 
-    Timer::mode_normal();
+    Timer::normal_mode();
     Timer::clock_frequency_divide_by_1024();  // arranca el timer
     print_registers();
 

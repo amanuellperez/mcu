@@ -87,7 +87,7 @@ void timer_init_asynchronous_mode()
 
     Timer::disable_interrupts();
     Timer::enable_asynchronous_mode();
-    Timer::mode_normal();
+    Timer::normal_mode();
     Timer::clock_frequency_divide_by_128();  // arranca el timer
 					      //
 

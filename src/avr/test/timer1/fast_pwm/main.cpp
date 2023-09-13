@@ -245,23 +245,23 @@ Mode mode_menu()
     uart >> c;
     switch (c){
 	case '1': 
-	    Timer::mode_fast_PWM_top_0x00FF();
+	    Timer::fast_PWM_mode_top_0x00FF();
 	    return Mode::top_0x00FF;
 
 	case '2': 
-	    Timer::mode_fast_PWM_top_0x01FF();
+	    Timer::fast_PWM_mode_top_0x01FF();
 	    return Mode::top_0x01FF;
 
 	case '3': 
-	    Timer::mode_fast_PWM_top_0x03FF();
+	    Timer::fast_PWM_mode_top_0x03FF();
 	    return Mode::top_0x03FF;
 
 	case '4': 
-	    Timer::mode_fast_PWM_top_ICR1();
+	    Timer::fast_PWM_mode_top_ICR1();
 	    return Mode::top_ICR1;
 
 	case '5': 
-	    Timer::mode_fast_PWM_top_OCR1A();
+	    Timer::fast_PWM_mode_top_OCR1A();
 	    return Mode::top_OCR1A;
     }
 
@@ -335,7 +335,7 @@ int main()
     Timer::counter_type top = 1000;
 
     // configuración inicial, para que se vea algo en el osciloscopio
-    Timer::mode_fast_PWM_top_ICR1();
+    Timer::fast_PWM_mode_top_ICR1();
     Timer::unsafe_input_capture_register(1000);
     Timer::unsafe_output_compare_register_A(500);
     Timer::unsafe_output_compare_register_B(200);

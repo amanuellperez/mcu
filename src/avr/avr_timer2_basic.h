@@ -145,15 +145,15 @@ public:
 
 
 // WAVEFORM GENERATION MODES (table 19-9)
-    static void mode_normal();
+    static void normal_mode();
 
-    static void mode_CTC();
+    static void CTC_mode();
 
-    static void mode_fast_PWM_top_OCRA();
-    static void mode_fast_PWM_top_0xFF();
+    static void fast_PWM_mode_top_OCRA();
+    static void fast_PWM_mode_top_0xFF();
 
-    static void mode_PWM_phase_correct_top_OCRA();
-    static void mode_PWM_phase_correct_top_0xFF();
+    static void PWM_phase_correct_mode_top_OCRA();
+    static void PWM_phase_correct_mode_top_0xFF();
 
 
 // PINS OPERATION 
@@ -309,37 +309,37 @@ inline constexpr void Timer2::clock_frequency(uint32_t prescaler_factor)
 
 // Modos de funcionamiento
 // -----------------------
-inline void Timer2::mode_normal()
+inline void Timer2::normal_mode()
 {
     atd::write_bits<WGM22>::to<0>::in(TCCR2B);
     atd::write_bits<WGM21, WGM20>::to<0,0>::in(TCCR2A);
 }
 
-inline void Timer2::mode_PWM_phase_correct_top_0xFF()
+inline void Timer2::PWM_phase_correct_mode_top_0xFF()
 {
     atd::write_bits<WGM22>::to<0>::in(TCCR2B);
     atd::write_bits<WGM21, WGM20>::to<0,1>::in(TCCR2A);
 }
 
-inline void Timer2::mode_CTC()
+inline void Timer2::CTC_mode()
 {
     atd::write_bits<WGM22>::to<0>::in(TCCR2B);
     atd::write_bits<WGM21, WGM20>::to<1,0>::in(TCCR2A);
 }
 
-inline void Timer2::mode_fast_PWM_top_0xFF()
+inline void Timer2::fast_PWM_mode_top_0xFF()
 {
     atd::write_bits<WGM22>::to<0>::in(TCCR2B);
     atd::write_bits<WGM21, WGM20>::to<1,1>::in(TCCR2A);
 }
 
-inline void Timer2::mode_PWM_phase_correct_top_OCRA()
+inline void Timer2::PWM_phase_correct_mode_top_OCRA()
 {
     atd::write_bits<WGM22>::to<1>::in(TCCR2B);
     atd::write_bits<WGM21, WGM20>::to<0,1>::in(TCCR2A);
 }
 
-inline void Timer2::mode_fast_PWM_top_OCRA()
+inline void Timer2::fast_PWM_mode_top_OCRA()
 {
     atd::write_bits<WGM22>::to<1>::in(TCCR2B);
     atd::write_bits<WGM21, WGM20>::to<1,1>::in(TCCR2A);

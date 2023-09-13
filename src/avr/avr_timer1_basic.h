@@ -232,36 +232,36 @@ public:
     static void unsafe_input_capture_register(counter_type x);/// Escritura del ICR.
 
 // WAVEFORM GENERATION MODES (table 20-6)
-// normal mode
-    static void mode_normal();
+// Normal mode
+    static void normal_mode();
 
 // CTC modes
-    static void mode_CTC_top_OCR1A();
-    static void mode_CTC_top_ICR1();
+    static void CTC_mode_top_OCR1A();
+    static void CTC_mode_top_ICR1();
 
 // Fast PWM modes
     /// El contador va desde 0 hasta 0x00FF. (top = 0x00FF)
-    static void mode_fast_PWM_top_0x00FF();
+    static void fast_PWM_mode_top_0x00FF();
 
     /// El contador va desde 0 hasta 0x01FF. (top = 0x01FF)
-    static void mode_fast_PWM_top_0x01FF();
+    static void fast_PWM_mode_top_0x01FF();
 
     /// El contador va desde 0 hasta 0x03FF. (top = 0x03FF)
-    static void mode_fast_PWM_top_0x03FF();
+    static void fast_PWM_mode_top_0x03FF();
 
-    static void mode_fast_PWM_top_ICR1();
-    static void mode_fast_PWM_top_OCR1A();
+    static void fast_PWM_mode_top_ICR1();
+    static void fast_PWM_mode_top_OCR1A();
 
 // PWM phase correct modes
-    static void mode_PWM_phase_correct_top_0x00FF();
-    static void mode_PWM_phase_correct_top_0x01FF();
-    static void mode_PWM_phase_correct_top_0x03FF();
-    static void mode_PWM_phase_correct_top_ICR1();
-    static void mode_PWM_phase_correct_top_OCR1A();
+    static void PWM_phase_correct_mode_top_0x00FF();
+    static void PWM_phase_correct_mode_top_0x01FF();
+    static void PWM_phase_correct_mode_top_0x03FF();
+    static void PWM_phase_correct_mode_top_ICR1();
+    static void PWM_phase_correct_mode_top_OCR1A();
 
 // PWM phase and frequency correct modes
-    static void mode_PWM_phase_and_frequency_correct_top_ICR1();
-    static void mode_PWM_phase_and_frequency_correct_top_OCR1A();
+    static void PWM_phase_and_frequency_correct_mode_top_ICR1();
+    static void PWM_phase_and_frequency_correct_mode_top_OCR1A();
 
 
 // pins operation 
@@ -648,92 +648,92 @@ inline void Timer1::disable_output_compare_B_match_interrupt()
 
 // Modos de funcionamiento
 // -----------------------
-inline void Timer1::mode_normal()
+inline void Timer1::normal_mode()
 {
     atd::write_bits<WGM13, WGM12>::to<0,0>::in(TCCR1B);
     atd::write_bits<WGM11, WGM10>::to<0,0>::in(TCCR1A);
 }
 
-inline void Timer1::mode_PWM_phase_correct_top_0x00FF()
+inline void Timer1::PWM_phase_correct_mode_top_0x00FF()
 {
     atd::write_bits<WGM13, WGM12>::to<0,0>::in(TCCR1B);
     atd::write_bits<WGM11, WGM10>::to<0,1>::in(TCCR1A);
 
 }
 
-inline void Timer1::mode_PWM_phase_correct_top_0x01FF()
+inline void Timer1::PWM_phase_correct_mode_top_0x01FF()
 {
     atd::write_bits<WGM13, WGM12>::to<0,0>::in(TCCR1B);
     atd::write_bits<WGM11, WGM10>::to<1,0>::in(TCCR1A);
 }
 
-inline void Timer1::mode_PWM_phase_correct_top_0x03FF()
+inline void Timer1::PWM_phase_correct_mode_top_0x03FF()
 {
     atd::write_bits<WGM13, WGM12>::to<0,0>::in(TCCR1B);
     atd::write_bits<WGM11, WGM10>::to<1,1>::in(TCCR1A);
 }
 
-inline void Timer1::mode_CTC_top_OCR1A()
+inline void Timer1::CTC_mode_top_OCR1A()
 {
     atd::write_bits<WGM13, WGM12>::to<0,1>::in(TCCR1B);
     atd::write_bits<WGM11, WGM10>::to<0,0>::in(TCCR1A);
 }
 
-inline void Timer1::mode_fast_PWM_top_0x00FF()
+inline void Timer1::fast_PWM_mode_top_0x00FF()
 {
     atd::write_bits<WGM13, WGM12>::to<0,1>::in(TCCR1B);
     atd::write_bits<WGM11, WGM10>::to<0,1>::in(TCCR1A);
 }
 
-inline void Timer1::mode_fast_PWM_top_0x01FF()
+inline void Timer1::fast_PWM_mode_top_0x01FF()
 {
     atd::write_bits<WGM13, WGM12>::to<0,1>::in(TCCR1B);
     atd::write_bits<WGM11, WGM10>::to<1,0>::in(TCCR1A);
 }
 
-inline void Timer1::mode_fast_PWM_top_0x03FF()
+inline void Timer1::fast_PWM_mode_top_0x03FF()
 {
     atd::write_bits<WGM13, WGM12>::to<0,1>::in(TCCR1B);
     atd::write_bits<WGM11, WGM10>::to<1,1>::in(TCCR1A);
 }
 
-inline void Timer1::mode_PWM_phase_and_frequency_correct_top_ICR1()
+inline void Timer1::PWM_phase_and_frequency_correct_mode_top_ICR1()
 {
     atd::write_bits<WGM13, WGM12>::to<1,0>::in(TCCR1B);
     atd::write_bits<WGM11, WGM10>::to<0,0>::in(TCCR1A);
 }
 
-inline void Timer1::mode_PWM_phase_and_frequency_correct_top_OCR1A()
+inline void Timer1::PWM_phase_and_frequency_correct_mode_top_OCR1A()
 {
     atd::write_bits<WGM13, WGM12>::to<1,0>::in(TCCR1B);
     atd::write_bits<WGM11, WGM10>::to<0,1>::in(TCCR1A);
 }
 
-inline void Timer1::mode_PWM_phase_correct_top_ICR1()
+inline void Timer1::PWM_phase_correct_mode_top_ICR1()
 {
     atd::write_bits<WGM13, WGM12>::to<1,0>::in(TCCR1B);
     atd::write_bits<WGM11, WGM10>::to<1,0>::in(TCCR1A);
 }
 
-inline void Timer1::mode_PWM_phase_correct_top_OCR1A()
+inline void Timer1::PWM_phase_correct_mode_top_OCR1A()
 {
     atd::write_bits<WGM13, WGM12>::to<1,0>::in(TCCR1B);
     atd::write_bits<WGM11, WGM10>::to<1,1>::in(TCCR1A);
 }
 
-inline void Timer1::mode_CTC_top_ICR1()
+inline void Timer1::CTC_mode_top_ICR1()
 {
     atd::write_bits<WGM13, WGM12>::to<1,1>::in(TCCR1B);
     atd::write_bits<WGM11, WGM10>::to<0,0>::in(TCCR1A);
 }
 
-inline void Timer1::mode_fast_PWM_top_ICR1()
+inline void Timer1::fast_PWM_mode_top_ICR1()
 {
     atd::write_bits<WGM13, WGM12>::to<1,1>::in(TCCR1B);
     atd::write_bits<WGM11, WGM10>::to<1,0>::in(TCCR1A);
 }
 
-inline void Timer1::mode_fast_PWM_top_OCR1A()
+inline void Timer1::fast_PWM_mode_top_OCR1A()
 {
     atd::write_bits<WGM13, WGM12>::to<1,1>::in(TCCR1B);
     atd::write_bits<WGM11, WGM10>::to<1,1>::in(TCCR1A);

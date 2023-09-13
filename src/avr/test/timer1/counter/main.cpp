@@ -104,7 +104,7 @@ int main()
     uart.on();
 
 // init_timer();
-    Timer::mode_normal();
+    Timer::normal_mode();
     Timer::pin_A_disconnected(); // (???) creo que es innecesario 
     Timer::pin_B_disconnected();
     Timer::clock_frequency_divide_by_1024();

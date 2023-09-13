@@ -150,15 +150,15 @@ public:
     static void output_compare_register_B(counter_type x) {OCR0B = x;}
 
 // WAVEFORM GENERATION MODES (table 19-9)
-    static void mode_normal();
+    static void normal_mode();
 
-    static void mode_CTC();
+    static void CTC_mode();
 
-    static void mode_fast_PWM_top_OCRA();
-    static void mode_fast_PWM_top_0xFF();
+    static void fast_PWM_mode_top_OCRA();
+    static void fast_PWM_mode_top_0xFF();
 
-    static void mode_PWM_phase_correct_top_OCRA();
-    static void mode_PWM_phase_correct_top_0xFF();
+    static void PWM_phase_correct_mode_top_OCRA();
+    static void PWM_phase_correct_mode_top_0xFF();
 
 // pins operation 
     // comunes a todas las tablas (19-3 y siguientes)
@@ -298,37 +298,37 @@ inline void Timer0::external_clock_rising_edge()
 
 // Modos de funcionamiento
 // -----------------------
-inline void Timer0::mode_normal()
+inline void Timer0::normal_mode()
 {
     atd::write_bits<WGM02>::to<0>::in(TCCR0B);
     atd::write_bits<WGM01, WGM00>::to<0,0>::in(TCCR0A);
 }
 
-inline void Timer0::mode_PWM_phase_correct_top_0xFF()
+inline void Timer0::PWM_phase_correct_mode_top_0xFF()
 {
     atd::write_bits<WGM02>::to<0>::in(TCCR0B);
     atd::write_bits<WGM01, WGM00>::to<0,1>::in(TCCR0A);
 }
 
-inline void Timer0::mode_CTC()
+inline void Timer0::CTC_mode()
 {
     atd::write_bits<WGM02>::to<0>::in(TCCR0B);
     atd::write_bits<WGM01, WGM00>::to<1,0>::in(TCCR0A);
 }
 
-inline void Timer0::mode_fast_PWM_top_0xFF()
+inline void Timer0::fast_PWM_mode_top_0xFF()
 {
     atd::write_bits<WGM02>::to<0>::in(TCCR0B);
     atd::write_bits<WGM01, WGM00>::to<1,1>::in(TCCR0A);
 }
 
-inline void Timer0::mode_PWM_phase_correct_top_OCRA()
+inline void Timer0::PWM_phase_correct_mode_top_OCRA()
 {
     atd::write_bits<WGM02>::to<1>::in(TCCR0B);
     atd::write_bits<WGM01, WGM00>::to<0,1>::in(TCCR0A);
 }
 
-inline void Timer0::mode_fast_PWM_top_OCRA()
+inline void Timer0::fast_PWM_mode_top_OCRA()
 {
     atd::write_bits<WGM02>::to<1>::in(TCCR0B);
     atd::write_bits<WGM01, WGM00>::to<1,1>::in(TCCR0A);
