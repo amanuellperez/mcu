@@ -51,23 +51,29 @@ donde inicializa todos los dispositivos.
 ## SPI devices
 
 + ¿Quién es responsable de encender/apagar el SPI del micro?
+
   Cada dispositivo encenderá el SPI, mientras que el programa principal podrá
   apagarlo si ve que no lo necesita. 
 
-  ¿Por qué cada dispositivo es responsable de encenderlo? Si por cualquier
+*  ¿Por qué cada dispositivo es responsable de encenderlo? 
+
+  Si por cualquier
   motivo el programa desconecta el SPI no quiero, como programador, tener que
   estar recordando que si quiero abrir un  fichero primero tengo que conectar
   SPI. 
 
 
 + ¿Quién configura el dispositivo SPI?
+
   El driver del dispositivo ya que es el driver el que sabe a qué frecuencia
   conectarlo, cuál es la polaridad y la fase que usa el dispositivo, si
   primero va el MSB o no... Todas esas cosas dependen del dispositivo.
 
 
 + ¿Quién es responsable de diseñar cómo se seleccionan los diferentes
-  dispositivos de la aplicación? El hardwador es el que sabe cómo va a
+  dispositivos de la aplicación? 
+
+  El hardwador es el que sabe cómo va a
   conectarlos. Él será el responsable de escribir la clase `Select_SPI` y de
   inicializarla correctamente en la aplicación de tal manera que el
   programador pueda ignorar por completo el cómo realmente se conecta a una
