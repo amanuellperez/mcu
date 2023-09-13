@@ -239,11 +239,14 @@ public:
 //  is_unsafe para indicar el doble interfaz.
     static constexpr bool is_unsafe = true;
 
-// types
+// Types
+// -----
     using Timer        = avr_::Timer1;
     using counter_type = typename Timer::counter_type;
     using Disable_interrupts = avr_::Disable_interrupts;
 
+// Initialization
+// --------------
 /// De momento el interfaz es static. Prohibo su construcción.
     Time_counter1_g() = delete;
 
@@ -265,29 +268,41 @@ public:
     static void safe_init(counter_type top0 = max_top()) 
     { 
 	Disable_interrupts l;
+	unsafe_init();
 
-	Timer::CTC_mode_top_OCR1A();
-	unsafe_reset();
-	unsafe_top(top0);
+//	Timer::CTC_mode_top_OCR1A();
+//	unsafe_reset();
+//	unsafe_top(top0);
     }
 
     static void init(counter_type top0 = max_top()) 
     { safe_init(top0); }
 
+
+// Interrupts
+// ----------
     /// Hay veces que puede ser interesante controlar cuándo el contador hace
     /// overflow. El único problema es que hay que definir la interrupción
     /// ISR_TIMER1_OVF que depende del Timer1 y no es genérico.
     // ¿Cómo independizarlo del avr este ISR_TIMER1_OVF? <-- En el dev.h
-    // al seleccionar el Generic_timer<Timer1> se puede definir
+    // al seleccionar el Time_counter1_g se puede definir
     // ISR_GENERIC_TIMER_OVF = ISR_TIMER1_OVF.
-    // Genera una interrupción al alcanzar el max_top (overflow).
-    // Se captura con ISR_TIMER1_OVF
-    static void enable_max_top_interrupt()
-    { Timer::enable_overflow_interrupt();}
 
-    static void disable_max_top_interrupt()
-    { Timer::disable_overflow_interrupt();}
+// DUDA: ¿por qué habilitar 2 tipos de interrupciones? No tiene sentido
+// Borrar este enable_max_top_interrupt en unos días (hoy 13/09/2023)
+//    // Genera una interrupción al alcanzar el max_top (overflow).
+//    // Se captura con ISR_TIMER1_OVF
+//    static void enable_max_top_interrupt()
+//    { Timer::enable_overflow_interrupt();}
+//
+//    static void disable_max_top_interrupt()
+//    { Timer::disable_overflow_interrupt();}
 
+// DUDA:enable_top_interrupt() vs enable_interrupt()
+//      Me gusta más la segunda, a fin de cuentas es la única interrupción del
+//      dispositivo. Pero enable_top_interrupt() es más descriptiva, le
+//      recuerda al usuario de esta clase que la interrupción salta al llegar
+//      al top. ¿Lo más dificil en programación? ¡Elegir los nombres! @_@
     // Genera una interrupción al alcanzar el top.
     /// Se captura con ISR_TIMER1_COMPA
     static void enable_top_interrupt()
@@ -329,10 +344,12 @@ public:
     template <uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
     static void on_with_overflow_every_1ms();
 
-    /// Apagamos el generador de señales.
+    /// Apagamos el contador
     static void off() { Timer::off(); }
 
 
+// Value
+// -----
     /// Devuelve el valor del contador en ticks.
     /// Versión fast: no bloquea las interrupciones. El usuario es responsable
     /// de bloquear las interrupciones antes de llamar a esta función.
@@ -361,6 +378,8 @@ public:
     }
     static void reset()  {safe_reset();}
 
+// Top
+// ---
     /// Define el top del counter.
     static void unsafe_top(counter_type top)
     {Timer::unsafe_output_compare_register_A(top);}
@@ -385,6 +404,9 @@ public:
 
     static counter_type top() {return safe_top();}
 
+
+// Max top
+// -------
     /// Valor máximo que puede tener el top.
     static constexpr counter_type max_top()
     { return Timer::max(); }
@@ -441,17 +463,30 @@ using Timer_counter1_g = Time_counter1_g;
 class Square_wave_generator1_g{
 public:
 // Hardware device
+// ---------------
     using Timer        = avr_::Timer1;
 
-// Interfaz static
-    Square_wave_generator1_g() = delete;
 
 // Características del Timer
+// -------------------------
     static constexpr uint8_t number_of_pins = cfg::timer1::number_of_pins;
-    static constexpr uint8_t pin[] = {Timer::OCA_pin(), Timer::OCB_pin()};
-    static constexpr bool is_pin(uint8_t n) 
-    { return (n == pin[0] or n == pin[1]);}
 
+    // pin[0], pin[1], ..., pin[number_of_pins - 1] = pins a los que podemos
+    // conectar el SWG
+    static constexpr uint8_t pin[] = {Timer::OCA_pin(), Timer::OCB_pin()};
+
+    /// Nos indica si el pin número `n` es uno de los pines del SQ
+    static constexpr bool is_pin(uint8_t n) 
+				    { return (n == pin[0] or n == pin[1]);}
+
+// Initialization
+// --------------
+    Square_wave_generator1_g() = delete;
+    // init(): no hay
+
+
+// Stop
+// ----
     /// Apagamos el generador de señales.
     // DUDA: stop() or off()??? Hoy me suena mejor stop: generate/stop
     static void stop();

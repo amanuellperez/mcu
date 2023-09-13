@@ -17,7 +17,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-// Ejemplo básico de uso del Timer como contador
 #include "../../../avr_atmega328p_cfg.h"
 #include "../../../avr_UART.h"
 #include "../../../avr_timer1_basic.h"
@@ -36,13 +35,10 @@ using Timer = mcu::Timer1;
 
 constexpr uint16_t period_in_us = 1024;
 
-volatile uint32_t contador = 0;
+volatile uint32_t counter = 0;
 
 ISR_TIMER1_OVF
-{
-    // ++contador;
-    contador = contador + 1;
-}
+{ counter = counter + 1; }
 
  
 struct time_in_days{
@@ -117,7 +113,7 @@ int main()
 	{// lo más atómico posible
 	    mcu::Disable_interrupts l;
 	    v = Timer::unsafe_counter();
-	    c = contador;
+	    c = counter;
 	}
 	
 	uint64_t t_us = (c*(uint64_t{Timer::max()} + 1)+ v)*period_in_us;
