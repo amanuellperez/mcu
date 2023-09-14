@@ -163,12 +163,11 @@ public:
 
 // Timer on/off
 // ------------
+    // Encendemos el Counter en modo síncrono. El usuario será responsable de
+    // llamar a la función init y activar las interrupciones si las necesita.
     template<uint16_t period_in_us
 	    , uint32_t clock_frequency_in_Hz = MCU_CLOCK_FREQUENCY_IN_HZ>
-    struct turn_on_with_clock_period_of{
-	static void us()
-	{timer2_::set_clock_period_in_us<period_in_us, clock_frequency_in_Hz>();}
-    };
+    struct turn_on_with_clock_period_of{ static void us(); };
 
     /// Apagamos el generador de señales.
     static void turn_off() { Timer::off(); }
@@ -202,6 +201,15 @@ inline void Time_counter2_g::init(counter_type top0)
     reset();
     top(top0);
 }
+
+
+template<uint16_t period_in_us, uint32_t clock_frequency_in_Hz>
+inline void 
+Time_counter2_g::
+turn_on_with_clock_period_of<period_in_us, clock_frequency_in_Hz>::us()
+{timer2_::set_clock_period_in_us<period_in_us, clock_frequency_in_Hz>();}
+
+
 
 
 }// namespace 

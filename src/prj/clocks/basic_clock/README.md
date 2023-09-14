@@ -1,8 +1,48 @@
 # `basic_clock`
-Este es el reloj más básico que se puede hacer. Consta de:
+Este es el reloj más básico que se puede hacer. Es un micro más un terminal
+que muestra la hora y tiene un teclado que permite ponerlo en hora.
 
-* Un LCD que nos muestra la hora.
-* Un teclado de 3 letras para poder poner/cambiar la hora.
+## Terminales
+
+Dos terminales básicos:
+
+1. PC terminal:
+
+   Consiste en usar el PC como terminal. Programar usando el PC como terminal
+   simplifica el primer prototipo del programa ya que nos podemos centrar en
+   la lógica y no en la presentación.
+
+2. LCD + keyboard:
+
+   En el caso del reloj con un teclado de 3 botones es suficiente para
+   poner/cambiar la hora.
+
+3. Pantalla táctil:
+
+   La ventaja de estas pantallas es que integran el teclado dentro de ellas.
+   La desventaja es que son más caras que la versión LCD + keyboard.
+
+
+### Problema
+
+¿Podemos fusionar los dos programas anteriores? Estaría bien poder escribir el
+programa para el PC y luego, simplemente cambiando el tipo de terminal que el
+mismo programa sirva para el LCD + keyboard. 
+
+¿Podemos definir `cout` y `cin`? En el PC es bastante sencillo, ya que tanto
+`cout` como `cin` serían instancias de `uart`. En el keyboard `cin` se puede
+definir (creo) que fácilmente, pero el problema está en cómo definir `cout`
+para el LCD ya que son pantallas distintas: en `cout` vas escribiendo y cuando
+se llega al final de la pantalla hace un scroll hacia arriba de toda la pantalla
+para dejar espacio para la siguiente línea, pero en el LCD (para mostrar la
+hora) usamos el LCD como una `screen`, una pantalla donde podemos elegir la
+posición `(x, y)` donde escribir un caracter y que no hace scroll al escribir
+el último caracter de la última línea de la pantalla. Son 2 ideas distintas la
+de `cout` y la de `LCD`: `cout` es una especie de papiro, mientras que `LCD`
+es una hoja de papel cuadriculada.
+
+
+
 
 ## Versión 0.0
 Lo conectas todo, lo programas, lo enciendes... y ¡ves que retrasa! (¡y en mi
@@ -18,11 +58,14 @@ diferente.
 
 ### Solución
 ¿Cómo conseguir que el reloj funcione practicamente a 1 MHz? En principio he
-visto dos formas diferentes:
+visto tres formas diferentes:
 1. Parece ser que es posible calibrar el oscilador interno (registro OSCCAL?).
 2. Se puede conectar a un cristal externo cambiando los fuses.
+3. Usar el Timer2 en modo asíncrono, conectado a un cristal de 32kHz. De hecho
+   parece ser que esta es la forma estandar de hacer un RTC con el atmega.
 
-En la versión 0.1 optó por cambiar los fuses.
+En la versión 0.1 optó por cambiar los fuses, mientras que en la versión 1.0
+pruebo a usar el Timer2 en modo asíncrono.
 
 ## Versión 0.1
 Para conseguir que el avr funcione prácticamente a 1 MHz basta con conectar un
@@ -53,5 +96,12 @@ programar.
 2. Pilas: Usar 5 voltios para un reloj a día de hoy parece excesivo. Mi
    despertador usa una pila de 1'5 voltios. ¿Cómo alimentar el circuito solo
    con 1'5 voltios? 
+
+   Para bajar el consumo del `avr` basta con dormir el microcontrolador y
+   despertarlo con el Timer2 en modo asíncrono. El problema sigue en el LCD,
+   que necesito un LCD que consuma poco.
+
+
+
 
 

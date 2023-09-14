@@ -71,7 +71,6 @@
 
 #include <atd_bit.h>
 #include <atd_type_traits.h>
-#include <atd_ostream.h>    // print_int_as_hex
 
 #include <avr/io.h> // registros: DDRB... PORT...
 #include "avr_pin.h"

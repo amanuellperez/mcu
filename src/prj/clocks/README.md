@@ -31,7 +31,7 @@ No tengo fotos del que hice en su día. Si lo vuelvo a hacer, ya subo alguna.
 
 * [Basic crhonometer](basic_chronometer)
 
-  Cronómeetro básico. Es un cronómetro que mide en milisegundos.
+  Cronómetro básico. Es un cronómetro que mide en milisegundos.
 
   Nota: es fundamental gestionar bien el bouncing del teclado con el
   cronómetro. Si no, al pulsar el botón para pararlo no lo para.
