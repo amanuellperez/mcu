@@ -274,42 +274,26 @@ int main()
         char c{};
 	uart >> c;
 	switch(c){
-	    case 'o':
-		timer_on(period_in_us);
-		break;
+	    break; case 'o': timer_on(period_in_us);
+	    break; case 'f': Timer::off();
+	    break; case 'a':
+	           case 'A': oca_menu();
+	    break; case 'b':
+		   case 'B': ocb_menu();
+	    break; case 'p':
+		    Timer::off();
+		    period_in_us = select_period();
+		    timer_on(period_in_us);
 
-	    case 'f':
-		Timer::off();
-		break;
-
-	    case 'a':
-	    case 'A':
-		oca_menu();
-		break;
-
-	    case 'b':
-	    case 'B':
-		ocb_menu();
-		break;
-
-	    case 'p':
-		Timer::off();
-		period_in_us = select_period();
-		timer_on(period_in_us);
-		break;
-
-	    case 't':
+	    break; case 't':
 		uart << "\ntop (max " << Timer::max() << ") = ";
 		uart >> top;
 		uart << top << '\n';
 		//Timer::output_compare_register_A(top);
 		{ avr_::Disable_interrupts l; 
 		  Timer::unsafe_input_capture_register(top);}
-		break;
 
-	    default:
-		uart << "I don't understand.\n";
-		break;
+	    break; default: uart << "Unknown option\n";
 
 	}
 

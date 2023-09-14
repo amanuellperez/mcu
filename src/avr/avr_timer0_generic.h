@@ -261,8 +261,6 @@ public:
     Time_counter0_g() = delete;
 
 /// Modo de funcionamiento: contador normal y corriente.
-//TODO: rename to cfg. Realmente está configurando este dispositivo para poder
-//      usarlo.  init suena a inicializar, a poner valores iniciales
     static void init(counter_type top0 = max_top()) 
     { 
 	Timer::CTC_mode();

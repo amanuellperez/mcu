@@ -59,6 +59,7 @@
 
 #include <avr_timer0_basic.h>
 #include <avr_timer1_basic.h>
+#include <avr_timer2_basic.h>
 
 #include <avr_ADC_basic.h>
 
@@ -79,6 +80,7 @@
 
 #include <avr_timer0_generic.h>
 #include <avr_timer1_generic.h>
+#include <avr_timer2_generic.h>
 
 // TODO: mirar qué depende del micro realmente y qué se basa en un UART
 // genérico.

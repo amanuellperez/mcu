@@ -268,11 +268,7 @@ public:
     static void safe_init(counter_type top0 = max_top()) 
     { 
 	Disable_interrupts l;
-	unsafe_init();
-
-//	Timer::CTC_mode_top_OCR1A();
-//	unsafe_reset();
-//	unsafe_top(top0);
+	unsafe_init(top0);
     }
 
     static void init(counter_type top0 = max_top()) 

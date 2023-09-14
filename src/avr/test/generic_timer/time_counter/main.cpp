@@ -17,18 +17,37 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "../../../avr_atmega328p_cfg.h"
-#include "../../../avr_pin.h"
+
+#include "../../../avr_timer2_generic.h" // TODO: recolocar
 #include "../../../avr_timer0_generic.h"
 #include "../../../avr_timer1_generic.h"
-#include "../../../avr_UART.h"
+#include "../../../avr_debug.h"
 
+#include "../../../avr_UART.h"
+#include "../../../avr_atmega328p_cfg.h"
+#include "../../../avr_pin.h"
+
+// Microcontroller
+// ---------------
 namespace mcu = avr_;
 
-constexpr uint8_t pin_test = 15;
+// Pin conections
+// --------------
+// Eligo pins que no tienen nada que ver con los Timers
+constexpr uint8_t npin0 = 26;
+constexpr uint8_t npin1 = 27;
+constexpr uint8_t npin2 = 28;
 
+// Devices
+// -------
 using Counter0  = mcu::Time_counter0_g;
-using Counter1 = mcu::Time_counter1_g;
+using Counter1  = mcu::Time_counter1_g;
+using Counter2  = mcu::Time_counter2_g;
+
+using Pin0 = mcu::Pin<npin0>;
+using Pin1 = mcu::Pin<npin1>;
+using Pin2 = mcu::Pin<npin2>;
+
 
 // CUIDADO: hay mucha diferencia entre tener el reloj del micro a 1MHz o a 8
 // MHz. Para tiempos precisos (del orden de 50 us (???)) usar 8MHz. Para el
@@ -59,97 +78,208 @@ using Counter1 = mcu::Time_counter1_g;
 //	        < 10 =>   = 20.70 ms :)
 //
 
-template <typename Counter, uint16_t period_in_us>
-void generate(const typename Counter::counter_type& max_value, uint16_t nrep)
-{
-    mcu::UART_iostream uart;
-    uart << "\n----------------------------\n"
-	    "Generating " << nrep << " times from 0 to " << (int) max_value << "\n"
-	    "\tTimer period in us = " << period_in_us << '\n';
-
-    if constexpr (std::is_same_v<Counter, Counter0>)
-	uart << "\tTimer 0";
-
-    else
-	uart << "\tTimer 1";
-
-    auto T = 2*(period_in_us * max_value);
-    uart << "\tPeriod of the signal generate =? " << T << '\n';
-
-    mcu::Output_pin<pin_test> pin;
-
-    Counter::init();
-    Counter::template turn_on_with_clock_period_of<period_in_us>::us();
-
-    for (uint16_t i = 0; i < nrep; ++i){
-	Counter::reset();   // DUDA: 1º el reset y luego el write o al revés?
-	pin.write_zero();
-	while (Counter::value() < max_value) { ; }
-
-	Counter::reset();
-	pin.write_one();
-	while (Counter::value() < max_value) { ; }
-    }
-
-    uart << "DONE\n";
-    pin.write_zero();
-}
+// Types
+// -----
+using Max_type = Counter1::counter_type;
 
 
-int main()
+void init_uart()
 {
     mcu::UART_iostream uart;
     mcu::basic_cfg(uart);
     uart.on();
+}
+
+void main_hello()
+{
+    mcu::UART_iostream uart;
 
     uart << "\n\nTime counter test\n"
-	        "----------------\n"
-		"Connect oscilloscope to pin " << (int) pin_test << '\n';
+	        "-----------------\n"
+		"Connect oscilloscope to pins:\n" 
+		"\t\t" << (int) Pin0::number << " (for Time_counter0)\n"
+		"\t\t" << (int) Pin1::number << " (for Time_counter1)\n"
+		"\t\t" << (int) Pin2::number << " (for Time_counter2)\n"
+		"\n";
+
+}
+
+void init_pins()
+{
+    Pin0::as_output();
+    Pin1::as_output();
+    Pin2::as_output();
+}
+
+template <typename Counter, uint16_t period>
+void generate(uint32_t top)
+{
+    mcu::UART_iostream uart;
+    Counter::init(static_cast<typename Counter::counter_type>(top));
+    Counter::template turn_on_with_clock_period_of<period>::us();
+    Counter::enable_top_interrupt();
+
+    uint32_t T = 2 * top * period;
+    uart << "Generating signal of period " << T << " us\n"
+	    "\t(timer clock period = " << period << 
+	    " us, max_value = " << top << ")\n";
+
+}
+
+char choose_timer()
+{
+    mcu::UART_iostream uart;
+    uart << "\nMenu\n"
+	    "----\n"       
+	    "0. Timer 0\n"
+	    "1. Timer 1\n"
+	    "2. Timer 2\n";
+
+    char timer{};
+    uart >> timer;
+
+    return timer;
+}
+
+char choose_period(char timer)
+{
+    mcu::UART_iostream uart;
+
+    uart << "\nPeriod:\n"
+	    "0. Turn off\n"
+	    "1.    1 us\n"
+	    "2.    8 us\n";
+
+    if (timer == '2')
+	uart << "3.   32 us\n";
+
+    uart << "4.   64 us\n";
+
+    if (timer == '2')
+	uart << "5.  128 us\n";
+
+    uart <<	"6.  256 us\n"
+	    "7. 1024 us\n"
+	    "p. print registers\n";
 
 
-constexpr Counter1::counter_type max_value = 1;
-    uint16_t nrep = 10000;
-    while(1){
-	uart << "--------------------------\n"
-	        "0. Timer 0\n"
-		"1. Timer 1\n";
+    char period{};
+    uart >> period;
 
-	char timer{};
-	uart >> timer;
+    return period;
+}
+
+
+Max_type choose_max_value(char timer, Max_type max)
+{
+    mcu::UART_iostream uart;
     
-	uart << "\nPeriod:\n"
-	        "[1]    1 us\n"
-		"[2]    8 us\n"
-		"[3]   64 us\n"
-		"[4]  256 us\n"
-		"[5] 1024 us\n";
+    uart << "Max. value (from 0 to ";
 
-	char period{};
-	uart >> period;
-
-	if (timer == '0')
-	    switch(period){
-		break; case '1': generate<Counter0, 1>(max_value, nrep);
-		break; case '2': generate<Counter0, 8>(max_value, nrep);
-		break; case '3': generate<Counter0, 64>(max_value, nrep);
-		break; case '4': generate<Counter0, 256>(max_value, nrep);
-		break; case '5': generate<Counter0, 1024>(max_value, nrep);
-		break; default: generate<Counter0, 1>(max_value, nrep);
-	    }
-
-	else
-	    switch(period){
-		break; case '1': generate<Counter1, 1>(max_value, nrep);
-		break; case '2': generate<Counter1, 8>(max_value, nrep);
-		break; case '3': generate<Counter1, 64>(max_value, nrep);
-		break; case '4': generate<Counter1, 256>(max_value, nrep);
-		break; case '5': generate<Counter1, 1024>(max_value, nrep);
-		break; default: generate<Counter1, 1>(max_value, nrep);
-	    }
-	
-
+    if (timer == '0') uart << (int) Counter0::max_top();
+    else if (timer == '1') uart << (int) Counter1::max_top();
+    else if (timer == '2') uart << (int) Counter2::max_top();
+    else {
+	uart << "Unknown timer\n";
+	return max;
     }
+
+    uart << ")\n";
+    uart >> max;
+
+    return max;
 }
 
 
 
+int main()
+{
+    init_uart();
+    init_pins();
+
+    mcu::enable_interrupts();
+
+    main_hello();
+
+    mcu::UART_iostream uart;
+
+
+    Max_type max_value = 10;
+
+    while(1){
+	char timer = choose_timer();
+	char period = choose_period(timer);
+	max_value = choose_max_value(timer, max_value);
+
+
+	if (timer == '0'){
+	    uart << "Timer 0: ";
+	    switch(period){
+		break; case '0': Counter0::disable_top_interrupt();
+				 Counter0::turn_off();
+		break; case '1': generate<Counter0, 1>(max_value);
+		break; case '2': generate<Counter0, 8>(max_value);
+		break; case '4': generate<Counter0, 64>(max_value);
+		break; case '6': generate<Counter0, 256>(max_value);
+		break; case '7': generate<Counter0, 1024>(max_value);
+		break; case 'p': 
+			    uart << '\n';
+			    mcu::print_registers_timer1(uart);
+		break; default: uart << "Unknwon option\n";
+	    }
+	}
+
+	else if (timer == '1'){
+	    uart << "Timer 1: ";
+	    switch(period){
+		break; case '0': Counter1::disable_top_interrupt();
+				 Counter1::turn_off();
+		break; case '1': generate<Counter1, 1>(max_value);
+		break; case '2': generate<Counter1, 8>(max_value);
+		break; case '4': generate<Counter1, 64>(max_value);
+		break; case '6': generate<Counter1, 256>(max_value);
+		break; case '7': generate<Counter1, 1024>(max_value);
+		break; case 'p': 
+			    uart << '\n';
+			    mcu::print_registers_timer1(uart);
+
+		break; default: uart << "Unknwon option\n";
+	    }
+	}
+
+	else if (timer == '2'){
+	    uart << "Timer 2: ";
+	    switch(period){
+		break; case '0': Counter2::disable_top_interrupt();
+				 Counter2::turn_off();
+		break; case '1': generate<Counter2, 1>(max_value);
+		break; case '2': generate<Counter2, 8>(max_value);
+		break; case '3': generate<Counter2, 32>(max_value);
+		break; case '4': generate<Counter2, 64>(max_value);
+		break; case '5': generate<Counter2, 128>(max_value);
+		break; case '6': generate<Counter2, 256>(max_value);
+		break; case '7': generate<Counter2, 1024>(max_value);
+		break; case 'p': 
+			    uart << '\n';
+			    mcu::print_registers_timer2(uart);
+
+		break; default: uart << "Unknwon option\n";
+	    }
+	}
+    }
+}
+
+
+// INTERRUPTS
+// ----------
+ISR_TIMER0_COMPA{
+    Pin0::toggle();
+}
+
+ISR_TIMER1_COMPA{
+    Pin1::toggle();
+}
+
+ISR_TIMER2_COMPA{
+    Pin2::toggle();
+}

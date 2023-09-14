@@ -25,6 +25,8 @@ INCS= dev_concepts.h	\
 	avr_timer0_generic.h\
 	avr_timer1_basic.h	\
 	avr_timer1_generic.h\
+	avr_timer2_basic.h	\
+	avr_timer2_generic.h\
 	avr_TWI.h			\
 	avr_TWI_basic.h		\
 	avr_TWI_master.h	\

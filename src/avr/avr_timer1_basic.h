@@ -71,6 +71,7 @@
 
 #include <atd_bit.h>
 #include <atd_type_traits.h>
+#include <atd_ostream.h>    // print_int_as_hex
 
 #include <avr/io.h> // registros: DDRB... PORT...
 #include "avr_pin.h"
@@ -838,6 +839,8 @@ inline void Timer1::CTC_pin_B_set_on_compare_match()
     // Obligatorio definirlo como de salida. 
     Pin<OCB_pin()>::as_output();
 }
+
+
 
 }// namespace avr
 
