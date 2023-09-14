@@ -12,10 +12,14 @@ Dos terminales básicos:
    simplifica el primer prototipo del programa ya que nos podemos centrar en
    la lógica y no en la presentación.
 
+   Las versiones que se conecten al PC las llamaré `version_pc`
+
 2. LCD + keyboard:
 
    En el caso del reloj con un teclado de 3 botones es suficiente para
    poner/cambiar la hora.
+
+   Las versiones que se conecten al PC las llamaré `version_lcd`
 
 3. Pantalla táctil:
 

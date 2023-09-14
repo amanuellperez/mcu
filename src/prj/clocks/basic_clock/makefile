@@ -1,5 +1,5 @@
-DIRS =  v0 \
-		v1
+DIRS =  v0_lcd \
+		v1_pc
 
 
 include $(MCU_RECRULES)
