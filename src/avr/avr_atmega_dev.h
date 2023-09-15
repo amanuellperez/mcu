@@ -96,6 +96,9 @@ namespace atmega{
     using Timer2         = avr_::Timer2;
     using Time_counter2_g= avr_::Time_counter2_g;
 
+    template <uint16_t timeout_ms_max>
+    using Time_counter2_32kHz_g= avr_::Time_counter2_32kHz_g<timeout_ms_max>;
+
 // PROTOCOLS
     using UART_basic = avr_::UART_basic;
     using UART_iostream = avr_::UART_iostream;

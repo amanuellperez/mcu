@@ -173,6 +173,8 @@ inline constexpr int8_t nINT_of_pin()
         static constexpr uint8_t OCA_pin   = 17u;
         static constexpr uint8_t OCB_pin   = 11u; // usa OCB0!!!
 	//constexpr uint16_t resolution= 256u;
+	static constexpr uint8_t TOSC1_pin = 9;
+	static constexpr uint8_t TOSC2_pin = 10;
     };
 
 }// namespace cfg

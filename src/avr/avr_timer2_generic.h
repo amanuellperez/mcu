@@ -33,6 +33,9 @@
  ****************************************************************************/
 #include "avr_timer2_basic.h"
 #include "avr_cfg.h"	// MCU_CLOCK_FREQUENCY_IN_HZ
+#include "avr_time.h"	// wait_ms
+#include "avr_interrupt.h" // Disable_interrupts
+
 
 #include <atd_type_traits.h>
 #include <tuple>    // std::tie
@@ -239,6 +242,146 @@ Time_counter2_g::turn_on_with_overflow_to_count_1s()
 
     return static_cast<counter_type>(-1); // Nunca debería de llegar aquí
 }
+
+
+/***************************************************************************
+ *			    Time_counter2_32kHz_g
+ ***************************************************************************/
+// Conectamos el Timer2 a un cristal externo de 32kHz.
+// El Timer2 tiene que funcionar en modo asíncrono.
+// De acuerdo a la datasheet:
+// When writing to one of the registers TCNT2, OCR2x, or TCCR2x, the value 
+// is transferred to a temporary register, and latched after two positive 
+// edges on TOSC1. The user should not write a new value before the contents 
+// of the temporary register have been transferred to its destination.  
+// Each of the five mentioned registers has its individual temporary register,
+// which means that e.g. writing to TCNT2 does not disturb an OCR2x write 
+// in progress. The Asynchronous Status Register (ASSR) indicates that a 
+// transfer to the destination register has taken place.
+//
+// TODO: de momento hago la implementación mínima para que funcione con
+// Clock_s. Ir ampliando la clase a medida que se necesite (teniendo en cuenta
+// el párrafo anterior)
+//
+template <uint16_t max_timeout_ms0 = 3000>
+class Time_counter2_32kHz_g{
+public:
+// Asserts
+// -------
+    static_assert(MCU_CLOCK_FREQUENCY_IN_HZ >= 4 * 32768,
+		"The CPU main clock frequency must be more "
+		"than four times the oscillator frequency");
+
+// Conections
+// ----------
+    // Pines donde hay que conectar el cristal
+    static constexpr uint8_t crystal_32_kHz_pin1 = cfg::timer2::TOSC1_pin;
+    static constexpr uint8_t crystal_32_kHz_pin2 = cfg::timer2::TOSC2_pin;
+
+// Types
+// -----
+    using Timer        = avr_::Timer2;
+    using counter_type = typename Timer::counter_type;
+
+// Cfg
+// ---
+    // Las funciones que requieran de un timeout usarán este valor por defecto
+    static constexpr uint16_t max_timeout_ms = max_timeout_ms0;
+
+// Constructor
+// -----------
+// De momento el interfaz es static. Prohibo su construcción.
+    Time_counter2_32kHz_g() = delete;
+
+
+// Interrupts
+// ----------
+    /// Hay veces que puede ser interesante controlar cuándo el contador hace
+    /// overflow. El único problema es que hay que definir la interrupción
+    /// ISR_TIMER0_OVF que depende del Timer2 y no es genérico.
+    // Genera una interrupción cuando llega al top.
+    // Capturarla con ISR_TIMER2_COMPA
+    static void enable_top_interrupt()
+    { Timer::enable_output_compare_A_match_interrupt();}
+
+    static void disable_top_interrupt()
+    { Timer::disable_output_compare_A_match_interrupt();}
+    
+
+// Timer on/off
+// ------------
+    static counter_type 
+	turn_on_with_overflow_to_count_1s(uint16_t timeout_ms = max_timeout_ms);
+
+    /// Apagamos el generador de señales.
+    static void turn_off() { Timer::off(); }
+
+
+//    /// Devuelve el valor del contador en ticks.
+//    static counter_type value() 
+//    { return Timer::counter(); }
+//    
+//    /// Hace que el counter = 0.
+//    CUIDADO: escribe en TCNT2A, la escritura tarda 2 ciclos de reloj!!!
+//    static void reset() { Timer::counter(0); }
+//
+//    /// Define el top del counter.
+//    CUIDADO: escribe en OCR2A, la escritura tarda 2 ciclos de reloj!!!
+//    static void top(counter_type top)
+//    {Timer::output_compare_register_A(top);}
+//
+//    /// Valor del top
+//    static counter_type top()
+//    { return Timer::output_compare_register_A(); }
+
+    /// Valor máximo que puede tener el top.
+    static constexpr counter_type max_top()
+    { return Timer::max(); }
+
+};
+
+
+
+
+// Turn on
+// -------
+//template<uint16_t period_in_us, uint32_t clock_frequency_in_Hz>
+//inline void 
+//Time_counter2_g::
+//turn_on_with_clock_period_of<period_in_us, clock_frequency_in_Hz>::us()
+//{timer2_::set_clock_period_in_us<period_in_us, clock_frequency_in_Hz>();}
+//
+
+
+// La forma de inicializar el Timer2 en modo asíncrono viene en el punto 22.9
+// de la datasheet "Asynchronous Operation of Timer/Counter2"
+template <uint16_t mto>
+Time_counter2_32kHz_g<mto>::counter_type 
+Time_counter2_32kHz_g<mto>::
+		turn_on_with_overflow_to_count_1s(uint16_t timeout_ms)
+{
+    Disable_interrupts lock;
+
+    Timer::disable_interrupts();
+    Timer::enable_asynchronous_mode();
+    Timer::CTC_mode();
+    Timer::output_compare_register_A(128);
+    Timer::clock_frequency_divide_by_256();  // arranca el timer
+					      
+
+    while (!Timer::are_registers_ready()){
+	wait_ms(1);
+	--timeout_ms;
+	if (timeout_ms == 0)
+	    return static_cast<counter_type>(-1);
+    }
+
+    Timer::clear_pending_interrupts();
+    Timer::enable_output_compare_A_match_interrupt(); 
+
+    return 1; // genera un tick cada segundo
+}
+
 
 
 }// namespace 
