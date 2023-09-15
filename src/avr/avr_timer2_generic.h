@@ -169,6 +169,9 @@ public:
 	    , uint32_t clock_frequency_in_Hz = MCU_CLOCK_FREQUENCY_IN_HZ>
     struct turn_on_with_clock_period_of{ static void us(); };
 
+    template <uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
+    static counter_type turn_on_with_overflow_to_count_1s();
+
     /// Apagamos el generador de señales.
     static void turn_off() { Timer::off(); }
 
@@ -203,6 +206,8 @@ inline void Time_counter2_g::init(counter_type top0)
 }
 
 
+// Turn on
+// -------
 template<uint16_t period_in_us, uint32_t clock_frequency_in_Hz>
 inline void 
 Time_counter2_g::
@@ -210,6 +215,30 @@ turn_on_with_clock_period_of<period_in_us, clock_frequency_in_Hz>::us()
 {timer2_::set_clock_period_in_us<period_in_us, clock_frequency_in_Hz>();}
 
 
+
+// (RRR) Números mágicos:
+//	 Para 1 MHz: 125 * 125 * 64 us = 1.000.000 us = 1 s
+template <uint32_t clock_frequency_in_hz>
+Time_counter2_g::counter_type 
+Time_counter2_g::turn_on_with_overflow_to_count_1s()
+{
+// cfg_overflow_every_1s();
+    if constexpr (clock_frequency_in_hz == 1'000'000ul){
+	init(125);
+	Timer::clock_frequency_divide_by_64();
+
+	enable_top_interrupt();
+	return 125;
+    }
+
+    else
+        static_assert(atd::always_false_v<int>,
+                      "turn_on_with_overflow_to_count_1s: I'm lazy. I haven't implemented "
+                      "that frequency. Please implement it.");
+
+
+    return static_cast<counter_type>(-1); // Nunca debería de llegar aquí
+}
 
 
 }// namespace 

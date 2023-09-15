@@ -84,7 +84,7 @@ namespace dev{
 // Voy a suministrar un doble interfaz (manejar solo segundos, o manejar
 // fechas) para que sea el usuario el que elija.
 //
-// TODO: De momento solo está pensado para funcionar con Timers que sean
+// Al principio solo lo implementé para funcionar con Timers que sean
 // capaces de generar 1 tick cada segundo, como el Timer1.
 // Pero ¿cómo implementarlo en el caso del Timer0 incapaz de dar 1 tick cada
 // segundo?.
@@ -122,14 +122,30 @@ namespace dev{
 //  Para el Timer1 basta con llevar la cuenta de nseconds, y una función
 //  `tick` que se limita a `++nseconds`. El Timer0 necesita dos contadores
 //  `nticks` y `nseconds` y una función `tick` un poco más complicada. 
-//  Recordar si se implementa el Timer0 no penalizar la implementación de
-//  Timer1 por culpa del Timer0.
-template <typename Micro, typename Time_counter_g>
+//
+//  ¿Qué diferencia hay entre Timer0 y Timer1? Que en el Timer0 hay que dar
+//  125 ticks para alcanzar 1 segundo, mientras que en Timer1 hay que dar 1
+//  tick para alcanzarlo. 
+//
+//  Si llamamos nticks_1s al número de ticks que hay en 1 segundo, el código
+//  anterior quedaría generalizado:
+//	    ++nticks;
+//	    if (nticks >= nticks_of_1s){
+//		nticks = 0;
+//		++nseconds;
+//	    }
+//
+//  El nticks_1s nos lo puede devolver la función Time_counter::turn_on();
+//  Esta es una forma de hacerlo genérico y que sirva para Timer0 y Timer1.
+//  Voy a probarla.
+//	
+template <typename Micro, typename Time_nticks_g>
 class Clock_s
 {
 public:
     using Disable_interrupts = Micro::Disable_interrupts;
-    using Time_counter	= Time_counter_g;
+    using Time_counter	= Time_nticks_g;
+
     using duration	= std::chrono::seconds;
     using rep		= duration::rep;
     using period	= duration::period;
@@ -163,23 +179,45 @@ public:
     static Date_time now_as_date_time();
 
     /// Damos un tick al clock.
-    static void tick() {counter_ = counter_ + 1;}
+    /// Obligatorio llamar a esta función dentro de la ISR correspondiente.
+    static void tick();
 
     /// Convertimos el time_point a Date_time 
     static Date_time as_date_time(const time_point& t);
 
+    /// En Timer0 se llama a la ISR un montón de veces antes de que haya
+    /// transcurrido un nuevo segundo. ¿Cómo saber cúando ha transcurrido un
+    /// nuevo segundo? Esta función nos lo dice. Devuelve true en caso de que
+    /// haya transcurrido un nuevo segundo.
+    static bool is_new_second();
+
 private:
-    inline static volatile rep counter_;
+    using counter_type = Time_counter::counter_type;
+
+    inline static volatile counter_type nticks_;
+    inline static volatile counter_type nticks_of_1s_;
+    inline static volatile rep nseconds_;
+
+    static void reset();
 
 };
+
+
+template <typename M, typename TC>
+void Clock_s<M, TC>::reset()
+{
+    nseconds_ = 0;
+    nticks_   = 0;
+}
 
 template <typename M, typename TC>
 void Clock_s<M, TC>::turn_on()
 {
     Disable_interrupts lock{};
 
-    counter_ = 0;
-    Time_counter::turn_on_with_overflow_every_1s();
+    reset();
+
+    nticks_of_1s_ = Time_counter::turn_on_with_overflow_to_count_1s();
 
     // (???) aqui enable_interrupts o que lo defina el cliente 
     // Micro::enable_interrupts();
@@ -187,17 +225,31 @@ void Clock_s<M, TC>::turn_on()
 
 template <typename M, typename TC>
 inline void Clock_s<M, TC>::turn_off()
+{ Time_counter::turn_off(); }
+
+
+// (RRR) La hago inline por ser la función que se llama en la ISR
+template <typename M, typename TC>
+inline void Clock_s<M, TC>::tick() 
 {
-    Time_counter::turn_off();
+    nticks_ = nticks_ + 1;
+
+    if (nticks_ >= nticks_of_1s_){
+	nticks_ = 0;
+	nseconds_ = nseconds_ + 1;
+    }
 }
 
+template <typename M, typename TC>
+inline bool Clock_s<M, TC>::is_new_second()
+{ return nticks_ == 0; }
 
 template <typename M, typename TC>
 inline Clock_s<M, TC>::time_point Clock_s<M, TC>::now() noexcept
 {
     Disable_interrupts lock{};
 
-    return time_point{duration{counter_}};
+    return time_point{duration{nseconds_}};
 }
 
 template <typename M, typename TC>
@@ -211,7 +263,8 @@ template <typename M, typename TC>
 void Clock_s<M, TC>::set(const rep& nseconds)
 {
     Disable_interrupts lock{}; 
-    counter_ = static_cast<volatile rep>(nseconds);
+    nseconds_ = static_cast<volatile rep>(nseconds);
+    nticks_   = 0;
 }
 
 template <typename M, typename TC>
@@ -225,7 +278,7 @@ template <typename M, typename TC>
 Clock_s<M, TC>::Date_time Clock_s<M, TC>::as_date_time(const time_point& t)
 {
     Date_time dt;
-    dt.from_time_t(static_cast<std::time_t>(counter_));
+    dt.from_time_t(static_cast<std::time_t>(nseconds_));
 
     return dt;
 }
@@ -235,6 +288,8 @@ Clock_s<M, TC>::Date_time Clock_s<M, TC>::as_date_time(const time_point& t)
 /***************************************************************************
  *			    Clock_ms
  ***************************************************************************/
+// TODO: modificar esta clase de forma similar a Clock_s para que pueda
+// funcionar con Timer0 y Timer2 también. Ahora solo funciona con Timer1.
 template <typename Micro, typename Time_counter_g>
 class Clock_ms
 {

@@ -195,10 +195,10 @@ void test_bugs()
  // Aqui compruebo automaticamente si son realmente bugs de Time_counter o no
     mcu::UART_iostream uart;
 
-    Counter1::turn_on_with_overflow_every_1s();
+    Counter1::turn_on_with_overflow_to_count_1s();
 
 // CHECK_TRUE:
-    uart << "turn_on_with_overflow_every_1s ... ";
+    uart << "turn_on_with_overflow_to_count_1s ... ";
     if (OCR1AH == 0x3D and OCR1AL == 0x09)
 	uart << " OK\n";
 

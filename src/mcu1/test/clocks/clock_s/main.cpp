@@ -26,16 +26,18 @@
 namespace mcu = atmega;
 using Micro   = mcu::Micro;
 
+
 // Devices
 // -------
-using Clock = dev::Clock_s<Micro, mcu::Time_counter1_g>;
-
-
+using Clock0 = dev::Clock_s<Micro, mcu::Time_counter0_g>;
+using Clock1 = dev::Clock_s<Micro, mcu::Time_counter1_g>;
+using Clock2 = dev::Clock_s<Micro, mcu::Time_counter2_g>;
 
 
 // Functions
 // ---------
-std::ostream& operator<<(std::ostream& out, const Clock::Date_time& t)
+template <typename Date_time>
+std::ostream& operator<<(std::ostream& out, const Date_time& t)
 {
     
     atd::print(out, t.day(), nm::Width{2});
@@ -55,26 +57,28 @@ std::ostream& operator<<(std::ostream& out, const Clock::Date_time& t)
 }
 
 
+template <typename Clock>
 void run_test()
 {
     mcu::UART_iostream uart;
 
     for (uint8_t i = 0; i < 10; ++i){
 	if (!(i % 5))
-	    uart << "-------------------\n";
+	    uart << "-------------------\n\t";
 
 	uart << Clock::now_as_date_time() << '\n';
 	Micro::wait_ms(1000);
     }
 }
 
+template <typename Clock>
 void test_leap_year()
 {
     mcu::UART_iostream uart;
 
     uart << "\n\nTest leap year\n";
 
-    Clock::Date_time dt;
+    typename Clock::Date_time dt;
     dt.day(28);
     dt.month(2);
     dt.year(2000); // es bisiesto!!!
@@ -84,17 +88,17 @@ void test_leap_year()
 
     Clock::set(dt);
 
-    run_test();
+    run_test<Clock>();
 }
 
-
+template <typename Clock>
 void test_not_leap_year()
 {
     mcu::UART_iostream uart;
 
     uart << "\n\nTest not leap year\n";
 
-    Clock::Date_time dt;
+    typename Clock::Date_time dt;
     dt.day(28);
     dt.month(2);
     dt.year(2001); // no es bisiesto!!!
@@ -104,17 +108,18 @@ void test_not_leap_year()
 
     Clock::set(dt);
 
-    run_test();
+    run_test<Clock>();
 }
 
 
+template <typename Clock>
 void test_end_year()
 {
     mcu::UART_iostream uart;
 
     uart << "\n\nTest end year\n";
 
-    Clock::Date_time dt;
+    typename Clock::Date_time dt;
     dt.day(31);
     dt.month(12);
     dt.year(2022); // es bisiesto!!!
@@ -124,24 +129,11 @@ void test_end_year()
 
     Clock::set(dt);
 
-    run_test();
+    run_test<Clock>();
 
 }
 
-void test_clock()
-{
-    mcu::UART_iostream uart;
 
-    uart << "\n\nClock test\n"
-	        "----------\n";
-
-    while(1){
-	test_leap_year();
-	test_not_leap_year();
-	test_end_year();
-
-    }
-}
 
 
 void init_uart()
@@ -153,26 +145,62 @@ void init_uart()
 
 
 
-void init_timer()
+template <typename Clock>
+void test(const char* name)
 {
+    mcu::UART_iostream uart;
+    uart << "\n\n" << name << " test\n"
+		"----------\n";
     Clock::turn_on();
-    Micro::enable_interrupts();
+    test_leap_year<Clock>();
+    test_not_leap_year<Clock>();
+    test_end_year<Clock>();
+    Clock::turn_off();
 }
 
 
 int main()
 {
     init_uart();
-    init_timer();
+    Micro::enable_interrupts();
 
-    test_clock();
+    while(1){
+	test<Clock0>("Clock0");
+	test<Clock1>("Clock1");
+	test<Clock2>("Clock2");
+    }
+
 }
 
 
 
 // Interrupts
 // ----------
+ISR_TIMER0_COMPA
+{
+    Clock0::tick();
+    if (Clock0::is_new_second()){
+	mcu::UART_iostream uart;
+	uart << "tick0: ";
+    }
+}
+
 ISR_TIMER1_COMPA
 {
-    Clock::tick();
+    Clock1::tick();
+
+    if (Clock1::is_new_second()){
+	mcu::UART_iostream uart;
+	uart << "tick1: ";
+    }
 }
+
+ISR_TIMER2_COMPA
+{
+    Clock2::tick();
+    if (Clock2::is_new_second()){
+	mcu::UART_iostream uart;
+	uart << "tick2: ";
+    }
+}
+

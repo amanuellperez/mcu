@@ -34,7 +34,7 @@
  *    07/12/2022 dev::Generic_timer<Timer0> --> avr::Timer0_g
  *		 ¿Por qué lo había definido como template?
  *		 Lo que quiero definir es un timer que obedece al
- *		 concept "timer". No necesito usar templates para nada.
+ *		 concept "time r". No necesito usar templates para nada.
  *
  *		 square_wave_generate
  *    15/12/2022 Square_wave_generator0_g
@@ -270,21 +270,7 @@ public:
 
     /// Hay veces que puede ser interesante controlar cuándo el contador hace
     /// overflow. El único problema es que hay que definir la interrupción
-    /// ISR_TIMER0_OVF que depende del Timer0 y no es genérico.
-    // ¿Cómo independizarlo del avr este ISR_TIMER0_OVF? <-- En el dev.h
-    // al seleccionar el Generic_timer<Timer0> se puede definir
-    // ISR_GENERIC_TIMER_OVF = ISR_TIMER0_OVF.
-    //
-// DUDA: ¿por qué habilitar 2 tipos de interrupciones? No tiene sentido
-// Borrar este enable_max_top_interrupt en unos días (hoy 13/09/2023)
-    // Genera una interrupción cuando llega al max_top (hace overflow)
-    // Capturarla con ISR_TIMER0_OVF
-//    static void enable_max_top_interrupt()
-//    { Timer::enable_overflow_interrupt();}
-//
-//    static void disable_max_top_interrupt()
-//    { Timer::disable_overflow_interrupt();}
-
+    /// ISR_TIMER0_COMPA que depende del Timer0 y no es genérico.
     // Genera una interrupción cuando llega al top.
     // Capturarla con ISR_TIMER0_COMPA
     static void enable_top_interrupt()
@@ -320,6 +306,14 @@ public:
 	{timer0_::set_clock_period_in_us<period_in_us, clock_frequency_in_Hz>();}
     };
 
+    template <uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
+    static counter_type turn_on_with_overflow_to_count_1s();
+
+// TODO: escribirla cuando modifique Clock_ms
+//    template <uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
+//    static void turn_on_with_overflow_every_1ms();
+
+
     /// Apagamos el generador de señales.
     static void turn_off() { Timer::off(); }
 
@@ -343,6 +337,35 @@ public:
     static constexpr counter_type max_top()
     { return Timer::max(); }
 };
+
+
+
+// Turn on
+// -------
+// (RRR) Números mágicos:
+//	 Para 1 MHz: 125 * 125 * 64 us = 1.000.000 us = 1 s
+template <uint32_t clock_frequency_in_hz>
+Time_counter0_g::counter_type 
+Time_counter0_g::turn_on_with_overflow_to_count_1s()
+{
+// cfg_overflow_every_1s();
+    if constexpr (clock_frequency_in_hz == 1'000'000ul){
+	init(125);
+	Timer::clock_frequency_divide_by_64();
+
+	enable_top_interrupt();
+	return 125;
+    }
+
+    else
+        static_assert(atd::always_false_v<int>,
+                      "turn_on_with_overflow_to_count_1s: I'm lazy. I haven't implemented "
+                      "that frequency. Please implement it.");
+
+
+    return static_cast<counter_type>(-1); // Nunca debería de llegar aquí
+}
+
 
 
 /***************************************************************************

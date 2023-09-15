@@ -93,6 +93,8 @@ namespace atmega{
     using Time_counter1_g= avr_::Time_counter1_g;
     using Square_wave_generator1_g = avr_::Square_wave_generator1_g;
 
+    using Timer2         = avr_::Timer2;
+    using Time_counter2_g= avr_::Time_counter2_g;
 
 // PROTOCOLS
     using UART_basic = avr_::UART_basic;
