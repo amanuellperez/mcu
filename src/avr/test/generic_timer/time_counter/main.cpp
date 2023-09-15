@@ -190,6 +190,25 @@ Max_type choose_max_value(char timer, Max_type max)
     return max;
 }
 
+void test_bugs()
+{// Posibles bugs encontrados en otros programas.
+ // Aqui compruebo automaticamente si son realmente bugs de Time_counter o no
+    mcu::UART_iostream uart;
+
+    Counter1::turn_on_with_overflow_every_1s();
+
+// CHECK_TRUE:
+    uart << "turn_on_with_overflow_every_1s ... ";
+    if (OCR1AH == 0x3D and OCR1AL == 0x09)
+	uart << " OK\n";
+
+    else
+	uart << "ERROR!!!\n";
+
+//    mcu::print_registers_timer1(uart);
+    Counter1::turn_off();
+
+}
 
 
 int main()
@@ -200,6 +219,8 @@ int main()
     mcu::enable_interrupts();
 
     main_hello();
+
+    test_bugs();
 
     mcu::UART_iostream uart;
 

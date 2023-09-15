@@ -59,7 +59,7 @@ void Main::reset(Date_time& t)
 
 void Main::init_system_clock()
 {
-    System_clock::on();
+    System_clock::turn_on();
     Date_time t;
     reset(t);
     System_clock::set(t);

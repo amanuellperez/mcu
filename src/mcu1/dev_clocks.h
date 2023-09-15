@@ -145,10 +145,10 @@ public:
     // normal es que lo enciendas y no lo apagues, ahora me suena mejor on/off
     // (problema: apostamos a que en unos días me suena mejor otra cosa? @_@)
     /// on() enciende el reloj desde 0. Recordar ponerlo en hora con set()
-    static void on();
+    static void turn_on();
 
     /// Apaga el reloj reiniciar el contador.
-    static void off();
+    static void turn_off();
 
     /// Ponemos en hora el reloj, pasándo el número de segundos que marca el
     /// reloj.
@@ -174,7 +174,7 @@ private:
 };
 
 template <typename M, typename TC>
-void Clock_s<M, TC>::on()
+void Clock_s<M, TC>::turn_on()
 {
     Disable_interrupts lock{};
 
@@ -186,9 +186,9 @@ void Clock_s<M, TC>::on()
 }
 
 template <typename M, typename TC>
-inline void Clock_s<M, TC>::off()
+inline void Clock_s<M, TC>::turn_off()
 {
-    Time_counter::off();
+    Time_counter::turn_off();
 }
 
 
@@ -256,21 +256,21 @@ public:
     // normal es que lo enciendas y no lo apagues, ahora me suena mejor on/off
     // (problema: apostamos a que en unos días me suena mejor otra cosa? @_@)
     /// on() enciende el reloj desde 0. 
-    static void on();
+    static void turn_on();
 
     // Lo dicho: ahora me suena mejor `start`. Motivo? `on` suena a
     // `enciendete` pero no refleja el hecho de que empezamos desde '0',
     // mientras que `start` indica 'empieza', lo cual si da una idea de que
     // empezamos desde 0.
-    static void start() {on();}
+    static void start() {turn_on();}
 
     /// Enciende el reloj sin reinicializar el counter.
     static void resume();
 
     /// Apaga el reloj reiniciar el contador.
-    static void off();
+    static void turn_off();
 
-    static void stop() {off();}
+    static void stop() {turn_off();}
 
 
     // Todas las funciones set/reset no encienden/apagan el Clock_ms. Si
@@ -320,7 +320,7 @@ private:
 };
 
 template <typename M, typename TC>
-void Clock_ms<M, TC>::on()
+void Clock_ms<M, TC>::turn_on()
 {
     Disable_interrupts lock{};
 
@@ -341,7 +341,7 @@ inline void Clock_ms<M, TC>::resume()
 
 
 template <typename M, typename TC>
-inline void Clock_ms<M, TC>::off()
+inline void Clock_ms<M, TC>::turn_off()
 {
     Time_counter::turn_off();
 }

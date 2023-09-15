@@ -284,16 +284,6 @@ public:
     // al seleccionar el Time_counter1_g se puede definir
     // ISR_GENERIC_TIMER_OVF = ISR_TIMER1_OVF.
 
-// DUDA: ¿por qué habilitar 2 tipos de interrupciones? No tiene sentido
-// Borrar este enable_max_top_interrupt en unos días (hoy 13/09/2023)
-//    // Genera una interrupción al alcanzar el max_top (overflow).
-//    // Se captura con ISR_TIMER1_OVF
-//    static void enable_max_top_interrupt()
-//    { Timer::enable_overflow_interrupt();}
-//
-//    static void disable_max_top_interrupt()
-//    { Timer::disable_overflow_interrupt();}
-
 // DUDA:enable_top_interrupt() vs enable_interrupt()
 //      Me gusta más la segunda, a fin de cuentas es la única interrupción del
 //      dispositivo. Pero enable_top_interrupt() es más descriptiva, le

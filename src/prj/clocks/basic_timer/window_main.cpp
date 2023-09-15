@@ -68,12 +68,12 @@ void Main::window_state_stop()
 void Main::window_state_running()
 {
     if (keyboard_.key<OK_KEY>().is_pressed()){
-	Chronometer::off();
+	Chronometer::turn_off();
 	state_ = State::stop;
     }
 
     else if (Chronometer::now_as_duration() >= alarm_time) {
-	Chronometer::off();
+	Chronometer::turn_off();
 	state_ = State::alarm;
     }
 

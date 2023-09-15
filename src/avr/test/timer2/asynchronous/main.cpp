@@ -21,6 +21,8 @@
 #include "../../../avr_UART.h"
 #include "../../../avr_timer2_basic.h"
 #include "../../../avr_time.h"
+#include "../../../avr_debug.h"
+
 
 #include <atd_ostream.h>
 #include <stdlib.h>
@@ -52,32 +54,6 @@ void init_uart()
     uart.on();
 }
 
-void print_register(const char* name, uint8_t value)
-{
-    mcu::UART_iostream uart;
-    uart << '\t' << name << "\t= ";
-    atd::print_int_as_hex(uart, value);
-    uart << '\n';
-}
-
-void print_registers()
-{
-    mcu::UART_iostream uart;
-    uart << "\nRegisters values:\n";
-    print_register("TCCR2A", TCCR2A);
-    print_register("TCCR2B", TCCR2B);
-    print_register("TCNT2", TCNT2);
-    print_register("OCR2A", OCR2A);
-    print_register("OCR2B", OCR2B);
-    print_register("TIMSK2", TIMSK2);
-    print_register("TIFR2", TIFR2);
-    print_register("ASSR", ASSR);
-    print_register("GTCCR", GTCCR);
-
-//    uart << "\nPress a key to continue\n";
-//    char c{};
-//    uart >> c;
-}
 
 // Este es el protocolo a seguir para inicializar el timer en modo asíncrono
 // (ver punto "22.9 Asynchronous Operation of Timer/Counter2" de la datasheet)
@@ -123,7 +99,7 @@ int main()
 
 
     timer_init_asynchronous_mode();
-    print_registers();
+    mcu::print_registers_timer2(uart);
 
 // start:
     mcu::enable_interrupts();

@@ -61,7 +61,7 @@ void Main::window_running()
 //	Micro::wait_ms(100); // si se descomenta va mas despacio el lcd
     }
 
-    Chronometer::off();
+    Chronometer::turn_off();
     Micro::wait_ms(200);
 }
 

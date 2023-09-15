@@ -59,7 +59,7 @@ void Main::init_system_clock()
     reset(t);
     System_clock::set(t);
 
-    System_clock::on(); // on inicializa el counter a 0!!!
+    System_clock::turn_on(); // on inicializa el counter a 0!!!
     window_set_time();
 }
 

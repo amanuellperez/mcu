@@ -56,7 +56,7 @@ void test_clock()
 	        "----------\n"
 		"Starting in 2 seconds:\n";
 
-    Clock::on();
+    Clock::turn_on();
 
     Clock::set(std::chrono::seconds{2});
 
@@ -87,7 +87,7 @@ void init_uart()
 
 void init_timer()
 {
-    Clock::on();
+    Clock::turn_on();
     Micro::enable_interrupts();
 }
 

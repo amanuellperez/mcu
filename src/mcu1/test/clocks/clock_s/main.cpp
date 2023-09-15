@@ -21,18 +21,20 @@
 #include <avr_atmega.h>
 #include <atd_time.h>
 
+// Microcontroller
+// ---------------
 namespace mcu = atmega;
 using Micro   = mcu::Micro;
 
+// Devices
+// -------
 using Clock = dev::Clock_s<Micro, mcu::Time_counter1_g>;
 
-ISR_TIMER1_COMPA
-{
-    Clock::tick();
-}
 
 
 
+// Functions
+// ---------
 std::ostream& operator<<(std::ostream& out, const Clock::Date_time& t)
 {
     
@@ -52,9 +54,11 @@ std::ostream& operator<<(std::ostream& out, const Clock::Date_time& t)
     return out;
 }
 
+
 void run_test()
 {
     mcu::UART_iostream uart;
+
     for (uint8_t i = 0; i < 10; ++i){
 	if (!(i % 5))
 	    uart << "-------------------\n";
@@ -151,9 +155,8 @@ void init_uart()
 
 void init_timer()
 {
-    Clock::on();
+    Clock::turn_on();
     Micro::enable_interrupts();
-
 }
 
 
@@ -166,3 +169,10 @@ int main()
 }
 
 
+
+// Interrupts
+// ----------
+ISR_TIMER1_COMPA
+{
+    Clock::tick();
+}
