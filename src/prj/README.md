@@ -2,7 +2,7 @@ Some applications.
 
 ---
 
-Algunas aplicaciones.
+# Algunas aplicaciones.
 
 
 ## Principiantes
@@ -48,5 +48,51 @@ Algunas aplicaciones.
   SD-card (es un editor de bajo nivel de una SD-card)
 
 
+
+
+# Estructura de los programas
+
+El programa lo escriben dos personas: el hardwador, es quién sabe qué
+dispositivos reales se van a usar, y el softwador que conoce qué dispositivos
+ahi pero desconoce cuáles son.
+
+
+## Archivos que escribe el hardwador
+
+1. `prj_dev.h`
+
+   Este archivo contiene las referencias a dispositivos reales
+   que hay. Aquí es donde se encuentran cómo conectar el micro a los
+   dispositivos. Se definen aquí también los dispositivos lógicos (o
+   genéricos) que son los que usará el softwador.
+
+2. `prj_init.cpp`
+
+   Los dispositivos y el micro hay que inicializarlos. El hardwador sabe si
+   tiene que inicializar SPI, o llamar a `sleep_mode`, y cómo se inicializa
+   cada dispositivo, ya que cada dispositivo real tiene su propia forma de
+   inicializarse. 
+
+3. `prj_interrupts.cpp` (DUDA: ¿mejor `prj_isr.cpp`?)
+
+   En este fichero se definen todas las ISRs que necesite el programa.
+
+
+## Softwador
+
+El softwador escribe el resto. 
+
+
+
+## Esto es experimental
+
+Por supuesto, como esto es experimental puede que sean necesarios más o menos
+archivos o que esta forma de concebir los proyectos no sea correcta. 
+
+Y recordar que la programación está pensada por capas: si se necesita hacer
+cosas especiales o raras usar directamente los traductores que permiten usar
+al máximo las capacidades de los dispositivos. Los interfaces genéricos tienen
+la ventaja de ser más sencillos de manejar y ser intercambiables pero el pago
+a hacer es no tener acceso a todas las capacidades del dispositivo.
 
 
