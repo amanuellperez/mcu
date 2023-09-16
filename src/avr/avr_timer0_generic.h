@@ -256,6 +256,7 @@ public:
 // types
     using Timer        = avr_::Timer0;
     using counter_type = typename Timer::counter_type;
+    static constexpr counter_type minus_one = static_cast<counter_type>(-1); 
 
 /// De momento el interfaz es static. Prohibo su construcción.
     Time_counter0_g() = delete;
@@ -363,7 +364,7 @@ Time_counter0_g::turn_on_with_overflow_to_count_1s()
                       "that frequency. Please implement it.");
 
 
-    return static_cast<counter_type>(-1); // Nunca debería de llegar aquí
+    return minus_one; // Nunca debería de llegar aquí
 }
 
 

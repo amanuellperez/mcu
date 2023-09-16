@@ -161,7 +161,10 @@ public:
     // normal es que lo enciendas y no lo apagues, ahora me suena mejor on/off
     // (problema: apostamos a que en unos días me suena mejor otra cosa? @_@)
     /// on() enciende el reloj desde 0. Recordar ponerlo en hora con set()
-    static void turn_on();
+    //
+    // Devuelve true si se inicializa correctamente el reloj, y false en caso
+    // de que haya algún error.
+    static bool turn_on();
 
     /// Apaga el reloj reiniciar el contador.
     static void turn_off();
@@ -211,7 +214,7 @@ void Clock_s<M, TC>::reset()
 }
 
 template <typename M, typename TC>
-void Clock_s<M, TC>::turn_on()
+bool Clock_s<M, TC>::turn_on()
 {
     Disable_interrupts lock{};
 
@@ -221,6 +224,11 @@ void Clock_s<M, TC>::turn_on()
 
     // (???) aqui enable_interrupts o que lo defina el cliente 
     // Micro::enable_interrupts();
+
+    if (nticks_of_1s_ == Time_counter::minus_one)
+	return false;
+
+    return true;
 }
 
 template <typename M, typename TC>
@@ -448,196 +456,6 @@ inline void Clock_ms<M, TC>::set(const Time& t)
 }
 
 
-
-// >>> BORRAME
-///***************************************************************************
-// *			    CHRONOMETER_MS
-// ***************************************************************************/
-//
-///// El tiempo lo podemos medir en milisegundos o escribirlo como
-///// hh:mm::ss::ms.
-///// Ejemplo: 2h 3min 4s 25ms = 7384025 ms
-///// Esta clase es responsable de pasar de una representación a otra.
-////
-//// ¿Por qué devolver las horas? ¿Por qué no devolver también días?
-//// La resolución la marca el tipo usado para representar los milisegundos.
-//// Si usamos int32_t podemos representar hasta 2^31 - 1 ms = que vienen a ser
-//// unas 600 horas. 
-//// Si en lugar de int32_t se usara int64_t podríamos representar hastsa
-//// 2^63 - 1 ms = con lo que se podría representar años perfectamente.
-//// En principio la idea es hacer stopwatch y timers no necesitando en la
-//// práctica  medir hasta las horas (usar un int16_t no serviría ya que solo se
-//// podrían representar hasta 30 segundos, demasiado poco tiempo).
-//struct _Sexagesimal_ms{
-//    int16_t milliseconds; // 00-999
-//    int8_t seconds;// 00-59
-//    int8_t minutes;// 00-59
-//    int8_t hours;  // 00-23
-//
-//    _Sexagesimal_ms() {}
-//
-//    // conversión de ms a sexagesimal
-//    _Sexagesimal_ms(int32_t ms);
-//
-//    // conversión de sexagesimal a ms
-//    int32_t to_milliseconds() const;
-//
-//    // std usa count(). La suministro por si en el futuro lo generalizo y lo
-//    // podemos integrar con std::duration.
-//    int32_t count() const {return to_milliseconds();}
-//
-//};
-//
-//
-//
-//inline bool operator==(const _Sexagesimal_ms& a,
-//	               const _Sexagesimal_ms& b)
-//{
-//    return a.milliseconds == b.milliseconds
-//	and a.seconds == b.seconds
-//	and a.minutes == b.minutes
-//	and a.hours == b.hours;
-//}
-//
-//inline bool operator!=(const _Sexagesimal_ms& a,
-//	               const _Sexagesimal_ms& b)
-//{
-//    return !(a == b);
-//}
-//
-//
-//
-//
-//
-//
-//// Tenemos 3 periodos al manejar timers (aunque escribo frecuencia son
-//// periodos, suena mejor con frecuencia):
-////  1. T_clock = frecuencia con la que opera el reloj del avr.
-////  2. T_timer = frecuencia a la que opera el timer. Al timer le pasamos un
-////	         preescaler, un divisor 'd' que hace que T_timer = d*T_clock.
-////  3. T_interrupt = frecuencia a la que se genera la interrupción. 
-////               DUDA: T_int = top * T_timer ó T_int = (top + 1)*T_timer???
-//template <typename Time_counter, uint16_t timer_period_in_us>
-//constexpr inline typename Time_counter::counter_type __Chronometer_ms_top()
-//{
-//    constexpr uint32_t one_millisecond_in_us = 1000u;
-//    constexpr uint32_t top = one_millisecond_in_us/timer_period_in_us;
-//
-//    static_assert(top < Time_counter::max_top(),
-//                  "Top too great for this timer. Try another period or choose "
-//                  "a different F_CPU.");
-//    return atd::safe_static_cast<typename Time_counter::counter_type, uint32_t, top>();
-//}
-//
-//
-//// * Restricciones: solo un Chronometer_ms por aplicación (culpa de que usa static
-////   milliseconds_).
-//// * (RRR) Voy a implementarlo siguiendo el formato de los relojes de std.
-//// * tick_up = indica si cada tick incrementa o decrementa el contador.
-////	     Esto es, si el tiempo va hacia adelante o hacia atras.
-////
-//// * mejoras (???): parametrizarlo con la representación y el ratio, de esta
-////   forma se puede elegir que sea un chronometro que funcione en ms ó us.
-////   ¿Merece la pena hacerlo? En lugar de contar milisegundos lo que cuenta
-////   son ticks. Los ticks podrán ser ms o us.
-//template <typename Time_counter,   // = Generic_timer
-//	 uint16_t timer_period_in_us, 
-//	 bool tick_up = true // up or down?
-//	 > 
-//struct Chronometer_ms {
-//    using duration   = std::chrono::duration<int32_t, std::milli>;
-//    using rep        = duration::rep;
-//    using period     = duration::period;
-//    using time_point = std::chrono::time_point<Chronometer_ms, duration>;
-//
-//    // milliseconds in sexagesimal representation
-//    using Sexagesimal_ms = _Sexagesimal_ms;
-//
-//    // Para recordar que solo hay un Chronometer_ms por aplicación no permito
-//    // construir objetos. 
-//    Chronometer_ms() = delete;
-//
-//    /// init chronometer. Lo ponemos a 0.
-//    constexpr static void init()
-//    {
-//	Time_counter::
-//	    init(__Chronometer_ms_top<Time_counter, timer_period_in_us>());
-//
-//        reset();
-//    }
-//
-//    /// Enciende el cronometro. Recordar definir el tiempo antes.
-//    static void on()
-//    { Time_counter::template on<timer_period_in_us>(); }
-//
-//    /// Para el cronómetro sin borrar el tiempo actual.
-//    static void off() { Time_counter::off(); }
-//
-//
-//// Lectura
-//    // la incluyo para que sea similar a un clock std
-//    static time_point now() noexcept 
-//    {return time_point{duration{milliseconds_}};}
-//
-//    // en un chronometro parece más útil esta funcion que no now() (<-- la
-//    // elimino?) 
-//    static rep count() {return milliseconds_;}
-//    static Sexagesimal_ms sexagesimal_count() 
-//    { return Sexagesimal_ms{milliseconds_}; }
-//
-//
-//// Escritura
-//    static void reset() 
-//    { 
-//	milliseconds_ = 0; 
-//	Time_counter::reset();
-//    }
-//
-//    static void count(const Sexagesimal_ms& sexag)
-//    { milliseconds_ = sexag.count(); }
-//
-//
-//    // precondition: state == stop
-//    static void add(duration incr_t0) 
-//    {
-//	duration incr_t{incr_t0};
-//	// milliseconds_ += incr_t.count();
-//	milliseconds_ = milliseconds_ + incr_t.count();
-//    }
-// 
-//
-//    // precondition: state == stop
-//    static void substract(duration incr_t0) 
-//    {
-//	duration incr_t{incr_t0};
-//	if (milliseconds_ > incr_t.count())
-//	    // milliseconds_ -= incr_t.count();
-//	    milliseconds_ = milliseconds_ - incr_t.count();
-//	else 
-//	    milliseconds_ = 0;
-//    }
-//
-//
-//    /// Damos un tick al clock. Esta función se llamará desde la interrupción
-//    /// correspondiente.
-//    static void tick() 
-//    {
-//	if constexpr (tick_up)
-//	    //++milliseconds_;
-//	    milliseconds_ = milliseconds_ + 1;
-//	else
-//	    // --milliseconds_;
-//	    milliseconds_ = milliseconds_ - 1;
-//    }
-//
-//
-//private:
-//    // por culpa de que tiene que ser volatile no se puede definir como
-//    // duration (sus operators no son volatiles)
-//    inline static volatile rep milliseconds_;
-//
-//};
-// <<< BORRAME
 }// dev
 
 #endif

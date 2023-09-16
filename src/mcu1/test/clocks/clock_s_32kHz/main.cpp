@@ -160,7 +160,11 @@ int main()
 {
     init_uart();
     Micro::enable_interrupts();
-    Clock2::turn_on();
+
+    if (Clock2::turn_on() == false){
+	mcu::UART_iostream uart;
+	uart << "ERROR: Clock2::turn_on fail!!!\n";
+    }
 
     while(1){
 	test<Clock2>("Clock2");

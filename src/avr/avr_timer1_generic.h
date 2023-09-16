@@ -244,6 +244,7 @@ public:
     using Timer        = avr_::Timer1;
     using counter_type = typename Timer::counter_type;
     using Disable_interrupts = avr_::Disable_interrupts;
+    static constexpr counter_type minus_one = static_cast<counter_type>(-1); 
 
 // Initialization
 // --------------
@@ -424,7 +425,7 @@ Time_counter1_g::turn_on_with_overflow_to_count_1s()
                       "that frequency. Please implement it.");
 
 
-    return static_cast<counter_type>(-1); // Nunca debería de llegar aquí
+    return minus_one; // Nunca debería de llegar aquí
 }
 
 

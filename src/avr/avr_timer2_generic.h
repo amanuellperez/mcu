@@ -142,6 +142,8 @@ public:
 // -----
     using Timer        = avr_::Timer2;
     using counter_type = typename Timer::counter_type;
+    static constexpr counter_type minus_one = static_cast<counter_type>(-1); 
+
 
 // Constructor
 // -----------
@@ -240,7 +242,7 @@ Time_counter2_g::turn_on_with_overflow_to_count_1s()
                       "that frequency. Please implement it.");
 
 
-    return static_cast<counter_type>(-1); // Nunca debería de llegar aquí
+    return minus_one; // Nunca debería de llegar aquí
 }
 
 
@@ -282,6 +284,7 @@ public:
 // -----
     using Timer        = avr_::Timer2;
     using counter_type = typename Timer::counter_type;
+    static constexpr counter_type minus_one = static_cast<counter_type>(-1); 
 
 // Cfg
 // ---
@@ -373,7 +376,7 @@ Time_counter2_32kHz_g<mto>::
 	wait_ms(1);
 	--timeout_ms;
 	if (timeout_ms == 0)
-	    return static_cast<counter_type>(-1);
+	    return minus_one;
     }
 
     Timer::clear_pending_interrupts();
