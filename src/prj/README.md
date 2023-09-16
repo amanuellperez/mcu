@@ -54,7 +54,7 @@ Some applications.
 
 El programa lo escriben dos personas: el hardwador, es quién sabe qué
 dispositivos reales se van a usar, y el softwador que conoce qué dispositivos
-ahi pero desconoce cuáles son.
+hay pero desconoce cuáles son.
 
 
 ## Archivos que escribe el hardwador
@@ -110,7 +110,7 @@ El softwador escribe el resto.
    Contiene las cadenas que se van a guardar en la progmem. Observar que no es
    un `.h` ya que he creado un script que transforma ese fichero en el `.h`
    correspondiente. Para hacerlo basta con añadir la siguiente regla de
-   compilación:
+   compilación al `makefile`:
    ```
 	prj_strings.h: prj_strings.pgm
 		str2progmem prj_strings.pgm
@@ -136,8 +136,8 @@ El softwador escribe el resto.
 	PROGMEM{"El coche "};
    void print_msg0(std::ostream& out, const char* s)
    {
-	atd::print(out, msg0);
-	atd::print(out, s);
+        atd::print(out, msg0);
+        atd::print(out, s);
    }
 
    ```
@@ -149,9 +149,9 @@ El softwador escribe el resto.
    constexpr mcu::Progmem_string<4> msg0_1 PROGMEM{" car"};
    void print_msg0(std::ostream& out, const char* s)
    {
-	atd::print(out, msg0_0);
-	atd::print(out, s);
-	atd::print(out, msg0_1);
+        atd::print(out, msg0_0);
+        atd::print(out, s);
+        atd::print(out, msg0_1);
    }
 
    ```
