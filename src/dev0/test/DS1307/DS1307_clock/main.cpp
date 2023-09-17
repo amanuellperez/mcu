@@ -144,7 +144,7 @@ int main()
 // init_UART();
     mcu::UART_iostream uart;
     mcu::basic_cfg(uart);
-    uart.on();
+    uart.turn_on();
 
 // init_TWI();
     // 50 kHz es la unica frecuencia de TWI que va a 1MHz.

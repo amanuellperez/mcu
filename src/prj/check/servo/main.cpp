@@ -34,7 +34,7 @@ int main()
     // init_uart();
     avr::UART_iostream uart;
     avr::basic_cfg(uart);
-    uart.on();
+    uart.turn_on();
 
     // init_timer();
     Timer::top_ICR(20000UL); // 20000 us = 20 ms

@@ -37,7 +37,7 @@ void test_streambuf()
 { 
     avr_::UART_iostream uart;
     avr_::basic_cfg(uart);
-    uart.on();
+    uart.turn_on();
 
     uart << "\n---------------\n";
     uart << "Probando streambuf!\n";
@@ -120,7 +120,7 @@ void test_iostream()
 {
     avr_::UART_iostream uart;
     avr_::basic_cfg(uart);
-    uart.on();
+    uart.turn_on();
 
     uart << "\n----------\n";
     uart << "UART test!\n";

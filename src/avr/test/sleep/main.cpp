@@ -52,7 +52,7 @@ void init_uart()
 {
     mcu::UART_iostream uart;
     basic_cfg(uart);
-    uart.on();
+    uart.turn_on();
 
 }
 

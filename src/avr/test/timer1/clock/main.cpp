@@ -77,7 +77,7 @@ int main()
 {
     mcu::UART_iostream uart;
     mcu::basic_cfg(uart);
-    uart.on();
+    uart.turn_on();
 
     Timer::clock_frequency_divide_by_64();
     Timer::enable_output_compare_A_match_interrupt();

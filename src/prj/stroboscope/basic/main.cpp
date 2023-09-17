@@ -59,7 +59,7 @@ int main()
 // init_uart()
     atmega::UART_iostream uart;
     atmega::basic_cfg(uart);
-    uart.on();
+    uart.turn_on();
 
 // data
     uint16_t freq = 500;

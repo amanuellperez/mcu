@@ -89,7 +89,7 @@ int main()
 // init_uart():
     mcu::UART_iostream uart;
     mcu::basic_cfg(uart);
-    uart.on();
+    uart.turn_on();
 
     uart << "\n\nKeyrow test\n"
 	        "-------------\n";

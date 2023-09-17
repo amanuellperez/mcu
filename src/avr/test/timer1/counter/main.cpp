@@ -97,7 +97,7 @@ int main()
 // init_uart();
     mcu::UART_iostream uart;
     mcu::basic_cfg(uart);
-    uart.on();
+    uart.turn_on();
 
 // init_timer();
     Timer::normal_mode();

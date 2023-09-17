@@ -32,7 +32,7 @@ void test_cfg()
 {
     avr_::UART_iostream uart;
     avr_::basic_cfg(uart);
-    uart.on();
+    uart.turn_on();
 
     while(1){
 	uart << "\n---------------\n";

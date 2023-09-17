@@ -291,7 +291,7 @@ void init_uart()
 {
     mcu::UART_iostream uart;
     mcu::basic_cfg(uart);
-    uart.on();
+    uart.turn_on();
 }
 
 void init_timer(const Timer::counter_type& top, uint16_t period_in_us)

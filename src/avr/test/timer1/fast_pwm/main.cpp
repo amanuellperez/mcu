@@ -326,7 +326,7 @@ int main()
 // init_uart()
     avr_::UART_iostream uart;
     avr_::basic_cfg(uart);
-    uart.on();
+    uart.turn_on();
 
 // init_timer()
     Mode mode = Mode::top_ICR1;

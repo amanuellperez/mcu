@@ -52,7 +52,7 @@ int main()
 // uart_init();
     mcu::UART_iostream uart;
     mcu::basic_cfg(uart);
-    uart.on();
+    uart.turn_on();
 
 // menu
     uart << "\n--------\n"

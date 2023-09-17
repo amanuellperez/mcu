@@ -164,7 +164,7 @@ int main()
 {
     atmega::UART_iostream uart;
     atmega::basic_cfg(uart);
-    uart.on();
+    uart.turn_on();
 
     Counter::init();
 

@@ -430,7 +430,7 @@ void print_params(std::iostream& uart, Sensor& sensor)
 //// init_UART();
 //    mcu::UART_iostream uart;
 //    mcu::basic_cfg(uart);
-//    uart.on();
+//    uart.turn_on();
 //
 //    uart << "----------------------------------------\n"
 //	 << "BME280\n"
@@ -474,7 +474,7 @@ void test_basic()
 // init_UART();
     mcu::UART_iostream uart;
     mcu::basic_cfg(uart);
-    uart.on();
+    uart.turn_on();
 
     uart << "----------------------------------------\n"
 	 << "BME280 (test basico)\n"
@@ -517,7 +517,7 @@ void test_calib()
 // init_UART();
     mcu::UART_iostream uart;
     mcu::basic_cfg(uart);
-    uart.on();
+    uart.turn_on();
 
     uart << "----------------------------------------\n"
 	 << "BME280 (test calib)\n"
@@ -552,7 +552,7 @@ void test_config()
 // init_UART();
     mcu::UART_iostream uart;
     mcu::basic_cfg(uart);
-    uart.on();
+    uart.turn_on();
 
     uart << "----------------------------------------\n"
 	 << "BME280 (test config)\n"
@@ -610,7 +610,7 @@ void test_uncompensated()
 // init_UART();
     mcu::UART_iostream uart;
     mcu::basic_cfg(uart);
-    uart.on();
+    uart.turn_on();
 
     uart << "----------------------------------------\n"
 	 << "BME280 (test uncompensated)\n"
@@ -679,7 +679,7 @@ void test_t_p_h()
 // init_UART();
     mcu::UART_iostream uart;
     mcu::basic_cfg(uart);
-    uart.on();
+    uart.turn_on();
 
     uart << "----------------------------------------\n"
 	 << "BME280 (test T, P, H)\n"

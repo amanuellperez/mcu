@@ -287,7 +287,7 @@ int main()
 // init_UART();
     mcu::UART_iostream uart;
     mcu::basic_cfg(uart);
-    uart.on();
+    uart.turn_on();
 
     atd::print(uart, menu);
 

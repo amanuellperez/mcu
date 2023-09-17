@@ -248,7 +248,7 @@ int main()
 {
     atmega::UART_iostream uart;
     atmega::basic_cfg(uart);
-    uart.on();
+    uart.turn_on();
 
 test_eeprom_interactiva();
 //    test_eeprom_automatico();

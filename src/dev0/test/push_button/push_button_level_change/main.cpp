@@ -29,7 +29,7 @@ int main()
 // init_uart()
     atmega::UART_iostream uart;
     atmega::basic_cfg(uart);
-    uart.on();
+    uart.turn_on();
 
     dev::Push_button_level_change<23> push_button;
 

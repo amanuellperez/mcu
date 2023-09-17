@@ -418,7 +418,7 @@ int main()
 // init_uart()
     avr::UART_iostream uart;
     avr::basic_cfg(uart);
-    uart.on();
+    uart.turn_on();
 
     uart << "\n\nPWM generator\n"
                 "-------------\n";

@@ -242,7 +242,7 @@ int main()
 // init_uart()
     avr_::UART_iostream uart;
     avr_::basic_cfg(uart);
-    uart.on();
+    uart.turn_on();
 
 // init_timer()
     uint16_t period_in_us = 1;

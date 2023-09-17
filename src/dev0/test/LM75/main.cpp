@@ -38,7 +38,7 @@ int main()
 {
     avr::UART_iostream uart;
     avr::basic_cfg(uart);
-    uart.on();
+    uart.turn_on();
 
     uart << "\nPrueba del LM75\n";
     uart << "---------------\n";

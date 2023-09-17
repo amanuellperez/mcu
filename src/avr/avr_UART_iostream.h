@@ -49,10 +49,10 @@ public:
     { UART::asynchronous_mode(); } // es UART, no USART, siempre asincrono.
 
     // Enciende el UART. Antes de encenderlo recordar haberlo configurado.
-    static void on();
+    static void turn_on();
 
     // Enciende el UART. Antes de encenderlo recordar haberlo configurado.
-    static void off();
+    static void turn_off();
 
 private:
     enum class State{
@@ -243,7 +243,7 @@ private:
 };
 
 
-inline void UART_streambuf_unbuffered::on()	
+inline void UART_streambuf_unbuffered::turn_on()	
 {                                
     if (!UART::is_receiver_enable())
 	UART::enable_receiver();
@@ -252,7 +252,7 @@ inline void UART_streambuf_unbuffered::on()
 	UART::enable_transmitter();
 }
 
-inline void UART_streambuf_unbuffered::off()	
+inline void UART_streambuf_unbuffered::turn_off()	
 {                                
     if (UART::is_receiver_enable())
 	UART::disable_receiver();
@@ -270,9 +270,9 @@ public:
 
     /// Enciende el UART en caso de que estuviera apagado.
     /// Recordar haber configurado el UART antes de llamar a esta función.
-    void on() { sb_.on(); }
+    void turn_on() { sb_.turn_on(); }
 
-    void off() { sb_.off(); }
+    void turn_off() { sb_.turn_off(); }
 
 
 private:

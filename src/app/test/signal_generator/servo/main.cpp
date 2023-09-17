@@ -39,7 +39,7 @@ int main()
 // init_uart()
     avr::UART_iostream uart;
     avr::basic_cfg(uart);
-    uart.on();
+    uart.turn_on();
 
 // init_pwm()
     PWM::on<period_in_us>();

@@ -74,7 +74,7 @@ int main()
 // init_uart()
     avr::UART_iostream uart;
     avr::basic_cfg(uart);
-    uart.on();
+    uart.turn_on();
 
 // init_pins
     Pin::init(); // <-- al usar su interfaz static, hay

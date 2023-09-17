@@ -423,7 +423,7 @@ void test_bmp280()
 // init_UART();
     mcu::UART_iostream uart;
     mcu::basic_cfg(uart);
-    uart.on();
+    uart.turn_on();
 
     uart << "----------------------------------------\n"
 	 << "BMP280\n"

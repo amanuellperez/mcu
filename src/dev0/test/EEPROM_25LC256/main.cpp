@@ -113,7 +113,7 @@ void test_write(EEPROM& eeprom)
 void test_uint8_t() {
     atmega::UART_iostream uart;
     atmega::basic_cfg(uart);
-    uart.on();
+    uart.turn_on();
 
     atmega::SPI_master::clock_period_in_us<periodo_en_us>();
     atmega::SPI_master::on();

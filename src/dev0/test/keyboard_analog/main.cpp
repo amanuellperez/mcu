@@ -231,7 +231,7 @@ int main()
 // init_UART();
     avr::UART_iostream uart;
     avr::basic_cfg(uart);
-    uart.on();
+    uart.turn_on();
 
 // main.run();
     while (1) {
