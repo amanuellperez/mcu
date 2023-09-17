@@ -23,7 +23,7 @@
 //  termómetro logger)
 //
 #include "../../../avr_time.h"
-#include "../../../avr_UART_iostream.h"
+#include "../../../avr_UART.h"
 
 #include <atd_ostream.h>
 
@@ -45,7 +45,7 @@ static constexpr uint8_t read_byte_fail = 0x04; // EOT
 // ---------
 void init_uart()
 {
-    mcu::UART_iostream_basic_cfg();
+    mcu::UART_basic_cfg();
 
     UART::enable_receiver();
     UART::enable_transmitter();

@@ -85,7 +85,6 @@
 // TODO: mirar qué depende del micro realmente y qué se basa en un UART
 // genérico.
 #include <avr_UART.h>
-#include <avr_UART_baud_rate.h>
 #include <avr_UART_iostream.h>
 
 

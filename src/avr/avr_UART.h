@@ -21,10 +21,49 @@
 
 #ifndef __AVR_UART_H__
 #define __AVR_UART_H__
+/****************************************************************************
+ *
+ * DESCRIPCION
+ *	Driver del UART.
+ *
+ *	Recordar:
+ *	    1. avr_UART_basic.h
+ *	       Aquí escribimos el traductor `UART_basic` del UART. Se limita a
+ *	       traducir la datasheet. NO añade funcionalidad.
+ *
+ *	    2. avr_UART.h
+ *	       Este es el driver del UART. Se trata de una clase `UART`o
+ *	       funciones basadas en el traductor que simplifican su uso.
+ *
+ *	    3. avr_UART_iostream.h
+ *	       Concebimos el UART como un iostream. 
+ *
+ * HISTORIA
+ *    Manuel Perez
+ *    17/09/2023 Reestructurado
+ *
+ ****************************************************************************/
 
-#include "avr_UART_baud_rate.h"
 #include "avr_UART_basic.h"
-#include "avr_UART_iostream.h"
+#include "avr_cfg.h"	// MCU_CLOCK_FREQUENCY_IN_HZ
+
+namespace avr_{
+template <uint32_t baud_rate = 9600u,
+	  uint32_t f_clock   = MCU_CLOCK_FREQUENCY_IN_HZ,
+	  uint32_t tolerance = 2>
+void UART_basic_cfg()
+{                                
+    using UART = UART_basic;
+
+    UART::baud_speed<f_clock, baud_rate, tolerance>();
+
+    UART::parity_mode_disabled();
+
+    UART::one_stop_bit();
+    UART::character_size_8();
+}
+}// namespace
+ 
 
 
 #endif

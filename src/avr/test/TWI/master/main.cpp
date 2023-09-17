@@ -20,7 +20,7 @@
 // Este microcontrolador dialoga con el test/TWI/slave
 #include "../../../avr_atmega328p_cfg.h"
 #include "../../../avr_time.h"  // TODO: cambiar orden
-#include "../../../avr_UART.h" // TODO: cambiar orden
+#include "../../../avr_UART_iostream.h" // TODO: cambiar orden
 #include "../../../avr_TWI_basic.h"
 #include "../../../avr_TWI_master.h"
 

@@ -32,8 +32,7 @@
  *
  ****************************************************************************/
 
-#include "avr_UART_basic.h"
-#include "avr_cfg.h"	// MCU_CLOCK_FREQUENCY_IN_HZ
+#include "avr_UART.h"
 
 #include <iostream>
 #include <streambuf>
@@ -280,22 +279,6 @@ private:
 
 };
 
-template <uint32_t baud_rate = 9600u,
-	  uint32_t f_clock   = MCU_CLOCK_FREQUENCY_IN_HZ,
-	  uint32_t tolerance = 2>
-void UART_iostream_basic_cfg()
-{                                
-    using UART = UART_basic;
-
-    UART::baud_speed<f_clock, baud_rate, tolerance>();
-
-    UART::parity_mode_disabled();
-
-    UART::one_stop_bit();
-    UART::character_size_8();
-}
-
-
 
 // El parámetro lo usamos para sobrecargar: quiero que configures el flujo
 // con la configuración básica.
@@ -303,7 +286,9 @@ template <uint32_t baud_rate = 9600u,
 	  uint32_t f_clock   = MCU_CLOCK_FREQUENCY_IN_HZ,
 	  uint32_t tolerance = 2>
 inline void basic_cfg(UART_iostream&) 
-{ UART_iostream_basic_cfg<baud_rate, f_clock, tolerance>();}
+{ 
+    UART_basic_cfg<baud_rate, f_clock, tolerance>();
+}
 
 
 }// namespace

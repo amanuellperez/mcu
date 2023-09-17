@@ -83,15 +83,17 @@ namespace atmega{
 
 // TIMERS
     using Timer0         = avr_::Timer0;
-    using Timer0_g	 = avr_::Timer0_g;
+    using Timer0_g	 = avr_::Timer0_g; // TODO: borrar
     using Time_counter0_g= avr_::Time_counter0_g;
     using Square_wave_generator0_g = avr_::Square_wave_generator0_g;
     using Square_wave_burst_generator0_g = avr_::Square_wave_burst_generator0_g;
+    using SWG0           = avr_::Square_wave_generator0_g;
 
     using Timer1         = avr_::Timer1;
-    using Timer1_g	 = avr_::Timer1_g;
+    using Timer1_g	 = avr_::Timer1_g; // TODO: borrar
     using Time_counter1_g= avr_::Time_counter1_g;
     using Square_wave_generator1_g = avr_::Square_wave_generator1_g;
+    using SWG1           = avr_::Square_wave_generator1_g;
 
     using Timer2         = avr_::Timer2;
     using Time_counter2_g= avr_::Time_counter2_g;
@@ -100,7 +102,7 @@ namespace atmega{
     using Time_counter2_32kHz_g= avr_::Time_counter2_32kHz_g<timeout_ms_max>;
 
 // PROTOCOLS
-    using UART_basic = avr_::UART_basic;
+    using UART_basic    = avr_::UART_basic;
     using UART_iostream = avr_::UART_iostream;
 
     using SPI        = avr_::SPI_basic;
@@ -159,7 +161,7 @@ namespace atmega{
 	      uint32_t f_clock   = MCU_CLOCK_FREQUENCY_IN_HZ,
 	      uint32_t tolerance = 2>
     inline static void basic_cfg(avr_::UART_iostream&) 
-    { return avr_::UART_iostream_basic_cfg<baud_rate, f_clock, tolerance>(); }
+    { return avr_::UART_basic_cfg<baud_rate, f_clock, tolerance>(); }
 
 }// namespace
 
