@@ -38,8 +38,10 @@ void Main::run()
 			 // asyncrhono, Timer2)
 
     while (1) {
+	uart.flush(); // Fundamental hacer el flush antes del sleep
+		      // DUDA: Que el UART usado en este proyecto haga flush
+		      // automáticamente?
 	Micro::sleep();
-//	Micro::wait_ms(1);
 
 	print_time();
     }

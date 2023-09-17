@@ -1,6 +1,7 @@
 BIN = xx
 
-SOURCES= main.cpp
+SOURCES= main.cpp	\
+		 ../../avr_UART.cpp
 
 #ASM_SOURCES=../../avr_time.S	\
 			../../avr_square_wave.S

@@ -16,35 +16,21 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#pragma once
 
-#ifndef __AVR_DEBUG_H__
-#define __AVR_DEBUG_H__
-/****************************************************************************
- *
- * DESCRIPCION
- *	Funciones para depurar el avr. Este archivo no se distribuye.
- *
- * HISTORIA
- *    Manuel Perez
- *    14/09/2023 Escrito
- *
- ****************************************************************************/
-#include <ostream>
-
+#include "avr_UART.h"
 
 namespace avr_{
 
-// Impresión de los registros del avr
-// ----------------------------------
-void print_registers_uart(std::ostream& out);
+void UART_flush()
+{
+    while (!UART_basic::is_transmit_complete())
+    {;}
 
-void print_registers_timer0(std::ostream& out);
-void print_registers_timer1(std::ostream& out);
-void print_registers_timer2(std::ostream& out);
-
+    // Datasheet: The TXC0 Flag bit is automatically cleared
+    // when a transmit complete interrupt is executed, 
+    // or it can be cleared by writing a one to its bit location.
+    
+    atd::write_bit<TXC0>::to<1>::in(UCSR0A);
+}
 
 }// namespace
-
- 
-#endif

@@ -90,7 +90,11 @@ private:
     //
     // Returns: -1 on failure (cada clase derivada determinará qué considera
     // fallo).
-    virtual int sync() override { return 0; }
+    virtual int sync() override 
+    { 
+	UART_flush();
+	return 0; 
+    }
     
     // Get area
     // --------
@@ -210,7 +214,7 @@ private:
 	// responda esta función. 
 	// La implementación de esta función será:
 	//  uint16_t timeout = 0;
-	//  while (!UART::is_ready_to_transmit()){
+	//  while (!UART::is_transmit_complete()){
 	//	++timeout;
 	//	if (timeout >= max_timeout_ms){
 	//	    state = Statetime_out;
@@ -220,7 +224,8 @@ private:
 	//
 	//  De esta forma evitamos bloquear el programa en caso de que falle
 	//  UART.
-	while(!UART::is_ready_to_transmit()) // wait_mientras_esta_transmitiendo();
+	//while(!UART::is_ready_to_transmit()) // wait_mientras_esta_transmitiendo();
+	while(!UART::is_data_register_empty()) 
 	    ;   
 
 	UART::data_register(c);

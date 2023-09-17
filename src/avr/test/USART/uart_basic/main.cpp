@@ -16,12 +16,6 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-//  Este programa dialoga con el programa test_cliente04.cpp
-//
-//  Enviamos un fichero desde el AVR al pc (es el paso previo para hacer un
-//  termómetro logger)
-//
 #include "../../../avr_time.h"
 #include "../../../avr_UART.h"
 
@@ -54,7 +48,7 @@ void init_uart()
 // Devuelve el número de caracteres escritos.
 uint8_t write(char c, uint16_t timeout = max_timeout_ms)
 {
-    while (!UART::is_ready_to_transmit())
+    while (!UART::is_data_register_empty())
     { 
 	if (timeout == 0)
 	    return 0;

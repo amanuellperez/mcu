@@ -82,12 +82,13 @@ public:
 
     /// Devuelve true si se ha enviado todo el frame
     static bool is_transmit_complete()
-    {return atd::is_one_bit<TXC0>::of(UCSR0A);}
+    {return (atd::is_one_bit<TXC0>::of(UCSR0A) == 1);}
 
-    /// Devuelve true si el UART está ocupado transmitiendo.
-    /// Para poder transmitir algo hay que esperar a que deje de transmitir.
-    static bool is_ready_to_transmit()
+
+    /// If is one the data register can be written
+    static bool is_data_register_empty()
     {return atd::is_one_bit<UDRE0>::of(UCSR0A);}
+
     
 
     // ------------------

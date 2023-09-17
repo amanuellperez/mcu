@@ -21,15 +21,7 @@
 
 void Main::print_time()
 {
-//    print_datetime(uart, Clock::now_as_date_time());
-    uart << "NUEVO\n";
-    for (int i = 1; i < 40; ++i)
-	uart << i << ';';
-
-    uart << "FIN\n";
-    while(!mcu::UART_basic::is_ready_to_transmit()) 
-	    ;   
-//    uart << "por que no imprime el segundo retorno de carro?\n";
-    Micro::wait_ms(1);
+    print_datetime(uart, Clock::now_as_date_time());
+    uart << '\n';
 }
 

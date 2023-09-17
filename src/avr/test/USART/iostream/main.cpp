@@ -58,16 +58,16 @@ void test_streambuf()
 template <typename Int>
 void test_int(avr_::UART_iostream& uart, const char* tipo)
 {
-    uart << "\n\nLectura de un " << tipo << "\n";
-    uart << "----------------------\n";
+    uart << "\n\nReading of a " << tipo << "\n";
+    uart << "------------------\n";
     while(uart){
-	uart << "Escribe un número menor de ";
+	uart << "Write a number between ";
 	if (std::numeric_limits<Int>::min() == 0)
 	    uart << '0';
 	else
 	    uart << std::numeric_limits<Int>::min() + Int{1};
 
-	uart << " a " << std::numeric_limits<Int>::max() << " (o enter para fin): ";
+	uart << " and " << std::numeric_limits<Int>::max() << " (o enter to cancel): ";
 
 	Int r32;
 	uart >> r32;
@@ -79,8 +79,8 @@ void test_int(avr_::UART_iostream& uart, const char* tipo)
 	    // hay que leerlo antes que escribir.
 	    char c;
 	    uart.get(c);
-	    uart << "\nHas escrito el número: [" << r32 << "]\n";
-	    uart << "\nUltimo caracter escrito [" << c << "]\n";
+	    uart << "\nYou have written : [" << r32 << "]\n";
+	    uart << "\nLast character written [" << c << "]\n";
 	}
 
     }

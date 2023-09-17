@@ -1,5 +1,6 @@
 DIRS = counter \
-	   asynchronous
+	   asynchronous	\
+	   uart_sleep
 
 
 include $(MCU_RECRULES)

@@ -18,6 +18,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "avr_debug.h"
+#include <atd_ostream.h>    // print_int_as_hex
+#include <avr/io.h> // registros: DDRB... PORT...
 
 namespace avr_{
 
@@ -88,6 +90,18 @@ void print_registers_timer2(std::ostream& out)
 
     print_register(out, "GTCCR", GTCCR);
 
+}
+
+void print_registers_uart(std::ostream& out)
+{
+    print_register(out, "UDR0  ", UDR0);
+
+    print_register(out, "UCSR0A", UCSR0A);
+    print_register(out, "UCSR0B", UCSR0B);
+    print_register(out, "UCSR0C", UCSR0C);
+
+    print_register(out, "UBRR0H", UBRR0H);
+    print_register(out, "UBRR0L", UBRR0L);
 }
 
 
