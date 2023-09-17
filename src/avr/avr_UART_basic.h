@@ -44,8 +44,6 @@ namespace avr_{
 /*!
  *  \brief  Traductor del UART del avr.
  *
- *  Siempre que se quiera usar, llamar a UART::on().
- *
  *  Clase traductora del interfaz que suministra el UART del avr. Para
  *  escribirla basta con ir leyendo la datasheet e ir dandole un nombre a cada
  *  función.
@@ -54,12 +52,6 @@ namespace avr_{
  *  hay un UART todas las funciones son static. No quiero que el usuario 
  *  pueda crear 2 UARTs pensando que está creando 2 UART. El avr solo tiene 1
  *  uart. 
- *
- *  Para facilitar el uso luego suministro un flujo:
- *	    
- *		UART::on();	// idioma: todo dispositivo hay que encenderlo
- *		auto usart = UART::as_a_stream();
- *		usart << "frecuencia = [" << f << "]\n";
  *
  */
 class UART_basic{

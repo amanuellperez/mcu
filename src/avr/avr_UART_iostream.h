@@ -46,7 +46,7 @@ public:
     using UART = UART_basic;
 
     UART_streambuf_unbuffered() : state_{State::consumido} 
-    { UART::asynchronous_mode(); } // es UART, no UART, siempre asincrono.
+    { UART::asynchronous_mode(); } // es UART, no USART, siempre asincrono.
 
     // Enciende el UART. Antes de encenderlo recordar haberlo configurado.
     static void on();
@@ -203,7 +203,24 @@ private:
 
     void put_unguarded(char_type c)
     {
-	// TODO: aqui se puede poner un contador y esperar un tiempo máximo.
+	// TODO: aqui se puede poner un contador y esperar un tiempo máximo?
+	// TODO: Sí que se puede hacer. Una forma es parametrizar con el
+	// max_timeout_ms a esperar. De esa forma el hardwador definirá algo
+	// del tipo: `using UART_iostream = mcu::UART_iostream<1000>;` siendo
+	// el `1000` los milisegundos que se quiere máximo esperar a que
+	// responda esta función. 
+	// La implementación de esta función será:
+	//  uint16_t timeout = 0;
+	//  while (!UART::is_ready_to_transmit()){
+	//	++timeout;
+	//	if (timeout >= max_timeout_ms){
+	//	    state = Statetime_out;
+	//	    return;
+	//	}
+	//  }
+	//
+	//  De esta forma evitamos bloquear el programa en caso de que falle
+	//  UART.
 	while(!UART::is_ready_to_transmit()) // wait_mientras_esta_transmitiendo();
 	    ;   
 
@@ -280,7 +297,6 @@ void UART_iostream_basic_cfg()
 
 
 
-// TODO: borrar esta función. No se usa.
 // El parámetro lo usamos para sobrecargar: quiero que configures el flujo
 // con la configuración básica.
 template <uint32_t baud_rate = 9600u,

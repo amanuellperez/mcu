@@ -19,10 +19,28 @@
 
 #include "prj_main.h"
 
+
+void Main::main_hello()
+{
+    uart << "\n\nBasic RTC\n"
+	        "---------\n"
+		"Remember to connect external crystal of 32 kHz\n\n";
+
+    Micro::wait_ms(10); // para que haga el flush del hello
+}
+
 void Main::run()
 {
+    main_hello();
+
+    Micro::wait_ms(500); // Según la datasheet se necesita 1 segundo para que 
+			 // el cristal de 32kHz se estabilice. (ver modo
+			 // asyncrhono, Timer2)
+
     while (1) {
 	Micro::sleep();
+//	Micro::wait_ms(1);
+
 	print_time();
     }
 }

@@ -51,6 +51,7 @@ private:
     void init_uart();
 
 // Main menu
+    void main_hello();
     char main_menu();
 
 // User commands
