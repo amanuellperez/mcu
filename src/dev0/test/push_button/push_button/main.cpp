@@ -30,30 +30,121 @@ using Micro = mcu::Micro;
 // ---------------
 static constexpr uint8_t led_pin    = 13;
 static constexpr uint8_t button_pin = 14;
-
+#define ISR_BUTTON ISR_PCINT_PIN14
 
 // Devices
 // -------
 using LED    = dev::LED<Micro, led_pin>;
 using Button = dev::Push_button<Micro, button_pin>;
 
+// Global vbles
+// ------------
+// Terminal
+mcu::UART_iostream uart;
+
+// Functions
+// ---------
+void init_uart()
+{
+    mcu::basic_cfg(uart);
+    uart.turn_on();
+}
+
+void main_hello()
+{
+    uart << "\n\nPush button test\n"
+	        "----------------\n"
+		"Connect a push button in pin " << (int) button_pin 
+		<< " and a LED in pin " << (int) led_pin << "\n\n";
+
+}
+
+void normal_test()
+{
+    uart << "\nNormal test\n"
+	    "-----------\n"
+	    "When the button is pressed the LED turns on\n"
+	    "and when it is released the LED turns off.\n"
+	    "Press a key to end test.\n";
+
+    while (1){
+	if (Button::is_pressed())
+	    LED::turn_on();
+	else 
+	    LED::turn_off();
+
+	if (uart.is_there_something_to_read()){
+	    char c{}; // uart.empty_buffer()???
+	    uart >> c;
+	    return; 
+	}
+	Micro::wait_ms(100);
+    }
+}
+
+void test_interrupts()
+{
+    while(1){
+	uart << "\nTest interrupts\n"
+	        "---------------\n"
+		"1. Enable interrupts\n"
+		"2. Disable interrupts\n"
+		"3. Return main menu\n";
+
+	char opt{};
+	uart >> opt;
+	switch (opt){
+	    break; case '1': Button::enable_change_level_interrupt();
+			    uart << "Interrupts enabled.\n"
+				    "When you press the button the LED "
+				    "has to change state.\n\n";
+
+	    break; case '2': Button::disable_change_level_interrupt();
+			    LED::turn_off();
+			    uart << "Interrupts disabled."
+				    "If you press now the button nothing "
+				    "happens.\n\n";
+	    break; case '3': return;
+	    break; default: uart << "Unknown option.\n";
+	}
+    }
+}
+
+void init()
+{
+    init_uart();
+    Button::init();
+    LED::init();
+    Micro::enable_interrupts();
+}
 
 // Main
 // ----
 int main()
 {
-    LED led;
-    Button button;
+    init();
+
+    main_hello();
 
     while(1){
-	if (button.is_pressed())
-	    led.on();
-	else 
-	    led.off();
+	uart << "\nMenu\n"
+	        "----\n"
+		"1. Normal test\n"
+		"2. Test interrupts\n";
 
-	Micro::wait_ms(100);
+	char opt{};
+	uart >> opt;
+	switch(opt){
+	    break; case '1': normal_test();
+	    break; case '2': test_interrupts();
+	    break; default: uart << "Unknown option\n";
+	}
+
     }
 }
 
 
-
+ISR_BUTTON{
+    uart << "Interrupt\n";
+    LED::toggle();
+}

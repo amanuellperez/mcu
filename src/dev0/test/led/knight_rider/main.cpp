@@ -47,27 +47,27 @@ using LED0 = dev::LED<Micro, 9>;
 struct LEDS{
     void on(uint8_t i){
 	switch(i){
-	    case 0: led0.on(); break;
-	    case 1: led1.on(); break;
-	    case 2: led2.on(); break;
-	    case 3: led3.on(); break;
-	    case 4: led4.on(); break;
-	    case 5: led5.on(); break;
-	    case 6: led6.on(); break;
-	    case 7: led7.on(); break;
+	    case 0: led0.turn_on(); break;
+	    case 1: led1.turn_on(); break;
+	    case 2: led2.turn_on(); break;
+	    case 3: led3.turn_on(); break;
+	    case 4: led4.turn_on(); break;
+	    case 5: led5.turn_on(); break;
+	    case 6: led6.turn_on(); break;
+	    case 7: led7.turn_on(); break;
 	}
     }
 
     void off(uint8_t i){
 	switch(i){
-	    case 0: led0.off(); break;
-	    case 1: led1.off(); break;
-	    case 2: led2.off(); break;
-	    case 3: led3.off(); break;
-	    case 4: led4.off(); break;
-	    case 5: led5.off(); break;
-	    case 6: led6.off(); break;
-	    case 7: led7.off(); break;
+	    case 0: led0.turn_off(); break;
+	    case 1: led1.turn_off(); break;
+	    case 2: led2.turn_off(); break;
+	    case 3: led3.turn_off(); break;
+	    case 4: led4.turn_off(); break;
+	    case 5: led5.turn_off(); break;
+	    case 6: led6.turn_off(); break;
+	    case 7: led7.turn_off(); break;
 	}
     }
 

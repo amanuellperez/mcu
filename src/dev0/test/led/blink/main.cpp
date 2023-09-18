@@ -44,10 +44,10 @@ int main()
     uint16_t time = 500; // probar con 10: ¡no parpadea!!!
 
     while(1){
-	led.on();
+	led.turn_on();
 	Micro::wait_ms(time);
 
-	led.off();
+	led.turn_off();
 	Micro::wait_ms(time);
     }
 }

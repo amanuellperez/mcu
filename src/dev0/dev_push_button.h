@@ -30,6 +30,7 @@
  *    24/07/2017 Push_button v0.0
  *    19/02/2021 Push_button_level_change v0.0
  *    18/09/2023 Eliminando dependencias de avr. 
+ *               enable/disable_change_level_interrupt
  *
  ****************************************************************************/
 #include <stdint.h>
@@ -97,6 +98,14 @@ public:
     static constexpr void wait_until_is_pressed()
     { while(!is_pressed()) ; }
 
+// Interrupts
+// ----------
+// Recordar definir la ISR correspondiente!!!
+    static void enable_change_level_interrupt()
+    { Pin::enable_change_level_interrupt(); }
+
+    static void disable_change_level_interrupt()
+    { Pin::disable_change_level_interrupt(); }
 };
 
 
@@ -137,6 +146,15 @@ public:
     /// ¿no está pulsado?
     static constexpr bool is_not_pressed()
     {return !is_pressed();}
+
+// Interrupts
+// ----------
+// Recordar definir la ISR correspondiente!!!
+    static void enable_change_level_interrupt()
+    { Pin::enable_change_level_interrupt(); }
+
+    static void disable_change_level_interrupt()
+    { Pin::disable_change_level_interrupt(); }
 
 private:
     inline static bool look_ = true;

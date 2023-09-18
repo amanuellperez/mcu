@@ -46,13 +46,18 @@ class LED{
 public:
     using Pin = typename Micro::Pin<n>;
 
-    LED() {Pin::as_output(); }
+    LED() {init();}
+
+    static void init() {Pin::as_output();}
 
     /// Encendemos el led
-    static void on() {Pin::write_one();}
+    static void turn_on() {Pin::write_one();}
 
     /// Apagamos el led
-    static void off() {Pin::write_zero();}
+    static void turn_off() {Pin::write_zero();}
+
+    /// Si está encendido lo apaga, y si está apagado lo enciende.
+    static void toggle() {Pin::toggle();}
 };
 
 
