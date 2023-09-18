@@ -29,6 +29,7 @@
  *    Manuel Perez
  *	07/10/2019 v0.0
  *	25/10/2019 '\n' --> se transforma en "\r\n". Es mucho más cómodo.
+ *	18/09/2023 is_there_something_to_read
  *
  ****************************************************************************/
 
@@ -40,6 +41,9 @@
 
 namespace avr_{
 
+/***************************************************************************
+ *			UART_streambuf_unbuffered
+ ***************************************************************************/
 class UART_streambuf_unbuffered : public std::streambuf {
 public:
     using UART = UART_basic;
@@ -54,6 +58,8 @@ public:
     static void turn_off();
 
 private:
+    // TODO: ¿cómo traducir esto al inglés? consumed, not_consumed?
+    // Me suena raro.
     enum class State{
 	consumido,   // la ultima operación fue o de escritura o de lectura
 		    // consumiendo el caracter.
@@ -106,23 +112,7 @@ private:
     // Reads max N characters from the input sequence and stores them into s.
     // The characters are read as if by repeated call of sbumpc.
     // Returns: the number of characters assigned to s.
-    virtual std::streamsize xsgetn(char_type* s, std::streamsize N) override
-    {
-	std::streamsize i = 0;
-	for (; i < N; ++i){
-	    int_type d = receive_byte();
-
-	    if (!is_eof(d))
-		s[i] = traits_type::to_char_type(d);
-
-	    else
-		return i;
-	}
-
-	state_ = State::consumido;
-
-	return i;
-    }
+    virtual std::streamsize xsgetn(char_type* s, std::streamsize N) override;
 
 
     // Ensures that at least one character is avaible in the input area by
@@ -130,27 +120,12 @@ private:
     // the input sequence. Returns the value of that character on success or
     // traits_type::eof() on failure.
     // (Esta función no consume el caracter)
-    virtual int_type underflow() override
-    {
-	if (state_ == State::consumido)
-	    buf_ = receive_byte();
-
-	state_ = State::no_consumido;    
-	return buf_;
-    }
+    virtual int_type underflow() override;
 
 
     // Idéntica a underflow salvo que esta función avanza un caracter el valor
     // de gptr() (consume un caracter).
-    virtual int_type uflow() override
-    {
-	if (state_ == State::consumido)
-	    buf_ = receive_byte();
-
-	state_ = State::consumido;
-
-	return buf_;
-    }
+    virtual int_type uflow() override;
 
 
     // Putback
@@ -180,69 +155,15 @@ private:
     // Writes up to n characters to the output sequence as if by repeated
     // calls to sputc(c).
     // Returns: the number of characters written.
-    virtual std::streamsize xsputn(const char_type* s, std::streamsize n) override
-    { 
-	state_ = State::consumido;
-
-	for (int i = 0; i < n; ++i)
-	    put(s[i]);
-
-	return n;
-    }
+    virtual std::streamsize xsputn(const char_type* s, std::streamsize n) override;
 
 
-    // Funciones ayuda
-    // ---------------
-    void put(char_type c)
-    {
-	if (c == '\r')
-	    return;
+// Helper functions
+// ----------------
+    void put(char_type c);
+    void put_unguarded(char_type c);
 
-	if (c == '\n')	// retorno de carro = \n\r
-	    put_unguarded('\r');
-
-	put_unguarded(c);
-    }
-
-    void put_unguarded(char_type c)
-    {
-	// TODO: aqui se puede poner un contador y esperar un tiempo máximo?
-	// TODO: Sí que se puede hacer. Una forma es parametrizar con el
-	// max_timeout_ms a esperar. De esa forma el hardwador definirá algo
-	// del tipo: `using UART_iostream = mcu::UART_iostream<1000>;` siendo
-	// el `1000` los milisegundos que se quiere máximo esperar a que
-	// responda esta función. 
-	// La implementación de esta función será:
-	//  uint16_t timeout = 0;
-	//  while (!UART::is_transmit_complete()){
-	//	++timeout;
-	//	if (timeout >= max_timeout_ms){
-	//	    state = Statetime_out;
-	//	    return;
-	//	}
-	//  }
-	//
-	//  De esta forma evitamos bloquear el programa en caso de que falle
-	//  UART.
-	//while(!UART::is_ready_to_transmit()) // wait_mientras_esta_transmitiendo();
-	while(!UART::is_data_register_empty()) 
-	    ;   
-
-	UART::data_register(c);
-    }
-
-    int_type receive_byte()
-    {
-	while(!UART::are_there_data_unread()) 
-	    ; 
-
-	int_type d = static_cast<char_type>(UART::data_register());
-
-	if (static_cast<char_type>(d) == atd::ASCII::EOT)
-	    return traits_type::eof();
-
-	return d;
-    }
+    int_type receive_byte();
 
 };
 
@@ -266,7 +187,133 @@ inline void UART_streambuf_unbuffered::turn_off()
 }
 
 
+// (RRR) ¿por qué `inline` todas estas funciones?
+//	 1. Al principio como esto era un experimento las deje dentro de la
+//	    clase (por pereza, por no tener que escribir el .cpp)
+//       2. Acabo de llevarlas a un .cpp esperando que el programa 
+//          test/UART/iostream disminuyera en tamaño y en vez de disminuir a
+//          aumentado!!! Ha pasado el .text de 12024 a 12052, así que la
+//          primera impresión es que no sirve para mucho el .cpp en este caso
+//          (salvo por supuesto, modularidad)
+//       3. Mi intención es generalizar esta clase y pasarle como parámetro de
+//          template el dispositivo real al que se conecta, en cuyo caso hay
+//          que escribir todo el código aquí en el .h. Si lo muevo ahora a un
+//          .cpp me toca cambiar todos los makefiles, y cuando lo generalice
+//          lo volveré a mover a un .h teniendo que cambiarlo de nuevo todo.
+//      Por estos motivos implemento estas funciones en el .h y no en el .cpp
+//      (teniendo que ser inline)
+inline 
+std::streamsize UART_streambuf_unbuffered::xsgetn(char_type* s, std::streamsize N) 
+{
+    std::streamsize i = 0;
+    for (; i < N; ++i){
+	int_type d = receive_byte();
 
+	if (!is_eof(d))
+	    s[i] = traits_type::to_char_type(d);
+
+	else
+	    return i;
+    }
+
+    state_ = State::consumido;
+
+    return i;
+}
+
+inline 
+std::streambuf::int_type UART_streambuf_unbuffered::underflow() 
+{
+    if (state_ == State::consumido)
+	buf_ = receive_byte();
+
+    state_ = State::no_consumido;    
+    return buf_;
+}
+
+inline 
+std::streambuf::int_type UART_streambuf_unbuffered::uflow()
+{
+    if (state_ == State::consumido)
+	buf_ = receive_byte();
+
+    state_ = State::consumido;
+
+    return buf_;
+}
+
+
+inline
+std::streamsize UART_streambuf_unbuffered::xsputn(const char_type* s, std::streamsize n)
+{ 
+    state_ = State::consumido;
+
+    for (int i = 0; i < n; ++i)
+	put(s[i]);
+
+    return n;
+}
+
+
+inline
+void UART_streambuf_unbuffered::put(char_type c)
+{
+    if (c == '\r')
+	return;
+
+    if (c == '\n')	// retorno de carro = \n\r
+	put_unguarded('\r');
+
+    put_unguarded(c);
+}
+
+
+inline 
+void UART_streambuf_unbuffered::put_unguarded(char_type c)
+{
+    // TODO: aqui se puede poner un contador y esperar un tiempo máximo?
+    // TODO: Sí que se puede hacer. Una forma es parametrizar con el
+    // max_timeout_ms a esperar. De esa forma el hardwador definirá algo
+    // del tipo: `using UART_streambuf_unbuffered = mcu::UART_streambuf_unbuffered<1000>;` siendo
+    // el `1000` los milisegundos que se quiere máximo esperar a que
+    // responda esta función. 
+    // La implementación de esta función será:
+    //  uint16_t timeout = 0;
+    //  while (!UART::is_transmit_complete()){
+    //	++timeout;
+    //	if (timeout >= max_timeout_ms){
+    //	    state = Statetime_out;
+    //	    return;
+    //	}
+    //  }
+    //
+    //  De esta forma evitamos bloquear el programa en caso de que falle
+    //  UART.
+    //while(!UART::is_ready_to_transmit()) // wait_mientras_esta_transmitiendo();
+    while(!UART::is_data_register_empty()) 
+	;   
+
+    UART::data_register(c);
+}
+
+inline 
+std::streambuf::int_type UART_streambuf_unbuffered::receive_byte()
+{
+    while(!UART::are_there_data_unread()) 
+	; 
+
+    int_type d = static_cast<char_type>(UART::data_register());
+
+    if (static_cast<char_type>(d) == atd::ASCII::EOT)
+	return traits_type::eof();
+
+    return d;
+}
+
+
+/***************************************************************************
+ *			    UART_iostream
+ ***************************************************************************/
 // TODO: crear un istream/ostream (uno enable rx, el otro tx)
 class UART_iostream : public std::iostream {
 public:
@@ -278,6 +325,16 @@ public:
 
     void turn_off() { sb_.turn_off(); }
 
+
+    // TODO: nombre???
+    // Mira, SIN BLOQUEAR, si hay caracteres a leer.
+    // ¿Cómo hace el standard para ver si hay caracteres pendientes de leer?
+    // No he encontrado la funcion correspondiente. ¿No existe? @_@ Todas las
+    // funciones del standard bloquean el flujo de caracteres. No quiero que
+    // lo bloquee, solo mirar.
+    // La necesito sistemáticamente.
+    bool is_there_something_to_read() 
+    { return UART_basic::are_there_data_unread();}
 
 private:
     UART_streambuf_unbuffered sb_;
