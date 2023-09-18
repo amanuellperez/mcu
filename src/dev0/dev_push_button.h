@@ -23,16 +23,16 @@
 #define __DEV_PUSHBUTTON_H__
 /****************************************************************************
  *
- *   - DESCRIPCION: Push_button
+ * DESCRIPCION: Push_button
  *
- *   - HISTORIA:
+ * HISTORIA
  *    Manuel Perez
  *    24/07/2017 Push_button v0.0
  *    19/02/2021 Push_button_level_change v0.0
+ *    18/09/2023 Eliminando dependencias de avr. 
  *
  ****************************************************************************/
-#include "avr_pin.h"
-#include "not_generic.h"
+#include <stdint.h>
 
 namespace dev{
 
@@ -55,7 +55,7 @@ namespace dev{
  *
  *	   No tenemos que hacer nada.
  *
- *	2) Como interfaz:
+ *	2) Como interfaz: 
  *		using Enter_button = Push_button<23>;
  *		Enter_button::init(); // no olvidarlo!!!
  *
@@ -64,17 +64,30 @@ namespace dev{
  *  Si el compilador optimiza el código deberían de generar el mismo código
  *  las dos.
  */
-template <uint8_t n>
+//template <uint8_t n>
+template <typename Micro, uint8_t n>
 class Push_button{
 public:
+// Types
+// -----
+    using Pin = typename Micro::Pin<n>;
+
+// Constructors
+// ------------
     constexpr Push_button() {init();}
 
     /// Inicializamos el pulsador.
-    static constexpr void init() { not_generic::Pin<n>::as_input_with_pullup(); }
+    static constexpr void init() 
+    //{ not_generic::Pin<n>::as_input_with_pullup(); }
+    { Pin::as_input_with_pullup(); }
 
+
+// Press/not press
+// ---------------
     /// ¿está pulsado?
     static constexpr bool is_pressed()
-    {return not_generic::Pin<n>::is_zero();}
+    //{return not_generic::Pin<n>::is_zero();}
+    {return Pin::is_zero();}
 
     /// ¿no está pulsado?
     static constexpr bool is_not_pressed()
@@ -83,6 +96,7 @@ public:
     /// Espera hasta que se pulsa el interruptor.
     static constexpr void wait_until_is_pressed()
     { while(!is_pressed()) ; }
+
 };
 
 
@@ -97,14 +111,26 @@ public:
  *       pulsador.
  *
  */
-template <uint8_t n>
+// template <uint8_t n>
+template <typename Micro, uint8_t n>
 class Push_button_level_change{
 public:
+// Types
+// -----
+    using Pin = typename Micro::Pin<n>;
+
+// Constructors
+// ------------
     constexpr Push_button_level_change() {init();}
 
     /// Inicializamos el pulsador.
-    static constexpr void init() { not_generic::Pin<n>::as_input_with_pullup(); }
+    static constexpr void init() 
+    //{ not_generic::Pin<n>::as_input_with_pullup(); }
+    { Pin::as_input_with_pullup(); }
 
+
+// Press/not press
+// ---------------
     /// ¿está pulsado?
     static bool is_pressed();
 
@@ -118,10 +144,10 @@ private:
 };
 
 
-template <uint8_t n>
-bool Push_button_level_change<n>::is_pressed()
+template <typename M, uint8_t n>
+bool Push_button_level_change<M, n>::is_pressed()
 {
-    if (not_generic::Pin<n>::is_zero()){
+    if (Pin::is_zero()){
 	if (look_){
 	    look_ = false;
 	    return true;

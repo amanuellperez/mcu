@@ -31,3 +31,10 @@ ISR_CLOCK
 //    }
 }
 
+
+ISR_USART_RX{
+    mcu::UART_iostream uart;
+    uart << "Recibida interruption\n";
+    char c{};
+    uart >> c;
+}

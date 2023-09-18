@@ -25,9 +25,8 @@ void Main::main_hello()
     uart << "\n\nBasic RTC\n"
 	        "---------\n"
 		"Remember to connect external crystal of 32 kHz\n\n";
-
-    Micro::wait_ms(10); // para que haga el flush del hello
 }
+
 
 void Main::run()
 {

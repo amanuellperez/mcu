@@ -21,9 +21,28 @@
 #include "../../../dev_led.h"
 #include <avr_atmega.h>
 
+// Microcontroller
+// ---------------
 namespace mcu = atmega;
+using Micro = mcu::Micro;
 
-using namespace dev;
+// Pin connections
+// ---------------
+
+// Mcu devices
+// -----------
+
+// Devices
+// -------
+using LED7 = dev::LED<Micro, 16>;
+using LED6 = dev::LED<Micro, 15>;
+using LED5 = dev::LED<Micro, 14>;
+using LED4 = dev::LED<Micro, 13>;
+using LED3 = dev::LED<Micro, 12>;
+using LED2 = dev::LED<Micro, 11>;
+using LED1 = dev::LED<Micro, 10>;
+using LED0 = dev::LED<Micro, 9>;
+
 
 struct LEDS{
     void on(uint8_t i){
@@ -53,14 +72,14 @@ struct LEDS{
     }
 
 
-    LED<16> led7;
-    LED<15> led6;
-    LED<14> led5;
-    LED<13> led4;
-    LED<12> led3;
-    LED<11> led2;
-    LED<10> led1;
-    LED<9> led0;
+    LED7 led7;
+    LED6 led6;
+    LED5 led5;
+    LED4 led4;
+    LED3 led3;
+    LED2 led2;
+    LED1 led1;
+    LED0 led0;
 };
 
 struct Main_app{

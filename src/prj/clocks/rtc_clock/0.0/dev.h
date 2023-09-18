@@ -40,7 +40,10 @@
 
 #include <avr_atmega.h>
 
+// Microcontroller
+// ---------------
 namespace mcu = atmega;
+using Micro   = mcu::Micro;
 
 // pins usados
 // ------------
@@ -92,7 +95,7 @@ using LCD              = Screen_1602;
 // keyrow
 using namespace dev::Key_codes; // OK_KEY, UP_KEY, DOWN_KEY
 using Keyrow_codes = dev::Keyrow_codes<OK_KEY, UP_KEY, DOWN_KEY>;
-using Keyrow       = dev::Basic_keyrow<Keyrow_pins, Keyrow_codes>;
+using Keyrow       = dev::Basic_keyrow<Micro, Keyrow_pins, Keyrow_codes>;
 
 // RTC_clock
 

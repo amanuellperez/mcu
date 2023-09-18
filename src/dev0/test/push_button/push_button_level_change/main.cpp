@@ -20,26 +20,39 @@
 #include "../../../dev_push_button.h"
 #include <avr_atmega.h>
 
+// Microcontroller
+// ---------------
 namespace mcu = atmega;
+using Micro = mcu::Micro;
 
-// Conectar un led al pin 15 y un pulsador al pin 23
-// Al pulsar el pulsador se enciende el led y al soltarlo se apaga
+// Pin connections
+// ---------------
+static constexpr uint8_t button_pin = 14;
+
+
+// Devices
+// -------
+using Button = dev::Push_button_level_change<Micro, button_pin>;
+
+
+// Main
+// ----
 int main()
 {
 // init_uart()
-    atmega::UART_iostream uart;
-    atmega::basic_cfg(uart);
+    mcu::UART_iostream uart;
+    mcu::basic_cfg(uart);
     uart.turn_on();
 
-    dev::Push_button_level_change<23> push_button;
+    Button button;
 
     while(1){
-	if (push_button.is_pressed())
+	if (button.is_pressed())
 	    uart << "press\n";
 	else 
 	    uart << "not press\n";
 
-	mcu::Micro::wait_ms(500);
+	Micro::wait_ms(500);
 
     }
 }

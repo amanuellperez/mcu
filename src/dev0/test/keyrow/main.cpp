@@ -22,8 +22,14 @@
 #include "../../dev_keyrow.h"
 
 #include <avr_atmega.h>
-namespace mcu = atmega;
 
+// Microcontroller
+// ----------------
+namespace mcu = atmega;
+using Micro   = mcu::Micro;
+
+// KeyRow
+// ------
 // pines a los que conectamos el teclado
 using Keyrow_2pins = dev::Keyrow_pins<24, 25>;
 using Keyrow_pins  = dev::Keyrow_pins<23, 24, 25>;
@@ -34,7 +40,7 @@ using Keyrow_2codes = dev::Keyrow_codes<UP_KEY, DOWN_KEY>;
 using Keyrow_codes  = dev::Keyrow_codes<OK_KEY, UP_KEY, DOWN_KEY>;
 
 // dispositivos que conectamos
-using Keyrow = dev::Basic_keyrow<Keyrow_pins, Keyrow_codes>;
+using Keyrow = dev::Basic_keyrow<Micro, Keyrow_pins, Keyrow_codes>;
 //using Keyrow = dev::Basic_keyrow<Keyrow_2pins, Keyrow_2codes>;
 
 

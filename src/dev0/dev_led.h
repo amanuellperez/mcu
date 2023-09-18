@@ -23,14 +23,16 @@
 #define __DEV_LED_H__
 /****************************************************************************
  *
- *   - DESCRIPCION: LED
+ * DESCRIPCION
+ *	LED
  *
- *   - HISTORIA:
- *           Manuel Perez - 24/07/2017 Escrito
+ * HISTORIA
+ *    Manuel Perez
+ *    24/07/2017 Escrito
+ *    18/09/2023 Eliminadas dependencias de avr.
  *
  ****************************************************************************/
-#include <avr_pin.h>
-#include "not_generic.h"
+#include <stdint.h>
 
 namespace dev{
 
@@ -38,16 +40,19 @@ namespace dev{
  *  \brief  Es un led vulgar y corriente.
  *
  */
-template <uint8_t n>
+// template <uint8_t n>
+template <typename Micro, uint8_t n>
 class LED{
 public:
-    LED() {not_generic::Pin<n>::as_output(); }
+    using Pin = typename Micro::Pin<n>;
+
+    LED() {Pin::as_output(); }
 
     /// Encendemos el led
-    static void on() {not_generic::Pin<n>::write_one();}
+    static void on() {Pin::write_one();}
 
     /// Apagamos el led
-    static void off() {not_generic::Pin<n>::write_zero();}
+    static void off() {Pin::write_zero();}
 };
 
 

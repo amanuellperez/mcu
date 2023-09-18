@@ -181,8 +181,11 @@ PROBLEMA CON LA CODIFICACIÓN
 	conectados.
 
  */
-template <typename Pins, typename Codes>
+template <typename Micro, typename Pins, typename Codes>
 struct Basic_keyrow{
+    template <uint8_t n>
+    using Button = Push_button<Micro, n>;
+
     using Code = Keyrow_code<Pins, Codes>;
 
     constexpr Basic_keyrow() {init();}
@@ -193,7 +196,8 @@ struct Basic_keyrow{
     template <uint8_t i = Code::num_keys - 1>
     static constexpr void init()
     {
-	Push_button<Code::pin[i]>::init();
+	// Push_button<Code::pin[i]>::init();
+	Button<Code::pin[i]>::init();
 
 	if constexpr (i >= 1)
 	    init<i-1>();
@@ -201,7 +205,7 @@ struct Basic_keyrow{
 
     template <uint8_t c>
     static constexpr auto key(){
-	return Push_button<Code::template code2pin<c>()>{};
+	return Button<Code::template code2pin<c>()>{};
     }
 
     /// Scanea el teclado devolviendo el caracter asociado a la tecla pulsada.
@@ -215,7 +219,7 @@ struct Basic_keyrow{
     template <uint8_t i = Code::num_keys - 1>
     static constexpr uint8_t scan()
     {
-	if (Push_button<Code::pin[i]>::is_pressed())
+	if (Button<Code::pin[i]>::is_pressed())
 	    return Code::code[i];
 
 	if constexpr (i >= 1)

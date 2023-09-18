@@ -1,5 +1,5 @@
 DIRS = blink	\
-	coche_fantastico
+	knight_rider
 
 include $(MCU_RECRULES)
 

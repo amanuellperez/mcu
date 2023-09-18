@@ -39,6 +39,7 @@
 #include <atd_cstring.h>
 
 #include "dev_keyrow.h"
+#include <not_generic.h>
 
 namespace dev{
 
@@ -318,6 +319,7 @@ void User_choose_string<I, A, t>::lcd_move_backwards()
 template <typename I, typename A, int t>
 uint8_t User_choose_string<I, A, t>::show(uint8_t first_option)
 {
+// TODO: Micro::wait_ms(T_clock);
     not_generic::wait_ms(T_clock);	// Le damos tiempo al usuario a que suelte enter.
 
     clear();
@@ -327,6 +329,7 @@ uint8_t User_choose_string<I, A, t>::show(uint8_t first_option)
     while (enter_key().is_not_pressed()){
 	lcd_move();
 
+// TODO: Micro::wait_ms(T_clock);
 	not_generic::wait_ms(T_clock);
     }
     

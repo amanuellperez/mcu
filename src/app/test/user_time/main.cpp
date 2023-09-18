@@ -32,10 +32,14 @@
 
 #include <avr_atmega.h>
 
-namespace mcu = atmega;
 
-// pines que usamos
-// ----------------
+// Microcontroller
+// ---------------
+namespace mcu = atmega;
+using Micro   = mcu::Micro;
+
+// Pin connections
+// ---------------
 // LCD
 using LCD_pins = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<4>,
 				       dev::LCD_HD44780_RW<5>,
@@ -53,7 +57,7 @@ using Keyrow_codes  = dev::Keyrow_codes<OK_KEY, UP_KEY, DOWN_KEY>;
 
 // dispositivos que conectamos
 // ---------------------------
-using Keyrow = dev::Basic_keyrow<Keyrow_pins, Keyrow_codes>;
+using Keyrow = dev::Basic_keyrow<Micro, Keyrow_pins, Keyrow_codes>;
 
 
 

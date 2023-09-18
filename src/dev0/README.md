@@ -71,6 +71,50 @@ class Device_basic{
 };
 ```
 
+Cuando se tratan de protocolos es sencillo identificar qué parámetros pasar:
+
++ Si el protocolo es One Wire, parametrizamos la clase como `DS18B20<Micro,
+   One_wire>`. 
+
++ Si es Two Wire, serán `BME280_basic<Micro, TWI>`.
+
++ Si es SPI, `25LC256_basic<Micro, SPI, SPI_selector>`.
+
+Pero ¿qué parámetros pasar cuando el device se comunique con el micro usando
+pines del microcontrolador? ¿Qué es mejor `Push_button<Micro, numero_de_pin>`,
+o `Push_button<Pin>`?
+
+La primera clase que escribí de `Push_button` la parametrizaba con el número
+de pin y lo mismo hago con el LCD HD448870. El código se lee muy bien ya que
+al escribir `Push_button<14>` queda claro que estamos conectando al pin número
+14 del micro el push button. El problema es que la forma de implementar el
+`Push_button` no es genérica, ya que las funciones que necesitamos llamar son
+las funciones del `Pin<14>` correspondientes.
+
+Un segundo intento es pasarle el `Pin<14>` como parámetro a `Push_button`:
+conseguimos que el código quede completamente genérico. Da la impresión de que
+está todo bien, hasta que revisamos el código de `KeyRow` y del LCD: al
+definir `KeyRow` con los números de pines a los que se conecta este
+dispositivo  `KeyRow<14, 15, 16>` queda claro cómo estamos conectando el
+dispositivo, mientras que definirlo usando los pines correpondientes no queda
+tan claro: `KeyRow<mcu::Pin<14>, mcu::Pin<15>, mcu::Pin<16>>` y peor queda el
+LCD. 
+
+Esto sugiere la tercera implementación: pasarle o bien Micro como parámetro y
+que a partir de `Micro` use la clase `Pin` o pasarle directamente la clase `Pin`.
+O bien `Push_button<Micro, 14>` o bien `Push_button<Pin, 14>`. A la primera
+opción le veo 2 ventajas: 
+
+1. El `Micro` se lo pasamos a todos los dispositivos. 
+
+2. La implementación de `KeyRow` está hecho con números de pines. Cambiarla
+   ahora a usar `Pin` como parámetro me obliga a repensarlo todo (y a día de
+   hoy ya ando pensando en marcar esa clase como obsoleta y eliminarla).
+
+Por ello de momento cuando un device se comunique directamente usando pines
+con el micro los parámetros de plantilla a pasar serán `Device<Micro, pin0,
+pin1, pin2, ...>` o mejor `Device<Micro, struct_with_npins>`.
+
 
 #### Test
 ¿Cómo probar un traductor? Una forma que me resulta muy práctica es escribir

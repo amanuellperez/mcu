@@ -94,7 +94,7 @@ using Font             = dev::Font_digit_4x3_t1;
 // ------
 using namespace dev::Key_codes; // OK_KEY, UP_KEY, DOWN_KEY
 using Keyrow_codes = dev::Keyrow_codes<OK_KEY, UP_KEY, DOWN_KEY>;
-using Keyboard     = dev::Basic_keyrow<Keyrow_pins, Keyrow_codes>;
+using Keyboard     = dev::Basic_keyrow<Micro, Keyrow_pins, Keyrow_codes>;
 
 
 // system_clock

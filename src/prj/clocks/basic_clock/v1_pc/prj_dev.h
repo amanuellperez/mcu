@@ -24,11 +24,13 @@
 
 #include <avr_atmega.h>
 #include <dev_clocks.h>
+#include <dev_push_button.h>
 
 // MICROCONTROLLER
 // ---------------
 namespace mcu = atmega;
 using Micro   = mcu::Micro;
+
 
 // PIN
 // ---
@@ -39,7 +41,10 @@ using Micro   = mcu::Micro;
 
 // VCC and GND: 7, 8
 
-// available: 9-15
+// available: 9-14
+static constexpr uint8_t button_pin = 15;
+#define ISR_BUTTON_PIN ISR_PCINT_PIN15
+
 // Not using SPI: available pins 16, 17, 18, 19
 
 // Alimentación y AREF: 20, 21, 22
@@ -48,9 +53,6 @@ using Micro   = mcu::Micro;
 
 // Not using TWI: available pins 27 and 28
 
-
-// HWD DEVICES
-// -----------
 
 
 // DEVICES
@@ -61,6 +63,8 @@ using Time_counter = mcu::Time_counter2_32kHz_g<3000>;
 using Clock	   = dev::Clock_s<Micro, Time_counter>;
 #define ISR_CLOCK ISR_TIMER2_COMPA
 
+//// Button
+//using Button = dev::Push_button<button_pin>;
 
 
 #endif

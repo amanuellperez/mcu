@@ -35,6 +35,7 @@
 #include "avr_interrupt.h"
 #include "avr_memory.h"
 #include "avr_sleep.h"
+#include "avr_pin.h"
 
 namespace avr_{
 
@@ -47,6 +48,11 @@ namespace avr_{
 struct Micro{
     // interfaz static
     Micro() = delete;
+
+// Types
+// -----
+    template <uint8_t n>
+    using Pin = avr_::Pin<n>;
 
 // Time
 // ----

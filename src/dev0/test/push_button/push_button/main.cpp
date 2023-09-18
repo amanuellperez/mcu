@@ -21,23 +21,37 @@
 #include "../../../dev_led.h"
 #include <avr_atmega.h>
 
+// Microcontroller
+// ---------------
 namespace mcu = atmega;
+using Micro = mcu::Micro;
 
-// Conectar un led al pin 15 y un pulsador al pin 23
-// Al pulsar el pulsador se enciende el led y al soltarlo se apaga
+// Pin connections
+// ---------------
+static constexpr uint8_t led_pin    = 13;
+static constexpr uint8_t button_pin = 14;
+
+
+// Devices
+// -------
+using LED    = dev::LED<Micro, led_pin>;
+using Button = dev::Push_button<Micro, button_pin>;
+
+
+// Main
+// ----
 int main()
 {
-    dev::LED<15> led;
-    dev::Push_button<23> push_button;
+    LED led;
+    Button button;
 
     while(1){
-	if (push_button.is_pressed())
+	if (button.is_pressed())
 	    led.on();
 	else 
 	    led.off();
 
-	mcu::Micro::wait_ms(100);
-
+	Micro::wait_ms(100);
     }
 }
 
