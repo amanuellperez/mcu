@@ -30,7 +30,7 @@
  *    24/07/2017 Push_button v0.0
  *    19/02/2021 Push_button_level_change v0.0
  *    18/09/2023 Eliminando dependencias de avr. 
- *               enable/disable_change_level_interrupt
+ *               enable/disable_interrupt
  *
  ****************************************************************************/
 #include <stdint.h>
@@ -73,6 +73,10 @@ public:
 // -----
     using Pin = typename Micro::Pin<n>;
 
+// Cfg
+// ---
+    static constexpr uint8_t pin_number = n;
+
 // Constructors
 // ------------
     constexpr Push_button() {init();}
@@ -101,10 +105,10 @@ public:
 // Interrupts
 // ----------
 // Recordar definir la ISR correspondiente!!!
-    static void enable_change_level_interrupt()
+    static void enable_interrupt()
     { Pin::enable_change_level_interrupt(); }
 
-    static void disable_change_level_interrupt()
+    static void disable_interrupt()
     { Pin::disable_change_level_interrupt(); }
 };
 
@@ -128,6 +132,10 @@ public:
 // -----
     using Pin = typename Micro::Pin<n>;
 
+// Cfg
+// ---
+    static constexpr uint8_t pin_number = n;
+
 // Constructors
 // ------------
     constexpr Push_button_level_change() {init();}
@@ -150,10 +158,10 @@ public:
 // Interrupts
 // ----------
 // Recordar definir la ISR correspondiente!!!
-    static void enable_change_level_interrupt()
+    static void enable_interrupt()
     { Pin::enable_change_level_interrupt(); }
 
-    static void disable_change_level_interrupt()
+    static void disable_interrupt()
     { Pin::disable_change_level_interrupt(); }
 
 private:

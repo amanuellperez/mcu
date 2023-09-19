@@ -48,7 +48,7 @@ es una hoja de papel cuadriculada.
 
 
 
-## Versión 0.0
+## Versión 0.0 (RTC con timer1)
 Lo conectas todo, lo programas, lo enciendes... y ¡ves que retrasa! (¡y en mi
 caso retrasaba bastante!). Conclusión: reloj totalmente inútil.
 

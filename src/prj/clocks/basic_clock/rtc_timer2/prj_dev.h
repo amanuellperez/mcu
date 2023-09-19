@@ -19,47 +19,53 @@
 
 #pragma once
 
-#ifndef __PRJ_MAIN_H__
-#define __PRJ_MAIN_H__
-/****************************************************************************
- *
- * DESCRIPCION
- *	RTC implementado usando el Timer2 del avr conectado a un cristal
- *	externo de 32 kHz.
- *
- * HISTORIA
- *    Manuel Perez
- *    16/09/2023 Escrito
- *
- ****************************************************************************/
-#include "prj_dev.h"
-#include "prj_cfg.h"
-//#include "prj_strings.h"
+#ifndef __PRJ_DEV_H__
+#define __PRJ_DEV_H__
+
+#include <avr_atmega.h>
+#include <dev_clocks.h>
+#include <dev_push_button.h>
+
+// MICROCONTROLLER
+// ---------------
+namespace mcu = atmega;
+using Micro   = mcu::Micro;
 
 
-class Main{
-public:
-    Main();
-    void run();
- 
-private:
-// User interface
-    mcu::UART_iostream uart;
+// PIN
+// ---
+// reset: pin 1
+// UART: pins 2 and 3
+
+// available 4-6
+
+// VCC and GND: 7, 8
+
+// available: 9-14
+static constexpr uint8_t button_pin = 14;
+#define ISR_BUTTON_PIN ISR_PCINT_PIN14
+
+// Not using SPI: available pins 16, 17, 18, 19
+
+// Alimentación y AREF: 20, 21, 22
+
+// available: 3-26
+
+// Not using TWI: available pins 27 and 28
 
 
-// Functions
-    void init_uart();
 
-// Main menu
-    void main_hello();
-    char main_menu();
+// DEVICES
+// -------
 
-// User commands
+// Clock
+using Time_counter = mcu::Time_counter2_32kHz_g<3000>;
+using Clock	   = dev::Clock_s<Micro, Time_counter>;
+#define ISR_CLOCK ISR_TIMER2_COMPA
 
-
-// Time
-    void print_time();
-};
+//// Button
+using Button = dev::Push_button<Micro, button_pin>;
+#define ISR_BUTTON ISR_BUTTON_PIN 
 
 
 #endif

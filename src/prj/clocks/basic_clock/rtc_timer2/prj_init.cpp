@@ -17,56 +17,33 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#pragma once
-
-#ifndef __PRJ_DEV_H__
-#define __PRJ_DEV_H__
-
-#include <avr_atmega.h>
-#include <dev_clocks.h>
-#include <dev_push_button.h>
-
-// MICROCONTROLLER
-// ---------------
-namespace mcu = atmega;
-using Micro   = mcu::Micro;
+#include "prj_main.h"
 
 
-// PIN
-// ---
-// reset: pin 1
-// UART: pins 2 and 3
-
-// available 4-6
-
-// VCC and GND: 7, 8
-
-// available: 9-14
-static constexpr uint8_t button_pin = 15;
-#define ISR_BUTTON_PIN ISR_PCINT_PIN15
-
-// Not using SPI: available pins 16, 17, 18, 19
-
-// Alimentación y AREF: 20, 21, 22
-
-// available: 3-26
-
-// Not using TWI: available pins 27 and 28
+void Main::init_uart()
+{
+    mcu::basic_cfg(uart);
+    uart.turn_on();
+}
 
 
+Main::Main()
+{
+    show_menu_ = false;
 
-// DEVICES
-// -------
+    init_uart();
 
-// Clock
-using Time_counter = mcu::Time_counter2_32kHz_g<3000>;
-using Clock	   = dev::Clock_s<Micro, Time_counter>;
-#define ISR_CLOCK ISR_TIMER2_COMPA
+    Micro::sleep_mode(mcu::Sleep::mode::power_save);
+    //Micro::sleep_mode(mcu::Sleep::mode::idle);
 
-//// Button
-//using Button = dev::Push_button<button_pin>;
+    if (Clock::turn_on() == false)
+	uart << "Error: can't initialize Clock\n";
+
+    Button::init();
+    Button::enable_interrupt();
+
+    Micro::enable_interrupts();
 
 
-#endif
-
+}
 

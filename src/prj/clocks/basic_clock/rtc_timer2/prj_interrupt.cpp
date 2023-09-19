@@ -19,25 +19,19 @@
 
 #include "prj_main.h"
 
-
-void Main::init_uart()
+// El Timer2 va a generar la interrupción cada segundo, luego no es necesario
+// mirar si hay un nuevo segundo o no. Esto simplifica el código pero lo hace
+// menos genérico. Pero esta clase la escribe el hardwador. Si se cambia algo
+// de hardware, el hardwador tiene que revisar todo este código.
+ISR_CLOCK
 {
-    mcu::basic_cfg(uart);
-    uart.turn_on();
-    mcu::UART_basic::enable_interrupt_unread_data();
+    Clock::tick();
+//    if (Clock::is_new_second()){
+//	new_second_ = true;
+//    }
 }
 
 
-Main::Main()
-{
-    init_uart();
-
-    //Micro::sleep_mode(mcu::Sleep::mode::power_save);
-    Micro::sleep_mode(mcu::Sleep::mode::idle);
-
-    if (Clock::turn_on() == false)
-	uart << "Error: can't initialize Clock\n";
-
-    Micro::enable_interrupts();
+ISR_BUTTON{
+    Main::show_menu_ = true;
 }
-

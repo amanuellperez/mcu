@@ -20,8 +20,41 @@
 #include "prj_main.h"
 
 void Main::print_time()
+
 {
     print_datetime(uart, Clock::now_as_date_time());
     uart << '\n';
 }
 
+int get_int(const char* name)
+{
+    mcu::UART_iostream uart;
+
+    int x{};
+
+    uart << name;
+    uart << ": ";
+    uart >> x;
+    uart << x << '\n'; // echo. Borrarlo
+			 
+    return x;
+}
+
+void Main::get_time()
+{
+    Date_time dt;
+
+// TODO: esto depende del locale!!!
+    dt.hours(get_int("Hour"));
+    dt.minutes(get_int("Minutes"));
+    dt.seconds(get_int("Seconds"));
+
+    dt.day(get_int("Day"));
+    dt.month(get_int("Month"));
+    dt.year(get_int("Year"));
+
+
+    Clock::set(dt);
+
+
+}

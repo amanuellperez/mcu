@@ -24,7 +24,16 @@ void Main::main_hello()
 {
     uart << "\n\nBasic RTC\n"
 	        "---------\n"
-		"Remember to connect external crystal of 32 kHz\n\n";
+		"Remember to connect an external crystal of 32 kHz\n"
+		"and a push button on pin." << (int) Button::pin_number 
+		<< "\nTo set time press the button.\n";
+}
+
+void Main::main_menu()
+{
+    uart << "\nSet time:\n";
+    get_time();
+
 }
 
 
@@ -37,10 +46,17 @@ void Main::run()
 			 // asyncrhono, Timer2)
 
     while (1) {
-	uart.flush(); // Fundamental hacer el flush antes del sleep
-		      // DUDA: Que el UART usado en este proyecto haga flush
-		      // automáticamente?
+	uart.flush(); // Si el dormimos el micro en "power-save mode" es 
+		      // fundamental hacer el flush antes del sleep, sino fijo
+		      // que genera garbage el uart.
 	Micro::sleep();
+	
+	if (show_menu_){
+	    main_menu();
+	    show_menu_ = false;
+	    uart.flush(); // Si no se hace este flush genera basura el uart
+			  // en "power-save mode"
+	}
 
 	print_time();
     }

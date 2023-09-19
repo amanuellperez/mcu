@@ -17,24 +17,59 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "prj_main.h"
+#pragma once
 
-// El Timer2 va a generar la interrupción cada segundo, luego no es necesario
-// mirar si hay un nuevo segundo o no. Esto simplifica el código pero lo hace
-// menos genérico. Pero esta clase la escribe el hardwador. Si se cambia algo
-// de hardware, el hardwador tiene que revisar todo este código.
-ISR_CLOCK
-{
-    Clock::tick();
-//    if (Clock::is_new_second()){
-//	new_second_ = true;
-//    }
-}
+#ifndef __PRJ_MAIN_H__
+#define __PRJ_MAIN_H__
+/****************************************************************************
+ *
+ * DESCRIPCION
+ *	RTC implementado usando el Timer2 del avr conectado a un cristal
+ *	externo de 32 kHz.
+ *
+ * HISTORIA
+ *    Manuel Perez
+ *    16/09/2023 Escrito
+ *
+ ****************************************************************************/
+#include "prj_dev.h"
+#include "prj_cfg.h"
+//#include "prj_strings.h"
 
 
-ISR_USART_RX{
+class Main{
+public:
+    Main();
+    void run();
+ 
+// Global vbles
+    inline static bool show_menu_;
+
+private:
+// Types 
+    using Date_time = Clock::Date_time;
+
+// User interface
     mcu::UART_iostream uart;
-    uart << "Recibida interruption\n";
-    char c{};
-    uart >> c;
-}
+
+
+// Functions
+    void init_uart();
+
+// Main menu
+    void main_hello();
+    void main_menu();
+
+// User commands
+
+
+// Time
+    void print_time();
+    void get_time();
+};
+
+
+
+#endif
+
+

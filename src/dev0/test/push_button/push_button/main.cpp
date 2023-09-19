@@ -94,12 +94,12 @@ void test_interrupts()
 	char opt{};
 	uart >> opt;
 	switch (opt){
-	    break; case '1': Button::enable_change_level_interrupt();
+	    break; case '1': Button::enable_interrupt();
 			    uart << "Interrupts enabled.\n"
 				    "When you press the button the LED "
 				    "has to change state.\n\n";
 
-	    break; case '2': Button::disable_change_level_interrupt();
+	    break; case '2': Button::disable_interrupt();
 			    LED::turn_off();
 			    uart << "Interrupts disabled."
 				    "If you press now the button nothing "

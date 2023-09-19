@@ -395,25 +395,6 @@ std::ostream& print_weekday(std::ostream& out,
 { return print_weekday<weekdays_length, std::ostream, Date_time_t>(out, t, weekdays); }
 
 
-// >>> DELETE
-//template <size_t weekdays_length, typename Out, typename T>
-//Out& print_weekday(Out& out, const const_Time_view<T>& t,
-//                             const char* weekdays)
-//{
-//    atd::Array_const_nstrings day{weekdays, weekdays_length};
-//    print(out, day[t.weekday()]);
-//
-//    return out;
-//}
-//
-//template <size_t weekdays_length, typename T>
-//std::ostream& print_weekday(std::ostream& out,
-//                            const const_Time_view<T>& t,
-//                            const char* weekdays)
-//{ return print_weekday<weekdays_length, std::ostream, T>(out, t, weekdays); }
-//
-// <<< DELETE
-
 
 // Manipuladores de impresión
 // --------------------------
