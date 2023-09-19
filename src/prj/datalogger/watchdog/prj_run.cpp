@@ -17,29 +17,35 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "avr_UART.h"
-#include "avr_time.h"
+#include "prj_main.h"
 
-namespace avr_{
 
-int UART_flush(uint16_t time_out_ms)
+void Main::run()
 {
-    while (!UART_basic::is_transmit_complete())
-    {
-	wait_ms(1);
-	if (time_out_ms == 0)
-	    return -1;
+    UART uart;
+    uart << "\n\nTemperature datalogger\n"
+	        "----------------------\n"
+	    "Connect DS18B20 to pin " << (int) one_wire_pin 
+					<< " with a 4.7k pull-up resistor\n";
 
-	--time_out_ms;
+    Watchdog::interrupt_mode<Watchdog::Period::T1_s>();
+    Micro::enable_interrupts();
+
+    Micro::sleep_mode(mcu::Sleep::mode::idle);
+
+    while (1){
+	Micro::sleep();
+
+	auto T = sensor_.read_temperature(sensor_timeout_ms);
+	if (sensor_.is_ok()){
+	    uart << nseconds << " s: " << T << " ºC\n";
+	}
+
+	else 
+	    print_error(uart, sensor_.errno());
+
+
     }
-
-    // Datasheet: The TXC0 Flag bit is automatically cleared
-    // when a transmit complete interrupt is executed, 
-    // or it can be cleared by writing a one to its bit location.
-    
-    atd::write_bit<TXC0>::to<1>::in(UCSR0A);
-
-    return 0;
 }
 
-}// namespace
+

@@ -98,8 +98,14 @@ private:
     // fallo).
     virtual int sync() override 
     { 
-	UART_flush();
-	return 0; 
+	return UART_flush(10); // TODO: parametrizar
+			       // a 9600 baudios en menos de 1 milisegundo
+			       // a enviado un bytee, 10 milisegundos es
+			       // excesivo, pero al añadir esta función sin
+			       // timeout me dejaron de funcionar los test
+			       // (si se define uart como vble global
+			       // funcionaba, como vble local, no)
+//	return 0; 
     }
     
     // Get area

@@ -134,4 +134,7 @@ terminal, comunicándonos a través del UART.
    power-save mode no saltan las interrupciones de UART. Lo más sencillo es
    ponerle un pulsador que despierte el micro para ponerlo en hora.
 
+### Evolución
+
+A partir de este programa se puede escribir un data logger básico.
 

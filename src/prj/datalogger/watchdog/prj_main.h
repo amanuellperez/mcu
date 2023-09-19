@@ -16,57 +16,51 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #pragma once
 
 #ifndef __PRJ_MAIN_H__
 #define __PRJ_MAIN_H__
 /****************************************************************************
  *
- * DESCRIPCION
- *	RTC implementado usando el Timer2 del avr conectado a un cristal
- *	externo de 32 kHz.
+ *  - DESCRIPCION: Datalogger que usa el Watchdog como timer
  *
- * HISTORIA
+ *  - HISTORIA:
  *    Manuel Perez
- *    16/09/2023 Escrito
+ *    05/09/2023 Escrito
  *
  ****************************************************************************/
 #include "prj_dev.h"
-#include "prj_cfg.h"
+//#include "prj_cfg.h"
 //#include "prj_strings.h"
 
+#include <ostream>
 
 class Main{
 public:
     Main();
     void run();
- 
-// Global vbles
-    inline static volatile bool show_menu_;
+    
+// Global varialbes
+    // Número de segundos transcurridos desde que se empezó a medir la
+    // temperatura
+    inline static volatile uint32_t nseconds = 0;
 
 private:
-// Types 
-    using Date_time = Clock::Date_time;
+// Hardware
+    Sensor sensor_;
 
-// User interface
-    mcu::UART_iostream uart;
+// Data
 
 
 // Functions
     void init_uart();
+    void init_watchdog();
+    void init_sensor();
+    
+    void print_error(std::ostream& out, Sensor::Errno error);
 
-// Main menu
-    void main_hello();
-    void main_menu();
-
-// User commands
-
-
-// Time
-    void print_time();
-    void get_time();
 };
+
 
 
 

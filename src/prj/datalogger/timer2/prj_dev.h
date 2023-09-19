@@ -17,56 +17,84 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+
 #pragma once
 
 #ifndef __PRJ_DEV_H__
 #define __PRJ_DEV_H__
 
+
+// En dev.h metemos todas las dependencias con el hardware.
+// El resto del programa NO tiene que saber qué dispositivos concretos usamos. 
+// Lo ideal es usar dispositivos genéricos en el resto, de esa forma se puede
+// cambiar el hardware sin tocar el software.
 #include <avr_atmega.h>
+#include <dev_one_wire.h>
 #include <dev_clocks.h>
+#include <dev_DS18B20.h>
 #include <dev_push_button.h>
 
-// MICROCONTROLLER
+// cfg
+// ---
+static constexpr uint16_t timeout_ms = 3000; // esperamos máximo 3 segundos
+					     
+// microcontroller
 // ---------------
 namespace mcu = atmega;
 using Micro   = mcu::Micro;
 
 
-// PIN
-// ---
-// reset: pin 1
-// UART: pins 2 and 3
-
-// available 4-6
-
+// pin connections
+// ---------------
+// using UART: pins 2 and 3
+// available: 4-6
 // VCC and GND: 7, 8
 
-// available: 9-13
+// crystal of 32kHz: pins 9, 10
+
+// available: 11-13
+
 static constexpr uint8_t button_pin = 14;
 #define ISR_BUTTON_PIN ISR_PCINT_PIN14
+
+constexpr uint8_t one_wire_pin = 15;
 
 // Not using SPI: available pins 16, 17, 18, 19
 
 // Alimentación y AREF: 20, 21, 22
 
-// available: 3-26
-
+// available: 23-26
 // Not using TWI: available pins 27 and 28
 
+// PROTOCOLS
+// ---------
+
+// One wire protocol
+// -----------------
+using Cfg = dev::One_wire_cfg<mcu::Micro, one_wire_pin>;
+using One_wire = dev::One_wire<Cfg>;
+using Search = dev::One_wire_search<Cfg>;
+
+
+// uart
+// ----
+using UART = mcu::UART_iostream;
 
 
 // DEVICES
 // -------
-
 // Clock
-using Time_counter = mcu::Time_counter2_32kHz_g<3000>;
+using Time_counter = mcu::Time_counter2_32kHz_g<timeout_ms>;
 using Clock	   = dev::Clock_s<Micro, Time_counter>;
 #define ISR_CLOCK ISR_TIMER2_COMPA
 
+// Sensor de T
+using Sensor   = dev::DS18B20<Micro, One_wire>;
+
 //// Button
 using Button = dev::Push_button<Micro, button_pin>;
-#define ISR_BUTTON ISR_BUTTON_PIN 
 
+#define ISR_BUTTON ISR_BUTTON_PIN 
 
 #endif
 

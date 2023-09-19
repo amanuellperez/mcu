@@ -21,17 +21,20 @@
 
 #include <atd_ostream.h>
 #include <avr_atmega.h>	
+
+// Microcontroller
+// ----------------
 namespace mcu = atmega; 
-using Micro = mcu::Micro;
+using Micro   = mcu::Micro;
+
+// Pin connections
+// ---------------
+constexpr uint8_t test_pin = 15;
+
 
 // Devices
 // -------
-
-constexpr uint8_t test_pin = 15;
-
-using Pin = mcu::Pin<test_pin>;
-using Cfg = dev::One_wire_cfg<mcu::Micro, Pin>;
-
+using Cfg      = dev::One_wire_cfg<mcu::Micro, test_pin>;
 using One_wire = dev::One_wire<Cfg>;
 using Device = dev::One_wire_device;
 using Search = dev::One_wire_search<Cfg>;

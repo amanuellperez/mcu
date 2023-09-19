@@ -17,29 +17,46 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "avr_UART.h"
-#include "avr_time.h"
+#include "prj_main.h"
 
-namespace avr_{
 
-int UART_flush(uint16_t time_out_ms)
+void Main::init_uart()
 {
-    while (!UART_basic::is_transmit_complete())
-    {
-	wait_ms(1);
-	if (time_out_ms == 0)
-	    return -1;
-
-	--time_out_ms;
-    }
-
-    // Datasheet: The TXC0 Flag bit is automatically cleared
-    // when a transmit complete interrupt is executed, 
-    // or it can be cleared by writing a one to its bit location.
-    
-    atd::write_bit<TXC0>::to<1>::in(UCSR0A);
-
-    return 0;
+    mcu::basic_cfg(uart);
+    uart.turn_on();
 }
 
-}// namespace
+void Main::init_sensor()
+{
+    uart << "Init sensor ... ";
+
+    Search search;
+    Sensor::Device dev;
+    if(search(dev)){
+	sensor_.bind(dev);
+	uart << "OK\n";
+    }
+
+    else
+	uart << "ERROR. No device found\n";
+}
+
+Main::Main()
+{
+    show_menu_ = false;
+
+    init_uart();
+    init_sensor();
+    
+    Micro::sleep_mode(mcu::Sleep::mode::power_save);
+    //Micro::sleep_mode(mcu::Sleep::mode::idle);
+
+    if (Clock::turn_on() == false)
+	uart << "Error: can't initialize Clock\n";
+
+    Button::init();
+    Button::enable_interrupt();
+
+    Micro::enable_interrupts();
+}
+

@@ -33,8 +33,7 @@ constexpr uint8_t one_wire_pin = 15;
 
 // One wire protocol
 // -----------------
-using Pin = mcu::Pin<one_wire_pin>;
-using Cfg = dev::One_wire_cfg<mcu::Micro, Pin>;
+using Cfg = dev::One_wire_cfg<mcu::Micro, one_wire_pin>;
 using One_wire = dev::One_wire<Cfg>;
 using Search = dev::One_wire_search<Cfg>;
 

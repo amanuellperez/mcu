@@ -16,57 +16,53 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #pragma once
 
 #ifndef __PRJ_MAIN_H__
 #define __PRJ_MAIN_H__
 /****************************************************************************
  *
- * DESCRIPCION
- *	RTC implementado usando el Timer2 del avr conectado a un cristal
- *	externo de 32 kHz.
+ *  - DESCRIPCION: Datalogger de T
  *
- * HISTORIA
+ *  - HISTORIA:
  *    Manuel Perez
- *    16/09/2023 Escrito
+ *    19/09/2023 Escrito
  *
  ****************************************************************************/
 #include "prj_dev.h"
-#include "prj_cfg.h"
+//#include "prj_cfg.h"
 //#include "prj_strings.h"
 
+#include <ostream>
 
 class Main{
 public:
     Main();
+    void hello();
     void run();
- 
+    
 // Global vbles
     inline static volatile bool show_menu_;
 
 private:
-// Types 
-    using Date_time = Clock::Date_time;
-
 // User interface
     mcu::UART_iostream uart;
 
+// Hardware
+    Sensor sensor_;
 
-// Functions
+// FUNCTIONS
+// init
     void init_uart();
-
+    void init_sensor();
+ 
 // Main menu
-    void main_hello();
     void main_menu();
 
-// User commands
-
-
-// Time
-    void print_time();
-    void get_time();
+// Sensor
+    void print_error(std::ostream& out, Sensor::Errno error);
 };
+
 
 
 

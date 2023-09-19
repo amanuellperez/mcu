@@ -17,29 +17,22 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "avr_UART.h"
-#include "avr_time.h"
+#include "prj_main.h"
 
-namespace avr_{
-
-int UART_flush(uint16_t time_out_ms)
+// El Timer2 va a generar la interrupción cada segundo, luego no es necesario
+// mirar si hay un nuevo segundo o no. Esto simplifica el código pero lo hace
+// menos genérico. Pero esta clase la escribe el hardwador. Si se cambia algo
+// de hardware, el hardwador tiene que revisar todo este código.
+ISR_CLOCK
 {
-    while (!UART_basic::is_transmit_complete())
-    {
-	wait_ms(1);
-	if (time_out_ms == 0)
-	    return -1;
-
-	--time_out_ms;
-    }
-
-    // Datasheet: The TXC0 Flag bit is automatically cleared
-    // when a transmit complete interrupt is executed, 
-    // or it can be cleared by writing a one to its bit location.
-    
-    atd::write_bit<TXC0>::to<1>::in(UCSR0A);
-
-    return 0;
+    Clock::tick();
+//    if (Clock::is_new_second()){
+//	new_second_ = true;
+//    }
 }
 
-}// namespace
+
+ISR_BUTTON{
+    Main::show_menu_ = true;
+}
+

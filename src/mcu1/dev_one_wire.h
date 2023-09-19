@@ -132,10 +132,11 @@ void print_family_name(std::ostream& out, const One_wire_device& dev);
  *			    ONE WIRE PROTOCOL
  ***************************************************************************/
 template <typename Micro0,
-	  typename Pin0>
+	  uint8_t npin>
+	  //typename Pin0>
 struct One_wire_cfg{
     using Micro = Micro0;		
-    using Pin	= Pin0;			
+    using Pin	= typename Micro::Pin<npin>;
 };
 
 // Pin: pin que usamos para comunicarnos con los dispositivos one-wire.
