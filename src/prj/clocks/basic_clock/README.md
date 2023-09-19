@@ -48,7 +48,10 @@ es una hoja de papel cuadriculada.
 
 
 
-## Versión 0.0 (RTC con timer1)
+## Versión RTC timer1
+Esta es la primera versión que se ocurre hacer: si quieres hacer un reloj lo
+natural es coger el timer del microcontrolador y usarlo para hacer el reloj.
+
 Lo conectas todo, lo programas, lo enciendes... y ¡ves que retrasa! (¡y en mi
 caso retrasaba bastante!). Conclusión: reloj totalmente inútil.
 
@@ -107,5 +110,28 @@ programar.
 
 
 
+## Versión RTC Timer2
+
+El timer 2 del atmega está pensado para hacer un RTC. Tiene dos ventajas
+frente al timer 0 y el timer 1:
+
+1. Se puede conectar a un cristal externo de 32kHz consiguiendo de esta forma
+   una medida más precisa del tiempo que con el timer 1.
+
+2. Se puede dormir el micro usando el "power-save mode", lo que resuelve parte
+   del problema que tenía con la versión del reloj anterior. 
+
+Para hacer probar la lógica del programa es más rápido usar el PC como
+terminal, comunicándonos a través del UART. 
+
+### Problemas
+
+1. En power-save mode hay que hacer un flush del UART sistemáticamente, sino
+   te genera un montón de basura.
+
+2. Ya que usamos el terminal del PC como interfaz de usuario parece lo más
+   lógico pulsar una tecla para poner en hora el reloj. El problema es que en
+   power-save mode no saltan las interrupciones de UART. Lo más sencillo es
+   ponerle un pulsador que despierte el micro para ponerlo en hora.
 
 
