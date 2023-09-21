@@ -166,7 +166,7 @@ public:
     // de que haya algún error.
     static bool turn_on();
 
-    /// Apaga el reloj reiniciar el contador.
+    /// Apaga el reloj.
     static void turn_off();
 
     /// Ponemos en hora el reloj, pasándo el número de segundos que marca el

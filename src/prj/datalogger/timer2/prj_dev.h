@@ -52,10 +52,7 @@ using Micro   = mcu::Micro;
 
 // crystal of 32kHz: pins 9, 10
 
-// available: 11-13
-
-static constexpr uint8_t button_pin = 14;
-#define ISR_BUTTON_PIN ISR_PCINT_PIN14
+// available: 11-14
 
 constexpr uint8_t one_wire_pin = 15;
 
@@ -78,8 +75,21 @@ using Search = dev::One_wire_search<Cfg>;
 
 // uart
 // ----
-using UART = mcu::UART_iostream;
+class UART : public mcu::UART_iostream{
+public:
+// Name? Realmente es empty_get_area(), aunque el standard usa más el nombre
+// de `ignore`
+    void empty_read_buffer();
+};
+#define ISR_UART_RX ISR_USART_RX
 
+inline void UART::empty_read_buffer()
+{
+    char c{};
+
+    while(is_there_something_to_read())
+	*(this) >> c;
+}
 
 // DEVICES
 // -------
@@ -91,10 +101,6 @@ using Clock	   = dev::Clock_s<Micro, Time_counter>;
 // Sensor de T
 using Sensor   = dev::DS18B20<Micro, One_wire>;
 
-//// Button
-using Button = dev::Push_button<Micro, button_pin>;
-
-#define ISR_BUTTON ISR_BUTTON_PIN 
 
 #endif
 

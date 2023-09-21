@@ -54,23 +54,23 @@ void init_uart()
 }
 
 
-bool is_return_cmd_ok(Sensor::Errno error)
+bool is_return_cmd_ok(Sensor::Result error)
 {
-    using Errno = Sensor::Errno;
+    using Result = Sensor::Result;
 
     mcu::UART_iostream uart;
     switch(error){
-	break; case Errno::ok: 
+	break; case Result::ok: 
 			// uart << "Ok"; 
 			return true;
 
-	break; case Errno::not_found:
+	break; case Result::not_found:
 			uart << "ERROR (device not found)\n";
 
-	break; case Errno::time_out:
+	break; case Result::time_out:
 			uart << "TIMEOUT\n";
 
-	break; case Errno::wrong_CRC:
+	break; case Result::wrong_CRC:
 			uart << "WRONG CRC\n";
     }
 

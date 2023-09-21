@@ -130,7 +130,15 @@ public:
 
     // Es el errno clásico pero en vez de ser global es local a esta clase
     // y que en lugar de usarlo como state lo uso como valor return
-    enum class Errno{
+    // Es el resultado que van a devolver las funciones cuando le pedimos
+    // hacer algo. ¿Cómo llamar a esto? 
+    //  0. Result? (Es el resultado de la operación solicitada)
+    //	1. Return? (porque es el valor del return, pero no le doy significado)
+    //	2. State? (aunque lo voy a usar como State, no tiene por qué ser el
+    //	   estado del sensor, ¿o sí lo es?)
+    //	3. Error? (Error suena fatal, ya que si todo va bien NO es un error)
+    //	4. ???
+    enum class Result{
 	ok = 0,	    // todo bien
 	not_found,  // falla la llamada de One_wire::reset()
 	time_out,
@@ -148,35 +156,35 @@ public:
 // datasheet.
     // Para esperar a que acabe de realizar la conversión llamar a
     // `wait_until(time_out)
-    Errno convert_T() const;
+    Result convert_T() const;
 
-    Errno write_scratchpad(int8_t TH, int8_t TL, Resolution res) const;
+    Result write_scratchpad(int8_t TH, int8_t TL, Resolution res) const;
 
     // Lee la scratchpad guardándola en el array pasado
     // DUDA: Necesito pasarlo como referencia? No debiera ser necesario ya que
     // Scratchpad es un array, luego es un puntero.
-    Errno read_scratchpad(Scratchpad& s) const;
+    Result read_scratchpad(Scratchpad& s) const;
 
-    Errno copy_scratchpad() const;
+    Result copy_scratchpad() const;
 
     // Para esperar a que acabe de realizar la operación llamar a
     // `wait_until(time_out)
-    Errno recall_e2() const;
+    Result recall_e2() const;
 
     // CUIDADO: esta función no habla con este sensor concreto sino con todos
     // los DS18B20_basic, preguntándo si alguno de los sensores DS18B20_basic está
     // usando parasite power.
     // TODO
-    // static Errno read_power_supply();
+    // static Result read_power_supply();
     
 
     // TODO: nombre mal puesto. Esta función lo que hace es esperar a que el
     // DS18B20_basic haya acabado de ejecutar el comando solicitado. Si lo acaba
-    // antes de `time_out_ms` milisegundos devuelve Errno::ok. Si no lo acaba
-    // devuelve Errno::time_out. ¿cómo llamar a esta función?
+    // antes de `time_out_ms` milisegundos devuelve Result::ok. Si no lo acaba
+    // devuelve Result::time_out. ¿cómo llamar a esta función?
     // Función a llamar despues de convert_T o recall_e2 para ver si el sensor
     // ha acabado la operación solicitada.
-    Errno wait_until(const uint16_t& time_out_ms) const;
+    Result wait_until(const uint16_t& time_out_ms) const;
 
 private:
 // Data
@@ -206,73 +214,73 @@ bool DS18B20_basic<M,OW>::send_command(uint8_t cmd) const
 
 
 template <typename M, typename OW>
-DS18B20_basic<M,OW>::Errno 
+DS18B20_basic<M,OW>::Result 
 	    //DS18B20_basic<M,OW>::convert_T(const uint16_t& time_out_ms) const
 	    DS18B20_basic<M,OW>::convert_T() const
 {
     if (!send_command(0x44))
-	return Errno::not_found;
+	return Result::not_found;
     
-    return Errno::ok;
+    return Result::ok;
 //    return wait_until(time_out_ms);
 }
 
 
 template <typename M, typename OW>
-DS18B20_basic<M,OW>::Errno DS18B20_basic<M,OW>::
+DS18B20_basic<M,OW>::Result DS18B20_basic<M,OW>::
 	write_scratchpad(int8_t TH, int8_t TL, Resolution res) const
 {
     if (!send_command(0x4E))
-	return Errno::not_found;
+	return Result::not_found;
 
     One_wire::write(static_cast<uint8_t>(TH));
     One_wire::write(static_cast<uint8_t>(TL));
     One_wire::write(Scratchpad::to_cfg_register(res));
 
-    return Errno::ok;
+    return Result::ok;
 }
 
 template <typename M, typename OW>
-DS18B20_basic<M,OW>::Errno
+DS18B20_basic<M,OW>::Result
 DS18B20_basic<M,OW>::read_scratchpad(Scratchpad& scratchpad) const
 {
     if (!send_command(0xBE))
-	return Errno::not_found;
+	return Result::not_found;
 
     for (uint8_t i = 0; i < Scratchpad::size(); ++i)
 	scratchpad[i] = One_wire::read();
 
-    return Errno::ok;
+    return Result::ok;
 }
 
 
 template <typename M, typename OW>
-DS18B20_basic<M,OW>::Errno DS18B20_basic<M,OW>::copy_scratchpad() const
+DS18B20_basic<M,OW>::Result DS18B20_basic<M,OW>::copy_scratchpad() const
 {
     if (!send_command(0x48))
-	return Errno::not_found;
+	return Result::not_found;
 
-    return Errno::ok;
+    return Result::ok;
 }
 
 
 template <typename M, typename OW>
-DS18B20_basic<M,OW>::Errno 
+DS18B20_basic<M,OW>::Result 
 DS18B20_basic<M,OW>::recall_e2() const
 {
     if (!send_command(0xB8))
-	return Errno::not_found;
+	return Result::not_found;
 
-    return Errno::ok;
+    return Result::ok;
 //    return wait_until(time_out_ms);
 }
 
 template <typename M, typename OW>
-DS18B20_basic<M,OW>::Errno 
+DS18B20_basic<M,OW>::Result 
 DS18B20_basic<M,OW>::wait_until(const uint16_t& time_out_ms) const
 {
     if (time_out_ms == 0)
-	return Errno::time_out;
+	return Result::time_out;
 
     uint16_t t = 0;
 
@@ -281,10 +289,10 @@ DS18B20_basic<M,OW>::wait_until(const uint16_t& time_out_ms) const
 	Micro::wait_ms(1);
 	++t;
 	if (t > time_out_ms)
-	    return Errno::time_out;
+	    return Result::time_out;
     }
 
-    return Errno::ok;
+    return Result::ok;
 }
 
 /***************************************************************************
@@ -309,7 +317,7 @@ public:
     using Micro    = Micro0;
     using One_wire = One_wire0;
     using Device   = typename One_wire::Device;
-    using Errno    = Base::Errno;
+    using Result    = Base::Result;
 
 // CFG
     using Scratchpad = _Scratchpad;
@@ -322,12 +330,12 @@ public:
     Celsius read_temperature(const uint16_t& time_out_ms);
 
     // Devuelve el errno de la ultima función llamada 
-    Errno errno() const {return errno_;}
+    Result errno() const {return errno_;}
 
-    bool is_ok() const {return errno_ == Errno::ok;}
+    bool is_ok() const {return errno_ == Result::ok;}
 
 private:
-    Errno errno_;
+    Result errno_;
 };
 
 
@@ -336,18 +344,18 @@ DS18B20<M, OW>::Celsius
 DS18B20<M, OW>::read_temperature(const uint16_t& time_out_ms)
 {
     errno_ = Base::convert_T();
-    if (errno_ != Errno::ok)
+    if (errno_ != Result::ok)
 	return Celsius{-1};
 
     errno_ = Base::wait_until(time_out_ms);
 
     Scratchpad s;
     errno_ = Base::read_scratchpad(s);
-    if (errno_ != Errno::ok)
+    if (errno_ != Result::ok)
 	return Celsius{-1};
 
     if (!s.is_CRC_ok()){
-	errno_ = Errno::wrong_CRC;
+	errno_ = Result::wrong_CRC;
 	return Celsius{-1};
     }
     

@@ -29,21 +29,27 @@ void Main::hello()
 }
 
 
+
 void Main::run()
 {
-    UART uart; // <-- si lo borro genera basura UART :???
-	       // Tiene que ver con el sleep power-save mode
-    uart.flush();
-    Micro::sleep();
+    if (show_main_menu_){
+	Micro::Disable_interrupts lock;
 
-    auto T = sensor_.read_temperature(timeout_ms);
-    if (sensor_.is_ok()){
-	uart << Clock::now().time_since_epoch().count() << " s: " << T << " ºC\n";
+	menu_main();
+	show_main_menu_ = false;
     }
 
-    else 
-	print_error(uart, sensor_.errno());
+    else {
+	Clock::time_point t = atomic_now();
 
+	if (t  >= time_next_alarm_){
+	    print_temperature(uart);
+	    update_alarm();
+	}
+    }
+
+    // uart.flush(); <-- fundamental en power-save mode
+    Micro::sleep(); // Se despierta cada segundo 
 }
 
 

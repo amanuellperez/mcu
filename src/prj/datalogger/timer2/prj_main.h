@@ -41,12 +41,17 @@ public:
     void hello();
     void run();
     
+// User interface (debería de ser `volatile` ya que accedemos en las
+// interrupciones)
+    inline static UART uart;
+
 // Global vbles
-    inline static volatile bool show_menu_;
+    inline static volatile bool show_main_menu_;
 
 private:
-// User interface
-    mcu::UART_iostream uart;
+// Data
+    Clock::time_point time_next_alarm_;
+    Clock::duration incr_alarm_;
 
 // Hardware
     Sensor sensor_;
@@ -56,14 +61,32 @@ private:
     void init_uart();
     void init_sensor();
  
-// Main menu
-    void main_menu();
+// Menus
+    void menu_main();
+    void menu_sensor();
+    void menu_time();
 
+// Clock
+    Clock::time_point atomic_now();
+    void print_time(std::ostream& out);
+    void update_alarm();
+    
 // Sensor
-    void print_error(std::ostream& out, Sensor::Errno error);
+    void print_temperature(std::ostream& out);
+    void print_result(std::ostream& out, Sensor::Result error);
+    Sensor::Result sensor_resolution(uint16_t res);
+    
 };
 
 
+inline void Main::print_time(std::ostream& out)
+{ out << Clock::now().time_since_epoch().count() << " s"; }
+
+inline Clock::time_point Main::atomic_now()
+{
+    Micro::Disable_interrupts lock;
+    return Clock::now();
+}
 
 
 #endif

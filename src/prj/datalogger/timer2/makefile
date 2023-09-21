@@ -3,7 +3,10 @@ BIN = xx
 SOURCES= 	prj_main.cpp 		\
 			prj_init.cpp		\
 			prj_interrupt.cpp	\
-			prj_ds18b20.cpp		
+			prj_menu.cpp		\
+			prj_ds18b20.cpp		\
+			prj_time.cpp
+
 
 MCU = atmega328p
 

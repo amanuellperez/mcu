@@ -19,21 +19,12 @@
 
 #include "prj_main.h"
 
-// El Timer2 va a generar la interrupción cada segundo, luego no es necesario
-// mirar si hay un nuevo segundo o no. Esto simplifica el código pero lo hace
-// menos genérico. Pero esta clase la escribe el hardwador. Si se cambia algo
-// de hardware, el hardwador tiene que revisar todo este código.
-ISR_CLOCK
+void Main::update_alarm()
 {
-    Clock::tick();
-//    if (Clock::is_new_second()){
-//	new_second_ = true;
-//    }
-}
+    Clock::time_point t = atomic_now();
 
-
-ISR_UART_RX{
-    Main::show_main_menu_ = true;
-    Main::uart.empty_read_buffer();
+    // TODO: time_next_alarm_ = t + incr_alarm_; (???)
+    t += incr_alarm_;
+    time_next_alarm_ = t;
 }
 

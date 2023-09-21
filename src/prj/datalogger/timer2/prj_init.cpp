@@ -24,6 +24,7 @@ void Main::init_uart()
 {
     mcu::basic_cfg(uart);
     uart.turn_on();
+    mcu::UART_basic::enable_interrupt_unread_data();
 }
 
 void Main::init_sensor()
@@ -43,19 +44,21 @@ void Main::init_sensor()
 
 Main::Main()
 {
-    show_menu_ = false;
+    show_main_menu_  = true;
+    time_next_alarm_ = Clock::time_point{};
+    incr_alarm_      = std::chrono::seconds{1};
 
     init_uart();
     init_sensor();
     
-    Micro::sleep_mode(mcu::Sleep::mode::power_save);
-    //Micro::sleep_mode(mcu::Sleep::mode::idle);
+    // TODO: me esta generando problemas el uso de UART con el power-save
+    // mode. Como esta aplicación va conectada al PC, de momento lo dejo en
+    // idle mode. ¿Cómo usar power-save mode?
+    // Micro::sleep_mode(mcu::Sleep::mode::power_save);
+    Micro::sleep_mode(mcu::Sleep::mode::idle);
 
     if (Clock::turn_on() == false)
 	uart << "Error: can't initialize Clock\n";
-
-    Button::init();
-    Button::enable_interrupt();
 
     Micro::enable_interrupts();
 }
