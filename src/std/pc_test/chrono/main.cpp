@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 Manuel Perez 
+// Copyright (C) 2019-2023 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -288,6 +288,36 @@ void test_clocks()
 }
 
 
+template <typename stdD, typename mtdD>
+void test_hh_mm_ss(stdD st, mtdD mt)
+{
+    std::chrono::hh_mm_ss sh{st};
+    mtd::chrono::hh_mm_ss mh{mt};
+
+    CHECK_TRUE(sh.hours().count() == mh.hours().count()
+		    and
+	       sh.minutes().count() == mh.minutes().count()
+		    and
+	       sh.seconds().count() == mh.seconds().count()
+		    and
+	       sh.subseconds().count() == mh.subseconds().count()
+	       , "hh_mm_ss");
+}
+
+void test_hh_mm_ss()
+{
+    test::interface("hh_mm_ss");
+    test_hh_mm_ss(std::chrono::seconds{0},
+	          mtd::chrono::seconds{0});
+    test_hh_mm_ss(std::chrono::seconds{340},
+	          mtd::chrono::seconds{340});
+    test_hh_mm_ss(std::chrono::minutes{340},
+	          mtd::chrono::minutes{340});
+    test_hh_mm_ss(std::chrono::hours{30},
+	          mtd::chrono::hours{30});
+}
+
+
 int main()
 {
 try{
@@ -296,6 +326,7 @@ try{
     test_asserts();
     test_duration();
     test_time_point();
+    test_hh_mm_ss();
     test_clocks();
 
 }catch(const std::exception& e){

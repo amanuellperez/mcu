@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 Manuel Perez 
+// Copyright (C) 2019-2023 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -34,6 +34,7 @@
  *  - HISTORIA:
  *    Manuel Perez
  *	08/12/2019 v0.0
+ *	21/09/2023 hh_mm_ss, treat_as_floating_point
  *
  ****************************************************************************/
 #include "std_config.h"
@@ -42,11 +43,21 @@
 #include "std_type_traits.h"
 #include "std_limits.h"
 #include "std_ctime.h"
-
+#include "std_cstdint.h"
 
 namespace STD{
 
 namespace chrono {
+// Traits
+// ------
+template <typename Rep>
+struct treat_as_floating_point : is_floating_point<Rep> { };
+
+template <typename Rep>
+inline constexpr bool treat_as_floating_point_v 
+				    = treat_as_floating_point<Rep>::value;
+
+
 // A duration type measures time between two points in time (time_points). A
 // duration has a representation which holds a count of ticks and a tick period.
 // The tick period is the amount of time which occurs from one tick to the next,
@@ -157,7 +168,9 @@ struct duration_values{
     static constexpr Rep max() {return numeric_limits<Rep>::max();}
 };
 
-
+/***************************************************************************
+ *			    duration
+ ***************************************************************************/
 /*!
  *  \brief  duration
  *
@@ -542,6 +555,11 @@ template <typename From, typename To>
 using __enable_if_is_convertible_t =
 				enable_if_t<is_convertible_v<From, To>, From>;
 
+
+
+/***************************************************************************
+ *			    time_point
+ ***************************************************************************/
 /*!
  *  \brief  time_point
  *
@@ -764,6 +782,9 @@ time_point_cast(const time_point<Clock, Duration>& t)
 
 
 
+/***************************************************************************
+ *			    system_clock
+ ***************************************************************************/
 /*!
  *  \brief  system_clock
  *
@@ -814,6 +835,161 @@ inline system_clock::time_point system_clock::from_time_t(time_t t) noexcept
 {
     return time_point{duration{t}};
 }
+
+
+/***************************************************************************
+ *			    utilities
+ ***************************************************************************/
+// abs
+template <typename Rep, typename Period>
+constexpr 
+enable_if_t<numeric_limits<Rep>::is_signed, duration<Rep, Period>>
+abs(duration<Rep, Period> d)
+{ 
+    if (d >= d.zero())
+	return +d;
+
+    else 
+	return -d;
+}
+
+
+/***************************************************************************
+ *			    hh_mm_ss
+ ***************************************************************************/
+
+// DUDA: ¿cómo llamar a las funciones de implementación?
+// Las podemos meter dentro del namespace _std, o detail, o helper, o ... ???
+// Necesito un convenio!!!
+namespace detail{
+// NOTA: La siguiente función es copia de la que tiene Howard Hinnant.
+// 
+// Para calcular el número de decimales que obtenemos al dividir n entre d, lo
+// que hacemos es la división larga.
+//
+// Los de gcc creo que tienen un error en su implementación (???) Ellos para
+// calcular el número de decimales lo que hacen es factorizar el denominador
+// en potencias de 2 y de 5. Si no se puede factorizar completamente el número
+// es irracional, siendo infinito el número de decimales que tienen. El error
+// que tienen es que se han olvidado de incluir el númerador, aunque solo he
+// ojeado el código.
+//
+// Calcula el número de decimales al dividir n entre d, máximo 19 decimales.
+template <uint64_t n, uint64_t d, unsigned w = 0,
+          bool should_continue = (n%d != 0) and (w < 19)>
+struct ndecimals 
+{
+    static_assert(d > 0, "width called with zero denominator");
+    static constexpr const unsigned value = 1 + ndecimals<n%d*10, d, w+1>::value;
+};
+
+template <uint64_t n, uint64_t d, unsigned w>
+struct ndecimals<n, d, w, false>
+{
+    static constexpr const unsigned value = 0;
+};
+
+
+// static_pow10
+// ------------
+// Esta también es copia de Hinnant. 
+template <unsigned exp>
+struct static_pow10
+{
+private:
+    static constexpr const uint64_t h = static_pow10<exp/2>::value;
+public:
+    static constexpr const uint64_t value = h * h * (exp % 2 ? 10 : 1);
+};
+
+template <>
+struct static_pow10<0>
+{
+    static constexpr const uint64_t value = 1;
+};
+}// namespace
+ 
+// ¿is_negative?
+//	Supongamos que Duration está dada en segundos y que son 110 segundos.
+//	Esta clase devuelve: +1h30m20s (1 hora, 30 minutos, 20 segundos).
+//	Si en cambio la duración es de -110 segundos, lo que devuelve es 
+//	-1h30m20s, donde el signo menos se indica con is_negative. 
+template <typename Duration>
+class hh_mm_ss{
+
+    static unsigned constexpr const trial_width =
+	    detail::ndecimals<Duration::period::num, 
+			      Duration::period::den>::value;
+
+public:
+    static constexpr unsigned 
+		fractional_width = trial_width < 19 ? trial_width : 6u;
+
+    using precision = 
+	duration<
+		    common_type_t<typename Duration::rep, chrono::seconds::rep>,
+		    ratio<1, detail::static_pow10<fractional_width>::value>
+		>;
+
+    constexpr hh_mm_ss() noexcept : hh_mm_ss{Duration::zero()}{}
+    constexpr explicit hh_mm_ss(Duration d);
+
+    constexpr bool is_negative() const noexcept	
+    { return is_negative_;}
+
+    constexpr chrono::hours hours() const noexcept 
+    {return hours_;}
+
+    constexpr chrono::minutes minutes() const noexcept 
+    {return minutes_;}
+    
+    constexpr chrono::seconds seconds() const noexcept
+    {return seconds_;}
+
+
+    constexpr precision subseconds() const noexcept
+    {return subseconds_;}
+
+    constexpr explicit operator precision() const noexcept
+    { return to_duration();}
+
+    constexpr precision to_duration() const noexcept;
+
+private:
+    bool is_negative_;
+    chrono::hours hours_;
+    chrono::minutes minutes_;
+    chrono::seconds seconds_;
+    precision subseconds_;
+};
+
+template <typename Duration>
+inline constexpr hh_mm_ss<Duration>::hh_mm_ss(Duration d)
+    : is_negative_(d < Duration::zero()),
+      hours_ (duration_cast<chrono::hours>(abs(d))),
+      minutes_(duration_cast<chrono::minutes>(abs(d) - hours())),
+      seconds_(duration_cast<chrono::seconds>(abs(d) - hours() - minutes()))
+{
+    if constexpr (treat_as_floating_point_v<typename precision::rep>)
+	subseconds_ = abs(d) - hours() - minutes() - seconds();
+
+    else
+	subseconds_ = 
+	    duration_cast<precision>(abs(d) - hours() - minutes() - seconds());
+
+}
+
+template <typename D>
+inline constexpr hh_mm_ss<D>::precision hh_mm_ss<D>::to_duration() const noexcept
+{
+    if (is_negative())
+	return -(hours() + minutes() + seconds() + subseconds());
+
+    else
+	return hours() + minutes() + seconds() + subseconds();
+}
+
+    
 
 }// namespace chrono
 
