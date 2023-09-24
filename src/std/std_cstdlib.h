@@ -28,6 +28,7 @@
  *  - HISTORIA:
  *    Manuel Perez
  *    09/03/2020 std::div
+ *    24/09/2023 atoi...
  *
  ****************************************************************************/
 #include "std_config.h"
@@ -37,6 +38,9 @@
 // Eliminamos posibles macros
 #undef div
 #undef ldiv
+#undef atoi
+#undef atol
+#undef atof // avr-libc suministra esta función
 
 namespace STD{
     using ::div_t;
@@ -56,6 +60,10 @@ namespace STD{
     inline void div(long long x, long long y) 
     {static_assert(true, "Not defined ::lldiv_t");}
 //    {return ::lldiv(x ,y);}
+
+    using ::atoi;
+    using ::atol;
+    using ::atof;
 
 }// namespace
 
