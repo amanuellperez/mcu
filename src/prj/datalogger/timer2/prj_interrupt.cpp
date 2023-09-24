@@ -33,7 +33,7 @@ ISR_CLOCK
 
 
 ISR_UART_RX{
-    Main::show_main_menu_ = true;
+    Main::reset_ = true;
     Main::uart.empty_read_buffer();
 }
 

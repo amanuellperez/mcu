@@ -5,6 +5,7 @@ SOURCES= 	prj_main.cpp 		\
 			prj_interrupt.cpp	\
 			prj_menu.cpp		\
 			prj_ds18b20.cpp		\
+			prj_print.cpp		\
 			prj_time.cpp
 
 

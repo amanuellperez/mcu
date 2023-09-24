@@ -1,10 +1,10 @@
 #include "prj_main.h"
 
-void Main::print_result(std::ostream& out, Sensor::Result error)
+void Main::print_result(std::ostream& out, Sensor::Result result) const
 {
     using Result = Sensor::Result;
 
-    switch(error){
+    switch(result){
 	break; case Result::ok: 
 			out << "OK\n"; 
 
@@ -23,7 +23,7 @@ void Main::print_temperature(std::ostream& out)
 {
     auto T = sensor_.read_temperature(timeout_ms);
     if (sensor_.is_ok()){
-	print_time(out);
+	print_time(out, Clock::now());
 	out << ": " << T << " ºC\n";
     }
 
@@ -47,10 +47,39 @@ Sensor::Result Main::sensor_resolution(uint16_t ures)
 	break; case 10: res = Resolution::bits_10;
 	break; case 11: res = Resolution::bits_11;
 	break; case 12: res = Resolution::bits_12;
-	break; default: uart << "Logic error: program can't be here\n";
+	break; default: logic_error();
     }
 
     return sensor_.write_scratchpad(0, 100, res);
 }
 
+void Main::print_sensor_resolution(Sensor::Resolution res) const
+{
+    using Resolution = Sensor::Resolution;
+
+    switch(res){
+	break; case Resolution::bits_9: uart << "9";
+	break; case Resolution::bits_10: uart << "10";
+	break; case Resolution::bits_11: uart << "11";
+	break; case Resolution::bits_12: uart << "12";
+	break; default: logic_error();
+    }
+}
+
+void Main::print_sensor_options()
+{
+    Sensor::Scratchpad s{};
+    auto res = sensor_.read_scratchpad(s);
+    
+    if (res != Sensor::Result::ok){
+	uart << "Error: can't read sensor options.\n"
+	        "       Details: ";
+	print_result(uart, res);
+	return;
+    }
+
+    uart << "Sensor resolution: ";
+    print_sensor_resolution(s.resolution());
+    uart << '\n';
+}
 

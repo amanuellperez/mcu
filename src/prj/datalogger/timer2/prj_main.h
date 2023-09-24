@@ -32,6 +32,7 @@
 #include "prj_dev.h"
 //#include "prj_cfg.h"
 //#include "prj_strings.h"
+#include "prj_alarm.h"
 
 #include <ostream>
 
@@ -46,12 +47,11 @@ public:
     inline static UART uart;
 
 // Global vbles
-    inline static volatile bool show_main_menu_;
+    inline static volatile bool reset_;
 
 private:
 // Data
-    Clock::time_point time_next_alarm_;
-    Clock::duration incr_alarm_;
+    Alarm next_alarm_;
 
 // Hardware
     Sensor sensor_;
@@ -62,31 +62,51 @@ private:
     void init_sensor();
  
 // Menus
-    void menu_main();
+    void menu_options();
     void menu_sensor();
     void menu_time();
 
+// Functions
+    void reset();
+
+// Info
+    void print_options();
+
 // Clock
     Clock::time_point atomic_now();
-    void print_time(std::ostream& out);
     void update_alarm();
+    void change_time_settings(const uint32_t& t, const uint32_t& t_incr);
+
+    void print_time_options() const;
     
 // Sensor
-    void print_temperature(std::ostream& out);
-    void print_result(std::ostream& out, Sensor::Result error);
     Sensor::Result sensor_resolution(uint16_t res);
+
+    void print_temperature(std::ostream& out);
+    void print_result(std::ostream& out, Sensor::Result error) const;
+    void print_sensor_options();
+    void print_sensor_resolution(Sensor::Resolution res) const;
     
+// Errors
+    void logic_error() const;
 };
 
 
-inline void Main::print_time(std::ostream& out)
-{ out << Clock::now().time_since_epoch().count() << " s"; }
 
 inline Clock::time_point Main::atomic_now()
 {
     Micro::Disable_interrupts lock;
     return Clock::now();
 }
+
+inline void Main::logic_error() const
+{ uart << "Logic error: program can't be here\n"; }
+
+inline void Main::print_time_options() const
+{ next_alarm_.print(uart); }
+
+inline void Main::reset()
+{ next_alarm_.reset(); }
 
 
 #endif

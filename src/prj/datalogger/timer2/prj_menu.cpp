@@ -19,20 +19,24 @@
 
 #include "prj_main.h"
 
-void Main::menu_main()
+void Main::menu_options()
 {
-    uart << "\nMain menu\n"
-	      "---------\n"
-	      "1. Sensor resolution\n"
-	      "2. Time measure\n"; 
+    while (1) {
+	uart << "\nMain menu\n"
+		  "---------\n"
+		  "1. Sensor resolution\n"
+		  "2. Time measure\n"
+		  "3. Start\n";
 
-    char opt{};
-    uart >> opt;
+	char opt{};
+	uart >> opt;
 
-    switch (opt){
-	break; case '1': menu_sensor();
-	break; case '2': menu_time();
-	break; default : uart << "Unknown option\n";
+	switch (opt){
+	    break; case '1': menu_sensor();
+	    break; case '2': menu_time();
+	    break; case '3': return;
+	    break; default : uart << "Unknown option\n";
+	}
     }
 }
 
@@ -48,7 +52,7 @@ void Main::menu_sensor()
 	return;
     }
 
-    uart << "Changing resolution to " << res << " bits ... ";
+    uart << "\nChanging resolution to " << res << " bits ... ";
     auto result = sensor_resolution(res);
     print_result(uart, result);
 }
@@ -57,19 +61,17 @@ void Main::menu_time()
 {
     uart << "Choose time between measurements (in seconds): ";
 
-    uint32_t t = 1;
-    uart >> t;
+    uint32_t t_incr = 1;
+    uart >> t_incr;
 
-    if (t == 0){
+    if (t_incr == 0){
 	uart << "Can't be 0\n";
 	return;
     }
 
-    incr_alarm_ = std::chrono::seconds{t};
-    uart << "Taking data every " << t << " seconds\n";
+    change_time_settings(0, t_incr);
 
-    Clock::set(0);
-    update_alarm();
+    uart << "\nTaking data every " << t_incr << " seconds\n";
 }
 
 

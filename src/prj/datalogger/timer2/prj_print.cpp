@@ -17,12 +17,16 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+// print = muestra al usuario...
+
 #include "prj_main.h"
 
-
-void Main::change_time_settings(const uint32_t& t, const uint32_t& t_incr)
+void Main::print_options()
 {
-    Clock::set(0);
-    next_alarm_.reset(0, std::chrono::seconds{t_incr});
+    uart << "\n-----------------\n"
+	      "Options:\n";
+    print_sensor_options();
+    print_time_options();
+    uart << "-----------------\n";
 }
 

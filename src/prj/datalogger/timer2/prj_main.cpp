@@ -32,19 +32,24 @@ void Main::hello()
 
 void Main::run()
 {
-    if (show_main_menu_){
+    if (reset_){
 	Micro::Disable_interrupts lock;
 
-	menu_main();
-	show_main_menu_ = false;
+	reset();
+
+	menu_options();
+	reset_ = false;
+	
+	print_options();
+
     }
 
-    else {
+    else { // TODO: está lógica omite el primer segundo!!! REVISAR
 	Clock::time_point t = atomic_now();
 
-	if (t  >= time_next_alarm_){
+	if (t  >= next_alarm_.time()){
 	    print_temperature(uart);
-	    update_alarm();
+	    next_alarm_.update(atomic_now());
 	}
     }
 

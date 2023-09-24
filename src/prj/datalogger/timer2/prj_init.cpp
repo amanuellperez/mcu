@@ -44,9 +44,7 @@ void Main::init_sensor()
 
 Main::Main()
 {
-    show_main_menu_  = true;
-    time_next_alarm_ = Clock::time_point{};
-    incr_alarm_      = std::chrono::seconds{1};
+    reset_ = true;
 
     init_uart();
     init_sensor();
