@@ -37,8 +37,8 @@ This directory contains the following:
     * [dev1](src/dev1/README.md): User-defined devices.
     
   
-3. Algorithms with meaning (application level?)
-    * [app](src/app/README.md): Application libraries.
+3. Common libraries:
+    * [libprj](src/libprj/README.md): Application libraries.
   
 
 4. Projects: 
@@ -141,8 +141,8 @@ Se puede organizar el código en diferentes niveles:
       El programador no conoce la datasheet ya que desconoce el chip real al
       que accede. Lo que conoce son los diferents concepts.
 
-3. Algoritmos con significado (application level?)
-    * [app](src/app/README.md)
+3. Bibliotecas comunes a varios proyectos:
+    * [libprj](src/libprj/README.md)
 
 4. Proyectos:
     * [prj](src/prj/README.md): Proyectos.
