@@ -605,6 +605,26 @@ void test_remove_extent()
 }
 
 
+template <typename T>
+void test_remove_cvref(const char* name_type)
+{
+    bool res = std::is_same_v<mtd::remove_cvref_t<T>, std::remove_cvref_t<T>>;
+    CHECK_TRUE(res, alp::as_str() << "remove_cvref_t(" << name_type << ")");
+}
+
+void test_remove_cvref()
+{
+    test::interface("remove_cvref");
+
+    test_remove_cvref<int>("int");
+    test_remove_cvref<int&>("int&");
+    test_remove_cvref<int&&>("int&&");
+    test_remove_cvref<const int&>("const int&");
+    test_remove_cvref<const int[2]>("const int[2]");
+    test_remove_cvref<const int(&)[2]>("const int(&)[2]");
+    test_remove_cvref<int(int)>("const int(int)");
+}
+
 
 
 template <typename T>
@@ -794,6 +814,7 @@ try{
 
     // other transformations
     // ---------------------
+    test_remove_cvref();
     test_decay();
     test_enable_if();
     test_common_type();

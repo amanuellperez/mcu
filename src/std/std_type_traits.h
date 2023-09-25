@@ -36,6 +36,7 @@
  *    14/08/2021 Completando implementación de common_type.
  *               Es copia de cppreference. TODO: reescribirla.
  *    23/12/2022 type_identity
+ *    25/09/2023 remove_cvref
  *
  ****************************************************************************/
 #include "std_config.h"
@@ -879,6 +880,22 @@ using add_pointer_t = typename add_pointer<T>::type;
 // Other transformations
 // ---------------------
 
+// remove_cvref
+// ------------
+template <typename T>
+struct remove_cvref : remove_cv<T>
+{};
+
+template <typename T>
+struct remove_cvref<T&> : remove_cv<T>
+{};
+
+template <typename T>
+struct remove_cvref<T&&> : remove_cv<T>
+{};
+
+template <typename T>
+using remove_cvref_t = typename remove_cvref<T>::type;
 
 // decay
 // -----
