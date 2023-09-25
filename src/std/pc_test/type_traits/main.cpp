@@ -203,7 +203,7 @@ void test_integral_constant()
 
 void test_conditional()
 {
-    test::interfaz("conditional_t");
+    test::interface("conditional_t");
 
     CHECK_TRUE((mtd::is_same_v<mtd::conditional_t<true, int, long>, int>), 
 		"true");
@@ -219,7 +219,7 @@ void test_conditional()
 
 void test_is_const()
 {
-    test::interfaz("is_const");
+    test::interface("is_const");
 
     CHECK_TRUE(!mtd::is_const_v<char>, "char");
     CHECK_TRUE(!mtd::is_const_v<int>, "int");
@@ -238,7 +238,7 @@ void test_is_const()
 
 void test_is_volatile()
 {
-    test::interfaz("is_volatile");
+    test::interface("is_volatile");
 
     CHECK_TRUE(!mtd::is_volatile_v<char>, "char");
     CHECK_TRUE(!mtd::is_volatile_v<int>, "int");
@@ -265,7 +265,7 @@ void test_is_void(const std::string& name_type, bool res)
 
 void test_is_void()
 {
-    test::interfaz("is_void");
+    test::interface("is_void");
 
     test_is_void<void>("void", true);
 
@@ -301,7 +301,7 @@ void test_is_lvalue_reference(const std::string& name_type)
 
 void test_is_lvalue_reference()
 {
-    test::interfaz("is_lvalue_reference");
+    test::interface("is_lvalue_reference");
     
     test_is_lvalue_reference<char>("char");
     test_is_lvalue_reference<int>("int");
@@ -331,7 +331,7 @@ void test_is_rvalue_reference(const std::string& name_type)
 
 void test_is_rvalue_reference()
 {
-    test::interfaz("is_rvalue_reference");
+    test::interface("is_rvalue_reference");
     
     test_is_rvalue_reference<char>("char");
     test_is_rvalue_reference<int>("int");
@@ -361,7 +361,7 @@ void test_is_reference(const std::string& name_type)
 
 void test_is_reference()
 {
-    test::interfaz("is_reference");
+    test::interface("is_reference");
     
     test_is_reference<char>("char");
     test_is_reference<int>("int");
@@ -392,7 +392,7 @@ void test_is_object(const std::string& name_type)
 
 void test_is_object()
 {
-    test::interfaz("is_object");
+    test::interface("is_object");
     
     test_is_object<char>("char");
     test_is_object<int>("int");
@@ -430,7 +430,7 @@ void test_remove_reference(const std::string& tname)
 
 void test_remove_reference()
 {
-    test::interfaz("remove_reference");
+    test::interface("remove_reference");
     
     test_remove_reference<char>("char");
     test_remove_reference<int>("int");
@@ -458,7 +458,7 @@ void test_add_lvalue_reference(const std::string& name_type)
 
 void test_add_lvalue_reference()
 {
-    test::interfaz("add_lvalue_reference");
+    test::interface("add_lvalue_reference");
     
     test_add_lvalue_reference<char>("char");
     test_add_lvalue_reference<int>("int");
@@ -476,13 +476,35 @@ void test_is_array(const std::string& name_type)
 
 void test_is_array()
 {
-    test::interfaz("is_array");
+    test::interface("is_array");
 
     test_is_array<char>("char");
     test_is_array<char[]>("char[]");
     test_is_array<char[20]>("char[20]");
     test_is_array<char*>("char*");
 }
+
+
+void test_is_base_of()
+{
+    test::interface("is_base_of");
+    class A {};
+    class B : A {};
+    class C : B {};
+    class D {};
+    union E {};
+    using I = int;
+
+    CHECK_TRUE(mtd::is_base_of_v<A, A> == std::is_base_of_v<A, A>, "<A, A>");
+    CHECK_TRUE(mtd::is_base_of_v<A, B> == std::is_base_of_v<A, B>, "<A, B>");
+    CHECK_TRUE(mtd::is_base_of_v<A, C> == std::is_base_of_v<A, C>, "<A, C>");
+    CHECK_TRUE(mtd::is_base_of_v<A, D> == std::is_base_of_v<A, D>, "<A, D>");
+    CHECK_TRUE(mtd::is_base_of_v<B, A> == std::is_base_of_v<B, A>, "<B, A>");
+    CHECK_TRUE(mtd::is_base_of_v<E, E> == std::is_base_of_v<E, E>, "<E, E>");
+    CHECK_TRUE(mtd::is_base_of_v<I, I> == std::is_base_of_v<I, I>, "<I, I>");
+
+}
+
 
 template <typename From, typename To>
 void test_is_convertible(const std::string& name_type)
@@ -494,7 +516,7 @@ void test_is_convertible(const std::string& name_type)
 
 void test_is_convertible()
 {
-    test::interfaz("is_convertible");
+    test::interface("is_convertible");
 
     // TODO: for (from = char...) for (to = char...)
     test_is_convertible<char, void>("char -> void");
@@ -515,7 +537,7 @@ void test_remove_pointer(const std::string& name_type)
 
 void test_remove_pointer()
 {
-    test::interfaz("remove_pointer");
+    test::interface("remove_pointer");
 
     test_remove_pointer<int>("int");
     test_remove_pointer<int&>("int&");
@@ -556,7 +578,7 @@ void test_add_pointer(const std::string& tname)
 
 void test_add_pointer()
 {
-    test::interfaz("add_pointer");
+    test::interface("add_pointer");
 
     test_add_pointer<char>("char");
     test_add_pointer<int>("int");
@@ -597,7 +619,7 @@ void test_remove_extent(const std::string& tname)
 
 void test_remove_extent()
 {
-    test::interfaz("remove_extent");
+    test::interface("remove_extent");
 
     test_remove_extent<char>("char");
     test_remove_extent<int>("int");
@@ -655,7 +677,7 @@ void test_decay(const std::string& tname)
 
 void test_decay()
 {
-    test::interfaz("decay");
+    test::interface("decay");
 
     test_decay<char>("char");
     test_decay<int>("int");
@@ -679,7 +701,7 @@ void test_enable_if(const std::string& name_type)
 
 void test_enable_if()
 {
-    test::interfaz("enable_if");
+    test::interface("enable_if");
 
     test_enable_if<char>("char");
     test_enable_if<int>("int");
@@ -701,7 +723,7 @@ void test_common_type(const std::string& name_type)
 
 void test_common_type()
 {
-    test::interfaz("common_type");
+    test::interface("common_type");
 
 //    test_common_type<>("nada"); // tiene que dar error de compilación
     test_common_type<char>("char");
@@ -721,7 +743,7 @@ void test_make_signed(const std::string& name)
 
 void test_make_signed()
 {
-    test::interfaz("make_signed");
+    test::interface("make_signed");
 
     test_make_signed<char>("char");
     test_make_signed<short>("short");
@@ -749,7 +771,7 @@ void test_make_unsigned(const std::string& name)
 
 void test_make_unsigned()
 {
-    test::interfaz("make_unsigned");
+    test::interface("make_unsigned");
 
     test_make_unsigned<char>("char");
     test_make_unsigned<short>("short");
@@ -843,6 +865,7 @@ try{
 
     // type relations
     // --------------
+    test_is_base_of();
     test_is_convertible();
  
     // array modifications

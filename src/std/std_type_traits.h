@@ -42,7 +42,7 @@
  *    14/08/2021 Completando implementación de common_type.
  *               Es copia de cppreference. TODO: reescribirla.
  *    23/12/2022 type_identity
- *    25/09/2023 remove_cvref, is_union
+ *    25/09/2023 remove_cvref, is_union, is_class, is_base_of
  *
  ****************************************************************************/
 #include "std_config.h"
@@ -739,7 +739,20 @@ using make_unsigned_t = typename make_unsigned<T>::type;
 // --------------
 // type relations
 // --------------
+// is_base_of
+// ----------
+// TODO: depende de gcc. __is_base_of!!!
+template<typename Base, typename Derived>
+struct is_base_of
+: public integral_constant<bool, __is_base_of(Base, Derived)>
+{ };
 
+template <typename B, typename D>
+inline constexpr bool is_base_of_v = is_base_of<B, D>::value;
+
+
+// is_convertible
+// --------------
 template <typename From, typename To>
 constexpr inline bool __is_convertible_req()
 {
