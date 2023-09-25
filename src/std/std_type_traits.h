@@ -23,9 +23,15 @@
 #define __MCU_STD_TYPE_TRAITS_H__
 /****************************************************************************
  *
- *  - DESCRIPCION: Corresponde con el type_traits del estandar
+ *  DESCRIPCION
+ *	Corresponde con el type_traits del estandar
  *
- *  - HISTORIA:
+ *  TODO
+ *	Algunas implementaciones dependen de GCC.
+ *	Ver https://gcc.gnu.org/onlinedocs/gcc/Type-Traits.html
+ *	¿Cómo se pueden desvincular de gcc?
+ *
+ *  HISTORIA
  *    A. Manuel Lopez 
  *    07/02/2019 v0.0
  *    22/10/2019 is_const_v, is_volatile_v, conditional_t
@@ -36,7 +42,7 @@
  *    14/08/2021 Completando implementación de common_type.
  *               Es copia de cppreference. TODO: reescribirla.
  *    23/12/2022 type_identity
- *    25/09/2023 remove_cvref
+ *    25/09/2023 remove_cvref, is_union
  *
  ****************************************************************************/
 #include "std_config.h"
@@ -64,8 +70,6 @@ using bool_constant = integral_constant<bool, B>;
 
 using true_type = integral_constant<bool, true>;
 using false_type = integral_constant<bool, false>;
-
-
 
 /// is_same
 template <typename X, typename Y>
@@ -137,6 +141,32 @@ using remove_cv_t = typename remove_cv<T>::type;
 // -----------------------
 // primary type categories
 // -----------------------
+
+// is_union
+// --------
+// TODO: depende de GCC. __is_union es de GCC
+template<typename T>
+struct is_union
+: public integral_constant<bool, __is_union(T)>
+{ };
+
+template <typename T>
+inline constexpr bool is_union_v = is_union<T>::value;
+
+
+// is_class
+// --------
+// TODO: depende de GCC. __is_class es de GCC
+// cppreference tiene una implementación que no depende de gcc
+template<typename T>
+struct is_class
+: public integral_constant<bool, __is_class(T)>
+{ };
+
+
+template <typename T>
+inline constexpr bool is_class_v = is_class<T>::value;
+
 
 // is_void
 // -------

@@ -764,6 +764,45 @@ void test_make_unsigned()
     test_make_unsigned<unsigned long long>("unsigned long long");
 }
 
+void test_is_union()
+{
+    struct A{};
+    typedef union
+    {
+	int a;
+	float b;
+    } B;
+     
+    struct C { B d; };
+
+    test::interface("is_union");
+    CHECK_TRUE(mtd::is_union<A>::value == std::is_union<A>::value, "A");
+    CHECK_TRUE(mtd::is_union<B>::value == std::is_union<B>::value, "B");
+    CHECK_TRUE(mtd::is_union<C>::value == std::is_union<C>::value, "C");
+    CHECK_TRUE(mtd::is_union<int>::value == std::is_union<int>::value, "int");
+}
+
+
+void test_is_class()
+{
+    struct A {};
+    class B {};
+    enum class E {};
+    union U { class UC {}; };
+    CHECK_TRUE(mtd::is_class_v<U> == std::is_class_v<U>, "U");
+    CHECK_TRUE(mtd::is_class_v<U::UC> == std::is_class_v<U::UC>, "U::UC");
+ 
+    CHECK_TRUE(mtd::is_class<A>::value == std::is_class<A>::value, "A");
+    CHECK_TRUE(mtd::is_class_v<B> == std::is_class_v<B>, "B");
+    CHECK_TRUE(mtd::is_class_v<B*> == std::is_class_v<B*>, "B*");
+    CHECK_TRUE(mtd::is_class_v<B&> == std::is_class_v<B&>, "B&");
+    CHECK_TRUE(mtd::is_class_v<const B> == std::is_class_v<const B>, "const B");
+    CHECK_TRUE(mtd::is_class<E>::value == std::is_class<E>::value, "E");
+    CHECK_TRUE(mtd::is_class_v<int> == std::is_class_v<int>, "int");
+    CHECK_TRUE(mtd::is_class_v<struct S> == std::is_class_v<struct S>, "S");
+    CHECK_TRUE(mtd::is_class_v<class C> == std::is_class_v<class C>, "C");
+}
+
 int main()
 {
 try{
@@ -773,6 +812,9 @@ try{
 
     // primary type categories
     // -----------------------
+    test_is_union();
+    test_is_class();
+
     test_is_void();
     test_is_array();
     test_is_lvalue_reference();
