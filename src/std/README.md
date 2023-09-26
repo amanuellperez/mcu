@@ -19,15 +19,15 @@ En principio iré escribiendola poco a poco, según vaya necesitando cosas.
 
 ## Referencias
 
-Se publica sistemáticamente un borrador del estandar. Se puede encontrar
-[aquí](https://open-std.org/JTC1/SC22/WG21/docs/papers/) (elegir el año
-correspondiente).
+Se publica sistemáticamente un borrador del estandar.  
+[Aquí](https://open-std.org/JTC1/SC22/WG21/docs/papers/) lo suelen publicar
+(elegir el año correspondiente).
 
-Por comodidad [aquí](doc/cpp_standard_2023_draft.pdf) se puede encontrar la
+Por comodidad en este [enlace](doc/cpp_standard_2023_draft.pdf) se puede encontrar la
 copia que estoy usando para implementarlo.
 
-Aparte de la copia [cppreference](https://en.cppreference.com/w/) suele ser
-una buena referencia, y conviene cotillear el código de `gcc` sobre todo
+Aparte de la copia, [cppreference](https://en.cppreference.com/w/) suele ser
+una buena referencia, y conviene cotillear el código de `gcc`, sobre todo
 cuando el estandar no está nada claro.
 
 
