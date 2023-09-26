@@ -17,6 +17,61 @@ o encontrar copias de gcc, decidí comenzar a implementarla para poder usarla y 
 
 En principio iré escribiendola poco a poco, según vaya necesitando cosas.
 
+## Referencias
+
+Se publica sistemáticamente un borrador del estandar. Se puede encontrar
+[aquí](https://open-std.org/JTC1/SC22/WG21/docs/papers/) (elegir el año
+correspondiente).
+
+Por comodidad [aquí](doc/cpp_standard_2023_draft.pdf) se puede encontrar la
+copia que estoy usando para implementarlo.
+
+Aparte de la copia [cppreference](https://en.cppreference.com/w/) suele ser
+una buena referencia, y conviene cotillear el código de `gcc` sobre todo
+cuando el estandar no está nada claro.
+
+
+## Sobre no usar memoria dinámica
+
+¿Por qué no usar memoria dinámica?
+
+A día de hoy solo programo el atmega32 que solo tiene 2kB de RAM, que es poca
+memoria para introducir la gestión de memoria dinámica.
+
+Pero la verdadera razón de por qué no implemento esta parte es simplemente
+porque no lo necesito: mis programas, de momento, no la necesitan para nada.
+
+(Bueno, inicialmente ni me la plantee implementarla porque he leído que los
+gestores de memoria dinámica consumen ellos mismos memoria, y con solo 2kB de
+RAM no quiero desperdiciarla en cosas no necesarias).
+
+
+## Sobre no lanzar excepciones
+
+¿Por qué no lanzarlas? 
+
+El motivo es la leyenda urbana que dice de que el usar excepciones genera
+mucho código. De hecho Herb Sutter tiene una charla proponiendo una futura
+alternatima más eficiente. 
+
+Al no haber hecho medidas desconozco si es verdad o no. De momento voy a
+suponer que es cierto. 
+
+
+### Problemas al implementar el estandar
+Hay partes del estandar, como `string_view`, que dan la impresión de poder ser
+útiles en microcontroladores. El problema es que algunas de sus funciones
+lanzan excepciones. ¿Qué hacer con estas funciones? ¿No suministrar la clase
+entera? ¿Suministrarla parcialmente?
+
+Suministrarla parcialmente encaja bien con lo que estoy implementando:
+implemento "la biblioteca estandar de C++ sin excepciones". El problema es que
+es posible que si suministro parcialmente una clase, al empezarla usarla al
+final quiera usar todo su interfaz. 
+
+El problema es: ¿qué hacer con las funciones que lanzan excepciones?
+
+
 ## Problemas con C++20
 NOTA: Los añadidos de C++20 introducen un montón de dependencias, lo cual hace
 que o bien le dedicas un montón de tiempo para escribir el archivo de cabecera
