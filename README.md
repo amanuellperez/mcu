@@ -23,12 +23,14 @@ This directory contains the following:
     * [atd](src/atd/README.md): General utilities.
       Depends on `std`.
  
-2. Devices: (device level?)
+2. Microcontroller: (microcontroller level?)
 
     * [avr](src/avr/README.md): "Drivers" for avr microcontrollers 
 	(right now, only for ATMEGA328). 
       
     * [mcu1](src/mcu1/README.md): Generic microcontrollers components.
+
+3. Devices: (device level?)
 
     * [dev0](src/dev0/README.md): Built-in devices.
       To program here you have to know your chip, 
@@ -37,7 +39,7 @@ This directory contains the following:
     * [dev1](src/dev1/README.md): User-defined devices.
     
   
-3. Projects: 
+4. Projects: 
     * [libprj](src/libprj/README.md): Common libraries
 
     * [prj](src/prj/README.md): Projects.
@@ -104,7 +106,7 @@ Se puede organizar el código en diferentes niveles:
     * [atd](src/atd/README.md): Funciones genéricas que se basan en mi std. 
 	 No usan excepciones ni los operadores new/delete.
 
-2. Dispositivos: (device level)
+2. Microcontroladores: (microcontroller level)
     
     * [avr](src/avr/README.md): Traductores del avr. 
 
@@ -119,6 +121,8 @@ Se puede organizar el código en diferentes niveles:
 
       Son todos aquellos componentes que se implementan usando exclusivamente
       hardware encontrado en los microcontroladores (timers, pins, ...)
+
+3. Dispositivos: (device level)
 
     * [dev0](src/dev0/README.md): Built-in devices
 
@@ -139,7 +143,7 @@ Se puede organizar el código en diferentes niveles:
       El programador no conoce la datasheet ya que desconoce el chip real al
       que accede. Lo que conoce son los diferents concepts.
 
-3. Proyectos:
+4. Proyectos:
 
     * [libprj](src/libprj/README.md): Bibliotecas comunes a varios proyectos.
 
