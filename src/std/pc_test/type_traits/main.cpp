@@ -443,16 +443,20 @@ void test_remove_reference()
 template <typename T>
 void test_add_lvalue_reference(const std::string& name_type)
 {
-    CHECK_TRUE( (std::is_same_v<mtd::add_lvalue_reference_t<T>, T&>),
+    CHECK_TRUE( (std::is_same_v<mtd::add_lvalue_reference_t<T>, 
+				std::add_lvalue_reference_t<T>>),
                name_type);
 
-    CHECK_TRUE( (std::is_same_v<mtd::add_lvalue_reference_t<T&>, T&>),
+    CHECK_TRUE( (std::is_same_v<mtd::add_lvalue_reference_t<T&>, 
+				std::add_lvalue_reference_t<T&>>),
                alp::as_str() << name_type << "&");
 
-    CHECK_TRUE( (std::is_same_v<mtd::add_lvalue_reference_t<const T>, const T&>),
+    CHECK_TRUE( (std::is_same_v<mtd::add_lvalue_reference_t<const T>, 
+				std::add_lvalue_reference_t<const T>>),
                alp::as_str() << "const " << name_type << "");
 
-    CHECK_TRUE( (std::is_same_v<mtd::add_lvalue_reference_t<const T&>, const T&>),
+    CHECK_TRUE( (std::is_same_v<mtd::add_lvalue_reference_t<const T&>, 
+				std::add_lvalue_reference_t<const T&>>),
                alp::as_str() << "const " << name_type << "&");
 }
 
@@ -466,7 +470,42 @@ void test_add_lvalue_reference()
     test_add_lvalue_reference<long long>("long long");
     test_add_lvalue_reference<float>("float");
     test_add_lvalue_reference<double>("double");
+    test_add_lvalue_reference<int (&)()>("int(&)()");
 }
+
+template <typename T>
+void test_add_rvalue_reference(const std::string& name_type)
+{
+    CHECK_TRUE( (std::is_same_v<mtd::add_rvalue_reference_t<T>, 
+				std::add_rvalue_reference_t<T>>),
+               name_type);
+
+    CHECK_TRUE( (std::is_same_v<mtd::add_rvalue_reference_t<T&>, 
+				std::add_rvalue_reference_t<T&>>),
+               alp::as_str() << name_type << "&");
+
+    CHECK_TRUE( (std::is_same_v<mtd::add_rvalue_reference_t<const T>, 
+				std::add_rvalue_reference_t<const T>>),
+               alp::as_str() << "const " << name_type << "");
+
+    CHECK_TRUE( (std::is_same_v<mtd::add_rvalue_reference_t<const T&>, 
+				std::add_rvalue_reference_t<const T&>>),
+               alp::as_str() << "const " << name_type << "&");
+}
+
+void test_add_rvalue_reference()
+{
+    test::interface("add_rvalue_reference");
+    
+    test_add_rvalue_reference<char>("char");
+    test_add_rvalue_reference<int>("int");
+    test_add_rvalue_reference<long>("long");
+    test_add_rvalue_reference<long long>("long long");
+    test_add_rvalue_reference<float>("float");
+    test_add_rvalue_reference<double>("double");
+    test_add_rvalue_reference<int (&)()>("int(&)()");
+}
+
 
 template <typename T>
 void test_is_array(const std::string& name_type)
@@ -928,6 +967,7 @@ try{
     // -----------------------
     test_remove_reference();
     test_add_lvalue_reference();
+    test_add_rvalue_reference();
 
     // sign modifications
     // ------------------

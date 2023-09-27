@@ -53,6 +53,7 @@
  *
  ****************************************************************************/
 #include "std_config.h"
+#include "std_private.h"
 
 #include "std_cstddef.h"    // size_t
 
@@ -670,45 +671,79 @@ using remove_reference_t = typename remove_reference<T>::type;
 // else return T;
 // ---
 //
-// TODO: gcc implementa también el caso en que se le pase una función. Aquí no
-// lo estoy implementando.
+//>>> BORRAME
+//// TODO: gcc implementa también el caso en que se le pase una función. Aquí no
+//// lo estoy implementando.
+//template <typename T>
+//constexpr inline bool __is_referenceable()
+//{
+//    if (is_object_v<T> or is_reference_v<T>)
+//	return true;
+//
+//    else
+//	return false;
+//}
+//
+//template <typename T, bool = __is_referenceable<T>()>
+//struct __add_lvalue_reference_switch;
+//
+//template <typename T>
+//struct __add_lvalue_reference_switch<T, false> {
+//    using type = T;
+//};
+//
+//template <typename T>
+//struct __add_lvalue_reference_switch<T, true> {
+//    using type = T&;
+//};
+//
+//template <typename T>
+//struct add_lvalue_reference{
+//    using type = typename __add_lvalue_reference_switch<T>::type;
+//};
+//<<< FIN BORRAME
+
+
+namespace impl_of{
+template <typename T, bool = private_::is_referenceable<T>>
+struct add_lvalue_reference
+{ using type = T;};
+
 template <typename T>
-constexpr inline bool __is_referenceable()
-{
-    if (is_object_v<T> or is_reference_v<T>)
-	return true;
+struct add_lvalue_reference<T, true>
+{ using type = T&;};
 
-    else
-	return false;
-}
-
-template <typename T, bool = __is_referenceable<T>()>
-struct __add_lvalue_reference_switch;
-
+}// namespace 
+ 
 template <typename T>
-struct __add_lvalue_reference_switch<T, false> {
-    using type = T;
-};
-
-template <typename T>
-struct __add_lvalue_reference_switch<T, true> {
-    using type = T&;
-};
-
-template <typename T>
-struct add_lvalue_reference{
-    using type = typename __add_lvalue_reference_switch<T>::type;
-};
-
+struct add_lvalue_reference
+	: public impl_of::add_lvalue_reference<T>
+{ };
 
 template <typename T>
 using add_lvalue_reference_t = typename add_lvalue_reference<T>::type;
 
 
-//// add_rvalue_reference
-//
-//template <typename T>
-//using add_rvalue_reference_t = typename add_rvalue_reference<T>::type;
+// add_rvalue_reference
+// --------------------
+namespace impl_of{
+template <typename T, bool = private_::is_referenceable<T>>
+struct add_rvalue_reference
+{ using type = T;};
+
+template <typename T>
+struct add_rvalue_reference<T, true>
+{ using type = T&&;};
+
+}// namespace 
+ 
+template <typename T>
+struct add_rvalue_reference
+	: public impl_of::add_rvalue_reference<T>
+{ };
+
+template <typename T>
+using add_rvalue_reference_t = typename add_rvalue_reference<T>::type;
 
 // ------------------
 // sign modifications
@@ -931,7 +966,7 @@ using remove_pointer_t = typename remove_pointer<T>::type;
 //  que es un error de gcc.
 //
 template <typename T, 
-	 bool = __is_referenceable<T>() or is_void_v<T>>
+	 bool = private_::is_referenceable<T> or is_void_v<T>>
 struct __add_pointer_switch;
 
 
