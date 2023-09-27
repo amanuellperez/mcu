@@ -1,4 +1,4 @@
-// Copyright (C) 2022 Manuel Perez 
+// Copyright (C) 2022-2023 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -17,7 +17,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#pragma once
 
 #pragma once
 
@@ -30,16 +29,66 @@
  *
  * HISTORIA
  *    Manuel Perez
- *    11/12/2022 Escrito
+ *    11/12/2022 integral
+ *    27/09/2023 same_as
  *
  ****************************************************************************/
 #include "std_config.h"
 #include "std_type_traits.h"
 
 namespace STD{
+// language-related concepts
+// --------------------------
+namespace impl_of{
+template <typename T, typename U>
+concept same_as = is_same_v<T,U>;
+}// namespace impl_of
+ 
+template <typename T, typename U>
+concept same_as = impl_of::same_as<T,U> and impl_of::same_as<U,T>;
 
+template <typename Derived, typename Base>
+concept derived_from =
+	is_base_of_v<Base, Derived> and
+	is_convertible_v<const volatile Derived*, const volatile Base*>;
+
+//convertible_to
+//common_reference_with
+//common_with
+
+// arithmetic concepts
 template <typename T>
 concept integral = is_integral_v<T>;
+
+//signed_integral
+//unsigned_integral
+//floating_point
+//
+//assignable_from
+//
+//// TODO: ranges 
+//
+//destructible
+//constructible_from
+//default_initializable
+//move_constructible
+//copy_constructible
+//
+//// comparison concepts
+//// -------------------
+//equality_comparable
+//equality_comparable_with
+//totally_ordered
+//totally_ordered_with
+//
+//// object concepts
+//// ---------------
+//movable
+//copyable
+//semiregular
+//regular
+//
+// etc...
 
 }// namespace
 

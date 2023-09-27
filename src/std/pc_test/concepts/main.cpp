@@ -28,9 +28,19 @@ using namespace test;
 
 struct A{};
 
-void test_concepts()
+
+void test_same_as()
 {
-    test::interfaz("mtd::concepts");
+    test::interface("same_as");
+
+    CHECK_TRUE(mtd::same_as<int, int> == std::same_as<int,int>, "same_as<int, int>");
+    CHECK_TRUE(mtd::same_as<int, const int> == std::same_as<int,const int>, "same_as<int, const int>");
+    CHECK_TRUE(mtd::same_as<int, int*> == std::same_as<int,int*>, "same_as<int, int*>");
+}
+
+void test_integral()
+{
+    test::interface("mtd::integral");
 
     CHECK_TRUE(mtd::integral<char> == std::integral<char>, "integral");
     CHECK_TRUE(mtd::integral<short> == std::integral<short>, "integral");
@@ -53,7 +63,10 @@ int main()
 try{
     test::header("concepts");
 
-    test_concepts();
+    // language-related concepts
+    // -------------------------
+    test_same_as();
+    test_integral();
 
 }catch(const std::exception& e){
     std::cerr << e.what() << '\n';
