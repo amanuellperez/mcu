@@ -825,6 +825,58 @@ void test_is_class()
     CHECK_TRUE(mtd::is_class_v<class C> == std::is_class_v<class C>, "C");
 }
 
+template <typename T>
+void test_add_const(const std::string& name_type)
+{
+    CHECK_TRUE(std::is_same_v<mtd::add_const_t<T>, std::add_const_t<T>>, 
+		alp::as_str() << "add_const(" << name_type << ")");
+}
+
+void test_add_const()
+{
+    test::interface("add_const");
+ 
+    test_add_const<int>("int");
+    test_add_const<const int>("const int");
+    test_add_const<volatile int>("volatile int");
+    test_add_const<const volatile int>("const volatile int");
+}
+
+template <typename T>
+void test_add_volatile(const std::string& name_type)
+{
+    CHECK_TRUE(std::is_same_v<mtd::add_volatile_t<T>, std::add_volatile_t<T>>, 
+		alp::as_str() << "add_volatile(" << name_type << ")");
+}
+
+void test_add_volatile()
+{
+    test::interface("add_volatile");
+ 
+    test_add_volatile<int>("int");
+    test_add_volatile<const int>("const int");
+    test_add_volatile<volatile int>("volatile int");
+    test_add_volatile<const volatile int>("const volatile int");
+}
+
+
+template <typename T>
+void test_add_cv(const std::string& name_type)
+{
+    CHECK_TRUE(std::is_same_v<mtd::add_cv_t<T>, std::add_cv_t<T>>, 
+		alp::as_str() << "add_cv(" << name_type << ")");
+}
+void test_add_cv()
+{
+    test::interface("add_cv");
+
+    test_add_cv<int>("int");
+    test_add_cv<const int>("const int");
+    test_add_cv<volatile int>("volatile int");
+    test_add_cv<const volatile int>("const volatile int");
+}
+
+
 int main()
 {
 try{
@@ -868,6 +920,12 @@ try{
     test_is_base_of();
     test_is_convertible();
  
+    // const-volatile modifications
+    // ----------------------------
+    test_add_const();
+    test_add_volatile();
+    test_add_cv();
+	
     // array modifications
     // --------------------
     test_remove_extent();
