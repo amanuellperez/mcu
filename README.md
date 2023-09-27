@@ -37,11 +37,9 @@ This directory contains the following:
     * [dev1](src/dev1/README.md): User-defined devices.
     
   
-3. Common libraries:
-    * [libprj](src/libprj/README.md): Application libraries.
-  
+3. Projects: 
+    * [libprj](src/libprj/README.md): Common libraries
 
-4. Projects: 
     * [prj](src/prj/README.md): Projects.
 
 
@@ -141,10 +139,10 @@ Se puede organizar el código en diferentes niveles:
       El programador no conoce la datasheet ya que desconoce el chip real al
       que accede. Lo que conoce son los diferents concepts.
 
-3. Bibliotecas comunes a varios proyectos:
-    * [libprj](src/libprj/README.md)
+3. Proyectos:
 
-4. Proyectos:
+    * [libprj](src/libprj/README.md): Bibliotecas comunes a varios proyectos.
+
     * [prj](src/prj/README.md): Proyectos.
 
 
@@ -247,5 +245,10 @@ sitio. El problema es que no podré poner aquí dónde (estaré bloqueado xD). S
 alguien quisiera localizarme que use el nuevo mail (manuel2perez@proton.me).
 
 
+## Tags usadas en el código
 
++ (RRR): rationale, esto es, indica los motivos por los que he implementado
+  (originalmente) la función de esa manera.
+
++ (impl): idea de implementación.
 
