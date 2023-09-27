@@ -877,6 +877,25 @@ void test_add_cv()
 }
 
 
+template <typename From, typename To, typename Res>
+void test_copy_cv(const std::string& name_type_from, const std::string& name_type_to)
+{
+    CHECK_TRUE(std::is_same_v<mtd::private_::copy_cv_t<From, To>, Res>,
+		alp::as_str() << "copy_cv_t<" << name_type_from << ", "
+		              << name_type_to << ")");
+}
+void test_copy_cv()
+{
+    test::interface("copy_cv");
+
+    test_copy_cv<std::string, int, int>("std::string", "int");
+    test_copy_cv<const std::string, int, const int>("const std::string", "int");
+    test_copy_cv<volatile std::string, int, volatile int>("volatile std::string", "int");
+    test_copy_cv<const volatile std::string, int, const volatile int>("const volatile std::string", "int");
+
+}
+
+
 int main()
 {
 try{
@@ -942,6 +961,10 @@ try{
     test_enable_if();
     test_common_type();
     test_conditional();
+
+    // private_
+    // --------
+    test_copy_cv();
 
 }catch(const std::exception& e){
     std::cerr << e.what() << '\n';

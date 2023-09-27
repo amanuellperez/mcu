@@ -27,12 +27,12 @@
  *	Corresponde con el type_traits del estandar
  *
  *  TODO
- *	Algunas implementaciones dependen de GCC.
+ *	Algunas implementaciones dependen de GCC (is_union, is_class...)
  *	Ver https://gcc.gnu.org/onlinedocs/gcc/Type-Traits.html
  *	¿Cómo se pueden desvincular de gcc?
  *
  *  HISTORIA
- *    A. Manuel Lopez 
+ *    Manuel Perez
  *    07/02/2019 v0.0
  *    22/10/2019 is_const_v, is_volatile_v, conditional_t
  *    03/11/2019 void_t
@@ -42,7 +42,14 @@
  *    14/08/2021 Completando implementación de common_type.
  *               Es copia de cppreference. TODO: reescribirla.
  *    23/12/2022 type_identity
- *    25/09/2023 remove_cvref, is_union, is_class, is_base_of
+ *    25/09/2023 remove_cvref, is_union, is_class, is_base_of,
+ *               add_const/volatile/cv
+ *               common_reference (TODO: falta probar!!!)
+ *               (¿Cómo probar common_reference? La definición del estandard
+ *               no está nada clara, ya que dice cómo funciona por dentro pero
+ *               no dice para qué sirve. Ni siquiera en cppreference se
+ *               encuentran ejemplos de cómo validar esta función. Pero sin
+ *               tests lo más probable es que tenga un montón de errores!!!)
  *
  ****************************************************************************/
 #include "std_config.h"
@@ -136,6 +143,38 @@ struct remove_cv {
 /// remove_cv_t
 template <typename T>
 using remove_cv_t = typename remove_cv<T>::type;
+
+
+// add_const
+// ---------
+template <typename T>
+struct add_const {
+    using type = const T;
+};
+
+template <typename T>
+using add_const_t = typename add_const<T>::type;
+
+// add_volatile
+// ------------
+template <typename T>
+struct add_volatile {
+    using type = volatile T;
+};
+
+template <typename T>
+using add_volatile_t = typename add_volatile<T>::type;
+
+// add_cv
+// ------
+template <typename T>
+struct add_cv {
+    using type = const volatile T;
+};
+
+template <typename T>
+using add_cv_t = typename add_cv<T>::type;
+
 
 
 // -----------------------
@@ -742,6 +781,7 @@ using make_unsigned_t = typename make_unsigned<T>::type;
 // is_base_of
 // ----------
 // TODO: depende de gcc. __is_base_of!!!
+// cppreference suministra una implementación que no depende de __is_base_of
 template<typename Base, typename Derived>
 struct is_base_of
 : public integral_constant<bool, __is_base_of(Base, Derived)>
@@ -944,16 +984,17 @@ using remove_cvref_t = typename remove_cvref<T>::type;
 // -----
 // El standard indica que la función a implementar es:
 //
-// typename U = remove_reference_t<T>;
+// type decay<T>:
+//	type U = remove_reference_t<T>;
 //
-// if (is_array_v<U>)
-//	return remove_extent_t<U>*;
+//	if (is_array_v<U>)
+//	    return remove_extent_t<U>*;
 //
-// else if (is_function_v<U>)
-//	return add_pointer_t<U>;
+//	else if (is_function_v<U>)
+//	    return add_pointer_t<U>;
 //
-// else
-//	return remove_cv_t<U>;
+//	else
+//	    return remove_cv_t<U>;
 template <typename U,
 	    bool = is_array_v<U>,
 	    bool = is_function_v<U>>
@@ -997,10 +1038,10 @@ using decay_t = typename decay<T>::type;
 
 // enable_if
 // ---------
-// typename enable_if(bool b, typename T)
+// type enable_if(bool b, type T)
 // {
 //	if (b == true) return T;
-//	else compile_error("no type");
+//	else no_type; // or compile_error("no type");
 // }
 template <bool b, typename T>
 struct enable_if;
@@ -1034,27 +1075,30 @@ using void_t = void;
 
 // common_type
 // -----------
-// if (sizeof...(T) == 0) 
-//	compile_error("undefined");
+//  type common_type<type T1, type T2, ..., type Tn>
+//  {
+//	if (sizeof...(T) == 0) 
+//	    return no_type; 
 //
-// else if (sizeof...(T) == 1) 
-//	return common_type_t<T, T>; // definido o no
+//	if (sizeof...(T) == 1) 
+//	    return common_type_t<T, T>; // definido o no
 //
-// else if (sizeof...(T) == 2){
-//	typename D1 = decay_t<T1>;
-//	typename D2 = decay_t<T2>;
+//	if (sizeof...(T) == 2){
+//	    typename D1 = decay_t<T1>;
+//	    typename D2 = decay_t<T2>;
 //
-//	// condicion == !(is_same_v<T1, D1> and is_same_v<T2, D2>)
-//	if (!is_same_v<T1, D1> or !is_same_v<T2, D2>)
-//	    return common_type_t<D1, D2>;
+//	    // condicion == !(is_same_v<T1, D1> and is_same_v<T2, D2>)
+//	    if (!is_same_v<T1, D1> or !is_same_v<T2, D2>)
+//		return common_type_t<D1, D2>;
 //
-//	else if (!there_is_specialization_of(common_type_t<D1, D2>))
-//	    return decay_t<decltype(false ? declval<D1>(): declval<D2>())>;
+//	    else if (!there_is_specialization_of(common_type_t<D1, D2>))
+//		return decay_t<decltype(false ? declval<D1>(): declval<D2>())>;
+//	}
+//
+// 
+//	return common_type_t<common_type_t<T1, T2>, Tail...>;
 // }
 //
-// else 
-//	return common_type_t<common_type_t<T1, T2>, Tail...>;
-//	
 // TODO: la impresión al hacer las pruebas es que al introducir common_type en
 // los test tarda bastante más en compilar. ¿Merecerá la pena mejorar la
 // implementación? Esta es muy sencilla de entender.
@@ -1122,6 +1166,385 @@ struct common_type<T1, T2>
 template <typename T1, typename T2, typename... Tail>
 struct common_type <T1, T2, Tail...>{
     using type = common_type_t<common_type_t<T1, T2>, Tail...>;
+};
+
+
+// basic_common_reference
+// ----------------------
+// Según el standard: 
+//	Unless this trait is specialized there shall be no member type.
+// 
+template<typename T, typename U,
+	 template<typename> typename TQ, template<typename> typename UQ>
+struct basic_common_reference { };
+
+
+// common_reference
+// ----------------
+// El standard define las siguientes funciones previas:
+//
+// template <typename A>
+// using CREF = add_lvalue_reference_t<const_ remove_reference_t<A>>;
+//
+// type XREF<type A, type U>	// = copy_cvref!!!
+// {
+//	if (is_lvalue_reference_v<A>)
+//	    return copy_cv_t<A, U>&;
+//
+//	if (is_rvalue_reference_v<A>)
+//	    return copy_cv_t<A, U>&&;
+//
+//	return copy_cv_t<A>;
+// }
+//
+// type COPYCV<type From, type To>  // == copy_cv_t<from, to>
+// {
+//	type res = To;
+//	
+//	if (is_const_v<From>)
+//	    res = add_const_t<res>;
+//
+//	if (is_volatile_v<From>)
+//	    res = add_volatile_t<res>;
+//
+//	return res;
+// }
+//
+// template <typename X, typename Y>
+// using COND_RES = decltype(false ? declval<X(&)()>()() : declval<Y(&)()>()());
+//
+// type COMMON_REF<type A, type B>
+// {
+//	type X = remove_reference_t<A>;
+//	type Y = remove_reference_t<B>;
+//	
+//	if (is_lvalue_reference_v<A> and is_lvalue_reference_v<B>){
+//	    type res = COND_RES(COPYCV(X,Y) &, COPYCV(Y,X) &);
+//
+//	    if (res != no_type and is_reference_v<res>)
+//		return res;
+//
+//	    // return no_type; <-- no queda del todo claro el "otherwise"
+//				  del standard
+//	}
+//
+//	type C = remove_reference_t<COMMON_REF<X&, Y&>&&;
+//	if (is_rvalue_reference_v<A> and is_rvalue_reference_v<B>
+//	    and is_convertible_v<X&&, C>
+//	    and is_convertible_v<Y&&, C>)
+//	    return C;  
+//
+//	type D = COMMON_REF<const X&, Y&>;
+//	if (is_rvalue_reference_v<A> and is_lvalue_reference_v<B>   
+//	    and D != no_type)
+//	    return D;
+//
+//	if (is_lvalue_reference_v<A> and is_rvalue_reference_v<B>)
+//	    return COMMON_REF<B, A>;
+//
+//	return no_type;
+// }
+//
+//
+// type common_reference<T1, T2, T3, ..., Tn>
+// {
+//	if (n == 0)
+//	    return no_type;
+//
+//	if (n == 1)
+//	    return T1;
+//
+//	if (n == 2){
+//	    type C = COMMON_REF<T1, T2>;
+//	    if (is_reference_type<T1> and is_reference_type<T2>
+//		and C != no_type)
+//		return C;
+//
+//	    type D = basic_common_reference<remove_cvref_t<T1>, 
+//				       remove_cvref_t<T2>,
+//				       XREF<T1>, XREF<T2>;
+//	    if (D != no_type)
+//		return D;
+//
+//	    type E = COND_RES<T1, T2>;
+//	    if (E != no_type)
+//		return E;
+//
+//	    type F = common_type_t<T1, T2>;
+//	    if (F != no_type)
+//		return F;
+//
+//	    return no_type;
+//	}
+//
+//	// if (n > 2)
+//	type C = common_reference_t<T1, T2>;
+//	if (is_type<C>) // == if(C != no_type)
+//	    return common_reference_t<C, T3, ..., Tn>;
+//
+//	return no_type;
+// }
+//  
+
+namespace private_{
+// type copy_cv<type From, type To> 
+// {
+//	type res = To;
+//	
+//	if (is_const_v<From>)
+//	    res = add_const_t<res>;
+//
+//	if (is_volatile_v<From>)
+//	    res = add_volatile_t<res>;
+//
+//	return res;
+// }
+//
+// (impl) ¿Cómo implementarlo? 
+// Como los condicionales se basan en 2 bools y no en tipos, 
+// una forma de hacerlo es pasando esos valores como parámetros de template.
+template <typename From, typename To,
+	  bool isConst = is_const_v<From>,
+	  bool isVolatile = is_volatile_v<From>>
+struct copy_cv;
+
+template <typename From, typename To>
+struct copy_cv<From, To, false, false>{
+    using type = To;
+};
+
+template <typename From, typename To>
+struct copy_cv<From, To, false, true>{
+    using type = volatile To;
+};
+
+template <typename From, typename To>
+struct copy_cv<From, To, true, false>{
+    using type = const To;
+};
+
+template <typename From, typename To>
+struct copy_cv<From, To, true, true>{
+    using type = const volatile To;
+};
+
+template <typename From, typename To>
+using copy_cv_t = typename copy_cv<From, To>::type;
+
+// xref  (== copy_cvref)
+// ----
+// pero el nombre real es `copy_cvref` ya que lo que hace es copiar el const,
+// volatile o ref de From, en To.
+template <typename T>
+struct xref{
+    template <typename U>
+    using type = copy_cv_t<T, U>;
+};
+
+template <typename T>
+struct xref<T&>{
+    template <typename U>
+    using type = copy_cv_t<T, U>&;
+};
+
+template <typename T>
+struct xref<T&&>{
+    template <typename U>
+    using type = copy_cv_t<T, U>&&;
+};
+
+
+} // namespace private_
+
+namespace impl_of{
+using private_::copy_cv;
+using private_::copy_cv_t;
+
+// cond_res
+// --------
+template<typename X, typename Y>
+using cond_res = decltype(false ? declval<X(&)()>()() : declval<Y(&)()>()());
+
+// COND_RES(COPYCV(X,Y)&, COPYCV(Y,X)&)
+// ------------------------------------
+template <typename X, typename Y>
+using cond_res_cvref = cond_res<copy_cv<X,Y>&, copy_cv<Y,X>&>;
+
+// common_ref (COMMON_REF)
+// -----------------------
+// TODO: Esta implementación sigue tanto el estandar como el código de gcc que
+// si se ve, van a la par. El único punto donde se separan es que el estandar
+// dice que X = remove_cvref_t<A> e Y = remove_cvref_t<B> cosa que los de gcc
+// no parece que tengan en cuenta. (como no quiero dedicarle mucho tiempo a
+// esto dejo el critero de gcc aunque convendría revisar si es correcto todo).
+template <typename X, typename Y, typename = void, typename = void>
+struct common_ref { };
+
+template <typename X, typename Y>
+using common_ref_t = typename common_ref<X,Y>::type;
+
+// case: is_lvalue_reference_v<A> and is_lvalue_reference_v<B>
+template <typename X, typename Y>
+struct common_ref
+		<X&, Y&, 
+		 void_t<cond_res_cvref<X, Y>>
+		>
+	: enable_if<is_reference_v<cond_res_cvref<X, Y>>,
+				   cond_res_cvref<X, Y>>
+{ };
+
+//  type C = remove_reference_t<COMMON_REF<X&, Y&>&&;
+template <typename X, typename Y>
+using common_ref_C = remove_reference_t<common_ref_t<X&, Y&>>&&;
+
+// case: is_rvalue_reference_v<A> and is_rvalue_reference_v<B>
+template <typename X, typename Y>
+struct common_ref<X&&, Y&&, 
+	enable_if< (is_convertible_v<X&&, common_ref_C<X, Y>> and
+	           is_convertible_v<Y&&, common_ref_C<X, Y>>)
+		, void>
+	>
+{ using type = common_ref_C<X, Y>; };
+
+
+//  type D = COMMON_REF<const X&, Y&>;
+template <typename X, typename Y>
+using common_ref_D = common_ref_t<const X&, Y&>;
+
+// if (is_rvalue_reference_v<A> and is_lvalue_reference_v<B> ...
+template <typename X, typename Y>
+struct common_ref<X&&, Y&,
+	    enable_if<is_convertible_v<X&&, common_ref_D<X, Y>>, void>
+	>
+{ using type = common_ref_D<X, Y>; };
+
+
+// if (is_lvalue_reference_v<A> and is_rvalue_reference_v<B>)
+template <typename X, typename Y>
+struct common_ref<X&, Y&&>
+    : common_ref<Y&&, X&> { };
+
+
+// common_reference (2 elementos)
+// ------------------------------
+// (impl) En este caso queremos implementar el siguiente flujo:
+//	type X1 =...
+//	if (X1 != no_type)
+//	    return ...
+//
+//	type X2 = ...
+//	if (X2 != no_type)
+//	    return ...
+//	...
+//	return no_type;
+//
+//  Si un tipo no está definido, pasamos al siguiente condicional.
+//  Los de gcc usan el siguiente truco: 
+//	Como es habitual para saber si un tipo está definido o no se usa
+//	void_t<T>. Cuando el tipo está definido, void_t<T> está definido y la
+//	especialización de template es la que se instancia.
+//	Pero ¿qué pasa si no está definido? Que entonces vamos a la definición
+//	general que es herencia de common_reference con un case_number
+//	superior, con lo que pasamos al siguiente case. Muy ingenioso.
+//
+template <typename T1, typename T2, int case_number = 1, typename = void>
+struct common_reference
+    : common_reference<T1, T2, case_number + 1>
+{ };
+
+template <typename T1, typename T2>
+using common_reference_t = typename common_reference<T1, T2>::type;
+
+// case C: is_reference_type... != no_type
+template <typename T1, typename T2>
+struct common_reference <T1&, T2&, 1,
+			void_t<common_ref<T1&, T2&>>
+			>
+{ using type = common_ref_t<T1&, T2&>; };
+
+template <typename T1, typename T2>
+struct common_reference <T1&&, T2&&, 1,
+			void_t<common_ref<T1&&, T2&&>>
+			>
+{ using type = common_ref_t<T1&&, T2&&>; };
+
+template <typename T1, typename T2>
+struct common_reference <T1&, T2&&, 1,
+			void_t<common_ref<T1&, T2&&>>
+			>
+{ using type = common_ref_t<T1&, T2&&>; };
+
+template <typename T1, typename T2>
+struct common_reference <T1&&, T2&, 1,
+			void_t<common_ref<T1&&, T2&>>
+			>
+{ using type = common_ref_t<T1&&, T2&>; };
+
+
+// case D: basic_common_reference<...> != no_type
+template <typename T1, typename T2>
+using basic_common_ref =
+    typename basic_common_reference<remove_cvref_t<T1>,
+				    remove_cvref_t<T2>,
+				    private_::xref<T1>::template type,
+				    private_::xref<T2>::template type>::type;
+
+template <typename T1, typename T2>
+struct common_reference <T1, T2, 2,
+			void_t<basic_common_ref<T1, T2>>
+			>
+{ using type = basic_common_ref<T1, T2>; };
+
+
+// case E: COND_RES<T1, T2> != no_type
+template <typename T1, typename T2>
+struct common_reference <T1, T2, 3,
+			void_t<cond_res<T1, T2>>
+			>
+{ using type = cond_res<T1, T2>; };
+
+// case F: common_type_t<T1, T2> != no_type
+template <typename T1, typename T2>
+struct common_reference <T1, T2, 4,
+			void_t<common_type_t<T1, T2>>
+			>
+{ using type = common_type_t<T1, T2>; };
+
+// default
+template <typename T1, typename T2>
+struct common_reference <T1, T2, 5, void>
+{ };
+
+}// namespace impl_of
+ 
+template <typename... T>
+struct common_reference;
+
+template <typename... T>
+using common_reference_t = typename common_reference<T...>::type;
+
+// if (n == 0) return no_type;
+template<>
+struct common_reference<>
+{ };
+
+// if (n == 1) return T1;
+template <typename T1>
+struct common_reference<T1>
+{ using type = T1;};
+
+
+// if (n == 2) ...
+template <typename T1, typename T2>
+struct common_reference<T1, T2>
+    : impl_of::common_reference<T1, T2>
+{ };
+
+
+// if (n > 2) recursivo
+template <typename T1, typename T2, typename... Tail>
+struct common_reference<T1, T2, Tail...>{
+    using type = common_reference_t<common_reference_t<T1, T2>, Tail...>;
 };
 
 
