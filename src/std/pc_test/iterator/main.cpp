@@ -21,6 +21,8 @@
 #include "../../std_algorithm.h"
 
 #include <alp_test.h>
+#include <alp_string.h>
+
 #include <iostream>
 #include <vector>
 
@@ -28,7 +30,7 @@ using namespace test;
 
 void test_reverse_iterator()
 {
-    test::interfaz("reverse_iterator");
+    test::interface("reverse_iterator");
     
     std::vector v = {1,2,3,4,5,6};
 
@@ -62,7 +64,7 @@ void test_advance(It it, int n)
 
 void test_advance()
 {
-    test::interfaz("advance");
+    test::interface("advance");
 
     { // random iterator
     int x[10];
@@ -76,7 +78,7 @@ void test_advance()
 
 void test_begin_end_size()
 {
-    test::interfaz("begin/end/size");
+    test::interface("begin/end/size");
 
     int a[3] = {10, 20, 30};
     CHECK_TRUE(mtd::begin(a) == std::begin(a), "begin");
@@ -89,6 +91,23 @@ void test_begin_end_size()
     CHECK_TRUE(mtd::size(b) == std::size(b), "size");
 }
 
+template <typename T>
+void test_iter_value(const std::string& name_type)
+{
+    CHECK_TRUE(std::is_same_v<mtd::iter_value_t<T>, std::iter_value_t<T>>
+		    , alp::as_str() << "iter_value(" << name_type << ")");
+}
+
+void test_iter_value()
+{
+    test::interface("iter_value");
+
+    test_iter_value<std::vector<int>>("vector<int>");
+    test_iter_value<std::array<int,4>>("array<int>");
+    test_iter_value<std::string>("string");
+		
+}
+
 int main()
 {
 try{
@@ -97,6 +116,8 @@ try{
     test_reverse_iterator();
     test_advance();
     test_begin_end_size();
+
+    test_iter_value();
 
 }catch(const std::exception& e){
     std::cerr << e.what() << '\n';

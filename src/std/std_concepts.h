@@ -27,10 +27,15 @@
  * DESCRIPCION
  *	El correspondiente a <concepts>
  *
+ * DUDA
+ *	Si el estandar suministra la mayoría de las definiciones de estos
+ *	concepts, por qué no dan también el código fuente para poder
+ *	incorporarlo directamente?
+ *
  * HISTORIA
  *    Manuel Perez
  *    11/12/2022 integral
- *    27/09/2023 same_as
+ *    27/09/2023 same_as, ...
  *
  ****************************************************************************/
 #include "std_config.h"
@@ -52,8 +57,20 @@ concept derived_from =
 	is_base_of_v<Base, Derived> and
 	is_convertible_v<const volatile Derived*, const volatile Base*>;
 
-//convertible_to
-//common_reference_with
+template <typename From, typename To>
+concept convertible_to =
+    is_convertible_v<From, To> and
+    requires(add_rvalue_reference_t<From> (&f)()){
+	static_cast<To>(f());
+    };
+
+
+template <typename T, typename U>
+concept common_reference_with =
+	same_as<common_reference_t<T, U>, common_reference_t<U, T>> 
+	and convertible_to<T, common_reference_t<T, U>>
+	and convertible_to<U, common_reference_t<T, U>>;
+
 //common_with
 
 // arithmetic concepts

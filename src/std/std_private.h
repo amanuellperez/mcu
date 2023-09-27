@@ -32,7 +32,8 @@
  *
  ****************************************************************************/
 #include "std_config.h"
-
+// Este header es común a todo. 
+// Que no incluya ningún otro archivo para evitar dependencias circulares.
 namespace STD{
 
 namespace private_{
