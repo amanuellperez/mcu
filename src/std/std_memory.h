@@ -29,6 +29,7 @@
  * HISTORIA
  *    Manuel Perez
  *    27/08/2023 to_address, pointer_traits (solo especialización con punteros)
+ *    28/09/2023 addressof
  *
  ****************************************************************************/
 #include "std_config.h"
@@ -75,6 +76,30 @@ constexpr auto to_address(const T& p) noexcept
     else
         return to_address(p.operator->());
 }
+
+// addressof
+// ---------
+// Iba a basar la implementación en la propuesta por cppreference, 
+// pero en la propia página de cppreference dice:
+// "Correct implementation of this function requires compiler support"
+// Así que tengo que usar __builtin_addressof que no es estandar.
+template <typename T>
+inline T* addressof(T& r) noexcept
+{
+    return __builtin_addressof(r);
+//    if constexpr (is_object_v<T>){
+//	return reinterpreted_cast<T*>(
+//			&const_cast<char&>(
+//			    reinterpreted_cast<const volatile char&>(r)));
+//    }
+//
+//    else    
+//	return &r;
+}
+
+
+template <typename T>
+const T* addressof(const T&&) = delete;
 
 }// namespace
 

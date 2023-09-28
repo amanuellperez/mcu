@@ -11,6 +11,7 @@ DIRS = algorithm\
 	iostream	\
 	iterator	\
 	limits		\
+	memory		\
 	numeric		\
 	ratio		\
 	sizeof_txt	\
