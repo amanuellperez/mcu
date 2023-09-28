@@ -42,6 +42,27 @@ void test_types()
     CHECK_TRUE(std::is_same_v<S::difference_type, M::difference_type>, "difference_type");
 }
 
+void test_constructor()
+{
+    test::interface("constructor");
+
+    mtd::string_view sempty{};
+    CHECK_TRUE(sempty.size() == 0, "string_view()");
+
+    std::string str{"abc"};
+    mtd::string_view sit{str.begin(), str.end()};
+    CHECK_EQUAL_CONTAINERS(str, sit, "string_view(begin, end)");
+
+    mtd::string_view schar{"abc"};
+    CHECK_EQUAL_CONTAINERS(str, schar, "string_view(const char*)");
+
+    mtd::string_view schar2{"abc", 2};
+    std::string str2{"ab"};
+    CHECK_EQUAL_CONTAINERS(str2, schar2, "string_view(const char* size_type)");
+
+
+}
+
 void compare_strings_views0(const std::string_view& sview, const mtd::string_view& mview)
 {
     CHECK_TRUE(sview.size() == mview.size(), "size");
@@ -91,14 +112,98 @@ void test_empty()
     compare_strings_views0(std::string_view{}, mtd::string_view{});
 }
 
-void test_const_char()
+void test_const_char(const char* str)
 {   
     test::interface("const char*");
+    std::cout << "str = " << str << '\n';
 
-    const char str[] = "abcd";
     std::string_view sview{str};
     mtd::string_view mview{str};
 
+    compare_strings_views0(sview, mview);
+    compare_strings_views1(sview, mview);
+
+
+}
+
+void test_remove_prefix(const char* str, size_t n, const std::string& res)
+{
+    mtd::string_view sview{str};
+
+    sview.remove_prefix(n);
+    CHECK_EQUAL_CONTAINERS(sview, res, 
+	    alp::as_str() << "remove_prefix(" << str 
+			  << ", " << n << ", " << res << ")");
+}
+
+
+void test_remove_prefix()
+{
+    test::interface("remove_prefix");
+
+    test_remove_prefix("123456789", 3, "456789");
+    test_remove_prefix("123", 0, "123");
+    test_remove_prefix("123", 1, "23");
+    test_remove_prefix("123", 2, "3");
+    test_remove_prefix("123", 3, "");
+}
+
+
+void test_remove_suffix(const char* str, size_t n, const std::string& res)
+{
+    mtd::string_view sview{str};
+
+    sview.remove_suffix(n);
+    CHECK_EQUAL_CONTAINERS(sview, res, 
+	    alp::as_str() << "remove_suffix(" << str 
+			  << ", " << n << ", " << res << ")");
+}
+
+
+void test_remove_suffix()
+{
+    test::interface("remove_suffix");
+
+    test_remove_suffix("123456789", 3, "123456");
+    test_remove_suffix("123", 0, "123");
+    test_remove_suffix("123", 1, "12");
+    test_remove_suffix("123", 2, "1");
+    test_remove_suffix("123", 3, "");
+}
+
+void test_swap(const std::string& a, const std::string& b)
+{   
+    mtd::string_view sa{a.begin(), a.end()};
+    mtd::string_view sb{b.begin(), b.end()};
+
+    sa.swap(sb);
+
+    std::cout << "swap(" << a << ", " << b << ":\n";
+    std::cout << '\t';
+    CHECK_EQUAL_CONTAINERS(sa, b, "(sa == b?)");
+    std::cout << '\t';
+    CHECK_EQUAL_CONTAINERS(sb, a, "(sb == a?)");
+}
+
+
+void test_swap()
+{
+    test::interface("swap");
+    test_swap("abcd", "1234");
+}
+
+void test_find()
+{
+    test::interface("find");
+//
+//    const char str[] = "abcd";
+//    mtd::string_view sview{str};
+//
+//    mtd::string_view kk{"ab", 2};
+    //mtd::string_view kk{addressof(c), 1};
+
+//    auto i = sview.find('a');
+//    CHECK_TRUE(i == 0, "find");
 
 }
 
@@ -108,11 +213,20 @@ try{
     test::header("string_view");
 
     test_types();
+
+    test_constructor();
+
     test_empty();
+
     test_basic(std::string{"abcd"});
-    // TODO: no compila.
-//    test_basic(std::array<char, 5>("abcd"));
+    test_basic(std::array<char, 5>("abcd"));
     test_const_char("abcd");
+
+    test_remove_prefix();
+    test_remove_suffix();
+    test_swap();
+
+    test_find();
 }catch(std::exception& e)
 {
     std::cerr << e.what() << '\n';

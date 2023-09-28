@@ -41,6 +41,7 @@
 #include "std_config.h"
 #include "std_char_traits.h"
 #include "std_iterator.h"
+#include "std_memory.h"
 
 namespace STD{
 
@@ -209,7 +210,7 @@ template <typename charT, typename Tr>
 // TODO: faltan los requires de It y End
 inline 
 constexpr basic_string_view<charT, Tr>::basic_string_view(It begin, End end)
-    : data_{to_address(begin)}, 
+    : data_{STD::to_address(begin)}, 
     //size_{end - begin}    <-- aunque lo correcto es esto, los de gcc tienen
     size_(end - begin)	//  <-- este para evitar que les de warning.
 			//	Probar a compilar el test cambiando al
