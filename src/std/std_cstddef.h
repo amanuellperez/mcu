@@ -30,6 +30,8 @@
  *   - HISTORIA:
  *	Manuel Perez 
  *	06/02/2019 byte
+ *	29/09/2023 nullptr_t
+ *
  *
  ****************************************************************************/
 #include "std_config.h"
@@ -41,7 +43,7 @@ namespace STD{
 
 using ::ptrdiff_t;
 using ::size_t;
-
+using nullptr_t = decltype(nullptr);
 
 /***************************************************************************
  *				byte

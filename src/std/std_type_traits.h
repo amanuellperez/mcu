@@ -55,7 +55,7 @@
 #include "std_config.h"
 #include "std_private.h"
 
-#include "std_cstddef.h"    // size_t
+#include "std_cstddef.h"    // size_t, nullptr_t
 
 namespace STD{
 // Helper class: integral_constant
@@ -103,7 +103,14 @@ template<typename T>
 auto declval() noexcept -> decltype(__declval<T>(0));
 
 
-
+// ------------------
+// operadores lógicos
+// ------------------
+// Estas funciones son genéricas
+namespace private_{
+template <bool x>
+struct static_not : bool_constant<!x> { };
+}// namespace private_
 
 
 // ----------------------------
@@ -182,36 +189,13 @@ using add_cv_t = typename add_cv<T>::type;
 // primary type categories
 // -----------------------
 
-// is_union
-// --------
-// TODO: depende de GCC. __is_union es de GCC
-template<typename T>
-struct is_union
-: public integral_constant<bool, __is_union(T)>
-{ };
-
-template <typename T>
-inline constexpr bool is_union_v = is_union<T>::value;
-
-
-// is_class
-// --------
-// TODO: depende de GCC. __is_class es de GCC
-// cppreference tiene una implementación que no depende de gcc
-template<typename T>
-struct is_class
-: public integral_constant<bool, __is_class(T)>
-{ };
-
-
-template <typename T>
-inline constexpr bool is_class_v = is_class<T>::value;
 
 
 // is_void
 // -------
+namespace impl_of{
 template <typename T>
-constexpr inline bool __is_void()
+constexpr inline bool is_void()
 {
     using U = remove_cv_t<T>;
 
@@ -220,12 +204,35 @@ constexpr inline bool __is_void()
     else
 	return false;
 }
-
+}// impl_of
+ 
 template <typename T>
-struct is_void : public bool_constant<__is_void<T>()> {};
+struct is_void : public bool_constant<impl_of::is_void<T>()> {};
 
 template <typename T>
 inline constexpr bool is_void_v = is_void<T>::value;
+
+// is_null_pointer
+// ---------------
+namespace impl_of{
+template <typename T>
+constexpr bool is_null_pointer()
+{
+    // Los de GCC hacen el remove_cv_t (LWG 2247)
+    if constexpr (is_same_v<remove_cv_t<T>, nullptr_t>)
+	return true;
+
+    else
+	return false;
+}
+}// impl_of
+ 
+template <typename T>
+struct is_null_pointer : bool_constant<impl_of::is_null_pointer<T>()> { };
+
+
+template <typename T>
+inline constexpr bool is_null_pointer_v = is_null_pointer<T>::value;
 
 
 // is_integral
@@ -335,6 +342,23 @@ struct is_array<T[]> : public true_type { };
 template <typename T>
 inline constexpr bool is_array_v = is_array<T>::value;
 
+// is_pointer
+// ----------
+namespace impl_of{
+template <typename T>
+struct is_pointer : false_type { };
+
+template <typename T>
+struct is_pointer<T*> : true_type { };
+
+}// namespace
+
+template <typename T>
+struct is_pointer : impl_of::is_pointer<remove_cv_t<T>>{ };
+
+template <typename T>
+inline constexpr bool is_pointer_v= is_pointer<T>::value;
+
 
 // is_lvalue_reference
 // -------------------
@@ -359,6 +383,43 @@ template <typename T>
 inline constexpr bool is_rvalue_reference_v = is_rvalue_reference<T>::value;
 
 
+// is_enum
+// --------
+// TODO: depende de GCC. __is_enum es de GCC
+template<typename T>
+struct is_enum
+: public integral_constant<bool, __is_enum(T)>
+{ };
+
+template <typename T>
+inline constexpr bool is_enum_v = is_enum <T>::value;
+
+// is_union
+// --------
+// TODO: depende de GCC. __is_union es de GCC
+template<typename T>
+struct is_union
+: public integral_constant<bool, __is_union(T)>
+{ };
+
+template <typename T>
+inline constexpr bool is_union_v = is_union<T>::value;
+
+
+// is_class
+// --------
+// TODO: depende de GCC. __is_class es de GCC
+// cppreference tiene una implementación que no depende de gcc
+template<typename T>
+struct is_class
+: public integral_constant<bool, __is_class(T)>
+{ };
+
+
+template <typename T>
+inline constexpr bool is_class_v = is_class<T>::value;
+
+// >>> ESTO ES DE GCC
 // is_function: copiado de cpp_reference (es un monstruo!!!)
 // ---------------------------------------------------------
 // primary template
@@ -522,24 +583,70 @@ struct is_function<Ret(Args..., ...) const volatile&& noexcept> : true_type {
 
 template <typename T>
 inline constexpr bool is_function_v = is_function<T>::value;
+// <<< FIN ESTO ES DE GCC
 
+
+// is_member_object_pointer
+// ------------------------
+namespace impl_of{
+template <typename T>
+struct is_member_object_pointer : false_type { };
+
+template <typename T, typename C>
+struct is_member_object_pointer<T C::*> 
+	: private_::static_not<is_function_v<T>> { };
+
+}// impl_of
+
+template <typename T>
+struct is_member_object_pointer 
+    : impl_of::is_member_object_pointer<remove_cv_t<T>> { };
+
+template <typename T>
+inline constexpr 
+    bool is_member_object_pointer_v = is_member_object_pointer<T>::value;
+
+
+// is_member_function_pointer
+// --------------------------
+namespace impl_of{
+template <typename T>
+struct is_member_function_pointer : false_type { };
+
+template <typename T, typename C>
+struct is_member_function_pointer<T C::*> 
+	    : is_function<T>::type { };
+}// impl_of
+ 
+
+template <typename T>
+struct is_member_function_pointer 
+	: impl_of::is_member_function_pointer<remove_cv_t<T>> 
+{ };
+
+template <typename T>
+inline constexpr bool is_member_function_pointer_v 
+				    = is_member_function_pointer<T>::value;
 
 // -------------------------
 // composite type categories
 // -------------------------
 // is_reference
 // ------------
+namespace impl_of{
 template <typename T>
-constexpr inline bool __is_reference()
+constexpr inline bool is_reference()
 {
     if (is_rvalue_reference_v<T> or is_lvalue_reference_v<T>)
 	return true;
 
     return false;
 }
-
+} // namespace
+  
+ 
 template <typename T>
-struct is_reference : public bool_constant<__is_reference<T>()>{ };
+struct is_reference : public bool_constant<impl_of::is_reference<T>()>{ };
 
 template <typename T>
 inline constexpr bool is_reference_v = is_reference<T>::value;
@@ -645,8 +752,42 @@ inline constexpr bool is_unsigned_v = is_unsigned<T>::value;
 
 
 
+// is_desstructible
+// ----------------
+// bool is_destructible<type T>
+// {
+//	if (is_reference_v<T>)
+//	    return true;
+//
+//	if (is_cv_void<T>)
+//	    return false;
+//
+//	if (is_function_type<T>)
+//	    return false;
+//
+//	if (is_unbound_array<T>)
+//	    return false;
+//
+//	if (is_object_v<T>){
+//	    type U = remove_all_extents_t<T>;
+//
+//	    if (requires {std::declval<U&>().~U})
+//		return true;
+//
+//	    return false;
+//	}
+//
+//	return false; //??? Esto no lo dicen
+// }
 
-
+//template <typename T, typename = void>
+//struct is_destructible : false_type {};
+//
+//
+//
+//// is_destructible_v
+//template <typename T>
+//inline constexpr bool is_destructible_v = is_destructible<T>::value;
 
 // -----------------------
 // Reference modifications

@@ -33,7 +33,15 @@
 
 using namespace test;
 
-struct Prueba{};
+class Class { };
+typedef union
+{
+    int a;
+    float b;
+} Union;
+
+enum Enum {black, white};
+enum class Enum_class{ one, two, three };
 
 void test_integral_constant()
 {
@@ -99,6 +107,11 @@ void test_integral_constant()
 		, "remove_cv_t(const int)");
     CHECK_TRUE((mtd::is_same_v<mtd::remove_cv_t<volatile int>, int> == true)
 		, "remove_cv_t(volatile int)");
+}
+
+void test_is_integral()
+{
+    test::interface("is_integral");
 
     // is_integral
     CHECK_TRUE(mtd::is_integral<bool>::value == true, "is_integral<bool>");
@@ -150,13 +163,17 @@ void test_integral_constant()
     CHECK_TRUE(mtd::is_integral<double>::value == false, "is_integral<double>");
     CHECK_TRUE(mtd::is_integral<const double>::value == false, "is_integral<const double>");
     CHECK_TRUE(mtd::is_integral<volatile double>::value == false, "is_integral<volatile double>");
-    CHECK_TRUE(mtd::is_integral<Prueba>::value == false, "is_integral<Prueba>");
-    CHECK_TRUE(mtd::is_integral<const Prueba>::value == false, "is_integral<const Prueba>");
-    CHECK_TRUE(mtd::is_integral<volatile Prueba>::value == false, "is_integral<volatile Prueba>");
+    CHECK_TRUE(mtd::is_integral<Class>::value == false, "is_integral<Class>");
+    CHECK_TRUE(mtd::is_integral<const Class>::value == false, "is_integral<const Class>");
+    CHECK_TRUE(mtd::is_integral<volatile Class>::value == false, "is_integral<volatile Class>");
 
     CHECK_TRUE(mtd::is_integral_v<int> == true, "is_integral_v<int>");
-    CHECK_TRUE(mtd::is_integral_v<Prueba> == false, "is_integral_v<Prueba>");
+    CHECK_TRUE(mtd::is_integral_v<Class> == false, "is_integral_v<Class>");
+}
 
+void test_is_floating_point()
+{
+    test::interface("is_floating_point");
     CHECK_TRUE(mtd::is_floating_point<float>::value == true, "is_floating_point<float>");
     CHECK_TRUE(mtd::is_floating_point<const float>::value == true, "is_floating_point<const float>");
     CHECK_TRUE(mtd::is_floating_point<volatile float>::value == true, "is_floating_point<volatile float>");
@@ -168,14 +185,18 @@ void test_integral_constant()
     CHECK_TRUE(mtd::is_floating_point<volatile long double>::value == true, "is_floating_point<volatile long double>");
 
     CHECK_TRUE(mtd::is_floating_point<int>::value == false, "is_floating_point<int>");
-    CHECK_TRUE(mtd::is_floating_point<Prueba>::value == false, "is_floating_point<Prueba>");
+    CHECK_TRUE(mtd::is_floating_point<Class>::value == false, "is_floating_point<Class>");
 
     CHECK_TRUE(mtd::is_floating_point_v<long double> == true, "is_floating_point_v<long double>");
     CHECK_TRUE(mtd::is_floating_point_v<char> == false, "is_floating_point_v<char>");
+}
 
+void test_is_arithmetic()
+{
+    test::interface("is_arithmetic");
 
     // is_arithmetic
-    CHECK_TRUE(mtd::is_arithmetic<Prueba>::value == false, "is_arithmetic<Prueba>");
+    CHECK_TRUE(mtd::is_arithmetic<Class>::value == false, "is_arithmetic<Class>");
     CHECK_TRUE(mtd::is_arithmetic<int>::value == true , "is_arithmetic<int>");
     CHECK_TRUE(mtd::is_arithmetic<int&>::value == false, "is_arithmetic<int&>");
     CHECK_TRUE(mtd::is_arithmetic<int*>::value == false, "is_arithmetic<int*>");
@@ -185,6 +206,11 @@ void test_integral_constant()
 
     CHECK_TRUE(mtd::is_arithmetic_v<float> == true, "is_arithmetic_v<float>");
     CHECK_TRUE(mtd::is_arithmetic_v<float*> == false, "is_arithmetic_v<float*>");
+}
+
+void test_is_signed()
+{
+    test::interface("is_signed");
 
     // is_signed
     CHECK_TRUE(mtd::is_signed<signed int>::value == true, "is_signed<signed int>");
@@ -256,31 +282,192 @@ void test_is_volatile()
 }
 
 template <typename T>
-void test_is_void(const std::string& name_type, bool res)
+void test_is_void(const std::string& name_type)
 {
-    CHECK_TRUE(mtd::is_void_v<T> == res, name_type);
-    CHECK_TRUE(mtd::is_void_v<const T> == res, alp::as_str() << "const " << name_type);
-    CHECK_TRUE(mtd::is_void_v<volatile T> == res, alp::as_str() << "volatile " << name_type);
+    CHECK_TRUE(mtd::is_void_v<T> == 
+	       std::is_void_v<T>, name_type);
+    CHECK_TRUE(mtd::is_void_v<const T> == 
+	       std::is_void_v<const T>, alp::as_str() << "const " << name_type);
+    CHECK_TRUE(mtd::is_void_v<volatile T> == 
+	       std::is_void_v<volatile T>, alp::as_str() << "volatile " << name_type);
+    CHECK_TRUE(mtd::is_void_v<const volatile T> == 
+	       std::is_void_v<const volatile T>, alp::as_str() << "const volatile " << name_type);
 }
 
 void test_is_void()
 {
     test::interface("is_void");
 
-    test_is_void<void>("void", true);
+    test_is_void<nullptr_t>("nullptr_t");
 
-    test_is_void<char>("char", false);
-    test_is_void<int>("int", false);
-    test_is_void<long>("long", false);
-    test_is_void<long long>("long long", false);
-    test_is_void<float>("float", false);
-    test_is_void<double>("double", false);
+    test_is_void<void>("void");
 
-    test_is_void<unsigned char>("unsigned char", false);
-    test_is_void<unsigned int>("unsigned int", false);
-    test_is_void<unsigned long>("unsigned long", false);
-    test_is_void<unsigned long long>("unsigned long long", false);
+    test_is_void<char>("char");
+    test_is_void<int>("int");
+    test_is_void<long>("long");
+    test_is_void<long long>("long long");
+    test_is_void<float>("float");
+    test_is_void<double>("double");
+
+    test_is_void<unsigned char>("unsigned char");
+    test_is_void<unsigned int>("unsigned int");
+    test_is_void<unsigned long>("unsigned long");
+    test_is_void<unsigned long long>("unsigned long long");
+
+// references
+    test_is_void<char&>("char&");
+    test_is_void<int&>("int&");
+    test_is_void<long&>("long&");
+    test_is_void<long long&>("long& long");
+    test_is_void<float&>("float&");
+    test_is_void<double&>("double&");
+
+    test_is_void<unsigned char&>("unsigned char&");
+    test_is_void<unsigned int&>("unsigned int&");
+    test_is_void<unsigned long&>("unsigned long&");
+    test_is_void<unsigned long long&>("unsigned long long&");
+
+// pointers
+    test_is_void<void*>("void*");
+
+    test_is_void<char*>("char*");
+    test_is_void<int*>("int*");
+    test_is_void<long*>("long*");
+    test_is_void<long long*>("long* long");
+    test_is_void<float*>("float*");
+    test_is_void<double*>("double*");
+
+    test_is_void<unsigned char*>("unsigned char*");
+    test_is_void<unsigned int*>("unsigned int*");
+    test_is_void<unsigned long*>("unsigned long*");
+    test_is_void<unsigned long long*>("unsigned long long*");
 }
+
+template <typename T>
+void test_is_null_pointer(const std::string& name_type)
+{
+    CHECK_TRUE(mtd::is_null_pointer_v<T> == 
+	       std::is_null_pointer_v<T>, name_type);
+    CHECK_TRUE(mtd::is_null_pointer_v<const T> == 
+	       std::is_null_pointer_v<const T>, alp::as_str() << "const " << name_type);
+    CHECK_TRUE(mtd::is_null_pointer_v<volatile T> == 
+	       std::is_null_pointer_v<volatile T>, alp::as_str() << "volatile " << name_type);
+    CHECK_TRUE(mtd::is_null_pointer_v<const volatile T> ==
+	       std::is_null_pointer_v<const volatile T>, alp::as_str() << "const volatile " << name_type);
+}
+
+void test_is_null_pointer()
+{
+    test::interface("is_null_pointer");
+
+    test_is_null_pointer<nullptr_t>("nullptr_t");
+
+    test_is_null_pointer<void>("void");
+
+    test_is_null_pointer<char>("char");
+    test_is_null_pointer<int>("int");
+    test_is_null_pointer<long>("long");
+    test_is_null_pointer<long long>("long long");
+    test_is_null_pointer<float>("float");
+    test_is_null_pointer<double>("double");
+
+    test_is_null_pointer<unsigned char>("unsigned char");
+    test_is_null_pointer<unsigned int>("unsigned int");
+    test_is_null_pointer<unsigned long>("unsigned long");
+    test_is_null_pointer<unsigned long long>("unsigned long long");
+
+// references
+    test_is_null_pointer<char&>("char&");
+    test_is_null_pointer<int&>("int&");
+    test_is_null_pointer<long&>("long&");
+    test_is_null_pointer<long long&>("long& long");
+    test_is_null_pointer<float&>("float&");
+    test_is_null_pointer<double&>("double&");
+
+    test_is_null_pointer<unsigned char&>("unsigned char&");
+    test_is_null_pointer<unsigned int&>("unsigned int&");
+    test_is_null_pointer<unsigned long&>("unsigned long&");
+    test_is_null_pointer<unsigned long long&>("unsigned long long&");
+
+// pointers
+    test_is_null_pointer<void*>("void*");
+
+    test_is_null_pointer<char*>("char*");
+    test_is_null_pointer<int*>("int*");
+    test_is_null_pointer<long*>("long*");
+    test_is_null_pointer<long long*>("long* long");
+    test_is_null_pointer<float*>("float*");
+    test_is_null_pointer<double*>("double*");
+
+    test_is_null_pointer<unsigned char*>("unsigned char*");
+    test_is_null_pointer<unsigned int*>("unsigned int*");
+    test_is_null_pointer<unsigned long*>("unsigned long*");
+    test_is_null_pointer<unsigned long long*>("unsigned long long*");
+}
+
+template <typename T>
+void test_is_pointer(const std::string& name_type)
+{
+    CHECK_TRUE(mtd::is_pointer_v<T> == std::is_pointer_v<T>, name_type);
+    CHECK_TRUE(mtd::is_pointer_v<const T> == std::is_pointer_v<const T>
+				    , alp::as_str() << "const " << name_type);
+    CHECK_TRUE(mtd::is_pointer_v<volatile T> == std::is_pointer_v<volatile T>, 
+				    alp::as_str() << "volatile " << name_type);
+    CHECK_TRUE(mtd::is_pointer_v<const volatile T> 
+	    == std::is_pointer_v<const volatile T>
+			, alp::as_str() << "const volatile " << name_type);
+}
+
+void test_is_pointer()
+{
+    test::interface("is_pointer");
+
+    test_is_pointer<nullptr_t>("nullptr_t"); // OJO: nullptr_t NO es un puntero!!!
+
+    test_is_pointer<void>("void");
+
+    test_is_pointer<char>("char");
+    test_is_pointer<int>("int");
+    test_is_pointer<long>("long");
+    test_is_pointer<long long>("long long");
+    test_is_pointer<float>("float");
+    test_is_pointer<double>("double");
+
+    test_is_pointer<unsigned char>("unsigned char");
+    test_is_pointer<unsigned int>("unsigned int");
+    test_is_pointer<unsigned long>("unsigned long");
+    test_is_pointer<unsigned long long>("unsigned long long");
+
+// references
+    test_is_pointer<char&>("char&");
+    test_is_pointer<int&>("int&");
+    test_is_pointer<long&>("long&");
+    test_is_pointer<long long&>("long& long");
+    test_is_pointer<float&>("float&");
+    test_is_pointer<double&>("double&");
+
+    test_is_pointer<unsigned char&>("unsigned char&");
+    test_is_pointer<unsigned int&>("unsigned int&");
+    test_is_pointer<unsigned long&>("unsigned long&");
+    test_is_pointer<unsigned long long&>("unsigned long long&");
+
+// pointers
+    test_is_pointer<void*>("void*");
+
+    test_is_pointer<char*>("char*");
+    test_is_pointer<int*>("int*");
+    test_is_pointer<long*>("long*");
+    test_is_pointer<long long*>("long* long");
+    test_is_pointer<float*>("float*");
+    test_is_pointer<double*>("double*");
+
+    test_is_pointer<unsigned char*>("unsigned char*");
+    test_is_pointer<unsigned int*>("unsigned int*");
+    test_is_pointer<unsigned long*>("unsigned long*");
+    test_is_pointer<unsigned long long*>("unsigned long long*");
+
+}
+
 
 template <typename T>
 void test_is_lvalue_reference(const std::string& name_type)
@@ -341,7 +528,58 @@ void test_is_rvalue_reference()
     test_is_rvalue_reference<double>("double");
 }
 
+template <typename T>
+void test_is_member_object_pointer(const std::string& name_type)
+{
+    CHECK_TRUE(mtd::is_member_object_pointer_v<T> == 
+	       std::is_member_object_pointer_v<T>, 
+	       alp::as_str() << "is_member_object_pointer(" << name_type << ")");
+}
 
+void test_is_member_object_pointer()
+{
+    test::interface("is_member_object_pointer");
+
+    test_is_member_object_pointer<void>("void");
+    test_is_member_object_pointer<char>("char");
+    test_is_member_object_pointer<int>("int");
+    test_is_member_object_pointer<long>("long");
+    test_is_member_object_pointer<long long>("long long");
+    test_is_member_object_pointer<float>("float");
+    test_is_member_object_pointer<double>("double");
+
+    test_is_member_object_pointer<Class>("Class");
+    test_is_member_object_pointer<int Class::*>("int Class::*");
+    test_is_member_object_pointer<int (Class::*)()>("int (Class::*)()");
+
+}
+
+
+template <typename T>
+void test_is_member_function_pointer(const std::string& name_type)
+{
+    CHECK_TRUE(mtd::is_member_function_pointer_v<T> == 
+	       std::is_member_function_pointer_v<T>, 
+	       alp::as_str() << "is_member_function_pointer(" << name_type << ")");
+}
+
+void test_is_member_function_pointer()
+{
+    test::interface("is_member_function_pointer");
+
+    test_is_member_function_pointer<void>("void");
+    test_is_member_function_pointer<char>("char");
+    test_is_member_function_pointer<int>("int");
+    test_is_member_function_pointer<long>("long");
+    test_is_member_function_pointer<long long>("long long");
+    test_is_member_function_pointer<float>("float");
+    test_is_member_function_pointer<double>("double");
+
+    test_is_member_function_pointer<Class>("Class");
+    test_is_member_function_pointer<int Class::*>("int Class::*");
+    test_is_member_function_pointer<int (Class::*)()>("int (Class::*)()");
+
+}
 template <typename T>
 void test_is_reference(const std::string& name_type)
 {
@@ -825,22 +1063,27 @@ void test_make_unsigned()
     test_make_unsigned<unsigned long long>("unsigned long long");
 }
 
+void test_is_enum()
+{
+    test::interface("is_enum");
+    CHECK_TRUE(mtd::is_enum_v<Class> == std::is_enum_v<Class>, "Class");
+    CHECK_TRUE(mtd::is_enum_v<Union> == std::is_enum_v<Union>, "Union");
+    CHECK_TRUE(mtd::is_enum_v<Enum> == std::is_enum_v<Enum>, "Enum");
+    CHECK_TRUE(mtd::is_enum_v<Enum_class> == std::is_enum_v<Enum_class>, "Enum_class");
+    CHECK_TRUE(mtd::is_enum_v<int> == std::is_enum_v<int>, "int");
+}
+
+
 void test_is_union()
 {
-    struct A{};
-    typedef union
-    {
-	int a;
-	float b;
-    } B;
      
-    struct C { B d; };
+    struct C { Union d; };
 
     test::interface("is_union");
-    CHECK_TRUE(mtd::is_union<A>::value == std::is_union<A>::value, "A");
-    CHECK_TRUE(mtd::is_union<B>::value == std::is_union<B>::value, "B");
-    CHECK_TRUE(mtd::is_union<C>::value == std::is_union<C>::value, "C");
-    CHECK_TRUE(mtd::is_union<int>::value == std::is_union<int>::value, "int");
+    CHECK_TRUE(mtd::is_union_v<Class> == std::is_union_v<Class>, "Class");
+    CHECK_TRUE(mtd::is_union_v<Union> == std::is_union_v<Union>, "Union");
+    CHECK_TRUE(mtd::is_union_v<C> == std::is_union_v<C>, "C");
+    CHECK_TRUE(mtd::is_union_v<int> == std::is_union_v<int>, "int");
 }
 
 
@@ -944,15 +1187,24 @@ try{
 
     // primary type categories
     // -----------------------
+    test_is_void();
+    test_is_null_pointer();
+    test_is_integral();
+    test_is_floating_point();
+    test_is_array();
+    test_is_pointer();
+    test_is_lvalue_reference();
+    test_is_rvalue_reference();
+    test_is_member_object_pointer();
+    test_is_member_function_pointer();
+    test_is_enum();
     test_is_union();
     test_is_class();
 
-    test_is_void();
-    test_is_array();
-    test_is_lvalue_reference();
-    test_is_rvalue_reference();
 //    test_is_function();   TODO: ¿cómo la pruebo?
 
+    test_is_arithmetic();
+    
     // composite type categories
     // -------------------------
     test_is_reference();
