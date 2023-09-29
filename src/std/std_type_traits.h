@@ -50,6 +50,7 @@
  *               no dice para qué sirve. Ni siquiera en cppreference se
  *               encuentran ejemplos de cómo validar esta función. Pero sin
  *               tests lo más probable es que tenga un montón de errores!!!)
+ *		 
  *
  ****************************************************************************/
 #include "std_config.h"
@@ -108,6 +109,8 @@ auto declval() noexcept -> decltype(__declval<T>(0));
 // ------------------
 // Estas funciones son genéricas
 namespace private_{
+// TODO: nombre?? no me gusta static_not, ya que realmente es de tipo
+// integral_constant. Mejor not_type???
 template <bool x>
 struct static_not : bool_constant<!x> { };
 }// namespace private_
@@ -666,14 +669,40 @@ struct is_arithmetic
 template <typename T>
 inline constexpr bool is_arithmetic_v = is_arithmetic<T>::value;
 
+// is_fundamental
+// --------------
+namespace impl_of{
+template <typename T>
+constexpr bool is_fundamental()
+{
+    if constexpr (is_arithmetic_v<T> or
+		  is_void_v<T> or
+		  is_null_pointer_v<T>)
+	return true;
+
+    return false;
+}
+
+}// impl_of
+
+template <typename T>
+struct is_fundamental 
+	: bool_constant<impl_of::is_fundamental<T>()>
+{};
+
+
+// is_arithmetic_v
+template <typename T>
+inline constexpr bool is_fundamental_v = is_fundamental<T>::value;
 
 // is_object
 // ---------
 // Según cppreference: If T is an object type (that is any possibly cv-qualified
 // type other than function, reference, or void types), provides the member
 // constant value equal true. For any other type, value is false.
+namespace impl_of{
 template <typename T>
-constexpr inline bool __is_object()
+constexpr inline bool is_object()
 {
     if (!(is_function_v<T> or is_reference_v<T> or is_void_v<T>))
 	return true;
@@ -681,13 +710,70 @@ constexpr inline bool __is_object()
     else 
 	return false;
 }
+} // impl_of
 
 template <typename T>
-struct is_object : public bool_constant<__is_object<T>()> { };
+struct is_object : public bool_constant<impl_of::is_object<T>()> { };
 
 
 template <typename T>
 inline constexpr bool is_object_v = is_object<T>::value;
+
+// is_member_pointer
+// -----------------
+namespace impl_of{
+template <typename T>
+struct is_member_pointer : false_type { };
+
+template <typename T, typename C>
+struct is_member_pointer<T C::*> : true_type { };
+}// impl_of
+ 
+template <typename T>
+struct is_member_pointer 
+    : impl_of::is_member_pointer<remove_cv_t<T>>{ };
+
+template <typename T>
+inline constexpr bool is_member_pointer_v = is_member_pointer<T>::value;
+
+// is_scalar
+// ---------
+namespace impl_of{
+template<typename T>
+constexpr bool is_scalar()
+{
+    if constexpr (is_arithmetic_v<T> or
+	          is_enum_v<T> or
+		  is_pointer_v<T> or
+		  is_member_pointer_v<T> or
+		  is_null_pointer_v<T>)
+	return true;
+
+    else return false;
+}
+
+}// impl_of
+
+template <typename T>
+struct is_scalar : 
+	bool_constant<impl_of::is_scalar<T>()> { };
+
+
+template <typename T>
+inline constexpr bool is_scalar_v = is_scalar<T>::value;
+
+
+// is_compound
+// -----------
+template <typename T>
+struct is_compound 
+	: private_::static_not<is_fundamental_v<T>>
+{ };
+
+
+template <typename T>
+inline constexpr bool is_compound_v = is_compound<T>::value;
+
 
 // ---------------
 // Type properties

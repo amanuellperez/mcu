@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 Manuel Perez 
+// Copyright (C) 2019-2023 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -25,6 +25,9 @@
 //
 // TODO: cambiar los test como los últimos. Comparar el comportamiento 
 // de mtd frente a std, de esa forma es más sencillo probarlo todo.
+// TODO: estoy repitiendo el mismo test continuamente: ejecuto la función de
+// mtd y la de std en distintos tipos comparando el resultado. ¿cómo
+// generalizarlo?
 #include "../../std_type_traits.h"
 
 #include <alp_test.h>
@@ -114,98 +117,223 @@ void test_is_integral()
     test::interface("is_integral");
 
     // is_integral
-    CHECK_TRUE(mtd::is_integral<bool>::value == true, "is_integral<bool>");
-    CHECK_TRUE(mtd::is_integral<const bool>::value == true, "is_integral<const bool>");
-    CHECK_TRUE(mtd::is_integral<volatile bool>::value == true, "is_integral<volatile bool>");
-    CHECK_TRUE(mtd::is_integral<char>::value == true, "is_integral<char>");
-    CHECK_TRUE(mtd::is_integral<const char>::value == true, "is_integral<const char>");
-    CHECK_TRUE(mtd::is_integral<volatile char>::value == true, "is_integral<volatile char>");
-    CHECK_TRUE(mtd::is_integral<signed char>::value == true, "is_integral<signed char>");
-    CHECK_TRUE(mtd::is_integral<const signed char>::value == true, "is_integral<const signed char>");
-    CHECK_TRUE(mtd::is_integral<volatile signed char>::value == true, "is_integral<volatile signed char>");
-    CHECK_TRUE(mtd::is_integral<unsigned char>::value == true, "is_integral<unsigned char>");
-    CHECK_TRUE(mtd::is_integral<const unsigned char>::value == true, "is_integral<const unsigned char>");
-    CHECK_TRUE(mtd::is_integral<volatile unsigned char>::value == true, "is_integral<volatile unsigned char>");
-    CHECK_TRUE(mtd::is_integral<char16_t>::value == true, "is_integral<char16_t>");
-    CHECK_TRUE(mtd::is_integral<const char16_t>::value == true, "is_integral<const char16_t>");
-    CHECK_TRUE(mtd::is_integral<volatile char16_t>::value == true, "is_integral<volatile char16_t>");
-    CHECK_TRUE(mtd::is_integral<char32_t>::value == true, "is_integral<char32_t>");
-    CHECK_TRUE(mtd::is_integral<const char32_t>::value == true, "is_integral<const char32_t>");
-    CHECK_TRUE(mtd::is_integral<volatile char32_t>::value == true, "is_integral<volatile char32_t>");
-    CHECK_TRUE(mtd::is_integral<short>::value == true, "is_integral<short>");
-    CHECK_TRUE(mtd::is_integral<const short>::value == true, "is_integral<const short>");
-    CHECK_TRUE(mtd::is_integral<volatile short>::value == true, "is_integral<volatile short>");
-    CHECK_TRUE(mtd::is_integral<unsigned short>::value == true, "is_integral<unsigned short>");
-    CHECK_TRUE(mtd::is_integral<const unsigned short>::value == true, "is_integral<const unsigned short>");
-    CHECK_TRUE(mtd::is_integral<volatile unsigned short>::value == true, "is_integral<volatile unsigned short>");
-    CHECK_TRUE(mtd::is_integral<int>::value == true, "is_integral<int>");
-    CHECK_TRUE(mtd::is_integral<const int>::value == true, "is_integral<const int>");
-    CHECK_TRUE(mtd::is_integral<volatile int>::value == true, "is_integral<volatile int>");
-    CHECK_TRUE(mtd::is_integral<unsigned int>::value == true, "is_integral<unsigned int>");
-    CHECK_TRUE(mtd::is_integral<const unsigned int>::value == true, "is_integral<const unsigned int>");
-    CHECK_TRUE(mtd::is_integral<volatile unsigned int>::value == true, "is_integral<volatile unsigned int>");
-    CHECK_TRUE(mtd::is_integral<long>::value == true, "is_integral<long>");
-    CHECK_TRUE(mtd::is_integral<const long>::value == true, "is_integral<const long>");
-    CHECK_TRUE(mtd::is_integral<volatile long>::value == true, "is_integral<volatile long>");
-    CHECK_TRUE(mtd::is_integral<unsigned long>::value == true, "is_integral<unsigned long>");
-    CHECK_TRUE(mtd::is_integral<const unsigned long>::value == true, "is_integral<const unsigned long>");
-    CHECK_TRUE(mtd::is_integral<volatile unsigned long>::value == true, "is_integral<volatile unsigned long>");
-    CHECK_TRUE(mtd::is_integral<long long>::value == true, "is_integral<long long>");
-    CHECK_TRUE(mtd::is_integral<const long long>::value == true, "is_integral<const long long>");
-    CHECK_TRUE(mtd::is_integral<volatile long long>::value == true, "is_integral<volatile long long>");
-    CHECK_TRUE(mtd::is_integral<unsigned long long>::value == true, "is_integral<unsigned long long>");
-    CHECK_TRUE(mtd::is_integral<const unsigned long long>::value == true, "is_integral<const unsigned long long>");
-    CHECK_TRUE(mtd::is_integral<volatile unsigned long long>::value == true, "is_integral<volatile unsigned long long>");
+    CHECK_TRUE(	mtd::is_integral<bool>::value ==
+		std::is_integral<bool>::value, "is_integral<bool>");
+    CHECK_TRUE(	mtd::is_integral<const bool>::value ==
+		std::is_integral<const bool>::value, "is_integral<const bool>");
+    CHECK_TRUE(	mtd::is_integral<volatile bool>::value ==
+		std::is_integral<volatile bool>::value, "is_integral<volatile bool>");
+    CHECK_TRUE(	mtd::is_integral<char>::value ==
+		std::is_integral<char>::value, "is_integral<char>");
+    CHECK_TRUE(	mtd::is_integral<const char>::value ==
+		std::is_integral<const char>::value, "is_integral<const char>");
+    CHECK_TRUE(	mtd::is_integral<volatile char>::value ==
+		std::is_integral<volatile char>::value, "is_integral<volatile char>");
+    CHECK_TRUE(	mtd::is_integral<signed char>::value ==
+		std::is_integral<signed char>::value, "is_integral<signed char>");
+    CHECK_TRUE(	mtd::is_integral<const signed char>::value ==
+		std::is_integral<const signed char>::value, "is_integral<const signed char>");
+    CHECK_TRUE(	mtd::is_integral<volatile signed char>::value ==
+		std::is_integral<volatile signed char>::value, "is_integral<volatile signed char>");
+    CHECK_TRUE(	mtd::is_integral<unsigned char>::value ==
+		std::is_integral<unsigned char>::value, "is_integral<unsigned char>");
+    CHECK_TRUE(	mtd::is_integral<const unsigned char>::value ==
+		std::is_integral<const unsigned char>::value, "is_integral<const unsigned char>");
+    CHECK_TRUE(	mtd::is_integral<volatile unsigned char>::value ==
+		std::is_integral<volatile unsigned char>::value, "is_integral<volatile unsigned char>");
+    CHECK_TRUE(	mtd::is_integral<char16_t>::value ==
+		std::is_integral<char16_t>::value, "is_integral<char16_t>");
+    CHECK_TRUE(	mtd::is_integral<const char16_t>::value ==
+		std::is_integral<const char16_t>::value, "is_integral<const char16_t>");
+    CHECK_TRUE(	mtd::is_integral<volatile char16_t>::value ==
+		std::is_integral<volatile char16_t>::value, "is_integral<volatile char16_t>");
+    CHECK_TRUE(	mtd::is_integral<char32_t>::value ==
+		std::is_integral<char32_t>::value, "is_integral<char32_t>");
+    CHECK_TRUE(	mtd::is_integral<const char32_t>::value ==
+		std::is_integral<const char32_t>::value, "is_integral<const char32_t>");
+    CHECK_TRUE(	mtd::is_integral<volatile char32_t>::value ==
+		std::is_integral<volatile char32_t>::value, "is_integral<volatile char32_t>");
+    CHECK_TRUE(	mtd::is_integral<short>::value ==
+		std::is_integral<short>::value, "is_integral<short>");
+    CHECK_TRUE(	mtd::is_integral<const short>::value ==
+		std::is_integral<const short>::value, "is_integral<const short>");
+    CHECK_TRUE(	mtd::is_integral<volatile short>::value ==
+		std::is_integral<volatile short>::value, "is_integral<volatile short>");
+    CHECK_TRUE(	mtd::is_integral<unsigned short>::value ==
+		std::is_integral<unsigned short>::value, "is_integral<unsigned short>");
+    CHECK_TRUE(	mtd::is_integral<const unsigned short>::value ==
+		std::is_integral<const unsigned short>::value, "is_integral<const unsigned short>");
+    CHECK_TRUE(	mtd::is_integral<volatile unsigned short>::value ==
+		std::is_integral<volatile unsigned short>::value, "is_integral<volatile unsigned short>");
+    CHECK_TRUE(	mtd::is_integral<int>::value ==
+		std::is_integral<int>::value, "is_integral<int>");
+    CHECK_TRUE(	mtd::is_integral<const int>::value ==
+		std::is_integral<const int>::value, "is_integral<const int>");
+    CHECK_TRUE(	mtd::is_integral<volatile int>::value ==
+		std::is_integral<volatile int>::value, "is_integral<volatile int>");
+    CHECK_TRUE(	mtd::is_integral<unsigned int>::value ==
+		std::is_integral<unsigned int>::value, "is_integral<unsigned int>");
+    CHECK_TRUE(	mtd::is_integral<const unsigned int>::value ==
+		std::is_integral<const unsigned int>::value, "is_integral<const unsigned int>");
+    CHECK_TRUE(	mtd::is_integral<volatile unsigned int>::value ==
+		std::is_integral<volatile unsigned int>::value, "is_integral<volatile unsigned int>");
+    CHECK_TRUE(	mtd::is_integral<long>::value ==
+		std::is_integral<long>::value, "is_integral<long>");
+    CHECK_TRUE(	mtd::is_integral<const long>::value ==
+		std::is_integral<const long>::value, "is_integral<const long>");
+    CHECK_TRUE(	mtd::is_integral<volatile long>::value ==
+		std::is_integral<volatile long>::value, "is_integral<volatile long>");
+    CHECK_TRUE(	mtd::is_integral<unsigned long>::value ==
+		std::is_integral<unsigned long>::value, "is_integral<unsigned long>");
+    CHECK_TRUE(	mtd::is_integral<const unsigned long>::value ==
+		std::is_integral<const unsigned long>::value, "is_integral<const unsigned long>");
+    CHECK_TRUE(	mtd::is_integral<volatile unsigned long>::value ==
+		std::is_integral<volatile unsigned long>::value, "is_integral<volatile unsigned long>");
+    CHECK_TRUE(	mtd::is_integral<long long>::value ==
+		std::is_integral<long long>::value, "is_integral<long long>");
+    CHECK_TRUE(	mtd::is_integral<const long long>::value ==
+		std::is_integral<const long long>::value, "is_integral<const long long>");
+    CHECK_TRUE(	mtd::is_integral<volatile long long>::value ==
+		std::is_integral<volatile long long>::value, "is_integral<volatile long long>");
+    CHECK_TRUE(	mtd::is_integral<unsigned long long>::value ==
+		std::is_integral<unsigned long long>::value, "is_integral<unsigned long long>");
+    CHECK_TRUE(	mtd::is_integral<const unsigned long long>::value ==
+		std::is_integral<const unsigned long long>::value, "is_integral<const unsigned long long>");
+    CHECK_TRUE(	mtd::is_integral<volatile unsigned long long>::value ==
+		std::is_integral<volatile unsigned long long>::value, "is_integral<volatile unsigned long long>");
 
-    CHECK_TRUE(mtd::is_integral<float>::value == false, "is_integral<float>");
-    CHECK_TRUE(mtd::is_integral<const float>::value == false, "is_integral<const float>");
-    CHECK_TRUE(mtd::is_integral<volatile float>::value == false, "is_integral<volatile float>");
-    CHECK_TRUE(mtd::is_integral<double>::value == false, "is_integral<double>");
-    CHECK_TRUE(mtd::is_integral<const double>::value == false, "is_integral<const double>");
-    CHECK_TRUE(mtd::is_integral<volatile double>::value == false, "is_integral<volatile double>");
-    CHECK_TRUE(mtd::is_integral<Class>::value == false, "is_integral<Class>");
-    CHECK_TRUE(mtd::is_integral<const Class>::value == false, "is_integral<const Class>");
-    CHECK_TRUE(mtd::is_integral<volatile Class>::value == false, "is_integral<volatile Class>");
+    CHECK_TRUE(	mtd::is_integral<float>::value ==
+		std::is_integral<float>::value, "is_integral<float>");
+    CHECK_TRUE(	mtd::is_integral<const float>::value ==
+		std::is_integral<const float>::value, "is_integral<const float>");
+    CHECK_TRUE(	mtd::is_integral<volatile float>::value ==
+		std::is_integral<volatile float>::value, "is_integral<volatile float>");
+    CHECK_TRUE(	mtd::is_integral<double>::value ==
+		std::is_integral<double>::value, "is_integral<double>");
+    CHECK_TRUE(	mtd::is_integral<const double>::value ==
+		std::is_integral<const double>::value, "is_integral<const double>");
+    CHECK_TRUE(	mtd::is_integral<volatile double>::value ==
+		std::is_integral<volatile double>::value, "is_integral<volatile double>");
+    CHECK_TRUE(	mtd::is_integral<Class>::value ==
+		std::is_integral<Class>::value, "is_integral<Class>");
+    CHECK_TRUE(	mtd::is_integral<const Class>::value ==
+		std::is_integral<const Class>::value, "is_integral<const Class>");
+    CHECK_TRUE(	mtd::is_integral<volatile Class>::value ==
+		std::is_integral<volatile Class>::value, "is_integral<volatile Class>");
 
-    CHECK_TRUE(mtd::is_integral_v<int> == true, "is_integral_v<int>");
-    CHECK_TRUE(mtd::is_integral_v<Class> == false, "is_integral_v<Class>");
+    CHECK_TRUE(	mtd::is_integral_v<int> ==
+		std::is_integral_v<int>, "is_integral_v<int>");
+    CHECK_TRUE(	mtd::is_integral_v<Class> ==
+		std::is_integral_v<Class>, "is_integral_v<Class>");
 }
 
 void test_is_floating_point()
 {
     test::interface("is_floating_point");
-    CHECK_TRUE(mtd::is_floating_point<float>::value == true, "is_floating_point<float>");
-    CHECK_TRUE(mtd::is_floating_point<const float>::value == true, "is_floating_point<const float>");
-    CHECK_TRUE(mtd::is_floating_point<volatile float>::value == true, "is_floating_point<volatile float>");
-    CHECK_TRUE(mtd::is_floating_point<double>::value == true, "is_floating_point<double>");
-    CHECK_TRUE(mtd::is_floating_point<const double>::value == true, "is_floating_point<const double>");
-    CHECK_TRUE(mtd::is_floating_point<volatile double>::value == true, "is_floating_point<volatile double>");
-    CHECK_TRUE(mtd::is_floating_point<long double>::value == true, "is_floating_point<long double>");
-    CHECK_TRUE(mtd::is_floating_point<const long double>::value == true, "is_floating_point<const long double>");
-    CHECK_TRUE(mtd::is_floating_point<volatile long double>::value == true, "is_floating_point<volatile long double>");
+    CHECK_TRUE(	mtd::is_floating_point<float>::value ==
+		std::is_floating_point<float>::value, "is_floating_point<float>");
+    CHECK_TRUE(	mtd::is_floating_point<const float>::value ==
+		std::is_floating_point<const float>::value, "is_floating_point<const float>");
+    CHECK_TRUE(	mtd::is_floating_point<volatile float>::value ==
+		std::is_floating_point<volatile float>::value, "is_floating_point<volatile float>");
+    CHECK_TRUE(	mtd::is_floating_point<double>::value ==
+		std::is_floating_point<double>::value, "is_floating_point<double>");
+    CHECK_TRUE(	mtd::is_floating_point<const double>::value ==
+		std::is_floating_point<const double>::value, "is_floating_point<const double>");
+    CHECK_TRUE(	mtd::is_floating_point<volatile double>::value ==
+		std::is_floating_point<volatile double>::value, "is_floating_point<volatile double>");
+    CHECK_TRUE(	mtd::is_floating_point<long double>::value ==
+		std::is_floating_point<long double>::value, "is_floating_point<long double>");
+    CHECK_TRUE(	mtd::is_floating_point<const long double>::value ==
+		std::is_floating_point<const long double>::value, "is_floating_point<const long double>");
+    CHECK_TRUE(	mtd::is_floating_point<volatile long double>::value ==
+		std::is_floating_point<volatile long double>::value, "is_floating_point<volatile long double>");
 
-    CHECK_TRUE(mtd::is_floating_point<int>::value == false, "is_floating_point<int>");
-    CHECK_TRUE(mtd::is_floating_point<Class>::value == false, "is_floating_point<Class>");
+    CHECK_TRUE(	mtd::is_floating_point<int>::value ==
+		std::is_floating_point<int>::value, "is_floating_point<int>");
+    CHECK_TRUE(	mtd::is_floating_point<Class>::value ==
+		std::is_floating_point<Class>::value, "is_floating_point<Class>");
 
-    CHECK_TRUE(mtd::is_floating_point_v<long double> == true, "is_floating_point_v<long double>");
-    CHECK_TRUE(mtd::is_floating_point_v<char> == false, "is_floating_point_v<char>");
+    CHECK_TRUE(	mtd::is_floating_point_v<long double> ==
+		std::is_floating_point_v<long double>, "is_floating_point_v<long double>");
+    CHECK_TRUE(	mtd::is_floating_point_v<char> ==
+		std::is_floating_point_v<char>, "is_floating_point_v<char>");
 }
+
+template <typename T>
+void test_is_arithmetic(const std::string& name_type)
+{
+    CHECK_TRUE(	mtd::is_arithmetic_v<T> == 
+		std::is_arithmetic_v<T>, name_type);
+    CHECK_TRUE(	mtd::is_arithmetic_v<T&> == 
+		std::is_arithmetic_v<T&>, alp::as_str() << name_type << '&');
+    CHECK_TRUE(	mtd::is_arithmetic_v<T&&> == 
+		std::is_arithmetic_v<T&&>, alp::as_str() << name_type << "&&");
+
+    CHECK_TRUE(	mtd::is_arithmetic_v<const T> == 
+		std::is_arithmetic_v<const T>, alp::as_str() << "const " << name_type);
+    CHECK_TRUE(	mtd::is_arithmetic_v<const T&> == 
+		std::is_arithmetic_v<const T&>, alp::as_str() << "const " << name_type << '&');
+    CHECK_TRUE(	mtd::is_arithmetic_v<const T&&> == 
+		std::is_arithmetic_v<const T&&>, alp::as_str() << "const " << name_type << "&&");
+
+    CHECK_TRUE(	mtd::is_arithmetic_v<volatile T> == 
+		std::is_arithmetic_v<volatile T>, alp::as_str() << "volatile " << name_type);
+    CHECK_TRUE(	mtd::is_arithmetic_v<volatile T&> == 
+		std::is_arithmetic_v<volatile T&>, alp::as_str() << "volatile " << name_type << '&');
+    CHECK_TRUE(	mtd::is_arithmetic_v<volatile T&&> == 
+		std::is_arithmetic_v<volatile T&&>, alp::as_str() << "volatile " << name_type << "&&");
+}
+
 
 void test_is_arithmetic()
 {
     test::interface("is_arithmetic");
 
-    // is_arithmetic
-    CHECK_TRUE(mtd::is_arithmetic<Class>::value == false, "is_arithmetic<Class>");
-    CHECK_TRUE(mtd::is_arithmetic<int>::value == true , "is_arithmetic<int>");
-    CHECK_TRUE(mtd::is_arithmetic<int&>::value == false, "is_arithmetic<int&>");
-    CHECK_TRUE(mtd::is_arithmetic<int*>::value == false, "is_arithmetic<int*>");
-    CHECK_TRUE(mtd::is_arithmetic<float>::value == true, "is_arithmetic<float>");
-    CHECK_TRUE(mtd::is_arithmetic<float&>::value == false, "is_arithmetic<float&>");
-    CHECK_TRUE(mtd::is_arithmetic<float*>::value == false, "is_arithmetic<float*>");
+    test_is_arithmetic<char>("char");
+    test_is_arithmetic<int>("int");
+    test_is_arithmetic<long>("long");
+    test_is_arithmetic<long long>("long long");
+    test_is_arithmetic<float>("float");
+    test_is_arithmetic<double>("double");
 
-    CHECK_TRUE(mtd::is_arithmetic_v<float> == true, "is_arithmetic_v<float>");
-    CHECK_TRUE(mtd::is_arithmetic_v<float*> == false, "is_arithmetic_v<float*>");
+    test_is_arithmetic<Class>("Class");
+    test_is_arithmetic<Union>("Union");
+    test_is_arithmetic<Enum>("Enum");
+    test_is_arithmetic<Enum_class>("Enum_class");
+}
+
+
+template <typename T>
+void test_is_fundamental(const std::string& name_type)
+{
+    CHECK_TRUE(	mtd::is_fundamental_v<T> == 
+		std::is_fundamental_v<T>, name_type);
+    CHECK_TRUE(	mtd::is_fundamental_v<const T> == 
+		std::is_fundamental_v<const T>, alp::as_str() << "const " << name_type);
+    CHECK_TRUE(	mtd::is_fundamental_v<volatile T> == 
+		std::is_fundamental_v<volatile T>, alp::as_str() << "volatile " << name_type);
+}
+
+
+void test_is_fundamental()
+{
+    test::interface("is_fundamental");
+
+    test_is_fundamental<void>("void");
+    test_is_fundamental<nullptr_t>("nullptr_t");
+
+    test_is_fundamental<char>("char");
+    test_is_fundamental<int>("int");
+    test_is_fundamental<long>("long");
+    test_is_fundamental<long long>("long long");
+    test_is_fundamental<float>("float");
+    test_is_fundamental<double>("double");
+
+    test_is_fundamental<Class>("Class");
+    test_is_fundamental<Union>("Union");
+    test_is_fundamental<Enum>("Enum");
+    test_is_fundamental<Enum_class>("Enum_class");
 }
 
 void test_is_signed()
@@ -213,17 +341,25 @@ void test_is_signed()
     test::interface("is_signed");
 
     // is_signed
-    CHECK_TRUE(mtd::is_signed<signed int>::value == true, "is_signed<signed int>");
-    CHECK_TRUE(mtd::is_signed<unsigned int>::value == false, "is_signed<unsigned int>");
+    CHECK_TRUE(mtd::is_signed<signed int>::value ==
+		std::is_signed<signed int>::value, "is_signed<signed int>");
+    CHECK_TRUE(mtd::is_signed<unsigned int>::value ==
+		std::is_signed<unsigned int>::value, "is_signed<unsigned int>");
 
-    CHECK_TRUE(mtd::is_signed_v<signed int> == true, "is_signed_v<signed int>");
-    CHECK_TRUE(mtd::is_signed_v<unsigned int> == false, "is_signed_v<unsigned int>");
+    CHECK_TRUE(mtd::is_signed_v<signed int> ==
+		std::is_signed_v<signed int>, "is_signed_v<signed int>");
+    CHECK_TRUE(mtd::is_signed_v<unsigned int> ==
+		std::is_signed_v<unsigned int>, "is_signed_v<unsigned int>");
 
-    CHECK_TRUE(mtd::is_unsigned<signed int>::value == false, "is_unsigned<signed int>");
-    CHECK_TRUE(mtd::is_unsigned<unsigned int>::value == true, "is_unsigned<unsigned int>");
+    CHECK_TRUE(mtd::is_unsigned<signed int>::value ==
+		std::is_unsigned<signed int>::value, "is_unsigned<signed int>");
+    CHECK_TRUE(mtd::is_unsigned<unsigned int>::value ==
+		std::is_unsigned<unsigned int>::value, "is_unsigned<unsigned int>");
 
-    CHECK_TRUE(mtd::is_unsigned_v<signed int> == false, "is_unsigned_v<signed int>");
-    CHECK_TRUE(mtd::is_unsigned_v<unsigned int> == true, "is_unsigned_v<unsigned int>");
+    CHECK_TRUE(mtd::is_unsigned_v<signed int> ==
+		std::is_unsigned_v<signed int>, "is_unsigned_v<signed int>");
+    CHECK_TRUE(mtd::is_unsigned_v<unsigned int> ==
+		std::is_unsigned_v<unsigned int>, "is_unsigned_v<unsigned int>");
 
 }
 
@@ -231,15 +367,20 @@ void test_conditional()
 {
     test::interface("conditional_t");
 
-    CHECK_TRUE((mtd::is_same_v<mtd::conditional_t<true, int, long>, int>), 
+    CHECK_TRUE((mtd::is_same_v<	mtd::conditional_t<true, int, long>, 
+				std::conditional_t<true, int, long>>), 
 		"true");
-    CHECK_TRUE((mtd::is_same_v<mtd::conditional_t<false, int, long>, long>), 
+    CHECK_TRUE((mtd::is_same_v<	mtd::conditional_t<false, int, long>, 
+				std::conditional_t<false, int, long>>), 
 		"false");
-    CHECK_TRUE((mtd::is_same_v<mtd::conditional_t<true, long, int>, long>), 
+    CHECK_TRUE((mtd::is_same_v<	mtd::conditional_t<true, long, int>, 
+				std::conditional_t<true, long, int>>), 
 		"true");
-    CHECK_TRUE((mtd::is_same_v<mtd::conditional_t<false, long, int>, int>), 
+    CHECK_TRUE((mtd::is_same_v<	mtd::conditional_t<false, long, int>, 
+				std::conditional_t<false, long, int>>), 
 		"false");
-    CHECK_TRUE((mtd::is_same_v<mtd::conditional_t<true, int, int>, int>), 
+    CHECK_TRUE((mtd::is_same_v<	mtd::conditional_t<true, int, int>, 
+				std::conditional_t<true, int, int>>), 
 		"degenerado");
 }
 
@@ -472,17 +613,26 @@ void test_is_pointer()
 template <typename T>
 void test_is_lvalue_reference(const std::string& name_type)
 {
-    CHECK_TRUE(mtd::is_lvalue_reference_v<T> == false, name_type);
-    CHECK_TRUE(mtd::is_lvalue_reference_v<T&> == true, alp::as_str() << name_type << '&');
-    CHECK_TRUE(mtd::is_lvalue_reference_v<T&&> == false, alp::as_str() << name_type << "&&");
+    CHECK_TRUE(	mtd::is_lvalue_reference_v<T> ==
+		std::is_lvalue_reference_v<T>, name_type);
+    CHECK_TRUE(	mtd::is_lvalue_reference_v<T&> ==
+		std::is_lvalue_reference_v<T&>, alp::as_str() << name_type << '&');
+    CHECK_TRUE(	mtd::is_lvalue_reference_v<T&&> ==
+		std::is_lvalue_reference_v<T&&>, alp::as_str() << name_type << "&&");
 
-    CHECK_TRUE(mtd::is_lvalue_reference_v<const T> == false, alp::as_str() << "const " << name_type);
-    CHECK_TRUE(mtd::is_lvalue_reference_v<const T&> == true, alp::as_str() << "const " << name_type << '&');
-    CHECK_TRUE(mtd::is_lvalue_reference_v<const T&&> == false, alp::as_str() << "const " << name_type << "&&");
+    CHECK_TRUE(	mtd::is_lvalue_reference_v<const T> ==
+		std::is_lvalue_reference_v<const T>, alp::as_str() << "const " << name_type);
+    CHECK_TRUE(	mtd::is_lvalue_reference_v<const T&> ==
+		std::is_lvalue_reference_v<const T&>, alp::as_str() << "const " << name_type << '&');
+    CHECK_TRUE(	mtd::is_lvalue_reference_v<const T&&> ==
+		std::is_lvalue_reference_v<const T&&>, alp::as_str() << "const " << name_type << "&&");
 
-    CHECK_TRUE(mtd::is_lvalue_reference_v<volatile T> == false, alp::as_str() << "volatile " << name_type);
-    CHECK_TRUE(mtd::is_lvalue_reference_v<volatile T&> == true, alp::as_str() << "volatile " << name_type << '&');
-    CHECK_TRUE(mtd::is_lvalue_reference_v<volatile T&&> == false, alp::as_str() << "volatile " << name_type << "&&");
+    CHECK_TRUE(	mtd::is_lvalue_reference_v<volatile T> ==
+		std::is_lvalue_reference_v<volatile T>, alp::as_str() << "volatile " << name_type);
+    CHECK_TRUE(	mtd::is_lvalue_reference_v<volatile T&> ==
+		std::is_lvalue_reference_v<volatile T&>, alp::as_str() << "volatile " << name_type << '&');
+    CHECK_TRUE(	mtd::is_lvalue_reference_v<volatile T&&> ==
+		std::is_lvalue_reference_v<volatile T&&>, alp::as_str() << "volatile " << name_type << "&&");
 
 }
 
@@ -502,17 +652,26 @@ void test_is_lvalue_reference()
 template <typename T>
 void test_is_rvalue_reference(const std::string& name_type)
 {
-    CHECK_TRUE(mtd::is_rvalue_reference_v<T> == false, name_type);
-    CHECK_TRUE(mtd::is_rvalue_reference_v<T&> == false, alp::as_str() << name_type << '&');
-    CHECK_TRUE(mtd::is_rvalue_reference_v<T&&> == true, alp::as_str() << name_type << "&&");
+    CHECK_TRUE(	mtd::is_rvalue_reference_v<T> ==
+		std::is_rvalue_reference_v<T>, name_type);
+    CHECK_TRUE(	mtd::is_rvalue_reference_v<T&> ==
+		std::is_rvalue_reference_v<T&>, alp::as_str() << name_type << '&');
+    CHECK_TRUE(	mtd::is_rvalue_reference_v<T&&> ==
+		std::is_rvalue_reference_v<T&&>, alp::as_str() << name_type << "&&");
 
-    CHECK_TRUE(mtd::is_rvalue_reference_v<const T> == false, alp::as_str() << "const " << name_type);
-    CHECK_TRUE(mtd::is_rvalue_reference_v<const T&> == false, alp::as_str() << "const " << name_type << '&');
-    CHECK_TRUE(mtd::is_rvalue_reference_v<const T&&> == true, alp::as_str() << "const " << name_type << "&&");
+    CHECK_TRUE(	mtd::is_rvalue_reference_v<const T> ==
+		std::is_rvalue_reference_v<const T>, alp::as_str() << "const " << name_type);
+    CHECK_TRUE(	mtd::is_rvalue_reference_v<const T&> ==
+		std::is_rvalue_reference_v<const T&>, alp::as_str() << "const " << name_type << '&');
+    CHECK_TRUE(	mtd::is_rvalue_reference_v<const T&&> ==
+		std::is_rvalue_reference_v<const T&&>, alp::as_str() << "const " << name_type << "&&");
 
-    CHECK_TRUE(mtd::is_rvalue_reference_v<volatile T> == false, alp::as_str() << "volatile " << name_type);
-    CHECK_TRUE(mtd::is_rvalue_reference_v<volatile T&> == false, alp::as_str() << "volatile " << name_type << '&');
-    CHECK_TRUE(mtd::is_rvalue_reference_v<volatile T&&> == true, alp::as_str() << "volatile " << name_type << "&&");
+    CHECK_TRUE(	mtd::is_rvalue_reference_v<volatile T> ==
+		std::is_rvalue_reference_v<volatile T>, alp::as_str() << "volatile " << name_type);
+    CHECK_TRUE(	mtd::is_rvalue_reference_v<volatile T&> ==
+		std::is_rvalue_reference_v<volatile T&>, alp::as_str() << "volatile " << name_type << '&');
+    CHECK_TRUE(	mtd::is_rvalue_reference_v<volatile T&&> ==
+		std::is_rvalue_reference_v<volatile T&&>, alp::as_str() << "volatile " << name_type << "&&");
 
 }
 
@@ -583,17 +742,26 @@ void test_is_member_function_pointer()
 template <typename T>
 void test_is_reference(const std::string& name_type)
 {
-    CHECK_TRUE(mtd::is_reference_v<T> == false, name_type);
-    CHECK_TRUE(mtd::is_reference_v<T&> == true, alp::as_str() << name_type << '&');
-    CHECK_TRUE(mtd::is_reference_v<T&&> == true, alp::as_str() << name_type << "&&");
+    CHECK_TRUE(	mtd::is_reference_v<T> ==
+		std::is_reference_v<T>, name_type);
+    CHECK_TRUE(	mtd::is_reference_v<T&> ==
+		std::is_reference_v<T&>, alp::as_str() << name_type << '&');
+    CHECK_TRUE(	mtd::is_reference_v<T&&> ==
+		std::is_reference_v<T&&>, alp::as_str() << name_type << "&&");
 
-    CHECK_TRUE(mtd::is_reference_v<const T> == false, alp::as_str() << "const " << name_type);
-    CHECK_TRUE(mtd::is_reference_v<const T&> == true, alp::as_str() << "const " << name_type << '&');
-    CHECK_TRUE(mtd::is_reference_v<const T&&> == true, alp::as_str() << "const " << name_type << "&&");
+    CHECK_TRUE(	mtd::is_reference_v<const T> ==
+		std::is_reference_v<const T>, alp::as_str() << "const " << name_type);
+    CHECK_TRUE(	mtd::is_reference_v<const T&> ==
+		std::is_reference_v<const T&>, alp::as_str() << "const " << name_type << '&');
+    CHECK_TRUE(	mtd::is_reference_v<const T&&> ==
+		std::is_reference_v<const T&&>, alp::as_str() << "const " << name_type << "&&");
 
-    CHECK_TRUE(mtd::is_reference_v<volatile T> == false, alp::as_str() << "volatile " << name_type);
-    CHECK_TRUE(mtd::is_reference_v<volatile T&> == true, alp::as_str() << "volatile " << name_type << '&');
-    CHECK_TRUE(mtd::is_reference_v<volatile T&&> == true, alp::as_str() << "volatile " << name_type << "&&");
+    CHECK_TRUE(	mtd::is_reference_v<volatile T> ==
+		std::is_reference_v<volatile T>, alp::as_str() << "volatile " << name_type);
+    CHECK_TRUE(	mtd::is_reference_v<volatile T&> ==
+		std::is_reference_v<volatile T&>, alp::as_str() << "volatile " << name_type << '&');
+    CHECK_TRUE(	mtd::is_reference_v<volatile T&&> ==
+		std::is_reference_v<volatile T&&>, alp::as_str() << "volatile " << name_type << "&&");
 
 }
 
@@ -607,6 +775,11 @@ void test_is_reference()
     test_is_reference<long long>("long long");
     test_is_reference<float>("float");
     test_is_reference<double>("double");
+
+    test_is_reference<Class>("Class");
+    test_is_reference<Union>("Union");
+    test_is_reference<Enum>("Enum");
+    test_is_reference<Enum_class>("Enum_class");
 }
 
 
@@ -614,17 +787,26 @@ void test_is_reference()
 template <typename T>
 void test_is_object(const std::string& name_type)
 {
-    CHECK_TRUE(mtd::is_object_v<T> == true, name_type);
-    CHECK_TRUE(mtd::is_object_v<T&> == false, alp::as_str() << name_type << '&');
-    CHECK_TRUE(mtd::is_object_v<T&&> == false, alp::as_str() << name_type << "&&");
+    CHECK_TRUE(	mtd::is_object_v<T> ==
+		std::is_object_v<T>, name_type);
+    CHECK_TRUE(	mtd::is_object_v<T&> ==
+		std::is_object_v<T&>, alp::as_str() << name_type << '&');
+    CHECK_TRUE(	mtd::is_object_v<T&&> ==
+		std::is_object_v<T&&>, alp::as_str() << name_type << "&&");
 
-    CHECK_TRUE(mtd::is_object_v<const T> == true, alp::as_str() << "const " << name_type);
-    CHECK_TRUE(mtd::is_object_v<const T&> == false, alp::as_str() << "const " << name_type << '&');
-    CHECK_TRUE(mtd::is_object_v<const T&&> == false, alp::as_str() << "const " << name_type << "&&");
+    CHECK_TRUE(	mtd::is_object_v<const T> ==
+		std::is_object_v<const T>, alp::as_str() << "const " << name_type);
+    CHECK_TRUE(	mtd::is_object_v<const T&> ==
+		std::is_object_v<const T&>, alp::as_str() << "const " << name_type << '&');
+    CHECK_TRUE(	mtd::is_object_v<const T&&> ==
+		std::is_object_v<const T&&>, alp::as_str() << "const " << name_type << "&&");
 
-    CHECK_TRUE(mtd::is_object_v<volatile T> == true, alp::as_str() << "volatile " << name_type);
-    CHECK_TRUE(mtd::is_object_v<volatile T&> == false, alp::as_str() << "volatile " << name_type << '&');
-    CHECK_TRUE(mtd::is_object_v<volatile T&&> == false, alp::as_str() << "volatile " << name_type << "&&");
+    CHECK_TRUE(	mtd::is_object_v<volatile T> ==
+		std::is_object_v<volatile T>, alp::as_str() << "volatile " << name_type);
+    CHECK_TRUE(	mtd::is_object_v<volatile T&> ==
+		std::is_object_v<volatile T&>, alp::as_str() << "volatile " << name_type << '&');
+    CHECK_TRUE(	mtd::is_object_v<volatile T&&> ==
+		std::is_object_v<volatile T&&>, alp::as_str() << "volatile " << name_type << "&&");
 
 }
 
@@ -638,7 +820,156 @@ void test_is_object()
     test_is_object<long long>("long long");
     test_is_object<float>("float");
     test_is_object<double>("double");
+
+    test_is_object<Class>("Class");
+    test_is_object<Union>("Union");
+    test_is_object<Enum>("Enum");
+    test_is_object<Enum_class>("Enum_class");
 }
+
+
+template <typename T>
+void test_is_scalar(const std::string& name_type)
+{
+    CHECK_TRUE(	mtd::is_scalar_v<T> ==
+		std::is_scalar_v<T>, name_type);
+    CHECK_TRUE(	mtd::is_scalar_v<T&> ==
+		std::is_scalar_v<T&>, alp::as_str() << name_type << '&');
+    CHECK_TRUE(	mtd::is_scalar_v<T&&> ==
+		std::is_scalar_v<T&&>, alp::as_str() << name_type << "&&");
+
+    CHECK_TRUE(	mtd::is_scalar_v<const T> ==
+		std::is_scalar_v<const T>, alp::as_str() << "const " << name_type);
+    CHECK_TRUE(	mtd::is_scalar_v<const T&> ==
+		std::is_scalar_v<const T&>, alp::as_str() << "const " << name_type << '&');
+    CHECK_TRUE(	mtd::is_scalar_v<const T&&> ==
+		std::is_scalar_v<const T&&>, alp::as_str() << "const " << name_type << "&&");
+
+    CHECK_TRUE(	mtd::is_scalar_v<volatile T> ==
+		std::is_scalar_v<volatile T>, alp::as_str() << "volatile " << name_type);
+    CHECK_TRUE(	mtd::is_scalar_v<volatile T&> ==
+		std::is_scalar_v<volatile T&>, alp::as_str() << "volatile " << name_type << '&');
+    CHECK_TRUE(	mtd::is_scalar_v<volatile T&&> ==
+		std::is_scalar_v<volatile T&&>, alp::as_str() << "volatile " << name_type << "&&");
+
+}
+
+void test_is_scalar()
+{
+    test::interface("is_scalar");
+    
+    test_is_scalar<nullptr_t>("nullptr_t");
+
+    test_is_scalar<char>("char");
+    test_is_scalar<int>("int");
+    test_is_scalar<long>("long");
+    test_is_scalar<long long>("long long");
+    test_is_scalar<float>("float");
+    test_is_scalar<double>("double");
+
+    test_is_scalar<Class>("Class");
+    test_is_scalar<int Class::*>("int Class::*");
+    test_is_scalar<int (Class::*)()>("int (Class::*)()");
+    test_is_scalar<Union>("Union");
+    test_is_scalar<Enum>("Enum");
+    test_is_scalar<Enum_class>("Enum_class");
+}
+
+
+
+template <typename T>
+void test_is_compound(const std::string& name_type)
+{
+    CHECK_TRUE(	mtd::is_compound_v<T> ==
+		std::is_compound_v<T>, name_type);
+    CHECK_TRUE(	mtd::is_compound_v<T&> ==
+		std::is_compound_v<T&>, alp::as_str() << name_type << '&');
+    CHECK_TRUE(	mtd::is_compound_v<T&&> ==
+		std::is_compound_v<T&&>, alp::as_str() << name_type << "&&");
+
+    CHECK_TRUE(	mtd::is_compound_v<const T> ==
+		std::is_compound_v<const T>, alp::as_str() << "const " << name_type);
+    CHECK_TRUE(	mtd::is_compound_v<const T&> ==
+		std::is_compound_v<const T&>, alp::as_str() << "const " << name_type << '&');
+    CHECK_TRUE(	mtd::is_compound_v<const T&&> ==
+		std::is_compound_v<const T&&>, alp::as_str() << "const " << name_type << "&&");
+
+    CHECK_TRUE(	mtd::is_compound_v<volatile T> ==
+		std::is_compound_v<volatile T>, alp::as_str() << "volatile " << name_type);
+    CHECK_TRUE(	mtd::is_compound_v<volatile T&> ==
+		std::is_compound_v<volatile T&>, alp::as_str() << "volatile " << name_type << '&');
+    CHECK_TRUE(	mtd::is_compound_v<volatile T&&> ==
+		std::is_compound_v<volatile T&&>, alp::as_str() << "volatile " << name_type << "&&");
+
+}
+
+void test_is_compound()
+{
+    test::interface("is_compound");
+    
+    test_is_compound<nullptr_t>("nullptr_t");
+
+    test_is_compound<char>("char");
+    test_is_compound<int>("int");
+    test_is_compound<long>("long");
+    test_is_compound<long long>("long long");
+    test_is_compound<float>("float");
+    test_is_compound<double>("double");
+
+    test_is_compound<Class>("Class");
+    test_is_compound<int Class::*>("int Class::*");
+    test_is_compound<int (Class::*)()>("int (Class::*)()");
+    test_is_compound<Union>("Union");
+    test_is_compound<Enum>("Enum");
+    test_is_compound<Enum_class>("Enum_class");
+
+}
+
+template <typename T>
+void test_is_member_pointer(const std::string& name_type)
+{
+    CHECK_TRUE(	mtd::is_member_pointer_v<T> ==
+		std::is_member_pointer_v<T>, name_type);
+    CHECK_TRUE(	mtd::is_member_pointer_v<T&> ==
+		std::is_member_pointer_v<T&>, alp::as_str() << name_type << '&');
+    CHECK_TRUE(	mtd::is_member_pointer_v<T&&> ==
+		std::is_member_pointer_v<T&&>, alp::as_str() << name_type << "&&");
+
+    CHECK_TRUE(	mtd::is_member_pointer_v<const T> ==
+		std::is_member_pointer_v<const T>, alp::as_str() << "const " << name_type);
+    CHECK_TRUE(	mtd::is_member_pointer_v<const T&> ==
+		std::is_member_pointer_v<const T&>, alp::as_str() << "const " << name_type << '&');
+    CHECK_TRUE(	mtd::is_member_pointer_v<const T&&> ==
+		std::is_member_pointer_v<const T&&>, alp::as_str() << "const " << name_type << "&&");
+
+    CHECK_TRUE(	mtd::is_member_pointer_v<volatile T> ==
+		std::is_member_pointer_v<volatile T>, alp::as_str() << "volatile " << name_type);
+    CHECK_TRUE(	mtd::is_member_pointer_v<volatile T&> ==
+		std::is_member_pointer_v<volatile T&>, alp::as_str() << "volatile " << name_type << '&');
+    CHECK_TRUE(	mtd::is_member_pointer_v<volatile T&&> ==
+		std::is_member_pointer_v<volatile T&&>, alp::as_str() << "volatile " << name_type << "&&");
+
+}
+
+void test_is_member_pointer()
+{
+    test::interface("is_member_pointer");
+    
+    test_is_member_pointer<char>("char");
+    test_is_member_pointer<int>("int");
+    test_is_member_pointer<long>("long");
+    test_is_member_pointer<long long>("long long");
+    test_is_member_pointer<float>("float");
+    test_is_member_pointer<double>("double");
+
+    test_is_member_pointer<Class>("Class");
+    test_is_member_pointer<int Class::*>("int Class::*");
+    test_is_member_pointer<int (Class::*)()>("int (Class::*)()");
+    test_is_member_pointer<Union>("Union");
+    test_is_member_pointer<Enum>("Enum");
+    test_is_member_pointer<Enum_class>("Enum_class");
+}
+
 
 template <typename T>
 void test_remove_reference_helper(const std::string& name_type)
@@ -1203,12 +1534,16 @@ try{
 
 //    test_is_function();   TODO: ¿cómo la pruebo?
 
-    test_is_arithmetic();
     
     // composite type categories
     // -------------------------
     test_is_reference();
+    test_is_arithmetic();
+    test_is_fundamental();
     test_is_object();
+    test_is_scalar();
+    test_is_compound();
+    test_is_member_pointer();
 
     // type properties
     // ---------------
