@@ -1,4 +1,4 @@
-// Copyright (C) 2022 Manuel Perez 
+// Copyright (C) 2022-2023 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -21,13 +21,42 @@
 #include <concepts>
 
 #include <alp_test.h>
+#include <alp_string.h>
+
 #include <iostream>
+#include <string>
 
 
 using namespace test;
 
-struct A{};
+class Class 
+{ int x; };
 
+class Class2
+{ Class x; };
+
+struct A {int m;};
+struct B : public A {int m;};
+struct C {virtual void f(); };
+
+class D{
+public:
+    D(int n) : v1{n}, v2{} { }
+    D(int n, double f) noexcept : v1{n}, v2{f} { }
+
+private:
+    int v1;
+    double v2;
+};
+
+typedef union
+{
+    int a;
+    float b;
+} Union;
+
+enum Enum {black, white};
+enum class Enum_class{ one, two, three };
 
 void test_same_as()
 {
@@ -57,6 +86,42 @@ void test_integral()
     CHECK_TRUE(mtd::integral<A> == std::integral<A>, "integral");
 }
 
+template <typename T>
+void test_equality_comparable(const std::string& name_type)
+{
+    CHECK_TRUE(mtd::equality_comparable<T> 
+	    == std::equality_comparable<T>, name_type);
+}
+
+void test_equality_comparable()
+{
+    test::interface("equality_comparable");
+    
+    test_equality_comparable<void>("void");
+    test_equality_comparable<nullptr_t>("nullptr_t");
+
+    test_equality_comparable<char>("char");
+    test_equality_comparable<int>("int");
+    test_equality_comparable<long>("long");
+    test_equality_comparable<long long>("long long");
+    test_equality_comparable<float>("float");
+    test_equality_comparable<double>("double");
+
+    test_equality_comparable<int[]>("int[]");
+    test_equality_comparable<int[3]>("int[3]");
+    test_equality_comparable<int[][3]>("int[][3]");
+
+    test_equality_comparable<Class>("Class");
+    test_equality_comparable<Class2>("Class2");
+    test_equality_comparable<Union>("Union");
+    test_equality_comparable<Enum>("Enum");
+    test_equality_comparable<Enum_class>("Enum_class");
+
+    test_equality_comparable<Class>("Class");
+    test_equality_comparable<int Class::*>("int Class::*");
+    test_equality_comparable<int (Class::*)()>("int (Class::*)()");
+}
+
 
 int main()
 {
@@ -67,6 +132,15 @@ try{
     // -------------------------
     test_same_as();
     test_integral();
+
+    // arithmetic concepts
+    // -------------------
+    
+
+    // comparison concepts
+    // -------------------
+    test_equality_comparable();
+
 
 }catch(const std::exception& e){
     std::cerr << e.what() << '\n';

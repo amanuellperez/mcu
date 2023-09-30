@@ -110,6 +110,39 @@ las ventanas.
 Hacerlo por capas permitiría crear diferentes proyectos que tendrían definidas
 unas dependencias muy claras.
 
+3. Suministrar código:
+
+Hay partes del estandar (concepts, traits...) que están totalmente definidas.
+¿Por qué no suministran archivos con el código también? Porque lo que estoy
+haciendo para escribir esas partes, básicamente, es copiar lo que pone el
+estandar. ¿Por qué cada implementación tiene que copiar lo mandado por el
+estandar? 
+
+Todo aquello que esté totalmente definido por el estandar tendrían que
+suministrarlo. Solamente las partes que admitan diferentes implementaciones
+tiene sentido que no las suministren, pero donde donde el implementador de la
+clase se tiene que limitar a copiar lo dicho por el estandar es una pérdida de
+tiempo no suministrarlo.
+
+4. Test!!!:
+
+Unas bibliotecas tan importantes como las que suministra el estandar tiene que
+tener muy bien pensados los test que tienen que pasar aquellos que las
+implementen. Y sin embargo, los tests brillan por su ausencia. Sería
+interesante que se suministrase una batería de test que te las puedas
+descargar de un repositorio. Además, en ese repositorio podríamos contribuir
+todos los que implementamos el estandar, ya que al encontrar un error en
+nuestra implementación podríamos proponer un test que pasarían a tenerlo todas
+las implementaciones. De esa forma conseguiríamos que las implementaciones del
+estandar fueran más robustas.
+
+¿Por qué no se suministran test? Oh, man, test is a difficult subject!!! (de
+hecho, muchas veces el problema es saber cómo probar el código escrito.
+Escribir código es fácil, escribir los test... puf! necesito que alguien me
+enseñe (ah, quiero una batería de test exhaustiva, que haga daño, que vaya a
+buscar todos los errores posibles; recordar que cuando quieres probar tu
+código tienes que ir a pillar, no basta con probar los casos donde sabes que
+funciona) (<-- lo triste es que esto es lo que se hace en la práctica).
 
 
 ## Test

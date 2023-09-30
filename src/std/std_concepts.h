@@ -42,8 +42,11 @@
 #include "std_type_traits.h"
 
 namespace STD{
+ 
 // language-related concepts
 // --------------------------
+// same_as
+// -------
 namespace impl_of{
 template <typename T, typename U>
 concept same_as = is_same_v<T,U>;
@@ -52,11 +55,16 @@ concept same_as = is_same_v<T,U>;
 template <typename T, typename U>
 concept same_as = impl_of::same_as<T,U> and impl_of::same_as<U,T>;
 
+// derived_from
+// ------------
 template <typename Derived, typename Base>
 concept derived_from =
 	is_base_of_v<Base, Derived> and
 	is_convertible_v<const volatile Derived*, const volatile Base*>;
 
+
+// convertible_to
+// --------------
 template <typename From, typename To>
 concept convertible_to =
     is_convertible_v<From, To> and
@@ -65,6 +73,8 @@ concept convertible_to =
     };
 
 
+// common_reference_with
+// ---------------------
 template <typename T, typename U>
 concept common_reference_with =
 	same_as<common_reference_t<T, U>, common_reference_t<U, T>> 
@@ -73,7 +83,11 @@ concept common_reference_with =
 
 //common_with
 
+// -------------------
 // arithmetic concepts
+// -------------------
+// is_integral
+// ----------
 template <typename T>
 concept integral = is_integral_v<T>;
 
@@ -91,10 +105,51 @@ concept integral = is_integral_v<T>;
 //move_constructible
 //copy_constructible
 //
-//// comparison concepts
-//// -------------------
-//equality_comparable
-//equality_comparable_with
+// -------------------
+// comparison concepts
+// -------------------
+
+// boolean
+// -------
+// Stroustrup ("A tour of C++", 14.5.1) tiene una implementación de boolean.
+// Voy a basarme en la de gcc, aunque no tengo claro el `static_cast<T&&>`???
+namespace atd_{
+namespace impl_of {
+template <typename T>
+concept boolean_convertible = convertible_to<T, bool>;
+}// impl_of
+ 
+template<typename T>
+concept boolean = impl_of::boolean_convertible<T> and
+		  requires (T&& t){
+		      {!static_cast<T&&>(t) } -> impl_of::boolean_convertible;
+		  };
+}// atd_
+ 
+// equality_comparable
+// -------------------
+namespace private_{
+
+template <typename T, typename U>
+concept weakly_equality_comparable_with = 
+    requires(const remove_reference_t<T>& t,
+	     const remove_reference_t<U>& u){
+	{ t == u } -> atd_::boolean;
+	{ t != u } -> atd_::boolean;
+	{ u == t } -> atd_::boolean;
+	{ u != t } -> atd_::boolean;
+    };
+
+}// private_
+ 
+template <typename T>
+concept equality_comparable 
+		    = private_::weakly_equality_comparable_with<T,T>;
+
+// equality_comparable_with
+// -------------------------
+
+
 //totally_ordered
 //totally_ordered_with
 //
