@@ -1,5 +1,6 @@
 DIRS = algorithm\
 	array		\
+	atd			\
 	bit			\
 	char_traits	\
 	cmath		\

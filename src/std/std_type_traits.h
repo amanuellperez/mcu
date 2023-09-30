@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 Manuel Perez 
+// Copyright (C) 2019-2023 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -54,31 +54,11 @@
  *
  ****************************************************************************/
 #include "std_config.h"
-#include "std_private.h"
+#include "std_atd.h"
 
 #include "std_cstddef.h"    // size_t, nullptr_t
 
 namespace STD{
-// Helper class: integral_constant
-// ------------------------------------
-template <typename T, T v>
-struct integral_constant{
-    using value_type = T;
-    using type = integral_constant<T,v>;
-
-    static constexpr T value = v;
-
-    constexpr operator value_type() const noexcept {return  value;}
-    constexpr value_type operator()() const noexcept {return value;}
-};
-
-
-/// bool_constant
-template <bool B>
-using bool_constant = integral_constant<bool, B>;
-
-using true_type = integral_constant<bool, true>;
-using false_type = integral_constant<bool, false>;
 
 /// is_same
 template <typename X, typename Y>
@@ -102,18 +82,6 @@ T __declval(long);
 
 template<typename T>
 auto declval() noexcept -> decltype(__declval<T>(0));
-
-
-// ------------------
-// operadores lógicos
-// ------------------
-// Estas funciones son genéricas
-namespace private_{
-// TODO: nombre?? no me gusta static_not, ya que realmente es de tipo
-// integral_constant. Mejor not_type???
-template <bool x>
-struct static_not : bool_constant<!x> { };
-}// namespace private_
 
 
 // ----------------------------
@@ -597,7 +565,7 @@ struct is_member_object_pointer : false_type { };
 
 template <typename T, typename C>
 struct is_member_object_pointer<T C::*> 
-	: private_::static_not<is_function_v<T>> { };
+	: atd_::static_not<is_function_v<T>> { };
 
 }// impl_of
 
@@ -665,9 +633,9 @@ struct is_arithmetic
 {};
 		
 
-// is_arithmetic_v
 template <typename T>
 inline constexpr bool is_arithmetic_v = is_arithmetic<T>::value;
+
 
 // is_fundamental
 // --------------
@@ -691,7 +659,6 @@ struct is_fundamental
 {};
 
 
-// is_arithmetic_v
 template <typename T>
 inline constexpr bool is_fundamental_v = is_fundamental<T>::value;
 
@@ -767,7 +734,7 @@ inline constexpr bool is_scalar_v = is_scalar<T>::value;
 // -----------
 template <typename T>
 struct is_compound 
-	: private_::static_not<is_fundamental_v<T>>
+	: atd_::static_not<is_fundamental_v<T>>
 { };
 
 
@@ -801,9 +768,196 @@ struct is_volatile<T volatile> : public true_type { };
 template <typename T>
 inline constexpr bool is_volatile_v = is_volatile<T>::value;
 
+// extent
+// ------
+// size_t extent<type T, unsigned N = 0>()
+// {
+//	if (!is_array_v<T> or 
+//	    rank<T> <= N or 
+//	    (N = 0 and is_array_of_unknown_bound<T>)
+//	    return 0;
+//	else
+//	    "the bound of the Nth dimension of T, where indexing of N
+//	     is zero-base";
+// }
+// Esa es la definición del estandard. Está más claro cppreference.
+//
+template <typename T, unsigned N>
+struct extent : integral_constant<size_t, 0> { };
+
+template<typename T>
+struct extent<T[], 0> : integral_constant<size_t, 0>
+{ };
+
+template<typename T, unsigned N>
+struct extent<T[], N> : extent<T, N - 1>
+{ };
+
+template<typename T, size_t sz>
+struct extent<T[sz], 0> : integral_constant<size_t, sz>
+{ };
+
+template<typename T, size_t sz, unsigned N>
+struct extent<T[sz], N> : extent<T, N - 1>
+{ };
 
 
+template <typename T, unsigned N = 0>
+inline constexpr size_t extent_v = extent<T, N>::value;
+
+// type_identity
+// -------------
+template <typename T>
+struct type_identity {
+    using type = T;
+};
+
+template <typename T>
+using type_identity_t = typename type_identity<T>::type;
+
+
+// ----------
+// is_trivial
+// ----------
+namespace private_{
+// is_array_known_bounds
+// ---------------------
+// DUDA: Los de gcc no comprueban que sea array. ¿queda incluido en extent?
+template <typename T>
+struct is_array_known_bounds
+    //: atd_::static_and<is_array_v<T>, extent_v<T> > 0>
+    : bool_constant<(extent_v<T> > 0)>
+{ };
+
+// is_array_unknown_bounds
+// -----------------------
+template <typename T>
+struct is_array_unknown_bounds
+    : atd_::static_and<is_array_v<T>, extent_v<T> == 0>
+{ };
+
+template <typename T>
+inline constexpr bool is_array_unknown_bounds_v 
+					= is_array_unknown_bounds<T>::value;
+
+// is_complete_or_unbounded
+// ------------------------
+template <typename T, size_t = sizeof(T)>
+constexpr true_type is_complete_or_unbounded(type_identity<T>)
+{ return true_type{}; }
+
+template <typename T,
+	  typename N = typename T::type>
+constexpr atd_::static_or<is_reference_v<N>,
+		    is_function_v<N>,
+		    is_void_v<N>,
+		    is_array_unknown_bounds_v<N>
+		   >
+	    is_complete_or_unbounded(T)
+{ return {}; }
+
+
+}// private_
+
+
+// is_trivial
+// ----------
+// Depende de gcc: __is_trivial
+template<typename T>
+struct is_trivial : bool_constant<__is_trivial(T)>
+{
+  static_assert(private_::is_complete_or_unbounded(type_identity<T>{}),
+    "Template argument must be a complete class or an unbounded array");
+};
+
+template <typename T>
+inline constexpr bool is_trivial_v = is_trivial<T>::value;
+
+// is_trivially_copyable
+// ---------------------
+// Depende de gcc: __is_trivially_copyable
+template<typename T>
+struct is_trivially_copyable 
+	: bool_constant< __is_trivially_copyable(T)>
+{
+  static_assert(private_::is_complete_or_unbounded(type_identity<T>{}),
+    "Template argument must be a complete class or an unbounded array");
+};
+
+template <typename T>
+inline constexpr bool is_trivially_copyable_v
+					= is_trivially_copyable<T>::value;
+
+
+// is_standard_layout
+// ------------------
+// Depende de gcc: __is_standard_layout
+template<typename T>
+struct is_standard_layout 
+	    : bool_constant<__is_standard_layout(T)>
+{
+  static_assert(private_::is_complete_or_unbounded(type_identity<T>{}),
+    "Template argument must be a complete class or an unbounded array");
+};
+
+template <typename T>
+inline constexpr bool is_standard_layout_v =  is_standard_layout<T>::value;
+
+
+// is_empty
+// --------
+// Depende de gcc: __is_empty
+template<typename T>
+struct is_empty : bool_constant<__is_empty(T)>
+{ };
+
+template <typename T>
+inline constexpr bool is_empty_v =  is_empty<T>::value;
+
+// is_polymorphic
 // --------------
+// Depende de gcc: __is_polymorphic
+template<typename T>
+struct is_polymorphic : bool_constant<__is_polymorphic(T)>
+{ };
+
+template <typename T>
+inline constexpr bool is_polymorphic_v =  is_polymorphic<T>::value;
+
+// is_abstract
+// -----------
+// Depende de gcc: __is_abstract
+template<typename T>
+struct is_abstract : bool_constant<__is_abstract(T)>
+{ };
+
+template <typename T>
+inline constexpr bool is_abstract_v =  is_abstract<T>::value;
+
+// is_final
+// --------
+// Depende de gcc: __is_final
+template<typename T>
+struct is_final : bool_constant<__is_final(T)>
+{ };
+
+template <typename T>
+inline constexpr bool is_final_v =  is_final<T>::value;
+
+
+// is_aggregate
+// ------------
+// Depende de gcc: __is_aggregate
+template<typename T>
+struct is_aggregate 
+	    : bool_constant<__is_aggregate(remove_cv_t<T>)>
+{ };
+
+template <typename T>
+inline constexpr bool is_aggregate_v =  is_aggregate<T>::value;
+
+
+
 // is_signed
 // --------------
 template <typename T, bool = is_arithmetic_v<T>>
@@ -824,7 +978,8 @@ template <typename T>
 inline constexpr bool is_signed_v = is_signed<T>::value;
 
 
-/// is_unsigned
+// is_unsigned
+// -----------
 template <typename T>
 struct is_unsigned 
     : public integral_constant<bool, is_arithmetic_v<T> and !is_signed_v<T>>
@@ -836,9 +991,25 @@ template <typename T>
 inline constexpr bool is_unsigned_v = is_unsigned<T>::value;
 
 
+// is_bounded_array
+// ----------------
+template<typename T>
+struct is_bounded_array 
+	    : private_::is_array_known_bounds<T> { };
 
+template <typename T>
+inline constexpr bool is_bounded_array_v =  is_bounded_array<T>::value;
 
-// is_desstructible
+// is_unbounded_array
+// ------------------
+template<typename T>
+struct is_unbounded_array 
+	: private_::is_array_unknown_bounds<T> { };
+
+template <typename T>
+inline constexpr bool is_unbounded_array_v = is_unbounded_array<T>::value;
+
+// is_destructible
 // ----------------
 // bool is_destructible<type T>
 // {
@@ -896,43 +1067,8 @@ using remove_reference_t = typename remove_reference<T>::type;
 // --------------------
 // if (is_referenceable<T>()) return T&;
 // else return T;
-// ---
-//
-//>>> BORRAME
-//// TODO: gcc implementa también el caso en que se le pase una función. Aquí no
-//// lo estoy implementando.
-//template <typename T>
-//constexpr inline bool __is_referenceable()
-//{
-//    if (is_object_v<T> or is_reference_v<T>)
-//	return true;
-//
-//    else
-//	return false;
-//}
-//
-//template <typename T, bool = __is_referenceable<T>()>
-//struct __add_lvalue_reference_switch;
-//
-//template <typename T>
-//struct __add_lvalue_reference_switch<T, false> {
-//    using type = T;
-//};
-//
-//template <typename T>
-//struct __add_lvalue_reference_switch<T, true> {
-//    using type = T&;
-//};
-//
-//template <typename T>
-//struct add_lvalue_reference{
-//    using type = typename __add_lvalue_reference_switch<T>::type;
-//};
-//<<< FIN BORRAME
-
-
 namespace impl_of{
-template <typename T, bool = private_::is_referenceable<T>>
+template <typename T, bool = atd_::is_referenceable<T>>
 struct add_lvalue_reference
 { using type = T;};
 
@@ -954,7 +1090,7 @@ using add_lvalue_reference_t = typename add_lvalue_reference<T>::type;
 // add_rvalue_reference
 // --------------------
 namespace impl_of{
-template <typename T, bool = private_::is_referenceable<T>>
+template <typename T, bool = atd_::is_referenceable<T>>
 struct add_rvalue_reference
 { using type = T;};
 
@@ -1193,7 +1329,7 @@ using remove_pointer_t = typename remove_pointer<T>::type;
 //  que es un error de gcc.
 //
 template <typename T, 
-	 bool = private_::is_referenceable<T> or is_void_v<T>>
+	 bool = atd_::is_referenceable<T> or is_void_v<T>>
 struct __add_pointer_switch;
 
 
@@ -1810,15 +1946,6 @@ struct common_reference<T1, T2, Tail...>{
 };
 
 
-// type_identity
-// -------------
-template <typename T>
-struct type_identity {
-    using type = T;
-};
-
-template <typename T>
-using type_identity_t = typename type_identity<T>::type;
 
 
 }// namespace

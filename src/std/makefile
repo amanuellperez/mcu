@@ -36,7 +36,7 @@ INCS= std_cstdio.h		\
 	std_memory.h		\
 	std_numeric.h		\
 	std_ostream.h		\
-	std_private.h		\
+	std_atd.h			\
 	std_span.h			\
 	std_ratio.h			\
 	std_streambuf.h		\
