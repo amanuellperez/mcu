@@ -1009,6 +1009,90 @@ struct is_unbounded_array
 template <typename T>
 inline constexpr bool is_unbounded_array_v = is_unbounded_array<T>::value;
 
+// is_constructible
+// ----------------
+namespace impl_of{
+// Depende de gcc: __is_constructible
+template<typename T, typename... Args>
+struct is_constructible
+	    : bool_constant<__is_constructible(T, Args...)>
+{ };
+
+}// impl_of
+
+template<typename T, typename... Args>
+struct is_constructible
+	: impl_of::is_constructible<T, Args...>
+{
+  static_assert(private_::is_complete_or_unbounded(type_identity<T>{}),
+    "Template argument must be a complete class or an unbounded array");
+};
+
+
+template <typename T, typename... Args>
+inline constexpr bool is_constructible_v = is_constructible<T, Args...>::value;
+
+// is_default_constructible
+// ------------------------
+//template <typename T>
+//struct is_default_constructible 
+//	: bool_constant<is_constructible_v<T>> {};
+
+template<typename T, typename... Args>
+struct is_default_constructible
+	: impl_of::is_constructible<T, Args...>
+{
+  // precondición: DUDA: el estandard impone también que pueda ser cv void
+  // (???) Lo incluye el __is_constructible()?
+  static_assert(private_::is_complete_or_unbounded(type_identity<T>{}),
+    "Template argument must be a complete class or an unbounded array");
+};
+
+template <typename T>
+inline constexpr bool is_default_constructible_v 
+				= is_default_constructible<T>::value;
+
+// is_copy_constructible
+// ---------------------
+// NOTA:
+//  Al implementarlo en forma de función estoy obligado a poner de forma
+//  explícita el caso en que T == [cv] void. En la implementación de gcc no
+//  queda claro.
+//  Estoy obligado a distinguir entre el caso void y no void ya que no se
+//  puede tomar una referencia a void. is_constructible<void, const void&> da
+//  un error de compilación.
+namespace impl_of{
+template <typename T>
+constexpr bool is_copy_constructible()
+{
+    if constexpr (requires {atd_::is_referenceable<T>;}){
+	if constexpr (is_same_v<remove_cv_t<T>, void>)
+	    return false;
+
+	else
+	    return is_constructible<T, const T&>();
+    }
+
+    else
+	return false;
+}
+
+}// impl_of
+
+template<typename T>
+struct is_copy_constructible
+	: bool_constant<impl_of::is_copy_constructible<T>()>
+{
+  static_assert(private_::is_complete_or_unbounded(type_identity<T>{}),
+    "Template argument must be a complete class or an unbounded array");
+};
+
+template <typename T>
+inline constexpr bool is_copy_constructible_v 
+				=  is_copy_constructible<T>::value;
+
+
+
 // is_destructible
 // ----------------
 // bool is_destructible<type T>

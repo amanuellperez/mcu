@@ -79,6 +79,16 @@ struct A {int m;};
 struct B : public A {int m;};
 struct C {virtual void f(); };
 
+class D{
+public:
+    D(int n) : v1{n}, v2{} { }
+    D(int n, double f) noexcept : v1{n}, v2{f} { }
+
+private:
+    int v1;
+    double v2;
+};
+
 typedef union
 {
     int a;
@@ -875,6 +885,149 @@ void test_is_unbounded_array()
     test_is_unbounded_array<B>("B");
     test_is_unbounded_array<C>("C");
 }
+
+
+
+template <typename T, typename... Args>
+void test_is_constructible(const std::string& name_type)
+{
+    CHECK_TRUE(mtd::is_constructible_v<T, Args...> ==
+	       std::is_constructible_v<T, Args...>, 
+	       alp::as_str() << "is_constructible(" << name_type << ")");
+}
+
+void test_is_constructible()
+{
+    test::interface("is_constructible");
+
+    test_is_constructible<void>("void");
+    test_is_constructible<nullptr_t>("nullptr_t");
+
+    test_is_constructible<char>("char");
+    test_is_constructible<int>("int");
+    test_is_constructible<long>("long");
+    test_is_constructible<long long>("long long");
+    test_is_constructible<float>("float");
+    test_is_constructible<double>("double");
+
+    test_is_constructible<int[]>("int[]");
+    test_is_constructible<int[3]>("int[3]");
+    test_is_constructible<int[][3]>("int[][3]");
+
+    test_is_constructible<Class>("Class");
+    test_is_constructible<Union>("Union");
+    test_is_constructible<Enum>("Enum");
+    test_is_constructible<Enum_class>("Enum_class");
+
+    test_is_constructible<Class>("Class");
+    test_is_constructible<Class2>("Class2");
+    test_is_constructible<int Class::*>("int Class::*");
+    test_is_constructible<int (Class::*)()>("int (Class::*)()");
+
+    test_is_constructible<A>("A");
+    test_is_constructible<B>("B");
+    test_is_constructible<C>("C");
+
+    test_is_constructible<D, int>("D, int");
+    test_is_constructible<D, int, float>("D, int, float");
+
+
+}
+
+template <typename T>
+void test_is_default_constructible(const std::string& name_type)
+{
+    CHECK_TRUE(mtd::is_default_constructible_v<T> ==
+	       std::is_default_constructible_v<T>, 
+	       alp::as_str() << "is_default_constructible(" << name_type << ")");
+}
+
+void test_is_default_constructible()
+{
+    test::interface("is_default_constructible");
+
+    test_is_default_constructible<void>("void");
+    test_is_default_constructible<const volatile void>("const volatile void");
+    test_is_default_constructible<nullptr_t>("nullptr_t");
+
+    test_is_default_constructible<char>("char");
+    test_is_default_constructible<int>("int");
+    test_is_default_constructible<long>("long");
+    test_is_default_constructible<long long>("long long");
+    test_is_default_constructible<float>("float");
+    test_is_default_constructible<double>("double");
+
+    test_is_default_constructible<int[]>("int[]");
+    test_is_default_constructible<int[3]>("int[3]");
+    test_is_default_constructible<int[][3]>("int[][3]");
+
+    test_is_default_constructible<Class>("Class");
+    test_is_default_constructible<Union>("Union");
+    test_is_default_constructible<Enum>("Enum");
+    test_is_default_constructible<Enum_class>("Enum_class");
+
+    test_is_default_constructible<Class>("Class");
+    test_is_default_constructible<Class2>("Class2");
+    test_is_default_constructible<int Class::*>("int Class::*");
+    test_is_default_constructible<int (Class::*)()>("int (Class::*)()");
+
+    test_is_default_constructible<A>("A");
+    test_is_default_constructible<B>("B");
+    test_is_default_constructible<C>("C");
+    test_is_default_constructible<D>("D");
+
+
+
+}
+
+
+
+template <typename T>
+void test_is_copy_constructible(const std::string& name_type)
+{
+    CHECK_TRUE(mtd::is_copy_constructible_v<T> ==
+	       std::is_copy_constructible_v<T>, 
+	       alp::as_str() << "is_copy_constructible(" << name_type << ")");
+}
+
+void test_is_copy_constructible()
+{
+    test::interface("is_copy_constructible");
+
+    test_is_copy_constructible<void>("void");
+    test_is_copy_constructible<const volatile void>("const volatile void");
+    test_is_copy_constructible<nullptr_t>("nullptr_t");
+
+    test_is_copy_constructible<char>("char");
+    test_is_copy_constructible<int>("int");
+    test_is_copy_constructible<long>("long");
+    test_is_copy_constructible<long long>("long long");
+    test_is_copy_constructible<float>("float");
+    test_is_copy_constructible<double>("double");
+
+    test_is_copy_constructible<int[]>("int[]");
+    test_is_copy_constructible<int[3]>("int[3]");
+    test_is_copy_constructible<int[][3]>("int[][3]");
+
+    test_is_copy_constructible<Class>("Class");
+    test_is_copy_constructible<Union>("Union");
+    test_is_copy_constructible<Enum>("Enum");
+    test_is_copy_constructible<Enum_class>("Enum_class");
+
+    test_is_copy_constructible<Class>("Class");
+    test_is_copy_constructible<Class2>("Class2");
+    test_is_copy_constructible<int Class::*>("int Class::*");
+    test_is_copy_constructible<int (Class::*)()>("int (Class::*)()");
+
+    test_is_copy_constructible<A>("A");
+    test_is_copy_constructible<B>("B");
+    test_is_copy_constructible<C>("C");
+    test_is_copy_constructible<D>("D");
+
+
+
+}
+
 
 
 template <typename T>
@@ -2054,6 +2207,9 @@ try{
     test_is_unsigned();
     test_is_bounded_array();
     test_is_unbounded_array();
+    test_is_constructible();
+    test_is_default_constructible();
+    test_is_copy_constructible();
 
     // type properties queries
     // -----------------------
