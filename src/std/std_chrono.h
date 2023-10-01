@@ -44,6 +44,7 @@
 #include "std_limits.h"
 #include "std_ctime.h"
 #include "std_cstdint.h"
+#include "std_cmath.h"	// abs
 
 namespace STD{
 

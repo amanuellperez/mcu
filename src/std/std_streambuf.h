@@ -34,7 +34,7 @@
 #include "std_config.h"
 
 #include "std_ios_types.h"
-#include "std_string.h"	// char_traits
+#include "std_char_traits.h"	
 #include "std_algorithm.h"  // min
 
 

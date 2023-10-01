@@ -37,7 +37,7 @@
  *
  ****************************************************************************/
 #include "std_config.h"
-#include "std_private.h"
+#include "std_atd.h"
 #include "std_type_traits.h"	// remove_cvref_t
 #include "std_utility.h"	// declval
 #include "std_concepts.h"	// integral
@@ -212,7 +212,7 @@ using iter_value_t = private_::iter_value_t<remove_cvref_t<T>>;
 
 // iter_reference_t
 // ----------------
-template<private_::dereferenceable T>
+template<atd_::dereferenceable T>
 using iter_reference_t = decltype(*declval<T&>());
 
 

@@ -67,7 +67,7 @@ void test_int(avr_::UART_iostream& uart, const char* tipo)
 	else
 	    uart << std::numeric_limits<Int>::min() + Int{1};
 
-	uart << " and " << std::numeric_limits<Int>::max() << " (o enter to cancel): ";
+	uart << " and " << std::numeric_limits<Int>::max() << " (or enter to cancel): ";
 
 	Int r32;
 	uart >> r32;

@@ -9,7 +9,7 @@ INCS= 	app_trace.h					\
 		user_time.h
 
 
-LIB=app_$(F_CPU)
+LIB=libprj_$(F_CPU)
 INSTALL_INC=$(MCU_INCLUDE)
 
 include $(APP_GENRULES)

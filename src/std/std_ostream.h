@@ -33,7 +33,7 @@
  ****************************************************************************/
 #include "std_config.h"
 #include "std_streambuf.h"
-#include "std_string.h"
+//#include "std_string.h"
 #include "std_sizeof_txt.h"
 #include "std_ios.h"
 #include "std_cstdio.h"	    // int_to_cstring

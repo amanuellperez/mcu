@@ -23,26 +23,26 @@ This directory contains the following:
     * [atd](src/atd/README.md): General utilities.
       Depends on `std`.
  
-2. Microcontroller: (microcontroller level?)
+2. [Microcontrollers](microcontrollers): (microcontroller level?)
 
-    * [avr](src/avr/README.md): "Drivers" for avr microcontrollers 
+    * [avr](src/microcontroller/avr/README.md): "Drivers" for avr microcontrollers 
 	(right now, only for ATMEGA328). 
       
-    * [mcu1](src/mcu1/README.md): Generic microcontrollers components.
+    * [mcu](src/microcontroller/mcu/README.md): Generic microcontrollers components.
 
-3. Devices: (device level?)
+3. [Devices](devices): (device level?)
 
-    * [dev0](src/dev0/README.md): Built-in devices.
+    * [hwd](src/devices/hwd/README.md): Built-in devices.
       To program here you have to know your chip, 
       you need to read the datasheet.
 
-    * [dev1](src/dev1/README.md): User-defined devices.
+    * [logic](src/devices/logic/README.md): User-defined devices.
     
   
 4. Projects: 
-    * [libprj](src/libprj/README.md): Common libraries
+    * [libprj](src/projects/lib/README.md): Common libraries
 
-    * [prj](src/prj/README.md): Projects.
+    * [prj](src/projects/prj/README.md): Projects.
 
 
 # mk: Compilation rules.
@@ -106,9 +106,9 @@ Se puede organizar el código en diferentes niveles:
     * [atd](src/atd/README.md): Funciones genéricas que se basan en mi std. 
 	 No usan excepciones ni los operadores new/delete.
 
-2. Microcontroladores: (microcontroller level)
+2. [Microcontroladores](microcontrollers): (microcontroller level)
     
-    * [avr](src/avr/README.md): Traductores del avr. 
+    * [avr](src/microcontrollers/avr/README.md): Traductores del avr. 
 
       En lugar de tener que recordar qué bit hay que escribir, 
       usamos nombres.
@@ -116,15 +116,16 @@ Se puede organizar el código en diferentes niveles:
       Quien programa este directorio tiene que conocer cómo funciona el
       microcontrolador. Necesita leer la datasheet.
 
-    * [mcu1](src/mcu1/README.md): Componentes genéricos de los
+    * [mcu](src/microcontrollers/mcu/README.md): Componentes genéricos de los
       microcontroladores.
 
       Son todos aquellos componentes que se implementan usando exclusivamente
       hardware encontrado en los microcontroladores (timers, pins, ...)
 
-3. Dispositivos: (device level)
+3. [Dispositivos](devices): (device level)
 
-    * [dev0](src/dev0/README.md): Built-in devices
+    * [hwd](src/devices/hwd/README.md): Built-in devices, dispositivos
+      físicos, reales, de hardware.
 
       Cada dispositivo físico, cada chip, necesita un driver. Aquí es donde
       guardo todos esos drivers. Cada dispositivo tendrá dos archivos: el
@@ -134,7 +135,7 @@ Se puede organizar el código en diferentes niveles:
       Quien programa aquí conoce los detalles del chip, necesitando leer la
       datasheet.
 
-    * [dev1](src/dev1/README.md): User-defined devices
+    * [logic](src/devices/logic/README.md): User-defined devices
 
       Los dispositivos que aparecen aquí son dispositivos construidos a
       partir de concepts, no sabiendo el dispositivo real que hay por
@@ -143,14 +144,25 @@ Se puede organizar el código en diferentes niveles:
       El programador no conoce la datasheet ya que desconoce el chip real al
       que accede. Lo que conoce son los diferents concepts.
 
-4. Proyectos:
+4. [Proyectos](projects):
 
-    * [libprj](src/libprj/README.md): Bibliotecas comunes a varios proyectos.
+    * [libprj](src/projects/lib/README.md): Bibliotecas comunes a varios proyectos.
 
-    * [prj](src/prj/README.md): Proyectos.
+    * [prj](src/projects/prj/README.md): Proyectos.
+
+
+### Entorno
+
+Para configurar el entorno de trabajo basta con ejecutar `[mcu_environment.sh](mcu_environment.sh)`.
 
 
 ### mk: Reglas para compilar
+
+En el directorio [mk](mk) están todas las reglas de compilación necesarias para 
+compilar cada bloque. 
+
+En la mayoría de los directorios se puede encontrar un script `make.sh` que
+compila la biblioteca con diferentes frecuencias.
 
 ### test y pc_test:
 En cada directorio suministro directorios `test` o `pc_test`. Los `pc_test`

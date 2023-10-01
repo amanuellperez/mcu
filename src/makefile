@@ -1,11 +1,8 @@
-DIRS = std	\
+DIRS = 	std	\
 		atd	\
-		avr	\
-		mcu1\
-		dev0\
-		dev1\
-		prj	\
-		app
+		microcontrollers	\
+		devices	\
+		projects
 
 include $(MCU_RECRULES)
 

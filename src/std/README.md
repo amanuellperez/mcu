@@ -120,7 +120,7 @@ Propuestas:
 
    Todo aquello que esté totalmente definido por el estandar tendrían que
    suministrarlo. Solamente las partes que admitan diferentes implementaciones
-   tiene sentido que no las suministren, pero donde donde el implementador de la
+   tiene sentido que no las suministren, pero donde el implementador de la
    clase se tiene que limitar a copiar lo dicho por el estandar es una pérdida de
    tiempo no suministrarlo.
 
