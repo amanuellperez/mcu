@@ -23,14 +23,14 @@ This directory contains the following:
     * [atd](src/atd/README.md): General utilities.
       Depends on `std`.
  
-2. [Microcontrollers](microcontrollers): (microcontroller level?)
+2. [Microcontrollers](src/microcontrollers): (microcontroller level?)
 
-    * [avr](src/microcontroller/avr/README.md): "Drivers" for avr microcontrollers 
+    * [avr](src/microcontrollers/avr/README.md): "Drivers" for avr microcontrollers 
 	(right now, only for ATMEGA328). 
       
-    * [mcu](src/microcontroller/mcu/README.md): Generic microcontrollers components.
+    * [mcu](src/microcontrollers/mcu/README.md): Generic microcontrollers components.
 
-3. [Devices](devices): (device level?)
+3. [Devices](src/devices): (device level?)
 
     * [hwd](src/devices/hwd/README.md): Built-in devices.
       To program here you have to know your chip, 
@@ -39,7 +39,7 @@ This directory contains the following:
     * [logic](src/devices/logic/README.md): User-defined devices.
     
   
-4. Projects: 
+4. [Projects](src/projects): 
     * [libprj](src/projects/lib/README.md): Common libraries
 
     * [prj](src/projects/prj/README.md): Projects.
@@ -106,7 +106,7 @@ Se puede organizar el código en diferentes niveles:
     * [atd](src/atd/README.md): Funciones genéricas que se basan en mi std. 
 	 No usan excepciones ni los operadores new/delete.
 
-2. [Microcontroladores](microcontrollers): (microcontroller level)
+2. [Microcontroladores](src/microcontrollers): (microcontroller level)
     
     * [avr](src/microcontrollers/avr/README.md): Traductores del avr. 
 
@@ -122,7 +122,7 @@ Se puede organizar el código en diferentes niveles:
       Son todos aquellos componentes que se implementan usando exclusivamente
       hardware encontrado en los microcontroladores (timers, pins, ...)
 
-3. [Dispositivos](devices): (device level)
+3. [Dispositivos](src/devices): (device level)
 
     * [hwd](src/devices/hwd/README.md): Built-in devices, dispositivos
       físicos, reales, de hardware.
@@ -144,7 +144,7 @@ Se puede organizar el código en diferentes niveles:
       El programador no conoce la datasheet ya que desconoce el chip real al
       que accede. Lo que conoce son los diferents concepts.
 
-4. [Proyectos](projects):
+4. [Proyectos](src/projects):
 
     * [libprj](src/projects/lib/README.md): Bibliotecas comunes a varios proyectos.
 
