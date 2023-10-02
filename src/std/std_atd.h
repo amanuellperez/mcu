@@ -72,7 +72,64 @@ template <typename...>
 using void_t = void;
 
 
+// is_const
+// --------
+template <typename T>
+struct is_const : public false_type { };
+
+template <typename T>
+struct is_const<T const> : public true_type { };
+
+template <typename T>
+inline constexpr bool is_const_v = is_const<T>::value;
+
+// is_volatile
+// -----------
+template <typename T>
+struct is_volatile : public false_type { };
+
+template <typename T>
+struct is_volatile<T volatile> : public true_type { };
+
+template <typename T>
+inline constexpr bool is_volatile_v = is_volatile<T>::value;
+
+
+/***************************************************************************
+ *				atd_
+ ***************************************************************************/
 namespace atd_{
+
+// is_a_type
+// ---------
+// Nos dice si una expresión es un tipo o no
+template <typename T>
+concept is_a_type = 
+    requires {
+	typename T;
+    };
+
+// -----------
+// type_member
+// -----------
+// has_type_member
+// ---------------
+template <typename T, typename = void>
+struct has_type_member : false_type { };
+
+template <typename T>
+struct has_type_member<T, void_t<typename T::type>>
+	    : true_type { };
+
+template <typename T>
+inline constexpr bool has_type_member_v = has_type_member<T>::value;
+
+// type_member
+// -----------
+template <typename T>
+concept type_member = has_type_member_v<T>;
+
+
 
 // add_reference
 // -------------
@@ -140,22 +197,52 @@ template <bool x1, bool x2, bool... rest>
 using static_or_t = typename static_or<x1, x2, rest...>::type;
 
 
-// has_type_member
-// ---------------
-template <typename T, typename = void>
-struct has_type_member : false_type { };
 
-template <typename T>
-struct has_type_member<T, void_t<typename T::type>>
-	    : true_type { };
 
-template <typename T>
-inline constexpr bool has_type_member_v = has_type_member<T>::value;
 
-// type_member
-// -----------
-template <typename T>
-concept type_member = has_type_member_v<T>;
+// type copy_cv<type From, type To> 
+// {
+//	type res = To;
+//	
+//	if (is_const_v<From>)
+//	    res = add_const_t<res>;
+//
+//	if (is_volatile_v<From>)
+//	    res = add_volatile_t<res>;
+//
+//	return res;
+// }
+//
+// (impl) ¿Cómo implementarlo? 
+// Como los condicionales se basan en 2 bools y no en tipos, 
+// una forma de hacerlo es pasando esos valores como parámetros de template.
+template <typename From, typename To,
+	  bool isConst = is_const_v<From>,
+	  bool isVolatile = is_volatile_v<From>>
+struct copy_cv;
+
+template <typename From, typename To>
+struct copy_cv<From, To, false, false>{
+    using type = To;
+};
+
+template <typename From, typename To>
+struct copy_cv<From, To, false, true>{
+    using type = volatile To;
+};
+
+template <typename From, typename To>
+struct copy_cv<From, To, true, false>{
+    using type = const To;
+};
+
+template <typename From, typename To>
+struct copy_cv<From, To, true, true>{
+    using type = const volatile To;
+};
+
+template <typename From, typename To>
+using copy_cv_t = typename copy_cv<From, To>::type;
 
 }// namespace atd_
 

@@ -101,6 +101,29 @@ void test_type_member()
 	    
 }
 
+template <typename From, typename To, typename Res>
+void test_copy_cv(const std::string& name_type_from,
+		  const std::string& name_type_to)
+{
+    CHECK_TRUE(std::is_same_v<mtd::atd_::copy_cv_t<From, To>, Res>,
+		alp::as_str() << "copy_cv_t<" << name_type_from << ", "
+		              << name_type_to << ")");
+}
+
+void test_copy_cv()
+{
+    test::interface("copy_cv");
+
+    test_copy_cv<char, char, char>("char", "char");
+    test_copy_cv<char&, char&, char&>("char&", "char&");
+    test_copy_cv<int&, int&, int&>("int&", "int&");
+
+    test_copy_cv<std::string, int, int>("std::string", "int");
+    test_copy_cv<const std::string, int, const int>("const std::string", "int");
+    test_copy_cv<volatile std::string, int, volatile int>("volatile std::string", "int");
+    test_copy_cv<const volatile std::string, int, const volatile int>("const volatile std::string", "int");
+
+}
 
 int main()
 {
@@ -111,7 +134,7 @@ try{
     test_and();
     test_or();
     test_type_member();
-
+    test_copy_cv();
 }catch(std::exception& e)
 {
     std::cerr << e.what() << '\n';

@@ -64,9 +64,9 @@
 //}
 
 
-#define LOG (std::cout << __PRETTY_FUNCTION__ << '\n')
-#include <iostream>
 #include "../../std_type_traits.h"
+#include <iostream>
+#define LOG (std::cout << __PRETTY_FUNCTION__ << '\n')
 
 #include <alp_test.h>
 #include <alp_string.h>
@@ -2103,11 +2103,13 @@ template <typename T, typename U, typename = void>
 struct mtd_common_reference_defined : std::false_type { };
 
 template <typename T, typename U>
-struct mtd_common_reference_defined<T, U, std::void_t<mtd::common_reference_t<T,U>>> 
+struct mtd_common_reference_defined<T, U, 
+				std::void_t<mtd::common_reference_t<T,U>>> 
 	    : std::true_type { };
 
 template <typename T, typename U>
-inline constexpr bool mtd_common_reference_defined_v = mtd_common_reference_defined<T,U>::value;
+inline constexpr 
+bool mtd_common_reference_defined_v = mtd_common_reference_defined<T,U>::value;
 
 template <typename T, typename U, typename = void>
 struct std_common_reference_defined : std::false_type { };
@@ -2145,18 +2147,26 @@ void test_common_reference(const std::string& name_type)
     test_common_reference<T, nullptr_t>(name_type, "nullptr_t");
 
     test_common_reference<T, char>(name_type, "char");
+    test_common_reference<T, char&>(name_type, "char&");
     test_common_reference<T, int>(name_type, "int");
+    test_common_reference<T, int&>(name_type, "int&");
     test_common_reference<T, long>(name_type, "long");
+    test_common_reference<T, long&>(name_type, "long&");
     test_common_reference<T, long long>(name_type, "long long");
+    test_common_reference<T, long long&>(name_type, "long long&");
     test_common_reference<T, float>(name_type, "float");
+    test_common_reference<T, float&>(name_type, "float&");
     test_common_reference<T, double>(name_type, "double");
+    test_common_reference<T, double&>(name_type, "double&");
 
     test_common_reference<T, int[]>(name_type, "int[]");
     test_common_reference<T, int[3]>(name_type, "int[3]");
     test_common_reference<T, int[][3]>(name_type, "int[][3]");
 
     test_common_reference<T, Class>(name_type, "Class");
+    test_common_reference<T, Class&>(name_type, "Class&");
     test_common_reference<T, Class2>(name_type, "Class2");
+    test_common_reference<T, Class2&>(name_type, "Class2&");
     test_common_reference<T, Union>(name_type, "Union");
 // Al comparar con Enum da un montón de warnings
 //    test_common_reference<T, Enum>(name_type, "Enum");
@@ -2169,6 +2179,7 @@ void test_common_reference(const std::string& name_type)
     test_common_reference<T, std::string>(name_type, "std::string"); 
 }
 
+
 void test_common_reference()
 {
     test::interface("common_reference");
@@ -2177,18 +2188,26 @@ void test_common_reference()
     test_common_reference<nullptr_t>("nullptr_t");
 
     test_common_reference<char>("char");
+    test_common_reference<char&>("char&");
     test_common_reference<int>("int");
+    test_common_reference<int&>("int&");
     test_common_reference<long>("long");
+    test_common_reference<long&>("long&");
     test_common_reference<long long>("long long");
+    test_common_reference<long long&>("long long&");
     test_common_reference<float>("float");
+    test_common_reference<float&>("float&");
     test_common_reference<double>("double");
+    test_common_reference<double&>("double&");
 
     test_common_reference<int[]>("int[]");
     test_common_reference<int[3]>("int[3]");
     test_common_reference<int[][3]>("int[][3]");
 
     test_common_reference<Class>("Class");
+    test_common_reference<Class&>("Class&");
     test_common_reference<Class2>("Class2");
+    test_common_reference<Class2&>("Class2&");
     test_common_reference<Union>("Union");
 // Al comparar con Enum da un montón de warnings
 //    test_common_reference<Enum>("Enum");
@@ -2349,23 +2368,6 @@ void test_add_cv()
 }
 
 
-template <typename From, typename To, typename Res>
-void test_copy_cv(const std::string& name_type_from, const std::string& name_type_to)
-{
-    CHECK_TRUE(std::is_same_v<mtd::private_::copy_cv_t<From, To>, Res>,
-		alp::as_str() << "copy_cv_t<" << name_type_from << ", "
-		              << name_type_to << ")");
-}
-void test_copy_cv()
-{
-    test::interface("copy_cv");
-
-    test_copy_cv<std::string, int, int>("std::string", "int");
-    test_copy_cv<const std::string, int, const int>("const std::string", "int");
-    test_copy_cv<volatile std::string, int, volatile int>("volatile std::string", "int");
-    test_copy_cv<const volatile std::string, int, const volatile int>("const volatile std::string", "int");
-
-}
 
 
 int main()
@@ -2468,9 +2470,6 @@ try{
     test_common_reference();
     test_conditional();
 
-    // private_
-    // --------
-    test_copy_cv();
 
 }catch(const std::exception& e){
     std::cerr << e.what() << '\n';

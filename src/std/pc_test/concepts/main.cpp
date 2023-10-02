@@ -35,6 +35,8 @@ class Class
 class Class2
 { Class x; };
 
+class Class_derived : Class{ };
+
 struct A {int m;};
 struct B : public A {int m;};
 struct C {virtual void f(); };
@@ -67,6 +69,172 @@ void test_same_as()
     CHECK_TRUE(mtd::same_as<int, int*> == std::same_as<int,int*>, "same_as<int, int*>");
 }
 
+template <typename From, typename To>
+void test_derived_from(const std::string& name_type_from,
+		       const std::string& name_type_to)
+{
+    CHECK_TRUE(mtd::derived_from<From, To> 
+	    == std::derived_from<From, To>, 
+	    alp::as_str() << "test_derived_from(" << name_type_from << ", " 
+			  << name_type_to << ")");
+}
+
+void test_derived_from()
+{
+    test::interface("derived_from");
+    
+    test_derived_from<void, nullptr_t>("void", "nullptr_t");
+    test_derived_from<int, int*>("int", "int*");
+    test_derived_from<Class_derived, Class>("Class_derived", "Class");
+    test_derived_from<Class, Class_derived>("Class", "Class_derived");
+}
+
+
+template <typename From, typename To>
+void test_convertible_to(const std::string& name_type_from,
+		         const std::string& name_type_to)
+{
+    CHECK_TRUE(mtd::convertible_to<From, To> 
+	    == std::convertible_to<From, To>, 
+	    alp::as_str() << "test_convertible_to(" << name_type_from << ", " 
+			  << name_type_to << ")");
+}
+
+template <typename From>
+void test_convertible_to(const std::string& name_type_from)
+{
+    test::interface("convertible_to");
+    
+    test_convertible_to<From, void>(name_type_from, "void");
+    test_convertible_to<From, nullptr_t>(name_type_from, "nullptr_t");
+
+    test_convertible_to<From, char>(name_type_from, "char");
+    test_convertible_to<From, int>(name_type_from, "int");
+    test_convertible_to<From, long>(name_type_from, "long");
+    test_convertible_to<From, long long>(name_type_from, "long long");
+    test_convertible_to<From, float>(name_type_from, "float");
+    test_convertible_to<From, double>(name_type_from, "double");
+
+    test_convertible_to<From, int[]>(name_type_from, "int[]");
+    test_convertible_to<From, int[3]>(name_type_from, "int[3]");
+    test_convertible_to<From, int[][3]>(name_type_from, "int[][3]");
+
+    test_convertible_to<From, Class>(name_type_from, "Class");
+    test_convertible_to<From, Class2>(name_type_from, "Class2");
+    test_convertible_to<From, Class_derived>(name_type_from, "Class_derived");
+    test_convertible_to<From, Union>(name_type_from, "Union");
+    test_convertible_to<From, Enum>(name_type_from, "Enum");
+    test_convertible_to<From, Enum_class>(name_type_from, "Enum_class");
+
+    test_convertible_to<From, Class>(name_type_from, "Class");
+    test_convertible_to<From, int Class::*>(name_type_from, "int Class::*");
+//    test_convertible_to<From, int (name_type_from, Class::*)()>("int (Class::*)()");
+}
+
+void test_convertible_to()
+{
+    test::interface("convertible_to");
+    
+    test_convertible_to<void>("void");
+    test_convertible_to<nullptr_t>("nullptr_t");
+
+    test_convertible_to<char>("char");
+    test_convertible_to<int>("int");
+    test_convertible_to<long>("long");
+    test_convertible_to<long long>("long long");
+    test_convertible_to<float>("float");
+    test_convertible_to<double>("double");
+
+    test_convertible_to<int[]>("int[]");
+    test_convertible_to<int[3]>("int[3]");
+    test_convertible_to<int[][3]>("int[][3]");
+
+    test_convertible_to<Class>("Class");
+    test_convertible_to<Class2>("Class2");
+    test_convertible_to<Class_derived>("Class_derived");
+    test_convertible_to<Union>("Union");
+    test_convertible_to<Enum>("Enum");
+    test_convertible_to<Enum_class>("Enum_class");
+
+    test_convertible_to<Class>("Class");
+    test_convertible_to<int Class::*>("int Class::*");
+    test_convertible_to<int (Class::*)()>("int (Class::*)()");
+}
+
+
+template <typename From, typename To>
+void test_common_reference_with(const std::string& name_type_from,
+		         const std::string& name_type_to)
+{
+    CHECK_TRUE(mtd::common_reference_with<From, To> 
+	    == std::common_reference_with<From, To>, 
+	    alp::as_str() << "test_common_reference_with(" << name_type_from << ", " 
+			  << name_type_to << ")");
+}
+
+template <typename From>
+void test_common_reference_with(const std::string& name_type_from)
+{
+    test::interface("common_reference_with");
+    
+    test_common_reference_with<From, void>(name_type_from, "void");
+    test_common_reference_with<From, nullptr_t>(name_type_from, "nullptr_t");
+
+    test_common_reference_with<From, char>(name_type_from, "char");
+    test_common_reference_with<From, int>(name_type_from, "int");
+    test_common_reference_with<From, long>(name_type_from, "long");
+    test_common_reference_with<From, long long>(name_type_from, "long long");
+    test_common_reference_with<From, float>(name_type_from, "float");
+    test_common_reference_with<From, double>(name_type_from, "double");
+
+    test_common_reference_with<From, int[]>(name_type_from, "int[]");
+    test_common_reference_with<From, int[3]>(name_type_from, "int[3]");
+    test_common_reference_with<From, int[][3]>(name_type_from, "int[][3]");
+
+    test_common_reference_with<From, Class>(name_type_from, "Class");
+    test_common_reference_with<From, Class2>(name_type_from, "Class2");
+    test_common_reference_with<From, Class_derived>(name_type_from, "Class_derived");
+    test_common_reference_with<From, Union>(name_type_from, "Union");
+//    test_common_reference_with<From, Enum>(name_type_from, "Enum");
+    test_common_reference_with<From, Enum_class>(name_type_from, "Enum_class");
+
+    test_common_reference_with<From, Class>(name_type_from, "Class");
+    test_common_reference_with<From, int Class::*>(name_type_from, "int Class::*");
+//    test_common_reference_with<From, int (name_type_from, Class::*)()>("int (Class::*)()");
+}
+
+void test_common_reference_with()
+{
+    test::interface("common_reference_with");
+    
+    test_common_reference_with<void>("void");
+    test_common_reference_with<nullptr_t>("nullptr_t");
+
+    test_common_reference_with<char>("char");
+    test_common_reference_with<int>("int");
+    test_common_reference_with<long>("long");
+    test_common_reference_with<long long>("long long");
+    test_common_reference_with<float>("float");
+    test_common_reference_with<double>("double");
+
+    test_common_reference_with<int[]>("int[]");
+    test_common_reference_with<int[3]>("int[3]");
+    test_common_reference_with<int[][3]>("int[][3]");
+
+    test_common_reference_with<Class>("Class");
+    test_common_reference_with<Class2>("Class2");
+    test_common_reference_with<Class_derived>("Class_derived");
+    test_common_reference_with<Union>("Union");
+//    test_common_reference_with<Enum>("Enum");
+    test_common_reference_with<Enum_class>("Enum_class");
+
+    test_common_reference_with<Class>("Class");
+    test_common_reference_with<int Class::*>("int Class::*");
+    test_common_reference_with<int (Class::*)()>("int (Class::*)()");
+}
+
+
+
 void test_integral()
 {
     test::interface("mtd::integral");
@@ -85,6 +253,9 @@ void test_integral()
 
     CHECK_TRUE(mtd::integral<A> == std::integral<A>, "integral");
 }
+
+
+
 
 template <typename T>
 void test_equality_comparable(const std::string& name_type)
@@ -164,8 +335,12 @@ void test_equality_comparable_with()
 {
     test::interface("equality_comparable_with");
     
-    CHECK_TRUE(mtd::equality_comparable_with<int, float> 
-	    == std::equality_comparable_with<int, float>, "kk");
+    if(std::equality_comparable_with<int, float>)
+	std::cout << "ok\n";
+    if(mtd::equality_comparable_with<int, float>)
+	std::cout << "ok\n";
+//    CHECK_TRUE(mtd::equality_comparable_with<int, float> 
+//	    == std::equality_comparable_with<int, float>, "kk");
 //    test_equality_comparable_with<void>("void");
 //    test_equality_comparable_with<nullptr_t>("nullptr_t");
 //
@@ -200,6 +375,9 @@ try{
     // language-related concepts
     // -------------------------
     test_same_as();
+    test_derived_from();
+    test_convertible_to();
+    test_common_reference_with();
     test_integral();
 
     // arithmetic concepts

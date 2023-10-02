@@ -754,27 +754,6 @@ inline constexpr bool is_compound_v = is_compound<T>::value;
 // Type properties
 // ---------------
 
-// is_const
-// --------
-template <typename T>
-struct is_const : public false_type { };
-
-template <typename T>
-struct is_const<T const> : public true_type { };
-
-template <typename T>
-inline constexpr bool is_const_v = is_const<T>::value;
-
-// is_volatile
-// -----------
-template <typename T>
-struct is_volatile : public false_type { };
-
-template <typename T>
-struct is_volatile<T volatile> : public true_type { };
-
-template <typename T>
-inline constexpr bool is_volatile_v = is_volatile<T>::value;
 
 // extent
 // ------
@@ -1620,8 +1599,10 @@ namespace impl_of{
 
 // cond_res
 // --------
+// FUNDAMENTAL: el STD:: delante del declval para que funcionen los test!!!
 template<typename X, typename Y>
-using cond_res = decltype(false ? declval<X(&)()>()() : declval<Y(&)()>()());
+using cond_res = 
+	    decltype(false ? STD::declval<X(&)()>()() : STD::declval<Y(&)()>()());
 
 namespace priv_{
 // La siguiente expresión compila solo si T1 y T2 tienen un tipo en común, en
@@ -1656,8 +1637,6 @@ struct common_type_part2 <T1, T2, 1, void_t<priv_::C_type<T1,T2>> >
 { 
     static constexpr int debug_number_part2 = 1;
     using type = priv_::C_type<T1, T2>; 
-
-    static constexpr void f() {LOG;}
 };
 
 template <typename T1, typename T2>
@@ -1853,50 +1832,6 @@ struct basic_common_reference { };
 //  
 
 namespace private_{
-// type copy_cv<type From, type To> 
-// {
-//	type res = To;
-//	
-//	if (is_const_v<From>)
-//	    res = add_const_t<res>;
-//
-//	if (is_volatile_v<From>)
-//	    res = add_volatile_t<res>;
-//
-//	return res;
-// }
-//
-// (impl) ¿Cómo implementarlo? 
-// Como los condicionales se basan en 2 bools y no en tipos, 
-// una forma de hacerlo es pasando esos valores como parámetros de template.
-template <typename From, typename To,
-	  bool isConst = is_const_v<From>,
-	  bool isVolatile = is_volatile_v<From>>
-struct copy_cv;
-
-template <typename From, typename To>
-struct copy_cv<From, To, false, false>{
-    using type = To;
-};
-
-template <typename From, typename To>
-struct copy_cv<From, To, false, true>{
-    using type = volatile To;
-};
-
-template <typename From, typename To>
-struct copy_cv<From, To, true, false>{
-    using type = const To;
-};
-
-template <typename From, typename To>
-struct copy_cv<From, To, true, true>{
-    using type = const volatile To;
-};
-
-template <typename From, typename To>
-using copy_cv_t = typename copy_cv<From, To>::type;
-
 // xref  (== copy_cvref)
 // ----
 // pero el nombre real es `copy_cvref` ya que lo que hace es copiar el const,
@@ -1904,87 +1839,106 @@ using copy_cv_t = typename copy_cv<From, To>::type;
 template <typename T>
 struct xref{
     template <typename U>
-    using type = copy_cv_t<T, U>;
+    using type = atd_::copy_cv_t<T, U>;
 };
 
 template <typename T>
 struct xref<T&>{
     template <typename U>
-    using type = copy_cv_t<T, U>&;
+    using type = atd_::copy_cv_t<T, U>&;
 };
 
 template <typename T>
 struct xref<T&&>{
     template <typename U>
-    using type = copy_cv_t<T, U>&&;
+    using type = atd_::copy_cv_t<T, U>&&;
 };
 
 
 } // namespace private_
 
 namespace impl_of{
-using private_::copy_cv;
-using private_::copy_cv_t;
+using atd_::copy_cv;
+using atd_::copy_cv_t;
 
 
 // COND_RES(COPYCV(X,Y)&, COPYCV(Y,X)&)
 // ------------------------------------
 template <typename X, typename Y>
-using cond_res_cvref = cond_res<copy_cv<X,Y>&, copy_cv<Y,X>&>;
+using cond_res_cvref = cond_res<copy_cv_t<X,Y>&, copy_cv_t<Y,X>&>;
 
 // common_ref (COMMON_REF)
 // -----------------------
-// TODO: Esta implementación sigue tanto el estandar como el código de gcc que
-// si se ve, van a la par. El único punto donde se separan es que el estandar
-// dice que X = remove_cvref_t<A> e Y = remove_cvref_t<B> cosa que los de gcc
-// no parece que tengan en cuenta. (como no quiero dedicarle mucho tiempo a
-// esto dejo el critero de gcc aunque convendría revisar si es correcto todo).
-template <typename X, typename Y, typename = void, typename = void>
-struct common_ref { };
+template <typename A, typename B>//, typename = void>
+struct common_ref 
+{ static constexpr int debug_number = 0; };
 
-template <typename X, typename Y>
-using common_ref_t = typename common_ref<X,Y>::type;
+template <typename A, typename B>
+using common_ref_t = typename common_ref<A,B>::type;
 
 // case: is_lvalue_reference_v<A> and is_lvalue_reference_v<B>
-template <typename X, typename Y>
-struct common_ref
-		<X&, Y&, 
-		 void_t<cond_res_cvref<X, Y>>
-		>
-	: enable_if<is_reference_v<cond_res_cvref<X, Y>>,
-				   cond_res_cvref<X, Y>>
-{ };
+template <typename A, typename B>
+    requires (atd_::is_a_type<cond_res_cvref<A,B>> and
+	      is_reference_v<cond_res_cvref<A, B>>)
+struct common_ref <A&, B&>
+{ 
+    using type = cond_res_cvref<A, B>;
+    static constexpr int debug_number = 1; 
+};
 
-//  type C = remove_reference_t<COMMON_REF<X&, Y&>&&;
-template <typename X, typename Y>
-using common_ref_C = remove_reference_t<common_ref_t<X&, Y&>>&&;
+
+template <typename A, typename B>
+    requires (atd_::is_a_type<cond_res_cvref<A,B>> and
+	      !is_reference_v<cond_res_cvref<A, B>>)
+struct common_ref <A&, B&>
+{ static constexpr int debug_number = 2; };
+
+//  type C = remove_reference_t<COMMON_REF<A&, B&>&&;
+template <typename A>
+using X_t = remove_reference_t<A>;
+
+template <typename B>
+using Y_t = remove_reference_t<B>;
+
+template <typename A, typename B>
+using common_ref_C = 
+	remove_reference_t<common_ref_t<X_t<A>&, 
+				        Y_t<B>&>>&&;
 
 // case: is_rvalue_reference_v<A> and is_rvalue_reference_v<B>
-template <typename X, typename Y>
-struct common_ref<X&&, Y&&, 
-	enable_if< (is_convertible_v<X&&, common_ref_C<X, Y>> and
-	           is_convertible_v<Y&&, common_ref_C<X, Y>>)
-		, void>
-	>
-{ using type = common_ref_C<X, Y>; };
+template <typename A, typename B>
+    requires(atd_::is_a_type<common_ref_C<A, B>> and
+	     is_convertible_v<X_t<A>&&, common_ref_C<A, B>> and
+	     is_convertible_v<Y_t<B>&&, common_ref_C<A, B>>)
+struct common_ref<A&&, B&&> //, void_t<common_ref_C<A,B>>>
+{ 
+    // DUDA: using type = common_ref_C<A&&, B&&>;
+    using type = common_ref_C<A, B>;
+    static constexpr int debug_number = 3; 
+};
 
 
-//  type D = COMMON_REF<const X&, Y&>;
-template <typename X, typename Y>
-using common_ref_D = common_ref_t<const X&, Y&>;
+//  type D = COMMON_REF<const A&, B&>;
+template <typename A, typename B>
+using common_ref_D = common_ref_t<const X_t<A>&, B&>;
 
 // if (is_rvalue_reference_v<A> and is_lvalue_reference_v<B> ...
-template <typename X, typename Y>
-struct common_ref<X&&, Y&,
-	    enable_if<is_convertible_v<X&&, common_ref_D<X, Y>>, void>
-	>
-{ using type = common_ref_D<X, Y>; };
-
+template <typename A, typename B>
+    requires (atd_::is_a_type<common_ref_D<A&&, B&>> and
+	      is_convertible_v<A&&, common_ref_D<A, B>>)
+struct common_ref<A&&, B&>//, void_t<common_ref_D<A,B>> >
+{ 
+    using type = common_ref_D<A, B>;
+    static constexpr int debug_number = 4; 
+};
 
 // if (is_lvalue_reference_v<A> and is_rvalue_reference_v<B>)
-template <typename X, typename Y>
-struct common_ref<X&, Y&&>
-    : common_ref<Y&&, X&> { };
+template <typename A, typename B>
+struct common_ref<A&, B&&>
+    : common_ref<B&&, A&> 
+{ 
+    static constexpr int debug_number = 5; 
+};
 
 
 // common_reference (2 elementos)
@@ -2020,25 +1974,25 @@ using common_reference_t = typename common_reference<T1, T2>::type;
 // case C: is_reference_type... != no_type
 template <typename T1, typename T2>
 struct common_reference <T1&, T2&, 1,
-			void_t<common_ref<T1&, T2&>>
+			void_t<common_ref_t<T1&, T2&>>
 			>
 { using type = common_ref_t<T1&, T2&>; };
 
 template <typename T1, typename T2>
 struct common_reference <T1&&, T2&&, 1,
-			void_t<common_ref<T1&&, T2&&>>
+			void_t<common_ref_t<T1&&, T2&&>>
 			>
 { using type = common_ref_t<T1&&, T2&&>; };
 
 template <typename T1, typename T2>
 struct common_reference <T1&, T2&&, 1,
-			void_t<common_ref<T1&, T2&&>>
+			void_t<common_ref_t<T1&, T2&&>>
 			>
 { using type = common_ref_t<T1&, T2&&>; };
 
 template <typename T1, typename T2>
 struct common_reference <T1&&, T2&, 1,
-			void_t<common_ref<T1&&, T2&>>
+			void_t<common_ref_t<T1&&, T2&>>
 			>
 { using type = common_ref_t<T1&&, T2&>; };
 
