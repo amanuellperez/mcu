@@ -335,35 +335,30 @@ void test_equality_comparable_with()
 {
     test::interface("equality_comparable_with");
     
-    if(std::equality_comparable_with<int, float>)
-	std::cout << "ok\n";
-    if(mtd::equality_comparable_with<int, float>)
-	std::cout << "ok\n";
-//    CHECK_TRUE(mtd::equality_comparable_with<int, float> 
-//	    == std::equality_comparable_with<int, float>, "kk");
-//    test_equality_comparable_with<void>("void");
-//    test_equality_comparable_with<nullptr_t>("nullptr_t");
-//
-//    test_equality_comparable_with<char>("char");
-//    test_equality_comparable_with<int>("int");
-//    test_equality_comparable_with<long>("long");
-//    test_equality_comparable_with<long long>("long long");
+    test_equality_comparable_with<void>("void");
+    test_equality_comparable_with<nullptr_t>("nullptr_t");
+
+    test_equality_comparable_with<char>("char");
+    test_equality_comparable_with<int>("int");
+    test_equality_comparable_with<long>("long");
+    test_equality_comparable_with<long long>("long long");
+    // float y double da muchos warnings
 //    test_equality_comparable_with<float>("float");
 //    test_equality_comparable_with<double>("double");
-//
-//    test_equality_comparable_with<int[]>("int[]");
-//    test_equality_comparable_with<int[3]>("int[3]");
-//    test_equality_comparable_with<int[][3]>("int[][3]");
-//
-//    test_equality_comparable_with<Class>("Class");
-//    test_equality_comparable_with<Class2>("Class2");
-//    test_equality_comparable_with<Union>("Union");
-//    test_equality_comparable_with<Enum>("Enum");
-//    test_equality_comparable_with<Enum_class>("Enum_class");
-//
-//    test_equality_comparable_with<Class>("Class");
-//    test_equality_comparable_with<int Class::*>("int Class::*");
-//    test_equality_comparable_with<int (Class::*)()>("int (Class::*)()");
+
+    test_equality_comparable_with<int[]>("int[]");
+    test_equality_comparable_with<int[3]>("int[3]");
+    test_equality_comparable_with<int[][3]>("int[][3]");
+
+    test_equality_comparable_with<Class>("Class");
+    test_equality_comparable_with<Class2>("Class2");
+    test_equality_comparable_with<Union>("Union");
+    //test_equality_comparable_with<Enum>("Enum");
+    test_equality_comparable_with<Enum_class>("Enum_class");
+
+    test_equality_comparable_with<Class>("Class");
+    test_equality_comparable_with<int Class::*>("int Class::*");
+    test_equality_comparable_with<int (Class::*)()>("int (Class::*)()");
 }
 
 
