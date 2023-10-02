@@ -148,6 +148,17 @@ concept equality_comparable
 
 // equality_comparable_with
 // -------------------------
+template <typename T, typename U>
+concept equality_comparable_with =
+	equality_comparable<T> and
+	equality_comparable<U> and
+	common_reference_with<const remove_reference_t<T>&, 
+			      const remove_reference_t<U>&> and
+	equality_comparable<common_reference_t<
+					    const remove_reference_t<T>&,
+					    const remove_reference_t<U>&>> and
+	private_::weakly_equality_comparable_with<T, U>;
+
 
 
 //totally_ordered

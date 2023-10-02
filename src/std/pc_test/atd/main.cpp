@@ -27,6 +27,12 @@
 
 using namespace test;
 
+struct Class_with_type{
+    using type = int;
+};
+
+struct Class_without_type{
+};
 
 void test_not()
 {
@@ -84,6 +90,18 @@ void test_or()
 
 }
 
+void test_type_member()
+{
+    test::interface("type_member");
+    CHECK_TRUE(mtd::atd_::type_member<int> == false, "int");
+    CHECK_TRUE(mtd::atd_::type_member<Class_with_type> == true, 
+						    "Class_with_type");
+    CHECK_TRUE(mtd::atd_::type_member<Class_without_type> == false, 
+						    "Class_without_type");
+	    
+}
+
+
 int main()
 {
 try{
@@ -92,6 +110,7 @@ try{
     test_not();
     test_and();
     test_or();
+    test_type_member();
 
 }catch(std::exception& e)
 {

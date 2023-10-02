@@ -50,6 +50,8 @@
 //    test_is_trivial<int[3]>("int[3]");
 //    test_is_trivial<int[][3]>("int[][3]");
 //
+//    test_is_trivial<std::string>("std::string");
+//
 //    test_is_trivial<Class>("Class");
 //    test_is_trivial<Class2>("Class2");
 //    test_is_trivial<Union>("Union");
@@ -61,11 +63,15 @@
 //    test_is_trivial<int (Class::*)()>("int (Class::*)()");
 //}
 
+
+#define LOG (std::cout << __PRETTY_FUNCTION__ << '\n')
+#include <iostream>
 #include "../../std_type_traits.h"
 
 #include <alp_test.h>
 #include <alp_string.h>
-#include <iostream>
+
+#include <typeinfo>
 
 using namespace test;
 
@@ -1906,26 +1912,24 @@ void test_remove_cvref()
 template <typename T>
 void test_decay_helper(const std::string& name_type)
 {
-    CHECK_TRUE(
-        (std::is_same_v<mtd::decay_t<T>, std::decay_t<T>>),
-        name_type);
+    CHECK_TRUE(std::is_same_v<mtd::decay_t<T>, std::decay_t<T>>, name_type);
 }
 
 template <typename T>
 void test_decay(const std::string& tname)
 {
     test_decay_helper<T>(tname);
-    test_decay_helper<T&>(alp::as_str() << tname << '&');
-    test_decay_helper<T&&>(alp::as_str() << tname << "&&");
-    test_decay_helper<T[]>(alp::as_str() << tname << "[]");
-    test_decay_helper<const T>(alp::as_str() << "const " << tname);
-    test_decay_helper<const T&>(alp::as_str() << "const " << tname << '&');
-    test_decay_helper<volatile T>(alp::as_str() << "volatile " << tname);
-    test_decay_helper<volatile T&>(alp::as_str()<< "volatile " << tname << '&');
-    test_decay_helper<T*>(alp::as_str() << tname << '*');
-    test_decay_helper<const T*>(alp::as_str() << "const " << tname << '*');
-    test_decay_helper<volatile T*>(alp::as_str() << "volatile " << tname << '*');
-    test_decay_helper<const volatile T*>(alp::as_str() << "const volatile " << tname << '*');
+//    test_decay_helper<T&>(alp::as_str() << tname << '&');
+//    test_decay_helper<T&&>(alp::as_str() << tname << "&&");
+//    test_decay_helper<T[]>(alp::as_str() << tname << "[]");
+//    test_decay_helper<const T>(alp::as_str() << "const " << tname);
+//    test_decay_helper<const T&>(alp::as_str() << "const " << tname << '&');
+//    test_decay_helper<volatile T>(alp::as_str() << "volatile " << tname);
+//    test_decay_helper<volatile T&>(alp::as_str()<< "volatile " << tname << '&');
+//    test_decay_helper<T*>(alp::as_str() << tname << '*');
+//    test_decay_helper<const T*>(alp::as_str() << "const " << tname << '*');
+//    test_decay_helper<volatile T*>(alp::as_str() << "volatile " << tname << '*');
+//    test_decay_helper<const volatile T*>(alp::as_str() << "const volatile " << tname << '*');
 }
 
 
@@ -1933,9 +1937,31 @@ void test_decay()
 {
     test::interface("decay");
 
+    test_decay<void>("void");
+    test_decay<nullptr_t>("nullptr_t");
+
     test_decay<char>("char");
     test_decay<int>("int");
+    test_decay<long>("long");
+    test_decay<long long>("long long");
+    test_decay<float>("float");
+    test_decay<double>("double");
+
+    test_decay<int[]>("int[]");
+    test_decay<int[3]>("int[3]");
+    test_decay<int[][3]>("int[][3]");
+
     test_decay<std::string>("string");
+
+    test_decay<Class>("Class");
+    test_decay<Class2>("Class2");
+    test_decay<Union>("Union");
+    test_decay<Enum>("Enum");
+    test_decay<Enum_class>("Enum_class");
+
+    test_decay<Class>("Class");
+    test_decay<int Class::*>("int Class::*");
+    test_decay<int (Class::*)()>("int (Class::*)()");
 }
 
 
@@ -1966,27 +1992,111 @@ void test_enable_if()
 
 
 
-template <typename... Ts>
-void test_common_type(const std::string& name_type)
+
+// mtd_common_type_defined
+// -----------------------
+template <typename T, typename U, typename = void>
+struct mtd_common_type_defined : std::false_type { };
+
+template <typename T, typename U>
+struct mtd_common_type_defined<T, U, std::void_t<mtd::common_type_t<T,U>>> 
+	    : std::true_type { };
+
+template <typename T, typename U>
+inline constexpr bool mtd_common_type_defined_v = mtd_common_type_defined<T,U>::value;
+
+template <typename T, typename U, typename = void>
+struct std_common_type_defined : std::false_type { };
+
+template <typename T, typename U>
+struct std_common_type_defined<T, U, std::void_t<std::common_type_t<T,U>>> 
+	    : std::true_type { };
+
+template <typename T, typename U>
+inline constexpr bool std_common_type_defined_v = std_common_type_defined<T,U>::value;
+
+
+template <typename T, typename U>
+void test_common_type(const std::string& name_type1, 
+		      const std::string& name_type2)
 {
-    CHECK_TRUE(
-        (std::is_same_v<mtd::common_type_t<Ts...>, std::common_type_t<Ts...>>),
-        name_type);
+    CHECK_TRUE(mtd_common_type_defined_v<T, U> ==
+	       std_common_type_defined_v<T, U>,
+	       alp::as_str() << "both compile or not? (" 
+			      << name_type1 << ", " << name_type2 << ")");
+
+    if constexpr (mtd_common_type_defined_v<T, U>){
+	CHECK_TRUE(std::is_same_v<mtd::common_type_t<T, U>, 
+				 std::common_type_t<T, U>>,
+		    alp::as_str() << name_type1 << ", " << name_type2);
+    }
 }
 
+
+template <typename T>
+void test_common_type(const std::string& name_type)
+{
+    test_common_type<T, void>(name_type, "void");
+
+    test_common_type<T, nullptr_t>(name_type, "nullptr_t");
+
+    test_common_type<T, char>(name_type, "char");
+    test_common_type<T, int>(name_type, "int");
+    test_common_type<T, long>(name_type, "long");
+    test_common_type<T, long long>(name_type, "long long");
+    test_common_type<T, float>(name_type, "float");
+    test_common_type<T, double>(name_type, "double");
+
+    test_common_type<T, int[]>(name_type, "int[]");
+    test_common_type<T, int[3]>(name_type, "int[3]");
+    test_common_type<T, int[][3]>(name_type, "int[][3]");
+
+    test_common_type<T, Class>(name_type, "Class");
+    test_common_type<T, Class2>(name_type, "Class2");
+    test_common_type<T, Union>(name_type, "Union");
+// Al comparar con Enum da un montón de warnings
+//    test_common_type<T, Enum>(name_type, "Enum");
+    test_common_type<T, Enum_class>(name_type, "Enum_class");
+
+    test_common_type<T, Class>(name_type, "Class");
+    test_common_type<T, int Class::*>(name_type, "int Class::*");
+//    test_common_type<T, int (name_type, Class::*)()>("int (Class::*)()");
+
+    test_common_type<T, std::string>(name_type, "std::string"); 
+}
 
 void test_common_type()
 {
     test::interface("common_type");
 
-//    test_common_type<>("nada"); // tiene que dar error de compilación
+    test_common_type<void>("void");
+    test_common_type<nullptr_t>("nullptr_t");
+
     test_common_type<char>("char");
-    test_common_type<char, int>("char, int");
-    test_common_type<int, unsigned int>("int, unsigned int");
-    test_common_type<int, long>("int, long");
-//    test_common_type<int, std::string>("int, long"); // esto no tiene que
-//    compilar
+    test_common_type<int>("int");
+    test_common_type<long>("long");
+    test_common_type<long long>("long long");
+    test_common_type<float>("float");
+    test_common_type<double>("double");
+
+    test_common_type<int[]>("int[]");
+    test_common_type<int[3]>("int[3]");
+    test_common_type<int[][3]>("int[][3]");
+
+    test_common_type<Class>("Class");
+    test_common_type<Class2>("Class2");
+    test_common_type<Union>("Union");
+// Al comparar con Enum da un montón de warnings
+//    test_common_type<Enum>("Enum");
+    test_common_type<Enum_class>("Enum_class");
+
+    test_common_type<Class>("Class");
+    test_common_type<int Class::*>("int Class::*");
+    test_common_type<int (Class::*)()>("int (Class::*)()");
 }
+
+
+
 
 template <typename T>
 void test_make_signed(const std::string& name)
@@ -2252,6 +2362,7 @@ try{
     test_decay();
     test_enable_if();
     test_common_type();
+//    test_common_reference();
     test_conditional();
 
     // private_

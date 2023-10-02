@@ -66,6 +66,10 @@ using bool_constant = integral_constant<bool, B>;
 using true_type = integral_constant<bool, true>;
 using false_type = integral_constant<bool, false>;
 
+// void_t
+// ------
+template <typename...>
+using void_t = void;
 
 
 namespace atd_{
@@ -134,6 +138,24 @@ struct static_or<x1, x2> :
 
 template <bool x1, bool x2, bool... rest>
 using static_or_t = typename static_or<x1, x2, rest...>::type;
+
+
+// has_type_member
+// ---------------
+template <typename T, typename = void>
+struct has_type_member : false_type { };
+
+template <typename T>
+struct has_type_member<T, void_t<typename T::type>>
+	    : true_type { };
+
+template <typename T>
+inline constexpr bool has_type_member_v = has_type_member<T>::value;
+
+// type_member
+// -----------
+template <typename T>
+concept type_member = has_type_member_v<T>;
 
 }// namespace atd_
 

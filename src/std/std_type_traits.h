@@ -31,6 +31,10 @@
  *	Ver https://gcc.gnu.org/onlinedocs/gcc/Type-Traits.html
  *	¿Cómo se pueden desvincular de gcc?
  *
+ *  EJEMPLOS
+ *	Para ver como implementar un switch de tipos ver 
+ *	common_type o common_reference.
+ *
  *  HISTORIA
  *    Manuel Perez
  *    07/02/2019 v0.0
@@ -40,16 +44,18 @@
  *		 add_pointer/remove_pointer, ...
  *    18/03/2021 make_signed/make_unsigned
  *    14/08/2021 Completando implementación de common_type.
- *               Es copia de cppreference. TODO: reescribirla.
+ *               Es copia de cppreference.
  *    23/12/2022 type_identity
  *    25/09/2023 remove_cvref, is_union, is_class, is_base_of,
  *               add_const/volatile/cv
- *               common_reference (TODO: falta probar!!!)
+ *               common_reference 
  *               (¿Cómo probar common_reference? La definición del estandard
  *               no está nada clara, ya que dice cómo funciona por dentro pero
  *               no dice para qué sirve. Ni siquiera en cppreference se
  *               encuentran ejemplos de cómo validar esta función. Pero sin
- *               tests lo más probable es que tenga un montón de errores!!!)
+ *               tests lo más probable es que tenga un montón de errores!!!
+ *               Forma de probarla: en caso de duda intentar una enumeración
+ *               exhaustiva }:), ver el test)
  *		 
  *
  ****************************************************************************/
@@ -74,14 +80,16 @@ inline constexpr bool is_same_v = is_same<X, Y>::value;
 // declval: copiado de gcc. Es propuesta de Eric Niebler:
 // https://bugs.llvm.org/show_bug.cgi?id=27798. Ver discusión en:
 // https://stackoverflow.com/questions/56212117/understanding-declval-optimized-implementation
+namespace impl_of{
 template<typename T, typename Up = T&&>
-Up __declval(int); 
+Up declval(int); 
 
 template<typename T>
-T __declval(long);
-
+T declval(long);
+}// impl_of
+ 
 template<typename T>
-auto declval() noexcept -> decltype(__declval<T>(0));
+auto declval() noexcept -> decltype(impl_of::declval<T>(0));
 
 
 // ----------------------------
@@ -1466,7 +1474,8 @@ using remove_cvref_t = typename remove_cvref<T>::type;
 // -----
 // El standard indica que la función a implementar es:
 //
-// type decay<T>:
+// type decay<T>
+// {
 //	type U = remove_reference_t<T>;
 //
 //	if (is_array_v<U>)
@@ -1477,40 +1486,42 @@ using remove_cvref_t = typename remove_cvref<T>::type;
 //
 //	else
 //	    return remove_cv_t<U>;
+//  }
+namespace impl_of{
 template <typename U,
 	    bool = is_array_v<U>,
 	    bool = is_function_v<U>>
-struct __decay_switch;
+struct decay;
 
 template <typename U>
-struct __decay_switch<U, false, false>
+struct decay<U, false, false>
 {
     using type = remove_cv_t<U>;
 };
 
 
 template <typename U> 
-struct __decay_switch<U, true, false>{
+struct decay<U, true, false>{
     using type = remove_extent_t<U>*;
 };
 
 
 template <typename U> 
-struct __decay_switch<U, false, true>{
+struct decay<U, false, true>{
     using type = add_pointer_t<U>;
 };
 
 // tiene prioridad is_array antes que is_function.
 template <typename U> 
-struct __decay_switch<U, true, true>{
+struct decay<U, true, true>{
     using type = remove_extent_t<U>*;
 };
-
+}// impl_of
 
 template <typename T>
 struct decay {
     using U    = remove_reference_t<T>;
-    using type = typename __decay_switch<U>::type;
+    using type = typename impl_of::decay<U>::type;
 };
 
 
@@ -1550,8 +1561,6 @@ struct conditional<false, True, False>
 template <bool B, typename T, typename F>
 using conditional_t = typename conditional<B, T, F>::type;
 
-template <typename...>
-using void_t = void;
 
 
 
@@ -1566,31 +1575,35 @@ using void_t = void;
 //	    return common_type_t<T, T>; // definido o no
 //
 //	if (sizeof...(T) == 2){
-//	    typename D1 = decay_t<T1>;
-//	    typename D2 = decay_t<T2>;
+//	    type D1 = decay_t<T1>
+//	    type D2 = decay_t<T2>;
 //
-//	    // condicion == !(is_same_v<T1, D1> and is_same_v<T2, D2>)
+//	    // equivalente a: if (!(is_same_v<T1,D1> and is_same_v<T2,D2>)
 //	    if (!is_same_v<T1, D1> or !is_same_v<T2, D2>)
 //		return common_type_t<D1, D2>;
 //
-//	    else if (!there_is_specialization_of(common_type_t<D1, D2>))
-//		return decay_t<decltype(false ? declval<D1>(): declval<D2>())>;
+//	    // case: is_same_v<T1, D1> and is_same_v<T2, D2>
+//	    else if (!there_is_specialization_of(common_type_t<D1, D2>)){
+//		// part2:
+//		type C = decay_t<decltype(false ? declval<D1>(): declval<D2>())>;
+//		if (C != no_type)
+//		    return C;
+//
+//		type D = COND_RES(CREF<D1>, CREF<D2>);
+//		if (D != no_type)
+//		    return decay_t<D>;
+//	    }
 //	}
 //
 // 
 //	return common_type_t<common_type_t<T1, T2>, Tail...>;
 // }
 //
-// TODO: la impresión al hacer las pruebas es que al introducir common_type en
-// los test tarda bastante más en compilar. ¿Merecerá la pena mejorar la
-// implementación? Esta es muy sencilla de entender.
-// gcc tiene una implementación diferente.
 template <typename... T>
 struct common_type {};
 
 template <typename... T> 
 using common_type_t = typename common_type<T...>::type;
-
 
 
 // sizeof...(T) == 0
@@ -1599,56 +1612,127 @@ struct common_type<> { };
 
 // sizeof...(T) == 1
 template <typename T>
-struct common_type<T> {
-    using type = common_type_t<T, T>;
-};
+struct common_type<T> : common_type<T,T> { };
+
 
 // sizeof...(T) == 2
-// TODO: esta implementación es copia de la que hay en cppreference.
-// Preferiría hacerla con un switch pero el problema es cómo hacerlo cuando no
-// `type` no queda definido. Por eso se usa la herencia.
-namespace detail {
+namespace impl_of{
 
-// La expresión "false? decl..." no compila si T1 y T2 no son del mismo tipo
-// (?)
-template<typename T1, typename T2>
-using common_declval_T1_T2 = decltype(false ? declval<T1>() : declval<T2>());
- 
-template<typename, typename, typename = void>
-struct decay_conditional_result {};
+// cond_res
+// --------
+template<typename X, typename Y>
+using cond_res = decltype(false ? declval<X(&)()>()() : declval<Y(&)()>()());
 
+namespace priv_{
+// La siguiente expresión compila solo si T1 y T2 tienen un tipo en común, en
+// cuyo caso es el que devuelve. Si no tienen tipo en común no compila.
+// Precondition: T1 == D1, T2 == D2
+// CUIDADO!!! si no llamo a STD::declval, y se llama directamente a declval el
+// test falla en void, diciendo que no está definido declval<void>()!!!
+// Por eso es fundamental llamar a STD::declval. ¿por qué ocurre esto? (por el
+// contexto las templates se buscan en el namespace correspondiente. ¿tendrá
+// que ver con eso?)
 template<typename T1, typename T2>
-struct decay_conditional_result<T1, T2, void_t<common_declval_T1_T2 <T1, T2>>>
-{
-    using type = decay_t<common_declval_T1_T2<T1, T2>>;
-};
- 
-template<typename T1, typename T2, typename = void>
-struct common_type_2_impl : decay_conditional_result<const T1&, const T2&> {};
- 
- 
+using C_type = 
+	    decay_t<decltype(false ? STD::declval<T1>() : STD::declval<T2>())>;
+
+template <typename T>
+using cref = add_lvalue_reference_t<const remove_reference_t<T>>;
+
+// Precondition: T1 == D1, T2 == D2
 template<typename T1, typename T2>
-struct common_type_2_impl<T1, T2, void_t<common_declval_T1_T2<T1, T2>>>
-    : decay_conditional_result<T1, T2> {};
+using D_type = cond_res<cref<T1>, cref<T2>>;
+
 }
+
+// part2: es un switch dependiendo de si existen tipos o no.
+template <typename T1, typename T2, int case_number = 1, typename = void>
+struct common_type_part2 
+	: common_type_part2<T1, T2, case_number + 1> 
+{ };
+
+template <typename T1, typename T2>
+struct common_type_part2 <T1, T2, 1, void_t<priv_::C_type<T1,T2>> >
+{ 
+    static constexpr int debug_number_part2 = 1;
+    using type = priv_::C_type<T1, T2>; 
+
+    static constexpr void f() {LOG;}
+};
+
+template <typename T1, typename T2>
+struct common_type_part2 <T1, T2, 2, void_t<priv_::D_type<T1,T2>> >
+{ 
+    static constexpr int debug_number_part2 = 2;
+    using type = decay_t<priv_::D_type<T1, T2>>; 
+};
+
+template <typename T1, typename T2>
+struct common_type_part2 <T1, T2, 3>
+{ 
+    static constexpr int debug_number_part2 = 3;
+};
+
+// NOTA: se podía implementar usando un flag `bool are_both_equal` que indique
+// si son iguales a su decay o no. Queda más sencillo de leer, pero involucra
+// más llamadas a funciones con lo que el compilador tardará más en
+// compilarlo. Por ello dejo esta implementación, que no muestra bien la
+// intención del código.
+// if (!(is_same_v<T1, D1> and is_same_v<T2,D2>))
+//	return common_type_t<D1, D2>;
+template <typename T1, typename T2,
+	  typename D1 = decay_t<T1>, typename D2 = decay_t<T2> >
+struct common_type : common_type<D1, D2>
+{
+    static constexpr int debug_decay_true = 0;
+};
+
+// else
+template <typename T1, typename T2>
+struct common_type<T1, T2, T1, T2>
+    : common_type_part2<T1, T2> 
+{ 
+    static constexpr int debug_decay_true = 1;
+};
+
+
+
+// common_type_fold
+// ----------------
+// type common_type_fold<T1, ..., Tn>{
+//	if (T1::type != no_type)
+//	    return common_type_t<T1,...,Tn>;
+//
+//	else
+//	    return no_type;
+// }
+template <typename T, typename... Tail>
+struct common_type_fold { };
+
+template <typename T, typename... Tail>
+    requires (atd_::type_member<T>)
+struct common_type_fold <T, Tail...>
+	    : common_type<typename T::type, Tail...> {};
+
+
+}// impl_of
  
 template <typename T1, typename T2>
 struct common_type<T1, T2> 
-    : conditional<is_same<T1, typename decay<T1>::type>::value &&
-                       is_same<T2, typename decay<T2>::type>::value,
-                       detail::common_type_2_impl<T1, T2>,
-                       common_type<typename decay<T2>::type,
-                                   typename decay<T2>::type>>::type {};
-
-
+	    : impl_of::common_type<T1, T2> 
+{ 
+    static constexpr int debug_common_type2 = 102; // el valor da lo mismo
+};
 
 
 // sizeof...(T) > 2
 // C(t1, t2, t3, ..., tn) = C( C(t1, t2), t3, ..., tn);
 template <typename T1, typename T2, typename... Tail>
-struct common_type <T1, T2, Tail...>{
-    using type = common_type_t<common_type_t<T1, T2>, Tail...>;
-};
+struct common_type <T1, T2, Tail...>
+	: impl_of::common_type_fold<common_type<T1, T2>, Tail...>
+{ };
+
+
 
 
 // basic_common_reference
@@ -1842,10 +1926,6 @@ namespace impl_of{
 using private_::copy_cv;
 using private_::copy_cv_t;
 
-// cond_res
-// --------
-template<typename X, typename Y>
-using cond_res = decltype(false ? declval<X(&)()>()() : declval<Y(&)()>()());
 
 // COND_RES(COPYCV(X,Y)&, COPYCV(Y,X)&)
 // ------------------------------------

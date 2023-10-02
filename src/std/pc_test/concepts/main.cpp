@@ -122,6 +122,75 @@ void test_equality_comparable()
     test_equality_comparable<int (Class::*)()>("int (Class::*)()");
 }
 
+template <typename T, typename U>
+void test_equality_comparable_with(const std::string& name_type1, 
+				   const std::string& name_type2)
+{
+    CHECK_TRUE(mtd::equality_comparable_with<T, U> 
+	    == std::equality_comparable_with<T, U>, 
+	    alp::as_str() << name_type1 << ", " << name_type2);
+}
+
+
+template <typename T>
+void test_equality_comparable_with(const std::string& name_type)
+{
+    test_equality_comparable_with<T, void>(name_type, "void");
+    test_equality_comparable_with<T, nullptr_t>(name_type, "nullptr_t");
+
+    test_equality_comparable_with<T, char>(name_type, "char");
+    test_equality_comparable_with<T, int>(name_type, "int");
+    test_equality_comparable_with<T, long>(name_type, "long");
+    test_equality_comparable_with<T, long long>(name_type, "long long");
+    test_equality_comparable_with<T, float>(name_type, "float");
+    test_equality_comparable_with<T, double>(name_type, "double");
+
+    test_equality_comparable_with<T, int[]>(name_type, "int[]");
+    test_equality_comparable_with<T, int[3]>(name_type, "int[3]");
+    test_equality_comparable_with<T, int[][3]>(name_type, "int[][3]");
+
+    test_equality_comparable_with<T, Class>(name_type, "Class");
+    test_equality_comparable_with<T, Class2>(name_type, "Class2");
+    test_equality_comparable_with<T, Union>(name_type, "Union");
+    test_equality_comparable_with<T, Enum>(name_type, "Enum");
+    test_equality_comparable_with<T, Enum_class>(name_type, "Enum_class");
+
+    test_equality_comparable_with<T, Class>(name_type, "Class");
+    test_equality_comparable_with<T, int Class::*>(name_type, "int Class::*");
+    test_equality_comparable_with<T, int (Class::*)()>(name_type, "int (Class::*)()");
+}
+
+void test_equality_comparable_with()
+{
+    test::interface("equality_comparable_with");
+    
+    CHECK_TRUE(mtd::equality_comparable_with<int, float> 
+	    == std::equality_comparable_with<int, float>, "kk");
+//    test_equality_comparable_with<void>("void");
+//    test_equality_comparable_with<nullptr_t>("nullptr_t");
+//
+//    test_equality_comparable_with<char>("char");
+//    test_equality_comparable_with<int>("int");
+//    test_equality_comparable_with<long>("long");
+//    test_equality_comparable_with<long long>("long long");
+//    test_equality_comparable_with<float>("float");
+//    test_equality_comparable_with<double>("double");
+//
+//    test_equality_comparable_with<int[]>("int[]");
+//    test_equality_comparable_with<int[3]>("int[3]");
+//    test_equality_comparable_with<int[][3]>("int[][3]");
+//
+//    test_equality_comparable_with<Class>("Class");
+//    test_equality_comparable_with<Class2>("Class2");
+//    test_equality_comparable_with<Union>("Union");
+//    test_equality_comparable_with<Enum>("Enum");
+//    test_equality_comparable_with<Enum_class>("Enum_class");
+//
+//    test_equality_comparable_with<Class>("Class");
+//    test_equality_comparable_with<int Class::*>("int Class::*");
+//    test_equality_comparable_with<int (Class::*)()>("int (Class::*)()");
+}
+
 
 int main()
 {
@@ -140,6 +209,7 @@ try{
     // comparison concepts
     // -------------------
     test_equality_comparable();
+    test_equality_comparable_with();
 
 
 }catch(const std::exception& e){
