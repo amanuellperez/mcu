@@ -2097,6 +2097,109 @@ void test_common_type()
 
 
 
+// mtd_common_reference_defined
+// -----------------------
+template <typename T, typename U, typename = void>
+struct mtd_common_reference_defined : std::false_type { };
+
+template <typename T, typename U>
+struct mtd_common_reference_defined<T, U, std::void_t<mtd::common_reference_t<T,U>>> 
+	    : std::true_type { };
+
+template <typename T, typename U>
+inline constexpr bool mtd_common_reference_defined_v = mtd_common_reference_defined<T,U>::value;
+
+template <typename T, typename U, typename = void>
+struct std_common_reference_defined : std::false_type { };
+
+template <typename T, typename U>
+struct std_common_reference_defined<T, U, std::void_t<std::common_reference_t<T,U>>> 
+	    : std::true_type { };
+
+template <typename T, typename U>
+inline constexpr bool std_common_reference_defined_v = std_common_reference_defined<T,U>::value;
+
+
+template <typename T, typename U>
+void test_common_reference(const std::string& name_type1, 
+		      const std::string& name_type2)
+{
+    CHECK_TRUE(mtd_common_reference_defined_v<T, U> ==
+	       std_common_reference_defined_v<T, U>,
+	       alp::as_str() << "both compile or not? (" 
+			      << name_type1 << ", " << name_type2 << ")");
+
+    if constexpr (mtd_common_reference_defined_v<T, U>){
+	CHECK_TRUE(std::is_same_v<mtd::common_reference_t<T, U>, 
+				 std::common_reference_t<T, U>>,
+		    alp::as_str() << name_type1 << ", " << name_type2);
+    }
+}
+
+
+template <typename T>
+void test_common_reference(const std::string& name_type)
+{
+    test_common_reference<T, void>(name_type, "void");
+
+    test_common_reference<T, nullptr_t>(name_type, "nullptr_t");
+
+    test_common_reference<T, char>(name_type, "char");
+    test_common_reference<T, int>(name_type, "int");
+    test_common_reference<T, long>(name_type, "long");
+    test_common_reference<T, long long>(name_type, "long long");
+    test_common_reference<T, float>(name_type, "float");
+    test_common_reference<T, double>(name_type, "double");
+
+    test_common_reference<T, int[]>(name_type, "int[]");
+    test_common_reference<T, int[3]>(name_type, "int[3]");
+    test_common_reference<T, int[][3]>(name_type, "int[][3]");
+
+    test_common_reference<T, Class>(name_type, "Class");
+    test_common_reference<T, Class2>(name_type, "Class2");
+    test_common_reference<T, Union>(name_type, "Union");
+// Al comparar con Enum da un montón de warnings
+//    test_common_reference<T, Enum>(name_type, "Enum");
+    test_common_reference<T, Enum_class>(name_type, "Enum_class");
+
+    test_common_reference<T, Class>(name_type, "Class");
+    test_common_reference<T, int Class::*>(name_type, "int Class::*");
+//    test_common_reference<T, int (name_type, Class::*)()>("int (Class::*)()");
+
+    test_common_reference<T, std::string>(name_type, "std::string"); 
+}
+
+void test_common_reference()
+{
+    test::interface("common_reference");
+
+    test_common_reference<void>("void");
+    test_common_reference<nullptr_t>("nullptr_t");
+
+    test_common_reference<char>("char");
+    test_common_reference<int>("int");
+    test_common_reference<long>("long");
+    test_common_reference<long long>("long long");
+    test_common_reference<float>("float");
+    test_common_reference<double>("double");
+
+    test_common_reference<int[]>("int[]");
+    test_common_reference<int[3]>("int[3]");
+    test_common_reference<int[][3]>("int[][3]");
+
+    test_common_reference<Class>("Class");
+    test_common_reference<Class2>("Class2");
+    test_common_reference<Union>("Union");
+// Al comparar con Enum da un montón de warnings
+//    test_common_reference<Enum>("Enum");
+    test_common_reference<Enum_class>("Enum_class");
+
+    test_common_reference<Class>("Class");
+    test_common_reference<int Class::*>("int Class::*");
+    test_common_reference<int (Class::*)()>("int (Class::*)()");
+}
+
+
 
 template <typename T>
 void test_make_signed(const std::string& name)
@@ -2362,7 +2465,7 @@ try{
     test_decay();
     test_enable_if();
     test_common_type();
-//    test_common_reference();
+    test_common_reference();
     test_conditional();
 
     // private_
