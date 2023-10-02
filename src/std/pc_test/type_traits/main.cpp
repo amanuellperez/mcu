@@ -1034,6 +1034,51 @@ void test_is_copy_constructible()
 
 }
 
+template <typename T>
+void test_is_destructible(const std::string& name_type)
+{
+    CHECK_TRUE(mtd::is_destructible_v<T> ==
+	       std::is_destructible_v<T>, 
+	       alp::as_str() << "is_destructible(" << name_type << ")");
+}
+
+void test_is_destructible()
+{
+    test::interface("is_destructible");
+
+    test_is_destructible<void>("void");
+    test_is_destructible<const volatile void>("const volatile void");
+    test_is_destructible<nullptr_t>("nullptr_t");
+
+    test_is_destructible<char>("char");
+    test_is_destructible<int>("int");
+    test_is_destructible<long>("long");
+    test_is_destructible<long long>("long long");
+    test_is_destructible<float>("float");
+    test_is_destructible<double>("double");
+
+    test_is_destructible<int[]>("int[]");
+    test_is_destructible<int[3]>("int[3]");
+    test_is_destructible<int[][3]>("int[][3]");
+
+    test_is_destructible<Class>("Class");
+    test_is_destructible<Union>("Union");
+    test_is_destructible<Enum>("Enum");
+    test_is_destructible<Enum_class>("Enum_class");
+
+    test_is_destructible<Class>("Class");
+    test_is_destructible<Class2>("Class2");
+    test_is_destructible<int Class::*>("int Class::*");
+    test_is_destructible<int (Class::*)()>("int (Class::*)()");
+
+    test_is_destructible<A>("A");
+    test_is_destructible<B>("B");
+    test_is_destructible<C>("C");
+    test_is_destructible<D>("D");
+
+
+
+}
 
 
 template <typename T>
@@ -1852,40 +1897,86 @@ void test_add_pointer()
     test_add_pointer_helper<const void*>("const void*");
 }
 
-
 template <typename T>
-void test_remove_extent_helper(const std::string& name_type)
+void test_remove_extent(const std::string& name_type)
 {
-    CHECK_TRUE(
-        (std::is_same_v<mtd::remove_extent_t<T>, std::remove_extent_t<T>>),
-        name_type);
+    CHECK_TRUE(std::is_same_v<mtd::remove_extent_t<T>, 
+			      std::remove_extent_t<T>>, name_type);
 }
-
-template <typename T>
-void test_remove_extent(const std::string& tname)
-{
-    test_remove_extent_helper<T>(tname);
-    test_remove_extent_helper<T&>(alp::as_str() << tname << '&');
-    test_remove_extent_helper<const T>(alp::as_str() << "const " << tname);
-    test_remove_extent_helper<const T&>(alp::as_str() << "const " << tname << '&');
-    test_remove_extent_helper<volatile T>(alp::as_str() << "volatile " << tname);
-    test_remove_extent_helper<volatile T&>(alp::as_str()<< "volatile " << tname << '&');
-    test_remove_extent_helper<T*>(alp::as_str() << tname << '*');
-    test_remove_extent_helper<const T*>(alp::as_str() << "const " << tname << '*');
-    test_remove_extent_helper<volatile T*>(alp::as_str() << "volatile " << tname << '*');
-    test_remove_extent_helper<const volatile T*>(alp::as_str() << "const volatile " << tname << '*');
-}
-
 
 void test_remove_extent()
 {
     test::interface("remove_extent");
 
+    test_remove_extent<void>("void");
+    test_remove_extent<nullptr_t>("nullptr_t");
+
     test_remove_extent<char>("char");
     test_remove_extent<int>("int");
-    test_remove_extent<std::string>("string");
+    test_remove_extent<long>("long");
+    test_remove_extent<long long>("long long");
+    test_remove_extent<float>("float");
+    test_remove_extent<double>("double");
+
+    test_remove_extent<int[]>("int[]");
+    test_remove_extent<int[3]>("int[3]");
+    test_remove_extent<int[][3]>("int[][3]");
+
+    test_remove_extent<std::string>("std::string");
+    test_remove_extent<std::string[4]>("std::string[4]");
+    test_remove_extent<std::string[][4]>("std::string[][4]");
+
+    test_remove_extent<Class>("Class");
+    test_remove_extent<Class2>("Class2");
+    test_remove_extent<Union>("Union");
+    test_remove_extent<Enum>("Enum");
+    test_remove_extent<Enum_class>("Enum_class");
+
+    test_remove_extent<Class>("Class");
+    test_remove_extent<int Class::*>("int Class::*");
+    test_remove_extent<int (Class::*)()>("int (Class::*)()");
 }
 
+
+template <typename T>
+void test_remove_all_extents(const std::string& name_type)
+{
+    CHECK_TRUE(std::is_same_v<mtd::remove_all_extents_t<T>, 
+			      std::remove_all_extents_t<T>>, name_type);
+}
+
+void test_remove_all_extents()
+{
+    test::interface("remove_all_extents");
+
+    test_remove_all_extents<void>("void");
+    test_remove_all_extents<nullptr_t>("nullptr_t");
+
+    test_remove_all_extents<char>("char");
+    test_remove_all_extents<int>("int");
+    test_remove_all_extents<long>("long");
+    test_remove_all_extents<long long>("long long");
+    test_remove_all_extents<float>("float");
+    test_remove_all_extents<double>("double");
+
+    test_remove_all_extents<int[]>("int[]");
+    test_remove_all_extents<int[3]>("int[3]");
+    test_remove_all_extents<int[][3]>("int[][3]");
+
+    test_remove_all_extents<std::string>("std::string");
+    test_remove_all_extents<std::string[4]>("std::string[4]");
+    test_remove_all_extents<std::string[][4]>("std::string[][4]");
+
+    test_remove_all_extents<Class>("Class");
+    test_remove_all_extents<Class2>("Class2");
+    test_remove_all_extents<Union>("Union");
+    test_remove_all_extents<Enum>("Enum");
+    test_remove_all_extents<Enum_class>("Enum_class");
+
+    test_remove_all_extents<Class>("Class");
+    test_remove_all_extents<int Class::*>("int Class::*");
+    test_remove_all_extents<int (Class::*)()>("int (Class::*)()");
+}
 
 template <typename T>
 void test_remove_cvref(const char* name_type)
@@ -2425,6 +2516,7 @@ try{
     test_is_constructible();
     test_is_default_constructible();
     test_is_copy_constructible();
+    test_is_destructible();
 
     // type properties queries
     // -----------------------
@@ -2455,6 +2547,7 @@ try{
     // array modifications
     // --------------------
     test_remove_extent();
+    test_remove_all_extents();
 
     // pointer modifications
     // ---------------------

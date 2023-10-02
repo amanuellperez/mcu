@@ -99,10 +99,17 @@ concept integral = is_integral_v<T>;
 //
 //// TODO: ranges 
 //
-//destructible
-//constructible_from
+template <typename T>
+concept destructible = is_nothrow_destructible_v<T>;
+
+template <typename T, typename... Args>
+concept constructible_from = destructible<T> and
+			     is_constructible_v<T, Args...>;
 //default_initializable
-//move_constructible
+template <typename T>
+concept move_constructible = constructible_from<T,T> and
+			     convertible_to<T, T>;
+	
 //copy_constructible
 //
 // -------------------
@@ -161,12 +168,57 @@ concept equality_comparable_with =
 
 
 
-//totally_ordered
-//totally_ordered_with
-//
-//// object concepts
-//// ---------------
-//movable
+// totally_ordered
+// ---------------
+namespace private_ {
+// Aunque el standard no da explícitamente la definición de
+// partially_ordered_with, se saca de lo que dice en la explicación
+// de totally_ordered_with
+template<typename T, typename U>
+concept partially_ordered_with = 
+    requires (const remove_reference_t<T>& t,
+	      const remove_reference_t<U>& u) {
+		  { t <  u } -> atd_::boolean;
+		  { t >  u } -> atd_::boolean;
+		  { t <= u } -> atd_::boolean;
+		  { t >= u } -> atd_::boolean;
+		  { u <  t } -> atd_::boolean;
+		  { u >  t } -> atd_::boolean;
+		  { u <= t } -> atd_::boolean;
+		  { u >= t } -> atd_::boolean;
+    };
+}// private_
+ 
+template <typename T>
+concept totally_ordered =
+	equality_comparable<T> and
+	private_::partially_ordered_with<T,T>;
+
+
+// totally_ordered_with
+// --------------------
+template <typename T, typename U>
+concept totally_ordered_with =
+	totally_ordered<T> and
+	totally_ordered<U> and
+	equality_comparable_with<T, U> and
+	totally_ordered<
+	    common_reference_t<
+		    const remove_reference_t<T>&,
+		    const remove_reference_t<U>&
+			      >
+		       > and
+	private_::partially_ordered_with<T, U>;
+
+
+// object concepts
+// ---------------
+template <typename T>
+concept movable = is_object_v<T> and
+		  move_constructible<T> and
+		  assignable_from<T&, T> and
+		  swappable<T>;
+
 //copyable
 //semiregular
 //regular

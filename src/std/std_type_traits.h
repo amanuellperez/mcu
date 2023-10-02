@@ -1079,6 +1079,54 @@ inline constexpr bool is_copy_constructible_v
 				=  is_copy_constructible<T>::value;
 
 
+// -------------------
+// Array modifications
+// -------------------
+// if (T == typename(T)[] or T == typename(T)[sz]) return typename(T);
+// else return T;
+template <typename T>
+struct remove_extent {
+    using type = T;
+};
+
+template <typename T>
+struct remove_extent<T[]> {
+    using type = T;
+};
+
+template <typename T, size_t sz>
+struct remove_extent<T[sz]> {
+    using type = T;
+};
+
+
+template <typename T>
+using remove_extent_t = typename remove_extent<T>::type;
+
+
+// remove_all_extents
+// ------------------
+template <typename T>
+struct remove_all_extents {
+    using type = T;
+};
+
+template <typename T>
+using remove_all_extents_t = typename remove_all_extents<T>::type;
+
+
+template <typename T, size_t N>
+struct remove_all_extents<T[N]>{
+    using type = remove_all_extents_t<T>;
+};
+
+template <typename T>
+struct remove_all_extents<T[]>{
+    using type = remove_all_extents_t<T>;
+};
+
+
+
 
 // is_destructible
 // ----------------
@@ -1108,14 +1156,81 @@ inline constexpr bool is_copy_constructible_v
 //	return false; //??? Esto no lo dicen
 // }
 
+namespace impl_of{
+
+
+// No admite usar void_t<decltype(STD::declval<U&>().~U())> para elegir el
+// resultado de la función en función de esa expresión.
+struct is_destructible_cond_
+{
+template<typename T, typename = decltype(declval<T&>().~T())>
+  static true_type test(int);
+
+template<typename>
+  static false_type test(...);
+};
+
+template<typename T>
+struct is_destructible_cond
+: private is_destructible_cond_
+{
+  using type = decltype(test<T>(0));
+};
+
+
+template <typename T>
+constexpr bool is_destructible()
+{
+    if constexpr (is_void_v<T> or
+		 private_:: is_array_unknown_bounds_v<T> or
+		  is_function_v<T>)
+	return false;
+
+    else if constexpr (is_reference_v<T> or
+		       is_scalar_v<T>)
+	return true;
+
+    else {
+	if constexpr (!is_object_v<T>)
+	    return false;
+
+	else {
+	    using Ret = is_destructible_cond<remove_all_extents_t<T>>::type;
+	    return Ret::value;
+
+	    // Quedaría más clara la siguiente implementación
+//	    using U = remove_all_extents_t<T>;
+//	    if constexpr ( requires {
+//				typename (decltype(STD::declval<U&>().~U()));
+//			    }
+//			    )
+//		return true;
+//
+//	    else
+//		return false;
+	}
+    }
+}
+
+}// impl_of
+ 
 //template <typename T, typename = void>
 //struct is_destructible : false_type {};
-//
-//
-//
-//// is_destructible_v
-//template <typename T>
-//inline constexpr bool is_destructible_v = is_destructible<T>::value;
+template<typename T>
+struct is_destructible
+	: bool_constant<impl_of::is_destructible<T>()>
+{
+  static_assert(private_::is_complete_or_unbounded(type_identity<T>{}),
+    "Template argument must be a complete class or an unbounded array");
+};
+
+// is_destructible_v
+template <typename T>
+inline constexpr bool is_destructible_v = is_destructible<T>::value;
+
+
+// is_nothrow_destructible
+// -----------------------
 
 // -----------------------
 // Reference modifications
@@ -1217,6 +1332,7 @@ using make_signed_t = typename make_signed<T>::type;
 
 
 // make_unsigned
+// -------------
 // TODO: falta incluir char8_t, char16_t...
 template <typename T>
 struct make_unsigned { using type = T; };
@@ -1242,6 +1358,7 @@ struct make_unsigned<signed long long> {using type = unsigned long long;};
 
 template <typename T>
 using make_unsigned_t = typename make_unsigned<T>::type;
+
 
 
 // --------------
@@ -1301,30 +1418,6 @@ template <typename From, typename To>
 inline constexpr bool is_convertible_v = is_convertible<From, To>::value;
 
 
-
-// -------------------
-// Array modifications
-// -------------------
-// if (T == typename(T)[] or T == typename(T)[sz]) return typename(T);
-// else return T;
-template <typename T>
-struct remove_extent {
-    using type = T;
-};
-
-template <typename T>
-struct remove_extent<T[]> {
-    using type = T;
-};
-
-template <typename T, size_t sz>
-struct remove_extent<T[sz]> {
-    using type = T;
-};
-
-
-template <typename T>
-using remove_extent_t = typename remove_extent<T>::type;
 
 
 // ---------------------
