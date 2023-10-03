@@ -377,9 +377,8 @@ inline constexpr bool is_rvalue_reference_v = is_rvalue_reference<T>::value;
 // --------
 // TODO: depende de GCC. __is_enum es de GCC
 template<typename T>
-struct is_enum
-: public integral_constant<bool, __is_enum(T)>
-{ };
+struct is_enum 
+	: bool_constant<__is_enum(T)> { };
 
 template <typename T>
 inline constexpr bool is_enum_v = is_enum <T>::value;
@@ -389,8 +388,7 @@ inline constexpr bool is_enum_v = is_enum <T>::value;
 // TODO: depende de GCC. __is_union es de GCC
 template<typename T>
 struct is_union
-: public integral_constant<bool, __is_union(T)>
-{ };
+	: bool_constant<__is_union(T)> { };
 
 template <typename T>
 inline constexpr bool is_union_v = is_union<T>::value;
@@ -402,7 +400,7 @@ inline constexpr bool is_union_v = is_union<T>::value;
 // cppreference tiene una implementación que no depende de gcc
 template<typename T>
 struct is_class
-: public integral_constant<bool, __is_class(T)>
+	: bool_constant<__is_class(T)>
 { };
 
 
@@ -770,11 +768,11 @@ inline constexpr bool is_compound_v = is_compound<T>::value;
 // ---------------
 // is_const
 // --------
-// TODO
+// Implementado en std_atd.h
 
 // is_volatile
 // -----------
-// TODO
+// Implementado en std_atd.h
 
 // extent
 // ------
@@ -1062,24 +1060,12 @@ inline constexpr bool is_default_constructible_v
 
 // is_copy_constructible
 // ---------------------
-// NOTA:
-//  Al implementarlo en forma de función estoy obligado a poner de forma
-//  explícita el caso en que T == [cv] void. En la implementación de gcc no
-//  queda claro.
-//  Estoy obligado a distinguir entre el caso void y no void ya que no se
-//  puede tomar una referencia a void. is_constructible<void, const void&> da
-//  un error de compilación.
 namespace impl_of{
 template <typename T>
 constexpr bool is_copy_constructible()
 {
-    if constexpr (requires {atd_::is_referenceable<T>;}){
-	if constexpr (is_same_v<remove_cv_t<T>, void>)
-	    return false;
-
-	else
-	    return is_constructible<T, const T&>();
-    }
+    if constexpr (atd_::is_referenceable<T>)
+	return __is_constructible(T, const T&);
 
     else
 	return false;
@@ -1106,15 +1092,71 @@ inline constexpr bool is_copy_constructible_v
 
 // is_assignable
 // -------------
-// TODO
+// Depende de gcc: __is_assignable
+template<typename T, typename U>
+struct is_assignable
+    : bool_constant<__is_assignable(T, U)>
+{
+    static_assert(private_::is_complete_or_unbounded(type_identity<T>{}),
+    "Template argument must be a complete class or an unbounded array");
+};
+
+template <typename T, typename U>
+inline constexpr bool is_assignable_v =   is_assignable<T, U>::value;
 
 // is_copy_assignable
 // ------------------
-// TODO
+namespace impl_of{
+template <typename T>
+constexpr bool is_copy_assignable()
+{
+    if constexpr (atd_::is_referenceable<T>)
+	return __is_assignable(T&, const T&);
+
+    else
+	return false;
+}
+
+}// impl_of
+
+template<typename T>
+struct is_copy_assignable
+	: bool_constant<impl_of::is_copy_assignable<T>()>
+{
+  static_assert(private_::is_complete_or_unbounded(type_identity<T>{}),
+    "Template argument must be a complete class or an unbounded array");
+};
+
+template <typename T>
+inline constexpr bool is_copy_assignable_v 
+				=  is_copy_assignable<T>::value;
 
 // is_move_assignable
 // ------------------
-// TODO
+namespace impl_of{
+template <typename T>
+constexpr bool is_move_assignable()
+{
+    if constexpr (atd_::is_referenceable<T>)
+	return __is_assignable(T&, T&&);
+
+    else
+	return false;
+}
+
+}// impl_of
+
+template<typename T>
+struct is_move_assignable
+	: bool_constant<impl_of::is_move_assignable<T>()>
+{
+  static_assert(private_::is_complete_or_unbounded(type_identity<T>{}),
+    "Template argument must be a complete class or an unbounded array");
+};
+
+template <typename T>
+inline constexpr bool is_move_assignable_v 
+				=  is_move_assignable<T>::value;
 
 // is_swappable_with
 // -----------------
@@ -1165,29 +1207,137 @@ inline constexpr bool is_copy_constructible_v
 
 // is_nothrow_constructible
 // ------------------------
-// TODO
+// Depende de gcc: __is_nothrow_constructible
+template<typename T, typename... Args>
+struct is_nothrow_constructible
+	: bool_constant<__is_nothrow_constructible(T,Args...)>
+{
+  static_assert(private_::is_complete_or_unbounded(type_identity<T>{}),
+    "Template argument must be a complete class or an unbounded array");
+};
+
+template <typename T, typename... Args>
+inline constexpr bool is_nothrow_constructible_v 
+				=   is_nothrow_constructible<T, Args...>::value;
 
 // is_nothrow_default_constructible
 // --------------------------------
-// TODO
+// Depende de gcc: __is_nothrow_constructible
+template<typename T>
+struct is_nothrow_default_constructible
+	: bool_constant<__is_nothrow_constructible(T)>
+{
+    static_assert(private_::is_complete_or_unbounded(type_identity<T>{}),
+    "Template argument must be a complete class or an unbounded array");
+};
+
+template <typename T>
+inline constexpr bool is_nothrow_default_constructible_v
+				=   is_nothrow_default_constructible<T>::value;
+
 
 // is_nothrow_copy_constructible
 // -----------------------------
-// TODO
+namespace impl_of{
 
-// is_notrhow_move_consstructible
+template <typename T>
+constexpr bool is_nothrow_copy_constructible()
+{
+    if constexpr (atd_::is_referenceable<T>)
+	return __is_nothrow_constructible(T, const T&);
+
+    else
+	return false;
+}
+
+}// impl_of
+ 
+template<typename T>
+struct is_nothrow_copy_constructible
+    : bool_constant<impl_of::is_nothrow_copy_constructible<T>()>
+{
+    static_assert(private_::is_complete_or_unbounded(type_identity<T>{}),
+    "Template argument must be a complete class or an unbounded array");
+};
+
+
+template <typename T>
+inline constexpr bool is_nothrow_copy_constructible_v
+				=   is_nothrow_copy_constructible<T>::value;
+
+
+// is_nothrow_move_constructible
 // ------------------------------
-// TODO
+namespace impl_of{
+
+template <typename T>
+constexpr bool is_nothrow_move_constructible()
+{
+    if constexpr (atd_::is_referenceable<T>)
+	return __is_nothrow_constructible(T, T&&);
+
+    else
+	return false;
+}
+
+}// impl_of
+ 
+template<typename T>
+struct is_nothrow_move_constructible
+    : bool_constant<impl_of::is_nothrow_move_constructible<T>()>
+{
+    static_assert(private_::is_complete_or_unbounded(type_identity<T>{}),
+    "Template argument must be a complete class or an unbounded array");
+};
+
+
+template <typename T>
+inline constexpr bool is_nothrow_move_constructible_v
+				=   is_nothrow_move_constructible<T>::value;
+
 
 
 // is_nothrow_assignable
 // ---------------------
-// TODO
+template <typename T, typename U>
+struct is_nothrow_assignable 
+	: bool_constant<__is_nothrow_assignable(T,U)> {};
 
+template <typename T, typename U>
+inline constexpr bool is_nothrow_assignable_v
+				=   is_nothrow_assignable<T,U>::value;
+	
 
 // is_nothrow_copy_assignable
 // --------------------------
-// TODO
+namespace impl_of{
+
+template <typename T>
+constexpr bool is_nothrow_copy_assignable()
+{
+    if constexpr (atd_::is_referenceable<T>)
+	return __is_nothrow_assignable(T&, const T&);
+
+    else
+	return false;
+}
+
+}// impl_of
+ 
+template<typename T>
+struct is_nothrow_copy_assignable
+    : bool_constant<impl_of::is_nothrow_copy_assignable<T>()>
+{
+    static_assert(private_::is_complete_or_unbounded(type_identity<T>{}),
+    "Template argument must be a complete class or an unbounded array");
+};
+
+
+template <typename T>
+inline constexpr bool is_nothrow_copy_assignable_v
+				=   is_nothrow_copy_assignable<T>::value;
+
+
 
 
 // is_nothrow_move_assignable
@@ -1445,10 +1595,6 @@ inline constexpr bool is_destructible_v = is_destructible<T>::value;
 // La implementación de este trait es idéntico a is_destructible salvo que se
 // mira que el destructor sea noexcept. ¿cómo fusionarlas las dos en una?
 namespace impl_of{
-//template <typename T>
-//concept has_nothrow_destructor =
-//	requires { noexcept(std::declval<T>().~T()) ;};
-
 template <typename T>
 constexpr bool is_nothrow_destructible()
 {

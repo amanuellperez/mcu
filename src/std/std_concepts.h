@@ -166,95 +166,95 @@ concept move_constructible = constructible_from<T,T> and
 	
 // swappable
 // ---------
-//namespace private_{
-//template<typename T>
-//concept class_or_enum = is_class_v<T> or 
-//			is_union_v<T> or
-//			is_enum_v<T>;
-//}// private_
-// 
-//namespace ranges {
-//namespace impl_of_swap {
-//
-//  template<typename T> void swap(T&, T&) = delete;
-//
-//  template<typename T, typename U>
-//    concept adl_swap
-//      = ( private_::class_or_enum<remove_reference_t<T>> or
-//	  private_::class_or_enum<remove_reference_t<U>>) and
-//	requires(T&& t, U&& u) {
-//		swap(static_cast<T&&>(t), static_cast<U&&>(u));
-//	    };
-//
-//struct Swap
-//{
-//private:
-//    template<typename T, typename U>
-//    static constexpr bool swap_noexcept()
-//    {
-//	if constexpr (adl_swap<T, U>)
-//	    return noexcept(swap(STD::declval<T>(), STD::declval<U>()));
-//
-//	else
-//	    return is_nothrow_move_constructible_v<remove_reference_t<T>> and
-//		   is_nothrow_move_assignable_v<remove_reference_t<T>>;
-//    }
-//
-//public:
-//    template<typename T, typename U>
-//    requires adl_swap<T, U> or 
-//	    (same_as<T, U> && is_lvalue_reference_v<T> and 
-//	     move_constructible<remove_reference_t<T>>  and 
-//	     assignable_from<T, remove_reference_t<T>>
-//	     )
-//    constexpr 
-//    void operator()(T&& t, U&& u) const noexcept(swap_noexcept<T, U>())
-//    {
-//        if constexpr (adl_swap<T, U>)
-//	    swap(static_cast<T&&>(t), static_cast<U&&>(u));
-//	else
-//	{
-//	    auto tmp = static_cast<remove_reference_t<T>&&>(t);
-//	    t = static_cast<remove_reference_t<T>&&>(u);
-//	    u = static_cast<remove_reference_t<T>&&>(tmp);
-//	}
-//    }
-//
-//    template<typename T, typename U, size_t _Num>
-//	requires 
-//	    requires(const Swap& swap, T& e1, U& e2) { swap(e1, e2); }
-//    constexpr 
-//    void operator()(T (&e1)[_Num], U (&e2)[_Num]) const
-//		    noexcept(noexcept(STD::declval<const Swap&>()(*e1, *e2)))
-//    {
-//	for (size_t n = 0; n < _Num; ++n)
-//	    (*this)(e1[n], e2[n]);
-//    }
-//};
-//} // namespace impl_of_swap
-//
-//inline namespace cust
-//{
-//  inline constexpr impl_of_swap::Swap swap{};
-//} // inline namespace cust
-//
-//} // ranges
-//
-//template<typename T>
-//concept swappable = requires(T& a, T& b) { ranges::swap(a, b); };
-//
-//
-//// swappable_with
-//// --------------
-//template<typename T, typename U>
-//concept swappable_with = common_reference_with<T, U> and
-//	requires(T&& t, U&& u) {
-//		ranges::swap(STD::forward<T>(t), STD::forward<T>(t));
-//		ranges::swap(STD::forward<U>(u), STD::forward<U>(u));
-//		ranges::swap(STD::forward<T>(t), STD::forward<U>(u));
-//		ranges::swap(STD::forward<U>(u), STD::forward<T>(t));
-//	    };
-//
+namespace private_{
+template<typename T>
+concept class_or_enum = is_class_v<T> or 
+			is_union_v<T> or
+			is_enum_v<T>;
+}// private_
+ 
+namespace ranges {
+namespace impl_of_swap {
+
+  template<typename T> void swap(T&, T&) = delete;
+
+  template<typename T, typename U>
+    concept adl_swap
+      = ( private_::class_or_enum<remove_reference_t<T>> or
+	  private_::class_or_enum<remove_reference_t<U>>) and
+	requires(T&& t, U&& u) {
+		swap(static_cast<T&&>(t), static_cast<U&&>(u));
+	    };
+
+struct Swap
+{
+private:
+    template<typename T, typename U>
+    static constexpr bool swap_noexcept()
+    {
+	if constexpr (adl_swap<T, U>)
+	    return noexcept(swap(STD::declval<T>(), STD::declval<U>()));
+
+	else
+	    return is_nothrow_move_constructible_v<remove_reference_t<T>> and
+		   is_nothrow_move_assignable_v<remove_reference_t<T>>;
+    }
+
+public:
+    template<typename T, typename U>
+    requires adl_swap<T, U> or 
+	    (same_as<T, U> && is_lvalue_reference_v<T> and 
+	     move_constructible<remove_reference_t<T>>  and 
+	     assignable_from<T, remove_reference_t<T>>
+	     )
+    constexpr 
+    void operator()(T&& t, U&& u) const noexcept(swap_noexcept<T, U>())
+    {
+        if constexpr (adl_swap<T, U>)
+	    swap(static_cast<T&&>(t), static_cast<U&&>(u));
+	else
+	{
+	    auto tmp = static_cast<remove_reference_t<T>&&>(t);
+	    t = static_cast<remove_reference_t<T>&&>(u);
+	    u = static_cast<remove_reference_t<T>&&>(tmp);
+	}
+    }
+
+    template<typename T, typename U, size_t _Num>
+	requires 
+	    requires(const Swap& swap, T& e1, U& e2) { swap(e1, e2); }
+    constexpr 
+    void operator()(T (&e1)[_Num], U (&e2)[_Num]) const
+		    noexcept(noexcept(STD::declval<const Swap&>()(*e1, *e2)))
+    {
+	for (size_t n = 0; n < _Num; ++n)
+	    (*this)(e1[n], e2[n]);
+    }
+};
+} // namespace impl_of_swap
+
+inline namespace cust
+{
+  inline constexpr impl_of_swap::Swap swap{};
+} // inline namespace cust
+
+} // ranges
+
+template<typename T>
+concept swappable = requires(T& a, T& b) { ranges::swap(a, b); };
+
+
+// swappable_with
+// --------------
+template<typename T, typename U>
+concept swappable_with = common_reference_with<T, U> and
+	requires(T&& t, U&& u) {
+		ranges::swap(STD::forward<T>(t), STD::forward<T>(t));
+		ranges::swap(STD::forward<U>(u), STD::forward<U>(u));
+		ranges::swap(STD::forward<T>(t), STD::forward<U>(u));
+		ranges::swap(STD::forward<U>(u), STD::forward<T>(t));
+	    };
+
 
 
 // copy_constructible
