@@ -34,6 +34,15 @@ struct Class_with_type{
 struct Class_without_type{
 };
 
+class Class_with_destructor
+{ };
+
+class Class_without_destructor
+{ 
+    public:
+	~Class_without_destructor() = delete;
+};
+
 void test_not()
 {
     test::interface("not");
@@ -125,6 +134,16 @@ void test_copy_cv()
 
 }
 
+void test_has_destructor()
+{
+    test::interface("has_destructor");
+
+    CHECK_TRUE(mtd::atd_::has_destructor<int> == true, "int");
+    CHECK_TRUE(mtd::atd_::has_destructor<Class_without_destructor> == false, "Class_without_destructor");
+    CHECK_TRUE(mtd::atd_::has_destructor<Class_with_destructor> == true, "Class_with_destructor");
+}
+
+
 int main()
 {
 try{
@@ -135,6 +154,7 @@ try{
     test_or();
     test_type_member();
     test_copy_cv();
+    test_has_destructor();
 }catch(std::exception& e)
 {
     std::cerr << e.what() << '\n';

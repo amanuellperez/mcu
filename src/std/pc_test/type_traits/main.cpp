@@ -1082,6 +1082,53 @@ void test_is_destructible()
 
 
 template <typename T>
+void test_is_nothrow_destructible(const std::string& name_type)
+{
+    CHECK_TRUE(mtd::is_nothrow_destructible_v<T> ==
+	       std::is_nothrow_destructible_v<T>, 
+	       alp::as_str() << "is_nothrow_destructible(" << name_type << ")");
+}
+
+void test_is_nothrow_destructible()
+{
+    test::interface("is_nothrow_destructible");
+
+    test_is_nothrow_destructible<void>("void");
+    test_is_nothrow_destructible<const volatile void>("const volatile void");
+    test_is_nothrow_destructible<nullptr_t>("nullptr_t");
+
+    test_is_nothrow_destructible<char>("char");
+    test_is_nothrow_destructible<int>("int");
+    test_is_nothrow_destructible<long>("long");
+    test_is_nothrow_destructible<long long>("long long");
+    test_is_nothrow_destructible<float>("float");
+    test_is_nothrow_destructible<double>("double");
+
+    test_is_nothrow_destructible<int[]>("int[]");
+    test_is_nothrow_destructible<int[3]>("int[3]");
+    test_is_nothrow_destructible<int[][3]>("int[][3]");
+
+    test_is_nothrow_destructible<Class>("Class");
+    test_is_nothrow_destructible<Union>("Union");
+    test_is_nothrow_destructible<Enum>("Enum");
+    test_is_nothrow_destructible<Enum_class>("Enum_class");
+
+    test_is_nothrow_destructible<Class>("Class");
+    test_is_nothrow_destructible<Class2>("Class2");
+    test_is_nothrow_destructible<int Class::*>("int Class::*");
+    test_is_nothrow_destructible<int (Class::*)()>("int (Class::*)()");
+
+    test_is_nothrow_destructible<A>("A");
+    test_is_nothrow_destructible<B>("B");
+    test_is_nothrow_destructible<C>("C");
+    test_is_nothrow_destructible<D>("D");
+
+
+
+}
+
+
+template <typename T>
 void test_extent(const std::string& name_type)
 {
     CHECK_TRUE(mtd::extent_v<T> == 
@@ -2517,6 +2564,7 @@ try{
     test_is_default_constructible();
     test_is_copy_constructible();
     test_is_destructible();
+    test_is_nothrow_destructible();
 
     // type properties queries
     // -----------------------

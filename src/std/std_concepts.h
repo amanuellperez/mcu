@@ -40,6 +40,7 @@
  ****************************************************************************/
 #include "std_config.h"
 #include "std_type_traits.h"
+#include "std_utility.h"    // STD::forward
 
 namespace STD{
  
@@ -81,7 +82,23 @@ concept common_reference_with =
 	and convertible_to<T, common_reference_t<T, U>>
 	and convertible_to<U, common_reference_t<T, U>>;
 
-//common_with
+// common_with
+// -----------
+template <typename T, typename U>
+concept common_with =
+	same_as< common_type_t<T, U>, common_type_t<U, T> > and
+	requires {
+	    static_cast<common_type_t<T, U>>(STD::declval<T>());
+	    static_cast<common_type_t<T, U>>(STD::declval<U>());
+	} and
+	common_reference_with<add_lvalue_reference_t<const T>,
+			      add_lvalue_reference_t<const U>> and
+	common_reference_with<
+		    add_lvalue_reference_t< common_type_t<T,U> >,
+		    common_reference_t< add_lvalue_reference_t<const T>,
+				        add_lvalue_reference_t<const U> >
+			    >;
+
 
 // -------------------
 // arithmetic concepts
@@ -91,27 +108,161 @@ concept common_reference_with =
 template <typename T>
 concept integral = is_integral_v<T>;
 
-//signed_integral
-//unsigned_integral
-//floating_point
-//
-//assignable_from
-//
-//// TODO: ranges 
-//
+// signed_integral
+// ---------------
+template <typename T>
+concept signed_integral = integral<T> and is_signed_v<T>;
+
+// unsigned_integral
+// -----------------
+template <typename T>
+concept unsigned_integral = integral<T> and !signed_integral<T>;
+
+
+// floating_point
+// --------------
+template <typename T>
+concept floating_point = is_floating_point_v<T>;
+
+
+// assignable_from
+// ---------------
+template <typename L, typename R>
+concept assignable_from =
+	is_lvalue_reference_v<L> and
+	common_reference_with<const remove_reference_t<L>&, 
+			      const remove_reference_t<R>&> and
+	requires(L lhs, R&& rhs){
+	    { lhs = STD::forward<R>(rhs) } -> same_as<L>;
+	};
+
+
+// swappable
+// ---------
+// Implementado más adelante por dependencias.
+
+// destructible
+// ------------
 template <typename T>
 concept destructible = is_nothrow_destructible_v<T>;
 
+
+// constructible_from
+// ------------------
 template <typename T, typename... Args>
 concept constructible_from = destructible<T> and
 			     is_constructible_v<T, Args...>;
-//default_initializable
+
+// default_initializable
+// ---------------------
+// TODO
+
+
+// move_constructible
+// ------------------
 template <typename T>
 concept move_constructible = constructible_from<T,T> and
 			     convertible_to<T, T>;
 	
-//copy_constructible
+// swappable
+// ---------
+//namespace private_{
+//template<typename T>
+//concept class_or_enum = is_class_v<T> or 
+//			is_union_v<T> or
+//			is_enum_v<T>;
+//}// private_
+// 
+//namespace ranges {
+//namespace impl_of_swap {
 //
+//  template<typename T> void swap(T&, T&) = delete;
+//
+//  template<typename T, typename U>
+//    concept adl_swap
+//      = ( private_::class_or_enum<remove_reference_t<T>> or
+//	  private_::class_or_enum<remove_reference_t<U>>) and
+//	requires(T&& t, U&& u) {
+//		swap(static_cast<T&&>(t), static_cast<U&&>(u));
+//	    };
+//
+//struct Swap
+//{
+//private:
+//    template<typename T, typename U>
+//    static constexpr bool swap_noexcept()
+//    {
+//	if constexpr (adl_swap<T, U>)
+//	    return noexcept(swap(STD::declval<T>(), STD::declval<U>()));
+//
+//	else
+//	    return is_nothrow_move_constructible_v<remove_reference_t<T>> and
+//		   is_nothrow_move_assignable_v<remove_reference_t<T>>;
+//    }
+//
+//public:
+//    template<typename T, typename U>
+//    requires adl_swap<T, U> or 
+//	    (same_as<T, U> && is_lvalue_reference_v<T> and 
+//	     move_constructible<remove_reference_t<T>>  and 
+//	     assignable_from<T, remove_reference_t<T>>
+//	     )
+//    constexpr 
+//    void operator()(T&& t, U&& u) const noexcept(swap_noexcept<T, U>())
+//    {
+//        if constexpr (adl_swap<T, U>)
+//	    swap(static_cast<T&&>(t), static_cast<U&&>(u));
+//	else
+//	{
+//	    auto tmp = static_cast<remove_reference_t<T>&&>(t);
+//	    t = static_cast<remove_reference_t<T>&&>(u);
+//	    u = static_cast<remove_reference_t<T>&&>(tmp);
+//	}
+//    }
+//
+//    template<typename T, typename U, size_t _Num>
+//	requires 
+//	    requires(const Swap& swap, T& e1, U& e2) { swap(e1, e2); }
+//    constexpr 
+//    void operator()(T (&e1)[_Num], U (&e2)[_Num]) const
+//		    noexcept(noexcept(STD::declval<const Swap&>()(*e1, *e2)))
+//    {
+//	for (size_t n = 0; n < _Num; ++n)
+//	    (*this)(e1[n], e2[n]);
+//    }
+//};
+//} // namespace impl_of_swap
+//
+//inline namespace cust
+//{
+//  inline constexpr impl_of_swap::Swap swap{};
+//} // inline namespace cust
+//
+//} // ranges
+//
+//template<typename T>
+//concept swappable = requires(T& a, T& b) { ranges::swap(a, b); };
+//
+//
+//// swappable_with
+//// --------------
+//template<typename T, typename U>
+//concept swappable_with = common_reference_with<T, U> and
+//	requires(T&& t, U&& u) {
+//		ranges::swap(STD::forward<T>(t), STD::forward<T>(t));
+//		ranges::swap(STD::forward<U>(u), STD::forward<U>(u));
+//		ranges::swap(STD::forward<T>(t), STD::forward<U>(u));
+//		ranges::swap(STD::forward<U>(u), STD::forward<T>(t));
+//	    };
+//
+
+
+// copy_constructible
+// ------------------
+// TODO
+
+
+
 // -------------------
 // comparison concepts
 // -------------------
@@ -211,19 +362,57 @@ concept totally_ordered_with =
 	private_::partially_ordered_with<T, U>;
 
 
+// ---------------
 // object concepts
 // ---------------
-template <typename T>
-concept movable = is_object_v<T> and
-		  move_constructible<T> and
-		  assignable_from<T&, T> and
-		  swappable<T>;
+// movable
+// -------
+//template <typename T>
+//concept movable = is_object_v<T> and
+//		  move_constructible<T> and
+//		  assignable_from<T&, T> and
+//		  swappable<T>;
 
-//copyable
-//semiregular
-//regular
-//
-// etc...
+// copyable
+// --------
+// TODO
+
+// semiregular
+// -----------
+// TODO
+
+// regular
+// -------
+// TODO
+
+
+// -----------------
+// callable concepts
+// -----------------
+// invocable
+// ---------
+// TODO
+
+// regular_invocable
+// -----------------
+// TODO
+
+// predicate
+// ---------
+// TODO
+
+// relation
+// --------
+// TODO
+
+// equivalence_relation
+// --------------------
+// TODO
+
+// strict_weak_order
+// -----------------
+// TODO
+
 
 }// namespace
 

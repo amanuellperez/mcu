@@ -109,6 +109,13 @@ concept is_a_type =
 	typename T;
     };
 
+// has_destructor
+// --------------
+template <typename T>
+concept has_destructor =
+	requires (T t){ t.~T();};
+
+
 // -----------
 // type_member
 // -----------

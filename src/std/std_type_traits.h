@@ -33,7 +33,9 @@
  *
  *  EJEMPLOS
  *	Para ver como implementar un switch de tipos ver 
- *	common_type o common_reference.
+ *	common_type o common_reference. Para ver cómo implementar un trait
+ *	usando funciones ver is_destructible (de hecho, seguramente muchos
+ *	traits se puedan implementar usando ese estilo).
  *
  *  HISTORIA
  *    Manuel Perez
@@ -95,6 +97,8 @@ auto declval() noexcept -> decltype(impl_of::declval<T>(0));
 // ----------------------------
 // const-volatile modifications
 // ----------------------------
+// remove_const
+// ------------
 template <typename T>
 struct remove_const {
     using type = T;
@@ -103,23 +107,23 @@ struct remove_const {
 template <typename T>
 struct remove_const <const T> { using type = T; };
 
-/// remove_const_v
 template <typename T>
 using remove_const_t = typename remove_const<T>::type;
 
 
-/// remove_volatile
+// remove_volatile
+// ---------------
 template <typename T>
 struct remove_volatile {using type = T; };
 
 template <typename T>
 struct remove_volatile <volatile T> {using type = T;};
 
-/// remove_volatile_t
 template <typename T>
 using remove_volatile_t = typename remove_volatile<T>::type;
 
-/// remove_cv
+// remove_cv
+// ---------
 template <typename T>
 struct remove_cv {
     using type = 
@@ -167,8 +171,6 @@ using add_cv_t = typename add_cv<T>::type;
 // -----------------------
 // primary type categories
 // -----------------------
-
-
 
 // is_void
 // -------
@@ -360,6 +362,15 @@ struct is_rvalue_reference<T&&> : public true_type { };
 
 template <typename T>
 inline constexpr bool is_rvalue_reference_v = is_rvalue_reference<T>::value;
+
+
+// is_member_object_pointer
+// ------------------------
+// Implementado más abajo.
+
+// is_member_function_pointer
+// --------------------------
+// Implementado más abajo.
 
 
 // is_enum
@@ -749,11 +760,21 @@ struct is_compound
 template <typename T>
 inline constexpr bool is_compound_v = is_compound<T>::value;
 
+// is_member_pointer
+// -----------------
+// Implementado más arriba
+
 
 // ---------------
 // Type properties
 // ---------------
+// is_const
+// --------
+// TODO
 
+// is_volatile
+// -----------
+// TODO
 
 // extent
 // ------
@@ -946,7 +967,7 @@ inline constexpr bool is_aggregate_v =  is_aggregate<T>::value;
 
 
 // is_signed
-// --------------
+// ---------
 template <typename T, bool = is_arithmetic_v<T>>
 struct _is_signed_helper : public false_type {};
 
@@ -1078,6 +1099,225 @@ template <typename T>
 inline constexpr bool is_copy_constructible_v 
 				=  is_copy_constructible<T>::value;
 
+// is_move_constructible
+// ---------------------
+// TODO
+
+
+// is_assignable
+// -------------
+// TODO
+
+// is_copy_assignable
+// ------------------
+// TODO
+
+// is_move_assignable
+// ------------------
+// TODO
+
+// is_swappable_with
+// -----------------
+// TODO
+
+// is_swappable
+// ------------
+// TODO
+
+// is_destructible
+// ---------------
+// Implementado más adelantes
+
+// is_trivially_constructible
+// --------------------------
+// TODO
+
+// is_trivially_default_constructible
+// ----------------------------------
+// TODO
+
+
+// is_trivially_copy_constructible
+// -------------------------------
+// TODO
+
+// is_trivially_move_constructible
+// -------------------------------
+// TODO
+
+// is_trivially_assignable
+// -----------------------
+// TODO
+
+
+// is_trivially_copy_assignable
+// ----------------------------
+// TODO
+
+
+// is_trivially_move_assignable
+// ----------------------------
+// TODO
+
+// is_trivially_destructible
+// -------------------------
+// TODO
+
+// is_nothrow_constructible
+// ------------------------
+// TODO
+
+// is_nothrow_default_constructible
+// --------------------------------
+// TODO
+
+// is_nothrow_copy_constructible
+// -----------------------------
+// TODO
+
+// is_notrhow_move_consstructible
+// ------------------------------
+// TODO
+
+
+// is_nothrow_assignable
+// ---------------------
+// TODO
+
+
+// is_nothrow_copy_assignable
+// --------------------------
+// TODO
+
+
+// is_nothrow_move_assignable
+// --------------------------
+// TODO
+
+// is_nothrow_swappable_with
+// --------------------------
+// TODO
+
+// is_nothrow_swappable
+// --------------------
+// TODO
+
+
+// is_nothrow_destructible
+// -----------------------
+// Implementado más abajo.
+
+// has_virtual_destructor
+// ----------------------
+// TODO
+
+// has_unique_object_representation
+// --------------------------------
+// TODO
+
+
+
+// ---------------------
+// Type property queries
+// ---------------------
+// alignment_of
+// ------------
+// TODO
+
+// rank
+// ----
+// TODO
+
+// extent
+// ------
+// Implementado más arriba.
+
+// ----------------------------
+// Type relationship predicates
+// ----------------------------
+// is_same
+// -------
+// Implementado.
+
+// is_base_of
+// ----------
+// TODO: depende de gcc. __is_base_of!!!
+// cppreference suministra una implementación que no depende de __is_base_of
+template<typename Base, typename Derived>
+struct is_base_of
+: public integral_constant<bool, __is_base_of(Base, Derived)>
+{ };
+
+template <typename B, typename D>
+inline constexpr bool is_base_of_v = is_base_of<B, D>::value;
+
+
+// is_convertible
+// --------------
+template <typename From, typename To>
+constexpr inline bool __is_convertible_req()
+{
+    return  is_void_v<From>	or 
+	    is_function_v<To>	or 
+	    is_array_v<To>;
+}
+
+template <typename From, typename To, bool = __is_convertible_req<From, To>()>
+struct __is_convertible_helper{
+    using type = typename is_void<To>::type;
+};
+
+
+template <typename From, typename To>
+class __is_convertible_helper<From, To, false> {
+    template <typename To1>
+    static void test_aux(To1);
+
+    template <typename From1,
+              typename To1,
+              typename = decltype(test_aux<To1>(declval<From1>()))>
+    static true_type test(int);
+
+    template <typename, typename>
+    static false_type test(...);
+
+public:
+    using type = decltype(test<From, To>(0));
+};
+
+template <typename From, typename To>
+struct is_convertible : __is_convertible_helper<From, To>::type { };
+
+
+template <typename From, typename To>
+inline constexpr bool is_convertible_v = is_convertible<From, To>::value;
+
+// is_nothrow_convertible
+// ----------------------
+// TODO
+
+
+// is_layout_compatible
+// --------------------
+// TODO
+
+// is_invocable
+// ------------
+// TODO
+
+// is_nothrow_invocable
+// --------------------
+// TODO
+
+// is_nothrow_invocable_r
+// ----------------------
+// TODO
+
+
+// ----------------------------
+// Const-volatile modifications
+// ----------------------------
+// Implementado.
 
 // -------------------
 // Array modifications
@@ -1158,31 +1398,11 @@ struct remove_all_extents<T[]>{
 
 namespace impl_of{
 
-
-// No admite usar void_t<decltype(STD::declval<U&>().~U())> para elegir el
-// resultado de la función en función de esa expresión.
-struct is_destructible_cond_
-{
-template<typename T, typename = decltype(declval<T&>().~T())>
-  static true_type test(int);
-
-template<typename>
-  static false_type test(...);
-};
-
-template<typename T>
-struct is_destructible_cond
-: private is_destructible_cond_
-{
-  using type = decltype(test<T>(0));
-};
-
-
 template <typename T>
 constexpr bool is_destructible()
 {
     if constexpr (is_void_v<T> or
-		 private_:: is_array_unknown_bounds_v<T> or
+		 private_::is_array_unknown_bounds_v<T> or
 		  is_function_v<T>)
 	return false;
 
@@ -1195,27 +1415,18 @@ constexpr bool is_destructible()
 	    return false;
 
 	else {
-	    using Ret = is_destructible_cond<remove_all_extents_t<T>>::type;
-	    return Ret::value;
+	    using U = remove_all_extents_t<T>;
+	    if constexpr ( atd_::has_destructor<U>)
+		return true;
 
-	    // Quedaría más clara la siguiente implementación
-//	    using U = remove_all_extents_t<T>;
-//	    if constexpr ( requires {
-//				typename (decltype(STD::declval<U&>().~U()));
-//			    }
-//			    )
-//		return true;
-//
-//	    else
-//		return false;
+	    else
+		return false;
 	}
     }
 }
 
 }// impl_of
  
-//template <typename T, typename = void>
-//struct is_destructible : false_type {};
 template<typename T>
 struct is_destructible
 	: bool_constant<impl_of::is_destructible<T>()>
@@ -1231,11 +1442,62 @@ inline constexpr bool is_destructible_v = is_destructible<T>::value;
 
 // is_nothrow_destructible
 // -----------------------
+// La implementación de este trait es idéntico a is_destructible salvo que se
+// mira que el destructor sea noexcept. ¿cómo fusionarlas las dos en una?
+namespace impl_of{
+//template <typename T>
+//concept has_nothrow_destructor =
+//	requires { noexcept(std::declval<T>().~T()) ;};
+
+template <typename T>
+constexpr bool is_nothrow_destructible()
+{
+    if constexpr (is_void_v<T> or
+		 private_::is_array_unknown_bounds_v<T> or
+		  is_function_v<T>)
+	return false;
+
+    else if constexpr (is_reference_v<T> or
+		       is_scalar_v<T>)
+	return true;
+
+    else {
+	if constexpr (!is_object_v<T>)
+	    return false;
+
+	else {
+	    using U = remove_all_extents_t<T>;
+	    if constexpr ( requires { noexcept(STD::declval<U>().~U()) ;})
+
+		return true;
+
+	    else
+		return false;
+	}
+    }
+}
+
+}// impl_of
+ 
+template<typename T>
+struct is_nothrow_destructible
+	: bool_constant<impl_of::is_nothrow_destructible<T>()>
+{
+  static_assert(private_::is_complete_or_unbounded(type_identity<T>{}),
+    "Template argument must be a complete class or an unbounded array");
+};
+
+// is_nothrow_destructible_v
+template <typename T>
+inline constexpr 
+    bool is_nothrow_destructible_v = is_nothrow_destructible<T>::value;
+
 
 // -----------------------
 // Reference modifications
 // -----------------------
 // remove_reference
+// ----------------
 template <typename T>
 struct remove_reference{ using type = T; };
 
@@ -1297,6 +1559,8 @@ using add_rvalue_reference_t = typename add_rvalue_reference<T>::type;
 // ------------------
 // sign modifications
 // ------------------
+// make_signed
+// -----------
 // make_signed(T):
 //	switch(T){
 //	    case char: 
@@ -1360,72 +1624,12 @@ template <typename T>
 using make_unsigned_t = typename make_unsigned<T>::type;
 
 
-
-// --------------
-// type relations
-// --------------
-// is_base_of
-// ----------
-// TODO: depende de gcc. __is_base_of!!!
-// cppreference suministra una implementación que no depende de __is_base_of
-template<typename Base, typename Derived>
-struct is_base_of
-: public integral_constant<bool, __is_base_of(Base, Derived)>
-{ };
-
-template <typename B, typename D>
-inline constexpr bool is_base_of_v = is_base_of<B, D>::value;
-
-
-// is_convertible
-// --------------
-template <typename From, typename To>
-constexpr inline bool __is_convertible_req()
-{
-    return  is_void_v<From>	or 
-	    is_function_v<To>	or 
-	    is_array_v<To>;
-}
-
-template <typename From, typename To, bool = __is_convertible_req<From, To>()>
-struct __is_convertible_helper{
-    using type = typename is_void<To>::type;
-};
-
-
-template <typename From, typename To>
-class __is_convertible_helper<From, To, false> {
-    template <typename To1>
-    static void test_aux(To1);
-
-    template <typename From1,
-              typename To1,
-              typename = decltype(test_aux<To1>(declval<From1>()))>
-    static true_type test(int);
-
-    template <typename, typename>
-    static false_type test(...);
-
-public:
-    using type = decltype(test<From, To>(0));
-};
-
-template <typename From, typename To>
-struct is_convertible : __is_convertible_helper<From, To>::type { };
-
-
-template <typename From, typename To>
-inline constexpr bool is_convertible_v = is_convertible<From, To>::value;
-
-
-
-
 // ---------------------
 // Pointer modifications
 // ---------------------
 
 // remove_pointer
-//
+// --------------
 // if (T == typename(T)*) return typename(T);
 // else if (T == const typename(T)*) return typename(T);
 // else if (T == volatile typename(T)*) return typename(T);
@@ -1524,6 +1728,13 @@ using add_pointer_t = typename add_pointer<T>::type;
 // ---------------------
 // Other transformations
 // ---------------------
+// type_identity
+// -------------
+// Implementado.
+
+// aligned_union
+// -------------
+// TODO
 
 // remove_cvref
 // ------------
@@ -1541,6 +1752,8 @@ struct remove_cvref<T&&> : remove_cv<T>
 
 template <typename T>
 using remove_cvref_t = typename remove_cvref<T>::type;
+
+
 
 // decay
 // -----
@@ -2156,6 +2369,22 @@ struct common_reference<T1, T2, Tail...>{
     using type = common_reference_t<common_reference_t<T1, T2>, Tail...>;
 };
 
+
+// underlying_type
+// ---------------
+// TODO
+
+// invoke_result
+// -------------
+// TODO
+
+// unwrap_reference
+// ----------------
+// TODO
+
+// unwrap_ref_decay
+// ----------------
+// TODO
 
 
 
