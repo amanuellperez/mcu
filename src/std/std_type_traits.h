@@ -26,11 +26,6 @@
  *  DESCRIPCION
  *	Corresponde con el type_traits del estandar
  *
- *  TODO
- *	Algunas implementaciones dependen de GCC (is_union, is_class...)
- *	Ver https://gcc.gnu.org/onlinedocs/gcc/Type-Traits.html
- *	¿Cómo se pueden desvincular de gcc?
- *
  *  EJEMPLOS
  *	Para ver como implementar un switch de tipos ver 
  *	common_type o common_reference. Para ver cómo implementar un trait
@@ -62,36 +57,18 @@
  *
  ****************************************************************************/
 #include "std_config.h"
-#include "std_atd.h"
+#include "std_type_traits0.h"
 
 #include "std_cstddef.h"    // size_t, nullptr_t
-
 namespace STD{
 
-/// is_same
-template <typename X, typename Y>
-struct is_same : public false_type {};
+// is_same
+// -------
+// Implementado en std_type_traits0.h
 
-template <typename X>
-struct is_same<X, X> : public true_type {};
-
-/// is_same_v
-template <typename X, typename Y>
-inline constexpr bool is_same_v = is_same<X, Y>::value;
-
-// declval: copiado de gcc. Es propuesta de Eric Niebler:
-// https://bugs.llvm.org/show_bug.cgi?id=27798. Ver discusión en:
-// https://stackoverflow.com/questions/56212117/understanding-declval-optimized-implementation
-namespace impl_of{
-template<typename T, typename Up = T&&>
-Up declval(int); 
-
-template<typename T>
-T declval(long);
-}// impl_of
- 
-template<typename T>
-auto declval() noexcept -> decltype(impl_of::declval<T>(0));
+// declval
+// -------
+// Implementado en std_type_traits0.h
 
 
 // ----------------------------
@@ -99,41 +76,15 @@ auto declval() noexcept -> decltype(impl_of::declval<T>(0));
 // ----------------------------
 // remove_const
 // ------------
-template <typename T>
-struct remove_const {
-    using type = T;
-};
-
-template <typename T>
-struct remove_const <const T> { using type = T; };
-
-template <typename T>
-using remove_const_t = typename remove_const<T>::type;
-
+// Implementado en std_type_traits0.h
 
 // remove_volatile
 // ---------------
-template <typename T>
-struct remove_volatile {using type = T; };
-
-template <typename T>
-struct remove_volatile <volatile T> {using type = T;};
-
-template <typename T>
-using remove_volatile_t = typename remove_volatile<T>::type;
+// Implementado en std_type_traits0.h
 
 // remove_cv
 // ---------
-template <typename T>
-struct remove_cv {
-    using type = 
-	typename remove_volatile<typename remove_const<T>::type>::type;
-};
-
-
-/// remove_cv_t
-template <typename T>
-using remove_cv_t = typename remove_cv<T>::type;
+// Implementado en std_type_traits0.h
 
 
 // add_const
@@ -174,24 +125,7 @@ using add_cv_t = typename add_cv<T>::type;
 
 // is_void
 // -------
-namespace impl_of{
-template <typename T>
-constexpr inline bool is_void()
-{
-    using U = remove_cv_t<T>;
-
-    if (is_same_v<U, void>)
-	return true;
-    else
-	return false;
-}
-}// impl_of
- 
-template <typename T>
-struct is_void : public bool_constant<impl_of::is_void<T>()> {};
-
-template <typename T>
-inline constexpr bool is_void_v = is_void<T>::value;
+// Implementado en std_type_traits0.h
 
 // is_null_pointer
 // ---------------
@@ -311,17 +245,7 @@ inline constexpr bool is_floating_point_v = is_floating_point<T>::value;
 
 // is_array
 // --------
-template <typename T>
-struct is_array : public false_type { };
-
-template <typename T, size_t sz>
-struct is_array<T[sz]> : public true_type { };
-
-template <typename T>
-struct is_array<T[]> : public true_type { };
-
-template <typename T>
-inline constexpr bool is_array_v = is_array<T>::value;
+// Implementado en std_type_traits0.h
 
 // is_pointer
 // ----------
@@ -343,25 +267,11 @@ inline constexpr bool is_pointer_v= is_pointer<T>::value;
 
 // is_lvalue_reference
 // -------------------
-template <typename T>
-struct is_lvalue_reference : public false_type { };
-
-template <typename T>
-struct is_lvalue_reference<T&> : public true_type { };
-
-template <typename T>
-inline constexpr bool is_lvalue_reference_v = is_lvalue_reference<T>::value;
+// Implementado en std_type_traits0.h
 
 // is_rvalue_reference
 // -------------------
-template <typename T>
-struct is_rvalue_reference : public false_type { };
-
-template <typename T>
-struct is_rvalue_reference<T&&> : public true_type { };
-
-template <typename T>
-inline constexpr bool is_rvalue_reference_v = is_rvalue_reference<T>::value;
+// Implementado en std_type_traits0.h
 
 
 // is_member_object_pointer
@@ -375,7 +285,7 @@ inline constexpr bool is_rvalue_reference_v = is_rvalue_reference<T>::value;
 
 // is_enum
 // --------
-// TODO: depende de GCC. __is_enum es de GCC
+// Depende de GCC. __is_enum es de GCC
 template<typename T>
 struct is_enum 
 	: bool_constant<__is_enum(T)> { };
@@ -385,7 +295,7 @@ inline constexpr bool is_enum_v = is_enum <T>::value;
 
 // is_union
 // --------
-// TODO: depende de GCC. __is_union es de GCC
+// Depende de GCC. __is_union es de GCC
 template<typename T>
 struct is_union
 	: bool_constant<__is_union(T)> { };
@@ -396,7 +306,7 @@ inline constexpr bool is_union_v = is_union<T>::value;
 
 // is_class
 // --------
-// TODO: depende de GCC. __is_class es de GCC
+// Depende de GCC. __is_class es de GCC
 // cppreference tiene una implementación que no depende de gcc
 template<typename T>
 struct is_class
@@ -407,172 +317,9 @@ struct is_class
 template <typename T>
 inline constexpr bool is_class_v = is_class<T>::value;
 
-// >>> ESTO ES DE GCC
-// is_function: copiado de cpp_reference (es un monstruo!!!)
-// ---------------------------------------------------------
-// primary template
-template <typename>
-struct is_function : false_type {
-};
-
-// specialization for regular functions
-template <typename Ret, typename... Args>
-struct is_function<Ret(Args...)> : true_type {
-};
-
-// specialization for variadic functions such as printf
-template <typename Ret, typename... Args>
-struct is_function<Ret(Args..., ...)> : true_type {
-};
-
-// specialization for function types that have cv-qualifiers
-template <typename Ret, typename... Args>
-struct is_function<Ret(Args...) const> : true_type {
-};
-template <typename Ret, typename... Args>
-struct is_function<Ret(Args...) volatile> : true_type {
-};
-template <typename Ret, typename... Args>
-struct is_function<Ret(Args...) const volatile> : true_type {
-};
-template <typename Ret, typename... Args>
-struct is_function<Ret(Args..., ...) const> : true_type {
-};
-template <typename Ret, typename... Args>
-struct is_function<Ret(Args..., ...) volatile> : true_type {
-};
-template <typename Ret, typename... Args>
-struct is_function<Ret(Args..., ...) const volatile> : true_type {
-};
-
-// specialization for function types that have ref-qualifiers
-template <typename Ret, typename... Args>
-struct is_function<Ret(Args...)&> : true_type {
-};
-template <typename Ret, typename... Args>
-struct is_function<Ret(Args...) const&> : true_type {
-};
-template <typename Ret, typename... Args>
-struct is_function<Ret(Args...) volatile&> : true_type {
-};
-template <typename Ret, typename... Args>
-struct is_function<Ret(Args...) const volatile&> : true_type {
-};
-template <typename Ret, typename... Args>
-struct is_function<Ret(Args..., ...)&> : true_type {
-};
-template <typename Ret, typename... Args>
-struct is_function<Ret(Args..., ...) const&> : true_type {
-};
-template <typename Ret, typename... Args>
-struct is_function<Ret(Args..., ...) volatile&> : true_type {
-};
-template <typename Ret, typename... Args>
-struct is_function<Ret(Args..., ...) const volatile&> : true_type {
-};
-template <typename Ret, typename... Args>
-struct is_function<Ret(Args...) &&> : true_type {
-};
-template <typename Ret, typename... Args>
-struct is_function<Ret(Args...) const&&> : true_type {
-};
-template <typename Ret, typename... Args>
-struct is_function<Ret(Args...) volatile&&> : true_type {
-};
-template <typename Ret, typename... Args>
-struct is_function<Ret(Args...) const volatile&&> : true_type {
-};
-template <typename Ret, typename... Args>
-struct is_function<Ret(Args..., ...) &&> : true_type {
-};
-template <typename Ret, typename... Args>
-struct is_function<Ret(Args..., ...) const&&> : true_type {
-};
-template <typename Ret, typename... Args>
-struct is_function<Ret(Args..., ...) volatile&&> : true_type {
-};
-template <typename Ret, typename... Args>
-struct is_function<Ret(Args..., ...) const volatile&&> : true_type {
-};
-
-// specializations for noexcept versions of all the above (C++17 and later)
-template <typename Ret, typename... Args>
-struct is_function<Ret(Args...) noexcept> : true_type {
-};
-template <typename Ret, typename... Args>
-struct is_function<Ret(Args..., ...) noexcept> : true_type {
-};
-template <typename Ret, typename... Args>
-struct is_function<Ret(Args...) const noexcept> : true_type {
-};
-template <typename Ret, typename... Args>
-struct is_function<Ret(Args...) volatile noexcept> : true_type {
-};
-template <typename Ret, typename... Args>
-struct is_function<Ret(Args...) const volatile noexcept> : true_type {
-};
-template <typename Ret, typename... Args>
-struct is_function<Ret(Args..., ...) const noexcept> : true_type {
-};
-template <typename Ret, typename... Args>
-struct is_function<Ret(Args..., ...) volatile noexcept> : true_type {
-};
-template <typename Ret, typename... Args>
-struct is_function<Ret(Args..., ...) const volatile noexcept> : true_type {
-};
-template <typename Ret, typename... Args>
-struct is_function<Ret(Args...) & noexcept> : true_type {
-};
-template <typename Ret, typename... Args>
-struct is_function<Ret(Args...) const& noexcept> : true_type {
-};
-template <typename Ret, typename... Args>
-struct is_function<Ret(Args...) volatile& noexcept> : true_type {
-};
-template <typename Ret, typename... Args>
-struct is_function<Ret(Args...) const volatile& noexcept> : true_type {
-};
-template <typename Ret, typename... Args>
-struct is_function<Ret(Args..., ...) & noexcept> : true_type {
-};
-template <typename Ret, typename... Args>
-struct is_function<Ret(Args..., ...) const& noexcept> : true_type {
-};
-template <typename Ret, typename... Args>
-struct is_function<Ret(Args..., ...) volatile& noexcept> : true_type {
-};
-template <typename Ret, typename... Args>
-struct is_function<Ret(Args..., ...) const volatile& noexcept> : true_type {
-};
-template <typename Ret, typename... Args>
-struct is_function<Ret(Args...) && noexcept> : true_type {
-};
-template <typename Ret, typename... Args>
-struct is_function<Ret(Args...) const&& noexcept> : true_type {
-};
-template <typename Ret, typename... Args>
-struct is_function<Ret(Args...) volatile&& noexcept> : true_type {
-};
-template <typename Ret, typename... Args>
-struct is_function<Ret(Args...) const volatile&& noexcept> : true_type {
-};
-template <typename Ret, typename... Args>
-struct is_function<Ret(Args..., ...) && noexcept> : true_type {
-};
-template <typename Ret, typename... Args>
-struct is_function<Ret(Args..., ...) const&& noexcept> : true_type {
-};
-template <typename Ret, typename... Args>
-struct is_function<Ret(Args..., ...) volatile&& noexcept> : true_type {
-};
-template <typename Ret, typename... Args>
-struct is_function<Ret(Args..., ...) const volatile&& noexcept> : true_type {
-};
-
-template <typename T>
-inline constexpr bool is_function_v = is_function<T>::value;
-// <<< FIN ESTO ES DE GCC
-
+// is_function
+// -----------
+// Implementado en std_type_traits0.h
 
 // is_member_object_pointer
 // ------------------------
@@ -621,24 +368,7 @@ inline constexpr bool is_member_function_pointer_v
 // -------------------------
 // is_reference
 // ------------
-namespace impl_of{
-template <typename T>
-constexpr inline bool is_reference()
-{
-    if (is_rvalue_reference_v<T> or is_lvalue_reference_v<T>)
-	return true;
-
-    return false;
-}
-} // namespace
-  
- 
-template <typename T>
-struct is_reference : public bool_constant<impl_of::is_reference<T>()>{ };
-
-template <typename T>
-inline constexpr bool is_reference_v = is_reference<T>::value;
-
+// Implementado en std_type_traits0.h
 
 
 // is_arithmetic
@@ -768,103 +498,19 @@ inline constexpr bool is_compound_v = is_compound<T>::value;
 // ---------------
 // is_const
 // --------
-// Implementado en std_atd.h
+// Implementado en std_type_traits0.h
 
 // is_volatile
 // -----------
-// Implementado en std_atd.h
+// Implementado en std_type_traits0.h
 
 // extent
 // ------
-// size_t extent<type T, unsigned N = 0>()
-// {
-//	if (!is_array_v<T> or 
-//	    rank<T> <= N or 
-//	    (N = 0 and is_array_of_unknown_bound<T>)
-//	    return 0;
-//	else
-//	    "the bound of the Nth dimension of T, where indexing of N
-//	     is zero-base";
-// }
-// Esa es la definición del estandard. Está más claro cppreference.
-//
-template <typename T, unsigned N>
-struct extent : integral_constant<size_t, 0> { };
-
-template<typename T>
-struct extent<T[], 0> : integral_constant<size_t, 0>
-{ };
-
-template<typename T, unsigned N>
-struct extent<T[], N> : extent<T, N - 1>
-{ };
-
-template<typename T, size_t sz>
-struct extent<T[sz], 0> : integral_constant<size_t, sz>
-{ };
-
-template<typename T, size_t sz, unsigned N>
-struct extent<T[sz], N> : extent<T, N - 1>
-{ };
-
-
-template <typename T, unsigned N = 0>
-inline constexpr size_t extent_v = extent<T, N>::value;
+// Implementado en std_type_traits0.h
 
 // type_identity
 // -------------
-template <typename T>
-struct type_identity {
-    using type = T;
-};
-
-template <typename T>
-using type_identity_t = typename type_identity<T>::type;
-
-
-// ----------
-// is_trivial
-// ----------
-namespace private_{
-// is_array_known_bounds
-// ---------------------
-// DUDA: Los de gcc no comprueban que sea array. ¿queda incluido en extent?
-template <typename T>
-struct is_array_known_bounds
-    //: atd_::static_and<is_array_v<T>, extent_v<T> > 0>
-    : bool_constant<(extent_v<T> > 0)>
-{ };
-
-// is_array_unknown_bounds
-// -----------------------
-template <typename T>
-struct is_array_unknown_bounds
-    : atd_::static_and<is_array_v<T>, extent_v<T> == 0>
-{ };
-
-template <typename T>
-inline constexpr bool is_array_unknown_bounds_v 
-					= is_array_unknown_bounds<T>::value;
-
-// is_complete_or_unbounded
-// ------------------------
-template <typename T, size_t = sizeof(T)>
-constexpr true_type is_complete_or_unbounded(type_identity<T>)
-{ return true_type{}; }
-
-template <typename T,
-	  typename N = typename T::type>
-constexpr atd_::static_or<is_reference_v<N>,
-		    is_function_v<N>,
-		    is_void_v<N>,
-		    is_array_unknown_bounds_v<N>
-		   >
-	    is_complete_or_unbounded(T)
-{ return {}; }
-
-
-}// private_
-
+// Implementado en std_type_traits0.h
 
 // is_trivial
 // ----------
@@ -1087,8 +733,7 @@ inline constexpr bool is_copy_constructible_v
 
 // is_move_constructible
 // ---------------------
-// TODO
-
+// Implementado en std_type_traits0.h
 
 // is_assignable
 // -------------
@@ -1102,7 +747,7 @@ struct is_assignable
 };
 
 template <typename T, typename U>
-inline constexpr bool is_assignable_v =   is_assignable<T, U>::value;
+inline constexpr bool is_assignable_v = is_assignable<T, U>::value;
 
 // is_copy_assignable
 // ------------------
@@ -1128,17 +773,188 @@ struct is_copy_assignable
 };
 
 template <typename T>
-inline constexpr bool is_copy_assignable_v 
-				=  is_copy_assignable<T>::value;
+inline constexpr bool is_copy_assignable_v = is_copy_assignable<T>::value;
 
 // is_move_assignable
 // ------------------
+// Implementado en std_type_traits0.h
+
+// is_swappable_with
+// -----------------
+namespace impl_of{
+template<typename T, typename U>
+constexpr bool is_swappable_with()
+{
+    if constexpr (is_same_v<T, U> and is_lvalue_reference_v<T>){
+	if constexpr 
+	    (requires { STD::swap(STD::declval<T&>(), STD::declval<T&>()); })
+		return true;
+
+	else
+	    return false;
+    }
+
+    else{
+	if constexpr 
+	    (requires { 
+		STD::swap(STD::declval<T>(), STD::declval<U>()); 
+		STD::swap(STD::declval<U>(), STD::declval<T>()); 
+		})
+		return true;
+
+	else
+	    return false;
+
+    }
+
+}
+
+
+}// impl_of
+
+template<typename T, typename U>
+struct is_swappable_with
+    : bool_constant<impl_of::is_swappable_with<T,U>()>
+{
+    static_assert(private_::is_complete_or_unbounded(type_identity<T>{}),
+    "First template argument must be a complete class or an unbounded array");
+
+    static_assert(private_::is_complete_or_unbounded(type_identity<U>{}),
+    "Second template argument must be a complete class or an unbounded array");
+};
+
+template <typename T, typename U>
+inline constexpr bool is_swappable_with_v 
+				=   is_swappable_with<T,U>::value;
+
+// is_swappable
+// ------------
+// Implementado en std_type_traits0.h
+
+// is_destructible
+// ---------------
+// Implementado más adelantes
+
+// is_trivially_constructible
+// --------------------------
+template<typename T, typename... Args>
+struct is_trivially_constructible
+	: bool_constant<__is_trivially_constructible(T, Args...)>
+{
+    static_assert(private_::is_complete_or_unbounded(type_identity<T>{}),
+    "Template argument must be a complete class or an unbounded array");
+};
+
+template <typename T, typename... Args>
+inline constexpr bool is_trivially_constructible_v 
+				= is_trivially_constructible<T, Args...>::value;
+
+
+// is_trivially_default_constructible
+// ----------------------------------
+template<typename T>
+struct is_trivially_default_constructible
+	: bool_constant<__is_trivially_constructible(T)>
+{
+    static_assert(private_::is_complete_or_unbounded(type_identity<T>{}),
+    "Template argument must be a complete class or an unbounded array");
+};
+
+template <typename T>
+inline constexpr bool is_trivially_default_constructible_v
+				= is_trivially_default_constructible<T>::value;
+
+
+// is_trivially_copy_constructible
+// -------------------------------
 namespace impl_of{
 template <typename T>
-constexpr bool is_move_assignable()
+constexpr bool is_trivially_copy_constructible()
+{
+    if constexpr (atd_::is_referenceable<T>){
+	if constexpr (__is_trivially_constructible(T, const T&) and
+		      __is_constructible(T, const T&))
+	    return true;
+
+	else 
+	    return false;
+    }
+    else
+	return false;
+}
+
+}// impl_of
+
+template<typename T>
+struct is_trivially_copy_constructible
+	: bool_constant<impl_of::is_trivially_copy_constructible<T>()>
+{
+    static_assert(private_::is_complete_or_unbounded(type_identity<T>{}),
+    "Template argument must be a complete class or an unbounded array");
+};
+
+template <typename T>
+inline constexpr bool is_trivially_copy_constructible_v 
+				    = is_trivially_copy_constructible<T>::value;
+
+
+// is_trivially_move_constructible
+// -------------------------------
+namespace impl_of{
+template <typename T>
+constexpr bool is_trivially_move_constructible()
+{
+    if constexpr (atd_::is_referenceable<T>){
+	if constexpr (__is_trivially_constructible(T, T&&) and
+		      __is_constructible(T, T&&))
+	    return true;
+
+	else 
+	    return false;
+    }
+    else
+	return false;
+}
+
+}// impl_of
+
+template<typename T>
+struct is_trivially_move_constructible
+	: bool_constant<impl_of::is_trivially_move_constructible<T>()>
+{
+    static_assert(private_::is_complete_or_unbounded(type_identity<T>{}),
+    "Template argument must be a complete class or an unbounded array");
+};
+
+template <typename T>
+inline constexpr bool is_trivially_move_constructible_v 
+				    = is_trivially_move_constructible<T>::value;
+
+
+
+// is_trivially_assignable
+// -----------------------
+template<typename T, typename U>
+struct is_trivially_assignable
+	: bool_constant<__is_trivially_assignable(T, U)>
+{
+    static_assert(private_::is_complete_or_unbounded(type_identity<T>{}),
+    "Template argument must be a complete class or an unbounded array");
+};
+
+template <typename T, typename U>
+inline constexpr bool is_trivially_assignable_v 
+				    = is_trivially_assignable<T, U>::value;
+
+
+// is_trivially_copy_assignable
+// ----------------------------
+namespace impl_of{
+template <typename T>
+constexpr bool is_trivially_copy_assignable()
 {
     if constexpr (atd_::is_referenceable<T>)
-	return __is_assignable(T&, T&&);
+	return __is_trivially_assignable(T&, const T&);
 
     else
 	return false;
@@ -1147,63 +963,157 @@ constexpr bool is_move_assignable()
 }// impl_of
 
 template<typename T>
-struct is_move_assignable
-	: bool_constant<impl_of::is_move_assignable<T>()>
+struct is_trivially_copy_assignable
+	: bool_constant<impl_of::is_trivially_copy_assignable<T>()>
+{
+    static_assert(private_::is_complete_or_unbounded(type_identity<T>{}),
+    "Template argument must be a complete class or an unbounded array");
+};
+
+template <typename T>
+inline constexpr bool is_trivially_copy_assignable_v 
+				    = is_trivially_copy_assignable<T>::value;
+
+
+
+
+// is_trivially_move_assignable
+// ----------------------------
+namespace impl_of{
+template <typename T>
+constexpr bool is_trivially_move_assignable()
+{
+    if constexpr (atd_::is_referenceable<T>)
+	return __is_trivially_assignable(T&, T&&);
+
+    else
+	return false;
+}
+
+}// impl_of
+
+template<typename T>
+struct is_trivially_move_assignable
+	: bool_constant<impl_of::is_trivially_move_assignable<T>()>
+{
+    static_assert(private_::is_complete_or_unbounded(type_identity<T>{}),
+    "Template argument must be a complete class or an unbounded array");
+};
+
+template <typename T>
+inline constexpr bool is_trivially_move_assignable_v 
+				    = is_trivially_move_assignable<T>::value;
+
+
+// remove_all_extents
+// ------------------
+template <typename T>
+struct remove_all_extents {
+    using type = T;
+};
+
+template <typename T>
+using remove_all_extents_t = typename remove_all_extents<T>::type;
+
+
+template <typename T, size_t N>
+struct remove_all_extents<T[N]>{
+    using type = remove_all_extents_t<T>;
+};
+
+template <typename T>
+struct remove_all_extents<T[]>{
+    using type = remove_all_extents_t<T>;
+};
+
+
+// is_destructible
+// ----------------
+// bool is_destructible<type T>
+// {
+//	if (is_reference_v<T>)
+//	    return true;
+//
+//	if (is_cv_void<T>)
+//	    return false;
+//
+//	if (is_function_type<T>)
+//	    return false;
+//
+//	if (is_unbound_array<T>)
+//	    return false;
+//
+//	if (is_object_v<T>){
+//	    type U = remove_all_extents_t<T>;
+//
+//	    if (requires {std::declval<U&>().~U})
+//		return true;
+//
+//	    return false;
+//	}
+//
+//	return false; //??? Esto no lo dicen
+// }
+
+namespace impl_of{
+
+template <typename T>
+constexpr bool is_destructible()
+{
+    if constexpr (is_void_v<T> or
+		 private_::is_array_unknown_bounds_v<T> or
+		  is_function_v<T>)
+	return false;
+
+    else if constexpr (is_reference_v<T> or
+		       is_scalar_v<T>)
+	return true;
+
+    else {
+	if constexpr (!is_object_v<T>)
+	    return false;
+
+	else {
+	    using U = remove_all_extents_t<T>;
+	    if constexpr ( atd_::has_destructor<U>)
+		return true;
+
+	    else
+		return false;
+	}
+    }
+}
+
+}// impl_of
+ 
+template<typename T>
+struct is_destructible
+	: bool_constant<impl_of::is_destructible<T>()>
 {
   static_assert(private_::is_complete_or_unbounded(type_identity<T>{}),
     "Template argument must be a complete class or an unbounded array");
 };
 
+// is_destructible_v
 template <typename T>
-inline constexpr bool is_move_assignable_v 
-				=  is_move_assignable<T>::value;
+inline constexpr bool is_destructible_v = is_destructible<T>::value;
 
-// is_swappable_with
-// -----------------
-// TODO
-
-// is_swappable
-// ------------
-// TODO
-
-// is_destructible
-// ---------------
-// Implementado más adelantes
-
-// is_trivially_constructible
-// --------------------------
-// TODO
-
-// is_trivially_default_constructible
-// ----------------------------------
-// TODO
-
-
-// is_trivially_copy_constructible
-// -------------------------------
-// TODO
-
-// is_trivially_move_constructible
-// -------------------------------
-// TODO
-
-// is_trivially_assignable
-// -----------------------
-// TODO
-
-
-// is_trivially_copy_assignable
-// ----------------------------
-// TODO
-
-
-// is_trivially_move_assignable
-// ----------------------------
-// TODO
 
 // is_trivially_destructible
 // -------------------------
-// TODO
+template<typename T>
+struct is_trivially_destructible
+	: bool_constant<impl_of::is_destructible<T>() and
+			__has_trivial_destructor(T)>
+{
+    static_assert(private_::is_complete_or_unbounded(type_identity<T>{}),
+    "Template argument must be a complete class or an unbounded array");
+};
+
+template <typename T>
+inline constexpr bool is_trivially_destructible_v 
+				    = is_trivially_destructible<T>::value;
+
 
 // is_nothrow_constructible
 // ------------------------
@@ -1268,34 +1178,7 @@ inline constexpr bool is_nothrow_copy_constructible_v
 
 // is_nothrow_move_constructible
 // ------------------------------
-namespace impl_of{
-
-template <typename T>
-constexpr bool is_nothrow_move_constructible()
-{
-    if constexpr (atd_::is_referenceable<T>)
-	return __is_nothrow_constructible(T, T&&);
-
-    else
-	return false;
-}
-
-}// impl_of
- 
-template<typename T>
-struct is_nothrow_move_constructible
-    : bool_constant<impl_of::is_nothrow_move_constructible<T>()>
-{
-    static_assert(private_::is_complete_or_unbounded(type_identity<T>{}),
-    "Template argument must be a complete class or an unbounded array");
-};
-
-
-template <typename T>
-inline constexpr bool is_nothrow_move_constructible_v
-				=   is_nothrow_move_constructible<T>::value;
-
-
+// Implementado en std_type_traits0.h
 
 // is_nothrow_assignable
 // ---------------------
@@ -1342,7 +1225,7 @@ inline constexpr bool is_nothrow_copy_assignable_v
 
 // is_nothrow_move_assignable
 // --------------------------
-// TODO
+// Implementado en std_type_traits0.h
 
 // is_nothrow_swappable_with
 // --------------------------
@@ -1496,98 +1379,9 @@ using remove_extent_t = typename remove_extent<T>::type;
 
 // remove_all_extents
 // ------------------
-template <typename T>
-struct remove_all_extents {
-    using type = T;
-};
-
-template <typename T>
-using remove_all_extents_t = typename remove_all_extents<T>::type;
+// Implementado más arriba.
 
 
-template <typename T, size_t N>
-struct remove_all_extents<T[N]>{
-    using type = remove_all_extents_t<T>;
-};
-
-template <typename T>
-struct remove_all_extents<T[]>{
-    using type = remove_all_extents_t<T>;
-};
-
-
-
-
-// is_destructible
-// ----------------
-// bool is_destructible<type T>
-// {
-//	if (is_reference_v<T>)
-//	    return true;
-//
-//	if (is_cv_void<T>)
-//	    return false;
-//
-//	if (is_function_type<T>)
-//	    return false;
-//
-//	if (is_unbound_array<T>)
-//	    return false;
-//
-//	if (is_object_v<T>){
-//	    type U = remove_all_extents_t<T>;
-//
-//	    if (requires {std::declval<U&>().~U})
-//		return true;
-//
-//	    return false;
-//	}
-//
-//	return false; //??? Esto no lo dicen
-// }
-
-namespace impl_of{
-
-template <typename T>
-constexpr bool is_destructible()
-{
-    if constexpr (is_void_v<T> or
-		 private_::is_array_unknown_bounds_v<T> or
-		  is_function_v<T>)
-	return false;
-
-    else if constexpr (is_reference_v<T> or
-		       is_scalar_v<T>)
-	return true;
-
-    else {
-	if constexpr (!is_object_v<T>)
-	    return false;
-
-	else {
-	    using U = remove_all_extents_t<T>;
-	    if constexpr ( atd_::has_destructor<U>)
-		return true;
-
-	    else
-		return false;
-	}
-    }
-}
-
-}// impl_of
- 
-template<typename T>
-struct is_destructible
-	: bool_constant<impl_of::is_destructible<T>()>
-{
-  static_assert(private_::is_complete_or_unbounded(type_identity<T>{}),
-    "Template argument must be a complete class or an unbounded array");
-};
-
-// is_destructible_v
-template <typename T>
-inline constexpr bool is_destructible_v = is_destructible<T>::value;
 
 
 // is_nothrow_destructible
@@ -1644,18 +1438,7 @@ inline constexpr
 // -----------------------
 // remove_reference
 // ----------------
-template <typename T>
-struct remove_reference{ using type = T; };
-
-template <typename T>
-struct remove_reference<T&> { using type = T;};
-
-template <typename T>
-struct remove_reference<T&&> { using type = T;};
-
-template <typename T>
-using remove_reference_t = typename remove_reference<T>::type;
-
+// Implementado en std_type_traits0.h
 
 // add_lvalue_reference
 // --------------------

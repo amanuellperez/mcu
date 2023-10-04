@@ -311,19 +311,7 @@ constexpr Forward_it shift_left(Forward_it p0, Forward_it pe,
 
 // swap
 // ----
-// ¿por qué pongo STD::move cuando no es necesario STD aqui?
-// En los test de pruebas comparo STD::swap con std::swap. Si pruebo a hacer
-// un swap con std::string el compilador se queja porque no sabe a que move
-// estoy llamando. Por eso lo pongo de forma explícita, para poder probar con
-// std::string.
-template <typename T>
-constexpr void swap(T& a, T& b)
-{
-    T tmp = STD::move(a);
-    a = STD::move(b);
-    b = STD::move(tmp);
-}
-
+// Implementado en std_type_traits0.h
 
 // reverse
 // -------

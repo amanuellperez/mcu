@@ -143,12 +143,20 @@ void test_has_destructor()
     CHECK_TRUE(mtd::atd_::has_destructor<Class_with_destructor> == true, "Class_with_destructor");
 }
 
+void test_is_referenceable()
+{
+    test::interface("is_referenceable");
+    CHECK_TRUE(mtd::atd_::is_referenceable<void> == false, "void");
+    CHECK_TRUE(mtd::atd_::is_referenceable<int> == true, "int");
+}
+
 
 int main()
 {
 try{
     test::header("atd_");
     
+    test_is_referenceable();
     test_not();
     test_and();
     test_or();

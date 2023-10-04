@@ -1,4 +1,5 @@
 SOURCES= main.cpp
+#SOURCES= kk.cpp
 
 BIN = xx
 

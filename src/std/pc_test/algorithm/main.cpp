@@ -333,24 +333,6 @@ void test_shift_left()
 
 }
 
-template <typename T>
-void test_swap(T x, T y)
-{
-    T sx = x;
-    T sy= y;
-
-    mtd::swap(x, y);
-    std::swap(sx, sy);
-    CHECK_TRUE(x == sx and y == sy, "swap");
-    
-}
-
-void test_swap()
-{
-    test::interfaz("swap");
-    test_swap<int>(2, 5);
-    test_swap<std::string>("uno", "dos");
-}
 
 
 void test_reverse(int* x, int* sx, size_t N)
@@ -407,7 +389,6 @@ try{
     test_find();
     test_count();
     test_shift_left();
-    test_swap();
     test_reverse();
 
 }catch(const std::exception& e){

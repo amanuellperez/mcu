@@ -104,71 +104,8 @@ typedef union
 enum Enum {black, white};
 enum class Enum_class{ one, two, three };
 
-void test_integral_constant()
-{
-    std::cout << "Probando mtd::integral_constant\n";
-    std::cout << "-------------------------------\n";
-
-    using two_t = mtd::integral_constant<int, 2>;
-    using four_t = mtd::integral_constant<int, 4>;
 
 
-    CHECK_TRUE(two_t::value == 2, "integral_constant::value");
-    CHECK_TRUE(two_t::value * 2 == four_t::value, "varios");   
-
-    two_t two;
-    CHECK_TRUE(two() == 2, "operator()");
-    int x = two;
-    CHECK_TRUE(x == 2, "operator value_type()");
-
-
-    CHECK_TRUE(mtd::true_type::value == true, "true_type");
-    CHECK_TRUE(mtd::false_type::value == false, "false_type");
-
-
-    // is_same
-    CHECK_TRUE(mtd::is_same<int, int>::value == true, "is_same(true)");
-    CHECK_TRUE(mtd::is_same<int, float>::value == false, "is_same(false)");
-
-    CHECK_TRUE(mtd::is_same_v<char, char> == true, "is_same_v(true)");
-    CHECK_TRUE(mtd::is_same_v<int, float> == false, "is_same_v(false)");
-
-    // remove_const
-    CHECK_TRUE(mtd::is_same_v<typename mtd::remove_const<int>::type, int> == true
-		, "remove_const(int)");
-    CHECK_TRUE(mtd::is_same_v<typename mtd::remove_const<const int>::type, int> == true
-		, "remove_const(const int)");
-
-    CHECK_TRUE(mtd::is_same_v<mtd::remove_const_t<int>, int> == true
-		, "remove_const_t(int)");
-    CHECK_TRUE(mtd::is_same_v<mtd::remove_const_t<const int>, int> == true
-		, "remove_const_t(const int)");
-
-    CHECK_TRUE(mtd::is_same_v<typename mtd::remove_volatile<int>::type, int> == true
-		, "remove_volatile(int)");
-    CHECK_TRUE(mtd::is_same_v<typename mtd::remove_volatile<volatile int>::type, int> == true
-		, "remove_volatile(volatile int)");
-
-    CHECK_TRUE(mtd::is_same_v<mtd::remove_volatile_t<int>, int> == true
-		, "remove_volatile_t(int)");
-    CHECK_TRUE(mtd::is_same_v<mtd::remove_volatile_t<volatile int>, int> == true
-		, "remove_volatile_t(volatile int)");
-
-
-    CHECK_TRUE(mtd::is_same_v<typename mtd::remove_cv<int>::type, int> == true
-		, "remove_cv(int)");
-    CHECK_TRUE(mtd::is_same_v<typename mtd::remove_cv<const int>::type, int> == true
-		, "remove_cv(const int)");
-    CHECK_TRUE(mtd::is_same_v<typename mtd::remove_cv<volatile int>::type, int> == true
-		, "remove_cv(volatile int)");
-
-    CHECK_TRUE((mtd::is_same_v<mtd::remove_cv_t<int>, int> == true)
-		, "remove_cv_t(int)");
-    CHECK_TRUE((mtd::is_same_v<mtd::remove_cv_t<const int>, int> == true)
-		, "remove_cv_t(const int)");
-    CHECK_TRUE((mtd::is_same_v<mtd::remove_cv_t<volatile int>, int> == true)
-		, "remove_cv_t(volatile int)");
-}
 
 void test_is_integral()
 {
@@ -446,51 +383,7 @@ void test_conditional()
 		"degenerado");
 }
 
-void test_is_const()
-{
-    test::interface("is_const");
 
-    CHECK_TRUE(!mtd::is_const_v<char>, "char");
-    CHECK_TRUE(!mtd::is_const_v<int>, "int");
-    CHECK_TRUE(!mtd::is_const_v<long>, "long");
-    CHECK_TRUE(!mtd::is_const_v<long long>, "long long");
-    CHECK_TRUE(!mtd::is_const_v<float>, "float");
-    CHECK_TRUE(!mtd::is_const_v<double>, "double");
-
-    CHECK_TRUE(mtd::is_const_v<const char>, "const char");
-    CHECK_TRUE(mtd::is_const_v<const int>, "const int");
-    CHECK_TRUE(mtd::is_const_v<const long>, "const long");
-    CHECK_TRUE(mtd::is_const_v<const long long>, "const long long");
-    CHECK_TRUE(mtd::is_const_v<const float>, "const float");
-    CHECK_TRUE(mtd::is_const_v<const double>, "const double");
-}
-
-template <typename T>
-void test_is_volatile(const std::string& name_type)
-{
-    CHECK_TRUE(mtd::is_volatile_v<T> ==
-	       std::is_volatile_v<T>, 
-	       alp::as_str() << "is_volatile(" << name_type << ")");
-}
-
-void test_is_volatile()
-{
-    test::interface("is_volatile");
-
-    test_is_volatile<char>("char");
-    test_is_volatile<int>("int");
-    test_is_volatile<long>("long");
-    test_is_volatile<long long>("long long");
-    test_is_volatile<float>("float");
-    test_is_volatile<double>("double");
-
-    test_is_volatile<volatile char>("volatile char");
-    test_is_volatile<volatile int>("volatile int");
-    test_is_volatile<volatile long>("volatile long");
-    test_is_volatile<volatile long long>("volatile long long");
-    test_is_volatile<volatile float>("volatile float");
-    test_is_volatile<volatile double>("volatile double");
-}
 
 
 template <typename T>
@@ -1252,51 +1145,10 @@ void test_is_copy_assignable()
 
 }
 
-template <typename T>
-void test_is_move_assignable(const std::string& name_type)
-{
-    CHECK_TRUE(mtd::is_move_assignable_v<T> ==
-	       std::is_move_assignable_v<T>, 
-	       alp::as_str() << "is_move_assignable(" << name_type << ")");
-}
-
-void test_is_move_assignable()
-{
-    test::interface("is_move_assignable");
-
-    test_is_move_assignable<void>("void");
-    test_is_move_assignable<const volatile void>("const volatile void");
-    test_is_move_assignable<nullptr_t>("nullptr_t");
-
-    test_is_move_assignable<char>("char");
-    test_is_move_assignable<int>("int");
-    test_is_move_assignable<long>("long");
-    test_is_move_assignable<long long>("long long");
-    test_is_move_assignable<float>("float");
-    test_is_move_assignable<double>("double");
-
-    test_is_move_assignable<int[]>("int[]");
-    test_is_move_assignable<int[3]>("int[3]");
-    test_is_move_assignable<int[][3]>("int[][3]");
-
-    test_is_move_assignable<Class>("Class");
-    test_is_move_assignable<Union>("Union");
-    test_is_move_assignable<Enum>("Enum");
-    test_is_move_assignable<Enum_class>("Enum_class");
-
-    test_is_move_assignable<Class>("Class");
-    test_is_move_assignable<Class2>("Class2");
-    test_is_move_assignable<int Class::*>("int Class::*");
-    test_is_move_assignable<int (Class::*)()>("int (Class::*)()");
-
-    test_is_move_assignable<A>("A");
-    test_is_move_assignable<B>("B");
-    test_is_move_assignable<C>("C");
-    test_is_move_assignable<D>("D");
 
 
 
-}
+
 
 
 template <typename T>
@@ -1343,48 +1195,6 @@ void test_is_nothrow_copy_constructible()
 }
 
 
-template <typename T>
-void test_is_nothrow_move_constructible(const std::string& name_type)
-{
-    CHECK_TRUE(mtd::is_nothrow_move_constructible_v<T> ==
-	       std::is_nothrow_move_constructible_v<T>, 
-	       alp::as_str() << "is_nothrow_move_constructible(" << name_type << ")");
-}
-
-void test_is_nothrow_move_constructible()
-{
-    test::interface("is_nothrow_move_constructible");
-
-    test_is_nothrow_move_constructible<void>("void");
-    test_is_nothrow_move_constructible<const volatile void>("const volatile void");
-    test_is_nothrow_move_constructible<nullptr_t>("nullptr_t");
-
-    test_is_nothrow_move_constructible<char>("char");
-    test_is_nothrow_move_constructible<int>("int");
-    test_is_nothrow_move_constructible<long>("long");
-    test_is_nothrow_move_constructible<long long>("long long");
-    test_is_nothrow_move_constructible<float>("float");
-    test_is_nothrow_move_constructible<double>("double");
-
-    test_is_nothrow_move_constructible<int[]>("int[]");
-    test_is_nothrow_move_constructible<int[3]>("int[3]");
-    test_is_nothrow_move_constructible<int[][3]>("int[][3]");
-
-    test_is_nothrow_move_constructible<Class>("Class");
-    test_is_nothrow_move_constructible<Union>("Union");
-    test_is_nothrow_move_constructible<Enum>("Enum");
-    test_is_nothrow_move_constructible<Enum_class>("Enum_class");
-
-    test_is_nothrow_move_constructible<Class>("Class");
-    test_is_nothrow_move_constructible<Class2>("Class2");
-    test_is_nothrow_move_constructible<int Class::*>("int Class::*");
-    test_is_nothrow_move_constructible<int (Class::*)()>("int (Class::*)()");
-
-    test_is_nothrow_move_constructible<A>("A");
-    test_is_nothrow_move_constructible<B>("B");
-    test_is_nothrow_move_constructible<C>("C");
-    test_is_nothrow_move_constructible<D>("D");
-}
 
 
 template <typename T>
@@ -1526,6 +1336,331 @@ void test_is_destructible()
 
 
 template <typename T>
+void test_is_trivially_constructible(const std::string& name_type)
+{
+    CHECK_TRUE(mtd::is_trivially_constructible_v<T> ==
+	       std::is_trivially_constructible_v<T>, 
+	       alp::as_str() << "is_trivially_constructible(" << name_type << ")");
+}
+
+void test_is_trivially_constructible()
+{
+    test::interface("is_trivially_constructible");
+
+    test_is_trivially_constructible<void>("void");
+    test_is_trivially_constructible<const volatile void>("const volatile void");
+    test_is_trivially_constructible<nullptr_t>("nullptr_t");
+
+    test_is_trivially_constructible<char>("char");
+    test_is_trivially_constructible<int>("int");
+    test_is_trivially_constructible<long>("long");
+    test_is_trivially_constructible<long long>("long long");
+    test_is_trivially_constructible<float>("float");
+    test_is_trivially_constructible<double>("double");
+
+    test_is_trivially_constructible<int[]>("int[]");
+    test_is_trivially_constructible<int[3]>("int[3]");
+    test_is_trivially_constructible<int[][3]>("int[][3]");
+
+    test_is_trivially_constructible<Class>("Class");
+    test_is_trivially_constructible<Union>("Union");
+    test_is_trivially_constructible<Enum>("Enum");
+    test_is_trivially_constructible<Enum_class>("Enum_class");
+
+    test_is_trivially_constructible<Class>("Class");
+    test_is_trivially_constructible<Class2>("Class2");
+    test_is_trivially_constructible<int Class::*>("int Class::*");
+    test_is_trivially_constructible<int (Class::*)()>("int (Class::*)()");
+
+    test_is_trivially_constructible<A>("A");
+    test_is_trivially_constructible<B>("B");
+    test_is_trivially_constructible<C>("C");
+    test_is_trivially_constructible<D>("D");
+
+
+
+}
+
+template <typename T>
+void test_is_trivially_default_constructible(const std::string& name_type)
+{
+    CHECK_TRUE(mtd::is_trivially_default_constructible_v<T> ==
+	       std::is_trivially_default_constructible_v<T>, 
+	       alp::as_str() << "is_trivially_default_constructible(" << name_type << ")");
+}
+
+void test_is_trivially_default_constructible()
+{
+    test::interface("is_trivially_default_constructible");
+
+    test_is_trivially_default_constructible<void>("void");
+    test_is_trivially_default_constructible<const volatile void>("const volatile void");
+    test_is_trivially_default_constructible<nullptr_t>("nullptr_t");
+
+    test_is_trivially_default_constructible<char>("char");
+    test_is_trivially_default_constructible<int>("int");
+    test_is_trivially_default_constructible<long>("long");
+    test_is_trivially_default_constructible<long long>("long long");
+    test_is_trivially_default_constructible<float>("float");
+    test_is_trivially_default_constructible<double>("double");
+
+    test_is_trivially_default_constructible<int[]>("int[]");
+    test_is_trivially_default_constructible<int[3]>("int[3]");
+    test_is_trivially_default_constructible<int[][3]>("int[][3]");
+
+    test_is_trivially_default_constructible<Class>("Class");
+    test_is_trivially_default_constructible<Union>("Union");
+    test_is_trivially_default_constructible<Enum>("Enum");
+    test_is_trivially_default_constructible<Enum_class>("Enum_class");
+
+    test_is_trivially_default_constructible<Class>("Class");
+    test_is_trivially_default_constructible<Class2>("Class2");
+    test_is_trivially_default_constructible<int Class::*>("int Class::*");
+    test_is_trivially_default_constructible<int (Class::*)()>("int (Class::*)()");
+
+    test_is_trivially_default_constructible<A>("A");
+    test_is_trivially_default_constructible<B>("B");
+    test_is_trivially_default_constructible<C>("C");
+    test_is_trivially_default_constructible<D>("D");
+
+
+
+}
+
+
+template <typename T>
+void test_is_trivially_copy_constructible(const std::string& name_type)
+{
+    CHECK_TRUE(mtd::is_trivially_copy_constructible_v<T> ==
+	       std::is_trivially_copy_constructible_v<T>, 
+	       alp::as_str() << "is_trivially_copy_constructible(" << name_type << ")");
+}
+
+void test_is_trivially_copy_constructible()
+{
+    test::interface("is_trivially_copy_constructible");
+
+    test_is_trivially_copy_constructible<void>("void");
+    test_is_trivially_copy_constructible<const volatile void>("const volatile void");
+    test_is_trivially_copy_constructible<nullptr_t>("nullptr_t");
+
+    test_is_trivially_copy_constructible<char>("char");
+    test_is_trivially_copy_constructible<int>("int");
+    test_is_trivially_copy_constructible<long>("long");
+    test_is_trivially_copy_constructible<long long>("long long");
+    test_is_trivially_copy_constructible<float>("float");
+    test_is_trivially_copy_constructible<double>("double");
+
+    test_is_trivially_copy_constructible<int[]>("int[]");
+    test_is_trivially_copy_constructible<int[3]>("int[3]");
+    test_is_trivially_copy_constructible<int[][3]>("int[][3]");
+
+    test_is_trivially_copy_constructible<Class>("Class");
+    test_is_trivially_copy_constructible<Union>("Union");
+    test_is_trivially_copy_constructible<Enum>("Enum");
+    test_is_trivially_copy_constructible<Enum_class>("Enum_class");
+
+    test_is_trivially_copy_constructible<Class>("Class");
+    test_is_trivially_copy_constructible<Class2>("Class2");
+    test_is_trivially_copy_constructible<int Class::*>("int Class::*");
+    test_is_trivially_copy_constructible<int (Class::*)()>("int (Class::*)()");
+
+    test_is_trivially_copy_constructible<A>("A");
+    test_is_trivially_copy_constructible<B>("B");
+    test_is_trivially_copy_constructible<C>("C");
+    test_is_trivially_copy_constructible<D>("D");
+
+
+
+}
+
+
+template <typename T>
+void test_is_trivially_move_constructible(const std::string& name_type)
+{
+    CHECK_TRUE(mtd::is_trivially_move_constructible_v<T> ==
+	       std::is_trivially_move_constructible_v<T>, 
+	       alp::as_str() << "is_trivially_move_constructible(" << name_type << ")");
+}
+
+void test_is_trivially_move_constructible()
+{
+    test::interface("is_trivially_move_constructible");
+
+    test_is_trivially_move_constructible<void>("void");
+    test_is_trivially_move_constructible<const volatile void>("const volatile void");
+    test_is_trivially_move_constructible<nullptr_t>("nullptr_t");
+
+    test_is_trivially_move_constructible<char>("char");
+    test_is_trivially_move_constructible<int>("int");
+    test_is_trivially_move_constructible<long>("long");
+    test_is_trivially_move_constructible<long long>("long long");
+    test_is_trivially_move_constructible<float>("float");
+    test_is_trivially_move_constructible<double>("double");
+
+    test_is_trivially_move_constructible<int[]>("int[]");
+    test_is_trivially_move_constructible<int[3]>("int[3]");
+    test_is_trivially_move_constructible<int[][3]>("int[][3]");
+
+    test_is_trivially_move_constructible<Class>("Class");
+    test_is_trivially_move_constructible<Union>("Union");
+    test_is_trivially_move_constructible<Enum>("Enum");
+    test_is_trivially_move_constructible<Enum_class>("Enum_class");
+
+    test_is_trivially_move_constructible<Class>("Class");
+    test_is_trivially_move_constructible<Class2>("Class2");
+    test_is_trivially_move_constructible<int Class::*>("int Class::*");
+    test_is_trivially_move_constructible<int (Class::*)()>("int (Class::*)()");
+
+    test_is_trivially_move_constructible<A>("A");
+    test_is_trivially_move_constructible<B>("B");
+    test_is_trivially_move_constructible<C>("C");
+    test_is_trivially_move_constructible<D>("D");
+
+
+
+}
+
+template <typename T>
+void test_is_trivially_copy_assignable(const std::string& name_type)
+{
+    CHECK_TRUE(mtd::is_trivially_copy_assignable_v<T> ==
+	       std::is_trivially_copy_assignable_v<T>, 
+	       alp::as_str() << "is_trivially_copy_assignable(" << name_type << ")");
+}
+
+void test_is_trivially_copy_assignable()
+{
+    test::interface("is_trivially_copy_assignable");
+
+    test_is_trivially_copy_assignable<void>("void");
+    test_is_trivially_copy_assignable<const volatile void>("const volatile void");
+    test_is_trivially_copy_assignable<nullptr_t>("nullptr_t");
+
+    test_is_trivially_copy_assignable<char>("char");
+    test_is_trivially_copy_assignable<int>("int");
+    test_is_trivially_copy_assignable<long>("long");
+    test_is_trivially_copy_assignable<long long>("long long");
+    test_is_trivially_copy_assignable<float>("float");
+    test_is_trivially_copy_assignable<double>("double");
+
+    test_is_trivially_copy_assignable<int[]>("int[]");
+    test_is_trivially_copy_assignable<int[3]>("int[3]");
+    test_is_trivially_copy_assignable<int[][3]>("int[][3]");
+
+    test_is_trivially_copy_assignable<Class>("Class");
+    test_is_trivially_copy_assignable<Union>("Union");
+    test_is_trivially_copy_assignable<Enum>("Enum");
+    test_is_trivially_copy_assignable<Enum_class>("Enum_class");
+
+    test_is_trivially_copy_assignable<Class>("Class");
+    test_is_trivially_copy_assignable<Class2>("Class2");
+    test_is_trivially_copy_assignable<int Class::*>("int Class::*");
+    test_is_trivially_copy_assignable<int (Class::*)()>("int (Class::*)()");
+
+    test_is_trivially_copy_assignable<A>("A");
+    test_is_trivially_copy_assignable<B>("B");
+    test_is_trivially_copy_assignable<C>("C");
+    test_is_trivially_copy_assignable<D>("D");
+
+
+
+}
+
+template <typename T>
+void test_is_trivially_move_assignable(const std::string& name_type)
+{
+    CHECK_TRUE(mtd::is_trivially_move_assignable_v<T> ==
+	       std::is_trivially_move_assignable_v<T>, 
+	       alp::as_str() << "is_trivially_move_assignable(" << name_type << ")");
+}
+
+void test_is_trivially_move_assignable()
+{
+    test::interface("is_trivially_move_assignable");
+
+    test_is_trivially_move_assignable<void>("void");
+    test_is_trivially_move_assignable<const volatile void>("const volatile void");
+    test_is_trivially_move_assignable<nullptr_t>("nullptr_t");
+
+    test_is_trivially_move_assignable<char>("char");
+    test_is_trivially_move_assignable<int>("int");
+    test_is_trivially_move_assignable<long>("long");
+    test_is_trivially_move_assignable<long long>("long long");
+    test_is_trivially_move_assignable<float>("float");
+    test_is_trivially_move_assignable<double>("double");
+
+    test_is_trivially_move_assignable<int[]>("int[]");
+    test_is_trivially_move_assignable<int[3]>("int[3]");
+    test_is_trivially_move_assignable<int[][3]>("int[][3]");
+
+    test_is_trivially_move_assignable<Class>("Class");
+    test_is_trivially_move_assignable<Union>("Union");
+    test_is_trivially_move_assignable<Enum>("Enum");
+    test_is_trivially_move_assignable<Enum_class>("Enum_class");
+
+    test_is_trivially_move_assignable<Class>("Class");
+    test_is_trivially_move_assignable<Class2>("Class2");
+    test_is_trivially_move_assignable<int Class::*>("int Class::*");
+    test_is_trivially_move_assignable<int (Class::*)()>("int (Class::*)()");
+
+    test_is_trivially_move_assignable<A>("A");
+    test_is_trivially_move_assignable<B>("B");
+    test_is_trivially_move_assignable<C>("C");
+    test_is_trivially_move_assignable<D>("D");
+
+
+
+}
+
+
+template <typename T>
+void test_is_trivially_destructible(const std::string& name_type)
+{
+    CHECK_TRUE(mtd::is_trivially_destructible_v<T> ==
+	       std::is_trivially_destructible_v<T>, 
+	       alp::as_str() << "is_trivially_destructible(" << name_type << ")");
+}
+
+void test_is_trivially_destructible()
+{
+    test::interface("is_trivially_destructible");
+
+    test_is_trivially_destructible<void>("void");
+    test_is_trivially_destructible<const volatile void>("const volatile void");
+    test_is_trivially_destructible<nullptr_t>("nullptr_t");
+
+    test_is_trivially_destructible<char>("char");
+    test_is_trivially_destructible<int>("int");
+    test_is_trivially_destructible<long>("long");
+    test_is_trivially_destructible<long long>("long long");
+    test_is_trivially_destructible<float>("float");
+    test_is_trivially_destructible<double>("double");
+
+    test_is_trivially_destructible<int[]>("int[]");
+    test_is_trivially_destructible<int[3]>("int[3]");
+    test_is_trivially_destructible<int[][3]>("int[][3]");
+
+    test_is_trivially_destructible<Class>("Class");
+    test_is_trivially_destructible<Union>("Union");
+    test_is_trivially_destructible<Enum>("Enum");
+    test_is_trivially_destructible<Enum_class>("Enum_class");
+
+    test_is_trivially_destructible<Class>("Class");
+    test_is_trivially_destructible<Class2>("Class2");
+    test_is_trivially_destructible<int Class::*>("int Class::*");
+    test_is_trivially_destructible<int (Class::*)()>("int (Class::*)()");
+
+    test_is_trivially_destructible<A>("A");
+    test_is_trivially_destructible<B>("B");
+    test_is_trivially_destructible<C>("C");
+    test_is_trivially_destructible<D>("D");
+
+
+
+}
+
+template <typename T>
 void test_is_nothrow_destructible(const std::string& name_type)
 {
     CHECK_TRUE(mtd::is_nothrow_destructible_v<T> ==
@@ -1572,105 +1707,11 @@ void test_is_nothrow_destructible()
 }
 
 
-template <typename T>
-void test_extent(const std::string& name_type)
-{
-    CHECK_TRUE(mtd::extent_v<T> == 
-	       std::extent_v<T>, name_type);
-    CHECK_TRUE(mtd::extent_v<const T> == 
-	       std::extent_v<const T>, alp::as_str() << "const " << name_type);
-    CHECK_TRUE(mtd::extent_v<volatile T> == 
-	       std::extent_v<volatile T>, alp::as_str() << "volatile " << name_type);
-    CHECK_TRUE(mtd::extent_v<const volatile T> == 
-	       std::extent_v<const volatile T>, alp::as_str() << "const volatile " << name_type);
-}
 
 
-void test_extent()
-{
-    test::interface("extent");
-
-    test_extent<void>("void");
-    test_extent<nullptr_t>("nullptr_t");
-
-    test_extent<char>("char");
-    test_extent<char>("char");
-    test_extent<int>("int");
-    test_extent<long>("long");
-    test_extent<long long>("long long");
-    test_extent<float>("float");
-    test_extent<double>("double");
-
-    test_extent<int[]>("int[]");
-
-    test_extent<int[4]>("int[4]");
-    test_extent<int[4][2]>("int[4][2]");
-    test_extent<int[]>("int[]");
-    test_extent<int[][3]>("int[][3]");
-}
 
 
-template <typename T>
-void test_is_void(const std::string& name_type)
-{
-    CHECK_TRUE(mtd::is_void_v<T> == 
-	       std::is_void_v<T>, name_type);
-    CHECK_TRUE(mtd::is_void_v<const T> == 
-	       std::is_void_v<const T>, alp::as_str() << "const " << name_type);
-    CHECK_TRUE(mtd::is_void_v<volatile T> == 
-	       std::is_void_v<volatile T>, alp::as_str() << "volatile " << name_type);
-    CHECK_TRUE(mtd::is_void_v<const volatile T> == 
-	       std::is_void_v<const volatile T>, alp::as_str() << "const volatile " << name_type);
-}
 
-void test_is_void()
-{
-    test::interface("is_void");
-
-    test_is_void<nullptr_t>("nullptr_t");
-
-    test_is_void<void>("void");
-
-    test_is_void<char>("char");
-    test_is_void<int>("int");
-    test_is_void<long>("long");
-    test_is_void<long long>("long long");
-    test_is_void<float>("float");
-    test_is_void<double>("double");
-
-    test_is_void<unsigned char>("unsigned char");
-    test_is_void<unsigned int>("unsigned int");
-    test_is_void<unsigned long>("unsigned long");
-    test_is_void<unsigned long long>("unsigned long long");
-
-// references
-    test_is_void<char&>("char&");
-    test_is_void<int&>("int&");
-    test_is_void<long&>("long&");
-    test_is_void<long long&>("long& long");
-    test_is_void<float&>("float&");
-    test_is_void<double&>("double&");
-
-    test_is_void<unsigned char&>("unsigned char&");
-    test_is_void<unsigned int&>("unsigned int&");
-    test_is_void<unsigned long&>("unsigned long&");
-    test_is_void<unsigned long long&>("unsigned long long&");
-
-// pointers
-    test_is_void<void*>("void*");
-
-    test_is_void<char*>("char*");
-    test_is_void<int*>("int*");
-    test_is_void<long*>("long*");
-    test_is_void<long long*>("long* long");
-    test_is_void<float*>("float*");
-    test_is_void<double*>("double*");
-
-    test_is_void<unsigned char*>("unsigned char*");
-    test_is_void<unsigned int*>("unsigned int*");
-    test_is_void<unsigned long*>("unsigned long*");
-    test_is_void<unsigned long long*>("unsigned long long*");
-}
 
 template <typename T>
 void test_is_null_pointer(const std::string& name_type)
@@ -1798,82 +1839,6 @@ void test_is_pointer()
 }
 
 
-template <typename T>
-void test_is_lvalue_reference(const std::string& name_type)
-{
-    CHECK_TRUE(	mtd::is_lvalue_reference_v<T> ==
-		std::is_lvalue_reference_v<T>, name_type);
-    CHECK_TRUE(	mtd::is_lvalue_reference_v<T&> ==
-		std::is_lvalue_reference_v<T&>, alp::as_str() << name_type << '&');
-    CHECK_TRUE(	mtd::is_lvalue_reference_v<T&&> ==
-		std::is_lvalue_reference_v<T&&>, alp::as_str() << name_type << "&&");
-
-    CHECK_TRUE(	mtd::is_lvalue_reference_v<const T> ==
-		std::is_lvalue_reference_v<const T>, alp::as_str() << "const " << name_type);
-    CHECK_TRUE(	mtd::is_lvalue_reference_v<const T&> ==
-		std::is_lvalue_reference_v<const T&>, alp::as_str() << "const " << name_type << '&');
-    CHECK_TRUE(	mtd::is_lvalue_reference_v<const T&&> ==
-		std::is_lvalue_reference_v<const T&&>, alp::as_str() << "const " << name_type << "&&");
-
-    CHECK_TRUE(	mtd::is_lvalue_reference_v<volatile T> ==
-		std::is_lvalue_reference_v<volatile T>, alp::as_str() << "volatile " << name_type);
-    CHECK_TRUE(	mtd::is_lvalue_reference_v<volatile T&> ==
-		std::is_lvalue_reference_v<volatile T&>, alp::as_str() << "volatile " << name_type << '&');
-    CHECK_TRUE(	mtd::is_lvalue_reference_v<volatile T&&> ==
-		std::is_lvalue_reference_v<volatile T&&>, alp::as_str() << "volatile " << name_type << "&&");
-
-}
-
-void test_is_lvalue_reference()
-{
-    test::interface("is_lvalue_reference");
-    
-    test_is_lvalue_reference<char>("char");
-    test_is_lvalue_reference<int>("int");
-    test_is_lvalue_reference<long>("long");
-    test_is_lvalue_reference<long long>("long long");
-    test_is_lvalue_reference<float>("float");
-    test_is_lvalue_reference<double>("double");
-}
-
-
-template <typename T>
-void test_is_rvalue_reference(const std::string& name_type)
-{
-    CHECK_TRUE(	mtd::is_rvalue_reference_v<T> ==
-		std::is_rvalue_reference_v<T>, name_type);
-    CHECK_TRUE(	mtd::is_rvalue_reference_v<T&> ==
-		std::is_rvalue_reference_v<T&>, alp::as_str() << name_type << '&');
-    CHECK_TRUE(	mtd::is_rvalue_reference_v<T&&> ==
-		std::is_rvalue_reference_v<T&&>, alp::as_str() << name_type << "&&");
-
-    CHECK_TRUE(	mtd::is_rvalue_reference_v<const T> ==
-		std::is_rvalue_reference_v<const T>, alp::as_str() << "const " << name_type);
-    CHECK_TRUE(	mtd::is_rvalue_reference_v<const T&> ==
-		std::is_rvalue_reference_v<const T&>, alp::as_str() << "const " << name_type << '&');
-    CHECK_TRUE(	mtd::is_rvalue_reference_v<const T&&> ==
-		std::is_rvalue_reference_v<const T&&>, alp::as_str() << "const " << name_type << "&&");
-
-    CHECK_TRUE(	mtd::is_rvalue_reference_v<volatile T> ==
-		std::is_rvalue_reference_v<volatile T>, alp::as_str() << "volatile " << name_type);
-    CHECK_TRUE(	mtd::is_rvalue_reference_v<volatile T&> ==
-		std::is_rvalue_reference_v<volatile T&>, alp::as_str() << "volatile " << name_type << '&');
-    CHECK_TRUE(	mtd::is_rvalue_reference_v<volatile T&&> ==
-		std::is_rvalue_reference_v<volatile T&&>, alp::as_str() << "volatile " << name_type << "&&");
-
-}
-
-void test_is_rvalue_reference()
-{
-    test::interface("is_rvalue_reference");
-    
-    test_is_rvalue_reference<char>("char");
-    test_is_rvalue_reference<int>("int");
-    test_is_rvalue_reference<long>("long");
-    test_is_rvalue_reference<long long>("long long");
-    test_is_rvalue_reference<float>("float");
-    test_is_rvalue_reference<double>("double");
-}
 
 template <typename T>
 void test_is_member_object_pointer(const std::string& name_type)
@@ -1926,48 +1891,6 @@ void test_is_member_function_pointer()
     test_is_member_function_pointer<int Class::*>("int Class::*");
     test_is_member_function_pointer<int (Class::*)()>("int (Class::*)()");
 
-}
-template <typename T>
-void test_is_reference(const std::string& name_type)
-{
-    CHECK_TRUE(	mtd::is_reference_v<T> ==
-		std::is_reference_v<T>, name_type);
-    CHECK_TRUE(	mtd::is_reference_v<T&> ==
-		std::is_reference_v<T&>, alp::as_str() << name_type << '&');
-    CHECK_TRUE(	mtd::is_reference_v<T&&> ==
-		std::is_reference_v<T&&>, alp::as_str() << name_type << "&&");
-
-    CHECK_TRUE(	mtd::is_reference_v<const T> ==
-		std::is_reference_v<const T>, alp::as_str() << "const " << name_type);
-    CHECK_TRUE(	mtd::is_reference_v<const T&> ==
-		std::is_reference_v<const T&>, alp::as_str() << "const " << name_type << '&');
-    CHECK_TRUE(	mtd::is_reference_v<const T&&> ==
-		std::is_reference_v<const T&&>, alp::as_str() << "const " << name_type << "&&");
-
-    CHECK_TRUE(	mtd::is_reference_v<volatile T> ==
-		std::is_reference_v<volatile T>, alp::as_str() << "volatile " << name_type);
-    CHECK_TRUE(	mtd::is_reference_v<volatile T&> ==
-		std::is_reference_v<volatile T&>, alp::as_str() << "volatile " << name_type << '&');
-    CHECK_TRUE(	mtd::is_reference_v<volatile T&&> ==
-		std::is_reference_v<volatile T&&>, alp::as_str() << "volatile " << name_type << "&&");
-
-}
-
-void test_is_reference()
-{
-    test::interface("is_reference");
-    
-    test_is_reference<char>("char");
-    test_is_reference<int>("int");
-    test_is_reference<long>("long");
-    test_is_reference<long long>("long long");
-    test_is_reference<float>("float");
-    test_is_reference<double>("double");
-
-    test_is_reference<Class>("Class");
-    test_is_reference<Union>("Union");
-    test_is_reference<Enum>("Enum");
-    test_is_reference<Enum_class>("Enum_class");
 }
 
 
@@ -2159,43 +2082,6 @@ void test_is_member_pointer()
 }
 
 
-template <typename T>
-void test_remove_reference_helper(const std::string& name_type)
-{
-    CHECK_TRUE(
-        (std::is_same_v<mtd::remove_reference_t<T>, std::remove_reference_t<T>>),
-        name_type);
-}
-
-template <typename T>
-void test_remove_reference(const std::string& tname)
-{
-    test_remove_reference_helper<T>(tname);
-    test_remove_reference_helper<T&>(alp::as_str() << tname << '&');
-    test_remove_reference_helper<T&&>(alp::as_str() << tname << "&&");
-    test_remove_reference_helper<T[]>(alp::as_str() << tname << "[]");
-    test_remove_reference_helper<const T>(alp::as_str() << "const " << tname);
-    test_remove_reference_helper<const T&>(alp::as_str() << "const " << tname << '&');
-    test_remove_reference_helper<volatile T>(alp::as_str() << "volatile " << tname);
-    test_remove_reference_helper<volatile T&>(alp::as_str()<< "volatile " << tname << '&');
-    test_remove_reference_helper<T*>(alp::as_str() << tname << '*');
-    test_remove_reference_helper<const T*>(alp::as_str() << "const " << tname << '*');
-    test_remove_reference_helper<volatile T*>(alp::as_str() << "volatile " << tname << '*');
-    test_remove_reference_helper<const volatile T*>(alp::as_str() << "const volatile " << tname << '*');
-}
-
-
-void test_remove_reference()
-{
-    test::interface("remove_reference");
-    
-    test_remove_reference<char>("char");
-    test_remove_reference<int>("int");
-    test_remove_reference<long>("long");
-    test_remove_reference<long long>("long long");
-    test_remove_reference<float>("float");
-    test_remove_reference<double>("double");
-}
 
 template <typename T>
 void test_add_lvalue_reference(const std::string& name_type)
@@ -2264,21 +2150,6 @@ void test_add_rvalue_reference()
 }
 
 
-template <typename T>
-void test_is_array(const std::string& name_type)
-{
-    CHECK_TRUE(mtd::is_array_v<T> == std::is_array_v<T>, name_type);
-}
-
-void test_is_array()
-{
-    test::interface("is_array");
-
-    test_is_array<char>("char");
-    test_is_array<char[]>("char[]");
-    test_is_array<char[20]>("char[20]");
-    test_is_array<char*>("char*");
-}
 
 
 void test_is_base_of()
@@ -2469,25 +2340,6 @@ void test_remove_all_extents()
     test_remove_all_extents<int (Class::*)()>("int (Class::*)()");
 }
 
-template <typename T>
-void test_remove_cvref(const char* name_type)
-{
-    bool res = std::is_same_v<mtd::remove_cvref_t<T>, std::remove_cvref_t<T>>;
-    CHECK_TRUE(res, alp::as_str() << "remove_cvref_t(" << name_type << ")");
-}
-
-void test_remove_cvref()
-{
-    test::interface("remove_cvref");
-
-    test_remove_cvref<int>("int");
-    test_remove_cvref<int&>("int&");
-    test_remove_cvref<int&&>("int&&");
-    test_remove_cvref<const int&>("const int&");
-    test_remove_cvref<const int[2]>("const int[2]");
-    test_remove_cvref<const int(&)[2]>("const int(&)[2]");
-    test_remove_cvref<int(int)>("const int(int)");
-}
 
 
 
@@ -2802,6 +2654,187 @@ void test_common_reference()
 
 
 
+
+template <typename T, typename U>
+void test_is_swappable_with(const std::string& name_type1, 
+		      const std::string& name_type2)
+{
+    CHECK_TRUE(mtd::is_swappable_with_v<T, U> ==
+			     std::is_swappable_with_v<T, U>,
+		alp::as_str() << name_type1 << ", " << name_type2);
+}
+
+
+template <typename T>
+void test_is_swappable_with(const std::string& name_type)
+{
+    test_is_swappable_with<T, void>(name_type, "void");
+
+    test_is_swappable_with<T, nullptr_t>(name_type, "nullptr_t");
+
+    test_is_swappable_with<T, char>(name_type, "char");
+    test_is_swappable_with<T, char&>(name_type, "char&");
+    test_is_swappable_with<T, int>(name_type, "int");
+    test_is_swappable_with<T, int&>(name_type, "int&");
+    test_is_swappable_with<T, long>(name_type, "long");
+    test_is_swappable_with<T, long&>(name_type, "long&");
+    test_is_swappable_with<T, long long>(name_type, "long long");
+    test_is_swappable_with<T, long long&>(name_type, "long long&");
+    test_is_swappable_with<T, float>(name_type, "float");
+    test_is_swappable_with<T, float&>(name_type, "float&");
+    test_is_swappable_with<T, double>(name_type, "double");
+    test_is_swappable_with<T, double&>(name_type, "double&");
+
+    test_is_swappable_with<T, int[]>(name_type, "int[]");
+    test_is_swappable_with<T, int[3]>(name_type, "int[3]");
+    test_is_swappable_with<T, int[][3]>(name_type, "int[][3]");
+
+    test_is_swappable_with<T, Class>(name_type, "Class");
+    test_is_swappable_with<T, Class&>(name_type, "Class&");
+    test_is_swappable_with<T, Class2>(name_type, "Class2");
+    test_is_swappable_with<T, Class2&>(name_type, "Class2&");
+    test_is_swappable_with<T, Union>(name_type, "Union");
+    test_is_swappable_with<T, Enum>(name_type, "Enum");
+    test_is_swappable_with<T, Enum_class>(name_type, "Enum_class");
+
+    test_is_swappable_with<T, Class>(name_type, "Class");
+    test_is_swappable_with<T, int Class::*>(name_type, "int Class::*");
+//    test_is_swappable_with<T, int (name_type, Class::*)()>("int (Class::*)()");
+
+    test_is_swappable_with<T, std::string>(name_type, "std::string"); 
+}
+
+
+void test_is_swappable_with()
+{
+    test::interface("is_swappable_with");
+
+    test_is_swappable_with<void>("void");
+    test_is_swappable_with<nullptr_t>("nullptr_t");
+
+    test_is_swappable_with<char>("char");
+    test_is_swappable_with<char&>("char&");
+    test_is_swappable_with<int>("int");
+    test_is_swappable_with<int&>("int&");
+    test_is_swappable_with<long>("long");
+    test_is_swappable_with<long&>("long&");
+    test_is_swappable_with<long long>("long long");
+    test_is_swappable_with<long long&>("long long&");
+    test_is_swappable_with<float>("float");
+    test_is_swappable_with<float&>("float&");
+    test_is_swappable_with<double>("double");
+    test_is_swappable_with<double&>("double&");
+
+    test_is_swappable_with<int[]>("int[]");
+    test_is_swappable_with<int[3]>("int[3]");
+    test_is_swappable_with<int[][3]>("int[][3]");
+
+    test_is_swappable_with<Class>("Class");
+    test_is_swappable_with<Class&>("Class&");
+    test_is_swappable_with<Class2>("Class2");
+    test_is_swappable_with<Class2&>("Class2&");
+    test_is_swappable_with<Union>("Union");
+    test_is_swappable_with<Enum>("Enum");
+    test_is_swappable_with<Enum_class>("Enum_class");
+
+    test_is_swappable_with<Class>("Class");
+    test_is_swappable_with<int Class::*>("int Class::*");
+    test_is_swappable_with<int (Class::*)()>("int (Class::*)()");
+}
+
+
+template <typename T, typename U>
+void test_is_trivially_assignable(const std::string& name_type1, 
+		      const std::string& name_type2)
+{
+    CHECK_TRUE(mtd::is_trivially_assignable_v<T, U> ==
+			     std::is_trivially_assignable_v<T, U>,
+		alp::as_str() << name_type1 << ", " << name_type2);
+}
+
+
+template <typename T>
+void test_is_trivially_assignable(const std::string& name_type)
+{
+    test_is_trivially_assignable<T, void>(name_type, "void");
+
+    test_is_trivially_assignable<T, nullptr_t>(name_type, "nullptr_t");
+
+    test_is_trivially_assignable<T, char>(name_type, "char");
+    test_is_trivially_assignable<T, char&>(name_type, "char&");
+    test_is_trivially_assignable<T, int>(name_type, "int");
+    test_is_trivially_assignable<T, int&>(name_type, "int&");
+    test_is_trivially_assignable<T, long>(name_type, "long");
+    test_is_trivially_assignable<T, long&>(name_type, "long&");
+    test_is_trivially_assignable<T, long long>(name_type, "long long");
+    test_is_trivially_assignable<T, long long&>(name_type, "long long&");
+    test_is_trivially_assignable<T, float>(name_type, "float");
+    test_is_trivially_assignable<T, float&>(name_type, "float&");
+    test_is_trivially_assignable<T, double>(name_type, "double");
+    test_is_trivially_assignable<T, double&>(name_type, "double&");
+
+    test_is_trivially_assignable<T, int[]>(name_type, "int[]");
+    test_is_trivially_assignable<T, int[3]>(name_type, "int[3]");
+    test_is_trivially_assignable<T, int[][3]>(name_type, "int[][3]");
+
+    test_is_trivially_assignable<T, Class>(name_type, "Class");
+    test_is_trivially_assignable<T, Class&>(name_type, "Class&");
+    test_is_trivially_assignable<T, Class2>(name_type, "Class2");
+    test_is_trivially_assignable<T, Class2&>(name_type, "Class2&");
+    test_is_trivially_assignable<T, Union>(name_type, "Union");
+    test_is_trivially_assignable<T, Enum>(name_type, "Enum");
+    test_is_trivially_assignable<T, Enum_class>(name_type, "Enum_class");
+
+    test_is_trivially_assignable<T, Class>(name_type, "Class");
+    test_is_trivially_assignable<T, int Class::*>(name_type, "int Class::*");
+//    test_is_trivially_assignable<T, int (name_type, Class::*)()>("int (Class::*)()");
+
+    test_is_trivially_assignable<T, std::string>(name_type, "std::string"); 
+}
+
+
+void test_is_trivially_assignable()
+{
+    test::interface("is_trivially_assignable");
+
+    test_is_trivially_assignable<void>("void");
+    test_is_trivially_assignable<nullptr_t>("nullptr_t");
+
+    test_is_trivially_assignable<char>("char");
+    test_is_trivially_assignable<char&>("char&");
+    test_is_trivially_assignable<int>("int");
+    test_is_trivially_assignable<int&>("int&");
+    test_is_trivially_assignable<long>("long");
+    test_is_trivially_assignable<long&>("long&");
+    test_is_trivially_assignable<long long>("long long");
+    test_is_trivially_assignable<long long&>("long long&");
+    test_is_trivially_assignable<float>("float");
+    test_is_trivially_assignable<float&>("float&");
+    test_is_trivially_assignable<double>("double");
+    test_is_trivially_assignable<double&>("double&");
+
+    test_is_trivially_assignable<int[]>("int[]");
+    test_is_trivially_assignable<int[3]>("int[3]");
+    test_is_trivially_assignable<int[][3]>("int[][3]");
+
+    test_is_trivially_assignable<Class>("Class");
+    test_is_trivially_assignable<Class&>("Class&");
+    test_is_trivially_assignable<Class2>("Class2");
+    test_is_trivially_assignable<Class2&>("Class2&");
+    test_is_trivially_assignable<Union>("Union");
+    test_is_trivially_assignable<Enum>("Enum");
+    test_is_trivially_assignable<Enum_class>("Enum_class");
+
+    test_is_trivially_assignable<Class>("Class");
+    test_is_trivially_assignable<int Class::*>("int Class::*");
+    test_is_trivially_assignable<int (Class::*)()>("int (Class::*)()");
+}
+
+
+
+
+
+
 template <typename T>
 void test_make_signed(const std::string& name)
 {
@@ -2949,6 +2982,25 @@ void test_add_cv()
     test_add_cv<const volatile int>("const volatile int");
 }
 
+template <typename T>
+void test_remove_cvref(const char* name_type)
+{
+    bool res = std::is_same_v<mtd::remove_cvref_t<T>, std::remove_cvref_t<T>>;
+    CHECK_TRUE(res, alp::as_str() << "remove_cvref_t(" << name_type << ")");
+}
+
+void test_remove_cvref()
+{
+    test::interface("remove_cvref");
+
+    test_remove_cvref<int>("int");
+    test_remove_cvref<int&>("int&");
+    test_remove_cvref<int&&>("int&&");
+    test_remove_cvref<const int&>("const int&");
+    test_remove_cvref<const int[2]>("const int[2]");
+    test_remove_cvref<const int(&)[2]>("const int(&)[2]");
+    test_remove_cvref<int(int)>("const int(int)");
+}
 
 
 
@@ -2957,20 +3009,21 @@ int main()
 try{
     // helper class
     // -----------
-    test_integral_constant();
+    // test_integral_constant(); (en std_first.h)
+    // test_is_same();		 (en std_first.h)
 
     // primary type categories
     // -----------------------
-    test_is_void();
+    // test_is_void();		    (en std_first.h)
     test_is_null_pointer();
     test_is_integral();
     test_is_floating_point();
-    test_is_array();
+//    test_is_array();		    (en std_first.h)
     test_is_pointer();
-    test_is_lvalue_reference();
-    test_is_rvalue_reference();
+//    test_is_lvalue_reference();   (en std_first.h)
+//    test_is_rvalue_reference();   (en std_first.h)
     test_is_member_object_pointer();
-    test_is_member_function_pointer();
+//    test_is_member_function_pointer(); <--?
     test_is_enum();
     test_is_union();
     test_is_class();
@@ -2980,7 +3033,7 @@ try{
     
     // composite type categories
     // -------------------------
-    test_is_reference();
+    // test_is_reference();	    (en std_first.h)
     test_is_arithmetic();
     test_is_fundamental();
     test_is_object();
@@ -2990,8 +3043,8 @@ try{
 
     // type properties
     // ---------------
-    test_is_const();
-    test_is_volatile();
+    // test_is_const(); (en std_first.h)
+    // test_is_volatile(); (en std_first.h)
     test_is_trivial();
     test_is_trivially_copyable();
     test_is_standard_layout();
@@ -3007,28 +3060,42 @@ try{
     test_is_constructible();
     test_is_default_constructible();
     test_is_copy_constructible();
+    // test_is_move_constructible();		(en std_first.h)
     test_is_assignable();
     test_is_copy_assignable();
-    test_is_move_assignable();
+    // test_is_move_assignable();		(en std_first.h)
+    test_is_swappable_with();
+    // test_is_swappable();			(en std_first.h)
 
     // ¿cómo hacer el test de is_nothrow_constructible???
     // test_is_nothrow_constructible();
     test_is_nothrow_default_constructible();
     test_is_nothrow_copy_constructible();
-    test_is_nothrow_move_constructible();
+    // test_is_nothrow_move_constructible();	(en std_first.h)
     test_is_nothrow_assignable();
     test_is_nothrow_copy_assignable();
+    // test_is_nothrow_move_assignable();	(en std_first.h)
 
     test_is_destructible();
+    test_is_trivially_constructible();
+    test_is_trivially_default_constructible();
+    test_is_trivially_constructible();
+    test_is_trivially_copy_constructible();;
+    test_is_trivially_move_constructible();;
+    test_is_trivially_assignable();;
+    test_is_trivially_copy_assignable();;
+    test_is_trivially_move_assignable();;
+    test_is_trivially_destructible();;
+
     test_is_nothrow_destructible();
 
     // type properties queries
     // -----------------------
-    test_extent();
+    // test_extent();		(en std_first.h)
 
     // reference modifications
     // -----------------------
-    test_remove_reference();
+    // test_remove_reference(); (en std_first.h)
     test_add_lvalue_reference();
     test_add_rvalue_reference();
 
@@ -3044,6 +3111,7 @@ try{
  
     // const-volatile modifications
     // ----------------------------
+    // test_remove_const();	(en std_first.h)
     test_add_const();
     test_add_volatile();
     test_add_cv();

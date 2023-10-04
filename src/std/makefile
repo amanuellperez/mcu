@@ -43,6 +43,7 @@ INCS= std_cstdio.h		\
 	std_cstring.h		\
 	std_string_view.h		\
 	std_tuple.h			\
+	std_type_traits0.h			\
 	std_type_traits.h	\
 	std_utility.h		\
 	algorithm	\

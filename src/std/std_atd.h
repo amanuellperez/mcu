@@ -40,10 +40,9 @@
  *
  ****************************************************************************/
 #include "std_config.h"
-// Este header es común a todo. 
-// Que no incluya ningún otro archivo para evitar dependencias circulares.
-namespace STD{
+#include "std_cstddef.h"    // size_t, nullptr_t
 
+namespace STD{
 
 // Helper class: integral_constant
 // ------------------------------------
@@ -65,11 +64,6 @@ using bool_constant = integral_constant<bool, B>;
 
 using true_type = integral_constant<bool, true>;
 using false_type = integral_constant<bool, false>;
-
-// void_t
-// ------
-template <typename...>
-using void_t = void;
 
 
 // is_const
@@ -95,9 +89,12 @@ template <typename T>
 inline constexpr bool is_volatile_v = is_volatile<T>::value;
 
 
-/***************************************************************************
- *				atd_
- ***************************************************************************/
+// void_t
+// ------
+template <typename...>
+using void_t = void;
+
+
 namespace atd_{
 
 // is_a_type
