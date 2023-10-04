@@ -929,6 +929,90 @@ void test_is_copy_constructible()
 
 
 template <typename T, typename U>
+void test_is_nothrow_swappable_with(const std::string& name_type1, 
+			const std::string& name_type2)
+{
+    CHECK_TRUE(mtd::is_nothrow_swappable_with_v<T, U> ==
+	       std::is_nothrow_swappable_with_v<T, U>, 
+	       alp::as_str() << "is_nothrow_swappable_with(" << name_type1
+			     << ", " << name_type2 << ")");
+}
+
+
+template <typename T>
+void test_is_nothrow_swappable_with(const std::string& name_type1)
+{
+    test::interface("is_nothrow_swappable_with");
+
+    test_is_nothrow_swappable_with<T, void>(name_type1, "void");
+    test_is_nothrow_swappable_with<T, const volatile void>(name_type1, "const volatile void");
+    test_is_nothrow_swappable_with<T, nullptr_t>(name_type1, "nullptr_t");
+
+    test_is_nothrow_swappable_with<T, char>(name_type1, "char");
+    test_is_nothrow_swappable_with<T, int>(name_type1, "int");
+    test_is_nothrow_swappable_with<T, long>(name_type1, "long");
+    test_is_nothrow_swappable_with<T, long long>(name_type1, "long long");
+    test_is_nothrow_swappable_with<T, float>(name_type1, "float");
+    test_is_nothrow_swappable_with<T, double>(name_type1, "double");
+
+    test_is_nothrow_swappable_with<T, int[]>(name_type1, "int[]");
+    test_is_nothrow_swappable_with<T, int[3]>(name_type1, "int[3]");
+    test_is_nothrow_swappable_with<T, int[][3]>(name_type1, "int[][3]");
+
+    test_is_nothrow_swappable_with<T, Class>(name_type1, "Class");
+    test_is_nothrow_swappable_with<T, Union>(name_type1, "Union");
+    test_is_nothrow_swappable_with<T, Enum>(name_type1, "Enum");
+    test_is_nothrow_swappable_with<T, Enum_class>(name_type1, "Enum_class");
+
+    test_is_nothrow_swappable_with<T, Class>(name_type1, "Class");
+    test_is_nothrow_swappable_with<T, Class2>(name_type1, "Class2");
+    test_is_nothrow_swappable_with<T, int Class::*>(name_type1, "int Class::*");
+    test_is_nothrow_swappable_with<T, int (Class::*)()>(name_type1, "int (Class::*)()");
+
+    test_is_nothrow_swappable_with<T, A>(name_type1, "A");
+    test_is_nothrow_swappable_with<T, B>(name_type1, "B");
+    test_is_nothrow_swappable_with<T, C>(name_type1, "C");
+    test_is_nothrow_swappable_with<T, D>(name_type1, "D");
+
+}
+
+void test_is_nothrow_swappable_with()
+{
+    test::interface("is_nothrow_swappable_with");
+
+    test_is_nothrow_swappable_with<void>("void");
+    test_is_nothrow_swappable_with<const volatile void>("const volatile void");
+    test_is_nothrow_swappable_with<nullptr_t>("nullptr_t");
+
+    test_is_nothrow_swappable_with<char>("char");
+    test_is_nothrow_swappable_with<int>("int");
+    test_is_nothrow_swappable_with<long>("long");
+    test_is_nothrow_swappable_with<long long>("long long");
+    test_is_nothrow_swappable_with<float>("float");
+    test_is_nothrow_swappable_with<double>("double");
+
+    test_is_nothrow_swappable_with<int[]>("int[]");
+    test_is_nothrow_swappable_with<int[3]>("int[3]");
+    test_is_nothrow_swappable_with<int[][3]>("int[][3]");
+
+    test_is_nothrow_swappable_with<Class>("Class");
+    test_is_nothrow_swappable_with<Union>("Union");
+    test_is_nothrow_swappable_with<Enum>("Enum");
+    test_is_nothrow_swappable_with<Enum_class>("Enum_class");
+
+    test_is_nothrow_swappable_with<Class>("Class");
+    test_is_nothrow_swappable_with<Class2>("Class2");
+    test_is_nothrow_swappable_with<int Class::*>("int Class::*");
+    test_is_nothrow_swappable_with<int (Class::*)()>("int (Class::*)()");
+
+    test_is_nothrow_swappable_with<A>("A");
+    test_is_nothrow_swappable_with<B>("B");
+    test_is_nothrow_swappable_with<C>("C");
+    test_is_nothrow_swappable_with<D>("D");
+
+}
+
+template <typename T, typename U>
 void test_is_assignable(const std::string& name_type1, 
 			const std::string& name_type2)
 {
@@ -1196,6 +1280,48 @@ void test_is_nothrow_copy_constructible()
 
 
 
+template <typename T>
+void test_is_nothrow_swappable(const std::string& name_type)
+{
+    CHECK_TRUE(mtd::is_nothrow_swappable_v<T> ==
+	       std::is_nothrow_swappable_v<T>, 
+	       alp::as_str() << "is_nothrow_swappable(" << name_type << ")");
+}
+
+void test_is_nothrow_swappable()
+{
+    test::interface("is_nothrow_swappable");
+
+    test_is_nothrow_swappable<void>("void");
+    test_is_nothrow_swappable<const volatile void>("const volatile void");
+    test_is_nothrow_swappable<nullptr_t>("nullptr_t");
+
+    test_is_nothrow_swappable<char>("char");
+    test_is_nothrow_swappable<int>("int");
+    test_is_nothrow_swappable<long>("long");
+    test_is_nothrow_swappable<long long>("long long");
+    test_is_nothrow_swappable<float>("float");
+    test_is_nothrow_swappable<double>("double");
+
+    test_is_nothrow_swappable<int[]>("int[]");
+    test_is_nothrow_swappable<int[3]>("int[3]");
+    test_is_nothrow_swappable<int[][3]>("int[][3]");
+
+    test_is_nothrow_swappable<Class>("Class");
+    test_is_nothrow_swappable<Union>("Union");
+    test_is_nothrow_swappable<Enum>("Enum");
+    test_is_nothrow_swappable<Enum_class>("Enum_class");
+
+    test_is_nothrow_swappable<Class>("Class");
+    test_is_nothrow_swappable<Class2>("Class2");
+    test_is_nothrow_swappable<int Class::*>("int Class::*");
+    test_is_nothrow_swappable<int (Class::*)()>("int (Class::*)()");
+
+    test_is_nothrow_swappable<A>("A");
+    test_is_nothrow_swappable<B>("B");
+    test_is_nothrow_swappable<C>("C");
+    test_is_nothrow_swappable<D>("D");
+}
 
 template <typename T>
 void test_is_nothrow_copy_assignable(const std::string& name_type)
@@ -1701,6 +1827,98 @@ void test_is_nothrow_destructible()
     test_is_nothrow_destructible<B>("B");
     test_is_nothrow_destructible<C>("C");
     test_is_nothrow_destructible<D>("D");
+
+
+
+}
+
+template <typename T>
+void test_has_unique_object_representations(const std::string& name_type)
+{
+    CHECK_TRUE(mtd::has_unique_object_representations_v<T> ==
+	       std::has_unique_object_representations_v<T>, 
+	       alp::as_str() << "has_unique_object_representations(" << name_type << ")");
+}
+
+void test_has_unique_object_representations()
+{
+    test::interface("has_unique_object_representations");
+
+    test_has_unique_object_representations<void>("void");
+    test_has_unique_object_representations<const volatile void>("const volatile void");
+    test_has_unique_object_representations<nullptr_t>("nullptr_t");
+
+    test_has_unique_object_representations<char>("char");
+    test_has_unique_object_representations<int>("int");
+    test_has_unique_object_representations<long>("long");
+    test_has_unique_object_representations<long long>("long long");
+    test_has_unique_object_representations<float>("float");
+    test_has_unique_object_representations<double>("double");
+
+    test_has_unique_object_representations<int[]>("int[]");
+    test_has_unique_object_representations<int[3]>("int[3]");
+    test_has_unique_object_representations<int[][3]>("int[][3]");
+
+    test_has_unique_object_representations<Class>("Class");
+    test_has_unique_object_representations<Union>("Union");
+    test_has_unique_object_representations<Enum>("Enum");
+    test_has_unique_object_representations<Enum_class>("Enum_class");
+
+    test_has_unique_object_representations<Class>("Class");
+    test_has_unique_object_representations<Class2>("Class2");
+    test_has_unique_object_representations<int Class::*>("int Class::*");
+    test_has_unique_object_representations<int (Class::*)()>("int (Class::*)()");
+
+    test_has_unique_object_representations<A>("A");
+    test_has_unique_object_representations<B>("B");
+    test_has_unique_object_representations<C>("C");
+    test_has_unique_object_representations<D>("D");
+
+
+
+}
+
+template <typename T>
+void test_has_virtual_destructor(const std::string& name_type)
+{
+    CHECK_TRUE(mtd::has_virtual_destructor_v<T> ==
+	       std::has_virtual_destructor_v<T>, 
+	       alp::as_str() << "has_virtual_destructor(" << name_type << ")");
+}
+
+void test_has_virtual_destructor()
+{
+    test::interface("has_virtual_destructor");
+
+    test_has_virtual_destructor<void>("void");
+    test_has_virtual_destructor<const volatile void>("const volatile void");
+    test_has_virtual_destructor<nullptr_t>("nullptr_t");
+
+    test_has_virtual_destructor<char>("char");
+    test_has_virtual_destructor<int>("int");
+    test_has_virtual_destructor<long>("long");
+    test_has_virtual_destructor<long long>("long long");
+    test_has_virtual_destructor<float>("float");
+    test_has_virtual_destructor<double>("double");
+
+    test_has_virtual_destructor<int[]>("int[]");
+    test_has_virtual_destructor<int[3]>("int[3]");
+    test_has_virtual_destructor<int[][3]>("int[][3]");
+
+    test_has_virtual_destructor<Class>("Class");
+    test_has_virtual_destructor<Union>("Union");
+    test_has_virtual_destructor<Enum>("Enum");
+    test_has_virtual_destructor<Enum_class>("Enum_class");
+
+    test_has_virtual_destructor<Class>("Class");
+    test_has_virtual_destructor<Class2>("Class2");
+    test_has_virtual_destructor<int Class::*>("int Class::*");
+    test_has_virtual_destructor<int (Class::*)()>("int (Class::*)()");
+
+    test_has_virtual_destructor<A>("A");
+    test_has_virtual_destructor<B>("B");
+    test_has_virtual_destructor<C>("C");
+    test_has_virtual_destructor<D>("D");
 
 
 
@@ -3075,6 +3293,8 @@ try{
     test_is_nothrow_assignable();
     test_is_nothrow_copy_assignable();
     // test_is_nothrow_move_assignable();	(en std_first.h)
+    test_is_nothrow_swappable_with();
+    test_is_nothrow_swappable();
 
     test_is_destructible();
     test_is_trivially_constructible();
@@ -3087,7 +3307,10 @@ try{
     test_is_trivially_move_assignable();;
     test_is_trivially_destructible();;
 
+
     test_is_nothrow_destructible();
+    test_has_virtual_destructor();
+    test_has_unique_object_representations();
 
     // type properties queries
     // -----------------------

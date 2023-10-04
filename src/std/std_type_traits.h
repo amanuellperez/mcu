@@ -1229,11 +1229,82 @@ inline constexpr bool is_nothrow_copy_assignable_v
 
 // is_nothrow_swappable_with
 // --------------------------
-// TODO
+namespace impl_of{
+template<typename T, typename U>
+constexpr bool is_nothrow_swappable_with()
+{
+    if constexpr (is_same_v<T, U> and is_lvalue_reference_v<T>){
+	if constexpr 
+	    (requires{
+		noexcept(STD::swap(STD::declval<T&>(), STD::declval<T&>()));}
+		)
+		return true;
+
+	else
+	    return false;
+    }
+
+    else{
+	if constexpr 
+	    (requires {
+		noexcept(STD::swap(STD::declval<T>(), STD::declval<U>()));
+		noexcept(STD::swap(STD::declval<U>(), STD::declval<T>())); }
+		)
+		return true;
+
+	else
+	    return false;
+
+    }
+
+}
+
+}// impl_of
+ 
+template<typename T, typename U>
+struct is_nothrow_swappable_with
+    : bool_constant<impl_of::is_nothrow_swappable_with<T,U>()>
+{
+    static_assert(private_::is_complete_or_unbounded(type_identity<T>{}),
+    "First template argument must be a complete class or an unbounded array");
+
+    static_assert(private_::is_complete_or_unbounded(type_identity<U>{}),
+    "Second template argument must be a complete class or an unbounded array");
+};
+
+template <typename T, typename U>
+inline constexpr bool is_nothrow_swappable_with_v 
+				=   is_nothrow_swappable_with<T,U>::value;
+
 
 // is_nothrow_swappable
 // --------------------
-// TODO
+namespace impl_of{
+template<typename T>
+constexpr bool is_nothrow_swappable()
+{
+    if constexpr 
+	    (requires{
+		noexcept(STD::swap(STD::declval<T&>(), STD::declval<T&>()));}
+		)
+		return true;
+
+	else
+	    return false;
+}
+
+}// impl_of
+template<typename T>
+struct is_nothrow_swappable
+    : bool_constant<impl_of::is_nothrow_swappable<T>()>
+{
+    static_assert(private_::is_complete_or_unbounded(type_identity<T>{}),
+    "Template argument must be a complete class or an unbounded array");
+};
+
+template <typename T>
+inline constexpr bool is_nothrow_swappable_v 
+				=   is_nothrow_swappable<T>::value;
 
 
 // is_nothrow_destructible
@@ -1242,11 +1313,36 @@ inline constexpr bool is_nothrow_copy_assignable_v
 
 // has_virtual_destructor
 // ----------------------
-// TODO
+template<typename T>
+struct has_virtual_destructor
+	: bool_constant< __has_virtual_destructor(T)>
+{
+    static_assert(private_::is_complete_or_unbounded(type_identity<T>{}),
+    "Template argument must be a complete class or an unbounded array");
+};
 
-// has_unique_object_representation
-// --------------------------------
-// TODO
+template <typename T>
+inline constexpr bool has_virtual_destructor_v 
+				= has_virtual_destructor<T>::value;
+
+
+// has_unique_object_representations
+// ---------------------------------
+template<typename T>
+struct has_unique_object_representations
+	: bool_constant< 
+		    __has_unique_object_representations(
+				remove_cv_t<remove_all_extents_t<T>>
+			)>
+{
+    static_assert(private_::is_complete_or_unbounded(type_identity<T>{}),
+    "Template argument must be a complete class or an unbounded array");
+};
+
+template <typename T>
+inline constexpr bool has_unique_object_representations_v 
+				= has_unique_object_representations<T>::value;
+
 
 
 
@@ -1255,11 +1351,34 @@ inline constexpr bool is_nothrow_copy_assignable_v
 // ---------------------
 // alignment_of
 // ------------
-// TODO
+template<typename T>
+struct alignment_of
+	: integral_constant<STD::size_t, alignof(T)>
+{
+    static_assert(private_::is_complete_or_unbounded(type_identity<T>{}),
+    "Template argument must be a complete class or an unbounded array");
+};
+
+template <typename T>
+inline constexpr size_t alignment_of_v =  alignment_of<T>::value;
 
 // rank
 // ----
-// TODO
+template<typename>
+struct rank
+	: integral_constant<STD::size_t, 0> { };
+
+template<typename T, STD::size_t _Size>
+struct rank<T[_Size]>
+	: integral_constant<STD::size_t, 1 + rank<T>::value> { };
+
+template<typename T>
+struct rank<T[]>
+	: integral_constant<STD::size_t, 1 + rank<T>::value> { };
+
+template <typename T>
+inline constexpr size_t rank_v =  rank<T>::value;
+
 
 // extent
 // ------
