@@ -1,5 +1,5 @@
 SOURCES= main.cpp
-#SOURCES= kk.cpp
+#SOURCES= debug.cpp
 
 BIN = xx
 

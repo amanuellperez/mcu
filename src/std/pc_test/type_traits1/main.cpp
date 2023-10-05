@@ -18,7 +18,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 //
-// TODO: estoy repitiendo el mismo test continuamente: ejecuto la función de
+// TOD_noexceptO: estoy repitiendo el mismo test continuamente: ejecuto la función de
 // mtd y la de std en distintos tipos comparando el resultado. ¿cómo
 // generalizarlo?:
 //
@@ -93,6 +93,14 @@ public:
 private:
     int v1;
     double v2;
+};
+
+class D_noexcept{
+public:
+    D_noexcept(int n) noexcept : v1{n} { }
+
+private:
+    int v1;
 };
 
 typedef union
@@ -828,7 +836,9 @@ void test_is_constructible()
     test_is_constructible<C>("C");
 
     test_is_constructible<D, int>("D, int");
+    test_is_constructible<D_noexcept, int>("D_noexcept, int");
     test_is_constructible<D, int, float>("D, int, float");
+    test_is_constructible<D_noexcept, int, float>("D_noexcept, int, float");
 
 
 }
@@ -874,6 +884,7 @@ void test_is_default_constructible()
     test_is_default_constructible<B>("B");
     test_is_default_constructible<C>("C");
     test_is_default_constructible<D>("D");
+    test_is_default_constructible<D_noexcept>("D_noexcept");
 
 
 
@@ -922,6 +933,7 @@ void test_is_copy_constructible()
     test_is_copy_constructible<B>("B");
     test_is_copy_constructible<C>("C");
     test_is_copy_constructible<D>("D");
+    test_is_copy_constructible<D_noexcept>("D_noexcept");
 
 
 
@@ -973,6 +985,7 @@ void test_is_nothrow_swappable_with(const std::string& name_type1)
     test_is_nothrow_swappable_with<T, B>(name_type1, "B");
     test_is_nothrow_swappable_with<T, C>(name_type1, "C");
     test_is_nothrow_swappable_with<T, D>(name_type1, "D");
+    test_is_nothrow_swappable_with<T, D_noexcept>(name_type1, "D_noexcept");
 
 }
 
@@ -1009,6 +1022,7 @@ void test_is_nothrow_swappable_with()
     test_is_nothrow_swappable_with<B>("B");
     test_is_nothrow_swappable_with<C>("C");
     test_is_nothrow_swappable_with<D>("D");
+    test_is_nothrow_swappable_with<D_noexcept>("D_noexcept");
 
 }
 
@@ -1057,6 +1071,7 @@ void test_is_assignable(const std::string& name_type1)
     test_is_assignable<T, B>(name_type1, "B");
     test_is_assignable<T, C>(name_type1, "C");
     test_is_assignable<T, D>(name_type1, "D");
+    test_is_assignable<T, D_noexcept>(name_type1, "D_noexcept");
 
 }
 
@@ -1093,6 +1108,7 @@ void test_is_assignable()
     test_is_assignable<B>("B");
     test_is_assignable<C>("C");
     test_is_assignable<D>("D");
+    test_is_assignable<D_noexcept>("D_noexcept");
 
 }
 
@@ -1143,6 +1159,7 @@ void test_is_nothrow_assignable(const std::string& name_type1)
     test_is_nothrow_assignable<T, B>(name_type1, "B");
     test_is_nothrow_assignable<T, C>(name_type1, "C");
     test_is_nothrow_assignable<T, D>(name_type1, "D");
+    test_is_nothrow_assignable<T, D_noexcept>(name_type1, "D_noexcept");
 
 }
 
@@ -1179,6 +1196,7 @@ void test_is_nothrow_assignable()
     test_is_nothrow_assignable<B>("B");
     test_is_nothrow_assignable<C>("C");
     test_is_nothrow_assignable<D>("D");
+    test_is_nothrow_assignable<D_noexcept>("D_noexcept");
 
 }
 
@@ -1224,6 +1242,7 @@ void test_is_copy_assignable()
     test_is_copy_assignable<B>("B");
     test_is_copy_assignable<C>("C");
     test_is_copy_assignable<D>("D");
+    test_is_copy_assignable<D_noexcept>("D_noexcept");
 
 
 
@@ -1276,6 +1295,7 @@ void test_is_nothrow_copy_constructible()
     test_is_nothrow_copy_constructible<B>("B");
     test_is_nothrow_copy_constructible<C>("C");
     test_is_nothrow_copy_constructible<D>("D");
+    test_is_nothrow_copy_constructible<D_noexcept>("D_noexcept");
 }
 
 
@@ -1321,6 +1341,7 @@ void test_is_nothrow_swappable()
     test_is_nothrow_swappable<B>("B");
     test_is_nothrow_swappable<C>("C");
     test_is_nothrow_swappable<D>("D");
+    test_is_nothrow_swappable<D_noexcept>("D_noexcept");
 }
 
 template <typename T>
@@ -1364,6 +1385,7 @@ void test_is_nothrow_copy_assignable()
     test_is_nothrow_copy_assignable<B>("B");
     test_is_nothrow_copy_assignable<C>("C");
     test_is_nothrow_copy_assignable<D>("D");
+    test_is_nothrow_copy_assignable<D_noexcept>("D_noexcept");
 }
 
 
@@ -1409,6 +1431,7 @@ void test_is_nothrow_default_constructible()
     test_is_nothrow_default_constructible<B>("B");
     test_is_nothrow_default_constructible<C>("C");
     test_is_nothrow_default_constructible<D>("D");
+    test_is_nothrow_default_constructible<D_noexcept>("D_noexcept");
 }
 
 
@@ -1455,6 +1478,7 @@ void test_is_destructible()
     test_is_destructible<B>("B");
     test_is_destructible<C>("C");
     test_is_destructible<D>("D");
+    test_is_destructible<D_noexcept>("D_noexcept");
 
 
 
@@ -1502,6 +1526,7 @@ void test_is_trivially_constructible()
     test_is_trivially_constructible<B>("B");
     test_is_trivially_constructible<C>("C");
     test_is_trivially_constructible<D>("D");
+    test_is_trivially_constructible<D_noexcept>("D_noexcept");
 
 
 
@@ -1548,6 +1573,7 @@ void test_is_trivially_default_constructible()
     test_is_trivially_default_constructible<B>("B");
     test_is_trivially_default_constructible<C>("C");
     test_is_trivially_default_constructible<D>("D");
+    test_is_trivially_default_constructible<D_noexcept>("D_noexcept");
 
 
 
@@ -1595,6 +1621,7 @@ void test_is_trivially_copy_constructible()
     test_is_trivially_copy_constructible<B>("B");
     test_is_trivially_copy_constructible<C>("C");
     test_is_trivially_copy_constructible<D>("D");
+    test_is_trivially_copy_constructible<D_noexcept>("D_noexcept");
 
 
 
@@ -1642,6 +1669,7 @@ void test_is_trivially_move_constructible()
     test_is_trivially_move_constructible<B>("B");
     test_is_trivially_move_constructible<C>("C");
     test_is_trivially_move_constructible<D>("D");
+    test_is_trivially_move_constructible<D_noexcept>("D_noexcept");
 
 
 
@@ -1688,6 +1716,7 @@ void test_is_trivially_copy_assignable()
     test_is_trivially_copy_assignable<B>("B");
     test_is_trivially_copy_assignable<C>("C");
     test_is_trivially_copy_assignable<D>("D");
+    test_is_trivially_copy_assignable<D_noexcept>("D_noexcept");
 
 
 
@@ -1734,6 +1763,7 @@ void test_is_trivially_move_assignable()
     test_is_trivially_move_assignable<B>("B");
     test_is_trivially_move_assignable<C>("C");
     test_is_trivially_move_assignable<D>("D");
+    test_is_trivially_move_assignable<D_noexcept>("D_noexcept");
 
 
 
@@ -1781,6 +1811,7 @@ void test_is_trivially_destructible()
     test_is_trivially_destructible<B>("B");
     test_is_trivially_destructible<C>("C");
     test_is_trivially_destructible<D>("D");
+    test_is_trivially_destructible<D_noexcept>("D_noexcept");
 
 
 
@@ -1827,6 +1858,7 @@ void test_is_nothrow_destructible()
     test_is_nothrow_destructible<B>("B");
     test_is_nothrow_destructible<C>("C");
     test_is_nothrow_destructible<D>("D");
+    test_is_nothrow_destructible<D_noexcept>("D_noexcept");
 
 
 
@@ -1873,6 +1905,7 @@ void test_has_unique_object_representations()
     test_has_unique_object_representations<B>("B");
     test_has_unique_object_representations<C>("C");
     test_has_unique_object_representations<D>("D");
+    test_has_unique_object_representations<D_noexcept>("D_noexcept");
 
 
 
@@ -1919,6 +1952,7 @@ void test_has_virtual_destructor()
     test_has_virtual_destructor<B>("B");
     test_has_virtual_destructor<C>("C");
     test_has_virtual_destructor<D>("D");
+    test_has_virtual_destructor<D_noexcept>("D_noexcept");
 
 
 
@@ -2392,25 +2426,189 @@ void test_is_base_of()
 
 
 template <typename From, typename To>
-void test_is_convertible(const std::string& name_type)
+void test_is_convertible(const std::string& name_type1,
+			 const std::string& name_type2)
 {
     CHECK_TRUE((mtd::is_convertible_v<From, To> ==
                    std::is_convertible_v<From, To>),
-               name_type);
+	    alp::as_str() << "is_convertible_v<" << name_type1 
+			  << ", " << name_type2 << ">");
+}
+
+template <typename T>
+void test_is_convertible(const std::string& name_type1)
+{
+    test::interface("is_convertible");
+
+    test_is_convertible<T, void>(name_type1, "void");
+    test_is_convertible<T, const volatile void>(name_type1, "const volatile void");
+    test_is_convertible<T, nullptr_t>(name_type1, "nullptr_t");
+
+    test_is_convertible<T, char>(name_type1, "char");
+    test_is_convertible<T, int>(name_type1, "int");
+    test_is_convertible<T, long>(name_type1, "long");
+    test_is_convertible<T, long long>(name_type1, "long long");
+    test_is_convertible<T, float>(name_type1, "float");
+    test_is_convertible<T, double>(name_type1, "double");
+
+    test_is_convertible<T, int[]>(name_type1, "int[]");
+    test_is_convertible<T, int[3]>(name_type1, "int[3]");
+    test_is_convertible<T, int[][3]>(name_type1, "int[][3]");
+
+    test_is_convertible<T, Class>(name_type1, "Class");
+    test_is_convertible<T, Union>(name_type1, "Union");
+    test_is_convertible<T, Enum>(name_type1, "Enum");
+    test_is_convertible<T, Enum_class>(name_type1, "Enum_class");
+
+    test_is_convertible<T, Class>(name_type1, "Class");
+    test_is_convertible<T, Class2>(name_type1, "Class2");
+    test_is_convertible<T, int Class::*>(name_type1, "int Class::*");
+    test_is_convertible<T, int (Class::*)()>(name_type1, "int (Class::*)()");
+
+    test_is_convertible<T, A>(name_type1, "A");
+    test_is_convertible<T, B>(name_type1, "B");
+    test_is_convertible<T, C>(name_type1, "C");
+    test_is_convertible<T, D>(name_type1, "D");
+    test_is_convertible<T, D_noexcept>(name_type1, "D_noexcept");
+
 }
 
 void test_is_convertible()
 {
     test::interface("is_convertible");
 
-    // TODO: for (from = char...) for (to = char...)
-    test_is_convertible<char, void>("char -> void");
-    test_is_convertible<char[], char*>("char[] -> char*");
-    test_is_convertible<char*, char[]>("char* -> char[]");
-    test_is_convertible<const int, int>("const int -> int");
-    test_is_convertible<int, const int>("int -> const int");
-    test_is_convertible<int, const int*>("int -> const int*");
+    test_is_convertible<void>("void");
+    test_is_convertible<const volatile void>("const volatile void");
+    test_is_convertible<nullptr_t>("nullptr_t");
+
+    test_is_convertible<char>("char");
+    test_is_convertible<int>("int");
+    test_is_convertible<long>("long");
+    test_is_convertible<long long>("long long");
+    test_is_convertible<float>("float");
+    test_is_convertible<double>("double");
+
+    test_is_convertible<int[]>("int[]");
+    test_is_convertible<int[3]>("int[3]");
+    test_is_convertible<int[][3]>("int[][3]");
+
+    test_is_convertible<Class>("Class");
+    test_is_convertible<Union>("Union");
+    test_is_convertible<Enum>("Enum");
+    test_is_convertible<Enum_class>("Enum_class");
+
+    test_is_convertible<Class>("Class");
+    test_is_convertible<Class2>("Class2");
+    test_is_convertible<int Class::*>("int Class::*");
+    test_is_convertible<int (Class::*)()>("int (Class::*)()");
+
+    test_is_convertible<A>("A");
+    test_is_convertible<B>("B");
+    test_is_convertible<C>("C");
+    test_is_convertible<D>("D");
+    test_is_convertible<D_noexcept>("D_noexcept");
+
+// Algunos a más
+    test_is_convertible<char, void>("char", "void");
+    test_is_convertible<char[], char*>("char[]", "char*");
+    test_is_convertible<char*, char[]>("char*", "char[]");
+    test_is_convertible<const int, int>("const int", "int");
+    test_is_convertible<int, const int>("int", "const int");
+    test_is_convertible<int, const int*>("int", "const int*");
 }
+
+template <typename From, typename To>
+void test_is_nothrow_convertible(const std::string& name_type1,
+			 const std::string& name_type2)
+{
+    CHECK_TRUE((mtd::is_nothrow_convertible_v<From, To> ==
+                   std::is_nothrow_convertible_v<From, To>),
+	    alp::as_str() << "is_nothrow_convertible_v<" << name_type1 
+			  << ", " << name_type2 << ">");
+}
+
+template <typename T>
+void test_is_nothrow_convertible(const std::string& name_type1)
+{
+    test::interface("is_nothrow_convertible");
+
+    test_is_nothrow_convertible<T, void>(name_type1, "void");
+    test_is_nothrow_convertible<T, const volatile void>(name_type1, "const volatile void");
+    test_is_nothrow_convertible<T, nullptr_t>(name_type1, "nullptr_t");
+
+    test_is_nothrow_convertible<T, char>(name_type1, "char");
+    test_is_nothrow_convertible<T, int>(name_type1, "int");
+    test_is_nothrow_convertible<T, long>(name_type1, "long");
+    test_is_nothrow_convertible<T, long long>(name_type1, "long long");
+    test_is_nothrow_convertible<T, float>(name_type1, "float");
+    test_is_nothrow_convertible<T, double>(name_type1, "double");
+
+    test_is_nothrow_convertible<T, int[]>(name_type1, "int[]");
+    test_is_nothrow_convertible<T, int[3]>(name_type1, "int[3]");
+    test_is_nothrow_convertible<T, int[][3]>(name_type1, "int[][3]");
+
+    test_is_nothrow_convertible<T, Class>(name_type1, "Class");
+    test_is_nothrow_convertible<T, Union>(name_type1, "Union");
+    test_is_nothrow_convertible<T, Enum>(name_type1, "Enum");
+    test_is_nothrow_convertible<T, Enum_class>(name_type1, "Enum_class");
+
+    test_is_nothrow_convertible<T, Class>(name_type1, "Class");
+    test_is_nothrow_convertible<T, Class2>(name_type1, "Class2");
+    test_is_nothrow_convertible<T, int Class::*>(name_type1, "int Class::*");
+    test_is_nothrow_convertible<T, int (Class::*)()>(name_type1, "int (Class::*)()");
+
+    test_is_nothrow_convertible<T, A>(name_type1, "A");
+    test_is_nothrow_convertible<T, B>(name_type1, "B");
+    test_is_nothrow_convertible<T, C>(name_type1, "C");
+    test_is_nothrow_convertible<T, D>(name_type1, "D");
+    test_is_nothrow_convertible<T, D_noexcept>(name_type1, "D_noexcept");
+
+}
+
+void test_is_nothrow_convertible()
+{
+    test::interface("is_convertible");
+
+    test_is_nothrow_convertible<void>("void");
+    test_is_nothrow_convertible<const volatile void>("const volatile void");
+    test_is_nothrow_convertible<nullptr_t>("nullptr_t");
+
+    test_is_nothrow_convertible<char>("char");
+    test_is_nothrow_convertible<int>("int");
+    test_is_nothrow_convertible<long>("long");
+    test_is_nothrow_convertible<long long>("long long");
+    test_is_nothrow_convertible<float>("float");
+    test_is_nothrow_convertible<double>("double");
+
+    test_is_nothrow_convertible<int[]>("int[]");
+    test_is_nothrow_convertible<int[3]>("int[3]");
+    test_is_nothrow_convertible<int[][3]>("int[][3]");
+
+    test_is_nothrow_convertible<Class>("Class");
+    test_is_nothrow_convertible<Union>("Union");
+    test_is_nothrow_convertible<Enum>("Enum");
+    test_is_nothrow_convertible<Enum_class>("Enum_class");
+
+    test_is_nothrow_convertible<Class>("Class");
+    test_is_nothrow_convertible<Class2>("Class2");
+    test_is_nothrow_convertible<int Class::*>("int Class::*");
+    test_is_nothrow_convertible<int (Class::*)()>("int (Class::*)()");
+
+    test_is_nothrow_convertible<A>("A");
+    test_is_nothrow_convertible<B>("B");
+    test_is_nothrow_convertible<C>("C");
+    test_is_nothrow_convertible<D>("D");
+    test_is_nothrow_convertible<D_noexcept>("D_noexcept");
+
+// Algunos a más
+    test_is_nothrow_convertible<char, void>("char", "void");
+    test_is_nothrow_convertible<char[], char*>("char[]", "char*");
+    test_is_nothrow_convertible<char*, char[]>("char*", "char[]");
+    test_is_nothrow_convertible<const int, int>("const int", "int");
+    test_is_nothrow_convertible<int, const int>("int", "const int");
+    test_is_nothrow_convertible<int, const int*>("int", "const int*");
+}
+
 
 template <typename T>
 void test_remove_pointer(const std::string& name_type)
@@ -3247,6 +3445,7 @@ try{
     test_is_class();
 
 //    test_is_function();   TODO: ¿cómo la pruebo?
+//    test_is_function();   TOD_noexceptO: ¿cómo la pruebo?
 
     
     // composite type categories
@@ -3331,6 +3530,7 @@ try{
     // --------------
     test_is_base_of();
     test_is_convertible();
+    test_is_nothrow_convertible();
  
     // const-volatile modifications
     // ----------------------------

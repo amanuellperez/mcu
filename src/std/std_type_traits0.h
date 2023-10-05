@@ -60,12 +60,36 @@ Up declval(int);
 
 template<typename T>
 T declval(long);
+
+// (???) ¿Qué es esto? 
+// Los de gcc lo tienen puesto. Lo he descubierto al ver que fallaba un test
+// en un trait, pero desconozco de dónde procede. 
+template<typename Tp>
+struct declval_protector{
+    static const bool stop = false; 
+};
+
 }// impl_of
  
+//template<typename T>
+//auto declval() noexcept -> decltype(impl_of::declval<T>(0));
+
+// (???) ¿Qué es esto? 
+// Los de gcc lo tienen puesto. Lo he descubierto al ver que fallaba un test
+// en un trait, pero desconozco de dónde procede. El comentario de gcc es:
+//
+// Utility to simplify expressions used in unevaluated operands
+// since C++11
+//
+// El static_assert siempre es true, con lo que es imposible instanciar esta
+// función.
 template<typename T>
-auto declval() noexcept -> decltype(impl_of::declval<T>(0));
-
-
+auto declval() noexcept -> decltype(impl_of::declval<T>(0))
+{
+  static_assert(impl_of::declval_protector<T>::stop,
+		"declval() must not be used!");
+  return impl_of::declval<T>(0);
+}
 
 // type_identity
 // -------------
@@ -198,10 +222,10 @@ template <typename T, unsigned N = 0>
 inline constexpr size_t extent_v = extent<T, N>::value;
 
 
-// >>> ESTO ES DE GCC
-// is_function: copiado de cpp_reference (es un monstruo!!!)
-// ---------------------------------------------------------
-// ¿esto es de gcc o de cpp_reference? Ni idea.
+// is_function
+// -----------
+// Esta función la copié de gcc o cppreference, no recuerdo.
+// Revisándola no hay mucho que reescribir.
 // primary template
 template <typename>
 struct is_function : false_type {
@@ -363,7 +387,6 @@ struct is_function<Ret(Args..., ...) const volatile&& noexcept> : true_type {
 
 template <typename T>
 inline constexpr bool is_function_v = is_function<T>::value;
-// <<< FIN ESTO ES DE GCC
 
 
 

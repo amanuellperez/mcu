@@ -27,10 +27,17 @@
  *	Corresponde con el type_traits del estandar
  *
  *  EJEMPLOS
+ *	OBSOLETO? 
  *	Para ver como implementar un switch de tipos ver 
  *	common_type o common_reference. Para ver cómo implementar un trait
  *	usando funciones ver is_destructible (de hecho, seguramente muchos
  *	traits se puedan implementar usando ese estilo).
+ *
+ *	MODERNO
+ *	Los últimos traits ya los he escrito usando `requires`. Hay unos
+ *	cuantos. Ver por ejemplo, `is_convertible`. Con los requires se 
+ *	entiende mucho mejor el código con lo que es más sencillo de escribir
+ *	y mantener. 
  *
  *  HISTORIA
  *    Manuel Perez
@@ -1393,7 +1400,7 @@ inline constexpr size_t rank_v =  rank<T>::value;
 
 // is_base_of
 // ----------
-// TODO: depende de gcc. __is_base_of!!!
+// Depende de gcc. __is_base_of!!!
 // cppreference suministra una implementación que no depende de __is_base_of
 template<typename Base, typename Derived>
 struct is_base_of
@@ -1406,48 +1413,104 @@ inline constexpr bool is_base_of_v = is_base_of<B, D>::value;
 
 // is_convertible
 // --------------
+namespace impl_of{
+
+template <typename T>
+void is_convertible_test(T);
+
+
 template <typename From, typename To>
-constexpr inline bool __is_convertible_req()
-{
-    return  is_void_v<From>	or 
-	    is_function_v<To>	or 
-	    is_array_v<To>;
+constexpr bool is_convertible(){
+    if constexpr ( is_void_v<From>	or 
+		   is_function_v<To>	or 
+		   is_array_v<To>){
+	if constexpr (is_void_v<To>)
+	    return true;
+
+	else 
+	    return false;
+    }
+
+    else{
+	if constexpr ( 
+		requires { is_convertible_test<To>(STD::declval<From>()); }
+		     )
+	return true;
+    else 
+	return false;
+    }
 }
 
-template <typename From, typename To, bool = __is_convertible_req<From, To>()>
-struct __is_convertible_helper{
-    using type = typename is_void<To>::type;
-};
-
+}// impl_of
+ 
 
 template <typename From, typename To>
-class __is_convertible_helper<From, To, false> {
-    template <typename To1>
-    static void test_aux(To1);
-
-    template <typename From1,
-              typename To1,
-              typename = decltype(test_aux<To1>(declval<From1>()))>
-    static true_type test(int);
-
-    template <typename, typename>
-    static false_type test(...);
-
-public:
-    using type = decltype(test<From, To>(0));
-};
-
-template <typename From, typename To>
-struct is_convertible : __is_convertible_helper<From, To>::type { };
-
+struct is_convertible 
+	: bool_constant<impl_of::is_convertible<From, To>()> { };
 
 template <typename From, typename To>
 inline constexpr bool is_convertible_v = is_convertible<From, To>::value;
 
+
+
 // is_nothrow_convertible
 // ----------------------
-// TODO
+namespace impl_of{
 
+template <typename To>
+void is_nothrow_convertible_test(To) noexcept;
+
+// TODO: ¿por qué se complica tanto la implementación de
+// is_nothrow_convertible()?
+// La primera implementación que hice la hice como is_convertible: sencilla y
+// clara, pero fallo el test_is_nothrow_convertible<char, D>. Cuando la clase
+// tiene un constructor D(int) de tipo noexcept la parte 2 del test no
+// funciona bien. Por eso he tenido que modificarla de esta forma.
+template <typename From, typename To>
+constexpr bool is_nothrow_convertible_part2()
+{
+    if constexpr ( 
+	    requires { 
+		noexcept(is_nothrow_convertible_test<To>
+				(STD::declval<From>())); }
+		 ){
+	using test = 
+	bool_constant<noexcept(
+		is_nothrow_convertible_test<To> (STD::declval<From>()))>;
+	if constexpr (test())
+	    return true;
+	else return false;
+
+    } else
+	return false;
+}
+
+template <typename From, typename To>
+constexpr bool is_nothrow_convertible(){
+    if constexpr ( is_void_v<From>	or 
+		   is_function_v<To>	or 
+		   is_array_v<To>){
+	if constexpr (is_void_v<To>)
+	    return true;
+
+	else 
+	    return false;
+    }
+
+    else
+	 return is_nothrow_convertible_part2<From,To>();
+}
+
+}// impl_of
+ 
+
+template <typename From, typename To>
+struct is_nothrow_convertible 
+	: bool_constant<impl_of::is_nothrow_convertible<From, To>()> { };
+
+template <typename From, typename To>
+inline constexpr bool is_nothrow_convertible_v 
+				    = is_nothrow_convertible<From, To>::value;
 
 // is_layout_compatible
 // --------------------
