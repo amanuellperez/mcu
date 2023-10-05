@@ -34,6 +34,7 @@
  *    Manuel Perez
  *	22/08/2023: forward_iterator (v-1)
  *	25/09/2023: indirectly_readable, indirectly_readable_traits
+ *	05/10/2023: random_access_iterator_tag
  *
  ****************************************************************************/
 #include "std_config.h"
@@ -41,25 +42,101 @@
 #include "std_type_traits.h"	// remove_cvref_t
 #include "std_utility.h"	// declval
 #include "std_concepts.h"	// integral
+#include "std_iterator.h"
 namespace STD{
 
-// versión del estandar
-//template <typename It>
-//concept forward_iterator = 
-//    input_iterator<It> and
-//    derived_from<???<It>, forward_iterator_tag> and
-//    incrementable<It> and
-//    sentinel_for<It, It>;
 
-// Mi miniversión
-template <typename It>
-concept forward_iterator = 
-    requires(It p){
-	++p; p++;
-	*p;
-    };
+// -------
+// General
+// -------
+namespace private_ {
+// is_specialization_of_iterator_traits
+// ------------------------------------
+// ¿puedo usar la siguiente implementación? No lo tengo claro:
+//template <typename T>
+//struct is_specialization_of_iterator_traits : std::false_type {};
+//
+//template <typename T>
+//struct is_specialization_of_iterator_traits<iterator_traits<T>> 
+//		: std::true_type {};
 
 
+// Voy a copiar el estilo de gcc para implementarlo.
+// Para saber si iterator_traits<R> procede de la primary template usan el
+// truco de que la primary template la estamos implementado como clase
+// derivada de __iterator_traits. Como esta clase es de implementación nadie
+// debería de usarla, y por tanto, cualquier otra clase iterator_traits<...>
+// que no proceda de la primary template no será hija de esta.
+//
+// iter_traits<I, T>:
+//  if (is_base_of<__iterator_traits<I>, iterator_traits<I>>)
+//	return T;
+//  else
+//	return iter_traits<I>;
+//
+template<typename I>
+concept is_specialization_of_iterator_traits_generated_primary_template 
+    = __is_base_of(__iterator_traits<I>, iterator_traits<I>);
+
+
+// ITER_TRAITS
+// -----------
+template<typename I, typename T>
+struct iter_traits
+{ using type = iterator_traits<I>; };
+
+template<typename I, typename T>
+    requires is_specialization_of_iterator_traits_generated_primary_template<I>
+struct iter_traits<I, T>
+{ using type = T; };
+ 
+template<typename I, typename T = I>
+using iter_traits_t = typename iter_traits<I, T>::type;
+
+
+// ITER_CONCEPT
+// ------------
+template<typename I>
+struct iter_concept;
+
+// If the qualified-id ITER_TRAITS(I)::iterator_concept is valid and names 
+// a type, then ITER_CONCEPT(I) denotes that type.
+template<typename I>
+    requires requires { typename iter_traits_t<I>::iterator_concept; }
+struct iter_concept<I>{ 
+    using type = typename iter_traits_t<I>::iterator_concept; 
+};
+
+// Otherwise, if the qualified-id ITER_TRAITS(I)::iterator_category is 
+// valid and names a type, then ITER_CONCEPT(I) denotes that type.
+template<typename I>
+    requires (!requires { typename iter_traits_t<I>::iterator_concept; } and 
+	       requires { typename iter_traits_t<I>::iterator_category; })
+struct iter_concept<I>{ 
+    using type = typename iter_traits_t<I>::iterator_category; 
+};
+
+// Otherwise, if iterator_traits<I> names a specialization generated from 
+// the primary template, then ITER_CONCEPT(I) denotes 
+// random_access_iterator_tag.
+template<typename I>
+    requires (!requires { typename iter_traits_t<I>::iterator_concept; } and 
+	      !requires { typename iter_traits_t<I>::iterator_category; } and
+	      is_specialization_of_iterator_traits_generated_primary_template<I>)
+struct iter_concept<I>{ 
+    using type = random_access_iterator_tag;
+};
+
+// Otherwise, ITER_CONCEPT(I) does not denote a type.
+template<typename I>
+struct iter_concept { };
+
+template <typename I>
+using iter_concept_t = typename iter_concept<I>::type;
+
+
+
+}// private_
 
 
 // -----------------
@@ -144,7 +221,7 @@ struct indirectly_readable_traits<T>
 //
 // ¿Qué significa eso de "is generated from the primary template"?
 // Parece ser (referencias???) que la primary template es
-//	template <typename It>
+//	template <typename I>
 //	struct iterator_traits;
 //
 //  y no
@@ -158,46 +235,6 @@ struct indirectly_readable_traits<T>
 //
 
 namespace private_{ 
-
-// ¿puedo usar la siguiente implementación? No lo tengo claro:
-//template <typename T>
-//struct is_specialization_of_iterator_traits : std::false_type {};
-//
-//template <typename T>
-//struct is_specialization_of_iterator_traits<iterator_traits<T>> 
-//		: std::true_type {};
-
-
-// Voy a copiar el estilo de gcc para implementarlo.
-// Para saber si iterator_traits<R> procede de la primary template usan el
-// truco de que la primary template la estamos implementado como clase
-// derivada de __iterator_traits. Como esta clase es de implementación nadie
-// debería de usarla, y por tanto, cualquier otra clase iterator_traits<...>
-// que no proceda de la primary template no será hija de esta.
-//
-// iter_traits<It, T>:
-//  if (is_base_of<__iterator_traits<It>, iterator_traits<It>>)
-//	return T;
-//  else
-//	return iter_traits<It>;
-//
-template<typename It>
-concept is_generated_from_the_primary_template
-    = __is_base_of(__iterator_traits<It>, iterator_traits<It>);
-
-template <typename It, typename T>
-struct iter_traits
-{ using type = iterator_traits<It>; };
-
-
-template <typename It, typename T>
-    requires is_generated_from_the_primary_template<It>
-struct iter_traits<It, T>
-{ using type = T; };
-
-
-template<typename It, typename T = It>
-using iter_traits_t = typename iter_traits<It, T>::type;
 
 
 template<typename T>
@@ -286,7 +323,7 @@ concept indirectly_readable =
 // TODO: iter_rvalue_reference_t depende de ranges.
 //	typename iter_rvalue_reference_t<In>;
 	{ *in } -> same_as<iter_reference_t<In>>;
-	// TODO: no tengo implementado ranges,
+	// TODO: no tengo implementado ranges::iter_move
 	// { ranges::iter_move(in) } -> same_as<iter_reference_t<In>>;
     } 
 	and
@@ -308,6 +345,55 @@ using iter_const_reference_t
 	= common_reference_t<const iter_value_t<T>&&, iter_reference_t<T>>;
 
 
+// weakly_incrementable
+// --------------------
+// TODO: revisar. Los de gcc incluyen que T pueda ser __max_diff_type.
+// __max_diff_type es una clase interna definida en bits/max_size_type.h
+// ¿Para qué sirve?
+namespace private_{
+template<typename T>
+concept is_signed_integer_like = signed_integral<T>; // or
+		//		 same_as<T, __max_diff_type>;
+}// private_
+ 
+template <typename I>
+concept weakly_incrementable =
+	   default_initializable<I> and
+	   movable<I> and
+	   requires(I i) {
+	       typename iter_difference_t<I>;
+	       requires private_::is_signed_integer_like<iter_difference_t<I>>;
+	       { ++i } -> same_as<I&>;
+	       i++;
+	   };
+
+	
+
+// incrementable
+// -------------
+template <typename I>
+concept incrementable = regular<I> and
+			weakly_incrementable<I> and
+			requires(I i) {
+			    { i++ } -> same_as<I>;
+			};
+
+// input_or_output_iterator
+// ------------------------
+template <typename I>
+concept input_or_output_iterator = 
+	    requires(I i) {
+		{ *i } -> atd_::can_reference;
+	    } and
+	    weakly_incrementable<I>;
+
+// sentinel_for
+// ------------
+template <typename S, typename I>
+concept sentinel_for = semiregular<S> and
+		       input_or_output_iterator<I> and
+		       private_::weakly_equality_comparable_with<S, I>;
+
 // disable_size_sentinel_for
 // -------------------------
 template <typename S, typename I>
@@ -315,15 +401,63 @@ inline constexpr bool disable_size_sentinel_for = false;
 
 // size_sentinel_for
 // -----------------
-//template <typename S, typename I>
-//concept size_sentinel_for =
-//	sentinel_for<S, I> and
-//	!disable_size_sentinel_for<remove_cv_t<S>, remove_cv_t<I>> and
-//	requires (const I& i, const S& s) {
-//	    { s - i } -> same_as<iter_difference_t<I>>;
-//	    { i - s } -> same_as<iter_difference_t<I>>;
-//	};
+template <typename S, typename I>
+concept sized_sentinel_for =
+	sentinel_for<S, I> and
+	!disable_size_sentinel_for<remove_cv_t<S>, remove_cv_t<I>> and
+	requires (const I& i, const S& s) {
+	    { s - i } -> same_as<iter_difference_t<I>>;
+	    { i - s } -> same_as<iter_difference_t<I>>;
+	};
 
+
+// input_iterator
+// --------------
+template <typename I>
+concept input_iterator = 
+	    input_or_output_iterator<I> and
+	    indirectly_readable<I> and
+	    requires { typename private_::iter_concept_t<I>; } and
+	    derived_from<private_::iter_concept_t<I>, input_iterator_tag>;
+
+
+// forward_iterator
+// ----------------
+template <typename I>
+concept forward_iterator = 
+	input_iterator<I> and
+	derived_from<private_::iter_concept_t<I>, forward_iterator_tag> and
+	incrementable<I> and
+	sentinel_for<I, I>;
+
+// bidirectional_iterator
+// ----------------------
+template <typename I>
+concept bidirectional_iterator = 
+	forward_iterator<I> and
+	derived_from<private_::iter_concept_t<I>, bidirectional_iterator_tag> and
+	requires(I i) {
+	    { --i } -> same_as<I&>;
+	    { i-- } -> same_as<I>;
+	};
+
+
+// random_access_iterator
+// ----------------------
+template <typename I>
+concept random_access_iterator =
+	bidirectional_iterator<I> and
+	derived_from<private_::iter_concept_t<I>, random_access_iterator_tag> and
+	totally_ordered<I> and
+	sized_sentinel_for<I, I> and
+	requires(I i, const I j, const iter_difference_t<I> n){
+	    { i += n } -> same_as<I&>;
+	    { j + n  } -> same_as<I>;
+	    { n + j  } -> same_as<I>;
+	    { i -= n } -> same_as<I&>;
+	    { j - n  } -> same_as<I>;
+	    {  j[n]  } -> same_as<iter_reference_t<I>>;
+	};
 
 }// namespace STD
 #endif

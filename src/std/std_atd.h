@@ -134,15 +134,20 @@ template <typename T>
 concept type_member = has_type_member_v<T>;
 
 
-
 // add_reference
 // -------------
 template<typename T>
 using add_reference = T&;
 
+
+// is_referenceable
+// ----------------
 template<typename T>
 concept is_referenceable = requires { typename add_reference<T>; };
 
+
+// dereferenceable
+// ---------------
 template<typename T>
 concept dereferenceable = 
 	requires(T& t)
@@ -150,6 +155,11 @@ concept dereferenceable =
 	    { *t } -> is_referenceable;
 	};
 
+
+// can_reference
+// -------------
+template <typename T>
+concept can_reference = requires{ typename add_reference<T>; };
 
 // ------------------
 // operadores lógicos
@@ -247,6 +257,8 @@ struct copy_cv<From, To, true, true>{
 
 template <typename From, typename To>
 using copy_cv_t = typename copy_cv<From, To>::type;
+
+
 
 }// namespace atd_
 

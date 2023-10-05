@@ -60,6 +60,7 @@
  *               tests lo más probable es que tenga un montón de errores!!!
  *               Forma de probarla: en caso de duda intentar una enumeración
  *               exhaustiva }:), ver el test)
+ *    05/10/2023 Escribo bastantes.
  *		 
  *
  ****************************************************************************/

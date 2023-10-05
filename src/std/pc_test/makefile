@@ -10,6 +10,7 @@ DIRS = algorithm\
 	cstring		\
 	functional	\
 	iostream	\
+	iterator_concepts	\
 	iterator	\
 	limits		\
 	memory		\
