@@ -42,6 +42,7 @@
 #include "std_char_traits.h"
 #include "std_iterator.h"
 #include "std_memory.h"
+#include "std_range_access.h"
 
 namespace STD{
 
@@ -73,8 +74,12 @@ public:
 							noexcept = default;
     constexpr basic_string_view(const charT* str);
     constexpr basic_string_view(const charT* str, size_type len);
-    template <typename It, typename End>
-	constexpr basic_string_view(It begin, End end);
+    template <contiguous_iterator It, sized_sentinel_for<It> End>
+	requires same_as<iter_value_t<It>, charT> and
+		 (!convertible_to<End, size_type>)
+	constexpr basic_string_view(It begin, End end)
+	: data_{STD::to_address(begin)}, size_{end - begin}
+	{}
 
 // Iterator support
     constexpr const_iterator begin() const noexcept;
@@ -204,18 +209,16 @@ basic_string_view<charT, Tr>::basic_string_view(const charT* str, size_type len)
 { }
 
 
-
-template <typename charT, typename Tr>
-    template <typename It, typename End>
-// TODO: faltan los requires de It y End
-inline 
-constexpr basic_string_view<charT, Tr>::basic_string_view(It begin, End end)
-    : data_{STD::to_address(begin)}, 
-    //size_{end - begin}    <-- aunque lo correcto es esto, los de gcc tienen
-    size_(end - begin)	//  <-- este para evitar que les de warning.
-			//	Probar a compilar el test cambiando al
-			//	anterior. Se verá un warning.
-{ }
+//template <typename charT, typename Tr>
+//    template <typename It, typename End>
+//inline 
+//constexpr basic_string_view<charT, Tr>::basic_string_view(It begin, End end)
+//    : data_{STD::to_address(begin)}, 
+//    //size_{end - begin}    <-- aunque lo correcto es esto, los de gcc tienen
+//    size_(end - begin)	//  <-- este para evitar que les de warning.
+//			//	Probar a compilar el test cambiando al
+//			//	anterior. Se verá un warning.
+//{ }
 
 
 // Iterator support

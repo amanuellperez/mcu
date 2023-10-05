@@ -459,6 +459,19 @@ concept random_access_iterator =
 	    {  j[n]  } -> same_as<iter_reference_t<I>>;
 	};
 
+
+// contiguous_iterator
+// -------------------
+template <typename I>
+concept contiguous_iterator = 
+	random_access_iterator<I> and
+	derived_from<private_::iter_concept_t<I>, contiguous_iterator_tag> and
+	is_lvalue_reference_v<iter_reference_t<I>> and
+	same_as<iter_value_t<I>, remove_cvref_t<iter_reference_t<I>>> and
+	requires(const I& i){
+	    { to_address(i) } -> same_as<add_pointer_t<iter_reference_t<I>>>;
+	};
+
 }// namespace STD
 #endif
 

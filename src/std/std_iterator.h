@@ -36,6 +36,7 @@
 
 #include "std_type_traits.h"	// void_t
 #include <stddef.h>		// size_t
+#include "std_range_access.h"
 
 namespace STD{
 // primitives
@@ -46,6 +47,7 @@ struct output_iterator_tag {};
 struct forward_iterator_tag : public input_iterator_tag { };
 struct bidirectional_iterator_tag : public forward_iterator_tag { };
 struct random_access_iterator_tag : public bidirectional_iterator_tag { };
+struct contiguous_iterator_tag	  : public random_access_iterator_tag { };
 
 // El standard indica que si It no es un iterador, iterator_traits == vacia!
 // Usamos void_t para seleccionar esto.
@@ -322,34 +324,6 @@ inline constexpr reverse_iterator<It> make_reverse_iterator(It i)
 
 
 
-// begin()
-// -------
-template <typename Container>
-inline constexpr auto begin(Container& c) -> decltype(c.begin())
-{ return c.begin(); }
-
-template <typename Container>
-constexpr auto begin(const Container& c) -> decltype(c.begin())
-{ return c.begin(); }
-
-template <typename T, size_t N>
-inline constexpr T* begin(T (&c)[N]) noexcept 
-{ return c; }
-
-
-// end()
-// -----
-template <typename Container>
-inline constexpr auto end(Container& c) -> decltype(c.end())
-{ return c.end(); }
-
-template <typename Container>
-constexpr auto end(const Container& c) -> decltype(c.end())
-{ return c.end(); }
-
-template <typename T, size_t N>
-inline constexpr T* end(T (&c)[N]) noexcept 
-{ return c + N; }
 
 
 // size()
