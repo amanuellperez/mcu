@@ -155,7 +155,12 @@ concept constructible_from = destructible<T> and
 
 // default_initializable
 // ---------------------
-// TODO
+template <typename T>
+concept default_initializable = constructible_from<T> and
+				requires { 
+				    T{}; 
+				    (void) ::new T;
+				};
 
 
 // move_constructible
@@ -166,6 +171,9 @@ concept move_constructible = constructible_from<T,T> and
 	
 // swappable
 // ---------
+// TODO: esta implementación sigue la línea de gcc.
+// Aunque la he intentado aclarar un poco, sigue muy liada para mi gusto.
+// Simplificarla!
 namespace private_{
 template<typename T>
 concept class_or_enum = is_class_v<T> or 
@@ -176,15 +184,15 @@ concept class_or_enum = is_class_v<T> or
 namespace ranges {
 namespace impl_of_swap {
 
-  template<typename T> void swap(T&, T&) = delete;
+template<typename T> void swap(T&, T&) = delete;
 
-  template<typename T, typename U>
-    concept adl_swap
-      = ( private_::class_or_enum<remove_reference_t<T>> or
-	  private_::class_or_enum<remove_reference_t<U>>) and
-	requires(T&& t, U&& u) {
-		swap(static_cast<T&&>(t), static_cast<U&&>(u));
-	    };
+template<typename T, typename U>
+concept adl_swap = 
+    ( private_::class_or_enum<remove_reference_t<T>> or
+			    private_::class_or_enum<remove_reference_t<U>>) and
+    requires(T&& t, U&& u) {
+	    swap(static_cast<T&&>(t), static_cast<U&&>(u));
+	};
 
 struct Swap
 {
@@ -259,8 +267,12 @@ concept swappable_with = common_reference_with<T, U> and
 
 // copy_constructible
 // ------------------
-// TODO
-
+template <typename T>
+concept copy_constructible = 
+	move_constructible<T> and
+	constructible_from<T, T&>	and convertible_to<T&, T> and
+	constructible_from<T, const T&> and convertible_to<const T&, T> and
+	constructible_from<T, const T>  and convertible_to<const T, T>;
 
 
 // -------------------
@@ -367,23 +379,33 @@ concept totally_ordered_with =
 // ---------------
 // movable
 // -------
-//template <typename T>
-//concept movable = is_object_v<T> and
-//		  move_constructible<T> and
-//		  assignable_from<T&, T> and
-//		  swappable<T>;
+template <typename T>
+concept movable = is_object_v<T> and
+		  move_constructible<T> and
+		  assignable_from<T&, T> and
+		  swappable<T>;
 
 // copyable
 // --------
-// TODO
+template <typename T>
+concept copyable = copy_constructible<T> and
+		   movable<T> and
+		   assignable_from<T&, T&> and
+		   assignable_from<T&, const T&> and
+		   assignable_from<T&, const T>;
 
 // semiregular
 // -----------
-// TODO
+template <typename T>
+concept semiregular = copyable<T> and
+		      default_initializable<T>;
 
 // regular
 // -------
-// TODO
+template <typename T>
+concept regular = semiregular<T> and
+		  equality_comparable<T>;
+
 
 
 // -----------------

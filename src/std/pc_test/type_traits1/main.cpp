@@ -18,7 +18,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 //
-// TOD_noexceptO: estoy repitiendo el mismo test continuamente: ejecuto la función de
+// TODO: estoy repitiendo el mismo test continuamente: ejecuto la función de
 // mtd y la de std en distintos tipos comparando el resultado. ¿cómo
 // generalizarlo?:
 //

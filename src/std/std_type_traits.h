@@ -1516,9 +1516,68 @@ inline constexpr bool is_nothrow_convertible_v
 // --------------------
 // TODO
 
+// invocable_result
+// ----------------
+// TODO: acabar
+//namespace impl_of{
+//
+//template <typename Member_ptr, typename... Args>
+//struct invoke_result_member_object;
+//
+//template <typename Res, typename Class, typename... Args>
+//struct invoke_result_member_object<Res Class::*, Args>
+//
+//template <typename F, typename... Args>
+//struct invoke_result { };
+//
+//
+//template <typename F, typename Arg>
+//    requires (is_member_object_pointer_v<remove_reference_t<F>>   == true and
+//	      is_member_function_pointer_v<remove_reference_t<F>> == false)
+//struct invoke_result<Member_ptr, Arg>
+//	: invoke_result_member_object<decay_t<Member_ptr> { };
+//
+//
+//
+//}// impl_of
+// 
+//template <typename F, typename... Args>
+//struct invoke_result
+//	: impl_of::invoke_result<F, Args...>
+//{
+//    static_assert(private_::is_complete_or_unbounded(type_identity<F>{}),
+//    "F must be a complete class or an unbounded array");
+//
+//    static_assert((private_::is_complete_or_unbounded(type_identity<Args>{}) 
+//		  and  ...),
+//    "Each argument type must be a complete class or an unbounded array");
+//}
+//
+//
+//template <typename F, typename... Args>
+//inline constexpr bool invoke_result_t = invoke_result<F, Args...>::type;
+//
+
+
 // is_invocable
 // ------------
-// TODO
+//namespace impl_of{
+//template <typename T, typename... Args>
+//constexpr bool is_invocable
+//{
+//
+//}
+//
+//
+//}// impl_of
+// 
+//template <typename T, typename... Args>
+//struct is_invocable
+//	: bool_constant<impl_of::is_invocable<T, Args...>()> { };
+//
+//template <typename From, typename To>
+//inline constexpr bool is_invocable_v  
+//				    =  is_invocable<From, To>::value;
 
 // is_nothrow_invocable
 // --------------------
@@ -2483,11 +2542,25 @@ struct common_reference<T1, T2, Tail...>{
 
 // underlying_type
 // ---------------
-// TODO
+namespace impl_of{
+template<typename T, bool = is_enum_v<T>>
+struct underlying_type{
+  using type = __underlying_type(T);
+};
+
+template<typename T>
+struct underlying_type<T, false> { };
+}// impl_of
+ 
+template<typename T>
+struct underlying_type : impl_of::underlying_type<T> { };
+
+template<typename T>
+using underlying_type_t = typename underlying_type<T>::type;
 
 // invoke_result
 // -------------
-// TODO
+// Implementado más arriba (TODO)
 
 // unwrap_reference
 // ----------------

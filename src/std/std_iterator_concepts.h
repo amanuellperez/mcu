@@ -315,14 +315,14 @@ inline constexpr bool disable_size_sentinel_for = false;
 
 // size_sentinel_for
 // -----------------
-template <typename S, typename I>
-concept size_sentinel_for =
-	sentinel_for<S, I> and
-	!disable_size_sentinel_for<remove_cv_t<S>, remove_cv_t<I>> and
-	requires (const I& i, const S& s) {
-	    { s - i } -> same_as<iter_difference_t<I>>;
-	    { i - s } -> same_as<iter_difference_t<I>>;
-	};
+//template <typename S, typename I>
+//concept size_sentinel_for =
+//	sentinel_for<S, I> and
+//	!disable_size_sentinel_for<remove_cv_t<S>, remove_cv_t<I>> and
+//	requires (const I& i, const S& s) {
+//	    { s - i } -> same_as<iter_difference_t<I>>;
+//	    { i - s } -> same_as<iter_difference_t<I>>;
+//	};
 
 
 }// namespace STD
