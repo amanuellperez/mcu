@@ -78,7 +78,8 @@ public:
 	requires same_as<iter_value_t<It>, charT> and
 		 (!convertible_to<End, size_type>)
 	constexpr basic_string_view(It begin, End end)
-	: data_{STD::to_address(begin)}, size_{end - begin}
+	: data_{STD::to_address(begin)}, size_(end - begin)
+	//size_{end - begin}	// este da warning: narrowing (???)
 	{}
 
 // Iterator support

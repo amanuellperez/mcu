@@ -98,11 +98,12 @@ void compare_strings_views1(const std::string_view& sview, const mtd::string_vie
 }
 
 
-void test_basic(const char str[])
+template <std::contiguous_iterator It>
+void test_basic(It p0, It pe)
 {
     test::interface("basic");
-    std::string_view sview{std::begin(str), std::end(str)};
-    mtd::string_view mview{mtd::begin(str), mtd::end(str)};
+    std::string_view sview{p0, pe};
+    mtd::string_view mview{p0, pe};
 
     compare_strings_views0(sview, mview);
     compare_strings_views1(sview, mview);
@@ -173,40 +174,54 @@ void test_remove_suffix()
     test_remove_suffix("123", 3, "");
 }
 
-//void test_swap(const std::string& a, const std::string& b)
-//{   
-//    mtd::string_view sa{a.begin(), a.end()};
-//    mtd::string_view sb{b.begin(), b.end()};
-//
-//    sa.swap(sb);
-//
-//    std::cout << "swap(" << a << ", " << b << ":\n";
-//    std::cout << '\t';
-//    CHECK_EQUAL_CONTAINERS(sa, b, "(sa == b?)");
-//    std::cout << '\t';
-//    CHECK_EQUAL_CONTAINERS(sb, a, "(sb == a?)");
-//}
+template <std::contiguous_iterator It>
+void test_swap(It p0, It pe, It q0, It qe)
+{   
+    mtd::string_view sa{p0, pe};
+    mtd::string_view sb{q0, qe};
+
+    sa.swap(sb);
+
+    CHECK_EQUAL_CONTAINERS(sa.begin(), sa.end(), q0, qe, "(sa == b?)");
+    CHECK_EQUAL_CONTAINERS(sb.begin(), sb.end(), p0, pe, "(sb == a?)");
+}
 
 
-//void test_swap()
-//{
-//    test::interface("swap");
-//    test_swap("abcd", "1234");
-//}
+void test_swap()
+{
+    test::interface("swap");
+
+    const char str0[] = "abcd";
+    const char str1[] = "1234";
+
+    test_swap(mtd::begin(str0), mtd::end(str0),
+	      mtd::begin(str1), mtd::end(str1));
+}
 
 void test_find()
 {
     test::interface("find");
-//
-//    const char str[] = "abcd";
-//    mtd::string_view sview{str};
-//
-//    mtd::string_view kk{"ab", 2};
-    //mtd::string_view kk{addressof(c), 1};
 
-//    auto i = sview.find('a');
-//    CHECK_TRUE(i == 0, "find");
+    const char str[] = "abcd";
+    mtd::string_view sview{str};
 
+    auto i = sview.find('a');
+    CHECK_TRUE(i == 0, "find");
+
+    i = sview.find('b');
+    CHECK_TRUE(i == 1, "find");
+
+    i = sview.find('c');
+    CHECK_TRUE(i == 2, "find");
+
+    i = sview.find('z');
+    CHECK_TRUE(i == mtd::string_view::npos, "find");
+
+    i = sview.find("bc");
+    CHECK_TRUE(i == 1, "find");
+
+    i = sview.find("ac");
+    CHECK_TRUE(i == mtd::string_view::npos, "find");
 }
 
 int main()
@@ -220,14 +235,14 @@ try{
 
     test_empty();
 
-    test_basic("abcd");
-//    test_basic(std::string{"abcd"});
-//    test_basic(mtd::array<char, 5>("abcd"));
+    const char str[] = "abcd";
+    test_basic(std::begin(str), std::end(str));
+
     test_const_char("abcd");
 
     test_remove_prefix();
     test_remove_suffix();
-    //test_swap();
+    test_swap();
 
     test_find();
 }catch(std::exception& e)

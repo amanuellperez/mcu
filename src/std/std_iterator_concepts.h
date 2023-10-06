@@ -40,9 +40,12 @@
 #include "std_config.h"
 #include "std_atd.h"
 #include "std_type_traits.h"	// remove_cvref_t
-#include "std_utility.h"	// declval
 #include "std_concepts.h"	// integral
 #include "std_iterator.h"
+
+// TODO: esto hay que ordenarlo. Hay un montón de dependencias circulares
+#include "std_utility.h"	// declval
+#include "std_memory.h"		// to_address
 namespace STD{
 
 
@@ -469,7 +472,7 @@ concept contiguous_iterator =
 	is_lvalue_reference_v<iter_reference_t<I>> and
 	same_as<iter_value_t<I>, remove_cvref_t<iter_reference_t<I>>> and
 	requires(const I& i){
-	    { to_address(i) } -> same_as<add_pointer_t<iter_reference_t<I>>>;
+	    { STD::to_address(i) } -> same_as<add_pointer_t<iter_reference_t<I>>>;
 	};
 
 }// namespace STD

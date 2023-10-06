@@ -19,6 +19,9 @@
 
 #include "../../std_iterator_concepts.h"
 
+#include "../../std_array.h"
+#include "../../std_string_view.h"
+
 #include <alp_test.h>
 #include <alp_string.h>
 
@@ -34,24 +37,35 @@
 // DISTINTAS!!! Luego no se puede usar el mismo método usado para verificar el
 // resto de programas. No puedo comparar el comportamiento de mtd con std para
 // ver si está bien.
-using It0 = int;
-constexpr const char*  it0 = "int";
 
-using It1 = std::istream_iterator<int>;
-constexpr const char*  it1 = "istream_iterator";
+using std_it1 = std::istream_iterator<int>;
+constexpr const char*  std_str_it1 = "istream_iterator";
 
-using It2 = std::ostream_iterator<int>;
-constexpr const char*  it2 = "ostream_iterator";
+using std_it2 = std::ostream_iterator<int>;
+constexpr const char*  std_str_it2 = "ostream_iterator";
 
-using It3 = std::vector<int>::iterator;
-constexpr const char*  it3 = "vector::iterator";
+using std_it3 = std::vector<int>::iterator;
+constexpr const char*  std_str_it3 = "vector::iterator";
 
-using It4 = std::list<int>::iterator;
-constexpr const char*  it4 = "list::iterator";
+using std_it4 = std::list<int>::iterator;
+constexpr const char*  std_str_it4 = "list::iterator";
 
-using It5 = std::map<int, int>::iterator;
-constexpr const char*  it5 = "map::iterator";
+using std_it5 = std::map<int, int>::iterator;
+constexpr const char*  std_str_it5 = "map::iterator";
 
+
+// Estos iteradores son los que funcionan en mtd
+using mtd_it0 = char*;
+constexpr const char*  mtd_str_it0 = "char*";
+
+using mtd_it1 = const char*;
+constexpr const char*  mtd_str_it1 = "const char*";
+
+using mtd_it2 = mtd::array<int,2>::iterator;
+constexpr const char*  mtd_str_it2 = "mtd::array";
+
+using mtd_it3 = mtd::string_view::const_iterator;
+constexpr const char*  mtd_str_it3 = "mtd::string_view";
 
 using namespace test;
 
@@ -76,15 +90,14 @@ void test_input_or_output_iterator()
 {
     test::interface("input_or_output_iterator");
 
-    test_input_or_output_iterator<It0>(it0);
-    test_input_or_output_iterator<It1>(it1);
-    test_input_or_output_iterator<It2>(it2);
-    test_input_or_output_iterator<It3>(it3);
-    test_input_or_output_iterator<It4>(it4);
-    test_input_or_output_iterator<It5>(it5);
+    test_input_or_output_iterator<mtd_it0>(mtd_str_it0);
+    test_input_or_output_iterator<std_it1>(std_str_it1);
+    test_input_or_output_iterator<std_it2>(std_str_it2);
+    test_input_or_output_iterator<std_it3>(std_str_it3);
+    test_input_or_output_iterator<std_it4>(std_str_it4);
+    test_input_or_output_iterator<std_it5>(std_str_it5);
 }
 
-// Esto FIJO va a dar error. No usarlo!!!
 //template <typename I>
 //void test_input_iterator(const std::string& name_type)
 //{
@@ -94,7 +107,59 @@ void test_input_or_output_iterator()
 
 void test_input_iterator()
 {
-    test::interface("input__iterator");
+    test::interface("input_iterator");
+
+    CHECK_TRUE(mtd::input_iterator<mtd_it0>, mtd_str_it0);
+    CHECK_TRUE(mtd::input_iterator<mtd_it1>, mtd_str_it1);
+    CHECK_TRUE(mtd::input_iterator<mtd_it2>, mtd_str_it2);
+    CHECK_TRUE(mtd::input_iterator<mtd_it3>, mtd_str_it3);
+}
+
+void test_bidirectional_iterator()
+{
+    test::interface("bidirectional_iterator");
+
+    CHECK_TRUE(mtd::bidirectional_iterator<mtd_it0>, mtd_str_it0);
+    CHECK_TRUE(mtd::bidirectional_iterator<mtd_it1>, mtd_str_it1);
+    CHECK_TRUE(mtd::bidirectional_iterator<mtd_it2>, mtd_str_it2);
+    CHECK_TRUE(mtd::bidirectional_iterator<mtd_it3>, mtd_str_it3);
+}
+
+
+void test_forward_iterator()
+{
+    test::interface("forward_iterator");
+
+    CHECK_TRUE(mtd::forward_iterator<mtd_it0>, mtd_str_it0);
+    CHECK_TRUE(mtd::forward_iterator<mtd_it1>, mtd_str_it1);
+    CHECK_TRUE(mtd::forward_iterator<mtd_it2>, mtd_str_it2);
+    CHECK_TRUE(mtd::forward_iterator<mtd_it3>, mtd_str_it3);
+}
+
+void test_random_access_iterator()
+{
+    test::interface("random_access_iterator");
+
+    CHECK_TRUE(mtd::random_access_iterator<mtd_it0>, mtd_str_it0);
+    CHECK_TRUE(mtd::random_access_iterator<mtd_it1>, mtd_str_it1);
+    CHECK_TRUE(mtd::random_access_iterator<mtd_it2>, mtd_str_it2);
+    CHECK_TRUE(mtd::random_access_iterator<mtd_it3>, mtd_str_it3);
+}
+
+template <typename I>
+concept prueba =
+requires(const I& i){
+	    { mtd::to_address(i) } -> 
+			mtd::same_as<mtd::add_pointer_t<mtd::iter_reference_t<I>>>;
+	};
+void test_contiguous_iterator()
+{
+    test::interface("contiguous_iterator");
+
+    CHECK_TRUE(mtd::contiguous_iterator<mtd_it0>, mtd_str_it0);
+    CHECK_TRUE(mtd::contiguous_iterator<mtd_it1>, mtd_str_it1);
+    CHECK_TRUE(mtd::contiguous_iterator<mtd_it2>, mtd_str_it2);
+    CHECK_TRUE(mtd::contiguous_iterator<mtd_it3>, mtd_str_it3);
 }
 
 template <typename I>
@@ -108,12 +173,12 @@ void test_incrementable()
 {
     test::interface("incrementable");
 
-    test_incrementable<It0>(it0);
-    test_incrementable<It1>(it1);
-    test_incrementable<It2>(it2);
-    test_incrementable<It3>(it3);
-    test_incrementable<It4>(it4);
-    test_incrementable<It5>(it5);
+    test_incrementable<mtd_it0>(mtd_str_it0);
+    test_incrementable<std_it1>(std_str_it1);
+    test_incrementable<std_it2>(std_str_it2);
+    test_incrementable<std_it3>(std_str_it3);
+    test_incrementable<std_it4>(std_str_it4);
+    test_incrementable<std_it5>(std_str_it5);
 }
 
 
@@ -128,12 +193,12 @@ void test_indirectly_readable()
 {
     test::interface("indirectly_readable");
 
-    test_indirectly_readable<It0>(it0);
-    test_indirectly_readable<It1>(it1);
-    test_indirectly_readable<It2>(it2);
-    test_indirectly_readable<It3>(it3);
-    test_indirectly_readable<It4>(it4);
-    test_indirectly_readable<It5>(it5);
+    test_indirectly_readable<mtd_it0>(mtd_str_it0);
+    test_indirectly_readable<std_it1>(std_str_it1);
+    test_indirectly_readable<std_it2>(std_str_it2);
+    test_indirectly_readable<std_it3>(std_str_it3);
+    test_indirectly_readable<std_it4>(std_str_it4);
+    test_indirectly_readable<std_it5>(std_str_it5);
 }
 
 
@@ -154,8 +219,11 @@ try{
     // iterators
     // ---------
     test_input_or_output_iterator();
-    // test_input_iterator();
-    // ...
+    test_input_iterator();
+    test_forward_iterator();
+    test_bidirectional_iterator();
+    test_random_access_iterator();
+    test_contiguous_iterator();
 
 }catch(const std::exception& e){
     std::cerr << e.what() << '\n';

@@ -74,22 +74,25 @@ template <typename It>
 
 
 template <typename T>
+    requires is_object_v<T>
 struct iterator_traits<T*> {
-    using difference_type   = ptrdiff_t;
+    using iterator_concept  = contiguous_iterator_tag;
+    using iterator_category = random_access_iterator_tag;
     using value_type        = T;
+    using difference_type   = ptrdiff_t;
     using pointer           = T*;
     using reference         = T&;
-    using iterator_category = random_access_iterator_tag;
 };
 
 
 template <typename T>
 struct iterator_traits<const T*> {
-    using difference_type   = ptrdiff_t;
+    using iterator_concept  = contiguous_iterator_tag;
+    using iterator_category = random_access_iterator_tag;
     using value_type        = T;
+    using difference_type   = ptrdiff_t;
     using pointer           = const T*;
     using reference         = const T&;
-    using iterator_category = random_access_iterator_tag;
 };
 
 
