@@ -34,6 +34,7 @@
 #include "std_config.h"
 #include <ctype.h>
 
+
 // TODO: no funciona isspace al usarla dentro de mcu
 // Revisar no sean macros y por eso desaparezcan.
 namespace STD{

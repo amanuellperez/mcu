@@ -61,11 +61,24 @@ void Main::menu_time()
 {
     uart << "Choose time between measurements (in seconds): ";
 
-    uint32_t t_incr = 1;
-    uart >> t_incr;
+    time_point t0{};
+    bool res = read_time(uart, t0);
 
+    if (res == false){
+	uart << "Wrong time";
+	return;
+    }
+//    uint32_t t_incr = 1;
+//    uart >> t_incr;
+//
+//    if (t_incr == 0){
+//	uart << "Can't be 0\n";
+//	return;
+//    }
+
+    uint32_t t_incr = t0.time_since_epoch().count();
     if (t_incr == 0){
-	uart << "Can't be 0\n";
+	uart << "Time can't be 0\n";
 	return;
     }
 

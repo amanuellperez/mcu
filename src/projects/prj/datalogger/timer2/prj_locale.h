@@ -23,11 +23,124 @@
 #define __PRJ_LOCALE_H__
 
 #include <chrono>
-#include <cctype>
 #include <tuple>    // std::tie
+#include <cstring>  // strlen
+#include <cctype>   // isdigit
+#include <string_view>
+#include <iostream>
 
-template <typename Time_point>
-void print_time(std::ostream& out, Time_point t0)
+// Configuración de las cadenas de texto que puede introducir el usuario
+// DEPENDE DEL locale!!!
+constexpr const char str_space[] = " \t";
+constexpr const char str_hours[] = "hours";
+constexpr const char str_minutes[] = "minutes";
+constexpr const char str_seconds[] = "seconds";
+
+
+// Descarta los caracteres `chars` del principio de la cadena [p, pe)
+const char* discard(const char* chars, const char* p, const char* pe);
+
+inline const char* discard_spaces(const char* p, const char* pe)
+{ return discard(str_space, p, pe); }
+
+
+// Lee un `unsigned int`.
+// Devuelve {número leído, puntero por donde seguir lectura}
+// Devuelve -1 en caso de no leer ningún número válido.
+std::pair<int, const char*> read_uint(const char* p, const char* pe);
+
+
+// Genérico
+// --------
+struct Char{
+    explicit Char(char c0) : c{c0} { }
+
+    // chars[] = cadena de C con los caracteres que se buscan
+    bool is_one_of(const char chars[]);
+
+    const char c;
+};
+
+// mover a generic.cpp
+inline bool Char::is_one_of(const char* p)
+{
+    while (*p != '\0' and *p != c)
+	++p;
+
+    return (*p != '\0');
+}
+
+
+
+enum class Time_unit{hours, minutes, seconds, unknown};
+
+// Mira si en la cadena [p, pe) se encuentra la cadena [w, we) o parte de esa
+// cadena.
+// Ejemplo:
+//	[w, we) = "hours", [p, pe) = "h 32min"
+//	Como 'h' forma parte del principio de "hours" la función tiene éxito, 
+//	devuelve el número de caracteres que tiene 'h'.
+//
+//	Si no tiene éxito devuelve 0.
+//
+// Devuelve el número de caracteres de la cadena [w, we) que ha encontrado en
+// el principio de [p, pe).
+size_t read_word(const char* w, const char* we, 
+		      const char* p, const char* pe);
+
+inline 
+std::pair<Time_unit, const char*> 
+read_unit_hours(const char* p, const char* pe)
+{
+    size_t n = read_word(str_hours, str_hours + std::strlen(str_hours),
+			 p, pe);
+    if (n != 0)
+	return {Time_unit::hours, p + n};
+
+    else
+	return {Time_unit::unknown, p};
+}
+
+
+inline 
+std::pair<Time_unit, const char*> 
+read_unit_minutes(const char* p, const char* pe)
+{
+    size_t n = read_word(str_minutes, str_minutes + std::strlen(str_minutes),
+			 p, pe);
+    if (n != 0)
+	return {Time_unit::minutes, p + n};
+
+    else
+	return {Time_unit::unknown, p};
+}
+
+
+
+inline 
+std::pair<Time_unit, const char*> 
+read_unit_seconds(const char* p, const char* pe)
+{
+    size_t n = read_word(str_seconds, str_seconds + std::strlen(str_seconds),
+			 p, pe);
+    if (n != 0)
+	return {Time_unit::seconds, p + n};
+
+    else
+	return {Time_unit::unknown, p};
+}
+
+// Devuelve la unidad de tiempo y un puntero por dónde continuar procesando la
+// cadena [p, pe).
+// Si no se encuentra una unidad de tiempo válida devuelve Time_unit::unknown
+// y el puntero p que se pasó como parámetro (= no modifica los punteros [p, pe)
+// en caso de no encontrar unidad)
+std::pair<Time_unit, const char*> 
+read_time_unit(const char* p, const char* pe);
+
+
+template <typename Tp>
+void print_time(std::ostream& out, Tp t0)
 { 
     std::chrono::hh_mm_ss t{t0.time_since_epoch()};
 
@@ -35,6 +148,8 @@ void print_time(std::ostream& out, Time_point t0)
 	<< t.minutes().count() << " min "
 	<< t.seconds().count() << " s";
 }
+
+
 
 // convierte str -> t0
 // El formato será: 
@@ -45,77 +160,68 @@ void print_time(std::ostream& out, Time_point t0)
 //       pasen las horas, minutos y segundos. 
 
 // Funciones de ayuda para implementar str2time_point
-template <typename Time_point>
-struct Str2time_point{
-    enum class Unit{hours, minutes, seconds, unknown};
+class Str2time_point{
+public:
 
-    static
-    bool convert(const char* p, uint8_t str_size, Time_point& t0);
+    // p = cadena de c
+    template <typename Time_point>
+    static bool convert(const char* p, Time_point& t0);
 
-    static 
-    std::pair<int8_t, const char*> read_int(const char* p, const char* pe);
-
-    static 
-    std::pair<Unit, const char*> read_unit(const char* p, const char* pe);
-
-    static int8_t to_hours(int8_t x);
-    static int8_t to_minutes(int8_t x);
-    static int8_t to_seconds(int8_t x);
+private:
+    static int to_hours(int x);
+    static int to_minutes(int x);
+    static int to_seconds(int x);
+    
+    static bool is_valid_time(int hours, int minutes, int seconds);
 };
 
 
 // Uso -1 para indicar error o valor no relleno.
+// TODO: con std::stringstream sería más standard, pero de momento no tengo
+// implementado stringstream
 template <typename Time_point>
-bool Str2time_point<Time_point>::
-		convert(const char* p, uint8_t str_size, Time_point& t0)
+bool Str2time_point::convert(const char* p, Time_point& t0)
 {
-    int8_t hours   = -1;
-    int8_t minutes = -1;
-    int8_t seconds = -1;
+    int hours   = 0;
+    int minutes = 0;
+    int seconds = 0;
 
-    const char* pe = p + str_size;
-    for (;*p != '\0' and p != pe; ++p){
+    const char* pe = p + std::strlen(p);
+    while(p != pe){
 	int n{};
-	std::tie(n, p) = read_int(p, pe);
+	std::tie(n, p) = read_uint(p, pe);
 	if (n == -1)
 	    return false;
 
-	std::tie(unit, p) = read_unit(p, pe);
+	Time_unit unit{};
+	std::tie(unit, p) = read_time_unit(p, pe);
 	switch (unit){
-	    break; case Unit::hours  : hours   = to_hours(n);
-	    break; case Unit::minutes: minutes = to_minutes(n);
-	    break; case Unit::seconds: seconds = to_seconds(n);
-	    break; case Unit::unknown: return false;
+	    break; case Time_unit::hours  : hours   = to_hours(n);
+	    break; case Time_unit::minutes: minutes = to_minutes(n);
+	    break; case Time_unit::seconds: seconds = to_seconds(n);
+	    break; case Time_unit::unknown: return false;
 	}
     }
 
-TODO: comprobar que hh_mm_ss es ok
-    t0 = t.to_duration();
+    if (!is_valid_time(hours, minutes, seconds))
+	return false;
+
+    std::chrono::hh_mm_ss t{std::chrono::hours{hours} +
+			    std::chrono::minutes{minutes} +
+			    std::chrono::seconds{seconds}};
+    t0 = Time_point{t.to_duration()};
     return true;
-
-
 }
 
-template <typename Tp>
-const char*
-Str2time_point<Tp>::discard_spaces(const char* p, const char* pe)
-{
-    std::find_if_not(AQUIII
-}
 
-template <typename Tp>
-std::pair<int8_t, const char*> 
-Str2time_point<Tp>::read_int(const char* p, const char* pe)
-{
-    p = discard_spaces(p, pe);
-}
+
+
 
 
 // (RRR) ¿por qué no validar que sea menor que 24?
 //       Porque no voy a usar días. Si quiero medir la temperatura cada 2 días
 //       se pasaran cada 48 horas.
-template <typename Tp>
-inline int8_t Str2time_point<Tp>::to_hours(int8_t x)
+inline int Str2time_point::to_hours(int x)
 {
     if (x < 0 /* or x > 23 */)
 	return -1;
@@ -123,8 +229,7 @@ inline int8_t Str2time_point<Tp>::to_hours(int8_t x)
     return x;
 }
 
-template <typename Tp>
-inline int8_t Str2time_point<Tp>::to_minutes(int8_t x)
+inline int Str2time_point::to_minutes(int x)
 {
     if (x < 0 or x > 59)
 	return -1;
@@ -133,8 +238,7 @@ inline int8_t Str2time_point<Tp>::to_minutes(int8_t x)
 }
 
 
-template <typename Tp>
-inline int8_t Str2time_point<Tp>::to_seconds(int8_t x)
+inline int Str2time_point::to_seconds(int x)
 {
     if (x < 0 or x > 59)
 	return -1;
@@ -157,7 +261,7 @@ bool read_time(std::istream& in, Time_point& t0)
 	return false;		    // '\r' porque yo uso `screen` como terminal 
 				    // not_generic!!!
 
-    if (!Str2time_point::convert(str, str_size, t0))
+    if (!Str2time_point::convert(str, t0))
 	return false;
 
     return true;

@@ -6,7 +6,8 @@ SOURCES= 	prj_main.cpp 		\
 			prj_menu.cpp		\
 			prj_ds18b20.cpp		\
 			prj_print.cpp		\
-			prj_time.cpp
+			prj_time.cpp		\
+			prj_locale.cpp
 
 
 MCU = atmega328p

@@ -160,7 +160,8 @@ public:
     constexpr size_type find_first_not_of(charT c, size_type pos = 0) const noexcept;
     constexpr size_type find_first_not_of(const charT* s, size_type pos, 
 							  size_type n) const;
-    constexpr size_type find_first_not_of(const charT* s, size_type pos = 0) const;
+    constexpr size_type find_first_not_of(const charT* s, 
+						    size_type pos = 0) const;
 
     constexpr size_type find_last_not_of(basic_string_view s, 
 					    size_type pos = npos) const noexcept;

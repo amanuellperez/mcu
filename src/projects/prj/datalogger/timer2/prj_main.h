@@ -50,6 +50,9 @@ public:
     inline static volatile bool reset_;
 
 private:
+// Types    
+    using time_point = Clock::time_point;
+
 // Data
     Alarm next_alarm_;
 
@@ -73,7 +76,7 @@ private:
     void print_options();
 
 // Clock
-    Clock::time_point atomic_now();
+    time_point atomic_now();
     void update_alarm();
     void change_time_settings(const uint32_t& t, const uint32_t& t_incr);
 
@@ -93,7 +96,7 @@ private:
 
 
 
-inline Clock::time_point Main::atomic_now()
+inline Main::time_point Main::atomic_now()
 {
     Micro::Disable_interrupts lock;
     return Clock::now();
