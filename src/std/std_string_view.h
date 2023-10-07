@@ -441,12 +441,13 @@ constexpr
 basic_string_view<charT, Tr>::size_type 
 basic_string_view<charT, Tr>::rfind(basic_string_view s, size_type pos) const noexcept
 {
-    size_type xpos = npos;
-
     if (size() < s.size())
 	return npos;
 
     size_type i = size() - s.size() + 1;
+    if (pos != npos)
+	i = pos;
+
     while (1) {
 	if (i == 0) 
 	    return npos;
@@ -482,122 +483,175 @@ basic_string_view<charT, Tr>::rfind(const charT* s, size_type pos) const
 
 
 
-//template <typename charT, typename Tr>
-//constexpr 
-//basic_string_view<charT,Tr>::size_type
-//basic_string_view<charT, Tr>::find_first_of(basic_string_view s, size_type pos) const noexcept
-//{
-//AQUIII
-//}
-//
-//template <typename charT, typename Tr>
-//inline constexpr
-//basic_string_view<charT,Tr>::size_type
-//basic_string_view<charT, Tr>::find_first_of(charT c, size_type pos) const noexcept
-//{ return find_first_of(basic_string_view{addressof(c), 1}, pos); }
-//
-//template <typename charT, typename Tr>
-//inline constexpr 
-//basic_string_view<charT,Tr>::size_type
-//basic_string_view<charT, Tr>::find_first_of(const charT* s, size_type pos, 
-//							    size_type n) const
-//{ return find_first_of(basic_string_view{s, n}, pos); }
-//
-//template <typename charT, typename Tr>
-//inline constexpr 
-//basic_string_view<charT, Tr>::size_type 
-//basic_string_view<charT, Tr>::find_first_of(const charT* s, size_type pos) const
-//{ return find_first_of(basic_string_view{s}, pos); }
-//
-//
-//template <typename charT, typename Tr>
-//constexpr 
-//basic_string_view<charT,Tr>::size_type
-//basic_string_view<charT, Tr>::find_last_of(basic_string_view s, 
-//						size_type pos) const noexcept
-//{
-//
-//}
-//
-//template <typename charT, typename Tr>
-//inline constexpr 
-//basic_string_view<charT,Tr>::size_type
-//basic_string_view<charT, Tr>::find_last_of(charT c, size_type pos) const noexcept
-//{ return find_last_of(basic_string_view{addressof(c), 1}, pos); }
-//
-//
-//template <typename charT, typename Tr>
-//inline constexpr 
-//basic_string_view<charT,Tr>::size_type
-//basic_string_view<charT, Tr>::find_last_of(const charT* s, size_type pos,
-//							    size_type n) const
-//{ return find_last_of(basic_string_view{s, n}, pos); }
-//
-//template <typename charT, typename Tr>
-//inline constexpr 
-//basic_string_view<charT,Tr>::size_type
-//basic_string_view<charT, Tr>::find_last_of(const charT* s, size_type pos) const
-//{ return find_last_of(basic_string_view{s}, pos); }
-//
-//
-//template <typename charT, typename Tr>
-//constexpr
-//basic_string_view<charT,Tr>::size_type
-//basic_string_view<charT, Tr>::find_first_not_of(basic_string_view s,
-//						size_type pos) const noexcept
-//{
-//
-//}
-//
-//template <typename charT, typename Tr>
-//inline constexpr 
-//basic_string_view<charT,Tr>::size_type
-//basic_string_view<charT, Tr>::find_first_not_of(charT c, 
-//						size_type pos) const noexcept
-//{ return find_first_not_of(basic_string_view{addressof(c), 1}, pos); }
-//
-//
-//template <typename charT, typename Tr>
-//inline constexpr 
-//basic_string_view<charT,Tr>::size_type
-//basic_string_view<charT, Tr>::find_first_not_of(const charT* s, size_type pos,
-//							    size_type n) const
-//{ return find_first_not_of(basic_string_view{s, n}, pos); }
-//
-//template <typename charT, typename Tr>
-//inline constexpr 
-//basic_string_view<charT,Tr>::size_type
-//basic_string_view<charT, Tr>::find_first_not_of(const charT* s, 
-//							size_type pos) const
-//{ return find_first_not_of(basic_string_view{s}, pos); }
-//
-//template <typename charT, typename Tr>
-//constexpr 
-//basic_string_view<charT,Tr>::size_type 
-//basic_string_view<charT, Tr>::find_last_not_of(basic_string_view s, 
-//						size_type pos) const noexcept
-//{
-//
-//}
-//
-//template <typename charT, typename Tr>
-//inline constexpr 
-//basic_string_view<charT,Tr>::size_type
-//basic_string_view<charT, Tr>::find_last_not_of(charT c, size_type pos) const noexcept
-//{ return find_last_not_of(basic_string_view{addressof(c), 1}, pos); }
-//
-//template <typename charT, typename Tr>
-//inline constexpr 
-//basic_string_view<charT,Tr>::size_type
-//basic_string_view<charT, Tr>::find_last_not_of(const charT* s, size_type pos,
-//							    size_type n) const
-//{ return find_last_not_of(basic_string_view{s, n}, pos); }
-//
-//template <typename charT, typename Tr>
-//inline constexpr 
-//basic_string_view<charT,Tr>::size_type 
-//basic_string_view<charT, Tr>::find_last_not_of(const charT* s, size_type pos) const
-//{ return find_last_not_of(basic_string_view{s}, pos); }
+template <typename charT, typename Tr>
+constexpr 
+basic_string_view<charT,Tr>::size_type
+basic_string_view<charT, Tr>::find_first_of(basic_string_view s, size_type pos) const noexcept
+{
+    for (size_type i = pos; i < size(); ++i){
+	for (size_type j = 0; j < s.size(); ++j){
+	    if (traits_type::eq(data_[i], s[j]))
+		return i;
+	}
+    }
+
+    return npos;
+}
+
+template <typename charT, typename Tr>
+inline constexpr
+basic_string_view<charT,Tr>::size_type
+basic_string_view<charT, Tr>::find_first_of(charT c, size_type pos) const noexcept
+{ return find_first_of(basic_string_view{addressof(c), 1}, pos); }
+
+template <typename charT, typename Tr>
+inline constexpr 
+basic_string_view<charT,Tr>::size_type
+basic_string_view<charT, Tr>::find_first_of(const charT* s, size_type pos, 
+							    size_type n) const
+{ return find_first_of(basic_string_view{s, n}, pos); }
+
+template <typename charT, typename Tr>
+inline constexpr 
+basic_string_view<charT, Tr>::size_type 
+basic_string_view<charT, Tr>::find_first_of(const charT* s, size_type pos) const
+{ return find_first_of(basic_string_view{s}, pos); }
+
+
+template <typename charT, typename Tr>
+constexpr 
+basic_string_view<charT,Tr>::size_type
+basic_string_view<charT, Tr>::find_last_of(basic_string_view s, 
+						size_type pos) const noexcept
+{
+    size_type i = size();
+    if (pos != npos)
+	i = pos + 1; // +1 porque lo primero que hago es --i
+
+    while (i > 0){
+	--i;
+	for (size_type j = 0; j < s.size(); ++j){
+	    if (traits_type::eq(data_[i], s[j]))
+		return i;
+	}
+    }
+
+    return npos;
+}
+
+template <typename charT, typename Tr>
+inline constexpr 
+basic_string_view<charT,Tr>::size_type
+basic_string_view<charT, Tr>::find_last_of(charT c, size_type pos) const noexcept
+{ return find_last_of(basic_string_view{addressof(c), 1}, pos); }
+
+
+template <typename charT, typename Tr>
+inline constexpr 
+basic_string_view<charT,Tr>::size_type
+basic_string_view<charT, Tr>::find_last_of(const charT* s, size_type pos,
+							    size_type n) const
+{ return find_last_of(basic_string_view{s, n}, pos); }
+
+template <typename charT, typename Tr>
+inline constexpr 
+basic_string_view<charT,Tr>::size_type
+basic_string_view<charT, Tr>::find_last_of(const charT* s, size_type pos) const
+{ return find_last_of(basic_string_view{s}, pos); }
+
+
+template <typename charT, typename Tr>
+constexpr
+basic_string_view<charT,Tr>::size_type
+basic_string_view<charT, Tr>::find_first_not_of(basic_string_view s,
+						size_type pos) const noexcept
+{
+    for (size_type i = pos; i < size(); ++i){
+	bool found_equal = false;
+
+	for (size_type j = 0; j < s.size(); ++j){
+	    if (traits_type::eq(data_[i], s[j])){
+		found_equal = true;
+		break;
+	    }
+	}
+
+	if (!found_equal)
+	    return i;
+    }
+
+    return npos;
+}
+
+template <typename charT, typename Tr>
+inline constexpr 
+basic_string_view<charT,Tr>::size_type
+basic_string_view<charT, Tr>::find_first_not_of(charT c, 
+						size_type pos) const noexcept
+{ return find_first_not_of(basic_string_view{addressof(c), 1}, pos); }
+
+
+template <typename charT, typename Tr>
+inline constexpr 
+basic_string_view<charT,Tr>::size_type
+basic_string_view<charT, Tr>::find_first_not_of(const charT* s, size_type pos,
+							    size_type n) const
+{ return find_first_not_of(basic_string_view{s, n}, pos); }
+
+template <typename charT, typename Tr>
+inline constexpr 
+basic_string_view<charT,Tr>::size_type
+basic_string_view<charT, Tr>::find_first_not_of(const charT* s, 
+							size_type pos) const
+{ return find_first_not_of(basic_string_view{s}, pos); }
+
+template <typename charT, typename Tr>
+constexpr 
+basic_string_view<charT,Tr>::size_type 
+basic_string_view<charT, Tr>::find_last_not_of(basic_string_view s, 
+						size_type pos) const noexcept
+{
+    size_type i = size();
+    if (pos != npos)
+	i = pos + 1; // +1 porque lo primero que hago es --i
+
+    while (i > 0){
+	--i;
+	bool found_equal = false;
+
+	for (size_type j = 0; j < s.size(); ++j){
+	    if (traits_type::eq(data_[i], s[j])){
+		found_equal = true;
+		break;
+	    }
+	}
+	
+	if (!found_equal)
+	    return i;
+    }
+
+    return npos;
+
+}
+
+template <typename charT, typename Tr>
+inline constexpr 
+basic_string_view<charT,Tr>::size_type
+basic_string_view<charT, Tr>::find_last_not_of(charT c, size_type pos) const noexcept
+{ return find_last_not_of(basic_string_view{addressof(c), 1}, pos); }
+
+template <typename charT, typename Tr>
+inline constexpr 
+basic_string_view<charT,Tr>::size_type
+basic_string_view<charT, Tr>::find_last_not_of(const charT* s, size_type pos,
+							    size_type n) const
+{ return find_last_not_of(basic_string_view{s, n}, pos); }
+
+template <typename charT, typename Tr>
+inline constexpr 
+basic_string_view<charT,Tr>::size_type 
+basic_string_view<charT, Tr>::find_last_not_of(const charT* s, size_type pos) const
+{ return find_last_not_of(basic_string_view{s}, pos); }
 
 
 

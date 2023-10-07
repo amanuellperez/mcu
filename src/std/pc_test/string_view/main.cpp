@@ -17,6 +17,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#include <iostream>
 #include "../../std_string_view.h"
 #include "../../std_array.h"
 #include <string_view>
@@ -24,7 +25,6 @@
 #include <alp_test.h>
 #include <alp_string.h>
 
-#include <iostream>
 #include <string>
 
 using namespace test;
@@ -202,11 +202,14 @@ void test_find()
 {
     test::interface("find");
 
-    const char str[] = "abcd";
+    const char str[] = "abcd abcd";
     mtd::string_view sview{str};
 
     auto i = sview.find('a');
     CHECK_TRUE(i == 0, "find");
+
+    i = sview.find('a', 3);
+    CHECK_TRUE(i == 5, "find(a,3)");
 
     i = sview.find('b');
     CHECK_TRUE(i == 1, "find");
@@ -222,6 +225,181 @@ void test_find()
 
     i = sview.find("ac");
     CHECK_TRUE(i == mtd::string_view::npos, "find");
+
+    i = sview.find("bc", 4);
+    CHECK_TRUE(i == 6, "find(bc, 4)");
+}
+
+
+void test_rfind()
+{
+    test::interface("rfind");
+
+    const char str[] = "ab ac bc";
+    mtd::string_view sview{str};
+
+    auto i = sview.rfind('a');
+    CHECK_TRUE(i == 3, "rfind(a)");
+
+    i = sview.rfind('a', 2);
+    CHECK_TRUE(i == 0, "rfind(a, 2)");
+
+    i = sview.rfind('b');
+    CHECK_TRUE(i == 6, "rfind(b)");
+
+    i = sview.rfind('c');
+    CHECK_TRUE(i == 7, "rfind(c)");
+
+    i = sview.rfind('z');
+    CHECK_TRUE(i == mtd::string_view::npos, "rfind(z)");
+
+    i = sview.rfind("bc");
+    CHECK_TRUE(i == 6, "rfind(bc)");
+
+    i = sview.rfind("ax");
+    CHECK_TRUE(i == mtd::string_view::npos, "rfind(ac)");
+}
+
+
+void test_find_first_of()
+{
+    test::interface("find_first_of");
+
+    const char str[] = "abcd abcd";
+    mtd::string_view sview{str};
+
+    auto i = sview.find_first_of('a');
+    CHECK_TRUE(i == 0, "find_first_of(a)");
+
+    i = sview.find_first_of('b');
+    CHECK_TRUE(i == 1, "find_first_of(b)");
+
+    i = sview.find_first_of('c');
+    CHECK_TRUE(i == 2, "find_first_of(c)");
+
+    i = sview.find_first_of('z');
+    CHECK_TRUE(i == mtd::string_view::npos, "find_first_of(z)");
+
+    i = sview.find_first_of("bc");
+    CHECK_TRUE(i == 1, "find_first_of(bc)");
+
+    i = sview.find_first_of("bc", 5);
+    CHECK_TRUE(i == 6, "find_first_of(bc, 5)");
+
+    i = sview.find_first_of("ax");
+    CHECK_TRUE(i == 0, "find_first_of(ax)");
+
+    i = sview.find_first_of("ac", 5);
+    CHECK_TRUE(i == 5, "find_first_of(ac, 5)");
+
+    i = sview.find_first_of("bd");
+    CHECK_TRUE(i == 1, "find_first_of(bd)");
+}
+
+
+void test_find_last_of()
+{
+    test::interface("find_last_of");
+
+    const char str[] = "abcd abcd";
+    mtd::string_view sview{str};
+
+    auto i = sview.find_last_of('a');
+    CHECK_TRUE(i == 5, "find_last_of(a)");
+
+    i = sview.find_last_of('b');
+    CHECK_TRUE(i == 6, "find_last_of(b)");
+
+    i = sview.find_last_of('c');
+    CHECK_TRUE(i == 7, "find_last_of(c)");
+
+    i = sview.find_last_of('z');
+    CHECK_TRUE(i == mtd::string_view::npos, "find_last_of(z)");
+
+    i = sview.find_last_of("xc");
+    CHECK_TRUE(i == 7, "find_last_of(xc)");
+
+    i = sview.find_last_of("ac");
+    CHECK_TRUE(i == 7, "find_last_of(ac)");
+
+    i = sview.find_last_of("ac", 3);
+    CHECK_TRUE(i == 2, "find_last_of(ac, 3)");
+
+    i = sview.find_last_of("bd");
+    CHECK_TRUE(i == 8, "find_last_of(bd)");
+
+    i = sview.find_last_of("bd", 3);
+    CHECK_TRUE(i == 3, "find_last_of(bd, 3)");
+}
+
+void test_find_first_not_of()
+{
+    test::interface("find_first_not_of");
+
+    const char str[] = "abcd abcd";
+    mtd::string_view sview{str};
+
+    auto i = sview.find_first_not_of('a');
+    CHECK_TRUE(i == 1, "find_first_not_of(a)");
+
+    i = sview.find_first_not_of('b');
+    CHECK_TRUE(i == 0, "find_first_not_of(b)");
+
+    i = sview.find_first_not_of('c');
+    CHECK_TRUE(i == 0, "find_first_not_of(c)");
+
+    i = sview.find_first_not_of('z');
+    CHECK_TRUE(i == 0, "find_first_not_of(z)");
+
+    i = sview.find_first_not_of("abc");
+    std::cout << i << '\n';
+    CHECK_TRUE(i == 3, "find_first_not_of(abc)");
+
+    i = sview.find_first_not_of("abc", 5);
+    CHECK_TRUE(i == 8, "find_first_not_of(abc, 5)");
+
+    i = sview.find_first_not_of("ax");
+    CHECK_TRUE(i == 1, "find_first_not_of(ax)");
+
+    i = sview.find_first_not_of("ac", 5);
+    CHECK_TRUE(i == 6, "find_first_not_of(ac, 5)");
+
+    i = sview.find_first_not_of("bd");
+    CHECK_TRUE(i == 0, "find_first_not_of(bd)");
+}
+
+
+void test_find_last_not_of()
+{
+    test::interface("find_last_not_of");
+
+    const char str[] = "abcd abcd";
+    mtd::string_view sview{str};
+
+    auto i = sview.find_last_not_of('a');
+    CHECK_TRUE(i == 8, "find_last_not_of(a)");
+
+    i = sview.find_last_not_of('b');
+    CHECK_TRUE(i == 8, "find_last_not_of(b)");
+
+    i = sview.find_last_not_of('d');
+    CHECK_TRUE(i == 7, "find_last_not_of(c)");
+
+    i = sview.find_last_not_of("abcd");
+    CHECK_TRUE(i == 4, "find_last_not_of(abc)");
+
+    i = sview.find_last_not_of("abc", 3);
+    CHECK_TRUE(i == 3, "find_last_not_of(abc, 3)");
+
+    i = sview.find_last_not_of("dbc", 3);
+    CHECK_TRUE(i == 0, "find_last_not_of(dbc, 3)");
+
+    i = sview.find_last_not_of("abcd", 3);
+    CHECK_TRUE(i == mtd::string_view::npos, "find_last_not_of(abcd, 3)");
+
+    i = sview.find_last_not_of("ad", 3);
+    CHECK_TRUE(i == 2, "find_last_not_of(ad, 3)");
+
 }
 
 int main()
@@ -245,6 +423,12 @@ try{
     test_swap();
 
     test_find();
+    test_rfind();
+    test_find_first_of();
+    test_find_last_of();
+    test_find_first_not_of();
+    test_find_last_not_of();
+
 }catch(std::exception& e)
 {
     std::cerr << e.what() << '\n';
