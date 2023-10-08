@@ -1,4 +1,5 @@
-SOURCES= main.cpp 
+SOURCES= main.cpp \
+		 ../prj_locale.cpp
 
 BIN = xx
 

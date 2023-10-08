@@ -44,16 +44,20 @@ void test_read_uint()
     const char* pe = str + N;
 
     int n{};	
+    p = discard_spaces(p, pe);
     std::tie(n, p) = read_uint(p, pe);
     CHECK_TRUE(n == 12 and p != pe, "12");
 
+    p = discard_spaces(p, pe);
     std::tie(n, p) = read_uint(p, pe);
     CHECK_TRUE(n == 345 and p != pe, "345");
 
 
+    p = discard_spaces(p, pe);
     std::tie(n, p) = read_uint(p, pe);
     CHECK_TRUE(n == 678 and p != pe, "678");
 
+    p = discard_spaces(p, pe);
     std::tie(n, p) = read_uint(p, pe);
     CHECK_TRUE(n == -1, "n == -1");
 }
@@ -78,41 +82,34 @@ void test_read_uint()
 }
 
 
-void test_char_is_one_of()
-{
-    test::interface("Char.is_one_of");
-    CHECK_TRUE(Char('a').is_one_of("") == false, "empty");
-    CHECK_TRUE(Char('a').is_one_of("abc"), "abc");
-    CHECK_TRUE(Char('b').is_one_of("abc"), "abc");
-    CHECK_TRUE(Char('c').is_one_of("abc"), "abc");
-    CHECK_TRUE(Char('d').is_one_of("abc") == false, "abc");
-}
 
-
-void test_read_word(const char* word, const char* str, size_t res)
+void test_string_start_with(const char* word, const char* str, size_t res)
 {
-    CHECK_TRUE(read_word(word, word + std::strlen(word),
+    CHECK_TRUE(string_start_with(word, word + std::strlen(word),
 			 str, str + std::strlen(str)) == res,
-		alp::as_str() << "read_word(" << word << ", " << str << ")");
+		alp::as_str() << "string_start_with(" << word << ", " << str << ")");
 }
 
 
-void test_read_word()
+void test_string_start_with()
 {
-    test::interface("read_word");
+    test::interface("string_start_with");
 
-    test_read_word("hours", "hours", 5);
-    test_read_word("hours", "", 0);
-    test_read_word("hours", "minutes", 0);
-    test_read_word("hours", "h 24 min 30 s", 1);
+    test_string_start_with("hours", "hours", 5);
+    test_string_start_with("hours", "", 0);
+    test_string_start_with("hours", "minutes", 0);
+    test_string_start_with("hours", "h 24 min 30 s", 1);
 }
 
-void test_read_time_unit(const char* str, Time_unit res_unit, size_t n)
+void test_read_time_unit(const char* str, Time_unit res_unit, size_t nres)
 {
-    auto [unit, p] = read_time_unit(str, str + std::strlen(str));
-
-    CHECK_TRUE(unit == res_unit and p == str + n, 
+    auto [n, unit] = read_time_unit(str, str + std::strlen(str));
+    if (n == 0)
+	CHECK_TRUE(nres == 0,
 	      alp::as_str() << "read_time_unit(" << str << ")");
+    else
+	CHECK_TRUE(unit == res_unit and n == nres,
+		  alp::as_str() << "read_time_unit(" << str << ")");
 }
 
 void test_read_time_unit()
@@ -120,13 +117,16 @@ void test_read_time_unit()
     test::interface("read_time_unit");
 
     test_read_time_unit("hours", Time_unit::hours, 5);
+    test_read_time_unit("hau", Time_unit::hours, 0);
     test_read_time_unit("h 23 min", Time_unit::hours, 1);
 
     test_read_time_unit("minutes", Time_unit::minutes, 7);
+    test_read_time_unit("minar", Time_unit::minutes, 0);
     test_read_time_unit("min", Time_unit::minutes, 3);
     test_read_time_unit("m", Time_unit::minutes, 1);
 
     test_read_time_unit("seconds", Time_unit::seconds, 7);
+    test_read_time_unit("secant", Time_unit::seconds, 0);
     test_read_time_unit("sec", Time_unit::seconds, 3);
     test_read_time_unit("s", Time_unit::seconds, 1);
 
@@ -139,7 +139,8 @@ void test_convert(const char* str, int hours, int minutes, int seconds, bool res
     time_point t0;
     bool res = Str2time_point::convert(str, t0);
 
-	print_time(std::cout, t0);
+    print_time(std::cout, t0);
+    std::cout << '\n';
     CHECK_TRUE(res == res0, alp::as_str() << "convert(" << str << ")");
     if (res){
 	std::chrono::hh_mm_ss t{t0.time_since_epoch()};
@@ -171,8 +172,7 @@ try{
     test::header("locale");
 
     test_read_uint();
-    test_char_is_one_of();
-    test_read_word();
+    test_string_start_with();
     test_read_time_unit();
 
     test_convert();

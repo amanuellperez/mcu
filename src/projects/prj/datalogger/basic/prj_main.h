@@ -39,7 +39,10 @@
 class Main{
 public:
     Main();
+
     void hello();
+    void user_cfg();
+
     void run();
     
 // User interface (debería de ser `volatile` ya que accedemos en las

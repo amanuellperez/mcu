@@ -28,33 +28,37 @@ void Main::hello()
 	    "and a cristal of 32kHz in pins TOSC1 and TOSC2\n\n";
 }
 
+void Main::user_cfg()
+{
+    Micro::Disable_interrupts lock;
+
+    reset();
+
+    menu_options();
+    reset_ = false;
+    
+    print_options();
+}
 
 
 void Main::run()
 {
-    if (reset_){
-	Micro::Disable_interrupts lock;
+    if (reset_)
+	user_cfg();
 
-	reset();
-
-	menu_options();
-	reset_ = false;
-	
-	print_options();
-
-    }
-
-    else { // TODO: está lógica omite el primer segundo!!! REVISAR
+    else{ 
 	Clock::time_point t = atomic_now();
 
 	if (t  >= next_alarm_.time()){
 	    print_temperature(uart);
 	    next_alarm_.update(atomic_now());
 	}
+
+	// uart.flush(); <-- fundamental en power-save mode
+	Micro::sleep(); // Se despierta cada segundo 
+		    
     }
 
-    // uart.flush(); <-- fundamental en power-save mode
-    Micro::sleep(); // Se despierta cada segundo 
 }
 
 
@@ -66,6 +70,7 @@ int main()
     Micro::wait_ms(500); // Según la datasheet se necesita 1 segundo para que 
 			 // el cristal de 32kHz se estabilice. (ver modo
 			 // asyncrhono, Timer2)
+
     while (1){
 	app.run();
     }

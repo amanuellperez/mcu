@@ -59,7 +59,7 @@ void Main::menu_sensor()
 
 void Main::menu_time()
 {
-    uart << "Choose time between measurements (in seconds): ";
+    uart << "Choose time between measurements\n  (xx h[ours] yy m[inutes] zz s[econds]): ";
 
     time_point t0{};
     bool res = read_time(uart, t0);
@@ -68,13 +68,6 @@ void Main::menu_time()
 	uart << "Wrong time";
 	return;
     }
-//    uint32_t t_incr = 1;
-//    uart >> t_incr;
-//
-//    if (t_incr == 0){
-//	uart << "Can't be 0\n";
-//	return;
-//    }
 
     uint32_t t_incr = t0.time_since_epoch().count();
     if (t_incr == 0){
@@ -84,7 +77,9 @@ void Main::menu_time()
 
     change_time_settings(0, t_incr);
 
-    uart << "\nTaking data every " << t_incr << " seconds\n";
+    uart << "\nTaking data every ";
+    print_time(uart, t0); 
+    uart << '\n';
 }
 
 

@@ -22,6 +22,7 @@ INCS= std_atd.h			\
 	std_cstdlib.h		\
 	std_cstring.h		\
 	std_ctime.h			\
+	std_exception.h		\
 	std_functional.h	\
 	std_initializer_list.h	\
 	std_ios_base.h		\

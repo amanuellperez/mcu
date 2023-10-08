@@ -51,7 +51,7 @@ std::pair<int, const char*> read_uint(const char* p, const char* pe);
 
 
 
-enum class Time_unit{hours, minutes, seconds, unknown};
+enum class Time_unit{hours, minutes, seconds};
 
 // Mira si en la cadena [p, pe) se encuentra la cadena [w, we) o parte de esa
 // cadena.
@@ -64,49 +64,31 @@ enum class Time_unit{hours, minutes, seconds, unknown};
 //
 // Devuelve el número de caracteres de la cadena [w, we) que ha encontrado en
 // el principio de [p, pe).
-size_t read_word(const char* w, const char* we, 
+size_t string_start_with(const char* w, const char* we, 
 		      const char* p, const char* pe);
 
 inline 
-std::pair<Time_unit, const char*> 
-read_unit_hours(const char* p, const char* pe)
+size_t read_unit_hours(const char* p, const char* pe)
 {
-    size_t n = read_word(str_hours, str_hours + std::strlen(str_hours),
+    return string_start_with(str_hours, str_hours + std::strlen(str_hours),
 			 p, pe);
-    if (n != 0)
-	return {Time_unit::hours, p + n};
-
-    else
-	return {Time_unit::unknown, p};
 }
 
 
 inline 
-std::pair<Time_unit, const char*> 
-read_unit_minutes(const char* p, const char* pe)
+size_t read_unit_minutes(const char* p, const char* pe)
 {
-    size_t n = read_word(str_minutes, str_minutes + std::strlen(str_minutes),
+    return string_start_with(str_minutes, str_minutes + std::strlen(str_minutes),
 			 p, pe);
-    if (n != 0)
-	return {Time_unit::minutes, p + n};
-
-    else
-	return {Time_unit::unknown, p};
 }
 
 
 
 inline 
-std::pair<Time_unit, const char*> 
-read_unit_seconds(const char* p, const char* pe)
+size_t read_unit_seconds(const char* p, const char* pe)
 {
-    size_t n = read_word(str_seconds, str_seconds + std::strlen(str_seconds),
+    return string_start_with(str_seconds, str_seconds + std::strlen(str_seconds),
 			 p, pe);
-    if (n != 0)
-	return {Time_unit::seconds, p + n};
-
-    else
-	return {Time_unit::unknown, p};
 }
 
 // Devuelve la unidad de tiempo y un puntero por dónde continuar procesando la
@@ -114,7 +96,7 @@ read_unit_seconds(const char* p, const char* pe)
 // Si no se encuentra una unidad de tiempo válida devuelve Time_unit::unknown
 // y el puntero p que se pasó como parámetro (= no modifica los punteros [p, pe)
 // en caso de no encontrar unidad)
-std::pair<Time_unit, const char*> 
+std::pair<size_t, Time_unit>
 read_time_unit(const char* p, const char* pe);
 
 
@@ -134,9 +116,8 @@ void print_time(std::ostream& out, Tp t0)
 // El formato será: 
 //	`3h 20min 43s`, donde h = horas, min = minutos, s = segundos
 //
-// DUDA: alguna forma standard de hacer esto?  (std::from_chars???)
-//       Observar que la implementación es flexible en el orden en que se
-//       pasen las horas, minutos y segundos. 
+// Observar que la implementación es flexible en el orden en que se
+// pasen las horas, minutos y segundos. 
 
 // Funciones de ayuda para implementar str2time_point
 class Str2time_point{
@@ -155,9 +136,6 @@ private:
 };
 
 
-// Uso -1 para indicar error o valor no relleno.
-// TODO: con std::stringstream sería más standard, pero de momento no tengo
-// implementado stringstream
 template <typename Time_point>
 bool Str2time_point::convert(const char* p, Time_point& t0)
 {
@@ -167,21 +145,25 @@ bool Str2time_point::convert(const char* p, Time_point& t0)
 
     const char* pe = p + std::strlen(p);
     while(p != pe){
-	int n{};
-	std::tie(n, p) = read_uint(p, pe);
-	if (n == -1)
+	int value{};
+	p = discard_spaces(p, pe);
+	std::tie(value, p) = read_uint(p, pe);
+	if (value == -1)
 	    return false;
 
-	Time_unit unit{};
-	std::tie(unit, p) = read_time_unit(p, pe);
+	p = discard_spaces(p, pe);
+	auto [n, unit] = read_time_unit(p, pe);
+	if (n == 0)
+	    return false;
+
+	p += n;
+
 	switch (unit){
-	    break; case Time_unit::hours  : hours   = to_hours(n);
-	    break; case Time_unit::minutes: minutes = to_minutes(n);
-	    break; case Time_unit::seconds: seconds = to_seconds(n);
-	    break; case Time_unit::unknown: return false;
+	    break; case Time_unit::hours  : hours   = to_hours(value);
+	    break; case Time_unit::minutes: minutes = to_minutes(value);
+	    break; case Time_unit::seconds: seconds = to_seconds(value);
 	}
     }
-
     if (!is_valid_time(hours, minutes, seconds))
 	return false;
 

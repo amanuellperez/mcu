@@ -50,9 +50,9 @@ std::pair<int, const char*> read_uint_unguarded(const char* p, const char* pe)
 
 std::pair<int, const char*> read_uint(const char* p, const char* pe)
 {
-    p = discard_spaces(p, pe);
+//    p = discard_spaces(p, pe);
 
-    if (!isdigit(*p) or p == pe)
+    if (p == pe or !isdigit(*p))
 	return {-1, p};
 
     return read_uint_unguarded(p, pe);
@@ -60,7 +60,7 @@ std::pair<int, const char*> read_uint(const char* p, const char* pe)
 
 
 
-size_t read_word(const char* w, const char* we, 
+size_t string_start_with(const char* w, const char* we, 
 		      const char* p, const char* pe)
 {
     size_t n = 0;
@@ -74,25 +74,35 @@ size_t read_word(const char* w, const char* we,
 
 
 
-std::pair<Time_unit, const char*> 
+// Devuelve {número de caracteres de la unidad encontrada, tipo de unidad}
+// Time_unit tiene validez solo si el size_t devuelto es > 0.
+std::pair<size_t, Time_unit>
 read_time_unit(const char* p, const char* pe)
 {
-    p = discard_spaces(p, pe);
-
     if (p == pe)
-	return {Time_unit::unknown, pe};
+	return {0, Time_unit::hours};
 
-    Time_unit unit = Time_unit::unknown;
-
+    size_t n = 0;
+    Time_unit unit{};
     switch (*p){
-	break; case 'h': return read_unit_hours(p, pe);
-	break; case 'm': return read_unit_minutes(p, pe);
-	break; case 's': return read_unit_seconds(p, pe);
-	break; default: return {Time_unit::unknown, p};
+	break; case 'h': 
+	    n = read_unit_hours(p, pe);
+	    unit = Time_unit::hours;
 
+	break; case 'm': 
+	    n = read_unit_minutes(p, pe);
+	    unit = Time_unit::minutes;
+
+	break; case 's': 
+	    n = read_unit_seconds(p, pe);
+	    unit = Time_unit::seconds;
     }
 
-    return {unit, p};
+    p += n;
+    if (p != pe and !isspace(*p))
+	return {0, Time_unit::hours};
+
+    return {n, unit};
 }
 
 
