@@ -57,7 +57,7 @@ private:
     void init_watchdog();
     void init_sensor();
     
-    void print_error(std::ostream& out, Sensor::Errno error);
+    void print_error(std::ostream& out, Sensor::Result res);
 
 };
 

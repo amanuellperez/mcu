@@ -1,5 +1,5 @@
 DIRS = timer2	\
-	   watchdog
+	   experiments
 
 include $(MCU_RECRULES)
 
