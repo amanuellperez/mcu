@@ -50,27 +50,6 @@ inline const char* discard_spaces(const char* p, const char* pe)
 std::pair<int, const char*> read_uint(const char* p, const char* pe);
 
 
-// Genérico
-// --------
-struct Char{
-    explicit Char(char c0) : c{c0} { }
-
-    // chars[] = cadena de C con los caracteres que se buscan
-    bool is_one_of(const char chars[]);
-
-    const char c;
-};
-
-// mover a generic.cpp
-inline bool Char::is_one_of(const char* p)
-{
-    while (*p != '\0' and *p != c)
-	++p;
-
-    return (*p != '\0');
-}
-
-
 
 enum class Time_unit{hours, minutes, seconds, unknown};
 

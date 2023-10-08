@@ -4,6 +4,7 @@ DIRS = algorithm	\
 	   bcd			\
 		bit			\
 		cast		\
+		char		\
 		crc			\
 		cstddef		\
 		cstring		\
