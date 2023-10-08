@@ -26,10 +26,6 @@
  * DESCRIPCION
  *	El correspondiente a <string_view>
  * 
- * TODO
- *	¿cómo imponer las precondiciones sin lanzar excepciones?
- *	¿cómo lo hacen en el standard?
- *
  * HISTORIA
  *    Manuel Perez
  *    25/09/2023 Versión mínima.
@@ -43,6 +39,8 @@
 #include "std_iterator.h"
 #include "std_memory.h"
 #include "std_range_access.h"
+#include "std_stdexcept.h"  // out_of_range
+#include "std_algorithm.h"  // min
 
 namespace STD{
 
@@ -100,9 +98,7 @@ public:
 
 // Element access 
     constexpr const_reference operator[](size_type pos) const;
-    // TODO: `at` lanza excepciones!!! Pero mi implementación no las lanza. 
-    // ¿qué hacer? 
-    // constexpr const_reference at(size_type pos) const;
+    constexpr const_reference at(size_type pos) const;
     constexpr const_reference front() const;
     constexpr const_reference back() const;
     constexpr const_pointer data() const noexcept;
@@ -113,27 +109,27 @@ public:
     constexpr void swap(basic_string_view& s) noexcept;
 
 // String operations
-// TODO: copy y substr lanzan excepciones y la mayoría del resto se
-// implementan usando estas dos funciones. ¿Qué hacer con las excepciones?
-//    constexpr size_type copy(charT* s, size_type n, size_type pos = 0) const;
-//    constexpr basic_string_view 
-//			substr(size_type pos = 0, size_type n = npos) const;
-//
-//    constexpr int compare(basic_string_view s) const noexcept;
-//    constexpr int compare(size_type pos1, size_type n1, basic_string_view s) const;
-//    constexpr int compare(size_type pos1, size_type n1, basic_string_view s,
-//			  size_type pos2, size_type n2) const;
-//    constexpr int compare(const charT* s) const;
-//    constexpr int compare(size_type pos1, size_type n1, const charT* s) const;
-//    constexpr int compare(size_type pos1, size_type n1, const charT* s,
-//				          size_type n2) const;
-//
-//    constexpr bool starts_with(basic_string_view x) const noexcept;
-//    constexpr bool starts_with(charT x) const noexcept;
-//    constexpr bool starts_with(const charT* x) const;
-//    constexpr bool ends_with(basic_string_view x) const noexcept;
-//    constexpr bool ends_with(charT x) const noexcept;
-//    constexpr bool ends_with(const charT* x) const;
+    constexpr size_type copy(charT* s, size_type n, size_type pos = 0) const;
+
+    constexpr basic_string_view 
+			substr(size_type pos = 0, size_type n = npos) const;
+
+    constexpr int compare(basic_string_view s) const noexcept;
+    constexpr int compare(size_type pos1, size_type n1, basic_string_view s) const;
+    constexpr int compare(size_type pos1, size_type n1, basic_string_view s,
+			  size_type pos2, size_type n2) const;
+    constexpr int compare(const charT* s) const;
+    constexpr int compare(size_type pos1, size_type n1, const charT* s) const;
+    constexpr int compare(size_type pos1, size_type n1, const charT* s,
+				          size_type n2) const;
+
+    constexpr bool starts_with(basic_string_view x) const noexcept;
+    constexpr bool starts_with(charT x) const noexcept;
+    constexpr bool starts_with(const charT* x) const;
+
+    constexpr bool ends_with(basic_string_view x) const noexcept;
+    constexpr bool ends_with(charT x) const noexcept;
+    constexpr bool ends_with(const charT* x) const;
 
 // Searching
     constexpr size_type find(basic_string_view s, size_type pos = 0) const noexcept;
@@ -305,6 +301,18 @@ basic_string_view<charT, Tr>::const_reference
     basic_string_view<charT, Tr>::operator[](size_type pos) const
 { return data_[pos]; }
 
+template <typename charT, typename Tr>
+inline
+constexpr 
+basic_string_view<charT, Tr>::const_reference 
+    basic_string_view<charT, Tr>::at(size_type pos) const
+{ 
+    if (pos >= size())
+	throw_exception<out_of_range>("TODO: write comment");
+
+    return data_[pos]; 
+}
+
 
 template <typename charT, typename Tr>
 inline
@@ -357,7 +365,128 @@ constexpr void basic_string_view<charT, Tr>::swap(basic_string_view& s) noexcept
 
 // String operations
 // -----------------
-// TODO: trhow exceptions!!!
+// copy
+template <typename charT, typename Tr>
+constexpr 
+basic_string_view<charT, Tr>::size_type 
+basic_string_view<charT, Tr>::
+			    copy(charT* s, size_type n, size_type pos) const
+{
+    if (pos > size())
+	throw_exception<out_of_range>("TODO: write comment");
+
+    size_type rlen = min(n, size() - pos);
+    traits_type::copy(s, data() + pos, rlen);
+
+    return rlen;
+}
+
+
+// substr
+// ------
+template <typename charT, typename Tr>
+constexpr
+basic_string_view<charT, Tr>
+basic_string_view<charT, Tr>::substr(size_type pos, size_type n) const
+{
+    if (pos > size())
+	throw_exception<out_of_range>("TODO: write comment");
+
+    size_type rlen = min(n, size() - pos);
+    return basic_string_view{data() + pos, rlen};
+
+}
+
+// compare
+// -------
+template <typename charT, typename Tr>
+constexpr 
+int basic_string_view<charT, Tr>::compare(basic_string_view s) const noexcept
+{
+    size_t rlen = min(size(), s.size());
+
+    return traits_type::compare(data(), s.data(), rlen);
+}
+
+
+template <typename charT, typename Tr>
+inline 
+constexpr int 
+basic_string_view<charT, Tr>::
+		compare(size_type pos1, size_type n1, basic_string_view s) const
+{ return substr(pos1, n1).compare(s); }
+
+template <typename charT, typename Tr>
+inline 
+constexpr int 
+basic_string_view<charT, Tr>::
+	compare(size_type pos1, size_type n1, basic_string_view s,
+					    size_type pos2, size_type n2) const
+{ return substr(pos1, n1).compare(s.substr(pos2, n2)); }
+
+template <typename charT, typename Tr>
+inline 
+constexpr int 
+basic_string_view<charT, Tr>::compare(const charT* s) const
+{ return compare(basic_string_view(s)); }
+
+template <typename charT, typename Tr>
+inline 
+constexpr int 
+basic_string_view<charT, Tr>::
+		    compare(size_type pos1, size_type n1, const charT* s) const
+{ return substr(pos1, n1).compare(basic_string_view(s)); }
+
+template <typename charT, typename Tr>
+inline 
+constexpr int 
+basic_string_view<charT, Tr>::
+    compare(size_type pos1, size_type n1, const charT* s, size_type n2) const
+{ return substr(pos1, n1).compare(basic_string_view(s, n2)); }
+
+
+// starts_with
+// ------------
+template <typename charT, typename Tr>
+inline 
+constexpr bool 
+basic_string_view<charT, Tr>::starts_with(basic_string_view x) const noexcept
+{ return substr(0, x.size()) == x; }
+
+template <typename charT, typename Tr>
+inline 
+constexpr bool
+basic_string_view<charT, Tr>::starts_with(charT x) const noexcept
+{ return !empty() and traits_type::eq(front(), x); }
+
+template <typename charT, typename Tr>
+inline constexpr bool 
+basic_string_view<charT, Tr>::starts_with(const charT* x) const
+{ return starts_with(basic_string_view(x)); }
+
+
+// ends_with
+// ----------
+
+template <typename charT, typename Tr>
+inline 
+constexpr bool 
+basic_string_view<charT, Tr>::ends_with(basic_string_view x) const noexcept
+{
+    return ((size() >= x.size()) and compare(size() - x.size(), npos, x)) == 0;
+}
+
+template <typename charT, typename Tr>
+inline 
+constexpr bool 
+basic_string_view<charT, Tr>::ends_with(charT x) const noexcept
+{ return !empty() and traits_type::eq(back(), x); }
+
+template <typename charT, typename Tr>
+inline 
+constexpr bool 
+basic_string_view<charT, Tr>::ends_with(const charT* x) const
+{ return ends_with(basic_string_view(x)); }
 
 
 // Searching
@@ -660,11 +789,23 @@ basic_string_view<charT, Tr>::find_last_not_of(const charT* s, size_type pos) co
  *			    NON MEMBER FUNCTIONS
  ***************************************************************************/
 // Non-member comparison functions
-// TODO
-//template <typename C, typename T>
-//constexpr bool operator==(basic_string_view<C, T>& x,
-//			  basic_string_view<C, T>& y) no except;
-//
+template <typename C, typename T>
+inline constexpr bool operator==(basic_string_view<C, T>& x,
+			  basic_string_view<C, T>& y) noexcept
+{
+    return x.size() == y.size() and
+	   x.compare(y) == 0;
+}
+
+
+template <typename C, typename T>
+inline constexpr bool operator==(basic_string_view<C, T>& x,
+			type_identity_t<basic_string_view<C, T>> y) noexcept
+{
+    return x.size() == y.size() and
+	   x.compare(y) == 0;
+}
+
 //template <typename C, typename T>
 //constexpr bool operator<=>(basic_string_view<C, T>& x,
 //			  basic_string_view<C, T>& y) no except;

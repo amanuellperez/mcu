@@ -72,12 +72,15 @@ constexpr void throw_exception(Args... args)
     if constexpr (can_throw_exceptions)
 	throw Exception{args...};
 
+    else {
 // DUDA: ¿gestionamos las excepciones en los micros? Podemos usar un errno o
 // exception_happened. 
-//    else 
-//	exception_happened = true;
+// De hecho se puede crear una enumeración con los tipos de excepciones que
+// lanza el standard y marcarlos en exception_type. (un valor que sea
+// 'no_exception' para saber que no se ha lanzado excepciones).
 //	exception_type = T;
-
+	return;
+    }
 }
 
 #endif

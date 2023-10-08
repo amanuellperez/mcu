@@ -198,6 +198,147 @@ void test_swap()
 	      mtd::begin(str1), mtd::end(str1));
 }
 
+void test_copy(const char* str, size_t n, size_t pos)
+{
+    char std_buffer[100];
+    char mtd_buffer[100];
+
+    std::string_view sview {str};
+    mtd::string_view mview {str};
+
+    sview.copy(std_buffer, n, pos);
+    mview.copy(mtd_buffer, n, pos);
+
+    std::string_view sres{std_buffer, n};
+    mtd::string_view mres{mtd_buffer, n};
+
+    CHECK_EQUAL_CONTAINERS(sres.begin(), sres.end(), 
+			   mres.begin(), mres.end(),
+			   alp::as_str() << "copy(" << str << ", "
+				        << n << ", " << pos << ")");
+
+
+}
+void test_copy()
+{
+    test::interface("copy");
+
+
+    {// normal
+    const char str[] = "abcdef";
+    test_copy(str, 0, 0);
+    for (size_t pos = 0; pos < strlen(str); ++pos)
+	for (size_t n = 0; n < strlen(str); ++n)
+	    test_copy(str, n, pos);
+    }
+    {// null
+    test_copy("", 0, 0);
+    }
+}
+
+
+void test_substr(const char* str, size_t pos = 0, size_t n = std::string_view::npos)
+{
+    std::string_view sview {str};
+    mtd::string_view mview {str};
+
+    auto std_sub = sview.substr(pos, n);
+    auto mtd_sub = mview.substr(pos, n);
+    CHECK_EQUAL_CONTAINERS(std_sub.begin(), std_sub.end(), 
+			   mtd_sub.begin(), mtd_sub.end(),
+			   alp::as_str() << "substr(" << str << ", "
+				        << pos << ", " << n << ")");
+
+
+}
+
+void test_substr()
+{
+    test::interface("substr");
+
+    {// normal
+    const char str[] = "abcdef";
+    test_substr(str);
+    for (size_t pos = 0; pos < strlen(str); ++pos)
+	for (size_t n = 0; n < strlen(str); ++n)
+	    test_substr(str, pos, n);
+    }
+    {// null
+    test_substr("");
+    }
+}
+
+void test_starts_with(const char* str, const char* str2)
+{
+    std::string_view sview {str};
+    mtd::string_view mview {str};
+
+    CHECK_TRUE(mview.starts_with(str2) == 
+	       sview.starts_with(str2),
+			   alp::as_str() << "starts_with(" << str << ", "
+				        << str2 << ")");
+}
+
+void test_starts_with(const char* str, const char c)
+{
+    std::string_view sview {str};
+    mtd::string_view mview {str};
+
+    CHECK_TRUE(mview.starts_with(c) == 
+	       sview.starts_with(c),
+			   alp::as_str() << "starts_with(" << str << ", "
+				        << c << ")");
+}
+void test_starts_with()
+{
+    test::interface("starts_with");
+
+    test_starts_with("abcd", "ab");
+    test_starts_with("abcd", "");
+    test_starts_with("abcd", "xyz");
+
+    test_starts_with("abcd", 'a');
+    test_starts_with("abcd", 'b');
+
+}
+
+
+void test_ends_with(const char* str, const char* str2)
+{
+    std::string_view sview {str};
+    mtd::string_view mview {str};
+
+    CHECK_TRUE(mview.ends_with(str2) == 
+	       sview.ends_with(str2),
+			   alp::as_str() << "ends_with(" << str << ", "
+				        << str2 << ")");
+}
+
+void test_ends_with(const char* str, const char c)
+{
+    std::string_view sview {str};
+    mtd::string_view mview {str};
+
+    CHECK_TRUE(mview.ends_with(c) == 
+	       sview.ends_with(c),
+			   alp::as_str() << "ends_with(" << str << ", "
+				        << c << ")");
+}
+void test_ends_with()
+{
+    test::interface("ends_with");
+
+    test_ends_with("abcd", "cd");
+    test_ends_with("abcd", "");
+    test_ends_with("abcd", "xyz");
+
+    test_ends_with("abcd", 'd');
+    test_ends_with("abcd", 'b');
+
+}
+
+
+
 void test_find()
 {
     test::interface("find");
@@ -421,6 +562,12 @@ try{
     test_remove_prefix();
     test_remove_suffix();
     test_swap();
+
+    test_copy();
+    test_substr();
+    // TODO: test_compare();
+    test_starts_with();
+    test_ends_with();
 
     test_find();
     test_rfind();
