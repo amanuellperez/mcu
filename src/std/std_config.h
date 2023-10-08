@@ -23,7 +23,8 @@
 #define __MCU_STD_CONFIG_H__
 /****************************************************************************
  *
- *   - DESCRIPCION: En principio no quiero tener que distinguir entre
+ * DESCRIPCION
+ *	En principio no quiero tener que distinguir entre
  *	si uso la STL estandard o la mía. Por ello, voy a meter todo este
  *	código, que tiene que ser estandar dentro de std.
  *
@@ -35,10 +36,13 @@
  *	cliente).
  *
  *
- *   - HISTORIA:
- *           Manuel Perez- 16/07/2019 v0.0
+ * HISTORIA
+ *    Manuel Perez
+ *    16/07/2019 v0.0
+ *    08/10/2023 throw_exception
  *
  ****************************************************************************/
+// mtd or std?
 #if defined __AVR__ || __AVR
 #   define STD std
 
@@ -46,9 +50,35 @@
 #   define STD mtd
 
 #else
-# error "Compilador desconocido"
+# error "Unknown compiler"
 #endif
 
+// Cfg
+// ---
+// (RRR) De momento no lanzo excepciones en mi código, pero el estandar
+//	 habla de lanzar excepciones. ¿Cómo escribir el código de manera que
+//	 esté de acuerdo con el estandard en caso de poder lanzar excepciones?
+//
+//	 La variable `can_throw_exceptions` va a determinar si se pueden
+//	 lanzar o no. En el código en lugar de escribir `throw exception`
+//	 escribiré `throw_exception` que dependiendo del valor de esta
+//	 variable lanzará o no una excepción.
+constexpr bool can_throw_exceptions = false;
+
+template <typename Exception, typename... Args>
+inline 
+constexpr void throw_exception(Args... args)
+{
+    if constexpr (can_throw_exceptions)
+	throw Exception{args...};
+
+// DUDA: ¿gestionamos las excepciones en los micros? Podemos usar un errno o
+// exception_happened. 
+//    else 
+//	exception_happened = true;
+//	exception_type = T;
+
+}
 
 #endif
 
