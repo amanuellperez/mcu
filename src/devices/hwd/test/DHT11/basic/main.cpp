@@ -1,4 +1,4 @@
-// Copyright (C) 2022 Manuel Perez 
+// Copyright (C) 2023 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -17,181 +17,187 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-// Este programa es para probar el Generic_timer_counter, aunque pone la base
-// para programar el DHT11.
-
 #include <atd_bit.h>
 #include <avr_atmega.h>
 
+// Micro
+// -----
+namespace mcu = atmega; 
+using Micro   = mcu::Micro;
+
+// pins
 constexpr uint8_t sensor_pin = 15;
-using Counter = atmega::Time_counter0_g;
-using Pin = atmega::Pin<sensor_pin>;
 
 
-// Esperamos de 0 a 255 ms
-void wait(const Counter::counter_type& t)
+// Hwd Devices
+// -----------
+//using Sensor = dev::DS18B20_basic<Micro, One_wire>;
+struct Protocol{
+//    using Micro = 
+    using Pin = Micro::Pin<sensor_pin>;
+    static void pin_write_zero();
+    static void pin_release_the_bus(); // = pin_write_one()
+    static bool pin_is_one();
+    static bool pin_is_zero() {return !pin_is_one();}
+
+};
+
+inline void Protocol::pin_release_the_bus()
 {
-    Counter::reset();
-    Counter::turn_on_with_clock_period_of<1024>::us();
+//    using Pin = typename Cfg::Pin;
 
-    while (Counter::value() < t)
-    { ; }
+    Pin::as_input_without_pullup(); // release the bus
 }
 
 
+inline void Protocol::pin_write_zero()
+{
+//    using Pin = typename Cfg::Pin;
+
+    Pin::write_zero();
+    Pin::as_output();
+}
+
+inline bool Protocol::pin_is_one()
+{
+//   using Pin = typename Cfg::Pin;
+
+    return Pin::is_one();
+}
+
+
+// Functions
+// ---------
+void init_uart()
+{
+    mcu::UART_iostream uart;
+    mcu::basic_cfg(uart);
+    uart.turn_on();
+}
+
 bool read()
 {
-    atmega::UART_iostream uart;
-
-// 1. Pulso mínimo de 18 ms
-    Pin::as_output();
-    Counter::turn_on_with_clock_period_of<1024>::us(); // T_tick = 1024 us
-    Counter::reset();
-    Pin::write_zero();
-
-    while (Counter::value() < 20) { ; } // 1.024 * 20 = 20.5 ms
-					// pero el reloj del avr tiene un 10%
-					// de incertidumbre (-10% son 18 ms +-)
-
-    Pin::as_input_without_pullup();
-
-
-// 2. Leemos la respuesta del sensor
-    Counter::turn_on_with_clock_period_of<1>::us();	// T_tick = 1 us
-    Counter::reset();
-
-    // El sensor mantiene HIGH durante 20-40 us
-    while (Pin::is_one()){
-	if (Counter::value() > 60){
-	    uart << "2. sensor HIGH > 60 us\n";
-	    return false;
-	}
-    }
-
-
-// Preambulo: pulso de 160 us (80 us LOW y 80 us HIGH)
-// ---------------------------------------------------
-    // todo lo que sigue lo medimos en microsegundos
-    Counter::turn_on_with_clock_period_of<1>::us();
-
-    Counter::reset();
-    while (Pin::is_zero()){ // 80 +- 10% us = de 72 a 88 us
-	if (Counter::value() > 100){
-	    uart << "Pulso 80 us LOW > 100 us\n";
-	    return false;
-	}
-    }
-
-//    if (Counter::value() < 72)
-//	return false;
-
-
-    Counter::reset();
-    while (Pin::is_one()){ // 80 +- 10% us = de 72 a 88 us
-	if (Counter::value() > 100){
-	    uart << "Pulso 80 us HIGH > 100 us\n";
-	    return false;
-	}
-    }
-
-//    if (Counter::value() < 72)
-//	return false;
-
-
-// Lectura: 50 us LOW, data HIGH 
-// -----------------------------
+    mcu::UART_iostream uart;
+    // Datos a leer
     uint8_t data[5];
+    data[0] = 0xFF;
+    data[1] = 0xFF;
+    data[2] = 0xFF;
+    data[3] = 0xFF;
+    data[4] = 0xFF;
+
+    // Start signal: at least 18 ms
+    Protocol::pin_write_zero();
+    Micro::wait_ms(20);
+    Protocol::pin_release_the_bus();
+
+
+    // MENTIRA: wait for 20-40 us, and the DHT pull-low for 80 us
+    // REALIDAD: al medir el DHT11 que tengo espera 10-11 us!!!
+    // DHT ACK: pulso de 80 us:
+    // El DHT mantiene LOW por 80 us. El intervalo más pequeño es
+    // [20, 100], mientras que el más grande es [40, 120]. La parte que se
+    // solapa de estos intervalos es [40, 100] ==> a los 70 us (punto medio)
+    // tiene que estar LOW.
+    // Lo que voy a considerar es que la mitad del LOW_80us empieza justo en
+    // estos 70us despues. Esto da un margen de error de +-10 us (por culpa de
+    // los 20-40us).
+    Micro::wait_us(30 + 40);
+    if (Protocol::pin_is_one()){
+	uart << "Can't read ACK\n";
+	return false;
+    }
+
+    // Esperamos a que envíe todo el pulso de 80 us que queda (40 us en LOW y
+    // 80 us en HIGH)
+    Micro::wait_us(40 + 80 - 10);
+
+    // Aquí empieza el DHT a enviar la respuesta
+
+
+    // Leemos el primer start bit
+    Micro::wait_us(46);
+    if (Protocol::pin_is_one()){
+	uart << "Can't read first bit. DHT not responding???\n";
+	return false;
+    }
+
+    bool wait_for_start_bit = false;
 
     for (uint8_t i = 0; i < 5; ++i){
 	for (int8_t j = 7; j >= 0; --j){
-	    // 50 us LOW
-	    Counter::reset();
-	    while (Pin::is_zero()){ // 50 +- 10% us = de 45 a 55 us
-		if (Counter::value() > 70){
-		    uart << "data zero > 70 us\n";
+	    if (wait_for_start_bit){
+		Micro::wait_us(46);
+		if (Protocol::pin_is_one()){
+		    uart << "Can't read bit " << j << " of byte number " << (int) i << '\n';
 		    return false;
 		}
 	    }
 
-	    // data: 28 us es 0, 70 us es 1
-	    Counter::reset();
-	    while (Pin::is_one()){ 
-		if (Counter::value() > 90){
-		    uart << "data one > 90 us\n";
-		    return false;
-		}
-	    }
-
-	    Counter::counter_type value = Counter::value();
-
-	    // Al probarlo me da un valor mínimo de 18 us!!! 
-	    // Según la datasheet tiene que ser de 26-28 us (con un 10% menos
-	    // de incertidumbre del reloj del avr sería 23, muy lejos del
-	    // 18!!!) ¿por qué?
-	    if (10 <= value and value <= 35)
+	    Micro::wait_us(74);
+	    bool bit = Protocol::pin_is_one();
+	    if (bit)
+		atd::write_one(data[i], j);
+	    else
 		atd::write_zero(data[i], j);
 
-	    else if (60 <= value and value <= 80)
-		atd::write_one(data[i], j);
-
-	    else {
-		uart << "data no valido:\n"
-		     << "   Leyendo (" << (int) i << ", " << (int) j << ") = "  << (int) value << '\n';
-
-		return false;
-	    }
+	    // Solo tenemos que esperar el start bit cuando el bit leído es 1.
+	    // Si es 0, ya estamos dentro del siguiente start bit.
+	    wait_for_start_bit = bit;
 	}
     }
 
-// Comprobamos que el checksum es correcto
-// TODO: aclarar este checksum
-    uint8_t check = (data[0] + data[1] + data[2] + data[3]) & 0xFF;
 
-    if (check != data[4])
-	return false;
 
     uart << "Recibido: " << (int) data[0]
 	 << '.' << (int) data[1]
 	 << "; " << (int) data[2]
 	 << '.' << (int) data[3]
+	 << "//" << (int) data[4]
 	 << '\n';
+
+// Comprobamos que el checksum es correcto
+// TODO: aclarar este checksum
+    uint8_t check = (data[0] + data[1] + data[2] + data[3]) & 0xFF;
+    if (check != data[4]){
+	uart << "Wrong check\n";
+	return false;
+    }
 
     return true;
 }
 
 
+void hello()
+{
+    mcu::UART_iostream uart;
+    uart << "\n\nDHT11 test\n"
+	        "----------\n"
+		"Connect sensor to pin " << sensor_pin 
+		<< " with a pull-up resistor of 4.7k\n";
+
+    uart << "Waiting 2 seconds for DHT11 to start working ... ";
+    Micro::wait_ms(2000);
+    uart << "OK\n";
+}
+
+
 int main()
 {
-    atmega::UART_iostream uart;
-    atmega::basic_cfg(uart);
-    uart.turn_on();
+    init_uart();
+    hello();
 
-    Counter::init();
-
-    uart << "\n--------------\n";
-    uart <<   "Testing DHT11!\n";
-    uart <<   "--------------\n";
-
-    uart << "Waiting 2 seconds for DHT11 to start working";
-    for (uint8_t i = 0; i < 8; ++i){
-	wait(250);
-	uart << '.';
-    }
-    uart << " OK\n";
-
+    mcu::UART_iostream uart;
 
     while(1){
 	if (!read())
 	    uart << "Reading error\n";
 
 	uart << "Waiting 1 second";
-	for (uint8_t i = 0; i < 4; ++i){
-	    wait(250);
+	Micro::wait_ms(1000);
 	uart << '.';
     }
-    uart << '\n';
 
-    }
 }
 
 

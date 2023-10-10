@@ -1,6 +1,7 @@
 DIRS = clocks		\
 		miniclock	\
-		onewire
+		onewire		\
+		train_of_pulses
 
 
 include $(MCU_RECRULES)

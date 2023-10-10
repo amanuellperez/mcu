@@ -20,15 +20,7 @@
 
 #ifndef __DEV_CYCLE_H__
 #define __DEV_CYCLE_H__
-
-#include <atd_array.h>
-#include <avr_pin.h>	    // TODO: esto depende del avr. Generic_pin???
-#include <avr_interrupt.h>  // Generic_interrupt??? Mejor: mcu::enable_interrupt...
-			    // Si uso mcu como clase la puedo pasar como
-			    // parámetro.
-
-// TODO: estoy duplicando la memoria. Al implementar Train_of_pulses_receiver
-//       puedo usar la memoria alojada en él para Train_of_pulses.
+#include <stdint.h>
 
 //  NOTACIÓN
 //  --------

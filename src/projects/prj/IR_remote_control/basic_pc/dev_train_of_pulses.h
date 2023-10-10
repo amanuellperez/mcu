@@ -1,3 +1,7 @@
+// TODO: esto YA está migrado a `dev`. Usar el genérico. Hay que retocar
+// alguna cosa para integrarlo con el genérico.
+//
+//
 // Copyright (C) 2022 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
@@ -38,7 +42,6 @@ template <size_t N>
 class Train_of_pulses{
 public:
     Train_of_pulses();
-//    Train_of_pulses(Cycle* cycle_container, size_t max_sz);
 
 // pulses
     Cycle& operator[](size_t i) { return cycle_[i];} 
@@ -71,7 +74,6 @@ private:
 };
 
 
-//inline Train_of_pulses::Train_of_pulses(Cycle* cycle_container, size_t max_sz)
 template <size_t N>
 inline Train_of_pulses<N>::Train_of_pulses()
     : polarity_{0xFF}
@@ -104,7 +106,6 @@ public:
 
 private:
 // Data
-    //static constexpr int16_t buffer_size = num_max_pulses * 2;
     inline static constexpr int16_t buffer_size = Cfg::buffer_size;
     inline static volatile uint16_t buffer_[buffer_size];
     inline static volatile bool level_[buffer_size];
