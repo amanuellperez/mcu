@@ -3,6 +3,8 @@
 
 # Object files
 *.o
+*.ii
+*.s
 
 
 # Dynamic libraries
