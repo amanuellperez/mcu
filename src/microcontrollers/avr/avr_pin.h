@@ -39,6 +39,18 @@
  *	03/09/2023 Introduzco la gestión de interrupciones de los pines dentro
  *	           de la clase Pin. Es más natural.
  *
+ *	11/10/2023 Al intentar implementar la lectura de trenes de pulsos
+ *	           mediante polling no funciona. Al mirar el código en
+ *	           ensamblador que se genera observo que no está `inlining`
+ *	           las funciones de Pin lo cual fijo está ralentizando la
+ *	           ejecución. 
+ *	           La clase Pin es muy básica, es fundamental que todas sus
+ *	           funciones sean de verdad inline. Por ello le añado el
+ *	           atributo de GCC de inline (problema: no es estandard,
+ *	           aunque como este fichero es para los avrs y estos de
+ *	           momento solo se pueden compilar con avr-gcc, no genera
+ *	           problemas).
+ *
  ****************************************************************************/
 #include <avr/io.h> // registros: cfg::DDRB... cfg::PORT...
 #include "avr_time.h"
@@ -160,31 +172,31 @@ public:
     static constexpr uint8_t number = n;
 
 // CONFIGURAMOS EL cfg::PIN
-    static void as_output();
-    static void as_input_with_pullup();
-    static void as_input_without_pullup();
+    static void as_output() __attribute__((always_inline));
+    static void as_input_with_pullup() __attribute__((always_inline));
+    static void as_input_without_pullup() __attribute__((always_inline));
 
 
 // FUNCIONES DE LECTURA
     // Si el bit es '1' devuelve un número distinto de cero.
     // Si el bit es '0' devuelve cero.
-    static uint8_t read();
+    static uint8_t read() __attribute__((always_inline));
 
     /// Devuelve si el bit es 0 o no. 
-    static bool is_zero();
+    static bool is_zero() __attribute__((always_inline));
 
     /// Devuelve si el bit es 1 o no. 
-    static bool is_one();
+    static bool is_one() __attribute__((always_inline));
 
 // FUNCIONES DE ESCRITURA
-    static void write_one();
-    static void write_zero();
+    static void write_one() __attribute__((always_inline));
+    static void write_zero() __attribute__((always_inline));
 
     /// Cambiamos el valor del pin (de 0 a 1 ó de 1 a 0).
-    static void toggle();
+    static void toggle() __attribute__((always_inline));
 
     /// Escribimos en el pin. Un valor distinto de cero es 1.
-    static void write(uint8_t x);
+    static void write(uint8_t x) __attribute__((always_inline));
     
 
 // INTERRUPTS
@@ -228,10 +240,14 @@ inline uint8_t Pin<n>::read()
 {return (*cfg::PIN[n]) & cfg::BIT_MASK[n];}
 
 template <uint8_t n>
-inline bool Pin<n>::is_zero() {return !read();}
+inline bool Pin<n>::is_zero()
+//{return !read();}
+{return !((*cfg::PIN[n]) & cfg::BIT_MASK[n]);}
 
 template <uint8_t n>
-inline bool Pin<n>::is_one() {return read();}
+inline bool Pin<n>::is_one() 
+{return (*cfg::PIN[n]) & cfg::BIT_MASK[n];}
+//{return read();}
 
 template <uint8_t n>
 inline void Pin<n>::write_one()	
