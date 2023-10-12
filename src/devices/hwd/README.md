@@ -115,6 +115,59 @@ Por ello de momento cuando un device se comunique directamente usando pines
 con el micro los parámetros de plantilla a pasar serán `Device<Micro, pin0,
 pin1, pin2, ...>` o mejor `Device<Micro, struct_with_npins>`.
 
+#### ¿Permitir construir objetos o no?
+
+##### Devices conectados a pines
+En el caso de dispositivos que conectamos a través de pines es imposible tener
+más de uno. Así, por ejemplo, si conecto un LCD via pines solo puedo tener un
+LCD, o si conecto un sensor DHT11 al pin 15 solo puedo tener 1 sensor
+conectado. Esto es, el hardware determina que solo puedo tener uno de estos
+dispositivos.
+
+Si, por ejemplo, quisiera tener dos sensores DHT11 los tendría que conectar a
+dos pines distintos generando el siguiente código:
+```
+using sensor1 = DHT11<Micro, 15>;
+using sensor2 = DHT11<Micro, 16>;
+```
+
+Cada sensor estaría conectado a un pin diferente genera una clase diferente.
+
+Como solo tengo un único sensor todos los métodos pueden ser `static`. La duda
+entra si dejar construir el objeto o no. 
+
+##### Devices conectados vía un protocol
+
+Sin embargo si conectamos un dispositivo vía SPI, TWI, ... la cosa puede 
+cambiar ya que a través de estos protocolos podemos conectar múltiples devices.
+
+**TWI**
+
+En el caso de TWI como cada dispositivo tiene una dirección única podemos usar
+esa dirección para diferenciar dispositivos.
+```
+using EEPROM1 = EEPROM<Micro, TWI, address1>;
+using EEPROM2 = EEPROM<Micro, TWI, address2>;
+```
+
+CUIDADO: Esto hace que el compilador genere dos clases DISTINTAS, con lo que
+podría estar duplicando el código de funciones genéricas, haciendo el programa
+más grande de lo necesario. Esto sugiere:
+
+1. Pasar el `address` como parámetro. De esa forma se garantiza tener una
+   única clase. Problema de esta opción: viola la regla de "todo lo que se
+   conozca en tiempo de compilación, pasarlo como parámetro de template".
+   Y el `address` está determinado por el hardware.
+
+2. Crear una clase base `EEPROM_base` (básicamente es la clase del punto 1) y
+   heredar de esta clase la clase a la que le pasamos como parámetro el
+   address.
+
+3. ???
+
+TODO: implementarlo a ver si funciona.
+
+
 
 #### Test
 ¿Cómo probar un traductor? Una forma que me resulta muy práctica es escribir
