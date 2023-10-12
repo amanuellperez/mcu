@@ -30,7 +30,7 @@ using namespace test;
 
 void test_length()
 {
-    test::interfaz("strlen");
+    test::interface("strlen");
 
     {
     constexpr const char* msg = "";
@@ -46,7 +46,7 @@ void test_length()
 
 void test_cstring()
 {
-    test::interfaz("const_cstring");
+    test::interface("const_cstring");
 
     constexpr const char* msg = "esto es una prueba";
 
@@ -68,7 +68,7 @@ void test_cstring()
 
 void test_nstring()
 {
-    test::interfaz("const_nstring");
+    test::interface("const_nstring");
 
     constexpr const char* msg = "DoLuMaMiJuViSa";
 
@@ -89,7 +89,7 @@ void test_nstring()
 
 void test_array_nstring()
 {
-    test::interfaz("Array_const_nstrings");
+    test::interface("Array_const_nstrings");
 
     {
     const char days_str[] = "DLMXJVS";
@@ -142,7 +142,7 @@ void test_line_count(const char* s, size_t res)
 
 void test_line_count()
 {
-    test::interfaz("line_count");
+    test::interface("line_count");
 
     test_line_count("", 0);
     test_line_count("uno", 1);

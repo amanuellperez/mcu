@@ -29,7 +29,7 @@ using namespace test;
 
 void test_bounded_cast()
 {    
-    test::interfaz("bounded_cast");
+    test::interface("bounded_cast");
 
     CHECK_TRUE(atd::bounded_cast<uint8_t>(uint16_t{0}) == 0, "(0) uint16_t -> uint8_t");
     CHECK_TRUE(atd::bounded_cast<uint8_t>(uint16_t{255}) == 255, "(255) uint16_t -> uint8_t");
@@ -47,7 +47,7 @@ struct Wrapper{
 
 void test_safe_static_cast()
 { 
-    test::interfaz("safe_static_cast");
+    test::interface("safe_static_cast");
 
     // Lo meto dentro del Wraper para que se vea que se genera en tiempo de
     // compilación.
@@ -63,7 +63,7 @@ void test_safe_static_cast()
 
 void test_to_integer()
 {
-    test::interfaz("to_integer");
+    test::interface("to_integer");
 
     using Dec8_1 = atd::Decimal<uint8_t, 1>;
 

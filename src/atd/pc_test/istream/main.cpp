@@ -66,7 +66,7 @@ void test_read_int_as_hex_fail()
 
 void test_read_int_as_hex()
 {
-    test::interfaz("read_int_as_hex");
+    test::interface("read_int_as_hex");
 
     for (int i = 0; i < 100000; ++i)
 	test_read_int_as_hex(i, true);

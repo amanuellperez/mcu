@@ -33,7 +33,7 @@ void f(const nm::Width<short>& x)
 
 void test_width()
 {
-    test::interfaz("Width");
+    test::interface("Width");
 
     nm::Width x{10};
     CHECK_TRUE(x == int{10}, "Width<int>");
@@ -65,7 +65,7 @@ Type print(nm::From<int> x0, nm::Size<int> x1)
 
 void test_fromto()
 {
-    test::interfaz("from, to...");
+    test::interface("from, to...");
 
     CHECK_TRUE ((print(nm::From{2}, nm::To{10}) == Type::from_to), "from_to");
     CHECK_TRUE ((print(nm::From{2}, nm::Size{10}) == Type::from_size), "from_size");

@@ -67,7 +67,7 @@ void test_digit_to_char()
 
 void test_binary_char_to()
 {
-    test::interfaz("binary_char_to");
+    test::interface("binary_char_to");
 
     {
 	CHECK_TRUE(0b10101010 == atd::binary_char_to<uint8_t>("10101010"), 

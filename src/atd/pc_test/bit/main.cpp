@@ -31,7 +31,7 @@ using namespace test;
 
 void test_bit()
 {    
-    test::interfaz("bit");
+    test::interface("bit");
     {
     uint8_t x = 0xF0;
     CHECK_TRUE(atd::is_one_bit<0>::of(x) == false, "bit<0>::of");
@@ -87,7 +87,7 @@ void test_bit()
 
 void test_concat_bytes()
 {
-    test::interfaz("concat_bytes");
+    test::interface("concat_bytes");
 
     CHECK_TRUE(atd::concat_bytes<uint16_t>(0x52, 0xF4) == 0x52F4, "concat_bytes");
     CHECK_TRUE(atd::concat_bytes<uint16_t>(0x00, 0x00) == 0, "concat_bytes");
@@ -117,7 +117,7 @@ void test_concat_bytes()
 
 void test_bitmask()
 {
-    test::interfaz("make_range_bitmask");
+    test::interface("make_range_bitmask");
 
     CHECK_TRUE((atd::make_range_bitmask<1,2, uint8_t>() == 0x06), "make_range_bitmask");
     CHECK_TRUE((atd::make_range_bitmask<1,1, uint8_t>() == 0x02), "make_range_bitmask");
@@ -136,7 +136,7 @@ void test_bitmask()
 
 void test_make_bitmask()
 {
-    test::interfaz("make_bitmask");
+    test::interface("make_bitmask");
     CHECK_TRUE((atd::make_bitmask<atd::static_array<uint8_t, 0>, uint8_t>() ==
                 0b00000001),
                "make_bitmask");
@@ -203,7 +203,7 @@ void test_mask()
 
 void test_mask()
 {
-    test::interfaz("Range_bitmask");
+    test::interface("Range_bitmask");
     
     test_mask<uint8_t>();
     test_mask<int8_t>();
@@ -237,7 +237,7 @@ void test_write_bits2(int x, int res)
 
 void test_write_bits()
 {
-    test::interfaz("write_bits");
+    test::interface("write_bits");
 
     test_write_bits<uint8_t>(0x00, 0x03);
     test_write_bits<int8_t>(0x00, 0x03);
@@ -273,7 +273,7 @@ void test_write_range_bits(int x0, int x1)
 
 void test_write_range_bits()
 {
-    test::interfaz("write_range_bits");
+    test::interface("write_range_bits");
 
     test_write_range_bits<0,3,0x05>(0, 0x05);
     test_write_range_bits<1,4,0x05>(0, 0x05 << 1);
@@ -288,7 +288,7 @@ void test_write_range_bits()
 
 void test_read_bits()
 {
-    test::interfaz("read_bits");
+    test::interface("read_bits");
 
     uint8_t data = 0b01011010;
 
@@ -324,7 +324,7 @@ void test_read_bits()
 
 void test_zero_with_bits()
 {
-    test::interfaz("zero_with_bits");
+    test::interface("zero_with_bits");
 
 // 1 bit
     CHECK_TRUE((atd::zero<uint8_t>::with_bits<0>::to<1>() == 0b00000001), "zero_with_bits");
@@ -345,7 +345,7 @@ void test_zero_with_bits()
 
 void test_dynamic_write()
 {
-    test::interfaz("write_zero");
+    test::interface("write_zero");
 
     uint8_t x = 0xFF;
 
@@ -402,7 +402,7 @@ void test_dynamic_write()
 
 void test_is_one_most_significant_bit_of()
 {
-    test::interfaz("is_one_most_significant_bit_of");
+    test::interface("is_one_most_significant_bit_of");
 
 // Hago un test exhaustivo
 // uint8_t
@@ -480,7 +480,7 @@ void test_is_one_most_significant_bit_of()
 
 void test_byte()
 {
-    test::interfaz("byte<>()");
+    test::interface("byte<>()");
 
     std::cout << "uint8_t ... ";
     for (uint8_t n = 0; n < 0xFF; ++n)
@@ -522,7 +522,7 @@ void test_byte()
 
 void test_nibble()
 {
-    test::interfaz("nibble<>()");
+    test::interface("nibble<>()");
 
 
     {

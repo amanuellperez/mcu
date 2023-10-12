@@ -28,7 +28,7 @@ using namespace test;
 
 void test_bounded()
 {
-    test::interfaz("Bounded");
+    test::interface("Bounded");
 
 // contructor
     {

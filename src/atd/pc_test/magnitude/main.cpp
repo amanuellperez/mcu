@@ -584,7 +584,7 @@ void test_arithmetic()
 
 void test_magnitude()
 {
-    test::interfaz("Magnitude");
+    test::interface("Magnitude");
 
     test_magnitude_basic();
     test_common_type();

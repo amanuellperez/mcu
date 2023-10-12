@@ -29,7 +29,7 @@ using namespace test;
 
 void test_ratio()
 {
-    test::interfaz("inverse");
+    test::interface("inverse");
 
     {
 	using X = std::ratio<2,3>;
@@ -47,7 +47,7 @@ void test_is_power_of_ten(bool res)
 
 void test_is_power_of_ten()
 {
-    test::interfaz("is_power_of_ten");
+    test::interface("is_power_of_ten");
 
     test_is_power_of_ten<10, 1>(true);
     test_is_power_of_ten<100, 1>(true);
@@ -80,7 +80,7 @@ void test_exponent(int res)
 
 void test_exponent()
 {
-    test::interfaz("ratio_exponent_of_power_of_ten");
+    test::interface("ratio_exponent_of_power_of_ten");
 
     test_exponent<10, 1>(1);
     test_exponent<100, 1>(2);

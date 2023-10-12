@@ -34,7 +34,7 @@ using namespace test;
 
 void test_buffer()
 {
-    test::interfaz("TWI_iobuffer (input)");
+    test::interface("TWI_iobuffer (input)");
 
     atd::TWI_iobuffer<10> buffer;
     buffer.reset_as_input();
@@ -95,7 +95,7 @@ void test_buffer()
 
 
 // Lo cambiamos a output
-    test::interfaz("TWI_iobuffer (output)");
+    test::interface("TWI_iobuffer (output)");
 
     buffer.reset_as_output();
 
@@ -233,7 +233,7 @@ void test_iobxtream(const std::vector<Int>& x)
 
 void test_iobxtream()
 {
-    test::interfaz("iobxtream");
+    test::interface("iobxtream");
 
     test_iobxtream<char>({'a','b','c','d'});
     test_iobxtream<short>({1,2,3,4});

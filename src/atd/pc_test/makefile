@@ -5,12 +5,14 @@ DIRS = algorithm	\
 		bit			\
 		cast		\
 		char		\
+		cmath		\
 		crc			\
 		cstddef		\
 		cstring		\
 		decimal		\
 		double		\
 		eng_magnitude\
+		float		\
 		iobxtream	\
 		istream		\
 		iterator	\

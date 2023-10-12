@@ -58,7 +58,7 @@ private:
 
 void test_ostream()
 {    
-    test::interfaz("atd_ostream");
+    test::interface("atd_ostream");
 
     LCD lcd;
     prueba_ostream out{lcd};
@@ -97,7 +97,7 @@ void test_ostream()
 
 void test_istream()
 {
-    test::interfaz("atd_istream");
+    test::interface("atd_istream");
 
     UART uart{"12 0 56 0 -78"};
     prueba_istream in{uart};

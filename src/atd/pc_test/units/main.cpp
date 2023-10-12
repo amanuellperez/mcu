@@ -28,7 +28,7 @@ using namespace test;
 
 void test_unit()
 {
-    test::interfaz("Unit");
+    test::interface("Unit");
     
     using U1 = atd::Unit<1,2,3,4,0>;
     using U2 = atd::Unit<5,6,7,8,0>;

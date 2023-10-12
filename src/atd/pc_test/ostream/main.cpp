@@ -35,7 +35,7 @@ using namespace test;
 
 void test_print()
 {
-    test::interfaz("print");
+    test::interface("print");
 
     CHECK_WIDTH(2, 3, "  2");
     CHECK_WIDTH(34, 5, "   34");
@@ -43,7 +43,7 @@ void test_print()
 
 void test_print_int_as_hex()
 {
-    test::interfaz("print_int_as_hex");
+    test::interface("print_int_as_hex");
 
     std::cout << "TODO: hacerlas automáticas\n";
 

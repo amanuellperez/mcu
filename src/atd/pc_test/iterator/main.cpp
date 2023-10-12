@@ -43,7 +43,7 @@ struct My_array{
 
 void test_progmem_iterator()
 {
-    test::interfaz("progmem_iterator");
+    test::interface("progmem_iterator");
 
     My_array<6> a = {1,2,3,4,5,6};
 

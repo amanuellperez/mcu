@@ -29,7 +29,7 @@
  *
  *  - TODO:
  *    ¿Cómo construir el Decimal<3> x con valor 3.001?
- *    Si escribo Decimal<3> x{3,1}, este es "3.1", para escribir "3.001"
+ *    Si escribo Decimal<3> x{3,1}, este es "3.1", pero para escribir "3.001"
  *    tendría que poder escribir Decimal<3> x{3, 001} lo cual significa
  *    "3.(octal 01)" diferente en general de "3.001". 
  *    Como esto es algo que no creo que use, y siempre se puede definir
@@ -99,7 +99,7 @@ class Decimal;
 template <typename To_decimal, typename Rep1, int n1>
 constexpr inline To_decimal decimal_cast(const Decimal<Rep1, n1>& d)
 {
-    constexpr int n2 = To_decimal::num_decimals;
+    constexpr int n2 = To_decimal::ndecimals;
 
     if constexpr (std::is_same_v<Decimal<Rep1, n1>, To_decimal>)
 	return d;
@@ -119,7 +119,7 @@ constexpr inline To_decimal decimal_cast(const Decimal<Rep1, n1>& d)
 
 
 /*!
- *  \brief  Número decimal con num_decimals cifras decimales.
+ *  \brief  Número decimal con ndecimals cifras decimales.
  *
  *  Lo que vamos a hacer es operar con números con un número fijo de
  *  decimales. Esto es, si multiplicamos/dividimos números con 2 cifras
@@ -142,7 +142,7 @@ public:
     using Rep    = Rep0; // representación. Copio la notación de chrono.
     using Scalar = Rep;  
 
-    static constexpr int num_decimals = ndecimals0;
+    static constexpr int ndecimals = ndecimals0;
 
 // Construction
     constexpr Decimal() = default;
@@ -216,7 +216,7 @@ private:
     // vale 3.14
     Rep x_;
 
-    static constexpr Rep ten_to_the_n = ten_to_the<Rep>(num_decimals);
+    static constexpr Rep ten_to_the_n = ten_to_the<Rep>(ndecimals);
 
 
 // construcción
@@ -250,7 +250,7 @@ constexpr inline Decimal<Rep, n>::Decimal(const Decimal<Rep2, n2>& d)
 		  "Rep2 has to be convertible to Rep");
     static_assert(has_same_sign<Rep2, Rep>(),
 		  "Different signs of Rep2 and To_decimal::Rep!!!");
-    static_assert(n2 == num_decimals,
+    static_assert(n2 == ndecimals,
 	      "If you change the number of decimals, you loose precision."
 	      "Make explicit the cast: call 'decimal_cast'");
 		

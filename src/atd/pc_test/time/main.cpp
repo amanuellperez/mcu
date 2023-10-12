@@ -32,7 +32,7 @@ constexpr char weekday_as_str2[] = "DoLuMaMiJuViSa";
 
 void test_ostream()
 {
-    test::interfaz("only_date/time - write");
+    test::interface("only_date/time - write");
 
     std::tm t;
 
@@ -112,7 +112,7 @@ void test_only_time_input(const std::string& time, char sep, bool fail = false)
 
 void test_istream()
 {
-    test::interfaz(">> only_date/time");
+    test::interface(">> only_date/time");
 
     test_only_date_input("02/11/2019", '/');
     test_only_date_input("02-11-2019", '-');
@@ -144,7 +144,7 @@ void test_istream()
  
 void test_generic_time()
 {
-    test::interfaz("Generic_time");
+    test::interface("Generic_time");
 
     std::tm t;
 
@@ -203,7 +203,7 @@ void test_generic_time()
 
 void test_const_generic_time()
 {
-    test::interfaz("const_Generic_time");
+    test::interface("const_Generic_time");
 
     std::tm t;
 
@@ -238,7 +238,7 @@ std::cout << t.day() << '/'
 
 void test_date_time()
 {
-    test::interfaz("Date_time");
+    test::interface("Date_time");
 
     atd::Date_time t;
     t.day(6);
@@ -286,7 +286,7 @@ std::ostream& operator<<(std::ostream& out, const atd::Time_ms& t)
 
 void test_time_ms()
 {
-    test::interfaz("Time_ms");
+    test::interface("Time_ms");
 
     {// normal
     std::chrono::milliseconds ms{7427259};

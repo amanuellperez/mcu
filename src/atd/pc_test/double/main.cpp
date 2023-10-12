@@ -55,7 +55,7 @@ void print(It p, It pe)
 //
 //void test_mantissa_to_str()
 //{
-//    test::interfaz("mantissa_to_str");
+//    test::interface("mantissa_to_str");
 //
 //    test_mantissa_to_str(0, "0");
 //    test_mantissa_to_str(0.1234, "1234");
@@ -76,7 +76,7 @@ std::cout << x << "->" << i << '@' << f << '\n';
 
 void test_modf()
 {
-    test::interfaz("modf");
+    test::interface("modf");
 
 
 // normal
@@ -127,7 +127,7 @@ void test_print()
 //
 //void test_remove_trailing_zeros()
 //{
-//    test::interfaz("__remove_trailing_zeros");
+//    test::interface("__remove_trailing_zeros");
 //
 //    test_remove_trailing_zeros('1', '2', '3', '4', "1234"); 
 //    test_remove_trailing_zeros('0', '0', '0', '0', "0");
@@ -169,7 +169,7 @@ void test_to_string_without_zeros(double x, const std::string& res)
 
 void test_to_string()
 {
-    test::interfaz("to_string");
+    test::interface("to_string");
 
     test_to_string(1.23, "1.23");
     test_to_string(-1.03, "-1.03");
@@ -187,7 +187,7 @@ void test_to_string()
 
 void test_to_string_with_zeros()
 {
-    test::interfaz("to_string_with_zeros");
+    test::interface("to_string_with_zeros");
 
     test_to_string_with_zeros<2>(234.1999, "234.20");
     test_to_string_with_zeros<2>(234, "234.00");
@@ -196,7 +196,7 @@ void test_to_string_with_zeros()
 
 void test_to_string_without_zeros()
 {
-    test::interfaz("to_string_without_zeros");
+    test::interface("to_string_without_zeros");
     test_to_string_without_zeros<2>(234.1999, "234.2");
     test_to_string_without_zeros<2>(234, "234");
 

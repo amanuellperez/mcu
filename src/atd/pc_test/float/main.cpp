@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 Manuel Perez 
+// Copyright (C) 2023 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -17,49 +17,51 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "../../atd_cstddef.h"
+#include "../../atd_float.h"
 
 #include <alp_test.h>
 #include <alp_string.h>
+
 #include <iostream>
-#include <vector>
+
 
 
 using namespace test;
 
-void test_write_read(std::byte b)
+template <int ndec>
+void test_integer_and_decimal_part(int i0, int d0, int dres)
 {
-    std::stringstream str;
-    atd::write(str, b);
-    std::byte res;
-    atd::read(str, res);
-    CHECK_TRUE(b == res, alp::as_str() << "read/write(" << static_cast<int>(b) << ")");
-}
+    using D = atd::Decimal<int, ndec>;
 
-void test_print()
-{    
-    test::interface("print");
-
-    for (int i = 0; i < 256; ++i)
-	test_write_read(std::byte{static_cast<unsigned char>(i)});
-
-    std::cout << "RESTO NO AUTOMÁTICAS\n";
-
-    std::cout << "No sé cómo probarlo rápidamente. Lo pruebo usando UART\n";
-//    for (unsigned int i = 0; i < 255; ++i){
-//	std::cout << i  << " = ";
-//	atd::print_in_binary(std::cout , std::byte{i});
-//    }
+    D res;
+    atd::Integer_and_decimal_part{i0,d0}.as_decimal(res);
+    auto [i, d] = res.value();
+    CHECK_TRUE(i == i0 and d == dres, 
+		alp::as_str() << "as_decimal(" << i0 << ", " << d0 << ")");
 }
 
 
+void test_integer_and_decimal_part()
+{
+    test::interface("integer_and_decimal_part");
+    test_integer_and_decimal_part<2>(0, 0, 0);
+
+    test_integer_and_decimal_part<1>(2, 3, 3);
+    test_integer_and_decimal_part<2>(2, 3, 30);
+    test_integer_and_decimal_part<3>(2, 3, 300);
+
+    test_integer_and_decimal_part<1>(-2, 3, 3);
+    test_integer_and_decimal_part<2>(-2, 3, 30);
+    test_integer_and_decimal_part<3>(-2, 3, 300);
+
+}
 
 int main()
 {
 try{
-    test::header("atd_cstddef");
-
-    test_print();
+    test::header("atd_names");
+    
+    test_integer_and_decimal_part();
 
 }catch(std::exception& e)
 {

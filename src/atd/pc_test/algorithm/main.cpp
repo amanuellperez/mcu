@@ -46,7 +46,7 @@ void test_find_c(const char* msg, char c, const std::string& res, int n)
 
 void test_find_c()
 {    
-    test::interfaz("find_c");
+    test::interface("find_c");
 
     test_find_c("1.Opción 1\n2. Otra\n3. La tercera", '\n',
 		   "1.Opción 1");
@@ -80,7 +80,7 @@ void test_find_c()
 
 void test_copy()
 {
-    test::interfaz("copy");
+    test::interface("copy");
 
     {// p > q
     std::vector<int> p {1,2,3,4};

@@ -42,7 +42,7 @@ void print(std::ostream& out, const atd::Linear_array<T,N>& buf)
 
 void test_circular_array()
 {
-    test::interfaz("Circular_array");
+    test::interface("Circular_array");
 
     constexpr int N = 6;
     atd::Circular_array<int, N> buf;
@@ -248,7 +248,7 @@ void test_circular_array()
 
 void test_linear_array()
 {
-    test::interfaz("Linear_array");
+    test::interface("Linear_array");
 
     {// caso extremo
     atd::Linear_array<int, 5> buffer;
@@ -330,7 +330,7 @@ void test_linear_array()
 
 void test_array()
 {
-    test::interfaz("Array");
+    test::interface("Array");
 
     {
 	atd::Array<int, 4> x;
@@ -389,7 +389,7 @@ void test_array()
 
 void test_array_view()
 {
-    test::interfaz("Array_view");
+    test::interface("Array_view");
 
     {// caso extremo
     int x[4];
@@ -422,7 +422,7 @@ void test_array_view()
 
 //void test_container_view()
 //{
-//    test::interfaz("const_Container_view");
+//    test::interface("const_Container_view");
 //
 //    {// array
 //    int x[2];

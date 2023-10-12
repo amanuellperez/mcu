@@ -17,8 +17,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include <iostream>
 #include "../../atd_decimal.h"
+#include <iostream>
 #include "../../atd_type_traits.h"
 #include "../../atd_cast.h"
 #include "../../atd_concepts.h"
@@ -580,7 +580,7 @@ void test_traits()
 
 void test_decimal()
 {
-    test::interfaz("Decimal");
+    test::interface("Decimal");
 
     test_decimal_construct();
     test_decimal_common_type();

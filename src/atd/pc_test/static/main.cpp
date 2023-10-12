@@ -42,7 +42,7 @@ bool operator==(const Opt& a, const Opt& b)
 
 void test_static_array()
 {
-    test::interfaz("static_array");
+    test::interface("static_array");
 
     using Pin = atd::static_array<int, 10, 20, 30>;
     CHECK_TRUE(Pin::at<0> == 10, "static_array::at<>");
@@ -138,7 +138,7 @@ void test_static_find_if()
 
 void test_variadic_element()
 {
-    test::interfaz("static_variadic_element");
+    test::interface("static_variadic_element");
 
     CHECK_TRUE((atd::static_variadic_element<0, int, 10, 20, 30> == 10),
 	"static_variadic_element");

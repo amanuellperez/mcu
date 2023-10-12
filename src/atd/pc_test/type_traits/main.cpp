@@ -296,37 +296,37 @@ void test_sizeof_in_bytes()
 }
 
 template <typename T>
-void test_is_a_true_integral(bool res, const std::string& name_type)
+void test_is_integer(bool res, const std::string& name_type)
 {
-    CHECK_TRUE(	atd::is_a_true_integral_v<T> == res
-		, alp::as_str() << "is_a_true_integral_v<" << name_type << ">");
+    CHECK_TRUE(	atd::is_integer_v<T> == res
+		, alp::as_str() << "is_integer_v<" << name_type << ">");
 }
-void test_is_a_true_integral()
+void test_is_integer()
 {
-    test::interface("is_a_true_integral");
+    test::interface("is_integer");
 
-    test_is_a_true_integral<bool>(false, "bool");
+    test_is_integer<bool>(false, "bool");
 
     // No funciona con `unsigned char` ya que este es `uint8_t`!!!
-//    test_is_a_true_integral<char>(false, "char");
-//    test_is_a_true_integral<unsigned>(false, "unsigned char");
+//    test_is_integer<char>(false, "char");
+//    test_is_integer<unsigned>(false, "unsigned char");
 
-    test_is_a_true_integral<uint8_t>(true, "uint8_t");
-    test_is_a_true_integral<uint16_t>(true, "uint16_t");
-    test_is_a_true_integral<uint32_t>(true, "uint32_t");
-    test_is_a_true_integral<uint64_t>(true, "uint64_t");
+    test_is_integer<uint8_t>(true, "uint8_t");
+    test_is_integer<uint16_t>(true, "uint16_t");
+    test_is_integer<uint32_t>(true, "uint32_t");
+    test_is_integer<uint64_t>(true, "uint64_t");
 
-    test_is_a_true_integral<int8_t>(true, "int8_t");
-    test_is_a_true_integral<int16_t>(true, "int16_t");
-    test_is_a_true_integral<int32_t>(true, "int32_t");
-    test_is_a_true_integral<int64_t>(true, "int64_t");
+    test_is_integer<int8_t>(true, "int8_t");
+    test_is_integer<int16_t>(true, "int16_t");
+    test_is_integer<int32_t>(true, "int32_t");
+    test_is_integer<int64_t>(true, "int64_t");
 
-    test_is_a_true_integral<float>(  false, "float");
-    test_is_a_true_integral<double>( false, "double");
+    test_is_integer<float>(  false, "float");
+    test_is_integer<double>( false, "double");
 
-    test_is_a_true_integral<char*>( false, "char*");
-    test_is_a_true_integral<int*>( false, "int*");
-    test_is_a_true_integral<float*>( false, "float*");
+    test_is_integer<char*>( false, "char*");
+    test_is_integer<int*>( false, "int*");
+    test_is_integer<float*>( false, "float*");
 }
 
 
@@ -380,7 +380,7 @@ try{
     test_iterator_type_t();
     test_sizeof_in_bits();
     test_sizeof_in_bytes();
-    test_is_a_true_integral();
+    test_is_integer();
     test_is_decimal();
 
 }catch(std::exception& e)

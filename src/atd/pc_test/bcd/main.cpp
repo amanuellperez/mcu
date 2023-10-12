@@ -39,7 +39,7 @@ void test_bcd(int en_hex, int en_dec)
 
 void test_bcd()
 {
-    test::interfaz("BCD2int");
+    test::interface("BCD2int");
 
     test_bcd(0x00, 0);
     test_bcd(0x10, 10);
@@ -56,7 +56,7 @@ void test_bcd()
 
 void test_counter2()
 {
-    test::interfaz("Counter_BCD2");
+    test::interface("Counter_BCD2");
 
 {// basic
     atd::Counter_BCD2 c{2,3}; // max: 23

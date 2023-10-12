@@ -19,42 +19,45 @@
 
 #pragma once
 
-#ifndef __ATD_CONCEPTS_H__
-#define __ATD_CONCEPTS_H__
+#ifndef __ATD_CMATH_H__
+#define __ATD_CMATH_H__
 /****************************************************************************
  *
  * DESCRIPCION
- *	Ampliación de concepts.
- *
- *	Los voy a meter en el namespace Type, para poder escribir cosas del
- *	tipo:
- *	    template <Type::Integer Int>
- *	    ...
- *
- *	Si los dejo en `atd` podría tener conflicto de nombres en el futuro.
- *
+ *	Ampliación de <cmath>
  *
  * HISTORIA
  *    Manuel Perez
- *    12/10/2023 Integer, Decimal
+ *    05/04/2020 div
+ *    14/12/2020 abs
+ *    12/10/2023 Traido de atd_math.h (tenía dependencias circulares)
  *
  ****************************************************************************/
-#include "atd_type_traits.h"
+#include <utility>
 
-namespace Type{
+#include "atd_concepts.h"
 
-// Integer
-// --------
-template <typename T>
-concept Integer = atd::is_integer_v<T>;
+#undef abs
+namespace atd{
 
-// Decimal
-// --------
-template <typename T>
-concept Decimal = atd::is_decimal_v<T>;
+// abs
+// ---
+// El standard no suministra std::abs(unsigned), ni es constexpr
+template <Type::Integer Int>
+inline constexpr Int abs(Int x)
+{ return x >= 0? x: -x; }
 
 
-}// namespace Type
+// div
+// ---
+// El standard no define std::div como constexpr!!!
+template <typename Int>
+inline constexpr std::pair<Int, Int> div(Int x, Int y)
+{
+    return {x / y, x % y};
+}
+
+}// namespace
 
 #endif
 

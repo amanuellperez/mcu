@@ -87,7 +87,7 @@ void test_basic()
 
 void test_sequence_of_steps()
 {
-    test::interfaz("static_Sequence_of_steps");
+    test::interface("static_Sequence_of_steps");
 
     using array_x = atd::static_array<uint8_t, 0, 2, 5>;
     using array_y = atd::static_array<uint8_t, 1, 3, 7>;
@@ -103,7 +103,7 @@ void test_sequence_of_steps()
 
 // ------------
 {
-    test::interfaz("Sequence_of_steps");
+    test::interface("Sequence_of_steps");
 
     std::array<uint8_t, 3> x{0, 2, 5};
     std::array<uint8_t, 3> y{1, 3, 7};

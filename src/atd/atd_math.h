@@ -28,12 +28,12 @@
  *  - HISTORIA:
  *    Manuel Perez
  *    07/03/2020 ten_to_the
- *    05/04/2020 number_of_digits, div
- *    14/12/2020 abs
+ *    05/04/2020 number_of_digits
  *    05/03/2021 is_power_of_ten, exponent_of_power_of_ten
  *    23/07/2021 remove_trailing_zeros
  *    19/02/2022 Digits_of, Digits_from_left_to_right
  *    23/04/2023 is_even/is_odd
+ *    12/10/2023 Integer_and_decimal_part
  *
  *
  ****************************************************************************/
@@ -42,8 +42,7 @@
 #include <type_traits>
 #include <limits>
 #include <algorithm> 
-
-#undef abs
+#include "atd_cmath.h"
 
 namespace atd{
 
@@ -136,18 +135,7 @@ inline constexpr int number_of_digits(Int x)
 
 
 
-// El standard no define std::div como constexpr!!!
-template <typename Int>
-inline constexpr std::pair<Int, Int> div(Int x, Int y)
-{
-    return {x / y, x % y};
-}
 
-
-// El standard no suministra std::abs(unsigned), ni es constexpr
-template <typename Int>
-inline constexpr Int abs(Int x)
-{ return x >= 0? x: -x; }
 
 
 /// Devuelve x pero sin los 0 a la derecha.
@@ -347,6 +335,9 @@ inline bool is_even(const Int& x) {return !(x % 2); }
 
 template <typename Int>
 inline bool is_odd(const Int& x) {return (x % 2); }
+
+
+
 
 } // namespace
 

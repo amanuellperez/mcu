@@ -29,7 +29,7 @@ using namespace test;
 
 void test_number_of_digits()
 {
-    test::interfaz("number_of_digits");
+    test::interface("number_of_digits");
 
     for (int i = 0; i < 10; ++i)
 	CHECK_TRUE(atd::number_of_digits(i) == 1, alp::as_str() << "number_of_digits(" << i << ")");
@@ -47,7 +47,7 @@ void test_number_of_digits()
 
 void test_ten_to_the()
 {
-    test::interfaz("ten_to_the");
+    test::interface("ten_to_the");
 
     constexpr int i0 = atd::ten_to_the<int>(0);
     CHECK_TRUE(i0 == 1, "ten_to_the<0>");
@@ -72,7 +72,7 @@ void test_most_significant_digits(Int x0, Int res)
 
 void test_most_significant_digits()
 {
-    test::interfaz("most_significant_digits");
+    test::interface("most_significant_digits");
 
     test_most_significant_digits<int, 1>(1, 1);
     test_most_significant_digits<int, 1>(12, 1);
@@ -91,52 +91,6 @@ void test_most_significant_digits()
 }
 
 
-template <typename Int>
-constexpr std::pair<Int, Int> test_div(Int a, Int b)
-{
-    auto [aq, ar] = atd::div(a, b);
-    auto [sq, sr] = atd::div(a, b);
-    CHECK_TRUE(aq == sq and ar == sr,
-               alp::as_str() << "div(" << a << ", " << b << ")");
-
-    return {aq, ar};
-}
-
-constexpr int const_test_div()
-{
-    auto [q, r] = atd::div(10, 3);
-    return q + r;
-}
-
-void test_div()
-{
-    for (int a = 1; a < 1000; ++a)
-	for (int b = 1; b < 100; ++b)
-	    test_div(a, b);
-
-    constexpr int x = const_test_div();
-    CHECK_TRUE(x == const_test_div(), "constexpr div");
-}
-
-void test_abs()
-{
-    test::interfaz("test_abs()");
-    for (int n = 0; n < 100; ++n){
-	if (atd::abs(n) != n)
-	    CHECK_TRUE(true, alp::as_str() << "test_abs(" << n << ")");
-    }
-
-    for (int n = -100; n < 0; ++n){
-	if (atd::abs(n) != -n)
-	    CHECK_TRUE(true, alp::as_str() << "test_abs(" << n << ")");
-    }
-
-    for (unsigned int n = 0; n < 100; ++n){
-	if (atd::abs(n) != n)
-	    CHECK_TRUE(true, alp::as_str() << "test_abs(" << n << ")");
-    }
-
-}
 
 inline void test_is_power_of_ten(int x, bool res)
 {
@@ -147,7 +101,7 @@ inline void test_is_power_of_ten(int x, bool res)
 
 void test_is_power_of_ten()
 {
-    test::interfaz("is_power_of_ten");
+    test::interface("is_power_of_ten");
     
     test_is_power_of_ten(1, true);
     test_is_power_of_ten(10, true);
@@ -170,7 +124,7 @@ void test_is_power_of_ten()
 
 void test_power_of_ten()
 {
-    test::interfaz("power_of_ten");
+    test::interface("power_of_ten");
     
     CHECK_TRUE((atd::exponent_of_power_of_ten(1) == 0), "power_of_ten");
     CHECK_TRUE((atd::exponent_of_power_of_ten(10) == 1), "power_of_ten");
@@ -183,7 +137,7 @@ void test_power_of_ten()
 
 void test_remove_trailing_zeros()
 {
-    test::interfaz("remove_trailing_zeros");
+    test::interface("remove_trailing_zeros");
 
     CHECK_TRUE((atd::remove_trailing_zeros<int>(0) == 0),
                "remove_trailing_zeros");
@@ -228,7 +182,7 @@ void test_digits_of(int x, const std::array<int, N>& res)
 
 void test_digits_of()
 {
-    test::interfaz("Digits_of");
+    test::interface("Digits_of");
     {std::array<int, 1> res = {0}; test_digits_of(0, res);}
     {std::array<int, 1> res = {2}; test_digits_of(2, res);}
     {std::array<int, 2> res = {7, 3}; test_digits_of(37, res);}
@@ -254,7 +208,7 @@ void test_digits_from_left_to_right(int x, const std::array<int, N>& res, int nd
 
 void test_digits_from_left_to_right()
 {
-    test::interfaz("Digits_from_left_to_right");
+    test::interface("Digits_from_left_to_right");
 
 // sin ceros a la izda
     {std::array<int,1> res = {0}; test_digits_from_left_to_right(0, res);}
@@ -280,7 +234,7 @@ void test_digits_from_left_to_right()
 
 void test_is_even()
 {
-    test::interfaz("is_even/is_odd");
+    test::interface("is_even/is_odd");
     for (uint8_t i = 0; i < 10; i += 2){
 	CHECK_TRUE(atd::is_even(i), "is_even");
 	CHECK_TRUE(!atd::is_odd(i), "is_odd");
@@ -303,8 +257,6 @@ try{
     test_number_of_digits();
     test_ten_to_the();
     test_most_significant_digits();
-    test_div();
-    test_abs();
     test_remove_trailing_zeros();
     test_digits_of();
     test_digits_from_left_to_right();

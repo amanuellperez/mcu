@@ -39,7 +39,7 @@ bool equal(const double& a, const double& b)
 
 void test_constexpr()
 {
-    test::interfaz("constexpr");
+    test::interface("constexpr");
 
     using Freq = atd::ENG_frequency<int>;
     
@@ -50,7 +50,7 @@ void test_constexpr()
 
 void test_basic()
 {
-    test::interfaz("basic");
+    test::interface("basic");
     using Rep      = double;
     using Freq     = atd::ENG_frequency<Rep>;
     using Length   = atd::ENG_length<Rep>;
@@ -323,7 +323,7 @@ void test_basic()
 template <typename Rep>
 void test_basic2()
 {
-    test::interfaz("basic");
+    test::interface("basic");
 
     using Freq     = atd::ENG_frequency<Rep>;
     using Length   = atd::ENG_length<Rep>;
@@ -437,7 +437,7 @@ void test_basic2()
 
 void test_observers()
 {
-    test::interfaz("observers");
+    test::interface("observers");
 
     using Potential = atd::ENG_electric_potential<double>;
     {
@@ -473,7 +473,7 @@ void test_observers()
 
 void test_double()
 {
-    test::interfaz("double");
+    test::interface("double");
 
     using Length   = atd::ENG_length<double>;
 
@@ -521,7 +521,7 @@ void test_double()
 template <typename Rep>
 void test_order()
 {
-    test::interfaz("order");
+    test::interface("order");
 
     using Freq     = atd::ENG_frequency<Rep>;
 
@@ -601,7 +601,7 @@ void test_to_magnitude()
 void test_bugs()
 {
 
-    test::interfaz("bugs");
+    test::interface("bugs");
 
 {
     using Rep = atd::Decimal<uint32_t, 3>;
@@ -689,7 +689,7 @@ void test_print(const atd::ENG_Magnitude<U,R>& m, const std::string& res)
 
 void test_print()
 {
-    test::interfaz("print");
+    test::interface("print");
 
     test_print(atd::ENG_frequency<int>{100,0}, " Hz");
     test_print(atd::ENG_frequency<int>{100,3}, "kHz");
