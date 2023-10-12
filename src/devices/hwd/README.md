@@ -2,11 +2,11 @@
 Dispositivos a los que accedemos desde el microcontrolador.
 
 ## Índice
-* [Clasificación](#T-tipos)
-* [Escritura de drivers](#T-drivers)
-* [Drivers suministrados](#T-suministrados)
+* [Clasificación](#tipos)
+* [Escritura de drivers](#drivers)
+* [Drivers suministrados](#suministrados)
 
-## <a name="T-tipos"></a>Clasificación
+## <a name="tipos"></a>Clasificación
 En principio, distingo los siguientes tipos:
 
 * Built-in devices:
@@ -35,7 +35,7 @@ En principio, distingo los siguientes tipos:
 
 
 
-## <a name="T-drivers"></a>Escritura de drivers
+## <a name="drivers"></a>Escritura de drivers
 
 ¿Cómo escribir un driver? Mi propuesta (a día de hoy) es la siguiente:
 
@@ -228,7 +228,7 @@ genérico.
 
 
 
-## <a name="T-suministrados"></a>Drivers suministrados 
+## <a name="suministrados"></a>Drivers suministrados 
 
 ### EEPROMs
 | Reference | I2C | SPI | datasheet |
