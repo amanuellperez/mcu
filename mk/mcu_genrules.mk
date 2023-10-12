@@ -160,6 +160,7 @@ ifdef BIN
 all: $(HEADERS) $(BIN).hex 
 	@$(PRINTF) "-------------------------------------\n"
 	@$(PRINTF) "Compilados: $(SOURCES) $(ASM_SOURCES)\n"
+	@$(PRINTF) "Micro frequency = $(F_CPU)\n"
 	@$(PRINTF) "-------------------------------------\n\n"
 
 
