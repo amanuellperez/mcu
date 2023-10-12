@@ -34,7 +34,7 @@ void test_integer_and_decimal_part(int i0, int d0, int dres)
     using D = atd::Decimal<int, ndec>;
 
     D res;
-    atd::Integer_and_decimal_part{i0,d0}.as_decimal(res);
+    atd::Integer_and_decimal_part{i0,d0}.as(res);
     auto [i, d] = res.value();
     CHECK_TRUE(i == i0 and d == dres, 
 		alp::as_str() << "as_decimal(" << i0 << ", " << d0 << ")");

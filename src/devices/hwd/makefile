@@ -7,6 +7,7 @@ SOURCES= dev_BMP280_basic.cpp	\
 INCS= 	dev_BME280_basic.h		\
 		dev_BMP280_basic.h		\
 		dev_counter_CD4017B.h	\
+		dev_DHT11.h				\
 		dev_DS1307_basic.h		\
 		dev_DS1307_clock.h		\
 		dev_DS18B20.h			\

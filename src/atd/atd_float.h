@@ -70,7 +70,7 @@ struct Integer_and_decimal_part{
 
     // Escribe el número {integer_part, decimal_part} en `res`
     template <typename Rep, int ndecimals>
-    void as_decimal(Decimal<Rep, ndecimals>& res)
+    void as(Decimal<Rep, ndecimals>& res)
     { res = Decimal<Rep, ndecimals>{integer_part, decimal_part}; }
 
 // Data

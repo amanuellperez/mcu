@@ -1,8 +1,10 @@
 SOURCES= dev_one_wire.cpp
 
 INCS= 	dev_clocks.h	\
+		dev_cycle.h		\
 		dev_miniclock.h	\
-		dev_one_wire.h
+		dev_one_wire.h	\
+		dev_train_of_pulses.h
 
 
 LIB=mcu1_$(F_CPU)

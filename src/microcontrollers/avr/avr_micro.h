@@ -49,6 +49,10 @@ struct Micro{
     // interfaz static
     Micro() = delete;
 
+// Cfg
+// ---
+    static constexpr auto frequency = F_CPU;
+
 // Types
 // -----
     template <uint8_t n>

@@ -83,10 +83,10 @@ void print_received(const Train_of_pulses& pulse)
     uart << "Polarity = ";
     if (pulse.polarity())
 	uart << "1\n"
-	        "n\tlow\thigh";
+	        "\tlow\thigh";
     else
 	uart << "0"
-	        "n\thigh\tlow";
+	        "\thigh\tlow";
 
     uart << '\n';
 

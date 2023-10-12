@@ -23,6 +23,13 @@
 #define __DEV_EEPROM_25LC256_BASIC_H__
 /****************************************************************************
  *
+ * TODO
+ *  Esto está muy anticuado. Reescribir:
+ *		EEPROM<Micro, SPI>
+ *	ó
+ *		EEPROM<Micro, SPI, SPI_selector>
+ *
+ *
  *   - DESCRIPCION: Traductor de la EEPROM 25LC256
  *	
  *   - HISTORIA:

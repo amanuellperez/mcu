@@ -1,4 +1,4 @@
-// Copyright (C) 2022 Manuel Perez 
+// Copyright (C) 2023 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -101,8 +101,6 @@ inline Train_of_pulses<N>::Train_of_pulses()
  *	sensor genera semipulsos de 20 us, y muchos menores de 30 us. Las
  *	interrupciones no funcionan en este caso.
  ***************************************************************************/
-// TODO: estoy duplicando la memoria. Al implementar Train_of_pulses_isr_receiver
-//       puedo usar la memoria alojada en él para Train_of_pulses.
 template <typename Micro0,
 	  typename Miniclock_us0, 
 	  uint8_t receiver_pin0, 
