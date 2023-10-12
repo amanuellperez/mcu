@@ -153,7 +153,7 @@ Se puede organizar el código en diferentes niveles:
 
 ### Entorno
 
-Para configurar el entorno de trabajo basta con ejecutar `[mcu_environment.sh](mcu_environment.sh)`.
+Para configurar el entorno de trabajo basta con ejecutar [mcu_environment.sh](mcu_environment.sh).
 
 
 ### mk: Reglas para compilar
