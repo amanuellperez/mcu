@@ -266,7 +266,7 @@ Driver: [HD44780](#HD44780)
 |BME280     |  x  |  x  |  x  |     |     |       |  x  |  x    |[datasheet](datasheet/BME280.pdf)
 |BME680     |  x  |  x  |  x  |  x  |     |       |  x  |  x    |[datasheet](datasheet/BME680.pdf)
 |LM75A      |  x  |     |     |     |     |       |  x  |       |
-|DS18B20    |  x  |     |     |     |     |       |     |  x    |[datasheet](datasheet/DS18B20.pdf)
+|DS18B20    |  x  |     |     |     |     |   x   |     |       |[datasheet](datasheet/DS18B20.pdf)
 |DHT11	    |  x  |     |  x  |     |  x  |       |     |       |[datasheet](datasheet/DHT11.pdf)
 
 
