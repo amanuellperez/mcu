@@ -20,9 +20,10 @@
 #include "../../atd_type_traits.h"
 
 #include <alp_test.h>
+#include <alp_string.h>
+
 #include <iostream>
 
-using namespace atd;
 using namespace test;
 
 
@@ -37,36 +38,36 @@ struct Wrapper{
 
 void test_less_than()
 {
-    test::interfaz("Less_than");
+    test::interface("Less_than");
 
-    CHECK_TRUE((Wrapper<bool, Less_than<int, 3, 4>::value>::value == true),
+    CHECK_TRUE((Wrapper<bool, atd::Less_than<int, 3, 4>::value>::value == true),
                "3 < 4?");
-    CHECK_TRUE((Wrapper<bool, Less_than<int, 4, 4>::value>::value == false),
+    CHECK_TRUE((Wrapper<bool, atd::Less_than<int, 4, 4>::value>::value == false),
                "4 < 4?");
-    CHECK_TRUE((Wrapper<bool, Less_than<int, 4, 3>::value>::value == false),
+    CHECK_TRUE((Wrapper<bool, atd::Less_than<int, 4, 3>::value>::value == false),
                "4 < 3?");
 }
 
 
 void test_pertenece_al_intervalo_cerrado()
 {
-    test::interfaz("test_pertenece_al_intervalo_cerrado");
+    test::interface("test_pertenece_al_intervalo_cerrado");
 
     CHECK_TRUE(
         (Wrapper<bool,
-                 Pertenece_al_intervalo_cerrado<int, 5, 2, 8>::value>::value 
+                 atd::Pertenece_al_intervalo_cerrado<int, 5, 2, 8>::value>::value 
 		== true),
         "5 pertenece a [2,8]?");
 
     CHECK_TRUE(
         (Wrapper<bool,
-                 Pertenece_al_intervalo_cerrado<int, 1, 2, 8>::value>::value 
+                 atd::Pertenece_al_intervalo_cerrado<int, 1, 2, 8>::value>::value 
 		== false),
         "1 pertenece a [2,8]?");
 
     CHECK_TRUE(
         (Wrapper<bool,
-                 Pertenece_al_intervalo_cerrado<int, 10, 2, 8>::value>::value 
+                 atd::Pertenece_al_intervalo_cerrado<int, 10, 2, 8>::value>::value 
 		== false),
         "10 pertenece a [2,8]?");
 }
@@ -85,7 +86,7 @@ inline constexpr int f()
 
 void test_always_false()
 {
-    test::interfaz("always_false_v");
+    test::interface("always_false_v");
 
     CHECK_TRUE(f<0>() == 1, "always_false_v");
     CHECK_TRUE(f<1>() == 30, "always_false_v");
@@ -96,7 +97,7 @@ void test_always_false()
 
 void test_has_same_sign()
 {
-    test::interfaz("has_same_sign");
+    test::interface("has_same_sign");
 
     CHECK_TRUE((atd::has_same_sign<int, int>()), "has_same_sign");
     CHECK_TRUE((!atd::has_same_sign<int, unsigned int>()), "has_same_sign");
@@ -112,7 +113,7 @@ void test_same_type_double_bits()
 
 void test_same_type_double_bits()
 {
-    test::interfaz("same_type_with_double_bits");
+    test::interface("same_type_with_double_bits");
     test_same_type_double_bits<uint8_t, uint16_t>();
     test_same_type_double_bits<uint16_t, uint32_t>();
     test_same_type_double_bits<uint32_t, uint64_t>();
@@ -133,7 +134,7 @@ void test_same_type_at_least32()
 
 void test_same_type_at_least32()
 {
-    test::interfaz("same_type_at_least32");
+    test::interface("same_type_at_least32");
     test_same_type_at_least32<uint8_t, uint32_t>();
     test_same_type_at_least32<uint16_t, uint32_t>();
     test_same_type_at_least32<uint32_t, uint32_t>();
@@ -163,7 +164,7 @@ void test_make_type_same_sign_as()
 
 void test_same_sign_as()
 {
-    test::interfaz("make_type");
+    test::interface("make_type");
 
     test_same_sign_as<int8_t, int8_t, int8_t>();
     test_same_sign_as<uint8_t, int8_t, int8_t>();
@@ -223,7 +224,7 @@ void test_value_type_t(const std::string& name)
 
 void test_value_type_t()
 {
-    test::interfaz("value_type_t");
+    test::interface("value_type_t");
     test_value_type_t<int[10], int>("int[10]");
     test_value_type_t<A, long>("A::value_type");
 }
@@ -236,7 +237,7 @@ void test_size_type_t(const std::string& name)
 
 void test_size_type_t()
 {
-    test::interfaz("size_type_t");
+    test::interface("size_type_t");
     test_size_type_t<int[10], int>("int[10]");
     test_size_type_t<A, unsigned long>("A::size_type");
 }
@@ -250,7 +251,7 @@ void test_iterator_type_t(const std::string& name)
 
 void test_iterator_type_t()
 {
-    test::interfaz("iterator_type_t");
+    test::interface("iterator_type_t");
     test_iterator_type_t<int[10], int*>("int[10]");
     test_iterator_type_t<A, double>("A::iterator_type");
 }
@@ -263,7 +264,7 @@ void test_number_constexpr(const std::string& msg)
 
 void test_sizeof_in_bits()
 {
-    test::interfaz("sizeof_in_bits");
+    test::interface("sizeof_in_bits");
 
     CHECK_TRUE(atd::sizeof_in_bits<uint8_t>() == 8, "sizeof_in_bits");
     CHECK_TRUE(atd::sizeof_in_bits<int8_t>() == 8, "sizeof_in_bits");
@@ -280,7 +281,7 @@ void test_sizeof_in_bits()
 
 void test_sizeof_in_bytes()
 {
-    test::interfaz("sizeof_in_bytes");
+    test::interface("sizeof_in_bytes");
 
     CHECK_TRUE(atd::sizeof_in_bytes<uint8_t>() == 1, "sizeof_in_bytes");
     CHECK_TRUE(atd::sizeof_in_bytes<int8_t>() == 1, "sizeof_in_bytes");
@@ -292,6 +293,40 @@ void test_sizeof_in_bytes()
     CHECK_TRUE(atd::sizeof_in_bytes<int64_t>() == 8, "sizeof_in_bytes");
 
     test_number_constexpr<atd::sizeof_in_bytes<uint8_t>()>("sizeof_in_bytes is constexpr");
+}
+
+template <typename T>
+void test_is_a_true_integral(bool res, const std::string& name_type)
+{
+    CHECK_TRUE(	atd::is_a_true_integral_v<T> == res
+		, alp::as_str() << "is_a_true_integral_v<" << name_type << ">");
+}
+void test_is_a_true_integral()
+{
+    test::interface("is_a_true_integral");
+
+    test_is_a_true_integral<bool>(false, "bool");
+
+    // No funciona con `unsigned char` ya que este es `uint8_t`!!!
+//    test_is_a_true_integral<char>(false, "char");
+//    test_is_a_true_integral<unsigned>(false, "unsigned char");
+
+    test_is_a_true_integral<uint8_t>(true, "uint8_t");
+    test_is_a_true_integral<uint16_t>(true, "uint16_t");
+    test_is_a_true_integral<uint32_t>(true, "uint32_t");
+    test_is_a_true_integral<uint64_t>(true, "uint64_t");
+
+    test_is_a_true_integral<int8_t>(true, "int8_t");
+    test_is_a_true_integral<int16_t>(true, "int16_t");
+    test_is_a_true_integral<int32_t>(true, "int32_t");
+    test_is_a_true_integral<int64_t>(true, "int64_t");
+
+    test_is_a_true_integral<float>(  false, "float");
+    test_is_a_true_integral<double>( false, "double");
+
+    test_is_a_true_integral<char*>( false, "char*");
+    test_is_a_true_integral<int*>( false, "int*");
+    test_is_a_true_integral<float*>( false, "float*");
 }
 
 int main()
@@ -311,6 +346,7 @@ try{
     test_iterator_type_t();
     test_sizeof_in_bits();
     test_sizeof_in_bytes();
+    test_is_a_true_integral();
 
 }catch(std::exception& e)
 {

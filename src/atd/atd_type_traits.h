@@ -36,6 +36,7 @@
  *    13/08/2021 common_type_if_convertible_t
  *    23/12/2022 value_type_t<T>/size_type<T>/iterator_type<T>
  *    25/02/2023 sizeof_in_bits<T>/size_of_in_bytes<T>
+ *    12/10/2023 is_a_true_integral
  *
  ****************************************************************************/
 #include <type_traits>
@@ -354,6 +355,63 @@ inline constexpr size_t sizeof_in_bits()
 }
 
 
+// is_a_true_integral
+// ------------------
+// Uno de los problemas con el standar de C++ es que considera `char` que es
+// un CARACTER como un integral type. Pero un carácter NO es un entero. Por
+// ello defino is_a_true_integral que excluye los char de los enteros
+// (mentira, ya que uint8_t que es un entero el compilador realmente lo
+// concibe como tipo char, lo cual es un error heredado, creo, de C)
+namespace impl_of{
+template <typename>
+struct is_a_true_integral:  std::false_type {};
+
+// `bool` no es un entero!!! bool es true/false. NO ES UN NÚMERO!!!
+//template <>
+//struct is_a_true_integral<bool> :  true_type {};
+
+// uint8_t/int8_t internamente son char!!! :(
+template <>
+struct is_a_true_integral<uint8_t> :  std::true_type {};
+
+template <>
+struct is_a_true_integral<int8_t> :  std::true_type {};
+
+template <>
+struct is_a_true_integral<short> :  std::true_type {};
+
+template <>
+struct is_a_true_integral<unsigned short> :  std::true_type {};
+
+template <>
+struct is_a_true_integral<int> :  std::true_type {};
+
+template <>
+struct is_a_true_integral<unsigned int> :  std::true_type {};
+
+template <>
+struct is_a_true_integral<long> :  std::true_type {};
+
+template <>
+struct is_a_true_integral<unsigned long> :  std::true_type {};
+
+template <>
+struct is_a_true_integral<long long> :  std::true_type {};
+
+template <>
+struct is_a_true_integral<unsigned long long> :  std::true_type {};
+}// impl_of
+
+/// is_a_true_integral
+template <typename T>
+struct is_a_true_integral: 
+     impl_of::is_a_true_integral<std::remove_cv_t<T>>::type
+{};
+
+
+/// is_a_true_integral_v
+template <typename T>
+inline constexpr bool is_a_true_integral_v = is_a_true_integral<T>::value;
 }// namespace
 
 #endif

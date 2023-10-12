@@ -164,56 +164,58 @@ inline constexpr bool is_null_pointer_v = is_null_pointer<T>::value;
 // dependiendo de si es o no integral type
 // Observar que se incluye char como tipo integral, pero... ¡es un caracter,
 // no un número!!! (legacy code???)
+namespace impl_of{
 template <typename>
-struct _is_integral_without_cv: public false_type {};
+struct is_integral:  false_type {};
 
 template <>
-struct _is_integral_without_cv<bool> : public true_type {};
+struct is_integral<bool> :  true_type {};
 
 template <>
-struct _is_integral_without_cv<char> : public true_type {};
+struct is_integral<char> :  true_type {};
 
 template <>
-struct _is_integral_without_cv<signed char> : public true_type {};
+struct is_integral<signed char> :  true_type {};
 
 template <>
-struct _is_integral_without_cv<unsigned char> : public true_type {};
+struct is_integral<unsigned char> :  true_type {};
 
 template <>
-struct _is_integral_without_cv<char16_t> : public true_type {};
+struct is_integral<char16_t> :  true_type {};
 
 template <>
-struct _is_integral_without_cv<char32_t> : public true_type {};
+struct is_integral<char32_t> :  true_type {};
 
 template <>
-struct _is_integral_without_cv<short> : public true_type {};
+struct is_integral<short> :  true_type {};
 
 template <>
-struct _is_integral_without_cv<unsigned short> : public true_type {};
+struct is_integral<unsigned short> :  true_type {};
 
 template <>
-struct _is_integral_without_cv<int> : public true_type {};
+struct is_integral<int> :  true_type {};
 
 template <>
-struct _is_integral_without_cv<unsigned int> : public true_type {};
+struct is_integral<unsigned int> :  true_type {};
 
 template <>
-struct _is_integral_without_cv<long> : public true_type {};
+struct is_integral<long> :  true_type {};
 
 template <>
-struct _is_integral_without_cv<unsigned long> : public true_type {};
+struct is_integral<unsigned long> :  true_type {};
 
 template <>
-struct _is_integral_without_cv<long long> : public true_type {};
+struct is_integral<long long> :  true_type {};
 
 template <>
-struct _is_integral_without_cv<unsigned long long> : public true_type {};
+struct is_integral<unsigned long long> :  true_type {};
+}// impl_of
 
 /// is_integral
 // Observar la forma tan curiosa de cómo hacer la composición de dos funciones
 template <typename T>
 struct is_integral: 
-    public _is_integral_without_cv<remove_cv_t<T>>::type
+     impl_of::is_integral<remove_cv_t<T>>::type
 {};
 
 
