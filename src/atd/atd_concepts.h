@@ -36,7 +36,7 @@
  *
  * HISTORIA
  *    Manuel Perez
- *    12/10/2023 Integral
+ *    12/10/2023 Integral, Decimal
  *
  ****************************************************************************/
 #include "atd_type_traits.h"
@@ -48,6 +48,10 @@ namespace Type{
 template <typename T>
 concept Integral = atd::is_a_true_integral_v<T>;
 
+// Decimal
+// --------
+template <typename T>
+concept Decimal = atd::is_decimal_v<T>;
 
 
 }// namespace Type

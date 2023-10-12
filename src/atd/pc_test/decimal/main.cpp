@@ -21,6 +21,7 @@
 #include "../../atd_decimal.h"
 #include "../../atd_type_traits.h"
 #include "../../atd_cast.h"
+#include "../../atd_concepts.h"
 
 #include <alp_test.h>
 #include <alp_string.h>
@@ -571,6 +572,9 @@ void test_traits()
     test_traits<uint16_t>(false);
     test_traits<uint32_t>(false);
     test_traits<uint64_t>(false);
+
+    CHECK_TRUE(atd::is_decimal_v<atd::Decimal<int, 3>>, "is_decimal_v");
+    CHECK_TRUE(Type::Decimal<atd::Decimal<int, 3>>, "Decimal");
 }
 
 

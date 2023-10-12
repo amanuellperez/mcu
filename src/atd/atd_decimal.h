@@ -1,4 +1,4 @@
-// Copyright (C) 2020-2022 Manuel Perez 
+// Copyright (C) 2020-2023 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -54,6 +54,7 @@
  *    14/08/2021       se permite operar con escalares que sean convertibles
  *                     a Rep.
  *    06/03/2022       print(out, decimal)
+ *    12/10/2023       is_decimal_v<Decimal> == true
  *
  ****************************************************************************/
 #include <utility>
@@ -754,6 +755,11 @@ struct same_type_with_double_bits_<Decimal<Rep, N>>{
     using type = Decimal<same_type_with_double_bits<Rep>, N>;
 };
 
+
+// is_decimal
+// ----------
+template <typename Rep, int N>
+struct is_decimal<Decimal<Rep, N>> : std::true_type {};
 
 }// namespace atd
 

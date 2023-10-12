@@ -329,6 +329,40 @@ void test_is_a_true_integral()
     test_is_a_true_integral<float*>( false, "float*");
 }
 
+
+template <typename T>
+void test_is_decimal(bool res, const std::string& name_type)
+{
+    CHECK_TRUE(	atd::is_decimal_v<T> == res
+		, alp::as_str() << "is_decimal_v<" << name_type << ">");
+}
+void test_is_decimal()
+{
+    test::interface("is_decimal");
+
+    test_is_decimal<bool>(false, "bool");
+
+    test_is_decimal<char>(false, "char");
+    test_is_decimal<unsigned>(false, "unsigned char");
+
+    test_is_decimal<uint8_t>(false, "uint8_t");
+    test_is_decimal<uint16_t>(false, "uint16_t");
+    test_is_decimal<uint32_t>(false, "uint32_t");
+    test_is_decimal<uint64_t>(false, "uint64_t");
+
+    test_is_decimal<int8_t>(false, "int8_t");
+    test_is_decimal<int16_t>(false, "int16_t");
+    test_is_decimal<int32_t>(false, "int32_t");
+    test_is_decimal<int64_t>(false, "int64_t");
+
+    test_is_decimal<float>( true, "float");
+    test_is_decimal<double>( true, "double");
+
+    test_is_decimal<char*>( false, "char*");
+    test_is_decimal<int*>( false, "int*");
+    test_is_decimal<float*>( false, "float*");
+}
+
 int main()
 {
 try{
@@ -347,6 +381,7 @@ try{
     test_sizeof_in_bits();
     test_sizeof_in_bytes();
     test_is_a_true_integral();
+    test_is_decimal();
 
 }catch(std::exception& e)
 {

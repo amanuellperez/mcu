@@ -36,7 +36,7 @@
  *    13/08/2021 common_type_if_convertible_t
  *    23/12/2022 value_type_t<T>/size_type<T>/iterator_type<T>
  *    25/02/2023 sizeof_in_bits<T>/size_of_in_bytes<T>
- *    12/10/2023 is_a_true_integral
+ *    12/10/2023 is_a_true_integral, is_decimal
  *
  ****************************************************************************/
 #include <type_traits>
@@ -412,6 +412,27 @@ struct is_a_true_integral:
 /// is_a_true_integral_v
 template <typename T>
 inline constexpr bool is_a_true_integral_v = is_a_true_integral<T>::value;
+
+
+// is_decimal
+// ----------
+// (RRR) Si esta clase es sinónima de `std:is_floating_point`¿para qué
+//       definirla?
+//
+//       cppreference indica que std::is_floating_point NO se puede
+//       especializar, pero yo quiero especializarla para atd::Decimal, ya que
+//       es de tipo floating_point. Como no puedo (=debo) violar el estandar
+//       me veo obligado a definir mi propio atd::is_floating_point. Opto por
+//       no llamarlo `atd::is_floating_point` por el lío que generaría el
+//       nombre con el del estandard.
+//
+//       Y esta clase se puede especializar todo lo que quieras!!!
+template <typename T>
+struct is_decimal: std::is_floating_point<T> {};
+
+template <typename T>
+inline constexpr bool is_decimal_v = is_decimal<T>::value;
+
 }// namespace
 
 #endif

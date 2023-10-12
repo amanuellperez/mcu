@@ -227,25 +227,26 @@ inline constexpr bool is_integral_v = is_integral<T>::value;
 
 // is_floating_point
 // -----------------
+namespace impl_of{
 template <typename T>
-struct _is_floating_point_without_cv: public false_type {};
+struct is_floating_point: false_type {};
 
 template <>
-struct _is_floating_point_without_cv<float> : public true_type {};
+struct is_floating_point<float> : true_type {};
 
 template <>
-struct _is_floating_point_without_cv<double> : public true_type {};
+struct is_floating_point<double> : true_type {};
 
 template <>
-struct _is_floating_point_without_cv<long double> : public true_type {};
-
+struct is_floating_point<long double> : true_type {};
+} // impl_of
 
 // is_floating_point
 // -----------------
 // Observar la forma tan curiosa de cómo hacer la composición de dos funciones
 template <typename T>
 struct is_floating_point: 
-    public _is_floating_point_without_cv<remove_cv_t<T>>::type
+	impl_of::is_floating_point<remove_cv_t<T>>::type
 {};
 
 
