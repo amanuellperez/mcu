@@ -115,6 +115,54 @@ Por ello de momento cuando un device se comunique directamente usando pines
 con el micro los parámetros de plantilla a pasar serán `Device<Micro, pin0,
 pin1, pin2, ...>` o mejor `Device<Micro, struct_with_npins>`.
 
+#### Problemas con los parámetros
+
+Al empezar a implementar los devices parametrizándolos con el número de pin
+surge la posibilidad de generar programas con código duplicado. 
+
+Supongamos que creo la clase `DHT11<Micro, npin>`. Si mi aplicación solo tiene
+un sensor se genera el código mínimo correspondiente para ese sensor, pero
+¿qué pasa si tenemos dos sensores de ese tipo? Crearíamos dos clases: una para
+conectar el sensor al pin número 14 `DHT11<atmega::Micro, 14>` y otra para
+conectar otro sensor al pin 15 `DHT11<atmega::Micro, 15>`. El compilador va a
+generar 2 clases DIFERENTES, a pesar de que el código es el mismo siendo la
+única diferencia el número de pin.
+
+Aunque algunos dispositivos es poco probable que se conecten 2 de un mismo
+tipo a un mismo microcontrolador (ejemplo, no creo que sea muy habitual
+conectar 2 LCDs a un mismo micro), los dispositivos SPI y TWI están pensados
+para ser conectados muchos a la vez. Por ejemplo, podría conectar varias
+EEPROMs juntas al mismo SPI (aunque sería mejor comprar un chip con más
+memoria), o conectar varios DS18B20 a una misma línea para monitorizar la
+temperatura de un edificio (esto sí parece más factible).
+
+En el caso de los devices que se conectan a SPI no se duplica el código, ya
+que `EEPROM<Micro, SPI, SPI_selector>` es la misma clase para TODAS esas
+EEPROM. Lo mismo ocurre con 1Wire (1Wi <-- ¿puedo abreviarlo así?) y TWI. El
+problema surge cuando el protocolo es vía pines.
+
+
+##### Aclaremos el problema
+
+Por una parte:
+
+1. Es muy sencillo leer los ficheros `prj_dev.h` y ver cómo se conectan los
+   dispositivos si paso como parámetros los pines. La forma de conectarlo
+   queda documentado en código.
+
+Luego quiero mantener, si se puede, esa forma de definir los devices.
+
+Pero por otra:
+
+2. Si se implementa la clase de forma normal se duplica código.
+
+Lo que quiero es poder usar 2 devices del mismo tipo en una aplicación sin que
+se duplique el código. 
+
+En principio esto sugiere que la clase sea un wrapper de la implementación
+real, para no duplicarla. Probemos ese método a ver sí funciona.
+
+
 #### ¿Permitir construir objetos o no?
 
 ##### Devices conectados a pines
