@@ -79,8 +79,9 @@ namespace atd{
 // ------------
 // concat_bytes
 // ------------
+namespace impl_of{
 template <typename Int, typename Byte>
-Int __concat_bytes(Int res, Byte b)
+Int concat_bytes(Int res, Byte b)
 {
     res <<= 8;
     res |= static_cast<uint8_t>(b);
@@ -90,14 +91,14 @@ Int __concat_bytes(Int res, Byte b)
 
 
 template <typename Int, typename Byte, typename... Tail>
-Int __concat_bytes(Int res, Byte b, Tail... b1_bn)
+Int concat_bytes(Int res, Byte b, Tail... b1_bn)
 {
     res <<= 8;
     res |= static_cast<uint8_t>(b);
 
-    return __concat_bytes(res, b1_bn...);
+    return concat_bytes(res, b1_bn...);
 }
-
+}// impl_of
 
 // Caso degenerado. ¿Alguien lo llamará?
 template <typename Int, typename Byte, typename ...Tail>
@@ -114,7 +115,7 @@ constexpr inline Int concat_bytes(Byte b0, Tail... b1_bn)
     Int res{0};
     
     res = static_cast<uint8_t>(b0);
-    return __concat_bytes(res, b1_bn...);
+    return impl_of::concat_bytes(res, b1_bn...);
 }
 
 

@@ -128,19 +128,14 @@ conectar otro sensor al pin 15 `DHT11<atmega::Micro, 15>`. El compilador va a
 generar 2 clases DIFERENTES, a pesar de que el código es el mismo siendo la
 única diferencia el número de pin.
 
-Aunque algunos dispositivos es poco probable que se conecten 2 de un mismo
-tipo a un mismo microcontrolador (ejemplo, no creo que sea muy habitual
-conectar 2 LCDs a un mismo micro), los dispositivos SPI y TWI están pensados
-para ser conectados muchos a la vez. Por ejemplo, podría conectar varias
-EEPROMs juntas al mismo SPI (aunque sería mejor comprar un chip con más
-memoria), o conectar varios DS18B20 a una misma línea para monitorizar la
-temperatura de un edificio (esto sí parece más factible).
+Haciendo experimentos, si se elimina toda la información para depurar, el
+compilador optimiza todo bastante y supuestamente el linker fusionaría las
+funciones comunes a todas esas clases no generando código de más. Con lo que
+de momento voy a mantener la idea inicial de pasar como parámetro los pines a
+los que se conecta el dispositivo. 
 
-En el caso de los devices que se conectan a SPI no se duplica el código, ya
-que `EEPROM<Micro, SPI, SPI_selector>` es la misma clase para TODAS esas
-EEPROM. Lo mismo ocurre con 1Wire (1Wi <-- ¿puedo abreviarlo así?) y TWI. El
-problema surge cuando el protocolo es vía pines.
-
+El uso dirá realmente si se genera código de más o no. (En caso de generarse
+código de más se puede reestructurar el código existente para evitar eso).
 
 ##### Aclaremos el problema
 

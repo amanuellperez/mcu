@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 Manuel Perez 
+// Copyright (C) 2023 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -23,80 +23,112 @@
 #define __DEV_DHT22_H__
 /****************************************************************************
  *
- *   - DESCRIPCION: Driver para acceder al sensor de temperatura y humedad
- *	    DHT22 y para el DHT11.
+ * DESCRIPCION
+ *	Driver del DHT22 (el traductor es DHT_protocol)
  *
- *	    Los dos sensores funcionan igual, la diferencia es que el DHT22
- *	    tiene más resolución. De todas formas de los 2 sensores DHT11 que
- *	    compré los 2 miden fatal el RH, y uno da la temperatura correcta
- *	    pero el otro no (no parece que sean muy buenos sensores).
- *
- *	    Conecto una pull-up resistor tal como dice la datasheet de estos
- *	    sensores.
- *
- *   - COMENTARIOS: Usa el timer0, con lo que la aplicación no puede usarlo.
- *
- *   - HISTORIA:
- *           Manuel Perez - 19/04/2018 Escrito
+ * HISTORIA
+ *    Manuel Perez
+ *    14/10/2023 Escrito
  *
  ****************************************************************************/
-#include "avr_pin.h"
-
-
+#include "dev_DHT11.h" // DHT_protocol
+#include <atd_magnitude.h>
+#include <utility>
 
 namespace dev{
-/*!
- *  \brief  Driver del DHT22
- *
- *  Conoce el protocolo de comunicación con este sensor.
- *  Al no poder controlar el tiempo, lo único que deja al cliente gestionar
- *  es que llame cada 2 segundos a la función read para leer la temperatura
- *  y la humedad.
- *
- */
+
+// Fundamental a tener en cuenta:
+// + When power is supplied to sensor, don't send any instruction to the 
+//   sensor within one second to pass unstable status
+//
+// + Collecting period should be : >2 second. (esperar 2 segundos entre
+//   medidas).
+// 
+// + Todas las funciones son secuenciales, bloquean al micro hasta que 
+//   acaban de ejecutarse.
+//
+template <typename Micro0, uint8_t dht_pin>
 class DHT22{
 public:
-    enum class Error
-    {
-      NONE = 0,
-      BUS_HUNG,
-      NOT_PRESENT,
-      ACK_TOO_LONG,
-      SYNC_TIMEOUT,
-      DATA_TIMEOUT,
-      CHECKSUM
-    };
+// Types
+    using Micro  = Micro0;
+    using Result = DHT_protocol::Result;
 
-    /// Conectamos el sensor al pin indicado
-    explicit DHT22(uint8_t num_pin);
+    using Celsius  = atd::Celsius<atd::Decimal<int32_t, 1>>;
+    using Humidity = atd::Decimal<int32_t, 1>;
 
-    /// Actualiza la la temperatura y el % de humedad
-    /// Esta función hay que llamarla cada 2 segundos. 
-    /// No voy a llevar control del tiempo aquí para no bloquear ningún timer.
-    /// Será el cliente el responsable de saber cuándo llamar a esta función.
-    /// Devuelve si la lectura fue realizada con éxito (true) o no (false)
-    /// Usa internamente el Timer0!!!
-    Error read();
+// Functions
+    // El valor devuelto será válido si result_last_operation == ok
+    static std::pair<Celsius, Humidity> read();
 
-    // Última lectura realizada con éxito.
-    int8_t T_parte_entera;
-    uint8_t T_parte_decimal;
-    uint8_t RH_parte_entera;
-    uint8_t RH_parte_decimal;
+
+// Interfaz unificado para sensores
+    static Celsius read_temperature();
+    static Humidity read_humidity();
+
+
+// Gestión de errores
+    // En caso de que la última operación haya fallado, aquí se pueden
+    // encontrar los detalles.
+    static Result result_last_operation() {return result_;}
+    static bool last_operation_fail() {return result_ != Result::ok;}
+
 
 private:
-    // pin de datos al que conectamos el sensor
-    // datos del pin (las funciones de Pin son a dia de hoy costosas, no
-    // funcionando si uso Pin)
-    uint8_t num_pin_;
+// Data
+    inline static Result result_;
 
-    constexpr static uint8_t DATA_BIT_COUNT= 40u;
+// Internal cfg
+    static constexpr uint8_t start_time_ms = 1;
 
-    // Funciones de ayuda
-    Error read_data(uint8_t* bit_high, uint8_t* bit_low);
+// Special values
+    static constexpr Celsius null_temperature = Celsius{-1};
+    static constexpr Humidity null_humidity   = Humidity{-1};
 };
 
-}// namespace
+
+template <typename M, uint8_t npin>
+std::pair<typename DHT22<M, npin>::Celsius, 
+	  typename DHT22<M, npin>::Humidity> 
+	DHT22<M, npin>::read()
+{
+    uint8_t data[5];
+
+    result_ = DHT_protocol::basic_read<Micro, npin, start_time_ms>(data);
+    if (result_ != Result::ok)
+	return {null_temperature, null_humidity};
+
+    using Dec = atd::Decimal<int32_t, 1>;
+    int32_t h = atd::concat_bytes<int32_t>(data[0], data[1]);
+    Dec dec_H = Dec::from_internal_value(h);
+
+    int32_t t = atd::concat_bytes<int32_t>(data[2], data[3]);
+    Dec dec_T = Dec::from_internal_value(t);
+
+    Celsius T{dec_T};
+    Humidity H{dec_H};
+
+    return {T, H};
+}
+
+template <typename M, uint8_t npin>
+inline DHT22<M, npin>::Celsius DHT22<M, npin>::read_temperature()
+{
+    auto [T, H] = read();
+    
+    return T;
+}
+
+template <typename M, uint8_t npin>
+inline DHT22<M, npin>::Humidity DHT22<M, npin>::read_humidity()
+{
+    auto [T, H] = read();
+    
+    return H;
+}
+
+}// namespace dev
+ 
 
 #endif
 

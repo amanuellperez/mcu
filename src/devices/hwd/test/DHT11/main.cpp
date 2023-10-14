@@ -33,17 +33,9 @@ constexpr uint8_t sensor_pin = 15;
 
 // Hwd Devices
 // -----------
+using DHT_protocol = dev::DHT_protocol;
 using DHT11 = dev::DHT11<Micro, sensor_pin>;
-
-static constexpr uint8_t nmax_pulses = 42; // ACK + 5 bytes data + end
-using Cfg_polling =
-    dev::Train_of_pulses_poll_receiver_cfg<Micro,
-				      sensor_pin, 
-				      nmax_pulses>;
-
-using Train_of_pulses_poll_receiver = 
-	    dev::Train_of_pulses_poll_receiver<Cfg_polling>;
-using Train_of_pulses = dev::Train_of_pulses<nmax_pulses>;
+using Result = DHT11::Result;
 
 // Functions
 // ---------
@@ -55,34 +47,6 @@ void init_uart()
 }
 
 
-void print_received(const Train_of_pulses& pulse)
-{
-    mcu::UART_iostream uart;
-    uart << "\n\nReceived " << pulse.size() << " pulses:\n"
-	        "---------"    "-----"    "--------\n";
-
-    uart << "Polarity = ";
-    if (pulse.polarity())
-	uart << "1\n"
-	        "\tlow\thigh";
-    else
-	uart << "0"
-	        "\thigh\tlow";
-
-    uart << '\n';
-
-
-    for (uint8_t i = 0; i < pulse.size(); ++i){
-	uart << (int) i << '\t';
-
-	if (pulse.polarity())
-	    uart << pulse[i].time_low << '\t' << pulse[i].time_high;
-	else
-	    uart << pulse[i].time_high << '\t' << pulse[i].time_low;
-
-	uart << '\n';
-    }
-}
 
 
 void hello()
@@ -98,19 +62,18 @@ void hello()
     uart << "OK\n";
 }
 
-void print_error()
+void print_error(Result res)
 {
     mcu::UART_iostream uart;
-    using Res = DHT11::Result;
 
-    switch(DHT11::result_last_operation()){
-	break; case Res::ok:	uart << "ok\n";
-	break; case Res::train_of_pulses_bad_polarity:
+    switch(res){
+	break; case Result::ok:	uart << "ok\n";
+	break; case Result::train_of_pulses_bad_polarity:
 			uart << "Bad polarity\n";
 
-	break; case Res::train_of_pulses_bad_size:
+	break; case Result::train_of_pulses_bad_size:
 			uart << "Bad size\n";
-	break; case Res::bad_check_sum:
+	break; case Result::bad_check_sum:
 			uart << "Wrong check sum\n";
     }	    
 
@@ -129,9 +92,10 @@ int main()
 	Micro::wait_ms(1200);
 
 	uint8_t data[5];
-	if (!DHT11::basic_read(data)){
+	Result res = DHT_protocol::basic_read<Micro, sensor_pin, 20>(data);
+	if (res != Result::ok){
 	    uart << "basic_read error\n";
-	    print_error();
+	    print_error(res);
 	}
 
 
@@ -145,17 +109,42 @@ int main()
 	
 
 
-	Micro::wait_ms(1200); // 1 segundo entre cada medida
-	atd::Decimal<uint16_t, 2> T;
-	atd::Decimal<uint16_t, 2> RH;
-	if (!DHT11::read(T, RH)){
+	Micro::wait_ms(1000); // 1 segundo entre cada medida
+
+	auto [T, H] = DHT11::read();
+
+	if (DHT11::last_operation_fail()){
 	    uart << "read error\n";
-	    print_error();
+	    print_error(DHT11::result_last_operation());
 
 	} else{
-		uart << "read :\tH = " << RH << "%\t"
-		     << "T = " << T << "ºC\n";
+		uart << "read :\tH = " << H << "%\t"
+		     << "T = " << T << " ºC\n";
 	}
+
+	Micro::wait_ms(1000); // 1 segundos entre medida segun datasheet
+
+	auto T1 = DHT11::read_temperature();
+	if (DHT11::result_last_operation() != Result::ok){
+	    uart << "read error\n";
+	    print_error(DHT11::result_last_operation());
+
+	} else{
+		uart << "read_temperature: " << T1 << " ºC\n";
+	}
+
+	Micro::wait_ms(1000); // 1 segundos entre medida segun datasheet
+
+	auto H1 = DHT11::read_humidity();
+	if (DHT11::result_last_operation() != Result::ok){
+	    uart << "read error\n";
+	    print_error(DHT11::result_last_operation());
+
+	} else{
+		uart << "read_humidity: " << H1 << " %\n";
+	}
+
+
 
     }
 

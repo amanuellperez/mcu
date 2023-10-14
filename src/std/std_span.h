@@ -63,7 +63,7 @@ namespace STD{
 //
 inline constexpr size_t dynamic_extent = static_cast<size_t>(-1);
 
-namespace __std{
+namespace private_{
 
 // Number que podemos conocer en tiempo de compilación o en tiempo de
 // ejecución. ¿Llamarlo mejor Number?
@@ -105,7 +105,7 @@ private:
 
 
 
-} // namespace __std
+} // namespace private_
   
 
 
@@ -196,7 +196,7 @@ public:
 
 private:
    pointer ptr_;
-   __std::Number<size0> size_;
+   private_::Number<size0> size_;
 };
 
 

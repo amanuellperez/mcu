@@ -1,13 +1,8 @@
 BIN = xx
 
-SOURCES= main.cpp \
-		 ../../alp_gen.cpp \
-		 ../../avr_pin.cpp \
-		 ../../mcu_DHT22.cpp \
-		 ../../avr_USART.cpp
+SOURCES= main.cpp	
 
-ASM_SOURCES=../../avr_time.S
-
+F_CPU = 8000000UL
 
 MCU = atmega328p
 

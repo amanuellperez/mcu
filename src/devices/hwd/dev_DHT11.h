@@ -24,7 +24,8 @@
 /****************************************************************************
  *
  * DESCRIPCION
- *	Traductor del DHT11.
+ *	Traductor del DHT_protocol y DHT11 driver
+ *	(¿separarlo en dos archivos de cabecera? `dht_protocol.h`y `dht11.h'?)
  *
  * HISTORIA
  *    Manuel Perez
@@ -33,17 +34,21 @@
  ****************************************************************************/
 #include <dev_train_of_pulses.h>
 #include <atd_concepts.h>
+#include <atd_bit.h>
 #include <atd_float.h>
+#include <atd_magnitude.h>
+#include <utility>
 
 namespace dev{
-
-template <typename Micro0, uint8_t dht_pin>
-class DHT11{
+/***************************************************************************
+ *				DHT PROTOCOL
+ ***************************************************************************/
+// DHT11 y DHT22 tienen el mismo protocolo de comunicación (varían en el
+// tiempo de espera para despertar al sensor: 1ms para el DHT22 y 20 ms para
+// el DHT11)
+class DHT_protocol{
 public:
 // Types
-    using Micro = Micro0;
-    using Pin   = typename Micro::Pin<dht_pin>;
-
     enum class Result{
 	ok,
 	train_of_pulses_bad_polarity,
@@ -51,45 +56,25 @@ public:
 	bad_check_sum
     };
 
-// Preconditions
-    // (RRR) Train_of_pulses_poll_receiver no es capaz de capturar bien 
-    //	     el tren de pulsos enviado por el DHT11. Para eliminar este assert
-    //	     es necesario cambiar la forma de leer el tren de pulsos.
-    static_assert(Micro::frequency >= 8'000'000,
-		  "Low frequency, change it to at least 8MHz");
 
+    // Bloquea durante unos 4 ms la ejecución
+    template <typename Micro, uint8_t npin, uint8_t start_time_ms>
+    static Result basic_read(uint8_t data[5]);
 
-    static bool basic_read(uint8_t data[5]);
-
-    template <Type::Decimal Float>
-    static bool read(Float& T, Float& RH);
-
-    // En caso de que la última operación haya fallado, aquí se pueden
-    // encontrar los detalles.
-    static Result result_last_operation() {return result_;}
 
 private:
-// State
-    inline static Result result_;
 
 // Internal Cfg
     static constexpr uint8_t nmax_pulses = 42; // ACK + 5 bytes data + end
-    static constexpr uint8_t sensor_pin = dht_pin;
 
 // Internal types
-    using Disable_interrupts = typename Micro::Disable_interrupts;
-    using Cfg_train = dev::Train_of_pulses_poll_receiver_cfg<Micro,
-					  sensor_pin, 
-					  nmax_pulses>;
-
-    using Train_of_pulses_receiver = 
-				dev::Train_of_pulses_poll_receiver<Cfg_train>;
-
     using Train_of_pulses = dev::Train_of_pulses<nmax_pulses>;
 
+    template <typename Micro, uint8_t npin, uint8_t start_time_ms>
     static void receive_polling(Train_of_pulses& pulse);
+
     static void pulse2data(const Train_of_pulses& pulse, uint8_t data[5]);
-    static bool is_pulse_corrupted(const Train_of_pulses& pulse);
+    static Result is_pulse_corrupted(const Train_of_pulses& pulse);
     static uint8_t check_sum(uint8_t data[5]);
     static bool is_check_sum_right(uint8_t data[5]);
     
@@ -98,25 +83,20 @@ private:
 
 // Functions
 // ---------
-template <typename M, uint8_t npin>
-bool DHT11<M, npin>::is_pulse_corrupted(const Train_of_pulses& pulse)
+DHT_protocol::Result
+    DHT_protocol::is_pulse_corrupted(const Train_of_pulses& pulse)
 {
-    if (pulse.polarity() == 0){
-	result_ = Result::train_of_pulses_bad_polarity;
-	return true;
-    }
+    if (pulse.polarity() == 0)
+	return Result::train_of_pulses_bad_polarity;
 
-    if (pulse.size() != nmax_pulses){
-	result_ = Result::train_of_pulses_bad_size;
-	return true;
-    }
+    if (pulse.size() != nmax_pulses)
+	return Result::train_of_pulses_bad_size;
 
-    return false;
+    return Result::ok;
 }
 
 
-template <typename M, uint8_t npin>
-void DHT11<M, npin>::pulse2data(const Train_of_pulses& pulse, uint8_t data[5])
+void DHT_protocol::pulse2data(const Train_of_pulses& pulse, uint8_t data[5])
 {
     // Datos a leer
     data[0] = 0;
@@ -139,82 +119,156 @@ void DHT11<M, npin>::pulse2data(const Train_of_pulses& pulse, uint8_t data[5])
 	    data[i / 8] |= 0x01;
 
     }
-// pulse[41] == pulse end. El DHT11 mantiene por 50 us low y luego release the
+// pulse[41] == pulse end. El DHT_protocol mantiene por 50 us low y luego release the
 // pin.
 
 }
 
-template <typename M, uint8_t npin>
-void DHT11<M, npin>::receive_polling(Train_of_pulses& pulse)
+template <typename Micro, uint8_t npin, uint8_t start_time_ms>
+void DHT_protocol::receive_polling(Train_of_pulses& pulse)
 {
-    // Enviamos al DHT11 la señal para que empiece
+    // (RRR) Train_of_pulses_poll_receiver no es capaz de capturar bien 
+    //	     el tren de pulsos enviado por el DHT_protocol. Para eliminar este assert
+    //	     es necesario cambiar la forma de leer el tren de pulsos.
+    static_assert(Micro::frequency >= 8'000'000,
+		  "Low frequency, change it to at least 8MHz");
+
+    using Pin   = typename Micro::Pin<npin>;
+    using Cfg_train = dev::Train_of_pulses_poll_receiver_cfg<Micro,
+					  npin, 
+					  nmax_pulses>;
+    using Train_of_pulses_receiver = 
+				dev::Train_of_pulses_poll_receiver<Cfg_train>;
+
+    // Enviamos al DHT_protocol la señal para que empiece
     Pin::write_zero();
     Pin::as_output();
-    Micro::wait_ms(20);
+    Micro::wait_ms(start_time_ms);
     Pin::as_input_without_pullup(); // release the bus
     Micro::wait_us(1); // tiempo para que pase de 0 -> 1 (tarda 0.7 us)
 
+
     Train_of_pulses_receiver::receive(pulse);
+
 }
 
-template <typename M, uint8_t npin>
-bool DHT11<M, npin>::basic_read(uint8_t data[5])
+template <typename Micro, uint8_t npin, uint8_t start_time_ms>
+DHT_protocol::Result 
+    DHT_protocol::basic_read(uint8_t data[5])
 {
-    result_ = Result::ok;
-
-    Disable_interrupts lock{};
+    typename Micro::Disable_interrupts lock{};
 
     Train_of_pulses  pulse;
-    receive_polling(pulse);
+    receive_polling<Micro, npin, start_time_ms>(pulse);
 
-    if(is_pulse_corrupted(pulse))
-	return false;
+    Result result = (is_pulse_corrupted(pulse));
+    if (result != Result::ok)
+	return result;
 
     pulse2data(pulse, data);
 
-    if (!is_check_sum_right(data)){
-	result_ = Result::bad_check_sum;
-	return false;
-    }
+    if (!is_check_sum_right(data))
+	result = Result::bad_check_sum;
 
-    return true;
+    return result;
 
 }
 
-template <typename M, uint8_t npin>
-inline uint8_t DHT11<M, npin>::check_sum(uint8_t data[5])
+inline uint8_t DHT_protocol::check_sum(uint8_t data[5])
 { return (data[0] + data[1] + data[2] + data[3]) & 0xFF; }
 
-template <typename M, uint8_t npin>
-inline bool DHT11<M, npin>::is_check_sum_right(uint8_t data[5])
+inline bool DHT_protocol::is_check_sum_right(uint8_t data[5])
 { return (check_sum(data) == data[4]); }
 
 
 
-// Observar que estoy duplicando el ' result_ = Result::ok'
-// ya que la función `basic_read` también lo hace, no siendo necesario hacerlo
-// aquí. 
+
+
+/***************************************************************************
+ *				DHT11
+ ***************************************************************************/
+// Fundamental a tener en cuenta:
+// + When power is supplied to sensor, don't send any instruction to the 
+//   sensor within one second to pass unstable status
 //
-// Lo dejo aquí para que se vea bien la lógica. Si mañana cambio basic_read,
-// no voy a acordarme de retocar esta función (si he eliminado el result_ =
-// Result::ok)
+// + Collecting period should be : >1 second. (esperar 1 segundos entre
+//   medidas).
+// 
+// + Todas las funciones son secuenciales, bloquean al micro hasta que 
+//   acaban de ejecutarse.
+//
+template <typename Micro0, uint8_t dht_pin>
+class DHT11{
+public:
+// Types
+    using Micro = Micro0;
+    using Result = DHT_protocol::Result;
+
+    using Celsius  = atd::Celsius<atd::Decimal<int32_t, 1>>;
+    using Humidity = atd::Decimal<int32_t, 1>;
+
+// Functions
+    // El valor devuelto será válido si result_last_operation == ok
+    static std::pair<Celsius, Humidity> read();
+
+
+// Interfaz unificado para sensores
+    static Celsius read_temperature();
+    static Humidity read_humidity();
+
+
+// Gestión de errores
+    // En caso de que la última operación haya fallado, aquí se pueden
+    // encontrar los detalles.
+    static Result result_last_operation() {return result_;}
+    static bool last_operation_fail() {return result_ != Result::ok;}
+
+
+private:
+// Data
+    inline static Result result_;
+
+// Internal cfg
+    static constexpr uint8_t start_time_ms = 20;
+
+// Special values
+    static constexpr Celsius null_temperature = Celsius{-1};
+    static constexpr Humidity null_humidity   = Humidity{-1};
+};
+
+
 template <typename M, uint8_t npin>
-template <Type::Decimal Float>
-bool DHT11<M, npin>::read(Float& T, Float& RH)
+std::pair<typename DHT11<M, npin>::Celsius, 
+	  typename DHT11<M, npin>::Humidity> 
+    DHT11<M, npin>::read()
 {
     uint8_t data[5];
 
-    result_ = Result::ok;
+    result_ = DHT_protocol::basic_read<Micro, npin, start_time_ms>(data);
+    if (result_ != Result::ok)
+	return {null_temperature, null_humidity};
 
-    if (!basic_read(data))
-	return false;
+    Humidity H{data[0], data[1]};
+    Celsius T{Celsius::Rep{data[2], data[3]}};
 
- 
 
-    atd::Integer_and_decimal_part{data[0], data[1]}.as(RH);
-    atd::Integer_and_decimal_part{data[2], data[3]}.as(T);
+    return {T, H};
+}
 
-    return true;
+template <typename M, uint8_t npin>
+inline DHT11<M, npin>::Celsius DHT11<M, npin>::read_temperature()
+{
+    auto [T, H] = read();
+    
+    return T;
+}
+
+template <typename M, uint8_t npin>
+inline DHT11<M, npin>::Humidity DHT11<M, npin>::read_humidity()
+{
+    auto [T, H] = read();
+    
+    return H;
 }
 
 

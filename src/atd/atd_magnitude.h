@@ -185,12 +185,11 @@ template <typename Unit0,
           typename Rep0,
           typename Multiplier0, typename Displacement0>
 class Magnitude {
-    // preconditions. TODO: con concepts esto se puede simplificar.
-    static_assert(is_ratio<Multiplier0>::value,
+    static_assert(is_ratio_v<Multiplier0>,
                   "Multiplier must be a specialization of ratio");
     static_assert(Multiplier0::num > 0, "Multiplier must be positive");
 
-    static_assert(is_ratio<Displacement0>::value,
+    static_assert(is_ratio_v<Displacement0>,
                   "Displacement must be a specialization of ratio");
     static_assert(Displacement0::num >= 0, "Displacement must be positive");
 
@@ -204,7 +203,7 @@ public:
     using Scalar       = Rep;  // las magnitudes las multiplicamos/dividimos 
 			       // por escalares.
 
-    // Construction
+// Construction
     constexpr Magnitude() = default;
 
     // TODO: poner como requirement que Rep2 se pueda convertir en Rep

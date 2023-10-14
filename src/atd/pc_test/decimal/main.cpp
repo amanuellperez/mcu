@@ -189,7 +189,7 @@ void test_decimal_common_type()
 
     using CD = std::common_type_t<D1, D2>;
     CHECK_TRUE((std::is_same_v<CD::Rep, long int>), "common_type::Rep");
-    CHECK_TRUE(CD::num_decimals == 4, "common_type::num_decimals");
+    CHECK_TRUE(CD::ndecimals == 4, "common_type::ndecimals");
     }
 
     {// caso degenerado: D1 == D2
@@ -197,7 +197,7 @@ void test_decimal_common_type()
 
     using CD = std::common_type_t<D1, D1>;
     CHECK_TRUE((std::is_same_v<CD::Rep, D1::Rep>), "common_type::Rep");
-    CHECK_TRUE(CD::num_decimals == D1::num_decimals, "common_type::num_decimals");
+    CHECK_TRUE(CD::ndecimals == D1::ndecimals, "common_type::ndecimals");
     }
 }
 
@@ -256,7 +256,7 @@ void test_decimal_multiplication(int ip1, int fp1, int ip2, int fp2,
     auto p = x*y;
 //   std::cerr << x << " * " << y << " = " << p << '\n';
 
-    CHECK_TRUE(p.num_decimals == std::max(x.num_decimals, y.num_decimals),
+    CHECK_TRUE(p.ndecimals == std::max(x.ndecimals, y.ndecimals),
                "operator*");
     auto [ip, fp] = p.value();
     CHECK_TRUE(ip == ipr and fp == fpr, "operator*");

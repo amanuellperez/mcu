@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 Manuel Perez 
+// Copyright (C) 2023 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -17,87 +17,115 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "../../mcu_DHT22.h"
-#include "../../avr_UART.h"
-#include "../../avr_time.h"
+#include "../../dev_DHT22.h"
 
-// No consigo programar bien este sensor.
-// Si uso mi clase Pin introduce demasiado ineficiencia. Hay que programarlo
-// directamente a bajo nivel, con lo que hay que saber de antemano a qué pin
-// se conecta, no pudiendo reutilizar el código.
-//
-// Para depurar uso el pin 13. El data del sensor queda conectado al pin 26.
-// Tal como ahora está programado funciona de vez en cuando (???)
-// Usar el osciloscopio para ver la señal.
+#include <avr_atmega.h>
+#include <dev_train_of_pulses.h>
 
+// Micro
+// -----
+namespace mcu = atmega; 
+using Micro   = mcu::Micro;
 
-
-using namespace avr;
+// pins
+constexpr uint8_t sensor_pin = 15;
 
 
-void lee(DHT22& sensor)
+// Hwd Devices
+// -----------
+using DHT_protocol = dev::DHT_protocol;
+using DHT22 = dev::DHT22<Micro, sensor_pin>;
+using Result = DHT22::Result;
+
+// Functions
+// ---------
+void init_uart()
 {
-    auto usart = UART::as_a_stream();
+    mcu::UART_iostream uart;
+    mcu::basic_cfg(uart);
+    uart.turn_on();
+}
 
-    switch(sensor.read()){
-	case DHT22::Error::NONE:
-	    usart << "T = " << sensor.T_parte_entera
-		  << "." << sensor.T_parte_decimal
-		  << "; RH(%) = " << sensor.RH_parte_entera
-		  << "." << sensor.RH_parte_decimal << "\n\r";
-	    break;
 
-	case DHT22::Error::BUS_HUNG:
-	    usart << "ERROR: BUS_HUNG\n\r";
-	    break;
 
-	case DHT22::Error::NOT_PRESENT:
-	    usart << "ERROR: NOT_PRESENT\r\n";
-	    break;
 
-	case DHT22::Error::ACK_TOO_LONG:
-	    usart << "ERROR: ACK_TOO_LONG\r\n";
-	    break;
+void hello()
+{
+    mcu::UART_iostream uart;
+    uart << "\n\nDHT22 test\n"
+	        "----------\n"
+		"Connect sensor to pin " << sensor_pin 
+		<< " with a pull-up resistor of 4.7k\n";
 
-	case DHT22::Error::SYNC_TIMEOUT:
-	    usart << "ERROR: SYNC_TIMEOUT\r\n";
-	    break;
+    uart << "Waiting 1 seconds for DHT22 to start working ... ";
+    Micro::wait_ms(1000);
+    uart << "OK\n";
+}
 
-	case DHT22::Error::DATA_TIMEOUT:
-	    usart << "ERROR: DATA_TIMEOUT\r\n";
-	    break;
+void print_error(Result res)
+{
+    mcu::UART_iostream uart;
 
-	case DHT22::Error::CHECKSUM:
-	    usart << "ERROR: CHECKSUM\r\n";
-	    break;
+    switch(res){
+	break; case Result::ok:	uart << "ok\n";
+	break; case Result::train_of_pulses_bad_polarity:
+			uart << "Bad polarity\n";
+
+	break; case Result::train_of_pulses_bad_size:
+			uart << "Bad size\n";
+	break; case Result::bad_check_sum:
+			uart << "Wrong check sum\n";
+    }	    
+
+}
+
+
+int main()
+{
+    init_uart();
+    hello();
+
+    mcu::UART_iostream uart;
+
+    while(1){
+
+	Micro::wait_ms(2000); // 2 segundos entre medida segun datasheet
+
+	auto [T, H] = DHT22::read();
+
+	if (DHT22::last_operation_fail()){
+	    uart << "read error\n";
+	    print_error(DHT22::result_last_operation());
+
+	} else{
+		uart << "read :\tH = " << H << "%\t"
+		     << "T = " << T << "ºC\n";
+	}
+
+	Micro::wait_ms(2000); // 2 segundos entre medida segun datasheet
+
+	auto T1 = DHT22::read_temperature();
+	if (DHT22::result_last_operation() != Result::ok){
+	    uart << "read error\n";
+	    print_error(DHT22::result_last_operation());
+
+	} else{
+		uart << "read_temperature: " << T1 << " ºC\n";
+	}
+
+	Micro::wait_ms(2000); // 2 segundos entre medida segun datasheet
+
+	auto H1 = DHT22::read_humidity();
+	if (DHT22::result_last_operation() != Result::ok){
+	    uart << "read error\n";
+	    print_error(DHT22::result_last_operation());
+
+	} else{
+		uart << "read_humidity: " << H1 << " %\n";
+	}
     }
-}
-
-
-int main() 
-{
-    auto usart = UART::init();
-
-    DHT22 sensor1{12};
-    DHT22 sensor2{13};
-    DHT22 sensor3{14};
-   
-    usart << "\r\n\nIniciando DTH22\r\n";
-    usart << "---------------\r\n";
-    while (1) {
-	usart << "sensor pin 12: ";
-	lee(sensor1);
-
-	usart << "sensor pin 13: ";
-	lee(sensor2);
-
-	usart << "sensor pin 14: ";
-	lee(sensor3);
-
-	usart << "-------------\n\r\n";
-
-	wait_ms(2000u);	// minimo 2 segundos entre medida y medida
-    
-  } // while(1)
 
 }
+
+
+

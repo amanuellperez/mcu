@@ -42,6 +42,8 @@
 
 namespace atd{
 
+// is_ratio
+// --------
 // bool is_ratio(typename T)
 // {
 //	if (is_<T>_a_specialization_of<ratio>)
@@ -55,11 +57,21 @@ struct is_ratio : std::false_type { };
 template <intmax_t N, intmax_t D>
 struct is_ratio<std::ratio<N, D>> : std::true_type { };
 
+template <typename T>
+inline constexpr bool is_ratio_v = is_ratio<T>::value;
+
+
+
+// ratio_inverse
+// -------------
 // ratio_inverse(num/den) == den/num
 template <typename r>
 using ratio_inverse = std::ratio<r::den, r::num>;
 
 
+
+// ratio_is_power_of_ten
+// ---------------------
 // ratio_is_power_of_ten<q>:
 //  if (q == 10^n) return true;
 //  else           return false;
@@ -71,19 +83,24 @@ struct _ratio_is_power_of_ten:
 template <typename q>
 inline constexpr bool ratio_is_power_of_ten = _ratio_is_power_of_ten<q>::value;
 
+
+// ratio_exponent_of_power_of_ten
+// -------------------------------
 // ratio_exponent_of_power_of_ten<10^n>:
 //  return n;
+namespace impl_of{
 template <typename q>
-struct _ratio_exponent_of_power_of_ten
+struct ratio_exponent_of_power_of_ten
     : public std::integral_constant<int,
           (q::num == 1? -exponent_of_power_of_ten(q::den):
           exponent_of_power_of_ten(q::num))> {
     static_assert(ratio_is_power_of_ten<q>);
 };
-
+}// impl_of
+ 
 template <typename q>
 inline constexpr int ratio_exponent_of_power_of_ten =
-    _ratio_exponent_of_power_of_ten<q>::value;
+    impl_of::ratio_exponent_of_power_of_ten<q>::value;
 
 }// namespace
 

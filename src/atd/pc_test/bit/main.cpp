@@ -113,6 +113,15 @@ void test_concat_bytes()
     CHECK_TRUE(atd::concat_bytes<int64_t>
 		(0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE) == 0x123456789ABCDE, 
 		"concat_bytes");
+
+
+    {
+	uint8_t x0 = 0xFF;
+	uint8_t x1 = 0xFF;
+	CHECK_TRUE(atd::concat_bytes<uint16_t>(x0, x1) == 65535u, "concat_bytes");
+	CHECK_TRUE(atd::concat_bytes<int16_t>(x0, x1) == -1, "concat_bytes");
+
+    }
 }
 
 void test_bitmask()
