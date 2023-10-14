@@ -321,6 +321,16 @@ H = humidity
 
 G = gas
 
+#### Características sensores de temperatura
+|		     | DHT11        |     DHT22	    | DS18B20      |
+|--------------------|:------------:|:-------------:|:------------:|
+|Operating range     | [0, 50] ºC   | [-40, 80] ºC  | [-55, 125] ºC|
+|Accuracy	     | +-2 ºC	    |  +-0.5 ºC	    |  +-0.5 ºC	   |
+|Resolution	     |   1 ºC (?)   |  0.1 ºC       | de 9 a 12 bits|
+|Response time	     | de 6 a 30 s  |   2s          |              |
+|Sampling period     | 1 s	    |	2s          |              |
+
+
 ### Keyboards
 
 #### Notación
