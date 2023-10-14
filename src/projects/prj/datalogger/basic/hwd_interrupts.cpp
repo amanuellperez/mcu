@@ -17,15 +17,22 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#pragma once
+#include "prj_main.h"
 
-#ifndef __HWD_DS18B20_H__
-#define __HWD_DS18B20_H__
+// El Timer2 va a generar la interrupción cada segundo, luego no es necesario
+// mirar si hay un nuevo segundo o no. Esto simplifica el código pero lo hace
+// menos genérico. Pero esta clase la escribe el hardwador. Si se cambia algo
+// de hardware, el hardwador tiene que revisar todo este código.
+ISR_CLOCK
+{
+    Clock::tick();
+//    if (Clock::is_new_second()){
+//	new_second_ = true;
+//    }
+}
 
-#include "hwd_dev.h"
-
-void print_result(std::ostream& out, Sensor::Result error);
-
-#endif
-
+ISR_UART_RX{
+    Main::reset_ = true;
+    Main::uart.empty_read_buffer();
+}
 

@@ -19,21 +19,28 @@
 
 #include "../prj_main.h"
 
-// El Timer2 va a generar la interrupción cada segundo, luego no es necesario
-// mirar si hay un nuevo segundo o no. Esto simplifica el código pero lo hace
-// menos genérico. Pero esta clase la escribe el hardwador. Si se cambia algo
-// de hardware, el hardwador tiene que revisar todo este código.
-ISR_CLOCK
+void Main::init_hwd()
 {
-    Clock::tick();
-//    if (Clock::is_new_second()){
-//	new_second_ = true;
-//    }
+    init_uart();
+    init_sensor();
 }
 
+void Main::init_uart()
+{
+    mcu::basic_cfg(uart);
+    uart.turn_on();
+    mcu::UART_basic::enable_interrupt_unread_data();
+}
 
-ISR_UART_RX{
-    Main::reset_ = true;
-    Main::uart.empty_read_buffer();
+void Main::init_sensor()
+{
+    uart << "Init sensor ... ";
+
+// Como hay un menú y se requiere la interacción del usuario para empezar
+// no es necesario esperar 1 segundo a más.
+//    Micro::wait_ms(sensor_start_time_ms);
+
+//    uart << "OK\n";
+    uart << " SKIPPING waiting time\n";
 }
 

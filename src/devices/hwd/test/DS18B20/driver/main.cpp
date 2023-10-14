@@ -54,12 +54,12 @@ void init_uart()
 }
 
 
-bool is_return_cmd_ok(Sensor::Result error)
+bool is_return_cmd_ok(Sensor::Result result)
 {
     using Result = Sensor::Result;
 
     mcu::UART_iostream uart;
-    switch(error){
+    switch(result){
 	break; case Result::ok: 
 			// uart << "Ok"; 
 			return true;
@@ -160,7 +160,8 @@ void Main::print_menu(bool all_options) const
 {
     mcu::UART_iostream uart;
 
-    uart << "\n----------------\n"
+    uart << "\n\nMenu\n"
+	      "----\n"
 	    "0. bind sensor\n";
     if (all_options)
 	uart << 
@@ -203,14 +204,14 @@ void Main::convert_T() const
     mcu::UART_iostream uart;
     
     uart << "Sending convert_T cmd ... ";
-    auto errno = sensor_.convert_T();
+    auto result = sensor_.convert_T();
     
-    if (!is_return_cmd_ok(errno))
+    if (!is_return_cmd_ok(result))
 	return;
 
-    errno = sensor_.wait_until(time_out_max);
+    result = sensor_.wait_until(time_out_max);
     
-    if (!is_return_cmd_ok(errno))
+    if (!is_return_cmd_ok(result))
 	return;
 
     uart << "OK\n";
@@ -224,9 +225,9 @@ void Main::read_scratchpad() const
     uart << "Sending `read scractpad` cmd ... ";
     Sensor::Scratchpad s;
     
-    auto errno = sensor_.read_scratchpad(s);
+    auto result = sensor_.read_scratchpad(s);
 
-    if (!is_return_cmd_ok(errno))
+    if (!is_return_cmd_ok(result))
 	return;
 
     if (s.is_CRC_ok()){
@@ -270,9 +271,9 @@ void Main::write_scratchpad() const
 				  << ", " << TL 
 				  << ", " << (int) ures << ") ... ";
     
-    auto errno = sensor_.write_scratchpad((uint8_t)TH, (uint8_t)TL, res);
+    auto result = sensor_.write_scratchpad((uint8_t)TH, (uint8_t)TL, res);
 
-    if (!is_return_cmd_ok(errno))
+    if (!is_return_cmd_ok(result))
 	return;
 
     uart << "OK\n";
@@ -286,9 +287,9 @@ void Main::copy_scratchpad() const
     
     uart << "Sending `copy scractpad` cmd ... ";
 
-    auto errno = sensor_.copy_scratchpad();
+    auto result = sensor_.copy_scratchpad();
 
-    if (!is_return_cmd_ok(errno))
+    if (!is_return_cmd_ok(result))
 	return;
 
     uart << "OK\n";
@@ -301,14 +302,14 @@ void Main::recall_e2() const
     
     uart << "Sending `recall2` cmd ... ";
     
-    auto errno = sensor_.recall_e2(); 
+    auto result = sensor_.recall_e2(); 
 
-    if (!is_return_cmd_ok(errno))
+    if (!is_return_cmd_ok(result))
 	return;
 
-    errno = sensor_.wait_until(time_out_max);
+    result = sensor_.wait_until(time_out_max);
     
-    if (!is_return_cmd_ok(errno))
+    if (!is_return_cmd_ok(result))
 	return;
 
     uart << "OK\n";
@@ -322,7 +323,7 @@ void Main::read_temperature()
     uart << "Reading temperature ... ";
     auto T = sensor_.read_temperature(time_out_max);
 
-    if (!is_return_cmd_ok(sensor_.errno()))
+    if (!is_return_cmd_ok(sensor_.result_last_operation()))
 	return;
 
     uart << "OK\n"

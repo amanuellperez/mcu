@@ -6,9 +6,9 @@ SOURCES= 	../prj_main.cpp 	\
 			../prj_print.cpp	\
 			../prj_time.cpp		\
 			../prj_locale.cpp	\
+			../hwd_interrupts.cpp	\
 			prj_menu_sensor.cpp \
 			hwd_init.cpp		\
-			hwd_interrupts.cpp	\
 			hwd_ds18b20.cpp	
 
 

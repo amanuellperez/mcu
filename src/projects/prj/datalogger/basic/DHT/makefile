@@ -1,5 +1,5 @@
-DIRS = DHT	\
-	   DS18B20
+DIRS = DHT11	\
+	   DHT22
 
 include $(MCU_RECRULES)
 

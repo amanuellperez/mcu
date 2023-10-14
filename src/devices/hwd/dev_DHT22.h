@@ -71,7 +71,8 @@ public:
     // En caso de que la última operación haya fallado, aquí se pueden
     // encontrar los detalles.
     static Result result_last_operation() {return result_;}
-    static bool last_operation_fail() {return result_ != Result::ok;}
+    static bool last_operation_is_ok() {return result_ == Result::ok;}
+    static bool last_operation_fail() {return !last_operation_is_ok();}
 
 
 private:

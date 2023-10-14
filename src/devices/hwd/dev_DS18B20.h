@@ -128,16 +128,6 @@ public:
     using Resolution = Scratchpad::Resolution;
     using Celsius    = Scratchpad::Celsius;
 
-    // Es el errno clásico pero en vez de ser global es local a esta clase
-    // y que en lugar de usarlo como state lo uso como valor return
-    // Es el resultado que van a devolver las funciones cuando le pedimos
-    // hacer algo. ¿Cómo llamar a esto? 
-    //  0. Result? (Es el resultado de la operación solicitada)
-    //	1. Return? (porque es el valor del return, pero no le doy significado)
-    //	2. State? (aunque lo voy a usar como State, no tiene por qué ser el
-    //	   estado del sensor, ¿o sí lo es?)
-    //	3. Error? (Error suena fatal, ya que si todo va bien NO es un error)
-    //	4. ???
     enum class Result{
 	ok = 0,	    // todo bien
 	not_found,  // falla la llamada de One_wire::reset()
@@ -324,18 +314,20 @@ public:
     using Resolution = Scratchpad::Resolution;
     using Celsius    = Scratchpad::Celsius;
 
+// Interfaz unificado para sensores
     // Leemos la temperatura. Esta función no devuelve el control hasta que:
     //	1) El sensor devuelve una temperatura válida
     //	2) Han transcurrido time_out_ms milisegundos
     Celsius read_temperature(const uint16_t& time_out_ms);
 
-    // Devuelve el errno de la ultima función llamada 
-    Result errno() const {return errno_;}
-
-    bool is_ok() const {return errno_ == Result::ok;}
+// Gestión de errores
+    // Devuelve el resulta_las_operation de la ultima función llamada 
+    Result result_last_operation() const {return result_;}
+    bool last_operation_is_ok() const { return result_ == Result::ok;}
+    bool last_operation_fail() const { return !last_operation_is_ok();}
 
 private:
-    Result errno_;
+    Result result_;
 };
 
 
@@ -343,19 +335,19 @@ template <typename M, typename OW>
 DS18B20<M, OW>::Celsius 
 DS18B20<M, OW>::read_temperature(const uint16_t& time_out_ms)
 {
-    errno_ = Base::convert_T();
-    if (errno_ != Result::ok)
+    result_ = Base::convert_T();
+    if (result_ != Result::ok)
 	return Celsius{-1};
 
-    errno_ = Base::wait_until(time_out_ms);
+    result_ = Base::wait_until(time_out_ms);
 
     Scratchpad s;
-    errno_ = Base::read_scratchpad(s);
-    if (errno_ != Result::ok)
+    result_ = Base::read_scratchpad(s);
+    if (result_ != Result::ok)
 	return Celsius{-1};
 
     if (!s.is_CRC_ok()){
-	errno_ = Result::wrong_CRC;
+	result_ = Result::wrong_CRC;
 	return Celsius{-1};
     }
     
