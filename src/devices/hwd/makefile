@@ -1,5 +1,6 @@
 SOURCES= dev_BMP280_basic.cpp	\
 		 dev_BME280_basic.cpp	\
+		 dev_DHT_protocol.cpp	\
 		 dev_DS1307_basic.cpp	\
 		 dev_DS18B20.cpp
 

@@ -32,7 +32,6 @@
 #include <dev_one_wire.h>
 #include <dev_clocks.h>
 #include <dev_DS18B20.h>
-#include <dev_push_button.h>
 
 // cfg
 // ---

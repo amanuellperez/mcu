@@ -59,7 +59,7 @@ hay pero desconoce cuáles son.
 
 ## Archivos que escribe el hardwador
 
-1. `prj_dev.h`
+1. `hwd_dev.h`
 
    Este archivo contiene las referencias a dispositivos reales
    que hay. Aquí es donde se encuentran cómo conectar el micro a los
@@ -69,14 +69,14 @@ hay pero desconoce cuáles son.
    Este archivo sirve además para dejar documentado no solo los dispositivos
    usados sino cómo se conectan. 
 
-2. `prj_init.cpp`
+2. `hwd_init.cpp`
 
    Los dispositivos y el micro hay que inicializarlos. El hardwador sabe si
    tiene que inicializar SPI, o llamar a `sleep_mode`, y cómo se inicializa
    cada dispositivo, ya que cada dispositivo real tiene su propia forma de
    inicializarse. 
 
-3. `prj_interrupts.cpp` (DUDA: ¿mejor `prj_isr.cpp`?)
+3. `hwd_interrupts.cpp` (DUDA: ¿mejor `prj_isr.cpp`?)
 
    En este fichero se definen todas las ISRs que necesite el programa.
 
@@ -161,6 +161,23 @@ El softwador escribe el resto.
 
 
 
+
+## ¿Por qué usar clase `Main`?
+
+Desde el principio he estado usando una clase `Main` donde defino todas las
+funciones necesarias para la aplicación. Esta clase realmente no es necesaria
+y se podría eliminar. 
+
+Motivos por los que la mantengo:
+
+1. Permite identificar más fácilmente código genérico. Todas las funciones que
+   no pertenezcan a la aplicación no las voy a escribir dentro de `Main`
+   siendo más fácil luego localizarlas para generalizarlas.
+
+2. Dentro de `Main` meto todos los dispositivos que necesito: tengo la noción
+   de tener más control sobre la construcción e inicialización de los devices
+   usados. (aunque esto realmente no es un motivo de peso por el que usar
+   `Main`).
 
 
 ## Esto es experimental

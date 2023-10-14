@@ -17,55 +17,26 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "prj_main.h"
+#include "../prj_main.h"
 
-void Main::user_cfg()
+void Main::init_hwd()
 {
-    Micro::Disable_interrupts lock;
-
-    reset();
-
-    menu_options();
-    reset_ = false;
-    
-    print_options();
+    init_uart();
+    init_sensor();
 }
 
-
-void Main::run()
+void Main::init_uart()
 {
-    if (reset_)
-	user_cfg();
-
-    else{ 
-	Clock::time_point t = atomic_now();
-
-	if (t  >= next_alarm_.time()){
-	    print_data(uart);
-	    next_alarm_.update(atomic_now());
-	}
-
-	// uart.flush(); <-- fundamental en power-save mode
-	Micro::sleep(); // Se despierta cada segundo 
-		    
-    }
-
+    mcu::basic_cfg(uart);
+    uart.turn_on();
 }
 
-
-int main()
+void Main::init_sensor()
 {
-    Main app;
+    uart << "Init sensor (1 second) ... ";
 
-    app.hello();
-    Micro::wait_ms(500); // Según la datasheet se necesita 1 segundo para que 
-			 // el cristal de 32kHz se estabilice. (ver modo
-			 // asyncrhono, Timer2)
+    Micro::wait_ms(1);
 
-    while (1){
-	app.run();
-    }
+    uart << "OK\n";
 }
-
-
 

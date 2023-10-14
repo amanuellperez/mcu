@@ -20,34 +20,12 @@
 #include "prj_main.h"
 
 
-void Main::init_uart()
-{
-    mcu::basic_cfg(uart);
-    uart.turn_on();
-    mcu::UART_basic::enable_interrupt_unread_data();
-}
-
-void Main::init_sensor()
-{
-    uart << "Init sensor ... ";
-
-    Search search;
-    Sensor::Device dev;
-    if(search(dev)){
-	sensor_.bind(dev);
-	uart << "OK\n";
-    }
-
-    else
-	uart << "ERROR. No device found\n";
-}
 
 Main::Main()
 {
     reset_ = true;
 
-    init_uart();
-    init_sensor();
+    init_hwd();
     
     // TODO: me esta generando problemas el uso de UART con el power-save
     // mode. Como esta aplicación va conectada al PC, de momento lo dejo en

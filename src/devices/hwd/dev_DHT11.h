@@ -81,49 +81,6 @@ private:
 };
 
 
-// Functions
-// ---------
-DHT_protocol::Result
-    DHT_protocol::is_pulse_corrupted(const Train_of_pulses& pulse)
-{
-    if (pulse.polarity() == 0)
-	return Result::train_of_pulses_bad_polarity;
-
-    if (pulse.size() != nmax_pulses)
-	return Result::train_of_pulses_bad_size;
-
-    return Result::ok;
-}
-
-
-void DHT_protocol::pulse2data(const Train_of_pulses& pulse, uint8_t data[5])
-{
-    // Datos a leer
-    data[0] = 0;
-    data[1] = 0;
-    data[2] = 0;
-    data[3] = 0;
-    data[4] = 0;
-
-//  pulse[0] == pulse de 80us. Como no medimos tiempo, sino ticks, no se cómo
-//  confirmar que se esté enviando realmente este pulso.
-
-    // CUIDADO: los valores que contienen los datos son pulse[1..40], pero el
-    // array es data[0...4]
-    for (uint8_t i = 0; i < 40; ++i){
-	data[i / 8] <<= 1;
-
-	if (pulse[i + 1].time_high > pulse[i + 1].time_low)
-	    //atd::write_bit<0>::to<1>::in(data[i / 8]); <-- en este caso esto
-	    //lía más que aclara @_@
-	    data[i / 8] |= 0x01;
-
-    }
-// pulse[41] == pulse end. El DHT_protocol mantiene por 50 us low y luego release the
-// pin.
-
-}
-
 template <typename Micro, uint8_t npin, uint8_t start_time_ms>
 void DHT_protocol::receive_polling(Train_of_pulses& pulse)
 {

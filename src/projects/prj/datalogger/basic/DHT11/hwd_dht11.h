@@ -17,55 +17,15 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "prj_main.h"
+#pragma once
 
-void Main::user_cfg()
-{
-    Micro::Disable_interrupts lock;
+#ifndef __HWD_DS18B20_H__
+#define __HWD_DS18B20_H__
 
-    reset();
+#include "hwd_dev.h"
 
-    menu_options();
-    reset_ = false;
-    
-    print_options();
-}
+void print_result(std::ostream& out, Sensor::Result error);
 
-
-void Main::run()
-{
-    if (reset_)
-	user_cfg();
-
-    else{ 
-	Clock::time_point t = atomic_now();
-
-	if (t  >= next_alarm_.time()){
-	    print_data(uart);
-	    next_alarm_.update(atomic_now());
-	}
-
-	// uart.flush(); <-- fundamental en power-save mode
-	Micro::sleep(); // Se despierta cada segundo 
-		    
-    }
-
-}
-
-
-int main()
-{
-    Main app;
-
-    app.hello();
-    Micro::wait_ms(500); // Según la datasheet se necesita 1 segundo para que 
-			 // el cristal de 32kHz se estabilice. (ver modo
-			 // asyncrhono, Timer2)
-
-    while (1){
-	app.run();
-    }
-}
-
+#endif
 
 

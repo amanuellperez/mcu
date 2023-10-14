@@ -17,55 +17,35 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "prj_main.h"
+#include "../prj_main.h"
+#include "hwd_ds18b20.h"
 
-void Main::user_cfg()
+static void menu_sensor(std::iostream& out, Sensor& sensor)
 {
-    Micro::Disable_interrupts lock;
+    out << "Choose resolution: 9, 10, 11 or 12 bits: ";
+    uint16_t res = 0;
+    out >> res;
 
-    reset();
-
-    menu_options();
-    reset_ = false;
-    
-    print_options();
-}
-
-
-void Main::run()
-{
-    if (reset_)
-	user_cfg();
-
-    else{ 
-	Clock::time_point t = atomic_now();
-
-	if (t  >= next_alarm_.time()){
-	    print_data(uart);
-	    next_alarm_.update(atomic_now());
-	}
-
-	// uart.flush(); <-- fundamental en power-save mode
-	Micro::sleep(); // Se despierta cada segundo 
-		    
+    if (res < 9 or res > 12){
+	out << "Wrong resolution\n";
+	return;
     }
 
+    out << "\nChanging resolution to " << res << " bits ... ";
+    auto result = sensor_resolution(sensor, res);
+    print_result(out, result);
 }
 
-
-int main()
+void Main::print_menu_sensor()
 {
-    Main app;
+    uart << "2. Sensor resolution\n";
+}
 
-    app.hello();
-    Micro::wait_ms(500); // Según la datasheet se necesita 1 segundo para que 
-			 // el cristal de 32kHz se estabilice. (ver modo
-			 // asyncrhono, Timer2)
-
-    while (1){
-	app.run();
+void Main::menu_sensor(char option)
+{
+    switch (option){
+	break; case '2': ::menu_sensor(uart, sensor_);
+	break; default : uart << "Unknown option\n";
     }
 }
-
-
 

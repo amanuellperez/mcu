@@ -22,7 +22,7 @@
 #ifndef __PRJ_ALARM_H__
 #define __PRJ_ALARM_H__
 
-#include "prj_dev.h"
+#include "hwd_dev.h"
 #include "prj_locale.h"
 
 // template <typename Clock>

@@ -24,38 +24,22 @@ void Main::menu_options()
     while (1) {
 	uart << "\nMain menu\n"
 		  "---------\n"
-		  "1. Sensor resolution\n"
-		  "2. Time measure\n"
-		  "3. Start\n";
+		  "0. Start\n"
+		  "1. Time measure\n";
+		  print_menu_sensor();
 
 	char opt{};
 	uart >> opt;
 
 	switch (opt){
-	    break; case '1': menu_sensor();
-	    break; case '2': menu_time();
-	    break; case '3': return;
-	    break; default : uart << "Unknown option\n";
+	    break; case '0': return;
+	    break; case '1': menu_time();
+	    break; default : menu_sensor(opt);
 	}
     }
 }
 
 
-void Main::menu_sensor()
-{
-    uart << "Choose resolution: 9, 10, 11 or 12 bits: ";
-    uint16_t res = 0;
-    uart >> res;
-
-    if (res < 9 or res > 12){
-	uart << "Wrong resolution\n";
-	return;
-    }
-
-    uart << "\nChanging resolution to " << res << " bits ... ";
-    auto result = sensor_resolution(res);
-    print_result(uart, result);
-}
 
 void Main::menu_time()
 {

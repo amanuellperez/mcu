@@ -17,55 +17,23 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "prj_main.h"
+#include "../prj_main.h"
 
-void Main::user_cfg()
+// El Timer2 va a generar la interrupción cada segundo, luego no es necesario
+// mirar si hay un nuevo segundo o no. Esto simplifica el código pero lo hace
+// menos genérico. Pero esta clase la escribe el hardwador. Si se cambia algo
+// de hardware, el hardwador tiene que revisar todo este código.
+ISR_CLOCK
 {
-    Micro::Disable_interrupts lock;
-
-    reset();
-
-    menu_options();
-    reset_ = false;
-    
-    print_options();
+    Clock::tick();
+//    if (Clock::is_new_second()){
+//	new_second_ = true;
+//    }
 }
 
 
-void Main::run()
-{
-    if (reset_)
-	user_cfg();
-
-    else{ 
-	Clock::time_point t = atomic_now();
-
-	if (t  >= next_alarm_.time()){
-	    print_data(uart);
-	    next_alarm_.update(atomic_now());
-	}
-
-	// uart.flush(); <-- fundamental en power-save mode
-	Micro::sleep(); // Se despierta cada segundo 
-		    
-    }
-
+ISR_UART_RX{
+    Main::reset_ = true;
+    Main::uart.empty_read_buffer();
 }
-
-
-int main()
-{
-    Main app;
-
-    app.hello();
-    Micro::wait_ms(500); // Según la datasheet se necesita 1 segundo para que 
-			 // el cristal de 32kHz se estabilice. (ver modo
-			 // asyncrhono, Timer2)
-
-    while (1){
-	app.run();
-    }
-}
-
-
 

@@ -17,23 +17,33 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "prj_main.h"
+#include "../prj_main.h"
 
-// El Timer2 va a generar la interrupción cada segundo, luego no es necesario
-// mirar si hay un nuevo segundo o no. Esto simplifica el código pero lo hace
-// menos genérico. Pero esta clase la escribe el hardwador. Si se cambia algo
-// de hardware, el hardwador tiene que revisar todo este código.
-ISR_CLOCK
+void Main::init_hwd()
 {
-    Clock::tick();
-//    if (Clock::is_new_second()){
-//	new_second_ = true;
-//    }
+    init_uart();
+    init_sensor();
 }
 
+void Main::init_uart()
+{
+    mcu::basic_cfg(uart);
+    uart.turn_on();
+    mcu::UART_basic::enable_interrupt_unread_data();
+}
 
-ISR_UART_RX{
-    Main::reset_ = true;
-    Main::uart.empty_read_buffer();
+void Main::init_sensor()
+{
+    uart << "Init sensor ... ";
+
+    Search search;
+    Sensor::Device dev;
+    if(search(dev)){
+	sensor_.bind(dev);
+	uart << "OK\n";
+    }
+
+    else
+	uart << "ERROR. No device found\n";
 }
 

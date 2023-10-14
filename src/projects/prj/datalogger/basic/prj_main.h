@@ -29,7 +29,7 @@
  *    19/09/2023 Escrito
  *
  ****************************************************************************/
-#include "prj_dev.h"
+#include "hwd_dev.h"
 //#include "prj_cfg.h"
 //#include "prj_strings.h"
 #include "prj_alarm.h"
@@ -64,13 +64,17 @@ private:
 
 // FUNCTIONS
 // init
+    void init_hwd();
     void init_uart();
     void init_sensor();
  
 // Menus
     void menu_options();
-    void menu_sensor();
     void menu_time();
+
+    // Menu específico del sensor
+    void menu_sensor(char option);
+    void print_menu_sensor();
 
 // Functions
     void reset();
@@ -86,17 +90,11 @@ private:
     void print_time_options() const;
     
 // Sensor
-    Sensor::Result sensor_resolution(uint16_t res);
+    void print_data(std::ostream& out);
 
-    void print_temperature(std::ostream& out);
-    void print_result(std::ostream& out, Sensor::Result error) const;
     void print_sensor_options();
-    void print_sensor_resolution(Sensor::Resolution res) const;
     
-// Errors
-    void logic_error() const;
 };
-
 
 
 inline Main::time_point Main::atomic_now()
@@ -105,8 +103,8 @@ inline Main::time_point Main::atomic_now()
     return Clock::now();
 }
 
-inline void Main::logic_error() const
-{ uart << "Logic error: program can't be here\n"; }
+inline void logic_error()
+{ Main::uart << "Logic error: program can't be here\n"; }
 
 inline void Main::print_time_options() const
 { next_alarm_.print(uart); }
