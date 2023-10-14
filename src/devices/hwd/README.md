@@ -137,25 +137,6 @@ los que se conecta el dispositivo.
 El uso dirá realmente si se genera código de más o no. (En caso de generarse
 código de más se puede reestructurar el código existente para evitar eso).
 
-##### Aclaremos el problema
-
-Por una parte:
-
-1. Es muy sencillo leer los ficheros `prj_dev.h` y ver cómo se conectan los
-   dispositivos si paso como parámetros los pines. La forma de conectarlo
-   queda documentado en código.
-
-Luego quiero mantener, si se puede, esa forma de definir los devices.
-
-Pero por otra:
-
-2. Si se implementa la clase de forma normal se duplica código.
-
-Lo que quiero es poder usar 2 devices del mismo tipo en una aplicación sin que
-se duplique el código. 
-
-En principio esto sugiere que la clase sea un wrapper de la implementación
-real, para no duplicarla. Probemos ese método a ver sí funciona.
 
 
 #### ¿Permitir construir objetos o no?
