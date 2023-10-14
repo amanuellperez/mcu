@@ -18,7 +18,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-#include "../../../dev_LCD_HD44780_basic.h"
+#include "../../../dev_HD44780_basic.h"
 #include "../../../dev_glyphs.h"
 //#include "../../../dev_LCD_HD44780_charset.h"
 #include <avr_atmega.h>

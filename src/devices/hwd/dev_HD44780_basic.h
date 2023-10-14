@@ -637,6 +637,6 @@ using LCD_HD44780_2004 = LCD_HD44780<pin>;
 
 }// namespace
 
-#include "dev_LCD_HD44780_basic.tcc"
+#include "dev_HD44780_basic.tcc"
 
 #endif

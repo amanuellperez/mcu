@@ -34,7 +34,7 @@
 #include <stdint.h>
 
 #include <dev_LCD_screen.h>
-#include <dev_LCD_HD44780.h>
+#include <dev_HD44780.h>
 #include <dev_keyrow.h>
 #include "stroboscope.h"
 

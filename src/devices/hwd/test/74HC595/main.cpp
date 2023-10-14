@@ -17,7 +17,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "../../dev_register_74HC595_SPI.h"
+#include "../../dev_74HC595.h"
 #include <avr_atmega.h>
 
 namespace mcu = atmega;

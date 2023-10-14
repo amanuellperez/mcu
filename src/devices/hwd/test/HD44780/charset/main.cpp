@@ -20,8 +20,8 @@
 
 
 #include "../../../dev_LCD_screen.h"
-#include "../../../dev_LCD_HD44780_generic.h"
-#include "../../../dev_LCD_HD44780_charset.h"
+#include "../../../dev_HD44780_generic.h"
+#include "../../../dev_HD44780_charset.h"
 #include <avr_time.h>
 #include <stddef.h>
 

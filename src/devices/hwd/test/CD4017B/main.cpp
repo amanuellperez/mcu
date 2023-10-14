@@ -17,7 +17,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "../../dev_counter_CD4017B.h"
+#include "../../dev_CD4017B.h"
 
 #include <avr_atmega.h>
 

@@ -20,7 +20,7 @@
 #include <dev_LCD_screen.h>  // TODO: hay que ponerlo primero, antes que 
 				// atd::decimal. print(screen, decimal)
 				// depende de este header.
-#include <dev_LCD_HD44780.h>
+#include <dev_HD44780.h>
 #include <atd_decimal.h>
 #include <atd_magnitude.h>
 #include <atd_eng_magnitude.h>

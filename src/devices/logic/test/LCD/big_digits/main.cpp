@@ -25,8 +25,8 @@
 #include "../../../dev_LCD_font_2x3.h"
 #include "../../../dev_LCD_font_3x3.h"
 #include "../../../dev_LCD_font_4x3.h"
-#include <dev_LCD_HD44780_generic.h>
-#include <dev_LCD_HD44780_charset.h>
+#include <dev_HD44780_generic.h>
+#include <dev_HD44780_charset.h>
 #include <avr_time.h>
 #include <stddef.h>
 

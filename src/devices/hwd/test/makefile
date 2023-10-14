@@ -1,26 +1,27 @@
-DIRS = 	BMP280			\
+DIRS = 	25LC256			\
+		BMP280			\
 		BME280			\
 		CD4017B			\
+		DHT11			\
+		DHT22			\
 		DS1307			\
 		DS18B20			\
-		DHT11			\
-		EEPROM_25LC256	\
+		HD44780			\
 		keypad			\
 		keyrow			\
 		led				\
-		HD44780			\
 		push_button		\
 		74HC595			\
 		sdcard
 
 # Revisar
-#	DHT22\
-	matrix_8x8\
-	matrix_leds_max7219\
+#	matrix_8x8\
+	MAX7219\
 	pololu_A4988\
 	TMP36\
 	LM75				\
-	pot_MCP4231			\
+	MCP4231			\
+	keyboard_analog
 
 include $(MCU_RECRULES)
 

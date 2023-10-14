@@ -18,7 +18,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "../../../dev_LCD_screen.h"
-#include <dev_LCD_HD44780_generic.h>
+#include <dev_HD44780_generic.h>
 
 #include "../../../dev_LCD_font_2x1.h"
 #include "../../../dev_LCD_font_2x2.h"

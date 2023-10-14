@@ -1,4 +1,4 @@
-DIRS = timer2	\
+DIRS = basic \
 	   experiments
 
 include $(MCU_RECRULES)

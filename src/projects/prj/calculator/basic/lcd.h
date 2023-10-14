@@ -22,8 +22,8 @@
 #ifndef __LCD_H__
 #define __LCD_H__
 
-#include <dev_LCD_HD44780.h>
-#include <dev_LCD_HD44780_charset.h>
+#include <dev_HD44780.h>
+#include <dev_HD44780_charset.h>
 
 #include "instcodes.h"
 

@@ -31,7 +31,7 @@
  *    05/02/2022 Escrito
  *
  ****************************************************************************/
-#include "dev_LCD_HD44780_charset.h" // symbol
+#include "dev_HD44780_charset.h" // symbol TODO: not_generic!!!
 #include <atd_math.h>	// Digits_of
 #include <atd_names.h>	// Width
 

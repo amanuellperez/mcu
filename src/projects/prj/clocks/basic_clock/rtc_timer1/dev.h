@@ -34,7 +34,7 @@
 #include <stdint.h>
 #include <avr_atmega.h>
 
-#include <dev_LCD_HD44780.h>
+#include <dev_HD44780.h>
 #include <dev_keyrow.h>
 #include <dev_clocks.h>
 

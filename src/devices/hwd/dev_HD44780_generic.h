@@ -51,7 +51,7 @@
 #include <atd_memory.h>
 
 #include "dev_LCD_generic.h"
-#include "dev_LCD_HD44780_basic.h" 
+#include "dev_HD44780_basic.h" 
 
 namespace dev{
 

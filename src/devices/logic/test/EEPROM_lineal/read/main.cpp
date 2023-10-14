@@ -19,7 +19,7 @@
 
 // Este es un ejemplo de descargar la eeprom en un cliente linux (en la
 // carpeta cliente) via UART.
-#include "../../../dev_EEPROM_25LC256.h"
+#include "../../../dev_25LC256.h"
 #include "../../../dev_EEPROM_buffer.h"
 #include <avr_UART.h>
 #include <avr_time.h>

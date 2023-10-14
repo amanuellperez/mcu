@@ -24,7 +24,7 @@
 // valor. Para evitar esto habría que meter las cadenas de texto en la EEPROM
 // del avr.
 #include "../../../dev_EEPROM_iostream.h"
-#include <dev_EEPROM_25LC256_basic.h>
+#include <dev_25LC256_basic.h>
 #include "../../../dev_EEPROM_lineal.h"
 
 #include <iomanip>

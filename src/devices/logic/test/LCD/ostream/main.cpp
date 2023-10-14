@@ -18,7 +18,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-#include <dev_LCD_HD44780_generic.h>
+#include <dev_HD44780_generic.h>
 #include "../../../dev_LCD_ostream.h"
 #include <avr_time.h>
 #include <stddef.h>

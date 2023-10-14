@@ -22,7 +22,7 @@
 				    // TODO: ¿cómo evitar tener que recordar
 				    // orden?
 #include "../../user_time.h"
-#include <dev_LCD_HD44780.h>
+#include <dev_HD44780.h>
 #include <dev_push_button.h>
 #include <dev_LCD_font_2x1.h>
 #include <dev_LCD_font_2x2.h>

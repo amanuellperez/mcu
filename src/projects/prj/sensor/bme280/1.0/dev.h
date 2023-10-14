@@ -25,7 +25,7 @@
 #include <avr_atmega.h>
 
 #include <dev_LCD_screen.h>
-#include <dev_LCD_HD44780.h>
+#include <dev_HD44780.h>
 #include <dev_keyrow.h>
 #include <dev_BME280_basic.h>
 #include <dev_DS1307_clock.h>

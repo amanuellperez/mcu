@@ -18,7 +18,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 // ¿Cuál es el código de caracteres que tiene el LCD?
-#include <dev_LCD_HD44780.h>
+#include <dev_HD44780.h>
 
 #include <algorithm>
 

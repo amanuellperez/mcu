@@ -19,7 +19,7 @@
 
 // Conectar el LCD y 3 pulsadores a los pines indicados
 #include "../../user_choose_string.h"
-#include <dev_LCD_HD44780.h>
+#include <dev_HD44780.h>
 #include <dev_keyrow.h>
 
 #include <atd_cstring.h>    // nstring

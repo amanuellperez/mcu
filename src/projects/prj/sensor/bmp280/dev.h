@@ -23,7 +23,7 @@
 #define __SENSOR_DEV_H__
 
 #include <avr_atmega.h>
-#include <dev_LCD_HD44780.h>
+#include <dev_HD44780.h>
 #include <dev_BMP280_basic.h>
 
 namespace mcu = atmega;
