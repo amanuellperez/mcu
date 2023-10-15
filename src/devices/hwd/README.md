@@ -257,7 +257,7 @@ genérico.
 ### EEPROMs
 | Reference | I2C | SPI | datasheet |
 |-----------|:---:|:---:|:---:|
-| [25LC256](#25LC256)   |     |  x  |[datasheet](datasheet/EEPROM_25LC256.pdf)
+| [25LC256](#25LC256)   |     |  x  |[datasheet](datasheet/25LC256.pdf)
 
 ### LCDs
 
@@ -545,7 +545,7 @@ Otros vídeos:
 * [test big digits](https://youtu.be/GvXpkpzUbeE)
 
 ##### Documentación
-* [Datasheet](datasheet/LCD_HD44780.pdf)
+* [Datasheet](datasheet/HD44780.pdf)
 * app note AN658 de Microchip: LCD Fundamentals
 
 Probado con: avr-gcc 9.2.0
