@@ -25,7 +25,7 @@
 namespace mcu = avr_;
 using Micro = mcu::Micro;
 
-constexpr uint8_t npin = 15;
+constexpr uint8_t npin = 13;
 using Pin = mcu::Pin<npin>;
 
 void blink()

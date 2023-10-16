@@ -19,6 +19,7 @@ INCS= 	dev_BME280_basic.h		\
 		dev_keyboard_code.h		\
 		dev_keypad.h			\
 		dev_keyrow.h			\
+		dev_HCSR04.h			\
 		dev_LCD_generic.h		\
 		dev_HD44780_basic.h		\
 		dev_HD44780_basic.tcc	\

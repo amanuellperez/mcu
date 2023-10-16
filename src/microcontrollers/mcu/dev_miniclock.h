@@ -124,7 +124,7 @@ public:
     
     // time
     // ----
-    /// Devuelve el número de milisegundos transcurridos desde start()
+    /// Devuelve el número de ticks transcurridos desde start()
     static counter_type time();
 
     // Cuando se quiera eficiencia, deshabilitar las interrupciones (como
@@ -158,7 +158,7 @@ public:
 // Info
     /// Devuelve el valor máximo que puede alcanzar el counter sin dar
     /// overflow: counter_max() + 1 == 0
-    static counter_type counter_max();
+    constexpr static counter_type counter_max();
 
 private:
     static constexpr int period = period0;
@@ -258,7 +258,8 @@ inline void Miniclock<M, T, p>::unsafe_reset()
 
 
 template <typename M, typename T, int p>
-inline Miniclock<M, T, p>::counter_type Miniclock<M, T, p>::counter_max()
+inline
+constexpr Miniclock<M, T, p>::counter_type Miniclock<M, T, p>::counter_max()
 { 
     return Timer_counter::max_top(); 
 }

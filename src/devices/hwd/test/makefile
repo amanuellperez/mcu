@@ -6,6 +6,7 @@ DIRS = 	25LC256			\
 		DHT22			\
 		DS1307			\
 		DS18B20			\
+		HCSR04			\
 		HD44780			\
 		keypad			\
 		keyrow			\
