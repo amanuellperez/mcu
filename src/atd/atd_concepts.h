@@ -56,6 +56,9 @@ concept Integer = atd::is_integer_v<T>;
 template <typename T>
 concept Decimal = atd::is_decimal_v<T>;
 
+
+// Arithmetic
+// ----------
 template <typename T>
 concept Arithmetic = Integer<T> or Decimal<T>;
 

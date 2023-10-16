@@ -37,12 +37,12 @@ void Main::run()
 	Micro::sleep();
 
 	auto T = sensor_.read_temperature(sensor_timeout_ms);
-	if (sensor_.is_ok()){
+	if (sensor_.last_operation_is_ok()){
 	    uart << nseconds << " s: " << T << " ºC\n";
 	}
 
 	else 
-	    print_error(uart, sensor_.errno());
+	    print_error(uart, sensor_.result_last_operation());
 
 
     }

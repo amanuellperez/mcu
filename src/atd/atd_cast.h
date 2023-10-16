@@ -149,13 +149,13 @@ inline constexpr To_decimal to_integer(const Decimal<Rep, N>& d)
 template <Type::Arithmetic To, Type::Arithmetic From>
     requires (!(private_::is_class_decimal_v<From> and
 	      private_::is_class_decimal_v<To>))
-constexpr inline 
+inline constexpr
 To floating_cast(const From& x) {return static_cast<To>(x);}
 
 template <typename To, typename From>
     requires (private_::is_class_decimal_v<From> and
 	      private_::is_class_decimal_v<To>)
-constexpr inline 
+inline constexpr
 To floating_cast(const From& x) {return decimal_cast<To>(x);}
 
 

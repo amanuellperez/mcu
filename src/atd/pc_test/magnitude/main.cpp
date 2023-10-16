@@ -133,6 +133,7 @@ void test_magnitude_basic()
 	CHECK_TRUE(m1 / m1 == 1, "Meter / Meter");
 
     }
+
 }
 
 
@@ -290,6 +291,31 @@ void test_magnitude_and_decimal()
     // pruebo que compile operator<<
     CHECK_STDOUT(rp, "93087.6");
 
+    {// Con diferentes decimales
+	using Meter2 = atd::Meter<float>;
+	using Centimeter = atd::Centimeter<float>;
+	Meter2 m{3.14};
+	Centimeter cm{m};
+	CHECK_TRUE(cm.value() == 314, "Meter to centimeter(float)");
+
+    }
+    {// Con diferentes decimales
+	using Meter2 = atd::Meter<atd::Decimal<int, 2>>;
+	using Centimeter = atd::Centimeter<atd::Decimal<int, 0>>;
+
+
+	Meter2 m{atd::Decimal<int, 2>{3,14}};
+	auto cm0 = atd::magnitude_cast<Centimeter>(m);
+	CHECK_TRUE(cm0 == Centimeter{314}, "magnitude_cast");
+	Centimeter cm1{m};
+	CHECK_TRUE(cm1 == Centimeter{314}, "Centimeter{Meter}");
+
+	Centimeter cm2{Centimeter::Rep{123,14}};
+	Meter2 m2{cm2};
+	CHECK_TRUE(m2 == Meter2{Meter2::Rep{1,23}}, "Meter{Centimeter}");
+
+
+    }
 
 }
 

@@ -61,7 +61,6 @@
  *    10/03/2022      print
  *
  ****************************************************************************/
-
 #include <ratio>
 #include <type_traits>
 #include <numeric>
@@ -72,7 +71,8 @@
 #include "atd_units.h"
 #include "atd_ratio.h"
 #include "atd_ostream.h"    // print
-
+#include "atd_cast.h"	    // floating_cast
+			    
 namespace atd{
 
 /***************************************************************************
@@ -116,7 +116,16 @@ constexpr inline To_magnitude
     using DIFF =
         std::ratio_subtract<Displacement, typename To_magnitude::Displacement>;
     using Q_D = std::ratio_divide<DIFF, typename To_magnitude::Multiplier>; 
-    constexpr typename To_magnitude::Rep D{CR{Q_D::num}/CR{Q_D::den}};
+    // constexpr typename To_magnitude::Rep D{CR{Q_D::num}/CR{Q_D::den}};
+    using Rep2 = typename To_magnitude::Rep;
+    constexpr Rep2 D = floating_cast<Rep2>(CR{Q_D::num}/CR{Q_D::den});
+
+//    using Rep2 = To_magnitude::Rep;
+//    Rep2 D{};
+//    if constexpr (Q_D::num == 0)
+//	D = Rep2{0};
+//    else 
+//	D = Rep2{CR{Q_D::num}/CR{Q_D::den}};
 
 //std::cout << "DIFF = " << DIFF::num << "/" << DIFF::den << '\n';
 //std::cout << "Q_D = " << Q_D::num << "/" << Q_D::den << '\n';
@@ -125,24 +134,32 @@ constexpr inline To_magnitude
 
     if constexpr (Q::num == 1 and Q::den == 1)	
         return To_magnitude(
-		    static_cast<typename To_magnitude::Rep>(m.value()) + D
+		    //static_cast<typename To_magnitude::Rep>(m.value()) + D
+		    floating_cast<Rep2>(m.value()) + D
 			   );
     
     else if (Q::num != 1 and Q::den == 1) {
         return To_magnitude(
-	    static_cast<typename To_magnitude::Rep>(
-		    static_cast<CR>(m.value()) * static_cast<CR>(Q::num) + D)
+	    //static_cast<typename To_magnitude::Rep>(
+		    //static_cast<CR>(m.value()) * static_cast<CR>(Q::num) + D)
+	    floating_cast<Rep2>(
+		    floating_cast<CR>(m.value()) * floating_cast<CR>(Q::num) + D)
 			  );
     }
 
     else if (Q::num == 1 and Q::den != 1)
-	return To_magnitude(static_cast<typename To_magnitude::Rep>(
-		    static_cast<CR>(m.value()) / static_cast<CR>(Q::den)) + D);
+	//return To_magnitude(static_cast<typename To_magnitude::Rep>(
+		    //static_cast<CR>(m.value()) / static_cast<CR>(Q::den)) + D);
+	return To_magnitude(floating_cast<Rep2>(
+		    floating_cast<CR>(m.value()) / floating_cast<CR>(Q::den)) + D);
 
     else
-	return To_magnitude(static_cast<typename To_magnitude::Rep>(
-	    static_cast<CR>(
-	    m.value()) * static_cast<CR>(Q::num) / static_cast<CR>(Q::den)) + D);
+//	return To_magnitude(static_cast<typename To_magnitude::Rep>(
+//	    static_cast<CR>(
+//	    m.value()) * static_cast<CR>(Q::num) / static_cast<CR>(Q::den)) + D);
+	return To_magnitude(floating_cast<Rep2>(
+	    floating_cast<CR>(
+	    m.value()) * floating_cast<CR>(Q::num) / floating_cast<CR>(Q::den)) + D);
 }
 
 
@@ -592,7 +609,7 @@ constexpr inline bool operator>=(
 
 
 // operator << 
-template <typename Out, typename U, typename R, typename M, typename D>
+template <Type::Ostream Out, typename U, typename R, typename M, typename D>
 inline Out& operator<<(Out& out, const Magnitude<U, R, M, D>& m)
 {
     print(out, m.value());

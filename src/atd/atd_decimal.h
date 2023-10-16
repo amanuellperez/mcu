@@ -73,6 +73,22 @@ namespace atd{
 template <Type::Arithmetic Rep, int ndecimals>
 class Decimal;
 
+namespace  private_{
+// TODO: nombre??? Es confuso. Estoy usando `atd::is_decimal_v` como
+// ampliación de std::is_floating_v. 
+// is_decimal
+// ----------
+template <typename T>
+struct is_class_decimal: public std::false_type { };
+
+template <Type::Arithmetic Rep, int N>
+struct is_class_decimal<Decimal<Rep, N>> : public std::true_type { };
+
+template <typename T>
+inline constexpr bool is_class_decimal_v = is_class_decimal<T>::value;
+
+}// private_
+ 
 // Un número decimal lo estoy almacenando como x*10^(-n).
 // Queremos escribir x1*10^(-n1) como x2*10^(-n2):
 //
@@ -96,24 +112,29 @@ class Decimal;
 // La regla es: el único cambio implítico permitido es cuando se aumenta el
 // número de bits del tipo Rep (de 8 a 16, o 32, ó 64). Cualquier otro cambio
 // tiene que ser explítico usando decimal_cast.
-template <typename To_decimal, Type::Arithmetic Rep1, int n1>
-constexpr inline To_decimal decimal_cast(const Decimal<Rep1, n1>& d)
+//template <typename To_decimal, Type::Arithmetic Rep1, int n1>
+template <typename To, typename From>
+    requires (private_::is_class_decimal_v<From> and
+	      private_::is_class_decimal_v<To>)
+//constexpr inline To_decimal decimal_cast(const Decimal<Rep1, n1>& d)
+constexpr inline To decimal_cast(const From& d)
 {
-    constexpr int n2 = To_decimal::ndecimals;
+    constexpr int n1 = From::ndecimals;
+    constexpr int n2 = To::ndecimals;
 
-    if constexpr (std::is_same_v<Decimal<Rep1, n1>, To_decimal>)
+    if constexpr (std::is_same_v<From, To>)
 	return d;
 
     if constexpr (n2 == n1)
-	return To_decimal::from_internal_value(d.internal_value());
+	return To::from_internal_value(d.internal_value());
 
     else if constexpr (n2 > n1)
-        return To_decimal::from_internal_value(d.internal_value() *
-	    ten_to_the<typename To_decimal::Rep>(n2 - n1));
+        return To::from_internal_value(d.internal_value() *
+	    ten_to_the<typename To::Rep>(n2 - n1));
 
     else
-        return To_decimal::from_internal_value(d.internal_value() /
-			    ten_to_the<typename To_decimal::Rep>(n1 - n2));
+        return To::from_internal_value(d.internal_value() /
+			    ten_to_the<typename To::Rep>(n1 - n2));
 }
 
 
@@ -655,44 +676,44 @@ bool operator>=(const Decimal<R1, n1>& a, const Decimal<R2, n2>& b)
 
 // Serialización
 // -------------
-template <typename Out, Type::Arithmetic Rep, int ndecimals, typename Int>
-Out& __print(Out& out, const atd::Decimal<Rep, ndecimals>& d)
-
+namespace impl_of{
+template <Type::Ostream Out, Type::Arithmetic Rep, int ndecimals, typename Int>
+Out& print(Out& out, const atd::Decimal<Rep, ndecimals>& d)
 {
     auto [n0, f0] = d.value();
     Int n = n0;
 
-    print(out, n);
+    atd::print(out, n);
 
     if constexpr (ndecimals > 0){
 	Int f = f0;
-	print(out, '.');
-	print(out, f, nm::Width{ndecimals});
+	atd::print(out, '.');
+	atd::print(out, f, nm::Width{ndecimals});
     }
 
     return out;
 }
-
+}// impl_of
 
 
 // (RRR) Los int8_t/uint8_t C++ los considera char, con lo que no los imprime
 //	 como números. Por ello esta función gestion aparte estos tipos.
-template <typename Out, Type::Arithmetic Rep, int ndecimals>
+template <Type::Ostream Out, Type::Arithmetic Rep, int ndecimals>
 Out& print(Out& out, const atd::Decimal<Rep, ndecimals>& d)
 {
     // para poder imprimir uint8_t como int
     if constexpr (std::is_same_v<Rep, uint8_t>)
-	return __print<Out, Rep, ndecimals, unsigned int>(out, d);
+	return impl_of::print<Out, Rep, ndecimals, unsigned int>(out, d);
 
     else if constexpr (std::is_same_v<Rep, int8_t>)
-	return __print<Out, Rep, ndecimals, int>(out, d);
+	return impl_of::print<Out, Rep, ndecimals, int>(out, d);
 
     else 
-	return __print<Out, Rep, ndecimals, Rep>(out, d);
+	return impl_of::print<Out, Rep, ndecimals, Rep>(out, d);
 }
 
 // TODO: falta implementarla. De momento hago un print.
-template <typename Out, Type::Arithmetic Rep, int ndecimals>
+template <Type::Ostream Out, Type::Arithmetic Rep, int ndecimals>
 Out& print(Out& out,
            const atd::Decimal<Rep, ndecimals>& d,
            const nm::Width<int>& w)
@@ -701,32 +722,13 @@ Out& print(Out& out,
 }
 
 template <typename Out, Type::Arithmetic Rep, int ndecimals>
-//std::ostream& operator<<(std::ostream& out,
 Out& operator<<(Out& out, const atd::Decimal<Rep, ndecimals>& d)
 {
     return print(out, d);
 }
 
 
-// __is_decimal
-// ------------
-template <typename T>
-struct __is_decimal_: public std::false_type { };
 
-template <Type::Arithmetic Rep, int N>
-struct __is_decimal_<Decimal<Rep, N>> : public std::true_type { };
-
-template <typename T>
-inline constexpr bool __is_decimal = __is_decimal_<T>::value;
-
-
-// __enable_if_is_decimal_
-// -----------------------
-template <typename T>
-using __enable_if_is_decimal = std::enable_if_t<__is_decimal<T>, T>;
-
-template <typename T>
-using __disable_if_is_decimal = std::enable_if_t<!__is_decimal<T>, T>;
 
 
 // casting
