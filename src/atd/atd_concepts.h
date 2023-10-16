@@ -37,10 +37,12 @@
  * HISTORIA
  *    Manuel Perez
  *    12/10/2023 Integer, Decimal
- *    16/10/2023 Arithmetic
+ *    16/10/2023 Arithmetic, Ostream, Istream, Iostream
  *
  ****************************************************************************/
+#include <concepts>
 #include "atd_type_traits.h"
+#include <iostream> // std::ostream...
 
 namespace Type{
 
@@ -56,6 +58,21 @@ concept Decimal = atd::is_decimal_v<T>;
 
 template <typename T>
 concept Arithmetic = Integer<T> or Decimal<T>;
+
+// Ostream
+// -------
+template <typename Out>
+concept Ostream = std::derived_from<Out, std::ostream>;
+
+// Istream
+// -------
+template <typename In>
+concept Istream = std::derived_from<In, std::istream>;
+
+// IOstream
+// --------
+template <typename In_out>
+concept IOstream = Ostream<In_out> and Istream<In_out>;
 
 }// namespace Type
 

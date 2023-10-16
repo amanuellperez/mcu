@@ -6,6 +6,7 @@ DIRS = algorithm	\
 		cast		\
 		char		\
 		cmath		\
+		concepts	\
 		crc			\
 		cstddef		\
 		cstring		\
