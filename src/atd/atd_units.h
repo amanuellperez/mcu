@@ -32,6 +32,7 @@
  *    13/03/2021 v0.0 Reestructurado. Las 'Units' las necesitan tanto
  *		      atd::Magnitude como atd::ENG_magnitude
  *    30/03/2021      Volt
+ *    16/10/2023      Unit como struct. Como enum daba warnings.
  *
  ****************************************************************************/
 
@@ -40,13 +41,22 @@ namespace atd{
 /// Unidades en sistema MKS
 template <int M, int Kg, int S, int Kelvin, int Ampere>
 struct Unit{
-    enum {m = M, kg = Kg, s = S, K = Kelvin, A = Ampere};
+    static constexpr int m = M;
+    static constexpr int kg = Kg;
+    static constexpr int s = S;
+    static constexpr int K = Kelvin;
+    static constexpr int A = Ampere;
 };
 
+// ----------
 // Operations
+// ----------
+
 // Addition: Unit_multiply<U1, U2>
+// -------------------------------
+namespace impl_of{
 template <typename U1, typename U2>
-struct __Unit_multiply{
+struct Unit_multiply{
     using type = Unit<U1::m + U2::m,
 		      U1::kg + U2::kg,
 		      U1::s + U2::s,
@@ -54,13 +64,18 @@ struct __Unit_multiply{
 		      U1::A + U2::A
 		     >;
 };
-
+}// impl_of
+ 
 template <typename U1, typename U2>
-using Unit_multiply = typename __Unit_multiply<U1, U2>::type;
+using Unit_multiply = typename impl_of::Unit_multiply<U1, U2>::type;
+
+
 
 // Substraction: Unit_divide<U1, U2>
+// ---------------------------------
+namespace impl_of{
 template <typename U1, typename U2>
-struct __Unit_divide{
+struct Unit_divide{
     using type = Unit<U1::m - U2::m,
 		      U1::kg - U2::kg,
 		      U1::s - U2::s,
@@ -68,19 +83,23 @@ struct __Unit_divide{
 		      U1::A + U2::A
 		     >;
 };
-
+}// impl_of
+ 
 template <typename U1, typename U2>
-using Unit_divide = typename __Unit_divide<U1, U2>::type;
+using Unit_divide = typename impl_of::Unit_divide<U1, U2>::type;
 
 
 // Inverse: Unit_inverse<U>
+// ------------------------
+namespace impl_of{
 template <typename U>
-struct __Unit_inverse{
+struct Unit_inverse{
     using type = Unit<-U::m, -U::kg, -U::s, -U::K, -U::A>;
 };
+}// impl_of
 
 template <typename U>
-using Unit_inverse = typename __Unit_inverse<U>::type;
+using Unit_inverse = typename impl_of::Unit_inverse<U>::type;
 
 
 // Different types of units
@@ -96,39 +115,44 @@ using Units_electric_potential = Unit<2, 1, -3, 0, -1>;
 
 
 // Symbols
+// --------
+namespace impl_of{
 template <typename U>
-struct __Unit_symbol;
-
-template <typename U>
-inline constexpr const char* Unit_symbol = __Unit_symbol<U>::value;
+struct Unit_symbol;
 
 template <>
-struct __Unit_symbol<Units_length>
+struct Unit_symbol<Units_length>
 { static constexpr const char* value = "m"; };
 
 template <>
-struct __Unit_symbol<Units_mass>
+struct Unit_symbol<Units_mass>
 { static constexpr const char* value = "g"; };
 
 template <>
-struct __Unit_symbol<Units_time>
+struct Unit_symbol<Units_time>
 { static constexpr const char* value = "s"; };
 
 template <>
-struct __Unit_symbol<Units_temperature>
+struct Unit_symbol<Units_temperature>
 { static constexpr const char* value = "K"; };
 
 template <>
-struct __Unit_symbol<Units_pressure>
+struct Unit_symbol<Units_pressure>
 { static constexpr const char* value = "Pa"; };
 
 template <>
-struct __Unit_symbol<Units_frequency>
+struct Unit_symbol<Units_frequency>
 { static constexpr const char* value = "Hz"; };
 
 template <>
-struct __Unit_symbol<Units_electric_potential>
+struct Unit_symbol<Units_electric_potential>
 { static constexpr const char* value = "V"; };
+
+} // impl_of
+
+
+template <typename U>
+inline constexpr const char* Unit_symbol = impl_of::Unit_symbol<U>::value;
 
 }// namespace
 
