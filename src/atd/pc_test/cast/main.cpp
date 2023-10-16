@@ -19,9 +19,11 @@
 
 #include "../../atd_cast.h"
 
-#include <alp_test.h>
+
 #include <iostream>
 
+#include <alp_test.h>
+#include <alp_string.h>
 
 
 using namespace test;
@@ -223,6 +225,22 @@ void test_big_endian()
 
 }
 
+template <typename From, typename To>
+void test_floating_cast(From x, To res)
+{
+    std::cout << "floating_cast(" << x << "): ";
+    CHECK_TRUE(atd::floating_cast<To>(x) == res, "");
+}
+void test_floating_cast()
+{
+    test::interface("floating_cast");
+
+    test_floating_cast(float{3.14}, float{3.14});
+    test_floating_cast(atd::Decimal<int, 2>{4}, atd::Decimal<int,0>{4});
+    test_floating_cast(atd::Decimal<int, 3>{3,141}, atd::Decimal<int,1>{3,1});
+
+}
+
 
 int main()
 {
@@ -232,6 +250,7 @@ try{
     test_bounded_cast();
     test_safe_static_cast();
     test_to_integer();
+    test_floating_cast();
     test_convert_into();
     test_little_endian();
     test_big_endian();

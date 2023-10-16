@@ -43,6 +43,8 @@
 #include "atd_decimal.h"
 
 namespace atd{
+// bounded_cast
+// ------------
 /*!
  *  \brief  Convierte el tipo r en IntReturn.
  *
@@ -67,7 +69,8 @@ IntReturn bounded_cast(const Int& r)
 
 
 
-
+// safe_static_cast
+// ----------------
 /// Hace un static cast convirtiendo T x en R x. Básicamente hace:
 ///	T x;
 ///	R ret = x;
@@ -89,6 +92,8 @@ inline constexpr R safe_static_cast()
 }
 
 
+// to_byte
+// -------
 // Conversión de bool -> std::byte (necesaria para usarla en las máscaras de
 // bits 
 inline std::byte to_byte(bool x)
@@ -97,25 +102,62 @@ inline std::byte to_byte(bool x)
     else    return std::byte{0};
 }
 
+// to_integer
+// ----------
 // (RRR) ¿Cómo convertir double en int? ¿y atd::Decimal en int? Necesito un
 // interfaz común. to_integer lo suministra.
-template <typename T>
+template <Type::Arithmetic T>
 constexpr inline T to_integer(const T& x) {return x;}
 
 
 template <typename Rep2, int N, typename Rep = Rep2>
-constexpr __disable_if_is_decimal<Rep2> to_integer(const Decimal<Rep, N>& d)
+    requires (!private_::is_class_decimal_v<Rep2>)
+inline constexpr Rep2 to_integer(const Decimal<Rep, N>& d)
 {
     auto [i, f] = d.value();
     return static_cast<Rep2>(i);
 }
 
 template <typename To_decimal, typename Rep, int N>
-inline constexpr __enable_if_is_decimal<To_decimal>
-to_integer(const Decimal<Rep, N>& d)
+    requires (private_::is_class_decimal_v<To_decimal>)
+inline constexpr To_decimal to_integer(const Decimal<Rep, N>& d)
 {
     return decimal_cast<To_decimal>(d);
 }
+
+// floating_cast
+// -------------
+// Define un interfaz común para convertir de un decimal point en otro.
+// Antes de llamar a esta función hay que confirmar que se puede hacer
+// realmente el casting.
+// (RRR) Surge en atd::Magnitude cuando se intenta pasar de Meter a Centimeter,
+//       por ejemplo, 4'00 m = 400 cm, se pueden usar diferentes números
+//       decimales en la representación: 2 decimales para los metros, ninguno
+//       para los centímetros. 
+//       Sin embargo si se usa atd::Decimal pasar de atd::Decimal<int,2> a
+//       atd::Decimal<int,0> supone una pérdida de cifras decimales. Ese
+//       cambio no se puede hacer de forma implícita estando prohibido en el
+//       constructor de atd::Decimal. ¿Cómo hacerlo? Llamando a
+//       `decimal_cast`. El problema es que si quiero que atd::Magnitude
+//       funcione también con floats no podemos llamar directamente a
+//       decimal_cast. Necesitamos un interfaz genérico: `floating_cast`
+//       suministra dicho interfaz.
+//
+// (RRR) ¿Por qué el orden To, From? Para que se pueda deducir automáticamente
+//       el tipo From del parámetro pasado. Si se pone al revés el compilador
+//       indica que no es capaz de deducirlo.
+template <Type::Arithmetic To, Type::Arithmetic From>
+    requires (!(private_::is_class_decimal_v<From> and
+	      private_::is_class_decimal_v<To>))
+constexpr inline 
+To floating_cast(const From& x) {return static_cast<To>(x);}
+
+template <typename To, typename From>
+    requires (private_::is_class_decimal_v<From> and
+	      private_::is_class_decimal_v<To>)
+constexpr inline 
+To floating_cast(const From& x) {return decimal_cast<To>(x);}
+
 
 
 // convert(a).into(b)
