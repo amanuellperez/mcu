@@ -37,6 +37,7 @@
  * HISTORIA
  *    Manuel Perez
  *    12/10/2023 Integer, Decimal
+ *    16/10/2023 Arithmetic
  *
  ****************************************************************************/
 #include "atd_type_traits.h"
@@ -53,6 +54,8 @@ concept Integer = atd::is_integer_v<T>;
 template <typename T>
 concept Decimal = atd::is_decimal_v<T>;
 
+template <typename T>
+concept Arithmetic = Integer<T> or Decimal<T>;
 
 }// namespace Type
 

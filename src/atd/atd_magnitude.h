@@ -79,7 +79,7 @@ namespace atd{
  *				MAGNITUDE
  ***************************************************************************/
 template <typename Unit0,
-          typename Rep0,
+          Type::Arithmetic Rep0,
           typename Multiplier0, typename Displacement = std::ratio<0>>
 class Magnitude;
 
@@ -97,11 +97,13 @@ class Magnitude;
 //
 //	value2() = value1() * m1 / m2 + (d1 - d2) / m2;
 //
-// Llamemos q = m1 / m2, y d = (d1 - d2) / m2;
+// Llamemos q = m1 / m2, y q_d = (d1 - d2) / m2;
 //
 //  Lo que hacemos es calcular estáticamente q = m1 / m2 y operar.
 template <typename To_magnitude, 
-	  typename Unit, typename Rep, typename Multiplier, typename Displacement>
+	  typename Unit, 
+	  Type::Arithmetic Rep, 
+	  typename Multiplier, typename Displacement>
 constexpr inline To_magnitude
 	magnitude_cast(const Magnitude<Unit, Rep, Multiplier, Displacement>& m)
 {
@@ -122,7 +124,9 @@ constexpr inline To_magnitude
 //std::cout << "D = " << D << '\n';
 
     if constexpr (Q::num == 1 and Q::den == 1)	
-        return To_magnitude(static_cast<typename To_magnitude::Rep>(m.value()) + D);
+        return To_magnitude(
+		    static_cast<typename To_magnitude::Rep>(m.value()) + D
+			   );
     
     else if (Q::num != 1 and Q::den == 1) {
         return To_magnitude(
@@ -182,7 +186,7 @@ constexpr inline To_magnitude
  *
  */
 template <typename Unit0,
-          typename Rep0,
+          Type::Arithmetic Rep0,
           typename Multiplier0, typename Displacement0>
 class Magnitude {
     static_assert(is_ratio_v<Multiplier0>,
@@ -206,16 +210,16 @@ public:
 // Construction
     constexpr Magnitude() = default;
 
-    // TODO: poner como requirement que Rep2 se pueda convertir en Rep
-    template <typename Rep2>
+    template <Type::Arithmetic Rep2>
     constexpr explicit Magnitude(const Rep2& value0)
+	requires (std::convertible_to<Rep2, Rep>)
 	: value_{static_cast<Rep>(value0)} {}
 
-    template <typename Rep2, typename M2, typename D2>
+    template <Type::Arithmetic Rep2, typename M2, typename D2>
     constexpr Magnitude(const Magnitude<Unit, Rep2, M2, D2>& m)
 	: value_{magnitude_cast<Magnitude>(m).value()} {}
 
-    template <typename Rep2, typename M2, typename D2>
+    template <Type::Arithmetic Rep2, typename M2, typename D2>
     Magnitude& operator=(const Magnitude<Unit, Rep2, M2, D2>& m)
     {
 	value_ = magnitude_cast<Magnitude>(m).value();
@@ -300,7 +304,7 @@ inline constexpr Magnitude<U, R, M, D>&
 
 // operaciones con escalares
 // -------------------------
-template <typename U, typename Rep, typename M, typename D>
+template <typename U, Type::Arithmetic Rep, typename M, typename D>
 inline constexpr Magnitude<U, Rep, M, D>& 
 			Magnitude<U, Rep, M, D>::operator*=(const Scalar& a)
 {
@@ -308,7 +312,7 @@ inline constexpr Magnitude<U, Rep, M, D>&
     return *this;
 }
 
-template <typename U, typename Rep, typename M, typename D>
+template <typename U, Type::Arithmetic Rep, typename M, typename D>
 inline constexpr Magnitude<U, Rep, M, D>& 
 			    Magnitude<U, Rep, M, D>::operator/=(const Scalar& a)
 {
@@ -381,8 +385,8 @@ namespace atd{
 // ---------------------
 // non-member arithmetic
 // ---------------------
-template <typename Unit, typename Rep1, typename Multiplier1, typename D1,
-			 typename Rep2, typename Multiplier2, typename D2>
+template <typename Unit, Type::Arithmetic Rep1, typename Multiplier1, typename D1,
+			 Type::Arithmetic Rep2, typename Multiplier2, typename D2>
 constexpr inline std::common_type_t<
 	    Magnitude<Unit, Rep1, Multiplier1, D1>,
 	    Magnitude<Unit, Rep2, Multiplier2, D2>>
@@ -396,8 +400,8 @@ constexpr inline std::common_type_t<
 }
 
 
-template <typename Unit, typename Rep1, typename Multiplier1, typename D1,
-			 typename Rep2, typename Multiplier2, typename D2>
+template <typename Unit, Type::Arithmetic Rep1, typename Multiplier1, typename D1,
+			 Type::Arithmetic Rep2, typename Multiplier2, typename D2>
 constexpr inline std::common_type_t <
 				    Magnitude<Unit, Rep1, Multiplier1, D1>,
 				    Magnitude<Unit, Rep2, Multiplier2, D2>
@@ -441,7 +445,7 @@ operator*(const Magnitude<U1,R1,M1,D>& m1, const Magnitude<U2,R2,M2,D>& m2)
 // Observar que no es la división de 2 magnitudes (eso sería espacio/tiempo =
 // velocidad), sino la división de 2 magnitudes del mismo tipo, que da como
 // resultado el número de veces que es mayor una que otra.
-template <typename U, typename Rep1, typename Rep2, typename M1, typename M2, typename D>
+template <typename U, Type::Arithmetic Rep1, Type::Arithmetic Rep2, typename M1, typename M2, typename D>
 constexpr inline std::common_type_t<Rep1, Rep2> 
 	    operator/(const Magnitude<U, Rep1, M1, D>& a, 
 		      const Magnitude<U, Rep2, M2, D>& b)
@@ -529,8 +533,8 @@ operator/(const R& a, const Magnitude<U, R, M, D>& b)
 // -----------
 // Comparisons
 // -----------
-template <typename Unit, typename Rep1, typename M1, typename D1,
-			 typename Rep2, typename M2, typename D2>
+template <typename Unit, Type::Arithmetic Rep1, typename M1, typename D1,
+			 Type::Arithmetic Rep2, typename M2, typename D2>
 constexpr inline bool operator==(
 	    const Magnitude<Unit, Rep1, M1, D1>& a,
 	    const Magnitude<Unit, Rep2, M2, D2>& b)
@@ -541,15 +545,15 @@ constexpr inline bool operator==(
     return CT{a}.value() == CT{b}.value();
 }
 
-template <typename Unit, typename Rep1, typename M1, typename D1,
-			 typename Rep2, typename M2, typename D2>
+template <typename Unit, Type::Arithmetic Rep1, typename M1, typename D1,
+			 Type::Arithmetic Rep2, typename M2, typename D2>
 constexpr inline bool operator!=(
 	    const Magnitude<Unit, Rep1, M1, D1>& a,
 	    const Magnitude<Unit, Rep2, M2, D2>& b)
 { return !(a == b); }
 
-template <typename Unit, typename Rep1, typename M1, typename D1,
-			 typename Rep2, typename M2, typename D2>
+template <typename Unit, Type::Arithmetic Rep1, typename M1, typename D1,
+			 Type::Arithmetic Rep2, typename M2, typename D2>
 constexpr inline bool operator<(
 	    const Magnitude<Unit, Rep1, M1, D1>& a,
 	    const Magnitude<Unit, Rep2, M2, D2>& b)
@@ -561,8 +565,8 @@ constexpr inline bool operator<(
 }
 
 
-template <typename Unit, typename Rep1, typename M1, typename D1,
-			 typename Rep2, typename M2, typename D2>
+template <typename Unit, Type::Arithmetic Rep1, typename M1, typename D1,
+			 Type::Arithmetic Rep2, typename M2, typename D2>
 constexpr inline bool operator<=(
 	    const Magnitude<Unit, Rep1, M1, D1>& a,
 	    const Magnitude<Unit, Rep2, M2, D2>& b)
@@ -570,8 +574,8 @@ constexpr inline bool operator<=(
 
 
 
-template <typename Unit, typename Rep1, typename M1, typename D1,
-			 typename Rep2, typename M2, typename D2>
+template <typename Unit, Type::Arithmetic Rep1, typename M1, typename D1,
+			 Type::Arithmetic Rep2, typename M2, typename D2>
 constexpr inline bool operator>(
 	    const Magnitude<Unit, Rep1, M1, D1>& a,
 	    const Magnitude<Unit, Rep2, M2, D2>& b)
@@ -579,8 +583,8 @@ constexpr inline bool operator>(
 
 
 
-template <typename Unit, typename Rep1, typename M1, typename D1,
-			 typename Rep2, typename M2, typename D2>
+template <typename Unit, Type::Arithmetic Rep1, typename M1, typename D1,
+			 Type::Arithmetic Rep2, typename M2, typename D2>
 constexpr inline bool operator>=(
 	    const Magnitude<Unit, Rep1, M1, D1>& a,
 	    const Magnitude<Unit, Rep2, M2, D2>& b)
@@ -737,7 +741,7 @@ using Millipascal = Pressure<Int, std::milli>;
 
 // numeric_limits
 // --------------
-template <typename U, typename Rep, typename M, typename D>
+template <typename U, Type::Arithmetic Rep, typename M, typename D>
 struct std::numeric_limits<atd::Magnitude<U,Rep,M, D>>{
     static constexpr bool is_specialized = true;
     static constexpr bool is_signed      = std::numeric_limits<Rep>::is_signed;

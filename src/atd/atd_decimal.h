@@ -70,7 +70,7 @@
 
 namespace atd{
 
-template <typename Rep, int ndecimals>
+template <Type::Arithmetic Rep, int ndecimals>
 class Decimal;
 
 // Un número decimal lo estoy almacenando como x*10^(-n).
@@ -96,7 +96,7 @@ class Decimal;
 // La regla es: el único cambio implítico permitido es cuando se aumenta el
 // número de bits del tipo Rep (de 8 a 16, o 32, ó 64). Cualquier otro cambio
 // tiene que ser explítico usando decimal_cast.
-template <typename To_decimal, typename Rep1, int n1>
+template <typename To_decimal, Type::Arithmetic Rep1, int n1>
 constexpr inline To_decimal decimal_cast(const Decimal<Rep1, n1>& d)
 {
     constexpr int n2 = To_decimal::ndecimals;
@@ -135,7 +135,7 @@ constexpr inline To_decimal decimal_cast(const Decimal<Rep1, n1>& d)
  *	2.78 = 278*10^(-2)  ==> almacenamos 278, usamos n = 2.
  *
  */
-template <typename Rep0, int ndecimals0>
+template <Type::Arithmetic Rep0, int ndecimals0>
 class Decimal{
 public:
 // Types
@@ -159,7 +159,7 @@ public:
     /// Definimos el número "integer_part'fractional_part". 
     constexpr Decimal(Rep integer_part, Rep fractional_part);
 
-    template <typename Rep2, int n2>
+    template <Type::Arithmetic Rep2, int n2>
     constexpr Decimal(const Decimal<Rep2, n2>& d);
 
 
@@ -241,8 +241,8 @@ Decimal<I,n>::Decimal(Rep integer_part, Rep fractional_part)
 //       a que se haga de forma explicita el casting en este caso llamando
 //       a decimal_cast, para que el usuario sea consciente de si produce
 //       overflow o no.
-template <typename Rep, int n>
-template <typename Rep2, int n2>
+template <Type::Arithmetic Rep, int n>
+template <Type::Arithmetic Rep2, int n2>
 constexpr inline Decimal<Rep, n>::Decimal(const Decimal<Rep2, n2>& d)
     :x_{decimal_cast<Decimal>(d).internal_value()} 
 {
@@ -304,7 +304,7 @@ constexpr typename Decimal<I,n>::Rep
 //       el caso habitual por culpa de gestionar un caso completamente 
 //       excepcional. Usémoslo y si se presenta ese caso, entonces
 //       incluyámoslo. Si no, olvidémoslo.
-template <typename Rep, int n>
+template <Type::Arithmetic Rep, int n>
 constexpr inline std::pair<Rep, Rep> Decimal<Rep, n>::value() const
 {
     auto [q, r] = atd::div(atd::abs(x_), ten_to_the_n);
@@ -440,7 +440,7 @@ inline constexpr Decimal<I,n>& Decimal<I,n>::operator/=(const Rep& a)
 // Como suele ocurrir con este tipo de funciones, hay un problema con el
 // overflow. De momento voy a dar por supuesto que Rep es suficientemente
 // grande para que no haya overflow (que es lo que suponemos en la práctica).
-template <typename Rep1, int n1, typename Rep2, int n2>
+template <Type::Arithmetic Rep1, int n1, Type::Arithmetic Rep2, int n2>
 struct std::common_type<atd::Decimal<Rep1, n1>, atd::Decimal<Rep2, n2>>{
 
     using Rep = std::common_type_t<Rep1, Rep2>;
@@ -655,7 +655,7 @@ bool operator>=(const Decimal<R1, n1>& a, const Decimal<R2, n2>& b)
 
 // Serialización
 // -------------
-template <typename Out, typename Rep, int ndecimals, typename Int>
+template <typename Out, Type::Arithmetic Rep, int ndecimals, typename Int>
 Out& __print(Out& out, const atd::Decimal<Rep, ndecimals>& d)
 
 {
@@ -677,7 +677,7 @@ Out& __print(Out& out, const atd::Decimal<Rep, ndecimals>& d)
 
 // (RRR) Los int8_t/uint8_t C++ los considera char, con lo que no los imprime
 //	 como números. Por ello esta función gestion aparte estos tipos.
-template <typename Out, typename Rep, int ndecimals>
+template <typename Out, Type::Arithmetic Rep, int ndecimals>
 Out& print(Out& out, const atd::Decimal<Rep, ndecimals>& d)
 {
     // para poder imprimir uint8_t como int
@@ -692,7 +692,7 @@ Out& print(Out& out, const atd::Decimal<Rep, ndecimals>& d)
 }
 
 // TODO: falta implementarla. De momento hago un print.
-template <typename Out, typename Rep, int ndecimals>
+template <typename Out, Type::Arithmetic Rep, int ndecimals>
 Out& print(Out& out,
            const atd::Decimal<Rep, ndecimals>& d,
            const nm::Width<int>& w)
@@ -700,7 +700,7 @@ Out& print(Out& out,
     return print(out, d);
 }
 
-template <typename Out, typename Rep, int ndecimals>
+template <typename Out, Type::Arithmetic Rep, int ndecimals>
 //std::ostream& operator<<(std::ostream& out,
 Out& operator<<(Out& out, const atd::Decimal<Rep, ndecimals>& d)
 {
@@ -713,7 +713,7 @@ Out& operator<<(Out& out, const atd::Decimal<Rep, ndecimals>& d)
 template <typename T>
 struct __is_decimal_: public std::false_type { };
 
-template <typename Rep, int N>
+template <Type::Arithmetic Rep, int N>
 struct __is_decimal_<Decimal<Rep, N>> : public std::true_type { };
 
 template <typename T>
@@ -731,14 +731,14 @@ using __disable_if_is_decimal = std::enable_if_t<!__is_decimal<T>, T>;
 
 // casting
 // -------
-//template <typename Rep2, int N, typename Rep = Rep2>
+//template <Type::Arithmetic Rep2, int N, Type::Arithmetic Rep = Rep2>
 //constexpr __disable_if_is_decimal<Rep2> to_integer(const Decimal<Rep, N>& d)
 //{
 //    auto [i, f] = d.value();
 //    return static_cast<Rep2>(i);
 //}
 //
-//template <typename To_decimal, typename Rep, int N>
+//template <typename To_decimal, Type::Arithmetic Rep, int N>
 //constexpr __enable_if_is_decimal<To_decimal>
 //to_integer(const Decimal<Rep, N>& d)
 //{
@@ -750,7 +750,7 @@ using __disable_if_is_decimal = std::enable_if_t<!__is_decimal<T>, T>;
 // traits
 // ------
 // same_type_with_double_bits_
-template<typename Rep, int N>
+template<Type::Arithmetic Rep, int N>
 struct same_type_with_double_bits_<Decimal<Rep, N>>{
     using type = Decimal<same_type_with_double_bits<Rep>, N>;
 };
@@ -758,7 +758,7 @@ struct same_type_with_double_bits_<Decimal<Rep, N>>{
 
 // is_decimal
 // ----------
-template <typename Rep, int N>
+template <Type::Arithmetic Rep, int N>
 struct is_decimal<Decimal<Rep, N>> : std::true_type {};
 
 }// namespace atd
@@ -767,7 +767,7 @@ struct is_decimal<Decimal<Rep, N>> : std::true_type {};
 
 // numeric_limits
 // --------------
-template <typename Rep, int N>
+template <Type::Arithmetic Rep, int N>
 struct std::numeric_limits<atd::Decimal<Rep,N>>{
     static constexpr bool is_specialized = true;
     static constexpr bool is_signed      = std::is_signed_v<Rep>;
@@ -781,7 +781,7 @@ struct std::numeric_limits<atd::Decimal<Rep,N>>{
     {return atd::Decimal<Rep,N>::max();}
 };
 
-template <typename Rep, int N>
+template <Type::Arithmetic Rep, int N>
 struct std::is_signed<atd::Decimal<Rep, N>>
     : public std::bool_constant<std::is_signed_v<Rep>> {
 };
