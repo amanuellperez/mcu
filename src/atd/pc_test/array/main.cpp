@@ -261,15 +261,15 @@ void test_linear_array()
 
     CHECK_TRUE(buf.size() == 3, "size");
     CHECK_TRUE(buf.max_size() == 6, "size");
-    CHECK_TRUE(buf[0] = 10, "operator[]");
-    CHECK_TRUE(buf[1] = 20, "operator[]");
-    CHECK_TRUE(buf[2] = 30, "operator[]");
+    CHECK_TRUE(buf[0] == 10, "operator[]");
+    CHECK_TRUE(buf[1] == 20, "operator[]");
+    CHECK_TRUE(buf[2] == 30, "operator[]");
 
     // back
     buf.push_back(40);
 
     CHECK_TRUE(buf.size() == 4, "push_back");
-    CHECK_TRUE(buf[3] = 40, "operator[]");
+    CHECK_TRUE(buf[3] == 40, "operator[]");
 
     buf.pop_back();
     CHECK_TRUE(buf.size() == 3, "pop_back");
@@ -278,18 +278,17 @@ void test_linear_array()
     int x = buf.pop_front();
     CHECK_TRUE(x == 10, "pop_front()");
     CHECK_TRUE(buf.size() == 2, "pop_front");
-    CHECK_TRUE(buf[0] = 20, "operator[]");
-    CHECK_TRUE(buf[1] = 30, "operator[]");
+    CHECK_TRUE(buf[0] == 20, "operator[]");
+    CHECK_TRUE(buf[1] == 30, "operator[]");
 
     x = buf.pop_front();
     CHECK_TRUE(x == 20, "pop_front()");
     CHECK_TRUE(buf.size() == 1, "pop_front");
-    CHECK_TRUE(buf[0] = 30, "operator[]");
+    CHECK_TRUE(buf[0] == 30, "operator[]");
     
-    buf.push_front(2);
+    buf.push_front(20);
     CHECK_TRUE(buf.size() == 2, "push_front");
-    CHECK_TRUE(buf[0] = 20, "operator[]");
-    CHECK_TRUE(buf[0] = 30, "operator[]");
+    CHECK_TRUE(buf[0] == 20, "operator[]");
 
 
     buf.clear();
