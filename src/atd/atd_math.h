@@ -43,6 +43,7 @@
 #include <limits>
 #include <algorithm> 
 #include "atd_cmath.h"
+#include "atd_concepts.h"
 
 namespace atd{
 
@@ -107,20 +108,24 @@ inline constexpr int exponent_of_power_of_ten(Int x, int exp = 0)
 ///	    int x = most_significant_digits<int, 2>(1234);
 ///
 /// Devuelve x == 12;
-template <typename Int, int n>
+template <Type::Integer Int, int n>
 inline constexpr Int most_significant_digits(Int x)
 {
     static_assert(n > 0, "n must be greater than 0");
 
-    while (x >= ten_to_the<Int>(n))
-	x /= Int{10};
+    Int x0 = x;
 
-    return x;
+    while (x >= ten_to_the<Int>(n-1)){
+	x0 = x;
+	x /= Int{10};
+    }
+
+    return x0;
 }
 
 // Devuelve el número de cifras que tiene x.
 // Ejemplo: number_of_digits(324) == 3;
-template <typename Int>
+template <Type::Integer Int>
 inline constexpr int number_of_digits(Int x)
 {
     int n = 1;

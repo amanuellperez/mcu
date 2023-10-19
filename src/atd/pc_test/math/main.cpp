@@ -45,21 +45,22 @@ void test_number_of_digits()
 
 }
 
+template <typename Int>
+void test_ten_to_the(int n, const Int& res)
+{
+    Int i = atd::ten_to_the<Int>(n);
+    CHECK_TRUE(i == res, alp::as_str() << "ten_to_the<" << n << ">");
+}
+
 void test_ten_to_the()
 {
     test::interface("ten_to_the");
 
-    constexpr int i0 = atd::ten_to_the<int>(0);
-    CHECK_TRUE(i0 == 1, "ten_to_the<0>");
+    test_ten_to_the<int>(0, 1);
+    test_ten_to_the<int>(1, 10);
+    test_ten_to_the<int>(2, 100);
+    test_ten_to_the<int>(3, 1000);
 
-    constexpr int i1 = atd::ten_to_the<int>(1);
-    CHECK_TRUE(i1 == 10, "ten_to_the<1>");
-
-    constexpr int i2 = atd::ten_to_the<int>(2);
-    CHECK_TRUE(i2 == 100, "ten_to_the<2>");
-
-    constexpr int i3 = atd::ten_to_the<int>(3);
-    CHECK_TRUE(i3 == 1000, "ten_to_the<3>");
 }
 
 template <typename Int, int n>
@@ -87,6 +88,7 @@ void test_most_significant_digits()
 // bug:
     test_most_significant_digits<int, 1>(10, 1);
     test_most_significant_digits<int, 2>(100, 10);
+    test_most_significant_digits<int8_t, 3>(123, 123);
     
 }
 
