@@ -1,7 +1,8 @@
 # TODO: si se implementan más micros, 
 # crear un directorio fuera `generic` para probar todos los dispositivos
 # genéricos sea cual sea el micro.
-DIRS = ADC	\
+
+DIRS = \
 	cfg		\
 	generic_timer\
 	memory	\
@@ -15,6 +16,7 @@ DIRS = ADC	\
 	TWI		\
 	USART 
 
+# Revisar:  ADC	
 
 
 include $(MCU_RECRULES)

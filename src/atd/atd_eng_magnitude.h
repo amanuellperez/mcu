@@ -26,6 +26,12 @@
  *
  *  - DESCRIPCION: Engineering notation for Magnitude
  *
+ *  TODO: BORRARLA!!! 
+ *	  Mezcle ideas al crear esta clase.
+ *	  Por una parte está `atd::Magnitude` y por otra parte cómo almacenar
+ *	  los números grandes/pequeños en un microcontrolador si queremos
+ *	  evitar el uso de float.
+ *
  *  - HISTORIA:
  *    Manuel Perez
  *    04/02/2021 v0.0 Implementación mínima.
@@ -38,7 +44,7 @@
 #include "atd_magnitude.h"
 #include "atd_cast.h"	    // to_integer
 #include "atd_math.h"
-#include "atd_type_traits.h"	// same_type_at_least32
+#include "atd_type_traits.h"	// same_type_at_least32_t
 #include "atd_names.h" // nm::Width
 
 namespace atd{
@@ -118,13 +124,13 @@ using scalar = typename scalar_<Int>::type;
  *  de una forma a otra (por eso suministro to_magnitude).
  *
  *  (RRR) ¿Cómo podemos representar un número?
- *	  (1) x*10^n , con x cualquier número (como potencia de 10). 
+ *	  (1) x * 10^n , con x cualquier número (como potencia de 10). 
  *			Esta es Magnitude.
  *
- *	  (2) x*10^(3n), con x <= 999 (notación ENG). 
+ *	  (2) x * 10^(3n), con x <= 999 (notación ENG). 
  *			Esta es ENG_Magnitude
  *
- *	  (3) x*10^n, con x <= 9 (notación científica)
+ *	  (3) x * 10^n, con x <= 9 (notación científica)
  *			Esta no la tengo implementada de momento.
  *
  *  A simple vista esta clase es más ineficiente que Magnitude, ya que
@@ -151,6 +157,14 @@ using scalar = typename scalar_<Int>::type;
  *  Los escalares son `int` ya que eso es lo natural: 1 / freq; 2*freq ...
  *
  */
+// TODO: NO usar esta clase, usar `atd::Magnitude`. Si se quiere una
+// ENG_Magnitude crearla como
+//	template <typename Unit>
+//	using eng_Magnitude = Magnitude<Unit, eng_Number>;
+//
+//	template <typename Unit>
+//	using sci_Magnitude = Magnitude<Unit, sci_Number>;
+//
 template <typename Unit0, typename Rep0>
 class ENG_Magnitude{
 public:
@@ -384,7 +398,7 @@ void ENG_Magnitude<U, Rep>::divide_rep(const Rep& a)
 	write_as_eng(x_, exp_);
     }
     else {
-	using Int = same_type_with_double_bits<Rep>;
+	using Int = same_type_with_double_bits_t<Rep>;
 
 	int n = number_of_digits(a);
         Int x    = (Int{x_} * ten_to_the<Int>(n)) / Int{a};
@@ -490,7 +504,7 @@ operator*(const ENG_Magnitude<Unit1, Rep1>& a,
 {
     using Unit = Unit_multiply<Unit1, Unit2>;
     using Rep = std::common_type_t<Rep1, Rep2>;
-    using Int = same_type_at_least32<Rep>;
+    using Int = same_type_at_least32_t<Rep>;
 
     using ENG = ENG_Magnitude<Unit, Rep>;
     using Exponent = ENG::Exponent;
@@ -512,7 +526,7 @@ operator/(const ENG_Magnitude<Unit1, Rep1>& a,
 {
     using Unit = Unit_divide<Unit1, Unit2>;
     using Rep = std::common_type_t<Rep1, Rep2>;
-    using Int = same_type_at_least32<Rep>;
+    using Int = same_type_at_least32_t<Rep>;
 
     using ENG = ENG_Magnitude<Unit, Rep>;
     using Exponent = ENG::Exponent;
@@ -530,7 +544,7 @@ template <typename Unit, typename Rep>
 Rep operator/(const ENG_Magnitude<Unit, Rep>& a,
               const ENG_Magnitude<Unit, Rep>& b)
 {
-    using Int = same_type_at_least32<Rep>;
+    using Int = same_type_at_least32_t<Rep>;
     using Exponent = ENG_Magnitude<Unit, Rep>::Exponent;
 
     Int y = (Int{a.internal_value()} * Int{1000}) /Int{b.internal_value()};
@@ -552,7 +566,7 @@ ENG_Magnitude<Unit_inverse<Unit1>, Rep>
 operator/(const Rep& a, const ENG_Magnitude<Unit1, Rep>& x)
 {
     using Unit = Unit_inverse<Unit1>;
-    using Int = same_type_at_least32<Rep>;
+    using Int = same_type_at_least32_t<Rep>;
 
     using ENG = ENG_Magnitude<Unit, Rep>;
     using Exponent = ENG::Exponent;

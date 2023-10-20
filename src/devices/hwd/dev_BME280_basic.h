@@ -370,7 +370,7 @@ struct __BME280_calibration{
     Pascal compensate_P(const uint32_t& adc_P) const{
 	int32_t pc = compensate_P_(adc_P)/256;
 	using Decimal = Pascal::Rep;
-	return Pascal{Decimal::from_internal_value(pc)};
+	return Pascal{Decimal::significand(pc)};
     }
 
     int32_t compensate_P_(const int32_t& adc_P) const;

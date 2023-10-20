@@ -179,13 +179,19 @@ inline Time clock_period()
 inline Frequency clock_frequency_in_Hz_1MHz()
 {
     using namespace literals;
-    using Rep = Frequency::Rep;
+//    using Rep = Frequency::Rep;
     switch(Timer0::frequency_divisor()){
 	case Timer0::Frequency_divisor::no_preescaling	: return 1_MHz;
 	case Timer0::Frequency_divisor::divide_by_8	: return 125_kHz;
-	case Timer0::Frequency_divisor::divide_by_64	: return Frequency{15625, 0};
-	case Timer0::Frequency_divisor::divide_by_256	: return Frequency{Rep{3906ul,25ul}, 0};
-	case Timer0::Frequency_divisor::divide_by_1024	: return Frequency{Rep{976ul,56ul}, 0};
+	case Timer0::Frequency_divisor::divide_by_64	: 
+					    //return Frequency{15625, 0};
+					    return Frequency{15625};
+	case Timer0::Frequency_divisor::divide_by_256	: 
+					//return Frequency{Rep{3906ul,25ul}, 0};
+					return Frequency{3906ul};
+	case Timer0::Frequency_divisor::divide_by_1024	: 
+					//return Frequency{Rep{976ul,56ul}, 0};
+					return Frequency{977ul};
 	case Timer0::Frequency_divisor::undefined	: return 0_Hz;
     }
 
@@ -196,13 +202,17 @@ inline Frequency clock_frequency_in_Hz_1MHz()
 inline Frequency clock_frequency_in_Hz_8MHz()
 {
     using namespace literals;
-    using Rep = Frequency::Rep;
+//    using Rep = Frequency::Rep;
     switch(Timer0::frequency_divisor()){
 	case Timer0::Frequency_divisor::no_preescaling  : return 0_Hz;
 	case Timer0::Frequency_divisor::divide_by_8	: return 1_MHz;
 	case Timer0::Frequency_divisor::divide_by_64	: return 125_kHz;
-	case Timer0::Frequency_divisor::divide_by_256	: return Frequency{Rep{31250ul,0ul}, 0};
-	case Timer0::Frequency_divisor::divide_by_1024	: return Frequency{Rep{7812ul,5ul}, 0};
+	case Timer0::Frequency_divisor::divide_by_256	: 
+				//return Frequency{Rep{31250ul,0ul}, 0};
+				return Frequency{31250ul};
+	case Timer0::Frequency_divisor::divide_by_1024	: 
+				// return Frequency{Rep{7812ul,5ul}, 0};
+				return Frequency{7813ul};
 	case Timer0::Frequency_divisor::undefined	: return 0_Hz;
     }
 

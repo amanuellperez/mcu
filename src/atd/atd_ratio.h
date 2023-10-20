@@ -30,9 +30,10 @@
  *
  *  - HISTORIA:
  *    Manuel Perez
- *    31/03/2020 is_ratio
+ *    31/03/2020 is_static_ratio
  *    31/01/2021 ratio_inverse
  *    05/03/2021 is_power_of_ten, ratio_exponent_of_power_of_ten
+ *    17/10/2023 Type::Static_ratio
  *
  ****************************************************************************/
 #include <type_traits>
@@ -42,9 +43,9 @@
 
 namespace atd{
 
-// is_ratio
+// is_static_ratio
 // --------
-// bool is_ratio(typename T)
+// bool is_static_ratio(typename T)
 // {
 //	if (is_<T>_a_specialization_of<ratio>)
 //	    return true;
@@ -52,15 +53,14 @@ namespace atd{
 //	    return false;
 // }
 template <typename T>
-struct is_ratio : std::false_type { };
+struct is_static_ratio : std::false_type { };
 
 template <intmax_t N, intmax_t D>
-struct is_ratio<std::ratio<N, D>> : std::true_type { };
+struct is_static_ratio<std::ratio<N, D>> : std::true_type { };
 
 template <typename T>
-inline constexpr bool is_ratio_v = is_ratio<T>::value;
-
-
+inline constexpr bool is_static_ratio_v = is_static_ratio<T>::value;
+ 
 
 // ratio_inverse
 // -------------
@@ -102,8 +102,13 @@ template <typename q>
 inline constexpr int ratio_exponent_of_power_of_ten =
     impl_of::ratio_exponent_of_power_of_ten<q>::value;
 
-}// namespace
+}// namespace atd
 
+namespace Type{
+template <typename T>
+concept Static_ratio = atd::is_static_ratio_v<T>;
+}// namespace Type
+ 
 #endif
 
 

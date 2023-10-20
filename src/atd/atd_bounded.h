@@ -28,17 +28,10 @@
  *  - HISTORIA:
  *    Manuel Perez
  *    21/03/2021 v0.0 Bounded
- *    01/05/2021      Empty_struct
  *
  ****************************************************************************/
 
 namespace atd{
-// Empty_struct
-// ------------
-struct Empty_struct {};
-
-
-
 /*!
  *  \brief  Bounded integer.
  *

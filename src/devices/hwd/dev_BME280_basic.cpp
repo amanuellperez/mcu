@@ -25,7 +25,7 @@ __BME280_calibration::Celsius
     int32_t T = (t_fine * 5 + 128) >> 8;
 
     using Decimal = Celsius::Rep;
-    return Celsius{Decimal::from_internal_value(T)};
+    return Celsius{Decimal::significand(T)};
 }
 
 
@@ -84,7 +84,7 @@ __BME280_calibration::compensate_H(const uint32_t& adc_H) const
 
     uint32_t H = (uint32_t)(var5 / 4096);
 
-    return Relative_humidity::from_internal_value(100*H/1024);
+    return Relative_humidity::significand(100*H/1024);
 
     // Prefiero que muestre un valor excesivo para que se sepa que no está
     // midiendo correctamente (???)

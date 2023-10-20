@@ -93,13 +93,19 @@ inline Time clock_period_in_us_1MHz()
 inline Frequency clock_frequency_in_Hz_1MHz()
 {
     using namespace literals;
-    using Rep = Frequency::Rep;
+//    using Rep = Frequency::Rep;
     switch(Timer1::frequency_divisor()){
 	case Timer1::Frequency_divisor::no_preescaling	: return 1_MHz;
 	case Timer1::Frequency_divisor::divide_by_8	: return 125_kHz;
-	case Timer1::Frequency_divisor::divide_by_64	: return Frequency{15625ul, 0};
-	case Timer1::Frequency_divisor::divide_by_256	: return Frequency{Rep{3906ul,25ul}, 0};
-	case Timer1::Frequency_divisor::divide_by_1024	: return Frequency{Rep{976ul,56ul}, 0};
+	case Timer1::Frequency_divisor::divide_by_64	: 
+					//return Frequency{15625ul, 0};
+					return Frequency{15625ul};
+	case Timer1::Frequency_divisor::divide_by_256	: 
+					//return Frequency{Rep{3906ul,25ul}, 0};
+					return Frequency{3906ul};
+	case Timer1::Frequency_divisor::divide_by_1024	: 
+					//return Frequency{Rep{976ul,56ul}, 0};
+					return Frequency{977};
 	case Timer1::Frequency_divisor::undefined	: return 0_Hz;
     }
 
@@ -154,13 +160,17 @@ inline Time clock_period_in_us_8MHz()
 inline Frequency clock_frequency_in_Hz_8MHz()
 {
     using namespace literals;
-    using Rep = Frequency::Rep;
+//    using Rep = Frequency::Rep;
     switch(Timer1::frequency_divisor()){
 	case Timer1::Frequency_divisor::no_preescaling	: return 0_MHz;
 	case Timer1::Frequency_divisor::divide_by_8	: return 1_MHz;
 	case Timer1::Frequency_divisor::divide_by_64	: return 125_kHz;
-	case Timer1::Frequency_divisor::divide_by_256	: return Frequency{Rep{31250ul,0ul}, 0};
-	case Timer1::Frequency_divisor::divide_by_1024	: return Frequency{Rep{7812ul,5ul}, 0};
+	case Timer1::Frequency_divisor::divide_by_256	: 
+				//return Frequency{Rep{31250ul,0ul}, 0};
+				return Frequency{31250ul};
+	case Timer1::Frequency_divisor::divide_by_1024	: 
+				//return Frequency{Rep{7812ul,5ul}, 0};
+				return Frequency{7813ul};// exacto: 7812.5 +-10%
 	case Timer1::Frequency_divisor::undefined	: return 0_Hz;
     }
 

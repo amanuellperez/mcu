@@ -1,4 +1,4 @@
-// Copyright (C) 2020-2022 Manuel Perez 
+// Copyright (C) 2020-2023 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -36,7 +36,7 @@
  *
  *  - SEE: ver std::chrono, ver atd::decimal.
  *  
- *  - TODO: Al usarlo se ve que hay un claro error de diseño. Una magnitud es
+ *  - TODO: No me gusta la forma de usarlo. Una magnitud es
  *	    la longitud, otra la frecuencia, otra el periodo y otra la
  *	    velocidad. Cada una de ellas se puede representar usando
  *	    diferentes unidades. Yo quiero hacer:
@@ -46,6 +46,11 @@
  *		    Length l2 = 2_km;
  *		    Length l3 = l1 + l2;
  *		    Time t = 3_s; <--- este es std::duration
+ *
+ *	    En cambio, de momento, hay que indicar las unidades:
+ *		    Meter l1 = 2_m;
+ *	    en lugar de 
+ *		    Length l1 = 2_m;
  *
  *  
  *  - HISTORIA:
@@ -80,7 +85,7 @@ namespace atd{
  ***************************************************************************/
 template <typename Unit0,
           Type::Arithmetic Rep0,
-          typename Multiplier0, typename Displacement = std::ratio<0>>
+          Type::Static_ratio Multiplier0, Type::Static_ratio Displacement = std::ratio<0>>
 class Magnitude;
 
 // --------------
@@ -103,7 +108,7 @@ class Magnitude;
 template <typename To_magnitude, 
 	  typename Unit, 
 	  Type::Arithmetic Rep, 
-	  typename Multiplier, typename Displacement>
+	  Type::Static_ratio Multiplier, Type::Static_ratio Displacement>
 constexpr inline To_magnitude
 	magnitude_cast(const Magnitude<Unit, Rep, Multiplier, Displacement>& m)
 {
@@ -204,14 +209,10 @@ constexpr inline To_magnitude
  */
 template <typename Unit0,
           Type::Arithmetic Rep0,
-          typename Multiplier0, typename Displacement0>
+          Type::Static_ratio Multiplier0, Type::Static_ratio Displacement0>
 class Magnitude {
-    static_assert(is_ratio_v<Multiplier0>,
-                  "Multiplier must be a specialization of ratio");
-    static_assert(Multiplier0::num > 0, "Multiplier must be positive");
 
-    static_assert(is_ratio_v<Displacement0>,
-                  "Displacement must be a specialization of ratio");
+    static_assert(Multiplier0::num > 0, "Multiplier must be positive");
     static_assert(Displacement0::num >= 0, "Displacement must be positive");
 
 public:
@@ -340,13 +341,14 @@ inline constexpr Magnitude<U, Rep, M, D>&
 }// namespace atd
 
 
+namespace impl_of{
 // if (Magnitude1::Displacement == Magnitude2::Displacement)
 //	type = common_type_equal_displacement(Magnitude1, Magnitude2);
 //  else
 //	type = common_type_different_displacement(Magnitude1, Magnitude2);
 template <typename Mangitude1, typename Mangitude2, 
 	  bool equal_displacement = true>
-struct __Magnitud_common_type{
+struct Magnitud_common_type{
     using Unit = typename Mangitude1::Unit;
     using R1   = typename Mangitude1::Rep;
     using M1   = typename Mangitude1::Multiplier;
@@ -373,7 +375,7 @@ struct __Magnitud_common_type{
 // En este caso no me rompo los cuernos y hago que el tipo común sea la
 // unidad del sistema internacional
 template <typename Mangitude1, typename Mangitude2>
-struct __Magnitud_common_type<Mangitude1, Mangitude2, false>{
+struct Magnitud_common_type<Mangitude1, Mangitude2, false>{
     using Unit = typename Mangitude1::Unit;
     using Unit2 = typename Mangitude2::Unit;
     static_assert(std::is_same_v<Unit, Unit2>);
@@ -384,15 +386,19 @@ struct __Magnitud_common_type<Mangitude1, Mangitude2, false>{
 
     using type = atd::Magnitude<Unit, Rep, std::ratio<1>, std::ratio<0>>;
 };
+}// impl_of
 
-
-template <typename Unit, typename R1, typename M1, typename D1,
-			 typename R2, typename M2, typename D2>
+//template <typename Unit, typename R1, typename M1, typename D1,
+//			 typename R2, typename M2, typename D2>
+template <typename Unit, Type::Arithmetic R1, Type::Static_ratio M1, 
+					      Type::Static_ratio D1,
+			 Type::Arithmetic R2, Type::Static_ratio M2, 
+					      Type::Static_ratio D2>
 struct std::common_type<atd::Magnitude<Unit, R1, M1, D1>,
 		   atd::Magnitude<Unit, R2, M2, D2>>
 {
     using type = typename 
-        __Magnitud_common_type<atd::Magnitude<Unit, R1, M1, D1>,
+        impl_of::Magnitud_common_type<atd::Magnitude<Unit, R1, M1, D1>,
                                atd::Magnitude<Unit, R2, M2, D2>>::type;
 };
 
@@ -402,8 +408,8 @@ namespace atd{
 // ---------------------
 // non-member arithmetic
 // ---------------------
-template <typename Unit, Type::Arithmetic Rep1, typename Multiplier1, typename D1,
-			 Type::Arithmetic Rep2, typename Multiplier2, typename D2>
+template <typename Unit, Type::Arithmetic Rep1, Type::Static_ratio Multiplier1, typename D1,
+			 Type::Arithmetic Rep2, Type::Static_ratio Multiplier2, typename D2>
 constexpr inline std::common_type_t<
 	    Magnitude<Unit, Rep1, Multiplier1, D1>,
 	    Magnitude<Unit, Rep2, Multiplier2, D2>>
@@ -417,8 +423,8 @@ constexpr inline std::common_type_t<
 }
 
 
-template <typename Unit, Type::Arithmetic Rep1, typename Multiplier1, typename D1,
-			 Type::Arithmetic Rep2, typename Multiplier2, typename D2>
+template <typename Unit, Type::Arithmetic Rep1, Type::Static_ratio Multiplier1, typename D1,
+			 Type::Arithmetic Rep2, Type::Static_ratio Multiplier2, typename D2>
 constexpr inline std::common_type_t <
 				    Magnitude<Unit, Rep1, Multiplier1, D1>,
 				    Magnitude<Unit, Rep2, Multiplier2, D2>
@@ -436,8 +442,10 @@ constexpr inline std::common_type_t <
 // TODO: de momento me olvido del desplazamiento D. En principio D solo lo uso
 // en temperaturas así que no creo que sea necesario tenerlo en cuenta a la
 // hora de multiplicar ya que ¿qué sentido tiene multiplicar dos temperaturas?
-template <typename U1, typename R1, typename M1, typename D,
-	  typename U2, typename R2, typename M2>
+//template <typename U1, typename R1, typename M1, typename D,
+//	  typename U2, typename R2, typename M2>
+template <typename U1, Type::Arithmetic R1, Type::Static_ratio M1, Type::Static_ratio D,
+	  typename U2, Type::Arithmetic R2, Type::Static_ratio M2>
 inline constexpr Magnitude<Unit_multiply<U1, U2>,
 			  std::common_type<R1, R2>,
 			  std::ratio_multiply<M1, M2>,
@@ -462,7 +470,10 @@ operator*(const Magnitude<U1,R1,M1,D>& m1, const Magnitude<U2,R2,M2,D>& m2)
 // Observar que no es la división de 2 magnitudes (eso sería espacio/tiempo =
 // velocidad), sino la división de 2 magnitudes del mismo tipo, que da como
 // resultado el número de veces que es mayor una que otra.
-template <typename U, Type::Arithmetic Rep1, Type::Arithmetic Rep2, typename M1, typename M2, typename D>
+template <typename U, Type::Arithmetic Rep1,
+		      Type::Arithmetic Rep2,
+		      Type::Static_ratio M1, Type::Static_ratio M2, 
+		      Type::Static_ratio D>
 constexpr inline std::common_type_t<Rep1, Rep2> 
 	    operator/(const Magnitude<U, Rep1, M1, D>& a, 
 		      const Magnitude<U, Rep2, M2, D>& b)
@@ -479,7 +490,9 @@ constexpr inline std::common_type_t<Rep1, Rep2>
 
 // operaciones con escalares
 // -------------------------
-template <typename U, typename R, typename M, typename D>
+// template <typename U, typename R, typename M, typename D>
+template <typename U, Type::Arithmetic R, Type::Static_ratio M, 
+					  Type::Static_ratio D>
 constexpr inline Magnitude<U, R, M, D>
 operator*(const typename Magnitude<U, R, M, D>::Scalar& a,
           Magnitude<U, R, M, D> v)
@@ -488,7 +501,9 @@ operator*(const typename Magnitude<U, R, M, D>::Scalar& a,
     return v;
 }
 
-template <typename U, typename R, typename M, typename D>
+//template <typename U, typename R, typename M, typename D>
+template <typename U, Type::Arithmetic R, Type::Static_ratio M, 
+					  Type::Static_ratio D>
 constexpr inline Magnitude<U, R, M, D>
 operator*(Magnitude<U, R, M, D> v,
           const typename Magnitude<U, R, M, D>::Scalar& a)
@@ -496,7 +511,9 @@ operator*(Magnitude<U, R, M, D> v,
     return a*v;
 }
 
-template <typename U, typename R, typename M, typename D>
+//template <typename U, typename R, typename M, typename D>
+template <typename U, Type::Arithmetic R, Type::Static_ratio M, 
+					  Type::Static_ratio D>
 constexpr inline Magnitude<U, R, M, D>
 operator/(Magnitude<U, R, M, D> v,
           const typename Magnitude<U, R, M, D>::Scalar& a)
@@ -506,8 +523,9 @@ operator/(Magnitude<U, R, M, D> v,
 }
 
 // Magnitud_inverse(Magnitud)
+// -------------------------
 template <typename Mag>
-struct __Magnitude_inverse{
+struct Magnitude_inverse{
     using type = Magnitude<Unit_inverse<typename Mag::Unit>, 
 			   typename Mag::Rep, 
 			   ratio_inverse<typename Mag::Multiplier>, 
@@ -515,7 +533,7 @@ struct __Magnitude_inverse{
 };
 
 template <typename Mag>
-using Magnitude_inverse_t = __Magnitude_inverse<Mag>::type;
+using Magnitude_inverse_t = Magnitude_inverse<Mag>::type;
 
 /// Hace 1/magnitud.
 // (RRR) Introduzco esta función para poder convertir frecuencias en periodos
@@ -525,7 +543,9 @@ using Magnitude_inverse_t = __Magnitude_inverse<Mag>::type;
 //	 velocity = space / time 
 //	 De momento no está implementado pero ya queda preparado para el
 //	 futuro.
-template <typename U, typename R, typename M, typename D>
+//template <typename U, typename R, typename M, typename D>
+template <typename U, Type::Arithmetic R, Type::Static_ratio M, 
+					  Type::Static_ratio D>
 constexpr inline Magnitude_inverse_t<Magnitude<U, R, M, D>>
 inverse(const Magnitude<U, R, M, D>& a)
 {
@@ -534,7 +554,9 @@ inverse(const Magnitude<U, R, M, D>& a)
     return Magnitude_inverse_t<Magnitude<U, R, M, D>> {res};
 }
 
-template <typename U, typename R, typename M, typename D>
+//template <typename U, typename R, typename M, typename D>
+template <typename U, Type::Arithmetic R, Type::Static_ratio M, 
+					  Type::Static_ratio D>
 constexpr inline Magnitude_inverse_t<Magnitude<U, R, M, D>>
 operator/(const R& a, const Magnitude<U, R, M, D>& b)
 {
@@ -609,7 +631,10 @@ constexpr inline bool operator>=(
 
 
 // operator << 
-template <Type::Ostream Out, typename U, typename R, typename M, typename D>
+//template <Type::Ostream Out, typename U, typename R, typename M, typename D>
+template <Type::Ostream Out, typename U, 
+			     Type::Arithmetic R, Type::Static_ratio M, 
+					         Type::Static_ratio D>
 inline Out& operator<<(Out& out, const Magnitude<U, R, M, D>& m)
 {
     print(out, m.value());
@@ -621,49 +646,66 @@ inline Out& operator<<(Out& out, const Magnitude<U, R, M, D>& m)
 // ----------------------
 // Length
 // ------
-template <typename Int, typename Multiplier>
+template <Type::Arithmetic Int, Type::Static_ratio Multiplier>
 using Length = atd::Magnitude<atd::Units_length, Int, Multiplier>;
 
-template <typename Int>
+template <Type::Arithmetic Int>
 using Kilometer = Length<Int, std::kilo>;
 
-template <typename Int>
+template <Type::Arithmetic Int>
 using Hectometer = Length<Int, std::hecto>;
 
-template <typename Int>
+template <Type::Arithmetic Int>
 using Decameter = Length<Int, std::deca>;
 
-template <typename Int>
+template <Type::Arithmetic Int>
 using Meter = Length<Int, std::ratio<1>>;
 
-template <typename Int>
+template <Type::Arithmetic Int>
 using Decimeter = Length<Int, std::deci>;
 
-template <typename Int>
+template <Type::Arithmetic Int>
 using Centimeter = Length<Int, std::centi>;
 
-template <typename Int>
+template <Type::Arithmetic Int>
 using Millimeter = Length<Int, std::milli>;
 
+// La ventaja de las siguientes funciones es que no hay que escribir el tipo
+// `Int` que se usa.
+// Comparar:
+//	Centimeter<Decimal<int32_t, 3>> cm(m);
+// versus
+//	auto cm = as_centimeter(m);
+//  Heredando `cm` el tipo de `m`.
+//template <Type::Arithmetic Int, Type::Static_ratio M>
+//inline 
+//constexpr Centimeter<Int> as_centimeter(const Length<Int, M>& x)
+//{
+//    using Int2 = decimal_type<Int>::add_digits<2>::add_decimals<-2>;
+//
+//
+//    return Centimeter<Int2>(x);
+//}
+//
 
 // Frequency
 // ---------
-template <typename Int, typename Multiplier>
+template <Type::Arithmetic Int, Type::Static_ratio Multiplier>
 using Frequency = atd::Magnitude<atd::Units_frequency, Int, Multiplier>;
 
-template <typename Int>
+template <Type::Arithmetic Int>
 using Hertz = Frequency<Int, std::ratio<1,1>>;
 
-template <typename Int>
+template <Type::Arithmetic Int>
 using KiloHertz = Frequency<Int, std::kilo>;
 
-template <typename Int>
+template <Type::Arithmetic Int>
 using MegaHertz = Frequency<Int, std::mega>;
 
-template <typename Int>
+template <Type::Arithmetic Int>
 using GigaHertz = Frequency<Int, std::giga>;
 
-template <typename Int>
+template <Type::Arithmetic Int>
 using TeraHertz = Frequency<Int, std::tera>;
 
 
@@ -671,55 +713,59 @@ using TeraHertz = Frequency<Int, std::tera>;
 // ------
 // (???) Observar que std::chrono define todo esto. 
 //       ¿se podría integrar magnitud con chrono?
-template <typename Int, typename Multiplier>
+template <Type::Arithmetic Int, Type::Static_ratio Multiplier>
 using Time = atd::Magnitude<atd::Units_time, Int, Multiplier>;
 
-template <typename Int>
+template <Type::Arithmetic Int>
 using Second = Time<Int, std::ratio<1,1>>;
 
-template <typename Int>
+template <Type::Arithmetic Int>
 using Millisecond = Time<Int, std::milli>;
 
-template <typename Int>
+template <Type::Arithmetic Int>
 using Microsecond = Time<Int, std::micro>;
 
-template <typename Int>
+template <Type::Arithmetic Int>
 using Nanosecond = Time<Int, std::nano>;
 
-template <typename Int>
+template <Type::Arithmetic Int>
 using Picosecond = Time<Int, std::pico>;
 
 
 // Temperature
 // -----------
 // Kelvin
-template <typename Int, typename Multiplier>
-using __Kelvin = Magnitude<atd::Units_temperature, Int, Multiplier>;
+namespace impl_of{
+template <Type::Arithmetic Int, Type::Static_ratio Multiplier>
+using Kelvin = Magnitude<atd::Units_temperature, Int, Multiplier>;
+}// impl_of
 
-template <typename Int>
-using Kelvin = __Kelvin<Int, std::ratio<1>>;
+template <Type::Arithmetic Int>
+using Kelvin = impl_of::Kelvin<Int, std::ratio<1>>;
 
 
 // Celsius
-template <typename Int, typename Multiplier>
-using __Celsius = Magnitude<atd::Units_temperature, Int, 
+namespace impl_of{
+template <Type::Arithmetic Int, Type::Static_ratio Multiplier>
+using Celsius = Magnitude<atd::Units_temperature, Int, 
 			    Multiplier, std::ratio<27315, 100>>;
+}// impl_of
+ 
+template <Type::Arithmetic Int>
+using Celsius = impl_of::Celsius<Int, std::ratio<1>>;
 
-template <typename Int>
-using Celsius = __Celsius<Int, std::ratio<1>>;
+template <Type::Arithmetic Int>
+using Decicelsius = impl_of::Celsius<Int, std::deci>;
 
-template <typename Int>
-using Decicelsius = __Celsius<Int, std::deci>;
+template <Type::Arithmetic Int>
+using Centicelsius = impl_of::Celsius<Int, std::centi>;
 
-template <typename Int>
-using Centicelsius = __Celsius<Int, std::centi>;
-
-template <typename Int>
-using Millicelsius = __Celsius<Int, std::milli>;
+template <Type::Arithmetic Int>
+using Millicelsius = impl_of::Celsius<Int, std::milli>;
 
 
 // Fahrenheit
-template <typename Int>
+template <Type::Arithmetic Int>
 using Fahrenheit = atd::Magnitude<atd::Units_temperature,
 				  Int,
 				  std::ratio<5, 9>, std::ratio<45967, 180>>;
@@ -727,28 +773,28 @@ using Fahrenheit = atd::Magnitude<atd::Units_temperature,
 
 // Pressure
 // --------
-template <typename Int, typename Multiplier>
+template <Type::Arithmetic Int, Type::Static_ratio Multiplier>
 using Pressure = atd::Magnitude<atd::Units_pressure, Int, Multiplier>;
 
-template <typename Int>
+template <Type::Arithmetic Int>
 using Kilopascal = Pressure<Int, std::kilo>;
 
-template <typename Int>
+template <Type::Arithmetic Int>
 using Hectopascal = Pressure<Int, std::hecto>;
 
-template <typename Int>
+template <Type::Arithmetic Int>
 using Decapascal = Pressure<Int, std::deca>;
 
-template <typename Int>
+template <Type::Arithmetic Int>
 using Pascal = Pressure<Int, std::ratio<1>>;
 
-template <typename Int>
+template <Type::Arithmetic Int>
 using Decipascal = Pressure<Int, std::deci>;
     
-template <typename Int>
+template <Type::Arithmetic Int>
 using Centipascal = Pressure<Int, std::centi>;
 
-template <typename Int>
+template <Type::Arithmetic Int>
 using Millipascal = Pressure<Int, std::milli>;
 
 
@@ -758,7 +804,8 @@ using Millipascal = Pressure<Int, std::milli>;
 
 // numeric_limits
 // --------------
-template <typename U, Type::Arithmetic Rep, typename M, typename D>
+template <typename U, Type::Arithmetic Rep, 
+				    Type::Static_ratio M, Type::Static_ratio D>
 struct std::numeric_limits<atd::Magnitude<U,Rep,M, D>>{
     static constexpr bool is_specialized = true;
     static constexpr bool is_signed      = std::numeric_limits<Rep>::is_signed;

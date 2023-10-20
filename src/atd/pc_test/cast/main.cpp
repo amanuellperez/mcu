@@ -78,15 +78,15 @@ void test_to_integer()
     using Dec2 = atd::Decimal<uint32_t, 3>;
     Dec1 from{953, 67};
     Dec2 to = atd::to_integer<Dec2>(from);
-    CHECK_TRUE(to.internal_value() == from.internal_value(), "b1");
+    CHECK_TRUE(to.significand() == from.significand(), "b1");
 }
 
 {// bug
     using Dec = atd::Decimal<uint32_t, 3>;
-    Dec from = Dec::from_internal_value(1090);
+    Dec from = Dec::significand(1090);
     Dec to = atd::to_integer<Dec>(from);
     std::cout << from << " --> " << to << '\n';
-    CHECK_TRUE(to.internal_value() == from.internal_value(), "b2");
+    CHECK_TRUE(to.significand() == from.significand(), "b2");
 }
 
 }

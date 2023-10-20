@@ -10,6 +10,7 @@ INCS= atd_algorithm.h	\
 	atd_ascii.h			\
 	atd_bcd.h			\
 	atd_bit.h 			\
+	atd_bounded.h		\
 	atd_cast.h			\
 	atd_char.h			\
 	atd_cmath.h			\
@@ -31,11 +32,11 @@ INCS= atd_algorithm.h	\
 	atd_names.h			\
 	atd_ostream.h		\
 	atd_ratio.h			\
+	atd_sci_number.h	\
 	atd_static.h		\
 	atd_string.h		\
 	atd_test.h			\
 	atd_time.h			\
-	atd_types.h			\
 	atd_type_traits.h	\
 	atd_units.h
 

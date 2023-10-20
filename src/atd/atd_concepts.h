@@ -51,6 +51,16 @@ namespace Type{
 template <typename T>
 concept Integer = atd::is_integer_v<T>;
 
+// Signed_integer
+// --------------
+template <typename T>
+concept Signed_integer = Integer<T> and std::is_signed_v<T>;
+
+// Unsigned_integer
+// --------------
+template <typename T>
+concept Unsigned_integer = Integer<T> and !Signed_integer<T>;
+
 // Decimal
 // --------
 template <typename T>

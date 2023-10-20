@@ -143,56 +143,56 @@ struct make_type{
  *  }
  */
 template <typename T>
-struct same_type_with_double_bits_{
+struct same_type_with_double_bits{
     using type = T;
 };
 
 template<>
-struct same_type_with_double_bits_<uint8_t>{
+struct same_type_with_double_bits<uint8_t>{
     using type = uint16_t;
 };
 
 template<>
-struct same_type_with_double_bits_<uint16_t>{
+struct same_type_with_double_bits<uint16_t>{
     using type = uint32_t;
 };
 
 template<>
-struct same_type_with_double_bits_<uint32_t>{
+struct same_type_with_double_bits<uint32_t>{
     using type = uint64_t;
 };
 
 
 template<>
-struct same_type_with_double_bits_<uint64_t>{
+struct same_type_with_double_bits<uint64_t>{
     using type = uint64_t;
 };
 
 template<>
-struct same_type_with_double_bits_<int8_t>{
+struct same_type_with_double_bits<int8_t>{
     using type = int16_t;
 };
 
 template<>
-struct same_type_with_double_bits_<int16_t>{
+struct same_type_with_double_bits<int16_t>{
     using type = int32_t;
 };
 
 template<>
-struct same_type_with_double_bits_<int32_t>{
+struct same_type_with_double_bits<int32_t>{
     using type = int64_t;
 };
 
 
 template<>
-struct same_type_with_double_bits_<int64_t>{
+struct same_type_with_double_bits<int64_t>{
     using type = int64_t;
 };
 
 
 template <typename T>
-using same_type_with_double_bits =
-    typename same_type_with_double_bits_<T>::type;
+using same_type_with_double_bits_t =
+    typename same_type_with_double_bits<T>::type;
 
 
 /*!
@@ -215,33 +215,33 @@ using same_type_with_double_bits =
  *  }
  */
 template <typename T>
-struct same_type_at_least32_{
+struct same_type_at_least32{
     using type = T;
 };
 
 template<>
-struct same_type_at_least32_<uint8_t>{
+struct same_type_at_least32<uint8_t>{
     using type = uint32_t;
 };
 
 template<>
-struct same_type_at_least32_<uint16_t>{
+struct same_type_at_least32<uint16_t>{
     using type = uint32_t;
 };
 
 template<>
-struct same_type_at_least32_<int8_t>{
+struct same_type_at_least32<int8_t>{
     using type = int32_t;
 };
 
 template<>
-struct same_type_at_least32_<int16_t>{
+struct same_type_at_least32<int16_t>{
     using type = int32_t;
 };
 
 template <typename T>
-using same_type_at_least32 =
-    typename same_type_at_least32_<T>::type;
+using same_type_at_least32_t =
+    typename same_type_at_least32<T>::type;
 
 
 

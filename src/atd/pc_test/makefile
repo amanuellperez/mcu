@@ -1,6 +1,7 @@
 DIRS = algorithm	\
 	   array		\
 	   ascii		\
+		bounded		\
 	   bcd			\
 		bit			\
 		cast		\
@@ -26,13 +27,13 @@ DIRS = algorithm	\
 		static		\
 		string		\
 		time		\
-		types		\
 		type_traits	\
 		units
 
 
 # TODO: las pruebas de iostream no son automaticas
 # iostream	\
+	
 
 
 include $(CPP_RECRULES)

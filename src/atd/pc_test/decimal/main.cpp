@@ -39,7 +39,7 @@ void test_decimal_construct(Int n, Int f, Int rep, Int res_n, Int res_f)
 //              << ", " << res_n << ", " << res_f << ")\n";
 
     atd::Decimal<Int, ndigits> dec{n,f};
-    CHECK_TRUE(dec.internal_value() == rep, 
+    CHECK_TRUE(dec.significand() == rep, 
 	    alp::as_str() << "dec{" << n << ", " << f << "}");
 
     auto [n1, f1] = dec.value();
@@ -66,13 +66,13 @@ void test_decimal_value(Int n, Int f, Int fres)
 
 
 template <typename Int, int ndigits>
-void test_decimal_from_internal_value(Int x, Int n, Int f)
+void test_decimal_significand(Int x, Int n, Int f)
 {
-    auto dec = atd::Decimal<int, ndigits>::from_internal_value(x);
+    auto dec = atd::Decimal<int, ndigits>::significand(x);
     auto [integer_part, fractional_part] = dec.value();
 
     CHECK_TRUE(integer_part == n and
-	       fractional_part == f, alp::as_str() << "from_internal_value(" << n << ", " << f << ")");
+	       fractional_part == f, alp::as_str() << "significand(" << n << ", " << f << ")");
 }
 
 template <int n1, int n2>
@@ -81,7 +81,7 @@ void test_decimal_construct_convert(int integer_part, int frac_part, int res)
     atd::Decimal<int, n1> d1{integer_part, frac_part};
 
     atd::Decimal<int, n2> d2 = atd::decimal_cast<atd::Decimal<int, n2>>(d1);
-    CHECK_TRUE(d2.internal_value() == res, "constructor conversion");
+    CHECK_TRUE(d2.significand() == res, "constructor conversion");
 }
 
 void test_decimal_construct()
@@ -126,11 +126,11 @@ void test_decimal_construct()
     test_decimal_value<int, 2>(3,1415,	14);
 
 // normal
-    test_decimal_from_internal_value<int, 1>(314, 31, 4);
-    test_decimal_from_internal_value<int, 2>(314, 3, 14);
-    test_decimal_from_internal_value<int, 3>(3014, 3, 14);
-    test_decimal_from_internal_value<int, 4>(30014, 3, 14);
-    test_decimal_from_internal_value<int, 5>(300014, 3, 14);
+    test_decimal_significand<int, 1>(314, 31, 4);
+    test_decimal_significand<int, 2>(314, 3, 14);
+    test_decimal_significand<int, 3>(3014, 3, 14);
+    test_decimal_significand<int, 4>(30014, 3, 14);
+    test_decimal_significand<int, 5>(300014, 3, 14);
 
 // constexpr
     {
@@ -143,7 +143,7 @@ void test_decimal_construct()
 
 	// Al escribir Int{10,23} se espera escribir el decimal "10,230"
 	Int a{10,23};
-	CHECK_TRUE(a.internal_value() == 10230, "constructor");
+	CHECK_TRUE(a.significand() == 10230, "constructor");
     }
 
 // Conversiones
@@ -375,7 +375,7 @@ void test_decimal_arithmetic_decimal()
 
     {// inverse
 	using Int = atd::Decimal<int, 3>;
-	CHECK_TRUE(((1 / Int{100}) == Int::from_internal_value(10)), "operator/");
+	CHECK_TRUE(((1 / Int{100}) == Int::significand(10)), "operator/");
 	CHECK_TRUE(((1 / Int{2,34}) == Int{0,427}), "operator/");
 	// f = 2 MHz ==> T = 0.5 ms:
 	CHECK_TRUE(((1 / Int{2}) == Int{0,5}), "operator/");
@@ -391,16 +391,16 @@ void test_decimal_arithmetic_escalar()
 // -----------
     Dec a{2,81};
     a += 3;
-    CHECK_TRUE(a.internal_value() == 581, "a += 3");
+    CHECK_TRUE(a.significand() == 581, "a += 3");
 
     a -= 3;
-    CHECK_TRUE(a.internal_value() == 281, "a -= 3");
+    CHECK_TRUE(a.significand() == 281, "a -= 3");
 
     a *=2;
-    CHECK_TRUE(a.internal_value() == 281*2, "a *=2");
+    CHECK_TRUE(a.significand() == 281*2, "a *=2");
 
     a /= 2;
-    CHECK_TRUE(a.internal_value() == 281, "a /= 2");
+    CHECK_TRUE(a.significand() == 281, "a /= 2");
 
 
 // decimal ? rep
@@ -577,6 +577,35 @@ void test_traits()
     CHECK_TRUE(Type::Decimal<atd::Decimal<int, 3>>, "Decimal");
 }
 
+template <typename T, int n, typename Res>
+void test_multiply_decimal_type_by_the_to_the(const std::string& name_type)
+{
+    CHECK_TRUE(std::is_same_v<atd::multiply_decimal_type_by_ten_to_the_t<T, n>,
+			    Res>,
+		    alp::as_str() << "multiply_decimal_type_by_ten_to_the_t("
+						<< name_type << ")");
+
+}
+void test_multiply_decimal_type_by_the_to_the()
+{
+    test::interface("multiply_decimal_type_by_ten_to_the");
+    test_multiply_decimal_type_by_the_to_the<float, 3, float>("float");
+    test_multiply_decimal_type_by_the_to_the<atd::Decimal<uint8_t, 2>, 0, 
+					     atd::Decimal<uint8_t, 2>>
+							("Decimal<uint8_t, 2>");
+    test_multiply_decimal_type_by_the_to_the<atd::Decimal<uint8_t, 2>, 1, 
+					     atd::Decimal<uint8_t, 1>>
+							("Decimal<uint8_t, 2>");
+    test_multiply_decimal_type_by_the_to_the<atd::Decimal<uint8_t, 2>, 2, 
+					     atd::Decimal<uint8_t, 0>>
+							("Decimal<uint8_t, 2>");
+    test_multiply_decimal_type_by_the_to_the<atd::Decimal<uint8_t, 2>, 3, 
+					     atd::Decimal<uint16_t, 0>>
+							("Decimal<uint8_t, 2>");
+
+    
+}
+
 
 void test_decimal()
 {
@@ -590,6 +619,7 @@ void test_decimal()
 //    test_to_integer();
     test_numerics();
     test_traits();
+    test_multiply_decimal_type_by_the_to_the();
 
 // operator<<
     {

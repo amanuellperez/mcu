@@ -123,9 +123,31 @@ inline constexpr Int most_significant_digits(Int x)
     return x0;
 }
 
+template <Type::Integer Int>
+inline constexpr Int most_n_significant_digits(int n, Int x)
+{
+    if (n <= 0)
+	return 0; // throw logic_error? (en micros no puedo lanzar excepciones)
+
+    Int x0 = x;
+
+    while (x >= ten_to_the<Int>(n-1)){
+	x0 = x;
+	x /= Int{10};
+    }
+
+    return x0;
+}
+
+
+
 // Devuelve el número de cifras que tiene x.
 // Ejemplo: number_of_digits(324) == 3;
-template <Type::Integer Int>
+// TODO: restringir a Type::Integer. No puedo ponerlo de momento
+// ya que eng_magnitude está calculando number_of_digits de un double!!!
+// Al eliminar eng_magnitude imponer esta reestricción
+//template <Type::Integer Int>
+template <typename Int>
 inline constexpr int number_of_digits(Int x)
 {
     int n = 1;

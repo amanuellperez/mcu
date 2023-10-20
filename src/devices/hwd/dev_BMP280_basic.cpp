@@ -22,7 +22,7 @@ __BMP280_calibration::Celsius
     int32_t T = (t_fine * 5 + 128) >> 8;
 
     using Decimal = Celsius::Rep;
-    return Celsius{Decimal::from_internal_value(T)};
+    return Celsius{Decimal::significand(T)};
 }
 
 

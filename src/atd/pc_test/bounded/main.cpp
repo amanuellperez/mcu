@@ -17,7 +17,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "../../atd_types.h"
+#include "../../atd_bounded.h"
 
 #include <alp_test.h>
 #include <iostream>

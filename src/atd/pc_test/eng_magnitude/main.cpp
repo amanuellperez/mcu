@@ -614,7 +614,7 @@ void test_bugs()
 	CHECK_TRUE((f2 == Freq{Rep{953, 674}, -3}), "b1");
 
 	Time t = atd::time_in_us<Rep>(1024);
-	CHECK_TRUE(t.internal_value() == Rep::from_internal_value(1024)
+	CHECK_TRUE(t.internal_value() == Rep::significand(1024)
 		    and t.exponent() == -3, "b2");
     }
     {
@@ -627,7 +627,7 @@ void test_bugs()
 
 
 	Time t = atd::time_in_us<Rep>(1024);
-	CHECK_TRUE(t.internal_value() == Rep::from_internal_value(1024)
+	CHECK_TRUE(t.internal_value() == Rep::significand(1024)
 		    and t.exponent() == -3, "b2");
     }
     
@@ -648,12 +648,12 @@ void test_bugs()
 
     {
 	using Potential = atd::ENG_electric_potential<atd::Decimal<uint32_t, 3>>;
-	Potential::Rep res_val = Potential::Rep::from_internal_value(1090);
+	Potential::Rep res_val = Potential::Rep::significand(1090);
 	std::cout << "res_val = " << res_val << '\n';
-	std::cout << "res_val (internal) = " << res_val.internal_value() << '\n';
+	std::cout << "res_val (internal) = " << res_val.significand() << '\n';
 	Potential res_pot {res_val, 0};
 	std::cout << "res_pot = " << res_pot << '\n';
-	std::cout << "res_pot (internal) = " << res_pot.internal_value().internal_value() << '\n';
+	std::cout << "res_pot (internal) = " << res_pot.internal_value().significand() << '\n';
 
 	Potential::Exponent exp = 0;
 	write_as_eng(res_val, exp);

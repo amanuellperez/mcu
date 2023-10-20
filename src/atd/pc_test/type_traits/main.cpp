@@ -107,7 +107,7 @@ void test_has_same_sign()
 template <typename T, typename U>
 void test_same_type_double_bits()
 {
-    CHECK_TRUE((std::is_same_v<atd::same_type_with_double_bits<T>, U>),
+    CHECK_TRUE((std::is_same_v<atd::same_type_with_double_bits_t<T>, U>),
                "same_type_with_double_bits");
 }
 
@@ -128,7 +128,7 @@ void test_same_type_double_bits()
 template <typename T, typename U>
 void test_same_type_at_least32()
 {
-    CHECK_TRUE((std::is_same_v<atd::same_type_at_least32<T>, U>),
+    CHECK_TRUE((std::is_same_v<atd::same_type_at_least32_t<T>, U>),
                "same_type_at_least32");
 }
 

@@ -94,14 +94,14 @@
 #include <array>
 
 #include <atd_metronome.h>
-#include <atd_types.h>
+// #include <atd_types.h> Empty_struct
 #include <atd_names.h>
 
 #include "dev_keyrow.h"
 #include "dev_LCD_big_digits.h"	// Digit fonts
 
 namespace dev{
-
+struct Empty_struct {} ;
 
 // Tipos 
 constexpr int user_choose_number_type_lineal   = 0;
@@ -148,7 +148,7 @@ constexpr int user_choose_number_type_circular = 1;
  */
 template <typename Screen, typename Keyrow3, 
 	  int type0, typename Rep0, 
-	  typename Main = atd::Empty_struct>
+	  typename Main = Empty_struct>	// DUDA: usar void?
 class User_choose_number{
 public:
     static_assert(type0 == user_choose_number_type_lineal or 

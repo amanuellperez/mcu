@@ -101,10 +101,10 @@ std::pair<typename DHT22<M, npin>::Celsius,
 
     using Dec = atd::Decimal<int32_t, 1>;
     int32_t h = atd::concat_bytes<int32_t>(data[0], data[1]);
-    Dec dec_H = Dec::from_internal_value(h);
+    Dec dec_H = Dec::significand(h);
 
     int32_t t = atd::concat_bytes<int32_t>(data[2], data[3]);
-    Dec dec_T = Dec::from_internal_value(t);
+    Dec dec_T = Dec::significand(t);
 
     Celsius T{dec_T};
     Humidity H{dec_H};

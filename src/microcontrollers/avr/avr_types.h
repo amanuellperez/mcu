@@ -41,38 +41,66 @@
 //       otros que puede que si los usen. En ese caso sería mejor usar double
 //       en lugar de Decimal (???)
 namespace avr_{
+// TODO: revisar todo esto!!!
 
 // (???) ¿Usar o no usar decimales con las frecuencias?
 //       Si se usan decimales no entran en uint16_t así que hay que usar un
 //       uint32_t. ¿O será mejor no usar Decimal y directamente uint16_t?
-using Frequency = atd::ENG_frequency<atd::Decimal<uint32_t, 3>>;
+//using Frequency = atd::ENG_frequency<atd::Decimal<uint32_t, 3>>;
+
+// Frequency representa una frequencia en hercios. Es lo que en atd::Magnitude
+// llamamos `atd::Hertz`. Usar el tipo base como uint32_t permite representar
+// frecuenias no decimales desde 1Hz hasta 4GHz que para los avrs es
+// demasiado. Lo que no permite es usar decimales. ¿Mejor un tipo con
+// decimales como atd::Decimal<>?
+using Frequency = atd::ENG_frequency<uint32_t>;
 
 inline constexpr Frequency frequency_in_Hz(const Frequency::Rep& x)
-{ return Frequency{x, 0}; }
+//{ return Frequency{x, 0}; }
+{ return Frequency{x}; }
 
 inline constexpr Frequency frequency_in_kHz(const Frequency::Rep& x)
-{ return Frequency{x, 3}; }
+//{ return Frequency{x, 3}; }
+{ return Frequency{x*1'000}; }
 
 inline constexpr Frequency frequency_in_MHz(const Frequency::Rep& x)
-{ return Frequency{x, 6}; }
+//{ return Frequency{x, 6}; }
+{ return Frequency{x*1'000'000}; }
 
 // Time
-using Time      = atd::ENG_time<atd::Decimal<uint32_t, 3>>;
+//using Time      = atd::ENG_time<atd::Decimal<uint32_t, 3>>;
 
-inline constexpr Time time_in_s(const Time::Rep& x) {return Time{x, 0};}
-inline constexpr Time time_in_ms(const Time::Rep& x) {return Time{x, -3};}
-inline constexpr Time time_in_us(const Time::Rep& x) {return Time{x, -6};}
+// almaceno en us el tiempo, dando un rango de:
+//    0, 2^32 = 4000 segundos = 1h 11 minutos
+using Time      = atd::ENG_time<uint32_t>;
+
+inline constexpr Time time_in_s(const Time::Rep& x) 
+//{return Time{x, 0};}
+{return Time{x * 1'000'000};}
+
+inline constexpr Time time_in_ms(const Time::Rep& x) 
+//{return Time{x, -3};}
+{return Time{x * 1'000};}
+inline constexpr Time time_in_us(const Time::Rep& x) 
+//{return Time{x, -6};}
+{return Time{x * 1};}
 
 // Electric potential
-using Potential = atd::ENG_electric_potential<atd::Decimal<uint32_t, 3>>;
+// Almacenamos el potencial en milivoltios, esa será la máxima resolución que
+// podemos dar.
+//using Potential = atd::ENG_electric_potential<atd::Decimal<uint32_t, 3>>;
+using Potential = atd::ENG_electric_potential<uint32_t>;
 inline constexpr Potential potential_in_V(const Potential::Rep& x)
-{ return Potential{x, 0}; }
+//{ return Potential{x, 0}; }
+{ return Potential{x*1'000}; }
 
 inline constexpr Potential potential_in_mV(const Potential::Rep& x)
-{ return Potential{x, -3}; }
+//{ return Potential{x, -3}; }
+{ return Potential{x}; }
 
 inline constexpr Potential::Rep in_mV(const Potential& x)
-{ return x.millivalue(); }
+//{ return x.millivalue(); }
+{ return x.internal_value(); }
 
 
 // syntactic sugar

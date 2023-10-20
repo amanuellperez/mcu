@@ -607,6 +607,18 @@ void test_arithmetic()
 
 }
 
+void test_lenght()
+{
+    test::interface("Length");
+
+//    {// float
+//    AQUIII
+//    atd::Meter<float> m{123.456};
+//    auto cm = atd::as_centimeter(m);
+//    CHECK_TRUE((cm.value() - (float)(12345.6) ) <= 0.01, "as_centimeter");
+//
+//    }
+}
 
 void test_magnitude()
 {
@@ -622,6 +634,7 @@ void test_magnitude()
     test_magnitude_temperature();
     test_magnitude_temperature_decimal();
     test_magnitude_frequency();
+    test_lenght();
 }
 
 
