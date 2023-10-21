@@ -681,7 +681,8 @@ void test_sci_meter()
     using Meter      = atd::Meter<Number>;
     using Centimeter = atd::Centimeter<Number>;
 
-    Meter m{2};
+    Meter m = 2u; // como Number es uint8_t, podemos poner
+		  // m = 2u, pero no `m = 2` ya que 2 es signed.
     std::cout << "meters = " << m << '\n';
 
     Centimeter cm = m;

@@ -229,8 +229,9 @@ public:
     constexpr Magnitude() = default;
 
     template <Type::Arithmetic Rep2>
-    constexpr explicit Magnitude(const Rep2& value0)
-	requires (std::convertible_to<Rep2, Rep>)
+    constexpr 
+    explicit (!std::convertible_to<Rep2, Rep>)
+    Magnitude(const Rep2& value0)
 	: value_{static_cast<Rep>(value0)} {}
 
     template <Type::Arithmetic Rep2, typename M2, typename D2>

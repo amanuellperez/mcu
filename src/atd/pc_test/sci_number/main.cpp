@@ -109,9 +109,8 @@ void test_constructor()
     CHECK_TRUE(x == 1'000'000u, "not explicit");
     }
     {// explicit
-    static_assert(atd::has_same_sign<uint8_t, int8_t>);
-    atd::Sci_number<int8_t> x = uint8_t{250};
-    CHECK_TRUE(x == 1'000'000u, "not explicit");
+    atd::Sci_number<int8_t> x{uint8_t{250}};
+    CHECK_TRUE(x == 250, "not explicit");
     }
 }
 

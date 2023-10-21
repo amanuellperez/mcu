@@ -72,7 +72,7 @@ public:
     // Example: Sci_number<uint8_t> x{23'000'000};
     template <Type::Integer Int>
     explicit (!(std::is_convertible_v<Rep, Int> and
-	        has_same_sign<Rep, Int>))
+	        has_same_sign_v<Rep, Int>))
     constexpr Sci_number(const Int& x);
 
     // As a decimal number
