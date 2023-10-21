@@ -18,8 +18,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "../../atd_magnitude.h"
-#include "../../atd_decimal.h"
 #include "../../atd_cast.h"
+#include "../../atd_decimal.h"
+#include "../../atd_sci_number.h"
 
 #include <alp_test.h>
 #include <alp_string.h>
@@ -673,6 +674,47 @@ void test_usability()
     f(5_MHz);
 }
 
+void test_sci_meter()
+{
+    using Number = atd::Sci_number<uint8_t>;
+    using Kilometer  = atd::Kilometer<Number>;
+    using Meter      = atd::Meter<Number>;
+    using Centimeter = atd::Centimeter<Number>;
+
+    Meter m{2};
+    std::cout << "meters = " << m << '\n';
+
+    Centimeter cm = m;
+    std::cout << "centimeters = " << cm << '\n';
+
+    Kilometer km = m;
+    std::cout << "kilometers = " << km << '\n';
+
+    CHECK_TRUE(cm == Centimeter(Number(2).E(2)), "meters to centimeters");
+    CHECK_TRUE(km == Kilometer(Number(2).E(-3)), "meters to kilometers");
+}
+
+void test_sci_frequency()
+{
+    using Number = atd::Sci_number<uint8_t>;
+    using MegaHertz = atd::MegaHertz<Number>;
+
+    MegaHertz freq{Number(8).E(6)}; // == 8_MHz
+    std::cout << "freq = " << freq << '\n';
+    auto T = Number{1} / freq;
+    std::cout << "T = " << T << '\n';
+
+
+}
+
+void test_with_sci_number()
+{
+    test::interface("test with Sci_number");
+
+    test_sci_meter();
+    test_sci_frequency();
+
+}
 
 
 int main()
@@ -682,6 +724,7 @@ try{
     
     test_magnitude();
     test_usability();
+    test_with_sci_number();
 
 }catch(std::exception& e)
 {

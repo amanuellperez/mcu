@@ -70,13 +70,18 @@ public:
     // As an integer
     // Example: Sci_number<uint8_t> x{23'000'000};
     template <Type::Integer Int>
-    explicit constexpr Sci_number(const Int& x);
+   // explicit  <-- un Int es un Sci_number, mejor no explicit (???)
+    constexpr Sci_number(const Int& x);
 
     // As a decimal number
     // Example: Sci_number<uint8_t> x{12,3}; // x == 12.3
     template <Type::Integer Int>
     constexpr Sci_number(const Int& integer_part, const Int& decimal_part);
 	
+    // Idioma: para crear el número 5*10^{-4} usamos la E-notation: 5E{-4}
+    // En código esto lo traducimos en:
+    //		auto x = Sci_number{5}.E(-4);
+    constexpr Sci_number& E(Exp_t e) {exp_ = e; return *this;}
 
 // Observers(estas dos funciones son más para depurar, ¿evitar usarlas?)
     constexpr Rep significand() const {return x_;}
@@ -144,8 +149,8 @@ private:
 
 };
 
-template <Type::Integer Rep, Type::Integer E>
-constexpr Rep Sci_number<Rep, E>::rep_change_sign(const Rep& x)
+template <Type::Integer Rep, Type::Integer E_t>
+constexpr Rep Sci_number<Rep, E_t>::rep_change_sign(const Rep& x)
 {
     if constexpr (Type::Signed_integer<Rep>)
 	return -x;
@@ -156,10 +161,10 @@ constexpr Rep Sci_number<Rep, E>::rep_change_sign(const Rep& x)
 // Reduce `x` a un valor representable por Rep
 // Si no se puede representar devuelve 0 (por ejemplo, -1 no se puede
 // representar usando Rep == uint8_t)
-template <Type::Integer R, Type::Integer E>
+template <Type::Integer R, Type::Integer E_t>
     template <Type::Integer Int>
 constexpr 
-std::pair<R, E> Sci_number<R, E>::reduce_to_rep_value(Int x)
+std::pair<R, E_t> Sci_number<R, E_t>::reduce_to_rep_value(Int x)
 {
     Exp_t exp = 0;
     while (!is_rep_value(x)){
@@ -176,10 +181,10 @@ std::pair<R, E> Sci_number<R, E>::reduce_to_rep_value(Int x)
 
 // constructor
 // -----------
-template <Type::Integer R, Type::Integer E>
+template <Type::Integer R, Type::Integer E_t>
     template <Type::Integer Int>
 inline constexpr 
-void Sci_number<R, E>::construct(const Int& integer_part)
+void Sci_number<R, E_t>::construct(const Int& integer_part)
 { std::tie(x_, exp_) = reduce_to_rep_value(integer_part); }
 
 // Al calcular ndecimals sumo 1 digits10. Intento aprovechar al máximo el tipo
@@ -197,10 +202,10 @@ void Sci_number<R, E>::construct(const Int& integer_part)
 // (1) 123*10 ¿entra en Rep? sí entra x = 123*10 = 1230
 // (2) si entra sigo: 1230*10 ¿entra en Rep? ...
 // correspon
-template <Type::Integer R, Type::Integer E>
+template <Type::Integer R, Type::Integer E_t>
     template <Type::Integer Int>
 constexpr 
-void Sci_number<R, E>::
+void Sci_number<R, E_t>::
 		construct(const Int& integer_part, const Int& decimal_part)
     // precondition (decimal_part > 0)
 {
@@ -244,19 +249,19 @@ void Sci_number<R, E>::
 }
 
 
-template <Type::Integer R, Type::Integer E>
+template <Type::Integer R, Type::Integer E_t>
     template <Type::Integer Int>
-inline constexpr Sci_number<R, E>::Sci_number(const Int& x)
+inline constexpr Sci_number<R, E_t>::Sci_number(const Int& x)
 { construct(x); }
 
 
 // precondicion: decimal_part > 0
 // Si se pasan negativas simplemente se ignoran. Seguramente sea un error de
 // lógica y habría que lanzar std::logic_error
-template <Type::Integer R, Type::Integer E>
+template <Type::Integer R, Type::Integer E_t>
     template <Type::Integer Int>
 constexpr 
-Sci_number<R, E>::Sci_number(const Int& integer_part, 
+Sci_number<R, E_t>::Sci_number(const Int& integer_part, 
 			     const Int& decimal_part)
 { 
     if (!is_rep_value(integer_part) or decimal_part <= 0)
@@ -269,14 +274,22 @@ Sci_number<R, E>::Sci_number(const Int& integer_part,
 
 // Order
 // -----
-template <Type::Integer R, Type::Integer E>
+// Idea: No basta con comparar signficand() y exponent() ya que no funcionaría
+// al comparar los números 20*10^-4 == 2*10^-3
+template <Type::Integer R, Type::Integer E_t>
 inline
-constexpr bool Sci_number<R, E>::operator==(const Sci_number<R, E>& a) const
-{ return a.x_ == x_ and a.exp_ == exp_; }
+constexpr bool Sci_number<R, E_t>::operator==(const Sci_number<R, E_t>& a) const
+{ 
+    if (exp_ >= a.exp_)
+	return (x_ * ten_to_the<Rep>(exp_ - a.exp_)) == a.x_;
 
-template <Type::Integer R, Type::Integer E>
+    else
+	return (a.x_ * ten_to_the<Rep>(a.exp_ - exp_)) == x_;
+}
+
+template <Type::Integer R, Type::Integer E_t>
 inline
-constexpr bool Sci_number<R, E>::operator<(const Sci_number<R, E>& a) const
+constexpr bool Sci_number<R, E_t>::operator<(const Sci_number<R, E_t>& a) const
 { 
     if (exp_ < a.exp_)
 	return true;
@@ -287,9 +300,9 @@ constexpr bool Sci_number<R, E>::operator<(const Sci_number<R, E>& a) const
     return x_ < a.x_;
 }
 
-template <Type::Integer R, Type::Integer E>
+template <Type::Integer R, Type::Integer E_t>
     template <Type::Integer Int>
-inline constexpr bool Sci_number<R, E>::operator==(const Int& y) const
+inline constexpr bool Sci_number<R, E_t>::operator==(const Int& y) const
 {
     if (exp_ >= 0){
 	Int res = x_ * ten_to_the<Int>(exp_);
@@ -300,37 +313,37 @@ inline constexpr bool Sci_number<R, E>::operator==(const Int& y) const
 	return x_ == (y * ten_to_the<Int>(-exp_));
 }
 
-template <Type::Integer R, Type::Integer E>
+template <Type::Integer R, Type::Integer E_t>
 inline
-constexpr bool operator!=(const Sci_number<R, E>& a, const Sci_number<R, E>& b)
+constexpr bool operator!=(const Sci_number<R, E_t>& a, const Sci_number<R, E_t>& b)
 {return !(a == b);}
 
 
-template <Type::Integer R, Type::Integer E, Type::Integer Int>
-inline constexpr bool operator!=(const Sci_number<R, E>& a, const Int& b)
+template <Type::Integer R, Type::Integer E_t, Type::Integer Int>
+inline constexpr bool operator!=(const Sci_number<R, E_t>& a, const Int& b)
 { return !(a == b); }
 
-template <Type::Integer R, Type::Integer E>
-inline constexpr bool operator>(const Sci_number<R, E>& a, 
-			         const Sci_number<R, E>& b)
+template <Type::Integer R, Type::Integer E_t>
+inline constexpr bool operator>(const Sci_number<R, E_t>& a, 
+			         const Sci_number<R, E_t>& b)
 { return b < a; }
 
-template <Type::Integer R, Type::Integer E>
-inline constexpr bool operator<=(const Sci_number<R, E>& a, 
-			         const Sci_number<R, E>& b)
+template <Type::Integer R, Type::Integer E_t>
+inline constexpr bool operator<=(const Sci_number<R, E_t>& a, 
+			         const Sci_number<R, E_t>& b)
 { return !(a > b); }
 
-template <Type::Integer R, Type::Integer E>
-inline constexpr bool operator>=(const Sci_number<R, E>& a, 
-			         const Sci_number<R, E>& b)
+template <Type::Integer R, Type::Integer E_t>
+inline constexpr bool operator>=(const Sci_number<R, E_t>& a, 
+			         const Sci_number<R, E_t>& b)
 { return !(a < b); }
 
 
 // Algebraic structure
 // -------------------
-template <Type::Integer R, Type::Integer E>
+template <Type::Integer R, Type::Integer E_t>
 inline constexpr 
-Sci_number<R, E> Sci_number<R,E>::operator-() const
+Sci_number<R, E_t> Sci_number<R, E_t>::operator-() const
     requires (Type::Signed_integer<R>)
 {
     Sci_number res;
@@ -341,8 +354,8 @@ Sci_number<R, E> Sci_number<R,E>::operator-() const
     return res;
 }
 
-template <Type::Integer R, Type::Integer E>
-constexpr void Sci_number<R, E>::add_equal_exponent(const Rep& a)
+template <Type::Integer R, Type::Integer E_t>
+constexpr void Sci_number<R, E_t>::add_equal_exponent(const Rep& a)
 {
     using Int = same_type_with_double_bits_t<Rep>;
 
@@ -360,8 +373,8 @@ constexpr void Sci_number<R, E>::add_equal_exponent(const Rep& a)
 
 // Esta función es necesaria para evitar overflows al usar:
 //		x2 /= ten_to_the<Rep>(e1);
-template <Type::Integer Rep, Type::Integer E>
-constexpr Rep Sci_number<Rep, E>::divide_by_ten_to_the(Rep x, Exp_t e)
+template <Type::Integer Rep, Type::Integer E_t>
+constexpr Rep Sci_number<Rep, E_t>::divide_by_ten_to_the(Rep x, Exp_t e)
 {
     for (Exp_t i = 0; i < e; ++i){
 	x /= Rep{10};
@@ -380,9 +393,9 @@ constexpr Rep Sci_number<Rep, E>::divide_by_ten_to_the(Rep x, Exp_t e)
 //
 // TODO: Creo que se puede optimizar un poco mirando que el producto de
 // x1*10^e1 sea menor que numeric_limits::digits10. 
-template <Type::Integer R, Type::Integer E>
-constexpr std::pair<R, E> 
-    Sci_number<R, E>::add_number(const Rep& x1, Exp_t e1, Rep x2)
+template <Type::Integer R, Type::Integer E_t>
+constexpr std::pair<R, E_t> 
+    Sci_number<R, E_t>::add_number(const Rep& x1, Exp_t e1, Rep x2)
 {
     if (e1 < std::numeric_limits<Rep>::digits10 + 1) 
     { // 10^e1 es representable por Rep
@@ -400,8 +413,8 @@ constexpr std::pair<R, E>
 }
 
 
-template <Type::Integer R, Type::Integer E>
-constexpr Sci_number<R, E>& Sci_number<R, E>::operator+=(const Sci_number& a)
+template <Type::Integer R, Type::Integer E_t>
+constexpr Sci_number<R, E_t>& Sci_number<R, E_t>::operator+=(const Sci_number& a)
 {
     if (exp_ == a.exp_)
 	add_equal_exponent(a.x_);
@@ -424,8 +437,8 @@ constexpr Sci_number<R, E>& Sci_number<R, E>::operator+=(const Sci_number& a)
 
 
 // precondition: *this > a
-template <Type::Integer R, Type::Integer E>
-constexpr void Sci_number<R, E>::unsigned_substract(const Sci_number& a)
+template <Type::Integer R, Type::Integer E_t>
+constexpr void Sci_number<R, E_t>::unsigned_substract(const Sci_number& a)
     requires Type::Unsigned_integer<Rep>
 {
     if (exp_ == a.exp_)
@@ -445,9 +458,9 @@ constexpr void Sci_number<R, E>::unsigned_substract(const Sci_number& a)
     }
 }
 
-template <Type::Integer R, Type::Integer E>
+template <Type::Integer R, Type::Integer E_t>
 inline constexpr 
-    Sci_number<R, E>& Sci_number<R, E>::operator-=(const Sci_number& a)
+    Sci_number<R, E_t>& Sci_number<R, E_t>::operator-=(const Sci_number& a)
 {
     if constexpr (Type::Signed_integer<Rep>)
 	x_ += (-a);
@@ -463,9 +476,9 @@ inline constexpr
 }
 
 
-template <Type::Integer R, Type::Integer E>
+template <Type::Integer R, Type::Integer E_t>
 inline constexpr 
-    Sci_number<R, E>& Sci_number<R, E>::operator*=(const Sci_number& a)
+    Sci_number<R, E_t>& Sci_number<R, E_t>::operator*=(const Sci_number& a)
 {
     using Rep2 = same_type_with_double_bits_t<Rep>;
 
@@ -483,9 +496,9 @@ inline constexpr
 //	 por Rep:
 //	    1/24 = 1000/24 * 10^{-3} = 41 * 10^{-3} = 0.41
 //
-template <Type::Integer R, Type::Integer E>
+template <Type::Integer R, Type::Integer E_t>
 inline constexpr 
-    Sci_number<R, E>& Sci_number<R, E>::operator/=(const Sci_number& a)
+    Sci_number<R, E_t>& Sci_number<R, E_t>::operator/=(const Sci_number& a)
 {
     if (a.x_ == 0){// TODO: devolver NaNd? otra cosa?
 	x_ = 0;
@@ -507,39 +520,66 @@ inline constexpr
 }
 
 
-template <Type::Integer R, Type::Integer E>
+template <Type::Integer R, Type::Integer E_t>
 inline constexpr 
-    Sci_number<R, E> operator+(Sci_number<R, E> a, const Sci_number<R, E>& b)
+    Sci_number<R, E_t> operator+(Sci_number<R, E_t> a, const Sci_number<R, E_t>& b)
 { 
     a += b;
     return a;
 }
 
-template <Type::Integer R, Type::Integer E>
+template <Type::Integer R, Type::Integer E_t>
 inline constexpr 
-    Sci_number<R, E> operator-(Sci_number<R, E> a, const Sci_number<R, E>& b)
+    Sci_number<R, E_t> operator-(Sci_number<R, E_t> a, const Sci_number<R, E_t>& b)
 { 
     a -= b;
     return a;
 }
 
-template <Type::Integer R, Type::Integer E>
+template <Type::Integer R, Type::Integer E_t>
 inline constexpr 
-    Sci_number<R, E> operator*(Sci_number<R, E> a, const Sci_number<R, E>& b)
+    Sci_number<R, E_t> operator*(Sci_number<R, E_t> a, const Sci_number<R, E_t>& b)
 { 
     a *= b;
     return a;
 }
 
-template <Type::Integer R, Type::Integer E>
+template <Type::Integer R, Type::Integer E_t>
 inline constexpr 
-    Sci_number<R, E> operator/(Sci_number<R, E> a, const Sci_number<R, E>& b)
+    Sci_number<R, E_t> operator/(Sci_number<R, E_t> a, const Sci_number<R, E_t>& b)
 { 
     a /= b;
     return a;
 }
 
+// print
+// -----
+template <typename Out, Type::Integer R, Type::Integer E_t>
+void print(Out& out, const Sci_number<R, E_t>& x)
+{ 
+    using Rep = Sci_number<R, E_t>::Rep;
+    if constexpr (sizeof(Rep) == 1) // caso uint8_t/int8_t
+	out << (int) x.significand();
+    else
+	out << x.significand();
 
+    if (x.exponent() != 0)
+	out << " x 10^{" << x.exponent() << '}';
+
+}
+
+template <typename Out, Type::Integer R, Type::Integer E_t>
+inline 
+Out& operator<<(Out& out, const Sci_number<R, E_t>& x)
+{
+    print(out, x); 
+    return out;
+}
+
+// is_decimal
+// ----------
+template <Type::Integer Rep, Type::Integer E_t>
+struct is_decimal<Sci_number<Rep, E_t>> : std::true_type {};
 
 }// namespace atd
 

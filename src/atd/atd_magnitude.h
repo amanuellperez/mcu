@@ -341,14 +341,13 @@ inline constexpr Magnitude<U, Rep, M, D>&
 }// namespace atd
 
 
-namespace impl_of{
 // if (Magnitude1::Displacement == Magnitude2::Displacement)
 //	type = common_type_equal_displacement(Magnitude1, Magnitude2);
 //  else
 //	type = common_type_different_displacement(Magnitude1, Magnitude2);
 template <typename Mangitude1, typename Mangitude2, 
 	  bool equal_displacement = true>
-struct Magnitud_common_type{
+struct __Magnitud_common_type{
     using Unit = typename Mangitude1::Unit;
     using R1   = typename Mangitude1::Rep;
     using M1   = typename Mangitude1::Multiplier;
@@ -375,7 +374,7 @@ struct Magnitud_common_type{
 // En este caso no me rompo los cuernos y hago que el tipo común sea la
 // unidad del sistema internacional
 template <typename Mangitude1, typename Mangitude2>
-struct Magnitud_common_type<Mangitude1, Mangitude2, false>{
+struct __Magnitud_common_type<Mangitude1, Mangitude2, false>{
     using Unit = typename Mangitude1::Unit;
     using Unit2 = typename Mangitude2::Unit;
     static_assert(std::is_same_v<Unit, Unit2>);
@@ -386,7 +385,6 @@ struct Magnitud_common_type<Mangitude1, Mangitude2, false>{
 
     using type = atd::Magnitude<Unit, Rep, std::ratio<1>, std::ratio<0>>;
 };
-}// impl_of
 
 //template <typename Unit, typename R1, typename M1, typename D1,
 //			 typename R2, typename M2, typename D2>
@@ -398,7 +396,7 @@ struct std::common_type<atd::Magnitude<Unit, R1, M1, D1>,
 		   atd::Magnitude<Unit, R2, M2, D2>>
 {
     using type = typename 
-        impl_of::Magnitud_common_type<atd::Magnitude<Unit, R1, M1, D1>,
+        __Magnitud_common_type<atd::Magnitude<Unit, R1, M1, D1>,
                                atd::Magnitude<Unit, R2, M2, D2>>::type;
 };
 
@@ -670,23 +668,6 @@ using Centimeter = Length<Int, std::centi>;
 template <Type::Arithmetic Int>
 using Millimeter = Length<Int, std::milli>;
 
-// La ventaja de las siguientes funciones es que no hay que escribir el tipo
-// `Int` que se usa.
-// Comparar:
-//	Centimeter<Decimal<int32_t, 3>> cm(m);
-// versus
-//	auto cm = as_centimeter(m);
-//  Heredando `cm` el tipo de `m`.
-//template <Type::Arithmetic Int, Type::Static_ratio M>
-//inline 
-//constexpr Centimeter<Int> as_centimeter(const Length<Int, M>& x)
-//{
-//    using Int2 = decimal_type<Int>::add_digits<2>::add_decimals<-2>;
-//
-//
-//    return Centimeter<Int2>(x);
-//}
-//
 
 // Frequency
 // ---------

@@ -29,8 +29,7 @@ using namespace test;
 template <Type::Integer Rep>
 void print(const atd::Sci_number<Rep>& x, bool print_return = true)
 { 
-    std::cout << (int) x.significand() << " x 10^{" << x.exponent()
-		<< "}";
+    std::cout << x;
     if (print_return)
 	std::cout << "\n"; 
 }
@@ -96,6 +95,15 @@ void test_constructor()
     test_constructor_decimal<uint16_t>(1,23456789, 12345, -4);
     test_constructor_decimal<uint16_t>(0,123456789, 12345, -5);
     test_constructor_decimal<uint16_t>(0ul,6987654321ul, 6987, -4);
+
+    {
+    auto x = atd::Sci_number<uint8_t>(3).E(4);
+    CHECK_TRUE(x.significand() == 3 and x.exponent() == 4, "E");
+    }
+    {
+    auto x = atd::Sci_number<uint8_t>(3).E(-4);
+    CHECK_TRUE(x.significand() == 3 and x.exponent() == -4, "E");
+    }
 }
 
 void test_comparison()
@@ -111,6 +119,11 @@ void test_comparison()
     CHECK_TRUE(atd::Sci_number<uint8_t>{300'000} == 300'000, "operator==");
 
     CHECK_TRUE(atd::Sci_number<int8_t>{-300'000} == -300'000, "operator==");
+
+    CHECK_TRUE(atd::Sci_number<int8_t>(20).E(-4) == 
+	       atd::Sci_number<int8_t>(2).E(-3), "operator==");
+    CHECK_TRUE(atd::Sci_number<int8_t>(2).E(-3) == 
+	       atd::Sci_number<int8_t>(20).E(-4), "operator==");
 }
 
 template <typename Rep, typename Int>

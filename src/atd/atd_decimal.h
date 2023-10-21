@@ -1,3 +1,4 @@
+// TODO: Sustituir esta clase a favor de Sci_number (???)
 // Copyright (C) 2020-2023 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
@@ -724,24 +725,6 @@ Out& operator<<(Out& out, const atd::Decimal<Rep, ndecimals>& d)
 
 
 
-
-// casting
-// -------
-//template <Type::Integer Rep2, int N, Type::Integer Rep = Rep2>
-//constexpr __disable_if_is_decimal<Rep2> to_integer(const Decimal<Rep, N>& d)
-//{
-//    auto [i, f] = d.value();
-//    return static_cast<Rep2>(i);
-//}
-//
-//template <typename To_decimal, Type::Integer Rep, int N>
-//constexpr __enable_if_is_decimal<To_decimal>
-//to_integer(const Decimal<Rep, N>& d)
-//{
-//    using Rep2 = typename To_decimal::Rep;
-//    auto [i, f] = d.value();
-//    return To_decimal{static_cast<Rep2>(i), static_cast<Rep2>(f)};
-//}
 
 // traits
 // ------

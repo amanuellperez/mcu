@@ -1,3 +1,4 @@
+// TODO: BORRAR ESTA CLASE
 // Copyright (C) 2021 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
