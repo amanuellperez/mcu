@@ -40,7 +40,8 @@
  ****************************************************************************/
 #include <limits>
 #include <algorithm>
-
+#include <tuple>    // tie
+		    
 #include "atd_concepts.h"
 #include "atd_math.h"
 
@@ -70,7 +71,8 @@ public:
     // As an integer
     // Example: Sci_number<uint8_t> x{23'000'000};
     template <Type::Integer Int>
-   // explicit  <-- un Int es un Sci_number, mejor no explicit (???)
+    explicit (!(std::is_convertible_v<Rep, Int> and
+	        has_same_sign<Rep, Int>))
     constexpr Sci_number(const Int& x);
 
     // As a decimal number

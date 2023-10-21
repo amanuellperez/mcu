@@ -71,16 +71,15 @@ inline constexpr bool always_false_v = always_false_type<T>::value;
 
 
 
-/*!
- *  bool has_same_sign(Integer T, Integer U)
- *  {
- *     if (sign(T) == sign(U))
- *          return true;
- *     else
- *          return false;
- *  }
- *
- */
+// has_same_sign
+// -------------
+// bool has_same_sign(Integer T, Integer U)
+// {
+//    if (sign(T) == sign(U))
+//       return true;
+//    else
+//       return false;
+// }
 template <typename T, typename U>
 inline constexpr bool has_same_sign()
 {
@@ -92,6 +91,9 @@ inline constexpr bool has_same_sign()
 	return false;
 }
 
+// Todas las funciones con tipo son _t ó _v. 
+template <typename T, typename U>
+inline static constexpr bool has_same_sign_v = has_same_sign<T,U>();
 
 /*!
  *

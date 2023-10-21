@@ -99,8 +99,13 @@ void test_has_same_sign()
 {
     test::interface("has_same_sign");
 
-    CHECK_TRUE((atd::has_same_sign<int, int>()), "has_same_sign");
-    CHECK_TRUE((!atd::has_same_sign<int, unsigned int>()), "has_same_sign");
+    CHECK_TRUE(atd::has_same_sign<uint8_t, uint8_t>(), "has_same_sign");
+    CHECK_TRUE(!atd::has_same_sign<uint8_t, int8_t>(), "has_same_sign");
+    CHECK_TRUE(!atd::has_same_sign<int8_t, uint8_t>(), "has_same_sign");
+    CHECK_TRUE(atd::has_same_sign<int8_t, int8_t>(), "has_same_sign");
+
+    CHECK_TRUE(atd::has_same_sign<int, int>(), "has_same_sign");
+    CHECK_TRUE(!atd::has_same_sign<int, unsigned int>(), "has_same_sign");
 
 }
 

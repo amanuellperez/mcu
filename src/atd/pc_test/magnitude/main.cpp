@@ -692,6 +692,12 @@ void test_sci_meter()
 
     CHECK_TRUE(cm == Centimeter(Number(2).E(2)), "meters to centimeters");
     CHECK_TRUE(km == Kilometer(Number(2).E(-3)), "meters to kilometers");
+
+
+    m = Meter(Number(117).E(4));
+    m /= Number(1'000'000);
+    CHECK_TRUE(m == Meter(Number(117).E(-2)), "meter / 10^6");
+
 }
 
 void test_sci_frequency()

@@ -17,7 +17,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "../../dev_HCSR04.h"
 
 #include <limits>
 #include <avr_atmega.h>
@@ -28,6 +27,7 @@
 // -----
 namespace mcu = atmega; 
 using Micro   = mcu::Micro;
+#include "../../dev_HCSR04.h" // TODO: posicion
 
 // pins
 constexpr uint8_t trigger_pin = 13;
@@ -81,6 +81,48 @@ void print_result(HCSR04::Result res)
 
 }
 
+void test_sci_meter()
+{
+    mcu::UART_iostream uart;
+    using Number = atd::Sci_number<uint8_t>;
+    using Kilometer  = atd::Kilometer<Number>;
+    using Meter      = atd::Meter<Number>;
+    using Centimeter = atd::Centimeter<Number>;
+
+    Meter m{2};
+    uart << "meters = " << m << '\n';
+
+    Centimeter cm = m;
+    uart << "centimeters = " << cm << '\n';
+
+    Kilometer km = m;
+    uart << "kilometers = " << km << '\n';
+
+    uart << "meters to centimeters";
+    if(cm == Centimeter(Number(2).E(2)))
+	uart << "OK\n";
+    else 
+	uart << "FAIL\n";
+
+    uart <<  "meters to kilometers";
+
+    if(km == Kilometer(Number(2).E(-3)))
+	uart << "OK\n";
+    else 
+	uart << "FAIL\n";
+
+
+    m = Meter(Number(117).E(4));
+    m /= Number(1'000'000);
+
+    uart << "meter / 10^6";
+    if(m == Meter(Number(117).E(-2)))
+	uart << "OK\n";
+    else 
+	uart << "FAIL\n";
+
+
+}
 
 int main()
 {
@@ -99,7 +141,9 @@ int main()
 	else
 	    print_result(HCSR04::result_last_operation());
 
-
+uart << "\n\n----------------------------\n";
+test_sci_meter();
+uart << "----------------------------\n";
 	Micro::wait_ms(1000);
     }
 

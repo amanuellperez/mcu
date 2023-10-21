@@ -31,7 +31,7 @@
  *    16/10/2023 v0.0
  *
  ****************************************************************************/
-#include <atd_decimal.h>
+#include <atd_sci_number.h>
 #include <atd_magnitude.h>
 
 namespace dev{
@@ -70,7 +70,7 @@ class HCSR04{
 public:
 // Types
     enum class Result{ok, time_out};
-    using Meter = atd::Meter<atd::Decimal<uint32_t, 2>>; // hasta centímetros
+    using Meter = atd::Meter<atd::Sci_number<uint8_t>>; 
 
 // Construction
     static void init();
@@ -119,13 +119,18 @@ template <typename C>
 HCSR04<C>::Meter HCSR04<C>::read(uint16_t time_out_us)
 {
     auto T = read_time(time_out_us); // = 2*t
+mcu::UART_iostream uart;
+uart << "T = " << T << " us\n";
+
     if (result_ != Result::ok)
 	return Meter{0};
 
     auto d = (speed_sound * T / 2);
+uart << "d = " << d << "\n";
 
     Meter m{d};
-    m /= 1'000'000; // cuidado al dividir entre 10^6
+uart << "m0 = " << m << "\n";
+    m /= Meter::Rep{1'000'000}; 
 
     return m;
 }

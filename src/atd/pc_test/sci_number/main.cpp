@@ -104,6 +104,15 @@ void test_constructor()
     auto x = atd::Sci_number<uint8_t>(3).E(-4);
     CHECK_TRUE(x.significand() == 3 and x.exponent() == -4, "E");
     }
+    {// not explicit
+    atd::Sci_number<uint8_t> x = 1'000'000u;
+    CHECK_TRUE(x == 1'000'000u, "not explicit");
+    }
+    {// explicit
+    static_assert(atd::has_same_sign<uint8_t, int8_t>);
+    atd::Sci_number<int8_t> x = uint8_t{250};
+    CHECK_TRUE(x == 1'000'000u, "not explicit");
+    }
 }
 
 void test_comparison()
@@ -362,7 +371,6 @@ void test_division()
     // que importa)
     test_division_decimal<uint8_t>(1,0, 2,0, 50, -2);
     test_division_decimal<uint8_t>(1,0, 5,0, 200, -3);
-									
 }
 
 int main()
