@@ -1,4 +1,4 @@
-// Copyright (C) 2020 Manuel Perez 
+// Copyright (C) 2020-2023 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -27,11 +27,12 @@
  *
  *  - HISTORIA:
  *    Manuel Perez 
- *	22/02/2020: ignore, implementación MINIMA de tuple para que funcione
+ *	22/02/2020  ignore, implementación MINIMA de tuple para que funcione
  *		    std::tie. 
  *		    TODO: implementar tuple. De hecho conviene revisar todos
  *		    los requirements (no implemento ninguno) y todo lo demás.
  *		    De momento solo estoy interesado en que funcione std::tie.
+ *	21/10/2023  Algunos requires, constexpr, y deduction guides.
  *
  ****************************************************************************/
 #include "std_config.h"
@@ -130,11 +131,11 @@ protected:
 template <typename... T0_n>
 class tuple : public __Tuple<0, T0_n...>
 {
-    using __Tuple_base = __Tuple<0, T0_n...>;
+    using Tuple_base = __Tuple<0, T0_n...>;
 
 public:
     // TODO: falta poner que sea 'conditionally explicit'
-    constexpr tuple(const T0_n&... args) : __Tuple_base(args...) { }
+    constexpr tuple(const T0_n&... args) : Tuple_base(args...) { }
 
     tuple(const tuple&) = default;
     tuple(tuple&&)      = default;
@@ -142,7 +143,7 @@ public:
 
     // TODO: faltan requirements, leer el standard. (hacerlo cuando tenga los
     // concepts)
-    tuple& operator=(const tuple<T0_n...>& u)
+    constexpr tuple& operator=(const tuple<T0_n...>& u)
     {
 	__assign(u);
 	return *this;
@@ -150,7 +151,7 @@ public:
 
     // TODO: faltan requirements, leer el standard. (hacerlo cuando tenga los
     // concepts)
-    tuple& operator=(const tuple<T0_n...>&& u)
+    constexpr tuple& operator=(const tuple<T0_n...>&& u)
     {
 	__assign(move(u));
 	return *this;
@@ -160,7 +161,7 @@ public:
     // TODO: faltan requirements, leer el standard. (hacerlo cuando tenga los
     // concepts)
     template <typename... U0_n>
-    tuple& operator=(const tuple<U0_n...>& u)
+    constexpr tuple& operator=(const tuple<U0_n...>& u)
     {
 	__assign(u);
 	return *this;
@@ -169,7 +170,7 @@ public:
     // TODO: faltan requirements, leer el standard. (hacerlo cuando tenga los
     // concepts)
     template <typename... U0_n>
-    tuple& operator=(const tuple<U0_n...>&& u)
+    constexpr tuple& operator=(const tuple<U0_n...>&& u)
     {
 	__assign(move(u));
 	return *this;
@@ -182,42 +183,47 @@ public:
 template <typename T1, typename T2>
 class tuple<T1, T2> : public __Tuple<0, T1, T2>
 {
-    using __Tuple_base = __Tuple<0, T1, T2>;
+    using Tuple_base = __Tuple<0, T1, T2>;
 
 public:
     // TODO: falta poner que sea 'conditionally explicit'
-    constexpr tuple(const T1& x1, const T2& x2) : __Tuple_base(x1, x2) { }
+    constexpr tuple(const T1& x1, const T2& x2) : Tuple_base(x1, x2) { }
 
     tuple(const tuple&) = default;
     tuple(tuple&&)      = default;
 
-    // TODO: faltan requirements, leer el standard. (hacerlo cuando tenga los
-    // concepts)
     template <typename U1, typename U2>
-    tuple(const pair<U1, U2>& p) : __Tuple_base(p.first, p.second) { }
+    constexpr
+    explicit (!is_constructible_v<T1, const U1&> or
+	      !is_constructible_v<T2, const U2&>)
+    tuple(const pair<U1, U2>& p) 
+	    : Tuple_base(p.first, p.second) { }
 
     template <typename U1, typename U2>
+    constexpr
+    explicit (!is_constructible_v<T1, const U1&> or
+	      !is_constructible_v<T2, const U2&>)
     tuple(pair<U1, U2>&& p)
-        : __Tuple_base(forward<U1>(p.first), forward<U2>(p.second))
+        : Tuple_base(forward<U1>(p.first), forward<U2>(p.second))
     { }
 
 
-    // TODO: faltan requirements, leer el standard. (hacerlo cuando tenga los
-    // concepts)
     template <typename U1, typename U2>
-    tuple& operator=(const pair<U1, U2>& p)
-    { // DUDA: sin this-> el compilador genera un error. ¿Por qué no sabe
-      // a quien pertenece value()?
+    constexpr tuple& operator=(const pair<U1, U2>& p)
+	requires (is_assignable_v<T1&, const U1&> and
+		  is_assignable_v<T2&, const U2&>)
+    { // sin this-> el compilador genera un error. 
+      // Es culpa de la herencia de templates
 	this->__value() = p.first;
 	this->__base(*this).__value() = p.second;
 
 	return *this;
     }
 
-    // TODO: faltan requirements, leer el standard. (hacerlo cuando tenga los
-    // concepts)
     template <typename U1, typename U2>
-    tuple& operator=(pair<U1, U2>&& p)
+	requires (is_assignable_v<T1&, const U1&> and
+		  is_assignable_v<T2&, const U2&>)
+    constexpr tuple& operator=(pair<U1, U2>&& p)
     {
 	this->__value() = forward<U1>(p.first);
 	this->__base(*this).__value() = forward<U2>(p.second);
@@ -313,13 +319,15 @@ get(const tuple<T0_n...>& t) noexcept
 
 // ignore
 // ------
-struct __Ignore{
+namespace impl_of{
+struct Ignore{
     template <typename T>
-    constexpr const __Ignore& operator=(const T&) const
+    constexpr const Ignore& operator=(const T&) const
     { return *this; }
 };
-
-inline constexpr __Ignore ignore;
+}// impl_of 
+ 
+inline constexpr impl_of::Ignore ignore;
 
 
 // tie
@@ -329,6 +337,15 @@ constexpr tuple<T0_n&...> tie(T0_n&... args) noexcept
 { return tuple<T0_n&...>(args...);}
 
 
+// Deduction guides
+// ----------------
+template <typename... T0_n>
+tuple(T0_n...) -> tuple<T0_n...>;
+
+template <typename T1, typename T2>
+tuple(pair<T1, T2>) -> tuple<T1, T2>;
+
+// TODO: faltan las que tienen Alloc como parámetro
 
 }// namespace
 
