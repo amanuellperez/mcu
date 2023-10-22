@@ -21,6 +21,7 @@ DIRS = algorithm	\
 		magnitude	\
 		math		\
 		metronome	\
+		minifloat	\
 		names		\
 		ostream		\
 		ratio		\

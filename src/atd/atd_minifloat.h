@@ -19,15 +19,33 @@
 
 #pragma once
 
-#ifndef __ATD_SCI_NUMBER_H__
-#define __ATD_SCI_NUMBER_H__
+#ifndef __ATD_MINIFLOAT_H__
+#define __ATD_MINIFLOAT_H__
 /****************************************************************************
  *
  * DESCRIPCION
  *    Número con un número fijo de cifras significativas.
+ *
  *    Se representa internamente como x*10^n donde `x` es del tipo indicado en
  *    `Rep` (que determina, por tanto, el número de cifras significativas que
  *    se pueden tener).
+ *
+ * OBJETIVO
+ *    Pretende ser una versión light de 'float'. 
+ *    Como el atmega no opera con floats en hardware, operar con floats hace
+ *    que los programas aumenten de tamaño. 
+ *    Por ello creo esta clase: como sustituto de float, con la idea de que
+ *    sea más pequeño.
+ *    Al poder elegir el tipo interno usado realmente estaría creando un
+ *    montón diferentes de floats:
+ *	using float8   = Minifloat<int8_t>;
+ *	using ufloat8  = Minifloat<uint8_t>;
+ *	using float16  = Minifloat<int16_t>
+ *	using ufloat16 = Minifloat<uint16_t>
+ *	...
+ *    
+ *    Por supuesto, que hay que medir para ver si realmente estoy consiguiendo
+ *    mi objetivo. 
  *
  * EVOLUCIÓN
  *    Esta clase pretende ser una generalización de la clase atd::Decimal y
@@ -46,11 +64,46 @@
 
 namespace atd{
 
+// Funciones genéricas
+// -------------------
+// TODO: no usarlas con este nombre en otros sitios.
+// Realmente estas funciones lo que garantizan es que no haya
+// overflow/underflow. `is_rep_value` es un nombre muy criptico. Elegir uno
+// mejor.
+// ¿se puede representar usando Rep el valor de x?
+template <Type::Integer Int2, Type::Integer Int>
+constexpr bool is_rep_value(const Int& x)
+{
+    return std::numeric_limits<Int2>::min() <= x and
+	   x <= std::numeric_limits<Int2>::max();
+}
 
 
+// TODO: esta función la estoy usando ya
+template <Type::Integer Int>
+constexpr 
+std::pair<Int, uint8_t> shift10_n_to_the_left(uint8_t n, const Int& x0)
+{
+    using Int2 = same_type_with_double_bits_t<Int>;
+
+    Int2 x = x0;
+    uint8_t ndigits = 0;
+    while (ndigits < n and is_rep_value<Int>(x)){
+	x *= Int2{10};
+	++ndigits;
+    }
+
+    if (!is_rep_value<Int>(x)){
+	x /= Int2{10};
+	--ndigits;
+    }
+
+    return {static_cast<Int>(x), ndigits};
+
+}
 
 /***************************************************************************
- *				Sci_number
+ *				Minifloat
  ***************************************************************************/
 // Número con un número fijo de cifras significativas.
 // ¿Cuántas cifras significativas admite? El tipo Rep nos lo indica.
@@ -58,48 +111,48 @@ namespace atd{
 // Si Rep == uint16_t pueden ir de 0 a 65535. 
 //
 template <Type::Integer Rep0, Type::Integer Exp0_t = int>
-class Sci_number{
+class Minifloat{
 public:
 // Types
     using Rep   = Rep0; // Rep define el número de cifras significativas
     using Exp_t = Exp0_t;
 
 // Construction
-    constexpr Sci_number() = default;
+    constexpr Minifloat() = default;
 
     // As an integer
-    // Example: Sci_number<uint8_t> x{23'000'000};
+    // Example: Minifloat<uint8_t> x{23'000'000};
     template <Type::Integer Int>
     explicit (!(std::is_convertible_v<Rep, Int> and
 	        has_same_sign_v<Rep, Int>))
-    constexpr Sci_number(const Int& x);
+    constexpr Minifloat(const Int& x);
 
     // As a decimal number
-    // Example: Sci_number<uint8_t> x{12,3}; // x == 12.3
+    // Example: Minifloat<uint8_t> x{12,3}; // x == 12.3
     template <Type::Integer Int>
-    constexpr Sci_number(const Int& integer_part, const Int& decimal_part);
+    constexpr Minifloat(const Int& integer_part, const Int& decimal_part);
 	
     // Idioma: para crear el número 5*10^{-4} usamos la E-notation: 5E{-4}
     // En código esto lo traducimos en:
-    //		auto x = Sci_number{5}.E(-4);
-    constexpr Sci_number& E(Exp_t e) {exp_ = e; return *this;}
+    //		auto x = Minifloat{5}.E(-4);
+    constexpr Minifloat& E(Exp_t e) {exp_ = e; return *this;}
 
 // Observers(estas dos funciones son más para depurar, ¿evitar usarlas?)
     constexpr Rep significand() const {return x_;}
     constexpr Exp_t exponent() const { return exp_;}
 
 // Algebraic structure
-    constexpr Sci_number operator-() const
+    constexpr Minifloat operator-() const
 	requires (Type::Signed_integer<Rep>);
 
-    constexpr Sci_number& operator+=(const Sci_number& a);
-    constexpr Sci_number& operator-=(const Sci_number& a);
-    constexpr Sci_number& operator*=(const Sci_number& a);
-    constexpr Sci_number& operator/=(const Sci_number& a);
+    constexpr Minifloat& operator+=(const Minifloat& a);
+    constexpr Minifloat& operator-=(const Minifloat& a);
+    constexpr Minifloat& operator*=(const Minifloat& a);
+    constexpr Minifloat& operator/=(const Minifloat& a);
 
 // Order
-    constexpr bool operator==(const Sci_number& a) const;
-    constexpr bool operator<(const Sci_number& a) const;
+    constexpr bool operator==(const Minifloat& a) const;
+    constexpr bool operator<(const Minifloat& a) const;
  
 // Comparison with Int
     // Esta comparación es muy cómoda de usar. Permite escribir cosas 
@@ -112,14 +165,6 @@ private:
     Rep x_;
     Exp_t exp_;
 
-    // ¿se puede representar usando Rep el valor de x?
-    template <Type::Integer Int2, Type::Integer Int>
-    static
-    constexpr bool is_rep_value(const Int& x)
-    {
-	return std::numeric_limits<Int2>::min() <= x and
-	       x <= std::numeric_limits<Int2>::max();
-    }
 
     template <Type::Integer Int>
     static 
@@ -128,10 +173,6 @@ private:
     static 
     constexpr Rep rep_change_sign(const Rep& x);
 
-    template <Type::Integer Int>
-    static 
-    constexpr 
-    std::pair<Int, uint8_t> shift10_n_to_the_left(uint8_t n, const Int& x0);
 
     template <Type::Integer Int>
     constexpr void construct(const Int& integer_part);
@@ -146,7 +187,7 @@ private:
     constexpr 
     std::pair<Rep, Exp_t> add_number(const Rep& x1, Exp_t e1, Rep x2);
 
-    constexpr void unsigned_substract(const Sci_number& a)
+    constexpr void unsigned_substract(const Minifloat& a)
 	requires Type::Unsigned_integer<Rep>;
 
     static 
@@ -155,7 +196,7 @@ private:
 };
 
 template <Type::Integer Rep, Type::Integer E_t>
-constexpr Rep Sci_number<Rep, E_t>::rep_change_sign(const Rep& x)
+constexpr Rep Minifloat<Rep, E_t>::rep_change_sign(const Rep& x)
 {
     if constexpr (Type::Signed_integer<Rep>)
 	return -x;
@@ -169,7 +210,7 @@ constexpr Rep Sci_number<Rep, E_t>::rep_change_sign(const Rep& x)
 template <Type::Integer R, Type::Integer E_t>
     template <Type::Integer Int>
 constexpr 
-std::pair<R, E_t> Sci_number<R, E_t>::reduce_to_rep_value(Int x)
+std::pair<R, E_t> Minifloat<R, E_t>::reduce_to_rep_value(Int x)
 {
     Exp_t exp = 0;
     while (!is_rep_value<Rep>(x)){
@@ -189,14 +230,14 @@ std::pair<R, E_t> Sci_number<R, E_t>::reduce_to_rep_value(Int x)
 template <Type::Integer R, Type::Integer E_t>
     template <Type::Integer Int>
 inline constexpr 
-void Sci_number<R, E_t>::construct(const Int& integer_part)
+void Minifloat<R, E_t>::construct(const Int& integer_part)
 { std::tie(x_, exp_) = reduce_to_rep_value(integer_part); }
 
 // Al calcular ndecimals sumo 1 digits10. Intento aprovechar al máximo el tipo
 // Rep. 
-// Ejemplo: Al llamar a Sci_number<uint8_t>{0,255}  quiero que 
-// Sci_number == 0.255.
-// Si no le sumara el 1 a digits10 obtendría Sci_number == 0.25 perdiendo la
+// Ejemplo: Al llamar a Minifloat<uint8_t>{0,255}  quiero que 
+// Minifloat == 0.255.
+// Si no le sumara el 1 a digits10 obtendría Minifloat == 0.25 perdiendo la
 // tercera cifra decimal que sí se puede representar en un uint8_t
 // precondicion: is_rep_value(integer_part)
 //
@@ -210,7 +251,7 @@ void Sci_number<R, E_t>::construct(const Int& integer_part)
 template <Type::Integer R, Type::Integer E_t>
     template <Type::Integer Int>
 constexpr 
-void Sci_number<R, E_t>::
+void Minifloat<R, E_t>::
 		construct(const Int& integer_part, const Int& decimal_part)
     // precondition (decimal_part > 0)
 {
@@ -256,7 +297,7 @@ void Sci_number<R, E_t>::
 
 template <Type::Integer R, Type::Integer E_t>
     template <Type::Integer Int>
-inline constexpr Sci_number<R, E_t>::Sci_number(const Int& x)
+inline constexpr Minifloat<R, E_t>::Minifloat(const Int& x)
 { construct(x); }
 
 
@@ -266,7 +307,7 @@ inline constexpr Sci_number<R, E_t>::Sci_number(const Int& x)
 template <Type::Integer R, Type::Integer E_t>
     template <Type::Integer Int>
 constexpr 
-Sci_number<R, E_t>::Sci_number(const Int& integer_part, 
+Minifloat<R, E_t>::Minifloat(const Int& integer_part, 
 			     const Int& decimal_part)
 { 
     if (!is_rep_value<Rep>(integer_part) or decimal_part <= 0)
@@ -281,7 +322,7 @@ Sci_number<R, E_t>::Sci_number(const Int& integer_part,
 // -----
 template <Type::Integer R, Type::Integer E_t>
 inline
-constexpr bool Sci_number<R, E_t>::operator==(const Sci_number<R, E_t>& a) const
+constexpr bool Minifloat<R, E_t>::operator==(const Minifloat<R, E_t>& a) const
 { 
     if (exp_ >= a.exp_)
 	return (x_ * ten_to_the<Rep>(exp_ - a.exp_)) == a.x_;
@@ -293,7 +334,7 @@ constexpr bool Sci_number<R, E_t>::operator==(const Sci_number<R, E_t>& a) const
 
 template <Type::Integer R, Type::Integer E_t>
 inline
-constexpr bool Sci_number<R, E_t>::operator<(const Sci_number<R, E_t>& a) const
+constexpr bool Minifloat<R, E_t>::operator<(const Minifloat<R, E_t>& a) const
 { 
     if (exp_ < a.exp_)
 	return true;
@@ -306,7 +347,7 @@ constexpr bool Sci_number<R, E_t>::operator<(const Sci_number<R, E_t>& a) const
 
 template <Type::Integer R, Type::Integer E_t>
     template <Type::Integer Int>
-inline constexpr bool Sci_number<R, E_t>::operator==(const Int& y) const
+inline constexpr bool Minifloat<R, E_t>::operator==(const Int& y) const
 {
     if (exp_ >= 0){
 	Int res = x_ * ten_to_the<Int>(exp_);
@@ -319,27 +360,27 @@ inline constexpr bool Sci_number<R, E_t>::operator==(const Int& y) const
 
 template <Type::Integer R, Type::Integer E_t>
 inline
-constexpr bool operator!=(const Sci_number<R, E_t>& a, const Sci_number<R, E_t>& b)
+constexpr bool operator!=(const Minifloat<R, E_t>& a, const Minifloat<R, E_t>& b)
 {return !(a == b);}
 
 
 template <Type::Integer R, Type::Integer E_t, Type::Integer Int>
-inline constexpr bool operator!=(const Sci_number<R, E_t>& a, const Int& b)
+inline constexpr bool operator!=(const Minifloat<R, E_t>& a, const Int& b)
 { return !(a == b); }
 
 template <Type::Integer R, Type::Integer E_t>
-inline constexpr bool operator>(const Sci_number<R, E_t>& a, 
-			         const Sci_number<R, E_t>& b)
+inline constexpr bool operator>(const Minifloat<R, E_t>& a, 
+			         const Minifloat<R, E_t>& b)
 { return b < a; }
 
 template <Type::Integer R, Type::Integer E_t>
-inline constexpr bool operator<=(const Sci_number<R, E_t>& a, 
-			         const Sci_number<R, E_t>& b)
+inline constexpr bool operator<=(const Minifloat<R, E_t>& a, 
+			         const Minifloat<R, E_t>& b)
 { return !(a > b); }
 
 template <Type::Integer R, Type::Integer E_t>
-inline constexpr bool operator>=(const Sci_number<R, E_t>& a, 
-			         const Sci_number<R, E_t>& b)
+inline constexpr bool operator>=(const Minifloat<R, E_t>& a, 
+			         const Minifloat<R, E_t>& b)
 { return !(a < b); }
 
 
@@ -347,10 +388,10 @@ inline constexpr bool operator>=(const Sci_number<R, E_t>& a,
 // -------------------
 template <Type::Integer R, Type::Integer E_t>
 inline constexpr 
-Sci_number<R, E_t> Sci_number<R,E_t>::operator-() const
+Minifloat<R, E_t> Minifloat<R,E_t>::operator-() const
     requires (Type::Signed_integer<R>)
 {
-    Sci_number res;
+    Minifloat res;
 
     res.x_ = -x_;
     res.exp_ = exp_;
@@ -359,7 +400,7 @@ Sci_number<R, E_t> Sci_number<R,E_t>::operator-() const
 }
 
 template <Type::Integer R, Type::Integer E_t>
-constexpr void Sci_number<R, E_t>::add_equal_exponent(const Rep& a)
+constexpr void Minifloat<R, E_t>::add_equal_exponent(const Rep& a)
 {
     using Int = same_type_with_double_bits_t<Rep>;
 
@@ -378,7 +419,7 @@ constexpr void Sci_number<R, E_t>::add_equal_exponent(const Rep& a)
 // Esta función es necesaria para evitar overflows al usar:
 //		x2 /= ten_to_the<Rep>(e1);
 template <Type::Integer Rep, Type::Integer E_t>
-constexpr Rep Sci_number<Rep, E_t>::divide_by_ten_to_the(Rep x, Exp_t e)
+constexpr Rep Minifloat<Rep, E_t>::divide_by_ten_to_the(Rep x, Exp_t e)
 {
     for (Exp_t i = 0; i < e; ++i){
 	x /= Rep{10};
@@ -399,7 +440,7 @@ constexpr Rep Sci_number<Rep, E_t>::divide_by_ten_to_the(Rep x, Exp_t e)
 // x1*10^e1 sea menor que numeric_limits::digits10. 
 template <Type::Integer R, Type::Integer E_t>
 constexpr std::pair<R, E_t> 
-    Sci_number<R, E_t>::add_number(const Rep& x1, Exp_t e1, Rep x2)
+    Minifloat<R, E_t>::add_number(const Rep& x1, Exp_t e1, Rep x2)
 {
     if (e1 < std::numeric_limits<Rep>::digits10 + 1) 
     { // 10^e1 es representable por Rep
@@ -422,7 +463,7 @@ constexpr std::pair<R, E_t>
 
 
 template <Type::Integer R, Type::Integer E_t>
-constexpr Sci_number<R, E_t>& Sci_number<R, E_t>::operator+=(const Sci_number& a)
+constexpr Minifloat<R, E_t>& Minifloat<R, E_t>::operator+=(const Minifloat& a)
 {
     if (exp_ == a.exp_)
 	add_equal_exponent(a.x_);
@@ -446,7 +487,7 @@ constexpr Sci_number<R, E_t>& Sci_number<R, E_t>::operator+=(const Sci_number& a
 
 // precondition: *this > a
 template <Type::Integer R, Type::Integer E_t>
-constexpr void Sci_number<R, E_t>::unsigned_substract(const Sci_number& a)
+constexpr void Minifloat<R, E_t>::unsigned_substract(const Minifloat& a)
     requires Type::Unsigned_integer<Rep>
 {
     if (exp_ == a.exp_)
@@ -468,7 +509,7 @@ constexpr void Sci_number<R, E_t>::unsigned_substract(const Sci_number& a)
 
 template <Type::Integer R, Type::Integer E_t>
 inline constexpr 
-    Sci_number<R, E_t>& Sci_number<R, E_t>::operator-=(const Sci_number& a)
+    Minifloat<R, E_t>& Minifloat<R, E_t>::operator-=(const Minifloat& a)
 {
     if constexpr (Type::Signed_integer<Rep>)
 	x_ += (-a);
@@ -486,7 +527,7 @@ inline constexpr
 
 template <Type::Integer R, Type::Integer E_t>
 inline constexpr 
-    Sci_number<R, E_t>& Sci_number<R, E_t>::operator*=(const Sci_number& a)
+    Minifloat<R, E_t>& Minifloat<R, E_t>::operator*=(const Minifloat& a)
 {
     using Rep2 = same_type_with_double_bits_t<Rep>;
 
@@ -500,30 +541,6 @@ inline constexpr
 
 
 
-// TODO: esta función la estoy usando ya
-template <Type::Integer R, Type::Integer E_t>
-    template <Type::Integer Int>
-constexpr 
-std::pair<Int, uint8_t>
-    Sci_number<R, E_t>::shift10_n_to_the_left(uint8_t n, const Int& x0)
-{
-    using Int2 = same_type_with_double_bits_t<Int>;
-
-    Int2 x = x0;
-    uint8_t ndigits = 0;
-    while (ndigits < n and is_rep_value<Int>(x)){
-	x *= Int2{10};
-	++ndigits;
-    }
-
-    if (!is_rep_value<Int>(x)){
-	x /= Int2{10};
-	--ndigits;
-    }
-
-    return {static_cast<Int>(x), ndigits};
-
-}
 
 // Idea: ¿cómo dividir 1/24?
 //	 Multipliquemos y dividamos por la máxima potencia de 10 representable
@@ -533,7 +550,7 @@ std::pair<Int, uint8_t>
 template <Type::Integer R, Type::Integer E_t>
 inline 
 constexpr 
-Sci_number<R, E_t>& Sci_number<R, E_t>::operator/=(const Sci_number& a)
+Minifloat<R, E_t>& Minifloat<R, E_t>::operator/=(const Minifloat& a)
 {
     if (a.x_ == 0){// TODO: devolver NaNd? otra cosa?
 	x_ = 0;
@@ -561,7 +578,7 @@ Sci_number<R, E_t>& Sci_number<R, E_t>::operator/=(const Sci_number& a)
 
 template <Type::Integer R, Type::Integer E_t>
 inline constexpr 
-    Sci_number<R, E_t> operator+(Sci_number<R, E_t> a, const Sci_number<R, E_t>& b)
+    Minifloat<R, E_t> operator+(Minifloat<R, E_t> a, const Minifloat<R, E_t>& b)
 { 
     a += b;
     return a;
@@ -569,7 +586,7 @@ inline constexpr
 
 template <Type::Integer R, Type::Integer E_t>
 inline constexpr 
-    Sci_number<R, E_t> operator-(Sci_number<R, E_t> a, const Sci_number<R, E_t>& b)
+    Minifloat<R, E_t> operator-(Minifloat<R, E_t> a, const Minifloat<R, E_t>& b)
 { 
     a -= b;
     return a;
@@ -577,7 +594,7 @@ inline constexpr
 
 template <Type::Integer R, Type::Integer E_t>
 inline constexpr 
-    Sci_number<R, E_t> operator*(Sci_number<R, E_t> a, const Sci_number<R, E_t>& b)
+    Minifloat<R, E_t> operator*(Minifloat<R, E_t> a, const Minifloat<R, E_t>& b)
 { 
     a *= b;
     return a;
@@ -585,7 +602,7 @@ inline constexpr
 
 template <Type::Integer R, Type::Integer E_t>
 inline constexpr 
-    Sci_number<R, E_t> operator/(Sci_number<R, E_t> a, const Sci_number<R, E_t>& b)
+    Minifloat<R, E_t> operator/(Minifloat<R, E_t> a, const Minifloat<R, E_t>& b)
 { 
     a /= b;
     return a;
@@ -595,9 +612,9 @@ inline constexpr
 // print
 // -----
 template <typename Out, Type::Integer R, Type::Integer E_t>
-void print(Out& out, const Sci_number<R, E_t>& x)
+void print(Out& out, const Minifloat<R, E_t>& x)
 { 
-    using Rep = Sci_number<R, E_t>::Rep;
+    using Rep = Minifloat<R, E_t>::Rep;
     if constexpr (sizeof(Rep) == 1) // caso uint8_t/int8_t
 	out << (int) x.significand();
     else
@@ -610,7 +627,7 @@ void print(Out& out, const Sci_number<R, E_t>& x)
 
 template <typename Out, Type::Integer R, Type::Integer E_t>
 inline 
-Out& operator<<(Out& out, const Sci_number<R, E_t>& x)
+Out& operator<<(Out& out, const Minifloat<R, E_t>& x)
 {
     print(out, x); 
     return out;
@@ -619,8 +636,17 @@ Out& operator<<(Out& out, const Sci_number<R, E_t>& x)
 // is_decimal
 // ----------
 template <Type::Integer Rep, Type::Integer E_t>
-struct is_decimal<Sci_number<Rep, E_t>> : std::true_type {};
+struct is_decimal<Minifloat<Rep, E_t>> : std::true_type {};
 
+// Alias
+// -----
+// Voy a usar int8_t como exponente para intentar que sean más pequeños.
+using Float8   = Minifloat<int8_t, int8_t>;
+using uFloat8  = Minifloat<uint8_t, int8_t>;
+using Float16  = Minifloat<int16_t, int8_t>;
+using uFloat16 = Minifloat<uint16_t, int8_t>;
+using Float32  = Minifloat<int32_t, int8_t>;
+using uFloat32 = Minifloat<uint32_t, int8_t>;
 
 }// namespace atd
 

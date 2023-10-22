@@ -29,10 +29,10 @@ INCS= atd_algorithm.h	\
 	atd_math.h 			\
 	atd_memory.h		\
 	atd_metronome.h		\
+	atd_minifloat.h		\
 	atd_names.h			\
 	atd_ostream.h		\
 	atd_ratio.h			\
-	atd_sci_number.h	\
 	atd_static.h		\
 	atd_string.h		\
 	atd_test.h			\

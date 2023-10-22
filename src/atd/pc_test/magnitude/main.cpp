@@ -20,7 +20,7 @@
 #include "../../atd_magnitude.h"
 #include "../../atd_cast.h"
 #include "../../atd_decimal.h"
-#include "../../atd_sci_number.h"
+#include "../../atd_minifloat.h"
 
 #include <alp_test.h>
 #include <alp_string.h>
@@ -676,10 +676,11 @@ void test_usability()
 
 void test_sci_meter()
 {
-    using Number = atd::Sci_number<uint8_t>;
+    using Number = atd::Minifloat<uint8_t>;
     using Kilometer  = atd::Kilometer<Number>;
     using Meter      = atd::Meter<Number>;
     using Centimeter = atd::Centimeter<Number>;
+
 
     Meter m = 2u; // como Number es uint8_t, podemos poner
 		  // m = 2u, pero no `m = 2` ya que 2 es signed.
@@ -703,7 +704,7 @@ void test_sci_meter()
 
 void test_sci_frequency()
 {
-    using Number = atd::Sci_number<uint8_t>;
+    using Number = atd::Minifloat<uint8_t>;
     using MegaHertz = atd::MegaHertz<Number>;
 
     MegaHertz freq{Number(8).E(6)}; // == 8_MHz
@@ -716,7 +717,7 @@ void test_sci_frequency()
 
 void test_with_sci_number()
 {
-    test::interface("test with Sci_number");
+    test::interface("test with Minifloat");
 
     test_sci_meter();
     test_sci_frequency();

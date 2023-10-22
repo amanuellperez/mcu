@@ -18,7 +18,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <iostream>
-#include "../../atd_sci_number.h"
+#include "../../atd_minifloat.h"
 
 #include <alp_test.h>
 #include <alp_string.h>
@@ -27,7 +27,7 @@
 using namespace test;
 
 template <Type::Integer Rep>
-void print(const atd::Sci_number<Rep>& x, bool print_return = true)
+void print(const atd::Minifloat<Rep>& x, bool print_return = true)
 { 
     std::cout << x;
     if (print_return)
@@ -37,7 +37,7 @@ void print(const atd::Sci_number<Rep>& x, bool print_return = true)
 template <typename Rep, typename Int>
 void test_constructor(const Int& x, const Rep& res, int exp)
 {
-    atd::Sci_number<Rep> s{x};
+    atd::Minifloat<Rep> s{x};
     CHECK_TRUE(s.significand() == res and s.exponent() == exp, "constructor");
 }
 
@@ -45,7 +45,7 @@ template <typename Rep, typename Int>
 void test_constructor_decimal(const Int& integer_part, const Int& decimal_part, 
 				    const Rep& res, int exp)
 {
-    atd::Sci_number<Rep> s{integer_part, decimal_part};
+    atd::Minifloat<Rep> s{integer_part, decimal_part};
     CHECK_TRUE(s.significand() == res and s.exponent() == exp, 
 	    alp::as_str() << "constructor_decimal(" << (int) integer_part
 			<< "." << (int) decimal_part << ")");
@@ -97,19 +97,19 @@ void test_constructor()
     test_constructor_decimal<uint16_t>(0ul,6987654321ul, 6987, -4);
 
     {
-    auto x = atd::Sci_number<uint8_t>(3).E(4);
+    auto x = atd::Minifloat<uint8_t>(3).E(4);
     CHECK_TRUE(x.significand() == 3 and x.exponent() == 4, "E");
     }
     {
-    auto x = atd::Sci_number<uint8_t>(3).E(-4);
+    auto x = atd::Minifloat<uint8_t>(3).E(-4);
     CHECK_TRUE(x.significand() == 3 and x.exponent() == -4, "E");
     }
     {// not explicit
-    atd::Sci_number<uint8_t> x = 1'000'000u;
+    atd::Minifloat<uint8_t> x = 1'000'000u;
     CHECK_TRUE(x == 1'000'000u, "not explicit");
     }
     {// explicit
-    atd::Sci_number<int8_t> x{uint8_t{250}};
+    atd::Minifloat<int8_t> x{uint8_t{250}};
     CHECK_TRUE(x == 250, "not explicit");
     }
 }
@@ -120,18 +120,18 @@ void test_comparison()
 
     // Observar que, como solo trabajamos con 2 cifras significativas (o
     // menores que 256), se redondean los números:
-    CHECK_TRUE(atd::Sci_number<uint8_t>{314} != 314, "operator!=");
-    CHECK_TRUE(atd::Sci_number<uint8_t>{314} == 310, "operator==");
-    CHECK_TRUE(atd::Sci_number<uint8_t>{314} == atd::Sci_number<uint8_t>{310}, "operator==");
+    CHECK_TRUE(atd::Minifloat<uint8_t>{314} != 314, "operator!=");
+    CHECK_TRUE(atd::Minifloat<uint8_t>{314} == 310, "operator==");
+    CHECK_TRUE(atd::Minifloat<uint8_t>{314} == atd::Minifloat<uint8_t>{310}, "operator==");
 
-    CHECK_TRUE(atd::Sci_number<uint8_t>{300'000} == 300'000, "operator==");
+    CHECK_TRUE(atd::Minifloat<uint8_t>{300'000} == 300'000, "operator==");
 
-    CHECK_TRUE(atd::Sci_number<int8_t>{-300'000} == -300'000, "operator==");
+    CHECK_TRUE(atd::Minifloat<int8_t>{-300'000} == -300'000, "operator==");
 
-    CHECK_TRUE(atd::Sci_number<int8_t>(20).E(-4) == 
-	       atd::Sci_number<int8_t>(2).E(-3), "operator==");
-    CHECK_TRUE(atd::Sci_number<int8_t>(2).E(-3) == 
-	       atd::Sci_number<int8_t>(20).E(-4), "operator==");
+    CHECK_TRUE(atd::Minifloat<int8_t>(20).E(-4) == 
+	       atd::Minifloat<int8_t>(2).E(-3), "operator==");
+    CHECK_TRUE(atd::Minifloat<int8_t>(2).E(-3) == 
+	       atd::Minifloat<int8_t>(20).E(-4), "operator==");
 }
 
 template <typename Rep, typename Int>
@@ -139,10 +139,10 @@ void test_less_than(const Int& a, const Int& b)
 {
     std::cout << a << " < " << b << "?\n";
 
-    CHECK_TRUE(atd::Sci_number<Rep>{a} < atd::Sci_number<Rep>{b}, "\t<");
-    CHECK_TRUE(atd::Sci_number<Rep>{a} <= atd::Sci_number<Rep>{b}, "\t<=");
-    CHECK_TRUE(!(atd::Sci_number<Rep>{a} > atd::Sci_number<Rep>{b}), "\t>");
-    CHECK_TRUE(!(atd::Sci_number<Rep>{a} >= atd::Sci_number<Rep>{b}), "\t>=");
+    CHECK_TRUE(atd::Minifloat<Rep>{a} < atd::Minifloat<Rep>{b}, "\t<");
+    CHECK_TRUE(atd::Minifloat<Rep>{a} <= atd::Minifloat<Rep>{b}, "\t<=");
+    CHECK_TRUE(!(atd::Minifloat<Rep>{a} > atd::Minifloat<Rep>{b}), "\t>");
+    CHECK_TRUE(!(atd::Minifloat<Rep>{a} >= atd::Minifloat<Rep>{b}), "\t>=");
 }
 
 void test_order()
@@ -168,8 +168,8 @@ void test_order()
 template <typename Rep, typename Int>
 void test_addition(const Int& a0, const Int& b0, const Int& c)
 {
-    atd::Sci_number<Rep> a{a0};
-    atd::Sci_number<Rep> b{b0};
+    atd::Minifloat<Rep> a{a0};
+    atd::Minifloat<Rep> b{b0};
     CHECK_TRUE(a + b == c, 
 	    alp::as_str() << (int) a0 << " + " << (int) b0);
 
@@ -180,8 +180,8 @@ void test_addition_decimal(const Int& i0, const Int& f0,
 		   const Int& i1, const Int& f1,
 		   const Int& sig, int exp)
 {
-    atd::Sci_number<Rep> a{i0, f0};
-    atd::Sci_number<Rep> b{i1, f1};
+    atd::Minifloat<Rep> a{i0, f0};
+    atd::Minifloat<Rep> b{i1, f1};
     auto c = a + b;
 print(c);
     CHECK_TRUE(c.significand() ==  sig and
@@ -220,8 +220,8 @@ void test_addition()
 template <typename Rep, typename Int>
 void test_substraction(const Int& a0, const Int& b0, const Int& c)
 {
-    atd::Sci_number<Rep> a{a0};
-    atd::Sci_number<Rep> b{b0};
+    atd::Minifloat<Rep> a{a0};
+    atd::Minifloat<Rep> b{b0};
     CHECK_TRUE(a - b == c, 
 	    alp::as_str() << (int) a0 << " + " << (int) b0);
 
@@ -246,8 +246,8 @@ void test_substraction()
 template <typename Rep, typename Int>
 void test_operator_minus(const Int& x0)
 {
-    atd::Sci_number<Rep> x{x0};
-    atd::Sci_number<Rep> y = -x;
+    atd::Minifloat<Rep> x{x0};
+    atd::Minifloat<Rep> y = -x;
     CHECK_TRUE(y == -x0, alp::as_str() << "-" << x0);
 }
 
@@ -285,8 +285,8 @@ void test_operator_minus()
 template <typename Rep, typename Int>
 void test_multiplication(const Int& a0, const Int& b0, const Int& res)
 {
-    atd::Sci_number<Rep> a{a0};
-    atd::Sci_number<Rep> b{b0};
+    atd::Minifloat<Rep> a{a0};
+    atd::Minifloat<Rep> b{b0};
     auto c = a * b;
     CHECK_TRUE(c == res, 
 	    alp::as_str() << (int) a0 << " * " << (int) b0);
@@ -299,8 +299,8 @@ void test_multiplication_decimal(const Int& a0, const Int& f0,
 				 const Int& a1, const Int& f1,
 				 const Int& sig, int exp)
 {
-    atd::Sci_number<Rep> a{a0, f0};
-    atd::Sci_number<Rep> b{a1, f1};
+    atd::Minifloat<Rep> a{a0, f0};
+    atd::Minifloat<Rep> b{a1, f1};
     auto c = a * b;
 print(c);
     CHECK_TRUE(c.significand() == sig and c.exponent() == exp,
@@ -331,8 +331,8 @@ void test_multiplication()
 template <typename Rep, typename Int>
 void test_division(const Int& a0, const Int& b0, const Int& res)
 {
-    atd::Sci_number<Rep> a{a0};
-    atd::Sci_number<Rep> b{b0};
+    atd::Minifloat<Rep> a{a0};
+    atd::Minifloat<Rep> b{b0};
     auto c = a / b;
     CHECK_TRUE(c == res, 
 	    alp::as_str() << (int) a0 << " / " << (int) b0);
@@ -345,8 +345,8 @@ void test_division_decimal(const Int& a0, const Int& f0,
 				 const Int& a1, const Int& f1,
 				 const Int& sig, int exp)
 {
-    atd::Sci_number<Rep> a{a0, f0};
-    atd::Sci_number<Rep> b{a1, f1};
+    atd::Minifloat<Rep> a{a0, f0};
+    atd::Minifloat<Rep> b{a1, f1};
     auto c = a / b;
     CHECK_TRUE(c.significand() == sig and c.exponent() == exp,
 	    alp::as_str() << (int) a0 << '.' << (int) f0 << " / " 
@@ -375,7 +375,7 @@ void test_division()
 int main()
 {
 try{
-    test::header("atd_Sci_number");
+    test::header("atd_Minifloat");
 
     test_constructor();
     test_comparison();

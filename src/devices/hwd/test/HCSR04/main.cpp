@@ -92,9 +92,10 @@ int main()
     mcu::UART_iostream uart;
 
     while(1){
-	auto distance = HCSR04::read();
+	HCSR04::Meter m = HCSR04::read();
 	if (HCSR04::last_operation_is_ok()){
-	    uart << "distance = " << distance << '\n';
+	    uart << "distance = " << m << " m\n";
+	    
 	}
 	else
 	    print_result(HCSR04::result_last_operation());
