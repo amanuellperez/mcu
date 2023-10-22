@@ -235,11 +235,15 @@ public:
 	: value_{static_cast<Rep>(value0)} {}
 
     template <Type::Arithmetic Rep2, typename M2, typename D2>
-    constexpr Magnitude(const Magnitude<Unit, Rep2, M2, D2>& m)
+    constexpr 
+    explicit (!std::convertible_to<Rep2, Rep>)
+    Magnitude(const Magnitude<Unit, Rep2, M2, D2>& m)
 	: value_{magnitude_cast<Magnitude>(m).value()} {}
 
     template <Type::Arithmetic Rep2, typename M2, typename D2>
+    constexpr
     Magnitude& operator=(const Magnitude<Unit, Rep2, M2, D2>& m)
+    requires (std::convertible_to<Rep2, Rep>)
     {
 	value_ = magnitude_cast<Magnitude>(m).value();
 	return *this;

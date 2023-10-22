@@ -40,8 +40,7 @@
  ****************************************************************************/
 #include <limits>
 #include <algorithm>
-#include <tuple>    // tie
-		    
+
 #include "atd_concepts.h"
 #include "atd_math.h"
 
@@ -114,12 +113,12 @@ private:
     Exp_t exp_;
 
     // ¿se puede representar usando Rep el valor de x?
-    template <Type::Integer Int>
+    template <Type::Integer Int2, Type::Integer Int>
     static
     constexpr bool is_rep_value(const Int& x)
     {
-	return std::numeric_limits<Rep>::min() <= x and
-	       x <= std::numeric_limits<Rep>::max();
+	return std::numeric_limits<Int2>::min() <= x and
+	       x <= std::numeric_limits<Int2>::max();
     }
 
     template <Type::Integer Int>
@@ -129,6 +128,10 @@ private:
     static 
     constexpr Rep rep_change_sign(const Rep& x);
 
+    template <Type::Integer Int>
+    static 
+    constexpr 
+    std::pair<Int, uint8_t> shift10_n_to_the_left(uint8_t n, const Int& x0);
 
     template <Type::Integer Int>
     constexpr void construct(const Int& integer_part);
@@ -169,7 +172,7 @@ constexpr
 std::pair<R, E_t> Sci_number<R, E_t>::reduce_to_rep_value(Int x)
 {
     Exp_t exp = 0;
-    while (!is_rep_value(x)){
+    while (!is_rep_value<Rep>(x)){
 	x /= Int{10};
 	++exp;
     }
@@ -220,12 +223,12 @@ void Sci_number<R, E_t>::
 // >>> shift10_to_the_left(x)_at_most(ndecimals)
 // {
     int nzeros = 0;
-    for(; is_rep_value(x) and nzeros < ndecimals; ++nzeros){
+    for(; is_rep_value<Rep>(x) and nzeros < ndecimals; ++nzeros){
 	x *= 10; // shift10_to_the_left<1>(x);
 	--exp_;
     }
 
-    if (!is_rep_value(x)){
+    if (!is_rep_value<Rep>(x)){
 	x /= 10;
 	++exp_;
     }
@@ -234,7 +237,7 @@ void Sci_number<R, E_t>::
     // Si x == 0, nos podemos pasar ndecimals == digits10 + 1 pudiéndo darse
     // overflow. Por eso garantizo que no se produzca el overflow.
     Rep2 y = x + most_n_significant_digits(-exp_, decimal_part);
-    if (is_rep_value(y))
+    if (is_rep_value<Rep>(y))
 	x = static_cast<Rep>(y);
     else{
 	++exp_;
@@ -266,7 +269,7 @@ constexpr
 Sci_number<R, E_t>::Sci_number(const Int& integer_part, 
 			     const Int& decimal_part)
 { 
-    if (!is_rep_value(integer_part) or decimal_part <= 0)
+    if (!is_rep_value<Rep>(integer_part) or decimal_part <= 0)
 	construct(integer_part);
 
     else
@@ -276,8 +279,6 @@ Sci_number<R, E_t>::Sci_number(const Int& integer_part,
 
 // Order
 // -----
-// Idea: No basta con comparar signficand() y exponent() ya que no funcionaría
-// al comparar los números 20*10^-4 == 2*10^-3
 template <Type::Integer R, Type::Integer E_t>
 inline
 constexpr bool Sci_number<R, E_t>::operator==(const Sci_number<R, E_t>& a) const
@@ -288,6 +289,7 @@ constexpr bool Sci_number<R, E_t>::operator==(const Sci_number<R, E_t>& a) const
     else
 	return (a.x_ * ten_to_the<Rep>(a.exp_ - exp_)) == x_;
 }
+
 
 template <Type::Integer R, Type::Integer E_t>
 inline
@@ -345,7 +347,7 @@ inline constexpr bool operator>=(const Sci_number<R, E_t>& a,
 // -------------------
 template <Type::Integer R, Type::Integer E_t>
 inline constexpr 
-Sci_number<R, E_t> Sci_number<R, E_t>::operator-() const
+Sci_number<R, E_t> Sci_number<R,E_t>::operator-() const
     requires (Type::Signed_integer<R>)
 {
     Sci_number res;
@@ -363,7 +365,7 @@ constexpr void Sci_number<R, E_t>::add_equal_exponent(const Rep& a)
 
     Int res = Int{x_} + Int{a}; // esto puede generar overflow
 
-    if (is_rep_value(res))
+    if (is_rep_value<Rep>(res))
 	x_ = static_cast<Rep>(res);
 
     else{
@@ -404,14 +406,18 @@ constexpr std::pair<R, E_t>
 	using Rep2 = same_type_with_double_bits_t<Rep>;
 	for (Exp_t e = e1; e > 0; --e){
 	    Rep2 y = x1*ten_to_the<Rep2>(e) + x2 / ten_to_the<Rep2>(e1 - e);
-	    if (is_rep_value(y))
-		return {y, e1 - e};
+	    if (is_rep_value<Rep>(y))
+		return {static_cast<Rep>(y), e1 - e};
 	}
     }
 
     x2 = divide_by_ten_to_the(x2, e1);
 
-    return {x1 + x2, e1};
+    if (is_rep_value<Rep>(x1 + x2))
+	return {static_cast<Rep>(x1 + x2), e1};
+
+    else    // DUDA: ¿se da este caso? Ej: x1 = 255, x2 = 1 ==> overflow!!!
+	return {std::numeric_limits<Rep>::max(), e1};
 }
 
 
@@ -493,14 +499,41 @@ inline constexpr
 }
 
 
+
+// TODO: esta función la estoy usando ya
+template <Type::Integer R, Type::Integer E_t>
+    template <Type::Integer Int>
+constexpr 
+std::pair<Int, uint8_t>
+    Sci_number<R, E_t>::shift10_n_to_the_left(uint8_t n, const Int& x0)
+{
+    using Int2 = same_type_with_double_bits_t<Int>;
+
+    Int2 x = x0;
+    uint8_t ndigits = 0;
+    while (ndigits < n and is_rep_value<Int>(x)){
+	x *= Int2{10};
+	++ndigits;
+    }
+
+    if (!is_rep_value<Int>(x)){
+	x /= Int2{10};
+	--ndigits;
+    }
+
+    return {static_cast<Int>(x), ndigits};
+
+}
+
 // Idea: ¿cómo dividir 1/24?
 //	 Multipliquemos y dividamos por la máxima potencia de 10 representable
 //	 por Rep:
 //	    1/24 = 1000/24 * 10^{-3} = 41 * 10^{-3} = 0.41
 //
 template <Type::Integer R, Type::Integer E_t>
-inline constexpr 
-    Sci_number<R, E_t>& Sci_number<R, E_t>::operator/=(const Sci_number& a)
+inline 
+constexpr 
+Sci_number<R, E_t>& Sci_number<R, E_t>::operator/=(const Sci_number& a)
 {
     if (a.x_ == 0){// TODO: devolver NaNd? otra cosa?
 	x_ = 0;
@@ -510,16 +543,20 @@ inline constexpr
 
     using Rep2 = same_type_with_double_bits_t<Rep>;
     
-    constexpr int rep_digits10 = std::numeric_limits<Rep>::digits10 + 1;
+    int rep_digits10 = std::numeric_limits<Rep>::digits10 + 1;
+
+
+    auto [d, n] = shift10_n_to_the_left<Rep2>(rep_digits10, x_);
+    d /= a.x_;
 
     Exp_t e{};
-    Rep2 d = (Rep2{x_} * ten_to_the<Rep2>(rep_digits10)) / Rep2{a.x_};
     std::tie(x_, e) = reduce_to_rep_value(d);
 
-    exp_ = exp_ - a.exp_ + e - rep_digits10;
+    exp_ = exp_ - a.exp_ + e - n;
 
     return *this;
 }
+
 
 
 template <Type::Integer R, Type::Integer E_t>
@@ -554,6 +591,7 @@ inline constexpr
     return a;
 }
 
+
 // print
 // -----
 template <typename Out, Type::Integer R, Type::Integer E_t>
@@ -582,6 +620,7 @@ Out& operator<<(Out& out, const Sci_number<R, E_t>& x)
 // ----------
 template <Type::Integer Rep, Type::Integer E_t>
 struct is_decimal<Sci_number<Rep, E_t>> : std::true_type {};
+
 
 }// namespace atd
 
