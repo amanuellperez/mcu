@@ -441,7 +441,7 @@ constexpr Rep Minifloat<Rep, E_t>::divide_by_ten_to_the(Rep x, Exp_t e)
 // x1*10^e1 sea menor que numeric_limits::digits10. 
 template <Type::Integer R, Type::Integer E_t>
 constexpr std::pair<R, E_t> 
-    Minifloat<R, E_t>::add_number(const Rep& x1, Exp_t e1, Rep x2)
+    Minifloat<R, E_t>::add_number(const Rep& x1, E_t e1, Rep x2)
 {
     if (e1 < std::numeric_limits<Rep>::digits10 + 1) 
     { // 10^e1 es representable por Rep
@@ -449,7 +449,7 @@ constexpr std::pair<R, E_t>
 	for (Exp_t e = e1; e > 0; --e){
 	    Rep2 y = x1*ten_to_the<Rep2>(e) + x2 / ten_to_the<Rep2>(e1 - e);
 	    if (is_rep_value<Rep>(y))
-		return {static_cast<Rep>(y), e1 - e};
+		return {static_cast<Rep>(y), static_cast<Exp_t>(e1 - e)};
 	}
     }
 

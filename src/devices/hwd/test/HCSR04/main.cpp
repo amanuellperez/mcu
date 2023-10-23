@@ -94,7 +94,10 @@ int main()
     while(1){
 	HCSR04::Meter m = HCSR04::read();
 	if (HCSR04::last_operation_is_ok()){
-	    uart << "distance = " << m << " m\n";
+	    uart << "distance = " << m;
+	    HCSR04::Centimeter cm = m;
+	    uart << " = " << cm << '\n';
+
 	    
 	}
 	else

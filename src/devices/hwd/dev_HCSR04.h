@@ -70,7 +70,10 @@ class HCSR04{
 public:
 // Types
     enum class Result{ok, time_out};
-    using Meter = atd::Meter<atd::uFloat8>;
+    // TODO: cómo evitar tener que definir Centimeter aquí?
+    //	    A fin de cuentas en Meter está toda la información!!!
+    using Meter      = atd::Meter<atd::uFloat8>;
+    using Centimeter = atd::Centimeter<atd::uFloat8>;
 
 // Construction
     static void init();
