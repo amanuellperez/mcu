@@ -376,11 +376,32 @@ void test_print()
 {
     test::interface("print");
 
+// con 0.xxx
+    CHECK_PRINT(atd::print_as_decimal(std::cout, atd::uFloat8{3}.E(-3)), "0.003");
+    CHECK_PRINT(atd::print_as_decimal(std::cout, atd::uFloat8{34}.E(-3)), "0.034");
+    CHECK_PRINT(atd::print_as_decimal(std::cout, atd::uFloat8{34}.E(-3)), "0.34");
     CHECK_PRINT(atd::print_as_decimal(std::cout, atd::uFloat8{0,34}), "0.34");
     CHECK_PRINT(atd::print_as_decimal(std::cout, atd::uFloat8{123}.E(-3)), "0.123");
+    CHECK_PRINT(atd::print_as_decimal(std::cout, atd::uFloat8{0}.E(-3)), "0.000");
+
+// decimal: xxx.yyy
+    CHECK_PRINT(atd::print_as_decimal(std::cout, atd::uFloat16{2004}.E(-3)), "2.004");
+    CHECK_PRINT(atd::print_as_decimal(std::cout, atd::uFloat8{204}.E(-2)), "2.04");
+    CHECK_PRINT(atd::print_as_decimal(std::cout, atd::uFloat8{2,4}), "2.4");
     CHECK_PRINT(atd::print_as_decimal(std::cout, atd::uFloat8{2,34}), "2.34");
-    CHECK_PRINT(atd::print_as_decimal(std::cout, atd::uFloat8{234}.E(3)), "234000");
-    atd::print_as_decimal(std::cout, atd::uFloat8{234}.E(3));
+
+// entero máximo 6 cifras
+    CHECK_PRINT(atd::print_as_decimal(std::cout, atd::uFloat8{234}), "234");
+    CHECK_PRINT(atd::print_as_decimal(std::cout, atd::uFloat8{2340}), "2340");
+    CHECK_PRINT(atd::print_as_decimal(std::cout, atd::uFloat8{23400}), "23400");
+    CHECK_PRINT(atd::print_as_decimal(std::cout, atd::uFloat8{234000}), "234000");
+    CHECK_PRINT(atd::print_as_decimal(std::cout, atd::uFloat8{234'000'000}), "234 x 10^{6}");
+    CHECK_PRINT(atd::print_as_decimal(std::cout, atd::uFloat8{234}.E(-5)), "234 x 10^{-5}");
+
+
+// operator<<
+    CHECK_PRINT((std::cout << atd::uFloat8{12,4}), "12.4");
+    CHECK_PRINT((std::cout << atd::uFloat8{12}.E(10)), "12 x 10^{10}");
 }
 
 int main()

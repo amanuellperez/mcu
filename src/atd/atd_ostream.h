@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022 Manuel Perez 
+// Copyright (C) 2019-2023 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -76,36 +76,6 @@ inline std::ostream& operator<<(std::ostream& out,
     return out << x.value;
 }
 
-//namespace impl_of{
-//struct Write_as_uint8_t{ uint8_t value; };
-//struct Write_as_int8_t { int8_t value; };
-//
-//}
-//
-///// EXAMPLE:
-///// std::ostream out;
-///// uint8_t x = 10;
-///// out << atd::write_as_uint8_t(x);
-//inline impl_of::Write_as_uint8_t write_as_uint8_t(uint8_t x)
-//{return impl_of::Write_as_uint8_t{x};}
-//
-//inline std::ostream& operator<<(std::ostream& out, 
-//					const impl_of::Write_as_uint8_t& x)
-//{
-//    return out << static_cast<uint16_t>(x.value);
-//}
-//
-//
-//
-//inline impl_of::Write_as_int8_t write_as_int8_t(int8_t x)
-//{return impl_of::Write_as_int8_t{x};}
-//
-//inline std::ostream& operator<<(std::ostream& out, 
-//					    const impl_of::Write_as_int8_t& x)
-//{
-//    return out << static_cast<int16_t>(x.value);
-//}
-//
 
 /***************************************************************************
  *		OSTREAM COMO DISPOSITIVO GENÉRICO DE SALIDA

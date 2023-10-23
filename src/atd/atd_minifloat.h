@@ -61,6 +61,7 @@
 
 #include "atd_concepts.h"
 #include "atd_math.h"
+#include "atd_ostream.h"    // write_as_int
 
 namespace atd{
 
@@ -615,15 +616,57 @@ inline constexpr
 template <typename Out, Type::Integer R, Type::Integer E_t>
 void print_as_power_of_ten(Out& out, const Minifloat<R, E_t>& x)
 { 
-    using Rep = Minifloat<R, E_t>::Rep;
-    if constexpr (sizeof(Rep) == 1) // caso uint8_t/int8_t
-	out << (int) x.significand();
-    else
-	out << x.significand();
+    out << write_as_int(x.significand());
 
     if (x.exponent() != 0)
-	out << " x 10^{" << x.exponent() << '}';
+	out << " x 10^{" << write_as_int(x.exponent()) << '}';
 
+}
+
+template <typename Out, Type::Integer Rep, Type::Integer E_t>
+void print_as_decimal_positive_exponent(Out& out, const Minifloat<Rep, E_t>& f)
+{
+    out << write_as_int(f.significand());
+
+    for (E_t i = 0; i < f.exponent(); ++i)
+	out << '0';
+}
+
+
+// Idea: descomponer el número de `n` cifras en `ndigits + ndecimals`
+// donde `ndigits` da el número de cifras enteras que tiene.
+template <typename Out, Type::Integer Rep, Type::Integer E_t>
+void print_as_decimal_negative_exponent(Out& out, const Minifloat<Rep, E_t>& f)
+{
+    auto x = f.significand();
+
+    E_t n = number_of_digits(x);
+
+    E_t ndecimals = -f.exponent();
+    E_t ndigits   = n > ndecimals? (n - ndecimals): 0;
+    
+    for (E_t i = 0; i < ndigits; ++i, --n){ 
+	int digit{x / ten_to_the<Rep>(n - 1)}; // digit = most_significant_digit(x);
+	out << write_as_int(digit);
+	x -= digit * ten_to_the<Rep>(n - 1);   // remove_most_significant_digit(x);
+    }
+
+    if (ndigits == 0)   // TODO: los americanos no escriben el 0. (???)
+	out << '0';
+
+    out << '.'; // TODO: meter esto en atd_locale.h
+
+    n = number_of_digits(x);
+    while (n < ndecimals){
+	out << '0';
+	--ndecimals;
+    }
+
+    for (E_t i = 0; i < ndecimals; ++i, --n){ // TODO: idéntico al bucle anterior. Meterlo en función. Pero ¿qué nombre?
+	int digit{x / ten_to_the<Rep>(n - 1)}; // digit = most_significant_digit(x);
+	out << write_as_int(digit);
+	x -= digit * ten_to_the<Rep>(n - 1);   // remove_most_significant_digit(x);
+    }
 }
 
 // Imprime el número como decimal. 
@@ -636,40 +679,13 @@ template <typename Out, Type::Integer Rep, Type::Integer E_t>
 void print_as_decimal(Out& out, const Minifloat<Rep, E_t>& f)
 {
     if (f.exponent() < -3 or f.exponent() > 3)
-	print_as_decimal(out, f);
+	print_as_power_of_ten(out, f);
 
-    if (f.exponent() >= 0){
-	out << f.significand();
+    else if (f.exponent() >= 0)
+	print_as_decimal_positive_exponent(out, f);
 
-	for (E_t i = 0; i < f.exponent(); ++i)
-	    out << '0';
-    }
-
-
-    else {
-	E_t n = number_of_digits(f.significand());
-
-	E_t ndecimals = -f.exponent();
-	E_t ndigits   = n - ndecimals;
-	
-	auto x = f.significand();
-	for (E_t i = 0; i < ndigits; ++i, --n){
-	    int digit{x / ten_to_the<Rep>(n - 1)}; // digit = most_significant_digit(x);
-	    out << (int) digit;
-	    x -= digit * ten_to_the<Rep>(n - 1);   // remove_most_significant_digit(x);
-	}
-
-	if (ndigits == 0)   // TODO: los americanos no escriben el 0. (???)
-	    out << '0';
-
-	out << '.'; // TODO: meter esto en atd_locale.h
-
-	for (E_t i = 0; i < ndecimals; ++i, --n){
-	    int digit{x / ten_to_the<Rep>(n - 1)}; // digit = most_significant_digit(x);
-	    out << (int) digit;
-	    x -= digit * ten_to_the<Rep>(n - 1);   // remove_most_significant_digit(x);
-	}
-    }
+    else 
+	print_as_decimal_negative_exponent(out, f);
 
 }
 
@@ -677,7 +693,7 @@ void print_as_decimal(Out& out, const Minifloat<Rep, E_t>& f)
 template <typename Out, Type::Integer R, Type::Integer E_t>
 inline void print(Out& out, const Minifloat<R, E_t>& x)
 {
-    print_as_power_of_ten(out, x);
+    print_as_decimal(out, x);
 }
 
 template <typename Out, Type::Integer R, Type::Integer E_t>
