@@ -372,6 +372,17 @@ void test_division()
     test_division_decimal<uint8_t>(1,0, 5,0, 200, -3);
 }
 
+void test_print()
+{
+    test::interface("print");
+
+    CHECK_PRINT(atd::print_as_decimal(std::cout, atd::uFloat8{0,34}), "0.34");
+    CHECK_PRINT(atd::print_as_decimal(std::cout, atd::uFloat8{123}.E(-3)), "0.123");
+    CHECK_PRINT(atd::print_as_decimal(std::cout, atd::uFloat8{2,34}), "2.34");
+    CHECK_PRINT(atd::print_as_decimal(std::cout, atd::uFloat8{234}.E(3)), "234000");
+    atd::print_as_decimal(std::cout, atd::uFloat8{234}.E(3));
+}
+
 int main()
 {
 try{
@@ -385,6 +396,7 @@ try{
     test_substraction();
     test_multiplication();
     test_division();
+    test_print();
 
 }catch(std::exception& e)
 {

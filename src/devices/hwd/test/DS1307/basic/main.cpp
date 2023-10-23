@@ -111,9 +111,9 @@ mcu::UART_iostream& operator<<(mcu::UART_iostream& out,
 {
     if (t.clock_on){
 	out << "Encendido: "
-	    << atd::write_as_uint8_t(t.hours) << ':'
-	     << atd::write_as_uint8_t(t.minutes) << ':' 
-	     << atd::write_as_uint8_t(t.seconds) << ' ';
+	    << atd::write_as_int(t.hours) << ':'
+	     << atd::write_as_int(t.minutes) << ':' 
+	     << atd::write_as_int(t.seconds) << ' ';
 
 	if (t.AMPM_format){
 	    if (t.is_PM)
@@ -122,10 +122,10 @@ mcu::UART_iostream& operator<<(mcu::UART_iostream& out,
 		out << "AM ";
 	}
 
-	out    << atd::write_as_uint8_t(t.date) << '/'
-	     << atd::write_as_uint8_t(t.month) << '/'
-	     << atd::write_as_uint8_t(t.year) << "; day = " 
-	     << atd::write_as_uint8_t(t.day);
+	out    << atd::write_as_int(t.date) << '/'
+	     << atd::write_as_int(t.month) << '/'
+	     << atd::write_as_int(t.year) << "; day = " 
+	     << atd::write_as_int(t.day);
     }
     else
 	out << "Apagado!!!";
@@ -256,7 +256,7 @@ void test_ram()
 	uint8_t nw = rtc.ram_write(buf, N, 0);
 	if (nw != N){
 	    uart << "ERROR: no se han escrito todos los bytes\n";
-	    uart << "Escritos " << atd::write_as_uint8_t(nw) << '\n';
+	    uart << "Escritos " << atd::write_as_int(nw) << '\n';
 	    twi_print_state();
 	    twi_print_error();
 	}

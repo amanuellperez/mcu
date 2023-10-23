@@ -611,8 +611,9 @@ inline constexpr
 
 // print
 // -----
+// Imprime como potencia de 10: x*10^n
 template <typename Out, Type::Integer R, Type::Integer E_t>
-void print(Out& out, const Minifloat<R, E_t>& x)
+void print_as_power_of_ten(Out& out, const Minifloat<R, E_t>& x)
 { 
     using Rep = Minifloat<R, E_t>::Rep;
     if constexpr (sizeof(Rep) == 1) // caso uint8_t/int8_t
@@ -623,6 +624,60 @@ void print(Out& out, const Minifloat<R, E_t>& x)
     if (x.exponent() != 0)
 	out << " x 10^{" << x.exponent() << '}';
 
+}
+
+// Imprime el número como decimal. 
+// De momento, para probar solo lo imprime como decimal si tiene 3 cifras
+// decimales como máximo o 3 ceros.
+// Ejemplos: 
+//	    123*10^{-2} = 1.23
+//	    123*10^{3}  = 123000
+template <typename Out, Type::Integer Rep, Type::Integer E_t>
+void print_as_decimal(Out& out, const Minifloat<Rep, E_t>& f)
+{
+    if (f.exponent() < -3 or f.exponent() > 3)
+	print_as_decimal(out, f);
+
+    if (f.exponent() >= 0){
+	out << f.significand();
+
+	for (E_t i = 0; i < f.exponent(); ++i)
+	    out << '0';
+    }
+
+
+    else {
+	E_t n = number_of_digits(f.significand());
+
+	E_t ndecimals = -f.exponent();
+	E_t ndigits   = n - ndecimals;
+	
+	auto x = f.significand();
+	for (E_t i = 0; i < ndigits; ++i, --n){
+	    int digit{x / ten_to_the<Rep>(n - 1)}; // digit = most_significant_digit(x);
+	    out << (int) digit;
+	    x -= digit * ten_to_the<Rep>(n - 1);   // remove_most_significant_digit(x);
+	}
+
+	if (ndigits == 0)   // TODO: los americanos no escriben el 0. (???)
+	    out << '0';
+
+	out << '.'; // TODO: meter esto en atd_locale.h
+
+	for (E_t i = 0; i < ndecimals; ++i, --n){
+	    int digit{x / ten_to_the<Rep>(n - 1)}; // digit = most_significant_digit(x);
+	    out << (int) digit;
+	    x -= digit * ten_to_the<Rep>(n - 1);   // remove_most_significant_digit(x);
+	}
+    }
+
+}
+
+
+template <typename Out, Type::Integer R, Type::Integer E_t>
+inline void print(Out& out, const Minifloat<R, E_t>& x)
+{
+    print_as_power_of_ten(out, x);
 }
 
 template <typename Out, Type::Integer R, Type::Integer E_t>

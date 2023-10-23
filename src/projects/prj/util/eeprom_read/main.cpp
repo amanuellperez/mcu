@@ -93,7 +93,7 @@ std::pair<uint16_t, uint8_t> user_read_peticion()
     uart << addr << "\n";
 
     uint8_t n = sz;
-    uart << "¿Cuántos bytes leemos? (máximo " << atd::write_as_uint8_t(sz)
+    uart << "¿Cuántos bytes leemos? (máximo " << atd::write_as_int(sz)
          << ") (30 por defecto)\n";
     uart >> atd::read_as_uint8_t(n);
     if (!uart){

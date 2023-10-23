@@ -52,9 +52,9 @@ mcu::UART_iostream& print(mcu::UART_iostream& out, const RTC::Time_point& t)
 {
     if (t.clock_on){
 	out << "Encendido: "
-	    << atd::write_as_uint8_t(t.hours) << ':'
-	     << atd::write_as_uint8_t(t.minutes) << ':' 
-	     << atd::write_as_uint8_t(t.seconds) << ' ';
+	    << atd::write_as_int(t.hours) << ':'
+	     << atd::write_as_int(t.minutes) << ':' 
+	     << atd::write_as_int(t.seconds) << ' ';
 
 	if (t.AMPM_format){
 	    if (t.is_PM)
@@ -63,10 +63,10 @@ mcu::UART_iostream& print(mcu::UART_iostream& out, const RTC::Time_point& t)
 		out << "AM ";
 	}
 
-	out    << atd::write_as_uint8_t(t.date) << '/'
-	     << atd::write_as_uint8_t(t.month) << '/'
-	     << atd::write_as_uint8_t(t.year) << "; day = " 
-	     << atd::write_as_uint8_t(t.day);
+	out    << atd::write_as_int(t.date) << '/'
+	     << atd::write_as_int(t.month) << '/'
+	     << atd::write_as_int(t.year) << "; day = " 
+	     << atd::write_as_int(t.day);
     }
     else
 	out << "Apagado!!!";

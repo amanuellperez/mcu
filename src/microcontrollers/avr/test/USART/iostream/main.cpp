@@ -142,11 +142,11 @@ void test_iostream()
 	uart << "--------------------\n";
 	uart << "123u        =? ";
 	uint8_t x8 = 123;
-	uart << atd::write_as_uint8_t(x8);
+	uart << atd::write_as_int(x8);
 
         uart << "\n+123        =? ";
 	int8_t s8 = 123;
-        uart << atd::write_as_int8_t(s8);
+        uart << atd::write_as_int(s8);
 
         uart << "\n-123        =? ";
 	s8 = -123;
@@ -174,7 +174,7 @@ void test_iostream()
 
 	    uint8_t x = 0;  // = 0 para evitar warning compilador
 	    uart >> atd::read_as_uint8_t(x);
-            uart << "\nYou have written: [" << atd::write_as_uint8_t(x)
+            uart << "\nYou have written: [" << atd::write_as_int(x)
                  << "]\n";
         }
 

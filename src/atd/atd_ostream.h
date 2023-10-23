@@ -32,39 +32,80 @@
  *	09/11/2019 write_as_int
  *	06/03/2022 print(ostream, T)
  *	05/11/2022 print_as_hex
+ *	23/10/2023 Generalizo write_as_uint8_t comom write_as_int
  *
  ****************************************************************************/
 #include <ostream>
 #include <iomanip>
 #include <stddef.h>
 #include "atd_names.h"
+#include "atd_concepts.h"
 
 namespace atd{
-struct _Write_as_uint8_t{ uint8_t value; };
 
-/// EXAMPLE:
-/// std::ostream out;
-/// uint8_t x = 10;
-/// out << atd::write_as_uint8_t(x);
-inline _Write_as_uint8_t write_as_uint8_t(uint8_t x)
-{return _Write_as_uint8_t{x};}
+// write_as_int
+// ------------
+// (RRR) El standard de C++ no define uint8_t/int8_t como enteros sino como
+//       caracteres (básicamente se miente al decir que uint8_t es un número).
+//       Eso genera el problema de que al imprimirlos se imprimen como
+//       caracteres. 
+//       La función `write_as_int` pretende dar un interfaz genérico para
+//       poder imprimir números sean del tipo que sea (sobraría si
+//       uint8_t/int8_t fueran realmente lo que son: números).
+//
+// No se puede meter Write_as_int_t dentro del namespace impl_of, ya que la
+// deducción automática de templates luego no encontraría la función
+// operator<< correspondiente.
+template <Type::Integer Int>
+struct Write_as_int_t { Int value;};
 
-inline std::ostream& operator<<(std::ostream& out, const _Write_as_uint8_t& x)
+template <Type::Integer Int>
+inline Write_as_int_t<Int> write_as_int(const Int& x)
+{return Write_as_int_t<Int>{x};}
+
+template <Type::Integer Int>
+inline std::ostream& operator<<(std::ostream& out, 
+				    const Write_as_int_t<Int>& x)
 {
-    return out << static_cast<uint16_t>(x.value);
+    if constexpr (std::is_same_v<Int, uint8_t>)
+	return out << static_cast<uint16_t>(x.value);
+
+    if constexpr (std::is_same_v<Int, int8_t>)
+	return out << static_cast<int16_t>(x.value);
+
+    return out << x.value;
 }
 
-
-struct _Write_as_int8_t{ int8_t value; };
-
-inline _Write_as_int8_t write_as_int8_t(int8_t x)
-{return _Write_as_int8_t{x};}
-
-inline std::ostream& operator<<(std::ostream& out, const _Write_as_int8_t& x)
-{
-    return out << static_cast<int16_t>(x.value);
-}
-
+//namespace impl_of{
+//struct Write_as_uint8_t{ uint8_t value; };
+//struct Write_as_int8_t { int8_t value; };
+//
+//}
+//
+///// EXAMPLE:
+///// std::ostream out;
+///// uint8_t x = 10;
+///// out << atd::write_as_uint8_t(x);
+//inline impl_of::Write_as_uint8_t write_as_uint8_t(uint8_t x)
+//{return impl_of::Write_as_uint8_t{x};}
+//
+//inline std::ostream& operator<<(std::ostream& out, 
+//					const impl_of::Write_as_uint8_t& x)
+//{
+//    return out << static_cast<uint16_t>(x.value);
+//}
+//
+//
+//
+//inline impl_of::Write_as_int8_t write_as_int8_t(int8_t x)
+//{return impl_of::Write_as_int8_t{x};}
+//
+//inline std::ostream& operator<<(std::ostream& out, 
+//					    const impl_of::Write_as_int8_t& x)
+//{
+//    return out << static_cast<int16_t>(x.value);
+//}
+//
 
 /***************************************************************************
  *		OSTREAM COMO DISPOSITIVO GENÉRICO DE SALIDA
@@ -99,7 +140,7 @@ inline std::ostream& print(std::ostream& out, double x) { return out << x; }
 // La impresión de números con anchura es:
 // 1. Todos los números se alinean a la derecha (es como se colocan para sumar)
 // 2. si fill = true, se pone el 0 (por defecto)
-template <typename Int>
+template <Type::Integer Int>
 std::ostream&
 __print_ostream(std::ostream& out, Int x, const nm::Width<int>& w, bool fill)
 {
@@ -161,7 +202,7 @@ inline std::ostream& print(std::ostream& out, const char* x) { return out << x; 
 /***************************************************************************
  *			    FORMATS
  ***************************************************************************/
-template <typename Int>
+template <Type::Integer Int>
 char nibble2hex(Int x)
 {
     switch(x){
@@ -188,7 +229,7 @@ char nibble2hex(Int x)
 
 // No he implementado la salida en hexadecimal en std::ostream, así que
 // suministro esta. Esto quedará obsoleto cuando implemente ios_base::hex
-template <typename Int>
+template <Type::Integer Int>
 std::ostream& print_int_as_hex(std::ostream& out, Int x, bool write_0x = true)
 {
     if (write_0x)

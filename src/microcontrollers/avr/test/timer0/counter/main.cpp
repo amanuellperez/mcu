@@ -76,9 +76,9 @@ time_in_days us_to_time_in_days(uint64_t time_in_us)
 std::ostream& operator<<(std::ostream& out, const time_in_days& t)
 {
     return out << t.day << "d "
-	        << atd::write_as_uint8_t(t.hour) << ':'
-		<< atd::write_as_uint8_t(t.min) << ':'
-		<< atd::write_as_uint8_t(t.sec) << '.'
+	        << atd::write_as_int(t.hour) << ':'
+		<< atd::write_as_int(t.min) << ':'
+		<< atd::write_as_int(t.sec) << '.'
 		<< t.ms << ':'
 		<< t.us;
 
@@ -114,7 +114,7 @@ int main()
 	
 	uint64_t t_us = (c*(Timer::max() + 1)+ v)*period_in_us;
         uart << '(' << c << "*" << (Timer::max() + 1) << "+"
-             << atd::write_as_uint8_t(v) << ")*" << period_in_us << " = ";
+             << atd::write_as_int(v) << ")*" << period_in_us << " = ";
 
         print (t_us);
 	uart << ".";

@@ -1,5 +1,5 @@
-DIRS = 	DS1307_basic	\
-		DS1307_clock
+DIRS = 	basic	\
+		clock
 
 
 include $(MCU_RECRULES)

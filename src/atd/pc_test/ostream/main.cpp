@@ -65,8 +65,31 @@ void test_print_int_as_hex()
 	atd::print_int_as_hex(std::cout, i);
 	std::cout << '\n';
     }
+}
 
+template <typename Int>
+void test_write_as_int(const Int& x, const std::string& res)
+{
+    CHECK_PRINT(std::cout << atd::write_as_int(x), res);
+}
 
+void test_write_as_int()
+{
+    test::interface("write_as_int");
+    
+    std::cout << std::dec;
+    uint8_t u8 = 65;
+    CHECK_PRINT(std::cout << u8, "A");
+    CHECK_PRINT(std::cout << atd::write_as_int(u8), "65");
+    int8_t i8 = 65;
+    CHECK_PRINT(std::cout << atd::write_as_int(i8), "65");
+
+    test_write_as_int<uint16_t>(65, "65");
+    test_write_as_int<int16_t>(65, "65");
+    test_write_as_int<uint32_t>(65, "65");
+    test_write_as_int<int32_t>(65, "65");
+    test_write_as_int<uint64_t>(65, "65");
+    test_write_as_int<int64_t>(65, "65");
 }
 
 int main()
@@ -76,6 +99,7 @@ try{
 
     test_print();
     test_print_int_as_hex();
+    test_write_as_int();
 
 }catch(std::exception& e)
 {
