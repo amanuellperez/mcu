@@ -29,12 +29,15 @@
  *
  *  - HISTORIA:
  *    Manuel Perez
- *    13/03/2021 v0.0 Reestructurado. Las 'Units' las necesitan tanto
- *		      atd::Magnitude como atd::ENG_magnitude
- *    30/03/2021      Volt
- *    16/10/2023      Unit como struct. Como enum daba warnings.
+ *    13/03/2021 Reestructurado. Las 'Units' las necesitan tanto
+ *		 atd::Magnitude como atd::ENG_magnitude
+ *    30/03/2021 Volt
+ *    16/10/2023 Unit como struct. Como enum daba warnings.
+ *    23/10/2023 Unit_prefix_symbol
  *
  ****************************************************************************/
+#include <ratio>
+#include "atd_ratio.h"
 
 namespace atd{
 
@@ -154,6 +157,132 @@ struct Unit_symbol<Units_electric_potential>
 template <typename U>
 inline constexpr const char* Unit_symbol = impl_of::Unit_symbol<U>::value;
 
+
+
+// Unit_prefix_symbol
+// ------------------
+namespace impl_of{
+template <typename U>
+struct Unit_prefix_symbol;
+
+
+// (RRR) ¿por qué definir `short_name` como `const char*`y no `char`?
+//       El culpable es el deca-
+template<>
+struct Unit_prefix_symbol<std::exa>{
+    static constexpr const char* short_name = "E";
+//    static constexpr const char* long_name = "exa";
+};
+
+template<>
+struct Unit_prefix_symbol<std::peta>{
+    static constexpr const char* short_name = "P";
+//    static constexpr const char* long_name = "peta";
+};
+
+template<>
+struct Unit_prefix_symbol<std::tera>{
+    static constexpr const char* short_name = "T";
+//    static constexpr const char* long_name = "tera";
+};
+
+template<>
+struct Unit_prefix_symbol<std::giga>{
+    static constexpr const char* short_name = "G";
+//    static constexpr const char* long_name = "giga";
+};
+
+
+template<>
+struct Unit_prefix_symbol<std::mega>{
+    static constexpr const char* short_name = "M";
+//    static constexpr const char* long_name = "mega";
+};
+
+template<>
+struct Unit_prefix_symbol<std::kilo>{
+    static constexpr const char* short_name = "k";
+//    static constexpr const char* long_name = "kilo";
+};
+
+template<>
+struct Unit_prefix_symbol<std::hecto>{
+    static constexpr const char* short_name = "h";
+//    static constexpr const char* long_name = "hecto";
+};
+
+
+template<>
+struct Unit_prefix_symbol<std::deca>{
+    static constexpr const char* short_name = "da"; // NO entra en un char!!!
+//    static constexpr const char* long_name = "deka";
+};
+
+// Defino este en blanco para que el caso de "10 m" se pueda escribir
+// usando el formato: numero prefijo-unidad
+template<>
+struct Unit_prefix_symbol<std::ratio<1>>{
+    static constexpr const char* short_name = "";
+//    static constexpr const char* long_name = "";
+};
+
+template<>
+struct Unit_prefix_symbol<std::deci>{
+    static constexpr const char* short_name = "d";
+//    static constexpr const char* long_name = "deci";
+};
+
+
+template<>
+struct Unit_prefix_symbol<std::centi>{
+    static constexpr const char* short_name = "c";
+//    static constexpr const char* long_name = "centi";
+};
+
+template<>
+struct Unit_prefix_symbol<std::milli>{
+    static constexpr const char* short_name = "m";
+//    static constexpr const char* long_name = "milli";
+};
+
+template<>
+struct Unit_prefix_symbol<std::micro>{
+    static constexpr const char* short_name = "u";
+//    static constexpr const char* long_name = "micro";
+};
+
+template<>
+struct Unit_prefix_symbol<std::nano>{
+    static constexpr const char* short_name = "n";
+//    static constexpr const char* long_name = "nano";
+};
+
+
+template<>
+struct Unit_prefix_symbol<std::pico>{
+    static constexpr const char* short_name = "p";
+//    static constexpr const char* long_name = "pico";
+};
+
+template<>
+struct Unit_prefix_symbol<std::femto>{
+    static constexpr const char* short_name = "f";
+//    static constexpr const char* long_name = "femto";
+};
+
+
+template<>
+struct Unit_prefix_symbol<std::atto>{
+    static constexpr const char* short_name = "a";
+//    static constexpr const char* long_name = "atto";
+};
 }// namespace
 
+
+template <Type::Static_ratio Q>
+inline constexpr 
+const char* Unit_prefix_symbol = impl_of::Unit_prefix_symbol<Q>::short_name;
+
+}// namespace atd
+ 
 #endif

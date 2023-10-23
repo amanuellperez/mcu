@@ -60,10 +60,11 @@
  *    Temperature and Pressure pero quiero dejar una estructura genérica para
  *    poder irla ampliando poco a poco.
  *
- *    30/01/2021 0.0: añado hertz, period y inverse.
- *    08/02/2021      operator / (entre magnitudes del mismo tipo).
- *    06/03/2021      Unit_symbol, numeric_limits, operator++/--
- *    10/03/2022      print
+ *    30/01/2021 Añado hertz, period y inverse.
+ *    08/02/2021 operator / (entre magnitudes del mismo tipo).
+ *    06/03/2021 Unit_symbol, numeric_limits, operator++/--
+ *    10/03/2022 print
+ *    23/10/2023 print: imprime las unidades
  *
  ****************************************************************************/
 #include <ratio>
@@ -634,13 +635,21 @@ constexpr inline bool operator>=(
 
 
 // operator << 
-//template <Type::Ostream Out, typename U, typename R, typename M, typename D>
-template <Type::Ostream Out, typename U, 
+// -----------
+
+template <Type::Ostream Out, typename Unit, 
 			     Type::Arithmetic R, Type::Static_ratio M, 
 					         Type::Static_ratio D>
-inline Out& operator<<(Out& out, const Magnitude<U, R, M, D>& m)
+inline Out& operator<<(Out& out, const Magnitude<Unit, R, M, D>& m)
 {
     print(out, m.value());
+    if constexpr (requires { Unit_symbol<Unit>;
+			     Unit_prefix_symbol<M>;}){
+	out << ' ' 
+	    << Unit_prefix_symbol<M>
+	    << Unit_symbol<Unit>;
+    }
+
     return out;
 }
 

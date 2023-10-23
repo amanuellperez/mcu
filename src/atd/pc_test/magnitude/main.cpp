@@ -608,18 +608,6 @@ void test_arithmetic()
 
 }
 
-void test_lenght()
-{
-    test::interface("Length");
-
-//    {// float
-//    AQUIII
-//    atd::Meter<float> m{123.456};
-//    auto cm = atd::as_centimeter(m);
-//    CHECK_TRUE((cm.value() - (float)(12345.6) ) <= 0.01, "as_centimeter");
-//
-//    }
-}
 
 void test_magnitude()
 {
@@ -635,7 +623,6 @@ void test_magnitude()
     test_magnitude_temperature();
     test_magnitude_temperature_decimal();
     test_magnitude_frequency();
-    test_lenght();
 }
 
 
@@ -650,29 +637,6 @@ MegaHertz operator"" _MHz(unsigned long long int x)
 { return MegaHertz{x}; }
 
 
-template<typename Multiplier>
-void f(const Frequency<Multiplier>& f)
-{
-    std::cout << "frequency = " << f;
-
-    if constexpr (std::is_same_v<Multiplier, std::ratio<1,1>>)
-	std::cout << " Hz\n";
-    else if constexpr (std::is_same_v<Multiplier, std::mega>)
-	std::cout << " MHz\n";
-    else
-	std::cout << " unknown!!!\n";
-
-    std::cout << "en Hz = " << Hertz{f} << " Hz\n";
-
-}
-
-void test_usability()
-{
-    f(Hertz{20});
-    f(30_Hz);
-    f(MegaHertz{2});
-    f(5_MHz);
-}
 
 void test_sci_meter()
 {
@@ -731,7 +695,6 @@ try{
     test::header("atd_magnitude");
     
     test_magnitude();
-    test_usability();
     test_with_sci_number();
 
 }catch(std::exception& e)
