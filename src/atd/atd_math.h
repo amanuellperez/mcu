@@ -34,6 +34,7 @@
  *    19/02/2022 Digits_of, Digits_from_left_to_right
  *    23/04/2023 is_even/is_odd
  *    12/10/2023 Integer_and_decimal_part
+ *    24/10/2023 sign_of
  *
  *
  ****************************************************************************/
@@ -357,12 +358,29 @@ private:
 
 // is_even/is_odd
 // --------------
-template <typename Int>
-inline bool is_even(const Int& x) {return !(x % 2); }
+template <Type::Integer Int>
+inline 
+constexpr bool is_even(const Int& x) {return !(x % 2); }
 
-template <typename Int>
-inline bool is_odd(const Int& x) {return (x % 2); }
+template <Type::Integer Int>
+inline 
+constexpr bool is_odd(const Int& x) {return (x % 2); }
 
+
+// sign_of
+// -------
+template <Type::Integer Int>
+inline 
+constexpr int sign_of(const Int& x)
+{
+    if (x > 0)
+	return +1;
+
+    if (x < 0)
+	return -1;
+
+    return 0;
+}
 
 
 
