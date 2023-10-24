@@ -376,8 +376,10 @@ constexpr int sign_of(const Int& x)
     if (x > 0)
 	return +1;
 
-    if (x < 0)
-	return -1;
+    if constexpr (std::is_signed_v<Int>){
+	if (x < 0)
+	    return -1;
+    }
 
     return 0;
 }

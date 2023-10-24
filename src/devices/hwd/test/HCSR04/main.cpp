@@ -95,7 +95,9 @@ int main()
 	HCSR04::Meter m = HCSR04::read();
 	if (HCSR04::last_operation_is_ok()){
 	    uart << "distance = " << m;
-	    HCSR04::Centimeter cm = m;
+	    // La aplicación correspondiente puede elegir el tipo de
+	    // centímetros que usa
+	    atd::Centimeter<atd::uFloat16> cm = m;
 	    uart << " = " << cm << '\n';
 
 	    

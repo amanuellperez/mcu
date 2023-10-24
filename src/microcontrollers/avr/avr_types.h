@@ -41,7 +41,8 @@
 //       otros que puede que si los usen. En ese caso sería mejor usar double
 //       en lugar de Decimal (???)
 namespace avr_{
-// TODO: revisar todo esto!!!
+// TODO: revisar todo esto!!! Cambiarlo todo a atd::Magnitude. Eliminar
+// ENG_magnitude.
 
 // (???) ¿Usar o no usar decimales con las frecuencias?
 //       Si se usan decimales no entran en uint16_t así que hay que usar un
@@ -53,6 +54,7 @@ namespace avr_{
 // frecuenias no decimales desde 1Hz hasta 4GHz que para los avrs es
 // demasiado. Lo que no permite es usar decimales. ¿Mejor un tipo con
 // decimales como atd::Decimal<>?
+// using Frequency = atd::ENG_frequency<uFloat16>; DUDA: usar uFloat16?
 using Frequency = atd::ENG_frequency<uint32_t>;
 
 inline constexpr Frequency frequency_in_Hz(const Frequency::Rep& x)

@@ -41,6 +41,7 @@
 #include <span>
 
 #include "atd_decimal.h"
+#include "atd_minifloat.h"
 
 namespace atd{
 // bounded_cast
@@ -127,6 +128,10 @@ inline constexpr To_decimal to_integer(const Decimal<Rep, N>& d)
 
 // floating_cast
 // -------------
+// Es `static_cast` para `floats`. 
+// CUIDADO: esta función puede truncar cifras significativas por 
+// eso hay que llamarla explícitamente para hacer el casting.
+//
 // Define un interfaz común para convertir de un decimal point en otro.
 // Antes de llamar a esta función hay que confirmar que se puede hacer
 // realmente el casting.
@@ -147,16 +152,20 @@ inline constexpr To_decimal to_integer(const Decimal<Rep, N>& d)
 //       el tipo From del parámetro pasado. Si se pone al revés el compilador
 //       indica que no es capaz de deducirlo.
 template <Type::Arithmetic To, Type::Arithmetic From>
-    requires (!(private_::is_class_decimal_v<From> and
-	      private_::is_class_decimal_v<To>))
 inline constexpr
-To floating_cast(const From& x) {return static_cast<To>(x);}
+To floating_cast(const From& x) 
+{
+    if constexpr (private_::is_class_decimal_v<From> and
+		  private_::is_class_decimal_v<To>)
+	return decimal_cast<To>(x);
 
-template <typename To, typename From>
-    requires (private_::is_class_decimal_v<From> and
-	      private_::is_class_decimal_v<To>)
-inline constexpr
-To floating_cast(const From& x) {return decimal_cast<To>(x);}
+    else if constexpr (is_minifloat_v<From> and
+	               is_minifloat_v<To>)
+	return minifloat_cast<To>(x);
+
+    else
+	return static_cast<To>(x);
+}
 
 
 

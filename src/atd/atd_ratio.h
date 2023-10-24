@@ -104,6 +104,9 @@ inline constexpr int ratio_exponent_of_power_of_ten =
 
 }// namespace atd
 
+
+// Static_ratio
+// ------------
 namespace Type{
 template <typename T>
 concept Static_ratio = atd::is_static_ratio_v<T>;

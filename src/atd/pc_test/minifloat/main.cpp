@@ -38,7 +38,9 @@ template <typename Rep, typename Int>
 void test_constructor(const Int& x, const Rep& res, int exp)
 {
     atd::Minifloat<Rep> s{x};
-    CHECK_TRUE(s.significand() == res and s.exponent() == exp, "constructor");
+    CHECK_TRUE(s.significand() == res and s.exponent() == exp, 
+	    alp::as_str() << "Minifloat(" << x << ") == " <<
+		(int) res << " x 10^" << exp);
 }
 
 template <typename Rep, typename Int>
@@ -56,12 +58,12 @@ void test_constructor()
     test::interface("constructor");
     
     test_constructor<uint8_t>(0, 0, 0);
-    test_constructor<uint8_t>(120, 120, 0);
-    test_constructor<uint8_t>(300, 30, 1);
-    test_constructor<uint8_t>(210'000, 210, 3);
+    test_constructor<uint8_t>(120, 12, 1);
+    test_constructor<uint8_t>(300, 3, 2);
+    test_constructor<uint8_t>(210'000, 21, 4);
 
-    test_constructor<int8_t>(-120, -120, 0);
-    test_constructor<int8_t>(-300, -30, 1);
+    test_constructor<int8_t>(-120, -12, 1);
+    test_constructor<int8_t>(-300, -3, 2);
     test_constructor<int8_t>(-210'000, -21, 4);
 
     test_constructor<uint16_t>(-123, 0, 0);
@@ -112,6 +114,22 @@ void test_constructor()
     atd::Minifloat<int8_t> x{uint8_t{250}};
     CHECK_TRUE(x == 250, "not explicit");
     }
+
+    {// casting implícito
+    atd::Minifloat<uint8_t> x8{250'000};
+    atd::Minifloat<uint16_t> x16 = x8;
+    CHECK_TRUE(x16 == 250'000, "Minifloat<uint8_t> -> Minifloat<uint16_t>");
+    }
+    {// casting explícito
+    atd::Minifloat<uint16_t> x16{250'000};
+//    atd::Minifloat<uint8_t> x8 = x16; <-- no tiene que compilar 
+//    atd::Minifloat<uint8_t> x8{x16}; //<-- no tiene que compilar 
+    auto x8 = atd::minifloat_cast<atd::Minifloat<uint8_t>>(x16);
+    std::cout << "x8 = " << x8 << '\n'; 
+    std::cout << "x16 = " << x16 << '\n';
+    std::cout << x16.significand() << " E" << x16.exponent() << '\n';
+    CHECK_TRUE(x8 == 250'000, "Minifloat<uint16_t> -> Minifloat<uint8_t>");
+    }
 }
 
 void test_comparison()
@@ -132,6 +150,12 @@ void test_comparison()
 	       atd::Minifloat<int8_t>(2).E(-3), "operator==");
     CHECK_TRUE(atd::Minifloat<int8_t>(2).E(-3) == 
 	       atd::Minifloat<int8_t>(20).E(-4), "operator==");
+
+    {// entre diferentes tipos
+    atd::Minifloat<uint8_t> x8{250'000};
+    atd::Minifloat<uint16_t> x16 = x8;
+    CHECK_TRUE(x16 == x8, "operator==");
+    }
 }
 
 template <typename Rep, typename Int>
@@ -156,12 +180,14 @@ void test_order()
 
     test_less_than<int8_t>(0, 20);
     test_less_than<int8_t>(-10, 0);
+    test_less_than<int8_t>(-10, -5);
+    test_less_than<int8_t>(-120'000, 80'000);
     test_less_than<int8_t>(-10, 20);
     test_less_than<int8_t>(-10, 100);
     test_less_than<int8_t>(-300, 1200);
 
     test_less_than<uint16_t>(123, 897689);
-    test_less_than<uint16_t>(-123, 897689);
+    test_less_than<int16_t>(-123, 897689);
 
 }
 
@@ -223,7 +249,7 @@ void test_substraction(const Int& a0, const Int& b0, const Int& c)
     atd::Minifloat<Rep> a{a0};
     atd::Minifloat<Rep> b{b0};
     CHECK_TRUE(a - b == c, 
-	    alp::as_str() << (int) a0 << " + " << (int) b0);
+	    alp::as_str() << (int) a0 << " - " << (int) b0);
 
 }
 void test_substraction()
@@ -323,8 +349,8 @@ void test_multiplication()
     test_multiplication_decimal<uint8_t>(2,3, 4,5, 103, -1);
 
     // Observar que mantiene el número de cifras signficativas:
-    test_multiplication_decimal<uint8_t>(0,12, 10,0, 120, -2);
-    test_multiplication_decimal<uint8_t>(0,12, 100,0, 120, -1);
+    test_multiplication_decimal<uint8_t>(0,12, 10,0, 12, -1);
+    test_multiplication_decimal<uint8_t>(0,12, 100,0, 12, 0);
 }
 
 
@@ -339,6 +365,17 @@ void test_division(const Int& a0, const Int& b0, const Int& res)
 
 }
 
+template <typename Rep, typename Int>
+void test_division(const Int& a0, const Int& b0, const Int& sig, int exp)
+{
+    atd::Minifloat<Rep> a{a0};
+    atd::Minifloat<Rep> b{b0};
+    auto c = a / b;
+    CHECK_TRUE(c.significand() == sig and c.exponent() == exp,
+	    alp::as_str() << (int) a0 << " / " << (int) b0);
+
+}
+
 
 template <typename Rep, typename Int>
 void test_division_decimal(const Int& a0, const Int& f0, 
@@ -348,6 +385,7 @@ void test_division_decimal(const Int& a0, const Int& f0,
     atd::Minifloat<Rep> a{a0, f0};
     atd::Minifloat<Rep> b{a1, f1};
     auto c = a / b;
+std::cout << a << "/" << b << " = " << c << '\n';
     CHECK_TRUE(c.significand() == sig and c.exponent() == exp,
 	    alp::as_str() << (int) a0 << '.' << (int) f0 << " / " 
 	                  << (int) a1 << '.' << (int) f1);
@@ -364,12 +402,13 @@ void test_division()
 
     test_division<int8_t>(-60'000, 5, -12'000);
 
+    test_division<uint8_t>(2, 1000, 2, -3);
 
     // Observar que el número de cifras significativas que devuelve es
     // un poco a voleo (aunque el resultado es correcto, que de momento es lo
     // que importa)
-    test_division_decimal<uint8_t>(1,0, 2,0, 50, -2);
-    test_division_decimal<uint8_t>(1,0, 5,0, 200, -3);
+    test_division_decimal<uint8_t>(1,0, 2,0, 5, -1);
+    test_division_decimal<uint8_t>(1,0, 5,0, 2, -1);
 }
 
 void test_print()

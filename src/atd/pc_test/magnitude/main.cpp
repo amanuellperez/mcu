@@ -640,7 +640,7 @@ MegaHertz operator"" _MHz(unsigned long long int x)
 
 void test_sci_meter()
 {
-    using Number = atd::Minifloat<uint8_t>;
+    using Number     = atd::uFloat8;
     using Kilometer  = atd::Kilometer<Number>;
     using Meter      = atd::Meter<Number>;
     using Centimeter = atd::Centimeter<Number>;
@@ -664,6 +664,8 @@ void test_sci_meter()
     m /= Number(1'000'000);
     CHECK_TRUE(m == Meter(Number(117).E(-2)), "meter / 10^6");
 
+    atd::Centimeter<atd::uFloat32> cm2 = m;
+    CHECK_TRUE(cm2 == Centimeter{117}, "Centimeter");
 }
 
 void test_sci_frequency()

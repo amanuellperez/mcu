@@ -51,6 +51,9 @@
  *    Esta clase pretende ser una generalización de la clase atd::Decimal y
  *    atd::ENG_Magnitude.
  *
+ * IDEA
+ *    Toda la implementación se basa en revisar que no haya overflow. 
+ *
  * HISTORIA
  *    Manuel Perez
  *    18/10/2023 Versión mínima, para probar.
@@ -58,11 +61,13 @@
  ****************************************************************************/
 #include <limits>
 #include <algorithm>
-
+#include <type_traits>	// common_type
+#include <tuple>	// std::tie
+			
 #include "atd_concepts.h"
 #include "atd_math.h"
-#include "atd_ostream.h"    // write_as_int
-
+#include "atd_ostream.h"	// write_as_int
+#include "atd_type_traits.h"	// always_false
 namespace atd{
 
 // Funciones genéricas
@@ -133,10 +138,20 @@ public:
     template <Type::Integer Int>
     constexpr Minifloat(const Int& integer_part, const Int& decimal_part);
 	
+    // Conversión entre minifloats
+    template <Type::Integer Rep2, Type::Integer E2_t>
+    constexpr Minifloat(const Minifloat<Rep2, E2_t>& f)
+	requires (std::is_convertible_v<Rep2, Rep> and
+		  sizeof(Rep2) <= sizeof(Rep) and
+		  std::is_convertible_v<E2_t, Exp_t>);
+
     // Idioma: para crear el número 5*10^{-4} usamos la E-notation: 5E{-4}
     // En código esto lo traducimos en:
     //		auto x = Minifloat{5}.E(-4);
-    constexpr Minifloat& E(Exp_t e) {exp_ = e; return *this;}
+    //
+    // Esta función realmente lo que hace es añadir al exponente `e`.
+    // Es equivalente a: multiply_by_ten_to_the_power_of(e)
+    constexpr Minifloat& E(Exp_t e) {exp_ += e; return *this;}
 
 // Observers(estas dos funciones son más para depurar, ¿evitar usarlas?)
     constexpr Rep significand() const {return x_;}
@@ -153,7 +168,11 @@ public:
 
 // Order
     constexpr bool operator==(const Minifloat& a) const;
-    constexpr bool operator<(const Minifloat& a) const;
+    constexpr bool operator<(const Minifloat& a) const
+	requires (std::is_signed_v<Rep>);
+
+    constexpr bool operator<(const Minifloat& a) const
+	requires (std::is_unsigned_v<Rep>);
  
 // Comparison with Int
     // Esta comparación es muy cómoda de usar. Permite escribir cosas 
@@ -170,6 +189,10 @@ private:
     template <Type::Integer Int>
     static 
     constexpr std::pair<Rep, Exp_t> reduce_to_rep_value(Int x);
+
+    template <Type::Integer Int>
+    static 
+    constexpr std::pair<Rep, Exp_t> reduce_right_zeros(Int x, Exp_t exp);
 
     static 
     constexpr Rep rep_change_sign(const Rep& x);
@@ -219,8 +242,25 @@ std::pair<R, E_t> Minifloat<R, E_t>::reduce_to_rep_value(Int x)
 	++exp;
     }
 
-    if (x == 0) 
+    std::tie(x, exp) = reduce_right_zeros(x, exp);
+//    if (x == 0)
+//	return {0, 0};
+
+    return {static_cast<Rep>(x), exp};
+}
+
+template <Type::Integer R, Type::Integer E_t>
+    template <Type::Integer Int>
+constexpr 
+std::pair<R, E_t> Minifloat<R, E_t>::reduce_right_zeros(Int x, Exp_t exp)
+{
+    if (x == 0)
 	return {0, 0};
+
+    while ((x % 10) == 0){
+	x /= 10;
+	++exp;
+    }
 
     return {static_cast<Rep>(x), exp};
 }
@@ -319,6 +359,20 @@ Minifloat<R, E_t>::Minifloat(const Int& integer_part,
 
 }
 
+
+template <Type::Integer R, Type::Integer E_t>
+    template <Type::Integer Rep2, Type::Integer E2_t>
+inline 
+constexpr Minifloat<R, E_t>::Minifloat(const Minifloat<Rep2, E2_t>& f)
+	requires (std::is_convertible_v<Rep2, Rep> and
+		  sizeof(Rep2) <= sizeof(Rep) and
+		  std::is_convertible_v<E2_t, Exp_t>)
+	: x_{f.significand()}, exp_{f.exponent()}
+{ }
+
+
+
+
 // Order
 // -----
 template <Type::Integer R, Type::Integer E_t>
@@ -336,6 +390,7 @@ constexpr bool Minifloat<R, E_t>::operator==(const Minifloat<R, E_t>& a) const
 template <Type::Integer R, Type::Integer E_t>
 inline
 constexpr bool Minifloat<R, E_t>::operator<(const Minifloat<R, E_t>& a) const
+    requires (std::is_unsigned_v<Rep>)
 { 
     if (exp_ < a.exp_)
 	return true;
@@ -344,6 +399,49 @@ constexpr bool Minifloat<R, E_t>::operator<(const Minifloat<R, E_t>& a) const
 	return false;
 
     return x_ < a.x_;
+}
+
+
+template <Type::Integer R, Type::Integer E_t>
+inline
+constexpr bool Minifloat<R, E_t>::operator<(const Minifloat<R, E_t>& a) const
+    requires (std::is_signed_v<Rep>)
+{ 
+    int sx = sign_of(x_);
+    int sa = sign_of(a.x_);
+
+    if (sx > 0){
+	if (sa <= 0)
+	    return false;
+
+	// los 2 números positivos:
+	if (exp_ < a.exp_)
+	    return true;
+
+	if (exp_ > a.exp_)
+	    return false;
+
+	return x_ < a.x_;
+    }
+
+    else if (sx < 0){
+	if (sa >= 0)
+	    return true;
+
+	// los 2 números negativos:
+	if (exp_ < a.exp_)
+	    return false;
+
+	if (exp_ > a.exp_)
+	    return true;
+
+	return x_ < a.x_;
+    }
+
+//    if (sx == 0)
+    else
+	return a.x_ > 0;
+
 }
 
 template <Type::Integer R, Type::Integer E_t>
@@ -491,9 +589,18 @@ template <Type::Integer R, Type::Integer E_t>
 constexpr void Minifloat<R, E_t>::unsigned_substract(const Minifloat& a)
     requires Type::Unsigned_integer<Rep>
 {
+
+//  Garantizamos que exp_ <= a.exp_ 
+    while (exp_ > a.exp_ and is_rep_value<Rep>(x_ * 10)){ 
+	x_ *= Rep{10};
+	--exp_;
+    }
+
+// Caso trivial
     if (exp_ == a.exp_)
 	x_ -= a.x_;
 
+// Resto casos: precondicion: exp_ <= a.exp_
     else {// Sabemos que *this > a ==> exp_ > a.exp_
 	  // Operación: x1*10^e1 - x2*10^e2 = (x1 - x2/10^(e1-e2))*10^e1
 	Rep x2d = divide_by_ten_to_the(a.x_, exp_ - a.exp_);
@@ -558,6 +665,9 @@ Minifloat<R, E_t>& Minifloat<R, E_t>::operator/=(const Minifloat& a)
 	exp_ = 0;
 	return *this;
     }
+
+//    if (x_ == 0) // El algoritmo implementado devuelve 0*10^{-10} si x == 0!!
+//	return *this;
 
     using Rep2 = same_type_with_double_bits_t<Rep>;
     
@@ -646,7 +756,7 @@ void print_as_decimal_negative_exponent(Out& out, const Minifloat<Rep, E_t>& f)
     E_t ndigits   = n > ndecimals? (n - ndecimals): 0;
     
     for (E_t i = 0; i < ndigits; ++i, --n){ 
-	int digit{x / ten_to_the<Rep>(n - 1)}; // digit = most_significant_digit(x);
+	auto digit{x / ten_to_the<Rep>(n - 1)}; // digit = most_significant_digit(x);
 	out << write_as_int(digit);
 	x -= digit * ten_to_the<Rep>(n - 1);   // remove_most_significant_digit(x);
     }
@@ -663,7 +773,7 @@ void print_as_decimal_negative_exponent(Out& out, const Minifloat<Rep, E_t>& f)
     }
 
     for (E_t i = 0; i < ndecimals; ++i, --n){ // TODO: idéntico al bucle anterior. Meterlo en función. Pero ¿qué nombre?
-	int digit{x / ten_to_the<Rep>(n - 1)}; // digit = most_significant_digit(x);
+	auto digit{x / ten_to_the<Rep>(n - 1)}; // digit = most_significant_digit(x);
 	out << write_as_int(digit);
 	x -= digit * ten_to_the<Rep>(n - 1);   // remove_most_significant_digit(x);
     }
@@ -709,6 +819,52 @@ Out& operator<<(Out& out, const Minifloat<R, E_t>& x)
 template <Type::Integer Rep, Type::Integer E_t>
 struct is_decimal<Minifloat<Rep, E_t>> : std::true_type {};
 
+
+// is_minifloat
+// ------------
+template <typename T>
+struct is_minifloat: public std::false_type { };
+
+template <Type::Integer Rep, Type::Integer E_t>
+struct is_minifloat<Minifloat<Rep, E_t>> : public std::true_type { };
+
+template <typename T>
+inline constexpr bool is_minifloat_v = is_minifloat<T>::value;
+
+
+// minifloat_cast
+// --------------
+template <typename To, Type::Integer Rep1, Type::Integer E1_t>
+    requires (is_minifloat_v<To>)
+inline 
+constexpr To minifloat_cast(const Minifloat<Rep1, E1_t>& f)
+{ 
+    using Rep2 = typename To::Rep;
+
+    // Caso: std::is_convertible_v<Rep1, Rep2> and sizeof(Rep1) >= sizeof(Rep2)
+    if constexpr (requires{To{f};})
+	return To{f}; 
+
+    // sizeof(Rep1) < sizeof(Rep2) ==> se van a truncar cifras significativas
+    else if constexpr (std::is_convertible_v<Rep1, Rep2>){
+	if (f.significand() == 0)
+	    return To{0};
+
+	To res = f.significand();
+	res.E(f.exponent()); // res *= ten_to_the(f.exponent());
+	return res;
+    }
+
+    else
+	static_assert(atd::always_false_v<To>, 
+		    "Can't convert Minifloat::Rep1 to Minifloat::Rep2");
+
+}
+
+
+
+
+
 // Alias
 // -----
 // Voy a usar int8_t como exponente para intentar que sean más pequeños.
@@ -719,7 +875,21 @@ using uFloat16 = Minifloat<uint16_t, int8_t>;
 using Float32  = Minifloat<int32_t, int8_t>;
 using uFloat32 = Minifloat<uint32_t, int8_t>;
 
+
 }// namespace atd
+
+
+// common_type
+// -----------
+template <Type::Integer Rep1, Type::Integer E1_t,
+	  Type::Integer Rep2, Type::Integer E2_t>
+struct std::common_type<atd::Minifloat<Rep1, E1_t>, atd::Minifloat<Rep2, E2_t>>{
+
+    using Rep = std::common_type_t<Rep1, Rep2>;
+    using E_t = std::common_type_t<E1_t, E2_t>;
+
+    using type = atd::Minifloat<Rep, E_t>;
+};
 
 #endif
 

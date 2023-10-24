@@ -248,6 +248,26 @@ void test_is_even()
     }
 }
 
+template <typename Int>
+void test_sign_of(const Int& x, int res)
+{
+    CHECK_TRUE(atd::sign_of(x) == res, 
+		    alp::as_str() << "sign_of(" << (int) x << ")");
+}
+
+void test_sign_of()
+{
+    test::interface("sign_of");
+
+    test_sign_of<uint8_t>(uint8_t{3}, 1);
+    test_sign_of<uint8_t>(uint8_t{0}, 0);
+
+    test_sign_of<int8_t>(int8_t{3}, 1);
+    test_sign_of<int8_t>(int8_t{0}, 0);
+    test_sign_of<int8_t>(int8_t{-3}, -1);
+}
+
+
 
 int main()
 {
@@ -263,6 +283,7 @@ try{
     test_digits_of();
     test_digits_from_left_to_right();
     test_is_even();
+    test_sign_of();
 
 }catch(std::exception& e)
 {
