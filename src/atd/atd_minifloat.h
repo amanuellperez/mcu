@@ -180,6 +180,14 @@ public:
     template <Type::Integer Int>
     constexpr bool operator==(const Int& a) const;
 
+    // Escribe el número normalizado.
+    // De momento, esta forma normalizada es escribir el número sin ningún
+    // cero a la derecha, todos escritos dentro del exponente.
+    // Ejemplo: en vez de guardar 250*10^0, guardamos 25*10^1, de tal forma
+    // que el número es lo más pequeño posible (observar que no respetamos el
+    // número de cifras significativas)
+    constexpr void normalize();
+
 private:
     // Internamente guardamos el número como: x_ * 10^exp
     Rep x_;
@@ -227,6 +235,11 @@ constexpr Rep Minifloat<Rep, E_t>::rep_change_sign(const Rep& x)
     else 
 	return 0; // throw std::logic_error;
 }
+
+template <Type::Integer R, Type::Integer E_t>
+constexpr 
+void Minifloat<R, E_t>::normalize()
+{ std::tie(x_, exp_) = reduce_right_zeros(x_, exp_); }
 
 // Reduce `x` a un valor representable por Rep
 // Si no se puede representar devuelve 0 (por ejemplo, -1 no se puede
@@ -327,12 +340,13 @@ void Minifloat<R, E_t>::
     }
 
 
-
     if (integer_part <  0)
 	x_ = rep_change_sign(x); // x_ = -x_;
 				 
     else 
 	x_ = x;
+
+    normalize();
 }
 
 
@@ -356,7 +370,6 @@ Minifloat<R, E_t>::Minifloat(const Int& integer_part,
 
     else
 	construct(integer_part, decimal_part);
-
 }
 
 
@@ -579,6 +592,8 @@ constexpr Minifloat<R, E_t>& Minifloat<R, E_t>::operator+=(const Minifloat& a)
 	exp_ = e + exp_;
     }
 
+    normalize();
+
     return *this;
 }
 
@@ -629,6 +644,8 @@ inline constexpr
 	    x_ = 0;
     }
 
+    normalize();
+
     return *this;
 }
 
@@ -643,6 +660,8 @@ inline constexpr
     std::tie(x_, e) = reduce_to_rep_value(Rep2{x_}*Rep2{a.x_});
 
     exp_ = exp_ + a.exp_ + e;
+
+    normalize();
 
     return *this;
 }
@@ -681,6 +700,8 @@ Minifloat<R, E_t>& Minifloat<R, E_t>::operator/=(const Minifloat& a)
     std::tie(x_, e) = reduce_to_rep_value(d);
 
     exp_ = exp_ - a.exp_ + e - n;
+
+    normalize();
 
     return *this;
 }

@@ -48,6 +48,7 @@ void test_constructor_decimal(const Int& integer_part, const Int& decimal_part,
 				    const Rep& res, int exp)
 {
     atd::Minifloat<Rep> s{integer_part, decimal_part};
+std::cout << "RESULTADO: " << s << '\n';
     CHECK_TRUE(s.significand() == res and s.exponent() == exp, 
 	    alp::as_str() << "constructor_decimal(" << (int) integer_part
 			<< "." << (int) decimal_part << ")");
@@ -82,12 +83,12 @@ void test_constructor()
 
     test_constructor_decimal<int8_t>(1,23, 123, -2);
     test_constructor_decimal<int8_t>(12,3, 123, -1);
-    test_constructor_decimal<int8_t>(20,3, 20, 0);
+    test_constructor_decimal<int8_t>(20,3, 2, 1);
     test_constructor_decimal<int8_t>(123,45, 123, 0);
 
     test_constructor_decimal<int8_t>(-1,23, -123, -2);
     test_constructor_decimal<int8_t>(-12,3, -123, -1);
-    test_constructor_decimal<int8_t>(-20,3, -20, 0);
+    test_constructor_decimal<int8_t>(-20,3, -2, 1);
     test_constructor_decimal<int8_t>(-123,45, -123, 0);
 
     test_constructor_decimal<uint16_t>(12345,6789, 12345, 0);

@@ -17,15 +17,23 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#pragma once
+#include "../prj_main.h"
 
-#ifndef __HWD_DHT11_H__
-#define __HWD_DHT11_H__
+void Main::init_hwd()
+{
+    init_uart();
+    init_sensor();
+}
 
-#include "hwd_dev.h"
+void Main::init_uart()
+{
+    mcu::basic_cfg(uart);
+    uart.turn_on();
+    mcu::UART_basic::enable_interrupt_unread_data();
+}
 
-void print_result(std::ostream& out, Sensor::Result result);
-
-#endif
-
+void Main::init_sensor()
+{ 
+    sensor_.init();
+}
 

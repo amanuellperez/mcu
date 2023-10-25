@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __HWD_DHT11_H__
-#define __HWD_DHT11_H__
+#ifndef __HWD_HCSR04_H__
+#define __HWD_HCSR04_H__
 
 #include "hwd_dev.h"
 

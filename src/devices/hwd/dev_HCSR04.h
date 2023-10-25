@@ -70,7 +70,7 @@ class HCSR04{
 public:
 // Types
     enum class Result{ok, time_out};
-    using Meter      = atd::Meter<atd::uFloat8>;
+    using Meter      = atd::Meter<atd::uFloat16>; // mide hasta 4 metros
 
 // Construction
     static void init();

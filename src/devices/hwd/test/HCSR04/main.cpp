@@ -18,6 +18,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+#include "../../dev_HCSR04.h" 
 
 #include <limits>
 #include <avr_atmega.h>
@@ -27,7 +28,6 @@
 // -----
 namespace mcu = atmega; 
 using Micro   = mcu::Micro;
-#include "../../dev_HCSR04.h" // TODO: posicion
 
 // pins
 constexpr uint8_t trigger_pin = 13;

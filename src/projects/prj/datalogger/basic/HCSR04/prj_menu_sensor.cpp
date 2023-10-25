@@ -17,15 +17,16 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#pragma once
+#include "../prj_main.h"
+#include "hwd_hcsr04.h"
 
-#ifndef __HWD_DHT11_H__
-#define __HWD_DHT11_H__
+void Main::print_menu_sensor()
+{ return; }
 
-#include "hwd_dev.h"
-
-void print_result(std::ostream& out, Sensor::Result result);
-
-#endif
-
+void Main::menu_sensor(char option)
+{
+    switch (option){
+	break; default : uart << "Unknown option\n";
+    }
+}
 
