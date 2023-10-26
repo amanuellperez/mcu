@@ -161,7 +161,10 @@ public:
     using Micro = Micro0;
     using Result = DHT_protocol::Result;
 
-    using Celsius  = atd::Celsius<atd::Decimal<int32_t, 1>>;
+    // Aumenta 1kB el código del datalogger al pasar de Decimal a Float16.
+    // pero Float16 es experimental. Revisarla!!!
+    //using Celsius  = atd::Celsius<atd::Decimal<int32_t, 1>>;
+    using Celsius  = atd::Celsius<atd::Float16>;
     using Humidity = atd::Decimal<int32_t, 1>;
 
 // Functions

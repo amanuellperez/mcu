@@ -192,6 +192,16 @@ void test_order()
 
 }
 
+
+template <typename Rep>
+void test_addition(const atd::Minifloat<Rep>& a, 
+		   const atd::Minifloat<Rep>& b, 
+		   const atd::Minifloat<Rep>& res)
+{
+    CHECK_TRUE(a + b == res, alp::as_str() << a << " + " << b);
+
+}
+
 template <typename Rep, typename Int>
 void test_addition(const Int& a0, const Int& b0, const Int& c)
 {
@@ -240,6 +250,19 @@ void test_addition()
 
     test_addition_decimal<int16_t>(10,123, 234,1, 24422 , -2);
     test_addition_decimal<int16_t>(-1,256, -45,1, -4635, -2);
+
+    test_addition(atd::Minifloat<uint8_t>(2).E(-2), 
+		  atd::Minifloat<uint8_t>(1),
+		  atd::Minifloat<uint8_t>(102).E(-2));
+
+    test_addition(atd::Minifloat<uint8_t>(2).E(-3), 
+		  atd::Minifloat<uint8_t>(2).E(-2),
+		  atd::Minifloat<uint8_t>(22).E(-3));
+
+    test_addition(atd::Minifloat<uint8_t>(2).E(-3), 
+		  atd::Minifloat<uint8_t>(0),
+		  atd::Minifloat<uint8_t>(2).E(-3));
+
 
 }
 

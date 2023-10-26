@@ -39,7 +39,7 @@
  ****************************************************************************/
 #include <stdint.h> 
 #include <atd_crc.h>
-#include <atd_decimal.h>
+#include <atd_minifloat.h>
 #include <atd_magnitude.h>
 #include <atd_bit.h>
 
@@ -55,12 +55,14 @@ namespace dev{
 // Esta clase es responsable de pasar del array de bytes a la estructura y
 // viceversa.
 struct _Scratchpad{
-    // Damos la temperatura en Celsius. 
-    // DUDA: mejor llamarlo T_celsius? Con Celsius queda claro que es una T
     // Resolución: parte entera de 3 dígitos máximo (mide de -55ºC a +125ºC);
     // parte decimal 4 decimales (con 12 bits mide 0.0625). Total 7 dígitos.
     // Entran en int32_t.
-    using Celsius  = atd::Celsius<atd::Decimal<int32_t, 4>>;
+    // TODO: al usar el DS18B20 en el datalogger, aumenta el datalogger 1KB de
+    // pasar de Celsius<Float16> a Celsius<Float32>. ¡ES MUCHO!!!
+    // Con todo Minifloat y Magnitude son experimentales. Si funciona
+    // convendría revisarlas para ver si se pueden simplificar.
+    using Celsius  = atd::Celsius<atd::Float32>;
 
     enum class Resolution{ bits_9, bits_10, bits_11, bits_12 };
 

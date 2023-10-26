@@ -57,7 +57,7 @@ void Main::print_data(std::ostream& out)
 
     else{
 	print_time(out, Clock::now());
-	out << ": " << T << " ºC\t" << H << " %\n";
+	out << ": " << T << '\t' << H << " %\n";
     }
 
 

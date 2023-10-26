@@ -625,25 +625,6 @@ constexpr inline bool operator>=(
 { return !(a < b);}
 
 
-// operator << 
-// -----------
-
-template <Type::Ostream Out, typename Unit, 
-			     Type::Arithmetic R, Type::Static_ratio M, 
-					         Type::Static_ratio D>
-inline Out& operator<<(Out& out, const Magnitude<Unit, R, M, D>& m)
-{
-    print(out, m.value());
-    if constexpr (requires { Unit_symbol<Unit>;
-			     Unit_prefix_symbol<M>;}){
-	out << ' ' 
-	    << Unit_prefix_symbol<M>
-	    << Unit_symbol<Unit>;
-    }
-
-    return out;
-}
-
 
 // Magnitudes por defecto
 // ----------------------
@@ -680,7 +661,7 @@ template <Type::Arithmetic Int, Type::Static_ratio Multiplier>
 using Frequency = atd::Magnitude<atd::Units_frequency, Int, Multiplier>;
 
 template <Type::Arithmetic Int>
-using Hertz = Frequency<Int, std::ratio<1,1>>;
+using Hertz = Frequency<Int, std::ratio<1>>;
 
 template <Type::Arithmetic Int>
 using KiloHertz = Frequency<Int, std::kilo>;
@@ -782,6 +763,171 @@ using Centipascal = Pressure<Int, std::centi>;
 
 template <Type::Arithmetic Int>
 using Millipascal = Pressure<Int, std::milli>;
+
+
+// Mass 
+// ----
+template <Type::Arithmetic Int, Type::Static_ratio Multiplier>
+using Mass = atd::Magnitude<atd::Units_mass, Int, Multiplier>;
+
+template <Type::Arithmetic Int>
+using Kilogram = Mass<Int, std::ratio<1>>;
+
+template <Type::Arithmetic Int>
+using Hectogram = Mass<Int, std::ratio<1,10>>;
+
+template <Type::Arithmetic Int>
+using Decagram = Mass<Int, std::ratio<1, 100>>;
+
+template <Type::Arithmetic Int>
+using Gram = Mass<Int, std::ratio<1, 1000>>;
+
+template <Type::Arithmetic Int>
+using Decigram = Mass<Int, std::ratio<1, 10'000>>;
+    
+template <Type::Arithmetic Int>
+using Centigram = Mass<Int, std::ratio<1, 100'000>>;
+
+template <Type::Arithmetic Int>
+using Milligram = Mass<Int, std::ratio<1, 1'000'000>>;
+
+
+
+// is_magnitude_unit_basic
+// -----------------------
+template <typename Unit>
+inline constexpr 
+bool can_unit_be_composed_by_prefix_and_symbol()
+{
+    if constexpr (std::is_same_v<Unit, Units_mass>)
+	return false;
+
+    else if constexpr (std::is_same_v<Unit, Units_temperature>)
+	return false;
+
+    return true;
+}
+
+// Magnitude_symbol
+// ----------------
+template <typename U>
+struct Magnitude_symbol;
+
+// Magnitudes básicas
+// ------------------
+// Las magnitudes componibles son las que puedo componer como "prefix + symbol".
+// Ejemplo: kilo-meter, milli-meter, ...
+// Podemos definir por separado el prefijo del símbolo.
+template <Type::Arithmetic Int>
+struct Magnitude_symbol<Meter<Int>>
+{ static constexpr const char* short_name = "m"; };
+
+template <Type::Arithmetic Int>
+struct Magnitude_symbol<Hertz<Int>>
+{ static constexpr const char* short_name = "Hz"; };
+
+template <Type::Arithmetic Int>
+struct Magnitude_symbol<Second<Int>>
+{ static constexpr const char* short_name = "s"; };
+
+template <Type::Arithmetic Int>
+struct Magnitude_symbol<Pascal<Int>>
+{ static constexpr const char* short_name = "Pa"; };
+
+// Mass
+// ----
+// La masa es rara. La magnitud básica es el kilogramo: kg. No podemos
+// componerla como "prefix + symbol" ya que el symbol básico es `kg`. 
+// Por ello me veo obligado a enumerar todas las posibilidades. 
+// ¿Otra forma más sencilla de hacerlo?
+template <Type::Arithmetic Int>
+struct Magnitude_symbol<Kilogram<Int>>
+{ static constexpr const char* short_name = "kg"; };
+
+template <Type::Arithmetic Int>
+struct Magnitude_symbol<Hectogram<Int>>
+{ static constexpr const char* short_name = "hg"; };
+
+template <Type::Arithmetic Int>
+struct Magnitude_symbol<Decagram<Int>>
+{ static constexpr const char* short_name = "dag"; };
+
+template <Type::Arithmetic Int>
+struct Magnitude_symbol<Gram<Int>>
+{ static constexpr const char* short_name = "g"; };
+
+
+template <Type::Arithmetic Int>
+struct Magnitude_symbol<Decigram<Int>>
+{ static constexpr const char* short_name = "dg"; };
+
+template <Type::Arithmetic Int>
+struct Magnitude_symbol<Centigram<Int>>
+{ static constexpr const char* short_name = "cg"; };
+
+
+template <Type::Arithmetic Int>
+struct Magnitude_symbol<Milligram<Int>>
+{ static constexpr const char* short_name = "mg"; };
+
+
+// Temperature
+// -----------
+// Magnitud que no se puede componer como "prefix + unit". 
+// Enumeramos todas las posibilidades.
+// NOTA: se podía averiguar si es Kelvin, Celsius o Fahrenheit mirando que la
+// unidad sea la Temperatura y el desplazamiento D. Pero esto no serviría para
+// la masa. ¿Alguna forma genérica de incluir todos los casos particulares de
+// forma más sencilla?
+template <Type::Arithmetic Int>
+struct Magnitude_symbol<Kelvin<Int>>
+{ static constexpr const char* short_name = "K"; };
+
+template <Type::Arithmetic Int>
+struct Magnitude_symbol<Celsius<Int>>
+{ static constexpr const char* short_name = "ºC"; };
+
+template <Type::Arithmetic Int>
+struct Magnitude_symbol<Decicelsius<Int>>
+{ static constexpr const char* short_name = "ºdC"; };
+
+template <Type::Arithmetic Int>
+struct Magnitude_symbol<Millicelsius<Int>>
+{ static constexpr const char* short_name = "ºmC"; };
+
+template <Type::Arithmetic Int>
+struct Magnitude_symbol<Fahrenheit<Int>>
+{ static constexpr const char* short_name = "ºF"; };
+
+
+
+
+// operator << 
+// -----------
+template <Type::Ostream Out, typename Unit, 
+			     Type::Arithmetic R, Type::Static_ratio M, 
+					         Type::Static_ratio D>
+inline Out& operator<<(Out& out, const Magnitude<Unit, R, M, D>& m)
+{
+
+    print(out, m.value());
+
+    if constexpr (can_unit_be_composed_by_prefix_and_symbol<Unit>()){
+//    if constexpr (requires { Unit_symbol<Unit>;
+//			     Unit_prefix_symbol<M>;}){
+	out << ' ' 
+	    << Unit_prefix_symbol<M>
+	    << Unit_symbol<Unit>;
+    } else{
+	using Mag = Magnitude<Unit, R, M, D>;
+	out << ' ' << Magnitude_symbol<Mag>::short_name;
+    }
+
+
+    return out;
+}
+
+
 
 
 }// namespace atd

@@ -34,7 +34,7 @@ void Main::print_data(std::ostream& out)
     auto T = sensor_.read_temperature(timeout_ms);
     if (sensor_.last_operation_is_ok()){
 	print_time(out, Clock::now());
-	out << ": " << T << " ºC\n";
+	out << ": " << T << '\n';
     }
 
     else 

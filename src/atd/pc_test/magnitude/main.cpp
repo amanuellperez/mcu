@@ -653,7 +653,14 @@ void test_sci_meter()
     Centimeter cm = m;
     std::cout << "centimeters = " << cm << '\n';
 
+    atd::uFloat8 mf{2};
+    atd::uFloat8 kmf = mf / atd::uFloat8{1'000};
+    std::cout << "mf = " << mf << '\n';
+    std::cout << "kmf = " << kmf << '\n';
+
+    std::cout << "m.value = " << m.value() << '\n';
     Kilometer km = m;
+    std::cout << "km.value = " << km.value() << '\n';
     std::cout << "kilometers = " << km << '\n';
 
     CHECK_TRUE(cm == Centimeter(Number(2).E(2)), "meters to centimeters");
@@ -681,13 +688,34 @@ void test_sci_frequency()
 
 }
 
+void test_print(const std::string& short_name, const std::string& res
+		, const std::string& name_test)
+{
+    CHECK_TRUE(short_name == res, name_test);
+}
+
+void test_print()
+{
+
+    CHECK_PRINT(std::cout << atd::Meter<float>(2.3), "2.3 m");
+    CHECK_PRINT(std::cout << atd::Kilometer<float>(2.3), "2.3 km");
+
+    CHECK_PRINT(std::cout << atd::Gram<float>(2.3), "2.3 g");
+    CHECK_PRINT(std::cout << atd::Kilogram<float>(2.3), "2.3 kg");
+
+    CHECK_PRINT(std::cout << atd::Kelvin<float>(2.3), "2.3 K");
+    CHECK_PRINT(std::cout << atd::Celsius<float>(2.3), "2.3 ºC");
+    CHECK_PRINT(std::cout << atd::Millicelsius<float>(2.3), "2.3 ºmC");
+    CHECK_PRINT(std::cout << atd::Fahrenheit<float>(2.3), "2.3 ºF");
+}
+
 void test_with_sci_number()
 {
     test::interface("test with Minifloat");
 
     test_sci_meter();
     test_sci_frequency();
-
+    test_print();
 }
 
 

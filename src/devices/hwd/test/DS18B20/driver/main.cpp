@@ -326,8 +326,14 @@ void Main::read_temperature()
     if (!is_return_cmd_ok(sensor_.result_last_operation()))
 	return;
 
+
+    atd::Kelvin<atd::Float16> K = T;
+    atd::Fahrenheit<atd::Float16> F = T;
     uart << "OK\n"
-	    "T = " << T << "ºC\n";
+	    "T = " << T << "\n"
+	    "    " << K << "\n"
+	    "    " << F << '\n';
+
 
 
 }

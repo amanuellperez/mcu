@@ -121,7 +121,8 @@ using Units_electric_potential = Unit<2, 1, -3, 0, -1>;
 // --------
 namespace impl_of{
 template <typename U>
-struct Unit_symbol;
+struct Unit_symbol
+{ static constexpr const char* value = " (Unknown unit. Please, write Unit_symbol) "; };
 
 template <>
 struct Unit_symbol<Units_length>
@@ -163,7 +164,8 @@ inline constexpr const char* Unit_symbol = impl_of::Unit_symbol<U>::value;
 // ------------------
 namespace impl_of{
 template <typename U>
-struct Unit_prefix_symbol;
+struct Unit_prefix_symbol
+{ static constexpr const char* short_name = "(Unknown prefix. Please write Unit_prefix_symbol)";};
 
 
 // (RRR) ¿por qué definir `short_name` como `const char*`y no `char`?

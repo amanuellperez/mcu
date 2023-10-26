@@ -545,8 +545,15 @@ constexpr Rep Minifloat<Rep, E_t>::divide_by_ten_to_the(Rep x, Exp_t e)
 
 // precondicion: queremos sumar a x1*10^e1 el número x2
 //
-// Para ello hacemos:
-//	    x1*10^e1 + x2 = (x1 + x2/10^e1)*10^e1
+// Primera idea: 
+//	Hacer x1*10^e1 + x2 = (x1 + x2/10^e1)*10^e1
+//
+// Problema: 2*10^2 + 3 = (2 + 3/100)*100 = 200!!! Pero tendría que ser 203!!!
+//
+// Para evitar este problema modificamos la primera idea:
+//	si podemos multiplicar 2*10^2 y es representable en Rep, lo hacemos, y
+//	luego añadimos 3.
+//	si no podemos hacer la multiplicación volvemos a la primera idea.
 //
 // TODO: Creo que se puede optimizar un poco mirando que el producto de
 // x1*10^e1 sea menor que numeric_limits::digits10. 
@@ -554,6 +561,9 @@ template <Type::Integer R, Type::Integer E_t>
 constexpr std::pair<R, E_t> 
     Minifloat<R, E_t>::add_number(const Rep& x1, E_t e1, Rep x2)
 {
+    if (x1 == 0)
+	return {x2, 0};
+
     if (e1 < std::numeric_limits<Rep>::digits10 + 1) 
     { // 10^e1 es representable por Rep
 	using Rep2 = same_type_with_double_bits_t<Rep>;
