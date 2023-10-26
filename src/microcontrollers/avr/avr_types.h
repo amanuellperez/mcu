@@ -55,37 +55,45 @@ namespace avr_{
 // demasiado. Lo que no permite es usar decimales. ¿Mejor un tipo con
 // decimales como atd::Decimal<>?
 // using Frequency = atd::ENG_frequency<uFloat16>; DUDA: usar uFloat16?
-using Frequency = atd::ENG_frequency<uint32_t>;
+//using Frequency = atd::ENG_frequency<uint32_t>;
+using Frequency = atd::Hertz<uint32_t>;
+using Hertz     = atd::Hertz<uint32_t>;
+using KiloHertz = atd::KiloHertz<uint32_t>;
+using MegaHertz = atd::MegaHertz<uint32_t>;
 
 inline constexpr Frequency frequency_in_Hz(const Frequency::Rep& x)
 //{ return Frequency{x, 0}; }
-{ return Frequency{x}; }
+{ return Hertz{x}; }
 
 inline constexpr Frequency frequency_in_kHz(const Frequency::Rep& x)
 //{ return Frequency{x, 3}; }
-{ return Frequency{x*1'000}; }
+{ return KiloHertz{x}; }
 
 inline constexpr Frequency frequency_in_MHz(const Frequency::Rep& x)
 //{ return Frequency{x, 6}; }
-{ return Frequency{x*1'000'000}; }
+{ return MegaHertz{x}; }
 
 // Time
 //using Time      = atd::ENG_time<atd::Decimal<uint32_t, 3>>;
 
 // almaceno en us el tiempo, dando un rango de:
 //    0, 2^32 = 4000 segundos = 1h 11 minutos
-using Time      = atd::ENG_time<uint32_t>;
+//using Time      = atd::ENG_time<uint32_t>;
+using Time      = atd::Second<uint32_t>;
+using Second	= atd::Second<uint32_t>;
+using Millisecond = atd::Millisecond<uint32_t>;
+using Microsecond = atd::Microsecond<uint32_t>;
 
 inline constexpr Time time_in_s(const Time::Rep& x) 
 //{return Time{x, 0};}
-{return Time{x * 1'000'000};}
+{return Second{x};}
 
 inline constexpr Time time_in_ms(const Time::Rep& x) 
 //{return Time{x, -3};}
-{return Time{x * 1'000};}
+{return Millisecond{x};}
 inline constexpr Time time_in_us(const Time::Rep& x) 
 //{return Time{x, -6};}
-{return Time{x * 1};}
+{return Microsecond{x};}
 
 // Electric potential
 // Almacenamos el potencial en milivoltios, esa será la máxima resolución que

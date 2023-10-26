@@ -327,8 +327,8 @@ void Main::read_temperature()
 	return;
 
 
-    atd::Kelvin<atd::Float16> K = T;
-    atd::Fahrenheit<atd::Float16> F = T;
+    atd::Kelvin<atd::Float32> K = T;
+    atd::Fahrenheit<atd::Float32> F = T;
     uart << "OK\n"
 	    "T = " << T << "\n"
 	    "    " << K << "\n"

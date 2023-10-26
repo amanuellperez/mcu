@@ -842,7 +842,7 @@ void print_as_decimal_negative_exponent(Out& out, const Minifloat<Rep, E_t>& f)
 template <typename Out, Type::Integer Rep, Type::Integer E_t>
 void print_as_decimal(Out& out, const Minifloat<Rep, E_t>& f)
 {
-    if (f.exponent() < -3 or f.exponent() > 3)
+    if (f.exponent() < -5 or f.exponent() > 5)
 	print_as_power_of_ten(out, f);
 
     else if (f.exponent() >= 0)
