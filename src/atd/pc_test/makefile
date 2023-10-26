@@ -13,7 +13,6 @@ DIRS = algorithm	\
 		cstring		\
 		decimal		\
 		double		\
-		eng_magnitude\
 		float		\
 		iobxtream	\
 		istream		\

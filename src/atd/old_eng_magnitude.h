@@ -1,4 +1,8 @@
 // TODO: BORRAR ESTA CLASE
+//	 DADA DE BAJA EL 26/10/2023. Si no se necesita en un par de años
+//	 borrarla.
+//	 Usar Magnitude.
+//
 // Copyright (C) 2021 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu

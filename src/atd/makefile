@@ -20,7 +20,6 @@ INCS= atd_algorithm.h	\
 	atd_cstring.h		\
 	atd_decimal.h		\
 	atd_double.h		\
-	atd_eng_magnitude.h	\
 	atd_float.h			\
 	atd_iobxtream.h		\
 	atd_istream.h		\

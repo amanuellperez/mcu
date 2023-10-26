@@ -792,6 +792,33 @@ template <Type::Arithmetic Int>
 using Milligram = Mass<Int, std::ratio<1, 1'000'000>>;
 
 
+// Electrical potential
+// --------------------
+template <Type::Arithmetic Int, Type::Static_ratio Multiplier>
+using Electrical_potential 
+		= atd::Magnitude<atd::Units_electric_potential, Int, Multiplier>;
+
+template <Type::Arithmetic Int>
+using Kilovolt = Electrical_potential<Int, std::kilo>;
+
+template <Type::Arithmetic Int>
+using Hectovolt = Electrical_potential<Int, std::hecto>;
+
+template <Type::Arithmetic Int>
+using Decavolt = Electrical_potential<Int, std::deca>;
+
+template <Type::Arithmetic Int>
+using Volt = Electrical_potential<Int, std::ratio<1>>;
+
+template <Type::Arithmetic Int>
+using Decivolt = Electrical_potential<Int, std::deci>;
+    
+template <Type::Arithmetic Int>
+using Centivolt = Electrical_potential<Int, std::centi>;
+
+template <Type::Arithmetic Int>
+using Millivolt = Electrical_potential<Int, std::milli>;
+
 
 // is_magnitude_unit_basic
 // -----------------------
@@ -813,26 +840,26 @@ bool can_unit_be_composed_by_prefix_and_symbol()
 template <typename U>
 struct Magnitude_symbol;
 
-// Magnitudes básicas
-// ------------------
-// Las magnitudes componibles son las que puedo componer como "prefix + symbol".
-// Ejemplo: kilo-meter, milli-meter, ...
-// Podemos definir por separado el prefijo del símbolo.
-template <Type::Arithmetic Int>
-struct Magnitude_symbol<Meter<Int>>
-{ static constexpr const char* short_name = "m"; };
-
-template <Type::Arithmetic Int>
-struct Magnitude_symbol<Hertz<Int>>
-{ static constexpr const char* short_name = "Hz"; };
-
-template <Type::Arithmetic Int>
-struct Magnitude_symbol<Second<Int>>
-{ static constexpr const char* short_name = "s"; };
-
-template <Type::Arithmetic Int>
-struct Magnitude_symbol<Pascal<Int>>
-{ static constexpr const char* short_name = "Pa"; };
+//// Magnitudes básicas
+//// ------------------
+//// Las magnitudes componibles son las que puedo componer como "prefix + symbol".
+//// Ejemplo: kilo-meter, milli-meter, ...
+//// Podemos definir por separado el prefijo del símbolo.
+//template <Type::Arithmetic Int>
+//struct Magnitude_symbol<Meter<Int>>
+//{ static constexpr const char* short_name = "m"; };
+//
+//template <Type::Arithmetic Int>
+//struct Magnitude_symbol<Hertz<Int>>
+//{ static constexpr const char* short_name = "Hz"; };
+//
+//template <Type::Arithmetic Int>
+//struct Magnitude_symbol<Second<Int>>
+//{ static constexpr const char* short_name = "s"; };
+//
+//template <Type::Arithmetic Int>
+//struct Magnitude_symbol<Pascal<Int>>
+//{ static constexpr const char* short_name = "Pa"; };
 
 // Mass
 // ----

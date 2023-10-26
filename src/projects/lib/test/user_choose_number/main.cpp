@@ -23,7 +23,6 @@
 #include <dev_HD44780.h>
 #include <atd_decimal.h>
 #include <atd_magnitude.h>
-#include <atd_eng_magnitude.h>
 #include <avr_types.h>
 
 #include <avr_time.h>

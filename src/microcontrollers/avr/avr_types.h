@@ -33,17 +33,13 @@
  *    30/03/2021      Potential.
  *
  ****************************************************************************/
-#include <atd_eng_magnitude.h>
-#include <atd_decimal.h>
+#include <atd_magnitude.h>
 
 // (RRR) ¿Podrían ser todos estos tipos genéricos?
 //       Creo que no. Hay micros que no usan double como el atmega32, pero
 //       otros que puede que si los usen. En ese caso sería mejor usar double
 //       en lugar de Decimal (???)
 namespace avr_{
-// TODO: revisar todo esto!!! Cambiarlo todo a atd::Magnitude. Eliminar
-// ENG_magnitude.
-
 // (???) ¿Usar o no usar decimales con las frecuencias?
 //       Si se usan decimales no entran en uint16_t así que hay que usar un
 //       uint32_t. ¿O será mejor no usar Decimal y directamente uint16_t?
@@ -54,7 +50,10 @@ namespace avr_{
 // frecuenias no decimales desde 1Hz hasta 4GHz que para los avrs es
 // demasiado. Lo que no permite es usar decimales. ¿Mejor un tipo con
 // decimales como atd::Decimal<>?
-// using Frequency = atd::ENG_frequency<uFloat16>; DUDA: usar uFloat16?
+// using Frequency = atd::ENG_frequency<uFloat16>; 
+// DUDA: usar uFloat16? A día de hoy uFloat16 creo que mete 1kB más de código.
+//       Mejorar esa clase antes de usarla de forma masiva.
+//						      
 //using Frequency = atd::ENG_frequency<uint32_t>;
 using Frequency = atd::Hertz<uint32_t>;
 using Hertz     = atd::Hertz<uint32_t>;
@@ -99,18 +98,21 @@ inline constexpr Time time_in_us(const Time::Rep& x)
 // Almacenamos el potencial en milivoltios, esa será la máxima resolución que
 // podemos dar.
 //using Potential = atd::ENG_electric_potential<atd::Decimal<uint32_t, 3>>;
-using Potential = atd::ENG_electric_potential<uint32_t>;
+//using Potential = atd::ENG_electric_potential<uint32_t>;
+using Potential = atd::Millivolt<uint32_t>; // TODO: borrar Potential
+using Volt      = atd::Volt<uint32_t>;
+using Millivolt = atd::Millivolt<uint32_t>;
 inline constexpr Potential potential_in_V(const Potential::Rep& x)
 //{ return Potential{x, 0}; }
-{ return Potential{x*1'000}; }
+{ return Volt{x}; }
 
 inline constexpr Potential potential_in_mV(const Potential::Rep& x)
 //{ return Potential{x, -3}; }
-{ return Potential{x}; }
+{ return Millivolt{x}; }
 
-inline constexpr Potential::Rep in_mV(const Potential& x)
+inline constexpr Potential::Rep in_mV(const Millivolt& x)
 //{ return x.millivalue(); }
-{ return x.internal_value(); }
+{ return x.value(); }
 
 
 // syntactic sugar
