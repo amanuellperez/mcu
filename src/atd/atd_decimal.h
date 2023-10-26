@@ -1,4 +1,3 @@
-// TODO: Sustituir esta clase a favor de Sci_number (???)
 // Copyright (C) 2020-2023 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
@@ -27,6 +26,12 @@
  *	cifras.
  *
  *  - SEE: ver std::chrono, ver atd::magnitude, tienen la misma estructura.
+ *
+ * TODO: Sustituir esta clase a favor de Minifloat(???)
+ *       No lo tengo muy claro. De momento con la primera implementación
+ *       usar Minifloat aumenta el datalogger 1kB. Es más eficiente Decimal.
+ *       ¿Dejar los 2?
+ *       CUIDADO: ¿la diferencia estará en la función print? Revisar. Medir.
  *
  *  - TODO:
  *    ¿Cómo construir el Decimal<3> x con valor 3.001?

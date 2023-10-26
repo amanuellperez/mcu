@@ -54,6 +54,33 @@
  * IDEA
  *    Toda la implementación se basa en revisar que no haya overflow. 
  *
+ * ¿CÓMO MEJORARLA?
+ *  1. Experimento a probar: 
+ *     Si se manejan en una misma aplicación diferentes tipos de Float 
+ *     ( uFloat8, Float16...) se está generando una clase diferente con todos
+ *     los métodos correspondientes duplicando el código mucho.
+ *     Quizás sería interesante hacer las funciones para uint32_t/int32_t y el
+ *     resto que se limiten a llamar a estas funciones.
+ *     Ejemplo:
+ *	Implementamos print_as_decimal(out, Minifloat<uint32_t, int>);
+ *	Y las funciones particulares serían algo parecido a:
+ *	    print_as_decimal(out, Minifloat<Rep, E_t> f)
+ *	    {
+ *		if constexpr (std::is_unsigned_v<Rep>)
+ *		    print_as_decimal(out, Minifloat<uint32_t, int>(f));
+ *		else
+ *		    print_as_decimal(out, Minifloat<int32_t, int>(f));
+ *	    }
+ *
+ *	De esta forma evitaríamos duplicar código. ¿Disminuirá el código así?
+ *	Habría que intentar que fuese eficiente el paso de Minifloat<uint8_t>
+ *	a Minifloat<uint32_t> y viceversa.
+ *
+ *
+ *  2. Revisar código y ver qué cosas se pueden sacar de la clase y no son
+ *     templates.
+ *
+ *
  * HISTORIA
  *    Manuel Perez
  *    18/10/2023 Versión mínima, para probar.
@@ -389,7 +416,6 @@ constexpr Minifloat<R, E_t>::Minifloat(const Minifloat<Rep2, E2_t>& f)
 // Order
 // -----
 template <Type::Integer R, Type::Integer E_t>
-inline
 constexpr bool Minifloat<R, E_t>::operator==(const Minifloat<R, E_t>& a) const
 { 
     if (exp_ >= a.exp_)
@@ -401,7 +427,6 @@ constexpr bool Minifloat<R, E_t>::operator==(const Minifloat<R, E_t>& a) const
 
 
 template <Type::Integer R, Type::Integer E_t>
-inline
 constexpr bool Minifloat<R, E_t>::operator<(const Minifloat<R, E_t>& a) const
     requires (std::is_unsigned_v<Rep>)
 { 
@@ -416,7 +441,6 @@ constexpr bool Minifloat<R, E_t>::operator<(const Minifloat<R, E_t>& a) const
 
 
 template <Type::Integer R, Type::Integer E_t>
-inline
 constexpr bool Minifloat<R, E_t>::operator<(const Minifloat<R, E_t>& a) const
     requires (std::is_signed_v<Rep>)
 { 
@@ -459,7 +483,7 @@ constexpr bool Minifloat<R, E_t>::operator<(const Minifloat<R, E_t>& a) const
 
 template <Type::Integer R, Type::Integer E_t>
     template <Type::Integer Int>
-inline constexpr bool Minifloat<R, E_t>::operator==(const Int& y) const
+constexpr bool Minifloat<R, E_t>::operator==(const Int& y) const
 {
     if (exp_ >= 0){
 	Int res = x_ * ten_to_the<Int>(exp_);
@@ -499,7 +523,7 @@ inline constexpr bool operator>=(const Minifloat<R, E_t>& a,
 // Algebraic structure
 // -------------------
 template <Type::Integer R, Type::Integer E_t>
-inline constexpr 
+constexpr 
 Minifloat<R, E_t> Minifloat<R,E_t>::operator-() const
     requires (Type::Signed_integer<R>)
 {
@@ -641,7 +665,7 @@ constexpr void Minifloat<R, E_t>::unsigned_substract(const Minifloat& a)
 }
 
 template <Type::Integer R, Type::Integer E_t>
-inline constexpr 
+constexpr 
     Minifloat<R, E_t>& Minifloat<R, E_t>::operator-=(const Minifloat& a)
 {
     if constexpr (Type::Signed_integer<Rep>)
@@ -661,7 +685,7 @@ inline constexpr
 
 
 template <Type::Integer R, Type::Integer E_t>
-inline constexpr 
+constexpr 
     Minifloat<R, E_t>& Minifloat<R, E_t>::operator*=(const Minifloat& a)
 {
     using Rep2 = same_type_with_double_bits_t<Rep>;
@@ -685,7 +709,6 @@ inline constexpr
 //	    1/24 = 1000/24 * 10^{-3} = 41 * 10^{-3} = 0.41
 //
 template <Type::Integer R, Type::Integer E_t>
-inline 
 constexpr 
 Minifloat<R, E_t>& Minifloat<R, E_t>::operator/=(const Minifloat& a)
 {
@@ -867,7 +890,6 @@ inline constexpr bool is_minifloat_v = is_minifloat<T>::value;
 // --------------
 template <typename To, Type::Integer Rep1, Type::Integer E1_t>
     requires (is_minifloat_v<To>)
-inline 
 constexpr To minifloat_cast(const Minifloat<Rep1, E1_t>& f)
 { 
     using Rep2 = typename To::Rep;
