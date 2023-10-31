@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 Manuel Perez 
+// Copyright (C) 2019-2023 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -18,8 +18,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #pragma once
 
-#ifndef __AVR_TWI_SLAVE_H__
-#define __AVR_TWI_SLAVE_H__
+#ifndef __DEV_TWI_SLAVE_H__
+#define __DEV_TWI_SLAVE_H__
 
 /****************************************************************************
  *
@@ -45,17 +45,19 @@
  *  - HISTORIA:
  *    Manuel Perez
  *    14/02/2020 v0.0
+ *    30/10/2023 Lo independizo de avr. Primer intento de ser genérico.
+ *               Para que pueda ser genérico hay que definir el interfaz del
+ *               `TWI generic` que es en el que se basa esta implementación.
+ *               Para poder definir ese interfaz necesito programar diferentes
+ *               micros (o diferentes TWIs). 
  *
  ****************************************************************************/
-#include "avr_interrupt.h" 
-#include <avr/io.h> // registros: DDRB... PORT...
-
-#include <atd_iobxtream.h>
-#include "avr_micro.h"
-
-
-
-namespace avr_{
+#include <cstdint>  // uint8_t
+#include <cstddef>  // std::byte
+		   
+#include <atd_iobxtream.h>  // TWI_iobuffer
+			    
+namespace dev{
 
 
 enum class __TWI_slave_state{
@@ -111,6 +113,14 @@ inline bool __TWI_slave_state_is_listening(__TWI_slave_state a)
 
 
 
+template <typename Micro0, 
+	  typename TWI0, typename TWI0::streamsize buffer_size0>
+struct TWI_slave_cfg{
+    using Micro = Micro0;
+    using TWI   = TWI0;
+    using streamsize = typename TWI::streamsize;
+    static constexpr streamsize buffer_size = buffer_size0;
+};
 
 // La idea es que esto no sea más que una ampliacion del TWI con 1 byte
 // de buffer. Le ponemos una put/get area a TWI en esta clase y ocultamos el
@@ -119,19 +129,24 @@ inline bool __TWI_slave_state_is_listening(__TWI_slave_state a)
 //	1.- Ponerle un buffer al hardware de TWI (que carece de el).
 //	2.- Ocultar el protocolo al usuario. El usuario no tiene que saber
 //	    nada de START/SLA+WR ... /STOP. 
-template <typename TWI, uint8_t buffer_size>
+template <typename Cfg>
 class TWI_slave{
 public:
-    using iostate= __TWI_slave_state;
-    using streamsize = uint8_t;
+// Types
+    using iostate    = __TWI_slave_state;
+    using Micro	     = Cfg::Micro;
+    using TWI	     = Cfg::TWI;
+    using streamsize = Cfg::streamsize;
 
+// cfg data
+    static constexpr streamsize buffer_size = Cfg::buffer_size;
 
     /// Enables TWI. En modo slave no hay que definir frecuencia de reloj!!!
     // Enables as a slave in the address SLAVE_ADDRESS.
     template <uint8_t TWI_slave_address>
     static void on()
     {
-	avr_::enable_interrupts();
+	Micro::enable_interrupts();
 	TWI::template slave_init<TWI_slave_address,1>(); // 1 = TWI::interrupt_enable()
 
 	reset();
@@ -231,8 +246,8 @@ private:
 // desconocido", mientras que si responde OK a SLA+W, pero luego te devuelve
 // NACK al data le estas diciendo al master: "estoy ocupado, inténtalo más
 // tarde".
-template <typename TWI, uint8_t bsz>
-void TWI_slave<TWI, bsz>::srm_sla_w()
+template <typename Cfg>
+void TWI_slave<Cfg>::srm_sla_w()
 {
     buffer_.reset_as_input();
 
@@ -241,8 +256,8 @@ void TWI_slave<TWI, bsz>::srm_sla_w()
 }
 
 
-template <typename TWI, uint8_t bsz>
-void TWI_slave<TWI, bsz>::srm_data_ack()
+template <typename Cfg>
+void TWI_slave<Cfg>::srm_data_ack()
 {
     buffer_.in_write_one(TWI::data());
 
@@ -258,16 +273,16 @@ void TWI_slave<TWI, bsz>::srm_data_ack()
 }
 
 
-template <typename TWI, uint8_t bsz>
-void TWI_slave<TWI, bsz>::srm_data_nack()
+template <typename Cfg>
+void TWI_slave<Cfg>::srm_data_nack()
 {
     TWI::recover_from_bus_error();      
     state_ = iostate::eor_data_nack;
 }
 
 
-template <typename TWI, uint8_t bsz>
-void TWI_slave<TWI, bsz>::srm_stop_or_repeated_start()
+template <typename Cfg>
+void TWI_slave<Cfg>::srm_stop_or_repeated_start()
 {
     state_ = iostate::eor;
 
@@ -278,8 +293,8 @@ void TWI_slave<TWI, bsz>::srm_stop_or_repeated_start()
 
 
 
-template <typename TWI, uint8_t bsz>
-void TWI_slave<TWI, bsz>::stm_sla_r()
+template <typename Cfg>
+void TWI_slave<Cfg>::stm_sla_r()
 {
     TWI::interrupt_disable();   
     buffer_.reset_as_output();
@@ -287,8 +302,8 @@ void TWI_slave<TWI, bsz>::stm_sla_r()
 }
 
 
-template <typename TWI, uint8_t bsz>
-void TWI_slave<TWI, bsz>::stm_send_data()
+template <typename Cfg>
+void TWI_slave<Cfg>::stm_send_data()
 {
     if (buffer_.out_size() == 1)
 	TWI::slave_transmit_byte_received_NACK(buffer_.out_read_one());
@@ -298,8 +313,8 @@ void TWI_slave<TWI, bsz>::stm_send_data()
 }
 
 
-template <typename TWI, uint8_t bsz>
-void TWI_slave<TWI, bsz>::stm_data_ack()
+template <typename Cfg>
+void TWI_slave<Cfg>::stm_data_ack()
 {
     if (buffer_.out_is_empty()){
 	state_ = iostate::eow_more_data;
@@ -313,8 +328,8 @@ void TWI_slave<TWI, bsz>::stm_data_ack()
 }
 
 
-template <typename TWI, uint8_t bsz>
-void TWI_slave<TWI, bsz>::stm_data_nack()
+template <typename Cfg>
+void TWI_slave<Cfg>::stm_data_nack()
 {
     if (buffer_.out_is_empty())
 	state_ = iostate::eow;
@@ -327,8 +342,8 @@ void TWI_slave<TWI, bsz>::stm_data_nack()
 
 
 
-template <typename TWI, uint8_t bsz>
-void TWI_slave<TWI, bsz>::bus_error()
+template <typename Cfg>
+void TWI_slave<Cfg>::bus_error()
 {
     TWI::recover_from_bus_error();      
     state_ = iostate::bus_error;
@@ -338,8 +353,8 @@ void TWI_slave<TWI, bsz>::bus_error()
 // Este caso lo tienen así implementado en la app-note, pero
 // ¿qué estatus puede ser este desconocido? ¿error de hardware?
 // ¿protección contra error de software?
-template <typename TWI, uint8_t bsz>
-inline void TWI_slave<TWI, bsz>::unknown_error()
+template <typename Cfg>
+inline void TWI_slave<Cfg>::unknown_error()
 {
     TWI::not_addressed_slave_mode();
     state_ = iostate::listening;
@@ -347,9 +362,9 @@ inline void TWI_slave<TWI, bsz>::unknown_error()
 
 
 
-template <typename TWI, uint8_t bsz>
-TWI_slave<TWI, bsz>::streamsize 
-TWI_slave<TWI, bsz>::write_buffer(const std::byte* buf, streamsize n)
+template <typename Cfg>
+TWI_slave<Cfg>::streamsize 
+TWI_slave<Cfg>::write_buffer(const std::byte* buf, streamsize n)
 {
     if (!wrt_be() and n != 0) // precondicion
 	return 0;
@@ -373,10 +388,10 @@ TWI_slave<TWI, bsz>::write_buffer(const std::byte* buf, streamsize n)
     return res;
 }
 
-template <typename TWI, uint8_t bsz>
-void TWI_slave<TWI, bsz>::stop_transmission()
+template <typename Cfg>
+void TWI_slave<Cfg>::stop_transmission()
 {
-    Micro::Disable_interrupts lock;   // garantizo control del flujo.
+    typename Micro::Disable_interrupts lock;   // garantizo control del flujo.
     reset();
 }
 
@@ -385,9 +400,9 @@ void TWI_slave<TWI, bsz>::stop_transmission()
 // En caso de que los haya los lee guardándolos en buffer.
 // Si no hay datos a leer, devuelve inmediatamente el control.
 // Devuelve el número de bytes leidos.
-template <typename TWI, uint8_t bsz>
-TWI_slave<TWI, bsz>::streamsize 
-TWI_slave<TWI, bsz>::read_buffer(std::byte* buffer, streamsize N)
+template <typename Cfg>
+TWI_slave<Cfg>::streamsize 
+TWI_slave<Cfg>::read_buffer(std::byte* buffer, streamsize N)
 {
     if (!is_waiting())
 	return 0;
@@ -418,12 +433,12 @@ TWI_slave<TWI, bsz>::read_buffer(std::byte* buffer, streamsize N)
 
 // Para poder independizarlo del microcontrolador es necesario
 // darle un nombre a los estados que dependan del protocolo de TWI!!!
-template <typename TWI, uint8_t bsz>
-void TWI_slave<TWI, bsz>::handle_interrupt()
+template <typename Cfg>
+void TWI_slave<Cfg>::handle_interrupt()
 {
-    using TWI_iostate = TWI_basic_iostate;
-    using SRM = TWI_basic_iostate::slave_receiver_mode;
-    using STM = TWI_basic_iostate::slave_transmitter_mode;
+    using TWI_state = TWI::State;
+    using SRM = TWI_state::slave_receiver_mode;
+    using STM = TWI_state::slave_transmitter_mode;
 
     switch (TWI::status()){
 
@@ -465,7 +480,7 @@ void TWI_slave<TWI, bsz>::handle_interrupt()
 
     // miscellaneous states
     // --------------------
-	case TWI_iostate::bus_error:
+	case TWI_state::bus_error:
 	    bus_error();
             break;
 

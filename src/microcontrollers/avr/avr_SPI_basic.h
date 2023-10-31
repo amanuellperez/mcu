@@ -56,7 +56,7 @@
 #include <atd_bit.h>
 #include "avr_pin.h"
 #include "avr_interrupt.h"
-#include "avr_cfg.h"	// MCU_CLOCK_FREQUENCY_IN_HZ
+#include "avr_cfg.h"	// clock_frequency_in_hz
 
 namespace avr_{
 

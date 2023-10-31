@@ -40,7 +40,7 @@
 
 #include "avr_interrupt.h"
 #include "avr_pin.h"
-#include "avr_cfg.h"	// MCU_CLOCK_FREQUENCY_IN_HZ
+#include "avr_cfg.h"	// clock_frequency_in_hz
 
 #include <array>
 
@@ -114,7 +114,7 @@ public:
 
     /// Frecuencia a la que funciona internamente el timer.
     /// Se cumple que clock_frequency() = 1 / clock_period();
-    template <uint32_t clock_frequency_in_Hz = MCU_CLOCK_FREQUENCY_IN_HZ>
+    template <uint32_t clock_frequency_in_Hz = clock_frequency_in_hz>
     static Frequency clock_frequency();
 
 

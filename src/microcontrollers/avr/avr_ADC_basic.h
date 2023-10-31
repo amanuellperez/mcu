@@ -44,7 +44,7 @@
 
 #include <atd_bit.h>
 #include <avr/io.h> // registros: DDRB... PORT...
-#include "avr_cfg.h"	// MCU_CLOCK_FREQUENCY_IN_HZ
+#include "avr_cfg.h"	// clock_frequency_in_hz
 			
 namespace avr_{
 
@@ -239,7 +239,7 @@ public:
     // frequency no válida no compila, y si cambias de frequency recalcula
     // automáticamente qué divisor de frequency usar.
     template<uint16_t frequency
-	, uint32_t clock_frequency_en_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
+	, uint32_t clock_frequency_en_hz = clock_frequency_in_hz>
     static void clock_speed_in_kHz();
 
 

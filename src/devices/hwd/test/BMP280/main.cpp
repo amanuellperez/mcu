@@ -19,32 +19,38 @@
 
 #include "../../dev_BMP280_basic.h"
 
-#include <cstddef>
-#include <atd_ostream.h>
 #include <atd_cstddef.h>
 
 #include <avr_atmega.h>	
+#include <dev_TWI_master.h>
+
+// Microcontroller
+// ---------------
 namespace mcu = atmega;
-using Micro = mcu::Micro;
+using Micro   = mcu::Micro;
 
-// pines que usamos
-// ----------------
 
-// dispositivos que conectamos
-// ---------------------------
-// Dispositivo TWI al que conectamos
-static constexpr uint8_t TWI_buffer_size = 100; 
-using TWI_master = mcu::TWI_master<mcu::TWI_basic, TWI_buffer_size>;
+
+// TWI Protocol
+// ------------
+constexpr uint8_t TWI_buffer_size = 100;
+using TWI_master_cfg = dev::TWI_master_cfg<Micro, 
+                                           mcu::TWI_basic,
+					   TWI_buffer_size>;
+
+using TWI_master  = dev::TWI_master<TWI_master_cfg>;
+using TWI = dev::TWI_master_ioxtream<TWI_master>;
+
 // 50 kHz es la unica frecuencia de TWI que va a 1MHz.
 // 100 kHz a 8 MHz
 static constexpr int TWI_frecuency = 50; // kHz
 
 
-// Dispositivos
-using TWI = mcu::TWI_master_ioxtream<TWI_master>;
-
+// Devices
+// -------
 static constexpr TWI::Address sensor_twi_address = 0x77;
 using Sensor = dev::BMP280_TWI<TWI_master, sensor_twi_address>;
+
 
 // En el breakout de adafruit la dirección la determina la conexión del pin
 // SDO:

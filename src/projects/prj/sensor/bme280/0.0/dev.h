@@ -26,7 +26,12 @@
 #include <dev_BME280_basic.h>
 
 #include <avr_atmega.h>
+#include <dev_TWI_master.h>
+
+// Microcontroller
+// ---------------
 namespace mcu = atmega;
+using Micro   = mcu::Micro;
 
 // pins usados
 // ------------
@@ -51,7 +56,11 @@ constexpr uint8_t LCD_D7_pin = 14;
 
 // using TWI: pins 27 and 28
 static constexpr uint8_t TWI_buffer_size = 100; 
-using TWI = atmega::TWI_master<atmega::TWI_basic, TWI_buffer_size>;
+using TWI_master_cfg = dev::TWI_master_cfg<Micro, 
+                                           mcu::TWI_basic,
+					   TWI_buffer_size>;
+
+using TWI = dev::TWI_master<TWI_master_cfg>;
 static constexpr int TWI_frecuency = 50; // kHz
 static constexpr TWI::Address twi_sensor_address = 0x76;
 

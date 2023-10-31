@@ -351,7 +351,7 @@ private:
 // El parámetro lo usamos para sobrecargar: quiero que configures el flujo
 // con la configuración básica.
 template <uint32_t baud_rate = 9600u,
-	  uint32_t f_clock   = MCU_CLOCK_FREQUENCY_IN_HZ,
+	  uint32_t f_clock   = clock_frequency_in_hz,
 	  uint32_t tolerance = 2>
 inline void basic_cfg(UART_iostream&) 
 { 

@@ -41,7 +41,7 @@
 #include "avr_timer1_basic.h"
 #include "avr_timern_basic.h"
 #include "avr_interrupt.h"
-#include "avr_cfg.h"	// MCU_CLOCK_FREQUENCY_IN_HZ
+#include "avr_cfg.h"	// clock_frequency_in_hz
 #include "avr_micro.h"
 
 namespace avr_{
@@ -181,7 +181,7 @@ inline Frequency clock_frequency_in_Hz_8MHz()
 
 
 
-template<uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
+template<uint32_t clock_frequency_in_hz = clock_frequency_in_hz>
 inline Time clock_period()
 {
     if constexpr (clock_frequency_in_hz == 1000000UL)
@@ -319,7 +319,7 @@ public:
     /// tiempo directamente del contador.
     // Leer notas en Time_counter0_g
     template<uint16_t period_in_us
-	    , uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
+	    , uint32_t clock_frequency_in_hz = clock_frequency_in_hz>
     struct turn_on_with_clock_period_of{
 	static void us()
 	{timer1_::set_clock_period_in_us<period_in_us, clock_frequency_in_hz>();}
@@ -337,10 +337,10 @@ public:
     /// para que se haya alcanzado 1s)
     /// Recordar que el cliente es responsable de llamar a `enable_interrupts()`
     /// para que funcione.
-    template <uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
+    template <uint32_t clock_frequency_in_hz = clock_frequency_in_hz>
     static counter_type turn_on_with_overflow_to_count_1s();
 
-    template <uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
+    template <uint32_t clock_frequency_in_hz = clock_frequency_in_hz>
     static void turn_on_with_overflow_every_1ms();
 
     /// Apagamos el contador
@@ -537,7 +537,7 @@ private:
     static void init(){ Timer::CTC_mode_top_ICR1();}
 
     template<uint16_t period
-	    , uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
+	    , uint32_t clock_frequency_in_hz = clock_frequency_in_hz>
     static void turn_on()
     {timer1_::set_clock_period_in_us<period, clock_frequency_in_hz>();}
 
@@ -565,7 +565,7 @@ private:
     /// Devuelve la frecuencia, en Hz,  que se genera dados 
     /// el prescaler factor d (divisor de frecuencia) y el top M. 
     /// (pag 132 datasheet)
-    template <uint32_t f_clock_in_Hz = MCU_CLOCK_FREQUENCY_IN_HZ>
+    template <uint32_t f_clock_in_Hz = clock_frequency_in_hz>
     static constexpr 
     uint32_t prescaler_top_to_frequency_in_Hz(uint32_t d, uint32_t M)
     { return avr_::timer_::
@@ -574,7 +574,7 @@ private:
     /// Función inversa a la prescaler_top_to_frequency_in_Hz:
     /// Devuelve el par (prescaler factor, top) necesario para generar la
     /// frecuencia freq_in_Hz.
-    template <uint32_t f_clock_in_Hz = MCU_CLOCK_FREQUENCY_IN_HZ>
+    template <uint32_t f_clock_in_Hz = clock_frequency_in_hz>
     static constexpr 
     std::pair<uint32_t, uint32_t> 
     frequency_in_Hz_to_prescaler_top(uint32_t freq_in_Hz)
@@ -697,7 +697,7 @@ public:
 
 
 // Timer características
-    template<uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
+    template<uint32_t clock_frequency_in_hz = clock_frequency_in_hz>
     static Time clock_period() {return timer1_::clock_period();}
 
     static Frequency clock_frequency() {return Timer::clock_frequency();}
@@ -706,7 +706,7 @@ public:
 // Timer on/off
 // ------------
     template<uint16_t period
-	    , uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
+	    , uint32_t clock_frequency_in_hz = clock_frequency_in_hz>
     static void turn_on()
     {timer1_::set_clock_period_in_us<period, clock_frequency_in_hz>();}
 

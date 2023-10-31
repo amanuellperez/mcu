@@ -34,7 +34,7 @@
  *    10/12/2020 v0.0
  *
  ****************************************************************************/
-
+#include <atd_bit.h>
 #include <atd_decimal.h>
 #include <atd_magnitude.h>
 #include "dev_TWI_memory_type.h"

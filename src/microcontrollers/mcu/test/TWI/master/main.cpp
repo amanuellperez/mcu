@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 Manuel Perez 
+// Copyright (C) 2019-2023 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -18,29 +18,39 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 // Este microcontrolador dialoga con el test/TWI/slave
-#include "../../../avr_atmega328p_cfg.h"
-#include "../../../avr_time.h"  // TODO: cambiar orden
-#include "../../../avr_UART_iostream.h" // TODO: cambiar orden
-#include "../../../avr_TWI_basic.h"
-#include "../../../avr_TWI_master.h"
+#include "../../../dev_TWI_master.h"
+#include <avr_atmega.h>
 
 
+// Microcontroller
+// ---------------
+namespace mcu = atmega;
+using Micro   = mcu::Micro;
+
+
+// Devices
+// -------
 constexpr uint8_t TWI_buffer_size = 10;
-using TWI = avr_::TWI_master<avr_::TWI_basic, TWI_buffer_size>;
+
+using TWI_master_cfg = dev::TWI_master_cfg<Micro, 
+                                           mcu::TWI_basic,
+					   TWI_buffer_size>;
+
+using TWI = dev::TWI_master<TWI_master_cfg>;
 
 constexpr uint8_t slave_address = 0x10;
 
 inline void traza_twcr()
 {
     auto tmp = TWCR;
-    avr_::UART_iostream uart;
+    mcu::UART_iostream uart;
     uart << "TWCR = " << static_cast<uint16_t>(tmp) << '\n';
 }
 
 
 void twi_print_error()
 {
-    avr_::UART_iostream uart;
+    mcu::UART_iostream uart;
 
     if (TWI::no_response())
 	uart << "Slave no responde.\n";
@@ -57,7 +67,7 @@ void twi_print_error()
 
 void twi_print_state()
 {
-    avr_::UART_iostream uart;
+    mcu::UART_iostream uart;
 
     if (TWI::error())
 	uart << "state == error()\n";
@@ -90,7 +100,7 @@ void twi_print_state()
 
 void twi_print_state(TWI::iostate st)
 {
-    avr_::UART_iostream uart;
+    mcu::UART_iostream uart;
 
     switch(st){
     case TWI::iostate::ok:
@@ -162,7 +172,7 @@ void twi_print_state(TWI::iostate st)
 
 void send_service1()
 {
-    avr_::UART_iostream uart;
+    mcu::UART_iostream uart;
     uart << "\n\n=================\n";
     uart << "Service1:\n";
 
@@ -285,7 +295,7 @@ void send_service1()
 
 void send_service2()
 {
-    avr_::UART_iostream uart;
+    mcu::UART_iostream uart;
     uart << "\n\n=================\n";
     uart << "Service2:\n";
 
@@ -318,7 +328,7 @@ void send_service2()
 
 void send_service3()
 {
-    avr_::UART_iostream uart;
+    mcu::UART_iostream uart;
     uart << "\n\n=================\n";
     uart << "Service3:\n";
 
@@ -438,11 +448,11 @@ void send_service3()
 void test_write()
 {
     send_service1();
-    avr_::wait_ms(500);
+    Micro::wait_ms(500);
     send_service2();
-    avr_::wait_ms(500);
+    Micro::wait_ms(500);
     send_service3();
-    avr_::wait_ms(500);
+    Micro::wait_ms(500);
 
 }
 
@@ -457,8 +467,8 @@ void test_master()
 
 int main() 
 {
-    avr_::UART_iostream uart;
-    avr_::basic_cfg(uart);
+    mcu::UART_iostream uart;
+    mcu::basic_cfg(uart);
     uart.turn_on();
 
     uart << "Empezando como MASTER\n";

@@ -13,10 +13,12 @@ DIRS = \
 	timer0	\
 	timer1	\
 	timer2	\
-	TWI		\
 	USART 
 
 # Revisar:  ADC	
+
+# TWI: el test de TWI está dentro de mcu.
+#      Probarlo directamente con TWI_master/TWI_slave
 
 
 include $(MCU_RECRULES)

@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 Manuel Perez 
+// Copyright (C) 2019-2023 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -18,18 +18,26 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 // Este microcontrolador dialoga con el test/TWI/slave
-#include "../../../avr_atmega328p_cfg.h"
-#include "../../../avr_TWI_basic.h"
-#include "../../../avr_TWI_master_ioxtream.h"
-#include "../../../avr_time.h"  
-#include "../../../avr_UART_iostream.h" 
+#include "../../../dev_TWI_master_ioxtream.h"
+#include "../../../dev_TWI_master.h"
+#include <avr_atmega.h>
+
+// Microcontroller
+// ---------------
+namespace mcu = atmega;
+using Micro   = mcu::Micro;
 
 
+// Devices
+// -------
 constexpr uint8_t TWI_buffer_size = 100;
-using TWI_master = avr_::TWI_master<avr_::TWI_basic, TWI_buffer_size>;
+using TWI_master_cfg = dev::TWI_master_cfg<Micro, 
+                                           mcu::TWI_basic,
+					   TWI_buffer_size>;
 
-//using TWI = avr_::TWI_master_ioxtream<avr_::TWI_basic, TWI_buffer_size>;
-using TWI = avr_::TWI_master_ioxtream<TWI_master>;
+using TWI_master  = dev::TWI_master<TWI_master_cfg>;
+
+using TWI = dev::TWI_master_ioxtream<TWI_master>;
 
 constexpr uint8_t slave_address = 0x10;
 
@@ -37,7 +45,7 @@ constexpr uint8_t slave_address = 0x10;
 
 void twi_print_state()
 {
-    avr_::UART_iostream uart;
+    mcu::UART_iostream uart;
 
     if (TWI::error())
 	uart << "state == error()\n";
@@ -70,7 +78,7 @@ void twi_print_state()
 
 void twi_print_error()
 {
-    avr_::UART_iostream uart;
+    mcu::UART_iostream uart;
 
     if (TWI::no_response())
 	uart << "Slave no responde.\n";
@@ -99,7 +107,7 @@ void twi_print_error()
 
 void send_service1()
 {
-    avr_::UART_iostream uart;
+    mcu::UART_iostream uart;
     uart << "\n==============================\n";
     uart << "Service1:\n";
 
@@ -154,7 +162,7 @@ void send_service1()
 
 void send_service2()
 {
-    avr_::UART_iostream uart;
+    mcu::UART_iostream uart;
     uart << "\n==============================\n";
     uart << "Service2: ";
 
@@ -178,20 +186,20 @@ void send_service2()
 template <typename T>
 void uart_print(const T& x)
 {
-    avr_::UART_iostream uart;
+    mcu::UART_iostream uart;
     uart << x;
 }
 
 void uart_print(std::byte b)
 {
-    avr_::UART_iostream uart;
+    mcu::UART_iostream uart;
     uart << (int) b;
 }
 
 template <typename Int>
 void send_type(const Int& x0, const char* tname)
 {
-    avr_::UART_iostream uart;
+    mcu::UART_iostream uart;
     uart << "\n==============================\n";
     uart << "Enviando un " << tname << ": ";
 
@@ -232,7 +240,7 @@ void send_type(const Int& x0, const char* tname)
 
 void send_service4()
 {
-    avr_::UART_iostream uart;
+    mcu::UART_iostream uart;
     uart << "\n==============================\n";
     uart << "Service4: \n";
 
@@ -324,7 +332,7 @@ Ostream& operator<<(Ostream& out, const Data& d)
 
 void service(const Data& in, Data& out)
 {
-    avr_::UART_iostream uart;
+    mcu::UART_iostream uart;
 
     TWI twi;
     twi.open(slave_address);
@@ -349,7 +357,7 @@ void service(const Data& in, Data& out)
 
 void test_typical_service()
 {
-    avr_::UART_iostream uart;
+    mcu::UART_iostream uart;
     uart << "\n==============================\n";
     uart << "typical_service: ";
 
@@ -369,7 +377,7 @@ void test_n()
     constexpr int data_size = 3;
     std::byte data[3] = {std::byte{10}, std::byte{20}, std::byte{30}};
 
-    avr_::UART_iostream uart;
+    mcu::UART_iostream uart;
     uart << "\n==============================\n";
     uart << "Probando read(q,n) y write(q, n): ";
     TWI twi;
@@ -410,14 +418,14 @@ void test_master()
 {
     while (1) {
 	send_service1();
-	avr_::wait_ms(500);
+	Micro::wait_ms(500);
 	send_service2();
-	avr_::wait_ms(500);
+	Micro::wait_ms(500);
 	test_all_send_type();
-	avr_::wait_ms(500);
+	Micro::wait_ms(500);
 	send_service4();
 	test_typical_service();
-	avr_::wait_ms(200);
+	Micro::wait_ms(200);
 	test_n();
     }
 }
@@ -425,8 +433,8 @@ void test_master()
 
 int main() 
 {
-    avr_::UART_iostream uart;
-    avr_::basic_cfg(uart);
+    mcu::UART_iostream uart;
+    mcu::basic_cfg(uart);
     uart.turn_on();
 
     uart << "\n\n\n* * * * * * * * * * * * * * * * * * * * * * * * * * * *\n";

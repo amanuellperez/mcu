@@ -37,8 +37,10 @@
 #include <dev_keyrow.h>
 
 #include <dev_DS1307_clock.h>
+#include <dev_TWI_master.h>
 
 #include <avr_atmega.h>
+
 
 // Microcontroller
 // ---------------
@@ -70,7 +72,10 @@ using Keyrow_pins = dev::Keyrow_pins<23, 24, 25>;
 
 // using TWI: pins 27 and 28
 static constexpr uint8_t TWI_buffer_size = 70; 
-using TWI = atmega::TWI_master<atmega::TWI_basic, TWI_buffer_size>;
+using TWI_master_cfg = dev::TWI_master_cfg<Micro, 
+                                           mcu::TWI_basic,
+					   TWI_buffer_size>;
+using TWI = dev::TWI_master<TWI_master_cfg>;
 static constexpr int TWI_frecuency = 50; // kHz
 
 

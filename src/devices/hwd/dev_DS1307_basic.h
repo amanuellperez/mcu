@@ -37,9 +37,6 @@
 #include <atd_memory.h>	// Memory_type
 #include <atd_bcd.h>
 
-#include <avr_TWI.h>
-#include "not_generic.h"
-
 #include <atd_bit.h>
 #include "dev_TWI_memory_type.h"
 
@@ -322,7 +319,7 @@ private:
 template <typename TWI_master>
 uint8_t DS1307_basic<TWI_master>::ram_read(std::byte* buf, uint8_t n, uint8_t i)
 {
-    using TWI = not_generic::TWI_master_ioxtream<TWI_master>;
+    using TWI = TWI_master_ioxtream<TWI_master>;
 
     TWI twi;
     twi.open(slave_address);
@@ -350,7 +347,7 @@ uint8_t DS1307_basic<TWI_master>::ram_read(std::byte* buf, uint8_t n, uint8_t i)
 template <typename TWI_master>
 uint8_t DS1307_basic<TWI_master>::ram_write(std::byte* buf, uint8_t n, uint8_t i)
 {
-    using TWI = not_generic::TWI_master_ioxtream<TWI_master>;
+    using TWI = TWI_master_ioxtream<TWI_master>;
 
     TWI twi;
     twi.open(slave_address);

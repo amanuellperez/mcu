@@ -45,11 +45,15 @@
 #include "avr_types.h"
 
 // CONFIGURACIÓN DEL RELOJ
-// TODO: eliminar esta a favor de clock_frequency!!!
-    constexpr uint32_t MCU_CLOCK_FREQUENCY_IN_HZ = F_CPU;
 
 namespace avr_{
-//constexpr Frequency clock_frequency{F_CPU, 0};
+
+// DUDA: ¿Cuál de las siguientes dos versiones usar?
+// (1) Para parámetro de template queda mejor el uint32_t.
+// (2) Para el resto mejor `Frequency`.
+// De momento suministro las dos y que el uso elija.
+//
+constexpr uint32_t clock_frequency_in_hz = F_CPU;
 constexpr Frequency clock_frequency{F_CPU};
 
 }// namespace

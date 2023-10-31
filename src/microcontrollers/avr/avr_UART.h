@@ -45,11 +45,11 @@
  ****************************************************************************/
 
 #include "avr_UART_basic.h"
-#include "avr_cfg.h"	// MCU_CLOCK_FREQUENCY_IN_HZ
+#include "avr_cfg.h"	// clock_frequency_in_hz
 
 namespace avr_{
 template <uint32_t baud_rate = 9600u,
-	  uint32_t f_clock   = MCU_CLOCK_FREQUENCY_IN_HZ,
+	  uint32_t f_clock   = clock_frequency_in_hz,
 	  uint32_t tolerance = 2>
 void UART_basic_cfg()
 {                                

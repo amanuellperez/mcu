@@ -28,11 +28,7 @@ INCS= dev_concepts.h	\
 	avr_timer1_generic.h\
 	avr_timer2_basic.h	\
 	avr_timer2_generic.h\
-	avr_TWI.h			\
 	avr_TWI_basic.h		\
-	avr_TWI_master.h	\
-	avr_TWI_slave.h		\
-	avr_TWI_master_ioxtream.h\
 	avr_types.h				\
 	avr_UART.h				\
 	avr_UART_basic.h		\
@@ -41,6 +37,10 @@ INCS= dev_concepts.h	\
 	avr_watchdog.h			\
 	avr_not_generic.h	
 
+#	avr_TWI_master.h	\
+	avr_TWI_slave.h		\
+	avr_TWI_master_ioxtream.h\
+	avr_TWI.h			\
 
 LIB=avr_$(F_CPU)
 INSTALL_INC=$(MCU_INCLUDE)

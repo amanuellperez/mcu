@@ -51,7 +51,7 @@ struct Micro{
 
 // Cfg
 // ---
-    static constexpr auto frequency = F_CPU;
+    static constexpr auto clock_frequency_in_hz = F_CPU;
 
 // Types
 // -----

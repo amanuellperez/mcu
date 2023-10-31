@@ -32,7 +32,7 @@
  *
  ****************************************************************************/
 #include "avr_timer2_basic.h"
-#include "avr_cfg.h"	// MCU_CLOCK_FREQUENCY_IN_HZ
+#include "avr_cfg.h"	// clock_frequency_in_hz
 #include "avr_time.h"	// wait_ms
 #include "avr_interrupt.h" // Disable_interrupts
 
@@ -171,10 +171,10 @@ public:
     // Encendemos el Counter en modo síncrono. El usuario será responsable de
     // llamar a la función init y activar las interrupciones si las necesita.
     template<uint16_t period_in_us
-	    , uint32_t clock_frequency_in_Hz = MCU_CLOCK_FREQUENCY_IN_HZ>
+	    , uint32_t clock_frequency_in_Hz = clock_frequency_in_hz>
     struct turn_on_with_clock_period_of{ static void us(); };
 
-    template <uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
+    template <uint32_t clock_frequency_in_hz = clock_frequency_in_hz>
     static counter_type turn_on_with_overflow_to_count_1s();
 
     /// Apagamos el generador de señales.
@@ -270,7 +270,7 @@ class Time_counter2_32kHz_g{
 public:
 // Asserts
 // -------
-    static_assert(MCU_CLOCK_FREQUENCY_IN_HZ >= 4 * 32768,
+    static_assert(clock_frequency_in_hz >= 4 * 32768,
 		"The CPU main clock frequency must be more "
 		"than four times the oscillator frequency");
 

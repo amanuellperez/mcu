@@ -42,10 +42,6 @@
  *		 - Crear BMP280_SPI: se conecta vía SPI al sensor.
  *
  ****************************************************************************/
-
-#include <stdint.h> // uint16_t ...
-#include <avr_TWI.h>
-#include <cstddef>  // std::byte
 #include <atd_bit.h>
 #include <atd_decimal.h>
 #include <atd_magnitude.h>

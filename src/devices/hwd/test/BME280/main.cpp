@@ -18,36 +18,43 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "../../dev_BME280_basic.h"
-#include <cstddef>
-#include <atd_ostream.h>
+
 #include <atd_cstddef.h>
+
 #include <avr_atmega.h>
 
+#include <dev_TWI_master.h>
+
+// Microcontroller
+// ---------------
 namespace mcu = atmega;
-
-// pines que usamos
-// ----------------
+using Micro   = mcu::Micro;
 
 
-// dispositivos que conectamos
-// ---------------------------
-// Dispositivo TWI al que conectamos
-static constexpr uint8_t TWI_buffer_size = 100; 
-using TWI_master = mcu::TWI_master<mcu::TWI_basic, TWI_buffer_size>;
+// TWI Protocol
+// ------------
+constexpr uint8_t TWI_buffer_size = 100;
+using TWI_master_cfg = dev::TWI_master_cfg<Micro, 
+                                           mcu::TWI_basic,
+					   TWI_buffer_size>;
+
+using TWI_master  = dev::TWI_master<TWI_master_cfg>;
+using TWI = dev::TWI_master_ioxtream<TWI_master>;
+
+// 50 kHz es la unica frecuencia de TWI que va a 1MHz.
+// 100 kHz a 8 MHz
+static constexpr int TWI_frecuency = 50; // kHz
 
 
-// Dispositivos
-using TWI = mcu::TWI_master_ioxtream<TWI_master>;
-using Sensor = dev::BME280_TWI<TWI_master, 0x76>;
-
+// Devices
+// -------
 // En el breakout de adafruit la dirección la determina la conexión del pin
 // SDO:
-//	si SDO = GND	    ==> slave_address = 0x76
-//	si SDO = flotante   ==> slave_address = 0x77
+//	si SDO = GND	    ==> sensor_twi_address = 0x76
+//	si SDO = flotante   ==> sensor_twi_address = 0x77
+static constexpr TWI::Address sensor_twi_address = 0x77;
+using Sensor = dev::BME280_TWI<TWI_master, sensor_twi_address>;
 
-
-// para depurar
-static constexpr uint8_t slave_address = 0x76;
 
 void twi_print_state(TWI::iostate st)
 {
@@ -125,7 +132,7 @@ void twi_print_state(TWI::iostate st)
 void bme280_read_all_mem(std::byte addr, std::byte* mem, uint8_t n)
 {
     TWI twi;
-    twi.open(slave_address);
+    twi.open(sensor_twi_address);
     
     twi << addr;
     twi.read(n);

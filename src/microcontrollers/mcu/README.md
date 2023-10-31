@@ -2,7 +2,67 @@
 
 Read the spanish description or look the directory `test`.
 
-Tested: avr-gcc 9.2.0
+
+### TWI_master_ioxtream
+
+```
+#include <avr_TWI_basic.h>
+#include <avr_TWI_master_ioxtream.h>
+
+constexpr uint8_t TWI_buffer_size = 100;
+using TWI = avr::TWI_master_ioxtream<avr::TWI_basic, TWI_buffer_size>;
+constexpr uint8_t slave_address = 0x10;
+
+void service(const Data_in& in, Data_out& out)
+{
+    TWI twi;
+    twi.open(slave_address);
+    
+    twi << in;
+
+    if (twi.error()){
+	uart << "Error: ";
+	twi_print_error();
+	return;
+    }
+
+    twi.read(Data::size()); // TODO: how to improve this???
+    twi >> out;
+
+    twi.close();
+
+    if (twi.error())
+	twi_print_error();
+}
+
+// Don't forget the ISR!!!
+ISR(TWI_vect)
+{
+    TWI::handle_interrupt();
+}
+```
+
+The problem with avr TWI is that its buffer is only of 1 byte. I change this
+behaviour by software. 3 different configurations are given:
+
+* `avr_TWI_master.h`: TWI with buffer. Only works as a master.
+* `avr_TWI_slave.h`: TWI with buffer. Only works as a slave.
+* `avr_TWI_multimaster.h`: TWI with buffer that can work as a master or slave.
+(TODO).
+
+But I don't want to remember the TWI protocol. It would be great if I can treat
+TWI as a normal `iostream`:
+
+* `avr_TWI_master_ioxtream.h`: TWI works as an `ioxtream`. Only works as a
+  master.
+
+#### ¿iostream vs ioxtream?
+What is the difference between an `iostream` and an `ioxtream`? `iostreams` are
+character streams, but `ioxtreams` are bytes streams. I want to send `uint16_t x
+= 500` as two byts '0x01F4` and not as 3 characters '5', '0', '0'.
+
+
+Compiler: avr-gcc 11.3.0
 
 ---
 
@@ -94,5 +154,75 @@ Ejemplos de relojes que podemos tener son:
 
 * 1-wire de Maxim
 
+* 2-wire (TWI o I2C)
 
-Probado con: avr-gcc 9.2.0
+
+## TWI_master_ioxtream
+Si se quiere usar TWI como master concibiéndolo como un flujo usar
+`avr::TWI_master_ioxtream`.
+
+```
+#include <avr_TWI_basic.h>
+#include <avr_TWI_master_ioxtream.h>
+
+constexpr uint8_t TWI_buffer_size = 100;
+using TWI = avr::TWI_master_ioxtream<avr::TWI_basic, TWI_buffer_size>;
+constexpr uint8_t slave_address = 0x10;
+
+void service(const Data_in& in, Data_out& out)
+{
+    TWI twi;
+    twi.open(slave_address);
+    
+    twi << in;
+
+    if (twi.error()){
+	uart << "Error: ";
+	twi_print_error();
+	return;
+    }
+
+    twi.read(Data::size()); // TODO: how to improve this???
+    twi >> out;
+
+    twi.close();
+
+    if (twi.error())
+	twi_print_error();
+}
+
+// No olvides definir la ISR
+ISR(TWI_vect)
+{
+    TWI::handle_interrupt();
+}
+
+```
+
+El paquete TWI incluye:
+
+* `avr_TWI_basic.h`: traductor de la datasheet.  Son todas las funciones que 
+  tiene el hardware de TWI.
+		    
+
+El problema que tiene el TWI del avr es que tiene un buffer interno de 1 byte. 
+Por software modifico esto suministrando un TWI con un buffer interno más
+grande. Aprovecho y separo TWI en 3 diferentes configuraciones:
+
+* `avr_TWI_master.h`: TWI con buffer que funciona únicamente como master.
+* `avr_TWI_slave.h`: TWI con buffer que funciona únicamente como slave.
+* `avr_TWI_multimaster.h`: TWI con buffer que funciona como master o slave.
+(TODO: no está implementado de momento)
+
+Pero es un rollo tener que andar recordando el protocolo de TWI. ¿No es mejor
+concebirlo como un `iostream` vulgar y corriente? De eso se encarga:
+* `avr_TWI_master_ioxtream.h`: concebimos TWI como un `ioxtream`. Este solo
+  funciona como master. 
+
+#### ¿iostream vs ioxtream?
+¿Cuál es la diferencia entre un `iostream` y un `ioxtream`? Los `iostream`
+clásicos de C++ son flujos de caracteres, mientras que un `ioxtream` es un flujo
+de bytes (en TWI, SPI... son precisamente estos flujos los que nos interesan).
+
+
+Compilador: avr-gcc 11.3.0

@@ -74,7 +74,7 @@
 
 #include <avr/io.h> // registros: DDRB... PORT...
 #include "avr_pin.h"
-#include "avr_cfg.h"	// MCU_CLOCK_FREQUENCY_IN_HZ
+#include "avr_cfg.h"	// clock_frequency_in_hz
 
 namespace avr_{
 /*!
@@ -160,15 +160,15 @@ public:
 //    /// Definimos el periodo del reloj que usa el timer.
 //    /// clock_frequency_in_hz = es la frecuencia del reloj del AVR.
 //    template<uint16_t period
-//	    , uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
+//	    , uint32_t clock_frequency_in_hz = clock_frequency_in_hz>
 //    static void set_clock_period_in_us();
 //
 //    // Si la frecuencia del micro es 8MHz puede funcionar a 125 ns
 //    template<uint16_t period
-//	    , uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
+//	    , uint32_t clock_frequency_in_hz = clock_frequency_in_hz>
 //    static void set_clock_period_in_ns();
 //
-//    template<uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
+//    template<uint32_t clock_frequency_in_hz = clock_frequency_in_hz>
 //    static Time clock_period();
 
     /// Seleccionamos la frecuencia a la que funciona el timer usando el
@@ -178,7 +178,7 @@ public:
 
     /// Frecuencia a la que funciona internamente el timer.
     /// Se cumple que clock_frequency() = 1 / clock_period();
-    template <uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
+    template <uint32_t clock_frequency_in_hz = clock_frequency_in_hz>
     static Frequency clock_frequency();
 
 
@@ -526,7 +526,7 @@ inline void Timer1::external_clock_rising_edge()
 //
 //
 //
-//template<uint32_t clock_frequency_in_hz = MCU_CLOCK_FREQUENCY_IN_HZ>
+//template<uint32_t clock_frequency_in_hz = clock_frequency_in_hz>
 //inline Time Timer1::clock_period()
 //{
 //    if constexpr (clock_frequency_in_hz == 1000000UL)

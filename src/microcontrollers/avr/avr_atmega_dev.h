@@ -30,7 +30,7 @@
  *      08/12/2022 Escrito
  *
  ****************************************************************************/
-#include "avr_cfg.h"	// MCU_CLOCK_FREQUENCY_IN_HZ
+#include "avr_cfg.h"	// clock_frequency_in_hz
 			
 /***************************************************************************
  *			BUILT-IN DEVICES FOR ATMEGA
@@ -65,6 +65,10 @@
 //
 
 namespace atmega{
+
+// MICRO
+    using Micro = avr_::Micro;
+
 
 // PINS
     template <uint8_t n>
@@ -111,17 +115,17 @@ namespace atmega{
 
     using TWI_basic  = avr_::TWI_basic;
 
-    // TODO: esta es genérica, no depende de avr. Sacarla de avr
-    template <typename TWI, typename TWI::streamsize buffer_size0>
-    using TWI_master = avr_::TWI_master<TWI, buffer_size0>;
-
-    // TODO: esta es genérica, no depende de avr. Sacarla de avr
-    template <typename TWI_master>
-    using TWI_master_ioxtream = avr_::TWI_master_ioxtream<TWI_master>;
-
-    // TODO: esta es genérica, no depende de avr. Sacarla de avr
-    template <typename TWI, uint8_t buffer_size>
-    using TWI_slave = avr_::TWI_slave<TWI, buffer_size>;
+//    // TODO: esta es genérica, no depende de avr. Sacarla de avr
+//    template <typename TWI, typename TWI::streamsize buffer_size0>
+//    using TWI_master = avr_::TWI_master<TWI, buffer_size0>;
+//
+//    // TODO: esta es genérica, no depende de avr. Sacarla de avr
+//    template <typename TWI_master>
+//    using TWI_master_ioxtream = avr_::TWI_master_ioxtream<TWI_master>;
+//
+//    // TODO: esta es genérica, no depende de avr. Sacarla de avr
+//    template <typename TWI, uint8_t buffer_size>
+//    using TWI_slave = avr_::TWI_slave<TWI, buffer_size>;
 
 
 // MCU UTILITIES
@@ -146,10 +150,7 @@ namespace atmega{
 
     namespace literals{ using namespace avr_::literals; }
 
-// micro
-// -----
-    using Micro = avr_::Micro;
-
+    
 
 /***************************************************************************
  *			FUNCIONES AUXILIARES
@@ -158,7 +159,7 @@ namespace atmega{
     // El parámetro lo usamos para sobrecargar: quiero que configures el flujo
     // con la configuración básica.
     template <uint32_t baud_rate = 9600u,
-	      uint32_t f_clock   = MCU_CLOCK_FREQUENCY_IN_HZ,
+	      uint32_t f_clock   = avr_::clock_frequency_in_hz,
 	      uint32_t tolerance = 2>
     inline static void basic_cfg(avr_::UART_iostream&) 
     { return avr_::UART_basic_cfg<baud_rate, f_clock, tolerance>(); }

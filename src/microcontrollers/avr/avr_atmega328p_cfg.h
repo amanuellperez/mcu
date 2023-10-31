@@ -177,25 +177,10 @@ inline constexpr int8_t nINT_of_pin()
 	static constexpr uint8_t TOSC2_pin = 10;
     };
 
-}// namespace cfg
 
 
-// namespace cfg{ ir incluyendo el resto según vaya reescribiendo codigo
-// --------------
-// CONFIGURACIÓN DEL ADC
-    // Devuelve el número de pin dentro del ADC que le corresponde al num_pin
-    // del avr
-    template<uint8_t num_pin> struct ADC_PIN{ static uint8_t value; };
-
-    template<> struct ADC_PIN<23>{ static constexpr uint8_t value = 0; };
-    template<> struct ADC_PIN<24>{ static constexpr uint8_t value = 1; };
-    template<> struct ADC_PIN<25>{ static constexpr uint8_t value = 2; };
-    template<> struct ADC_PIN<26>{ static constexpr uint8_t value = 3; };
-    template<> struct ADC_PIN<27>{ static constexpr uint8_t value = 4; };
-    template<> struct ADC_PIN<28>{ static constexpr uint8_t value = 5; };
-
-
-// CONFIGURACIÓN DEL TWI
+// TWI
+// ---
     constexpr uint8_t TWI_MASK_STATUS_BITS = 0xF8;
     constexpr uint8_t TWI_MASK_BIT_RATE_PRESCALER = 0x03;
     // bits of slave address: [1,7]
@@ -234,8 +219,9 @@ inline constexpr int8_t nINT_of_pin()
     // Data byte has been received and NACK tramsmitted
     constexpr static uint8_t TWI_MRM_DATA_NACK = 0x58;
    
+namespace impl_of{
     // Modos comunes a transmitter/receiver mode
-    struct __TWI_basic_iostate_master_mode {
+    struct TWI_basic_state_master_mode {
         // START has been transmitted
         static constexpr uint8_t start = 0x08;
 
@@ -247,7 +233,7 @@ inline constexpr int8_t nINT_of_pin()
     };
 
     // Table 26-3, junto con el diagrama figure 26-12.
-    struct __TWI_basic_iostate_master_transmitter_mode {
+    struct TWI_basic_state_master_transmitter_mode {
         // SLA+W has been tramsmitted and ACK received
         static constexpr uint8_t sla_w_ack = 0x18;
 
@@ -262,7 +248,7 @@ inline constexpr int8_t nINT_of_pin()
     };
 
     // Table 26-4, junto con el diagrama figure 26-14.
-    struct __TWI_basic_iostate_master_receiver_mode {
+    struct TWI_basic_state_master_receiver_mode {
 
         // SLA+R has been tramsmitted and ACK received
         constexpr static uint8_t sla_r_ack = 0x40;
@@ -278,7 +264,7 @@ inline constexpr int8_t nINT_of_pin()
     };
 
     // Table 26-5, junto con el diagrama figure 26-16.
-    struct __TWI_basic_iostate_slave_transmitter_mode {
+    struct TWI_basic_state_slave_transmitter_mode {
 	// Own SLA+R has been received; ACK has been returned
 	static constexpr uint8_t sla_r            = 0xA8;
 
@@ -299,7 +285,7 @@ inline constexpr int8_t nINT_of_pin()
 
 
     // Table 26-6, junto con el diagrama figure 26-18.
-    struct __TWI_basic_iostate_slave_receiver_mode {
+    struct TWI_basic_state_slave_receiver_mode {
 
         // Own SLA+W has been received ACK has been returned
         static constexpr uint8_t sla_w = 0x60;
@@ -335,17 +321,19 @@ inline constexpr int8_t nINT_of_pin()
         // still addressed as Slave
         static constexpr uint8_t stop_or_repeated_start = 0xA0;
     };
-
-    struct TWI_basic_iostate{
-	using master_mode = __TWI_basic_iostate_master_mode;
+} // namespace impl_of
+  
+    struct TWI_basic_state{
+	using master_mode = impl_of::TWI_basic_state_master_mode;
         using master_transmitter_mode =
-			        __TWI_basic_iostate_master_transmitter_mode;
+			impl_of::TWI_basic_state_master_transmitter_mode;
 
         using master_receiver_mode =
-			        __TWI_basic_iostate_master_receiver_mode;
-        using slave_receiver_mode = __TWI_basic_iostate_slave_receiver_mode;
+			        impl_of::TWI_basic_state_master_receiver_mode;
+        using slave_receiver_mode = 
+				impl_of::TWI_basic_state_slave_receiver_mode;
         using slave_transmitter_mode =
-				 __TWI_basic_iostate_slave_transmitter_mode;
+			      impl_of::TWI_basic_state_slave_transmitter_mode;
 
         // Miscellaneous (table 26-7)
 	// Bus error due to an illegal START or STOP condition
@@ -355,6 +343,26 @@ inline constexpr int8_t nINT_of_pin()
         // la servicio solicitado.
         static constexpr uint8_t running   = 0xF8;
     };
+
+
+
+}// namespace cfg
+
+
+// namespace cfg{ ir incluyendo el resto según vaya reescribiendo codigo
+// --------------
+// CONFIGURACIÓN DEL ADC
+    // Devuelve el número de pin dentro del ADC que le corresponde al num_pin
+    // del avr
+    template<uint8_t num_pin> struct ADC_PIN{ static uint8_t value; };
+
+    template<> struct ADC_PIN<23>{ static constexpr uint8_t value = 0; };
+    template<> struct ADC_PIN<24>{ static constexpr uint8_t value = 1; };
+    template<> struct ADC_PIN<25>{ static constexpr uint8_t value = 2; };
+    template<> struct ADC_PIN<26>{ static constexpr uint8_t value = 3; };
+    template<> struct ADC_PIN<27>{ static constexpr uint8_t value = 4; };
+    template<> struct ADC_PIN<28>{ static constexpr uint8_t value = 5; };
+
 
 
 }// namespace

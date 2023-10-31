@@ -25,22 +25,29 @@
 #include <atd_time.h>
 
 #include <avr_atmega.h>
+
+#include <dev_TWI_master.h>
+
+
+// Microcontroller
+// ---------------
 namespace mcu = atmega;
-
-// pines que usamos
-// ----------------
+using Micro   = mcu::Micro;
 
 
-// dispositivos que conectamos
-// ---------------------------
-// Dispositivo TWI al que conectamos
+// TWI Protocol
+// ------------
 static constexpr uint8_t TWI_buffer_size = 70; 
-using TWI = mcu::TWI_master<mcu::TWI_basic, TWI_buffer_size>;
+using TWI_master_cfg = dev::TWI_master_cfg<Micro, 
+                                           mcu::TWI_basic,
+					   TWI_buffer_size>;
 
+using TWI = dev::TWI_master<TWI_master_cfg>;
+
+
+// Devices
+// -------
 using RTC = dev::DS1307_clock<TWI>;
-
-
-
 
 
 

@@ -87,7 +87,7 @@ void DHT_protocol::receive_polling(Train_of_pulses& pulse)
     // (RRR) Train_of_pulses_poll_receiver no es capaz de capturar bien 
     //	     el tren de pulsos enviado por el DHT_protocol. Para eliminar este assert
     //	     es necesario cambiar la forma de leer el tren de pulsos.
-    static_assert(Micro::frequency >= 8'000'000,
+    static_assert(Micro::clock_frequency_in_hz >= 8'000'000,
 		  "Low frequency, change it to at least 8MHz");
 
     using Pin   = typename Micro::Pin<npin>;

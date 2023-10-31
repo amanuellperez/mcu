@@ -1,4 +1,4 @@
-// Copyright (C) 2020 Manuel Perez 
+// Copyright (C) 2020-2023 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __AVR_TWI_MASTER_IOXTREAM_H__
-#define __AVR_TWI_MASTER_IOXTREAM_H__
+#ifndef __DEV_TWI_MASTER_IOXTREAM_H__
+#define __DEV_TWI_MASTER_IOXTREAM_H__
 
 /****************************************************************************
  *
@@ -43,18 +43,18 @@
  *  todo de una misma vez. A fin de cuentas esta es una versión de aprendizaje
  *  y no se si la usaré o no. 
  *
- *  - TODO: esta clase no depende del avr::TWI. Sacarla de avr (hacerlo a la
- *  vez que se saque TWI_master/slave).
  *
  *  - HISTORIA:
  *    Manuel Perez
  *    24/02/2020 v0.0
+ *    31/10/2023 Lo independizo de avr. Primer intento de ser genérico.
  *
  ****************************************************************************/
-#include "avr_TWI_master.h"
+#include <cstdint>  // uint8_t
+#include <cstddef>  // std::byte
+		    
 
-
-namespace avr_{
+namespace dev{
 /*!
  *  \brief  Concebimos TWI como ioxtream.
  * 
@@ -97,15 +97,13 @@ namespace avr_{
  *	(Regla: ante la duda, implementación mínima. Siempre se puede añadir
  *	en el futuro sin cambiar el código actual.)
  */
-//template <typename TWI_basic, uint8_t buffer_size>
 template <typename TWI_master>
 class TWI_master_ioxtream{
 public:
-    // using TWI = TWI_master<TWI_basic, buffer_size>;   
-    using TWI = TWI_master;
-    using Address = TWI::Address;
-    using streamsize = TWI::streamsize;
-    using iostate = TWI::iostate;   // para depurar
+    using TWI         = TWI_master;
+    using Address     = TWI::Address;
+    using streamsize  = TWI::streamsize;
+    using iostate     = TWI::iostate;   // para depurar
 
 // Destructor
     TWI_master_ioxtream() {}
@@ -123,7 +121,7 @@ public:
 //    /// a la que vamos a operar.
 //    /// f_scl = frecuencia en kilohercios de SCL (tipica: 100 y 400 kHz).
 //    /// f_clock = frecuencia a la que funciona el reloj del avr.
-//    template <uint16_t f_scl, uint32_t f_clock = MCU_CLOCK_FREQUENCY_IN_HZ>
+//    template <uint16_t f_scl, uint32_t f_clock = clock_frequency_in_hz>
 //    static void on() {TWI::template on<f_scl, f_clock>();}
 
     /// Reinicializa el dispositivo.
@@ -208,8 +206,8 @@ public:
 //    static void handle_interrupt() {TWI::handle_interrupt();}
 
 
-// estados
-// -------
+// States
+// ------
 // grupos
     static bool is_idle() {return TWI::is_idle();} 
     static bool is_busy() {return TWI::is_busy();}

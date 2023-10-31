@@ -36,7 +36,7 @@
 #include <cstddef>    // std::byte
 #include <atd_bit.h>
 #include <avr/io.h> // registros: DDRB... PORT...
-#include "avr_cfg.h"	// MCU_CLOCK_FREQUENCY_IN_HZ
+#include "avr_cfg.h"	// clock_frequency_in_hz
 #include "avr_not_generic.h"
 
 namespace avr_{
@@ -81,6 +81,7 @@ public:
 // Types
     using streamsize = uint8_t;
     using Address = uint8_t;
+    using State   = cfg::TWI_basic_state;
 
 // Functions
     /// Selects the division factor for the bit rate generator.
@@ -96,7 +97,7 @@ public:
 
     /// Devuelve el status bit.
     static uint8_t status()
-    { return TWSR & TWI_MASK_STATUS_BITS;}
+    { return TWSR & cfg::TWI_MASK_STATUS_BITS;}
 
 
     // Selección de la velocidad del reloj
@@ -115,13 +116,13 @@ public:
 
     /// Devuelve los bits con el rate prescaler seleccionado.
     static uint8_t bit_rate_prescaler()
-    { return TWSR & TWI_MASK_BIT_RATE_PRESCALER;}
+    { return TWSR & cfg::TWI_MASK_BIT_RATE_PRESCALER;}
 
 
     /// Definimos la frecuencia del reloj SCL.
     /// f_scl = frecuencia en kHz de SCL (tipica: 100 kHz y 400 kHz).
     /// f_clock = frecuencia a la que funciona el reloj del avr.
-    template <uint16_t f_scl, uint32_t f_clock = MCU_CLOCK_FREQUENCY_IN_HZ>
+    template <uint16_t f_scl, uint32_t f_clock = clock_frequency_in_hz>
     static void SCL_frequency_in_kHz();
     
 
@@ -170,7 +171,8 @@ public:
     template <uint8_t TWI_slave_address, uint8_t TWIE_on = 1>
     static void slave_init()
     {
-	atd::write_range_bits<TWI_SLAVE_ADDRESS_BIT0,TWI_SLAVE_ADDRESS_BITn>::
+	atd::write_range_bits<cfg::TWI_SLAVE_ADDRESS_BIT0,
+						cfg::TWI_SLAVE_ADDRESS_BITn>::
 	    to<TWI_slave_address>::in(TWAR); // TWAR = TWI_slave_address;
 
 	slave_reset<TWIE_on>();

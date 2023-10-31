@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 Manuel Perez 
+// Copyright (C) 2019-2023 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -18,25 +18,34 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 // Este microcontrolador dialoga con el test/TWI/master
-
-#include "../../../avr_atmega328p_cfg.h"
-#include "../../../avr_UART_iostream.h" // cambiar de sitio
-#include "../../../avr_TWI_basic.h"
-#include "../../../avr_TWI_slave.h"
-#include "../../../avr_time.h"
-#include "../../../avr_interrupt.h"
-
-#include <atd_iobxtream.h>
+#include "../../../dev_TWI_slave.h"
+#include <avr_atmega.h>
 
 
+// Microcontroller
+// ---------------
+namespace mcu = atmega;
+using Micro   = mcu::Micro;
+
+
+// Devices
+// -------
 constexpr uint8_t TWI_buffer_size = 100; // voy a enviarle un tipo de cada: int8, int16, ...
-using TWI = avr_::TWI_slave<avr_::TWI_basic, TWI_buffer_size>;
+					 
+using TWI_slave_cfg = dev::TWI_slave_cfg<Micro, 
+                                         mcu::TWI_basic,
+					 TWI_buffer_size>;
+
+using TWI = dev::TWI_slave<TWI_slave_cfg>;
+
+
+
 
 inline void traza(const char* fname)
 {
     auto tmp = TWCR;
 
-    avr_::UART_iostream uart;
+    mcu::UART_iostream uart;
     uart << ">>> " << fname << ": TWCR = " << static_cast<uint16_t>(tmp) << "; TWINT = ";
 
     if (atd::is_one_bit<TWINT>::of(TWCR))
@@ -48,7 +57,7 @@ inline void traza(const char* fname)
 inline void traza_twcr()
 {
     auto tmp = TWCR;
-    avr_::UART_iostream uart;
+    mcu::UART_iostream uart;
     uart << "\tTWCR = " << static_cast<uint16_t>(tmp) << "\n";
 }
 
@@ -70,7 +79,7 @@ constexpr std::byte service2_name {0x87};
 // nread [out]: parametros leidos
 Service read_service_name(std::array<std::byte, TWI_buffer_size>& params_in, TWI::streamsize& nread)
 {
-    avr_::UART_iostream uart;
+    mcu::UART_iostream uart;
     uart << "\n\n=================\n";
     uart << "read_service_name\n";
 
@@ -119,7 +128,7 @@ Service read_service_name(std::array<std::byte, TWI_buffer_size>& params_in, TWI
 
 void print_TWI_state()
 {
-    avr_::UART_iostream uart;
+    mcu::UART_iostream uart;
     uart << "state = ";
 
     if (TWI::state() == TWI::iostate::listening)
@@ -159,7 +168,7 @@ void print_TWI_state()
 void service1(const std::array<std::byte, TWI_buffer_size>& params_in,
 		    std::array<std::byte, TWI_buffer_size>& params_out)
 {
-    avr_::UART_iostream uart;
+    mcu::UART_iostream uart;
     uart << "--------- Ejecutando service1\n";
     uart << "params_in: "
 	 << static_cast<uint16_t>(params_in[1]) << ", "
@@ -175,7 +184,7 @@ void service1(const std::array<std::byte, TWI_buffer_size>& params_in,
     uart << "Esperamos a que esté wrt_be\n";
     while (!TWI::wrt_be())
     { 
-	avr_::wait_ms(100);
+	Micro::wait_ms(100);
 	print_TWI_state();
 	
     }
@@ -206,7 +215,7 @@ void service1(const std::array<std::byte, TWI_buffer_size>& params_in,
 // params_in[...] = resto de parámetros
 void service2(const std::array<std::byte, TWI_buffer_size>& params_in)
 {
-    avr_::UART_iostream uart;
+    mcu::UART_iostream uart;
     uart << "-------------- Recibido service2\n";
 }
 
@@ -215,7 +224,7 @@ void service2(const std::array<std::byte, TWI_buffer_size>& params_in)
 void service_unknown(const std::array<std::byte, TWI_buffer_size>& params_in,
                      TWI::streamsize n)
 {
-    avr_::UART_iostream uart;
+    mcu::UART_iostream uart;
     uart << "--------- Service unknown\n"
 	 << "Devolvemos lo recibido\n";
 
@@ -223,7 +232,7 @@ void service_unknown(const std::array<std::byte, TWI_buffer_size>& params_in,
     uart << "Esperamos a que esté wrt_be\n";
     while (!TWI::wrt_be())
     { 
-	avr_::wait_ms(100);
+	Micro::wait_ms(100);
 	uart << "Tendría que estar en state == wrt_be, pero está en: ";
 	print_TWI_state();
 	
@@ -253,7 +262,7 @@ void service_unknown(const std::array<std::byte, TWI_buffer_size>& params_in,
 
 void test_servidor()
 {
-    avr_::UART_iostream uart;
+    mcu::UART_iostream uart;
     uart << "test_servidor\n"
          << "-------------\n"
          << "Elegir buffer_size de manera que se garantice que todo el mensaje "
@@ -313,7 +322,7 @@ void test_servidor()
 
 void test_read()
 {
-    avr_::UART_iostream uart;
+    mcu::UART_iostream uart;
     uart << "test_read\n"
 	 << "---------\n"
 	 << "Probar con distintos buffer_size\n\n";
@@ -345,7 +354,7 @@ void test_read()
 
 	uart << "\n\n------------------------\n";
 	
-	avr_::wait_ms(100);
+	Micro::wait_ms(100);
 
     }// while(1)
 
@@ -355,8 +364,8 @@ void test_read()
 
 int main() 
 {
-    avr_::UART_iostream uart;
-    avr_::basic_cfg(uart);
+    mcu::UART_iostream uart;
+    mcu::basic_cfg(uart);
     uart.turn_on();
 
     uart << "TWI slave\n"
