@@ -198,6 +198,9 @@ private:
 #define ISR_USART_UDRE	ISR(USART_UDRE_vect)
 #define ISR_USART_TX	ISR(USART_TX_vect)
 
+// TWI
+#define ISR_TWI		ISR(TWI_vect)
+
 }// namespace
 
 

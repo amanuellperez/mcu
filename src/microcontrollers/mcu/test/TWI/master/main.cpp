@@ -20,6 +20,7 @@
 // Este microcontrolador dialoga con el test/TWI/slave
 #include "../../../dev_TWI_master.h"
 #include <avr_atmega.h>
+#include <atd_ostream.h>    // print_int_as_hex
 
 
 // Microcontroller
@@ -38,8 +39,15 @@ using TWI_master_cfg = dev::TWI_master_cfg<Micro,
 
 using TWI = dev::TWI_master<TWI_master_cfg>;
 
-constexpr uint8_t slave_address = 0x10;
 
+// Slave info
+// ----------
+constexpr uint8_t slave_address = 0x10;
+constexpr uint8_t nservices = 2;
+constexpr uint8_t service_id[nservices] = {0x34, 0x87};
+
+// Functions
+// ---------
 inline void traza_twcr()
 {
     auto tmp = TWCR;
@@ -53,7 +61,7 @@ void twi_print_error()
     mcu::UART_iostream uart;
 
     if (TWI::no_response())
-	uart << "Slave no responde.\n";
+	uart << "Slave no response.\n";
 
     else if (TWI::eow_data_nack())
 	uart << "Error: eow_data_nack\n";
@@ -62,7 +70,7 @@ void twi_print_error()
 	uart << "Error de programación\n";
 
     else
-	uart << "Error desconocido\n";
+	uart << "Unknown error\n";
 }
 
 void twi_print_state()
@@ -94,7 +102,7 @@ void twi_print_state()
 	uart << "state == ok()\n";
 
     else
-	uart << "state DESCONOCIDO!!!\n";
+	uart << "Unknown state!!!\n";
     
 }
 
@@ -164,23 +172,23 @@ void twi_print_state(TWI::iostate st)
 	break;
 
     default:
-	uart << "desconocido\n";
+	uart << "Unknown state\n";
     }   
 }
 
 
 
-void send_service1()
+void send_service0()
 {
     mcu::UART_iostream uart;
     uart << "\n\n=================\n";
-    uart << "Service1:\n";
+    uart << "Service 0:\n";
 
     TWI::reset();
 
     constexpr uint8_t N = 8;
     uint8_t msg[N];
-    msg[0] = 0x34;
+    msg[0] = service_id[0]; // 0x34;
     msg[1] = 37;
     msg[2] = 98;
     msg[3] = 125;
@@ -192,19 +200,19 @@ void send_service1()
 
     TWI::send_start();
     if (TWI::state() != TWI::iostate::read_or_write){
-	uart << "Error: tendría que estar en read_or_write\n";
+	uart << "Error: state is not read_or_write\n";
 	return;
     }
 
 
-    if (TWI::write_to<slave_address>(reinterpret_cast<std::byte*>(msg), 3) != 3){
-	uart << "Error enviando servicio 1: ";
-        uart << "Se está intentando enviar demasiados datos de golpe, aumentar "
-                "el buffer del TWI\n";
+    if (TWI::write_to<slave_address>(
+			    reinterpret_cast<std::byte*>(msg), 3) != 3){
+	uart << "Error sending service 1: ";
+        uart << "Trying to send to many bytes at once, make TWI buffer bigger\n";
 	return;
     }
     else
-	uart << "\tEscribiendo ... ";
+	uart << "\tWriting ... ";
 
     for (uint8_t i = 3; i < N; ++i){
 // 	wait_ms(100); <-- simula una transmisión lenta. Tal como está ahora
@@ -219,18 +227,18 @@ void send_service1()
     { ; }
     
     if (i == 65000){
-	uart << "No responde!\n";
-	uart << "Parando transmisión ... ";
+	uart << "Slave doesn't respond!\n";
+	uart << "Stopping transmission... ";
 	TWI::reset();
 	uart << "OK\n";
 	return;
     }
  
     if (TWI::prog_error()) // es el único posible error
-	uart << "Error de programación\n";
+	uart << "Program error\n";
 
     if (TWI::no_response()) // es el único posible error
-	uart << "dispostivo no responde\n";
+	uart << "Device no response\n";
 
     if (!TWI::eow()){
 	uart << "FAIL\n";
@@ -242,7 +250,7 @@ void send_service1()
     constexpr uint8_t out_nbytes = 3;
     static_assert(out_nbytes < TWI_buffer_size);
 
-    uart << "\tLeemos respuesta: ";
+    uart << "\tReading the answer: ";
     TWI::send_repeated_start();
     TWI::read_from<slave_address>(out_nbytes);
 
@@ -250,8 +258,8 @@ void send_service1()
     { ; }
     
     if (i == 65000){
-	uart << "No responde!\n";
-	uart << "Parando transmisión ... ";
+	uart << "No response!\n";
+	uart << "Stopping transmission ... ";
 	TWI::reset();	// ESTO no funciona. De hecho, mientras el slave
 	// mantenga SCL bajo es imposible parar la conexión.
 	uart << "OK\n";
@@ -293,14 +301,15 @@ void send_service1()
 }
 
 
-void send_service2()
+void send_service1()
 {
     mcu::UART_iostream uart;
     uart << "\n\n=================\n";
-    uart << "Service2:\n";
+    uart << "Service 1:\n";
 
 
-    std::byte msg[1] = {std::byte{0x87}};
+    //std::byte msg[1] = {std::byte{0x87}};
+    std::byte msg[1] = {std::byte{service_id[1]}};
 
 
     TWI::send_start();
@@ -326,13 +335,13 @@ void send_service2()
 	uart << "FAIL\n";
 }
 
-void send_service3()
+void send_service2()
 {
     mcu::UART_iostream uart;
     uart << "\n\n=================\n";
-    uart << "Service3:\n";
+    uart << "Service 2:\n";
 
-    uint8_t x0 = 45;
+    uint8_t x0 = 0x2D; //45;
     uint16_t x1 = 320; // bytes (decimal): 64 1
     uint16_t x2 = 876;	// bytes (decimal): 108 3
 
@@ -445,44 +454,91 @@ void send_service3()
 
 
 
-void test_write()
-{
-    send_service1();
-    Micro::wait_ms(500);
-    send_service2();
-    Micro::wait_ms(500);
-    send_service3();
-    Micro::wait_ms(500);
-
-}
 
 
-void test_master()
-{
-    while (1) {
-	test_write();
-    }
-}
 
-
-int main() 
+void init_uart()
 {
     mcu::UART_iostream uart;
     mcu::basic_cfg(uart);
     uart.turn_on();
+}
 
-    uart << "Empezando como MASTER\n";
-
+void init_TWI()
+{
     TWI::on<50>();
+}
 
-    uart << "TWI enable\n";
+void hello()
+{
+    mcu::UART_iostream uart;
+    uart << "\n\nTWI master test\n"
+	        "---------------\n"
+		"Connect via TWI to another microcontroller with the slave program installed.\n\n"
+		"The slave has the address ";
+    atd::print_int_as_hex(uart, slave_address);
+
+    uart << " and gives " << (int) nservices << " different services:\n";
+    
+    for (uint8_t i = 0; i < nservices; ++i){
+	uart << "\tService " << (int) i << " (";
+	atd::print_int_as_hex(uart, service_id[i]);
+	uart << ")\n";
+    }
+
+}
+
+void automatic_mode()
+{
+    mcu::UART_iostream uart;
+    uart << "\n\nThis option is to test the slave program\n\n";
+    Micro::wait_ms(1000);
+
+    while (1) {
+    send_service0();
+    Micro::wait_ms(500);
+
+    send_service1();
+    Micro::wait_ms(500);
+
+    send_service2();
+    Micro::wait_ms(500);
+    }
+}
+
+int main() 
+{
+    init_uart();
+    init_TWI();
+
+    hello();
+
  
-    test_master();
+    while (1) {
+	mcu::UART_iostream uart;
+	uart << "\nMenu\n"
+	          "----\n"
+		  "0. Send service 0\n"
+		  "1. Send service 1\n"
+		  "2. Send unknown service\n"
+		  "3. Automatic mode (send all services in a loop to test slave program)\n";
+
+
+	char opt{};
+	uart >> opt;
+	switch (opt){
+	    break; case '0': send_service0();
+	    break; case '1': send_service1();
+	    break; case '2': send_service2();
+	    break; case '3': automatic_mode();
+	    break; default : uart << "Unknown option\n";
+	}
+    }
 }
 
 
 
-ISR(TWI_vect)
+ISR_TWI
 {
     TWI::handle_interrupt();
 }

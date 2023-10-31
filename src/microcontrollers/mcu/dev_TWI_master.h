@@ -64,7 +64,8 @@
 
 namespace dev{
 
-enum class __TWI_master_state : uint8_t {
+namespace impl_of{
+enum class TWI_master_state : uint8_t {
 // group of states: gg (2 bits)
     idle    = 0x00,
     busy    = 0x01,
@@ -99,38 +100,42 @@ enum class __TWI_master_state : uint8_t {
     prog_error        = (27 << 3) | error | idle // error de programación
 };
 
-constexpr uint8_t __TWI_master_state_mask_group_states = 0x03;
-constexpr uint8_t __TWI_master_state_mask_error = 0x04;
+constexpr uint8_t TWI_master_state_mask_group_states = 0x03;
+constexpr uint8_t TWI_master_state_mask_error = 0x04;
 
-inline bool __TWI_master_state_error(__TWI_master_state a)
+inline bool TWI_master_state_error(TWI_master_state a)
 {
-    return (static_cast<uint8_t>(a) & __TWI_master_state_mask_error);
+    return (static_cast<uint8_t>(a) & TWI_master_state_mask_error);
 }
 
-inline bool __TWI_master_state_is_group(__TWI_master_state a, __TWI_master_state group)
+inline 
+bool TWI_master_state_is_group(TWI_master_state a, TWI_master_state group)
 {
     return 
-    (static_cast<uint8_t>(a) & __TWI_master_state_mask_group_states) == 
+    (static_cast<uint8_t>(a) & TWI_master_state_mask_group_states) == 
 	static_cast<uint8_t>(group);
 }
 
-inline bool __TWI_master_state_is_busy(__TWI_master_state a)
+inline bool TWI_master_state_is_busy(TWI_master_state a)
 {
-    return __TWI_master_state_is_group(a, __TWI_master_state::busy);
+    return TWI_master_state_is_group(a, TWI_master_state::busy);
 }
 
-inline bool __TWI_master_state_is_waiting(__TWI_master_state a)
+inline bool TWI_master_state_is_waiting(TWI_master_state a)
 {
-    return __TWI_master_state_is_group(a, __TWI_master_state::waiting);
+    return TWI_master_state_is_group(a, TWI_master_state::waiting);
 }
 
-inline bool __TWI_master_state_is_idle(__TWI_master_state a)
+inline bool TWI_master_state_is_idle(TWI_master_state a)
 {
-    return __TWI_master_state_is_group(a, __TWI_master_state::idle);
+    return TWI_master_state_is_group(a, TWI_master_state::idle);
 }
 
+}// namespace impl_of
 
 
+// Configuración de TWI_master
+// ---------------------------
 template <typename Micro0, 
 	  typename TWI0, typename TWI0::streamsize buffer_size0>
 struct TWI_master_cfg{
@@ -143,9 +148,10 @@ struct TWI_master_cfg{
 };
 
 
-// La idea es que esto no sea más que una ampliacion del TWI con 1 byte
-// de buffer. Le ponemos una put/get area a TWI en esta clase y ocultamos el
-// protocolo al usuario.
+// La idea es que esto no sea más que una ampliacion del TWI con `buffer_size`
+// bytes de buffer. Le ponemos una put/get area a TWI en esta clase y ocultamos 
+// el protocolo al usuario.
+//
 // Responsabilidades de esta clase:
 //	1. Ponerle un buffer al hardware de TWI (que carece de el).
 //
@@ -163,7 +169,7 @@ template <typename Cfg>
 class TWI_master{
 public:
 // Types
-    using iostate    = __TWI_master_state;
+    using iostate    = impl_of::TWI_master_state;
     using Micro	     = Cfg::Micro;
     using TWI	     = Cfg::TWI;
     using streamsize = Cfg::streamsize;
@@ -177,6 +183,16 @@ public:
     /// a la que vamos a operar.
     /// f_scl = frecuencia en kilohercios de SCL (tipica: 100 y 400 kHz).
     /// f_clock = frecuencia a la que funciona el reloj del microcontrolador.
+    //
+    // DUDA: Observar que al pasar la frecuencia de SCL de forma static estoy
+    // suponiendo:
+    //	    (1) Que el micro siempre va a dialogar con todos los dispositivos
+    //	    a la misma velocidad.
+    //
+    //	¿Es verdad eso? Esto es: ¿la frecuencia de SCL la define el hardwador
+    //	y será la velocidad del menor dispositivo conectado a TWI o la puede
+    //	cambiar el softwador cuando quiera? El softwador no sabe de hardware,
+    //	así que no es probable que quiera cambiarla o se lie al hacerlo.
     template <uint16_t f_scl, uint32_t f_clock = Micro::clock_frequency_in_hz>
     static void on()
     {
@@ -279,13 +295,13 @@ public:
 // states
 // ------
 // groups
-    static bool is_idle() {return __TWI_master_state_is_idle(state_);}
-    static bool is_busy() {return __TWI_master_state_is_busy(state_);}
-    static bool is_waiting() {return __TWI_master_state_is_waiting(state_);}
+    static bool is_idle() {return TWI_master_state_is_idle(state_);}
+    static bool is_busy() {return TWI_master_state_is_busy(state_);}
+    static bool is_waiting() {return TWI_master_state_is_waiting(state_);}
 
 // is there an error?
-    static bool error() {return __TWI_master_state_error(state_);}
-    static bool error(iostate st) {return __TWI_master_state_error(st);}
+    static bool error() {return TWI_master_state_error(state_);}
+    static bool error(iostate st) {return TWI_master_state_error(st);}
 
 // generic errors
     static bool no_response() {return state_ == iostate::no_response;}
@@ -296,13 +312,22 @@ public:
 
 // transmitting
     static bool transmitting() {return state_ == iostate::transmitting;}
+
+    // end_of_writing? Received ACK
     static bool eow() {return state_ == iostate::eow;}
+
+    // end_of_writing? Received NACK. 
+    // No se han podido enviar todos los bytes. Se recibió NACK al enviar un
+    // byte (un dato)
     static bool eow_data_nack() {return state_ == iostate::eow_data_nack;}
+
     static bool error_buffer_size()
 			    { return state_ == iostate::error_buffer_size; }
 
 // receiving
     static bool receiving() {return state_ == iostate::receiving;}
+
+    // end_of_reading?
     static bool eor() {return state_ == iostate::eor;}
     static bool eor_bf() {return state_ == iostate::eor_bf;}
 
