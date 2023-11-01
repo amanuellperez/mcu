@@ -62,21 +62,21 @@ __DS1307_timekeeper __DS1307_timekeeper::struct_to_mem(__DS1307_timekeeper st)
 }
 
 
-void __DS1307_control_register::mem_to_struct(const std::byte& mem,
+void __DS1307_control_register::mem_to_struct(const uint8_t& mem,
                               __DS1307_control_register& st)
 {
-    st.output_control     = (mask_output_control(mem) == std::byte{1});
-    st.square_wave_enable = (mask_square_wave_enable(mem) == std::byte{1});
+    st.output_control     = (mask_output_control(mem) == uint8_t{1});
+    st.square_wave_enable = (mask_square_wave_enable(mem) == uint8_t{1});
     st.rate_select        = mask_rate_select(mem);
 }
 
 
 void __DS1307_control_register::struct_to_mem(const __DS1307_control_register& st, 
-				std::byte& mem)
+				uint8_t& mem)
 {
-    mem = std::byte{0};
-    mask_output_control(mem)     = atd::to_byte(st.output_control);
-    mask_square_wave_enable(mem) = atd::to_byte(st.square_wave_enable);
+    mem = uint8_t{0};
+    mask_output_control(mem)     = atd::bool_to<uint8_t>(st.output_control);
+    mask_square_wave_enable(mem) = atd::bool_to<uint8_t>(st.square_wave_enable);
     mask_rate_select(mem)        = st.rate_select;
 }
 

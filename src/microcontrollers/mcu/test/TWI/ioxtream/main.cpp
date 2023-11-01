@@ -43,6 +43,8 @@ constexpr uint8_t slave_address = 0x10;
 
 
 
+// Functions
+// ---------
 void twi_print_state()
 {
     mcu::UART_iostream uart;
@@ -127,7 +129,7 @@ void send_service1()
 
     TWI twi{slave_address};
 // twi.open(slave_address); // no necesario si se pasa en el constructor
-    uart << "Escribimos ... ";
+    uart << "Writing ... ";
     for (uint8_t i = 0; i < N; ++i){
 	twi << msg[i];
     }
@@ -140,7 +142,7 @@ void send_service1()
 
     uart << "OK\n";
 
-    uart << "Leemos: ";
+    uart << "Reading: ";
     constexpr uint8_t out_nbytes = 3;
     twi.read(out_nbytes);
     for (uint8_t i = 0; i < out_nbytes; ++i){
@@ -167,7 +169,7 @@ void send_service2()
     uart << "Service2: ";
 
 
-    std::byte msg[1] = {std::byte{0x87}};
+    uint8_t msg[1] = {uint8_t{0x87}};
 
     TWI twi;
     twi.open(slave_address);
@@ -190,7 +192,7 @@ void uart_print(const T& x)
     uart << x;
 }
 
-void uart_print(std::byte b)
+void uart_print(uint8_t b)
 {
     mcu::UART_iostream uart;
     uart << (int) b;
@@ -201,7 +203,7 @@ void send_type(const Int& x0, const char* tname)
 {
     mcu::UART_iostream uart;
     uart << "\n==============================\n";
-    uart << "Enviando un " << tname << ": ";
+    uart << "Sending a " << tname << ": ";
 
     TWI twi;
     twi.open(slave_address);
@@ -298,7 +300,7 @@ void test_all_send_type()
     send_type<char>('a', "char");
     send_type<signed char>('c', "signed char");
     send_type<unsigned char>('r', "unsigned char");
-    send_type<std::byte>(std::byte{0x02}, "std::byte");
+    send_type<uint8_t>(uint8_t{0x02}, "uint8_t");
     send_type<uint8_t>(34, "uint8_t");
     send_type<uint16_t>(340, "uint16_t");
     send_type<uint32_t>(10000, "uint32_t");
@@ -375,7 +377,7 @@ void test_typical_service()
 void test_n()
 {
     constexpr int data_size = 3;
-    std::byte data[3] = {std::byte{10}, std::byte{20}, std::byte{30}};
+    uint8_t data[3] = {uint8_t{10}, uint8_t{20}, uint8_t{30}};
 
     mcu::UART_iostream uart;
     uart << "\n==============================\n";
@@ -389,7 +391,7 @@ void test_n()
     }
 
 
-    std::byte q[data_size];
+    uint8_t q[data_size];
     twi.read(data_size);
     if (twi.read(q, data_size) != data_size){
 	uart << "ERROR en read: data_size recibido erroneo!\n";
@@ -438,7 +440,7 @@ int main()
     uart.turn_on();
 
     uart << "\n\n\n* * * * * * * * * * * * * * * * * * * * * * * * * * * *\n";
-    uart << "Empezando como MASTER ioxtream\n";
+    uart << "MASTER ioxtream Test\n";
     uart << "* * * * * * * * * * * * * * * * * * * * * * * * * * * *\n";
 
     TWI_master::on<50>();
@@ -449,8 +451,7 @@ int main()
 }
 
 
-
-ISR(TWI_vect)
+ISR_TWI
 {
     TWI_master::handle_interrupt();
 }

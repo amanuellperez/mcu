@@ -181,7 +181,7 @@ public:
     /// Lee exáctamente n bytes metiéndolos en q[0, n). 
     /// Bloquea la ejecución. Hasta que no lee todo no devuelve el control.
     /// Precondition: se ha llamado a read(N) antes (con N >= n).
-    streamsize read(std::byte* q, streamsize n);
+    streamsize read(uint8_t* q, streamsize n);
 
     // read: array-style
 //    template <streamsize N>  doesn't work!!!
@@ -191,7 +191,7 @@ public:
     /// Escribe q[0,n) en el flujo.
     /// No bloquea. q[0,n) se mete en el buffer interno de TWI y lo irá
     /// enviando poco a poco.
-    streamsize write(const std::byte* q, streamsize n);
+    streamsize write(const uint8_t* q, streamsize n);
 
     // write: array-style
 //    template <streamsize N> doesn't work!!!
@@ -251,11 +251,11 @@ private:
     {// TODO: gestión de errores. Si write no devuelve sizeof(x) error	
 	if (TWI::read_or_write()){
             TWI::write_to(slave_address_,
-                          reinterpret_cast<const std::byte*>(&x),
+                          reinterpret_cast<const uint8_t*>(&x),
                           sizeof(x));
         }
 	else {
-	    TWI::write(reinterpret_cast<const std::byte*>(&x), sizeof(x));
+	    TWI::write(reinterpret_cast<const uint8_t*>(&x), sizeof(x));
 	}
 
 	return *this;
@@ -264,9 +264,9 @@ private:
     template <typename T>
     TWI_master_ioxtream& read_(T& x)
     {// TODO: gestión de errores. Si read no devuelve sizeof(x) error
-	TWI::wait_till_no_busy();
+	TWI::wait_while_busy();
 	
-	TWI::read_buffer(reinterpret_cast<std::byte*>(&x), sizeof(x));
+	TWI::read_buffer(reinterpret_cast<uint8_t*>(&x), sizeof(x));
 	return *this;
     }
 
@@ -292,7 +292,7 @@ inline void TWI_master_ioxtream<T>::close()
     if (TWI::is_idle())	// No estamos dentro de una transmisión
 	return;
 
-    TWI::wait_till_no_busy();
+    TWI::wait_while_busy();
 
     // if (TWI::eow() or TWI::eor())	<--- al no ponerlo podemos cerrar
     // desde cualquier estado. Mejor descomentarlo (???)
@@ -305,7 +305,7 @@ void TWI_master_ioxtream<T>::read(streamsize n)
     if (TWI::is_idle()) 
 	TWI::send_start();
 
-    TWI::wait_till_no_busy();
+    TWI::wait_while_busy();
 
     if (!TWI::read_or_write()) // ignoramos el state real de TWI
 	TWI::send_repeated_start();
@@ -334,11 +334,11 @@ void TWI_master_ioxtream<T>::read(streamsize n)
 //	
 template <typename T>
 TWI_master_ioxtream<T>::streamsize
-TWI_master_ioxtream<T>::read(std::byte* q, streamsize n)
+TWI_master_ioxtream<T>::read(uint8_t* q, streamsize n)
 {
 //    read(n); (*)
     
-    TWI::wait_till_no_busy();
+    TWI::wait_while_busy();
 
     return TWI::read_buffer(q, n);
 }
@@ -347,7 +347,7 @@ TWI_master_ioxtream<T>::read(std::byte* q, streamsize n)
 // pre: state() == read_or_write() or state() == transmitting()
 template <typename T>
 TWI_master_ioxtream<T>::streamsize 
-TWI_master_ioxtream<T>::write(const std::byte* q, streamsize n)
+TWI_master_ioxtream<T>::write(const uint8_t* q, streamsize n)
 {
     if (TWI::read_or_write())
 	return TWI::write_to(slave_address_, q, n);

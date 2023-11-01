@@ -43,18 +43,18 @@ void test_buffer()
     CHECK_TRUE(!buffer.in_is_full(), "!in_is_full");
 
     for (uint8_t i = 10; i < 15; ++i)
-	buffer.in_write_one(std::byte{i});
+	buffer.in_write_one(uint8_t{i});
 
     CHECK_TRUE(!buffer.in_is_empty(), "!in_is_empty");
     CHECK_TRUE(!buffer.in_is_full(), "!in_is_full");
 
 // normal
-    std::byte msg[10];
+    uint8_t msg[10];
     int n = buffer.in_read_all_n(msg, 10);
     CHECK_TRUE(n == 5, "read_all_n");
     CHECK_TRUE(buffer.in_is_empty(), "in_is_empty");
     for (uint8_t i = 0; i < n; ++i)
-	CHECK_TRUE(msg[i] == static_cast<std::byte>(10 + i), "read_all_n");
+	CHECK_TRUE(msg[i] == static_cast<uint8_t>(10 + i), "read_all_n");
 
 // empty
     n = buffer.in_read_all_n(msg, 10);
@@ -62,35 +62,35 @@ void test_buffer()
 
 // full
     for (uint8_t i = 100; i < 110; ++i)
-	buffer.in_write_one(std::byte{i});
+	buffer.in_write_one(uint8_t{i});
 
     n = buffer.in_read_all_n(msg, 10); // leemos justo hasta el final
     CHECK_TRUE(n == 10, "read_all_n");
     CHECK_TRUE(buffer.in_is_empty(), "in_is_empty");
     for (uint8_t i = 0; i < n; ++i)
-	CHECK_TRUE(msg[i] == static_cast<std::byte>(100 + i), "read_all_n");
+	CHECK_TRUE(msg[i] == static_cast<uint8_t>(100 + i), "read_all_n");
 
 // leemos de menos
     for (uint8_t i = 10; i < 20; ++i)
-	buffer.in_write_one(std::byte{i});
+	buffer.in_write_one(uint8_t{i});
 
     n = buffer.in_read_all_n(msg, 5);
     CHECK_TRUE(n == 5, "read_all_n");
     CHECK_TRUE(!buffer.in_is_empty(), "!in_is_empty");
     for (uint8_t i = 0; i < n; ++i)
-	CHECK_TRUE(msg[i] == static_cast<std::byte>(10 + i), "read_all_n");
+	CHECK_TRUE(msg[i] == static_cast<uint8_t>(10 + i), "read_all_n");
 
     n = buffer.in_read_all_n(msg, 1);
     CHECK_TRUE(n == 1, "read_all_n");
     CHECK_TRUE(!buffer.in_is_empty(), "!in_is_empty");
     for (uint8_t i = 0; i < n; ++i)
-	CHECK_TRUE(msg[i] == static_cast<std::byte>(15 + i), "read_all_n");
+	CHECK_TRUE(msg[i] == static_cast<uint8_t>(15 + i), "read_all_n");
 
     n = buffer.in_read_all_n(msg, 4);
     CHECK_TRUE(n == 4, "read_all_n");
     CHECK_TRUE(buffer.in_is_empty(), "in_is_empty");
     for (uint8_t i = 0; i < n; ++i)
-	CHECK_TRUE(msg[i] == static_cast<std::byte>(16 + i), "read_all_n");
+	CHECK_TRUE(msg[i] == static_cast<uint8_t>(16 + i), "read_all_n");
 
 
 
@@ -102,7 +102,7 @@ void test_buffer()
     CHECK_TRUE(buffer.out_is_empty(), "out_is_empty");
 
     for (uint8_t i = 0; i < 10; ++i)
-	msg[i] = static_cast<std::byte>(10 + i);
+	msg[i] = static_cast<uint8_t>(10 + i);
 
 // solo 1 byte
     n = buffer.out_write_all_n(msg, 1);
@@ -113,7 +113,7 @@ void test_buffer()
     {
 	int i;
 	for (i = 0; i < 10 and !buffer.out_is_empty(); ++i){
-	    std::byte b = buffer.out_read_one();
+	    uint8_t b = buffer.out_read_one();
 	    CHECK_TRUE(b == msg[i], "out_read_one");
 	}
 
@@ -130,7 +130,7 @@ void test_buffer()
     {
 	int i;
 	for (i = 0; i < 10 and !buffer.out_is_empty(); ++i){
-	    std::byte b = buffer.out_read_one();
+	    uint8_t b = buffer.out_read_one();
 	    CHECK_TRUE(b == msg[i], "out_read_one");
 	}
 
@@ -147,7 +147,7 @@ void test_buffer()
     {
 	int i;
 	for (i = 0; i < 10 and !buffer.out_is_empty(); ++i){
-	    std::byte b = buffer.out_read_one();
+	    uint8_t b = buffer.out_read_one();
 	    CHECK_TRUE(b == msg[i], "out_read_one");
 	}
 
@@ -164,7 +164,7 @@ void test_buffer()
     {
 	int i;
 	for (i = 0; i < 10 and !buffer.out_is_empty(); ++i){
-	    std::byte b = buffer.out_read_one();
+	    uint8_t b = buffer.out_read_one();
 	    CHECK_TRUE(b == msg[i], "out_read_one");
 	}
 

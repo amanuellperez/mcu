@@ -100,7 +100,7 @@ __BME280_calibration::compensate_H(const uint32_t& adc_H) const
 
 
 void __BME280_temp_and_press_and_hum::mem_to_struct(
-    const std::array<std::byte, size>& mem, __BME280_temp_and_press_and_hum& st)
+    const std::array<uint8_t, size>& mem, __BME280_temp_and_press_and_hum& st)
 {
     st.upressure = atd::concat_bytes<uint32_t>(mem[0], mem[1], mem[2]);
     st.upressure >>= 4;
@@ -114,7 +114,7 @@ void __BME280_temp_and_press_and_hum::mem_to_struct(
 
 
 // decode according to table 16
-void __BME280_calibration::mem_to_temp_and_press(const std::byte* mem)
+void __BME280_calibration::mem_to_temp_and_press(const uint8_t* mem)
 {
     // El BME280 almacena los parámetros de calibración en little-endian:
     // LSB,MSB. De ahí el orden definido (see table 17)
@@ -132,31 +132,31 @@ void __BME280_calibration::mem_to_temp_and_press(const std::byte* mem)
     dig_P8 = atd::concat_bytes<int16_t>(mem[21], mem[20]);
     dig_P9 = atd::concat_bytes<int16_t>(mem[23], mem[22]);
 
-    dig_H1 = std::to_integer<uint8_t>(mem[25]);
+    dig_H1 = mem[25];
 }
 
 
 // decode according to table 16
-void __BME280_calibration::mem_to_hum(const std::byte* mem)
+void __BME280_calibration::mem_to_hum(const uint8_t* mem)
 {
     dig_H2 = atd::concat_bytes<int16_t>(mem[1], mem[0]);
-    dig_H3 = std::to_integer<uint8_t>(mem[2]);
+    dig_H3 = mem[2];
 
 // NO CUADRA LA DATASHEET CON EL CÓDIGO DE BOSCH. Lo dejo como lo marca la
 // biblioteca de Bosch.
 // Según Bosch:
-    int16_t msb_h4 = std::to_integer<int16_t>(mem[3]) << 4;
-    int16_t lsb_h4 = std::to_integer<int16_t>(mem[4]) & 0x0F;
+    int16_t msb_h4 = static_cast<int16_t>(mem[3]) << 4;
+    int16_t lsb_h4 = static_cast<int16_t>(mem[4]) & 0x0F;
     dig_H4 = msb_h4 | lsb_h4;
 
-    int16_t msb_h5 = std::to_integer<int16_t>(mem[5]) << 4;
-    int16_t lsb_h5 = std::to_integer<int16_t>(mem[4]) >> 4;
+    int16_t msb_h5 = static_cast<int16_t>(mem[5]) << 4;
+    int16_t lsb_h5 = static_cast<int16_t>(mem[4]) >> 4;
     dig_H5 = msb_h5 | lsb_h5;
 
-    dig_H6 = std::to_integer<uint8_t>(mem[6]);
+    dig_H6 = mem[6];
 }
 
-void __BME280_config::mem_to_struct(const std::array<std::byte, size>& mem,
+void __BME280_config::mem_to_struct(const std::array<uint8_t, size>& mem,
                                     __BME280_config& st)
 {
     st.osrs_h   = mask_osrs_h(mem[i_ctrl_hum]);
@@ -173,10 +173,10 @@ void __BME280_config::mem_to_struct(const std::array<std::byte, size>& mem,
 
 
 // st -> mem
-void __BME280_config::struct_to_mem(const __BME280_config& st, std::byte* mem)
+void __BME280_config::struct_to_mem(const __BME280_config& st, uint8_t* mem)
 {
 // FUNDAMENTAL: inicializar la memoria!!!
-    std::fill(mem, mem + size, std::byte{0});
+    std::fill(mem, mem + size, uint8_t{0});
 
     mask_osrs_h(mem[i_ctrl_hum])   = st.osrs_h;
 

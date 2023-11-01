@@ -34,6 +34,7 @@
  *	12/03/2021 to_integer
  *	25/11/2022 convert(a).into(b);
  *	13/03/2023 little_endian_to<>/big_endian_to<>
+ *	01/11/2023 bool_to
  *
  ****************************************************************************/
 #include <limits>
@@ -101,6 +102,13 @@ inline std::byte to_byte(bool x)
 {
     if (x)  return std::byte{1};
     else    return std::byte{0};
+}
+
+template <Type::Integer Int>
+inline Int bool_to(bool x)
+{
+    if (x)  return Int{1};
+    else    return Int{0};
 }
 
 // to_integer

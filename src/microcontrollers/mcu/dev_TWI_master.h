@@ -23,23 +23,26 @@
 
 /****************************************************************************
  *
- *  - DESCRIPCION: Implementación de un master de TWI genérico con buffer.
+ *  DESCRIPCION
+ *	Implementación de un master de TWI genérico con buffer.
  *
- *  - COMENTARIOS: La idea es que se pueda usar con cualquier dispositivo TWI
+ *  COMENTARIOS
+ *	La idea es que se pueda usar con cualquier dispositivo TWI
  *  (ya sea avr, pic, ...). De momento supongo que dependerá del avr ya que es
  *  el único TWI que tengo.
  *	Es un proyecto de aprendizaje así que es posible que cambie bastante
  *  en el futuro.
  *
- *  - TIPO DE USUARIO: de bajo nivel. Tiene que saber lo que hace. No impongo
+ *  TIPO DE USUARIO
+ *	de bajo nivel. Tiene que saber lo que hace. No impongo
  *  muchas precondiciones en código.
  *
- *  - TODO: Dar la opción de lanzar una interrupción cuando acabe de hacer
+ *  TODO: Dar la opción de lanzar una interrupción cuando acabe de hacer
  *  algo (cuando pase de busy a no_busy). De esa forma el usuario no tendrá
  *  que estar haciendo polling continuamente.  (ANTES DE HACERLO: ¿merece la
  *  pena? ¿Lo voy a usar?)
  *
- *  - TODO: La mejor forma de usarlo es teniendo un buffer suficientemente
+ *  TODO: La mejor forma de usarlo es teniendo un buffer suficientemente
  *  grande para que se lea/escriba cualquier mensaje. Sin embargo está casi
  *  (basta con que read_buffer se pueda llamar tambien en estado
  *  receiving/nread_ > 0) preparado para que se pueda
@@ -47,7 +50,7 @@
  *  interno usado. Revisarlo e implementarlo (ANTES DE HACERLO: ¿merece la
  *  pena? ¿Lo voy a usar?)
  *  
- *  - HISTORIA:
+ *  HISTORIA
  *    Manuel Perez
  *    14/02/2020 v0.0
  *    30/10/2023 Lo independizo de avr. Primer intento de ser genérico.
@@ -56,11 +59,15 @@
  *               Para poder definir ese interfaz necesito programar diferentes
  *               micros (o diferentes TWIs). 
  *
+ *               Elimino std::byte a favor de uint8_t.
+ *    
+ *
  ****************************************************************************/
 #include <cstdint>  // uint8_t
-#include <cstddef>  // std::byte
-		    
+#include <limits>
+
 #include <atd_array.h>	// Circular_array
+#include <atd_concepts.h>
 
 namespace dev{
 
@@ -177,6 +184,9 @@ public:
 
 // cfg data
     static constexpr streamsize buffer_size = Cfg::buffer_size;
+    static constexpr uint16_t max_time_out_us 
+					= std::numeric_limits<uint16_t>::max();
+
 
 // on/off (off (???))
     /// Enables TWI interface definiendo la frecuencia del SCL 
@@ -252,7 +262,12 @@ public:
     /// postcondition: state() == iostate::eor or eor_bf (si no vacío todo el
     /// buffer).
     /// Returns: number of bytes leidos.
-    static streamsize read_buffer(std::byte* q, streamsize N);
+    static streamsize read_buffer(uint8_t* q, streamsize N);
+
+    // Observar que devuelve el número de bytes leidos.
+    template <Type::Integer Int>
+    static streamsize read_buffer(Int& q)
+    { return read_buffer(reinterpret_cast<uint8_t*>(&q), sizeof(q)); }
 
 
     /// Escribe en el buffer de salida buf[0, n) y comienza el envío por TWI.
@@ -269,12 +284,18 @@ public:
     // el diagrama de estados. Doy por supuesto que el usuario sabe lo que
     // hace.
     template <Address slave_address> // tiene que estar definido en tiempo de compilación!!!
-    static streamsize write_to(const std::byte* buf, streamsize n)
+    static streamsize write_to(const uint8_t* buf, streamsize n)
     { return write_to(slave_address, buf, n); }
+
+    template <Address slave_address, Type::Integer Int>
+    static streamsize write_to(const Int& b)
+    { return 
+	write_to<slave_address>(reinterpret_cast<const uint8_t*>(&b), sizeof(Int)); }
+
 
     // versión 2 de write_to. La necesito en TWI_master_ioxtream
     static streamsize
-    write_to(Address slave_address, const std::byte* buf, streamsize n);
+    write_to(Address slave_address, const uint8_t* buf, streamsize n);
 
     /// Escribe en el buffer buf[0, n) y envía los datos vía TWI.
     // Observar que no lo llamo write_buffer, ya que sería mentira que solo 
@@ -286,7 +307,15 @@ public:
     //
     //	El caso de read_buffer es diferente ya que read_buffer se limita a
     //	leer datos del buffer, no de TWI. Los nombres no mienten.
-    static streamsize write(const std::byte* buf, streamsize n);
+    static streamsize write(const uint8_t* buf, streamsize n);
+
+    // Observar que devuelve el número de bytes escritos y no el número de
+    // objetos de tipo Int escritos, ya que, si falla,  no tiene por qué enviar 
+    // un número entero de objetos tipo Int.
+    template <Type::Integer Int>
+    static streamsize write(const Int& b)
+    { return write(reinterpret_cast<const uint8_t*>(&b), sizeof(Int)); }
+
 
 	    
     // Función que va dentro de la ISR
@@ -337,8 +366,11 @@ public:
     static iostate state() {return state_;}
 
 // Da la impresión de que en polling voy a necesitar esta función bastante:
-//  ENGLISH DOUBT: wait_till_no_busy??? or wait_no_busy??? @_@
-    static void wait_till_no_busy() { while (is_busy()) { asm("nop"); } }
+    // Devuelve el número de microsegundos que quedaban para que venciera el
+    // timeout. Cuando vence el timeout devuelve 0.
+    // (Devuelve distinto de 0 en caso de que no venza el timeout, 0 en caso
+    // de que venza)
+    static uint16_t wait_while_busy(uint16_t time_out_us = max_time_out_us);
 
 private:
     // FUNDAMENTAL: busy_ tiene que ser volatile, ya que lo voy a usar:
@@ -348,7 +380,7 @@ private:
     //	Antes funcionaba bien y de repente dejó de funcionar!!!)
     static inline volatile iostate state_;
 
-    static inline atd::Circular_array<std::byte, buffer_size> buffer_;
+    static inline atd::Circular_array<uint8_t, buffer_size> buffer_;
     static inline streamsize nread_;   // num. bytes a leer (solo para receiver mode)
 
     // (RRR) El usuario pide leer o escribir. Para ello:
@@ -580,7 +612,7 @@ void TWI_master<Cfg>::mrm_data_nack()
 // versión 2 de write_to. La necesito en TWI_master_ioxtream
 template <typename Cfg>
 TWI_master<Cfg>::streamsize TWI_master<Cfg>
-    ::write_to(Address slave_address, const std::byte* buf, streamsize n)
+    ::write_to(Address slave_address, const uint8_t* buf, streamsize n)
 {
     if (state_ != iostate::read_or_write){	// precondition
 	invalid_state();
@@ -603,7 +635,7 @@ TWI_master<Cfg>::streamsize TWI_master<Cfg>
 
 template <typename Cfg>
 TWI_master<Cfg>::streamsize TWI_master<Cfg>::
-    write(const std::byte* buf, streamsize n)
+    write(const uint8_t* buf, streamsize n)
 {
     typename Micro::Disable_interrupts lock;// fundamental, ya que se llamará desde 'busy'
 
@@ -656,7 +688,7 @@ TWI_master<Cfg>::streamsize TWI_master<Cfg>::read(streamsize n)
 
 template <typename Cfg>
 TWI_master<Cfg>::streamsize 
-TWI_master<Cfg>::read_buffer(std::byte* q, streamsize N)
+TWI_master<Cfg>::read_buffer(uint8_t* q, streamsize N)
 {
     if (!eor_bf()){  // precondicion
 	invalid_state();
@@ -784,6 +816,18 @@ void TWI_master<Cfg>::handle_interrupt()
 	    break;
     }
 }
+
+
+template <typename Cfg>
+uint16_t TWI_master<Cfg>::wait_while_busy(uint16_t time_out_us)   
+{
+    uint16_t i = 0;
+    for (; i < time_out_us and is_busy(); ++i)
+	Micro::wait_us(1);
+
+    return (time_out_us - i);
+}
+
 
 
 }// namespace dev

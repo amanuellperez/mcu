@@ -53,7 +53,6 @@
  *
  ****************************************************************************/
 #include <cstdint>  // uint8_t
-#include <cstddef>  // std::byte
 		   
 #include <atd_iobxtream.h>  // TWI_iobuffer
 			    
@@ -156,7 +155,7 @@ public:
     /// En caso de que el dispositivo esté ocupado o el buffer esté vacío
     /// devuelve 0.
     /// Postcondición: get_area() == empty()
-    static streamsize read_buffer(std::byte* buffer, streamsize N);
+    static streamsize read_buffer(uint8_t* buffer, streamsize N);
 
     /// Escribe en el buffer de salida buf[0, n). 
     /// Devuelve el número de bytes escritos.
@@ -164,7 +163,7 @@ public:
     /// versión está limitada a enviar el buffer completo de una sola vez (no
     /// se puede escribir poco a poco). Si en el futuro se usa, cambiarlo y
     /// darle más flexibilidad. Esta es una versión de aprendizaje.
-    static streamsize write_buffer(const std::byte* buf, streamsize n);
+    static streamsize write_buffer(const uint8_t* buf, streamsize n);
 
     static void stop_transmission();
 
@@ -364,7 +363,7 @@ inline void TWI_slave<Cfg>::unknown_error()
 
 template <typename Cfg>
 TWI_slave<Cfg>::streamsize 
-TWI_slave<Cfg>::write_buffer(const std::byte* buf, streamsize n)
+TWI_slave<Cfg>::write_buffer(const uint8_t* buf, streamsize n)
 {
     if (!wrt_be() and n != 0) // precondicion
 	return 0;
@@ -402,7 +401,7 @@ void TWI_slave<Cfg>::stop_transmission()
 // Devuelve el número de bytes leidos.
 template <typename Cfg>
 TWI_slave<Cfg>::streamsize 
-TWI_slave<Cfg>::read_buffer(std::byte* buffer, streamsize N)
+TWI_slave<Cfg>::read_buffer(uint8_t* buffer, streamsize N)
 {
     if (!is_waiting())
 	return 0;

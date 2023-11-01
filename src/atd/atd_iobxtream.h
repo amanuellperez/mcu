@@ -29,14 +29,15 @@
  *
  *  - HISTORIA:
  *    Manuel Perez
- *    12/02/2020: v0.0 - TWI_iobuffer 
- *    22/02/2020: Circular_array, ioxtream_of_bytes
- *    17/06/2021: Reestructurado.
+ *    12/02/2020 v0.0 - TWI_iobuffer 
+ *    22/02/2020 Circular_array, ioxtream_of_bytes
+ *    17/06/2021 Reestructurado.
+ *    01/11/2023 Elimino uint8_t a favor de uint8_t, es más sencillo de
+ *               manejar.
  *
  ****************************************************************************/
 #include <array>
 #include <algorithm>
-#include <cstddef>  // std::byte
 #include "atd_algorithm.h"
 #include "atd_array.h"	// Circular_array
 
@@ -78,14 +79,14 @@ public:
     /// WARNING: no mira que se escriba fuera del buffer!!! El usuario tendrá
     /// que mirar if (in_is_full()) ... para saber si está lleno o no. En caso
     /// de estar lleno tendrá que vaciarlo leyendolo.
-    void in_write_one(std::byte b);
+    void in_write_one(uint8_t b);
 
     /// Lee el buffer de entrada copiandolo a partir de q. Copia como máximo N
     /// bytes.
     /// Returns: el número de bytes movidos del buffer de entrada a q.
     /// Llamando n a ese número, se tiene que [q, n) son los bytes copiados
     /// del input_buffer.
-    size_type in_read_all_n(std::byte* q, size_type N);
+    size_type in_read_all_n(uint8_t* q, size_type N);
 
     /// Checks whether the input buffer is empty.
     bool in_is_empty() const {return pa_ == p0_();}
@@ -113,14 +114,14 @@ public:
     /// Intenta escribir los bytes q[0, n) en el buffer. Si n > capacity(),
     /// llena el buffer no sobrepasando la capacidad del buffer.
     /// Returns: número de bytes escritos. 
-    size_type out_write_all_n(const std::byte* q, size_type n);
+    size_type out_write_all_n(const uint8_t* q, size_type n);
 
     /// Lee el buffer de entrada copiandolo a partir de q. Copia como máximo N
     /// bytes.
     /// WARNING: no mira que se lea fuera del buffer!!! El usuario tendrá
     /// que mirar if (out_is_empty()) ... para saber si queda algo que leer o
     /// no.
-    std::byte out_read_one();
+    uint8_t out_read_one();
 
     /// Checks whether the output buffer is empty. (si hay datos que enviar
     /// al dispositivo o no).
@@ -137,26 +138,26 @@ public:
     constexpr size_type capacity() const {return buffer_size;}
 
 private:
-    std::array<std::byte, buffer_size> buffer_; // = [p0, pe)
-    std::byte* pa_;
+    std::array<uint8_t, buffer_size> buffer_; // = [p0, pe)
+    uint8_t* pa_;
 
-    constexpr std::byte* p0_() {return buffer_.begin();}
-    constexpr std::byte* pe_() {return buffer_.end();}
+    constexpr uint8_t* p0_() {return buffer_.begin();}
+    constexpr uint8_t* pe_() {return buffer_.end();}
 
-    constexpr const std::byte* p0_() const {return buffer_.begin();}
-    constexpr const std::byte* pe_() const {return buffer_.end();}
+    constexpr const uint8_t* p0_() const {return buffer_.begin();}
+    constexpr const uint8_t* pe_() const {return buffer_.end();}
 
 };
 
 template <uint8_t sz>
-inline void TWI_iobuffer<sz>::in_write_one(std::byte b)
+inline void TWI_iobuffer<sz>::in_write_one(uint8_t b)
 {
     *pa_ = b;
     ++pa_;
 }
 
 template <uint8_t sz>
-TWI_iobuffer<sz>::size_type TWI_iobuffer<sz>::in_read_all_n(std::byte* q,
+TWI_iobuffer<sz>::size_type TWI_iobuffer<sz>::in_read_all_n(uint8_t* q,
                                                             size_type N_q)
 {
     size_type n_p = pa_ - p0_();
@@ -175,16 +176,16 @@ TWI_iobuffer<sz>::size_type TWI_iobuffer<sz>::in_read_all_n(std::byte* q,
 }
 
 template <uint8_t sz>
-inline std::byte TWI_iobuffer<sz>::out_read_one()
+inline uint8_t TWI_iobuffer<sz>::out_read_one()
 {
-    std::byte b = *pa_;
+    uint8_t b = *pa_;
     ++pa_;
     return b;
 }
 
 template <uint8_t sz>
 TWI_iobuffer<sz>::size_type
-TWI_iobuffer<sz>::out_write_all_n(const std::byte* q, size_type n_q)
+TWI_iobuffer<sz>::out_write_all_n(const uint8_t* q, size_type n_q)
 {
     if (!out_is_empty()) // realmente es: assert(!out_is_empty());
 	return 0;	    
@@ -259,20 +260,20 @@ public:
     iobxtream& operator>>(unsigned long long& c) {return read(c);}
 
 private:
-    Circular_array<std::byte, N> buffer_;
+    Circular_array<uint8_t, N> buffer_;
 
 
     template <typename T>
     iobxtream& write(const T& x)
     {
-	buffer_.ewrite(reinterpret_cast<const std::byte*>(&x), sizeof(x));
+	buffer_.ewrite(reinterpret_cast<const uint8_t*>(&x), sizeof(x));
 	return *this;
     }
 
     template <typename T>
     iobxtream& read(T& x)
     {
-	buffer_.eread(reinterpret_cast<std::byte*>(&x), sizeof(x));
+	buffer_.eread(reinterpret_cast<uint8_t*>(&x), sizeof(x));
 	return *this;
     }
 

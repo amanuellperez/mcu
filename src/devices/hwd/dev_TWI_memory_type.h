@@ -31,7 +31,7 @@
  *    12/12/2020 v0.1 
  *
  ****************************************************************************/
-#include <cstddef>  // std::byte
+#include <cstddef>  // uint8_t
 #include <array>
 #include <algorithm>
 
@@ -43,7 +43,7 @@ namespace dev{
 
 
 // syntactic sugar
-using __Mem_address = std::byte;
+using __Mem_address = uint8_t;
 
 /*!
  *  \brief  Dispositivo de memoria.
@@ -58,20 +58,20 @@ using __Mem_address = std::byte;
  *  (1) Leemos/escribimos un array de bytes y luego lo formateamos.
  *  struct __BMP280_id{
  *  // Data
- *      std::byte id;
+ *      uint8_t id;
  *  
  *  // Memory
  *      static constexpr atd::Memory_type mem_type = atd::Memory_type::read_only;
- *      static constexpr std::byte address{0xD0}; // siempre std::byte!!!
+ *      static constexpr uint8_t address{0xD0}; // siempre uint8_t!!!
  *      static constexpr uint8_t size = 1;	
  *
  *  // Format functions: transforman el array de bytes 'mem' leido del 
  *  // dispositivo en la estructura, y viceversa.
  *  // mem <-> struct
- *      static void mem_to_struct(const std::array<std::byte, size>& mem
+ *      static void mem_to_struct(const std::array<uint8_t, size>& mem
  *  				, __BMP280_id& st);
  *      static void struct_to_mem(__BMP280_id& st, 
- *					const std::array<std::byte, size>& mem);
+ *					const std::array<uint8_t, size>& mem);
  *  //...
  *  };
  *
@@ -82,11 +82,11 @@ using __Mem_address = std::byte;
  *  array de bytes intermedio.
  *  struct __BMP280_id{
  *  // Data
- *      std::byte id;
+ *      uint8_t id;
  *  
  *  // Memory
  *      static constexpr atd::Memory_type mem_type = atd::Memory_type::read_only;
- *      static constexpr std::byte address{0xD0};
+ *      static constexpr uint8_t address{0xD0};
  *      static constexpr uint8_t size = 1;	
  *
  *  // Leemos y escribimos:
@@ -135,12 +135,12 @@ struct TWI_memory_type {
     // Lee 'n' bytes del dispositivo a partir de la dirección 'address'
     // guardando el resultado en 'mem'.
     template <Mem_address address, typename TWI_master::streamsize n>
-    static iostate mem_read(std::byte* mem);
+    static iostate mem_read(uint8_t* mem);
 
     // Escribe 'n' bytes de 'mem' a partir de la dirección 'address' en el 
     // dispositivo.
     template <Mem_address address, typename TWI_master::streamsize n>
-    static iostate mem_write(const std::byte* mem);
+    static iostate mem_write(const uint8_t* mem);
 
 private:
     template <typename T>
@@ -175,7 +175,7 @@ struct __has_use_struct_as_mem<T,
 template <typename TWI_master, typename TWI_master::Address slave_address>
 template <__Mem_address mem_address, typename TWI_master::streamsize n>
 inline TWI_memory_type<TWI_master, slave_address>::iostate
-TWI_memory_type<TWI_master, slave_address>::mem_read(std::byte* mem)
+TWI_memory_type<TWI_master, slave_address>::mem_read(uint8_t* mem)
 {
     TWI twi;		    
     twi.open(slave_address);
@@ -197,7 +197,7 @@ TWI_memory_type<TWI_master, slave_address>::mem_read(std::byte* mem)
 template <typename TWI_master, typename TWI_master::Address slave_address>
 template <__Mem_address mem_address, typename TWI_master::streamsize n>
 inline TWI_memory_type<TWI_master, slave_address>::iostate
-TWI_memory_type<TWI_master, slave_address>::mem_write(const std::byte* mem)
+TWI_memory_type<TWI_master, slave_address>::mem_write(const uint8_t* mem)
 {
     TWI twi;
     twi.open(slave_address);
@@ -256,7 +256,7 @@ TWI_memory_type<TWI_master, slave_address>::read_without_optimization
 {
     static_assert (atd::is_readable(T::mem_type));
 
-    std::array<std::byte, T::size> mem;
+    std::array<uint8_t, T::size> mem;
 
     mem_read<T::address, T::size>(mem.data());
 
@@ -278,8 +278,8 @@ TWI_memory_type<TWI_master, slave_address>::write_without_optimization
 {
     static_assert (atd::is_writeable(T::mem_type));
 
-    std::array<std::byte, T::size> mem;
-    std::fill(mem.begin(), mem.end(), std::byte{0}); // ver nota
+    std::array<uint8_t, T::size> mem;
+    std::fill(mem.begin(), mem.end(), uint8_t{0}); // ver nota
     T::struct_to_mem(st, mem);
 
     mem_write<T::address, T::size>(mem.data());

@@ -45,21 +45,21 @@ namespace dev{
 // datasheet 5.4.1
 struct __BME280_id{
 // Data
-    std::byte id;
+    uint8_t id;
 
     /// The value of this id is valid?
     bool is_valid() const;
 
 // Memory
     static constexpr atd::Memory_type mem_type = atd::Memory_type::read_only;
-    static constexpr std::byte address{0xD0};
+    static constexpr uint8_t address{0xD0};
     static constexpr uint8_t size = 1;	
 
     static constexpr bool use_struct_as_mem = true;
 
 private:
     // unico posible valor que puede tomar el id
-    static constexpr std::byte chip_identification_number{0x60};
+    static constexpr uint8_t chip_identification_number{0x60};
 };
 
 
@@ -76,11 +76,11 @@ inline bool __BME280_id::is_valid() const
 // ---------------------------------------------------------------------------
 // datasheet 5.4.2
 struct __BME280_reset{
-    static constexpr std::byte reset_cmd {0xB6};
+    static constexpr uint8_t reset_cmd {0xB6};
 
 // Memory
     static constexpr atd::Memory_type mem_type = atd::Memory_type::write_only;
-    static constexpr std::byte address{0xE0};
+    static constexpr uint8_t address{0xE0};
     static constexpr uint8_t size = 1;
 
     static constexpr bool use_struct_as_mem = true;
@@ -107,22 +107,22 @@ struct __BME280_status{
 
 // Memory
     static constexpr atd::Memory_type mem_type = atd::Memory_type::read_only;
-    static constexpr std::byte address{0xF3};
+    static constexpr uint8_t address{0xF3};
     static constexpr uint8_t size = 1;	
 
 // mem <-> struct
-    static void mem_to_struct(const std::array<std::byte, size>& mem
+    static void mem_to_struct(const std::array<uint8_t, size>& mem
 				, __BME280_status& st);
 
 private:
-    static constexpr atd::Range_bitmask<3, 3, std::byte> mask_measuring{};
-    static constexpr atd::Range_bitmask<0, 0, std::byte> mask_im_update{};
+    static constexpr atd::Range_bitmask<3, 3, uint8_t> mask_measuring{};
+    static constexpr atd::Range_bitmask<0, 0, uint8_t> mask_im_update{};
 
 };
 
 
 inline void
-__BME280_status::mem_to_struct(const std::array<std::byte, size>& mem,
+__BME280_status::mem_to_struct(const std::array<uint8_t, size>& mem,
                                __BME280_status& st)
 {
     st.measuring = atd::to_bool(mask_measuring(mem[0]));
@@ -136,17 +136,17 @@ __BME280_status::mem_to_struct(const std::array<std::byte, size>& mem,
 struct __BME280_config{
 // Data
     // ctrl_hum
-    std::byte osrs_h;	// Controls oversampling of humidity.
+    uint8_t osrs_h;	// Controls oversampling of humidity.
 
     // ctrl_meas
-    std::byte osrs_t;	// Controls oversampling temperature.
-    std::byte osrs_p;	// Controls oversampling pressure.
-    std::byte mode;	// Controls the power mode of the device.
+    uint8_t osrs_t;	// Controls oversampling temperature.
+    uint8_t osrs_p;	// Controls oversampling pressure.
+    uint8_t mode;	// Controls the power mode of the device.
 
     // config
-    std::byte t_sb;	// Controls inactive duration (t_standby)
-    std::byte filter;	// Controls the time constant of IIR filter.
-    std::byte spi3w_en;	// Enables 3-wire SPI interface when set to '1'.
+    uint8_t t_sb;	// Controls inactive duration (t_standby)
+    uint8_t filter;	// Controls the time constant of IIR filter.
+    uint8_t spi3w_en;	// Enables 3-wire SPI interface when set to '1'.
 
 
 // 3.5: recommended modes of operation
@@ -160,13 +160,13 @@ struct __BME280_config{
 // que es de solo lectura y no pertenece a la configuración) no podemos usar 
 // las funciones por defecto. Usamos twi_write particular.
     static constexpr atd::Memory_type mem_type = atd::Memory_type::read_and_write;
-    static constexpr std::byte address{0xF2}; 
+    static constexpr uint8_t address{0xF2}; 
     static constexpr uint8_t size = 4;
 
     // Este registro tiene forma específica de ser escrito
-    static constexpr std::byte ctrl_hum_address	{0xF2};
-    static constexpr std::byte ctrl_meas_address{0xF4};
-    static constexpr std::byte config_address	{0xF5};
+    static constexpr uint8_t ctrl_hum_address	{0xF2};
+    static constexpr uint8_t ctrl_meas_address{0xF4};
+    static constexpr uint8_t config_address	{0xF5};
 
     // posiciones dentro de la memoria de cada registro
     static constexpr uint8_t i_ctrl_hum   = 0;
@@ -176,9 +176,9 @@ struct __BME280_config{
 
 
     //  mem <-> struct
-    static void mem_to_struct(const std::array<std::byte, size>& mem,
+    static void mem_to_struct(const std::array<uint8_t, size>& mem,
 					__BME280_config& st);
-    static void struct_to_mem(const __BME280_config& st, std::byte* mem);
+    static void struct_to_mem(const __BME280_config& st, uint8_t* mem);
 
 
     // Escribe toda la configuración. La configuración hay que escribirla
@@ -190,50 +190,50 @@ struct __BME280_config{
 
 // Options
 // Tables 20, 23 and 24 have the same values for osrs_h, osrs_t and osrs_p.
-    static constexpr std::byte oversampling_none{0x00};
-    static constexpr std::byte oversampling_x1	{0x01};
-    static constexpr std::byte oversampling_x2	{0x02};
-    static constexpr std::byte oversampling_x4	{0x03};
-    static constexpr std::byte oversampling_x8	{0x04};
-    static constexpr std::byte oversampling_x16	{0x05};
+    static constexpr uint8_t oversampling_none{0x00};
+    static constexpr uint8_t oversampling_x1	{0x01};
+    static constexpr uint8_t oversampling_x2	{0x02};
+    static constexpr uint8_t oversampling_x4	{0x03};
+    static constexpr uint8_t oversampling_x8	{0x04};
+    static constexpr uint8_t oversampling_x16	{0x05};
 
 // 6.3
-    static constexpr std::byte spi3w_disable{0x00};
-    static constexpr std::byte spi3w_enable{0x01};
+    static constexpr uint8_t spi3w_disable{0x00};
+    static constexpr uint8_t spi3w_enable{0x01};
 
 // Table 25: mode settings
-    static constexpr std::byte sleep_mode {0x00};
-    static constexpr std::byte force_mode {0x01}; // also 0x10 
-    static constexpr std::byte normal_mode{0x03};
+    static constexpr uint8_t sleep_mode {0x00};
+    static constexpr uint8_t force_mode {0x01}; // also 0x10 
+    static constexpr uint8_t normal_mode{0x03};
 
 // Table 27: t_sb settings
     // Esto lo llama también la datasheet como ODR = Output Data Rate
-    static constexpr std::byte t_sb_0_5_ms	{0x00};
-    static constexpr std::byte t_sb_62_5_ms	{0x01};
-    static constexpr std::byte t_sb_125_ms	{0x02};
-    static constexpr std::byte t_sb_250_ms	{0x03};
-    static constexpr std::byte t_sb_500_ms	{0x04};
-    static constexpr std::byte t_sb_1000_ms	{0x05};
-    static constexpr std::byte t_sb_2000_ms	{0x06};
-    static constexpr std::byte t_sb_4000_ms	{0x07};
+    static constexpr uint8_t t_sb_0_5_ms	{0x00};
+    static constexpr uint8_t t_sb_62_5_ms	{0x01};
+    static constexpr uint8_t t_sb_125_ms	{0x02};
+    static constexpr uint8_t t_sb_250_ms	{0x03};
+    static constexpr uint8_t t_sb_500_ms	{0x04};
+    static constexpr uint8_t t_sb_1000_ms	{0x05};
+    static constexpr uint8_t t_sb_2000_ms	{0x06};
+    static constexpr uint8_t t_sb_4000_ms	{0x07};
     
 // Table 28: filter settings
-    static constexpr std::byte filter_off	{0x00};
-    static constexpr std::byte filter_coeff_2	{0x01};
-    static constexpr std::byte filter_coeff_4	{0x02};
-    static constexpr std::byte filter_coeff_8	{0x03};
-    static constexpr std::byte filter_coeff_16	{0x04};
+    static constexpr uint8_t filter_off	{0x00};
+    static constexpr uint8_t filter_coeff_2	{0x01};
+    static constexpr uint8_t filter_coeff_4	{0x02};
+    static constexpr uint8_t filter_coeff_8	{0x03};
+    static constexpr uint8_t filter_coeff_16	{0x04};
 
 private:
-    static constexpr atd::Range_bitmask<0, 2, std::byte> mask_osrs_h{};
+    static constexpr atd::Range_bitmask<0, 2, uint8_t> mask_osrs_h{};
 
-    static constexpr atd::Range_bitmask<5, 7, std::byte> mask_osrs_t{};
-    static constexpr atd::Range_bitmask<2, 4, std::byte> mask_osrs_p{};
-    static constexpr atd::Range_bitmask<0, 1, std::byte> mask_mode{};
+    static constexpr atd::Range_bitmask<5, 7, uint8_t> mask_osrs_t{};
+    static constexpr atd::Range_bitmask<2, 4, uint8_t> mask_osrs_p{};
+    static constexpr atd::Range_bitmask<0, 1, uint8_t> mask_mode{};
 
-    static constexpr atd::Range_bitmask<5, 7, std::byte> mask_t_sb{};
-    static constexpr atd::Range_bitmask<2, 4, std::byte> mask_filter{};
-    static constexpr atd::Range_bitmask<0, 0, std::byte> mask_spi3w_en{};
+    static constexpr atd::Range_bitmask<5, 7, uint8_t> mask_t_sb{};
+    static constexpr atd::Range_bitmask<2, 4, uint8_t> mask_filter{};
+    static constexpr atd::Range_bitmask<0, 0, uint8_t> mask_spi3w_en{};
 
 };
 
@@ -249,7 +249,7 @@ void __BME280_config::twi_write() const
 { 
     TWI_memory_type<TWI_master, slave_address> twi_mem;
 
-    std::byte mem[size];
+    uint8_t mem[size];
     struct_to_mem(*this, mem);
 
 // 1. Poner el dispositivo en sleep mode. 
@@ -263,7 +263,7 @@ void __BME280_config::twi_write() const
     
 // 2. Leer. El ejemplo de Bosch dice que siempre hay que leer antes de
 // escribir la cfg. ¿Es realmente necesario?
-    std::byte tmp[size];
+    uint8_t tmp[size];
 
     twi_mem.template mem_read<address, size>(tmp);
 
@@ -302,14 +302,14 @@ struct __BME280_temp_and_press_and_hum{
 
 // Memory
     static constexpr atd::Memory_type mem_type = atd::Memory_type::read_only;
-    static constexpr std::byte address {0xF7};
+    static constexpr uint8_t address {0xF7};
     static constexpr uint8_t size = 8;
 
 // mem <-> struct
 /// Devuelve los valores de temperatura, presión y humedad sin compensar.
 // En caso de que los valores leídos no estén dentro de los límites
 // devuelve todo 0.
-    static void mem_to_struct(const std::array<std::byte, size>& mem, 
+    static void mem_to_struct(const std::array<uint8_t, size>& mem, 
 						__BME280_temp_and_press_and_hum& st);
 
 };
@@ -341,10 +341,10 @@ struct __BME280_calibration{
     int8_t  dig_H6;
 
 // Memory. Método particular twi_read de lectura.
-    static constexpr std::byte temp_and_press_address {0x88};
+    static constexpr uint8_t temp_and_press_address {0x88};
     static constexpr uint8_t temp_and_press_size = 26;
 
-    static constexpr std::byte hum_address {0xE1};
+    static constexpr uint8_t hum_address {0xE1};
     static constexpr uint8_t hum_size = 7;
 
     // Al ser discontinua la memoria tenemos que leer
@@ -383,8 +383,8 @@ private:
     // compensation formula.
     int32_t t_fine;
 
-    void mem_to_temp_and_press(const std::byte* mem);
-    void mem_to_hum(const std::byte* mem);
+    void mem_to_temp_and_press(const uint8_t* mem);
+    void mem_to_hum(const uint8_t* mem);
 
 
     // Mira a ver si los valores de temperatura y presión están dentro de los
@@ -412,7 +412,7 @@ void __BME280_calibration::read()
 {
     TWI_memory_type<TWI_master, slave_address> twi_mem;
 
-    std::byte mem[std::max(temp_and_press_size, hum_size)];
+    uint8_t mem[std::max(temp_and_press_size, hum_size)];
 
 // primer bloque: el código de Bosch lee también el registro 0xA0.
     twi_mem.template mem_read<temp_and_press_address, temp_and_press_size>(mem);

@@ -259,7 +259,7 @@ void test_ram()
 
     while (1){
 	constexpr int N = 56;
-	std::byte buf[N];
+	uint8_t buf[N];
 	std::iota((uint8_t*) buf, (uint8_t*) &buf[N], 0);
 
 	uint8_t nw = rtc.ram_write(buf, N, 0);
@@ -273,8 +273,8 @@ void test_ram()
 	if (rtc.error())
 	    uart << "Error al intentar escribir en la RAM\n";
 
-	std::byte res[N];
-	std::fill(res, &res[N], std::byte{0});
+	uint8_t res[N];
+	std::fill(res, &res[N], uint8_t{0});
 
 	if (rtc.ram_read(res, N, 0) != N)
 	    uart << "ERROR: no se han leído todos bytes\n";
@@ -283,7 +283,7 @@ void test_ram()
 	    uart << "Error al intentar leer en la RAM\n";
     
 	for (uint8_t i = 0; i < N; ++i)
-	    uart << std::to_integer<int>(res[i]) << ", ";
+	    uart << (int)(res[i]) << ", ";
 
 	uart << '\n';
 
@@ -296,13 +296,13 @@ void test_ram()
 	    uart << "Error: error en el rtc!!!\n";
 
 
-	std::fill(res, &res[N], std::byte{0});
+	std::fill(res, &res[N], uint8_t{0});
 	if (rtc.ram_read(res, 10, 10) != 10)
 	    uart << "ERROR: no se han leído todos bytes\n";
 
 	uart << "\nSegunda lectura:\n";
 	for (uint8_t i = 0; i < N; ++i)
-	    uart << std::to_integer<int>(res[i]) << ", ";
+	    uart << (int)(res[i]) << ", ";
 
 	mcu::Micro::wait_ms(5000);
     }

@@ -73,11 +73,11 @@ enum class Service{
     service2
 };
 
-constexpr std::byte service1_name {0x34};
-constexpr std::byte service2_name {0x87};
+constexpr uint8_t service1_name {0x34};
+constexpr uint8_t service2_name {0x87};
 
 // nread [out]: parametros leidos
-Service read_service_name(std::array<std::byte, TWI_buffer_size>& params_in, TWI::streamsize& nread)
+Service read_service_name(std::array<uint8_t, TWI_buffer_size>& params_in, TWI::streamsize& nread)
 {
     mcu::UART_iostream uart;
     uart << "\n\n=================\n";
@@ -165,8 +165,8 @@ void print_TWI_state()
 
 // params_in[0] = nombre del servicio
 // params_in[...] = resto de parámetros
-void service1(const std::array<std::byte, TWI_buffer_size>& params_in,
-		    std::array<std::byte, TWI_buffer_size>& params_out)
+void service1(const std::array<uint8_t, TWI_buffer_size>& params_in,
+		    std::array<uint8_t, TWI_buffer_size>& params_out)
 {
     mcu::UART_iostream uart;
     uart << "--------- Ejecutando service1\n";
@@ -176,9 +176,9 @@ void service1(const std::array<std::byte, TWI_buffer_size>& params_in,
 	 << static_cast<uint16_t>(params_in[3]) << '\n';
 
     // respondemos 3 byte con 45!!!
-    params_out[0] = std::byte{45};
-    params_out[1] = std::byte{50};
-    params_out[2] = std::byte{87};
+    params_out[0] = uint8_t{45};
+    params_out[1] = uint8_t{50};
+    params_out[2] = uint8_t{87};
 
     print_TWI_state();
     uart << "Esperamos a que esté wrt_be\n";
@@ -213,7 +213,7 @@ void service1(const std::array<std::byte, TWI_buffer_size>& params_in,
 
 // params_in[0] = nombre del servicio
 // params_in[...] = resto de parámetros
-void service2(const std::array<std::byte, TWI_buffer_size>& params_in)
+void service2(const std::array<uint8_t, TWI_buffer_size>& params_in)
 {
     mcu::UART_iostream uart;
     uart << "-------------- Recibido service2\n";
@@ -221,7 +221,7 @@ void service2(const std::array<std::byte, TWI_buffer_size>& params_in)
 
 
 // params_in[0,n) = parametros de entrada
-void service_unknown(const std::array<std::byte, TWI_buffer_size>& params_in,
+void service_unknown(const std::array<uint8_t, TWI_buffer_size>& params_in,
                      TWI::streamsize n)
 {
     mcu::UART_iostream uart;
@@ -275,8 +275,8 @@ void test_servidor()
 	}
 	uart << "FIN\n";
 
-	std::array<std::byte, TWI_buffer_size> params_in;
-	std::array<std::byte, TWI_buffer_size> params_out;
+	std::array<uint8_t, TWI_buffer_size> params_in;
+	std::array<uint8_t, TWI_buffer_size> params_out;
 
 	// TODO: read_service_name miente! Lee tambien params_in!!! CAMBIARLO!
 	TWI::streamsize n;
@@ -328,7 +328,7 @@ void test_read()
 	 << "Probar con distintos buffer_size\n\n";
 
     while (1){
-	std::byte buffer[TWI_buffer_size];
+	uint8_t buffer[TWI_buffer_size];
 	
 	// El caso más habitual es que el master pida algo al slave, por ello,
 	// lo normal será que el master siempre envía primero SLA+W.
@@ -339,7 +339,7 @@ void test_read()
                 uart << "\nXXX Recibidos " << static_cast<uint16_t>(n)
                      << " datos:\n";
                 for (uint8_t i = 0; i < n; ++i)
-                    uart << '\t' << std::to_integer<uint16_t>(buffer[i])
+                    uart << '\t' << (uint16_t) buffer[i]
                          << '\n';
             }
         } // while
@@ -348,7 +348,7 @@ void test_read()
 	if (uint8_t n = TWI::read_buffer(buffer, TWI_buffer_size)){
 	    uart << "\nFFF Recibidos " << static_cast<uint16_t>(n)  << " datos:\n";
 	    for (uint8_t i = 0; i < n; ++i)
-		uart << '\t' << std::to_integer<uint16_t>(buffer[i]) << '\n';
+		uart << '\t' << (uint16_t)(buffer[i]) << '\n';
 	}
 	}
 

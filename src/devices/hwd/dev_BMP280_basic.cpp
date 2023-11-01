@@ -56,9 +56,9 @@ int32_t __BMP280_calibration::compensate_P_(const int32_t& adc_P) const
 
 
 
-// void __BMP280_temp_and_press::mem_to_struct(const std::byte* mem,
+// void __BMP280_temp_and_press::mem_to_struct(const uint8_t* mem,
 void __BMP280_temp_and_press::mem_to_struct(
-    const std::array<std::byte, size>& mem, __BMP280_temp_and_press& st)
+    const std::array<uint8_t, size>& mem, __BMP280_temp_and_press& st)
 {
     st.upressure = atd::concat_bytes<uint32_t>(mem[0], mem[1], mem[2]);
     st.upressure >>= 4;
@@ -71,8 +71,8 @@ void __BMP280_temp_and_press::mem_to_struct(
 
 
 // decode according to table 17
-// void __BMP280_calibration::mem_to_struct(std::byte* mem,
-void __BMP280_calibration::mem_to_struct(const std::array<std::byte,size>& mem,
+// void __BMP280_calibration::mem_to_struct(uint8_t* mem,
+void __BMP280_calibration::mem_to_struct(const std::array<uint8_t,size>& mem,
                                          __BMP280_calibration& st)
 {
     // El BMP280 almacena los parámetros de calibración en little-endian:
@@ -95,8 +95,8 @@ void __BMP280_calibration::mem_to_struct(const std::array<std::byte,size>& mem,
 
 
 // mem -> st
-// void __BMP280_config::mem_to_struct(std::byte* mem, __BMP280_config& st)
-void __BMP280_config::mem_to_struct(const std::array<std::byte, size>& mem,
+// void __BMP280_config::mem_to_struct(uint8_t* mem, __BMP280_config& st)
+void __BMP280_config::mem_to_struct(const std::array<uint8_t, size>& mem,
                                     __BMP280_config& st)
 {
     st.osrs_t   = mask_osrs_t(mem[0]);
@@ -112,15 +112,15 @@ void __BMP280_config::mem_to_struct(const std::array<std::byte, size>& mem,
 
 // st -> mem
 //void __BMP280_config::struct_to_mem(const __BMP280_config& st,
-//                                    std::array<std::byte, size>& mem)
+//                                    std::array<uint8_t, size>& mem)
 void __BMP280_config::struct_to_mem(const __BMP280_config& st,
-                                    std::byte* mem)
+                                    uint8_t* mem)
 {
 //    static_assert(mem.size() == 2, "mem"); // voy a usar 2 bytes
 
 // FUNDAMENTAL: inicializar la memoria!!!
-    mem[0] = std::byte{0};
-    mem[1] = std::byte{0};
+    mem[0] = uint8_t{0};
+    mem[1] = uint8_t{0};
 
     mask_osrs_t(mem[0])   = st.osrs_t;
     mask_osrs_p(mem[0])   = st.osrs_p;

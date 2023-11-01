@@ -154,7 +154,16 @@ Ejemplos de relojes que podemos tener son:
 
 * 1-wire de Maxim
 
-* 2-wire (TWI o I2C)
+* 2-wire (TWI o I2C).
+
+  La implementación está pensada por capas. Cuanto más elaborada es la capa
+  más sencilla de manejar y más robusta, pero también más ineficiente. Si
+  buscas eficiencia usa directamente el traductor del microcontrolador.
+
+  `TWI_master` añade un buffer al dispositivo TWI.
+  [Aquí](doc/TWI_master_state_diagram_v0.0.jpg) se puede encontrar la versión
+  0 del diagrama de estados que implementa esta clase (solo tiene interés si
+  quieres ver la implementación de la clase, no se necesita para usarla).
 
 
 ## TWI_master_ioxtream

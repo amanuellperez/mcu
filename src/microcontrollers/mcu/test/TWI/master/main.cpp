@@ -205,8 +205,7 @@ void send_service0()
     }
 
 
-    if (TWI::write_to<slave_address>(
-			    reinterpret_cast<std::byte*>(msg), 3) != 3){
+    if (TWI::write_to<slave_address>(msg, 3) != 3){
 	uart << "Error sending service 1: ";
         uart << "Trying to send to many bytes at once, make TWI buffer bigger\n";
 	return;
@@ -219,14 +218,10 @@ void send_service0()
 			// el slave no muetra los datos hasta que no recibe
 			// todo. Esto se podría mejorar bastante. Para el
 			// futuro si lo uso.
-	TWI::write((std::byte*)(&msg[i]), 1);
+	TWI::write(msg[i]);
     }
 
-    uint16_t i = 0;
-    for (; TWI::is_busy() and i < 65000; ++i)
-    { ; }
-    
-    if (i == 65000){
+    if (TWI::wait_while_busy(65000) == 0) {
 	uart << "Slave doesn't respond!\n";
 	uart << "Stopping transmission... ";
 	TWI::reset();
@@ -238,7 +233,7 @@ void send_service0()
 	uart << "Program error\n";
 
     if (TWI::no_response()) // es el único posible error
-	uart << "Device no response\n";
+	uart << "Error: no response\n";
 
     if (!TWI::eow()){
 	uart << "FAIL\n";
@@ -254,10 +249,7 @@ void send_service0()
     TWI::send_repeated_start();
     TWI::read_from<slave_address>(out_nbytes);
 
-    for (; TWI::is_busy() and i < 65000; ++i)
-    { ; }
-    
-    if (i == 65000){
+    if (TWI::wait_while_busy(65000) == 0){
 	uart << "No response!\n";
 	uart << "Stopping transmission ... ";
 	TWI::reset();	// ESTO no funciona. De hecho, mientras el slave
@@ -267,10 +259,10 @@ void send_service0()
     }
 
     if (TWI::prog_error()) // es el único posible error
-	uart << "Error de programación\n";
+	uart << "Program error\n";
 
     if (TWI::no_response()){ // es el único posible error
-	uart << "ERROR: dispostivo no responde\n";
+	uart << "Error: No response\n";
 	return;
     }
 
@@ -279,14 +271,14 @@ void send_service0()
 	return;
     }
 
-    std::array<std::byte, out_nbytes> bout;
+    std::array<uint8_t, out_nbytes> bout;
     if (TWI::read_buffer(bout.data(), out_nbytes) != out_nbytes){
-	uart << "ERROR: no se han leido " << out_nbytes << " bytes del buffer\n";
+	uart << "ERROR: can't read " << out_nbytes << " bytes from buffer\n";
     }
     else{
 	uart << "OK; datos recibidos: ";
 	for (auto b: bout)
-	    uart << std::to_integer<uint16_t>(b) << ' ';
+	    uart << (uint16_t)(b) << ' ';
 	uart << '\n';
     }
 
@@ -309,7 +301,7 @@ void send_service1()
 
 
     //std::byte msg[1] = {std::byte{0x87}};
-    std::byte msg[1] = {std::byte{service_id[1]}};
+    uint8_t msg[1] = {service_id[1]};
 
 
     TWI::send_start();
@@ -322,7 +314,7 @@ void send_service1()
     else
 	uart << "\tEscribiendo ... ";
 
-    TWI::wait_till_no_busy();
+    TWI::wait_while_busy();
     
     if (TWI::no_response()) // es el único posible error
 	uart << "dispostivo no responde\n";
@@ -350,8 +342,7 @@ void send_service2()
     TWI::send_start();
 
     uart << "\tEscribiendo ... ";
-    TWI::streamsize nres = TWI::write_to<slave_address>
-	    (reinterpret_cast<std::byte*>(&x0), sizeof(x0));
+    TWI::streamsize nres = TWI::write_to<slave_address>(x0);
 
     if (nres != sizeof(x0)){
 	uart << "\nERROR: write_to devuelve 0!\n";
@@ -368,7 +359,7 @@ void send_service2()
 	return;
     }
 
-    nres = TWI::write(reinterpret_cast<std::byte*>(&x1), sizeof(x1));
+    nres = TWI::write(x1);
     if (nres != sizeof(x1)){
 	if (TWI::prog_error())
 	    uart << "ERROR: write devuelve prog_error\n";
@@ -378,14 +369,14 @@ void send_service2()
     }
 
 
-    nres = TWI::write(reinterpret_cast<std::byte*>(&x2), sizeof(x2));
+    nres = TWI::write(x2);
 
     if (nres == 0){
 	uart << "\nERROR: write(x2) devuelve 0\n";
 	return;
     }
 
-    TWI::wait_till_no_busy();
+    TWI::wait_while_busy();
 
     if (TWI::no_response()) // es el único posible error
 	uart << "dispostivo no responde\n";
@@ -402,18 +393,18 @@ void send_service2()
 
     TWI::read_from<slave_address>(sizeof(x0) + sizeof(x1) + sizeof(x2));
 
-    TWI::wait_till_no_busy();
+    TWI::wait_while_busy();
 
     uint8_t y0;
     uint16_t y1;
     uint16_t y2;
-    if (TWI::read_buffer((std::byte*) &y0, sizeof(y0)) != sizeof(y0)){
+    if (TWI::read_buffer(y0) != sizeof(y0)){
 	uart << "Error: no se ha recibido y1 enviado\n";
 	TWI::send_stop();
 	return;
     }
 
-    if (TWI::read_buffer((std::byte*) &y1, sizeof(y1)) != sizeof(y1)){
+    if (TWI::read_buffer(y1) != sizeof(y1)){
 	uart << "Error: no se ha recibido y1 enviado\n";
 	TWI::send_stop();
 	return;
@@ -425,7 +416,7 @@ void send_service2()
 	return;
     }
 
-    if (TWI::read_buffer((std::byte*) &y2, sizeof(y2)) != sizeof(y2)){
+    if (TWI::read_buffer(y2) != sizeof(y2)){
 	uart << "Error: no se ha recibido y2 enviado\n";
 	TWI::send_stop();
 	return;

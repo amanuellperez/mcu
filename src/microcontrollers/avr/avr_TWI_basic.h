@@ -30,10 +30,13 @@
  *    Manuel Perez
  *    24/08/2019 v0.0
  *    27/01/2020 Reescribo todo.
+ *    01/11/2023 Elimino std::byte a favor de uint8_t.
+ *               He intentado usar std::byte porque con lo que trabajamos son
+ *               con bytes y no con números, pero usarlo obliga a hacer
+ *               continuamente castings tanto aquí como en el cliente. 
+ *               Más sencillo uint8_t.
  *
  ****************************************************************************/
-
-#include <cstddef>    // std::byte
 #include <atd_bit.h>
 #include <avr/io.h> // registros: DDRB... PORT...
 #include "avr_cfg.h"	// clock_frequency_in_hz
@@ -143,12 +146,12 @@ public:
     // de 1 byte que funciona a la vez como put/get area. ¿Sería mejor
     // llamarlo buffer?
     /// Dato que queremos enviar a continuación.
-    static void data(std::byte x)
-    { TWDR = std::to_integer<uint8_t>(x); }
+    static void data(uint8_t x)
+    { TWDR = x; }
 
     /// Dato que hemos recibido.
-    static std::byte data()
-    { return std::byte{TWDR};}
+    static uint8_t data()
+    { return TWDR;}
 
 
     /// Enables TWI as a master.
@@ -249,10 +252,6 @@ public:
 	atd::write_bits<TWSTA, TWSTO, TWINT>::to<0,0,1>::in(TWCR);
     }
 
-    /// SLA+R/W or data byte will be transmitted.
-    static void master_transmit_byte(std::byte x)
-    {master_transmit_byte(std::to_integer<uint8_t>(x));}
-
 
 //    /// SLA+W will be transmitted to 'slave_address'.
 //    template <uint8_t slave_address>
@@ -292,16 +291,16 @@ public:
 // Actions by Slave Mode (see: tables 26-5/6)
 // ------------------------------------------
     /// Data byte will be transmitted and NACK should be received.
-    static void slave_transmit_byte_received_NACK(std::byte x)
+    static void slave_transmit_byte_received_NACK(uint8_t x)
     {
-	TWDR = std::to_integer<uint8_t>(x);
+	TWDR = x;
 	atd::write_bits<TWSTO, TWINT, TWEA>::to<0,1,0>::in(TWCR);
     }
 
     /// Data byte will be transmitted and NACK should be received.
-    static void slave_transmit_byte_received_ACK(std::byte x)
+    static void slave_transmit_byte_received_ACK(uint8_t x)
     {
-	TWDR = std::to_integer<uint8_t>(x);
+	TWDR = x;
 	atd::write_bits<TWSTO, TWINT, TWEA>::to<0,1,1>::in(TWCR);
     }
 

@@ -129,7 +129,7 @@ void twi_print_state(TWI::iostate st)
 }
 
 
-void bme280_read_all_mem(std::byte addr, std::byte* mem, uint8_t n)
+void bme280_read_all_mem(uint8_t addr, uint8_t* mem, uint8_t n)
 {
     TWI twi;
     twi.open(sensor_twi_address);
@@ -148,22 +148,22 @@ void bme280_read_all_mem(std::byte addr, std::byte* mem, uint8_t n)
 
 }
 
-void print_in_hex(std::ostream& uart, std::byte* p, uint8_t n)
+void print_in_hex(std::ostream& uart, uint8_t* p, uint8_t n)
 {
     for (uint8_t i = 0; i < n; ++i){
-	atd::print_in_hex(uart, p[i]);
+	atd::print_int_as_hex(uart, p[i]);
 	uart << ' ';
     }
     uart << '\n';
 }
 
 void mem_dump_(std::ostream& uart, 
-	       std::byte addr, std::byte* mem, uint8_t mem_size)
+	       uint8_t addr, uint8_t* mem, uint8_t mem_size)
 {
     bme280_read_all_mem(addr, mem, mem_size);
 
     uart << "Memoria [";
-    atd::print_in_hex(uart, addr);
+    atd::print_int_as_hex(uart, addr);
     uart << "]:\n";
 
     print_in_hex(uart, mem, mem_size);
@@ -174,8 +174,8 @@ void mem_dump(std::ostream& uart)
 {
 //    {
 //    constexpr uint8_t mem_size = 24;
-//    constexpr std::byte addr{0x88};
-//    std::byte mem[mem_size];
+//    constexpr uint8_t addr{0x88};
+//    uint8_t mem[mem_size];
 //    uart << "Calibration params: ";
 //
 //    mem_dump_(uart, addr, mem, mem_size);
@@ -185,21 +185,21 @@ void mem_dump(std::ostream& uart)
     // si se intenta leer falla la lectura del resto.
     {
     constexpr uint8_t mem_size = 1;
-    constexpr std::byte addr{0xD0};
-    std::byte mem[mem_size];
+    constexpr uint8_t addr{0xD0};
+    uint8_t mem[mem_size];
 
     mem_dump_(uart, addr, mem, mem_size);
     }
     {
     constexpr uint8_t mem_size = 3;
-    constexpr std::byte addr{0xF3};
-    std::byte mem[mem_size];
+    constexpr uint8_t addr{0xF3};
+    uint8_t mem[mem_size];
     mem_dump_(uart, addr, mem, mem_size);
     }
     {
     constexpr uint8_t mem_size = 6;
-    constexpr std::byte addr{0xF7};
-    std::byte mem[mem_size];
+    constexpr uint8_t addr{0xF7};
+    uint8_t mem[mem_size];
     mem_dump_(uart, addr, mem, mem_size);
     }
 
@@ -208,7 +208,7 @@ void mem_dump(std::ostream& uart)
 
 
 
-void print_mode(std::ostream& out, std::byte mode)
+void print_mode(std::ostream& out, uint8_t mode)
 {
     using Cfg = dev::__BME280_config;
     if (mode == Cfg::sleep_mode)
@@ -221,7 +221,7 @@ void print_mode(std::ostream& out, std::byte mode)
 	out << "ERROR: mode desconocido\n\\nn";
 }
 
-void print_oversampling(std::ostream& out, std::byte osr)
+void print_oversampling(std::ostream& out, uint8_t osr)
 {
     using Cfg = dev::__BME280_config;
     if (osr == Cfg::oversampling_none)
@@ -247,7 +247,7 @@ void print_oversampling(std::ostream& out, std::byte osr)
 
 }
 
-void print_t_sb(std::ostream& out, std::byte t_sb)
+void print_t_sb(std::ostream& out, uint8_t t_sb)
 {
     using Cfg = dev::__BME280_config;
 
@@ -279,7 +279,7 @@ void print_t_sb(std::ostream& out, std::byte t_sb)
 	out << "ERROR: desconocido\n";
 }
 
-void print_filter(std::ostream& out, std::byte filter)
+void print_filter(std::ostream& out, uint8_t filter)
 {
     using Cfg = dev::__BME280_config;
 
@@ -302,7 +302,7 @@ void print_filter(std::ostream& out, std::byte filter)
 	out << "ERROR: desconocido: [" << (int) filter << "]\n";
 }
 
-void print_spi3w_en(std::ostream& out, std::byte spi3w_en)
+void print_spi3w_en(std::ostream& out, uint8_t spi3w_en)
 {
     using Cfg = dev::__BME280_config;
 

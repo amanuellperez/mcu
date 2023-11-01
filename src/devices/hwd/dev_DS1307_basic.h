@@ -67,7 +67,7 @@ struct __DS1307_timekeeper{
 // Memory
     static constexpr atd::Memory_type mem_type =
 					      atd::Memory_type::read_and_write;
-    static constexpr std::byte address {0x00};
+    static constexpr uint8_t address {0x00};
     static constexpr uint8_t size = 7;
 
     static constexpr bool use_struct_as_mem = true;
@@ -155,7 +155,7 @@ struct __DS1307_control_register{
 // Data
     bool output_control;
     bool square_wave_enable;
-    std::byte rate_select;
+    uint8_t rate_select;
 
     __DS1307_control_register() {}
     __DS1307_control_register(bool out, bool square, uint8_t rate)
@@ -164,7 +164,7 @@ struct __DS1307_control_register{
 // Memory
     static constexpr atd::Memory_type mem_type =
 					      atd::Memory_type::read_and_write;
-    static constexpr std::byte address {0x07};
+    static constexpr uint8_t address {0x07};
     static constexpr uint8_t size = 1;
 
     static constexpr bool use_struct_as_mem = true;
@@ -200,15 +200,15 @@ struct __DS1307_control_register{
 
 
 private:
-    static constexpr atd::Range_bitmask<7, 7, std::byte> mask_output_control{};
-    static constexpr atd::Range_bitmask<4, 4, std::byte> mask_square_wave_enable{};
-    static constexpr atd::Range_bitmask<0, 1, std::byte> mask_rate_select{};
+    static constexpr atd::Range_bitmask<7, 7, uint8_t> mask_output_control{};
+    static constexpr atd::Range_bitmask<4, 4, uint8_t> mask_square_wave_enable{};
+    static constexpr atd::Range_bitmask<0, 1, uint8_t> mask_rate_select{};
 
-    static void mem_to_struct(const std::byte& mem,
+    static void mem_to_struct(const uint8_t& mem,
                               __DS1307_control_register& st);
 
     static void struct_to_mem(const __DS1307_control_register& st, 
-				std::byte& mem);
+				uint8_t& mem);
 };
 
 
@@ -217,7 +217,7 @@ Ixtream& operator>>(Ixtream& in, __DS1307_control_register& st)
 {
     using T = __DS1307_control_register;
 
-    std::byte mem;
+    uint8_t mem;
     in >> mem;
 
     T::mem_to_struct(mem, st);
@@ -231,7 +231,7 @@ Oxtream& operator<<(Oxtream& out, const __DS1307_control_register& st)
 {
     using T = __DS1307_control_register;
 
-    std::byte mem;
+    uint8_t mem;
     T::struct_to_mem(st, mem);
 
     out << mem;
@@ -275,11 +275,11 @@ public:
 // RAM access
     /// Leemos ram[i... i + n) guardándolo en buf.
     /// Devuelve el número de bytes leidos.
-    uint8_t ram_read(std::byte* buf, uint8_t n, uint8_t i);
+    uint8_t ram_read(uint8_t* buf, uint8_t n, uint8_t i);
 
     /// Escribimos n bytes de buf en ram[i... i+n).
     /// Devuelve el número de bytes escritos.
-    uint8_t ram_write(std::byte* buf, uint8_t n, uint8_t i);
+    uint8_t ram_write(uint8_t* buf, uint8_t n, uint8_t i);
 
 
 // Output
@@ -317,7 +317,7 @@ private:
 };
 
 template <typename TWI_master>
-uint8_t DS1307_basic<TWI_master>::ram_read(std::byte* buf, uint8_t n, uint8_t i)
+uint8_t DS1307_basic<TWI_master>::ram_read(uint8_t* buf, uint8_t n, uint8_t i)
 {
     using TWI = TWI_master_ioxtream<TWI_master>;
 
@@ -325,7 +325,7 @@ uint8_t DS1307_basic<TWI_master>::ram_read(std::byte* buf, uint8_t n, uint8_t i)
     twi.open(slave_address);
      
     uint8_t addr = ram_address + i;
-    twi << std::byte{addr};
+    twi << uint8_t{addr};
 
     if (twi.error()){
 	state_ = TWI::state();
@@ -345,7 +345,7 @@ uint8_t DS1307_basic<TWI_master>::ram_read(std::byte* buf, uint8_t n, uint8_t i)
 }
 
 template <typename TWI_master>
-uint8_t DS1307_basic<TWI_master>::ram_write(std::byte* buf, uint8_t n, uint8_t i)
+uint8_t DS1307_basic<TWI_master>::ram_write(uint8_t* buf, uint8_t n, uint8_t i)
 {
     using TWI = TWI_master_ioxtream<TWI_master>;
 
@@ -358,7 +358,7 @@ uint8_t DS1307_basic<TWI_master>::ram_write(std::byte* buf, uint8_t n, uint8_t i
     }
 
     uint8_t addr = ram_address + i;
-    twi << std::byte{addr};
+    twi << uint8_t{addr};
 
     uint8_t nwrite = twi.write(buf, n);
 
