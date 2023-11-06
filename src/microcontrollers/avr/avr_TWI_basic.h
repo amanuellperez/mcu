@@ -38,6 +38,7 @@
  *
  ****************************************************************************/
 #include <atd_bit.h>
+#include <atd_type_traits.h>	// always_false_v
 #include <avr/io.h> // registros: DDRB... PORT...
 #include "avr_cfg.h"	// clock_frequency_in_hz
 #include "avr_not_generic.h"
@@ -352,104 +353,184 @@ public:
 
 // Los siguientes datos proceden de la tabla 1-1 de la application note
 // AVR315.
-template <>
-inline void TWI_basic::SCL_frequency_in_kHz<400u, 16000000uL>()
+template <uint16_t f_scl, uint32_t f_clock>
+inline void TWI_basic::SCL_frequency_in_kHz()
 {
     bit_rate_prescaler_value_1();
-    TWBR = 12;
+
+    if constexpr (f_clock == 16'000'000UL){
+	if constexpr (f_scl == 400u)	    { TWBR = 12; }
+	else if constexpr (f_scl == 100u)   { TWBR = 72; }
+	else 
+	    static_assert(atd::always_false_v<int>, 
+			  "TWI unsupported frequency "
+		          "(review SCL_frequency_in_kHz)");
+
+    }
+
+    else if constexpr (f_clock == 14'400'000UL){
+	if constexpr (f_scl == 400u)	    { TWBR = 10; }
+	else if constexpr (f_scl == 100u)   { TWBR = 64; }
+	else 
+	    static_assert(atd::always_false_v<int>, 
+			  "TWI unsupported frequency "
+		          "(review SCL_frequency_in_kHz)");
+    }
+
+    else if constexpr (f_clock == 12'000'000UL){
+	if constexpr (f_scl == 400u)	    { TWBR = 7; }
+	else if constexpr (f_scl == 100u)   { TWBR = 52; }
+	else 
+	    static_assert(atd::always_false_v<int>, 
+			  "TWI unsupported frequency "
+		          "(review SCL_frequency_in_kHz)");
+    }
+
+    else if constexpr (f_clock == 8'000'000uL){
+	if constexpr (f_scl == 400u)	    { TWBR = 2; }
+	else if constexpr (f_scl == 100u)   { TWBR = 32; }
+	else 
+	    static_assert(atd::always_false_v<int>, 
+			  "TWI unsupported frequency "
+		          "(review SCL_frequency_in_kHz)");
+    }
+
+    else if constexpr (f_clock == 4'000'000uL){
+	if constexpr (f_scl == 100u)	    { TWBR = 12; }
+	else 
+	    static_assert(atd::always_false_v<int>, 
+			  "TWI unsupported frequency "
+		          "(review SCL_frequency_in_kHz)");
+    }
+
+    else if constexpr (f_clock == 3'600'000uL){
+	if constexpr (f_scl == 100u)	    { TWBR = 10; }
+	else 
+	    static_assert(atd::always_false_v<int>, 
+			  "TWI unsupported frequency "
+		          "(review SCL_frequency_in_kHz)");
+    }
+
+    else if constexpr (f_clock == 2'000'000uL){
+	if constexpr (f_scl == 100u)	    { TWBR = 2; }
+	else if constexpr (f_scl == 50u)    { TWBR = 12; }
+	else 
+	    static_assert(atd::always_false_v<int>, 
+			  "TWI unsupported frequency "
+		          "(review SCL_frequency_in_kHz)");
+    }
+
+    else if constexpr (f_clock == 1'000'000uL){
+	if constexpr (f_scl == 50u)	    { TWBR = 2; }
+	else 
+	    static_assert(atd::always_false_v<int>, 
+			  "TWI unsupported frequency "
+		          "(review SCL_frequency_in_kHz)");
+    }
+    else 
+	static_assert(atd::always_false_v<int>, 
+		      "TWI unsupported frequency "
+		          "(review SCL_frequency_in_kHz)");
 }
 
-
-template <>
-inline void TWI_basic::SCL_frequency_in_kHz<100u, 16000000uL>()
-{
-    bit_rate_prescaler_value_1();
-    TWBR = 72;
-}
-
-
-template <>
-inline void TWI_basic::SCL_frequency_in_kHz<400u, 14400000uL>()
-{
-    bit_rate_prescaler_value_1();
-    TWBR = 10;
-}
-
-template <>
-inline void TWI_basic::SCL_frequency_in_kHz<100u, 14400000uL>()
-{
-    bit_rate_prescaler_value_1();
-    TWBR = 64;
-}
-
-
-template <>
-inline void TWI_basic::SCL_frequency_in_kHz<400u, 12000000uL>()
-{
-    bit_rate_prescaler_value_1();
-    TWBR = 7;
-}
-
-
-template <>
-inline void TWI_basic::SCL_frequency_in_kHz<100u, 12000000uL>()
-{
-    bit_rate_prescaler_value_1();
-    TWBR = 52;
-}
-
-template <>
-inline void TWI_basic::SCL_frequency_in_kHz<400u, 8000000uL>()
-{
-    bit_rate_prescaler_value_1();
-    TWBR = 2;
-}
-
-
-template <>
-inline void TWI_basic::SCL_frequency_in_kHz<100u, 8000000uL>()
-{
-    bit_rate_prescaler_value_1();
-    TWBR = 32;
-}
-
-template <>
-inline void TWI_basic::SCL_frequency_in_kHz<100u, 4000000uL>()
-{
-    bit_rate_prescaler_value_1();
-    TWBR = 12;
-}
-
-
-template <>
-inline void TWI_basic::SCL_frequency_in_kHz<100u, 3600000uL>()
-{
-    bit_rate_prescaler_value_1();
-    TWBR = 10;
-}
-
-
-template <>
-inline void TWI_basic::SCL_frequency_in_kHz<100u, 2000000uL>()
-{
-    bit_rate_prescaler_value_1();
-    TWBR = 2;
-}
-
-template <>
-inline void TWI_basic::SCL_frequency_in_kHz<50u, 2000000uL>()
-{
-    bit_rate_prescaler_value_1();
-    TWBR = 12;
-}
-
-template <>
-inline void TWI_basic::SCL_frequency_in_kHz<50u, 1000000uL>()
-{
-    bit_rate_prescaler_value_1();
-    TWBR = 2;
-}
-
+//template <>
+//inline void TWI_basic::SCL_frequency_in_kHz<400u, 16000000uL>()
+//{
+//    bit_rate_prescaler_value_1();
+//    TWBR = 12;
+//}
+//
+//
+//template <>
+//inline void TWI_basic::SCL_frequency_in_kHz<100u, 16000000uL>()
+//{
+//    bit_rate_prescaler_value_1();
+//    TWBR = 72;
+//}
+//
+//
+//template <>
+//inline void TWI_basic::SCL_frequency_in_kHz<400u, 14400000uL>()
+//{
+//    bit_rate_prescaler_value_1();
+//    TWBR = 10;
+//}
+//
+//template <>
+//inline void TWI_basic::SCL_frequency_in_kHz<100u, 14400000uL>()
+//{
+//    bit_rate_prescaler_value_1();
+//    TWBR = 64;
+//}
+//
+//
+//template <>
+//inline void TWI_basic::SCL_frequency_in_kHz<400u, 12000000uL>()
+//{
+//    bit_rate_prescaler_value_1();
+//    TWBR = 7;
+//}
+//
+//
+//template <>
+//inline void TWI_basic::SCL_frequency_in_kHz<100u, 12000000uL>()
+//{
+//    bit_rate_prescaler_value_1();
+//    TWBR = 52;
+//}
+//
+//template <>
+//inline void TWI_basic::SCL_frequency_in_kHz<400u, 8000000uL>()
+//{
+//    bit_rate_prescaler_value_1();
+//    TWBR = 2;
+//}
+//
+//
+//template <>
+//inline void TWI_basic::SCL_frequency_in_kHz<100u, 8000000uL>()
+//{
+//    bit_rate_prescaler_value_1();
+//    TWBR = 32;
+//}
+//
+//template <>
+//inline void TWI_basic::SCL_frequency_in_kHz<100u, 4000000uL>()
+//{
+//    bit_rate_prescaler_value_1();
+//    TWBR = 12;
+//}
+//
+//
+//template <>
+//inline void TWI_basic::SCL_frequency_in_kHz<100u, 3600000uL>()
+//{
+//    bit_rate_prescaler_value_1();
+//    TWBR = 10;
+//}
+//
+//
+//template <>
+//inline void TWI_basic::SCL_frequency_in_kHz<100u, 2000000uL>()
+//{
+//    bit_rate_prescaler_value_1();
+//    TWBR = 2;
+//}
+//
+//template <>
+//inline void TWI_basic::SCL_frequency_in_kHz<50u, 2000000uL>()
+//{
+//    bit_rate_prescaler_value_1();
+//    TWBR = 12;
+//}
+//
+//template <>
+//inline void TWI_basic::SCL_frequency_in_kHz<50u, 1000000uL>()
+//{
+//    bit_rate_prescaler_value_1();
+//    TWBR = 2;
+//}
+//
 
 }// namespace
 
