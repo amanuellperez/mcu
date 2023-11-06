@@ -66,24 +66,27 @@ Compiler: avr-gcc 11.3.0
 
 ---
 
-# Microcontrolador genérico
+# Capa `mcu`
 
-De momento distingo dos capas para implementar el microcontrolador genérico:
+Esta capa es totalmente genérica NO PUDIENDO DEPENDER de ningún
+microcontrolador concreto. Tiene que poder usarse tanto con `attiny`,
+`atmega`, `pic`, `8052`, ...
 
-* Capa `mcu0`: estará formada por los traductores de cada microcontrolador.
-  Aquí se encontrarán los directorios `avr`, `pic`, ...
 
-* Capa `mcu1`: aquí se implementarán dispositivos o protocolos que basados
-  exclusivamente en hardware suministrado habitualmente por los micros
-  (timers, pins, ...).
+Incluso algunas partes de esta capa, como `UART_iostream`, las voy a usar 
+dentro de los tests de `avr`.
+
+
+
+## Comentarios sobre algunas implementaciones
 
 En principio implemento:
 
-## Clocks
+### Clocks
 Se tratan de dispositivos genéricos usados para medir tiempo, basados en
 `Generic_timer`.
 
-### ¿Qué tipos de relojes podemos tener?
+#### ¿Qué tipos de relojes podemos tener?
 
 **Relojes que miden ticks = Tickers**
 
@@ -144,13 +147,13 @@ Ejemplos de relojes que podemos tener son:
   como mucho hasta horas. 
 
 
-### Implementación
+#### Implementación
   + `system_clock`: 
 
     reloj de sistema básico. Suministro este por consistencia con el standard `std`.
 
 
-## Protocolos
+### Protocolos
 
 * 1-wire de Maxim
 
@@ -166,7 +169,7 @@ Ejemplos de relojes que podemos tener son:
   quieres ver la implementación de la clase, no se necesita para usarla).
 
 
-## TWI_master_ioxtream
+### TWI_master_ioxtream
 Si se quiere usar TWI como master concibiéndolo como un flujo usar
 `avr::TWI_master_ioxtream`.
 
@@ -228,7 +231,7 @@ concebirlo como un `iostream` vulgar y corriente? De eso se encarga:
 * `avr_TWI_master_ioxtream.h`: concebimos TWI como un `ioxtream`. Este solo
   funciona como master. 
 
-#### ¿iostream vs ioxtream?
+##### ¿iostream vs ioxtream?
 ¿Cuál es la diferencia entre un `iostream` y un `ioxtream`? Los `iostream`
 clásicos de C++ son flujos de caracteres, mientras que un `ioxtream` es un flujo
 de bytes (en TWI, SPI... son precisamente estos flujos los que nos interesan).

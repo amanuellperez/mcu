@@ -457,7 +457,7 @@ void init_uart()
 
 void init_TWI()
 {
-    TWI::on<50>();
+    TWI::turn_on<50>();
 }
 
 void hello()

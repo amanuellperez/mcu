@@ -371,7 +371,7 @@ int main()
     uart << "TWI slave\n"
 	 << "---------\n";
 
-    TWI::on<slave_address>();
+    TWI::turn_on<slave_address>();
 
     uart << "TWI enable\n";
     

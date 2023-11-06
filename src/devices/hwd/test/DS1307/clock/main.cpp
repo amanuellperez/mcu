@@ -156,7 +156,7 @@ int main()
 // init_TWI();
     // 50 kHz es la unica frecuencia de TWI que va a 1MHz.
     // 100 kHz a 8 MHz
-    TWI::on<50>();
+    TWI::turn_on<50>();
 
     uart << "----------------------------------------\n"
 	 << "DS1307 as a system clock\n"

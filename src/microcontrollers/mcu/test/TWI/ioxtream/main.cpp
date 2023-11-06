@@ -443,7 +443,7 @@ int main()
     uart << "MASTER ioxtream Test\n";
     uart << "* * * * * * * * * * * * * * * * * * * * * * * * * * * *\n";
 
-    TWI_master::on<50>();
+    TWI_master::turn_on<50>();
 
     uart << "TWI enable\n";
  

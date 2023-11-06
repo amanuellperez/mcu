@@ -436,7 +436,7 @@ void test_bmp280()
 	 << "----------------------------------------\n\n";
 
 // init_TWI();
-    TWI_master::on<TWI_frecuency>();
+    TWI_master::turn_on<TWI_frecuency>();
 
 // init_sensor();
     Sensor sensor;

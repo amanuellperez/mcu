@@ -143,7 +143,7 @@ public:
     /// Enables TWI. En modo slave no hay que definir frecuencia de reloj!!!
     // Enables as a slave in the address SLAVE_ADDRESS.
     template <uint8_t TWI_slave_address>
-    static void on()
+    static void turn_on()
     {
 	Micro::enable_interrupts();
 	TWI::template slave_init<TWI_slave_address,1>(); // 1 = TWI::interrupt_enable()

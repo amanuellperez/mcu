@@ -63,7 +63,7 @@ namespace dev{
  *	2. Concebir TWI como flujo normal y corriente.
  *
  *  Ejemplo (ideal):
- *	TWI_master_ioxtream twi;    // antes hay que haber encendido TWI::on!!!
+ *	TWI_master_ioxtream twi;    // antes hay que haber encendido TWI::turn_on!!!
  *	twi.open(slave_address);    // establece la conexión
  *	char x;
  *	int y;

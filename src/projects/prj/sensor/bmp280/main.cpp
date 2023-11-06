@@ -31,7 +31,7 @@ Main::Main()
 
 void Main::init_TWI()
 {
-    TWI::on<TWI_frecuency>();
+    TWI::turn_on<TWI_frecuency>();
 }
 
 

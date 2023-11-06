@@ -188,7 +188,7 @@ public:
 					= std::numeric_limits<uint16_t>::max();
 
 
-// on/off (off (???))
+// turn_on/turn_off (off (???))
     /// Enables TWI interface definiendo la frecuencia del SCL 
     /// a la que vamos a operar.
     /// f_scl = frecuencia en kilohercios de SCL (tipica: 100 y 400 kHz).
@@ -204,7 +204,7 @@ public:
     //	cambiar el softwador cuando quiera? El softwador no sabe de hardware,
     //	así que no es probable que quiera cambiarla o se lie al hacerlo.
     template <uint16_t f_scl, uint32_t f_clock = Micro::clock_frequency_in_hz>
-    static void on()
+    static void turn_on()
     {
 	TWI::template SCL_frequency_in_kHz<f_scl, f_clock>();
 	Micro::enable_interrupts();

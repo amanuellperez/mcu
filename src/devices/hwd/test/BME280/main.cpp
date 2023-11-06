@@ -490,7 +490,7 @@ void test_basic()
 // init_TWI();
     // 50 kHz es la unica frecuencia de TWI que va a 1MHz.
     // 100 kHz a 8 MHz
-    TWI_master::on<50>();
+    TWI_master::turn_on<50>();
 
 // init_sensor();
     Sensor sensor;
@@ -533,7 +533,7 @@ void test_calib()
 // init_TWI();
     // 50 kHz es la unica frecuencia de TWI que va a 1MHz.
     // 100 kHz a 8 MHz
-    TWI_master::on<50>();
+    TWI_master::turn_on<50>();
 
 // init_sensor();
     Sensor sensor;
@@ -568,7 +568,7 @@ void test_config()
 // init_TWI();
     // 50 kHz es la unica frecuencia de TWI que va a 1MHz.
     // 100 kHz a 8 MHz
-    TWI_master::on<50>();
+    TWI_master::turn_on<50>();
 
 // init_sensor();
     Sensor sensor;
@@ -626,7 +626,7 @@ void test_uncompensated()
 // init_TWI();
     // 50 kHz es la unica frecuencia de TWI que va a 1MHz.
     // 100 kHz a 8 MHz
-    TWI_master::on<50>();
+    TWI_master::turn_on<50>();
 
 // init_sensor();
     Sensor sensor;
@@ -695,7 +695,7 @@ void test_t_p_h()
 // init_TWI();
     // 50 kHz es la unica frecuencia de TWI que va a 1MHz.
     // 100 kHz a 8 MHz
-    TWI_master::on<50>();
+    TWI_master::turn_on<50>();
 
 // init_sensor();
     Sensor sensor;

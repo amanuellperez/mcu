@@ -145,7 +145,7 @@ void Pololu_A4988::gira(Num_steps num_steps)
 
 
 
-int main(void) 
+int main() 
 {
     Pololu_A4988 pololu{Pololu_A4988::Pin_STEP{12}, Pololu_A4988::Pin_DIR{13}};
 
