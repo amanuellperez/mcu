@@ -112,10 +112,10 @@ public:
     static void bit_rate_prescaler_value_4()
     { atd::write_bits<TWPS1, TWPS0>::to<0,1>::in(TWSR); }
 
-    static void bit_rate_bit_rate_prescaler_value_16()
+    static void bit_rate_prescaler_value_16()
     { atd::write_bits<TWPS1, TWPS0>::to<1,0>::in(TWSR); }
 
-    static void bit_rate_bit_rate_prescaler_value_64()
+    static void bit_rate_prescaler_value_64()
     { atd::write_bits<TWPS1, TWPS0>::to<1,1>::in(TWSR); }
 
     /// Devuelve los bits con el rate prescaler seleccionado.
@@ -350,89 +350,87 @@ public:
     }
 };
 
-
+ 
 // Los siguientes datos proceden de la tabla 1-1 de la application note
 // AVR315.
+// La fórmula para calcularlo viene en la datasheet (26.5.2):
+//
+//	f_scl = f_clock / (16 + 2*TWBR*prescaler)
+//
+// (1) Despejando obtenemos que
+//	
+//	TWBR * prescaler = f_clock / (2 * f_scl)  - 8
+//
+//	formula que podemos usar para calcular TWBR y prescaler.
+//
+// (2) Esa misma fórmula la podemos escribir como
+//	
+//	f_clock / f_scl = 16 * 2*TWBR*prescaler >= 16
+//
+//	==> f_clock >= 16*f_scl.
+//
+//	(de hecho la app-note AVR315 indica que la frecuencia del reloj tiene
+//	del slave tiene que ser 16 veces mayor que f_scl)
+//
+namespace impl_of{
+
+struct TWBR_prescaler{
+    uint8_t twbr;
+    uint8_t prescaler;
+    constexpr TWBR_prescaler(uint8_t twbr0, uint8_t prescaler0)
+	    : twbr{twbr0}, prescaler{prescaler0} {}
+};
+
+// Calculamos {TWBR, prescaler} para los valores (f_scl, f_clock)
+template <uint16_t f_scl_in_kHz, uint32_t f_clock>
+constexpr TWBR_prescaler TWI_TWBR_prescaler()
+{
+    constexpr uint32_t f_scl = uint32_t{f_scl_in_kHz} * 1000u;
+
+    static_assert ((f_clock >=  16u * f_scl), 
+		   "f_clock must be at least 16 times higher than the SCL frequency.");
+
+
+    uint32_t T_p = f_clock / (2 * f_scl);
+
+    T_p -= 8;
+
+    if (T_p < 256) 
+	return {static_cast<uint8_t>(T_p), 1};
+
+    T_p /= 4;
+    if (T_p  < 256)
+	return {static_cast<uint8_t>(T_p), 4};
+
+    T_p /= 4;
+    if (T_p  < 256)
+	return {static_cast<uint8_t>(T_p), 16};
+
+    T_p /= 4;
+    if (T_p  < 256)
+	return {static_cast<uint8_t>(T_p), 64};
+
+    return {0, 0}; // error
+}   
+
+}// impl_of
 template <uint16_t f_scl, uint32_t f_clock>
 inline void TWI_basic::SCL_frequency_in_kHz()
 {
-    bit_rate_prescaler_value_1();
+    constexpr
+	auto res = impl_of::TWI_TWBR_prescaler<f_scl, f_clock>();
 
-    if constexpr (f_clock == 16'000'000UL){
-	if constexpr (f_scl == 400u)	    { TWBR = 12; }
-	else if constexpr (f_scl == 100u)   { TWBR = 72; }
-	else 
-	    static_assert(atd::always_false_v<int>, 
-			  "TWI unsupported frequency "
-		          "(review SCL_frequency_in_kHz)");
+    if constexpr      (res.prescaler ==  1) bit_rate_prescaler_value_1();
+    else if constexpr (res.prescaler ==  4) bit_rate_prescaler_value_4();
+    else if constexpr (res.prescaler == 16) bit_rate_prescaler_value_16();
+    else if constexpr (res.prescaler == 64) bit_rate_prescaler_value_64();
+    else
+	static_assert(atd::always_false_v<int>, "Program logic error.");
 
-    }
-
-    else if constexpr (f_clock == 14'400'000UL){
-	if constexpr (f_scl == 400u)	    { TWBR = 10; }
-	else if constexpr (f_scl == 100u)   { TWBR = 64; }
-	else 
-	    static_assert(atd::always_false_v<int>, 
-			  "TWI unsupported frequency "
-		          "(review SCL_frequency_in_kHz)");
-    }
-
-    else if constexpr (f_clock == 12'000'000UL){
-	if constexpr (f_scl == 400u)	    { TWBR = 7; }
-	else if constexpr (f_scl == 100u)   { TWBR = 52; }
-	else 
-	    static_assert(atd::always_false_v<int>, 
-			  "TWI unsupported frequency "
-		          "(review SCL_frequency_in_kHz)");
-    }
-
-    else if constexpr (f_clock == 8'000'000uL){
-	if constexpr (f_scl == 400u)	    { TWBR = 2; }
-	else if constexpr (f_scl == 100u)   { TWBR = 32; }
-	else 
-	    static_assert(atd::always_false_v<int>, 
-			  "TWI unsupported frequency "
-		          "(review SCL_frequency_in_kHz)");
-    }
-
-    else if constexpr (f_clock == 4'000'000uL){
-	if constexpr (f_scl == 100u)	    { TWBR = 12; }
-	else 
-	    static_assert(atd::always_false_v<int>, 
-			  "TWI unsupported frequency "
-		          "(review SCL_frequency_in_kHz)");
-    }
-
-    else if constexpr (f_clock == 3'600'000uL){
-	if constexpr (f_scl == 100u)	    { TWBR = 10; }
-	else 
-	    static_assert(atd::always_false_v<int>, 
-			  "TWI unsupported frequency "
-		          "(review SCL_frequency_in_kHz)");
-    }
-
-    else if constexpr (f_clock == 2'000'000uL){
-	if constexpr (f_scl == 100u)	    { TWBR = 2; }
-	else if constexpr (f_scl == 50u)    { TWBR = 12; }
-	else 
-	    static_assert(atd::always_false_v<int>, 
-			  "TWI unsupported frequency "
-		          "(review SCL_frequency_in_kHz)");
-    }
-
-    else if constexpr (f_clock == 1'000'000uL){
-	if constexpr (f_scl == 50u)	    { TWBR = 2; }
-	else 
-	    static_assert(atd::always_false_v<int>, 
-			  "TWI unsupported frequency "
-		          "(review SCL_frequency_in_kHz)");
-    }
-    else 
-	static_assert(atd::always_false_v<int>, 
-		      "TWI unsupported frequency "
-		          "(review SCL_frequency_in_kHz)");
+    TWBR = res.twbr;
 }
 
+// TODO: borrar lo siguiente cuando este probada la nueva implementacion
 //template <>
 //inline void TWI_basic::SCL_frequency_in_kHz<400u, 16000000uL>()
 //{
