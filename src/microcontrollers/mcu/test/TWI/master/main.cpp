@@ -42,7 +42,7 @@ using TWI = dev::TWI_master<TWI_master_cfg>;
 
 // Slave info
 // ----------
-constexpr uint8_t slave_address = 0x10;
+constexpr uint8_t slave_address = 0x10;	// = 16
 constexpr uint8_t nservices = 2;
 constexpr uint8_t service_id[nservices] = {0x34, 0x87};
 
@@ -175,6 +175,8 @@ void twi_print_state(TWI::iostate st)
 	uart << "Unknown state\n";
     }   
 }
+
+
 
 
 

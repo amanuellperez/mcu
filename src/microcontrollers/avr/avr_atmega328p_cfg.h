@@ -186,38 +186,6 @@ inline constexpr int8_t nINT_of_pin()
     // bits of slave address: [1,7]
     constexpr uint8_t TWI_SLAVE_ADDRESS_BIT0 = 1;
     constexpr uint8_t TWI_SLAVE_ADDRESS_BITn = 7;
-
-    // TWI Status register codes TODO: eliminar los codigo en mayusculas
-    // -------------------------
-    // START has been transmitted  
-    constexpr static uint8_t TWI_START = 0x08; 
-    // Repeated START has been transmitted
-    constexpr static uint8_t TWI_REPEATED_START = 0x10;  
-    // Arbitration lost in SLA+R/W or data bytes
-    constexpr static uint8_t TWI_ARBITRATION_LOST = 0x38;
-
-
-    // TWI Master Transmitter status codes (table 26-3)
-    // ------------------------------------------------
-    // SLA+W has been tramsmitted and ACK received
-    constexpr static uint8_t TWI_MTM_ADDRESS_ACK = 0x18;
-    // SLA+W has been tramsmitted and NACK received 
-    constexpr static uint8_t TWI_MTM_ADDRESS_NACK = 0x20;
-    // Data byte has been tramsmitted and ACK received
-    constexpr static uint8_t TWI_MTM_DATA_ACK = 0x28;
-    // Data byte has been tramsmitted and NACK received 
-    constexpr static uint8_t TWI_MTM_DATA_NACK = 0x30;
-
-    // TWI Master Receiver status codes (table 26-4)
-    // ---------------------------------------------
-    // SLA+R has been tramsmitted and ACK received
-    constexpr static uint8_t TWI_MRM_ADDRESS_ACK = 0x40;
-    // SLA+R has been tramsmitted and NACK received
-    constexpr static uint8_t TWI_MRM_ADDRESS_NACK = 0x48;
-    // Data byte has been received and ACK tramsmitted
-    constexpr static uint8_t TWI_MRM_DATA_ACK = 0x50;
-    // Data byte has been received and NACK tramsmitted
-    constexpr static uint8_t TWI_MRM_DATA_NACK = 0x58;
    
 namespace impl_of{
     // Modos comunes a transmitter/receiver mode

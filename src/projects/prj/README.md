@@ -25,19 +25,21 @@ Some applications.
   aplicación muestra en la pantalla del LCD todos los caracteres que trae en
   la ROM, así se puede saber si es 'inglés/japonés', 'inglés/europeo' u otros.
 
-* [oscilloscope](util/oscilloscope): Si quieres programar un mando de TV lo
-  primero que tienes que hacer es aprender el protocolo con el que se
-  comunican el emisor/receptor de IR. Si bien es fácil de ver la señal
-  generada por el receptor en un osciloscopio ¿cómo verla en el
-  microcontrolador? Este pequeño programa sirve para medir los pulsos
-  generados por el receptor (o cualquier otro dispositivo).
-
+* [TWI scan](util/TWI scan): ¿Qué dirección tiene un dispositivo TWI?
+  Cuando se empieza a programar un nuevo TWI-device lo primero que hay que
+  ver es que lo hayamos conectado correctamente y sepamos su dirección. Con
+  esta aplicación podemos scanear el bus de TWI buscando el dispositivo.
+  Incluso si no desconocemos la dirección del dispositivo podemos scanear todo
+  el rango de direcciones posibles, averiguando su dirección.
+  
 
 ## Un poco más elaboradas
 * [clocks](clocks/README.md): Diferentes tipos de relojes.
 
 * [calculator](calculator/README.md): Implementación de una calculadora
   básica.
+
+* [datalogger](datalogger/README.md): Implementación de un datalogger.
 
 * [IR_remote_control](IR_remote_control/README.md): Investigando el protocolo
   de los control remotos (por ejemplo, el mando de la tele).

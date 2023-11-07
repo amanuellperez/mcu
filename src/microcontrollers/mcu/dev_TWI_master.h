@@ -321,6 +321,9 @@ public:
     // Función que va dentro de la ISR
     static void handle_interrupt();
 
+    // Mira a ver si hay algún slave de dirección addr conectado a TWI
+    static bool probe(const Address& addr);
+
 // states
 // ------
 // groups
@@ -748,10 +751,9 @@ inline void TWI_master<Cfg>::send_stop()
 template <typename Cfg>
 void TWI_master<Cfg>::handle_interrupt()
 {
-    using TWI_state = TWI::State; 
-    using MM = TWI_state::master_mode;
-    using MRM = TWI_state::master_receiver_mode;
-    using MTM = TWI_state::master_transmitter_mode;
+    using MM  = TWI::State::master_mode;
+    using MRM = TWI::State::master_receiver_mode;
+    using MTM = TWI::State::master_transmitter_mode;
 
     switch (TWI::status()){
     // modos comunes a transmitter/receiver mode
@@ -807,7 +809,7 @@ void TWI_master<Cfg>::handle_interrupt()
 
     // miscellaneous states
     // --------------------
-	case TWI_state::bus_error:
+	case TWI::State::bus_error:
 	    bus_error();
             break;
 
@@ -828,6 +830,33 @@ uint16_t TWI_master<Cfg>::wait_while_busy(uint16_t time_out_us)
     return (time_out_us - i);
 }
 
+
+template <typename Cfg>
+bool TWI_master<Cfg>::probe(const Address& addr)
+{
+    reset();
+
+    send_start();
+    if (state() != iostate::read_or_write)
+	return false;
+
+    write_to(addr, nullptr, 0);
+
+    // DUDA: si esperamos 1 ms, TWI funciona como mínimo a 1kHz.
+    // Podemos calcular el tiempo a esperar conociendo la frecuencia a la que
+    // funciona, pero esa frecuencia no la guardamos. 
+    // Otra posibilidad es que probe arranque/pare TWI.
+    Micro::wait_ms(1);
+
+    bool res = false;
+    if (state() == iostate::eow)
+	res = true;
+
+    send_stop();
+
+    return res;
+
+}
 
 
 }// namespace dev

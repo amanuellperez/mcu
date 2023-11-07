@@ -351,8 +351,6 @@ public:
 };
 
  
-// Los siguientes datos proceden de la tabla 1-1 de la application note
-// AVR315.
 // La fórmula para calcularlo viene en la datasheet (26.5.2):
 //
 //	f_scl = f_clock / (16 + 2*TWBR*prescaler)
