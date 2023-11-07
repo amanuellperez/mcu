@@ -230,6 +230,30 @@ void test_circular_array()
     CHECK_TRUE(buf.available() == N, "available");
     CHECK_TRUE(buf.size() == 0, "size");
 
+// prueba con nullptr
+    buf.reset();
+    for (int i = 0; i < N; ++i)
+	buf.write(i);
+
+    CHECK_TRUE(buf.size() == N, "write");
+    buf.ewrite(nullptr, 10);
+    CHECK_TRUE(buf.is_empty(), "is_empty");
+    CHECK_TRUE(buf.capacity() == N, "capacity");
+    CHECK_TRUE(buf.available() == N, "available");
+    CHECK_TRUE(buf.size() == 0, "size");
+
+// prueba con size == 0
+    buf.reset();
+    for (int i = 0; i < N; ++i)
+	buf.write(i);
+
+    CHECK_TRUE(buf.size() == N, "write");
+    buf.ewrite(b, 0);
+    CHECK_TRUE(buf.is_empty(), "is_empty");
+    CHECK_TRUE(buf.capacity() == N, "capacity");
+    CHECK_TRUE(buf.available() == N, "available");
+    CHECK_TRUE(buf.size() == 0, "size");
+
 
     {// prueba que falló en TWI
     atd::Circular_array<std::byte, 10> buf;
@@ -243,6 +267,7 @@ void test_circular_array()
 
     
     }
+
 }
 
 

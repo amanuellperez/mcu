@@ -198,6 +198,11 @@ template <typename T, int N>
 Circular_array<T, N>::size_type 
     Circular_array<T, N>::ewrite(const T* b0, size_type n)
 {
+    if (b0 == nullptr or n == 0){
+	reset();
+	return 0;
+    }
+
     if (available() < n)
 	return 0;
 
