@@ -138,7 +138,7 @@ void bmp280_read_all_mem(uint8_t addr, uint8_t* mem, uint8_t n)
     twi.open(slave_address);
     
     twi << addr;
-    twi.read(n);
+    twi.prepare_to_read(n);
     twi.read(mem, n);
 
     twi.close();

@@ -147,5 +147,26 @@ funciona.
 Si se quiere dejar el producto final con la posibilidad de reprogramarlo hay
 que dejar esas resistencias. 
 
+
+## AtMega328P Fuses
+
+Para seleccionar el reloj, tenemos que elegir el LFUSE. Opciones de interés:
+
+* LFUSE = 0xF7: conectar cristal externo con 2 condensadores de 12 a 22 pF en
+  los pines XTAL1/XTAL2. (full swing oscillator)
+
+* LFUSE = 0xB7: misma opción que antes, pero además sacamos por el pin CLKO
+  (pin número 14) la señal del reloj.
+
+* LFUSE = 0x22: micro a 1 MHz sacando la señal de reloj por el pin CLKO.
+
+* LFUSE = 0xA2: micro a 8 MHz sacando la señal de reloj por el pin CLKO.
+
+### Errores iniciales
+
+La primera vez que quise usar el "full swing oscillator" probé LFUSE = 0xE7,
+luego me resultó imposible conectarme con el micro a través de avrdude. 
+
+
 Compilardor: avr-gcc 11.3.0
  

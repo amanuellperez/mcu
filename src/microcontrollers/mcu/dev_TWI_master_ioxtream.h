@@ -69,7 +69,7 @@ namespace dev{
  *	int y;
  *	twi << x << y;
  *	...
- *	twi.read(n);	    // ¿cómo poder eliminar esto? TWI necesita marcar
+ *	twi.prepare_to_read(n);	    // ¿cómo poder eliminar esto? TWI necesita marcar
  *			    // el último byte enviado, ¿cómo saber cuál es el 
  *			    // último? twi << last(x); ???
  *	twi >> x >> y;
@@ -143,7 +143,7 @@ public:
     /// Vamos a leer exactamente n bytes de TWI.
     /// No bloquea.
     /// Precondición: se ha llamado a open antes.
-    void read(streamsize n);
+    void prepare_to_read(streamsize n);
 
 
 // operator<<. Ninguna bloquea.
@@ -300,7 +300,7 @@ inline void TWI_master_ioxtream<T>::close()
 }
 
 template <typename T>
-void TWI_master_ioxtream<T>::read(streamsize n)
+void TWI_master_ioxtream<T>::prepare_to_read(streamsize n)
 {
     if (TWI::is_idle()) 
 	TWI::send_start();
@@ -315,8 +315,8 @@ void TWI_master_ioxtream<T>::read(streamsize n)
 
 
 // (*) Al principio pensé en que el usuario tuviese que elegir entre llamar a
-// read(n) o a read(q, n), para no tener que escribir código del tipo:
-//	twi.read(n);
+// prepare_to_read(n) o a read(q, n), para no tener que escribir código del tipo:
+//	twi.prepare_to_read(n);
 //	twi.read(q, n);
 //  que parece un poco redundante.
 //  Sin embargo, nada más que escribí el primer programa me confundí, ya que
@@ -324,19 +324,19 @@ void TWI_master_ioxtream<T>::read(streamsize n)
 //	read_object(st){
 //	    twi.open();
 //	    twi << cmd;
-//	    twi.read(size_object);
+//	    twi.prepare_to_read(size_object);
 //	    twi >> st; 
 //	}
 //
 //  y el operator>> unas veces se limita a llamar a operator>>, mientras que
 //  otras llama a read(q,n)!!!  Luego con esta forma de razonar llamaré a
-//  read(n) y luego a read(q,n).
+//  prepare_to_read(n) y luego a read(q,n).
 //	
 template <typename T>
 TWI_master_ioxtream<T>::streamsize
 TWI_master_ioxtream<T>::read(uint8_t* q, streamsize n)
 {
-//    read(n); (*)
+//    prepare_to_read(n); (*)
     
     TWI::wait_while_busy();
 
