@@ -127,11 +127,14 @@ public:
 
 
 // open/close
-    /// Inicia una transmisión. 
-    /// No bloquea.
-    /// Precondition: TWI::is_idle();
-    /// Return: true, todo va bien; false, error (se viola la precondición)
-    bool open(Address slave_address);
+    // Inicia una transmisión. En general no llamarla directamente, ya que se
+    // llama a través del constructor. 
+    // DUDA: pensar este open
+    // No bloquea.
+    // Precondition: TWI::is_idle();
+    // Return: no devuelvo nada ya que open no se debería de llamar en
+    // general. Se llama a través del constructor. 
+    void open(Address slave_address);
 
     /// Cierra la transmisión actual.
     /// Bloquea el flujo. No devuelve el control hasta que no la ha cerrado
@@ -244,10 +247,15 @@ private:
 // Data
     Address slave_address_;
 
-
+    // TODO: gestión de errores. Si write no devuelve sizeof(x) error	
+    // Formas posibles:
+    //	    (1) Almacenar el número de bytes escritos/leidos y que se pueda
+    //	        consultar despues.
+    //	    (2) Ampliar el state de TWI con más errores. El problema es que no
+    //	        sabría cúantos bytes se han enviado.
     template <typename T>
     TWI_master_ioxtream& write_(const T& x)
-    {// TODO: gestión de errores. Si write no devuelve sizeof(x) error	
+    {
 	if (TWI::read_or_write()){
             TWI::write_to(slave_address_,
                           reinterpret_cast<const uint8_t*>(&x),
@@ -260,12 +268,13 @@ private:
 	return *this;
     }
 
+    // TODO: gestión de errores. Si read no devuelve sizeof(x) error
     template <typename T>
     TWI_master_ioxtream& read_(T& x)
-    {// TODO: gestión de errores. Si read no devuelve sizeof(x) error
+    {
 	TWI::wait_while_busy();
 
-	if (TWI::is_busy()) 
+	if (TWI::is_busy()) // ha vencido timeout 
 	    return *this;
 	
 	TWI::read_buffer(reinterpret_cast<uint8_t*>(&x), sizeof(x));
@@ -275,16 +284,14 @@ private:
 };
 
 template <typename T>
-inline bool TWI_master_ioxtream<T>::open(Address slave_address)
+inline void TWI_master_ioxtream<T>::open(Address slave_address)
 {
     if (!TWI::is_idle())
-	return false; // ¿hacer mejor TWI::reset()?
+	TWI::reset();
 
     slave_address_ = slave_address;
 
     TWI::send_start();
-
-    return true;
 }
 
 

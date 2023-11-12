@@ -49,7 +49,27 @@
  *  enviar/recibir mensajes de cualquier tamaño independientemente del buffer
  *  interno usado. Revisarlo e implementarlo (ANTES DE HACERLO: ¿merece la
  *  pena? ¿Lo voy a usar?)
- *  
+ *
+ *  RESPONSABILIDADES
+ *	+ Añade un buffer a TWI.
+ *	+ Gestiona todo el protocolo de TWI. 
+ *
+ *  DISEÑO
+ *	+ ¿Cómo pasar la dirección del dispositivo a TWI? 
+ *	  (1) La dirección de un sensor es una decisión del harwador, 
+ *	      conociendola en tiempo de compilación. Esto me llevo a que 
+ *	      en la primera implementación pasara como parámetro de template 
+ *	      el slave_address. 
+ *
+ *	  (2) Por otra parte TWI es un protocolo para conectar muchos devices
+ *	      a la vez y no solo uno. En una aplicación abrirás una conexión
+ *	      con un slave, luego con otro, ... ==> el slave_address es
+ *	      dinámico. En este caso hay que pasarlo como parámetro.
+ *
+ *	  En este momento me da la impresión de que es más natural pasar las
+ *	  direcciones de forma dinámica, ya que la aplicación va a ir variando
+ *	  con qué device quiere comunicarse. 
+ *
  *  HISTORIA
  *    Manuel Perez
  *    14/02/2020 v0.0
@@ -60,6 +80,8 @@
  *               micros (o diferentes TWIs). 
  *
  *               Elimino std::byte a favor de uint8_t.
+ *
+ *    12/11/2023 Rethinking and simplifying interface.
  *    
  *
  ****************************************************************************/
@@ -245,11 +267,6 @@ public:
     // FUTURO: si se usa esto bastante, relajarlo. Si n > buffer_size que 
     // lea n buffer_size, y pase a eor_bne, esperando al usuario que llame a
     // read_buffer, y después continue leyendo.
-    template <Address slave_address> 
-    static streamsize read_from(streamsize n)
-    { return read_from(slave_address, n); }
-
-    // versión 2 de read_from. La necesito en TWI_master_ioxtream
     static streamsize read_from(Address slave_address, streamsize n)
     {
 	slave_address_ = slave_address;
@@ -283,19 +300,13 @@ public:
     // waiting/eor_bf a transmitting. De momento no estoy imponiendo en código
     // el diagrama de estados. Doy por supuesto que el usuario sabe lo que
     // hace.
-    template <Address slave_address> // tiene que estar definido en tiempo de compilación!!!
-    static streamsize write_to(const uint8_t* buf, streamsize n)
-    { return write_to(slave_address, buf, n); }
-
-    template <Address slave_address, Type::Integer Int>
-    static streamsize write_to(const Int& b)
-    { return 
-	write_to<slave_address>(reinterpret_cast<const uint8_t*>(&b), sizeof(Int)); }
-
-
-    // versión 2 de write_to. La necesito en TWI_master_ioxtream
     static streamsize
     write_to(Address slave_address, const uint8_t* buf, streamsize n);
+
+    template <Type::Integer Int>
+    static streamsize write_to(Address slave_address, const Int& b)
+    { return 
+	write_to(slave_address, reinterpret_cast<const uint8_t*>(&b), sizeof(Int)); }
 
     /// Escribe en el buffer buf[0, n) y envía los datos vía TWI.
     // Observar que no lo llamo write_buffer, ya que sería mentira que solo 

@@ -207,7 +207,7 @@ void send_service0()
     }
 
 
-    if (TWI::write_to<slave_address>(msg, 3) != 3){
+    if (TWI::write_to(slave_address, msg, 3) != 3){
 	uart << "Error sending service 1: ";
         uart << "Trying to send to many bytes at once, make TWI buffer bigger\n";
 	return;
@@ -249,7 +249,7 @@ void send_service0()
 
     uart << "\tReading the answer: ";
     TWI::send_repeated_start();
-    TWI::read_from<slave_address>(out_nbytes);
+    TWI::read_from(slave_address, out_nbytes);
 
     if (TWI::wait_while_busy(65000) == 0){
 	uart << "No response!\n";
@@ -307,7 +307,7 @@ void send_service1()
 
 
     TWI::send_start();
-    if (TWI::write_to<slave_address>(msg, 1) != 1){
+    if (TWI::write_to(slave_address, msg, 1) != 1){
 	uart << "Error enviando servicio 2: ";
         uart << "Se está intentando enviar demasiados datos de golpe, aumentar "
                 "el buffer del TWI\n";
@@ -344,7 +344,7 @@ void send_service2()
     TWI::send_start();
 
     uart << "\tEscribiendo ... ";
-    TWI::streamsize nres = TWI::write_to<slave_address>(x0);
+    TWI::streamsize nres = TWI::write_to(slave_address, x0);
 
     if (nres != sizeof(x0)){
 	uart << "\nERROR: write_to devuelve 0!\n";
@@ -393,7 +393,7 @@ void send_service2()
     uart << "\tRecibiendo datos enviados ... ";
     TWI::send_repeated_start();
 
-    TWI::read_from<slave_address>(sizeof(x0) + sizeof(x1) + sizeof(x2));
+    TWI::read_from(slave_address, sizeof(x0) + sizeof(x1) + sizeof(x2));
 
     TWI::wait_while_busy();
 
