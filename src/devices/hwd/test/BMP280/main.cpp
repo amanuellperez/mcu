@@ -137,7 +137,7 @@ void bmp280_read_all_mem(uint8_t addr, uint8_t* mem, uint8_t n)
     TWI twi(slave_address);
     
     twi << addr;
-    twi.prepare_to_read(n);
+//    twi.prepare_to_read(n);
     twi.read(mem, n);
 
     twi.close();
@@ -460,7 +460,7 @@ void test_bmp280()
 	if (sensor.error())
 	    uart << "Error: error en el sensor!!!\n";
 
-	Micro::wait_ms(4000);
+	Micro::wait_ms(2000);
     }
 }
 

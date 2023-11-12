@@ -10,8 +10,8 @@ namespace dev{
 // Output value of “5123” equals 51.23 DegC.  
 // From datasheet  (4.2.3)
 // This is magic!!! Copy it and hopes it works.
-__BME280_calibration::Celsius
-	__BME280_calibration::compensate_T(const uint32_t& adc_T)
+impl_of::BME280_calibration::Celsius
+	impl_of::BME280_calibration::compensate_T(const uint32_t& adc_T)
 {
     int32_t var1 =
         ((((adc_T >> 3) - ((int32_t)dig_T1 << 1))) * ((int32_t)dig_T2)) >> 11;
@@ -32,7 +32,7 @@ __BME280_calibration::Celsius
 
 // From datasheet (4.2.3)
 // This is magic!!! Copy it and hopes it works.
-int32_t __BME280_calibration::compensate_P_(const int32_t& adc_P) const
+int32_t impl_of::BME280_calibration::compensate_P_(const int32_t& adc_P) const
 {
     // Observar que usa t_fine!!! Hay que calcular primero compensate_T!!!
     int64_t var1 = ((int64_t)t_fine) - 128000;
@@ -63,8 +63,8 @@ int32_t __BME280_calibration::compensate_P_(const int32_t& adc_P) const
 // Returns humidity in %RH as unsigned 32 bit integer in Q22.10 format 
 // (22 integer and 10 fractional bits).
 // Output value of “47445” represents 47445/1024 = 46.333 %RH
-__BME280_calibration::Relative_humidity
-__BME280_calibration::compensate_H(const uint32_t& adc_H) const
+impl_of::BME280_calibration::Relative_humidity
+impl_of::BME280_calibration::compensate_H(const uint32_t& adc_H) const
 {
 //    uint32_t humidity_max = 102400;
     int32_t var1 = t_fine - ((int32_t)76800);
@@ -99,8 +99,8 @@ __BME280_calibration::compensate_H(const uint32_t& adc_H) const
 
 
 
-void __BME280_temp_and_press_and_hum::mem_to_struct(
-    const std::array<uint8_t, size>& mem, __BME280_temp_and_press_and_hum& st)
+void impl_of::BME280_temp_and_press_and_hum::mem_to_struct(
+    const std::array<uint8_t, size>& mem, impl_of::BME280_temp_and_press_and_hum& st)
 {
     st.upressure = atd::concat_bytes<uint32_t>(mem[0], mem[1], mem[2]);
     st.upressure >>= 4;
@@ -114,7 +114,7 @@ void __BME280_temp_and_press_and_hum::mem_to_struct(
 
 
 // decode according to table 16
-void __BME280_calibration::mem_to_temp_and_press(const uint8_t* mem)
+void impl_of::BME280_calibration::mem_to_temp_and_press(const uint8_t* mem)
 {
     // El BME280 almacena los parámetros de calibración en little-endian:
     // LSB,MSB. De ahí el orden definido (see table 17)
@@ -137,7 +137,7 @@ void __BME280_calibration::mem_to_temp_and_press(const uint8_t* mem)
 
 
 // decode according to table 16
-void __BME280_calibration::mem_to_hum(const uint8_t* mem)
+void impl_of::BME280_calibration::mem_to_hum(const uint8_t* mem)
 {
     dig_H2 = atd::concat_bytes<int16_t>(mem[1], mem[0]);
     dig_H3 = mem[2];
@@ -156,8 +156,8 @@ void __BME280_calibration::mem_to_hum(const uint8_t* mem)
     dig_H6 = mem[6];
 }
 
-void __BME280_config::mem_to_struct(const std::array<uint8_t, size>& mem,
-                                    __BME280_config& st)
+void impl_of::BME280_config::mem_to_struct(const std::array<uint8_t, size>& mem,
+                                    impl_of::BME280_config& st)
 {
     st.osrs_h   = mask_osrs_h(mem[i_ctrl_hum]);
 
@@ -173,7 +173,7 @@ void __BME280_config::mem_to_struct(const std::array<uint8_t, size>& mem,
 
 
 // st -> mem
-void __BME280_config::struct_to_mem(const __BME280_config& st, uint8_t* mem)
+void impl_of::BME280_config::struct_to_mem(const impl_of::BME280_config& st, uint8_t* mem)
 {
 // FUNDAMENTAL: inicializar la memoria!!!
     std::fill(mem, mem + size, uint8_t{0});
@@ -190,7 +190,7 @@ void __BME280_config::struct_to_mem(const __BME280_config& st, uint8_t* mem)
 }
 
 // 3.5.1
-void __BME280_config::weather_monitoring(__BME280_config& cfg)
+void impl_of::BME280_config::weather_monitoring(impl_of::BME280_config& cfg)
 {
     cfg.mode   = force_mode;
     cfg.osrs_p = oversampling_x1;
@@ -202,7 +202,7 @@ void __BME280_config::weather_monitoring(__BME280_config& cfg)
 }
 
 // 3.5.2
-void __BME280_config::humidity_sensing(__BME280_config& cfg)
+void impl_of::BME280_config::humidity_sensing(impl_of::BME280_config& cfg)
 {
     cfg.mode   = force_mode;
     cfg.osrs_p = oversampling_none;
@@ -215,7 +215,7 @@ void __BME280_config::humidity_sensing(__BME280_config& cfg)
 
 
 // 3.5.3
-void __BME280_config::indoor_navigation(__BME280_config& cfg)
+void impl_of::BME280_config::indoor_navigation(impl_of::BME280_config& cfg)
 {
     cfg.mode   = normal_mode;
     cfg.t_sb   = t_sb_0_5_ms; 
@@ -227,7 +227,7 @@ void __BME280_config::indoor_navigation(__BME280_config& cfg)
 }
 
 // 3.5.4
-void __BME280_config::gaming(__BME280_config& cfg)
+void impl_of::BME280_config::gaming(impl_of::BME280_config& cfg)
 {
     cfg.mode   = normal_mode;
     cfg.t_sb   = t_sb_0_5_ms; 
@@ -240,7 +240,7 @@ void __BME280_config::gaming(__BME280_config& cfg)
 
 
 
-//void __BME280_temp_and_press_and_hum::make_bounded(__BME280_temp_and_press_and_hum& st)
+//void impl_of::BME280_temp_and_press_and_hum::make_bounded(impl_of::BME280_temp_and_press_and_hum& st)
 //{
 //    if (st.utemperature <= utemp_min || st.utemperature >= utemp_max)
 //	st.utemperature = 0;
@@ -253,5 +253,18 @@ void __BME280_config::gaming(__BME280_config& cfg)
 //}
 //
 
+
+namespace impl_of{
+bool operator==(const BME280_config& a, const BME280_config& b)
+{
+    return ((a.osrs_h == b.osrs_h) and
+    (a.osrs_t == b.osrs_t) and
+    (a.osrs_p == b.osrs_p) and
+    (a.mode == b.mode) and
+    (a.t_sb == b.t_sb) and
+    (a.filter == b.filter) and
+    (a.spi3w_en == b.spi3w_en));
+}
+}// impl_of
 }// namespace
 

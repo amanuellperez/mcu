@@ -144,7 +144,7 @@ void send_service1()
 
     uart << "Reading: ";
     constexpr uint8_t out_nbytes = 3;
-    twi.prepare_to_read(out_nbytes);
+//    twi.prepare_to_read(out_nbytes);
     for (uint8_t i = 0; i < out_nbytes; ++i){
 	uint8_t x;
 	twi >> x;
@@ -215,7 +215,7 @@ void send_type(const Int& x0, const char* tname)
     }
 
 
-    twi.prepare_to_read(sizeof(Int));
+//    twi.prepare_to_read(sizeof(Int));
 
     Int y0{};
     twi >> y0;
@@ -264,8 +264,8 @@ void send_service4()
 
 
     uart << "\tLeyendo datos enviados... ";
-    twi.prepare_to_read(sizeof(x0) + sizeof(x1) + sizeof(x2)
-	    +sizeof(x3) + sizeof(x4) + sizeof(x5));
+//    twi.prepare_to_read(sizeof(x0) + sizeof(x1) + sizeof(x2)
+//	    +sizeof(x3) + sizeof(x4) + sizeof(x5));
 
     uint8_t y0;
     uint16_t y1;
@@ -343,7 +343,7 @@ void service(const Data& in, Data& out)
 	return;
     }
 
-    twi.prepare_to_read(Data::size());
+//    twi.prepare_to_read(Data::size());
     twi >> out;
 
     twi.close();
@@ -388,7 +388,7 @@ void test_n()
 
 
     uint8_t q[data_size];
-    twi.prepare_to_read(data_size);
+//    twi.prepare_to_read(data_size);
     if (twi.read(q, data_size) != data_size){
 	uart << "ERROR en read: data_size recibido erroneo!\n";
 	return;

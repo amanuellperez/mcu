@@ -56,7 +56,7 @@ using __Mem_address = uint8_t;
  *  struct. Dos formas de hacerlo:
  *
  *  (1) Leemos/escribimos un array de bytes y luego lo formateamos.
- *  struct __BMP280_id{
+ *  struct BMP280_id{
  *  // Data
  *      uint8_t id;
  *  
@@ -69,8 +69,8 @@ using __Mem_address = uint8_t;
  *  // dispositivo en la estructura, y viceversa.
  *  // mem <-> struct
  *      static void mem_to_struct(const std::array<uint8_t, size>& mem
- *  				, __BMP280_id& st);
- *      static void struct_to_mem(__BMP280_id& st, 
+ *  				, BMP280_id& st);
+ *      static void struct_to_mem(BMP280_id& st, 
  *					const std::array<uint8_t, size>& mem);
  *  //...
  *  };
@@ -80,7 +80,7 @@ using __Mem_address = uint8_t;
  *  funciones de formato. En su lugar definimos operadores<< y >>. Hay que
  *  añadir el flag use_struct_as_mem, para indicar que no vamos a usar el
  *  array de bytes intermedio.
- *  struct __BMP280_id{
+ *  struct BMP280_id{
  *  // Data
  *      uint8_t id;
  *  
@@ -108,8 +108,8 @@ struct TWI_memory_type {
     using Slave_address = TWI_master::Address;
     using iostate = typename TWI::iostate;
 
-//// Tipos para configurar un segmento de memoria
-//// Un segmento de memoria queda definido dando:
+// Tipos para configurar un segmento de memoria
+// Un segmento de memoria queda definido dando:
 //    using Memory_type = atd::Memory_type;
     using Mem_address = __Mem_address;
 //    using Size        = uint8_t;
@@ -162,14 +162,15 @@ private:
 // ------------------------------
 // avr_TWI_memory_type.cxx
 // ------------------------------
+namespace private_{
 // Detecta si la clase T tiene el tipo use_struct_as_mem
 template <typename T, typename = void>
-struct __has_use_struct_as_mem : std::false_type {};
+struct has_use_struct_as_mem : std::false_type {};
 
 template <typename T>
-struct __has_use_struct_as_mem<T, 
+struct has_use_struct_as_mem<T, 
 	std::void_t<decltype(T::use_struct_as_mem)> > : std::true_type {};
-
+}// private_
 
 
 template <typename TWI_master, typename TWI_master::Address slave_address>
@@ -184,7 +185,7 @@ TWI_memory_type<TWI_master, slave_address>::mem_read(uint8_t* mem)
     if (twi.error())
 	return TWI::state();
 
-    twi.prepare_to_read(n);
+//    twi.prepare_to_read(n);
     twi.read(mem, n);
 
     twi.close();	
@@ -220,7 +221,7 @@ TWI_memory_type<TWI_master, slave_address>::read(T& st)
 {
     static_assert (atd::is_readable(T::mem_type));
     
-    if constexpr (__has_use_struct_as_mem<T>())
+    if constexpr (private_::has_use_struct_as_mem<T>())
 	return read_with_optimization(st);
 
     else 
@@ -235,7 +236,7 @@ TWI_memory_type<TWI_master, slave_address>::write(const T& st)
 {
     static_assert (atd::is_writeable(T::mem_type));
 
-    if constexpr (__has_use_struct_as_mem<T>())
+    if constexpr (private_::has_use_struct_as_mem<T>())
 	return write_with_optimization(st);
 
     else 
@@ -300,7 +301,7 @@ TWI_memory_type<TWI_master, slave_address>::read_with_optimization(T& st)
     if (twi.error())
 	return TWI::state();
 
-    twi.prepare_to_read(T::size);
+//    twi.prepare_to_read(T::size);
 
     twi >> st;
 

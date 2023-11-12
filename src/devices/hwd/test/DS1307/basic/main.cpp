@@ -186,7 +186,7 @@ void test_clock()
 	if (rtc.error())
 	    uart << "Error: error en el rtc!!!\n";
 
-	mcu::Micro::wait_ms(1000);
+	Micro::wait_ms(1000);
 	++n;
 	if (!(n % 10)){
 	    t.clock_on = !t.clock_on;
@@ -240,7 +240,7 @@ void test_bateria()
 	if (rtc.error())
 	    uart << "Error: error en el rtc!!!\n";
 
-	mcu::Micro::wait_ms(1000);
+	Micro::wait_ms(1000);
 
     }
 }
@@ -250,62 +250,80 @@ void test_ram()
 {
     mcu::UART_iostream uart;
 
-    uart << "----------------------------------------\n"
-	 << "Probando la RAM\n"
-	 << "----------------------------------------\n\n";
+    uart << "\n\nRAM test\n"
+	 << "--------\n";
 
 // init_rtc();
     RTC rtc;
 
-    while (1){
-	constexpr int N = 56;
-	uint8_t buf[N];
-	std::iota((uint8_t*) buf, (uint8_t*) &buf[N], 0);
+    uart << "Writing RAM ... ";
+    constexpr int N = 56;
+    uint8_t buf[N];
+    std::iota((uint8_t*) buf, (uint8_t*) &buf[N], 0);
 
-	uint8_t nw = rtc.ram_write(buf, N, 0);
-	if (nw != N){
-	    uart << "ERROR: no se han escrito todos los bytes\n";
-	    uart << "Escritos " << atd::write_as_int(nw) << '\n';
-	    twi_print_state();
-	    twi_print_error();
-	}
-
-	if (rtc.error())
-	    uart << "Error al intentar escribir en la RAM\n";
-
-	uint8_t res[N];
-	std::fill(res, &res[N], uint8_t{0});
-
-	if (rtc.ram_read(res, N, 0) != N)
-	    uart << "ERROR: no se han leído todos bytes\n";
-
-	if (rtc.error())
-	    uart << "Error al intentar leer en la RAM\n";
-    
-	for (uint8_t i = 0; i < N; ++i)
-	    uart << (int)(res[i]) << ", ";
-
-	uart << '\n';
-
-	// Probar a desconectar el sensor mientras está funcionando. Tiene que
-	// generar el error correspondiente.
-	if (rtc.no_response())
-	    uart << "Error: no response\n";
-
-	if (rtc.error())
-	    uart << "Error: error en el rtc!!!\n";
-
-
-	std::fill(res, &res[N], uint8_t{0});
-	if (rtc.ram_read(res, 10, 10) != 10)
-	    uart << "ERROR: no se han leído todos bytes\n";
-
-	uart << "\nSegunda lectura:\n";
-	for (uint8_t i = 0; i < N; ++i)
-	    uart << (int)(res[i]) << ", ";
-
-	mcu::Micro::wait_ms(5000);
+    uint8_t nw = rtc.ram_write(buf, N, 0);
+    if (nw != N){
+	uart << "Error: can't write buffer\n";
+	uart << "Write " << (int) nw << " bytes out of " << (int) N << '\n';
+	twi_print_state();
+	twi_print_error();
     }
+
+    if (rtc.error())
+	uart << "Error: can't write RAM\n";
+
+    uart << "OK\n";
+
+    uart << "Reading RAM:\n";
+    uint8_t res[N];
+    std::fill(res, &res[N], uint8_t{0});
+
+    if (rtc.ram_read(res, N, 0) != N)
+	uart << "ERROR: can't write " << (int) N << " bytes\n";
+
+    if (rtc.no_response())
+	uart << "Error: no response\n";
+
+    if (rtc.error())
+	uart << "Error: can't read RAM\n";
+
+    bool ok = true;
+    for (uint8_t i = 0; i < N; ++i){
+	if (res[i] != buf[i]){
+	    uart << "wrong, ";
+	    ok = false;
+	}
+	else
+	    uart << (int)(res[i]) << ", ";
+    }
+
+    uart << '\n';
+    if (ok) uart << "OK\n";
+    else    uart << "FAIL\n";
+
+
+
+    std::fill(res, &res[N], uint8_t{0});
+    constexpr uint8_t nsecond = 10;
+    constexpr uint8_t i0_second = 10;
+    if (rtc.ram_read(res, nsecond, i0_second) != nsecond)
+	uart << "ERROR: can't write " << (int) nsecond << " bytes\n";
+
+    uart << "\nSecond lecture (partial reading):\n";
+    ok = true;
+    for (uint8_t i = 0; i < nsecond; ++i){
+	if (res[i] != buf[i0_second + i]){
+	    ok = false;
+	    uart << "wrong, ";
+	}
+	else
+	    uart << (int)(res[i]) << ", ";
+    }
+    uart << '\n';
+
+    if (ok) uart << "OK\n";
+    else    uart << "FAIL\n";
+
 }
 
 
@@ -376,16 +394,16 @@ int main()
     // 100 kHz a 8 MHz
     TWI::turn_on<50>();
 
-    uart << "----------------------------------------\n"
-	 << "DS1307\n"
-	 << "----------------------------------------\n\n";
+    uart << "\n\nDS1307 test\n"
+	        "-----------\n";
 
     while(1){
-	uart << "\n\nMenu:\n"
-	     << "[b]atería auxiliar\n"
-	     << "[c]lock\n"
-	     << "[o]utput\n"
-	     << "[r]am\n";
+	uart << "\n\nMenu\n"
+		 "----\n"
+		 "[b]atería auxiliar\n"
+		 "[c]lock\n"
+		 "[o]utput\n"
+		 "[r]am\n";
 
 	char res{};
 	uart >> res;

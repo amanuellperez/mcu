@@ -62,6 +62,11 @@ namespace dev{
  *	1. Ocultar el protocolo de TWI.
  *	2. Concebir TWI como flujo normal y corriente.
  *
+ *  Cada lectura/escritura es una transacción completa. Esto es, cada vez que
+ *  se intenta leer/escribir se envía un `repeated_start` al device
+ *  correspondiente. Si se quiere leer de golpe un montón de bytes usar la
+ *  función `read(q, n)`
+ *
  *  Ejemplo (ideal):
  *	TWI_master_ioxtream twi;    // antes hay que haber encendido TWI::turn_on!!!
  *	twi.open(slave_address);    // establece la conexión
@@ -69,9 +74,6 @@ namespace dev{
  *	int y;
  *	twi << x << y;
  *	...
- *	twi.prepare_to_read(n);	    // ¿cómo poder eliminar esto? TWI necesita marcar
- *			    // el último byte enviado, ¿cómo saber cuál es el 
- *			    // último? twi << last(x); ???
  *	twi >> x >> y;
  *	...
  *	twi.close();
@@ -85,11 +87,6 @@ namespace dev{
  *	    TWI::handle_interrupt();
  *	}
 
- *  TODO: Tal como está hecho ahora no se puede escribir después de leer.
- *	Habría que cerrar el flujo y volverlo a abrir. Pero creo que la forma
- *	habitual de manejar twi será: 1. escribo; 2. leo; 3. cierro. En
- *	principio no necesito escribir después de leer.
- *
  *  DUDA: ¿ponerle un state?
  *	Por una parte quiero que sea lo más eficiente posible, pero por otra
  *	un state es muy natural en un flujo. 
@@ -114,13 +111,7 @@ public:
 
 // init
 // El cliente es el responsable de la gestión de TWI. Es él el que se encarga
-// de encenderlo o apagarlo.
-//    /// Enables TWI interface definiendo la frecuencia del SCL 
-//    /// a la que vamos a operar.
-//    /// f_scl = frecuencia en kilohercios de SCL (tipica: 100 y 400 kHz).
-//    /// f_clock = frecuencia a la que funciona el reloj del avr.
-//    template <uint16_t f_scl, uint32_t f_clock = clock_frequency_in_hz>
-//    static void on() {TWI::template on<f_scl, f_clock>();}
+// de encenderlo o apagarlo. Por eso no suministro función `turn_on`
 
     /// Reinicializa el dispositivo.
     static void reset() {TWI::reset();}
@@ -141,10 +132,6 @@ public:
     /// por completo.
     void close();
 
-    /// Vamos a leer exactamente n bytes de TWI.
-    /// No bloquea.
-    /// Precondición: se ha llamado a open antes.
-    void prepare_to_read(streamsize n);
 
 
 // operator<<. Ninguna bloquea.
@@ -247,6 +234,14 @@ private:
 // Data
     Address slave_address_;
 
+// Functions
+    // postcondition: TWI::state == read_or_write
+    void send_start_if_needed();
+
+    // Enviamos a TWI el comando de que lea `n` bytes. 
+    void send_read_cmd(streamsize n);
+
+
     // TODO: gestión de errores. Si write no devuelve sizeof(x) error	
     // Formas posibles:
     //	    (1) Almacenar el número de bytes escritos/leidos y que se pueda
@@ -256,6 +251,8 @@ private:
     template <typename T>
     TWI_master_ioxtream& write_(const T& x)
     {
+//	send_start_if_needed(); (*) ver comentario en write()
+
 	if (TWI::read_or_write()){
             TWI::write_to(slave_address_,
                           reinterpret_cast<const uint8_t*>(&x),
@@ -265,6 +262,7 @@ private:
 	    TWI::write(reinterpret_cast<const uint8_t*>(&x), sizeof(x));
 	}
 
+//	write(reinterpret_cast<const uint8_t*>(&x), sizeof(x));
 	return *this;
     }
 
@@ -272,12 +270,15 @@ private:
     template <typename T>
     TWI_master_ioxtream& read_(T& x)
     {
-	TWI::wait_while_busy();
-
-	if (TWI::is_busy()) // ha vencido timeout 
-	    return *this;
-	
-	TWI::read_buffer(reinterpret_cast<uint8_t*>(&x), sizeof(x));
+//	send_read_cmd(sizeof(T));
+//
+//	TWI::wait_while_busy();
+//
+//	if (TWI::is_busy()) // ha vencido timeout 
+//	    return *this;
+//	
+//	TWI::read_buffer(reinterpret_cast<uint8_t*>(&x), sizeof(x));
+	read(reinterpret_cast<uint8_t*>(&x), sizeof(x));
 	return *this;
     }
 
@@ -309,7 +310,7 @@ inline void TWI_master_ioxtream<T>::close()
 }
 
 template <typename T>
-void TWI_master_ioxtream<T>::prepare_to_read(streamsize n)
+void TWI_master_ioxtream<T>::send_start_if_needed()
 {
     if (TWI::is_idle()) 
 	TWI::send_start();
@@ -318,34 +319,23 @@ void TWI_master_ioxtream<T>::prepare_to_read(streamsize n)
 
     if (!TWI::read_or_write()) // ignoramos el state real de TWI
 	TWI::send_repeated_start();
+}
+
+
+template <typename T>
+void TWI_master_ioxtream<T>::send_read_cmd(streamsize n)
+{
+    send_start_if_needed();
 
     TWI::read_from(slave_address_, n);
 }
 
 
-// (*) Al principio pensé en que el usuario tuviese que elegir entre llamar a
-// prepare_to_read(n) o a read(q, n), para no tener que escribir código del tipo:
-//	twi.prepare_to_read(n);
-//	twi.read(q, n);
-//  que parece un poco redundante.
-//  Sin embargo, nada más que escribí el primer programa me confundí, ya que
-//  la forma que tengo de operar es:
-//	read_object(st){
-//	    twi.open();
-//	    twi << cmd;
-//	    twi.prepare_to_read(size_object);
-//	    twi >> st; 
-//	}
-//
-//  y el operator>> unas veces se limita a llamar a operator>>, mientras que
-//  otras llama a read(q,n)!!!  Luego con esta forma de razonar llamaré a
-//  prepare_to_read(n) y luego a read(q,n).
-//	
 template <typename T>
 TWI_master_ioxtream<T>::streamsize
 TWI_master_ioxtream<T>::read(uint8_t* q, streamsize n)
 {
-//    prepare_to_read(n); (*)
+    send_read_cmd(n); 
     
     TWI::wait_while_busy();
 
@@ -355,17 +345,28 @@ TWI_master_ioxtream<T>::read(uint8_t* q, streamsize n)
     return TWI::read_buffer(q, n);
 }
 
-
-// pre: state() == read_or_write() or state() == transmitting()
+// (*) Al escribir no se puede enviar repeated_start si estamos leyendo la RAM
+//     del device. 
+//     Ejemplo:
+//	    TWI twi(slave_address);
+//	    twi << ram_address;
+//	    twi.write(buffer, n); <-- NO puedo enviar repeated_start
+//
+//	Si enviaramos repeated_start el device no sabría a qué zona de la
+//	memoria queremos acceder!!!
+//	    
 template <typename T>
 TWI_master_ioxtream<T>::streamsize 
 TWI_master_ioxtream<T>::write(const uint8_t* q, streamsize n)
 {
+//    send_start_if_needed(); (*)
+
     if (TWI::read_or_write())
 	return TWI::write_to(slave_address_, q, n);
 
     else 
 	return TWI::write(q, n);
+
 }
 
 

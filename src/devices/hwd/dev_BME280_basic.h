@@ -41,9 +41,10 @@
 
 namespace dev{
 
+namespace impl_of{
 // ---------------------------------------------------------------------------
 // datasheet 5.4.1
-struct __BME280_id{
+struct BME280_id{
 // Data
     uint8_t id;
 
@@ -64,18 +65,18 @@ private:
 
 
 template <typename Ixtream>
-inline Ixtream& operator>>(Ixtream& in, __BME280_id& st)
+inline Ixtream& operator>>(Ixtream& in, BME280_id& st)
 { return in >> st.id; }
 
 
-inline bool __BME280_id::is_valid() const
+inline bool BME280_id::is_valid() const
 { return id == chip_identification_number;}
 
 
 
 // ---------------------------------------------------------------------------
 // datasheet 5.4.2
-struct __BME280_reset{
+struct BME280_reset{
     static constexpr uint8_t reset_cmd {0xB6};
 
 // Memory
@@ -89,7 +90,7 @@ struct __BME280_reset{
 
 
 template <typename Oxtream>
-inline Oxtream& operator<<(Oxtream& out, const __BME280_reset& st)
+inline Oxtream& operator<<(Oxtream& out, const BME280_reset& st)
 { 
     out << st.reset_cmd;
 
@@ -100,7 +101,7 @@ inline Oxtream& operator<<(Oxtream& out, const __BME280_reset& st)
 
 // ---------------------------------------------------------------------------
 // datasheet: 5.4.4
-struct __BME280_status{
+struct BME280_status{
 // Data
     bool measuring; // Is there a conversion running?
     bool im_update;
@@ -112,7 +113,7 @@ struct __BME280_status{
 
 // mem <-> struct
     static void mem_to_struct(const std::array<uint8_t, size>& mem
-				, __BME280_status& st);
+				, BME280_status& st);
 
 private:
     static constexpr atd::Range_bitmask<3, 3, uint8_t> mask_measuring{};
@@ -122,8 +123,8 @@ private:
 
 
 inline void
-__BME280_status::mem_to_struct(const std::array<uint8_t, size>& mem,
-                               __BME280_status& st)
+BME280_status::mem_to_struct(const std::array<uint8_t, size>& mem,
+                               BME280_status& st)
 {
     st.measuring = atd::to_bool(mask_measuring(mem[0]));
     st.im_update = atd::to_bool(mask_im_update(mem[0]));
@@ -133,7 +134,7 @@ __BME280_status::mem_to_struct(const std::array<uint8_t, size>& mem,
 
 // ---------------------------------------------------------------------------
 // datasheet 5.4.5/6
-struct __BME280_config{
+struct BME280_config{
 // Data
     // ctrl_hum
     uint8_t osrs_h;	// Controls oversampling of humidity.
@@ -150,10 +151,10 @@ struct __BME280_config{
 
 
 // 3.5: recommended modes of operation
-    static void weather_monitoring(__BME280_config& cfg);
-    static void humidity_sensing(__BME280_config& cfg);
-    static void indoor_navigation(__BME280_config& cfg);
-    static void gaming(__BME280_config& cfg);
+    static void weather_monitoring(BME280_config& cfg);
+    static void humidity_sensing(BME280_config& cfg);
+    static void indoor_navigation(BME280_config& cfg);
+    static void gaming(BME280_config& cfg);
 
 
 // Memory. Al no ser continua la memoria (en medio está el registro 'status'
@@ -177,8 +178,8 @@ struct __BME280_config{
 
     //  mem <-> struct
     static void mem_to_struct(const std::array<uint8_t, size>& mem,
-					__BME280_config& st);
-    static void struct_to_mem(const __BME280_config& st, uint8_t* mem);
+					BME280_config& st);
+    static void struct_to_mem(const BME280_config& st, uint8_t* mem);
 
 
     // Escribe toda la configuración. La configuración hay que escribirla
@@ -245,7 +246,7 @@ private:
 // de SPI lo miramos.
 // En caso de error el error queda en el estado del flujo de salida out.
 template <typename TWI_master, typename TWI_master::Address slave_address>
-void __BME280_config::twi_write() const
+void BME280_config::twi_write() const
 { 
     TWI_memory_type<TWI_master, slave_address> twi_mem;
 
@@ -255,7 +256,7 @@ void __BME280_config::twi_write() const
 // 1. Poner el dispositivo en sleep mode. 
 //    El ejemplo de Bosch dice que la forma más rápida de hacerlo es con
 //    reset.
-    twi_mem.write(__BME280_reset{});
+    twi_mem.write(BME280_reset{});
 
     if (TWI_master::error())
 	return;
@@ -290,12 +291,19 @@ void __BME280_config::twi_write() const
 
 }
 
+// Para depurar
+bool operator==(const BME280_config& a, const BME280_config& b);
+
+inline 
+bool operator!=(const BME280_config& a, const BME280_config& b)
+{ return !(a == b); }
+
 
 
 // ---------------------------------------------------------------------------
 // datasheet 5.4.7-9
 // According to 4: use a burst read to read from 0xF7 to 0xFC.
-struct __BME280_temp_and_press_and_hum{
+struct BME280_temp_and_press_and_hum{
     uint32_t upressure;	    // uncompensated pressure
     uint32_t utemperature;  // uncompensated temperature
     uint32_t uhumidity;	    // uncompensated humidity
@@ -310,14 +318,14 @@ struct __BME280_temp_and_press_and_hum{
 // En caso de que los valores leídos no estén dentro de los límites
 // devuelve todo 0.
     static void mem_to_struct(const std::array<uint8_t, size>& mem, 
-						__BME280_temp_and_press_and_hum& st);
+						BME280_temp_and_press_and_hum& st);
 
 };
 
 
 
 // ---------------------------------------------------------------------------
-struct __BME280_calibration{
+struct BME280_calibration{
 // Data. Types according table 16
     uint16_t dig_T1;
     int16_t dig_T2;
@@ -390,7 +398,7 @@ private:
     // Mira a ver si los valores de temperatura y presión están dentro de los
     // límites. Si no lo están, los pone a 0 (de esa forma el usuario puede 
     // detectar el error).
-//    static void make_bounded(__BME280_temp_and_press_and_hum& st);
+//    static void make_bounded(BME280_temp_and_press_and_hum& st);
 
 // Límites (estos no los he encontrado en la datasheet, sino en el ejemplo 
 // de Bosch). Valores ya compensados
@@ -408,7 +416,7 @@ private:
 
 
 template <typename TWI_master, typename TWI_master::Address slave_address>
-void __BME280_calibration::read()
+void BME280_calibration::read()
 {
     TWI_memory_type<TWI_master, slave_address> twi_mem;
 
@@ -433,7 +441,7 @@ void __BME280_calibration::read()
 
 }
 
-
+}// namespace impl_of
 
 
 /*!
@@ -445,11 +453,11 @@ void __BME280_calibration::read()
 class BME280_base{
 public:
 // Types
-    using Id               = __BME280_id;
-    using Status           = __BME280_status;
-    using Config           = __BME280_config;
-    using Temp_and_press_and_hum   = __BME280_temp_and_press_and_hum;
-    using Calibration      = __BME280_calibration;
+    using Id               = impl_of::BME280_id;
+    using Status           = impl_of::BME280_status;
+    using Config           = impl_of::BME280_config;
+    using Temp_and_press_and_hum   = impl_of::BME280_temp_and_press_and_hum;
+    using Calibration      = impl_of::BME280_calibration;
 
     using Celsius           = Calibration::Celsius;
     using Pascal            = Calibration::Pascal;
@@ -533,12 +541,9 @@ public:
 
     using State = TWI_master::iostate;
 
-    // CONSTRUCTION
-    /// Inicializa el sensor.
-    /// Verifica que haya comunicación con el sensor y que el sensor conectado
-    /// sea realmente un BME280. Para ello comprueba que el id sea el
-    /// correspondiente.
-    void init();
+// CONSTRUCTION
+    BME280_TWI() {init();}
+
 
 // Modos de funcionamiento propuestos por BOSCH
     void weather_monitoring()
@@ -559,7 +564,7 @@ public:
     void read(Id& id) {state_ = TWI_mem::read(id);}
 
     /// The device is reset using the complete power-on-reset procedure.
-    void reset() { state_ = TWI_mem::write(__BME280_reset{});}
+    void reset() { state_ = TWI_mem::write(impl_of::BME280_reset{});}
 
     /// Read the status register.
     void read(Status& res) {state_ = TWI_mem::read(res);}
@@ -626,7 +631,15 @@ public:
     State state() const {return state_;}
 
 private:
+// Data
     State state_;
+
+// Functions
+    // Inicializa el sensor.
+    // Verifica que haya comunicación con el sensor y que el sensor conectado
+    // sea realmente un BME280. Para ello comprueba que el id sea el
+    // correspondiente.
+    void init();
 
     void read_calibration_params() 
     {
@@ -643,7 +656,7 @@ void BME280_TWI<TWI,sa>::init()
 {
     BME280_base::init();
 
-    __BME280_id id;
+    impl_of::BME280_id id;
     state_ = TWI_mem::read(id);
 
     if (error()){

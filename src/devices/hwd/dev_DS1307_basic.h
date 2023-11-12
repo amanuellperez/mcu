@@ -331,8 +331,6 @@ uint8_t DS1307_basic<TWI_master>::ram_read(uint8_t* buf, uint8_t n, uint8_t i)
 	return 0;
     }
 
-    twi.prepare_to_read(n);
-
     uint8_t nread = twi.read(buf, n);
 
     twi.close();
