@@ -171,8 +171,7 @@ void send_service2()
 
     uint8_t msg[1] = {uint8_t{0x87}};
 
-    TWI twi;
-    twi.open(slave_address);
+    TWI twi(slave_address);
 
     twi << msg[0];
 
@@ -205,8 +204,7 @@ void send_type(const Int& x0, const char* tname)
     uart << "\n==============================\n";
     uart << "Sending a " << tname << ": ";
 
-    TWI twi;
-    twi.open(slave_address);
+    TWI twi(slave_address);
 
     twi << x0;
 
@@ -253,8 +251,7 @@ void send_service4()
     int16_t x4 = -300; // bytes (decimal): 64 1
     int32_t x5 = -10000;
 
-    TWI twi;
-    twi.open(slave_address);
+    TWI twi(slave_address);
 
     twi << x0 << x1 << x2
 	<< x3 << x4 << x5;
@@ -336,8 +333,7 @@ void service(const Data& in, Data& out)
 {
     mcu::UART_iostream uart;
 
-    TWI twi;
-    twi.open(slave_address);
+    TWI twi(slave_address);
     
     twi << in;
 
@@ -382,8 +378,8 @@ void test_n()
     mcu::UART_iostream uart;
     uart << "\n==============================\n";
     uart << "Probando read(q,n) y write(q, n): ";
-    TWI twi;
-    twi.open(slave_address);
+
+    TWI twi(slave_address);
 
     if (twi.write(data, data_size) != data_size){
 	uart << "ERROR en write: data_size recibido erroneo!\n";

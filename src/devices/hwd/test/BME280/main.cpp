@@ -131,8 +131,7 @@ void twi_print_state(TWI::iostate st)
 
 void bme280_read_all_mem(uint8_t addr, uint8_t* mem, uint8_t n)
 {
-    TWI twi;
-    twi.open(sensor_twi_address);
+    TWI twi(sensor_twi_address);
     
     twi << addr;
     twi.prepare_to_read(n);
@@ -484,7 +483,7 @@ void test_basic()
     uart.turn_on();
 
     uart << "----------------------------------------\n"
-	 << "BME280 (test basico)\n"
+	 << "BME280 (basic test basico)\n"
 	 << "----------------------------------------\n\n";
 
 // init_TWI();
@@ -508,10 +507,12 @@ void test_basic()
 	}
 
 	else if (!id.is_valid())
-	    uart << "ID no válido. No es un BME280!!!\n";
+	    uart << "Invalid ID. Not a BME280 sensor!!!\n";
 
-	else
-	    uart << "OK. Sensor BME280 conectado.\n";
+	else{
+	    uart << "found BME280.\n";
+	    return;
+	}
 
 	mcu::Micro::wait_ms(1000);
 
@@ -756,6 +757,7 @@ void test_t_p_h()
 
 int main()
 {
+    // TODO: convertir esto en menu y probar bien
 //    test_basic();
 //    test_calib();
 //    test_config();

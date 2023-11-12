@@ -321,8 +321,7 @@ uint8_t DS1307_basic<TWI_master>::ram_read(uint8_t* buf, uint8_t n, uint8_t i)
 {
     using TWI = TWI_master_ioxtream<TWI_master>;
 
-    TWI twi;
-    twi.open(slave_address);
+    TWI twi(slave_address);
      
     uint8_t addr = ram_address + i;
     twi << uint8_t{addr};
@@ -332,7 +331,7 @@ uint8_t DS1307_basic<TWI_master>::ram_read(uint8_t* buf, uint8_t n, uint8_t i)
 	return 0;
     }
 
-    twi.read(n);
+    twi.prepare_to_read(n);
 
     uint8_t nread = twi.read(buf, n);
 
@@ -349,8 +348,7 @@ uint8_t DS1307_basic<TWI_master>::ram_write(uint8_t* buf, uint8_t n, uint8_t i)
 {
     using TWI = TWI_master_ioxtream<TWI_master>;
 
-    TWI twi;
-    twi.open(slave_address);
+    TWI twi(slave_address);
  
     if (twi.error()){
 	state_ = TWI::state();

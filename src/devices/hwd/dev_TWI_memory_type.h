@@ -177,8 +177,7 @@ template <__Mem_address mem_address, typename TWI_master::streamsize n>
 inline TWI_memory_type<TWI_master, slave_address>::iostate
 TWI_memory_type<TWI_master, slave_address>::mem_read(uint8_t* mem)
 {
-    TWI twi;		    
-    twi.open(slave_address);
+    TWI twi(slave_address);		    
      
     twi << mem_address;
 
@@ -199,8 +198,7 @@ template <__Mem_address mem_address, typename TWI_master::streamsize n>
 inline TWI_memory_type<TWI_master, slave_address>::iostate
 TWI_memory_type<TWI_master, slave_address>::mem_write(const uint8_t* mem)
 {
-    TWI twi;
-    twi.open(slave_address);
+    TWI twi(slave_address);
 
     if (twi.error())
 	return TWI::state();
@@ -295,8 +293,7 @@ template <typename T>
 TWI_memory_type<TWI_master, slave_address>::iostate
 TWI_memory_type<TWI_master, slave_address>::read_with_optimization(T& st)
 {
-    TWI twi;
-    twi.open(slave_address);
+    TWI twi(slave_address);
      
     twi << T::address;
 
@@ -320,8 +317,7 @@ TWI_memory_type<TWI_master, slave_address>::iostate
 TWI_memory_type<TWI_master, slave_address>::write_with_optimization
 								   (const T& st)
 {
-    TWI twi;
-    twi.open(slave_address);
+    TWI twi(slave_address);
     
     if (twi.error())
 	return TWI::state();

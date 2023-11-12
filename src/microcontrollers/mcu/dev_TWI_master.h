@@ -375,6 +375,9 @@ public:
     // de que venza)
     static uint16_t wait_while_busy(uint16_t time_out_us = max_time_out_us);
 
+// To debug
+    static void print_state(std::ostream&);
+
 private:
     // FUNDAMENTAL: busy_ tiene que ser volatile, ya que lo voy a usar:
     //	    while (is_busy()) { ; }
@@ -856,6 +859,38 @@ bool TWI_master<Cfg>::probe(const Address& addr)
 
     return res;
 
+}
+
+template <typename Cfg>
+void TWI_master<Cfg>::print_state(std::ostream& out)
+{
+    out << "State: ";
+
+    if (is_idle()) out << "is_idle; ";
+    if (is_busy()) out << "is_busy; ";
+    if (is_waiting()) out << "is_waiting; ";
+
+    if (error()) out << "error; ";
+
+    if (read_or_write()) out << "read_or_write; ";
+    if (state_ == iostate::sla_w) out << "sla_w; ";
+    if (state_ == iostate::sla_r) out << "sla_r; ";
+    if (no_response()) out << "no_response; ";
+
+    if (transmitting()) out << "transmitting; ";
+    if (eow()) out << "eow; ";
+    if (eow_data_nack()) out << "eow_data_nack; ";
+    if (error_buffer_size()) out << "error_buffer_size; ";
+
+    if (receiving()) out << "receiving; ";
+    if (eor_bf()) out << "eor_bf; ";
+    if (eor()) out << "eor; ";
+
+    if (state_ == iostate::bus_error) out << "bus_error; ";
+    if (state_ == iostate::unknown_error) out << "unknown_error; ";
+    if (prog_error()) out << "prog_error; ";
+
+    out << '\n';
 }
 
 

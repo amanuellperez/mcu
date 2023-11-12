@@ -52,7 +52,7 @@
  ****************************************************************************/
 #include <cstdint>  // uint8_t
 #include <cstddef>  // std::byte
-		    
+#include <ostream>	    
 
 namespace dev{
 /*!
@@ -105,9 +105,7 @@ public:
     using streamsize  = TWI::streamsize;
     using iostate     = TWI::iostate;   // para depurar
 
-// Destructor
-    TWI_master_ioxtream() {}
-
+// Construction
     /// Construimos la conexión conectandola
     explicit TWI_master_ioxtream(Address slave_address)
     {open(slave_address);}
@@ -239,6 +237,7 @@ public:
 
 // para depurar
     static iostate state() {return TWI::state();}
+    static void print_state(std::ostream& out) {TWI::print_state(out);}
 
 
 private:
@@ -265,6 +264,9 @@ private:
     TWI_master_ioxtream& read_(T& x)
     {// TODO: gestión de errores. Si read no devuelve sizeof(x) error
 	TWI::wait_while_busy();
+
+	if (TWI::is_busy()) 
+	    return *this;
 	
 	TWI::read_buffer(reinterpret_cast<uint8_t*>(&x), sizeof(x));
 	return *this;
@@ -340,6 +342,9 @@ TWI_master_ioxtream<T>::read(uint8_t* q, streamsize n)
     
     TWI::wait_while_busy();
 
+    if (TWI::is_busy()) 
+	return 0;
+
     return TWI::read_buffer(q, n);
 }
 
@@ -355,6 +360,7 @@ TWI_master_ioxtream<T>::write(const uint8_t* q, streamsize n)
     else 
 	return TWI::write(q, n);
 }
+
 
 
 
