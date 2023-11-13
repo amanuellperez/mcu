@@ -1,11 +1,13 @@
 # HARDWARE DEVICES
 Dispositivos a los que accedemos desde el microcontrolador.
 
+Probado con avr-gcc 11.3.0
+
 ## Índice
 * [Clasificación](#tipos)
 * [Escritura de drivers](#drivers)
 * [Drivers suministrados](#suministrados)
-* [TWI address](#TWIaddress)
+* [TWI address](#twiaddress)
 
 ## <a name="tipos"></a>Clasificación
 En principio, distingo los siguientes tipos:
@@ -549,7 +551,7 @@ Otros vídeos:
 * [Datasheet](datasheet/HD44780.pdf)
 * app note AN658 de Microchip: LCD Fundamentals
 
-## <a name="TWIaddress"></a>TWI address
+## <a name="twiaddress"></a>TWI address
 
 La siguiente tabla muestra las direcciones que traen algunos dispositivos.
 
@@ -566,4 +568,3 @@ Otras listas:
 
 
 
-Probado con: avr-gcc 9.2.0

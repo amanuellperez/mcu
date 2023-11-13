@@ -26,6 +26,9 @@
  *
  *  DESCRIPCION
  *	Concebimos TWI como un ioxtream.
+ *	Esta clase está pensada para crear TWI_master_ioxtream en local: el
+ *	constructor y destructor gestionan el coger el bus de TWI.
+ *
  *
  *  TIPO DE USUARIO
  *	Normal. No necesita saber cosas de bajo nivel del protocolo TWI.
@@ -102,8 +105,7 @@ namespace dev{
  *  función `read(q, n)`
  *
  *  Ejemplo (ideal):
- *	TWI_master_ioxtream twi;    // antes hay que haber encendido TWI::turn_on!!!
- *	twi.open(slave_address);    // establece la conexión
+ *	TWI_master_ioxtream twi(slave_address);
  *	char x;
  *	int y;
  *	twi << x << y;
@@ -121,12 +123,6 @@ namespace dev{
  *	    TWI::handle_interrupt();
  *	}
 
- *  DUDA: ¿ponerle un state?
- *	Por una parte quiero que sea lo más eficiente posible, pero por otra
- *	un state es muy natural en un flujo. 
- *	De momento no lo pongo. Si lo necesito lo añado en el futuro.
- *	(Regla: ante la duda, implementación mínima. Siempre se puede añadir
- *	en el futuro sin cambiar el código actual.)
  */
 template <typename TWI_master>
 class TWI_master_ioxtream{
@@ -144,9 +140,17 @@ public:
     ~TWI_master_ioxtream() {close();}
 
 // open/close
+    // (RRR) ¿Necesito open/close cuando lo gestiona mejor el
+    //        constructor/destructor?
+    //       Sí. Hay devices como la cámara OV7670 que cuando se quiere leer
+    //       un registro de la memoria:
+    //		1º) se escribe la dirección de ese registro.
+    //		2º) se cierra la conexión y espera 1 ms
+    //		3º) se abre la conexión y se lee el valor del registro pedido
+    //		4º) se cierra la conexión
+    //	    Para está cámara sí necesito el interfaz open/close.
     // Inicia una transmisión. En general no llamarla directamente, ya que se
     // llama a través del constructor. 
-    // DUDA: pensar este open
     // No bloquea.
     // Precondition: TWI::is_idle();
     // Return: no devuelvo nada ya que open no se debería de llamar en
@@ -273,10 +277,6 @@ private:
 
     void send_start();
 
-    // Enviamos a TWI el comando de que lea `n` bytes. 
-    void send_read_cmd(streamsize n);
-
-
     // TODO: gestión de errores. Si write no devuelve sizeof(x) error	
     // Formas posibles:
     //	    (1) Almacenar el número de bytes escritos/leidos y que se pueda
@@ -329,6 +329,8 @@ inline void TWI_master_ioxtream<T>::close()
 template <typename T>
 void TWI_master_ioxtream<T>::send_start()
 {
+    TWI::wait_while_busy(); // FUNDAMENTAL!!! El micro va a 1MHz, TWI a 100kHz!
+
     if (TWI::read_or_write())
 	return;
 
@@ -341,25 +343,12 @@ void TWI_master_ioxtream<T>::send_start()
 
 
 template <typename T>
-void TWI_master_ioxtream<T>::send_read_cmd(streamsize n)
-{
-    if (TWI::is_idle()) 
-	TWI::send_start();
-
-    TWI::wait_while_busy();
-
-    if (!TWI::read_or_write()) // ignoramos el state real de TWI
-	TWI::send_repeated_start();
-
-    TWI::read_from(slave_address_, n);
-}
-
-
-template <typename T>
 TWI_master_ioxtream<T>::streamsize
 TWI_master_ioxtream<T>::read(uint8_t* q, streamsize n)
 {
-    send_read_cmd(n); 
+    send_start();
+    
+    TWI::read_from(slave_address_, n);
     
     TWI::wait_while_busy();
 

@@ -249,8 +249,7 @@ TWI_memory_type<TWI_master, slave_address>::write(const T& st)
 template <typename TWI_master, typename TWI_master::Address slave_address>
 template <typename T>
 TWI_memory_type<TWI_master, slave_address>::iostate
-TWI_memory_type<TWI_master, slave_address>::read_without_optimization
-									(T& st)
+TWI_memory_type<TWI_master, slave_address>::read_without_optimization(T& st)
 {
     static_assert (atd::is_readable(T::mem_type));
 

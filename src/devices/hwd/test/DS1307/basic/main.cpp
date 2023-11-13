@@ -279,7 +279,7 @@ void test_ram()
     std::fill(res, &res[N], uint8_t{0});
 
     if (rtc.ram_read(res, N, 0) != N)
-	uart << "ERROR: can't write " << (int) N << " bytes\n";
+	uart << "ERROR: can't read" << (int) N << " bytes\n";
 
     if (rtc.no_response())
 	uart << "Error: no response\n";
