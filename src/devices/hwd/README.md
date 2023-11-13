@@ -5,6 +5,7 @@ Dispositivos a los que accedemos desde el microcontrolador.
 * [Clasificación](#tipos)
 * [Escritura de drivers](#drivers)
 * [Drivers suministrados](#suministrados)
+* [TWI address](#TWIaddress)
 
 ## <a name="tipos"></a>Clasificación
 En principio, distingo los siguientes tipos:
@@ -547,5 +548,22 @@ Otros vídeos:
 ##### Documentación
 * [Datasheet](datasheet/HD44780.pdf)
 * app note AN658 de Microchip: LCD Fundamentals
+
+## <a name="TWIaddress"></a>TWI address
+
+La siguiente tabla muestra las direcciones que traen algunos dispositivos.
+
+|Address    |  Devices		    |
+|:---------:|-----------------------|
+|   0x21    | OV7670		    |
+|   0x68    | DS1307		    |
+|  0x76 or 0x77	| BMP280, BME280    |
+
+Otras listas:
+
+* [Adafruit](https://learn.adafruit.com/i2c-addresses/the-list) 
+
+
+
 
 Probado con: avr-gcc 9.2.0
