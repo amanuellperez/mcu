@@ -185,7 +185,6 @@ TWI_memory_type<TWI_master, slave_address>::mem_read(uint8_t* mem)
     if (twi.error())
 	return TWI::state();
 
-//    twi.prepare_to_read(n);
     twi.read(mem, n);
 
     twi.close();	
@@ -300,8 +299,6 @@ TWI_memory_type<TWI_master, slave_address>::read_with_optimization(T& st)
 
     if (twi.error())
 	return TWI::state();
-
-//    twi.prepare_to_read(T::size);
 
     twi >> st;
 

@@ -445,12 +445,12 @@ void test_bmp280()
 	debug(uart, sensor);
 
 	auto [T, P] = sensor.T_and_P();
-	uart << "T_and_P = " << T << " ºC; P = " << P << " Pa\n";
+	uart << "T_and_P = " << T << "; P = " << P << "\n";
 
 	auto [T2, hP] = sensor.T_and_hP();
-	uart << "T_and_hP= " << T2 << " ºC; P = " << hP << " hPa\n";
+	uart << "T_and_hP= " << T2 << "; P = " << hP << "\n";
 
-	uart << "T       = " << sensor.T() << " ºC\n";
+	uart << "T       = " << sensor.T() << "\n";
 
 	// Probar a desconectar el sensor mientras está funcionando. Tiene que
 	// generar el error correspondiente.

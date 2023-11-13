@@ -153,8 +153,6 @@ void bme280_read_all_mem(uint8_t addr, uint8_t* mem, uint8_t n)
 //    twi.prepare_to_read(n);
     twi.read(mem, n);
 
-    twi.close();
-
     if (twi.error()){
 	mcu::UART_iostream uart;
 	uart << "ERROR (bme280_read_all_mem): ";

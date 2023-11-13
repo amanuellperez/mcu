@@ -152,7 +152,7 @@ void send_service1()
     }
     uart << '\n';
 
-    twi.close();
+//    twi.close();
 
     if (twi.error()){
 	twi_print_error();
@@ -175,7 +175,7 @@ void send_service2()
 
     twi << msg[0];
 
-    twi.close();
+//    twi.close();
 
     if (twi.error())
 	twi_print_error();
@@ -230,7 +230,7 @@ void send_type(const Int& x0, const char* tname)
     else
 	uart << "OK\n";
 
-    twi.close();
+//    twi.close();
 
     if (twi.error())
 	twi_print_error();
@@ -286,7 +286,7 @@ void send_service4()
     else
 	uart << "OK\n";
 
-    twi.close();
+//    twi.close();
 
     if (twi.error())
 	twi_print_error();
@@ -346,7 +346,7 @@ void service(const Data& in, Data& out)
 //    twi.prepare_to_read(Data::size());
     twi >> out;
 
-    twi.close();
+//    twi.close();
 
     if (twi.error())
 	twi_print_error();
@@ -400,7 +400,7 @@ void test_n()
 		 << " != data[" << i << "] = " << (int) data[i] << '\n';
     }
 
-    twi.close();
+//    twi.close();
 
     if (twi.error())
 	twi_print_error();

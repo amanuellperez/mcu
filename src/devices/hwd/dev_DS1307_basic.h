@@ -333,8 +333,6 @@ uint8_t DS1307_basic<TWI_master>::ram_read(uint8_t* buf, uint8_t n, uint8_t i)
 
     uint8_t nread = twi.read(buf, n);
 
-    twi.close();
-
     state_ = TWI::state();
 
     return nread;
@@ -357,8 +355,6 @@ uint8_t DS1307_basic<TWI_master>::ram_write(uint8_t* buf, uint8_t n, uint8_t i)
     twi << uint8_t{addr};
 
     uint8_t nwrite = twi.write(buf, n);
-
-    twi.close();
 
     state_ = TWI::state();
 

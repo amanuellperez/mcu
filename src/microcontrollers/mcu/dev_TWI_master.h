@@ -341,6 +341,12 @@ public:
     static bool is_idle() {return TWI_master_state_is_idle(state_);}
     static bool is_busy() {return TWI_master_state_is_busy(state_);}
     static bool is_waiting() {return TWI_master_state_is_waiting(state_);}
+    static bool is_writing() { return state_ == iostate::sla_w or 
+				      state_ == iostate::transmitting;}
+    static bool is_reading() { return state_ == iostate::sla_r or 
+				      state_ == iostate::receiving or
+				      state_ == iostate::eor_bf;}
+
 
 // is there an error?
     static bool error() {return TWI_master_state_error(state_);}

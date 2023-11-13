@@ -24,19 +24,53 @@
 
 /****************************************************************************
  *
- *  - DESCRIPCION: Concebimos TWI como un ioxtream.
+ *  DESCRIPCION
+ *	Concebimos TWI como un ioxtream.
  *
- *  - COMENTARIOS: ¿Qué es un ioxtream? La 'x' indica que no se va a hacer
- *	ningún tipo de procesamiento en los bytes. Que es un flujo de bytes,
- *	a diferencia de los iostreams que son flujos de caracteres.
+ *  TIPO DE USUARIO
+ *	Normal. No necesita saber cosas de bajo nivel del protocolo TWI.
  *
- *  - TIPO DE USUARIO: normal. No necesita saber cosas de bajo nivel del
- *	protocolo TWI.
+ *  RESPONSABILIDADES
+ *  Suministra funciones de alto nivel para leer tipos.
  *
- *  - TODO: Sería interesante que se pudiera indicar como parámetro si se
+ *  MÉTODO DE FLUJO
+ *  Para leer/escribir datos podemos concebir TWI como un stream de bytes:
+ *
+ *	TWI_master_ioxtream twi{slave_address};
+ *	twi << uint8_t{0x10}; 
+ *	twi << int16_t{-23};
+ *	twi >> x;
+ *	twi >> y;
+ *
+ *  Para escribir se puede llamar al operator<< tantas veces como se quiera
+ *  que todas se ejecutarán dentro de la misma twi data transfer. Para leer,
+ *  el twi-master tiene que marcar el final del data transfer con NACK
+ *  necesitando conocer el número de bytes que se van a transferir. Eso obliga
+ *  a que cada lectura sea un data transfer independiente (<-- CUIDADO con
+ *  esto). 
+ *  (otra forma de implementarlo sería que explicitamente se llamase a twi >>
+ *  end_of_reading; o algo parecido para marcar el final, pero casi seguro que
+ *  ese estilo de programación generaría muchos dolores de cabeza porque
+ *  habría que recordar llamar al end_of_reading continuamente. Por eso opto
+ *  por hacer data transfers independientes a la hora de leer).
+ *
+ *  Si se necesita leer muchos bytes en un mismo data transfer usar
+ *  directamente read(slave_address, buffer, n);
+ *
+ *  MÉTODO read/write
+ *	
+ *	TWI_master_ioxtream twi(slave_address);
+ *	write(buffer, n);
+ *	read (buffer, n);
+ *
+ *  que sirven para transferir datos al twi-device. 
+ *
+ *  Además, añade los operadores <</>> correspondientes.
+ *
+ *  TODO: Sería interesante que se pudiera indicar como parámetro si se
  *  quiere enviar como little or big endian.
  *
- *  - TODO: TWI_master tiene la restricción de que todo lo envíado/recibido
+ *  TODO: TWI_master tiene la restricción de que todo lo envíado/recibido
  *  tiene que entrar en el buffer, así que hay que elegir un tamaño de buffer
  *  suficientemente grande, sino se producirá el error error_buffer_size. No
  *  es complicado mejorarlo, pero de momento parece sencillo y práctico enviar
@@ -44,7 +78,7 @@
  *  y no se si la usaré o no. 
  *
  *
- *  - HISTORIA:
+ *  HISTORIA
  *    Manuel Perez
  *    24/02/2020 v0.0
  *    31/10/2023 Lo independizo de avr. Primer intento de ser genérico.
@@ -109,14 +143,6 @@ public:
 
     ~TWI_master_ioxtream() {close();}
 
-// init
-// El cliente es el responsable de la gestión de TWI. Es él el que se encarga
-// de encenderlo o apagarlo. Por eso no suministro función `turn_on`
-
-    /// Reinicializa el dispositivo.
-    static void reset() {TWI::reset();}
-
-
 // open/close
     // Inicia una transmisión. En general no llamarla directamente, ya que se
     // llama a través del constructor. 
@@ -127,10 +153,19 @@ public:
     // general. Se llama a través del constructor. 
     void open(Address slave_address);
 
-    /// Cierra la transmisión actual.
-    /// Bloquea el flujo. No devuelve el control hasta que no la ha cerrado
-    /// por completo.
+    // Cierra la transmisión actual.
+    // Bloquea el flujo. No devuelve el control hasta que no la ha cerrado
+    // por completo.
     void close();
+
+// init
+// El cliente es el responsable de la gestión de TWI. Es él el que se encarga
+// de encenderlo o apagarlo. Por eso no suministro función `turn_on`
+
+    /// Reinicializa el dispositivo.
+    static void reset() {TWI::reset();}
+
+
 
 
 
@@ -235,8 +270,8 @@ private:
     Address slave_address_;
 
 // Functions
-    // postcondition: TWI::state == read_or_write
-    void send_start_if_needed();
+
+    void send_start();
 
     // Enviamos a TWI el comando de que lea `n` bytes. 
     void send_read_cmd(streamsize n);
@@ -251,18 +286,7 @@ private:
     template <typename T>
     TWI_master_ioxtream& write_(const T& x)
     {
-//	send_start_if_needed(); (*) ver comentario en write()
-
-	if (TWI::read_or_write()){
-            TWI::write_to(slave_address_,
-                          reinterpret_cast<const uint8_t*>(&x),
-                          sizeof(x));
-        }
-	else {
-	    TWI::write(reinterpret_cast<const uint8_t*>(&x), sizeof(x));
-	}
-
-//	write(reinterpret_cast<const uint8_t*>(&x), sizeof(x));
+	write(reinterpret_cast<const uint8_t*>(&x), sizeof(x));
 	return *this;
     }
 
@@ -270,14 +294,6 @@ private:
     template <typename T>
     TWI_master_ioxtream& read_(T& x)
     {
-//	send_read_cmd(sizeof(T));
-//
-//	TWI::wait_while_busy();
-//
-//	if (TWI::is_busy()) // ha vencido timeout 
-//	    return *this;
-//	
-//	TWI::read_buffer(reinterpret_cast<uint8_t*>(&x), sizeof(x));
 	read(reinterpret_cast<uint8_t*>(&x), sizeof(x));
 	return *this;
     }
@@ -309,8 +325,23 @@ inline void TWI_master_ioxtream<T>::close()
     TWI::send_stop();
 }
 
+
 template <typename T>
-void TWI_master_ioxtream<T>::send_start_if_needed()
+void TWI_master_ioxtream<T>::send_start()
+{
+    if (TWI::read_or_write())
+	return;
+
+    if (TWI::is_idle()) 
+	TWI::send_start();
+
+    else 
+	TWI::send_repeated_start();
+}
+
+
+template <typename T>
+void TWI_master_ioxtream<T>::send_read_cmd(streamsize n)
 {
     if (TWI::is_idle()) 
 	TWI::send_start();
@@ -319,13 +350,6 @@ void TWI_master_ioxtream<T>::send_start_if_needed()
 
     if (!TWI::read_or_write()) // ignoramos el state real de TWI
 	TWI::send_repeated_start();
-}
-
-
-template <typename T>
-void TWI_master_ioxtream<T>::send_read_cmd(streamsize n)
-{
-    send_start_if_needed();
 
     TWI::read_from(slave_address_, n);
 }
@@ -345,21 +369,12 @@ TWI_master_ioxtream<T>::read(uint8_t* q, streamsize n)
     return TWI::read_buffer(q, n);
 }
 
-// (*) Al escribir no se puede enviar repeated_start si estamos leyendo la RAM
-//     del device. 
-//     Ejemplo:
-//	    TWI twi(slave_address);
-//	    twi << ram_address;
-//	    twi.write(buffer, n); <-- NO puedo enviar repeated_start
-//
-//	Si enviaramos repeated_start el device no sabría a qué zona de la
-//	memoria queremos acceder!!!
-//	    
 template <typename T>
 TWI_master_ioxtream<T>::streamsize 
 TWI_master_ioxtream<T>::write(const uint8_t* q, streamsize n)
 {
-//    send_start_if_needed(); (*)
+    if (!TWI::is_writing())
+	send_start(); 
 
     if (TWI::read_or_write())
 	return TWI::write_to(slave_address_, q, n);
