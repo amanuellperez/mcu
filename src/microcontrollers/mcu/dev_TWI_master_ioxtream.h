@@ -124,9 +124,10 @@ namespace dev{
  *	}
 
  */
-template <typename TWI_master>
+template <typename TWI_master0>
 class TWI_master_ioxtream{
 public:
+    using TWI_master  = TWI_master0; // para que sea accesible por el usuario
     using TWI         = TWI_master;
     using Address     = TWI::Address;
     using streamsize  = TWI::streamsize;

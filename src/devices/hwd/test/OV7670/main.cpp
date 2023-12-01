@@ -17,6 +17,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#include "../../dev_OV7670.h"
 
 #include <atd_ostream.h>
 
@@ -59,8 +60,6 @@ constexpr uint8_t vsync_pin = 25;
 
 // using TWI: available pins 27 and 28 (SIOC/SIOD)
 
-// Hwd Devices
-// -----------
 
 // TWI
 // ---
@@ -76,86 +75,9 @@ using TWI        = dev::TWI_master_ioxtream<TWI_master>;
 
 constexpr uint8_t TWI_frequency = 100; // 100 kHz
 
-// pag. 11 indica el address pero no dice si es decimal o hexadecimal (???)
-constexpr uint8_t cam_address = 0x21;
-
-
-// Como el slave_address es único, solo es posible tener una cámara de este
-// estilo conectada. Por eso todas las funciones son static.
-class OV7670{
-public:
-    using Address = typename TWI_master::Address;
-    static constexpr Address slave_address = 0x21; // es única
-	
-    // Miramos a ver si hay comunicación con el twi-device
-    // Return: true (found device); false (no response)
-    static bool probe();
-
-// Commands
-    static bool reset();
-
-// Funciones de bajo nivel para acceder a los registros
-    // register[i] = x;
-    static bool write_register(uint8_t i, uint8_t x);
-
-    // x = register[i];
-    static uint8_t read_register(uint8_t i);
-private:
-};
-
-
-bool OV7670::write_register(uint8_t i, uint8_t x)
-{
-    TWI twi{slave_address};
-
-    twi << i;
-    if (twi.error()) return false;
-
-    twi << x;
-    if (twi.error()) return false;
-
-    twi.close();
-
-    Micro::wait_ms(1); // según la datasheet máximo 300 ms en cambiar un registro!!!
-
-    return true;
-}
-
-
-// TODO: crear state y que tenga state wrong si va mal la lectura
-uint8_t OV7670::read_register(uint8_t i)
-{
-    TWI twi{slave_address};
-    twi << i;
-    // if (twi.error()) ...
-    twi.close();
-    Micro::wait_ms(1);  // FUNDAMENTAL!!!
-
-    uint8_t res{};
-    twi.open(slave_address);
-    twi >> res;
-    // if (twi.error()) ...
-    twi.close();
-    Micro::wait_ms(1); 
-    
-    return res;
-}
-
-
-
-inline bool OV7670::probe()
-{ return TWI_master::probe(slave_address); }
-
-inline bool OV7670::reset()
-{
-    if (write_register(0x12, 0x80) == false)
-	return false;
-
-    Micro::wait_ms(100);    // segun la datasheet 1 ms máximo
-			  
-    return true;
-    
-}
+// Hwd Devices
+// -----------
+using OV7670 = dev::OV7670<Micro, TWI>;
 
 
 // Functions
@@ -246,6 +168,11 @@ void read_cam_ram_address(uint8_t addr)
 
     uint8_t b = OV7670::read_register(addr);
 
+    if (OV7670::last_operation_fail()){
+	uart << "Error: read_register fail\n";
+	return;
+    }
+
     uart << "cam[";
     atd::print_int_as_hex(uart, addr);
     uart << "] = ";
@@ -275,6 +202,15 @@ void test_read_register()
 	uart << "OK\n";
     else
 	uart << "ERROR\n";
+
+    uint8_t hM = (OV7670::read_register(0x1C));
+    uint8_t lM = (OV7670::read_register(0x1D));
+    uint16_t manufacturer_id = atd::concat_bytes<uint16_t>(hM, lM);
+    uart << "Manufacturer ID = ";
+    atd::print_int_as_hex(uart, manufacturer_id);
+    uart << '\n';
+
+
 
 }
 
