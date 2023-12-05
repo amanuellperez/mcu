@@ -30,6 +30,9 @@
  *    Manuel Perez
  *    08/04/2020 Memory_type
  *    25/12/2022 Progmem and Progmem_array
+ *    05/12/2023 Opto por pasar como parámetro la función Read
+ *               (antes se basaba en la función progmem_read que tenía que
+ *               estar definida globalmente)
  *
  ****************************************************************************/
 #include "atd_iterator.h"
@@ -94,72 +97,16 @@ inline constexpr bool is_writeable(atd::Memory_type mem)
  *  en el futuro, si se ve que queda mejor (2) que (1), migrarlo a (2).
  *
  ***************************************************************************/
-// Concept
-// -------
-// La función que nos va a permitir leer cualquier tipo, built-in or
-// user-define, de progmem es progmem_read(a); De esta forma se puede meter en
-// Progmem cualquier tipo.
-// + Tengo que definirlo despues de progmem_read(uint8/16_t). ¿Por qué?
-//   Motivo: parece ser que con los built-in tipos el compilador no busca la
-//   función correspondiente. Con los user-define tipos no hay problema.
-//
-// (???) Según la GSL (T.20) esta sería una mala definición de `concept` ya
-//       que no tiene un significado semántico (¿qué es eso? @_@) sino solo
-//       sintáctico. Sin embargo queda muy bien el error que da si no está
-//       definido `progmem_read`. Los errores de las templates son horribles y
-//       esto simplifica la detección de errores por parte del usuario.
-//       ¿A lo mejor el concept debería ser Memory? Los `devices` encajan
-//       muy bien con los concepts (aunque puede que ese no sea su idea
-//       original).  De todas formas los ejemplos que he visto en la GSL son
-//       todo estructuras algebraícas matemáticas, para nada piensan en
-//       `devices`. (De hecho T.22 habla explicitamente de la estructura
-//       algebráica de anillo).
-//       Sin embargo luego en cppreference se puede encontrar los requirements
-//       for Container.
-//
-// 
-// Ejemplo mínimo de uso de concepts:
-//	namespace atd{
-//
-//	void f(int x) {}    <-- int = built-int type, definirlo antes del
-//				      concept!!!
-//
-//	template <typename T>
-//	concept Concept =
-//	    requires (T a)
-//	    { f(a); };
-//	}
-//	namespace atd{
-//	    template <typename T>
-//		requires Concept<T>
-//	    struct A { };
-//	}
-//
-//
-//	namespace b{
-//	    struct B{};
-//	    void f(B x) { }
-//	}
-//
-//	int main(){
-//	    atd::A<b::B> a;
-//	}
-// Parece ser que los concepts se miran dentro del namespace que estén. Luego
-// el requires Progmem_readable obliga a tener definido atd::progmem_read
-template <typename T>
-concept Progmem_readable =
-    requires (T a)
-    { progmem_read(a); };
-
-
 // One element
 // -----------
-template <typename T>
-    requires Progmem_readable<T>
+template <typename T, typename Read>
 class Progmem{
 public:
     constexpr Progmem(const T& x): x_{x} { }
-    operator T() const { return progmem_read(x_); }
+    operator T() const { 
+	Read read;
+	return read(x_); 
+    }
 
     template<typename T2>
     Progmem& operator=(const T2&) = delete;
@@ -171,8 +118,7 @@ private:
 
 // Arrays
 // ------
-template <typename T, size_t N>
-    requires Progmem_readable<T>
+template <typename T, size_t N, typename Read>
 class Progmem_array{
 public:
 // Types
@@ -198,7 +144,10 @@ public:
 
 
 // Element access
-    const T operator[](size_type i) const { return progmem_read(data[i]); }
+    const T operator[](size_type i) const {
+	Read read;
+	return read(data[i]); 
+    }
 
 // Iterators
     iterator begin() const {return iterator{*this, 0};}

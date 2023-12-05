@@ -33,32 +33,59 @@ using Micro   = mcu::Micro;
 // Pin connections
 // ---------------
 // using UART: pins 2 and 3
-// available: 4
-constexpr uint8_t d7_pin = 5;
-constexpr uint8_t d6_pin = 6;
+// available: 4-5
+
+// PORTD_HIGH: 13, 12, 11, 6
+constexpr uint8_t d4_pin =  6;
 
 // VCC and GND: 7, 8
 
-constexpr uint8_t d5_pin = 9;
-constexpr uint8_t d4_pin = 10;
-constexpr uint8_t d3_pin = 11;
-constexpr uint8_t d2_pin = 12;
-constexpr uint8_t d1_pin = 13;
-constexpr uint8_t d0_pin = 15;
+constexpr uint8_t vsync_pin = 9;
+constexpr uint8_t href_pin  = 10;
+
+constexpr uint8_t d5_pin = 11;
+constexpr uint8_t d6_pin = 12;
+constexpr uint8_t d7_pin = 13;
 
 constexpr uint8_t xclk_pin  = 14;   // = CLKO
-constexpr uint8_t pclk_pin  = 23;
-constexpr uint8_t href_pin  = 24;
-constexpr uint8_t vsync_pin = 25;
+		
+constexpr uint8_t pclk_pin  = 15;
 
-// Not using SPI: available pins 16, 17, 18, 19
 // CUIDADO: al principio conecté la CAM a los pins de SPI para aprovecharlos
 // pero luego daba errores el programador (posiblemente conflicto de que la
 // CAM interaccionaba con el SPI (???))
+// avalaible: (Not using SPI:) 16,17, 18, 19
 
-// Alimentación y AREF: 20, 21, 22
+// AVCC, AREF, GND: 20,21,22
 
-// using TWI: available pins 27 and 28 (SIOC/SIOD)
+// PORTC_LOW: 26, 25, 24, 23
+constexpr uint8_t d0_pin =  23;
+constexpr uint8_t d1_pin =  24;
+constexpr uint8_t d2_pin =  25;
+constexpr uint8_t d3_pin =  26;
+
+// using TWI: pins 27 and 28 (SIOC/SIOD)
+
+// Voy a usar como OV7670_D port [PD_high, PC_low]
+// PD_high: pins 6, 11, 12, 13
+// PC_low : pins 23, 24, 25, 26
+struct OV7670_DPort{
+    static void as_input_without_pullup()
+    {
+	atd::write_bits<4,5,6,7>::to<0,0,0,0>::in(DDRD);
+	atd::write_bits<4,5,6,7>::to<0,0,0,0>::in(PORTD);
+
+	atd::write_bits<0,1,2,3>::to<0,0,0,0>::in(DDRC);
+	atd::write_bits<0,1,2,3>::to<0,0,0,0>::in(PORTC);
+    }
+
+
+    // Fundamental: esta conversión tiene que ser eficiente
+    operator uint8_t() const 
+    { return (PORTD & 0xF0) | (PORTC & 0xF);}
+};
+
+
 
 
 // TWI
@@ -77,7 +104,14 @@ constexpr uint8_t TWI_frequency = 100; // 100 kHz
 
 // Hwd Devices
 // -----------
-using OV7670 = dev::OV7670<Micro, TWI>;
+using OV7670_pins =
+	dev::OV7670_pins<dev::OV7670_VSYNC<vsync_pin>,
+			 dev::OV7670_HREF<href_pin>,
+			 dev::OV7670_PCLK<pclk_pin>,
+			 OV7670_DPort>;
+
+using OV7670_cfg = dev::OV7670_cfg<Micro, TWI, OV7670_pins>;
+using OV7670 = dev::OV7670<OV7670_cfg>;
 
 
 // Functions
@@ -139,12 +173,12 @@ void test_cam_connected()
 void init_cam()
 {
     mcu::UART_iostream uart;
-    uart << "Reseting cam ... ";
+    uart << "Init cam ... ";
 
-    if (OV7670::reset())
+    if (OV7670::init())
 	uart << "OK\n";
     else {
-	uart << "Can't reset cam\n";
+	uart << "Can't init cam\n";
 	// TODO: devolver el state de TWI? un state propio de la cam?
     }
 }

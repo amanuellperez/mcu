@@ -62,17 +62,18 @@ using LCD = Screen_1602;
 //using LCD = Screen_4004; <-- sin probar
 
 namespace gl = dev::glyphs_5x8;
+using Glyph = gl::Glyph<mcu::ROM_read>;
 
 
 void new_extended_char(LCD& lcd,
-	const atd::Progmem_array<uint8_t, 8>& g1, 
-	const atd::Progmem_array<uint8_t, 8>& g2, 
-	const atd::Progmem_array<uint8_t, 8>& g3, 
-	const atd::Progmem_array<uint8_t, 8>& g4, 
-	const atd::Progmem_array<uint8_t, 8>& g5, 
-	const atd::Progmem_array<uint8_t, 8>& g6, 
-	const atd::Progmem_array<uint8_t, 8>& g7, 
-	const atd::Progmem_array<uint8_t, 8>& g8)
+	const Glyph& g1, 
+	const Glyph& g2, 
+	const Glyph& g3, 
+	const Glyph& g4, 
+	const Glyph& g5, 
+	const Glyph& g6, 
+	const Glyph& g7, 
+	const Glyph& g8)
 {
     lcd.new_extended_char(0, g1);
     lcd.new_extended_char(1, g2);

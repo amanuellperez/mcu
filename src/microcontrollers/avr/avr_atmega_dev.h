@@ -148,7 +148,10 @@ namespace atmega{
     template <typename T, size_t nrows, size_t ncols>
     using Progmem_biarray_view = avr_::Progmem_biarray_view<T, nrows, ncols>;
 
+    using ROM_read = avr_::ROM_read;
+
     namespace literals{ using namespace avr_::literals; }
+
 
     
 

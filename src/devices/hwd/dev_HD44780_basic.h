@@ -126,6 +126,8 @@ struct LCD_HD44780_base_pins4{
  *        concretará los pines usados (ahora es decidir qué pin E se usa, ya
  *        que el LCD 40 x 04 tiene 2 pines E).
  */
+// TODO: pasar el Micro como parámetro y sustituir not_generic::Pin por
+// Micro::Pin.
 template <typename pin>
 // requires: std::is_same_v<pin, LCD_HD44780_pins>;
 class LCD_HD44780_base{

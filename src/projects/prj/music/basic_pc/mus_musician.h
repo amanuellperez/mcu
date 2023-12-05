@@ -55,6 +55,10 @@ struct Note
 
 Note progmem_read(const Note& x);
 
+struct ROM_read_Note{
+    Note operator()(const Note& x) { return progmem_read(x);}
+};
+
 
 // PARTITURAS (notación en español)
 //

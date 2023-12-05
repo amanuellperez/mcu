@@ -35,6 +35,7 @@ using LCD_pins = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<4>,
 using LCD = dev::LCD_HD44780<LCD_pins>;
 
 namespace gl = dev::glyphs_5x8;
+using Glyph = gl::Glyph<mcu::ROM_read>;
 
 void print(LCD& lcd, const char* c)
 {
@@ -209,7 +210,7 @@ void test_lcd4()
 }
 
 
-void new_glyph(LCD& lcd, const atd::Progmem_array<uint8_t, 8>& glyph)
+void new_glyph(LCD& lcd, const Glyph& glyph)
 {
     for (uint8_t i  = 0; i < 8; ++i)
 	lcd.write_data_to_CG_or_DDRAM(glyph[i]);
@@ -218,14 +219,14 @@ void new_glyph(LCD& lcd, const atd::Progmem_array<uint8_t, 8>& glyph)
 
 
 void show_glyphs(LCD& lcd,
-	const atd::Progmem_array<uint8_t, 8>& g1, 
-	const atd::Progmem_array<uint8_t, 8>& g2, 
-	const atd::Progmem_array<uint8_t, 8>& g3, 
-	const atd::Progmem_array<uint8_t, 8>& g4, 
-	const atd::Progmem_array<uint8_t, 8>& g5, 
-	const atd::Progmem_array<uint8_t, 8>& g6, 
-	const atd::Progmem_array<uint8_t, 8>& g7, 
-	const atd::Progmem_array<uint8_t, 8>& g8)
+	const Glyph& g1, 
+	const Glyph& g2, 
+	const Glyph& g3, 
+	const Glyph& g4, 
+	const Glyph& g5, 
+	const Glyph& g6, 
+	const Glyph& g7, 
+	const Glyph& g8)
 {
     lcd.set_cgram_address(0x00);
     new_glyph(lcd, g1);

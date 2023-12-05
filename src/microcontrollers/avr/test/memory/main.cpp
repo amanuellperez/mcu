@@ -79,7 +79,13 @@ My_struct progmem_read(const My_struct& x)
     return s;
 }
 
+struct Progmem_read_my_struct{
+    My_struct operator()(const My_struct& x)
+    { return progmem_read(x);}
+};
+
 }
+
 
 constexpr static my::My_struct struct1 PROGMEM = {100, 200};
 
@@ -129,18 +135,19 @@ void test_basic()
 
 constexpr uint8_t nu8 = 12;
 constexpr uint16_t nu16 = 47;
-constexpr atd::Progmem<uint8_t> pu8 PROGMEM = nu8;
-constexpr atd::Progmem<uint16_t> pu16 PROGMEM = nu16;
+constexpr atd::Progmem<uint8_t, mcu::Progmem_read> pu8 PROGMEM = nu8;
+constexpr atd::Progmem<uint16_t, mcu::Progmem_read> pu16 PROGMEM = nu16;
 // Este no tiene que compilar:
 // constexpr Progmem<uint32_t> pu32 PROGMEM = 200;
-constexpr atd::Progmem<my::My_struct> pstruct PROGMEM 
+constexpr atd::Progmem<my::My_struct, my::Progmem_read_my_struct> pstruct PROGMEM 
 			    = my::My_struct{111, 222, my::Enum::b};
 
 static constexpr uint8_t narray_u8[4] = {10, 20, 30, 40};
-constexpr atd::Progmem_array<uint8_t, 4> parray_u8 PROGMEM = 
+constexpr atd::Progmem_array<uint8_t, 4, mcu::Progmem_read> parray_u8 PROGMEM = 
 	        {narray_u8[0], narray_u8[1], narray_u8[2], narray_u8[3]};
 
-constexpr atd::Progmem_array<my::My_struct, 3> parray_struct PROGMEM 
+constexpr atd::Progmem_array<my::My_struct, 3, my::Progmem_read_my_struct> 
+	parray_struct PROGMEM 
 	= {my::My_struct{11, 22, my::Enum::a}, 
 	   my::My_struct{33, 44, my::Enum::b}, 
 	   my::My_struct{55, 66, my::Enum::c}};

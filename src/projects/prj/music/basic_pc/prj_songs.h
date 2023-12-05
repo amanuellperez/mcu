@@ -29,7 +29,7 @@
 //
 // Escribir la canción en song.txt y usando un script que se genere esto
 // automáticamente.
-constexpr const atd::Progmem_array<music::Note, 62> PROGMEM
+constexpr const atd::Progmem_array<music::Note, 62, music::ROM_read_Note> PROGMEM
     ode_to_joy =
 {
     music::Note{music::Octave::one_line,  music::Step::Mi,  16 },

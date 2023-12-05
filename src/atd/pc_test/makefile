@@ -19,6 +19,7 @@ DIRS = algorithm	\
 		iterator	\
 		magnitude	\
 		math		\
+		memory		\
 		metronome	\
 		minifloat	\
 		names		\

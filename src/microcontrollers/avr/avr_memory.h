@@ -132,6 +132,23 @@ inline int bytes_of_free_ram()
 
 namespace avr_{
 
+struct Progmem_read{
+    template <typename T>
+    T operator()(const T& x) const
+    {
+	if constexpr (std::is_same_v<T, uint8_t>)
+	    return pgm_read_byte(&x);
+
+	else if constexpr (std::is_same_v<T, uint16_t>)
+	    return pgm_read_word(&x);
+
+	else
+	    static_assert(atd::always_false_v<int>, "Not implemented");
+    }
+};
+
+using ROM_read = Progmem_read;
+
 // Strings
 // -------
 template <size_t N>

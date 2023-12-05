@@ -233,8 +233,11 @@ public:
     /// Crea un nuevo caracter 'c' de 8 filas en la página de memoria extendida.
     // TODO: limpiar. Dejar una sola de estas funciones
     void new_extended_char(uint8_t c, const uint8_t glyph[8]);
+
+    template<typename ROM_read>
     void new_extended_char(uint8_t c,
-                           const atd::Progmem_array<uint8_t, 8>& glyph);
+                           const atd::Progmem_array<uint8_t, 8, ROM_read>& glyph);
+
     void new_extended_char(uint8_t c,
                            const not_generic::Progmem_array_view<uint8_t, 8>& glyph);
 
