@@ -77,7 +77,7 @@ using ROM_read = not_generic::ROM_read;
 namespace glyphs_5x8{
 
 template <typename Read>
-using Glyph = atd::Progmem_array<uint8_t, 8, Read>;
+using Glyph = atd::ROM_array<uint8_t, 8, Read>;
 
 constexpr const Glyph<ROM_read> bell PROGMEM = 
 			  { 0b0000000,

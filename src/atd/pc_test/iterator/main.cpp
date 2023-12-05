@@ -30,7 +30,7 @@ template <size_t N>
 struct My_array{
     using value_type = int;
     using size_type  = size_t;
-    using iterator   = atd::Progmem_iterator<My_array>;
+    using iterator   = atd::ROM_iterator<My_array>;
 
     size_type size() const { return N; }
     const value_type operator[](size_type i) const {return data[i];}

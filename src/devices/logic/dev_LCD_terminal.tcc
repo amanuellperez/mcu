@@ -328,7 +328,7 @@ void LCD_terminal<num_cols, num_rows, LCD>::new_extended_char(uint8_t c,
 template <uint8_t num_cols, uint8_t num_rows, typename LCD>
 template <typename ROM_read>
 void LCD_terminal<num_cols, num_rows, LCD>::new_extended_char(uint8_t c
-				, const atd::Progmem_array<uint8_t, 8, ROM_read>& glyph)
+				, const atd::ROM_array<uint8_t, 8, ROM_read>& glyph)
 {
     lcd_.new_extended_char(c, glyph);
     cursor_pos(x_, y_);

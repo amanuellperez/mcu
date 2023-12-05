@@ -185,7 +185,7 @@ public:
 
     template <typename ROM_read>
     static void new_extended_char(uint8_t c,
-                          const atd::Progmem_array<uint8_t, 8, ROM_read>& glyph);
+                          const atd::ROM_array<uint8_t, 8, ROM_read>& glyph);
 
     static void new_extended_char(uint8_t c,
                                   const not_generic::Progmem_array_view<uint8_t, 8>& glyph);
@@ -312,7 +312,7 @@ void Generic_LCD<LCD_HD44780<pin>>::new_extended_char(uint8_t c,
 template <typename pin>
 template <typename ROM_read>
 void Generic_LCD<LCD_HD44780<pin>>::new_extended_char(uint8_t c,
-                             const atd::Progmem_array<uint8_t, 8, ROM_read>& glyph)
+                             const atd::ROM_array<uint8_t, 8, ROM_read>& glyph)
 {
     LCD::set_cgram_address(c*8);
 
@@ -398,7 +398,7 @@ public:
 
     template <typename ROM_read>
     static void new_extended_char(uint8_t c,
-                             const atd::Progmem_array<uint8_t, 8, ROM_read>& glyph);
+                             const atd::ROM_array<uint8_t, 8, ROM_read>& glyph);
     static void new_extended_char(uint8_t c,
                                   const not_generic::Progmem_array_view<uint8_t, 8>& glyph);
 
@@ -637,7 +637,7 @@ void Generic_LCD<LCD_HD44780_4004<pin>>::new_extended_char(uint8_t c,
 template <typename pin>
 template <typename ROM_read>
 void Generic_LCD<LCD_HD44780_4004<pin>>::new_extended_char(uint8_t c,
-                            const atd::Progmem_array<uint8_t, 8,  ROM_read>& glyph)
+                            const atd::ROM_array<uint8_t, 8,  ROM_read>& glyph)
 {
     LCD::set_cgram_address(c*8);
 

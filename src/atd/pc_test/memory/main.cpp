@@ -39,7 +39,7 @@ void test_const()
 {
     test::interface("atd::Const");
 
-    atd::Progmem<int, Read> x{5};
+    atd::ROM<int, Read> x{5};
 
     CHECK_TRUE(x == 5, "int");
 }

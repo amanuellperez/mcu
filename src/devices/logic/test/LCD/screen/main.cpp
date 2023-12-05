@@ -101,7 +101,7 @@ constexpr const uint8_t heart_full[8] =
 // Curiosamente, al usar PROGMEM aumenta el tamaño del programa. Es culpa
 // (creo, y de acuerdo con el manual de avr-libc) de llamar a las funciones
 // pgm_read_byte que ocupan código. 
-constexpr const atd::Progmem_array<uint8_t, 8, mcu::ROM_read> arrow_up PROGMEM = 
+constexpr const atd::ROM_array<uint8_t, 8, mcu::ROM_read> arrow_up PROGMEM = 
 //constexpr const char arrow_up[8] = 
 			  { 0b0000000,
 			    0b0000100,
@@ -113,7 +113,7 @@ constexpr const atd::Progmem_array<uint8_t, 8, mcu::ROM_read> arrow_up PROGMEM =
 			    0b0000000 };
 
 
-constexpr const atd::Progmem_array<uint8_t, 8, mcu::ROM_read> arrow_down PROGMEM = 
+constexpr const atd::ROM_array<uint8_t, 8, mcu::ROM_read> arrow_down PROGMEM = 
 //constexpr const char arrow_down[8] = 
 			  { 0b0000000,
 			    0b0000100,

@@ -28,7 +28,7 @@
  *
  * HISTORIA
  *    Manuel Perez
- *    24/12/2022 Progmem_iterator, versión mínima
+ *    24/12/2022 ROM_iterator, versión mínima
  *
  ****************************************************************************/
 
@@ -36,7 +36,7 @@ namespace atd{
 
 // DESCRIPCION
 //	
-//	Algunos arrays, como los Progmem_array, solo suministran el operator[]
+//	Algunos arrays, como los ROM_array, solo suministran el operator[]
 //  para iterar no disponiendo de iteradores nativos (no tenemos un puntero al
 //  primer elemento ya que para acceder a PROGMEM hay que usar las macros de
 //  avr-gcc).
@@ -45,14 +45,14 @@ namespace atd{
 //  correspondiente.
 //
 // DUDA: ¿Qué nombre ponerle?
-//	 De momento lo llamo Progmem_iterator para indicar que se basa en las
+//	 De momento lo llamo ROM_iterator para indicar que se basa en las
 //  características de un array PROGMEM:
 //	(1) suministra operator[]
 //	(2) No suministra punteros. No puedo tener un puntero a una región de
 //	    memoria PROGMEM (salvo usando las macros de avr-gcc).
 //
 template <typename Array>
-class Progmem_iterator{
+class ROM_iterator{
 public:
 // Types
     using value_type = typename Array::value_type;
@@ -60,8 +60,8 @@ public:
     using size_type  = typename Array::size_type;
 
 // Constructors
-    Progmem_iterator() : data{nullptr}, i{0}  { }
-    Progmem_iterator(const Array& data0, size_type i0) : data{&data0}, i{i0} { }
+    ROM_iterator() : data{nullptr}, i{0}  { }
+    ROM_iterator(const Array& data0, size_type i0) : data{&data0}, i{i0} { }
 
 // Functions
     reference operator*() const { return (*data)[i]; }
@@ -69,11 +69,11 @@ public:
     void operator--() { --i; }
 
     friend
-    bool operator==(const Progmem_iterator& a, const Progmem_iterator& b)
+    bool operator==(const ROM_iterator& a, const ROM_iterator& b)
     { return a.data == b.data and a.i == b.i; }
 
     friend
-    bool operator!=(const Progmem_iterator& a, const Progmem_iterator& b)
+    bool operator!=(const ROM_iterator& a, const ROM_iterator& b)
     { return !(a == b); }
 
 private:
