@@ -156,20 +156,6 @@ inline int bytes_of_free_ram()
 
 namespace avr_{
 
-struct Progmem_read{
-    template <typename T>
-    T operator()(const T& x) const
-    {
-	if constexpr (std::is_same_v<T, uint8_t>)
-	    return pgm_read_byte(&x);
-
-	else if constexpr (std::is_same_v<T, uint16_t>)
-	    return pgm_read_word(&x);
-
-	else
-	    static_assert(atd::always_false_v<int>, "Not implemented");
-    }
-};
 
 
 
@@ -332,9 +318,32 @@ private:
 
 // Interfaz genérico
 // -----------------
-using ROM_read = Progmem_read;
+// (RRR) ¿Por qué devolver T{pgm_read_byte(&x)} construyendo T{...}?
+//	 Para que funcione con enums. Si T es un `enum class` el compilador
+//	 genera un error al intentar convertir de forma implícita
+//	 pgm_read_byte a esa enum. 
+template <typename T>
+inline constexpr T rom_read(const T& x)
+{
+    if constexpr (sizeof(T) == 1)
+	return T{pgm_read_byte(&x)};
+
+    else if constexpr (sizeof(T) == 2)
+	return T{pgm_read_word(&x)};
+
+    else
+	static_assert(atd::always_false_v<int>, "Not implemented");
+}
+
+struct ROM_read{
+    template <typename T>
+    T operator()(const T& x) const
+    { return rom_read(x); }
+};
+
 using ROM_uint8_t = atd::ROM<uint8_t, ROM_read>;
 using ROM_uint16_t = atd::ROM<uint16_t, ROM_read>;
+
 
 template <typename T, size_t N, typename Read = ROM_read>
 using ROM_array = atd::ROM_array<T, N, Read>;

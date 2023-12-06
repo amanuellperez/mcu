@@ -60,6 +60,7 @@ constexpr uint8_t barray_u8[barray_rows][barray_cols] PROGMEM = {
 namespace my{
 enum class Enum :uint8_t {a = 10, b, c};
 
+
 // User define types
 struct My_struct{
     uint8_t u8;
@@ -70,18 +71,19 @@ struct My_struct{
 // Esta es la función a definir si se quiere meter My_struct en PROGMEM
 // DUDA: necesito el atributo PROGMEM en el prototipo??? Ni idea.
 // My_struct progmem_read(const My_struct& x PROGMEM)
-My_struct progmem_read(const My_struct& x)
+My_struct rom_read(const My_struct& x)
 {
     My_struct s;
-    s.u8 = pgm_read_byte(&x.u8);
-    s.u16 = pgm_read_word(&x.u16);
-    s.en = Enum{pgm_read_byte(&x.en)};
+    s.u8  = mcu::rom_read(x.u8);
+    s.u16 = mcu::rom_read(x.u16);
+    s.en  = mcu::rom_read(x.en);
+
     return s;
 }
 
 struct ROM_read_my_struct{
     My_struct operator()(const My_struct& x)
-    { return progmem_read(x);}
+    { return rom_read(x); }
 };
 
 }
@@ -126,7 +128,7 @@ void test_basic()
 	uint16_t u16 = pgm_read_word(&struct1.u16);
 	uart << u16 << "}\n";
 
-	auto res = progmem_read(struct1);
+	auto res = rom_read(struct1);
 	uart << "same   = {" << (int) res.u8 << ", " << res.u16 << "}\n";
     }
 

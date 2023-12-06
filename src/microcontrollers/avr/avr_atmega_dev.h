@@ -133,6 +133,9 @@ namespace atmega{
     using Watchdog = avr_::Watchdog;
 
 // ROM (Generic interface of progmem)
+    template <typename T>
+    inline constexpr T rom_read(const T& x) { return avr_::rom_read(x);}
+
     using ROM_read     = avr_::ROM_read;
 
     using ROM_uint8_t  = avr_::ROM_uint8_t;
