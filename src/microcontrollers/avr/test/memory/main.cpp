@@ -1,4 +1,4 @@
-// Copyright (C) 2022 Manuel Perez 
+// Copyright (C) 2022-2023 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -79,7 +79,7 @@ My_struct progmem_read(const My_struct& x)
     return s;
 }
 
-struct Progmem_read_my_struct{
+struct ROM_read_my_struct{
     My_struct operator()(const My_struct& x)
     { return progmem_read(x);}
 };
@@ -135,35 +135,36 @@ void test_basic()
 
 constexpr uint8_t nu8 = 12;
 constexpr uint16_t nu16 = 47;
-constexpr atd::ROM<uint8_t, mcu::Progmem_read> pu8 PROGMEM = nu8;
-constexpr atd::ROM<uint16_t, mcu::Progmem_read> pu16 PROGMEM = nu16;
+constexpr mcu::ROM_uint8_t pu8 PROGMEM = nu8;
+constexpr mcu::ROM_uint16_t pu16 PROGMEM = nu16;
+
 // Este no tiene que compilar:
 // constexpr Progmem<uint32_t> pu32 PROGMEM = 200;
-constexpr atd::ROM<my::My_struct, my::Progmem_read_my_struct> pstruct PROGMEM 
+constexpr atd::ROM<my::My_struct, my::ROM_read_my_struct> pstruct PROGMEM 
 			    = my::My_struct{111, 222, my::Enum::b};
 
 static constexpr uint8_t narray_u8[4] = {10, 20, 30, 40};
-constexpr atd::ROM_array<uint8_t, 4, mcu::Progmem_read> parray_u8 PROGMEM = 
+constexpr mcu::ROM_array<uint8_t, 4> parray_u8 PROGMEM = 
 	        {narray_u8[0], narray_u8[1], narray_u8[2], narray_u8[3]};
 
-constexpr atd::ROM_array<my::My_struct, 3, my::Progmem_read_my_struct> 
+constexpr mcu::ROM_array<my::My_struct, 3, my::ROM_read_my_struct> 
 	parray_struct PROGMEM 
 	= {my::My_struct{11, 22, my::Enum::a}, 
 	   my::My_struct{33, 44, my::Enum::b}, 
 	   my::My_struct{55, 66, my::Enum::c}};
 
-constexpr mcu::Progmem_string<6> pstr PROGMEM{"hello"};
+constexpr mcu::ROM_string<6> pstr PROGMEM{"hello"};
 
-constexpr mcu::Progmem_string_array<3> parray_str PROGMEM = {
+constexpr mcu::ROM_string_array<3> parray_str PROGMEM = {
     str1, str2, str3
     };
 
 
 template <size_t N>
-void f(const mcu::Progmem_string_array<N>& str0)
+void f(const mcu::ROM_string_array<N>& str0)
 {
     mcu::UART_iostream uart;
-    mcu::Progmem_string_array<3> str = str0; // <-- esto genera error en 
+    mcu::ROM_string_array<3> str = str0; // <-- esto genera error en 
 					    // tiempo de ejecución
 
     uart << "Dentro de f\n";
@@ -221,7 +222,7 @@ void test_progmem()
 	uart << '\n';
     }
 	
-    {// Progmem_string
+    {// ROM_string
 
 	uart << "pstr = [";
 	for (size_t i = 0; i < pstr.size(); ++i)
@@ -270,12 +271,12 @@ void test_progmem()
 //{
 //    mcu::UART_iostream uart;
 //
-//    mcu::Progmem_biarray_view<uint8_t, barray_rows, barray_cols> a{barray_u8};
+//    mcu::ROM_biarray_view<uint8_t, barray_rows, barray_cols> a{barray_u8};
 //
 //    uart << "\n\nProgram view test\n"
 //	    "-----------------\n";
 //
-//    uart << "Progmem_biarray_view:\n";
+//    uart << "ROM_biarray_view:\n";
 //    for (uint8_t i = 0; i < barray_rows; ++i){
 //	for (uint8_t j = 0; j < barray_cols; ++j){
 //	    uart << (int)a[i][j] << ' ';
@@ -287,7 +288,7 @@ void test_progmem()
 //}
 
 
-constexpr mcu::Progmem_string<15> menu PROGMEM{"\n\nProgmem test\n"};
+constexpr mcu::ROM_string<15> menu PROGMEM{"\n\nProgmem test\n"};
 
 int main()
 {
@@ -302,7 +303,7 @@ int main()
 	uart << "---------------\n"
 		"1. Basic functions\n"
 		"2. Progmem\n";
-//		"3. Progmem_view\n";
+//		"3. ROM_view\n";
 
 	char ans{};
 	uart >> ans;

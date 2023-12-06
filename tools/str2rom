@@ -23,7 +23,7 @@
 #
 #  DESCRIPCION
 #	Las strings conviene meterlas en PROGMEM. Para ello uso la clase
-#	Progmem_string. 
+#	ROM_string. 
 #	El problema con esa clase es que hay que pasarle el número de
 #	caracteres que tiene la cadena, lo cual es propenso a error.
 #
@@ -80,7 +80,7 @@ BEGIN {
 }
 
 { 
-    printf "constexpr mcu::Progmem_string<%d> ", \$3
+    printf "constexpr mcu::ROM_string<%d> ", \$3
     printf "%s\n\tPROGMEM{\"%s\"};\n\n", \$1, \$2
 }
 EOF

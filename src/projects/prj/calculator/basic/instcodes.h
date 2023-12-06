@@ -53,7 +53,7 @@ struct Instructions_code
 
 namespace __progmem{
 using Abb2str_array = 
-atmega::Progmem_string_array<Instructions_code::last_abb -
+atmega::ROM_string_array<Instructions_code::last_abb -
                                     Instructions_code::first_abb + 1>;
 
 constexpr const char abb1[] PROGMEM = "ANS";
@@ -65,7 +65,7 @@ constexpr Abb2str_array abb2str PROGMEM = {
 // Es el casi-equivalente a `const char*` (¿`const char* const`?) pero
 // almacenando la memoria en PROGMEM
 struct Abb2str{
-    atmega::Element_progmem_string_array<__progmem::Abb2str_array::size()> 
+    atmega::Element_ROM_string_array<__progmem::Abb2str_array::size()> 
 	    operator[](size_t i) const { return __progmem::abb2str[i];}
 
     // Devuelve la longitud máxima de las cadenas almacenadas

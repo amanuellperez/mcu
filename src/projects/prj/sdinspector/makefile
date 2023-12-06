@@ -21,11 +21,11 @@ include $(DEV0_GENRULES)
 
 # meter esto en genrules como una regla genérica?
 prj_strings.h: prj_strings.pgm
-	str2progmem prj_strings.pgm
+	str2rom prj_strings.pgm
 
 dev_strings.h: dev_strings.pgm
-	str2progmem dev_strings.pgm
+	str2rom dev_strings.pgm
 
 sdc_strings.h: sdc_strings.pgm
-	str2progmem sdc_strings.pgm
+	str2rom sdc_strings.pgm
 

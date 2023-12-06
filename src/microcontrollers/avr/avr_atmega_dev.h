@@ -132,23 +132,31 @@ namespace atmega{
     using Sleep    = avr_::Sleep;
     using Watchdog = avr_::Watchdog;
 
-// PROGMEM
-    template <size_t N>
-    using Progmem_string = avr_::Progmem_string<N>;
+// ROM (Generic interface of progmem)
+    using ROM_read     = avr_::ROM_read;
+
+    using ROM_uint8_t  = avr_::ROM_uint8_t;
+    using ROM_uint16_t = avr_::ROM_uint16_t;
+
+    template <typename T, size_t N, typename Read = ROM_read>
+    using ROM_array = avr_::ROM_array<T, N, Read>;
 
     template <size_t N>
-    using Element_progmem_string_array = avr_::Element_progmem_string_array<N>;
+    using ROM_string = avr_::ROM_string<N>;
 
     template <size_t N>
-    using Progmem_string_array = avr_::Progmem_string_array<N>;
+    using Element_ROM_string_array = avr_::Element_ROM_string_array<N>;
 
+    template <size_t N>
+    using ROM_string_array = avr_::ROM_string_array<N>;
+
+    // TODO: borrar las views de progmem. DEPRECATED
     template <typename T, size_t N>
     using Progmem_array_view = avr_::Progmem_array_view<T, N>;
 
     template <typename T, size_t nrows, size_t ncols>
     using Progmem_biarray_view = avr_::Progmem_biarray_view<T, nrows, ncols>;
 
-    using ROM_read = avr_::ROM_read;
 
     namespace literals{ using namespace avr_::literals; }
 

@@ -16,7 +16,7 @@ include $(DEV0_GENRULES)
 
 # meter esto en genrules como una regla genérica?
 strings.h: strings.pgm
-	str2progmem strings.pgm
+	str2rom strings.pgm
 
 
 

@@ -22,10 +22,27 @@
 #ifndef __AVR_MEMORY_H__
 #define __AVR_MEMORY_H__
 /****************************************************************************
-// *
- *  - DESCRIPCION: Funciones para acceder a la memoria: RAM, flash, eeprom
  *
- *  - HISTORIA:
+ *  DESCRIPCION
+ *	Funciones para acceder a la memoria: RAM, flash, eeprom
+ *
+ *  TODO
+ *	Lo ideal sería poder definir:
+ *		avr::ROM_uint8_t x{4};
+ *		avr::ROM_array<uint8_t, 4> a{1, 2,3,4};
+ *
+ *	y poder usarlas.
+ *
+ *	A día de hoy hay que indicar explícitamente PROGMEM. Lo anterior se
+ *	escribe como
+ *		avr::ROM_uint8_t PROGMEM x{4};
+ *		avr::ROM_array<uint8_t, 4> PROGMEM a{1, 2,3,4};
+ *
+ *	¿cómo poder eliminar el PROGMEM para que el usuario de la clase no
+ *	tenga que recordar ponerlo?
+ *
+ *	    
+ *  HISTORIA
  *    Manuel Perez
  *    16/01/2022 v0.0 Experimental.
  *                    Suministro dos interfaces:
@@ -34,6 +51,12 @@
  *
  *    19/11/2022 atd::print
  *    23/12/2022 begin/end
+ *    06/12/2023 Pruebo a concebir la memoria del microcontrolador de dos
+ *               tipos: RAM y ROM. De esta forma podemos definir un interfaz
+ *               genérico para los microcontroladores: si se quiere acceder a
+ *               la ROM, usar ROM_uint8_t, ROM_uint16_t, ... que serán los
+ *               mismos nombres sea cual sea el microcontrolador (ese es el
+ *               ideal).
  *
  ****************************************************************************/
 #include <ostream>  // std::ostream
@@ -42,6 +65,7 @@
 #include <initializer_list>
 #include <atd_type_traits.h>
 #include <atd_iterator.h>
+#include <atd_memory.h>
 
 namespace atd{
 // pgm_read_xxx son macros, no se pueden escribir como avr_::pgm_read_byte
@@ -147,7 +171,7 @@ struct Progmem_read{
     }
 };
 
-using ROM_read = Progmem_read;
+
 
 // Strings
 // -------
@@ -306,6 +330,23 @@ private:
 };
 
 
+// Interfaz genérico
+// -----------------
+using ROM_read = Progmem_read;
+using ROM_uint8_t = atd::ROM<uint8_t, ROM_read>;
+using ROM_uint16_t = atd::ROM<uint16_t, ROM_read>;
+
+template <typename T, size_t N, typename Read = ROM_read>
+using ROM_array = atd::ROM_array<T, N, Read>;
+
+template <size_t N>
+using ROM_string = Progmem_string<N>;	// equivalente en RAM a const char p[N];
+
+template <size_t N>
+using ROM_string_array = Progmem_string_array<N>; // == const char* p[N];
+
+template <size_t N>
+using Element_ROM_string_array = Element_progmem_string_array<N>;
 
 /***************************************************************************
  *			    FUNCTIONS
