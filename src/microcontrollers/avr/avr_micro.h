@@ -93,8 +93,29 @@ struct Micro{
     //	    sleep();
     static void sleep(Sleep::mode mode) {avr_::sleep(mode);}
 
-// Progmem
-// -------
+// ROM
+// ---
+    template <typename T>
+    inline static
+    constexpr T rom_read(const T& x) { return avr_::rom_read(x);}
+
+    using ROM_read     = avr_::ROM_read;
+
+    using ROM_uint8_t  = avr_::ROM_uint8_t;
+    using ROM_uint16_t = avr_::ROM_uint16_t;
+
+    template <typename T, size_t N, typename Read = ROM_read>
+    using ROM_array = avr_::ROM_array<T, N, Read>;
+
+    template <size_t N>
+    using ROM_string = avr_::ROM_string<N>;
+
+    template <size_t N>
+    using Element_ROM_string_array = avr_::Element_ROM_string_array<N>;
+
+    template <size_t N>
+    using ROM_string_array = avr_::ROM_string_array<N>;
+
     // TODO: ¿cómo importar directamente estas funciones?
     // using ... ???
     // Manejamos el array como memoria normal y corriente

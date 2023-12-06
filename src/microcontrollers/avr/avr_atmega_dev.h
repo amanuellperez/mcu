@@ -180,7 +180,8 @@ namespace atmega{
 
 }// namespace
 
-
+// Micros equivalentes a nivel de código
+namespace atmega328p = atmega;
 
 #endif
 

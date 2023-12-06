@@ -34,6 +34,8 @@
 #include <stdint.h>
 #include <iostream>
 
+#include "dev_OV7670_cfg.h"
+
 namespace dev{
 
 // Result
@@ -51,15 +53,29 @@ enum class OV7670_state{
 enum class OV7670_size{
     VGA, QVGA, QQVGA, CIF, QCIF
 };
+}// impl_of
 
-
-
+// Visible para poder definir la configuración en ROM
 struct OV7670_register{
     uint8_t address;
     uint8_t value;
 };
 
-}// impl_of
+//template <typename Micro>
+//OV7670_register rom_read(const OV7670_register& x)
+//{
+//    OV7670_register reg;
+//    reg.address = Micro::rom_read(x.address);
+//    reg.value   = Micro::rom_read(x.value);
+//    return reg;
+//}
+//
+//template <typename Micro>
+//struct ROM_read_OV7670_register{
+//    OV7670_register operator()(const OV7670_register& x)
+//    { return rom_read<Micro>(x); }
+//};
+
 
 // Camera Inteface (CAMIF)
 // -----------------------
@@ -117,7 +133,11 @@ public:
     using TWI_master = Cfg::TWI_master;
     using Address    = typename TWI::Address;
     using Result     = impl_of::OV7670_state;
-    using Register   = impl_of::OV7670_register;
+    using Register   = OV7670_register;
+
+//    template <size_t N>
+//    using ROM_register_array = 
+//    typename Micro::ROM_array<Register, N, ROM_read_OV7670_register<Micro>>;
 
     static constexpr Address slave_address = 0x21; // es única
 	
@@ -151,7 +171,8 @@ public:
     //	     PROGMEM, desvinculando esta clase de PROGMEM.
     //
     // Escribe un array de registros en memoria
-    template <std::forward_iterator It>
+    //TODO: concept: template <std::forward_iterator It>
+    template <typename It>
     static bool write(It p0, It pe);
 
 // Gestión de errores
@@ -256,11 +277,16 @@ uint8_t OV7670<Cfg>::read_register(uint8_t i)
 }
 
 template <typename Cfg>
-    template <std::forward_iterator It>
+    //template <std::forward_iterator It>
+    template <typename It>
 bool OV7670<Cfg>::write(It p0, It pe)
 {
-    for (; p0 != pe; ++p0)
-	write_register(p0->address, p0->value);
+    for (; p0 != pe; ++p0){
+	if (write_register((*p0).address, (*p0).value) == false)
+	    return false;
+    }
+
+    return true;
 }
 
 

@@ -20,8 +20,10 @@
 #include "../../dev_OV7670.h"
 
 #include <atd_ostream.h>
+#include <atd_istream.h>
 
 #include <avr_atmega.h>
+#include "../../dev_OV7670_rom.h"
 #include <dev_TWI_master.h>
 #include <dev_TWI_master_ioxtream.h>
 
@@ -112,6 +114,9 @@ using OV7670_pins =
 
 using OV7670_cfg = dev::OV7670_cfg<Micro, TWI, OV7670_pins>;
 using OV7670 = dev::OV7670<OV7670_cfg>;
+
+
+
 
 
 // Functions
@@ -280,6 +285,47 @@ void test_write_register()
 
 }
 
+void test_write_vga_cfg()
+{
+    mcu::UART_iostream uart;
+    uart << "\n\nwrite vga cfg\n"
+	        "-------------\n";
+
+    namespace cfg = dev::OV7670_register_cfg;
+
+    uart << "Writing vga cfg ... ";
+    if (OV7670::write(cfg::vga.begin(), cfg::vga.end()) == true)
+	uart << "OK\n";
+    else{
+	uart << "ERROR\n";
+    }
+}
+
+void test_interactive_read()
+{
+    mcu::UART_iostream uart;
+    uart << "\n\nRead register\n"
+	    "-------------\n"
+	    "Register address (in hex): ";
+
+    uint8_t address{};
+    atd::read_int_as_hex(uart, address);
+
+    uart << "\nRegister[";
+    atd::print_int_as_hex(uart, address);
+    uart << "] = ";
+
+    uint8_t value = OV7670::read_register(address);
+    if (OV7670::last_operation_fail()){
+	uart << "ERROR: can't read register\n";
+	return;
+    }
+
+    atd::print_int_as_hex(uart, value);
+    uart << '\n';
+    
+
+}
 
 int main()
 {
@@ -297,6 +343,9 @@ int main()
 
 	test_read_register();
 	test_write_register();
+	test_write_vga_cfg();
+
+	test_interactive_read();
 
 	Micro::wait_ms(2000);
     }

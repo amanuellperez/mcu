@@ -31,6 +31,7 @@
  *    24/12/2022 ROM_iterator, versión mínima
  *
  ****************************************************************************/
+#include <iterator>
 
 namespace atd{
 
@@ -55,6 +56,7 @@ template <typename Array>
 class ROM_iterator{
 public:
 // Types
+    using iterator_category = std::forward_iterator_tag;
     using value_type = typename Array::value_type;
     using reference  = value_type; // por ser PROGMEM es const!!!
     using size_type  = typename Array::size_type;

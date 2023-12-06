@@ -8,6 +8,8 @@ LFUSE=0xA2
 
 MCU = atmega328p
 
+USER_CXXFLAGS=-DMCU=atmega
+
 include $(DEV0_GENRULES)
 
 

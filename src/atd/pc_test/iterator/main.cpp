@@ -19,7 +19,6 @@
 
 
 #include "../../atd_iterator.h"
-
 #include <alp_test.h>
 
 #include <iostream> 
@@ -41,10 +40,11 @@ struct My_array{
     value_type data[N];
 };
 
-void test_progmem_iterator()
+void test_rom_iterator()
 {
-    test::interface("progmem_iterator");
+    test::interface("rom_iterator");
 
+// basic test
     My_array<6> a = {1,2,3,4,5,6};
 
 
@@ -65,7 +65,7 @@ int main()
 try{
     test::header("atd_iterator");
 
-    test_progmem_iterator();
+    test_rom_iterator();
 
 }catch(std::exception& e)
 {
