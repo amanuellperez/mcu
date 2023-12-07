@@ -50,13 +50,13 @@ template <typename Int, Int x, Int y>
 struct Less_than: public std::bool_constant<x < y>{};
 
 
-// ¿x pertenece al intervalo cerrado [a,b]?
-// TODO: cambiar nombre. Lo usa UART_baud_rate
-template <typename Int, Int x, Int a, Int b>
-struct Pertenece_al_intervalo_cerrado
-    : public std::bool_constant< 
-				a <= x and x <= b
-				> {};
+//// ¿x pertenece al intervalo cerrado [a,b]?
+//// TODO: cambiar nombre. Lo usa UART_baud_rate
+//template <typename Int, Int x, Int a, Int b>
+//struct Pertenece_al_intervalo_cerrado
+//    : public std::bool_constant< 
+//				a <= x and x <= b
+//				> {};
 
 
 

@@ -23,22 +23,22 @@
 #define __AVR_UART_BAUD_RATE_H__
 /****************************************************************************
  *
- *   - DESCRIPCION: Calculamos el valor del UBBRn y el tipo de velocidad
- *	(normal mode o double speed) a partir de la frecuencia de reloj usada
- *	y del baud rate que queremos.
+ * DESCRIPCION
+ *  Calculamos el valor del UBBRn y el tipo de velocidad
+ *  (normal mode o double speed) a partir de la frecuencia de reloj usada
+ *  y del baud rate que queremos.
  *
- *   - COMENTARIOS: avrlibc suministra util/setbaud.h. Básicamente aquí hago
- *	lo mismo que allí con 2 diferencias fundamentales:
- *	    1.- No uso macros, solo constexpr.
- *	    2.- setbaud.h selecciona la velocidad definiendo la variable
- *	    USE_2X lo cual es una forma muy oscura de razonar. Prefiero llamar
- *	    a una función UBBRn() que me devuelve UBBR y el modo al que
- *	    configurar el UART.
+ *  REFERENCIAS
+ *	Datasheet atmega328p: pag 227.
+ *	App. note AVR306.
  *
- *   - HISTORIA:
- *           Manuel Perez- 27/08/2019 v0.0
+ *  HISTORIA
+ *	Manuel Perez
+ *	27/08/2019 v0.0
+ *	07/12/2023 Lo reescribo todo.
  *
  ****************************************************************************/
+
 #include <atd_cast.h>
 #include <atd_type_traits.h>
 #include <cstdint>
@@ -52,48 +52,91 @@ enum class UART_mode{
     // TODO: synchronous_master
 };
 
-// Calculamos el UBBR que corresponde al normal mode para esta frecuencia
-// de reloj y el baud rate dado. Usamos la tabla tabla 24.1 (pag. 227) de 
-// la datasheet.
-template <uint32_t f_clock, uint32_t baud_rate, uint32_t tolerance = 2>
-struct UART_normal_mode{
-    // Si se produce overflow generamos UBBRn = 0 y dentro_tolerancia = false.
-    static constexpr bool overflow = f_clock > 16*baud_rate? 1:0;
+namespace impl_of{
 
-    static constexpr uint32_t UBBRn32 = 
-	(f_clock -8u*baud_rate)/(16u*baud_rate) * overflow;
+// La tabla 24.1 (pag. 227) de la datasheet muestra cómo calcular 
+// el valor de UBRR.
+inline
+constexpr uint32_t baud_rate_normal_mode(uint32_t f_clock, uint32_t UBBR)
+{ return f_clock / (16 * (UBBR + 1)); }
 
-    static constexpr uint16_t UBBRn =
-		    atd::safe_static_cast<uint16_t, uint32_t, UBBRn32>();
+inline
+constexpr uint32_t baud_rate_double_speed_mode(uint32_t f_clock, uint32_t UBBR)
+{ return f_clock / (8 * (UBBR + 1)); }
 
-    static constexpr bool dentro_tolerancia
-	= atd::Pertenece_al_intervalo_cerrado<uint32_t, 
-        100u * f_clock * overflow, 
-	(16u * baud_rate * (UBBRn + 1) * (100 - tolerance)),
-	(16u * baud_rate * (UBBRn + 1) * (100 + tolerance))>::value;
+// Nombre tan largo para que no se llame nunca
+inline 
+constexpr int8_t calculate_percentage_error(uint32_t b, uint32_t baud_rate)
+{
+    if (b >= baud_rate)
+	return ((b - baud_rate) * 100) / baud_rate;
+
+    else
+	return ((baud_rate - b) * 100) / baud_rate;
+}
+
+struct UBBR_and_error{
+    uint16_t UBBR;
+    int8_t error;
 };
 
+// Return: [UBBRn, % de error como número]
+// Devuelve 100% de error en caso de que no se pueda calcular.
+inline
+constexpr UBBR_and_error
+    UBBR_and_error_normal_mode(uint32_t f_clock, uint32_t baud_rate)
+{
+    if (f_clock <= 16 * baud_rate) // overflow
+	return {0, 100};
 
-// Calculamos el UBBR que corresponde al double speed mode para esta frecuencia
-// de reloj y el baud rate dado. Usamos la tabla tabla 24.1 (pag. 227) de 
-// la datasheet.
-template <uint32_t f_clock, uint32_t baud_rate, uint32_t tolerance = 2>
-struct UART_double_speed_mode{
-    // Si se produce overflow generamos UBBRn = 0 y dentro_tolerancia = false.
-    static constexpr bool overflow = f_clock > 8*baud_rate? 1:0;
+    uint32_t u0 = (f_clock -16u*baud_rate)/(16u*baud_rate); // UBBR
+    uint32_t u1 = u0 + 1;
+    
+    uint32_t b0 = baud_rate_normal_mode(f_clock, u0); // baud_rate_closest_match
+    uint32_t b1 = baud_rate_normal_mode(f_clock, u1);
 
-    static constexpr uint32_t UBBRn32 = 
-	(f_clock -4u*baud_rate)/(8u*baud_rate) * overflow;
+    int8_t e0 = calculate_percentage_error(b0, baud_rate);
+    int8_t e1 = calculate_percentage_error(b1, baud_rate);
 
-    static constexpr uint16_t UBBRn =
-		    atd::safe_static_cast<uint16_t, uint32_t, UBBRn32>();
+    if (atd::abs(e0) <= atd::abs(e1)) // Elegimos el que menor error tenga
+	return {static_cast<uint16_t>(u0), e0};
 
-    static constexpr bool dentro_tolerancia
-	= atd::Pertenece_al_intervalo_cerrado<uint32_t, 
-        100u * f_clock * overflow, 
-	(8u * baud_rate * (UBBRn + 1) * (100 - tolerance)),
-	(8u * baud_rate * (UBBRn + 1) * (100 + tolerance))>::value;
-};
+    else 
+	return {static_cast<uint16_t>(u1), e1};
+}
+
+
+// Return: [UBBRn, % de error como número]
+// Devuelve 100% de error en caso de que no se pueda calcular.
+inline
+constexpr UBBR_and_error
+    UBBR_and_error_double_speed_mode(uint32_t f_clock, uint32_t baud_rate)
+{
+    if (f_clock <= 16 * baud_rate) // overflow
+	return {0, 100};
+
+    uint32_t u0 = (f_clock -8u*baud_rate)/(8u*baud_rate); // UBBR
+    uint32_t u1 = u0 + 1;
+    
+    uint32_t b0 = baud_rate_double_speed_mode(f_clock, u0); // baud_rate_closest_match
+    uint32_t b1 = baud_rate_double_speed_mode(f_clock, u1);
+
+    int8_t e0 = calculate_percentage_error(b0, baud_rate);
+    int8_t e1 = calculate_percentage_error(b1, baud_rate);
+
+    if (atd::abs(e0) <= atd::abs(e1)) // Elegimos el que menor error tenga
+	return {static_cast<uint16_t>(u0), e0};
+
+    else 
+	return {static_cast<uint16_t>(u1), e1};
+}
+
+
+
+
+
+
+}// impl_of
 
 
 
@@ -128,21 +171,35 @@ struct UART_double_speed_mode{
 /// el baud_speed del UART.
 // La llamo UBBRn y no UBBR por si acaso los de avrlibc definen alguna macro
 // llamada UBBR.
-template <uint32_t f_clock, uint32_t baud_rate, uint32_t tolerance = 2>
+template <uint32_t f_clock, uint32_t baud_rate, uint32_t max_error = 2>
 constexpr inline std::pair<UART_mode, uint32_t> UBBRn()
 {
-    if constexpr (UART_normal_mode<f_clock, baud_rate, tolerance>::dentro_tolerancia)
-	return {UART_mode::normal, 
-			    UART_normal_mode<f_clock, baud_rate, tolerance>::UBBRn};
+    constexpr impl_of::UBBR_and_error normal = 
+		    impl_of::UBBR_and_error_normal_mode(f_clock, baud_rate);
 
-    if constexpr (UART_double_speed_mode<f_clock, baud_rate, tolerance>::dentro_tolerancia)
-	return {UART_mode::double_speed, 
-			UART_double_speed_mode<f_clock, baud_rate, tolerance>::UBBRn};
+    constexpr impl_of::UBBR_and_error double_speed = 
+		    impl_of::UBBR_and_error_double_speed_mode(f_clock, baud_rate);
 
-    else // no se puede poner false directamente, de ahi el baud_rate-baud_rate
+    if constexpr (normal.error <= double_speed.error){
+	if constexpr (normal.error <= max_error)
+	    return {UART_mode::normal, normal.UBBR};
+
+	else
 	static_assert(
-        baud_rate - baud_rate, "\nUBBRn: Es imposible conseguir el baud_rate indicado con la frecuencia "
-              "de reloj dada. Seguramente tengas que incrementar la frecuencia del reloj.");
+        max_error - max_error,
+	    "\nUBBRn: Can't achieve that baud_rate with so small max_error."
+              "Increment max_error or try to increase the frequency F_CPU.");
+    }
+
+    else {
+	if constexpr (double_speed.error <= max_error)
+	    return {UART_mode::double_speed, double_speed.UBBR};
+	else
+	static_assert(
+        max_error - max_error,
+	    "\nUBBRn: Can't achieve that baud_rate with so small max_error."
+              "Increment max_error or try to increase the frequency F_CPU.");
+    }
 
     // Aqui nunca llega. Pongo el return para que no genere el warning el
     // compilador.

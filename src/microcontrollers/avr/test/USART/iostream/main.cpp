@@ -29,31 +29,41 @@
 
 #include <avr/power.h>
 
+// Probados a 8 MHz:
+//constexpr uint32_t baud_rate = 4'800u;    // funciona
+constexpr uint32_t baud_rate = 9600u;	    // funciona
+//constexpr uint32_t baud_rate = 14'400u;      NO FUNCIONA!!!
+//constexpr uint32_t baud_rate = 19'200u;	    // funciona
+//constexpr uint32_t baud_rate = 28'800u;	    NO funciona
+//constexpr uint32_t baud_rate = 38'400u;	    // funciona
+//constexpr uint32_t baud_rate = 57'600u;	    // funciona
+//constexpr uint32_t baud_rate = 76'800u;	    NO funciona
+
 using int_type = std::char_traits<char>::int_type;
 using char_type = std::char_traits<char>::char_type;
 using traits = std::char_traits<char>;
 
-void test_streambuf()
-{ 
-    avr_::UART_iostream uart;
-    avr_::basic_cfg(uart);
-    uart.turn_on();
-
-    uart << "\n---------------\n";
-    uart << "Probando streambuf!\n";
-    uart << "-------------------\n\n";
-
-    uart << "Pulsa una tecla: \n\n";
-
-    while (1){
-	int_type d = uart.rdbuf()->sgetc();
-
-	uart << "\nHas escrito [";
-	uart.rdbuf()->sputc(traits::to_char_type(d));
-	uart << "]\n";
-	uart << "Pulsa otra tecla: ";
-    }
-}
+//void test_streambuf()
+//{ 
+//    avr_::UART_iostream uart;
+//    avr_::basic_cfg<baud_rate>(uart);
+//    uart.turn_on();
+//
+//    uart << "\n---------------\n";
+//    uart << "Probando streambuf!\n";
+//    uart << "-------------------\n\n";
+//
+//    uart << "Pulsa una tecla: \n\n";
+//
+//    while (1){
+//	int_type d = uart.rdbuf()->sgetc();
+//
+//	uart << "\nHas escrito [";
+//	uart.rdbuf()->sputc(traits::to_char_type(d));
+//	uart << "]\n";
+//	uart << "Pulsa otra tecla: ";
+//    }
+//}
 
 template <typename Int>
 void test_int(avr_::UART_iostream& uart, const char* tipo)
@@ -119,7 +129,7 @@ void test_interrupt_receive()
 void test_iostream()
 {
     avr_::UART_iostream uart;
-    avr_::basic_cfg(uart);
+    avr_::basic_cfg<baud_rate>(uart);
     uart.turn_on();
 
     uart << "\n----------\n";
