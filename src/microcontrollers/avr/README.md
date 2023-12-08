@@ -38,7 +38,7 @@ Compiler: avr-gcc 11.3.0
 # Índice
 * [¿Por qué esta biblioteca?](#problemas)
 * [Problemas al programar el atmega usando SPI](#conexionSPI)
-* [Selección del reloj y salida del reloj](#seleccionReloj)
+* [Cristales externos](#cristalexterno)
 
 ## <a name="problemas"></a>¿Por qué esta biblioteca? 
 
@@ -155,8 +155,9 @@ Si se quiere dejar el producto final con la posibilidad de reprogramarlo hay
 que dejar esas resistencias. 
 
 
-## <a name="seleccionReloj"></a>Selección del reloj y salida del reloj
+## <a name="cristalexterno"></a>Cristales externos
 
+### Usar cristal externo
 Para seleccionar el reloj, tenemos que elegir el LFUSE. Opciones de interés:
 
 * LFUSE = 0xF7: conectar cristal externo con 2 condensadores de 12 a 22 pF en
@@ -170,6 +171,13 @@ Para seleccionar el reloj, tenemos que elegir el LFUSE. Opciones de interés:
 * LFUSE = 0xA2: micro a 8 MHz sacando la señal de reloj por el pin CLKO.
 
 No olvidar definir `F_CPU` a la frecuencia correspondiente del cristal usado.
+
+La figura 32-1 de la datasheet muestra las frecuencias máximas a las que puede
+operar el atmega32 dependiendo de Vcc:
+
++ A 3.3V la frecuencia máxima son 12MHz.
++ A 5V es de 20MHz.
+
 
 ### Errores iniciales
 

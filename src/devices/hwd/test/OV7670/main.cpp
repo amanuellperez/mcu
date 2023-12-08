@@ -36,14 +36,15 @@ using Micro   = mcu::Micro;
 // ---------------
 // using UART: pins 2 and 3
 // available: 4-5
+constexpr uint8_t vsync_pin = 4;
+constexpr uint8_t href_pin  = 5;
 
 // PORTD_HIGH: 13, 12, 11, 6
 constexpr uint8_t d4_pin =  6;
 
 // VCC and GND: 7, 8
 
-constexpr uint8_t vsync_pin = 9;
-constexpr uint8_t href_pin  = 10;
+// crystal of 16MHz in pins 9-10
 
 constexpr uint8_t d5_pin = 11;
 constexpr uint8_t d6_pin = 12;
@@ -285,16 +286,13 @@ void test_write_register()
 
 }
 
-void test_write_vga_cfg()
+template <typename It>
+void write_resolution(It p0, It pe)
 {
     mcu::UART_iostream uart;
-    uart << "\n\nwrite vga cfg\n"
-	        "-------------\n";
 
-    namespace cfg = dev::OV7670_register_cfg;
-
-    uart << "Writing vga cfg ... ";
-    if (OV7670::write(cfg::vga.begin(), cfg::vga.end()) == true)
+    uart << "Writing resolution ... ";
+    if (OV7670::write(p0, pe) == true)
 	uart << "OK\n";
     else{
 	uart << "ERROR\n";
@@ -327,6 +325,53 @@ void test_interactive_read()
 
 }
 
+void test_resolution()
+{
+    mcu::UART_iostream uart;
+    uart << "\n\nResolution:\n"
+	    "1. VGA\n"
+	    "2. QVGA\n"
+	    "3. QQVGA\n";
+
+    char opt{};
+    uart >> opt;
+
+    namespace cfg = dev::OV7670_register_cfg;
+    switch(opt){
+	break; case '2': write_resolution(cfg::qvga.begin(), cfg::qvga.end());
+	break; case '3': write_resolution(cfg::qqvga.begin(), cfg::qqvga.end());
+	break; default : write_resolution(cfg::vga.begin(), cfg::vga.end());
+
+    }
+}
+
+void test_pclk()
+{
+    namespace cfg = dev::OV7670_register_cfg;
+
+    mcu::UART_iostream uart;
+    uart << "\n\nPrescalar of PCLK (see changes in oscilloscope)\n";
+
+    while (1){
+	uart << "Write value of CLKRC (0 to return): ";
+	uint16_t tmp = 0; // no definirlo como uint8_t ya que lee un caracter!!!
+	uart >> tmp ;
+	if (tmp == 0)
+	    return;
+	uint8_t clkcr = static_cast<uint8_t>(tmp);
+
+	atd::print_int_as_hex(uart, clkcr);
+	uart << " =(" << (int) clkcr << ") ";
+	uart << " ... ";
+	OV7670::write_register(cfg::REG::CLKRC, clkcr);
+	if (OV7670::last_operation_fail())
+	    uart << "ERROR\n";
+	else
+	    uart << "OK\n";
+    }
+
+}
+
 int main()
 {
     init_uart();
@@ -343,7 +388,10 @@ int main()
 
 	test_read_register();
 	test_write_register();
-	test_write_vga_cfg();
+
+	test_pclk();
+	test_resolution();
+
 
 	test_interactive_read();
 

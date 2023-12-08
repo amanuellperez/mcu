@@ -89,6 +89,29 @@ constexpr ROM_register_array<7> vga PROGMEM = {
 };
 
 
+constexpr ROM_register_array<9> qvga PROGMEM = {
+    Register{REG::COM14, 0x19},
+    Register{REG::SCALING_DCWCTR, 0x11},
+    Register{REG::SCALING_PCLK_DIV, 0xf1},
+    Register{REG::HSTART,0x16},
+    Register{REG::HSTOP,0x04},
+    Register{REG::HREF,0x24},
+    Register{REG::VSTART,0x02},
+    Register{REG::VSTOP,0x7a},
+    Register{REG::VREF,0x0a},
+};
+
+constexpr ROM_register_array<9> qqvga PROGMEM = {
+    Register{REG::COM14, 0x1a},	// divide by 4
+    Register{REG::SCALING_DCWCTR, 0x22},		// downsample by 4
+    Register{REG::SCALING_PCLK_DIV, 0xf2},		// divide by 4
+    Register{REG::HSTART,0x16},
+    Register{REG::HSTOP,0x04},
+    Register{REG::HREF,0xa4},		   
+    Register{REG::VSTART,0x02},
+    Register{REG::VSTOP,0x7a},
+    Register{REG::VREF,0x0a},
+};
 
 }// namespace OV7670_register_cfg
 }// namespace dev
