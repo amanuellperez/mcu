@@ -36,11 +36,14 @@ Compiler: avr-gcc 11.3.0
 # Traductores de la datasheet
 
 # Índice
-* [Problemas al programar los microcontroladores](#problemas)
+* [¿Por qué esta biblioteca?](#problemas)
 * [Problemas al programar el atmega usando SPI](#conexionSPI)
 * [Selección del reloj y salida del reloj](#seleccionReloj)
 
-## <a name="problemas"></a>Problemas al programar los microcontroladores
+## <a name="problemas"></a>¿Por qué esta biblioteca? 
+
+Cuando empecé a programar un microcontrolador me encontré los siguientes
+problemas básicos:
 
 ### Dificultad de leer el código
 Uno de los problemas que te encuentras cuando empiezas a programar el microcontrolador
