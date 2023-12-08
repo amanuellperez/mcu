@@ -38,6 +38,16 @@ constexpr uint32_t baud_rate = 9600u;	    // funciona
 //constexpr uint32_t baud_rate = 38'400u;	    // funciona
 //constexpr uint32_t baud_rate = 57'600u;	    // funciona
 //constexpr uint32_t baud_rate = 76'800u;	    NO funciona
+// Los siguientes no funcionan a 8MHz pero sí a 16MHz:
+//constexpr uint32_t baud_rate = 115'200;   
+//constexpr uint32_t baud_rate = 230'400;	// FUNCIONA!!!
+//constexpr uint32_t baud_rate = 250000; //NO funciona (???)
+//constexpr uint32_t baud_rate = 460'800: <-- no aparece en la avr306
+//constexpr uint32_t baud_rate = 500'000; // FUNCIONA!!!
+//constexpr uint32_t baud_rate = 921'600;// No FUNCIONA (error 9%)
+//constexpr uint32_t baud_rate = 1'000'000; // FUNCIONA!!!
+constexpr uint32_t max_error = 3; // Típico error +-2.5%
+
 
 using int_type = std::char_traits<char>::int_type;
 using char_type = std::char_traits<char>::char_type;
@@ -129,7 +139,7 @@ void test_interrupt_receive()
 void test_iostream()
 {
     avr_::UART_iostream uart;
-    avr_::basic_cfg<baud_rate>(uart);
+    avr_::basic_cfg<baud_rate, F_CPU, max_error>(uart);
     uart.turn_on();
 
     uart << "\n----------\n";

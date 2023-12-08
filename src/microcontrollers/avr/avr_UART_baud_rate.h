@@ -86,7 +86,7 @@ inline
 constexpr UBBR_and_error
     UBBR_and_error_normal_mode(uint32_t f_clock, uint32_t baud_rate)
 {
-    if (f_clock <= 16 * baud_rate) // overflow
+    if (f_clock < 16 * baud_rate) // overflow
 	return {0, 100};
 
     uint32_t u0 = (f_clock -16u*baud_rate)/(16u*baud_rate); // UBBR
@@ -112,7 +112,7 @@ inline
 constexpr UBBR_and_error
     UBBR_and_error_double_speed_mode(uint32_t f_clock, uint32_t baud_rate)
 {
-    if (f_clock <= 16 * baud_rate) // overflow
+    if (f_clock < 16 * baud_rate) // overflow
 	return {0, 100};
 
     uint32_t u0 = (f_clock -8u*baud_rate)/(8u*baud_rate); // UBBR

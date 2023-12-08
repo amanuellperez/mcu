@@ -48,10 +48,10 @@ void print_double_speed_mode(uint32_t f_clock, uint32_t baud_rate)
 
 }
 
-template <uint32_t f_clock, uint32_t baud_rate>
+template <uint32_t f_clock, uint32_t baud_rate, uint32_t max_error = 3>
 void print_ubbrn()
 {
-    auto [mode, ubbrn] = avr_::UBBRn<f_clock, baud_rate>();
+    auto [mode, ubbrn] = avr_::UBBRn<f_clock, baud_rate, max_error>();
     std::cout << "UBBRn<" << f_clock << ", " << baud_rate << ">:\n";
     std::cout << "\tmode = ";
 
@@ -203,6 +203,14 @@ void test_UBBRn()
     test_UBBRn<8'000'000, 115'200, 4>(Mode::double_speed, 8);
     test_UBBRn<8'000'000, 230'400, 9>(Mode::normal, 1);
 
+
+    print_normal_mode(16'000'000, 921'600);
+    print_double_speed_mode(16'000'000, 921'600);
+    print_ubbrn<16'000'000, 921'600, 9>();
+
+    print_normal_mode(16'000'000, 1'000'000);
+    print_double_speed_mode(16'000'000, 1'000'000);
+    print_ubbrn<16'000'000, 1'000'000>();
 }
 
 int main()

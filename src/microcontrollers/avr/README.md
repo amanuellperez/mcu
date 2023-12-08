@@ -35,7 +35,12 @@ Compiler: avr-gcc 11.3.0
 ---
 # Traductores de la datasheet
 
-## Problemas al programar los microcontroladores
+# Índice
+* [Problemas al programar los microcontroladores](#problemas)
+* [Problemas al programar el atmega usando SPI](#conexionSPI)
+* [Selección del reloj y salida del reloj](#seleccionReloj)
+
+## <a name="problemas"></a>Problemas al programar los microcontroladores
 
 ### Dificultad de leer el código
 Uno de los problemas que te encuentras cuando empiezas a programar el microcontrolador
@@ -107,7 +112,7 @@ dispositivo genérico.
 
 
 
-## ¿Qué implementar lo primero?
+###¿Qué implementar lo primero?
 
 Para poder depurar un programa se necesita una forma de trazarlo. En el caso
 del atmega conviene programar cuanto antes el traductor del UART ya que una
@@ -118,8 +123,8 @@ traductor `UART_basic`, con escribir `UART_generic` podríamos definir `using
 atmega::UART_iostream = generic::UART_iostream<UART_generic>`).
 
 
-## Algunos ejemplos
-### `UART` como flujo
+### Algunos ejemplos
+#### `UART` como flujo
 Además de los traductores suministro también algunas clases de más alto nivel. Por ejemplo, 
 un flujo normal y corriente para acceder a UART. 
 
@@ -134,9 +139,8 @@ un flujo normal y corriente para acceder a UART.
  
 
 
-## SPI
+## <a name="conexionSPI"></a>Problemas al programar el atmega usando SPI
 
-### In-System Programming
 Al conectar por primera vez una SD card al SPI el programador falla. ¿Por qué?
 El avr se programa usando SPI con lo que se puede generar un SPI driver
 contention entre el programador y la SD card. La application note AVR910 da la
@@ -148,7 +152,7 @@ Si se quiere dejar el producto final con la posibilidad de reprogramarlo hay
 que dejar esas resistencias. 
 
 
-## AtMega328P Fuses
+## <a name="seleccionReloj"></a>Selección del reloj y salida del reloj
 
 Para seleccionar el reloj, tenemos que elegir el LFUSE. Opciones de interés:
 
@@ -162,11 +166,14 @@ Para seleccionar el reloj, tenemos que elegir el LFUSE. Opciones de interés:
 
 * LFUSE = 0xA2: micro a 8 MHz sacando la señal de reloj por el pin CLKO.
 
+No olvidar definir `F_CPU` a la frecuencia correspondiente del cristal usado.
+
 ### Errores iniciales
 
 La primera vez que quise usar el "full swing oscillator" probé LFUSE = 0xE7,
 luego me resultó imposible conectarme con el micro a través de avrdude. 
 
 
-Compilardor: avr-gcc 11.3.0
+
+Compilador: avr-gcc 11.3.0
  

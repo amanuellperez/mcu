@@ -50,12 +50,12 @@
 namespace avr_{
 template <uint32_t baud_rate = 9600u,
 	  uint32_t f_clock   = clock_frequency_in_hz,
-	  uint32_t tolerance = 2>
+	  uint32_t max_error = 2>
 void UART_basic_cfg()
 {                                
     using UART = UART_basic;
 
-    UART::baud_speed<f_clock, baud_rate, tolerance>();
+    UART::baud_speed<f_clock, baud_rate, max_error>();
 
     UART::parity_mode_disabled();
 
