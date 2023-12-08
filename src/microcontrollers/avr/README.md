@@ -112,7 +112,7 @@ dispositivo genérico.
 
 
 
-###¿Qué implementar lo primero?
+### ¿Qué implementar lo primero?
 
 Para poder depurar un programa se necesita una forma de trazarlo. En el caso
 del atmega conviene programar cuanto antes el traductor del UART ya que una
