@@ -260,7 +260,7 @@ genérico.
 ### EEPROMs
 | Reference | I2C | SPI | datasheet |
 |-----------|:---:|:---:|:---:|
-| [25LC256](#25LC256)   |     |  x  |[datasheet](datasheet/25LC256.pdf)
+| [25LC256](#25LC256)   |     |  x  |[datasheet](doc/25LC256.pdf)
 
 ### LCDs
 
@@ -269,32 +269,32 @@ Driver: [HD44780](#HD44780)
 ### Potentiometers (digital)
 | Reference | I2C | SPI | datasheet |
 |-----------|:---:|:---:|:---:|
-|MCP4231    |     |  x  |[datasheet](datasheet/MCP4231.pdf)
+|MCP4231    |     |  x  |[datasheet](doc/MCP4231.pdf)
 
 
 ### Registers
 | Reference | Comments| datasheet |
 |-----------| ---- |:---:|
-| 74HC595   | 8-bit serial-in, parallel-out shift |[datasheet](datasheet/SN74HC595.pdf)
+| 74HC595   | 8-bit serial-in, parallel-out shift |[datasheet](doc/SN74HC595.pdf)
 
 
 ### RTC (Real-Time Clock)
 
 | Reference | I2C | SPI | datasheet |
 |-----------|:---:|:---:|:---:|
-|DS1307	    |  x  |     |[datasheet](datasheet/DS1307.pdf)
+|DS1307	    |  x  |     |[datasheet](doc/DS1307.pdf)
 
 
 ### Sensors
 
 | Reference |  T  |  P  |  H  |  G  | PIN | 1WIRE | TWI | SPI   | datasheet |
 |-----------|:---:|:---:|:---:|:---:|:---:|:-----:|:---:|:-----:|:--------:|
-|BMP280     |  x  |  x  |     |     |     |       |  x  |  x    |[datasheet](datasheet/BMP280.pdf)
-|BME280     |  x  |  x  |  x  |     |     |       |  x  |  x    |[datasheet](datasheet/BME280.pdf)
-|BME680     |  x  |  x  |  x  |  x  |     |       |  x  |  x    |[datasheet](datasheet/BME680.pdf)
+|BMP280     |  x  |  x  |     |     |     |       |  x  |  x    |[datasheet](doc/BMP280.pdf)
+|BME280     |  x  |  x  |  x  |     |     |       |  x  |  x    |[datasheet](doc/BME280.pdf)
+|BME680     |  x  |  x  |  x  |  x  |     |       |  x  |  x    |[datasheet](doc/BME680.pdf)
 |LM75A      |  x  |     |     |     |     |       |  x  |       |
-|DS18B20    |  x  |     |     |     |     |   x   |     |       |[datasheet](datasheet/DS18B20.pdf)
-|DHT11	    |  x  |     |  x  |     |  x  |       |     |       |[datasheet](datasheet/DHT11.pdf)
+|DS18B20    |  x  |     |     |     |     |   x   |     |       |[datasheet](doc/DS18B20.pdf)
+|DHT11	    |  x  |     |  x  |     |  x  |       |     |       |[datasheet](doc/DHT11.pdf)
 
 
 T = temperature
@@ -314,6 +314,13 @@ G = gas
 |Response time	     | de 6 a 30 s  |   2s          |              |
 |Sampling period     | 1 s	    |	2s          |              |
 
+### Camaras
+
+OV7670:
++ [datasheet](doc/OV7670_v1.2.pdf)
++ [Implementatin Guide](doc/OV7670 Implementation Guide.pdf)
++ [Protocolo SCCB](doc/OmniVision SCCB Functional Specification.pdf)
+	
 
 ### Keyboards
 
