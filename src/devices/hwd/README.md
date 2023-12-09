@@ -6,7 +6,18 @@ Probado con avr-gcc 11.3.0
 ## Índice
 * [Clasificación](#tipos)
 * [Escritura de drivers](#drivers)
-* [Drivers suministrados](#suministrados)
+* [Drivers suministrados](#suministrados):
+    + [EEPROMs](#eeproms)
+    + [LCDs](#lcd)
+    + [Potentiometers](#potentiometers)
+    + [Registers](#registers)
+    + [RTCs](#rtcs)
+    + [Sensors](#sensors)
+    + [Cámaras](#camaras)
+    + [Keyboards](#keyboards)
+    + [Clocks](#clocks)
+
+
 * [TWI address](#twiaddress)
 
 ## <a name="tipos"></a>Clasificación
@@ -257,35 +268,35 @@ genérico.
 
 ## <a name="suministrados"></a>Drivers suministrados 
 
-### EEPROMs
+### <a name="eeproms"></a>EEPROMs
 | Reference | I2C | SPI | datasheet |
 |-----------|:---:|:---:|:---:|
 | [25LC256](#25LC256)   |     |  x  |[datasheet](doc/25LC256.pdf)
 
-### LCDs
+### <a name="lcd"></a>LCDs
 
 Driver: [HD44780](#HD44780)
 
-### Potentiometers (digital)
+### <a name="potentiometers"></a>Potentiometers (digital)
 | Reference | I2C | SPI | datasheet |
 |-----------|:---:|:---:|:---:|
 |MCP4231    |     |  x  |[datasheet](doc/MCP4231.pdf)
 
 
-### Registers
+### <a name="registers"></a>Registers
 | Reference | Comments| datasheet |
 |-----------| ---- |:---:|
 | 74HC595   | 8-bit serial-in, parallel-out shift |[datasheet](doc/SN74HC595.pdf)
 
 
-### RTC (Real-Time Clock)
+### <a name="rtcs"></a>RTC (Real-Time Clock)
 
 | Reference | I2C | SPI | datasheet |
 |-----------|:---:|:---:|:---:|
 |DS1307	    |  x  |     |[datasheet](doc/DS1307.pdf)
 
 
-### Sensors
+### <a name="sensors"></a>Sensors
 
 | Reference |  T  |  P  |  H  |  G  | PIN | 1WIRE | TWI | SPI   | datasheet |
 |-----------|:---:|:---:|:---:|:---:|:---:|:-----:|:---:|:-----:|:--------:|
@@ -314,15 +325,17 @@ G = gas
 |Response time	     | de 6 a 30 s  |   2s          |              |
 |Sampling period     | 1 s	    |	2s          |              |
 
-### Camaras
+### <a name="camaras"></a>Cámaras
 
 OV7670:
 + [datasheet](doc/OV7670_v1.2.pdf)
-+ [Implementatin Guide](doc/OV7670 Implementation Guide.pdf)
+
++ [Implementation Guide](doc/OV7670 Implementation Guide.pdf)
+
 + [Protocolo SCCB](doc/OmniVision SCCB Functional Specification.pdf)
 	
 
-### Keyboards
+### <a name="keyboards"></a>Keyboards
 
 #### Notación
 Tengo 2 tipos de teclados:
@@ -369,7 +382,7 @@ De momento suministro dos tipos de teclado:
   dejo señalado aquí para tener presente mejorarlo para futuros proyectos.
 
 
-### Clocks
+### <a name="clocks"></a>Clocks
 Se tratan de dispositivos genéricos usados para medir tiempo, basados en
 `Generic_timer`.
 
