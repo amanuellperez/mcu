@@ -330,9 +330,9 @@ G = gas
 OV7670:
 + [datasheet](doc/OV7670_v1.2.pdf)
 
-+ [Implementation Guide](doc/OV7670 Implementation Guide.pdf)
++ [ImplementationGuide](doc/OV7670 Implementation Guide.pdf)
 
-+ [Protocolo SCCB](doc/OmniVision SCCB Functional Specification.pdf)
++ [ProtocoloSCCB](doc/OmniVision SCCB Functional Specification.pdf)
 	
 
 ### <a name="keyboards"></a>Keyboards
