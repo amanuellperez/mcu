@@ -29,6 +29,11 @@
 
 #include <avr/power.h>
 
+constexpr char end_of_line = '\n'; // para usar `myterm`
+constexpr const char end_of_line_as_char[] = "\\n";
+//constexpr char end_of_line = '\r'; // para usar `screen` como terminal
+//constexpr const char end_of_line_as_char[] = "\\r";
+
 // Probados a 8 MHz:
 //constexpr uint32_t baud_rate = 4'800u;    // funciona
 constexpr uint32_t baud_rate = 9600u;	    // funciona
@@ -87,7 +92,8 @@ void test_int(avr_::UART_iostream& uart, const char* tipo)
 	else
 	    uart << std::numeric_limits<Int>::min() + Int{1};
 
-	uart << " and " << std::numeric_limits<Int>::max() << " (or enter to cancel): ";
+	uart << " and " << std::numeric_limits<Int>::max() 
+					<< " (or a letter to cancel): ";
 
 	Int r32;
 	uart >> r32;
@@ -100,7 +106,7 @@ void test_int(avr_::UART_iostream& uart, const char* tipo)
 	    char c;
 	    uart.get(c);
 	    uart << "\nYou have written : [" << r32 << "]\n";
-	    uart << "\nLast character written [" << c << "]\n";
+//	    uart << "\nLast character written [" << c << "]\n";
 	}
 
     }
@@ -211,7 +217,8 @@ void test_iostream()
 
 	uart << "\nReading a line\n";
 	uart << "-----------------\n";
-	uart << "Write a text line (end = '\r') (maximum number of characters: 10)\n";
+	uart << "Write a text line (end = " << end_of_line_as_char 
+	     << ") (maximum number of characters: 10)\n";
 
 	char str[11];
 	// CUIDADO: con screen necesito '' en lugar de '\n' como fin de
@@ -219,7 +226,7 @@ void test_iostream()
 	// El '\r' es necesario si se usa `screen` terminal, que es el que yo
 	// estoy usando. Parece ser (???) que el protocolo TTY es enviar \r en
 	// lugar de \n.
-	if (uart.getline(str, 11, '\r'))
+	if (uart.getline(str, 11, end_of_line))
 	    uart << "You have written: [" << str << "]\n";
 	else {
 	    uart.clear();
@@ -228,15 +235,25 @@ void test_iostream()
 
 	uart << "\n\nTesting transmission\n";
 	uart << "--------------------\n";
-	uart << "Write whatever you like. You have to see it on your screen:\n";
+	uart << "Write whatever you like. If your terminal echo "
+	        "the output you are going to see what you write:\n";
+
+	constexpr uint8_t N = 20;
+	char msg[N + 1];
+	int i = 0;
 
 	while(1){
 	    char c;
 	    if (uart.get(c)){
-		if (c == '\r')
-		    uart << '\n';
+		msg[i] = c;
+		++i;
 
-		uart << c;
+		if (i == N){
+		    msg[i] = '\0';
+		    uart << " ---> You have written: [" << msg << "]\n";
+		    i = 0;
+		}
+
 	    }
 	    else
 		break;
