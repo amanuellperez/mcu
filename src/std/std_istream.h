@@ -276,13 +276,13 @@ Int istream::read()
     int_type d = rdbuf()->sgetc();
     char_type c = traits_type::to_char_type(d);
 
-    Int signo = 1;	// +1 ó -1
+    Int sign = 1;	// +1 ó -1
     if (c == '+'){
-	// signo = Int{1};
+	// sign = Int{1};
 	d = rdbuf()->snextc();
     }
     else if (c == '-'){
-	signo = Int{-1};
+	sign = Int{-1};
 	d = rdbuf()->snextc();
     }
 
@@ -291,7 +291,7 @@ Int istream::read()
 	return 0;
     }
 
-    return signo*read_number<Int>();
+    return sign*read_number<Int>();
 
 }
 

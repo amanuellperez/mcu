@@ -31,9 +31,9 @@ using namespace test;
 
 namespace mtd{
 
-class prueba_istream : public mtd::istream{
+class test_istream : public mtd::istream{
 public:
-    explicit prueba_istream(UART& uart):
+    explicit test_istream(UART& uart):
 	istream{&sb_}, sb_{uart} 
     {
 	sb_.as_input();
@@ -53,6 +53,19 @@ private:
 
 } // namespace
 
+
+template <typename Int>
+void print(const std::string& s, Int x)
+{
+    std::cout << s << x << "]\n";
+}
+
+// El uint8_t falla ya que lee como caracteres y no como números!!!
+void print(const std::string& s, uint8_t x)
+{
+    std::cout << s << (unsigned int) x << "]\n";
+}
+
 template <typename Int>
 void test_number(const std::string& s)
 {
@@ -60,14 +73,14 @@ void test_number(const std::string& s)
 
     constexpr char msg[] = "23   \t 145  +876";
     UART uart{msg};
-    mtd::prueba_istream in{uart};
+    mtd::test_istream in{uart};
     Int x;
     in >> x;
-    std::cout << "out: [23] ?= [" << x << "]\n";
+    print("out: [23] ?= [", x);
     in >> x;
-    std::cout << "out: [145] ?= [" << x << "]\n";
+    print("out: [145] ?= [", x);
     in >> x;
-    std::cout << "out: [876] ?= [" << x << "]\n";
+    print("out: [876] ?= [", x);
 
     CHECK_TRUE(bool(in), "in");
 }
@@ -80,7 +93,7 @@ void test_istream()
     {
     constexpr char msg[] = "hola FIN";
     UART uart{msg};
-    mtd::prueba_istream in{uart};
+    mtd::test_istream in{uart};
     CHECK_TRUE(in.good(), "good");
 
     constexpr int res_size = 200;
@@ -103,7 +116,7 @@ void test_istream()
     constexpr char msg[] = "una linea\nSegunda\nUna tercera aqui\n\nfin";
 
     UART uart{msg};
-    mtd::prueba_istream in{uart};
+    mtd::test_istream in{uart};
     CHECK_TRUE(in.good(), "good");
 
     constexpr int res_size = 200;
@@ -143,7 +156,7 @@ void test_istream()
 
     {
     UART uart{msg};
-    mtd::prueba_istream in{uart};
+    mtd::test_istream in{uart};
     CHECK_TRUE(in.good(), "good");
     char res[255];
     in.read(res, 255);
@@ -151,7 +164,7 @@ void test_istream()
     }
     {
     UART uart{msg};
-    mtd::prueba_istream in{uart};
+    mtd::test_istream in{uart};
     CHECK_TRUE(in.good(), "good");
     char res[255];
     in.read(res, 2);
@@ -164,7 +177,7 @@ void test_istream()
     constexpr char msg[] = "456d   123 negativo -45 esto no lo leo Ahora si\n"
                            "Una linea entera\nEspacios    \t -54 ";
     UART uart{msg};
-    mtd::prueba_istream in{uart};
+    mtd::test_istream in{uart};
     int i;
 
 
@@ -211,7 +224,7 @@ void test_istream()
     {
     constexpr char msg[] = "una";
     UART uart{msg};
-    mtd::prueba_istream in{uart};
+    mtd::test_istream in{uart};
     char c;
     in.get(c);
     CHECK_TRUE(bool(in), "in");
@@ -235,6 +248,17 @@ void test_istream()
     test_number<uint32_t>("uint32_t");
     test_number<int64_t>("int64_t");
     test_number<uint64_t>("uint64_t");
+
+// Al llamar a std::cin >> x, se ignoran los retornos de carro.
+// La única forma de salir es escribiendo algo.
+// Si se escribe una letra el flujo queda en mal estado.
+//    int x = 3;
+//    std::cin >> x;
+//    if (std::cin)
+//	std::cout << "OK\n";
+//    else
+//	std::cout << "FAIL\n";
+
 }
 
 
@@ -243,7 +267,7 @@ int main()
 try{
     test::header("istream");
 
-    std::cerr << "NO SON AUTOMÁTICAS ESTAS PRUEBAS!!!\n";
+    std::cerr << "TODO: These aren't automatic tests. `grep` =?\n";
     test_istream();
 
 }catch(alp::Excepcion& e){
