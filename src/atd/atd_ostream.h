@@ -33,6 +33,7 @@
  *	06/03/2022 print(ostream, T)
  *	05/11/2022 print_as_hex
  *	23/10/2023 Generalizo write_as_uint8_t comom write_as_int
+ *	05/01/2024 print_int_as_hex: prefijo \x
  *
  ****************************************************************************/
 #include <ostream>
@@ -199,11 +200,19 @@ char nibble2hex(Int x)
 
 // No he implementado la salida en hexadecimal en std::ostream, así que
 // suministro esta. Esto quedará obsoleto cuando implemente ios_base::hex
+//
+// prefix: indica qué prefijo ponerle al número hexadecimal. Valores:
+//	    0 - no poner prefijo
+//	    'x' - poner prefijo 0x
+//	    '\' - poner prefijo '\'
 template <Type::Integer Int>
-std::ostream& print_int_as_hex(std::ostream& out, Int x, bool write_0x = true)
+std::ostream& print_int_as_hex(std::ostream& out, Int x, uint8_t prefix = 'x')
 {
-    if (write_0x)
+    if (prefix == 'x')
 	out << "0x";
+
+    else if (prefix == '\\')
+	out << "\\x";
 
     for (size_t i = sizeof(Int); i > 0; --i){
 	Int b = (x >> (i - 1) * 8);

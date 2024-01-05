@@ -65,6 +65,10 @@ void test_print_int_as_hex()
 	atd::print_int_as_hex(std::cout, i);
 	std::cout << '\n';
     }
+
+    CHECK_PRINT(atd::print_int_as_hex(std::cout, uint8_t{254}, 0), "FE");
+    CHECK_PRINT(atd::print_int_as_hex(std::cout, uint8_t{254}, 'x'), "0xFE");
+    CHECK_PRINT(atd::print_int_as_hex(std::cout, uint8_t{254}, '\\'), "\\xFE");
 }
 
 template <typename Int>
