@@ -236,7 +236,7 @@ void test_iostream()
 	uart << "\n\nTesting transmission\n";
 	uart << "--------------------\n";
 	uart << "Write whatever you like. If your terminal echo "
-	        "the output you are going to see what you write:\n";
+	        "the output you are going to see what you write. Press 0 to end:\n";
 
 	constexpr uint8_t N = 20;
 	char msg[N + 1];
@@ -248,11 +248,14 @@ void test_iostream()
 		msg[i] = c;
 		++i;
 
-		if (i == N){
+		if (i == N or c == '0'){
 		    msg[i] = '\0';
 		    uart << " ---> You have written: [" << msg << "]\n";
 		    i = 0;
 		}
+
+		if (c == '0')
+		    break;
 
 	    }
 	    else
@@ -260,6 +263,17 @@ void test_iostream()
 	}
 
 	uart.clear();
+
+	{ // Hexadecimal test (for myterm)
+	uart << "\n\nSend hexadecimal block? (y/n) ";
+	char ans{};
+	uart >> ans;
+	if (ans == 'y' or ans == 'Y'){
+	    for (uint8_t i = 0; i < 255; ++i)
+		uart << i;
+	}
+	}
+
     }
 
 }
