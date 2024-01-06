@@ -49,6 +49,7 @@ try{
     test::header("atd_ascii");
 
     tst();
+
 }catch(std::exception& e)
 {
     std::cerr << e.what() << '\n';
