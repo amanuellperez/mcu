@@ -35,7 +35,7 @@ void test_streambuf()
     test::interfaz("streambuf");
  
     LCD lcd;
-    mtd::prueba_streambuf buf{lcd};
+    mtd::my_streambuf buf{lcd};
     const char s[] = "Esto es una prueba";
     buf.sputn(s, strlen(s));
     buf.sputc('\n');

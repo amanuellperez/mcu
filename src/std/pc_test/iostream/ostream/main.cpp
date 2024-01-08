@@ -32,16 +32,16 @@ using namespace test;
 
 namespace mtd{
 
-class prueba_ostream : public mtd::ostream{
+class my_ostream : public mtd::ostream{
 public:
-    explicit prueba_ostream(LCD& lcd):
+    explicit my_ostream(LCD& lcd):
 	ostream{&sb_}, 
 	sb_{lcd} {}
 
-    virtual ~prueba_ostream() { }
+    virtual ~my_ostream() { }
 
 private:
-    prueba_streambuf sb_;
+    my_streambuf sb_;
     
 };
 //
@@ -63,7 +63,7 @@ private:
 } // namespace
 
 template <typename Int>
-void test_int(mtd::prueba_ostream& out, const std::string& msg)
+void test_int(mtd::my_ostream& out, const std::string& msg)
 {
     Int m = std::numeric_limits<Int>::min();
     if (m < 0)
@@ -79,7 +79,7 @@ void test_ostream()
     test::interfaz("ostream");
 
     LCD lcd;
-    mtd::prueba_ostream out{lcd};
+    mtd::my_ostream out{lcd};
     short s = -10;
     unsigned short us = 40;
 
@@ -228,17 +228,42 @@ void test_fill()
     std::cout << "]\n";
 }
 
+void test_hexadecimal()
+{
+    LCD lcd;
+    mtd::my_ostream out{lcd};
 
+    out << "my: HEX\n";
+    for (uint8_t i = 0; i < 255; ++i)
+	out.put(i);
+    out << "HEX\n";
+
+    out << "std: HEX\n";
+    for (uint8_t i = 0; i < 255; ++i)
+	std::cout.put(i);
+    out << "HEX\n";
+}
+
+void test_bugs()
+{
+//    LCD lcd;
+//    mtd::my_ostream out{lcd};
+//    out << "bug[";
+//    out.put('\0');
+//    out << "] =? 0x00\n";
+}
 
 int main()
 {
 try{
     test::header("ostream");
 
-    std::cerr << "NO SON AUTOMÁTICAS ESTAS PRUEBAS!!!\n";
+    std::cerr << "THESE ARE NOT AUTOMATIC TEST!!!\n";
     test_ostream();
     test_fix_ostream();
     test_fill();
+//  test_hexadecimal();
+    test_bugs();
 
 }catch(alp::Excepcion& e){
     cerr << e.what() << '\n';

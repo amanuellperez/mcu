@@ -152,7 +152,10 @@ public:
     static bool reset();
 
     // Guarda una imagen en out. TODO: name??? save_image??? take_picture???
-    static void capture_image(std::ostream& out);
+    // Devuelve (bytes, lines), el número de bytes leído en la última línea y
+    // el número de líneas leidas.
+    template <bool print = true>    // para depurar o solo obtener [bytes, lines]
+    static std::pair<uint16_t, uint16_t> capture_image(std::ostream& out);
 
 // Funciones de bajo nivel para acceder a los registros
     // register[i] = x;
@@ -313,26 +316,48 @@ bool OV7670<Cfg>::reset()
 // TODO: esta función da por supuesto que la cámara tiene configurada una
 // cierta polaridad (se puede cambiar en COM10). Generalizarla.
 template <typename Cfg>
-void OV7670<Cfg>::capture_image(std::ostream& out)
+template <bool print>
+std::pair<uint16_t, uint16_t> OV7670<Cfg>::capture_image(std::ostream& out)
 {
-  Micro::Disable_interrupts(); // CUIDADO: ostream no debe usar interrupciones!!!
+out << "capture_image\n";
+    typename   Micro::Disable_interrupts(); // CUIDADO: ostream no debe usar interrupciones!!!
 
-  DPort dport;
+    DPort dport;
+    uint16_t nbytes = 0;
+    uint16_t nlines = 0;
+
+    uint32_t total = 0;
 
 // Esperamos a que empiece el siguiente frame
     while (VSYNC::is_zero()) { ; }
     while (VSYNC::is_one()) { ; }
     
 // Leemos lo que envia la cámara y lo escribimos en out
-    while (VSYNC::is_zero()){
-	while (HREF::is_zero()) { ; } // wail_start_next_row();
-				 
+    while (true){
+	while (HREF::is_zero()) {  // wail_start_next_row();
+	    if (VSYNC::is_one()){ 
+out << "\nTotal = " << total << '\n';
+	    return {nbytes, nlines};
+	    }
+	}
+	
+	nbytes = 0; // devuelve el número de bytes leidos en la última fila
+	++nlines;
+
 	while (HREF::is_one()){
 	    while (PCLK::is_zero()) { ; } // wait_read_next_pixel();
-	    
-	    out << dport;
+					  
+// TODO: not_generic: (es para medir velocidad)
+    if constexpr (print)
+	avr_::UART_basic::data_register(dport.value());
+
+    //	out << dport.value();
+	    ++nbytes;
+	    ++total;
+	    while (PCLK::is_one()) { ; } 
 	}
     }
+
 }
 
 

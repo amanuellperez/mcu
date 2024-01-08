@@ -68,9 +68,13 @@ ostream& ostream::put(char_type c)
     sentry sen{*this};
 
     if (sen){
-	char_type buf[2] = {c, '\0'};
+	if (is_eof(rdbuf()->sputc(c)))
+	    setstate(ios_base::badbit);
 
-	print_with_padding(buf);
+// Versión antigua: no imprimía '\0'. Borrarla cuando esté probada.
+//	    char_type buf[2] = {c, '\0'};
+//
+//	    print_with_padding(buf);
     }
 
     return *this;
@@ -185,6 +189,28 @@ ostream& operator<<(ostream& out, const char* s)
 }
 
 
+ostream& operator<<(ostream& out, char c)
+{
+    ostream::sentry sen{out};
+
+    if (sen){
+	const char s[2] = {c, '\0'};
+	out.print_with_padding(s); 
+    }
+
+    return out;
+}
+
+ostream& operator<<(ostream& out, unsigned char c)
+{
+    ostream::sentry sen{out};
+
+    if (sen){
+	const char s[2] = {static_cast<char>(c), '\0'};
+	out.print_with_padding(s); 
+    }
+    return out;
+}
 
 }// namespace
 

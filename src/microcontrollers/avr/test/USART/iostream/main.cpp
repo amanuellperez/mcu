@@ -269,8 +269,11 @@ void test_iostream()
 	char ans{};
 	uart >> ans;
 	if (ans == 'y' or ans == 'Y'){
+	    uart << "HEX\n";
 	    for (uint8_t i = 0; i < 255; ++i)
-		uart << i;
+	//	avr_::UART_basic::data_register(i);
+		uart.put(i);
+	    uart << "HEX\n";
 	}
 	}
 

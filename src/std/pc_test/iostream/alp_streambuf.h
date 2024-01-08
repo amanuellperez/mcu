@@ -36,7 +36,8 @@ using namespace std;
 // Flujo solo de salida
 struct LCD
 {
-    int print(char c) {std::cout << c; return 1;}
+//    int print(char c) {std::cout << c; return 1;}
+    int print(char c) {std::cout.put(c); return 1;}
 };
 
 
@@ -68,14 +69,14 @@ struct UART
 
 
 namespace mtd{
-class prueba_streambuf:public mtd::streambuf{
+class my_streambuf:public mtd::streambuf{
 public:
     // Fundamental: inicializar la put y get area.
-    prueba_streambuf(LCD& lcd):lcd_{lcd}
+    my_streambuf(LCD& lcd):lcd_{lcd}
     { }
 
 
-    virtual ~prueba_streambuf() {}
+    virtual ~my_streambuf() {}
 
 protected:
     virtual int_type overflow(int_type c = traits_type::eof()) override

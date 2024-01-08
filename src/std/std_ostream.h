@@ -83,6 +83,10 @@ public:
     ostream& operator<<(unsigned long long x)
     {return operator_print<unsigned long long>(x);}
 
+    friend ostream& operator<<(ostream& out, char s);
+    friend ostream& operator<<(ostream& out, unsigned char s);
+//    friend ostream& operator<<(ostream& out, signed char s);
+
     friend ostream& operator<<(ostream& out, const char* s);
 
     // Manipuladores
@@ -192,20 +196,25 @@ ostream& ostream::operator_print(const Int& x)
 
 
 
+ostream& operator<<(ostream& out, char c);
+ostream& operator<<(ostream& out, unsigned char c);
+//ostream& operator<<(ostream& out, signed char c);
 
-inline ostream& operator<<(ostream& out, char c)
-{
-    out.put(c);
-
-    return out;
-}
-
-inline ostream& operator<<(ostream& out, unsigned char c)
-{
-    out.put(c);	// TODO: ¿por qué char == unsigned char!!! No tiene por qué!!!
-
-    return out;
-}
+// Versiones antiguas: no se pueden basar en `put` que es unformatted.
+// Borrarlas cuando estén probadas.
+//inline ostream& operator<<(ostream& out, char c)
+//{
+//    out.put(c);
+//
+//    return out;
+//}
+//
+//inline ostream& operator<<(ostream& out, unsigned char c)
+//{
+//    out.put(c);	// TODO: ¿por qué char == unsigned char!!! No tiene por qué!!!
+//
+//    return out;
+//}
 
 
 //inline ostream& operator<<(ostream& out, signed char c)

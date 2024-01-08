@@ -17,7 +17,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "../../dev_OV7670.h"
 
 #include <atd_ostream.h>
 #include <atd_istream.h>
@@ -27,6 +26,7 @@
 #include <dev_TWI_master.h>
 #include <dev_TWI_master_ioxtream.h>
 
+#include "../../dev_OV7670.h" // TODO: orden
 // Micro
 // -----
 namespace mcu = atmega; 
@@ -35,7 +35,6 @@ using Micro   = mcu::Micro;
 // Pin connections
 // ---------------
 // using UART: pins 2 and 3
-// available: 4-5
 constexpr uint8_t vsync_pin = 4;
 constexpr uint8_t href_pin  = 5;
 
@@ -83,13 +82,24 @@ struct OV7670_DPort{
     }
 
 
-    // Fundamental: esta conversión tiene que ser eficiente
-    operator uint8_t() const 
-    { return (PORTD & 0xF0) | (PORTC & 0xF);}
+//    // Fundamental: esta conversión tiene que ser eficiente
+//    operator uint8_t() const 
+//    { return value();}
+
+    uint8_t value() const // ??? volatile
+    { return (PIND & 0xF0) | (PINC & 0x0F);}
 };
 
 
-
+// UART
+// ----
+// El número de bytes por segundo que podemos transmitir es 
+//		baud_rate / 8.
+//
+// Ejemplo: si baud_rate = 500.000 bit/second ==> transmitimos 
+//	    62.500 bytes por segundo.
+constexpr uint32_t baud_rate = 500'000u;
+#warning "Remember to use baud_rate == 500'000"
 
 // TWI
 // ---
@@ -126,7 +136,7 @@ using OV7670 = dev::OV7670<OV7670_cfg>;
 void init_uart()
 {
     mcu::UART_iostream uart;
-    mcu::basic_cfg(uart);
+    mcu::basic_cfg<baud_rate>(uart);
     uart.turn_on();
 }
 
@@ -287,11 +297,11 @@ void test_write_register()
 }
 
 template <typename It>
-void write_resolution(It p0, It pe)
+void write_registers(It p0, It pe)
 {
     mcu::UART_iostream uart;
 
-    uart << "Writing resolution ... ";
+    uart << "Writing registers ... ";
     if (OV7670::write(p0, pe) == true)
 	uart << "OK\n";
     else{
@@ -338,9 +348,9 @@ void test_resolution()
 
     namespace cfg = dev::OV7670_register_cfg;
     switch(opt){
-	break; case '2': write_resolution(cfg::qvga.begin(), cfg::qvga.end());
-	break; case '3': write_resolution(cfg::qqvga.begin(), cfg::qqvga.end());
-	break; default : write_resolution(cfg::vga.begin(), cfg::vga.end());
+	break; case '2': write_registers(cfg::qvga.begin(), cfg::qvga.end());
+	break; case '3': write_registers(cfg::qqvga.begin(), cfg::qqvga.end());
+	break; default : write_registers(cfg::vga.begin(), cfg::vga.end());
 
     }
 }
@@ -372,6 +382,28 @@ void test_pclk()
 
 }
 
+void test_capture_image()
+{
+    mcu::UART_iostream uart;
+
+    namespace cfg = dev::OV7670_register_cfg;
+    write_registers(cfg::color_bar_test.begin(), cfg::color_bar_test.end());
+    Micro::wait_ms(300); // TODO: en write_registers
+//
+//    uart << "Press a key to capture image\n";
+//    char ans{};
+//    uart >> ans;
+
+
+    while (1){
+    auto [nbytes, nlines] = OV7670::capture_image<true>(uart);
+    uart << "\nRead " << nbytes << " bytes in " << nlines << "\n";
+    Micro::wait_ms(5000);
+    }
+
+
+}
+
 int main()
 {
     init_uart();
@@ -387,13 +419,13 @@ int main()
 	uart << "\n\n-------------------\n";
 
 	test_read_register();
-	test_write_register();
+//	test_write_register();
+//
+//	test_pclk();
+//	test_resolution();
+	test_capture_image();
 
-	test_pclk();
-	test_resolution();
-
-
-	test_interactive_read();
+//	test_interactive_read();
 
 	Micro::wait_ms(2000);
     }

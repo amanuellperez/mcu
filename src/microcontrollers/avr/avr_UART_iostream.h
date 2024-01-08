@@ -153,7 +153,7 @@ private:
     { 
 	state_ = State::consumido;
 
-	put(c);
+	put_(c);
 
 	return 1;
     }
@@ -166,7 +166,7 @@ private:
 
 // Helper functions
 // ----------------
-    void put(char_type c);
+    void put_(char_type c);
     void put_unguarded(char_type c);
 
     int_type receive_byte();
@@ -255,14 +255,14 @@ std::streamsize UART_streambuf_unbuffered::xsputn(const char_type* s, std::strea
     state_ = State::consumido;
 
     for (int i = 0; i < n; ++i)
-	put(s[i]);
+	put_(s[i]);
 
     return n;
 }
 
 
 inline
-void UART_streambuf_unbuffered::put(char_type c)
+void UART_streambuf_unbuffered::put_(char_type c)
 {
     if (c == '\r')
 	return;
