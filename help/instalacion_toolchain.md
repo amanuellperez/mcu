@@ -323,7 +323,11 @@ ningún problema.
 
 
 4. Para abrir un terminal de comunicación con el AVR, podemos:
-   * Usar `screen`:
+   * Usar `screen`: (obsoleto; aunque funciona genera problemas ya que
+     para escribir una nueva línea hay que enviar los dos caracteres "\r\n" y
+     yo opto por enviar solo uno '\n'. A partir de ahora voy a empezar a usar
+     mi terminal `myterm`. El código fuente se puede encontrar en el
+     repositorio tools).
 
      Para instalarlo ejecutar
 

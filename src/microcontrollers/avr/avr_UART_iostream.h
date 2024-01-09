@@ -30,6 +30,20 @@
  *	07/10/2019 v0.0
  *	25/10/2019 '\n' --> se transforma en "\r\n". Es mucho más cómodo.
  *	18/09/2023 is_there_something_to_read
+ *	09/01/2024 Deshago el cambio del 25/10/2019. Necesitaba escribir
+ *	           el \r porque estaba usando el terminal `screen`. 
+ *	           El problema de haber escrito ese cambio en `streambuf` es
+ *	           que estaba procesando los caracteres NO funcionando la
+ *	           función `put` para escribir caracteres, y no pudiendo
+ *	           escribir en `uart` valores en formato binario (por ejemplo,
+ *	           no podía enviar una imagen desde el micro hasta el
+ *	           ordenador usando `put`). Era un error generado por usar el
+ *	           terminal screen.
+ *	           Ahora tengo el terminal `myterm` que no tiene ese error.
+ *	           Por ello deshago el cambio dejándolo bien (?) hecho.
+ *	           Problema: ya no puedo usar el terminal `screen` sino que
+ *	           estoy obligado a usar `myterm` para que funcione todo. Eso
+ *	           me obligará a ir mejorando poco a poco ese terminal.
  *
  ****************************************************************************/
 
@@ -264,11 +278,14 @@ std::streamsize UART_streambuf_unbuffered::xsputn(const char_type* s, std::strea
 inline
 void UART_streambuf_unbuffered::put_(char_type c)
 {
-    if (c == '\r')
-	return;
-
-    if (c == '\n')	// retorno de carro = \n\r
-	put_unguarded('\r');
+// 09/01/2024: Lo que comento no puede venir aqui.
+// El procesamiento de los caracteres lo lleva a cabo ostream y no el
+// streambuf. Esta conversión la necesitaba para poder usar screen
+//    if (c == '\r')
+//	return;
+//
+//    if (c == '\n')	// retorno de carro = \n\r
+//	put_unguarded('\r');
 
     put_unguarded(c);
 }

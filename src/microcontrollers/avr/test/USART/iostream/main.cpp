@@ -152,6 +152,10 @@ void test_iostream()
     uart << "UART test!\n";
     uart << "----------\n";
 
+uart << "A = [";
+uart.put('a');
+uart << "]\n";
+
     while (1) {
 	test_interrupt_receive();
 
@@ -271,8 +275,8 @@ void test_iostream()
 	if (ans == 'y' or ans == 'Y'){
 	    uart << "HEX\n";
 	    for (uint8_t i = 0; i < 255; ++i)
-	//	avr_::UART_basic::data_register(i);
 		uart.put(i);
+	    uart.put(255);
 	    uart << "HEX\n";
 	}
 	}
