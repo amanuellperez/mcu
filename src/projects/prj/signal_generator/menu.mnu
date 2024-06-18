@@ -1,0 +1,19 @@
+# Menu definition.
+# Menu version: 0.0
+menu_main
+    "SW generator"  execute &Main::window_sw_generator
+    "Sound generator" execute &Main::sound_main
+    "cfg"	    execute &Main::window_cfg
+
+#menu_b
+#    "b1 - one" execute &Main::b1
+#    "b2 - two" show menu_c
+#
+#menu_c
+#    "c1 ; 1" execute &Main::c1
+#    "c2 ; 2" execute &Main::c2
+#    "c3	; 3" execute &Main::c3
+#
+#menu_d
+#    "d1" execute &Main::d1
+#    "d2" execute &Main::d2

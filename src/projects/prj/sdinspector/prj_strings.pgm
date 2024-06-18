@@ -1,0 +1,43 @@
+# strings necesarias para el programa
+# Para generar el fichero .h: 
+#	$ str2progmem strings.pgm
+#
+
+# main
+msg_hello   "\n\n----------------------------------------\n"
+	    "SDCard inspector\n"
+	    "----------------------------------------\n\n"
+
+msg_main_no_sector_load "No sector in memory"
+msg_main_sector_load "Sector in memory. Address: "
+
+msg_main_menu	"1. Read status register\n"
+		"2. Load sector\n"
+
+msg_main_menu2	"3. Print sector\n"
+		"4. Print sector bytes from a to b\n"
+		"5. Edit sector in hexadecimal\n"
+		"6. Edit sector with chars\n"
+		"7. Flush sector\n"
+
+
+
+# load sector
+msg_sector_address	"Sector address: "
+
+# print_sector_fromto
+msg_print_sector_from "Print sector from byte number"
+msg_print_sector_size "Number of bytes to print (0 to the end)"
+
+msg_print_sector_from_to_big "\nError: first byte has to be less than "
+msg_print_sector_size_to_big "\nError: size to big"
+
+# edit_sector
+msg_edit_sector_instructions_in_hex "Write all modifications in hexadecimal without "
+			     "0x.\nPress return to end.\n"
+
+msg_edit_sector_instructions_in_char "Write all modifications in chars.\n"
+			    "Press return to end.\n"
+
+msg_edit_sector_from "First byte to edit"
+msg_edit_sector_from_error "Error reading"

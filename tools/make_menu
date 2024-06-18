@@ -1,0 +1,142 @@
+#!/usr/bin/awk -f
+#
+# Copyright (C) 2021 Manuel Perez <manuel2perez@proton.me>
+# 
+# This file is part of the MCU++ Library.
+# 
+# MCU++ Library is a free library: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#
+#  USAGE: make_menu menu.mnu > menu.h
+#
+#  TODO: Está dando por supuesto que la clase que ejecuta este menu es
+#  `Main` y que está en el archivo `main.h`. Pasar esto como parámetro.
+#**********************************************************************
+BEGIN{
+    srcfile = ARGV[1]
+    tmpfile = srcfile".tmp"
+    nmenu = 0
+
+    #*****************************************************************
+    #			    LECTURA DEL MENU
+    #*****************************************************************
+    # Leemos el fichero de entrada, convirtiendolo
+    # en formato rígido.
+    FS="[ \t]+"
+    while (getline <srcfile >0){
+	sub(/#.*/, "")	# strip comments
+
+	if ($1 != ""){# empezamos nuevo menu
+	    menu = $1
+	    name_menu[$1] = nmenu
+	    nmenu++
+	    noption = 0
+	}
+	else{# opciones del menu
+	    split($0, arr, "\"")
+	    str = arr[2]
+	    split(arr[3], action, "[ \t]+")
+
+	    if (action[2] == "show"){
+		print menu "|" menu noption "|\"" str "\"|nullptr|" action[3] >tmpfile
+	    }
+	    else if (action[2] == "execute"){
+		print menu "|" menu noption "|\"" str "\"|" action[3] "|0" >tmpfile
+	    }
+	    noption++
+	}
+    }
+
+    close(tmpfile)
+
+
+
+    #*****************************************************************
+    #			    GENERACIÓN DEL CÓDIGO
+    #*****************************************************************
+    FS="|"
+    # header
+    # ------
+print "// Copyright (C) Manuel Perez <manuel2perez@proton.me>"
+print "//"
+print "// This file is part of the MCU++ Library."
+print "//"
+print "// MCU++ Library is a free library: you can redistribute it and/or modify"
+print "// it under the terms of the GNU General Public License as published by"
+print "// the Free Software Foundation, either version 3 of the License, or"
+print "// (at your option) any later version."
+print "//"
+print "// This library is distributed in the hope that it will be useful,"
+print "// but WITHOUT ANY WARRANTY; without even the implied warranty of"
+print "// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the"
+print "// GNU General Public License for more details."
+print "//"
+print "// You should have received a copy of the GNU General Public License"
+print "// along with this program.  If not, see <https://www.gnu.org/licenses/>."
+
+    print "\n\n// Automatically generated file. To change this menu change .mnu"
+    print "\n#pragma once"
+
+    print "\n#ifndef __MENU_H__"
+    print "#define __MENU_H__"
+
+    print "\n#include <user_menu.h>"
+    print "#include \"main.h\""     # TODO: generalizar
+
+    # menu_str
+    # --------
+    print "constexpr const char* menu_str[] ="
+    printf "{"
+    comma = ""
+    while (getline <tmpfile >0){
+	printf comma $3
+	comma = ","
+    }
+    print "};\n\n"
+    close(tmpfile)
+
+    # ids de las cadenas
+    # ------------------
+    nline = 0
+    while (getline <tmpfile >0){
+	print "constexpr size_t " $2 "= " nline ";"
+	nline++
+    }
+    print "\n\n"
+    close(tmpfile)
+
+
+    # Options
+    # -------
+    print "using Option = dev::Option<Main>;\n" # TODO: depende de Main
+    print "using Options = atd::static_array<Option"
+    while (getline <tmpfile >0){
+	printf("\t, Option{")
+	if ($4 == "nullptr"){
+	    printf name_menu[$1] ", " $2  ", "$4 ", " name_menu[$5]
+	}
+	else{
+	    printf name_menu[$1] ", " $2  ", "$4 ", " $5
+	}
+	print "}"
+    }
+    printf("\t>;\n")
+    close(tmpfile)
+    
+    # fin
+    # ---
+    print "#endif"
+
+}
+
+

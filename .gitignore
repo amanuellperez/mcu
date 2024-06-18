@@ -1,0 +1,31 @@
+# Prerequisites
+*.d
+
+# Object files
+*.o
+*.ii
+*.s
+
+
+# Dynamic libraries
+*.so
+
+# Static libraries
+*.a
+
+# my tests
+xx
+*.hex
+*.map
+*.elf
+bugs
+tmp
+borrame
+debug.cpp
+old
+
+# tags
+tags
+
+# vim files
+*.swp

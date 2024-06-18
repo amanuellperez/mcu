@@ -1,0 +1,155 @@
+# strings necesarias para el programa
+# Para generar el fichero .h: 
+#	$ str2progmem strings.pgm
+#
+# El `make size` antes de usar este fichero:
+#      text       data        bss      total filename
+#      6326       1424          1       7751 xx.elf
+#
+# Después de crear este fichero la salida de `make size` es:
+#      text       data        bss      total filename
+#      8808        164          1       8973 xx.elf
+#
+# Pasa de 1424 a 164 bytes!!!
+
+# Generic msgs
+msg_yes	"yes"
+msg_no	"no"
+msg_ok	"ok"
+msg_press_key_to_continue   "Press a key to continue\n"
+msg_line    "-------------------------------\n"
+
+# msgs automatic_init
+msg_cmd0_fail		"CMD0 error\n"
+msg_cmd8_crc_error	"CMD8 CRC error\n"
+msg_voltage_mismatch	"ERROR: voltage mismatch\n"
+msg_cmd8_echo_fail	"CMD8 echo error\n"
+msg_acmd41_in_idle_state "ACMD41 fail: card still in idle state\n"
+msg_card_no_power_up	"CMD58 fail: card still no power up\n"
+msg_init_SDSC_card_ok	"Init OK: SDSC card type\n"
+msg_init_SDHC_or_SDXC_ok "Init OK: SDHC or SDXC card type\n"
+
+# step_by_step_init
+msg_go_idle_state   "go_idle_state (cmd0) ... = entering SPI mode\n"
+msg_send_if_cond    "\nsend_if_cond (cmd8) ... \n"
+msg_legacy_card	    "\tLegacy card\n"
+#msg_cmd8_crc_error  "\tCMD8 CRC error\n"
+msg_vca_mismatch    "\tVCA mismatch\n"
+msg_cmd8_ok	    "\tCMD8 ok\n"
+msg_read_ocr1	    "\nread_ocr (cmd58) ... = supported voltages?\n"
+msg_send_op_cond    "\nsd_send_op_cond (acmd41) ... \n"
+msg_read_ocr2	    "\nread_ocr (cmd58) ... = is SDSC or SDHC/SDXC card? \n"
+
+# main
+msg_hello   "----------------------------------------\n"
+	    "SDCard\n"
+	    "----------------------------------------\n\n"
+
+msg_main_menu	"Menu\n"
+		"----\n"
+		"Choose type of initialization:\n"
+		"\t1. Step by step\n"
+		"\t2. Automatic\n"
+
+msg_main_menu2	"\n----\n"
+		"1. Read status register\n"
+		"2. Read block\n"
+		"3. Write block\n"
+
+
+# read block
+msg_main_read	"Read\n"
+		"----\n"
+		"block_size = "
+msg_address	"Address"
+
+msg_read_ok "read OK."
+
+# write block
+msg_main_write  "Write\n"
+		"-----\n"
+
+# print(R1)
+msg_r1_response	"R1 response\n"
+		"\tR1 : "
+
+msg_invalid_r1		"\tError: invalid r1\n"
+msg_card_ready		"\tCard ready\n"
+msg_in_idle_state	"\tIn idle state\n"
+msg_erase_reset_error	"\tErase reset error\n"
+msg_illegal_command	"\tIllegal command\n"
+msg_crc_error		"\tCRC error\n"
+msg_erase_sequence_error "\tErase sequence error\n"
+msg_address_error	"\tAddress error\n"
+msg_parameter_error	"\tParameter error\n"
+
+# print_if_error_r1
+msg_r1	    "\tr1["
+msg_error1  "] ERROR:\n"
+
+
+# print_raw_R3
+msg_r3 "\tR3     : "
+
+# print_type_card
+msg_r3_response "R3 response\n"
+msg_card_has_finished_power_up "\tCard has finished power up? "
+msg_card_type	    "\tCard type : "
+msg_SDSC	    "SDSC"
+msg_SDHC_or_SDXC    "SDHC or SDXC"
+
+# print(R3)
+msg_support_3_5_3_6V "support 3.5-3-6V()"
+msg_support_3_4_3_5V "support 3.4-3-5V()"
+msg_support_3_3_3_4V "support 3.3-3-4V()"
+msg_support_3_2_3_3V "support 3.2-3-3V()"
+msg_support_3_1_3_2V "support 3.1-3-2V()"
+msg_support_3_0_3_1V "support 3.0-3-1V()"
+msg_support_2_9_3_0V "support 2.9-3-0V()"
+msg_support_2_8_2_9V "support 2.8-2-9V()"
+msg_support_2_7_2_8V "support 2.7-2-8V()"
+
+# print(R7)
+msg_r7_response "R7 response\n"
+msg_r7		"\tR7     : "
+
+msg_version	"\tVersion: "
+msg_voltage	"\tVoltage: "
+
+msg_not_defined	    "not defined!"
+msg_from_2_7_to_3_6V "from 2.7 to 3.6V"
+msg_low_voltage	    "low voltage"
+msg_reserved	    "reserved"
+msg_pattern	    "\tPattern: "
+
+# print(Read_return)
+msg_read_return_response "Read response\n"
+msg_timeout	"time out"
+msg_r1_ok	"R1 ok"
+msg_error	"error"
+msg_CC_error    "CC error"
+msg_card_ECC_failed   "card ECC failed"
+msg_out_of_range    "out of range"
+
+# print(R2)
+msg_r2_response	    "R2 response\n"
+msg_card_is_locked  "card is locked"
+msg_write_protect_erase_skip	"write protec erase skip"
+#msg_error		    "error"
+#msg_CC_error		    
+#msg_card_ECC_failed 
+msg_write_protect_violation "write protect violation"
+msg_erase_param		    "erase param"
+#msg_out_of_range
+
+# print(Write_return)
+msg_write_return_response   "Write_return response\n"
+msg_write_ok	"\tWrite OK"
+
+# print(Data_response_token)
+msg_data_response_token	"Data response token\n"
+msg_is_valid		"valid"
+msg_data_accepted	"data accepted"
+msg_data_rejected_CRC_error	"data rejected, CRC error"
+msg_data_rejected_write_error	"data rejected, write error"
+#msg_timeout		"time out"

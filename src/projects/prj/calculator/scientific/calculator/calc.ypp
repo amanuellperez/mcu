@@ -1,0 +1,71 @@
+%{
+#include "symbol.h"
+#include "lex.h"
+#include "error.h"
+#include "calc_math.h"
+#include "main.h"
+
+// Fundamental: al principio desborde la pila. Si se ve que la calculadora
+// hace algo raro activar las trazas para ver el número de bytes libres de
+// RAM.
+#define YYMAXDEPTH 20
+#define YYINITDEPTH 100
+%}
+
+%union{		// stack type
+    double value;	// actual value
+    Symbol* symbol; // symbol table pointer
+}
+
+
+%token <value> NUMBER
+%token <symbol> CONSTANT VARIABLE BUILTIN UNDEF
+%type <value> expr asgn
+
+// CUIDADO: para la multiplicación hay que usar '*' y no 'x', ya que 'x'
+// es un alfanumérico, mientras que '*' no lo es!!! Si se usa 'x' falla
+// lex.cpp (llama a isalpha())
+%right '='
+%left '+' '-'		/* left associaive, same precedence */
+%left '*' '/' 	/* left associaive, higher precedence */
+%left UNARYMINUS
+%right '^'  /* exponentiation */
+
+%%
+
+
+list: /* nothing */
+      | '='            {Main::result = 15;}
+      | list '='	
+      | list asgn '='
+      | list expr '='	{Main::result = $2;}
+      | list error '=' {yyerrok;}
+      ;
+
+asgn:	VARIABLE '=' expr	{ $$ = $1->u.value = $3; }
+
+expr:   NUMBER		{ $$ = $1; }
+      | CONSTANT	{ $$ = $1->u.value; }
+      | VARIABLE	{ if ($1->type == UNDEF)
+			    msg_error("undefine variable");
+
+			$$ = $1->u.value; }
+      | asgn
+      | BUILTIN expr   { $$ = (*($1->u.ptr))($2);} // para s25 = sqrt(25)
+      | BUILTIN'(' expr ')'  { $$ = (*($1->u.ptr))($3);}
+      | expr '+' expr   { $$ = $1 + $3;}
+      | expr '-' expr	{ $$ = $1 - $3;}
+      | expr '*' expr	{ $$ = $1 * $3;}
+      | expr '/' expr	{ 
+		if ($3 == 0.0)
+		    msg_error("division by zero");
+
+		$$ = $1 / $3; }
+      | expr '^' expr	{ $$ = Pow($1, $3); }
+      | '(' expr ')'	{ $$ = $2; }
+      | '-' expr %prec UNARYMINUS {$$ = -$2;}
+      ;
+
+%%
+
+

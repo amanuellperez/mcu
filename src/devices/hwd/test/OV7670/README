@@ -1,0 +1,13 @@
+La comunicación con la cámara funciona bien, pero a día de hoy no sé
+configurarla.
+
+Hay que configurarla de tal manera que la velocidad a la que envía datos sea
+la velocidad a la que el ATMEGA puede procesarlos. Con todo lo más sencillo
+para manejar cámaras sea cambiar de microcontrolador y usar uno más veloz.
+
+Adjunto una foto del montaje que he hecho para recordarla cuando retome el
+proyecto. 
+
+Importante: Uso un cristal de 12MHz
+
+

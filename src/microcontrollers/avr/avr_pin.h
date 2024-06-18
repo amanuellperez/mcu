@@ -1,0 +1,669 @@
+// Copyright (C) 2019-2020 Manuel Perez 
+//           mail: <manuel2perez@proton.me>
+//           https://github.com/amanuellperez/mcu
+//
+// This file is part of the MCU++ Library.
+//
+// MCU++ Library is a free library: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#pragma once
+
+#ifndef __AVR_PIN_H__
+#define __AVR_PIN_H__
+/****************************************************************************
+ *
+ * DESCRIPCION
+ *	Clases para manejar pines del AVR
+ *
+ * HISTORIA
+ *    Manuel Perez
+ *      24/07/2017 Escrito
+ *	27/01/2019 Reescrito, paso a usar templates.
+ *	09/06/2019 Output_pin<0> y pulso_1us. 
+ *	05/01/2020 Migrado a inglés.
+ *	06/11/2022 toggle
+ *	10/12/2022 number: lo necesito para depurar. Puedo poner cosas del
+ *			     tipo "conectar osciloscopio al pin " <<
+ *			     pin.number;
+ *	03/09/2023 Introduzco la gestión de interrupciones de los pines dentro
+ *	           de la clase Pin. Es más natural.
+ *
+ *	11/10/2023 Al intentar implementar la lectura de trenes de pulsos
+ *	           mediante polling no funciona. Al mirar el código en
+ *	           ensamblador que se genera observo que no está `inlining`
+ *	           las funciones de Pin lo cual fijo está ralentizando la
+ *	           ejecución. 
+ *	           La clase Pin es muy básica, es fundamental que todas sus
+ *	           funciones sean de verdad inline. Por ello le añado el
+ *	           atributo de GCC de inline (problema: no es estandard,
+ *	           aunque como este fichero es para los avrs y estos de
+ *	           momento solo se pueden compilar con avr-gcc, no genera
+ *	           problemas).
+ *
+ ****************************************************************************/
+#include <avr/io.h> // registros: cfg::DDRB... cfg::PORT...
+#include "avr_time.h"
+#include "avr_not_generic.h"
+#include <atd_bit.h>
+
+namespace avr_{
+
+// Traductor de las interrupciones INT0, INT1, ...
+//
+// (RRR) ¿Por qué parametrizarlo por el número de la INT en lugar de escribir
+//       clases particulares INT0 e INT1?
+//       ¿por qué INT__<0> en lugar de INT0? ¿e INT__<1> en lugar de INT1?
+//
+//       Porque el número de interrupciones INTx depende del microcontrolador.
+//       El atmega32 tiene 2, pero el atmega2560 tiene más. 
+//       
+template <int8_t n>
+class INT__{
+public:
+    static void enable_change_level();
+    static void enable_when_falling_edge();
+    static void enable_when_rising_edge();
+    static void enable_when_is_zero();
+    static void disable();
+
+private:
+    static void enable_interrupt()
+    {
+	constexpr uint8_t i = cfg::INT_POS::at<n>;
+	//atd::write_bit<cfg::INT_POS::at<n> >::template to<1>::in(EIMSK);
+	atd::write_bit<i>::template to<1>::in(EIMSK);
+    }
+
+};
+
+
+template <int8_t n>
+void INT__<n>::enable_when_is_zero()
+{
+    constexpr uint8_t ISC1 = cfg::ISC1::at<n>; // = ISCn1
+    constexpr uint8_t ISC0 = cfg::ISC0::at<n>; // = ISCn0
+
+    atd::write_bits<ISC1, ISC0>::template to<0,0>::in(EICRA);
+    //atd::write_bits<ISC01, ISC00>::to<0,0>::in(EICRA);
+    enable_interrupt();
+}
+
+template <int8_t n>
+void INT__<n>::enable_change_level()
+{
+    constexpr uint8_t ISC1 = cfg::ISC1::at<n>; // = ISCn1
+    constexpr uint8_t ISC0 = cfg::ISC0::at<n>; // = ISCn0
+
+    atd::write_bits<ISC1, ISC0>::template to<0,1>::in(EICRA);
+    // atd::write_bits<ISC01, ISC00>::to<0,1>::in(EICRA);
+    enable_interrupt();
+}
+
+
+template <int8_t n>
+void INT__<n>::enable_when_falling_edge()
+{
+    constexpr uint8_t ISC1 = cfg::ISC1::at<n>; // = ISCn1
+    constexpr uint8_t ISC0 = cfg::ISC0::at<n>; // = ISCn0
+
+    atd::write_bits<ISC1, ISC0>::template to<1,0>::in(EICRA);
+    // atd::write_bits<ISC01, ISC00>::to<1,0>::in(EICRA);
+    enable_interrupt();
+}
+
+template <int8_t n>
+void INT__<n>::enable_when_rising_edge()
+{
+    constexpr uint8_t ISC1 = cfg::ISC1::at<n>; // = ISCn1
+    constexpr uint8_t ISC0 = cfg::ISC0::at<n>; // = ISCn0
+
+    atd::write_bits<ISC1, ISC0>::template to<1,1>::in(EICRA);
+    // atd::write_bits<ISC01, ISC00>::to<1,1>::in(EICRA);
+    enable_interrupt();
+}
+
+
+template <int8_t n>
+inline void INT__<n>::disable()
+{
+    constexpr uint8_t i = cfg::INT_POS::at<n>;
+    atd::write_bit<i>::template to<0>::in(EIMSK);
+    //atd::write_bit<cfg::INT_POS::at<n> >::template to<0>::in(EIMSK);
+}
+
+// Especialización para que de error al compilar si 
+// se intenta generar una INTx en un pin no válido
+template <>
+class INT__<-1>{ };
+
+
+/*!
+ *  \brief  Clase para manejar pins
+ *
+ *  Este es un pin totalmente configurable. Lo podemos cambiar de entrada a
+ *  salida y viceversa en medio del código.
+ *
+ *  Si se quiere una versión más reestringida usar Output_pin/de_entrada
+ *
+ */
+template <uint8_t n>
+class Pin{
+public:
+// CONSTRUCCIÓN
+    constexpr Pin(){}	
+
+    // No es posible copiar pins (aunque como es una template static no
+    // debería de generar ningún problema)
+    Pin(const Pin&)		= delete;
+    Pin& operator=(const Pin&)	= delete;
+
+// INFO
+    static constexpr uint8_t number = n;
+
+// CONFIGURAMOS EL cfg::PIN
+    static void as_output() __attribute__((always_inline));
+    static void as_input_with_pullup() __attribute__((always_inline));
+    static void as_input_without_pullup() __attribute__((always_inline));
+
+
+// FUNCIONES DE LECTURA
+    // Si el bit es '1' devuelve un número distinto de cero.
+    // Si el bit es '0' devuelve cero.
+    static uint8_t read() __attribute__((always_inline));
+
+    /// Devuelve si el bit es 0 o no. 
+    static bool is_zero() __attribute__((always_inline));
+
+    /// Devuelve si el bit es 1 o no. 
+    static bool is_one() __attribute__((always_inline));
+
+// FUNCIONES DE ESCRITURA
+    static void write_one() __attribute__((always_inline));
+    static void write_zero() __attribute__((always_inline));
+
+    /// Cambiamos el valor del pin (de 0 a 1 ó de 1 a 0).
+    static void toggle() __attribute__((always_inline));
+
+    /// Escribimos en el pin. Un valor distinto de cero es 1.
+    static void write(uint8_t x) __attribute__((always_inline));
+    
+
+// INTERRUPTS
+    // PCINT interrupts
+    // ----------------
+    // Genera una interrupción cada vez que el pin cambia de 0->1 ó de 1->0
+    static void enable_change_level_interrupt();
+    static void disable_change_level_interrupt();
+
+    using INT = INT__<cfg::nINT_of_pin<n>()>;
+
+};
+
+
+// Implementación
+// --------------
+template <uint8_t n>
+inline void Pin<n>::as_output() 
+{
+    // (*cfg::DDR[n]) |= cfg::BIT_MASK[n]; <-- deprecated with volatile
+    (*cfg::DDR[n]) = (*cfg::DDR[n]) | cfg::BIT_MASK[n];
+}
+
+template <uint8_t n>
+inline void Pin<n>::as_input_with_pullup() 
+{
+    (*cfg::DDR[n]) = (*cfg::DDR[n]) & ~cfg::BIT_MASK[n];	// de entrada
+    (*cfg::PORT[n]) = (*cfg::PORT[n]) | cfg::BIT_MASK[n];	// enables pull-up resistor
+}
+
+template <uint8_t n>
+inline void Pin<n>::as_input_without_pullup() 
+{
+    (*cfg::DDR[n]) = (*cfg::DDR[n]) & ~cfg::BIT_MASK[n];	// de entrada
+    (*cfg::PORT[n]) = (*cfg::PORT[n]) & ~cfg::BIT_MASK[n];	// disable pull-up resistor
+}
+
+
+template <uint8_t n>
+inline uint8_t Pin<n>::read()
+{return (*cfg::PIN[n]) & cfg::BIT_MASK[n];}
+
+template <uint8_t n>
+inline bool Pin<n>::is_zero()
+//{return !read();}
+{return !((*cfg::PIN[n]) & cfg::BIT_MASK[n]);}
+
+template <uint8_t n>
+inline bool Pin<n>::is_one() 
+{return (*cfg::PIN[n]) & cfg::BIT_MASK[n];}
+//{return read();}
+
+template <uint8_t n>
+inline void Pin<n>::write_one()	
+{(*cfg::PORT[n]) = (*cfg::PORT[n]) | cfg::BIT_MASK[n];}
+
+template <uint8_t n>
+inline void Pin<n>::write_zero()	
+{(*cfg::PORT[n]) = (*cfg::PORT[n]) & ~cfg::BIT_MASK[n];}
+
+template <uint8_t n>
+inline void Pin<n>::toggle()  
+{ (*cfg::PORT[n]) = (*cfg::PORT[n]) ^ cfg::BIT_MASK[n]; }
+
+template <uint8_t n>
+inline void Pin<n>::write(uint8_t x)
+{
+    if(x) write_one();
+    else  write_zero();
+}
+
+
+// Interrupts
+// ----------
+template<>
+inline void Pin<2>::enable_change_level_interrupt()
+{
+    atd::write_bit<PCIE2>::to<1>::in(PCICR);
+    atd::write_bit<PCINT16>::to<1>::in(PCMSK2);
+}
+
+template<>
+inline void Pin<2>::disable_change_level_interrupt()
+{ atd::write_bit<PCINT16>::to<0>::in(PCMSK2); }
+
+
+template<>
+inline void Pin<3>::enable_change_level_interrupt()
+{
+    atd::write_bit<PCIE2>::to<1>::in(PCICR);
+    atd::write_bit<PCINT17>::to<1>::in(PCMSK2);
+}
+
+template<>
+inline void Pin<3>::disable_change_level_interrupt()
+{ atd::write_bit<PCINT17>::to<0>::in(PCMSK2); }
+
+
+template<>
+inline void Pin<4>::enable_change_level_interrupt()
+{
+    atd::write_bit<PCIE2>::to<1>::in(PCICR);
+    atd::write_bit<PCINT18>::to<1>::in(PCMSK2);
+}
+
+template<>
+inline void Pin<4>::disable_change_level_interrupt()
+{ atd::write_bit<PCINT18>::to<0>::in(PCMSK2); }
+
+
+template<>
+inline void Pin<5>::enable_change_level_interrupt()
+{
+    atd::write_bit<PCIE2>::to<1>::in(PCICR);
+    atd::write_bit<PCINT19>::to<1>::in(PCMSK2);
+}
+
+template<>
+inline void Pin<5>::disable_change_level_interrupt()
+{ atd::write_bit<PCINT19>::to<0>::in(PCMSK2); }
+
+
+template<>
+inline void Pin<6>::enable_change_level_interrupt()
+{
+    atd::write_bit<PCIE2>::to<1>::in(PCICR);
+    atd::write_bit<PCINT20>::to<1>::in(PCMSK2);
+}
+
+template<>
+inline void Pin<6>::disable_change_level_interrupt()
+{ atd::write_bit<PCINT20>::to<0>::in(PCMSK2); }
+
+
+template<>
+inline void Pin<9>::enable_change_level_interrupt()
+{
+    atd::write_bit<PCIE0>::to<1>::in(PCICR);
+    atd::write_bit<PCINT6>::to<1>::in(PCMSK0);
+}
+
+template<>
+inline void Pin<9>::disable_change_level_interrupt()
+{ atd::write_bit<PCINT6>::to<0>::in(PCMSK0); }
+
+
+template<>
+inline void Pin<10>::enable_change_level_interrupt()
+{
+    atd::write_bit<PCIE0>::to<1>::in(PCICR);
+    atd::write_bit<PCINT7>::to<1>::in(PCMSK0);
+}
+
+template<>
+inline void Pin<10>::disable_change_level_interrupt()
+{ atd::write_bit<PCINT7>::to<0>::in(PCMSK0); }
+
+
+template<>
+inline void Pin<11>::enable_change_level_interrupt()
+{
+    atd::write_bit<PCIE2>::to<1>::in(PCICR);
+    atd::write_bit<PCINT21>::to<1>::in(PCMSK2);
+}
+
+template<>
+inline void Pin<11>::disable_change_level_interrupt()
+{ atd::write_bit<PCINT21>::to<0>::in(PCMSK2); }
+
+
+template<>
+inline void Pin<12>::enable_change_level_interrupt()
+{
+    atd::write_bit<PCIE2>::to<1>::in(PCICR);
+    atd::write_bit<PCINT22>::to<1>::in(PCMSK2);
+}
+
+template<>
+inline void Pin<12>::disable_change_level_interrupt()
+{ atd::write_bit<PCINT22>::to<0>::in(PCMSK2); }
+
+
+template<>
+inline void Pin<13>::enable_change_level_interrupt()
+{
+    atd::write_bit<PCIE2>::to<1>::in(PCICR);
+    atd::write_bit<PCINT23>::to<1>::in(PCMSK2);
+}
+
+template<>
+inline void Pin<13>::disable_change_level_interrupt()
+{ atd::write_bit<PCINT23>::to<0>::in(PCMSK2); }
+
+
+template<>
+inline void Pin<14>::enable_change_level_interrupt()
+{
+    atd::write_bit<PCIE0>::to<1>::in(PCICR);
+    atd::write_bit<PCINT0>::to<1>::in(PCMSK0);
+}
+
+template<>
+inline void Pin<14>::disable_change_level_interrupt()
+{ atd::write_bit<PCINT0>::to<0>::in(PCMSK0); }
+
+
+template<>
+inline void Pin<15>::enable_change_level_interrupt()
+{
+    atd::write_bit<PCIE0>::to<1>::in(PCICR);
+    atd::write_bit<PCINT1>::to<1>::in(PCMSK0);
+}
+
+template<>
+inline void Pin<15>::disable_change_level_interrupt()
+{ atd::write_bit<PCINT1>::to<0>::in(PCMSK0); }
+
+
+template<>
+inline void Pin<16>::enable_change_level_interrupt()
+{
+    atd::write_bit<PCIE0>::to<1>::in(PCICR);
+    atd::write_bit<PCINT2>::to<1>::in(PCMSK0);
+}
+
+template<>
+inline void Pin<16>::disable_change_level_interrupt()
+{ atd::write_bit<PCINT2>::to<0>::in(PCMSK0); }
+
+
+template<>
+inline void Pin<17>::enable_change_level_interrupt()
+{
+    atd::write_bit<PCIE0>::to<1>::in(PCICR);
+    atd::write_bit<PCINT3>::to<1>::in(PCMSK0);
+}
+
+template<>
+inline void Pin<17>::disable_change_level_interrupt()
+{ atd::write_bit<PCINT3>::to<0>::in(PCMSK0); }
+
+
+template<>
+inline void Pin<18>::enable_change_level_interrupt()
+{
+    atd::write_bit<PCIE0>::to<1>::in(PCICR);
+    atd::write_bit<PCINT4>::to<1>::in(PCMSK0);
+}
+
+template<>
+inline void Pin<18>::disable_change_level_interrupt()
+{ atd::write_bit<PCINT4>::to<0>::in(PCMSK0); }
+
+
+template<>
+inline void Pin<19>::enable_change_level_interrupt()
+{
+    atd::write_bit<PCIE0>::to<1>::in(PCICR);
+    atd::write_bit<PCINT5>::to<1>::in(PCMSK0);
+}
+
+template<>
+inline void Pin<19>::disable_change_level_interrupt()
+{ atd::write_bit<PCINT5>::to<0>::in(PCMSK0); }
+
+
+template<>
+inline void Pin<23>::enable_change_level_interrupt()
+{
+    atd::write_bit<PCIE1>::to<1>::in(PCICR);
+    atd::write_bit<PCINT8>::to<1>::in(PCMSK1);
+}
+
+template<>
+inline void Pin<23>::disable_change_level_interrupt()
+{ atd::write_bit<PCINT8>::to<0>::in(PCMSK1); }
+
+
+template<>
+inline void Pin<24>::enable_change_level_interrupt()
+{
+    atd::write_bit<PCIE1>::to<1>::in(PCICR);
+    atd::write_bit<PCINT9>::to<1>::in(PCMSK1);
+}
+
+template<>
+inline void Pin<24>::disable_change_level_interrupt()
+{ atd::write_bit<PCINT9>::to<0>::in(PCMSK1); }
+
+
+template<>
+inline void Pin<25>::enable_change_level_interrupt()
+{
+    atd::write_bit<PCIE1>::to<1>::in(PCICR);
+    atd::write_bit<PCINT10>::to<1>::in(PCMSK1);
+}
+
+template<>
+inline void Pin<25>::disable_change_level_interrupt()
+{ atd::write_bit<PCINT10>::to<0>::in(PCMSK1); }
+
+
+template<>
+inline void Pin<26>::enable_change_level_interrupt()
+{
+    atd::write_bit<PCIE1>::to<1>::in(PCICR);
+    atd::write_bit<PCINT11>::to<1>::in(PCMSK1);
+}
+
+template<>
+inline void Pin<26>::disable_change_level_interrupt()
+{ atd::write_bit<PCINT11>::to<0>::in(PCMSK1); }
+
+
+template<>
+inline void Pin<27>::enable_change_level_interrupt()
+{
+    atd::write_bit<PCIE1>::to<1>::in(PCICR);
+    atd::write_bit<PCINT12>::to<1>::in(PCMSK1);
+}
+
+template<>
+inline void Pin<27>::disable_change_level_interrupt()
+{ atd::write_bit<PCINT12>::to<0>::in(PCMSK1); }
+
+
+template<>
+inline void Pin<28>::enable_change_level_interrupt()
+{
+    atd::write_bit<PCIE1>::to<1>::in(PCICR);
+    atd::write_bit<PCINT13>::to<1>::in(PCMSK1);
+}
+
+template<>
+inline void Pin<28>::disable_change_level_interrupt()
+{ atd::write_bit<PCINT13>::to<0>::in(PCMSK1); }
+
+/***************************************************************************
+ *			    OUTPUT cfg::PIN
+ ***************************************************************************/
+/*!
+ *  \brief  Creamos un pin que es de salida
+ *  
+ *  Observar que para que sea un pin de salida es necesario crear un objeto
+ *  de este tipo.
+ *
+ *  (RRR) ¿Por qué necesito cfg()? 
+ *        Si se usa como parámetro de template (y sospecho que es así como lo
+ *        estoy usando casi siempre) necesito inicializarlo. Aquí todavía
+ *        tengo dudas de si llamar a esta función init() o cfg() (???)
+ *        Usándolo me resulta más natural llamarlo `as_output` ya que de esa
+ *        forma se muestra la intención del código.
+ */
+template<uint8_t n>
+class Output_pin{
+public:
+    static constexpr uint8_t number = n;
+
+// Constructor
+    constexpr Output_pin()
+    { Pin<n>::as_output(); }
+
+    Output_pin& operator=(const Output_pin&)	= delete;
+
+    // static void cfg()         { Pin<n>::as_output(); }
+    static void as_output()   { Pin<n>::as_output(); }
+
+// Write pin
+    static void write_one()	{Pin<n>::write_one();}
+    static void write_zero()	{Pin<n>::write_zero();}
+    static void write(uint8_t x) {Pin<n>::write(x);}
+    static void toggle()	{Pin<n>::toggle();}
+
+// Read pin
+    static uint8_t read() {return Pin<n>::read();}
+
+    /// Devuelve si el bit es 0 o no. 
+    static bool is_zero() {return Pin<n>::is_zero();}
+
+    /// Devuelve si el bit es 1 o no. 
+    static bool is_one() {return Pin<n>::is_one();}
+};
+
+
+// Cuando quiera definir en un dispositivo un pin de forma opcional lo defino
+// como 0. El Pin<0> no está conectado realmente a ningún pin.
+template<>
+class Output_pin<0>{
+public:
+    static constexpr uint8_t number = 0;
+
+    constexpr Output_pin(){}
+    Output_pin& operator=(const Output_pin&)	= delete;
+
+    constexpr static void write_one()	{}
+    constexpr static void write_zero()	{}
+};
+
+
+/***************************************************************************
+ *			    INPUT cfg::PIN WITH PULLUP
+ ***************************************************************************/
+/*!
+ *  \brief  Creamos un pin de entrada con pull-up
+ *
+ */
+template<uint8_t n>
+class Input_pin_with_pullup{
+public:
+    static constexpr uint8_t number = n;
+
+    Input_pin_with_pullup()
+    {init();}
+
+    static void init()
+    {Pin<n>::as_input_with_pullup();}
+
+
+    Input_pin_with_pullup& operator=(const Input_pin_with_pullup&) = delete;
+
+    /// Leemos el valor del pin (0 ó 1)
+    static uint8_t read()
+    {return Pin<n>::read();}
+
+    /// Devuelve si el bit es 0 o no. 
+    static bool is_zero() {return Pin<n>::is_zero();}
+
+    /// Devuelve si el bit es 1 o no. 
+    static bool is_one() {return Pin<n>::is_one();}
+};
+
+
+
+/***************************************************************************
+ *			INPUT cfg::PIN WITHOUT PULLUP
+ ***************************************************************************/
+/*!
+ *  \brief  Creamos un pin de entrada sin pull-up
+ *
+ */
+template<uint8_t n>
+class Input_pin_without_pullup{
+public:
+    static constexpr uint8_t number = n;
+
+    Input_pin_without_pullup()
+    {init();}
+
+    static void init()
+    {Pin<n>::as_input_without_pullup();}
+
+    Input_pin_without_pullup& operator=(const Input_pin_without_pullup&)	= delete;
+
+    /// Leemos el valor del pin (0 ó 1)
+    static uint8_t read()
+    {return Pin<n>::read();}
+
+    /// Devuelve si el bit es 0 o no. 
+    static bool is_zero() {return Pin<n>::is_zero();}
+
+    /// Devuelve si el bit es 1 o no. 
+    static bool is_one() {return Pin<n>::is_one();}
+};
+
+
+}// namespace avr
+
+
+#endif
+
