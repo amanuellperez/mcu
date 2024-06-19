@@ -308,6 +308,9 @@ void test_sign()
     
     atd::Sign sign = atd::Sign::positive;
     CHECK_PRINT(std::cout << sign, '+');
+
+    CHECK_TRUE(atd::opposite(atd::Sign::positive) == atd::Sign::negative, "opposite");
+    CHECK_TRUE(atd::opposite(atd::Sign::negative) == atd::Sign::positive, "opposite");
 }
 
 int main()

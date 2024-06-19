@@ -415,6 +415,15 @@ enum class Sign{
     minus = negative
 };
 
+inline Sign opposite(Sign s)
+{
+    if (s == Sign::positive)
+	return Sign::negative;
+
+    else 
+	return Sign::positive;
+}
+
 inline std::ostream& operator<<(std::ostream& out, Sign sign)
 {
     switch (sign){
