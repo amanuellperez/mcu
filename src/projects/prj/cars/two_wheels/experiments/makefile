@@ -2,7 +2,8 @@ BIN = xx
 
 SOURCES= 	hwd_init.cpp	\
 			prj_init.cpp	\
-			prj_main.cpp
+			prj_iostream.cpp\
+			prj_main.cpp	
 
 MCU = atmega328p
 

@@ -64,7 +64,13 @@ private:
 // Menus
 
 // Experiments
+    void interactive_test();
+    void wheel_working();
+
+    void driving_in_circles();
     void lateral_movement();
+    void lateral_movement(bool automatic, 
+			    atd::Sign sign, uint8_t right, uint8_t left);
     
 };
 
@@ -78,8 +84,6 @@ private:
 // el programa.
 inline void logic_error()
 { Main::uart << "Logic error: program can't be here\n"; }
-
-
 
 #endif
 

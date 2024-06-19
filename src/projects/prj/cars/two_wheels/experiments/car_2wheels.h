@@ -43,15 +43,61 @@ public:
 
 // Moving functions
     static void stop();
+
     static void forward(const atd::Percentage& p);
-    static void backward(const atd::Percentage& p);
-    static void forward_turn_right();
+    static void forward_turn_right_(const atd::Percentage& right, 
+				   const atd::Percentage& left);
+
+    static void forward_turn_right(const atd::Percentage& right, 
+				   const atd::Percentage& left);
     static void forward_turn_left();
+
+    static void backward(const atd::Percentage& p);
+    static void backward_turn_right();
+    static void backward_turn_left();
+
     static void lateral_movement();
 
-private:
-    
+// Movimiento genérico: para probar 
+    // Se mueve hacia adelante o hacia atras con las velocidades de las ruedas
+    // indicadas en right/left.
+    static void move(atd::Sign sign, const atd::Percentage& right, 
+				     const atd::Percentage& left);
+
+    // En este caso el sentido de giro de las ruedas es diferente
+    static void move_opposite(atd::Sign sign, const atd::Percentage& right, 
+				     const atd::Percentage& left);
+
+// nombres con significado
+    static void right_wheel(atd::Sign sign, const atd::Percentage& p);
+    static void left_wheel(atd::Sign sign, const atd::Percentage& p);
 };
+
+template <typename D>
+inline 
+void Car_2_wheels<D>::right_wheel(atd::Sign sign, const atd::Percentage& p)
+{ H_Bridge::voltage1(sign, p); }
+
+template <typename D>
+inline 
+void Car_2_wheels<D>::left_wheel(atd::Sign sign, const atd::Percentage& p)
+{ H_Bridge::voltage2(sign, p); }
+
+template <typename D>
+void Car_2_wheels<D>::move(atd::Sign sign, const atd::Percentage& right, 
+				 const atd::Percentage& left)
+{
+    right_wheel(sign, right);
+    left_wheel (sign, left);
+}
+
+template <typename D>
+void Car_2_wheels<D>::move_opposite(atd::Sign sign, const atd::Percentage& right, 
+				 const atd::Percentage& left)
+{
+    right_wheel(sign, right);
+    left_wheel (atd::opposite(sign), left);
+}
 
 template <typename D>
 void Car_2_wheels<D>::stop()
@@ -64,38 +110,53 @@ void Car_2_wheels<D>::stop()
 template <typename D>
 void Car_2_wheels<D>::forward(const atd::Percentage& p)
 {
-    H_Bridge::voltage1(atd::Sign::positive, p);
-    H_Bridge::voltage2(atd::Sign::positive, p);
+    right_wheel(atd::Sign::positive, p);
+    left_wheel (atd::Sign::positive, p);
 }
 
 template <typename D>
 void Car_2_wheels<D>::backward(const atd::Percentage& p)
 {
-    H_Bridge::voltage1(atd::Sign::negative, p);
-    H_Bridge::voltage2(atd::Sign::negative, p);
+    right_wheel(atd::Sign::negative, p);
+    left_wheel (atd::Sign::negative, p);
 }
 
-// TODO: values ???
 template <typename D>
-void Car_2_wheels<D>::forward_turn_right()
+void Car_2_wheels<D>::forward_turn_right(const atd::Percentage& right,
+					 const atd::Percentage& left)
 {
-    H_Bridge::voltage1(atd::Sign::positive, 0);
-    H_Bridge::voltage2(atd::Sign::positive, 50);
+    right_wheel(atd::Sign::positive, right);
+    left_wheel (atd::Sign::positive, left);
 }
 
 template <typename D>
 void Car_2_wheels<D>::forward_turn_left()
 {
-    H_Bridge::voltage1(atd::Sign::positive, 50);
-    H_Bridge::voltage2(atd::Sign::positive, 0);
+    right_wheel(atd::Sign::positive, 50);
+    left_wheel (atd::Sign::positive, 0);
 }
+
+template <typename D>
+void Car_2_wheels<D>::backward_turn_right()
+{
+    right_wheel(atd::Sign::negative, 0);
+    left_wheel (atd::Sign::negative, 50);
+}
+
+template <typename D>
+void Car_2_wheels<D>::backward_turn_left()
+{
+    right_wheel(atd::Sign::negative, 50);
+    left_wheel (atd::Sign::negative, 0);
+}
+
 
 
 template <typename D>
 void Car_2_wheels<D>::lateral_movement()
 {
     for (uint8_t i = 0; i < 10; ++i){
-	forward_turn_right();
+	forward_turn_right(0, 50);
 	forward_turn_left();
     }
 }
