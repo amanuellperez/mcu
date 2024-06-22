@@ -45,7 +45,7 @@ public:
     
 // User interface (<-- mal traducido? Es: "interfaz con el usuario", esto es
 // ¿cómo va a interaccionar el programa con el usuario? En este caso via UART.
-    inline static mcu::UART_iostream uart;
+    inline static my_mcu::UART_iostream uart;
 
 // Global vbles
 

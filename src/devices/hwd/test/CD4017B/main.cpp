@@ -21,7 +21,7 @@
 
 #include <avr_atmega.h>
 
-namespace mcu = atmega;
+namespace my_mcu = atmega;
 
 using namespace dev;
 
@@ -38,28 +38,28 @@ int main()
 	// probamos que cuente
 	for (uint8_t i = 0; i < 15; ++i){
 	    counter.next();
-	    mcu::Micro::wait_ms(100);
+	    my_mcu::Micro::wait_ms(100);
 	}
 
 	counter.disable();
 	for (uint8_t i = 0; i < 15; ++i){
 	    counter.next();
-	    mcu::Micro::wait_ms(200);
+	    my_mcu::Micro::wait_ms(200);
 	}
 
 	counter.enable();
 	for (uint8_t i = 0; i < 10; ++i){
 	    counter.next();
-	    mcu::Micro::wait_ms(200);
+	    my_mcu::Micro::wait_ms(200);
 	}
 
 	for (uint8_t i = 0; i < 10; ++i){
 	    counter.reset();
-	    mcu::Micro::wait_ms(200);
+	    my_mcu::Micro::wait_ms(200);
 	    counter.next();
-	    mcu::Micro::wait_ms(200);
+	    my_mcu::Micro::wait_ms(200);
 	    counter.next();
-	    mcu::Micro::wait_ms(200);
+	    my_mcu::Micro::wait_ms(200);
 	}
 
     }

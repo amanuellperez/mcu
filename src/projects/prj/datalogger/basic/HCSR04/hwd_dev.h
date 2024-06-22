@@ -39,8 +39,8 @@ static constexpr uint16_t timeout_ms = 3000; // esperamos máximo 3 segundos
 					     
 // microcontroller
 // ---------------
-namespace mcu = atmega;
-using Micro   = mcu::Micro;
+namespace my_mcu = atmega;
+using Micro   = my_mcu::Micro;
 
 
 // pin connections
@@ -65,7 +65,7 @@ constexpr uint8_t echo_pin    = 14;
 
 // uart
 // ----
-class UART : public mcu::UART_iostream{
+class UART : public my_mcu::UART_iostream{
 public:
 // Name? Realmente es empty_get_area(), aunque el standard usa más el nombre
 // de `ignore`
@@ -87,10 +87,10 @@ inline void UART::empty_read_buffer()
 // ------
 // Timer0: sin usar
 // Timer1: Miniclock_us	    (cualquier device lo puede usar)
-using Miniclock_us = dev::Miniclock_us<mcu::Micro, mcu::Time_counter1_g>;
+using Miniclock_us = dev::Miniclock_us<my_mcu::Micro, my_mcu::Time_counter1_g>;
 
 // Timer2: Clock_s	    (propiedad de Clock_s. No lo puede usar nadie más)
-using Time_counter = mcu::Time_counter2_32kHz_g<timeout_ms>;
+using Time_counter = my_mcu::Time_counter2_32kHz_g<timeout_ms>;
 
 // Clock
 using Clock	   = dev::Clock_s<Micro, Time_counter>;

@@ -24,8 +24,8 @@
 
 // Microcontroller
 // ---------------
-namespace mcu = atmega;
-using Micro   = mcu::Micro;
+namespace my_mcu = atmega;
+using Micro   = my_mcu::Micro;
 
 
 // Devices
@@ -33,7 +33,7 @@ using Micro   = mcu::Micro;
 constexpr uint8_t TWI_buffer_size = 100; // voy a enviarle un tipo de cada: int8, int16, ...
 					 
 using TWI_slave_cfg = dev::TWI_slave_cfg<Micro, 
-                                         mcu::TWI_basic,
+                                         my_mcu::TWI_basic,
 					 TWI_buffer_size>;
 
 using TWI = dev::TWI_slave<TWI_slave_cfg>;
@@ -45,7 +45,7 @@ inline void traza(const char* fname)
 {
     auto tmp = TWCR;
 
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     uart << ">>> " << fname << ": TWCR = " << static_cast<uint16_t>(tmp) << "; TWINT = ";
 
     if (atd::is_one_bit<TWINT>::of(TWCR))
@@ -57,7 +57,7 @@ inline void traza(const char* fname)
 inline void traza_twcr()
 {
     auto tmp = TWCR;
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     uart << "\tTWCR = " << static_cast<uint16_t>(tmp) << "\n";
 }
 
@@ -79,7 +79,7 @@ constexpr uint8_t service2_name {0x87};
 // nread [out]: parametros leidos
 Service read_service_name(std::array<uint8_t, TWI_buffer_size>& params_in, TWI::streamsize& nread)
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     uart << "\n\n=================\n";
     uart << "read_service_name\n";
 
@@ -128,7 +128,7 @@ Service read_service_name(std::array<uint8_t, TWI_buffer_size>& params_in, TWI::
 
 void print_TWI_state()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     uart << "state = ";
 
     if (TWI::state() == TWI::iostate::listening)
@@ -168,7 +168,7 @@ void print_TWI_state()
 void service1(const std::array<uint8_t, TWI_buffer_size>& params_in,
 		    std::array<uint8_t, TWI_buffer_size>& params_out)
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     uart << "--------- Ejecutando service1\n";
     uart << "params_in: "
 	 << static_cast<uint16_t>(params_in[1]) << ", "
@@ -215,7 +215,7 @@ void service1(const std::array<uint8_t, TWI_buffer_size>& params_in,
 // params_in[...] = resto de parámetros
 void service2(const std::array<uint8_t, TWI_buffer_size>& params_in)
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     uart << "-------------- Recibido service2\n";
 }
 
@@ -224,7 +224,7 @@ void service2(const std::array<uint8_t, TWI_buffer_size>& params_in)
 void service_unknown(const std::array<uint8_t, TWI_buffer_size>& params_in,
                      TWI::streamsize n)
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     uart << "--------- Service unknown\n"
 	 << "Devolvemos lo recibido\n";
 
@@ -262,7 +262,7 @@ void service_unknown(const std::array<uint8_t, TWI_buffer_size>& params_in,
 
 void test_servidor()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     uart << "test_servidor\n"
          << "-------------\n"
          << "Elegir buffer_size de manera que se garantice que todo el mensaje "
@@ -322,7 +322,7 @@ void test_servidor()
 
 void test_read()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     uart << "test_read\n"
 	 << "---------\n"
 	 << "Probar con distintos buffer_size\n\n";
@@ -364,8 +364,8 @@ void test_read()
 
 int main() 
 {
-    mcu::UART_iostream uart;
-    mcu::basic_cfg(uart);
+    my_mcu::UART_iostream uart;
+    my_mcu::basic_cfg(uart);
     uart.turn_on();
 
     uart << "TWI slave\n"

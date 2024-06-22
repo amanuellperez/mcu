@@ -27,15 +27,15 @@
 
 // Microcontroller
 // ---------------
-namespace mcu = atmega;
-using Micro   = mcu::Micro;
+namespace my_mcu = atmega;
+using Micro   = my_mcu::Micro;
 
 
 // TWI Protocol
 // ------------
 constexpr uint8_t TWI_buffer_size = 100;
 using TWI_master_cfg = dev::TWI_master_cfg<Micro, 
-                                           mcu::TWI_basic,
+                                           my_mcu::TWI_basic,
 					   TWI_buffer_size>;
 
 using TWI_master  = dev::TWI_master<TWI_master_cfg>;
@@ -60,8 +60,8 @@ using Sensor = dev::BME280_TWI<TWI_master, sensor_address>;
 // ---------
 void init_UART()
 {
-    mcu::UART_iostream uart;
-    mcu::basic_cfg(uart);
+    my_mcu::UART_iostream uart;
+    my_mcu::basic_cfg(uart);
     uart.turn_on();
 }
 
@@ -74,7 +74,7 @@ void init_TWI()
 
 void twi_print_state(TWI::iostate st)
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     uart << "state = ";
 
     switch(st){
@@ -154,7 +154,7 @@ void bme280_read_all_mem(uint8_t addr, uint8_t* mem, uint8_t n)
     twi.read(mem, n);
 
     if (twi.error()){
-	mcu::UART_iostream uart;
+	my_mcu::UART_iostream uart;
 	uart << "ERROR (bme280_read_all_mem): ";
 	twi_print_state(TWI::state());
     }
@@ -397,7 +397,7 @@ void print_cfg(std::ostream& out,
 //
 //void init(Sensor& sensor)
 //{
-//    mcu::UART_iostream uart;
+//    my_mcu::UART_iostream uart;
 //    uart << "init ... ";
 //    sensor.init();
 //    if (sensor.error()){
@@ -495,8 +495,8 @@ void print_params(std::iostream& uart, Sensor& sensor)
 //void test_bme280()
 //{
 //// init_UART();
-//    mcu::UART_iostream uart;
-//    mcu::basic_cfg(uart);
+//    my_mcu::UART_iostream uart;
+//    my_mcu::basic_cfg(uart);
 //    uart.turn_on();
 //
 //    uart << "----------------------------------------\n"
@@ -538,7 +538,7 @@ void print_params(std::iostream& uart, Sensor& sensor)
 
 void probe_sensor()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
 
     Sensor sensor;
 
@@ -574,7 +574,7 @@ void probe_sensor()
 
 void print_params()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
 
     uart << "Params: \n";
 
@@ -597,7 +597,7 @@ void print_params()
 
 void test_config()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
 
     Sensor sensor;
 
@@ -645,7 +645,7 @@ void test_config()
 
 void test_uncompensated()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
 
     uart << "----------------------------------------\n"
 	 << "BME280 (test uncompensated)\n"
@@ -707,7 +707,7 @@ void test_uncompensated()
 
 void test_t_p_h()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
 
     uart << "----------------------------------------\n"
 	 << "BME280 (test T, P, H)\n"
@@ -772,7 +772,7 @@ void test_t_p_h()
 
 void hello()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     uart << "\n\nBME280 test\n"
 	    "-----------\n"
 	    "slave_address       =\t";

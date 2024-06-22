@@ -24,8 +24,8 @@
 
 // Micro
 // -----
-namespace mcu = atmega; 
-using Micro   = mcu::Micro;
+namespace my_mcu = atmega; 
+using Micro   = my_mcu::Micro;
 
 // pins
 constexpr uint8_t sensor_pin = 15;
@@ -41,8 +41,8 @@ using Result = DHT22::Result;
 // ---------
 void init_uart()
 {
-    mcu::UART_iostream uart;
-    mcu::basic_cfg(uart);
+    my_mcu::UART_iostream uart;
+    my_mcu::basic_cfg(uart);
     uart.turn_on();
 }
 
@@ -51,7 +51,7 @@ void init_uart()
 
 void hello()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     uart << "\n\nDHT22 test\n"
 	        "----------\n"
 		"Connect sensor to pin " << sensor_pin 
@@ -64,7 +64,7 @@ void hello()
 
 void print_error(Result res)
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
 
     switch(res){
 	break; case Result::ok:	uart << "ok\n";
@@ -85,7 +85,7 @@ int main()
     init_uart();
     hello();
 
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
 
     while(1){
 

@@ -23,7 +23,7 @@
 //#include "../../../dev_LCD_HD44780_charset.h"
 #include <avr_atmega.h>
 
-namespace mcu = atmega;
+namespace my_mcu = atmega;
 
 // Si lo conectamos solo a 4 pins de datos
 using LCD_pins = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<4>,
@@ -35,7 +35,7 @@ using LCD_pins = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<4>,
 using LCD = dev::LCD_HD44780<LCD_pins>;
 
 namespace gl = dev::glyphs_5x8;
-using Glyph = gl::Glyph<mcu::ROM_read>;
+using Glyph = gl::Glyph<my_mcu::ROM_read>;
 
 void print(LCD& lcd, const char* c)
 {
@@ -52,7 +52,7 @@ void test_static()
     LCD::write_data_to_CG_or_DDRAM('O');
     LCD::write_data_to_CG_or_DDRAM('K');
     LCD::write_data_to_CG_or_DDRAM('?');
-    mcu::Micro::wait_ms(1000);
+    my_mcu::Micro::wait_ms(1000);
 }
 
 
@@ -69,7 +69,7 @@ void test_lcd4()
     lcd.write_data_to_CG_or_DDRAM('O');
     lcd.write_data_to_CG_or_DDRAM('K');
     lcd.write_data_to_CG_or_DDRAM('?');
-    mcu::Micro::wait_ms(1000);
+    my_mcu::Micro::wait_ms(1000);
 
 
     lcd.clear_display();
@@ -80,79 +80,79 @@ void test_lcd4()
 	uint8_t c = lcd.read_data_from_CG_or_DDRAM();
 	lcd.set_ddram_address(0x40 + x);
 	lcd.write_data_to_CG_or_DDRAM(c);
-	mcu::Micro::wait_ms(100);
+	my_mcu::Micro::wait_ms(100);
     }
-    mcu::Micro::wait_ms(1000);
+    my_mcu::Micro::wait_ms(1000);
 
 
     lcd.clear_display();
     print(lcd, "Probando clear");
-    mcu::Micro::wait_ms(1000);
+    my_mcu::Micro::wait_ms(1000);
 
     lcd.clear_display();
-    mcu::Micro::wait_ms(1000);
+    my_mcu::Micro::wait_ms(1000);
 
     print(lcd, "Pruebo return_home");
-    mcu::Micro::wait_ms(1000);
+    my_mcu::Micro::wait_ms(1000);
     lcd.return_home();
     print(lcd, "VUELVO!!!");
-    mcu::Micro::wait_ms(1500);
+    my_mcu::Micro::wait_ms(1500);
 
     lcd.clear_display();
     print(lcd, "Shift izda:");
     lcd.entry_mode(true, true);
-    mcu::Micro::wait_ms(500);
+    my_mcu::Micro::wait_ms(500);
     const char* p = &shift_izda[0];
     while (*p){
 	lcd.write_data_to_CG_or_DDRAM(*p);
-	mcu::Micro::wait_ms(500);
+	my_mcu::Micro::wait_ms(500);
 	++p;
     }
-    mcu::Micro::wait_ms(1000);
+    my_mcu::Micro::wait_ms(1000);
 
     lcd.entry_mode(true, false);	// recordar dejar shift = false
     lcd.clear_display();
     print(lcd, "Shift dcha");
-    mcu::Micro::wait_ms(1000);
+    my_mcu::Micro::wait_ms(1000);
     lcd.entry_mode(false, true);
-    mcu::Micro::wait_ms(500);
+    my_mcu::Micro::wait_ms(500);
     p = &shift_dcha[0];
     while (*p){
 	lcd.write_data_to_CG_or_DDRAM(*p);
-	mcu::Micro::wait_ms(500);
+	my_mcu::Micro::wait_ms(500);
 	++p;
     }
-    mcu::Micro::wait_ms(1000);
+    my_mcu::Micro::wait_ms(1000);
     lcd.entry_mode(true, false);	// recordar dejar shift = false
 
     lcd.clear_display();
     print(lcd, "Apago por 1 segundo");
     lcd.display_control(true, false, false);
-    mcu::Micro::wait_ms(1000);
+    my_mcu::Micro::wait_ms(1000);
     lcd.display_control(false, false, false);
-    mcu::Micro::wait_ms(1000);
+    my_mcu::Micro::wait_ms(1000);
     lcd.display_control(true, false, false);
-    mcu::Micro::wait_ms(1000);
+    my_mcu::Micro::wait_ms(1000);
     lcd.clear_display();
     print(lcd, "Encendido?");
-    mcu::Micro::wait_ms(1000);
+    my_mcu::Micro::wait_ms(1000);
 
     lcd.clear_display();
     print(lcd, "Cursor on");
     lcd.display_control(true, true, false);
-    mcu::Micro::wait_ms(1000);
+    my_mcu::Micro::wait_ms(1000);
     lcd.clear_display();
     print(lcd, "Cursor off");
     lcd.display_control(true, false, false);
-    mcu::Micro::wait_ms(2000);
+    my_mcu::Micro::wait_ms(2000);
     lcd.clear_display();
     print(lcd, "Cursor blink on");
     lcd.display_control(true, false, true);
-    mcu::Micro::wait_ms(3000);
+    my_mcu::Micro::wait_ms(3000);
     lcd.clear_display();
     print(lcd, "Cursor blink off");
     lcd.display_control(true, false, false);
-    mcu::Micro::wait_ms(1000);
+    my_mcu::Micro::wait_ms(1000);
     // Lo dejamos sin cursor
     lcd.display_control(true, false, false);
 
@@ -162,7 +162,7 @@ void test_lcd4()
     print(lcd, "Esta fila hace un shift a la izda");
     for (uint8_t i = 0; i < 40; ++i){
 	lcd.cursor_or_display_shift(true, false);
-	mcu::Micro::wait_ms(200);
+	my_mcu::Micro::wait_ms(200);
     }
     // Lo dejamos como estaba
     lcd.return_home();
@@ -171,7 +171,7 @@ void test_lcd4()
     print(lcd, "Esta fila hace un shift a la dcha");
     for (uint8_t i = 0; i < 40; ++i){
 	lcd.cursor_or_display_shift(true, true);
-	mcu::Micro::wait_ms(200);
+	my_mcu::Micro::wait_ms(200);
     }
     // Lo dejamos como estaba
     lcd.return_home();
@@ -180,7 +180,7 @@ void test_lcd4()
     print(lcd, "Move cursor izda");
     for (uint8_t i = 0; i < 15; ++i){
 	lcd.cursor_or_display_shift(false, false);
-	mcu::Micro::wait_ms(300);
+	my_mcu::Micro::wait_ms(300);
     }
 
     lcd.clear_display();
@@ -188,7 +188,7 @@ void test_lcd4()
     lcd.set_ddram_address(0); // coloco el cursor al principio
     for (uint8_t i = 0; i < 15; ++i){
 	lcd.cursor_or_display_shift(false, true);
-	mcu::Micro::wait_ms(300);
+	my_mcu::Micro::wait_ms(300);
     }
 
 
@@ -196,14 +196,14 @@ void test_lcd4()
     lcd.clear_display();
     lcd.set_ddram_address(3);
     print(lcd, "a partir 3");
-    mcu::Micro::wait_ms(1000);
+    my_mcu::Micro::wait_ms(1000);
 
     lcd.clear_display();
     lcd.set_ddram_address(0x00);
     print(lcd, "Segunda fila");
     lcd.set_ddram_address(0x40);
     print(lcd, "Primera fila");
-    mcu::Micro::wait_ms(1000);
+    my_mcu::Micro::wait_ms(1000);
 
     lcd.clear_display();
 
@@ -263,7 +263,7 @@ void test_cgram4()
                 gl::plug,
                 gl::musical_note);
 
-    mcu::Micro::wait_ms(2000);
+    my_mcu::Micro::wait_ms(2000);
 
     show_glyphs(lcd,
                 gl::pacman,
@@ -274,7 +274,7 @@ void test_cgram4()
                 gl::speaker_right,
                 gl::plug,
                 gl::musical_note);
-    mcu::Micro::wait_ms(2000);
+    my_mcu::Micro::wait_ms(2000);
 
     show_glyphs(lcd,
                 gl::heart_full,
@@ -291,11 +291,11 @@ void test_cgram4()
 	lcd.set_ddram_address(0x40);
 	lcd.write_data_to_CG_or_DDRAM(0x00);
 	lcd.write_data_to_CG_or_DDRAM(0x02);
-	mcu::Micro::wait_ms(500);
+	my_mcu::Micro::wait_ms(500);
 	lcd.set_ddram_address(0x40);
 	lcd.write_data_to_CG_or_DDRAM(0x01);
 	lcd.write_data_to_CG_or_DDRAM(0x03);
-	mcu::Micro::wait_ms(500);
+	my_mcu::Micro::wait_ms(500);
     }
 
 

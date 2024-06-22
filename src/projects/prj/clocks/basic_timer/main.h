@@ -79,7 +79,7 @@ private:
 
 inline void wait_release_key()
 {
-    mcu::Micro::wait_ms(time_wait_release_key);
+    my_mcu::Micro::wait_ms(time_wait_release_key);
 }
 
 

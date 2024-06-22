@@ -26,8 +26,8 @@
 
 // Micro
 // -----
-namespace mcu = atmega; 
-using Micro   = mcu::Micro;
+namespace my_mcu = atmega; 
+using Micro   = my_mcu::Micro;
 
 // pins
 constexpr uint8_t trigger_pin = 13;
@@ -36,7 +36,7 @@ constexpr uint8_t echo_pin    = 14;
 
 // Devices
 // -------
-using Miniclock_us = dev::Miniclock_us<mcu::Micro, mcu::Time_counter1_g>;
+using Miniclock_us = dev::Miniclock_us<my_mcu::Micro, my_mcu::Time_counter1_g>;
 using HCSR04_cfg = dev::HCSR04_cfg<Micro, Miniclock_us,
 				   trigger_pin, echo_pin>;
 using HCSR04 = dev::HCSR04<HCSR04_cfg>;
@@ -46,8 +46,8 @@ using HCSR04 = dev::HCSR04<HCSR04_cfg>;
 // ---------
 void init_uart()
 {
-    mcu::UART_iostream uart;
-    mcu::basic_cfg(uart);
+    my_mcu::UART_iostream uart;
+    my_mcu::basic_cfg(uart);
     uart.turn_on();
 }
 
@@ -56,7 +56,7 @@ void init_uart()
 
 void hello()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     uart << "\n\nHCSR04 test\n"
 	        "-----------\n"
 		"Connect:\n"
@@ -70,7 +70,7 @@ void print_result(HCSR04::Result res)
 {
     using Result = HCSR04::Result;
 
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
 
     switch(res){
 	break; case Result::ok:	uart << "ok\n";
@@ -89,7 +89,7 @@ int main()
 
     hello();
 
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
 
     while(1){
 	HCSR04::Meter m = HCSR04::read();

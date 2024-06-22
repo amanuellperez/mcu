@@ -30,7 +30,7 @@ Main::Main()
     init_rtc_clock();
 
 //    // No meto este wait en init_keyboard para que se vea explicitamente
-//    mcu::Micro::wait_ms(200);   // Garantizamos que los botones dejen de hacer bouncing
+//    my_mcu::Micro::wait_ms(200);   // Garantizamos que los botones dejen de hacer bouncing
 }
 
 
@@ -73,7 +73,7 @@ void Main::init_rtc_clock()
     if (!t.clock_on){
 	lcd_.clear();
 	lcd_ << "RTC v0.0";  // presentación y sirve para depurar
-	mcu::Micro::wait_ms(500);
+	my_mcu::Micro::wait_ms(500);
 	init_time(t);
 	window_set_time(t);
     }

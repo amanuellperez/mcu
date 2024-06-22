@@ -28,7 +28,7 @@ void Main::init_sensor()
     if (sensor_.error()) {
 	lcd_.clear();
 	lcd_ << "Sensor no responde";
-	mcu::Micro::wait_ms(1000);
+	my_mcu::Micro::wait_ms(1000);
     }
 }
 

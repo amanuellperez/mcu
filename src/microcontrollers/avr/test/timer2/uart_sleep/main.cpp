@@ -28,7 +28,7 @@
 
 // Microcontroller
 // ---------------
-namespace mcu = avr_;
+namespace my_mcu = avr_;
 
 
 // Pin connections
@@ -37,20 +37,20 @@ static constexpr uint8_t led_pin = 14;
 
 // Hwd devices
 // -----------
-using Counter = mcu::Time_counter2_32kHz_g<1000>;
-using Pin     = mcu::Pin<led_pin>;
+using Counter = my_mcu::Time_counter2_32kHz_g<1000>;
+using Pin     = my_mcu::Pin<led_pin>;
 
 
 // Terminal
 // --------
-mcu::UART_iostream uart; // análogo a std::cout/std::cin
+my_mcu::UART_iostream uart; // análogo a std::cout/std::cin
 
 						
 // Functions
 // ---------
 void init_uart()
 {
-    mcu::basic_cfg(uart);
+    my_mcu::basic_cfg(uart);
 
     uart.turn_on();
 }
@@ -69,8 +69,8 @@ void init()
     init_uart();
     Pin::as_output();
     Counter::turn_on_with_overflow_to_count_1s();
-    mcu::enable_interrupts();
-    mcu::sleep_mode(mcu::Sleep::mode::power_save);
+    my_mcu::enable_interrupts();
+    my_mcu::sleep_mode(my_mcu::Sleep::mode::power_save);
 
 }
 
@@ -83,8 +83,8 @@ void print()
 
 void flush()
 {
-    mcu::print_registers_uart(uart);
-    while (!mcu::UART_basic::is_transmit_complete())
+    my_mcu::print_registers_uart(uart);
+    while (!my_mcu::UART_basic::is_transmit_complete())
     {;}
     // Datasheet: The TXC0 Flag bit is automatically cleared
     // when a transmit complete interrupt is executed, 
@@ -106,7 +106,7 @@ int main()
     while (1) {
 	flush();    // comment this line. The program generates garbage
 
-	mcu::sleep();
+	my_mcu::sleep();
 
 	print();
     }

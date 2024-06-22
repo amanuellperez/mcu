@@ -30,8 +30,8 @@ Main::Main()
     // TODO: me esta generando problemas el uso de UART con el power-save
     // mode. Como esta aplicación va conectada al PC, de momento lo dejo en
     // idle mode. ¿Cómo usar power-save mode?
-    // Micro::sleep_mode(mcu::Sleep::mode::power_save);
-    Micro::sleep_mode(mcu::Sleep::mode::idle);
+    // Micro::sleep_mode(my_mcu::Sleep::mode::power_save);
+    Micro::sleep_mode(my_mcu::Sleep::mode::idle);
 
     if (Clock::turn_on() == false)
 	uart << "Error: can't initialize Clock\n";

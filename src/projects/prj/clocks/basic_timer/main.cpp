@@ -56,7 +56,7 @@ void Main::run()
 
 	Micro::wait_ms(100); // es un reloj de horno. Miro el teclado cada 100 ms
 //	Micro::wait_ms(10); // es un cronometro que funciona a 1 ms. 
-//		    // Actualizo el LCD cada 1 ms (si se elimina este mcu::Micro::wait_ms
+//		    // Actualizo el LCD cada 1 ms (si se elimina este my_mcu::Micro::wait_ms
 //		    // el LCD se actualiza tan rápido que no se ve nada)
     }
 }

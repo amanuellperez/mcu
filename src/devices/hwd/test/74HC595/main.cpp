@@ -20,7 +20,7 @@
 #include "../../dev_74HC595.h"
 #include <avr_atmega.h>
 
-namespace mcu = atmega;
+namespace my_mcu = atmega;
 
 // dev
 constexpr uint16_t period_in_us = 2;	
@@ -38,10 +38,10 @@ void sweep(Register& reg)
 {
     for (uint8_t p = 1; p != 0; p <<= 1){
 	reg.write(p);
-	mcu::Micro::wait_ms(100);
+	my_mcu::Micro::wait_ms(100);
     }
 
-    mcu::Micro::wait_ms(100);
+    my_mcu::Micro::wait_ms(100);
     reg.clear();
 }
 
@@ -50,11 +50,11 @@ void counter(Register& reg)
 {
     for (uint8_t i = 0; i < 255; ++i){
 	reg.write(i);
-	mcu::Micro::wait_ms(500);
+	my_mcu::Micro::wait_ms(500);
     }
 
     reg.write(255);
-    mcu::Micro::wait_ms(500);
+    my_mcu::Micro::wait_ms(500);
 
 }
 

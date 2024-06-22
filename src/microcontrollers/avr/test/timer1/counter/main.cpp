@@ -29,9 +29,9 @@
 #include <stdlib.h>
 #include <std_type_traits.h>
 
-namespace mcu = avr_;
+namespace my_mcu = avr_;
 
-using Timer = mcu::Timer1;
+using Timer = my_mcu::Timer1;
 
 constexpr uint16_t period_in_us = 1024;
 
@@ -87,7 +87,7 @@ std::ostream& operator<<(std::ostream& out, const time_in_days& t)
 
 void print(uint64_t time_en_us)
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     uart << us_to_time_in_days(time_en_us) << "\n\r";
 }
 
@@ -95,8 +95,8 @@ void print(uint64_t time_en_us)
 int main()
 {
 // init_uart();
-    mcu::UART_iostream uart;
-    mcu::basic_cfg(uart);
+    my_mcu::UART_iostream uart;
+    my_mcu::basic_cfg(uart);
     uart.turn_on();
 
 // init_timer();
@@ -105,13 +105,13 @@ int main()
     Timer::pin_B_disconnected();
     Timer::clock_frequency_divide_by_1024();
     Timer::enable_overflow_interrupt();
-    mcu::enable_interrupts();
+    my_mcu::enable_interrupts();
 
     while(1){
 	Timer::counter_type v;
 	uint32_t c;
 	{// lo más atómico posible
-	    mcu::Disable_interrupts l;
+	    my_mcu::Disable_interrupts l;
 	    v = Timer::unsafe_counter();
 	    c = counter;
 	}
@@ -121,7 +121,7 @@ int main()
              << period_in_us << " = " << t_us << " us = ";
 
         print (t_us);
-	mcu::wait_ms(1000);
+	my_mcu::wait_ms(1000);
     }
 }
 

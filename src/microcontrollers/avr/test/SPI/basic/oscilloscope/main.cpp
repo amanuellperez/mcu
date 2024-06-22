@@ -25,9 +25,9 @@
 #include "../../../../avr_UART_iostream.h"
 
 
-namespace mcu = avr_;
+namespace my_mcu = avr_;
 
-using SPI = mcu::SPI_master_g;
+using SPI = my_mcu::SPI_master_g;
 
 constexpr uint16_t period_in_us = 8;	
 
@@ -54,7 +54,7 @@ int main()
 //	    "----------\n"
 //	    "Connect oscilloscope and measure SCK and MOSI pins\n";
 
-    mcu::Output_pin<SPI::CS_pin_number> no_SS;
+    my_mcu::Output_pin<SPI::CS_pin_number> no_SS;
     no_SS.write_zero();
     while (1) {
 	SPI::write(0xFF);   // esto pone a 1 MOSI durante 8 ciclos de reloj

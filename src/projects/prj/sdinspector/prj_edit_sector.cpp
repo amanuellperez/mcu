@@ -26,7 +26,7 @@
 
 void Main::edit_sector(bool in_hexadecimal)
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
 
     uart << '\n';
     print_line(uart);
@@ -45,7 +45,7 @@ void Main::edit_sector(bool in_hexadecimal)
 
 void Main::edit_sector_from_in_hexadecimal(Sector::Address addr)
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     atd::print(uart, msg_edit_sector_instructions_in_hex);
 
     while (addr < sector.size()) {
@@ -72,7 +72,7 @@ void Main::edit_sector_from_in_hexadecimal(Sector::Address addr)
 
 void Main::edit_sector_from_with_chars(Sector::Address addr)
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     atd::print(uart, msg_edit_sector_instructions_in_char);
 
     while (addr < sector.size()) {

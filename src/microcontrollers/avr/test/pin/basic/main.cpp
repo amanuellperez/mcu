@@ -22,17 +22,17 @@
 #include "../../../avr_micro.h"
 #include "../../../avr_UART_iostream.h"
 
-namespace mcu = avr_;
-using Micro = mcu::Micro;
+namespace my_mcu = avr_;
+using Micro = my_mcu::Micro;
 
 constexpr uint8_t npin = 13;
-using Pin = mcu::Pin<npin>;
+using Pin = my_mcu::Pin<npin>;
 
 void blink()
 {
     Pin::as_output();
 
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     for (uint8_t i = 0; i < 10; ++i){
 	uart << '.';
 
@@ -50,8 +50,8 @@ void blink()
 int main()
 {
 // uart_init();
-    mcu::UART_iostream uart;
-    mcu::basic_cfg(uart);
+    my_mcu::UART_iostream uart;
+    my_mcu::basic_cfg(uart);
     uart.turn_on();
 
 // menu

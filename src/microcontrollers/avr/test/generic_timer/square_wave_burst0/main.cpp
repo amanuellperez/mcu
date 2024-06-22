@@ -22,20 +22,20 @@
 #include "../../../avr_timer0_generic.h"
 #include "../../../avr_timer1_generic.h"
 
-namespace mcu = avr_;
-using Micro   = mcu::Micro;
+namespace my_mcu = avr_;
+using Micro   = my_mcu::Micro;
 
 static constexpr uint8_t test_pin = 12;
-using SWG  = mcu::Square_wave_burst_generator0_g;
-using Timer = mcu::Timer_counter1_g;
+using SWG  = my_mcu::Square_wave_burst_generator0_g;
+using Timer = my_mcu::Timer_counter1_g;
 
 static constexpr uint32_t frequency = 38000;
 static constexpr Timer::counter_type T = 500; 
 
 int main()
 {
-    mcu::UART_iostream uart;
-    mcu::basic_cfg(uart);
+    my_mcu::UART_iostream uart;
+    my_mcu::basic_cfg(uart);
     uart.turn_on();
 
     uart << "\n\nSquare burst wave test\n"

@@ -28,9 +28,9 @@
 #include <avr_atmega.h>
 #include "../dev.h"
 
-namespace mcu = atmega;
+namespace my_mcu = atmega;
 
-using SPI = mcu::SPI_master;
+using SPI = my_mcu::SPI_master;
 
 // La frecuencia del master tiene que ser 4 veces más lenta que la del slave.
 // El slave lo tenemos a 1MHz, luego el periodo máximo debe ser 4 us.
@@ -41,7 +41,7 @@ constexpr uint16_t period_in_us = 8;
 
 void print_code(uint8_t code)
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
 
     switch(code){
 	break; case Code::del: uart << "DEL"; 
@@ -56,7 +56,7 @@ void print_code(uint8_t code)
 void test_keyboard()
 {
 
-    mcu::Output_pin<SPI_SS_pin> no_SS;
+    my_mcu::Output_pin<SPI_SS_pin> no_SS;
 
     while (1) {
 	no_SS.write_zero();
@@ -66,7 +66,7 @@ void test_keyboard()
 	if (res != uint8_t{0})
 	    print_code(static_cast<char>(res));
 
-	mcu::Micro::wait_ms(100);
+	my_mcu::Micro::wait_ms(100);
     }
 }
 
@@ -74,8 +74,8 @@ void test_keyboard()
 int main() 
 {
 // init_uart()
-    mcu::UART_iostream uart;
-    mcu::basic_cfg(uart);
+    my_mcu::UART_iostream uart;
+    my_mcu::basic_cfg(uart);
     uart.turn_on();
 
 // init_SPI()

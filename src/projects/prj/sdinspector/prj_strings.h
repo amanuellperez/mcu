@@ -25,46 +25,46 @@
 #define __PRJ_STRINGS_H__ 
 
 
-constexpr mcu::ROM_string<102> msg_hello   
+constexpr my_mcu::ROM_string<102> msg_hello   
 	PROGMEM{"\n\n----------------------------------------\nSDCard inspector\n----------------------------------------\n\n"};
 
-constexpr mcu::ROM_string<19> msg_main_no_sector_load 
+constexpr my_mcu::ROM_string<19> msg_main_no_sector_load 
 	PROGMEM{"No sector in memory"};
 
-constexpr mcu::ROM_string<27> msg_main_sector_load 
+constexpr my_mcu::ROM_string<27> msg_main_sector_load 
 	PROGMEM{"Sector in memory. Address: "};
 
-constexpr mcu::ROM_string<39> msg_main_menu	
+constexpr my_mcu::ROM_string<39> msg_main_menu	
 	PROGMEM{"1. Read status register\n2. Load sector\n"};
 
-constexpr mcu::ROM_string<122> msg_main_menu2	
+constexpr my_mcu::ROM_string<122> msg_main_menu2	
 	PROGMEM{"3. Print sector\n4. Print sector bytes from a to b\n5. Edit sector in hexadecimal\n6. Edit sector with chars\n7. Flush sector\n"};
 
-constexpr mcu::ROM_string<16> msg_sector_address	
+constexpr my_mcu::ROM_string<16> msg_sector_address	
 	PROGMEM{"Sector address: "};
 
-constexpr mcu::ROM_string<29> msg_print_sector_from 
+constexpr my_mcu::ROM_string<29> msg_print_sector_from 
 	PROGMEM{"Print sector from byte number"};
 
-constexpr mcu::ROM_string<39> msg_print_sector_size 
+constexpr my_mcu::ROM_string<39> msg_print_sector_size 
 	PROGMEM{"Number of bytes to print (0 to the end)"};
 
-constexpr mcu::ROM_string<39> msg_print_sector_from_to_big 
+constexpr my_mcu::ROM_string<39> msg_print_sector_from_to_big 
 	PROGMEM{"\nError: first byte has to be less than "};
 
-constexpr mcu::ROM_string<19> msg_print_sector_size_to_big 
+constexpr my_mcu::ROM_string<19> msg_print_sector_size_to_big 
 	PROGMEM{"\nError: size to big"};
 
-constexpr mcu::ROM_string<72> msg_edit_sector_instructions_in_hex 
+constexpr my_mcu::ROM_string<72> msg_edit_sector_instructions_in_hex 
 	PROGMEM{"Write all modifications in hexadecimal without 0x.\nPress return to end.\n"};
 
-constexpr mcu::ROM_string<55> msg_edit_sector_instructions_in_char 
+constexpr my_mcu::ROM_string<55> msg_edit_sector_instructions_in_char 
 	PROGMEM{"Write all modifications in chars.\nPress return to end.\n"};
 
-constexpr mcu::ROM_string<18> msg_edit_sector_from 
+constexpr my_mcu::ROM_string<18> msg_edit_sector_from 
 	PROGMEM{"First byte to edit"};
 
-constexpr mcu::ROM_string<13> msg_edit_sector_from_error 
+constexpr my_mcu::ROM_string<13> msg_edit_sector_from_error 
 	PROGMEM{"Error reading"};
 
 

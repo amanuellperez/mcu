@@ -39,8 +39,8 @@ static constexpr uint16_t timeout_ms = 3000; // esperamos máximo 3 segundos
 					     
 // microcontroller
 // ---------------
-namespace mcu = atmega;
-using Micro   = mcu::Micro;
+namespace my_mcu = atmega;
+using Micro   = my_mcu::Micro;
 
 
 // pin connections
@@ -67,14 +67,14 @@ constexpr uint8_t one_wire_pin = 15;
 
 // One wire protocol
 // -----------------
-using Cfg = dev::One_wire_cfg<mcu::Micro, one_wire_pin>;
+using Cfg = dev::One_wire_cfg<my_mcu::Micro, one_wire_pin>;
 using One_wire = dev::One_wire<Cfg>;
 using Search = dev::One_wire_search<Cfg>;
 
 
 // uart
 // ----
-class UART : public mcu::UART_iostream{
+class UART : public my_mcu::UART_iostream{
 public:
 // Name? Realmente es empty_get_area(), aunque el standard usa más el nombre
 // de `ignore`
@@ -93,7 +93,7 @@ inline void UART::empty_read_buffer()
 // DEVICES
 // -------
 // Clock
-using Time_counter = mcu::Time_counter2_32kHz_g<timeout_ms>;
+using Time_counter = my_mcu::Time_counter2_32kHz_g<timeout_ms>;
 using Clock	   = dev::Clock_s<Micro, Time_counter>;
 #define ISR_CLOCK ISR_TIMER2_COMPA
 

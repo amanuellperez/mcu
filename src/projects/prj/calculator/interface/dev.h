@@ -41,7 +41,7 @@
 
 #include "../interface.h"
 
-namespace mcu = atmega;
+namespace my_mcu = atmega;
 
 // pins usados
 // ------------

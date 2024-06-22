@@ -29,7 +29,7 @@ void Main::run()
 	else
 	    window_main();
 
-	mcu::Micro::wait_ms(1000);
+	my_mcu::Micro::wait_ms(1000);
     }
 }
 

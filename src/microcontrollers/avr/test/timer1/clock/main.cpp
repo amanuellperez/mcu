@@ -27,9 +27,9 @@
 
 #include <time.h>
 
-namespace mcu = avr_;
+namespace my_mcu = avr_;
 
-using Timer = mcu::Timer1;
+using Timer = my_mcu::Timer1;
 
 
 ISR_TIMER1_COMPA
@@ -51,7 +51,7 @@ std::ostream& operator<<(std::ostream& out, const tm& t)
 
 void print_time()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     time_t sec = time(nullptr);
     tm* t = gmtime(&sec);
 
@@ -75,13 +75,13 @@ void init_time()
 
 int main()
 {
-    mcu::UART_iostream uart;
-    mcu::basic_cfg(uart);
+    my_mcu::UART_iostream uart;
+    my_mcu::basic_cfg(uart);
     uart.turn_on();
 
     Timer::clock_frequency_divide_by_64();
     Timer::enable_output_compare_A_match_interrupt();
-    mcu::enable_interrupts();
+    my_mcu::enable_interrupts();
 
     // Elegimos OCR1A para generar una señal de 1 Hz
     // El osciloscopio la marca de 996ms. Hay que calibrar el número o usar un
@@ -91,7 +91,7 @@ int main()
 
     Timer::CTC_mode_top_OCR1A();
     {
-	mcu::Disable_interrupts l;
+	my_mcu::Disable_interrupts l;
 	Timer::unsafe_output_compare_register_A(ocr1a);
     }
 
@@ -99,7 +99,7 @@ int main()
     Timer::clock_frequency_divide_by_64();
 
     while(1){
-	mcu::wait_ms(1000);
+	my_mcu::wait_ms(1000);
 	print_time();
     }
 }

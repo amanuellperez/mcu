@@ -23,7 +23,7 @@
 #include "../../avr_memory.h"
 
 
-namespace mcu = avr_;
+namespace my_mcu = avr_;
 
 /***************************************************************************
  *			    TEST BÁSICO 
@@ -74,9 +74,9 @@ struct My_struct{
 My_struct rom_read(const My_struct& x)
 {
     My_struct s;
-    s.u8  = mcu::rom_read(x.u8);
-    s.u16 = mcu::rom_read(x.u16);
-    s.en  = mcu::rom_read(x.en);
+    s.u8  = my_mcu::rom_read(x.u8);
+    s.u16 = my_mcu::rom_read(x.u16);
+    s.en  = my_mcu::rom_read(x.en);
 
     return s;
 }
@@ -93,7 +93,7 @@ constexpr static my::My_struct struct1 PROGMEM = {100, 200};
 
 void test_basic()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
 
     // Tipos básicos
     {
@@ -137,8 +137,8 @@ void test_basic()
 
 constexpr uint8_t nu8 = 12;
 constexpr uint16_t nu16 = 47;
-constexpr mcu::ROM_uint8_t pu8 PROGMEM = nu8;
-constexpr mcu::ROM_uint16_t pu16 PROGMEM = nu16;
+constexpr my_mcu::ROM_uint8_t pu8 PROGMEM = nu8;
+constexpr my_mcu::ROM_uint16_t pu16 PROGMEM = nu16;
 
 // Este no tiene que compilar:
 // constexpr Progmem<uint32_t> pu32 PROGMEM = 200;
@@ -146,27 +146,27 @@ constexpr atd::ROM<my::My_struct, my::ROM_read_my_struct> pstruct PROGMEM
 			    = my::My_struct{111, 222, my::Enum::b};
 
 static constexpr uint8_t narray_u8[4] = {10, 20, 30, 40};
-constexpr mcu::ROM_array<uint8_t, 4> parray_u8 PROGMEM = 
+constexpr my_mcu::ROM_array<uint8_t, 4> parray_u8 PROGMEM = 
 	        {narray_u8[0], narray_u8[1], narray_u8[2], narray_u8[3]};
 
-constexpr mcu::ROM_array<my::My_struct, 3, my::ROM_read_my_struct> 
+constexpr my_mcu::ROM_array<my::My_struct, 3, my::ROM_read_my_struct> 
 	parray_struct PROGMEM 
 	= {my::My_struct{11, 22, my::Enum::a}, 
 	   my::My_struct{33, 44, my::Enum::b}, 
 	   my::My_struct{55, 66, my::Enum::c}};
 
-constexpr mcu::ROM_string<6> pstr PROGMEM{"hello"};
+constexpr my_mcu::ROM_string<6> pstr PROGMEM{"hello"};
 
-constexpr mcu::ROM_string_array<3> parray_str PROGMEM = {
+constexpr my_mcu::ROM_string_array<3> parray_str PROGMEM = {
     str1, str2, str3
     };
 
 
 template <size_t N>
-void f(const mcu::ROM_string_array<N>& str0)
+void f(const my_mcu::ROM_string_array<N>& str0)
 {
-    mcu::UART_iostream uart;
-    mcu::ROM_string_array<3> str = str0; // <-- esto genera error en 
+    my_mcu::UART_iostream uart;
+    my_mcu::ROM_string_array<3> str = str0; // <-- esto genera error en 
 					    // tiempo de ejecución
 
     uart << "Dentro de f\n";
@@ -174,7 +174,7 @@ void f(const mcu::ROM_string_array<N>& str0)
     {
 	char buffer[10];
 	for (size_t i = 0; i < str.size(); ++i){
-	    mcu::strcpy(buffer, str[i]);
+	    my_mcu::strcpy(buffer, str[i]);
 	    uart << "str[" << (int) i << "] = " << buffer << '\n';
 	}
     }
@@ -185,7 +185,7 @@ void f(const mcu::ROM_string_array<N>& str0)
 
 void test_progmem()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
 
     uart << "\n\n";
     uint8_t x8 = pu8;
@@ -238,7 +238,7 @@ void test_progmem()
     {
 	char buffer[10];
 	for (size_t i = 0; i < parray_str.size(); ++i){
-	    mcu::strcpy(buffer, parray_str[i]);
+	    my_mcu::strcpy(buffer, parray_str[i]);
 	    uart << "str[" << (int) i << "] = " << buffer << '\n';
 	}
     }
@@ -249,7 +249,7 @@ void test_progmem()
     {
 	char buffer[4];
 	for (size_t i = 0; i < parray_str.size(); ++i){
-	    mcu::strncpy(buffer, parray_str[i], 4);
+	    my_mcu::strncpy(buffer, parray_str[i], 4);
 	    buffer[3] = '\0'; // garantizamos que acaba bien
 	    uart << "str[" << (int) i << "] = " << buffer << '\n';
 	}
@@ -261,7 +261,7 @@ void test_progmem()
     {
 	char buffer[4];
 	for (size_t i = 0; i < parray_str.size(); ++i){
-	    size_t n = mcu::strlcpy(buffer, parray_str[i], 4);
+	    size_t n = my_mcu::strlcpy(buffer, parray_str[i], 4);
 	    uart << "original string has [" << n << "] --> [" 
 			    << (int) i << "] = " << buffer << '\n';
 	}
@@ -271,9 +271,9 @@ void test_progmem()
 
 //void test_progmem_view()
 //{
-//    mcu::UART_iostream uart;
+//    my_mcu::UART_iostream uart;
 //
-//    mcu::ROM_biarray_view<uint8_t, barray_rows, barray_cols> a{barray_u8};
+//    my_mcu::ROM_biarray_view<uint8_t, barray_rows, barray_cols> a{barray_u8};
 //
 //    uart << "\n\nProgram view test\n"
 //	    "-----------------\n";
@@ -290,13 +290,13 @@ void test_progmem()
 //}
 
 
-constexpr mcu::ROM_string<15> menu PROGMEM{"\n\nProgmem test\n"};
+constexpr my_mcu::ROM_string<15> menu PROGMEM{"\n\nProgmem test\n"};
 
 int main()
 {
 // init_UART();
-    mcu::UART_iostream uart;
-    mcu::basic_cfg(uart);
+    my_mcu::UART_iostream uart;
+    my_mcu::basic_cfg(uart);
     uart.turn_on();
 
     atd::print(uart, menu);

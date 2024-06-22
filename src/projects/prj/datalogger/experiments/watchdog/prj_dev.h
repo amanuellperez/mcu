@@ -34,8 +34,8 @@
 
 // microcontroller
 // ---------------
-namespace mcu = atmega;
-using Micro   = mcu::Micro;
+namespace my_mcu = atmega;
+using Micro   = my_mcu::Micro;
 
 
 // pin connections
@@ -59,19 +59,19 @@ constexpr uint8_t one_wire_pin = 15;
 
 // One wire protocol
 // -----------------
-using Cfg = dev::One_wire_cfg<mcu::Micro, one_wire_pin>;
+using Cfg = dev::One_wire_cfg<my_mcu::Micro, one_wire_pin>;
 using One_wire = dev::One_wire<Cfg>;
 using Search = dev::One_wire_search<Cfg>;
 
 
 // UART
 // ----
-using UART = mcu::UART_iostream;
+using UART = my_mcu::UART_iostream;
 
 
 // Hwd Devices
 // -----------
-using Watchdog = mcu::Watchdog;
+using Watchdog = my_mcu::Watchdog;
 using Sensor   = dev::DS18B20<Micro, One_wire>;
 
 

@@ -21,7 +21,7 @@
 			
 char Main::main_menu()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
 
     uart << '\n';
     print_line(uart);

@@ -23,8 +23,8 @@
 
 // Microcontroller
 // ---------------
-namespace mcu = atmega;
-using Micro = mcu::Micro;
+namespace my_mcu = atmega;
+using Micro = my_mcu::Micro;
 
 // Pin connections
 // ---------------
@@ -40,13 +40,13 @@ using Button = dev::Push_button<Micro, button_pin>;
 // Global vbles
 // ------------
 // Terminal
-mcu::UART_iostream uart;
+my_mcu::UART_iostream uart;
 
 // Functions
 // ---------
 void init_uart()
 {
-    mcu::basic_cfg(uart);
+    my_mcu::basic_cfg(uart);
     uart.turn_on();
 }
 

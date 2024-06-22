@@ -40,7 +40,7 @@
 
 #include <avr_atmega.h>
 
-namespace mcu = atmega;
+namespace my_mcu = atmega;
 
 #include "../interface.h"
 

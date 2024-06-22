@@ -31,15 +31,15 @@
 
 // Microcontroller
 // ---------------
-namespace mcu = atmega;
-using Micro   = mcu::Micro;
+namespace my_mcu = atmega;
+using Micro   = my_mcu::Micro;
 
 
 // TWI Protocol
 // ------------
 static constexpr uint8_t TWI_buffer_size = 70; 
 using TWI_master_cfg = dev::TWI_master_cfg<Micro, 
-                                           mcu::TWI_basic,
+                                           my_mcu::TWI_basic,
 					   TWI_buffer_size>;
 
 using TWI = dev::TWI_master<TWI_master_cfg>;
@@ -55,7 +55,7 @@ using RTC = dev::DS1307_clock<TWI>;
 // del DS1307.h!!! ¿por qué? Debería de coger la función más especializada.
 // Con todo con concepts este problema debería de desaparecer ya que la
 // template quedaría sobrecargada solo para IOxtreams.
-mcu::UART_iostream& print(mcu::UART_iostream& out, const RTC::Time_point& t)
+my_mcu::UART_iostream& print(my_mcu::UART_iostream& out, const RTC::Time_point& t)
 {
     if (t.clock_on){
 	out << "Encendido: "
@@ -95,7 +95,7 @@ std::ostream& operator<<(std::ostream& out, const RTC::time_point& t0)
 
 void test_clock()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
 
     uart << "\nProbando clock\n"
 	 <<   "==============\n";
@@ -141,7 +141,7 @@ void test_clock()
 	if (rtc.error())
 	    uart << "Error: error en el rtc!!!\n";
 
-	mcu::Micro::wait_ms(1000);
+	my_mcu::Micro::wait_ms(1000);
 
     }
 }
@@ -149,8 +149,8 @@ void test_clock()
 int main()
 {
 // init_UART();
-    mcu::UART_iostream uart;
-    mcu::basic_cfg(uart);
+    my_mcu::UART_iostream uart;
+    my_mcu::basic_cfg(uart);
     uart.turn_on();
 
 // init_TWI();

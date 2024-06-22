@@ -27,7 +27,7 @@
 
 void Main::print_sector()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     print_line(uart);
     sector.print(uart);
 
@@ -35,7 +35,7 @@ void Main::print_sector()
 
 bool Main::print_sector_fromto_ask(Sector::Address& from, size_t& sz)
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
 
     uart << '\n';
     print_line(uart);
@@ -73,7 +73,7 @@ bool Main::print_sector_fromto_ask(Sector::Address& from, size_t& sz)
 
 void Main::print_sector_fromto()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
 
     Sector::Address from{};
     size_t sz{};

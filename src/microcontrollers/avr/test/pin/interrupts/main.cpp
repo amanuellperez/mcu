@@ -26,13 +26,13 @@
 
 // Micro
 // -----
-namespace mcu = avr_;
-//using Micro = mcu::Micro;
+namespace my_mcu = avr_;
+//using Micro = my_mcu::Micro;
 
 // Pins
 // ----
 template <uint8_t n>
-using Pin = mcu::Pin<n>;
+using Pin = my_mcu::Pin<n>;
 
 // Hwd Devices
 // -----------
@@ -269,7 +269,7 @@ void pins_as_input_with_pullup()
  
 void init_uart()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     basic_cfg(uart);
     uart.turn_on();
 }
@@ -279,14 +279,14 @@ void init()
     init_uart();
 
     pins_as_input_with_pullup();
-    mcu::enable_interrupts();
+    my_mcu::enable_interrupts();
 }
 
 
 // Devuelve true si queremos acabar
 bool menu_pcint()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     uart << "\n\nMenu\n"
 	        "----\n"
 	    "1. Enable interrupt\n"
@@ -331,7 +331,7 @@ bool menu_pcint()
 
 void check_pin(volatile bool& int_pin, uint8_t npin)
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
 
     if (int_pin){
 	uart << "pin " << (int) npin << " interrupt\n";
@@ -366,7 +366,7 @@ void check_pcints()
 
 void test_pcint()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     uart << "\nTest PCINT\n"
 	      "----------\n"
 	     "Connect a push button to a pin and test the interruption\n"
@@ -378,7 +378,7 @@ void test_pcint()
     while(1){
 	check_pcints();
 
-	if (mcu::UART_basic::are_there_data_unread()){
+	if (my_mcu::UART_basic::are_there_data_unread()){
 	    char tmp{};
 	    uart >> tmp; // borramos el caracter usado para entrar aqui
 	    if (menu_pcint())
@@ -392,7 +392,7 @@ void test_pcint()
 template <uint8_t nINT, uint8_t npin>
 void test_int()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     while(1){
 	uart << "\nTest INT" << nINT << " (in pin " << (int) npin << ")\n"
 		  "---------------\n"
@@ -435,7 +435,7 @@ void test_int1()
 
 void main_menu()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     uart << "\n\nMenu\n"
 		"----\n"
 	    "0. Test INT0\n"
@@ -457,7 +457,7 @@ int main()
 {
     init();
 
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     uart << "\n\nExternal interrupts test\n"
 	        "------------------------\n"
 		"All external interrupts enables by default\n";
@@ -510,14 +510,14 @@ ISR(PCINT2_vect){// pines del 2 al 6, y del 11 al 13
 }
 
 ISR_INT0{
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     uart << "INT0 interrupt\n";
 
 }
 
 
 ISR_INT1{
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     uart << "INT1 interrupt\n";
 
 }

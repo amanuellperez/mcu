@@ -40,8 +40,8 @@
 					     
 // microcontroller
 // ---------------
-namespace mcu = atmega;
-using Micro   = mcu::Micro;
+namespace my_mcu = atmega;
+using Micro   = my_mcu::Micro;
 
 
 // pin connections
@@ -61,8 +61,8 @@ static constexpr uint8_t IN4_pin = 14;
 static constexpr uint8_t ENA_pin = 15;
 static constexpr uint8_t ENB_pin = 16;
 
-using PWM_pinA = mcu::PWM1_pin<ENA_pin>;
-using PWM_pinB = mcu::PWM1_pin<ENB_pin>;
+using PWM_pinA = my_mcu::PWM1_pin<ENA_pin>;
+using PWM_pinB = my_mcu::PWM1_pin<ENB_pin>;
 
 // Not using SPI: available pins 16, 17, 18, 19
 

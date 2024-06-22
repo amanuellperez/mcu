@@ -22,10 +22,10 @@
 #include "../../../avr_timer0_generic.h"
 #include "../../../avr_timer1_generic.h"
 
-namespace mcu = avr_;
+namespace my_mcu = avr_;
 
-using SWG0 = mcu::Square_wave_generator0_g;
-using SWG1 = mcu::Square_wave_generator1_g;
+using SWG0 = my_mcu::Square_wave_generator0_g;
+using SWG1 = my_mcu::Square_wave_generator1_g;
 
 enum class Use_timer{zero, one };
 
@@ -38,8 +38,8 @@ static_assert(SWG1::is_pin(16));
 
 int main()
 {
-    mcu::UART_iostream uart;
-    mcu::basic_cfg(uart);
+    my_mcu::UART_iostream uart;
+    my_mcu::basic_cfg(uart);
     uart.turn_on();
 
     uart << "\n\nSquare wave test\n"

@@ -35,8 +35,8 @@
 
 // micro
 // -----
-namespace mcu = atmega;
-using  Micro  = mcu::Micro;
+namespace my_mcu = atmega;
+using  Micro  = my_mcu::Micro;
 
 // pins connections
 // ----------------
@@ -93,7 +93,7 @@ using Keyboard	   = dev::Basic_keyrow<Micro, Keyrow_pins, Keyrow_codes>;
 
 // Chronometer
 // -----------
-using Chronometer = dev::Clock_ms<Micro, mcu::Time_counter1_g>;
+using Chronometer = dev::Clock_ms<Micro, my_mcu::Time_counter1_g>;
 
 #endif
 

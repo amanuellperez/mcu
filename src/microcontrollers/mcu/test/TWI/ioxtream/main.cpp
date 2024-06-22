@@ -24,15 +24,15 @@
 
 // Microcontroller
 // ---------------
-namespace mcu = atmega;
-using Micro   = mcu::Micro;
+namespace my_mcu = atmega;
+using Micro   = my_mcu::Micro;
 
 
 // Devices
 // -------
 constexpr uint8_t TWI_buffer_size = 100;
 using TWI_master_cfg = dev::TWI_master_cfg<Micro, 
-                                           mcu::TWI_basic,
+                                           my_mcu::TWI_basic,
 					   TWI_buffer_size>;
 
 using TWI_master  = dev::TWI_master<TWI_master_cfg>;
@@ -47,7 +47,7 @@ constexpr uint8_t slave_address = 0x10;
 // ---------
 void twi_print_state()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
 
     if (TWI::error())
 	uart << "state == error()\n";
@@ -80,7 +80,7 @@ void twi_print_state()
 
 void twi_print_error()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
 
     if (TWI::no_response())
 	uart << "Slave no responde.\n";
@@ -109,7 +109,7 @@ void twi_print_error()
 
 void send_service1()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     uart << "\n==============================\n";
     uart << "Service1:\n";
 
@@ -164,7 +164,7 @@ void send_service1()
 
 void send_service2()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     uart << "\n==============================\n";
     uart << "Service2: ";
 
@@ -187,20 +187,20 @@ void send_service2()
 template <typename T>
 void uart_print(const T& x)
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     uart << x;
 }
 
 void uart_print(uint8_t b)
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     uart << (int) b;
 }
 
 template <typename Int>
 void send_type(const Int& x0, const char* tname)
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     uart << "\n==============================\n";
     uart << "Sending a " << tname << ": ";
 
@@ -240,7 +240,7 @@ void send_type(const Int& x0, const char* tname)
 
 void send_service4()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     uart << "\n==============================\n";
     uart << "Service4: \n";
 
@@ -331,7 +331,7 @@ Ostream& operator<<(Ostream& out, const Data& d)
 
 void service(const Data& in, Data& out)
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
 
     TWI twi(slave_address);
     
@@ -355,7 +355,7 @@ void service(const Data& in, Data& out)
 
 void test_typical_service()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     uart << "\n==============================\n";
     uart << "typical_service: ";
 
@@ -375,7 +375,7 @@ void test_n()
     constexpr int data_size = 3;
     uint8_t data[3] = {uint8_t{10}, uint8_t{20}, uint8_t{30}};
 
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     uart << "\n==============================\n";
     uart << "Probando read(q,n) y write(q, n): ";
 
@@ -431,8 +431,8 @@ void test_master()
 
 int main() 
 {
-    mcu::UART_iostream uart;
-    mcu::basic_cfg(uart);
+    my_mcu::UART_iostream uart;
+    my_mcu::basic_cfg(uart);
     uart.turn_on();
 
     uart << "\n\n\n* * * * * * * * * * * * * * * * * * * * * * * * * * * *\n";

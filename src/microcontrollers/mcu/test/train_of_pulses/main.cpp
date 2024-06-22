@@ -29,8 +29,8 @@ static constexpr int16_t nmax_pulses = 64;
 
 // Microcontroller
 // ----------------
-namespace mcu = atmega; 
-using Micro   = mcu::Micro;
+namespace my_mcu = atmega; 
+using Micro   = my_mcu::Micro;
 
 // Pin connections
 // ---------------
@@ -40,7 +40,7 @@ constexpr uint8_t test_pin = 15;
 
 // Devices
 // -------
-using Miniclock_us = dev::Miniclock_us<mcu::Micro, mcu::Time_counter1_g>;
+using Miniclock_us = dev::Miniclock_us<my_mcu::Micro, my_mcu::Time_counter1_g>;
 using Pin = Micro::Pin<test_pin>;
 
 
@@ -69,14 +69,14 @@ using Train_of_pulses = dev::Train_of_pulses<nmax_pulses>;
 // ---------
 void init_uart()
 {
-    mcu::UART_iostream uart;
-    mcu::basic_cfg(uart);
+    my_mcu::UART_iostream uart;
+    my_mcu::basic_cfg(uart);
     uart.turn_on();
 }
 
 void print_received(const Train_of_pulses& pulse)
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     uart << "\n\nReceived " << pulse.size() << " pulses:\n"
 	        "---------"    "-----"    "--------\n";
 
@@ -106,7 +106,7 @@ void print_received(const Train_of_pulses& pulse)
 
 void receive_with_isr()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
 
 
     uart << "\n\nReceiving pulses with interrupt\n"
@@ -134,7 +134,7 @@ void receive_with_isr()
 
 void receive_polling()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     uart << "\n\nReceiving polling the pin\n"
 	    "-------------------------\n";
 
@@ -160,7 +160,7 @@ int main()
     init_uart();
     Miniclock_us::cfg();
 
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
 
     uart << "\n\nTrain of pulses test\n"
 	        "--------------------\n"

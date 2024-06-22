@@ -23,8 +23,8 @@
 
 // Micro
 // -----
-namespace mcu = atmega; 
-using Micro   = mcu::Micro;
+namespace my_mcu = atmega; 
+using Micro   = my_mcu::Micro;
 
 // pins
 constexpr uint8_t push_button_pin = 26; // es ADC, veamos que todo funciona
@@ -34,12 +34,12 @@ constexpr uint8_t y_pin = 28;
 
 // Hwd Devices
 // -----------
-using ADC = mcu::ADC;
+using ADC = my_mcu::ADC;
 constexpr uint16_t AREF_in_mV = 5'000;
 constexpr uint8_t AREF_connection = ADC::AREF_connect_to_internal_AVCC;
-using kk = mcu::ADC_pin_single_mode<28, 5'000>;
-using ADC_x_pin = mcu::ADC_pin_single_mode<x_pin, AREF_in_mV>;
-using ADC_y_pin = mcu::ADC_pin_single_mode<y_pin, AREF_in_mV>;
+using kk = my_mcu::ADC_pin_single_mode<28, 5'000>;
+using ADC_x_pin = my_mcu::ADC_pin_single_mode<x_pin, AREF_in_mV>;
+using ADC_y_pin = my_mcu::ADC_pin_single_mode<y_pin, AREF_in_mV>;
 
 using Cfg = dev::Joystick_cfg_type1<Micro, 
 				    ADC_x_pin, ADC_y_pin,
@@ -51,8 +51,8 @@ using Joystick = dev::Joystick_type1<Cfg>;
 // ---------
 void init_uart()
 {
-    mcu::UART_iostream uart;
-    mcu::basic_cfg(uart);
+    my_mcu::UART_iostream uart;
+    my_mcu::basic_cfg(uart);
     uart.turn_on();
 }
 
@@ -64,7 +64,7 @@ void init_adc()
 
 void press_key_to_continue()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     uart << "Press a key to continue\n";
 
     char c{};
@@ -74,7 +74,7 @@ void press_key_to_continue()
 
 void hello()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     uart << "\n\nJoystick test\n"
 	        "-------------\n"
 		"IMPORTANT: Don't forget to connect AVCC to power\n"
@@ -97,7 +97,7 @@ int main()
 
     Joystick joystick;
 
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     
     while(1){
 	

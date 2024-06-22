@@ -22,8 +22,8 @@
 
 // Microcontroller
 // ---------------
-namespace mcu = atmega;
-using Micro   = mcu::Micro;
+namespace my_mcu = atmega;
+using Micro   = my_mcu::Micro;
 
 // UART
 // ----
@@ -40,8 +40,8 @@ static constexpr uint8_t IN4_pin = 14;
 static constexpr uint8_t ENA_pin = 15;
 static constexpr uint8_t ENB_pin = 16;
 
-using PWM_pinA = mcu::PWM1_pin<ENA_pin>;
-using PWM_pinB = mcu::PWM1_pin<ENB_pin>;
+using PWM_pinA = my_mcu::PWM1_pin<ENA_pin>;
+using PWM_pinB = my_mcu::PWM1_pin<ENB_pin>;
 
 // Devices
 // -------
@@ -55,14 +55,14 @@ using L298N = dev::L298N_basic<Micro, L298_pinA, L298_pinB>;
 // ---------
 void init_uart()
 {
-    mcu::UART_iostream uart;
-    mcu::basic_cfg<baud_rate>(uart);
+    my_mcu::UART_iostream uart;
+    my_mcu::basic_cfg<baud_rate>(uart);
     uart.turn_on();
 }
 
 void hello()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     uart << "\n\nL298N test\n"
 	        "----------\n"
 		"Connections:\n"
@@ -83,7 +83,7 @@ inline atd::Sign to_Sign(char c)
 
 void port1_voltage()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     uart << "\nPercentage: ";
     uint16_t p{0};
     uart >> p;
@@ -102,7 +102,7 @@ void port1_voltage()
 
 void port1_percentage()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     uart << "\nPercentage: ";
     uint16_t p{0};
     uart >> p;
@@ -116,7 +116,7 @@ void port1_percentage()
 
 void port1_sign()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     uart << "sign (+/-): ";
     char sign{'+'};
     uart >> sign;
@@ -129,7 +129,7 @@ void port1_sign()
 
 void test_port1()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     uart << "\n\nPort 1 change:\n"
 	    "\t0. stop\n"
 	    "\t1. Voltage\n"
@@ -153,7 +153,7 @@ void test_port1()
 
 void port2_voltage()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     uart << "\nPercentage: ";
     uint16_t p{0};
     uart >> p;
@@ -172,7 +172,7 @@ void port2_voltage()
 
 void port2_percentage()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     uart << "\nPercentage: ";
     uint16_t p{0};
     uart >> p;
@@ -186,7 +186,7 @@ void port2_percentage()
 
 void port2_sign()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     uart << "sign (+/-): ";
     char sign{'+'};
     uart >> sign;
@@ -199,7 +199,7 @@ void port2_sign()
 
 void test_port2()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     uart << "\n\nPort 2 change:\n"
 	    "\t0. stop\n"
 	    "\t1. Voltage\n"
@@ -227,7 +227,7 @@ int main()
 
     hello();
 
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
 
     while(1){
 	uart << "\nMenu\n"

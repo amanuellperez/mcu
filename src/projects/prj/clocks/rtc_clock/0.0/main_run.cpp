@@ -30,7 +30,7 @@ void Main::run()
 	else 
 	    window_main();
 
-	mcu::Micro::wait_ms(100); // ¿se puede poner 500 ms? No, dejaría de funcionar el
+	my_mcu::Micro::wait_ms(100); // ¿se puede poner 500 ms? No, dejaría de funcionar el
 		      // teclado ya que solo se miraría cada 500 ms si se
 		      // ha pulsado una tecla o no.
     }

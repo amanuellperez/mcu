@@ -35,7 +35,7 @@ void Main::run()
 	else
 	    window_main_.run();
 
-	mcu::Micro::wait_ms(time_polling);
+	my_mcu::Micro::wait_ms(time_polling);
     }
 }
 

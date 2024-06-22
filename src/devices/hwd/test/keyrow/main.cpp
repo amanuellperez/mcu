@@ -25,8 +25,8 @@
 
 // Microcontroller
 // ----------------
-namespace mcu = atmega;
-using Micro   = mcu::Micro;
+namespace my_mcu = atmega;
+using Micro   = my_mcu::Micro;
 
 // KeyRow
 // ------
@@ -46,7 +46,7 @@ using Keyrow = dev::Basic_keyrow<Micro, Keyrow_pins, Keyrow_codes>;
 
 void test_keyrow()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     uart << "\n\nPress test\n";
 
     Keyrow keyrow;
@@ -64,13 +64,13 @@ void test_keyrow()
 	// CHECK_DONT_COMPILE
 //	if (keyrow.key<100>().is_pressed())
 //	  uart << "error no tiene que compilar\n" << std::flush;
-	mcu::Micro::wait_ms(100);
+	my_mcu::Micro::wait_ms(100);
     }
 }
 
 void test_scan()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
 
     uart << "\n\nRead test\n";
 
@@ -84,7 +84,7 @@ void test_scan()
 	    case DOWN_KEY: uart << "down\n"; break;
 	    case NO_KEY: uart << "none\n"; break;
 	}
-	mcu::Micro::wait_ms(100);
+	my_mcu::Micro::wait_ms(100);
     }
 
 }
@@ -93,8 +93,8 @@ void test_scan()
 int main()
 {
 // init_uart():
-    mcu::UART_iostream uart;
-    mcu::basic_cfg(uart);
+    my_mcu::UART_iostream uart;
+    my_mcu::basic_cfg(uart);
     uart.turn_on();
 
     uart << "\n\nKeyrow test\n"

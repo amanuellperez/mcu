@@ -30,11 +30,11 @@
 
 // Microcontroller
 // ---------------
-namespace mcu = avr_;
+namespace my_mcu = avr_;
 
 // Hwd devices
 // -----------
-using Timer = mcu::Timer2;
+using Timer = my_mcu::Timer2;
 
 // Cfg
 // ---
@@ -49,8 +49,8 @@ volatile uint32_t counter = 0;
 // ---------
 void init_uart()
 {
-    mcu::UART_iostream uart;
-    mcu::basic_cfg(uart);
+    my_mcu::UART_iostream uart;
+    my_mcu::basic_cfg(uart);
     uart.turn_on();
 }
 
@@ -59,7 +59,7 @@ void init_uart()
 // (ver punto "22.9 Asynchronous Operation of Timer/Counter2" de la datasheet)
 void timer_init_asynchronous_mode()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
 
     Timer::disable_interrupts();
     Timer::enable_asynchronous_mode();
@@ -77,7 +77,7 @@ void timer_init_asynchronous_mode()
 
 	atd::print_int_as_hex(uart, ASSR);
 	uart << " ";
-	mcu::wait_ms(400);
+	my_mcu::wait_ms(400);
     }
     uart << "OK\n";
 
@@ -89,7 +89,7 @@ int main()
 {
     init_uart();
 
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     uart << "\nTimer2 counter test\n"
 	      "-------------------\n"
 	      "Connect a crystal of 32kHz to pins TOSC1, TOSC2\n"
@@ -99,20 +99,20 @@ int main()
 
 
     timer_init_asynchronous_mode();
-    mcu::print_registers_timer2(uart);
+    my_mcu::print_registers_timer2(uart);
 
 // start:
-    mcu::enable_interrupts();
+    my_mcu::enable_interrupts();
 					      
 
 
     while(1){
 	{// atomic
-	    mcu::Disable_interrupts di;
+	    my_mcu::Disable_interrupts di;
 	    uart << (int) counter << " s\n";
 	}
 
-	mcu::wait_ms(1000);
+	my_mcu::wait_ms(1000);
     }
 }
 
@@ -120,7 +120,7 @@ int main()
 
 ISR_TIMER2_OVF
 {
-//    mcu::UART_iostream uart;
+//    my_mcu::UART_iostream uart;
 //    uart << "int\n";
     counter = counter + 1;
 }

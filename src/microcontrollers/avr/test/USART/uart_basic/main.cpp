@@ -23,12 +23,12 @@
 
 // Microcontroller
 // ---------------
-namespace mcu = avr_;
+namespace my_mcu = avr_;
 
 
 // Hwd devices
 // -----------
-using UART = mcu::UART_basic;
+using UART = my_mcu::UART_basic;
 
 // Cfg
 // ---
@@ -39,7 +39,7 @@ static constexpr uint8_t read_byte_fail = 0x04; // EOT
 // ---------
 void init_uart()
 {
-    mcu::UART_basic_cfg();
+    my_mcu::UART_basic_cfg();
 
     UART::enable_receiver();
     UART::enable_transmitter();
@@ -54,7 +54,7 @@ uint8_t write(char c, uint16_t timeout = max_timeout_ms)
 	    return 0;
 
 	--timeout;
-	mcu::wait_ms(1);
+	my_mcu::wait_ms(1);
     }
 
     UART::data_register(c);
@@ -91,7 +91,7 @@ uint8_t read_byte(uint16_t timeout = max_timeout_ms)
 	    return read_byte_fail;
 
 	--timeout;
-	mcu::wait_ms(1);
+	my_mcu::wait_ms(1);
     }
 
     return UART::data_register();

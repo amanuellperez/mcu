@@ -41,8 +41,8 @@
 
 // micro
 // -----
-namespace mcu = atmega;
-using  Micro  = mcu::Micro;
+namespace my_mcu = atmega;
+using  Micro  = my_mcu::Micro;
 
 
 // pins usados
@@ -100,7 +100,7 @@ using Keyboard     = dev::Basic_keyrow<Micro, Keyrow_pins, Keyrow_codes>;
 // system_clock
 // ------------
 using System_clock = 
-	dev::Clock_s<Micro, mcu::Time_counter1_g>;
+	dev::Clock_s<Micro, my_mcu::Time_counter1_g>;
 
 
 

@@ -62,7 +62,6 @@ character streams, but `ioxtreams` are bytes streams. I want to send `uint16_t x
 = 500` as two byts '0x01F4` and not as 3 characters '5', '0', '0'.
 
 
-Compiler: avr-gcc 11.3.0
 
 ---
 
@@ -237,4 +236,3 @@ clásicos de C++ son flujos de caracteres, mientras que un `ioxtream` es un fluj
 de bytes (en TWI, SPI... son precisamente estos flujos los que nos interesan).
 
 
-Compilador: avr-gcc 11.3.0

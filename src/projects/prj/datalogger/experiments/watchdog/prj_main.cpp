@@ -23,7 +23,7 @@
 void Main::init_uart()
 {
     UART uart;
-    mcu::basic_cfg(uart);
+    my_mcu::basic_cfg(uart);
     uart.turn_on();
 }
 

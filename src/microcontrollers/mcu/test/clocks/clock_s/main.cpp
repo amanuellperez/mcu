@@ -23,15 +23,15 @@
 
 // Microcontroller
 // ---------------
-namespace mcu = atmega;
-using Micro   = mcu::Micro;
+namespace my_mcu = atmega;
+using Micro   = my_mcu::Micro;
 
 
 // Devices
 // -------
-using Clock0 = dev::Clock_s<Micro, mcu::Time_counter0_g>;
-using Clock1 = dev::Clock_s<Micro, mcu::Time_counter1_g>;
-using Clock2 = dev::Clock_s<Micro, mcu::Time_counter2_g>;
+using Clock0 = dev::Clock_s<Micro, my_mcu::Time_counter0_g>;
+using Clock1 = dev::Clock_s<Micro, my_mcu::Time_counter1_g>;
+using Clock2 = dev::Clock_s<Micro, my_mcu::Time_counter2_g>;
 
 
 // Functions
@@ -60,7 +60,7 @@ std::ostream& operator<<(std::ostream& out, const Date_time& t)
 template <typename Clock>
 void run_test()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
 
     for (uint8_t i = 0; i < 10; ++i){
 	if (!(i % 5))
@@ -74,7 +74,7 @@ void run_test()
 template <typename Clock>
 void test_leap_year()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
 
     uart << "\n\nTest leap year\n";
 
@@ -94,7 +94,7 @@ void test_leap_year()
 template <typename Clock>
 void test_not_leap_year()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
 
     uart << "\n\nTest not leap year\n";
 
@@ -115,7 +115,7 @@ void test_not_leap_year()
 template <typename Clock>
 void test_end_year()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
 
     uart << "\n\nTest end year\n";
 
@@ -138,8 +138,8 @@ void test_end_year()
 
 void init_uart()
 {
-    mcu::UART_iostream uart;
-    mcu::basic_cfg(uart);
+    my_mcu::UART_iostream uart;
+    my_mcu::basic_cfg(uart);
     uart.turn_on();
 }
 
@@ -148,7 +148,7 @@ void init_uart()
 template <typename Clock>
 void test(const char* name)
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     uart << "\n\n" << name << " test\n"
 		"----------\n";
     Clock::turn_on();
@@ -180,7 +180,7 @@ ISR_TIMER0_COMPA
 {
     Clock0::tick();
     if (Clock0::is_new_second()){
-	mcu::UART_iostream uart;
+	my_mcu::UART_iostream uart;
 	uart << "tick0: ";
     }
 }
@@ -190,7 +190,7 @@ ISR_TIMER1_COMPA
     Clock1::tick();
 
     if (Clock1::is_new_second()){
-	mcu::UART_iostream uart;
+	my_mcu::UART_iostream uart;
 	uart << "tick1: ";
     }
 }
@@ -199,7 +199,7 @@ ISR_TIMER2_COMPA
 {
     Clock2::tick();
     if (Clock2::is_new_second()){
-	mcu::UART_iostream uart;
+	my_mcu::UART_iostream uart;
 	uart << "tick2: ";
     }
 }

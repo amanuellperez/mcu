@@ -25,19 +25,19 @@
 
 // microcontroller
 // ---------------
-namespace mcu = avr_;
-using Micro = mcu::Micro;
+namespace my_mcu = avr_;
+using Micro = my_mcu::Micro;
 #include "../../avr_watchdog.h" // TODO: orden
 
 // pin connections
 // ---------------
 constexpr uint8_t npin = 15;
-using Pin = mcu::Pin<npin>;
+using Pin = my_mcu::Pin<npin>;
 
 
 // Hwd Devices
 // -----------
-using Watchdog = mcu::Watchdog;
+using Watchdog = my_mcu::Watchdog;
 
 
 /***************************************************************************
@@ -51,8 +51,8 @@ volatile bool counter;
 // ---------
 void init_uart()
 {
-    mcu::UART_iostream uart;
-    mcu::basic_cfg(uart);
+    my_mcu::UART_iostream uart;
+    my_mcu::basic_cfg(uart);
     uart.turn_on();
 }
 
@@ -63,7 +63,7 @@ int main()
     counter = false;
 
 // menu
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     uart << "\n\nWatchdog test\n"
 	        "-------------\n"
 		"Connect oscilloscope to pin " << (int) Pin::number << "\n"

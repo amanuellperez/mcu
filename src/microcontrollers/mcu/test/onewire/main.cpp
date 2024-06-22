@@ -24,8 +24,8 @@
 
 // Microcontroller
 // ----------------
-namespace mcu = atmega; 
-using Micro   = mcu::Micro;
+namespace my_mcu = atmega; 
+using Micro   = my_mcu::Micro;
 
 // Pin connections
 // ---------------
@@ -34,7 +34,7 @@ constexpr uint8_t test_pin = 15;
 
 // Devices
 // -------
-using Cfg      = dev::One_wire_cfg<mcu::Micro, test_pin>;
+using Cfg      = dev::One_wire_cfg<my_mcu::Micro, test_pin>;
 using One_wire = dev::One_wire<Cfg>;
 using Device = dev::One_wire_device;
 using Search = dev::One_wire_search<Cfg>;
@@ -45,8 +45,8 @@ using Search = dev::One_wire_search<Cfg>;
 // ---------
 void init_uart()
 {
-    mcu::UART_iostream uart;
-    mcu::basic_cfg(uart);
+    my_mcu::UART_iostream uart;
+    my_mcu::basic_cfg(uart);
     uart.turn_on();
 }
 
@@ -54,7 +54,7 @@ void init_uart()
 
 void print_menu()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
 
     uart << "\n----------------\n"
 	    "[b]asic test\n"
@@ -70,7 +70,7 @@ void print_menu()
 
 void print_device_found(const Device& dev)
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
 
     uart << "Device found\n";
     
@@ -91,7 +91,7 @@ void print_device_found(const Device& dev)
 
 void DS18B20_convert_T()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
 
     One_wire::reset();
     One_wire::write(0xCC); // Skip ROM command to select a single device
@@ -120,14 +120,14 @@ void DS18B20_print_T(uint8_t T0, uint8_t T1)
     
     uint8_t T_dec = (T0 & 0x0F);
 
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     uart << (int) T << '.' << (int) T_dec;
 }
 
 
 void DS18B20_print_scratchpad(const uint8_t* scratchpad)
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
 
     uart << "Scratchpad\n"
 	    "\tTemperature (LSB MSB = 0x50 0x05)= ";
@@ -162,7 +162,7 @@ void DS18B20_print_scratchpad(const uint8_t* scratchpad)
 
 void DS18B20_read_scratchpad()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
 
     static constexpr uint8_t scratchpad_size = 9;
     uint8_t scratchpad[scratchpad_size];
@@ -184,7 +184,7 @@ void DS18B20_read_scratchpad()
 
 void DS18B20_test()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     
     uart << "\nDS18B20 basic test\n"
 	    "------------------\n"
@@ -202,7 +202,7 @@ void DS18B20_test()
 
 void basic_test()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
 
     uart << "\nBasic test\n"
 	      "----------\n"
@@ -227,7 +227,7 @@ void basic_test()
 
 void search_test(Search::Type type)
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
 
     uint8_t n = 0;
 
@@ -252,7 +252,7 @@ void search_test(Search::Type type)
 
 void search_test()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
 
     uart << "\nSearch test\n"
 	      "-----------\n"
@@ -275,7 +275,7 @@ void search_test()
 
 void read_rom_test()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     uart << "Read rom command\n";
 
     if (!One_wire::reset()){
@@ -297,7 +297,7 @@ int main()
 {
     init_uart();
 
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
 
     uart << "\n\nOne wire test\n"
 	        "-------------\n"

@@ -25,15 +25,15 @@
 
 // Microcontroller
 // ---------------
-namespace mcu = avr_;
+namespace my_mcu = avr_;
 
 // Hwd devices
 // -----------
-using Timer = mcu::Timer0;
+using Timer = my_mcu::Timer0;
 
 // Types
 // -----
-using namespace mcu::literals;
+using namespace my_mcu::literals;
 
 
 // Si se quiere que generar una señal de 1 segundo, usar period_in_us = 64 y:
@@ -45,8 +45,8 @@ using namespace mcu::literals;
 
 void timer_on_1MHz(uint16_t period_in_us)
 {
-    if constexpr (mcu::clock_frequency == 1_MHz){
-	mcu::UART_iostream uart;
+    if constexpr (my_mcu::clock_frequency == 1_MHz){
+	my_mcu::UART_iostream uart;
 
 	switch(period_in_us){
 	    case 1: Timer::clock_frequency_no_preescaling(); break;
@@ -64,9 +64,9 @@ void timer_on_1MHz(uint16_t period_in_us)
 
 void timer_on_8MHz(uint16_t period_in_us)
 {
-    if constexpr (mcu::clock_frequency == 8_MHz){// si no se pone aunque no se llame a 
+    if constexpr (my_mcu::clock_frequency == 8_MHz){// si no se pone aunque no se llame a 
 	    // timer_on_8MHz (por ser a 1MHz) la compila, generando error!!!
-	mcu::UART_iostream uart;
+	my_mcu::UART_iostream uart;
 
 	switch(period_in_us){
 	    case 1: Timer::clock_frequency_divide_by_8(); break;
@@ -84,10 +84,10 @@ void timer_on_8MHz(uint16_t period_in_us)
 
 void timer_on(uint16_t period_in_us)
 {
-    if constexpr (mcu::clock_frequency == 1_MHz)
+    if constexpr (my_mcu::clock_frequency == 1_MHz)
 	timer_on_1MHz(period_in_us);
 
-    else if constexpr (mcu::clock_frequency == 8_MHz)
+    else if constexpr (my_mcu::clock_frequency == 8_MHz)
 	timer_on_8MHz(period_in_us);
 
 }
@@ -97,7 +97,7 @@ void print_state(const Timer::counter_type& top, uint16_t period_in_us)
 {
     uint32_t period = uint32_t{2} * (uint32_t{top} + 1)* uint32_t{period_in_us};
 
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     uart << "\n\nState\n"
 		"-----\n"
 	      "top          = " << (int) top <<
@@ -115,7 +115,7 @@ void print_state(const Timer::counter_type& top, uint16_t period_in_us)
  ***************************************************************************/
 uint16_t select_period_1MHz()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
 
     uart << "\n\nSelect period in us of the clock timer (avr at 1MHz):\n"
 	    "1\n"
@@ -141,7 +141,7 @@ uint16_t select_period_1MHz()
 
 uint16_t select_period_8MHz()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
 
     uart << "\n\nSelect period in us of the clock timer (avr at 8MHz):\n"
 	    "1\n"
@@ -166,14 +166,14 @@ uint16_t select_period_8MHz()
 
 uint16_t _select_period()
 {
-    if constexpr (mcu::clock_frequency == 1_MHz)
+    if constexpr (my_mcu::clock_frequency == 1_MHz)
 	return select_period_1MHz();
 
-    else if constexpr (mcu::clock_frequency == 8_MHz)
+    else if constexpr (my_mcu::clock_frequency == 8_MHz)
 	return select_period_8MHz();
 
     else{
-	mcu::UART_iostream uart;
+	my_mcu::UART_iostream uart;
 	uart << "ERROR: select_period(), unknown frecuency\n";
 	return 1;
     }
@@ -191,7 +191,7 @@ uint16_t select_period(uint16_t period_in_us)
 
 Timer::counter_type select_top(Timer::counter_type top)
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
 
     uart << "\ntop (max " << (int) Timer::max() << ") = ";
 
@@ -210,7 +210,7 @@ Timer::counter_type select_top(Timer::counter_type top)
  ***************************************************************************/
 void oca_menu()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
 
     uart << "\nOCA menu:\n"
 	    "[d]isconnect\n"
@@ -234,7 +234,7 @@ void oca_menu()
 
 void ocb_menu()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
 
     uart << "\nOCB menu:\n"
 	    "[d]isconnect\n"
@@ -257,7 +257,7 @@ void ocb_menu()
 
 void main_menu(Timer::counter_type& top, uint16_t& period_in_us)
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
 
     print_state(top, period_in_us);
 
@@ -289,8 +289,8 @@ void main_menu(Timer::counter_type& top, uint16_t& period_in_us)
  ***************************************************************************/
 void init_uart()
 {
-    mcu::UART_iostream uart;
-    mcu::basic_cfg(uart);
+    my_mcu::UART_iostream uart;
+    my_mcu::basic_cfg(uart);
     uart.turn_on();
 }
 
@@ -307,7 +307,7 @@ void init_timer(const Timer::counter_type& top, uint16_t period_in_us)
 // Presentación
 void main_hello()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
 
     uart << "\n\nCTC mode test\n"
                 "-------------\n"

@@ -29,11 +29,11 @@
 
 // Microcontroller
 // ---------------
-namespace mcu = avr_;
+namespace my_mcu = avr_;
 
 // Hwd devices
 // -----------
-using Timer = mcu::Timer2;
+using Timer = my_mcu::Timer2;
 
 // Cfg
 // ---
@@ -48,14 +48,14 @@ volatile uint32_t counter = 0;
 // ---------
 void init_uart()
 {
-    mcu::UART_iostream uart;
-    mcu::basic_cfg(uart);
+    my_mcu::UART_iostream uart;
+    my_mcu::basic_cfg(uart);
     uart.turn_on();
 }
 
 void print_register(const char* name, uint8_t value)
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     uart << name << "\t= ";
     atd::print_int_as_hex(uart, value);
     uart << '\n';
@@ -63,7 +63,7 @@ void print_register(const char* name, uint8_t value)
 
 void print_registers()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     print_register("TCCR2A", TCCR2A);
     print_register("TCCR2B", TCCR2B);
     print_register("TCNT2", TCNT2);
@@ -83,7 +83,7 @@ int main()
 {
     init_uart();
 
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     uart << "\nTimer2 counter test\n"
 	      "-------------------\n";
 
@@ -94,7 +94,7 @@ int main()
     print_registers();
 
 // start:
-    mcu::enable_interrupts();
+    my_mcu::enable_interrupts();
 					      
 
 
@@ -102,7 +102,7 @@ int main()
 	Timer::counter_type v;
 	uint32_t c{};
 	{
-	    mcu::Disable_interrupts di;
+	    my_mcu::Disable_interrupts di;
 	    v = Timer::counter();
 	    c = counter;
 	}
@@ -111,7 +111,7 @@ int main()
 	uint64_t t_s = t_us / uint64_t{1'000'000};
 	uart << t_s << " s\n";
 
-	mcu::wait_ms(1000);
+	my_mcu::wait_ms(1000);
     }
 }
 

@@ -34,8 +34,8 @@
 
 // microcontroller
 // ---------------
-namespace mcu = atmega;
-using Micro = mcu::Micro;
+namespace my_mcu = atmega;
+using Micro = my_mcu::Micro;
 
 
 // pin connections
@@ -60,10 +60,10 @@ constexpr uint8_t speaker_pin = 12;
 // -------
 // Uso: Timer0 como SWG0_g
 //	Timer1 como Miniclock
-using Miniclock1_ms = dev::Miniclock_ms<mcu::Micro, mcu::Time_counter1_g>;
+using Miniclock1_ms = dev::Miniclock_ms<my_mcu::Micro, my_mcu::Time_counter1_g>;
 
-using SWG0_ms = dev::Square_wave_generator< mcu::Square_wave_generator0_g
-					  , mcu::Output_pin<speaker_pin>
+using SWG0_ms = dev::Square_wave_generator< my_mcu::Square_wave_generator0_g
+					  , my_mcu::Output_pin<speaker_pin>
 					  , Miniclock1_ms>;
 
 
@@ -72,19 +72,19 @@ using SWG0_ms = dev::Square_wave_generator< mcu::Square_wave_generator0_g
 // Interfaz static para leer/escribir en UART
 // Como vamos a llamar a funciones del traductor `UART_basic`
 // hay que implementarlo como una clase. Si no habría valido con un
-// using UART = mcu::UART_iostream;
-class UART : public mcu::UART_iostream {
+// using UART = my_mcu::UART_iostream;
+class UART : public my_mcu::UART_iostream {
 public:
     static void init();
 
     static bool are_there_data_unread()
-    { return mcu::UART_basic::are_there_data_unread();}
+    { return my_mcu::UART_basic::are_there_data_unread();}
 
     static void enable_interrupt_unread_data()
-    {mcu::UART_basic::enable_interrupt_unread_data();}
+    {my_mcu::UART_basic::enable_interrupt_unread_data();}
 
     static void disable_interrupt_unread_data()
-    {mcu::UART_basic::disable_interrupt_unread_data();}
+    {my_mcu::UART_basic::disable_interrupt_unread_data();}
 
 };
 

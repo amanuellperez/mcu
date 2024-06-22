@@ -34,8 +34,8 @@
 
 // Microcontroller
 // ---------------
-namespace mcu = atmega;
-using Micro   = mcu::Micro;
+namespace my_mcu = atmega;
+using Micro   = my_mcu::Micro;
 
 // Pin connections
 // ---------------
@@ -63,7 +63,7 @@ using Keyrow_pins = dev::Keyrow_pins<23, 24, 25>;
 // using TWI: pins 27 and 28
 static constexpr uint8_t TWI_buffer_size = 100; 
 using TWI_master_cfg = dev::TWI_master_cfg<Micro, 
-                                           mcu::TWI_basic,
+                                           my_mcu::TWI_basic,
 					   TWI_buffer_size>;
 
 using TWI = dev::TWI_master<TWI_master_cfg>;

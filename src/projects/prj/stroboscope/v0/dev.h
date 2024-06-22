@@ -39,7 +39,7 @@
 #include "stroboscope.h"
 
 #include <avr_atmega.h>
-namespace mcu = atmega;
+namespace my_mcu = atmega;
 
 // pins usados
 // ------------

@@ -26,8 +26,8 @@
 
 // Microcontroller
 // ---------------
-namespace mcu = atmega;
-using Micro   = mcu::Micro;
+namespace my_mcu = atmega;
+using Micro   = my_mcu::Micro;
 
 
 
@@ -35,7 +35,7 @@ using Micro   = mcu::Micro;
 // ------------
 constexpr uint8_t TWI_buffer_size = 100;
 using TWI_master_cfg = dev::TWI_master_cfg<Micro, 
-                                           mcu::TWI_basic,
+                                           my_mcu::TWI_basic,
 					   TWI_buffer_size>;
 
 using TWI_master  = dev::TWI_master<TWI_master_cfg>;
@@ -63,7 +63,7 @@ static constexpr uint8_t slave_address = 0x77;
 
 void twi_print_state(TWI::iostate st)
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     uart << "state = ";
 
     switch(st){
@@ -143,7 +143,7 @@ void bmp280_read_all_mem(uint8_t addr, uint8_t* mem, uint8_t n)
     twi.close();
 
     if (twi.error()){
-	mcu::UART_iostream uart;
+	my_mcu::UART_iostream uart;
 	uart << "ERROR (bmp280_read_all_mem): ";
 	twi_print_state(TWI::state());
     }
@@ -339,7 +339,7 @@ void print_cfg(std::ostream& out, dev::__BMP280_config& cfg)
 
 void init(Sensor& sensor)
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     uart << "init ... ";
     sensor.init();
     if (sensor.error()){
@@ -426,8 +426,8 @@ void debug(std::ostream& out, Sensor& sensor)
 void test_bmp280()
 {
 // init_UART();
-    mcu::UART_iostream uart;
-    mcu::basic_cfg(uart);
+    my_mcu::UART_iostream uart;
+    my_mcu::basic_cfg(uart);
     uart.turn_on();
 
     uart << "----------------------------------------\n"

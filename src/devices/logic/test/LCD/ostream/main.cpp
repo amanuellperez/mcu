@@ -25,7 +25,7 @@
 
 #include <atd_double.h>
 
-namespace mcu = atmega;
+namespace my_mcu = atmega;
 
 // pins
 using LCD_pins_1602 = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<4>,
@@ -72,29 +72,29 @@ void test_lcd_ostream4()
     while(1){
 	lcd.clear();
 	lcd << "LCD_HD44780_ostream";
-	mcu::Micro::wait_ms(1000);
+	my_mcu::Micro::wait_ms(1000);
 
 	char c = 'x';
 	lcd << "\nUn caracter (x): [" << c << "]";
-	mcu::Micro::wait_ms(1000);
+	my_mcu::Micro::wait_ms(1000);
         lcd << "\nUna frase que sea un poco larga, para que no entre en una "
                "linea...";
-        mcu::Micro::wait_ms(1500);
+        my_mcu::Micro::wait_ms(1500);
 	char u8 = 'c';
 	lcd << "\nUn uint8_t(c): [" << u8 << "]";
-	mcu::Micro::wait_ms(1000);
+	my_mcu::Micro::wait_ms(1000);
 	int8_t i8 = -100;
 	lcd << "\nUn int8_t (-100): [" << i8 << "]";
-	mcu::Micro::wait_ms(1000);
+	my_mcu::Micro::wait_ms(1000);
 	uint16_t u16 = 65500;
 	lcd << "\nUn uint16_t(65500): [" << u16 << "]";
-	mcu::Micro::wait_ms(1000);
+	my_mcu::Micro::wait_ms(1000);
 	int16_t i16 = -10000;
 	lcd << "\nUn int16_t (-10000): [" << i16 << "]";
-	mcu::Micro::wait_ms(1000);
+	my_mcu::Micro::wait_ms(1000);
 	uint32_t u32 = 1000000;
 	lcd << "\nUn uint32_t(1000000): [" << u32 << "]";
-	mcu::Micro::wait_ms(1000);
+	my_mcu::Micro::wait_ms(1000);
 
     {// double
 	double a = 2;
@@ -103,7 +103,7 @@ void test_lcd_ostream4()
 	lcd.clear();
 	lcd << "double\n2^8 = ";
 	atd::print(lcd, c);
-	mcu::Micro::wait_ms(1000);
+	my_mcu::Micro::wait_ms(1000);
     }
     }
 }

@@ -54,15 +54,15 @@
 
 #include "../dev.h"
 
-namespace mcu = atmega;
+namespace my_mcu = atmega;
 
-using SPI = mcu::SPI_slave;
+using SPI = my_mcu::SPI_slave;
 
 volatile uint8_t data = 0;
 
 void test_keyboard()
 {
-    mcu::UART_iostream uart;
+    my_mcu::UART_iostream uart;
     
     uart << "\n-------------------\n";
     uart <<   "Driver keyboard " << (int)Keypad::nrows() << "x"
@@ -84,7 +84,7 @@ void test_keyboard()
 	    break; default: uart << data; 
 	}
 
-	mcu::Micro::wait_ms(100); // debouncing
+	my_mcu::Micro::wait_ms(100); // debouncing
     }
 }
 
@@ -93,8 +93,8 @@ void test_keyboard()
 int main()
 {
 // init_UART();
-    mcu::UART_iostream uart;
-    mcu::basic_cfg(uart);
+    my_mcu::UART_iostream uart;
+    my_mcu::basic_cfg(uart);
     uart.turn_on();
  
 // init_SPI()
@@ -102,9 +102,9 @@ int main()
     SPI::spi_mode(0,0);
     SPI::data_order_LSB();
     SPI::interrupt_enable();
-    //mcu::Interrupt::enable_pin<SPI_SS_pin>();
-    mcu::Pin<SPI_SS_pin>::enable_change_level_interrupt();
-    mcu::Micro::enable_interrupts();
+    //my_mcu::Interrupt::enable_pin<SPI_SS_pin>();
+    my_mcu::Pin<SPI_SS_pin>::enable_change_level_interrupt();
+    my_mcu::Micro::enable_interrupts();
 
 
     test_keyboard();
@@ -124,7 +124,7 @@ ISR_SPI_STC{
 
 
 ISR_PCINT_PIN_SS{
-    if (mcu::Pin<SPI_SS_pin>::is_one()){
+    if (my_mcu::Pin<SPI_SS_pin>::is_one()){
 	SPI::data_register(uint8_t{data});
 	data = 0; // escrito
     }
