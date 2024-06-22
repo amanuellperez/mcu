@@ -40,6 +40,11 @@
  *    15/12/2022 Square_wave_generator0_g
  *    02/01/2023 Square_wave_burst_generator0_g
  *
+ *    TODO: Time_counter0_g -> Counter0
+ *          Square_wave_generator0_g -> SWG0_pin
+ *          Square_wave_burst_generator0_g -> Burst_SWG0_pin (o algo parecido
+ *					      el nombre)
+ *
  ****************************************************************************/
 #include "avr_timer0_basic.h"
 #include "avr_cfg.h"	// clock_frequency_in_hz
@@ -444,8 +449,8 @@ protected:
     static constexpr 
     std::pair<uint32_t, uint32_t> 
     frequency_in_Hz_to_prescaler_top(uint32_t freq_in_Hz)
-    { return avr_::timer_::
-    timer_frequency_in_Hz_to_prescaler_top<Timer, f_clock_in_Hz>(freq_in_Hz); 
+    { return avr_::timer_::CTC_mode::
+    frequency_in_Hz_to_prescaler_top<Timer, f_clock_in_Hz>(freq_in_Hz); 
     }
 };
 
@@ -529,6 +534,7 @@ inline void Square_wave_generator0_g_base::disconnect_all_pins()
 //  deseada (tarda 1 ms) y una vez calculado ya no es necesario recalcularlo
 //  con lo que se pueden generar los burst de 500 us (sin el delay de 1 ms que
 //  introduce Square_wave_generator).
+// TODO: obsoleta: escribir SWG0_pin. Copiar de Timer1.
 class Square_wave_generator0_g : public Square_wave_generator0_g_base{
 public:
 // Interfaz static

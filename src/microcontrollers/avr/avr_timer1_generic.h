@@ -268,7 +268,8 @@ inline Frequency clock_frequency()
 
 // PWM modes
 // ---------
-
+// TODO: esto es válido para el Timer0 y el Timer2? Si lo es, moverlo a
+// avr_timern_basic.h
 class PWM_mode{
 public:
 // data
@@ -319,7 +320,7 @@ inline Frequency PWM_mode::frequency_fast_mode(const Frequency& freq_clk) const
 inline Frequency PWM_mode::frequency_phase_mode(const Frequency& freq_clk) const
 { return freq_clk / (2 * prescaler * top); }
 
-}// namespace
+}// namespace timer1_
 
 
 
@@ -561,7 +562,6 @@ public:
 // ---------------
     using Timer        = avr_::Timer1;
 
-
 // Características del Timer
 // -------------------------
     static constexpr uint8_t number_of_pins = cfg::timer1::number_of_pins;
@@ -658,8 +658,8 @@ private:
     template <uint32_t f_clock_in_Hz = clock_frequency_in_hz>
     static constexpr 
     uint32_t prescaler_top_to_frequency_in_Hz(uint32_t d, uint32_t M)
-    { return avr_::timer_::
-	    timer_prescaler_top_to_frequency_in_Hz<f_clock_in_Hz>(d, M);}
+    { return avr_::timer_::CTC_mode::
+	    prescaler_top_to_frequency_in_Hz<f_clock_in_Hz>(d, M);}
 
     /// Función inversa a la prescaler_top_to_frequency_in_Hz:
     /// Devuelve el par (prescaler factor, top) necesario para generar la
@@ -668,8 +668,8 @@ private:
     static constexpr 
     std::pair<uint32_t, uint32_t> 
     frequency_in_Hz_to_prescaler_top(uint32_t freq_in_Hz)
-    { return avr_::timer_::
-    timer_frequency_in_Hz_to_prescaler_top<Timer, f_clock_in_Hz>(freq_in_Hz); 
+    { return avr_::timer_::CTC_mode::
+    frequency_in_Hz_to_prescaler_top<Timer, f_clock_in_Hz>(freq_in_Hz); 
     }
 };
 
@@ -749,12 +749,115 @@ class SWG1_pin{
 public:
 // types
     using Timer        = avr_::Timer1;
-    using PWM_signal   = avr_::PWM_signal;
+    using SW_signal    = avr_::SW_signal;
+    using counter_type = Timer::counter_type;
 
+// cfg
+    static constexpr uint8_t number  = npin0;
+    static constexpr Frequency clock_frequency = avr_::clock_frequency;
+
+// basic interface
+    // Genera la señal SW indicada. Enciende el Timer en caso de que
+    // estuviera apagado. Cuidado si se manejan los dos pins asociados a ese
+    // timer: cambiará la frecuencia del otro pin.
+    // [in/out] SW_signal indica la señal que se quiere generar.
+    //          Como no es posible generar cualquier señal, como salida indica
+    //          la señal que realmente se va a generar. <-- TODO: falta
+    static void generate(const SW_signal& sw);
+
+    // Conecta el pin al Timer.
+    // Al llamar a generate se hace de forma automática.
+    // Esto se podría usar para, sin llamar a generate, conectar y desconectar
+    // el pin a la señal generada. ¿Servirá para algo? El uso lo dirá.
+    static void connect();
+
+    // Desconecta el pin del SWG sin modificar el estado del Timer
+    // No modifico el estado del Timer por si acaso se está generando en el
+    // otro pin del Timer1 una señal.
+    static void disconnect();
+
+    // Paramos el Timer
+    // DUDA: Ahora al llamar a stop() está dejando el pin que estaba conectado
+    // en HIGH. ¿poner el pin como salida por defecto en 0 o que lo gestione
+    // el cliente?
+    static void stop();
+
+    // Podemos usarlo como un pin normal y corriente de salida.
+    // Corresponderían a los casos extremos de 0% ó 100% de duty cycle.
+    static void write_zero();
+    static void write_one();
+
+private:
+    static void pin_as_output();
 }; 
 
+
+template <uint8_t n>
+void SWG1_pin<n>::generate(const SW_signal& sw)
+{
+    using CTC = timer_::CTC_mode;
+    auto [d, t] = CTC::frequency_to_prescaler_top
+			    <Timer, clock_frequency.value()> (sw.frequency());
+
+    Timer::CTC_mode_top_ICR1();
+
+    connect();
+
+    {
+	Disable_interrupts l;
+	Timer::unsafe_input_capture_register(atd::to_integer<counter_type>(t));
+    }
+
+    Timer::clock_frequency_prescaler(d); // esto enciende el Timer
+}
+
+template <uint8_t n>
+inline void SWG1_pin<n>::connect()
+{
+    if constexpr (number == Timer::OCA_pin())
+	Timer::CTC_pin_A_toggle_on_compare_match(); 
+
+    else
+	Timer::CTC_pin_B_toggle_on_compare_match(); 
+}
+
+template <uint8_t n>
+inline void SWG1_pin<n>::disconnect()
+{
+    if constexpr (number == Timer::OCA_pin())
+	Timer::pin_A_disconnected();
+
+    else
+	Timer::pin_B_disconnected();
+}
+
+
+template <uint8_t n>
+inline void SWG1_pin<n>::stop() { Timer::off(); }
+
+
+template <uint8_t n>
+void SWG1_pin<n>::pin_as_output() {
+    disconnect();
+    Pin<n>::as_output();
+}
+
+template <uint8_t n>
+void SWG1_pin<n>::write_zero() {
+    pin_as_output();
+    Pin<n>::write_zero();
+}
+
+
+template <uint8_t n>
+void SWG1_pin<n>::write_one() {
+    pin_as_output();
+    Pin<n>::write_one();
+}
+
+
 /***************************************************************************
- *				PWM_pin
+ *				PWM1_pin
  ***************************************************************************/
 
 /*!
@@ -802,13 +905,14 @@ public:
     static constexpr Frequency clock_frequency = avr_::clock_frequency;
 
 // basic interface
-    // Genera la la señal PWM indicada. Enciende el Timer en caso de que
+    // Genera la señal PWM indicada. Enciende el Timer en caso de que
     // estuviera apagado. Cuidado si se manejan los dos pins asociados a ese
     // timer: cambiará la frecuencia del otro pin.
     // [in/out] PWM_signal indica la señal que se quiere generar.
     //          Como no es posible generar cualquier señal, como salida indica
-    //          la señal que realmente se va a generar.
-    static void generate(PWM_signal& pwm);
+    //          la señal que realmente se va a generar. TODO: se me olvido!!!
+    //          (por eso lo pongo temporalmente como const)
+    static void generate(const PWM_signal& pwm);
 
     // Cambia el duty cycle sin modificar la frecuencia
     static void duty_cycle(const atd::Percentage& p);
@@ -853,7 +957,7 @@ void PWM1_pin<n>::cfg_duty_cycle(const Timer::counter_type& ocr)
 // gestionar eso? De momento, no: esto es una versión experimental pensada
 // para los motores donde eso no generará problemas. 
 template <uint8_t n>
-void PWM1_pin<n>::generate(PWM_signal& pwm)
+void PWM1_pin<n>::generate(const PWM_signal& pwm)
 {
 
     timer1_::PWM_mode mode;

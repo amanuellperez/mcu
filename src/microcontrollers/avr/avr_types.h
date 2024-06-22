@@ -32,6 +32,7 @@
  *    31/01/2021 v0.0 Frequency and Time.
  *    30/03/2021      Potential.
  *    05/06/2024      PWM_signal, Nanosecond
+ *    22/06/2024      SW_signal
  *
  ****************************************************************************/
 #include <atd_magnitude.h>
@@ -104,6 +105,7 @@ using Millivolt = atd::Millivolt<uint32_t>;
 //	 sabe.
 //	 Total: esta versión es para probar. El uso dirá.
 using PWM_signal = atd::PWM_signal<Hertz, Nanosecond>;
+using SW_signal  = atd::SW_signal<Hertz, Nanosecond>;
 
 // syntactic sugar
 namespace literals{

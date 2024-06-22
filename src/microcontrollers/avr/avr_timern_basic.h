@@ -34,27 +34,40 @@
 #include <array>
 #include <cstdint>
 
+#include "avr_types.h"
+
 namespace avr_{
 
 namespace timer_{ // private. Don't use them 
 
+// CTC mode
+// --------
+class CTC_mode{
+public:
+
+// CUIDADO: estas fórmulas son para el CTC mode.
 // Fórmula para calcular la frecuencia dados el divisor d (prescaler_factor) y
 // el top M del counter. (pag. 132 datasheet)
 // d = prescaler factor
 // M = top
 template <uint32_t f_clock_in_Hz>
-inline constexpr 
-uint32_t timer_prescaler_top_to_frequency_in_Hz(uint32_t d, uint32_t M)
+static constexpr 
+uint32_t prescaler_top_to_frequency_in_Hz(uint32_t d, uint32_t M)
 { return f_clock_in_Hz / (2 * d * (1 + M)); }
 
 
+// Función inversa a timer_prescaler_top_to_frequency_in_Hz.
+// Calcula el valor del top necesario para generar la frecuencia freq_in_Hz.
 // Se podía cometer menos error si se redondeara dx1_M (= d*(1+M)).
 // Pero eso llevaría más tiempo y como muestra el test no se comete un error
 // de más del 10%.
+// Notación: 
+//	d = prescaler factor
+//	M = top
 template <typename Timer, uint32_t f_clock_in_Hz>
-constexpr 
+static constexpr 
 std::pair<uint32_t, uint32_t> 
-timer_frequency_in_Hz_to_prescaler_top(uint32_t freq_in_Hz)
+frequency_in_Hz_to_prescaler_top(Frequency::Rep freq_in_Hz)
 {
     // f = f_clock_in_Hz / (2 * d * (1 + M)) ==> d*(1 + M) = f_clock_in_Hz / (2 * f);
     uint32_t dx1_M = f_clock_in_Hz / (2 * freq_in_Hz);
@@ -70,7 +83,19 @@ timer_frequency_in_Hz_to_prescaler_top(uint32_t freq_in_Hz)
 
 }
 
-}// namespace
+// Devuelve el par [prescaler, top] necesario para configurar el Timer en el
+// modo CTC para generar la frecuencia freq_gen.
+template <typename Timer, uint32_t f_clock_in_Hz>
+static constexpr 
+std::pair<uint32_t, uint32_t> 
+frequency_to_prescaler_top(const Frequency& freq_gen)
+{ return frequency_in_Hz_to_prescaler_top<Timer, f_clock_in_Hz>(freq_gen.value()); }
+
+private:
+    
+};
+
+}// namespace timer_
  
 }// namespace
 
