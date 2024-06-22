@@ -19,7 +19,6 @@ DIRS = 	25LC256			\
 # Revisar
 #	matrix_8x8\
 	MAX7219\
-	pololu_A4988\
 	TMP36\
 	LM75				\
 	MCP4231			\

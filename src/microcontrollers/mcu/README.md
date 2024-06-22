@@ -67,10 +67,17 @@ character streams, but `ioxtreams` are bytes streams. I want to send `uint16_t x
 
 # Capa `mcu`
 
+Esta capa amplia la capacidad de los microcontroladores. Las clases
+implementadas aquí solo se basan en elementos encontrados dentro de los micros
+y no en elementos externos. Los elementos externos serían los traductores
+implementados en `hwd`.
+
+
+## Criterios
+
 Esta capa es totalmente genérica NO PUDIENDO DEPENDER de ningún
 microcontrolador concreto. Tiene que poder usarse tanto con `attiny`,
 `atmega`, `pic`, `8052`, ...
-
 
 Incluso algunas partes de esta capa, como `UART_iostream`, las voy a usar 
 dentro de los tests de `avr`.

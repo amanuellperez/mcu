@@ -28,13 +28,17 @@
  *
  * HISTORIA
  *    Manuel Perez
- *    05/06/2024 Escrito: versión mínima
+ *    05/06/2024 PWM_signal: versión mínima
+ *    22/06/2024 SW_signal (a fin de cuentas es una PWM de 50% de duty cycle)
+ *			    SW_signal = square wave signal
  *
  ****************************************************************************/
 #include "atd_percentage.h"
 
 namespace atd{
-
+/***************************************************************************
+ *			    PWM_signal
+ ***************************************************************************/
 template <typename Frequency_t, typename Time_t>
 class PWM_signal{
 public:
@@ -63,6 +67,34 @@ private:
 };
 
 
+/***************************************************************************
+ *			    SW_signal
+ ***************************************************************************/
+template <typename Frequency_t, typename Time_t>
+class SW_signal{
+public:
+// typs
+    using Frequency = Frequency_t;
+    using Time      = Time_t;
+
+// constructors
+    SW_signal(const Frequency& f)
+	    : frequency_{f}{ }
+
+// caracteristicas
+    Frequency frequency() const { return frequency_;}
+    void frequency(const Frequency& f) { frequency_ = f;}
+
+    Time period() const { return inverse(frequency_);}
+    void period(const Time& T) { frequency_ = inverse(T);}
+
+    // Le voy a suministrar esta función para que se puedan usar
+    // PWM_signal y SW_signal casi de forma intercambiable
+    Percentage duty_cycle() const { return Percentage{50};}
+
+private:
+    Frequency frequency_;
+};
 
 }// namespace
 

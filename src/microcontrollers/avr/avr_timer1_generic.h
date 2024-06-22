@@ -74,6 +74,7 @@
  *		 concept "timer". No necesito usar templates para nada.
  *    15/12/2022 Square_wave_generator1_g
  *    04/06/2024 PWM1_pin
+ *    22/06/2024 SWG1_pin
  *
  ****************************************************************************/
 #include "avr_timer1_basic.h"
@@ -553,6 +554,7 @@ using Timer_counter1_g = Time_counter1_g;
 /***************************************************************************
  *			Square_wave_generator1_g
  ***************************************************************************/
+// TODO: obsoleta (???) Usar mejor SWG1_pin
 class Square_wave_generator1_g{
 public:
 // Hardware device
@@ -724,9 +726,35 @@ inline void Square_wave_generator1_g::disconnect_all_pins()
     disconnect_pin<pin[1]>();
 }
 
+/***************************************************************************
+ *				SWG_pin
+ ***************************************************************************/
+/*!
+ *  \brief pin donde se genera una señal cuadrada 
+ *	    
+ *  Esta clase oculta la configuración del Timer1 para generar ondas
+ *  cuadradas.
+ *
+ *  Leer el comentario a PWM1_pin, es aplicable casi todo aquí.
+ *
+ */
+template <uint8_t npin0>
+//    requires (npin0 == Timer1::OCA_pin() or npin0 == Timer1::OCB_pin())
+//    En g++ 13 si defino la clase con requires luego todas las
+//    implementaciones tienen que llevar ese require ==> hay que modificar
+//    todas las funciones definidas fuera de la clase para añadirles el
+//    requires @_@ <-- por eso, por pereza prefiero usar el static_assert
+class SWG1_pin{
+    static_assert(npin0 == Timer1::OCA_pin() or npin0 == Timer1::OCB_pin());
+public:
+// types
+    using Timer        = avr_::Timer1;
+    using PWM_signal   = avr_::PWM_signal;
+
+}; 
 
 /***************************************************************************
- *			    PWM_pin
+ *				PWM_pin
  ***************************************************************************/
 
 /*!

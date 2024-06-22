@@ -72,6 +72,48 @@ void test_pwm_signal()
 
 }
 
+void  test_sw_signal()
+{ // es copia del test de PWM_signal
+    test::interface("SW_signal");
+
+    using Hertz       = atd::Hertz<uint32_t>;
+    using KiloHertz   = atd::KiloHertz<uint32_t>;
+    using MegaHertz   = atd::MegaHertz<uint32_t>;
+    using Microsecond = atd::Microsecond<uint32_t>;
+    using Nanosecond  = atd::Nanosecond<uint32_t>;
+
+    // Si le pongo nanoseconds puedo manejar calcular inversos de frecuencias
+    // de hasta 1 MHz con varias cifras significativas.
+    // No puedo usar Seconds como medida de Time ya que estoy usando uint32_t
+    // como Rep. Si usaramos float sería más sencillo.
+    using SW_signal = atd::SW_signal<Hertz, Nanosecond>;
+
+    {// normal
+	SW_signal sw{Hertz{1'000'000}};
+	std::cout << sw.frequency() << '\n';
+	std::cout << sw.period() << '\n';
+
+	CHECK_TRUE(sw.frequency() == MegaHertz{1}, "frequency");
+	CHECK_TRUE(sw.period() == Microsecond{1}, "period");
+	CHECK_TRUE(sw.duty_cycle() == atd::Percentage{50}, "duty_cycle");
+
+	sw.frequency(KiloHertz{123});
+	CHECK_TRUE(sw.frequency() == Hertz{123'000}, "frequency");
+	CHECK_TRUE(sw.period() == Nanosecond{8'130}, "period");
+	CHECK_TRUE(sw.duty_cycle() == atd::Percentage{50}, "duty_cycle");
+
+	sw.period(Microsecond{123});
+	CHECK_TRUE(sw.frequency() == Hertz{8'130}, "frequency");
+	
+	// El periodo vale 123'001 ns. Al compararlo con 123
+	// microsegundos lo que hace el operator== es convertir los 123 us en
+	// 123'000 ns != 123'001 ns fallando el test. Por eso hago el casting.
+	CHECK_TRUE(Microsecond{sw.period()} == Microsecond{123}, "period");
+	CHECK_TRUE(sw.duty_cycle() == atd::Percentage{50}, "duty_cycle");
+
+    }
+}
+
 
 
 int main()
@@ -80,6 +122,7 @@ try{
     test::header("PWM");
 
     test_pwm_signal();
+    test_sw_signal();
 
 }catch(std::exception& e)
 {
