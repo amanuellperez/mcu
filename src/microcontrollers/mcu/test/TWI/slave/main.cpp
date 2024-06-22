@@ -18,7 +18,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 // Este microcontrolador dialoga con el test/TWI/master
-#include "../../../dev_TWI_slave.h"
+#include "../../../mcu_TWI_slave.h"
 #include <avr_atmega.h>
 
 
@@ -32,11 +32,11 @@ using Micro   = my_mcu::Micro;
 // -------
 constexpr uint8_t TWI_buffer_size = 100; // voy a enviarle un tipo de cada: int8, int16, ...
 					 
-using TWI_slave_cfg = dev::TWI_slave_cfg<Micro, 
+using TWI_slave_cfg = mcu::TWI_slave_cfg<Micro, 
                                          my_mcu::TWI_basic,
 					 TWI_buffer_size>;
 
-using TWI = dev::TWI_slave<TWI_slave_cfg>;
+using TWI = mcu::TWI_slave<TWI_slave_cfg>;
 
 
 

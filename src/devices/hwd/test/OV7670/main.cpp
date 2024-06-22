@@ -23,8 +23,8 @@
 
 #include <avr_atmega.h>
 #include "../../dev_OV7670_rom.h"
-#include <dev_TWI_master.h>
-#include <dev_TWI_master_ioxtream.h>
+#include <mcu_TWI_master.h>
+#include <mcu_TWI_master_ioxtream.h>
 
 #include "../../dev_OV7670.h" // TODO: orden
 // Micro

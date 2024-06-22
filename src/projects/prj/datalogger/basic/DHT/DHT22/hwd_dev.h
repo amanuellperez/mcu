@@ -29,7 +29,7 @@
 // Lo ideal es usar dispositivos genéricos en el resto, de esa forma se puede
 // cambiar el hardware sin tocar el software.
 #include <avr_atmega.h>
-#include <dev_clocks.h>
+#include <mcu_clock.h>
 #include <dev_DHT22.h>
 
 // cfg
@@ -83,7 +83,7 @@ inline void UART::empty_read_buffer()
 // -------
 // Clock
 using Time_counter = my_mcu::Time_counter2_32kHz_g<timeout_ms>;
-using Clock	   = dev::Clock_s<Micro, Time_counter>;
+using Clock	   = mcu::Clock_s<Micro, Time_counter>;
 #define ISR_CLOCK ISR_TIMER2_COMPA
 
 // Sensor

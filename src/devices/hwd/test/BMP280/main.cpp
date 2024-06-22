@@ -22,7 +22,7 @@
 #include <atd_cstddef.h>
 
 #include <avr_atmega.h>	
-#include <dev_TWI_master.h>
+#include <mcu_TWI_master.h>
 
 // Microcontroller
 // ---------------
@@ -34,12 +34,12 @@ using Micro   = my_mcu::Micro;
 // TWI Protocol
 // ------------
 constexpr uint8_t TWI_buffer_size = 100;
-using TWI_master_cfg = dev::TWI_master_cfg<Micro, 
+using TWI_master_cfg = mcu::TWI_master_cfg<Micro, 
                                            my_mcu::TWI_basic,
 					   TWI_buffer_size>;
 
-using TWI_master  = dev::TWI_master<TWI_master_cfg>;
-using TWI = dev::TWI_master_ioxtream<TWI_master>;
+using TWI_master  = mcu::TWI_master<TWI_master_cfg>;
+using TWI = mcu::TWI_master_ioxtream<TWI_master>;
 
 // 50 kHz es la unica frecuencia de TWI que va a 1MHz.
 // 100 kHz a 8 MHz

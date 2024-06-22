@@ -27,7 +27,7 @@
 
 #include <dev_HD44780.h>
 #include <dev_keyrow.h>
-#include <dev_clocks.h>
+#include <mcu_clock.h>
 
 // micro
 // -----
@@ -88,7 +88,7 @@ using Keyboard	   = dev::Basic_keyrow<Micro, Keyrow_pins, Keyrow_codes>;
 // Chronometer
 // -----------
 using Chronometer= 
-	dev::Clock_ms<Micro, my_mcu::Time_counter1_g>;
+	mcu::Clock_ms<Micro, my_mcu::Time_counter1_g>;
 
 #endif
 

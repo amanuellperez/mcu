@@ -23,7 +23,7 @@
 #define __PRJ_DEV_H__
 
 #include <avr_atmega.h>
-#include <dev_clocks.h>
+#include <mcu_clock.h>
 #include <dev_push_button.h>
 
 // MICROCONTROLLER
@@ -60,7 +60,7 @@ static constexpr uint8_t button_pin = 14;
 
 // Clock
 using Time_counter = my_mcu::Time_counter2_32kHz_g<3000>;
-using Clock	   = dev::Clock_s<Micro, Time_counter>;
+using Clock	   = mcu::Clock_s<Micro, Time_counter>;
 #define ISR_CLOCK ISR_TIMER2_COMPA
 
 //// Button

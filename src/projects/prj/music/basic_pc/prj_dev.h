@@ -29,7 +29,7 @@
 // Lo ideal es usar dispositivos genéricos en el resto, de esa forma se puede
 // cambiar el hardware sin tocar el software.
 #include <avr_atmega.h>
-#include <dev_miniclock.h>
+#include <mcu_miniclock.h>
 #include <dev_square_wave.h>
 
 // microcontroller
@@ -60,7 +60,7 @@ constexpr uint8_t speaker_pin = 12;
 // -------
 // Uso: Timer0 como SWG0_g
 //	Timer1 como Miniclock
-using Miniclock1_ms = dev::Miniclock_ms<my_mcu::Micro, my_mcu::Time_counter1_g>;
+using Miniclock1_ms = mcu::Miniclock_ms<my_mcu::Micro, my_mcu::Time_counter1_g>;
 
 using SWG0_ms = dev::Square_wave_generator< my_mcu::Square_wave_generator0_g
 					  , my_mcu::Output_pin<speaker_pin>

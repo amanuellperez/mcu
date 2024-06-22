@@ -18,8 +18,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #pragma once
 
-#ifndef __DEV_TWI_MASTER_H__
-#define __DEV_TWI_MASTER_H__
+#ifndef __MCU_TWI_MASTER_H__
+#define __MCU_TWI_MASTER_H__
 
 /****************************************************************************
  *
@@ -91,7 +91,7 @@
 #include <atd_array.h>	// Circular_array
 #include <atd_concepts.h>
 
-namespace dev{
+namespace mcu{
 
 namespace impl_of{
 enum class TWI_master_state : uint8_t {

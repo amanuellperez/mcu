@@ -30,7 +30,7 @@
 #include <dev_BME280_basic.h>
 #include <dev_DS1307_clock.h>
 
-#include <dev_TWI_master.h>
+#include <mcu_TWI_master.h>
 
 // Microcontroller
 // ---------------
@@ -62,11 +62,11 @@ using Keyrow_pins = dev::Keyrow_pins<23, 24, 25>;
 
 // using TWI: pins 27 and 28
 static constexpr uint8_t TWI_buffer_size = 100; 
-using TWI_master_cfg = dev::TWI_master_cfg<Micro, 
+using TWI_master_cfg = mcu::TWI_master_cfg<Micro, 
                                            my_mcu::TWI_basic,
 					   TWI_buffer_size>;
 
-using TWI = dev::TWI_master<TWI_master_cfg>;
+using TWI = mcu::TWI_master<TWI_master_cfg>;
 static constexpr int TWI_frecuency = 50; // kHz
 static constexpr TWI::Address twi_sensor_address = 0x77;
 // twi_RTC_address = 0x68 (fijo)

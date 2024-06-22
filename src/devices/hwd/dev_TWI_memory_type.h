@@ -36,8 +36,8 @@
 #include <algorithm>
 
 #include <atd_memory.h>
-		    
-#include <dev_TWI_master_ioxtream.h>
+		 
+#include <mcu_TWI_master_ioxtream.h>
 
 namespace dev{
 
@@ -104,7 +104,7 @@ template <typename TWI_master, typename TWI_master::Address slave_address>
 struct TWI_memory_type {
 
 // Configuración de la conexión con el dispositivo
-    using TWI     = TWI_master_ioxtream<TWI_master>;
+    using TWI     = mcu::TWI_master_ioxtream<TWI_master>;
     using Slave_address = TWI_master::Address;
     using iostate = typename TWI::iostate;
 

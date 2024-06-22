@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __DEV_MINICLOCK_H__
-#define __DEV_MINICLOCK_H__
+#ifndef __MCU_MINICLOCK_H__
+#define __MCU_MINICLOCK_H__
 /****************************************************************************
  *
  *  DESCRIPCION
@@ -79,13 +79,13 @@
  *    31/12/2022 unsafe_time/unsafe_reset
  *
  ****************************************************************************/
-#include <dev_concepts.h>
+#include "mcu_concepts.h"
 			    
-namespace dev{
+namespace mcu{
 /***************************************************************************
  *			    MINICLOCK_XX
  ***************************************************************************/
-namespace dev_{
+namespace mcu_{
 // De momento no suministro funciones write/reset/resume porque no parece que
 // tenga mucho sentido. Si se necesita en el futuro añadirlas.
 //
@@ -263,16 +263,16 @@ constexpr Miniclock<M, T, p>::counter_type Miniclock<M, T, p>::counter_max()
 { 
     return Timer_counter::max_top(); 
 }
-}// namespace dev_
+}// namespace mcu_
 
 
 // Miniclocks
 // ----------
 template <typename M, typename T>
-using Miniclock_us = dev_::Miniclock<M, T, 1>;
+using Miniclock_us = mcu_::Miniclock<M, T, 1>;
 
 template <typename M, typename T>
-using Miniclock_ms = dev_::Miniclock<M, T, 1024>;
+using Miniclock_ms = mcu_::Miniclock<M, T, 1024>;
 
 
 

@@ -29,8 +29,8 @@
 // Lo ideal es usar dispositivos genéricos en el resto, de esa forma se puede
 // cambiar el hardware sin tocar el software.
 #include <avr_atmega.h>
-#include <dev_clocks.h>
-#include <dev_miniclock.h>
+#include <mcu_clock.h>
+#include <mcu_miniclock.h>
 #include <dev_HCSR04.h>
 
 // cfg
@@ -87,13 +87,13 @@ inline void UART::empty_read_buffer()
 // ------
 // Timer0: sin usar
 // Timer1: Miniclock_us	    (cualquier device lo puede usar)
-using Miniclock_us = dev::Miniclock_us<my_mcu::Micro, my_mcu::Time_counter1_g>;
+using Miniclock_us = mcu::Miniclock_us<my_mcu::Micro, my_mcu::Time_counter1_g>;
 
 // Timer2: Clock_s	    (propiedad de Clock_s. No lo puede usar nadie más)
 using Time_counter = my_mcu::Time_counter2_32kHz_g<timeout_ms>;
 
 // Clock
-using Clock	   = dev::Clock_s<Micro, Time_counter>;
+using Clock	   = mcu::Clock_s<Micro, Time_counter>;
 #define ISR_CLOCK ISR_TIMER2_COMPA
 
 // Sensor medición de distancia

@@ -19,7 +19,7 @@
 
 
 #include "main.h"
-#include <dev_clocks.h>
+#include <mcu_clock.h>
 #include <atd_time.h>
 
 void Main::run()

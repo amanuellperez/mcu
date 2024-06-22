@@ -17,7 +17,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "../../../dev_clocks.h"
+#include "../../../mcu_clock.h"
 #include <avr_atmega.h>
 #include <atd_time.h>
 
@@ -30,7 +30,7 @@ using Micro   = my_mcu::Micro;
 // Devices
 // -------
 using Time_counter = my_mcu::Time_counter2_32kHz_g<3000>;
-using Clock2 = dev::Clock_s<Micro, Time_counter>;
+using Clock2 = mcu::Clock_s<Micro, Time_counter>;
 
 
 // Functions

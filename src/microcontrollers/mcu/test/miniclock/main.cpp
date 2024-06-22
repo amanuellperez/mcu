@@ -17,7 +17,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "../../dev_miniclock.h"
+#include "../../mcu_miniclock.h"
 #include <avr_atmega.h>
 
 // Devices
@@ -28,11 +28,11 @@ constexpr uint8_t test_pin = 14;
 
 using Pin = my_mcu::Output_pin<test_pin>;
 
-using Miniclock0_us = dev::Miniclock_us<my_mcu::Micro, my_mcu::Time_counter0_g>;
-using Miniclock0_ms = dev::Miniclock_ms<my_mcu::Micro, my_mcu::Time_counter0_g>;
+using Miniclock0_us = mcu::Miniclock_us<my_mcu::Micro, my_mcu::Time_counter0_g>;
+using Miniclock0_ms = mcu::Miniclock_ms<my_mcu::Micro, my_mcu::Time_counter0_g>;
 
-using Miniclock1_us = dev::Miniclock_us<my_mcu::Micro, my_mcu::Time_counter1_g>;
-using Miniclock1_ms = dev::Miniclock_ms<my_mcu::Micro, my_mcu::Time_counter1_g>;
+using Miniclock1_us = mcu::Miniclock_us<my_mcu::Micro, my_mcu::Time_counter1_g>;
+using Miniclock1_ms = mcu::Miniclock_ms<my_mcu::Micro, my_mcu::Time_counter1_g>;
 
 
 // Functions

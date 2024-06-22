@@ -27,10 +27,10 @@
  *    28/08/2023 Escrito
  *
  ****************************************************************************/
-#include "dev_one_wire.h"
+#include "mcu_one_wire.h"
 #include <atd_ostream.h>
 
-namespace dev{
+namespace mcu{
 
 bool One_wire_device::is_CRC_ok() const
 {

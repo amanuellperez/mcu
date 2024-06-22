@@ -25,7 +25,7 @@
 
 #include "dev.h"
 #include "cfg.h"
-#include <dev_clocks.h>
+#include <mcu_clock.h>
 #include <avr_time.h>
 #include <user_time.h>
 

@@ -17,7 +17,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "../../dev_one_wire.h"
+#include "../../mcu_one_wire.h"
 
 #include <atd_ostream.h>
 #include <avr_atmega.h>	
@@ -34,10 +34,10 @@ constexpr uint8_t test_pin = 15;
 
 // Devices
 // -------
-using Cfg      = dev::One_wire_cfg<my_mcu::Micro, test_pin>;
-using One_wire = dev::One_wire<Cfg>;
-using Device = dev::One_wire_device;
-using Search = dev::One_wire_search<Cfg>;
+using Cfg      = mcu::One_wire_cfg<my_mcu::Micro, test_pin>;
+using One_wire = mcu::One_wire<Cfg>;
+using Device = mcu::One_wire_device;
+using Search = mcu::One_wire_search<Cfg>;
 
 
 

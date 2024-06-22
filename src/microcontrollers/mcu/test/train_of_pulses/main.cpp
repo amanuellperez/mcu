@@ -17,8 +17,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "../../dev_train_of_pulses.h"
-#include "../../dev_miniclock.h"
+#include "../../mcu_train_of_pulses.h"
+#include "../../mcu_miniclock.h"
 
 #include <atd_ostream.h>
 #include <avr_atmega.h>	
@@ -40,29 +40,29 @@ constexpr uint8_t test_pin = 15;
 
 // Devices
 // -------
-using Miniclock_us = dev::Miniclock_us<my_mcu::Micro, my_mcu::Time_counter1_g>;
+using Miniclock_us = mcu::Miniclock_us<my_mcu::Micro, my_mcu::Time_counter1_g>;
 using Pin = Micro::Pin<test_pin>;
 
 
 // Train of pulses receiver
 // ------------------------
 using Train_isr_cfg =
-    dev::Train_of_pulses_isr_receiver_cfg<Micro,
+    mcu::Train_of_pulses_isr_receiver_cfg<Micro,
 				      Miniclock_us,
 				      test_pin, 
 				      nmax_pulses>;
 
-using Train_of_pulses_isr_receiver = dev::Train_of_pulses_isr_receiver<Train_isr_cfg>;
+using Train_of_pulses_isr_receiver = mcu::Train_of_pulses_isr_receiver<Train_isr_cfg>;
 
 using Cfg_polling =
-    dev::Train_of_pulses_poll_receiver_cfg<Micro,
+    mcu::Train_of_pulses_poll_receiver_cfg<Micro,
 				      test_pin, 
 				      nmax_pulses>;
 
 using Train_of_pulses_poll_receiver = 
-	    dev::Train_of_pulses_poll_receiver<Cfg_polling>;
+	    mcu::Train_of_pulses_poll_receiver<Cfg_polling>;
 
-using Train_of_pulses = dev::Train_of_pulses<nmax_pulses>;
+using Train_of_pulses = mcu::Train_of_pulses<nmax_pulses>;
 
 
 // Functions
@@ -116,7 +116,7 @@ void receive_with_isr()
 	    "that can be read with the interrupt (right now uses 50 asm instructions)\n";
 
 
-    dev::Train_of_pulses<nmax_pulses> pulse;
+    mcu::Train_of_pulses<nmax_pulses> pulse;
 
     volatile bool abort = false; // no la uso
 				 
@@ -138,7 +138,7 @@ void receive_polling()
     uart << "\n\nReceiving polling the pin\n"
 	    "-------------------------\n";
 
-    dev::Train_of_pulses<nmax_pulses> pulse;
+    mcu::Train_of_pulses<nmax_pulses> pulse;
 
     // Enviamos al DHT11 la señal para que empiece
     Pin::write_zero();

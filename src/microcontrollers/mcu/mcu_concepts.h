@@ -1,4 +1,4 @@
-// Copyright (C) 2022 Manuel Perez 
+// Copyright (C) 2024 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -19,36 +19,38 @@
 
 #pragma once
 
-#ifndef __DEV_CONCEPTS_H__
-#define __DEV_CONCEPTS_H__
+#ifndef __MCU_CONCEPTS_H__
+#define __MCU_CONCEPTS_H__
 /****************************************************************************
  *
  * DESCRIPCION
- *	Concepts devices.
- *	
- *	WARNING: nunca he usado los concepts y tampoco tengo claro las
- *	características genéricas de los dispositivos. Así que esto irá
- *	evolucionando a medida que gane experiencia. Conclusión: esto, al
- *	principio, será MUY INESTABLE.
+ *	Concepts asociados con el hardware usado en microcontroladores.
  *
- *	¿Cuáles son las ideas claves que caracterizan los devices? Esas ideas
- *	deberían de traducirse en C++ concepts. Este es un primer intento de
- *	hacerlo.
+ *  La implementación por capas que estoy haciendo se basa en pasar como
+ *  parámetros de template Micros, Timers... A día de hoy no estoy validando
+ *  de ninguna forma que lo pasado sea realmente un Micro.
  *
- *	Por otra parte es muy atrayente la idea de usar los concepts para
- *	definir las características genéricas de un device. ¿Qué es un Timer?
- *	Yo quiero que las clases Miniclock, Clock, ... vengan parametrizadas
- *	por el concept `Timer` y no por un `typename`. Creo (???) que este no 
- *	es el uso para el que se concibieron los concepts pero puede que sea
- *	muy útil. Seguramente acabe experimentando con ello.
+ *  Ejemplo:
+ *	    template <typename Micro, ...>
+ *	    class Driver{ ... };
+ *
+ *	    // Si instancio Driver con algo que no es un Micro 
+ *	    using My_driver = Driver<No_soy_un_micro,...>;
+ *
+ *	    // el compilador dará un error clásico. Quedaría mejor:
+ *	    template <mcu::Type::Micro Micro, ...>
+ *	    class Driver{...};
+ *
+ *
  *
  *
  * HISTORIA
  *    Manuel Perez
  *    11/12/2022 Unsafe_device
+ *    22/06/2024 Escrito
  *
  ****************************************************************************/
-namespace dev{
+namespace mcu{
 
 // Timer1 tiene un contador de 16 bits que para acceder hay que bloquear las
 // interrupciones. No hacerlo podría generar errores.
@@ -71,8 +73,8 @@ concept Unsafe_device = requires(T a){
 template <typename T>
 concept Safe_device = (!Unsafe_device<T>);
 
-}
 
+}// namespace
 
 #endif
 

@@ -20,8 +20,8 @@
 
 #pragma once
 
-#ifndef __DEV_CLOCKS_H__
-#define __DEV_CLOCKS_H__
+#ifndef __MCU_CLOCKS_H__
+#define __MCU_CLOCKS_H__
 /****************************************************************************
  *
  * DESCRIPCION
@@ -58,7 +58,7 @@
 #include <atd_time.h>
 #include <atd_cast.h>
 
-namespace dev{
+namespace mcu{
 
 /***************************************************************************
  *				CLOCK_S

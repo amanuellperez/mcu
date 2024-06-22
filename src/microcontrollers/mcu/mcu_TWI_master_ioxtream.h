@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __DEV_TWI_MASTER_IOXTREAM_H__
-#define __DEV_TWI_MASTER_IOXTREAM_H__
+#ifndef __MCU_TWI_MASTER_IOXTREAM_H__
+#define __MCU_TWI_MASTER_IOXTREAM_H__
 
 /****************************************************************************
  *
@@ -91,7 +91,7 @@
 #include <cstddef>  // std::byte
 #include <ostream>	    
 
-namespace dev{
+namespace mcu{
 /*!
  *  \brief  Concebimos TWI como ioxtream.
  * 

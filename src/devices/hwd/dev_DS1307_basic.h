@@ -38,6 +38,8 @@
 #include <atd_bcd.h>
 
 #include <atd_bit.h>
+#include <mcu_TWI_master_ioxtream.h>
+
 #include "dev_TWI_memory_type.h"
 
 namespace dev{
@@ -319,7 +321,7 @@ private:
 template <typename TWI_master>
 uint8_t DS1307_basic<TWI_master>::ram_read(uint8_t* buf, uint8_t n, uint8_t i)
 {
-    using TWI = TWI_master_ioxtream<TWI_master>;
+    using TWI = mcu::TWI_master_ioxtream<TWI_master>;
 
     TWI twi(slave_address);
      
@@ -342,7 +344,7 @@ uint8_t DS1307_basic<TWI_master>::ram_read(uint8_t* buf, uint8_t n, uint8_t i)
 template <typename TWI_master>
 uint8_t DS1307_basic<TWI_master>::ram_write(uint8_t* buf, uint8_t n, uint8_t i)
 {
-    using TWI = TWI_master_ioxtream<TWI_master>;
+    using TWI = mcu::TWI_master_ioxtream<TWI_master>;
 
     TWI twi(slave_address);
  

@@ -26,7 +26,7 @@
 
 #include <avr_atmega.h>
 
-#include <dev_TWI_master.h>
+#include <mcu_TWI_master.h>
 
 
 // Microcontroller
@@ -38,11 +38,11 @@ using Micro   = my_mcu::Micro;
 // TWI Protocol
 // ------------
 static constexpr uint8_t TWI_buffer_size = 70; 
-using TWI_master_cfg = dev::TWI_master_cfg<Micro, 
+using TWI_master_cfg = mcu::TWI_master_cfg<Micro, 
                                            my_mcu::TWI_basic,
 					   TWI_buffer_size>;
 
-using TWI = dev::TWI_master<TWI_master_cfg>;
+using TWI = mcu::TWI_master<TWI_master_cfg>;
 
 
 // Devices

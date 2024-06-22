@@ -1,13 +1,14 @@
-SOURCES= dev_one_wire.cpp
+SOURCES= mcu_one_wire.cpp
 
-INCS= 	dev_clocks.h	\
-		dev_cycle.h		\
-		dev_miniclock.h	\
-		dev_one_wire.h	\
-		dev_train_of_pulses.h	\
-		dev_TWI_master.h\
-		dev_TWI_master_ioxtream.h	\
-		dev_TWI_slave.h
+INCS= 	mcu_clock.h	\
+		mcu_concepts.h	\
+		mcu_cycle.h		\
+		mcu_miniclock.h	\
+		mcu_one_wire.h	\
+		mcu_train_of_pulses.h	\
+		mcu_TWI_master.h\
+		mcu_TWI_master_ioxtream.h	\
+		mcu_TWI_slave.h
 
 
 LIB=mcu1_$(F_CPU)

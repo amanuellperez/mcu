@@ -29,8 +29,8 @@
 // Lo ideal es usar dispositivos genéricos en el resto, de esa forma se puede
 // cambiar el hardware sin tocar el software.
 #include <avr_atmega.h>
-#include <dev_one_wire.h>
-#include <dev_clocks.h>
+#include <mcu_one_wire.h>
+#include <mcu_clock.h>
 #include <dev_DS18B20.h>
 
 // cfg
@@ -67,9 +67,9 @@ constexpr uint8_t one_wire_pin = 15;
 
 // One wire protocol
 // -----------------
-using Cfg = dev::One_wire_cfg<my_mcu::Micro, one_wire_pin>;
-using One_wire = dev::One_wire<Cfg>;
-using Search = dev::One_wire_search<Cfg>;
+using Cfg = mcu::One_wire_cfg<my_mcu::Micro, one_wire_pin>;
+using One_wire = mcu::One_wire<Cfg>;
+using Search = mcu::One_wire_search<Cfg>;
 
 
 // uart
@@ -94,7 +94,7 @@ inline void UART::empty_read_buffer()
 // -------
 // Clock
 using Time_counter = my_mcu::Time_counter2_32kHz_g<timeout_ms>;
-using Clock	   = dev::Clock_s<Micro, Time_counter>;
+using Clock	   = mcu::Clock_s<Micro, Time_counter>;
 #define ISR_CLOCK ISR_TIMER2_COMPA
 
 // Sensor de T

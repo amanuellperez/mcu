@@ -21,7 +21,7 @@
 void set_system_time(time_t x){}
 void system_tick(){}
 
-#include "../../../dev_system_clock.h"
+#include "../../../mcu_system_clock.h"
 
 #include <alp_test.h>
 #include <alp_string.h>
@@ -66,24 +66,24 @@ void test_system_clock_top()
 {
 //    CHECK_DONT_COMPILE(
 //    {
-//    constexpr uint8_t top = dev::__system_clock_top<Timer0, 32>();
+//    constexpr uint8_t top = mcu::__system_clock_top<Timer0, 32>();
 //    CHECK_TRUE(top == 31250, "__system_clock_top(32)");
 //    }
 //    )
 //    CHECK_DONT_COMPILE(
 //    {
-//    constexpr uint8_t top = dev::__system_clock_top<Timer0, 64>();
+//    constexpr uint8_t top = mcu::__system_clock_top<Timer0, 64>();
 //    CHECK_TRUE(top == 15625, "__system_clock_top(64)");
 //    }
 //    )
 
 
     {
-    constexpr uint16_t top = dev::__system_clock_top<Timer1, 32>();
+    constexpr uint16_t top = mcu::__system_clock_top<Timer1, 32>();
     CHECK_TRUE(top == 31250, "__system_clock_top(32)");
     }
     {
-    constexpr uint16_t top = dev::__system_clock_top<Timer1, 64>();
+    constexpr uint16_t top = mcu::__system_clock_top<Timer1, 64>();
     CHECK_TRUE(top == 15625, "__system_clock_top(64)");
     }
 }

@@ -20,7 +20,6 @@
 #include "../../dev_DHT11.h"
 
 #include <avr_atmega.h>
-#include <dev_train_of_pulses.h>
 
 // Micro
 // -----

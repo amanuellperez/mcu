@@ -1,7 +1,7 @@
 BIN = xx
 
 SOURCES= main.cpp	\
-		 ../../dev_one_wire.cpp
+		 ../../mcu_one_wire.cpp
 
 #F_CPU = 8000000UL
 

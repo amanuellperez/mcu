@@ -30,7 +30,7 @@
 // cambiar el hardware sin tocar el software.
 #include <avr_atmega.h>
 
-#include <dev_miniclock.h>
+#include <mcu_miniclock.h>
 #include <dev_square_wave.h>
 
 #include "dev_train_of_pulses.h"
@@ -66,7 +66,7 @@ constexpr uint8_t ir_receiver_pin = 15;	   // Timer1::OCA
 // -------
 // Uso: Timer0 como SWG0_g
 //	Timer1 como Miniclock_us
-using Miniclock_us = dev::Miniclock_us<my_mcu::Micro, my_mcu::Time_counter1_g>;
+using Miniclock_us = mcu::Miniclock_us<my_mcu::Micro, my_mcu::Time_counter1_g>;
 
 using SWG = dev::Square_wave_burst_generator< my_mcu::Square_wave_burst_generator0_g
 					  , my_mcu::Output_pin<ir_transmitter_pin>

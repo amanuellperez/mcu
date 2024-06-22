@@ -18,8 +18,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #pragma once
 
-#ifndef __DEV_CYCLE_H__
-#define __DEV_CYCLE_H__
+#ifndef __MCU_CYCLE_H__
+#define __MCU_CYCLE_H__
 /****************************************************************************
  *
  * DESCRIPCION
@@ -60,7 +60,7 @@
 /***************************************************************************
  *				    CYCLE
  ***************************************************************************/
-namespace dev{
+namespace mcu{
 
 struct Cycle{
     uint16_t time_low;

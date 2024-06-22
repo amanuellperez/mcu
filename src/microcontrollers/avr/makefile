@@ -7,8 +7,7 @@ SOURCES= avr_sleep.cpp	\
 		 avr_UART.cpp
 
 
-INCS= dev_concepts.h	\
-	avr_ADC_basic.h		\
+INCS= avr_ADC_basic.h		\
 	avr_ADC_driver.h	\
 	avr_atmega328p_cfg.h\
 	avr_atmega_dev.h	\

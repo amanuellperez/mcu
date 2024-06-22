@@ -18,8 +18,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #pragma once
 
-#ifndef __DEV_TRAIN_OF_PULSES_H__
-#define __DEV_TRAIN_OF_PULSES_H__
+#ifndef __MCU_TRAIN_OF_PULSES_H__
+#define __MCU_TRAIN_OF_PULSES_H__
 /****************************************************************************
  *
  * DESCRIPCION
@@ -30,10 +30,10 @@
  *    10/10/2023 Traído de IR remote control y generalizado.
  *
  ****************************************************************************/
-#include "dev_cycle.h"
+#include "mcu_cycle.h"
 #include <atd_array.h>
 
-namespace dev{
+namespace mcu{
 
 /***************************************************************************
  *			    TRAIN OF PULSES

@@ -18,7 +18,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 // Este microcontrolador dialoga con el test/TWI/slave
-#include "../../../dev_TWI_master.h"
+#include "../../../mcu_TWI_master.h"
 #include <avr_atmega.h>
 #include <atd_ostream.h>    // print_int_as_hex
 
@@ -33,11 +33,11 @@ using Micro   = my_mcu::Micro;
 // -------
 constexpr uint8_t TWI_buffer_size = 10;
 
-using TWI_master_cfg = dev::TWI_master_cfg<Micro, 
+using TWI_master_cfg = mcu::TWI_master_cfg<Micro, 
                                            my_mcu::TWI_basic,
 					   TWI_buffer_size>;
 
-using TWI = dev::TWI_master<TWI_master_cfg>;
+using TWI = mcu::TWI_master<TWI_master_cfg>;
 
 
 // Slave info

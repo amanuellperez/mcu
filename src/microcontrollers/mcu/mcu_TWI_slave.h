@@ -18,8 +18,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #pragma once
 
-#ifndef __DEV_TWI_SLAVE_H__
-#define __DEV_TWI_SLAVE_H__
+#ifndef __MCU_TWI_SLAVE_H__
+#define __MCU_TWI_SLAVE_H__
 
 /****************************************************************************
  *
@@ -56,7 +56,7 @@
 		   
 #include <atd_iobxtream.h>  // TWI_iobuffer
 			    
-namespace dev{
+namespace mcu{
 
 
 enum class __TWI_slave_state{

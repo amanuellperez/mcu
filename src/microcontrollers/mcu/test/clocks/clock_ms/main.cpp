@@ -17,14 +17,14 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "../../../dev_clocks.h"
+#include "../../../mcu_clock.h"
 #include <avr_atmega.h>
 #include <atd_time.h>
 
 namespace my_mcu = atmega;
 using Micro   = my_mcu::Micro;
 
-using Clock = dev::Clock_ms<Micro, my_mcu::Time_counter1_g>;
+using Clock = mcu::Clock_ms<Micro, my_mcu::Time_counter1_g>;
 
 
 

@@ -29,7 +29,7 @@
 // Lo ideal es usar dispositivos genéricos en el resto, de esa forma se puede
 // cambiar el hardware sin tocar el software.
 #include <avr_atmega.h>
-#include <dev_one_wire.h>
+#include <mcu_one_wire.h>
 #include <dev_DS18B20.h>
 
 // microcontroller
@@ -59,9 +59,9 @@ constexpr uint8_t one_wire_pin = 15;
 
 // One wire protocol
 // -----------------
-using Cfg = dev::One_wire_cfg<my_mcu::Micro, one_wire_pin>;
-using One_wire = dev::One_wire<Cfg>;
-using Search = dev::One_wire_search<Cfg>;
+using Cfg = mcu::One_wire_cfg<my_mcu::Micro, one_wire_pin>;
+using One_wire = mcu::One_wire<Cfg>;
+using Search = mcu::One_wire_search<Cfg>;
 
 
 // UART

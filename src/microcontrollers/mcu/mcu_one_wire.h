@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __DEV_ONE_WIRE_H__
-#define __DEV_ONE_WIRE_H__
+#ifndef __MCU_ONE_WIRE_H__
+#define __MCU_ONE_WIRE_H__
 /****************************************************************************
  *
  * DESCRIPCION
@@ -50,7 +50,7 @@
 #include <atd_crc.h>	    // CRC8_Maxim
 			    
 
-namespace dev{
+namespace mcu{
 
 /***************************************************************************
  *			    ONE WIRE DEVICE
@@ -483,7 +483,7 @@ class One_wire_search_end{};
 template <typename Cfg>
 class One_wire_search{
 public:
-    using One_wire = dev::One_wire<Cfg>;
+    using One_wire = mcu::One_wire<Cfg>;
     using Device   = One_wire_device;
 
     enum class Type{normal_search, alarm_search};

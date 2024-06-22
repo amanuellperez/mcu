@@ -32,7 +32,7 @@
  *    12/10/2023 Escrito
  *
  ****************************************************************************/
-#include <dev_train_of_pulses.h>
+#include <mcu_train_of_pulses.h>
 #include <atd_concepts.h>
 #include <atd_bit.h>
 #include <atd_float.h>
@@ -68,7 +68,7 @@ private:
     static constexpr uint8_t nmax_pulses = 42; // ACK + 5 bytes data + end
 
 // Internal types
-    using Train_of_pulses = dev::Train_of_pulses<nmax_pulses>;
+    using Train_of_pulses = mcu::Train_of_pulses<nmax_pulses>;
 
     template <typename Micro, uint8_t npin, uint8_t start_time_ms>
     static void receive_polling(Train_of_pulses& pulse);
@@ -91,11 +91,11 @@ void DHT_protocol::receive_polling(Train_of_pulses& pulse)
 		  "Low frequency, change it to at least 8MHz");
 
     using Pin   = typename Micro::Pin<npin>;
-    using Cfg_train = dev::Train_of_pulses_poll_receiver_cfg<Micro,
+    using Cfg_train = mcu::Train_of_pulses_poll_receiver_cfg<Micro,
 					  npin, 
 					  nmax_pulses>;
     using Train_of_pulses_receiver = 
-				dev::Train_of_pulses_poll_receiver<Cfg_train>;
+				mcu::Train_of_pulses_poll_receiver<Cfg_train>;
 
     // Enviamos al DHT_protocol la señal para que empiece
     Pin::write_zero();

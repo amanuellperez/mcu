@@ -18,8 +18,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 // Este microcontrolador dialoga con el test/TWI/slave
-#include "../../../dev_TWI_master_ioxtream.h"
-#include "../../../dev_TWI_master.h"
+#include "../../../mcu_TWI_master_ioxtream.h"
+#include "../../../mcu_TWI_master.h"
 #include <avr_atmega.h>
 
 // Microcontroller
@@ -31,13 +31,13 @@ using Micro   = my_mcu::Micro;
 // Devices
 // -------
 constexpr uint8_t TWI_buffer_size = 100;
-using TWI_master_cfg = dev::TWI_master_cfg<Micro, 
+using TWI_master_cfg = mcu::TWI_master_cfg<Micro, 
                                            my_mcu::TWI_basic,
 					   TWI_buffer_size>;
 
-using TWI_master  = dev::TWI_master<TWI_master_cfg>;
+using TWI_master  = mcu::TWI_master<TWI_master_cfg>;
 
-using TWI = dev::TWI_master_ioxtream<TWI_master>;
+using TWI = mcu::TWI_master_ioxtream<TWI_master>;
 
 constexpr uint8_t slave_address = 0x10;
 
