@@ -131,18 +131,18 @@ public:
     // ocurre por defecto dentro de una ISR) y usar las funciones unsafe.
     // Serán un pelín más eficientes.
     static counter_type unsafe_time()
-	    requires Unsafe_device<Timer_counter>;
+	    requires Type::Unsafe_device<Timer_counter>;
 
     static counter_type unsafe_time()
-	    requires Safe_device<Timer_counter>;
+	    requires Type::Safe_device<Timer_counter>;
 
     /// Espera t ticks de reloj. Si el tick son microsegundos, espera t
     /// microsegundos. Si el tick son milisegundos, t milisegundos.
     static void wait(const counter_type& t)
-	    requires Unsafe_device<Timer_counter>;
+	    requires Type::Unsafe_device<Timer_counter>;
 
     static void wait(const counter_type& t)
-	    requires Safe_device<Timer_counter>;
+	    requires Type::Safe_device<Timer_counter>;
 
     // reset
     // -----
@@ -150,10 +150,10 @@ public:
     static void reset();
 
     static void unsafe_reset()
-	    requires Unsafe_device<Timer_counter>;
+	    requires Type::Unsafe_device<Timer_counter>;
 
     static void unsafe_reset()
-	    requires Safe_device<Timer_counter>;
+	    requires Type::Safe_device<Timer_counter>;
 
 // Info
     /// Devuelve el valor máximo que puede alcanzar el counter sin dar
@@ -196,14 +196,14 @@ inline Miniclock<M, T, p>::counter_type Miniclock<M, T, p>::time()
 
 template <typename M, typename T, int p>
 inline Miniclock<M, T, p>::counter_type Miniclock<M, T, p>::unsafe_time()
-	    requires Unsafe_device<Timer_counter>
+	    requires Type::Unsafe_device<Timer_counter>
 {
     return Timer_counter::unsafe_value();
 }
 
 template <typename M, typename T, int p>
 inline Miniclock<M, T, p>::counter_type Miniclock<M, T, p>::unsafe_time()
-	    requires Safe_device<Timer_counter>
+	    requires Type::Safe_device<Timer_counter>
 {
     return Timer_counter::safe_value();
 }
@@ -211,7 +211,7 @@ inline Miniclock<M, T, p>::counter_type Miniclock<M, T, p>::unsafe_time()
 
 template <typename M, typename T, int p>
 inline void Miniclock<M, T, p>::wait(const counter_type& t)
-	    requires Unsafe_device<Timer_counter>
+	    requires Type::Unsafe_device<Timer_counter>
 
 {
     using Disable_interrupts = Micro::Disable_interrupts;
@@ -226,7 +226,7 @@ inline void Miniclock<M, T, p>::wait(const counter_type& t)
 
 template <typename M, typename T, int p>
 inline void Miniclock<M, T, p>::wait(const counter_type& t)
-	    requires Safe_device<Timer_counter>
+	    requires Type::Safe_device<Timer_counter>
 {
     Timer_counter::reset();
     
@@ -244,14 +244,14 @@ inline void Miniclock<M, T, p>::reset()
 
 template <typename M, typename T, int p>
 inline void Miniclock<M, T, p>::unsafe_reset()
-	requires Unsafe_device<Timer_counter>
+	requires Type::Unsafe_device<Timer_counter>
 {
     Timer_counter::unsafe_reset();
 }
 
 template <typename M, typename T, int p>
 inline void Miniclock<M, T, p>::unsafe_reset()
-	requires Safe_device<Timer_counter>
+	requires Type::Safe_device<Timer_counter>
 {
     Timer_counter::reset();
 }

@@ -26,6 +26,17 @@
  * DESCRIPCION
  *	Clases para manejar pines del AVR
  *
+ * DUDA
+ *	¿Merecen la pena Output_pin/Input_pin? 
+ *	En la práctica lo que estoy haciendo es:
+ *	    1) Usar el interfaz static. Con lo que puedo eliminar el
+ *	       constructor.
+ *
+ *	    2) Llamar explícitamente a Pin::as_output() or
+ *	       Pin::as_input_with_pullup() en el init() del driver.
+ *
+ *	¿Eliminar esas clases? (???)
+ *
  * HISTORIA
  *    Manuel Perez
  *      24/07/2017 Escrito
@@ -209,6 +220,25 @@ public:
     using INT = INT__<cfg::nINT_of_pin<n>()>;
 
 };
+
+// Usamos el pin 0, que no existe, to indicate a floating pin o a pin
+// conectado a Vcc o GND.
+template<>
+class Pin<0>{ };
+
+// La idea de estas clases es poder dejar documentado en código las conexiones
+// de hardware y que el compilador de error en caso de intentar usar un pin
+// que el harwador dice que no ha conectado.
+// Ejemplo: el driver A4988 tiene un montón de pines de entrada que pueden
+// conectarse al micro o fijar su valor a Vcc o GND. El hardwador en hwd_dev.h
+// indica cómo se conecta. Supongamos por ejemplo que el harwador decide que
+// el motor siempre va a estar encendido (ENABLE = 1). Si ahora el sofwador
+// intenta llamar a A4988::disable() el compilador dará un error indicándole
+// que está intentando hacer algo que fijo no va a poder hacer. Capturamos el
+// error en tiempo de compilación.
+using Pin_floating         = Pin<0>;
+using Pin_connected_to_Vcc = Pin<0>;
+using Pin_connected_to_GND = Pin<0>;
 
 
 // Implementación
@@ -581,19 +611,11 @@ public:
 };
 
 
-// Cuando quiera definir en un dispositivo un pin de forma opcional lo defino
-// como 0. El Pin<0> no está conectado realmente a ningún pin.
+// Usamos el pin 0, que no existe, to indicate a floating pin o a pin
+// conectado a Vcc o GND.
 template<>
-class Output_pin<0>{
-public:
-    static constexpr uint8_t number = 0;
+class Output_pin<0>{ };
 
-    constexpr Output_pin(){}
-    Output_pin& operator=(const Output_pin&)	= delete;
-
-    constexpr static void write_one()	{}
-    constexpr static void write_zero()	{}
-};
 
 
 /***************************************************************************

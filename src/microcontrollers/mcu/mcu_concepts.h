@@ -42,16 +42,22 @@
  *	    class Driver{...};
  *
  *
+ * NOTA
+ *  Al igual que hice en atd, voy a meter los concepts en el namespace Type
+ *  para poder escribir cosas del tipo: template <Type::Pin ...>. ¿Sería mejor
+ *  meterlos en mcu? Queda muy largo: template <mcu::Type::Pin ...> <-- esto
+ *  se lee fatal. Mejor el primero.  ¡La idea es poder leer el código!
  *
  *
  * HISTORIA
  *    Manuel Perez
  *    11/12/2022 Unsafe_device
- *    22/06/2024 Escrito
+ *    22/06/2024 Pin
  *
  ****************************************************************************/
-namespace mcu{
-
+namespace Type {
+// Unsafe_device
+// -------------
 // Timer1 tiene un contador de 16 bits que para acceder hay que bloquear las
 // interrupciones. No hacerlo podría generar errores.
 //
@@ -74,7 +80,19 @@ template <typename T>
 concept Safe_device = (!Unsafe_device<T>);
 
 
-}// namespace
+
+// Pin
+// ---
+// Se trata de un pin de entrada/salida (que en la práctica es lo que estoy
+// pasando a las clases). Es un experimento: porque ¿qué es un Pin?
+template <typename T>
+concept Pin = requires { 
+      T::write_zero();
+      T::write_one();
+      T::read();    // o mejor mirar: is_zero() & is_one()?
+    };
+
+}// namespace Type
 
 #endif
 
