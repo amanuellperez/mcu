@@ -103,7 +103,6 @@ namespace atmega{
     using Time_counter1_g= avr_::Time_counter1_g;
     using Square_wave_generator1_g = avr_::Square_wave_generator1_g;
     using SWG1           = avr_::Square_wave_generator1_g;
-//    using SWG1_pin	 = avr_::SWG1_pin; <-- TODO: square wave generator pin
 
     // TODO: sería más genérico el pasar solamente el número de pin sin
     // indicar el Timer al que pertenece.

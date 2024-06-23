@@ -463,6 +463,14 @@ Si se conecta Vcc a menos de 12V se puede tener puesto el jumper de los 5V y
 suministrar 5V como output pin. Pero si Vcc > 12V **quitar ese jumper**.
 
 
+A4988: de Allegro
+
+Hay un clon chino que es el HR4988. En algún foro comentan que es peor que el
+A4988. Al comprar en aliexpress o similar mirar la foto del chip para ver la
+referencia real. Algunas veces los venden como A4988 pero realmente son
+HR4988.
+
+
 ### <a name="joystick"></a>Joysticks
 
 Type 1: Es un joystick básico con un botón.
