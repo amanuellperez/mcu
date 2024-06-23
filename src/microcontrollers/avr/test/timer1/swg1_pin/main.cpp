@@ -73,8 +73,20 @@ void generate_sw_signal_pin_A()
 
     if (freq == 0) return;
 
+    uart << "\nPulses number to generate (0 = don't stop): ";
+    uint16_t npulses;
+    uart >> npulses;
+
     my_mcu::SW_signal sw{freq};
-    SWG_pin1::generate(sw);
+
+    if (npulses == 0){
+	uart << "Generating " << sw.frequency() << '\n';
+	SWG_pin1::generate(sw);
+    }
+    else{
+	uart << "Generating " << npulses << " at " << sw.frequency() << '\n';
+	SWG_pin1::generate(sw, npulses);
+    }
 }
 
 
@@ -156,6 +168,8 @@ int main()
     init_uart();
     
     hello();
+    
+    my_mcu::enable_interrupts();
 
     my_mcu::UART_iostream uart;
 
@@ -183,4 +197,7 @@ int main()
 }
 
 
+ISR_TIMER1_CAPT{
+    SWG_pin1::handle_interrupt();
+}
 

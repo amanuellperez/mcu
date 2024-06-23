@@ -765,6 +765,13 @@ public:
     //          la señal que realmente se va a generar. <-- TODO: falta
     static void generate(const SW_signal& sw);
 
+    // Genera un número fijo de pulsos de la SW_signal.
+    // IMPORTANTE: Para poder usar esta función:
+    //	1) Activar las interrupciones globalmente.
+    //	2) Implementar la función: 
+    //		    ISR_TIMER1_CAPT {SWG1_pin::handle_interrupt();}
+    static void generate(const SW_signal& sw, uint16_t npulses);
+
     // Conecta el pin al Timer.
     // Al llamar a generate se hace de forma automática.
     // Esto se podría usar para, sin llamar a generate, conectar y desconectar
@@ -787,7 +794,28 @@ public:
     static void write_zero();
     static void write_one();
 
+// Interrupts
+    // La interrupción que usa esta clase es
+    //	    ISR_TIMER1_CAPT
+    static void handle_interrupt();
 private:
+// Data
+    // TODO(DUDA?): SWG1_pin<15> y SWG1_pin<16> son dos clases distintas, y
+    // por tanto cada una de ellas tiene su propio npulses_. Sin embargo las
+    // dos clases están acopladas: si se generan 10 pulsos a 100Hz en el
+    // SWG1_pin<15> también se van a generar esos mismos pulsos en
+    // SWG1_pin<16>. Una optimización sería que npulses_ sea común a ambas
+    // clases, lo mismo que la clase generate(sw, npulses); (<-- ahora se
+    // duplica el código de esta función si se crean las dos clases).
+    // Una posible forma de hacerlo sería con una clase padre que defina las
+    // partes en común. ¿Merece la pena hacerlo? Se crearán dos clases
+    // asociadas a los pines 15 y 16 a la vez? Están acopladas ... Usémoslo y
+    // ya veremos.
+    //
+    // (RRR) volatile porque se modifica en interrupción
+    inline static volatile uint16_t npulses_; 
+
+// Helpers
     static void pin_as_output();
 }; 
 
@@ -801,15 +829,43 @@ void SWG1_pin<n>::generate(const SW_signal& sw)
 
     Timer::CTC_mode_top_ICR1();
 
-    connect();
-
     {
 	Disable_interrupts l;
+
+	Timer::unsafe_counter(0); 
 	Timer::unsafe_input_capture_register(atd::to_integer<counter_type>(t));
     }
 
+    connect();
     Timer::clock_frequency_prescaler(d); // esto enciende el Timer
 }
+
+
+template <uint8_t n>
+inline 
+void SWG1_pin<n>::generate(const SW_signal& sw, uint16_t npulses)
+{
+    if (npulses == 0)
+	return;
+
+// TODO: validar que no haya overflow? o definir npulses_ como uint32_t?
+    npulses_ = 2*npulses;
+    generate(sw);
+    Timer::enable_input_capture_interrupt();
+}
+
+template <uint8_t n>
+inline 
+void SWG1_pin<n>::handle_interrupt()
+{
+    npulses_ = npulses_ - 1;
+    
+    if (npulses_ == 0){
+	stop();
+	Timer::disable_input_capture_interrupt();
+    }
+}
+
 
 template <uint8_t n>
 inline void SWG1_pin<n>::connect()
@@ -833,7 +889,11 @@ inline void SWG1_pin<n>::disconnect()
 
 
 template <uint8_t n>
-inline void SWG1_pin<n>::stop() { Timer::off(); }
+inline void SWG1_pin<n>::stop() 
+{ 
+    Timer::off(); 
+    disconnect();
+}
 
 
 template <uint8_t n>

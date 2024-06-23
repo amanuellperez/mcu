@@ -313,6 +313,36 @@ void test_sign()
     CHECK_TRUE(atd::opposite(atd::Sign::negative) == atd::Sign::positive, "opposite");
 }
 
+template <typename Int>
+void test_overflow2(const Int& x, bool res)
+{
+    CHECK_TRUE(atd::overflow<Int>(2*x) == res, "overflow");
+}
+
+template <typename Int>
+void test_overflow10(const Int& x, bool res)
+{
+    CHECK_TRUE(atd::overflow<Int>(10*x) == res, "overflow");
+}
+
+void test_overflow()
+{
+    test::interface("overflow");
+
+    test_overflow2<uint8_t>(uint8_t{0}, false);
+    test_overflow2<uint8_t>(uint8_t{100}, false);
+    test_overflow2<uint8_t>(uint8_t{127}, false);
+    test_overflow2<uint8_t>(uint8_t{128}, true);
+    test_overflow2<uint8_t>(uint8_t{200}, true);
+
+    test_overflow2<uint16_t>(uint16_t{0}, false);
+    test_overflow2<uint16_t>(uint16_t{100}, false);
+    test_overflow2<uint16_t>(uint16_t{127}, false);
+    test_overflow2<uint16_t>(uint16_t{128}, false);
+    test_overflow2<uint16_t>(uint16_t{32767}, false);
+    test_overflow2<uint16_t>(uint16_t{32768}, true);
+}
+
 int main()
 {
 try{
@@ -330,6 +360,7 @@ try{
     test_sign_of();
     test_divide_rounding();
     test_sign();
+    test_overflow();
 
 }catch(std::exception& e)
 {

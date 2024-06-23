@@ -37,6 +37,7 @@
  *    24/10/2023 sign_of
  *    06/06/2024 divide_rounding<int>
  *    10/06/2024 Sign
+ *    23/06/2024 overflow
  *
  *
  ****************************************************************************/
@@ -47,6 +48,7 @@
 #include <algorithm> 
 #include "atd_cmath.h"
 #include "atd_concepts.h"
+#include "atd_type_traits.h"
 
 namespace atd{
 
@@ -433,6 +435,23 @@ inline std::ostream& operator<<(std::ostream& out, Sign sign)
     }
 
     return out;
+}
+
+
+// overflow
+// --------
+
+// (RRR) Si x fuera negativo hay que mirar que x >= min(). Por eso, esta
+//	 implementación solo es válida para unsigned.
+template <Type::Integer Int>
+    requires (std::is_unsigned_v<Int>)
+inline 
+constexpr bool overflow(const same_type_with_double_bits_t<Int>& x)
+{
+    if (x <= std::numeric_limits<Int>::max())
+	return false;
+
+    return true;
 }
 
 } // namespace
