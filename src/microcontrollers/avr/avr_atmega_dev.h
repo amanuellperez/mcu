@@ -117,6 +117,9 @@ namespace atmega{
     template <uint8_t npin>
     using PWM1_pin	 = avr_::PWM1_pin<npin>;
 
+    template <uint8_t npin>
+    using SWG1_pin	 = avr_::SWG1_pin<npin>;
+
     using Timer2         = avr_::Timer2;
     using Time_counter2_g= avr_::Time_counter2_g;
 

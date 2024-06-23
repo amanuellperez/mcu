@@ -83,6 +83,7 @@
 #include "avr_cfg.h"	// clock_frequency_in_hz
 #include "avr_micro.h"
 
+#include <atd_math.h>
 namespace avr_{
 
 namespace timer1_{
@@ -751,6 +752,7 @@ public:
     using Timer        = avr_::Timer1;
     using SW_signal    = avr_::SW_signal;
     using counter_type = Timer::counter_type;
+    using NPulses_t    = uint16_t;
 
 // cfg
     static constexpr uint8_t number  = npin0;
@@ -770,7 +772,7 @@ public:
     //	1) Activar las interrupciones globalmente.
     //	2) Implementar la función: 
     //		    ISR_TIMER1_CAPT {SWG1_pin::handle_interrupt();}
-    static void generate(const SW_signal& sw, uint16_t npulses);
+    static void generate(const SW_signal& sw, const NPulses_t& npulses);
 
     // Conecta el pin al Timer.
     // Al llamar a generate se hace de forma automática.
@@ -813,7 +815,7 @@ private:
     // ya veremos.
     //
     // (RRR) volatile porque se modifica en interrupción
-    inline static volatile uint16_t npulses_; 
+    inline static volatile NPulses_t npulses_; 
 
 // Helpers
     static void pin_as_output();
@@ -823,6 +825,9 @@ private:
 template <uint8_t n>
 void SWG1_pin<n>::generate(const SW_signal& sw)
 {
+    write_zero(); // garantizamos empezar a contar correctamente (para
+		  // npulses_)
+
     using CTC = timer_::CTC_mode;
     auto [d, t] = CTC::frequency_to_prescaler_top
 			    <Timer, clock_frequency.value()> (sw.frequency());
@@ -843,12 +848,16 @@ void SWG1_pin<n>::generate(const SW_signal& sw)
 
 template <uint8_t n>
 inline 
-void SWG1_pin<n>::generate(const SW_signal& sw, uint16_t npulses)
+void SWG1_pin<n>::generate(const SW_signal& sw, const NPulses_t& npulses)
 {
     if (npulses == 0)
 	return;
 
-// TODO: validar que no haya overflow? o definir npulses_ como uint32_t?
+    if (atd::overflow<NPulses_t>(2 * npulses)){
+	// error("SWG1_pin::generate: overflow");
+	return; // Al no hacer nada el programador detectará, espero, el error
+    }
+
     npulses_ = 2*npulses;
     generate(sw);
     Timer::enable_input_capture_interrupt();
@@ -1028,6 +1037,7 @@ void PWM1_pin<n>::generate(const PWM_signal& pwm)
 
     { // unsafe operations ==> Disable_interrupts 
     Disable_interrupts l; 
+    Timer::unsafe_counter(0); 
     Timer::unsafe_input_capture_register(mode.top);
 
     Timer::counter_type ocr = pwm.duty_cycle().of(mode.top);
