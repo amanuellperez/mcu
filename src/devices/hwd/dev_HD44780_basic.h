@@ -23,16 +23,21 @@
 #define __DEV_LCD_HD4780_BASIC_H__
 /****************************************************************************
  *
- *  - DESCRIPCION: Traductor del display HD44780
+ *  DESCRIPCION
+ *	Traductor del display HD44780
  *  
- *  - COMENTARIOS: Aunque al principio implementé el acceso al LCD usando los
+ *  COMENTARIOS
+ *	Aunque al principio implementé el acceso al LCD usando los
  *    8 bits en la práctica nunca lo he usado. Al estar todas las funciones de
  *    8 bits sin probar optó por comentarlas. Si se quieren usar
  *    descomentarlas y probarlas. NO BORRARLAS, dejarlas comentadas por si en
  *    el futuro se quiere usar el interfaz de 8 bits.
  *
- *  - HISTORIA:
- *     A. Manuel L.Perez
+ *  TODO
+ *	Pasar los pines de forma parecida a lo hecho en A4988
+ *
+ *  HISTORIA
+ *     Manuel Perez
  *	    11/07/2017 v0.0
  *	    29/07/2019 v0.1: Creo traductor.
  *	    26/09/2019 v0.2: LCD_ostream y cambios menores.

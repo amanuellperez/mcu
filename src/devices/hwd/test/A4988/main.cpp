@@ -35,16 +35,29 @@ constexpr uint32_t baud_rate = 9'600;
 
 // Pin connections
 // ---------------
-// static constexpr uint8_t NO_ENABLE = mcu::Pin::floating;
-static constexpr uint8_t DIR_pin = 14;
-static constexpr uint8_t STEP_pin = 15;
-using STEP_SWG_pin = myu::SWG1_pin<STEP_pin>;
+struct A4988_pins{
+//     ----------
+// Aunque no es necesario indicar los floatings pins, a la hora
+// de mantener el programa es mucho más sencillo ya que queda documentado
+// en código cómo se conectan los pins
+static constexpr uint8_t NO_ENABLE= mcu::Pin::floating;
+
+static constexpr uint8_t MS1= mcu::Pin::floating;
+static constexpr uint8_t MS2= mcu::Pin::floating;
+static constexpr uint8_t MS3= mcu::Pin::floating;
+
+// Realmente están conectados reset con sleep
+static constexpr uint8_t NO_RESET= mcu::Pin::floating;
+static constexpr uint8_t NO_SLEEP= mcu::Pin::floating;
+
+static constexpr uint8_t DIR     = 14;
+static constexpr uint8_t STEP_pin= 15;
+
+using STEP = myu::SWG1_pin<STEP_pin>;
+};
 
 // Devices
 // -------
-using A4988_STEP_AND_DIR = dev::A4988_STEP_AND_DIR<STEP_SWG_pin, DIR_pin>;
-using A4988_pins = dev::A4988_pins<A4988_STEP_AND_DIR>;
-
 using A4988 = dev::A4988_basic<Micro, A4988_pins>;
 
 
@@ -62,10 +75,14 @@ void hello()
     myu::UART_iostream uart;
     uart << "\n\nA4988 test\n"
 	        "----------\n"
-		"IMPORTANT: connect an electrolytic capacitor of 100 uF (minimum 47 uF)!!!\n"
+		"*************************************************************\n"
+		"                        IMPORTANT\n"
+		" Don't forget to connect an electrolytic capacitor of 100 uF\n"
+		" (minimum 47 uF) between VMOT and GND!!!\n"
+		"*************************************************************\n"
 		"Connections:\n"
-		"\tDIR = " << (int) DIR_pin << 
-		"; STEP = " << (int) STEP_pin << 
+		"\tDIR = " << (int) A4988_pins::DIR << 
+		"; STEP = " << (int) A4988_pins::STEP_pin << 
 		"\n\n";
 }
 
@@ -87,6 +104,22 @@ void test_step()
 }
 
 
+void test_direction()
+{
+    myu::UART_iostream uart;
+    uart << "\nDirection (+/-): ";
+    char d{};
+    uart >> d;
+
+    auto dir = A4988::Direction::positive;
+
+    if (d == '-')
+	dir = A4988::Direction::negative;
+
+    A4988::direction(dir);
+}
+
+
 // Main
 // ----
 int main() 
@@ -102,13 +135,15 @@ int main()
     while(1){
 	uart << "\nMenu\n"
 	          "----\n"
-		  "1. step\n";
+		  "1. step\n"
+		  "2. direction\n";
 
 	char opt{};
 	uart >> opt;
 
 	switch (opt){
 	    break; case '1': test_step();
+	    break; case '2': test_direction();
 
 	    break; default: uart << "What???\n";
 
@@ -118,5 +153,5 @@ int main()
 
 
 ISR_TIMER1_CAPT{
-    STEP_SWG_pin::handle_interrupt();
+    A4988_pins::STEP::handle_interrupt();
 }
