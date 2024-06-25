@@ -50,6 +50,12 @@ namespace cfg{ // ir incluyendo el resto según vaya reescribiendo codigo
 // si conecto el pin 12, debo revisar que haya conectado el pin 12 del avr.
 // Sencillo!!!)
 
+struct pins{
+constexpr static uint8_t number_of_pins     =  28;
+constexpr static uint8_t minimum_pin	    =  1; // Este siempre será 1 (:?)
+constexpr static uint8_t maximum_pin	    =  28;
+};
+
 // Las macros DDRB son del tipo *(volatile uint8_t*) direccion_ddrb;
 // Estas funciones devuelven la dirección de memoria del registro que 
 // siempre es válida.

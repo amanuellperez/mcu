@@ -43,33 +43,34 @@ namespace dev{
 // Si no se pasa un pin se da por supuesto que está flotante.
 template <typename Pins>
 struct A4988_pins{
-    static constexpr uint8_t NO_ENABLE(){ return mcu::Pin::floating;}
+    using Pin = mcu::Pin_connection;
+    static constexpr uint8_t NO_ENABLE(){ return Pin::floating;}
     static constexpr uint8_t NO_ENABLE()
 		requires requires {Pins::NO_ENABLE;}
 		{ return Pins::NO_ENABLE;}
 
-    static constexpr uint8_t MS1() { return mcu::Pin::floating; }
+    static constexpr uint8_t MS1() { return Pin::floating; }
     static constexpr uint8_t MS1()
 		requires requires {Pins::MS1;}
 		{ return Pins::MS1; }
 
-    static constexpr uint8_t MS2() { return mcu::Pin::floating; }
+    static constexpr uint8_t MS2() { return Pin::floating; }
     static constexpr uint8_t MS2()
 		requires requires {Pins::MS2;}
 		{ return Pins::MS2; }
 
-    static constexpr uint8_t MS3() { return mcu::Pin::floating; }
+    static constexpr uint8_t MS3() { return Pin::floating; }
     static constexpr uint8_t MS3()
 		requires requires {Pins::MS3;}
 		{ return Pins::MS3; }
 
 
-    static constexpr uint8_t NO_RESET() { return mcu::Pin::floating; }
+    static constexpr uint8_t NO_RESET() { return Pin::floating; }
     static constexpr uint8_t NO_RESET()
 		requires requires {Pins::NO_RESET;}
 		{ return Pins::NO_RESET; }
 
-    static constexpr uint8_t NO_SLEEP() { return mcu::Pin::floating; }
+    static constexpr uint8_t NO_SLEEP() { return Pin::floating; }
     static constexpr uint8_t NO_SLEEP()
 		requires requires {Pins::NO_SLEEP;}
 		{ return Pins::NO_SLEEP; }
@@ -127,6 +128,10 @@ public:
     // (???) ¿Tiene algún sentido estas dos funciones? 
     // step(Frequency){STEP::genera(freq);}; // el motor gira sin parar 
     // stop(){STEP::stop();};		     // se para el motor
+
+// Cfg
+    static void enable()
+	    requires (mcu::Pin_connection::is_valid(NO_ENABLE::number));
 private:
 // Types
     using SW_signal = typename STEP::SW_signal;

@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 Manuel Perez 
+// Copyright (C) 2019-2024 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -62,11 +62,33 @@
  *	           momento solo se pueden compilar con avr-gcc, no genera
  *	           problemas).
  *
+ *	25/06/2024 Evolución de significado:
+ *		   Quiero poder dejado en código documentado cómo se conectan 
+ *		   los pines de un chip. Por ejemplo, en el A4988 se puede 
+ *		   conectar el pin MS1 al microcontrolador, o dejarlo flotante
+ *		   o conectarlo a GND o Vcc.
+ *
+ *		    ¿Cómo indicar eso?
+ *
+ *		    A4988::MS1 = Pin<14>; // conectado al pin 14 del mcu
+ *		    A4988::MS1 = Pin<connected_to_GND> // conectado a GND
+ *		    A4988::MS1 = Pin<connected_to_VCC> // conectado a +5V
+ *		    A4988::MS1 = Pin<floating>         // sin conectar
+ *	
+ *		    Como se ve queda completamente documentado en código. El 
+ *		    problema es que la clase Pin tiene 2 significados 
+ *		    diferentes:
+ *			1) Pin<14> es el pin del micro. 
+ *			2) Pin<floating> no es un pin del micro, sino 
+ *			   simplemente documenta como conectar el pin del chip.
+ *		    Implemento este doble significado.
+ *
  ****************************************************************************/
 #include <avr/io.h> // registros: cfg::DDRB... cfg::PORT...
 #include "avr_time.h"
 #include "avr_not_generic.h"
 #include <atd_bit.h>
+#include <mcu_pin.h>
 
 namespace avr_{
 
@@ -168,11 +190,21 @@ class INT__<-1>{ };
  *  Si se quiere una versión más reestringida usar Output_pin/de_entrada
  *
  */
+// (RRR) Para no reescribir el nombre del Pin lo meto todo dentro de avr_. Es
+// pereza, no tiene ninguna idea de diseño detras. (Mejorarlo en el futuro)
+namespace avr_pin {
 template <uint8_t n>
 class Pin{
 public:
+    using number_type = uint8_t;
+
+    static constexpr bool is_a_valid_pin()
+    {return cfg::pins::minimum_pin <= n and n <= cfg::pins::maximum_pin; }
+
+
 // CONSTRUCCIÓN
-    constexpr Pin(){}	
+    // constexpr Pin(){}	
+    Pin() = delete;
 
     // No es posible copiar pins (aunque como es una template static no
     // debería de generar ningún problema)
@@ -223,22 +255,8 @@ public:
 
 // Usamos el pin 0, que no existe, to indicate a floating pin o a pin
 // conectado a Vcc o GND.
-template<>
-class Pin<0>{ };
-
-// La idea de estas clases es poder dejar documentado en código las conexiones
-// de hardware y que el compilador de error en caso de intentar usar un pin
-// que el harwador dice que no ha conectado.
-// Ejemplo: el driver A4988 tiene un montón de pines de entrada que pueden
-// conectarse al micro o fijar su valor a Vcc o GND. El hardwador en hwd_dev.h
-// indica cómo se conecta. Supongamos por ejemplo que el harwador decide que
-// el motor siempre va a estar encendido (ENABLE = 1). Si ahora el sofwador
-// intenta llamar a A4988::disable() el compilador dará un error indicándole
-// que está intentando hacer algo que fijo no va a poder hacer. Capturamos el
-// error en tiempo de compilación.
-using Pin_floating         = Pin<0>;
-using Pin_connected_to_Vcc = Pin<0>;
-using Pin_connected_to_GND = Pin<0>;
+//template<>
+//class Pin<0>{ };
 
 
 // Implementación
@@ -563,6 +581,50 @@ inline void Pin<28>::enable_change_level_interrupt()
 template<>
 inline void Pin<28>::disable_change_level_interrupt()
 { atd::write_bit<PCINT13>::to<0>::in(PCMSK1); }
+
+
+
+// Pin_connection
+// --------------
+// De momento voy a usar el número de pin en `hwd` para identificar si se
+// trata de un pin or a connection.
+template <uint8_t n>
+class Pin_connection{
+public:
+    static constexpr uint8_t number = n;
+};
+
+} // namespace avr_pin
+ 
+// Pin
+// ---
+// type Pin(uint8_t n){
+//	if (n is a valid pin)
+//	    return avr_::Pin<n>;
+//
+//	else
+//	    return avr_::Pin_connection<n>;
+// }
+namespace impl_of{
+template <uint8_t n, 
+	  bool avr_pin = avr_pin::Pin<n>::is_a_valid_pin(), 
+	  bool pin_connection = (!avr_pin::Pin<n>::is_a_valid_pin() and 
+		    mcu::Pin_connection::is_valid<n>())>
+struct Pin;
+
+template <uint8_t n>
+struct Pin<n, true, false>
+{ using type = avr_pin::Pin<n>; };
+
+template <uint8_t n>
+struct Pin <n, false, true>
+{ using type = avr_pin::Pin_connection<n>; };
+
+}// namespace impl_of
+
+template <uint8_t n>
+using Pin = impl_of::Pin<n>::type;
+
 
 /***************************************************************************
  *			    OUTPUT cfg::PIN

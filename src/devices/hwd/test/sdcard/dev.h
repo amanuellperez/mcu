@@ -27,8 +27,8 @@
 
 // microcontroller
 // ---------------
-namespace mcu = atmega;
-using Micro   = mcu::Micro;
+namespace myu = atmega;
+using Micro   = myu::Micro;
 			
 #include "../../dev_sdcard.h"
 
@@ -41,9 +41,9 @@ using Micro   = mcu::Micro;
 // ---------------------------
 // Dispositivos SPI
 using Chip_select = 
-    dev::SDCard_select<mcu::Output_pin<mcu::SPI::CS_pin_number>, mcu::SPI_master>;
+    dev::SDCard_select<myu::Output_pin<myu::SPI::CS_pin_number>, myu::SPI_master>;
 
-using SDCard_cfg = dev::SDCard_cfg<mcu::Micro, mcu::SPI_master, Chip_select>;
+using SDCard_cfg = dev::SDCard_cfg<myu::Micro, myu::SPI_master, Chip_select>;
 
 using SDCard = dev::SDCard_basic<SDCard_cfg>;
 

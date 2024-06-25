@@ -40,15 +40,16 @@ struct A4988_pins{
 // Aunque no es necesario indicar los floatings pins, a la hora
 // de mantener el programa es mucho más sencillo ya que queda documentado
 // en código cómo se conectan los pins
-static constexpr uint8_t NO_ENABLE= mcu::Pin::floating;
+//static constexpr uint8_t NO_ENABLE= mcu::Pin::floating;
+static constexpr uint8_t NO_ENABLE= 13;
 
-static constexpr uint8_t MS1= mcu::Pin::floating;
-static constexpr uint8_t MS2= mcu::Pin::floating;
-static constexpr uint8_t MS3= mcu::Pin::floating;
+static constexpr uint8_t MS1= mcu::Pin_connection::floating;
+static constexpr uint8_t MS2= mcu::Pin_connection::floating;
+static constexpr uint8_t MS3= mcu::Pin_connection::floating;
 
 // Realmente están conectados reset con sleep
-static constexpr uint8_t NO_RESET= mcu::Pin::floating;
-static constexpr uint8_t NO_SLEEP= mcu::Pin::floating;
+static constexpr uint8_t NO_RESET= mcu::Pin_connection::floating;
+static constexpr uint8_t NO_SLEEP= mcu::Pin_connection::floating;
 
 static constexpr uint8_t DIR     = 14;
 static constexpr uint8_t STEP_pin= 15;

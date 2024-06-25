@@ -27,7 +27,7 @@
 
 void press_key_to_continue()
 {
-    mcu::UART_iostream uart;
+    myu::UART_iostream uart;
     uart << '\n';
     atd::print(uart, msg_press_key_to_continue);
     char c{};
@@ -36,7 +36,7 @@ void press_key_to_continue()
 
 void read_status()
 {
-    mcu::UART_iostream uart;
+    myu::UART_iostream uart;
 
     auto r2 = SDCard::send_status();
     print(uart, r2);
@@ -52,7 +52,7 @@ void ask_modify_block(SDCard::Block data)
 
 void write_block()
 {
-    mcu::UART_iostream uart;
+    myu::UART_iostream uart;
 
     atd::print(uart, msg_main_write);
     print_question(uart, msg_address, false);
@@ -75,8 +75,8 @@ void write_block()
 int main()
 {
 // init_UART();
-    mcu::UART_iostream uart;
-    mcu::basic_cfg(uart);
+    myu::UART_iostream uart;
+    myu::basic_cfg(uart);
     uart.turn_on();
 
     Chip_select::init();

@@ -36,14 +36,21 @@
 
 namespace mcu{
 
-struct Pin {
+// Indica cómo se conecta un pin de un chip (NO del micro) 
+struct Pin_connection {
     using number_type = uint8_t;
 
 // Precondicion: un microcontrolador no tiene más de 252 pins
 // (si hubiera más basta con cambiar el tipo)
-    static constexpr number_type connected_to_VCC = 253;
-    static constexpr number_type connected_to_GND = 254;
-    static constexpr number_type floating         = 255;
+    static constexpr number_type to_VCC	    = 253;
+    static constexpr number_type to_GND	    = 254;
+    static constexpr number_type floating   = 255;
+
+    template <number_type n>
+    static constexpr bool is_valid()
+    { return n == to_VCC or 
+	     n == to_GND or
+	     n == floating; }
 };
 
 

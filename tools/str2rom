@@ -66,7 +66,7 @@ esac
 input_file=$1
 output_file=$(echo $1 | cut -d'.' -f1).h
 define_file=$(echo $output_file | cut -d'.' -f1|tr [a-z] [A-Z])
-
+myu_namespace="myu"
 end="xXyY;.;"
 
 
@@ -80,7 +80,7 @@ BEGIN {
 }
 
 { 
-    printf "constexpr mcu::ROM_string<%d> ", \$3
+    printf "constexpr ${myu_namespace}::ROM_string<%d> ", \$3
     printf "%s\n\tPROGMEM{\"%s\"};\n\n", \$1, \$2
 }
 EOF
