@@ -1,4 +1,4 @@
-// Copyright (C) 2021 Manuel Perez 
+// Copyright (C) 2021-2024 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -30,8 +30,8 @@ void test_unit()
 {
     test::interface("Unit");
     
-    using U1 = atd::Unit<1,2,3,4,0>;
-    using U2 = atd::Unit<5,6,7,8,0>;
+    using U1 = atd::Unit<1,2,3,4,0,0>;
+    using U2 = atd::Unit<5,6,7,8,0,0>;
 
     using Up = atd::Unit_multiply<U1, U2>;
     CHECK_TRUE(Up::m == U1::m + U2::m and

@@ -5,7 +5,8 @@ SOURCES= dev_BMP280_basic.cpp	\
 		 dev_DS18B20.cpp
 
 
-INCS= 	dev_BME280_basic.h		\
+INCS= 	dev_A4988.h				\
+		dev_BME280_basic.h		\
 		dev_BMP280_basic.h		\
 		dev_CD4017B.h			\
 		dev_DHT11.h				\

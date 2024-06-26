@@ -1,4 +1,4 @@
-// Copyright (C) 2020-2023 Manuel Perez 
+// Copyright (C) 2020-2024 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -22,7 +22,7 @@
 #define __ATD_MAGNITUDE_H__
 /****************************************************************************
  *
- *  - DESCRIPCION: Magnitudes definidas en el S.I.
+ *  DESCRIPCION: Magnitudes definidas en el S.I.
  *
  *    Hay que tener cuidado al restar temperaturas de diferentes unidades ya
  *    que no está claro en qué consiste eso de restar:
@@ -34,9 +34,9 @@
  *	ya que la "idea" de restar 0 K no es restar un valor absoluto sino un
  *	incremento. Lo que uno esperaría es que 0C - 0K = 0C.
  *
- *  - SEE: ver std::chrono, ver atd::decimal.
+ *  SEE: ver std::chrono, ver atd::decimal.
  *  
- *  - TODO: No me gusta la forma de usarlo. Una magnitud es
+ *  USO:    No me gusta la forma de usarlo. Una magnitud es
  *	    la longitud, otra la frecuencia, otra el periodo y otra la
  *	    velocidad. Cada una de ellas se puede representar usando
  *	    diferentes unidades. Yo quiero hacer:
@@ -52,8 +52,11 @@
  *	    en lugar de 
  *		    Length l1 = 2_m;
  *
+ *	    26/06/2024 El "problema" comentado no es tal. Se puede definir 
+ *	    Frequency = Hertz, y el código anterior compilará y funcionará
+ *	    correctamente.
  *  
- *  - HISTORIA:
+ *  HISTORIA:
  *    Manuel Perez
  *    31/03/2020 v0.0 - versión mínima basada en Stroustrup (The C++
  *    Programming Language, section 28.7). De momento solo necesito
@@ -65,6 +68,7 @@
  *    06/03/2021 Unit_symbol, numeric_limits, operator++/--
  *    10/03/2022 print
  *    23/10/2023 print: imprime las unidades
+ *    26/06/2024 Radian/Degree, Angular_speed
  *
  ****************************************************************************/
 #include <ratio>
@@ -670,6 +674,37 @@ using Centimeter = Length<Int, std::centi>;
 template <Type::Arithmetic Int>
 using Millimeter = Length<Int, std::milli>;
 
+// Angle
+// -----
+// Radian
+template <Type::Arithmetic Int, Type::Static_ratio Multiplier>
+using Angle = Magnitude<atd::Units_angle, Int, Multiplier>;
+
+template <Type::Arithmetic Int>
+using Radian = Angle<Int, std::ratio<1>>;
+
+namespace impl_of{
+using pi = std::ratio<355, 113>;
+//using pi = std::ratio<103'993, 33'102>; // más preciso
+
+using radians_per_degree = std::ratio_divide<pi, std::ratio<180,1>>;
+
+template <Type::Arithmetic Int, Type::Static_ratio Multiplier>
+using Degree = Angle<Int, std::ratio_multiply<radians_per_degree, Multiplier>>;
+}
+
+template <Type::Arithmetic Int>
+using Degree = impl_of::Degree<Int, std::ratio<1>>;
+
+template <Type::Arithmetic Int>
+using Decidegree = impl_of::Degree<Int, std::deci>;
+
+template <Type::Arithmetic Int>
+using Centidegree = impl_of::Degree<Int, std::centi>;
+
+template <Type::Arithmetic Int>
+using Millidegree = impl_of::Degree<Int, std::milli>;
+
 
 // Frequency
 // ---------
@@ -848,6 +883,9 @@ bool can_unit_be_composed_by_prefix_and_symbol()
     else if constexpr (std::is_same_v<Unit, Units_temperature>)
 	return false;
 
+    else if constexpr (std::is_same_v<Unit, Units_angle>)
+	return false;
+
     return true;
 }
 
@@ -941,6 +979,31 @@ struct Magnitude_symbol<Millicelsius<Int>>
 template <Type::Arithmetic Int>
 struct Magnitude_symbol<Fahrenheit<Int>>
 { static constexpr const char* short_name = "ºF"; };
+
+
+// Angle
+// -----
+// Magnitud que no se puede componer como "prefix + unit". 
+// Es el mismo problema que con la temperatura: allí tenemos 3 unidades, ºC, K
+// y ºF, y en ángulos tenemos dos: º y rad. El radian se compone de forma
+// genérica pero el Degree no.
+template <Type::Arithmetic Int>
+struct Magnitude_symbol<Radian<Int>>
+{ static constexpr const char* short_name = "rad"; };
+
+template <Type::Arithmetic Int>
+struct Magnitude_symbol<Degree<Int>>
+{ static constexpr const char* short_name = "º"; };
+
+// Aunque se ve raro por la falta de uso, el simbolo del decigrado
+// tiene que ser "dº"
+template <Type::Arithmetic Int>
+struct Magnitude_symbol<Decidegree<Int>>
+{ static constexpr const char* short_name = "dº"; };
+
+template <Type::Arithmetic Int>
+struct Magnitude_symbol<Millidegree<Int>>
+{ static constexpr const char* short_name = "mº"; };
 
 
 

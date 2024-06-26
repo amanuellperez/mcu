@@ -651,6 +651,24 @@ void test_magnitude_integer_type()
 }
 
 
+void test_angle()
+{
+    test::interface("Angle");
+
+    using Degree = atd::Degree<float>;
+    using Radian = atd::Radian<float>;
+
+    {
+    Degree d{360};
+    Radian r = d;
+    Degree d2 = r;
+    CHECK_TRUE( d2 == d, "degree <-> radians");
+    }
+
+
+}
+
+
 void test_magnitude()
 {
     test::interface("Magnitude");
@@ -666,6 +684,7 @@ void test_magnitude()
     test_magnitude_temperature_decimal();
     test_magnitude_frequency();
     test_magnitude_integer_type();
+    test_angle();
 }
 
 
@@ -750,6 +769,12 @@ void test_print()
     CHECK_PRINT(std::cout << atd::Celsius<float>(2.3), "2.3 ºC");
     CHECK_PRINT(std::cout << atd::Millicelsius<float>(2.3), "2.3 ºmC");
     CHECK_PRINT(std::cout << atd::Fahrenheit<float>(2.3), "2.3 ºF");
+
+    CHECK_PRINT(std::cout << atd::Radian<float>(2.3), "2.3 rad");
+    CHECK_PRINT(std::cout << atd::Degree<float>(2.3), "2.3 º");
+    CHECK_PRINT(std::cout << atd::Decidegree<float>(2.3), "2.3 dº");
+    CHECK_PRINT(std::cout << atd::Millidegree<float>(2.3), "2.3 mº");
+
 }
 
 void test_with_sci_number()

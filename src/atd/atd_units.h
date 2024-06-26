@@ -1,4 +1,4 @@
-// Copyright (C) 2021 Manuel Perez 
+// Copyright (C) 2021-2024 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -25,15 +25,40 @@
 
 /****************************************************************************
  *
- *  - DESCRIPCION: Unidades en el S.I.
+ * DESCRIPCION: Unidades en el S.I.
  *
- *  - HISTORIA:
+ * COMENTARIOS
+ *    Ángulos
+ *    -------
+ *    Un ángulo ES una magnitud; en geometría euclidea los segmentos y los
+ *    ángulos se conciben de forma similar porque tienen realidad física. 
+ *    Si pensamos en radianes son adimensionales porque están definidos por
+ *    una razón de longitudes, pero si pienso en grados uso una unidad: 
+ *    cuando digo que un ángulo mide 90º me refiero a que voy a tener 90
+ *    unidades que llamo grado. Es la misma idea que cuando digo que una
+ *    longitud son 90 m. 
+ *    Esto sugiere la idea de que puedo concebir el ángulo como unidad básica
+ *    y lo puedo añadir a Unit. 
+ *
+ *    Las unidades están vinculadas a magnitudes: si existe una magnitud,
+ *    tiene que existir su unidad correspondiente. Otra cosa es que las
+ *    unidades sean derivables o no de otras magnitudes básicas. 
+ *    
+ *    Concebirlo como unidad básica tiene la ventaja de que se definen de
+ *    forma automática la velocidad angular: angulo/tiempo. Si no se define
+ *    como unidad básica la velocidad angular tendría unidades de tiempo^{-1}
+ *    que son las mismas unidades que Herzt lo cual no permitiría definir una
+ *    Magnitud Angular_speed.
+ *
+ *
+ * HISTORIA
  *    Manuel Perez
  *    13/03/2021 Reestructurado. Las 'Units' las necesitan tanto
  *		 atd::Magnitude como atd::ENG_magnitude
  *    30/03/2021 Volt
  *    16/10/2023 Unit como struct. Como enum daba warnings.
  *    23/10/2023 Unit_prefix_symbol
+ *    26/06/2024 Ángulos
  *
  ****************************************************************************/
 #include <ratio>
@@ -42,13 +67,17 @@
 namespace atd{
 
 /// Unidades en sistema MKS
-template <int M, int Kg, int S, int Kelvin, int Ampere>
+//
+// Dimensionless == 0: es unidad
+//		 == 1: es adimensional
+template <int M, int Kg, int S, int Kelvin, int Ampere, int Angle>
 struct Unit{
     static constexpr int m = M;
     static constexpr int kg = Kg;
     static constexpr int s = S;
     static constexpr int K = Kelvin;
     static constexpr int A = Ampere;
+    static constexpr int angle = Angle; 
 };
 
 // ----------
@@ -64,7 +93,8 @@ struct Unit_multiply{
 		      U1::kg + U2::kg,
 		      U1::s + U2::s,
 		      U1::K + U2::K,
-		      U1::A + U2::A
+		      U1::A + U2::A,
+		      U1::angle + U2::angle
 		     >;
 };
 }// impl_of
@@ -83,7 +113,8 @@ struct Unit_divide{
 		      U1::kg - U2::kg,
 		      U1::s - U2::s,
 		      U1::K - U2::K,
-		      U1::A + U2::A
+		      U1::A - U2::A,
+		      U1::angle - U2::angle
 		     >;
 };
 }// impl_of
@@ -97,7 +128,7 @@ using Unit_divide = typename impl_of::Unit_divide<U1, U2>::type;
 namespace impl_of{
 template <typename U>
 struct Unit_inverse{
-    using type = Unit<-U::m, -U::kg, -U::s, -U::K, -U::A>;
+    using type = Unit<-U::m, -U::kg, -U::s, -U::K, -U::A, -U::angle>;
 };
 }// impl_of
 
@@ -106,15 +137,18 @@ using Unit_inverse = typename impl_of::Unit_inverse<U>::type;
 
 
 // Different types of units
-using Units_scalar      = Unit<0, 0, 0, 0, 0>;
-using Units_length      = Unit<1, 0, 0, 0, 0>;
-using Units_mass	= Unit<0, 1, 0, 0, 0>;
-using Units_time        = Unit<0, 0, 1, 0, 0>;
-using Units_temperature = Unit<0, 0, 0, 1, 0>;
-using Units_pressure    = Unit<-1, 1, -2, 0, 0>;
-using Units_frequency   = Unit<0, 0, -1, 0, 0>;
-using Units_velocity    = Unit<1, 0, -1, 0, 0>;
-using Units_electric_potential = Unit<2, 1, -3, 0, -1>;
+using Units_scalar      = Unit<0, 0, 0, 0, 0, 0>;
+using Units_angle	= Unit<0, 0, 0, 0, 0, 1>; 
+using Units_length      = Unit<1, 0, 0, 0, 0, 0>;
+using Units_mass	= Unit<0, 1, 0, 0, 0, 0>;
+using Units_time        = Unit<0, 0, 1, 0, 0, 0>;
+using Units_temperature = Unit<0, 0, 0, 1, 0, 0>;
+using Units_pressure    = Unit<-1, 1, -2, 0, 0, 0>;
+using Units_frequency   = Unit<0, 0, -1, 0, 0, 0>;
+// (???) Units_velocity vs Units_speed 
+using Units_velocity    = Unit<1, 0, -1, 0, 0, 0>;
+using Units_angular_speed      = Unit<0, 0, -1, 0, 0, 1>;
+using Units_electric_potential = Unit<2, 1, -3, 0, -1, 0>;
 
 
 // Symbols
@@ -127,6 +161,10 @@ struct Unit_symbol
 template <>
 struct Unit_symbol<Units_length>
 { static constexpr const char* value = "m"; };
+
+template <>
+struct Unit_symbol<Units_angle>
+{ static constexpr const char* value = "rad"; };
 
 template <>
 struct Unit_symbol<Units_mass>

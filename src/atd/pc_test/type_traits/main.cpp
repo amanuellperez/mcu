@@ -386,7 +386,7 @@ void test_least_uint_t_to_represent()
     test_least_uint_t_to_represent<std::numeric_limits<uint16_t>::max(), uint16_t>();
     test_least_uint_t_to_represent<std::numeric_limits<uint16_t>::max()+1, uint32_t>();
     test_least_uint_t_to_represent<std::numeric_limits<uint32_t>::max(), uint32_t>();
-    test_least_uint_t_to_represent<std::numeric_limits<uint32_t>::max()+1, uint64_t>();
+    test_least_uint_t_to_represent<std::numeric_limits<uint32_t>::max()+uint64_t{1}, uint64_t>();
 }
 
 
