@@ -29,6 +29,9 @@
 namespace myu = atmega;
 using Micro   = myu::Micro;
 
+template <uint8_t n>
+using Pin = typename Micro::Pin<n>;
+
 // UART
 // ----
 constexpr uint32_t baud_rate = 9'600;
@@ -40,19 +43,27 @@ struct A4988_pins{
 // Aunque no es necesario indicar los floatings pins, a la hora
 // de mantener el programa es mucho más sencillo ya que queda documentado
 // en código cómo se conectan los pins
-//static constexpr uint8_t NO_ENABLE= mcu::Pin::floating;
-static constexpr uint8_t NO_ENABLE= 13;
+// INSTRUCCIONES
+//	Probar a conectar los pines al micro o dejarlos flotantes, el programa
+//  cambiará completamente.
+//static constexpr uint8_t NO_ENABLE= mcu::Pin_connection::floating;
+static constexpr uint8_t NO_ENABLE= 9;
 
-static constexpr uint8_t MS1= mcu::Pin_connection::floating;
-static constexpr uint8_t MS2= mcu::Pin_connection::floating;
-static constexpr uint8_t MS3= mcu::Pin_connection::floating;
+static constexpr uint8_t MS1= 10;
+static constexpr uint8_t MS2= 11;
+static constexpr uint8_t MS3= 12;
+//static constexpr uint8_t MS1= mcu::Pin_connection::floating;
+//static constexpr uint8_t MS2= mcu::Pin_connection::floating;
+//static constexpr uint8_t MS3= mcu::Pin_connection::floating;
 
-// Realmente están conectados reset con sleep
+// En lugar de dejarlos floating conectar no_reset con no_sleep
+//static constexpr uint8_t NO_RESET= 13;
 static constexpr uint8_t NO_RESET= mcu::Pin_connection::floating;
+//static constexpr uint8_t NO_SLEEP= 14;
 static constexpr uint8_t NO_SLEEP= mcu::Pin_connection::floating;
 
-static constexpr uint8_t DIR     = 14;
-static constexpr uint8_t STEP_pin= 15;
+static constexpr uint8_t DIR     = 15;
+static constexpr uint8_t STEP_pin= 16;
 
 using STEP = myu::SWG1_pin<STEP_pin>;
 };
@@ -71,6 +82,29 @@ void init_uart()
     uart.turn_on();
 }
 
+template <uint8_t npin>
+void print_pin_number(const char* name)
+{
+    myu::UART_iostream uart;
+
+    uart << name << " = ";
+
+    if (Micro::Pin<npin>::is_a_valid_pin())
+	uart << (int) npin;
+
+    else if (npin == mcu::Pin_connection::floating)
+	uart << "floating";
+
+    else if (npin == mcu::Pin_connection::to_VCC)
+	uart << "to VCC";
+
+    else if (npin == mcu::Pin_connection::to_GND)
+	uart << "to GND";
+
+    uart << "; ";
+}
+
+
 void hello()
 {
     myu::UART_iostream uart;
@@ -83,8 +117,19 @@ void hello()
 		"*************************************************************\n"
 		"Connections:\n"
 		"\tDIR = " << (int) A4988_pins::DIR << 
-		"; STEP = " << (int) A4988_pins::STEP_pin << 
-		"\n\n";
+		"; STEP = " << (int) A4988_pins::STEP_pin;
+
+
+    uart << "\n\t";
+    print_pin_number<A4988_pins::NO_ENABLE>("NO ENABLE");
+    print_pin_number<A4988_pins::NO_SLEEP>("NO SLEEP");
+    print_pin_number<A4988_pins::NO_RESET>("NO RESET");
+
+    uart << "\n\t";
+    print_pin_number<A4988_pins::MS1>("MS1");
+    print_pin_number<A4988_pins::MS2>("MS2");
+    print_pin_number<A4988_pins::MS3>("MS3");
+    uart << "\n\n";
 }
 
 void test_step()
@@ -120,6 +165,171 @@ void test_direction()
     A4988::direction(dir);
 }
 
+// no enable
+// ---------
+template <uint8_t no_enable_pin>
+void print_menu_enable()
+    requires (!Pin<no_enable_pin>::is_a_valid_pin())
+{ }
+
+template <uint8_t no_enable_pin>
+void print_menu_enable()
+    requires (Pin<no_enable_pin>::is_a_valid_pin())
+{ 
+    myu::UART_iostream uart;
+    uart << "3. enable/disable\n";
+}
+
+template <uint8_t no_enable_pin>
+void test_enable()
+    requires (!Pin<no_enable_pin>::is_a_valid_pin())
+{ }
+
+template <uint8_t no_enable_pin>
+void test_enable()
+    requires (Pin<no_enable_pin>::is_a_valid_pin())
+{
+    myu::UART_iostream uart;
+    uart << "\nEnable/disable (e/d): ";
+
+    char opt{};
+    uart >> opt;
+
+    switch (opt){
+	break; case 'e':
+	       case 'E': A4988::enable();
+
+	break; case 'd':
+	       case 'D': A4988::disable();
+
+	break; default: uart << "What?\n";
+    }
+}
+
+
+// no sleep
+// --------
+template <uint8_t no_sleep_pin>
+void print_menu_sleep()
+{ 
+    if constexpr (Pin<no_sleep_pin>::is_a_valid_pin()){
+	myu::UART_iostream uart;
+	uart << "4. sleep/awake\n";
+    }
+}
+
+template <uint8_t no_sleep_pin>
+void test_sleep()
+    requires (!Pin<no_sleep_pin>::is_a_valid_pin())
+{ }
+
+template <uint8_t no_sleep_pin>
+void test_sleep()
+    requires (Pin<no_sleep_pin>::is_a_valid_pin())
+{
+    myu::UART_iostream uart;
+    uart << "\nSleep/awake (s/a): ";
+
+    char opt{};
+    uart >> opt;
+
+    switch (opt){
+	break; case 's':
+	       case 'S': A4988::sleep();
+
+	break; case 'a':
+	       case 'A': A4988::awake();
+
+	break; default: uart << "What?\n";
+    }
+}
+
+// no reset
+// --------
+template <uint8_t no_reset_pin>
+void print_menu_reset()
+{ 
+    if constexpr (Pin<no_reset_pin>::is_a_valid_pin()){
+	myu::UART_iostream uart;
+	uart << "5. engage/disengage\n";
+    }
+}
+
+template <uint8_t no_reset_pin>
+void test_reset()
+    requires (!Pin<no_reset_pin>::is_a_valid_pin())
+{ }
+
+template <uint8_t no_reset_pin>
+void test_reset()
+    requires (Pin<no_reset_pin>::is_a_valid_pin())
+{
+    myu::UART_iostream uart;
+    uart << "\nEngage/disengage (e/d): ";
+
+    char opt{};
+    uart >> opt;
+
+    switch (opt){
+	break; case 'e':
+	       case 'E': A4988::engage();
+
+	break; case 'd':
+	       case 'D': A4988::disengage();
+
+	break; default: uart << "What?\n";
+    }
+}
+
+// mode
+// ----
+template <uint8_t ms1, uint8_t ms2, uint8_t ms3>
+void print_menu_mode()
+{ 
+    if constexpr (Pin<ms1>::is_a_valid_pin() and
+		  Pin<ms2>::is_a_valid_pin() and
+		  Pin<ms3>::is_a_valid_pin()){
+	myu::UART_iostream uart;
+	uart << "6. Mode\n";
+    }
+}
+
+template <uint8_t ms1, uint8_t ms2, uint8_t ms3>
+void test_mode()
+    requires (!(Pin<ms1>::is_a_valid_pin() and
+	      Pin<ms2>::is_a_valid_pin() and
+	      Pin<ms3>::is_a_valid_pin()))
+{ }
+
+template <uint8_t ms1, uint8_t ms2, uint8_t ms3>
+void test_mode()
+    requires (Pin<ms1>::is_a_valid_pin() and
+	      Pin<ms2>::is_a_valid_pin() and
+	      Pin<ms3>::is_a_valid_pin())
+{
+    myu::UART_iostream uart;
+    uart << "\nMode\n"
+	      "----\n"
+	      "1. Full mode\n"
+	      "2. Half mode\n"
+	      "3. Quarter mode\n"
+	      "4. Eighth mode\n"
+	      "5. Sixteenth mode\n";
+
+    char opt{};
+    uart >> opt;
+
+    switch (opt){
+	break; case '1': A4988::full_step_mode();
+	break; case '2': A4988::half_step_mode();
+	break; case '3': A4988::quarter_step_mode();
+	break; case '4': A4988::eighth_step_mode();
+	break; case '5': A4988::sixteenth_step_mode();
+
+	break; default: uart << "What?\n";
+    }
+}
+
 
 // Main
 // ----
@@ -138,6 +348,12 @@ int main()
 	          "----\n"
 		  "1. step\n"
 		  "2. direction\n";
+	print_menu_enable<A4988_pins::NO_ENABLE>();
+	print_menu_sleep<A4988_pins::NO_SLEEP>();
+	print_menu_reset<A4988_pins::NO_RESET>();
+	print_menu_mode<A4988_pins::MS1, A4988_pins::MS2, 
+				         A4988_pins::MS3>();
+
 
 	char opt{};
 	uart >> opt;
@@ -145,6 +361,12 @@ int main()
 	switch (opt){
 	    break; case '1': test_step();
 	    break; case '2': test_direction();
+	    break; case '3': test_enable<A4988_pins::NO_ENABLE>();
+	    break; case '4': test_sleep<A4988_pins::NO_SLEEP>();
+	    break; case '5': test_reset<A4988_pins::NO_RESET>();
+	    break; case '6': test_mode<A4988_pins::MS1,
+		                       A4988_pins::MS2, 
+				       A4988_pins::MS3>();
 
 	    break; default: uart << "What???\n";
 

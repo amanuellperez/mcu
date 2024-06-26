@@ -592,6 +592,9 @@ template <uint8_t n>
 class Pin_connection{
 public:
     static constexpr uint8_t number = n;
+
+    static constexpr bool is_a_valid_pin()
+    {return Pin<n>::is_a_valid_pin();}
 };
 
 } // namespace avr_pin

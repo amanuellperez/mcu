@@ -26,6 +26,21 @@
  * DESCRIPCION
  *	Traductor del driver del stepper motor A4988	
  *
+ * TODO
+ *	A día de hoy si se usan dos instancias de A4988 (porque haya 2
+ *	motores) se van a crear dos clases diferentes A4988<pines_motor1>
+ *	y A4988<pines_motor2>, duplicando el código, lo cual es ineficiente.
+ *
+ *	Una forma de eliminar esto es sacar todas las funciones comunes a una
+ *	clase padre y que las hijas se limiten a particularizar los pines.
+ *	
+ *	De esa forma conseguimos:
+ *	(1) "Todo las conexiones de hardware se conocen en tiempo de
+ *	compilación, con lo que hay que pasarlas como parámetros de templates"
+ *	para detectar errores en tiempo de compilación.
+ *
+ *	(2) No duplicamos código.
+ *
  * HISTORIA
  *    Manuel Perez
  *    22/06/2024 Escrito
@@ -100,8 +115,8 @@ public:
 
     // de configuración
     using NO_ENABLE = typename Micro::Pin<Pins::NO_ENABLE()>;
-    using NO_RESET = typename Micro::Pin<Pins::NO_RESET()>;
-    using NO_SLEEP = typename Micro::Pin<Pins::NO_SLEEP()>;
+    using NO_RESET  = typename Micro::Pin<Pins::NO_RESET()>;
+    using NO_SLEEP  = typename Micro::Pin<Pins::NO_SLEEP()>;
 
     // tipo de movimiento
     using MS1 = typename Micro::Pin<Pins::MS1()>;
@@ -119,7 +134,8 @@ public:
     
     static void init();
 
-// Motor
+// Movement
+// --------
     static void direction(Direction);
 
     // Envía al motor nsteps pulsos a la frecuencia indicada.
@@ -130,22 +146,121 @@ public:
     // stop(){STEP::stop();};		     // se para el motor
 
 // Cfg
-    static void enable()
-	    requires (mcu::Pin_connection::is_valid(NO_ENABLE::number));
+// ---
+// no enable pin
+    static void enable()    requires (NO_ENABLE::is_a_valid_pin());
+    static void disable()   requires (NO_ENABLE::is_a_valid_pin());
+
+
+    static void enable()    requires (!NO_ENABLE::is_a_valid_pin())
+	    {static_assert(false, "NO ENABLE pin disconnected!");}
+
+    static void disable()   requires (!NO_ENABLE::is_a_valid_pin())
+	    {static_assert(false, "NO ENABLE pin disconnected!");}
+
+
+// no sleep pin
+    static void sleep() requires (NO_SLEEP::is_a_valid_pin());
+    static void awake() requires (NO_SLEEP::is_a_valid_pin());
+
+
+    static void sleep() requires (!NO_SLEEP::is_a_valid_pin())
+	    {static_assert(false, "NO SLEEP pin disconnected!");}
+
+    static void awake() requires (!NO_SLEEP::is_a_valid_pin())
+	    {static_assert(false, "NO SLEEP pin disconnected!");}
+
+// no reset
+    // Datasheet: Reset input: [...] All STEP inputs are ingored until the
+    // no_reset input is set to high.
+    // El nombre "reset" parece estar mal puesto. Como lo que hace es
+    // ignorar steps, al principio pensé en llamarlo ignore_steps(). Pero
+    // ¿cómo llamar a la acción opuesta? Al final opto por engage/disengage 
+    static void engage()    requires (NO_RESET::is_a_valid_pin());
+    static void disengage() requires (NO_RESET::is_a_valid_pin());
+
+
+    static void engage()    requires (!NO_RESET::is_a_valid_pin())
+	    {static_assert(false, "NO RESET pin disconnected!");}
+
+    static void disengage() requires (!NO_RESET::is_a_valid_pin())
+	    {static_assert(false, "NO RESET pin disconnected!");}
+
+// Modes
+    // El A4988 se puede configurar para que funcione: en full step, en half
+    // step, quarter step, eighth step y sixteenth step mode.
+    // (???) de momento voy a imponer que para poder configurar el modo
+    // dinámicamente los tres pines MS1, MS2 y MS3 tienen que estar conectados
+    // al microcontrolador. (Si sabemos que el pin MS1 está conectado a Vcc,
+    // podríamos configurar el driver en algunos modos, pero ¿merece la pena
+    // implementar esos casos raros?)
+    //
+    // DUDA: por qué no puedo definir esta función después? El compilador se
+    // queja.
+    static constexpr bool MS123_connected()
+    { return MS1::is_a_valid_pin()  and
+	     MS2::is_a_valid_pin()  and MS3::is_a_valid_pin(); }
+
+    static void full_step_mode()	requires (MS123_connected());
+    static void half_step_mode()	requires (MS123_connected());
+    static void quarter_step_mode()	requires (MS123_connected());
+    static void eighth_step_mode()	requires (MS123_connected());
+    static void sixteenth_step_mode()	requires (MS123_connected());
+
+    static void full_step_mode()	requires (!MS123_connected())
+	    {static_assert(false, "MS1, MS2 and MS3 pins disconnected!");}
+
+    static void half_step_mode()	requires (!MS123_connected())
+	    {static_assert(false, "MS1, MS2 and MS3 pins disconnected!");}
+
+    static void quarter_step_mode()	requires (!MS123_connected())
+	    {static_assert(false, "MS1, MS2 and MS3 pins disconnected!");}
+
+    static void eighth_step_mode()	requires (!MS123_connected())
+	    {static_assert(false, "MS1, MS2 and MS3 pins disconnected!");}
+
+    static void sixteenth_step_mode()	requires (!MS123_connected())
+	    {static_assert(false, "MS1, MS2 and MS3 pins disconnected!");}
+
 private:
 // Types
     using SW_signal = typename STEP::SW_signal;
+
+
+
 };
+
 
 template <typename M, typename P>
 void A4988_basic<M, P>::init()
 {
     DIR::as_output();
+
+    if constexpr (NO_ENABLE::is_a_valid_pin()){
+	NO_ENABLE::as_output();
+	enable(); // TODO: en qué estado inicial lo dejamos?
+    }
+
+    if constexpr (NO_SLEEP::is_a_valid_pin()){
+	NO_SLEEP::as_output();
+	awake(); // TODO: en qué estado inicial lo dejamos?
+    }
+
+    if constexpr (NO_RESET::is_a_valid_pin()){
+	NO_RESET::as_output();
+	engage(); // TODO: en qué estado inicial lo dejamos?
+    }
+
+    if constexpr (MS1::is_a_valid_pin()){ MS1::as_output(); }
+    if constexpr (MS2::is_a_valid_pin()){ MS2::as_output(); }
+    if constexpr (MS3::is_a_valid_pin()){ MS3::as_output(); }
 }
 
 
+// Movement
+// --------
 // DUDA: ¿hay que parar el motor antes de cambiar dirección? 
-//	¿Qué pasa si con SQG el sofwador hace que el motor vaya dando pasos y
+//	¿Qué pasa si con SWG el sofwador hace que el motor vaya dando pasos y
 //	cambia la dirección? ¿Puede generar algún problema? Si el driver es
 //	robusto, no. ¿Lo es?
 template <typename M, typename P>
@@ -166,6 +281,110 @@ void A4988_basic<M, P>::step(const Frequency& freq, const NSteps_t& nsteps)
     SW_signal sw{freq};
     STEP::generate(sw, nsteps); 
 }
+
+
+// no enable
+// ---------
+template <typename M, typename P>
+inline 
+void A4988_basic<M, P>::enable()
+    requires (NO_ENABLE::is_a_valid_pin())
+{ NO_ENABLE::write_zero(); }
+
+template <typename M, typename P>
+inline 
+void A4988_basic<M, P>::disable()
+    requires (NO_ENABLE::is_a_valid_pin())
+{ NO_ENABLE::write_one(); }
+
+
+// no sleep
+// --------
+template <typename M, typename P>
+inline 
+void A4988_basic<M, P>::sleep()
+    requires (NO_SLEEP::is_a_valid_pin())
+{ NO_SLEEP::write_zero(); }
+
+template <typename M, typename P>
+inline 
+void A4988_basic<M, P>::awake()
+    requires (NO_SLEEP::is_a_valid_pin())
+{ 
+    NO_SLEEP::write_one(); 
+    // La datasheet indica que despés de despertar esperar 1ms antes de enviar
+    // ningún step. ¿Hago la espera aquí bloqueando al micro por 1 ms o que la
+    // gestione el cliente? 
+    //	A favor: el cliente se olvida del funcionamiento del driver
+    //	En contra: bloqueamos 1 ms el micro, lo cual es mucho tiempo.
+    //	De momento forcemos al cliente a que sea él el que espere 1 ms (pero,
+    //	... cómo forzarle? como hacer que no se le olvide?)
+    // (???) Micro::wait_ms(1);
+}
+
+
+// no reset
+// --------
+template <typename M, typename P>
+inline 
+void A4988_basic<M, P>::engage()
+    requires (NO_RESET::is_a_valid_pin())
+{ NO_RESET::write_one(); }
+
+template <typename M, typename P>
+inline 
+void A4988_basic<M, P>::disengage()
+    requires (NO_RESET::is_a_valid_pin())
+{ NO_RESET::write_zero(); }
+
+
+// modes
+// -----
+template <typename M, typename P>
+void A4988_basic<M, P>::full_step_mode()	
+    requires (MS123_connected())
+{// 000
+    MS1::write_zero();
+    MS2::write_zero();
+    MS3::write_zero();
+}
+
+template <typename M, typename P>
+void A4988_basic<M, P>::half_step_mode()	
+    requires (MS123_connected())
+{// 100
+    MS1::write_one();
+    MS2::write_zero();
+    MS3::write_zero();
+}
+
+template <typename M, typename P>
+void A4988_basic<M, P>::quarter_step_mode()	
+    requires (MS123_connected())
+{// 010
+    MS1::write_zero();
+    MS2::write_one();
+    MS3::write_zero();
+}
+
+template <typename M, typename P>
+void A4988_basic<M, P>::eighth_step_mode()	
+    requires (MS123_connected())
+{// 110
+    MS1::write_one();
+    MS2::write_one();
+    MS3::write_zero();
+}
+
+template <typename M, typename P>
+void A4988_basic<M, P>::sixteenth_step_mode()	
+    requires (MS123_connected())
+{// 111
+    MS1::write_one();
+    MS2::write_one();
+    MS3::write_one();
+}
+
 
 
 }// namespace
