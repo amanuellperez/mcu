@@ -38,6 +38,8 @@
  *    06/06/2024 divide_rounding<int>
  *    10/06/2024 Sign
  *    23/06/2024 overflow
+ *    27/06/2024 multiply(x).by_ten_to_the(n);
+ *               divide  (x).by_ten_to_the(n);
  *
  *
  ****************************************************************************/
@@ -453,6 +455,77 @@ constexpr bool overflow(const same_type_with_double_bits_t<Int>& x)
 
     return true;
 }
+
+
+// multiply
+// --------
+template <Type::Integer Int>
+struct multiply{
+    constexpr multiply(const Int& x) : x_{x} { }
+
+    // DUDA: qué nombre? by_ten_to_the_power_of vs by_ten_to_the
+    template <Type::Integer Int2>
+    constexpr Int by_ten_to_the_power_of(Int2 n);
+
+    template <Type::Integer Int2>
+    constexpr Int by_ten_to_the(Int2 n)
+	{return by_ten_to_the_power_of<Int2>(n);}
+
+    const Int& x_;
+};
+
+// TODO: cómo gestionar el overflow?
+template <Type::Integer Int>
+    template <Type::Integer Int2>
+constexpr 
+Int multiply<Int>::by_ten_to_the_power_of(Int2 n)
+{
+    Int x = x_;
+    for (; n > 0; --n){
+	x *= Int{10};
+//	if (x < x_) 
+//	    throw overflow!!!
+    }
+
+    return x;
+}
+
+
+// divide
+// ------
+template <Type::Integer Int>
+struct divide{
+    constexpr divide(const Int& x) : x_{x} { }
+
+    // DUDA: qué nombre? by_ten_to_the_power_of vs by_ten_to_the
+    template <Type::Integer Int2>
+    constexpr Int by_ten_to_the_power_of(Int2 n);
+
+    template <Type::Integer Int2>
+    constexpr Int by_ten_to_the(Int2 n)
+	{return by_ten_to_the_power_of<Int2>(n);}
+
+    const Int& x_;
+};
+
+// TODO: cómo gestionar el overflow?
+template <Type::Integer Int>
+    template <Type::Integer Int2>
+constexpr 
+Int divide<Int>::by_ten_to_the_power_of(Int2 n)
+{
+    Int x = x_;
+
+    for (; n > 0; --n){
+	x /= Int{10};
+
+	if (x == 0)
+	    return 0;
+    }
+
+    return x;
+}
+
 
 } // namespace
 

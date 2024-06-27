@@ -1,4 +1,4 @@
-// Copyright (C) 2020 Manuel Perez 
+// Copyright (C) 2020-2024 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -343,6 +343,85 @@ void test_overflow()
     test_overflow2<uint16_t>(uint16_t{32768}, true);
 }
 
+template <Type::Integer Int>
+void test_multiply(const Int& x, int n, const Int& res)
+{
+    CHECK_TRUE(atd::multiply(x).by_ten_to_the(n) == res, 
+	    alp::as_str() << "multiply(" << x << ").by_ten_to_the(" << n <<")");
+}
+
+void test_multiply()
+{
+    test::interface("multiply");
+
+    test_multiply<uint16_t>(0, 4, 0);
+    test_multiply<uint16_t>(3, 1, 3'0);
+    test_multiply<uint16_t>(3, 2, 3'00);
+    test_multiply<uint16_t>(3, 3, 3'000);
+    test_multiply<uint16_t>(3, 4, 3'0000);
+
+    test_multiply<uint32_t>(0, 4, 0);
+    test_multiply<uint32_t>(3, 1, 3'0);
+    test_multiply<uint32_t>(3, 2, 3'00);
+    test_multiply<uint32_t>(3, 3, 3'000);
+    test_multiply<uint32_t>(3, 4, 3'0000);
+    test_multiply<uint32_t>(3, 5, 3'00000);
+    test_multiply<uint32_t>(3, 6, 3'000000);
+
+    test_multiply<int32_t>(0, 4, 0);
+    test_multiply<int32_t>(3, 1, 3'0);
+    test_multiply<int32_t>(3, 2, 3'00);
+    test_multiply<int32_t>(-3, 3, -3'000);
+    test_multiply<int32_t>(-3, 4, -3'0000);
+    test_multiply<int32_t>(-3, 5, -3'00000);
+    test_multiply<int32_t>(-3, 6, -3'000000);
+
+}
+
+
+template <Type::Integer Int>
+void test_divide(const Int& x, int n, const Int& res)
+{
+    CHECK_TRUE(atd::divide(x).by_ten_to_the(n) == res, 
+	    alp::as_str() << "divide(" << x << ").by_ten_to_the(" << n <<")");
+}
+
+void test_divide()
+{
+    test::interface("divide");
+
+    test_divide<uint16_t>(0, 4, 0);
+    test_divide<uint16_t>(3'0, 1, 3);
+    test_divide<uint16_t>(3'00, 2, 3);
+    test_divide<uint16_t>(3'000, 3, 3);
+    test_divide<uint16_t>(3'0000, 4, 3);
+
+    test_divide<uint32_t>(0, 4, 0);
+    test_divide<uint32_t>(3'0, 1, 3);
+    test_divide<uint32_t>(3'00, 2, 3);
+    test_divide<uint32_t>(3'000, 3, 3);
+    test_divide<uint32_t>(3'0000, 4, 3);
+    test_divide<uint32_t>(3'00000, 5, 3);
+    test_divide<uint32_t>(3'000000, 6, 3);
+
+    test_divide<int32_t>(0, 4, 0);
+    test_divide<int32_t>(3'0, 1, 3);
+    test_divide<int32_t>(3'00, 2, 3);
+    test_divide<int32_t>(-3'000, 3, -3);
+    test_divide<int32_t>(-3'0000, 4, -3);
+    test_divide<int32_t>(-3'00000, 5, -3);
+    test_divide<int32_t>(-3'000000, 6, -3);
+
+    test_divide<uint16_t>(1234, 1, 123);
+    test_divide<uint16_t>(1234, 2, 12);
+    test_divide<uint16_t>(1234, 3, 1);
+    test_divide<uint16_t>(1234, 4, 0);
+    test_divide<uint16_t>(1234, 5, 0);
+    test_divide<uint16_t>(1234, 6, 0);
+    test_divide<uint16_t>(1234, 100, 0);
+}
+
+
 int main()
 {
 try{
@@ -361,6 +440,8 @@ try{
     test_divide_rounding();
     test_sign();
     test_overflow();
+    test_multiply();
+    test_divide();
 
 }catch(std::exception& e)
 {

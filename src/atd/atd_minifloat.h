@@ -84,6 +84,7 @@
  * HISTORIA
  *    Manuel Perez
  *    18/10/2023 Versión mínima, para probar.
+ *    27/06/2024 integer_part
  *
  ****************************************************************************/
 #include <limits>
@@ -184,6 +185,16 @@ public:
     constexpr Rep significand() const {return x_;}
     constexpr Exp_t exponent() const { return exp_;}
 
+    // CUIDADO: integer_part devuelve la parte entera siempre y cuando esta
+    // entre en Rep2. Es responsabilidad del cliente garantizar que esa parte
+    // entra. 
+    // Si el número tiene parte decimal, trunca.
+    template <Type::Integer Rep2>
+    constexpr Rep2 integer_part() const;
+
+//    template <Type::Integer Rep2>
+//    constexpr Rep decimal_part() const;
+
 // Algebraic structure
     constexpr Minifloat operator-() const
 	requires (Type::Signed_integer<Rep>);
@@ -248,9 +259,6 @@ private:
 
     constexpr void unsigned_substract(const Minifloat& a)
 	requires Type::Unsigned_integer<Rep>;
-
-    static 
-    constexpr Rep divide_by_ten_to_the(Rep x, Exp_t e);
 
 };
 
@@ -411,6 +419,24 @@ constexpr Minifloat<R, E_t>::Minifloat(const Minifloat<Rep2, E2_t>& f)
 { }
 
 
+// Observers
+// ---------
+template <Type::Integer R, Type::Integer E_t>
+    template <Type::Integer Rep2>
+constexpr Rep2 Minifloat<R, E_t>::integer_part() const
+{
+    Rep2 res = static_cast<Rep>(x_);
+
+    if (exp_ == 0) 
+	return res;
+
+    if (exp_ > 0)
+	return multiply(res).by_ten_to_the_power_of(exp_);
+
+    else // exp_ == 0
+	return divide(res).by_ten_to_the_power_of(-exp_);
+}
+
 
 
 // Order
@@ -552,19 +578,6 @@ constexpr void Minifloat<R, E_t>::add_equal_exponent(const Rep& a)
     }
 }
 
-// Esta función es necesaria para evitar overflows al usar:
-//		x2 /= ten_to_the<Rep>(e1);
-template <Type::Integer Rep, Type::Integer E_t>
-constexpr Rep Minifloat<Rep, E_t>::divide_by_ten_to_the(Rep x, Exp_t e)
-{
-    for (Exp_t i = 0; i < e; ++i){
-	x /= Rep{10};
-	if (x == 0)
-	    return 0;
-    }
-
-    return x;
-}
 
 
 // precondicion: queremos sumar a x1*10^e1 el número x2
@@ -598,7 +611,7 @@ constexpr std::pair<R, E_t>
 	}
     }
 
-    x2 = divide_by_ten_to_the(x2, e1);
+    x2 = divide(x2).by_ten_to_the_power_of(e1); 
 
     if (is_rep_value<Rep>(x1 + x2))
 	return {static_cast<Rep>(x1 + x2), e1};
@@ -652,8 +665,8 @@ constexpr void Minifloat<R, E_t>::unsigned_substract(const Minifloat& a)
 // Resto casos: precondicion: exp_ <= a.exp_
     else {// Sabemos que *this > a ==> exp_ > a.exp_
 	  // Operación: x1*10^e1 - x2*10^e2 = (x1 - x2/10^(e1-e2))*10^e1
-	Rep x2d = divide_by_ten_to_the(a.x_, exp_ - a.exp_);
-
+//	Rep x2d = divide_by_ten_to_the(a.x_, exp_ - a.exp_);
+	Rep x2d = divide(a.x_).by_ten_to_the_power_of(exp_ - a.exp_);
 	if (x_ > x2d)
 	    x_ -= x2d;
 	else	// underflow (recordar que Rep es unsigned)

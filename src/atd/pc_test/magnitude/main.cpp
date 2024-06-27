@@ -655,14 +655,20 @@ void test_angle()
 {
     test::interface("Angle");
 
-    using Degree = atd::Degree<float>;
-    using Radian = atd::Radian<float>;
 
     {
+    using Degree = atd::Degree<float>;
+    using Radian = atd::Radian<float>;
     Degree d{360};
     Radian r = d;
     Degree d2 = r;
     CHECK_TRUE( d2 == d, "degree <-> radians");
+    }
+    {
+    using Degree      = atd::Degree<atd::Float16>; 
+    constexpr uint16_t nsteps = 200;
+    constexpr Degree y = Degree{360} / atd::Float16{nsteps};
+    std::cout << "y = " << y << '\n';
     }
 
 
