@@ -189,7 +189,7 @@ public:
     // entre en Rep2. Es responsabilidad del cliente garantizar que esa parte
     // entra. 
     // Si el número tiene parte decimal, trunca.
-    template <Type::Integer Rep2>
+    template <Type::Integer Rep2 = Rep>
     constexpr Rep2 integer_part() const;
 
 //    template <Type::Integer Rep2>

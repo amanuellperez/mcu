@@ -355,12 +355,14 @@ void test_multiply()
     test::interface("multiply");
 
     test_multiply<uint16_t>(0, 4, 0);
+    test_multiply<uint16_t>(3, 0, 3);
     test_multiply<uint16_t>(3, 1, 3'0);
     test_multiply<uint16_t>(3, 2, 3'00);
     test_multiply<uint16_t>(3, 3, 3'000);
     test_multiply<uint16_t>(3, 4, 3'0000);
 
     test_multiply<uint32_t>(0, 4, 0);
+    test_multiply<uint32_t>(3, 0, 3);
     test_multiply<uint32_t>(3, 1, 3'0);
     test_multiply<uint32_t>(3, 2, 3'00);
     test_multiply<uint32_t>(3, 3, 3'000);
@@ -369,6 +371,7 @@ void test_multiply()
     test_multiply<uint32_t>(3, 6, 3'000000);
 
     test_multiply<int32_t>(0, 4, 0);
+    test_multiply<int32_t>(3, 0, 3);
     test_multiply<int32_t>(3, 1, 3'0);
     test_multiply<int32_t>(3, 2, 3'00);
     test_multiply<int32_t>(-3, 3, -3'000);
@@ -412,6 +415,7 @@ void test_divide()
     test_divide<int32_t>(-3'00000, 5, -3);
     test_divide<int32_t>(-3'000000, 6, -3);
 
+    test_divide<uint16_t>(1234, 0, 1234);
     test_divide<uint16_t>(1234, 1, 123);
     test_divide<uint16_t>(1234, 2, 12);
     test_divide<uint16_t>(1234, 3, 1);

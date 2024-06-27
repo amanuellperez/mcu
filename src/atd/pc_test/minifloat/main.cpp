@@ -1,4 +1,4 @@
-// Copyright (C) 2023 Manuel Perez 
+// Copyright (C) 2023-2024 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -467,12 +467,31 @@ void test_print()
     CHECK_PRINT((std::cout << atd::uFloat8{12}.E(10)), "12 x 10^{10}");
 }
 
+void test_integer_part()
+{
+    test::interface("integer_part");
+    
+    atd::Float8 x{12,4};
+    CHECK_TRUE(x.integer_part() == 12, "integer_part");
+
+    x *= 10;
+    CHECK_TRUE(x.integer_part() == 124, "integer_part");
+    
+    x *= 10;
+    CHECK_TRUE(x.integer_part<int>() == 1240, "integer_part");
+
+    // CUIDADO con los overflows!!!
+    // (en mi ordenador x.integer_part() == 40!!!)
+    CHECK_TRUE(x.integer_part() != 1240, "OVERFLOW!!! integer_part");
+}
+
 int main()
 {
 try{
     test::header("atd_Minifloat");
 
     test_constructor();
+    test_integer_part();
     test_comparison();
     test_order();
     test_operator_minus();
