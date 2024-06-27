@@ -442,15 +442,25 @@ inline std::ostream& operator<<(std::ostream& out, Sign sign)
 
 // overflow
 // --------
-
-// (RRR) Si x fuera negativo hay que mirar que x >= min(). Por eso, esta
-//	 implementación solo es válida para unsigned.
 template <Type::Integer Int>
     requires (std::is_unsigned_v<Int>)
 inline 
 constexpr bool overflow(const same_type_with_double_bits_t<Int>& x)
 {
     if (x <= std::numeric_limits<Int>::max())
+	return false;
+
+    return true;
+}
+
+
+template <Type::Integer Int>
+    requires (std::is_signed_v<Int>)
+inline 
+constexpr bool overflow(const same_type_with_double_bits_t<Int>& x)
+{
+    if (std::numeric_limits<Int>::min() <= x and 
+				x <= std::numeric_limits<Int>::max())
 	return false;
 
     return true;

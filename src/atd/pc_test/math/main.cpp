@@ -316,13 +316,15 @@ void test_sign()
 template <typename Int>
 void test_overflow2(const Int& x, bool res)
 {
-    CHECK_TRUE(atd::overflow<Int>(2*x) == res, "overflow");
+    CHECK_TRUE(atd::overflow<Int>(2*x) == res, 
+	    alp::as_str() << "overflow2(" << (int) x << ")");
 }
 
 template <typename Int>
 void test_overflow10(const Int& x, bool res)
 {
-    CHECK_TRUE(atd::overflow<Int>(10*x) == res, "overflow");
+    CHECK_TRUE(atd::overflow<Int>(10*x) == res, 
+	    alp::as_str() << "overflow10(" << (int) x << ")");
 }
 
 void test_overflow()
@@ -341,6 +343,29 @@ void test_overflow()
     test_overflow2<uint16_t>(uint16_t{128}, false);
     test_overflow2<uint16_t>(uint16_t{32767}, false);
     test_overflow2<uint16_t>(uint16_t{32768}, true);
+
+    test_overflow2<int8_t>(int8_t{0}, false);
+    test_overflow2<int8_t>(int8_t{63}, false);
+    test_overflow2<int8_t>(int8_t{64}, true);
+    test_overflow2<int8_t>(int8_t{100}, true);
+    test_overflow2<int8_t>(int8_t{-64}, false);
+    test_overflow2<int8_t>(int8_t{-65}, true);
+    test_overflow2<int8_t>(int8_t{-100}, true);
+
+    test_overflow2<int16_t>(int16_t{0}, false);
+    test_overflow2<int16_t>(int16_t{100}, false);
+    test_overflow2<int16_t>(int16_t{127}, false);
+    test_overflow2<int16_t>(int16_t{128}, false);
+    test_overflow2<int16_t>(int16_t{16'383}, false);
+    test_overflow2<int16_t>(int16_t{16'384}, true);
+    test_overflow2<int16_t>(int16_t{32'000}, true);
+    test_overflow2<int16_t>(int16_t{-100}, false);
+    test_overflow2<int16_t>(int16_t{-127}, false);
+    test_overflow2<int16_t>(int16_t{-128}, false);
+    test_overflow2<int16_t>(int16_t{-16'384}, false);
+    test_overflow2<int16_t>(int16_t{-16'385}, true);
+    test_overflow2<int16_t>(int16_t{-32'000}, true);
+
 }
 
 template <Type::Integer Int>
