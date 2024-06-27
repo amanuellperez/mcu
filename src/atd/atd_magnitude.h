@@ -705,6 +705,30 @@ using Centidegree = impl_of::Degree<Int, std::centi>;
 template <Type::Arithmetic Int>
 using Millidegree = impl_of::Degree<Int, std::milli>;
 
+// Angular_speed
+// -------------
+template <Type::Arithmetic Int, Type::Static_ratio Multiplier>
+using Angular_speed = Magnitude<atd::Units_angular_speed, Int, Multiplier>;
+
+// in rad/second
+template <Type::Arithmetic Int>
+using Radians_per_second = Angular_speed<Int, std::ratio<1>>;
+
+namespace impl_of{
+template <Type::Arithmetic Int, Type::Static_ratio Multiplier>
+using Degrees_per_second = 
+	Angular_speed<Int, std::ratio_multiply<radians_per_degree, Multiplier>>;
+}
+
+template <Type::Arithmetic Int>
+using Degrees_per_second = impl_of::Degrees_per_second<Int, std::ratio<1>>;
+
+template <Type::Arithmetic Int>
+using Decidegrees_per_second = impl_of::Degrees_per_second<Int, std::deci>;
+
+template <Type::Arithmetic Int>
+using Millidegrees_per_second = impl_of::Degrees_per_second<Int, std::milli>;
+
 
 // Frequency
 // ---------
@@ -886,6 +910,9 @@ bool can_unit_be_composed_by_prefix_and_symbol()
     else if constexpr (std::is_same_v<Unit, Units_angle>)
 	return false;
 
+    else if constexpr (std::is_same_v<Unit, Units_angular_speed>)
+	return false;
+
     return true;
 }
 
@@ -1006,6 +1033,27 @@ struct Magnitude_symbol<Millidegree<Int>>
 { static constexpr const char* short_name = "mº"; };
 
 
+// Angular_speed
+// -------------
+// Magnitud que no se puede componer como "prefix + unit". 
+// Mismo comentario que en Angle, Temperature, Mass
+template <Type::Arithmetic Int>
+struct Magnitude_symbol<Radians_per_second<Int>>
+{ static constexpr const char* short_name = "rad/s"; };
+
+template <Type::Arithmetic Int>
+struct Magnitude_symbol<Degrees_per_second<Int>>
+{ static constexpr const char* short_name = "º/s"; };
+
+// Aunque se ve raro por la falta de uso, el simbolo del decigrado
+// tiene que ser "dº"
+template <Type::Arithmetic Int>
+struct Magnitude_symbol<Decidegrees_per_second<Int>>
+{ static constexpr const char* short_name = "dº/s"; };
+
+template <Type::Arithmetic Int>
+struct Magnitude_symbol<Millidegrees_per_second<Int>>
+{ static constexpr const char* short_name = "mº/s"; };
 
 
 // operator << 

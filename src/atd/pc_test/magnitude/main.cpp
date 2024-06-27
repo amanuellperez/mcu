@@ -1,4 +1,4 @@
-// Copyright (C) 2020 Manuel Perez 
+// Copyright (C) 2020-2024 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -668,6 +668,27 @@ void test_angle()
 
 }
 
+void test_angular_speed()
+{
+    test::interface("Angular speed");
+
+    using Degrees_per_second = atd::Degrees_per_second<float>;
+    using Millidegrees_per_second = atd::Millidegrees_per_second<float>;
+    using Radians_per_second = atd::Radians_per_second<float>;
+
+    {
+    Degrees_per_second d{100};
+    Radians_per_second r = d;
+    Degrees_per_second d2 = r;
+    CHECK_TRUE( d2 == d, "degree/s <-> radians/s");
+
+    Millidegrees_per_second m = d;
+    CHECK_TRUE( m == Millidegrees_per_second(100*1000), "millidegrees");
+
+    }
+
+
+}
 
 void test_magnitude()
 {
@@ -685,6 +706,7 @@ void test_magnitude()
     test_magnitude_frequency();
     test_magnitude_integer_type();
     test_angle();
+    test_angular_speed();
 }
 
 
@@ -774,6 +796,11 @@ void test_print()
     CHECK_PRINT(std::cout << atd::Degree<float>(2.3), "2.3 º");
     CHECK_PRINT(std::cout << atd::Decidegree<float>(2.3), "2.3 dº");
     CHECK_PRINT(std::cout << atd::Millidegree<float>(2.3), "2.3 mº");
+
+    CHECK_PRINT(std::cout << atd::Radians_per_second<float>(2.3), "2.3 rad/s");
+    CHECK_PRINT(std::cout << atd::Degrees_per_second<float>(2.3), "2.3 º/s");
+    CHECK_PRINT(std::cout << atd::Decidegrees_per_second<float>(2.3), "2.3 dº/s");
+    CHECK_PRINT(std::cout << atd::Millidegrees_per_second<float>(2.3), "2.3 mº/s");
 
 }
 
