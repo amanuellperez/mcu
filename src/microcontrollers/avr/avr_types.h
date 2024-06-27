@@ -50,7 +50,7 @@ namespace avr_{
 
 // Frequency representa una frequencia en hercios. Es lo que en atd::Magnitude
 // llamamos `atd::Hertz`. Usar el tipo base como uint32_t permite representar
-// frecuenias no decimales desde 1Hz hasta 4GHz que para los avrs es
+// frecuencias no decimales desde 1Hz hasta 4GHz que para los avrs es
 // demasiado. Lo que no permite es usar decimales. ¿Mejor un tipo con
 // decimales como atd::Decimal<>?
 // using Frequency = atd::ENG_frequency<uFloat16>; 

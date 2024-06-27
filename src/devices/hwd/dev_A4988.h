@@ -126,7 +126,8 @@ public:
 
     // types
     using Direction = atd::Sign;
-    using Frequency = typename STEP::SW_signal::Frequency;
+    using Frequency = typename STEP::Frequency;
+    using Hertz     = typename STEP::Hertz;
     using NSteps_t  = STEP::NPulses_t;
 
 // Constructor 

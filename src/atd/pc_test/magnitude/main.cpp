@@ -819,6 +819,16 @@ void test_with_sci_number()
     test_print();
 }
 
+void test_bugs()
+{
+    {
+    using Hertz = atd::Hertz<uint32_t>;
+    Hertz::Rep f = 200;
+    Hertz freq{f};
+    CHECK_TRUE(freq.value() == f, "bug1");
+    }
+}
+
 
 int main()
 {
@@ -827,6 +837,7 @@ try{
     
     test_magnitude();
     test_with_sci_number();
+    test_bugs();
 
 }catch(std::exception& e)
 {

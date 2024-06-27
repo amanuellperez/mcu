@@ -442,6 +442,7 @@ inline std::ostream& operator<<(std::ostream& out, Sign sign)
 
 // overflow
 // --------
+// ¿Se puede representar el valor x en el tipo Int?
 template <Type::Integer Int>
     requires (std::is_unsigned_v<Int>)
 inline 
@@ -452,7 +453,6 @@ constexpr bool overflow(const same_type_with_double_bits_t<Int>& x)
 
     return true;
 }
-
 
 template <Type::Integer Int>
     requires (std::is_signed_v<Int>)

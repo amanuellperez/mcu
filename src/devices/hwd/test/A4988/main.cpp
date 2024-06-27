@@ -49,12 +49,12 @@ struct A4988_pins{
 //static constexpr uint8_t NO_ENABLE= mcu::Pin_connection::floating;
 static constexpr uint8_t NO_ENABLE= 9;
 
-static constexpr uint8_t MS1= 10;
-static constexpr uint8_t MS2= 11;
-static constexpr uint8_t MS3= 12;
-//static constexpr uint8_t MS1= mcu::Pin_connection::floating;
-//static constexpr uint8_t MS2= mcu::Pin_connection::floating;
-//static constexpr uint8_t MS3= mcu::Pin_connection::floating;
+//static constexpr uint8_t MS1= 10;
+//static constexpr uint8_t MS2= 11;
+//static constexpr uint8_t MS3= 12;
+static constexpr uint8_t MS1= mcu::Pin_connection::floating;
+static constexpr uint8_t MS2= mcu::Pin_connection::floating;
+static constexpr uint8_t MS3= mcu::Pin_connection::floating;
 
 // En lugar de dejarlos floating conectar no_reset con no_sleep
 //static constexpr uint8_t NO_RESET= 13;

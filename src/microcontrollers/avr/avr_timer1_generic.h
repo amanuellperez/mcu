@@ -753,6 +753,8 @@ public:
     using SW_signal    = avr_::SW_signal;
     using counter_type = Timer::counter_type;
     using NPulses_t    = uint16_t;
+    using Frequency    = avr_::Frequency;
+    using Hertz	       = avr_::Hertz;
 
 // cfg
     static constexpr uint8_t number  = npin0;

@@ -106,10 +106,11 @@ namespace atd{
 // mejor.
 // ¿se puede representar usando Rep el valor de x?
 template <Type::Integer Int2, Type::Integer Int>
-constexpr bool is_rep_value(const Int& x)
+inline constexpr bool is_rep_value(const Int& x)
 {
-    return std::numeric_limits<Int2>::min() <= x and
-	   x <= std::numeric_limits<Int2>::max();
+    return !overflow<Int2>(x);
+//    return std::numeric_limits<Int2>::min() <= x and
+//	   x <= std::numeric_limits<Int2>::max();
 }
 
 
