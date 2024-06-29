@@ -21,7 +21,18 @@
 #include <avr_atmega.h>
 
 #include <atd_magnitude.h>
+#include <atd_test.h>
 
+constexpr const char* msg_hello = "\n\n"
+		"*************************************************************\n"
+		"                        A4988 TEST\n"
+		"*************************************************************\n"
+		"                        IMPORTANT\n"
+		" Don't forget to connect an electrolytic capacitor of 100 uF\n"
+		" (minimum 47 uF) between VMOT and GND!!!\n"
+		"*************************************************************\n";
+
+using namespace test;
 
 // Microcontroller
 // ---------------
@@ -49,12 +60,20 @@ struct A4988_pins{
 //static constexpr uint8_t NO_ENABLE= mcu::Pin_connection::floating;
 static constexpr uint8_t NO_ENABLE= 9;
 
-//static constexpr uint8_t MS1= 10;
-//static constexpr uint8_t MS2= 11;
-//static constexpr uint8_t MS3= 12;
-static constexpr uint8_t MS1= mcu::Pin_connection::floating;
-static constexpr uint8_t MS2= mcu::Pin_connection::floating;
-static constexpr uint8_t MS3= mcu::Pin_connection::floating;
+static constexpr uint8_t MS1= 10;
+static constexpr uint8_t MS2= 11;
+static constexpr uint8_t MS3= 12;
+//static constexpr uint8_t MS1= mcu::Pin_connection::floating;
+//static constexpr uint8_t MS1= mcu::Pin_connection::to_VCC;
+//static constexpr uint8_t MS1= mcu::Pin_connection::to_GND;
+
+//static constexpr uint8_t MS2= mcu::Pin_connection::floating;
+//static constexpr uint8_t MS2= mcu::Pin_connection::to_VCC;
+//static constexpr uint8_t MS2= mcu::Pin_connection::to_GND;
+
+//static constexpr uint8_t MS3= mcu::Pin_connection::floating;
+//static constexpr uint8_t MS3= mcu::Pin_connection::to_VCC;
+//static constexpr uint8_t MS3= mcu::Pin_connection::to_GND;
 
 // En lugar de dejarlos floating conectar no_reset con no_sleep
 //static constexpr uint8_t NO_RESET= 13;
@@ -108,13 +127,7 @@ void print_pin_number(const char* name)
 void hello()
 {
     myu::UART_iostream uart;
-    uart << "\n\nA4988 test\n"
-	        "----------\n"
-		"*************************************************************\n"
-		"                        IMPORTANT\n"
-		" Don't forget to connect an electrolytic capacitor of 100 uF\n"
-		" (minimum 47 uF) between VMOT and GND!!!\n"
-		"*************************************************************\n"
+    uart << msg_hello <<
 		"Connections:\n"
 		"\tDIR = " << (int) A4988_pins::DIR << 
 		"; STEP = " << (int) A4988_pins::STEP_pin;
@@ -177,7 +190,7 @@ void print_menu_enable()
     requires (Pin<no_enable_pin>::is_a_valid_pin())
 { 
     myu::UART_iostream uart;
-    uart << "3. enable/disable\n";
+    uart << "4. enable/disable\n";
 }
 
 template <uint8_t no_enable_pin>
@@ -214,7 +227,7 @@ void print_menu_sleep()
 { 
     if constexpr (Pin<no_sleep_pin>::is_a_valid_pin()){
 	myu::UART_iostream uart;
-	uart << "4. sleep/awake\n";
+	uart << "5. sleep/awake\n";
     }
 }
 
@@ -251,7 +264,7 @@ void print_menu_reset()
 { 
     if constexpr (Pin<no_reset_pin>::is_a_valid_pin()){
 	myu::UART_iostream uart;
-	uart << "5. engage/disengage\n";
+	uart << "6. engage/disengage\n";
     }
 }
 
@@ -290,7 +303,7 @@ void print_menu_mode()
 		  Pin<ms2>::is_a_valid_pin() and
 		  Pin<ms3>::is_a_valid_pin()){
 	myu::UART_iostream uart;
-	uart << "6. Mode\n";
+	uart << "7. Write mode\n";
     }
 }
 
@@ -302,6 +315,35 @@ void test_mode()
 { }
 
 template <uint8_t ms1, uint8_t ms2, uint8_t ms3>
+void test_mode_automatic_check()
+    requires (Pin<ms1>::is_a_valid_pin() and
+	      Pin<ms2>::is_a_valid_pin() and
+	      Pin<ms3>::is_a_valid_pin())
+{
+    myu::UART_iostream uart;
+    auto test = Test::interface(uart, "mode()");
+
+    A4988::full_step_mode();
+    CHECK_TRUE(test, A4988::mode() == A4988::Mode::full_step, "full_step");
+
+    A4988::half_step_mode();
+    CHECK_TRUE(test, A4988::mode() == A4988::Mode::half_step, "half_step");
+
+    A4988::quarter_step_mode();
+    CHECK_TRUE(test, A4988::mode() == A4988::Mode::quarter_step
+							    , "quarter_step");
+
+    A4988::eighth_step_mode();
+    CHECK_TRUE(test, A4988::mode() == A4988::Mode::eighth_step, "eighth_step");
+
+    A4988::sixteenth_step_mode();
+    CHECK_TRUE(test, A4988::mode() == A4988::Mode::sixteenth_step
+							    , "sixteenth_step");
+}
+
+
+
+template <uint8_t ms1, uint8_t ms2, uint8_t ms3>
 void test_mode()
     requires (Pin<ms1>::is_a_valid_pin() and
 	      Pin<ms2>::is_a_valid_pin() and
@@ -310,6 +352,7 @@ void test_mode()
     myu::UART_iostream uart;
     uart << "\nMode\n"
 	      "----\n"
+	      "0. Automatic check\n"
 	      "1. Full mode\n"
 	      "2. Half mode\n"
 	      "3. Quarter mode\n"
@@ -320,6 +363,7 @@ void test_mode()
     uart >> opt;
 
     switch (opt){
+	break; case '0': test_mode_automatic_check<ms1, ms2, ms3>();
 	break; case '1': A4988::full_step_mode();
 	break; case '2': A4988::half_step_mode();
 	break; case '3': A4988::quarter_step_mode();
@@ -329,6 +373,23 @@ void test_mode()
 	break; default: uart << "What?\n";
     }
 }
+
+void test_read_mode()
+{
+    using Mode = A4988::Mode;
+
+    myu::UART_iostream uart;
+    uart << "\n\n";
+    switch (A4988::mode()){
+	break; case Mode::full_step: uart << "Mode full_step\n";
+	break; case Mode::half_step: uart << "Mode half_step\n";
+	break; case Mode::quarter_step: uart << "Mode quarter_step\n";
+	break; case Mode::eighth_step: uart << "Mode eighth_step\n";
+	break; case Mode::sixteenth_step: uart << "Mode sixteenth_step\n";
+	break; default: uart << "Unknown mode\n";
+    }
+}
+
 
 
 // Main
@@ -346,8 +407,10 @@ int main()
     while(1){
 	uart << "\nMenu\n"
 	          "----\n"
-		  "1. step\n"
-		  "2. direction\n";
+		  "1. Step\n"
+		  "2. Direction\n"
+		  "3. Read mode\n";
+
 	print_menu_enable<A4988_pins::NO_ENABLE>();
 	print_menu_sleep<A4988_pins::NO_SLEEP>();
 	print_menu_reset<A4988_pins::NO_RESET>();
@@ -361,10 +424,11 @@ int main()
 	switch (opt){
 	    break; case '1': test_step();
 	    break; case '2': test_direction();
-	    break; case '3': test_enable<A4988_pins::NO_ENABLE>();
-	    break; case '4': test_sleep<A4988_pins::NO_SLEEP>();
-	    break; case '5': test_reset<A4988_pins::NO_RESET>();
-	    break; case '6': test_mode<A4988_pins::MS1,
+	    break; case '3': test_read_mode();
+	    break; case '4': test_enable<A4988_pins::NO_ENABLE>();
+	    break; case '5': test_sleep<A4988_pins::NO_SLEEP>();
+	    break; case '6': test_reset<A4988_pins::NO_RESET>();
+	    break; case '7': test_mode<A4988_pins::MS1,
 		                       A4988_pins::MS2, 
 				       A4988_pins::MS3>();
 

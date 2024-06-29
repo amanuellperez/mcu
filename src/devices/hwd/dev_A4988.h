@@ -202,6 +202,14 @@ public:
     { return MS1::is_a_valid_pin()  and
 	     MS2::is_a_valid_pin()  and MS3::is_a_valid_pin(); }
 
+    enum class Mode {
+	    full_step, half_step, quarter_step, eighth_step, sixteenth_step,
+	    unknown };
+
+    static Mode mode() requires (MS123_connected());
+    static Mode mode() requires (!MS123_connected());
+
+
     static void full_step_mode()	requires (MS123_connected());
     static void half_step_mode()	requires (MS123_connected());
     static void quarter_step_mode()	requires (MS123_connected());
@@ -386,6 +394,88 @@ void A4988_basic<M, P>::sixteenth_step_mode()
     MS3::write_one();
 }
 
+
+// (@_@) Aquí tenemos un ejemplo de código ilegible.
+//       Se podría escribir:
+//	    uint8_t x{};
+//	    first_bit(x) = MS1::is_one();
+//	    second_bit(x) = MS2::is_one();
+//	    third_bit(x) = MS3::is_one(); // o algo parecido
+//	    switch(x):
+//		case 000: return full_step;
+//		case 100: return half_step;
+//		case 010: return quarter_step;
+//		case 110: return eighth_step;
+//		case 111: return sixteenth_step;
+//
+//	Quedando la tabla completamente legible. El problema es que 
+//	es un pelín más ineficiente y genera un poco más código que el
+//	siguiente monstruo:
+template <typename M, typename P>
+A4988_basic<M, P>::Mode A4988_basic<M, P>::mode()
+    requires (MS123_connected())
+{
+    if (MS1::is_zero()){// 0..
+	if (MS2::is_zero()){ // 00.
+	    if (MS3::is_zero()) return Mode::full_step;
+	    // else  001 no mode
+	} else { // 01.
+	    if (MS3::is_zero()) return Mode::quarter_step;
+	    // else 011 no mode
+	}
+    } else {// 1..
+	if (MS2::is_zero()){ // 10.
+	    if (MS3::is_zero()) return Mode::half_step;
+	    // else 101 no mode
+	} else { // 11.
+	    if (MS3::is_zero()) return Mode::eighth_step;
+	    else                return Mode::sixteenth_step;
+	}
+    }
+
+    return Mode::unknown;
+}
+
+
+template <typename M, typename P>
+inline 
+A4988_basic<M, P>::Mode A4988_basic<M, P>::mode()
+    requires (!MS123_connected())
+{
+    if constexpr (mcu::pin<MS1>::is_floating() and
+	          mcu::pin<MS2>::is_floating() and
+	          mcu::pin<MS3>::is_floating())
+	return Mode::full_step;
+    
+    else if constexpr (mcu::pin<MS1>::is_connected_to_GND() and
+		       mcu::pin<MS2>::is_connected_to_GND() and
+	               mcu::pin<MS3>::is_connected_to_GND())
+	return Mode::full_step;
+
+    else if constexpr (mcu::pin<MS1>::is_connected_to_VCC() and
+		       mcu::pin<MS2>::is_connected_to_GND() and
+	               mcu::pin<MS3>::is_connected_to_GND())
+	return Mode::half_step;
+
+    else if constexpr (mcu::pin<MS1>::is_connected_to_GND() and
+		       mcu::pin<MS2>::is_connected_to_VCC() and
+	               mcu::pin<MS3>::is_connected_to_GND())
+	return Mode::quarter_step;
+
+    else if constexpr (mcu::pin<MS1>::is_connected_to_VCC() and
+		       mcu::pin<MS2>::is_connected_to_VCC() and
+	               mcu::pin<MS3>::is_connected_to_GND())
+	return Mode::eighth_step;
+
+    else if constexpr (mcu::pin<MS1>::is_connected_to_VCC() and
+		       mcu::pin<MS2>::is_connected_to_VCC() and
+	               mcu::pin<MS3>::is_connected_to_VCC())
+	return Mode::sixteenth_step;
+
+    else 
+	static_assert(atd::always_false_v<M>, 
+		    "Wrong connection in pins: MS1, MS2, MS3");
+}
 
 
 }// namespace
