@@ -58,6 +58,14 @@ void test_constructor()
 {
     test::interface("constructor");
     
+    // El exponente del número 0 tiene que quedar 0 para evitar futuros
+    // errores en operaciones.
+    {
+	auto x = atd::Float8(0).E(4);
+	CHECK_TRUE(x.significand() == 0, "significand(0)");
+	CHECK_TRUE(x.exponent() == 0, "exponent(0)");
+    }
+
     test_constructor<uint8_t>(0, 0, 0);
     test_constructor<uint8_t>(120, 12, 1);
     test_constructor<uint8_t>(300, 3, 2);
@@ -485,6 +493,23 @@ void test_integer_part()
     CHECK_TRUE(x.integer_part() != 1240, "OVERFLOW!!! integer_part");
 }
 
+
+void test_abs()
+{
+    test::interface("abs");
+
+// exp = 0
+    CHECK_TRUE(atd::abs(atd::Float8(0).E(0)) == atd::Float8(0).E(0), "abs");
+    CHECK_TRUE(atd::abs(atd::Float8(+2).E(0)) == atd::Float8(+2).E(0), "abs");
+    CHECK_TRUE(atd::abs(atd::Float8(-2).E(0)) == atd::Float8(+2).E(0), "abs");
+    
+
+// exp != 0
+    CHECK_TRUE(atd::abs(atd::Float8(-2).E(4)) == atd::Float8(2).E(4), "abs");
+    CHECK_TRUE(atd::abs(atd::Float8(0).E(4)) == atd::Float8(0), "abs");
+    CHECK_TRUE(atd::abs(atd::Float8(+2).E(4)) == atd::Float8(2).E(4), "abs");
+}
+
 int main()
 {
 try{
@@ -499,7 +524,9 @@ try{
     test_substraction();
     test_multiplication();
     test_division();
+    test_abs();
     test_print();
+
 
 }catch(std::exception& e)
 {

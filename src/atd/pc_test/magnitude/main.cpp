@@ -696,6 +696,18 @@ void test_angular_speed()
 
 }
 
+void test_abs()
+{
+    test::interface("abs");
+
+    using Degree = atd::Degree<float>;
+
+    CHECK_TRUE(atd::abs(Degree{-30}) == Degree{30}, "abs(30)");
+    CHECK_TRUE(atd::abs(Degree{30}) == Degree{30}, "abs(30)");
+    CHECK_TRUE(atd::abs(Degree{0}) == Degree{0}, "abs(30)");
+
+}
+
 void test_magnitude()
 {
     test::interface("Magnitude");
@@ -713,6 +725,7 @@ void test_magnitude()
     test_magnitude_integer_type();
     test_angle();
     test_angular_speed();
+    test_abs();
 }
 
 

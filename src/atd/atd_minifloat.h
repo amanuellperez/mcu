@@ -180,7 +180,11 @@ public:
     //
     // Esta función realmente lo que hace es añadir al exponente `e`.
     // Es equivalente a: multiply_by_ten_to_the_power_of(e)
-    constexpr Minifloat& E(Exp_t e) {exp_ += e; return *this;}
+    constexpr Minifloat& E(Exp_t e) 
+    {
+	if (x_ != 0) exp_ += e; // si el número es 0, su exponente es 0!!!
+	return *this;
+    }
 
 // Observers(estas dos funciones son más para depurar, ¿evitar usarlas?)
     constexpr Rep significand() const {return x_;}
@@ -227,6 +231,9 @@ public:
     // número de cifras significativas)
     constexpr void normalize();
 
+    // Devuelve el valor absoluto 
+    constexpr Minifloat abs() const { return Minifloat{atd::abs(x_)}.E(exp_); }
+    
 private:
     // Internamente guardamos el número como: x_ * 10^exp
     Rep x_;
@@ -348,7 +355,7 @@ void Minifloat<R, E_t>::
     int ndecimals = std::min(number_of_digits(decimal_part),
 					std::numeric_limits<Rep>::digits10 + 1);
     using Rep2 = same_type_with_double_bits_t<Rep>;
-    Rep2 x = abs(integer_part);
+    Rep2 x = atd::abs(integer_part);
     exp_ = 0;
 
 // >>> shift10_to_the_left(x)_at_most(ndecimals)

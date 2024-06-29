@@ -43,10 +43,22 @@ namespace atd{
 // abs
 // ---
 // El standard no suministra std::abs(unsigned), ni es constexpr
-template <Type::Integer Int>
+template <Type::Signed_integer Int>
 inline constexpr Int abs(Int x)
 { return x >= 0? x: -x; }
 
+
+template <Type::Unsigned_integer Int>
+inline constexpr Int abs(Int x)
+{ return x; }
+
+inline constexpr float abs(const float& x)
+{ return x >= 0? x: -x; }
+
+template <typename Int>
+inline constexpr Int abs(const Int& x)
+    requires requires {x.abs();}
+{ return x.abs();}
 
 // div
 // ---

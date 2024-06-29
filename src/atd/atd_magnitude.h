@@ -262,6 +262,9 @@ public:
     constexpr Magnitude& operator+=(const Magnitude& x);
     constexpr Magnitude& operator-=(const Magnitude& x);
 
+// Operadores
+    constexpr Magnitude abs() const { return Magnitude{atd::abs(value_)}; }
+
 private:
     Rep value_;
 };

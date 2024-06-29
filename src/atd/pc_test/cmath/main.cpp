@@ -27,7 +27,14 @@
 using namespace test;
 
 
+struct Int{
+    int x;
+    constexpr Int abs() const {return Int{atd::abs(x)};}
+};
+bool operator==(const Int& a, const Int& b)
+{return a.x == b.x; }
 
+struct X {};
 
 void test_abs()
 {
@@ -47,7 +54,13 @@ void test_abs()
 	if (atd::abs(n) != n)
 	    CHECK_TRUE(true, alp::as_str() << "test_abs(" << n << ")");
     }
+
+    Int x{-2};
+    CHECK_TRUE(atd::abs(x) == Int{2}, "Int::abs");
+
     std::cout << "OK\n";
+
+
 
 }
 
