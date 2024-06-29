@@ -23,7 +23,20 @@
 #include <avr_atmega.h>
 #include <dev_A4988.h>
 
+#include <atd_test.h>
 
+
+constexpr const char* msg_hello = "\n\n"
+	    "*************************************************************\n"
+	    "                    STEPPER MOTOR TEST\n"
+	    "*************************************************************\n"
+	    "                        IMPORTANT\n"
+	    " Don't forget to connect an electrolytic capacitor of 100 uF\n"
+	    " (minimum 47 uF) between VMOT and GND!!!\n"
+	    "*************************************************************\n";
+
+
+using namespace test;
 
 // Microcontroller
 // ---------------
@@ -75,12 +88,18 @@ using STEP = myu::SWG1_pin<STEP_pin>;
 // -------
 using A4988 = dev::A4988_basic<Micro, A4988_pins>;
 
-struct Cfg_motor{
-    using Driver = A4988;
-};
-
-using Motor = dev::NEMA17<Cfg_motor>;
+using Motor = dev::NEMA17<A4988>;
 //static_assert(Motor::step_angle == Motor::Millidegree{1'800});
+
+// Types
+using Degree = Motor::Degree;
+using Degrees_per_second = Motor::Degrees_per_second;
+using Speed  = Degrees_per_second;
+
+using Hertz  = Motor::Hertz;
+using Frequency= Hertz;
+using NSteps_t= Motor::NSteps_t;
+
 
 // Functions
 // ---------
@@ -90,6 +109,16 @@ void init_uart()
     myu::basic_cfg<baud_rate>(uart);
     uart.turn_on();
 }
+
+void press_key_to_continue()
+{
+    myu::UART_iostream uart;
+    uart << "Press a key to continue\n";
+
+    char c{};
+    uart >> c;
+}
+
 
 template <uint8_t npin>
 void print_pin_number(const char* name)
@@ -117,14 +146,8 @@ void print_pin_number(const char* name)
 void hello()
 {
     myu::UART_iostream uart;
-    uart << "\n\nStepper motor test\n"
-	        "------------------\n"
-		"*************************************************************\n"
-		"                        IMPORTANT\n"
-		" Don't forget to connect an electrolytic capacitor of 100 uF\n"
-		" (minimum 47 uF) between VMOT and GND!!!\n"
-		"*************************************************************\n"
-		"Connections:\n"
+    uart << msg_hello;
+    uart << "Connections:\n"
 		"\tDIR = " << (int) A4988_pins::DIR << 
 		"; STEP = " << (int) A4988_pins::STEP_pin;
 
@@ -139,13 +162,91 @@ void hello()
     print_pin_number<A4988_pins::MS2>("MS2");
     print_pin_number<A4988_pins::MS3>("MS3");
     uart << "\n\n";
+    uart << "Motor: \n";
+    uart << "\tstep angle = " << Motor::step_angle << '\n';
 }
 
-void turn()
+void test_turn()
 {
-    Motor::turn(Motor::Degree{3*360}, 
-				Motor::Degrees_per_second(3*360));
+    myu::UART_iostream uart;
+    uart << "\nNumber of degrees to turn: ";
+    int16_t degree{};
+    uart >> degree;
+
+    if (degree == 0)
+	return;
+
+    uart << "Angular speed (in degrees/second): ";
+    int16_t speed{};
+    uart >> speed;
+    if (speed == 0)
+	return;
+
+    Motor::turn(Degree{degree}, Degrees_per_second(speed));
 }
+
+void test_angle2freq(Test& test, const Degree& degree, const Speed& speed,
+		const NSteps_t& res_nsteps, const Frequency& res_freq)
+{
+    auto [freq, nsteps] = Motor::angle2freq(degree, speed);
+    CHECK_TRUE(test,
+		nsteps == res_nsteps and freq == res_freq, "angle2freq");
+
+//    myu::UART_iostream uart;
+//    uart << "nsteps = " << nsteps << " ?= " << res_nsteps << '\n';
+//    uart << "freq   = " << freq << " ?= " << res_freq << '\n';
+}
+
+void test_angle2direction(Test& test, const Degree& degree, const Speed& speed,
+			Motor::Direction res)
+{
+    CHECK_TRUE(test,
+		Motor::angle2direction(degree, speed) == res,
+		"angle2direction");
+}
+void test_angle2freq()
+{
+    // Los overflows y los casting dan dolor de cabeza. Hagamos algunas
+    // comprobaciones básicas:
+    
+    myu::UART_iostream uart;
+    auto test = Test::interface(uart, "angle2direction");
+
+    test_angle2direction(test, Degree{+100}, Degrees_per_second{+100} , 
+						    Motor::Direction::positive);
+    test_angle2direction(test, Degree{+100}, Degrees_per_second{-100} , 
+						    Motor::Direction::negative);
+    test_angle2direction(test, Degree{-100}, Degrees_per_second{100} , 
+						    Motor::Direction::negative);
+    test_angle2direction(test, Degree{-100}, Degrees_per_second{-100} , 
+						    Motor::Direction::positive);
+
+    test.interface("angle2freq");
+
+//    press_key_to_continue();
+
+// +angle, +speed
+    test_angle2freq(test, Degree{360}, Speed{360}, NSteps_t{200}, Hertz{200});
+    test_angle2freq(test, Degree{2*360}, Speed{2*360}, NSteps_t{400}, Hertz{400});
+    test_angle2freq(test, Degree{3*360}, Speed{3*360}, NSteps_t{600}, Hertz{600});
+
+    test_angle2freq(test, Degree{360}, Speed{720}, NSteps_t{200}, Hertz{400});
+    test_angle2freq(test, Degree{360}, Speed{1080}, NSteps_t{200}, Hertz{600});
+
+    // 10 vueltas
+    test_angle2freq(test, Degree{3'600}, Speed{1'080}, NSteps_t{2'000}, Hertz{600});
+
+// +angle, -speed
+    test_angle2freq(test, Degree{+360}, Speed{-360}, NSteps_t{200}, Hertz{200});
+
+// -angle, +speed
+    test_angle2freq(test, Degree{-360}, Speed{360}, NSteps_t{200}, Hertz{200});
+
+// -angle, -speed
+    test_angle2freq(test, Degree{-360}, Speed{-360}, NSteps_t{200}, Hertz{200});
+
+}
+
 
 // Main
 // ----
@@ -158,23 +259,20 @@ int main()
 
     Micro::enable_interrupts();
     myu::UART_iostream uart;
-    uart << "step angle = " << Motor::step_angle << '\n';
 
-uint32_t f = 200;
-Motor::Driver::Hertz freq_gen{f};
-uart << freq_gen << " (?= " << f << ")\n";
 
     while(1){
 	uart << "\nMenu\n"
 	          "----\n"
-		  "1. step\n"
-		  "2. direction\n";
+		  "0. angle2freq test\n"
+		  "1. turn\n";
 
 	char opt{};
 	uart >> opt;
 
 	switch (opt){
-	    break; case '1': turn();
+	    break; case '0': test_angle2freq();
+	    break; case '1': test_turn();
 		    
 
 	    break; default: uart << "What???\n";

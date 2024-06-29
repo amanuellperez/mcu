@@ -54,6 +54,23 @@ struct Pin_connection {
 };
 
 
+// Esto opera como función, no como struct, por eso es `pin` y no `Pin`
+// Idioma:
+//	    if (pin<MS1>::is_connected_to_VCC()) ...
+template <typename Pin>
+    requires requires {Pin::number;}
+struct pin
+{
+    static constexpr bool is_floating() 
+    { return Pin::number == Pin_connection::floating;}
+
+    static constexpr bool is_connected_to_VCC() 
+    { return Pin::number == Pin_connection::to_VCC;}
+
+    static constexpr bool is_connected_to_GND() 
+    { return Pin::number == Pin_connection::to_GND;}
+};
+
 }// namespace
 
 
