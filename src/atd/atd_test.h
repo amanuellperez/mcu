@@ -67,32 +67,38 @@
 
 namespace test{
 
-struct Data{
-    inline static std::ostream* out_ = nullptr;	// flujo donde mostramos la salida
-    static std::ostream& out() {return *out_;}
+class Test{
+public:
+    Test(std::ostream& out0) : out_ {&out0} { }
+
+    static Test interface(std::ostream& out, const char* name);
+
+    void interface(const char* name);
+
+    void check_true( bool condition, 
+		     const char* fname, int line, 
+		     const char* test_name);
+
+
+private:
+    std::ostream& out() {return *out_;}
+    std::ostream* out_;
+
+    void line();
 };
 
-inline void init(std::ostream& out0)
-{ Data::out_ = &out0; }
+inline void Test::line()
+{ out() << "---------------------------------\n"; }
 
-inline void check_true( bool condition, 
-			const char* fname, int line, 
-			const char* test_name)
-{
-    if (Data::out == nullptr)
-	return;
-
-    Data::out() << test_name << " ... ";
-
-    if (condition)
-	Data::out() << " OK\n";
-
-    else
-	Data::out() << " ERROR in " << fname << '[' << line << "]\n";
-}
-
-#define CHECK_TRUE(condicion, prueba) \
-	    {test::check_true((condicion), (__FILE__), (__LINE__), (prueba));}
+// TODO: no he conseguido encontrar la definición de
+// __builtin_source_location(), no pudiendo implementar source_location.
+// Una vez que se implemente, se puede eliminar esta macro y llamar
+// directamente a:
+//	test.check_true(condicion, prueba); 
+// siendo check_true una función real de Test.
+//
+#define CHECK_TRUE(test, condicion, prueba) \
+	    {test.check_true((condicion), (__FILE__), (__LINE__), (prueba));}
 
 }// namespace test
 
