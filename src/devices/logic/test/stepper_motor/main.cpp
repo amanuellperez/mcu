@@ -65,18 +65,18 @@ struct A4988_pins{
 //static constexpr uint8_t NO_ENABLE= mcu::Pin_connection::floating;
 static constexpr uint8_t NO_ENABLE= 9;
 
-//static constexpr uint8_t MS1= 10;
-//static constexpr uint8_t MS2= 11;
-//static constexpr uint8_t MS3= 12;
-static constexpr uint8_t MS1= mcu::Pin_connection::floating;
-static constexpr uint8_t MS2= mcu::Pin_connection::floating;
-static constexpr uint8_t MS3= mcu::Pin_connection::floating;
+static constexpr uint8_t MS1= 10;
+static constexpr uint8_t MS2= 11;
+static constexpr uint8_t MS3= 12;
+//static constexpr uint8_t MS1= mcu::Pin_connection::floating;
+//static constexpr uint8_t MS2= mcu::Pin_connection::floating;
+//static constexpr uint8_t MS3= mcu::Pin_connection::floating;
 
 // En lugar de dejarlos floating conectar no_reset con no_sleep
-//static constexpr uint8_t NO_RESET= 13;
-static constexpr uint8_t NO_RESET= mcu::Pin_connection::floating;
-//static constexpr uint8_t NO_SLEEP= 14;
-static constexpr uint8_t NO_SLEEP= mcu::Pin_connection::floating;
+//static constexpr uint8_t NO_RESET= mcu::Pin_connection::floating;
+//static constexpr uint8_t NO_SLEEP= mcu::Pin_connection::floating;
+static constexpr uint8_t NO_RESET= 13;
+static constexpr uint8_t NO_SLEEP= 14;
 
 static constexpr uint8_t DIR     = 15;
 static constexpr uint8_t STEP_pin= 16;
@@ -163,7 +163,7 @@ void hello()
     print_pin_number<A4988_pins::MS3>("MS3");
     uart << "\n\n";
     uart << "Motor: \n";
-    uart << "\tstep angle = " << Motor::step_angle << '\n';
+    uart << "\tstep angle = " << Motor::step_angle() << '\n';
 }
 
 void test_turn()
@@ -204,12 +204,13 @@ void test_angle2direction(Test& test, const Degree& degree, const Speed& speed,
 		Motor::angle2direction(degree, speed) == res,
 		"angle2direction");
 }
-void test_angle2freq()
+void test_automatic()
 {
     // Los overflows y los casting dan dolor de cabeza. Hagamos algunas
     // comprobaciones básicas:
     
     myu::UART_iostream uart;
+
     auto test = Test::interface(uart, "angle2direction");
 
     test_angle2direction(test, Degree{+100}, Degrees_per_second{+100} , 
@@ -245,8 +246,145 @@ void test_angle2freq()
 // -angle, -speed
     test_angle2freq(test, Degree{-360}, Speed{-360}, NSteps_t{200}, Hertz{200});
 
+// step_angle
+    
 }
 
+
+void print_mode()
+{
+    using Mode = Motor::Mode;
+
+    myu::UART_iostream uart;
+    uart << "\n\n";
+    switch (Motor::mode()){
+	break; case Mode::full_step: uart << "Mode full_step\n";
+	break; case Mode::half_step: uart << "Mode half_step\n";
+	break; case Mode::quarter_step: uart << "Mode quarter_step\n";
+	break; case Mode::eighth_step: uart << "Mode eighth_step\n";
+	break; case Mode::sixteenth_step: uart << "Mode sixteenth_step\n";
+	break; default: uart << "Unknown mode\n";
+    }
+}
+template <typename Motor>
+void test_mode()
+{
+    myu::UART_iostream uart;
+    uart << "\nMode\n"
+	      "----\n"
+	      "0. Read mode\n";
+
+    if constexpr (requires {Motor::Driver::full_step_mode();}){
+	uart << "1. Full mode\n"
+	      "2. Half mode\n"
+	      "3. Quarter mode\n"
+	      "4. Eighth mode\n"
+	      "5. Sixteenth mode\n";
+    }
+	      
+    char opt{};
+    uart >> opt;
+
+    if (opt == '0'){
+	print_mode();
+	return;
+    }
+
+    if constexpr (requires {Motor::Driver::full_step_mode();}){
+	switch (opt){
+	    break; case '1': Motor::full_step_mode();
+	    break; case '2': Motor::half_step_mode();
+	    break; case '3': Motor::quarter_step_mode();
+	    break; case '4': Motor::eighth_step_mode();
+	    break; case '5': Motor::sixteenth_step_mode();
+
+	    break; default: uart << "What?\n";
+	}
+    }
+}
+
+
+
+template <typename Motor>
+void test_enable()
+{
+    myu::UART_iostream uart;
+    uart << "\nTo enable/disable you have to connect pin NO_ENABLE\n";
+}
+
+template <typename Motor>
+    requires requires {Motor::Driver::enable();}
+void test_enable()
+{
+    myu::UART_iostream uart;
+    uart << "\nenable/disable (e/d): ";
+    char opt{};
+    uart >> opt;
+
+    switch (opt){
+	break; case 'e':
+	       case 'E': Motor::enable();
+
+	break; case 'd':
+	       case 'D': Motor::disable();
+
+	break; default: uart << "What?\n";
+    }
+}
+
+template <typename Motor>
+void test_sleep()
+{
+    myu::UART_iostream uart;
+    uart << "\nTo sleep/awake you have to connect pin NO_SLEEP\n";
+}
+
+template <typename Motor>
+    requires requires {Motor::Driver::sleep();}
+void test_sleep()
+{
+    myu::UART_iostream uart;
+    uart << "\nsleep/awake (s/a): ";
+    char opt{};
+    uart >> opt;
+
+    switch (opt){
+	break; case 's':
+	       case 'S': Motor::sleep();
+
+	break; case 'a':
+	       case 'A': Motor::awake();
+
+	break; default: uart << "What?\n";
+    }
+}
+
+template <typename Motor>
+void test_engage()
+{
+    myu::UART_iostream uart;
+    uart << "\nTo engage/disengage you have to connect pin NO_RESET\n";
+}
+
+template <typename Motor>
+    requires requires {Motor::Driver::engage();}
+void test_engage()
+{
+    myu::UART_iostream uart;
+    uart << "\nengage/disengage (e/d): ";
+    char opt{};
+    uart >> opt;
+
+    switch (opt){
+	break; case 'e':
+	       case 'E': Motor::engage();
+
+	break; case 'd':
+	       case 'D': Motor::disengage();
+
+	break; default: uart << "What?\n";
+    }
+}
 
 // Main
 // ----
@@ -260,19 +398,26 @@ int main()
     Micro::enable_interrupts();
     myu::UART_iostream uart;
 
-
     while(1){
 	uart << "\nMenu\n"
 	          "----\n"
-		  "0. angle2freq test\n"
-		  "1. turn\n";
+		  "0. Automatic test\n"
+		  "1. Turn\n"
+		  "2. Mode\n"
+		  "3. Enable/disable\n"
+		  "4. Sleep/awake\n"
+		  "5. Engage/disengage\n";
 
 	char opt{};
 	uart >> opt;
 
 	switch (opt){
-	    break; case '0': test_angle2freq();
+	    break; case '0': test_automatic();
 	    break; case '1': test_turn();
+	    break; case '2': test_mode<Motor>();
+	    break; case '3': test_enable<Motor>();
+	    break; case '4': test_sleep<Motor>();
+	    break; case '5': test_engage<Motor>();
 		    
 
 	    break; default: uart << "What???\n";

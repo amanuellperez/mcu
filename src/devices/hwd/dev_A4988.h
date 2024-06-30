@@ -152,24 +152,9 @@ public:
     static void enable()    requires (NO_ENABLE::is_a_valid_pin());
     static void disable()   requires (NO_ENABLE::is_a_valid_pin());
 
-
-    static void enable()    requires (!NO_ENABLE::is_a_valid_pin())
-	    {static_assert(false, "NO ENABLE pin disconnected!");}
-
-    static void disable()   requires (!NO_ENABLE::is_a_valid_pin())
-	    {static_assert(false, "NO ENABLE pin disconnected!");}
-
-
 // no sleep pin
     static void sleep() requires (NO_SLEEP::is_a_valid_pin());
     static void awake() requires (NO_SLEEP::is_a_valid_pin());
-
-
-    static void sleep() requires (!NO_SLEEP::is_a_valid_pin())
-	    {static_assert(false, "NO SLEEP pin disconnected!");}
-
-    static void awake() requires (!NO_SLEEP::is_a_valid_pin())
-	    {static_assert(false, "NO SLEEP pin disconnected!");}
 
 // no reset
     // Datasheet: Reset input: [...] All STEP inputs are ingored until the
@@ -179,13 +164,6 @@ public:
     // ¿cómo llamar a la acción opuesta? Al final opto por engage/disengage 
     static void engage()    requires (NO_RESET::is_a_valid_pin());
     static void disengage() requires (NO_RESET::is_a_valid_pin());
-
-
-    static void engage()    requires (!NO_RESET::is_a_valid_pin())
-	    {static_assert(false, "NO RESET pin disconnected!");}
-
-    static void disengage() requires (!NO_RESET::is_a_valid_pin())
-	    {static_assert(false, "NO RESET pin disconnected!");}
 
 // Modes
     // El A4988 se puede configurar para que funcione: en full step, en half
@@ -201,6 +179,11 @@ public:
     static constexpr bool MS123_connected()
     { return MS1::is_a_valid_pin()  and
 	     MS2::is_a_valid_pin()  and MS3::is_a_valid_pin(); }
+    
+    // Función común a todos los steppers drivers. Indica si el step_mode
+    // está fijado en tiempo de compilación o no, permitiendo alguna
+    // optimización sencilla
+    static constexpr bool step_mode_at_compile_time();
 
     enum class Mode {
 	    full_step, half_step, quarter_step, eighth_step, sixteenth_step,
@@ -216,20 +199,6 @@ public:
     static void eighth_step_mode()	requires (MS123_connected());
     static void sixteenth_step_mode()	requires (MS123_connected());
 
-    static void full_step_mode()	requires (!MS123_connected())
-	    {static_assert(false, "MS1, MS2 and MS3 pins disconnected!");}
-
-    static void half_step_mode()	requires (!MS123_connected())
-	    {static_assert(false, "MS1, MS2 and MS3 pins disconnected!");}
-
-    static void quarter_step_mode()	requires (!MS123_connected())
-	    {static_assert(false, "MS1, MS2 and MS3 pins disconnected!");}
-
-    static void eighth_step_mode()	requires (!MS123_connected())
-	    {static_assert(false, "MS1, MS2 and MS3 pins disconnected!");}
-
-    static void sixteenth_step_mode()	requires (!MS123_connected())
-	    {static_assert(false, "MS1, MS2 and MS3 pins disconnected!");}
 
 private:
 // Types
@@ -392,6 +361,15 @@ void A4988_basic<M, P>::sixteenth_step_mode()
     MS1::write_one();
     MS2::write_one();
     MS3::write_one();
+}
+
+template <typename M, typename P>
+constexpr bool A4988_basic<M, P>::step_mode_at_compile_time()
+{
+    if constexpr (MS123_connected())
+	return false;
+    else
+	return true;
 }
 
 

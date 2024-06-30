@@ -60,26 +60,28 @@ struct A4988_pins{
 //static constexpr uint8_t NO_ENABLE= mcu::Pin_connection::floating;
 static constexpr uint8_t NO_ENABLE= 9;
 
-static constexpr uint8_t MS1= 10;
-static constexpr uint8_t MS2= 11;
-static constexpr uint8_t MS3= 12;
-//static constexpr uint8_t MS1= mcu::Pin_connection::floating;
+//static constexpr uint8_t MS1= 10;
+//static constexpr uint8_t MS2= 11;
+//static constexpr uint8_t MS3= 12;
+
+static constexpr uint8_t MS1= mcu::Pin_connection::floating;
+static constexpr uint8_t MS2= mcu::Pin_connection::floating;
+static constexpr uint8_t MS3= mcu::Pin_connection::floating;
+
 //static constexpr uint8_t MS1= mcu::Pin_connection::to_VCC;
 //static constexpr uint8_t MS1= mcu::Pin_connection::to_GND;
 
-//static constexpr uint8_t MS2= mcu::Pin_connection::floating;
 //static constexpr uint8_t MS2= mcu::Pin_connection::to_VCC;
 //static constexpr uint8_t MS2= mcu::Pin_connection::to_GND;
 
-//static constexpr uint8_t MS3= mcu::Pin_connection::floating;
 //static constexpr uint8_t MS3= mcu::Pin_connection::to_VCC;
 //static constexpr uint8_t MS3= mcu::Pin_connection::to_GND;
 
-// En lugar de dejarlos floating conectar no_reset con no_sleep
-//static constexpr uint8_t NO_RESET= 13;
+// En lugar de dejarlos floating conectar no_reset con no_sleep::
 static constexpr uint8_t NO_RESET= mcu::Pin_connection::floating;
-//static constexpr uint8_t NO_SLEEP= 14;
 static constexpr uint8_t NO_SLEEP= mcu::Pin_connection::floating;
+//static constexpr uint8_t NO_RESET= 13;
+//static constexpr uint8_t NO_SLEEP= 14;
 
 static constexpr uint8_t DIR     = 15;
 static constexpr uint8_t STEP_pin= 16;
@@ -180,27 +182,26 @@ void test_direction()
 
 // no enable
 // ---------
-template <uint8_t no_enable_pin>
+template <typename Driver>
 void print_menu_enable()
-    requires (!Pin<no_enable_pin>::is_a_valid_pin())
 { }
 
-template <uint8_t no_enable_pin>
+template <typename Driver>
 void print_menu_enable()
-    requires (Pin<no_enable_pin>::is_a_valid_pin())
+    requires requires {Driver::enable(); }
 { 
     myu::UART_iostream uart;
     uart << "4. enable/disable\n";
 }
 
-template <uint8_t no_enable_pin>
+template <typename Driver>
 void test_enable()
-    requires (!Pin<no_enable_pin>::is_a_valid_pin())
+//    requires (!Pin<no_enable_pin>::is_a_valid_pin())
 { }
 
-template <uint8_t no_enable_pin>
+template <typename Driver>
 void test_enable()
-    requires (Pin<no_enable_pin>::is_a_valid_pin())
+    requires requires {Driver::enable(); }
 {
     myu::UART_iostream uart;
     uart << "\nEnable/disable (e/d): ";
@@ -210,10 +211,10 @@ void test_enable()
 
     switch (opt){
 	break; case 'e':
-	       case 'E': A4988::enable();
+	       case 'E': Driver::enable();
 
 	break; case 'd':
-	       case 'D': A4988::disable();
+	       case 'D': Driver::disable();
 
 	break; default: uart << "What?\n";
     }
@@ -222,23 +223,25 @@ void test_enable()
 
 // no sleep
 // --------
-template <uint8_t no_sleep_pin>
+template <typename Driver>
 void print_menu_sleep()
+{}
+
+template <typename Driver>
+void print_menu_sleep()
+    requires requires {Driver::sleep(); Driver::awake();}
 { 
-    if constexpr (Pin<no_sleep_pin>::is_a_valid_pin()){
-	myu::UART_iostream uart;
-	uart << "5. sleep/awake\n";
-    }
+    myu::UART_iostream uart;
+    uart << "5. sleep/awake\n";
 }
 
-template <uint8_t no_sleep_pin>
+template <typename Driver>
 void test_sleep()
-    requires (!Pin<no_sleep_pin>::is_a_valid_pin())
 { }
 
-template <uint8_t no_sleep_pin>
+template <typename Driver>
 void test_sleep()
-    requires (Pin<no_sleep_pin>::is_a_valid_pin())
+    requires requires {Driver::sleep(); Driver::awake();}
 {
     myu::UART_iostream uart;
     uart << "\nSleep/awake (s/a): ";
@@ -248,10 +251,10 @@ void test_sleep()
 
     switch (opt){
 	break; case 's':
-	       case 'S': A4988::sleep();
+	       case 'S': Driver::sleep();
 
 	break; case 'a':
-	       case 'A': A4988::awake();
+	       case 'A': Driver::awake();
 
 	break; default: uart << "What?\n";
     }
@@ -259,23 +262,25 @@ void test_sleep()
 
 // no reset
 // --------
-template <uint8_t no_reset_pin>
+template <typename Driver>
+void print_menu_reset()
+{}
+
+template <typename Driver>
+    requires requires {Driver::engage(); Driver::disengage();}
 void print_menu_reset()
 { 
-    if constexpr (Pin<no_reset_pin>::is_a_valid_pin()){
-	myu::UART_iostream uart;
-	uart << "6. engage/disengage\n";
-    }
+    myu::UART_iostream uart;
+    uart << "6. engage/disengage\n";
 }
 
-template <uint8_t no_reset_pin>
+template <typename Driver>
 void test_reset()
-    requires (!Pin<no_reset_pin>::is_a_valid_pin())
 { }
 
-template <uint8_t no_reset_pin>
+template <typename Driver>
 void test_reset()
-    requires (Pin<no_reset_pin>::is_a_valid_pin())
+    requires requires {Driver::engage(); Driver::disengage();}
 {
     myu::UART_iostream uart;
     uart << "\nEngage/disengage (e/d): ";
@@ -285,10 +290,10 @@ void test_reset()
 
     switch (opt){
 	break; case 'e':
-	       case 'E': A4988::engage();
+	       case 'E': Driver::engage();
 
 	break; case 'd':
-	       case 'D': A4988::disengage();
+	       case 'D': Driver::disengage();
 
 	break; default: uart << "What?\n";
     }
@@ -296,58 +301,71 @@ void test_reset()
 
 // mode
 // ----
-template <uint8_t ms1, uint8_t ms2, uint8_t ms3>
+template <typename Driver>
 void print_menu_mode()
-{ 
-    if constexpr (Pin<ms1>::is_a_valid_pin() and
-		  Pin<ms2>::is_a_valid_pin() and
-		  Pin<ms3>::is_a_valid_pin()){
-	myu::UART_iostream uart;
-	uart << "7. Write mode\n";
-    }
-}
-
-template <uint8_t ms1, uint8_t ms2, uint8_t ms3>
-void test_mode()
-    requires (!(Pin<ms1>::is_a_valid_pin() and
-	      Pin<ms2>::is_a_valid_pin() and
-	      Pin<ms3>::is_a_valid_pin()))
 { }
 
-template <uint8_t ms1, uint8_t ms2, uint8_t ms3>
+template <typename Driver>
+void print_menu_mode()
+    requires (Driver::MS123_connected())
+{ 
+    myu::UART_iostream uart;
+    uart << "7. Write mode\n";
+}
+
+template <typename Driver>
 void test_mode_automatic_check()
-    requires (Pin<ms1>::is_a_valid_pin() and
-	      Pin<ms2>::is_a_valid_pin() and
-	      Pin<ms3>::is_a_valid_pin())
+{} 
+
+template <typename Driver>
+void test_mode_automatic_check()
+    requires (Driver::MS123_connected())
 {
     myu::UART_iostream uart;
     auto test = Test::interface(uart, "mode()");
 
-    A4988::full_step_mode();
-    CHECK_TRUE(test, A4988::mode() == A4988::Mode::full_step, "full_step");
+    Driver::full_step_mode();
+    CHECK_TRUE(test, Driver::mode() == Driver::Mode::full_step, "full_step");
 
-    A4988::half_step_mode();
-    CHECK_TRUE(test, A4988::mode() == A4988::Mode::half_step, "half_step");
+    Driver::half_step_mode();
+    CHECK_TRUE(test, Driver::mode() == Driver::Mode::half_step, "half_step");
 
-    A4988::quarter_step_mode();
-    CHECK_TRUE(test, A4988::mode() == A4988::Mode::quarter_step
+    Driver::quarter_step_mode();
+    CHECK_TRUE(test, Driver::mode() == Driver::Mode::quarter_step
 							    , "quarter_step");
 
-    A4988::eighth_step_mode();
-    CHECK_TRUE(test, A4988::mode() == A4988::Mode::eighth_step, "eighth_step");
+    Driver::eighth_step_mode();
+    CHECK_TRUE(test, Driver::mode() == Driver::Mode::eighth_step, "eighth_step");
 
-    A4988::sixteenth_step_mode();
-    CHECK_TRUE(test, A4988::mode() == A4988::Mode::sixteenth_step
+    Driver::sixteenth_step_mode();
+    CHECK_TRUE(test, Driver::mode() == Driver::Mode::sixteenth_step
 							    , "sixteenth_step");
+
+    Driver::full_step_mode(); // lo dejamos en full step mode
 }
 
 
-
-template <uint8_t ms1, uint8_t ms2, uint8_t ms3>
+template <typename Driver>
 void test_mode()
-    requires (Pin<ms1>::is_a_valid_pin() and
-	      Pin<ms2>::is_a_valid_pin() and
-	      Pin<ms3>::is_a_valid_pin())
+{
+    myu::UART_iostream uart;
+    uart << "\nMode\n"
+	      "----\n"
+	      "0. Automatic check\n";
+
+    char opt{};
+    uart >> opt;
+
+    switch (opt){
+	break; case '0': test_mode_automatic_check<Driver>();
+	break; default: uart << "What?\n";
+    }
+}
+
+
+template <typename Driver>
+void test_mode()
+    requires (Driver::MS123_connected())
 {
     myu::UART_iostream uart;
     uart << "\nMode\n"
@@ -363,12 +381,12 @@ void test_mode()
     uart >> opt;
 
     switch (opt){
-	break; case '0': test_mode_automatic_check<ms1, ms2, ms3>();
-	break; case '1': A4988::full_step_mode();
-	break; case '2': A4988::half_step_mode();
-	break; case '3': A4988::quarter_step_mode();
-	break; case '4': A4988::eighth_step_mode();
-	break; case '5': A4988::sixteenth_step_mode();
+	break; case '0': test_mode_automatic_check<Driver>();
+	break; case '1': Driver::full_step_mode();
+	break; case '2': Driver::half_step_mode();
+	break; case '3': Driver::quarter_step_mode();
+	break; case '4': Driver::eighth_step_mode();
+	break; case '5': Driver::sixteenth_step_mode();
 
 	break; default: uart << "What?\n";
     }
@@ -411,12 +429,10 @@ int main()
 		  "2. Direction\n"
 		  "3. Read mode\n";
 
-	print_menu_enable<A4988_pins::NO_ENABLE>();
-	print_menu_sleep<A4988_pins::NO_SLEEP>();
-	print_menu_reset<A4988_pins::NO_RESET>();
-	print_menu_mode<A4988_pins::MS1, A4988_pins::MS2, 
-				         A4988_pins::MS3>();
-
+	print_menu_enable<A4988>();
+	print_menu_sleep<A4988>();
+	print_menu_reset<A4988>();
+	print_menu_mode<A4988>();
 
 	char opt{};
 	uart >> opt;
@@ -425,12 +441,10 @@ int main()
 	    break; case '1': test_step();
 	    break; case '2': test_direction();
 	    break; case '3': test_read_mode();
-	    break; case '4': test_enable<A4988_pins::NO_ENABLE>();
-	    break; case '5': test_sleep<A4988_pins::NO_SLEEP>();
-	    break; case '6': test_reset<A4988_pins::NO_RESET>();
-	    break; case '7': test_mode<A4988_pins::MS1,
-		                       A4988_pins::MS2, 
-				       A4988_pins::MS3>();
+	    break; case '4': test_enable<A4988>();
+	    break; case '5': test_sleep<A4988>();
+	    break; case '6': test_reset<A4988>();
+	    break; case '7': test_mode<A4988>();
 
 	    break; default: uart << "What???\n";
 
