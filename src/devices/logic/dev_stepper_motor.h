@@ -110,7 +110,7 @@ public:
     // no hace).
     // De momento experimento con la (2) porque estoy seguro de que al
     // escribir dentro de unos meses una aplicacion usando motores, no me
-    // acuerde de si puedo usar enable o no, y agradeceré que el compilador me
+    // acordaré de si puedo usar enable o no, y agradeceré que el compilador me
     // diga que no he conectado el pin correspondiente.
     // enable
     static void enable()  {Driver::enable();}

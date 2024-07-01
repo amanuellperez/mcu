@@ -204,6 +204,7 @@ void test_angle2direction(Test& test, const Degree& degree, const Speed& speed,
 		Motor::angle2direction(degree, speed) == res,
 		"angle2direction");
 }
+
 void test_automatic()
 {
     // Los overflows y los casting dan dolor de cabeza. Hagamos algunas
@@ -224,7 +225,6 @@ void test_automatic()
 
     test.interface("angle2freq");
 
-//    press_key_to_continue();
 
 // +angle, +speed
     test_angle2freq(test, Degree{360}, Speed{360}, NSteps_t{200}, Hertz{200});
@@ -246,8 +246,39 @@ void test_automatic()
 // -angle, -speed
     test_angle2freq(test, Degree{-360}, Speed{-360}, NSteps_t{200}, Hertz{200});
 
+
 // step_angle
-    
+    if constexpr (requires {Motor::Driver::full_step_mode();}){
+	press_key_to_continue();
+
+	test.interface("step_angle");
+	int16_t nsteps = 200;
+	Degree angle{Degree::Rep{1,8}}; // if constexpr Rep == Float16 ...
+
+	Motor::full_step_mode();
+	CHECK_TRUE(test, Motor::nsteps_per_turn() == nsteps, "full_step_mode");
+	CHECK_TRUE(test, Motor::step_angle() == angle, "full_step_mode");
+
+	Motor::half_step_mode();
+	CHECK_TRUE(test, Motor::nsteps_per_turn() == 2*nsteps, "half_step_mode");
+	CHECK_TRUE(test, Motor::step_angle() == angle/2, "half_step_mode");
+
+	Motor::quarter_step_mode();
+	CHECK_TRUE(test, Motor::nsteps_per_turn() == 4*nsteps, "quarter_step_mode");
+	CHECK_TRUE(test, Motor::step_angle() == angle/4, "quarter_step_mode");
+
+	Motor::eighth_step_mode();
+	CHECK_TRUE(test, Motor::nsteps_per_turn() == 8*nsteps, "eighth_step_mode");
+	CHECK_TRUE(test, Motor::step_angle() == angle / 8, "eighth_step_mode");
+
+	Motor::sixteenth_step_mode();
+	CHECK_TRUE(test, Motor::nsteps_per_turn() == 16*nsteps, "sixteenth_step_mode");
+	CHECK_TRUE(test, Motor::step_angle() == angle / 16, "sixteenth_step_mode");
+
+
+	Motor::full_step_mode(); // lo dejamos en full step mode
+    }
+
 }
 
 
