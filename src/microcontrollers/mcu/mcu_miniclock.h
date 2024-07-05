@@ -48,9 +48,9 @@
  *	                Ejemplo: system_clock es un tipo de Clock_s
  *	    
  *
- *  RELACIÓN CON TIMER_COUNTER
+ *  RELACIÓN CON TIME_COUNTER
  *
- *	Timer_counter
+ *	Time_counter
  *	-------------
  *	    (1) Podemos configurar el periodo del reloj interno, que nos da la
  *	        unidad de medida del counter. Podemos medir en (1us, 2us, 20us,
@@ -85,7 +85,7 @@ namespace mcu{
 /***************************************************************************
  *			    MINICLOCK_XX
  ***************************************************************************/
-namespace mcu_{
+namespace impl_of{
 // De momento no suministro funciones write/reset/resume porque no parece que
 // tenga mucho sentido. Si se necesita en el futuro añadirlas.
 //
@@ -263,16 +263,16 @@ constexpr Miniclock<M, T, p>::counter_type Miniclock<M, T, p>::counter_max()
 { 
     return Timer_counter::max_top(); 
 }
-}// namespace mcu_
+}// namespace impl_of
 
 
 // Miniclocks
 // ----------
 template <typename M, typename T>
-using Miniclock_us = mcu_::Miniclock<M, T, 1>;
+using Miniclock_us = impl_of::Miniclock<M, T, 1>;
 
 template <typename M, typename T>
-using Miniclock_ms = mcu_::Miniclock<M, T, 1024>;
+using Miniclock_ms = impl_of::Miniclock<M, T, 1024>;
 
 
 

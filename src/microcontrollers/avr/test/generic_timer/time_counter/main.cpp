@@ -18,9 +18,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-#include "../../../avr_timer2_generic.h" // TODO: recolocar
-#include "../../../avr_timer0_generic.h"
-#include "../../../avr_timer1_generic.h"
+#include "../../../avr_timer0.h"
+#include "../../../avr_timer1.h"
+#include "../../../avr_timer2.h" 
 #include "../../../avr_debug.h"
 
 #include "../../../avr_UART_iostream.h"
@@ -29,7 +29,7 @@
 
 // Microcontroller
 // ---------------
-namespace my_mcu = avr_;
+namespace myu = avr_;
 
 // Pin conections
 // --------------
@@ -40,13 +40,13 @@ constexpr uint8_t npin2 = 28;
 
 // Devices
 // -------
-using Counter0  = my_mcu::Time_counter0_g;
-using Counter1  = my_mcu::Time_counter1_g;
-using Counter2  = my_mcu::Time_counter2_g;
+using Counter0  = myu::Time_counter0;
+using Counter1  = myu::Time_counter1;
+using Counter2  = myu::Time_counter2;
 
-using Pin0 = my_mcu::Pin<npin0>;
-using Pin1 = my_mcu::Pin<npin1>;
-using Pin2 = my_mcu::Pin<npin2>;
+using Pin0 = myu::Pin<npin0>;
+using Pin1 = myu::Pin<npin1>;
+using Pin2 = myu::Pin<npin2>;
 
 
 // CUIDADO: hay mucha diferencia entre tener el reloj del micro a 1MHz o a 8
@@ -85,14 +85,14 @@ using Max_type = Counter1::counter_type;
 
 void init_uart()
 {
-    my_mcu::UART_iostream uart;
-    my_mcu::basic_cfg(uart);
+    myu::UART_iostream uart;
+    myu::basic_cfg(uart);
     uart.turn_on();
 }
 
 void main_hello()
 {
-    my_mcu::UART_iostream uart;
+    myu::UART_iostream uart;
 
     uart << "\n\nTime counter test\n"
 	        "-----------------\n"
@@ -114,7 +114,7 @@ void init_pins()
 template <typename Counter, uint16_t period>
 void generate(uint32_t top)
 {
-    my_mcu::UART_iostream uart;
+    myu::UART_iostream uart;
     Counter::init(static_cast<typename Counter::counter_type>(top));
     Counter::template turn_on_with_clock_period_of<period>::us();
     Counter::enable_top_interrupt();
@@ -128,7 +128,7 @@ void generate(uint32_t top)
 
 char choose_timer()
 {
-    my_mcu::UART_iostream uart;
+    myu::UART_iostream uart;
     uart << "\nMenu\n"
 	    "----\n"       
 	    "0. Timer 0\n"
@@ -143,7 +143,7 @@ char choose_timer()
 
 char choose_period(char timer)
 {
-    my_mcu::UART_iostream uart;
+    myu::UART_iostream uart;
 
     uart << "\nPeriod:\n"
 	    "0. Turn off\n"
@@ -172,7 +172,7 @@ char choose_period(char timer)
 
 Max_type choose_max_value(char timer, Max_type max)
 {
-    my_mcu::UART_iostream uart;
+    myu::UART_iostream uart;
     
     uart << "Max. value (from 0 to ";
 
@@ -193,7 +193,7 @@ Max_type choose_max_value(char timer, Max_type max)
 void test_bugs()
 {// Posibles bugs encontrados en otros programas.
  // Aqui compruebo automaticamente si son realmente bugs de Time_counter o no
-    my_mcu::UART_iostream uart;
+    myu::UART_iostream uart;
 
     Counter1::turn_on_with_overflow_to_count_1s();
 
@@ -205,7 +205,7 @@ void test_bugs()
     else
 	uart << "ERROR!!!\n";
 
-//    my_mcu::print_registers_timer1(uart);
+//    myu::print_registers_timer1(uart);
     Counter1::turn_off();
 
 }
@@ -216,13 +216,13 @@ int main()
     init_uart();
     init_pins();
 
-    my_mcu::enable_interrupts();
+    myu::enable_interrupts();
 
     main_hello();
 
     test_bugs();
 
-    my_mcu::UART_iostream uart;
+    myu::UART_iostream uart;
 
 
     Max_type max_value = 10;
@@ -245,7 +245,7 @@ int main()
 		break; case '7': generate<Counter0, 1024>(max_value);
 		break; case 'p': 
 			    uart << '\n';
-			    my_mcu::print_registers_timer1(uart);
+			    myu::print_registers_timer1(uart);
 		break; default: uart << "Unknwon option\n";
 	    }
 	}
@@ -262,7 +262,7 @@ int main()
 		break; case '7': generate<Counter1, 1024>(max_value);
 		break; case 'p': 
 			    uart << '\n';
-			    my_mcu::print_registers_timer1(uart);
+			    myu::print_registers_timer1(uart);
 
 		break; default: uart << "Unknwon option\n";
 	    }
@@ -282,7 +282,7 @@ int main()
 		break; case '7': generate<Counter2, 1024>(max_value);
 		break; case 'p': 
 			    uart << '\n';
-			    my_mcu::print_registers_timer2(uart);
+			    myu::print_registers_timer2(uart);
 
 		break; default: uart << "Unknwon option\n";
 	    }

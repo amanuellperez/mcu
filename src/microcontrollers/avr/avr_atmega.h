@@ -77,25 +77,16 @@
 
 // Dispositivos genéricos
 // ----------------------
-#include <avr_SPI_generic.h>
+#include <avr_SPI.h>
 
-#include <avr_timer0_generic.h>
-#include <avr_timer1_generic.h>
-#include <avr_timer2_generic.h>
+#include <avr_timer0.h>
+#include <avr_timer1.h>
+#include <avr_timer2.h>
 
 // TODO: mirar qué depende del micro realmente y qué se basa en un UART
-// genérico.
+// genérico. Mover a `mcu` lo que sea genérico.
 #include <avr_UART.h>
 #include <avr_UART_iostream.h>
-
-
-//// TODO: esto no pertenece a esta capa. Moverlo al sitio que corresponda
-////	 Seguramente haya que crear primero un Generic_TWI para poder
-////	 parametrizar estas clases con ese dispositivo genérico.
-//#include <avr_TWI.h>
-//#include <avr_TWI_master.h>
-//#include <avr_TWI_slave.h>
-//#include <avr_TWI_master_ioxtream.h>
 
 // Built-in devices for atmega
 #include <avr_atmega_dev.h>

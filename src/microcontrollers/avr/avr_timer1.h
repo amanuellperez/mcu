@@ -26,7 +26,21 @@
  *  DESCRIPCION
  *	Diferentes formas de usar el Timer1
  *
- *  DUDAS
+ *	El Timer1 del avr realmente tiene 4 diferentes usos:
+ *	(1) Pulse_counter: cuenta el número de pulsos en un pin 
+ *		           TODO: implementar. El nombre Pulse_counter es
+ *		           temporal. ¿dejarlo? Esta capacidad no la tiene el
+ *		           Timer0 ni el Timer2.
+ *
+ *	(1) Time_counter : medidor de tiempo (de pulsos de reloj).
+ *	(2) SWG_pin      : generador de una señal cuadrada en un pin.
+ *	(3) PWM_pin      : generador de una señal PWM en un pin.
+ *
+ *	Esas, creo, son los distintos usos que podemos dar al hardware
+ *	correspondiente. Al traductor del hardware lo llamo directamente
+ *	Timer1, mientras que a sus usos los nombres anteriores.
+ *
+ *  COMENTARIOS ANTIGUOS
  *	Estas clases sirven para separar las responsabilidades del Timer.
  *  Un Timer mezcla distintos dispositivos: un contador, un generador de onda
  *  cuadrada, otro de PWM. Las clases definidas aquí separan todas esos
@@ -326,12 +340,12 @@ inline Frequency PWM_mode::frequency_phase_mode(const Frequency& freq_clk) const
 
 
 /***************************************************************************
- *			    Time_counter1_g
+ *			    Time_counter1
  ***************************************************************************/
 /// Un Timer_counter se limita a contar microsegundos o milisegundos. Su rango
 /// de valores será max_top, no más. No sirve para contar tiempo, pero son
 /// ideales para medir/generar pulsos de electrónica. 
-class Time_counter1_g{
+class Time_counter1{
 public:
 // Tipo de tipo
 //  DUDA: ¿existe alguna función que tengan todos los dispositivos con doble
@@ -350,7 +364,7 @@ public:
 // Initialization
 // --------------
 /// De momento el interfaz es static. Prohibo su construcción.
-    Time_counter1_g() = delete;
+    Time_counter1() = delete;
 
 /// Modo de funcionamiento: contador normal y corriente.
     static void unsafe_init(counter_type top0 = max_top()) 
@@ -383,7 +397,7 @@ public:
     /// overflow. El único problema es que hay que definir la interrupción
     /// ISR_TIMER1_OVF que depende del Timer1 y no es genérico.
     // ¿Cómo independizarlo del avr este ISR_TIMER1_OVF? <-- En el dev.h
-    // al seleccionar el Time_counter1_g se puede definir
+    // al seleccionar el Time_counter1 se puede definir
     // ISR_GENERIC_TIMER_OVF = ISR_TIMER1_OVF.
 
 // DUDA:enable_top_interrupt() vs enable_interrupt()
@@ -408,7 +422,7 @@ public:
     ///
     /// Esta función será la típica usada en los Miniclocks que miden el
     /// tiempo directamente del contador.
-    // Leer notas en Time_counter0_g
+    // Leer notas en Time_counter0
     template<uint16_t period_in_us
 	    , uint32_t clock_frequency_in_hz = avr_::clock_frequency_in_hz>
     struct turn_on_with_clock_period_of{
@@ -508,8 +522,8 @@ public:
 // (RRR) Números mágicos:
 //	 Para 1 MHz: 15.625 * 64 us = 1.000.000 us = 1 s
 template <uint32_t clock_frequency_in_hz>
-Time_counter1_g::counter_type 
-Time_counter1_g::turn_on_with_overflow_to_count_1s()
+Time_counter1::counter_type 
+Time_counter1::turn_on_with_overflow_to_count_1s()
 {
 // cfg_overflow_every_1s();
     if constexpr (clock_frequency_in_hz == 1'000'000ul){
@@ -533,7 +547,7 @@ Time_counter1_g::turn_on_with_overflow_to_count_1s()
 // (RRR) Números mágicos:
 //	 Para 1 MHz: 125 * 8 us = 1.000 us = 1 ms
 template <uint32_t clock_frequency_in_hz>
-inline void Time_counter1_g::turn_on_with_overflow_every_1ms()
+inline void Time_counter1::turn_on_with_overflow_every_1ms()
 {
 // cfg_overflow_every_1s();
     if constexpr (clock_frequency_in_hz == 1'000'000ul){
@@ -550,8 +564,6 @@ inline void Time_counter1_g::turn_on_with_overflow_every_1ms()
 
 }
 
-
-using Timer_counter1_g = Time_counter1_g;
 
 /***************************************************************************
  *			Square_wave_generator1_g

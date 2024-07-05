@@ -134,9 +134,9 @@ inline void set_clock_period_in_us()
 
 
 /***************************************************************************
- *			    Time_counter2_g
+ *			    Time_counter2
  ***************************************************************************/
-class Time_counter2_g{
+class Time_counter2{
 public:
 // Types
 // -----
@@ -148,7 +148,7 @@ public:
 // Constructor
 // -----------
 // De momento el interfaz es static. Prohibo su construcción.
-    Time_counter2_g() = delete;
+    Time_counter2() = delete;
 
     static void init(counter_type top0 = max_top());
 
@@ -203,7 +203,7 @@ public:
 
 
 // TODO: a .cpp?
-inline void Time_counter2_g::init(counter_type top0)
+inline void Time_counter2::init(counter_type top0)
 { 
     Timer::CTC_mode();
     reset();
@@ -215,7 +215,7 @@ inline void Time_counter2_g::init(counter_type top0)
 // -------
 template<uint16_t period_in_us, uint32_t clock_frequency_in_Hz>
 inline void 
-Time_counter2_g::
+Time_counter2::
 turn_on_with_clock_period_of<period_in_us, clock_frequency_in_Hz>::us()
 {timer2_::set_clock_period_in_us<period_in_us, clock_frequency_in_Hz>();}
 
@@ -224,8 +224,8 @@ turn_on_with_clock_period_of<period_in_us, clock_frequency_in_Hz>::us()
 // (RRR) Números mágicos:
 //	 Para 1 MHz: 125 * 125 * 64 us = 1.000.000 us = 1 s
 template <uint32_t clock_frequency_in_hz>
-Time_counter2_g::counter_type 
-Time_counter2_g::turn_on_with_overflow_to_count_1s()
+Time_counter2::counter_type 
+Time_counter2::turn_on_with_overflow_to_count_1s()
 {
 // cfg_overflow_every_1s();
     if constexpr (clock_frequency_in_hz == 1'000'000ul){
@@ -350,7 +350,7 @@ public:
 // -------
 //template<uint16_t period_in_us, uint32_t clock_frequency_in_Hz>
 //inline void 
-//Time_counter2_g::
+//Time_counter2::
 //turn_on_with_clock_period_of<period_in_us, clock_frequency_in_Hz>::us()
 //{timer2_::set_clock_period_in_us<period_in_us, clock_frequency_in_Hz>();}
 //

@@ -25,6 +25,8 @@
  *
  *  DESCRIPCION
  *	Generic views of Timer0.
+ *
+ *	Leer los comentarios en Timer1.
  *    
  *  HISTORIA
  *    Manuel Perez
@@ -40,7 +42,7 @@
  *    15/12/2022 Square_wave_generator0_g
  *    02/01/2023 Square_wave_burst_generator0_g
  *
- *    TODO: Time_counter0_g -> Counter0
+ *    TODO: Time_counter0 -> Counter0
  *          Square_wave_generator0_g -> SWG0_pin
  *          Square_wave_burst_generator0_g -> Burst_SWG0_pin (o algo parecido
  *					      el nombre)
@@ -246,7 +248,7 @@ inline Frequency clock_frequency()
 
 
 /***************************************************************************
- *			    Time_counter0_g
+ *			    Time_counter0
  ***************************************************************************/
 // Un Time_counter es un contador de tiempo (vamos, un reloj).
 // Los periodos ha usar serían:
@@ -266,7 +268,7 @@ inline Frequency clock_frequency()
 /// Un Timer_counter se limita a contar microsegundos o milisegundos. Su rango
 /// de valores será 255, no más. No sirve para contar tiempo, pero son
 /// ideales para medir/generar pulsos de electrónica. 
-class Time_counter0_g{
+class Time_counter0{
 public:
 // types
     using Timer        = avr_::Timer0;
@@ -274,7 +276,7 @@ public:
     static constexpr counter_type minus_one = static_cast<counter_type>(-1); 
 
 /// De momento el interfaz es static. Prohibo su construcción.
-    Time_counter0_g() = delete;
+    Time_counter0() = delete;
 
 /// Modo de funcionamiento: contador normal y corriente.
     static void init(counter_type top0 = max_top()) 
@@ -361,8 +363,8 @@ public:
 // (RRR) Números mágicos:
 //	 Para 1 MHz: 125 * 125 * 64 us = 1.000.000 us = 1 s
 template <uint32_t clock_frequency_in_hz>
-Time_counter0_g::counter_type 
-Time_counter0_g::turn_on_with_overflow_to_count_1s()
+Time_counter0::counter_type 
+Time_counter0::turn_on_with_overflow_to_count_1s()
 {
 // cfg_overflow_every_1s();
     if constexpr (clock_frequency_in_hz == 1'000'000ul){

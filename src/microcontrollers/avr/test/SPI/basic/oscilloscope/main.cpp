@@ -20,7 +20,7 @@
 // Ideal para aprender cómo funciona SPI.
 // Conectar el osciloscopio y jugar con la polaridad.
 
-#include "../../../../avr_SPI_generic.h"
+#include "../../../../avr_SPI.h"
 #include "../../../../avr_pin.h"
 #include "../../../../avr_UART_iostream.h"
 

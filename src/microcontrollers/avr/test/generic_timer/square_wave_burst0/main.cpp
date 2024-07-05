@@ -19,15 +19,15 @@
 
 #include "../../../avr_atmega328p_cfg.h"
 #include "../../../avr_UART_iostream.h"
-#include "../../../avr_timer0_generic.h"
-#include "../../../avr_timer1_generic.h"
+#include "../../../avr_timer0.h"
+#include "../../../avr_timer1.h"
 
 namespace my_mcu = avr_;
 using Micro   = my_mcu::Micro;
 
 static constexpr uint8_t test_pin = 12;
 using SWG  = my_mcu::Square_wave_burst_generator0_g;
-using Timer = my_mcu::Timer_counter1_g;
+using Timer = my_mcu::Time_counter1;
 
 static constexpr uint32_t frequency = 38000;
 static constexpr Timer::counter_type T = 500; 

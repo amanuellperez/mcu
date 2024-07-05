@@ -19,8 +19,8 @@
 
 #include "../../../avr_atmega328p_cfg.h"
 #include "../../../avr_UART_iostream.h"
-#include "../../../avr_timer0_generic.h"
-#include "../../../avr_timer1_generic.h"
+#include "../../../avr_timer0.h"
+#include "../../../avr_timer1.h"
 
 namespace my_mcu = avr_;
 

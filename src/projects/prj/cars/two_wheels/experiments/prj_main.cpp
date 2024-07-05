@@ -17,7 +17,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "prj_main.h"
-#include "pli_iostream.h"
+#include <pli_iostream.h>
 
 void Main::hello()
 {

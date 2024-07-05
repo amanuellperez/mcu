@@ -18,7 +18,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "../../../../avr_atmega328p_cfg.h"
-#include "../../../../avr_SPI_generic.h"
+#include "../../../../avr_SPI.h"
 #include "../../../../avr_interrupt.h"
 #include "../../../../avr_UART_iostream.h"
 #include "../../../../avr_micro.h"

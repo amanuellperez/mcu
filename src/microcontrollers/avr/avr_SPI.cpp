@@ -17,7 +17,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "avr_SPI_generic.h"
+#include "avr_SPI.h"
 #include "avr_pin.h"
 
 // Observar que todas son funciones de configuración que se ejecutan una sola

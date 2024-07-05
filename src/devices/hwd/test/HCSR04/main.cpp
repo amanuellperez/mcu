@@ -36,7 +36,7 @@ constexpr uint8_t echo_pin    = 14;
 
 // Devices
 // -------
-using Miniclock_us = mcu::Miniclock_us<my_mcu::Micro, my_mcu::Time_counter1_g>;
+using Miniclock_us = mcu::Miniclock_us<my_mcu::Micro, my_mcu::Time_counter1>;
 using HCSR04_cfg = dev::HCSR04_cfg<Micro, Miniclock_us,
 				   trigger_pin, echo_pin>;
 using HCSR04 = dev::HCSR04<HCSR04_cfg>;

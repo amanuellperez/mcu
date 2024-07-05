@@ -23,7 +23,7 @@
 #define __PRJ_DEV_H__
 
 #include <avr_atmega.h>
-#include <avr_SPI_generic.h>
+#include <avr_SPI.h>
 
 #include "dev_sector.h"
 

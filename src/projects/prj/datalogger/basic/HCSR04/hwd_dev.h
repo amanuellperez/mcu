@@ -87,7 +87,7 @@ inline void UART::empty_read_buffer()
 // ------
 // Timer0: sin usar
 // Timer1: Miniclock_us	    (cualquier device lo puede usar)
-using Miniclock_us = mcu::Miniclock_us<my_mcu::Micro, my_mcu::Time_counter1_g>;
+using Miniclock_us = mcu::Miniclock_us<my_mcu::Micro, my_mcu::Time_counter1>;
 
 // Timer2: Clock_s	    (propiedad de Clock_s. No lo puede usar nadie más)
 using Time_counter = my_mcu::Time_counter2_32kHz_g<timeout_ms>;

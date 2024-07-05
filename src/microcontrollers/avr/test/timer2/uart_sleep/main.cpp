@@ -23,7 +23,7 @@
 #include "../../../avr_time.h"
 #include "../../../avr_sleep.h"
 #include "../../../avr_debug.h"
-#include "../../../avr_timer2_generic.h"
+#include "../../../avr_timer2.h"
 
 
 // Microcontroller

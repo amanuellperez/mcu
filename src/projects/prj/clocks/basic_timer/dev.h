@@ -88,7 +88,7 @@ using Keyboard	   = dev::Basic_keyrow<Micro, Keyrow_pins, Keyrow_codes>;
 // Chronometer
 // -----------
 using Chronometer= 
-	mcu::Clock_ms<Micro, my_mcu::Time_counter1_g>;
+	mcu::Clock_ms<Micro, my_mcu::Time_counter1>;
 
 #endif
 

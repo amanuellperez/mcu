@@ -40,7 +40,7 @@ constexpr uint8_t test_pin = 15;
 
 // Devices
 // -------
-using Miniclock_us = mcu::Miniclock_us<my_mcu::Micro, my_mcu::Time_counter1_g>;
+using Miniclock_us = mcu::Miniclock_us<my_mcu::Micro, my_mcu::Time_counter1>;
 using Pin = Micro::Pin<test_pin>;
 
 

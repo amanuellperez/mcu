@@ -24,7 +24,7 @@
 namespace my_mcu = atmega;
 using Micro   = my_mcu::Micro;
 
-using Clock = mcu::Clock_ms<Micro, my_mcu::Time_counter1_g>;
+using Clock = mcu::Clock_ms<Micro, my_mcu::Time_counter1>;
 
 
 

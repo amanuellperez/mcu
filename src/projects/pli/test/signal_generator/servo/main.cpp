@@ -24,7 +24,7 @@
 // (Con los servos que tengo van de 7 ms hasta 2.7 ms)
 #include "../../../dev_signal_generator.h"
 #include <avr_UART.h>
-#include <avr_timer1_generic.h>
+#include <avr_timer1.h>
 #include <avr_time.h>
 
 

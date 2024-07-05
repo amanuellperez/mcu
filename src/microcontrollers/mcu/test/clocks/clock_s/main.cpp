@@ -29,9 +29,9 @@ using Micro   = my_mcu::Micro;
 
 // Devices
 // -------
-using Clock0 = mcu::Clock_s<Micro, my_mcu::Time_counter0_g>;
-using Clock1 = mcu::Clock_s<Micro, my_mcu::Time_counter1_g>;
-using Clock2 = mcu::Clock_s<Micro, my_mcu::Time_counter2_g>;
+using Clock0 = mcu::Clock_s<Micro, my_mcu::Time_counter0>;
+using Clock1 = mcu::Clock_s<Micro, my_mcu::Time_counter1>;
+using Clock2 = mcu::Clock_s<Micro, my_mcu::Time_counter2>;
 
 
 // Functions

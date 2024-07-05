@@ -21,7 +21,7 @@
 // Circuito: libro de make, pag. 299.
 #include "../../../dev_signal_generator.h"
 #include <avr_UART.h>
-#include <avr_timer1_generic.h>
+#include <avr_timer1.h>
 #include <avr_time.h>
 
 

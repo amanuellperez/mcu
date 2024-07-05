@@ -1,9 +1,9 @@
 SOURCES= avr_sleep.cpp	\
 		 avr_ADC_driver.cpp	\
 		 avr_SPI_basic.cpp \
-		 avr_SPI_generic.cpp \
-		 avr_timer0_generic.cpp	\
-		 avr_timer1_generic.cpp	\
+		 avr_SPI.cpp \
+		 avr_timer0.cpp	\
+		 avr_timer1.cpp	\
 		 avr_UART.cpp
 
 
@@ -20,15 +20,15 @@ INCS= avr_ADC_basic.h		\
 	avr_port_basic.h	\
 	avr_sleep.h			\
 	avr_SPI_basic.h		\
-	avr_SPI_generic.h	\
+	avr_SPI.h	\
 	avr_time.h			\
 	avr_timern_basic.h	\
 	avr_timer0_basic.h	\
-	avr_timer0_generic.h\
+	avr_timer0.h\
 	avr_timer1_basic.h	\
-	avr_timer1_generic.h\
+	avr_timer1.h\
 	avr_timer2_basic.h	\
-	avr_timer2_generic.h\
+	avr_timer2.h\
 	avr_TWI_basic.h		\
 	avr_types.h				\
 	avr_UART.h				\

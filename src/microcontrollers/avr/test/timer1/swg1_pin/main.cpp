@@ -18,7 +18,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "../../../avr_atmega328p_cfg.h"
-#include "../../../avr_timer1_generic.h"
+#include "../../../avr_timer1.h"
 #include "../../../avr_time.h"
 #include "../../../avr_UART_iostream.h"
 

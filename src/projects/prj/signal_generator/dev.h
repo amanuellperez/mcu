@@ -38,7 +38,7 @@
 #include <dev_HD44780.h>
 #include <dev_keyrow.h>
 #include <dev_signal_generator.h>
-#include <avr_timer1_generic.h>
+#include <avr_timer1.h>
 
 
 // pins usados

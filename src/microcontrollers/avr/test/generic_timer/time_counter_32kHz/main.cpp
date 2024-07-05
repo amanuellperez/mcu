@@ -18,7 +18,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-#include "../../../avr_timer2_generic.h" 
+#include "../../../avr_timer2.h" 
 #include "../../../avr_debug.h"
 
 #include "../../../avr_UART_iostream.h"

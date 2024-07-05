@@ -91,19 +91,6 @@ namespace atmega{
 	    = avr_::ADC_pin_single_mode<AREF_connect_to, adc_frequency_in_kHz>;
 
 // TIMERS
-    using Timer0         = avr_::Timer0;
-    using Timer0_g	 = avr_::Timer0_g; // TODO: borrar
-    using Time_counter0_g= avr_::Time_counter0_g;
-    using Square_wave_generator0_g = avr_::Square_wave_generator0_g;
-    using Square_wave_burst_generator0_g = avr_::Square_wave_burst_generator0_g;
-    using SWG0           = avr_::Square_wave_generator0_g;
-//    using PWM0_pin	 = avr_::PWM0_pin; TODO
-
-    using Timer1         = avr_::Timer1;
-    using Time_counter1_g= avr_::Time_counter1_g;
-    using Square_wave_generator1_g = avr_::Square_wave_generator1_g;
-    using SWG1           = avr_::Square_wave_generator1_g;
-
     // TODO: sería más genérico el pasar solamente el número de pin sin
     // indicar el Timer al que pertenece.
     //
@@ -113,14 +100,35 @@ namespace atmega{
     // De esa forma no tendríamos que indicar en código el Timer que estamos
     // usando. ¿Más sencillo o lo complica? 
     //
+    // Timer0
+    // ------
+    using Timer0         = avr_::Timer0;
+    using Time_counter0  = avr_::Time_counter0;
+    // TODO: borrar Square_wave_generator0_g a favor de SWG0_pin
+    using Square_wave_generator0_g = avr_::Square_wave_generator0_g;
+    using Square_wave_burst_generator0_g = avr_::Square_wave_burst_generator0_g;
+    using SWG0           = avr_::Square_wave_generator0_g;
+//    using PWM0_pin	 = avr_::PWM0_pin; TODO
+
+    // Timer1
+    // ------
+    using Timer1         = avr_::Timer1;
+    using Time_counter1  = avr_::Time_counter1;
+
     template <uint8_t npin>
     using PWM1_pin	 = avr_::PWM1_pin<npin>;
 
     template <uint8_t npin>
     using SWG1_pin	 = avr_::SWG1_pin<npin>;
 
+    // TODO: borrar estos 2
+    using Square_wave_generator1_g = avr_::Square_wave_generator1_g;
+    using SWG1           = avr_::Square_wave_generator1_g;
+
+    // Timer2
+    // ------
     using Timer2         = avr_::Timer2;
-    using Time_counter2_g= avr_::Time_counter2_g;
+    using Time_counter2  = avr_::Time_counter2;
 
     template <uint16_t timeout_ms_max>
     using Time_counter2_32kHz_g= avr_::Time_counter2_32kHz_g<timeout_ms_max>;

@@ -32,7 +32,7 @@ using Micro   = my_mcu::Micro;
 constexpr uint8_t test_pin = 12;
 
 using Pin = my_mcu::Output_pin<test_pin>;
-using Miniclock1_us = mcu::Miniclock_us<my_mcu::Micro, my_mcu::Time_counter1_g>;
+using Miniclock1_us = mcu::Miniclock_us<my_mcu::Micro, my_mcu::Time_counter1>;
 
 using SWG_us = 
 	dev::Square_wave_burst_generator< my_mcu::Square_wave_burst_generator0_g
