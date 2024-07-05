@@ -42,7 +42,7 @@ This directory contains the following:
     
   
 4. [Projects](src/projects): 
-    * [libprj](src/projects/lib/README.md): Common libraries
+    * [pli](src/projects/pli/README.md): Common libraries
 
     * [prj](src/projects/prj/README.md): Projects.
 
@@ -68,8 +68,13 @@ ATMEGA328).
 # Índice
 * [Compilador y toolchain](#compilador)
 * [Estructura de directorios](#directorios)
-* [GPL](#licencia)
+* [Configurar entorno de trabajo](#entorno)
+* [Reglas para compilar](#reglas_compilar)
+* [Tests](#test)
+* [Documentación y ayuda](#documentacion)
+* [Licencia GPL](#licencia)
 * [Vídeos](#videos)
+* [Tags usadas en el código](#tags)
 
 ## <a name="compilador"></a>Compilador y toolchain
 `binutils 2.42`
@@ -147,17 +152,36 @@ Se puede organizar el código en diferentes niveles:
 
 4. [Proyectos](src/projects):
 
-    * [libprj](src/projects/lib/README.md): Bibliotecas comunes a varios proyectos.
+    * [pli](src/projects/pli/README.md): Bibliotecas comunes a varios proyectos.
 
     * [prj](src/projects/prj/README.md): Proyectos.
 
+## <a name="namespaces"></a>Namespaces definidos
 
-### Entorno
+* `std` es el namespace usado por el estandard. 
+* `atd` incluye todas las funciones genéricas que no usan excepciones ni
+   memoria dinámica.
+
+* `mcu` contiene todo lo genérico a microcontroladores. 
+* `atmega`, `attiny`, ... son funciones concretas de microcontroladores
+   concretos.
+* `dev` incluye todos los traductores y drivers de dispositivos. Observar que
+   en este namespace estoy incluyendo dos cosas diferentes: por una parte
+   traductores de dispositivos reales de hardware (como el L298N que es un
+   chip real), mientras que también incluyo dentro drivers de dispositivos
+   lógicos, dispositivos que no se corresponden realmente con un chip
+   concreto (por ejemplo, `EEPROM_iostream` consiste en concebir una memoria
+   EEPROM como un iostream).
+
+* `pli` incluye código común a diferentes proyectos. (`pli` viene de PrjLib)
+
+
+## <a name="entorno"></a>Configurar entorno de trabajo
 
 Para configurar el entorno de trabajo basta con ejecutar [mcu_environment.sh](mcu_environment.sh).
 
 
-### mk: Reglas para compilar
+## <a name="reglas_compilar"></a>Reglas para compilar
 
 En el directorio [mk](mk) están todas las reglas de compilación necesarias para 
 compilar cada bloque. 
@@ -165,7 +189,7 @@ compilar cada bloque.
 En la mayoría de los directorios se puede encontrar un script `make.sh` que
 compila la biblioteca con diferentes frecuencias.
 
-### test y pc_test:
+## <a name="test"></a>test y pc_test
 En cada directorio suministro directorios `test` o `pc_test`. Los `pc_test`
 son test automáticos para realizar en el ordenador. Se compilan con `gcc`
 mientras que `test` son test para realizar en el microcontrolador, compilados
@@ -176,7 +200,7 @@ Los `pc_test` necesitan varios ficheros de
 Basta con que descargarse `alp_test.h`, `alp_test.cpp`, 
 `alp_string.h` y `alp_string.cpp` para que compilen.
 
-### Documentación y ayuda
+## <a name="documentacion"></a>Documentación y ayuda
 Esto es un proyecto de aprendizaje y para experimentar, pudiendo haber partes
 muy inestables. Aunque según voy escribiendo cosas algunas ya van siendo muy
 estables, otras, las más nuevas o las que apenas he usado son todavía
@@ -280,7 +304,7 @@ sitio. El problema es que no podré poner aquí dónde (estaré bloqueado xD). S
 alguien quisiera localizarme que use el nuevo mail (manuel2perez@proton.me).
 
 
-## Tags usadas en el código
+## <a name="tags"></a>Tags usadas en el código
 
 + (RRR): rationale, esto es, indica los motivos por los que he implementado
   (originalmente) la función de esa manera.

@@ -78,6 +78,7 @@ alias avr='cd ${MCU_SRC}/microcontrollers/avr'
 alias mcu='cd ${MCU_SRC}/microcontrollers/mcu'
 alias hwd='cd ${MCU_SRC}/devices/hwd'
 alias logic='cd ${MCU_SRC}/devices/logic'
+alias pli='cd ${MCU_SRC}/projects/pli'
 alias prj='cd ${MCU_SRC}/projects/prj'
 
 
