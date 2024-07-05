@@ -68,6 +68,7 @@ ATMEGA328).
 # Índice
 * [Compilador y toolchain](#compilador)
 * [Estructura de directorios](#directorios)
+* [Namespaces definidos](#namespaces)
 * [Configurar entorno de trabajo](#entorno)
 * [Reglas para compilar](#reglas_compilar)
 * [Tests](#test)
