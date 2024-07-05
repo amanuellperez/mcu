@@ -8,7 +8,7 @@ MCU = atmega328p
 
 USER_CXXFLAGS=-save-temps -fverbose-asm
 
-include $(MCU1_GENRULES)
+include $(MCU_GENRULES)
 
 
 

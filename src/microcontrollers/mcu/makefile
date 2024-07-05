@@ -15,7 +15,7 @@ INCS= 	mcu_clock.h					\
 LIB=mcu1_$(F_CPU)
 INSTALL_INC=$(MCU_INCLUDE)
 
-include $(MCU1_GENRULES)
+include $(MCU_GENRULES)
 
 
 

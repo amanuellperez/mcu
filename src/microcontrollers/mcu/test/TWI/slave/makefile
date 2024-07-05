@@ -6,7 +6,7 @@ MCU = atmega328p
 
 #F_CPU=8000000UL
 
-include $(MCU1_GENRULES)
+include $(MCU_GENRULES)
 
 
 
