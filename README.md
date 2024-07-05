@@ -82,9 +82,11 @@ ATMEGA328).
 `avr-g++ 13.3.0`
 `avr-libc 2.2.0`
 
-Voy a empezar a probar las nuevas características de C++20 en este proyecto
-según vaya aprendiendo a manejarlas. Por ello esta rama en unos meses
-dejará de compilar en compiladores anteriores. 
+El código usa cada vez más los concepts de C++20, con lo que no compilará con
+versiones anticuadas del compilador. Aunque quiero empezar a usar módulos,
+todavía no los uso ya que parece ser que no están completamente implementados 
+en gcc. Cuando lo estén espero introducirlos de forma sistemática con lo que
+ya no compilará nada de código en compiladores que no compilen C++20.
 
 Si nunca has compilado la toolchain puede que
 [este](help/instalacion_toolchain.md) documento te pueda ayudar.
