@@ -18,7 +18,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-# Reglas para compilar la librería app
+# Reglas para compilar la librería pli
 
 include $(MCU_COMRULES)
 
@@ -32,7 +32,7 @@ PROJ_CXXFLAGS=
 # 	ya que no compilaría.
 PROJ_LDFLAGS=-L$(MCU_LIB) \
 			 -llogic_$(F_CPU) -lhwd_$(F_CPU)\
-			 -lmcu1_$(F_CPU) -lavr_$(F_CPU) \
+			 -lmcu_$(F_CPU) -lavr_$(F_CPU) \
 			 -latd -lstd
 
 include $(MCU_GENRULES)

@@ -397,6 +397,7 @@ debug:
 
 	@$(PRINTF) "Flags usados para compilar\n"
 	@$(PRINTF) "--------------------------\n"
+	@$(PRINTF) "STD= [$(STD)]\n"
 	@$(PRINTF) "PROJ_CXXFLAGS  = [$(PROJ_CXXFLAGS)]\n"
 	@$(PRINTF) "PROJ_LDFLAGS = [$(PROJ_LDFLAGS)]\n"
 	@$(PRINTF) "CPPFLAGS = [$(CPPFLAGS)]\n"

@@ -1,4 +1,5 @@
-SOURCES= app_trace.cpp	
+SOURCES= app_trace.cpp	\
+		 pli_iostream.cpp
 
 
 INCS= 	app_trace.h					\
@@ -6,13 +7,14 @@ INCS= 	app_trace.h					\
 		user_choose_number.h		\
 		user_choose_string.h		\
 		user_menu.h					\
-		user_time.h
+		user_time.h	\
+		pli_iostream.h
 
 
-LIB=libprj_$(F_CPU)
+LIB=pli_$(F_CPU)
 INSTALL_INC=$(MCU_INCLUDE)
 
-include $(APP_GENRULES)
+include $(PLI_GENRULES)
 
 
 

@@ -17,8 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "prj_iostream.h"
+#include "pli_iostream.h"
 
+namespace pli{
 void press_key(std::iostream& os)
 {
     char c{};
@@ -49,3 +50,7 @@ bool ask_yesno(std::iostream& os, const char* msg)
 
     return true;    // default
 }
+
+
+}// namespace
+ 

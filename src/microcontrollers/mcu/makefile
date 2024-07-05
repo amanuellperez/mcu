@@ -12,10 +12,10 @@ INCS= 	mcu_clock.h					\
 		mcu_TWI_slave.h
 
 
-LIB=mcu1_$(F_CPU)
+LIB=mcu_$(F_CPU)
 INSTALL_INC=$(MCU_INCLUDE)
 
-include $(MCU_GENRULES)
+include $(MCU_MCUGENRULES)
 
 
 

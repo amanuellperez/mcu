@@ -32,13 +32,13 @@ MCU_COMRULES=${MCU_MK}/com.mk		; export MCU_COMRULES
 STD_GENRULES=${MCU_MK}/std.mk	; export STD_GENRULES
 ATD_GENRULES=${MCU_MK}/atd.mk	; export ATD_GENRULES
 AVR_GENRULES=${MCU_MK}/avr.mk	; export AVR_GENRULES
-MCU_GENRULES=${MCU_MK}/mcu.mk	; export MCU_GENRULES
+MCU_MCUGENRULES=${MCU_MK}/mcu.mk	; export MCU_MCUGENRULES
 
 HWD_GENRULES=${MCU_MK}/hwd.mk	; export HWD_GENRULES
 LOGIC_GENRULES=${MCU_MK}/logic.mk; export LOGIC_GENRULES
 
 DEBUG_GENRULES=${MCU_MK}/debug.mk	; export DEBUG_GENRULES
-APP_GENRULES=${MCU_MK}/app.mk	; export APP_GENRULES
+PLI_GENRULES=${MCU_MK}/pli.mk	; export PLI_GENRULES
 PRJ_GENRULES=${MCU_MK}/prj.mk	; export PRJ_GENRULES
 
 # ------------------------------

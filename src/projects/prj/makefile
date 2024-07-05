@@ -1,5 +1,6 @@
 DIRS =  blink		\
 		calculator	\
+		cars		\
 		clocks 		\
 		datalogger	\
 		IR_remote_control	\

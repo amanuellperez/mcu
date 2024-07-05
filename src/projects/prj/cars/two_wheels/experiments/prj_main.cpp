@@ -17,7 +17,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "prj_main.h"
-#include "prj_iostream.h"
+#include "pli_iostream.h"
 
 void Main::hello()
 {
@@ -42,7 +42,7 @@ void Main::lateral_movement(bool automatic,
     Micro::wait_ms(100);
     if (!automatic){
 	Car::stop();
-	press_key(uart);
+	pli::press_key(uart);
     }
 }
 
@@ -55,22 +55,22 @@ void Main::lateral_movement()
 	Car::move(atd::Sign::negative, 0, 50);
     Micro::wait_ms(150);
     Car::stop();
-    press_key(uart);
+    pli::press_key(uart);
 
 	Car::backward(50);
     Micro::wait_ms(150);
     Car::stop();
-    press_key(uart);
+    pli::press_key(uart);
 
 	Car::move(atd::Sign::negative, 50, 0);
     Micro::wait_ms(150);
     Car::stop();
-    press_key(uart);
+    pli::press_key(uart);
 	Car::forward(50);
 
     Micro::wait_ms(150);
     Car::stop();
-    press_key(uart);
+    pli::press_key(uart);
 //	lateral_movement(automatic, atd::Sign::positive, 0, 50);
 //	lateral_movement(automatic, atd::Sign::positive, 50, 0);
 //	lateral_movement(automatic, atd::Sign::negative, 0, 50);
@@ -94,21 +94,21 @@ void Main::interactive_test()
 	sign = atd::Sign::negative;
 
 
-    uint8_t right = ask_uint8_t(uart, "\nRight percentage: ");
+    uint8_t right = pli::ask_uint8_t(uart, "\nRight percentage: ");
     if (right == 255)
 	return;
     
-    uint8_t left = ask_uint8_t(uart, "Left percentage: ");
+    uint8_t left = pli::ask_uint8_t(uart, "Left percentage: ");
     if (left == 255)
 	return;
 
-    bool sense = ask_yesno(uart, "Same direction of wheels rotation");
+    bool sense = pli::ask_yesno(uart, "Same direction of wheels rotation");
     if (sense)
 	Car::move(sign, right, left);
     else
 	Car::move_opposite(sign, right, left);
 
-    press_key_to("stop", uart);
+    pli::press_key_to("stop", uart);
 
     Car::stop();
 
@@ -121,7 +121,7 @@ void Main::driving_in_circles()
 
     uart << "Press '+' to increase radius or other letter to end\n";
     
-    press_key_to_continue(uart);
+    pli::press_key_to_continue(uart);
 
     uint8_t left = 100;
     for (uint8_t right = 30; right < 100; right += 5)
@@ -151,7 +151,7 @@ void Main::wheel_working()
 	Car::right_wheel(atd::Sign::positive, 50);
 	Micro::wait_ms(150);
 	Car::stop();
-	press_key(uart);
+	pli::press_key(uart);
     }
 
     uart << "Left test:\n"
@@ -161,7 +161,7 @@ void Main::wheel_working()
 	Car::left_wheel(atd::Sign::positive, 50);
 	Micro::wait_ms(150);
 	Car::stop();
-	press_key(uart);
+	pli::press_key(uart);
     }
 
 }

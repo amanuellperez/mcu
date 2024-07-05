@@ -27,9 +27,9 @@ PROJ_CXXFLAGS=
 # 	poner las librerías que dependen de otras antes.
 # 	Ejemplo: A depende de B. Luego escribir '-lA -lB' y no al revés
 # 	ya que no compilaría.
-PROJ_LDFLAGS=-L$(MCU_LIB) -llibprj_$(F_CPU) \
+PROJ_LDFLAGS=-L$(MCU_LIB) -lpli_$(F_CPU) \
 			 -llogic_$(F_CPU) -lhwd_$(F_CPU) \
-			 -lmcu1_$(F_CPU) -lavr_$(F_CPU) \
+			 -lmcu_$(F_CPU) -lavr_$(F_CPU) \
 			 -latd -lstd
 
 include $(MCU_GENRULES)
