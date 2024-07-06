@@ -3,6 +3,7 @@
 # genéricos sea cual sea el micro.
 
 DIRS = \
+	automatic
 	ADC		\
 	cfg		\
 	generic_timer\
