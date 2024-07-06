@@ -37,6 +37,7 @@ Compiler: avr-gcc 11.3.0
 
 # Índice
 * [¿Por qué esta biblioteca?](#problemas)
+* [Static interface vs objects](#staticono)
 * [Problemas al programar el atmega usando SPI](#conexionSPI)
 * [Cristales externos](#cristalexterno)
 * [Timers](#timers)
@@ -63,7 +64,9 @@ código tradicional que se encuentra escrito en C.  En lugar de recordar que
 para mirar si UART está listo para transmitir tengo que mirar
 si el bit `UDRE0` del registro `UCSR0A` es 1, basta con escribir 
 
+```
      if (UART::is_ready_to_transmit()) { haz_algo(); }
+```
      
 Es mucho más legible, menos propenso a error y más fácil de portar. Además, los traductores
 son muy sencillos de escribir: basta con leer la datasheet y escribir las funciones correspondientes.
@@ -84,19 +87,41 @@ Esto lleva a querer definir todos los dispositivos genéricos. Mientras que el
 traductor traduce la datasheet a código, el conceptuador (<-- mmm, es el
 primer nombre que se me ha ocurrido, es porque escribe concepts de tipo C++)
 traduce el traductor a un dispositivo genérico, un interfaz común para todos
-los dispositivos del mismo tipo. 
+los dispositivos del mismo tipo. (NOTA: últimamente al dispositivo genérico
+cada vez más lo llamó driver que desconozco si se corresponde exactamente con
+la definición de driver. Pero encaja bastante bien: a fin de cuentas, cuando
+el ordenador quiere acceder a un dispositivo concreto de hardware lo hace a
+través del driver que tiene que tener el mismo interfaz sea cual sea el
+dispositivo real de hardware: esto es, es un dispositivo genérico).
 
-Ejemplo: mi aplicación necesita un Timer, el cual es un dispositivo con el que
+#### Ejemplo
+
+Mi aplicación necesita un Timer, el cual es un dispositivo con el que
 puedo realizar ciertas operaciones. El timer concreto puede ser
-atmega::Timer0_g, o attiny::Timer0_g, o PIC::Timer0_g, 
-o ESP::Timer0_g, pero sea cual sea el elegido todos representan el mismo
+`atmega::Time_counter`, o `attiny::Time_counter`, o `PIC::Time_counter`, 
+o `ESP::Time_counter`, pero sea cual sea el elegido todos representan el mismo
 dispositivo lógico (el mismo concept de C++). La ventaja de esto es que mi
 programa funcionará independientemente del Timer real elegido. La desventaja
 es que al usar un interfaz genérico puede que no pueda incluir algunas
 características particulares del Timer real que estoy usando. Pero si
-necesitara usar esas características en lugar de usar atmega::Timer0_g
-usaría atmega::Timer0_basic (el traductor que suministra todas las funciones
+necesitara usar esas características en lugar de usar `atmega::Time_counter`
+usaría `atmega::Timer0` (el traductor que suministra todas las funciones
 del dispositivo).
+
+### Otro ejemplo
+
+Se puede ver un ejemplo de lo que digo en la aplicación datalogger. Estoy
+implementando la misma aplicación para diferentes sensores: DHT11, DHT22,
+DS18B20 y HCSR04 (de momento). 
+
+La idea es que un datalogger se limita a tomar medidas de un sensor, *sea cual
+sea el sensor*. Podemos escribir una aplicación genérica que no conozca el
+sensor concreto, y cuando se quiera hacer un datalogger para un sensor nuevo
+lo único que hay que hacer es escribir la parte correspondiente del sensor.
+Nada más.
+
+
+
 
 ### Notación
 
@@ -104,16 +129,12 @@ De momento pruebo con la siguiente notación:
 
 * `atmega_timer0_basic.h`: contiene el traductor del `Timer0` del `atmega`
 
-* `atmega_timer0_g.h`: contiene el dispositivo genérico correspondiente.
+* `atmega_timer0.h`: contiene el dispositivo genérico correspondiente.
 
-Al dispositivo generic lo llamaré `atmega::Timer0_g`. El nombre del
-traductor no lo tengo claro: ¿`atmega::Timer0` o `atmega::Timer0_basic`?
-
-De momento optó más por el segundo estilo, ya que entre `atmega::Pin` y
-`atmega::Pin_basic` el segundo no me gusta nada. Además que es bastante claro
-que si escribes `atmega::Timer0` es porque vas a usar el `Timer0` y no un
-dispositivo genérico.
-
+A día de hoy es `avr_timer0_basic.h` ya que, de momento, voy a suponer que
+todos los timer0 del avr funcionan igual (según se vayan programando otros
+avr diferentes del atmega, supongo que habrá que volver a la notación
+`atmega_timer0_basic.h`).
 
 
 ### ¿Qué implementar lo primero?
@@ -133,7 +154,7 @@ Además de los traductores suministro también algunas clases de más alto nivel
 un flujo normal y corriente para acceder a UART. 
 
     avr::UART_iostream uart;
-    avr::cfg_basica(uart);      // esta es la configuración por defecto que siempre uso. Puedes usar otra.
+    avr::basic_cfg(uart);      // esta es la configuración por defecto que siempre uso. Puedes usar otra.
     uart.on();
     
     uart << "Escribe un numero:\n";
@@ -141,6 +162,28 @@ un flujo normal y corriente para acceder a UART.
     uart >> x;
     uart << "Has escrito [" << x << "]\n";
  
+
+## <a name="staticono"></a>Static interface vs objects
+
+Los traductores son traductores de dispositivos de hardware, no teniendo
+estado. Por ello desde el principio he optado por implementarlos como meros
+interfaces.
+
+Los drivers (= traductor al que le he añadido más funcionalidad) pueden o no
+tener estado. De momento la mayoría no lo tienen, definiendolos como
+interfaces (y si tienen estado, como el dispositivo de hardware es único se
+puede definir dicho estado como static no necesitando crear un objeto de esa
+clase).
+
+La duda desde el principio siempre ha sido si dejar al usuario crear o no
+estos interfaces como objetos. Al carecer de experiencia programando
+aplicaciones reales desconozco qué puede ser mejor.
+
+Por el momento, basándome en mi poca experiencia (traducción: cuando tenga más
+experiencia puede que esto lo cambie radicalmente) me resulta muy cómodo que
+el harwador defina en `hwd_dev.h` los elementos de hardware que va a usar el
+sofwador en la aplicación. Como son elementos de hardware solo va haber una
+instancia de cada uno de ellos y por ello se pueden definir como interfaces. 
 
 
 ## <a name="conexionSPI"></a>Problemas al programar el atmega usando SPI
