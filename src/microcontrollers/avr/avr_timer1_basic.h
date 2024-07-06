@@ -222,6 +222,7 @@ public:
     static void unsafe_input_capture_register(counter_type x);/// Escritura del ICR.
 
 // WAVEFORM GENERATION MODES (table 20-6)
+// TODO: static Mode mode(); similar a Timer0 (???)
 // Normal mode
     static void normal_mode();
 

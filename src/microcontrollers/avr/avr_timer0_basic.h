@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2023 Manuel Perez 
+// Copyright (C) 2019-2024 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -150,15 +150,28 @@ public:
     static void output_compare_register_B(counter_type x) {OCR0B = x;}
 
 // WAVEFORM GENERATION MODES (table 19-9)
+    enum class Mode{
+	normal, CTC, 
+	fast_PWM_top_0xFF, fast_PWM_top_OCRA,
+	PWM_phase_correct_top_0xFF, PWM_phase_correct_top_OCRA,
+	unknown};
+
+    static Mode mode();
+
+// Normal mode
     static void normal_mode();
 
+// CTC mode
     static void CTC_mode();
 
+// Fast PWM modes
     static void fast_PWM_mode_top_OCRA();
     static void fast_PWM_mode_top_0xFF();
 
+// PWM phase correct modes
     static void PWM_phase_correct_mode_top_OCRA();
     static void PWM_phase_correct_mode_top_0xFF();
+
 
 // pins operation 
     // comunes a todas las tablas (19-3 y siguientes)
@@ -304,11 +317,6 @@ inline void Timer0::normal_mode()
     atd::write_bits<WGM01, WGM00>::to<0,0>::in(TCCR0A);
 }
 
-inline void Timer0::PWM_phase_correct_mode_top_0xFF()
-{
-    atd::write_bits<WGM02>::to<0>::in(TCCR0B);
-    atd::write_bits<WGM01, WGM00>::to<0,1>::in(TCCR0A);
-}
 
 inline void Timer0::CTC_mode()
 {
@@ -317,22 +325,68 @@ inline void Timer0::CTC_mode()
 }
 
 inline void Timer0::fast_PWM_mode_top_0xFF()
-{
+{// 011
     atd::write_bits<WGM02>::to<0>::in(TCCR0B);
     atd::write_bits<WGM01, WGM00>::to<1,1>::in(TCCR0A);
 }
 
+inline void Timer0::fast_PWM_mode_top_OCRA()
+{// 111
+    atd::write_bits<WGM02>::to<1>::in(TCCR0B);
+    atd::write_bits<WGM01, WGM00>::to<1,1>::in(TCCR0A);
+}
+
+inline void Timer0::PWM_phase_correct_mode_top_0xFF()
+{// 001
+    atd::write_bits<WGM02>::to<0>::in(TCCR0B);
+    atd::write_bits<WGM01, WGM00>::to<0,1>::in(TCCR0A);
+}
+
 inline void Timer0::PWM_phase_correct_mode_top_OCRA()
-{
+{// 101
     atd::write_bits<WGM02>::to<1>::in(TCCR0B);
     atd::write_bits<WGM01, WGM00>::to<0,1>::in(TCCR0A);
 }
 
-inline void Timer0::fast_PWM_mode_top_OCRA()
+//  La siguiente función quedaría 
+//    reg <<= 3;
+//    static_assert (WGM00 < WGM01);
+//    reg |= (atd::read_bits<WGM01, WGM00>::of(TCCR0A) >> WGM00
+
+inline Timer0::Mode Timer0::mode()
 {
-    atd::write_bits<WGM02>::to<1>::in(TCCR0B);
-    atd::write_bits<WGM01, WGM00>::to<1,1>::in(TCCR0A);
+    if (atd::read_bit<WGM02>::of(TCCR0B)){ // 1..
+	switch(atd::read_bits<WGM01, WGM00>::of(TCCR0A)){ 
+    //	case atd::zero<uint8_t>::with_bits<WGM01, WGM00>::to<0,0>(): 
+    //	    return Mode::reserved;
+
+	    case atd::zero<uint8_t>::with_bits<WGM01, WGM00>::to<0,1>():
+		return Mode::PWM_phase_correct_top_OCRA;
+
+    //	case atd::zero<uint8_t>::with_bits<WGM01, WGM00>::to<1,0>():
+    //	    return Mode::reserved;
+
+	    case atd::zero<uint8_t>::with_bits<WGM01, WGM00>::to<1,1>():
+		return Mode::fast_PWM_top_OCRA;
+	}
+    } else { // 0..
+	switch(atd::read_bits<WGM01, WGM00>::of(TCCR0A)){ 
+	case atd::zero<uint8_t>::with_bits<WGM01, WGM00>::to<0,0>(): 
+	    return Mode::normal;
+
+	case atd::zero<uint8_t>::with_bits<WGM01, WGM00>::to<0,1>():
+	    return Mode::PWM_phase_correct_top_0xFF;
+
+	case atd::zero<uint8_t>::with_bits<WGM01, WGM00>::to<1,0>():
+	    return Mode::CTC;
+
+	case atd::zero<uint8_t>::with_bits<WGM01, WGM00>::to<1,1>():
+	    return Mode::fast_PWM_top_0xFF;
+	}
+    }
+    return Mode::unknown;
 }
+
 
 
 // pins
