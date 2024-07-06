@@ -203,6 +203,29 @@ Los `pc_test` necesitan varios ficheros de
 Basta con que descargarse `alp_test.h`, `alp_test.cpp`, 
 `alp_string.h` y `alp_string.cpp` para que compilen.
 
+### Implementación de los test
+
+Cuando implementas algo te acuerdas de todo. Si implementas un test guarro,
+que es lo que se suele hacer al principio, resulta que 6 meses después cuando
+tienes que modificar el driver o programa no recuerdas cómo funciona el test y
+no solo tienes que perder tiempo en la modificación real sino también en
+averiguar cómo funcionaba el test. ¿Qué pines estan conectados con quien?
+¿Pongo un condensador? ¿Resistencia? ¿Cristal? ...
+
+Por ello, es fundamental que los tests guien al que los ejecuta para probarlos. 
+Cada vez voy desarrollando más el hábito de:
+
+1. Poner un mensaje de presentación que indique cómo hay que conectar todo el
+   hardware. (a día de hoy es la función `hello()`).
+
+2. Estoy empezando a hacer algunas pruebas automáticas en el microcontrolador
+   similares a las de `pc_test`. Estas pruebas dan mucha tranquilidad mental
+   cuando se modifica un programa, el problema es que con el micro no tengo
+   todavía claro cómo hacerlo. ¿Hacer un programa para probar todo lo del
+   micro? Suena bien: experimentemos a crear un test llamado `automatic` a 
+   ver si lo uso.
+
+
 ## <a name="documentacion"></a>Documentación y ayuda
 Esto es un proyecto de aprendizaje y para experimentar, pudiendo haber partes
 muy inestables. Aunque según voy escribiendo cosas algunas ya van siendo muy
