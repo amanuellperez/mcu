@@ -39,6 +39,7 @@ Compiler: avr-gcc 11.3.0
 * [¿Por qué esta biblioteca?](#problemas)
 * [Problemas al programar el atmega usando SPI](#conexionSPI)
 * [Cristales externos](#cristalexterno)
+* [Timers](#timers)
 
 ## <a name="problemas"></a>¿Por qué esta biblioteca? 
 
@@ -185,6 +186,48 @@ La primera vez que quise usar el "full swing oscillator" probé LFUSE = 0xE7,
 luego me resultó imposible conectarme con el micro a través de avrdude. 
 
 
+## <a name="timers"></a>Timers
 
-Compilador: avr-gcc 11.3.0
+### Hardware vs uso
+
+Conviene distinguir entre el hardware que suministra el `avr` y el uso que
+vamos a dar de dicho hardware. 
+
+¿Cómo podemos usar el Timer del `avr`?
+
+1. Pulse counter: el Timer 1 lo podemos conectar externamente y medir los
+   pulsos. ¿Serviría para contar objetos? Probablemente, pero todavía no he
+   jugado con esta opción.
+
+2. Timer counter: podemos contar tiempo. En este caso lo que contamos son los
+   pulsos de un reloj. Esto es lo que uso para luego implementar `Miniclock` y
+   `Clock`.
+
+3. SWG pin: podemos usarlo para generar una onda cuadrada en un pin.
+
+4. PWM pin: o podemos generar una señal PWM.
+
+### Restriciones impuestas por el hardware
+
+*Timer0: PWM pin*
+
+En este timer tenemos que elegir:
+
++ Generar 2 señales de dutys cycle diferentes en los pines A y B, pero
+  imponiendo serias limitaciones a las frecuencias generadas. Solo podemos
+  generar las frecuencias `f_clock / (N * 256)` ó `f_clock / (N * 510)`,
+  siendo N el prescaler (1, 8, 64, 256 ó 1024).
+
++ Generar 1 señal PWM de "cualquier" frecuencia y cualquier duty cycle. La
+  señal se generaría en el pin B. En el pin A se puede obtener una señal
+  cuadrada.
+
+
+*Timer1: PWM pin*
+
+Podemos generar una señal PWM en los dos pines del timer de cualquier duty
+cycle pero de igual frecuencia. El hardware no permite generar dos frecuencias 
+diferentes en el pin A y B a la vez.
+
+
  
