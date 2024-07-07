@@ -32,9 +32,9 @@
  *		           temporal. ¿dejarlo? Esta capacidad no la tiene el
  *		           Timer0 ni el Timer2.
  *
- *	(1) Time_counter : medidor de tiempo (de pulsos de reloj).
- *	(2) SWG_pin      : generador de una señal cuadrada en un pin.
- *	(3) PWM_pin      : generador de una señal PWM en un pin.
+ *	(2) Time_counter : medidor de tiempo (de pulsos de reloj).
+ *	(3) SWG_pin      : generador de una señal cuadrada en un pin.
+ *	(4) PWM_pin      : generador de una señal PWM en un pin.
  *
  *	Esas, creo, son los distintos usos que podemos dar al hardware
  *	correspondiente. Al traductor del hardware lo llamo directamente
@@ -283,15 +283,10 @@ inline Frequency clock_frequency()
 
 // PWM modes
 // ---------
-// TODO: esto es válido para el Timer0 y el Timer2? Si lo es, moverlo a
-// avr_timern_basic.h
-class PWM_mode{
+class PWM_mode : public timer_::PWM_mode<Timer1>{
 public:
-// data
-    Timer1::counter_type top;
-    uint16_t prescaler; // puede llegar hasta 1024
     bool fast_mode; // if false, then mode == phase_mode
-
+		    
     // Experimental: por eso nombre tan raro.
     // Para ver el método 1 ver util/timer1/main.cpp
     void calculate_cfg_method2(const Frequency& freq_clk,
@@ -300,40 +295,16 @@ public:
 
     void calculate_cfg_method2(const Frequency::Rep& freq_clk,
 			       const Frequency::Rep& freq_gen);
-
-
-// publicas para depurarlas. Además es interna la clase
-    uint8_t prescaler2top_fast_mode( const Frequency::Rep& freq_clk,
-				 const Frequency::Rep& freq_gen);
-    uint8_t prescaler2top_phase_mode( const Frequency::Rep& freq_clk,
-				 const Frequency::Rep& freq_gen);
-
-// para depurar (ver cómo calcula el micro con los redondeos)
-    Frequency frequency_fast_mode(const Frequency& freq_clk) const; 
-    Frequency frequency_phase_mode(const Frequency& freq_clk) const; 
-
-//private:
-    // Manejamos números positivos
-    template <std::integral Int>
-    static uint8_t percentage_error(const Int& x, const Int& y)
-    { 
-	if (x >= y)
-	    return ((x - y) * 100) / y;
-
-	else
-	    return ((y - x) * 100) / y;
-    }
-
 };
 
 
 
 
-inline Frequency PWM_mode::frequency_fast_mode(const Frequency& freq_clk) const
-{ return freq_clk / (prescaler * (top + 1)); }
-
-inline Frequency PWM_mode::frequency_phase_mode(const Frequency& freq_clk) const
-{ return freq_clk / (2 * prescaler * top); }
+//inline Frequency PWM_mode::frequency_fast_mode(const Frequency& freq_clk) const
+//{ return freq_clk / (prescaler * (top + 1)); }
+//
+//inline Frequency PWM_mode::frequency_phase_mode(const Frequency& freq_clk) const
+//{ return freq_clk / (2 * prescaler * top); }
 
 }// namespace timer1_
 

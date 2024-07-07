@@ -1,4 +1,4 @@
-// Copyright (C) 2021-2022 Manuel Perez 
+// Copyright (C) 2021-2024 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __AVR_TIMER0_GENERIC_H__
-#define __AVR_TIMER0_GENERIC_H__
+#ifndef __AVR_TIMER0_H__
+#define __AVR_TIMER0_H__
 /****************************************************************************
  *
  *  DESCRIPCION
@@ -41,9 +41,9 @@
  *		 square_wave_generate
  *    15/12/2022 Square_wave_generator0_g
  *    02/01/2023 Square_wave_burst_generator0_g
+ *    06/07/2024 PWM0_pin
  *
- *    TODO: Time_counter0 -> Counter0
- *          Square_wave_generator0_g -> SWG0_pin
+ *    TODO: Square_wave_generator0_g -> SWG0_pin
  *          Square_wave_burst_generator0_g -> Burst_SWG0_pin (o algo parecido
  *					      el nombre)
  *
@@ -243,7 +243,30 @@ inline Frequency clock_frequency()
 }
 
 
-}// namespace
+// PWM modes
+// ---------
+class PWM_mode : public timer_::PWM_mode<Timer0>{
+public:
+    bool fast_mode; // if false, then mode == phase_mode
+		    
+    void calculate_cfg_top_0xFF(const Frequency& freq_clk,
+			       const Frequency& freq_gen)
+    { calculate_cfg_top_0xFF(freq_clk.value(), freq_gen.value());}
+
+    void calculate_cfg_top_0xFF(const Frequency::Rep& freq_clk,
+			       const Frequency::Rep& freq_gen);
+
+    void calculate_cfg_top_OCRA(const Frequency& freq_clk,
+			       const Frequency& freq_gen)
+    { calculate_cfg_top_OCRA(freq_clk.value(), freq_gen.value());}
+
+    void calculate_cfg_top_OCRA(const Frequency::Rep& freq_clk,
+			       const Frequency::Rep& freq_gen);
+
+};
+
+
+}// namespace timer0_
 
 
 
@@ -583,195 +606,457 @@ inline void Square_wave_burst_generator0_g::generate_burst()
 {
     connect_pin<npin>();
     top(top_); 
-    Timer::clock_frequency(prescaler_factor_); // esto enciende el Timer
+    Timer::clock_frequency_prescaler(prescaler_factor_); // esto enciende el Timer
 }
 
-
 /***************************************************************************
- *				Timer0_g
+ *				PWM0_pin
  ***************************************************************************/
-// TODO: eliminar Generic_timer a favor de clases particulares. 
-class Timer0_g{
+/*!
+ *  \brief  pin donde se genera una señal PWM.
+ *
+ *	Esta clase pretende ocultar toda la configuración del Timer0 para
+ *	generar una señal PWM.
+ *
+ *
+ * NOTACIÓN
+ *	El 0 del PWM0 indica que se está usando el Timer0.
+ *
+ * ADVERTENCIA
+ *	Los pines OCA y OCB están acoplados.
+ *
+ *	En el pin OCA solo se puede generar señales de frecuencia fija, ya que
+ *	tenemos que fijar el top a 0xFF. El duty lo fijamos con OCRA.
+ *
+ *	En el pin OCB podemos generar señales de frecuencia variable, fijando
+ *	el top en OCRA, y el duty con OCRB. Observar que al fijar el top a
+ *	OCRA prohibimos generar una señal en el pin OCA.
+ *
+ *	Por ello el criterio usado a la hora de implementar PWM0_pin es:
+ *	    1) Si el usuario usa el pin A, fijamos el top a 0xFF: las
+ *	       frecuencias que vamos a generar son muy limitadas, pero podemos
+ *	       generar señales PWM en los dos pines A y B.
+ *
+ *	    2) Si el usuario no usa el pin A, solo el B, usamos como top OCRA.
+ *	       En este caso el rango de frecuencias es mayor pero solo podemos
+ *	       usar el pin B para generar PWM.
+ *
+ *	La seleccion se hace al llamar a la función init().
+ *
+ * DUDAS
+ *	La implementación se basa en suponer que los pines se van a usar para
+ *	genererar PWM. El harwador al principio decidirá que hacer con el
+ *	Timer0 y durante el programa no se cambiará su uso. Esto simplifica
+ *	mucho el diseño y evita (fijo) muchos dolores de cabeza.
+ *
+ *	Otra forma de programar sería usar el Timer0 dependiendo del momento
+ *	(dependiendo de que el usuario quiera hacer una cosa u otra). Para
+ *	hacer eso sería mejor construir las clases PWM0_pin, en lugar de tener
+ *	un static interface. A priori, da la impresión de que esta forma de
+ *	programar puede generar muchos errores sobre todo si encima usamos
+ *	interrupciones. 
+ *
+ *	¿Cuál de las dos formas es mejor? Modificar la clase para admitir el
+ *	segundo estilo es sencillo, bastando con crear un constructor que
+ *	llame a init. 
+ *	    
+ */
+namespace impl_of{
+// state
+    // (RRR) El siguiente flag es para averiguar si el usuario va a usar los
+    // dos pines o solo 1. Lo ideal sería que fuese el compilador quien
+    // gestionase esto:
+    //	    using pin1 = PWM0_pin<OCRA>;
+    //	    using pin2 = PWM0_pin<OCRB>;
+class PWM0_pin_flags{
+public:
+    struct Flags{
+	bool pin_A_connected : 1;
+	bool pin_B_connected : 1;
+    };
+
+    inline static Flags flags_{false, false};
+
+    static void pin_A_connected() { flags_.pin_A_connected = true; }
+    static void pin_B_connected() { flags_.pin_B_connected = true; }
+
+    static bool is_pin_A_connected() { return flags_.pin_A_connected; }
+    static bool is_pin_B_connected() { return flags_.pin_B_connected; }
+};
+
+}// impl_of
+
+// Observar que los flags son comunes a PWM0_pin<11> y PWM0_pin<12> pudiendo
+// modificarse desde ambas clases.
+template <uint8_t npin0>
+//    requires (npin0 == Timer1::OCA_pin() or npin0 == Timer1::OCB_pin())
+//    En g++ 13 si defino la clase con requires luego todas las
+//    implementaciones tienen que llevar ese require ==> hay que modificar
+//    todas las funciones definidas fuera de la clase para añadirles el
+//    requires @_@
+class PWM0_pin : public impl_of::PWM0_pin_flags{
+    static_assert(npin0 == Timer0::OCA_pin() or npin0 == Timer0::OCB_pin());
 public:
 // types
     using Timer        = avr_::Timer0;
-    using counter_type = typename Timer::counter_type;
-    using Frequency    = avr_::Frequency;
-    using Time         = avr_::Time;
-    using Scalar       = Frequency::Scalar; // TODO: es el mismo para Microseconds
-                                  // y Hertz. ¿qué nombre común usar? ponerlo en
-                                  // avr_types.h
+    using PWM_signal   = avr_::PWM_signal;
 
-    // PWM configuration 
-    enum class Mode {
-        fix_0xFF,
-        only_channel2
-    };
+// cfg
+    static constexpr uint8_t number  = npin0;
+    static constexpr Frequency clock_frequency = avr_::clock_frequency;
 
-//    // Indica qué canales se conectan a la hora de generar SW
-//    // TODO: cambiar. Esto no es genérico. ¿Y si el SWG tiene 3 pines? ¿y 4?
-//    // Mejor usar numeros.
-//    enum class Connect{
-//	only_channel1, only_channel2, channel1_and_2
-//    };
+// constructor
+    PWM0_pin() = delete;    // de momento static interface, aunque dudo...
+    static void init();
 
-// pines 
-    static constexpr uint8_t pin_channel1 = Timer::OCA_pin();
-    static constexpr uint8_t pin_channel2 = Timer::OCB_pin();
+// basic interface
+    // Genera la señal PWM indicada. Enciende el Timer en caso de que
+    // estuviera apagado. Cuidado si se manejan los dos pins asociados a ese
+    // timer: cambiará la frecuencia del otro pin.
+    // [in/out] PWM_signal indica la señal que se quiere generar.
+    //          Como no es posible generar cualquier señal, como salida indica
+    //          la señal que realmente se va a generar. TODO: se me olvido!!!
+    //          (por eso lo pongo temporalmente como const)
+    static void generate(const PWM_signal& pwm);
 
-    /// ¿los dos canales funcionan siempre a la misma frecuencia?
-    static constexpr bool ch1_and_ch2_same_frequency = true;
+    // Cambia el duty cycle sin modificar la frecuencia
+    static void duty_cycle(const atd::Percentage& p);
 
+    // Desconecta el pin del PWM sin modificar el estado del Timer
+    // No modifico el estado del Timer por si acaso se está generando en el
+    // otro pin del Timer0 una señal.
+    static void disconnect();
 
-// Timer características
-    template<uint32_t clock_frequency_in_Hz = clock_frequency_in_hz>
-    static Time clock_period() {return timer0_::clock_period();}
+    // Paramos el Timer
+    static void stop();
 
-    static Frequency clock_frequency() {return Timer::clock_frequency();}
-
-
-// Timer on/off
-// ------------
-    template<uint16_t period_in_us
-	    , uint32_t clock_frequency_in_Hz = clock_frequency_in_hz>
-    static void turn_on()
-    {timer0_::set_clock_period_in_us<period_in_us, clock_frequency_in_Hz>();}
-
-    /// Apagamos el generador de señales.
-    static void turn_off() { Timer::off(); }
-
-
-
-// PWM mode
-// --------
-    template <uint32_t top>
-    static void PWM_mode_fix_frequency() 
-    {
-	Timer::fast_PWM_mode_top_0xFF();
-	mode_ = Mode::fix_0xFF;
-    }
-    
-    static void PWM_mode_variable_pwm_only_channel2()
-    { 
-	Timer::fast_PWM_mode_top_OCRA();
-	mode_ = Mode::only_channel2;
-    }
-
-
-    // Timer0 no suministra esta posibilidad:
-    // static void PWM_mode_variable_pwm_both_channels()
-    
-    // configuración
-    static void PWM_top(Scalar top)
-    { 
-	switch(mode_){
-
-	    case Mode::only_channel2:
-                Timer::output_compare_register_A(
-					atd::to_integer<counter_type>(top));
-		break;
-
-	    case Mode::fix_0xFF:
-		// El usuario nunca debe de llamar esta posibilidad.
-		break;
-        }
-    }
-
-    static counter_type PWM_top() 
-    {
-	switch(mode_){
-	    case Mode::only_channel2:
-		return Timer::output_compare_register_A();
-
-            case Mode::fix_0xFF: 
-                return counter_type{0xFF};
-	}
-
-	return 0;
-    }
-
-    static void PWM_ch1_duty_top(Scalar duty_top)
-    {
-	switch(mode_){
-	    case Mode::fix_0xFF:
-                Timer::output_compare_register_A(
-				atd::to_integer<counter_type>(duty_top));
-		break;
-
-            case Mode::only_channel2:
-		// ERROR: en only_channel2 no se puede fijar el OCRA
-		break;
-	}
-    }
-
-    static counter_type PWM_ch1_duty_top()
-    {
-	switch(mode_){
-	    case Mode::fix_0xFF:
-		return Timer::output_compare_register_A();
-
-            case Mode::only_channel2:
-		return 0;
-	}
-
-	return 0;
-    }
-
-    static void PWM_ch2_duty_top(Scalar duty_top)
-    {
-        Timer::output_compare_register_B(
-				    atd::to_integer<counter_type>(duty_top));
-    }
-
-    static counter_type PWM_ch2_duty_top()
-    {return Timer::output_compare_register_B();}
-
-
-    // modos de funcionamiento
-    static void PWM_ch1_non_inverting_mode()
-    { Timer::PWM_pin_A_non_inverting_mode();}
-
-    static void PWM_ch1_inverting_mode()
-    { Timer:: PWM_pin_A_inverting_mode();}
-
-    static void PWM_ch2_non_inverting_mode()
-    { Timer::PWM_pin_B_non_inverting_mode();}
-
-    static void PWM_ch2_inverting_mode()
-    { Timer::PWM_pin_B_inverting_mode();}
-
-    static void PWM_ch1_off()
-    { Timer::pin_A_disconnected(); }
-
-    static void PWM_ch2_off()
-    { Timer::pin_B_disconnected(); }
+    // Podemos usarlo como un pin normal y corriente de salida.
+    // Corresponderían a los casos extremos de 0% ó 100% de duty cycle.
+    static void write_zero();
+    static void write_one();
 
 
 private:
-    inline static Mode mode_;
+// types
+    using counter_type = Timer::counter_type;
 
-//// Funciones no genéricas: conocen cómo funciona el Timer0
-//    /// Devuelve la frecuencia, en Hz,  que se genera dados 
-//    /// el prescaler factor d (divisor de frecuencia) y el top M. 
-//    /// (pag 132 datasheet)
-//    template <uint32_t f_clock_in_Hz = clock_frequency_in_hz>
-//    static constexpr 
-//    uint32_t prescaler_top_to_frequency_in_Hz(uint32_t d, uint32_t M)
-//    { return avr_::timer_::
-//	    timer_prescaler_top_to_frequency_in_Hz<f_clock_in_Hz>(d, M);}
-//
-//    /// Función inversa a la prescaler_top_to_frequency_in_Hz:
-//    /// Devuelve el par (prescaler factor, top) necesario para generar la
-//    /// frecuencia freq_in_Hz.
-//    template <uint32_t f_clock_in_Hz = clock_frequency_in_hz>
-//    static constexpr 
-//    std::pair<uint32_t, uint32_t> 
-//    frequency_in_Hz_to_prescaler_top(uint32_t freq_in_Hz)
-//    { return avr_::timer_::
-//    timer_frequency_in_Hz_to_prescaler_top<Timer, f_clock_in_Hz>(freq_in_Hz); 
-//    }
 
+// helpers
+    static void pin_as_output();
+    static void cfg_duty_cycle(const counter_type& ocr);
+    static counter_type top();
+    static bool top_is_0xFF();
 };
+
+template <uint8_t n>
+inline void PWM0_pin<n>::init()
+{
+    if constexpr (number == Timer::OCA_pin())
+	pin_A_connected();
+    else
+	pin_B_connected();
+}
+
+template <uint8_t n>
+inline bool PWM0_pin<n>::top_is_0xFF()
+{ return is_pin_A_connected(); }
+
+// Si se llama a esta función via el pin A ==> este pin esta conectado
+// ==> el top es 0xFF ==> podemos modificar el registro OCRA. Por eso no pongo
+// la validación `if(top_is_0xFF()) ...` al modificar OCRA
+template <uint8_t n>
+void PWM0_pin<n>::cfg_duty_cycle(const counter_type& ocr)
+{
+    if constexpr (number == Timer::OCA_pin()){
+	Timer::PWM_pin_A_non_inverting_mode(); // DUDA: dar a elegirlo?
+	Timer::output_compare_register_A(ocr);
+    }
+    else {
+	Timer::PWM_pin_B_non_inverting_mode();
+	Timer::output_compare_register_B(ocr);
+    }
+}
+
+
+// En FAST PWM : freq_generada = clock_freq / (prescaler * (top + 1));
+// En PHASE PWM: freq_generada = clock_freq / (2 * prescaler * top);
+template <uint8_t n>
+void PWM0_pin<n>::generate(const PWM_signal& pwm)
+{
+    timer0_::PWM_mode mode;
+
+// top 0xFF
+    if (top_is_0xFF()){
+	mode.calculate_cfg_top_0xFF(clock_frequency, pwm.frequency());
+
+	if (mode.fast_mode)  Timer::fast_PWM_mode_top_0xFF();
+	else		     Timer::PWM_phase_correct_mode_top_0xFF();
+    
+	// top = 0xFF
+    }
+
+// top OCRA
+    else{ 
+	mode.calculate_cfg_top_OCRA(clock_frequency, pwm.frequency());
+
+	if (mode.fast_mode)  Timer::fast_PWM_mode_top_OCRA();
+	else		     Timer::PWM_phase_correct_mode_top_OCRA();
+
+	Timer::output_compare_register_A(mode.top);
+    }
+
+// common
+    Timer::counter(0); 
+
+    counter_type ocr = pwm.duty_cycle().of(mode.top);
+    cfg_duty_cycle(ocr);
+
+    Timer::clock_frequency_prescaler(mode.prescaler);
+}
+
+
+template <uint8_t n>
+auto PWM0_pin<n>::top() -> counter_type
+{
+    if (top_is_0xFF())
+	return 0xFF;
+    else
+	return Timer::output_compare_register_A();
+}
+
+template <uint8_t n>
+void PWM0_pin<n>::duty_cycle(const atd::Percentage& percentage)
+{
+    auto t = top();
+
+    if (t == 0) return;
+
+    counter_type ocr = percentage.of(t);
+    cfg_duty_cycle(ocr);
+}
+
+
+template <uint8_t n>
+inline void PWM0_pin<n>::disconnect()
+{
+    if constexpr (number == Timer::OCA_pin())
+	Timer::pin_A_disconnected();
+
+    else
+	Timer::pin_B_disconnected();
+}
+
+
+template <uint8_t n>
+inline void PWM0_pin<n>::stop() { Timer::off(); }
+
+
+template <uint8_t n>
+void PWM0_pin<n>::pin_as_output() {
+    disconnect();
+    Pin<n>::as_output();
+}
+
+template <uint8_t n>
+void PWM0_pin<n>::write_zero() {
+    pin_as_output();
+    Pin<n>::write_zero();
+}
+
+
+template <uint8_t n>
+void PWM0_pin<n>::write_one() {
+    pin_as_output();
+    Pin<n>::write_one();
+}
+
+
+
+///***************************************************************************
+// *				Timer0_g
+// ***************************************************************************/
+//// TODO: eliminar Generic_timer a favor de clases particulares. 
+//class Timer0_g{
+//public:
+//// types
+//    using Timer        = avr_::Timer0;
+//    using counter_type = typename Timer::counter_type;
+//    using Frequency    = avr_::Frequency;
+//    using Time         = avr_::Time;
+//    using Scalar       = Frequency::Scalar; // TODO: es el mismo para Microseconds
+//                                  // y Hertz. ¿qué nombre común usar? ponerlo en
+//                                  // avr_types.h
+//
+//    // PWM configuration 
+//    enum class Mode {
+//        fix_0xFF,
+//        only_channel2
+//    };
+//
+////    // Indica qué canales se conectan a la hora de generar SW
+////    // TODO: cambiar. Esto no es genérico. ¿Y si el SWG tiene 3 pines? ¿y 4?
+////    // Mejor usar numeros.
+////    enum class Connect{
+////	only_channel1, only_channel2, channel1_and_2
+////    };
+//
+//// pines 
+//    static constexpr uint8_t pin_channel1 = Timer::OCA_pin();
+//    static constexpr uint8_t pin_channel2 = Timer::OCB_pin();
+//
+//    /// ¿los dos canales funcionan siempre a la misma frecuencia?
+//    static constexpr bool ch1_and_ch2_same_frequency = true;
+//
+//
+//// Timer características
+//    template<uint32_t clock_frequency_in_Hz = clock_frequency_in_hz>
+//    static Time clock_period() {return timer0_::clock_period();}
+//
+//    static Frequency clock_frequency() {return Timer::clock_frequency();}
+//
+//
+//// Timer on/off
+//// ------------
+//    template<uint16_t period_in_us
+//	    , uint32_t clock_frequency_in_Hz = clock_frequency_in_hz>
+//    static void turn_on()
+//    {timer0_::set_clock_period_in_us<period_in_us, clock_frequency_in_Hz>();}
+//
+//    /// Apagamos el generador de señales.
+//    static void turn_off() { Timer::off(); }
+//
+//
+//
+//// PWM mode
+//// --------
+//    template <uint32_t top>
+//    static void PWM_mode_fix_frequency() 
+//    {
+//	Timer::fast_PWM_mode_top_0xFF();
+//	mode_ = Mode::fix_0xFF;
+//    }
+//    
+//    static void PWM_mode_variable_pwm_only_channel2()
+//    { 
+//	Timer::fast_PWM_mode_top_OCRA();
+//	mode_ = Mode::only_channel2;
+//    }
+//
+//
+//    // Timer0 no suministra esta posibilidad:
+//    // static void PWM_mode_variable_pwm_both_channels()
+//    
+//    // configuración
+//    static void PWM_top(Scalar top)
+//    { 
+//	switch(mode_){
+//
+//	    case Mode::only_channel2:
+//                Timer::output_compare_register_A(
+//					atd::to_integer<counter_type>(top));
+//		break;
+//
+//	    case Mode::fix_0xFF:
+//		// El usuario nunca debe de llamar esta posibilidad.
+//		break;
+//        }
+//    }
+//
+//    static counter_type PWM_top() 
+//    {
+//	switch(mode_){
+//	    case Mode::only_channel2:
+//		return Timer::output_compare_register_A();
+//
+//            case Mode::fix_0xFF: 
+//                return counter_type{0xFF};
+//	}
+//
+//	return 0;
+//    }
+//
+//    static void PWM_ch1_duty_top(Scalar duty_top)
+//    {
+//	switch(mode_){
+//	    case Mode::fix_0xFF:
+//                Timer::output_compare_register_A(
+//				atd::to_integer<counter_type>(duty_top));
+//		break;
+//
+//            case Mode::only_channel2:
+//		// ERROR: en only_channel2 no se puede fijar el OCRA
+//		break;
+//	}
+//    }
+//
+//    static counter_type PWM_ch1_duty_top()
+//    {
+//	switch(mode_){
+//	    case Mode::fix_0xFF:
+//		return Timer::output_compare_register_A();
+//
+//            case Mode::only_channel2:
+//		return 0;
+//	}
+//
+//	return 0;
+//    }
+//
+//    static void PWM_ch2_duty_top(Scalar duty_top)
+//    {
+//        Timer::output_compare_register_B(
+//				    atd::to_integer<counter_type>(duty_top));
+//    }
+//
+//    static counter_type PWM_ch2_duty_top()
+//    {return Timer::output_compare_register_B();}
+//
+//
+//    // modos de funcionamiento
+//    static void PWM_ch1_non_inverting_mode()
+//    { Timer::PWM_pin_A_non_inverting_mode();}
+//
+//    static void PWM_ch1_inverting_mode()
+//    { Timer:: PWM_pin_A_inverting_mode();}
+//
+//    static void PWM_ch2_non_inverting_mode()
+//    { Timer::PWM_pin_B_non_inverting_mode();}
+//
+//    static void PWM_ch2_inverting_mode()
+//    { Timer::PWM_pin_B_inverting_mode();}
+//
+//    static void PWM_ch1_off()
+//    { Timer::pin_A_disconnected(); }
+//
+//    static void PWM_ch2_off()
+//    { Timer::pin_B_disconnected(); }
+//
+//
+//private:
+//    inline static Mode mode_;
+//
+////// Funciones no genéricas: conocen cómo funciona el Timer0
+////    /// Devuelve la frecuencia, en Hz,  que se genera dados 
+////    /// el prescaler factor d (divisor de frecuencia) y el top M. 
+////    /// (pag 132 datasheet)
+////    template <uint32_t f_clock_in_Hz = clock_frequency_in_hz>
+////    static constexpr 
+////    uint32_t prescaler_top_to_frequency_in_Hz(uint32_t d, uint32_t M)
+////    { return avr_::timer_::
+////	    timer_prescaler_top_to_frequency_in_Hz<f_clock_in_Hz>(d, M);}
+////
+////    /// Función inversa a la prescaler_top_to_frequency_in_Hz:
+////    /// Devuelve el par (prescaler factor, top) necesario para generar la
+////    /// frecuencia freq_in_Hz.
+////    template <uint32_t f_clock_in_Hz = clock_frequency_in_hz>
+////    static constexpr 
+////    std::pair<uint32_t, uint32_t> 
+////    frequency_in_Hz_to_prescaler_top(uint32_t freq_in_Hz)
+////    { return avr_::timer_::
+////    timer_frequency_in_Hz_to_prescaler_top<Timer, f_clock_in_Hz>(freq_in_Hz); 
+////    }
+//
+//};
 
 }// namespace 
 

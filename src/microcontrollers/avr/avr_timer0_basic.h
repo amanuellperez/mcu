@@ -117,9 +117,10 @@ public:
     static void clock_frequency_divide_by_1024();
 
 
+    /// Seleccionamos la frecuencia a la que funciona el timer usando el
     /// divisor de frecuencias (prescaler_factor)
     /// Enciende el timer (si prescaler_factor != 0) o lo apaga (si es == 0)
-    static constexpr void clock_frequency(uint32_t prescaler_factor);
+    static constexpr void clock_frequency_prescaler(uint32_t prescaler_factor);
 
     /// Frecuencia a la que funciona internamente el timer.
     /// Se cumple que clock_frequency() = 1 / clock_period();
@@ -285,7 +286,7 @@ inline void Timer0::clock_frequency_divide_by_1024()
 }
 
 // DUDA: ¿cómo gestionar los errores de programación?
-inline constexpr void Timer0::clock_frequency(uint32_t prescaler_factor)
+inline constexpr void Timer0::clock_frequency_prescaler(uint32_t prescaler_factor)
 {
     switch (prescaler_factor){
 	break; case 8   : clock_frequency_divide_by_8();

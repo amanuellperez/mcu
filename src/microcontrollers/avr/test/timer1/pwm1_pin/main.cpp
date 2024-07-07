@@ -25,35 +25,35 @@
 
 // Microcontroller
 // ---------------
-namespace my_mcu = avr_;
+namespace myu = avr_;
 
 					 
 // Hwd devices
 // -----------
-using Timer    = my_mcu::Timer1;
-// DONT_COMPILE(using PWM_pin1 = my_mcu::PWM1_pin<18>;)
-using PWM_pin1 = my_mcu::PWM1_pin<15>;
-using PWM_pin2 = my_mcu::PWM1_pin<16>;
+using Timer    = myu::Timer1;
+// DONT_COMPILE(using PWM_pin1 = myu::PWM1_pin<18>;)
+using PWM_pin1 = myu::PWM1_pin<15>;
+using PWM_pin2 = myu::PWM1_pin<16>;
 
 
 // Cfg
 // ---
-using namespace my_mcu::literals;
+using namespace myu::literals;
 
 
 // FUNCTIONS
 // ---------
 void init_uart()
 {
-    my_mcu::UART_iostream uart;
-    my_mcu::basic_cfg(uart);
+    myu::UART_iostream uart;
+    myu::basic_cfg(uart);
     uart.turn_on();
 }
 
 
 void hello()
 {
-    my_mcu::UART_iostream uart;
+    myu::UART_iostream uart;
     uart << "\n\nPWM1_pin test\n"
 	        "-------------\n"
             "Connect oscilloscope to pins "
@@ -64,8 +64,8 @@ void hello()
 
 
 void print(std::ostream& out, 
-	   const my_mcu::timer1_::PWM_mode& pwm,
-	   const my_mcu::Frequency& freq_clk)
+	   const myu::timer1_::PWM_mode& pwm,
+	   const myu::Frequency& freq_clk)
 {
     if (pwm.fast_mode){
 	out << " -> " << pwm.frequency_fast_mode(freq_clk);
@@ -85,15 +85,15 @@ void print(std::ostream& out,
 
 void pwm_mode_test()
 {
-    my_mcu::UART_iostream uart;
+    myu::UART_iostream uart;
     uart << "\nPWM_mode test\n"
 	    "-------------\n";
 
-    my_mcu::Frequency freq_clk = 1_MHz;
+    myu::Frequency freq_clk = 1_MHz;
 
-    my_mcu::timer1_::PWM_mode pwm;
+    myu::timer1_::PWM_mode pwm;
 
-    for (my_mcu::Frequency fg = 20_Hz; fg < 100_Hz; fg += 1_Hz){
+    for (myu::Frequency fg = 20_Hz; fg < 100_Hz; fg += 1_Hz){
 	pwm.calculate_cfg_method2(freq_clk, fg);
 	uart << fg << ": ";
 	print(uart, pwm, freq_clk);
@@ -104,7 +104,7 @@ void pwm_mode_test()
 
 void generate_pwm_signal_pin_A()
 {
-    my_mcu::UART_iostream uart;
+    myu::UART_iostream uart;
     uart << "\nFrequency: ";
     uint32_t freq{0};
     uart >> freq;
@@ -116,14 +116,14 @@ void generate_pwm_signal_pin_A()
     uart >> duty_cycle;
     if (duty_cycle == 0) return;
 
-    my_mcu::PWM_signal pwm{freq, static_cast<uint8_t>(duty_cycle)};
+    myu::PWM_signal pwm{freq, static_cast<uint8_t>(duty_cycle)};
     PWM_pin1::generate(pwm);
 }
 
 
 void pin_A_change_duty_cycle()
 {
-    my_mcu::UART_iostream uart;
+    myu::UART_iostream uart;
     uart << "\nDuty cycle (as number): ";
     uint16_t duty_cycle{0};
     uart >> duty_cycle;
@@ -134,7 +134,7 @@ void pin_A_change_duty_cycle()
 
 void test_pin_A()
 {
-    my_mcu::UART_iostream uart;
+    myu::UART_iostream uart;
     uart << "\nTest pin A\n"
 	    "-------------\n"
 	    "0. Write 0\n"
@@ -164,7 +164,7 @@ void test_pin_A()
 
 void generate_pwm_signal_pin_B()
 {
-    my_mcu::UART_iostream uart;
+    myu::UART_iostream uart;
     uart << "\nFrequency: ";
     uint32_t freq{0};
     uart >> freq;
@@ -176,14 +176,14 @@ void generate_pwm_signal_pin_B()
     uart >> duty_cycle;
     if (duty_cycle == 0) return;
 
-    my_mcu::PWM_signal pwm{freq, static_cast<uint8_t>(duty_cycle)};
+    myu::PWM_signal pwm{freq, static_cast<uint8_t>(duty_cycle)};
     PWM_pin2::generate(pwm);
 }
 
 
 void pin_B_change_duty_cycle()
 {
-    my_mcu::UART_iostream uart;
+    myu::UART_iostream uart;
     uart << "\nDuty cycle (as number): ";
     uint16_t duty_cycle{0};
     uart >> duty_cycle;
@@ -194,7 +194,7 @@ void pin_B_change_duty_cycle()
 
 void test_pin_B()
 {
-    my_mcu::UART_iostream uart;
+    myu::UART_iostream uart;
     uart << "\nTest pin B\n"
 	    "-------------\n"
 	    "0. Write 0\n"
@@ -227,7 +227,7 @@ int main()
     
     hello();
 
-    my_mcu::UART_iostream uart;
+    myu::UART_iostream uart;
 
     while(1){
 	uart << "\nMenu\n"

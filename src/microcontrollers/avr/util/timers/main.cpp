@@ -1,4 +1,4 @@
-// Copyright (C) 2021 Manuel Perez 
+// Copyright (C) 2024 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -30,7 +30,8 @@
 using namespace test;
 
 constexpr std::array prescalers = {1,8, 64, 256, 1024};
-constexpr int max_top = 65535;
+
+
 // constexpr int freq_clock = 1000000;
 
 void print_result(int freq_clock, int freq_generated, 
@@ -58,19 +59,19 @@ void print_top(int freq_clock, int prescaler, int top)
     print_result(freq_clock, freq_generated, prescaler, top, "PHASE PWM");
 }
 
-void print_top_ICR1(int freq_clock, int prescaler)
+void print_top_ICR1(int freq_clock, int prescaler, int max_top)
 {
     for (int top = 4; top <  max_top; ++top)
 	print_top(freq_clock, prescaler, top);
 }
 
 	
-void print_top_ICR1(int freq_clock)
+void print_top_ICR1(int freq_clock, int max_top)
 {
     std::cout << "ICR1 = variable\n"
 	         "---------------\n";
     for (auto p: prescalers)
-	print_top_ICR1(freq_clock, p);
+	print_top_ICR1(freq_clock, p, max_top);
 
     std::cout << '\n';
 }
@@ -106,7 +107,7 @@ void print_top_0x03FF(int freq_clock)
     std::cout << '\n';
 }
 
-void print_tops()
+void print_tops_timer1()
 {
     constexpr int freq_clock = 8000000;
 
@@ -135,7 +136,7 @@ void print_tops()
 //	86  kHz		14%
 //	100 kHz		17%
 //	120 kHz		21%
-void error_method1(int freq_clk, int freq_gen)
+void error_method1(int freq_clk, int freq_gen, int max_top)
 {
 
     // Las fórmulas son:
@@ -193,13 +194,13 @@ void error_method1(int freq_clk, int freq_gen)
 
 }
 
-void error_method1()
+void error_method1(int max_top)
 {
     int freq_clk = 1'000'000;
 
     for (int freq_gen = 20; freq_gen < 1'000'000; ++freq_gen)
     // for (int freq_gen = 20; freq_gen < 100'000; ++freq_gen)
-	error_method1(freq_clk, freq_gen);
+	error_method1(freq_clk, freq_gen, max_top);
 }
 
 
@@ -210,7 +211,7 @@ struct PWM_mode{
 };
 
 // Devuelve el error para poder imprimirlo
-float calculate_data2(int freq_clk, int freq_gen, PWM_mode& res)
+float calculate_data2(int freq_clk, int freq_gen, PWM_mode& res, int max_top)
 {
     res.prescaler = 0; // invalid data
     float last_error = 1;
@@ -293,44 +294,93 @@ float calculate_data2(int freq_clk, int freq_gen, PWM_mode& res)
 //	resultados tienen prescaler = 1, modo fast or phase. Luego basta con
 //	mirar estos dos casos ignorando el resto.
 //
-void error_method2(int freq_clk, int freq_gen)
+void error_method2(int freq_clk, int freq_gen, int max_top)
 {
     PWM_mode mode;
-    float error = calculate_data2(freq_clk, freq_gen, mode);
+    float error = calculate_data2(freq_clk, freq_gen, mode, max_top);
 
+    std::cout << std::right << std::setw(6);
     if (error >= 0.01)
-	std::cout << std::fixed << std::setprecision(2) << error << '\t' ;
+	std::cout << std::fixed << std::setprecision(2) << error;
     else
-	std::cout << 0 << '\t';
+	std::cout << 0;
 
-    std::cout << freq_gen << '\t'
-	      << mode.prescaler << '\t'
-	      << mode.top << '\t';
+    std::cout << std::setw(10) << freq_gen 
+	      << std::setw(10) << mode.prescaler 
+	      << std::setw(10) << mode.top;
+
+    std::cout << std::setw(5) << ' '
+	      << std::left << std::setw(5);
 
     if (mode.fast_mode)
-	std::cout << "\tFAST\n";
+	std::cout << "FAST\n";
     else
-	std::cout << "\tPHASE\n";
+	std::cout << "PHASE\n";
 
 }
 
-void error_method2()
+void error_method2(int max_top)
 {
     int freq_clk = 1'000'000;
 
-    for (int freq_gen = 20; freq_gen < 1'000'000; ++freq_gen)
-    //    for (int freq_gen = 20; freq_gen < 120'000; ++freq_gen)
-	error_method2(freq_clk, freq_gen);
+    std::cout << std::setfill(' ') << std::right;
+    std::cout << std::setw(6) << "Error" 
+	      << std::setw(10) << "Freq. gen"
+	      << std::setw(10) << "Prescaler"
+	      << std::setw(10) << "Top"
+	      << std::setw(5) << ' '
+	      << std::setw(5) << "Mode"
+	      << '\n';
+    
+    std::cout << std::setw(6) << "-----" 
+	      << std::setw(10) << "---------"
+	      << std::setw(10) << "---------"
+	      << std::setw(10) << "---"
+	      << std::setw(5) << ' '
+	      << std::setw(5) << "----"
+	      << '\n';
+
+    // for (int freq_gen = 20; freq_gen < 1'000'000; ++freq_gen)
+    //for (int freq_gen = 20; freq_gen < 120'000; ++freq_gen)
+    // for (int freq_gen = 20; freq_gen < 120'000; freq_gen +=1'000)
+    for (int freq_gen = 20; freq_gen < 10'000; freq_gen +=10)
+    //for (int freq_gen = 20; freq_gen < 40; ++freq_gen)
+	error_method2(freq_clk, freq_gen, max_top);
+}
+
+int main_menu()
+{
+    int max_top{};
+
+    std::cout << "\n\nTimers test\n"
+	             "-----------\n"
+		     "0. Timer 0\n"
+		     "1. Timer 1\n";
+
+    char opt{};
+    std::cin >> opt;
+    switch (opt){
+	break; case '0': max_top = 255;
+	break; case '1': 
+	break; default : max_top = 65535;
+    }
+
+    return max_top;
 }
 
 
 int main()
 {
 try{
+//    int max_top = main_menu();
+    int max_top = 255;		// Timer 0
+//    int max_top = 65535;	// Timer 1
 
-//    print_tops();
-//    error_method1();
-    error_method2();
+    std::cout << "max_top = " << max_top << '\n';
+
+//    print_tops_timer1();
+//    error_method1(max_top);
+    error_method2(max_top);
 
 }catch(std::exception& e)
 {

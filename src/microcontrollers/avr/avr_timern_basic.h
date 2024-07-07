@@ -1,4 +1,4 @@
-// Copyright (C) 2022 Manuel Perez 
+// Copyright (C) 2022-2024 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -94,6 +94,134 @@ frequency_to_prescaler_top(const Frequency& freq_gen)
 private:
     
 };
+
+
+template <typename Timern>
+class PWM_mode{
+public:
+// Types
+    using Timer        = Timern;
+    using counter_type = typename Timer::counter_type;
+
+// Data
+    counter_type top;
+    uint16_t prescaler; // puede llegar hasta 1024
+
+// Calculo de la frecuencia generada por el modo
+    // Calcula la frecuencia que generaria este PWM_mode configurado 
+    // como fast mode
+    Frequency frequency_fast_mode(const Frequency& freq_clk) const;
+
+    // Calcula la frecuencia que generaria este PWM_mode configurado 
+    // como phase mode
+    Frequency frequency_phase_mode(const Frequency& freq_clk) const;
+
+// Calculo del prescaler a partir del top.
+// Lo que hace es rellenar el valor del top con el valor correspondiente al
+// prescaler. Dan por supuesto que prescaler tiene el valor de entrada.
+// Quizas mejor: 
+//  [top, error] = top_fast_mode(freq_clk, freq_gen,  prescaler); (???)
+    // Devuelve el error cometido (100 en caso de no poder calcular la cfg)
+    // fast mode
+    uint8_t prescaler2top_fast_mode( const Frequency::Rep& freq_clk,
+				     const Frequency::Rep& freq_gen);
+    // phase mode
+    uint8_t prescaler2top_phase_mode( const Frequency::Rep& freq_clk,
+				      const Frequency::Rep& freq_gen);
+
+// Errores
+    // Manejamos números positivos
+    template <std::integral Int>
+    static uint8_t percentage_error(const Int& x, const Int& y);
+
+};
+
+template <typename C>
+inline 
+Frequency PWM_mode<C>::frequency_fast_mode(const Frequency& freq_clk) const
+{ return freq_clk / (prescaler * (top + 1)); }
+
+template <typename C>
+inline 
+Frequency PWM_mode<C>::frequency_phase_mode(const Frequency& freq_clk) const
+{ return freq_clk / (2 * prescaler * top); }
+
+
+
+// Devuelve el error (100 en caso de no poder calcular la cfg)
+// precondition: prescaler tiene un valor válido
+//
+//  Fast  PWM: freq_gen = freq_clk/(p * (top + 1);
+template <typename C>
+uint8_t PWM_mode<C>::prescaler2top_fast_mode( const Frequency::Rep& freq_clk,
+				 const Frequency::Rep& freq_gen)
+{
+    using Rep = Frequency::Rep;
+
+    // Si se trunca se comete en algunas ocasiones mucho error
+    auto q = atd::divide_rounding(freq_clk, freq_gen);
+
+    if (prescaler > q){
+	top = 0;
+	return 100;
+    }
+
+    top = atd::divide_rounding(q, Rep{prescaler}) - 1;
+    
+    if (top > 3 and top < Timer::max()){
+
+	Frequency::Rep freq_res = freq_clk / (prescaler * (top + 1));
+	return percentage_error(freq_res, freq_gen);
+    }
+
+    else
+	return 100;
+
+}
+
+// Devuelve el error (100 en caso de no poder calcular la cfg)
+// precondition: prescaler tiene un valor válido
+//
+//  Phase PWM: freq_gen = freq_clk/(2 * p * top);
+template <typename C>
+uint8_t PWM_mode<C>::prescaler2top_phase_mode( const Frequency::Rep& freq_clk,
+				 const Frequency::Rep& freq_gen)
+{
+    using Rep = Frequency::Rep;
+
+    // Si se trunca se comete en algunas ocasiones mucho error
+    auto q = atd::divide_rounding(freq_clk, freq_gen);
+
+    if (prescaler > q){
+	top = 0;
+	return 100;
+    }
+
+    top = atd::divide_rounding(q, Rep{2 * prescaler});
+    
+    if (top > 4 and top < Timer::max()){
+
+//	Frequency::Rep freq_res = frequency_phase_mode(freq_clk).value();
+	Frequency::Rep freq_res = freq_clk / (2 * prescaler * top);
+	return percentage_error(freq_res, freq_gen);
+    }
+
+    else
+	return 100;
+
+}
+
+
+template <typename C>
+template <std::integral Int>
+uint8_t PWM_mode<C>::percentage_error(const Int& x, const Int& y)
+{ 
+    if (x >= y)
+	return ((x - y) * 100) / y;
+
+    else
+	return ((y - x) * 100) / y;
+}
 
 }// namespace timer_
  
