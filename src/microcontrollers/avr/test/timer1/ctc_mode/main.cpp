@@ -236,9 +236,9 @@ int main()
     uint16_t period_in_us = 1;
     Timer::counter_type top = 1000;
 
-    //Timer::mode_CTC_top_OCR1A();
+    //Timer::mode_CTC_top_OCRA();
     //Timer::output_compare_register_A(top);
-    Timer::CTC_mode_top_ICR1();
+    Timer::CTC_mode_top_ICR();
     { avr_::Disable_interrupts l; Timer::unsafe_input_capture_register(top);}
     Timer::CTC_pin_A_toggle_on_compare_match(); // para que se vea algo al ppio
     Timer::CTC_pin_B_toggle_on_compare_match();

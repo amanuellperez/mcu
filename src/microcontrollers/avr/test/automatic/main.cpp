@@ -21,6 +21,7 @@
 #include "../../avr_atmega328p_cfg.h"
 #include "../../avr_UART_iostream.h"
 #include "../../avr_timer0_basic.h"
+#include "../../avr_timer1_basic.h"
 #include "../../avr_time.h"
 
 #include <atd_ostream.h>
@@ -99,6 +100,144 @@ void test_timer0()
     Timer::PWM_phase_correct_mode_top_0xFF();
     CHECK_TRUE(test, Timer::mode() == Timer::Mode::PWM_phase_correct_top_0xFF, 
 						    "PWM_phase_correct_mode_top_0xFF");
+
+// prescalers
+    Timer::off();
+    CHECK_TRUE(test, Timer::prescaler() == 0, "off");
+
+    Timer::clock_frequency_no_preescaling();
+    CHECK_TRUE(test, Timer::prescaler() == 1, 
+					    "clock_frequency_no_preescaling");
+
+    Timer::clock_frequency_divide_by_8();
+    CHECK_TRUE(test, Timer::prescaler() == 8, "clock_frequency_divide_by_8");
+
+    Timer::clock_frequency_divide_by_64();
+    CHECK_TRUE(test, Timer::prescaler() == 64, "clock_frequency_divide_by_64");
+
+    Timer::clock_frequency_divide_by_256();
+    CHECK_TRUE(test, Timer::prescaler() == 256, "clock_frequency_divide_by_256");
+
+    Timer::clock_frequency_divide_by_1024();
+    CHECK_TRUE(test, Timer::prescaler() == 1024, "clock_frequency_divide_by_1024");
+
+
+    // Garantizo apagarlo
+    Timer::off();
+}
+
+void test_timer1()
+{
+    myu::Disable_interrupts lock; // para poder usar las funciones unsafe
+
+    myu::UART_iostream uart;
+    auto test = Test::interface(uart, "Timer0");
+
+    using Timer = myu::Timer1;
+
+    Timer::off();
+
+// counter
+    Timer::unsafe_counter(25u);
+    CHECK_TRUE(test, Timer::unsafe_counter() == 25u, "counter");
+
+// modes
+    Timer::normal_mode();
+    CHECK_TRUE(test, Timer::mode() == Timer::Mode::normal, "normal_mode");
+
+    Timer::CTC_mode_top_OCRA();
+    CHECK_TRUE(test, Timer::mode() == 
+		    Timer::Mode::CTC_top_OCRA, 
+		    "CTC_mode_top_OCRA");
+
+    Timer::CTC_mode_top_ICR();
+    CHECK_TRUE(test, Timer::mode() == 
+		    Timer::Mode::CTC_top_ICR, 
+		    "CTC_mode_top_ICR");
+
+    Timer::fast_PWM_mode_top_0x00FF();
+    CHECK_TRUE(test, Timer::mode() == 
+		    Timer::Mode::fast_PWM_top_0x00FF, 
+		    "fast_PWM_mode_top_0x00FF");
+
+    Timer::fast_PWM_mode_top_0x01FF();
+    CHECK_TRUE(test, Timer::mode() == 
+		    Timer::Mode::fast_PWM_top_0x01FF, 
+		    "fast_PWM_mode_top_0x01FF");
+
+    Timer::fast_PWM_mode_top_0x03FF();
+    CHECK_TRUE(test, Timer::mode() == 
+		    Timer::Mode::fast_PWM_top_0x03FF, 
+		    "fast_PWM_mode_top_0x03FF");
+
+    Timer::fast_PWM_mode_top_ICR();
+    CHECK_TRUE(test, Timer::mode() == 
+		    Timer::Mode::fast_PWM_top_ICR, 
+		    "fast_PWM_mode_top_ICR");
+
+    Timer::fast_PWM_mode_top_OCRA();
+    CHECK_TRUE(test, Timer::mode() == 
+		    Timer::Mode::fast_PWM_top_OCRA, 
+		    "fast_PWM_mode_top_OCRA");
+
+    Timer::PWM_phase_correct_mode_top_0x00FF();
+    CHECK_TRUE(test, Timer::mode() == 
+		    Timer::Mode::PWM_phase_correct_top_0x00FF, 
+		    "PWM_phase_correct_mode_top_0x00FF");
+
+    Timer::PWM_phase_correct_mode_top_0x01FF();
+    CHECK_TRUE(test, Timer::mode() == 
+		Timer::Mode::PWM_phase_correct_top_0x01FF, 
+		"PWM_phase_correct_mode_top_0x01FF");
+
+    Timer::PWM_phase_correct_mode_top_0x03FF();
+    CHECK_TRUE(test, Timer::mode() == 
+		Timer::Mode::PWM_phase_correct_top_0x03FF, 
+		"PWM_phase_correct_mode_top_0x03FF");
+
+    Timer::PWM_phase_correct_mode_top_ICR();
+    CHECK_TRUE(test, Timer::mode() == 
+		Timer::Mode::PWM_phase_correct_top_ICR, 
+		"PWM_phase_correct_mode_top_ICR");
+
+    Timer::PWM_phase_correct_mode_top_OCRA();
+    CHECK_TRUE(test, Timer::mode() == 
+		Timer::Mode::PWM_phase_correct_top_OCRA, 
+		"PWM_phase_correct_mode_top_OCRA");
+
+    Timer::PWM_phase_and_frequency_correct_mode_top_ICR();
+    CHECK_TRUE(test, Timer::mode() == 
+		Timer::Mode::PWM_phase_and_frequency_correct_top_ICR,
+		"PWM_phase_and_frequency_correct_mode_top_ICR");
+
+    Timer::PWM_phase_and_frequency_correct_mode_top_OCRA();
+    CHECK_TRUE(test, Timer::mode() == 
+		Timer::Mode::PWM_phase_and_frequency_correct_top_OCRA, 
+		"PWM_phase_and_frequency_correct_mode_top_OCRA");
+
+// prescalers
+    Timer::off();
+    CHECK_TRUE(test, Timer::prescaler() == 0, "off");
+
+    Timer::clock_frequency_no_preescaling();
+    CHECK_TRUE(test, Timer::prescaler() == 1, 
+					    "clock_frequency_no_preescaling");
+
+    Timer::clock_frequency_divide_by_8();
+    CHECK_TRUE(test, Timer::prescaler() == 8, "clock_frequency_divide_by_8");
+
+    Timer::clock_frequency_divide_by_64();
+    CHECK_TRUE(test, Timer::prescaler() == 64, "clock_frequency_divide_by_64");
+
+    Timer::clock_frequency_divide_by_256();
+    CHECK_TRUE(test, Timer::prescaler() == 256, "clock_frequency_divide_by_256");
+
+    Timer::clock_frequency_divide_by_1024();
+    CHECK_TRUE(test, Timer::prescaler() == 1024, "clock_frequency_divide_by_1024");
+
+
+    // Garantizo apagarlo
+    Timer::off();
 }
 
 void test_pin()
@@ -146,6 +285,9 @@ int main()
 	press_key_to_continue();
 
 	test_timer0();
+	press_key_to_continue();
+
+	test_timer1();
 	press_key_to_continue();
     }
 }

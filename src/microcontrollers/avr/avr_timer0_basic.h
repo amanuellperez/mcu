@@ -46,6 +46,8 @@
  *			 Timer0_generic. 
  *			 Esto tiene que ser un traductor: se limita a TRADUCIR
  *			 la datasheet sin añadir nada.
+ *
+ *	08/07/2024	 mode(), prescaler()
  ****************************************************************************/
 #include <avr/io.h> // registros: DDRB... PORT...
 #include "avr_timern_basic.h"
@@ -98,7 +100,8 @@ public:
 				prescaler_factor = {1, 8, 64, 256, 1024};
 
     enum class Frequency_divisor{
-		    undefined,    
+		    no_clock_prescaling,    
+		    off = no_clock_prescaling,
 		    no_preescaling,
 		    divide_by_8,
 		    divide_by_64,
@@ -107,6 +110,7 @@ public:
 
     // Obtenemos el divisor de frecuencia que se aplica al reloj del micro.
     static Frequency_divisor frequency_divisor();
+
 
     // Selección del reloj y de su velocidad (según tabla 19-10)
     // Establecemos el divisor de frecuencia a aplicar al reloj del micro.
@@ -117,10 +121,13 @@ public:
     static void clock_frequency_divide_by_1024();
 
 
+    // Devuelve el prescaler correspondiente
+    static uint16_t prescaler();
+
     /// Seleccionamos la frecuencia a la que funciona el timer usando el
     /// divisor de frecuencias (prescaler_factor)
     /// Enciende el timer (si prescaler_factor != 0) o lo apaga (si es == 0)
-    static constexpr void clock_frequency_prescaler(uint32_t prescaler_factor);
+    static void prescaler(uint16_t prescaler_factor);
 
     /// Frecuencia a la que funciona internamente el timer.
     /// Se cumple que clock_frequency() = 1 / clock_period();
@@ -155,7 +162,7 @@ public:
 	normal, CTC, 
 	fast_PWM_top_0xFF, fast_PWM_top_OCRA,
 	PWM_phase_correct_top_0xFF, PWM_phase_correct_top_OCRA,
-	unknown};
+	reserved};
 
     static Mode mode();
 
@@ -225,27 +232,6 @@ public:
 }; // Timer0
 
 
-inline Timer0::Frequency_divisor Timer0::frequency_divisor()
-{ 
-    switch(atd::read_bits<CS02, CS01, CS00>::of(TCCR0B)){
-	case atd::zero<uint8_t>::with_bits<CS02, CS01, CS00>::to<0,0,1>():
-	    return Frequency_divisor::no_preescaling;
-
-	case atd::zero<uint8_t>::with_bits<CS02, CS01, CS00>::to<0,1,0>():
-	    return Frequency_divisor::divide_by_8;
-
-	case atd::zero<uint8_t>::with_bits<CS02, CS01, CS00>::to<0,1,1>():
-	    return Frequency_divisor::divide_by_64;
-
-	case atd::zero<uint8_t>::with_bits<CS02, CS01, CS00>::to<1,0,0>():
-	    return Frequency_divisor::divide_by_256;
-
-	case atd::zero<uint8_t>::with_bits<CS02, CS01, CS00>::to<1,0,1>():
-	    return Frequency_divisor::divide_by_1024;
-    }
-
-    return Frequency_divisor::undefined;
-}
 
 
 // preescaler
@@ -284,19 +270,6 @@ inline void Timer0::clock_frequency_divide_by_1024()
 {   // 101
     atd::write_bits<CS02, CS01, CS00>::to<1,0,1>::in(TCCR0B);
 }
-
-// DUDA: ¿cómo gestionar los errores de programación?
-inline constexpr void Timer0::clock_frequency_prescaler(uint32_t prescaler_factor)
-{
-    switch (prescaler_factor){
-	break; case 8   : clock_frequency_divide_by_8();
-	break; case 64  : clock_frequency_divide_by_64();
-	break; case 256 : clock_frequency_divide_by_256();
-	break; case 1024: clock_frequency_divide_by_1024();
-	break; default  : clock_frequency_no_preescaling();
-    }
-}
-
 
 
 inline void Timer0::external_clock_falling_edge()
@@ -348,46 +321,6 @@ inline void Timer0::PWM_phase_correct_mode_top_OCRA()
     atd::write_bits<WGM02>::to<1>::in(TCCR0B);
     atd::write_bits<WGM01, WGM00>::to<0,1>::in(TCCR0A);
 }
-
-//  La siguiente función quedaría 
-//    reg <<= 3;
-//    static_assert (WGM00 < WGM01);
-//    reg |= (atd::read_bits<WGM01, WGM00>::of(TCCR0A) >> WGM00
-
-inline Timer0::Mode Timer0::mode()
-{
-    if (atd::read_bit<WGM02>::of(TCCR0B)){ // 1..
-	switch(atd::read_bits<WGM01, WGM00>::of(TCCR0A)){ 
-    //	case atd::zero<uint8_t>::with_bits<WGM01, WGM00>::to<0,0>(): 
-    //	    return Mode::reserved;
-
-	    case atd::zero<uint8_t>::with_bits<WGM01, WGM00>::to<0,1>():
-		return Mode::PWM_phase_correct_top_OCRA;
-
-    //	case atd::zero<uint8_t>::with_bits<WGM01, WGM00>::to<1,0>():
-    //	    return Mode::reserved;
-
-	    case atd::zero<uint8_t>::with_bits<WGM01, WGM00>::to<1,1>():
-		return Mode::fast_PWM_top_OCRA;
-	}
-    } else { // 0..
-	switch(atd::read_bits<WGM01, WGM00>::of(TCCR0A)){ 
-	case atd::zero<uint8_t>::with_bits<WGM01, WGM00>::to<0,0>(): 
-	    return Mode::normal;
-
-	case atd::zero<uint8_t>::with_bits<WGM01, WGM00>::to<0,1>():
-	    return Mode::PWM_phase_correct_top_0xFF;
-
-	case atd::zero<uint8_t>::with_bits<WGM01, WGM00>::to<1,0>():
-	    return Mode::CTC;
-
-	case atd::zero<uint8_t>::with_bits<WGM01, WGM00>::to<1,1>():
-	    return Mode::fast_PWM_top_0xFF;
-	}
-    }
-    return Mode::unknown;
-}
-
 
 
 // pins

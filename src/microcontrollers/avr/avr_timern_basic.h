@@ -137,7 +137,6 @@ public:
 };
 
 template <typename C>
-inline 
 Frequency PWM_mode<C>::frequency_fast_mode(const Frequency& freq_clk) const
 { return freq_clk / (prescaler * (top + 1)); }
 

@@ -89,7 +89,7 @@ int main()
     uint16_t ocr1a = 15625; // 15625 miniticks * 64 us/minitick = 1 seg
 
 
-    Timer::CTC_mode_top_OCR1A();
+    Timer::CTC_mode_top_OCRA();
     {
 	my_mcu::Disable_interrupts l;
 	Timer::unsafe_output_compare_register_A(ocr1a);

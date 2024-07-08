@@ -199,7 +199,6 @@ public:
     static void enable_output_compare_B_match_interrupt();
     static void disable_output_compare_B_match_interrupt();
 
-    // DUDA: disable_interrupts vs disable_all_interrupts!!!
     static void disable_interrupts();
 
     static void clear_pending_interrupts();

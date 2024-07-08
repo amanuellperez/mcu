@@ -1,6 +1,7 @@
 BIN = xx
 
 SOURCES= main.cpp \
+		 ../../../avr_timer1_basic.cpp \
 		 ../../../avr_timer1.cpp \
 		 ../../../avr_UART.cpp 
 

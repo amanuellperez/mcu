@@ -6,7 +6,6 @@ DIRS = \
 	automatic	\
 	ADC		\
 	cfg		\
-	generic_timer\
 	memory	\
 	pin		\
 	port	\
@@ -15,6 +14,7 @@ DIRS = \
 	timer0	\
 	timer1	\
 	timer2	\
+	timern	\
 	USART 
 
 

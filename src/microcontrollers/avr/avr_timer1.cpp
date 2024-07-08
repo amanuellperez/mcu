@@ -34,7 +34,7 @@ void Square_wave_generator1_g::generate(uint32_t freq_in_Hz, uint8_t npin)
     connect_pin(npin);
 
     top(t); 
-    Timer::clock_frequency_prescaler(d); // esto enciende el Timer
+    Timer::prescaler(d); // esto enciende el Timer
 }
 
 

@@ -1,9 +1,11 @@
-SOURCES= avr_sleep.cpp	\
-		 avr_ADC_driver.cpp	\
-		 avr_SPI_basic.cpp \
-		 avr_SPI.cpp \
-		 avr_timer0.cpp	\
-		 avr_timer1.cpp	\
+SOURCES= avr_sleep.cpp			\
+		 avr_ADC_driver.cpp		\
+		 avr_SPI_basic.cpp 		\
+		 avr_SPI.cpp 			\
+		 avr_timer0_basic.cpp	\
+		 avr_timer0.cpp			\
+		 avr_timer1_basic.cpp	\
+		 avr_timer1.cpp			\
 		 avr_UART.cpp
 
 

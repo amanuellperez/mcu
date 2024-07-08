@@ -138,7 +138,7 @@ inline Time clock_period_in_us_1MHz()
 	case Timer1::Frequency_divisor::divide_by_64	: return 64_us;
 	case Timer1::Frequency_divisor::divide_by_256	: return 256_us;
 	case Timer1::Frequency_divisor::divide_by_1024	: return 1024_us;
-	case Timer1::Frequency_divisor::undefined	: return 0_us;
+	case Timer1::Frequency_divisor::off		: return 0_us;
     }
 
     return 0_us;
@@ -157,7 +157,7 @@ inline Frequency clock_frequency_in_Hz_1MHz()
 					return Frequency{3'906ul};
 	case Timer1::Frequency_divisor::divide_by_1024	: 
 					return Frequency{977};
-	case Timer1::Frequency_divisor::undefined	: return 0_Hz;
+	case Timer1::Frequency_divisor::off		: return 0_Hz;
     }
 
     return 0_Hz;
@@ -202,7 +202,7 @@ inline Time clock_period_in_us_8MHz()
 	case Timer1::Frequency_divisor::divide_by_64	: return 8_us;
 	case Timer1::Frequency_divisor::divide_by_256	: return 32_us;
 	case Timer1::Frequency_divisor::divide_by_1024	: return 128_us;
-	case Timer1::Frequency_divisor::undefined	: return 0_us;
+	case Timer1::Frequency_divisor::off		: return 0_us;
     }
 
     return 0_us;
@@ -219,7 +219,7 @@ inline Frequency clock_frequency_in_Hz_8MHz()
 				return Frequency{31'250ul};
 	case Timer1::Frequency_divisor::divide_by_1024	: 
 				return Frequency{7'813ul};// exacto: 7812.5 +-10%
-	case Timer1::Frequency_divisor::undefined	: return 0_Hz;
+	case Timer1::Frequency_divisor::off		: return 0_Hz;
     }
 
     return 0_Hz;
@@ -297,15 +297,6 @@ public:
 			       const Frequency::Rep& freq_gen);
 };
 
-
-
-
-//inline Frequency PWM_mode::frequency_fast_mode(const Frequency& freq_clk) const
-//{ return freq_clk / (prescaler * (top + 1)); }
-//
-//inline Frequency PWM_mode::frequency_phase_mode(const Frequency& freq_clk) const
-//{ return freq_clk / (2 * prescaler * top); }
-
 }// namespace timer1_
 
 
@@ -340,7 +331,7 @@ public:
 /// Modo de funcionamiento: contador normal y corriente.
     static void unsafe_init(counter_type top0 = max_top()) 
     { 
-	Timer::CTC_mode_top_OCR1A();
+	Timer::CTC_mode_top_OCRA();
 	unsafe_reset();
 	unsafe_top(top0);
     }
@@ -608,7 +599,7 @@ private:
     using Disable_interrupts = avr_::Disable_interrupts;
 
 // Funciones de ayuda
-    static void init(){ Timer::CTC_mode_top_ICR1();}
+    static void init(){ Timer::CTC_mode_top_ICR();}
 
     template<uint16_t period
 	    , uint32_t clock_frequency_in_hz = clock_frequency_in_hz>
@@ -817,7 +808,7 @@ void SWG1_pin<n>::generate(const SW_signal& sw)
     auto [d, t] = CTC::frequency_to_prescaler_top
 			    <Timer, clock_frequency.value()> (sw.frequency());
 
-    Timer::CTC_mode_top_ICR1();
+    Timer::CTC_mode_top_ICR();
 
     {
 	Disable_interrupts l;
@@ -827,7 +818,7 @@ void SWG1_pin<n>::generate(const SW_signal& sw)
     }
 
     connect();
-    Timer::clock_frequency_prescaler(d); // esto enciende el Timer
+    Timer::prescaler(d); // esto enciende el Timer
 }
 
 
@@ -958,6 +949,10 @@ public:
     static constexpr uint8_t number  = npin0;
     static constexpr Frequency clock_frequency = avr_::clock_frequency;
 
+// constructor
+    PWM1_pin() = delete; // de momento static interface
+    static void init() {};// debería registrar los pines que se usa como PWM0?
+
 // basic interface
     // Genera la señal PWM indicada. Enciende el Timer en caso de que
     // estuviera apagado. Cuidado si se manejan los dos pins asociados a ese
@@ -984,11 +979,29 @@ public:
     static void write_zero();
     static void write_one();
 
+// info
+    // Devuelve la frecuencia que se está generando
+    static Frequency frequency();
 
 private:
+// types
+    using counter_type = typename Timer::counter_type;
+    using PWM_mode     = timer1_::PWM_mode;
+
+// helpers
     static void pin_as_output();
     static void cfg_duty_cycle(const Timer::counter_type& ocr);
+    static counter_type top();
 };
+
+
+template <uint8_t n>
+inline PWM1_pin<n>::counter_type PWM1_pin<n>::top()
+{
+    Disable_interrupts l;
+    return Timer::unsafe_input_capture_register();
+}
+
 
 template <uint8_t n>
 void PWM1_pin<n>::cfg_duty_cycle(const Timer::counter_type& ocr)
@@ -1017,8 +1030,8 @@ void PWM1_pin<n>::generate(const PWM_signal& pwm)
     timer1_::PWM_mode mode;
     mode.calculate_cfg_method2(clock_frequency, pwm.frequency());
 
-    if (mode.fast_mode)  Timer::fast_PWM_mode_top_ICR1();
-    else		 Timer::PWM_phase_and_frequency_correct_mode_top_ICR1();
+    if (mode.fast_mode)  Timer::fast_PWM_mode_top_ICR();
+    else		 Timer::PWM_phase_and_frequency_correct_mode_top_ICR();
 
     { // unsafe operations ==> Disable_interrupts 
     Disable_interrupts l; 
@@ -1029,7 +1042,7 @@ void PWM1_pin<n>::generate(const PWM_signal& pwm)
     cfg_duty_cycle(ocr);
     }
 
-    Timer::clock_frequency_prescaler(mode.prescaler);
+    Timer::prescaler(mode.prescaler);
 
 }
 
@@ -1077,6 +1090,30 @@ template <uint8_t n>
 void PWM1_pin<n>::write_one() {
     pin_as_output();
     Pin<n>::write_one();
+}
+
+//  Esta función es casi idéntica a la de PWM0_pin
+template <uint8_t n>
+Frequency PWM1_pin<n>::frequency()
+{
+    using Mode = Timer1::Mode;
+    Mode mode  = Timer1::mode();       
+
+    PWM_mode pwm;
+    pwm.top       = top();
+    pwm.prescaler = Timer1::prescaler();
+
+    if (pwm.prescaler == 0) // timer apagado?
+	return Frequency{0}; 
+
+    if (mode == Mode::fast_PWM_top_ICR)
+	return pwm.frequency_fast_mode(clock_frequency);
+
+    if (mode == Mode::PWM_phase_and_frequency_correct_top_ICR)
+	return pwm.frequency_phase_mode(clock_frequency);
+
+    return Frequency{0}; // 0 marca error en este caso ^_^'
+    
 }
 
 
