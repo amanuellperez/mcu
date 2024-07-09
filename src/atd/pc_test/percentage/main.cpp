@@ -72,6 +72,19 @@ void test_percentage_of()
     
 }
 
+void test_order()
+{
+    using P = atd::Percentage;
+    CHECK_TRUE(P{20} > P{10}, ">");
+
+    CHECK_TRUE(P{20} >= P{10}, ">=");
+    CHECK_TRUE(P{20} >= P{20}, ">=");
+
+    CHECK_TRUE(P{20} <= P{20}, "<=");
+    CHECK_TRUE(P{10} <= P{20}, "<=");
+
+    CHECK_TRUE(P{10} < P{20}, "<=");
+}
 
 
 void test_percentage()
@@ -80,6 +93,7 @@ void test_percentage()
     test::interface("Percentage");
     test_percentage_constructor();
     test_percentage_of();
+    test_order();
 }
 
 

@@ -60,10 +60,12 @@ namespace atd{
 //
 class Percentage{
 public:
+// constructor
     // precondition (0 <= x <= 100)
     constexpr Percentage(uint8_t x);
 
 
+// value
     // Calcula el tanto por cien del número x
     template <std::integral Int> // TODO: demasiado restringido, esto
 				 // vale para todo número (tb floats)
@@ -74,8 +76,14 @@ public:
     // Acceso de bajo nivel. ¿cómo evitar esta función?
     constexpr uint8_t as_uint() const { return value_;};
 
-    // print
+// print
     friend std::ostream& operator<<(std::ostream& out, const Percentage p);
+
+// order
+    // (RRR) ¿Tiene sentido comparar tantos por cien?
+    //       A veces sí: por ejemplo, si queremos comparar el error cometido
+    //       al calcular algo.
+    auto operator<=>(const Percentage& a) const;
 
 private:
     uint8_t value_;
@@ -115,6 +123,7 @@ constexpr Int Percentage::of(const Int& x) const
 }
 
 
+// equality
 inline
 constexpr bool operator==(const Percentage& x, const Percentage& y)
 { return x.as_uint() == y.as_uint();}
@@ -124,6 +133,16 @@ constexpr bool operator!=(const Percentage& x, const Percentage& y)
 { return !(x == y);}
 
 
+// order
+inline 
+auto Percentage::operator<=>(const Percentage& a) const
+{
+    if (value_ < a.value_) return -1;
+    if (a.value_ == value_) return 0;
+    else return +1;
+}
+
+// print
 inline std::ostream& operator<<(std::ostream& out, const Percentage p)
 {
     return out << static_cast<int>(p.value_) << " %";

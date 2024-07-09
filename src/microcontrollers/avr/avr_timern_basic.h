@@ -101,10 +101,10 @@ class PWM_mode{
 public:
 // Types
     using Timer        = Timern;
-    using counter_type = typename Timer::counter_type;
+    using top_type     = typename Timer::counter_type;
 
 // Data
-    counter_type top;
+    top_type top;
     uint16_t prescaler; // puede llegar hasta 1024
 
 // Calculo de la frecuencia generada por el modo
@@ -165,8 +165,12 @@ uint8_t PWM_mode<C>::prescaler2top_fast_mode( const Frequency::Rep& freq_clk,
 	return 100;
     }
 
-    top = atd::divide_rounding(q, Rep{prescaler}) - 1;
-    
+    Rep top2 = atd::divide_rounding(q, Rep{prescaler}) - 1;
+    if (atd::overflow<top_type>(top2)) // cuidado con los overflow!!!
+	return 100;
+
+    top = static_cast<top_type>(top2);
+
     if (top > 3 and top < Timer::max()){
 
 	Frequency::Rep freq_res = freq_clk / (prescaler * (top + 1));
@@ -196,7 +200,11 @@ uint8_t PWM_mode<C>::prescaler2top_phase_mode( const Frequency::Rep& freq_clk,
 	return 100;
     }
 
-    top = atd::divide_rounding(q, Rep{2 * prescaler});
+    auto top2 = atd::divide_rounding(q, Rep{2 * prescaler});
+    if (atd::overflow<top_type>(top2)) // cuidado con los overflow!!!
+	return 100;
+
+    top = static_cast<top_type>(top2);
     
     if (top > 4 and top < Timer::max()){
 

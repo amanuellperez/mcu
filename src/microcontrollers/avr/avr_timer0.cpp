@@ -71,44 +71,66 @@ void PWM_mode::calculate_cfg_top_0xFF(const Frequency::Rep& freq_clk,
     }
 }
 
-void PWM_mode::calculate_cfg_top_OCRA(const Frequency::Rep& freq_clk,
-			   const Frequency::Rep& freq_gen)
+// Lo que hace es mirar cual de los dos modos comete menos error usando el
+// prescaler0.
+atd::Percentage
+	PWM_mode::calculate_cfg_top_OCRA(const Frequency::Rep& freq_clk,
+			   const Frequency::Rep& freq_gen, 
+			   const uint16_t& prescaler0)
 {
 // Calculamos los dos modos para prescaler = 1
-    PWM_mode fast;
-    fast.prescaler = 1;
+    PWM_mode fast{};
+    fast.prescaler = prescaler0;
 
-    PWM_mode phase;
-    phase.prescaler = 1;
+    PWM_mode phase{};
+    phase.prescaler = prescaler0;
 
     auto ferr = fast.prescaler2top_fast_mode  (freq_clk, freq_gen);
     auto perr = phase.prescaler2top_phase_mode(freq_clk, freq_gen);
 
-
 // Rellenamos datos
-// A partir de 2kHz el prescaler es 1. Si se quieren generar frecuencias
-// menores es mejor elegir otros prescalers.
-// TODO: (???) modificarlo? Qué frecuencias en la práctica se usan?
-// Si lo modifico el código es mayor, ¿cuanto? merece la pena incrementar el
-// código en TODOS los programas que usen PWM0_pin o no?
-// Razones:
-//  (1) por consistencia, sí: tiene que generar la frecuencia más proxima a la
-//      pedida.
-//  (2) por eficiencia, no lo se. Todo depende de cuanto aumente el código en
-//      tamaño y ralentice al programa (no creo que ralentizarlo sea
-//      problematico)
-    prescaler = 1;
+    prescaler = prescaler0;
     if (ferr <= perr){
 	top = fast.top;
 	fast_mode = true;
+	return ferr;
 
     } else {
 	top = phase.top;
 	fast_mode = false;
+	return perr;
     }
-
 }
 
+// Voy a iterar por todos los prescalers buscando el que genera menos error
+// (son solo 5 prescalers, y la mayoria de las veces funcionara para prescaler
+// = 1)
+atd::Percentage PWM_mode::calculate_cfg_top_OCRA(const Frequency::Rep& freq_clk,
+			   const Frequency::Rep& freq_gen)
+{
+    auto error = calculate_cfg_top_OCRA(freq_clk, freq_gen, 
+						Timer0::prescaler_factor[0]);
+
+    PWM_mode tmp;
+
+    for (uint8_t i = 1; i < Timer0::prescaler_factor.size(); ++i){
+	auto error2 = 
+		tmp.calculate_cfg_top_OCRA(freq_clk, freq_gen, 
+				    Timer0::prescaler_factor[i]);
+	
+	if (error2 < error){
+	    *this = tmp;
+
+	    if (error2 == 0)
+		return error2;
+
+	    error = error2;
+	}
+
+    }
+
+    return error;
+}
 
 
 }// namespace timer0_

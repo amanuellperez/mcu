@@ -71,6 +71,19 @@ void init_timers()
     PWM_pin4::init();
 }
 
+// esto es `abort` pero ya hay una función abort 
+bool user_press_key()
+{
+    myu::UART_iostream uart;
+
+    if (uart.is_there_something_to_read()){
+	char c{};
+	uart >> c; // uart.clear(); que nombre estandar tiene esto?
+	return true;
+    }
+
+    return false;
+}
 
 void hello()
 {
@@ -125,24 +138,6 @@ void print(std::ostream& out,
 }
 
 
-void pwm_mode_test()
-{
-    myu::UART_iostream uart;
-    uart << "\nPWM_mode test\n"
-	    "-------------\n";
-
-    myu::Frequency freq_clk = 1_MHz;
-
-    myu::timer1_::PWM_mode pwm;
-
-    for (myu::Frequency fg = 20_Hz; fg < 100_Hz; fg += 1_Hz){
-	pwm.calculate_cfg_method2(freq_clk, fg);
-	uart << fg << ": ";
-	print(uart, pwm, freq_clk);
-	uart << '\n';
-    }
-
-}
 
 template <typename PWM_pin>
 void print_debug()
@@ -177,6 +172,77 @@ void print_debug()
 
 }
 
+template <Type::Integer Int>
+Int ask(std::iostream& out, const char* msg)
+{
+    out << "From (freq. in Hz): ";
+    Int x;
+    out >> x;
+    return x;
+}
+
+template <typename PWM_pin>
+void automatic_duty_cycle_test()
+{
+    myu::UART_iostream uart;
+    uart << "\n\nAutomatic generation of a range of duty cycles\n"
+	        "----------------------------------------------\n";
+
+
+    auto freq = ask<uint32_t>(uart, "Frequency to generate (in Hz): ");
+    if (freq == 0) return;
+    
+    myu::Frequency freq_gen = PWM_pin::frequency();
+    uart << "Generating frequency " << freq_gen << '\n';
+
+    for (uint8_t duty_cycle = 0; duty_cycle <= 100; duty_cycle += 10){
+	myu::PWM_signal pwm{freq, duty_cycle};
+	PWM_pin::generate(pwm);
+
+	uart << "duty cycle = " << (int) duty_cycle << " %\n";
+
+	myu::wait_ms(1000);
+	if (user_press_key())
+	    break;
+    }
+
+    PWM_pin::stop();
+
+}
+template <typename PWM_pin>
+void automatic_frequency_test()
+{
+    myu::UART_iostream uart;
+    uart << "\n\nAutomatic generation of a range of frequencies\n"
+	    "----------------------------------------------\n";
+
+    auto freq0 = ask<uint32_t>(uart, "From (freq. in Hz): ");
+    if (freq0 == 0) return;
+    
+    auto freq1 = ask<uint32_t>(uart, "To (freq. in Hz): ");
+    if (freq1 == 0) return;
+
+    auto incr = ask<uint32_t>(uart, "Increment (in Hz): ");
+    if (incr == 0) return;
+
+    uint8_t duty_cycle = 50;
+    for (; freq0 <= freq1; freq0 += incr){
+	myu::PWM_signal pwm{freq0, duty_cycle};
+	PWM_pin::generate(pwm);
+
+	myu::Frequency freq_gen = PWM_pin::frequency();
+	uart << "Trying to generate ... " << freq0 <<
+	        " but generating " << freq_gen << '\n';
+
+	myu::wait_ms(1000);
+	if (user_press_key())
+	    break;
+    }
+
+    PWM_pin::stop();
+
+}
+
 template <typename PWM_pin>
 void generate_pwm_signal()
 {
@@ -190,7 +256,7 @@ void generate_pwm_signal()
     uart << "Duty cycle (as number): ";
     uint16_t duty_cycle{0};
     uart >> duty_cycle;
-    if (duty_cycle == 0) return;
+    // if (duty_cycle == 0) return; // se puede probar duty cycle 0%
 
     myu::PWM_signal pwm{freq, static_cast<uint8_t>(duty_cycle)};
     PWM_pin::generate(pwm);
@@ -230,7 +296,9 @@ void test_pin()
 	    "2. Generate PWM signal\n"
 	    "3. Change duty cycle\n"
 	    "4. Stop timer\n"
-	    "5. Disconnect pin from timer\n";
+	    "5. Disconnect pin from timer\n"
+	    "6. Automatic frequency test\n"
+	    "7. Automatic duty cycle test\n";
 
     char opt{};
     uart >> opt;
@@ -242,6 +310,8 @@ void test_pin()
 	break; case '3': change_duty_cycle<PWM_pin>();
 	break; case '4': PWM_pin::stop();
 	break; case '5': PWM_pin::disconnect();
+	break; case '6': automatic_frequency_test<PWM_pin>();
+	break; case '7': automatic_duty_cycle_test<PWM_pin>();
 	break; default: uart << "I don't understand.\n";
     }
 
@@ -260,27 +330,24 @@ int main()
     while(1){
 	uart << "\nMenu\n"
 	          "----\n"
-		  "1. PWM_mode: list of values\n"
-		  "2. Timer0::PWM_pin " << uint16_t{PWM_pin1::number} << "\n";
+		  "1. Timer0::PWM_pin " << uint16_t{PWM_pin1::number} << "\n";
 
 	if constexpr (timer0_both_pins)
-	    uart << "3. Timer0::PWM_pin " << uint16_t{PWM_pin2::number} << "\n";
+	    uart << "2. Timer0::PWM_pin " << uint16_t{PWM_pin2::number} << "\n";
 
-	uart << "4. Timer1::PWM_pin " << uint16_t{PWM_pin3::number} << "\n"
-		"5. Timer1::PWM_pin " << uint16_t{PWM_pin4::number} << "\n";
+	uart << "3. Timer1::PWM_pin " << uint16_t{PWM_pin3::number} << "\n"
+		"4. Timer1::PWM_pin " << uint16_t{PWM_pin4::number} << "\n";
 
 
 
         char c{};
 	uart >> c;
 	switch(c){
-	    break; case '1': pwm_mode_test();
-
-	    break; case '2': test_pin<PWM_pin1>();
-	    break; case '3': if constexpr (timer0_both_pins)
+	    break; case '1': test_pin<PWM_pin1>();
+	    break; case '2': if constexpr (timer0_both_pins)
 				    test_pin<PWM_pin2>();
-	    break; case '4': test_pin<PWM_pin3>();
-	    break; case '5': test_pin<PWM_pin4>();
+	    break; case '3': test_pin<PWM_pin3>();
+	    break; case '4': test_pin<PWM_pin4>();
 
 	    break; default:
 		uart << "I don't understand.\n";

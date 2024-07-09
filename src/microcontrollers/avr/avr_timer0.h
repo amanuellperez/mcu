@@ -51,9 +51,11 @@
 #include "avr_timer0_basic.h"
 #include "avr_cfg.h"	// clock_frequency_in_hz
 
-#include <atd_type_traits.h>
 #include <tuple>    // std::tie
 		    
+#include <atd_type_traits.h>
+#include <atd_percentage.h>
+
 namespace avr_{
 
 namespace timer0_{
@@ -260,9 +262,16 @@ public:
 			       const Frequency& freq_gen)
     { calculate_cfg_top_OCRA(freq_clk.value(), freq_gen.value());}
 
-    void calculate_cfg_top_OCRA(const Frequency::Rep& freq_clk,
+    // Esta función va a intentar generar la frecuencia freq_gen, pero
+    // muchas veces no se va a generar exactamente. Por ello devuelve el error
+    // que comete (como %)
+    atd::Percentage calculate_cfg_top_OCRA(const Frequency::Rep& freq_clk,
 			       const Frequency::Rep& freq_gen);
 
+private:
+    atd::Percentage calculate_cfg_top_OCRA(const Frequency::Rep& freq_clk,
+			        const Frequency::Rep& freq_gen, 
+			        const uint16_t& prescaler);
 };
 
 
@@ -753,6 +762,7 @@ private:
     static void pin_as_output();
     static void cfg_duty_cycle(const counter_type& ocr);
     static counter_type top();
+    static void generate_impl(const PWM_signal& pwm);
 };
 
 template <uint8_t n>
@@ -785,10 +795,26 @@ void PWM0_pin<n>::cfg_duty_cycle(const counter_type& ocr)
 }
 
 
+template <uint8_t n>
+void PWM0_pin<n>::generate(const PWM_signal& pwm)
+{
+    if (pwm.duty_cycle() == 0){
+	write_zero();
+	return;
+    }
+
+    if (pwm.duty_cycle() == 100){
+	write_one();
+	return;
+    }
+
+    generate_impl(pwm);
+}
+
 // En FAST PWM : freq_generada = clock_freq / (prescaler * (top + 1));
 // En PHASE PWM: freq_generada = clock_freq / (2 * prescaler * top);
 template <uint8_t n>
-void PWM0_pin<n>::generate(const PWM_signal& pwm)
+void PWM0_pin<n>::generate_impl(const PWM_signal& pwm)
 {
     timer0_::PWM_mode mode;
 
@@ -855,7 +881,11 @@ inline void PWM0_pin<n>::disconnect()
 
 
 template <uint8_t n>
-inline void PWM0_pin<n>::stop() { Timer::off(); }
+inline void PWM0_pin<n>::stop() 
+{ 
+    Timer::off(); 
+    write_zero();   // garantizamos un 0 como estado final
+}
 
 
 template <uint8_t n>

@@ -104,10 +104,9 @@ void Timer0::prescaler(uint16_t prescaler_factor)
 	break; case 64  : clock_frequency_divide_by_64();
 	break; case 256 : clock_frequency_divide_by_256();
 	break; case 1024: clock_frequency_divide_by_1024();
+	break; default  : clock_frequency_no_preescaling();
     }
 
-    // default
-    return clock_frequency_no_preescaling();
 }
 
 }// namespace

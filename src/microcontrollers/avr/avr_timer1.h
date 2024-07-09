@@ -992,6 +992,7 @@ private:
     static void pin_as_output();
     static void cfg_duty_cycle(const Timer::counter_type& ocr);
     static counter_type top();
+    static void generate_impl(const PWM_signal& pwm);
 };
 
 
@@ -1017,6 +1018,22 @@ void PWM1_pin<n>::cfg_duty_cycle(const Timer::counter_type& ocr)
 }
 
 
+template <uint8_t n>
+void PWM1_pin<n>::generate(const PWM_signal& pwm)
+{
+    if (pwm.duty_cycle() == 0){
+	write_zero();
+	return;
+    }
+
+    if (pwm.duty_cycle() == 100){
+	write_one();
+	return;
+    }
+
+    generate_impl(pwm);
+}
+
 // En FAST PWM : freq_generada = clock_freq / (prescaler * (top + 1));
 // En PHASE PWM: freq_generada = clock_freq / (2 * prescaler * top);
 // DUDA: ICR1 no es doble buffered, lo que puede generar el problema de que al
@@ -1024,9 +1041,8 @@ void PWM1_pin<n>::cfg_duty_cycle(const Timer::counter_type& ocr)
 // gestionar eso? De momento, no: esto es una versión experimental pensada
 // para los motores donde eso no generará problemas. 
 template <uint8_t n>
-void PWM1_pin<n>::generate(const PWM_signal& pwm)
+void PWM1_pin<n>::generate_impl(const PWM_signal& pwm)
 {
-
     timer1_::PWM_mode mode;
     mode.calculate_cfg_method2(clock_frequency, pwm.frequency());
 
@@ -1043,7 +1059,6 @@ void PWM1_pin<n>::generate(const PWM_signal& pwm)
     }
 
     Timer::prescaler(mode.prescaler);
-
 }
 
 template <uint8_t n>
@@ -1070,7 +1085,11 @@ inline void PWM1_pin<n>::disconnect()
 
 
 template <uint8_t n>
-inline void PWM1_pin<n>::stop() { Timer::off(); }
+inline void PWM1_pin<n>::stop() 
+{ 
+    Timer::off(); 
+    write_zero();   // garantizamos un 0 como estado final
+}
 
 
 template <uint8_t n>

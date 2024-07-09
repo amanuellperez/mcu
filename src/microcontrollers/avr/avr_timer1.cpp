@@ -47,10 +47,10 @@ void PWM_mode::calculate_cfg_method2(const Frequency::Rep& freq_clk,
 				     const Frequency::Rep& freq_gen)
 {
 // Calculamos los dos modos para prescaler = 1
-    PWM_mode fast;
+    PWM_mode fast{};
     fast.prescaler = 1;
 
-    PWM_mode phase;
+    PWM_mode phase{};
     phase.prescaler = 1;
 
     auto ferr = fast.prescaler2top_fast_mode  (freq_clk, freq_gen);
