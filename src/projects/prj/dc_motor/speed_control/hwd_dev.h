@@ -31,6 +31,7 @@
 
 #include "adev_motor.h"
 #include "my_miniclock.h"
+#include <mcu_time.h>
 
 #include <avr_atmega.h>
 #include <dev_L298N.h>
@@ -125,6 +126,13 @@ using L298N = dev::L298N_basic<Micro, L298_pinA, L298_pinB>;
 using Motor = adev::DC_Motor<L298N>;
 
 using Speed_sensor_pin = Micro::Pin<speed_sensor_pin>;
+
+
+
+// FUNCTIONS
+// ---------
+template <typename Pred>
+using wait_till = mcu::wait_till<myu::Wait_1_ms, Pred>;
 
 #endif
 

@@ -158,7 +158,7 @@ void receive_polling()
 int main()
 {
     init_uart();
-    Miniclock_us::cfg();
+    Miniclock_us::init();
 
     my_mcu::UART_iostream uart;
 

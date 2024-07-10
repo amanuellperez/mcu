@@ -74,6 +74,9 @@ namespace atmega{
     template <uint8_t n>
     using Pin = avr_::Pin<n>;
 
+    template <uint8_t n>
+    using Enable_change_level_interrupt = avr_::Enable_change_level_interrupt<n>;
+
     template<uint8_t n>
     using Output_pin = avr_::Output_pin<n>;
 
@@ -83,6 +86,7 @@ namespace atmega{
     template<uint8_t n>
     using Input_pin_without_pullup = avr_::Input_pin_without_pullup<n>;
 
+// ADC
     using ADC_basic = avr_::ADC_basic;
     using ADC	    = avr_::ADC;
 
@@ -145,19 +149,6 @@ namespace atmega{
 
     using TWI_basic  = avr_::TWI_basic;
 
-//    // TODO: esta es genérica, no depende de avr. Sacarla de avr
-//    template <typename TWI, typename TWI::streamsize buffer_size0>
-//    using TWI_master = avr_::TWI_master<TWI, buffer_size0>;
-//
-//    // TODO: esta es genérica, no depende de avr. Sacarla de avr
-//    template <typename TWI_master>
-//    using TWI_master_ioxtream = avr_::TWI_master_ioxtream<TWI_master>;
-//
-//    // TODO: esta es genérica, no depende de avr. Sacarla de avr
-//    template <typename TWI, uint8_t buffer_size>
-//    using TWI_slave = avr_::TWI_slave<TWI, buffer_size>;
-
-
 // MCU UTILITIES
     using Sleep    = avr_::Sleep;
     using Watchdog = avr_::Watchdog;
@@ -193,8 +184,10 @@ namespace atmega{
 
     namespace literals{ using namespace avr_::literals; }
 
-
     
+// TIME
+    using Wait_1_us = avr_::Wait_1_us;
+    using Wait_1_ms = avr_::Wait_1_ms;
 
 /***************************************************************************
  *			FUNCIONES AUXILIARES

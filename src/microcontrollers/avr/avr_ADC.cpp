@@ -16,7 +16,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#include "avr_ADC_driver.h"
+#include "avr_ADC.h"
 
 namespace avr_{
 

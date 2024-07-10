@@ -2,7 +2,7 @@ BIN = xx
 
 SOURCES= main.cpp	\
 		 ../../../avr_UART.cpp	\
-		 ../../../avr_ADC_driver.cpp	
+		 ../../../avr_ADC.cpp	
 
 MCU = atmega328p
 

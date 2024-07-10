@@ -62,7 +62,6 @@
 #include <avr_timer2_basic.h>
 
 #include <avr_ADC_basic.h>
-#include <avr_ADC_driver.h>
 
 #include <avr_cfg.h>
 #include <avr_interrupt.h>
@@ -82,6 +81,8 @@
 #include <avr_timer0.h>
 #include <avr_timer1.h>
 #include <avr_timer2.h>
+
+#include <avr_ADC.h>
 
 // TODO: mirar qué depende del micro realmente y qué se basa en un UART
 // genérico. Mover a `mcu` lo que sea genérico.

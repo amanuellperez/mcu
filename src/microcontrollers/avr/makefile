@@ -1,5 +1,5 @@
 SOURCES= avr_sleep.cpp			\
-		 avr_ADC_driver.cpp		\
+		 avr_ADC.cpp			\
 		 avr_SPI_basic.cpp 		\
 		 avr_SPI.cpp 			\
 		 avr_timer0_basic.cpp	\
@@ -9,8 +9,8 @@ SOURCES= avr_sleep.cpp			\
 		 avr_UART.cpp
 
 
-INCS= avr_ADC_basic.h		\
-	avr_ADC_driver.h	\
+INCS= avr_ADC_basic.h	\
+	avr_ADC.h			\
 	avr_atmega328p_cfg.h\
 	avr_atmega_dev.h	\
 	avr_atmega.h		\

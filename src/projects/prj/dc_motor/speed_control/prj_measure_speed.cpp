@@ -20,34 +20,27 @@
 #include "prj_main.h"
 #include <pli_iostream.h>
 
-#include "mcu_time.h"
-
 
 void Main::measure_speed()
 {
-    uint8_t max_abort_time = 250;
+    uint16_t abort_time = 400;
 
-    Speed_sensor_pin::enable_change_level_interrupt(); 
+    myu::Enable_change_level_interrupt<speed_sensor_pin> inter{};
 
     Miniclock_ms::reset();
 
-//    if (no_response_after_ms_while(max_abort_time,
-//			    []{ return Miniclock_ms::is_off(); },
-//			    []{ Micro::wait_ms(1);}
-//			    )
-    if (no_response_after(max_abort_time).ms_while(
-			    []{ return Miniclock_ms::is_off(); },
-			    []{ Micro::wait_ms(1);}
-			    )
-	){
+    if (wait_till([]{ return Miniclock_ms::is_off(); })
+		._at_most_ms(abort_time)) {
 	    uart << "Miniclock_ms doesn't start! Aborting\n";
-	    Speed_sensor_pin::disable_change_level_interrupt();
 	    return;
     }
 
 
-    while (Miniclock_ms::is_on()) 
-    { ; } // wait
+    if (wait_till([]{ return Miniclock_ms::is_on(); })
+		._at_most_ms(abort_time)) {
+	    uart << "Miniclock_ms doesn't end! Aborting\n";
+	    return;
+    }
 
     uart << "Time: " << Miniclock_ms::time() << " ms\n";
 

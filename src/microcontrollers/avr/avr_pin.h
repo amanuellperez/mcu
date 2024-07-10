@@ -83,6 +83,8 @@
  *			   simplemente documenta como conectar el pin del chip.
  *		    Implemento este doble significado.
  *
+ *	10/07/2024 Enable_change_level_interrupt
+ *
  ****************************************************************************/
 #include <avr/io.h> // registros: cfg::DDRB... cfg::PORT...
 #include "avr_time.h"
@@ -252,11 +254,6 @@ public:
     using INT = INT__<cfg::nINT_of_pin<n>()>;
 
 };
-
-// Usamos el pin 0, que no existe, to indicate a floating pin o a pin
-// conectado a Vcc o GND.
-//template<>
-//class Pin<0>{ };
 
 
 // Implementación
@@ -627,6 +624,22 @@ struct Pin <n, false, true>
 
 template <uint8_t n>
 using Pin = impl_of::Pin<n>::type;
+
+
+
+
+/***************************************************************************
+ *			ENABLE_CHANGE_LEVEL_INTERRUPT
+ ***************************************************************************/
+// Equivalente a Enable_interrupts pero solo para el pin correspondiente
+template <uint8_t n>
+struct Enable_change_level_interrupt{
+    Enable_change_level_interrupt() 
+	{Pin<n>::enable_change_level_interrupt(); }
+
+    ~Enable_change_level_interrupt() 
+	{Pin<n>::disable_change_level_interrupt();}
+};
 
 
 /***************************************************************************

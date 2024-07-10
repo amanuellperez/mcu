@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __AVR_ADC_DRIVER_H__
-#define __AVR_ADC_DRIVER_H__
+#ifndef __AVR_ADC_H__
+#define __AVR_ADC_H__
 /****************************************************************************
  *
  * DESCRIPCION

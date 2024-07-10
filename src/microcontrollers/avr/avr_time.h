@@ -38,6 +38,7 @@
  *    Manuel Perez
  *	27/01/2019 Reestructurado.
  *	11/12/2022 Encapsulamos macros en funciones de C++
+ *	10/07/2024 Wait_1_us/Wait_1_ms
  *
  ****************************************************************************/
 #include <util/delay.h>
@@ -68,6 +69,16 @@ inline constexpr void wait_ms(Int t)
 
 #undef _delay_us
 #undef _delay_ms
+
+// Wait_1_us/ms
+// ------------
+struct Wait_1_us{
+    void operator()() {wait_us(1);}
+};
+
+struct Wait_1_ms{
+    void operator()() {wait_ms(1);}
+};
 
 }// namespace
 
