@@ -25,7 +25,7 @@
  * - DESCRIPCION: Traductor del módulo UART del avr.
  *
  * - HISTORIA:
- *   AManuel LPerez
+ *   Manuel Perez
  *	26/07/2017 Escrito.
  *	27/08/2019 Modifico el calculo de UBBR.
  *	13/10/2019 Creo uart_iostream dejando UART como traductor puro.

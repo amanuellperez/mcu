@@ -170,7 +170,7 @@ int main()
     Pin pin;
 
     init_uart();
-    Miniclock0_ms::cfg();
+    Miniclock0_ms::init();
 
     myu::UART_iostream uart;
     Cfg cfg = Cfg::miniclock0_ms;

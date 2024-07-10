@@ -1,4 +1,4 @@
-// Copyright (C) 2022 Manuel Perez 
+// Copyright (C) 2024 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -17,33 +17,40 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "prj_main.h"
+#pragma once
 
-// ¿Dónde poner este warning? Si lo pongo en dev.h se genera el warning al
-// compilar todos los ficheros, lo cual ocultaría warnings reales. De momento
-// lo dejo aquí.
-#if F_CPU==8000000UL
-#pragma GCC warning "Micro in 8MHz: remember to execute `make set_fast_fuse`"
+#ifndef __MCU_TIME_H__
+#define __MCU_TIME_H__
+
+// Nombre?
+//	if (no_response_after(300)_ms_while(f)) abort;
+template <typename Wait_1_ms, typename Predicate>
+bool no_response_after_ms_while(uint8_t time_ms, Predicate f, Wait_1_ms wait_1_ms)
+{
+    if (time_ms == 0)
+	return true;
+
+    while (f()){
+	wait_1_ms();
+	--time_ms;
+	if (time_ms == 0)
+	    return true;
+    }
+
+    return false;
+}
+
+struct no_response_after{
+    no_response_after(uint16_t wait_time_in_ms) 
+	    : wait_time_in_ms_ {wait_time_in_ms} {}
+
+    template <typename Predicate, typename Wait_1_ms>
+    bool ms_while(Predicate f, Wait_1_ms wait_1_ms)
+    { return no_response_after_ms_while(wait_time_in_ms_, f, wait_1_ms);}
+	    
+    uint16_t wait_time_in_ms_;
+};
+
 #endif
-
-void Main::init_uart()
-{
-    UART::init();
-}
-
-
-Main::Main()
-{
-    init_uart();
-    Miniclock_us::init();
-}
-
-
-int main()
-{
-    Main app;
-    app.run();
-}
-
 
 

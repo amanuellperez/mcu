@@ -1,4 +1,4 @@
-// Copyright (C) 2022 Manuel Perez 
+// Copyright (C) 2024 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -19,31 +19,25 @@
 
 #include "prj_main.h"
 
-// ¿Dónde poner este warning? Si lo pongo en dev.h se genera el warning al
-// compilar todos los ficheros, lo cual ocultaría warnings reales. De momento
-// lo dejo aquí.
-#if F_CPU==8000000UL
-#pragma GCC warning "Micro in 8MHz: remember to execute `make set_fast_fuse`"
-#endif
+void Main::init_hwd()
+{
+    init_uart();
+
+    Miniclock_ms::init();
+
+    PWM_pinA::init();
+
+    Speed_sensor_pin::as_input_without_pullup();
+    // Activamos la interrupt cuando vayamos a medir
+//    Speed_sensor_pin::enable_change_level_interrupt(); 
+
+    Micro::enable_interrupts();
+}
 
 void Main::init_uart()
 {
-    UART::init();
+    myu::basic_cfg(uart);
+    uart.turn_on();
 }
-
-
-Main::Main()
-{
-    init_uart();
-    Miniclock_us::init();
-}
-
-
-int main()
-{
-    Main app;
-    app.run();
-}
-
 
 

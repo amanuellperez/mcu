@@ -108,7 +108,9 @@ namespace atmega{
     using Square_wave_generator0_g = avr_::Square_wave_generator0_g;
     using Square_wave_burst_generator0_g = avr_::Square_wave_burst_generator0_g;
     using SWG0           = avr_::Square_wave_generator0_g;
-//    using PWM0_pin	 = avr_::PWM0_pin; TODO
+
+    template <uint8_t npin>
+    using PWM0_pin	 = avr_::PWM0_pin<npin>;
 
     // Timer1
     // ------

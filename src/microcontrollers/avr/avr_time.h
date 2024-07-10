@@ -35,7 +35,7 @@
  *	Además en la práctica no necesito esa función.
  *
  *  - HISTORIA:
- *    A.Manuel López
+ *    Manuel Perez
  *	27/01/2019 Reestructurado.
  *	11/12/2022 Encapsulamos macros en funciones de C++
  *

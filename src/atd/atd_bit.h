@@ -29,7 +29,7 @@
  *
  *  HISTORIA
  *  --------
- *  AManuel Lopez Perez
+ *  Manuel Perez
  *  26/07/2017 v0.0: Escrito
  *  31/07/2019 v0.1:
  *	    No me gusta el nombre de las funciones:

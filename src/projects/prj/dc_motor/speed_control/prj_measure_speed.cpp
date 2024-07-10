@@ -1,4 +1,4 @@
-// Copyright (C) 2022 Manuel Perez 
+// Copyright (C) 2024 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -18,32 +18,38 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "prj_main.h"
+#include <pli_iostream.h>
 
-// ¿Dónde poner este warning? Si lo pongo en dev.h se genera el warning al
-// compilar todos los ficheros, lo cual ocultaría warnings reales. De momento
-// lo dejo aquí.
-#if F_CPU==8000000UL
-#pragma GCC warning "Micro in 8MHz: remember to execute `make set_fast_fuse`"
-#endif
+#include "mcu_time.h"
 
-void Main::init_uart()
+
+void Main::measure_speed()
 {
-    UART::init();
+    uint8_t max_abort_time = 250;
+
+    Speed_sensor_pin::enable_change_level_interrupt(); 
+
+    Miniclock_ms::reset();
+
+//    if (no_response_after_ms_while(max_abort_time,
+//			    []{ return Miniclock_ms::is_off(); },
+//			    []{ Micro::wait_ms(1);}
+//			    )
+    if (no_response_after(max_abort_time).ms_while(
+			    []{ return Miniclock_ms::is_off(); },
+			    []{ Micro::wait_ms(1);}
+			    )
+	){
+	    uart << "Miniclock_ms doesn't start! Aborting\n";
+	    Speed_sensor_pin::disable_change_level_interrupt();
+	    return;
+    }
+
+
+    while (Miniclock_ms::is_on()) 
+    { ; } // wait
+
+    uart << "Time: " << Miniclock_ms::time() << " ms\n";
+
 }
-
-
-Main::Main()
-{
-    init_uart();
-    Miniclock_us::init();
-}
-
-
-int main()
-{
-    Main app;
-    app.run();
-}
-
-
 

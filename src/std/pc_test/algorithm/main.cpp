@@ -213,7 +213,7 @@ void test_find(It p0, It pe, char x, const std::string& res)
     CHECK_TRUE(res == y, "find");
 }
 
-struct Es_uno{
+struct Is_one{
     bool operator()(char x) const {return x == '1';}
 };
 
@@ -247,20 +247,20 @@ void test_find()
     }
     {
     std::string s{"00123"};
-    test_find_if(s.begin(), s.end(), Es_uno{}, "00");
+    test_find_if(s.begin(), s.end(), Is_one{}, "00");
     s = "";
-    test_find_if(s.begin(), s.end(), Es_uno{}, "");
+    test_find_if(s.begin(), s.end(), Is_one{}, "");
     s = "0000";
-    test_find_if(s.begin(), s.end(), Es_uno{}, "0000");
+    test_find_if(s.begin(), s.end(), Is_one{}, "0000");
     }
 
     {
     std::string s{"111011"};
-    test_find_if_not(s.begin(), s.end(), Es_uno{}, "111");
+    test_find_if_not(s.begin(), s.end(), Is_one{}, "111");
     s = "";
-    test_find_if_not(s.begin(), s.end(), Es_uno{}, "");
+    test_find_if_not(s.begin(), s.end(), Is_one{}, "");
     s = "1111";
-    test_find_if_not(s.begin(), s.end(), Es_uno{}, "1111");
+    test_find_if_not(s.begin(), s.end(), Is_one{}, "1111");
     }
 }
 

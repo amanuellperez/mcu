@@ -1,4 +1,4 @@
-// Copyright (C) 2022 Manuel Perez 
+// Copyright (C) 2024 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -17,33 +17,22 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "prj_main.h"
+#include "hwd_dev.h"
+#include "prj_main.h" // borrame
 
-// ¿Dónde poner este warning? Si lo pongo en dev.h se genera el warning al
-// compilar todos los ficheros, lo cual ocultaría warnings reales. De momento
-// lo dejo aquí.
-#if F_CPU==8000000UL
-#pragma GCC warning "Micro in 8MHz: remember to execute `make set_fast_fuse`"
-#endif
+ISR_SPEED_SENSOR_PIN{
+    // Medimos transiciones 0 -> 1
+    if (Speed_sensor_pin::is_one()){
 
-void Main::init_uart()
-{
-    UART::init();
+	if (Miniclock_ms::is_off())
+	    Miniclock_ms::start();
+
+	else{
+	    Miniclock_ms::stop();
+	    Speed_sensor_pin::disable_change_level_interrupt(); 
+	}
+
+    }
 }
-
-
-Main::Main()
-{
-    init_uart();
-    Miniclock_us::init();
-}
-
-
-int main()
-{
-    Main app;
-    app.run();
-}
-
 
 

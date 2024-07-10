@@ -29,9 +29,13 @@
  * HISTORIA
  *    Manuel Perez
  *    05/06/2024 press_key
+ *    10/07/2024 ask_char, ask<Int>
  *
  ****************************************************************************/
 #include <iostream>
+#include <type_traits>
+
+#include <atd_concepts.h>
 
 namespace pli{
 
@@ -50,7 +54,24 @@ inline void press_key_to_continue(std::iostream& os)
 // contrario devuelve true.
 bool ask_yesno(std::iostream& os, const char* msg);
 
+char ask_char(std::iostream& os, const char* msg);
+
 uint8_t ask_uint8_t(std::iostream& os, const char* msg);
+
+template <Type::Integer Int>
+Int ask(std::iostream& os, const char* msg)
+{
+    if constexpr (std::is_same_v<Int, uint8_t>)
+	return ask_uint8_t(os, msg);
+
+// else
+    os << msg;
+    Int x{};
+    os >> x;
+    return x;
+
+}
+
 
 
 }// namespace

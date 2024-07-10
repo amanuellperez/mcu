@@ -144,7 +144,7 @@ uint32_t HCSR04<C>::read_time(uint16_t time_out_us)
 {
     result_ = Result::ok;
 
-    Miniclock_us::cfg();
+    Miniclock_us::init();
 
     typename Micro::Disable_interrupts lock;
 

@@ -17,49 +17,55 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "pli_iostream.h"
+#pragma once
 
-namespace pli{
-void press_key(std::iostream& os)
-{
-    char c{};
-    os >> c;
-}
+#ifndef __PRJ_MINICLOCK_H__
+#define __PRJ_MINICLOCK_H__
 
-void press_key_to(const char* msg, std::iostream& os)
-{
-    os << "Press a key to " << msg << '\n';
-    press_key(os);
-}
+#include <mcu_miniclock.h>
 
-uint8_t ask_uint8_t(std::iostream& os, const char* msg)
-{
-    os << msg;
-    uint16_t x{};
-    os >> x;
-    return static_cast<uint8_t>(x);
-}
+namespace my{
 
-char ask_char(std::iostream& os, const char* msg)
-{
-    os << msg;
-    char x{};
-    os >> x;
-    return x;
-}
+template <typename Micro_t,   
+	 typename Time_counter_t>
+class Miniclock_ms : public mcu::Miniclock_ms<Micro_t, Time_counter_t>{
+public:
+    using Base = mcu::Miniclock_ms<Micro_t, Time_counter_t>;
 
+// construction
+    Miniclock_ms() = delete;
 
-bool ask_yesno(std::iostream& os, const char* msg)
-{
-    os << msg << " (y/n)?";
-    char ans{};
-    os >> ans;
-    if (ans == 'n' or ans == 'N')
-	return false;
+    static void init() 
+    {
+	Base::init();
+	on_ = false;
+    }
 
-    return true;    // default
-}
+    static void reset() { init(); }
+    
+// operations
+    static void start() 
+    {
+	Base::start();
+	on_ = true;
+    }
+
+    static void stop() 
+    {
+	Base::stop();
+	on_ = false;
+    }
+
+// info
+    static bool is_on () { return on_;}
+    static bool is_off() { return !is_on();}
+
+private:
+    inline static volatile bool on_; 
+};
 
 
 }// namespace
- 
+#endif
+
+

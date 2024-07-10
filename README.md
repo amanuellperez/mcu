@@ -72,6 +72,7 @@ ATMEGA328).
 * [Configurar entorno de trabajo](#entorno)
 * [Reglas para compilar](#reglas_compilar)
 * [Tests](#test)
+* [Diseño](#discapas)
 * [Documentación y ayuda](#documentacion)
 * [Licencia GPL](#licencia)
 * [Vídeos](#videos)
@@ -224,6 +225,87 @@ Cada vez voy desarrollando más el hábito de:
    todavía claro cómo hacerlo. ¿Hacer un programa para probar todo lo del
    micro? Suena bien: experimentemos a crear un test llamado `automatic` a 
    ver si lo uso.
+
+
+## <a name="discapas"></a>Diseño
+
+### Diseño por capas
+Todo el diseño está pensado por capas, donde cada capa se *parametriza* como
+parámetro de template. Aunque por el momento no tengo intención de hacerlo, si
+se escribe el equivalente de `avr` para `arduino` se podrían usar los drivers
+definidos en la capa `devices` con arduino. Salvo por curiosidad y como
+experimento, no creo (a día de hoy) que merezca mucho la pena escribir la 
+capa de arduino ya que el estilo de arduino es muy diferente al estilo que 
+uso aquí.
+
+### Traductores vs drivers
+La capa más básica son los traductores: de momento, a los traductores les
+pongo el sufijo `_basic`. De esa forma puedes tener el traductor del
+controlador de motor `A4988_basic` y el driver `A4988`. Cada día tengo mis
+dudas de seguir manteniendo el `_basic`: por una parte es un incordio a la
+hora de leer el código, pero por otra parte recuerda al programador que se
+está usando un traductor y por tanto no se (debería de) introducir ningún tipo
+de ineficiencia: lo único que hace el traductor es que en lugar de tener que
+recordar qué bits son los que hay que modificar para hacer tal cosa y usar
+código críptico que nadie entiende, el traductor le da un nombre más legible.
+ Nada más. 
+
+Por otra parte, si el programador ve en el código que se va a usar el `A4988`
+sin el `_basic` sabrá que es un driver pudiendo estar introduciendo
+funciones de más alto nivel que pueden ralentizar la ejecución del programa u
+ocupar más memoria de la necesaria. 
+
+Por eso sigo manteniendo el `_basic`, pero cada vez me gusta menos verlo en el
+código. Si bien es verdad que solo lo ve el hardwador... me resulta feo.
+¿Quitarlo o mantenerlo? Esa duda corroe mi corazón en estos momentos. De
+momento mantengámoslo a ver si lo acabo odiando o no.
+
+### Static interface vs objects
+
+Desde el principio llevo con una duda:
+
+1. Por una parte, si tengo un Timer0 en el microcontrolador solo tengo un
+   dispositivo de hardware, *no* tiene sentido dar la opción a crear 2 Timer0.
+   Para evitar que el programador se confunda definiendo dos Timer0 lo defino
+   como static interface, borrando el constructor.
+
+2. Por otra parte, los dispositivos hay que inicializarlos para que funcionen
+   correctamente. Con el static interface defino la función `init` que el
+   programador se tiene que acordar de llamar. Pero los constructores de C++
+   precisamente evitan que el programador se olvide de inicializar el
+   dispositivo haciendolo automáticamente y evitando error. 
+
+Conclusión: quiero que el programador pueda crear objetos para que se llame al
+constructor automáticamente, pero quiero que el compilador (?) genere un error
+si el programador intenta definir dos objetos del mismo tipo a la vez.
+
+Por ejemplo, supongamos que el programador quiere usar un `PWM1_pin` y asocia
+un `Miniclock` al Timer1. Claramente esto es un error, porque el Timer1 o lo
+usas para generar una señal PWM o lo usas para medir tiempos. A día de hoy, es
+el hardwador el responsable de ello, definiendo en `hwd_dev.h` algo del tipo:
+
+```
+using PWM_pin      = myu::PWM1_pin<15>;
+using Miniclock_ms = mcu::Miniclock_ms<Micro, myu::Time_counter1>;
+```
+
+Si, como hago ahora, uso las clases como static interface el hardwador llamará
+en el `init` del programa a
+
+```
+PWM_pin::init();
+Miniclock_ms::init();
+```
+
+El llamar a ambas funciones init debería de generar un error del compilador
+diciendo "estas intentando usar el Timer1 de dos formas completamente
+diferente". 
+
+**PROBLEMA** ¿Cómo generar ese error? 
+
+Observar que una vez que se genere ese error, se podrían usar objetos.
+Bastaría con que los constructores se limitaran a llamar a `init`.
+
 
 
 ## <a name="documentacion"></a>Documentación y ayuda

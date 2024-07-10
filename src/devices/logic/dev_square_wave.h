@@ -116,7 +116,7 @@ private:
 template <typename S, typename OP, typename MC, bool ci>
 void Square_wave_generator<S, OP, MC, ci>::cfg()
 {
-    Miniclock::cfg();
+    Miniclock::init();
     Miniclock::start();	// Es necesario encender el reloj!!!
     // SWG no tiene cfg
 }
@@ -246,7 +246,7 @@ inline Square_wave_burst_generator<S, OP, MC>::
     Square_wave_burst_generator(uint32_t freq_in_Hz) 
 	: swg_{freq_in_Hz} 
 { 
-    Miniclock::cfg();
+    Miniclock::init();
     Miniclock::start();
 }
 

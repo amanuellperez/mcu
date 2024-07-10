@@ -3,6 +3,7 @@ DIRS =  blink		\
 		cars		\
 		clocks 		\
 		datalogger	\
+		dc_motor	\
 		IR_remote_control	\
 		music		\
 		POV_toy		\
