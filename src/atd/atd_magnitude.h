@@ -1044,9 +1044,11 @@ template <Type::Arithmetic Int>
 struct Magnitude_symbol<Radians_per_second<Int>>
 { static constexpr const char* short_name = "rad/s"; };
 
+// TODO: usar º/s, no funciona bien con myterm
 template <Type::Arithmetic Int>
 struct Magnitude_symbol<Degrees_per_second<Int>>
-{ static constexpr const char* short_name = "º/s"; };
+//{ static constexpr const char* short_name = "º/s"; };
+{ static constexpr const char* short_name = "deg/s"; };
 
 // Aunque se ve raro por la falta de uso, el simbolo del decigrado
 // tiene que ser "dº"

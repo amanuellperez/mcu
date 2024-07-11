@@ -31,6 +31,7 @@ void Main::hello()
 		"\n\tENA = " << (int) ENA_pin <<
 //		"; ENB = " << (int) ENB_pin 
 		"\nSpeed sensor pin = " << (int) speed_sensor_pin <<
+		"\n\nN = " << (int) speed_sensor_N <<
 		"\n\n";
 
 }
@@ -43,7 +44,8 @@ void Main::run()
 	      "----\n"
 	      "0. Stop car\n"
 	      "1. Turn\n"
-	      "2. Measure speed\n";
+	      "2. Measure speed\n"
+	      "3. Automatic table (percentage, speed)\n";
 
     char opt{};
     uart >> opt;
@@ -53,6 +55,7 @@ void Main::run()
 	break; case '0': Motor::stop();
 	break; case '1': turn();
 	break; case '2': measure_speed();
+	break; case '3': table_speed();
 
 	break; default : uart << "What?\n";
     }

@@ -21,18 +21,7 @@
 #include "prj_main.h" // borrame
 
 ISR_SPEED_SENSOR_PIN{
-    // Medimos transiciones 0 -> 1
-    if (Speed_sensor_pin::is_one()){
-
-	if (Miniclock_ms::is_off())
-	    Miniclock_ms::start();
-
-	else{
-	    Miniclock_ms::stop();
-	    Speed_sensor_pin::disable_change_level_interrupt(); 
-	}
-
-    }
+    Encoder::handle_interrupt();
 }
 
 

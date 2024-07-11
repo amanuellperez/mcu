@@ -23,14 +23,9 @@ void Main::init_hwd()
 {
     init_uart();
 
-    Miniclock_ms::init();
-
     PWM_pinA::init();
 
-    Speed_sensor_pin::as_input_without_pullup();
-    // Activamos la interrupt cuando vayamos a medir
-//    Speed_sensor_pin::enable_change_level_interrupt(); 
-
+    Encoder::init();
     Micro::enable_interrupts();
 }
 

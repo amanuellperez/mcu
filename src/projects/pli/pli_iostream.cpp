@@ -51,7 +51,7 @@ char ask_char(std::iostream& os, const char* msg)
 
 bool ask_yesno(std::iostream& os, const char* msg)
 {
-    os << msg << " (y/n)?";
+    os << msg << " (y/n)? ";
     char ans{};
     os >> ans;
     if (ans == 'n' or ans == 'N')

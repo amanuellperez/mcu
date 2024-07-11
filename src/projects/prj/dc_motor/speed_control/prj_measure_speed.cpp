@@ -20,29 +20,68 @@
 #include "prj_main.h"
 #include <pli_iostream.h>
 
+Miniclock_ms::counter_type Main::measure_speed_period_in_ms() const
+{
+    return Encoder::measure_time_in_ms();
+}
 
 void Main::measure_speed()
 {
-    uint16_t abort_time = 400;
+    auto t = measure_speed_period_in_ms();
 
-    myu::Enable_change_level_interrupt<speed_sensor_pin> inter{};
-
-    Miniclock_ms::reset();
-
-    if (wait_till([]{ return Miniclock_ms::is_off(); })
-		._at_most_ms(abort_time)) {
-	    uart << "Miniclock_ms doesn't start! Aborting\n";
-	    return;
+    if (t == 0) {
+	uart << "Can't read anything. Is motor stop?\n";
+	return;
     }
 
+    uart << "Time: " << t << " ms "
+	    "-> speed: " << Encoder::sensor_speed_dps(t) <<
+	    " = " << Encoder::sensor_speed_rpm(t) << " rpm\n";
+}
 
-    if (wait_till([]{ return Miniclock_ms::is_on(); })
-		._at_most_ms(abort_time)) {
-	    uart << "Miniclock_ms doesn't end! Aborting\n";
-	    return;
+void Main::table_speed()
+{
+    uart << "\n\nAutomatic test\n"
+	        "--------------\n";
+
+    uint8_t nmes = pli::ask<uint8_t>(uart, "Number of measurements: ");
+    if (nmes == 0) return;
+
+    bool verbose = !(pli::ask_yesno(uart, "Silent mode"));
+    uart << '\n';
+
+    table_speed_impl(nmes, verbose);
+}
+
+void Main::table_speed_impl(uint8_t nmes, bool verbose)
+{
+    for (uint8_t p = 0; p <= 100; p += 5){
+	uart << atd::Percentage{p} << '\t';
+	Motor::turn(Direction::positive, p);
+	Micro::wait_ms(500); // Darle tiempo a la inercia del motor
+		
+	atd::Float16 mean_rpm = 0;
+
+	for (uint8_t i = 0; i < nmes; ++i){
+	    auto t = measure_speed_period_in_ms();
+	    if (t == 0) {
+		uart << "---\n";
+		break;
+	    }
+
+	    auto rpm = Encoder::sensor_speed_rpm(t);
+	    mean_rpm += rpm;
+
+	    if (verbose)
+		uart << rpm << " rpm\t";
+	}
+
+	if (mean_rpm != 0){
+	    uart << "mean = " << (mean_rpm / atd::Float16{nmes}) << '\n';
+	}
     }
 
-    uart << "Time: " << Miniclock_ms::time() << " ms\n";
+    Motor::stop();
 
 }
 

@@ -64,6 +64,11 @@ private:
 // Menus
     void turn();
     void measure_speed();
+    void table_speed();
+	void table_speed_impl(uint8_t nmes, bool verbose);
+
+// Functions
+    Miniclock_ms::counter_type measure_speed_period_in_ms() const;
     
     
 };

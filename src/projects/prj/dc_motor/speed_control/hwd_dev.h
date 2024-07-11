@@ -125,14 +125,23 @@ using L298N = dev::L298N_basic<Micro, L298_pinA, L298_pinB>;
 
 using Motor = adev::DC_Motor<L298N>;
 
-using Speed_sensor_pin = Micro::Pin<speed_sensor_pin>;
+// El sensor no es más que una rueda con N ranuras que pasa entre un slotted
+// optocoupler conectado al pin Speed_sensor_pin
+static constexpr uint8_t speed_sensor_N = 20;
 
+struct Encoder_cfg : adev::Encoder_disk_optocoupler_cfg_default {
+    using Micro	       = ::Micro;
+    using Miniclock_ms = ::Miniclock_ms;
+    static constexpr uint8_t optocoupler_pin = speed_sensor_pin;
+    static constexpr uint8_t disk_number_of_slots = speed_sensor_N;
+};
 
+using Encoder = adev::Encoder_disk_optocoupler<Encoder_cfg>;
 
-// FUNCTIONS
-// ---------
-template <typename Pred>
-using wait_till = mcu::wait_till<myu::Wait_1_ms, Pred>;
+//// FUNCTIONS
+//// ---------
+//template <typename Pred>
+//using wait_till = mcu::wait_till<myu::Wait_1_ms, Pred>;
 
 #endif
 

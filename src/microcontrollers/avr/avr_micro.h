@@ -58,6 +58,10 @@ struct Micro{
     template <uint8_t n>
     using Pin = avr_::Pin<n>;
 
+    template <uint8_t n>
+    using Enable_change_level_interrupt 
+				    = avr_::Enable_change_level_interrupt<n>;
+
 // Time
 // ----
     template <std::integral Int>
