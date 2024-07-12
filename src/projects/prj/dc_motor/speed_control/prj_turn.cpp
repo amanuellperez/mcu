@@ -26,11 +26,7 @@ void Main::turn()
     uint8_t p = pli::ask<uint8_t>(uart, "\nPercentage: ");
     if (p == 0) return;
 
-    char dir = pli::ask_char(uart, "\nDirection (+/-): ");
-
-    auto direction = Direction::positive; // default
-    if (dir == '-')
-	direction = Direction::negative;
+    auto direction = ask_direction();
     
 // execution
     Motor::turn(direction, p);

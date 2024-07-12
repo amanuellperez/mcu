@@ -20,14 +20,9 @@
 #include "prj_main.h"
 #include <pli_iostream.h>
 
-Miniclock_ms::counter_type Main::measure_speed_period_in_ms() const
-{
-    return Encoder::measure_time_in_ms();
-}
-
 void Main::measure_speed()
 {
-    auto t = measure_speed_period_in_ms();
+    auto t = Speedmeter::measure_time_in_ms();
 
     if (t == 0) {
 	uart << "Can't read anything. Is motor stop?\n";
@@ -35,8 +30,8 @@ void Main::measure_speed()
     }
 
     uart << "Time: " << t << " ms "
-	    "-> speed: " << Encoder::sensor_speed_dps(t) <<
-	    " = " << Encoder::sensor_speed_rpm(t) << " rpm\n";
+	    "-> speed: " << Speedmeter::measure_speed_dps() <<
+	    " = " << Speedmeter::measure_speed_rpm() << " rpm\n";
 }
 
 void Main::table_speed()
@@ -63,13 +58,13 @@ void Main::table_speed_impl(uint8_t nmes, bool verbose)
 	atd::Float16 mean_rpm = 0;
 
 	for (uint8_t i = 0; i < nmes; ++i){
-	    auto t = measure_speed_period_in_ms();
+	    auto t = Speedmeter::measure_time_in_ms();
 	    if (t == 0) {
 		uart << "---\n";
 		break;
 	    }
 
-	    auto rpm = Encoder::sensor_speed_rpm(t);
+	    auto rpm = Speedmeter::measure_speed_rpm();
 	    mean_rpm += rpm;
 
 	    if (verbose)

@@ -77,6 +77,7 @@ ATMEGA328).
 * [Licencia GPL](#licencia)
 * [Vídeos](#videos)
 * [Tags usadas en el código](#tags)
+* [Nombres de funciones](#namefunction)
 
 ## <a name="compilador"></a>Compilador y toolchain
 `binutils 2.42`
@@ -306,7 +307,21 @@ diferente".
 Observar que una vez que se genere ese error, se podrían usar objetos.
 Bastaría con que los constructores se limitaran a llamar a `init`.
 
+### Dispositivos lógicos
 
+Podemos agrupar diferentes dispositivos de hardware para crear un nuevo
+dispositivo. Por ejemplo, si quiero controlar la velocidad de un DC motor voy
+a crear un nuevo dispositivo `Speed_control_motor`, o nombre parecido, que
+está formado por dos componentes: un motor y un sensor de velocidad de giro.
+
+Estos dos componentes tendrán sus drivers correspondientes `Motor` y
+`Speedmeter`, pero es importante ser consciente de que el
+`Speed_control_motor` *está formado por* incluye estos dos dispositivos dentro
+de él. Eso hace que el `Speed_control_motor` sea responsable de la
+creación/destrucción de esas clases.
+
+Es importante tener en cuenta esto sobre todo cuando se quieren reutilizar
+componentes como pueden ser los timers.
 
 ## <a name="documentacion"></a>Documentación y ayuda
 Esto es un proyecto de aprendizaje y para experimentar, pudiendo haber partes
@@ -420,4 +435,25 @@ alguien quisiera localizarme que use el nuevo mail (manuel2perez@proton.me).
 + (impl): idea de implementación.
 
 + (???): duda. No tengo claro cómo hacerlo o si es verdad lo que digo.
+
+## <a name="namefunction"></a>Nombres de funciones
+
+C++ no admite la posibilidad de pasar parámetros en cualquier posición. Por
+ejemplo, si quieres copiar dos números escribes `copy(x,y)` y siempre queda la
+duda de si lo que se está haciendo es `x = y` o `x -> y`, con significados
+completamente distintos.
+
+Personalmente me gustaría que C++ admitiese notación del tipo
+`copy(x)_into(y)`. Como esto es bastante práctico, de momento, tengo 2 métodos
+para implementarlo:
+
+1. Usando estructuras es fácil simular la notación `copy(x).into(y)`. El
+   problema es que hay que escribir más código y siempre queda la duda de que
+   pueda ser más ineficiente.
+
+2. Una nueva notación experimental es escribir el nombre de la función como
+   `copy___into___(x, y)` de esa forma los 3 guiones bajos indican dónde va
+   cada parámetro. Esto es, `copy__into__(x,y)` es mi forma de escribir
+   `copy(x)_into(y)`.
+
 

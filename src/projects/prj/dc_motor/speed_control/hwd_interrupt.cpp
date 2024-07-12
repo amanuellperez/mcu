@@ -21,7 +21,7 @@
 #include "prj_main.h" // borrame
 
 ISR_SPEED_SENSOR_PIN{
-    Encoder::handle_interrupt();
+    Speedmeter::handle_interrupt();
 }
 
 

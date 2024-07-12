@@ -59,6 +59,7 @@ public:
 
 // Constructor
     DC_Motor() = delete;	// static interface
+    static void init() {} 
 
 // Moving functions
     static void stop();
@@ -105,18 +106,13 @@ struct Encoder_disk_optocoupler_cfg_default{
     static constexpr uint16_t abort_time_ms = 400;
 };
 
-template <typename Micro_t,
-	  uint8_t optocoupler_pin_n,
-	  typename Miniclock_ms_t, 
-	  uint8_t disk_number_of_slots_n,
-	  uint16_t abort_time_ms_n = 400>
-struct Encoder_disk_optocoupler_cfg{
-    using Micro	       = Micro_t;
-    using Miniclock_ms = Miniclock_ms_t;
-    static constexpr uint8_t optocoupler_pin = optocoupler_pin_n;
-    static constexpr uint8_t disk_number_of_slots = disk_number_of_slots_n;
-    static constexpr uint16_t abort_time_ms = abort_time_ms_n;
-};
+//struct Encoder_disk_optocoupler_cfg{
+//    using Micro	       = Micro_t;
+//    using Miniclock_ms = Miniclock_ms_t;
+//    static constexpr uint8_t optocoupler_pin = optocoupler_pin_n;
+//    static constexpr uint8_t disk_slots_number = disk_slots_number_n;
+//    static constexpr uint16_t abort_time_ms = abort_time_ms_n;
+//};
 
 // TODO: Problema: si mido la velocidad de varios motores usando esta clase
 //	 se va a generar una clase por cada Motor. Esto va a hacer que se
@@ -150,7 +146,8 @@ public:
 
 // Cfg
     // Me gusta más N; ^_^'
-    static constexpr uint8_t N = Cfg::disk_number_of_slots;
+    static constexpr uint8_t N = Cfg::disk_slots_number ;
+    static constexpr uint8_t disk_slots_number= N; // mejor que N???
 
 // Constructor
     Encoder_disk_optocoupler() = delete;
@@ -163,16 +160,14 @@ public:
     // Devuelve 0 en caso de error.
     static time_type measure_time_in_ms();
 
+    static Angular_speed measure_speed_dps();
+    static atd::Float16 measure_speed_rpm();
 
-    // El número de ranuras del sensor queda fijado por hardware ==> template
-    // parameter
-    // _dps = degrees per second
-    static constexpr Angular_speed sensor_speed_dps(uint16_t period_ms);
-    static constexpr atd::Float16 sensor_speed_rpm(uint16_t period_ms);
 
 // Interrupt
     // Maneja la interrupción correspondiente al pin optocoupler_pin
     static void handle_interrupt();
+
 
 private:
     // Tiempo máximo que esperamos antes de cancelar una operación
@@ -184,6 +179,16 @@ private:
 
     template <typename Pred>
     using wait_till = mcu::wait_till<Wait_1_ms, Pred>;
+
+// helpers
+    // El número de ranuras del sensor queda fijado por hardware ==> template
+    // parameter
+    // _dps = degrees per second
+    static constexpr 
+	    Angular_speed time_in_ms_to_speed_in_dps(uint16_t period_ms);
+
+    static constexpr 
+	    atd::Float16 time_in_ms_to_speed_in_rpm(uint16_t period_ms);
 };
 
 
@@ -248,7 +253,7 @@ Encoder_disk_optocoupler<C>::time_type
 template <typename C>
 constexpr 
 Encoder_disk_optocoupler<C>::Angular_speed 
-	Encoder_disk_optocoupler<C>::sensor_speed_dps(uint16_t period_ms)
+	Encoder_disk_optocoupler<C>::time_in_ms_to_speed_in_dps(uint16_t period_ms)
 { // 360'000 en vez de 360 porque el period_ms esta en milisegundos 
     // return atd::Degree<atd::Float16>{360'000} / (N * period_ms); 
     atd::Float16::Rep d = N * period_ms;
@@ -258,56 +263,107 @@ Encoder_disk_optocoupler<C>::Angular_speed
 
 template <typename C>
 constexpr 
-atd::Float16 Encoder_disk_optocoupler<C>::sensor_speed_rpm(uint16_t period_ms)
+atd::Float16 
+    Encoder_disk_optocoupler<C>::time_in_ms_to_speed_in_rpm(uint16_t period_ms)
 {
     atd::Float16::Rep d = N * period_ms;
     return atd::Float16{60'000} / atd::Float16{d};
 }
 
+template <typename C>
+Encoder_disk_optocoupler<C>::Angular_speed 
+    Encoder_disk_optocoupler<C>::measure_speed_dps()
+{ 
+    auto t = measure_time_in_ms();
+    if (t == 0) return 0;
+
+    return time_in_ms_to_speed_in_dps(t);
+}
+
+
+template <typename C>
+atd::Float16 Encoder_disk_optocoupler<C>::measure_speed_rpm()
+{ 
+    auto t = measure_time_in_ms();
+    if (t == 0) return 0;
+
+    return time_in_ms_to_speed_in_rpm(t);
+}
+
+
 /***************************************************************************
  *			    SPEED CONTROL MOTOR
  ***************************************************************************/
-//// (???) ¿Cómo llamarlo en ingles? 
-//// Es un motor en el que se puede fijar la velocidad de giro.
-//template <typename Motor_t, uin>
-//class Speed_control_motor{
-//public:
-//    using Motor     = Motor_t;
-//    using Direction = typename Motor::Direction;
-//    using RPM       = atd::Float16;
+// struct Speed_control_motor_cfg{
+//	using Micro = ...
+//	using Motor = ...
+//	using Speedmeter = ...
+// };
 //
-//    static void stop();
+// Speed_control_motor = es un motor con un medidor de velocidad de giro
+// (???) ¿Cómo llamarlo en ingles? 
+// Es un motor en el que se puede fijar la velocidad de giro.
 //
-//    static void turn_right(const RPM& rpm);
-//    static void turn_left( const RPM& rpm);
-//
-//    static void turn(Direction dir, const RPM& rpm);
-//
-//private:
-//    
-//};
-//
-//
-//template <typename M>
-//inline void Speed_control_motor<M>::stop()
-//{ Motor::stop(); }
-//
-//
-//template <typename M>
-//void Speed_control_motor<M>::turn_right(const RPM& rmp)
-//{
-//}
-//
-//template <typename M>
-//void Speed_control_motor<M>::turn_left( const RPM& rmp)
-//{
-//}
-//
-//
-//template <typename M>
-//void Speed_control_motor<M>::turn(Direction dir, const RPM& rpm);
-//{
-//}
+template <typename Cfg>
+class Speed_control_motor{
+public:
+// types
+    using Micro	    = Cfg::Micro;
+    using Motor     = Cfg::Motor;
+    using Speedmeter= Cfg::Speedmeter;
+    using Direction = typename Motor::Direction;
+    using RPM       = atd::Float16;
+
+// construction
+    Speed_control_motor() = delete; 
+    static void init();
+
+// Movement
+    static void stop();
+
+    static void turn_right(const RPM& rpm);
+    static void turn_left( const RPM& rpm);
+
+    static void turn(Direction dir, const RPM& rpm);
+
+private:
+    
+};
+
+template <typename C>
+inline void Speed_control_motor<C>::init()
+{
+    Motor::init();
+    Speedmeter::init();
+}
+
+template <typename C>
+inline void Speed_control_motor<C>::stop()
+{ Motor::stop(); }
+
+
+template <typename C>
+inline
+void Speed_control_motor<C>::turn_right(const RPM& rpm)
+{ turn(Direction::negative, rpm); }
+
+template <typename C>
+void Speed_control_motor<C>::turn_left(const RPM& rpm)
+{ turn(Direction::positive, rpm); }
+
+
+template <typename C>
+void Speed_control_motor<C>::turn(Direction dir, const RPM& rpm)
+{
+    uint8_t p = 20; // TODO: por qué empezar en 20?
+
+    for (; p <= 100; p += 5){
+	Motor::turn(dir, p);
+	Micro::wait_ms(10); // TODO: por que 10 ms? inercia
+	if (Speedmeter::measure_speed_rpm() > rpm)
+	    return;
+    }
+}
 
 
 }// namespace

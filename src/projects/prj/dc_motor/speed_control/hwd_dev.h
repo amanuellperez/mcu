@@ -39,13 +39,20 @@
 
 // cfg
 // ---
-					     
+namespace cfg{
+// El sensor no es más que una rueda con N ranuras que pasa entre un slotted
+// optocoupler conectado al pin Speed_sensor_pin
+static constexpr uint8_t speed_sensor_N = 20;
+}// cfg				     
+ 
 // microcontroller
 // ---------------
 namespace myu = atmega;
 using Micro   = myu::Micro;
 
-
+// priv_: dispositivos a partir de los cuales se crean los dispositivos reales
+// que usara el sofwador
+namespace priv_{
 // pin connections
 // ---------------
 // using UART: pins 2 and 3
@@ -123,20 +130,34 @@ using L298_pinB = dev::L298N_pin_cfg<PWM_pinB, IN3_pin, IN4_pin>;
 
 using L298N = dev::L298N_basic<Micro, L298_pinA, L298_pinB>;
 
-using Motor = adev::DC_Motor<L298N>;
 
-// El sensor no es más que una rueda con N ranuras que pasa entre un slotted
-// optocoupler conectado al pin Speed_sensor_pin
-static constexpr uint8_t speed_sensor_N = 20;
 
 struct Encoder_cfg : adev::Encoder_disk_optocoupler_cfg_default {
     using Micro	       = ::Micro;
-    using Miniclock_ms = ::Miniclock_ms;
+    using Miniclock_ms = priv_::Miniclock_ms;
     static constexpr uint8_t optocoupler_pin = speed_sensor_pin;
-    static constexpr uint8_t disk_number_of_slots = speed_sensor_N;
+    static constexpr uint8_t disk_slots_number = cfg::speed_sensor_N;
 };
+} // namespace priv_
 
-using Encoder = adev::Encoder_disk_optocoupler<Encoder_cfg>;
+
+// Dispositivos visibles para el sofwador
+// --------------------------------------
+using Motor = adev::DC_Motor<priv_::L298N>;
+
+// La utilidad del encoder disk es medir la velocidad ==> es un speed meter!
+using Speedmeter = adev::Encoder_disk_optocoupler<priv_::Encoder_cfg>;
+
+namespace cfg{
+struct Speed_control_motor {
+    using Micro		= ::Micro;
+    using Motor		= ::Motor;
+    using Speedmeter	= ::Speedmeter;
+};
+}
+
+using Speed_control_motor = adev::Speed_control_motor<cfg::Speed_control_motor>;
+
 
 //// FUNCTIONS
 //// ---------

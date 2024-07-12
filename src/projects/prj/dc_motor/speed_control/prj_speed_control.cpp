@@ -18,26 +18,37 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "prj_main.h"
+#include <pli_iostream.h>
 
-void Main::init_hwd()
+Main::Direction Main::ask_direction()
 {
-    init_uart();
+    char dir = pli::ask_char(uart, "Direction (+/-): ");
 
-    priv_::PWM_pinA::init(); // TODO: PWM_pinA pertenece al motor
-			     //	¿no debería de inicializarse en el motor?
-			     //	Pero cuidado: L298 es dual H-bridge!!!
-			     //	Observar que aparezca priv_:: da pistas de que
-			     //	hay algo raro
+    if (dir == '-')
+	return Direction::negative;
 
-//    Speedmeter::init(); // lo inicializa Speed_control_motor
-    Speed_control_motor::init();
-    Micro::enable_interrupts();
+    return Direction::positive;
 }
 
-void Main::init_uart()
+void Main::turn_speed_control()
 {
-    myu::basic_cfg(uart);
-    uart.turn_on();
-}
+    int16_t rpm = pli::ask<int16_t>(uart, "Speed (in rpm): ");
 
+    auto direction = ask_direction();
+
+//    Speed_control_motor::turn(direction, rpm);
+    uint8_t p = 20; // TODO: por qué empezar en 20?
+
+    atd::Float16 RPM{rpm};
+    for (; p <= 100; p += 5){
+	Motor::turn(direction, p);
+	Micro::wait_ms(10); // TODO: por que 10 ms? inercia
+	auto speed = Speedmeter::measure_speed_rpm();
+	uart << "p = " << atd::Percentage{p} << " -> " 
+	     << speed << " rpm\n";
+	if (speed > atd::Float16{rpm})
+	    return;
+    }
+
+}
 
