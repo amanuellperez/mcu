@@ -46,6 +46,17 @@ void test_number_of_digits()
     for (int i = 1000; i < 10000; ++i)
 	CHECK_TRUE(atd::number_of_digits(i) == 4, alp::as_str() << "number_of_digits(" << i << ")");
 
+    for (int i = 0; i < 10; ++i)
+	CHECK_TRUE(atd::number_of_digits(-i) == 1, alp::as_str() << "number_of_digits(" << -i << ")");
+
+    for (int i = 10; i < 100; ++i)
+	CHECK_TRUE(atd::number_of_digits(-i) == 2, alp::as_str() << "number_of_digits(" << -i << ")");
+
+    for (int i = 100; i < 1000; ++i)
+	CHECK_TRUE(atd::number_of_digits(-i) == 3, alp::as_str() << "number_of_digits(" << -i << ")");
+
+    for (int i = 1000; i < 10000; ++i)
+	CHECK_TRUE(atd::number_of_digits(-i) == 4, alp::as_str() << "number_of_digits(" << -i << ")");
 }
 
 template <typename Int>

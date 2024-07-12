@@ -159,6 +159,11 @@ inline constexpr int number_of_digits(Int x)
 {
     int n = 1;
 
+    if constexpr (std::is_signed_v<Int>){
+	if (x < 0)
+	    x = -x;
+    }
+
     while (x >= Int{10}){
 	++n;
 	x /= 10;

@@ -176,7 +176,25 @@ void test_less_than(const Int& a, const Int& b)
     CHECK_TRUE(atd::Minifloat<Rep>{a} <= atd::Minifloat<Rep>{b}, "\t<=");
     CHECK_TRUE(!(atd::Minifloat<Rep>{a} > atd::Minifloat<Rep>{b}), "\t>");
     CHECK_TRUE(!(atd::Minifloat<Rep>{a} >= atd::Minifloat<Rep>{b}), "\t>=");
+
+    CHECK_TRUE(!(atd::Minifloat<Rep>{a} > atd::Minifloat<Rep>{b}), "\t<");
+    CHECK_TRUE(atd::Minifloat<Rep>{a} < atd::Minifloat<Rep>{b}, "\t>");
 }
+
+template <typename Int>
+void test_less_than(const atd::Minifloat<Int>& a, const atd::Minifloat<Int>& b)
+{
+    std::cout << a << " < " << b << "?\n";
+
+    CHECK_TRUE(a < b, "\t<");
+    CHECK_TRUE(a <= b, "\t<=");
+    CHECK_TRUE(!(a > b), "\t>");
+    CHECK_TRUE(!(a >= b), "\t>=");
+
+    CHECK_TRUE(!(a > b), "\t<");
+    CHECK_TRUE(a < b, "\t>");
+}
+
 
 void test_order()
 {
@@ -194,10 +212,18 @@ void test_order()
     test_less_than<int8_t>(-10, 20);
     test_less_than<int8_t>(-10, 100);
     test_less_than<int8_t>(-300, 1200);
-
     test_less_than<uint16_t>(123, 897689);
     test_less_than<int16_t>(-123, 897689);
 
+    using F = atd::Float16;
+    test_less_than<int16_t>(F{50}, F{56,6});
+    test_less_than<int16_t>(F{-56,6}, F{-50});
+
+    // Casos particulares para depurar
+    CHECK_TRUE(F{50} < F{56,6}, "<");
+    CHECK_TRUE(!(F{56,6} < F{50}), "<");
+    CHECK_TRUE(!(F{-50} < F{-56,6}), "<");
+    CHECK_TRUE(F{-56,6} < F{-50}, "<");
 }
 
 
@@ -510,6 +536,23 @@ void test_abs()
     CHECK_TRUE(atd::abs(atd::Float8(+2).E(4)) == atd::Float8(2).E(4), "abs");
 }
 
+void test_bug()
+{
+// bug 1
+    atd::Float16 a{50};
+    atd::Float16 b{56,6};
+    CHECK_TRUE(a < b, "a < b");
+
+// bug 2
+    auto f = atd::Float16{-12,34};
+    atd::print_as_power_of_ten(std::cout, f);
+    std::cout << '\n';
+    atd::print_as_decimal(std::cout, f);
+    std::cout << '\n';
+    std::cout << atd::Float16{-12,34} << '\n';
+}
+
+
 int main()
 {
 try{
@@ -526,6 +569,7 @@ try{
     test_division();
     test_abs();
     test_print();
+    test_bug();
 
 
 }catch(std::exception& e)

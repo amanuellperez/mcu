@@ -109,8 +109,6 @@ template <Type::Integer Int2, Type::Integer Int>
 inline constexpr bool is_rep_value(const Int& x)
 {
     return !overflow<Int2>(x);
-//    return std::numeric_limits<Int2>::min() <= x and
-//	   x <= std::numeric_limits<Int2>::max();
 }
 
 
@@ -267,6 +265,9 @@ private:
 
     constexpr void unsigned_substract(const Minifloat& a)
 	requires Type::Unsigned_integer<Rep>;
+
+    static constexpr Rep 
+	truncate___with_exponent___(const Minifloat& a, Exp_t exp);
 
 };
 
@@ -473,6 +474,22 @@ constexpr bool Minifloat<R, E_t>::operator<(const Minifloat<R, E_t>& a) const
     return x_ < a.x_;
 }
 
+// Escribe el número a*10^exp_ = ap * 10^exp, siendo exp > exp_, devolviendo
+// el valor de ap.
+//
+//  Ejemplo: 56.6 = 566E-1 = 5E1 = 50
+//	     Observar que hemos aproximado 56.6 a 50, por ello el nombre de
+//	     truncar.
+//	     En este caso: a = 566E-1 y exp = 1
+template <Type::Integer Rep, Type::Integer E_t>
+constexpr Rep 
+Minifloat<Rep, E_t>::
+    truncate___with_exponent___(const Minifloat<Rep, E_t>& a, Exp_t exp)
+{
+    if (a.exp_ >= exp) return a.x_; // precondition: exp_ <= exp
+
+    return divide(a.x_).by_ten_to_the_power_of(exp - a.exp_);
+}
 
 template <Type::Integer R, Type::Integer E_t>
 constexpr bool Minifloat<R, E_t>::operator<(const Minifloat<R, E_t>& a) const
@@ -481,37 +498,41 @@ constexpr bool Minifloat<R, E_t>::operator<(const Minifloat<R, E_t>& a) const
     int sx = sign_of(x_);
     int sa = sign_of(a.x_);
 
+    if (sx > 0 and sa <= 0) return false;
+    if (sx < 0 and sa >= 0) return true;
+    if (sx == 0) return a.x_ > 0;
+
     if (sx > 0){
-	if (sa <= 0)
-	    return false;
-
-	// los 2 números positivos:
-	if (exp_ < a.exp_)
-	    return true;
-
-	if (exp_ > a.exp_)
-	    return false;
-
-	return x_ < a.x_;
+	if (exp_ == a.exp_) 
+		return x_ < a.x_;
+    
+	// exp_ != a.exp_
+	if (exp_ > a.exp_){
+	    auto a2 = truncate___with_exponent___(a, exp_);
+	    return x_ <= a2; // si x_ == a2 ==> x_ < a ya que al truncar
+			     //	hacemos que a2 sea menor que a
+	}
+	// else
+	auto x2 = truncate___with_exponent___(*this, a.exp_);
+	return x2 < a.x_; // si x2 == a.x_ ==> x_ > a.x_
     }
 
-    else if (sx < 0){
-	if (sa >= 0)
-	    return true;
-
+//    else if (sx < 0){
 	// los 2 números negativos:
-	if (exp_ < a.exp_)
-	    return false;
+	if (exp_ == a.exp_) 
+		return x_ < a.x_;
 
-	if (exp_ > a.exp_)
-	    return true;
+	// exp_ != a.exp_
+	if (exp_ > a.exp_){
+	    auto a2 = truncate___with_exponent___(a, exp_);
+	    return x_ < a2; // si x_ == a2 ==> x_ < a ya que al truncar
+			     //	hacemos que a2 sea menor que a
+	}
+	// else
+	auto x2 = truncate___with_exponent___(*this, a.exp_);
+	return x2 <= a.x_; // si x2 == a.x_ ==> x_ > a.x_
 
-	return x_ < a.x_;
-    }
-
-//    if (sx == 0)
-    else
-	return a.x_ > 0;
+ //   }
 
 }
 
@@ -825,6 +846,13 @@ void print_as_decimal_negative_exponent(Out& out, const Minifloat<Rep, E_t>& f)
 {
     auto x = f.significand();
 
+    if constexpr (std::is_signed_v<Rep>){
+	if (x < 0){
+	    out << '-';
+	    x = -x;
+	}
+    }
+
     E_t n = number_of_digits(x);
 
     E_t ndecimals = -f.exponent();
@@ -835,6 +863,7 @@ void print_as_decimal_negative_exponent(Out& out, const Minifloat<Rep, E_t>& f)
 	out << write_as_int(digit);
 	x -= digit * ten_to_the<Rep>(n - 1);   // remove_most_significant_digit(x);
     }
+
 
     if (ndigits == 0)   // TODO: los americanos no escriben el 0. (???)
 	out << '0';
