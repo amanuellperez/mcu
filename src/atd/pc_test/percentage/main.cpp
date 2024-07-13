@@ -27,11 +27,19 @@
 using namespace test;
 
 
+template <typename Int>
+void test_as_ratio(const Int& n, const Int& d, uint8_t res)
+{
+	auto p = atd::Percentage::as_ratio(n, d);
+	CHECK_TRUE(p.as_uint() == res, 
+		    alp::as_str() << "as_ratio(" << (int)n << ", " << (int)d << ")");
+}
 
 void test_percentage_constructor()
 {
     test::interface("atd::Percentage()");
 
+// constructor
     {// normal
     atd::Percentage p{30};
     CHECK_TRUE(p.as_uint() == 30 , "as_uint");
@@ -46,7 +54,25 @@ void test_percentage_constructor()
     CHECK_TRUE(p.as_uint() == 0 , "overflow");
     }
 
-    
+// ratio
+    test_as_ratio<uint8_t>(0, 200, 0);
+    test_as_ratio<uint8_t>(20, 200, 10);
+    test_as_ratio<uint8_t>(40, 200, 20);
+    test_as_ratio<uint8_t>(60, 200, 30);
+    test_as_ratio<uint8_t>(80, 200, 40);
+    test_as_ratio<uint8_t>(100, 200, 50);
+    test_as_ratio<uint8_t>(120, 200, 60);
+    test_as_ratio<uint8_t>(140, 200, 70);
+    test_as_ratio<uint8_t>(160, 200, 80);
+    test_as_ratio<uint8_t>(180, 200, 90);
+    test_as_ratio<uint8_t>(200, 200, 100);
+
+    test_as_ratio<int8_t>(0, 100, 0);
+    test_as_ratio<int8_t>(20, 100, 20);
+    test_as_ratio<int8_t>(40, 100, 40);
+    test_as_ratio<int8_t>(60, 100, 60);
+    test_as_ratio<int8_t>(80, 100, 80);
+    test_as_ratio<int8_t>(100, 100, 100);
 }
 
 
