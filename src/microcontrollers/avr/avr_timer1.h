@@ -965,6 +965,9 @@ public:
 
     // Cambia el duty cycle sin modificar la frecuencia
     static void duty_cycle(const atd::Percentage& p);
+    
+    // Devuelve el duty cycle que está configurado
+    static atd::Percentage duty_cycle();
 
     // Desconecta el pin del PWM sin modificar el estado del Timer
     // No modifico el estado del Timer por si acaso se está generando en el
@@ -990,22 +993,28 @@ private:
 
 // helpers
     static void pin_as_output();
-    static void cfg_duty_cycle(const Timer::counter_type& ocr);
-    static counter_type top();
     static void generate_impl(const PWM_signal& pwm);
+
+    static counter_type unsafe_ocr();
+    static void unsafe_ocr(const Timer::counter_type& ocr);
+
+    static counter_type unsafe_top();
 };
 
+template <uint8_t n>
+inline PWM1_pin<n>::counter_type PWM1_pin<n>::unsafe_top()
+{ return Timer::unsafe_input_capture_register(); }
+
+//template <uint8_t n>
+//inline PWM1_pin<n>::counter_type PWM1_pin<n>::top()
+//{
+//    Disable_interrupts l;
+//    return unsafe_top();
+//}
+
 
 template <uint8_t n>
-inline PWM1_pin<n>::counter_type PWM1_pin<n>::top()
-{
-    Disable_interrupts l;
-    return Timer::unsafe_input_capture_register();
-}
-
-
-template <uint8_t n>
-void PWM1_pin<n>::cfg_duty_cycle(const Timer::counter_type& ocr)
+void PWM1_pin<n>::unsafe_ocr(const Timer::counter_type& ocr)
 {
     if constexpr (number == Timer::OCA_pin()){
 	Timer::PWM_pin_A_non_inverting_mode(); // DUDA: dar a elegirlo?
@@ -1015,6 +1024,16 @@ void PWM1_pin<n>::cfg_duty_cycle(const Timer::counter_type& ocr)
 	Timer::PWM_pin_B_non_inverting_mode();
 	Timer::unsafe_output_compare_register_B(ocr);
     }
+}
+
+template <uint8_t n>
+PWM1_pin<n>::Timer::counter_type PWM1_pin<n>::unsafe_ocr()
+{
+    if constexpr (number == Timer::OCA_pin())
+	return Timer::unsafe_output_compare_register_A();
+
+    else 
+	return Timer::unsafe_output_compare_register_B();
 }
 
 
@@ -1055,7 +1074,7 @@ void PWM1_pin<n>::generate_impl(const PWM_signal& pwm)
     Timer::unsafe_input_capture_register(mode.top);
 
     Timer::counter_type ocr = pwm.duty_cycle().of(mode.top);
-    cfg_duty_cycle(ocr);
+    unsafe_ocr(ocr);
     }
 
     Timer::prescaler(mode.prescaler);
@@ -1069,9 +1088,26 @@ void PWM1_pin<n>::duty_cycle(const atd::Percentage& percentage)
     auto top = Timer::unsafe_input_capture_register();
 
     Timer::counter_type ocr = percentage.of(top);
-    cfg_duty_cycle(ocr);
+    unsafe_ocr(ocr);
     }
 }
+
+template <uint8_t n>
+atd::Percentage PWM1_pin<n>::duty_cycle()
+{
+    counter_type top{};
+    counter_type ocr{};
+
+    { // unsafe operations ==> Disable_interrupts 
+	Disable_interrupts l; 
+
+	top = unsafe_top();
+	ocr = unsafe_ocr();
+    }
+
+    return atd::Percentage::as_ratio(ocr, top);
+}
+
 
 template <uint8_t n>
 inline void PWM1_pin<n>::disconnect()
@@ -1119,7 +1155,7 @@ Frequency PWM1_pin<n>::frequency()
     Mode mode  = Timer1::mode();       
 
     PWM_mode pwm;
-    pwm.top       = top();
+    pwm.top       = unsafe_top();
     pwm.prescaler = Timer1::prescaler();
 
     if (pwm.prescaler == 0) // timer apagado?

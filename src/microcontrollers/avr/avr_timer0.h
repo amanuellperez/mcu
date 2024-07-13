@@ -731,6 +731,9 @@ public:
     // Cambia el duty cycle sin modificar la frecuencia
     static void duty_cycle(const atd::Percentage& p);
 
+    // Devuelve el duty cycle que está configurado
+    static atd::Percentage duty_cycle();
+
     // Desconecta el pin del PWM sin modificar el estado del Timer
     // No modifico el estado del Timer por si acaso se está generando en el
     // otro pin del Timer0 una señal.
@@ -760,9 +763,13 @@ private:
 
 // helpers
     static void pin_as_output();
-    static void cfg_duty_cycle(const counter_type& ocr);
-    static counter_type top();
     static void generate_impl(const PWM_signal& pwm);
+
+
+    static counter_type OCR();
+    static void OCR(const counter_type& ocr);
+
+    static counter_type top();
 };
 
 template <uint8_t n>
@@ -782,7 +789,7 @@ inline bool PWM0_pin<n>::top_is_0xFF()
 // ==> el top es 0xFF ==> podemos modificar el registro OCRA. Por eso no pongo
 // la validación `if(top_is_0xFF()) ...` al modificar OCRA
 template <uint8_t n>
-void PWM0_pin<n>::cfg_duty_cycle(const counter_type& ocr)
+void PWM0_pin<n>::OCR(const counter_type& ocr)
 {
     if constexpr (number == Timer::OCA_pin()){
 	Timer::PWM_pin_A_non_inverting_mode(); // DUDA: dar a elegirlo?
@@ -792,6 +799,16 @@ void PWM0_pin<n>::cfg_duty_cycle(const counter_type& ocr)
 	Timer::PWM_pin_B_non_inverting_mode();
 	Timer::output_compare_register_B(ocr);
     }
+}
+
+template <uint8_t n>
+PWM0_pin<n>::counter_type PWM0_pin<n>::OCR()
+{
+    if constexpr (number == Timer::OCA_pin())
+	return Timer::output_compare_register_A();
+
+    else 
+	return Timer::output_compare_register_B();
 }
 
 
@@ -842,7 +859,7 @@ void PWM0_pin<n>::generate_impl(const PWM_signal& pwm)
     Timer::counter(0); 
 
     counter_type ocr = pwm.duty_cycle().of(mode.top);
-    cfg_duty_cycle(ocr);
+    OCR(ocr);
 
     Timer::prescaler(mode.prescaler);
 }
@@ -865,9 +882,17 @@ void PWM0_pin<n>::duty_cycle(const atd::Percentage& percentage)
     if (t == 0) return;
 
     counter_type ocr = percentage.of(t);
-    cfg_duty_cycle(ocr);
+    OCR(ocr);
 }
 
+template <uint8_t n>
+atd::Percentage PWM0_pin<n>::duty_cycle()
+{
+    auto t = top();
+    auto ocr = OCR();
+
+    return atd::Percentage::as_ratio(ocr, t);
+}
 
 template <uint8_t n>
 inline void PWM0_pin<n>::disconnect()

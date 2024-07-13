@@ -185,6 +185,7 @@ template <typename PWM_pin>
 void automatic_duty_cycle_test()
 {
     myu::UART_iostream uart;
+
     uart << "\n\nAutomatic generation of a range of duty cycles\n"
 	        "----------------------------------------------\n";
 
@@ -199,8 +200,15 @@ void automatic_duty_cycle_test()
 	myu::PWM_signal pwm{freq, duty_cycle};
 	PWM_pin::generate(pwm);
 
-	uart << "duty cycle = " << (int) duty_cycle << " %\n";
+	uart << "duty cycle = " << (int) duty_cycle << " % ... ";
+	
+	auto dt = PWM_pin::duty_cycle();
+	if (dt == duty_cycle)
+	    uart << "OK\n";
 
+	else
+	    uart << "ERROR: real duty cycle = " << dt << '\n';
+	
 	myu::wait_ms(1000);
 	if (user_press_key())
 	    break;
