@@ -78,6 +78,9 @@ public:
     // potencial.
     static void voltage1_percentage(const atd::Percentage& p);
 
+    // Devuelve el duty cycle usado para generar el voltage1
+    static atd::Percentage voltage1_percentage();
+
     // Cambia tanto el signo como el valor del potencial mostrado 
     static void voltage1(atd::Sign sign, const atd::Percentage& p);
 
@@ -94,6 +97,9 @@ public:
     // La salida del puerto1 será el p por cien de Vs. No cambia el signo del
     // potencial.
     static void voltage2_percentage(const atd::Percentage& p);
+
+    // Devuelve el duty cycle usado para generar el voltage2
+    static atd::Percentage voltage2_percentage();
 
     // Cambia tanto el signo como el valor del potencial mostrado 
     static void voltage2(atd::Sign sign, const atd::Percentage& p);
@@ -158,6 +164,16 @@ void L298N_basic<M, P1, P2, F>::voltage1_percentage(const atd::Percentage& p)
     }
 }
 
+template <typename M, typename P1, typename P2, uint32_t F>
+atd::Percentage L298N_basic<M, P1, P2, F>::voltage1_percentage()
+{
+    if (PWM_pin1::is_zero())
+	return 0;
+    if (PWM_pin1::is_one())
+	return 100;
+
+    return PWM_pin1::duty_cycle();
+}
 
 template <typename M, typename P1, typename P2, uint32_t F>
 inline void L298N_basic<M, P1, P2, F>::voltage1_sign(atd::Sign sign) 
@@ -216,6 +232,17 @@ void L298N_basic<M, P1, P2, F>::voltage2_percentage(const atd::Percentage& p)
     }
 }
 
+template <typename M, typename P1, typename P2, uint32_t F>
+atd::Percentage L298N_basic<M, P1, P2, F>::voltage2_percentage()
+{
+    if (PWM_pin2::is_zero())
+	return 0;
+   
+    if (PWM_pin2::is_one())
+	return 100;
+
+    return PWM_pin2::duty_cycle();
+}
 
 template <typename M, typename P1, typename P2, uint32_t F>
 inline void L298N_basic<M, P1, P2, F>::voltage2_sign(atd::Sign sign) 

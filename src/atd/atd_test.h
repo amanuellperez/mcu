@@ -79,10 +79,12 @@ public:
 		     const char* fname, int line, 
 		     const char* test_name);
 
+    void silent_mode(bool be_silent = true) {silent_mode_ = be_silent;}
 
 private:
     std::ostream& out() {return *out_;}
     std::ostream* out_;
+    bool silent_mode_ = false;
 
     void line();
 };

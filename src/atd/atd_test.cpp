@@ -43,6 +43,9 @@ void Test::check_true( bool condition,
 			const char* fname, int line, 
 			const char* test_name)
 {
+    if (silent_mode_ and condition == true)
+	return;
+
     out() << test_name << " ... ";
 
     if (condition)

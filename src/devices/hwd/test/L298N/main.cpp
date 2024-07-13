@@ -20,6 +20,9 @@
 #include "../../dev_L298N.h"
 #include <avr_atmega.h>
 
+#include <atd_test.h>
+using namespace test;
+
 // Microcontroller
 // ---------------
 namespace my_mcu = atmega;
@@ -75,11 +78,25 @@ void hello()
 		<< "\n\n";
 }
 
+// Admito un error del 2 por cien
+constexpr uint8_t percentage_error = 2;
+
+inline 
+bool equal_percentage(const atd::Percentage& a, 
+		      const atd::Percentage& b)
+{
+    if (a >= b)
+	return (a.as_uint() - b.as_uint()) < percentage_error;
+
+    else
+	return (b.as_uint() - a.as_uint()) < percentage_error;
+}
 inline atd::Sign to_Sign(char c)
 {
     if (c == '-') return atd::Sign::negative;
     return atd::Sign::positive;
 }
+
 
 void port1_voltage()
 {
@@ -93,10 +110,14 @@ void port1_voltage()
     uart << "sign (+/-): ";
     char sign{'+'};
     uart >> sign;
-    if (sign != '+' and sign != '-')
-	return;
+    if (sign != '-')
+	sign = '+';
 
     L298N::voltage1(to_Sign(sign), static_cast<uint8_t>(p));
+
+    Test test{uart};
+    CHECK_TRUE(test, equal_percentage(p ,L298N::voltage1_percentage()),
+						    "voltage1_percentage()");
 }
 
 
@@ -110,6 +131,10 @@ void port1_percentage()
     if (p == 0) return;
 
     L298N::voltage1_percentage(static_cast<uint8_t>(p));
+
+    Test test{uart};
+    CHECK_TRUE(test, equal_percentage(p ,L298N::voltage1_percentage()),
+						    "voltage1_percentage()");
 }
 
 
@@ -163,10 +188,15 @@ void port2_voltage()
     uart << "sign (+/-): ";
     char sign{'+'};
     uart >> sign;
-    if (sign != '+' and sign != '-')
-	return;
+
+    if (sign != '-')
+	sign = '+';
 
     L298N::voltage2(to_Sign(sign), static_cast<uint8_t>(p));
+
+    Test test{uart};
+    CHECK_TRUE(test, equal_percentage(p ,L298N::voltage2_percentage()),
+						    "voltage2_percentage()");
 }
 
 
@@ -180,6 +210,10 @@ void port2_percentage()
     if (p == 0) return;
 
     L298N::voltage2_percentage(static_cast<uint8_t>(p));
+
+    Test test{uart};
+    CHECK_TRUE(test, equal_percentage(p ,L298N::voltage2_percentage()),
+						    "voltage2_percentage()");
 }
 
 
