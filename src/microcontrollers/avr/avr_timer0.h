@@ -747,6 +747,9 @@ public:
     static void write_zero();
     static void write_one();
 
+    static bool is_zero();
+    static bool is_one();
+
 // info
     // Devuelve la frecuencia que se está generando
     static Frequency frequency();
@@ -770,6 +773,8 @@ private:
     static void OCR(const counter_type& ocr);
 
     static counter_type top();
+
+    static bool is_disconnected();
 };
 
 template <uint8_t n>
@@ -904,6 +909,15 @@ inline void PWM0_pin<n>::disconnect()
 	Timer::pin_B_disconnected();
 }
 
+template <uint8_t n>
+inline bool PWM0_pin<n>::is_disconnected()
+{
+    if constexpr (number == Timer::OCA_pin())
+	return Timer::is_pin_A_disconnected();
+
+    else
+	return Timer::is_pin_B_disconnected();
+}
 
 template <uint8_t n>
 inline void PWM0_pin<n>::stop() 
@@ -932,6 +946,19 @@ void PWM0_pin<n>::write_one() {
     Pin<n>::write_one();
 }
 
+template <uint8_t n>
+bool PWM0_pin<n>::is_zero() 
+{
+    if (!is_disconnected()) return false;
+    return Pin<n>::is_zero();
+}
+
+template <uint8_t n>
+bool PWM0_pin<n>::is_one() 
+{
+    if (!is_disconnected()) return false;
+    return Pin<n>::is_one();
+}
 
 // Observar que no mira si esta encendido o no
 // (???) no depende de n esta función, a clase padre.

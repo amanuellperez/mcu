@@ -982,6 +982,9 @@ public:
     static void write_zero();
     static void write_one();
 
+    static bool is_zero();
+    static bool is_one ();
+
 // info
     // Devuelve la frecuencia que se está generando
     static Frequency frequency();
@@ -999,6 +1002,8 @@ private:
     static void unsafe_ocr(const Timer::counter_type& ocr);
 
     static counter_type unsafe_top();
+
+    static bool is_disconnected();
 };
 
 template <uint8_t n>
@@ -1119,6 +1124,15 @@ inline void PWM1_pin<n>::disconnect()
 	Timer::pin_B_disconnected();
 }
 
+template <uint8_t n>
+inline bool PWM1_pin<n>::is_disconnected()
+{
+    if constexpr (number == Timer::OCA_pin())
+	return Timer::is_pin_A_disconnected();
+
+    else
+	return Timer::is_pin_B_disconnected();
+}
 
 template <uint8_t n>
 inline void PWM1_pin<n>::stop() 
@@ -1142,9 +1156,24 @@ void PWM1_pin<n>::write_zero() {
 
 
 template <uint8_t n>
-void PWM1_pin<n>::write_one() {
+void PWM1_pin<n>::write_one() 
+{
     pin_as_output();
     Pin<n>::write_one();
+}
+
+template <uint8_t n>
+bool PWM1_pin<n>::is_zero() 
+{
+    if (!is_disconnected()) return false;
+    return Pin<n>::is_zero();
+}
+
+template <uint8_t n>
+bool PWM1_pin<n>::is_one() 
+{
+    if (!is_disconnected()) return false;
+    return Pin<n>::is_one();
 }
 
 //  Esta función es casi idéntica a la de PWM0_pin

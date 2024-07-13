@@ -176,6 +176,9 @@ public:
     /// Paramos el timer.
     static void off();
 
+    static bool is_on();
+    static bool is_off();
+
 
 // SELECCIÓN DE RELOJ EXTERNO
     /// External clock source on T1 pin. Clock on falling edge.
@@ -270,6 +273,12 @@ public:
     static void pin_A_disconnected();
     static void pin_B_disconnected();
 
+    static bool is_pin_A_disconnected();
+    static bool is_pin_A_connected();
+
+    static bool is_pin_B_disconnected();
+    static bool is_pin_B_connected();
+
     // comunes a PWM
     static void PWM_pin_A_non_inverting_mode();
     static void PWM_pin_A_inverting_mode();
@@ -324,7 +333,11 @@ private:
 
 }; // Timer1
 
+inline bool Timer1::is_on()
+{return !is_off();}
 
+inline bool Timer1::is_off()
+{ return prescaler() == 0; }
 
 inline void Timer1::off()
 { // 000
@@ -524,11 +537,31 @@ inline void Timer1::fast_PWM_mode_top_OCRA()
 
 // pins
 // ----
+inline bool Timer1::is_pin_A_connected()
+{return !is_pin_A_disconnected(); }
+
+inline bool Timer1::is_pin_A_disconnected()
+{
+    return atd::read_bits<COM1A1, COM1A0>::of(TCCR1A) ==
+	atd::zero<uint8_t>::with_bits<COM1A1, COM1A0>::to<0,0>();
+}
+
+inline bool Timer1::is_pin_B_connected()
+{return !is_pin_B_disconnected(); }
+
+
+inline bool Timer1::is_pin_B_disconnected()
+{
+    return atd::read_bits<COM1B1, COM1B0>::of(TCCR1A) ==
+	atd::zero<uint8_t>::with_bits<COM1B1, COM1B0>::to<0,0>();
+}
+
 inline void Timer1::pin_A_disconnected()
 {
     atd::write_bits<COM1A1, COM1A0>::to<0,0>::in(TCCR1A);
     // (???) ¿En qué estado dejar el puerto pin_A()?
 }
+
 
 inline void Timer1::pin_B_disconnected()
 {

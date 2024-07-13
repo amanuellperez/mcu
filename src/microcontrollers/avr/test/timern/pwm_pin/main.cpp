@@ -23,6 +23,8 @@
 #include "../../../avr_time.h"
 #include "../../../avr_UART_iostream.h"
 
+#include <atd_test.h>
+using namespace test;
 
 // El comportamiento del Timer0 varia dependiendo de si usamos
 // los dos pines o solo el B. Con esta variable selecciono la opción.
@@ -193,8 +195,13 @@ void automatic_duty_cycle_test()
     auto freq = ask<uint32_t>(uart, "Frequency to generate (in Hz): ");
     if (freq == 0) return;
     
-    myu::Frequency freq_gen = PWM_pin::frequency();
-    uart << "Generating frequency " << freq_gen << '\n';
+    // Aquí todavia no hemos llamado a PWM_pin::generate con lo que 
+    // PWM_pin::frequency es 0!!! Si se quiere imprimir ponerlo despues.
+//    myu::Frequency freq_gen = PWM_pin::frequency();
+//    uart << "Generating frequency " << freq_gen << '\n';
+
+    Test test{uart};
+    test.silent_mode();
 
     for (uint8_t duty_cycle = 0; duty_cycle <= 100; duty_cycle += 10){
 	myu::PWM_signal pwm{freq, duty_cycle};
@@ -207,12 +214,30 @@ void automatic_duty_cycle_test()
 	    uart << "OK\n";
 
 	else
-	    uart << "ERROR: real duty cycle = " << dt << '\n';
+	    uart << "ERROR? real duty cycle = " << dt << '\n';
 	
+	if (duty_cycle != 0 and duty_cycle != 100) { 
+	    // en 0, escribe un 0 ==> PWM_pin::is_zero() == true
+	    // en 100, escribe 1 ==> PWM_pin::is_one() == true
+	    CHECK_TRUE(test, PWM_pin::is_zero() == false, "!PWM_pin::is_zero()");
+	    CHECK_TRUE(test, PWM_pin::is_one() == false, "!PWM_pin::is_one()");
+	}
+
 	myu::wait_ms(1000);
 	if (user_press_key())
 	    break;
     }
+
+    test.silent_mode(false);
+
+    PWM_pin::write_zero();
+    myu::wait_ms(1);
+    CHECK_TRUE(test, PWM_pin::is_zero() == true, "write_zero");
+    CHECK_TRUE(test, PWM_pin::is_one() == false, "write_zero");
+
+    PWM_pin::write_one();
+    CHECK_TRUE(test, PWM_pin::is_zero() == false, "write_one");
+    CHECK_TRUE(test, PWM_pin::is_one() == true, "write_one");
 
     PWM_pin::stop();
 

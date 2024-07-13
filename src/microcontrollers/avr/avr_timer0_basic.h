@@ -138,6 +138,9 @@ public:
     /// Paramos el timer.
     static void off();
 
+    static bool is_on();
+    static bool is_off();
+
 
 // SELECCIÓN DE RELOJ EXTERNO
     /// External clock source on T0 pin. Clock on falling edge.
@@ -185,6 +188,12 @@ public:
     // comunes a todas las tablas (19-3 y siguientes)
     static void pin_A_disconnected();
     static void pin_B_disconnected();
+
+    static bool is_pin_A_disconnected();
+    static bool is_pin_A_connected();
+
+    static bool is_pin_B_disconnected();
+    static bool is_pin_B_connected();
 
     // table 19-3 and 19-6
     static void CTC_pin_A_toggle_on_compare_match();
@@ -236,6 +245,12 @@ public:
 
 // preescaler
 // ----------
+inline bool Timer0::is_on()
+{return !is_off();}
+
+inline bool Timer0::is_off()
+{ return prescaler() == 0; }
+
 inline void Timer0::off()
 { // 000
     atd::write_bits<CS02, CS01, CS00>::to<0,0,0>::in(TCCR0B);
@@ -325,6 +340,26 @@ inline void Timer0::PWM_phase_correct_mode_top_OCRA()
 
 // pins
 // ----
+inline bool Timer0::is_pin_A_connected()
+{return !is_pin_A_disconnected(); }
+
+inline bool Timer0::is_pin_A_disconnected()
+{
+    return atd::read_bits<COM0A1, COM0A0>::of(TCCR0A) ==
+	atd::zero<uint8_t>::with_bits<COM0A1, COM0A0>::to<0,0>();
+}
+
+inline bool Timer0::is_pin_B_connected()
+{return !is_pin_B_disconnected(); }
+
+
+inline bool Timer0::is_pin_B_disconnected()
+{
+    return atd::read_bits<COM1B1, COM1B0>::of(TCCR0A) ==
+	atd::zero<uint8_t>::with_bits<COM1B1, COM1B0>::to<0,0>();
+}
+
+
 inline void Timer0::pin_A_disconnected()
 { 
     atd::write_bits<COM0A1, COM0A0>::to<0,0>::in(TCCR0A); 

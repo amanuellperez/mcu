@@ -130,14 +130,37 @@ void test_timer0()
     Timer::PWM_phase_correct_mode_top_0xFF();
     CHECK_TRUE(test, Timer::mode() == Timer::Mode::PWM_phase_correct_top_0xFF, 
 						    "PWM_phase_correct_mode_top_0xFF");
+// pin connected
+    Timer::PWM_pin_A_non_inverting_mode();
+    CHECK_TRUE(test, Timer::is_pin_A_disconnected() == false, "is_pin_A_disconnected");
+    CHECK_TRUE(test, Timer::is_pin_A_connected() == true, "is_pin_A_connected");
+
+    Timer::pin_A_disconnected();
+    CHECK_TRUE(test, Timer::is_pin_A_disconnected() == true, "is_pin_A_disconnected");
+    CHECK_TRUE(test, Timer::is_pin_A_connected() == false, "is_pin_A_connected");
+
+    Timer::PWM_pin_B_non_inverting_mode();
+    CHECK_TRUE(test, Timer::is_pin_B_disconnected() == false, "is_pin_B_disconnected");
+    CHECK_TRUE(test, Timer::is_pin_B_connected() == true, "is_pin_B_connected");
+
+    Timer::pin_B_disconnected();
+    CHECK_TRUE(test, Timer::is_pin_B_disconnected() == true, "is_pin_B_disconnected");
+    CHECK_TRUE(test, Timer::is_pin_B_connected() == false, "is_pin_B_connected");
+
 
 // prescalers
     Timer::off();
+    CHECK_TRUE(test, Timer::is_on() == false, "is_on");
+    CHECK_TRUE(test, Timer::is_off() == true, "is_off");
+
     CHECK_TRUE(test, Timer::prescaler() == 0, "off");
 
     Timer::clock_frequency_no_preescaling();
     CHECK_TRUE(test, Timer::prescaler() == 1, 
 					    "clock_frequency_no_preescaling");
+
+    CHECK_TRUE(test, Timer::is_on() == true, "is_on");
+    CHECK_TRUE(test, Timer::is_off() == false, "is_off");
 
     Timer::clock_frequency_divide_by_8();
     CHECK_TRUE(test, Timer::prescaler() == 8, "clock_frequency_divide_by_8");
@@ -161,7 +184,7 @@ void test_timer1()
     myu::Disable_interrupts lock; // para poder usar las funciones unsafe
 
     myu::UART_iostream uart;
-    auto test = Test::interface(uart, "Timer0");
+    auto test = Test::interface(uart, "Timer1");
 
     using Timer = myu::Timer1;
 
@@ -245,13 +268,38 @@ void test_timer1()
 		Timer::Mode::PWM_phase_and_frequency_correct_top_OCRA, 
 		"PWM_phase_and_frequency_correct_mode_top_OCRA");
 
+
+
+// pin connected
+    Timer::PWM_pin_A_non_inverting_mode();
+    CHECK_TRUE(test, Timer::is_pin_A_disconnected() == false, "is_pin_A_disconnected");
+    CHECK_TRUE(test, Timer::is_pin_A_connected() == true, "is_pin_A_connected");
+
+    Timer::pin_A_disconnected();
+    CHECK_TRUE(test, Timer::is_pin_A_disconnected() == true, "is_pin_A_disconnected");
+    CHECK_TRUE(test, Timer::is_pin_A_connected() == false, "is_pin_A_connected");
+
+    Timer::PWM_pin_B_non_inverting_mode();
+    CHECK_TRUE(test, Timer::is_pin_B_disconnected() == false, "is_pin_B_disconnected");
+    CHECK_TRUE(test, Timer::is_pin_B_connected() == true, "is_pin_B_connected");
+
+    Timer::pin_B_disconnected();
+    CHECK_TRUE(test, Timer::is_pin_B_disconnected() == true, "is_pin_B_disconnected");
+    CHECK_TRUE(test, Timer::is_pin_B_connected() == false, "is_pin_B_connected");
+
 // prescalers
     Timer::off();
+    CHECK_TRUE(test, Timer::is_on() == false, "is_on");
+    CHECK_TRUE(test, Timer::is_off() == true, "is_off");
+
     CHECK_TRUE(test, Timer::prescaler() == 0, "off");
 
     Timer::clock_frequency_no_preescaling();
     CHECK_TRUE(test, Timer::prescaler() == 1, 
 					    "clock_frequency_no_preescaling");
+
+    CHECK_TRUE(test, Timer::is_on() == true, "is_on");
+    CHECK_TRUE(test, Timer::is_off() == false, "is_off");
 
     Timer::clock_frequency_divide_by_8();
     CHECK_TRUE(test, Timer::prescaler() == 8, "clock_frequency_divide_by_8");
