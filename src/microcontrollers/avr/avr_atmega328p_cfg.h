@@ -85,9 +85,8 @@ constexpr volatile uint8_t* PIN[29] = {
     , 0    , &PINC, &PINC, &PINC, &PINC, &PINC, &PINC};
 
 
-// TODO: ver si se puede pasar esto a static_array como he hecho con INT_POS
-// Es más sencillo de definir. ¿podrá dar un error de compilación si se
-// intenta usar un pin no valido?
+// TODO: borrar BIT_MASK. Todavia queda una dependencia en toggle (porque no
+// está escrita la función atd::toggle bit). Escribirla y borrar BIT_MASK.
 constexpr uint8_t BIT_MASK[29] = {
     0
     , 1 << PC6, 1 << PD0, 1 << PD1, 1 << PD2, 1 << PD3, 1 << PD4, 0
@@ -96,6 +95,18 @@ constexpr uint8_t BIT_MASK[29] = {
     , 0  , 1 << PC0, 1 << PC1, 1 << PC2, 1 << PC3, 1 << PC4, 1 << PC5
     };
 
+namespace impl_of{
+using pin_bit = atd::static_array<uint8_t, 
+    0
+    , PC6, PD0, PD1, PD2, PD3, PD4, 0
+    , 0  , PB6, PB7, PD5, PD6, PD7, PB0
+    , PB1, PB2, PB3, PB4, PB5, 0  , 0
+    , 0  , PC0, PC1, PC2, PC3, PC4, PC5
+    >;
+}// impl_of
+ 
+template <uint8_t N>
+inline constexpr uint8_t pin_bit = impl_of::pin_bit::at<N>;
 
 // Interrupciones INT0, INT1, ...
 // -------------------------------

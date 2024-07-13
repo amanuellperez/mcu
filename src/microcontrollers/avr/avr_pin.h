@@ -84,6 +84,8 @@
  *		    Implemento este doble significado.
  *
  *	10/07/2024 Enable_change_level_interrupt
+ *	13/07/2024 is_input/is_output
+ *		   Reescrito internamente: uso atd::write_bit/read_bit
  *
  ****************************************************************************/
 #include <avr/io.h> // registros: cfg::DDRB... cfg::PORT...
@@ -221,11 +223,16 @@ public:
     static void as_input_with_pullup() __attribute__((always_inline));
     static void as_input_without_pullup() __attribute__((always_inline));
 
+    static bool is_output_pin();
+    static bool is_input_pin();
+    static bool is_input_with_pullup_pin();
+    static bool is_input_without_pullup_pin();
+
 
 // FUNCIONES DE LECTURA
     // Si el bit es '1' devuelve un número distinto de cero.
     // Si el bit es '0' devuelve cero.
-    static uint8_t read() __attribute__((always_inline));
+    static bool read() __attribute__((always_inline));
 
     /// Devuelve si el bit es 0 o no. 
     static bool is_zero() __attribute__((always_inline));
@@ -260,47 +267,85 @@ public:
 // --------------
 template <uint8_t n>
 inline void Pin<n>::as_output() 
-{
-    // (*cfg::DDR[n]) |= cfg::BIT_MASK[n]; <-- deprecated with volatile
-    (*cfg::DDR[n]) = (*cfg::DDR[n]) | cfg::BIT_MASK[n];
-}
+//{ (*cfg::DDR[n]) = (*cfg::DDR[n]) | cfg::BIT_MASK[n]; }
+{ atd::write_bit<cfg::pin_bit<n>>::template to<1>::in(*cfg::DDR[n]); }
+
+template <uint8_t n>
+inline bool Pin<n>::is_output_pin()
+{ return (atd::read_bit<cfg::pin_bit<n>>::of(*cfg::DDR[n]) !=  0); }
+
 
 template <uint8_t n>
 inline void Pin<n>::as_input_with_pullup() 
 {
-    (*cfg::DDR[n]) = (*cfg::DDR[n]) & ~cfg::BIT_MASK[n];	// de entrada
-    (*cfg::PORT[n]) = (*cfg::PORT[n]) | cfg::BIT_MASK[n];	// enables pull-up resistor
+//    (*cfg::DDR[n]) = (*cfg::DDR[n]) & ~cfg::BIT_MASK[n];	// de entrada
+//    (*cfg::PORT[n]) = (*cfg::PORT[n]) | cfg::BIT_MASK[n];	// enables pull-up resistor
+
+    // de entrada:
+    atd::write_bit<cfg::pin_bit<n>>::template to<0>::in(*cfg::DDR[n]); 
+
+    // enable pull-up resistor 
+    atd::write_bit<cfg::pin_bit<n>>::template to<1>::in(*cfg::PORT[n]);
 }
 
 template <uint8_t n>
 inline void Pin<n>::as_input_without_pullup() 
 {
-    (*cfg::DDR[n]) = (*cfg::DDR[n]) & ~cfg::BIT_MASK[n];	// de entrada
-    (*cfg::PORT[n]) = (*cfg::PORT[n]) & ~cfg::BIT_MASK[n];	// disable pull-up resistor
+//    (*cfg::DDR[n]) = (*cfg::DDR[n]) & ~cfg::BIT_MASK[n];	// de entrada
+//    (*cfg::PORT[n]) = (*cfg::PORT[n]) & ~cfg::BIT_MASK[n];	// disable pull-up resistor
+								
+    // de entrada:
+    atd::write_bit<cfg::pin_bit<n>>::template to<0>::in(*cfg::DDR[n]); 
+
+    // disable pull-up resistor 
+    atd::write_bit<cfg::pin_bit<n>>::template to<0>::in(*cfg::PORT[n]);
+}
+
+template <uint8_t n>
+bool Pin<n>::is_input_pin()
+{ return (atd::read_bit<cfg::pin_bit<n>>::of(*cfg::DDR[n]) ==  0); }
+
+
+template <uint8_t n>
+bool Pin<n>::is_input_with_pullup_pin()
+{ 
+    return (is_input_pin() and
+	   (atd::read_bit<cfg::pin_bit<n>>::of(*cfg::PORT[n]) !=  0)); 
 }
 
 
 template <uint8_t n>
-inline uint8_t Pin<n>::read()
-{return (*cfg::PIN[n]) & cfg::BIT_MASK[n];}
+bool Pin<n>::is_input_without_pullup_pin()
+{
+    return (is_input_pin() and
+	   (atd::read_bit<cfg::pin_bit<n>>::of(*cfg::PORT[n]) ==  0)); 
+}
+
+
+template <uint8_t n>
+inline bool Pin<n>::read()
+//{return (*cfg::PIN[n]) & cfg::BIT_MASK[n];}
+{return atd::read_bit<cfg::pin_bit<n>>::of(*cfg::PIN[n]) != 0;}
 
 template <uint8_t n>
 inline bool Pin<n>::is_zero()
-//{return !read();}
-{return !((*cfg::PIN[n]) & cfg::BIT_MASK[n]);}
+// {return !((*cfg::PIN[n]) & cfg::BIT_MASK[n]);}
+{return atd::read_bit<cfg::pin_bit<n>>::of(*cfg::PIN[n]) == 0;}
 
 template <uint8_t n>
 inline bool Pin<n>::is_one() 
-{return (*cfg::PIN[n]) & cfg::BIT_MASK[n];}
-//{return read();}
+// {return (*cfg::PIN[n]) & cfg::BIT_MASK[n];}
+{return atd::read_bit<cfg::pin_bit<n>>::of(*cfg::PIN[n]) != 0;}
 
 template <uint8_t n>
 inline void Pin<n>::write_one()	
-{(*cfg::PORT[n]) = (*cfg::PORT[n]) | cfg::BIT_MASK[n];}
+// {(*cfg::PORT[n]) = (*cfg::PORT[n]) | cfg::BIT_MASK[n];}
+{atd::write_bit<cfg::pin_bit<n>>::template to<1>::in(*cfg::PORT[n]); }
 
 template <uint8_t n>
 inline void Pin<n>::write_zero()	
-{(*cfg::PORT[n]) = (*cfg::PORT[n]) & ~cfg::BIT_MASK[n];}
+//{(*cfg::PORT[n]) = (*cfg::PORT[n]) & ~cfg::BIT_MASK[n];}
+{atd::write_bit<cfg::pin_bit<n>>::template to<0>::in(*cfg::PORT[n]); }
 
 template <uint8_t n>
 inline void Pin<n>::toggle()  
@@ -679,7 +724,7 @@ public:
     static void toggle()	{Pin<n>::toggle();}
 
 // Read pin
-    static uint8_t read() {return Pin<n>::read();}
+    static bool read() {return Pin<n>::read();}
 
     /// Devuelve si el bit es 0 o no. 
     static bool is_zero() {return Pin<n>::is_zero();}
@@ -718,7 +763,7 @@ public:
     Input_pin_with_pullup& operator=(const Input_pin_with_pullup&) = delete;
 
     /// Leemos el valor del pin (0 ó 1)
-    static uint8_t read()
+    static bool read()
     {return Pin<n>::read();}
 
     /// Devuelve si el bit es 0 o no. 
@@ -751,7 +796,7 @@ public:
     Input_pin_without_pullup& operator=(const Input_pin_without_pullup&)	= delete;
 
     /// Leemos el valor del pin (0 ó 1)
-    static uint8_t read()
+    static bool read()
     {return Pin<n>::read();}
 
     /// Devuelve si el bit es 0 o no. 
