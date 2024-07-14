@@ -32,23 +32,10 @@ Main::Direction Main::ask_direction()
 
 void Main::turn_speed_control()
 {
-    int16_t rpm = pli::ask<int16_t>(uart, "Speed (in rpm): ");
-
+    int16_t rpm    = pli::ask<int16_t>(uart, "Speed (in rpm): ");
     auto direction = ask_direction();
 
-//    Speed_control_motor::turn(direction, rpm);
-    uint8_t p = 20; // TODO: por qué empezar en 20?
-
-    atd::Float16 RPM{rpm};
-    for (; p <= 100; p += 5){
-	Motor::turn(direction, p);
-	Micro::wait_ms(10); // TODO: por que 10 ms? inercia
-	auto speed = Speedmeter::measure_speed_rpm();
-	uart << "p = " << atd::Percentage{p} << " -> " 
-	     << speed << " rpm\n";
-	if (speed > atd::Float16{rpm})
-	    return;
-    }
+    Speed_control_motor::turn(direction, rpm);
 
 }
 

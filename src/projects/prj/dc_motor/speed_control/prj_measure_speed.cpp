@@ -20,9 +20,16 @@
 #include "prj_main.h"
 #include <pli_iostream.h>
 
+// (RRR) Por culpa de la bateria que tengo, que ya tiene que andar
+//       descargándose, si llamo dos veces seguidas a measure_speed (una para
+//       medir tiempo, otra para medir rpm) al hacer la primera medición
+//       ralentiza el motor obteniendo un resultado inconsistente con la
+//       segunda medición ya que el motor en la segunda medida irá mas lento.
+//       Por eso uso speed_in_rpm_to_time_in_ms.
 void Main::measure_speed()
 {
-    auto t = Speedmeter::measure_time_in_ms();
+    auto rpm = Speedmeter::measure_speed_rpm();
+    auto t = Speedmeter::speed_in_rpm_to_time_in_ms(rpm);
 
     if (t == 0) {
 	uart << "Can't read anything. Is motor stop?\n";
@@ -30,8 +37,7 @@ void Main::measure_speed()
     }
 
     uart << "Time: " << t << " ms "
-	    "-> speed: " << Speedmeter::measure_speed_dps() <<
-	    " = " << Speedmeter::measure_speed_rpm() << " rpm\n";
+	    "-> speed: " << rpm << " rpm\n";
 }
 
 void Main::table_speed()
@@ -58,7 +64,7 @@ void Main::table_speed_impl(uint8_t nmes, bool verbose)
 	atd::Float16 mean_rpm = 0;
 
 	for (uint8_t i = 0; i < nmes; ++i){
-	    auto t = Speedmeter::measure_time_in_ms();
+	    auto t = Speedmeter::measure_speed_in_ms();
 	    if (t == 0) {
 		uart << "---\n";
 		break;

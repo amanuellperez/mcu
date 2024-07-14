@@ -33,8 +33,8 @@ void Main::hello()
 //		"; IN4 = " << (int) IN4_pin << 
 		"\n\tENA = " << (int) priv_::ENA_pin <<
 //		"; ENB = " << (int) ENB_pin 
-		"\nSpeed sensor pin = " << (int) Speedmeter::disk_slots_number <<
-		"\n\nN = " << (int) cfg::speed_sensor_N <<
+		"\nSpeed sensor pin = " << (int) Speedmeter::Pin::number <<
+		"\n\nDisk slots = " << (int) Speedmeter::disk_slots_number  <<
 		"\n\n";
 
 }

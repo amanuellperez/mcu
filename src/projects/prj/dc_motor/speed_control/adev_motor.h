@@ -68,6 +68,14 @@ public:
     static void turn_left( const atd::Percentage& left);
 
     static void turn(Direction dir, const atd::Percentage& p);
+
+// Info
+    // Devuelve el percentage de la señal PWM generada para controlar
+    // la velocidad del motor
+    static atd::Percentage percentage();
+
+    // Devuelve el sentido de giro del motor
+    static Direction direction();
 };
 
 
@@ -92,10 +100,16 @@ void DC_Motor<D>::turn(Direction dir, const atd::Percentage& p)
 
 
 template <typename D>
-inline 
-void DC_Motor<D>::stop()
+inline void DC_Motor<D>::stop()
 { H_Bridge::stop1(); }
 
+template <typename D>
+inline atd::Percentage DC_Motor<D>::percentage()
+{ return H_Bridge::voltage1_percentage(); }
+
+template <typename D>
+inline DC_Motor<D>::Direction DC_Motor<D>::direction()
+{ return H_Bridge::voltage1_sign(); }
 
 /***************************************************************************
  *			    ENCODER_DISK_OPTOCOUPLER
@@ -116,7 +130,7 @@ struct Encoder_disk_optocoupler_cfg_default{
 
 // TODO: Problema: si mido la velocidad de varios motores usando esta clase
 //	 se va a generar una clase por cada Motor. Esto va a hacer que se
-//	 duplique código: por ejemplo, la funcion measure_time_in_ms se
+//	 duplique código: por ejemplo, la funcion measure_speed_in_ms se
 //	 generara por cada motor y solo depende del pin. Crear una clase padre
 //	 que incluya todo lo comun. (de paso evitar llamar a
 //	 Miniclock_ms::init() más de una vez en esas clases):
@@ -125,7 +139,7 @@ struct Encoder_disk_optocoupler_cfg_default{
 //			    |
 //		    Encoder<Miniclock, pin>
 //
-//	La base tiene la función Miniclock::init, y measure_time_in_ms(pin)
+//	La base tiene la función Miniclock::init, y measure_speed_in_ms(pin)
 //	que es la que llama la hija. De esa forma no duplicamos código.
 //	
 //
@@ -143,6 +157,7 @@ public:
     using Pin       = typename Micro::Pin<Cfg::optocoupler_pin>;
     using time_type = typename Miniclock_ms::counter_type;
     using Angular_speed = atd::Degrees_per_second<atd::Float16>;
+    using RPM       = atd::Float16;
 
 // Cfg
     // Me gusta más N; ^_^'
@@ -158,7 +173,7 @@ public:
     // empieza un pulso de luz hasta el siguiente pulso de luz.
     // Esto es, el tiempo que tarda el encoder al girar de un slot a otro.
     // Devuelve 0 en caso de error.
-    static time_type measure_time_in_ms();
+    static time_type measure_speed_in_ms();
 
     static Angular_speed measure_speed_dps();
     static atd::Float16 measure_speed_rpm();
@@ -168,6 +183,8 @@ public:
     // Maneja la interrupción correspondiente al pin optocoupler_pin
     static void handle_interrupt();
 
+// Units conversion 
+    static constexpr time_type speed_in_rpm_to_time_in_ms(const RPM& rpm);
 
 private:
     // Tiempo máximo que esperamos antes de cancelar una operación
@@ -180,7 +197,7 @@ private:
     template <typename Pred>
     using wait_till = mcu::wait_till<Wait_1_ms, Pred>;
 
-// helpers
+// Units conversion
     // El número de ranuras del sensor queda fijado por hardware ==> template
     // parameter
     // _dps = degrees per second
@@ -230,7 +247,7 @@ void Encoder_disk_optocoupler<C>::handle_interrupt()
 
 template <typename C>
 Encoder_disk_optocoupler<C>::time_type
-    Encoder_disk_optocoupler<C>::measure_time_in_ms()
+    Encoder_disk_optocoupler<C>::measure_speed_in_ms()
 {
     using Enable_change_level_interrupt = typename Micro::Enable_change_level_interrupt<Pin::number>;
     Enable_change_level_interrupt inter{};
@@ -270,11 +287,25 @@ atd::Float16
     return atd::Float16{60'000} / atd::Float16{d};
 }
 
+// (RRR) ¿Puede haber overflow?
+//	 No ya que res entra en un uint16_t:
+//		    60'000 / d < 60'000 < 2^16
+template <typename C>
+constexpr 
+Encoder_disk_optocoupler<C>::time_type
+    Encoder_disk_optocoupler<C>::speed_in_rpm_to_time_in_ms(const RPM& rpm)
+{
+    RPM d = RPM{N} * rpm;
+    auto res = RPM{60'000} / d;
+    return res.integer_part<uint16_t>();
+}
+
+
 template <typename C>
 Encoder_disk_optocoupler<C>::Angular_speed 
     Encoder_disk_optocoupler<C>::measure_speed_dps()
 { 
-    auto t = measure_time_in_ms();
+    auto t = measure_speed_in_ms();
     if (t == 0) return 0;
 
     return time_in_ms_to_speed_in_dps(t);
@@ -284,7 +315,7 @@ Encoder_disk_optocoupler<C>::Angular_speed
 template <typename C>
 atd::Float16 Encoder_disk_optocoupler<C>::measure_speed_rpm()
 { 
-    auto t = measure_time_in_ms();
+    auto t = measure_speed_in_ms();
     if (t == 0) return 0;
 
     return time_in_ms_to_speed_in_rpm(t);
@@ -298,6 +329,7 @@ atd::Float16 Encoder_disk_optocoupler<C>::measure_speed_rpm()
 //	using Micro = ...
 //	using Motor = ...
 //	using Speedmeter = ...
+//	static constexpr uint8_t time_ms_intertia = 0;
 // };
 //
 // Speed_control_motor = es un motor con un medidor de velocidad de giro
@@ -314,6 +346,7 @@ public:
     using Direction = typename Motor::Direction;
     using RPM       = atd::Float16;
 
+
 // construction
     Speed_control_motor() = delete; 
     static void init();
@@ -327,6 +360,8 @@ public:
     static void turn(Direction dir, const RPM& rpm);
 
 private:
+// cfg
+    static constexpr uint8_t time_ms_inertia = Cfg::time_ms_inertia;
     
 };
 
@@ -353,15 +388,52 @@ void Speed_control_motor<C>::turn_left(const RPM& rpm)
 
 
 template <typename C>
-void Speed_control_motor<C>::turn(Direction dir, const RPM& rpm)
+void Speed_control_motor<C>::turn(Direction direction, const RPM& rpm)
 {
-    uint8_t p = 20; // TODO: por qué empezar en 20?
+    constexpr uint8_t p_min = 20; // TODO: por qué empezar en 20?
+    constexpr int8_t increment0 = 2;
 
-    for (; p <= 100; p += 5){
-	Motor::turn(dir, p);
-	Micro::wait_ms(10); // TODO: por que 10 ms? inercia
-	if (Speedmeter::measure_speed_rpm() > rpm)
-	    return;
+    auto direction0 = Motor::direction();
+    if (direction != direction0)
+	Motor::stop();
+
+    auto time_ms0 = Speedmeter::speed_in_rpm_to_time_in_ms(rpm);
+
+    auto t = Speedmeter::measure_speed_in_ms();
+    int16_t p = p_min; 
+    int16_t incr = increment0;
+
+    bool increase_t = false; // caso que t == 0, el motor no se mueve
+			     //	el time_ms == infinito!!!
+    if (t != 0){ // si se esta moviendo
+	p = Motor::percentage().as_uint();
+	if (t < time_ms0) 
+	    increase_t = true;
+	else 
+	    increase_t = false;
+    }
+
+
+    while(true){
+	if (increase_t) {
+	    if (p < p_min) return;
+	    p -= incr;
+	}
+	else {
+	    if (p >= 100) return;
+	    p += incr;
+	}
+	Motor::turn(direction, p);
+	if constexpr (time_ms_inertia != 0)
+	    Micro::wait_ms(time_ms_inertia);
+
+	auto t = Speedmeter::measure_speed_in_ms();
+
+	if (t == 0) // error al leer: el motor no ha arrancado
+	    continue;
+
+	if (increase_t and t >= time_ms0) return;
+	if (!increase_t and t <= time_ms0) return;
     }
 }
 

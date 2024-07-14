@@ -43,6 +43,7 @@ namespace cfg{
 // El sensor no es más que una rueda con N ranuras que pasa entre un slotted
 // optocoupler conectado al pin Speed_sensor_pin
 static constexpr uint8_t speed_sensor_N = 20;
+static constexpr uint8_t motor_time_ms_intertia = 0;
 }// cfg				     
  
 // microcontroller
@@ -153,6 +154,7 @@ struct Speed_control_motor {
     using Micro		= ::Micro;
     using Motor		= ::Motor;
     using Speedmeter	= ::Speedmeter;
+    static constexpr uint8_t time_ms_inertia = cfg::motor_time_ms_intertia;
 };
 }
 
