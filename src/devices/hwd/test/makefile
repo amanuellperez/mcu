@@ -1,7 +1,8 @@
 DIRS = 	25LC256			\
+		74HC595			\
 		A4988			\
-		BMP280			\
 		BME280			\
+		BMP280			\
 		CD4017B			\
 		DHT11			\
 		DHT22			\
@@ -12,18 +13,26 @@ DIRS = 	25LC256			\
 		joystick		\
 		keypad			\
 		keyrow			\
+		L298N			\
 		led				\
 		push_button		\
-		74HC595			\
 		sdcard
+
+
+
+
+
 
 # Revisar
 #	matrix_8x8\
 	MAX7219\
+	OV7670\
+	pot_MCP4231\
 	TMP36\
 	LM75				\
 	MCP4231			\
-	keyboard_analog
+	keyboard_analog	\
+	ULN2003
 
 include $(MCU_RECRULES)
 

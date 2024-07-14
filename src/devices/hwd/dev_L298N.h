@@ -67,6 +67,7 @@ class L298N_basic{
 public:
 // Constructors
     L298N_basic() = delete;	// static interface
+    void init() {}
 
 // port 1
 // ------
@@ -78,15 +79,19 @@ public:
     // potencial.
     static void voltage1_percentage(const atd::Percentage& p);
 
-    // Devuelve el duty cycle usado para generar el voltage1
-    static atd::Percentage voltage1_percentage();
-
     // Cambia tanto el signo como el valor del potencial mostrado 
     static void voltage1(atd::Sign sign, const atd::Percentage& p);
 
     // Para la señal generada por PWM_pin1
     static void stop1();
 
+// Info
+    // Devuelve el duty cycle usado para generar el voltage1
+    // El potencial medio de salida del port1 será Vs * voltage1_percentage().
+    static atd::Percentage voltage1_percentage();
+
+    // Signo del potencial de salida del port1
+    static atd::Sign voltage1_sign();
 
 // port 2
 // ------
@@ -98,15 +103,19 @@ public:
     // potencial.
     static void voltage2_percentage(const atd::Percentage& p);
 
-    // Devuelve el duty cycle usado para generar el voltage2
-    static atd::Percentage voltage2_percentage();
-
     // Cambia tanto el signo como el valor del potencial mostrado 
     static void voltage2(atd::Sign sign, const atd::Percentage& p);
 
     // Para la señal generada por PWM_pin1
     static void stop2();
 
+// Info
+    // Devuelve el duty cycle usado para generar el voltage2
+    // El potencial medio de salida del port2 será Vs * voltage2_percentage().
+    static atd::Percentage voltage2_percentage();
+
+    // Signo del potencial de salida del port2
+    static atd::Sign voltage2_sign();
 
 private:
 // types
@@ -169,6 +178,7 @@ atd::Percentage L298N_basic<M, P1, P2, F>::voltage1_percentage()
 {
     if (PWM_pin1::is_zero())
 	return 0;
+
     if (PWM_pin1::is_one())
 	return 100;
 
@@ -189,6 +199,29 @@ inline void L298N_basic<M, P1, P2, F>::voltage1_sign(atd::Sign sign)
 	if constexpr (IN1::number != IN2::number)
 	    IN2::write_one();
     }
+}
+
+
+template <typename M, typename P1, typename P2, uint32_t F>
+inline atd::Sign L298N_basic<M, P1, P2, F>::voltage1_sign() 
+{
+    if constexpr (IN1::number != IN2::number){
+	if (IN1::is_one() and IN2::is_zero()) 
+	    return atd::Sign::positive;
+
+	else
+	    return atd::Sign::negative;
+    }
+
+    else {
+	if (IN1::is_one()) 
+	    return atd::Sign::positive;
+
+	else
+	    return atd::Sign::negative;
+
+    }
+
 }
 
 
@@ -257,6 +290,27 @@ inline void L298N_basic<M, P1, P2, F>::voltage2_sign(atd::Sign sign)
 	IN3::write_zero();
 	if constexpr (IN3::number != IN4::number)
 	    IN4::write_one();
+    }
+}
+
+template <typename M, typename P1, typename P2, uint32_t F>
+inline atd::Sign L298N_basic<M, P1, P2, F>::voltage2_sign() 
+{
+    if constexpr (IN3::number != IN4::number){
+	if (IN3::is_one() and IN4::is_zero()) 
+	    return atd::Sign::positive;
+
+	else
+	    return atd::Sign::negative;
+    }
+
+    else {
+	if (IN3::is_one()) 
+	    return atd::Sign::positive;
+
+	else
+	    return atd::Sign::negative;
+
     }
 }
 

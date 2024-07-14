@@ -25,8 +25,8 @@ using namespace test;
 
 // Microcontroller
 // ---------------
-namespace my_mcu = atmega;
-using Micro   = my_mcu::Micro;
+namespace myu = atmega;
+using Micro   = myu::Micro;
 
 // UART
 // ----
@@ -43,8 +43,8 @@ static constexpr uint8_t IN4_pin = 14;
 static constexpr uint8_t ENA_pin = 15;
 static constexpr uint8_t ENB_pin = 16;
 
-using PWM_pinA = my_mcu::PWM1_pin<ENA_pin>;
-using PWM_pinB = my_mcu::PWM1_pin<ENB_pin>;
+using PWM_pinA = myu::PWM1_pin<ENA_pin>;
+using PWM_pinB = myu::PWM1_pin<ENB_pin>;
 
 // Devices
 // -------
@@ -58,14 +58,14 @@ using L298N = dev::L298N_basic<Micro, L298_pinA, L298_pinB>;
 // ---------
 void init_uart()
 {
-    my_mcu::UART_iostream uart;
-    my_mcu::basic_cfg<baud_rate>(uart);
+    myu::UART_iostream uart;
+    myu::basic_cfg<baud_rate>(uart);
     uart.turn_on();
 }
 
 void hello()
 {
-    my_mcu::UART_iostream uart;
+    myu::UART_iostream uart;
     uart << "\n\nL298N test\n"
 	        "----------\n"
 		"Connections:\n"
@@ -91,39 +91,45 @@ bool equal_percentage(const atd::Percentage& a,
     else
 	return (b.as_uint() - a.as_uint()) < percentage_error;
 }
-inline atd::Sign to_Sign(char c)
+
+atd::Sign ask_sign(std::iostream& out)
 {
-    if (c == '-') return atd::Sign::negative;
+    out << "sign (+/-): ";
+    char sign{'+'};
+    out >> sign;
+
+    out << '\n';
+
+    if (sign == '-')
+	return atd::Sign::negative;
+
     return atd::Sign::positive;
 }
 
 
 void port1_voltage()
 {
-    my_mcu::UART_iostream uart;
+    myu::UART_iostream uart;
     uart << "\nPercentage: ";
     uint16_t p{0};
     uart >> p;
 
     if (p == 0) return;
 
-    uart << "sign (+/-): ";
-    char sign{'+'};
-    uart >> sign;
-    if (sign != '-')
-	sign = '+';
+    auto sign = ask_sign(uart);
 
-    L298N::voltage1(to_Sign(sign), static_cast<uint8_t>(p));
+    L298N::voltage1(sign, static_cast<uint8_t>(p));
 
     Test test{uart};
     CHECK_TRUE(test, equal_percentage(p ,L298N::voltage1_percentage()),
 						    "voltage1_percentage()");
+    CHECK_TRUE(test, L298N::voltage1_sign() == sign, "voltage1_sign()");
 }
 
 
 void port1_percentage()
 {
-    my_mcu::UART_iostream uart;
+    myu::UART_iostream uart;
     uart << "\nPercentage: ";
     uint16_t p{0};
     uart >> p;
@@ -141,20 +147,20 @@ void port1_percentage()
 
 void port1_sign()
 {
-    my_mcu::UART_iostream uart;
-    uart << "sign (+/-): ";
-    char sign{'+'};
-    uart >> sign;
-    if (sign != '+' and sign != '-')
-	return;
+    myu::UART_iostream uart;
+    auto sign = ask_sign(uart);
 
-    L298N::voltage1_sign(to_Sign(sign));
+    L298N::voltage1_sign(sign);
+
+    Micro::wait_ms(1); // para que de tiempo a los pins a cambiar
+    Test test{uart};
+    CHECK_TRUE(test, L298N::voltage1_sign() == sign, "voltage1_sign()");
 }
 
 
 void test_port1()
 {
-    my_mcu::UART_iostream uart;
+    myu::UART_iostream uart;
     uart << "\n\nPort 1 change:\n"
 	    "\t0. stop\n"
 	    "\t1. Voltage\n"
@@ -178,31 +184,27 @@ void test_port1()
 
 void port2_voltage()
 {
-    my_mcu::UART_iostream uart;
+    myu::UART_iostream uart;
     uart << "\nPercentage: ";
     uint16_t p{0};
     uart >> p;
 
     if (p == 0) return;
 
-    uart << "sign (+/-): ";
-    char sign{'+'};
-    uart >> sign;
+    auto sign = ask_sign(uart);
 
-    if (sign != '-')
-	sign = '+';
-
-    L298N::voltage2(to_Sign(sign), static_cast<uint8_t>(p));
+    L298N::voltage2(sign, static_cast<uint8_t>(p));
 
     Test test{uart};
     CHECK_TRUE(test, equal_percentage(p ,L298N::voltage2_percentage()),
 						    "voltage2_percentage()");
+    CHECK_TRUE(test, L298N::voltage2_sign() == sign, "voltage2_sign()");
 }
 
 
 void port2_percentage()
 {
-    my_mcu::UART_iostream uart;
+    myu::UART_iostream uart;
     uart << "\nPercentage: ";
     uint16_t p{0};
     uart >> p;
@@ -220,20 +222,20 @@ void port2_percentage()
 
 void port2_sign()
 {
-    my_mcu::UART_iostream uart;
-    uart << "sign (+/-): ";
-    char sign{'+'};
-    uart >> sign;
-    if (sign != '+' and sign != '-')
-	return;
+    myu::UART_iostream uart;
+    atd::Sign sign = ask_sign(uart);
 
-    L298N::voltage2_sign(to_Sign(sign));
+    L298N::voltage2_sign(sign);
+
+    Micro::wait_ms(1); // para que de tiempo a los pins a cambiar
+    Test test{uart};
+    CHECK_TRUE(test, L298N::voltage2_sign() == sign, "voltage2_sign()");
 }
 
 
 void test_port2()
 {
-    my_mcu::UART_iostream uart;
+    myu::UART_iostream uart;
     uart << "\n\nPort 2 change:\n"
 	    "\t0. stop\n"
 	    "\t1. Voltage\n"
@@ -261,7 +263,7 @@ int main()
 
     hello();
 
-    my_mcu::UART_iostream uart;
+    myu::UART_iostream uart;
 
     while(1){
 	uart << "\nMenu\n"
