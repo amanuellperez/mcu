@@ -116,11 +116,13 @@ inline DC_Motor<D>::Direction DC_Motor<D>::direction()
  ***************************************************************************/
 // Cfg
 // ---
-struct Encoder_disk_optocoupler_cfg_default{
+namespace default_cfg{
+struct Encoder_disk_optocoupler {
     static constexpr uint16_t abort_time_ms = 400;
 };
+}
 
-//struct Encoder_disk_optocoupler_cfg{
+//struct Encoder_disk_optocoupler_cfg : default_cfg::Encoder_disk_optocoupler{
 //    using Micro	       = Micro_t;
 //    using Miniclock_ms = Miniclock_ms_t;
 //    static constexpr uint8_t optocoupler_pin = optocoupler_pin_n;
@@ -325,7 +327,33 @@ atd::Float16 Encoder_disk_optocoupler<C>::measure_speed_rpm()
 /***************************************************************************
  *			    SPEED CONTROL MOTOR
  ***************************************************************************/
-// struct Speed_control_motor_cfg{
+namespace default_cfg {
+struct Speed_control_motor {
+    // Incrementamos el percentage de 5 en 5 hasta alcanzar más-menos la
+    // velocidad solicitada a `turn`
+    static constexpr uint8_t turn_increment_first_try = 5;
+
+    // El motor que tengo no empieza con cualquier señal de PWM. 
+    // De hecho empieza a partir de 25% de duty_cycle. Esta variable indica 
+    // qué percentage aplica la función `turn` cuando quiere arrancar el
+    // motor.
+    static constexpr uint8_t turn_percentage_start = 25;
+
+    // El motor tiene una inercia: desde que le pides que empiece a girar a
+    // una velocidad hasta que alcanza esa velocidad tarda un tiempo. El
+    // tiempo de espera del micro viene dado por esta variable
+    // TODO: se puede complicar la función turn y que compare el tiempo de
+    // giro actual con la última medida para saber si está acelerando o no. Si
+    // no acelera no cambiar el percentage y repetir. Si el valor no cambia en
+    // 10 mediciones, por ejemplo, es que el motor ya no puede alcanzar una
+    // velocidad mayor y devolvería el control. Esa podría ser una forma de
+    // evitar tener que definir `turn_time_ms_inertia`(???)
+    static constexpr uint8_t turn_time_ms_inertia = 1;
+
+};
+}
+
+// struct Speed_control_motor_cfg : default_cfg::Speed_control_motor {
 //	using Micro = ...
 //	using Motor = ...
 //	using Speedmeter = ...
@@ -345,6 +373,7 @@ public:
     using Speedmeter= Cfg::Speedmeter;
     using Direction = typename Motor::Direction;
     using RPM       = atd::Float16;
+    using time_type = typename Speedmeter::time_type;
 
 
 // construction
@@ -361,8 +390,18 @@ public:
 
 private:
 // cfg
-    static constexpr uint8_t time_ms_inertia = Cfg::time_ms_inertia;
-    
+    static constexpr uint8_t turn_time_ms_inertia = Cfg::turn_time_ms_inertia;
+    static constexpr uint8_t turn_percentage_start = Cfg::turn_percentage_start;
+    static constexpr uint8_t turn_increment_first_try 
+						= Cfg::turn_increment_first_try;
+					 
+// turn implementation
+    static void turn_impl(Direction direction, const time_type& time_ms0);
+    static void turn_increasing_time(int8_t incr, Direction direction, 
+						 const time_type& time_ms0);
+    static void turn_decreasing_time(int8_t incr, Direction direction, 
+						 const time_type& time_ms0);
+
 };
 
 template <typename C>
@@ -390,8 +429,10 @@ void Speed_control_motor<C>::turn_left(const RPM& rpm)
 template <typename C>
 void Speed_control_motor<C>::turn(Direction direction, const RPM& rpm)
 {
-    constexpr uint8_t p_min = 20; // TODO: por qué empezar en 20?
-    constexpr int8_t increment0 = 2;
+    if (rpm == 0){
+	Motor::stop();
+	return;
+    }
 
     auto direction0 = Motor::direction();
     if (direction != direction0)
@@ -399,41 +440,76 @@ void Speed_control_motor<C>::turn(Direction direction, const RPM& rpm)
 
     auto time_ms0 = Speedmeter::speed_in_rpm_to_time_in_ms(rpm);
 
-    auto t = Speedmeter::measure_speed_in_ms();
-    int16_t p = p_min; 
-    int16_t incr = increment0;
+    turn_impl(direction, time_ms0);
+}
 
-    bool increase_t = false; // caso que t == 0, el motor no se mueve
-			     //	el time_ms == infinito!!!
-    if (t != 0){ // si se esta moviendo
-	p = Motor::percentage().as_uint();
-	if (t < time_ms0) 
-	    increase_t = true;
-	else 
-	    increase_t = false;
+
+// Intenta llegar a la velocidad deseada 
+template <typename C>
+void Speed_control_motor<C>::turn_impl(Direction direction, 
+				       const time_type& time_ms0)
+{
+    auto t = Speedmeter::measure_speed_in_ms();
+
+    if (0 < t and t < time_ms0){
+	turn_increasing_time(turn_increment_first_try, direction, time_ms0);
+	turn_decreasing_time(1, direction, time_ms0);
     }
 
+    else{ // el caso t == 0 es cuando el motor está parado, realmente t = infinito
+	turn_decreasing_time(turn_increment_first_try, direction, time_ms0);
+	turn_increasing_time(1, direction, time_ms0);
+    }
+}
 
-    while(true){
-	if (increase_t) {
-	    if (p < p_min) return;
-	    p -= incr;
-	}
-	else {
-	    if (p >= 100) return;
-	    p += incr;
-	}
+
+template <typename C>
+void Speed_control_motor<C>::turn_increasing_time(int8_t incr, 
+						 Direction direction, 
+						 const time_type& time_ms0)
+{
+    auto p = Motor::percentage().as_uint();
+
+    for( ; p >= turn_percentage_start ; p -= incr){
+
 	Motor::turn(direction, p);
-	if constexpr (time_ms_inertia != 0)
-	    Micro::wait_ms(time_ms_inertia);
+	if constexpr (turn_time_ms_inertia != 0)
+	    Micro::wait_ms(turn_time_ms_inertia);
 
 	auto t = Speedmeter::measure_speed_in_ms();
 
-	if (t == 0) // error al leer: el motor no ha arrancado
+//	if (t == 0) // error al leer: el motor no ha arrancado
+//	    continue;
+
+	if (t >= time_ms0) return;
+    }
+}
+
+// precondition: time_ms0 > 0
+template <typename C>
+void Speed_control_motor<C>::turn_decreasing_time(int8_t incr, 
+						 Direction direction, 
+						 const time_type& time_ms0)
+{
+    auto p = Motor::percentage().as_uint();
+
+    if (p == 0)
+	p = turn_percentage_start ;
+
+    for ( ; p <= 100; p += incr){
+
+	Motor::turn(direction, p);
+
+	if constexpr (turn_time_ms_inertia != 0)
+	    Micro::wait_ms(turn_time_ms_inertia);
+
+	auto t = Speedmeter::measure_speed_in_ms();
+
+	if (t == 0) // motor parado ==> tiempo = infinito > time_ms0
 	    continue;
 
-	if (increase_t and t >= time_ms0) return;
-	if (!increase_t and t <= time_ms0) return;
+	if (t <= time_ms0) 
+	    return;
     }
 }
 

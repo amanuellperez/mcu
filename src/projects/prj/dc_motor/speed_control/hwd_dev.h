@@ -132,8 +132,7 @@ using L298_pinB = dev::L298N_pin_cfg<PWM_pinB, IN3_pin, IN4_pin>;
 using L298N = dev::L298N_basic<Micro, L298_pinA, L298_pinB>;
 
 
-
-struct Encoder_cfg : adev::Encoder_disk_optocoupler_cfg_default {
+struct Encoder_cfg : adev::default_cfg::Encoder_disk_optocoupler{
     using Micro	       = ::Micro;
     using Miniclock_ms = priv_::Miniclock_ms;
     static constexpr uint8_t optocoupler_pin = speed_sensor_pin;
@@ -150,7 +149,7 @@ using Motor = adev::DC_Motor<priv_::L298N>;
 using Speedmeter = adev::Encoder_disk_optocoupler<priv_::Encoder_cfg>;
 
 namespace cfg{
-struct Speed_control_motor {
+struct Speed_control_motor : adev::default_cfg::Speed_control_motor {
     using Micro		= ::Micro;
     using Motor		= ::Motor;
     using Speedmeter	= ::Speedmeter;
