@@ -43,7 +43,7 @@
 namespace my_mcu = atmega;
 using Micro   = my_mcu::Micro;
 
-
+namespace priv_{
 // pin connections
 // ---------------
 // using UART: pins 2 and 3
@@ -80,12 +80,25 @@ using PWM_pinB = my_mcu::PWM1_pin<ENB_pin>;
 
 // DEVICES
 // -------
-using L298_pinA = dev::L298N_pin_cfg<PWM_pinA, IN1_pin, IN2_pin>;
-using L298_pinB = dev::L298N_pin_cfg<PWM_pinB, IN3_pin, IN4_pin>;
+struct L298N_cfg : dev::default_cfg::L298N {
+    using Micro    = ::Micro;
+    using PWM_pinA = priv_::PWM_pinA;
+    static constexpr uint8_t IN1 = IN1_pin;
+    static constexpr uint8_t IN2 = IN2_pin;
 
-using L298N = dev::L298N_basic<Micro, L298_pinA, L298_pinB>;
+    using PWM_pinB = priv_::PWM_pinB;
+    static constexpr uint8_t IN3 = IN3_pin;
+    static constexpr uint8_t IN4 = IN4_pin;
+};
 
-using Car = adev::Car_2_wheels<L298N>;
+using L298N = dev::L298N_basic<L298N_cfg>;
+
+using Right_wheel = dev::L298N_H_bridge1<L298N>;
+using Left_wheel  = dev::L298N_H_bridge2<L298N>;
+
+} // priv_
+
+using Car = adev::Car_2_wheels<priv_::Right_wheel, priv_::Left_wheel>;
 
 #endif
 

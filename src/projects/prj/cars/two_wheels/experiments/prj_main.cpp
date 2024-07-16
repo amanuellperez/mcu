@@ -24,12 +24,12 @@ void Main::hello()
     uart << "\n\nCar 2 wheels experiment\n"
 	        "-----------------------\n"
 		"Connections:\n"
-		"\tIN1 = " << (int) IN1_pin << 
-		"; IN2 = " << (int) IN2_pin << 
-		"; IN3 = " << (int) IN3_pin << 
-		"; IN4 = " << (int) IN4_pin << 
-		"\n\tENA = " << (int) ENA_pin <<
-		"; ENB = " << (int) ENB_pin 
+		"\tIN1 = " << (int) priv_::IN1_pin << 
+		"; IN2 = " << (int) priv_::IN2_pin << 
+		"; IN3 = " << (int) priv_::IN3_pin << 
+		"; IN4 = " << (int) priv_::IN4_pin << 
+		"\n\tENA = " << (int) priv_::ENA_pin <<
+		"; ENB = " << (int) priv_::ENB_pin 
 		<< "\n\n";
 }
 

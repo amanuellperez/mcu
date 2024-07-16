@@ -73,6 +73,7 @@ ATMEGA328).
 * [Reglas para compilar](#reglas_compilar)
 * [Tests](#test)
 * [Diseño](#discapas)
+* [Programación](#programacion)
 * [Documentación y ayuda](#documentacion)
 * [Licencia GPL](#licencia)
 * [Vídeos](#videos)
@@ -322,6 +323,20 @@ creación/destrucción de esas clases.
 
 Es importante tener en cuenta esto sobre todo cuando se quieren reutilizar
 componentes como pueden ser los timers.
+
+## <a name="programacion"></a>Programación
+
+### Estilo
+
+Uso snake case, definiendo las clases con la primera letra en mayúscula.
+
+Uno de los objetivos propuestos es que todo el código sea legible, que se
+pueda entender sin necesidad de comentarios. Me quedo con snake case porque
+para mi es el que se parece más a la forma normal de escribir: en lugar de
+espacios entre palabras escribes un underscore.
+
+
+
 
 ## <a name="documentacion"></a>Documentación y ayuda
 Esto es un proyecto de aprendizaje y para experimentar, pudiendo haber partes

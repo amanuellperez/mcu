@@ -35,7 +35,7 @@
 
 #include <avr_atmega.h>
 #include <dev_L298N.h>
-
+#include <dev_dc_motor.h>
 
 // cfg
 // ---
@@ -154,7 +154,7 @@ struct Encoder_cfg : adev::default_cfg::Encoder_disk_optocoupler{
 
 // Dispositivos visibles para el sofwador
 // --------------------------------------
-using Motor = adev::DC_Motor<priv_::H_bridge>;
+using Motor = dev::DC_Motor<priv_::H_bridge>;
 
 // La utilidad del encoder disk es medir la velocidad ==> es un speed meter!
 using Speedmeter = adev::Encoder_disk_optocoupler<priv_::Encoder_cfg>;

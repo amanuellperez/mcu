@@ -30,13 +30,11 @@ namespace adev{ // ampliacion de dev. Son clases que puede que sea interesante
 
 // Example: Dual_H_Bridge = L298N
 // TODO: mejor pasar como parámetro Right_H_Bridge and Left_H_Bridge
-template <typename Dual_H_Bridge>
+template <typename Right_wheel_t, typename Left_wheel_t>
 class Car_2_wheels{
 public:
-    using H_Bridge = Dual_H_Bridge;
-    // TODO:
-    // Right_wheel = ...
-    // Left_wheel  = ...
+    using Right_wheel = Right_wheel_t;
+    using Left_wheel  = Left_wheel_t;
 
 // Constructor
     Car_2_wheels() = delete;	// static interface
@@ -73,78 +71,78 @@ public:
     static void left_wheel(atd::Sign sign, const atd::Percentage& p);
 };
 
-template <typename D>
+template <typename R, typename L>
 inline 
-void Car_2_wheels<D>::right_wheel(atd::Sign sign, const atd::Percentage& p)
-{ H_Bridge::voltage1(sign, p); }
+void Car_2_wheels<R,L>::right_wheel(atd::Sign sign, const atd::Percentage& p)
+{ Right_wheel::voltage(sign, p); }
 
-template <typename D>
+template <typename R, typename L>
 inline 
-void Car_2_wheels<D>::left_wheel(atd::Sign sign, const atd::Percentage& p)
-{ H_Bridge::voltage2(sign, p); }
+void Car_2_wheels<R,L>::left_wheel(atd::Sign sign, const atd::Percentage& p)
+{ Left_wheel::voltage(sign, p); }
 
-template <typename D>
-void Car_2_wheels<D>::move(atd::Sign sign, const atd::Percentage& right, 
+template <typename R, typename L>
+void Car_2_wheels<R,L>::move(atd::Sign sign, const atd::Percentage& right, 
 				 const atd::Percentage& left)
 {
     right_wheel(sign, right);
     left_wheel (sign, left);
 }
 
-template <typename D>
-void Car_2_wheels<D>::move_opposite(atd::Sign sign, const atd::Percentage& right, 
+template <typename R, typename L>
+void Car_2_wheels<R,L>::move_opposite(atd::Sign sign, const atd::Percentage& right, 
 				 const atd::Percentage& left)
 {
     right_wheel(sign, right);
     left_wheel (atd::opposite(sign), left);
 }
 
-template <typename D>
-void Car_2_wheels<D>::stop()
+template <typename R, typename L>
+void Car_2_wheels<R,L>::stop()
 {
-    H_Bridge::stop1();
-    H_Bridge::stop2();
+    Right_wheel::stop();
+    Left_wheel::stop();
 }
 
 
-template <typename D>
-void Car_2_wheels<D>::forward(const atd::Percentage& p)
+template <typename R, typename L>
+void Car_2_wheels<R,L>::forward(const atd::Percentage& p)
 {
     right_wheel(atd::Sign::positive, p);
     left_wheel (atd::Sign::positive, p);
 }
 
-template <typename D>
-void Car_2_wheels<D>::backward(const atd::Percentage& p)
+template <typename R, typename L>
+void Car_2_wheels<R,L>::backward(const atd::Percentage& p)
 {
     right_wheel(atd::Sign::negative, p);
     left_wheel (atd::Sign::negative, p);
 }
 
-template <typename D>
-void Car_2_wheels<D>::forward_turn_right(const atd::Percentage& right,
+template <typename R, typename L>
+void Car_2_wheels<R,L>::forward_turn_right(const atd::Percentage& right,
 					 const atd::Percentage& left)
 {
     right_wheel(atd::Sign::positive, right);
     left_wheel (atd::Sign::positive, left);
 }
 
-template <typename D>
-void Car_2_wheels<D>::forward_turn_left()
+template <typename R, typename L>
+void Car_2_wheels<R,L>::forward_turn_left()
 {
     right_wheel(atd::Sign::positive, 50);
     left_wheel (atd::Sign::positive, 0);
 }
 
-template <typename D>
-void Car_2_wheels<D>::backward_turn_right()
+template <typename R, typename L>
+void Car_2_wheels<R,L>::backward_turn_right()
 {
     right_wheel(atd::Sign::negative, 0);
     left_wheel (atd::Sign::negative, 50);
 }
 
-template <typename D>
-void Car_2_wheels<D>::backward_turn_left()
+template <typename R, typename L>
+void Car_2_wheels<R,L>::backward_turn_left()
 {
     right_wheel(atd::Sign::negative, 50);
     left_wheel (atd::Sign::negative, 0);
@@ -152,8 +150,8 @@ void Car_2_wheels<D>::backward_turn_left()
 
 
 
-template <typename D>
-void Car_2_wheels<D>::lateral_movement()
+template <typename R, typename L>
+void Car_2_wheels<R,L>::lateral_movement()
 {
     for (uint8_t i = 0; i < 10; ++i){
 	forward_turn_right(0, 50);
