@@ -28,7 +28,8 @@
  *
  * HISTORIA
  *    Manuel Perez
- *    09/06/2024 Escrito
+ *    09/06/2024 L298N_basic
+ *    16/07/2024 L298N_H_bridge
  *
  ****************************************************************************/
 #include <cstdint>
@@ -37,17 +38,30 @@
 
 namespace dev{
 
+namespace default_cfg{
+    struct L298N{
+    // DUDA: qué frecuencia es la mejor? funciona de 50Hz a 2KHz
+	static constexpr uint32_t L298N_frequency_in_Hz = 500;
+    };
+}// default_cfg
+ 
+
+// Ejemplo cfg
+// -----------
 // Si pin_IN2 == pin_IN1 se entiende que están conectados 
 // usando una puerta NOT via hardware, solo necesitando escribirse
 // pin_IN1 para controlar el signo del potencial
-template <typename PWM_pin0, 
-	  uint8_t Pin_IN1, uint8_t Pin_IN2 = Pin_IN1>
-struct L298N_pin_cfg{
-    using PWM_pin = PWM_pin0;
-    static constexpr uint8_t IN1 = Pin_IN1;
-    static constexpr uint8_t IN2 = Pin_IN2;
-};
-
+//struct L298N_cfg : default_cfg::L298N {
+//    using Micro    = ::Micro;
+//
+//    using PWM_pinA = ::PWM_pinA;
+//    static constexpr uint8_t IN1 = IN1_pin;
+//    static constexpr uint8_t IN2 = IN2_pin;
+//
+//    using PWM_pinB = ::PWM_pinB;
+//    static constexpr uint8_t IN1 = IN3_pin;
+//    static constexpr uint8_t IN2 = IN4_pin;
+//};
 
 // (RRR) ¿por qué el interfaz habla de potencial y no de motores?
 //	 El L298N son dos puentes H con capacidad de 2A por cada puente.
@@ -59,10 +73,7 @@ struct L298N_pin_cfg{
 //	 señal no va a ser una señal continua de potencial, sino una señal
 //	 PWM. Para manejar un motor, aplicación típica, un primer modelo sería
 //	 el anterior (pero es un modelo muy simple: ¿qué error se comete?)
-template <typename Micro0,
-	  typename Pin1_cfg, typename Pin2_cfg,
-	  uint32_t L298N_frequency_in_Hz = 500> // DUDA: qué frecuencia es la mejor?
-						//       funciona de 50Hz a 2KHz
+template <typename Cfg>
 class L298N_basic{
 public:
 // Constructors
@@ -119,16 +130,16 @@ public:
 
 private:
 // types
-    using Micro = Micro0;
+    using Micro = Cfg::Micro;
 
     // pins   
-    using PWM_pin1 = Pin1_cfg::PWM_pin; // == EN_A
-    using IN1 =  typename Micro::Pin<Pin1_cfg::IN1>;
-    using IN2 =  typename Micro::Pin<Pin1_cfg::IN2>;
+    using PWM_pin1 = Cfg::PWM_pinA; // == EN_A
+    using IN1 =  typename Micro::Pin<Cfg::IN1>;
+    using IN2 =  typename Micro::Pin<Cfg::IN2>;
 
-    using PWM_pin2 = Pin2_cfg::PWM_pin; // == EN_B
-    using IN3 =  typename Micro::Pin<Pin2_cfg::IN1>;
-    using IN4 =  typename Micro::Pin<Pin2_cfg::IN2>;
+    using PWM_pin2 = Cfg::PWM_pinB; // == EN_B
+    using IN3 =  typename Micro::Pin<Cfg::IN3>;
+    using IN4 =  typename Micro::Pin<Cfg::IN4>;
 
     using PWM_signal1 = PWM_pin1::PWM_signal;
     using PWM_signal2 = PWM_pin2::PWM_signal;
@@ -140,7 +151,7 @@ private:
 
 // cfg
     static constexpr 
-	Frequency L298N_frequency = Frequency{L298N_frequency_in_Hz};
+	Frequency L298N_frequency = Frequency{Cfg::L298N_frequency_in_Hz};
 
 // Helpers
     static void write1_zero();
@@ -150,16 +161,16 @@ private:
 
 // port 1
 // ------
-template <typename M, typename P1, typename P2, uint32_t F>
-void L298N_basic<M, P1, P2, F>::voltage1(atd::Sign sign, const atd::Percentage& p)
+template <typename C>
+void L298N_basic<C>::voltage1(atd::Sign sign, const atd::Percentage& p)
 {
     voltage1_sign(sign); 
     voltage1_percentage(p);
 }
 
 
-template <typename M, typename P1, typename P2, uint32_t F>
-void L298N_basic<M, P1, P2, F>::voltage1_percentage(const atd::Percentage& p)
+template <typename C>
+void L298N_basic<C>::voltage1_percentage(const atd::Percentage& p)
 {
     if (p == 0)
 	write1_zero();
@@ -173,8 +184,8 @@ void L298N_basic<M, P1, P2, F>::voltage1_percentage(const atd::Percentage& p)
     }
 }
 
-template <typename M, typename P1, typename P2, uint32_t F>
-atd::Percentage L298N_basic<M, P1, P2, F>::voltage1_percentage()
+template <typename C>
+atd::Percentage L298N_basic<C>::voltage1_percentage()
 {
     if (PWM_pin1::is_zero())
 	return 0;
@@ -185,8 +196,8 @@ atd::Percentage L298N_basic<M, P1, P2, F>::voltage1_percentage()
     return PWM_pin1::duty_cycle();
 }
 
-template <typename M, typename P1, typename P2, uint32_t F>
-inline void L298N_basic<M, P1, P2, F>::voltage1_sign(atd::Sign sign) 
+template <typename C>
+inline void L298N_basic<C>::voltage1_sign(atd::Sign sign) 
 {
     if (sign == atd::Sign::positive){
 	IN1::write_one();
@@ -202,8 +213,8 @@ inline void L298N_basic<M, P1, P2, F>::voltage1_sign(atd::Sign sign)
 }
 
 
-template <typename M, typename P1, typename P2, uint32_t F>
-inline atd::Sign L298N_basic<M, P1, P2, F>::voltage1_sign() 
+template <typename C>
+inline atd::Sign L298N_basic<C>::voltage1_sign() 
 {
     if constexpr (IN1::number != IN2::number){
 	if (IN1::is_one() and IN2::is_zero()) 
@@ -225,13 +236,13 @@ inline atd::Sign L298N_basic<M, P1, P2, F>::voltage1_sign()
 }
 
 
-template <typename M, typename P1, typename P2, uint32_t F>
-inline void L298N_basic<M, P1, P2, F>::write1_zero() 
+template <typename C>
+inline void L298N_basic<C>::write1_zero() 
     { PWM_pin1::write_zero(); }
 
 
-template <typename M, typename P1, typename P2, uint32_t F>
-inline void L298N_basic<M, P1, P2, F>::stop1() 
+template <typename C>
+inline void L298N_basic<C>::stop1() 
 {
     PWM_pin1::write_zero(); // garantizamos que genere 0
     PWM_pin1::stop();
@@ -241,17 +252,16 @@ inline void L298N_basic<M, P1, P2, F>::stop1()
 
 // port 2
 // ------
-template <typename M, typename P1, typename P2, uint32_t F>
-void 
-L298N_basic<M, P1, P2, F>::voltage2(atd::Sign sign, const atd::Percentage& p)
+template <typename C>
+void L298N_basic<C>::voltage2(atd::Sign sign, const atd::Percentage& p)
 {
     voltage2_sign(sign); 
     voltage2_percentage(p);
 }
 
 
-template <typename M, typename P1, typename P2, uint32_t F>
-void L298N_basic<M, P1, P2, F>::voltage2_percentage(const atd::Percentage& p)
+template <typename C>
+void L298N_basic<C>::voltage2_percentage(const atd::Percentage& p)
 {
     if (p == 0)
 	write2_zero();
@@ -265,8 +275,8 @@ void L298N_basic<M, P1, P2, F>::voltage2_percentage(const atd::Percentage& p)
     }
 }
 
-template <typename M, typename P1, typename P2, uint32_t F>
-atd::Percentage L298N_basic<M, P1, P2, F>::voltage2_percentage()
+template <typename C>
+atd::Percentage L298N_basic<C>::voltage2_percentage()
 {
     if (PWM_pin2::is_zero())
 	return 0;
@@ -277,8 +287,8 @@ atd::Percentage L298N_basic<M, P1, P2, F>::voltage2_percentage()
     return PWM_pin2::duty_cycle();
 }
 
-template <typename M, typename P1, typename P2, uint32_t F>
-inline void L298N_basic<M, P1, P2, F>::voltage2_sign(atd::Sign sign) 
+template <typename C>
+inline void L298N_basic<C>::voltage2_sign(atd::Sign sign) 
 {
     if (sign == atd::Sign::positive){
 	IN3::write_one();
@@ -293,8 +303,8 @@ inline void L298N_basic<M, P1, P2, F>::voltage2_sign(atd::Sign sign)
     }
 }
 
-template <typename M, typename P1, typename P2, uint32_t F>
-inline atd::Sign L298N_basic<M, P1, P2, F>::voltage2_sign() 
+template <typename C>
+inline atd::Sign L298N_basic<C>::voltage2_sign() 
 {
     if constexpr (IN3::number != IN4::number){
 	if (IN3::is_one() and IN4::is_zero()) 
@@ -315,17 +325,114 @@ inline atd::Sign L298N_basic<M, P1, P2, F>::voltage2_sign()
 }
 
 
-template <typename M, typename P1, typename P2, uint32_t F>
-inline void L298N_basic<M, P1, P2, F>::write2_zero() 
+template <typename C>
+inline void L298N_basic<C>::write2_zero() 
     { PWM_pin2::write_zero(); }
 
 
-template <typename M, typename P1, typename P2, uint32_t F>
-inline void L298N_basic<M, P1, P2, F>::stop2() 
+template <typename C>
+inline void L298N_basic<C>::stop2() 
 {
     PWM_pin2::write_zero(); // garantizamos que genere 0
     PWM_pin2::stop();
 }
+
+/***************************************************************************
+ *			    L298N_H_BRIDGE
+ ***************************************************************************/
+// L298N_H_bridge es una view del L298N ==> no es responsable de
+// inicializarlo. Por eso no tiene funciones `init`
+template <typename L298N, uint8_t nbridge>
+class L298N_H_bridge
+{
+public:
+   static_assert(nbridge == 1 or nbridge == 2);
+};
+
+template <typename L298N>
+class L298N_H_bridge<L298N, 1>{
+public:
+// Cfg
+    static constexpr uint8_t nport = 1;
+
+// constructor
+    L298N_H_bridge() = delete;
+
+// port n
+// ------
+    // Cambia el signo del potencial al indicado, sin cambiar el valor
+    // absoluto del potencial de salida
+    static void voltage_sign(atd::Sign sign) {L298N::voltage1_sign(sign);}
+
+    // La salida del puerto1 será el p por cien de Vs. No cambia el signo del
+    // potencial.
+    static void voltage_percentage(const atd::Percentage& p)
+    {L298N::voltage1_percentage(p);}
+
+    // Cambia tanto el signo como el valor del potencial mostrado 
+    static void voltage(atd::Sign sign, const atd::Percentage& p)
+    {L298N::voltage1(sign, p);}
+
+    // Para la señal generada por PWM_pin
+    static void stop() {L298N::stop1();}
+
+// Info
+    // Devuelve el duty cycle usado para generar el voltage1
+    // El potencial medio de salida del port será Vs * voltage_percentage().
+    static atd::Percentage voltage_percentage()
+    {return L298N::voltage1_percentage();}
+
+    // Signo del potencial de salida del port1
+    static atd::Sign voltage_sign()
+    {return L298N::voltage1_sign(); }
+    
+};
+
+template <typename L298N>
+class L298N_H_bridge<L298N, 2>{
+public:
+// Cfg
+    static constexpr uint8_t nport = 2;
+
+// constructor
+    L298N_H_bridge() = delete;
+
+// port n
+// ------
+    // Cambia el signo del potencial al indicado, sin cambiar el valor
+    // absoluto del potencial de salida
+    static void voltage_sign(atd::Sign sign) {L298N::voltage2_sign(sign);}
+
+    // La salida del puerto2 será el p por cien de Vs. No cambia el signo del
+    // potencial.
+    static void voltage_percentage(const atd::Percentage& p)
+    {L298N::voltage2_percentage(p);}
+
+    // Cambia tanto el signo como el valor del potencial mostrado 
+    static void voltage(atd::Sign sign, const atd::Percentage& p)
+    {L298N::voltage2(sign, p);}
+
+    // Para la señal generada por PWM_pin
+    static void stop() {L298N::stop2();}
+
+// Info
+    // Devuelve el duty cycle usado para generar el voltage2
+    // El potencial medio de salida del port será Vs * voltage_percentage().
+    static atd::Percentage voltage_percentage()
+    {return L298N::voltage2_percentage();}
+
+    // Signo del potencial de salida del port2
+    static atd::Sign voltage_sign()
+    {return L298N::voltage2_sign(); }
+    
+};
+
+template <typename L298N_t>
+using L298N_H_bridge1 = L298N_H_bridge<L298N_t, 1>;
+
+template <typename L298N_t>
+using L298N_H_bridge2 = L298N_H_bridge<L298N_t, 2>;
+
 }// namespace
 
 

@@ -32,9 +32,6 @@
 namespace adev{ // ampliacion de dev. Son clases que puede que sea interesante
 		// pasarlas a dev
 
-// Example: Dual_H_Bridge = L298N
-// TODO: solo es un motor, bastaría con pasar un puente H, no un dual-
-//
 // Dudas paranoicas
 // ----------------
 //	    ¿Qué dirección es positiva y cual negativa?
@@ -50,10 +47,10 @@ namespace adev{ // ampliacion de dev. Son clases que puede que sea interesante
 // me pongo DELANTE del motor y miro cómo gira. Si gira en el sentido
 // matemático de ángulos positivos eso es girar hacia la izquierda;
 // el sentido negativo es girar hacia la derecha
-template <typename Dual_H_Bridge>
+template <typename H_Bridge_t>
 class DC_Motor{
 public:
-    using H_Bridge  = Dual_H_Bridge;
+    using H_Bridge  = H_Bridge_t;
 
     using Direction = atd::Sign;
 
@@ -82,12 +79,12 @@ public:
 template <typename D>
 inline 
 void DC_Motor<D>::turn_right(const atd::Percentage& p)
-{ H_Bridge::voltage1(atd::Sign::negative, p); }
+{ H_Bridge::voltage(atd::Sign::negative, p); }
 
 template <typename D>
 inline 
 void DC_Motor<D>::turn_left(const atd::Percentage& p)
-{ H_Bridge::voltage1(atd::Sign::positive, p); }
+{ H_Bridge::voltage(atd::Sign::positive, p); }
 
 template <typename D>
 void DC_Motor<D>::turn(Direction dir, const atd::Percentage& p)
@@ -101,15 +98,15 @@ void DC_Motor<D>::turn(Direction dir, const atd::Percentage& p)
 
 template <typename D>
 inline void DC_Motor<D>::stop()
-{ H_Bridge::stop1(); }
+{ H_Bridge::stop(); }
 
 template <typename D>
 inline atd::Percentage DC_Motor<D>::percentage()
-{ return H_Bridge::voltage1_percentage(); }
+{ return H_Bridge::voltage_percentage(); }
 
 template <typename D>
 inline DC_Motor<D>::Direction DC_Motor<D>::direction()
-{ return H_Bridge::voltage1_sign(); }
+{ return H_Bridge::voltage_sign(); }
 
 /***************************************************************************
  *			    ENCODER_DISK_OPTOCOUPLER

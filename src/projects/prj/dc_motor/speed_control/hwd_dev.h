@@ -126,10 +126,21 @@ using Miniclock_ms = my::Miniclock_ms<Micro, myu::Time_counter1>;
 
 // DEVICES
 // -------
-using L298_pinA = dev::L298N_pin_cfg<PWM_pinA, IN1_pin, IN2_pin>;
-using L298_pinB = dev::L298N_pin_cfg<PWM_pinB, IN3_pin, IN4_pin>;
 
-using L298N = dev::L298N_basic<Micro, L298_pinA, L298_pinB>;
+struct L298N_cfg : dev::default_cfg::L298N {
+    using Micro    = ::Micro;
+    using PWM_pinA = priv_::PWM_pinA;
+    static constexpr uint8_t IN1 = IN1_pin;
+    static constexpr uint8_t IN2 = IN2_pin;
+
+    using PWM_pinB = priv_::PWM_pinB;
+    static constexpr uint8_t IN3 = IN3_pin;
+    static constexpr uint8_t IN4 = IN4_pin;
+};
+
+
+using L298N = dev::L298N_basic<L298N_cfg>;
+using H_bridge = dev::L298N_H_bridge1<L298N>;
 
 
 struct Encoder_cfg : adev::default_cfg::Encoder_disk_optocoupler{
@@ -143,7 +154,7 @@ struct Encoder_cfg : adev::default_cfg::Encoder_disk_optocoupler{
 
 // Dispositivos visibles para el sofwador
 // --------------------------------------
-using Motor = adev::DC_Motor<priv_::L298N>;
+using Motor = adev::DC_Motor<priv_::H_bridge>;
 
 // La utilidad del encoder disk es medir la velocidad ==> es un speed meter!
 using Speedmeter = adev::Encoder_disk_optocoupler<priv_::Encoder_cfg>;

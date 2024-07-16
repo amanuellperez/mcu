@@ -48,11 +48,23 @@ using PWM_pinB = myu::PWM1_pin<ENB_pin>;
 
 // Devices
 // -------
-using L298_pinA = dev::L298N_pin_cfg<PWM_pinA, IN1_pin, IN2_pin>;
-using L298_pinB = dev::L298N_pin_cfg<PWM_pinB, IN3_pin, IN4_pin>;
+struct L298N_cfg : dev::default_cfg::L298N {
+    using Micro    = ::Micro;
+    using PWM_pinA = ::PWM_pinA;
+    static constexpr uint8_t IN1 = IN1_pin;
+    static constexpr uint8_t IN2 = IN2_pin;
 
-using L298N = dev::L298N_basic<Micro, L298_pinA, L298_pinB>;
+    using PWM_pinB = ::PWM_pinB;
+    static constexpr uint8_t IN3 = IN3_pin;
+    static constexpr uint8_t IN4 = IN4_pin;
+};
 
+
+
+using L298N = dev::L298N_basic<L298N_cfg>;
+
+template <uint8_t n>
+using L298N_H_bridge = dev::L298N_H_bridge<L298N, n>;
 
 // Functions
 // ---------
@@ -255,6 +267,95 @@ void test_port2()
     }
 
 }
+
+
+template <uint8_t n>
+void port_voltage()
+{
+    using Bridge = L298N_H_bridge<n>;
+
+    myu::UART_iostream uart;
+    uart << "\nPercentage: ";
+    uint16_t p{0};
+    uart >> p;
+
+    if (p == 0) return;
+
+    auto sign = ask_sign(uart);
+
+    Bridge::voltage(sign, static_cast<uint8_t>(p));
+
+    Test test{uart};
+    CHECK_TRUE(test, equal_percentage(p ,Bridge::voltage_percentage()),
+						    "voltage_percentage()");
+    CHECK_TRUE(test, Bridge::voltage_sign() == sign, "voltage_sign()");
+}
+
+
+template <uint8_t n>
+void port_percentage()
+{
+    using Bridge = L298N_H_bridge<n>;
+
+    myu::UART_iostream uart;
+    uart << "\nPercentage: ";
+    uint16_t p{0};
+    uart >> p;
+
+    if (p == 0) return;
+
+    Bridge::voltage_percentage(static_cast<uint8_t>(p));
+
+    Test test{uart};
+    CHECK_TRUE(test, equal_percentage(p ,Bridge::voltage_percentage()),
+						    "voltage_percentage()");
+}
+
+
+
+template <uint8_t n>
+void port_sign()
+{
+    using Bridge = L298N_H_bridge<n>;
+
+    myu::UART_iostream uart;
+    atd::Sign sign = ask_sign(uart);
+
+    Bridge::voltage_sign(sign);
+
+    Micro::wait_ms(1); // para que de tiempo a los pins a cambiar
+    Test test{uart};
+    CHECK_TRUE(test, Bridge::voltage_sign() == sign, "voltage_sign()");
+}
+
+
+template <uint8_t n>
+void test_port()
+{
+    using Bridge = L298N_H_bridge<n>;
+
+    myu::UART_iostream uart;
+    uart << "\n\nPort " << Bridge::nport << " change:\n"
+	    "\t0. stop\n"
+	    "\t1. Voltage\n"
+	    "\t2. Percentage\n"
+	    "\t3. sign\n";
+
+    char opt{};
+    uart >> opt;
+
+    switch(opt){
+	break; case '0': Bridge::stop();
+	break; case '1': port_voltage<n>();
+	break; case '2': port_percentage<n>();
+	break; case '3': port_sign<n>();
+
+	break; default: uart << "What???\n";
+    }
+
+}
+
+
 // Main
 // ----
 int main() 
@@ -269,7 +370,9 @@ int main()
 	uart << "\nMenu\n"
 	          "----\n"
 		  "1. Port A (out1-out2)\n"
-		  "2. Port B (out3-out4)\n";
+		  "2. Port B (out3-out4)\n"
+		  "3. Test L298N_H_bridge<1>\n"
+		  "4. Test L298N_H_bridge<2>\n";
 
 	char opt{};
 	uart >> opt;
@@ -277,6 +380,8 @@ int main()
 	switch (opt){
 	    break; case '1': test_port1();
 	    break; case '2': test_port2();
+	    break; case '3': test_port<1>();
+	    break; case '4': test_port<2>();
 
 	    break; default: uart << "What???\n";
 
