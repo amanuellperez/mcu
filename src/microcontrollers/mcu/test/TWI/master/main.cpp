@@ -19,6 +19,7 @@
 
 // Este microcontrolador dialoga con el test/TWI/slave
 #include "../../../mcu_TWI_master.h"
+#include "../../../mcu_concepts.h"
 #include <avr_atmega.h>
 #include <atd_ostream.h>    // print_int_as_hex
 
@@ -39,6 +40,8 @@ using TWI_master_cfg = mcu::TWI_master_cfg<Micro,
 
 using TWI = mcu::TWI_master<TWI_master_cfg>;
 
+// concept
+static_assert(Type::TWI_master<TWI>);
 
 // Slave info
 // ----------

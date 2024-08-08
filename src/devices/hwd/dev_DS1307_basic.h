@@ -40,7 +40,7 @@
 #include <atd_bit.h>
 #include <mcu_TWI_master_ioxtream.h>
 
-#include "dev_TWI_memory_type.h"
+#include <mcu_TWI_memory_type.h>
 
 namespace dev{
 
@@ -261,7 +261,7 @@ public:
     static_assert(TWI_master::buffer_size >= TWI_buffer_size);
 
 // Types
-    using TWI              = TWI_memory_type<TWI_master, slave_address>;
+    using TWI              = mcu::TWI_memory_type<TWI_master, slave_address>;
     using State            = TWI::iostate;
     using Time_point       = __DS1307_timekeeper;
     using Control_register = __DS1307_control_register;

@@ -36,7 +36,6 @@ INCS= 	dev_A4988.h				\
 		dev_74HC595.h			\
 		dev_sdcard.h			\
 		dev_TMP36.h				\
-		dev_TWI_memory_type.h	\
 		not_generic.h		
 
 

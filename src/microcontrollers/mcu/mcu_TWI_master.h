@@ -204,6 +204,10 @@ public:
     using streamsize = Cfg::streamsize;
     using Address    = Cfg::Address; 
 
+    // Vble temporal hasta que sepa qué es un TWI_master. 
+    // La uso para poder definir el concept TWI_master
+    static constexpr bool is_twi_master = true;
+
 // cfg data
     static constexpr streamsize buffer_size = Cfg::buffer_size;
     static constexpr uint16_t max_time_out_us 

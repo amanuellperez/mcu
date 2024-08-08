@@ -37,7 +37,7 @@
 #include <atd_bit.h>
 #include <atd_decimal.h>
 #include <atd_magnitude.h>
-#include "dev_TWI_memory_type.h"
+#include <mcu_TWI_memory_type.h>
 
 namespace dev{
 
@@ -248,7 +248,7 @@ private:
 template <typename TWI_master, typename TWI_master::Address slave_address>
 void BME280_config::twi_write() const
 { 
-    TWI_memory_type<TWI_master, slave_address> twi_mem;
+    mcu::TWI_memory_type<TWI_master, slave_address> twi_mem;
 
     uint8_t mem[size];
     struct_to_mem(*this, mem);
@@ -418,7 +418,7 @@ private:
 template <typename TWI_master, typename TWI_master::Address slave_address>
 void BME280_calibration::read()
 {
-    TWI_memory_type<TWI_master, slave_address> twi_mem;
+    mcu::TWI_memory_type<TWI_master, slave_address> twi_mem;
 
     uint8_t mem[std::max(temp_and_press_size, hum_size)];
 
@@ -537,7 +537,7 @@ public:
     static_assert(slave_address == 0x76 or slave_address == 0x77,
 	    "Wrong BME280 address. Available only: 0x76 and 0x77");
 
-    using TWI_mem = TWI_memory_type<TWI_master, slave_address>;
+    using TWI_mem = mcu::TWI_memory_type<TWI_master, slave_address>;
 
     using State = TWI_master::iostate;
 

@@ -53,6 +53,7 @@
  *    Manuel Perez
  *    11/12/2022 Unsafe_device
  *    22/06/2024 Pin
+ *    08/08/2024 TWI_master
  *
  ****************************************************************************/
 namespace Type {
@@ -90,6 +91,14 @@ concept Pin = requires {
       T::write_zero();
       T::write_one();
       T::read();    // o mejor mirar: is_zero() & is_one()?
+    };
+
+
+// TWI_master
+// ----------
+template <typename T>
+concept TWI_master = requires {
+    T::is_twi_master == true;
     };
 
 }// namespace Type
