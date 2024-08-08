@@ -60,7 +60,6 @@ struct L298N_cfg : dev::default_cfg::L298N {
 };
 
 
-
 using L298N = dev::L298N_basic<L298N_cfg>;
 
 template <uint8_t n>

@@ -1,6 +1,6 @@
 // Copyright (C) 2023 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
-//           https://github.com/amanuellperez/mcu
+//           https://github.com/amanuellperez/myu
 //
 // This file is part of the MCU++ Library.
 //
@@ -18,26 +18,26 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 // Este microcontrolador dialoga con el test/TWI/slave
-#include <dev_TWI_master.h>
+#include <mcu_TWI_master.h>
 #include <avr_atmega.h>
 #include <atd_ostream.h>    // print_int_as_hex
 
 
 // Microcontroller
 // ---------------
-namespace mcu = atmega;
-using Micro   = mcu::Micro;
+namespace myu = atmega;
+using Micro   = myu::Micro;
 
 
 // Devices
 // -------
 constexpr uint8_t TWI_buffer_size = 10;
 
-using TWI_master_cfg = dev::TWI_master_cfg<Micro, 
-                                           mcu::TWI_basic,
+using TWI_master_cfg = mcu::TWI_master_cfg<Micro, 
+                                           myu::TWI_basic,
 					   TWI_buffer_size>;
 
-using TWI = dev::TWI_master<TWI_master_cfg>;
+using TWI = mcu::TWI_master<TWI_master_cfg>;
 
 constexpr uint8_t TWI_scl_frequency = 100; // 100 kHz
 
@@ -46,7 +46,7 @@ constexpr uint8_t TWI_scl_frequency = 100; // 100 kHz
 // ---------
 void twi_print_error()
 {
-    mcu::UART_iostream uart;
+    myu::UART_iostream uart;
 
     if (TWI::no_response())
 	uart << "Slave no response.\n";
@@ -63,7 +63,7 @@ void twi_print_error()
 
 void twi_print_state()
 {
-    mcu::UART_iostream uart;
+    myu::UART_iostream uart;
 
     if (TWI::error())
 	uart << "state == error()\n";
@@ -108,7 +108,7 @@ void twi_print_state()
 
 void twi_print_state_as_hex()
 {
-    mcu::UART_iostream uart;
+    myu::UART_iostream uart;
     uart << "state = ";
     atd::print_int_as_hex(uart, static_cast<uint8_t>(TWI::state()));
     uart << '\n';
@@ -117,7 +117,7 @@ void twi_print_state_as_hex()
 
 void scan_address(TWI::Address addr)
 {
-    mcu::UART_iostream uart;
+    myu::UART_iostream uart;
     uart << "Looking for slave with address " << (int) addr << " ... ";
 
     if (TWI::probe(addr))
@@ -128,7 +128,7 @@ void scan_address(TWI::Address addr)
 
 void scan_slaves()
 {
-    mcu::UART_iostream uart;
+    myu::UART_iostream uart;
     uart << "\nScan for slaves\n"
 	      "---------------\n"
 	      "Scan from address: ";
@@ -176,8 +176,8 @@ void scan_slaves()
 
 void init_uart()
 {
-    mcu::UART_iostream uart;
-    mcu::basic_cfg(uart);
+    myu::UART_iostream uart;
+    myu::basic_cfg(uart);
     uart.turn_on();
 }
 
@@ -188,7 +188,7 @@ void init_TWI()
 
 void hello()
 {
-    mcu::UART_iostream uart;
+    myu::UART_iostream uart;
     uart << "\n\nTWI scan slaves\n"
 	        "---------------\n"
 		"This program scan looking for devices connected to TWI.\n"
