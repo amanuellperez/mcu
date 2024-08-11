@@ -19,7 +19,7 @@
 
 #include "../../../dev_LCD_screen.h"
 #include <dev_HD44780_generic.h>
-#include <dev_glyphs.h>
+#include <rom_glyphs_5x8.h>
 #include <avr_atmega.h>
 #include <stddef.h>
 
@@ -61,7 +61,7 @@ using LCD = Screen_1602;
 //using LCD = Screen_2004;
 //using LCD = Screen_4004; <-- sin probar
 
-namespace gl = dev::glyphs_5x8;
+namespace gl = rom::glyphs_5x8;
 using Glyph = gl::Glyph<my_mcu::ROM_read>;
 
 

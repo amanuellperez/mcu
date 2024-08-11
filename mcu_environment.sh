@@ -31,6 +31,7 @@ MCU_COMRULES=${MCU_MK}/com.mk		; export MCU_COMRULES
 # Reglas particulares de cada entorno
 STD_GENRULES=${MCU_MK}/std.mk	; export STD_GENRULES
 ATD_GENRULES=${MCU_MK}/atd.mk	; export ATD_GENRULES
+ROM_GENRULES=${MCU_MK}/rom.mk	; export ROM_GENRULES
 AVR_GENRULES=${MCU_MK}/avr.mk	; export AVR_GENRULES
 MCU_MCUGENRULES=${MCU_MK}/mcu.mk	; export MCU_MCUGENRULES
 
@@ -80,6 +81,7 @@ alias hwd='cd ${MCU_SRC}/devices/hwd'
 alias logic='cd ${MCU_SRC}/devices/logic'
 alias pli='cd ${MCU_SRC}/projects/pli'
 alias prj='cd ${MCU_SRC}/projects/prj'
+alias rom='cd ${MCU_SRC}/rom'
 
 
 cd ${MCU_SRC}

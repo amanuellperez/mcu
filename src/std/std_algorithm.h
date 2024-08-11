@@ -271,7 +271,7 @@ template <typename Input_it, typename Output_it>
 constexpr Output_it copy(Input_it p, Input_it pe, Output_it q)
 {
     for (; p != pe; ++p, ++q)
-	*p = *q;
+	*q = *p;
 
     return q;
 }

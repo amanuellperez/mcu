@@ -24,7 +24,7 @@
 
 #include <dev_HD44780.h>
 #include <dev_HD44780_charset.h>
-#include <dev_glyphs.h>
+#include <rom_glyphs_5x8.h>
 
 #include "../instcodes.h"
 
@@ -75,7 +75,7 @@ void LCD_calculator<P>::new_glyph(const atd::ROM_array<uint8_t, 8, atmega::ROM_r
 template <typename P>
 void LCD_calculator<P>::save_new_glyphs()
 {
-    namespace gl = dev::glyphs_5x8;
+    namespace gl = rom::glyphs_5x8;
 
     LCD::set_cgram_address(0x00);
     new_glyph(gl::exponent2); // mismo orden que en keycodes.h!!!

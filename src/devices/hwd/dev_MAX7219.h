@@ -23,15 +23,17 @@
 #define __DEV_MATRIX_LED_MAX7219_H__
 /****************************************************************************
  *
- *   - DESCRIPCION: Clases para manejar las matrices de led.
- *	    El driver será el MAX7219.
+ * DESCRIPCION
+ *	Clases para manejar las matrices de led. El driver será el MAX7219.
  *
- *   - COMENTARIOS: Todo el código se basa en el código de Joey Conenna.
+ * COMENTARIOS
+ *	Todo el código se basa en el código de Joey Conenna.
  *	https://embeddedthoughts.com/2016/04/19
  *		/scrolling-text-on-the-8x8-led-matrix-with-max7219-drivers/
  *
- *   - HISTORIA:
- *           Manuel Perez - 31/12/2018 Escrito
+ * HISTORIA
+ *    Manuel Perez
+ *    31/12/2018 Escrito
  *
  ****************************************************************************/
 

@@ -9,6 +9,7 @@ Probado con avr-gcc 11.3.0
 * [Drivers suministrados](#suministrados):
     + [EEPROMs](#eeproms)
     + [LCDs](#lcd)
+    + [Displays](#displays)
     + [Potentiometers](#potentiometers)
     + [Registers](#registers)
     + [RTCs](#rtcs)
@@ -274,41 +275,48 @@ genérico.
 ### <a name="eeproms"></a>EEPROMs
 | Reference | I2C | SPI | datasheet |
 |-----------|:---:|:---:|:---:|
-| [25LC256](#25LC256)   |     |  x  |[datasheet](doc/25LC256.pdf)
+| [25LC256](#25LC256)   |     |  x  |[datasheet](datasheet/25LC256.pdf)
 
 ### <a name="lcd"></a>LCDs
 
 Driver: [HD44780](#HD44780)
 
+### <a name="displays"></a>Displays
+| Reference | I2C | SPI | datasheet |
+|-----------|:---:|:---:|:---:|
+|SDD1306    |  x  |  x  |[datasheet](datasheet/SDD1306.pdf)
+|MAX7219    |     |  x  |[datasheet](datasheet/MAX7219.pdf)
+
+
 ### <a name="potentiometers"></a>Potentiometers (digital)
 | Reference | I2C | SPI | datasheet |
 |-----------|:---:|:---:|:---:|
-|MCP4231    |     |  x  |[datasheet](doc/MCP4231.pdf)
+|MCP4231    |     |  x  |[datasheet](datasheet/MCP4231.pdf)
 
 
 ### <a name="registers"></a>Registers
 | Reference | Comments| datasheet |
 |-----------| ---- |:---:|
-| 74HC595   | 8-bit serial-in, parallel-out shift |[datasheet](doc/SN74HC595.pdf)
+| 74HC595   | 8-bit serial-in, parallel-out shift |[datasheet](datasheet/SN74HC595.pdf)
 
 
 ### <a name="rtcs"></a>RTC (Real-Time Clock)
 
 | Reference | I2C | SPI | datasheet |
 |-----------|:---:|:---:|:---:|
-|DS1307	    |  x  |     |[datasheet](doc/DS1307.pdf)
+|DS1307	    |  x  |     |[datasheet](datasheet/DS1307.pdf)
 
 
 ### <a name="sensors"></a>Sensors
 
 | Reference |  T  |  P  |  H  |  G  | PIN | 1WIRE | TWI | SPI   | datasheet |
 |-----------|:---:|:---:|:---:|:---:|:---:|:-----:|:---:|:-----:|:--------:|
-|BMP280     |  x  |  x  |     |     |     |       |  x  |  x    |[datasheet](doc/BMP280.pdf)
-|BME280     |  x  |  x  |  x  |     |     |       |  x  |  x    |[datasheet](doc/BME280.pdf)
-|BME680     |  x  |  x  |  x  |  x  |     |       |  x  |  x    |[datasheet](doc/BME680.pdf)
+|BMP280     |  x  |  x  |     |     |     |       |  x  |  x    |[datasheet](datasheet/BMP280.pdf)
+|BME280     |  x  |  x  |  x  |     |     |       |  x  |  x    |[datasheet](datasheet/BME280.pdf)
+|BME680     |  x  |  x  |  x  |  x  |     |       |  x  |  x    |[datasheet](datasheet/BME680.pdf)
 |LM75A      |  x  |     |     |     |     |       |  x  |       |
-|DS18B20    |  x  |     |     |     |     |   x   |     |       |[datasheet](doc/DS18B20.pdf)
-|DHT11	    |  x  |     |  x  |     |  x  |       |     |       |[datasheet](doc/DHT11.pdf)
+|DS18B20    |  x  |     |     |     |     |   x   |     |       |[datasheet](datasheet/DS18B20.pdf)
+|DHT11	    |  x  |     |  x  |     |  x  |       |     |       |[datasheet](datasheet/DHT11.pdf)
 
 
 T = temperature
@@ -331,9 +339,9 @@ G = gas
 ### <a name="camaras"></a>Cámaras
 
 OV7670:
-+ [datasheet](doc/OV7670_v1.2.pdf)
-+ [Implementation Guide](doc/OV7670_Implementation_Guide.pdf)
-+ [Protocolo SCCB](doc/OmniVision_SCCB_Functional_Specification.pdf)
++ [datasheet](datasheet/OV7670_v1.2.pdf)
++ [Implementation Guide](datasheet/OV7670_Implementation_Guide.pdf)
++ [Protocolo SCCB](datasheet/OmniVision_SCCB_Functional_Specification.pdf)
 	
 
 ### <a name="keyboards"></a>Keyboards
@@ -456,8 +464,8 @@ Ejemplos de relojes que podemos tener son:
 ### <a name="motors"></a>Motores
 
 L298N: Dual H-Bridge Motor Driver
-+ [L298 - datasheet](doc/L298.pdf)
-+ [L298N - datasheet](doc/L298N.pdf) 
++ [L298 - datasheet](datasheet/L298.pdf)
++ [L298N - datasheet](datasheet/L298N.pdf) 
 
 Si se conecta Vcc a menos de 12V se puede tener puesto el jumper de los 5V y
 suministrar 5V como output pin. Pero si Vcc > 12V **quitar ese jumper**.

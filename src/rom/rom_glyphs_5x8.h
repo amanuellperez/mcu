@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __DEV_GLYPHS_H__
-#define __DEV_GLYPHS_H__
+#ifndef __ROM_GLYPHS_5x8_H__
+#define __ROM_GLYPHS_5x8_H__
 
 /****************************************************************************
  *
@@ -33,53 +33,25 @@
  *  - HISTORIA:
  *    Manuel Perez
  *    06/02/2022 Escrito
+ *    11/08/2024 Lo convertimos en rom::
  *
- *  TODO: moverlo a dev1
  ****************************************************************************/
-#include <avr_memory.h>
 #include <atd_memory.h>
-#include "not_generic.h" // TODO: Este archivo no es genérico por dos motivos:
-			 // (1) Aparece la macro PROGMEM (¿es genérica?)
-			 // (2) Hay que parametrizarlo todo por la función
-			 //	Micro::ROM_read que dependerá del
-			 //	microcontrolador.
-			 //
-			 // ¿Cómo podemos "generalizar" esto?
-			 //
-			 // Solución 1
-			 // ----------
-			 // En lugar de distribuir este archivo
-			 // distribuimos un archivo de texto con los gliphs.
-			 // Ejemplo:
-			 //	bell = 0b00000
-			 //	       0b00010 ...
-			 //
-			 // fichero que llamamos glyphs.rom (o .pgm???)
-			 // A partir de este fichero usando un script
-			 // generamos este archivo de cabecera:
-			 //	$ rom2cpp atmega32 glyphs.rom
-			 // que genera el fichero adecuado dependiendo de la
-			 // arquitectura usada.
-			 //
-			 // Solución 2
-			 // ----------
-			 // ??? ¿Cómo hacerlo usando C++ sin usar scripts ni
-			 // macros?
+// #include <avr_memory.h> <-- hay que incluirlo antes de este archivo
 
-namespace dev{
+namespace rom{
 
-// TODO: incluir aqui dev_cols_glyhps.h!!! Son glyphs!!
-
-using ROM_read = not_generic::ROM_read;
 
 // El nombre del namespace clasifica el tipo de glyphs. 
 // Siempre estarán alineados a la derecha.
 namespace glyphs_5x8{
 
+using ROM_read = MCU::ROM_read;
+
 template <typename Read>
 using Glyph = atd::ROM_array<uint8_t, 8, Read>;
 
-constexpr const Glyph<ROM_read> bell PROGMEM = 
+constexpr Glyph<ROM_read> bell PROGMEM = 
 			  { 0b0000000,
 			    0b0000100,
 			    0b0001110,
@@ -89,7 +61,7 @@ constexpr const Glyph<ROM_read> bell PROGMEM =
 			    0b0000100,
 			    0b0000000 };
 
-constexpr const Glyph<ROM_read> arrow_up PROGMEM = 
+constexpr Glyph<ROM_read> arrow_up PROGMEM = 
 			  { 0b0000000,
 			    0b0000100,
 			    0b0001110,
@@ -100,7 +72,7 @@ constexpr const Glyph<ROM_read> arrow_up PROGMEM =
 			    0b0000000 };
 
 
-constexpr const Glyph<ROM_read> arrow_down PROGMEM = 
+constexpr Glyph<ROM_read> arrow_down PROGMEM = 
 			  { 0b0000000,
 			    0b0000100,
 			    0b0000100,
@@ -110,7 +82,7 @@ constexpr const Glyph<ROM_read> arrow_down PROGMEM =
 			    0b0000100,
 			    0b0000000};
 
-constexpr const Glyph<ROM_read> heart_full PROGMEM = 
+constexpr Glyph<ROM_read> heart_full PROGMEM = 
 			  { 0b0000000,
 			    0b0001010,
 			    0b0011111,
@@ -120,7 +92,7 @@ constexpr const Glyph<ROM_read> heart_full PROGMEM =
 			    0b0000000,
 			    0b0000000};
 
-constexpr const Glyph<ROM_read> heart_empty PROGMEM = 
+constexpr Glyph<ROM_read> heart_empty PROGMEM = 
 			  { 0b0000000,
 			    0b0001010,
 			    0b0010101,
@@ -131,7 +103,7 @@ constexpr const Glyph<ROM_read> heart_empty PROGMEM =
 			    0b0000000};
 
 
-constexpr const Glyph<ROM_read> battery_empty PROGMEM = 
+constexpr Glyph<ROM_read> battery_empty PROGMEM = 
 			  { 0b0001110,
 			    0b0011011,
 			    0b0010001,
@@ -141,7 +113,7 @@ constexpr const Glyph<ROM_read> battery_empty PROGMEM =
 			    0b0010001,
 			    0b0011111 };
 
-constexpr const Glyph<ROM_read> battery_half PROGMEM = 
+constexpr Glyph<ROM_read> battery_half PROGMEM = 
 			  { 0b0001110,
 			    0b0011011,
 			    0b0010001,
@@ -151,7 +123,7 @@ constexpr const Glyph<ROM_read> battery_half PROGMEM =
 			    0b0011111,
 			    0b0011111 };
 
-constexpr const Glyph<ROM_read> battery_full PROGMEM = 
+constexpr Glyph<ROM_read> battery_full PROGMEM = 
 			  { 0b0001110,
 			    0b0011111,
 			    0b0011111,
@@ -161,7 +133,7 @@ constexpr const Glyph<ROM_read> battery_full PROGMEM =
 			    0b0011111,
 			    0b0011111 };
 
-constexpr const Glyph<ROM_read> musical_note PROGMEM = 
+constexpr Glyph<ROM_read> musical_note PROGMEM = 
 			  { 0b0000000,
 			    0b0000011,
 			    0b0001101,
@@ -172,7 +144,7 @@ constexpr const Glyph<ROM_read> musical_note PROGMEM =
 			    0b0000000 };
 
 
-constexpr const Glyph<ROM_read> padlock_close PROGMEM = 
+constexpr Glyph<ROM_read> padlock_close PROGMEM = 
 			  { 0b0000000,
 			    0b0001110,
 			    0b0010001,
@@ -182,7 +154,7 @@ constexpr const Glyph<ROM_read> padlock_close PROGMEM =
 			    0b0011011,
 			    0b0011111 };
 
-constexpr const Glyph<ROM_read> padlock_open PROGMEM = 
+constexpr Glyph<ROM_read> padlock_open PROGMEM = 
 			  { 0b0000000,
 			    0b0001110,
 			    0b0010000,
@@ -192,7 +164,7 @@ constexpr const Glyph<ROM_read> padlock_open PROGMEM =
 			    0b0011011,
 			    0b0011111 };
 
-constexpr const Glyph<ROM_read> man PROGMEM = 
+constexpr Glyph<ROM_read> man PROGMEM = 
 			  { 0b0001110,
 			    0b0001110,
 			    0b0000100,
@@ -202,7 +174,7 @@ constexpr const Glyph<ROM_read> man PROGMEM =
 			    0b0001010,
 			    0b0010001 };
 
-constexpr const Glyph<ROM_read> skull PROGMEM = 
+constexpr Glyph<ROM_read> skull PROGMEM = 
 			  { 0b0000000,
 			    0b0001110,
 			    0b0010101,
@@ -213,7 +185,7 @@ constexpr const Glyph<ROM_read> skull PROGMEM =
 			    0b0000000 };
 
 
-constexpr const Glyph<ROM_read> speaker_right PROGMEM = 
+constexpr Glyph<ROM_read> speaker_right PROGMEM = 
 			  { 0b0000001,
 			    0b0000011,
 			    0b0001111,
@@ -224,7 +196,7 @@ constexpr const Glyph<ROM_read> speaker_right PROGMEM =
 			    0b0000000 };
 
 
-constexpr const Glyph<ROM_read> plug PROGMEM = 
+constexpr Glyph<ROM_read> plug PROGMEM = 
 			  { 0b0001010,
 			    0b0001010,
 			    0b0011111,
@@ -238,7 +210,7 @@ constexpr const Glyph<ROM_read> plug PROGMEM =
 // Al principio lo llamé 'square', pero eso entra en conflicto con la
 // función square de C. Además, se pueden crear símbolos 3, 4, ... cuyos
 // nombres serían exponent3, exponent4, ... 
-constexpr const Glyph<ROM_read> exponent2 PROGMEM = 
+constexpr Glyph<ROM_read> exponent2 PROGMEM = 
 			  { 0b0000110,
 			    0b0001001,
 			    0b0000010,
@@ -249,7 +221,7 @@ constexpr const Glyph<ROM_read> exponent2 PROGMEM =
 			    0b0000000 };
 
 
-constexpr const Glyph<ROM_read> exponent3 PROGMEM = 
+constexpr Glyph<ROM_read> exponent3 PROGMEM = 
 			  { 0b0000110,
 			    0b0000001,
 			    0b0000010,
@@ -260,7 +232,7 @@ constexpr const Glyph<ROM_read> exponent3 PROGMEM =
 			    0b0000000 };
 
 
-constexpr const Glyph<ROM_read> cuberoot PROGMEM = 
+constexpr Glyph<ROM_read> cuberoot PROGMEM = 
 			  { 0b0011011,
 			    0b0000110,
 			    0b0001010,
@@ -270,7 +242,7 @@ constexpr const Glyph<ROM_read> cuberoot PROGMEM =
 			    0b0000110,
 			    0b0000010 };
 
-constexpr const Glyph<ROM_read> pacman PROGMEM = 
+constexpr Glyph<ROM_read> pacman PROGMEM = 
 			  { 0b0000000,
 			    0b0001110,
 			    0b0011011,
@@ -280,7 +252,7 @@ constexpr const Glyph<ROM_read> pacman PROGMEM =
 			    0b0011111,
 			    0b0001110 };
 
-constexpr const Glyph<ROM_read> pacman_phantom PROGMEM = 
+constexpr Glyph<ROM_read> pacman_phantom PROGMEM = 
 			  { 0b0000000,
 			    0b0001110,
 			    0b0011111,

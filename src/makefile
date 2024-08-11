@@ -1,5 +1,6 @@
 DIRS = 	std	\
 		atd	\
+		rom	\
 		microcontrollers	\
 		devices	\
 		projects

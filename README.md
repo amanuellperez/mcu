@@ -24,6 +24,8 @@ This directory contains the following:
      
     * [atd](src/atd/README.md): General utilities.
       Depends on `std`.
+
+    * [rom](src/rom/README.md): Data to save in ROM.
  
 2. [Microcontrollers](src/microcontrollers): (microcontroller level?)
 
@@ -117,6 +119,8 @@ Se puede organizar el código en diferentes niveles:
 
     * [atd](src/atd/README.md): Funciones genéricas que se basan en mi std. 
 	 No usan excepciones ni los operadores new/delete.
+
+    * [rom](src/rom/README.md): Datos a guardar en la ROM (progmem del avr)
 
 2. [Microcontroladores](src/microcontrollers): (microcontroller level)
     

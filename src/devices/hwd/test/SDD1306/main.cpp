@@ -73,6 +73,7 @@ struct SDD1306_init_cfg {
 
 static constexpr uint8_t control_byte = 0x00;
 static constexpr uint8_t data_byte    = 0x40;
+using Rect = dev::PageCol_rectangle;
 
 
 
@@ -122,38 +123,16 @@ void hello()
 
 
 
-void blink(uint8_t x, uint8_t page)
+void blink(uint8_t npage, uint8_t x)
 {
-//    // Calculate the page and column
-//    uint8_t page = y / 8; // Each page is 8 pixels high
-			     
-    for (uint8_t i = 0; i < 1; ++i){
-	TWI twi{SDD1306::address};
-	twi << control_byte;
-	twi << uint8_t(0xB0 + page); // Set page address
-	twi << uint8_t(0x00 + x); // Set lower column address
-	twi << uint8_t(127); // Set higher column address
-	twi.close();
+    uint8_t x1 = x + 4u;
+    dev::PageCol_rectangle r{{npage, x}, {npage, x1}};
 
-	twi.open(SDD1306::address);
-	twi << data_byte;
-	twi << uint8_t{0xFF};
-	twi.close();
+    SDD1306::fill(r, 0xFF);
+    Micro::wait_ms(200);
 
-	Micro::wait_ms(500);
-
-	twi << control_byte;
-	twi << uint8_t(0xB0 + page); // Set page address
-	twi << uint8_t(0x00 + x); // Set lower column address
-	twi << uint8_t(127); // Set higher column address
-	twi.close();
-
-	twi.open(SDD1306::address);
-	twi << data_byte;
-	twi << uint8_t{0x00};
-	Micro::wait_ms(500);
-	twi.close();
-    }
+    SDD1306::fill(r, 0x00);
+    Micro::wait_ms(200);
 
 }
 
@@ -171,7 +150,7 @@ void send_data_waiting(TWI& twi, uint8_t x, bool wait)
     twi << data_byte;
 }
 
-void prueba()
+void basic_drawing()
 {
     myu::UART_iostream uart;
 
@@ -211,8 +190,44 @@ void prueba()
     twi.close();
 }
 
+constexpr myu::ROM_array<uint8_t, 5> letter_A 
+    PROGMEM  {0b01111100,
+	      0b00010010,
+	      0b00010001,
+	      0b00010010,
+	      0b01111100};
+
+void write_letter()
+{
+    uint8_t tmp[5];
+    std::copy(letter_A.begin(), letter_A.end(), &tmp[0]);
+    
+    SDD1306::horizontal_mode(Rect{{3, 10}, {3, 14}});
+    SDD1306::gddram_write(tmp);
+}
 
 
+void test_display()
+{
+
+    SDD1306::fill(0xF0);
+    Micro::wait_ms(700);
+
+    SDD1306::clear();
+
+    for (uint8_t page = 0; page < 8; ++page){
+	SDD1306::fill(Rect{{page, 60}, {page, 68}}, 0xFF);
+	Micro::wait_ms(200);
+	SDD1306::fill(Rect{{page, 60}, {page, 68}}, 0x00);
+    }
+
+    for (uint8_t i = 0; i < 5; ++i)
+	blink(0, 4*i);
+
+    basic_drawing();
+
+    write_letter();
+}
 
 
 
@@ -220,7 +235,6 @@ void prueba()
 // ----
 int main() 
 {
-    using Rect = dev::PageCol_rectangle;
 
     init_uart();
     hello();
@@ -232,27 +246,9 @@ int main()
     myu::UART_iostream uart;
 
     while(1){
-	SDD1306::fill(0xF0);
-	Micro::wait_ms(700);
+	test_display();
 
-	SDD1306::clear();
-
-	for (uint8_t page = 0; page < 8; ++page){
-	    SDD1306::fill(Rect{{page, 60}, {page, 68}}, 0xFF);
-	    Micro::wait_ms(300);
-	    SDD1306::fill(Rect{{page, 60}, {page, 68}}, 0x00);
-	}
-
-	prueba();
-
-
-	char opt{};
-	uart >> opt;
-
-	switch (opt){
-	    break; default: uart << "What???\n";
-
-	}
+	Micro::wait_ms(2000);
     }
 }
 

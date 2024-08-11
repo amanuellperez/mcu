@@ -508,6 +508,7 @@ public:
 
 
 // basic drawing functions (escriben directamente a la GDDRAM)
+    
     // Llenamos el rectángulo r con el byte x
     static void fill(const PageCol_rectangle& r, uint8_t x);
 

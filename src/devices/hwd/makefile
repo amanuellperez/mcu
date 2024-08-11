@@ -15,7 +15,6 @@ INCS= 	dev_A4988.h				\
 		dev_DS1307_clock.h		\
 		dev_DS18B20.h			\
 		dev_25LC256_basic.h		\
-		dev_glyphs.h			\
 		dev_keyboard_analog.h	\
 		dev_keyboard_code.h		\
 		dev_keypad.h			\

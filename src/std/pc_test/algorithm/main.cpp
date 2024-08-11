@@ -19,6 +19,7 @@
 
 #include "../../std_algorithm.h"
 #include "../../std_functional.h"
+#include "../../std_array.h"
 
 #include <alp_test.h>
 #include <iostream>
@@ -30,7 +31,7 @@ using namespace test;
 
 void test_for_each()
 {
-    test::interfaz("for_each");
+    test::interface("for_each");
     {
     std::vector v = {1, 2, 3, 4};
     std::vector res = {2, 3, 4, 5};
@@ -52,7 +53,7 @@ void test_for_each()
 
 void test_minmax()
 {
-    test::interfaz("min/max");
+    test::interface("min/max");
 
     CHECK_TRUE(mtd::min(4, 6) == 4, "min(4,6)");
     CHECK_TRUE(mtd::min(4, 4) == 4, "min(4,4)");
@@ -69,7 +70,7 @@ void test_minmax()
 
 void test_minmax_element()
 {
-    test::interfaz("min/max_element");
+    test::interface("min/max_element");
 
 {// caso normal
     std::vector<int> v {2, 7, 1, 8, 3, 1, 4, 1, 5};
@@ -124,9 +125,9 @@ void test_minmax_element()
 
 void test_copy()
 {
-    test::interfaz("copy");
+    test::interface("copy");
     
-    std::array<int, 5> a = {1,2,3,4,5};
+    mtd::array<int, 5> a = {1,2,3,4,5};
     int res[10];
     for (int i = 0; i < 10; ++i)
 	res[i] = -1;
@@ -149,7 +150,7 @@ void test_copy()
 
 void test_copy_n()
 {
-    test::interfaz("copy_n");
+    test::interface("copy_n");
     
     std::array<int, 5> a = {1,2,3,4,5};
     int res[10];
@@ -175,7 +176,7 @@ void test_copy_n()
 
 void test_fill()
 {
-    test::interfaz("fill");
+    test::interface("fill");
 
     int x[5];
     int* xe = mtd::fill(&x[0], x + 5, 40);
@@ -191,7 +192,7 @@ void test_fill()
 
 void test_fill_n()
 {
-    test::interfaz("fill_n");
+    test::interface("fill_n");
 
     int x[5];
     int* xe = mtd::fill_n(x, 5, 20);
@@ -237,7 +238,7 @@ void test_find_if_not(It p0, It pe, UnaryPredicate pred, const std::string& res)
 
 void test_find()
 {
-    test::interfaz("find");
+    test::interface("find");
     {
     std::string s{"abcde"};
 
@@ -285,7 +286,7 @@ void test_count_if(It p0, It pe, UnaryPredicate p, const std::string& msg)
 
 void test_count()
 {
-    test::interfaz("count");
+    test::interface("count");
 
     std::string msg = "uno-dos-tres";
     test_count(msg.begin(), msg.end(), '-', msg);
@@ -316,7 +317,7 @@ void test_shift_left(int n, It1 p0, It1 pe, It2 y0, It2 y1, It1 res)
 
 void test_shift_left()
 {
-    test::interfaz("shift_left");
+    test::interface("shift_left");
 
     constexpr int sz = 7;
     int x[sz];
@@ -346,7 +347,7 @@ void test_reverse(int* x, int* sx, size_t N)
 
 void test_reverse()
 {
-    test::interfaz("reverse");
+    test::interface("reverse");
 
 {// extreme: 0
     int* x{};
@@ -373,6 +374,16 @@ void test_reverse()
 }
 }
 
+void bugs()
+{
+    test::interface("bugs");
+    int a[2] = {10, 20};
+    int b[2] = {0, 0 };
+
+    mtd::copy(a, a + 2, b);
+    CHECK_TRUE(b[0] == 10 and b[1] == 20, "bug");
+}
+
 
 int main()
 {
@@ -390,6 +401,7 @@ try{
     test_count();
     test_shift_left();
     test_reverse();
+    bugs();
 
 }catch(const std::exception& e){
     std::cerr << e.what() << '\n';

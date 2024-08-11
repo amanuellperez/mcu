@@ -78,7 +78,7 @@ FIC_TAGS 	:= tags
 
 
 # Flags para el preprocesador
-CPPFLAGS += -DF_CPU=$(F_CPU) -DBAUD=$(BAUD) $(PROJ_CPPFLAGS)
+CPPFLAGS += -DMCU=$(MCU) -DF_CPU=$(F_CPU) -DBAUD=$(BAUD) $(PROJ_CPPFLAGS)
 
 
 # ------------------------

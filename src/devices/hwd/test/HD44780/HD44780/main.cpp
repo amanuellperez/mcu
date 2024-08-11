@@ -19,9 +19,9 @@
 
 
 #include "../../../dev_HD44780_basic.h"
-#include "../../../dev_glyphs.h"
-//#include "../../../dev_LCD_HD44780_charset.h"
+
 #include <avr_atmega.h>
+#include <rom_glyphs_5x8.h> // siempre despues de avr_atmega.h o equivalente
 
 namespace my_mcu = atmega;
 
@@ -34,7 +34,7 @@ using LCD_pins = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<4>,
 
 using LCD = dev::LCD_HD44780<LCD_pins>;
 
-namespace gl = dev::glyphs_5x8;
+namespace gl = rom::glyphs_5x8;
 using Glyph = gl::Glyph<my_mcu::ROM_read>;
 
 void print(LCD& lcd, const char* c)

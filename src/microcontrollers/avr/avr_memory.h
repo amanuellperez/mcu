@@ -67,6 +67,16 @@
 #include <atd_iterator.h>
 #include <atd_memory.h>
 
+// (RRR) El problema que tengo con el manejo de la ROM (= progmem) es que el
+// compilador necesita la macro PROGMEM en avr para meterla en ROM. ¿Cómo
+// generalizar eso?
+// De momento, voy a suponer que la macro PROGMEM, o una equivalente, la
+// suministran todos los compiladores. Si tiene otro nombre, en el archivo
+// correspondiente a este del micro definiré:
+// #define PROGMEM FORMA_DE_DEFINIRLO_EN_ESE_MICRO
+// y de esa forma puedo considerar que la macro PROGMEM es genérica.
+// ¿Cómo poder generalizarlo? ¿Alguna idea?
+
 namespace atd{
 // pgm_read_xxx son macros, no se pueden escribir como avr_::pgm_read_byte
 inline uint8_t progmem_read(const uint8_t& x) { return pgm_read_byte(&x); }
