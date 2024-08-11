@@ -37,13 +37,16 @@
  *
  ****************************************************************************/
 #include <cstdint>
+#include <span>
 
 #include <mcu_concepts.h>
 #include <mcu_TWI_master_ioxtream.h>
 
 namespace dev{
 
-
+/***************************************************************************
+ *			    SDD1306_basic<TWI>
+ ***************************************************************************/
 // (RRR) Al usar el concept TWI_master podemos sobrecargar SDD1306_basic y
 //       usar este mismo nombre tanto si lo conectamos via SPI o TWI.
 //
@@ -172,7 +175,11 @@ public:
     static void disable_charge_pump_regulator(TWI& twi);
 
 // GDDRAM
-//    static void gddram_write()
+    static void prepare_to_write_gddram(TWI& twi);
+
+    // Devuelve el número de bytes escritos en la GDDRAM
+    static 
+	std::span<uint8_t>::size_type gddram_write(std::span<uint8_t> data);
 
 // DEBUG
     // Prueba a ver si el SDD1306 responde
@@ -189,6 +196,10 @@ private:
 template <Type::TWI_master T, typename T::Address A>
 void SDD1306_basic<T, A>::prepare_to_send_command(TWI& twi)
 { twi << control_byte; }
+
+template <Type::TWI_master T, typename T::Address A>
+void SDD1306_basic<T, A>::prepare_to_write_gddram(TWI& twi)
+{ twi << data_byte; }
 
 template <Type::TWI_master T, typename T::Address A>
 inline
@@ -393,6 +404,215 @@ template <Type::TWI_master T, typename T::Address A>
 inline
 void SDD1306_basic<T, A>::disable_charge_pump_regulator(TWI& twi)
 { twi << uint8_t{0x8D} << uint8_t{0x10}; }
+
+
+// GDDRAM
+// ------
+template <Type::TWI_master T, typename T::Address A>
+inline
+std::span<uint8_t>::size_type
+		SDD1306_basic<T, A>::gddram_write(std::span<uint8_t> data)
+{
+    using size_type = std::span<uint8_t>::size_type;
+
+    TWI twi{address};
+    twi << data_byte;
+
+    if (twi.error())
+	return 0;
+
+    for (size_type i = 0; i < data.size(); ++i){
+	twi << data[i];
+
+//	if (twi.error()) // DUDA: si pongo esto es más ineficiente. Ponerlo?
+//	    return i;	 // si no lo pongo cambiar a `for(auto x: data) twi<<x;
+    }
+
+    if (twi.error())
+	return 0;   // TODO: desconozco el número de bytes enviados
+		    // correctamente
+
+    return data.size();
+}
+
+
+/***************************************************************************
+ *			    SDD1306_driver
+ ***************************************************************************/
+// Este driver agrupa las filas en bytes que llama page.
+struct PageCol {
+    uint8_t page;
+    uint8_t col;
+
+    constexpr
+    PageCol(uint8_t page0, uint8_t col0) : page{page0}, col{col0} { }
+};
+
+struct PageCol_rectangle{
+    PageCol p0;
+    PageCol p1;
+
+    // DUDA: ¿verificar que p1 > p0?
+    constexpr
+    PageCol_rectangle(const PageCol& p00, const PageCol& p10) 
+		: p0{p00}, p1{p10} { }
+
+    constexpr uint16_t size() const 
+    { return (p1.col - p0.col + 1) * (p1.page - p0.page + 1); }
+};
+
+
+/*
+ struct Cfg{
+    using TWI_master = ...
+    static constexpr TWI_master::Address    twi_address = 0x3C;
+ };
+
+ */
+
+// (RRR) ¿por qué pasar nrows como parámetro cuando lo paso en Cfg?
+// Para poder definir: SDD1306_128x64, y SDD1306_128x32.
+template <typename Cfg, uint8_t ncols0, uint8_t nrows0>
+class SDD1306_I2C_driver : 
+    public SDD1306_basic<typename Cfg::TWI_master, Cfg::twi_address>{
+public:
+// Types
+    using TWI_master = typename Cfg::TWI_master;
+    using TWI = mcu::TWI_master_ioxtream<TWI_master>;
+    using Address = typename TWI::Address;
+
+// Cfg
+    static constexpr Address address = Cfg::twi_address;
+    static constexpr uint8_t nrows = nrows0;
+    static constexpr uint8_t ncols = ncols0;
+
+    static_assert (nrows % 8 == 0);
+    static constexpr uint8_t npages = nrows / 8;
+
+    // Devuelve las coordenadas del rectangulo que define el display
+    static constexpr PageCol_rectangle pagecol_rectangle_display();
+
+// constructor y configuración
+    template <typename Init_cfg>
+    static void init();
+
+    // Configura el display para escribir en horizontal addressing mode
+    // La region donde se va a escribir es [p0, p1].
+    static void horizontal_mode(const PageCol& p0, const PageCol& p1);
+
+    // DUDA: llamar Region a PageCol_rectangle? Hoy me gusta Region más
+    static void horizontal_mode(const PageCol_rectangle& r);
+
+    // Configura todo el display en horizontal mode.
+    static void horizontal_mode();
+
+
+// basic drawing functions (escriben directamente a la GDDRAM)
+    // Llenamos el rectángulo r con el byte x
+    static void fill(const PageCol_rectangle& r, uint8_t x);
+
+    // Llenamos toda la imagen con el valor x
+    static void fill(uint8_t x);
+
+    // Borramos toda la imagen (¿no tiene comando para borrar el driver?)
+    static void clear() {fill(0);}
+
+private:
+// Por culpa de la herencia de templates necesito este `Base`
+    using Base = SDD1306_basic<TWI_master, address>;
+};
+
+template <typename C, uint8_t nc, uint8_t nr>
+template <typename ICfg> // ICfg = init_cfg
+void SDD1306_I2C_driver<C, nc, nr>::init()
+{
+// CUIDADO: parece ser que el orden es importante!!!
+    TWI twi{address};
+    Base::prepare_to_send_command(twi);
+
+    Base::set_display_off(twi);
+    Base::set_display_clock(twi, 0, 8);
+    Base::set_multiplex_ratio(twi, 63); // 63 filas
+
+    Base::set_display_offset(twi, 0);
+    Base::set_display_start_line(twi, 0);
+    Base::enable_charge_pump_regulator(twi);
+
+    // CUIDADO: si muevo esto la pantalla deja de funcionar (???)
+    Base::set_horizontal_addressing_mode(twi);
+
+    Base::map_COL0_to_SEG0(twi);
+    Base::scan_from_COM0_to_COMn_1(twi);
+			  
+    Base::set_COM_pins(twi, true, false);
+
+    Base::set_contrast_control(twi, 127);
+
+    Base::set_precharge_period(twi, 1, 15);
+
+    Base::set_Vcomh_deselect_level_077(twi);
+
+    Base::enable_display_on_follows_RAM_content(twi);
+    Base::display_normal_mode(twi);
+
+//    twi << 0x2E;    // deactivate scroll
+			  
+    Base::turn_on(twi);
+}
+
+template <typename C, uint8_t nc, uint8_t nr>
+void SDD1306_I2C_driver<C, nc, nr>::
+	horizontal_mode(const PageCol& p0, const PageCol& p1)
+{
+    TWI twi{address};
+    Base::prepare_to_send_command(twi);
+
+    Base::set_horizontal_addressing_mode(twi);
+    Base::hv_mode_column_address(twi, p0.col , p1.col );
+    Base::hv_mode_page_address  (twi, p0.page, p1.page);
+}
+
+template <typename C, uint8_t nc, uint8_t nr>
+inline
+void SDD1306_I2C_driver<C, nc, nr>::horizontal_mode(const PageCol_rectangle& r)
+{ horizontal_mode(r.p0, r.p1); }
+
+template <typename C, uint8_t nc, uint8_t nr>
+inline 
+void SDD1306_I2C_driver<C, nc, nr>::horizontal_mode()
+{horizontal_mode(PageCol{0, 0}, PageCol{npages - 1, ncols - 1});}
+
+
+template <typename C, uint8_t nc, uint8_t nr>
+void SDD1306_I2C_driver<C, nc, nr>::fill(const PageCol_rectangle& r, uint8_t x)
+{
+    horizontal_mode(r);
+
+    TWI twi(address);
+    Base::prepare_to_write_gddram(twi);
+    for (uint16_t i = 0; i < r.size(); ++i)
+	twi << x;
+
+    // return twi.error() ???
+}
+template <typename C, uint8_t nc, uint8_t nr>
+inline void SDD1306_I2C_driver<C, nc, nr>::fill(uint8_t x)
+{ fill (pagecol_rectangle_display(), x); }
+
+template <typename C, uint8_t nc, uint8_t nr>
+constexpr 
+inline
+PageCol_rectangle SDD1306_I2C_driver<C, nc, nr>::pagecol_rectangle_display()
+{ return PageCol_rectangle{{0,0}, {npages - 1, ncols - 1}};}
+
+
+// Tipos particulares
+// ------------------
+template <typename Cfg>
+using SDD1306_I2C_128x32 = SDD1306_I2C_driver<Cfg, 128, 32>;
+
+template <typename Cfg>
+using SDD1306_I2C_128x64 = SDD1306_I2C_driver<Cfg, 128, 64>;
 
 }// namespace
  

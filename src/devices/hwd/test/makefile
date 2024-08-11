@@ -16,7 +16,8 @@ DIRS = 	25LC256			\
 		L298N			\
 		led				\
 		push_button		\
-		sdcard
+		sdcard			\
+		SDD1306
 
 
 
