@@ -451,6 +451,9 @@ alguien quisiera localizarme que use el nuevo mail (manuel2perez@proton.me).
 
 + (???): duda. No tengo claro cómo hacerlo o si es verdad lo que digo.
 
++ TORNOT: abreviatura de "TODO or not TODO".
+
+
 ## <a name="namefunction"></a>Nombres de funciones
 
 C++ no admite la posibilidad de pasar parámetros en cualquier posición. Por
