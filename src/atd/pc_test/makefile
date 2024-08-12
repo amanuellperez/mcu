@@ -20,7 +20,6 @@ DIRS = 	algorithm	\
 		iterator	\
 		magnitude	\
 		math		\
-		memory		\
 		metronome	\
 		minifloat	\
 		names		\
@@ -28,6 +27,7 @@ DIRS = 	algorithm	\
 		percentage	\
 		pwm			\
 		ratio		\
+		rom			\
 		static		\
 		string		\
 		time		\

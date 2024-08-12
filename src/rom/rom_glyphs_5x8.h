@@ -36,7 +36,7 @@
  *    11/08/2024 Lo convertimos en rom::
  *
  ****************************************************************************/
-#include <atd_memory.h>
+#include <atd_rom.h>
 // #include <avr_memory.h> <-- hay que incluirlo antes de este archivo
 
 namespace rom{

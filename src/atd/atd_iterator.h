@@ -52,7 +52,15 @@ namespace atd{
 //	(2) No suministra punteros. No puedo tener un puntero a una región de
 //	    memoria PROGMEM (salvo usando las macros de avr-gcc).
 //
+// (???) No puedo poner el requires para requerir que esté definido el
+// operador[] ya que en la clase ROM_array defino el iterador antes del
+// operador[]: el compilador todavía no sabe que esa clase tiene ese operador,
+// generando un error.
 template <typename Array>
+//    requires requires {typename Array::size_type; } and
+//	     requires (Array a, typename Array::size_type i){
+//		a[i];
+//	     }
 class ROM_iterator{
 public:
 // Types

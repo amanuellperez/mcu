@@ -31,7 +31,7 @@
  *    11/08/2024 Traido de dev.
  *
  ****************************************************************************/
-#include <atd_memory.h>
+#include <atd_rom.h>
 // #include <avr_memory.h> <-- hay que incluirlo antes de este archivo
 
 namespace rom{
@@ -41,14 +41,14 @@ namespace font_basic_5x8{
 
 using ROM_read = MCU::ROM_read;
 
-constexpr uint8_t font_size = 96; // 96 códigos ASCII
-constexpr uint8_t font_cols = 5;  // número de columnas que tiene cada font
+constexpr uint8_t font_cols   = 5;  // número de columnas que tiene cada font
+constexpr uint8_t font_nchars = 96; // número de caracteres: 96 códigos ASCII
 
 // Tabla con los caracteres ASCII
 // Como queremos poder hacer un scroll de izquierda a derecha (o al revés)
 // en lugar de escribir las letras por filas las escribimos por columnas.
 constexpr 
-atd::ROM_array<uint8_t, font_size * font_cols, ROM_read> font
+atd::ROM_biarray<uint8_t, font_nchars, font_cols, ROM_read> font
      PROGMEM = { 
  0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,// space
  0b00000000,0b00000000,0b11110010,0b00000000,0b00000000,// !

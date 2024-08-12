@@ -36,6 +36,7 @@ INCS= atd_algorithm.h	\
 	atd_percentage.h	\
 	atd_pwm.h			\
 	atd_ratio.h			\
+	atd_rom.h			\
 	atd_static.h		\
 	atd_string.h		\
 	atd_test.h			\
