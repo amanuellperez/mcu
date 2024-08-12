@@ -22,6 +22,8 @@
 #include <mcu_TWI_master.h>
 #include <mcu_TWI_master_ioxtream.h>
 
+#include <rom_font_basic_5x8.h>
+
 #include <atd_test.h>
 using namespace test;
 
@@ -157,8 +159,6 @@ void basic_drawing()
     TWI twi(SDD1306::address);
     twi << control_byte;
 
-//    twi << uint8_t(0x21) << uint8_t{0} << uint8_t{127}; // column add start at 0 y acaba en 127
-//    twi << uint8_t{0x22} << uint8_t{0x00} << uint8_t{0x07}; // page address start at 0, end at 7
     
     twi << uint8_t(0x21) << uint8_t{0} << uint8_t{127}; // column add start at 0 y acaba en 127
     twi << uint8_t{0x22} << uint8_t{0x01} << uint8_t{0x02}; // page address start at 0, end at 7
@@ -190,20 +190,19 @@ void basic_drawing()
     twi.close();
 }
 
-constexpr myu::ROM_array<uint8_t, 5> letter_A 
-    PROGMEM  {0b01111100,
-	      0b00010010,
-	      0b00010001,
-	      0b00010010,
-	      0b01111100};
-
-void write_letter()
+dev::PageCol write_letter(char c, const dev::PageCol& pos)
 {
-    uint8_t tmp[5];
-    std::copy(letter_A.begin(), letter_A.end(), &tmp[0]);
+    using namespace rom::font_basic_5x8;
+
+    uint8_t tmp[font_cols];
+
+    auto letter = font.row(c - font_index0);
+    std::copy(letter.begin(), letter.end(), &tmp[0]);
     
-    SDD1306::horizontal_mode(Rect{{3, 10}, {3, 14}});
+    uint8_t col1 = pos.col + font_cols - 1;
+    SDD1306::horizontal_mode(Rect{pos, {pos.page, col1}});
     SDD1306::gddram_write(tmp);
+    return {pos.page, col1};
 }
 
 
@@ -226,7 +225,20 @@ void test_display()
 
     basic_drawing();
 
-    write_letter();
+
+    dev::PageCol pos{0, 0};
+    for (char c = 'a'; c <= 'z'; ++c){
+	pos = write_letter(c, pos);
+	if (pos.col + 5 < SDD1306::ncols)
+	    pos.col += 5;
+	else{
+	    pos.col = 0;
+	    ++pos.page;
+	}
+
+
+    }
+    Micro::wait_ms(5000);
 }
 
 

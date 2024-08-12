@@ -247,7 +247,7 @@ public:
 	return read(data[index(i, j)]); 
     }
 
-    const_Row row(Ind i) 
+    const_Row row(Ind i) const
 	{ return const_Row{*this, index(i, 0), index(i + 1, 0)};}
 
 // Unidimensional access

@@ -65,7 +65,7 @@
 #include <initializer_list>
 #include <atd_type_traits.h>
 #include <atd_iterator.h>
-#include <atd_memory.h>
+#include <atd_rom.h>
 
 // (RRR) El problema que tengo con el manejo de la ROM (= progmem) es que el
 // compilador necesita la macro PROGMEM en avr para meterla en ROM. ¿Cómo
