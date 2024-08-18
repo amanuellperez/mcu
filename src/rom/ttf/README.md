@@ -34,6 +34,7 @@ Las siguientes fuentes están descargadas de la página de dafont. He descargado
 las primeras que me han salido para hacer pruebas. 
 
 Font name       | Autor             | font size | License
+----------------|-------------------|-----------|--------
 Minecraft       | Craftron Gaming   | 16px      | Free
 VCR OSD Mono    | Riciery Leal      | 21px      | Free
 Rainy Hearts    | Camelina          | 16px      | Free
