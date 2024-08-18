@@ -41,7 +41,7 @@ Rainy Hearts    | Camelina          | 16px      | Free
 Dogica          | Roberto Mocci     |  8px      | Public domain/GPL
 Upheaval        | AEnigma           | 20px      | Free
 Retro Gaming    | Daymarius         | 11px      | Free
-Alagard         | Hewwett Tsoi      | 16px      | Free
+Alagard         | Hewett Tsoi      | 16px      | Free
 Home Video      | GGBotNet          | 20px      | Free
 DePixel         | ingoFonts         |  9px      | Free
 Mai 10          | J. Font           | 10px      | Free
@@ -49,7 +49,10 @@ Perfect DOS VGA 437| Zeh Fernando   | 16px      | Free
 
 Voy a dejar en github tanto el `ttf` de la fuente como el `txt` generado con
 el tamaño indicado. En el `txt` se ve perfectamente el tipo de letra y cómo va
-a quedar. Curiosamente lo que estoy haciendo se podría usar para ampliar el
+a quedar (de hecho al mirar el `txt` en github se ve fenomenal el tipo de
+letra que se generará).
+
+Curiosamente lo que estoy haciendo se podría usar para ampliar el
 tipo de letras para programas de linux tipo `banner`.
 
 
