@@ -506,6 +506,15 @@ public:
     // Configura todo el display en horizontal mode.
     static void horizontal_mode();
 
+    // Configura el display para escribir en horizontal addressing mode
+    // La region donde se va a escribir es [p0, p1].
+    static void vertical_mode(const PageCol& p0, const PageCol& p1);
+
+    // DUDA: llamar Region a PageCol_rectangle? Hoy me gusta Region más
+    static void vertical_mode(const PageCol_rectangle& r);
+
+    // Configura todo el display en horizontal mode.
+    static void vertical_mode();
 
 // basic drawing functions (escriben directamente a la GDDRAM)
     
@@ -561,6 +570,8 @@ void SDD1306_I2C_driver<C, nc, nr>::init()
     Base::turn_on(twi);
 }
 
+// horizontal_mode
+// ---------------
 template <typename C, uint8_t nc, uint8_t nr>
 void SDD1306_I2C_driver<C, nc, nr>::
 	horizontal_mode(const PageCol& p0, const PageCol& p1)
@@ -584,6 +595,32 @@ void SDD1306_I2C_driver<C, nc, nr>::horizontal_mode()
 {horizontal_mode(PageCol{0, 0}, PageCol{npages - 1, ncols - 1});}
 
 
+// vertical_mode
+// -------------
+template <typename C, uint8_t nc, uint8_t nr>
+void SDD1306_I2C_driver<C, nc, nr>::
+	vertical_mode(const PageCol& p0, const PageCol& p1)
+{
+    TWI twi{address};
+    Base::prepare_to_send_command(twi);
+
+    Base::set_vertical_addressing_mode(twi);
+    Base::hv_mode_column_address(twi, p0.col , p1.col );
+    Base::hv_mode_page_address  (twi, p0.page, p1.page);
+}
+
+template <typename C, uint8_t nc, uint8_t nr>
+inline
+void SDD1306_I2C_driver<C, nc, nr>::vertical_mode(const PageCol_rectangle& r)
+{ vertical_mode(r.p0, r.p1); }
+
+template <typename C, uint8_t nc, uint8_t nr>
+inline 
+void SDD1306_I2C_driver<C, nc, nr>::vertical_mode()
+{vertical_mode(PageCol{0, 0}, PageCol{npages - 1, ncols - 1});}
+
+
+// fill
 template <typename C, uint8_t nc, uint8_t nr>
 void SDD1306_I2C_driver<C, nc, nr>::fill(const PageCol_rectangle& r, uint8_t x)
 {

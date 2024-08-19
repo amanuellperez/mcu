@@ -22,7 +22,24 @@
 #include <mcu_TWI_master.h>
 #include <mcu_TWI_master_ioxtream.h>
 
-#include <rom_font_basic_5x8.h>
+// Fonts
+#include <rom_font_alagard_13x15_cr.h>
+#include <rom_font_DePixelBreit_12x10_cr.h>
+#include <rom_font_DePixelBreitFett_23x13_cr.h>
+#include <rom_font_DePixelHalbfett_11x13_cr.h>
+#include <rom_font_DePixelIllegible_8x8_cr.h>
+#include <rom_font_DePixelKlein_10x10_cr.h>
+#include <rom_font_DePixelSchmal_10x11_cr.h>
+#include <rom_font_dogica_8x8_cr.h>
+#include <rom_font_dogicabold_8x8_cr.h>
+#include <rom_font_dogica_number_5x7_cr.h>
+#include <rom_font_dogicapixel_7x8_cr.h>
+#include <rom_font_dogicapixelbold_8x8_cr.h>
+#include <rom_font_mai10_10x14_cr.h>
+#include <rom_font_Minecraft_14x16_cr.h>
+#include <rom_font_rainyhearts_11x13_cr.h>
+#include <rom_font_RetroGaming_11x13_cr.h>
+#include <rom_font_upheavtt_13x14_cr.h>
 
 #include <atd_test.h>
 using namespace test;
@@ -190,55 +207,124 @@ void basic_drawing()
     twi.close();
 }
 
+
+
+template <typename Font>
 dev::PageCol write_letter(char c, const dev::PageCol& pos)
 {
-    using namespace rom::font_basic_5x8;
+    // TODO: a font.h
+    constexpr uint8_t char_byte_size = Font::cols * Font::col_in_bytes;
+    uint8_t tmp[char_byte_size];
 
-    uint8_t tmp[font_cols];
-
-    auto letter = font.row(c - font_index0);
+    auto letter = Font::glyph.row(c - Font::index0);
     std::copy(letter.begin(), letter.end(), &tmp[0]);
     
-    uint8_t col1 = pos.col + font_cols - 1;
-    SDD1306::horizontal_mode(Rect{pos, {pos.page, col1}});
+    uint8_t col1 = pos.col + Font::cols - 1;
+    uint8_t page1 = pos.page + Font::col_in_bytes - 1;
+    SDD1306::vertical_mode(Rect{pos, {page1, col1}});
     SDD1306::gddram_write(tmp);
     return {pos.page, col1};
+}
+
+template <typename Font>
+dev::PageCol write(dev::PageCol pos, const char msg[])
+{
+    for (const char* p = msg; *p != '\0'; ++p){
+	pos = write_letter<Font>(*p, pos);
+	if (pos.col + 6 >= SDD1306::ncols){
+	    pos.col = 0;
+	    ++pos.page;
+	}
+    }
+    return pos;
+}
+
+
+template <typename Font>
+void write_font(const char font_name[])
+{
+    dev::PageCol pos{0, 0};
+    
+    pos = write<Font>(pos, font_name);
+
+//    for (const char* p = font_name; *p != '\0'; ++p){
+//	pos = write_letter<Font>(*p, pos);
+//	if (pos.col + 6 >= SDD1306::ncols){
+//	    pos.col = 0;
+//	    ++pos.page;
+//	}
+//    }
+    ++pos.page;
+    pos.col = 0;
+
+
+    for (char c = 32; c <= 125; ++c){
+	pos = write_letter<Font>(c, pos);
+	if (pos.col + 6 >= SDD1306::ncols){
+	    pos.col = 0;
+	    ++pos.page;
+	}
+    }
 }
 
 
 void test_display()
 {
 
-    SDD1306::fill(0xF0);
-    Micro::wait_ms(700);
+//    SDD1306::fill(0xF0);
+//    Micro::wait_ms(700);
+//
+//    SDD1306::clear();
+
+//    for (uint8_t page = 0; page < 8; ++page){
+//	SDD1306::fill(Rect{{page, 60}, {page, 68}}, 0xFF);
+//	Micro::wait_ms(200);
+//	SDD1306::fill(Rect{{page, 60}, {page, 68}}, 0x00);
+//    }
+
+//    for (uint8_t i = 0; i < 5; ++i)
+//	blink(0, 4*i);
+
+//    basic_drawing();
+    
+    using Dogica = rom::font_dogica_8x8_cr::Font;
+
+    SDD1306::clear();
+    write_letter<Dogica>('0', {0,0});
+    write_letter<Dogica>('1', {1,0});
+    write_letter<Dogica>('2', {2,0});
+    write_letter<Dogica>('3', {3,0});
+
+    write_letter16({2,10});
 
     SDD1306::clear();
 
-    for (uint8_t page = 0; page < 8; ++page){
-	SDD1306::fill(Rect{{page, 60}, {page, 68}}, 0xFF);
-	Micro::wait_ms(200);
-	SDD1306::fill(Rect{{page, 60}, {page, 68}}, 0x00);
-    }
+    using Minecraft = rom::font_Minecraft_14x16_cr::Font;
+    write<Minecraft>({2,5}, "Minecraft");
+    Micro::wait_ms(1000);
 
-    for (uint8_t i = 0; i < 5; ++i)
-	blink(0, 4*i);
+    using DePixelBreitFett = rom::font_DePixelBreitFett_23x13_cr::Font;
+    write<DePixelBreitFett>({2,5}, "DePixel");
+    Micro::wait_ms(1000);
 
-    basic_drawing();
+    SDD1306::clear();
 
+    write_font<Dogica>("Dogica");
+    Micro::wait_ms(1000);
 
-    dev::PageCol pos{0, 0};
-    for (char c = 'a'; c <= 'z'; ++c){
-	pos = write_letter(c, pos);
-	if (pos.col + 5 < SDD1306::ncols)
-	    pos.col += 5;
-	else{
-	    pos.col = 0;
-	    ++pos.page;
-	}
+    using DogicaBold = rom::font_dogicabold_8x8_cr::Font;
+    write_font<DogicaBold>("Dogica bold");
+    Micro::wait_ms(1000);
 
+    using DogicaPixel = rom::font_dogicapixel_7x8_cr::Font;
+    write_font<DogicaPixel>("Dogica pixel");
+    Micro::wait_ms(1000);
 
-    }
-    Micro::wait_ms(5000);
+    using DogicaPixelBold = rom::font_dogicapixelbold_8x8_cr::Font;
+    write_font<DogicaPixelBold>("Dogica pixel bold");
+    Micro::wait_ms(1000);
+//
+//    Micro::wait_ms(10'000);
 }
 
 

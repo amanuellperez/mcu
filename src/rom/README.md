@@ -9,7 +9,8 @@ Es importante (???) que solo se puedan incluir los tipos de letra usados y no
 todo. Supuestamente el compilador debería de optimizar las variables no usadas
 y no guardarlas en memoria, pero al no haber conseguido ninguna referencia
 optó por intentar que el programa incluya solo aquello que tiene intención de
-usar.
+usar (<-- en la práctica parece que funciona correctamente y solo incluye
+aquellas variables que se usan)
 
 
 Todavía no se cómo generalizar la gestión de la memoria usando C++, así que
