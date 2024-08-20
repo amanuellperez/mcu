@@ -22,23 +22,34 @@
 
 
 #pragma once
-#ifndef __ROM_FONT_HOMEVIDEO-REGULAR_10X14_CR_H__
-#define __ROM_FONT_HOMEVIDEO-REGULAR_10X14_CR_H__
+#ifndef __ROM_FONT_HOMEVIDEO_10X14_CR_H__
+#define __ROM_FONT_HOMEVIDEO_10X14_CR_H__
 
 #include <atd_rom.h>
 // #include <avr_memory.h> <-- hay que incluirlo antes de este archivo
 
 namespace rom{
-namespace font_HomeVideo-Regular_10x14_cr{
+namespace font_HomeVideo_10x14_cr{
 
 using ROM_read = MCU::ROM_read;
 
 struct Font{
+// Los caracteres son para ser escritos por columnas o por filas?
+static constexpr bool by_columns = true;
+
+// Número de caracteres
+static constexpr uint8_t nchars = 94;
+
+// Los códigos ASCII empiezan en 32
 static constexpr uint8_t index0 = 32;
-static constexpr uint8_t rows           = 14; // número de filas que tiene cada font
-static constexpr uint8_t cols           = 10; // número de columnas que tiene cada font
+
+// Dimensions
+static constexpr uint8_t rows = 14; // número de filas que tiene cada font
+static constexpr uint8_t cols = 10; // número de columnas que tiene cada font
+
+// Tamaño en bytes
 static constexpr uint8_t col_in_bytes   = 2; // número de bytes que tiene cada columna
-static constexpr uint8_t nchars         = 94; // número de caracteres
+inline constexpr uint8_t char_byte_size() {return cols * col_in_bytes;}
 
 static constexpr
 atd::ROM_biarray<uint8_t, nchars, cols*2, ROM_read> glyph

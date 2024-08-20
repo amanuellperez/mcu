@@ -35,17 +35,17 @@ las primeras que me han salido para hacer pruebas.
 
 Font name       | Autor             | font size | License
 ----------------|-------------------|-----------|--------
-Minecraft       | Craftron Gaming   | 16px      | Free
-VCR OSD Mono    | Riciery Leal      | 21px      | Free
-Rainy Hearts    | Camelina          | 16px      | Free
 Dogica          | Roberto Mocci     |  8px      | Public domain/GPL
-Upheaval        | AEnigma           | 20px      | Free
-Retro Gaming    | Daymarius         | 11px      | Free
-Alagard         | Hewett Tsoi      | 16px      | Free
-Home Video      | GGBotNet          | 20px      | Free
 DePixel         | ingoFonts         |  9px      | Free
 Mai 10          | J. Font           | 10px      | Free
+Retro Gaming    | Daymarius         | 11px      | Free
+Alagard         | Hewett Tsoi       | 16px      | Free
+Minecraft       | Craftron Gaming   | 16px      | Free
 Perfect DOS VGA 437| Zeh Fernando   | 16px      | Free
+Rainy Hearts    | Camelina          | 16px      | Free
+Home Video      | GGBotNet          | 20px      | Free
+Upheaval        | AEnigma           | 20px      | Free
+VCR OSD Mono    | Riciery Leal      | 21px      | Free
 
 Voy a dejar en github tanto el `ttf` de la fuente como el `txt` generado con
 el tamaño indicado. En el `txt` se ve perfectamente el tipo de letra y cómo va

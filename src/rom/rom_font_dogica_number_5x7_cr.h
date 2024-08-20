@@ -34,6 +34,7 @@ namespace font_dogica_number_5x7_cr{
 using ROM_read = MCU::ROM_read;
 
 struct Font{
+static constexpr bool by_columns = true;
 static constexpr uint8_t rows           = 7; // número de filas que tiene cada font
 static constexpr uint8_t cols           = 5; // número de columnas que tiene cada font
 static constexpr uint8_t col_in_bytes   = 1; // número de bytes que tiene cada columna

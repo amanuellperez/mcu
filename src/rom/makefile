@@ -12,7 +12,7 @@ INCS= 	rom_font_alagard_13x15_cr.h					\
 		rom_font_dogica_number_5x7_cr.h				\
 		rom_font_dogicapixel_7x8_cr.h				\
 		rom_font_dogicapixelbold_8x8_cr.h			\
-		rom_font_HomeVideo-Regular_10x14_cr.h		\
+		rom_font_HomeVideo_10x14_cr.h				\
 		rom_font_mai10_10x14_cr.h					\
 		rom_font_Minecraft_14x16_cr.h				\
 		rom_font_PerfectDOSVGA437_8x15_cr.h			\
