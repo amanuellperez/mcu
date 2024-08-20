@@ -527,6 +527,17 @@ public:
     // Borramos toda la imagen (¿no tiene comando para borrar el driver?)
     static void clear() {fill(0);}
 
+    // Escribe el caracter c en la posición indicada
+    template <typename ASCII_Font>
+    static PageCol print(const PageCol& pos, char c);
+
+    // DUDA: esta función no es de aquí, sino de una capa superior que
+    // controle la impresión de mensajes y dónde está el cursor
+    // (aunque es una función cómoda de tener...)
+    // Escribe el mensaje indicado en pos
+    template <typename Font>
+    static PageCol print(PageCol pos, const char msg[]);
+
 private:
 // Por culpa de la herencia de templates necesito este `Base`
     using Base = SDD1306_basic<TWI_master, address>;
@@ -643,7 +654,42 @@ inline
 PageCol_rectangle SDD1306_I2C_driver<C, nc, nr>::pagecol_rectangle_display()
 { return PageCol_rectangle{{0,0}, {npages - 1, ncols - 1}};}
 
+template <typename C, uint8_t nc, uint8_t nr>
+    template <typename Font>
+PageCol SDD1306_I2C_driver<C, nc, nr>::
+				print(const dev::PageCol& pos, char c)
+{
+    using Rect = dev::PageCol_rectangle;
 
+    static_assert(Font::by_columns == true);
+
+    uint8_t tmp[Font::char_byte_size()];
+
+    auto letter = Font::glyph.row(c - Font::index0);
+    std::copy(letter.begin(), letter.end(), &tmp[0]);
+    
+    uint8_t col1 = pos.col + Font::cols - 1;
+    uint8_t page1 = pos.page + Font::col_in_bytes - 1;
+    vertical_mode(Rect{pos, {page1, col1}});
+    Base::gddram_write(tmp);
+    return {pos.page, col1};
+}
+
+
+template <typename C, uint8_t nc, uint8_t nr>
+    template <typename Font>
+PageCol SDD1306_I2C_driver<C, nc, nr>::
+				print(dev::PageCol pos, const char msg[])
+{
+    for (const char* p = msg; *p != '\0'; ++p){
+	pos = print<Font>(pos, *p);
+	if (pos.col + Font::cols >= ncols){
+	    pos.col = 0;
+	    pos.page += Font::col_in_bytes;
+	}
+    }
+    return pos;
+}
 // Tipos particulares
 // ------------------
 template <typename Cfg>

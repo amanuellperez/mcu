@@ -49,7 +49,7 @@ static constexpr uint8_t cols = 14; // número de columnas que tiene cada font
 
 // Tamaño en bytes
 static constexpr uint8_t col_in_bytes   = 2; // número de bytes que tiene cada columna
-inline constexpr uint8_t char_byte_size() {return cols * col_in_bytes;}
+inline static constexpr uint8_t char_byte_size() {return cols * col_in_bytes;}
 
 static constexpr
 atd::ROM_biarray<uint8_t, nchars, cols*2, ROM_read> glyph

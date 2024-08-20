@@ -17,6 +17,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+// Elegir que fuentes mostrar en pantalla
+//constexpr int font_test = 1; 
+//constexpr int font_test = 2; 
+//constexpr int font_test = 3; 
+constexpr int font_test = 3; 
+
 #include "../../dev_SDD1306.h"
 #include <avr_atmega.h>
 #include <mcu_TWI_master.h>
@@ -35,11 +41,15 @@
 #include <rom_font_dogica_number_5x7_cr.h>
 #include <rom_font_dogicapixel_7x8_cr.h>
 #include <rom_font_dogicapixelbold_8x8_cr.h>
+#include <rom_font_HomeVideo_10x14_cr.h>
 #include <rom_font_mai10_10x14_cr.h>
 #include <rom_font_Minecraft_14x16_cr.h>
+#include <rom_font_PerfectDOSVGA437_8x15_cr.h>
+#include <rom_font_PerfectDOSVGA437Win_8x15_cr.h>
 #include <rom_font_rainyhearts_11x13_cr.h>
 #include <rom_font_RetroGaming_11x13_cr.h>
 #include <rom_font_upheavtt_13x14_cr.h>
+#include <rom_font_VCR_12x17_cr.h>
 
 #include <atd_test.h>
 using namespace test;
@@ -157,174 +167,201 @@ void blink(uint8_t npage, uint8_t x)
 
 
 
-void send_data_waiting(TWI& twi, uint8_t x, bool wait)
-{
-    twi << x;
-    if (!wait)
-	return;
-
-    twi.close();
-    Micro::wait_ms(400);
-    twi.open(SDD1306::address);
-    twi << data_byte;
-}
-
-void basic_drawing()
-{
-    myu::UART_iostream uart;
-
-    TWI twi(SDD1306::address);
-    twi << control_byte;
-
-    
-    twi << uint8_t(0x21) << uint8_t{0} << uint8_t{127}; // column add start at 0 y acaba en 127
-    twi << uint8_t{0x22} << uint8_t{0x01} << uint8_t{0x02}; // page address start at 0, end at 7
-							    
-    if (twi.error())
-	uart << "1.FAIL\n";
-
-    twi.close();
-
-    twi.open(SDD1306::address);
-    twi << data_byte;
-
-    uint16_t colmax = 10;
-    bool wait = false;
-
-    for (int j = 0; j < 2; ++j){
-	for (uint16_t i = 0; i < colmax - 1; ++i){
-	    send_data_waiting(twi, uint8_t{0x81}, wait);
-	}
-
-	twi << uint8_t{0xFF};
-
-	for (uint16_t i = 0; i < colmax - 1; ++i){
-	    send_data_waiting(twi, uint8_t{0x18}, wait);
-	}
-	twi << uint8_t{0xFF};
-    }
-
-    twi.close();
-}
-
-
-
-template <typename Font>
-dev::PageCol write_letter(char c, const dev::PageCol& pos)
-{
-    // TODO: a font.h
-    constexpr uint8_t char_byte_size = Font::cols * Font::col_in_bytes;
-    uint8_t tmp[char_byte_size];
-
-    auto letter = Font::glyph.row(c - Font::index0);
-    std::copy(letter.begin(), letter.end(), &tmp[0]);
-    
-    uint8_t col1 = pos.col + Font::cols - 1;
-    uint8_t page1 = pos.page + Font::col_in_bytes - 1;
-    SDD1306::vertical_mode(Rect{pos, {page1, col1}});
-    SDD1306::gddram_write(tmp);
-    return {pos.page, col1};
-}
-
-template <typename Font>
-dev::PageCol write(dev::PageCol pos, const char msg[])
-{
-    for (const char* p = msg; *p != '\0'; ++p){
-	pos = write_letter<Font>(*p, pos);
-	if (pos.col + 6 >= SDD1306::ncols){
-	    pos.col = 0;
-	    ++pos.page;
-	}
-    }
-    return pos;
-}
-
-
+// Escribe todos los códigos ASCII
 template <typename Font>
 void write_font(const char font_name[])
 {
     dev::PageCol pos{0, 0};
     
-    pos = write<Font>(pos, font_name);
+    pos = SDD1306::print<Font>(pos, font_name);
 
-//    for (const char* p = font_name; *p != '\0'; ++p){
-//	pos = write_letter<Font>(*p, pos);
-//	if (pos.col + 6 >= SDD1306::ncols){
-//	    pos.col = 0;
-//	    ++pos.page;
-//	}
-//    }
     ++pos.page;
     pos.col = 0;
 
 
     for (char c = 32; c <= 125; ++c){
-	pos = write_letter<Font>(c, pos);
-	if (pos.col + 6 >= SDD1306::ncols){
+	pos = SDD1306::print<Font>(pos, c);
+	if (pos.col + Font::cols >= SDD1306::ncols){
 	    pos.col = 0;
-	    ++pos.page;
+	    pos.page += Font::col_in_bytes;
 	}
     }
 }
 
 
-void test_display()
+void test_basic()
 {
-
-//    SDD1306::fill(0xF0);
-//    Micro::wait_ms(700);
-//
-//    SDD1306::clear();
-
-//    for (uint8_t page = 0; page < 8; ++page){
-//	SDD1306::fill(Rect{{page, 60}, {page, 68}}, 0xFF);
-//	Micro::wait_ms(200);
-//	SDD1306::fill(Rect{{page, 60}, {page, 68}}, 0x00);
-//    }
-
-//    for (uint8_t i = 0; i < 5; ++i)
-//	blink(0, 4*i);
-
-//    basic_drawing();
-    
-    using Dogica = rom::font_dogica_8x8_cr::Font;
-
-    SDD1306::clear();
-    write_letter<Dogica>('0', {0,0});
-    write_letter<Dogica>('1', {1,0});
-    write_letter<Dogica>('2', {2,0});
-    write_letter<Dogica>('3', {3,0});
-
-    write_letter16({2,10});
+    SDD1306::fill(0xF0);
+    Micro::wait_ms(700);
 
     SDD1306::clear();
 
-    using Minecraft = rom::font_Minecraft_14x16_cr::Font;
-    write<Minecraft>({2,5}, "Minecraft");
-    Micro::wait_ms(1000);
+    for (uint8_t page = 0; page < 8; ++page){
+	SDD1306::fill(Rect{{page, 60}, {page, 68}}, 0xFF);
+	Micro::wait_ms(200);
+	SDD1306::fill(Rect{{page, 60}, {page, 68}}, 0x00);
+    }
 
-    using DePixelBreitFett = rom::font_DePixelBreitFett_23x13_cr::Font;
-    write<DePixelBreitFett>({2,5}, "DePixel");
-    Micro::wait_ms(1000);
+    for (uint8_t i = 0; i < 5; ++i)
+	blink(0, 4*i);
+}
+
+
+void test_font()
+{
+    // Son demasiadas letras para probar a la vez
+    // De hecho al intentar probarlas todas el compilador dio overflow de la
+    // zona .text xD
+    // Por eso uso flags para compilar unas u otras a elección
 
     SDD1306::clear();
 
-    write_font<Dogica>("Dogica");
-    Micro::wait_ms(1000);
+    if constexpr (font_test == 1){
+	using alagard = rom::font_alagard_13x15_cr::Font;
+	using DePixelBreit = rom::font_DePixelBreit_12x10_cr::Font;
+	using DePixelBreitFett = rom::font_DePixelBreitFett_23x13_cr::Font;
+	using DePixelHalbfett = rom::font_DePixelHalbfett_11x13_cr::Font;
+	using DePixelIllegible = rom::font_DePixelIllegible_8x8_cr::Font;
+	using DePixelKlein = rom::font_DePixelKlein_10x10_cr::Font;
+	using DePixelSchmal = rom::font_DePixelSchmal_10x11_cr::Font;
 
-    using DogicaBold = rom::font_dogicabold_8x8_cr::Font;
-    write_font<DogicaBold>("Dogica bold");
-    Micro::wait_ms(1000);
+	SDD1306::print<DePixelKlein>({0,0},
+		    "Lets see some fonts");
+	Micro::wait_ms(2000);
+	SDD1306::clear();
 
-    using DogicaPixel = rom::font_dogicapixel_7x8_cr::Font;
-    write_font<DogicaPixel>("Dogica pixel");
-    Micro::wait_ms(1000);
+	SDD1306::print<alagard>({2,0}, "alagard");
+	Micro::wait_ms(1000);
+	SDD1306::clear();
 
-    using DogicaPixelBold = rom::font_dogicapixelbold_8x8_cr::Font;
-    write_font<DogicaPixelBold>("Dogica pixel bold");
-    Micro::wait_ms(1000);
-//
-//    Micro::wait_ms(10'000);
+	SDD1306::print<DePixelBreit>({2,0}, "DePixelBreit");
+	Micro::wait_ms(1000);
+	SDD1306::clear();
+
+	SDD1306::print<DePixelBreitFett>({0,0}, "DePixelBreitFett");
+	Micro::wait_ms(1000);
+	SDD1306::clear();
+
+	SDD1306::print<DePixelHalbfett>({2,0}, "DePixelHalbfett");
+	Micro::wait_ms(1000);
+	SDD1306::clear();
+
+	SDD1306::print<DePixelIllegible>({2,0}, "DePixelIllegible");
+	Micro::wait_ms(1000);
+	SDD1306::clear();
+
+	SDD1306::print<DePixelKlein>({2,0}, "DePixelKlein");
+	Micro::wait_ms(1000);
+	SDD1306::clear();
+
+	SDD1306::print<DePixelSchmal>({2,0}, "DePixelSchmal");
+	Micro::wait_ms(1000);
+	SDD1306::clear();
+	
+	write_font<DePixelKlein>("DePixelKlein (ASCII letters)");
+	Micro::wait_ms(2000);
+	SDD1306::clear();
+
+	SDD1306::print<DePixelKlein>({0,0}, "Change font_test to see others fonts");
+	Micro::wait_ms(5000);
+	SDD1306::clear();
+
+    } else if constexpr (font_test == 2){
+	using dogica = rom::font_dogica_8x8_cr::Font;
+	using dogicabold = rom::font_dogicabold_8x8_cr::Font;
+	using dogicapixel = rom::font_dogicapixel_7x8_cr::Font;
+	using dogicapixelbold = rom::font_dogicapixelbold_8x8_cr::Font;
+	using HomeVideo = rom::font_HomeVideo_10x14_cr::Font;
+	using mai10 = rom::font_mai10_10x14_cr::Font;
+
+	SDD1306::print<dogica>({0,0},
+		    "Lets see some fonts");
+	Micro::wait_ms(2000);
+	SDD1306::clear();
+
+	SDD1306::print<dogica>({2,0}, "dogica");
+	Micro::wait_ms(1000);
+	SDD1306::clear();
+
+	SDD1306::print<dogicabold>({2,0}, "dogicabold");
+	Micro::wait_ms(1000);
+	SDD1306::clear();
+
+	SDD1306::print<dogicapixel>({2,0}, "dogicapixel");
+	Micro::wait_ms(1000);
+	SDD1306::clear();
+
+	SDD1306::print<dogicapixelbold>({2,0}, "dogicapixelbold");
+	Micro::wait_ms(1000);
+	SDD1306::clear();
+
+	SDD1306::print<HomeVideo>({2,0}, "HomeVideo");
+	Micro::wait_ms(1000);
+	SDD1306::clear();
+
+	SDD1306::print<mai10>({2,0}, "mai10");
+	Micro::wait_ms(1000);
+	SDD1306::clear();
+
+	write_font<dogica>("dogica (ASCII letters)");
+	Micro::wait_ms(2000);
+	SDD1306::clear();
+
+	SDD1306::print<dogica>({2,0}, "Change font_test to see others fonts");
+	Micro::wait_ms(5000);
+	SDD1306::clear();
+
+    } else if constexpr (font_test == 3){
+	using Minecraft = rom::font_Minecraft_14x16_cr::Font;
+	using PerfectDOSVGA437 = rom::font_PerfectDOSVGA437_8x15_cr::Font;
+	using PerfectDOSVGA437Win = rom::font_PerfectDOSVGA437Win_8x15_cr::Font;
+	using rainyhearts = rom::font_rainyhearts_11x13_cr::Font;
+	using RetroGaming = rom::font_RetroGaming_11x13_cr::Font;
+	using upheavtt = rom::font_upheavtt_13x14_cr::Font;
+	using VCR = rom::font_VCR_12x17_cr::Font;
+
+	SDD1306::print<PerfectDOSVGA437>({0,0},
+		    "Lets see some fonts");
+	Micro::wait_ms(2000);
+	SDD1306::clear();
+
+	SDD1306::clear();
+	SDD1306::print<Minecraft>({2,0}, "Minecraft");
+	Micro::wait_ms(1000);
+	SDD1306::clear();
+
+	SDD1306::print<PerfectDOSVGA437>({2,0}, "PerfectDOSVGA437");
+	Micro::wait_ms(1000);
+	SDD1306::clear();
+
+	SDD1306::print<PerfectDOSVGA437Win>({2,0}, "PerfectDOSVGA437Win");
+	Micro::wait_ms(1000);
+	SDD1306::clear();
+
+	SDD1306::print<rainyhearts>({2,0}, "rainyhearts");
+	Micro::wait_ms(1000);
+	SDD1306::clear();
+
+	SDD1306::print<RetroGaming>({2,0}, "RetroGaming");
+	Micro::wait_ms(1000);
+	SDD1306::clear();
+
+	SDD1306::print<upheavtt>({2,0}, "upheavtt");
+	Micro::wait_ms(1000);
+	SDD1306::clear();
+
+	SDD1306::print<VCR>({2,0}, "VCR");
+	Micro::wait_ms(1000);
+	SDD1306::clear();
+
+	write_font<PerfectDOSVGA437>("PerfectDOSVGA437 (ASCII letters)");
+	Micro::wait_ms(2000);
+	SDD1306::clear();
+
+	SDD1306::print<PerfectDOSVGA437>({0,0}, "Change font_test to see others fonts");
+	Micro::wait_ms(5000);
+	SDD1306::clear();
+    }
 }
 
 
@@ -344,9 +381,8 @@ int main()
     myu::UART_iostream uart;
 
     while(1){
-	test_display();
-
-	Micro::wait_ms(2000);
+//	test_basic();
+	test_font();
     }
 }
 
