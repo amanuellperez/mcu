@@ -39,6 +39,8 @@
 #include <cstdint>
 #include <span>
 
+#include <atd_coordinates.h>
+
 #include <mcu_concepts.h>
 #include <mcu_TWI_master_ioxtream.h>
 
@@ -439,29 +441,6 @@ std::span<uint8_t>::size_type
 /***************************************************************************
  *			    SDD1306_driver
  ***************************************************************************/
-// Este driver agrupa las filas en bytes que llama page.
-struct PageCol {
-    uint8_t page;
-    uint8_t col;
-
-    constexpr
-    PageCol(uint8_t page0, uint8_t col0) : page{page0}, col{col0} { }
-};
-
-struct PageCol_rectangle{
-    PageCol p0;
-    PageCol p1;
-
-    // DUDA: ¿verificar que p1 > p0?
-    constexpr
-    PageCol_rectangle(const PageCol& p00, const PageCol& p10) 
-		: p0{p00}, p1{p10} { }
-
-    constexpr uint16_t size() const 
-    { return (p1.col - p0.col + 1) * (p1.page - p0.page + 1); }
-};
-
-
 /*
  struct Cfg{
     using TWI_master = ...
@@ -480,6 +459,10 @@ public:
     using TWI_master = typename Cfg::TWI_master;
     using TWI = mcu::TWI_master_ioxtream<TWI_master>;
     using Address = typename TWI::Address;
+
+    using PageCol	    = atd::PageCol<uint8_t>;
+    using PageCol_rectangle = atd::PageCol_rectangle<uint8_t>;
+
 
 // Cfg
     static constexpr Address address = Cfg::twi_address;
@@ -651,15 +634,15 @@ inline void SDD1306_I2C_driver<C, nc, nr>::fill(uint8_t x)
 template <typename C, uint8_t nc, uint8_t nr>
 constexpr 
 inline
-PageCol_rectangle SDD1306_I2C_driver<C, nc, nr>::pagecol_rectangle_display()
+SDD1306_I2C_driver<C, nc, nr>::PageCol_rectangle SDD1306_I2C_driver<C, nc, nr>::pagecol_rectangle_display()
 { return PageCol_rectangle{{0,0}, {npages - 1, ncols - 1}};}
 
 template <typename C, uint8_t nc, uint8_t nr>
     template <typename Font>
-PageCol SDD1306_I2C_driver<C, nc, nr>::
-				print(const dev::PageCol& pos, char c)
+SDD1306_I2C_driver<C, nc, nr>::PageCol SDD1306_I2C_driver<C, nc, nr>::
+				print(const PageCol& pos, char c)
 {
-    using Rect = dev::PageCol_rectangle;
+    using Rect = PageCol_rectangle;
 
     static_assert(Font::by_columns == true);
 
@@ -678,8 +661,8 @@ PageCol SDD1306_I2C_driver<C, nc, nr>::
 
 template <typename C, uint8_t nc, uint8_t nr>
     template <typename Font>
-PageCol SDD1306_I2C_driver<C, nc, nr>::
-				print(dev::PageCol pos, const char msg[])
+SDD1306_I2C_driver<C, nc, nr>::PageCol SDD1306_I2C_driver<C, nc, nr>::
+				print(PageCol pos, const char msg[])
 {
     for (const char* p = msg; *p != '\0'; ++p){
 	pos = print<Font>(pos, *p);

@@ -102,7 +102,7 @@ struct SDD1306_init_cfg {
 
 static constexpr uint8_t control_byte = 0x00;
 static constexpr uint8_t data_byte    = 0x40;
-using Rect = dev::PageCol_rectangle;
+using Rect = SDD1306::PageCol_rectangle;
 
 
 
@@ -155,7 +155,7 @@ void hello()
 void blink(uint8_t npage, uint8_t x)
 {
     uint8_t x1 = x + 4u;
-    dev::PageCol_rectangle r{{npage, x}, {npage, x1}};
+    Rect r{{npage, x}, {npage, x1}};
 
     SDD1306::fill(r, 0xFF);
     Micro::wait_ms(200);
@@ -171,7 +171,7 @@ void blink(uint8_t npage, uint8_t x)
 template <typename Font>
 void write_font(const char font_name[])
 {
-    dev::PageCol pos{0, 0};
+    SDD1306::PageCol pos{0, 0};
     
     pos = SDD1306::print<Font>(pos, font_name);
 
