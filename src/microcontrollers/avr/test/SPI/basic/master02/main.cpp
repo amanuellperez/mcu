@@ -23,7 +23,7 @@
 #include "../../../../avr_UART_iostream.h"
 
 
-using SPI = avr_::SPI_master_g;
+using SPI = avr_::SPI_master;
 
 // OJO: clave periodo a 8 us. Si pongo a 2 us al slave no le da tiempo a leer
 // y se lee basura y pierden datos.

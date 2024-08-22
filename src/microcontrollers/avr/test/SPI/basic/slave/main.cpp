@@ -23,7 +23,7 @@
 #include "../../../../avr_UART_iostream.h"
 
 
-using SPI = avr_::SPI_slave_g;
+using SPI = avr_::SPI_slave;
 
 constexpr uint16_t periodo_en_us = 2;	
 

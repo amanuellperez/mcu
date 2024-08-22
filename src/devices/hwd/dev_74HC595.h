@@ -61,7 +61,7 @@ struct Register_74HC595_pins{
 
 
 /// Fundamental:
-///	1. Hay que configurar SPI como master, llamando a SPI_master_g::on.
+///	1. Hay que configurar SPI como master, llamando a SPI_master::on.
 ///	2. Antes que escribir en el registro hay que seleccionarlo.
 ///	   En principio como hay diferentes formas de selecionarlo no defino
 ///	   cómo hacerlo aquí.
@@ -77,7 +77,7 @@ class Register_74HC595_SPI{
 public:
     Register_74HC595_SPI() 
     { 
-	not_generic::SPI_master_g::data_order_LSB();
+	not_generic::SPI_master::data_order_LSB();
 	NO_SRCLR_.write_one(); 
     }
 
@@ -85,7 +85,7 @@ public:
     /// hasta no acabar de escribir.
     // Observar que esta función se puede definir como const. Sin embargo,
     // el cliente supondrá que es no const. La dejo con el prototipo esperado.
-    void buffer_write(uint8_t x) { not_generic::SPI_master_g::write(uint8_t{x}); }
+    void buffer_write(uint8_t x) { not_generic::SPI_master::write(uint8_t{x}); }
 
     void buffer_clear() 
     { 

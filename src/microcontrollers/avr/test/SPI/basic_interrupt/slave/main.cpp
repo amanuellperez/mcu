@@ -24,7 +24,7 @@
 #include "../../../../avr_micro.h"
 
 
-using SPI = avr_::SPI_slave_g;
+using SPI = avr_::SPI_slave;
 
 
 static volatile uint8_t data {0};

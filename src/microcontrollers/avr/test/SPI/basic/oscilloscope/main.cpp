@@ -27,7 +27,7 @@
 
 namespace my_mcu = avr_;
 
-using SPI = my_mcu::SPI_master_g;
+using SPI = my_mcu::SPI_master;
 
 constexpr uint16_t period_in_us = 8;	
 

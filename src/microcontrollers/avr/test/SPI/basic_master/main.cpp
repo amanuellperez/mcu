@@ -40,7 +40,7 @@
 
 // TODO: revisar. No se está seleccionando explícitamente el slave!!!
 
-using SPI = avr_::SPI_master_g;
+using SPI = avr_::SPI_master;
 
 constexpr uint8_t npin_RCLK = 12;
 constexpr uint16_t periodo_en_us = 2;	// 2 microsegundos!!!

@@ -45,7 +45,7 @@
  *	10/07/2019 Reescrito. Comienzo con traductor.
  *	19/10/2019 Lo dejo como un traductor puro.
  *	10/04/2021 SPI_basic_basic, SPI_master, SPI_slave
- *	12/02/2023 Elimino uint8_t a favor de uint8_t. Usar uint8_t obliga
+ *	12/02/2023 Elimino std::byte a favor de uint8_t. Usar std::byte obliga
  *		   a tener que estar haciendo castings todo el rato. Puede que
  *		   no sepa usarlo. De momento me quedo con uint8_t para
  *		   representar los bytes.
@@ -70,6 +70,12 @@ public:
     // como master este pin obligatoriamente tiene que estar como output:
     // usémoslo como chip select!!! (esto será genérico? qué hacen otros
     // micros?)
+    // De acuerdo a la datasheet, 23.3.2, en caso de configurarlo como input
+    // pin, si su valor es LOW el SPI consideraría que hay otro SPI-Master que
+    // quiere seleccionarlo y el micro cambiaría la configuración a
+    // SPI-slave!!!
+    // Si no se trabaja en un entorno con varios SPI-master, definirlo como
+    // output es la configuración más sencilla.
     static constexpr uint8_t CS_pin_number = cfg::spi::SS_pin_number;
 
 

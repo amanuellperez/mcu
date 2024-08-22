@@ -38,9 +38,9 @@
 namespace avr_{
 
 
-class SPI_base_g : public SPI_basic{
+class SPI_base : public SPI_basic{
 public:
-    SPI_base_g() = delete;
+    SPI_base() = delete;
 
     /// Configuramos la velocidad del reloj del SPI en microsegundos.
     // La función clock_period_in_us traduce la forma de hablar del cliente (en
@@ -119,9 +119,9 @@ private:
 };
 
 
-class SPI_master_g : public SPI_base_g {
+class SPI_master : public SPI_base {
 public:
-    SPI_master_g() = delete;
+    SPI_master() = delete;
 
     /// Configuramos los pines para que el SPI funciones como master.
     /// Configuramos todos: SCK, MOSI y SS como de salida, y MISO como de
@@ -150,9 +150,9 @@ public:
 };
 
 
-class SPI_slave_g : public SPI_base_g {
+class SPI_slave : public SPI_base {
 public:
-    SPI_slave_g() = delete;
+    SPI_slave() = delete;
 
     /// Enciende el SPI como slave.
     static void on()
@@ -169,7 +169,7 @@ private:
 // tiene que decirlo.
 template<uint32_t frequency
 	    , uint32_t clock_frequency_in_hz>
-inline void SPI_base_g::clock_frequency_in_hz()
+inline void SPI_base::clock_frequency_in_hz()
 {static_assert(atd::always_false_v<int>, "Frequency not supported");}
 
 
@@ -177,73 +177,73 @@ inline void SPI_base_g::clock_frequency_in_hz()
 // --------------------
 // a 500 kHz = 2 us
 template<>
-inline void SPI_base_g::clock_period_in_us<2u, 1000000UL>() 
+inline void SPI_base::clock_period_in_us<2u, 1000000UL>() 
 {clock_frequency_divide_by_2();}
 
 // a 4 us
 template<>
-inline void SPI_base_g::clock_period_in_us<4u, 1000000UL>() 
+inline void SPI_base::clock_period_in_us<4u, 1000000UL>() 
 {clock_frequency_divide_by_4();}
 
 // a 8 us
 template<>
-inline void SPI_base_g::clock_period_in_us<8u, 1000000UL>() 
+inline void SPI_base::clock_period_in_us<8u, 1000000UL>() 
 {clock_frequency_divide_by_8();}
 
 // a 16 us
 template<>
-inline void SPI_base_g::clock_period_in_us<16u, 1000000UL>() 
+inline void SPI_base::clock_period_in_us<16u, 1000000UL>() 
 {clock_frequency_divide_by_16();}
 
 // a 32 us
 template<>
-inline void SPI_base_g::clock_period_in_us<32u, 1000000UL>() 
+inline void SPI_base::clock_period_in_us<32u, 1000000UL>() 
 {clock_frequency_divide_by_32();}
 
 // a 64 us
 template<>
-inline void SPI_base_g::clock_period_in_us<64u, 1000000UL>() 
+inline void SPI_base::clock_period_in_us<64u, 1000000UL>() 
 {clock_frequency_divide_by_64();}
 
 // a 128 us
 template<>
-inline void SPI_base_g::clock_period_in_us<128u, 1000000UL>() 
+inline void SPI_base::clock_period_in_us<128u, 1000000UL>() 
 {clock_frequency_divide_by_128();}
 
 
 // a 500 kHz
 template<>
-inline void SPI_base_g::clock_frequency_in_hz<500'000UL, 1'000'000UL>()
+inline void SPI_base::clock_frequency_in_hz<500'000UL, 1'000'000UL>()
 { clock_frequency_divide_by_2(); }
 
 // a 250 kHz
 template<>
-inline void SPI_base_g::clock_frequency_in_hz<250'000UL, 1'000'000UL>()
+inline void SPI_base::clock_frequency_in_hz<250'000UL, 1'000'000UL>()
 { clock_frequency_divide_by_4(); }
 
 // a 125 kHz
 template<>
-inline void SPI_base_g::clock_frequency_in_hz<125'000UL, 1'000'000UL>()
+inline void SPI_base::clock_frequency_in_hz<125'000UL, 1'000'000UL>()
 { clock_frequency_divide_by_8(); }
 
 // a 62.5 kHz
 template<>
-inline void SPI_base_g::clock_frequency_in_hz<62'500UL, 1'000'000UL>()
+inline void SPI_base::clock_frequency_in_hz<62'500UL, 1'000'000UL>()
 { clock_frequency_divide_by_16(); }
 
 // a 31.25 kHz
 template<>
-inline void SPI_base_g::clock_frequency_in_hz<31'250UL, 1'000'000UL>()
+inline void SPI_base::clock_frequency_in_hz<31'250UL, 1'000'000UL>()
 { clock_frequency_divide_by_32(); }
 
 // a 15.625 kHz
 template<>
-inline void SPI_base_g::clock_frequency_in_hz<15'625UL, 1'000'000UL>()
+inline void SPI_base::clock_frequency_in_hz<15'625UL, 1'000'000UL>()
 { clock_frequency_divide_by_64(); }
 
 // a 7812 Hz
 template<>
-inline void SPI_base_g::clock_frequency_in_hz<7'812UL, 1'000'000UL>()
+inline void SPI_base::clock_frequency_in_hz<7'812UL, 1'000'000UL>()
 { clock_frequency_divide_by_128(); }
 
 
@@ -251,37 +251,37 @@ inline void SPI_base_g::clock_frequency_in_hz<7'812UL, 1'000'000UL>()
 // --------------------
 // a 250 ns
 //template<>
-//inline void SPI_base_g::clock_frequency_en_ns<250u, 8000000UL>() 
+//inline void SPI_base::clock_frequency_en_ns<250u, 8000000UL>() 
 //{clock_frequency_divide_by_2();}
 
 // a 500 ns
 //template<>
-//inline void SPI_base_g::clock_frequency_en_ns<500u, 8000000UL>() 
+//inline void SPI_base::clock_frequency_en_ns<500u, 8000000UL>() 
 //{clock_frequency_divide_by_4();}
 
 // a 1 us
 template<>
-inline void SPI_base_g::clock_period_in_us<1u, 8000000UL>() 
+inline void SPI_base::clock_period_in_us<1u, 8000000UL>() 
 {clock_frequency_divide_by_8();}
 
 // a 2 us
 template<>
-inline void SPI_base_g::clock_period_in_us<2u, 8000000UL>() 
+inline void SPI_base::clock_period_in_us<2u, 8000000UL>() 
 {clock_frequency_divide_by_16();}
 
 // a 4 us
 template<>
-inline void SPI_base_g::clock_period_in_us<4u, 8000000UL>() 
+inline void SPI_base::clock_period_in_us<4u, 8000000UL>() 
 {clock_frequency_divide_by_32();}
 
 // a 8 us
 template<>
-inline void SPI_base_g::clock_period_in_us<8u, 8000000UL>() 
+inline void SPI_base::clock_period_in_us<8u, 8000000UL>() 
 {clock_frequency_divide_by_64();}
 
 // a 16 us
 template<>
-inline void SPI_base_g::clock_period_in_us<16u, 8000000UL>() 
+inline void SPI_base::clock_period_in_us<16u, 8000000UL>() 
 {clock_frequency_divide_by_128();}
 
 }// namespace avr
