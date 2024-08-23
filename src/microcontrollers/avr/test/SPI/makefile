@@ -1,6 +1,6 @@
-DIRS = basic	\
-	basic_interrupt \
-	basic_master
+DIRS = basic_interrupt \
+	master			\
+	slave
 
 include $(MCU_RECRULES)
 

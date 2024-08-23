@@ -76,7 +76,7 @@ public:
     // SPI-slave!!!
     // Si no se trabaja en un entorno con varios SPI-master, definirlo como
     // output es la configuración más sencilla.
-    static constexpr uint8_t CS_pin_number = cfg::spi::SS_pin_number;
+    static constexpr uint8_t noCS_pin_number = cfg::spi::SS_pin_number;
 
 
 // CONSTRUCTOR
@@ -121,7 +121,8 @@ public:
 
 
     /// Configuramos el modo de operación: la polaridad cpol y la fase cpha
-    static void spi_mode(bool cpol, bool cpha);
+    /// cpol y cpha son números: 0 ó 1
+    static void spi_mode(uint8_t cpol, uint8_t cpha);
 
 
     // Selección de la velocidad del reloj.

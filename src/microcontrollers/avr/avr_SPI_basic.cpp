@@ -27,7 +27,7 @@
 namespace avr_{
 
 
-void SPI_basic::spi_mode(bool cpol, bool cpha)
+void SPI_basic::spi_mode(uint8_t cpol, uint8_t cpha)
 {
     if (cpol == 0)
 	atd::write_bit<CPOL>::to<0>::in(SPCR);

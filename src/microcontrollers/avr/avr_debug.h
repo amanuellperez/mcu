@@ -29,6 +29,7 @@
  *    Manuel Perez
  *    14/09/2023 Escrito
  *    14/06/2024 print_registers_adc
+ *    22/08/2024 print_registers_spi
  *
  ****************************************************************************/
 #include <ostream>
@@ -39,6 +40,8 @@ namespace avr_{
 // Impresión de los registros del avr
 // ----------------------------------
 void print_registers_uart(std::ostream& out);
+
+void print_registers_spi(std::ostream& out);
 
 void print_registers_timer0(std::ostream& out);
 void print_registers_timer1(std::ostream& out);

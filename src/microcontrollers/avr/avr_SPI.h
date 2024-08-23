@@ -43,6 +43,12 @@ public:
     SPI_base() = delete;
 
     /// Configuramos la velocidad del reloj del SPI en microsegundos.
+    //
+    // Observar que esta función lo único que hace es traducir la frecuencia o
+    // periodo correspondiente en el divisor de frecuencia adecuado llamando a
+    // la función `clock_frequency_divide_by_xxx` correspondiente.
+    // No enciende el SPI, para ello hay que llamar a turn_on.
+    //
     // La función clock_period_in_us traduce la forma de hablar del cliente (en
     // microsegundos) en la forma de hablar del avr (en divisor de frecuencia)
     // CUIDADO: parece ser que si se quieren conectar 2 avrs la frecuencia del
@@ -79,7 +85,6 @@ public:
 
     /// Lee un byte. Espera hasta que haya leido el byte.
     static uint8_t read()
-    //{ return transfer(uint8_t{0}); }
     { return transfer(transfer_value_); }
 
 
@@ -128,24 +133,15 @@ public:
     /// entrada.
     static void cfg_pins();
 
-    /// Enciende el SPI como Master, configurándolo todo.
-    /// La frecuencia del reloj usada será la definida por
-    /// period_in_us. Falta definir la polaridad y la phase ya que cada
-    /// dispositivo tendrá una polaridad y fase diferente. Esta configuración
-    /// la hara cada dispositivo antes de escribir en SPI.
-//    template <uint16_t period_in_us>
-//    static void on()
-//    {
-//	cfg_pins();
-//	clock_period_in_us<period_in_us>();
-//	enable_as_a_master();
-//    }
-    // Recordar llamar antes a clock_period_in_us/clock_frequency_in_hz
-    static void on()
+    /// Enciende el SPI como Master, configurándolo los pins adecuadamente
+    static void turn_on()
     {
 	cfg_pins();
 	enable_as_a_master();
     }
+
+    static void turn_off()
+    { disable(); }
     
 };
 
@@ -155,12 +151,15 @@ public:
     SPI_slave() = delete;
 
     /// Enciende el SPI como slave.
-    static void on()
+    static void turn_on()
     {
 	init();
 	enable_as_a_slave();
     }
     
+    static void turn_off()
+    { disable(); }
+
 private:
     static void init();
 };

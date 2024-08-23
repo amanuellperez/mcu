@@ -120,6 +120,13 @@ void print_registers_adc(std::ostream& out)
 }
 
 
+void print_registers_spi(std::ostream& out)
+{
+    print_register(out, "SPCR", SPCR);
+    print_register(out, "SPSR", SPSR);
+    print_register(out, "SPDR", SPDR);
+}
+
 
 }// namespace
  

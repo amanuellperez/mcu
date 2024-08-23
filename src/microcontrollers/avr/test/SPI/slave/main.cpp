@@ -17,10 +17,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "../../../../avr_atmega328p_cfg.h"
-#include "../../../../avr_SPI.h"
-#include "../../../../avr_interrupt.h"
-#include "../../../../avr_UART_iostream.h"
+#include "../../../avr_atmega328p_cfg.h"
+#include "../../../avr_SPI.h"
+#include "../../../avr_interrupt.h"
+#include "../../../avr_UART_iostream.h"
 
 
 using SPI = avr_::SPI_slave;
@@ -37,7 +37,7 @@ int main()
 
 
 // init_SPI()
-    SPI::on();
+    SPI::turn_on();
     SPI::spi_mode(0,0);
     SPI::data_order_LSB();
 

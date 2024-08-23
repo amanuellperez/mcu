@@ -1,4 +1,5 @@
 SOURCES= avr_sleep.cpp			\
+		 avr_debug.cpp			\
 		 avr_ADC.cpp			\
 		 avr_SPI_basic.cpp 		\
 		 avr_SPI.cpp 			\
@@ -15,6 +16,7 @@ INCS= avr_ADC_basic.h	\
 	avr_atmega_dev.h	\
 	avr_atmega.h		\
 	avr_cfg.h			\
+	avr_debug.h			\
 	avr_interrupt.h		\
 	avr_memory.h		\
 	avr_micro.h			\
