@@ -15,6 +15,7 @@ DIRS = 	25LC256			\
 		keyrow			\
 		L298N			\
 		led				\
+		MAX7219			\
 		push_button		\
 		sdcard			\
 		SDD1306
@@ -26,7 +27,6 @@ DIRS = 	25LC256			\
 
 # Revisar
 #	matrix_8x8\
-	MAX7219\
 	OV7670\
 	pot_MCP4231\
 	TMP36\

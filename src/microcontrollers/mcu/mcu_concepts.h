@@ -101,6 +101,19 @@ concept TWI_master = requires {
     T::is_twi_master == true;
     };
 
+// SPI_master
+// ----------
+// El problema con el SPI es que la forma de seleccionar el slave depende de
+// la aplicación. Es el cliente el que sabe cómo se selecciona.
+// Los requirements de SPI_selector es que tenga constructor y destructor
+// (pero la mayoría de tipos tienen eso, con lo que no parece una buena
+// constraint)
+template <typename T>
+concept SPI_master = requires {
+    typename T::SPI_master;	// driver del SPI
+    typename T::SPI_selector;	// forma de seleccionar el SPI
+    };
+
 }// namespace Type
 
 #endif

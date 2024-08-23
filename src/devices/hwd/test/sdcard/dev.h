@@ -41,7 +41,7 @@ using Micro   = myu::Micro;
 // ---------------------------
 // Dispositivos SPI
 using Chip_select = 
-    dev::SDCard_select<myu::Output_pin<myu::SPI::CS_pin_number>, myu::SPI_master>;
+    dev::SDCard_select<myu::Output_pin<myu::SPI::noCS_pin_number>, myu::SPI_master>;
 
 using SDCard_cfg = dev::SDCard_cfg<myu::Micro, myu::SPI_master, Chip_select>;
 

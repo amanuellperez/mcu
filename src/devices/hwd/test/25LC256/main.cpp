@@ -116,7 +116,7 @@ void test_uint8_t() {
     uart.turn_on();
 
     atmega::SPI_master::clock_period_in_us<periodo_en_us>();
-    atmega::SPI_master::on();
+    atmega::SPI_master::turn_on();
 
     EEPROM eeprom;
     eeprom.cfg_SPI();

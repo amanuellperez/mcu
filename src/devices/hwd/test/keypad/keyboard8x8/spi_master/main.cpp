@@ -82,7 +82,7 @@ int main()
     SPI::spi_mode(0,0);
     SPI::data_order_LSB();
     SPI::clock_period_in_us<period_in_us>();
-    SPI::on();
+    SPI::turn_on();
 
     uart << "\n\nTest driver keyboard\n"
 	        "--------------------\n";

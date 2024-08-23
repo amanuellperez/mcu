@@ -68,7 +68,7 @@ namespace dev{
 // El `Selector_SPI` lo define en general el cliente. Es el que diseña el
 // hardware de la aplicación el que sabe cómo va a conectar los diferentes
 // dispositivos SPI. `SDCard_select` es el selector más básico: usa un pin
-// (que por defecto será el que SPI::CS_pin_number).
+// (que por defecto será el que SPI::noCS_pin_number).
 // TODO: Generalizar esta clase. Se puede meter en mcu_SPI.h ya que no depende
 // del micro concreto a usar ni de los dispositivos. Se basa en un pin.
 template <typename Output_pin, typename SPI>
@@ -91,6 +91,7 @@ public:
 //	SPI::write(0xFF);   // hacemos MOSI = 1
     }
 
+    // TODO: revisar la lógica, esto está raro... Usar mcu::SPI_pin_selector?
     SDCard_select() 
     {
 	selected = Output_pin::is_one();

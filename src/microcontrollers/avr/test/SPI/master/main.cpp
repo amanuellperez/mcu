@@ -36,7 +36,7 @@ using SPI = myu::SPI_master;
 
 // OJO: clave periodo a 8 us. Si pongo a 2 us al slave no le da tiempo a leer
 // y se lee basura y pierden datos.
-constexpr uint16_t periodo_en_us = 8;	
+constexpr uint16_t period_in_us = 8;	
 using no_CS = myu::Pin<SPI::SS_pin_number>;
 
 void SPI_write(uint8_t x)
@@ -80,7 +80,7 @@ void init_SPI()
 {
     SPI::spi_mode(0,0);
     SPI::data_order_LSB();
-    SPI::clock_period_in_us<periodo_en_us>();
+    SPI::clock_period_in_us<period_in_us>();
     SPI::turn_on();
 }
 

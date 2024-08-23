@@ -6,6 +6,7 @@ INCS= 	mcu_clock.h					\
 		mcu_miniclock.h				\
 		mcu_one_wire.h				\
 		mcu_pin.h					\
+		mcu_SPI.h					\
 		mcu_time.h					\
 		mcu_train_of_pulses.h		\
 		mcu_TWI_master.h			\

@@ -170,7 +170,7 @@ private:
  *
  *  Acceso típico al dispositivo:
  *
- *  Pot_MCP4231_basic::cfg_SPI();
+ *  Pot_MCP4231_basic::SPI_cfg();
  *  select();
  *  Pot_MCP4231_basic::cmd1
  *  Pot_MCP4231_basic::cmd2
@@ -200,7 +200,7 @@ public:
     /// Recordar haber inicializado correctamente el SPI antes.
     /// Es responsabilidad del usuario el inicializar el SPI y configurarlo
     /// antes de acceder al potenciómetro.
-    static void cfg_SPI();
+    static void SPI_cfg();
 
 
 // Wiper Registers
@@ -331,7 +331,7 @@ private:
 };
 
 
-void Pot_MCP4231_basic::cfg_SPI()
+void Pot_MCP4231_basic::SPI_cfg()
 {
     SPI::spi_mode(0, 0);
     SPI::data_order_MSB();
@@ -339,7 +339,7 @@ void Pot_MCP4231_basic::cfg_SPI()
 
 
 /*!
- *  \brief  Añadimos la gestión automática de cfg_SPI
+ *  \brief  Añadimos la gestión automática de SPI_cfg
  *
  *  Esta clase simplifica la interacción con el dispositivo. 
  *
@@ -360,7 +360,7 @@ public:
     template <uint8_t npot>
     static void wiper_write_data(uint16_t x)
     {
-	cfg_SPI();
+	SPI_cfg();
 	Select select;
 	Base::wiper_write_data<npot>(x);
     }
@@ -368,7 +368,7 @@ public:
     template <uint8_t npot>
     static uint16_t wiper_read_data()
     {
-	cfg_SPI();
+	SPI_cfg();
 	Select select;
 	return Base::wiper_read_data<npot>();
     }
@@ -376,7 +376,7 @@ public:
     template <uint8_t npot>
     static void wiper_increment()
     {
-	cfg_SPI();
+	SPI_cfg();
 	Select select;
 	Base::wiper_increment<npot>();
     }
@@ -384,7 +384,7 @@ public:
     template <uint8_t npot>
     static void wiper_decrement()
     {
-	cfg_SPI();
+	SPI_cfg();
 	Select select;
 	Base::wiper_decrement<npot>();
     }
@@ -393,7 +393,7 @@ public:
 // Status Register
     static std::byte status_register()
     {
-	cfg_SPI();
+	SPI_cfg();
 	Select select;
 	return Base::status_register();
     }
@@ -402,14 +402,14 @@ public:
 // TCON register
     static void TCON_register(std::byte x)
     {
-	cfg_SPI();
+	SPI_cfg();
 	Select select;
 	Base::TCON_register(x);
     }
 
     static std::byte TCON_register()
     {
-	cfg_SPI();
+	SPI_cfg();
 	Select select;
 	return Base::TCON_register();
     }

@@ -78,7 +78,7 @@ class L298N_basic{
 public:
 // Constructors
     L298N_basic() = delete;	// static interface
-    void init() {}
+    static void init() {}
 
 // port 1
 // ------

@@ -70,6 +70,8 @@ public:
     // forma de saberlo.
     /// Espera hasta que el SPI ha enviado/recibido el último byte.
     // En la practica el SPI es tan rapido que el avr no tiene que esperar.
+    // TODO: esta función no FUNCIONA!!! No debo de tener claro cuándo
+    // funciona is_transmission_complete. REVISARLO
     static void wait_transmission_complete()
     {
 	while (!is_transmission_complete())
