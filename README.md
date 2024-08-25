@@ -25,7 +25,6 @@ This directory contains the following:
     * [atd](src/atd/README.md): General utilities.
       Depends on `std`.
 
-    * [rom](src/rom/README.md): Data to save in ROM.
  
 2. [Microcontrollers](src/microcontrollers): (microcontroller level?)
 
@@ -33,6 +32,8 @@ This directory contains the following:
 	(right now, only for ATMEGA328). 
       
     * [mcu](src/microcontrollers/mcu/README.md): Generic microcontrollers components.
+
+    * [rom](src/rom/README.md): Data to save in ROM.
 
 3. [Devices](src/devices): (device level?)
 
@@ -120,7 +121,6 @@ Se puede organizar el código en diferentes niveles:
     * [atd](src/atd/README.md): Funciones genéricas que se basan en mi std. 
 	 No usan excepciones ni los operadores new/delete.
 
-    * [rom](src/rom/README.md): Datos a guardar en la ROM (progmem del avr)
 
 2. [Microcontroladores](src/microcontrollers): (microcontroller level)
     
@@ -137,6 +137,8 @@ Se puede organizar el código en diferentes niveles:
 
       Son todos aquellos componentes que se implementan usando exclusivamente
       hardware encontrado en los microcontroladores (timers, pins, ...)
+
+    * [rom](src/rom/README.md): Datos a guardar en la ROM (progmem del avr)
 
 3. [Dispositivos](src/devices): (device level)
 
@@ -173,6 +175,7 @@ Se puede organizar el código en diferentes niveles:
    memoria dinámica.
 
 * `mcu` contiene todo lo genérico a microcontroladores. 
+* `rom` contiene constantes guardadas en la ROM del microcontrolador.
 * `atmega`, `attiny`, ... son funciones concretas de microcontroladores
    concretos.
 * `dev` incluye todos los traductores y drivers de dispositivos. Observar que
