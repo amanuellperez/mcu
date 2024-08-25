@@ -35,6 +35,9 @@
 #include <cstdint>
 namespace dev{
 
+/***************************************************************************
+ *				MAX7219
+ ***************************************************************************/
 // struct MAX7219_cfg {
 //	using SPI_master   = myu::SPI_master;
 //	using SPI_selector = mcu::SPI_selector<myu::Micro, 
@@ -47,14 +50,14 @@ namespace dev{
 //	  la misma para todos los dispositivos SPI
 //	  
 template <typename Cfg>
-class  MAX7219{
+class  MAX7219_basic{
 public:
 // Types
     using SPI		= typename Cfg::SPI_master;
     using SPI_select	= typename Cfg::SPI_selector;
 
 // Constructor
-    MAX7219() = delete;
+    MAX7219_basic() = delete;
     static void init() { SPI_select::init(); }
 
 // digits values
@@ -97,14 +100,14 @@ private:
 };
 
 template <typename C>
-void MAX7219<C>::SPI_cfg() 
+void MAX7219_basic<C>::SPI_cfg() 
 {
     SPI::spi_mode(0, 0); // CPOL = 0, CPHA = 0
     SPI::data_order_MSB();
 }
 
 template <typename C>
-void MAX7219<C>::send_packet(uint8_t address, uint8_t data)
+void MAX7219_basic<C>::send_packet(uint8_t address, uint8_t data)
 {
     SPI_cfg();
 
@@ -116,6 +119,29 @@ void MAX7219<C>::send_packet(uint8_t address, uint8_t data)
     SPI::write(data);
 
 }
+
+
+/***************************************************************************
+ *			    MAX7219_driver
+ ***************************************************************************/
+// A partir de una matriz de 8x8 leds podemos crear un display de leds:
+//
+//  +------+------+------+------+
+//  |      |      |      |      |
+//  |      |      |      |      |
+//  +------+------+------+------+
+//  |      |      |      |      |
+//  |      |      |      |      |
+//  +------+------+------+------+
+//  |      |      |      |      |
+//  |      |      |      |      |
+//  +------+------+------+------+
+//
+//  Por ejemplo, ese sería un display tipo matricial de 24 x 32 leds (filas x
+//  columnas).
+//
+//  Como en el SDD1306 hablan por páginas, podemos concebir la matriz anterior
+//  como 3 páginas de 32 leds cada una.
 
 
 }// namespace dev

@@ -63,7 +63,7 @@ void init_UART()
 void init_SPI()
 {
     atmega::SPI_master::clock_period_in_us<period_in_us>();
-    atmega::SPI_master::on();
+    atmega::SPI_master::turn_on();
 }
 
 

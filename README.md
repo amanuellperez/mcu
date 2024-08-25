@@ -72,7 +72,7 @@ ATMEGA328).
 * [Estructura de directorios](#directorios)
 * [Namespaces definidos](#namespaces)
 * [Configurar entorno de trabajo](#entorno)
-* [Reglas para compilar](#reglas_compilar)
+* [Compilar](#compilar)
 * [Tests](#test)
 * [Diseño](#discapas)
 * [Programación](#programacion)
@@ -191,13 +191,42 @@ Se puede organizar el código en diferentes niveles:
 Para configurar el entorno de trabajo basta con ejecutar [mcu_environment.sh](mcu_environment.sh).
 
 
-## <a name="reglas_compilar"></a>Reglas para compilar
+## <a name="compilar"></a>Compilar
+
+### Problema: crear bibliotecas con diferentes frecuencias
+
+Las dos frecuencias más básicas a las que funciona el `atmega32` son a 1MHz y
+a 8 MHz. Si se genera código en `.cpp` ese código solo funcionara a la
+frecuencia `F_CPU` que se usó para compilarlo. 
+
+Para poder generar bibliotecas para cada una de las diferentes frecuencias
+usadas al nombre de la bilioteca generada le añado la frecuencia `F_CPU` que
+se uso para compilarla. Así, se generan `libavr_1000000UL.a` y
+`libavr_8000000UL.a`, la primera a 1MHz y la segunda a 8MHz. El usuario tendrá
+que enlazar con la biblioteca que corresponda.
+
+*NOTA* Como esto es un proyecto de aprendizaje y experimentación tengo mis
+dudas si en el código tal y como está ahora realmente se está utilizando
+`F_CPU`. Si no se usa, sobraría generar una biblioteca por cada frecuencia de
+trabajo.
+
+
+**make.sh**
+Para compilar todas las bibliotecas a la vez, uso el script `make.sh` que se
+puede encontrar en el directorio `tools`. Se limita a compilar todas las
+frecuencias definidas en la variable de entorno `LIST_F_CPU`.
+
+
+
+### Reglas para compilar
 
 En el directorio [mk](mk) están todas las reglas de compilación necesarias para 
 compilar cada bloque. 
 
 En la mayoría de los directorios se puede encontrar un script `make.sh` que
 compila la biblioteca con diferentes frecuencias.
+
+
 
 ## <a name="test"></a>test y pc_test
 En cada directorio suministro directorios `test` o `pc_test`. Los `pc_test`
@@ -209,6 +238,8 @@ Los `pc_test` necesitan varios ficheros de
 [alp](https://github.com/amanuellperez/alp/tree/master/src) (otro proyecto).
 Basta con que descargarse `alp_test.h`, `alp_test.cpp`, 
 `alp_string.h` y `alp_string.cpp` para que compilen.
+
+
 
 ### Implementación de los test
 
@@ -444,6 +475,7 @@ Si por
 lo que fuera los de github deciden bloquearme migraré el proyecto a otro
 sitio. El problema es que no podré poner aquí dónde (estaré bloqueado xD). Si
 alguien quisiera localizarme que use el nuevo mail (manuel2perez@proton.me).
+
 
 
 ## <a name="tags"></a>Tags usadas en el código

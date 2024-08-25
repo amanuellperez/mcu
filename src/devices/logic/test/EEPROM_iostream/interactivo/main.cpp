@@ -139,7 +139,7 @@ void test_eeprom_interactiva()
 {
     atmega::UART_iostream uart;
     SPI::clock_period_in_us<period_in_us>();
-    SPI::on();
+    SPI::turn_on();
 
     EEPROM_ostream out;
     out.open(0);

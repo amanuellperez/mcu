@@ -250,7 +250,7 @@ int main()
     uart.turn_on();
 
 // init_SPI()
-    SPI::on<period_in_us>();
+    SPI::turn_on<period_in_us>();
 
     uart << "\n\nPotentiometer MCP4231\n"
 	        "---------------------\n";

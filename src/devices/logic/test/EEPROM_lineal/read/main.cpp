@@ -63,7 +63,7 @@ void read_and_print(EEPROM& eeprom, uint16_t addr0)
 
 void test_eeprom() {
     UART_ostream uart;
-    SPI::on<num_pin_chip_select>();
+    SPI::turn_on<num_pin_chip_select>();
 
     EEPROM eeprom;
     eeprom.cfg_SPI();

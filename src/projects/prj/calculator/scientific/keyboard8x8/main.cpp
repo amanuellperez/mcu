@@ -108,7 +108,7 @@ int main()
     uart.turn_on();
  
 // init_SPI()
-    SPI::on();
+    SPI::turn_on();
     SPI::spi_mode(0,0);
     SPI::data_order_LSB();
     SPI::interrupt_enable();

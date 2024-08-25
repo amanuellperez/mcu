@@ -66,7 +66,17 @@ PATH=${PATH}:${MY_HOME}/../bin/avr/bin
 PATH=${PATH}:${MCU_TOOLS}
 export PATH
 
-# Alias 
+# LIST_F_CPU: listado con las frecuencias F_CPU que compilará el script
+# make.sh
+LIST_F_CPU="1000000UL"
+LIST_F_CPU=${LIST_F_CPU}" 8000000UL"	#  8 MHz
+#LIST_F_CPU=${LIST_F_CPU}" 12000000UL"	# 12 MHz
+#LIST_F_CPU=${LIST_F_CPU}" 16000000UL"	# 16 MHz
+#LIST_F_CPU=${LIST_F_CPU}" 20000000UL"	# 20 MHz
+export LIST_F_CPU
+
+# Alias para compilar
+# -------------------
 alias mf='make flash'
 alias mc='make super_clean'
 

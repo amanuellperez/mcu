@@ -871,7 +871,7 @@ void SDCard_basic<Cfg>::SPI_turn_on()
 {
     SPI_cfg__();
     SPI::template clock_frequency_in_hz<frequency>();
-    SPI::on();
+    SPI::turn_on();
 }
 
 
