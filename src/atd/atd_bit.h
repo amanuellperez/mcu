@@ -616,6 +616,7 @@ inline bool is_one_most_significant_bit_of(const Int& x)
 
 // byte
 // ----
+// Devuelve el byte n de x
 template <size_t n, typename T>
 inline uint8_t byte(T x)
 {
@@ -627,6 +628,7 @@ inline uint8_t byte(T x)
 
 // nibble 
 // ------
+// Devuelve el nibble n de x
 template <size_t n, typename T>
 inline uint8_t nibble(T x)
 {

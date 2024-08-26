@@ -96,8 +96,10 @@ private:
 };
 
 
+// PWM cfg contiene la forma en que hay que configurar el timer para generar
+// una determinada señal PWM
 template <typename Timern>
-class PWM_mode{
+class PWM_cfg{
 public:
 // Types
     using Timer        = Timern;
@@ -108,11 +110,11 @@ public:
     uint16_t prescaler; // puede llegar hasta 1024
 
 // Calculo de la frecuencia generada por el modo
-    // Calcula la frecuencia que generaria este PWM_mode configurado 
+    // Calcula la frecuencia que generaria este PWM_cfg configurado 
     // como fast mode
     Frequency frequency_fast_mode(const Frequency& freq_clk) const;
 
-    // Calcula la frecuencia que generaria este PWM_mode configurado 
+    // Calcula la frecuencia que generaria este PWM_cfg configurado 
     // como phase mode
     Frequency frequency_phase_mode(const Frequency& freq_clk) const;
 
@@ -137,12 +139,12 @@ public:
 };
 
 template <typename C>
-Frequency PWM_mode<C>::frequency_fast_mode(const Frequency& freq_clk) const
+Frequency PWM_cfg<C>::frequency_fast_mode(const Frequency& freq_clk) const
 { return freq_clk / (prescaler * (top + 1)); }
 
 template <typename C>
 inline 
-Frequency PWM_mode<C>::frequency_phase_mode(const Frequency& freq_clk) const
+Frequency PWM_cfg<C>::frequency_phase_mode(const Frequency& freq_clk) const
 { return freq_clk / (2 * prescaler * top); }
 
 
@@ -152,7 +154,7 @@ Frequency PWM_mode<C>::frequency_phase_mode(const Frequency& freq_clk) const
 //
 //  Fast  PWM: freq_gen = freq_clk/(p * (top + 1);
 template <typename C>
-uint8_t PWM_mode<C>::prescaler2top_fast_mode( const Frequency::Rep& freq_clk,
+uint8_t PWM_cfg<C>::prescaler2top_fast_mode( const Frequency::Rep& freq_clk,
 				 const Frequency::Rep& freq_gen)
 {
     using Rep = Frequency::Rep;
@@ -187,7 +189,7 @@ uint8_t PWM_mode<C>::prescaler2top_fast_mode( const Frequency::Rep& freq_clk,
 //
 //  Phase PWM: freq_gen = freq_clk/(2 * p * top);
 template <typename C>
-uint8_t PWM_mode<C>::prescaler2top_phase_mode( const Frequency::Rep& freq_clk,
+uint8_t PWM_cfg<C>::prescaler2top_phase_mode( const Frequency::Rep& freq_clk,
 				 const Frequency::Rep& freq_gen)
 {
     using Rep = Frequency::Rep;
@@ -221,7 +223,7 @@ uint8_t PWM_mode<C>::prescaler2top_phase_mode( const Frequency::Rep& freq_clk,
 
 template <typename C>
 template <std::integral Int>
-uint8_t PWM_mode<C>::percentage_error(const Int& x, const Int& y)
+uint8_t PWM_cfg<C>::percentage_error(const Int& x, const Int& y)
 { 
     if (x >= y)
 	return ((x - y) * 100) / y;

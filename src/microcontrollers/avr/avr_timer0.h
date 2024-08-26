@@ -247,7 +247,7 @@ inline Frequency clock_frequency()
 
 // PWM modes
 // ---------
-class PWM_mode : public timer_::PWM_mode<Timer0>{
+class PWM_cfg : public timer_::PWM_cfg<Timer0>{
 public:
     bool fast_mode; // if false, then mode == phase_mode
 		    
@@ -762,7 +762,7 @@ public:
 private:
 // types
     using counter_type = Timer::counter_type;
-    using PWM_mode     = timer0_::PWM_mode;
+    using PWM_cfg     = timer0_::PWM_cfg;
 
 // helpers
     static void pin_as_output();
@@ -838,7 +838,7 @@ void PWM0_pin<n>::generate(const PWM_signal& pwm)
 template <uint8_t n>
 void PWM0_pin<n>::generate_impl(const PWM_signal& pwm)
 {
-    timer0_::PWM_mode mode;
+    timer0_::PWM_cfg mode;
 
 // top 0xFF
     if (top_is_0xFF()){
@@ -970,7 +970,7 @@ Frequency PWM0_pin<n>::frequency()
     using Mode = Timer0::Mode;
     Mode mode  = Timer0::mode();       
 
-    PWM_mode pwm;
+    PWM_cfg pwm;
     pwm.top       = top();
     pwm.prescaler = Timer0::prescaler();
 

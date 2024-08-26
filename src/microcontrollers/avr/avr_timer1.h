@@ -283,7 +283,7 @@ inline Frequency clock_frequency()
 
 // PWM modes
 // ---------
-class PWM_mode : public timer_::PWM_mode<Timer1>{
+class PWM_cfg : public timer_::PWM_cfg<Timer1>{
 public:
     bool fast_mode; // if false, then mode == phase_mode
 		    
@@ -922,6 +922,34 @@ void SWG1_pin<n>::write_one() {
  *	como generador de señales PWM sin necesidad de saber cómo funciona por
  *	dentro.
  *
+ * DOS INTERFACES
+ *	Hay, mínimo, dos formas de querer generar una señal PWM:
+ *
+ *	PWM de duty cycle fijo
+ *	----------------------
+ *	Si queremos controlar la intensidad de un  LED, o la velocidad de giro
+ *	de un motor, generamos una señal PWM de un determinado duty cycle que
+ *	no vamos a cambiar.
+ *
+ *	PWM de duty cycle variable (o continuamente variable)
+ *	--------------------------
+ *	Hay algunos dispositivos, por ejemplo la led strip WS2812B, 
+ *	codifican los bits en pulsos de diferente duración.
+ *
+ *	En el WS2812B hay que generar una señal de unos 800kHz
+ *	donde un 0 se representa con un pulso de un duty cycle del 30% +-, y
+ *	un 1 tiene un duty de un 60% +-
+ *
+ *	Para enviar el byte 10101010 hay que estar continuamente cambiando el
+ *	duty cycle de la señal.
+ *
+ *	Para generar este tipo de señales necesito no perder tiempo pasando de
+ *	atd::Percentage a OCR. Por ello, suministro un interfaz más eficiente
+ *	para este caso. Observar que el interfaz está diseñado para que el
+ *	usuario no tenga que saber nada de cómo funciona el Timer1 (eso es
+ *	requisito indispensable de esta clase).
+ *
+ *  
  * NOTACIÓN
  *	El 1 del PWM1 indica que se está usando el Timer1.
  *
@@ -943,7 +971,10 @@ class PWM1_pin{
 public:
 // types
     using Timer        = avr_::Timer1;
+    using counter_type = Timer::counter_type;
+
     using PWM_signal   = avr_::PWM_signal;
+    using Timer_cfg    = timer1_::PWM_cfg;
 
 // cfg
     static constexpr uint8_t number  = npin0;
@@ -953,7 +984,7 @@ public:
     PWM1_pin() = delete; // de momento static interface
     static void init() {};// debería registrar los pines que se usa como PWM0?
 
-// basic interface
+// Interfaz 1: genera una señal PWM determinada. 
     // Genera la señal PWM indicada. Enciende el Timer en caso de que
     // estuviera apagado. Cuidado si se manejan los dos pins asociados a ese
     // timer: cambiará la frecuencia del otro pin.
@@ -969,6 +1000,28 @@ public:
     // Devuelve el duty cycle que está configurado
     static atd::Percentage duty_cycle();
 
+
+
+// Interfaz 2: Generamos una señal PWM de pulsos VARIABLES en longitud.
+    // Calcula la configuración del Timer1 para generar la frecuencia freq_gen
+    static void cfg_to_generate(const Frequency& freq_gen, Timer_cfg& cfg);
+
+    // Configura el Timer1 con la configuración obtenida en cfg_to_generate
+    static void cfg(const Timer_cfg& cfg);
+
+    // Enciende el Timer1, empezando a generar la señal PWM
+    static void turn_on(const Timer_cfg& cfg);
+
+    // Calcula el valor que usa internamente el Timer1 para obtener ese duty
+    // cycle.
+    static counter_type 
+	    duty_cycle(const Timer_cfg& cfg, const atd::Percentage& p);
+
+    // ocr es el valor devuelto por la función anterior
+    static void duty_cycle(const counter_type& ocr);
+
+
+// Interfaz común a 1 y 2
     // Desconecta el pin del PWM sin modificar el estado del Timer
     // No modifico el estado del Timer por si acaso se está generando en el
     // otro pin del Timer1 una señal.
@@ -977,6 +1030,11 @@ public:
     // Paramos el Timer
     static void stop();
 
+    // Cada vez me gusta más `turn_on/turn_off` para encender/apagar cualquier
+    // device (pero... a lo mejor es mejor `stop` en este caso :?)
+    static void turn_off() {stop(); }
+
+// Como pin de salida
     // Podemos usarlo como un pin normal y corriente de salida.
     // Corresponderían a los casos extremos de 0% ó 100% de duty cycle.
     static void write_zero();
@@ -990,10 +1048,6 @@ public:
     static Frequency frequency();
 
 private:
-// types
-    using counter_type = typename Timer::counter_type;
-    using PWM_mode     = timer1_::PWM_mode;
-
 // helpers
     static void pin_as_output();
     static void generate_impl(const PWM_signal& pwm);
@@ -1001,6 +1055,7 @@ private:
     static counter_type unsafe_ocr();
     static void unsafe_ocr(const Timer::counter_type& ocr);
 
+    static counter_type top();
     static counter_type unsafe_top();
 
     static bool is_disconnected();
@@ -1010,12 +1065,12 @@ template <uint8_t n>
 inline PWM1_pin<n>::counter_type PWM1_pin<n>::unsafe_top()
 { return Timer::unsafe_input_capture_register(); }
 
-//template <uint8_t n>
-//inline PWM1_pin<n>::counter_type PWM1_pin<n>::top()
-//{
-//    Disable_interrupts l;
-//    return unsafe_top();
-//}
+template <uint8_t n>
+inline PWM1_pin<n>::counter_type PWM1_pin<n>::top()
+{
+    Disable_interrupts l;
+    return unsafe_top();
+}
 
 
 template <uint8_t n>
@@ -1058,6 +1113,43 @@ void PWM1_pin<n>::generate(const PWM_signal& pwm)
     generate_impl(pwm);
 }
 
+template <uint8_t n>
+inline 
+void PWM1_pin<n>::cfg_to_generate(const Frequency& freq_gen, Timer_cfg& cfg)
+{ cfg.calculate_cfg_method2(clock_frequency, freq_gen); }
+
+template <uint8_t n>
+void PWM1_pin<n>::cfg(const Timer_cfg& cfg)
+{
+    if (cfg.fast_mode)  Timer::fast_PWM_mode_top_ICR();
+    else		Timer::PWM_phase_and_frequency_correct_mode_top_ICR();
+
+    { // unsafe operations ==> Disable_interrupts 
+    Disable_interrupts l; 
+    Timer::unsafe_counter(0); 
+    Timer::unsafe_input_capture_register(cfg.top);
+    }
+}
+
+template <uint8_t n>
+inline void PWM1_pin<n>::turn_on(const Timer_cfg& cfg)
+{ Timer::prescaler(cfg.prescaler); }
+
+
+template <uint8_t n>
+inline PWM1_pin<n>::counter_type 
+    PWM1_pin<n>::duty_cycle(const Timer_cfg& cfg, const atd::Percentage& p)
+{ return p.of(cfg.top); }
+
+
+
+template <uint8_t n>
+inline void PWM1_pin<n>::duty_cycle(const counter_type& ocr)
+{
+    Disable_interrupts l; 
+    unsafe_ocr(ocr);
+}
+
 // En FAST PWM : freq_generada = clock_freq / (prescaler * (top + 1));
 // En PHASE PWM: freq_generada = clock_freq / (2 * prescaler * top);
 // DUDA: ICR1 no es doble buffered, lo que puede generar el problema de que al
@@ -1067,22 +1159,33 @@ void PWM1_pin<n>::generate(const PWM_signal& pwm)
 template <uint8_t n>
 void PWM1_pin<n>::generate_impl(const PWM_signal& pwm)
 {
-    timer1_::PWM_mode mode;
-    mode.calculate_cfg_method2(clock_frequency, pwm.frequency());
+    Timer_cfg timer_cfg;
 
-    if (mode.fast_mode)  Timer::fast_PWM_mode_top_ICR();
-    else		 Timer::PWM_phase_and_frequency_correct_mode_top_ICR();
+    cfg_to_generate(pwm.frequency(), timer_cfg);
+    cfg(timer_cfg);
 
-    { // unsafe operations ==> Disable_interrupts 
-    Disable_interrupts l; 
-    Timer::unsafe_counter(0); 
-    Timer::unsafe_input_capture_register(mode.top);
+    auto ocr = duty_cycle(timer_cfg, pwm.duty_cycle());
+    duty_cycle(ocr);
 
-    Timer::counter_type ocr = pwm.duty_cycle().of(mode.top);
-    unsafe_ocr(ocr);
-    }
+    turn_on(timer_cfg);
 
-    Timer::prescaler(mode.prescaler);
+//    cfg.calculate_cfg_method2(clock_frequency, pwm.frequency());
+//
+//    if (cfg.fast_mode)  Timer::fast_PWM_mode_top_ICR();
+//    else		 Timer::PWM_phase_and_frequency_correct_mode_top_ICR();
+//
+//    { // unsafe operations ==> Disable_interrupts 
+//    Disable_interrupts l; 
+//    Timer::unsafe_counter(0); 
+//    Timer::unsafe_input_capture_register(cfg.top);
+//
+//    Timer::counter_type ocr = pwm.duty_cycle().of(cfg.top);
+//    unsafe_ocr(ocr);
+//    }
+//
+//    Timer::prescaler(timer_cfg.prescaler);
+    
+	    
 }
 
 template <uint8_t n>
@@ -1183,18 +1286,18 @@ Frequency PWM1_pin<n>::frequency()
     using Mode = Timer1::Mode;
     Mode mode  = Timer1::mode();       
 
-    PWM_mode pwm;
-    pwm.top       = unsafe_top();
-    pwm.prescaler = Timer1::prescaler();
+    Timer_cfg cfg;
+    cfg.top       = top();
+    cfg.prescaler = Timer1::prescaler();
 
-    if (pwm.prescaler == 0) // timer apagado?
+    if (cfg.prescaler == 0) // timer apagado?
 	return Frequency{0}; 
 
     if (mode == Mode::fast_PWM_top_ICR)
-	return pwm.frequency_fast_mode(clock_frequency);
+	return cfg.frequency_fast_mode(clock_frequency);
 
     if (mode == Mode::PWM_phase_and_frequency_correct_top_ICR)
-	return pwm.frequency_phase_mode(clock_frequency);
+	return cfg.frequency_phase_mode(clock_frequency);
 
     return Frequency{0}; // 0 marca error en este caso ^_^'
     

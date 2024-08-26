@@ -54,7 +54,7 @@ namespace timer0_{
 // Da por supuesto que la freq_gen es una de las frecuencias que realmente se
 // pueden generar. A fin de cuentas, si se usa el top 0xFF se están limitando
 // las frecuencias, teniendo que saberlo el programador.
-void PWM_mode::calculate_cfg_top_0xFF(const Frequency::Rep& freq_clk,
+void PWM_cfg::calculate_cfg_top_0xFF(const Frequency::Rep& freq_clk,
 			   const Frequency::Rep& freq_gen)
 {
     top = 0xFF;
@@ -74,15 +74,15 @@ void PWM_mode::calculate_cfg_top_0xFF(const Frequency::Rep& freq_clk,
 // Lo que hace es mirar cual de los dos modos comete menos error usando el
 // prescaler0.
 atd::Percentage
-	PWM_mode::calculate_cfg_top_OCRA(const Frequency::Rep& freq_clk,
+	PWM_cfg::calculate_cfg_top_OCRA(const Frequency::Rep& freq_clk,
 			   const Frequency::Rep& freq_gen, 
 			   const uint16_t& prescaler0)
 {
 // Calculamos los dos modos para prescaler = 1
-    PWM_mode fast{};
+    PWM_cfg fast{};
     fast.prescaler = prescaler0;
 
-    PWM_mode phase{};
+    PWM_cfg phase{};
     phase.prescaler = prescaler0;
 
     auto ferr = fast.prescaler2top_fast_mode  (freq_clk, freq_gen);
@@ -105,13 +105,13 @@ atd::Percentage
 // Voy a iterar por todos los prescalers buscando el que genera menos error
 // (son solo 5 prescalers, y la mayoria de las veces funcionara para prescaler
 // = 1)
-atd::Percentage PWM_mode::calculate_cfg_top_OCRA(const Frequency::Rep& freq_clk,
+atd::Percentage PWM_cfg::calculate_cfg_top_OCRA(const Frequency::Rep& freq_clk,
 			   const Frequency::Rep& freq_gen)
 {
     auto error = calculate_cfg_top_OCRA(freq_clk, freq_gen, 
 						Timer0::prescaler_factor[0]);
 
-    PWM_mode tmp;
+    PWM_cfg tmp;
 
     for (uint8_t i = 1; i < Timer0::prescaler_factor.size(); ++i){
 	auto error2 = 

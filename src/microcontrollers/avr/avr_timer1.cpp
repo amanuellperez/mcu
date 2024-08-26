@@ -43,14 +43,14 @@ void Square_wave_generator1_g::generate(uint32_t freq_in_Hz, uint8_t npin)
 namespace timer1_{
 // Experimentalmente he encontrado que esté método calcula todo con preescaler
 // = 1, mode fast or phase.
-void PWM_mode::calculate_cfg_method2(const Frequency::Rep& freq_clk, 
+void PWM_cfg::calculate_cfg_method2(const Frequency::Rep& freq_clk, 
 				     const Frequency::Rep& freq_gen)
 {
 // Calculamos los dos modos para prescaler = 1
-    PWM_mode fast{};
+    PWM_cfg fast{};
     fast.prescaler = 1;
 
-    PWM_mode phase{};
+    PWM_cfg phase{};
     phase.prescaler = 1;
 
     auto ferr = fast.prescaler2top_fast_mode  (freq_clk, freq_gen);
@@ -75,7 +75,7 @@ void PWM_mode::calculate_cfg_method2(const Frequency::Rep& freq_clk,
 //// precondition: prescaler tiene un valor válido
 ////
 ////  Fast  PWM: freq_gen = freq_clk/(p * (top + 1);
-//uint8_t PWM_mode::prescaler2top_fast_mode( const Frequency::Rep& freq_clk,
+//uint8_t PWM_cfg::prescaler2top_fast_mode( const Frequency::Rep& freq_clk,
 //				 const Frequency::Rep& freq_gen)
 //{
 //    using Rep = Frequency::Rep;
@@ -106,7 +106,7 @@ void PWM_mode::calculate_cfg_method2(const Frequency::Rep& freq_clk,
 //// precondition: prescaler tiene un valor válido
 ////
 ////  Phase PWM: freq_gen = freq_clk/(2 * p * top);
-//uint8_t PWM_mode::prescaler2top_phase_mode( const Frequency::Rep& freq_clk,
+//uint8_t PWM_cfg::prescaler2top_phase_mode( const Frequency::Rep& freq_clk,
 //				 const Frequency::Rep& freq_gen)
 //{
 //    using Rep = Frequency::Rep;

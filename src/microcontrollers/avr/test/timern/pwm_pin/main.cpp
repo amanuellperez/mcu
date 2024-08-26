@@ -119,9 +119,9 @@ void hello()
 }
 
 
-template <typename PWM_mode>
+template <typename PWM_cfg>
 void print(std::ostream& out, 
-	   const PWM_mode& pwm,
+	   const PWM_cfg& pwm,
 	   const myu::Frequency& freq_clk)
 {
     if (pwm.fast_mode){
@@ -162,7 +162,7 @@ void print_debug()
 	uart << "res = " << res << '\n';
 
 
-	avr_::timer_::PWM_mode<avr_::Timer1> pwm;
+	avr_::timer_::PWM_cfg<avr_::Timer1> pwm;
 	pwm.prescaler = 1;
 	pwm.top = 999;
 	auto res2 = pwm.frequency_fast_mode(freq_clk);
