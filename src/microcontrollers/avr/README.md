@@ -29,8 +29,6 @@ iostream:
     uart >> x;
     uart << "x = [" << x << "]\n";
     
-
-Compiler: avr-gcc 11.3.0
     
 ---
 # Traductores de la datasheet
@@ -38,7 +36,7 @@ Compiler: avr-gcc 11.3.0
 # Índice
 * [¿Por qué esta biblioteca?](#problemas)
 * [Static interface vs objects](#staticono)
-* [Problemas al programar el atmega usando SPI](#conexionSPI)
+* [SPI](#conexionSPI)
 * [Cristales externos](#cristalexterno)
 * [Timers](#timers)
 
@@ -186,7 +184,72 @@ sofwador en la aplicación. Como son elementos de hardware solo va haber una
 instancia de cada uno de ellos y por ello se pueden definir como interfaces. 
 
 
-## <a name="conexionSPI"></a>Problemas al programar el atmega usando SPI
+### Ejemplo
+
+Supongamos que quiero conectar una led strip WS2812B al Timer1: estoy obligado
+a hacer una conexión física, con un cable, entre el timer y el WS2812B. Eso
+sugiere que el Timer1 solo lo voy a poder usar para generar en ese pin la
+señal adecuada para controlar el WS2812B. 
+
+Supongamos que uso la clase `using PW = Pulse_wave01<PWM_pin, 800_kHz, 30,
+60>`, donde paso como parámetros el pin usado para generar la señal PWM, la
+frecuencia que voy a generar de 800 kHz, y el duty cycle correspondiente a un
+0 (30%) y a un 1 (60%). Todos estos datos los conozco en tiempo de
+compilación, por ello los paso como parametros de template.
+
+Al arrancar el microcontrolador llamaremos a la función `PW::init()` que
+configurará el Timer adecuadamente y calculará todo lo que necesite para poder
+generar la señal solicitada. Como se ve, puedo usar un static interface.
+
+Pero ¿qué pasa si quisiera usar el Timer1 para medir tiempo? ¿O si quiero
+conectar otra led strip en el otro pin del Timer1? En este caso necesitaría,
+no definir al principio la configuración del Timer1, sino definirla en el
+momento en el que vaya a usarlo. Sería más cómodo usar un objeto:
+
+```
+    PW pulse_wave; // llama a init
+    pulse_wave.send(0b10101010); // envia el packet correspondiente
+```
+
+De esta forma, al reconfigurar el Timer1 cada vez que se vaya a usar podemos
+usar los dos pines del Timer y usarlo también para medir tiempo (??? no tengo
+del todo claro si es cierto ya que hay que mirar cómo gestionar las
+interrupciones).
+
+
+Esto sugiere:
+
+1. Los static interface tienen que tener todos una función `init`
+2. Si se usa un dispositivo que se pueda usar de diferentes formas, se puede
+   suministrar un constructor que llamará a `init` configurando el
+   dispositivo.
+
+El usuario de la clase será el que decida cómo usar el dispositivo: si solo lo
+va a usar de una forma (por ejemplo, solo va a usar el Timer1 para programar
+un WS2812B) llamará a la función `init` al arrancar el micro configurando el
+Timer1 y no teniendo que reconfigurarlo. 
+
+Pero si va a usar el dispositivo de diferentes formas (por ejemplo, conectamos
+dos led strips al Timer1, una a cada pin diferente (??? sospecho que puedo
+usar `init` en este caso también)) no llamará `init` al arrancar sino que
+creará los objetos correspondientes, que serán los responsables de llamar a
+'init`. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## <a name="conexionSPI"></a>SPI
+### Problemas al programar el atmega usando SPI
 
 Al conectar por primera vez una SD card al SPI el programador falla. ¿Por qué?
 El avr se programa usando SPI con lo que se puede generar un SPI driver
@@ -273,4 +336,46 @@ cycle pero de igual frecuencia. El hardware no permite generar dos frecuencias
 diferentes en el pin A y B a la vez.
 
 
+### PWM
+
+Hay, mínimo, tres formas de querer generar una señal PWM:
+
+1. PWM de duty cycle fijo
+
+Si queremos controlar la intensidad de un  LED, o la velocidad de giro
+de un motor, generamos una señal PWM de un determinado duty cycle que
+no vamos a cambiar.
+
+
+2. PWM de duty cycle variable (solo un par de valores)
+
+Hay algunos dispositivos, por ejemplo la led strip WS2812B, 
+codifican los bits en pulsos de diferente duración.
+
+En el WS2812B hay que generar una señal de unos 800kHz
+donde un 0 se representa con un pulso de un duty cycle del 30% +-, y
+un 1 tiene un duty de un 60% +-
+
+Para enviar el byte 10101010 hay que estar continuamente cambiando el
+duty cycle de la señal.
+
+Para generar este tipo de señales necesito no perder tiempo pasando de
+atd::Percentage a OCR. Por ello, suministro un interfaz más eficiente
+para este caso. Observar que el interfaz está diseñado para que el
+usuario no tenga que saber nada de cómo funciona el Timer1 (eso es
+requisito indispensable de esta clase).
+
+
+3. PWM de duty cycle variable (continuamente)
+
+Con una señal PWM podemos simular generar una señal analógica. 
+Por ejemplo, si queremos generar v(t) = sen wt, podemos "generarlo"
+usando una señal PWM. 
+Una forma de hacerlo es generar una señal PWM de frecuencia fija y
+cada cierto tiempo T cambiar el valor del duty cycle para modificar el
+valor medio generado. 
+
+Mientras que en el caso anterior solo ibamos a generar un par de duty
+cycles diferentes, en este caso el duty cycle lo vamos a ir variando
+continuamente.
  
