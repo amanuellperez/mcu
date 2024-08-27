@@ -734,6 +734,9 @@ public:
     // Devuelve el duty cycle que está configurado
     static atd::Percentage duty_cycle();
 
+    // Conecta el pin al timer
+    static void connect();
+
     // Desconecta el pin del PWM sin modificar el estado del Timer
     // No modifico el estado del Timer por si acaso se está generando en el
     // otro pin del Timer0 una señal.
@@ -797,11 +800,11 @@ template <uint8_t n>
 void PWM0_pin<n>::OCR(const counter_type& ocr)
 {
     if constexpr (number == Timer::OCA_pin()){
-	Timer::PWM_pin_A_non_inverting_mode(); // DUDA: dar a elegirlo?
+//	Timer::PWM_pin_A_non_inverting_mode(); // DUDA: dar a elegirlo?
 	Timer::output_compare_register_A(ocr);
     }
     else {
-	Timer::PWM_pin_B_non_inverting_mode();
+//	Timer::PWM_pin_B_non_inverting_mode();
 	Timer::output_compare_register_B(ocr);
     }
 }
@@ -820,12 +823,12 @@ PWM0_pin<n>::counter_type PWM0_pin<n>::OCR()
 template <uint8_t n>
 void PWM0_pin<n>::generate(const PWM_signal& pwm)
 {
-    if (pwm.duty_cycle() == 0){
+    if (pwm.duty_cycle() == atd::Percentage{0}){
 	write_zero();
 	return;
     }
 
-    if (pwm.duty_cycle() == 100){
+    if (pwm.duty_cycle() == atd::Percentage{100}){
 	write_one();
 	return;
     }
@@ -865,6 +868,7 @@ void PWM0_pin<n>::generate_impl(const PWM_signal& pwm)
 
     counter_type ocr = pwm.duty_cycle().of(mode.top);
     OCR(ocr);
+    connect();
 
     Timer::prescaler(mode.prescaler);
 }
@@ -898,6 +902,19 @@ atd::Percentage PWM0_pin<n>::duty_cycle()
 
     return atd::Percentage::as_ratio(ocr, t);
 }
+
+
+
+// TODO: dar a elegir el idle state  (o polarity??? = CPOL?)
+template <uint8_t n>
+void PWM0_pin<n>::connect()
+{
+    if constexpr (number == Timer::OCA_pin())
+	Timer::PWM_pin_A_non_inverting_mode();
+    else 
+	Timer::PWM_pin_B_non_inverting_mode();
+}
+
 
 template <uint8_t n>
 inline void PWM0_pin<n>::disconnect()

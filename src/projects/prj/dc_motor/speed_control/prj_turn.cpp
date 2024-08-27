@@ -29,6 +29,6 @@ void Main::turn()
     auto direction = ask_direction();
     
 // execution
-    Motor::turn(direction, p);
+    Motor::turn(direction, atd::Percentage{p});
 }
 

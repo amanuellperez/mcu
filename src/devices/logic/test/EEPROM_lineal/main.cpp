@@ -222,7 +222,7 @@ void test_eeprom_automatico()
 {
     atmega::UART_iostream uart;
     SPI::clock_period_in_us<period_in_us>();
-    SPI::on();
+    SPI::turn_on();
     EEPROM eeprom;
 
     while(1){

@@ -89,6 +89,8 @@
  *    15/12/2022 Square_wave_generator1_g
  *    04/06/2024 PWM1_pin
  *    22/06/2024 SWG1_pin
+ *    27/08/2024 PWM1_pin: funciones para poder controlar mejor la señal
+ *			   generada
  *
  ****************************************************************************/
 #include "avr_timer1_basic.h"
@@ -922,8 +924,8 @@ void SWG1_pin<n>::write_one() {
  *	como generador de señales PWM sin necesidad de saber cómo funciona por
  *	dentro.
  *
- * DOS INTERFACES
- *	Hay, mínimo, dos formas de querer generar una señal PWM:
+ * TRES INTERFACES
+ *	Hay, mínimo, tres formas de querer generar una señal PWM:
  *
  *	PWM de duty cycle fijo
  *	----------------------
@@ -931,7 +933,8 @@ void SWG1_pin<n>::write_one() {
  *	de un motor, generamos una señal PWM de un determinado duty cycle que
  *	no vamos a cambiar.
  *
- *	PWM de duty cycle variable (o continuamente variable)
+ *
+ *	PWM de duty cycle variable (solo un par de valores)
  *	--------------------------
  *	Hay algunos dispositivos, por ejemplo la led strip WS2812B, 
  *	codifican los bits en pulsos de diferente duración.
@@ -948,6 +951,20 @@ void SWG1_pin<n>::write_one() {
  *	para este caso. Observar que el interfaz está diseñado para que el
  *	usuario no tenga que saber nada de cómo funciona el Timer1 (eso es
  *	requisito indispensable de esta clase).
+ *
+ *
+ *	PWM de duty cycle variable (continuamente)
+ *	-------------------------------------------
+ *	Con una señal PWM podemos simular generar una señal analógica. 
+ *	Por ejemplo, si queremos generar v(t) = sen wt, podemos "generarlo"
+ *	usando una señal PWM. 
+ *	Una forma de hacerlo es generar una señal PWM de frecuencia fija y
+ *	cada cierto tiempo T cambiar el valor del duty cycle para modificar el
+ *	valor medio generado. 
+ *
+ *	Mientras que en el caso anterior solo ibamos a generar un par de duty
+ *	cycles diferentes, en este caso el duty cycle lo vamos a ir variando
+ *	continuamente.
  *
  *  
  * NOTACIÓN
@@ -1018,10 +1035,16 @@ public:
 	    duty_cycle(const Timer_cfg& cfg, const atd::Percentage& p);
 
     // ocr es el valor devuelto por la función anterior
-    static void duty_cycle(const counter_type& ocr);
+    static void duty_cycle(counter_type ocr);
+
+    // Lo paso por valor para no tener que definir dos funciones diferrentes:
+    // una volatile y otra no
+    static void unsafe_duty_cycle(counter_type ocr) {unsafe_ocr(ocr);}
 
 
 // Interfaz común a 1 y 2
+    static void connect();
+
     // Desconecta el pin del PWM sin modificar el estado del Timer
     // No modifico el estado del Timer por si acaso se está generando en el
     // otro pin del Timer1 una señal.
@@ -1033,6 +1056,12 @@ public:
     // Cada vez me gusta más `turn_on/turn_off` para encender/apagar cualquier
     // device (pero... a lo mejor es mejor `stop` en este caso :?)
     static void turn_off() {stop(); }
+
+    // Enable OCR interrupt
+    // DUDA: dar opciones a capturar otras interrupciones? Que el uso lo diga
+    static void enable_interrupt();
+
+    static void disable_interrupt();
 
 // Como pin de salida
     // Podemos usarlo como un pin normal y corriente de salida.
@@ -1053,7 +1082,7 @@ private:
     static void generate_impl(const PWM_signal& pwm);
 
     static counter_type unsafe_ocr();
-    static void unsafe_ocr(const Timer::counter_type& ocr);
+    static void unsafe_ocr(Timer::counter_type ocr);
 
     static counter_type top();
     static counter_type unsafe_top();
@@ -1074,17 +1103,15 @@ inline PWM1_pin<n>::counter_type PWM1_pin<n>::top()
 
 
 template <uint8_t n>
-void PWM1_pin<n>::unsafe_ocr(const Timer::counter_type& ocr)
+void PWM1_pin<n>::unsafe_ocr(Timer::counter_type ocr)
 {
-    if constexpr (number == Timer::OCA_pin()){
-	Timer::PWM_pin_A_non_inverting_mode(); // DUDA: dar a elegirlo?
+    if constexpr (number == Timer::OCA_pin())
 	Timer::unsafe_output_compare_register_A(ocr);
-    }
-    else {
-	Timer::PWM_pin_B_non_inverting_mode();
+
+    else 
 	Timer::unsafe_output_compare_register_B(ocr);
-    }
 }
+
 
 template <uint8_t n>
 PWM1_pin<n>::Timer::counter_type PWM1_pin<n>::unsafe_ocr()
@@ -1097,15 +1124,16 @@ PWM1_pin<n>::Timer::counter_type PWM1_pin<n>::unsafe_ocr()
 }
 
 
+
 template <uint8_t n>
 void PWM1_pin<n>::generate(const PWM_signal& pwm)
 {
-    if (pwm.duty_cycle() == 0){
+    if (pwm.duty_cycle() == atd::Percentage{0}){
 	write_zero();
 	return;
     }
 
-    if (pwm.duty_cycle() == 100){
+    if (pwm.duty_cycle() == atd::Percentage{100}){
 	write_one();
 	return;
     }
@@ -1144,7 +1172,7 @@ inline PWM1_pin<n>::counter_type
 
 
 template <uint8_t n>
-inline void PWM1_pin<n>::duty_cycle(const counter_type& ocr)
+inline void PWM1_pin<n>::duty_cycle(counter_type ocr)
 {
     Disable_interrupts l; 
     unsafe_ocr(ocr);
@@ -1166,9 +1194,12 @@ void PWM1_pin<n>::generate_impl(const PWM_signal& pwm)
 
     auto ocr = duty_cycle(timer_cfg, pwm.duty_cycle());
     duty_cycle(ocr);
+    connect();
 
     turn_on(timer_cfg);
 
+// Borrame:
+//    Timer_cfg cfg;
 //    cfg.calculate_cfg_method2(clock_frequency, pwm.frequency());
 //
 //    if (cfg.fast_mode)  Timer::fast_PWM_mode_top_ICR();
@@ -1182,8 +1213,9 @@ void PWM1_pin<n>::generate_impl(const PWM_signal& pwm)
 //    Timer::counter_type ocr = pwm.duty_cycle().of(cfg.top);
 //    unsafe_ocr(ocr);
 //    }
+//    connect();
 //
-//    Timer::prescaler(timer_cfg.prescaler);
+//    Timer::prescaler(cfg.prescaler);
     
 	    
 }
@@ -1216,6 +1248,15 @@ atd::Percentage PWM1_pin<n>::duty_cycle()
     return atd::Percentage::as_ratio(ocr, top);
 }
 
+// TODO: dar a elegir el idle state  (o polarity??? = CPOL?)
+template <uint8_t n>
+void PWM1_pin<n>::connect()
+{
+    if constexpr (number == Timer::OCA_pin())
+	Timer::PWM_pin_A_non_inverting_mode(); 
+    else 
+	Timer::PWM_pin_B_non_inverting_mode();
+}
 
 template <uint8_t n>
 inline void PWM1_pin<n>::disconnect()
@@ -1236,6 +1277,28 @@ inline bool PWM1_pin<n>::is_disconnected()
     else
 	return Timer::is_pin_B_disconnected();
 }
+
+
+template <uint8_t n>
+inline void PWM1_pin<n>::enable_interrupt()
+{
+    if constexpr (number == Timer::OCA_pin())
+	Timer::enable_output_compare_A_match_interrupt();
+
+    else
+	Timer::enable_output_compare_B_match_interrupt();
+}
+
+template <uint8_t n>
+inline void PWM1_pin<n>::disable_interrupt()
+{
+    if constexpr (number == Timer::OCA_pin())
+	Timer::disable_output_compare_A_match_interrupt();
+
+    else
+	Timer::disable_output_compare_B_match_interrupt();
+}
+
 
 template <uint8_t n>
 inline void PWM1_pin<n>::stop() 

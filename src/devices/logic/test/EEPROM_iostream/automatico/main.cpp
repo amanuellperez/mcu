@@ -448,7 +448,7 @@ void test_eeprom_automatico()
 {
     atmega::UART_iostream uart;
     atmega::SPI_master::clock_period_in_us<period_in_us>();
-    atmega::SPI_master::on();
+    atmega::SPI_master::turn_on();
 
     if (test_ostream_automatico())
 	test_istream_automatico();

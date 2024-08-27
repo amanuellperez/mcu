@@ -58,7 +58,7 @@ void Main::table_speed_impl(uint8_t nmes, bool verbose)
 {
     for (uint8_t p = 0; p <= 100; p += 5){
 	uart << atd::Percentage{p} << '\t';
-	Motor::turn(Direction::positive, p);
+	Motor::turn(Direction::positive, atd::Percentage{p});
 	Micro::wait_ms(500); // Darle tiempo a la inercia del motor
 		
 	atd::Float16 mean_rpm = 0;

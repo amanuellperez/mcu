@@ -122,14 +122,16 @@ void port1_voltage()
 {
     myu::UART_iostream uart;
     uart << "\nPercentage: ";
-    uint16_t p{0};
-    uart >> p;
+    uint16_t per{0};
+    uart >> per;
 
-    if (p == 0) return;
+    if (per == 0) return;
 
     auto sign = ask_sign(uart);
 
-    L298N::voltage1(sign, static_cast<uint8_t>(p));
+    auto p = atd::Percentage{static_cast<uint8_t>(per)};
+
+    L298N::voltage1(sign, p);
 
     Test test{uart};
     CHECK_TRUE(test, equal_percentage(p ,L298N::voltage1_percentage()),
@@ -142,12 +144,14 @@ void port1_percentage()
 {
     myu::UART_iostream uart;
     uart << "\nPercentage: ";
-    uint16_t p{0};
-    uart >> p;
+    uint16_t per{0};
+    uart >> per;
 
-    if (p == 0) return;
+    if (per == 0) return;
 
-    L298N::voltage1_percentage(static_cast<uint8_t>(p));
+    auto p = atd::Percentage{static_cast<uint8_t>(per)};
+    L298N::voltage1_percentage(p);
+
 
     Test test{uart};
     CHECK_TRUE(test, equal_percentage(p ,L298N::voltage1_percentage()),
@@ -197,14 +201,15 @@ void port2_voltage()
 {
     myu::UART_iostream uart;
     uart << "\nPercentage: ";
-    uint16_t p{0};
-    uart >> p;
+    uint16_t per{0};
+    uart >> per;
 
-    if (p == 0) return;
+    if (per == 0) return;
+    auto p = atd::Percentage{static_cast<uint8_t>(per)};
 
     auto sign = ask_sign(uart);
 
-    L298N::voltage2(sign, static_cast<uint8_t>(p));
+    L298N::voltage2(sign, p);
 
     Test test{uart};
     CHECK_TRUE(test, equal_percentage(p ,L298N::voltage2_percentage()),
@@ -217,12 +222,13 @@ void port2_percentage()
 {
     myu::UART_iostream uart;
     uart << "\nPercentage: ";
-    uint16_t p{0};
-    uart >> p;
+    uint16_t per{0};
+    uart >> per;
 
-    if (p == 0) return;
+    if (per == 0) return;
+    auto p = atd::Percentage{static_cast<uint8_t>(per)};
 
-    L298N::voltage2_percentage(static_cast<uint8_t>(p));
+    L298N::voltage2_percentage(p);
 
     Test test{uart};
     CHECK_TRUE(test, equal_percentage(p ,L298N::voltage2_percentage()),
@@ -275,14 +281,15 @@ void port_voltage()
 
     myu::UART_iostream uart;
     uart << "\nPercentage: ";
-    uint16_t p{0};
-    uart >> p;
+    uint16_t per{0};
+    uart >> per;
 
-    if (p == 0) return;
+    if (per == 0) return;
+    auto p = atd::Percentage{static_cast<uint8_t>(per)};
 
     auto sign = ask_sign(uart);
 
-    Bridge::voltage(sign, static_cast<uint8_t>(p));
+    Bridge::voltage(sign, p);
 
     Test test{uart};
     CHECK_TRUE(test, equal_percentage(p ,Bridge::voltage_percentage()),
@@ -298,12 +305,13 @@ void port_percentage()
 
     myu::UART_iostream uart;
     uart << "\nPercentage: ";
-    uint16_t p{0};
-    uart >> p;
+    uint16_t per{0};
+    uart >> per;
 
-    if (p == 0) return;
+    if (per == 0) return;
+    auto p = atd::Percentage{static_cast<uint8_t>(per)};
 
-    Bridge::voltage_percentage(static_cast<uint8_t>(p));
+    Bridge::voltage_percentage(p);
 
     Test test{uart};
     CHECK_TRUE(test, equal_percentage(p ,Bridge::voltage_percentage()),

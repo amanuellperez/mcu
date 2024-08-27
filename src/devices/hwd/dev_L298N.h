@@ -172,10 +172,10 @@ void L298N_basic<C>::voltage1(atd::Sign sign, const atd::Percentage& p)
 template <typename C>
 void L298N_basic<C>::voltage1_percentage(const atd::Percentage& p)
 {
-    if (p == 0)
+    if (p == atd::Percentage{0})
 	write1_zero();
 
-    else if (p == 1)
+    else if (p == atd::Percentage{1})
 	PWM_pin1::write_one();
 
     else {
@@ -188,10 +188,10 @@ template <typename C>
 atd::Percentage L298N_basic<C>::voltage1_percentage()
 {
     if (PWM_pin1::is_zero())
-	return 0;
+	return atd::Percentage{0};
 
     if (PWM_pin1::is_one())
-	return 100;
+	return atd::Percentage{100};
 
     return PWM_pin1::duty_cycle();
 }
@@ -263,10 +263,10 @@ void L298N_basic<C>::voltage2(atd::Sign sign, const atd::Percentage& p)
 template <typename C>
 void L298N_basic<C>::voltage2_percentage(const atd::Percentage& p)
 {
-    if (p == 0)
+    if (p == atd::Percentage{0})
 	write2_zero();
 
-    else if (p == 1)
+    else if (p == atd::Percentage{1})
 	PWM_pin2::write_one();
 
     else {
@@ -279,10 +279,10 @@ template <typename C>
 atd::Percentage L298N_basic<C>::voltage2_percentage()
 {
     if (PWM_pin2::is_zero())
-	return 0;
+	return atd::Percentage{0};
    
     if (PWM_pin2::is_one())
-	return 100;
+	return atd::Percentage{100};
 
     return PWM_pin2::duty_cycle();
 }

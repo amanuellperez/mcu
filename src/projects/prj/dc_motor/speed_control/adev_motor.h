@@ -393,7 +393,7 @@ void Speed_control_motor<C>::turn_increasing_time(int8_t incr,
 
     for( ; p >= turn_percentage_start ; p -= incr){
 
-	Motor::turn(direction, p);
+	Motor::turn(direction, atd::Percentage{p});
 	if constexpr (turn_time_ms_inertia != 0)
 	    Micro::wait_ms(turn_time_ms_inertia);
 
@@ -419,7 +419,7 @@ void Speed_control_motor<C>::turn_decreasing_time(int8_t incr,
 
     for ( ; p <= 100; p += incr){
 
-	Motor::turn(direction, p);
+	Motor::turn(direction, atd::Percentage{p});
 
 	if constexpr (turn_time_ms_inertia != 0)
 	    Micro::wait_ms(turn_time_ms_inertia);

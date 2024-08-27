@@ -93,12 +93,12 @@ atd::Percentage
     if (ferr <= perr){
 	top = fast.top;
 	fast_mode = true;
-	return ferr;
+	return atd::Percentage{ferr};
 
     } else {
 	top = phase.top;
 	fast_mode = false;
-	return perr;
+	return atd::Percentage{perr};
     }
 }
 
@@ -121,7 +121,7 @@ atd::Percentage PWM_cfg::calculate_cfg_top_OCRA(const Frequency::Rep& freq_clk,
 	if (error2 < error){
 	    *this = tmp;
 
-	    if (error2 == 0)
+	    if (error2 == atd::Percentage{0})
 		return error2;
 
 	    error = error2;

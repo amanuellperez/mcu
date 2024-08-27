@@ -34,6 +34,7 @@
  *    Manuel Perez
  *    04/06/2024 Escrito
  *    15/06/2024 Parts_per<1024>
+ *    27/08/2024 Hago explicit el constructor. 
  *
  ****************************************************************************/
 #include <cstdint>
@@ -62,7 +63,7 @@ class Percentage{
 public:
 // constructor
     // precondition (0 <= x <= 100)
-    constexpr Percentage(uint8_t x);
+    constexpr explicit Percentage(uint8_t x);
 
     // En avr no podemos usar decimales: pasamos el tanto por cien como
     // fracción. 
@@ -110,7 +111,7 @@ constexpr Percentage Percentage::as_ratio(const Int& num, const Int& den)
     using Int2 = same_type_with_double_bits_t<Int>;
     Int2 N = Int2{num} * Int2{100}; 
     uint8_t p = static_cast<uint8_t>(N / Int2{den});
-    return p;
+    return Percentage{p};
 }
 
 // (RRR) ¿por qué complico la implementación?

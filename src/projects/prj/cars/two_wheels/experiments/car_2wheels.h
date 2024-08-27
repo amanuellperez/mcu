@@ -130,22 +130,22 @@ void Car_2_wheels<R,L>::forward_turn_right(const atd::Percentage& right,
 template <typename R, typename L>
 void Car_2_wheels<R,L>::forward_turn_left()
 {
-    right_wheel(atd::Sign::positive, 50);
-    left_wheel (atd::Sign::positive, 0);
+    right_wheel(atd::Sign::positive, atd::Percentage{50});
+    left_wheel (atd::Sign::positive, atd::Percentage{0});
 }
 
 template <typename R, typename L>
 void Car_2_wheels<R,L>::backward_turn_right()
 {
-    right_wheel(atd::Sign::negative, 0);
-    left_wheel (atd::Sign::negative, 50);
+    right_wheel(atd::Sign::negative, atd::Percentage{0});
+    left_wheel (atd::Sign::negative, atd::Percentage{50});
 }
 
 template <typename R, typename L>
 void Car_2_wheels<R,L>::backward_turn_left()
 {
-    right_wheel(atd::Sign::negative, 50);
-    left_wheel (atd::Sign::negative, 0);
+    right_wheel(atd::Sign::negative, atd::Percentage{50});
+    left_wheel (atd::Sign::negative, atd::Percentage{0});
 }
 
 
@@ -154,7 +154,7 @@ template <typename R, typename L>
 void Car_2_wheels<R,L>::lateral_movement()
 {
     for (uint8_t i = 0; i < 10; ++i){
-	forward_turn_right(0, 50);
+	forward_turn_right(atd::Percentage{0}, atd::Percentage{50});
 	forward_turn_left();
     }
 }

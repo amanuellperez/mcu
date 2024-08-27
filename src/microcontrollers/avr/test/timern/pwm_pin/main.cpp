@@ -53,6 +53,16 @@ using PWM_pin4 = myu::PWM1_pin<16>;
 // ---
 using namespace myu::literals;
 
+// Global vbles
+// ------------
+// Variables necesarias en las interrupciones
+struct PWG{ // Pulse Wave Generation
+inline static volatile uint16_t ocr1 = 0;
+inline static volatile uint16_t ocr2 = 0;
+inline static volatile uint8_t npin = 0;
+inline static volatile uint8_t i = 0; // núm. pulso actual
+constexpr static uint8_t nmax_pulses = 8; 
+};
 
 // FUNCTIONS
 // ---------
@@ -177,7 +187,8 @@ void print_debug()
 template <Type::Integer Int>
 Int ask(std::iostream& out, const char* msg)
 {
-    out << "From (freq. in Hz): ";
+    // out << "From (freq. in Hz): ";
+    out << msg;
     Int x;
     out >> x;
     return x;
@@ -204,13 +215,13 @@ void automatic_duty_cycle_test()
     test.silent_mode();
 
     for (uint8_t duty_cycle = 0; duty_cycle <= 100; duty_cycle += 10){
-	myu::PWM_signal pwm{freq, duty_cycle};
+	myu::PWM_signal pwm{freq, atd::Percentage{duty_cycle}};
 	PWM_pin::generate(pwm);
 
 	uart << "duty cycle = " << (int) duty_cycle << " % ... ";
 	
 	auto dt = PWM_pin::duty_cycle();
-	if (dt == duty_cycle)
+	if (dt == atd::Percentage{duty_cycle})
 	    uart << "OK\n";
 
 	else
@@ -260,7 +271,7 @@ void automatic_frequency_test()
 
     uint8_t duty_cycle = 50;
     for (; freq0 <= freq1; freq0 += incr){
-	myu::PWM_signal pwm{freq0, duty_cycle};
+	myu::PWM_signal pwm{freq0, atd::Percentage{duty_cycle}};
 	PWM_pin::generate(pwm);
 
 	myu::Frequency freq_gen = PWM_pin::frequency();
@@ -291,7 +302,7 @@ void generate_pwm_signal()
     uart >> duty_cycle;
     // if (duty_cycle == 0) return; // se puede probar duty cycle 0%
 
-    myu::PWM_signal pwm{freq, static_cast<uint8_t>(duty_cycle)};
+    myu::PWM_signal pwm{freq, atd::Percentage{static_cast<uint8_t>(duty_cycle)}};
     PWM_pin::generate(pwm);
 
     myu::Frequency freq_gen = PWM_pin::frequency();
@@ -312,9 +323,73 @@ void change_duty_cycle()
     uart >> duty_cycle;
     if (duty_cycle == 0) return;
 
-    PWM_pin::duty_cycle(duty_cycle);
+    auto dc = atd::Percentage{static_cast<uint8_t>(duty_cycle)};
+    PWM_pin::duty_cycle(dc);
 }
 
+template <typename PWM_pin>
+void pulse_wave_generation()
+{
+    // TODO: eliminar esta reestricción
+    if constexpr (PWM_pin::number == 15 or
+		  PWM_pin::number == 16) {
+
+    myu::UART_iostream uart;
+    auto freq = ask<uint32_t>(uart, "\n\nFrequency in Hz: ");
+    if (freq == 0) return;
+
+
+    auto dc1 = ask<uint16_t>(uart, "First duty cycle (percentage as number): ");
+    if (dc1 == 0) return;
+
+    auto dc2 = ask<uint16_t>(uart, "First duty cycle (percentage as number): ");
+    if (dc2 == 0) return;
+
+    typename PWM_pin::Timer_cfg cfg;
+    PWM_pin::cfg_to_generate(freq, cfg);
+
+
+    PWM_pin::cfg(cfg);
+
+    PWG::ocr1 = PWM_pin::duty_cycle(cfg, atd::Percentage{static_cast<uint8_t>(dc1)});
+    PWG::ocr2 = PWM_pin::duty_cycle(cfg, atd::Percentage{static_cast<uint8_t>(dc2)});
+
+    PWM_pin::duty_cycle(PWG::ocr1);
+    PWM_pin::connect();
+
+    PWG::npin = PWM_pin::number;
+    PWG::i    = PWG::nmax_pulses;
+
+    PWM_pin::enable_interrupt();
+    myu::enable_interrupts();
+    PWM_pin::turn_on(cfg);
+
+    while (PWG::i){
+	myu::wait_ms(1);
+    }
+
+    PWM_pin::turn_off();
+    PWM_pin::disable_interrupt();
+    myu::disable_interrupts();
+    }
+
+}
+
+template <typename PWM_pin>
+void connect_pin()
+{
+    myu::UART_iostream uart;
+    uart << "\n\nConnect or disconnect? (c/d) ";
+    char ans{};
+    uart >> ans;
+
+    if (ans == 'd' or ans == 'D')
+	PWM_pin::disconnect();
+
+    else
+	PWM_pin::connect();
+
+}
 
 template <typename PWM_pin>
 void test_pin()
@@ -329,9 +404,10 @@ void test_pin()
 	    "2. Generate PWM signal\n"
 	    "3. Change duty cycle\n"
 	    "4. Stop timer\n"
-	    "5. Disconnect pin from timer\n"
+	    "5. Connect/disconnect pin from timer\n"
 	    "6. Automatic frequency test\n"
-	    "7. Automatic duty cycle test\n";
+	    "7. Automatic duty cycle test\n"
+	    "8. Pulse wave generation\n";
 
     char opt{};
     uart >> opt;
@@ -342,9 +418,10 @@ void test_pin()
 	break; case '2': generate_pwm_signal<PWM_pin>();
 	break; case '3': change_duty_cycle<PWM_pin>();
 	break; case '4': PWM_pin::stop();
-	break; case '5': PWM_pin::disconnect();
+	break; case '5': connect_pin<PWM_pin>();
 	break; case '6': automatic_frequency_test<PWM_pin>();
 	break; case '7': automatic_duty_cycle_test<PWM_pin>();
+	break; case '8': pulse_wave_generation<PWM_pin>();
 	break; default: uart << "I don't understand.\n";
     }
 
@@ -389,4 +466,38 @@ int main()
 }
 
 
+
+ISR_TIMER1_COMPA{
+    if (PWG::i) {
+	PWG::i = PWG::i - 1;
+	if (PWG::i % 2) {
+	    if (PWG::npin == PWM_pin3::number)
+		PWM_pin3::unsafe_duty_cycle(PWG::ocr2);
+	    else
+		PWM_pin4::unsafe_duty_cycle(PWG::ocr2);
+	} else {
+	    if (PWG::npin == PWM_pin3::number)
+		PWM_pin3::unsafe_duty_cycle(PWG::ocr1);
+	    else
+		PWM_pin4::unsafe_duty_cycle(PWG::ocr1);
+	}
+    }
+}
+
+ISR_TIMER1_COMPB{
+    if (PWG::i) {
+	PWG::i = PWG::i - 1;
+	if (PWG::i % 2) {
+	    if (PWG::npin == PWM_pin3::number)
+		PWM_pin3::unsafe_duty_cycle(PWG::ocr2);
+	    else
+		PWM_pin4::unsafe_duty_cycle(PWG::ocr2);
+	} else {
+	    if (PWG::npin == PWM_pin3::number)
+		PWM_pin3::unsafe_duty_cycle(PWG::ocr1);
+	    else
+		PWM_pin4::unsafe_duty_cycle(PWG::ocr1);
+	}
+    }
+}
 

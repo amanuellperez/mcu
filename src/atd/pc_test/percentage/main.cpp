@@ -41,16 +41,16 @@ void test_percentage_constructor()
 
 // constructor
     {// normal
-    atd::Percentage p{30};
+    auto p = atd::Percentage{30};
     CHECK_TRUE(p.as_uint() == 30 , "as_uint");
     }
     {// normal
-    atd::Percentage p = 30;
+    auto p = atd::Percentage{30};
     CHECK_TRUE(p.as_uint() == 30 , "as_uint");
     CHECK_PRINT(std::cout << p, "30 %");
     }
     {// overflow 
-    atd::Percentage p = 130;
+    auto p = atd::Percentage{130};
     CHECK_TRUE(p.as_uint() == 0 , "overflow");
     }
 

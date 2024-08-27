@@ -37,7 +37,7 @@ void Main::hello()
 void Main::lateral_movement(bool automatic, 
 			    atd::Sign sign, uint8_t right, uint8_t left)
 {
-    Car::move_opposite(sign, right, left);
+    Car::move_opposite(sign, atd::Percentage{right}, atd::Percentage{left});
 
     Micro::wait_ms(100);
     if (!automatic){
@@ -52,21 +52,21 @@ void Main::lateral_movement()
 //    bool automatic = ask_yesno(uart, "Automatic");
 
     for (uint8_t i = 0; i < 10; ++i){
-	Car::move(atd::Sign::negative, 0, 50);
+	Car::move(atd::Sign::negative, atd::Percentage{0}, atd::Percentage{50});
     Micro::wait_ms(150);
     Car::stop();
     pli::press_key(uart);
 
-	Car::backward(50);
+	Car::backward(atd::Percentage{50});
     Micro::wait_ms(150);
     Car::stop();
     pli::press_key(uart);
 
-	Car::move(atd::Sign::negative, 50, 0);
+	Car::move(atd::Sign::negative, atd::Percentage{50}, atd::Percentage{0});
     Micro::wait_ms(150);
     Car::stop();
     pli::press_key(uart);
-	Car::forward(50);
+	Car::forward(atd::Percentage{50});
 
     Micro::wait_ms(150);
     Car::stop();
@@ -104,9 +104,9 @@ void Main::interactive_test()
 
     bool sense = pli::ask_yesno(uart, "Same direction of wheels rotation");
     if (sense)
-	Car::move(sign, right, left);
+	Car::move(sign, atd::Percentage{right}, atd::Percentage{left});
     else
-	Car::move_opposite(sign, right, left);
+	Car::move_opposite(sign, atd::Percentage{right}, atd::Percentage{left});
 
     pli::press_key_to("stop", uart);
 
@@ -127,7 +127,7 @@ void Main::driving_in_circles()
     for (uint8_t right = 30; right < 100; right += 5)
     {
 	uart << right << '/' << left << '\n';
-	Car::forward_turn_right(right, left);
+	Car::forward_turn_right(atd::Percentage{right}, atd::Percentage{left});
 	char opt{};
 	uart >> opt;
 	if (opt != '+'){
@@ -148,7 +148,7 @@ void Main::wheel_working()
 	    "take in your hand the car an look at the right wheel\n";
 
     for (uint8_t i = 0; i < 6; ++i){
-	Car::right_wheel(atd::Sign::positive, 50);
+	Car::right_wheel(atd::Sign::positive, atd::Percentage{50});
 	Micro::wait_ms(150);
 	Car::stop();
 	pli::press_key(uart);
@@ -158,7 +158,7 @@ void Main::wheel_working()
 	    "look now at the left wheel\n";
 
     for (uint8_t i = 0; i < 6; ++i){
-	Car::left_wheel(atd::Sign::positive, 50);
+	Car::left_wheel(atd::Sign::positive, atd::Percentage{50});
 	Micro::wait_ms(150);
 	Car::stop();
 	pli::press_key(uart);
@@ -186,9 +186,9 @@ void Main::run()
 
     switch (opt){
 	break; case '0': Car::stop();
-	break; case '1': Car::forward(50);
-	break; case '2': Car::backward(50);
-	break; case '3': Car::forward_turn_right(0, 50);
+	break; case '1': Car::forward(atd::Percentage{50});
+	break; case '2': Car::backward(atd::Percentage{50});
+	break; case '3': Car::forward_turn_right(atd::Percentage{0}, atd::Percentage{50});
 	break; case '4': Car::forward_turn_left();
 	break; case '5': interactive_test();
 	break; case '6': driving_in_circles();
