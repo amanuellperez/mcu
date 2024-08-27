@@ -100,6 +100,8 @@
 #include "avr_micro.h"
 
 #include <atd_math.h>
+#include <atd_names.h>
+
 namespace avr_{
 
 namespace timer1_{
@@ -992,6 +994,8 @@ public:
 
     using PWM_signal   = avr_::PWM_signal;
     using Timer_cfg    = timer1_::PWM_cfg;
+    using Prescaler    = uint16_t;
+    using Hertz	       = avr_::Hertz;
 
 // cfg
     static constexpr uint8_t number  = npin0;
@@ -1009,7 +1013,7 @@ public:
     //          Como no es posible generar cualquier señal, como salida indica
     //          la señal que realmente se va a generar. TODO: se me olvido!!!
     //          (por eso lo pongo temporalmente como const)
-    static void generate(const PWM_signal& pwm);
+    static nm::Result generate(const PWM_signal& pwm);
 
     // Cambia el duty cycle sin modificar la frecuencia
     static void duty_cycle(const atd::Percentage& p);
@@ -1021,13 +1025,13 @@ public:
 
 // Interfaz 2: Generamos una señal PWM de pulsos VARIABLES en longitud.
     // Calcula la configuración del Timer1 para generar la frecuencia freq_gen
-    static void cfg_to_generate(const Frequency& freq_gen, Timer_cfg& cfg);
+    static nm::Result cfg_to_generate(const Frequency& freq_gen, Timer_cfg& cfg);
 
     // Configura el Timer1 con la configuración obtenida en cfg_to_generate
     static void cfg(const Timer_cfg& cfg);
 
     // Enciende el Timer1, empezando a generar la señal PWM
-    static void turn_on(const Timer_cfg& cfg);
+    static void turn_on(const uint16_t& prescaler);
 
     // Calcula el valor que usa internamente el Timer1 para obtener ese duty
     // cycle.
@@ -1079,7 +1083,7 @@ public:
 private:
 // helpers
     static void pin_as_output();
-    static void generate_impl(const PWM_signal& pwm);
+    static nm::Result generate_impl(const PWM_signal& pwm);
 
     static counter_type unsafe_ocr();
     static void unsafe_ocr(Timer::counter_type ocr);
@@ -1126,25 +1130,31 @@ PWM1_pin<n>::Timer::counter_type PWM1_pin<n>::unsafe_ocr()
 
 
 template <uint8_t n>
-void PWM1_pin<n>::generate(const PWM_signal& pwm)
+nm::Result PWM1_pin<n>::generate(const PWM_signal& pwm)
 {
     if (pwm.duty_cycle() == atd::Percentage{0}){
 	write_zero();
-	return;
+	return nm::ok;
     }
 
     if (pwm.duty_cycle() == atd::Percentage{100}){
 	write_one();
-	return;
+	return nm::ok;
     }
 
-    generate_impl(pwm);
+    return generate_impl(pwm);
 }
 
 template <uint8_t n>
 inline 
-void PWM1_pin<n>::cfg_to_generate(const Frequency& freq_gen, Timer_cfg& cfg)
-{ cfg.calculate_cfg_method2(clock_frequency, freq_gen); }
+nm::Result PWM1_pin<n>::cfg_to_generate(const Frequency& freq_gen, Timer_cfg& cfg)
+{ 
+    cfg.calculate_cfg_method2(clock_frequency, freq_gen); 
+    if (cfg.top == 0)
+	return nm::fail;
+
+    return nm::ok;
+}
 
 template <uint8_t n>
 void PWM1_pin<n>::cfg(const Timer_cfg& cfg)
@@ -1160,8 +1170,8 @@ void PWM1_pin<n>::cfg(const Timer_cfg& cfg)
 }
 
 template <uint8_t n>
-inline void PWM1_pin<n>::turn_on(const Timer_cfg& cfg)
-{ Timer::prescaler(cfg.prescaler); }
+inline void PWM1_pin<n>::turn_on(const uint16_t& prescaler)
+{ Timer::prescaler(prescaler); }
 
 
 template <uint8_t n>
@@ -1185,18 +1195,22 @@ inline void PWM1_pin<n>::duty_cycle(counter_type ocr)
 // gestionar eso? De momento, no: esto es una versión experimental pensada
 // para los motores donde eso no generará problemas. 
 template <uint8_t n>
-void PWM1_pin<n>::generate_impl(const PWM_signal& pwm)
+nm::Result PWM1_pin<n>::generate_impl(const PWM_signal& pwm)
 {
     Timer_cfg timer_cfg;
 
-    cfg_to_generate(pwm.frequency(), timer_cfg);
+    if (cfg_to_generate(pwm.frequency(), timer_cfg) == nm::fail)
+	return nm::fail;
+
     cfg(timer_cfg);
 
     auto ocr = duty_cycle(timer_cfg, pwm.duty_cycle());
     duty_cycle(ocr);
     connect();
 
-    turn_on(timer_cfg);
+    turn_on(timer_cfg.prescaler);
+
+    return nm::ok;
 
 // Borrame:
 //    Timer_cfg cfg;

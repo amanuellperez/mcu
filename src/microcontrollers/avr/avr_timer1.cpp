@@ -63,9 +63,15 @@ void PWM_cfg::calculate_cfg_method2(const Frequency::Rep& freq_clk,
 	top = fast.top;
 	fast_mode = true;
 
+	if (ferr == 100)
+	    top = 0;	// top == 0 marca que no se puede generar la señal
+
     } else {
 	top = phase.top;
 	fast_mode = false;
+
+	if (perr == 100)
+	    top = 0;
     }
 
 }

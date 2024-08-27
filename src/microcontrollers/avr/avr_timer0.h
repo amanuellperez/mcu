@@ -55,6 +55,7 @@
 		    
 #include <atd_type_traits.h>
 #include <atd_percentage.h>
+#include <atd_names.h>
 
 namespace avr_{
 
@@ -726,7 +727,7 @@ public:
     //          Como no es posible generar cualquier señal, como salida indica
     //          la señal que realmente se va a generar. TODO: se me olvido!!!
     //          (por eso lo pongo temporalmente como const)
-    static void generate(const PWM_signal& pwm);
+    static nm::Result generate(const PWM_signal& pwm);
 
     // Cambia el duty cycle sin modificar la frecuencia
     static void duty_cycle(const atd::Percentage& p);
@@ -769,7 +770,7 @@ private:
 
 // helpers
     static void pin_as_output();
-    static void generate_impl(const PWM_signal& pwm);
+    static nm::Result generate_impl(const PWM_signal& pwm);
 
 
     static counter_type OCR();
@@ -821,25 +822,25 @@ PWM0_pin<n>::counter_type PWM0_pin<n>::OCR()
 
 
 template <uint8_t n>
-void PWM0_pin<n>::generate(const PWM_signal& pwm)
+nm::Result PWM0_pin<n>::generate(const PWM_signal& pwm)
 {
     if (pwm.duty_cycle() == atd::Percentage{0}){
 	write_zero();
-	return;
+	return nm::ok;
     }
 
     if (pwm.duty_cycle() == atd::Percentage{100}){
 	write_one();
-	return;
+	return nm::ok;
     }
 
-    generate_impl(pwm);
+    return generate_impl(pwm);
 }
 
 // En FAST PWM : freq_generada = clock_freq / (prescaler * (top + 1));
 // En PHASE PWM: freq_generada = clock_freq / (2 * prescaler * top);
 template <uint8_t n>
-void PWM0_pin<n>::generate_impl(const PWM_signal& pwm)
+nm::Result PWM0_pin<n>::generate_impl(const PWM_signal& pwm)
 {
     timer0_::PWM_cfg mode;
 
@@ -871,6 +872,8 @@ void PWM0_pin<n>::generate_impl(const PWM_signal& pwm)
     connect();
 
     Timer::prescaler(mode.prescaler);
+
+    return nm::ok; // TODO: revisar cuando devolver fail
 }
 
 

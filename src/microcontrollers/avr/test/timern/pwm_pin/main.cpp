@@ -303,7 +303,12 @@ void generate_pwm_signal()
     // if (duty_cycle == 0) return; // se puede probar duty cycle 0%
 
     myu::PWM_signal pwm{freq, atd::Percentage{static_cast<uint8_t>(duty_cycle)}};
-    PWM_pin::generate(pwm);
+    if (PWM_pin::generate(pwm) == nm::fail){
+	uart << "\n\n**** ERROR ****\n"
+	        "Can't generate that frequency\n"
+		"Change frequency or choose other F_CPU\n";
+	return;
+    }
 
     myu::Frequency freq_gen = PWM_pin::frequency();
     uart << "Generating " << freq_gen << " signal\n";
@@ -346,7 +351,12 @@ void pulse_wave_generation()
     if (dc2 == 0) return;
 
     typename PWM_pin::Timer_cfg cfg;
-    PWM_pin::cfg_to_generate(freq, cfg);
+    if (PWM_pin::cfg_to_generate(freq, cfg) == nm::fail){
+	uart << "\n\n**** ERROR ****\n"
+	        "Can't generate that frequency\n"
+		"Change frequency or choose other F_CPU\n";
+	return;
+    }
 
 
     PWM_pin::cfg(cfg);
@@ -362,7 +372,7 @@ void pulse_wave_generation()
 
     PWM_pin::enable_interrupt();
     myu::enable_interrupts();
-    PWM_pin::turn_on(cfg);
+    PWM_pin::turn_on(cfg.prescaler);
 
     while (PWG::i){
 	myu::wait_ms(1);
@@ -467,6 +477,8 @@ int main()
 
 
 
+// Interrupts
+// ----------
 ISR_TIMER1_COMPA{
     if (PWG::i) {
 	PWG::i = PWG::i - 1;
