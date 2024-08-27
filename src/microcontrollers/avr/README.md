@@ -342,40 +342,40 @@ Hay, mínimo, tres formas de querer generar una señal PWM:
 
 1. PWM de duty cycle fijo
 
-Si queremos controlar la intensidad de un  LED, o la velocidad de giro
-de un motor, generamos una señal PWM de un determinado duty cycle que
-no vamos a cambiar.
+    Si queremos controlar la intensidad de un  LED, o la velocidad de giro
+    de un motor, generamos una señal PWM de un determinado duty cycle que
+    no vamos a cambiar.
 
 
 2. PWM de duty cycle variable (solo un par de valores)
 
-Hay algunos dispositivos, por ejemplo la led strip WS2812B, 
-codifican los bits en pulsos de diferente duración.
+    Hay algunos dispositivos, por ejemplo la led strip WS2812B, 
+    codifican los bits en pulsos de diferente duración.
 
-En el WS2812B hay que generar una señal de unos 800kHz
-donde un 0 se representa con un pulso de un duty cycle del 30% +-, y
-un 1 tiene un duty de un 60% +-
+    En el WS2812B hay que generar una señal de unos 800kHz
+    donde un 0 se representa con un pulso de un duty cycle del 30% +-, y
+    un 1 tiene un duty de un 60% +-
 
-Para enviar el byte 10101010 hay que estar continuamente cambiando el
-duty cycle de la señal.
+    Para enviar el byte 10101010 hay que estar continuamente cambiando el
+    duty cycle de la señal.
 
-Para generar este tipo de señales necesito no perder tiempo pasando de
-atd::Percentage a OCR. Por ello, suministro un interfaz más eficiente
-para este caso. Observar que el interfaz está diseñado para que el
-usuario no tenga que saber nada de cómo funciona el Timer1 (eso es
-requisito indispensable de esta clase).
+    Para generar este tipo de señales necesito no perder tiempo pasando de
+    atd::Percentage a OCR. Por ello, suministro un interfaz más eficiente
+    para este caso. Observar que el interfaz está diseñado para que el
+    usuario no tenga que saber nada de cómo funciona el Timer1 (eso es
+    requisito indispensable de esta clase).
 
 
 3. PWM de duty cycle variable (continuamente)
 
-Con una señal PWM podemos simular generar una señal analógica. 
-Por ejemplo, si queremos generar v(t) = sen wt, podemos "generarlo"
-usando una señal PWM. 
-Una forma de hacerlo es generar una señal PWM de frecuencia fija y
-cada cierto tiempo T cambiar el valor del duty cycle para modificar el
-valor medio generado. 
+    Con una señal PWM podemos simular generar una señal analógica. 
+    Por ejemplo, si queremos generar v(t) = sen wt, podemos "generarlo"
+    usando una señal PWM. 
+    Una forma de hacerlo es generar una señal PWM de frecuencia fija y
+    cada cierto tiempo T cambiar el valor del duty cycle para modificar el
+    valor medio generado. 
 
-Mientras que en el caso anterior solo ibamos a generar un par de duty
-cycles diferentes, en este caso el duty cycle lo vamos a ir variando
-continuamente.
+    Mientras que en el caso anterior solo ibamos a generar un par de duty
+    cycles diferentes, en este caso el duty cycle lo vamos a ir variando
+    continuamente.
  
