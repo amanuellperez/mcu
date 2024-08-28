@@ -33,6 +33,8 @@
  *
  ****************************************************************************/
 #include <cstdint>
+#include <span>
+
 namespace dev{
 
 /***************************************************************************
@@ -61,7 +63,7 @@ public:
     static void init() { SPI_select::init(); }
 
 // digits values
-    // ndigit = 1..8
+  // ndigit = 1..8
     // Escribimos el valor del digit correspondiente
     static void digit(uint8_t ndigit, uint8_t x) {send_packet (ndigit, x); }
 
@@ -142,8 +144,127 @@ void MAX7219_basic<C>::send_packet(uint8_t address, uint8_t data)
 //
 //  Como en el SDD1306 hablan por páginas, podemos concebir la matriz anterior
 //  como 3 páginas de 32 leds cada una.
+//
+//  Version prueba: hagamos un array de MAX7219. Serán N MAX7219.
+template <typename Cfg, uint8_t N>
+class MAX7219_array{
+public:
+// Cfg
+    static constexpr uint8_t size() { return N; }
+    static constexpr uint8_t nrows() {return 8;}
+
+// Constructor
+    MAX7219_array() = delete;
+    static void init();
+
+// Write
+    // Escribimos en la fila nrow el array x[0...N)
+    // Las filas van de [0...8) (lo normal, no como van en el MAX7219 que van
+    // de [1...9) lo cual es muy confuso para un programador de C++ @_@
+    static void row(uint8_t nrow, std::span<uint8_t, N> x);
+
+    // Borra la fila nrow
+    static void clear(uint8_t nrow);
+
+    // Borra todo el array
+    static void clear();
+
+// comandos
+    static void intensity(uint8_t I);
+
+    // turn_on/turn_off (me gustan más que normal_mode/shutdown
+    static void turn_on ();
+    static void turn_off ();
 
 
+    static void display_test_on();
+    static void display_test_off();
+
+    
+private:
+   using MAX7219 = MAX7219_basic<Cfg>;
+
+   static void move_command_till_last();
+};
+
+template <typename C, uint8_t N>
+void MAX7219_array<C, N>::init() 
+{
+    MAX7219::init(); 
+
+    MAX7219::disable_decode_mode(); // es un display, no 7-segments
+    MAX7219::scan_all_digits();
+
+    move_command_till_last();
+}
+
+// Mueve el comando hasta el final
+template <typename C, uint8_t N>
+void MAX7219_array<C, N>::move_command_till_last()
+{
+    if constexpr (size() > 1) {
+	for (uint8_t i = 0; i < size() - 1; ++i)
+	    MAX7219::no_op();
+    }
+}
+
+
+template <typename C, uint8_t N>
+void MAX7219_array<C, N>::row(uint8_t nrow, std::span<uint8_t, N> value)
+{
+    for (auto x: value)
+	MAX7219::digit(nrow + 1, x);
+}
+
+template <typename C, uint8_t N>
+inline void MAX7219_array<C, N>::clear(uint8_t nrow)
+{
+    MAX7219::digit(nrow + 1, 0x00);
+    move_command_till_last();
+}
+
+template <typename C, uint8_t N>
+inline void MAX7219_array<C, N>::clear()
+{
+    for (uint8_t i = 0; i < nrows(); ++i)
+	clear(i);
+}
+
+template <typename C, uint8_t N>
+void MAX7219_array<C, N>::intensity(uint8_t I) 
+{
+    MAX7219::intensity(I);
+    move_command_till_last();
+}
+
+template <typename C, uint8_t N>
+void MAX7219_array<C, N>::turn_on() 
+{
+    MAX7219::turn_on();
+    move_command_till_last();
+}
+
+template <typename C, uint8_t N>
+void MAX7219_array<C, N>::turn_off() 
+{
+    MAX7219::turn_off();
+    move_command_till_last();
+}
+
+
+template <typename C, uint8_t N>
+void MAX7219_array<C, N>::display_test_on()
+{
+    MAX7219::display_test_on();
+    move_command_till_last();
+}
+
+template <typename C, uint8_t N>
+void MAX7219_array<C, N>::display_test_off()
+{
+    MAX7219::display_test_off();
+    move_command_till_last();
+}
 }// namespace dev
 
 #endif

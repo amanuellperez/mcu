@@ -338,46 +338,6 @@ void Pulse_wave_01_pin_polling<C>::send_impl(const uint8_t* x, uint8_t n)
 }
 
 
-// TODO borrame: antigua, pierde el primer pulso
-//template <typename C>
-//void Pulse_wave_01_pin_polling<C>::send_impl(const uint8_t* x, uint8_t n)
-//{
-//    // El tener que configurar el primer pulso antes de empezar, rompe todo el
-//    // flujo (queda muy feo, alguna forma más sencilla?)
-//    uint8_t j = 0;
-//
-//    if (x[0] & (1 << j))
-//	PWM_pin::unsafe_duty_cycle(ocr_bit1_);
-//
-//    else
-//	PWM_pin::unsafe_duty_cycle(ocr_bit0_);
-//    
-//    ++j;
-//
-//    PWM_pin::turn_on(prescaler_);
-//
-//
-//    for (uint8_t i = 0; i < n; ++i){
-//
-//	for (; j < 8; ++j){
-//	    
-//	    PWM_pin::wait_for_interrupt();
-//
-//	    if (x[i] & (1 << j))
-//		PWM_pin::unsafe_duty_cycle(ocr_bit1_);
-//
-//	    else
-//		PWM_pin::unsafe_duty_cycle(ocr_bit0_);
-//	}
-//	
-//	j = 0;
-//
-//    }
-//
-//    // Esperamos a generar el último pulso
-//    PWM_pin::wait_for_interrupt();
-//}
-
 
 template <typename C>
 void Pulse_wave_01_pin_polling<C>::print_cfg(std::ostream& out)

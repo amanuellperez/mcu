@@ -50,6 +50,7 @@ struct MAX7219_cfg{
 };
 
 using MAX7219 = dev::MAX7219_basic<MAX7219_cfg>;
+using MAX7219_array = dev::MAX7219_array<MAX7219_cfg, 4>;
 
 // Functions
 // ---------
@@ -66,6 +67,8 @@ void init_spi()
     SPI::turn_on();
 }
 
+
+// inicializamos 1 display solo
 void init_max7219()
 {
     MAX7219::init(); 
@@ -75,6 +78,12 @@ void init_max7219()
     MAX7219::normal_mode();
 }
 
+void init_max7219_array()
+{
+    MAX7219_array::init(); 
+    MAX7219_array::intensity(0x00);
+    MAX7219_array::turn_on();
+}
 
 void hello()
 {
@@ -86,6 +95,47 @@ void hello()
 		<< "\n\n";
 }
 
+// Para 1 display
+void test_basic1()
+{
+    init_max7219();
+
+    // CUIDADO: de [1..8] !!!
+    for (uint8_t i = 1; i <= 8; ++i){
+	MAX7219::digit(i, 0x00);
+    }
+
+	for (uint8_t i = 0; i < 8; ++i){
+	    for (uint8_t j = 1; j <= 8; ++j) 
+		MAX7219::digit(j, 1 << i);
+
+	    Micro::wait_ms(1000);
+	}
+}
+
+
+void test_array()
+{
+    myu::UART_iostream uart;
+    uart << "Testing array of " << (int) MAX7219_array::size() << " MAX7219\n";
+
+    init_max7219_array();
+
+    uint8_t x[] = {0x01, 0x02, 0x04, 0x08};
+
+    MAX7219_array::clear();
+
+    for (uint8_t i = 0; i < MAX7219_array::nrows(); ++i){
+	MAX7219_array::row(i, x);
+	Micro::wait_ms(800);
+
+	MAX7219_array::clear(i);
+    }
+
+    MAX7219_array::clear();
+
+
+}
 
 // Main
 // ----
@@ -93,24 +143,14 @@ int main()
 {
     init_uart();
     init_spi();
-    init_max7219();
 
     hello();
 
-    // CUIDADO: de [1..8] !!!
-    for (uint8_t i = 1; i <= 8; ++i){
-	MAX7219::digit(i, 0x00);
-    }
-    
     myu::UART_iostream uart;
     while (1) 
     {
-	for (uint8_t i = 0; i < 8; ++i){
-	    for (uint8_t j = 1; j <= 8; ++j) 
-		MAX7219::digit(j, 1 << i);
-
-	    Micro::wait_ms(1000);
-	}
+//	test_basic1();
+	test_array();
 
     }                                                 
 }
