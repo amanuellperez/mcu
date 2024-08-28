@@ -1005,6 +1005,10 @@ public:
     PWM1_pin() = delete; // de momento static interface
     static void init() {};// debería registrar los pines que se usa como PWM0?
 
+    // Reinicializa los registros variables (el counter, por ejemplo)
+    // No cambia la configuración que hubiese definida.
+    static void reset();
+
 // Interfaz 1: genera una señal PWM determinada. 
     // Genera la señal PWM indicada. Enciende el Timer en caso de que
     // estuviera apagado. Cuidado si se manejan los dos pins asociados a ese
@@ -1067,6 +1071,22 @@ public:
 
     static void disable_interrupt();
 
+    // Las siguientes funciones son para poder hacer polling usando
+    // interrupciones. Para usarlas, 
+    //	    Micro::Disable_interrupts disint;
+    //	    PWM_pin::enable_interrupt();
+    //
+    //	    PWM_pin::wait_for_interrupt();
+    //	    
+    //	    do whatever you need
+    //
+
+    // Espera a que se "lance" una interrupción (da por supuesto que las
+    // interrupciones del micro están desabilitadas, con lo que no se lanzara
+    // realmente tal interrupcion). Se encarga de hacer el clear al flag
+    // correspondiente
+    static void wait_for_interrupt();
+
 // Como pin de salida
     // Podemos usarlo como un pin normal y corriente de salida.
     // Corresponderían a los casos extremos de 0% ó 100% de duty cycle.
@@ -1092,6 +1112,11 @@ private:
     static counter_type unsafe_top();
 
     static bool is_disconnected();
+
+    // DUDA: dejar estas públicas? Como es más facil pasarlas de private a
+    // public, dejemoslas al principio private.
+    static bool interrupt_flag_is_set();
+    static void clear_interrupt_flag();
 };
 
 template <uint8_t n>
@@ -1154,6 +1179,13 @@ nm::Result PWM1_pin<n>::cfg_to_generate(const Frequency& freq_gen, Timer_cfg& cf
 	return nm::fail;
 
     return nm::ok;
+}
+
+template <uint8_t n>
+void PWM1_pin<n>::reset()
+{ 
+    Disable_interrupts l; 
+    Timer::unsafe_counter(0); 
 }
 
 template <uint8_t n>
@@ -1312,6 +1344,37 @@ inline void PWM1_pin<n>::disable_interrupt()
     else
 	Timer::disable_output_compare_B_match_interrupt();
 }
+
+
+template <uint8_t n>
+inline bool PWM1_pin<n>::interrupt_flag_is_set()
+{
+    if constexpr (number == Timer::OCA_pin())
+	return Timer::output_compare_A_match_flag_is_set();
+
+    else
+	return Timer::output_compare_B_match_flag_is_set();
+}
+
+template <uint8_t n>
+inline void PWM1_pin<n>::clear_interrupt_flag()
+{
+    if constexpr (number == Timer::OCA_pin())
+	Timer::clear_output_compare_A_match_flag();
+
+    else
+	Timer::clear_output_compare_B_match_flag();
+}
+
+template <uint8_t n>
+inline void PWM1_pin<n>::wait_for_interrupt()
+{
+    while (!interrupt_flag_is_set()) 
+    { ; }
+
+    clear_interrupt_flag();
+}
+
 
 
 template <uint8_t n>
