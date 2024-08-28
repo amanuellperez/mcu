@@ -112,7 +112,7 @@ template<uint16_t period>
 inline void set_clock_period_in_us_1MHz() 
 {
     if constexpr (period == 1u)
-	Timer1::clock_frequency_no_preescaling();
+	Timer1::clock_frequency_no_prescaling();
     
     else if constexpr (period == 8u)
 	Timer1::clock_frequency_divide_by_8();
@@ -137,7 +137,7 @@ inline Time clock_period_in_us_1MHz()
 {
     using namespace literals;
     switch(Timer1::frequency_divisor()){
-	case Timer1::Frequency_divisor::no_preescaling	: return 1_us;
+	case Timer1::Frequency_divisor::no_prescaling	: return 1_us;
 	case Timer1::Frequency_divisor::divide_by_8	: return 8_us;
 	case Timer1::Frequency_divisor::divide_by_64	: return 64_us;
 	case Timer1::Frequency_divisor::divide_by_256	: return 256_us;
@@ -153,7 +153,7 @@ inline Frequency clock_frequency_in_Hz_1MHz()
     using namespace literals;
 
     switch(Timer1::frequency_divisor()){
-	case Timer1::Frequency_divisor::no_preescaling	: return 1_MHz;
+	case Timer1::Frequency_divisor::no_prescaling	: return 1_MHz;
 	case Timer1::Frequency_divisor::divide_by_8	: return 125_kHz;
 	case Timer1::Frequency_divisor::divide_by_64	: 
 					return Frequency{15'625ul};
@@ -173,7 +173,7 @@ inline Frequency clock_frequency_in_Hz_1MHz()
 //// a 125 ns
 //template<>
 //inline void set_clock_period_in_ns<125u, 8000000UL>() 
-//{Timer1::clock_frequency_no_preescaling();}
+//{Timer1::clock_frequency_no_prescaling();}
 
 template<uint16_t period>
 inline void set_clock_period_in_us_8MHz() 
@@ -201,7 +201,7 @@ inline Time clock_period_in_us_8MHz()
 {
     using namespace literals;
     switch(Timer1::frequency_divisor()){
-	case Timer1::Frequency_divisor::no_preescaling	: return 0_us;
+	case Timer1::Frequency_divisor::no_prescaling	: return 0_us;
 	case Timer1::Frequency_divisor::divide_by_8	: return 1_us;
 	case Timer1::Frequency_divisor::divide_by_64	: return 8_us;
 	case Timer1::Frequency_divisor::divide_by_256	: return 32_us;
@@ -216,7 +216,7 @@ inline Frequency clock_frequency_in_Hz_8MHz()
 {
     using namespace literals;
     switch(Timer1::frequency_divisor()){
-	case Timer1::Frequency_divisor::no_preescaling	: return 0_MHz;
+	case Timer1::Frequency_divisor::no_prescaling	: return 0_MHz;
 	case Timer1::Frequency_divisor::divide_by_8	: return 1_MHz;
 	case Timer1::Frequency_divisor::divide_by_64	: return 125_kHz;
 	case Timer1::Frequency_divisor::divide_by_256	: 

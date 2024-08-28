@@ -155,9 +155,9 @@ void test_timer0()
 
     CHECK_TRUE(test, Timer::prescaler() == 0, "off");
 
-    Timer::clock_frequency_no_preescaling();
+    Timer::clock_frequency_no_prescaling();
     CHECK_TRUE(test, Timer::prescaler() == 1, 
-					    "clock_frequency_no_preescaling");
+					    "clock_frequency_no_prescaling");
 
     CHECK_TRUE(test, Timer::is_on() == true, "is_on");
     CHECK_TRUE(test, Timer::is_off() == false, "is_off");
@@ -294,9 +294,9 @@ void test_timer1()
 
     CHECK_TRUE(test, Timer::prescaler() == 0, "off");
 
-    Timer::clock_frequency_no_preescaling();
+    Timer::clock_frequency_no_prescaling();
     CHECK_TRUE(test, Timer::prescaler() == 1, 
-					    "clock_frequency_no_preescaling");
+					    "clock_frequency_no_prescaling");
 
     CHECK_TRUE(test, Timer::is_on() == true, "is_on");
     CHECK_TRUE(test, Timer::is_off() == false, "is_off");

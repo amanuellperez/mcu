@@ -26,7 +26,7 @@ Timer0::Frequency_divisor Timer0::frequency_divisor()
 { 
     switch(atd::read_bits<CS02, CS01, CS00>::of(TCCR0B)){
 	case atd::zero<uint8_t>::with_bits<CS02, CS01, CS00>::to<0,0,1>():
-	    return Frequency_divisor::no_preescaling;
+	    return Frequency_divisor::no_prescaling;
 
 	case atd::zero<uint8_t>::with_bits<CS02, CS01, CS00>::to<0,1,0>():
 	    return Frequency_divisor::divide_by_8;
@@ -85,7 +85,7 @@ uint16_t Timer0::prescaler()
 {
     switch(frequency_divisor()){
 	break; case Frequency_divisor::no_clock_prescaling  : return 0;
-	break; case Frequency_divisor::no_preescaling	    : return 1;
+	break; case Frequency_divisor::no_prescaling	    : return 1;
 	break; case Frequency_divisor::divide_by_8	    : return 8;
 	break; case Frequency_divisor::divide_by_64	    : return 64;
 	break; case Frequency_divisor::divide_by_256	    : return 256;
@@ -104,7 +104,7 @@ void Timer0::prescaler(uint16_t prescaler_factor)
 	break; case 64  : clock_frequency_divide_by_64();
 	break; case 256 : clock_frequency_divide_by_256();
 	break; case 1024: clock_frequency_divide_by_1024();
-	break; default  : clock_frequency_no_preescaling();
+	break; default  : clock_frequency_no_prescaling();
     }
 
 }

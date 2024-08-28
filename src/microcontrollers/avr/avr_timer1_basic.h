@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022 Manuel Perez 
+// Copyright (C) 2019-2024 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -63,6 +63,7 @@
  *		  Generic_timer.
  *
  *     08/07/2024 mode(), prescaler()
+ *     28/08/2024 Funciones de acceso a los flags de las interrupciones.
  *
  ****************************************************************************/
 #include <limits>
@@ -130,7 +131,7 @@ public:
     // (RRR) ¿por qué definir explícitamente aquí los prescaler_factor?
     //       Los podía definir en cfg::timer0, pero la implementación de esta
     //       clase conoce los prescalers en las funciones
-    //       clock_frequency_no_preescaling, ... O se generalizan esas
+    //       clock_frequency_no_prescaling, ... O se generalizan esas
     //       funciones metiendolas en cfg::timer0 o no mejor hacerlo todo
     //       concreto.
     //
@@ -141,7 +142,7 @@ public:
     enum class Frequency_divisor{
 		    no_clock_source,    
 		    off = no_clock_source,
-		    no_preescaling,
+		    no_prescaling,
 		    divide_by_8,
 		    divide_by_64,
 		    divide_by_256,
@@ -152,7 +153,7 @@ public:
 
 
     // Establecemos el divisor de frecuencia a aplicar al reloj del micro.
-    static void clock_frequency_no_preescaling();
+    static void clock_frequency_no_prescaling();
     static void clock_frequency_divide_by_8();
     static void clock_frequency_divide_by_64();
     static void clock_frequency_divide_by_256();
@@ -312,22 +313,54 @@ public:
 // INTERRUPCIONES
 //  Recordar llamar a avr::enable_interrupts para que funcionen.
 
+// overflow interrupt
     /// Cuando se produce un overflow generamos la interrupción
     /// correspondiente. Se captura con ISR_TIMER1_OVF
     static void enable_overflow_interrupt();
     static void disable_overflow_interrupt();
 
+    static bool overflow_interrupt_is_set();
+    static void clear_overflow_interrupt();
+
+// input capture interrupt
     /// Se captura con ISR_TIMER1_CAPT
     static void enable_input_capture_interrupt();
     static void disable_input_capture_interrupt();
 
+    /// Devuelve true si ICR alcanza el TOP
+    static bool input_capture_interrupt_is_set();
+
+    // ICF is automatically cleared when the Input Capture Interrupt Vector 
+    // is executed. Si no se ejecuta, esta función permite hacerle el clear a
+    // mano.
+    static void clear_input_capture_interrupt_flag();
+
+// output compare A match interrupt
     /// Se captura con ISR_TIMER1_COMPA
     static void enable_output_compare_A_match_interrupt();
     static void disable_output_compare_A_match_interrupt();
 
+    // Devuelve true si TCNT1 value matches the Output Compare OCR1A
+    static bool output_compare_A_match_flag_is_set();
+
+    // OCFA is automatically cleared when the Output Compare Match A 
+    // Interrupt Vector is executed.
+    // Si no se ejecuta, esta función permite hacerle el clear a mano
+    static void clear_output_compare_A_match_flag();
+
+// output compare B match interrupt
     /// Se captura con ISR_TIMER1_COMPB
     static void enable_output_compare_B_match_interrupt();
     static void disable_output_compare_B_match_interrupt();
+
+    // Devuelve true si TCNT1 value matches the Output Compare OCR1B
+    static bool output_compare_B_match_flag_is_set();
+
+    // OCFA is automatically cleared when the Output Compare Match B
+    // Interrupt Vector is executed.
+    // Si no se ejecuta, esta función permite hacerle el clear a mano
+    static void clear_output_compare_B_match_flag();
+
 
 private:
 
@@ -344,7 +377,7 @@ inline void Timer1::off()
     atd::write_bits<CS12, CS11, CS10>::to<0,0,0>::in(TCCR1B);
 }
 
-inline void Timer1::clock_frequency_no_preescaling()
+inline void Timer1::clock_frequency_no_prescaling()
 { // 001
     atd::write_bits<CS12, CS11, CS10>::to<0,0,1>::in(TCCR1B);
 }
@@ -415,6 +448,7 @@ inline void Timer1::unsafe_input_capture_register(Timer1::counter_type x)
 { ICR1 = x; }
 
 
+// INTERRUPTS
 inline void Timer1::enable_overflow_interrupt()
 { atd::write_bits<TOIE1>::to<1>::in(TIMSK1); }
 
@@ -438,6 +472,43 @@ inline void Timer1::enable_output_compare_B_match_interrupt()
 
 inline void Timer1::disable_output_compare_B_match_interrupt()
 { atd::write_bits<OCIE1B>::to<0>::in(TIMSK1); }
+
+// INTERRUPTS FLAGS
+
+inline bool Timer1::input_capture_interrupt_is_set()
+{return atd::read_bit<ICF1>::of(TIFR1) != 0;}
+//{return atd::read_bit<ICF1>::of(TIFR1) ==
+//	atd::zero<uint8_t>::with_bit<ICF1>::to<1>();}
+
+// Datasheet: 
+// ICF can be cleared by writing a logic one to its bit location.
+inline void Timer1::clear_input_capture_interrupt_flag()
+{ atd::write_bits<ICF1>::to<1>::in(TIFR1); }
+
+
+inline bool Timer1::overflow_interrupt_is_set()
+{return atd::read_bit<TOV1>::of(TIFR1) != 0;}
+
+inline void Timer1::clear_overflow_interrupt()
+{ atd::write_bits<TOV1>::to<1>::in(TIFR1); }
+
+
+inline bool Timer1::output_compare_A_match_flag_is_set()
+{return atd::read_bit<OCF1A>::of(TIFR1) != 0;}
+
+inline void Timer1::clear_output_compare_A_match_flag()
+{ atd::write_bits<OCF1A>::to<1>::in(TIFR1); }
+
+
+inline bool Timer1::output_compare_B_match_flag_is_set()
+{return atd::read_bit<OCF1B>::of(TIFR1) != 0;}
+
+
+inline void Timer1::clear_output_compare_B_match_flag()
+{ atd::write_bits<OCF1B>::to<1>::in(TIFR1); }
+
+
+
 
 
 // Modos de funcionamiento

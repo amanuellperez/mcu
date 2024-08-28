@@ -55,7 +55,7 @@ template<uint16_t period>
 inline void set_clock_period_in_us_1MHz() 
 {
     if constexpr (period == 1u)
-	Timer2::clock_frequency_no_preescaling();
+	Timer2::clock_frequency_no_prescaling();
     
     else if constexpr (period == 8u)
 	Timer2::clock_frequency_divide_by_8();

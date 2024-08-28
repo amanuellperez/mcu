@@ -91,7 +91,7 @@ public:
     // (RRR) ¿por qué definir explícitamente aquí los prescaler_factor?
     //       Los podía definir en cfg::timer0, pero la implementación de esta
     //       clase conoce los prescalers en las funciones
-    //       clock_frequency_no_preescaling, ... O se generalizan esas
+    //       clock_frequency_no_prescaling, ... O se generalizan esas
     //       funciones metiendolas en cfg::timer0 o no mejor hacerlo todo
     //       concreto.
     //
@@ -102,7 +102,7 @@ public:
     enum class Frequency_divisor{
 		    no_clock_prescaling,    
 		    off = no_clock_prescaling,
-		    no_preescaling,
+		    no_prescaling,
 		    divide_by_8,
 		    divide_by_64,
 		    divide_by_256,
@@ -114,7 +114,7 @@ public:
 
     // Selección del reloj y de su velocidad (según tabla 19-10)
     // Establecemos el divisor de frecuencia a aplicar al reloj del micro.
-    static void clock_frequency_no_preescaling();
+    static void clock_frequency_no_prescaling();
     static void clock_frequency_divide_by_8();
     static void clock_frequency_divide_by_64();
     static void clock_frequency_divide_by_256();
@@ -257,7 +257,7 @@ inline void Timer0::off()
 }
 
 
-inline void Timer0::clock_frequency_no_preescaling() 
+inline void Timer0::clock_frequency_no_prescaling() 
 {   // 001
     atd::write_bits<CS02, CS01, CS00>::to<0,0,1>::in(TCCR0B);
 }

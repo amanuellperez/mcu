@@ -49,7 +49,7 @@ void timer_on_1MHz(uint16_t period_in_us)
 	my_mcu::UART_iostream uart;
 
 	switch(period_in_us){
-	    case 1: Timer::clock_frequency_no_preescaling(); break;
+	    case 1: Timer::clock_frequency_no_prescaling(); break;
 	    case 8: Timer::clock_frequency_divide_by_8(); break;
 	    case 64: Timer::clock_frequency_divide_by_64(); break;
 	    case 256: Timer::clock_frequency_divide_by_256(); break;

@@ -74,7 +74,7 @@ public:
     // (RRR) ¿por qué definir explícitamente aquí los prescaler_factor?
     //       Los podía definir en cfg::timer0, pero la implementación de esta
     //       clase conoce los prescalers en las funciones
-    //       clock_frequency_no_preescaling, ... O se generalizan esas
+    //       clock_frequency_no_prescaling, ... O se generalizan esas
     //       funciones metiendolas en cfg::timer0 o no mejor hacerlo todo
     //       concreto.
     //
@@ -86,7 +86,7 @@ public:
     enum class Frequency_divisor{
 		    undefined,    
 		    timer_stopped,
-		    no_preescaling,
+		    no_prescaling,
 		    divide_by_8,
 		    divide_by_32,
 		    divide_by_64,
@@ -99,7 +99,7 @@ public:
 
     // Selección del reloj y de su velocidad (según tabla 19-10)
     // Establecemos el divisor de frecuencia a aplicar al reloj del micro.
-    static void clock_frequency_no_preescaling();
+    static void clock_frequency_no_prescaling();
     static void clock_frequency_divide_by_8();
     static void clock_frequency_divide_by_32();
     static void clock_frequency_divide_by_64();
@@ -239,7 +239,7 @@ inline Timer2::Frequency_divisor Timer2::frequency_divisor()
 	    return Frequency_divisor::timer_stopped;
 
 	case atd::zero<uint8_t>::with_bits<CS22, CS21, CS20>::to<0,0,1>():
-	    return Frequency_divisor::no_preescaling;
+	    return Frequency_divisor::no_prescaling;
 
 	case atd::zero<uint8_t>::with_bits<CS22, CS21, CS20>::to<0,1,0>():
 	    return Frequency_divisor::divide_by_8;
@@ -269,7 +269,7 @@ inline Timer2::Frequency_divisor Timer2::frequency_divisor()
 inline void Timer2::off()
 { atd::write_bits<CS22, CS21, CS20>::to<0,0,0>::in(TCCR2B); }
 
-inline void Timer2::clock_frequency_no_preescaling() 
+inline void Timer2::clock_frequency_no_prescaling() 
 { atd::write_bits<CS22, CS21, CS20>::to<0,0,1>::in(TCCR2B); }
 
 inline void Timer2::clock_frequency_divide_by_8()
@@ -301,7 +301,7 @@ inline constexpr void Timer2::clock_frequency(uint32_t prescaler_factor)
 	break; case 128 : clock_frequency_divide_by_128();
 	break; case 256 : clock_frequency_divide_by_256();
 	break; case 1024: clock_frequency_divide_by_1024();
-	break; default  : clock_frequency_no_preescaling();
+	break; default  : clock_frequency_no_prescaling();
     }
 }
 

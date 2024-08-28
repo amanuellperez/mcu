@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 Manuel Perez 
+// Copyright (C) 2019-2024 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -23,24 +23,64 @@
 #include "../../../avr_time.h"
 #include "../../../avr_interrupt.h"
 #include "../../../avr_micro.h"
+#include "../../../avr_debug.h"
 
 
 #include <atd_ostream.h>
 #include <stdlib.h>
 #include <std_type_traits.h>
 
-namespace my_mcu = avr_;
+#include <atd_test.h>
+using namespace test;
 
-using Timer = my_mcu::Timer1;
+// Microcontroller
+// ---------------
+namespace myu = avr_;
 
+// UART
+// ----
+constexpr uint32_t baud_rate = 9'600;
+
+
+// Devices
+// -------
+using Timer = myu::Timer1;
+
+// Global vbles
+// ------------
 constexpr uint16_t period_in_us = 1024;
 
+// Interrupt vbles
+// ---------------
 volatile uint32_t counter = 0;
 
-ISR_TIMER1_OVF
-{ counter = counter + 1; }
 
+// Functions
+// ---------
+void init_uart()
+{
+    myu::UART_iostream uart;
+    myu::basic_cfg<baud_rate>(uart);
+    uart.turn_on();
+}
  
+void init_timer_clock()
+{
+    Timer::normal_mode();
+    Timer::clock_frequency_divide_by_1024();
+    Timer::enable_overflow_interrupt();
+}
+
+
+void hello()
+{
+    myu::UART_iostream uart;
+    uart << "\n\nTimer1 counter test\n"
+	        "--------------------\n"
+		"Connections: none\n";
+}
+
+
 struct time_in_days{
     uint16_t us; // microseconds: [0, 999]
     uint16_t ms; // miliseconds : [0, 999]
@@ -87,31 +127,20 @@ std::ostream& operator<<(std::ostream& out, const time_in_days& t)
 
 void print(uint64_t time_en_us)
 {
-    my_mcu::UART_iostream uart;
+    myu::UART_iostream uart;
     uart << us_to_time_in_days(time_en_us) << "\n\r";
 }
 
-
-int main()
+void test_clock()
 {
-// init_uart();
-    my_mcu::UART_iostream uart;
-    my_mcu::basic_cfg(uart);
-    uart.turn_on();
+    init_timer_clock();
 
-// init_timer();
-    Timer::normal_mode();
-    Timer::pin_A_disconnected(); // (???) creo que es innecesario 
-    Timer::pin_B_disconnected();
-    Timer::clock_frequency_divide_by_1024();
-    Timer::enable_overflow_interrupt();
-    my_mcu::enable_interrupts();
-
-    while(1){
+    myu::UART_iostream uart;
+    while (1){
 	Timer::counter_type v;
 	uint32_t c;
 	{// lo más atómico posible
-	    my_mcu::Disable_interrupts l;
+	    myu::Disable_interrupts l;
 	    v = Timer::unsafe_counter();
 	    c = counter;
 	}
@@ -121,9 +150,69 @@ int main()
              << period_in_us << " = " << t_us << " us = ";
 
         print (t_us);
-	my_mcu::wait_ms(1000);
+	myu::wait_ms(1000);
+    }
+}
+
+void test_flag_interrupt()
+{
+    myu::UART_iostream uart;
+
+    myu::disable_interrupts();
+
+    Timer::normal_mode();
+    Timer::unsafe_counter(0);	// es safe por haber llamado a disable_interrupts
+    Timer::enable_overflow_interrupt();
+
+    Test test{uart};
+    uart << '\n';
+
+    CHECK_TRUE(test, Timer::overflow_interrupt_is_set() == false, 
+					"Timer::overflow_interrupt_is_set");
+
+    Timer::clock_frequency_no_prescaling(); // turn on
+    
+    while (!Timer::overflow_interrupt_is_set()) ;
+
+    uart << "\nOVERFLOW INTERRUPT SET!\n";
+
+    // comprobemos que no ha cambiado
+    CHECK_TRUE(test, Timer::overflow_interrupt_is_set() == true, 
+					"Timer::overflow_interrupt_is_set");
+
+    Timer::clear_overflow_interrupt();
+    CHECK_TRUE(test, Timer::overflow_interrupt_is_set() == false, 
+					"Timer::clear_overflow_interrupt");
+
+    Timer::off();
+}
+
+int main()
+{
+    init_uart();
+    myu::enable_interrupts();
+
+    hello();
+    myu::UART_iostream uart;
+
+    while(1){
+	uart << "\n\nMenu\n"
+	            "----\n"
+		    "1. Clock\n"
+		    "2. Test flag interrupt\n";
+	char opt{};
+	uart >> opt;
+
+	switch(opt){
+	    break; case '2': test_flag_interrupt();
+	    break; default: test_clock();
+	}
     }
 }
 
 
+// ISRs
+// ----
+ISR_TIMER1_OVF
+{ counter = counter + 1; }
 
