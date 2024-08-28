@@ -17,7 +17,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "../../mcu_PWM.h"
 #include <avr_atmega.h>
 
 //#include <atd_test.h>
@@ -27,6 +26,8 @@
 // ---------------
 namespace myu = atmega;
 using Micro   = myu::Micro;
+
+#include "../../../mcu_PWM.h"
 
 // UART
 // ----
@@ -39,13 +40,19 @@ constexpr uint32_t baud_rate = 9'600;
 // -----
 struct Pulse_wave_cfg {
     using PWM_pin = myu::PWM1_pin<15>;
-    //static constexpr uint32_t frequency_in_hz = 800'000; // F_CPU = 8MHz
+    using Micro   = myu::Micro;
+
+    // Para 100 Hz funciona bien, pero a F_CPU = 1MHz no se puede generar
+    // 800kHz.
+    // ¿Funcionará a 20MHz? Con 20 MHz son 25 ticks de reloj la frecuencia de
+    // 800kHz. Muy justo... :?
+    //static constexpr uint32_t frequency_in_hz = 800'000; // F_CPU = ???
     static constexpr uint32_t frequency_in_hz = 100;
     static constexpr uint8_t duty_cycle_bit0 = 30;
     static constexpr uint8_t duty_cycle_bit1 = 60;
 };
 
-using PW_pin = mcu::Pulse_wave_01_pin<Pulse_wave_cfg>;
+using PW_pin = mcu::Pulse_wave_01_pin_polling<Pulse_wave_cfg>;
 
 
 // Functions
@@ -80,7 +87,6 @@ void print_cfg(std::ostream& out)
 int main()
 {
     init_uart();
-    Micro::enable_interrupts();
 
     hello();
 
@@ -94,28 +100,16 @@ int main()
     print_cfg(uart);
 
     while(1){
-	uart << "\n\n(Examples: send 0, 16 bits; send 65.535, 16 bits)\n";
-	uart << "\nWrite uint16_t to send: ";
+	uart << "\n\nWrite uint8_t to send: ";
 	uint16_t x{};
 	uart >> x;
 
-	uart << "Number of bit to send: ";
-	uint16_t n16{};
-	uart >> n16;
-
-	uint8_t n = static_cast<uint8_t>(n16);
-
-	PW_pin::send(x, n);
+	uint8_t data[1] = {(uint8_t) x};
+	PW_pin::send(data, 1);
     }
 
 }
 
 
 
-
-// Interrupts
-// ----------
-ISR_TIMER1_COMPA{
-    PW_pin::handle_interrupt();
-}
 
