@@ -857,6 +857,53 @@ CHECK_TRUE(atd::reverse_bits(uint16_t{0xCCCC}) == 0x3333u, "reverse_bits(0xCCCC)
 
 }
 
+void test_Bit()
+{
+    test::interface("bit (dynamic version)");
+
+    {
+    uint8_t x = 0xF0;
+    CHECK_TRUE(atd::bit(0).of(x) == 0, "bit(0).of");
+    CHECK_TRUE(atd::bit(1).of(x) == 0, "bit(1).of");
+    CHECK_TRUE(atd::bit(2).of(x) == 0, "bit(2).of");
+    CHECK_TRUE(atd::bit(3).of(x) == 0, "bit(3).of");
+    CHECK_TRUE(atd::bit(4).of(x) == 1, "bit(4).of");
+    CHECK_TRUE(atd::bit(5).of(x) == 1, "bit(5).of");
+    CHECK_TRUE(atd::bit(6).of(x) == 1, "bit(6).of");
+    CHECK_TRUE(atd::bit(7).of(x) == 1, "bit(7).of");
+
+    atd::bit(0).of(x) = 1;
+    CHECK_TRUE(atd::bit(0).of(x) == 1, "bit(0).of");
+    
+    // DONT_COMPILE(const uint8_t y = 0; atd::bit(0).of(y) = 1;)
+
+    }
+
+    {
+    uint16_t x = 0xF0F0;
+    CHECK_TRUE(atd::bit(0).of(x) == 0, "bit(0).of");
+    CHECK_TRUE(atd::bit(1).of(x) == 0, "bit(1).of");
+    CHECK_TRUE(atd::bit(2).of(x) == 0, "bit(2).of");
+    CHECK_TRUE(atd::bit(3).of(x) == 0, "bit(3).of");
+
+    CHECK_TRUE(atd::bit(4).of(x) == 1, "bit(4).of");
+    CHECK_TRUE(atd::bit(5).of(x) == 1, "bit(5).of");
+    CHECK_TRUE(atd::bit(6).of(x) == 1, "bit(6).of");
+    CHECK_TRUE(atd::bit(7).of(x) == 1, "bit(7).of");
+
+    CHECK_TRUE(atd::bit(8).of(x) == 0, "bit(8).of");
+    CHECK_TRUE(atd::bit(9).of(x) == 0, "bit(9).of");
+    CHECK_TRUE(atd::bit(10).of(x) == 0, "bit(10).of");
+    CHECK_TRUE(atd::bit(11).of(x) == 0, "bit(11).of");
+
+    CHECK_TRUE(atd::bit(12).of(x) == 1, "bit(12).of");
+    CHECK_TRUE(atd::bit(13).of(x) == 1, "bit(13).of");
+    CHECK_TRUE(atd::bit(14).of(x) == 1, "bit(14).of");
+    CHECK_TRUE(atd::bit(15).of(x) == 1, "bit(15).of");
+    }
+
+}
+
 int main()
 {
 try{
@@ -876,6 +923,7 @@ try{
     test_byte();
     test_nibble();
     test_reverse_bits();
+    test_Bit();
 
 }catch(std::exception& e)
 {

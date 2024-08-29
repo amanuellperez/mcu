@@ -63,6 +63,7 @@
  *  25/02/23: is_one_most_significant_bit_of
  *  28/02/23: nibble<n>(); byte<n>();
  *  21/08/23: reverse_bits
+ *  29/08/24: bit  (versión dinámica)
  *
  ****************************************************************************/
 #include <stdint.h> // uint8_t
@@ -70,7 +71,8 @@
 #include <type_traits>
 #include "atd_static.h"	// static_array
 #include "atd_type_traits.h"	// sizeof_in_bytes
-				
+#include "atd_concepts.h"
+
 // avr define bit
 #undef bit
 
@@ -555,14 +557,53 @@ template <typename Int>
 inline void write_one(Int& x, uint8_t pos)
 { x = x | (Int{1} << pos); }
 
-// Ejemplo (para ver como hacer un for en metaprogramming)
-//template<int... pos, typename Int>
-//inline constexpr void write_one_bit(Int& i)
-//{
-//    using expand = int[];
-//    expand{0,
-//	    ((i |= (Int{1} << pos)), 0)...};
-//}
+
+// Bit
+// ---
+namespace impl_{
+template <typename T>
+struct Bit_handler{
+    constexpr Bit_handler(T& x0, uint8_t pos0)
+	    : x{x0}, pos{pos0} { }
+
+
+    // DUDA: qué devolver? Bit_handler&? Si en el futuro
+    // no es necesario cambiarlo borrar este comentario
+    template <Type::Integer Int>
+    constexpr 
+    void operator=(const Int& n)
+	requires (!std::is_const_v<T>) 
+    {
+	if (n != 0)
+	    write_one(x, pos);
+	else
+	    write_zero(x, pos);
+    }
+
+    // En esta clase voy a imponer la restricción de que un bit
+    // solo puede valer 0 ó 1 
+    constexpr operator uint8_t() const
+    { return (x & (T{1} << pos))? 1: 0; }
+
+// data
+    T& x;
+    uint8_t pos;
+};
+
+ 
+struct Bit{
+    constexpr Bit(uint8_t pos0) : pos{pos0} { }
+
+    template <typename T>
+    constexpr Bit_handler<T> of(T& x)
+    { return Bit_handler<T>{x, pos};}
+
+    const uint8_t pos;
+};
+
+}// impl_
+
+inline impl_::Bit bit (uint8_t pos) { return impl_::Bit{pos}; }
 
 
 // is_one_most_significant_bit_of
