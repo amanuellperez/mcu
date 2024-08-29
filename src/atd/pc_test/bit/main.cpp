@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 Manuel Perez 
+// Copyright (C) 2019-2024 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -21,7 +21,6 @@
 #include <alp_test.h>
 #include <alp_string.h>
 #include <iostream>
-#include <vector>
 
 #include <cstddef>
 #include "../../atd_bit.h"
@@ -875,6 +874,12 @@ void test_Bit()
     atd::bit(0).of(x) = 1;
     CHECK_TRUE(atd::bit(0).of(x) == 1, "bit(0).of");
     
+    atd::Bit b = atd::bit(0).of(x);
+    CHECK_TRUE(b == 1, "Bit");
+    b = 0;
+    CHECK_TRUE(b == 0, "Bit");
+    CHECK_TRUE(atd::bit(0).of(x) == 0, "bit(0).of");
+
     // DONT_COMPILE(const uint8_t y = 0; atd::bit(0).of(y) = 1;)
 
     }

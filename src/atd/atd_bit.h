@@ -560,14 +560,13 @@ inline void write_one(Int& x, uint8_t pos)
 
 // Bit
 // ---
-namespace impl_{
 template <typename T>
-struct Bit_handler{
-    constexpr Bit_handler(T& x0, uint8_t pos0)
+struct Bit{
+    constexpr Bit(T& x0, uint8_t pos0)
 	    : x{x0}, pos{pos0} { }
 
 
-    // DUDA: qué devolver? Bit_handler&? Si en el futuro
+    // DUDA: qué devolver? Bit&? Si en el futuro
     // no es necesario cambiarlo borrar este comentario
     template <Type::Integer Int>
     constexpr 
@@ -591,19 +590,28 @@ struct Bit_handler{
 };
 
  
-struct Bit{
-    constexpr Bit(uint8_t pos0) : pos{pos0} { }
+namespace impl_{
+struct Bit_of{
+    constexpr Bit_of(uint8_t pos0) : pos{pos0} { }
 
     template <typename T>
-    constexpr Bit_handler<T> of(T& x)
-    { return Bit_handler<T>{x, pos};}
+    constexpr Bit<T> of(T& x)
+    { return Bit<T>{x, pos};}
 
     const uint8_t pos;
 };
 
 }// impl_
 
-inline impl_::Bit bit (uint8_t pos) { return impl_::Bit{pos}; }
+
+// Esta función no está pensada para llamarse sola, sino que hay que usar el
+// idioma:
+//	Bit b = bit(3).of(x);
+//  Observar que la que devuelve `Bit` es la función  `of` no `bit`.
+//  Que esta función devuelva impl_::Bit_of, el impl_ esta diciendo "NO ME
+//  USES BAJO NINGÚN CONCEPTO". El usuario no puede usar clases de
+//  implementación.
+inline impl_::Bit_of bit(uint8_t pos) { return impl_::Bit_of{pos}; }
 
 
 // is_one_most_significant_bit_of
