@@ -644,11 +644,11 @@ SDD1306_I2C_driver<C, nc, nr>::PageCol SDD1306_I2C_driver<C, nc, nr>::
 {
     using Rect = PageCol_rectangle;
 
-    static_assert(Font::by_columns == true);
+    static_assert(requires {Font::is_by_columns;});
 
     uint8_t tmp[Font::char_byte_size()];
 
-    auto letter = Font::glyph.row(c - Font::index0);
+    auto letter = Font::glyph.row(Font::index(c));
     std::copy(letter.begin(), letter.end(), &tmp[0]);
     
     uint8_t col1 = pos.col + Font::cols - 1;

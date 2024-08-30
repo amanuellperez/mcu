@@ -4,10 +4,12 @@ DIRS = 	algorithm	\
 		bounded		\
 	   	bcd			\
 		bit			\
+		bit_matrix	\
 		cast		\
 		char		\
 		cmath		\
 		concepts	\
+		coordinates \
 		crc			\
 		cstddef		\
 		cstring		\

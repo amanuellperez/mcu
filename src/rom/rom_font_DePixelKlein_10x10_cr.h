@@ -34,14 +34,15 @@ namespace font_DePixelKlein_10x10_cr{
 using ROM_read = MCU::ROM_read;
 
 struct Font{
-// Los caracteres son para ser escritos por columnas o por filas?
-static constexpr bool by_columns = true;
+// Traits requirements
+static constexpr bool is_by_columns{};
+static constexpr bool is_ASCII_font{};
 
 // Número de caracteres
 static constexpr uint8_t nchars = 94;
 
 // Los códigos ASCII empiezan en 32
-static constexpr uint8_t index0 = 32;
+static constexpr uint8_t index(char c) {return c - 32;}
 
 // Dimensions
 static constexpr uint8_t rows = 10; // número de filas que tiene cada font

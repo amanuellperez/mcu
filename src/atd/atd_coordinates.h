@@ -54,7 +54,7 @@
  *
  * HISTORIA
  *    Manuel Perez
- *    21/08/2024 Escrito
+ *    21/08/2024 PageCol
  *
  ****************************************************************************/
 #include <ostream>
@@ -72,9 +72,50 @@ struct PageCol{
 
     constexpr
     PageCol(const Int& page0, const Int& col0) : page{page0}, col{col0} { }
+
+    constexpr PageCol& operator+=(const PageCol& x);
+    constexpr PageCol& operator-=(const PageCol& x);
 };
 
 
+// operadores aritmeticos
+// ----------------------
+template <Type::Numeric Int>
+constexpr PageCol<Int>& PageCol<Int>::operator+=(const PageCol& x)
+{
+    page += x.page;
+    col  += x.col;
+
+    return *this;
+}
+
+template <Type::Numeric Int>
+constexpr PageCol<Int>& PageCol<Int>::operator-=(const PageCol& x)
+{
+    page -= x.page;
+    col  -= x.col;
+
+    return *this;
+}
+
+template <Type::Numeric Int>
+inline constexpr PageCol<Int> 
+    operator+(PageCol<Int> x, const PageCol<Int>& y)
+{
+    x += y;
+    return x;
+}
+
+template <Type::Numeric Int>
+inline constexpr PageCol<Int> 
+    operator-(PageCol<Int> x, const PageCol<Int>& y)
+{
+    x -= y;
+    return x;
+}
+
+// flujo de salida
+// ---------------
 template <Type::Numeric Int>
 std::ostream& operator<<(std::ostream& out, const PageCol<Int>& p)
 { return out << '(' << p.page << ", " << p.col << ')'; }

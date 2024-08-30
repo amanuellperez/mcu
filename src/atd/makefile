@@ -11,6 +11,7 @@ INCS= atd_algorithm.h	\
 	atd_ascii.h			\
 	atd_bcd.h			\
 	atd_bit.h 			\
+	atd_bit_matrix.h 	\
 	atd_bounded.h		\
 	atd_cast.h			\
 	atd_char.h			\
@@ -22,6 +23,7 @@ INCS= atd_algorithm.h	\
 	atd_cstring.h		\
 	atd_decimal.h		\
 	atd_double.h		\
+	atd_draw.h			\
 	atd_float.h			\
 	atd_geometry_2d.h	\
 	atd_iobxtream.h		\
