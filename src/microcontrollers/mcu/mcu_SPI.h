@@ -28,10 +28,12 @@
  *
  * HISTORIA
  *    Manuel Perez
- *    22/08/2024 SPI concept
+ *    22/08/2024 SPI pin selector
+ *    31/08/2024 SPI_selector_with_deselect_delay
  *
  ****************************************************************************/
 #include <cstdint>
+#include <atd_static.h>
 
 namespace mcu {
 
@@ -40,10 +42,11 @@ namespace mcu {
 //
 // Por defecto el pin es no_CS, esto es, para seleccionarlo escribimos 0, y
 // para deseleccionarla un 1.
-template <typename Micro, uint8_t npin>
+template <typename Micro0, uint8_t npin>
 class SPI_pin_selector{
 public:
-    using Pin = typename Micro::Pin<npin>;
+    using Micro = Micro0;
+    using Pin   = typename Micro::Pin<npin>;
 
     // Fundamental dejar deseleccionado el spi device.
     static void init() 
@@ -53,13 +56,10 @@ public:
     }
 
     static void select()
-    { 
-	Pin::write_zero(); }
+    { Pin::write_zero(); }
 
     static void deselect()
-    { 
-	Pin::write_one(); 
-    }
+    { Pin::write_one(); }
 
     SPI_pin_selector() 
     { select(); }
@@ -67,7 +67,171 @@ public:
     ~SPI_pin_selector() 
     { deselect(); }
 
+};
+
+
+template <typename Micro0, uint8_t... npins>
+class SPI_pin_array_selector{
+public:
+// Types
+    using Micro = Micro0;
+    using npin  = atd::static_array<uint8_t, npins...>;
+
+    static_assert(npin::size <= 4, "To use more than 4 pin, modify select/deselect");
+    template <uint8_t pin>
+    using Pin   = typename Micro::Pin<pin>;
+
+    // CUIDADO: i va de [0..npin::size) 
+    // Quiero que el usuario desconozca los pines reales a los que se
+    // ha conectado el dispositivo. Por eso la numeración es 0, 1, 2,...
+    template <uint8_t i> 
+    using SPI_pin_selector = 
+			mcu::SPI_pin_selector<Micro, npin::template at<i>>;
+
+// Functors
+    template <uint8_t i>
+    struct Functor{
+	static void init(){
+	    Pin<i>::as_output();
+	    Pin<i>::write_one(); // deselect<i>();
+	}
+    };
+
+    // Init se limita a convertir Init_functor<i>::init() en functor
+    template <uint8_t i>
+    using Init = atd::Function_as_functor_template<i, Functor<i>::init>;
+
+
+// Constructors
+    SPI_pin_array_selector() = delete;
+
+    // Fundamental dejar deseleccionado el spi device.
+    static void init() 
+    { atd::for_each<npin, Init>(); } 
+
+
+// static interface
+    template <uint8_t i>
+    static void select()   { SPI_pin_selector<i>::select(); }
+
+    template <uint8_t i>
+    static void deselect()   { SPI_pin_selector<i>::deselect(); }
+
+
+// dynamic interface
+// DUDA: ¿Cómo iterar en tiempo de ejecución sobre un static array?
+//	 De momento no tengo claro la forma más eficiente de hacerlo.
+//	 Implemento la más sencilla.
+    SPI_pin_array_selector(uint8_t i) : npin_selected_{i}
+    { select(); }
+
+    ~SPI_pin_array_selector() 
+    { deselect(); }
+
+
 private:
+// Data
+// (RRR) Quiero un interfaz dinámico, que se pueda seleccionar la conexión que
+//       se quiera:
+//	    SPI_array spi{3}; // selecciona la 3
+//	 Pero además, quiero mantener que Pin<3> sea static.
+//	 Estas dos constraints me llevan a implementarlo de esta forma (a
+//	 falta de una mejor).
+//	    
+    uint8_t npin_selected_;
+
+    // TODO: ¿cómo se puede implementar esto mas corto? (es sencillo, pero
+    // largo, y no es genérico, no vale para cualquier npin::size)
+    void select()
+    {
+	if constexpr (npin::size == 1){
+	    SPI_pin_selector<0>::select();
+	}
+	else if constexpr (npin::size == 2){
+	    switch (npin_selected_){
+		break; case 0: SPI_pin_selector<0>::select();
+		break; case 1: SPI_pin_selector<1>::select();
+	    }
+	}
+	else if constexpr (npin::size == 3){
+	    switch (npin_selected_){
+		break; case 0: SPI_pin_selector<0>::select();
+		break; case 1: SPI_pin_selector<1>::select();
+		break; case 2: SPI_pin_selector<2>::select();
+	    }
+	}
+	else if constexpr (npin::size == 4){
+	    switch (npin_selected_){
+		break; case 0: SPI_pin_selector<0>::select();
+		break; case 1: SPI_pin_selector<1>::select();
+		break; case 2: SPI_pin_selector<2>::select();
+		break; case 3: SPI_pin_selector<3>::select();
+	    }
+	}
+    }
+
+    void deselect()
+    {
+	if constexpr (npin::size == 1){
+	    SPI_pin_selector<0>::deselect();
+	}
+	else if constexpr (npin::size == 2){
+	    switch (npin_selected_){
+		break; case 0: SPI_pin_selector<0>::deselect();
+		break; case 1: SPI_pin_selector<1>::deselect();
+	    }
+	}
+	else if constexpr (npin::size == 3){
+	    switch (npin_selected_){
+		break; case 0: SPI_pin_selector<0>::deselect();
+		break; case 1: SPI_pin_selector<1>::deselect();
+		break; case 2: SPI_pin_selector<2>::deselect();
+	    }
+	}
+	else if constexpr (npin::size == 4){
+	    switch (npin_selected_){
+		break; case 0: SPI_pin_selector<0>::deselect();
+		break; case 1: SPI_pin_selector<1>::deselect();
+		break; case 2: SPI_pin_selector<2>::deselect();
+		break; case 3: SPI_pin_selector<3>::deselect();
+	    }
+	}
+    }
+};
+
+
+// time_in_us = tiempo mínimo que necesita el chip select estar en HIGH para
+// que se haga el LOAD de los bytes enviados
+// Es un wrapper sobre SPI_selector que le añade un tiempo de espera despues
+// de cada deselect para garantizar que se carga correctamente todo.
+template <typename SPI_selector, uint8_t deselect_delay_in_us>
+class SPI_selector_with_deselect_delay {
+public:
+    using Micro = typename SPI_selector::Micro;
+
+    // Fundamental dejar deseleccionado el spi device.
+    static void init() 
+    { SPI_selector::init(); }
+
+    static void select()
+	requires requires {SPI_selector::select();}
+    { SPI_selector::select(); }
+
+    static void deselect()
+	requires requires {SPI_selector::deselect();}
+    { 
+	SPI_selector::deselect(); 
+	Micro::wait_us(deselect_delay_in_us);// <- esta es la diferencia con SPI_selector
+    }
+
+    SPI_selector_with_deselect_delay()
+	requires requires {SPI_selector::select();}
+    { select(); }
+
+    ~SPI_selector_with_deselect_delay()
+	requires requires {SPI_selector::deselect();}
+    { deselect(); }
+
 };
 
 
