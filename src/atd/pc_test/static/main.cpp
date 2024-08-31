@@ -1,4 +1,4 @@
-// Copyright (C) 2021 Manuel Perez 
+// Copyright (C) 2021-2024 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -40,6 +40,14 @@ bool operator==(const Opt& a, const Opt& b)
     return a.id == b.id and a.next == b.next;
 }
 
+template <int i>
+struct A{
+    static void init() {std::cout << "A " << i << '\n';}
+};
+
+// Convertimos la función init en un functor para for_each
+template <int i>
+using Functor_A = atd::Function_as_functor_template<i, A<i>::init>;
 
 void test_static_array()
 {
@@ -99,6 +107,15 @@ void test_static_array()
 
 	int n5 = std::count(Array::begin(), Array::end(), 5);
 	CHECK_TRUE(n5 == 0, "count");
+    }
+
+// for each test
+// -------------
+    {
+    std::cout << ">>> for_each: NO SON AUTOMÁTICAS!!!\n";
+    using Array = atd::static_array<int, 10, 20, 30>;
+    atd::for_each<Array, Functor_A>();
+    std::cout << "<<< for_each\n";
     }
 }
 

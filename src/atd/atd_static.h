@@ -1,4 +1,4 @@
-// Copyright (C) 2021 Manuel Perez 
+// Copyright (C) 2021-2024 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -32,6 +32,8 @@
  *		 static_variadic_element
  *		 static_array_push_back/front
  *		 static_extract_subset
+ *    31/08/2024 for_each<static_array>
+ *    
  *
  ****************************************************************************/
 
@@ -76,6 +78,10 @@ struct static_array{
     using iterator	    = const T*;
     using const_iterator    = const T*;
 
+// Traits
+    static constexpr bool is_static_array = true; // para requires
+
+// Random access
     /// Devuelve el elemento i del array.
     template <size_type i>
     static constexpr T at = static_variadic_element<i, T, args...>;
@@ -83,6 +89,7 @@ struct static_array{
     static constexpr size_type size = sizeof...(args);
     static constexpr T data[size] = {args...};
 
+// Iterators
     static constexpr const_iterator begin() {return &data[size_type(0)];}
     static constexpr const_iterator end() {return &data[size];}
 
@@ -183,6 +190,40 @@ template <typename Function, typename Static_array>
 using static_extract_subset = 
     typename _static_extract_subset<Function, Static_array>::type;
 
+
+
+
+
+// for_each
+// --------
+template <typename A, template<int j> typename F, int i = 0>
+    requires (i == A::size) and
+    requires {A::is_static_array;}
+void for_each()
+{ }
+
+
+template <typename A, template<int j> typename F, int i = 0>
+    requires (i < A::size) and
+    requires {A::is_static_array;}
+void for_each()
+{ 
+    F<A::template at<i>>()();
+    for_each<A, F, i+1>();
+
+}
+
+// Convierte la función F, que será de la forma F<i>::f() en un functor
+// Ejemplo:
+//
+//	template <int i>
+//	using Functor_A = atd::Function_as_functor_template<i, A<i>::init>;
+//
+//	Functor_A<0>()(); // llamará a A<i>::init();
+template <int i, void (*F)()>
+struct Function_as_functor_template{
+    void operator()() {F();}
+};
 
 }// namespace
 
