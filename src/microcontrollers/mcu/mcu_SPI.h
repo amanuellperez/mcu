@@ -28,8 +28,9 @@
  *
  * HISTORIA
  *    Manuel Perez
- *    22/08/2024 SPI pin selector
+ *    22/08/2024 SPI_pin_selector
  *    31/08/2024 SPI_selector_with_deselect_delay
+ *	         SPI_pin_array_selector
  *
  ****************************************************************************/
 #include <cstdint>
@@ -69,7 +70,9 @@ public:
 
 };
 
-
+/***************************************************************************
+ *			  SPI_PIN_ARRAY_SELECTOR
+ ***************************************************************************/
 template <typename Micro0, uint8_t... npins>
 class SPI_pin_array_selector{
 public:
@@ -117,16 +120,19 @@ public:
     template <uint8_t i>
     static void deselect()   { SPI_pin_selector<i>::deselect(); }
 
-
 // dynamic interface
-// DUDA: ¿Cómo iterar en tiempo de ejecución sobre un static array?
-//	 De momento no tengo claro la forma más eficiente de hacerlo.
-//	 Implemento la más sencilla.
+    static void select(uint8_t i)
+    { spi_select(i); }
+
+    static void deselect(uint8_t i)
+    { spi_deselect(i); }
+
+// Constructor/destructor inteface
     SPI_pin_array_selector(uint8_t i) : npin_selected_{i}
-    { select(); }
+    { spi_select(npin_selected_); }
 
     ~SPI_pin_array_selector() 
-    { deselect(); }
+    { spi_deselect(npin_selected_); }
 
 
 private:
@@ -138,30 +144,30 @@ private:
 //	 Estas dos constraints me llevan a implementarlo de esta forma (a
 //	 falta de una mejor).
 //	    
-    uint8_t npin_selected_;
+    uint8_t npin_selected_; // Lo necesita el destructor
 
     // TODO: ¿cómo se puede implementar esto mas corto? (es sencillo, pero
     // largo, y no es genérico, no vale para cualquier npin::size)
-    void select()
+    static void spi_select(uint8_t n)
     {
 	if constexpr (npin::size == 1){
 	    SPI_pin_selector<0>::select();
 	}
 	else if constexpr (npin::size == 2){
-	    switch (npin_selected_){
+	    switch (n){
 		break; case 0: SPI_pin_selector<0>::select();
 		break; case 1: SPI_pin_selector<1>::select();
 	    }
 	}
 	else if constexpr (npin::size == 3){
-	    switch (npin_selected_){
+	    switch (n){
 		break; case 0: SPI_pin_selector<0>::select();
 		break; case 1: SPI_pin_selector<1>::select();
 		break; case 2: SPI_pin_selector<2>::select();
 	    }
 	}
 	else if constexpr (npin::size == 4){
-	    switch (npin_selected_){
+	    switch (n){
 		break; case 0: SPI_pin_selector<0>::select();
 		break; case 1: SPI_pin_selector<1>::select();
 		break; case 2: SPI_pin_selector<2>::select();
@@ -170,26 +176,26 @@ private:
 	}
     }
 
-    void deselect()
+    static void spi_deselect(uint8_t n)
     {
 	if constexpr (npin::size == 1){
 	    SPI_pin_selector<0>::deselect();
 	}
 	else if constexpr (npin::size == 2){
-	    switch (npin_selected_){
+	    switch (n){
 		break; case 0: SPI_pin_selector<0>::deselect();
 		break; case 1: SPI_pin_selector<1>::deselect();
 	    }
 	}
 	else if constexpr (npin::size == 3){
-	    switch (npin_selected_){
+	    switch (n){
 		break; case 0: SPI_pin_selector<0>::deselect();
 		break; case 1: SPI_pin_selector<1>::deselect();
 		break; case 2: SPI_pin_selector<2>::deselect();
 	    }
 	}
 	else if constexpr (npin::size == 4){
-	    switch (npin_selected_){
+	    switch (n){
 		break; case 0: SPI_pin_selector<0>::deselect();
 		break; case 1: SPI_pin_selector<1>::deselect();
 		break; case 2: SPI_pin_selector<2>::deselect();
@@ -200,22 +206,29 @@ private:
 };
 
 
+/***************************************************************************
+ *			SPI_SELECTOR_WITH_DESELECT_DELAY
+ ***************************************************************************/
 // time_in_us = tiempo mínimo que necesita el chip select estar en HIGH para
 // que se haga el LOAD de los bytes enviados
 // Es un wrapper sobre SPI_selector que le añade un tiempo de espera despues
 // de cada deselect para garantizar que se carga correctamente todo.
-template <typename SPI_selector, uint8_t deselect_delay_in_us>
-class SPI_selector_with_deselect_delay {
+template <typename SPI_selector, uint32_t deselect_delay_in_us>
+class SPI_selector_with_deselect_delay : public SPI_selector {
 public:
+// Types
     using Micro = typename SPI_selector::Micro;
 
+// static interface
     // Fundamental dejar deseleccionado el spi device.
     static void init() 
     { SPI_selector::init(); }
 
+// static interface para SPI_pin_selector
     static void select()
 	requires requires {SPI_selector::select();}
     { SPI_selector::select(); }
+
 
     static void deselect()
 	requires requires {SPI_selector::deselect();}
@@ -224,13 +237,33 @@ public:
 	Micro::wait_us(deselect_delay_in_us);// <- esta es la diferencia con SPI_selector
     }
 
-    SPI_selector_with_deselect_delay()
-	requires requires {SPI_selector::select();}
-    { select(); }
+// static interface para SPI_pin_array_selector
+    static void select(uint8_t i)
+	requires requires(uint8_t j) {SPI_selector::select(j);}
+    { SPI_selector::select(i); }
 
-    ~SPI_selector_with_deselect_delay()
-	requires requires {SPI_selector::deselect();}
-    { deselect(); }
+    static void deselect(uint8_t i)
+	requires requires(uint8_t j) {SPI_selector::deselect(j);}
+    { 
+	SPI_selector::deselect(i); 
+	Micro::wait_us(deselect_delay_in_us);// <- esta es la diferencia con SPI_selector
+    }
+
+// dynamic interface
+    SPI_selector_with_deselect_delay()
+	requires requires {SPI_selector{};}
+	: SPI_selector{}
+    {}
+
+    SPI_selector_with_deselect_delay(uint8_t i)
+	requires requires(uint8_t j) {SPI_selector{j};}
+	: SPI_selector{i}
+    {}
+
+    ~SPI_selector_with_deselect_delay() 
+    {
+	Micro::wait_us(deselect_delay_in_us);// <- esta es la diferencia con SPI_selector
+    }
 
 };
 
