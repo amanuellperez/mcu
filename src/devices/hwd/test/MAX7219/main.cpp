@@ -18,7 +18,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-#include "../../dev_MAX7219.h"
 #include <avr_atmega.h>
 #include <mcu_SPI.h>
 #include <atd_test.h>
@@ -28,6 +27,7 @@ using namespace test;
 // ---------------
 namespace myu = atmega;
 using Micro   = myu::Micro;
+#include "../../dev_MAX7219.h"
 
 // UART
 // ----
@@ -35,11 +35,16 @@ constexpr uint32_t baud_rate = 9'600;
 
 // Pin connections
 // ---------------
+static constexpr uint8_t noCS = 16;
+static constexpr uint8_t page0 = noCS;
+static constexpr uint8_t page1 = 15;
+static constexpr uint8_t matrix_npages = 2;
 
 // SPI protocol
 // ------------
 using SPI = myu::SPI_master;
 constexpr uint32_t spi_frequency_in_hz = 500'000; // máx. 10MHz
+static_assert (noCS == myu::SPI_master::noCS_pin_number);
 
 
 // Devices
@@ -49,8 +54,15 @@ struct MAX7219_cfg{
     using SPI_selector	= mcu::SPI_pin_selector<Micro, myu::SPI_master::noCS_pin_number>;
 };
 
-using MAX7219 = dev::MAX7219_basic<MAX7219_cfg>;
-using MAX7219_array = dev::MAX7219_array<MAX7219_cfg, 4>;
+struct MAX7219_cfg_matrix{
+    using SPI_master	= myu::SPI_master;
+    using SPI_selector	= 
+	mcu::SPI_pin_array_selector<Micro, page0, page1>;
+};
+
+using MAX7219        = dev::MAX7219_basic<MAX7219_cfg>;
+using MAX7219_array  = dev::MAX7219_array<MAX7219_cfg, 4>;
+using MAX7219_matrix = dev::MAX7219_matrix<MAX7219_cfg_matrix, 2, 4>;
 
 // Functions
 // ---------
@@ -85,13 +97,28 @@ void init_max7219_array()
     MAX7219_array::turn_on();
 }
 
+void init_max7219_matrix()
+{
+    myu::UART_iostream uart;
+    Test test{uart};
+    CHECK_TRUE(test, MAX7219_matrix::npages() == matrix_npages, 
+						    "MAX7219_matrix::npages()");
+    CHECK_TRUE(test, MAX7219_matrix::modules_per_page() == 4, 
+					"MAX7219_matrix::modules_per_page()");
+
+    MAX7219_matrix::init(); 
+    MAX7219_matrix::intensity(0x00);
+    MAX7219_matrix::turn_on();
+}
+
 void hello()
 {
     myu::UART_iostream uart;
     uart << "\n\nMAX7219 test\n"
 	        "------------\n"
 		"Connections:\n"
-		"\tConnect MAX7219 to SPI via CS pin"
+		"\tConnect MAX7219 to SPI via " << (int) noCS << " pin\n"
+		"\tConnecto other modules to pins " << (int) page1
 		<< "\n\n";
 }
 
@@ -105,12 +132,13 @@ void test_basic1()
 	MAX7219::digit(i, 0x00);
     }
 
-	for (uint8_t i = 0; i < 8; ++i){
-	    for (uint8_t j = 1; j <= 8; ++j) 
-		MAX7219::digit(j, 1 << i);
 
-	    Micro::wait_ms(1000);
-	}
+    for (uint8_t i = 0; i < 8; ++i){
+	for (uint8_t j = 1; j <= 8; ++j) 
+	    MAX7219::digit(j, 1 << i);
+
+	Micro::wait_ms(1000);
+    }
 }
 
 
@@ -125,7 +153,7 @@ void test_array()
 
     MAX7219_array::clear();
 
-    for (uint8_t i = 0; i < MAX7219_array::nrows(); ++i){
+    for (uint8_t i = 0; i < MAX7219_array::rows(); ++i){
 	MAX7219_array::row(i, x);
 	Micro::wait_ms(800);
 
@@ -137,6 +165,57 @@ void test_array()
 
 }
 
+void test_array2()
+{
+    myu::UART_iostream uart;
+    uart << "Testing array of " << (int) MAX7219_array::size() << " MAX7219\n";
+
+    init_max7219_array();
+
+    MAX7219_array::clear();
+
+    for (uint8_t i = 0; i < 8; ++i){
+	MAX7219_array::write(1, i, 0xFF);
+	Micro::wait_ms(500);
+	MAX7219_array::clear();
+    }
+
+    MAX7219_array::clear();
+
+
+}
+
+void test_matrix()
+{
+    myu::UART_iostream uart;
+    uart << "Testing array of " << (int) MAX7219_array::size() << " MAX7219\n";
+
+    init_max7219_matrix();
+
+//    MAX7219_matrix::clear();
+//    for (uint8_t i = 0; i < MAX7219_matrix::npages(); ++i){
+//	MAX7219_matrix::display_test_on(i);
+//	Micro::wait_ms(1000);
+//	MAX7219_matrix::display_test_off(i);
+//	Micro::wait_ms(1000);
+//    }
+
+    MAX7219_matrix::clear();
+
+    uint8_t x[] = {0x01, 0x02, 0x04, 0x08};
+    for (uint8_t i = 0; i < 8; ++i){
+	MAX7219_matrix::write(0, i, x);
+	Micro::wait_ms(500);
+    }
+
+    uint8_t y[] = {0x08, 0x04, 0x02, 0x01};
+    for (uint8_t i = 0; i < 8; ++i){
+	MAX7219_matrix::write(1, i, y);
+	Micro::wait_ms(500);
+    }
+
+
+}
 // Main
 // ----
 int main() 
@@ -150,7 +229,9 @@ int main()
     while (1) 
     {
 //	test_basic1();
-	test_array();
+//	test_array();
+//	test_array2();
+	test_matrix();
 
     }                                                 
 }
