@@ -55,6 +55,7 @@
  * HISTORIA
  *    Manuel Perez
  *    21/08/2024 PageCol
+ *    07/09/2024 Coord_ij
  *
  ****************************************************************************/
 #include <ostream>
@@ -62,8 +63,9 @@
 #include "atd_concepts.h"
 
 namespace atd{
-// PageCol
-// -------
+/***************************************************************************
+ *				PAGECOL
+ ***************************************************************************/
 // Descomponemos el plano en páginas horizontales
 template <Type::Numeric Int>
 struct PageCol{
@@ -136,6 +138,66 @@ struct PageCol_rectangle{
     constexpr uint16_t size() const 
     { return (p1.col - p0.col + 1) * (p1.page - p0.page + 1); }
 };
+
+
+/***************************************************************************
+ *				COORD_IJ
+ ***************************************************************************/
+// Coordenadas de matriz (i,j)
+template <Type::Numeric Int>
+struct Coord_ij{
+    Int i;	
+    Int j;	
+
+    constexpr
+    Coord_ij(const Int& i0, const Int& col0) : i{i0}, j{col0} { }
+
+    constexpr Coord_ij& operator+=(const Coord_ij& x);
+    constexpr Coord_ij& operator-=(const Coord_ij& x);
+};
+
+
+// operadores aritmeticos
+// ----------------------
+template <Type::Numeric Int>
+constexpr Coord_ij<Int>& Coord_ij<Int>::operator+=(const Coord_ij& x)
+{
+    i += x.i;
+    j  += x.j;
+
+    return *this;
+}
+
+template <Type::Numeric Int>
+constexpr Coord_ij<Int>& Coord_ij<Int>::operator-=(const Coord_ij& x)
+{
+    i -= x.i;
+    j  -= x.j;
+
+    return *this;
+}
+
+template <Type::Numeric Int>
+inline constexpr Coord_ij<Int> 
+    operator+(Coord_ij<Int> x, const Coord_ij<Int>& y)
+{
+    x += y;
+    return x;
+}
+
+template <Type::Numeric Int>
+inline constexpr Coord_ij<Int> 
+    operator-(Coord_ij<Int> x, const Coord_ij<Int>& y)
+{
+    x -= y;
+    return x;
+}
+
+// flujo de salida
+// ---------------
+template <Type::Numeric Int>
+std::ostream& operator<<(std::ostream& out, const Coord_ij<Int>& p)
+{ return out << '(' << p.i << ", " << p.j << ')'; }
 
 
 } // namespace atd

@@ -27,19 +27,30 @@
  *	Un posible uso de una matriz de bits es usarlo como lienzo donde
  *	dibujar imágenes monocromas que luego mostraremos en displays.
  *
+ *	El problema es que hay 4 formas diferentes de almacenar los uint8_t
+ *	que componen los bits de la matriz:
+ *
+ *	    Bitmatrix_row_1bit: filas de 1 bit , uint8_t por filas
+ *	    Bitmatrix_row_8bit: filas de 8 bits, uint8_t por filas
+ *	    Bitmatrix_col_1bit: columnas 1 bit , uint8_t por columnas
+ *	    Bitmatrix_col_8bit: columnas 8 bits, uint8_t por columnas
+ *
+ *	(ver pag 27, proleg I)
+ *
+ *
  * HISTORIA
  *    Manuel Perez
- *    29/08/2024 Bit_matrix_by_rows
+ *    29/08/2024 Bitmatrix_row_1bit
  *
  ****************************************************************************/
 #include "atd_cmath.h"	// div
 #include "atd_bit.h"
-#include "atd_coordinates.h"	// PageCol
+#include "atd_coordinates.h"	// Coord_ij
 
 namespace atd{
 
 /***************************************************************************
- *			    BIT_MATRIX_BY_ROWS
+ *			    BITMATRIX_ROW_1BIT
  ***************************************************************************/
 // El SDD1306 escribe bytes por columnas, mientras que el MAX7219 (tal como lo
 // venden conectado al display) está por filas. 
@@ -51,9 +62,9 @@ namespace atd{
 //
 // (???) En la práctica los displays con 4 MAX7219 que he comprado se pueden
 // colocar por columnas, permitiendo escribir las letras como en el SDD1306
-// siendo más práctico (para hacer scrolls). Mejor usar Bit_matrix_by_cols?
+// siendo más práctico (para hacer scrolls). Mejor usar Bitmatrix_col_1bit?
 template <size_t nrows, size_t ncols>
-class Bit_matrix_by_rows{
+class Bitmatrix_row_1bit{
 public:
 // Types
     using data_type  = uint8_t; // esto es para documentar
@@ -95,13 +106,13 @@ private:
     //	2) (J, p) = indicando el número de byte J en el que se encuentra y el
     //		    bit p dentro de ese byte
     //	La relación es: j = 8 * J + p
-    static constexpr std::pair<uint8_t, uint8_t> index(index_type j)
+    static constexpr std::pair<index_type, index_type> index(index_type j)
     { return div(j, index_type{8}); }
 };
 
 template <size_t nrows, size_t ncols>
 constexpr 
-auto Bit_matrix_by_rows<nrows, ncols>::
+auto Bitmatrix_row_1bit<nrows, ncols>::
 			operator()(index_type i, index_type j) -> Bit
 {
     auto [J, p] = index(j);
@@ -110,7 +121,7 @@ auto Bit_matrix_by_rows<nrows, ncols>::
 
 template <size_t nrows, size_t ncols>
 constexpr 
-auto Bit_matrix_by_rows<nrows, ncols>::
+auto Bitmatrix_row_1bit<nrows, ncols>::
 			operator()(index_type i, index_type j) const -> const_Bit
 {
     auto [J, p] = index(j);
@@ -118,7 +129,7 @@ auto Bit_matrix_by_rows<nrows, ncols>::
 }
 
 template <size_t nrows, size_t ncols>
-void Bit_matrix_by_rows<nrows, ncols>::fill(uint8_t b)
+void Bitmatrix_row_1bit<nrows, ncols>::fill(uint8_t b)
 {
     if (b != 0)
 	b = 0xFF; // esto supone que data_type == uint8_t
@@ -129,40 +140,50 @@ void Bit_matrix_by_rows<nrows, ncols>::fill(uint8_t b)
 }
 
 /***************************************************************************
- *			    BIT_MATRIX_BY_COLS
+ *			    BITMATRIX_COL_1BIT
  ***************************************************************************/
 // Matriz de nrows x ncols bits. 
 // Internamente se almacenan en bloques por columnas.
 // Lo podemos concebir como que descomponemos la matriz de bits en páginas
 // horizontales, cada página de 8 bits de alto. El número de páginas que hay
 // son nrows / 8
+//
+// Suministro dos tipos de interfaces:
+//  1) Interfaz de matrices de bits. Este interfaz es igual para todos los
+//     Bitmatrix_...
+//
+//  2) Interfaz que depende de la implementación: interfaz de bytes.
+//     Si suministro diferentes matrices de bits es para que se puedan copiar
+//     de la forma más rápida posible a diferentes displays monocromáticos.
 template <size_t nrows, size_t ncols>
-class Bit_matrix_by_cols{
+class Bitmatrix_col_1bit{
 public:
 // Types
     using data_type  = uint8_t; // esto es para documentar
     using index_type = uint16_t; 
     using Bit        = atd::Bit<data_type>;
     using const_Bit  = atd::Bit<const data_type>;
-    using PageCol    = atd::PageCol<index_type>;
+    using Coord_ij   = atd::Coord_ij<index_type>;
+
+// iterator = data_type* <-- NO, ya que de iterar sería sobre los bits, no
+//			         sobre los bytes.
+// Mejor: byte_iterator = data_type*; ??? 
 
     static_assert(sizeof(data_type) == 1); // si se cambiar, revisar implementación
     static_assert(nrows % 8 == 0, "Only implemented multiples of 8");
 
 
+// Bit matrix interface
+// --------------------
 // Dimensions
+// Es una matriz de bits ==> convenio no pongo el `bit` en `bit_rows`
     static constexpr size_t rows() {return nrows;}
     static constexpr size_t cols() {return ncols;}
-    // número de páginas horizontales
-    static constexpr size_t npages() {return nrows / 8*sizeof(data_type);}
 
 // Acceso aleatorio
     // lectura
     constexpr Bit operator()(index_type i, index_type j);
     constexpr const_Bit operator()(index_type i, index_type j) const;
-
-    // Escribe el byte indicado en (npage, j)
-    constexpr void write_byte(data_type x, const PageCol& pos);
 
 // Funciones más eficientes 
     // Rellena toda la matriz con el valor b (0 ó 1 únicamente)
@@ -170,54 +191,115 @@ public:
 
     void clear() {fill(0);}
 
+// Implementation interface: byte interface
+// ----------------------------------------
+// Byte dimensions
+    static constexpr size_t rows_in_bytes() {return nrows / 8*sizeof(data_type);}
+    static constexpr size_t cols_in_bytes() {return ncols;}
+
+    // Escribe el byte indicado en (i, j)
+    constexpr void write_byte(data_type x, const Coord_ij& pos);
+
+// Acceso por columnas 
+    // Iteradores: begin/end por columnas en bytes (!!!)
+    data_type* col_begin(index_type j); // byte donde empieza la columna j
+    data_type* col_end(index_type j);	// byte + 1 donde acaba la columna j
+					
+    const data_type* col_begin(index_type j) const; // byte donde empieza la columna j
+    const data_type* col_end(index_type j) const;	// byte + 1 donde acaba la columna j
+							
+    // tamaño en bytes de la columna j
+    static constexpr index_type col_size(index_type j);
+
+
 private:
+
 
     // observar el orden: 
     // row = 1: uint8_t, uint8_t, uint8_t, ... <-- los bits están agrupados
     //                                              por filas
-    data_type data_[npages()][ncols]; 
+    data_type data_[cols_in_bytes()][rows_in_bytes()]; 
 
     // Dos formas de identificar un bit en una columna:
     //	1) i = indicando el número de bit
     //	2) (I, p) = indicando el número de byte I en el que se encuentra y el
     //		    bit p dentro de ese byte
     //	La relación es: i = 8 * I + p
-    static constexpr std::pair<uint8_t, uint8_t> index(index_type i)
+    static constexpr std::pair<index_type, index_type> index(index_type i)
     { return div(i, index_type{8}); }
 };
 
 template <size_t nrows, size_t ncols>
+inline 
 constexpr 
-auto Bit_matrix_by_cols<nrows, ncols>::
+auto Bitmatrix_col_1bit<nrows, ncols>::
 			operator()(index_type i, index_type j) -> Bit
 {
-    auto [I, p] = index(i);
-    return bit(p).of(data_[I][j]);
+    auto [J, p] = index(i);
+    return bit(p).of(data_[j][J]);
 }
 
 template <size_t nrows, size_t ncols>
+inline 
 constexpr 
-auto Bit_matrix_by_cols<nrows, ncols>::
+auto Bitmatrix_col_1bit<nrows, ncols>::
 			operator()(index_type i, index_type j) const -> const_Bit
 {
-    auto [I, p] = index(i);
-    return bit(p).of(data_[I][j]);
+    auto [J, p] = index(i);
+    return bit(p).of(data_[j][J]);
 }
 
 template <size_t nrows, size_t ncols>
 inline constexpr void
-Bit_matrix_by_cols<nrows, ncols>::
-    write_byte(data_type x, const PageCol& pos)
-{ data_[pos.page][pos.col] = x; }
+Bitmatrix_col_1bit<nrows, ncols>::
+    write_byte(data_type x, const Coord_ij& pos)
+{ 
+    auto [J, p] = index(pos.i);
+    data_[pos.j][J] = x; 
+}
+
 
 template <size_t nrows, size_t ncols>
-void Bit_matrix_by_cols<nrows, ncols>::fill(uint8_t b)
+inline 
+auto 
+Bitmatrix_col_1bit<nrows, ncols>::col_begin(index_type j) -> data_type*
+{ return &(data_[j][0]); }
+
+
+template <size_t nrows, size_t ncols>
+inline 
+auto Bitmatrix_col_1bit<nrows, ncols>::col_end(index_type j) -> data_type*
+{ return col_begin(j + 1); }
+
+template <size_t nrows, size_t ncols>
+inline 
+auto 
+Bitmatrix_col_1bit<nrows, ncols>::col_begin(index_type j) const 
+							-> const data_type*
+{ return &(data_[j][0]); }
+
+
+template <size_t nrows, size_t ncols>
+inline 
+auto Bitmatrix_col_1bit<nrows, ncols>::col_end(index_type j) const
+						    -> const data_type*
+{ return col_begin(j + 1); }
+
+template <size_t nrows, size_t ncols>
+inline 
+constexpr auto 
+Bitmatrix_col_1bit<nrows, ncols>::col_size(index_type j) -> index_type
+{return rows_in_bytes();}
+
+
+template <size_t nrows, size_t ncols>
+void Bitmatrix_col_1bit<nrows, ncols>::fill(uint8_t b)
 {
     if (b != 0)
 	b = 0xFF; // esto supone que data_type == uint8_t
 
-    for (uint8_t i = 0; i < npages(); ++i)
-	for (uint8_t j = 0; j < cols(); ++j)
+    for (uint8_t i = 0; i < cols(); ++i)
+	for (uint8_t j = 0; j < rows_in_bytes(); ++j)
 	    data_[i][j] = b;
 }
 

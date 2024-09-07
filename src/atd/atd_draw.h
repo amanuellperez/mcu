@@ -43,22 +43,31 @@
 namespace atd{
 
 // Escribe el caracter c en (i, j) usando la fuente Font
-template <typename Font, size_t nrows, size_t ncols, typename PageCol>
-void write(Bit_matrix_by_cols<nrows, ncols>& m, const PageCol& pos, char ic)
+// (RRR) Paso Coord_ij como parametro para no tener que escribir
+//	const typename Bitmatrix_col_1bit<nrows, ncols>::Coord_ij& pos
+//	(creo que sería más confuso)
+template <typename Font, size_t nrows, size_t ncols, typename Coord_ij>
+void write(Bitmatrix_col_1bit<nrows, ncols>& m, const Coord_ij& pos, char ic)
     requires requires 
 	    {	Font::is_by_columns; 
 		Font::is_ASCII_font;
-		std::is_same_v<typename Bit_matrix_by_cols<nrows, ncols>::PageCol, PageCol>;
+		std::is_same_v<typename Bitmatrix_col_1bit<nrows, ncols>::Coord_ij, Coord_ij>;
 	    }
 {
     auto letter = Font::glyph.row(Font::index(ic));
     auto c = letter.begin();
     for (uint8_t j = 0; j < Font::cols; ++j){
-	for (uint8_t npage = 0; 
-		    npage < Font::col_in_bytes and c != letter.end(); 
-		    ++npage, ++c){
-	    m.write_byte(*c, pos + PageCol{npage, j});
+	for (uint8_t i = 0; 
+		    i < Font::col_in_bytes and c != letter.end(); 
+		    ++i, ++c){
+	    m.write_byte(*c, pos + Coord_ij{i, j});
+
+	    if (i + pos.i + 1 == m.rows_in_bytes()) // realmente no necesaria
+		break;
 	}
+
+	if (j + pos.j + 1 == m.cols_in_bytes())	// necesaria
+	    return;
     }
 }
 

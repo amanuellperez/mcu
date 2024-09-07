@@ -30,7 +30,7 @@
 using namespace test;
 
 template <size_t nrows, size_t ncols>
-void print(const atd::Bit_matrix_by_rows<nrows, ncols>& m)
+void print(const atd::Bitmatrix_row_1bit<nrows, ncols>& m)
 {
     for (uint8_t i = 0; i < m.rows(); ++i){
 	for (uint8_t j = 0; j < m.cols(); ++j){
@@ -46,7 +46,7 @@ void print(const atd::Bit_matrix_by_rows<nrows, ncols>& m)
 
 
 template <size_t nrows, size_t ncols>
-void print(const atd::Bit_matrix_by_cols<nrows, ncols>& m)
+void print(const atd::Bitmatrix_col_1bit<nrows, ncols>& m)
 {
     for (uint8_t i = 0; i < m.rows(); ++i){
 	for (uint8_t j = 0; j < m.cols(); ++j){
@@ -61,11 +61,11 @@ void print(const atd::Bit_matrix_by_cols<nrows, ncols>& m)
 }
 
 
-void test_bit_matrix_by_rows()
+void test_bitmatrix_row_1bit()
 {
-    test::interface("Bit_matrix_by_rows");
+    test::interface("Bitmatrix_row_1bit");
 
-    using BM = atd::Bit_matrix_by_rows<3, 16>;
+    using BM = atd::Bitmatrix_row_1bit<3, 16>;
 
     BM bm;
 
@@ -89,19 +89,20 @@ void test_bit_matrix_by_rows()
 
 }
 
-void test_bit_matrix_by_cols()
+void test_bitmatrix_col_1bit()
 {
-    test::interface("Bit_matrix_by_cols");
+    test::interface("Bitmatrix_col_1bit");
 
     constexpr uint8_t nrows = 16;
     constexpr uint8_t ncols = 30;
-    using BM = atd::Bit_matrix_by_cols<nrows, ncols>;
-    using PageCol = BM::PageCol;
+    using BM = atd::Bitmatrix_col_1bit<nrows, ncols>;
+    using Coord_ij = BM::Coord_ij;
 
     BM bm;
 
     CHECK_TRUE(bm.rows() == nrows, "rows()");
     CHECK_TRUE(bm.cols() == ncols, "cols()");
+    CHECK_TRUE(bm.col_size(0) == nrows / 8, "col_size()");
 
     bm(0,0) = 1;
     CHECK_TRUE(bm(0,0) == 1, "operator()");
@@ -125,12 +126,13 @@ void test_bit_matrix_by_cols()
 
     using Font = rom::font_dogica_8x8_cr::Font;
     bm.clear();
-    atd::write<Font, nrows, ncols>(bm, PageCol{0, 0}, 'H');
-    atd::write<Font, nrows, ncols>(bm, PageCol{0, 8}, 'e');
-    atd::write<Font, nrows, ncols>(bm, PageCol{0, 16}, 'l');
-    atd::write<Font, nrows, ncols>(bm, PageCol{1, 0}, 'l');
-    atd::write<Font, nrows, ncols>(bm, PageCol{1, 8}, 'o');
-    atd::write<Font, nrows, ncols>(bm, PageCol{1, 16}, '!');
+    atd::write<Font, nrows, ncols>(bm, Coord_ij{0, 0}, 'H');
+    atd::write<Font, nrows, ncols>(bm, Coord_ij{0, 0}, 'H');
+    atd::write<Font, nrows, ncols>(bm, Coord_ij{0, 8}, 'e');
+    atd::write<Font, nrows, ncols>(bm, Coord_ij{0, 16}, 'l');
+    atd::write<Font, nrows, ncols>(bm, Coord_ij{8, 0}, 'l');
+    atd::write<Font, nrows, ncols>(bm, Coord_ij{8, 8}, 'o');
+    atd::write<Font, nrows, ncols>(bm, Coord_ij{8, 16}, '!');
     print(bm);
 }
 
@@ -140,8 +142,8 @@ int main()
 try{
     test::header("atd_bit_matrix");
 
-    test_bit_matrix_by_rows();
-    test_bit_matrix_by_cols();
+    test_bitmatrix_row_1bit();
+    test_bitmatrix_col_1bit();
 
 }catch(std::exception& e)
 {

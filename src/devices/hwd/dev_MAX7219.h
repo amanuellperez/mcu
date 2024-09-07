@@ -46,6 +46,7 @@
 #include <span>
 
 #include <mcu_SPI.h>
+#include <atd_bit_matrix.h>
 
 namespace dev{
 
@@ -557,9 +558,9 @@ void MAX7219_array<C, N>::display_test_off()
 //
 // Venden 4 MAX7219 juntos con los displays correspondientes. Tal como los
 // venden una forma sencilla de formar (con esos displays) una matriz es
-// dividir la matriz verticalmente en páginas, cada página siendo uno de los
-// conjuntos de los 4 displays:
-//
+// dividir la matriz verticalmente en strips, cada strip siendo uno de los
+// conjuntos de los 4 módulos MAX7219:
+//     0       1       2       3     <- número de strip
 //     ||      ||      ||      ||
 //     \/      \/      \/      \/
 //  +------++------++------++------+
@@ -575,14 +576,16 @@ void MAX7219_array<C, N>::display_test_off()
 //  |      ||      ||      ||      |
 //  |      ||      ||      ||      |
 //  +------++------++------++------+
-//
+//  01234567012345670123456701234567 <- columnas relativas a la strip
+//  0123456789,10,11, ...	     <- columnas absolutas al display
+//            
 //  Al montarlo de esta forma estoy conectando cada página con conexiones
 //  un chip_select DISTINTO, necesitando un SPI_selector que me permita iterar
 //  por las 4 páginas.
 //
 //  Las caracteristicas de la matriz son: 
-//	1) número de páginas (tantas como quieras)
-//	2) número de MAX7219 por página = numero de moduls por página
+//	1) número de strips (tantas como quieras)
+//	2) número de MAX7219 por strip = numero de modulos por strip
 //
 //  Como el MAX7219 solo puede gestionar matrices de led 8x8, cada display
 //  será de 8x8. 
@@ -593,23 +596,49 @@ void MAX7219_array<C, N>::display_test_off()
 //	Una matriz de LEDs (= display) está formado a partir de LED modules 
 //	(= minidisplays)
 //
+//  COORDENADAS
+//	Observar que hay varios tipos de coordenadas:
+//	1) Absolutas al display : (i,j) = (row, col) <- referencia bits
+//	2) Relativas a la página: (npage, col_rel) con col_rel = [0..7]
+//
+//	Las absolutas no son prácticas ya que tenemos que escribir bytes
+//	enteros.
 //
 //
-template <typename Cfg, uint8_t npages0, uint8_t nmodules_per_page0>
+template <typename Cfg, uint8_t nstrips0, uint8_t nmodules_per_strip0>
 class MAX7219_matrix {
 public:
+// Types
+    
 // Cfg
-    static constexpr uint8_t npages() { return npages0; }
-    static constexpr uint8_t modules_per_page() { return nmodules_per_page0; }
+    static constexpr uint8_t nstrips = nstrips0; 
+    static constexpr uint8_t modules_per_strip = nmodules_per_strip0; 
+
+    static constexpr uint8_t strip_cols = 8;
+
+    // dimensiones de los pequeños displays que forman el display entero
+    // minidisplay = modulo (pero hoy me suena mejor minidisplay)
+    static constexpr uint8_t minidisplay_rows = 8;
+    static constexpr uint8_t minidisplay_cols = 8;
+
+// Concebido como matriz de bits
+    // Dimensiones en bits del display 
+    static constexpr uint8_t rows = modules_per_strip * minidisplay_rows;
+    static constexpr uint8_t cols = nstrips * minidisplay_cols;
+
+    using Bitmatrix = atd::Bitmatrix_col_1bit<rows, cols>;
 
 // Constructor
     MAX7219_matrix() = delete;
     static void init();
 
 // Write
-    // Escribe en la página npage, columna col, el array x
-    static void write(uint8_t npage, uint8_t col,
-				std::span<uint8_t, modules_per_page()> x);
+    // Escribe en la página nstrip, columna ndigit de la strip, el array x
+    static void write(uint8_t nstrip, uint8_t ndigit,
+				std::span<uint8_t, modules_per_strip> x);
+
+    // Escribimos la matriz m en el display
+    static void write(const Bitmatrix& m);
 
     // Borra la fila row
     static void clear(uint8_t row);
@@ -618,21 +647,21 @@ public:
     static void clear();
 
 // comandos
-    static void intensity(uint8_t npage, uint8_t I);
+    static void intensity(uint8_t nstrip, uint8_t I);
     static void intensity(uint8_t I);
 
     // turn_on/turn_off (me gustan más que normal_mode/shutdown
-    static void turn_on (uint8_t npage);
+    static void turn_on (uint8_t nstrip);
     static void turn_on ();
 
-    static void turn_off (uint8_t npage);
+    static void turn_off (uint8_t nstrip);
     static void turn_off ();
 
 
-    static void display_test_on(uint8_t npage);
+    static void display_test_on(uint8_t nstrip);
     static void display_test_on();
 
-    static void display_test_off(uint8_t npage);
+    static void display_test_off(uint8_t nstrip);
     static void display_test_off();
 
 private:
@@ -644,13 +673,15 @@ private:
     using MAX7219    = private_::MAX7219<SPI>;
     
 // Helpers
-    static void move_command_till_last(uint8_t npage);
-    static void send_no_op(uint8_t npage, uint8_t n);
+    static void move_command_till_last(uint8_t nstrip);
+    static void send_no_op(uint8_t nstrip, uint8_t n);
 
     static void SPI_cfg() {MAX7219::SPI_cfg();}
 
-    static 
-	void digit(uint8_t npage, uint8_t nmodule, uint8_t ndigit, uint8_t x);
+    static void write_column(uint8_t nstrip, uint8_t col,
+					const uint8_t* p0, const uint8_t* pe);
+//    static 
+//	void digit(uint8_t nstrip, uint8_t nmodule, uint8_t ndigit, uint8_t x);
 };
 
 // Quiero inicializar todos los modulos de la página, por ello tengo que ir
@@ -663,32 +694,32 @@ void MAX7219_matrix<C, np, nm>::init()
 
     SPI_cfg();
 
-    for (uint8_t npage = 0; npage < npages(); ++npage){
-	SPI_select::select(npage);
+    for (uint8_t nstrip = 0; nstrip < nstrips; ++nstrip){
+	SPI_select::select(nstrip);
 	MAX7219::disable_decode_mode(); // es un display, no 7-segments
-	SPI_select::deselect(npage);
+	SPI_select::deselect(nstrip);
 
-	SPI_select::select(npage);
+	SPI_select::select(nstrip);
 	MAX7219::scan_all_digits();
-	SPI_select::deselect(npage);
+	SPI_select::deselect(nstrip);
 
-	move_command_till_last(npage);
+	move_command_till_last(nstrip);
     }
 }
 
 // precondition: spi está configurado, y el chip no está seleccionado
 template <typename C, uint8_t np, uint8_t nm>
 inline 
-void MAX7219_matrix<C, np, nm>::move_command_till_last(uint8_t npage)
-{ send_no_op(npage, modules_per_page() - 1); }
+void MAX7219_matrix<C, np, nm>::move_command_till_last(uint8_t nstrip)
+{ send_no_op(nstrip, modules_per_strip - 1); }
 
 // precondition: spi está configurado, y el chip no está seleccionado
 template <typename C, uint8_t np, uint8_t nm>
-void MAX7219_matrix<C, np, nm>::send_no_op(uint8_t npage, uint8_t n)
+void MAX7219_matrix<C, np, nm>::send_no_op(uint8_t nstrip, uint8_t n)
 {
 // SPI_cfg(); 
     for (uint8_t i = 0; i < n; ++i){
-	SPI_select spi{npage};
+	SPI_select spi{nstrip};
 	MAX7219::no_op();
     }
 }
@@ -701,43 +732,68 @@ void MAX7219_matrix<C, np, nm>::send_no_op(uint8_t npage, uint8_t n)
 // Esto genera el problema de que al escribir en diferentes módulos de una
 // misma página, luego se propagará lo escrito a los demás. Por ello, me veo
 // obligado a usar tantos no-op
+//template <typename C, uint8_t np, uint8_t nm>
+//void MAX7219_matrix<C, np, nm>::digit(uint8_t nstrip, 
+//				uint8_t nmodule, uint8_t ndigit, uint8_t x)
+//{
+//    SPI_cfg();
+//
+//    SPI_select spi{nstrip};
+//
+//    for (uint8_t i = 0; i < modules_per_strip() - nmodule; ++i)
+//	MAX7219::no_op();
+//
+//    MAX7219::digit(ndigit, x);
+//
+//    for (uint8_t i = 0; i < nmodule; ++i)
+//	MAX7219::no_op();
+//}
+
 template <typename C, uint8_t np, uint8_t nm>
-void MAX7219_matrix<C, np, nm>::digit(uint8_t npage, 
-				uint8_t nmodule, uint8_t ndigit, uint8_t x)
+inline
+void MAX7219_matrix<C, np, nm>::write(uint8_t nstrip, uint8_t col,
+				std::span<uint8_t, modules_per_strip> data)
+{ write_column(nstrip, col, data.begin(), data.end()); }
+
+template <typename C, uint8_t np, uint8_t nm>
+void MAX7219_matrix<C, np, nm>::write_column(uint8_t nstrip, uint8_t col,
+					const uint8_t* p0, const uint8_t* pe)
 {
-    SPI_cfg();
+    SPI_select spi{nstrip};
 
-    SPI_select spi{npage};
-
-    for (uint8_t i = 0; i < modules_per_page() - nmodule; ++i)
-	MAX7219::no_op();
-
-    MAX7219::digit(ndigit, x);
-
-    for (uint8_t i = 0; i < nmodule; ++i)
-	MAX7219::no_op();
+    for (; p0 != pe; ++p0)
+	MAX7219::digit(col + 1, *p0);
 }
 
+
+// Dos sistemas de coordenadas:
+//	(nstrip, ndigit) = estamos en la strip nstrip, en su digit ndigit
+//	          j      = estamos en la columna j del display (esta es global)
 template <typename C, uint8_t np, uint8_t nm>
-void MAX7219_matrix<C, np, nm>::write(uint8_t npage, uint8_t col,
-				std::span<uint8_t, modules_per_page()> data)
+void MAX7219_matrix<C, np, nm>::write(const Bitmatrix& m)
 {
-    for (uint8_t i = 0; i < data.size(); ++i)
-	digit(npage, i, col + 1, data[i]);
+    using index_type = typename Bitmatrix::index_type;
+    for (uint8_t nstrip = 0; nstrip < nstrips; ++nstrip)
+    {
+	for (uint8_t ndigit = 0; ndigit < minidisplay_cols; ++ndigit){
+	    index_type j = minidisplay_cols * nstrip + ndigit;
+	    write_column(nstrip, ndigit, m.col_begin(j), m.col_end(j));
+	}
+    }
 }
 
 
 template <typename C, uint8_t np, uint8_t nm>
-void MAX7219_matrix<C, np, nm>::clear(uint8_t npage)
+void MAX7219_matrix<C, np, nm>::clear(uint8_t nstrip)
 {
     SPI_cfg();
 
     for (uint8_t row = 0; row < 8; ++row){
-	SPI_select::select(npage); 
+	SPI_select::select(nstrip); 
 	MAX7219::digit(row + 1, 0x00);
-	SPI_select::deselect(npage); 
+	SPI_select::deselect(nstrip); 
 
-	move_command_till_last(npage);
+	move_command_till_last(nstrip);
     }
 }
 
@@ -746,98 +802,98 @@ void MAX7219_matrix<C, np, nm>::clear(uint8_t npage)
 //     llamaria a move_command_till_last con el chip seleccionado, y se
 //     deseleccionaria despues de move_command_till_last!!!
 template <typename C, uint8_t np, uint8_t nm>
-void MAX7219_matrix<C, np, nm>::intensity(uint8_t npage, uint8_t I)
+void MAX7219_matrix<C, np, nm>::intensity(uint8_t nstrip, uint8_t I)
 {
     SPI_cfg();
 
-    SPI_select::select(npage);// No usar SPI_select spi{npage} (*)
+    SPI_select::select(nstrip);// No usar SPI_select spi{nstrip} (*)
     MAX7219::intensity(I);
-    SPI_select::deselect(npage);
+    SPI_select::deselect(nstrip);
 
-    move_command_till_last(npage);
+    move_command_till_last(nstrip);
 }
 
 template <typename C, uint8_t np, uint8_t nm>
-void MAX7219_matrix<C, np, nm>::turn_on(uint8_t npage)
+void MAX7219_matrix<C, np, nm>::turn_on(uint8_t nstrip)
 {
     SPI_cfg();
 
-    SPI_select::select(npage);
+    SPI_select::select(nstrip);
     MAX7219::normal_mode();
-    SPI_select::deselect(npage);
+    SPI_select::deselect(nstrip);
 
-    move_command_till_last(npage);
+    move_command_till_last(nstrip);
 }
 
 template <typename C, uint8_t np, uint8_t nm>
-void MAX7219_matrix<C, np, nm>::turn_off(uint8_t npage)
+void MAX7219_matrix<C, np, nm>::turn_off(uint8_t nstrip)
 {
     SPI_cfg();
 
-    SPI_select::select(npage);
+    SPI_select::select(nstrip);
     MAX7219::shutdown();
-    SPI_select::deselect(npage);
+    SPI_select::deselect(nstrip);
 
-    move_command_till_last(npage);
+    move_command_till_last(nstrip);
 }
 
 
 template <typename C, uint8_t np, uint8_t nm>
-void MAX7219_matrix<C, np, nm>::display_test_on(uint8_t npage)
+void MAX7219_matrix<C, np, nm>::display_test_on(uint8_t nstrip)
 {
     SPI_cfg();
 
-    SPI_select::select(npage);
+    SPI_select::select(nstrip);
     MAX7219::display_test_on();
-    SPI_select::deselect(npage);
+    SPI_select::deselect(nstrip);
 
-    move_command_till_last(npage);
+    move_command_till_last(nstrip);
 }
 
 template <typename C, uint8_t np, uint8_t nm>
-void MAX7219_matrix<C, np, nm>::display_test_off(uint8_t npage)
+void MAX7219_matrix<C, np, nm>::display_test_off(uint8_t nstrip)
 {
     SPI_cfg();
 
-    SPI_select::select(npage);
+    SPI_select::select(nstrip);
     MAX7219::display_test_off();
-    SPI_select::deselect(npage);
+    SPI_select::deselect(nstrip);
 
-    move_command_till_last(npage);
+    move_command_till_last(nstrip);
 }
 
 template <typename C, uint8_t np, uint8_t nm>
 void MAX7219_matrix<C, np, nm>::clear()
 {
-    for (uint8_t p = 0; p < npages(); ++p)
+    for (uint8_t p = 0; p < nstrips; ++p)
 	clear(p);
 }
 
 template <typename C, uint8_t np, uint8_t nm>
 void MAX7219_matrix<C, np, nm>::intensity(uint8_t I)
 {
-    for (uint8_t p = 0; p < npages(); ++p)
+    for (uint8_t p = 0; p < nstrips; ++p)
 	intensity(p, I);
 }
 
 template <typename C, uint8_t np, uint8_t nm>
 void MAX7219_matrix<C, np, nm>::turn_on()
 {
-    for (uint8_t p = 0; p < npages(); ++p)
+    for (uint8_t p = 0; p < nstrips; ++p)
 	turn_on(p);
 }
 
 template <typename C, uint8_t np, uint8_t nm>
 void MAX7219_matrix<C, np, nm>::turn_off()
 {
-    for (uint8_t p = 0; p < npages(); ++p)
+    for (uint8_t p = 0; p < nstrips; ++p)
 	turn_off(p);
 }
 
 template <typename C, uint8_t np, uint8_t nm>
 void MAX7219_matrix<C, np, nm>::display_test_on()
 {
-    for (uint8_t p = 0; p < npages(); ++p)
+    for (uint8_t p = 0; p < nstrips; ++p)
 	display_test_on(p);
 }
 
@@ -845,7 +901,7 @@ void MAX7219_matrix<C, np, nm>::display_test_on()
 template <typename C, uint8_t np, uint8_t nm>
 void MAX7219_matrix<C, np, nm>::display_test_off()
 {
-    for (uint8_t p = 0; p < npages(); ++p)
+    for (uint8_t p = 0; p < nstrips; ++p)
 	display_test_off(p);
 }
 
