@@ -134,6 +134,19 @@ void test_bitmatrix_col_1bit()
     atd::write<Font, nrows, ncols>(bm, Coord_ij{8, 8}, 'o');
     atd::write<Font, nrows, ncols>(bm, Coord_ij{8, 16}, '!');
     print(bm);
+
+    bm.write_byte(127, {0,0});
+    bm.write_byte(231, {8,0});
+
+    std::cout << "From 0 to (row - 1): ";
+    for (auto c = bm.col_begin(0); c != bm.col_end(0); ++c)
+	std::cout << (int) *c << ' ';
+    std::cout << '\n';
+
+    std::cout << "From (row - 1) to 0: ";
+    for (auto c = bm.rcol_begin(0); c != bm.rcol_end(0); ++c)
+	std::cout << (int) *c << ' ';
+    std::cout << '\n';
 }
 
 

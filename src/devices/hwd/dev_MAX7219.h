@@ -44,6 +44,7 @@
  ****************************************************************************/
 #include <cstdint>
 #include <span>
+//#include <iterator> // forward_iterator
 
 #include <mcu_SPI.h>
 #include <atd_bit_matrix.h>
@@ -563,21 +564,21 @@ void MAX7219_array<C, N>::display_test_off()
 //     0       1       2       3     <- número de strip
 //     ||      ||      ||      ||
 //     \/      \/      \/      \/
+// i+------++------++------++------+
+// 0|      ||      ||      ||      |
+// 1|      ||      ||      ||      |
 //  +------++------++------++------+
-//  |      ||      ||      ||      |
-//  |      ||      ||      ||      |
+// 2|      ||      ||      ||      |
+// 3|      ||      ||      ||      |
 //  +------++------++------++------+
-//  |      ||      ||      ||      |
-//  |      ||      ||      ||      |
+// 4|      ||      ||      ||      |
+// 5|      ||      ||      ||      |
 //  +------++------++------++------+
-//  |      ||      ||      ||      |
-//  |      ||      ||      ||      |
-//  +------++------++------++------+
-//  |      ||      ||      ||      |
-//  |      ||      ||      ||      |
+// 6|      ||      ||      ||      |
+// 7|      ||      ||      ||      |
 //  +------++------++------++------+
 //  01234567012345670123456701234567 <- columnas relativas a la strip
-//  0123456789,10,11, ...	     <- columnas absolutas al display
+//j:0123456789,10,11, ...	     <- columnas absolutas al display = j
 //            
 //  Al montarlo de esta forma estoy conectando cada página con conexiones
 //  un chip_select DISTINTO, necesitando un SPI_selector que me permita iterar
@@ -599,7 +600,7 @@ void MAX7219_array<C, N>::display_test_off()
 //  COORDENADAS
 //	Observar que hay varios tipos de coordenadas:
 //	1) Absolutas al display : (i,j) = (row, col) <- referencia bits
-//	2) Relativas a la página: (npage, col_rel) con col_rel = [0..7]
+//	2) Relativas a la página: (strip, digit) con digit = [0..7]
 //
 //	Las absolutas no son prácticas ya que tenemos que escribir bytes
 //	enteros.
@@ -678,8 +679,10 @@ private:
 
     static void SPI_cfg() {MAX7219::SPI_cfg();}
 
+    //template <std::forward_iterator It> TODO: no compila, pero debiera
+    template <typename  It>
     static void write_column(uint8_t nstrip, uint8_t col,
-					const uint8_t* p0, const uint8_t* pe);
+					It p0, const It pe);
 //    static 
 //	void digit(uint8_t nstrip, uint8_t nmodule, uint8_t ndigit, uint8_t x);
 };
@@ -755,9 +758,16 @@ void MAX7219_matrix<C, np, nm>::write(uint8_t nstrip, uint8_t col,
 				std::span<uint8_t, modules_per_strip> data)
 { write_column(nstrip, col, data.begin(), data.end()); }
 
+// Observar que no hago SPI::select/deselect con cada envio de comando
+// Hay que enviar todos los comandos para llenar los registros de cada MAX7219 
+// conectado en serie, y luego al hacer el deselect se cargan todos los
+// valores en el MAX7219 correspondiente 
+
 template <typename C, uint8_t np, uint8_t nm>
+    // template <std::forward_iterator It>
+    template <typename It>
 void MAX7219_matrix<C, np, nm>::write_column(uint8_t nstrip, uint8_t col,
-					const uint8_t* p0, const uint8_t* pe)
+					It p0, const It pe)
 {
     SPI_select spi{nstrip};
 
@@ -777,7 +787,7 @@ void MAX7219_matrix<C, np, nm>::write(const Bitmatrix& m)
     {
 	for (uint8_t ndigit = 0; ndigit < minidisplay_cols; ++ndigit){
 	    index_type j = minidisplay_cols * nstrip + ndigit;
-	    write_column(nstrip, ndigit, m.col_begin(j), m.col_end(j));
+	    write_column(nstrip, ndigit, m.rcol_begin(j), m.rcol_end(j));
 	}
     }
 }
@@ -904,6 +914,7 @@ void MAX7219_matrix<C, np, nm>::display_test_off()
     for (uint8_t p = 0; p < nstrips; ++p)
 	display_test_off(p);
 }
+
 
 
 }// namespace dev

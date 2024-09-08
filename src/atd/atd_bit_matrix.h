@@ -43,6 +43,8 @@
  *    29/08/2024 Bitmatrix_row_1bit
  *
  ****************************************************************************/
+#include <iterator>
+
 #include "atd_cmath.h"	// div
 #include "atd_bit.h"
 #include "atd_coordinates.h"	// Coord_ij
@@ -168,6 +170,12 @@ public:
 // iterator = data_type* <-- NO, ya que de iterar sería sobre los bits, no
 //			         sobre los bytes.
 // Mejor: byte_iterator = data_type*; ??? 
+// Byte iterators
+    using byte_iterator         = data_type*; 
+    using const_byte_iterator   = const data_type*; 
+    using reverse_byte_iterator = std::reverse_iterator<byte_iterator>;
+    using const_reverse_byte_iterator 
+				= std::reverse_iterator<const_byte_iterator>;
 
     static_assert(sizeof(data_type) == 1); // si se cambiar, revisar implementación
     static_assert(nrows % 8 == 0, "Only implemented multiples of 8");
@@ -202,12 +210,19 @@ public:
 
 // Acceso por columnas 
     // Iteradores: begin/end por columnas en bytes (!!!)
-    data_type* col_begin(index_type j); // byte donde empieza la columna j
-    data_type* col_end(index_type j);	// byte + 1 donde acaba la columna j
+    byte_iterator col_begin(index_type j);  // byte donde empieza la columna j
+    byte_iterator col_end(index_type j);    // byte + 1 donde acaba la columna j
 					
-    const data_type* col_begin(index_type j) const; // byte donde empieza la columna j
-    const data_type* col_end(index_type j) const;	// byte + 1 donde acaba la columna j
+    const_byte_iterator col_begin(index_type j) const; // byte donde empieza la columna j
+    const_byte_iterator col_end(index_type j) const;	// byte + 1 donde acaba la columna j
 							
+    // Reverse iterators: rbegin/rend por columnas en bytes (!!!)
+    reverse_byte_iterator rcol_begin(index_type j); 
+    reverse_byte_iterator rcol_end(index_type j);	
+					
+    const_reverse_byte_iterator rcol_begin(index_type j) const; 
+    const_reverse_byte_iterator rcol_end(index_type j) const;
+								
     // tamaño en bytes de la columna j
     static constexpr index_type col_size(index_type j);
 
@@ -262,28 +277,57 @@ Bitmatrix_col_1bit<nrows, ncols>::
 template <size_t nrows, size_t ncols>
 inline 
 auto 
-Bitmatrix_col_1bit<nrows, ncols>::col_begin(index_type j) -> data_type*
+Bitmatrix_col_1bit<nrows, ncols>::col_begin(index_type j) -> byte_iterator
 { return &(data_[j][0]); }
 
 
 template <size_t nrows, size_t ncols>
 inline 
-auto Bitmatrix_col_1bit<nrows, ncols>::col_end(index_type j) -> data_type*
+auto Bitmatrix_col_1bit<nrows, ncols>::col_end(index_type j) -> byte_iterator
 { return col_begin(j + 1); }
 
 template <size_t nrows, size_t ncols>
 inline 
 auto 
 Bitmatrix_col_1bit<nrows, ncols>::col_begin(index_type j) const 
-							-> const data_type*
+							-> const_byte_iterator
 { return &(data_[j][0]); }
 
 
 template <size_t nrows, size_t ncols>
 inline 
 auto Bitmatrix_col_1bit<nrows, ncols>::col_end(index_type j) const
-						    -> const data_type*
+						    -> const_byte_iterator
 { return col_begin(j + 1); }
+
+
+template <size_t nrows, size_t ncols>
+inline 
+auto 
+Bitmatrix_col_1bit<nrows, ncols>::rcol_begin(index_type j) -> reverse_byte_iterator
+{ return reverse_byte_iterator{col_end(j)}; }
+
+
+template <size_t nrows, size_t ncols>
+inline 
+auto Bitmatrix_col_1bit<nrows, ncols>::rcol_end(index_type j) -> reverse_byte_iterator
+{ return reverse_byte_iterator{col_begin(j)}; }
+
+template <size_t nrows, size_t ncols>
+inline 
+auto 
+Bitmatrix_col_1bit<nrows, ncols>::rcol_begin(index_type j) const 
+							-> const_reverse_byte_iterator
+{ return const_reverse_byte_iterator{col_end(j)}; }
+
+
+template <size_t nrows, size_t ncols>
+inline 
+auto Bitmatrix_col_1bit<nrows, ncols>::rcol_end(index_type j) const
+						    -> const_reverse_byte_iterator
+{ return const_reverse_byte_iterator{col_begin(j)}; }
+					
+
 
 template <size_t nrows, size_t ncols>
 inline 

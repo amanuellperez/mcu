@@ -40,9 +40,11 @@ constexpr uint32_t baud_rate = 9'600;
 // Pin connections
 // ---------------
 static constexpr uint8_t noCS = 16;
-static constexpr uint8_t page0 = noCS;
-static constexpr uint8_t page1 = 15;
-static constexpr uint8_t matrix_npages = 2;
+static constexpr uint8_t strip0 = noCS;
+static constexpr uint8_t strip1 = 15;
+static constexpr uint8_t strip2 = 14;
+static constexpr uint8_t strip3 = 13;
+static constexpr uint8_t matrix_nstrips = 4;
 
 // SPI protocol
 // ------------
@@ -61,12 +63,13 @@ struct MAX7219_cfg{
 struct MAX7219_cfg_matrix{
     using SPI_master	= myu::SPI_master;
     using SPI_selector	= 
-	mcu::SPI_pin_array_selector<Micro, page0, page1>;
+	mcu::SPI_pin_array_selector<Micro, strip0, strip1, strip2, strip3>;
 };
 
 using MAX7219        = dev::MAX7219_basic<MAX7219_cfg>;
 using MAX7219_array  = dev::MAX7219_array<MAX7219_cfg, 4>;
-using MAX7219_matrix = dev::MAX7219_matrix<MAX7219_cfg_matrix, 2, 4>;
+using MAX7219_matrix = dev::MAX7219_matrix<MAX7219_cfg_matrix, 
+						    matrix_nstrips, 4>;
 
 using Bitmatrix = MAX7219_matrix::Bitmatrix;
 using Coord = Bitmatrix::Coord_ij;
@@ -124,10 +127,10 @@ void init_max7219_matrix()
 {
     myu::UART_iostream uart;
     Test test{uart};
-    CHECK_TRUE(test, MAX7219_matrix::nstrips == matrix_npages, 
-						    "MAX7219_matrix::npages");
+    CHECK_TRUE(test, MAX7219_matrix::nstrips == matrix_nstrips, 
+						    "MAX7219_matrix::nstrips");
     CHECK_TRUE(test, MAX7219_matrix::modules_per_strip == 4, 
-					"MAX7219_matrix::modules_per_page");
+					"MAX7219_matrix::modules_per_strip");
 
     MAX7219_matrix::init(); 
     MAX7219_matrix::intensity(0x00);
@@ -141,7 +144,7 @@ void hello()
 	        "------------\n"
 		"Connections:\n"
 		"\tConnect MAX7219 to SPI via " << (int) noCS << " pin\n"
-		"\tConnecto other modules to pins " << (int) page1
+		"\tConnecto other modules to pins " << (int) strip1
 		<< "\n\n";
 }
 
@@ -246,9 +249,9 @@ void test_font()
 
     bm.clear();
     atd::write<Font>(bm, Coord{0, 0}, 'H');
-    atd::write<Font>(bm, Coord{8, 0}, 'e');
-    atd::write<Font>(bm, Coord{16, 0}, 'l');
-    atd::write<Font>(bm, Coord{24, 0}, 'l');
+    atd::write<Font>(bm, Coord{0, 8}, 'e');
+    atd::write<Font>(bm, Coord{0, 16}, 'l');
+    atd::write<Font>(bm, Coord{0, 24}, 'l');
 //    print(uart, bm);
     MAX7219_matrix::write(bm);
     Micro::wait_ms(800);
