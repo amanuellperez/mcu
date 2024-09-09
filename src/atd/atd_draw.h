@@ -31,6 +31,12 @@
  *	intensidad (0/255), o colores de verdad (r,g,b) (o la representación
  *	que se quiera).
  *
+ * TODO/DUDA:
+ *	En los bucles estoy usando `uint8_t` por ser el tipo básico del
+ *	atmega, pero otros micros no tienen pueden ser de 16 bits y no de 8
+ *	bits. Por defecto, la regla es usar siempre `int`. ¿Dejar uint8_t o
+ *	cambiarlo a int?
+ *
  * HISTORIA
  *    Manuel Perez
  *    30/08/2024 Primeros experimentos
@@ -42,34 +48,73 @@
 
 namespace atd{
 
+// Bitmatrix_col_1bit
+// ------------------
+// TODO: proteger que no se escriba fuera del bitmatrix (dara core)
 // Escribe el caracter c en (i, j) usando la fuente Font
-// (RRR) Paso Coord_ij como parametro para no tener que escribir
-//	const typename Bitmatrix_col_1bit<nrows, ncols>::Coord_ij& pos
-//	(creo que sería más confuso)
-template <typename Font, size_t nrows, size_t ncols, typename Coord_ij>
-void write(Bitmatrix_col_1bit<nrows, ncols>& m, const Coord_ij& pos, char ic)
+template <typename Font, size_t nrows, size_t ncols>
+void write(Bitmatrix_col_1bit<nrows, ncols>& m, 
+	    const typename Bitmatrix_col_1bit<nrows, ncols>::Coord_ij& p0, 
+	    char ic)
     requires requires 
 	    {	Font::is_by_columns; 
+		Font::is_turned_to_the_right;
 		Font::is_ASCII_font;
-		std::is_same_v<typename Bitmatrix_col_1bit<nrows, ncols>::Coord_ij, Coord_ij>;
 	    }
 {
+    using Coord_ij = typename Bitmatrix_col_1bit<nrows, ncols>::Coord_ij;
+
     auto letter = Font::glyph.row(Font::index(ic));
     auto c = letter.begin();
     for (uint8_t j = 0; j < Font::cols; ++j){
 	for (uint8_t i = 0; 
 		    i < Font::col_in_bytes and c != letter.end(); 
 		    ++i, ++c){
-	    m.write_byte(*c, pos + Coord_ij{i, j});
+	    m.write_byte(*c, p0 + Coord_ij{i, j});
 
-	    if (i + pos.i + 1 == m.rows_in_bytes()) // realmente no necesaria
+	    if (i + p0.i + 1 == m.rows_in_bytes()) // realmente no necesaria
 		break;
 	}
 
-	if (j + pos.j + 1 == m.cols_in_bytes())	// necesaria
+	if (j + p0.j + 1 == m.cols_in_bytes())	// necesaria
 	    return;
     }
 }
+
+// Bitmatrix_row_1bit
+// ------------------
+// TODO: proteger que no se escriba fuera del bitmatrix (dara core)
+// Escribe el caracter c en (i, j) usando la fuente Font
+template <typename Font, size_t nrows, size_t ncols>
+void write(Bitmatrix_row_1bit<nrows, ncols>& m, 
+	    const typename Bitmatrix_row_1bit<nrows, ncols>::Coord_ij& p0,
+	    char ic)
+    requires requires 
+	    {	Font::is_by_rows; 
+		Font::is_looking_from_the_front;
+		Font::is_ASCII_font;
+	    }
+{
+    using Coord_ij = typename Bitmatrix_row_1bit<nrows, ncols>::Coord_ij;
+
+    auto letter = Font::glyph.row(Font::index(ic));
+    auto c = letter.begin();
+    for (uint8_t i = 0; i < Font::rows; ++i){
+	for (uint8_t j = 0; 
+		    j < Font::row_in_bytes and c != letter.end(); 
+		    ++j, ++c){
+	    m.write_byte(*c, p0 + Coord_ij{i, j});
+
+	    if (j + p0.j + 1u == m.cols_in_bytes()) 
+		break;
+	}
+
+	if (i + p0.i + 1u == m.rows_in_bytes())	
+	    return;
+    }
+}
+
+
 
 
 }// atd

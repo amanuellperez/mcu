@@ -25,21 +25,7 @@
 #ifndef __ROM_FONT_DOGICA_8X8_CR_H__
 #define __ROM_FONT_DOGICA_8X8_CR_H__
 
-#include "../../atd_rom.h"
-
-// ----------------------------------------------
-// Funciones que dependen de la gestión de la ROM
-namespace my{
-struct ROM_read{
-    template <typename T>
-    T operator()(const T& x) const
-    { return x; }
-};
-} // my
-#define PROGMEM
-#define MCU my
-// ----------------------------------------------
-
+#include <atd_rom.h>
 
 namespace rom{
 namespace font_dogica_8x8_cr{
@@ -49,6 +35,7 @@ using ROM_read = MCU::ROM_read;
 struct Font{
 // Traits requirements
 static constexpr bool is_by_columns{};
+static constexpr bool is_turned_to_the_right{};
 static constexpr bool is_ASCII_font{};
 
 // Número de caracteres
@@ -56,7 +43,6 @@ static constexpr uint8_t nchars = 94;
 
 // Los códigos ASCII empiezan en 32
 static constexpr uint8_t index(char c) {return c - 32;}
-
 
 // Dimensions
 static constexpr uint8_t rows = 8; // número de filas que tiene cada font
@@ -67,7 +53,7 @@ static constexpr uint8_t col_in_bytes   = 1; // número de bytes que tiene cada 
 inline static constexpr uint8_t char_byte_size() {return cols * col_in_bytes;}
 
 static constexpr
-atd::ROM_biarray<uint8_t, nchars, cols*1, ROM_read> glyph
+atd::ROM_biarray<uint8_t, nchars, cols*col_in_bytes, ROM_read> glyph
 	PROGMEM = {
 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, //  
 0b00000000, 0b00000000, 0b00000000, 0b01011111, 0b00000000, 0b00000000, 0b00000000, 0b00000000, // !

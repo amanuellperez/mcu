@@ -36,6 +36,7 @@ using ROM_read = MCU::ROM_read;
 struct Font{
 // Traits requirements
 static constexpr bool is_by_columns{};
+static constexpr bool is_turned_to_the_right{};
 static constexpr bool is_ASCII_font{};
 
 // Número de caracteres

@@ -73,10 +73,22 @@ public:
     using index_type = uint16_t; 
     using Bit        = atd::Bit<data_type>;
     using const_Bit  = atd::Bit<const data_type>;
+    using Coord_ij   = atd::Coord_ij<index_type>;
+
+// iterator = data_type* <-- NO, ya que de iterar sería sobre los bits, no
+//			         sobre los bytes.
+// Byte iterators
+    using byte_iterator         = data_type*; 
+    using const_byte_iterator   = const data_type*; 
+    using reverse_byte_iterator = std::reverse_iterator<byte_iterator>;
+    using const_reverse_byte_iterator 
+				= std::reverse_iterator<const_byte_iterator>;
 
     static_assert(sizeof(data_type) == 1); // si se cambiar, revisar implementación
     static_assert(ncols % 8 == 0, "Only implemented multiples of 8");
 
+// Bit matrix interface
+// --------------------
 // Dimensions
     constexpr size_t rows() const {return nrows;}
     constexpr size_t cols() const {return ncols;}
@@ -92,16 +104,39 @@ public:
 
     void clear() {fill(0);}
 
-private:
-    // Internamente no almacenamos los bits como tales, sino que los agrupamos
-    // en bloques por columnas. Si el data_type es uint8_t, los almacenamos
-    // por bytes.
-    static constexpr size_t ncols_in_blocks() {return ncols / 8*sizeof(data_type);}
+// Implementation interface: byte interface
+// ----------------------------------------
+// Byte dimensions
+    static constexpr size_t rows_in_bytes() {return nrows; }
+    static constexpr size_t cols_in_bytes() {return ncols / 8*sizeof(data_type);}
 
+    // Escribe el byte indicado en (i, j)
+    constexpr void write_byte(data_type x, const Coord_ij& pos);
+
+// Acceso por columnas 
+    // Iteradores: begin/end por columnas en bytes (!!!)
+    byte_iterator row_begin(index_type i);  // byte donde empieza la columna j
+    byte_iterator row_end(index_type i);    // byte + 1 donde acaba la columna j
+					
+    const_byte_iterator row_begin(index_type i) const; // byte donde empieza la columna j
+    const_byte_iterator row_end(index_type i) const;	// byte + 1 donde acaba la columna j
+							
+    // Reverse iterators: rbegin/rend por columnas en bytes (!!!)
+    reverse_byte_iterator rrow_begin(index_type i); 
+    reverse_byte_iterator rrow_end(index_type i);	
+					
+    const_reverse_byte_iterator rrow_begin(index_type i) const; 
+    const_reverse_byte_iterator rrow_end(index_type i) const;
+								
+    // tamaño en bytes de la columna j
+    static constexpr index_type row_size(index_type i);
+
+private:
+// Data
     // observar el orden: 
     // row = 1: uint8_t, uint8_t, uint8_t, ... <-- los bits están agrupados
     //                                              por filas
-    data_type data_[nrows][ncols_in_blocks()]; 
+    data_type data_[nrows][cols_in_bytes()]; 
 
     // Dos formas de identificar un bit en una fila:
     //	1) j = indicando el número de bit
@@ -112,12 +147,23 @@ private:
     { return div(j, index_type{8}); }
 };
 
+// (RRR) ¿por qué necesito r?
+//	 Almacenamos en bytes los datos:
+//
+//	76543210 76543210 76543210  <-- esta es la posición p en el byte
+//	-------- -------- --------  <-- valor de los bytes
+//	01234567 01234567 01234567  <-- indice r
+//	01234567 89..               <-- indice j
+//
+//	Observar que cuando decimos que j == 0 nos referimos realmente al
+//	valor p = 0
 template <size_t nrows, size_t ncols>
 constexpr 
 auto Bitmatrix_row_1bit<nrows, ncols>::
 			operator()(index_type i, index_type j) -> Bit
 {
-    auto [J, p] = index(j);
+    auto [J, r] = index(j);
+    uint8_t p = 7 - r;	// 8 = cada byte tiene 8 bits, con p + r + 1 = 8 
     return bit(p).of(data_[i][J]);
 }
 
@@ -126,9 +172,82 @@ constexpr
 auto Bitmatrix_row_1bit<nrows, ncols>::
 			operator()(index_type i, index_type j) const -> const_Bit
 {
-    auto [J, p] = index(j);
+    auto [J, r] = index(j);
+    uint8_t p = 7 - r;	// 8 = cada byte tiene 8 bits
     return bit(p).of(data_[i][J]);
 }
+
+
+template <size_t nrows, size_t ncols>
+inline constexpr void
+Bitmatrix_row_1bit<nrows, ncols>::
+    write_byte(data_type x, const Coord_ij& pos)
+{ 
+    auto [J, p] = index(pos.j);
+    data_[pos.i][J] = x; 
+}
+
+template <size_t nrows, size_t ncols>
+inline 
+auto 
+Bitmatrix_row_1bit<nrows, ncols>::row_begin(index_type i) -> byte_iterator
+{ return &(data_[i][0]); }
+
+
+template <size_t nrows, size_t ncols>
+inline 
+auto Bitmatrix_row_1bit<nrows, ncols>::row_end(index_type i) -> byte_iterator
+{ return row_begin(i + 1); }
+
+template <size_t nrows, size_t ncols>
+inline 
+auto 
+Bitmatrix_row_1bit<nrows, ncols>::row_begin(index_type i) const 
+							-> const_byte_iterator
+{ return &(data_[i][0]); }
+
+
+template <size_t nrows, size_t ncols>
+inline 
+auto Bitmatrix_row_1bit<nrows, ncols>::row_end(index_type i) const
+						    -> const_byte_iterator
+{ return row_begin(i + 1); }
+
+
+template <size_t nrows, size_t ncols>
+inline 
+auto 
+Bitmatrix_row_1bit<nrows, ncols>::rrow_begin(index_type i) -> reverse_byte_iterator
+{ return reverse_byte_iterator{row_end(i)}; }
+
+
+template <size_t nrows, size_t ncols>
+inline 
+auto Bitmatrix_row_1bit<nrows, ncols>::rrow_end(index_type i) -> reverse_byte_iterator
+{ return reverse_byte_iterator{row_begin(i)}; }
+
+template <size_t nrows, size_t ncols>
+inline 
+auto 
+Bitmatrix_row_1bit<nrows, ncols>::rrow_begin(index_type i) const 
+							-> const_reverse_byte_iterator
+{ return const_reverse_byte_iterator{row_end(i)}; }
+
+
+template <size_t nrows, size_t ncols>
+inline 
+auto Bitmatrix_row_1bit<nrows, ncols>::rrow_end(index_type i) const
+						    -> const_reverse_byte_iterator
+{ return const_reverse_byte_iterator{row_begin(i)}; }
+					
+
+
+template <size_t nrows, size_t ncols>
+inline 
+constexpr auto 
+Bitmatrix_row_1bit<nrows, ncols>::row_size(index_type i) -> index_type
+{return rows_in_bytes();}
+
 
 template <size_t nrows, size_t ncols>
 void Bitmatrix_row_1bit<nrows, ncols>::fill(uint8_t b)
@@ -137,7 +256,7 @@ void Bitmatrix_row_1bit<nrows, ncols>::fill(uint8_t b)
 	b = 0xFF; // esto supone que data_type == uint8_t
 
     for (uint8_t i = 0; i < rows(); ++i)
-	for (uint8_t j = 0; j < ncols_in_blocks(); ++j)
+	for (uint8_t j = 0; j < cols_in_bytes(); ++j)
 	    data_[i][j] = b;
 }
 
@@ -169,7 +288,6 @@ public:
 
 // iterator = data_type* <-- NO, ya que de iterar sería sobre los bits, no
 //			         sobre los bytes.
-// Mejor: byte_iterator = data_type*; ??? 
 // Byte iterators
     using byte_iterator         = data_type*; 
     using const_byte_iterator   = const data_type*; 

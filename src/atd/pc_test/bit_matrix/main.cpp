@@ -25,7 +25,10 @@
 #include <cstddef>
 #include "../../atd_bit_matrix.h"
 #include "../../atd_draw.h"
-#include "dogica.h"
+
+#include "my_rom.h"
+#include "dogica_cr.h"
+#include "dogica_rf.h"
 
 using namespace test;
 
@@ -65,12 +68,16 @@ void test_bitmatrix_row_1bit()
 {
     test::interface("Bitmatrix_row_1bit");
 
-    using BM = atd::Bitmatrix_row_1bit<3, 16>;
+    constexpr uint8_t rows = 8;
+    constexpr uint8_t cols = 8*5;
+
+    using BM = atd::Bitmatrix_row_1bit<rows, cols>;
+    using Coord_ij = BM::Coord_ij;
 
     BM bm;
 
-    CHECK_TRUE(bm.rows() == 3, "rows()");
-    CHECK_TRUE(bm.cols() == 16, "cols()");
+    CHECK_TRUE(bm.rows() == rows, "rows()");
+    CHECK_TRUE(bm.cols() == cols, "cols()");
 
     bm(0,0) = 1;
     CHECK_TRUE(bm(0,0) == 1, "operator()");
@@ -86,6 +93,34 @@ void test_bitmatrix_row_1bit()
     std::cout << "\nOne matrix:\n";
     print(bm);
 
+// write_byte
+// TODO: no es automático!!!
+    bm.fill(0);
+    bm.write_byte(127, {0,0});
+    bm.write_byte(231, {0,8});
+
+    std::cout << "From 0 to (row - 1): ";
+    for (auto c = bm.row_begin(0); c != bm.row_end(0); ++c)
+	std::cout << (int) *c << ' ';
+    std::cout << '\n';
+
+    std::cout << "From (row - 1) to 0: ";
+    for (auto c = bm.rrow_begin(0); c != bm.rrow_end(0); ++c)
+	std::cout << (int) *c << ' ';
+    std::cout << '\n';
+
+// font
+// ----
+// TODO: no es automático!!!
+    using Font = rom::font_dogica_8x8_rf::Font;
+    bm.clear();
+    atd::write<Font, rows, cols>(bm, Coord_ij{0, 0}, 'H');
+    atd::write<Font, rows, cols>(bm, Coord_ij{0, 8*1}, 'e');
+    atd::write<Font, rows, cols>(bm, Coord_ij{0, 8*2}, 'l');
+    atd::write<Font, rows, cols>(bm, Coord_ij{0, 8*3}, 'l');
+    atd::write<Font, rows, cols>(bm, Coord_ij{0, 8*4}, 'o');
+//    atd::write<Font, rows, cols>(bm, Coord_ij{8, 16}, '!');
+    print(bm);
 
 }
 
@@ -126,7 +161,6 @@ void test_bitmatrix_col_1bit()
 
     using Font = rom::font_dogica_8x8_cr::Font;
     bm.clear();
-    atd::write<Font, nrows, ncols>(bm, Coord_ij{0, 0}, 'H');
     atd::write<Font, nrows, ncols>(bm, Coord_ij{0, 0}, 'H');
     atd::write<Font, nrows, ncols>(bm, Coord_ij{0, 8}, 'e');
     atd::write<Font, nrows, ncols>(bm, Coord_ij{0, 16}, 'l');
