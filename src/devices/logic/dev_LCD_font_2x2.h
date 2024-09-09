@@ -24,6 +24,11 @@
 /****************************************************************************
  *
  *  - DESCRIPCION: Big digits de 2 x 2
+ *  
+ *  TODO: llevarlo al directorio `rom`. 
+ *	Generalizarlo como `rom_lcdnombre_de_letra_2x2.h`
+ *	Meterlo en la ROM
+ *
  *
  *  - HISTORIA:
  *    Manuel Perez

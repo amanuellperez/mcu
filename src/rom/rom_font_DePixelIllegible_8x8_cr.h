@@ -53,7 +53,7 @@ static constexpr uint8_t col_in_bytes   = 1; // número de bytes que tiene cada 
 inline static constexpr uint8_t char_byte_size() {return cols * col_in_bytes;}
 
 static constexpr
-atd::ROM_biarray<uint8_t, nchars, cols*1, ROM_read> glyph
+atd::ROM_biarray<uint8_t, nchars, cols*col_in_bytes, ROM_read> glyph
 	PROGMEM = {
 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, //  
 0b00000000, 0b00111111, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, // !
