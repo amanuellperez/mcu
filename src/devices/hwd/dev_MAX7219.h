@@ -309,6 +309,7 @@ void MAX7219_basic<C>::display_test_off()
 /***************************************************************************
  *				MAX7219_array
  ***************************************************************************/
+// TODO: borrar MAX7219_array. Queda incluido en MAX7219_matrix
 // Conectamos varios MAX7219 en fila
 //
 //  +------+------+------+------+
@@ -362,195 +363,195 @@ void MAX7219_basic<C>::display_test_off()
 //  MAX7219_array_by_rows (???))
 //
 //  Version prueba: hagamos un array de MAX7219. Serán N MAX7219.
-template <typename Cfg, uint8_t N>
-class MAX7219_array {
-public:
-// Cfg
-    static constexpr uint8_t size() { return N; } // = nmodules() (???)
-    static constexpr uint8_t rows() {return 8;}	  // filas que tiene cada display
-    
-// Constructor
-    MAX7219_array() = delete;
-    static void init();
-
-// Write
-    // Escribimos en la fila row el array x[0...N)
-    // Las filas van de [0...8) (lo normal, no como van en el MAX7219 que van
-    // de [1...9) lo cual es muy confuso para un programador de C++ @_@
-    static void row(uint8_t row, std::span<uint8_t, N> x);
-
-    // Escribe en el display ndisplay, en el digit ndigit el valor x
-    static void write(uint8_t ndisplay, uint8_t ndigit, uint8_t x);
-
-    // Borra la fila row
-    static void clear(uint8_t row);
-
-    // Borra todo el array
-    static void clear();
-
-// comandos
-    static void intensity(uint8_t I);
-
-    // turn_on/turn_off (me gustan más que normal_mode/shutdown
-    static void turn_on ();
-    static void turn_off ();
-
-
-    static void display_test_on();
-    static void display_test_off();
-
-    
-private:
-// Types
-    using SPI        = typename Cfg::SPI_master;
-    using SelectoR   = typename Cfg::SPI_selector;
-    using SPI_select = mcu::SPI_selector_with_deselect_delay<SelectoR, 1>;
-
-    using MAX7219    = private_::MAX7219<SPI>;
-    
-// Cfg
-    static void move_command_till_last();
-};
-
-template <typename C, uint8_t N>
-void MAX7219_array<C, N>::init() 
-{
-    MAX7219::SPI_cfg();
-
-    SPI_select::select();
-    MAX7219::disable_decode_mode(); // es un display, no 7-segments
-    SPI_select::deselect();
-
-    SPI_select::select();
-    MAX7219::scan_all_digits();
-    SPI_select::deselect();
-
-    move_command_till_last();
-}
-
-// Mueve el comando hasta el final
-template <typename C, uint8_t N>
-void MAX7219_array<C, N>::move_command_till_last()
-{
-    if constexpr (size() > 1) {
-	for (uint8_t i = 0; i < size() - 1; ++i){
-	    SPI_select spi;
-	    MAX7219::no_op();
-
-	}
-    }
-}
-
-
-template <typename C, uint8_t N>
-void MAX7219_array<C, N>::row(uint8_t row, std::span<uint8_t, N> value)
-{
-    MAX7219::SPI_cfg();
-    SPI_select select;
-
-    for (auto x: value)
-	MAX7219::digit(row + 1, x);
-}
-
-// Esta función genera parpadeo!!! (es culpa de la forma de funcionar del
-// MAX7219?)
-template <typename C, uint8_t N>
-void MAX7219_array<C, N>::write(uint8_t ndisplay, uint8_t ndigit, uint8_t x)
-{
-    MAX7219::SPI_cfg();
-    SPI_select select;
-
-    for (uint8_t i = 0; i < size() - ndisplay; ++i)
-	MAX7219::no_op();
-
-    MAX7219::digit(ndigit, x);
-
-    for (uint8_t i = 0; i < ndisplay; ++i)
-	MAX7219::no_op();
-}
-
-
-template <typename C, uint8_t N>
-inline void MAX7219_array<C, N>::clear(uint8_t row)
-{
-    MAX7219::SPI_cfg();
-
-    SPI_select::select();
-    MAX7219::digit(row + 1, 0x00);
-    SPI_select::deselect();
-
-    move_command_till_last();
-}
-
-template <typename C, uint8_t N>
-inline void MAX7219_array<C, N>::clear()
-{
-    for (uint8_t i = 0; i < rows(); ++i)
-	clear(i);
-}
-
-template <typename C, uint8_t N>
-void MAX7219_array<C, N>::intensity(uint8_t I) 
-{
-    MAX7219::SPI_cfg();
-
-
-    SPI_select::select();
-    MAX7219::intensity(I);
-    SPI_select::deselect();
-
-    move_command_till_last();
-}
-
-template <typename C, uint8_t N>
-void MAX7219_array<C, N>::turn_on() 
-{
-    MAX7219::SPI_cfg();
-
-    SPI_select::select();
-    MAX7219::turn_on();
-    SPI_select::deselect();
-
-    move_command_till_last();
-}
-
-template <typename C, uint8_t N>
-void MAX7219_array<C, N>::turn_off() 
-{
-    MAX7219::SPI_cfg();
-
-    SPI_select::select();
-    MAX7219::turn_off();
-    SPI_select::deselect();
-
-    move_command_till_last();
-}
-
-
-template <typename C, uint8_t N>
-void MAX7219_array<C, N>::display_test_on()
-{
-    MAX7219::SPI_cfg();
-
-    SPI_select::select();
-    MAX7219::display_test_on();
-    SPI_select::deselect();
-
-    move_command_till_last();
-}
-
-template <typename C, uint8_t N>
-void MAX7219_array<C, N>::display_test_off()
-{
-    MAX7219::SPI_cfg();
-
-    SPI_select::select();
-    MAX7219::display_test_off();
-    SPI_select::deselect();
-
-    move_command_till_last();
-}
-
+//template <typename Cfg, uint8_t N>
+//class MAX7219_array {
+//public:
+//// Cfg
+//    static constexpr uint8_t size() { return N; } // = nmodules() (???)
+//    static constexpr uint8_t rows() {return 8;}	  // filas que tiene cada display
+//    
+//// Constructor
+//    MAX7219_array() = delete;
+//    static void init();
+//
+//// Write
+//    // Escribimos en la fila row el array x[0...N)
+//    // Las filas van de [0...8) (lo normal, no como van en el MAX7219 que van
+//    // de [1...9) lo cual es muy confuso para un programador de C++ @_@
+//    static void row(uint8_t row, std::span<uint8_t, N> x);
+//
+//    // Escribe en el display ndisplay, en el digit ndigit el valor x
+//    static void write(uint8_t ndisplay, uint8_t ndigit, uint8_t x);
+//
+//    // Borra la fila row
+//    static void clear(uint8_t row);
+//
+//    // Borra todo el array
+//    static void clear();
+//
+//// comandos
+//    static void intensity(uint8_t I);
+//
+//    // turn_on/turn_off (me gustan más que normal_mode/shutdown
+//    static void turn_on ();
+//    static void turn_off ();
+//
+//
+//    static void display_test_on();
+//    static void display_test_off();
+//
+//    
+//private:
+//// Types
+//    using SPI        = typename Cfg::SPI_master;
+//    using SelectoR   = typename Cfg::SPI_selector;
+//    using SPI_select = mcu::SPI_selector_with_deselect_delay<SelectoR, 1>;
+//
+//    using MAX7219    = private_::MAX7219<SPI>;
+//    
+//// Cfg
+//    static void move_command_till_last();
+//};
+//
+//template <typename C, uint8_t N>
+//void MAX7219_array<C, N>::init() 
+//{
+//    MAX7219::SPI_cfg();
+//
+//    SPI_select::select();
+//    MAX7219::disable_decode_mode(); // es un display, no 7-segments
+//    SPI_select::deselect();
+//
+//    SPI_select::select();
+//    MAX7219::scan_all_digits();
+//    SPI_select::deselect();
+//
+//    move_command_till_last();
+//}
+//
+//// Mueve el comando hasta el final
+//template <typename C, uint8_t N>
+//void MAX7219_array<C, N>::move_command_till_last()
+//{
+//    if constexpr (size() > 1) {
+//	for (uint8_t i = 0; i < size() - 1; ++i){
+//	    SPI_select spi;
+//	    MAX7219::no_op();
+//
+//	}
+//    }
+//}
+//
+//
+//template <typename C, uint8_t N>
+//void MAX7219_array<C, N>::row(uint8_t row, std::span<uint8_t, N> value)
+//{
+//    MAX7219::SPI_cfg();
+//    SPI_select select;
+//
+//    for (auto x: value)
+//	MAX7219::digit(row + 1, x);
+//}
+//
+//// Esta función genera parpadeo!!! (es culpa de la forma de funcionar del
+//// MAX7219?)
+//template <typename C, uint8_t N>
+//void MAX7219_array<C, N>::write(uint8_t ndisplay, uint8_t ndigit, uint8_t x)
+//{
+//    MAX7219::SPI_cfg();
+//    SPI_select select;
+//
+//    for (uint8_t i = 0; i < size() - ndisplay; ++i)
+//	MAX7219::no_op();
+//
+//    MAX7219::digit(ndigit, x);
+//
+//    for (uint8_t i = 0; i < ndisplay; ++i)
+//	MAX7219::no_op();
+//}
+//
+//
+//template <typename C, uint8_t N>
+//inline void MAX7219_array<C, N>::clear(uint8_t row)
+//{
+//    MAX7219::SPI_cfg();
+//
+//    SPI_select::select();
+//    MAX7219::digit(row + 1, 0x00);
+//    SPI_select::deselect();
+//
+//    move_command_till_last();
+//}
+//
+//template <typename C, uint8_t N>
+//inline void MAX7219_array<C, N>::clear()
+//{
+//    for (uint8_t i = 0; i < rows(); ++i)
+//	clear(i);
+//}
+//
+//template <typename C, uint8_t N>
+//void MAX7219_array<C, N>::intensity(uint8_t I) 
+//{
+//    MAX7219::SPI_cfg();
+//
+//
+//    SPI_select::select();
+//    MAX7219::intensity(I);
+//    SPI_select::deselect();
+//
+//    move_command_till_last();
+//}
+//
+//template <typename C, uint8_t N>
+//void MAX7219_array<C, N>::turn_on() 
+//{
+//    MAX7219::SPI_cfg();
+//
+//    SPI_select::select();
+//    MAX7219::turn_on();
+//    SPI_select::deselect();
+//
+//    move_command_till_last();
+//}
+//
+//template <typename C, uint8_t N>
+//void MAX7219_array<C, N>::turn_off() 
+//{
+//    MAX7219::SPI_cfg();
+//
+//    SPI_select::select();
+//    MAX7219::turn_off();
+//    SPI_select::deselect();
+//
+//    move_command_till_last();
+//}
+//
+//
+//template <typename C, uint8_t N>
+//void MAX7219_array<C, N>::display_test_on()
+//{
+//    MAX7219::SPI_cfg();
+//
+//    SPI_select::select();
+//    MAX7219::display_test_on();
+//    SPI_select::deselect();
+//
+//    move_command_till_last();
+//}
+//
+//template <typename C, uint8_t N>
+//void MAX7219_array<C, N>::display_test_off()
+//{
+//    MAX7219::SPI_cfg();
+//
+//    SPI_select::select();
+//    MAX7219::display_test_off();
+//    SPI_select::deselect();
+//
+//    move_command_till_last();
+//}
+//
 
 /***************************************************************************
  *				MAX7219_matrix
@@ -605,12 +606,60 @@ void MAX7219_array<C, N>::display_test_off()
 //	Las absolutas no son prácticas ya que tenemos que escribir bytes
 //	enteros.
 //
+//  ¿POR QUÉ USO DOS TIPOS DE Bitmatrix?
+//  Cuando el MAX7219 lo conectamos en columnas, los bytes del bitmatrix
+//  tienen que estar en columnas para ser copiados rápidamente.
+//  Pero si los conectamos en filas, los bytes del bitmatrix hay que
+//  copiarlos en filas.
+//  De ahí la diferencia.
+namespace MAX7219_matrix_impl_{
+
+// Dependiendo de cómo esté conectado por hardware usaremos un tipo de
+// Bitmatrix
+// typename Bitmatrix(typename Cfg)
+// {
+//    if (Cfg::by_columns)
+//	return atd::Bitmatrix_col_1bit<rows, cols>;
 //
+//    else if (Cfg::by_rows)
+//	return atd::Bitmatrix_row_1bit<rows, cols>;
+// }
+//
+template <typename Cfg>
+inline constexpr int matrix_type()
+{
+    if constexpr (requires {Cfg::by_columns;})
+	{ return 1;}
+
+    else if constexpr (requires {Cfg::by_rows;})
+	{ return 2;}
+
+    else 
+	return -1;
+}
+
+
+template <typename Cfg, uint8_t rows, uint8_t cols, 
+	  int type = matrix_type<Cfg>()> // este hace el switch
+struct Bitmatrix_type{};
+
+template <typename Cfg, uint8_t rows, uint8_t cols>
+struct Bitmatrix_type<Cfg, rows, cols, 1> 
+{ using type = atd::Bitmatrix_col_1bit<rows, cols>;};
+
+template <typename Cfg, uint8_t rows, uint8_t cols>
+struct Bitmatrix_type<Cfg, rows, cols, 2>
+{ using type = atd::Bitmatrix_row_1bit<rows, cols>;};
+
+template <typename Cfg, uint8_t rows, uint8_t cols>
+using Bitmatrix_t = typename Bitmatrix_type<Cfg, rows, cols>::type;
+
+} // namespace
+  
+
 template <typename Cfg, uint8_t nstrips0, uint8_t nmodules_per_strip0>
 class MAX7219_matrix {
 public:
-// Types
-    
 // Cfg
     static constexpr uint8_t nstrips = nstrips0; 
     static constexpr uint8_t modules_per_strip = nmodules_per_strip0; 
@@ -627,7 +676,7 @@ public:
     static constexpr uint8_t rows = modules_per_strip * minidisplay_rows;
     static constexpr uint8_t cols = nstrips * minidisplay_cols;
 
-    using Bitmatrix = atd::Bitmatrix_col_1bit<rows, cols>;
+    using Bitmatrix = MAX7219_matrix_impl_::Bitmatrix_t<Cfg, rows, cols>;
 
 // Constructor
     MAX7219_matrix() = delete;
@@ -639,7 +688,11 @@ public:
 				std::span<uint8_t, modules_per_strip> x);
 
     // Escribimos la matriz m en el display
-    static void write(const Bitmatrix& m);
+    static void write(const Bitmatrix& m)
+	requires (std::is_same_v<Bitmatrix, atd::Bitmatrix_col_1bit<rows, cols> >);
+
+    static void write(const Bitmatrix& m)
+	requires (std::is_same_v<Bitmatrix, atd::Bitmatrix_row_1bit<rows, cols> >);
 
     // Borra la fila row
     static void clear(uint8_t row);
@@ -681,7 +734,7 @@ private:
 
     //template <std::forward_iterator It> TODO: no compila, pero debiera
     template <typename  It>
-    static void write_column(uint8_t nstrip, uint8_t col,
+    static void write_digit(uint8_t nstrip, uint8_t ndigit,
 					It p0, const It pe);
 //    static 
 //	void digit(uint8_t nstrip, uint8_t nmodule, uint8_t ndigit, uint8_t x);
@@ -754,9 +807,9 @@ void MAX7219_matrix<C, np, nm>::send_no_op(uint8_t nstrip, uint8_t n)
 
 template <typename C, uint8_t np, uint8_t nm>
 inline
-void MAX7219_matrix<C, np, nm>::write(uint8_t nstrip, uint8_t col,
+void MAX7219_matrix<C, np, nm>::write(uint8_t nstrip, uint8_t ndigit,
 				std::span<uint8_t, modules_per_strip> data)
-{ write_column(nstrip, col, data.begin(), data.end()); }
+{ write_digit(nstrip, ndigit, data.begin(), data.end()); }
 
 // Observar que no hago SPI::select/deselect con cada envio de comando
 // Hay que enviar todos los comandos para llenar los registros de cada MAX7219 
@@ -766,13 +819,13 @@ void MAX7219_matrix<C, np, nm>::write(uint8_t nstrip, uint8_t col,
 template <typename C, uint8_t np, uint8_t nm>
     // template <std::forward_iterator It>
     template <typename It>
-void MAX7219_matrix<C, np, nm>::write_column(uint8_t nstrip, uint8_t col,
+void MAX7219_matrix<C, np, nm>::write_digit(uint8_t nstrip, uint8_t ndigit,
 					It p0, const It pe)
 {
     SPI_select spi{nstrip};
 
     for (; p0 != pe; ++p0)
-	MAX7219::digit(col + 1, *p0);
+	MAX7219::digit(ndigit + 1, *p0);
 }
 
 
@@ -781,17 +834,31 @@ void MAX7219_matrix<C, np, nm>::write_column(uint8_t nstrip, uint8_t col,
 //	          j      = estamos en la columna j del display (esta es global)
 template <typename C, uint8_t np, uint8_t nm>
 void MAX7219_matrix<C, np, nm>::write(const Bitmatrix& m)
+    requires (std::is_same_v<Bitmatrix, atd::Bitmatrix_col_1bit<rows, cols> >)
 {
     using index_type = typename Bitmatrix::index_type;
     for (uint8_t nstrip = 0; nstrip < nstrips; ++nstrip)
     {
 	for (uint8_t ndigit = 0; ndigit < minidisplay_cols; ++ndigit){
 	    index_type j = minidisplay_cols * nstrip + ndigit;
-	    write_column(nstrip, ndigit, m.rcol_begin(j), m.rcol_end(j));
+	    write_digit(nstrip, ndigit, m.rcol_begin(j), m.rcol_end(j));
 	}
     }
 }
 
+template <typename C, uint8_t np, uint8_t nm>
+void MAX7219_matrix<C, np, nm>::write(const Bitmatrix& m)
+    requires (std::is_same_v<Bitmatrix, atd::Bitmatrix_row_1bit<rows, cols> >)
+{
+    using index_type = typename Bitmatrix::index_type;
+    for (uint8_t nstrip = 0; nstrip < nstrips; ++nstrip)
+    {
+	for (uint8_t ndigit = 0; ndigit < minidisplay_rows; ++ndigit){
+	    index_type j = minidisplay_rows * nstrip + ndigit;
+	    write_digit(nstrip, ndigit, m.row_begin(j), m.row_end(j));
+	}
+    }
+}
 
 template <typename C, uint8_t np, uint8_t nm>
 void MAX7219_matrix<C, np, nm>::clear(uint8_t nstrip)

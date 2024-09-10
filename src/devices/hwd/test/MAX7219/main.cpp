@@ -22,6 +22,7 @@
 #include <mcu_SPI.h>
 
 #include <rom_font_dogica_8x8_cr.h>
+#include <rom_font_dogica_8x8_rf.h>
 #include <atd_draw.h>
 
 #include <atd_test.h>
@@ -43,8 +44,8 @@ static constexpr uint8_t noCS = 16;
 static constexpr uint8_t strip0 = noCS;
 static constexpr uint8_t strip1 = 15;
 static constexpr uint8_t strip2 = 14;
-static constexpr uint8_t strip3 = 13;
-static constexpr uint8_t matrix_nstrips = 4;
+// dejo solo 3 para poder probar 
+static constexpr uint8_t matrix_nstrips = 3;
 
 // SPI protocol
 // ------------
@@ -60,16 +61,37 @@ struct MAX7219_cfg{
     using SPI_selector	= mcu::SPI_pin_selector<Micro, myu::SPI_master::noCS_pin_number>;
 };
 
-struct MAX7219_cfg_matrix{
+struct MAX7219_cfg_by_rows{
     using SPI_master	= myu::SPI_master;
     using SPI_selector	= 
-	mcu::SPI_pin_array_selector<Micro, strip0, strip1, strip2, strip3>;
+	mcu::SPI_pin_array_selector<Micro, strip0, strip1, strip2>;
+
+    static constexpr bool by_rows{};
+
+// Font no lo necesita MAX7219_matrix, pero lo uso en las pruebas
+    using Font = rom::font_dogica_8x8_rf::Font;
+    static constexpr bool is_by_rows = true;
+    static constexpr bool is_by_cols = false;
 };
 
+struct MAX7219_cfg_by_columns{
+    using SPI_master	= myu::SPI_master;
+    using SPI_selector	= 
+	mcu::SPI_pin_array_selector<Micro, strip0, strip1, strip2>;
+
+    static constexpr bool by_columns{};
+
+// Font no lo necesita MAX7219_matrix, pero lo uso en las pruebas
+    using Font = rom::font_dogica_8x8_cr::Font;
+    static constexpr bool is_by_rows = false;
+    static constexpr bool is_by_cols = true;
+};
+
+//using Cfg = MAX7219_cfg_by_columns;
+using Cfg = MAX7219_cfg_by_rows;
+
 using MAX7219        = dev::MAX7219_basic<MAX7219_cfg>;
-using MAX7219_array  = dev::MAX7219_array<MAX7219_cfg, 4>;
-using MAX7219_matrix = dev::MAX7219_matrix<MAX7219_cfg_matrix, 
-						    matrix_nstrips, 4>;
+using MAX7219_matrix = dev::MAX7219_matrix<Cfg, matrix_nstrips, 4>;
 
 using Bitmatrix = MAX7219_matrix::Bitmatrix;
 using Coord = Bitmatrix::Coord_ij;
@@ -116,12 +138,6 @@ void init_max7219()
     MAX7219::normal_mode();
 }
 
-void init_max7219_array()
-{
-    MAX7219_array::init(); 
-    MAX7219_array::intensity(0x00);
-    MAX7219_array::turn_on();
-}
 
 void init_max7219_matrix()
 {
@@ -168,48 +184,7 @@ void test_basic1()
 }
 
 
-void test_array()
-{
-    myu::UART_iostream uart;
-    uart << "Testing array of " << (int) MAX7219_array::size() << " MAX7219\n";
 
-    init_max7219_array();
-
-    uint8_t x[] = {0x01, 0x02, 0x04, 0x08};
-
-    MAX7219_array::clear();
-
-    for (uint8_t i = 0; i < MAX7219_array::rows(); ++i){
-	MAX7219_array::row(i, x);
-	Micro::wait_ms(800);
-
-	MAX7219_array::clear(i);
-    }
-
-    MAX7219_array::clear();
-
-
-}
-
-void test_array2()
-{
-    myu::UART_iostream uart;
-    uart << "Testing array of " << (int) MAX7219_array::size() << " MAX7219\n";
-
-    init_max7219_array();
-
-    MAX7219_array::clear();
-
-    for (uint8_t i = 0; i < 8; ++i){
-	MAX7219_array::write(1, i, 0xFF);
-	Micro::wait_ms(500);
-	MAX7219_array::clear();
-    }
-
-    MAX7219_array::clear();
-
-
-}
 
 void test_write_bitmatrix()
 {
@@ -229,9 +204,9 @@ void test_write_bitmatrix()
 
     MAX7219_matrix::write(bm);
 
-    Micro::wait_ms(800);
+    Micro::wait_ms(500);
     MAX7219_matrix::clear();
-    Micro::wait_ms(800);
+    Micro::wait_ms(500);
 
 
 }
@@ -241,17 +216,36 @@ void test_font()
     myu::UART_iostream uart;
     uart << "Font test\n"
 	    "---------\n";
-    using Font = rom::font_dogica_8x8_cr::Font;
+    using Font = Cfg::Font;
 
     MAX7219_matrix::clear();
 
     Bitmatrix bm;
 
     bm.clear();
-    atd::write<Font>(bm, Coord{0, 0}, 'H');
-    atd::write<Font>(bm, Coord{0, 8}, 'e');
-    atd::write<Font>(bm, Coord{0, 16}, 'l');
-    atd::write<Font>(bm, Coord{0, 24}, 'l');
+    if (Cfg::is_by_cols){
+    atd::write<Font>(bm, Coord{0, 0}, '1');
+    atd::write<Font>(bm, Coord{8, 0}, '2');
+    atd::write<Font>(bm, Coord{8*2, 0}, '3');
+    atd::write<Font>(bm, Coord{8*3, 0}, '4');
+    atd::write<Font>(bm, Coord{0, 8*1}, '5');
+    atd::write<Font>(bm, Coord{8, 8*1}, '6');
+    atd::write<Font>(bm, Coord{8*2, 8*1}, '7');
+    atd::write<Font>(bm, Coord{8*3, 8*1}, '8');
+
+    } else {
+
+    atd::write<Font>(bm, Coord{0, 0}  , '1');
+//    atd::write<Font>(bm, Coord{0, 8}  , '2');
+//    atd::write<Font>(bm, Coord{0, 8*2}, '3');
+//    atd::write<Font>(bm, Coord{0, 8*3}, '4');
+//    atd::write<Font>(bm, Coord{8, 0}  , '5');
+//    atd::write<Font>(bm, Coord{8, 8*1}, '6');
+//    atd::write<Font>(bm, Coord{8, 8*2}, '7');
+//    atd::write<Font>(bm, Coord{8, 8*3}, '8');
+    }
+
+
 //    print(uart, bm);
     MAX7219_matrix::write(bm);
     Micro::wait_ms(800);
@@ -264,13 +258,13 @@ void test_basic()
     MAX7219_matrix::clear();
     for (uint8_t i = 0; i < MAX7219_matrix::nstrips; ++i){
 	MAX7219_matrix::display_test_on(i);
-	Micro::wait_ms(1000);
+	Micro::wait_ms(500);
 	MAX7219_matrix::display_test_off(i);
 	Micro::wait_ms(1000);
     }
 }
 
-void test_write_column()
+void test_write_digit()
 {
     myu::UART_iostream uart;
     uart << "Write column test\n"
@@ -321,15 +315,15 @@ void test_write()
 void test_matrix()
 {
     myu::UART_iostream uart;
-    uart << "\nTesting array of " << (int) MAX7219_array::size() << " MAX7219\n";
+    uart << "\nTesting  MAX7219\n";
 
     init_max7219_matrix();
     
 //    test_basic();
-//   test_write();
-//    test_write_column();
-//    test_write_bitmatrix();
-    test_font();
+//    test_write();
+//    test_write_digit();
+    test_write_bitmatrix();
+   // test_font();
 }
 
 // Main
@@ -345,8 +339,6 @@ int main()
     while (1) 
     {
 //	test_basic1();
-//	test_array();
-//	test_array2();
 	test_matrix();
 
     }                                                 
