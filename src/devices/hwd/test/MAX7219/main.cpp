@@ -56,11 +56,6 @@ static_assert (noCS == myu::SPI_master::noCS_pin_number);
 
 // Devices
 // -------
-struct MAX7219_cfg{
-    using SPI_master	= myu::SPI_master;
-    using SPI_selector	= mcu::SPI_pin_selector<Micro, myu::SPI_master::noCS_pin_number>;
-};
-
 struct MAX7219_cfg_by_rows{
     using SPI_master	= myu::SPI_master;
     using SPI_selector	= 
@@ -87,10 +82,10 @@ struct MAX7219_cfg_by_columns{
     static constexpr bool is_by_cols = true;
 };
 
+// Elegir para probar por filas o por columnas
 //using Cfg = MAX7219_cfg_by_columns;
 using Cfg = MAX7219_cfg_by_rows;
 
-using MAX7219        = dev::MAX7219_basic<MAX7219_cfg>;
 using MAX7219_matrix = dev::MAX7219_matrix<Cfg, matrix_nstrips, 4>;
 
 using Bitmatrix = MAX7219_matrix::Bitmatrix;
@@ -112,6 +107,42 @@ void print(std::ostream& out, const atd::Bitmatrix_col_1bit<nrows, ncols>& m)
 
     }
 }
+
+template <size_t nrows, size_t ncols>
+void print(std::ostream& out, const atd::Bitmatrix_row_1bit<nrows, ncols>& m)
+{
+    for (uint8_t i = 0; i < m.rows(); ++i){
+	for (uint8_t j = 0; j < m.cols(); ++j){
+	    if (m(i, j) == 1)
+		out << 'X';
+	    else
+		out << '.';
+	}
+	out << '\n';
+
+    }
+}
+
+
+template <size_t nrows, size_t ncols>
+void print_uints(std::ostream& out, const atd::Bitmatrix_row_1bit<nrows, ncols>& m)
+{
+    using index_type = typename Bitmatrix::index_type;
+    for (uint8_t nstrip = 0; nstrip < MAX7219_matrix::nstrips; ++nstrip)
+    {
+	for (uint8_t ndigit = 0; ndigit < 8; ++ndigit){
+	    index_type i = 8 * nstrip + ndigit;
+	    out << (int) i << ": ";
+	    for (auto p = m.row_begin(i); p !=  m.row_end(i); ++p){
+		out << (int) *p << ' ';
+	    }
+	    out << '\n';
+	}
+    }
+}
+
+
+
 // Functions
 // ---------
 void init_uart()
@@ -128,17 +159,6 @@ void init_spi()
 }
 
 
-// inicializamos 1 display solo
-void init_max7219()
-{
-    MAX7219::init(); 
-    MAX7219::scan_all_digits();
-//    MAX7219::intensity(10);
-    MAX7219::disable_decode_mode();
-    MAX7219::normal_mode();
-}
-
-
 void init_max7219_matrix()
 {
     myu::UART_iostream uart;
@@ -151,6 +171,7 @@ void init_max7219_matrix()
     MAX7219_matrix::init(); 
     MAX7219_matrix::intensity(0x00);
     MAX7219_matrix::turn_on();
+    MAX7219_matrix::clear();
 }
 
 void hello()
@@ -161,28 +182,12 @@ void hello()
 		"Connections:\n"
 		"\tConnect MAX7219 to SPI via " << (int) noCS << " pin\n"
 		"\tConnecto other modules to pins " << (int) strip1
+		    << ", " << (int) strip2 
+		<< "\n\nTo test the matrix by rows or by columns you have "
+		   "to choose Cfg as MAX7219_cfg_by_rows or MAX7219_cfg_by_columns"
+		   "and recompile"
 		<< "\n\n";
 }
-
-// Para 1 display
-void test_basic1()
-{
-    init_max7219();
-
-    // CUIDADO: de [1..8] !!!
-    for (uint8_t i = 1; i <= 8; ++i){
-	MAX7219::digit(i, 0x00);
-    }
-
-
-    for (uint8_t i = 0; i < 8; ++i){
-	for (uint8_t j = 1; j <= 8; ++j) 
-	    MAX7219::digit(j, 1 << i);
-
-	Micro::wait_ms(1000);
-    }
-}
-
 
 
 
@@ -191,22 +196,25 @@ void test_write_bitmatrix()
     myu::UART_iostream uart;
     uart << "write::MAX7219_matrix\n";
 
-    static uint8_t j = 0;
+    uart << "matrix of " << (int) MAX7219_matrix::rows 
+		         << " rows and " 
+			 << (int) MAX7219_matrix::cols
+			 << " cols\n";
+
     Bitmatrix bm;
+    for (uint8_t j = 0; j < bm.cols(); ++j){
 
-    bm.clear(); // FUNDAMENTAL!!!
-    for (uint8_t i = 0; i < bm.rows(); ++i)
-	bm(i,j) = 1;
-    ++j;
+	bm.clear(); // FUNDAMENTAL!!!
+	for (uint8_t i = 0; i < bm.rows(); ++i)
+	    bm(i,j) = 1;
+	++j;
 
-    if (j == bm.cols())
-	j = 0;
+	MAX7219_matrix::write(bm);
 
-    MAX7219_matrix::write(bm);
+	Micro::wait_ms(500);
+    }
 
-    Micro::wait_ms(500);
     MAX7219_matrix::clear();
-    Micro::wait_ms(500);
 
 
 }
@@ -224,107 +232,109 @@ void test_font()
 
     bm.clear();
     if (Cfg::is_by_cols){
-    atd::write<Font>(bm, Coord{0, 0}, '1');
-    atd::write<Font>(bm, Coord{8, 0}, '2');
-    atd::write<Font>(bm, Coord{8*2, 0}, '3');
-    atd::write<Font>(bm, Coord{8*3, 0}, '4');
-    atd::write<Font>(bm, Coord{0, 8*1}, '5');
-    atd::write<Font>(bm, Coord{8, 8*1}, '6');
-    atd::write<Font>(bm, Coord{8*2, 8*1}, '7');
-    atd::write<Font>(bm, Coord{8*3, 8*1}, '8');
+    atd::write<Font>(bm, Coord{0, 0}  , '1');
+    atd::write<Font>(bm, Coord{0, 8}  , '2');
+    atd::write<Font>(bm, Coord{0, 8*2}, '3');
 
+    atd::write<Font>(bm, Coord{8, 0}  , '4');
+    atd::write<Font>(bm, Coord{8, 8*1}, '5');
+    atd::write<Font>(bm, Coord{8, 8*2}, '6');
+
+    atd::write<Font>(bm, Coord{8*2, 8*0}, '7');
+    atd::write<Font>(bm, Coord{8*2, 8*1}, '8');
+    atd::write<Font>(bm, Coord{8*2, 8*2}, '9');
+
+    atd::write<Font>(bm, Coord{8*3, 8*0}, 'A');
+    atd::write<Font>(bm, Coord{8*3, 8*1}, '8');
+    atd::write<Font>(bm, Coord{8*3, 8*2}, 'C');
     } else {
 
     atd::write<Font>(bm, Coord{0, 0}  , '1');
-//    atd::write<Font>(bm, Coord{0, 8}  , '2');
-//    atd::write<Font>(bm, Coord{0, 8*2}, '3');
-//    atd::write<Font>(bm, Coord{0, 8*3}, '4');
-//    atd::write<Font>(bm, Coord{8, 0}  , '5');
-//    atd::write<Font>(bm, Coord{8, 8*1}, '6');
-//    atd::write<Font>(bm, Coord{8, 8*2}, '7');
-//    atd::write<Font>(bm, Coord{8, 8*3}, '8');
+    atd::write<Font>(bm, Coord{0, 8}  , '2');
+    atd::write<Font>(bm, Coord{0, 8*2}, '3');
+    atd::write<Font>(bm, Coord{0, 8*3}, '4');
+    atd::write<Font>(bm, Coord{8, 0}  , '5');
+    atd::write<Font>(bm, Coord{8, 8*1}, '6');
+    atd::write<Font>(bm, Coord{8, 8*2}, '7');
+    atd::write<Font>(bm, Coord{8, 8*3}, '8');
+
+    atd::write<Font>(bm, Coord{8*2, 8*0}, '9');
+    atd::write<Font>(bm, Coord{8*2, 8*1}, 'A');
+    atd::write<Font>(bm, Coord{8*2, 8*2}, 'B');
+    atd::write<Font>(bm, Coord{8*2, 8*3}, 'C');
     }
 
 
-//    print(uart, bm);
     MAX7219_matrix::write(bm);
-    Micro::wait_ms(800);
-    MAX7219_matrix::clear();
-    Micro::wait_ms(800);
 }
 
 void test_basic()
 {
+    myu::UART_iostream uart;
+    uart << "\nBasit test\n"
+	      "----------\n";
+	    
+
     MAX7219_matrix::clear();
     for (uint8_t i = 0; i < MAX7219_matrix::nstrips; ++i){
+	uart << "Strip " << (int) i << " ON ... ";
 	MAX7219_matrix::display_test_on(i);
 	Micro::wait_ms(500);
+	uart << "OFF\n";
 	MAX7219_matrix::display_test_off(i);
 	Micro::wait_ms(1000);
     }
 }
 
-void test_write_digit()
-{
-    myu::UART_iostream uart;
-    uart << "Write column test\n"
-	    "-----------------\n";
-    MAX7219_matrix::clear();
-
-
-    uint8_t x0[] = {0x01, 0x02, 0x04, 0x08};
-    uint8_t x1[] = {0x07, 0x0E, 0x1C, 0x38};
-    uint8_t x2[] = {0x04, 0x08, 0x10, 0x20};
-
-    for (uint8_t nstrip = 0; nstrip < 2; ++nstrip){
-	for (uint8_t j = 0; j + 2 < MAX7219_matrix::strip_cols; ++j){
-	    MAX7219_matrix::write(nstrip, j + 0, x0);
-	    MAX7219_matrix::write(nstrip, j + 1, x1);
-	    MAX7219_matrix::write(nstrip, j + 2, x2);
-	    Micro::wait_ms(1000);
-	    MAX7219_matrix::clear();
-	}
-    }
-}
+// Esta función no aporta mucho
+//void test_write_digit()
+//{
+//    myu::UART_iostream uart;
+//    uart << "write_digit test\n"
+//	    "----------------\n";
+//    MAX7219_matrix::clear();
+//
+//
+//    uint8_t x0[] = {0x01, 0x02, 0x04, 0x08};
+//    uint8_t x1[] = {0x07, 0x0E, 0x1C, 0x38};
+//    uint8_t x2[] = {0x04, 0x08, 0x10, 0x20};
+//
+//    for (uint8_t nstrip = 0; nstrip < 2; ++nstrip){
+//	for (uint8_t j = 0; j + 2 < MAX7219_matrix::strip_cols; ++j){
+//	    MAX7219_matrix::write(nstrip, j + 0, x0);
+//	    MAX7219_matrix::write(nstrip, j + 1, x1);
+//	    MAX7219_matrix::write(nstrip, j + 2, x2);
+//	    Micro::wait_ms(1000);
+//	    MAX7219_matrix::clear();
+//	}
+//    }
+//}
 
 void test_write()
 {
     myu::UART_iostream uart;
-    uart << "Write test\n"
-	    "----------\n";
+    uart << "\nWrite test\n"
+	      "----------\n"
+	      "Writing 0x01 in strip 0\n"
+	      "        0x02 in strip 1\n"
+	      "        0x04 in strip 2\n"
+	      "and     0x08 in strip 3\n";
+
+
     MAX7219_matrix::clear();
 
     uint8_t x[] = {0x01, 0x02, 0x04, 0x08};
-    for (uint8_t i = 0; i < 8; ++i){
-	MAX7219_matrix::write(0, i, x);
-//	Micro::wait_ms(500);
+    for (uint8_t nstrip = 0; nstrip < MAX7219_matrix::nstrips; ++nstrip){
+	for (uint8_t i = 0; i < 8; ++i){
+	    MAX7219_matrix::write(nstrip, i, x);
+	    Micro::wait_ms(500);
+	}
     }
     Micro::wait_ms(500);
     MAX7219_matrix::clear();
     Micro::wait_ms(800);
-
-
-//    uint8_t y[] = {0x08, 0x04, 0x02, 0x01};
-//    for (uint8_t i = 0; i < 8; ++i){
-//	MAX7219_matrix::write(1, i, y);
-//	Micro::wait_ms(500);
-//    }
-
 }
 
-void test_matrix()
-{
-    myu::UART_iostream uart;
-    uart << "\nTesting  MAX7219\n";
-
-    init_max7219_matrix();
-    
-//    test_basic();
-//    test_write();
-//    test_write_digit();
-    test_write_bitmatrix();
-   // test_font();
-}
 
 // Main
 // ----
@@ -332,14 +342,33 @@ int main()
 {
     init_uart();
     init_spi();
+    init_max7219_matrix();
 
     hello();
 
     myu::UART_iostream uart;
-    while (1) 
-    {
-//	test_basic1();
-	test_matrix();
+
+    while (1){
+	uart << "\nMenu\n"
+	          "----\n"
+		  "0. Clear\n"
+		  "1. Basic test\n"
+		  "2. Write test\n"
+		  "3. Write bit matrix test\n"
+		  "4. Font test\n";
+
+	char opt{};
+	uart >> opt;
+	
+	switch (opt){
+	    break; case '0': MAX7219_matrix::clear();
+	    break; case '1': test_basic();
+	    break; case '2': test_write();
+	    break; case '3': test_write_bitmatrix();
+	    break; case '4': test_font();
+	    break; default:
+			uart << "What??? \n";
+	}
 
     }                                                 
 }

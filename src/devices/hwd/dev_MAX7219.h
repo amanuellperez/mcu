@@ -614,6 +614,8 @@ void MAX7219_basic<C>::display_test_off()
 //  De ahí la diferencia.
 namespace MAX7219_matrix_impl_{
 
+enum class Matrix_type{ by_columns, by_rows, unknown };
+
 // Dependiendo de cómo esté conectado por hardware usaremos un tipo de
 // Bitmatrix
 // typename Bitmatrix(typename Cfg)
@@ -626,34 +628,71 @@ namespace MAX7219_matrix_impl_{
 // }
 //
 template <typename Cfg>
-inline constexpr int matrix_type()
+inline constexpr Matrix_type matrix_type()
 {
     if constexpr (requires {Cfg::by_columns;})
-	{ return 1;}
+	{ return Matrix_type::by_columns;}
 
     else if constexpr (requires {Cfg::by_rows;})
-	{ return 2;}
+	{ return Matrix_type::by_rows;}
 
     else 
-	return -1;
+	return Matrix_type::unknown;
 }
 
 
 template <typename Cfg, uint8_t rows, uint8_t cols, 
-	  int type = matrix_type<Cfg>()> // este hace el switch
+	  Matrix_type type = matrix_type<Cfg>()> // este hace el switch
 struct Bitmatrix_type{};
 
 template <typename Cfg, uint8_t rows, uint8_t cols>
-struct Bitmatrix_type<Cfg, rows, cols, 1> 
+struct Bitmatrix_type<Cfg, rows, cols, Matrix_type::by_columns> 
 { using type = atd::Bitmatrix_col_1bit<rows, cols>;};
 
 template <typename Cfg, uint8_t rows, uint8_t cols>
-struct Bitmatrix_type<Cfg, rows, cols, 2>
+struct Bitmatrix_type<Cfg, rows, cols, Matrix_type::by_rows>
 { using type = atd::Bitmatrix_row_1bit<rows, cols>;};
 
 template <typename Cfg, uint8_t rows, uint8_t cols>
 using Bitmatrix_t = typename Bitmatrix_type<Cfg, rows, cols>::type;
 
+// rows and cols
+// -------------
+// TODO: viendo que estoy calculando mucha cosa, se puede calcular todo dentro
+// de una clase y usar el resultado en MAX7219_matrix
+template <typename Cfg, uint8_t nstrips, uint8_t modules_per_strip>
+inline 
+constexpr uint8_t rows()
+{
+    constexpr uint8_t minidisplay_rows = 8; // DUDA: generalizarlo?
+    constexpr uint8_t minidisplay_cols = 8;
+
+    if constexpr (matrix_type<Cfg>() == Matrix_type::by_columns)
+	return modules_per_strip * minidisplay_rows;
+
+    else if constexpr (matrix_type<Cfg>() == Matrix_type::by_rows)
+	return nstrips * minidisplay_cols;
+
+    else
+	return 0; // error
+}
+
+template <typename Cfg, uint8_t nstrips, uint8_t modules_per_strip>
+inline
+constexpr uint8_t cols()
+{
+    constexpr uint8_t minidisplay_rows = 8; // DUDA: generalizarlo?
+    constexpr uint8_t minidisplay_cols = 8;
+
+    if constexpr (matrix_type<Cfg>() == Matrix_type::by_columns)
+	return nstrips * minidisplay_cols;
+
+    else if constexpr (matrix_type<Cfg>() == Matrix_type::by_rows)
+	return modules_per_strip * minidisplay_rows;
+
+    else
+	return 0; // error
+}
 } // namespace
   
 
@@ -673,8 +712,10 @@ public:
 
 // Concebido como matriz de bits
     // Dimensiones en bits del display 
-    static constexpr uint8_t rows = modules_per_strip * minidisplay_rows;
-    static constexpr uint8_t cols = nstrips * minidisplay_cols;
+    static constexpr uint8_t rows 
+	    = MAX7219_matrix_impl_::rows<Cfg, nstrips, modules_per_strip>();
+    static constexpr uint8_t cols 
+	    = MAX7219_matrix_impl_::cols<Cfg, nstrips, modules_per_strip>();
 
     using Bitmatrix = MAX7219_matrix_impl_::Bitmatrix_t<Cfg, rows, cols>;
 
@@ -854,8 +895,8 @@ void MAX7219_matrix<C, np, nm>::write(const Bitmatrix& m)
     for (uint8_t nstrip = 0; nstrip < nstrips; ++nstrip)
     {
 	for (uint8_t ndigit = 0; ndigit < minidisplay_rows; ++ndigit){
-	    index_type j = minidisplay_rows * nstrip + ndigit;
-	    write_digit(nstrip, ndigit, m.row_begin(j), m.row_end(j));
+	    index_type i = minidisplay_rows * nstrip + ndigit;
+	    write_digit(nstrip, ndigit, m.row_begin(i), m.row_end(i));
 	}
     }
 }
