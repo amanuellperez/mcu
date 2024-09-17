@@ -652,7 +652,7 @@ SDD1306_I2C_driver<C, nc, nr>::PageCol SDD1306_I2C_driver<C, nc, nr>::
     std::copy(letter.begin(), letter.end(), &tmp[0]);
     
     uint8_t col1 = pos.col + Font::cols - 1;
-    uint8_t page1 = pos.page + Font::col_in_bytes - 1;
+    uint8_t page1 = pos.page + Font::bytes_in_a_column - 1;
     vertical_mode(Rect{pos, {page1, col1}});
     Base::gddram_write(tmp);
     return {pos.page, col1};
@@ -668,7 +668,7 @@ SDD1306_I2C_driver<C, nc, nr>::PageCol SDD1306_I2C_driver<C, nc, nr>::
 	pos = print<Font>(pos, *p);
 	if (pos.col + Font::cols >= ncols){
 	    pos.col = 0;
-	    pos.page += Font::col_in_bytes;
+	    pos.page += Font::bytes_in_a_column;
 	}
     }
     return pos;

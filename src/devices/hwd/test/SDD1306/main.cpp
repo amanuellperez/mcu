@@ -183,7 +183,7 @@ void write_font(const char font_name[])
 	pos = SDD1306::print<Font>(pos, c);
 	if (pos.col + Font::cols >= SDD1306::ncols){
 	    pos.col = 0;
-	    pos.page += Font::col_in_bytes;
+	    pos.page += Font::bytes_in_a_column;
 	}
     }
 }

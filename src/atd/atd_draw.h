@@ -63,23 +63,28 @@ void write(Bitmatrix_col_1bit<nrows, ncols>& m,
 	    }
 {
     using Coord_ij = typename Bitmatrix_col_1bit<nrows, ncols>::Coord_ij;
+    using Index = typename Bitmatrix_col_1bit<nrows, ncols>::index_type;
+
+    if (m.rows() < p0.i or m.cols() < p0.j)
+	return;
 
     auto letter = Font::glyph.row(Font::index(ic));
     auto c = letter.begin();
-    for (uint8_t j = 0; j < Font::cols; ++j){
-	for (uint8_t i = 0; 
-		    i < Font::col_in_bytes and c != letter.end(); 
-		    ++i, ++c){
-	    m.write_byte(*c, p0 + Coord_ij{i, j});
 
-	    if (i + p0.i + 1 == m.rows_in_bytes()) // realmente no necesaria
-		break;
+    Index I = std::min<Index>(Font::bytes_in_a_column, m.rows() - p0.i);
+    Index J = std::min<Index>(Font::cols, m.cols() - p0.j);
+
+    for (uint8_t j = 0; j < J; ++j){
+	uint8_t i = 0;
+	for (; i < I; ++i, ++c){
+	    m.write_byte(*c, p0 + Coord_ij{i, j});
 	}
 
-	if (j + p0.j + 1 == m.cols_in_bytes())	// necesaria
-	    return;
+	for (; i < Font::bytes_in_a_column; ++i)
+	    ++c;   
     }
 }
+
 
 // Bitmatrix_row_1bit
 // ------------------
@@ -101,7 +106,7 @@ void write(Bitmatrix_row_1bit<nrows, ncols>& m,
     auto c = letter.begin();
     for (uint8_t i = 0; i < Font::rows; ++i){
 	for (uint8_t j = 0; 
-		    j < Font::row_in_bytes and c != letter.end(); 
+		    j < Font::bytes_in_a_row and c != letter.end(); 
 		    ++j, ++c){
 	    m.write_byte(*c, p0 + Coord_ij{i, j});
 

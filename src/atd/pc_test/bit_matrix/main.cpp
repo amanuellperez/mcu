@@ -29,6 +29,7 @@
 #include "my_rom.h"
 #include "dogica_cr.h"
 #include "dogica_rf.h"
+#include "vcr_cr.h"
 
 using namespace test;
 
@@ -124,6 +125,32 @@ void test_bitmatrix_row_1bit()
 
 }
 
+template <typename Font, uint8_t nrows, uint8_t ncols>
+void test_font_col()
+{
+    using BM = atd::Bitmatrix_col_1bit<nrows, ncols>;
+    using Coord_ij = BM::Coord_ij;
+    
+    BM bm;
+std::cout << "bm.rows_in_bytes = " << (int) bm.rows_in_bytes() << '\n';
+std::cout << "bm.cols_in_bytes = " << (int) bm.cols_in_bytes() << '\n';
+
+    bm.clear();
+    atd::write<Font, nrows, ncols>(bm, Coord_ij{0, 0}, 'H');
+//    atd::write<Font, nrows, ncols>(bm, Coord_ij{0, 6}, 'e');
+//    atd::write<Font, nrows, ncols>(bm, Coord_ij{0, 12}, 'l');
+//    atd::write<Font, nrows, ncols>(bm, Coord_ij{0, 16}, 'l');
+//    atd::write<Font, nrows, ncols>(bm, Coord_ij{0, 22}, 'o');
+//
+//    // hacemos un pequeño scroll
+//    atd::write<Font, nrows, ncols>(bm, Coord_ij{8, 4}, 'H');
+//    atd::write<Font, nrows, ncols>(bm, Coord_ij{8, 10}, 'e');
+//    atd::write<Font, nrows, ncols>(bm, Coord_ij{8, 16}, 'l');
+//    atd::write<Font, nrows, ncols>(bm, Coord_ij{8, 20}, 'l');
+//    atd::write<Font, nrows, ncols>(bm, Coord_ij{8, 26}, 'o');
+    print(bm);
+}
+
 void test_bitmatrix_col_1bit()
 {
     test::interface("Bitmatrix_col_1bit");
@@ -131,7 +158,6 @@ void test_bitmatrix_col_1bit()
     constexpr uint8_t nrows = 16;
     constexpr uint8_t ncols = 30;
     using BM = atd::Bitmatrix_col_1bit<nrows, ncols>;
-    using Coord_ij = BM::Coord_ij;
 
     BM bm;
 
@@ -159,15 +185,12 @@ void test_bitmatrix_col_1bit()
     bm(0,4) = 0;
     CHECK_TRUE(bm(0,4) == 0, "operator()");
 
-    using Font = rom::font_dogica_8x8_cr::Font;
-    bm.clear();
-    atd::write<Font, nrows, ncols>(bm, Coord_ij{0, 0}, 'H');
-    atd::write<Font, nrows, ncols>(bm, Coord_ij{0, 8}, 'e');
-    atd::write<Font, nrows, ncols>(bm, Coord_ij{0, 16}, 'l');
-    atd::write<Font, nrows, ncols>(bm, Coord_ij{8, 0}, 'l');
-    atd::write<Font, nrows, ncols>(bm, Coord_ij{8, 8}, 'o');
-    atd::write<Font, nrows, ncols>(bm, Coord_ij{8, 16}, '!');
-    print(bm);
+//    using Dogica = rom::font_dogica_8x8_cr::Font;
+//    test_font_col<Dogica, nrows, ncols>();
+
+    using VCR = rom::font_VCR_12x17_cr::Font;
+    test_font_col<VCR , 24, 32>();
+
 
     bm.write_byte(127, {0,0});
     bm.write_byte(231, {8,0});

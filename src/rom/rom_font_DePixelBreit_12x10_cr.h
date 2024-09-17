@@ -50,11 +50,11 @@ static constexpr uint8_t rows = 10; // número de filas que tiene cada font
 static constexpr uint8_t cols = 12; // número de columnas que tiene cada font
 
 // Tamaño en bytes
-static constexpr uint8_t col_in_bytes   = 2; // número de bytes que tiene cada columna
-inline static constexpr uint8_t char_byte_size() {return cols * col_in_bytes;}
+static constexpr uint8_t bytes_in_a_column= 2; // número de bytes que tiene cada columna
+inline static constexpr uint8_t char_byte_size() {return cols * bytes_in_a_column;}
 
 static constexpr
-atd::ROM_biarray<uint8_t, nchars, cols*col_in_bytes, ROM_read> glyph
+atd::ROM_biarray<uint8_t, nchars, cols*bytes_in_a_column, ROM_read> glyph
 	PROGMEM = {
 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, //  
 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00101111, 0b10000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, // !
