@@ -30,6 +30,8 @@
 #include "dogica_cr.h"
 #include "dogica_rf.h"
 #include "vcr_cr.h"
+#include "upheavtt_cr.h"
+
 
 using namespace test;
 
@@ -64,6 +66,19 @@ void print(const atd::Bitmatrix_col_1bit<nrows, ncols>& m)
     }
 }
 
+template <size_t nrows, size_t ncols>
+void print_bytes(const atd::Bitmatrix_col_1bit<nrows, ncols>& m)
+{
+    std::cout << std::hex;
+
+    for (uint8_t i = 0; i < m.rows_in_bytes(); ++i){
+	for (uint8_t j = 0; j < m.cols_in_bytes(); ++j){
+		std::cout << "0x" << (int) m.read_byte(i,j) << ' ';
+	}
+	std::cout << '\n';
+
+    }
+}
 
 void test_bitmatrix_row_1bit()
 {
@@ -130,25 +145,26 @@ void test_font_col()
 {
     using BM = atd::Bitmatrix_col_1bit<nrows, ncols>;
     using Coord_ij = BM::Coord_ij;
-    
-    BM bm;
-std::cout << "bm.rows_in_bytes = " << (int) bm.rows_in_bytes() << '\n';
-std::cout << "bm.cols_in_bytes = " << (int) bm.cols_in_bytes() << '\n';
+    static uint16_t w = Font::cols; // ancho de una letra
+    static uint16_t h = 8*Font::rows_in_bytes; // alto de una letra
 
+    BM bm;
+    std::cout << "\n\n";
     bm.clear();
     atd::write<Font, nrows, ncols>(bm, Coord_ij{0, 0}, 'H');
-//    atd::write<Font, nrows, ncols>(bm, Coord_ij{0, 6}, 'e');
-//    atd::write<Font, nrows, ncols>(bm, Coord_ij{0, 12}, 'l');
-//    atd::write<Font, nrows, ncols>(bm, Coord_ij{0, 16}, 'l');
-//    atd::write<Font, nrows, ncols>(bm, Coord_ij{0, 22}, 'o');
-//
-//    // hacemos un pequeño scroll
-//    atd::write<Font, nrows, ncols>(bm, Coord_ij{8, 4}, 'H');
-//    atd::write<Font, nrows, ncols>(bm, Coord_ij{8, 10}, 'e');
-//    atd::write<Font, nrows, ncols>(bm, Coord_ij{8, 16}, 'l');
-//    atd::write<Font, nrows, ncols>(bm, Coord_ij{8, 20}, 'l');
-//    atd::write<Font, nrows, ncols>(bm, Coord_ij{8, 26}, 'o');
+    atd::write<Font, nrows, ncols>(bm, Coord_ij{0, uint16_t(w)}, 'e');
+    atd::write<Font, nrows, ncols>(bm, Coord_ij{0, uint16_t(2*w)}, 'l');
+    atd::write<Font, nrows, ncols>(bm, Coord_ij{0, uint16_t(3*w)}, 'l');
+    atd::write<Font, nrows, ncols>(bm, Coord_ij{0, uint16_t(4*w)}, 'o');
+
+    // hacemos un pequeño scroll
+    atd::write<Font, nrows, ncols>(bm, Coord_ij{h, uint16_t(w + 1)}, 'H');
+    atd::write<Font, nrows, ncols>(bm, Coord_ij{h, uint16_t(2*w + 1u)}, 'e');
+    atd::write<Font, nrows, ncols>(bm, Coord_ij{h, uint16_t(3*w + 1u)}, 'l');
+    atd::write<Font, nrows, ncols>(bm, Coord_ij{h, uint16_t(4*w + 1u)}, 'l');
+    atd::write<Font, nrows, ncols>(bm, Coord_ij{h, uint16_t(5*w + 4)}, 'o');
     print(bm);
+//    print_bytes(bm);
 }
 
 void test_bitmatrix_col_1bit()
@@ -185,15 +201,23 @@ void test_bitmatrix_col_1bit()
     bm(0,4) = 0;
     CHECK_TRUE(bm(0,4) == 0, "operator()");
 
-//    using Dogica = rom::font_dogica_8x8_cr::Font;
-//    test_font_col<Dogica, nrows, ncols>();
 
+    using Dogica = rom::font_dogica_8x8_cr::Font;
+    using Upheavtt = rom::font_upheavtt_13x14_cr::Font;
     using VCR = rom::font_VCR_12x17_cr::Font;
-    test_font_col<VCR , 24, 32>();
 
+// Entra todo
+    test_font_col<Dogica  , 2*8*Dogica::rows_in_bytes, Dogica::cols * 6>();
+    test_font_col<Upheavtt, 2*8*Upheavtt::rows_in_bytes, Upheavtt::cols*6>();
+    test_font_col<VCR     , 2*8*VCR::rows_in_bytes, VCR::cols*6>();
 
-    bm.write_byte(127, {0,0});
-    bm.write_byte(231, {8,0});
+//  No entra
+    std::cout << "\nTrying to write outside of matrix:\n";
+    test_font_col<Upheavtt, 3 * 8, Upheavtt::cols*6>();
+    test_font_col<VCR , 2*8*VCR::rows_in_bytes - 8, VCR::cols*6>();
+
+    bm.write_byte(127, 0,0);
+    bm.write_byte(231, 8,0);
 
     std::cout << "From 0 to (row - 1): ";
     for (auto c = bm.col_begin(0); c != bm.col_end(0); ++c)

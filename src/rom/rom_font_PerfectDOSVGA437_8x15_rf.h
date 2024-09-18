@@ -51,6 +51,8 @@ static constexpr uint8_t cols = 8; // número de columnas que tiene cada font
 
 // Tamaño en bytes
 static constexpr uint8_t bytes_in_a_row   = 1; // número de bytes que tiene cada fila
+static constexpr uint8_t rows_in_bytes = 15;
+static constexpr uint8_t cols_in_bytes = 1;
 inline static constexpr uint8_t char_byte_size() {return rows * bytes_in_a_row;}
 
 static constexpr

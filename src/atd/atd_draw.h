@@ -50,8 +50,8 @@ namespace atd{
 
 // Bitmatrix_col_1bit
 // ------------------
-// TODO: proteger que no se escriba fuera del bitmatrix (dara core)
-// Escribe el caracter c en (i, j) usando la fuente Font
+// Escribe el caracter c en el byte más próximo al bit (i, j) 
+// usando la fuente Font.
 template <typename Font, size_t nrows, size_t ncols>
 void write(Bitmatrix_col_1bit<nrows, ncols>& m, 
 	    const typename Bitmatrix_col_1bit<nrows, ncols>::Coord_ij& p0, 
@@ -62,26 +62,31 @@ void write(Bitmatrix_col_1bit<nrows, ncols>& m,
 		Font::is_ASCII_font;
 	    }
 {
-    using Coord_ij = typename Bitmatrix_col_1bit<nrows, ncols>::Coord_ij;
     using Index = typename Bitmatrix_col_1bit<nrows, ncols>::index_type;
 
-    if (m.rows() < p0.i or m.cols() < p0.j)
+    auto [I0, J0] = m.byte_coordinates_of(p0);
+
+    if (I0 >= m.rows_in_bytes() or J0 >=  m.cols_in_bytes())
 	return;
 
     auto letter = Font::glyph.row(Font::index(ic));
     auto c = letter.begin();
 
-    Index I = std::min<Index>(Font::bytes_in_a_column, m.rows() - p0.i);
-    Index J = std::min<Index>(Font::cols, m.cols() - p0.j);
+    Index I = std::min<Index>(Font::rows_in_bytes, m.rows_in_bytes() - I0);
+    Index J = std::min<Index>(Font::cols_in_bytes, m.cols_in_bytes() - J0);
 
+    // CUIDADO: los glyphs de las letras giradas a la derecha, empiezan por la
+    // primera columna ABAJO, y luego van subiendo hasta llegar a la primera
+    // columna ARRIBA (van de (n..0] las j)
     for (uint8_t j = 0; j < J; ++j){
+	// saltamos la parte de abajo del glyph que queda fuera del bitmatrix
 	uint8_t i = 0;
-	for (; i < I; ++i, ++c){
-	    m.write_byte(*c, p0 + Coord_ij{i, j});
-	}
-
-	for (; i < Font::bytes_in_a_column; ++i)
+	for (; i < Font::rows_in_bytes - I; ++i)
 	    ++c;   
+
+	for (; i < Font::rows_in_bytes; ++i, ++c)
+	    m.write_byte(*c, I0+ Font::rows_in_bytes - 1 - i, J0 + j);
+
     }
 }
 
