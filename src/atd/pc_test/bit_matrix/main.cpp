@@ -29,9 +29,12 @@
 #include "my_rom.h"
 #include "dogica_cr.h"
 #include "dogica_rf.h"
-#include "vcr_cr.h"
-#include "upheavtt_cr.h"
 
+#include "upheavtt_cr.h"
+#include "upheavtt_rf.h"
+
+#include "vcr_cr.h"
+#include "depixel_rf.h"
 
 using namespace test;
 
@@ -80,6 +83,36 @@ void print_bytes(const atd::Bitmatrix_col_1bit<nrows, ncols>& m)
     }
 }
 
+template <typename Font, uint16_t nrows, uint16_t ncols>
+void test_font_row(const std::string& msg)
+{
+    using BM = atd::Bitmatrix_row_1bit<nrows, ncols>;
+    using Coord_ij = BM::Coord_ij;
+    static uint16_t w = 8*Font::cols_in_bytes; // ancho de una letra
+    static uint16_t h = Font::rows; // alto de una letra
+
+    BM bm;
+    std::cout << "\n\n";
+    bm.clear();
+    uint16_t k = 0;
+    for (auto c: msg){
+	uint16_t j = k * w;
+	atd::write<Font, nrows, ncols>(bm, Coord_ij{0, j}, c);
+	++k;
+    }
+
+    k = 0;
+    for (auto c: msg){
+	uint16_t i = h + 4;
+	uint16_t j = k * w;
+	atd::write<Font, nrows, ncols>(bm, Coord_ij{i, j}, c);
+	++k;
+    }
+    print(bm);
+//    print_bytes(bm);
+}
+
+
 void test_bitmatrix_row_1bit()
 {
     test::interface("Bitmatrix_row_1bit");
@@ -88,7 +121,6 @@ void test_bitmatrix_row_1bit()
     constexpr uint8_t cols = 8*5;
 
     using BM = atd::Bitmatrix_row_1bit<rows, cols>;
-    using Coord_ij = BM::Coord_ij;
 
     BM bm;
 
@@ -112,8 +144,8 @@ void test_bitmatrix_row_1bit()
 // write_byte
 // TODO: no es automático!!!
     bm.fill(0);
-    bm.write_byte(127, {0,0});
-    bm.write_byte(231, {0,8});
+    bm.write_byte(127, 0,0);
+    bm.write_byte(231, 0,8);
 
     std::cout << "From 0 to (row - 1): ";
     for (auto c = bm.row_begin(0); c != bm.row_end(0); ++c)
@@ -128,15 +160,15 @@ void test_bitmatrix_row_1bit()
 // font
 // ----
 // TODO: no es automático!!!
-    using Font = rom::font_dogica_8x8_rf::Font;
-    bm.clear();
-    atd::write<Font, rows, cols>(bm, Coord_ij{0, 0}, 'H');
-    atd::write<Font, rows, cols>(bm, Coord_ij{0, 8*1}, 'e');
-    atd::write<Font, rows, cols>(bm, Coord_ij{0, 8*2}, 'l');
-    atd::write<Font, rows, cols>(bm, Coord_ij{0, 8*3}, 'l');
-    atd::write<Font, rows, cols>(bm, Coord_ij{0, 8*4}, 'o');
-//    atd::write<Font, rows, cols>(bm, Coord_ij{8, 16}, '!');
-    print(bm);
+    using Dogica = rom::font_dogica_8x8_rf::Font;
+    using Upheavtt = rom::font_upheavtt_13x14_rf::Font;
+    using Depixel= rom::font_DePixelBreitFett_23x13_rf::Font;
+
+// Entra todo
+    test_font_row<Dogica  , 2*Dogica::rows, 8*Dogica::cols_in_bytes * 6>("Hello");
+    test_font_row<Upheavtt, 2*Upheavtt::rows, 8*Upheavtt::cols_in_bytes * 6>("Hello");
+    test_font_row<Depixel , 2*Depixel::rows, 8*Depixel::cols_in_bytes*6>("Hello");
+
 
 }
 
@@ -237,7 +269,7 @@ try{
     test::header("atd_bit_matrix");
 
     test_bitmatrix_row_1bit();
-    test_bitmatrix_col_1bit();
+//    test_bitmatrix_col_1bit();
 
 }catch(std::exception& e)
 {

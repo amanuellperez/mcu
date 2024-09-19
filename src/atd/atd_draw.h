@@ -105,22 +105,28 @@ void write(Bitmatrix_row_1bit<nrows, ncols>& m,
 		Font::is_ASCII_font;
 	    }
 {
-    using Coord_ij = typename Bitmatrix_row_1bit<nrows, ncols>::Coord_ij;
+    using Index = typename Bitmatrix_row_1bit<nrows, ncols>::index_type;
+
+    auto [I0, J0] = m.byte_coordinates_of(p0);
+
+    if (I0 >= m.rows_in_bytes() or J0 >=  m.cols_in_bytes())
+	return;
 
     auto letter = Font::glyph.row(Font::index(ic));
     auto c = letter.begin();
-    for (uint8_t i = 0; i < Font::rows; ++i){
-	for (uint8_t j = 0; 
-		    j < Font::bytes_in_a_row and c != letter.end(); 
-		    ++j, ++c){
-	    m.write_byte(*c, p0 + Coord_ij{i, j});
 
-	    if (j + p0.j + 1u == m.cols_in_bytes()) 
-		break;
-	}
+    Index I = std::min<Index>(Font::rows_in_bytes, m.rows_in_bytes() - I0);
+    Index J = std::min<Index>(Font::cols_in_bytes, m.cols_in_bytes() - J0);
 
-	if (i + p0.i + 1u == m.rows_in_bytes())	
-	    return;
+    for (uint8_t i = 0; i < I; ++i){
+	// saltamos la parte de abajo del glyph que queda fuera del bitmatrix
+	uint8_t j = 0;
+	for (; j < J; ++j, ++c)
+	    m.write_byte(*c, I0 + i, J0 + j);
+
+	for (; j < Font::cols_in_bytes- J; ++j)
+	    ++c;   
+
     }
 }
 

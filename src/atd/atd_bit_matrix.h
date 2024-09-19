@@ -111,7 +111,14 @@ public:
     static constexpr size_t cols_in_bytes() {return ncols / 8*sizeof(data_type);}
 
     // Escribe el byte indicado en (i, j)
-    void write_byte(data_type x, const Coord_ij& pos);
+    void write_byte(data_type x, index_type I, index_type J);
+    data_type read_byte(index_type I, index_type J) const;
+
+    // Imaginar que sobre esta matriz de bits, ponemos un grid de bytes
+    // (colocados por columnas). Esta función devuelve la coordenada del bit
+    // p0 ajustada a ese grid.
+    constexpr static std::pair<index_type, index_type>
+				byte_coordinates_of(const Coord_ij& p0);
 
 // Acceso por columnas 
     // Iteradores: begin/end por columnas en bytes (!!!)
@@ -181,11 +188,25 @@ auto Bitmatrix_row_1bit<nrows, ncols>::
 template <size_t nrows, size_t ncols>
 inline void
 Bitmatrix_row_1bit<nrows, ncols>::
-    write_byte(data_type x, const Coord_ij& pos)
+    write_byte(data_type x, index_type I, index_type J)
 { 
-    auto [J, p] = index(pos.j);
-    data_[pos.i][J] = x; 
+    data_[I][J] = x;
+//    auto [J, p] = index(pos.j);
+//    data_[pos.i][J] = x; 
 }
+
+template <size_t nrows, size_t ncols>
+inline auto
+Bitmatrix_row_1bit<nrows, ncols>::
+    read_byte(index_type I, index_type J) const -> data_type
+{ return data_[I][J]; }
+
+template <size_t nrows, size_t ncols>
+inline constexpr auto
+Bitmatrix_row_1bit<nrows, ncols>::byte_coordinates_of(const Coord_ij& p0) 
+		    -> std::pair<index_type, index_type>
+{ return { p0.i, p0.j / 8}; }
+
 
 template <size_t nrows, size_t ncols>
 inline 
@@ -404,11 +425,7 @@ template <size_t nrows, size_t ncols>
 inline void
 Bitmatrix_col_1bit<nrows, ncols>::
     write_byte(data_type x, index_type I, index_type J)
-{ 
-    data_[J][I] = x; 
-//    auto [J, p] = index(pos.i);
-//    data_[pos.j][J] = x; 
-}
+{ data_[J][I] = x; }
 
 template <size_t nrows, size_t ncols>
 inline auto
