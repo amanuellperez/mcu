@@ -14,6 +14,7 @@ DIRS = 	algorithm	\
 		cstddef		\
 		cstring		\
 		decimal		\
+		display		\
 		double		\
 		float		\
 		geometry_2d	\
