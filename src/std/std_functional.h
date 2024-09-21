@@ -32,9 +32,11 @@
  *	31/01/2022 std::less, less_equal, greater, greater_equal, 
  *		   equal_to, not_equal_to. (TODO: faltan especializaciones
  *		   tipo std::less<void>).
+ *	21/09/2024 identity
  *
  ****************************************************************************/
 #include "std_config.h"
+#include "std_type_traits0.h" // forward para identity
 
 namespace STD{
 // Comparisons
@@ -77,6 +79,27 @@ struct not_equal_to{
     constexpr bool operator()(const T& x, const T& y) const
     { return x != y;}
 };
+
+
+// identity
+// --------
+// gcc define esta clase en otro header que luego incluye functional.
+// Además define con el atributo [[nodiscard]] el operator(), pero el
+// estandard de C++ del 2023 no lo define así (???)
+
+namespace impl_of {
+    struct is_transparent; // gcc no lo define
+}; 
+
+struct identity
+{
+    template <typename T>
+    constexpr T&& operator()(T&& t) const noexcept
+    {return STD::forward<T>(t); }
+
+    using is_transparent = impl_of::is_transparent;
+};
+
 }// namespace
 
 #endif

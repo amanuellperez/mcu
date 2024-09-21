@@ -43,7 +43,7 @@ void test_comparisons(Mtd_cmp cmp1, Std_cmp cmp2, const std::string& name)
 
 void test_comparisons()
 {
-    test::interfaz("comparisons");
+    test::interface("comparisons");
 
     test_comparisons(mtd::less<int>{}, std::less<int>{}, "less");
     test_comparisons(mtd::less_equal<int>{}, std::less_equal<int>{}, "less_equal");
@@ -57,12 +57,21 @@ void test_comparisons()
 
 }
 
+void test_identity()
+{
+    test::interface("identity");
+
+    int x = 3;
+    CHECK_TRUE(mtd::identity{}(x) == std::identity{}(x), "identity");
+}
+
 int main()
 {
 try{
     test::header("functional");
 
     test_comparisons();
+    test_identity();
 
 }catch(const std::exception& e){
     std::cerr << e.what() << '\n';

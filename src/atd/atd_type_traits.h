@@ -38,13 +38,15 @@
  *    25/02/2023 sizeof_in_bits<T>/size_of_in_bytes<T>
  *    12/10/2023 is_integer, is_decimal
  *    15/06/2024 least_uint_t_to_represent
+ *    21/07/2024 identity
  *
  ****************************************************************************/
 #include <type_traits>
 #include <stdint.h> // uint8_t ...
 #include <cstddef>
 #include <limits>
-
+#include <functional>	// identity
+			
 namespace atd{
 
 
@@ -479,6 +481,14 @@ struct least_uint_t_to_represent<N, 64>
 template <uint64_t N>
 using least_uint_t_to_represent_t
 	= typename impl_of::least_uint_t_to_represent<N>::type;
+
+
+// identity
+// --------
+// La defino para simplificar su uso
+template <typename T>
+constexpr T&& identity(T&& t) noexcept 
+{ return std::identity{}(t); }
 
 }// namespace
 

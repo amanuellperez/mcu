@@ -56,6 +56,7 @@
  *    Manuel Perez
  *    21/08/2024 PageCol
  *    07/09/2024 Coord_ij
+ *    21/09/2024 Bounded_rectangle_ij
  *
  ****************************************************************************/
 #include <ostream>
@@ -193,12 +194,130 @@ inline constexpr Coord_ij<Int>
     return x;
 }
 
+template <Type::Numeric Int>
+inline constexpr 
+bool operator==(const Coord_ij<Int>& a, const Coord_ij<Int>& b)
+{ return a.i == b.i and a.j == b.j; }
+
+template <Type::Numeric Int>
+inline constexpr 
+bool operator!=(const Coord_ij<Int>& a, const Coord_ij<Int>& b)
+{ return !(a == b); }
+
+
 // flujo de salida
 // ---------------
 template <Type::Numeric Int>
 std::ostream& operator<<(std::ostream& out, const Coord_ij<Int>& p)
 { return out << '(' << p.i << ", " << p.j << ')'; }
 
+
+/***************************************************************************
+ *			    BOUNDED_RECTANGLE_ij
+ ***************************************************************************/
+// Notación:
+//      
+// p0-> +--------------------+
+//	|		     |
+//	|		     |
+//	|		     |
+//	|		     |
+//	+--------------------+ <- p1
+//			     x <- pe
+//	Uso la misma notación que con los intervalos:
+//	[p0, p1] = [p0, pe)
+//	p0 = primer punto
+//	p1 = ultimo punto
+//	pe = p1 + 1
+//	Lo unico que en rectángulos son esquinas. 
+//	Observar que los rectángulos tienen una orientación: el punto p0 es 
+//	la esquina superior izquierda, mientras que p1 la esquina inferior
+//	derecha. Este convenio conviene mantenerlo independientemente de que
+//	el rectangulo sea de coordenadas ij o xy.
+//	
+//  Se trata de un rectángulo acotado por otro (que llamo background): 
+//  podemos mover este rectángulo por el background, siempre y cuando todo el
+//  rectángulo esté incluido en el background.
+//
+//  Lo llamo fix_ ya que voy a pasar en tiempo de compilación tanto el tamaño
+//  del background como el del rectangulo. El `Bounded_rectangle_ij` sería la
+//  misma clase cuando se pasan de forma dinámica esos valores.
+namespace impl_of{
+
+template <typename Cfg>
+class fix_Bounded_rectangle_ij_plane_type{
+public:
+// Types
+    using index_type = Cfg::index_type;
+    using Coord_ij = atd::Coord_ij<index_type>;
+    
+// Cfg
+    // Dimensiones del background
+    static constexpr index_type bg_width  = Cfg::bg_width;
+    static constexpr index_type bg_height = Cfg::bg_height;
+    
+    // Dimensiones del rectángulo
+    static constexpr index_type width()  {return  Cfg::width;}
+    static constexpr index_type height() { return Cfg::height; }
+
+    static_assert(bg_width  >= width());
+    static_assert(bg_height >= height());
+    
+
+// Constructor
+    constexpr fix_Bounded_rectangle_ij_plane_type(const Coord_ij& p0 = {0,0});
+
+// Info
+    constexpr Coord_ij p0() const {return p0_; }
+    constexpr Coord_ij p1() const {return pe() - Coord_ij{1, 1};}
+    constexpr Coord_ij pe() const {return p0_ + Coord_ij{height(), width()}; }
+
+private:
+// Data
+    Coord_ij p0_; // esquina superior izda del rectángulo
+
+};
+
+template <typename C>
+inline 
+constexpr fix_Bounded_rectangle_ij_plane_type<C>::
+    fix_Bounded_rectangle_ij_plane_type(const Coord_ij& p0) : p0_{p0}
+{}
+
+
+// static_switch
+// -------------
+enum class Bounded_rectangle_type{
+    cylinder_type, plane_type
+};
+
+template <typename T>
+inline 
+constexpr Bounded_rectangle_type bounded_rectangle_type()
+{
+    if constexpr ( requires { T::cylinder_type; })
+	return Bounded_rectangle_type::cylinder_type;
+    else
+	return Bounded_rectangle_type::plane_type;
+}
+
+}// namespace impl_of
+ 
+
+template <typename Cfg, 
+	    impl_of::Bounded_rectangle_type type 
+				= impl_of::bounded_rectangle_type<Cfg>()>
+class fix_Bounded_rectangle_ij;
+
+template <typename Cfg>
+class fix_Bounded_rectangle_ij <Cfg, impl_of::Bounded_rectangle_type::plane_type>
+    : public impl_of::fix_Bounded_rectangle_ij_plane_type<Cfg>
+{};
+
+//template <typename Cfg>
+//class fix_Bounded_rectangle_ij <Cfg, impl_of::Bounded_rectangle_type::cylinder_type>
+//    : public impl_of::fix_Bounded_rectangle_ij_cylinder_type<Cfg>
+//{};
 
 } // namespace atd
 

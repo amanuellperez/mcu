@@ -40,12 +40,12 @@
 using namespace test;
 
 template <typename Cfg>
-using Text_display =  atd::Monochromatic_text_display<Cfg>;
+using Text_block =  atd::Text_block<Cfg>;
 
 struct Cout {
 };
 
-struct Text_display_cfg{
+struct Text_block_cfg{
 // Text buffer
     using index_type = int;
     static constexpr index_type text_rows = 4;
@@ -60,7 +60,7 @@ struct Text_display_cfg{
 };
 
 template <typename C>
-void print_buffer(std::ostream& out, const Text_display<C>& txt)
+void print_buffer(std::ostream& out, const Text_block<C>& txt)
 {
     out << "\n>>>-------------------------------\n";
     for (auto c: txt){
@@ -74,7 +74,7 @@ void print_buffer(std::ostream& out, const Text_display<C>& txt)
 }
 
 template <typename C>
-void print(std::ostream& out, const Text_display<C>& txt)
+void print(std::ostream& out, const Text_block<C>& txt)
 {
     out << "\n>>>-------------------------------\n";
     for (int i = 0; i < txt.text_rows(); ++i){
@@ -92,7 +92,7 @@ void print(std::ostream& out, const Text_display<C>& txt)
 void test_text_display()
 {
     test::interface("Monochromatic_text_display");
-    Text_display<Text_display_cfg> txt;
+    Text_block<Text_block_cfg> txt;
 
     txt.clear();
     print(std::cout, txt);

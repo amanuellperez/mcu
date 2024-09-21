@@ -48,6 +48,36 @@ void test_pagecol()
 
 }
 
+struct bounded_cfg {
+    using index_type = int;
+    
+// Dimensiones del background
+    static constexpr index_type bg_width  = 16;
+    static constexpr index_type bg_height = 4;
+    
+// Dimensiones del rectángulo
+    static constexpr index_type width = 6;
+    static constexpr index_type height= 2;
+
+};
+
+void test_fix_bounded_rectangle_ij()
+{
+    test::interface("fix_Bounded_rectangle_ij");
+    
+    using BR = atd::fix_Bounded_rectangle_ij<bounded_cfg>;
+    using Coord = BR::Coord_ij;
+
+    BR br;
+
+    CHECK_TRUE(br.width() == bounded_cfg::width, "width()");
+    CHECK_TRUE(br.height() == bounded_cfg::height, "height()");
+
+    CHECK_TRUE(br.p0() == Coord{0,0}, "p0()");
+    CHECK_TRUE(br.p1() == Coord{1,5}, "p1()");
+    CHECK_TRUE(br.pe() == Coord{2,6}, "pe()");
+
+}
 
 int main()
 {
@@ -55,6 +85,7 @@ try{
     test::header("atd_coordinates");
 
     test_pagecol();
+    test_fix_bounded_rectangle_ij();
 
 }catch(std::exception& e)
 {
