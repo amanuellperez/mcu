@@ -48,7 +48,7 @@ void test_pagecol()
 
 }
 
-struct bounded_cfg {
+struct bounded_plane_type_cfg {
     using index_type = int;
     
 // Dimensiones del background
@@ -61,23 +61,123 @@ struct bounded_cfg {
 
 };
 
-void test_fix_bounded_rectangle_ij()
+void test_fix_bounded_rectangle_ij_plane_type()
 {
-    test::interface("fix_Bounded_rectangle_ij");
+    test::interface("Bounded_rectangle_ij_plane_type");
     
-    using BR = atd::fix_Bounded_rectangle_ij<bounded_cfg>;
+    using BR = atd::Bounded_rectangle_ij<bounded_plane_type_cfg>;
     using Coord = BR::Coord_ij;
 
     BR br;
 
-    CHECK_TRUE(br.width() == bounded_cfg::width, "width()");
-    CHECK_TRUE(br.height() == bounded_cfg::height, "height()");
+    CHECK_TRUE(br.width() == bounded_plane_type_cfg::width, "width()");
+    CHECK_TRUE(br.height() == bounded_plane_type_cfg::height, "height()");
 
     CHECK_TRUE(br.p0() == Coord{0,0}, "p0()");
     CHECK_TRUE(br.p1() == Coord{1,5}, "p1()");
     CHECK_TRUE(br.pe() == Coord{2,6}, "pe()");
 
+    CHECK_TRUE(br.scroll_left(1) == nm::fail, "scroll_left");
+    CHECK_TRUE(br.scroll_up(1) == nm::fail, "scroll_up");
+
+    CHECK_TRUE(br.scroll_right(1) == nm::ok, "scroll_right");
+
+    CHECK_TRUE(br.p0() == Coord{0,1}, "p0()");
+    CHECK_TRUE(br.p1() == Coord{1,6}, "p1()");
+    CHECK_TRUE(br.pe() == Coord{2,7}, "pe()");
+
+    CHECK_TRUE(br.scroll_down(1) == nm::ok, "scroll_down");
+
+    CHECK_TRUE(br.p0() == Coord{1,1}, "p0()");
+    CHECK_TRUE(br.p1() == Coord{2,6}, "p1()");
+    CHECK_TRUE(br.pe() == Coord{3,7}, "pe()");
+
+// moviendo fuera del bg
+    CHECK_TRUE(br.move_to({0, 10}) == nm::ok, "move_to");
+    CHECK_TRUE(br.p0() == Coord{0,10}, "p0()");
+    CHECK_TRUE(br.p1() == Coord{1,15}, "p1()");
+    CHECK_TRUE(br.pe() == Coord{2,16}, "pe()");
+
+    CHECK_TRUE(br.move_to({0, 11}) == nm::fail, "move_to");
+
+    CHECK_TRUE(br.move_to({2, 0}) == nm::ok, "move_to");
+    CHECK_TRUE(br.p0() == Coord{2,0}, "p0()");
+    CHECK_TRUE(br.p1() == Coord{3,5}, "p1()");
+    CHECK_TRUE(br.pe() == Coord{4,6}, "pe()");
+
+    CHECK_TRUE(br.move_to({3, 0}) == nm::fail, "move_to");
 }
+
+
+struct bounded_cylinder_type_cfg {
+// Type
+    static constexpr bool cylinder_type{};
+
+    using index_type = int;
+    
+// Dimensiones del background
+    static constexpr index_type bg_width  = 16;
+    static constexpr index_type bg_height = 4;
+    
+// Dimensiones del rectángulo
+    static constexpr index_type width = 6;
+    static constexpr index_type height= 2;
+
+};
+
+
+
+void test_fix_bounded_rectangle_ij_cylinder_type()
+{
+    test::interface("Bounded_rectangle_ij_cylinder_type");
+    
+    using BR = atd::Bounded_rectangle_ij<bounded_cylinder_type_cfg>;
+    using Coord = BR::Coord_ij;
+
+    BR br;
+
+    CHECK_TRUE(br.width() == bounded_cylinder_type_cfg::width, "width()");
+    CHECK_TRUE(br.height() == bounded_cylinder_type_cfg::height, "height()");
+
+    CHECK_TRUE(br.p0() == Coord{0,0}, "p0()");
+    CHECK_TRUE(br.p1() == Coord{1,5}, "p1()");
+    CHECK_TRUE(br.pe() == Coord{2,6}, "pe()");
+
+
+    CHECK_TRUE(br.scroll_right(1) == nm::ok, "scroll_right");
+
+    CHECK_TRUE(br.p0() == Coord{0,1}, "p0()");
+    CHECK_TRUE(br.p1() == Coord{1,6}, "p1()");
+    CHECK_TRUE(br.pe() == Coord{2,7}, "pe()");
+
+    CHECK_TRUE(br.scroll_down(1) == nm::ok, "scroll_down");
+
+    CHECK_TRUE(br.p0() == Coord{1,1}, "p0()");
+    CHECK_TRUE(br.p1() == Coord{2,6}, "p1()");
+    CHECK_TRUE(br.pe() == Coord{3,7}, "pe()");
+
+    CHECK_TRUE(br.move_to({0, 10}) == nm::ok, "move_to");
+    CHECK_TRUE(br.p0() == Coord{0,10}, "p0()");
+    CHECK_TRUE(br.p1() == Coord{1,15}, "p1()");
+    CHECK_TRUE(br.pe() == Coord{2,16}, "pe()");
+
+    CHECK_TRUE(br.move_to({0, 11}) == nm::ok, "move_to");
+    CHECK_TRUE(br.p0() == Coord{0,11}, "p0()");
+    CHECK_TRUE(br.p1() == Coord{1,0}, "p1()");
+    CHECK_TRUE(br.pe() == Coord{2,1}, "pe()");
+
+    CHECK_TRUE(br.move_to({2, 0}) == nm::ok, "move_to");
+    CHECK_TRUE(br.p0() == Coord{2,0}, "p0()");
+    CHECK_TRUE(br.p1() == Coord{3,5}, "p1()");
+    CHECK_TRUE(br.pe() == Coord{4,6}, "pe()");
+
+    CHECK_TRUE(br.move_to({3, 0}) == nm::ok, "move_to");
+    CHECK_TRUE(br.p0() == Coord{3,0}, "p0()");
+    CHECK_TRUE(br.p1() == Coord{0,5}, "p1()");
+    CHECK_TRUE(br.pe() == Coord{1,6}, "pe()");
+
+}
+
 
 int main()
 {
@@ -85,7 +185,8 @@ try{
     test::header("atd_coordinates");
 
     test_pagecol();
-    test_fix_bounded_rectangle_ij();
+    test_fix_bounded_rectangle_ij_plane_type();
+    test_fix_bounded_rectangle_ij_cylinder_type();
 
 }catch(std::exception& e)
 {
