@@ -106,6 +106,13 @@ void test_fix_bounded_rectangle_ij_plane_type()
     CHECK_TRUE(br.pe() == Coord{4,6}, "pe()");
 
     CHECK_TRUE(br.move_to({3, 0}) == nm::fail, "move_to");
+
+// Cambio de coordenadas
+    br.move_to({1,3});
+    CHECK_TRUE(br.local_to_background({1,2}) == Coord{2, 5}, "local_to_background");
+    CHECK_TRUE(br.background_to_local({2,5}) == Coord{1, 2}, "background_to_local");
+    // observar que funciona con numeros negativos si index_type es signed
+    CHECK_TRUE(br.background_to_local({0,0}) == Coord{-1, -3}, "background_to_local");
 }
 
 
@@ -141,6 +148,7 @@ void test_fix_bounded_rectangle_ij_cylinder_type()
 
     CHECK_TRUE(br.p0() == Coord{0,0}, "p0()");
     CHECK_TRUE(br.p1() == Coord{1,5}, "p1()");
+    CHECK_TRUE(br.pm() == br.pe()   , "pm()");
     CHECK_TRUE(br.pe() == Coord{2,6}, "pe()");
 
 
@@ -148,34 +156,46 @@ void test_fix_bounded_rectangle_ij_cylinder_type()
 
     CHECK_TRUE(br.p0() == Coord{0,1}, "p0()");
     CHECK_TRUE(br.p1() == Coord{1,6}, "p1()");
+    CHECK_TRUE(br.pm() == br.pe()   , "pm()");
     CHECK_TRUE(br.pe() == Coord{2,7}, "pe()");
 
     CHECK_TRUE(br.scroll_down(1) == nm::ok, "scroll_down");
 
     CHECK_TRUE(br.p0() == Coord{1,1}, "p0()");
     CHECK_TRUE(br.p1() == Coord{2,6}, "p1()");
+    CHECK_TRUE(br.pm() == br.pe()   , "pm()");
     CHECK_TRUE(br.pe() == Coord{3,7}, "pe()");
 
     CHECK_TRUE(br.move_to({0, 10}) == nm::ok, "move_to");
     CHECK_TRUE(br.p0() == Coord{0,10}, "p0()");
     CHECK_TRUE(br.p1() == Coord{1,15}, "p1()");
+    CHECK_TRUE(br.pm() == br.pe()   , "pm()");
     CHECK_TRUE(br.pe() == Coord{2,16}, "pe()");
 
     CHECK_TRUE(br.move_to({0, 11}) == nm::ok, "move_to");
     CHECK_TRUE(br.p0() == Coord{0,11}, "p0()");
     CHECK_TRUE(br.p1() == Coord{1,0}, "p1()");
+    CHECK_TRUE(br.pm() == Coord{2,16}, "pm()");
     CHECK_TRUE(br.pe() == Coord{2,1}, "pe()");
 
     CHECK_TRUE(br.move_to({2, 0}) == nm::ok, "move_to");
     CHECK_TRUE(br.p0() == Coord{2,0}, "p0()");
     CHECK_TRUE(br.p1() == Coord{3,5}, "p1()");
+    CHECK_TRUE(br.pm() == br.pe()   , "pm()");
     CHECK_TRUE(br.pe() == Coord{4,6}, "pe()");
 
     CHECK_TRUE(br.move_to({3, 0}) == nm::ok, "move_to");
     CHECK_TRUE(br.p0() == Coord{3,0}, "p0()");
     CHECK_TRUE(br.p1() == Coord{0,5}, "p1()");
+    CHECK_TRUE(br.pm() == Coord{4,6}, "pm()");
     CHECK_TRUE(br.pe() == Coord{1,6}, "pe()");
 
+// cambio de coordenadas
+    br.move_to({1,3});
+    CHECK_TRUE(br.local_to_background({1,2}) == Coord{2, 5}, "local_to_background");
+    CHECK_TRUE(br.background_to_local({2,5}) == Coord{1, 2}, "background_to_local");
+    // observar que funciona con numeros negativos si index_type es signed
+    CHECK_TRUE(br.background_to_local({0,0}) == Coord{-1, -3}, "background_to_local");
 }
 
 

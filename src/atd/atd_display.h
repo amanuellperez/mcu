@@ -60,22 +60,23 @@ public:
     Text_block(); 
 
 // Text interface
-    static constexpr size_type text_rows() { return Cfg::text_rows;}
-    static constexpr size_type text_cols() { return Cfg::text_cols;}
+    static constexpr size_type rows() { return Cfg::text_rows;}
+    static constexpr size_type cols() { return Cfg::text_cols;}
 
     // Número de caracteres que entran 
-    static constexpr size_type text_size() {return text_rows() * text_cols();}
+    static constexpr size_type size() {return rows() * cols();}
 
     void write(const Coord_ij& p, char c);
     void write(const Coord_ij& p, std::string_view str);
 
     char read(const Coord_ij& p) const;
+    char read(index_type i, index_type j) const {return read({i,j});}
 
     iterator begin() { return &text_[0];}
-    iterator end()   { return &text_[text_size()];}
+    iterator end()   { return &text_[size()];}
 
     const_iterator begin() const { return &text_[0];}
-    const_iterator end()   const { return &text_[text_size()];}
+    const_iterator end()   const { return &text_[size()];}
 
 
     // Rellena el buffer de texto con el caracter 'c'
@@ -90,7 +91,7 @@ private:
     // (RRR) Opto por definirlo unidimensional para que sea sencillo tanto
     // leer como escribir cadenas de texto (concatenadas entre lineas)
     // ¿mejor bidimensional? Que el uso lo diga.
-    char text_[text_size()]; // buffer de texto
+    char text_[size()]; // buffer de texto
 
 // Helpers
     index_type coord2index(const Coord_ij& p) const;
@@ -102,13 +103,13 @@ inline Text_block<C>::Text_block()
 
 template <typename C>
 inline auto Text_block<C>::coord2index(const Coord_ij& p) const -> index_type
-{ return p.i * text_cols() + p.j; }
+{ return p.i * cols() + p.j; }
 
 template <typename C>
 void Text_block<C>::write(const Coord_ij& p, char c)
 {
     index_type k = coord2index(p);
-    if (k < text_size())
+    if (k < size())
 	text_[k] = c;
 
     else { // TODO: ¿qué hacer? Se podría configurar el comportamiento via
@@ -128,8 +129,8 @@ inline void Text_block<C>::write(const Coord_ij& p, std::string_view str)
 
     index_type ke = k0 + str.length();
     index_type ki = ke;
-    if (ke > text_size()){
-	ki = text_size();
+    if (ke > size()){
+	ki = size();
 	ke -= ki;
     }
 
@@ -150,7 +151,7 @@ template <typename C>
 inline char Text_block<C>::read(const Coord_ij& p) const
 {
     index_type k = coord2index(p);
-    if (k < text_size())
+    if (k < size())
 	return text_[k];
 
     else
@@ -159,13 +160,100 @@ inline char Text_block<C>::read(const Coord_ij& p) const
 
 template <typename C>
 inline void Text_block<C>::fill(char c)
-{ std::fill_n(&text_[0], text_size(), c); }
+{ std::fill_n(&text_[0], size(), c); }
 
 template <typename C>
 inline void Text_block<C>::clear()
 { fill('\0'); }
 
+/***************************************************************************
+ *			    SUBTEXT_BLOCK
+ ***************************************************************************/
+namespace impl_of{
 
+// (RRR) ¿por qué heredo?
+//	 Para poder hacer visible la variable cylinder_type en
+//	 Subtext_block_rectangle_cfg. Heredando es muy sencillo.
+template <typename Cfg>
+struct Subtext_block_rectangle_cfg : Cfg{
+    using index_type = Cfg::index_type;
+
+// Dimensiones del background
+    static constexpr index_type bg_width  = Cfg::text_cols;
+    static constexpr index_type bg_height = Cfg::text_rows;
+    
+// Dimensiones del rectángulo
+    static constexpr index_type width = Cfg::subtext_cols;
+    static constexpr index_type height= Cfg::subtext_rows;
+};
+
+}// namespace impl_of
+ 
+// En lugar de llamar rows/cols opto por llamarlos subtext_rows/subtext_cols
+// para que en una misma struct Cfg se pueda pasar la configuración del
+// text_block y del subtext_block. 
+//
+// struct Cfg{
+//	using Text_block = ...
+//	static constexpr uint16_t subtext_rows = 2;
+//	static constexpr uint16_t subtext_cols = 8;
+// };
+template <typename Cfg>
+class Subtext_block{
+public:
+// Types
+    using Text_block= atd::Text_block<Cfg>;
+    using size_type = typename Text_block::size_type;
+    using index_type= typename Text_block::index_type;
+    using Coord_ij  = typename Text_block::Coord_ij;
+    using iterator  = typename Text_block::iterator;
+    using const_iterator = typename Text_block::const_iterator;
+
+// Constructor
+    Subtext_block(Text_block& txt_block) : txt_block_{txt_block} { }
+    
+// Bidimensional container
+    static constexpr size_type rows() { return Cfg::subtext_rows;}
+    static constexpr size_type cols() { return Cfg::subtext_cols;}
+
+    // Las coordenadas son relativas al subtext
+    char read(const Coord_ij& p) const;
+    char read(index_type i, index_type j) const {return read({i,j});}
+
+
+// Unidimensional container
+    static constexpr size_type size() { return rows() * cols(); }
+
+
+// Movimiento
+    nm::Result move_to(const Coord_ij& q0) {return rect_.move_to(q0);}
+
+    // Movimiento relativo: añadimos q0 a la esquina
+    nm::Result move_rel(const Coord_ij& q0) {return rect_.move_rel(q0);}
+
+    nm::Result scroll_up  (index_type incr) {return rect_.scroll_up(incr);}
+    nm::Result scroll_down(index_type incr) {return rect_.scroll_down(incr);}
+    nm::Result scroll_left(index_type incr) {return rect_.scroll_left(incr);}
+    nm::Result scroll_right(index_type incr){return rect_.scroll_right(incr);}
+
+// Para depurar, no creo que se necesite en la práctica
+    constexpr Coord_ij p0() const {return rect_.p0(); }
+    constexpr Coord_ij p1() const {return rect_.p1(); }
+    constexpr Coord_ij pm() const {return rect_.pm(); }
+    constexpr Coord_ij pe() const {return rect_.pe();}
+
+private:
+// Data
+    Text_block& txt_block_;
+
+    using Rect_cfg = impl_of::Subtext_block_rectangle_cfg<Cfg>;
+    Bounded_rectangle_ij<Rect_cfg> rect_;
+};
+
+template <typename Cfg>
+inline 
+char Subtext_block<Cfg>::read(const Coord_ij& p) const
+{ return txt_block_.read(rect_.local_to_background(p)); }
 
 
 /***************************************************************************

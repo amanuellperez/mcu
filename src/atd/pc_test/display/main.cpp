@@ -42,15 +42,24 @@ using namespace test;
 template <typename Cfg>
 using Text_block =  atd::Text_block<Cfg>;
 
+template <typename Cfg>
+using Subtext_block =  atd::Subtext_block<Cfg>;
+
 struct Cout {
 };
 
 struct Text_block_cfg{
 // Text buffer
     using index_type = int;
+    //using index_type = unsigned int;
     static constexpr index_type text_rows = 4;
     static constexpr index_type text_cols = 10;
 
+// Ventana que vemos del buffer
+    static constexpr bool cylinder_type{};
+    static constexpr index_type subtext_rows = 2;
+    static constexpr index_type subtext_cols = 5;
+    
 // Windows
     using Font = rom::font_dogica_8x8_cr::Font;
     using Bitmatrix = atd::Bitmatrix_col_1bit<16, 32>; // la del MAX7219
@@ -76,9 +85,11 @@ void print_buffer(std::ostream& out, const Text_block<C>& txt)
 template <typename C>
 void print(std::ostream& out, const Text_block<C>& txt)
 {
+    using index_t = Text_block<C>::index_type;
+
     out << "\n>>>-------------------------------\n";
-    for (int i = 0; i < txt.text_rows(); ++i){
-	for (int j = 0; j < txt.text_cols(); ++j){
+    for (index_t i = 0; i < txt.rows(); ++i){
+	for (index_t j = 0; j < txt.cols(); ++j){
 	    char c = txt.read({i, j});
 	    if (c == '\0')
 		out << "_";
@@ -89,10 +100,24 @@ void print(std::ostream& out, const Text_block<C>& txt)
     }
     out << "<<<-------------------------------\n";
 }
+
+template <typename Cfg>
+void print(std::ostream& out, const Subtext_block<Cfg>& sub)
+{
+    using index_t = Subtext_block<Cfg>::index_type;
+
+    for (index_t i = 0; i < sub.rows(); ++i){
+	for (index_t j = 0; j < sub.cols(); ++j){
+	    out << sub.read({i,j}) << ' ' ;
+	}
+	out << '\n';
+    }
+}
 void test_text_display()
 {
-    test::interface("Monochromatic_text_display");
+    test::interface("Text_block");
     Text_block<Text_block_cfg> txt;
+    using index_t = Text_block<Text_block_cfg>::index_type;
 
     txt.clear();
     print(std::cout, txt);
@@ -103,6 +128,35 @@ void test_text_display()
     txt.write({3,0}, "123456789012345");
 
     print(std::cout, txt);
+
+    txt.write({0,0}, "1234567890abcdefghijklmnopqrstuvwxyzABCD");
+    print(std::cout, txt);
+
+    Subtext_block<Text_block_cfg> sub{txt};
+    std::cout << "\nSub(0,0)\n"
+	           "--------\n";
+    print(std::cout, sub);
+
+    sub.scroll_down(1);
+    std::cout << "\nscroll_down(1)\n"
+	           "--------------\n";
+    print(std::cout, sub);
+
+    for (index_t i = 0; i < 4; ++i){
+	sub.scroll_right(2);
+
+	std::cout << "\nscroll_right(2)\n"
+		       "--------------\n";
+	std::cout << "p0 = " << sub.p0() << "; pm = " << sub.pm() << "; pe = " << sub.pe() << '\n';
+	print(std::cout, sub);
+    }
+
+    for (index_t i = 0; i < 4; ++i){
+	sub.scroll_left(2);
+	std::cout << "\nscroll_left(2)\n"
+		       "--------------\n";
+	print(std::cout, sub);
+    }
 }
 
 int main()

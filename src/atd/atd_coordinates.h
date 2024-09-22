@@ -275,6 +275,13 @@ public:
     constexpr Coord_ij pe() const {return pe(p0_);}
 
 // Move
+// DUDA: ¿Aclarar? 
+//	 Observar que estamos manejando dos tipos de coordenadas Coord_ij:
+//	 A `move_to` le pasamos una coordenada absoluta al background.
+//	 A `move_rel` le pasamos una coordenada relativa (o local) al
+//	 rectangulo.
+//	 ¿Merece la pena crear Coord_absoluta/Coord_relativa??? Da la
+//	 impresion de complicaria mas que aclarar.  (???)
     // Movimiento absoluto: movemos el rectángulo de tal manera que su esquina
     // superior izquierda sea q0. 
     // DUDA: ¿qué hacer en caso de no poder mover el rectángulo a esa
@@ -291,8 +298,16 @@ public:
 
     nm::Result scroll_up  (index_type incr) {return move_rel({-incr, 0});}
     nm::Result scroll_down(index_type incr) {return move_rel({+incr, 0});}
-    nm::Result scroll_left(index_type incr) {return move_rel({0, -incr});}
-    nm::Result scroll_right(index_type incr){return move_rel({0, +incr});}
+    nm::Result scroll_left(index_type incr) {return move_rel({0, +incr});}
+    nm::Result scroll_right(index_type incr){return move_rel({0, -incr});}
+
+// Coordenadas
+    // Converitmos las coordenadas locales del rectángulo en coordenadas
+    // relativas al background
+    // :? Confieso que me gusta más el nombre `rel2bg` y `bg2rel` pero no son
+    // nada expresivos.
+    Coord_ij local_to_background(const Coord_ij& p) const {return p + p0_;}
+    Coord_ij background_to_local(const Coord_ij& p) const {return p - p0_;}
 
 private:
 // Data
@@ -403,8 +418,21 @@ public:
     constexpr fix_Bounded_rectangle_ij_cylinder_type(const Coord_ij& p0 = {0,0});
 
 // Info
+// Para que el usuario no tenga que andar pensando qué valores posibles puede
+// tener (i,j), suministro pm:
+//	Si im == ie, el rectangulo está dentro del background 0. El rango válido
+//	de indices es [i0, ie).
+//
+//	Si im != ie, el rectángulo se sale del background 0. El rango válido
+//	será: [i0, im) union [0, ie)
+// Se puede crear un iterador para iterar por los indices de tal manera que el
+// usuario no tenga que saber nada de esto, pero en principio esto lo voy a
+// usar con Text_block y será más práctico im.
+
+    // Todo son coordenadas absolutas al background
     constexpr Coord_ij p0() const {return p0_; }
     constexpr Coord_ij p1() const {return p1(p0_);}
+    constexpr Coord_ij pm() const;
     constexpr Coord_ij pe() const {return pe(p0_);}
 
 // Move
@@ -424,25 +452,25 @@ public:
 
     nm::Result scroll_up  (index_type incr) {return move_rel({-incr, 0});}
     nm::Result scroll_down(index_type incr) {return move_rel({+incr, 0});}
-    nm::Result scroll_left(index_type incr) {return move_rel({0, -incr});}
-    nm::Result scroll_right(index_type incr){return move_rel({0, +incr});}
+    nm::Result scroll_left(index_type incr) {return move_rel({0, +incr});}
+    nm::Result scroll_right(index_type incr){return move_rel({0, -incr});}
+
+// Coordenadas
+    // Converitmos las coordenadas locales del rectángulo en coordenadas
+    // relativas al background
+    // :? Confieso que me gusta más el nombre `rel2bg` y `bg2rel` pero no son
+    // nada expresivos.
+    Coord_ij local_to_background(const Coord_ij& p) const 
+    {return reduce_to_background(p + p0_);}
+
+    Coord_ij background_to_local(const Coord_ij& p) const {return p - p0_;}
 
 private:
 // Data
     Coord_ij p0_; // esquina superior izda del rectángulo
 
 // Helpers
-    constexpr Coord_ij pe(const Coord_ij& p0) const
-    {
-	auto res = p0 + Coord_ij{height(), width()};
-	if (res.i > bg_height)
-	    res.i = res.i % bg_height;
-
-	if (res.j > bg_width)
-	    res.j = res.j % bg_width;
-
-	return res;
-    }
+    constexpr Coord_ij pe(const Coord_ij& p0) const;
 
     constexpr Coord_ij p1(const Coord_ij& p0) const
     {return reduce_to_background(p0 + Coord_ij{height() - 1, width() - 1});}
@@ -467,6 +495,38 @@ nm::Result fix_Bounded_rectangle_ij_cylinder_type<C>::move_to(const Coord_ij& q0
 
     return nm::ok;
 }
+
+template <typename C>
+constexpr 
+auto fix_Bounded_rectangle_ij_cylinder_type<C>::
+		pe(const Coord_ij& p0) const -> Coord_ij
+{
+    auto res = p0 + Coord_ij{height(), width()};
+    if (res.i > bg_height)
+	res.i = res.i % bg_height;
+
+    if (res.j > bg_width)
+	res.j = res.j % bg_width;
+
+    return res;
+}
+
+template <typename C>
+constexpr 
+auto fix_Bounded_rectangle_ij_cylinder_type<C>::
+		pm() const -> Coord_ij
+{
+    auto res = p0_ + Coord_ij{height(), width()};
+
+    if (res.i > bg_height)
+	res.i = bg_height;
+
+    if (res.j > bg_width)
+	res.j = bg_width;
+
+    return res;
+}
+
 
 
 
@@ -496,6 +556,25 @@ constexpr Bounded_rectangle_type bounded_rectangle_type()
 
 }// namespace impl_of
  
+// Cfg
+// ---
+//struct bounded_plane_type_cfg {
+//    // tipo: si no se define es plano por defecto
+//    // static constexpr bool cylinder_type{};
+//
+//    using index_type = int;
+//    
+//    
+//    // Dimensiones del background
+//    static constexpr index_type bg_width  = 16;
+//    static constexpr index_type bg_height = 4;
+//    
+//    // Dimensiones del rectángulo
+//    static constexpr index_type width = 6;
+//    static constexpr index_type height= 2;
+//
+//};
+//
 // fix_Bounded_rectangle_ij
 // ------------------------
 // typename Bounded_rectangle_ij(typename Cfg)
