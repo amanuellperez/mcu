@@ -194,7 +194,6 @@ struct Subtext_block_rectangle_cfg : Cfg{
 // text_block y del subtext_block. 
 //
 // struct Cfg{
-//	using Text_block = ...
 //	static constexpr uint16_t subtext_rows = 2;
 //	static constexpr uint16_t subtext_cols = 8;
 // };
@@ -228,13 +227,10 @@ public:
 // Movimiento
     nm::Result move_to(const Coord_ij& q0) {return rect_.move_to(q0);}
 
-    // Movimiento relativo: añadimos q0 a la esquina
-    nm::Result move_rel(const Coord_ij& q0) {return rect_.move_rel(q0);}
-
-    nm::Result scroll_up  (index_type incr) {return rect_.scroll_up(incr);}
-    nm::Result scroll_down(index_type incr) {return rect_.scroll_down(incr);}
-    nm::Result scroll_left(index_type incr) {return rect_.scroll_left(incr);}
-    nm::Result scroll_right(index_type incr){return rect_.scroll_right(incr);}
+    nm::Result move_up  (index_type incr) {return rect_.move_up(incr);}
+    nm::Result move_down(index_type incr) {return rect_.move_down(incr);}
+    nm::Result move_left(index_type incr) {return rect_.move_left(incr);}
+    nm::Result move_right(index_type incr){return rect_.move_right(incr);}
 
 // Para depurar, no creo que se necesite en la práctica
     constexpr Coord_ij p0() const {return rect_.p0(); }
@@ -257,13 +253,113 @@ char Subtext_block<Cfg>::read(const Coord_ij& p) const
 
 
 /***************************************************************************
+ *			TEXT_BLOCK_WITH_VIEW	
+ ***************************************************************************/
+//struct Text_block_cfg{
+//// Bacground
+//    using index_type = int;
+//    //using index_type = unsigned int;
+//    static constexpr index_type text_rows = 4;
+//    static constexpr index_type text_cols = 10;
+//
+//// View
+//    static constexpr bool cylinder_type{}; <-- ELEGIR EL TIPO!!!
+//    static constexpr index_type subtext_rows = 2;
+//    static constexpr index_type subtext_cols = 5;
+//};
+//
+// Esta clase fusiona las dos clases anteriores
+template <typename Cfg>
+class Text_block_with_view {
+public:
+// Types
+    using Bg   = Text_block<Cfg>;
+    using View = Subtext_block<Cfg>;
+
+    using size_type = typename Bg::size_type;
+    using index_type= typename Bg::index_type;
+    using Coord_ij  = typename Bg::Coord_ij;
+    using iterator  = typename Bg::iterator;
+    using const_iterator = typename Bg::const_iterator;
+
+// Background interface
+    static constexpr size_type bg_rows() { return Bg::rows();}
+    static constexpr size_type bg_cols() { return Bg::cols();}
+
+    // Número de caracteres que entran 
+    static constexpr size_type bg_size() {return Bg::size();}
+
+    // Coordenadas absolutas al background
+    void bg_write(const Coord_ij& p, char c) { bg_.write(p, c); }
+    void bg_write(const Coord_ij& p, std::string_view str)
+    { bg_.write(p, str); }
+
+    // Coordenadas absolutas al background
+    char bg_read(const Coord_ij& p) const { return bg_.read(p);}
+    char bg_read(index_type i, index_type j) const {return bg_.read({i,j});}
+
+    iterator bg_begin() { return bg_.begin();}
+    iterator bg_end()   { return bg_.end();}
+
+    const_iterator bg_begin() const { return bg_.begin();}
+    const_iterator bg_end()   const { return bg_.end();}
+
+
+    // Rellena el buffer de texto con el caracter 'c'
+    void bg_fill(char c) {return bg_.fill(c);}
+
+    // Borra todo el buffer de texto
+    void bg_clear() {return bg_.clear();}
+
+// View interface
+    static constexpr size_type view_rows() { return View::rows();}
+    static constexpr size_type view_cols() { return View::cols();}
+
+    // Las coordenadas son relativas a la view
+    char view_read(const Coord_ij& p) const {return view_.read(p); }
+    char view_read(index_type i, index_type j) const {return view_.read(i, j);}
+
+
+// Unidimensional container
+    static constexpr size_type view_size() { return View::size(); }
+
+
+// Movimiento
+// DUDA: las operaciones de movimiento solo son aplicables a la view, nunca al
+// background. Sobraría view_ ¿quitarlo? (aunque se leera mejor el codigo si
+// se pone txt.view_move_up(2), que no txt.move_up(2))
+    nm::Result view_move_to(const Coord_ij& q0) {return view_.move_to(q0);}
+
+    nm::Result view_move_up  (index_type incr) {return view_.move_up(incr);}
+    nm::Result view_move_down(index_type incr) {return view_.move_down(incr);}
+    nm::Result view_move_left(index_type incr) {return view_.move_left(incr);}
+    nm::Result view_move_right(index_type incr){return view_.move_right(incr);}
+
+// Para depurar, no creo que se necesite en la práctica
+// (???) Necesitare p0()?
+//    constexpr Coord_ij p0() const {return view_.p0(); }
+//    constexpr Coord_ij p1() const {return view_.p1(); }
+//    constexpr Coord_ij pm() const {return view_.pm(); }
+//    constexpr Coord_ij pe() const {return view_.pe();}
+
+private:
+// Data
+    Bg bg_;
+    View view_{bg_};
+};
+
+
+/***************************************************************************
  *			MONOCROMATIC_TEXT_DISPLAY
  ***************************************************************************/
 // struct Cfg {
 //	using Display    = MAX7219_matrix...
 //	using index_type = uint16_t;
-//	static constexpr index_type text_rows = 2;
-//	static constexpr index_type text_cols = 16;
+//	static constexpr index_type bg_rows = 2;
+//	static constexpr index_type bg_cols = 16;
+//	static constexpr index_type view_rows = 2;
+//	static constexpr index_type view_cols = 16;
+//	using Font = ... // fuente que vamos a usar para escribir en el	display
 //
 // };
 //
@@ -288,7 +384,7 @@ template <typename Cfg>
 class Monochromatic_text_display : public Text_block<Cfg>{
 public:
 // Types
-    using TextBlock = Text_block<Cfg>;
+    using TextBlock     = Text_block<Cfg>;
 
     using size_type = Cfg::index_type; 
     using index_type= Cfg::index_type;
@@ -323,10 +419,10 @@ public:
 
 private:
 // Data
-    Bitmatrix bm_;	     // Imagen con los glyphs a mostrar en el display
-    
-    Coord_ij bm_pos_;  // posicion del bm_ en el background
+//    Subtext_block subtxt_;  // Bloque de texto que mostramos en el display
 
+    Bitmatrix bm_;	    // Es subtxt_ pero dibujado con la fuente Font
+//  Display out_;	// Display donde mostramos bm_
 };
 
 

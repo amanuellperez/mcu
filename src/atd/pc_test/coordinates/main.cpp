@@ -77,16 +77,16 @@ void test_fix_bounded_rectangle_ij_plane_type()
     CHECK_TRUE(br.p1() == Coord{1,5}, "p1()");
     CHECK_TRUE(br.pe() == Coord{2,6}, "pe()");
 
-    CHECK_TRUE(br.scroll_left(1) == nm::fail, "scroll_left");
-    CHECK_TRUE(br.scroll_up(1) == nm::fail, "scroll_up");
+    CHECK_TRUE(br.move_left(1) == nm::fail, "move_right");
+    CHECK_TRUE(br.move_up(1) == nm::fail, "move_up");
 
-    CHECK_TRUE(br.scroll_right(1) == nm::ok, "scroll_right");
+    CHECK_TRUE(br.move_right(1) == nm::ok, "move_right");
 
     CHECK_TRUE(br.p0() == Coord{0,1}, "p0()");
     CHECK_TRUE(br.p1() == Coord{1,6}, "p1()");
     CHECK_TRUE(br.pe() == Coord{2,7}, "pe()");
 
-    CHECK_TRUE(br.scroll_down(1) == nm::ok, "scroll_down");
+    CHECK_TRUE(br.move_down(1) == nm::ok, "move_down");
 
     CHECK_TRUE(br.p0() == Coord{1,1}, "p0()");
     CHECK_TRUE(br.p1() == Coord{2,6}, "p1()");
@@ -120,7 +120,8 @@ struct bounded_cylinder_type_cfg {
 // Type
     static constexpr bool cylinder_type{};
 
-    using index_type = int;
+    // using index_type = int;
+    using index_type = uint16_t;
     
 // Dimensiones del background
     static constexpr index_type bg_width  = 16;
@@ -152,14 +153,14 @@ void test_fix_bounded_rectangle_ij_cylinder_type()
     CHECK_TRUE(br.pe() == Coord{2,6}, "pe()");
 
 
-    CHECK_TRUE(br.scroll_right(1) == nm::ok, "scroll_right");
+    CHECK_TRUE(br.move_right(1) == nm::ok, "move_right");
 
     CHECK_TRUE(br.p0() == Coord{0,1}, "p0()");
     CHECK_TRUE(br.p1() == Coord{1,6}, "p1()");
     CHECK_TRUE(br.pm() == br.pe()   , "pm()");
     CHECK_TRUE(br.pe() == Coord{2,7}, "pe()");
 
-    CHECK_TRUE(br.scroll_down(1) == nm::ok, "scroll_down");
+    CHECK_TRUE(br.move_down(1) == nm::ok, "move_down");
 
     CHECK_TRUE(br.p0() == Coord{1,1}, "p0()");
     CHECK_TRUE(br.p1() == Coord{2,6}, "p1()");
@@ -190,12 +191,45 @@ void test_fix_bounded_rectangle_ij_cylinder_type()
     CHECK_TRUE(br.pm() == Coord{4,6}, "pm()");
     CHECK_TRUE(br.pe() == Coord{1,6}, "pe()");
 
+
+// Coordenadas negativas
+    br.move_to({0,0}); // no pongo negativas ya que si index_type == unsigned
+		       // no compilara
+    br.move_left(2);
+    CHECK_TRUE(br.p0() == Coord{0, 14}, "p0()");
+    CHECK_TRUE(br.p1() == Coord{1, 3}, "p1()");
+    CHECK_TRUE(br.pm() == Coord{2, 16}, "pm()");
+    CHECK_TRUE(br.pe() == Coord{2, 4}, "pe()");
+
+    br.move_right(2);
+    CHECK_TRUE(br.p0() == Coord{0,0}, "p0()");
+    CHECK_TRUE(br.p1() == Coord{1,5}, "p1()");
+    CHECK_TRUE(br.pm() == br.pe()   , "pm()");
+    CHECK_TRUE(br.pe() == Coord{2,6}, "pe()");
+
+    br.move_up(1);
+    CHECK_TRUE(br.p0() == Coord{3,0}, "p0()");
+    CHECK_TRUE(br.p1() == Coord{0,5}, "p1()");
+    CHECK_TRUE(br.pm() == Coord{4,6}, "pm()");
+    CHECK_TRUE(br.pe() == Coord{1,6}, "pe()");
+
+    br.move_down(1);
+    CHECK_TRUE(br.p0() == Coord{0,0}, "p0()");
+    CHECK_TRUE(br.p1() == Coord{1,5}, "p1()");
+    CHECK_TRUE(br.pm() == br.pe()   , "pm()");
+    CHECK_TRUE(br.pe() == Coord{2,6}, "pe()");
+
+    br.move_up(4);
+    CHECK_TRUE(br.p0() == Coord{0,0}, "p0()");
+    CHECK_TRUE(br.p1() == Coord{1,5}, "p1()");
+    CHECK_TRUE(br.pm() == br.pe()   , "pm()");
+    CHECK_TRUE(br.pe() == Coord{2,6}, "pe()");
+
 // cambio de coordenadas
     br.move_to({1,3});
     CHECK_TRUE(br.local_to_background({1,2}) == Coord{2, 5}, "local_to_background");
     CHECK_TRUE(br.background_to_local({2,5}) == Coord{1, 2}, "background_to_local");
     // observar que funciona con numeros negativos si index_type es signed
-    CHECK_TRUE(br.background_to_local({0,0}) == Coord{-1, -3}, "background_to_local");
 }
 
 

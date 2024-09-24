@@ -45,6 +45,9 @@ using Text_block =  atd::Text_block<Cfg>;
 template <typename Cfg>
 using Subtext_block =  atd::Subtext_block<Cfg>;
 
+template <typename Cfg>
+using Text_block_with_view =  atd::Text_block_with_view<Cfg>;
+
 struct Cout {
 };
 
@@ -113,7 +116,46 @@ void print(std::ostream& out, const Subtext_block<Cfg>& sub)
 	out << '\n';
     }
 }
-void test_text_display()
+
+template <typename C>
+void print_bg(std::ostream& out, const Text_block_with_view<C>& txt)
+{
+    using index_t = Text_block<C>::index_type;
+
+    out << "\n>>>-------------------------------\n";
+    for (index_t i = 0; i < txt.bg_rows(); ++i){
+	for (index_t j = 0; j < txt.bg_cols(); ++j){
+	    char c = txt.bg_read({i, j});
+	    if (c == '\0')
+		out << "_";
+	    else
+		out << c;
+	}
+	out << '\n';
+    }
+    out << "<<<-------------------------------\n";
+}
+
+
+template <typename C>
+void print_view(std::ostream& out, const Text_block_with_view<C>& txt)
+{
+    using index_t = Text_block<C>::index_type;
+
+    out << "\n>>>-------------------------------\n";
+    for (index_t i = 0; i < txt.view_rows(); ++i){
+	for (index_t j = 0; j < txt.view_cols(); ++j){
+	    char c = txt.view_read({i, j});
+	    if (c == '\0')
+		out << "_";
+	    else
+		out << c;
+	}
+	out << '\n';
+    }
+    out << "<<<-------------------------------\n";
+}
+void test_text_block()
 {
     test::interface("Text_block");
     Text_block<Text_block_cfg> txt;
@@ -137,34 +179,76 @@ void test_text_display()
 	           "--------\n";
     print(std::cout, sub);
 
-    sub.scroll_down(1);
-    std::cout << "\nscroll_down(1)\n"
+    sub.move_down(1);
+    std::cout << "\nmove_down(1)\n"
 	           "--------------\n";
     print(std::cout, sub);
 
     for (index_t i = 0; i < 4; ++i){
-	sub.scroll_right(2);
+	sub.move_right(2);
 
-	std::cout << "\nscroll_right(2)\n"
+	std::cout << "\nmove_right(2)\n"
 		       "--------------\n";
-	std::cout << "p0 = " << sub.p0() << "; pm = " << sub.pm() << "; pe = " << sub.pe() << '\n';
 	print(std::cout, sub);
     }
 
     for (index_t i = 0; i < 4; ++i){
-	sub.scroll_left(2);
-	std::cout << "\nscroll_left(2)\n"
+	sub.move_left(2);
+	std::cout << "\nmove_left(2)\n"
 		       "--------------\n";
 	print(std::cout, sub);
     }
+}
+
+void test_text_block_with_view()
+{
+    test::interface("Text_block_with_view");
+    
+    using Cfg = Text_block_cfg;
+    Text_block_with_view<Cfg> txt;
+    CHECK_TRUE(txt.bg_rows() == Cfg::text_rows, "bg_rows");
+    CHECK_TRUE(txt.bg_cols() == Cfg::text_cols, "bg_cols");
+
+    txt.bg_write({0,0}, "1234567890abcdefghijklmnopqrstuvwxyzABCD");
+    print_bg(std::cout, txt);
+
+    std::cout << "View:";
+    print_view(std::cout, txt);
+    txt.view_move_up(2);
+    std::cout << "move_up(2):";
+    print_view(std::cout, txt);
+
+    txt.view_move_down(2);
+    std::cout << "move_down(2):";
+    print_view(std::cout, txt);
+
+
+    txt.view_move_left(2);
+    std::cout << "move_left(2):";
+    print_view(std::cout, txt);
+
+    txt.view_move_right(2);
+    std::cout << "move_right(2):";
+    print_view(std::cout, txt);
+    
+
+}
+
+void test_monochromatic_text_display()
+{
+    test::interface("Monochromatic_text_display");
+
 }
 
 int main()
 {
 try{
     test::header("atd_display");
+    std::cerr << "NO SON AUTOMÁTICAS!!!";
 
-    test_text_display();
+    test_text_block();
+    test_text_block_with_view();
+//    test_monochromatic_text_display();
 
 }catch(std::exception& e)
 {

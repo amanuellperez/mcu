@@ -291,15 +291,14 @@ public:
     //	Al no tener criterio, de momento "no hagamos nada"
     nm::Result move_to(const Coord_ij& q0);
 
-    // Movimiento relativo: añadimos q0 a la esquina
-    // Equivalente a move_to(p0() + q0)
-    // TODO: nombre? move_rel es muy feo @_@
-    nm::Result move_rel(const Coord_ij& q0) {return move_to(p0() + q0); }
 
-    nm::Result scroll_up  (index_type incr) {return move_rel({-incr, 0});}
-    nm::Result scroll_down(index_type incr) {return move_rel({+incr, 0});}
-    nm::Result scroll_left(index_type incr) {return move_rel({0, +incr});}
-    nm::Result scroll_right(index_type incr){return move_rel({0, -incr});}
+    // Movimiento de la ventana (del rectángulo) respecto del background
+    // Los incrementos son relativos al rectángulo
+    nm::Result move_up  (index_type incr);
+    nm::Result move_down(index_type incr) {return move_rel({ incr, 0});}
+    nm::Result move_left(index_type incr);
+    nm::Result move_right(index_type incr){return move_rel({0, incr});}
+
 
 // Coordenadas
     // Converitmos las coordenadas locales del rectángulo en coordenadas
@@ -324,6 +323,11 @@ private:
 
     constexpr Coord_ij reduce_to_background(const Coord_ij& p) const
     { return Coord_ij{p.i % bg_height, p.j % bg_width};}
+
+    // Movimiento relativo: añadimos q0 a la esquina
+    // Si index_type es unsigned, esta funcion esta muy limitada. Por eso no
+    // hacerla publica
+    nm::Result move_rel(const Coord_ij& q0) {return move_to(p0() + q0); }
 };
 
 
@@ -344,6 +348,40 @@ nm::Result fix_Bounded_rectangle_ij_plane_type<C>::move_to(const Coord_ij& q0)
 
     return nm::ok;
 }
+
+template <typename C>
+inline 
+nm::Result fix_Bounded_rectangle_ij_plane_type<C>::
+	    move_up (index_type incr)
+{
+    if (p0_.i >= incr){
+	p0_.i -= incr;
+	return nm::ok;
+    }
+
+    else{
+	p0_.i = 0;
+	return nm::fail;
+    }
+}
+
+
+template <typename C>
+inline 
+nm::Result fix_Bounded_rectangle_ij_plane_type<C>::
+	    move_left(index_type incr)
+{
+    if (p0_.j >= incr){
+	p0_.j -= incr;
+	return nm::ok;
+    }
+
+    else{
+	p0_.j = 0;
+	return nm::fail;
+    }
+}
+
 
 template <typename C>
 inline 
@@ -438,22 +476,15 @@ public:
 // Move
     // Movimiento absoluto: movemos el rectángulo de tal manera que su esquina
     // superior izquierda sea q0. 
-    // DUDA: ¿qué hacer en caso de no poder mover el rectángulo a esa
-    // posición?
-    //	1) No hace nada.
-    //	2) Intenta colocar el rectángulo lo más próximo a q0
-    //	Al no tener criterio, de momento "no hagamos nada"
+    // q0 son coordenadas absolutas al background
     nm::Result move_to(const Coord_ij& q0);
 
-    // Movimiento relativo: añadimos q0 a la esquina
-    // Equivalente a move_to(p0() + q0)
-    // TODO: nombre? move_rel es muy feo @_@
-    nm::Result move_rel(const Coord_ij& q0) {return move_to(p0() + q0); }
-
-    nm::Result scroll_up  (index_type incr) {return move_rel({-incr, 0});}
-    nm::Result scroll_down(index_type incr) {return move_rel({+incr, 0});}
-    nm::Result scroll_left(index_type incr) {return move_rel({0, +incr});}
-    nm::Result scroll_right(index_type incr){return move_rel({0, -incr});}
+    // Movimiento de la ventana (del rectángulo) respecto del background
+    // Los incrementos son relativos al rectángulo
+    nm::Result move_up  (index_type incr);
+    nm::Result move_down(index_type incr) {return move_rel({ incr, 0});}
+    nm::Result move_left(index_type incr);
+    nm::Result move_right(index_type incr){return move_rel({0, incr});}
 
 // Coordenadas
     // Converitmos las coordenadas locales del rectángulo en coordenadas
@@ -467,6 +498,8 @@ public:
 
 private:
 // Data
+// Invariante: p0_ siempre está en el background 0 
+// ( 0 <= p0_.i < bg_width and 0 <= j < bg_height)
     Coord_ij p0_; // esquina superior izda del rectángulo
 
 // Helpers
@@ -475,8 +508,14 @@ private:
     constexpr Coord_ij p1(const Coord_ij& p0) const
     {return reduce_to_background(p0 + Coord_ij{height() - 1, width() - 1});}
 
-    constexpr Coord_ij reduce_to_background(const Coord_ij& p) const
-    { return Coord_ij{p.i % bg_height, p.j % bg_width};}
+    constexpr Coord_ij reduce_to_background(Coord_ij p) const;
+
+    // Movimiento relativo: añadimos q0 a la esquina
+    // No hago publica esta funcion ya que si index_type es unsigned, no puedo
+    // escribir cosas del tipo `move_rel({-2,-3})`.
+    // Por ello, de momento, opto a dejar los movimientos relativos con
+    // scroll_up/down/left/right
+    nm::Result move_rel(const Coord_ij& q0) {return move_to(p0() + q0); }
 };
 
 
@@ -488,10 +527,57 @@ constexpr fix_Bounded_rectangle_ij_cylinder_type<C>::
     : p0_{reduce_to_background(p0)}
 { }
 
+
 template <typename C>
-nm::Result fix_Bounded_rectangle_ij_cylinder_type<C>::move_to(const Coord_ij& q0)
+inline 
+constexpr auto fix_Bounded_rectangle_ij_cylinder_type<C>::
+    reduce_to_background(Coord_ij p) const -> Coord_ij
+{ 
+    if (p.i < 0)
+	p.i = p.i + bg_height * (p.i / bg_height + 1);
+    else
+	p.i = p.i % bg_height;
+
+    if (p.j < 0)
+	p.j = p.j + bg_width * (p.j / bg_width + 1);
+    else
+	p.j = p.j % bg_width;
+
+    return p;
+}
+
+template <typename C>
+nm::Result fix_Bounded_rectangle_ij_cylinder_type<C>::
+				move_to(const Coord_ij& q0)
 {
     p0_ = reduce_to_background(q0);
+
+    return nm::ok;
+}
+
+template <typename C>
+nm::Result fix_Bounded_rectangle_ij_cylinder_type<C>::
+    move_up(index_type incr)
+{
+    if ( p0_.i >=  incr)
+	p0_.i -= incr;
+
+    else
+	p0_.i = p0_.i + bg_height - incr;
+
+    return nm::ok;
+}
+
+template <typename C>
+nm::Result fix_Bounded_rectangle_ij_cylinder_type<C>::
+    move_left(index_type incr)
+{ 
+    if ( p0_.j >=  incr)
+	p0_.j -= incr;
+
+    else
+	p0_.j = p0_.j + bg_width - incr;
+
 
     return nm::ok;
 }
