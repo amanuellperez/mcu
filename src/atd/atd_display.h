@@ -32,8 +32,10 @@
  *    20/09/2024 Monochromatic_text_display (primeras pruebas)
  *
  ****************************************************************************/
-#include "atd_coordinates.h"
 #include <algorithm>
+
+#include "atd_coordinates.h"
+#include "atd_draw.h"
 
 namespace atd{
 /***************************************************************************
@@ -218,6 +220,8 @@ public:
     // Las coordenadas son relativas al subtext
     char read(const Coord_ij& p) const;
     char read(index_type i, index_type j) const {return read({i,j});}
+    
+    void write(const Coord_ij& p, char c);
 
 
 // Unidimensional container
@@ -250,6 +254,12 @@ template <typename Cfg>
 inline 
 char Subtext_block<Cfg>::read(const Coord_ij& p) const
 { return txt_block_.read(rect_.local_to_background(p)); }
+
+template <typename Cfg>
+inline 
+void Subtext_block<Cfg>::write(const Coord_ij& p, char c)
+{ txt_block_.write(rect_.local_to_background(p), c); }
+
 
 
 /***************************************************************************
@@ -319,6 +329,8 @@ public:
     char view_read(const Coord_ij& p) const {return view_.read(p); }
     char view_read(index_type i, index_type j) const {return view_.read(i, j);}
 
+    void view_write(const Coord_ij& p, char c) {return view_.write(p, c); }
+
 
 // Unidimensional container
     static constexpr size_type view_size() { return View::size(); }
@@ -352,15 +364,63 @@ private:
 /***************************************************************************
  *			MONOCROMATIC_TEXT_DISPLAY
  ***************************************************************************/
+namespace impl_of {
+template <typename Bitmatrix, typename Font>
+concept bitmatrix_and_font_both_by_columns =
+    requires 
+    { 
+	typename Bitmatrix::index_type; 
+	Font::is_by_columns;
+    }
+    and
+    requires (Bitmatrix b, typename Bitmatrix::index_type i)
+    { b.col_begin(i); };
+
+template <typename Bitmatrix, typename Font>
+concept bitmatrix_and_font_both_by_rows =
+    requires 
+    { 
+	typename Bitmatrix::index_type; 
+	Font::is_by_rows;
+    }
+    and
+    requires (Bitmatrix b, typename Bitmatrix::index_type i)
+    { b.row_begin(i); };
+
+
+
+
+template <typename Cfg>
+struct Monochromatic_text_display_cfg : Cfg{
+
+    using size_type = Cfg::index_type; 
+    using Bitmatrix = typename Cfg::Display::Bitmatrix; 
+    using Font      = Cfg::Font; 
+
+    static constexpr size_type subtext_rows = Bitmatrix::rows() / Font::rows; 
+    static constexpr size_type subtext_cols = Bitmatrix::cols() / Font::cols; 
+    
+    // Que la view sea mas pequeña que el background
+    static_assert(subtext_rows <= Cfg::text_rows);
+    static_assert(subtext_cols <= Cfg::text_cols);
+
+    // Comprobamos que Bitmatrix y Font sean ambos del mismo tipo
+    static_assert(bitmatrix_and_font_both_by_rows<Bitmatrix, Font> or
+		  bitmatrix_and_font_both_by_columns<Bitmatrix, Font>);
+};
+
+}// namespace
+ 
 // struct Cfg {
-//	using Display    = MAX7219_matrix...
 //	using index_type = uint16_t;
-//	static constexpr index_type bg_rows = 2;
-//	static constexpr index_type bg_cols = 16;
-//	static constexpr index_type view_rows = 2;
-//	static constexpr index_type view_cols = 16;
-//	using Font = ... // fuente que vamos a usar para escribir en el	display
 //
+//	// Dimensiones del block de texto que vamos a usar
+//	static constexpr index_type text_rows = 2;
+//	static constexpr index_type text_cols = 16;
+//
+//	// Fuente que vamos a usar en el display
+//	using Font       = ... 
+//	using Display    = MAX7219_matrix...
 // };
 //
 // primeras pruebas
@@ -380,10 +440,13 @@ private:
 //  dibujados todos los glyphs del buffer de texto. El display real lo
 //  moveremos sobre este background.
 //  
-template <typename Cfg>
-class Monochromatic_text_display : public Text_block<Cfg>{
+template <typename Cfg0>
+class Monochromatic_text_display : 
+    public Text_block_with_view<impl_of::Monochromatic_text_display_cfg<Cfg0>>
+{
 public:
 // Types
+    using Cfg = impl_of::Monochromatic_text_display_cfg<Cfg0>;
     using TextBlock     = Text_block<Cfg>;
 
     using size_type = Cfg::index_type; 
@@ -398,21 +461,15 @@ public:
     using Display   = Cfg::Display;
 
 // Constructor
-    Monochromatic_text_display(); 
+    Monochromatic_text_display();
 
-// Background display
-    static constexpr size_type bg_display_rows() 
-	{ return TextBlock::text_rows() * Font::rows;}
-
-    static constexpr size_type bg_display_cols() 
-	{ return TextBlock::text_rows() * Font::cols;}
-    
 // Display
-    static constexpr size_type display_rows() { return Bitmatrix::rows();}
-    static constexpr size_type display_cols() { return Bitmatrix::cols();}
+    static constexpr size_type bit_rows() { return Bitmatrix::rows();}
+    static constexpr size_type bit_cols() { return Bitmatrix::cols();}
+
+    static constexpr size_type view_rows() { return Cfg::subtext_rows; }
+    static constexpr size_type view_cols() { return Cfg::subtext_cols; }
     
-    static_assert(bg_display_rows() >= display_rows());
-    static_assert(bg_display_cols() >= display_cols());
 
     // Volcamos el contenido del buffer en el display
     void flush();
@@ -422,8 +479,53 @@ private:
 //    Subtext_block subtxt_;  // Bloque de texto que mostramos en el display
 
     Bitmatrix bm_;	    // Es subtxt_ pero dibujado con la fuente Font
-//  Display out_;	// Display donde mostramos bm_
+    Display out_;	// Display donde mostramos bm_
+
+    void flush_view_to_bitmatrix();
+    void flush_bitmatrix_to_view() {out_.write(bm_);}
+
+    Bitmatrix::Coord_ij 
+	    view_coord2bitmatrix_coord(index_type i, index_type j) const;
 };
+
+template <typename C>
+inline 
+Monochromatic_text_display<C>::Monochromatic_text_display()
+{ bm_.clear(); }
+
+template <typename C>
+void Monochromatic_text_display<C>::flush()
+{ 
+    flush_view_to_bitmatrix(); // TODO(?): si no ha cambiado la view, no es
+			       // necesario este paso
+    flush_bitmatrix_to_view();
+}
+
+template <typename C>
+inline auto 
+Monochromatic_text_display<C>::
+	view_coord2bitmatrix_coord(index_type i, index_type j) const
+							-> Bitmatrix::Coord_ij
+{ 
+    using index_t = Bitmatrix::index_type;
+    index_t I = Font::rows * i;
+    index_t J = Font::cols * j;
+    return {I, J};
+}
+
+
+
+template <typename C>
+void Monochromatic_text_display<C>::flush_view_to_bitmatrix()
+{
+    for (index_type i = 0; i < view_rows(); ++i){
+	for (index_type j = 0; j < view_cols(); ++j){
+	    char c = this->view_read(i, j);
+	    auto p = view_coord2bitmatrix_coord(i, j);
+	    write<Font>(bm_, p, c);
+	}
+    }
+}
 
 
 }// atd

@@ -90,8 +90,8 @@ public:
 // Bit matrix interface
 // --------------------
 // Dimensions
-    constexpr size_t rows() const {return nrows;}
-    constexpr size_t cols() const {return ncols;}
+    static constexpr size_t rows() {return nrows;}
+    static constexpr size_t cols() {return ncols;}
 
 // Acceso aleatorio
     // lectura

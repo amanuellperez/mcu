@@ -32,7 +32,6 @@
 #include "dogica_rf.h"
 
 #include "upheavtt_cr.h"
-#include "upheavtt_rf.h"
 
 #include "vcr_cr.h"
 #include "depixel_rf.h"
@@ -48,9 +47,50 @@ using Subtext_block =  atd::Subtext_block<Cfg>;
 template <typename Cfg>
 using Text_block_with_view =  atd::Text_block_with_view<Cfg>;
 
-struct Cout {
+template <typename Cfg>
+using Text_display = atd::Monochromatic_text_display<Cfg>;
+
+struct Cout_by_columns {
+    static constexpr int rows = 2;
+    static constexpr int cols = 6;
+    using Bitmatrix = atd::Bitmatrix_col_1bit<rows*8, cols * 8>;
+
+    void write(const Bitmatrix& m)
+    {
+	for (uint8_t i = 0; i < m.rows(); ++i){
+	    for (uint8_t j = 0; j < m.cols(); ++j){
+		if (m(i, j) == 1)
+		    std::cout << 'X';
+		else
+		    std::cout << '.';
+	    }
+	    std::cout << '\n';
+
+	}
+    }
+
 };
 
+struct Cout_by_rows{
+    static constexpr int rows = 2;
+    static constexpr int cols = 6;
+    using Bitmatrix = atd::Bitmatrix_row_1bit<rows*8, cols * 8>;
+
+    void write(const Bitmatrix& m)
+    {
+	for (uint8_t i = 0; i < m.rows(); ++i){
+	    for (uint8_t j = 0; j < m.cols(); ++j){
+		if (m(i, j) == 1)
+		    std::cout << 'X';
+		else
+		    std::cout << '.';
+	    }
+	    std::cout << '\n';
+
+	}
+    }
+
+};
 struct Text_block_cfg{
 // Text buffer
     using index_type = int;
@@ -62,14 +102,27 @@ struct Text_block_cfg{
     static constexpr bool cylinder_type{};
     static constexpr index_type subtext_rows = 2;
     static constexpr index_type subtext_cols = 5;
+};
+
+
+template <typename Font0, typename Cout>
+struct Display_cfg{
+// Text buffer
+    using index_type = int;
+    //using index_type = unsigned int;
+    static constexpr index_type text_rows = 4;
+    static constexpr index_type text_cols = 10;
+
+// Ventana que vemos del buffer
+    static constexpr bool cylinder_type{};
     
-// Windows
-    using Font = rom::font_dogica_8x8_cr::Font;
-    using Bitmatrix = atd::Bitmatrix_col_1bit<16, 32>; // la del MAX7219
+// Fuente
+    using Font = Font0;
 
 // Display output
     using Display    = Cout;
 };
+
 
 template <typename C>
 void print_buffer(std::ostream& out, const Text_block<C>& txt)
@@ -231,12 +284,41 @@ void test_text_block_with_view()
     std::cout << "move_right(2):";
     print_view(std::cout, txt);
     
+    txt.view_write({0,0}, '(');
+    txt.view_write({0,4}, ')');
+    txt.view_write({1,0}, '<');
+    txt.view_write({1,4}, '>');
+    print_view(std::cout, txt);
 
 }
 
-void test_monochromatic_text_display()
+template <typename Font, typename Cout>
+void test_monochromatic_text_display(const std::string& str)
 {
     test::interface("Monochromatic_text_display");
+    std::cout << "\n***********************************\n"
+	      << str
+	      << "\n***********************************\n";
+
+    Text_display<Display_cfg<Font, Cout>> display;
+
+    display.bg_write({0,0}, "1234567890abcdefghijklmnopqrstuvwxyzABCD");
+    print_bg(std::cout, display);
+    display.flush();
+
+    std::cout << "Move to the right\n";
+    for (int i = 0; i < 5; ++i){
+	display.view_move_right(2);
+	std::cout << "\n";
+	display.flush();
+    }
+
+    std::cout << "Move down\n";
+    for (int i = 0; i < 4; ++i){
+	display.view_move_down(1);
+	std::cout << "\n";
+	display.flush();
+    }
 
 }
 
@@ -248,7 +330,18 @@ try{
 
     test_text_block();
     test_text_block_with_view();
-//    test_monochromatic_text_display();
+
+    using Dogica_cr = rom::font_dogica_8x8_cr::Font;
+    test_monochromatic_text_display<Dogica_cr, Cout_by_columns>("Dogica_cr");
+
+    using Dogica_rf = rom::font_dogica_8x8_rf::Font;
+    test_monochromatic_text_display<Dogica_rf, Cout_by_rows>("Dogica_rf");
+
+    using Upheavtt_cr = rom::font_upheavtt_13x14_cr::Font;
+    test_monochromatic_text_display<Upheavtt_cr , Cout_by_columns>("Upheavtt_cr");
+
+    using Depixel_rf = rom::font_DePixelBreitFett_23x13_rf::Font;
+    test_monochromatic_text_display<Depixel_rf, Cout_by_rows>("Depixel_rf");
 
 }catch(std::exception& e)
 {

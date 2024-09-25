@@ -22,6 +22,7 @@ INCS= atd_algorithm.h	\
 	atd_cstddef.h		\
 	atd_cstring.h		\
 	atd_decimal.h		\
+	atd_display.h		\
 	atd_double.h		\
 	atd_draw.h			\
 	atd_float.h			\
