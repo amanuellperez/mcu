@@ -24,6 +24,7 @@
 #include <rom_font_dogica_8x8_cr.h>
 #include <rom_font_dogica_8x8_rf.h>
 #include <atd_draw.h>
+#include <atd_display.h>
 
 #include <atd_test.h>
 using namespace test;
@@ -83,13 +84,36 @@ struct MAX7219_cfg_by_columns{
 };
 
 // Elegir para probar por filas o por columnas
-//using Cfg = MAX7219_cfg_by_columns;
-using Cfg = MAX7219_cfg_by_rows;
+using Cfg = MAX7219_cfg_by_columns;
+//using Cfg = MAX7219_cfg_by_rows;
 
 using MAX7219_matrix = dev::MAX7219_matrix<Cfg, matrix_nstrips, 4>;
 
 using Bitmatrix = MAX7219_matrix::Bitmatrix;
 using Coord = Bitmatrix::Coord_ij;
+
+
+// Text_display
+template <typename Cfg>
+using Text_display = atd::Monochromatic_text_display<Cfg>;
+
+template <typename Font0, typename Display0>
+struct Display_cfg_by_columns{
+// Text buffer
+    using index_type = int;
+    //using index_type = unsigned int;
+    static constexpr index_type text_rows = 4;
+    static constexpr index_type text_cols = 20;
+
+// Ventana que vemos del buffer
+    static constexpr bool cylinder_type{};
+    
+// Fuente
+    using Font = Font0;
+
+// Display output
+    using Display    = Display0;
+};
 
 // Helpers
 // -------
@@ -142,6 +166,24 @@ void print_uints(std::ostream& out, const atd::Bitmatrix_row_1bit<nrows, ncols>&
 }
 
 
+template <typename C>
+void print_bg(std::ostream& out, const atd::Text_block_with_view<C>& txt)
+{
+    using index_t = atd::Text_block<C>::index_type;
+
+    out << "\n>>>-------------------------------\n";
+    for (index_t i = 0; i < txt.bg_rows(); ++i){
+	for (index_t j = 0; j < txt.bg_cols(); ++j){
+	    char c = txt.bg_read({i, j});
+	    if (c == '\0')
+		out << "_";
+	    else
+		out << c;
+	}
+	out << '\n';
+    }
+    out << "<<<-------------------------------\n";
+}
 
 // Functions
 // ---------
@@ -335,6 +377,52 @@ void test_write()
     Micro::wait_ms(800);
 }
 
+void test_display()
+{
+    myu::UART_iostream uart;
+    uart << "\nTest display\n";
+    
+    using Dogica = rom::font_dogica_8x8_cr::Font;
+    using Display = Text_display<Display_cfg_by_columns<Dogica, MAX7219_matrix>>;
+    Display display;
+
+    display.bg_write({0,0}, "View                "
+			    "     to             "
+			    "        the         "
+			    "            right!  ");
+    print_bg(uart, display);
+
+    display.flush();
+
+    uart << "bitmatrix.rows() = " << (int) Display::Bitmatrix::rows() 
+	  << "; cols() = " << (int) Display::Bitmatrix::cols() << "\n";
+    for (uint8_t i = 0; i < 15; ++i){
+	display.view_move_right(1);
+	display.flush();
+	Micro::wait_ms(300);
+    }
+
+    // display.bg_write({0,0}, "View to the left");
+    display.bg_write({0,0}, "tfel eht ot weiV");
+    print_bg(uart, display);
+    for (uint8_t i = 0; i < 15; ++i){
+	display.view_move_left(1);
+	display.flush();
+	Micro::wait_ms(300);
+    }
+
+    display.bg_write({0,0}, "1                   "
+			    "  2                 "
+			    "3                   "
+			    "  4                 ");
+    print_bg(uart, display);
+    for (uint8_t i = 0; i < 20; ++i){
+	display.view_move_down(1);
+	display.flush();
+	Micro::wait_ms(800);
+    }
+}
+
 
 // Main
 // ----
@@ -355,7 +443,8 @@ int main()
 		  "1. Basic test\n"
 		  "2. Write test\n"
 		  "3. Write bit matrix test\n"
-		  "4. Font test\n";
+		  "4. Basic Font test\n"
+		  "5. Text display\n";
 
 	char opt{};
 	uart >> opt;
@@ -366,6 +455,7 @@ int main()
 	    break; case '2': test_write();
 	    break; case '3': test_write_bitmatrix();
 	    break; case '4': test_font();
+	    break; case '5': test_display();
 	    break; default:
 			uart << "What??? \n";
 	}

@@ -33,6 +33,7 @@
  *
  ****************************************************************************/
 #include <algorithm>
+#include <string_view>
 
 #include "atd_coordinates.h"
 #include "atd_draw.h"
@@ -522,7 +523,10 @@ void Monochromatic_text_display<C>::flush_view_to_bitmatrix()
 	for (index_type j = 0; j < view_cols(); ++j){
 	    char c = this->view_read(i, j);
 	    auto p = view_coord2bitmatrix_coord(i, j);
-	    write<Font>(bm_, p, c);
+	    if (c != '\0')
+		write<Font>(bm_, p, c);
+	    else
+		write<Font>(bm_, p, ' ');
 	}
     }
 }

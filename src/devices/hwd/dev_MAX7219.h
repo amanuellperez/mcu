@@ -720,7 +720,7 @@ public:
     using Bitmatrix = MAX7219_matrix_impl_::Bitmatrix_t<Cfg, rows, cols>;
 
 // Constructor
-    MAX7219_matrix() = delete;
+    MAX7219_matrix() {}; // Text_display necesita un constructor
     static void init();
 
 // Write
