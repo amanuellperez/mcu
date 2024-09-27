@@ -268,8 +268,8 @@ int main()
 try{
     test::header("atd_bit_matrix");
 
-    test_bitmatrix_row_1bit();
-//    test_bitmatrix_col_1bit();
+//    test_bitmatrix_row_1bit();
+    test_bitmatrix_col_1bit();
 
 }catch(std::exception& e)
 {

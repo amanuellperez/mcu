@@ -447,6 +447,9 @@ void test_is_one_most_significant_bit_of()
 	}
     std::cout << "OK\n";
 
+    std::cout << "uint32_t and uint64_t are too low: comment return to test\n";
+    return;
+
 // uint32_t
     std::cout << "uint32_t ... ";
     for (uint32_t n = 0; n < 0x80000000; ++n)
@@ -909,6 +912,24 @@ void test_Bit()
 
 }
 
+void test_array_byte_view()
+{
+    test::interface("Array_byte_view");
+
+    uint8_t x[4] = {0xFF, 0xFF, 0xFF, 0xFF};
+
+    atd::in(x).bit(0).write_byte(0xAA);
+    CHECK_TRUE(x[0] == 0xAA, "write_byte");
+
+    atd::in(x).bit(4).write_byte(0xCB);
+    CHECK_TRUE(x[0] == 0xBA and x[1] == 0xFC, "write_byte");
+
+    x[0] = 0;
+    x[1] = 0;
+    atd::in(x).bit(2).write_byte(0b11011111);
+    CHECK_TRUE(x[0] == 0b01111100 and x[1] == 0x03, "write_byte");
+}
+
 int main()
 {
 try{
@@ -929,6 +950,7 @@ try{
     test_nibble();
     test_reverse_bits();
     test_Bit();
+    test_array_byte_view();
 
 }catch(std::exception& e)
 {

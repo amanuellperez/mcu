@@ -64,6 +64,7 @@
  *  28/02/23: nibble<n>(); byte<n>();
  *  21/08/23: reverse_bits
  *  29/08/24: bit  (versión dinámica)
+ *  27/09/24: in(x).bit(4).write_byte(a);
  *
  ****************************************************************************/
 #include <stdint.h> // uint8_t
@@ -72,6 +73,7 @@
 #include "atd_static.h"	// static_array
 #include "atd_type_traits.h"	// sizeof_in_bytes
 #include "atd_concepts.h"
+#include "atd_cmath.h"	    // div
 
 // avr define bit
 #undef bit
@@ -741,6 +743,99 @@ inline uint16_t reverse_bits(uint16_t x)
 }
 
 
+// View_as_bit_array
+// ---------------
+
+// Concebimos el array de bytes como un array de bits.
+// Esta función escribe el byte x en la posición [i0, i0 + 8)
+//
+// Ejemplo:
+//     i0= 2
+//   data: 12345678 abcdefgh
+//      x:       AB CDEFGH    
+//  ------
+//  data:  123456AB CDEFGHgh  <-- resultado
+//
+template <size_t N, bool safe = true>
+inline void in___bit___write_byte(uint8_t (&data)[N], size_t i0, uint8_t x)
+{
+    auto [I0, r] = atd::div<size_t>(i0, 8u);
+
+    if constexpr (safe) {
+    if (I0 >= N)
+	return;
+    }
+
+    if (r == 0){
+	data[I0] = x;
+	return;
+    }
+
+    data[I0] = (data[I0] & ~(0xFF << r)) | (x << r);
+	
+    ++I0;
+
+    if (I0 >= N)
+	return;
+
+    data[I0] = (data[I0] & (0xFF << r)) | (x >> (8 - r));
+
+}
+
+namespace impl_of{
+
+template <size_t N>
+struct View_as_bit_array{
+// Constructor
+    View_as_bit_array(uint8_t (&x) [N], size_t i0)
+	: data{x}, i{i0} { }
+
+// Operations
+    void write_byte(uint8_t x)
+    { in___bit___write_byte(data, i, x); }
+
+// Data
+    uint8_t (& data)[N];
+    size_t i;
+};
+
+}// namespace impl_of
+
+template <size_t N>
+struct View_as_bit_array{
+
+    using Bit = impl_of::View_as_bit_array<N>;
+
+// Constructor
+    View_as_bit_array(uint8_t (&x) [N]) : data{x} {}
+
+// Operations
+    Bit bit(size_t i) {return Bit{data, i};}
+
+// Data
+    uint8_t (& data)[N];
+};
+
+template <size_t N>
+inline 
+View_as_bit_array<N> view_as_bit_array(uint8_t (&x) [N])
+{ return View_as_bit_array<N>{x}; }
+
+// Propuesta de idioma:
+//  in(x) = convierte en una clase de atd el tipo básico.
+//  La función atd::in quedará sobrecargada para cada tipo.
+//  Ejemplos:
+//	int x;
+//	auto ax = atd::in(x);
+//	ax.write(...);
+//
+// Esto está pensado para poder escribir cosas mas readables:
+//	    in(x).write(y).in_bit(i);
+//
+template <size_t N>
+inline 
+View_as_bit_array<N> in(uint8_t (&x) [N])
+{ return view_as_bit_array(x);}
 
 }// namespace
 

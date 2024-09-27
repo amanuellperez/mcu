@@ -191,8 +191,6 @@ Bitmatrix_row_1bit<nrows, ncols>::
     write_byte(data_type x, index_type I, index_type J)
 { 
     data_[I][J] = x;
-//    auto [J, p] = index(pos.j);
-//    data_[pos.i][J] = x; 
 }
 
 template <size_t nrows, size_t ncols>
@@ -332,6 +330,9 @@ public:
     constexpr Bit operator()(index_type i, index_type j);
     constexpr const_Bit operator()(index_type i, index_type j) const;
 
+    // Escritura (es más eficiente write_byte)
+    void write(data_type x, index_type i, index_type j);
+
 // Funciones más eficientes 
     // Rellena toda la matriz con el valor b (0 ó 1 únicamente)
     void fill(uint8_t b);
@@ -419,6 +420,13 @@ inline constexpr auto
 Bitmatrix_col_1bit<nrows, ncols>::byte_coordinates_of(const Coord_ij& p0) 
 		    -> std::pair<index_type, index_type>
 { return { p0.i / 8 , p0.j}; }
+
+
+template <size_t nrows, size_t ncols>
+inline void
+Bitmatrix_col_1bit<nrows, ncols>::
+    write(data_type x, index_type i, index_type j)
+{ in(data_[j]).bit(i).write_byte(x); }
 
 
 template <size_t nrows, size_t ncols>

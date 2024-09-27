@@ -23,6 +23,8 @@
 
 #include <rom_font_dogica_8x8_cr.h>
 #include <rom_font_dogica_8x8_rf.h>
+#include <rom_font_upheavtt_13x14_cr.h>
+
 #include <atd_draw.h>
 #include <atd_display.h>
 
@@ -45,8 +47,9 @@ static constexpr uint8_t noCS = 16;
 static constexpr uint8_t strip0 = noCS;
 static constexpr uint8_t strip1 = 15;
 static constexpr uint8_t strip2 = 14;
-// dejo solo 3 para poder probar 
-static constexpr uint8_t matrix_nstrips = 3;
+static constexpr uint8_t strip3 = 13;
+
+static constexpr uint8_t matrix_nstrips = 4;
 
 // SPI protocol
 // ------------
@@ -60,12 +63,10 @@ static_assert (noCS == myu::SPI_master::noCS_pin_number);
 struct MAX7219_cfg_by_rows{
     using SPI_master	= myu::SPI_master;
     using SPI_selector	= 
-	mcu::SPI_pin_array_selector<Micro, strip0, strip1, strip2>;
+	mcu::SPI_pin_array_selector<Micro, strip0, strip1, strip2, strip3>;
 
     static constexpr bool by_rows{};
 
-// Font no lo necesita MAX7219_matrix, pero lo uso en las pruebas
-    using Font = rom::font_dogica_8x8_rf::Font;
     static constexpr bool is_by_rows = true;
     static constexpr bool is_by_cols = false;
 };
@@ -73,7 +74,7 @@ struct MAX7219_cfg_by_rows{
 struct MAX7219_cfg_by_columns{
     using SPI_master	= myu::SPI_master;
     using SPI_selector	= 
-	mcu::SPI_pin_array_selector<Micro, strip0, strip1, strip2>;
+	mcu::SPI_pin_array_selector<Micro, strip0, strip1, strip2, strip3>;
 
     static constexpr bool by_columns{};
 
@@ -97,13 +98,13 @@ using Coord = Bitmatrix::Coord_ij;
 template <typename Cfg>
 using Text_display = atd::Monochromatic_text_display<Cfg>;
 
-template <typename Font0, typename Display0>
+template <typename Font0, typename Display0, int rows, int cols>
 struct Display_cfg_by_columns{
 // Text buffer
     using index_type = int;
     //using index_type = unsigned int;
-    static constexpr index_type text_rows = 4;
-    static constexpr index_type text_cols = 20;
+    static constexpr index_type text_rows = rows;
+    static constexpr index_type text_cols = cols;
 
 // Ventana que vemos del buffer
     static constexpr bool cylinder_type{};
@@ -261,12 +262,13 @@ void test_write_bitmatrix()
 
 }
 
-void test_font()
+void test_font_dogica()
 {
     myu::UART_iostream uart;
-    uart << "Font test\n"
-	    "---------\n";
-    using Font = Cfg::Font;
+    uart << "Font dogica\n";
+
+    using Font = rom::font_dogica_8x8_cr::Font;
+
 
     MAX7219_matrix::clear();
 
@@ -306,8 +308,58 @@ void test_font()
     atd::write<Font>(bm, Coord{8*2, 8*3}, 'C');
     }
 
+    MAX7219_matrix::write(bm);
+}
+
+void test_font_upheavtt()
+{
+    myu::UART_iostream uart;
+    uart << "Font upheavtt\n";
+
+    using Font = rom::font_upheavtt_13x14_cr::Font;
+
+    MAX7219_matrix::clear();
+
+    Bitmatrix bm;
+
+    bm.clear();
+    if (Cfg::is_by_cols){
+    atd::write<Font>(bm, Coord{0, 0}  , '1');
+    atd::write<Font>(bm, Coord{0, 8*2}  , '2');
+
+    atd::write<Font>(bm, Coord{8*2, 0}  , '3');
+    atd::write<Font>(bm, Coord{8*2, 8*2}, '4'); // no entra!!!
+    } else {
+
+    atd::write<Font>(bm, Coord{0, 0}  , '1');
+//    atd::write<Font>(bm, Coord{0, 8}  , '2');
+//    atd::write<Font>(bm, Coord{0, 8*2}, '3');
+//    atd::write<Font>(bm, Coord{0, 8*3}, '4');
+//    atd::write<Font>(bm, Coord{8, 0}  , '5');
+//    atd::write<Font>(bm, Coord{8, 8*1}, '6');
+//    atd::write<Font>(bm, Coord{8, 8*2}, '7');
+//    atd::write<Font>(bm, Coord{8, 8*3}, '8');
+//
+//    atd::write<Font>(bm, Coord{8*2, 8*0}, '9');
+//    atd::write<Font>(bm, Coord{8*2, 8*1}, 'A');
+//    atd::write<Font>(bm, Coord{8*2, 8*2}, 'B');
+//    atd::write<Font>(bm, Coord{8*2, 8*3}, 'C');
+    }
 
     MAX7219_matrix::write(bm);
+}
+
+
+void test_font()
+{
+    myu::UART_iostream uart;
+    uart << "Font test\n"
+	    "---------\n";
+
+    test_font_dogica();
+    Micro::wait_ms(1000);
+    test_font_upheavtt();
+
 }
 
 void test_basic()
@@ -377,13 +429,14 @@ void test_write()
     Micro::wait_ms(800);
 }
 
-void test_display()
+void test_display_dogica_cr()
 {
     myu::UART_iostream uart;
-    uart << "\nTest display\n";
+    uart << "\nTest display dogica cr\n";
     
     using Dogica = rom::font_dogica_8x8_cr::Font;
-    using Display = Text_display<Display_cfg_by_columns<Dogica, MAX7219_matrix>>;
+    using Display_cfg = Display_cfg_by_columns<Dogica, MAX7219_matrix, 4, 20>;
+    using Display = Text_display<Display_cfg>;
     Display display;
 
     display.bg_write({0,0}, "View                "
@@ -402,9 +455,14 @@ void test_display()
 	Micro::wait_ms(300);
     }
 
-    // display.bg_write({0,0}, "View to the left");
-    display.bg_write({0,0}, "tfel eht ot weiV");
+    display.bg_write({0,0}, "    tfel            "
+			    "         eht        "
+			    "             ot     "
+			    "                weiV");
     print_bg(uart, display);
+    display.flush();
+    Micro::wait_ms(300);
+
     for (uint8_t i = 0; i < 15; ++i){
 	display.view_move_left(1);
 	display.flush();
@@ -416,13 +474,70 @@ void test_display()
 			    "3                   "
 			    "  4                 ");
     print_bg(uart, display);
-    for (uint8_t i = 0; i < 20; ++i){
+    display.flush();
+    Micro::wait_ms(800);
+
+    for (uint8_t i = 0; i < 8; ++i){
 	display.view_move_down(1);
 	display.flush();
 	Micro::wait_ms(800);
     }
 }
 
+
+void test_display_upheavtt_cr()
+{
+    myu::UART_iostream uart;
+    uart << "\nTest display upheavtt cr\n";
+    
+    using Font = rom::font_upheavtt_13x14_cr::Font;
+    using Display_cfg = Display_cfg_by_columns<Font, MAX7219_matrix, 2, 20>;
+    using Display = Text_display<Display_cfg>;
+    Display display;
+
+    display.bg_write({0,0}, "Tiew to             "
+			    "1       the right!  ");
+    print_bg(uart, display);
+
+    display.flush();
+
+    for (uint8_t i = 0; i < 15; ++i){
+    char c;
+    uart >> c;
+	Micro::wait_ms(300);
+	display.view_move_right(1);
+	display.flush();
+    }
+
+    display.bg_write({0,0}, "    tfel eht        "
+			    "             ot weiV");
+    print_bg(uart, display);
+    for (uint8_t i = 0; i < 15; ++i){
+	Micro::wait_ms(300);
+	display.view_move_left(1);
+	display.flush();
+    }
+
+    display.bg_write({0,0}, "1                   "
+			    "  2                 ");
+    print_bg(uart, display);
+    for (uint8_t i = 0; i < 8; ++i){
+	display.view_move_down(1);
+	display.flush();
+	Micro::wait_ms(800);
+    }
+}
+
+void test_display()
+{
+    myu::UART_iostream uart;
+    uart << "Test display\n"
+	    "------------\n";
+
+//    test_display_dogica_cr();
+    test_display_upheavtt_cr();
+    
+}
 
 // Main
 // ----
