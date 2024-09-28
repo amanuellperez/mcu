@@ -23,7 +23,9 @@
 
 #include <rom_font_dogica_8x8_cr.h>
 #include <rom_font_dogica_8x8_rf.h>
+
 #include <rom_font_upheavtt_13x14_cr.h>
+#include <rom_font_upheavtt_13x14_rf.h>
 
 #include <atd_draw.h>
 #include <atd_display.h>
@@ -79,19 +81,19 @@ struct MAX7219_cfg_by_columns{
     static constexpr bool by_columns{};
 
 // Font no lo necesita MAX7219_matrix, pero lo uso en las pruebas
-    using Font = rom::font_dogica_8x8_cr::Font;
     static constexpr bool is_by_rows = false;
     static constexpr bool is_by_cols = true;
 };
 
 // Elegir para probar por filas o por columnas
-using Cfg = MAX7219_cfg_by_columns;
-//using Cfg = MAX7219_cfg_by_rows;
 
-using MAX7219_matrix = dev::MAX7219_matrix<Cfg, matrix_nstrips, 4>;
+using MAX7219_matrix_cols = dev::MAX7219_matrix<MAX7219_cfg_by_columns, matrix_nstrips, 4>;
+using MAX7219_matrix_rows = dev::MAX7219_matrix<MAX7219_cfg_by_rows, matrix_nstrips, 4>;
 
-using Bitmatrix = MAX7219_matrix::Bitmatrix;
-using Coord = Bitmatrix::Coord_ij;
+// Elegir por filas o columnas para probar
+//using MAX7219_matrix = MAX7219_matrix_cols;
+using MAX7219_matrix = MAX7219_matrix_rows;
+
 
 
 // Text_display
@@ -99,7 +101,7 @@ template <typename Cfg>
 using Text_display = atd::Monochromatic_text_display<Cfg>;
 
 template <typename Font0, typename Display0, int rows, int cols>
-struct Display_cfg_by_columns{
+struct Display_cfg{
 // Text buffer
     using index_type = int;
     //using index_type = unsigned int;
@@ -150,9 +152,12 @@ void print(std::ostream& out, const atd::Bitmatrix_row_1bit<nrows, ncols>& m)
 
 
 template <size_t nrows, size_t ncols>
-void print_uints(std::ostream& out, const atd::Bitmatrix_row_1bit<nrows, ncols>& m)
+void print_uints(std::ostream& out, 
+			const atd::Bitmatrix_row_1bit<nrows, ncols>& m)
 {
+    using Bitmatrix = atd::Bitmatrix_row_1bit<nrows, ncols>;
     using index_type = typename Bitmatrix::index_type;
+
     for (uint8_t nstrip = 0; nstrip < MAX7219_matrix::nstrips; ++nstrip)
     {
 	for (uint8_t ndigit = 0; ndigit < 8; ++ndigit){
@@ -236,6 +241,8 @@ void hello()
 
 void test_write_bitmatrix()
 {
+    using Bitmatrix  = typename MAX7219_matrix::Bitmatrix;
+
     myu::UART_iostream uart;
     uart << "write::MAX7219_matrix\n";
 
@@ -250,11 +257,10 @@ void test_write_bitmatrix()
 	bm.clear(); // FUNDAMENTAL!!!
 	for (uint8_t i = 0; i < bm.rows(); ++i)
 	    bm(i,j) = 1;
-	++j;
 
 	MAX7219_matrix::write(bm);
 
-	Micro::wait_ms(500);
+	Micro::wait_ms(200);
     }
 
     MAX7219_matrix::clear();
@@ -262,21 +268,24 @@ void test_write_bitmatrix()
 
 }
 
+template <typename MAX7219, typename Font>
 void test_font_dogica()
 {
+    using Bitmatrix = typename MAX7219::Bitmatrix;
+    using Coord = typename Bitmatrix::Coord_ij;
+
     myu::UART_iostream uart;
     uart << "Font dogica\n";
 
-    using Font = rom::font_dogica_8x8_cr::Font;
     static constexpr auto h = Font::rows;
     static constexpr auto w = Font::cols;
 
-    MAX7219_matrix::clear();
+    MAX7219::clear();
 
     Bitmatrix bm;
 
     bm.clear();
-    if (Cfg::is_by_cols){
+
     atd::write<Font>(bm, Coord{0, 0}  , '1');
     atd::write<Font>(bm, Coord{0, w}  , '2');
     atd::write<Font>(bm, Coord{0, w*2}, '3');
@@ -296,41 +305,30 @@ void test_font_dogica()
     atd::write<Font>(bm, Coord{h*3, w*1}, 'E');
     atd::write<Font>(bm, Coord{h*3, w*2}, 'F');
     atd::write<Font>(bm, Coord{h*3, w*3}, 'G');
-    } else {
 
-    atd::write<Font>(bm, Coord{0, 0}  , '1');
-    atd::write<Font>(bm, Coord{0, 8}  , '2');
-    atd::write<Font>(bm, Coord{0, 8*2}, '3');
-    atd::write<Font>(bm, Coord{0, 8*3}, '4');
-    atd::write<Font>(bm, Coord{8, 0}  , '5');
-    atd::write<Font>(bm, Coord{8, 8*1}, '6');
-    atd::write<Font>(bm, Coord{8, 8*2}, '7');
-    atd::write<Font>(bm, Coord{8, 8*3}, '8');
-
-    atd::write<Font>(bm, Coord{8*2, 8*0}, '9');
-    atd::write<Font>(bm, Coord{8*2, 8*1}, 'A');
-    atd::write<Font>(bm, Coord{8*2, 8*2}, 'B');
-    atd::write<Font>(bm, Coord{8*2, 8*3}, 'C');
-    }
-
-    MAX7219_matrix::write(bm);
+    MAX7219::write(bm);
 }
 
+
+
+template <typename MAX7219, typename Font>
 void test_font_upheavtt()
 {
+    using Bitmatrix = typename MAX7219::Bitmatrix;
+    using Coord = typename Bitmatrix::Coord_ij;
+
     myu::UART_iostream uart;
     uart << "Font upheavtt\n";
 
-    using Font = rom::font_upheavtt_13x14_cr::Font;
     static constexpr auto h = Font::rows;
     static constexpr auto w = Font::cols;
 
-    MAX7219_matrix::clear();
+    MAX7219::clear();
 
     Bitmatrix bm;
 
     bm.clear();
-    if (Cfg::is_by_cols){
+
     atd::write<Font>(bm, Coord{0, 0}  , '1');
     atd::write<Font>(bm, Coord{0, w}  , '2');
     atd::write<Font>(bm, Coord{0, 2*w}, '3');
@@ -341,38 +339,48 @@ void test_font_upheavtt()
     atd::write<Font>(bm, Coord{h, 2*w}, '6'); 
     uart << "Only half of number 6 can be written\n";
 
-    } else {
 
-    atd::write<Font>(bm, Coord{0, 0}  , '1');
-//    atd::write<Font>(bm, Coord{0, 8}  , '2');
-//    atd::write<Font>(bm, Coord{0, 8*2}, '3');
-//    atd::write<Font>(bm, Coord{0, 8*3}, '4');
-//    atd::write<Font>(bm, Coord{8, 0}  , '5');
-//    atd::write<Font>(bm, Coord{8, 8*1}, '6');
-//    atd::write<Font>(bm, Coord{8, 8*2}, '7');
-//    atd::write<Font>(bm, Coord{8, 8*3}, '8');
-//
-//    atd::write<Font>(bm, Coord{8*2, 8*0}, '9');
-//    atd::write<Font>(bm, Coord{8*2, 8*1}, 'A');
-//    atd::write<Font>(bm, Coord{8*2, 8*2}, 'B');
-//    atd::write<Font>(bm, Coord{8*2, 8*3}, 'C');
-    }
-
-    MAX7219_matrix::write(bm);
+    MAX7219::write(bm);
 }
 
-
+// Esto es raro... @_@ ¿por qué no sobrecargar la función?
+//                     ¬_¬ no se por qué, pero no quiero pasar MAX7219 como
+//                     parametro (seguro que la proxima vez lo cambio xD)
+template <typename MAX7219>
+    requires (std::is_same_v<MAX7219, MAX7219_matrix_cols>)
 void test_font()
 {
     myu::UART_iostream uart;
     uart << "Font test\n"
 	    "---------\n";
 
-    test_font_dogica();
+    using Dogica = rom::font_dogica_8x8_cr::Font;
+    test_font_dogica<MAX7219, Dogica>();
     Micro::wait_ms(1000);
-    test_font_upheavtt();
+
+    using Upheavtt = rom::font_upheavtt_13x14_cr::Font;
+    test_font_upheavtt<MAX7219, Upheavtt>();
 
 }
+
+
+template <typename MAX7219>
+    requires (std::is_same_v<MAX7219, MAX7219_matrix_rows>)
+void test_font()
+{
+    myu::UART_iostream uart;
+    uart << "Font test\n"
+	    "---------\n";
+
+    using Dogica = rom::font_dogica_8x8_rf::Font;
+    test_font_dogica<MAX7219, Dogica>();
+    Micro::wait_ms(1000);
+
+    using Upheavtt = rom::font_upheavtt_13x14_rf::Font;
+    test_font_upheavtt<MAX7219, Upheavtt>();
+
+}
+
 
 void test_basic()
 {
@@ -385,10 +393,10 @@ void test_basic()
     for (uint8_t i = 0; i < MAX7219_matrix::nstrips; ++i){
 	uart << "Strip " << (int) i << " ON ... ";
 	MAX7219_matrix::display_test_on(i);
-	Micro::wait_ms(500);
+	Micro::wait_ms(400);
 	uart << "OFF\n";
 	MAX7219_matrix::display_test_off(i);
-	Micro::wait_ms(1000);
+	Micro::wait_ms(800);
     }
 }
 
@@ -410,7 +418,7 @@ void test_write()
     for (uint8_t nstrip = 0; nstrip < MAX7219_matrix::nstrips; ++nstrip){
 	for (uint8_t i = 0; i < 8; ++i){
 	    MAX7219_matrix::write(nstrip, i, x);
-	    Micro::wait_ms(500);
+	    Micro::wait_ms(200);
 	}
     }
     Micro::wait_ms(500);
@@ -418,14 +426,14 @@ void test_write()
     Micro::wait_ms(800);
 }
 
-void test_display_dogica_cr()
+template <typename MAX7219, typename Font>
+void test_display_dogica()
 {
     myu::UART_iostream uart;
-    uart << "\nTest display dogica cr\n";
+    uart << "\nTest display dogica\n";
     
-    using Dogica = rom::font_dogica_8x8_cr::Font;
-    using Display_cfg = Display_cfg_by_columns<Dogica, MAX7219_matrix, 4, 20>;
-    using Display = Text_display<Display_cfg>;
+    using Cfg = Display_cfg<Font, MAX7219, 4, 20>;
+    using Display = Text_display<Cfg>;
     Display display;
 
     display.bg_write({0,0}, "View                "
@@ -458,10 +466,10 @@ void test_display_dogica_cr()
 	Micro::wait_ms(300);
     }
 
-    display.bg_write({0,0}, "1  d                "
+    display.bg_write({0,0}, "1  .                "
 			    "2  c                "
 			    "3  b                "
-			    "4  a                ");
+			    ".  a                ");
     print_bg(uart, display);
     display.flush();
     Micro::wait_ms(800);
@@ -474,17 +482,17 @@ void test_display_dogica_cr()
 }
 
 
-void test_display_upheavtt_cr()
+template <typename MAX7219, typename Font>
+void test_display_upheavtt()
 {
     myu::UART_iostream uart;
-    uart << "\nTest display upheavtt cr\n"
+    uart << "\nTest display upheavtt\n"
 	    "WARNING: this font has 14 rows x 13 cols.\n"
 	    "         In a 32 x 32 display we get a View of only 2 x 2\n"
 	    "         (13 cols x 2 = 26 bits ==> it only uses 2 columns of the left MAX7219\n";
     
-    using Font = rom::font_upheavtt_13x14_cr::Font;
-    using Display_cfg = Display_cfg_by_columns<Font, MAX7219_matrix, 2, 20>;
-    using Display = Text_display<Display_cfg>;
+    using Cfg = Display_cfg<Font, MAX7219, 2, 20>;
+    using Display = Text_display<Cfg>;
     Display display;
 
     display.bg_write({0,0}, "View to             "
@@ -526,16 +534,38 @@ void test_display_upheavtt_cr()
     }
 }
 
+template <typename MAX7219>
+    requires (std::is_same_v<MAX7219, MAX7219_matrix_cols>)
 void test_display()
 {
     myu::UART_iostream uart;
     uart << "Test display\n"
 	    "------------\n";
 
-    test_display_dogica_cr();
-    test_display_upheavtt_cr();
+    using Dogica = rom::font_dogica_8x8_cr::Font;
+    test_display_dogica<MAX7219, Dogica>();
+
+    using Upheavtt = rom::font_upheavtt_13x14_cr::Font;
+    test_display_upheavtt<MAX7219, Upheavtt>();
     
 }
+
+template <typename MAX7219>
+    requires (std::is_same_v<MAX7219, MAX7219_matrix_rows>)
+void test_display()
+{
+    myu::UART_iostream uart;
+    uart << "Test display\n"
+	    "------------\n";
+
+    using Dogica = rom::font_dogica_8x8_rf::Font;
+    test_display_dogica<MAX7219, Dogica>();
+
+    using Upheavtt = rom::font_upheavtt_13x14_rf::Font;
+    test_display_upheavtt<MAX7219, Upheavtt>();
+    
+}
+
 
 // Main
 // ----
@@ -551,7 +581,7 @@ int main()
 
     while (1){
 	uart << "\nMenu\n"
-	          "----\n"
+		  "----\n"
 		  "0. Clear\n"
 		  "1. Basic test\n"
 		  "2. Write test\n"
@@ -567,12 +597,11 @@ int main()
 	    break; case '1': test_basic();
 	    break; case '2': test_write();
 	    break; case '3': test_write_bitmatrix();
-	    break; case '4': test_font();
-	    break; case '5': test_display();
+	    break; case '4': test_font<MAX7219_matrix>();
+	    break; case '5': test_display<MAX7219_matrix>();
 	    break; default:
-			uart << "What??? \n";
+			uart << "What?\n";
 	}
-
     }                                                 
 }
 
