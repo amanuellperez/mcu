@@ -52,9 +52,11 @@ namespace atd{
 // ------------------
 // Escribe el caracter c en el byte más próximo al bit (i, j) 
 // usando la fuente Font.
-template <typename Font, size_t nrows, size_t ncols>
-void write(Bitmatrix_col_1bit<nrows, ncols>& m, 
-	    const typename Bitmatrix_col_1bit<nrows, ncols>::Coord_ij& p0, 
+// precondition: (i, j) son unsigned ==> i >= 0 and j >= 0
+//		(¿modificarlo para que admita signed? De momento no)
+template <typename Font, size_t NR, size_t NC>
+void write(Bitmatrix_col_1bit<NR, NC>& m, 
+	    const typename Bitmatrix_col_1bit<NR, NC>::Coord_ij& p0, 
 	    char ic)
     requires requires 
 	    {	Font::is_by_columns; 
@@ -62,30 +64,34 @@ void write(Bitmatrix_col_1bit<nrows, ncols>& m,
 		Font::is_ASCII_font;
 	    }
 {
-    using Index = typename Bitmatrix_col_1bit<nrows, ncols>::index_type;
+    using Index = typename Bitmatrix_col_1bit<NR, NC>::index_type;
 
-    auto [I0, J0] = m.byte_coordinates_of(p0);
-
-    if (I0 >= m.rows_in_bytes() or J0 >=  m.cols_in_bytes())
+    if (p0.i >= m.rows() or p0.j >=  m.cols())
 	return;
 
     auto letter = Font::glyph.row(Font::index(ic));
     auto c = letter.begin();
 
-    Index I = std::min<Index>(Font::rows_in_bytes, m.rows_in_bytes() - I0);
-    Index J = std::min<Index>(Font::cols_in_bytes, m.cols_in_bytes() - J0);
+    // nrows = número de filas de la Font a escribir en la matriz
+    // nrows0 = ceil_division(m.rows() - p0.i, 8) ???
+    Index nrows0 = (m.rows() - p0.i) / 8;
+    if ((m.rows() - p0.i) % 8 != 0)
+	++nrows0; 
+
+    Index nrows_in_bytes = std::min<Index>(Font::rows_in_bytes, nrows0);
+    Index ncols = std::min<Index>(Font::cols, m.cols() - p0.j);
 
     // CUIDADO: los glyphs de las letras giradas a la derecha, empiezan por la
     // primera columna ABAJO, y luego van subiendo hasta llegar a la primera
     // columna ARRIBA (van de (n..0] las j)
-    for (uint8_t j = 0; j < J; ++j){
+    for (uint8_t j = 0; j < ncols; ++j){
+	uint8_t I = 0; // dibujamos la fila I de la Font contando desde ABAJO
 	// saltamos la parte de abajo del glyph que queda fuera del bitmatrix
-	uint8_t i = 0;
-	for (; i < Font::rows_in_bytes - I; ++i)
+	for (; I < Font::rows_in_bytes - nrows_in_bytes; ++I)
 	    ++c;   
 
-	for (; i < Font::rows_in_bytes; ++i, ++c)
-	    m.write_byte(*c, I0+ Font::rows_in_bytes - 1 - i, J0 + j);
+	for (; I < Font::rows_in_bytes; ++I, ++c)
+	    m.write(*c, p0.i + 8 * (Font::rows_in_bytes - 1 - I), p0.j + j);
 
     }
 }
@@ -93,7 +99,8 @@ void write(Bitmatrix_col_1bit<nrows, ncols>& m,
 
 // Bitmatrix_row_1bit
 // ------------------
-// TODO: proteger que no se escriba fuera del bitmatrix (dara core)
+// TODO: permitir que se pueda escribir en cualquier (i,j) como
+// Bitmatrix_col_1bit
 // Escribe el caracter c en (i, j) usando la fuente Font
 template <typename Font, size_t nrows, size_t ncols>
 void write(Bitmatrix_row_1bit<nrows, ncols>& m, 

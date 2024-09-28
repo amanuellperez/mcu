@@ -178,7 +178,7 @@ void test_font_col()
     using BM = atd::Bitmatrix_col_1bit<nrows, ncols>;
     using Coord_ij = BM::Coord_ij;
     static uint16_t w = Font::cols; // ancho de una letra
-    static uint16_t h = 8*Font::rows_in_bytes; // alto de una letra
+    static uint16_t h = Font::rows; // alto de una letra
 
     BM bm;
     std::cout << "\n\n";
@@ -268,7 +268,7 @@ int main()
 try{
     test::header("atd_bit_matrix");
 
-//    test_bitmatrix_row_1bit();
+    test_bitmatrix_row_1bit();
     test_bitmatrix_col_1bit();
 
 }catch(std::exception& e)

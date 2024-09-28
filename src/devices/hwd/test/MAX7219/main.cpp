@@ -268,7 +268,8 @@ void test_font_dogica()
     uart << "Font dogica\n";
 
     using Font = rom::font_dogica_8x8_cr::Font;
-
+    static constexpr auto h = Font::rows;
+    static constexpr auto w = Font::cols;
 
     MAX7219_matrix::clear();
 
@@ -277,20 +278,24 @@ void test_font_dogica()
     bm.clear();
     if (Cfg::is_by_cols){
     atd::write<Font>(bm, Coord{0, 0}  , '1');
-    atd::write<Font>(bm, Coord{0, 8}  , '2');
-    atd::write<Font>(bm, Coord{0, 8*2}, '3');
+    atd::write<Font>(bm, Coord{0, w}  , '2');
+    atd::write<Font>(bm, Coord{0, w*2}, '3');
+    atd::write<Font>(bm, Coord{0, w*3}, '4');
 
-    atd::write<Font>(bm, Coord{8, 0}  , '4');
-    atd::write<Font>(bm, Coord{8, 8*1}, '5');
-    atd::write<Font>(bm, Coord{8, 8*2}, '6');
+    atd::write<Font>(bm, Coord{h, 0}  , '5');
+    atd::write<Font>(bm, Coord{h, w*1}, '6');
+    atd::write<Font>(bm, Coord{h, w*2}, '7');
+    atd::write<Font>(bm, Coord{h, w*3}, '8');
 
-    atd::write<Font>(bm, Coord{8*2, 8*0}, '7');
-    atd::write<Font>(bm, Coord{8*2, 8*1}, '8');
-    atd::write<Font>(bm, Coord{8*2, 8*2}, '9');
+    atd::write<Font>(bm, Coord{h*2, w*0}, '9');
+    atd::write<Font>(bm, Coord{h*2, w*1}, 'A');
+    atd::write<Font>(bm, Coord{h*2, w*2}, 'B');
+    atd::write<Font>(bm, Coord{h*2, w*3}, 'C');
 
-    atd::write<Font>(bm, Coord{8*3, 8*0}, 'A');
-    atd::write<Font>(bm, Coord{8*3, 8*1}, '8');
-    atd::write<Font>(bm, Coord{8*3, 8*2}, 'C');
+    atd::write<Font>(bm, Coord{h*3, w*0}, 'D');
+    atd::write<Font>(bm, Coord{h*3, w*1}, 'E');
+    atd::write<Font>(bm, Coord{h*3, w*2}, 'F');
+    atd::write<Font>(bm, Coord{h*3, w*3}, 'G');
     } else {
 
     atd::write<Font>(bm, Coord{0, 0}  , '1');
@@ -317,6 +322,8 @@ void test_font_upheavtt()
     uart << "Font upheavtt\n";
 
     using Font = rom::font_upheavtt_13x14_cr::Font;
+    static constexpr auto h = Font::rows;
+    static constexpr auto w = Font::cols;
 
     MAX7219_matrix::clear();
 
@@ -325,10 +332,15 @@ void test_font_upheavtt()
     bm.clear();
     if (Cfg::is_by_cols){
     atd::write<Font>(bm, Coord{0, 0}  , '1');
-    atd::write<Font>(bm, Coord{0, 8*2}  , '2');
+    atd::write<Font>(bm, Coord{0, w}  , '2');
+    atd::write<Font>(bm, Coord{0, 2*w}, '3');
+    uart << "Only half of number 3 can be written\n";
 
-    atd::write<Font>(bm, Coord{8*2, 0}  , '3');
-    atd::write<Font>(bm, Coord{8*2, 8*2}, '4'); // no entra!!!
+    atd::write<Font>(bm, Coord{h, 0}  , '4');
+    atd::write<Font>(bm, Coord{h, w}  , '5'); 
+    atd::write<Font>(bm, Coord{h, 2*w}, '6'); 
+    uart << "Only half of number 6 can be written\n";
+
     } else {
 
     atd::write<Font>(bm, Coord{0, 0}  , '1');
@@ -380,29 +392,6 @@ void test_basic()
     }
 }
 
-// Esta función no aporta mucho
-//void test_write_digit()
-//{
-//    myu::UART_iostream uart;
-//    uart << "write_digit test\n"
-//	    "----------------\n";
-//    MAX7219_matrix::clear();
-//
-//
-//    uint8_t x0[] = {0x01, 0x02, 0x04, 0x08};
-//    uint8_t x1[] = {0x07, 0x0E, 0x1C, 0x38};
-//    uint8_t x2[] = {0x04, 0x08, 0x10, 0x20};
-//
-//    for (uint8_t nstrip = 0; nstrip < 2; ++nstrip){
-//	for (uint8_t j = 0; j + 2 < MAX7219_matrix::strip_cols; ++j){
-//	    MAX7219_matrix::write(nstrip, j + 0, x0);
-//	    MAX7219_matrix::write(nstrip, j + 1, x1);
-//	    MAX7219_matrix::write(nstrip, j + 2, x2);
-//	    Micro::wait_ms(1000);
-//	    MAX7219_matrix::clear();
-//	}
-//    }
-//}
 
 void test_write()
 {
@@ -469,10 +458,10 @@ void test_display_dogica_cr()
 	Micro::wait_ms(300);
     }
 
-    display.bg_write({0,0}, "1                   "
-			    "  2                 "
-			    "3                   "
-			    "  4                 ");
+    display.bg_write({0,0}, "1  d                "
+			    "2  c                "
+			    "3  b                "
+			    "4  a                ");
     print_bg(uart, display);
     display.flush();
     Micro::wait_ms(800);
@@ -488,39 +477,48 @@ void test_display_dogica_cr()
 void test_display_upheavtt_cr()
 {
     myu::UART_iostream uart;
-    uart << "\nTest display upheavtt cr\n";
+    uart << "\nTest display upheavtt cr\n"
+	    "WARNING: this font has 14 rows x 13 cols.\n"
+	    "         In a 32 x 32 display we get a View of only 2 x 2\n"
+	    "         (13 cols x 2 = 26 bits ==> it only uses 2 columns of the left MAX7219\n";
     
     using Font = rom::font_upheavtt_13x14_cr::Font;
     using Display_cfg = Display_cfg_by_columns<Font, MAX7219_matrix, 2, 20>;
     using Display = Text_display<Display_cfg>;
     Display display;
 
-    display.bg_write({0,0}, "Tiew to             "
-			    "1       the right!  ");
+    display.bg_write({0,0}, "View to             "
+			    "        the right!  ");
     print_bg(uart, display);
 
     display.flush();
+    Micro::wait_ms(300);
 
     for (uint8_t i = 0; i < 15; ++i){
-    char c;
-    uart >> c;
-	Micro::wait_ms(300);
 	display.view_move_right(1);
 	display.flush();
+	Micro::wait_ms(300);
     }
+
 
     display.bg_write({0,0}, "    tfel eht        "
 			    "             ot weiV");
     print_bg(uart, display);
+    display.flush();
+    Micro::wait_ms(300);
+
     for (uint8_t i = 0; i < 15; ++i){
-	Micro::wait_ms(300);
 	display.view_move_left(1);
 	display.flush();
+	Micro::wait_ms(300);
     }
 
     display.bg_write({0,0}, "1                   "
-			    "  2                 ");
+			    " 2                  ");
     print_bg(uart, display);
+    display.flush();
+    Micro::wait_ms(800);
+
     for (uint8_t i = 0; i < 8; ++i){
 	display.view_move_down(1);
 	display.flush();
@@ -534,7 +532,7 @@ void test_display()
     uart << "Test display\n"
 	    "------------\n";
 
-//    test_display_dogica_cr();
+    test_display_dogica_cr();
     test_display_upheavtt_cr();
     
 }
