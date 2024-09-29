@@ -83,35 +83,79 @@ void print_bytes(const atd::Bitmatrix_col_1bit<nrows, ncols>& m)
     }
 }
 
-template <typename Font, uint16_t nrows, uint16_t ncols>
-void test_font_row(const std::string& msg)
+template <size_t nrows, size_t ncols>
+void print_bytes(const atd::Bitmatrix_row_1bit<nrows, ncols>& m)
+{
+    std::cout << std::hex;
+
+    for (uint8_t i = 0; i < m.rows_in_bytes(); ++i){
+	for (uint8_t j = 0; j < m.cols_in_bytes(); ++j){
+		std::cout << "0x" << (int) m.read_byte(i,j) << ' ';
+	}
+	std::cout << '\n';
+
+    }
+}
+
+//template <typename Font, uint16_t nrows, uint16_t ncols>
+//void test_font_row(const std::string& msg)
+//{
+//    using BM = atd::Bitmatrix_row_1bit<nrows, ncols>;
+//    using Coord_ij = BM::Coord_ij;
+//    static uint16_t w = Font::cols; // ancho de una letra
+//    static uint16_t h = Font::rows; // alto de una letra
+//
+//    BM bm;
+//    std::cout << "\n\n";
+//    bm.clear();
+//    uint16_t k = 0;
+//    for (auto c: msg){
+//	uint16_t j = k * w;
+//	atd::write<Font, nrows, ncols>(bm, Coord_ij{0, j}, c);
+//	++k;
+//    }
+//
+//    k = 0;
+//    for (auto c: msg){
+//	uint16_t i = h + 4;
+//	uint16_t j = k * w;
+//	atd::write<Font, nrows, ncols>(bm, Coord_ij{i, j}, c);
+//	++k;
+//    }
+//    print(bm);
+////    print_bytes(bm);
+//}
+
+template <typename Font, uint8_t nrows, uint8_t ncols>
+void test_font_row()
 {
     using BM = atd::Bitmatrix_row_1bit<nrows, ncols>;
     using Coord_ij = BM::Coord_ij;
-    static uint16_t w = 8*Font::cols_in_bytes; // ancho de una letra
+    static uint16_t w = Font::cols; // ancho de una letra
     static uint16_t h = Font::rows; // alto de una letra
+    static uint16_t incr = w / 2;
 
     BM bm;
+    std::cout <<  "bm.rows = " << bm.rows() 
+	      <<"\n  .cols = " << bm.cols()
+	      << '\n';
     std::cout << "\n\n";
     bm.clear();
-    uint16_t k = 0;
-    for (auto c: msg){
-	uint16_t j = k * w;
-	atd::write<Font, nrows, ncols>(bm, Coord_ij{0, j}, c);
-	++k;
-    }
+    atd::write<Font, nrows, ncols>(bm, Coord_ij{0, 0}, 'H');
+    atd::write<Font, nrows, ncols>(bm, Coord_ij{0, uint16_t(w)}, 'e');
+    atd::write<Font, nrows, ncols>(bm, Coord_ij{0, uint16_t(2*w)}, 'l');
+    atd::write<Font, nrows, ncols>(bm, Coord_ij{0, uint16_t(3*w)}, 'l');
+    atd::write<Font, nrows, ncols>(bm, Coord_ij{0, uint16_t(4*w)}, 'o');
 
-    k = 0;
-    for (auto c: msg){
-	uint16_t i = h + 4;
-	uint16_t j = k * w;
-	atd::write<Font, nrows, ncols>(bm, Coord_ij{i, j}, c);
-	++k;
-    }
+    // hacemos un pequeño scroll
+    atd::write<Font, nrows, ncols>(bm, Coord_ij{h, uint16_t(w + incr)}, 'H');
+    atd::write<Font, nrows, ncols>(bm, Coord_ij{h, uint16_t(2*w + incr)}, 'e');
+    atd::write<Font, nrows, ncols>(bm, Coord_ij{h, uint16_t(3*w + incr)}, 'l');
+    atd::write<Font, nrows, ncols>(bm, Coord_ij{h, uint16_t(4*w + incr)}, 'l');
+    atd::write<Font, nrows, ncols>(bm, Coord_ij{h, uint16_t(5*w + incr)}, 'o');
     print(bm);
 //    print_bytes(bm);
 }
-
 
 void test_bitmatrix_row_1bit()
 {
@@ -165,9 +209,9 @@ void test_bitmatrix_row_1bit()
     using Depixel= rom::font_DePixelBreitFett_23x13_rf::Font;
 
 // Entra todo
-    test_font_row<Dogica  , 2*Dogica::rows, 8*Dogica::cols_in_bytes * 6>("Hello");
-    test_font_row<Upheavtt, 2*Upheavtt::rows, 8*Upheavtt::cols_in_bytes * 6>("Hello");
-    test_font_row<Depixel , 2*Depixel::rows, 8*Depixel::cols_in_bytes*6>("Hello");
+    test_font_row<Dogica  , 2*Dogica::rows, Dogica::cols* 6>();
+    test_font_row<Upheavtt, 2*Upheavtt::rows, Upheavtt::cols* 6>();
+    test_font_row<Depixel , 2*Depixel::rows, Depixel::cols*6>();
 
 
 }
@@ -239,9 +283,9 @@ void test_bitmatrix_col_1bit()
     using VCR = rom::font_VCR_12x17_cr::Font;
 
 // Entra todo
-    test_font_col<Dogica  , 2*8*Dogica::rows_in_bytes, Dogica::cols * 6>();
-    test_font_col<Upheavtt, 2*8*Upheavtt::rows_in_bytes, Upheavtt::cols*6>();
-    test_font_col<VCR     , 2*8*VCR::rows_in_bytes, VCR::cols*6>();
+    test_font_col<Dogica  , 2*Dogica::rows, Dogica::cols * 6>();
+    test_font_col<Upheavtt, 2*Upheavtt::rows, Upheavtt::cols*6>();
+    test_font_col<VCR     , 2*VCR::rows, VCR::cols*6>();
 
 //  No entra
     std::cout << "\nTrying to write outside of matrix:\n";

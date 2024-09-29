@@ -40,7 +40,7 @@
  *    23/06/2024 overflow
  *    27/06/2024 multiply(x).by_ten_to_the(n);
  *               divide  (x).by_ten_to_the(n);
- *
+ *    29/09/2024 ceil_division
  *
  ****************************************************************************/
 #include <cstdlib>
@@ -541,6 +541,22 @@ Int divide<Int>::by_ten_to_the_power_of(Int2 n)
     return x;
 }
 
+
+// ceil_division
+// -------------
+// Devuelve el mínimo número de cajas necesarias para meter x caramelos en
+// cajas de n  (x = dividend; n = divisor)
+template <Type::Integer Int>
+inline constexpr 
+Int ceil_division(const Int& dividend, const Int& divisor)
+{
+    auto [q, r] = div<Int>(dividend, divisor);
+
+    if (r == 0)
+	return q;
+
+    return q + 1;
+}
 
 } // namespace
 

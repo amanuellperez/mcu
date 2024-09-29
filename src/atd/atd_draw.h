@@ -45,7 +45,8 @@
 #include <type_traits>
 
 #include "atd_bit_matrix.h"
-
+#include "atd_math.h"	// ceil_division
+			
 namespace atd{
 
 // Bitmatrix_col_1bit
@@ -73,8 +74,7 @@ void write(Bitmatrix_col_1bit<NR, NC>& m,
     auto c = letter.begin();
 
     // nrows = número de filas de la Font a escribir en la matriz
-    // nrows0 = ceil_division(m.rows() - p0.i, 8) ???
-    Index nrows0 = (m.rows() - p0.i) / 8;
+    Index nrows0 = ceil_division<Index>(m.rows() - p0.i, 8);
     if ((m.rows() - p0.i) % 8 != 0)
 	++nrows0; 
 
@@ -99,12 +99,10 @@ void write(Bitmatrix_col_1bit<NR, NC>& m,
 
 // Bitmatrix_row_1bit
 // ------------------
-// TODO: permitir que se pueda escribir en cualquier (i,j) como
-// Bitmatrix_col_1bit
 // Escribe el caracter c en (i, j) usando la fuente Font
-template <typename Font, size_t nrows, size_t ncols>
-void write(Bitmatrix_row_1bit<nrows, ncols>& m, 
-	    const typename Bitmatrix_row_1bit<nrows, ncols>::Coord_ij& p0,
+template <typename Font, size_t NR, size_t NC>
+void write(Bitmatrix_row_1bit<NR, NC>& m, 
+	    const typename Bitmatrix_row_1bit<NR, NC>::Coord_ij& p0,
 	    char ic)
     requires requires 
 	    {	Font::is_by_rows; 
@@ -112,32 +110,35 @@ void write(Bitmatrix_row_1bit<nrows, ncols>& m,
 		Font::is_ASCII_font;
 	    }
 {
-    using Index = typename Bitmatrix_row_1bit<nrows, ncols>::index_type;
+    using Index = typename Bitmatrix_row_1bit<NR, NC>::index_type;
 
-    auto [I0, J0] = m.byte_coordinates_of(p0);
 
-    if (I0 >= m.rows_in_bytes() or J0 >=  m.cols_in_bytes())
+    if (p0.i >= m.rows() or p0.j >=  m.cols())
 	return;
 
     auto letter = Font::glyph.row(Font::index(ic));
     auto c = letter.begin();
 
-    Index I = std::min<Index>(Font::rows_in_bytes, m.rows_in_bytes() - I0);
-    Index J = std::min<Index>(Font::cols_in_bytes, m.cols_in_bytes() - J0);
+    // nrows = número de filas de la Font a escribir en la matriz
+    Index ncols0 = ceil_division<Index>(m.cols() - p0.j, 8);
+    if ((m.cols() - p0.j) % 8 != 0)
+	++ncols0; 
 
-    for (uint8_t i = 0; i < I; ++i){
-	// saltamos la parte de abajo del glyph que queda fuera del bitmatrix
-	uint8_t j = 0;
-	for (; j < J; ++j, ++c)
-	    m.write_byte(*c, I0 + i, J0 + j);
+    Index nrows = std::min<Index>(Font::rows, m.rows() - p0.i);
+    Index ncols_in_bytes  = std::min<Index>(Font::cols_in_bytes, ncols0);
 
-	for (; j < Font::cols_in_bytes- J; ++j)
+
+    for (uint8_t i = 0; i < nrows; ++i){
+	uint8_t J = 0;
+	for (; J < ncols_in_bytes; ++J, ++c)
+	    m.write(*c, p0.i + i, p0.j + 8 * J);
+
+	// saltamos la parte de la dcha que queda fuera del bitmatrix
+	for (; J < Font::cols_in_bytes - ncols_in_bytes; ++J)
 	    ++c;   
 
     }
 }
-
-
 
 
 }// atd

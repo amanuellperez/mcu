@@ -912,9 +912,9 @@ void test_Bit()
 
 }
 
-void test_array_byte_view()
+void test_view_as_bit_array()
 {
-    test::interface("Array_byte_view");
+    test::interface("View_as_bit_array");
 
     uint8_t x[4] = {0xFF, 0xFF, 0xFF, 0xFF};
 
@@ -928,6 +928,15 @@ void test_array_byte_view()
     x[1] = 0;
     atd::in(x).bit(2).write_byte(0b11011111);
     CHECK_TRUE(x[0] == 0b01111100 and x[1] == 0x03, "write_byte");
+
+    {
+	uint8_t y[6];
+	y[5] = 0xFF;
+	atd::in(y).bit(44).write_byte(0b00001111);
+	std::cout << std::hex << "0x" << (int) y[5] << '\n';
+	CHECK_TRUE(y[5] == 0b11110000, "write_byte");
+
+    }
 }
 
 int main()
@@ -950,7 +959,7 @@ try{
     test_nibble();
     test_reverse_bits();
     test_Bit();
-    test_array_byte_view();
+    test_view_as_bit_array();
 
 }catch(std::exception& e)
 {

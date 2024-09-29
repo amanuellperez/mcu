@@ -46,6 +46,7 @@
 #include <iterator>
 
 #include "atd_cmath.h"	// div
+#include "atd_math.h"	// ceil_division
 #include "atd_bit.h"
 #include "atd_coordinates.h"	// Coord_ij
 
@@ -85,7 +86,6 @@ public:
 				= std::reverse_iterator<const_byte_iterator>;
 
     static_assert(sizeof(data_type) == 1); // si se cambiar, revisar implementación
-    static_assert(ncols % 8 == 0, "Only implemented multiples of 8");
 
 // Bit matrix interface
 // --------------------
@@ -98,6 +98,9 @@ public:
     constexpr Bit operator()(index_type i, index_type j);
     constexpr const_Bit operator()(index_type i, index_type j) const;
 
+    // Escritura (es más eficiente write_byte)
+    void write(data_type x, index_type i, index_type j);
+
 // Funciones más eficientes 
     // Rellena toda la matriz con el valor b (0 ó 1 únicamente)
     void fill(uint8_t b);
@@ -108,7 +111,8 @@ public:
 // ----------------------------------------
 // Byte dimensions
     static constexpr size_t rows_in_bytes() {return nrows; }
-    static constexpr size_t cols_in_bytes() {return ncols / 8*sizeof(data_type);}
+    static constexpr size_t cols_in_bytes() 
+    {return ceil_division(ncols, 8*sizeof(data_type));}
 
     // Escribe el byte indicado en (i, j)
     void write_byte(data_type x, index_type I, index_type J);
@@ -198,6 +202,14 @@ inline auto
 Bitmatrix_row_1bit<nrows, ncols>::
     read_byte(index_type I, index_type J) const -> data_type
 { return data_[I][J]; }
+
+template <size_t nrows, size_t ncols>
+inline
+void Bitmatrix_row_1bit<nrows, ncols>::
+    write(data_type x, index_type i, index_type j)
+{ in(data_[i]).bit(j).write_byte_reverse_order(x); }
+
+
 
 template <size_t nrows, size_t ncols>
 inline constexpr auto
@@ -315,7 +327,6 @@ public:
 				= std::reverse_iterator<const_byte_iterator>;
 
     static_assert(sizeof(data_type) == 1); // si se cambiar, revisar implementación
-    static_assert(nrows % 8 == 0, "Only implemented multiples of 8");
 
 
 // Bit matrix interface
@@ -344,7 +355,8 @@ public:
 // La idea es imaginar poner un grid de bytes (por columnas) sobre la matriz
 // de bits.
 // Byte dimensions
-    static constexpr size_t rows_in_bytes() {return nrows / 8*sizeof(data_type);}
+    static constexpr size_t rows_in_bytes() 
+	{return ceil_division(nrows, 8*sizeof(data_type));}
     static constexpr size_t cols_in_bytes() {return ncols;}
 
     // CUIDADO: las coordenadas (i,j) son las coordenadas de la matriz de
@@ -426,7 +438,7 @@ template <size_t nrows, size_t ncols>
 inline void
 Bitmatrix_col_1bit<nrows, ncols>::
     write(data_type x, index_type i, index_type j)
-{ in(data_[j]).bit(i).write_byte(x); }
+{ in(data_[j]).bit(i).write_byte_same_order(x); }
 
 
 template <size_t nrows, size_t ncols>

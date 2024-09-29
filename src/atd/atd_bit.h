@@ -756,8 +756,56 @@ inline uint16_t reverse_bits(uint16_t x)
 //  ------
 //  data:  123456AB CDEFGHgh  <-- resultado
 //
+//
+// Importante:
+//  Es importante tener claro el orden de los bits en el que damos x:
+//	
+//  data: 0123456789...  <-- orden de los bits
+//     x:     76543210   <-- orden de los bits
+//
+// Problema:
+//  Hay 2 formas de almacenar los bytes
+//  a) Como en Bitmatrix_col_1bit
+//                      98 76543210    = i = posición del bit en el array
+//	 76543210 76543210 76543210    = r = posición del bit dentro del byte
+//	+--------+--------+--------+
+//	|        |        |        |
+//	+--------+--------+--------+
+//          2        1        0        = I 
+//
+//      En este caso coincide el orden ascendente de i con el de r
+//      ( i = 8*i + r )
+//
+//
+//  b) Como en Bitmatrix_row_1bit
+//                      98 76543210    = i
+//	 01234567 01234567 01234567    = r'
+//	+--------+--------+--------+
+//	|        |        |        |
+//	+--------+--------+--------+
+//          2        1        0        = I
+//
+//      En este caso i y r tienen un orden contrario.
+//      ( i = 8*I + r ; con r' + r = 7 ==> i = 8*I + 7 - r' = 8*(I + 1) - r')
+//
+//	Observar que b) es la forma normal de definir un array:
+//	uint8_t x[3];
+//
+//       01234567 89..                 = i
+//	 76543210 76543210 76543210    = r
+//	+--------+--------+--------+
+//	|        |        |        |
+//	+--------+--------+--------+
+//          0        1        2        = I
+//
+//	donde he dibujado b) usando el sentido habitual.
+//
+//
+//  Como en a) coinciden el orden de i y r, llamemosla 'same_order' y a b)
+//  'reverse_order'
 template <size_t N, bool safe = true>
-inline void in___bit___write_byte(uint8_t (&data)[N], size_t i0, uint8_t x)
+inline void in___bit___write_byte_same_order(uint8_t (&data)[N], 
+							size_t i0, uint8_t x)
 {
     auto [I0, r] = atd::div<size_t>(i0, 8u);
 
@@ -770,7 +818,6 @@ inline void in___bit___write_byte(uint8_t (&data)[N], size_t i0, uint8_t x)
 	data[I0] = x;
 	return;
     }
-
     data[I0] = (data[I0] & ~(0xFF << r)) | (x << r);
 	
     ++I0;
@@ -782,6 +829,33 @@ inline void in___bit___write_byte(uint8_t (&data)[N], size_t i0, uint8_t x)
 
 }
 
+template <size_t N, bool safe = true>
+inline void in___bit___write_byte_reverse_order(uint8_t (&data)[N], 
+							size_t i0, uint8_t x)
+{
+    auto [I0, r] = atd::div<size_t>(i0, 8u);
+
+    if constexpr (safe) {
+    if (I0 >= N)
+	return;
+    }
+
+    if (r == 0){
+	data[I0] = x;
+	return;
+    }
+    data[I0] = (data[I0] & ~(0xFF >> r)) | (x >> r);
+	
+    ++I0;
+
+    if (I0 >= N)
+	return;
+
+    data[I0] = (data[I0] & (0xFF << r)) | (x << (8 - r));
+
+}
+
+
 namespace impl_of{
 
 template <size_t N>
@@ -791,8 +865,11 @@ struct View_as_bit_array{
 	: data{x}, i{i0} { }
 
 // Operations
-    void write_byte(uint8_t x)
-    { in___bit___write_byte(data, i, x); }
+    void write_byte_same_order(uint8_t x)
+    { in___bit___write_byte_same_order(data, i, x); }
+
+    void write_byte_reverse_order(uint8_t x)
+    { in___bit___write_byte_reverse_order(data, i, x); }
 
 // Data
     uint8_t (& data)[N];
