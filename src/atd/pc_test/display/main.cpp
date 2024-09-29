@@ -32,6 +32,7 @@
 #include "dogica_rf.h"
 
 #include "upheavtt_cr.h"
+#include "upheavtt_rf.h"
 
 #include "vcr_cr.h"
 #include "depixel_rf.h"
@@ -71,9 +72,10 @@ struct Cout_by_columns {
 
 };
 
-struct Cout_by_rows{
-    static constexpr int rows = 2;
-    static constexpr int cols = 6;
+template <int rows0, int cols0>
+struct Cout_by_rows_t{
+    static constexpr int rows = rows0;
+    static constexpr int cols = cols0;
     using Bitmatrix = atd::Bitmatrix_row_1bit<rows*8, cols * 8>;
 
     void write(const Bitmatrix& m)
@@ -91,6 +93,9 @@ struct Cout_by_rows{
     }
 
 };
+
+using Cout_by_rows = Cout_by_rows_t<2, 6>;
+
 struct Text_block_cfg{
 // Text buffer
     using index_type = int;
@@ -105,13 +110,13 @@ struct Text_block_cfg{
 };
 
 
-template <typename Font0, typename Cout>
+template <typename Font0, typename Cout, int text_rows0 = 4, int text_cols0 = 10>
 struct Display_cfg{
 // Text buffer
     using index_type = int;
     //using index_type = unsigned int;
-    static constexpr index_type text_rows = 4;
-    static constexpr index_type text_cols = 10;
+    static constexpr index_type text_rows = text_rows0;
+    static constexpr index_type text_cols = text_cols0;
 
 // Ventana que vemos del buffer
     static constexpr bool cylinder_type{};
@@ -322,6 +327,30 @@ void test_monochromatic_text_display(const std::string& str)
 
 }
 
+
+template <typename Font, typename Cout>
+void test_bug(const std::string& str)
+{
+    test::interface("test_bug");
+    std::cout << "\n***********************************\n"
+	      << str
+	      << "\n***********************************\n";
+
+    Text_display<Display_cfg<Font, Cout, 2, 20>> display;
+
+    display.bg_write({0,0}, "ew to               "
+			    "        the right!  ");
+    print_bg(std::cout, display);
+    display.flush();
+
+    display.view_move_right(1);
+    std::cout << "\n";
+    display.flush();
+    print_bg(std::cout, display);
+    print_view(std::cout, display);
+
+}
+
 int main()
 {
 try{
@@ -342,6 +371,9 @@ try{
 
     using Depixel_rf = rom::font_DePixelBreitFett_23x13_rf::Font;
     test_monochromatic_text_display<Depixel_rf, Cout_by_rows>("Depixel_rf");
+
+    using Upheavtt_rf = rom::font_upheavtt_13x14_rf::Font;
+    test_bug<Upheavtt_rf, Cout_by_rows_t<2, 4>>("Upheavtt_rf");
 
 }catch(std::exception& e)
 {

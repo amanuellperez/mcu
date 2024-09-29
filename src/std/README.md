@@ -5,6 +5,7 @@ able to use it and also as a learning project.
 
 I intend to write code as needed, little by little.
 
+You can find this project in [github](https://github.com/amanuellperez/mcu).
 
 Tested: `avr-g++ 11.3.0`
 
@@ -16,6 +17,12 @@ Tested: `avr-g++ 11.3.0`
 o encontrar copias de gcc, decidí comenzar a implementarla para poder usarla y como proyecto de aprendizaje.
 
 En principio iré escribiendola poco a poco, según vaya necesitando cosas.
+
+## ¿Dónde está estoy?
+
+Este proyecto, de momento, lo tengo almacenado en github.
+[Aquí](https://github.com/amanuellperez/mcu) puedes encontrar el original.
+
 
 ## Referencias
 

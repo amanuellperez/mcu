@@ -516,9 +516,14 @@ Monochromatic_text_display<C>::
 
 
 
+// TODO: el bm_.clear() se podría ahorrar y solo hacer el clear de los puntos
+// que no se escriban con write<Font>. El problema es cómo identificar todos
+// esos puntos.
 template <typename C>
 void Monochromatic_text_display<C>::flush_view_to_bitmatrix()
 {
+    bm_.clear();
+
     for (index_type i = 0; i < view_rows(); ++i){
 	for (index_type j = 0; j < view_cols(); ++j){
 	    char c = this->view_read(i, j);

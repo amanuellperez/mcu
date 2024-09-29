@@ -18,6 +18,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+#include "../../dev_MAX7219.h"
 #include <avr_atmega.h>
 #include <mcu_SPI.h>
 
@@ -37,7 +38,6 @@ using namespace test;
 // ---------------
 namespace myu = atmega;
 using Micro   = myu::Micro;
-#include "../../dev_MAX7219.h"
 
 // UART
 // ----
@@ -91,8 +91,8 @@ using MAX7219_matrix_cols = dev::MAX7219_matrix<MAX7219_cfg_by_columns, matrix_n
 using MAX7219_matrix_rows = dev::MAX7219_matrix<MAX7219_cfg_by_rows, matrix_nstrips, 4>;
 
 // Elegir por filas o columnas para probar
-//using MAX7219_matrix = MAX7219_matrix_cols;
-using MAX7219_matrix = MAX7219_matrix_rows;
+using MAX7219_matrix = MAX7219_matrix_cols;
+//using MAX7219_matrix = MAX7219_matrix_rows;
 
 
 
@@ -507,7 +507,6 @@ void test_display_upheavtt()
 	display.flush();
 	Micro::wait_ms(300);
     }
-
 
     display.bg_write({0,0}, "    tfel eht        "
 			    "             ot weiV");
