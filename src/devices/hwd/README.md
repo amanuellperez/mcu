@@ -282,10 +282,10 @@ genérico.
 Driver: [HD44780](#HD44780)
 
 ### <a name="displays"></a>Displays
-| Reference     | Display       | I2C | SPI | datasheet |
-|---------------|:-------------:|:---:|:---:|:---:|
-|SDD1306        | 128 x [32|64] | x   |  x  |[datasheet](datasheet/SDD1306.pdf)
-|MAX7219/MAX7221| 64 LEDs       |     |  x  |[datasheet](datasheet/MAX7219.pdf)
+| Reference     | Display       | I2C | SPI | datasheet | video test |
+|---------------|:-------------:|:---:|:---:|:---:|:---:|
+|SDD1306        | 128 x [32|64] | x   |  x  |[datasheet](datasheet/SDD1306.pdf) | [test](https://youtu.be/Qj-BLW8-8dI)
+|MAX7219/MAX7221| 64 LEDs       |     |  x  |[datasheet](datasheet/MAX7219.pdf) | [matrix test](https://youtu.be/7aq5ABbi19Y)
 |               | 8 7-segments  |     |     |
 
 
