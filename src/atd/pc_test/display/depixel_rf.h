@@ -25,7 +25,7 @@
 #ifndef __ROM_FONT_DEPIXELBREITFETT_23X13_RF_H__
 #define __ROM_FONT_DEPIXELBREITFETT_23X13_RF_H__
 
-#include <atd_rom.h>
+#include "../../atd_rom.h"
 // #include <avr_memory.h> <-- hay que incluirlo antes de este archivo
 
 namespace rom{

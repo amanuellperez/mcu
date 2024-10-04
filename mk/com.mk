@@ -37,7 +37,7 @@ BAUD  ?= 9600UL
 
 # Compilador y versión que usamos
 CXX := avr-g++
-STD ?= c++23
+CPP_STD ?= c++23
 
 # ----------------------
 # Programador que usamos

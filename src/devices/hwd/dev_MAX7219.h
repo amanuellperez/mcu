@@ -27,19 +27,24 @@
  *	Traductor del MAX7219
  *
  *	De momento hay 2 formas de conectar el dispositivo:
+ *	1) Como matriz de LEDS (MAX7219_matrix)
+ *	2) Como digitos de un display tradicional BCD (MAX7219_digits)
  *
+ *
+ *	Las matrices de led, a su vez, las podemos conectar:
  *	1) Una fila de MAX7219 conectados en serie (daisy chained).
- *	   Esto es MAX7219_array. 
  *
  *	2) Conectar varios de los dispositivos anteriores a SPI via diferentes
  *	   chip selects, de tal manera que se obtiene una matriz de leds (bits
- *	   agrupados por columnas). Esto es MAX7219_matrix
+ *	   agrupados por columnas). 
  *       
  *
  * HISTORIA
  *    Manuel Perez
  *    22/08/2024 Escrito como traductor. El primer intento es del 2018.
- *		 MAX7219_array, MAX7219_matrix
+ *		 MAX7219_matrix
+ *
+ *    02/10/2024 MAX7219_digits
  *
  ****************************************************************************/
 #include <cstdint>
@@ -145,6 +150,8 @@ void MAX7219<C>::send_packet(uint8_t address, uint8_t data)
 //	  Voy a suponer una comunicación SPI donde la frecuecia del relojo es
 //	  la misma para todos los dispositivos SPI
 //	  
+//
+// Este es el traductor del MAX7219
 template <typename Cfg>
 class  MAX7219_basic{
 public:
@@ -188,7 +195,8 @@ public:
 private:
 // Types
     using SPI		= typename Cfg::SPI_master;
-    using SPI_select	= typename Cfg::SPI_selector;
+    using SelectoR   = Cfg::SPI_selector;
+    using SPI_select = mcu::SPI_selector_with_deselect_delay<SelectoR, 1>;
 
     using MAX7219 = private_::MAX7219<SPI>;
 
@@ -304,254 +312,6 @@ void MAX7219_basic<C>::display_test_off()
     MAX7219::display_test_off();
 }
 
-
-
-/***************************************************************************
- *				MAX7219_array
- ***************************************************************************/
-// TODO: borrar MAX7219_array. Queda incluido en MAX7219_matrix
-// Conectamos varios MAX7219 en fila
-//
-//  +------+------+------+------+
-//  |      |      |      |      |
-//  |      |      |      |      |
-//  +------+------+------+------+
-// 
-// Hay 2 formas de conectar los displays:
-//  1) por filas
-//	+------+------+------+------+
-//	|      |      |      |      |
-//	+------+------+------+------+
-//	|      |      |      |      |
-//	+------+------+------+------+
-//	
-//	Si se escriben en el digit(1) 'ab' 4 veces (suponiendo que
-//	tenemos 4 MAX7219) obtenemos:
-//
-//	+------+------+------+------+
-//	|  ab  |  ab  |  ab  |  ab  |
-//	+------+------+------+------+
-//	|      |      |      |      |
-//	+------+------+------+------+
-//
-//  2) por columnas
-//       1  2 3 1 2 3  1 2  3 1 2  3 
-//	+------+------+------+------+
-//	| |  | | |  | | |  | | |  | |
-//	| |  | | |  | | |  | | |  | |
-//	+------+------+------+------+
-//
-//	Si se escriben en el digit(1) 'ab' 4 veces (suponiendo que
-//	tenemos 4 MAX7219) obtenemos:
-//
-//       1  2 3 1 2 3  1 2  3 1 2  3 
-//	+------+------+------+------+
-//	|a|  | |a|  | |a|  | |a|  | |
-//	|b|  | |b|  | |b|  | |b|  | |
-//	+------+------+------+------+
-//
-//	Aunque a simple vista da la impresión de que este es peor que 1) en
-//	este se podrían escribir las letras por columnas, pudiendo hacer
-//	scrolling facilmente. Además para rellenarlo bastaria con copiar una
-//	matriz y copiarla rellenandola en el orden:
-//	    write(4, 3); write(4, 2); write(4, 1); <--- rellenado ultimo
-//	    write(3, 3); write(3, 2); write(3, 1); <--- rellenado penultimo
-//	    ...
-//
-//  Como los displays que tengo son del tipo 1), las pruebas estan hechas con
-//  ese tipo no teniendo que funcionar con el tipo 2). (llamar a la clase
-//  MAX7219_array_by_rows (???))
-//
-//  Version prueba: hagamos un array de MAX7219. Serán N MAX7219.
-//template <typename Cfg, uint8_t N>
-//class MAX7219_array {
-//public:
-//// Cfg
-//    static constexpr uint8_t size() { return N; } // = nmodules() (???)
-//    static constexpr uint8_t rows() {return 8;}	  // filas que tiene cada display
-//    
-//// Constructor
-//    MAX7219_array() = delete;
-//    static void init();
-//
-//// Write
-//    // Escribimos en la fila row el array x[0...N)
-//    // Las filas van de [0...8) (lo normal, no como van en el MAX7219 que van
-//    // de [1...9) lo cual es muy confuso para un programador de C++ @_@
-//    static void row(uint8_t row, std::span<uint8_t, N> x);
-//
-//    // Escribe en el display ndisplay, en el digit ndigit el valor x
-//    static void write(uint8_t ndisplay, uint8_t ndigit, uint8_t x);
-//
-//    // Borra la fila row
-//    static void clear(uint8_t row);
-//
-//    // Borra todo el array
-//    static void clear();
-//
-//// comandos
-//    static void intensity(uint8_t I);
-//
-//    // turn_on/turn_off (me gustan más que normal_mode/shutdown
-//    static void turn_on ();
-//    static void turn_off ();
-//
-//
-//    static void display_test_on();
-//    static void display_test_off();
-//
-//    
-//private:
-//// Types
-//    using SPI        = typename Cfg::SPI_master;
-//    using SelectoR   = typename Cfg::SPI_selector;
-//    using SPI_select = mcu::SPI_selector_with_deselect_delay<SelectoR, 1>;
-//
-//    using MAX7219    = private_::MAX7219<SPI>;
-//    
-//// Cfg
-//    static void move_command_till_last();
-//};
-//
-//template <typename C, uint8_t N>
-//void MAX7219_array<C, N>::init() 
-//{
-//    MAX7219::SPI_cfg();
-//
-//    SPI_select::select();
-//    MAX7219::disable_decode_mode(); // es un display, no 7-segments
-//    SPI_select::deselect();
-//
-//    SPI_select::select();
-//    MAX7219::scan_all_digits();
-//    SPI_select::deselect();
-//
-//    move_command_till_last();
-//}
-//
-//// Mueve el comando hasta el final
-//template <typename C, uint8_t N>
-//void MAX7219_array<C, N>::move_command_till_last()
-//{
-//    if constexpr (size() > 1) {
-//	for (uint8_t i = 0; i < size() - 1; ++i){
-//	    SPI_select spi;
-//	    MAX7219::no_op();
-//
-//	}
-//    }
-//}
-//
-//
-//template <typename C, uint8_t N>
-//void MAX7219_array<C, N>::row(uint8_t row, std::span<uint8_t, N> value)
-//{
-//    MAX7219::SPI_cfg();
-//    SPI_select select;
-//
-//    for (auto x: value)
-//	MAX7219::digit(row + 1, x);
-//}
-//
-//// Esta función genera parpadeo!!! (es culpa de la forma de funcionar del
-//// MAX7219?)
-//template <typename C, uint8_t N>
-//void MAX7219_array<C, N>::write(uint8_t ndisplay, uint8_t ndigit, uint8_t x)
-//{
-//    MAX7219::SPI_cfg();
-//    SPI_select select;
-//
-//    for (uint8_t i = 0; i < size() - ndisplay; ++i)
-//	MAX7219::no_op();
-//
-//    MAX7219::digit(ndigit, x);
-//
-//    for (uint8_t i = 0; i < ndisplay; ++i)
-//	MAX7219::no_op();
-//}
-//
-//
-//template <typename C, uint8_t N>
-//inline void MAX7219_array<C, N>::clear(uint8_t row)
-//{
-//    MAX7219::SPI_cfg();
-//
-//    SPI_select::select();
-//    MAX7219::digit(row + 1, 0x00);
-//    SPI_select::deselect();
-//
-//    move_command_till_last();
-//}
-//
-//template <typename C, uint8_t N>
-//inline void MAX7219_array<C, N>::clear()
-//{
-//    for (uint8_t i = 0; i < rows(); ++i)
-//	clear(i);
-//}
-//
-//template <typename C, uint8_t N>
-//void MAX7219_array<C, N>::intensity(uint8_t I) 
-//{
-//    MAX7219::SPI_cfg();
-//
-//
-//    SPI_select::select();
-//    MAX7219::intensity(I);
-//    SPI_select::deselect();
-//
-//    move_command_till_last();
-//}
-//
-//template <typename C, uint8_t N>
-//void MAX7219_array<C, N>::turn_on() 
-//{
-//    MAX7219::SPI_cfg();
-//
-//    SPI_select::select();
-//    MAX7219::turn_on();
-//    SPI_select::deselect();
-//
-//    move_command_till_last();
-//}
-//
-//template <typename C, uint8_t N>
-//void MAX7219_array<C, N>::turn_off() 
-//{
-//    MAX7219::SPI_cfg();
-//
-//    SPI_select::select();
-//    MAX7219::turn_off();
-//    SPI_select::deselect();
-//
-//    move_command_till_last();
-//}
-//
-//
-//template <typename C, uint8_t N>
-//void MAX7219_array<C, N>::display_test_on()
-//{
-//    MAX7219::SPI_cfg();
-//
-//    SPI_select::select();
-//    MAX7219::display_test_on();
-//    SPI_select::deselect();
-//
-//    move_command_till_last();
-//}
-//
-//template <typename C, uint8_t N>
-//void MAX7219_array<C, N>::display_test_off()
-//{
-//    MAX7219::SPI_cfg();
-//
-//    SPI_select::select();
-//    MAX7219::display_test_off();
-//    SPI_select::deselect();
-//
-//    move_command_till_last();
-//}
-//
 
 /***************************************************************************
  *				MAX7219_matrix
@@ -1024,6 +784,84 @@ void MAX7219_matrix<C, np, nm>::display_test_off()
 }
 
 
+/***************************************************************************
+ *				MAX7219_digits
+ ***************************************************************************/
+template <typename Cfg>
+class MAX7219_digits : private MAX7219_basic<Cfg>{
+public:
+// Types
+    using Base = MAX7219_basic<Cfg>;
+
+// Constructor
+    MAX7219_digits() = delete;
+    static void init();
+
+// Write
+    // Escribimos el digit 'x' en la posición i. Observar que un digit es
+    // un número de una cifra (de 0 a 9)
+    // digit va de [0..8) (y no de [1..8] como el MAX7219_basic)
+    static void digit(uint8_t i, uint8_t x)
+    {Base::digit(i + 1, x);}
+
+    // Escribe el uint8_t x en la posición i. En este caso el número va de
+    // 0 a 255
+    static void write(uint8_t i, uint8_t x);
+
+    // Borra el digit escrito en la posición i
+    static void clear(uint8_t i) {digit(i, 0x0F);}
+
+    // Borra el display
+    static void clear();
+
+// comandos
+    static void intensity(uint8_t I) {Base::intensity(I);}
+
+    // turn_on/turn_off (me gustan más que normal_mode/shutdown
+    static void turn_on ()  {Base::turn_on();}
+    static void turn_off () {Base::turn_off();}
+
+
+    static void display_test_on() {Base::display_test_on();}
+    static void display_test_off(){Base::display_test_off();}
+
+
+private:
+};
+
+template <typename C>
+void MAX7219_digits<C>::init()
+{
+    Base::init();
+
+    Base::enable_decode_mode();
+    Base::scan_all_digits();
+}
+
+template <typename C>
+void MAX7219_digits<C>::clear()
+{
+    for (uint8_t i = 0; i < 8; ++i)
+	clear(i);
+}
+
+// Esta función es copia casi literal de "std::ostream::operator_print"
+//template <typename C>
+//    template <Type::Integer Int>
+//void MAX7219_digits<C>::write(uint8_t i, const Int& x)
+//{
+//    // El +1 es para el '\0'
+//    char buffer[atd::Max_number_of_digits_of<Int>+1];
+//
+//    char* p = atd::int_to_cstring(
+//	buffer, buffer + atd::Max_number_of_digits_of<Int>, x);
+//
+//    buffer[atd_::Max_number_of_digits_of<Int>] = '\0';
+//
+////    print_with_padding(p); <-- si se quiere dar formato mirar esta función
+////				 en std_ostream.cpp
+//    
+//}
 
 }// namespace dev
 

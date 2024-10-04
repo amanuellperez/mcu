@@ -18,7 +18,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-#include "../../dev_MAX7219.h"
+#include "../../../dev_MAX7219.h"
 #include <avr_atmega.h>
 #include <mcu_SPI.h>
 

@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 Manuel Perez 
+// Copyright (C) 2019-2024 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -40,17 +40,25 @@
  *    Manuel Perez
  *    16/07/2019 v0.0
  *    08/10/2023 throw_exception
+ *    04/10/2024 Al intentar llevar STD::atd_ a atd fallan las pruebas en
+ *               atd/pc_test por culpa de la variable STD. Por ello, opto por
+ *               definir STD en mi cpp_environment para poder ejecutar las
+ *               pruebas en atd/pc_test.
  *
  ****************************************************************************/
-// mtd or std?
-#if defined __AVR__ || __AVR
-#   define STD std
+#if !defined STD
 
-#elif defined(__GNUC__) || defined(__clang__)
-#   define STD mtd
+    // mtd or std?
+    #if defined __AVR__ || __AVR
+    #   define STD std
 
-#else
-# error "Unknown compiler"
+    #elif defined(__GNUC__) || defined(__clang__)
+    #   define STD mtd
+
+    #else
+    # error "Unknown compiler"
+    #endif
+
 #endif
 
 // Cfg

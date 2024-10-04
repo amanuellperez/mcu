@@ -35,11 +35,13 @@
  *	25/11/2022 convert(a).into(b);
  *	13/03/2023 little_endian_to<>/big_endian_to<>
  *	01/11/2023 bool_to
+ *	04/10/2024 int_to_cstring
  *
  ****************************************************************************/
 #include <limits>
 #include <cstddef>
 #include <span>
+#include <std/std_atd.h>
 
 #include "atd_decimal.h"
 #include "atd_minifloat.h"
@@ -238,6 +240,12 @@ inline Int big_endian_to(std::span<uint8_t> data)
 
     return res;
 }
+
+// int_to_cstring
+// --------------
+template <typename It, typename Int>
+It int_to_cstring(It p0, It pe, Int x)
+{ return STD::atd_::int_to_cstring(p0, pe, x); }
 
 
 }// namespace

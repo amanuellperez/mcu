@@ -72,7 +72,7 @@ ATMEGA328).
 * [Compilador y toolchain](#compilador)
 * [Estructura de directorios](#directorios)
 * [Namespaces definidos](#namespaces)
-* [Configurar entorno de trabajo](#entorno)
+* [Entorno de trabajo](#entorno)
 * [Compilar](#compilar)
 * [Tests](#test)
 * [Diseño](#discapas)
@@ -189,8 +189,21 @@ Se puede organizar el código en diferentes niveles:
 * `pli` incluye código común a diferentes proyectos. (`pli` viene de PrjLib)
 
 
-## <a name="entorno"></a>Configurar entorno de trabajo
+## <a name="entorno"></a>Entorno de trabajo
 
+* ¿Sistema operativo? Linux.
+
+* ¿Mi entorno de trabajo? Un terminal (varios realmente) de linux. 
+
+* ¿Mi editor? El mejor editor del mundo: ¡vim! No uso ningún tipo de IDE ni
+  nada parecido. 
+
+* `make` es el programa para controlar las dependencias y `gcc` el compilador.
+
+Todo el software que uso es gratuito.
+
+
+### Configurar entorno de trabajo
 Para configurar el entorno de trabajo basta con ejecutar [mcu_environment.sh](mcu_environment.sh).
 
 
@@ -471,6 +484,15 @@ motivos los siguientes:
   que ha creado el contenido.
 
   Recuerda: Google, Meta, Amazon, ... se queda con todo tu trabajo. 
+
+* Update: cosa de 2 años después de escribir lo anterior de repente Youtube me
+  vuelve a dar acceso a mis canales. ¿Motivo? Ni idea, ya que yo no hice nada.
+
+  Ando buscando una alternativa a Youtube. Probé con Odysee pero (antes?)
+  tenía el problema de que solo te dejaba subir un número determinado de
+  videos. Si tus videos se veían, te dejaban subir más. Si no, pues no. Y como
+  yo no promociono mis videos, no me deja subir más que un número fijo de
+  videos, no sirviéndome para documentar lo que voy haciendo aquí. 
 
 
 

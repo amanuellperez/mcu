@@ -16,7 +16,7 @@ DIRS = algorithm\
 	memory		\
 	numeric		\
 	ratio		\
-	sizeof_txt	\
+	sizeof		\
 	span		\
 	string_view	\
 	type_traits0	\

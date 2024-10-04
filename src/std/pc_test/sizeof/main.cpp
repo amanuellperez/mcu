@@ -17,7 +17,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "../../std_sizeof_txt.h"
+#include "../../std_sizeof.h"
 
 #include <alp_test.h>
 #include <iostream>
@@ -26,12 +26,12 @@ using namespace test;
 
 void tst()
 {    
-    CHECK_TRUE(mtd::__Num_caracteres_max<uint8_t> == 3, "Num_caracteres_max<uint8_t>");
-    CHECK_TRUE(mtd::__Num_caracteres_max<int8_t> == 4, "Num_caracteres_max<int8_t>");
-    CHECK_TRUE(mtd::__Num_caracteres_max<uint16_t> == 5, "Num_caracteres_max<uint16_t>");
-    CHECK_TRUE(mtd::__Num_caracteres_max<int16_t> == 6, "Num_caracteres_max<int16_t>");
-    CHECK_TRUE(mtd::__Num_caracteres_max<uint32_t> == 10, "Num_caracteres_max<uint32_t>");
-    CHECK_TRUE(mtd::__Num_caracteres_max<int32_t> == 11, "Num_caracteres_max<int32_t>");
+    CHECK_TRUE(mtd::atd_::Max_number_of_digits_of<uint8_t> == 3, "Num_caracteres_max<uint8_t>");
+    CHECK_TRUE(mtd::atd_::Max_number_of_digits_of<int8_t> == 4, "Num_caracteres_max<int8_t>");
+    CHECK_TRUE(mtd::atd_::Max_number_of_digits_of<uint16_t> == 5, "Num_caracteres_max<uint16_t>");
+    CHECK_TRUE(mtd::atd_::Max_number_of_digits_of<int16_t> == 6, "Num_caracteres_max<int16_t>");
+    CHECK_TRUE(mtd::atd_::Max_number_of_digits_of<uint32_t> == 10, "Num_caracteres_max<uint32_t>");
+    CHECK_TRUE(mtd::atd_::Max_number_of_digits_of<int32_t> == 11, "Num_caracteres_max<int32_t>");
 }
 
 
@@ -39,7 +39,7 @@ void tst()
 int main()
 {
 try{
-    test::header("__Num_caracteres_max");
+    test::header("atd_::Max_number_of_digits_of");
 
     tst();
 }catch(std::exception& e)

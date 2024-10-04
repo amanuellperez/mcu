@@ -25,7 +25,7 @@
 #ifndef __ROM_FONT_DOGICA_8X8_RF_H__
 #define __ROM_FONT_DOGICA_8X8_RF_H__
 
-#include <atd_rom.h>
+#include "../../atd_rom.h"
 // #include <avr_memory.h> <-- hay que incluirlo antes de este archivo
 
 namespace rom{

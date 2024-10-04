@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 Manuel Perez 
+// Copyright (C) 2019-2024 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -18,26 +18,30 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #pragma once
-#ifndef __ATD_SIZEOF_TXT_H__
-#define __ATD_SIZEOF_TXT_H__
+#ifndef __ATD_SIZEOF_H__
+#define __ATD_SIZEOF_H__
 /****************************************************************************
  *
- *   - DESCRIPCION: Necesito Num_caracteres_max para crear los ostream.
+ * DESCRIPCION
+ *  Necesito Num_caracteres_max para crear los ostream.
  *
- *  - TODO: Esta función la suministra el estandar!!! Es 
- *  numeric_limits::digits/digits10... Revisarlo y eliminar esto!!!
- *
- *   - HISTORIA:
- *       Manuel Perez - 08/02/2019 v0.0
- *			- 11/10/2019 v0.1 Completo y simplifico cosas.
+ * HISTORIA
+ *    Manuel Perez
+ *    08/02/2013 Escrito
+ *    11/10/2019 Completo y simplifico cosas
+ *    04/10/2024 Metido en atd_ para llevarlo a atd
  *
  ****************************************************************************/
+
+
 #include "std_config.h"
 
 #include <stdint.h> // uint8_t, ...
 #include "std_type_traits.h"
 
 namespace STD{
+namespace atd_{
+
 /// Al no poder usar string, cuando se quiere convertir un entero a
 /// cadena hay que reservar la memoria necesaria:
 /// 
@@ -64,7 +68,7 @@ namespace STD{
 
 
 template <uint8_t sz>
-inline constexpr uint8_t __num_caracteres_max()
+inline constexpr uint8_t __max_number_of_digits()
 {
     if constexpr (sz == 1) return 3;
     else if constexpr (sz == 2) return 5;
@@ -76,26 +80,26 @@ inline constexpr uint8_t __num_caracteres_max()
 
 
 template <typename Int, bool signo>
-struct __Num_caracteres_max_h
+struct Max_number_of_digits_of_h
     : public 
-      integral_constant<Int, __num_caracteres_max<sizeof(Int)>()> 
+      integral_constant<Int, __max_number_of_digits<sizeof(Int)>()> 
 { };
 
 template <typename Int>
-struct __Num_caracteres_max_h<Int, true>
+struct Max_number_of_digits_of_h<Int, true>
     : public 
-      integral_constant<Int, __num_caracteres_max<sizeof(Int)>() + 1> 
+      integral_constant<Int, __max_number_of_digits<sizeof(Int)>() + 1> 
 { };
 
 /// Devuelve el número de caracteres que cómo máximo ocupa el Int como cadena
 /// de C.
 template <typename Int>
-inline constexpr int __Num_caracteres_max
-    = __Num_caracteres_max_h<Int, is_signed_v<Int>>::value;
+inline constexpr int Max_number_of_digits_of
+    = Max_number_of_digits_of_h<Int, is_signed_v<Int>>::value;
 
 
-
-}// namespace
+}// namespace atd_
+}// namespace STD
 
 
 

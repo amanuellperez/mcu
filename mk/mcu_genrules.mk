@@ -88,7 +88,7 @@ CPPFLAGS += -DMCU=$(MCU) -DF_CPU=$(F_CPU) -DBAUD=$(BAUD) $(PROJ_CPPFLAGS)
 # 	-std: versión del estandar a usar
 # 	-Wall: mostrar todos los warnings
 # 	-g	: produce información para poder depurar.
-CXXFLAGS = -Os -std=$(STD) -Wall -pedantic $(PROJ_CXXFLAGS) $(USER_CXXFLAGS)
+CXXFLAGS = -Os -std=$(CPP_STD) -Wall -pedantic $(PROJ_CXXFLAGS) $(USER_CXXFLAGS)
 
 # Use short (8-bit) data types 
 # -funsigned-char	: hace que el tipo char sea unsigned

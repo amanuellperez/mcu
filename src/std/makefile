@@ -15,9 +15,7 @@ INCS= std_atd.h			\
 	std_concepts.h		\
 	std_climits.h		\
 	std_config.h		\
-	std_cstdio.h		\
 	std_cstddef.h		\
-	std_cstdio.h		\
 	std_cstdint.h		\
 	std_cstdlib.h		\
 	std_cstring.h		\
@@ -40,9 +38,9 @@ INCS= std_atd.h			\
 	std_ostream.h		\
 	std_range_access.h	\
 	std_ratio.h			\
+	std_sizeof.h		\
 	std_span.h			\
 	std_streambuf.h		\
-	std_sizeof_txt.h	\
 	std_stdexcept.h		\
 	std_string_view.h	\
 	std_tuple.h			\

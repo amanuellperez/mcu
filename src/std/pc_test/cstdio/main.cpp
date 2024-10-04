@@ -17,7 +17,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "../../std_cstdio.h"
+#include "../../std_atd.h"
 
 #include <alp_test.h>
 #include <iostream>
@@ -36,7 +36,7 @@ template <typename Int>
 void test_int_to_cstring(Int i, const std::string& msg)
 {
     char buffer[100];
-    char* pc = mtd::__int_to_cstring(buffer, buffer + 100, i);
+    char* pc = mtd::atd_::int_to_cstring(buffer, buffer + 100, i);
     std::cout << msg << ": [";
     print(pc, buffer + 100);
     std::cout << "] ?= [" << i << "]\n";

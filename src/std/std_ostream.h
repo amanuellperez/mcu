@@ -33,10 +33,9 @@
  ****************************************************************************/
 #include "std_config.h"
 #include "std_streambuf.h"
-//#include "std_string.h"
-#include "std_sizeof_txt.h"
+#include "std_sizeof.h"
 #include "std_ios.h"
-#include "std_cstdio.h"	    // int_to_cstring
+#include "std_atd.h"	    // int_to_cstring
 
 namespace STD{
 
@@ -181,12 +180,12 @@ ostream& ostream::operator_print(const Int& x)
 
     if (sen){
 	// El +1 es para el '\0'
-	char buffer[__Num_caracteres_max<Int>+1];
+	char buffer[atd_::Max_number_of_digits_of<Int>+1];
 
-        char* p = __int_to_cstring(
-            buffer, buffer + __Num_caracteres_max<Int>, x);
+        char* p = atd_::int_to_cstring(
+            buffer, buffer + atd_::Max_number_of_digits_of<Int>, x);
 
-	buffer[__Num_caracteres_max<Int>] = '\0';
+	buffer[atd_::Max_number_of_digits_of<Int>] = '\0';
 
         print_with_padding(p);
     }

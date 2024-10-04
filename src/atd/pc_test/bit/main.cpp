@@ -918,23 +918,23 @@ void test_view_as_bit_array()
 
     uint8_t x[4] = {0xFF, 0xFF, 0xFF, 0xFF};
 
-    atd::in(x).bit(0).write_byte(0xAA);
-    CHECK_TRUE(x[0] == 0xAA, "write_byte");
+    atd::in(x).bit(0).write_byte_same_order(0xAA);
+    CHECK_TRUE(x[0] == 0xAA, "write_byte_same_order");
 
-    atd::in(x).bit(4).write_byte(0xCB);
-    CHECK_TRUE(x[0] == 0xBA and x[1] == 0xFC, "write_byte");
+    atd::in(x).bit(4).write_byte_same_order(0xCB);
+    CHECK_TRUE(x[0] == 0xBA and x[1] == 0xFC, "write_byte_same_order");
 
     x[0] = 0;
     x[1] = 0;
-    atd::in(x).bit(2).write_byte(0b11011111);
-    CHECK_TRUE(x[0] == 0b01111100 and x[1] == 0x03, "write_byte");
+    atd::in(x).bit(2).write_byte_same_order(0b11011111);
+    CHECK_TRUE(x[0] == 0b01111100 and x[1] == 0x03, "write_byte_same_order");
 
     {
 	uint8_t y[6];
 	y[5] = 0xFF;
-	atd::in(y).bit(44).write_byte(0b00001111);
+	atd::in(y).bit(44).write_byte_reverse_order(0b00001111);
 	std::cout << std::hex << "0x" << (int) y[5] << '\n';
-	CHECK_TRUE(y[5] == 0b11110000, "write_byte");
+	CHECK_TRUE(y[5] == 0b11110000, "write_byte_reverse_order");
 
     }
 }
