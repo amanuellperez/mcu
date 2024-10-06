@@ -53,7 +53,8 @@
 
 #include <mcu_SPI.h>
 #include <atd_bit_matrix.h>
-
+#include <atd_basic_types.h>	// View_of_int
+				
 namespace dev{
 
 /***************************************************************************
@@ -787,11 +788,16 @@ void MAX7219_matrix<C, np, nm>::display_test_off()
 /***************************************************************************
  *				MAX7219_digits
  ***************************************************************************/
+// DUDA: de momento solo está implementado 1 MAX7219. ¿Merece la pena conectar
+// en serie varios MAX7219 digits? La modificación es sencilla.
 template <typename Cfg>
 class MAX7219_digits : private MAX7219_basic<Cfg>{
 public:
 // Types
     using Base = MAX7219_basic<Cfg>;
+
+// Cfg
+    static constexpr uint8_t ndigits = 8;
 
 // Constructor
     MAX7219_digits() = delete;
@@ -800,13 +806,24 @@ public:
 // Write
     // Escribimos el digit 'x' en la posición i. Observar que un digit es
     // un número de una cifra (de 0 a 9)
-    // digit va de [0..8) (y no de [1..8] como el MAX7219_basic)
+    // digit va de [0..ndigits) 
     static void digit(uint8_t i, uint8_t x)
     {Base::digit(i + 1, x);}
 
+    static void digit_with_point(uint8_t i, uint8_t x)
+    {
+	atd::bit(7).of(x) = 1;
+	digit(i, x);
+    }
+
+    static void write_point(uint8_t i)
+    {digit(i, 0x8F);}
+
     // Escribe el uint8_t x en la posición i. En este caso el número va de
     // 0 a 255
-    static void write(uint8_t i, uint8_t x);
+    template <Type::Integer Int>
+    static void write(uint8_t i, const Int& x);
+
 
     // Borra el digit escrito en la posición i
     static void clear(uint8_t i) {digit(i, 0x0F);}
@@ -827,6 +844,7 @@ public:
 
 
 private:
+
 };
 
 template <typename C>
@@ -841,27 +859,23 @@ void MAX7219_digits<C>::init()
 template <typename C>
 void MAX7219_digits<C>::clear()
 {
-    for (uint8_t i = 0; i < 8; ++i)
+    for (uint8_t i = 0; i < ndigits; ++i)
 	clear(i);
 }
 
-// Esta función es copia casi literal de "std::ostream::operator_print"
-//template <typename C>
-//    template <Type::Integer Int>
-//void MAX7219_digits<C>::write(uint8_t i, const Int& x)
-//{
-//    // El +1 es para el '\0'
-//    char buffer[atd::Max_number_of_digits_of<Int>+1];
-//
-//    char* p = atd::int_to_cstring(
-//	buffer, buffer + atd::Max_number_of_digits_of<Int>, x);
-//
-//    buffer[atd_::Max_number_of_digits_of<Int>] = '\0';
-//
-////    print_with_padding(p); <-- si se quiere dar formato mirar esta función
-////				 en std_ostream.cpp
-//    
-//}
+template <typename C>
+    template <Type::Integer Int>
+void MAX7219_digits<C>::write(uint8_t i, const Int& x)
+{
+    atd::View_of_int v{x};
+    for (auto d = v.digit_begin();
+	      d != v.digit_end() and i < ndigits;
+	      ++d, ++i){
+	digit(i, *d);
+    }
+
+    
+}
 
 }// namespace dev
 

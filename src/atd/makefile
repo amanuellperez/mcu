@@ -9,6 +9,7 @@ SOURCES= atd_bcd.cpp		\
 INCS= atd_algorithm.h	\
 	  atd_array.h		\
 	atd_ascii.h			\
+	atd_basic_types.h	\
 	atd_bcd.h			\
 	atd_bit.h 			\
 	atd_bit_matrix.h 	\

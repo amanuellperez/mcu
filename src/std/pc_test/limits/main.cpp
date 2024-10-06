@@ -74,13 +74,29 @@ void test_limits(const std::string& name)
 void test_limits()
 {
     test_limits<int8_t>("int8_t");
+    test_limits<const int8_t>("const int8_t");
+
     test_limits<uint8_t>("uint8_t");
+    test_limits<const uint8_t>("const uint8_t");
+
     test_limits<int16_t>("int16_t");
+    test_limits<const int16_t>("const int16_t");
+
     test_limits<uint16_t>("uint16_t");
+    test_limits<const uint16_t>("const uint16_t");
+
     test_limits<int32_t>("int32_t");
+    test_limits<const int32_t>("const int32_t");
+
     test_limits<uint32_t>("uint32_t");
+    test_limits<const uint32_t>("const uint32_t");
+
     test_limits<int64_t>("int64_t");
+    test_limits<const int64_t>("const int64_t");
+
     test_limits<uint64_t>("uint64_t");
+    test_limits<const uint64_t>("const uint64_t");
+
 }
 
 

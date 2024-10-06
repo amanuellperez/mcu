@@ -53,6 +53,8 @@ inline constexpr auto __x_log10_of_2(const T& x)
 template <typename T>
 struct numeric_limits;
 
+template <typename T>
+struct numeric_limits<const T> : public numeric_limits<T> {};
 
 template<>
 struct numeric_limits<int8_t>{

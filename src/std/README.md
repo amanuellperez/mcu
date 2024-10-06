@@ -151,6 +151,33 @@ Propuestas:
    código tienes que ir a pillar, no basta con probar los casos donde sabes que
    funciona) (<-- lo triste es que esto es lo que se hace en la práctica).
 
+### `uint8_t` no es un entero!!!
+
+¿Por qué uso tanto `uint8_t`?
+
+1. El atmega32 es de 8 bits: parece lógico manejar `uint8_t` en ese tipo de
+   micros.
+
+2. Al principio, para los bytes, empecé usando `std::byte` y resulto ser un
+   dolor de xxx: había que estar todo el día haciendo castings, problemas al
+   manejar arrays... Desconozco si es porque nunca lo había manejado o es que
+   es incómodo de manejar. Resultado: cuando quiero usar un byte uso `uint8_t`
+
+¿El problema?
+
+Uno de los problemas más habituales al programar son todas las mentiras que
+introducimos los programadores sin darnos cuenta (yo el primero). Con
+`uint8_t` sucede eso: el nombre dice que es un `unsigned int` de 8 bits
+¿verdad? ¡Mentira! ¡Es un char! (y eso lleva sistemáticamente a confusiones en
+el código: tú piensas que es un entero, pero el compilador lo trata como un
+char y ahí está el lío).
+
+Más de una vez he estado tentado de definir `atd::Uint8_t` y el resto de
+`Uint16_t`, ..., dentro de `atd` pero eso generaría confusión. Por eso no lo
+defino. 
+
+
+
 
 ## Test
 `pc_test`: directorio con pruebas automáticas. Depende de `alp`.

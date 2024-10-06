@@ -1,10 +1,11 @@
 DIRS = 	algorithm	\
 	   	array		\
 	   	ascii		\
-		bounded		\
+		basic_types	\
 	   	bcd			\
 		bit			\
 		bit_matrix	\
+		bounded		\
 		cast		\
 		char		\
 		cmath		\

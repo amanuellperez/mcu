@@ -81,12 +81,7 @@ void init_max7219()
 
     MAX7219::init(); 
     MAX7219::intensity(0x00);
-//    MAX7219::enable_decode_mode();
-//    MAX7219::scan_all_digits();
     MAX7219::turn_on();
-    MAX7219::display_test_on();
-    Micro::wait_ms(1000);
-    MAX7219::display_test_off();
 }
 
 
@@ -100,10 +95,14 @@ void hello()
 		<< "\n\n";
 }
 
-template <uint16_t ms>
+template <uint16_t ms, bool with_point = false>
 void blink(uint8_t d, uint8_t value)
 {
-    MAX7219::digit(d, value);
+    if constexpr (with_point)
+	MAX7219::digit_with_point(d, value);
+    else
+	MAX7219::digit(d, value);
+
     Micro::wait_ms(ms);
     MAX7219::clear(d);
 }
@@ -111,15 +110,62 @@ void blink(uint8_t d, uint8_t value)
 void test_basic()
 {
     myu::UART_iostream uart;
+    uart << "\nBasic test\n"
+	      "----------\n";
+
+    MAX7219::display_test_on();
+    Micro::wait_ms(500);
+    MAX7219::display_test_off();
+}
+
+void test_basic_counter()
+{
+    myu::UART_iostream uart;
 
     static constexpr uint16_t ms = 500;
 
-    uart << "\nBasic test\n"
-	      "----------\n";
-    for (uint8_t i = 0; i < 8; ++i){
-	uart << "writing " << (int) i << " ... ";
+    uart << "\nBasic counter\n"
+	      "-------------\n";
+
+    uart << "writing numbers ... ";
+    for (uint8_t i = 0; i < 8; ++i)
 	blink<ms>(i, i);
-	uart << "OK\n";
+
+    uart << "OK\n";
+
+    uart << "Adding point ...";
+    for (uint8_t i = 0; i < 8; ++i)
+	blink<ms, true>(i, i);
+
+    uart << "OK\n";
+    
+    uart << "Writing points\n";
+    for (uint8_t i = 0; i < 8; ++i)
+	MAX7219::write_point(i);
+}
+
+
+void test_counter()
+{
+    myu::UART_iostream uart;
+
+    uart << "\nCounter test\n"
+	      "------------\n";
+
+    uart << "Write from: ";
+    uint16_t x0;
+    uart >> x0;
+    uart << "to: ";
+    uint16_t x1;
+    uart >> x1;
+    uart << "In position (0..7): ";
+    uint16_t i;
+    uart >> i;
+
+    for (uint16_t x = x0; x <= x1; ++x){
+	MAX7219::write(i, x);
+	if (x1 - x0 < 500) // si no no se ve nada
+	    Micro::wait_ms(10);
     }
 }
 
@@ -139,18 +185,25 @@ int main()
     while (1){
 	uart << "\nMenu\n"
 		  "----\n"
-		  "0. Clear\n";
+		  "0. Clear\n"
+		  "1. Basic test\n"
+		  "2. Basic counter\n"
+		  "3. Counter test\n";
 
 	char opt{};
 	uart >> opt;
-	test_basic();
+
 	
 
-//	switch (opt){
-//	    break; case '5': test_display<MAX7219_matrix>();
-//	    break; default:
-//			uart << "What?\n";
-//	}
+	switch (opt){
+	    break; case '0': MAX7219::clear();
+	    break; case '1': test_basic();
+	    break; case '2': test_basic_counter();
+	    break; case '3': test_counter();
+
+	    break; default:
+			uart << "What?\n";
+	}
     }                                                 
 }
 
