@@ -286,7 +286,7 @@ Driver: [HD44780](#HD44780)
 |---------------|:-------------:|:---:|:---:|:---:|:---:|
 |SDD1306        | 128 x [32/64] | x   |  x  |[datasheet](datasheet/SDD1306.pdf) | [test](https://youtu.be/Qj-BLW8-8dI)
 |MAX7219/MAX7221| 64 LEDs       |     |  x  |[datasheet](datasheet/MAX7219.pdf) | [matrix test](https://youtu.be/7aq5ABbi19Y)
-|               | 8 7-segments  |     |     |
+|               | 8 7-segments  |     |     |                                   | [digit test](https://youtu.be/rEBQZDCc5ME)
 
 
 ### <a name="potentiometers"></a>Potentiometers (digital)
