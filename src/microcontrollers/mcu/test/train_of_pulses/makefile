@@ -8,8 +8,8 @@ MCU = atmega328p
 
 USER_CXXFLAGS=-save-temps -fverbose-asm
 
-include $(MCU_MCUGENRULES)
 
+include $(HWD_GENRULES)
 
 
 

@@ -83,6 +83,9 @@ INCS= std_atd.h			\
 	utility
 
 
+MCU=atmega328p
+#MCU=atmega4809
+
 LIB=std
 
 include $(STD_GENRULES)

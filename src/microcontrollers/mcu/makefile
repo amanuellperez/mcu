@@ -16,7 +16,10 @@ INCS= 	mcu_clock.h					\
 		mcu_TWI_slave.h
 
 
-LIB=mcu_$(F_CPU)
+MCU=atmega328p
+
+LIB=mcu
+
 INSTALL_INC=$(MCU_INCLUDE)
 
 include $(MCU_MCUGENRULES)

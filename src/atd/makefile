@@ -50,6 +50,9 @@ INCS= atd_algorithm.h	\
 	atd_type_traits.h	\
 	atd_units.h
 
+MCU=atmega328p
+#MCU=atmega4809
+
 LIB=atd
 
 

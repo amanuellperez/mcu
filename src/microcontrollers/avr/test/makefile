@@ -6,6 +6,7 @@ DIRS = \
 	automatic	\
 	ADC		\
 	cfg		\
+	hello_world	\
 	memory	\
 	pin		\
 	port	\

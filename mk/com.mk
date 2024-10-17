@@ -19,7 +19,7 @@
 # -------------------------------------------------
 # Datos del microcontrolador por defecto que usamos
 # -------------------------------------------------
-MCU   ?= atmega168a
+#MCU   ?= atmega168a  TODO: borrar el MCU. Hay que definirlo en cada lib
 
 # Frecuencia a la que funciona la CPU 
 # OJO: el reloj del atmega328p funciona a 8 MHz, pero su CPU a 1 MHz!!!

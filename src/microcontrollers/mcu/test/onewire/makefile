@@ -7,8 +7,8 @@ SOURCES= main.cpp	\
 
 MCU = atmega328p
 
-include $(MCU_MCUGENRULES)
 
+include $(HWD_GENRULES)
 
 
 

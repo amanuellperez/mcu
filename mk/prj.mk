@@ -19,6 +19,8 @@
 
 include $(MCU_COMRULES)
 
+LIBSUFFIX=$(MCU)_$(F_CPU)
+
 # Variables genéricas de compilación del proyecto
 PROJ_CXXFLAGS=
 
@@ -27,10 +29,10 @@ PROJ_CXXFLAGS=
 # 	poner las librerías que dependen de otras antes.
 # 	Ejemplo: A depende de B. Luego escribir '-lA -lB' y no al revés
 # 	ya que no compilaría.
-PROJ_LDFLAGS=-L$(MCU_LIB) -lpli_$(F_CPU) \
-			 -llogic_$(F_CPU) -lhwd_$(F_CPU) \
-			 -lmcu_$(F_CPU) -lavr_$(F_CPU) \
-			 -latd -lstd
+PROJ_LDFLAGS=-L$(MCU_LIB) -lpli_$(LIBSUFFIX) \
+			 -llogic_$(LIBSUFFIX) -lhwd_$(LIBSUFFIX) \
+			 -lmcu_$(LIBSUFFIX) -lmicro_$(LIBSUFFIX) \
+			 -latd_$(MCU) -lstd_$(MCU)
 
 include $(MCU_GENRULES)
 

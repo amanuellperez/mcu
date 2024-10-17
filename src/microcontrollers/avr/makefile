@@ -43,7 +43,9 @@ INCS= avr_ADC_basic.h	\
 	avr_not_generic.h	
 
 
-LIB=avr_$(F_CPU)
+MCU=atmega328p
+LIB=micro
+
 INSTALL_INC=$(MCU_INCLUDE)
 
 include $(AVR_GENRULES)

@@ -39,8 +39,10 @@ INCS= 	dev_A4988.h				\
 		not_generic.h		
 
 
+MCU=atmega328p
 
-LIB=hwd_$(F_CPU)
+LIB=hwd
+
 INSTALL_INC=$(MCU_INCLUDE)
 
 include $(HWD_GENRULES)

@@ -1,5 +1,4 @@
-DIRS =  blink		\
-		calculator	\
+DIRS =  calculator	\
 		cars		\
 		clocks 		\
 		datalogger	\

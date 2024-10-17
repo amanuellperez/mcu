@@ -11,7 +11,10 @@ INCS= 	app_trace.h					\
 		pli_iostream.h
 
 
-LIB=pli_$(F_CPU)
+MCU=atmega328p
+
+LIB=pli
+
 INSTALL_INC=$(MCU_INCLUDE)
 
 include $(PLI_GENRULES)

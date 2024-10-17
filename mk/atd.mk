@@ -20,10 +20,12 @@
 include $(MCU_COMRULES)
 
 
+LIBSUFFIX=$(MCU)
+
 # Variables genéricas de compilación del proyecto
 # Recuerdo haber leido que el orden del ld es importante)
 PROJ_CXXFLAGS=
-PROJ_LDFLAGS=-lstd
+PROJ_LDFLAGS=-lstd_$(MCU)
 
 
 include $(MCU_GENRULES)

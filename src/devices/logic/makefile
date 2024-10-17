@@ -17,7 +17,9 @@ INCS= 	dev_dc_motor.h			\
 		dev_square_wave.h
 
 
-LIB=logic_$(F_CPU)
+MCU=atmega328p
+LIB=logic
+
 INSTALL_INC=$(MCU_INCLUDE)
 
 include $(LOGIC_GENRULES)

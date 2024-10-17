@@ -32,6 +32,7 @@
 # 		Manuel Perez
 # 		21/07/17: Creado a partir del del libro de MAKE.
 # 		01/03/21: tag HEADERS para poder generar automáticamente los menus.
+# 		17/10/24: Las librerías se nombran dependiendo del micro
 #
 #***************************************************************************
 include $(MCU_FUSES)
@@ -160,6 +161,7 @@ ifdef BIN
 all: $(HEADERS) $(BIN).hex 
 	@$(PRINTF) "-------------------------------------\n"
 	@$(PRINTF) "Compilados: $(SOURCES) $(ASM_SOURCES)\n"
+	@$(PRINTF) "MCU             = $(MCU)\n"
 	@$(PRINTF) "Micro frequency = $(F_CPU)\n"
 	@$(PRINTF) "-------------------------------------\n\n"
 
@@ -181,7 +183,7 @@ endif
 ifdef LIB
 
 # cambio el nombre a LIB
-LIB_NAME := lib$(LIB).a
+LIB_NAME := lib$(LIB)_$(LIBSUFFIX).a
 
 .PHONY: all
 all: $(DIR_DEPENDS) $(DIR_OBJECTS) $(LIB_NAME)
@@ -397,7 +399,7 @@ debug:
 
 	@$(PRINTF) "Flags usados para compilar\n"
 	@$(PRINTF) "--------------------------\n"
-	@$(PRINTF) "STD= [$(STD)]\n"
+	@$(PRINTF) "CPP_STD= [$(CPP_STD)]\n"
 	@$(PRINTF) "PROJ_CXXFLAGS  = [$(PROJ_CXXFLAGS)]\n"
 	@$(PRINTF) "PROJ_LDFLAGS = [$(PROJ_LDFLAGS)]\n"
 	@$(PRINTF) "CPPFLAGS = [$(CPPFLAGS)]\n"
