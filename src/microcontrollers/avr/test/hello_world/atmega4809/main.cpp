@@ -17,13 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-// conectar al pin 14 un led. Tiene que parpadear.
+// conectar al pin 1 un led. Tiene que parpadear.
 
-// #include <avr/io.h>
-
-#undef BAUD
-
-#include "kk.h"
+#include <avr/io.h>
 #include <util/delay.h>
 
 int main()
