@@ -17,7 +17,7 @@
 
 #***************************************************************************
 #
-#     - DESCRIPCIÓN: Reglas genéricas de compilación para AVRs
+#  DESCRIPCIÓN: Reglas genéricas de compilación para AVRs
 #
 #     Para cargar: 
 #     	> make flash
@@ -28,11 +28,11 @@
 #		Si se quiere ver el código asm que genera, compilar con la opción
 #		-save-temps
 #
-#     - HISTORIA:
+#  HISTORIA:
 # 		Manuel Perez
 # 		21/07/17: Creado a partir del del libro de MAKE.
 # 		01/03/21: tag HEADERS para poder generar automáticamente los menus.
-# 		17/10/24: Las librerías se nombran dependiendo del micro
+# 		17/10/24: Soporte para varios micros (atmega328p y atmega4809)
 #
 #***************************************************************************
 include $(MCU_FUSES)
@@ -79,7 +79,7 @@ FIC_TAGS 	:= tags
 
 
 # Flags para el preprocesador
-CPPFLAGS += -DMCU=$(MCU) -DF_CPU=$(F_CPU) -DBAUD=$(BAUD) $(PROJ_CPPFLAGS)
+CPPFLAGS += -DMCU=$(MCU) -DF_CPU=$(F_CPU) $(PROJ_CPPFLAGS)
 
 
 # ------------------------
@@ -320,7 +320,7 @@ $(FIC_TAGS): $(SOURCES)
 # Subimos el .hex al AVR
 .PHONY: flash
 flash: $(BIN).hex 
-	$(AVRDUDE) -c $(PROGRAMMER_TYPE) -p $(MCU) $(PROGRAMMER_ARGS) -U flash:w:$<
+	$(AVRDUDE) -c $(PROGRAMMER_TYPE) -P $(PROGRAMMER_PORT) -b $(PROGRAMMER_BAUDRATE) -p $(MCU) $(PROGRAMMER_ARGS) -U flash:w:$<
 
 # Un sinónimo. ¿Mejor flash o upload?
 .PHONY: upload
@@ -415,13 +415,18 @@ debug:
 
 	@$(PRINTF) "MCU   = [$(MCU)]\n"
 	@$(PRINTF) "F_CPU = [$(F_CPU)]\n"
-	@$(PRINTF) "BAUD  = [$(BAUD)]\n\n" 
+
 	@$(PRINTF) "LFUSE = [$(LFUSE)]\n"
 	@$(PRINTF) "HFUSE = [$(HFUSE)]\n"
 	@$(PRINTF) "EFUSE = [$(EFUSE)]\n"
 	@$(PRINTF) "FUSE_STRING = [$(FUSE_STRING)]\n\n"
-	@$(PRINTF) "PROGRAMMER_TYPE = [$(PROGRAMMER_TYPE)]\n"
-	@$(PRINTF) "PROGRAMMER_ARGS = [$(PROGRAMMER_ARGS)]\n\n"
+
+	@$(PRINTF) "Flags usados por el programador\n"
+	@$(PRINTF) "-------------------------------\n"
+	@$(PRINTF) "PROGRAMMER_TYPE     = [$(PROGRAMMER_TYPE)]\n"
+	@$(PRINTF) "PROGRAMMER_PORT     = [$(PROGRAMMER_PORT)]\n" 
+	@$(PRINTF) "PROGRAMMER_BAUDRATE = [$(PROGRAMMER_BAUDRATE)]\n" 
+	@$(PRINTF) "PROGRAMMER_ARGS     = [$(PROGRAMMER_ARGS)]\n\n"
 
 
 

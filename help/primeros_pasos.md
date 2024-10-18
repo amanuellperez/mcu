@@ -132,6 +132,8 @@ uso los siguientes programadores:
 * [v1](programador_v1.4.0.jpg)
 * [v2](programador_v2.1.0.jpg)
 
+La versión que uso es la 2.0.0. La llevo usando varios años y es muy cómoda
+para programar el `atmega328p`.
 
 
 ---

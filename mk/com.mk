@@ -1,4 +1,4 @@
-# Copyright (C) 2019-2020 Manuel Perez
+# Copyright (C) 2019-2024 Manuel Perez
 #
 # This file is part of the MCU++ Library.
 #
@@ -19,21 +19,13 @@
 # -------------------------------------------------
 # Datos del microcontrolador por defecto que usamos
 # -------------------------------------------------
-#MCU   ?= atmega168a  TODO: borrar el MCU. Hay que definirlo en cada lib
+#MCU   ?= atmega168a  <-- el micro lo define el cliente en el makefile
 
 # Frecuencia a la que funciona la CPU 
 # OJO: el reloj del atmega328p funciona a 8 MHz, pero su CPU a 1 MHz!!!
 # No confundir estas dos cosas.
 F_CPU ?= 1000000UL
 
-# BAUD = velocidad a la que queremos transmitir.
-# Esta variable la necesitamos en <util/setbaud.h> para elegir la velocidad
-# de transmisión.
-# TODO: esto tiene que elegirse en el main del cliente:
-# 		UART::baud_rate_9600(); ó baud_rate<9600>(); ó baud_rate(9600);
-# Revisar, creo que esto ya no es necesario. Lo eliminé con mi baud_rate
-BAUD  ?= 9600UL
-# Also try BAUD = 19200 or 38400 if you're feeling lucky.
 
 # Compilador y versión que usamos
 CXX := avr-g++
@@ -42,7 +34,15 @@ CPP_STD ?= c++23
 # ----------------------
 # Programador que usamos
 # ----------------------
-PROGRAMMER_TYPE ?= usbasp
+ifeq ($(MCU), atmega4809)
+	PROGRAMMER_TYPE     ?= serialupdi
+	PROGRAMMER_BAUDRATE ?= 57600
+else
+	PROGRAMMER_TYPE     ?= usbasp
+	PROGRAMMER_BAUDRATE ?= 9600
+endif
+
+PROGRAMMER_PORT ?= /dev/ttyUSB0
 PROGRAMMER_ARGS ?= 
 
 

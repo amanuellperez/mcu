@@ -406,7 +406,7 @@ ningún problema.
 
     (<tu_userid> es el resultado de ejecutar `whoami`)
 
-   No olvidar reiniciar el ordendador.
+   No olvidar reiniciar el ordenador.
 
 
 3. Conectar el cable al AVR:
@@ -460,6 +460,22 @@ ningún problema.
      `$ python -m serial.tools.miniterm --filter debug /decv/ttyUSB0 9600`
 
      En la práctica yo uso `screen`.
+
+
+## <a name="programadores">Programadores del micro</a>
+
+### Para el `atmega328p`
+
+Llevo usando varios años un programador chino, marca Baite. Es un usbasp.
+Muy barato y funciona bien.
+
+### Para programar avrs usando UPDI
+
+El `atmega4809` usa UPDI. Para programarlo he comprado el 'UPDI Friend' de
+Adafruit. No es caro y de momento el producto de Adafruit que he usado siempre
+ha funciionado. Como lo acabo de comprar y estoy jugando con él me reservo la
+opinión. Dentro de unos años (escribo esto en octubre del 2024), cuando lo
+haya usado ya opinaré. 
 
 
 ---

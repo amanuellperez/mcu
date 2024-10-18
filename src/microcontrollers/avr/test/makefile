@@ -16,7 +16,8 @@ DIRS = \
 	timer1	\
 	timer2	\
 	timern	\
-	USART 
+	USART 	\
+	watchdog
 
 
 # TWI: el test de TWI está dentro de mcu.
