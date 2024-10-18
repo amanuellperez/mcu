@@ -39,7 +39,9 @@ INCS= 	dev_A4988.h				\
 		not_generic.h		
 
 
-MCU=atmega328p
+# Aunque esta librería es genérica, hay que compilarla para el target
+# correspondiente.
+MCU=${DEFAULT_MCU_FOR_LIBS}
 
 LIB=hwd
 

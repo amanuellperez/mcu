@@ -11,7 +11,9 @@ INCS= 	app_trace.h					\
 		pli_iostream.h
 
 
-MCU=atmega328p
+# Aunque esta librería es genérica, hay que compilarla para el target
+# correspondiente.
+MCU=${DEFAULT_MCU_FOR_LIBS}
 
 LIB=pli
 

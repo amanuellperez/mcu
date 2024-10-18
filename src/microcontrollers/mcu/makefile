@@ -16,7 +16,9 @@ INCS= 	mcu_clock.h					\
 		mcu_TWI_slave.h
 
 
-MCU=atmega328p
+# Aunque esta librería es genérica, hay que compilarla para el target
+# correspondiente.
+MCU=${DEFAULT_MCU_FOR_LIBS}
 
 LIB=mcu
 

@@ -83,8 +83,7 @@ INCS= std_atd.h			\
 	utility
 
 
-MCU=atmega328p
-#MCU=atmega4809
+MCU=${DEFAULT_MCU_FOR_LIBS}
 
 LIB=std
 

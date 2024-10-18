@@ -24,6 +24,11 @@ LIBSUFFIX=$(MCU)_$(F_CPU)
 # Variables genéricas de compilación del proyecto
 PROJ_CXXFLAGS=
 
+# TODO: hwd es una librería generica independiente del micro, luego no debe de
+# enlazar con micro_$(LIBSUFFIX). Es el cliente, el que escribe el programa
+# final, el que elige el micro y enlaza con micro_$(LIBSUFFIX). Borrar de aquí
+# micro_$(LIBSUFFIX)
+#
 # Librerías con las que enlazar 
 # Recordar el orden: 
 # 	poner las librerías que dependen de otras antes.

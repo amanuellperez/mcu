@@ -66,8 +66,14 @@ PATH=${PATH}:${MY_HOME}/../bin/avr/bin
 PATH=${PATH}:${MCU_TOOLS}
 export PATH
 
-# LIST_F_CPU: listado con las frecuencias F_CPU que compilará el script
-# make.sh
+# -------
+# Targets
+# -------
+
+
+# LIST_F_CPU
+# ----------
+# Listado con las frecuencias F_CPU que compilará el script make.sh
 LIST_F_CPU="1000000UL"
 LIST_F_CPU=${LIST_F_CPU}" 8000000UL"	#  8 MHz
 #LIST_F_CPU=${LIST_F_CPU}" 12000000UL"	# 12 MHz
@@ -75,6 +81,17 @@ LIST_F_CPU=${LIST_F_CPU}" 8000000UL"	#  8 MHz
 #LIST_F_CPU=${LIST_F_CPU}" 20000000UL"	# 20 MHz
 export LIST_F_CPU
 
+
+# MCU
+# ---
+# Target usado por defecto a la hora de compilar las librerías.
+DEFAULT_MCU_FOR_LIBS=atmega328p
+#DEFAULT_MCU_FOR_LIBS=atmega4809
+
+export DEFAULT_MCU_FOR_LIBS
+
+
+#--------------------
 # Alias para compilar
 # -------------------
 alias mf='make flash'
