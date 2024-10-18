@@ -102,7 +102,10 @@ alias mc='make super_clean'
 alias s='cd ${MCU_SRC}'   
 alias std='cd ${MCU_SRC}/std'
 alias atd='cd ${MCU_SRC}/atd'
-alias avr='cd ${MCU_SRC}/microcontrollers/avr'
+# DUDA: se podía definir únicamente avr como mega o mega0 dependiendo del
+# micro con el que esté trabajando (DEFAULT_MCU_FOR_LIBS)
+alias avr='cd ${MCU_SRC}/microcontrollers/avr/mega'
+alias avr0='cd ${MCU_SRC}/microcontrollers/avr/mega0'
 alias mcu='cd ${MCU_SRC}/microcontrollers/mcu'
 alias hwd='cd ${MCU_SRC}/devices/hwd'
 alias logic='cd ${MCU_SRC}/devices/logic'

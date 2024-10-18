@@ -1,0 +1,17 @@
+SOURCES=
+
+
+INCS=
+
+
+MCU=atmega4809
+
+LIB=micro
+
+INSTALL_INC=$(MCU_INCLUDE)
+
+include $(AVR_GENRULES)
+
+
+
+
