@@ -96,7 +96,7 @@
 #include "avr_timer1_basic.h"
 #include "avr_timern_basic.h"
 #include "avr_interrupt.h"
-#include "avr_cfg.h"	// clock_frequency_in_hz
+#include <avr_constants.h>
 #include "avr_micro.h"
 
 #include <atd_math.h>

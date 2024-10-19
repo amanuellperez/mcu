@@ -31,6 +31,8 @@
  *    08/12/2022 Escrito
  *
  ****************************************************************************/
+#include <avr_time.h>
+
 // TODO: Como esto lo he ido desarrollando poco a poco, a medida que he ido
 // aprendiendo la mayoria de los dispositivos acceden directamente a las
 // funciones del atmega (que al principio defini como avr). Para identificar

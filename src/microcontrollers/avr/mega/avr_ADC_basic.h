@@ -44,7 +44,7 @@
 
 #include <atd_bit.h>
 #include <avr/io.h> // registros: DDRB... PORT...
-#include "avr_cfg.h"	// clock_frequency_in_hz
+#include <avr_constants.h>
 
 #include "avr_atmega328p_cfg.h"	// cfg
 

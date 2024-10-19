@@ -74,7 +74,7 @@
 
 #include <avr/io.h> // registros: DDRB... PORT...
 #include "avr_pin.h"
-#include "avr_cfg.h"	// clock_frequency_in_hz
+#include <avr_constants.h>
 
 namespace avr_{
 /*!

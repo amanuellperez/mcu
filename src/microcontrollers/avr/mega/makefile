@@ -15,7 +15,6 @@ INCS= avr_ADC_basic.h	\
 	avr_atmega328p_cfg.h\
 	avr_atmega_dev.h	\
 	avr_atmega.h		\
-	avr_cfg.h			\
 	avr_debug.h			\
 	avr_interrupt.h		\
 	avr_memory.h		\
@@ -25,7 +24,6 @@ INCS= avr_ADC_basic.h	\
 	avr_sleep.h			\
 	avr_SPI_basic.h		\
 	avr_SPI.h	\
-	avr_time.h			\
 	avr_timern_basic.h	\
 	avr_timer0_basic.h	\
 	avr_timer0.h\
@@ -34,7 +32,6 @@ INCS= avr_ADC_basic.h	\
 	avr_timer2_basic.h	\
 	avr_timer2.h\
 	avr_TWI_basic.h		\
-	avr_types.h				\
 	avr_UART.h				\
 	avr_UART_basic.h		\
 	avr_UART_baud_rate.h	\

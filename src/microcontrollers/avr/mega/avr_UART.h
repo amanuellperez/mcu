@@ -45,7 +45,7 @@
  ****************************************************************************/
 
 #include "avr_UART_basic.h"
-#include "avr_cfg.h"	// clock_frequency_in_hz
+#include <avr_constants.h>	// clock_frequency_in_hz
 
 namespace avr_{
 template <uint32_t baud_rate = 9600u,

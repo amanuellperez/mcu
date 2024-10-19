@@ -20,7 +20,7 @@
 #include "../../../avr_atmega328p_cfg.h"
 #include "../../../avr_timer0.h"
 #include "../../../avr_timer1.h"
-#include "../../../avr_time.h"
+#include <avr_time.h>
 #include "../../../avr_UART_iostream.h"
 
 #include <atd_test.h>

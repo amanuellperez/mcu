@@ -19,7 +19,7 @@
 
 // Conectar el puerto B a 8 leds. Hacemos el coche fantástico.
 #include "../../../avr_port_basic.h"
-#include "../../../avr_time.h"
+#include <avr_time.h>
 
 
 int main()

@@ -21,7 +21,7 @@
 #include "../../../avr_atmega328p_cfg.h"
 #include "../../../avr_UART_iostream.h"
 #include "../../../avr_timer0_basic.h"
-#include "../../../avr_time.h"
+#include <avr_time.h>
 
 #include <atd_ostream.h>
 #include <stdlib.h>

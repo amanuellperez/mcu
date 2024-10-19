@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 Manuel Perez 
+// Copyright (C) 2024 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -17,39 +17,28 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-// Conectar el puerto B a 8 leds. Hacemos el coche fantástico.
-#include "../../../avr_port_basic.h"
-#include <avr_time.h>
+// conectar al pin 14 un led. Tiene que parpadear.
 
+#include "../../avr_time.h"
 
+#include <avr/io.h>
 
-void POVDisplay(uint8_t fila_glyph)
-{
-    PORTB = fila_glyph;
-    avr_::wait_ms(2);
-}
+// Microcontroller
+// ---------------
+namespace myu = avr_;
 
 int main()
 {
-    avr_::Output_portB portB;
+    DDRB = 0b00000001;
 
     while(1){
-	POVDisplay(0b00001110);
-	POVDisplay(0b00011000);
-	POVDisplay(0b10111101);
-	POVDisplay(0b01110110);
-	POVDisplay(0b00111100);
-	POVDisplay(0b00111100);
-	POVDisplay(0b00111100);
-	POVDisplay(0b01110110);
-	POVDisplay(0b10111101);
-	POVDisplay(0b00011000);
-	POVDisplay(0b00001110);
+	PORTB = 0b00000001;
+	myu::wait_ms(1000);
 
-	portB = 0;
-	avr_::wait_ms(10);
+	PORTB = 0b00000000;
+	myu::wait_ms(1000);
     }
-}
 
+}
 
 

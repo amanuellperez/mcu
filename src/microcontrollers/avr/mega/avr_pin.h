@@ -89,7 +89,6 @@
  *
  ****************************************************************************/
 #include <avr/io.h> // registros: cfg::DDRB... cfg::PORT...
-#include "avr_time.h"
 #include "avr_not_generic.h"
 #include <atd_bit.h>
 #include <mcu_pin.h>

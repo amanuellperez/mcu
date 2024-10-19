@@ -63,7 +63,7 @@
 
 #include <avr_ADC_basic.h>
 
-#include <avr_cfg.h>
+#include <avr_constants.h>
 #include <avr_interrupt.h>
 #include <avr_memory.h>
 

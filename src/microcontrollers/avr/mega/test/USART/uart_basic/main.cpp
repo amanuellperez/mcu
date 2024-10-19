@@ -16,7 +16,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#include "../../../avr_time.h"
+#include <avr_time.h>
 #include "../../../avr_UART.h"
 
 #include <atd_ostream.h>

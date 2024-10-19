@@ -1,11 +1,23 @@
 # AVR microcontrollers
 
-De momento voy a probar a separar el código de los avr por familias: 
+De momento voy a probar a separar el código de los avr por familias, creando
+los siguientes directorios:
+
+* [`avr`](mega/avr)
+  Contiene los archivos de cabecera comunes a todos los avrs.
 
 * [`atmega`](mega/README.md)
+  Familia megaAVR.
+
 * `atmega-0`
+  Familia mega0AVR.
 
 etc. Cada una de estas familias tiene su propio directorio.
+
+Más adelante puede que sea interesante crear directorios `avr8`, `avr32` para
+los micros de 8 bits o los de 32 bits. 
+
+## ¿Por qué separarlos por familias?
 
 Al escribir por primera vez un programa para el `atmega4809` e intentar
 enlazarlo con las librerías de `std` y `atd` descubrí que se tratan de
@@ -46,6 +58,7 @@ cada target. Eso dió lugar a `libstd_atmega328p.a` y `libstd_atmega4809.a`.
 
 
 ### megaAVR
+ATmega328p
 
 
 ### TODO: faltan más familias

@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 Manuel Perez 
+// Copyright (C) 2019-2024 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __AVR_CFG_H__
-#define __AVR_CFG_H__
+#ifndef __AVR_CONSTANTS_H__
+#define __AVR_CONSTANTS_H__
 /****************************************************************************
  *
  *   - DESCRIPCION: Configuración del avr que vamos a usar
@@ -35,16 +35,8 @@
  *    27/01/2020 v0.0
  *
  ****************************************************************************/
-// TODO: este archivo seguramente haya que recolocarlo.
-// Porque ¿avr_cfg == configuración de CUALQUIER avr?
-// Dudo mucho que todos los avr se puedan configurar de igual forma.
-// De hecho los avr_types.h están pensados para un microcontrolador de 8 bits
-// que no dispone de coprocesador de floating-point numbers. Si fuera de 16
-// bits o hubiese coprocesador de floats se definirían de otra forma.
-// ¿Llamarlo avr_types8.h? ¿Para indicar que es de 8 bits?
 #include "avr_types.h"
 
-// CONFIGURACIÓN DEL RELOJ
 
 namespace avr_{
 
@@ -57,6 +49,10 @@ constexpr uint32_t clock_frequency_in_hz = F_CPU;
 constexpr Frequency clock_frequency{F_CPU};
 
 }// namespace
+
+// F_CPU lo usa <util/delay.h>. No se puede hacer el undef
+// sin incluir antes delay.h
+//#undef F_CPU
 
 
 

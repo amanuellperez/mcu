@@ -57,7 +57,7 @@ INSTALL_LIB ?=$(MCU_LIB)
 
 # Directorio donde se instalan los archivos de cabecera de las bibliotecas
 #INSTALL_INC ?=$(MCU_INCLUDE)
-INSTALL_INC ?=$(MCU_INCLUDE)/$(LIB) 
+INSTALL_INC ?=$(MCU_INCLUDE)/$(LIB)
 
 # Directorio donde se instala mi std.
 INSTALL_INC_STD = $(MCU_INCLUDE)/std

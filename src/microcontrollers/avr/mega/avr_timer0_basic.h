@@ -57,7 +57,7 @@
 
 #include "avr_interrupt.h"
 #include "avr_pin.h"
-#include "avr_cfg.h"	// clock_frequency_in_hz
+#include <avr_constants.h>
 
 #include <array>
 

@@ -42,16 +42,11 @@
  *
  ****************************************************************************/
 #include <util/delay.h>
-#include <time.h>
-#include <ostream>
-#include <istream>
-#include <iomanip>
 #include <concepts>
 
 namespace avr_{
 /// Espera t microsegundos
 /// t tiene que ser una constante en tiempo de compilación.
-//#define wait_us(t)  _delay_us(t)
 template <std::integral Int>
 inline constexpr void wait_us(Int t)
 {
@@ -60,7 +55,6 @@ inline constexpr void wait_us(Int t)
 
 /// Espera t milisegundos.
 /// t tiene que ser una constante en tiempo de compilación.
-//#define wait_ms(t) _delay_ms(t)
 template <std::integral Int>
 inline constexpr void wait_ms(Int t)
 {

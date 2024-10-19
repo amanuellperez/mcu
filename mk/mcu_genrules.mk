@@ -132,12 +132,28 @@ BIN_ARCH = -mmcu=$(MCU)
 
 
 
-# ----------------------------------------------------
-# Validamos que esté definida la variable BIN o la LIB
-# ----------------------------------------------------
-$(if $(BIN),,\
-	$(if $(LIB),,\
-		$(error No se ha definido la variable BIN ó la LIB)))
+# ---------------
+# Fase validación
+# ---------------
+ifdef BIN
+	compile=1
+endif
+
+ifdef LIB
+	compile=1
+endif
+
+ifdef DIST
+	compile=1
+endif
+
+ifndef compile
+	$(error You have define BIN, LIB or DIST variable)))
+endif
+
+#$(if $(BIN),,\
+#	$(if $(LIB),,\
+#		$(error No se ha definido la variable BIN ó la LIB)))
 
 
 
@@ -192,12 +208,22 @@ all: $(DIR_DEPENDS) $(DIR_OBJECTS) $(LIB_NAME)
 dist: $(INCS) $(LIB_NAME)
 	@$(call distribuye,$(INCS),$(INSTALL_INC))
 	@$(call distribuye,$(LIB_NAME),$(INSTALL_LIB))
-#ifdef INCS_STD
-#	@$(call distribuye,$(INCS_STD),$(INSTALL_INC_STD))
-#endif
 
 endif	# LIB
 
+# -----------------------------------
+# Regla dist para distribuir archivos
+# -----------------------------------
+ifdef DIST
+
+.PHONY: all
+	@echo "Usage: make dist"
+
+.PHONY: dist
+dist: $(DIST) 
+	@$(call distribuye,$(DIST),$(INSTALL_DIST))
+
+endif	# LIB
 
 
 # TODO: solo funciona (creo) con un .cpp. Que admita varios o pasarle 
@@ -338,8 +364,14 @@ avrdude_terminal:
 # help
 .PHONY: help
 help:
-	@$(PRINTF) "\nHELP:\n"
-	@$(PRINTF) "-----\n"
+	@$(PRINTF) "\nHELP\n"
+	@$(PRINTF) "----\n"
+	@$(PRINTF) "Tres modos de funcionamiento dependiendo si se definen las siguientes variables:\n"
+	@$(PRINTF) "\tBIN: compila un programa generando el ejecutable\n"
+	@$(PRINTF) "\tLIB: compila una librería pudiendo distribuirla con 'make dist'\n"
+	@$(PRINTF) "\tDIST: no compila nada, limitandose a distribuir archivos 'make dist'\n"
+	@$(PRINTF) "\ntags\n"
+	@$(PRINTF) "----\n"
 	@$(PRINTF) "flash	: Compila y carga el programa en el avr\n"
 	@$(PRINTF) "size 	: Muestra el tamaño del programa\n"
 	@$(PRINTF) "          OJO: hay un problema con el avr-size que yo compilé,\n"
@@ -350,8 +382,8 @@ help:
 	@$(PRINTF) "debug	: Muestra las variables usadas para compilar.\n"
 	@$(PRINTF) "          Si se quiere ver el código asm que genera,\n"
 	@$(PRINTF) "          añadir 'USER_CXXFLAGS=-save-temps -fverbose-asm' al makefile.\n"
-	@$(PRINTF) "\nFUSES:\n"
-	@$(PRINTF) "------\n"
+	@$(PRINTF) "\nFUSES\n"
+	@$(PRINTF) "-----\n"
 	@$(PRINTF) "show_fuses       : Muestra los fuses.\n"
 	@$(PRINTF) "set_default_fuses: Escribe los fuses como vienen de fábrica.\n"
 	@$(PRINTF) "set_fast_fuse    : No dividimos la frecuencia de reloj entre 8,\n"
@@ -378,7 +410,8 @@ debug:
 	@$(PRINTF) "Directorios de instalación\n"
 	@$(PRINTF) "--------------------------\n"
 	@$(PRINTF) "INSTALL_LIB = [$(INSTALL_LIB)]\n"
-	@$(PRINTF) "INSTALL_INC = [$(INSTALL_INC)]\n\n"
+	@$(PRINTF) "INSTALL_INC = [$(INSTALL_INC)]\n"
+	@$(PRINTF) "INSTALL_DIST= [$(INSTALL_DIST)]\n\n"
 
 	@$(PRINTF) "Programas usados\n"
 	@$(PRINTF) "----------------\n"
@@ -394,7 +427,8 @@ debug:
 	@$(PRINTF) "\nTargets\n"
 	@$(PRINTF)   "-------\n"
 	@$(PRINTF) "BIN      = [$(BIN)]\n"
-	@$(PRINTF) "LIB_NAME = [$(LIB_NAME)]\n\n"
+	@$(PRINTF) "LIB_NAME = [$(LIB_NAME)]\n"
+	@$(PRINTF) "DIST     = [$(DIST)]\n\n"
 
 
 	@$(PRINTF) "Flags usados para compilar\n"
@@ -530,7 +564,10 @@ clear_eeprom_save_fuse: fuses
 # En caso de que el directorio no exista lo crea.
 # $(call distribuye,$(ficheros),$(directorio))
 define distribuye
-	@$(PRINTF) "Distribuyendo archivos [$1] en el directorio [$2]\n\n"
+	@$(PRINTF) "-------------------------------------------------------------\n"
+	@$(PRINTF) "Distribuyendo al directorio [$2]:\n"
+	@$(PRINTF) "[$1]\n"
+	@$(PRINTF) "-------------------------------------------------------------\n"
 	$(MKDIR) $2
 	for f in $1;		\
 	do			\

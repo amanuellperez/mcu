@@ -21,7 +21,7 @@
 // Conectar el FTDI y abrir screen. Lo que se escriba en teclado se envia
 // al microcontrolador que lo devuelve, con lo que lo vemos en pantalla.
 #include "../../../avr_UART_iostream.h"
-#include "../../../avr_time.h"
+#include <avr_time.h>
 #include "../../../avr_interrupt.h" // To test interrupts
 
 #include <atd_istream.h>

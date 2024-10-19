@@ -34,7 +34,7 @@
 #include <array>
 #include <cstdint>
 
-#include "avr_types.h"
+#include <avr_types.h>
 
 namespace avr_{
 

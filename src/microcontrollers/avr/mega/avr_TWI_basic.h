@@ -40,7 +40,7 @@
 #include <atd_bit.h>
 #include <atd_type_traits.h>	// always_false_v
 #include <avr/io.h> // registros: DDRB... PORT...
-#include "avr_cfg.h"	// clock_frequency_in_hz
+#include <avr_constants.h>
 #include "avr_not_generic.h"
 
 namespace avr_{

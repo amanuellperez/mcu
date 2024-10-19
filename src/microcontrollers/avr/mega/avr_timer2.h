@@ -32,8 +32,8 @@
  *
  ****************************************************************************/
 #include "avr_timer2_basic.h"
-#include "avr_cfg.h"	// clock_frequency_in_hz
-#include "avr_time.h"	// wait_ms
+#include <avr_constants.h>
+#include <avr_time.h>	// wait_ms
 #include "avr_interrupt.h" // Disable_interrupts
 
 

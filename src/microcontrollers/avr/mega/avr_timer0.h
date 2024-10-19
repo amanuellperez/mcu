@@ -49,7 +49,7 @@
  *
  ****************************************************************************/
 #include "avr_timer0_basic.h"
-#include "avr_cfg.h"	// clock_frequency_in_hz
+#include <avr_constants.h>
 
 #include <tuple>    // std::tie
 		    
