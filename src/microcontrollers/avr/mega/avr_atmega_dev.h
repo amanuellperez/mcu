@@ -30,7 +30,7 @@
  *      08/12/2022 Escrito
  *
  ****************************************************************************/
-#include <avr_constants.h>
+#include <avr_private.h>    // import avr_;
 			
 /***************************************************************************
  *			BUILT-IN DEVICES FOR ATMEGA
@@ -65,6 +65,7 @@
 //
 
 namespace atmega{
+    using namespace avr_;
 
 // MICRO
     using Micro = avr_::Micro;
@@ -185,9 +186,9 @@ namespace atmega{
     namespace literals{ using namespace avr_::literals; }
 
     
-// TIME
-    using Wait_1_us = avr_::Wait_1_us;
-    using Wait_1_ms = avr_::Wait_1_ms;
+//// TIME
+//    using Wait_1_us = avr_::Wait_1_us;
+//    using Wait_1_ms = avr_::Wait_1_ms;
 
 /***************************************************************************
  *			FUNCIONES AUXILIARES

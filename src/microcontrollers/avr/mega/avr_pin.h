@@ -266,7 +266,6 @@ public:
 // --------------
 template <uint8_t n>
 inline void Pin<n>::as_output() 
-//{ (*cfg::DDR[n]) = (*cfg::DDR[n]) | cfg::BIT_MASK[n]; }
 { atd::write_bit<cfg::pin_bit<n>>::template to<1>::in(*cfg::DDR[n]); }
 
 template <uint8_t n>
@@ -277,9 +276,6 @@ inline bool Pin<n>::is_output_pin()
 template <uint8_t n>
 inline void Pin<n>::as_input_with_pullup() 
 {
-//    (*cfg::DDR[n]) = (*cfg::DDR[n]) & ~cfg::BIT_MASK[n];	// de entrada
-//    (*cfg::PORT[n]) = (*cfg::PORT[n]) | cfg::BIT_MASK[n];	// enables pull-up resistor
-
     // de entrada:
     atd::write_bit<cfg::pin_bit<n>>::template to<0>::in(*cfg::DDR[n]); 
 
@@ -290,9 +286,6 @@ inline void Pin<n>::as_input_with_pullup()
 template <uint8_t n>
 inline void Pin<n>::as_input_without_pullup() 
 {
-//    (*cfg::DDR[n]) = (*cfg::DDR[n]) & ~cfg::BIT_MASK[n];	// de entrada
-//    (*cfg::PORT[n]) = (*cfg::PORT[n]) & ~cfg::BIT_MASK[n];	// disable pull-up resistor
-								
     // de entrada:
     atd::write_bit<cfg::pin_bit<n>>::template to<0>::in(*cfg::DDR[n]); 
 
@@ -323,27 +316,22 @@ bool Pin<n>::is_input_without_pullup_pin()
 
 template <uint8_t n>
 inline bool Pin<n>::read()
-//{return (*cfg::PIN[n]) & cfg::BIT_MASK[n];}
 {return atd::read_bit<cfg::pin_bit<n>>::of(*cfg::PIN[n]) != 0;}
 
 template <uint8_t n>
 inline bool Pin<n>::is_zero()
-// {return !((*cfg::PIN[n]) & cfg::BIT_MASK[n]);}
 {return atd::read_bit<cfg::pin_bit<n>>::of(*cfg::PIN[n]) == 0;}
 
 template <uint8_t n>
 inline bool Pin<n>::is_one() 
-// {return (*cfg::PIN[n]) & cfg::BIT_MASK[n];}
 {return atd::read_bit<cfg::pin_bit<n>>::of(*cfg::PIN[n]) != 0;}
 
 template <uint8_t n>
 inline void Pin<n>::write_one()	
-// {(*cfg::PORT[n]) = (*cfg::PORT[n]) | cfg::BIT_MASK[n];}
 {atd::write_bit<cfg::pin_bit<n>>::template to<1>::in(*cfg::PORT[n]); }
 
 template <uint8_t n>
 inline void Pin<n>::write_zero()	
-//{(*cfg::PORT[n]) = (*cfg::PORT[n]) & ~cfg::BIT_MASK[n];}
 {atd::write_bit<cfg::pin_bit<n>>::template to<0>::in(*cfg::PORT[n]); }
 
 template <uint8_t n>

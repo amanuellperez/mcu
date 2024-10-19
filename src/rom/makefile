@@ -1,6 +1,6 @@
-SOURCES= 
+#SOURCES= 
 
-INCS= 	rom_font_alagard_13x15_cr.h					\
+DIST = 	rom_font_alagard_13x15_cr.h					\
 		rom_font_alagard_13x15_rf.h		\
 		rom_font_DePixelBreit_12x10_cr.h		\
 		rom_font_DePixelBreit_12x10_rf.h		\
@@ -44,8 +44,8 @@ INCS= 	rom_font_alagard_13x15_cr.h					\
 		rom_glyphs_5x8.h
 
 
-LIB=rom
-INSTALL_INC=$(MCU_INCLUDE)
+#LIB=rom
+INSTALL_DIST=$(MCU_INCLUDE)
 
 include $(ROM_GENRULES)
 
