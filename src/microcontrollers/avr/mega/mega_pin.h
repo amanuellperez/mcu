@@ -87,8 +87,10 @@
  *	13/07/2024 is_input/is_output
  *		   Reescrito internamente: uso atd::write_bit/read_bit
  *
+ *	20/10/2024 Parametrizo Pin por Cfg para admitir micros de diferentes
+ *	           pines.
+ *
  ****************************************************************************/
-#include <avr/io.h> // registros: cfg::DDRB... cfg::PORT...
 #include "avr_not_generic.h" // TODO: para eliminar este archivo basta con
 			     // escribir Pin como he hecho en atmega4809,
 			     // pasándole la configuración a Pin.
@@ -198,14 +200,15 @@ class INT__<-1>{ };
  */
 // (RRR) Para no reescribir el nombre del Pin lo meto todo dentro de avr_. Es
 // pereza, no tiene ninguna idea de diseño detras. (Mejorarlo en el futuro)
-namespace avr_pin {
-template <uint8_t n>
+namespace private_ {
+
+template <uint8_t n, typename Cfg>
 class Pin{
 public:
     using number_type = uint8_t;
 
     static constexpr bool is_a_valid_pin()
-    {return cfg::pins::minimum_pin <= n and n <= cfg::pins::maximum_pin; }
+    {return Cfg::template is_a_valid_pin<n>(); }
 
 
 // CONSTRUCCIÓN
@@ -262,421 +265,149 @@ public:
 
     using INT = INT__<cfg::nINT_of_pin<n>()>;
 
+private:
+// En la datasheet se habla de DDRn, PORTn, ... pero en código tenemos DDRB,
+// DDRC, ... Las siguientes funciones (realmente Cfg::ddr<n>()) permiten
+// hablar como la datasheet: DDRn es Cfg::ddr<n>();
+    static constexpr auto ddr()     {return Cfg::template ddr<n>();}
+    static constexpr auto port()    {return Cfg::template port<n>();}
+    static constexpr auto pin()     {return Cfg::template pin<n>();}
+    static constexpr auto pin_bit() {return Cfg::template pin_bit<n>();}
+    static constexpr auto bitmask() {return Cfg::template bitmask<n>();}
+
+    static constexpr auto pcie() {return Cfg::template pcie<n>();}
+    static constexpr auto pcint() {return Cfg::template pcint<n>();}
+    static constexpr auto pcmsk() {return Cfg::template pcmsk<n>();}
+
 };
 
 
 // Implementación
 // --------------
-template <uint8_t n>
-inline void Pin<n>::as_output() 
-{ atd::write_bit<cfg::pin_bit<n>>::template to<1>::in(*cfg::DDR[n]); }
+template <uint8_t n, typename Cfg>
+inline void Pin<n, Cfg>::as_output() 
+//{ atd::write_bit<cfg::pin_bit<n>>::template to<1>::in(*cfg::DDR[n]); }
+{ atd::write_bit<pin_bit()>::template to<1>::in(*ddr()); }
 
-template <uint8_t n>
-inline bool Pin<n>::is_output_pin()
-{ return (atd::read_bit<cfg::pin_bit<n>>::of(*cfg::DDR[n]) !=  0); }
+template <uint8_t n, typename Cfg>
+inline bool Pin<n, Cfg>::is_output_pin()
+{ return (atd::read_bit<pin_bit()>::of(*ddr()) !=  0); }
 
 
-template <uint8_t n>
-inline void Pin<n>::as_input_with_pullup() 
+template <uint8_t n, typename Cfg>
+inline void Pin<n, Cfg>::as_input_with_pullup() 
 {
     // de entrada:
-    atd::write_bit<cfg::pin_bit<n>>::template to<0>::in(*cfg::DDR[n]); 
+    atd::write_bit<pin_bit()>::template to<0>::in(*ddr()); 
 
     // enable pull-up resistor 
-    atd::write_bit<cfg::pin_bit<n>>::template to<1>::in(*cfg::PORT[n]);
+    atd::write_bit<pin_bit()>::template to<1>::in(*port());
 }
 
-template <uint8_t n>
-inline void Pin<n>::as_input_without_pullup() 
+template <uint8_t n, typename Cfg>
+inline void Pin<n, Cfg>::as_input_without_pullup() 
 {
     // de entrada:
-    atd::write_bit<cfg::pin_bit<n>>::template to<0>::in(*cfg::DDR[n]); 
+    atd::write_bit<pin_bit()>::template to<0>::in(*ddr()); 
 
     // disable pull-up resistor 
-    atd::write_bit<cfg::pin_bit<n>>::template to<0>::in(*cfg::PORT[n]);
+    atd::write_bit<pin_bit()>::template to<0>::in(*port());
 }
 
-template <uint8_t n>
-bool Pin<n>::is_input_pin()
-{ return (atd::read_bit<cfg::pin_bit<n>>::of(*cfg::DDR[n]) ==  0); }
+template <uint8_t n, typename Cfg>
+bool Pin<n, Cfg>::is_input_pin()
+{ return (atd::read_bit<pin_bit()>::of(*ddr()) ==  0); }
 
 
-template <uint8_t n>
-bool Pin<n>::is_input_with_pullup_pin()
+template <uint8_t n, typename Cfg>
+bool Pin<n, Cfg>::is_input_with_pullup_pin()
 { 
     return (is_input_pin() and
-	   (atd::read_bit<cfg::pin_bit<n>>::of(*cfg::PORT[n]) !=  0)); 
+	   (atd::read_bit<pin_bit()>::of(*port()) !=  0)); 
 }
 
 
-template <uint8_t n>
-bool Pin<n>::is_input_without_pullup_pin()
+template <uint8_t n, typename Cfg>
+bool Pin<n, Cfg>::is_input_without_pullup_pin()
 {
     return (is_input_pin() and
-	   (atd::read_bit<cfg::pin_bit<n>>::of(*cfg::PORT[n]) ==  0)); 
+	   (atd::read_bit<pin_bit()>::of(*port()) ==  0)); 
 }
 
 
-template <uint8_t n>
-inline bool Pin<n>::read()
-{return atd::read_bit<cfg::pin_bit<n>>::of(*cfg::PIN[n]) != 0;}
+template <uint8_t n, typename Cfg>
+inline bool Pin<n, Cfg>::read()
+{return atd::read_bit<pin_bit()>::of(*pin()) != 0;}
 
-template <uint8_t n>
-inline bool Pin<n>::is_zero()
-{return atd::read_bit<cfg::pin_bit<n>>::of(*cfg::PIN[n]) == 0;}
+template <uint8_t n, typename Cfg>
+inline bool Pin<n, Cfg>::is_zero()
+{return atd::read_bit<pin_bit()>::of(*pin()) == 0;}
 
-template <uint8_t n>
-inline bool Pin<n>::is_one() 
-{return atd::read_bit<cfg::pin_bit<n>>::of(*cfg::PIN[n]) != 0;}
+template <uint8_t n, typename Cfg>
+inline bool Pin<n, Cfg>::is_one() 
+{return atd::read_bit<pin_bit()>::of(*pin()) != 0;}
 
-template <uint8_t n>
-inline void Pin<n>::write_one()	
-{atd::write_bit<cfg::pin_bit<n>>::template to<1>::in(*cfg::PORT[n]); }
+template <uint8_t n, typename Cfg>
+inline void Pin<n, Cfg>::write_one()	
+{atd::write_bit<pin_bit()>::template to<1>::in(*port()); }
 
-template <uint8_t n>
-inline void Pin<n>::write_zero()	
-{atd::write_bit<cfg::pin_bit<n>>::template to<0>::in(*cfg::PORT[n]); }
+template <uint8_t n, typename Cfg>
+inline void Pin<n, Cfg>::write_zero()	
+{atd::write_bit<pin_bit()>::template to<0>::in(*port()); }
 
-template <uint8_t n>
-inline void Pin<n>::toggle()  
-{ (*cfg::PORT[n]) = (*cfg::PORT[n]) ^ cfg::BIT_MASK[n]; }
+template <uint8_t n, typename Cfg>
+inline void Pin<n, Cfg>::toggle()  
+{ (*port()) = (*port()) ^ bitmask(); }
 
-template <uint8_t n>
-inline void Pin<n>::write(uint8_t x)
+template <uint8_t n, typename Cfg>
+inline void Pin<n, Cfg>::write(uint8_t x)
 {
     if(x) write_one();
     else  write_zero();
 }
 
-
-// Interrupts
-// ----------
-template<>
-inline void Pin<2>::enable_change_level_interrupt()
-{
-    atd::write_bit<PCIE2>::to<1>::in(PCICR);
-    atd::write_bit<PCINT16>::to<1>::in(PCMSK2);
+template <uint8_t n, typename Cfg>
+inline void Pin<n, Cfg>::enable_change_level_interrupt()
+{ 
+    atd::write_bit<pcie()>::template to<1>::in(PCICR);
+    atd::write_bit<pcint()>::template to<1>::in(*pcmsk());
 }
 
-template<>
-inline void Pin<2>::disable_change_level_interrupt()
-{ atd::write_bit<PCINT16>::to<0>::in(PCMSK2); }
+template<uint8_t n, typename Cfg>
+inline void Pin<n, Cfg>::disable_change_level_interrupt()
+{ atd::write_bit<pcint()>::template to<0>::in(*pcmsk()); }
 
 
-template<>
-inline void Pin<3>::enable_change_level_interrupt()
-{
-    atd::write_bit<PCIE2>::to<1>::in(PCICR);
-    atd::write_bit<PCINT17>::to<1>::in(PCMSK2);
-}
-
-template<>
-inline void Pin<3>::disable_change_level_interrupt()
-{ atd::write_bit<PCINT17>::to<0>::in(PCMSK2); }
-
-
-template<>
-inline void Pin<4>::enable_change_level_interrupt()
-{
-    atd::write_bit<PCIE2>::to<1>::in(PCICR);
-    atd::write_bit<PCINT18>::to<1>::in(PCMSK2);
-}
-
-template<>
-inline void Pin<4>::disable_change_level_interrupt()
-{ atd::write_bit<PCINT18>::to<0>::in(PCMSK2); }
-
-
-template<>
-inline void Pin<5>::enable_change_level_interrupt()
-{
-    atd::write_bit<PCIE2>::to<1>::in(PCICR);
-    atd::write_bit<PCINT19>::to<1>::in(PCMSK2);
-}
-
-template<>
-inline void Pin<5>::disable_change_level_interrupt()
-{ atd::write_bit<PCINT19>::to<0>::in(PCMSK2); }
-
-
-template<>
-inline void Pin<6>::enable_change_level_interrupt()
-{
-    atd::write_bit<PCIE2>::to<1>::in(PCICR);
-    atd::write_bit<PCINT20>::to<1>::in(PCMSK2);
-}
-
-template<>
-inline void Pin<6>::disable_change_level_interrupt()
-{ atd::write_bit<PCINT20>::to<0>::in(PCMSK2); }
-
-
-template<>
-inline void Pin<9>::enable_change_level_interrupt()
-{
-    atd::write_bit<PCIE0>::to<1>::in(PCICR);
-    atd::write_bit<PCINT6>::to<1>::in(PCMSK0);
-}
-
-template<>
-inline void Pin<9>::disable_change_level_interrupt()
-{ atd::write_bit<PCINT6>::to<0>::in(PCMSK0); }
-
-
-template<>
-inline void Pin<10>::enable_change_level_interrupt()
-{
-    atd::write_bit<PCIE0>::to<1>::in(PCICR);
-    atd::write_bit<PCINT7>::to<1>::in(PCMSK0);
-}
-
-template<>
-inline void Pin<10>::disable_change_level_interrupt()
-{ atd::write_bit<PCINT7>::to<0>::in(PCMSK0); }
-
-
-template<>
-inline void Pin<11>::enable_change_level_interrupt()
-{
-    atd::write_bit<PCIE2>::to<1>::in(PCICR);
-    atd::write_bit<PCINT21>::to<1>::in(PCMSK2);
-}
-
-template<>
-inline void Pin<11>::disable_change_level_interrupt()
-{ atd::write_bit<PCINT21>::to<0>::in(PCMSK2); }
-
-
-template<>
-inline void Pin<12>::enable_change_level_interrupt()
-{
-    atd::write_bit<PCIE2>::to<1>::in(PCICR);
-    atd::write_bit<PCINT22>::to<1>::in(PCMSK2);
-}
-
-template<>
-inline void Pin<12>::disable_change_level_interrupt()
-{ atd::write_bit<PCINT22>::to<0>::in(PCMSK2); }
-
-
-template<>
-inline void Pin<13>::enable_change_level_interrupt()
-{
-    atd::write_bit<PCIE2>::to<1>::in(PCICR);
-    atd::write_bit<PCINT23>::to<1>::in(PCMSK2);
-}
-
-template<>
-inline void Pin<13>::disable_change_level_interrupt()
-{ atd::write_bit<PCINT23>::to<0>::in(PCMSK2); }
-
-
-template<>
-inline void Pin<14>::enable_change_level_interrupt()
-{
-    atd::write_bit<PCIE0>::to<1>::in(PCICR);
-    atd::write_bit<PCINT0>::to<1>::in(PCMSK0);
-}
-
-template<>
-inline void Pin<14>::disable_change_level_interrupt()
-{ atd::write_bit<PCINT0>::to<0>::in(PCMSK0); }
-
-
-template<>
-inline void Pin<15>::enable_change_level_interrupt()
-{
-    atd::write_bit<PCIE0>::to<1>::in(PCICR);
-    atd::write_bit<PCINT1>::to<1>::in(PCMSK0);
-}
-
-template<>
-inline void Pin<15>::disable_change_level_interrupt()
-{ atd::write_bit<PCINT1>::to<0>::in(PCMSK0); }
-
-
-template<>
-inline void Pin<16>::enable_change_level_interrupt()
-{
-    atd::write_bit<PCIE0>::to<1>::in(PCICR);
-    atd::write_bit<PCINT2>::to<1>::in(PCMSK0);
-}
-
-template<>
-inline void Pin<16>::disable_change_level_interrupt()
-{ atd::write_bit<PCINT2>::to<0>::in(PCMSK0); }
-
-
-template<>
-inline void Pin<17>::enable_change_level_interrupt()
-{
-    atd::write_bit<PCIE0>::to<1>::in(PCICR);
-    atd::write_bit<PCINT3>::to<1>::in(PCMSK0);
-}
-
-template<>
-inline void Pin<17>::disable_change_level_interrupt()
-{ atd::write_bit<PCINT3>::to<0>::in(PCMSK0); }
-
-
-template<>
-inline void Pin<18>::enable_change_level_interrupt()
-{
-    atd::write_bit<PCIE0>::to<1>::in(PCICR);
-    atd::write_bit<PCINT4>::to<1>::in(PCMSK0);
-}
-
-template<>
-inline void Pin<18>::disable_change_level_interrupt()
-{ atd::write_bit<PCINT4>::to<0>::in(PCMSK0); }
-
-
-template<>
-inline void Pin<19>::enable_change_level_interrupt()
-{
-    atd::write_bit<PCIE0>::to<1>::in(PCICR);
-    atd::write_bit<PCINT5>::to<1>::in(PCMSK0);
-}
-
-template<>
-inline void Pin<19>::disable_change_level_interrupt()
-{ atd::write_bit<PCINT5>::to<0>::in(PCMSK0); }
-
-
-template<>
-inline void Pin<23>::enable_change_level_interrupt()
-{
-    atd::write_bit<PCIE1>::to<1>::in(PCICR);
-    atd::write_bit<PCINT8>::to<1>::in(PCMSK1);
-}
-
-template<>
-inline void Pin<23>::disable_change_level_interrupt()
-{ atd::write_bit<PCINT8>::to<0>::in(PCMSK1); }
-
-
-template<>
-inline void Pin<24>::enable_change_level_interrupt()
-{
-    atd::write_bit<PCIE1>::to<1>::in(PCICR);
-    atd::write_bit<PCINT9>::to<1>::in(PCMSK1);
-}
-
-template<>
-inline void Pin<24>::disable_change_level_interrupt()
-{ atd::write_bit<PCINT9>::to<0>::in(PCMSK1); }
-
-
-template<>
-inline void Pin<25>::enable_change_level_interrupt()
-{
-    atd::write_bit<PCIE1>::to<1>::in(PCICR);
-    atd::write_bit<PCINT10>::to<1>::in(PCMSK1);
-}
-
-template<>
-inline void Pin<25>::disable_change_level_interrupt()
-{ atd::write_bit<PCINT10>::to<0>::in(PCMSK1); }
-
-
-template<>
-inline void Pin<26>::enable_change_level_interrupt()
-{
-    atd::write_bit<PCIE1>::to<1>::in(PCICR);
-    atd::write_bit<PCINT11>::to<1>::in(PCMSK1);
-}
-
-template<>
-inline void Pin<26>::disable_change_level_interrupt()
-{ atd::write_bit<PCINT11>::to<0>::in(PCMSK1); }
-
-
-template<>
-inline void Pin<27>::enable_change_level_interrupt()
-{
-    atd::write_bit<PCIE1>::to<1>::in(PCICR);
-    atd::write_bit<PCINT12>::to<1>::in(PCMSK1);
-}
-
-template<>
-inline void Pin<27>::disable_change_level_interrupt()
-{ atd::write_bit<PCINT12>::to<0>::in(PCMSK1); }
-
-
-template<>
-inline void Pin<28>::enable_change_level_interrupt()
-{
-    atd::write_bit<PCIE1>::to<1>::in(PCICR);
-    atd::write_bit<PCINT13>::to<1>::in(PCMSK1);
-}
-
-template<>
-inline void Pin<28>::disable_change_level_interrupt()
-{ atd::write_bit<PCINT13>::to<0>::in(PCMSK1); }
-
-
-
-// Pin_connection
-// --------------
-// De momento voy a usar el número de pin en `hwd` para identificar si se
-// trata de un pin or a connection.
-template <uint8_t n>
-class Pin_connection{
-public:
-    static constexpr uint8_t number = n;
-
-    static constexpr bool is_a_valid_pin()
-    {return Pin<n>::is_a_valid_pin();}
-};
-
-} // namespace avr_pin
+} // namespace private_ 
  
-// Pin
-// ---
-// type Pin(uint8_t n){
-//	if (n is a valid pin)
-//	    return avr_::Pin<n>;
-//
-//	else
-//	    return avr_::Pin_connection<n>;
-// }
-namespace impl_of{
-template <uint8_t n, 
-	  bool avr_pin = avr_pin::Pin<n>::is_a_valid_pin(), 
-	  bool pin_connection = (!avr_pin::Pin<n>::is_a_valid_pin() and 
-		    mcu::Pin_connection<n>::is_a_valid_pin())>
-struct Pin;
 
-template <uint8_t n>
-struct Pin<n, true, false>
-{ using type = avr_pin::Pin<n>; };
+// TODO: descomentar y borrar el particular
+//template <uint8_t n, typename Cfg>
+//using Pin = mcu::Pin<private_::Pin<n, Cfg>>::type;
 
-template <uint8_t n>
-struct Pin <n, false, true>
-{ using type = avr_pin::Pin_connection<n>; };
-
-}// namespace impl_of
-
-template <uint8_t n>
-using Pin = impl_of::Pin<n>::type;
-
-
+// TODO: este es temporal, en lo que reestructuro el código
+template <uint8_t n, typename Cfg = avr_::cfg::pins_28>
+using Pin = mcu::Pin<private_::Pin<n, Cfg>>::type;
 
 
 /***************************************************************************
  *			ENABLE_CHANGE_LEVEL_INTERRUPT
  ***************************************************************************/
 // Equivalente a Enable_interrupts pero solo para el pin correspondiente
-template <uint8_t n>
+// TODO: quitar el valor por defecto cfg::pins_28
+template <uint8_t n, typename Cfg = avr_::cfg::pins_28>
 struct Enable_change_level_interrupt{
     Enable_change_level_interrupt() 
-	{Pin<n>::enable_change_level_interrupt(); }
+	{Pin<n, Cfg>::enable_change_level_interrupt(); }
 
     ~Enable_change_level_interrupt() 
-	{Pin<n>::disable_change_level_interrupt();}
+	{Pin<n, Cfg>::disable_change_level_interrupt();}
 };
 
 
+// DUDA: borrar estas clases? En la práctica no las estoy usando.
+// Me gusta más configurar los pines en el driver directamente porque así
+// controlo lo que hago. 
 /***************************************************************************
  *			    OUTPUT cfg::PIN
  ***************************************************************************/
@@ -731,70 +462,73 @@ class Output_pin<0>{ };
 
 
 
-/***************************************************************************
- *			    INPUT cfg::PIN WITH PULLUP
- ***************************************************************************/
-/*!
- *  \brief  Creamos un pin de entrada con pull-up
- *
- */
-template<uint8_t n>
-class Input_pin_with_pullup{
-public:
-    static constexpr uint8_t number = n;
-
-    Input_pin_with_pullup()
-    {init();}
-
-    static void init()
-    {Pin<n>::as_input_with_pullup();}
-
-
-    Input_pin_with_pullup& operator=(const Input_pin_with_pullup&) = delete;
-
-    /// Leemos el valor del pin (0 ó 1)
-    static bool read()
-    {return Pin<n>::read();}
-
-    /// Devuelve si el bit es 0 o no. 
-    static bool is_zero() {return Pin<n>::is_zero();}
-
-    /// Devuelve si el bit es 1 o no. 
-    static bool is_one() {return Pin<n>::is_one();}
-};
-
-
-
-/***************************************************************************
- *			INPUT cfg::PIN WITHOUT PULLUP
- ***************************************************************************/
-/*!
- *  \brief  Creamos un pin de entrada sin pull-up
- *
- */
-template<uint8_t n>
-class Input_pin_without_pullup{
-public:
-    static constexpr uint8_t number = n;
-
-    Input_pin_without_pullup()
-    {init();}
-
-    static void init()
-    {Pin<n>::as_input_without_pullup();}
-
-    Input_pin_without_pullup& operator=(const Input_pin_without_pullup&)	= delete;
-
-    /// Leemos el valor del pin (0 ó 1)
-    static bool read()
-    {return Pin<n>::read();}
-
-    /// Devuelve si el bit es 0 o no. 
-    static bool is_zero() {return Pin<n>::is_zero();}
-
-    /// Devuelve si el bit es 1 o no. 
-    static bool is_one() {return Pin<n>::is_one();}
-};
+// Me gusta más configurar los pines en el driver directamente porque así
+// controlo lo que hago. 
+// Comentadas el 20/10/2024. Borrarlas si no se usan.
+///***************************************************************************
+// *			    INPUT cfg::PIN WITH PULLUP
+// ***************************************************************************/
+///*!
+// *  \brief  Creamos un pin de entrada con pull-up
+// *
+// */
+//template<uint8_t n>
+//class Input_pin_with_pullup{
+//public:
+//    static constexpr uint8_t number = n;
+//
+//    Input_pin_with_pullup()
+//    {init();}
+//
+//    static void init()
+//    {Pin<n>::as_input_with_pullup();}
+//
+//
+//    Input_pin_with_pullup& operator=(const Input_pin_with_pullup&) = delete;
+//
+//    /// Leemos el valor del pin (0 ó 1)
+//    static bool read()
+//    {return Pin<n>::read();}
+//
+//    /// Devuelve si el bit es 0 o no. 
+//    static bool is_zero() {return Pin<n>::is_zero();}
+//
+//    /// Devuelve si el bit es 1 o no. 
+//    static bool is_one() {return Pin<n>::is_one();}
+//};
+//
+//
+//
+///***************************************************************************
+// *			INPUT cfg::PIN WITHOUT PULLUP
+// ***************************************************************************/
+///*!
+// *  \brief  Creamos un pin de entrada sin pull-up
+// *
+// */
+//template<uint8_t n>
+//class Input_pin_without_pullup{
+//public:
+//    static constexpr uint8_t number = n;
+//
+//    Input_pin_without_pullup()
+//    {init();}
+//
+//    static void init()
+//    {Pin<n>::as_input_without_pullup();}
+//
+//    Input_pin_without_pullup& operator=(const Input_pin_without_pullup&)	= delete;
+//
+//    /// Leemos el valor del pin (0 ó 1)
+//    static bool read()
+//    {return Pin<n>::read();}
+//
+//    /// Devuelve si el bit es 0 o no. 
+//    static bool is_zero() {return Pin<n>::is_zero();}
+//
+//    /// Devuelve si el bit es 1 o no. 
+//    static bool is_one() {return Pin<n>::is_one();}
+//};
 
 
 }// namespace avr

@@ -20,24 +20,27 @@
 // (???) Este programa es genérico salvo los archivos de cabecera y el
 // namespace myu. Se podría usar para probar cualquier micro???
 #include "../../../mega_pin.h"
-#include "../../../mega.h"
 
 #include <avr_time.h>
 
 // Microcontroller
 // ---------------
-namespace myu = atmega328p;
+namespace myu = avr_;
 
 // Conectar un LED al pin 'led_pin'. Tiene que parpadear.
-constexpr uint8_t led_pin = 14;
+constexpr uint8_t led_pin = 15;
 
 using Pin = myu::Pin<led_pin>;
 
 // ¿Compila is_a_valid_pin()?
 static_assert(myu::Pin<led_pin>::is_a_valid_pin());
-//static_assert(myu::Pin<mcu::Pin_connection_type::floating>::is_a_valid_pin());
+
+static_assert(!myu::Pin<mcu::Pin_connection_type::floating>::is_a_valid_pin());
+static_assert(myu::Pin<mcu::Pin_connection_type::floating>::is_a_valid_connection());
 
 //DONT_COMPILE(static_assert(!myu::Pin<100>::is_a_valid_pin());)
+
+constexpr uint16_t time_ms = 500;
 
 int main()
 {
@@ -47,16 +50,16 @@ int main()
     while (1)
     {
 	Pin::write_one();
-	myu::wait_ms(500);
+	myu::wait_ms(time_ms);
 
 	Pin::write_zero();
-	myu::wait_ms(500);
+	myu::wait_ms(time_ms);
 
 	Pin::toggle();
-	myu::wait_ms(500);
+	myu::wait_ms(time_ms);
 
 	Pin::toggle();
-	myu::wait_ms(500);
+	myu::wait_ms(time_ms);
     }
 
 }

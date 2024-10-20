@@ -50,7 +50,12 @@ template <uint8_t n>
 struct Pin_connection {
     static constexpr uint8_t number = n;
 
+    // No es un pin del micro
     static constexpr bool is_a_valid_pin()
+    { return false; }
+
+    // pero si es una conexión
+    static constexpr bool is_a_valid_connection()
     { return n == Pin_connection_type::to_VCC or 
 	     n == Pin_connection_type::to_GND or
 	     n == Pin_connection_type::floating; }
@@ -86,7 +91,7 @@ struct pin
 template <typename Pin_t,
 	  bool is_pin = Pin_t::is_a_valid_pin(), 
 	  bool pin_connection = (!Pin_t::is_a_valid_pin() and 
-		    mcu::Pin_connection<Pin_t::number>::is_a_valid_pin())>
+		    mcu::Pin_connection<Pin_t::number>::is_a_valid_connection())>
 struct Pin;
 
 template <typename Pin_t>

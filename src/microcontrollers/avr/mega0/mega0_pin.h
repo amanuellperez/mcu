@@ -466,21 +466,6 @@ inline void Pin<n, C>::write(uint8_t x)
 //inline void Pin<28>::disable_change_level_interrupt()
 //{ atd::write_bit<PCINT13>::to<0>::in(PCMSK1); }
 //
-//
-//
-//// Pin_connection
-//// --------------
-//// De momento voy a usar el número de pin en `hwd` para identificar si se
-//// trata de un pin or a connection.
-//template <uint8_t n>
-//class Pin_connection{
-//public:
-//    static constexpr uint8_t number = n;
-//
-//    static constexpr bool is_a_valid_pin()
-//    {return Pin<n>::is_a_valid_pin();}
-//};
-//
 } // namespace private_
 
 

@@ -32,11 +32,9 @@
  *		 DUDAS: creo (???) que los registros de todos los micros de
  *		 una misma familia se llaman igual. Por ello basta con definir
  *		 una única configuración para todos ellos comunes (salvo en
- *		 pines, que cada uno tiene un número de pins diferente).
+ *		 pines, que hay que clasificarlos por número de pins).
  *
  ****************************************************************************/
-
-#include <atd_type_traits.h>	// always_false_v
 
 #include <type_traits>
 

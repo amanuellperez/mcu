@@ -32,12 +32,12 @@
  *   - HISTORIA:
  *    Manuel Perez
  *      13/01/2019 v0.0
+ *      20/10/2024 cfg::pins_28
  *
  ****************************************************************************/
 #include <cstdint>  // uint8_t
 #include <avr/io.h> // registros: DDRB... PORT...
-#include <atd_static.h>
-#include <atd_type_traits.h>	// atd::always_false_v
+#include <atd_static.h> // static_array
 
 namespace avr_{
 
@@ -50,63 +50,268 @@ namespace cfg{ // ir incluyendo el resto según vaya reescribiendo codigo
 // si conecto el pin 12, debo revisar que haya conectado el pin 12 del avr.
 // Sencillo!!!)
 
-struct pins{
-constexpr static uint8_t number_of_pins     =  28;
-constexpr static uint8_t minimum_pin	    =  1; // Este siempre será 1 (:?)
-constexpr static uint8_t maximum_pin	    =  28;
+struct pins_28{
+template <uint8_t n>
+static constexpr 
+bool is_a_valid_pin(){
+    return 
+    (n == 1) or (n == 2) or (n == 3) or (n == 4) or (n == 5)
+    or (n == 6) or (n == 9)
+    or (n == 10) or (n == 11) or (n == 12) or (n == 13) or (n == 14)
+    or (n == 15) or (n == 16) or (n == 17) or (n == 18) or (n == 19)
+    or (n == 23) or (n == 24)
+    or (n == 25) or (n == 26) or (n == 27) or (n == 28);
+}
+
+template <uint8_t n>
+static constexpr 
+auto ddr()
+{
+    static_assert(is_a_valid_pin<n>(), "Wrong pin number");
+
+    if constexpr (n == 1) return &DDRC;
+
+    if constexpr (n == 2) return &DDRD;
+    if constexpr (n == 3) return &DDRD;
+    if constexpr (n == 4) return &DDRD;
+    if constexpr (n == 5) return &DDRD;
+    if constexpr (n == 6) return &DDRD;
+
+    if constexpr (n == 9) return &DDRB;
+    if constexpr (n == 10) return &DDRB;
+
+    if constexpr (n == 11) return &DDRD;
+    if constexpr (n == 12) return &DDRD;
+    if constexpr (n == 13) return &DDRD;
+
+    if constexpr (n == 14) return &DDRB;
+    if constexpr (n == 15) return &DDRB;
+    if constexpr (n == 16) return &DDRB;
+    if constexpr (n == 17) return &DDRB;
+    if constexpr (n == 18) return &DDRB;
+    if constexpr (n == 19) return &DDRB;
+
+    if constexpr (n == 23) return &DDRC;
+    if constexpr (n == 24) return &DDRC;
+    if constexpr (n == 25) return &DDRC;
+    if constexpr (n == 26) return &DDRC;
+    if constexpr (n == 27) return &DDRC;
+    if constexpr (n == 28) return &DDRC;
+
+}
+
+template <uint8_t n>
+static constexpr 
+auto port()
+{
+    static_assert(is_a_valid_pin<n>(), "Wrong pin number");
+
+    if constexpr (n == 1) return &PORTC;
+
+    if constexpr (n == 2) return &PORTD;
+    if constexpr (n == 3) return &PORTD;
+    if constexpr (n == 4) return &PORTD;
+    if constexpr (n == 5) return &PORTD;
+    if constexpr (n == 6) return &PORTD;
+
+    if constexpr (n == 9) return &PORTB;
+    if constexpr (n == 10) return &PORTB;
+
+    if constexpr (n == 11) return &PORTD;
+    if constexpr (n == 12) return &PORTD;
+    if constexpr (n == 13) return &PORTD;
+
+    if constexpr (n == 14) return &PORTB;
+    if constexpr (n == 15) return &PORTB;
+    if constexpr (n == 16) return &PORTB;
+    if constexpr (n == 17) return &PORTB;
+    if constexpr (n == 18) return &PORTB;
+    if constexpr (n == 19) return &PORTB;
+
+    if constexpr (n == 23) return &PORTC;
+    if constexpr (n == 24) return &PORTC;
+    if constexpr (n == 25) return &PORTC;
+    if constexpr (n == 26) return &PORTC;
+    if constexpr (n == 27) return &PORTC;
+    if constexpr (n == 28) return &PORTC;
+}
+
+template <uint8_t n>
+static constexpr 
+auto pin()
+{
+    static_assert(is_a_valid_pin<n>(), "Wrong pin number");
+
+    if constexpr (n == 1) return &PINC;
+
+    if constexpr (n == 2) return &PIND;
+    if constexpr (n == 3) return &PIND;
+    if constexpr (n == 4) return &PIND;
+    if constexpr (n == 5) return &PIND;
+    if constexpr (n == 6) return &PIND;
+
+    if constexpr (n == 9) return &PINB;
+    if constexpr (n == 10) return &PINB;
+
+    if constexpr (n == 11) return &PIND;
+    if constexpr (n == 12) return &PIND;
+    if constexpr (n == 13) return &PIND;
+
+    if constexpr (n == 14) return &PINB;
+    if constexpr (n == 15) return &PINB;
+    if constexpr (n == 16) return &PINB;
+    if constexpr (n == 17) return &PINB;
+    if constexpr (n == 18) return &PINB;
+    if constexpr (n == 19) return &PINB;
+
+    if constexpr (n == 23) return &PINC;
+    if constexpr (n == 24) return &PINC;
+    if constexpr (n == 25) return &PINC;
+    if constexpr (n == 26) return &PINC;
+    if constexpr (n == 27) return &PINC;
+    if constexpr (n == 28) return &PINC;
+}
+
+template <uint8_t n>
+static constexpr 
+auto pin_bit()
+{
+    static_assert(is_a_valid_pin<n>(), "Wrong pin number");
+
+    if constexpr (n == 1) return PC6;
+
+    if constexpr (n == 2) return PD0;
+    if constexpr (n == 3) return PD1;
+    if constexpr (n == 4) return PD2;
+    if constexpr (n == 5) return PD3;
+    if constexpr (n == 6) return PD4;
+
+    if constexpr (n == 9) return PB6;
+    if constexpr (n == 10) return PB7;
+
+    if constexpr (n == 11) return PD5;
+    if constexpr (n == 12) return PD6;
+    if constexpr (n == 13) return PD7;
+
+    if constexpr (n == 14) return PB0;
+    if constexpr (n == 15) return PB1;
+    if constexpr (n == 16) return PB2;
+    if constexpr (n == 17) return PB3;
+    if constexpr (n == 18) return PB4;
+    if constexpr (n == 19) return PB5;
+
+    if constexpr (n == 23) return PC0;
+    if constexpr (n == 24) return PC1;
+    if constexpr (n == 25) return PC2;
+    if constexpr (n == 26) return PC3;
+    if constexpr (n == 27) return PC4;
+    if constexpr (n == 28) return PC5;
+}
+
+template <uint8_t n>
+static constexpr 
+auto bitmask()
+{ return (1 << pin_bit<n>()); }
+
+template <uint8_t n>
+static constexpr 
+auto pcie()
+{
+    static_assert(is_a_valid_pin<n>(), "Wrong pin number");
+
+    if constexpr (n == 2) return PCIE2;
+    if constexpr (n == 3) return PCIE2;
+    if constexpr (n == 4) return PCIE2;
+    if constexpr (n == 5) return PCIE2;
+    if constexpr (n == 6) return PCIE2;
+    if constexpr (n == 9) return PCIE0;
+    if constexpr (n == 10) return PCIE0;
+    if constexpr (n == 11) return PCIE2;
+    if constexpr (n == 12) return PCIE2;
+    if constexpr (n == 13) return PCIE2;
+    if constexpr (n == 14) return PCIE0;
+    if constexpr (n == 15) return PCIE0;
+    if constexpr (n == 16) return PCIE0;
+    if constexpr (n == 17) return PCIE0;
+    if constexpr (n == 18) return PCIE0;
+    if constexpr (n == 19) return PCIE0;
+    if constexpr (n == 23) return PCIE1;
+    if constexpr (n == 24) return PCIE1;
+    if constexpr (n == 25) return PCIE1;
+    if constexpr (n == 26) return PCIE1;
+    if constexpr (n == 27) return PCIE1;
+    if constexpr (n == 28) return PCIE1;
+}
+
+
+
+template <uint8_t n>
+static constexpr 
+auto pcint()
+{
+    static_assert(is_a_valid_pin<n>(), "Wrong pin number");
+
+    if constexpr (n == 2) return PCINT16;
+    if constexpr (n == 3) return PCINT17;
+    if constexpr (n == 4) return PCINT18;
+    if constexpr (n == 5) return PCINT19;
+    if constexpr (n == 6) return PCINT20;
+    if constexpr (n == 9) return PCINT6;
+    if constexpr (n == 10) return PCINT7;
+    if constexpr (n == 11) return PCINT21;
+    if constexpr (n == 12) return PCINT22;
+    if constexpr (n == 13) return PCINT23;
+    if constexpr (n == 14) return PCINT0;
+    if constexpr (n == 15) return PCINT1;
+    if constexpr (n == 16) return PCINT2;
+    if constexpr (n == 17) return PCINT3;
+    if constexpr (n == 18) return PCINT4;
+    if constexpr (n == 19) return PCINT5;
+    if constexpr (n == 23) return PCINT8;
+    if constexpr (n == 24) return PCINT9;
+    if constexpr (n == 25) return PCINT10;
+    if constexpr (n == 26) return PCINT11;
+    if constexpr (n == 27) return PCINT12;
+    if constexpr (n == 28) return PCINT13;
+}
+
+
+
+template <uint8_t n>
+static constexpr 
+auto pcmsk()
+{
+    static_assert(is_a_valid_pin<n>(), "Wrong pin number");
+
+    if constexpr (n == 2) return &PCMSK2;
+    if constexpr (n == 3) return &PCMSK2;
+    if constexpr (n == 4) return &PCMSK2;
+    if constexpr (n == 5) return &PCMSK2;
+    if constexpr (n == 6) return &PCMSK2;
+    if constexpr (n == 9) return &PCMSK0;
+    if constexpr (n == 10) return &PCMSK0;
+    if constexpr (n == 11) return &PCMSK2;
+    if constexpr (n == 12) return &PCMSK2;
+    if constexpr (n == 13) return &PCMSK2;
+    if constexpr (n == 14) return &PCMSK0;
+    if constexpr (n == 15) return &PCMSK0;
+    if constexpr (n == 16) return &PCMSK0;
+    if constexpr (n == 17) return &PCMSK0;
+    if constexpr (n == 18) return &PCMSK0;
+    if constexpr (n == 19) return &PCMSK0;
+    if constexpr (n == 23) return &PCMSK1;
+    if constexpr (n == 24) return &PCMSK1;
+    if constexpr (n == 25) return &PCMSK1;
+    if constexpr (n == 26) return &PCMSK1;
+    if constexpr (n == 27) return &PCMSK1;
+    if constexpr (n == 28) return &PCMSK1;
+}
+
+
 };
 
-// Las macros DDRB son del tipo *(volatile uint8_t*) direccion_ddrb;
-// Estas funciones devuelven la dirección de memoria del registro que 
-// siempre es válida.
-//
-// Los pines no válidos les asigno un 0.
-constexpr volatile uint8_t* DDR[29] = {
-    0
-    , &DDRC, &DDRD, &DDRD, &DDRD, &DDRD, &DDRD, 0
-    , 0    , &DDRB, &DDRB, &DDRD, &DDRD, &DDRD, &DDRB
-    , &DDRB, &DDRB, &DDRB, &DDRB, &DDRB, 0    , 0
-    , 0	   , &DDRC, &DDRC, &DDRC, &DDRC, &DDRC, &DDRC
-};
-
-constexpr volatile uint8_t* PORT[29] = {
-    0
-    , &PORTC, &PORTD, &PORTD, &PORTD, &PORTD, &PORTD, 0
-    , 0	    , &PORTB, &PORTB, &PORTD, &PORTD, &PORTD, &PORTB
-    , &PORTB, &PORTB, &PORTB, &PORTB, &PORTB, 0     , 0
-    , 0	    , &PORTC, &PORTC, &PORTC, &PORTC, &PORTC, &PORTC
-};
-
-constexpr volatile uint8_t* PIN[29] = {
-    0
-    , &PINC, &PIND, &PIND, &PIND, &PIND, &PIND, 0
-    , 0	   , &PINB, &PINB, &PIND, &PIND, &PIND, &PINB
-    , &PINB, &PINB, &PINB, &PINB, &PINB, 0    , 0
-    , 0    , &PINC, &PINC, &PINC, &PINC, &PINC, &PINC};
 
 
-// TODO: borrar BIT_MASK. Todavia queda una dependencia en toggle (porque no
-// está escrita la función atd::toggle bit). Escribirla y borrar BIT_MASK.
-constexpr uint8_t BIT_MASK[29] = {
-    0
-    , 1 << PC6, 1 << PD0, 1 << PD1, 1 << PD2, 1 << PD3, 1 << PD4, 0
-    , 0  , 1 << PB6, 1 << PB7, 1 << PD5, 1 << PD6, 1 << PD7, 1 << PB0
-    , 1 << PB1, 1 << PB2, 1 << PB3, 1 << PB4, 1 << PB5, 0  , 0
-    , 0  , 1 << PC0, 1 << PC1, 1 << PC2, 1 << PC3, 1 << PC4, 1 << PC5
-    };
-
-namespace impl_of{
-using pin_bit = atd::static_array<uint8_t, 
-    0
-    , PC6, PD0, PD1, PD2, PD3, PD4, 0
-    , 0  , PB6, PB7, PD5, PD6, PD7, PB0
-    , PB1, PB2, PB3, PB4, PB5, 0  , 0
-    , 0  , PC0, PC1, PC2, PC3, PC4, PC5
-    >;
-}// impl_of
- 
-template <uint8_t N>
-inline constexpr uint8_t pin_bit = impl_of::pin_bit::at<N>;
 
 // Interrupciones INT0, INT1, ...
 // -------------------------------

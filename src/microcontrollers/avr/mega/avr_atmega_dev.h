@@ -78,14 +78,14 @@ namespace atmega{
     template <uint8_t n>
     using Enable_change_level_interrupt = avr_::Enable_change_level_interrupt<n>;
 
-    template<uint8_t n>
-    using Output_pin = avr_::Output_pin<n>;
-
-    template<uint8_t n>
-    using Input_pin_with_pullup = avr_::Input_pin_with_pullup<n>;
-
-    template<uint8_t n>
-    using Input_pin_without_pullup = avr_::Input_pin_without_pullup<n>;
+//    template<uint8_t n>
+//    using Output_pin = avr_::Output_pin<n>;
+//
+//    template<uint8_t n>
+//    using Input_pin_with_pullup = avr_::Input_pin_with_pullup<n>;
+//
+//    template<uint8_t n>
+//    using Input_pin_without_pullup = avr_::Input_pin_without_pullup<n>;
 
 // ADC
     using ADC_basic = avr_::ADC_basic;

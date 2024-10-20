@@ -55,8 +55,9 @@ struct Micro{
 
 // Types
 // -----
-    template <uint8_t n>
-    using Pin = avr_::Pin<n>;
+    // TODO: borrar valor por defecto pins_28
+    template <uint8_t n, typename Cfg = cfg::pins_28>
+    using Pin = avr_::Pin<n, Cfg>;
 
     template <uint8_t n>
     using Enable_change_level_interrupt 
