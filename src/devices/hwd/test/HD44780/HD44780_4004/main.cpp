@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 Manuel Perez 
+// Copyright (C) 2019-2024 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -33,7 +33,7 @@ using LCD_pins = dev::LCD_HD44780_4004_pins4<dev::LCD_HD44780_RS<4>,
 				       dev::LCD_HD44780_D4<11,12,13,14>
 				       >;
 
-using LCD = dev::LCD_HD44780_4004<LCD_pins>;
+using LCD = dev::LCD_HD44780_4004<myu::Micro, LCD_pins>;
 
 namespace gl = rom::glyphs_5x8;
 using Glyph = gl::Glyph<myu::ROM_read>;

@@ -32,15 +32,14 @@
  ****************************************************************************/
 #include <atd_bit.h>
 #include <avr_time.h>
-#include "not_generic.h"
 
 namespace dev{
 
 
 // Escribe solo los bits d4-d7 de 'd' (los más significativos)
-template <typename P>
+template <typename M, typename P>
 template <typename pin_E>
-void LCD_HD44780_base<P>::write_d4_d7( uint8_t rs
+void LCD_HD44780_base<M, P>::write_d4_d7( uint8_t rs
 		, uint8_t rw
 		, uint8_t d)
 {
@@ -70,8 +69,8 @@ void LCD_HD44780_base<P>::write_d4_d7( uint8_t rs
 //}
 
 
-template <typename P>
-void LCD_HD44780_base<P>::write_d4(uint8_t d)
+template <typename M, typename P>
+void LCD_HD44780_base<M, P>::write_d4(uint8_t d)
 {
     D4::write(d & 0x01);
     d >>= 1;
@@ -104,9 +103,9 @@ void LCD_HD44780_base<P>::write_d4(uint8_t d)
 //}
 
 
-template <typename P>
+template <typename M, typename P>
 template <typename pin_E>
-void LCD_HD44780_base<P>::write_d4(uint8_t rs
+void LCD_HD44780_base<M, P>::write_d4(uint8_t rs
 	    , uint8_t rw
 	    , uint8_t d)
 {
@@ -152,8 +151,8 @@ void LCD_HD44780_base<P>::write_d4(uint8_t rs
 //}
     
 
-template <typename P>
-void LCD_HD44780_base<P>::D_pins_as_output()
+template <typename M, typename P>
+void LCD_HD44780_base<M, P>::D_pins_as_output()
 {
     if constexpr (num_D_pins == 8){
 	D0::as_output();
@@ -168,8 +167,8 @@ void LCD_HD44780_base<P>::D_pins_as_output()
     D7::as_output();
 }
 
-template <typename P>
-void LCD_HD44780_base<P>::D_pins_as_input_without_pullup()
+template <typename M, typename P>
+void LCD_HD44780_base<M, P>::D_pins_as_input_without_pullup()
 {
     if constexpr (num_D_pins == 8){
 	D0::as_input_without_pullup();
@@ -185,9 +184,9 @@ void LCD_HD44780_base<P>::D_pins_as_input_without_pullup()
 }
 
 
-template <typename P>
+template <typename M, typename P>
 template <typename pin_E>
-bool LCD_HD44780_base<P>::is_busy4()
+bool LCD_HD44780_base<M, P>::is_busy4()
 {
     // Vamos a leer de los pines
     D_pins_as_input_without_pullup();
@@ -195,13 +194,13 @@ bool LCD_HD44780_base<P>::is_busy4()
     RS::write_zero();
     RW::write_one();
     //_delay_us(1);
-    not_generic::wait_us(1);
+    Micro::wait_us(1);
 
     bool res = false;
 
     pin_E::write_one();
     //_delay_us(1); 
-    not_generic::wait_us(1);
+    Micro::wait_us(1);
 		
     // Fundamental: leer D[7] cuando E = 1 (pag. 32, datasheet)
     if(D7::is_one()) 
@@ -212,7 +211,7 @@ bool LCD_HD44780_base<P>::is_busy4()
     // (que se envían en el segundo paquete)
     pin_E::write_one();
     //_delay_us(1);
-    not_generic::wait_us(1);
+    Micro::wait_us(1);
     pin_E::write_zero();
 
     // Dejamos los pines como estaban
@@ -225,9 +224,9 @@ bool LCD_HD44780_base<P>::is_busy4()
 // Esta función está implementada de acuerdo a la figura 9 de la datasheet.
 // Observar que cuando se lee es cuando el pin E está en 1, no hay que enviar
 // un pulso como en el caso de escribir.
-template <typename P>
+template <typename M, typename P>
 template <typename pin_E>
-uint8_t LCD_HD44780_base<P>::read_d4()
+uint8_t LCD_HD44780_base<M, P>::read_d4()
 {
     // Vamos a leer de los pines
     D_pins_as_input_without_pullup();
@@ -239,7 +238,7 @@ uint8_t LCD_HD44780_base<P>::read_d4()
 
     pin_E::write_one();
     //_delay_us(1);
-    not_generic::wait_us(1);
+    Micro::wait_us(1);
 
     if (D7::is_one()) atd::write_bit<7>::to<1>::in(res);
     if (D6::is_one()) atd::write_bit<6>::to<1>::in(res);
@@ -248,10 +247,10 @@ uint8_t LCD_HD44780_base<P>::read_d4()
 
     pin_E::write_zero();
     //_delay_us(1);
-    not_generic::wait_us(1);
+    Micro::wait_us(1);
     pin_E::write_one();
     //_delay_us(1);
-    not_generic::wait_us(1);
+    Micro::wait_us(1);
     
     if (D7::is_one()) atd::write_bit<3>::to<1>::in(res);
     if (D6::is_one()) atd::write_bit<2>::to<1>::in(res);
@@ -329,30 +328,25 @@ uint8_t LCD_HD44780_base<P>::read_d4()
 // funcionaría!!! (realmente sí funciona al cargar el display por primera vez,
 // pero al desconectarlo de corriente y reconectarlo deja de funcionar, lo
 // cual al principio despista mucho qué es lo que ha ocurrido).
-template <typename P>
+template <typename M, typename P>
 template <typename pin_E>
-void LCD_HD44780_base<P>::init4()
+void LCD_HD44780_base<M, P>::init4()
 {
     //delay_ms(50);   // wait for more than 40 ms after Vcc rises to 2.7V
-    not_generic::wait_ms(50);
+    Micro::wait_ms(50);
 
     // 8 bit mode
     // this is according to the hitachi HD44780 datasheet
     // figure 23, pg 46
     write_d4_d7<pin_E>(0,0, 0x30);	// Function set: Interface is 8 bits long
-// NO BORRAR: los delay_us hasta que no esté suficientemente probado.
-// No me fio de que el compilador haga inline de todos los wait_us
-//    delay_us(4500);		// wait min 4.1ms
-    not_generic::wait_us(4500);
+    Micro::wait_us(4500);
 
     write_d4_d7<pin_E>(0,0, 0x30); // Function set: Interface is 8 bits long
-    //delay_us(4500);	    // wait min 100us <--- TODO? solo 100us no 4500!!
-    not_generic::wait_us(4500);
+    Micro::wait_us(4500);
 
     
     write_d4_d7<pin_E>(0,0, 0x30); // Function set: Interface is 8 bits long
-    //delay_us(150);	    // Aquí la datasheet no pone que esperes. (TODO?)
-    not_generic::wait_us(150);
+    Micro::wait_us(150);
  
     // TODO: la datasheet pone que ya se puede mirar BF. Si no se mira
     // entonces the waiting time between instructions is longer than the
@@ -360,38 +354,33 @@ void LCD_HD44780_base<P>::init4()
     // de momento le añado un delay de 100 us.
     // Function set: Interface is 4 bits long
     write_d4_d7<pin_E>(0,0, 0x20);
-    //delay_us(100);
-    not_generic::wait_us(100);
+    Micro::wait_us(100);
 
     // definimos display 16 x 2 
     // function_set(true, true, true);
     write_d4_d7<pin_E>(0,0, 0x20);
     write_d4_d7<pin_E>(0,0, 0x80);
-    //delay_us(100);
-    not_generic::wait_us(100);
+    Micro::wait_us(100);
 
     // display_on();
     write_d4_d7<pin_E>(0,0, 0x00);
     write_d4_d7<pin_E>(0,0, 0xC0);
-    //delay_us(100);
-    not_generic::wait_us(100);
+    Micro::wait_us(100);
 
     // clear();
     write_d4_d7<pin_E>(0,0, 0x00);
     write_d4_d7<pin_E>(0,0, 0x10);
-    //delay_us(100);
-    not_generic::wait_us(100);
+    Micro::wait_us(100);
 
     // entry mode set
     // entry_mode(incrementa_cursor_, shift_display_);
     write_d4_d7<pin_E>(0,0, 0x00);
     write_d4_d7<pin_E>(0,0, 0x60);
-    //delay_us(100);
-    not_generic::wait_us(100);
+    Micro::wait_us(100);
 }
 
-template <typename P>
-void LCD_HD44780_base<P>::setup_pins()
+template <typename M, typename P>
+void LCD_HD44780_base<M, P>::setup_pins()
 {
     D_pins_as_output();
 
@@ -411,22 +400,20 @@ void LCD_HD44780_base<P>::setup_pins()
 
 
 // Para realizar una operación en el LCD necesitamos activar E
-template <typename P>
+template <typename M, typename P>
 template <typename pin_E>
-void LCD_HD44780_base<P>::pulse_E()
+void LCD_HD44780_base<M, P>::pulse_E()
 {
     pin_E::write_one();
-    // NO BORRAR delay_us hasta que no se haya probado lo suficiente.
-    // Si el compilador hace inline de todo debería de funcionar
     //delay_us(1);   // OJO: esto antes tenía que ponerlo a delay_ms(1)???
-    not_generic::wait_us(1);
+    Micro::wait_us(1);
     pin_E::write_zero();
 }
 
 
-template <typename P>
+template <typename M, typename P>
 template <typename pin_E>
-void LCD_HD44780_base<P>::write_d(uint8_t rs
+void LCD_HD44780_base<M, P>::write_d(uint8_t rs
 	    , uint8_t rw
 	    , uint8_t d)
 {
@@ -438,9 +425,9 @@ void LCD_HD44780_base<P>::write_d(uint8_t rs
 
 
 // Instrucciones del HD44780
-template <typename P>
+template <typename M, typename P>
 template <typename pin_E>
-void LCD_HD44780_base<P>::set_ddram_address(uint8_t addr)
+void LCD_HD44780_base<M, P>::set_ddram_address(uint8_t addr)
 {
     // addr tiene que tener DB7 = 1
     atd::write_bit<7>::to<1>::in(addr);
@@ -450,9 +437,9 @@ void LCD_HD44780_base<P>::set_ddram_address(uint8_t addr)
 }
 
 
-template <typename P>
+template <typename M, typename P>
 template <typename pin_E>
-void LCD_HD44780_base<P>::set_cgram_address(uint8_t addr)
+void LCD_HD44780_base<M, P>::set_cgram_address(uint8_t addr)
 {
     // bits DB7 = 0 and DB6 = 1
     atd::write_bits<7, 6>::to<0, 1>::in(addr);
@@ -462,9 +449,9 @@ void LCD_HD44780_base<P>::set_cgram_address(uint8_t addr)
 }
 
 
-template <typename P>
+template <typename M, typename P>
 template <typename pin_E>
-void LCD_HD44780_base<P>::cursor_or_display_shift(bool display_no_cursor, bool to_the_right)
+void LCD_HD44780_base<M, P>::cursor_or_display_shift(bool display_no_cursor, bool to_the_right)
 {
     uint8_t d = 0x10;
     if(display_no_cursor)	d |= 0x08;
@@ -475,9 +462,9 @@ void LCD_HD44780_base<P>::cursor_or_display_shift(bool display_no_cursor, bool t
 }
 
 
-template <typename P>
+template <typename M, typename P>
 template <typename pin_E>
-void LCD_HD44780_base<P>::display_control(bool display_on, bool cursor_on, bool cursor_blink)
+void LCD_HD44780_base<M, P>::display_control(bool display_on, bool cursor_on, bool cursor_blink)
 {
     uint8_t d = 0x08;
     if(display_on)	d |= 0x04;
@@ -488,9 +475,9 @@ void LCD_HD44780_base<P>::display_control(bool display_on, bool cursor_on, bool 
     write_d<pin_E>(0,0,d);
 }
 
-template <typename P>
+template <typename M, typename P>
 template <typename pin_E>
-void LCD_HD44780_base<P>::entry_mode(bool incrementa_cursor, bool shift_display)
+void LCD_HD44780_base<M, P>::entry_mode(bool incrementa_cursor, bool shift_display)
 {
     uint8_t d = 0x04;
     if(incrementa_cursor)   d |= 0x02;
@@ -500,9 +487,9 @@ void LCD_HD44780_base<P>::entry_mode(bool incrementa_cursor, bool shift_display)
     write_d<pin_E>(0,0,d);
 }
 
-template <typename P>
+template <typename M, typename P>
 template <typename pin_E>
-void LCD_HD44780_base<P>::function_set(bool interface_8_bits // ¿es 8 bit o 4 bit interface?
+void LCD_HD44780_base<M, P>::function_set(bool interface_8_bits // ¿es 8 bit o 4 bit interface?
 		, bool tiene_2_filas    // ¿tiene 2 ó 1 linea?
 		, bool character_font_5x8) // ¿char de 5x8 ó 5x10?
 {
@@ -517,9 +504,9 @@ void LCD_HD44780_base<P>::function_set(bool interface_8_bits // ¿es 8 bit o 4 b
 }
 
 
-template <typename P>
+template <typename M, typename P>
 template <typename pin_E>
-bool LCD_HD44780_base<P>::is_busy()
+bool LCD_HD44780_base<M, P>::is_busy()
 {
 //    if constexpr (num_D_pins == 8)	
 //	return is_busy8();
@@ -528,18 +515,18 @@ bool LCD_HD44780_base<P>::is_busy()
 }
 
 
-template <typename P>
+template <typename M, typename P>
 template <typename pin_E>
-void LCD_HD44780_base<P>::write_data_to_CG_or_DDRAM(uint8_t data)
+void LCD_HD44780_base<M, P>::write_data_to_CG_or_DDRAM(uint8_t data)
 {
     wait_to_be_available<pin_E>(); 
     write_d<pin_E>(1,0,data);
 }
 
 
-template <typename P>
+template <typename M, typename P>
 template <typename pin_E>
-uint8_t LCD_HD44780_base<P>::read_data_from_CG_or_DDRAM()
+uint8_t LCD_HD44780_base<M, P>::read_data_from_CG_or_DDRAM()
 {
     wait_to_be_available<pin_E>(); 
     return read_d4<pin_E>();
@@ -547,9 +534,9 @@ uint8_t LCD_HD44780_base<P>::read_data_from_CG_or_DDRAM()
 
 
 
-template <typename P>
+template <typename M, typename P>
 template <typename pin_E>
-void LCD_HD44780_base<P>::init()
+void LCD_HD44780_base<M, P>::init()
 {
     pin_E::write_zero();
 
@@ -561,9 +548,9 @@ void LCD_HD44780_base<P>::init()
 
 
 
-template <typename P>
+template <typename M, typename P>
 template <typename pin_E>
-void LCD_HD44780_base<P>::clear_display()	    
+void LCD_HD44780_base<M, P>::clear_display()	    
 {
     wait_to_be_available<pin_E>();
     write_d<pin_E>(0,0, 0x01);
@@ -571,9 +558,9 @@ void LCD_HD44780_base<P>::clear_display()
 
 /// Coloca el cursor en (0,0) y si el texto se estuviera moviendo en 
 /// el display, lo coloca en su posición inicial.
-template <typename P>
+template <typename M, typename P>
 template <typename pin_E>
-void LCD_HD44780_base<P>::return_home()	    
+void LCD_HD44780_base<M, P>::return_home()	    
 {
     wait_to_be_available<pin_E>();
     write_d<pin_E>(0,0, 0x02);

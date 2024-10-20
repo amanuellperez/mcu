@@ -35,8 +35,8 @@
 
 // Microcontroller
 // ---------------
-namespace my_mcu = atmega;
-using Micro   = my_mcu::Micro;
+namespace myu = atmega;
+using Micro   = myu::Micro;
 
 // Pin connections
 // ---------------
@@ -63,7 +63,7 @@ using Keyrow = dev::Basic_keyrow<Micro, Keyrow_pins, Keyrow_codes>;
 
 // LCD
 // NO USAR EL DE 16 x 02. USAR SOLO EL DE 20x04 para que se vea bien.
-using LCD_2004 = dev::LCD_HD44780_2004<LCD_pins>;
+using LCD_2004 = dev::LCD_HD44780_2004<Micro, LCD_pins>;
 using Generic_LCD_2004 = dev::Generic_LCD<LCD_2004>;
 using Screen_2004 = dev::LCD_screen_2004<Generic_LCD_2004>;
 //using LCD_ostream_2004 = dev::LCD_ostream_1602<Generic_LCD_2004>;
@@ -173,7 +173,7 @@ void test_user_time(LCD& lcd, Keyrow key, atd::Date_time_view<T> t)
     atd::print_weekday<week_days_length>(lcd, t, week_days);
     
 
-    my_mcu::Micro::wait_ms(4000);
+    myu::Micro::wait_ms(4000);
 }
 
 
@@ -181,7 +181,7 @@ void title(LCD& lcd, const char* str)
 {
     lcd.clear();
     lcd << str;
-    my_mcu::Micro::wait_ms(500);
+    myu::Micro::wait_ms(500);
     lcd.clear();
 }
 
@@ -197,7 +197,7 @@ void test_user_time()
 	lcd << "Test with";
 	lcd.cursor_pos(0,1);
 	lcd << "LCD of 20 x 4!";
-	my_mcu::Micro::wait_ms(1000);
+	myu::Micro::wait_ms(1000);
 
 	{
 	using Font = Font_digit_2x3_t1;
@@ -226,7 +226,7 @@ void test_user_time()
 	    atd::print_date(lcd, atd::Date_time_view{*t0});
 	    lcd.print('\n');
 	    atd::print_time(lcd, atd::Date_time_view{*t0});
-            my_mcu::Micro::wait_ms(4000);
+            myu::Micro::wait_ms(4000);
         }
 
     }

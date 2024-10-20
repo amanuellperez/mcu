@@ -81,8 +81,8 @@ using LCD_pins = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<LCD_RS_pin>,
 
 // LCD
 // ---
-using LCD_1602         = dev::LCD_HD44780_1602<LCD_pins>;
-using LCD_2004         = dev::LCD_HD44780_2004<LCD_pins>;
+using LCD_1602         = dev::LCD_HD44780_1602<Micro, LCD_pins>;
+using LCD_2004         = dev::LCD_HD44780_2004<Micro, LCD_pins>;
 using Generic_LCD_1602 = dev::Generic_LCD<LCD_1602>;
 using Generic_LCD_2004 = dev::Generic_LCD<LCD_2004>;
 // using LCD              = dev::LCD_screen_1602<Generic_LCD_1602>;

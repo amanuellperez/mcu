@@ -23,7 +23,9 @@
 #include <algorithm>
 
 #include <avr_atmega.h>
-namespace my_mcu = atmega;
+
+namespace myu = atmega;
+using Micro = myu::Micro;
 
 // pins
 using LCD_pins_1602 = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<4>,
@@ -43,9 +45,9 @@ using LCD_pins_4004 = dev::LCD_HD44780_4004_pins4<dev::LCD_HD44780_RS<4>,
 
 
 // Dispositivos reales conectados
-using LCD_1602 = dev::LCD_HD44780_1602<LCD_pins_1602>;
-using LCD_2004 = dev::LCD_HD44780_2004<LCD_pins_2004>;
-using LCD_4004 = dev::LCD_HD44780_4004<LCD_pins_4004>;
+using LCD_1602 = dev::LCD_HD44780_1602<Micro, LCD_pins_1602>;
+using LCD_2004 = dev::LCD_HD44780_2004<Micro, LCD_pins_2004>;
+using LCD_4004 = dev::LCD_HD44780_4004<Micro, LCD_pins_4004>;
 
 // Generic devices
 using Generic_LCD_1602 = dev::Generic_LCD<LCD_1602>;
@@ -86,7 +88,7 @@ void show_charset()
     while(1){
 	for (char i = 0; i < 8; ++i){
 	    print(lcd, 32*i);
-	    my_mcu::Micro::wait_ms(3000);
+	    myu::Micro::wait_ms(3000);
 	}
     }
 }

@@ -27,8 +27,8 @@
 
 // Microcontroller
 // ---------------
-namespace my_mcu = atmega;
-using Micro   = my_mcu::Micro;
+namespace myu = atmega;
+using Micro   = myu::Micro;
 
 // Pin connections
 // ---------------
@@ -53,8 +53,8 @@ using Keyrow_codes  = dev::Keyrow_codes<OK_KEY, UP_KEY, DOWN_KEY>;
 using Keyrow = dev::Basic_keyrow<Micro, Keyrow_pins, Keyrow_codes>;
 
 // Dispositivos reales conectados
-using LCD_1602 = dev::LCD_HD44780_1602<LCD_pins>;
-using LCD_2004 = dev::LCD_HD44780_2004<LCD_pins>;
+using LCD_1602 = dev::LCD_HD44780_1602<Micro, LCD_pins>;
+using LCD_2004 = dev::LCD_HD44780_2004<Micro, LCD_pins>;
 
 // Generic devices
 using Generic_LCD_1602 = dev::Generic_LCD<LCD_1602>;
@@ -70,13 +70,13 @@ using LCD = Screen_2004;
 
 
 struct Main{
-    void a2() {lcd.clear(); lcd << "ejecutando a2"; my_mcu::Micro::wait_ms(500);}
-    void b1() {lcd.clear(); lcd << "ejecutando b1"; my_mcu::Micro::wait_ms(500);}
-    void c1() {lcd.clear(); lcd << "ejecutando c1"; my_mcu::Micro::wait_ms(500);}
-    void c2() {lcd.clear(); lcd << "ejecutando c2"; my_mcu::Micro::wait_ms(500);}
-    void c3() {lcd.clear(); lcd << "ejecutando c3"; my_mcu::Micro::wait_ms(500);}
-    void d1() {lcd.clear(); lcd << "ejecutando d1"; my_mcu::Micro::wait_ms(500);}
-    void d2() {lcd.clear(); lcd << "ejecutando d2"; my_mcu::Micro::wait_ms(500);}
+    void a2() {lcd.clear(); lcd << "ejecutando a2"; myu::Micro::wait_ms(500);}
+    void b1() {lcd.clear(); lcd << "ejecutando b1"; myu::Micro::wait_ms(500);}
+    void c1() {lcd.clear(); lcd << "ejecutando c1"; myu::Micro::wait_ms(500);}
+    void c2() {lcd.clear(); lcd << "ejecutando c2"; myu::Micro::wait_ms(500);}
+    void c3() {lcd.clear(); lcd << "ejecutando c3"; myu::Micro::wait_ms(500);}
+    void d1() {lcd.clear(); lcd << "ejecutando d1"; myu::Micro::wait_ms(500);}
+    void d2() {lcd.clear(); lcd << "ejecutando d2"; myu::Micro::wait_ms(500);}
     
 
     void run();

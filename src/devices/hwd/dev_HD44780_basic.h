@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021 Manuel Perez 
+// Copyright (C) 2019-2024 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -46,9 +46,10 @@
  *	    07/01/2021       set_cgram_address
  *	    08/01/2021 v0.5: Reestructuro para poder usar LCD 40 x 04.
  *	    06/02/2022       alias LCD_HD44780_1602 y LCD_HD44780_2004
+ *	    20/10/2024 Independizado del microcontrolador.
  *
  ****************************************************************************/
-#include "not_generic.h"
+#include <cstdint>
 #include <mcu_pin.h>
 
 namespace dev{
@@ -131,14 +132,14 @@ struct LCD_HD44780_base_pins4{
  *        concretará los pines usados (ahora es decidir qué pin E se usa, ya
  *        que el LCD 40 x 04 tiene 2 pines E).
  */
-// TODO: pasar el Micro como parámetro y sustituir not_generic::Pin por
-// Micro::Pin.
-template <typename pin>
-// requires: std::is_same_v<pin, LCD_HD44780_pins>;
+template <typename Micro0, typename pin>
 class LCD_HD44780_base{
 public:
 
 protected:
+// Types
+    using Micro = Micro0;
+
 //    LCD_HD44780_base(); <-- llamar a setup_pins() para inicializarlo.
     static void setup_pins();
 
@@ -225,19 +226,22 @@ private:
 // PINS
     static constexpr uint8_t num_D_pins = pin::num_D_pins;
 
-    using RS = not_generic::Pin<pin::RS>;
-    using RW = not_generic::Pin<pin::RW>;
-//    using E = not_generic::Pin<pin::E>;
+    template <uint8_t n>
+    using Pin = Micro::template Pin<n>;
+
+    using RS = Pin<pin::RS>;
+    using RW = Pin<pin::RW>;
+//    using E = Pin<pin::E>;
 
     // Si solo usamos 4 pines, serán D<4>-D<7>
-    using D0 = not_generic::Pin<pin::D0>;
-    using D1 = not_generic::Pin<pin::D1>;
-    using D2 = not_generic::Pin<pin::D2>;
-    using D3 = not_generic::Pin<pin::D3>;
-    using D4 = not_generic::Pin<pin::D4>;
-    using D5 = not_generic::Pin<pin::D5>;
-    using D6 = not_generic::Pin<pin::D6>;
-    using D7 = not_generic::Pin<pin::D7>;
+    using D0 = Pin<pin::D0>;
+    using D1 = Pin<pin::D1>;
+    using D2 = Pin<pin::D2>;
+    using D3 = Pin<pin::D3>;
+    using D4 = Pin<pin::D4>;
+    using D5 = Pin<pin::D5>;
+    using D6 = Pin<pin::D6>;
+    using D7 = Pin<pin::D7>;
 
 
 
@@ -339,11 +343,12 @@ struct LCD_HD44780_pins4{
  * inteligible? De momento creo que no.
  */
 
-template <typename pin>
+template <typename Micro, typename pin>
 // requires: std::is_same_v<pin, LCD_HD44780_pins>;
-class LCD_HD44780: public LCD_HD44780_base<typename pin::Base_pins>{
+class LCD_HD44780: 
+	public LCD_HD44780_base<Micro, typename pin::Base_pins>{
 public:
-    using Base = LCD_HD44780_base<typename pin::Base_pins>;
+    using Base = LCD_HD44780_base<Micro, typename pin::Base_pins>;
 
 // Construcción:
 //  Suministro 2 formas de usar el LCD:
@@ -437,7 +442,10 @@ public:
     {return Base::template read_data_from_CG_or_DDRAM<E>();}
 
 private:
-    using E = not_generic::Pin<pin::E>;
+    template <uint8_t n>
+    using Pin = Micro::template Pin<n>;
+
+    using E = Pin<pin::E>;
 
 
     static void setup_pins() { E::as_output(); }
@@ -445,8 +453,8 @@ private:
 };
 
 
-template <typename pin>
-void LCD_HD44780<pin>::init() 
+template <typename M, typename pin>
+void LCD_HD44780<M, pin>::init() 
 {
     Base::setup_pins();
     setup_pins();
@@ -502,11 +510,12 @@ struct LCD_HD44780_4004_pins4{
  *       implemento así.
  *
  */
-template <typename pin>
+template <typename Micro, typename pin>
 // requires: std::is_same_v<pin, LCD_HD44780_4004_pins4>;
-class LCD_HD44780_4004: public LCD_HD44780_base<typename pin::Base_pins>{
+class LCD_HD44780_4004: 
+	public LCD_HD44780_base<Micro, typename pin::Base_pins>{
 public:
-    using Base = LCD_HD44780_base<typename pin::Base_pins>;
+    using Base = LCD_HD44780_base<Micro, typename pin::Base_pins>;
 
     LCD_HD44780_4004() {init();}
 
@@ -621,8 +630,12 @@ public:
     {return Base::template read_data_from_CG_or_DDRAM<E2>();}
 
 private:
-    using E1 = not_generic::Pin<pin::E1>;
-    using E2 = not_generic::Pin<pin::E2>;
+
+    template <uint8_t n>
+    using Pin = Micro::template Pin<n>;
+
+    using E1 = Pin<pin::E1>;
+    using E2 = Pin<pin::E2>;
 
     static void setup_pins() 
     { 
@@ -636,11 +649,11 @@ private:
 // Una de las características fundamentales de los LCDs son sus dimensiones.
 // Al definir el hardware en un programa quiero que se pueda leer que estoy
 // usando un LCD de 16x02, de 20x04 ó de 40x04. Por eso defino estos alias.
-template <typename pin>
-using LCD_HD44780_1602 = LCD_HD44780<pin>;
+template <typename Micro, typename pin>
+using LCD_HD44780_1602 = LCD_HD44780<Micro, pin>;
 
-template <typename pin>
-using LCD_HD44780_2004 = LCD_HD44780<pin>;
+template <typename Micro, typename pin>
+using LCD_HD44780_2004 = LCD_HD44780<Micro, pin>;
 
 }// namespace
 

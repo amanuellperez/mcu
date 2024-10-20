@@ -32,9 +32,9 @@ using Code      = Sci_code;
 
 // TODO: esto lo escribí antes de mejorar la gestión de los glyphs de los
 // LCDs. Reestructurarlo (algo parecido a lo hecho en la calculadora basic).
-template <typename LCD_pins>
+template <typename Micro, typename LCD_pins>
 class LCD_calculator : 
-    public dev::LCD_ostream_1602<dev::Generic_LCD<dev::LCD_HD44780<LCD_pins>>>
+    public dev::LCD_ostream_1602<dev::Generic_LCD<dev::LCD_HD44780<Micro, LCD_pins>>>
 {
 public:
     void init();
@@ -49,13 +49,13 @@ private:
     void print_lcd_symbol(char c);
 
     using Parent  = 
-	dev::LCD_ostream_1602<dev::Generic_LCD<dev::LCD_HD44780<LCD_pins>>>;
-    using LCD = dev::LCD_HD44780<LCD_pins>;
+	dev::LCD_ostream_1602<dev::Generic_LCD<dev::LCD_HD44780<Micro, LCD_pins>>>;
+    using LCD = dev::LCD_HD44780<Micro, LCD_pins>;
 };
 
 
-template <typename P>
-void LCD_calculator<P>::init()
+template <typename M, typename P>
+void LCD_calculator<M, P>::init()
 {
     Parent::terminal().stop_brcorner(true);// I'm not going to use it as a terminal
     Parent::terminal().nowrap(); 
@@ -64,16 +64,16 @@ void LCD_calculator<P>::init()
 
 
 
-template <typename P>
-void LCD_calculator<P>::new_glyph(const atd::ROM_array<uint8_t, 8, atmega::ROM_read> glyph)
+template <typename M, typename P>
+void LCD_calculator<M, P>::new_glyph(const atd::ROM_array<uint8_t, 8, atmega::ROM_read> glyph)
 {
     for (uint8_t i  = 0; i < 8; ++i)
 	LCD::write_data_to_CG_or_DDRAM(glyph[i]);
 }
 
 
-template <typename P>
-void LCD_calculator<P>::save_new_glyphs()
+template <typename M, typename P>
+void LCD_calculator<M, P>::save_new_glyphs()
 {
     namespace gl = rom::glyphs_5x8;
 
@@ -93,8 +93,8 @@ void LCD_calculator<P>::save_new_glyphs()
 
 }
 
-template <typename P>
-void LCD_calculator<P>::print(char c)
+template <typename M, typename P>
+void LCD_calculator<M, P>::print(char c)
 {
     if (Code::first_symbol <= c and c <= Code::last_symbol)
 	print_lcd_symbol(c);
@@ -108,14 +108,14 @@ void LCD_calculator<P>::print(char c)
 }
 
 
-template <typename P>
-inline void LCD_calculator<P>::print_lcd_new_symbol(char c) 
+template <typename M, typename P>
+inline void LCD_calculator<M, P>::print_lcd_new_symbol(char c) 
 {
     LCD::write_data_to_CG_or_DDRAM(c - Code::first_new_symbol);
 }
 
-template <typename P>
-void LCD_calculator<P>::print_lcd_symbol(char c)
+template <typename M, typename P>
+void LCD_calculator<M, P>::print_lcd_symbol(char c)
 {
     switch(c){
 	break; case Code::sqrt: Parent::terminal().print(symbol::of("√"));

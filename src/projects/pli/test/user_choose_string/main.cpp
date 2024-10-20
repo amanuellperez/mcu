@@ -29,8 +29,8 @@
 
 // Microcontroller
 // ---------------
-namespace my_mcu = atmega;
-using Micro   = my_mcu::Micro;
+namespace myu = atmega;
+using Micro   = myu::Micro;
 
 // Pin connections
 // ---------------
@@ -55,8 +55,8 @@ using Keyrow_codes  = dev::Keyrow_codes<OK_KEY, UP_KEY, DOWN_KEY>;
 using Keyrow = dev::Basic_keyrow<Micro, Keyrow_pins, Keyrow_codes>;
 
 // Dispositivos reales conectados
-using LCD_1602 = dev::LCD_HD44780_1602<LCD_pins>;
-using LCD_2004 = dev::LCD_HD44780_2004<LCD_pins>;
+using LCD_1602 = dev::LCD_HD44780_1602<Micro, LCD_pins>;
+using LCD_2004 = dev::LCD_HD44780_2004<Micro, LCD_pins>;
 
 // Generic devices
 using Generic_LCD_1602 = dev::Generic_LCD<LCD_1602>;
@@ -122,7 +122,7 @@ void test_lcd_menu()
 
 	lcd.clear();
 	lcd << "Seleccion: " << static_cast<uint16_t>(day);
-	my_mcu::Micro::wait_ms(1000);
+	myu::Micro::wait_ms(1000);
 
 //	constexpr std::array days2 ={"Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sa"};
 	constexpr const char* days2 = "DoLuMaMiJuViSa";
@@ -138,7 +138,7 @@ void test_lcd_menu()
 	lcd.clear();
 	lcd_clear(lcd);
 	lcd << "Seleccion: " << static_cast<uint16_t>(day2);
-	my_mcu::Micro::wait_ms(1000);
+	myu::Micro::wait_ms(1000);
 
 
 //	lcd.clear();
@@ -150,7 +150,7 @@ void test_lcd_menu()
 
 	lcd.clear();
 	lcd << "Seleccion: " << static_cast<uint16_t>(unidad);
-	my_mcu::Micro::wait_ms(1000);
+	myu::Micro::wait_ms(1000);
 
 //	lcd.clear();
 	lcd_clear(lcd);
@@ -163,7 +163,7 @@ void test_lcd_menu()
         lcd.clear();
 	lcd << "seleccion:\n" << seleccion;
 
-	my_mcu::Micro::wait_ms(1000);
+	myu::Micro::wait_ms(1000);
 
 	lcd_clear(lcd);
 	lcd << "Elige: xxxx = unidades";
@@ -174,7 +174,7 @@ void test_lcd_menu()
         lcd.clear();
 	lcd << "seleccion:\n" << seleccion;
 
-	my_mcu::Micro::wait_ms(1000);
+	myu::Micro::wait_ms(1000);
 
 
 	lcd_clear(lcd);
@@ -184,7 +184,7 @@ void test_lcd_menu()
 
 	lcd.clear();
 	lcd << "seleccion:\n" << seleccion;
-	my_mcu::Micro::wait_ms(1000);
+	myu::Micro::wait_ms(1000);
 
 	lcd_clear(lcd);
 	lcd << "Todo bien? ";
@@ -195,7 +195,7 @@ void test_lcd_menu()
         lcd.clear();
 	lcd << "seleccion:\n" << seleccion;
 
-	my_mcu::Micro::wait_ms(1000);
+	myu::Micro::wait_ms(1000);
 
 	lcd_clear(lcd);
 	lcd << "Todo bien (2)? ";
@@ -205,7 +205,7 @@ void test_lcd_menu()
         lcd.clear();
 	lcd << "seleccion:\n" << seleccion;
 
-	my_mcu::Micro::wait_ms(1000);
+	myu::Micro::wait_ms(1000);
     }
 
 }

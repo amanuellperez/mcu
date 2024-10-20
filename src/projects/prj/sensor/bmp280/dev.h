@@ -78,7 +78,7 @@ using LCD_pins = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<LCD_RS_pin>,
 
 // LCD
 // ---
-using LCD_1602         = dev::LCD_HD44780_1602<LCD_pins>;
+using LCD_1602         = dev::LCD_HD44780_1602<Micro, LCD_pins>;
 using Generic_LCD_1602 = dev::Generic_LCD<LCD_1602>;
 using LCD_ostream      = dev::LCD_ostream_1602<Generic_LCD_1602>;
 using lcd_symbol       = dev::HD44780_charset_A00;
