@@ -24,7 +24,7 @@
 // Al ser este un dispositivo de bajo nivel, no uso LED, sino directamente
 // accedo a los pins.
 
-#include <avr_pin.h>
+#include <mega_pin.h>
 #include <avr_time.h>
 
 using namespace avr;

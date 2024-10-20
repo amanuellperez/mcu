@@ -31,7 +31,6 @@
  *	17/04/2021       Reestructurado.
  *
  ****************************************************************************/
-#include <avr_pin.h>
 #include <avr_SPI_basic.h>
 #include "not_generic.h"
 

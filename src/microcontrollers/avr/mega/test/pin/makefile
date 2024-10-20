@@ -1,4 +1,6 @@
-DIRS = basic \
+DIRS = \
+	   basic 	\
+	   blink	\
 	   interrupts
 
 

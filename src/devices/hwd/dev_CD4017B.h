@@ -31,7 +31,6 @@
  *           Manuel Perez- 11/06/2019 Escrito
  *
  ****************************************************************************/
-#include <avr_pin.h>
 #include "not_generic.h"
 
 namespace dev{

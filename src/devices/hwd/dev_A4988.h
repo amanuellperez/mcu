@@ -58,7 +58,7 @@ namespace dev{
 // Si no se pasa un pin se da por supuesto que está flotante.
 template <typename Pins>
 struct A4988_pins{
-    using Pin = mcu::Pin_connection;
+    using Pin = mcu::Pin_connection_type;
     static constexpr uint8_t NO_ENABLE(){ return Pin::floating;}
     static constexpr uint8_t NO_ENABLE()
 		requires requires {Pins::NO_ENABLE;}

@@ -19,12 +19,12 @@
 
 #pragma once
 
-#ifndef __MEGA0_H__
-#define __MEGA0_H__
+#ifndef __MEGA_H__
+#define __MEGA_H__
 /****************************************************************************
  *
  * DESCRIPCION
- *	Built-in devices que suministra cada micro de la familia mega0	
+ *	Built-in devices que suministra cada micro de la familia mega
  *
  * HISTORIA
  *    Manuel Perez
@@ -33,18 +33,8 @@
  ****************************************************************************/
 #include <avr_private.h>   // importamos todo avr_
 
-#include "mega0_pin.h"
 
-
-/***************************************************************************
- *			    ATMEGA4809 de 40 pins
- ***************************************************************************/
-namespace atmega4809_40{
-    using namespace avr_;
-
-    template <uint8_t n>
-    using Pin = mega0_::Pin<n, mega0_::cfg::pins_40>;
-}
+#include "avr_atmega.h"
 
 
 #endif

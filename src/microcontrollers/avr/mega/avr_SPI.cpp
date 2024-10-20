@@ -18,7 +18,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "avr_SPI.h"
-#include "avr_pin.h"
+#include "mega_pin.h"
 
 // Observar que todas son funciones de configuración que se ejecutan una sola
 // vez. No es imprescindible que sean las más eficientes.

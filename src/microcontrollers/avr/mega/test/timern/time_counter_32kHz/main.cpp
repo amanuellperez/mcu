@@ -23,7 +23,7 @@
 
 #include "../../../avr_UART_iostream.h"
 #include "../../../avr_atmega328p_cfg.h"
-#include "../../../avr_pin.h"
+#include "../../../mega_pin.h"
 
 // Microcontroller
 // ---------------

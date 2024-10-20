@@ -32,6 +32,7 @@
  *
  ****************************************************************************/
 #include <avr_time.h>
+#include <mega_pin.h>
 
 // TODO: Como esto lo he ido desarrollando poco a poco, a medida que he ido
 // aprendiendo la mayoria de los dispositivos acceden directamente a las

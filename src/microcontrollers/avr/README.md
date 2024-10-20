@@ -3,7 +3,7 @@
 De momento voy a probar a separar el código de los avr por familias, creando
 los siguientes directorios:
 
-* [`avr`](mega/avr)
+* [`avr`](avr)
   Contiene los archivos de cabecera comunes a todos los avrs.
 
 * [`atmega`](mega/README.md)
@@ -22,7 +22,7 @@ los micros de 8 bits o los de 32 bits.
 Al escribir por primera vez un programa para el `atmega4809` e intentar
 enlazarlo con las librerías de `std` y `atd` descubrí que se tratan de
 plataformas distintas, siendo obligatorio compilar todas las librerías para
-cada target. Eso dió lugar a `libstd_atmega328p.a` y `libstd_atmega4809.a`.
+cada target. Eso dió lugar a `libmicro_atmega328p.a` y `libmicro_atmega4809.a`.
 
 ## Familias de avrs
 

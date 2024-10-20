@@ -48,7 +48,6 @@
  *	    06/02/2022       alias LCD_HD44780_1602 y LCD_HD44780_2004
  *
  ****************************************************************************/
-#include <avr_pin.h>
 #include "not_generic.h"
 #include <mcu_pin.h>
 
@@ -109,10 +108,10 @@ struct LCD_HD44780_base_pins4{
     static constexpr uint8_t RS = pin_RS::RS;
     static constexpr uint8_t RW = pin_RW::RW;
 
-    static constexpr uint8_t D0 = mcu::Pin_connection::floating;
-    static constexpr uint8_t D1 = mcu::Pin_connection::floating;
-    static constexpr uint8_t D2 = mcu::Pin_connection::floating;
-    static constexpr uint8_t D3 = mcu::Pin_connection::floating;
+    static constexpr uint8_t D0 = mcu::Pin_connection_type::floating;
+    static constexpr uint8_t D1 = mcu::Pin_connection_type::floating;
+    static constexpr uint8_t D2 = mcu::Pin_connection_type::floating;
+    static constexpr uint8_t D3 = mcu::Pin_connection_type::floating;
     static constexpr uint8_t D4 = pins_D4::D4;
     static constexpr uint8_t D5 = pins_D4::D5;
     static constexpr uint8_t D6 = pins_D4::D6;

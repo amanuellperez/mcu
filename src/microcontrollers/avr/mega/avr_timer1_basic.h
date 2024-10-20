@@ -73,7 +73,7 @@
 #include <atd_type_traits.h>
 
 #include <avr/io.h> // registros: DDRB... PORT...
-#include "avr_pin.h"
+#include "mega_pin.h"
 #include <avr_constants.h>
 
 namespace avr_{

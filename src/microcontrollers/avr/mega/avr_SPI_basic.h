@@ -54,7 +54,7 @@
 #include <stdint.h> // uint8_t
 #include <avr/io.h> // registros: DDRB... PORT...
 #include <atd_bit.h>
-#include "avr_pin.h"
+#include "mega_pin.h"
 #include "avr_interrupt.h"
 #include <avr_constants.h>	// clock_frequency_in_hz
 

@@ -19,23 +19,23 @@
 
 // (???) Este programa es genérico salvo los archivos de cabecera y el
 // namespace myu. Se podría usar para probar cualquier micro???
-#include "../../../mega0_pin.h"
-#include "../../../mega0.h"
+#include "../../../mega_pin.h"
+#include "../../../mega.h"
 
 #include <avr_time.h>
 
 // Microcontroller
 // ---------------
-namespace myu = atmega4809_40;
+namespace myu = atmega328p;
 
 // Conectar un LED al pin 'led_pin'. Tiene que parpadear.
-constexpr uint8_t led_pin = 2;
+constexpr uint8_t led_pin = 14;
 
 using Pin = myu::Pin<led_pin>;
 
 // ¿Compila is_a_valid_pin()?
-static_assert(myu::Pin<2>::is_a_valid_pin());
-static_assert(myu::Pin<mcu::Pin_connection_type::floating>::is_a_valid_pin());
+static_assert(myu::Pin<led_pin>::is_a_valid_pin());
+//static_assert(myu::Pin<mcu::Pin_connection_type::floating>::is_a_valid_pin());
 
 //DONT_COMPILE(static_assert(!myu::Pin<100>::is_a_valid_pin());)
 

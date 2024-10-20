@@ -35,7 +35,7 @@
 #include "avr_interrupt.h"
 #include "avr_memory.h"
 #include "avr_sleep.h"
-#include "avr_pin.h"
+#include "mega_pin.h"
 
 namespace avr_{
 

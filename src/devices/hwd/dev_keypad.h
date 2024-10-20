@@ -34,7 +34,6 @@
  *    31/07/2021 Keypad, Keyboard_keypad
  *
  ****************************************************************************/
-#include <avr_pin.h>
 #include "not_generic.h"
 
 #include <atd_static.h>

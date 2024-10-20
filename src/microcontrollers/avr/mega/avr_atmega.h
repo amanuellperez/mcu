@@ -67,7 +67,7 @@
 #include <avr_interrupt.h>
 #include <avr_memory.h>
 
-#include <avr_pin.h>
+#include <mega_pin.h>
 #include <avr_port_basic.h>
 #include <avr_sleep.h>
 #include <avr_time.h>

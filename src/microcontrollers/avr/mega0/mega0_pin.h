@@ -34,7 +34,7 @@
  ****************************************************************************/
 #include "mega0_cfg.h"
 
-#include <atd_bit.h>
+#include <mcu_pin.h>
 
 namespace mega0_{
 
@@ -484,6 +484,8 @@ inline void Pin<n, C>::write(uint8_t x)
 } // namespace private_
 
 
+template <uint8_t n, typename Cfg>
+using Pin = mcu::Pin<private_::Pin<n, Cfg>>::type;
 
 }// namespace mega0_
 

@@ -39,7 +39,7 @@
 #include <atd_type_traits.h>
 
 #include "avr_interrupt.h"
-#include "avr_pin.h"
+#include "mega_pin.h"
 #include <avr_constants.h>	// clock_frequency_in_hz
 
 #include <array>

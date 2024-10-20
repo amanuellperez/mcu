@@ -57,29 +57,29 @@ struct A4988_pins{
 // INSTRUCCIONES
 //	Probar a conectar los pines al micro o dejarlos flotantes, el programa
 //  cambiará completamente.
-//static constexpr uint8_t NO_ENABLE= mcu::Pin_connection::floating;
+//static constexpr uint8_t NO_ENABLE= mcu::Pin_connection_type::floating;
 static constexpr uint8_t NO_ENABLE= 9;
 
 //static constexpr uint8_t MS1= 10;
 //static constexpr uint8_t MS2= 11;
 //static constexpr uint8_t MS3= 12;
 
-static constexpr uint8_t MS1= mcu::Pin_connection::floating;
-static constexpr uint8_t MS2= mcu::Pin_connection::floating;
-static constexpr uint8_t MS3= mcu::Pin_connection::floating;
+static constexpr uint8_t MS1= mcu::Pin_connection_type::floating;
+static constexpr uint8_t MS2= mcu::Pin_connection_type::floating;
+static constexpr uint8_t MS3= mcu::Pin_connection_type::floating;
 
-//static constexpr uint8_t MS1= mcu::Pin_connection::to_VCC;
-//static constexpr uint8_t MS1= mcu::Pin_connection::to_GND;
+//static constexpr uint8_t MS1= mcu::Pin_connection_type::to_VCC;
+//static constexpr uint8_t MS1= mcu::Pin_connection_type::to_GND;
 
-//static constexpr uint8_t MS2= mcu::Pin_connection::to_VCC;
-//static constexpr uint8_t MS2= mcu::Pin_connection::to_GND;
+//static constexpr uint8_t MS2= mcu::Pin_connection_type::to_VCC;
+//static constexpr uint8_t MS2= mcu::Pin_connection_type::to_GND;
 
-//static constexpr uint8_t MS3= mcu::Pin_connection::to_VCC;
-//static constexpr uint8_t MS3= mcu::Pin_connection::to_GND;
+//static constexpr uint8_t MS3= mcu::Pin_connection_type::to_VCC;
+//static constexpr uint8_t MS3= mcu::Pin_connection_type::to_GND;
 
 // En lugar de dejarlos floating conectar no_reset con no_sleep::
-static constexpr uint8_t NO_RESET= mcu::Pin_connection::floating;
-static constexpr uint8_t NO_SLEEP= mcu::Pin_connection::floating;
+static constexpr uint8_t NO_RESET= mcu::Pin_connection_type::floating;
+static constexpr uint8_t NO_SLEEP= mcu::Pin_connection_type::floating;
 //static constexpr uint8_t NO_RESET= 13;
 //static constexpr uint8_t NO_SLEEP= 14;
 
@@ -113,13 +113,13 @@ void print_pin_number(const char* name)
     if (Micro::Pin<npin>::is_a_valid_pin())
 	uart << (int) npin;
 
-    else if (npin == mcu::Pin_connection::floating)
+    else if (npin == mcu::Pin_connection_type::floating)
 	uart << "floating";
 
-    else if (npin == mcu::Pin_connection::to_VCC)
+    else if (npin == mcu::Pin_connection_type::to_VCC)
 	uart << "to VCC";
 
-    else if (npin == mcu::Pin_connection::to_GND)
+    else if (npin == mcu::Pin_connection_type::to_GND)
 	uart << "to GND";
 
     uart << "; ";

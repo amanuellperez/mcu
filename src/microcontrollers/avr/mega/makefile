@@ -19,7 +19,6 @@ INCS= avr_ADC_basic.h	\
 	avr_interrupt.h		\
 	avr_memory.h		\
 	avr_micro.h			\
-	avr_pin.h			\
 	avr_port_basic.h	\
 	avr_sleep.h			\
 	avr_SPI_basic.h		\
@@ -37,6 +36,8 @@ INCS= avr_ADC_basic.h	\
 	avr_UART_baud_rate.h	\
 	avr_UART_iostream.h		\
 	avr_watchdog.h			\
+	mega.h				\
+	mega_pin.h			\
 	avr_not_generic.h	
 
 

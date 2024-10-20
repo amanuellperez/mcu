@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __AVR_PIN_H__
-#define __AVR_PIN_H__
+#ifndef __MEGA_PIN_H__
+#define __MEGA_PIN_H__
 /****************************************************************************
  *
  * DESCRIPCION
@@ -63,7 +63,7 @@
  *	           problemas).
  *
  *	25/06/2024 Evolución de significado:
- *		   Quiero poder dejado en código documentado cómo se conectan 
+ *		   Quiero poder dejar en código documentado cómo se conectan 
  *		   los pines de un chip. Por ejemplo, en el A4988 se puede 
  *		   conectar el pin MS1 al microcontrolador, o dejarlo flotante
  *		   o conectarlo a GND o Vcc.
@@ -89,7 +89,10 @@
  *
  ****************************************************************************/
 #include <avr/io.h> // registros: cfg::DDRB... cfg::PORT...
-#include "avr_not_generic.h"
+#include "avr_not_generic.h" // TODO: para eliminar este archivo basta con
+			     // escribir Pin como he hecho en atmega4809,
+			     // pasándole la configuración a Pin.
+    
 #include <atd_bit.h>
 #include <mcu_pin.h>
 
@@ -641,7 +644,7 @@ namespace impl_of{
 template <uint8_t n, 
 	  bool avr_pin = avr_pin::Pin<n>::is_a_valid_pin(), 
 	  bool pin_connection = (!avr_pin::Pin<n>::is_a_valid_pin() and 
-		    mcu::Pin_connection::is_valid<n>())>
+		    mcu::Pin_connection<n>::is_a_valid_pin())>
 struct Pin;
 
 template <uint8_t n>
