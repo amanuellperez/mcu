@@ -44,7 +44,7 @@
  ****************************************************************************/
 // Configuración del micro
 // -----------------------
-#include <avr_atmega328p_cfg.h>
+#include <mega_cfg.h>
 #include <avr_types.h>
 
 // Micro

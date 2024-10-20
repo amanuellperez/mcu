@@ -44,7 +44,7 @@
 //  Para que funcione es fundamental conectar a un voltage regulator (por 
 //  ejemplo el 7805) la fuente de alimentación. Si no oscila mucho AREF no
 //  sirviendo para nada.
-#include "../../../avr_atmega328p_cfg.h"
+#include "../../../mega_cfg.h"
 #include "../../../avr_ADC_basic.h"
 #include "../../../avr_UART_iostream.h"
 #include <avr_time.h>

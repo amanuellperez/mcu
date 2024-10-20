@@ -63,6 +63,28 @@ struct pins{
 // Pines del atmega4809 de 40 pins
 struct pins_40 : impl_of::pins{
 
+// datasheet: pag 20, nota 4:
+// The 40-pin version of the ATmega4809 is using the die of the 48-pin 
+// ATmega4809 but offers fewer connected pads. For this reason, 
+// the pins PB[5:0] and PC[7:6] must be disabled (INPUT_DISABLE) 
+// or enable pull-ups (PULLUPEN).
+//
+// Esto lo ejecuto en esta función init que solo es propia del chip de 40
+// pins.
+static constexpr void init()
+{
+    // PB[5:0] disabled
+    PORTB.PIN0CTRL |= PORT_ISC_INPUT_DISABLE_gc; 
+    PORTB.PIN1CTRL |= PORT_ISC_INPUT_DISABLE_gc; 
+    PORTB.PIN2CTRL |= PORT_ISC_INPUT_DISABLE_gc; 
+    PORTB.PIN3CTRL |= PORT_ISC_INPUT_DISABLE_gc; 
+    PORTB.PIN4CTRL |= PORT_ISC_INPUT_DISABLE_gc; 
+
+    // PC[7:6] disabled
+    PORTC.PIN6CTRL |= PORT_ISC_INPUT_DISABLE_gc; 
+    PORTC.PIN7CTRL |= PORT_ISC_INPUT_DISABLE_gc; 
+}
+
 template <uint8_t n>
 static constexpr 
 bool is_a_valid_pin(){
@@ -168,6 +190,50 @@ auto bitmask()
     if constexpr (n == 40) return PIN7_bm;
 }
 
+template <uint8_t n>
+static constexpr 
+auto pin_ctrl()
+{
+    static_assert(is_a_valid_pin<n>(), "Wrong pin number");
+
+    if constexpr (n == 1) return &(PORTC.PIN0CTRL);
+    if constexpr (n == 2) return &(PORTC.PIN1CTRL);
+    if constexpr (n == 3) return &(PORTC.PIN2CTRL);
+    if constexpr (n == 4) return &(PORTC.PIN3CTRL);
+    if constexpr (n == 7) return &(PORTC.PIN4CTRL);
+    if constexpr (n == 8) return &(PORTC.PIN5CTRL);
+
+    if constexpr (n ==  9) return &(PORTD.PIN0CTRL);
+    if constexpr (n == 10) return &(PORTD.PIN1CTRL);
+    if constexpr (n == 11) return &(PORTD.PIN2CTRL);
+    if constexpr (n == 12) return &(PORTD.PIN3CTRL);
+    if constexpr (n == 13) return &(PORTD.PIN4CTRL);
+    if constexpr (n == 14) return &(PORTD.PIN5CTRL);
+    if constexpr (n == 15) return &(PORTD.PIN6CTRL);
+    if constexpr (n == 16) return &(PORTD.PIN7CTRL);
+
+    if constexpr (n == 19) return &(PORTE.PIN0CTRL);
+    if constexpr (n == 20) return &(PORTE.PIN1CTRL);
+    if constexpr (n == 21) return &(PORTE.PIN2CTRL);
+    if constexpr (n == 22) return &(PORTE.PIN3CTRL);
+
+    if constexpr (n == 23) return &(PORTF.PIN0CTRL);
+    if constexpr (n == 24) return &(PORTF.PIN1CTRL);
+    if constexpr (n == 25) return &(PORTF.PIN2CTRL);
+    if constexpr (n == 26) return &(PORTF.PIN3CTRL);
+    if constexpr (n == 27) return &(PORTF.PIN4CTRL);
+    if constexpr (n == 28) return &(PORTF.PIN5CTRL);
+    if constexpr (n == 29) return &(PORTF.PIN6CTRL);
+
+    if constexpr (n == 33) return &(PORTA.PIN0CTRL);
+    if constexpr (n == 34) return &(PORTA.PIN1CTRL);
+    if constexpr (n == 35) return &(PORTA.PIN2CTRL);
+    if constexpr (n == 36) return &(PORTA.PIN3CTRL);
+    if constexpr (n == 37) return &(PORTA.PIN4CTRL);
+    if constexpr (n == 38) return &(PORTA.PIN5CTRL);
+    if constexpr (n == 39) return &(PORTA.PIN6CTRL);
+    if constexpr (n == 40) return &(PORTA.PIN7CTRL);
+}
 };
 
 }// namespace cfg

@@ -46,7 +46,7 @@
 #include <avr/io.h> // registros: DDRB... PORT...
 #include <avr_constants.h>
 
-#include "avr_atmega328p_cfg.h"	// cfg
+#include "mega_cfg.h"	// cfg
 
 namespace avr_{
 

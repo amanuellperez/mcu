@@ -52,6 +52,12 @@ public:
     // constexpr Pin(){}	
     Pin() = delete;
 
+    // El único micro que usa init es el atmega4809 de 40 pins.
+    // ¿Cómo forzar al cliente que lo llame? Se le va a olvidar fijo @_@
+    static constexpr void init()
+	requires requires {Cfg::init();}
+    { Cfg::init();}
+
     // No es posible copiar pins (aunque como es una template static no
     // debería de generar ningún problema)
     Pin(const Pin&)		= delete;
@@ -111,6 +117,7 @@ private:
     static constexpr auto bitmask() {return Cfg::template bitmask<n>();}
     static constexpr auto PORT()    {return Cfg::template PORT<n>();}
     static constexpr auto pullupen_mask()    {return Cfg::pullupen_mask;}
+    static constexpr auto pin_ctrl()    {return Cfg::template pin_ctrl<n>();}
 };
 
 
@@ -132,8 +139,7 @@ inline void Pin<n, C>::as_input_with_pullup()
     PORT()->DIRCLR = bitmask();
 
     // enable pull-up resistor 
-    // DUDA: mejor PORT()->PIN2CTRL = pullupen_mask(); ??? funciona como DIRCLR?
-    PORT()->PIN2CTRL |= pullupen_mask();
+    (*pin_ctrl()) |= pullupen_mask();
 
 }
 
@@ -144,7 +150,7 @@ inline void Pin<n, C>::as_input_without_pullup()
     PORT()->DIRCLR = bitmask();
 
     // disable pull-up resistor 
-    PORT()->PIN2CTRL &= ~pullupen_mask();
+    (*pin_ctrl()) &= ~pullupen_mask();
 }
 
 template <uint8_t n, typename C>
@@ -156,7 +162,7 @@ template <uint8_t n, typename C>
 bool Pin<n, C>::is_input_with_pullup_pin()
 { 
     return (is_input_pin() and
-	   (PORT()->PIN2CTRL & pullupen_mask()) != 0);
+	   ((*pin_ctrl()) & pullupen_mask()) != 0);
 }
 
 
@@ -164,7 +170,7 @@ template <uint8_t n, typename C>
 bool Pin<n, C>::is_input_without_pullup_pin()
 {
     return (is_input_pin() and
-	   (PORT()->PIN2CTRL & pullupen_mask()) == 0);
+	   ((*pin_ctrl()) & pullupen_mask()) == 0);
 }
 
 
@@ -199,273 +205,6 @@ inline void Pin<n, C>::write(uint8_t x)
     else  write_zero();
 }
 
-
-//// Interrupts
-//// ----------
-///TODO: cambiar. Esto es copia de atmega32
-//template<>
-//inline void Pin<2>::enable_change_level_interrupt()
-//{
-//    atd::write_bit<PCIE2>::to<1>::in(PCICR);
-//    atd::write_bit<PCINT16>::to<1>::in(PCMSK2);
-//}
-//
-//template<>
-//inline void Pin<2>::disable_change_level_interrupt()
-//{ atd::write_bit<PCINT16>::to<0>::in(PCMSK2); }
-//
-//
-//template<>
-//inline void Pin<3>::enable_change_level_interrupt()
-//{
-//    atd::write_bit<PCIE2>::to<1>::in(PCICR);
-//    atd::write_bit<PCINT17>::to<1>::in(PCMSK2);
-//}
-//
-//template<>
-//inline void Pin<3>::disable_change_level_interrupt()
-//{ atd::write_bit<PCINT17>::to<0>::in(PCMSK2); }
-//
-//
-//template<>
-//inline void Pin<4>::enable_change_level_interrupt()
-//{
-//    atd::write_bit<PCIE2>::to<1>::in(PCICR);
-//    atd::write_bit<PCINT18>::to<1>::in(PCMSK2);
-//}
-//
-//template<>
-//inline void Pin<4>::disable_change_level_interrupt()
-//{ atd::write_bit<PCINT18>::to<0>::in(PCMSK2); }
-//
-//
-//template<>
-//inline void Pin<5>::enable_change_level_interrupt()
-//{
-//    atd::write_bit<PCIE2>::to<1>::in(PCICR);
-//    atd::write_bit<PCINT19>::to<1>::in(PCMSK2);
-//}
-//
-//template<>
-//inline void Pin<5>::disable_change_level_interrupt()
-//{ atd::write_bit<PCINT19>::to<0>::in(PCMSK2); }
-//
-//
-//template<>
-//inline void Pin<6>::enable_change_level_interrupt()
-//{
-//    atd::write_bit<PCIE2>::to<1>::in(PCICR);
-//    atd::write_bit<PCINT20>::to<1>::in(PCMSK2);
-//}
-//
-//template<>
-//inline void Pin<6>::disable_change_level_interrupt()
-//{ atd::write_bit<PCINT20>::to<0>::in(PCMSK2); }
-//
-//
-//template<>
-//inline void Pin<9>::enable_change_level_interrupt()
-//{
-//    atd::write_bit<PCIE0>::to<1>::in(PCICR);
-//    atd::write_bit<PCINT6>::to<1>::in(PCMSK0);
-//}
-//
-//template<>
-//inline void Pin<9>::disable_change_level_interrupt()
-//{ atd::write_bit<PCINT6>::to<0>::in(PCMSK0); }
-//
-//
-//template<>
-//inline void Pin<10>::enable_change_level_interrupt()
-//{
-//    atd::write_bit<PCIE0>::to<1>::in(PCICR);
-//    atd::write_bit<PCINT7>::to<1>::in(PCMSK0);
-//}
-//
-//template<>
-//inline void Pin<10>::disable_change_level_interrupt()
-//{ atd::write_bit<PCINT7>::to<0>::in(PCMSK0); }
-//
-//
-//template<>
-//inline void Pin<11>::enable_change_level_interrupt()
-//{
-//    atd::write_bit<PCIE2>::to<1>::in(PCICR);
-//    atd::write_bit<PCINT21>::to<1>::in(PCMSK2);
-//}
-//
-//template<>
-//inline void Pin<11>::disable_change_level_interrupt()
-//{ atd::write_bit<PCINT21>::to<0>::in(PCMSK2); }
-//
-//
-//template<>
-//inline void Pin<12>::enable_change_level_interrupt()
-//{
-//    atd::write_bit<PCIE2>::to<1>::in(PCICR);
-//    atd::write_bit<PCINT22>::to<1>::in(PCMSK2);
-//}
-//
-//template<>
-//inline void Pin<12>::disable_change_level_interrupt()
-//{ atd::write_bit<PCINT22>::to<0>::in(PCMSK2); }
-//
-//
-//template<>
-//inline void Pin<13>::enable_change_level_interrupt()
-//{
-//    atd::write_bit<PCIE2>::to<1>::in(PCICR);
-//    atd::write_bit<PCINT23>::to<1>::in(PCMSK2);
-//}
-//
-//template<>
-//inline void Pin<13>::disable_change_level_interrupt()
-//{ atd::write_bit<PCINT23>::to<0>::in(PCMSK2); }
-//
-//
-//template<>
-//inline void Pin<14>::enable_change_level_interrupt()
-//{
-//    atd::write_bit<PCIE0>::to<1>::in(PCICR);
-//    atd::write_bit<PCINT0>::to<1>::in(PCMSK0);
-//}
-//
-//template<>
-//inline void Pin<14>::disable_change_level_interrupt()
-//{ atd::write_bit<PCINT0>::to<0>::in(PCMSK0); }
-//
-//
-//template<>
-//inline void Pin<15>::enable_change_level_interrupt()
-//{
-//    atd::write_bit<PCIE0>::to<1>::in(PCICR);
-//    atd::write_bit<PCINT1>::to<1>::in(PCMSK0);
-//}
-//
-//template<>
-//inline void Pin<15>::disable_change_level_interrupt()
-//{ atd::write_bit<PCINT1>::to<0>::in(PCMSK0); }
-//
-//
-//template<>
-//inline void Pin<16>::enable_change_level_interrupt()
-//{
-//    atd::write_bit<PCIE0>::to<1>::in(PCICR);
-//    atd::write_bit<PCINT2>::to<1>::in(PCMSK0);
-//}
-//
-//template<>
-//inline void Pin<16>::disable_change_level_interrupt()
-//{ atd::write_bit<PCINT2>::to<0>::in(PCMSK0); }
-//
-//
-//template<>
-//inline void Pin<17>::enable_change_level_interrupt()
-//{
-//    atd::write_bit<PCIE0>::to<1>::in(PCICR);
-//    atd::write_bit<PCINT3>::to<1>::in(PCMSK0);
-//}
-//
-//template<>
-//inline void Pin<17>::disable_change_level_interrupt()
-//{ atd::write_bit<PCINT3>::to<0>::in(PCMSK0); }
-//
-//
-//template<>
-//inline void Pin<18>::enable_change_level_interrupt()
-//{
-//    atd::write_bit<PCIE0>::to<1>::in(PCICR);
-//    atd::write_bit<PCINT4>::to<1>::in(PCMSK0);
-//}
-//
-//template<>
-//inline void Pin<18>::disable_change_level_interrupt()
-//{ atd::write_bit<PCINT4>::to<0>::in(PCMSK0); }
-//
-//
-//template<>
-//inline void Pin<19>::enable_change_level_interrupt()
-//{
-//    atd::write_bit<PCIE0>::to<1>::in(PCICR);
-//    atd::write_bit<PCINT5>::to<1>::in(PCMSK0);
-//}
-//
-//template<>
-//inline void Pin<19>::disable_change_level_interrupt()
-//{ atd::write_bit<PCINT5>::to<0>::in(PCMSK0); }
-//
-//
-//template<>
-//inline void Pin<23>::enable_change_level_interrupt()
-//{
-//    atd::write_bit<PCIE1>::to<1>::in(PCICR);
-//    atd::write_bit<PCINT8>::to<1>::in(PCMSK1);
-//}
-//
-//template<>
-//inline void Pin<23>::disable_change_level_interrupt()
-//{ atd::write_bit<PCINT8>::to<0>::in(PCMSK1); }
-//
-//
-//template<>
-//inline void Pin<24>::enable_change_level_interrupt()
-//{
-//    atd::write_bit<PCIE1>::to<1>::in(PCICR);
-//    atd::write_bit<PCINT9>::to<1>::in(PCMSK1);
-//}
-//
-//template<>
-//inline void Pin<24>::disable_change_level_interrupt()
-//{ atd::write_bit<PCINT9>::to<0>::in(PCMSK1); }
-//
-//
-//template<>
-//inline void Pin<25>::enable_change_level_interrupt()
-//{
-//    atd::write_bit<PCIE1>::to<1>::in(PCICR);
-//    atd::write_bit<PCINT10>::to<1>::in(PCMSK1);
-//}
-//
-//template<>
-//inline void Pin<25>::disable_change_level_interrupt()
-//{ atd::write_bit<PCINT10>::to<0>::in(PCMSK1); }
-//
-//
-//template<>
-//inline void Pin<26>::enable_change_level_interrupt()
-//{
-//    atd::write_bit<PCIE1>::to<1>::in(PCICR);
-//    atd::write_bit<PCINT11>::to<1>::in(PCMSK1);
-//}
-//
-//template<>
-//inline void Pin<26>::disable_change_level_interrupt()
-//{ atd::write_bit<PCINT11>::to<0>::in(PCMSK1); }
-//
-//
-//template<>
-//inline void Pin<27>::enable_change_level_interrupt()
-//{
-//    atd::write_bit<PCIE1>::to<1>::in(PCICR);
-//    atd::write_bit<PCINT12>::to<1>::in(PCMSK1);
-//}
-//
-//template<>
-//inline void Pin<27>::disable_change_level_interrupt()
-//{ atd::write_bit<PCINT12>::to<0>::in(PCMSK1); }
-//
-//
-//template<>
-//inline void Pin<28>::enable_change_level_interrupt()
-//{
-//    atd::write_bit<PCIE1>::to<1>::in(PCICR);
-//    atd::write_bit<PCINT13>::to<1>::in(PCMSK1);
-//}
-//
-//template<>
-//inline void Pin<28>::disable_change_level_interrupt()
-//{ atd::write_bit<PCINT13>::to<0>::in(PCMSK1); }
-//
 } // namespace private_
 
 

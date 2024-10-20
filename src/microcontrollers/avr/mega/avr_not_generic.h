@@ -23,7 +23,7 @@
 #define __AVR_NOT_GENERIC_H__
 // Defino este fichero para tener localizado aquellos archivos que hay 
 // que modificar para generalizar el código. 
-// Ejemplo: avr_SPI_basic.cpp usa los pines definidos en avr_atmega328p_cfg.h
+// Ejemplo: avr_SPI_basic.cpp usa los pines definidos en mega_cfg.h
 // NO ES GENÉRICO. Al compilarlo lo estamos compilando solo para el atmega.
 // Podemos:
 //  (1) Renombrarlo llamandolo atmega_SPI_basic.cpp ya que es lo que realmente
@@ -38,7 +38,7 @@
 //  NOTA: si se ve que resulta más liado intentar reutilizar código que
 //  duplicar código, duplicarlo!!! Que cada micro tenga su propio:
 //  atmega_pin_basic.h, attiny_pin_basic.h ... 
-#include "avr_atmega328p_cfg.h"
+#include "mega_cfg.h"
 
 
 #endif

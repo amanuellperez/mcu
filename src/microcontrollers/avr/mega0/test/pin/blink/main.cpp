@@ -35,12 +35,14 @@ using Pin = myu::Pin<led_pin>;
 
 // ¿Compila is_a_valid_pin()?
 static_assert(myu::Pin<2>::is_a_valid_pin());
-static_assert(myu::Pin<mcu::Pin_connection_type::floating>::is_a_valid_pin());
+static_assert(!myu::Pin<mcu::Pin_connection_type::floating>::is_a_valid_pin());
+static_assert(myu::Pin<mcu::Pin_connection_type::floating>::is_a_valid_connection());
 
 //DONT_COMPILE(static_assert(!myu::Pin<100>::is_a_valid_pin());)
 
 int main()
 {
+    Pin::init();
 
     Pin::as_output();
 

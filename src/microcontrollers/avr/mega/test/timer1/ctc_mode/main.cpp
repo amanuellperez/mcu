@@ -17,7 +17,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "../../../avr_atmega328p_cfg.h"
+#include "../../../mega_cfg.h"
 #include "../../../avr_timer1_basic.h"
 #include <avr_time.h>
 #include "../../../avr_interrupt.h"

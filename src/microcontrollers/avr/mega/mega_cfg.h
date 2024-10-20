@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 Manuel Perez 
+// Copyright (C) 2019-2024 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -19,17 +19,14 @@
 
 #pragma once
 
-#ifndef __AVR_ATMEGA328P_H__
-#define __AVR_ATMEGA328P_H__
+#ifndef __MEGA_CFG_H__
+#define __MEGA_CFG_H__
 /****************************************************************************
  *
- *   - DESCRIPCION: ATMEGA328P configuration
- *  
- *	DUDA: La configuración de todos los atmega328 es la misma? Si es así,
- *	sobra el P al final del 328P. Como ahora no lo se, mantengo la P. En
- *	el futuro, si se programan más micros ir cambiando nombres.
+ * DESCRIPCION
+ *	Configuración de la familia megaAVR	
  *
- *   - HISTORIA:
+ * HISTORIA
  *    Manuel Perez
  *      13/01/2019 v0.0
  *      20/10/2024 cfg::pins_28

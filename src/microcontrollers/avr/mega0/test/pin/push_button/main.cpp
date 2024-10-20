@@ -30,7 +30,7 @@ namespace myu = atmega4809_40;
 
 // pines
 constexpr uint8_t push_button_pin = 3;
-constexpr uint8_t led_pin         = 8;
+constexpr uint8_t led_pin         = 2;
 
 using Led  = myu::Pin<led_pin>;
 using Push = myu::Pin<push_button_pin>;

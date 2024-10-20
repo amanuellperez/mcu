@@ -12,7 +12,6 @@ SOURCES= avr_sleep.cpp			\
 
 INCS= avr_ADC_basic.h	\
 	avr_ADC.h			\
-	avr_atmega328p_cfg.h\
 	avr_atmega_dev.h	\
 	avr_atmega.h		\
 	avr_debug.h			\
@@ -37,6 +36,7 @@ INCS= avr_ADC_basic.h	\
 	avr_UART_iostream.h		\
 	avr_watchdog.h			\
 	mega.h				\
+	mega_cfg.h			\
 	mega_pin.h			\
 	avr_not_generic.h	
 

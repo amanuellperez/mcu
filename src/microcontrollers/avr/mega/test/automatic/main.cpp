@@ -18,7 +18,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 // Ejemplo básico de uso del Timer como contador
-#include "../../avr_atmega328p_cfg.h"
+#include "../../mega_cfg.h"
 #include "../../avr_UART_iostream.h"
 #include "../../avr_timer0_basic.h"
 #include "../../avr_timer1_basic.h"
