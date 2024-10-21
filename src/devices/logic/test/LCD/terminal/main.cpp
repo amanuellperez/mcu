@@ -25,19 +25,19 @@
 namespace myu = atmega;
 
 // Conexiones
-using LCD_pins_1602 = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<4>,
-				       dev::LCD_HD44780_RW<5>,
-				       dev::LCD_HD44780_E<6>,
-				       dev::LCD_HD44780_D4<11,12,13,14>
+using LCD_pins_1602 = dev::HD44780_pins4<dev::HD44780_RS<4>,
+				       dev::HD44780_RW<5>,
+				       dev::HD44780_E<6>,
+				       dev::HD44780_D4<11,12,13,14>
 				       >;
 using LCD_pins_2004 = LCD_pins_1602;
 
 
 
-using LCD_pins_4004 = dev::LCD_HD44780_4004_pins4<dev::LCD_HD44780_RS<4>,
-				       dev::LCD_HD44780_RW<5>,
-				       dev::LCD_HD44780_4004_E<6, 10>,
-				       dev::LCD_HD44780_D4<11,12,13,14>
+using LCD_pins_4004 = dev::HD44780_4004_pins4<dev::HD44780_RS<4>,
+				       dev::HD44780_RW<5>,
+				       dev::HD44780_4004_E<6, 10>,
+				       dev::HD44780_D4<11,12,13,14>
 				       >;
 
 // Dispositivos reales conectados
@@ -45,15 +45,10 @@ using LCD_1602 = dev::LCD_HD44780_1602<myu::Micro, LCD_pins_1602>;
 using LCD_2004 = dev::LCD_HD44780_2004<myu::Micro, LCD_pins_2004>;
 using LCD_4004 = dev::LCD_HD44780_4004<myu::Micro, LCD_pins_4004>;
 
-// Generic devices
-using Generic_LCD_1602 = dev::Generic_LCD<LCD_1602>;
-using Generic_LCD_2004 = dev::Generic_LCD<LCD_2004>;
-using Generic_LCD_4004 = dev::Generic_LCD<LCD_4004>;
-
 // Terminals
-using Terminal_1602 = dev::LCD_terminal_1602<Generic_LCD_1602>;
-using Terminal_2004 = dev::LCD_terminal_2004<Generic_LCD_2004>;
-using Terminal_4004 = dev::LCD_terminal_4004<Generic_LCD_4004>;
+using Terminal_1602 = dev::LCD_terminal_1602<LCD_1602>;
+using Terminal_2004 = dev::LCD_terminal_2004<LCD_2004>;
+using Terminal_4004 = dev::LCD_terminal_4004<LCD_4004>;
 
 // Choose Terminal to test
 //using Terminal = Terminal_1602;

@@ -24,6 +24,8 @@
 
 #include <avr_atmega.h>
 #include <dev_HD44780.h>
+#include <dev_LCD_ostream.h>
+
 #include <dev_BMP280_basic.h>
 #include <mcu_TWI_master.h>
 
@@ -68,10 +70,10 @@ static constexpr TWI::Address twi_sensor_address = 0x77;
 // Hardware connections
 // --------------------
 // LCD
-using LCD_pins = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<LCD_RS_pin>,
-					dev::LCD_HD44780_RW<LCD_RW_pin>,
-					dev::LCD_HD44780_E<LCD_E_pin>,
-					dev::LCD_HD44780_D4<LCD_D4_pin, 
+using LCD_pins = dev::HD44780_pins4<dev::HD44780_RS<LCD_RS_pin>,
+					dev::HD44780_RW<LCD_RW_pin>,
+					dev::HD44780_E<LCD_E_pin>,
+					dev::HD44780_D4<LCD_D4_pin, 
 							    LCD_D5_pin, 
 							    LCD_D6_pin, 
 							    LCD_D7_pin>>;
@@ -79,8 +81,7 @@ using LCD_pins = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<LCD_RS_pin>,
 // LCD
 // ---
 using LCD_1602         = dev::LCD_HD44780_1602<Micro, LCD_pins>;
-using Generic_LCD_1602 = dev::Generic_LCD<LCD_1602>;
-using LCD_ostream      = dev::LCD_ostream_1602<Generic_LCD_1602>;
+using LCD_ostream      = dev::LCD_ostream_1602<LCD_1602>;
 using lcd_symbol       = dev::HD44780_charset_A00;
 
 

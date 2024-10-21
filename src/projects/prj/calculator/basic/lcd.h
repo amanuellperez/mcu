@@ -23,6 +23,7 @@
 #define __LCD_H__
 
 #include <dev_HD44780.h>
+#include <dev_LCD_ostream.h>
 #include <dev_HD44780_charset.h>
 
 #include "instcodes.h"

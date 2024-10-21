@@ -47,13 +47,24 @@
  *                     idea es no tener que volver a usar un LCD concreto a
  *                     partir de ahora y poder usar siempre Generic_LCD
  *                     (o mejor LCD_screen/ostream).
+ *    21/10/2024 Elimino template (se lee bien, pero da la impresión de
+ *               complicar más el código). Paso de Generic_LCD<LCD> a clases
+ *               particulares: LCD_HD44780 y LCD_HD44780_4004.
+ *
+ *               TODO: Necesito un criterio para nombrar las clases.
+ *               Al final el traductor en lugar de llamarlo HD44780_basic,
+ *               prefiero llamarlo igual que el device: HD44780. Pero ¿cómo
+ *               llamar el dispositivo genérico? ¿LCD_HD44780?
+ *               ¿generic::HD44780? ¿HD44780_g? ¿HD44780_generic? @_@
+ *               El primero no sirve para otros tipos de devices, mientras que
+ *               los otros 3 sí.
+ *
  *
  ****************************************************************************/
 #include <avr_memory.h>	// Progmem
 #include "not_generic.h"
 #include <atd_memory.h>
 
-#include "dev_LCD_generic.h"
 #include "dev_HD44780_basic.h" 
 
 namespace dev{
@@ -131,11 +142,11 @@ inline constexpr bool operator!=(_LCD_HD44780_generic_flags a, int b)
  *  
  */
 template <typename Micro, typename pin>
-class Generic_LCD<LCD_HD44780<Micro, pin>>{
+class LCD_HD44780 {
 public:
-    using LCD = LCD_HD44780<Micro, pin>;
+    using LCD = HD44780<Micro, pin>;
 
-    Generic_LCD() {init();}
+    LCD_HD44780() {init();}
 
     /// Init display
     void init();
@@ -224,7 +235,7 @@ public:
  *			    IMPLEMENTACION (.tcc)
  ***************************************************************************/
 template <typename M, typename pin>
-void Generic_LCD<LCD_HD44780<M, pin>>::init() 
+void LCD_HD44780<M, pin>::init() 
 {
     LCD::init();
     display_on();
@@ -233,7 +244,7 @@ void Generic_LCD<LCD_HD44780<M, pin>>::init()
 
 
 template <typename M, typename pin>
-void Generic_LCD<LCD_HD44780<M, pin>>::display_on() 
+void LCD_HD44780<M, pin>::display_on() 
 {
     set_flag(display_on_bit);
     LCD::display_control(flag(display_on_bit),
@@ -243,7 +254,7 @@ void Generic_LCD<LCD_HD44780<M, pin>>::display_on()
 }
 
 template <typename M, typename pin>
-void Generic_LCD<LCD_HD44780<M, pin>>::display_off() 
+void LCD_HD44780<M, pin>::display_off() 
 {
     unset_flag(display_on_bit);
     LCD::display_control(flag(display_on_bit),
@@ -254,7 +265,7 @@ void Generic_LCD<LCD_HD44780<M, pin>>::display_off()
 
 // x = col; y = row
 template <typename M, typename pin>
-void Generic_LCD<LCD_HD44780<M, pin>>::cursor_pos(uint8_t x, uint8_t y)
+void LCD_HD44780<M, pin>::cursor_pos(uint8_t x, uint8_t y)
 {
     switch (y){
 	case 0: LCD::set_ddram_address(0x00 + x); break;
@@ -270,7 +281,7 @@ void Generic_LCD<LCD_HD44780<M, pin>>::cursor_pos(uint8_t x, uint8_t y)
 
 
 template <typename M, typename pin>
-bool Generic_LCD<LCD_HD44780<M, pin>>::cursor(bool on)
+bool LCD_HD44780<M, pin>::cursor(bool on)
 {
     bool res = flag(cursor_on_bit);
 
@@ -288,7 +299,7 @@ bool Generic_LCD<LCD_HD44780<M, pin>>::cursor(bool on)
 
 
 template <typename M, typename pin>
-void Generic_LCD<LCD_HD44780<M, pin>>::cursor_blink(bool yes)
+void LCD_HD44780<M, pin>::cursor_blink(bool yes)
 {
     if (yes)
 	set_flag(cursor_blink_bit);
@@ -301,7 +312,7 @@ void Generic_LCD<LCD_HD44780<M, pin>>::cursor_blink(bool yes)
 }
 
 template <typename M, typename pin>
-void Generic_LCD<LCD_HD44780<M, pin>>::new_extended_char(uint8_t c,
+void LCD_HD44780<M, pin>::new_extended_char(uint8_t c,
                                                       const uint8_t glyph[8])
 {
     LCD::set_cgram_address(c*8);
@@ -314,7 +325,7 @@ void Generic_LCD<LCD_HD44780<M, pin>>::new_extended_char(uint8_t c,
 
 template <typename M, typename pin>
 template <typename ROM_read>
-void Generic_LCD<LCD_HD44780<M, pin>>::new_extended_char(uint8_t c,
+void LCD_HD44780<M, pin>::new_extended_char(uint8_t c,
                              const atd::ROM_array<uint8_t, 8, ROM_read>& glyph)
 {
     LCD::set_cgram_address(c*8);
@@ -326,7 +337,7 @@ void Generic_LCD<LCD_HD44780<M, pin>>::new_extended_char(uint8_t c,
 }
 
 template <typename M, typename pin>
-void Generic_LCD<LCD_HD44780<M, pin>>::new_extended_char(uint8_t c,
+void LCD_HD44780<M, pin>::new_extended_char(uint8_t c,
                                   const not_generic::Progmem_array_view<uint8_t, 8>& glyph)
 {
     LCD::set_cgram_address(c*8);
@@ -344,11 +355,11 @@ void Generic_LCD<LCD_HD44780<M, pin>>::new_extended_char(uint8_t c,
  *
  */
 template <typename Micro, typename pin>
-class Generic_LCD<LCD_HD44780_4004<Micro, pin>>{
+class LCD_HD44780_4004{
 public:
-    using LCD = LCD_HD44780_4004<Micro, pin>;
+    using LCD = HD44780_4004<Micro, pin>;
 
-    Generic_LCD() {init();}
+    LCD_HD44780_4004() {init();}
 
     /// Init display
     void init();
@@ -452,7 +463,7 @@ private:
  *			    IMPLEMENTACION (.tcc)
  ***************************************************************************/
 template <typename M, typename pin>
-void Generic_LCD<LCD_HD44780_4004<M, pin>>::init() 
+void LCD_HD44780_4004<M, pin>::init() 
 {
     LCD::init();
     display_on();
@@ -461,7 +472,7 @@ void Generic_LCD<LCD_HD44780_4004<M, pin>>::init()
 
 
 template <typename M, typename pin>
-void Generic_LCD<LCD_HD44780_4004<M, pin>>::display_on() 
+void LCD_HD44780_4004<M, pin>::display_on() 
 {
     set_flag(display_on_bit);
     display_control_1_and_2();
@@ -469,14 +480,14 @@ void Generic_LCD<LCD_HD44780_4004<M, pin>>::display_on()
 
 
 template <typename M, typename pin>
-void Generic_LCD<LCD_HD44780_4004<M, pin>>::display_off() 
+void LCD_HD44780_4004<M, pin>::display_off() 
 {
     unset_flag(display_on_bit);
     display_control_1_and_2();
 }
 
 template <typename M, typename pin>
-void Generic_LCD<LCD_HD44780_4004<M, pin>>::cursor_display_E1()
+void LCD_HD44780_4004<M, pin>::cursor_display_E1()
 {
     if (flag(cursor_on_bit)){
 	LCD::display_control1(flag(display_on_bit), 
@@ -489,7 +500,7 @@ void Generic_LCD<LCD_HD44780_4004<M, pin>>::cursor_display_E1()
 
 
 template <typename M, typename pin>
-void Generic_LCD<LCD_HD44780_4004<M, pin>>::cursor_display_E2()
+void LCD_HD44780_4004<M, pin>::cursor_display_E2()
 {
     if (flag(cursor_on_bit)){
 	LCD::display_control1(flag(display_on_bit), 
@@ -501,7 +512,7 @@ void Generic_LCD<LCD_HD44780_4004<M, pin>>::cursor_display_E2()
 
 // x = col; y = row
 template <typename M, typename pin>
-void Generic_LCD<LCD_HD44780_4004<M, pin>>::cursor_pos(uint8_t x, uint8_t y)
+void LCD_HD44780_4004<M, pin>::cursor_pos(uint8_t x, uint8_t y)
 {
     switch (y){
         case 0:
@@ -542,7 +553,7 @@ void Generic_LCD<LCD_HD44780_4004<M, pin>>::cursor_pos(uint8_t x, uint8_t y)
 
 
 template <typename M, typename pin>
-bool Generic_LCD<LCD_HD44780_4004<M, pin>>::cursor_on()
+bool LCD_HD44780_4004<M, pin>::cursor_on()
 {
     bool res = flag(cursor_on_bit);
 
@@ -554,7 +565,7 @@ bool Generic_LCD<LCD_HD44780_4004<M, pin>>::cursor_on()
 
 
 template <typename M, typename pin>
-bool Generic_LCD<LCD_HD44780_4004<M, pin>>::cursor_off()
+bool LCD_HD44780_4004<M, pin>::cursor_off()
 {
     bool res = flag(cursor_on_bit);
 
@@ -566,7 +577,7 @@ bool Generic_LCD<LCD_HD44780_4004<M, pin>>::cursor_off()
 
 
 template <typename M, typename pin>
-void Generic_LCD<LCD_HD44780_4004<M, pin>>::cursor_blink()
+void LCD_HD44780_4004<M, pin>::cursor_blink()
 {
     set_flag(cursor_blink_bit);
     display_control_1_or_2();
@@ -574,7 +585,7 @@ void Generic_LCD<LCD_HD44780_4004<M, pin>>::cursor_blink()
 
 
 template <typename M, typename pin>
-void Generic_LCD<LCD_HD44780_4004<M, pin>>::cursor_no_blink()
+void LCD_HD44780_4004<M, pin>::cursor_no_blink()
 {
     unset_flag(cursor_blink_bit);
 
@@ -583,7 +594,7 @@ void Generic_LCD<LCD_HD44780_4004<M, pin>>::cursor_no_blink()
 
 
 template <typename M, typename pin>
-void Generic_LCD<LCD_HD44780_4004<M, pin>>::print(char data)
+void LCD_HD44780_4004<M, pin>::print(char data)
 {
     if (E1_pin())
 	LCD::write_data_to_CG_or_DDRAM1(data);
@@ -593,7 +604,7 @@ void Generic_LCD<LCD_HD44780_4004<M, pin>>::print(char data)
 
 
 template <typename M, typename pin>
-uint8_t Generic_LCD<LCD_HD44780_4004<M, pin>>::read()
+uint8_t LCD_HD44780_4004<M, pin>::read()
 {
     if (E1_pin())
 	return LCD::read_data_from_CG_or_DDRAM1();
@@ -603,7 +614,7 @@ uint8_t Generic_LCD<LCD_HD44780_4004<M, pin>>::read()
 }
 
 template <typename M, typename pin>
-void Generic_LCD<LCD_HD44780_4004<M, pin>>::display_control_1_and_2()
+void LCD_HD44780_4004<M, pin>::display_control_1_and_2()
 {
     LCD::display_control1(flag(display_on_bit), 
 			  flag(cursor_on_bit), flag(cursor_blink_bit));
@@ -613,7 +624,7 @@ void Generic_LCD<LCD_HD44780_4004<M, pin>>::display_control_1_and_2()
 
 
 template <typename M, typename pin>
-void Generic_LCD<LCD_HD44780_4004<M, pin>>::display_control_1_or_2()
+void LCD_HD44780_4004<M, pin>::display_control_1_or_2()
 {
     if (E1_pin())
 	LCD::display_control1(flag(display_on_bit), 
@@ -625,7 +636,7 @@ void Generic_LCD<LCD_HD44780_4004<M, pin>>::display_control_1_or_2()
 
 
 template <typename M, typename pin>
-void Generic_LCD<LCD_HD44780_4004<M, pin>>::new_extended_char(uint8_t c,
+void LCD_HD44780_4004<M, pin>::new_extended_char(uint8_t c,
                                                       const uint8_t glyph[8])
 {
     LCD::set_cgram_address(c*8);
@@ -639,7 +650,7 @@ void Generic_LCD<LCD_HD44780_4004<M, pin>>::new_extended_char(uint8_t c,
 
 template <typename M, typename pin>
 template <typename ROM_read>
-void Generic_LCD<LCD_HD44780_4004<M, pin>>::new_extended_char(uint8_t c,
+void LCD_HD44780_4004<M, pin>::new_extended_char(uint8_t c,
                             const atd::ROM_array<uint8_t, 8,  ROM_read>& glyph)
 {
     LCD::set_cgram_address(c*8);
@@ -651,7 +662,7 @@ void Generic_LCD<LCD_HD44780_4004<M, pin>>::new_extended_char(uint8_t c,
 }
 
 template <typename M, typename pin>
-void Generic_LCD<LCD_HD44780_4004<M, pin>>::new_extended_char(uint8_t c,
+void LCD_HD44780_4004<M, pin>::new_extended_char(uint8_t c,
                                   const not_generic::Progmem_array_view<uint8_t, 8>& glyph)
 {
     LCD::set_cgram_address(c*8);
@@ -661,6 +672,16 @@ void Generic_LCD<LCD_HD44780_4004<M, pin>>::new_extended_char(uint8_t c,
 
     LCD::set_ddram_address(0x00); 
 }
+
+
+
+// Alias
+// -----
+template <typename Micro, typename pin>
+using LCD_HD44780_1602 = LCD_HD44780<Micro, pin>;
+
+template <typename Micro, typename pin>
+using LCD_HD44780_2004 = LCD_HD44780<Micro, pin>;
 
 }// namespace
 

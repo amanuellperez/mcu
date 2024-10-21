@@ -28,10 +28,4 @@
 #include "dev_HD44780_generic.h"
 #include "dev_HD44780_charset.h"
 
-// DUDA: Los dos siguientes archivos no pertenecen a `hwd` sino a `logic`
-// Pero es cómodo tenerlos dentro de este archivo de cabecera.
-// ¿Mover este archivo a `logic`? ¿dejarlo aquí? (<- raro)
-#include "dev_LCD_screen.h"
-#include "dev_LCD_ostream.h"
-
 #endif

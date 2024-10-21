@@ -45,7 +45,7 @@
  *	    06/01/2020 v0.4: Elimino DPin a favor de Pin.
  *	    07/01/2021       set_cgram_address
  *	    08/01/2021 v0.5: Reestructuro para poder usar LCD 40 x 04.
- *	    06/02/2022       alias LCD_HD44780_1602 y LCD_HD44780_2004
+ *	    06/02/2022       alias HD44780_1602 y HD44780_2004
  *	    20/10/2024 Independizado del microcontrolador.
  *
  ****************************************************************************/
@@ -77,12 +77,12 @@ namespace dev{
  *	    K   = 0V
  */
 template <uint8_t pin_RS>
-struct LCD_HD44780_RS{
+struct HD44780_RS{
     static constexpr uint8_t RS = pin_RS;
 };
 
 template <uint8_t pin_RW>
-struct LCD_HD44780_RW{
+struct HD44780_RW{
     static constexpr uint8_t RW = pin_RW;
 };
 
@@ -92,7 +92,7 @@ template <uint8_t pin_D4,
 	  uint8_t pin_D5,
 	  uint8_t pin_D6,
 	  uint8_t pin_D7>
-struct LCD_HD44780_D4{
+struct HD44780_D4{
     static constexpr uint8_t D4 = pin_D4;
     static constexpr uint8_t D5 = pin_D5;
     static constexpr uint8_t D6 = pin_D6;
@@ -103,7 +103,7 @@ struct LCD_HD44780_D4{
 template <typename pin_RS, 
 	  typename pin_RW,
 	  typename pins_D4>
-struct LCD_HD44780_base_pins4{
+struct HD44780_base_pins4{
     static constexpr uint8_t num_D_pins = 4;
 
     static constexpr uint8_t RS = pin_RS::RS;
@@ -133,14 +133,14 @@ struct LCD_HD44780_base_pins4{
  *        que el LCD 40 x 04 tiene 2 pines E).
  */
 template <typename Micro0, typename pin>
-class LCD_HD44780_base{
+class HD44780_base{
 public:
 
 protected:
 // Types
     using Micro = Micro0;
 
-//    LCD_HD44780_base(); <-- llamar a setup_pins() para inicializarlo.
+//    HD44780_base(); <-- llamar a setup_pins() para inicializarlo.
     static void setup_pins();
 
     /// Inicializamos el IC
@@ -305,10 +305,10 @@ private:
 
 
 /***************************************************************************
- *		  LCD_HD44780: display 16 x 2 or 20 x 4
+ *		  HD44780: display 16 x 2 or 20 x 4
  ***************************************************************************/
 template <uint8_t pin_E>
-struct LCD_HD44780_E{
+struct HD44780_E{
     static constexpr uint8_t E = pin_E;
 };
 
@@ -317,8 +317,8 @@ template <typename pin_RS,
 	  typename pin_RW,
 	  typename pin_E,
 	  typename pins_D4>
-struct LCD_HD44780_pins4{
-    using Base_pins = LCD_HD44780_base_pins4<pin_RS, pin_RW, pins_D4>;
+struct HD44780_pins4{
+    using Base_pins = HD44780_base_pins4<pin_RS, pin_RW, pins_D4>;
 
     static constexpr uint8_t E  = pin_E::E;
 };
@@ -327,41 +327,41 @@ struct LCD_HD44780_pins4{
  * La forma de definir un LCD es de la siguiente forma:
  *
  * // Si lo conectamos solo a 4 pins de datos
- * using LCD_pins = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<4>,
- *					   dev::LCD_HD44780_RW<5>,
- *					   dev::LCD_HD44780_E<6>,
- *					   dev::LCD_HD44780_D4<11,12,13,14>
+ * using LCD_pins = dev::HD44780_pins4<dev::HD44780_RS<4>,
+ *					   dev::HD44780_RW<5>,
+ *					   dev::HD44780_E<6>,
+ *					   dev::HD44780_D4<11,12,13,14>
  *					   >;
  *					   
- * using LCD_HD44780_base = dev::LCD_HD44780_base<LCD_pins>;
+ * using HD44780_base = dev::HD44780_base<LCD_pins>;
  *
  * En caso de que se pasen en orden equivocado los pines (por ejemplo, 
  * se pase primero RW en vez de RS) dará un error (misterioso) de compilación
  * impidiendo que se definan mal los pines.
  *
- * DUDA: ¿merece la pena modificar LCD_HD44780_pins4 para que de un error
+ * DUDA: ¿merece la pena modificar HD44780_pins4 para que de un error
  * inteligible? De momento creo que no.
  */
 
 template <typename Micro, typename pin>
-// requires: std::is_same_v<pin, LCD_HD44780_pins>;
-class LCD_HD44780: 
-	public LCD_HD44780_base<Micro, typename pin::Base_pins>{
+// requires: std::is_same_v<pin, HD44780_pins>;
+class HD44780: 
+	public HD44780_base<Micro, typename pin::Base_pins>{
 public:
-    using Base = LCD_HD44780_base<Micro, typename pin::Base_pins>;
+    using Base = HD44780_base<Micro, typename pin::Base_pins>;
 
 // Construcción:
 //  Suministro 2 formas de usar el LCD:
-//  1. Defines un objeto que se autoinicializa: LCD_HD44780 lcd;
+//  1. Defines un objeto que se autoinicializa: HD44780 lcd;
 //  2. No definir el objeto y usar todas las funciones static. No olvidar
 //     llamar a init():
-//	    LCD_HD44780::init();
-//	    LCD_HD44780::clear_display(); 
+//	    HD44780::init();
+//	    HD44780::clear_display(); 
 //	    ...
 //  En principio me gusta más 1, pero al implementar LCD_screen es más
 //  práctico 2 ya que concibo el LCD como interfaz.
 //		
-    LCD_HD44780():Base() {init();}
+    HD44780():Base() {init();}
 
     static void init();
 
@@ -454,7 +454,7 @@ private:
 
 
 template <typename M, typename pin>
-void LCD_HD44780<M, pin>::init() 
+void HD44780<M, pin>::init() 
 {
     Base::setup_pins();
     setup_pins();
@@ -465,10 +465,10 @@ void LCD_HD44780<M, pin>::init()
 
 
 /***************************************************************************
- *		  LCD_HD44780_4004: display 40 x 04
+ *		  HD44780_4004: display 40 x 04
  ***************************************************************************/
 template <uint8_t pin_E1, uint8_t pin_E2>
-struct LCD_HD44780_4004_E{
+struct HD44780_4004_E{
     static constexpr uint8_t E1 = pin_E1;
     static constexpr uint8_t E2 = pin_E2;
 };
@@ -478,8 +478,8 @@ template <typename pin_RS,
 	  typename pin_RW,
 	  typename pin_E,
 	  typename pins_D4>
-struct LCD_HD44780_4004_pins4{
-    using Base_pins = LCD_HD44780_base_pins4<pin_RS, pin_RW, pins_D4>;
+struct HD44780_4004_pins4{
+    using Base_pins = HD44780_base_pins4<pin_RS, pin_RW, pins_D4>;
 
     static constexpr uint8_t E1  = pin_E::E1;
     static constexpr uint8_t E2  = pin_E::E2;
@@ -511,13 +511,13 @@ struct LCD_HD44780_4004_pins4{
  *
  */
 template <typename Micro, typename pin>
-// requires: std::is_same_v<pin, LCD_HD44780_4004_pins4>;
-class LCD_HD44780_4004: 
-	public LCD_HD44780_base<Micro, typename pin::Base_pins>{
+// requires: std::is_same_v<pin, HD44780_4004_pins4>;
+class HD44780_4004: 
+	public HD44780_base<Micro, typename pin::Base_pins>{
 public:
-    using Base = LCD_HD44780_base<Micro, typename pin::Base_pins>;
+    using Base = HD44780_base<Micro, typename pin::Base_pins>;
 
-    LCD_HD44780_4004() {init();}
+    HD44780_4004() {init();}
 
     static void init() 
     {
@@ -650,10 +650,10 @@ private:
 // Al definir el hardware en un programa quiero que se pueda leer que estoy
 // usando un LCD de 16x02, de 20x04 ó de 40x04. Por eso defino estos alias.
 template <typename Micro, typename pin>
-using LCD_HD44780_1602 = LCD_HD44780<Micro, pin>;
+using HD44780_1602 = HD44780<Micro, pin>;
 
 template <typename Micro, typename pin>
-using LCD_HD44780_2004 = LCD_HD44780<Micro, pin>;
+using HD44780_2004 = HD44780<Micro, pin>;
 
 }// namespace
 

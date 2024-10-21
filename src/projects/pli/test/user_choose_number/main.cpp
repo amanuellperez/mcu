@@ -42,10 +42,10 @@ using Micro   = myu::Micro;
 // Pin connections
 // ---------------
 // LCD
-using LCD_pins = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<4>,
-				       dev::LCD_HD44780_RW<5>,
-				       dev::LCD_HD44780_E<6>,
-				       dev::LCD_HD44780_D4<11,12,13,14>
+using LCD_pins = dev::HD44780_pins4<dev::HD44780_RS<4>,
+				       dev::HD44780_RW<5>,
+				       dev::HD44780_E<6>,
+				       dev::HD44780_D4<11,12,13,14>
 				       >;
 
 // keyrow
@@ -66,13 +66,9 @@ using Keyrow = dev::Basic_keyrow<Micro, Keyrow_pins, Keyrow_codes>;
 using LCD_1602 = dev::LCD_HD44780_1602<Micro, LCD_pins>;
 using LCD_2004 = dev::LCD_HD44780_2004<Micro, LCD_pins>;
 
-// Generic devices
-using Generic_LCD_1602 = dev::Generic_LCD<LCD_1602>;
-using Generic_LCD_2004 = dev::Generic_LCD<LCD_2004>;
-
 // Screens
-using Screen_1602 = dev::LCD_screen_1602<Generic_LCD_1602>;
-using Screen_2004 = dev::LCD_screen_2004<Generic_LCD_2004>;
+using Screen_1602 = dev::LCD_screen_1602<LCD_1602>;
+using Screen_2004 = dev::LCD_screen_2004<LCD_2004>;
 
 // Choose LCD to test
 //using LCD = Screen_1602;

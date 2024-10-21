@@ -25,6 +25,13 @@
  *
  *  - DESCRIPCION: Interfaz al display HD44780
  *  
+ *  TODO: Eliminar esta clase a favor de un "Text_display" como el que he 
+ *  empezado a crear en atd. 
+ *
+ *  TODO: hay un problema con el print. Eso hace que haya que poner este
+ *  archivo de cabecera SIEMPRE EL PRIMERO!!! (<-- como la idea es eliminar
+ *  esta clase a favor de un Text_display, me olvido de esto)
+ *
  *  - HISTORIA:
  *    A. Manuel L.Perez
  *	11/07/2017 v0.0

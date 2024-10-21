@@ -19,7 +19,7 @@
 
 
 
-#include "../../../dev_LCD_screen.h"
+#include "../../../dev_LCD_screen.h" // TODO: siempre ponerlo al principio
 #include "../../../dev_HD44780_generic.h"
 #include "../../../dev_HD44780_charset.h"
 #include <avr_time.h>

@@ -39,7 +39,7 @@ namespace dev{
 // Escribe solo los bits d4-d7 de 'd' (los más significativos)
 template <typename M, typename P>
 template <typename pin_E>
-void LCD_HD44780_base<M, P>::write_d4_d7( uint8_t rs
+void HD44780_base<M, P>::write_d4_d7( uint8_t rs
 		, uint8_t rw
 		, uint8_t d)
 {
@@ -54,7 +54,7 @@ void LCD_HD44780_base<M, P>::write_d4_d7( uint8_t rs
 
 
 //template <typename P>
-//void LCD_HD44780_base<P>::write_d8(uint8_t rs
+//void HD44780_base<P>::write_d8(uint8_t rs
 //	    , uint8_t rw
 //	    , uint8_t d)
 //{
@@ -70,7 +70,7 @@ void LCD_HD44780_base<M, P>::write_d4_d7( uint8_t rs
 
 
 template <typename M, typename P>
-void LCD_HD44780_base<M, P>::write_d4(uint8_t d)
+void HD44780_base<M, P>::write_d4(uint8_t d)
 {
     D4::write(d & 0x01);
     d >>= 1;
@@ -83,7 +83,7 @@ void LCD_HD44780_base<M, P>::write_d4(uint8_t d)
 
 
 //template <typename P>
-//void LCD_HD44780_base<P>::write_d8(uint8_t d)
+//void HD44780_base<P>::write_d8(uint8_t d)
 //{
 //    D0::write(d & 0x01);
 //    d >>= 1;
@@ -105,7 +105,7 @@ void LCD_HD44780_base<M, P>::write_d4(uint8_t d)
 
 template <typename M, typename P>
 template <typename pin_E>
-void LCD_HD44780_base<M, P>::write_d4(uint8_t rs
+void HD44780_base<M, P>::write_d4(uint8_t rs
 	    , uint8_t rw
 	    , uint8_t d)
 {
@@ -125,7 +125,7 @@ void LCD_HD44780_base<M, P>::write_d4(uint8_t rs
 }
 
 //template <typename P>
-//bool LCD_HD44780_base<P>::is_busy8()
+//bool HD44780_base<P>::is_busy8()
 //{
 //    // marcamos el pin 7 de lectura
 //    D7::as_input_without_pullup();
@@ -152,7 +152,7 @@ void LCD_HD44780_base<M, P>::write_d4(uint8_t rs
     
 
 template <typename M, typename P>
-void LCD_HD44780_base<M, P>::D_pins_as_output()
+void HD44780_base<M, P>::D_pins_as_output()
 {
     if constexpr (num_D_pins == 8){
 	D0::as_output();
@@ -168,7 +168,7 @@ void LCD_HD44780_base<M, P>::D_pins_as_output()
 }
 
 template <typename M, typename P>
-void LCD_HD44780_base<M, P>::D_pins_as_input_without_pullup()
+void HD44780_base<M, P>::D_pins_as_input_without_pullup()
 {
     if constexpr (num_D_pins == 8){
 	D0::as_input_without_pullup();
@@ -186,7 +186,7 @@ void LCD_HD44780_base<M, P>::D_pins_as_input_without_pullup()
 
 template <typename M, typename P>
 template <typename pin_E>
-bool LCD_HD44780_base<M, P>::is_busy4()
+bool HD44780_base<M, P>::is_busy4()
 {
     // Vamos a leer de los pines
     D_pins_as_input_without_pullup();
@@ -226,7 +226,7 @@ bool LCD_HD44780_base<M, P>::is_busy4()
 // un pulso como en el caso de escribir.
 template <typename M, typename P>
 template <typename pin_E>
-uint8_t LCD_HD44780_base<M, P>::read_d4()
+uint8_t HD44780_base<M, P>::read_d4()
 {
     // Vamos a leer de los pines
     D_pins_as_input_without_pullup();
@@ -279,7 +279,7 @@ uint8_t LCD_HD44780_base<M, P>::read_d4()
 // pero al desconectarlo de corriente y reconectarlo deja de funcionar, lo
 // cual al principio despista mucho qué es lo que ha ocurrido).
 //template <typename P>
-//void LCD_HD44780_base<P>::init8()
+//void HD44780_base<P>::init8()
 //{
 //    _delay_ms(50);   // wait for more than 40 ms
 //
@@ -330,7 +330,7 @@ uint8_t LCD_HD44780_base<M, P>::read_d4()
 // cual al principio despista mucho qué es lo que ha ocurrido).
 template <typename M, typename P>
 template <typename pin_E>
-void LCD_HD44780_base<M, P>::init4()
+void HD44780_base<M, P>::init4()
 {
     //delay_ms(50);   // wait for more than 40 ms after Vcc rises to 2.7V
     Micro::wait_ms(50);
@@ -380,7 +380,7 @@ void LCD_HD44780_base<M, P>::init4()
 }
 
 template <typename M, typename P>
-void LCD_HD44780_base<M, P>::setup_pins()
+void HD44780_base<M, P>::setup_pins()
 {
     D_pins_as_output();
 
@@ -393,7 +393,7 @@ void LCD_HD44780_base<M, P>::setup_pins()
 //// Definimos las conexiones hardware del display.
 //// Interface 4 bits.
 //template <typename P>
-//inline LCD_HD44780_base<P>::LCD_HD44780_base()
+//inline HD44780_base<P>::HD44780_base()
 //{
 //    setup(); 
 //}
@@ -402,7 +402,7 @@ void LCD_HD44780_base<M, P>::setup_pins()
 // Para realizar una operación en el LCD necesitamos activar E
 template <typename M, typename P>
 template <typename pin_E>
-void LCD_HD44780_base<M, P>::pulse_E()
+void HD44780_base<M, P>::pulse_E()
 {
     pin_E::write_one();
     //delay_us(1);   // OJO: esto antes tenía que ponerlo a delay_ms(1)???
@@ -413,7 +413,7 @@ void LCD_HD44780_base<M, P>::pulse_E()
 
 template <typename M, typename P>
 template <typename pin_E>
-void LCD_HD44780_base<M, P>::write_d(uint8_t rs
+void HD44780_base<M, P>::write_d(uint8_t rs
 	    , uint8_t rw
 	    , uint8_t d)
 {
@@ -427,7 +427,7 @@ void LCD_HD44780_base<M, P>::write_d(uint8_t rs
 // Instrucciones del HD44780
 template <typename M, typename P>
 template <typename pin_E>
-void LCD_HD44780_base<M, P>::set_ddram_address(uint8_t addr)
+void HD44780_base<M, P>::set_ddram_address(uint8_t addr)
 {
     // addr tiene que tener DB7 = 1
     atd::write_bit<7>::to<1>::in(addr);
@@ -439,7 +439,7 @@ void LCD_HD44780_base<M, P>::set_ddram_address(uint8_t addr)
 
 template <typename M, typename P>
 template <typename pin_E>
-void LCD_HD44780_base<M, P>::set_cgram_address(uint8_t addr)
+void HD44780_base<M, P>::set_cgram_address(uint8_t addr)
 {
     // bits DB7 = 0 and DB6 = 1
     atd::write_bits<7, 6>::to<0, 1>::in(addr);
@@ -451,7 +451,7 @@ void LCD_HD44780_base<M, P>::set_cgram_address(uint8_t addr)
 
 template <typename M, typename P>
 template <typename pin_E>
-void LCD_HD44780_base<M, P>::cursor_or_display_shift(bool display_no_cursor, bool to_the_right)
+void HD44780_base<M, P>::cursor_or_display_shift(bool display_no_cursor, bool to_the_right)
 {
     uint8_t d = 0x10;
     if(display_no_cursor)	d |= 0x08;
@@ -464,7 +464,7 @@ void LCD_HD44780_base<M, P>::cursor_or_display_shift(bool display_no_cursor, boo
 
 template <typename M, typename P>
 template <typename pin_E>
-void LCD_HD44780_base<M, P>::display_control(bool display_on, bool cursor_on, bool cursor_blink)
+void HD44780_base<M, P>::display_control(bool display_on, bool cursor_on, bool cursor_blink)
 {
     uint8_t d = 0x08;
     if(display_on)	d |= 0x04;
@@ -477,7 +477,7 @@ void LCD_HD44780_base<M, P>::display_control(bool display_on, bool cursor_on, bo
 
 template <typename M, typename P>
 template <typename pin_E>
-void LCD_HD44780_base<M, P>::entry_mode(bool incrementa_cursor, bool shift_display)
+void HD44780_base<M, P>::entry_mode(bool incrementa_cursor, bool shift_display)
 {
     uint8_t d = 0x04;
     if(incrementa_cursor)   d |= 0x02;
@@ -489,7 +489,7 @@ void LCD_HD44780_base<M, P>::entry_mode(bool incrementa_cursor, bool shift_displ
 
 template <typename M, typename P>
 template <typename pin_E>
-void LCD_HD44780_base<M, P>::function_set(bool interface_8_bits // ¿es 8 bit o 4 bit interface?
+void HD44780_base<M, P>::function_set(bool interface_8_bits // ¿es 8 bit o 4 bit interface?
 		, bool tiene_2_filas    // ¿tiene 2 ó 1 linea?
 		, bool character_font_5x8) // ¿char de 5x8 ó 5x10?
 {
@@ -506,7 +506,7 @@ void LCD_HD44780_base<M, P>::function_set(bool interface_8_bits // ¿es 8 bit o 
 
 template <typename M, typename P>
 template <typename pin_E>
-bool LCD_HD44780_base<M, P>::is_busy()
+bool HD44780_base<M, P>::is_busy()
 {
 //    if constexpr (num_D_pins == 8)	
 //	return is_busy8();
@@ -517,7 +517,7 @@ bool LCD_HD44780_base<M, P>::is_busy()
 
 template <typename M, typename P>
 template <typename pin_E>
-void LCD_HD44780_base<M, P>::write_data_to_CG_or_DDRAM(uint8_t data)
+void HD44780_base<M, P>::write_data_to_CG_or_DDRAM(uint8_t data)
 {
     wait_to_be_available<pin_E>(); 
     write_d<pin_E>(1,0,data);
@@ -526,7 +526,7 @@ void LCD_HD44780_base<M, P>::write_data_to_CG_or_DDRAM(uint8_t data)
 
 template <typename M, typename P>
 template <typename pin_E>
-uint8_t LCD_HD44780_base<M, P>::read_data_from_CG_or_DDRAM()
+uint8_t HD44780_base<M, P>::read_data_from_CG_or_DDRAM()
 {
     wait_to_be_available<pin_E>(); 
     return read_d4<pin_E>();
@@ -536,7 +536,7 @@ uint8_t LCD_HD44780_base<M, P>::read_data_from_CG_or_DDRAM()
 
 template <typename M, typename P>
 template <typename pin_E>
-void LCD_HD44780_base<M, P>::init()
+void HD44780_base<M, P>::init()
 {
     pin_E::write_zero();
 
@@ -550,7 +550,7 @@ void LCD_HD44780_base<M, P>::init()
 
 template <typename M, typename P>
 template <typename pin_E>
-void LCD_HD44780_base<M, P>::clear_display()	    
+void HD44780_base<M, P>::clear_display()	    
 {
     wait_to_be_available<pin_E>();
     write_d<pin_E>(0,0, 0x01);
@@ -560,7 +560,7 @@ void LCD_HD44780_base<M, P>::clear_display()
 /// el display, lo coloca en su posición inicial.
 template <typename M, typename P>
 template <typename pin_E>
-void LCD_HD44780_base<M, P>::return_home()	    
+void HD44780_base<M, P>::return_home()	    
 {
     wait_to_be_available<pin_E>();
     write_d<pin_E>(0,0, 0x02);

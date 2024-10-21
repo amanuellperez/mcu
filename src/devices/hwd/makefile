@@ -25,7 +25,6 @@ INCS= 	dev_A4988.h				\
 		dev_HD44780_generic.h	\
 		dev_HD44780.h			\
 		dev_L298N.h				\
-		dev_LCD_generic.h		\
 		dev_led.h				\
 		dev_LM75.h				\
 		dev_MAX7219.h			\

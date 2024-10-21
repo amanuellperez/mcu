@@ -27,13 +27,13 @@
 namespace myu = atmega;
 
 // Si lo conectamos solo a 4 pins de datos
-using LCD_pins = dev::LCD_HD44780_4004_pins4<dev::LCD_HD44780_RS<4>,
-				       dev::LCD_HD44780_RW<5>,
-				       dev::LCD_HD44780_4004_E<6, 10>,
-				       dev::LCD_HD44780_D4<11,12,13,14>
+using LCD_pins = dev::HD44780_4004_pins4<dev::HD44780_RS<4>,
+				       dev::HD44780_RW<5>,
+				       dev::HD44780_4004_E<6, 10>,
+				       dev::HD44780_D4<11,12,13,14>
 				       >;
 
-using LCD = dev::LCD_HD44780_4004<myu::Micro, LCD_pins>;
+using LCD = dev::HD44780_4004<myu::Micro, LCD_pins>;
 
 namespace gl = rom::glyphs_5x8;
 using Glyph = gl::Glyph<myu::ROM_read>;

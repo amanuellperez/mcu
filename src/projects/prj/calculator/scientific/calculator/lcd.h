@@ -24,6 +24,7 @@
 
 #include <dev_HD44780.h>
 #include <dev_HD44780_charset.h>
+#include <dev_LCD_ostream.h>
 #include <rom_glyphs_5x8.h>
 
 #include "../instcodes.h"
@@ -34,7 +35,7 @@ using Code      = Sci_code;
 // LCDs. Reestructurarlo (algo parecido a lo hecho en la calculadora basic).
 template <typename Micro, typename LCD_pins>
 class LCD_calculator : 
-    public dev::LCD_ostream_1602<dev::Generic_LCD<dev::LCD_HD44780<Micro, LCD_pins>>>
+    public dev::LCD_ostream_1602<dev::LCD_HD44780<Micro, LCD_pins>>
 {
 public:
     void init();
@@ -49,8 +50,8 @@ private:
     void print_lcd_symbol(char c);
 
     using Parent  = 
-	dev::LCD_ostream_1602<dev::Generic_LCD<dev::LCD_HD44780<Micro, LCD_pins>>>;
-    using LCD = dev::LCD_HD44780<Micro, LCD_pins>;
+	dev::LCD_ostream_1602<dev::LCD_HD44780<Micro, LCD_pins>>;
+    using LCD = dev::HD44780<Micro, LCD_pins>;
 };
 
 
