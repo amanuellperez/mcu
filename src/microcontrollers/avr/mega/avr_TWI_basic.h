@@ -41,7 +41,7 @@
 #include <atd_type_traits.h>	// always_false_v
 #include <avr/io.h> // registros: DDRB... PORT...
 #include <avr_constants.h>
-#include "avr_not_generic.h"
+#include "mega_cfg.h"
 
 namespace avr_{
 

@@ -5,6 +5,7 @@ SOURCES= main.cpp	\
 		 ../../../avr_debug.cpp
 
 MCU = atmega328p
+F_CPU = 1000000UL
 
 include $(AVR_GENRULES)
 

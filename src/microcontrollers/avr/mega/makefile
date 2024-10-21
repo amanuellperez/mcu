@@ -37,8 +37,7 @@ INCS= avr_ADC_basic.h	\
 	avr_watchdog.h			\
 	mega.h				\
 	mega_cfg.h			\
-	mega_pin.h			\
-	avr_not_generic.h	
+	mega_pin.h			
 
 
 MCU=atmega328p

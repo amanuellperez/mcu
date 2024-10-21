@@ -16,17 +16,6 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-# -------------------------------------------------
-# Datos del microcontrolador por defecto que usamos
-# -------------------------------------------------
-#MCU   ?= atmega168a  <-- el micro lo define el cliente en el makefile
-
-# Frecuencia a la que funciona la CPU 
-# OJO: el reloj del atmega328p funciona a 8 MHz, pero su CPU a 1 MHz!!!
-# No confundir estas dos cosas.
-F_CPU ?= 1000000UL
-
-
 # Compilador y versión que usamos
 CXX := avr-g++
 CPP_STD ?= c++23

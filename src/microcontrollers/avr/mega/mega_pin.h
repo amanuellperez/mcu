@@ -91,9 +91,7 @@
  *	           pines.
  *
  ****************************************************************************/
-#include "avr_not_generic.h" // TODO: para eliminar este archivo basta con
-			     // escribir Pin como he hecho en atmega4809,
-			     // pasándole la configuración a Pin.
+#include "mega_cfg.h" 
     
 #include <atd_bit.h>
 #include <mcu_pin.h>
