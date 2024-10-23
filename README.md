@@ -82,6 +82,7 @@ ATMEGA328).
 * [Vídeos](#videos)
 * [Tags usadas en el código](#tags)
 * [Nombres de funciones](#namefunction)
+* [Varios](#varios)
 
 ## <a name="compilador"></a>Compilador y toolchain
 `binutils 2.42`

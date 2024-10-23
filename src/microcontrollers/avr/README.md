@@ -32,7 +32,7 @@ en un namespace interno: `mega_`, `mega0_`, ... Estos namespaces son internos
 y los iré cambiando a medida que sea necesario.
 
 Cada microcontrolador por su parte tendrá su propio namespace: `atmega328p`,
-`atmega4809, ... Estos namespaces son estables, no se cambiarán en el futuro.
+`atmega4809`, ... Estos namespaces son estables, no se cambiarán en el futuro.
 
 ### Nombres de archivo
 
