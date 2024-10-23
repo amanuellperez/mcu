@@ -1,4 +1,4 @@
-# Copyright (C) 2019-2023 Manuel Perez <manuel2perez@proton.me>
+# Copyright (C) 2019-2024 Manuel Perez <manuel2perez@proton.me>
 #
 # This file is part of the MCU++ Library.
 #

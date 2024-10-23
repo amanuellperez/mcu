@@ -1,4 +1,4 @@
-# Copyright (C) 2019-2020 Manuel Perez
+# Copyright (C) 2019-2024 Manuel Perez
 #
 # This file is part of the MCU++ Library.
 #
@@ -19,7 +19,8 @@
 
 include $(MCU_COMRULES)
 
-LIBSUFFIX=$(MCU)_$(F_CPU)
+LIBSUFFIX=$(MCU)
+MICROSUFFIX=$(MCU)_$(F_CPU)
 
 # Variables genéricas de compilación del proyecto
 PROJ_CXXFLAGS=
@@ -29,9 +30,14 @@ PROJ_CXXFLAGS=
 # 	poner las librerías que dependen de otras antes.
 # 	Ejemplo: A depende de B. Luego escribir '-lA -lB' y no al revés
 # 	ya que no compilaría.
+ifdef BIN
 PROJ_LDFLAGS=-L$(MCU_LIB) -lhwd_$(LIBSUFFIX) \
-			 -lmcu_$(LIBSUFFIX) -lmicro_$(LIBSUFFIX) \
+			 -lmcu_$(MICROSUFFIX) -lmicro_$(MICROSUFFIX) \
 			 -latd_$(MCU) -lstd_$(MCU)
+else
+PROJ_LDFLAGS=-L$(MCU_LIB) -lhwd_$(LIBSUFFIX) \
+			 -latd_$(MCU) -lstd_$(MCU)
+endif
 
 include $(MCU_GENRULES)
 

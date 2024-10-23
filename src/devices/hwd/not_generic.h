@@ -31,7 +31,7 @@
  *    08/12/2022 Escrito
  *
  ****************************************************************************/
-#include <mega_private.h> // wait_ms
+#include <mega_import_avr.h> // wait_ms
 #include <mega_pin.h>
 #include <mega_memory.h>    // lo usa logic (dev_LCD_font_xxx.h)
 			    // y LCD_HD44780_generic.h

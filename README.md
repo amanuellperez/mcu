@@ -206,11 +206,16 @@ Todo el software que uso es gratuito.
 ### Configurar entorno de trabajo
 Para configurar el entorno de trabajo basta con ejecutar [mcu_environment.sh](mcu_environment.sh).
 
+Para que el entorno se cargue correctamente es necesario configurar el primer
+apartado de `mcu_environment.sh`: rellenar `MCU_ROOT`, que indica dónde se
+encuentra el proyecto instalado, y la variable `PATH_AVR_BINS` que indica
+dónde encontrar los compiladores.
 
 ## <a name="compilar"></a>Compilar
 
 ### Problema: crear bibliotecas con diferentes frecuencias
 
+#### Generar la librería del traductor del micro a diferentes frecuencias
 Las dos frecuencias más básicas a las que funciona el `atmega32` son a 1MHz y
 a 8 MHz. Si se genera código en `.cpp` ese código solo funcionara a la
 frecuencia `F_CPU` que se usó para compilarlo. 
@@ -221,16 +226,18 @@ se uso para compilarla. Así, se generan `libavr_1000000UL.a` y
 `libavr_8000000UL.a`, la primera a 1MHz y la segunda a 8MHz. El usuario tendrá
 que enlazar con la biblioteca que corresponda.
 
-*NOTA* Como esto es un proyecto de aprendizaje y experimentación tengo mis
-dudas si en el código tal y como está ahora realmente se está utilizando
-`F_CPU`. Si no se usa, sobraría generar una biblioteca por cada frecuencia de
-trabajo.
-
 
 **make.sh**
 Para compilar todas las bibliotecas a la vez, uso el script `make.sh` que se
 puede encontrar en el directorio `tools`. Se limita a compilar todas las
 frecuencias definidas en la variable de entorno `LIST_F_CPU`.
+
+#### Resto de librerías
+
+El resto de librerías, `hwd`, `logic`, ... son librerías genéricas que *no*
+dependen del microcontrolador ni de la frecuencia a la que opere. Por ello,
+las librerías no hacen referencia a `F_CPU`. Para compilarlas basta con
+ejecutar `make dist`.
 
 
 
@@ -534,5 +541,12 @@ para implementarlo:
    `copy___into___(x, y)` de esa forma los 3 guiones bajos indican dónde va
    cada parámetro. Esto es, `copy__into__(x,y)` es mi forma de escribir
    `copy(x)_into(y)`.
+
+## <a name="varios"></a>Varios
+
+* Estoy traduciendo `libraries` por librería. Sí, ya se que está mal
+  traducido, pero qué quieres: cuando estudie mi profesor no debía saber nada
+  de inglés y escuché tantas veces la palabra "librería" que ya me suena raro
+  si digo otra cosa.
 
 

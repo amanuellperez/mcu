@@ -1,7 +1,33 @@
+# Copyright (C) 2017-2024 Manuel Perez
+#
+# This file is part of the MCU++ Library.
+#
+# MCU++ Library is a free library: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+# ----------------------
+# Variables a configurar
+# ----------------------
+# Where is the project?
+MCU_ROOT=${MY_HOME}/prj/git/mcu		; export MCU_ROOT
+
+# Where is avr-gcc?
+PATH_AVR_BINS=${MY_HOME}/../bin/avr/bin
+
 # -------------------------
 # Estructura de directorios
 # -------------------------
-MCU_ROOT=${MY_HOME}/prj/git/mcu		; export MCU_ROOT
+#MCU_ROOT=${MY_HOME}/prj/git/mcu		; export MCU_ROOT
 MCU_SRC=${MCU_ROOT}/src			; export MCU_SRC
 MCU_MK=${MCU_ROOT}/mk			; export MCU_MK
 MCU_TOOLS=${MCU_ROOT}/tools		; export MCU_TOOLS
@@ -62,7 +88,7 @@ LIBRARY_PATH=${MCU_LIB}	; export LIBRARY_PATH
 # PATH
 # ----
 # path del avr-g++
-PATH=${PATH}:${MY_HOME}/../bin/avr/bin
+PATH=${PATH}:${PATH_AVR_BINS}
 PATH=${PATH}:${MCU_TOOLS}
 export PATH
 
@@ -95,6 +121,7 @@ export DEFAULT_MCU_FOR_LIBS
 # Alias para compilar
 # -------------------
 alias mf='make flash'
+alias md='make clean; make dist'
 alias mc='make super_clean'
 
 # Alias para navegar
