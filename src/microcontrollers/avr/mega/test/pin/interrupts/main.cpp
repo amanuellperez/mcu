@@ -18,15 +18,15 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "../../../mega_cfg.h"
-#include "../../../avr_interrupt.h"
+#include "../../../mega_interrupt.h"
 #include "../../../mega_pin.h"
 #include <avr_time.h>
-#include "../../../avr_UART_iostream.h"
+#include "../../../mega_UART_iostream.h"
 
 
 // Micro
 // -----
-namespace my_mcu = avr_;
+namespace my_mcu = mega_;
 //using Micro = my_mcu::Micro;
 
 // Pins

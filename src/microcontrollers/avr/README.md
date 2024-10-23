@@ -24,6 +24,26 @@ enlazarlo con las librerías de `std` y `atd` descubrí que se tratan de
 plataformas distintas, siendo obligatorio compilar todas las librerías para
 cada target. Eso dió lugar a `libmicro_atmega328p.a` y `libmicro_atmega4809.a`.
 
+### Namespaces
+
+Suponiendo que el funcionamiento de todos los micros de una misma familia sea
+el mismo, cosa que la experiencia lo dirá, voy a meter de momento cada familia
+en un namespace interno: `mega_`, `mega0_`, ... Estos namespaces son internos
+y los iré cambiando a medida que sea necesario.
+
+Cada microcontrolador por su parte tendrá su propio namespace: `atmega328p`,
+`atmega4809, ... Estos namespaces son estables, no se cambiarán en el futuro.
+
+### Nombres de archivo
+
+¿Cómo llamar a los archivos de cabecera? `avr_mega_timer1.h` vs
+`mega_timer1.h`. Como el segundo es más corto opto por este. Si en el futuro
+se ve que puede entrar en conflicto con otros archivos bastaría con meter
+todos estos archivos en un directorio llamado `avr`.
+
+
+
+
 ## Familias de avrs
 
 ### tinyAVR 0-series

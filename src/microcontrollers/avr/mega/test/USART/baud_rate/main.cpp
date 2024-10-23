@@ -17,7 +17,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "../../../avr_UART_baud_rate.h"
+#include "../../../mega_UART_baud_rate.h"
 
 #include <iostream>
 #include <type_traits>

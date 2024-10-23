@@ -19,10 +19,10 @@
 
 #include "../../../mega_cfg.h"
 #include "../../../mega_pin.h"
-#include "../../../avr_micro.h"
-#include "../../../avr_UART_iostream.h"
+#include "../../../mega_micro.h"
+#include "../../../mega_UART_iostream.h"
 
-namespace my_mcu = avr_;
+namespace my_mcu = mega_;
 using Micro = my_mcu::Micro;
 
 constexpr uint8_t npin = 13;

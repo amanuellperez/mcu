@@ -42,55 +42,56 @@
  *    03/12/2022 Escrito
  *
  ****************************************************************************/
+// Cosas genéricas a todas las familias de avrs
+// --------------------------------------------
+#include <mega_private.h>
+
 // Configuración del micro
 // -----------------------
 #include <mega_cfg.h>
-#include <avr_types.h>
 
 // Micro
 // -----
-#include <avr_micro.h>
+#include <mega_micro.h>
 
 // Traductores
 // -----------
-#include <avr_UART_basic.h>
-#include <avr_SPI_basic.h>
-#include <avr_TWI_basic.h>
+#include <mega_UART_basic.h>
+#include <mega_SPI_basic.h>
+#include <mega_TWI_basic.h>
 
-#include <avr_timer0_basic.h>
-#include <avr_timer1_basic.h>
-#include <avr_timer2_basic.h>
+#include <mega_timer0_basic.h>
+#include <mega_timer1_basic.h>
+#include <mega_timer2_basic.h>
 
-#include <avr_ADC_basic.h>
+#include <mega_ADC_basic.h>
 
-#include <avr_constants.h>
-#include <avr_interrupt.h>
-#include <avr_memory.h>
+#include <mega_interrupt.h>
+#include <mega_memory.h>
 
 #include <mega_pin.h>
-#include <avr_port_basic.h>
-#include <avr_sleep.h>
-#include <avr_time.h>
-#include <avr_watchdog.h>
+#include <mega_port_basic.h>
+#include <mega_sleep.h>
+#include <mega_watchdog.h>
 
 
 // Dispositivos genéricos
 // ----------------------
-#include <avr_SPI.h>
+#include <mega_SPI.h>
 
-#include <avr_timer0.h>
-#include <avr_timer1.h>
-#include <avr_timer2.h>
+#include <mega_timer0.h>
+#include <mega_timer1.h>
+#include <mega_timer2.h>
 
-#include <avr_ADC.h>
+#include <mega_ADC.h>
 
 // TODO: mirar qué depende del micro realmente y qué se basa en un UART
 // genérico. Mover a `mcu` lo que sea genérico.
-#include <avr_UART.h>
-#include <avr_UART_iostream.h>
+#include <mega_UART.h>
+#include <mega_UART_iostream.h>
 
 // Built-in devices for atmega
-#include <avr_atmega_dev.h>
+#include <mega_atmega_dev.h>
 
 #endif
 

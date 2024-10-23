@@ -18,11 +18,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "../../../mega_cfg.h"
-#include "../../../avr_UART_iostream.h"
-#include "../../../avr_timer0.h"
-#include "../../../avr_timer1.h"
+#include "../../../mega_UART_iostream.h"
+#include "../../../mega_timer0.h"
+#include "../../../mega_timer1.h"
 
-namespace my_mcu = avr_;
+namespace my_mcu = mega_;
 
 using SWG0 = my_mcu::Square_wave_generator0_g;
 using SWG1 = my_mcu::Square_wave_generator1_g;

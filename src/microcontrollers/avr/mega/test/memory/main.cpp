@@ -19,11 +19,11 @@
 
 
 #include <avr_time.h>
-#include "../../avr_UART_iostream.h"
-#include "../../avr_memory.h"
+#include "../../mega_UART_iostream.h"
+#include "../../mega_memory.h"
 
 
-namespace my_mcu = avr_;
+namespace my_mcu = mega_;
 
 /***************************************************************************
  *			    TEST BÁSICO 

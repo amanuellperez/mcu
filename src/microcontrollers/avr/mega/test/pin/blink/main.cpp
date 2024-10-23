@@ -20,12 +20,11 @@
 // (???) Este programa es genérico salvo los archivos de cabecera y el
 // namespace myu. Se podría usar para probar cualquier micro???
 #include "../../../mega_pin.h"
-
-#include <avr_time.h>
+#include "../../../mega_private.h" // wait_ms
 
 // Microcontroller
 // ---------------
-namespace myu = avr_;
+namespace myu = mega_;
 
 // Conectar un LED al pin 'led_pin'. Tiene que parpadear.
 constexpr uint8_t led_pin = 15;

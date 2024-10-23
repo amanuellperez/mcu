@@ -18,12 +18,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "../../../mega_cfg.h"
-#include "../../../avr_SPI.h"
-#include "../../../avr_interrupt.h"
-#include "../../../avr_UART_iostream.h"
+#include "../../../mega_SPI.h"
+#include "../../../mega_interrupt.h"
+#include "../../../mega_UART_iostream.h"
 
 
-using SPI = avr_::SPI_slave;
+using SPI = mega_::SPI_slave;
 
 constexpr uint16_t periodo_en_us = 2;	
 
@@ -31,8 +31,8 @@ constexpr uint16_t periodo_en_us = 2;
 int main() 
 {
 // init_uart()
-    avr_::UART_iostream uart;
-    avr_::basic_cfg(uart);
+    mega_::UART_iostream uart;
+    mega_::basic_cfg(uart);
     uart.turn_on();
 
 
@@ -54,7 +54,7 @@ int main()
 //	if (data != uint8_t{0}){
 //	    uint8_t ndata{0};
 //	    {
-//                avr_::Interrupts_lock lock;
+//                mega_::Interrupts_lock lock;
 //                ndata = data;
 //                data  = uint8_t{0};
 //	    }

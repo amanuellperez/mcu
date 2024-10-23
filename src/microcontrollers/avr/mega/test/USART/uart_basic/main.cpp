@@ -17,13 +17,13 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <avr_time.h>
-#include "../../../avr_UART.h"
+#include "../../../mega_UART.h"
 
 #include <atd_ostream.h>
 
 // Microcontroller
 // ---------------
-namespace my_mcu = avr_;
+namespace my_mcu = mega_;
 
 
 // Hwd devices

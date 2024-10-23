@@ -17,14 +17,14 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "../../../mega_cfg.h"
-#include "../../../avr_ADC.h"
-#include "../../../avr_UART_iostream.h"
+#include "../../../mega_ADC.h"
+#include "../../../mega_UART_iostream.h"
 #include <avr_time.h>
 
 
 // Microcontroller
 // ---------------
-namespace my_mcu = avr_;
+namespace my_mcu = mega_;
 		
 // Pin connections
 // ---------------

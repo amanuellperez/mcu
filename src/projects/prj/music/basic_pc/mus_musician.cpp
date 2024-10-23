@@ -19,7 +19,7 @@
 
 #include "mus_musician.h"
 #include <atd_memory.h>
-#include <avr_memory.h>	// macro pgm_read_byte!!! 
+#include <avr_atmega.h>	// macro pgm_read_byte!!! 
 
 namespace music{
 

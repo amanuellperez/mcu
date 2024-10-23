@@ -18,11 +18,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "../../../mega_cfg.h"
-#include "../../../avr_UART_iostream.h"
-#include "../../../avr_timer0.h"
-#include "../../../avr_timer1.h"
+#include "../../../mega_UART_iostream.h"
+#include "../../../mega_timer0.h"
+#include "../../../mega_timer1.h"
 
-namespace my_mcu = avr_;
+namespace my_mcu = mega_;
 using Micro   = my_mcu::Micro;
 
 static constexpr uint8_t test_pin = 12;

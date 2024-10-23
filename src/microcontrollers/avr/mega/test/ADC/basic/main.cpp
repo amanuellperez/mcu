@@ -45,16 +45,17 @@
 //  ejemplo el 7805) la fuente de alimentación. Si no oscila mucho AREF no
 //  sirviendo para nada.
 #include "../../../mega_cfg.h"
-#include "../../../avr_ADC_basic.h"
-#include "../../../avr_UART_iostream.h"
+#include "../../../mega_ADC.h"
+#include "../../../mega_UART_iostream.h"
+#include "../../../mega_debug.h"
 #include <avr_time.h>
-#include "../../../avr_debug.h"
 
 
 // Microcontroller
 // ---------------
-namespace my_mcu = avr_;
-		
+namespace my_mcu = mega_;
+
+
 // Pin connections
 // ---------------
 constexpr uint8_t ADC_pin = 28;

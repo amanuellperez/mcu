@@ -18,16 +18,16 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-#include "../../../avr_timer2.h" 
-#include "../../../avr_debug.h"
+#include "../../../mega_timer2.h" 
+#include "../../../mega_debug.h"
 
-#include "../../../avr_UART_iostream.h"
+#include "../../../mega_UART_iostream.h"
 #include "../../../mega_cfg.h"
 #include "../../../mega_pin.h"
 
 // Microcontroller
 // ---------------
-namespace my_mcu = avr_;
+namespace my_mcu = mega_;
 
 // Pin conections
 // --------------

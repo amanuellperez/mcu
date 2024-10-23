@@ -31,7 +31,7 @@
  *    19/10/2024 Empezando...
  *
  ****************************************************************************/
-#include <avr_private.h>   // importamos todo avr_
+#include "mega_private.h"   // importamos todo avr_
 
 
 #include <avr_atmega.h>

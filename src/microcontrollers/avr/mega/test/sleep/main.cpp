@@ -23,16 +23,16 @@
 // Para ver que cualquier pin puede despertar al avr, defino 2 interrupciones.
 // Funciona con los 2 pines correctamente. Probar a descomentar el pin2.
 #include "../../mega_cfg.h"
-#include "../../avr_sleep.h"
-#include "../../avr_interrupt.h"
+#include "../../mega_sleep.h"
+#include "../../mega_interrupt.h"
 #include "../../mega_pin.h"
 #include <avr_time.h>
-#include "../../avr_UART_iostream.h"
+#include "../../mega_UART_iostream.h"
 
 
 // Micro
 // -----
-namespace my_mcu = avr_;
+namespace my_mcu = mega_;
 //using Micro = my_mcu::Micro;
 
 // Pins

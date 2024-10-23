@@ -18,13 +18,13 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "../../../../mega_cfg.h"
-#include "../../../../avr_SPI.h"
-#include "../../../../avr_interrupt.h"
-#include "../../../../avr_UART_iostream.h"
-#include "../../../../avr_micro.h"
+#include "../../../../mega_SPI.h"
+#include "../../../../mega_interrupt.h"
+#include "../../../../mega_UART_iostream.h"
+#include "../../../../mega_micro.h"
 
 
-using SPI = avr_::SPI_slave;
+using SPI = mega_::SPI_slave;
 
 
 static volatile uint8_t data {0};
@@ -32,8 +32,8 @@ static volatile uint8_t data {0};
 int main() 
 {
 // init_uart()
-    avr_::UART_iostream uart;
-    avr_::basic_cfg(uart);
+    mega_::UART_iostream uart;
+    mega_::basic_cfg(uart);
     uart.turn_on();
 
 
@@ -42,7 +42,7 @@ int main()
     SPI::spi_mode(0,0);
     SPI::data_order_LSB();
     SPI::interrupt_enable();
-    avr_::enable_interrupts();
+    mega_::enable_interrupts();
 
     uart << "\n\nSlave SPI\n"
 	    "----------\n"
@@ -56,7 +56,7 @@ int main()
 	if (data != uint8_t{0}){
 	    uint8_t ndata{0};
 	    {
-                avr_::Disable_interrupts lock;
+                mega_::Disable_interrupts lock;
                 ndata = data;
                 data  = uint8_t{0};
 	    }

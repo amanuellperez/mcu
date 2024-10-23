@@ -18,19 +18,19 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 // Conectar el puerto B a 8 leds. Hacemos el coche fantástico.
-#include "../../../avr_port_basic.h"
-#include <avr_time.h>
+#include "../../../mega_port_basic.h"
+#include "../../../mega_private.h" // wait_ms
 
 
 int main()
 {
-    avr_::Output_portB portB;
+    mega_::Output_portB portB;
 
     while(1){
 	uint8_t v = 0b00000001;
 	for (uint8_t i = 0; i < 8; ++i){
 	    portB = v;
-	    avr_::wait_ms(200);
+	    mega_::wait_ms(200);
 	    v <<= 1;
 	}
     }

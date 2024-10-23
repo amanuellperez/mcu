@@ -1,7 +1,7 @@
 BIN = xx
 
 SOURCES= main.cpp\
-		 ../../avr_UART.cpp
+		 ../../mega_UART.cpp
 
 MCU = atmega328p
 F_CPU = 1000000UL

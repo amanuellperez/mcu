@@ -18,12 +18,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "../../../mega_cfg.h"
-#include "../../../avr_UART_iostream.h"
-#include "../../../avr_timer1_basic.h"
+#include "../../../mega_UART_iostream.h"
+#include "../../../mega_timer1_basic.h"
 #include <avr_time.h>
-#include "../../../avr_interrupt.h"
-#include "../../../avr_micro.h"
-#include "../../../avr_debug.h"
+#include "../../../mega_interrupt.h"
+#include "../../../mega_micro.h"
+#include "../../../mega_debug.h"
 
 
 #include <atd_ostream.h>
@@ -35,7 +35,7 @@ using namespace test;
 
 // Microcontroller
 // ---------------
-namespace myu = avr_;
+namespace myu = mega_;
 
 // UART
 // ----

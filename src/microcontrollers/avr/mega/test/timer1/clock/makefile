@@ -1,7 +1,7 @@
 BIN = xx
 
 SOURCES= main.cpp	\
-		 ../../../avr_UART.cpp
+		 ../../../mega_UART.cpp
 
 #F_CPU = 8000000UL
 

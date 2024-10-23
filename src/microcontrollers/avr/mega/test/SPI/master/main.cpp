@@ -18,17 +18,17 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "../../../mega_cfg.h"
-#include "../../../avr_SPI.h"
+#include "../../../mega_SPI.h"
 #include "../../../mega_pin.h"
-#include "../../../avr_UART_iostream.h"
-#include "../../../avr_debug.h"
+#include "../../../mega_UART_iostream.h"
+#include "../../../mega_debug.h"
 
 #include <atd_ostream.h>
 
 
 // Microcontroller
 // ---------------
-namespace myu = avr_;
+namespace myu = mega_;
 
 // SPI protocol
 // ------------

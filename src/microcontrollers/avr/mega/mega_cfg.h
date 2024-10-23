@@ -36,7 +36,7 @@
 #include <avr/io.h> // registros: DDRB... PORT...
 #include <atd_static.h> // static_array
 
-namespace avr_{
+namespace mega_{
 
 namespace cfg{ // ir incluyendo el resto según vaya reescribiendo codigo
 // CONFIGURACIÓN DE LOS PINES

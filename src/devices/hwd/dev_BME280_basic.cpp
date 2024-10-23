@@ -2,8 +2,6 @@
 
 #include <atd_bit.h>
 
-#include <avr_UART_iostream.h>
-
 namespace dev{
 
 

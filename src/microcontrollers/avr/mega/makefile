@@ -1,43 +1,48 @@
-SOURCES= avr_sleep.cpp			\
-		 avr_debug.cpp			\
-		 avr_ADC.cpp			\
-		 avr_SPI_basic.cpp 		\
-		 avr_SPI.cpp 			\
-		 avr_timer0_basic.cpp	\
-		 avr_timer0.cpp			\
-		 avr_timer1_basic.cpp	\
-		 avr_timer1.cpp			\
-		 avr_UART.cpp
+# Ejecutar: make.sh
+# No defino aquí F_CPU, sino que make.sh usa LIST_F_CPU
+
+SOURCES= mega_sleep.cpp			\
+		 mega_debug.cpp			\
+		 mega_ADC.cpp			\
+		 mega_SPI_basic.cpp 		\
+		 mega_SPI.cpp 			\
+		 mega_timer0_basic.cpp	\
+		 mega_timer0.cpp			\
+		 mega_timer1_basic.cpp	\
+		 mega_timer1.cpp			\
+		 mega_UART.cpp
 
 
-INCS= avr_ADC_basic.h	\
-	avr_ADC.h			\
-	avr_atmega_dev.h	\
+INCS= \
 	avr_atmega.h		\
-	avr_debug.h			\
-	avr_interrupt.h		\
-	avr_memory.h		\
-	avr_micro.h			\
-	avr_port_basic.h	\
-	avr_sleep.h			\
-	avr_SPI_basic.h		\
-	avr_SPI.h	\
-	avr_timern_basic.h	\
-	avr_timer0_basic.h	\
-	avr_timer0.h\
-	avr_timer1_basic.h	\
-	avr_timer1.h\
-	avr_timer2_basic.h	\
-	avr_timer2.h\
-	avr_TWI_basic.h		\
-	avr_UART.h				\
-	avr_UART_basic.h		\
-	avr_UART_baud_rate.h	\
-	avr_UART_iostream.h		\
-	avr_watchdog.h			\
-	mega.h				\
+	mega_ADC_basic.h	\
+	mega_ADC.h			\
+	mega_atmega_dev.h	\
 	mega_cfg.h			\
-	mega_pin.h			
+	mega_debug.h			\
+	mega_interrupt.h		\
+	mega_memory.h		\
+	mega_micro.h			\
+	mega_pin.h				\
+	mega_port_basic.h	\
+	mega_private.h		\
+	mega_sleep.h			\
+	mega_SPI_basic.h		\
+	mega_SPI.h	\
+	mega_timern_basic.h	\
+	mega_timer0_basic.h	\
+	mega_timer0.h\
+	mega_timer1_basic.h	\
+	mega_timer1.h\
+	mega_timer2_basic.h	\
+	mega_timer2.h\
+	mega_TWI_basic.h		\
+	mega_UART.h				\
+	mega_UART_basic.h		\
+	mega_UART_baud_rate.h	\
+	mega_UART_iostream.h		\
+	mega_watchdog.h			\
+	mega.h	
 
 
 MCU=atmega328p

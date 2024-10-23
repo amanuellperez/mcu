@@ -61,7 +61,6 @@
  *
  *
  ****************************************************************************/
-#include <avr_memory.h>	// Progmem
 #include "not_generic.h"
 #include <atd_memory.h>
 

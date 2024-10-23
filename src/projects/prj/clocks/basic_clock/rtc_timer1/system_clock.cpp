@@ -20,7 +20,7 @@
 
 #include "main.h"
 
-#include <avr_interrupt.h>
+#include <avr_atmega.h>
 
 
 // Definimos el reloj del sistema

@@ -1,9 +1,9 @@
 BIN = xx
 
 SOURCES= main.cpp \
-		 ../../../avr_sleep.cpp	\
-		 ../../../avr_debug.cpp \
-		 ../../../avr_UART.cpp
+		 ../../../mega_sleep.cpp	\
+		 ../../../mega_debug.cpp \
+		 ../../../mega_UART.cpp
 
 
 MCU = atmega328p

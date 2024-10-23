@@ -20,9 +20,8 @@
 // Probamos el UART.
 // Conectar el FTDI y abrir screen. Lo que se escriba en teclado se envia
 // al microcontrolador que lo devuelve, con lo que lo vemos en pantalla.
-#include <avr_constants.h>
-#include "../../avr_UART_iostream.h"
-#include <avr_time.h>
+#include "../../mega_private.h"
+#include "../../mega_UART_iostream.h"
 
 
 
@@ -30,8 +29,8 @@
 
 void test_cfg()
 {
-    avr_::UART_iostream uart;
-    avr_::basic_cfg(uart);
+    mega_::UART_iostream uart;
+    mega_::basic_cfg(uart);
     uart.turn_on();
 
     while(1){
@@ -39,7 +38,7 @@ void test_cfg()
 	uart << "Variables cfg!\n";
 	uart << "---------------\n";
 
-	uart << "clock_frequency = " << avr_::clock_frequency << '\n';
+	uart << "clock_frequency = " << mega_::clock_frequency << '\n';
 	char c{};
 	uart >> c;
     }

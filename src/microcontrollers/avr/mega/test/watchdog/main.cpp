@@ -19,15 +19,15 @@
 
 #include "../../mega_cfg.h"
 #include "../../mega_pin.h"
-#include "../../avr_micro.h"
-#include "../../avr_UART_iostream.h"
+#include "../../mega_micro.h"
+#include "../../mega_UART_iostream.h"
 #include <atd_ostream.h>
 
 // microcontroller
 // ---------------
-namespace my_mcu = avr_;
+namespace my_mcu = mega_;
 using Micro = my_mcu::Micro;
-#include "../../avr_watchdog.h" // TODO: orden
+#include "../../mega_watchdog.h" // TODO: orden
 
 // pin connections
 // ---------------

@@ -18,10 +18,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "../../../mega_cfg.h"
-#include "../../../avr_timer0.h"
-#include "../../../avr_timer1.h"
-#include <avr_time.h>
-#include "../../../avr_UART_iostream.h"
+#include "../../../mega_timer0.h"
+#include "../../../mega_timer1.h"
+#include "../../../mega_private.h"
+#include "../../../mega_UART_iostream.h"
 
 #include <atd_test.h>
 using namespace test;
@@ -32,7 +32,7 @@ constexpr bool timer0_both_pins = false;
 
 // Microcontroller
 // ---------------
-namespace myu = avr_;
+namespace myu = mega_;
 
 					 
 // Hwd devices
@@ -172,7 +172,7 @@ void print_debug()
 	uart << "res = " << res << '\n';
 
 
-	avr_::timer_::PWM_cfg<avr_::Timer1> pwm;
+	myu::timer_::PWM_cfg<myu::Timer1> pwm;
 	pwm.prescaler = 1;
 	pwm.top = 999;
 	auto res2 = pwm.frequency_fast_mode(freq_clk);

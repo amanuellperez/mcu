@@ -19,15 +19,15 @@
 
 // Reloj de sistema básico. Me baso en time.h
 #include "../../../mega_cfg.h"
-#include "../../../avr_UART_iostream.h"
-#include "../../../avr_timer1_basic.h"
+#include "../../../mega_UART_iostream.h"
+#include "../../../mega_timer1_basic.h"
 #include <avr_time.h>
-#include "../../../avr_interrupt.h"
-#include "../../../avr_micro.h"
+#include "../../../mega_interrupt.h"
+#include "../../../mega_micro.h"
 
 #include <time.h>
 
-namespace my_mcu = avr_;
+namespace my_mcu = mega_;
 
 using Timer = my_mcu::Timer1;
 

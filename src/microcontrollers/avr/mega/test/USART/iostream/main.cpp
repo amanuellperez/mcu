@@ -20,9 +20,9 @@
 // Probamos el UART.
 // Conectar el FTDI y abrir screen. Lo que se escriba en teclado se envia
 // al microcontrolador que lo devuelve, con lo que lo vemos en pantalla.
-#include "../../../avr_UART_iostream.h"
+#include "../../../mega_UART_iostream.h"
 #include <avr_time.h>
-#include "../../../avr_interrupt.h" // To test interrupts
+#include "../../../mega_interrupt.h" // To test interrupts
 
 #include <atd_istream.h>
 #include <atd_ostream.h>
@@ -60,8 +60,8 @@ using traits = std::char_traits<char>;
 
 //void test_streambuf()
 //{ 
-//    avr_::UART_iostream uart;
-//    avr_::basic_cfg<baud_rate>(uart);
+//    mega_::UART_iostream uart;
+//    mega_::basic_cfg<baud_rate>(uart);
 //    uart.turn_on();
 //
 //    uart << "\n---------------\n";
@@ -81,7 +81,7 @@ using traits = std::char_traits<char>;
 //}
 
 template <typename Int>
-void test_int(avr_::UART_iostream& uart, const char* type)
+void test_int(mega_::UART_iostream& uart, const char* type)
 {
     uart << "\n\nReading of a " << type << "\n";
     uart << "------------------\n";
@@ -119,11 +119,11 @@ volatile bool time_out = false;
 
 void test_interrupt_receive()
 {
-    avr_::UART_iostream uart;
+    mega_::UART_iostream uart;
     time_out = false;
 
-    avr_::enable_interrupts();
-    avr_::UART_basic::enable_interrupt_unread_data();
+    mega_::enable_interrupts();
+    mega_::UART_basic::enable_interrupt_unread_data();
 
     uart << "Testing interrupt unread_data()\n"
 	    "\tPress a key to throw the interrupt\n";
@@ -134,8 +134,8 @@ void test_interrupt_receive()
 
     uart << "\tOutside interrupt\n";
 
-    avr_::disable_interrupts();
-    avr_::UART_basic::disable_interrupt_unread_data();
+    mega_::disable_interrupts();
+    mega_::UART_basic::disable_interrupt_unread_data();
 
     char c{};
     uart >> c;
@@ -144,8 +144,8 @@ void test_interrupt_receive()
 
 void test_iostream()
 {
-    avr_::UART_iostream uart;
-    avr_::basic_cfg<baud_rate, F_CPU, max_error>(uart);
+    mega_::UART_iostream uart;
+    mega_::basic_cfg<baud_rate, F_CPU, max_error>(uart);
     uart.turn_on();
 
     uart << "\n----------\n";
@@ -294,7 +294,7 @@ int main()
 
 
 ISR_USART_RX{
-    avr_::UART_iostream uart;
+    mega_::UART_iostream uart;
 
 // Es obligatorio o bien vaciar el buffer o desactivar la interrupción para
 // evitar que se relance.
@@ -305,7 +305,7 @@ ISR_USART_RX{
 //
 // Método 2
 // --------
-    avr_::UART_basic::disable_interrupt_unread_data();
+    mega_::UART_basic::disable_interrupt_unread_data();
 
     uart << "\n\tInterruption: Inside ISR_USART_RX\n\n";
 

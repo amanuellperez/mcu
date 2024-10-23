@@ -32,7 +32,6 @@
  ****************************************************************************/
 #include "dev_LCD_big_digits.h" 
 
-#include <avr_memory.h>
 #include "not_generic.h"
 
 namespace dev{

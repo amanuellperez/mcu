@@ -96,7 +96,7 @@
 #include <atd_bit.h>
 #include <mcu_pin.h>
 
-namespace avr_{
+namespace mega_{
 
 // Traductor de las interrupciones INT0, INT1, ...
 //
@@ -384,7 +384,7 @@ inline void Pin<n, Cfg>::disable_change_level_interrupt()
 //using Pin = mcu::Pin<private_::Pin<n, Cfg>>::type;
 
 // TODO: este es temporal, en lo que reestructuro el código
-template <uint8_t n, typename Cfg = avr_::cfg::pins_28>
+template <uint8_t n, typename Cfg = mega_::cfg::pins_28>
 using Pin = mcu::Pin<private_::Pin<n, Cfg>>::type;
 
 
@@ -393,7 +393,7 @@ using Pin = mcu::Pin<private_::Pin<n, Cfg>>::type;
  ***************************************************************************/
 // Equivalente a Enable_interrupts pero solo para el pin correspondiente
 // TODO: quitar el valor por defecto cfg::pins_28
-template <uint8_t n, typename Cfg = avr_::cfg::pins_28>
+template <uint8_t n, typename Cfg = mega_::cfg::pins_28>
 struct Enable_change_level_interrupt{
     Enable_change_level_interrupt() 
 	{Pin<n, Cfg>::enable_change_level_interrupt(); }
