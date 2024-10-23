@@ -19,7 +19,7 @@
 
 // Conectar el puerto B a 8 leds. Hacemos el coche fantástico.
 #include "../../../mega_port_basic.h"
-#include "../../../mega_private.h" // wait_ms
+#include "../../../mega_import_avr.h" // wait_ms
 
 
 int main()

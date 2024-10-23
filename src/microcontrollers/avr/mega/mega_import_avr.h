@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __MEGA_PRIVATE_H__
-#define __MEGA_PRIVATE_H__
+#ifndef __MEGA_IMPORT_AVR_H__
+#define __MEGA_IMPORT_AVR_H__
 /****************************************************************************
  *
  * DESCRIPCION

@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __AVR_TIMERN_BASIC_H__
-#define __AVR_TIMERN_BASIC_H__
+#ifndef __MEGA_TIMERN_BASIC_H__
+#define __MEGA_TIMERN_BASIC_H__
 /****************************************************************************
  *
  *  - DESCRIPCION: Cosas comunes a los atmega::Timers
@@ -34,7 +34,7 @@
 #include <array>
 #include <cstdint>
 
-#include "mega_private.h"
+#include "mega_import_avr.h"
 
 namespace mega_{
 

@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __AVR_TWI_BASIC_H__
-#define __AVR_TWI_BASIC_H__
+#ifndef __MEGA_TWI_BASIC_H__
+#define __MEGA_TWI_BASIC_H__
 /****************************************************************************
  *
  *   - DESCRIPCION: Traductor del TWI (I2C)
@@ -40,7 +40,7 @@
 #include <atd_bit.h>
 #include <atd_type_traits.h>	// always_false_v
 #include <avr/io.h> // registros: DDRB... PORT...
-#include "mega_private.h"
+#include "mega_import_avr.h"
 #include "mega_cfg.h"
 
 namespace mega_{

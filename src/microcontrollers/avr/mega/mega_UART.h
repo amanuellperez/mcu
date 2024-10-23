@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __AVR_UART_H__
-#define __AVR_UART_H__
+#ifndef __MEGA_UART_H__
+#define __MEGA_UART_H__
 /****************************************************************************
  *
  * DESCRIPCION
@@ -45,7 +45,7 @@
  ****************************************************************************/
 
 #include "mega_UART_basic.h"
-#include "mega_private.h"	// clock_frequency_in_hz
+#include "mega_import_avr.h"	// clock_frequency_in_hz
 
 namespace mega_{
 template <uint32_t baud_rate = 9600u,

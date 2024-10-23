@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __AVR_ATMEGA_DEV_H__
-#define __AVR_ATMEGA_DEV_H__
+#ifndef __MEGA_ATMEGA_DEV_H__
+#define __MEGA_ATMEGA_DEV_H__
 /****************************************************************************
  *
  *   - DESCRIPCION: Built-in devices que suministra el atmega
@@ -30,7 +30,7 @@
  *      08/12/2022 Escrito
  *
  ****************************************************************************/
-#include "mega_private.h"    // import avr_;
+#include "mega_import_avr.h"    // import avr_;
 			
 /***************************************************************************
  *			BUILT-IN DEVICES FOR ATMEGA

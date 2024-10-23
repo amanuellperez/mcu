@@ -1,4 +1,4 @@
-// Copyright (C) 2023 Manuel Perez 
+// Copyright (C) 2024 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -16,40 +16,39 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #pragma once
 
-#ifndef __MEGA_DEBUG_H__
-#define __MEGA_DEBUG_H__
+#ifndef __AVR_MEMORY_H__
+#define __AVR_MEMORY_H__
 /****************************************************************************
  *
  * DESCRIPCION
- *	Funciones para depurar el avr. Este archivo no se distribuye.
+ *	Funciones de manejo de memoria comunes a todos los avrs
  *
  * HISTORIA
  *    Manuel Perez
- *    14/09/2023 Escrito
- *    14/06/2024 print_registers_adc
- *    22/08/2024 print_registers_spi
+ *    23/10/2024 Traido del antiugo avr_
  *
  ****************************************************************************/
-#include <ostream>
 
+namespace avr_{
 
-namespace mega_{
-
-// Impresión de los registros del avr
-// ----------------------------------
-void print_registers_uart(std::ostream& out);
-
-void print_registers_spi(std::ostream& out);
-
-void print_registers_timer0(std::ostream& out);
-void print_registers_timer1(std::ostream& out);
-void print_registers_timer2(std::ostream& out);
-
-void print_registers_adc(std::ostream& out);
+// Indica el número de bytes de RAM libres (para ver si se está usando
+// demasiada memoria).
+// Ver avr-libc-user-manual-2.0.0, punto 3.
+// Esta función es copia de internet.
+inline int bytes_of_free_ram() 
+{
+  extern int __heap_start; 
+  extern int* __brkval; 
+  int v; 
+  return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval); 
+}
 
 }// namespace
-
  
+
 #endif
+
+

@@ -19,17 +19,11 @@
 
 #pragma once
 
-#ifndef __AVR_INTERRUPT_H__
-#define __AVR_INTERRUPT_H__
+#ifndef __MEGA_INTERRUPT_H__
+#define __MEGA_INTERRUPT_H__
 /****************************************************************************
  *
  *   - DESCRIPCION: Interfaz para manejar interrupciones
- *
- *   - COMENTARIOS: Las interrupciones están definidas a la hora de definir 
- *	la arquitectura. Luego las conocemos en tiempo de compilación. Es más
- *	eficiente usar templates que funciones (y si está bien hecho, podemos
- *	detectar errores en tiempo de compilación).
- *  
  *
  *   - HISTORIA:
  *    Manuel Perez
@@ -50,53 +44,10 @@
  *
  ****************************************************************************/
 #include <avr/interrupt.h>
-#include <atd_bit.h>
 
+#include "mega_import_avr.h" // importamos avr_interrupt a mega_
 
 namespace mega_{
-/***************************************************************************
- *			    INTERRUPTS
- ***************************************************************************/
-/// Habilita el uso de interrupciones. Además, recordar habilitar
-/// cada interrupción por separado.
-inline void enable_interrupts() {sei();}
-
-/// Deshabilita el uso de interrupciones
-inline void disable_interrupts() {cli();}
-
-
-class Disable_interrupts{
-public:
-    Disable_interrupts()
-    {
-	sreg_ = SREG;
-	disable_interrupts();
-    }
-
-    ~Disable_interrupts()
-    { SREG = sreg_; }
-
-
-private:
-    unsigned char sreg_;
-};
-
-
-class Enable_interrupts{
-public:
-    Enable_interrupts()
-    {
-	sreg_ = SREG;
-	enable_interrupts();
-    }
-
-    ~Enable_interrupts()
-    { SREG = sreg_; }
-
-
-private:
-    unsigned char sreg_;
-};
 
 
 /***************************************************************************

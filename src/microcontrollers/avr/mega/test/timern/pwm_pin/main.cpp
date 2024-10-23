@@ -20,7 +20,7 @@
 #include "../../../mega_cfg.h"
 #include "../../../mega_timer0.h"
 #include "../../../mega_timer1.h"
-#include "../../../mega_private.h"
+#include "../../../mega_import_avr.h"
 #include "../../../mega_UART_iostream.h"
 
 #include <atd_test.h>

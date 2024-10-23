@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __AVR_WATCHDOG_H__
-#define __AVR_WATCHDOG_H__
+#ifndef __MEGA_WATCHDOG_H__
+#define __MEGA_WATCHDOG_H__
 /****************************************************************************
  *
  * DESCRIPCION

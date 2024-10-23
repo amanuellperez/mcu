@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __AVR_SPI_GENERIC_H__
-#define __AVR_SPI_GENERIC_H__
+#ifndef __MEGA_SPI_GENERIC_H__
+#define __MEGA_SPI_GENERIC_H__
 /****************************************************************************
  *
  *  DESCRIPCION

@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __AVR_UART_IOSTREAM_H__
-#define __AVR_UART_IOSTREAM_H__
+#ifndef __MEGA_UART_IOSTREAM_H__
+#define __MEGA_UART_IOSTREAM_H__
 /****************************************************************************
  *
  *  - DESCRIPCION: Implementación del flujo uart.

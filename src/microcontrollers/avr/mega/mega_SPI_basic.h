@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __AVR_SPI_BASIC_H__
-#define __AVR_SPI_BASIC_H__
+#ifndef __MEGA_SPI_BASIC_H__
+#define __MEGA_SPI_BASIC_H__
 /****************************************************************************
  *
  *  - DESCRIPCION: Traductor del SPI.
@@ -56,7 +56,7 @@
 #include <atd_bit.h>
 #include "mega_pin.h"
 #include "mega_interrupt.h"
-#include "mega_private.h"	// clock_frequency_in_hz
+#include "mega_import_avr.h"	// clock_frequency_in_hz
 
 namespace mega_{
 

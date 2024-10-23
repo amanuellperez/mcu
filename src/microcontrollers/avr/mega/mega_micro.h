@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __AVR_MICRO_H__
-#define __AVR_MICRO_H__
+#ifndef __MEGA_MICRO_H__
+#define __MEGA_MICRO_H__
 /****************************************************************************
  *
  * DESCRIPCION
@@ -31,7 +31,7 @@
  *    12/12/2022 Escrito
  *
  ****************************************************************************/
-#include "mega_private.h"
+#include "mega_import_avr.h"
 #include "mega_interrupt.h"
 #include "mega_memory.h"
 #include "mega_sleep.h"

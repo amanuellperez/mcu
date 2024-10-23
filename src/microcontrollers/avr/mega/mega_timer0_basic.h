@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __AVR_TIMER0_BASIC_H__
-#define __AVR_TIMER0_BASIC_H__
+#ifndef __MEGA_TIMER0_BASIC_H__
+#define __MEGA_TIMER0_BASIC_H__
 
 /****************************************************************************
  *
@@ -57,7 +57,7 @@
 
 #include "mega_interrupt.h"
 #include "mega_pin.h"
-#include "mega_private.h"
+#include "mega_import_avr.h"
 
 #include <array>
 

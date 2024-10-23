@@ -18,8 +18,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #pragma once
-#ifndef __AVR_UART_BASIC_H__
-#define __AVR_UART_BASIC_H__
+#ifndef __MEGA_UART_BASIC_H__
+#define __MEGA_UART_BASIC_H__
 /****************************************************************************
  *
  * - DESCRIPCION: Traductor del módulo UART del avr.

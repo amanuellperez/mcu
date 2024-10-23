@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __AVR_SLEEP_H__
-#define __AVR_SLEEP_H__
+#ifndef __MEGA_SLEEP_H__
+#define __MEGA_SLEEP_H__
 /****************************************************************************
  *
  *  DESCRIPCION

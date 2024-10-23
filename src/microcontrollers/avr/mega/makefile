@@ -25,7 +25,7 @@ INCS= \
 	mega_micro.h			\
 	mega_pin.h				\
 	mega_port_basic.h	\
-	mega_private.h		\
+	mega_import_avr.h		\
 	mega_sleep.h			\
 	mega_SPI_basic.h		\
 	mega_SPI.h	\

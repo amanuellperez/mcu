@@ -1,4 +1,5 @@
 DIRS = 	\
+		avr		\
 		mega	\
 		mega0
 

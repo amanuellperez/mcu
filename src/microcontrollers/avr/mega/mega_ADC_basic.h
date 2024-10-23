@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __AVR_ADC_BASIC_H__
-#define __AVR_ADC_BASIC_H__
+#ifndef __MEGA_ADC_BASIC_H__
+#define __MEGA_ADC_BASIC_H__
 
 /****************************************************************************
  *
@@ -45,7 +45,7 @@
 #include <atd_bit.h>
 #include <avr/io.h> // registros: DDRB... PORT...
 		    
-#include "mega_private.h"
+#include "mega_import_avr.h"
 #include "mega_cfg.h"	// cfg
 
 namespace mega_{

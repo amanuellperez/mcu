@@ -9,6 +9,8 @@
 # compile aquí)
 DIST =\
 		avr_constants.h	\
+		avr_interrupt.h	\
+		avr_memory.h	\
 		avr_private.h	\
 		avr_time.h		\
 		avr_types.h

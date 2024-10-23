@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __AVR_MEMORY_H__
-#define __AVR_MEMORY_H__
+#ifndef __MEGA_MEMORY_H__
+#define __MEGA_MEMORY_H__
 /****************************************************************************
  *
  *  DESCRIPCION
@@ -67,6 +67,8 @@
 #include <atd_iterator.h>
 #include <atd_rom.h>
 
+#include "mega_import_avr.h"
+
 // (RRR) El problema que tengo con el manejo de la ROM (= progmem) es que el
 // compilador necesita la macro PROGMEM en avr para meterla en ROM. ¿Cómo
 // generalizar eso?
@@ -90,21 +92,6 @@ inline uint16_t progmem_read(const uint16_t& x) { return pgm_read_word(&x); }
 // los concepts. Por ello este orden no se puede cambiar.
 #include <atd_memory.h>
 
-namespace mega_{
-
-// Indica el número de bytes de RAM libres (para ver si se está usando
-// demasiada memoria).
-// Ver avr-libc-user-manual-2.0.0, punto 3.
-// Esta función es copia de internet.
-// No puedo incluirla dentro del namespace avr. Da error (???)
-inline int bytes_of_free_ram() 
-{
-  extern int __heap_start; 
-  extern int* __brkval; 
-  int v; 
-  return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval); 
-}
-}// namespace
 
 /***************************************************************************
  *				PROGMEM

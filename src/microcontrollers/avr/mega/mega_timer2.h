@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __AVR_TIMER2_GENERIC_H__
-#define __AVR_TIMER2_GENERIC_H__
+#ifndef __MEGA_TIMER2_GENERIC_H__
+#define __MEGA_TIMER2_GENERIC_H__
 /****************************************************************************
  *
  *  DESCRIPCION
@@ -32,7 +32,7 @@
  *
  ****************************************************************************/
 #include "mega_timer2_basic.h"
-#include "mega_private.h"
+#include "mega_import_avr.h"
 #include "mega_interrupt.h" // Disable_interrupts
 
 

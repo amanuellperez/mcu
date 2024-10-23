@@ -18,7 +18,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "mega_UART.h"
-#include "mega_private.h"
+#include "mega_import_avr.h"
 
 namespace mega_{
 

@@ -20,7 +20,7 @@
 // (???) Este programa es genérico salvo los archivos de cabecera y el
 // namespace myu. Se podría usar para probar cualquier micro???
 #include "../../../mega_pin.h"
-#include "../../../mega_private.h" // wait_ms
+#include "../../../mega_import_avr.h" // wait_ms
 
 // Microcontroller
 // ---------------

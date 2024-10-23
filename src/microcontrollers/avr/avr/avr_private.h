@@ -37,6 +37,8 @@
  ****************************************************************************/
 
 #include <avr_constants.h>
+#include <avr_interrupt.h>
+#include <avr_memory.h>
 #include <avr_time.h>
 #include <avr_types.h>
 

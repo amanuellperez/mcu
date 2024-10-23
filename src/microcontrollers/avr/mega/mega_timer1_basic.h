@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __AVR_TIMER1_BASIC_H__
-#define __AVR_TIMER1_BASIC_H__
+#ifndef __MEGA_TIMER1_BASIC_H__
+#define __MEGA_TIMER1_BASIC_H__
 /****************************************************************************
  *
  *  - DESCRIPCION: Traductor del timer 1 del AVR. 
@@ -74,7 +74,7 @@
 
 #include <avr/io.h> // registros: DDRB... PORT...
 #include "mega_pin.h"
-#include "mega_private.h"
+#include "mega_import_avr.h"
 
 namespace mega_{
 /*!

@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __AVR_ATMEGA_H__
-#define __AVR_ATMEGA_H__
+#ifndef __MEGA_ATMEGA_H__
+#define __MEGA_ATMEGA_H__
 /****************************************************************************
  *
  *  - DESCRIPCION: La idea es intentar desvincular las aplicaciones del bare
@@ -44,7 +44,7 @@
  ****************************************************************************/
 // Cosas genéricas a todas las familias de avrs
 // --------------------------------------------
-#include <mega_private.h>
+#include <mega_import_avr.h>
 
 // Configuración del micro
 // -----------------------

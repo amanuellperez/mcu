@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __AVR_PORT_BASIC_H__
-#define __AVR_PORT_BASIC_H__
+#ifndef __MEGA_PORT_BASIC_H__
+#define __MEGA_PORT_BASIC_H__
 /****************************************************************************
  *
  *   - DESCRIPCION: Clases para manejar los puertos enteros

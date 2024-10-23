@@ -20,7 +20,7 @@
 // Probamos el UART.
 // Conectar el FTDI y abrir screen. Lo que se escriba en teclado se envia
 // al microcontrolador que lo devuelve, con lo que lo vemos en pantalla.
-#include "../../mega_private.h"
+#include "../../mega_import_avr.h"
 #include "../../mega_UART_iostream.h"
 
 

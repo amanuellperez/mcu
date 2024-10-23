@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __AVR_ADC_H__
-#define __AVR_ADC_H__
+#ifndef __MEGA_ADC_H__
+#define __MEGA_ADC_H__
 /****************************************************************************
  *
  * DESCRIPCION

@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __AVR_TIMER1_GENERIC_H__
-#define __AVR_TIMER1_GENERIC_H__
+#ifndef __MEGA_TIMER1_GENERIC_H__
+#define __MEGA_TIMER1_GENERIC_H__
 /****************************************************************************
  *
  *  DESCRIPCION
@@ -96,7 +96,7 @@
 #include "mega_timer1_basic.h"
 #include "mega_timern_basic.h"
 #include "mega_interrupt.h"
-#include "mega_private.h"
+#include "mega_import_avr.h"
 #include "mega_micro.h"
 
 #include <atd_math.h>

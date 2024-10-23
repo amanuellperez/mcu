@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __AVR_UART_BAUD_RATE_H__
-#define __AVR_UART_BAUD_RATE_H__
+#ifndef __MEGA_UART_BAUD_RATE_H__
+#define __MEGA_UART_BAUD_RATE_H__
 /****************************************************************************
  *
  * DESCRIPCION

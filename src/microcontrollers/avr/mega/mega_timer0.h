@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __AVR_TIMER0_H__
-#define __AVR_TIMER0_H__
+#ifndef __MEGA_TIMER0_H__
+#define __MEGA_TIMER0_H__
 /****************************************************************************
  *
  *  DESCRIPCION
@@ -49,7 +49,7 @@
  *
  ****************************************************************************/
 #include "mega_timer0_basic.h"
-#include "mega_private.h"
+#include "mega_import_avr.h"
 
 #include <tuple>    // std::tie
 		    
