@@ -42,7 +42,7 @@ static_assert(myu::Pin<mcu::Pin_connection_type::floating>::is_a_valid_connectio
 
 int main()
 {
-    Pin::init();
+    myu::init();
 
     Pin::as_output();
 

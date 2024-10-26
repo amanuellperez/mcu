@@ -3,7 +3,9 @@
 # genéricos sea cual sea el micro.
 
 DIRS = \
-	hello_world	\
+		clock		\
+		hello_world	\
+		pin
 
 
 # TWI: el test de TWI está dentro de mcu.

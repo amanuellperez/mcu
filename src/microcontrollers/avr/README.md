@@ -80,6 +80,15 @@ todos estos archivos en un directorio llamado `avr`.
 ### megaAVR
 ATmega328p
 
+### AVR DA serie
+
+28 pins: AVR32DA28, AVR64DA28, AVR128DA28
+
+32 pins: AVR32DA32, AVR64DA32, AVR128DA32
+
+48 pins: AVR32DA48, AVR64DA48, AVR128DA48
+
+64 pins: AVR64DA64, AVR128DA64
 
 ### TODO: faltan más familias
 

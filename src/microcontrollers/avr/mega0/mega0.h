@@ -42,8 +42,13 @@
 namespace atmega4809_40{
     using namespace avr_;
 
+    // Fundamental: llamar a esta función init!!!
+    inline void init() { mega0_::cfg::pins_40::init();}
+
+
     template <uint8_t n>
     using Pin = mega0_::Pin<n, mega0_::cfg::pins_40>;
+
 }
 
 

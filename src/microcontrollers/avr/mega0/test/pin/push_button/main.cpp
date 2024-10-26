@@ -37,6 +37,8 @@ using Push = myu::Pin<push_button_pin>;
 
 int main()
 {
+    myu::init();
+
     Led::as_output();
     Push::as_input_with_pullup();
 

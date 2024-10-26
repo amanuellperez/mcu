@@ -38,6 +38,7 @@
 
 namespace mega0_{
 
+
 namespace private_ {
 template <uint8_t n, typename Cfg>
 class Pin{
@@ -52,11 +53,6 @@ public:
     // constexpr Pin(){}	
     Pin() = delete;
 
-    // El único micro que usa init es el atmega4809 de 40 pins.
-    // ¿Cómo forzar al cliente que lo llame? Se le va a olvidar fijo @_@
-    static constexpr void init()
-	requires requires {Cfg::init();}
-    { Cfg::init();}
 
     // No es posible copiar pins (aunque como es una template static no
     // debería de generar ningún problema)

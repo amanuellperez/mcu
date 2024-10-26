@@ -87,7 +87,13 @@ CPPFLAGS += -DMCU=$(MCU) -DF_CPU=$(F_CPU) $(PROJ_CPPFLAGS)
 # ------------------------
 # FLAGS PARA EL COMPILADOR
 # ------------------------
-# 	-Os	: optimiza el size. (o usar -O3?)
+#  De acuerdo a la nota, del punto 3 de la app "Internal High-Frequency
+#  Oscillator Calibration Using the Auto-Tune Feature", la macro
+#  _PROTECTED_WRITE necesita mínimo -O1 para ejecutarse correctamente.
+#  La opción -Os incluye la mayoría de -O2 así que debería de compilar
+#  correctamente la macro.
+#
+# 	-Os	: optimiza el size. (o usar -O3?) <-- no borrar -Os, ver nota anterior.
 # 	-std: versión del estandar a usar
 # 	-Wall: mostrar todos los warnings
 # 	-g	: produce información para poder depurar.
