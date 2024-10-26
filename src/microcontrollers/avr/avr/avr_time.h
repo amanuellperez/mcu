@@ -41,7 +41,12 @@
  *	10/07/2024 Wait_1_us/Wait_1_ms
  *
  ****************************************************************************/
+// Si no se define __DELAY_ROUND_CLOSEST__ antes de delay.h
+// genera un error _delay_ms al definir F_CPU = 16MHz/6.
+#define __DELAY_ROUND_CLOSEST__
 #include <util/delay.h>
+#undef __DELAY_ROUND_CLOSEST__
+
 #include <concepts>
 
 namespace avr_{

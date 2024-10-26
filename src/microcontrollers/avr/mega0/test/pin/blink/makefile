@@ -6,8 +6,9 @@ USER_CXXFLAGS=-save-temps -fverbose-asm
 
 MCU = atmega4809
 
-# TODO: revisar valor de F_CPU???
-F_CPU = 1000000UL
+# A 16MHz
+FUSE2=0x01
+F_CPU = 2666667UL # 16 MHz / 6
 
 include $(AVR_GENRULES)
 

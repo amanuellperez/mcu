@@ -3,7 +3,9 @@ BIN = xx
 SOURCES= main.cpp
 
 MCU = atmega4809
-F_CPU = 1000000UL
+
+# 16 MHz / 6
+F_CPU = 2666667UL
 
 include $(AVR_GENRULES)
 

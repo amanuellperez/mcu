@@ -59,7 +59,9 @@ RM			:= rm -rf
 SED			:= sed
 PRINTF		:= /usr/bin/printf
 
-
+# LOGS
+# ----
+AVRDUDE_LOG := avrdude.log
 
 
 # -------------------
@@ -325,7 +327,8 @@ clean:
 	$(BIN).d $(BIN).eep $(BIN).lst \
 	$(BIN).lss $(BIN).sym $(BIN).map \
 	$(BIN).eeprom $(FIC_TAGS) $(DEPENDENCIAS) \
-	$(OBJECTS) $(BIN) $(LIB_NAME) $(FIC_TAGS)
+	$(OBJECTS) $(BIN) $(LIB_NAME) $(FIC_TAGS) \
+	$(AVRDUDE_LOG)
 
 .PHONY: super_clean
 super_clean: clean
@@ -359,7 +362,8 @@ flash_eeprom: $(BIN).eeprom
 
 .PHONY: avrdude_terminal 
 avrdude_terminal:
-	$(AVRDUDE) -c $(PROGRAMMER_TYPE) -p $(MCU) $(PROGRAMMER_ARGS) -nt
+	$(AVRDUDE) -c $(PROGRAMMER_TYPE)  -P $(PROGRAMMER_PORT) \
+			   -b $(PROGRAMMER_BAUDRATE)  -p $(MCU) -t 
 
 # help
 .PHONY: help
@@ -384,7 +388,10 @@ help:
 	@$(PRINTF) "          añadir 'USER_CXXFLAGS=-save-temps -fverbose-asm' al makefile.\n"
 	@$(PRINTF) "\nFUSES\n"
 	@$(PRINTF) "-----\n"
-	@$(PRINTF) "show_fuses       : Muestra los fuses.\n"
+	@$(PRINTF) "read_fuses       : Muestra los fuses.\n"
+	@$(PRINTF) "write_fuses      : Escribe los fuses. Hay que definir las variables\n"
+	@$(PRINTF) "                   correspondientes dependiendo del avr:\n"
+	@$(PRINTF) "                   (LFUSE, HFUSE y EFUSE) ó (FUSE0, FUSE1, ...),\n"
 	@$(PRINTF) "set_default_fuses: Escribe los fuses como vienen de fábrica.\n"
 	@$(PRINTF) "set_fast_fuse    : No dividimos la frecuencia de reloj entre 8,\n"
 	@$(PRINTF) "                   dejando su máximo valor.\n"
@@ -398,9 +405,6 @@ help:
 	@$(PRINTF) "                   Conectamos un cristal externo de 8MHz,\n"
 	@$(PRINTF) "                   dividiendo la frecuencia del reloj entre 8,\n"
 	@$(PRINTF) "                   y no sacando el reloj por el pin CLKO.\n"
-	@$(PRINTF) "fuses            : Configura los fuses. Hay que definir las variables:\n"
-	@$(PRINTF) "                   LFUSE, HFUSE y EFUSE. Si alguna no se define se usa\n"
-	@$(PRINTF) "                   el valor por defecto de fábrica.\n"
 	@$(PRINTF) "\n"
 	
 
@@ -450,10 +454,11 @@ debug:
 	@$(PRINTF) "MCU   = [$(MCU)]\n"
 	@$(PRINTF) "F_CPU = [$(F_CPU)]\n"
 
-	@$(PRINTF) "LFUSE = [$(LFUSE)]\n"
-	@$(PRINTF) "HFUSE = [$(HFUSE)]\n"
-	@$(PRINTF) "EFUSE = [$(EFUSE)]\n"
-	@$(PRINTF) "FUSE_STRING = [$(FUSE_STRING)]\n\n"
+#	@$(PRINTF) "LFUSE = [$(LFUSE)]\n"
+#	@$(PRINTF) "HFUSE = [$(HFUSE)]\n"
+#	@$(PRINTF) "EFUSE = [$(EFUSE)]\n"
+	@$(PRINTF) "READ_FUSE_STRING  = [$(READ_FUSE_STRING)]\n"
+	@$(PRINTF) "WRITE_FUSE_STRING = [$(WRITE_FUSE_STRING)]\n\n"
 
 	@$(PRINTF) "Flags usados por el programador\n"
 	@$(PRINTF) "-------------------------------\n"
@@ -485,7 +490,6 @@ flash_usbasp: flash
 .PHONY: flash_arduinoISP
 flash_arduinoISP: PROGRAMMER_TYPE = avrisp
 flash_arduinoISP: PROGRAMMER_ARGS = -b 19200 -P /dev/ttyACM0 
-# (for windows) flash_arduinoISP: PROGRAMMER_ARGS = -b 19200 -P com5
 flash_arduinoISP: flash
 
 .PHONY: flash_109
@@ -503,55 +507,74 @@ HFUSE ?= $(HFUSE_DEFAULT)
 EFUSE ?= $(EFUSE_DEFAULT)
 
 
-# Generic 
-FUSE_STRING = -U lfuse:w:$(LFUSE):m -U hfuse:w:$(HFUSE):m -U efuse:w:$(EFUSE):m 
+.PHONY: write_fuses
+write_fuses: 
+	$(AVRDUDE) -c $(PROGRAMMER_TYPE)  -P $(PROGRAMMER_PORT) \
+			   -b $(PROGRAMMER_BAUDRATE)  -p $(MCU) $(PROGRAMMER_ARGS) \
+	           $(PROGRAMMER_ARGS) $(WRITE_FUSE_STRING)
 
-fuses: 
-	$(AVRDUDE) -c $(PROGRAMMER_TYPE) -p $(MCU) \
-	           $(PROGRAMMER_ARGS) $(FUSE_STRING)
-show_fuses:
-	$(AVRDUDE) -c $(PROGRAMMER_TYPE) -p $(MCU) $(PROGRAMMER_ARGS) -nv	
+.PHONY: read_fuses
+read_fuses:
+	$(AVRDUDE) -c $(PROGRAMMER_TYPE)  -P $(PROGRAMMER_PORT) \
+			   -b $(PROGRAMMER_BAUDRATE)  -p $(MCU) $(PROGRAMMER_ARGS) \
+			   -l $(AVRDUDE_LOG) $(READ_FUSE_STRING)
+
+#-nv
+
+# TODO: lo siguiente solo funciona para avrs que tengan HFUSE/LFUSE/EFUSE.
+# Generalizarlo para admitir otros micros (similar a lo hecho en fuses and 
+# read_fuses)
+ifeq ($(MCU), atmega328p)
 
 # Called with no extra definitions, sets to defaults
-set_default_fuses:  FUSE_STRING = -U lfuse:w:$(LFUSE):m -U hfuse:w:$(HFUSE):m -U efuse:w:$(EFUSE):m 
+.PHONY: set_default_fuses
+set_default_fuses:  WRITE_FUSE_STRING = -U lfuse:w:$(LFUSE):m -U hfuse:w:$(HFUSE):m -U efuse:w:$(EFUSE):m 
 set_default_fuses:  fuses
 
 # Set the fuse byte for full-speed mode
 # Note: can also be set in firmware for modern chips
 #set_fast_fuse: LFUSE = 0xE2
+.PHONY: set_fast_fuse
 set_fast_fuse: LFUSE = $(LFUSE_FAST_FUSE)
-set_fast_fuse: FUSE_STRING = -U lfuse:w:$(LFUSE):m 
+set_fast_fuse: WRITE_FUSE_STRING = -U lfuse:w:$(LFUSE):m 
 set_fast_fuse: fuses
 
 # Sacamos el reloj por el pin CLKO a la frecuencia del reloj del AVR
 #set_clock_output_fuse: LFUSE = 0xA2
+.PHONY: set_clock_output_fuse
 set_clock_output_fuse: LFUSE = $(LFUSE_CLOCK_OUTPUT_FUSE)
-set_clock_output_fuse: FUSE_STRING = -U lfuse:w:$(LFUSE):m 
+set_clock_output_fuse: WRITE_FUSE_STRING = -U lfuse:w:$(LFUSE):m 
 set_clock_output_fuse: fuses
 
 # Sacamos el reloj por el pin CLKO, dividiendo la frecuencia del reloj entre 8
 #set_clock_output_divide_by_8_fuse: LFUSE = 0x22
+.PHONY: set_clock_output_divide_by_8_fuse
 set_clock_output_divide_by_8_fuse: LFUSE = $(LFUSE_CLOCK_OUTPUT_DIVIDE_BY_8)
-set_clock_output_divide_by_8_fuse: FUSE_STRING = -U lfuse:w:$(LFUSE):m 
+set_clock_output_divide_by_8_fuse: WRITE_FUSE_STRING = -U lfuse:w:$(LFUSE):m 
 set_clock_output_divide_by_8_fuse: fuses
 
 # Usamos un cristal externo de 8MHz, no dividiendo la frecuencia entre 8 
 # TODO: el nombre es confuso, ¿cómo llamarlo?
+.PHONY: set_external_crystal_8MHz
 set_external_crystal_8MHz: LFUSE = $(LFUSE_SET_EXTERNAL_CRYSTAL_8MHZ)
-set_external_crystal_8MHz: FUSE_STRING = -U lfuse:w:$(LFUSE):m 
+set_external_crystal_8MHz: WRITE_FUSE_STRING = -U lfuse:w:$(LFUSE):m 
 set_external_crystal_8MHz: fuses
 
 
 
 # Set the EESAVE fuse byte to preserve EEPROM across flashes
 #set_eeprom_save_fuse: HFUSE = 0xD7
+.PHONY: set_eeprom_save_fuse
 set_eeprom_save_fuse: HFUSE = $(HFUSE_EEPROM_SAVE_FUSE)
-set_eeprom_save_fuse: FUSE_STRING = -U hfuse:w:$(HFUSE):m
+set_eeprom_save_fuse: WRITE_FUSE_STRING = -U hfuse:w:$(HFUSE):m
 set_eeprom_save_fuse: fuses
 
 # Clear the EESAVE fuse byte
-clear_eeprom_save_fuse: FUSE_STRING = -U hfuse:w:$(HFUSE):m
+.PHONY: clear_eeprom_save_fuse
+clear_eeprom_save_fuse: WRITE_FUSE_STRING = -U hfuse:w:$(HFUSE):m
 clear_eeprom_save_fuse: fuses
+
+endif # if (MCU == atmega328p)
 
 
 
