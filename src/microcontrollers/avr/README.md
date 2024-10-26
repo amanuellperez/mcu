@@ -9,7 +9,7 @@ los siguientes directorios:
 * [`atmega`](mega/README.md)
   Familia megaAVR.
 
-* `atmega-0`
+* [`atmega-0`](mega0/README.md)
   Familia mega0AVR.
 
 etc. Cada una de estas familias tiene su propio directorio.
