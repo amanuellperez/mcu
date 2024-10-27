@@ -36,7 +36,7 @@
 
 #include <dev_HD44780.h>
 #include <dev_LCD_screen.h>
-#include <dev_LCD_font_4x3.h>
+#include <rom_LCD_font_4x3.h>
 #include <dev_keyrow.h>
 #include <mcu_clock.h>
 

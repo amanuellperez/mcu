@@ -25,6 +25,8 @@
 #include <dev_HD44780.h>
 #include <dev_HD44780_charset.h>
 #include <dev_LCD_ostream.h>
+
+#include <avr_atmega.h>
 #include <rom_glyphs_5x8.h>
 
 #include "../instcodes.h"

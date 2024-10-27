@@ -175,12 +175,12 @@ namespace atmega{
     template <size_t N>
     using ROM_string_array = mega_::ROM_string_array<N>;
 
-    // TODO: borrar las views de progmem. DEPRECATED
-    template <typename T, size_t N>
-    using Progmem_array_view = mega_::Progmem_array_view<T, N>;
-
-    template <typename T, size_t nrows, size_t ncols>
-    using Progmem_biarray_view = mega_::Progmem_biarray_view<T, nrows, ncols>;
+//    // TODO: borrar las views de progmem. DEPRECATED
+//    template <typename T, size_t N>
+//    using Progmem_array_view = mega_::Progmem_array_view<T, N>;
+//
+//    template <typename T, size_t nrows, size_t ncols>
+//    using Progmem_biarray_view = mega_::Progmem_biarray_view<T, nrows, ncols>;
 
 
     namespace literals{ using namespace mega_::literals; }

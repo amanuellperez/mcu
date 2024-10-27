@@ -193,15 +193,9 @@ public:
     /// Crea un nuevo caracter 'c' de 8 filas en la página de memoria extendida.
     /// Deja el cursor en la posición inicial.
     /// Precondition: 0 <= c < 7
-    // TODO: limpiar. Dejar solo una de las 3 funciones.
-    static void new_extended_char(uint8_t c, const uint8_t glyph[8]);
+    template <typename Array>
+    static void new_extended_char(uint8_t c, const Array& glyph);
 
-    template <typename ROM_read>
-    static void new_extended_char(uint8_t c,
-                          const atd::ROM_array<uint8_t, 8, ROM_read>& glyph);
-
-    static void new_extended_char(uint8_t c,
-                                  const not_generic::Progmem_array_view<uint8_t, 8>& glyph);
 
   private:
     using Flags = _LCD_HD44780_generic_flags;
@@ -311,8 +305,8 @@ void LCD_HD44780<M, pin>::cursor_blink(bool yes)
 }
 
 template <typename M, typename pin>
-void LCD_HD44780<M, pin>::new_extended_char(uint8_t c,
-                                                      const uint8_t glyph[8])
+template <typename Array>
+void LCD_HD44780<M, pin>::new_extended_char(uint8_t c, const Array& glyph)
 {
     LCD::set_cgram_address(c*8);
 
@@ -322,30 +316,6 @@ void LCD_HD44780<M, pin>::new_extended_char(uint8_t c,
     LCD::set_ddram_address(0x00); 
 }
 
-template <typename M, typename pin>
-template <typename ROM_read>
-void LCD_HD44780<M, pin>::new_extended_char(uint8_t c,
-                             const atd::ROM_array<uint8_t, 8, ROM_read>& glyph)
-{
-    LCD::set_cgram_address(c*8);
-
-    for (uint8_t j  = 0; j < 8; ++j)
-	LCD::write_data_to_CG_or_DDRAM(glyph[j]);
-
-    LCD::set_ddram_address(0x00); 
-}
-
-template <typename M, typename pin>
-void LCD_HD44780<M, pin>::new_extended_char(uint8_t c,
-                                  const not_generic::Progmem_array_view<uint8_t, 8>& glyph)
-{
-    LCD::set_cgram_address(c*8);
-
-    for (uint8_t j  = 0; j < 8; ++j)
-	LCD::write_data_to_CG_or_DDRAM(glyph[j]);
-
-    LCD::set_ddram_address(0x00); 
-}
 
 /*!
  *  \brief  Capa genérica del LCD_HD44780_4004
@@ -407,13 +377,8 @@ public:
     /// Crea un nuevo caracter 'c' de 8 filas en la página de memoria extendida.
     /// Deja el cursor en la posición inicial.
     /// Precondition: 0 <= c < 7
-    static void new_extended_char(uint8_t c, const uint8_t glyph[8]);
-
-    template <typename ROM_read>
-    static void new_extended_char(uint8_t c,
-                             const atd::ROM_array<uint8_t, 8, ROM_read>& glyph);
-    static void new_extended_char(uint8_t c,
-                                  const not_generic::Progmem_array_view<uint8_t, 8>& glyph);
+    template <typename Array>
+    static void new_extended_char(uint8_t c, const Array& glyph);
 
 private:
 
@@ -633,36 +598,9 @@ void LCD_HD44780_4004<M, pin>::display_control_1_or_2()
 			  flag(cursor_on_bit), flag(cursor_blink_bit));
 }
 
-
 template <typename M, typename pin>
-void LCD_HD44780_4004<M, pin>::new_extended_char(uint8_t c,
-                                                      const uint8_t glyph[8])
-{
-    LCD::set_cgram_address(c*8);
-
-    for (uint8_t j  = 0; j < 8; ++j)
-	LCD::write_data_to_CG_or_DDRAM(glyph[j]);
-
-    LCD::set_ddram_address(0x00); 
-}
-
-
-template <typename M, typename pin>
-template <typename ROM_read>
-void LCD_HD44780_4004<M, pin>::new_extended_char(uint8_t c,
-                            const atd::ROM_array<uint8_t, 8,  ROM_read>& glyph)
-{
-    LCD::set_cgram_address(c*8);
-
-    for (uint8_t j  = 0; j < 8; ++j)
-	LCD::write_data_to_CG_or_DDRAM(glyph[j]);
-
-    LCD::set_ddram_address(0x00); 
-}
-
-template <typename M, typename pin>
-void LCD_HD44780_4004<M, pin>::new_extended_char(uint8_t c,
-                                  const not_generic::Progmem_array_view<uint8_t, 8>& glyph)
+template <typename Array>
+void LCD_HD44780_4004<M, pin>::new_extended_char(uint8_t c, const Array& glyph)
 {
     LCD::set_cgram_address(c*8);
 

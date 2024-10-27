@@ -33,8 +33,6 @@
  ****************************************************************************/
 #include <mega_import_avr.h> // wait_ms
 #include <mega_pin.h>
-#include <mega_memory.h>    // lo usa logic (dev_LCD_font_xxx.h)
-			    // y LCD_HD44780_generic.h
 
 // TODO: Como esto lo he ido desarrollando poco a poco, a medida que he ido
 // aprendiendo la mayoria de los dispositivos acceden directamente a las

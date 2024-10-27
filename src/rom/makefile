@@ -41,7 +41,12 @@ DIST = 	rom_font_alagard_13x15_cr.h					\
 		rom_font_upheavtt_13x14_rf.h		\
 		rom_font_VCR_12x17_cr.h		\
 		rom_font_VCR_12x17_rf.h		\
-		rom_glyphs_5x8.h
+		rom_glyphs_5x8.h			\
+		rom_LCD_font_2x1.h			\
+		rom_LCD_font_2x2.h			\
+		rom_LCD_font_2x3.h			\
+		rom_LCD_font_3x3.h			\
+		rom_LCD_font_4x3.h
 
 
 #LIB=rom

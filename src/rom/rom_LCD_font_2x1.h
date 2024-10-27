@@ -31,9 +31,7 @@
  *                                 posibilidades).
  *
  ****************************************************************************/
-#include "dev_LCD_big_digits.h" 
-
-#include "not_generic.h"
+#include <atd_rom.h>
 
 
 namespace dev{
@@ -42,89 +40,92 @@ namespace dev{
  *			    FONT T1 2x1
  ***************************************************************************/
 namespace big_digits{
+using ROM_read = MCU::ROM_read;
+
 constexpr uint8_t bricks2x1_t1_size = 8;
-constexpr const uint8_t _bricks2x1_t1_size[8][bricks2x1_t1_size] PROGMEM = {
-    { 0b00000001,
-      0b00000001,
-      0b00000001,
-      0b00000001,
-      0b00000001,
-      0b00000001,
-      0b00000001,
-      0b00000001},
 
-    { 0b00011111,
+static constexpr 
+atd::ROM_biarray<uint8_t, 8, bricks2x1_t1_size, ROM_read> bricks2x1_t1 
+	PROGMEM = {
+      0b00000001,
+      0b00000001,
+      0b00000001,
+      0b00000001,
+      0b00000001,
+      0b00000001,
+      0b00000001,
+      0b00000001,
+
+      0b00011111,
       0b00010000,
       0b00010000,
       0b00010000,
       0b00010000,
       0b00010000,
       0b00010000,
-      0b00011111},
+      0b00011111,
 
-    { 0b00011111,
+      0b00011111,
       0b00000001,
       0b00000001,
       0b00000001,
       0b00000001,
       0b00000001,
       0b00000001,
-      0b00000001},
-
-
-    { 0b00011111,
       0b00000001,
-      0b00000001,
-      0b00000001,
-      0b00000001,
-      0b00000001,
-      0b00000001,
-      0b00011111},
 
 
-    { 0b00000001,
+      0b00011111,
       0b00000001,
       0b00000001,
       0b00000001,
       0b00000001,
       0b00000001,
       0b00000001,
-      0b00011111},
+      0b00011111,
 
 
-    { 0b00010001,
-      0b00010001,
-      0b00010001,
-      0b00010001,
-      0b00010001,
-      0b00010001,
-      0b00010001,
-      0b00011111},
+      0b00000001,
+      0b00000001,
+      0b00000001,
+      0b00000001,
+      0b00000001,
+      0b00000001,
+      0b00000001,
+      0b00011111,
 
 
-    { 0b00011111,
       0b00010001,
       0b00010001,
       0b00010001,
       0b00010001,
       0b00010001,
       0b00010001,
-      0b00011111},
+      0b00010001,
+      0b00011111,
 
 
-    { 0b00011111,
+      0b00011111,
       0b00010001,
       0b00010001,
       0b00010001,
       0b00010001,
       0b00010001,
       0b00010001,
-      0b00010001}
+      0b00011111,
+
+
+      0b00011111,
+      0b00010001,
+      0b00010001,
+      0b00010001,
+      0b00010001,
+      0b00010001,
+      0b00010001,
+      0b00010001
 };
 
 
-static inline not_generic::Progmem_biarray_view<uint8_t, 8, big_digits::bricks2x1_t1_size> 
-				    bricks2x1_t1{big_digits::_bricks2x1_t1_size};
 
 // Cada digit está construido de una serie de bricks. Aquí indicamos qué
 // bricks necesita cada digit.
@@ -166,12 +167,14 @@ constexpr const uint8_t digits2x1_t1[10][2] /* PROGMEM */ = {
 /***************************************************************************
  *		     INTERFAZ DE ACCESO A LAS FONTS
  ***************************************************************************/
-struct _Font_digit_2x1_t1{
+namespace impl_of{
+
+struct Font_digit_2x1_t1{
     static constexpr uint8_t rows = 2;
     static constexpr uint8_t cols = 1;
     static constexpr uint8_t nbricks = big_digits::bricks2x1_t1_size;
 
-    static auto brick(uint8_t i) { return big_digits::bricks2x1_t1[i];}
+    static auto brick(uint8_t i) { return big_digits::bricks2x1_t1.row(i);}
     static auto digit(uint8_t i, uint8_t j)
     {return big_digits::digits2x1_t1[i][j];}
 
@@ -183,10 +186,10 @@ struct _Font_digit_2x1_t1{
     static bool is_digit_char_space(uint8_t i, uint8_t j)
     {return digit(i, j) == big_digits::char_space;}
 };
-
+}// impl_of
 
 // Alias
-using Font_digit_2x1_t1= Big_digit<_Font_digit_2x1_t1>;
+using Font_digit_2x1_t1= Big_digit<impl_of::Font_digit_2x1_t1>;
 
 
 /***************************************************************************
@@ -194,88 +197,88 @@ using Font_digit_2x1_t1= Big_digit<_Font_digit_2x1_t1>;
  ***************************************************************************/
 namespace big_digits{
 constexpr uint8_t bricks2x1_t2_size = 8;
-constexpr const uint8_t _bricks2x1_t2_size[8][bricks2x1_t2_size] PROGMEM = {
-    { 0b00000011,
-      0b00000011,
-      0b00000011,
-      0b00000011,
-      0b00000011,
-      0b00000011,
-      0b00000011,
-      0b00000011},
 
-    { 0b00011111,
+static constexpr 
+atd::ROM_biarray<uint8_t, 8, bricks2x1_t2_size, ROM_read> bricks2x1_t2
+	PROGMEM = {
+      0b00000011,
+      0b00000011,
+      0b00000011,
+      0b00000011,
+      0b00000011,
+      0b00000011,
+      0b00000011,
+      0b00000011,
+
+      0b00011111,
       0b00011111,
       0b00011000,
       0b00011000,
       0b00011000,
       0b00011000,
       0b00011111,
-      0b00011111},
+      0b00011111,
 
-    { 0b00011111,
+      0b00011111,
       0b00011111,
       0b00000011,
       0b00000011,
       0b00000011,
       0b00000011,
       0b00000011,
-      0b00000011},
+      0b00000011,
 
 
-    { 0b00011111,
+      0b00011111,
       0b00011111,
       0b00000011,
       0b00000011,
       0b00000011,
       0b00000011,
       0b00011111,
-      0b00011111},
+      0b00011111,
 
 
-    { 0b00000011,
+      0b00000011,
       0b00000011,
       0b00000011,
       0b00000011,
       0b00000011,
       0b00000011,
       0b00011111,
-      0b00011111},
+      0b00011111,
 
 
-    { 0b00011011,
+      0b00011011,
       0b00011011,
       0b00011011,
       0b00011011,
       0b00011011,
       0b00011011,
       0b00011111,
-      0b00011111},
+      0b00011111,
 
 
-    { 0b00011111,
+      0b00011111,
       0b00011111,
       0b00011011,
       0b00011011,
       0b00011011,
       0b00011011,
       0b00011111,
-      0b00011111},
+      0b00011111,
 
 
-    { 0b00011111,
+      0b00011111,
       0b00011011,
       0b00011011,
       0b00011011,
       0b00011011,
       0b00011011,
       0b00011011,
-      0b00011011}
+      0b00011011
 };
 
-
-static inline not_generic::Progmem_biarray_view<uint8_t, 8, big_digits::bricks2x1_t2_size> 
-				    bricks2x1_t2{big_digits::_bricks2x1_t2_size};
 
 // Cada digit está construido de una serie de bricks. Aquí indicamos qué
 // bricks necesita cada digit.
@@ -317,12 +320,13 @@ constexpr const uint8_t digits2x1_t2[10][2] /* PROGMEM */ = {
 /***************************************************************************
  *		     INTERFAZ DE ACCESO A LAS FONTS
  ***************************************************************************/
-struct _Font_digit_2x1_t2{
+namespace impl_of {
+struct Font_digit_2x1_t2{
     static constexpr uint8_t rows = 2;
     static constexpr uint8_t cols = 1;
     static constexpr uint8_t nbricks = big_digits::bricks2x1_t2_size;
 
-    static auto brick(uint8_t i) { return big_digits::bricks2x1_t2[i];}
+    static auto brick(uint8_t i) { return big_digits::bricks2x1_t2.row(i);}
     static auto digit(uint8_t i, uint8_t j)
     {return big_digits::digits2x1_t2[i][j];}
 
@@ -335,10 +339,10 @@ struct _Font_digit_2x1_t2{
     {return digit(i, j) == big_digits::char_space;}
 
 };
-
+}// impl_of
 
 // Alias
-using Font_digit_2x1_t2= Big_digit<_Font_digit_2x1_t2>;
+using Font_digit_2x1_t2= Big_digit<impl_of::Font_digit_2x1_t2>;
 
 }// namespace
 

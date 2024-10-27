@@ -250,67 +250,67 @@ strlcpy(char* dst, const Element_progmem_string_array<N>& src, size_t n)
 
 
 
-/***************************************************************************
- *				VIEWS
- *
- *  No tengo claro de que las anteriores implementaciones funcionen siempre.
- *  Aunque me gusta más la forma anterior voy a probar a crear views de las
- *  progmems. Las views se limitan a suministrar un interfaz más cómodo de
- *  acceso a la PROGMEM.
- *  
- *  TODO: eliminarlo. Lo uso en el LCD
- ***************************************************************************/
-// Se trata de un array en progmem. Como no es propietario de los datos sería 
-// un Progmem_array_view????
-template <typename T, size_t N>
-class Progmem_array_view{
-public:
-    using size_type = size_t;
-
-    static_assert(std::is_same_v<T, uint8_t> 
-	       or std::is_same_v<T, uint16_t>);
-
-    Progmem_array_view(const T* data):data_{data}{}
-
-    constexpr static size_type size() {return N;}
-
-    T operator[](size_type i) const
-    {
-	if constexpr (std::is_same_v<T, uint8_t>)
-	    return pgm_read_byte(&data_[i]);
-
-	else if constexpr (std::is_same_v<T, uint16_t>)
-	    return pgm_read_word(&data_[i]);
-
-	else
-	    static_assert(atd::always_false_v<int>, "error");
-    }
-
-private:
-    const T* data_;
-};
-
-
-
-template <typename T, size_t nrows, size_t ncols>
-class Progmem_biarray_view{
-public:
-    using size_type = size_t;
-
-    static_assert(std::is_same_v<T, uint8_t> 
-	       or std::is_same_v<T, uint16_t>);
-
-    Progmem_biarray_view(const T (*data)[ncols]) : data_{data} {}
-
-    constexpr static size_type rows() {return nrows;}
-    constexpr static size_type cols() {return ncols;}
-
-    Progmem_array_view<T, cols()> operator[](size_type i) const 
-    { return Progmem_array_view<T, cols()>{data_[i]}; }
-
-private:
-    const T (*data_)[ncols];
-};
+///***************************************************************************
+// *				VIEWS
+// *
+// *  No tengo claro de que las anteriores implementaciones funcionen siempre.
+// *  Aunque me gusta más la forma anterior voy a probar a crear views de las
+// *  progmems. Las views se limitan a suministrar un interfaz más cómodo de
+// *  acceso a la PROGMEM.
+// *  
+// *  TODO: eliminarlo. Lo uso en el LCD
+// ***************************************************************************/
+//// Se trata de un array en progmem. Como no es propietario de los datos sería 
+//// un Progmem_array_view????
+//template <typename T, size_t N>
+//class Progmem_array_view{
+//public:
+//    using size_type = size_t;
+//
+//    static_assert(std::is_same_v<T, uint8_t> 
+//	       or std::is_same_v<T, uint16_t>);
+//
+//    Progmem_array_view(const T* data):data_{data}{}
+//
+//    constexpr static size_type size() {return N;}
+//
+//    T operator[](size_type i) const
+//    {
+//	if constexpr (std::is_same_v<T, uint8_t>)
+//	    return pgm_read_byte(&data_[i]);
+//
+//	else if constexpr (std::is_same_v<T, uint16_t>)
+//	    return pgm_read_word(&data_[i]);
+//
+//	else
+//	    static_assert(atd::always_false_v<int>, "error");
+//    }
+//
+//private:
+//    const T* data_;
+//};
+//
+//
+//
+//template <typename T, size_t nrows, size_t ncols>
+//class Progmem_biarray_view{
+//public:
+//    using size_type = size_t;
+//
+//    static_assert(std::is_same_v<T, uint8_t> 
+//	       or std::is_same_v<T, uint16_t>);
+//
+//    Progmem_biarray_view(const T (*data)[ncols]) : data_{data} {}
+//
+//    constexpr static size_type rows() {return nrows;}
+//    constexpr static size_type cols() {return ncols;}
+//
+//    Progmem_array_view<T, cols()> operator[](size_type i) const 
+//    { return Progmem_array_view<T, cols()>{data_[i]}; }
+//
+//private:
+//    const T (*data_)[ncols];
+//};
 
 
 // Interfaz genérico

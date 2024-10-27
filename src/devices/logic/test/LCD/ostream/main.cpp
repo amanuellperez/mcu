@@ -20,7 +20,7 @@
 
 #include <dev_HD44780_generic.h>
 #include "../../../dev_LCD_ostream.h"
-#include <avr_time.h>
+#include <avr_atmega.h>
 #include <stddef.h>
 
 #include <atd_double.h>

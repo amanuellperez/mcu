@@ -19,114 +19,106 @@
 
 #pragma once
 
-#ifndef __DEV_LCD_FONT_3X3_H__
-#define __DEV_LCD_FONT_3X3_H__
+#ifndef __DEV_LCD_FONT_4X3_H__
+#define __DEV_LCD_FONT_4X3_H__
 /****************************************************************************
  *
  *  - DESCRIPCION: Fuente tipo 1 para el LCD.
  *
- *    Quedaría mejor llamar a la fuente: Courier_3x3, o Times_New_Roman_3x3, 
- *    en lugar de Big_digit_3x3_t1. Pero es un
- *    tipo de letra que he visto en internet y no se de dónde la habrán sacado.
- *    Si no, sería interesante ponerle el nombre del que la diseñó.
- *    ¿Alguien sabe su nombre? ¿Para bautizarla así en lugar de 't1'?
- *  
  *  - HISTORIA:
  *    Manuel Perez
- *    09/02/2022 Big_digit_3x3_t1: el formato lo baso en uno visto en internet.
+ *    15/02/2022 Big_digit_4x3_t1: diseño mío.
  *
  ****************************************************************************/
-#include "dev_LCD_big_digits.h" 
-
-#include "not_generic.h"
+#include <atd_rom.h>
 
 namespace dev{
 
 namespace big_digits{
 
+using ROM_read = MCU::ROM_read;
+
 /***************************************************************************
- *			    FONT T1 3x3
+ *			    FONT T1 4x3
  ***************************************************************************/
 // Para el display de 4 filas (cada digit es de 3 x 3)
-constexpr uint8_t bricks3x3_t1_size = 8;
-constexpr const uint8_t _bricks3x3_t1[8][bricks3x3_t1_size] PROGMEM = {
-    { 0b00000011,
+constexpr uint8_t bricks4x3_t1_size = 8;
+static constexpr 
+atd::ROM_biarray<uint8_t, 8, bricks4x3_t1_size, ROM_read> bricks4x3_t1
+	PROGMEM = {
+      0b00000000,
+      0b00000000,
+      0b00000000,
+      0b00000000,
+      0b00000011,
       0b00000111,
       0b00001111,
-      0b00011111,
-      0b00000000,
-      0b00000000,
-      0b00000000,
-      0b00000000 },
+      0b00011111 ,
 
-    { 0b00011000,
+      0b00000000,
+      0b00000000,
+      0b00000000,
+      0b00000000,
+      0b00011000,
       0b00011100,
       0b00011110,
-      0b00011111,
-      0b00000000,
-      0b00000000,
-      0b00000000,
-      0b00000000 },
+      0b00011111 ,
     
-    { 0b00011111,
+      0b00011111,
       0b00001111,
       0b00000111,
       0b00000011,
       0b00000000,
       0b00000000,
       0b00000000,
-      0b00000000 },
+      0b00000000 ,
 
-    { 0b00011111,
+      0b00011111,
       0b00011110,
       0b00011100,
       0b00011000,
       0b00000000,
       0b00000000,
       0b00000000,
-      0b00000000 },
+      0b00000000 ,
 
-    { 0b00000011,
-      0b00000111,
+
+      0b00011111,
+      0b00011111,
+      0b00011111,
+      0b00011111,
+      0b00011111,
       0b00001111,
-      0b00011111,
-      0b00011111,
-      0b00011111,
-      0b00011111,
-      0b00011111 },
+      0b00000111,
+      0b00000011 ,
 
-    { 0b00011000,
-      0b00011100,
+      0b00011111,
+      0b00011111,
+      0b00011111,
+      0b00011111,
+      0b00011111,
       0b00011110,
-      0b00011111,
-      0b00011111,
-      0b00011111,
-      0b00011111,
-      0b00011111 },
+      0b00011100,
+      0b00011000 ,
 
-    { 0b00011111,
+      0b00011111,
       0b00011111,
       0b00011111,
       0b00011111,
       0b00000000,
       0b00000000,
       0b00000000,
-      0b00000000 },
+      0b00000000 ,
 
-    { 0b00001110,  // decimal point
-      0b00001110,
-      0b00001110,
       0b00000000,
       0b00000000,
       0b00000000,
       0b00000000,
-      0b00000000 },
+      0b00011111,
+      0b00011111,
+      0b00011111,
+      0b00011111 
 };
-
-// DUDA: el definir static esta variable hace que al hacer un avr-size
-// se generen 2 bytes en memoria no inicializada (sección .bss) ¿por qué?
-static inline not_generic::Progmem_biarray_view<uint8_t, 8, big_digits::bricks3x3_t1_size> 
-				    bricks3x3_t1{big_digits::_bricks3x3_t1};
 
 
 // DUDA: ¿merece la pena meter esto en PROGMEM? 
@@ -135,56 +127,66 @@ static inline not_generic::Progmem_biarray_view<uint8_t, 8, big_digits::bricks3x
 // dibujar un digit. 
 // Cada digit está construido de una serie de bricks. Aquí indicamos qué
 // bricks necesita cada digit.
-constexpr const uint8_t digits3x3_t1[10][9] /* PROGMEM */ = {
+constexpr const uint8_t digits4x3_t1[10][12] /* PROGMEM */ = {
     // 0
-    { 4, 6, 5,	
+    { 0, 7, 1,
+      char_full, char_space, char_full,
       char_full, char_space, char_full, 
-      2, 6, 3 },
+      4, 7, 5},
 
     // 1
-    { 0, char_full, char_space,
+    { 0, 7, char_space, 
       char_space, char_full, char_space,
-      6, 6, 6 },
+      char_space, char_full, char_space,
+      7, char_full, 7 },
 
     // 2
-    { 0, 6, 5,
-      4, 6, 3, 
-      6, 6, 6},
+    { 0, 7, 1, 
+      char_space, char_space, char_full,
+      char_full, 6, 3,
+      4, 7, 1 },
 
     // 3
-    { 6, 6, 5,
+    { 0, 7, 1, 
+      char_space, char_space, char_full,
       char_space, 6, char_full,
-      6 , 6, 3},
+      0, 7, 5 },
 
     // 4
-    { char_full, char_space, char_full,
+    { 0, char_space, 1,
+      char_full, char_space, char_full,
       2, 6, char_full, 
-      char_space, char_space, 6},
+      char_space, char_space, 5 },
 
     // 5
-    { char_full, 6, 6,
-      2, 6, 5,
-      2, 6, 3 },
+    { 0, 7, 1,
+      char_full, char_space, char_space,
+      2, 6, char_full, 
+      0, 7, 5 },
 
     // 6
-    { 4, 6, 1, 
-      char_full, 6, 5,
-      2, 6, 3 },
+    { 0, 7, 1, 
+      char_full, char_space, char_space,
+      char_full, 6, char_full,
+      4, 7, 5 },
 
     // 7
-    { 6, 6, char_full,
-      char_space, 4, 3,
-      char_space, 6, char_space},
+    { 0, 7, 1,
+      char_space, char_space, char_full, 
+      char_space, char_space, char_full, 
+      char_space, char_space, 5 },
 
     // 8
-    { 4, 6, 5,
+    { 0, 7, 1, 
+      char_full, char_space, char_full,
       char_full, 6, char_full,
-      2, 6, 3},
+      4, 7, 5 },
 
     // 9
-    { 4, 6, 5,
-      2, 6, char_full,
-      2, 6, 3}
+    { 0, 7, 1,
+      char_full, char_space, char_full,
+      2, 6, char_full, 
+      0, 7, 5 }
 };
 
 
@@ -194,20 +196,15 @@ constexpr const uint8_t digits3x3_t1[10][9] /* PROGMEM */ = {
 /***************************************************************************
  *		     INTERFAZ DE ACCESO A LAS FONTS
  ***************************************************************************/
-// (RRR) Esta estructura tiene dos finalidades:
-//       1. Define el tipo de fuente. La clase Big_digit queda parametrizada
-//          por la fuente. (esta es la razón principal por la que inicialmente
-//          la definí).
-//       2. Encapsular cómo se almacenan los bricks y los digits. ¿en RAM? ¿en
-//          PROGMEM?
-struct _Font_digit_3x3_t1{
-    static constexpr uint8_t rows = 3;
+namespace impl_of{
+struct Font_digit_4x3_t1{
+    static constexpr uint8_t rows = 4;
     static constexpr uint8_t cols = 3;
-    static constexpr uint8_t nbricks = big_digits::bricks3x3_t1_size;
+    static constexpr uint8_t nbricks = big_digits::bricks4x3_t1_size;
 
-    static auto brick(uint8_t i) { return big_digits::bricks3x3_t1[i];}
+    static auto brick(uint8_t i) { return big_digits::bricks4x3_t1.row(i);}
     static auto digit(uint8_t i, uint8_t j)
-    {return big_digits::digits3x3_t1[i][j];}
+    {return big_digits::digits4x3_t1[i][j];}
 
     // is_digit(i,j).char_full()?
     static bool is_digit_char_full(uint8_t i, uint8_t j)
@@ -217,10 +214,10 @@ struct _Font_digit_3x3_t1{
     static bool is_digit_char_space(uint8_t i, uint8_t j)
     {return digit(i, j) == big_digits::char_space;}
 };
-
+}// impl_of
 
 // Alias
-using Font_digit_3x3_t1 = Big_digit<_Font_digit_3x3_t1>;
+using Font_digit_4x3_t1 = Big_digit<impl_of::Font_digit_4x3_t1>;
 
 } //namespace
 #endif

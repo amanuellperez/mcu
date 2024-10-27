@@ -46,8 +46,6 @@
  ****************************************************************************/
 #include <stdint.h>
 
-#include <avr_atmega.h>	// Progmem TODO: remove. Not generic
-#include "not_generic.h"
 #include <atd_memory.h>
 
 namespace dev{
@@ -286,13 +284,8 @@ public:
 // PÁGINA DE MEMORIA EXTENDIDA
     /// Crea un nuevo caracter 'c' de 8 filas en la página de memoria extendida.
     // TODO: limpiar. Dejar una sola de estas funciones
-    void new_extended_char(uint8_t c, const uint8_t glyph[8]);
-    
-    template <typename ROM_read>
-    void new_extended_char(uint8_t c,
-                           const atd::ROM_array<uint8_t, 8, ROM_read>& glyph);
-    void new_extended_char(uint8_t c,
-                           const not_generic::Progmem_array_view<uint8_t, 8>& glyph);
+    template <typename Array>
+    void new_extended_char(uint8_t c, const Array& glyph);
 
 // DATOS DEL LCD
     constexpr static uint8_t rows() {return num_rows;}

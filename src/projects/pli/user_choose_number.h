@@ -94,8 +94,9 @@
 #include <array>
 
 #include <atd_metronome.h>
-// #include <atd_types.h> Empty_struct
 #include <atd_names.h>
+
+#include <not_generic.h>
 
 #include "dev_keyrow.h"
 #include "dev_LCD_big_digits.h"	// Digit fonts

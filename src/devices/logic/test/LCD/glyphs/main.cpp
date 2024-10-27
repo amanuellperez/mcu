@@ -19,8 +19,8 @@
 
 #include "../../../dev_LCD_screen.h" // TODO: siempre ponerlo al principio
 #include <dev_HD44780_generic.h>
-#include <rom_glyphs_5x8.h>
 #include <avr_atmega.h>
+#include <rom_glyphs_5x8.h>
 #include <stddef.h>
 
 namespace myu = atmega;

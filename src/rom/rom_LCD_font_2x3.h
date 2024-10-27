@@ -30,97 +30,96 @@
  *    15/02/2022 Big_digit_2x3_t1: el formato lo baso en uno visto en internet.
  *
  ****************************************************************************/
-#include "dev_LCD_big_digits.h" 
-
-#include "not_generic.h"
+#include <atd_rom.h>
 
 namespace dev{
 
 namespace big_digits{
 
+using ROM_read = MCU::ROM_read;
+
 /***************************************************************************
  *			    FONT T1 2x3
  ***************************************************************************/
 constexpr uint8_t bricks2x3_t1_size = 8;
-constexpr const uint8_t _bricks2x3_t1[8][bricks2x3_t1_size] PROGMEM = {
-    { 0b00000111,
+
+static constexpr 
+atd::ROM_biarray<uint8_t, 8, bricks2x3_t1_size, ROM_read> bricks2x3_t1
+	PROGMEM = {
+      0b00000111,
       0b00001111,
       0b00011111,
       0b00011111,
       0b00011111,
       0b00011111,
       0b00011111,
-      0b00011111 },
+      0b00011111 ,
 
-    { 0b00011100,
+      0b00011100,
       0b00011110,
       0b00011111,
       0b00011111,
       0b00011111,
       0b00011111,
       0b00011111,
-      0b00011111 },
+      0b00011111 ,
  
-    { 0b00011111,
+      0b00011111,
       0b00011111,
       0b00011111,
       0b00011111,
       0b00011111,
       0b00011111,
       0b00001111,
-      0b00000111 },
+      0b00000111 ,
 
-    { 0b00011111,
+      0b00011111,
       0b00011111,
       0b00011111,
       0b00011111,
       0b00011111,
       0b00011111,
       0b00011110,
-      0b00011100 },
+      0b00011100 ,
 
-    { 0b00011111,
       0b00011111,
       0b00011111,
+      0b00011111,
       0b00000000,
       0b00000000,
       0b00000000,
       0b00000000,
-      0b00000000 },
+      0b00000000 ,
 
 
-    { 0b00000000,
+      0b00000000,
       0b00000000,
       0b00000000,
       0b00000000,
       0b00000000,
       0b00011111,
       0b00011111,
-      0b00011111 },
+      0b00011111 ,
 
-    { 0b00011111,
+      0b00011111,
       0b00011111,
       0b00011111,
       0b00000000,
       0b00000000,
       0b00000000,
       0b00011111,
-      0b00011111 },
+      0b00011111 ,
 
-    { 0b00000111,
+      0b00000111,
       0b00001111,
       0b00011111,
       0b00000000,
       0b00000000,
       0b00000000,
       0b00000000,
-      0b00000000 }
+      0b00000000 
 };
 
-// DUDA: el definir static esta variable hace que al hacer un avr-size
-// se generen 2 bytes en memoria no inicializada (sección .bss) ¿por qué?
-static inline not_generic::Progmem_biarray_view<uint8_t, 8, big_digits::bricks2x3_t1_size> 
-				    bricks2x3_t1{big_digits::_bricks2x3_t1};
 
 
 // DUDA: ¿merece la pena meter esto en PROGMEM? 
@@ -178,12 +177,13 @@ constexpr const uint8_t digits2x3_t1[10][6] /* PROGMEM */ = {
 /***************************************************************************
  *		     INTERFAZ DE ACCESO A LAS FONTS
  ***************************************************************************/
-struct _Font_digit_2x3_t1{
+namespace impl_of{
+struct Font_digit_2x3_t1{
     static constexpr uint8_t rows = 2;
     static constexpr uint8_t cols = 3;
     static constexpr uint8_t nbricks = big_digits::bricks2x3_t1_size;
 
-    static auto brick(uint8_t i) { return big_digits::bricks2x3_t1[i];}
+    static auto brick(uint8_t i) { return big_digits::bricks2x3_t1.row(i);}
     static auto digit(uint8_t i, uint8_t j)
     {return big_digits::digits2x3_t1[i][j];}
 
@@ -196,9 +196,10 @@ struct _Font_digit_2x3_t1{
     {return digit(i, j) == big_digits::char_space;}
 };
 
+} // impl_of
 
 // Alias
-using Font_digit_2x3_t1 = Big_digit<_Font_digit_2x3_t1>;
+using Font_digit_2x3_t1 = Big_digit<impl_of::Font_digit_2x3_t1>;
 
 } //namespace
 #endif
