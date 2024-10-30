@@ -41,6 +41,14 @@
  *	10/07/2024 Wait_1_us/Wait_1_ms
  *
  ****************************************************************************/
+// TODO: hay avrs, como el atmega328, que funcionan a una F_CPU fija, definida
+// en tiempo de compilación, pero otros, como el atmega4809, no. Puede ser
+// dinámica. Si se define F_CPU implementar wait_ms en función de _delay_ms;
+// si no se define ...???
+#ifndef F_CPU
+#error "To include these header you need to define F_CPU"
+#endif
+
 // Si no se define __DELAY_ROUND_CLOSEST__ antes de delay.h
 // genera un error _delay_ms al definir F_CPU = 16MHz/6.
 #define __DELAY_ROUND_CLOSEST__

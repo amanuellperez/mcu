@@ -176,7 +176,17 @@ Más de una vez he estado tentado de definir `atd::Uint8_t` y el resto de
 `Uint16_t`, ..., dentro de `atd` pero eso generaría confusión. Por eso no lo
 defino. 
 
+### ¿Heredar namespaces?
 
+Al implementar el `atmega4809` me encuentro con código común para todos los
+avrs. Quiero definir mi namespace `avr` donde meta el código dentro de otro
+namespace `protected`, código que solo se podrá llamar dentro de namespaces
+"heredados" de `avr`.
+
+Además, sistemáticamente creo namespaces `impl_of` o `private_` que contienen
+código que no quiero que sea llamado por los usuarios. (creo que esto se puede
+hacer con los módulos de C++20, pero como todavía no están implementados del
+todo en gcc  no he jugado con ellos).
 
 
 ## Test

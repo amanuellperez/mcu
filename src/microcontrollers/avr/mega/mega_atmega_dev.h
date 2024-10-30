@@ -68,7 +68,7 @@ namespace atmega{
     using namespace mega_;
 
 // MICRO
-    using Micro = mega_::Micro;
+    using Micro = mega_::Micro<cfg::pins_28>;
 
 
 // PINS

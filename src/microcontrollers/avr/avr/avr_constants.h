@@ -37,6 +37,9 @@
  ****************************************************************************/
 #include "avr_types.h"
 
+#ifndef F_CPU
+#error "To include these header you need to define F_CPU"
+#endif
 
 namespace avr_{
 

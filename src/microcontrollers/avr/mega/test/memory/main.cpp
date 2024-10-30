@@ -20,7 +20,7 @@
 
 #include <avr_time.h>
 #include "../../mega_UART_iostream.h"
-#include "../../mega_memory.h"
+#include <avr_memory.h>
 
 
 namespace my_mcu = mega_;

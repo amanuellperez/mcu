@@ -31,9 +31,13 @@
  *    19/10/2024 Empezando...
  *
  ****************************************************************************/
-#include <avr_private.h>   // importamos todo avr_
+#include "mega0_import_avr.h"
 
 #include "mega0_pin.h"
+#include "mega0_micro.h"
+#include "mega0_clock.h"
+
+#include "mega0_cfg.h"
 
 
 /***************************************************************************
@@ -49,8 +53,14 @@ namespace atmega4809_40{
     template <uint8_t n>
     using Pin = mega0_::Pin<n, mega0_::cfg::pins_40>;
 
+    using Micro = mega0_::Micro<mega0_::cfg::pins_40>;
+
+    using Clock_controller = mega0_::Clock_controller;
 }
 
+// La única diferencia entre estos dos namespace son los pines y la función
+// init del atmega4809_40.  El resto es igual (???)
+namespace atmega4809 = atmega4809_40;
 
 #endif
 

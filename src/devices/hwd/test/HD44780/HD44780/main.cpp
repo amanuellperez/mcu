@@ -16,13 +16,16 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
+//#define ATMEGA328P
+#define ATMEGA4809
 
 #include "../../../dev_HD44780_basic.h"
 
 
+#ifdef ATMEGA328P
 #include <avr_atmega.h>
 #include <rom_glyphs_5x8.h> // siempre despues de avr_atmega.h o equivalente
-
+			    
 namespace myu = atmega;
 
 // Si lo conectamos solo a 4 pins de datos
@@ -31,6 +34,30 @@ using LCD_pins = dev::HD44780_pins4<dev::HD44780_RS<4>,
 				       dev::HD44780_E<6>,
 				       dev::HD44780_D4<11,12,13,14>
 				       >;
+
+void myu_init()
+{}
+
+#elif defined ATMEGA4809
+
+#include <mega0.h>
+#include <rom_glyphs_5x8.h> // siempre despues de avr_atmega.h o equivalente
+
+namespace myu = atmega4809_40;
+
+// para el atmega4809
+using LCD_pins = dev::HD44780_pins4<dev::HD44780_RS<8>,
+				       dev::HD44780_RW<9>,
+				       dev::HD44780_E<10>,
+				       dev::HD44780_D4<11,12,13,14>
+				       >;
+// Lo pruebo a 1MHz para empezar
+void myu_init()
+{
+    myu::init();
+    myu::Clock_controller::clk_main_divided_by_16(); // a 1 MHz
+}
+#endif
 
 using LCD = dev::HD44780<myu::Micro, LCD_pins>;
 
@@ -68,9 +95,8 @@ void test_lcd4()
     // Si no el resto no funcionará.
     lcd.write_data_to_CG_or_DDRAM('O');
     lcd.write_data_to_CG_or_DDRAM('K');
-    lcd.write_data_to_CG_or_DDRAM('?');
+    lcd.write_data_to_CG_or_DDRAM('!');
     myu::Micro::wait_ms(1000);
-
 
     lcd.clear_display();
     lcd.return_home();
@@ -304,6 +330,8 @@ void test_cgram4()
 
 int main()
 {
+    myu_init();
+
     while(1){
 	test_static();
 	test_lcd4();

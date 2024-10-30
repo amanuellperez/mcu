@@ -6,6 +6,9 @@ Datasheet: 10.3.3 el prescaler por defecto es 6. No he encontrado el valor por
 defecto que trae OSC20M de fábrica. En el chip que tengo son 16MHz en cuyo
 caso por defecto funciona a 2 666 666 Hz.
 
+El valor del reloj interno que se usa lo da el fuse2: si vale 0x01 funciona a
+16 MHz; si 0x02 a 20 MHz
+
 ### `F_CPU`
 
 El reloj del `atmega4809` se configura dinámicamente (el fuse2 permite elegir

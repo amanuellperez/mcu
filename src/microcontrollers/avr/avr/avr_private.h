@@ -30,17 +30,20 @@
  *	Para facilitar esa inclusión aquí defino todos los archivos de
  *	cabecera de este directorio.
  *
+ *	No se incluyen los archivos que dependen de F_CPU. 
+ *
  * HISTORIA
  *    Manuel Perez
  *    19/10/2024 Escrito
  *
  ****************************************************************************/
 
-#include <avr_constants.h>
 #include <avr_interrupt.h>
 #include <avr_memory.h>
-#include <avr_time.h>
 #include <avr_types.h>
+#include <avr_constants.h>
+#include <avr_time.h>
+#include <avr_micro.h>
 
 
 #endif

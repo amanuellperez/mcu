@@ -21,7 +21,6 @@ INCS= \
 	mega_cfg.h			\
 	mega_debug.h			\
 	mega_interrupt.h		\
-	mega_memory.h		\
 	mega_micro.h			\
 	mega_pin.h				\
 	mega_port_basic.h	\

@@ -67,7 +67,6 @@
 #include <mega_ADC_basic.h>
 
 #include <mega_interrupt.h>
-#include <mega_memory.h>
 
 #include <mega_pin.h>
 #include <mega_port_basic.h>
