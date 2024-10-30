@@ -97,7 +97,8 @@ CPPFLAGS += -DMCU=$(MCU) -DF_CPU=$(F_CPU) $(PROJ_CPPFLAGS)
 # 	-std: versión del estandar a usar
 # 	-Wall: mostrar todos los warnings
 # 	-g	: produce información para poder depurar.
-CXXFLAGS = -Os -std=$(CPP_STD) -Wall -pedantic $(PROJ_CXXFLAGS) $(USER_CXXFLAGS)
+#CXXFLAGS = -Os -std=$(CPP_STD) -Wall -pedantic $(PROJ_CXXFLAGS) $(USER_CXXFLAGS)
+CXXFLAGS = -Os -std=$(CPP_STD) -Wall -pedantic 
 
 # Use short (8-bit) data types 
 # -funsigned-char	: hace que el tipo char sea unsigned
@@ -354,8 +355,17 @@ $(FIC_TAGS): $(SOURCES)
 # ----------------------------------
 # Subimos el .hex al AVR
 .PHONY: flash
-flash: $(BIN).hex 
-	$(AVRDUDE) -c $(PROGRAMMER_TYPE) -P $(PROGRAMMER_PORT) -b $(PROGRAMMER_BAUDRATE) -p $(MCU) $(PROGRAMMER_ARGS) -U flash:w:$<
+# 30/10/2024
+# Al intentar upload programas al atmega4809, falla porque no está subiendo la
+# .rodata section. Si en lugar de subir el .hex se sube el .elf, que avrdude
+# entiende, avrdude sube automáticamente la .rodata section. De momento no
+# borro esto ya que lo llevo usando más de 7 años con el atmega328p. Cuando se
+# haya probado con el atmega328p, borrarlo.
+#flash: $(BIN).hex 
+#	$(AVRDUDE) -c $(PROGRAMMER_TYPE) -P $(PROGRAMMER_PORT) -b $(PROGRAMMER_BAUDRATE) -p $(MCU) $(PROGRAMMER_ARGS) -U flash:w:$<
+
+flash: $(BIN).elf
+	$(AVRDUDE) -c $(PROGRAMMER_TYPE) -P $(PROGRAMMER_PORT) -b $(PROGRAMMER_BAUDRATE) -p $(MCU) $(PROGRAMMER_ARGS) -U flash:w:$<:e
 
 # Un sinónimo. ¿Mejor flash o upload?
 .PHONY: upload
