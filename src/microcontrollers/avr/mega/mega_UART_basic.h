@@ -77,7 +77,7 @@ public:
     /// leido, y false en caso de que no haya nada que leer. Si devuelve false
     /// y la última operación que realizó el UART fue leer, mantiene en el
     /// data register (UDR0) el último valor leído (hace de get area de 1 byte).
-    static bool are_there_data_unread()
+    static bool are_there_unread_data()
     {return atd::is_one_bit<RXC0>::of(UCSR0A);}
 
     /// Devuelve true si se ha enviado todo el frame
@@ -193,14 +193,14 @@ public:
 
 
     /// Parity mode enabled, even parity
-    static void parity_mode_enabled_even_parity()
+    static void parity_mode_even_parity()
     {// mode 10
 	atd::write_bits<UPM01, UPM00>::to<1,0>::in(UCSR0C);
     }
 
 
     /// Parity mode enabled, odd parity
-    static void parity_mode_enabled_odd_parity()
+    static void parity_mode_odd_parity()
     {// mode 11
 	atd::write_bits<UPM01, UPM00>::to<1,1>::in(UCSR0C);
     }

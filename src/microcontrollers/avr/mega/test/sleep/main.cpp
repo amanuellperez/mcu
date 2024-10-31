@@ -113,7 +113,7 @@ void test_sleep()
     Pin::disable_change_level_interrupt();
 
     // vaciamos el buffer para que no vuelva a saltar la interrupcion
-    while (my_mcu::UART_basic::are_there_data_unread()){
+    while (my_mcu::UART_basic::are_there_unread_data()){
 	char ans{};
 	uart >> ans; 
     }

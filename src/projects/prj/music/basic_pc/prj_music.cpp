@@ -83,17 +83,17 @@ void Main::musical_scale(Octave octave, uint16_t t)
 
 bool Main::organ_toy_UART_are_data_unread(const uint16_t& counter)
 {
-    if (UART::are_there_data_unread())
+    if (UART::are_there_unread_data())
 	return true;
     
     if (counter > 1){
 	Micro::wait_ms(50);
-	return UART::are_there_data_unread();
+	return UART::are_there_unread_data();
     }
 
     for (uint8_t i = 0; i < 8; ++i){
 	Micro::wait_ms(50);
-	if (UART::are_there_data_unread())
+	if (UART::are_there_unread_data())
 		return true;
     }
 
@@ -145,7 +145,7 @@ void Main::organ_toy()
 	    counter = 0;
 	}
 
-	if (!UART::are_there_data_unread()){
+	if (!UART::are_there_unread_data()){
 	    ++counter;
 	    Micro::wait_ms(1);
 	}

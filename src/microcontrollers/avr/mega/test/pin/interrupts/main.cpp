@@ -378,7 +378,7 @@ void test_pcint()
     while(1){
 	check_pcints();
 
-	if (my_mcu::UART_basic::are_there_data_unread()){
+	if (my_mcu::UART_basic::are_there_unread_data()){
 	    char tmp{};
 	    uart >> tmp; // borramos el caracter usado para entrar aqui
 	    if (menu_pcint())

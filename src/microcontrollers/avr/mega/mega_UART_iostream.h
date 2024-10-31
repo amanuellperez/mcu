@@ -322,7 +322,7 @@ void UART_streambuf_unbuffered::put_unguarded(char_type c)
 inline 
 std::streambuf::int_type UART_streambuf_unbuffered::receive_byte()
 {
-    while(!UART::are_there_data_unread()) 
+    while(!UART::are_there_unread_data()) 
 	; 
 
     int_type d = static_cast<char_type>(UART::data_register());
@@ -357,7 +357,7 @@ public:
     // lo bloquee, solo mirar.
     // La necesito sistemáticamente.
     bool is_there_something_to_read() 
-    { return UART_basic::are_there_data_unread();}
+    { return UART_basic::are_there_unread_data();}
 
 private:
     UART_streambuf_unbuffered sb_;

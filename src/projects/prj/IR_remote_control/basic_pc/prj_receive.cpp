@@ -73,7 +73,7 @@ void Main::receive_print_help()
 
 bool Main::receive_read_uart()
 {
-    if (!UART::are_there_data_unread())
+    if (!UART::are_there_unread_data())
 	return false;	// error de lógica
 
     UART uart;

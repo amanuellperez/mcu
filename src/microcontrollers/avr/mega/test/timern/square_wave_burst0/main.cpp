@@ -23,7 +23,6 @@
 #include "../../../mega_timer1.h"
 
 namespace my_mcu = mega_;
-using Micro   = my_mcu::Micro;
 
 static constexpr uint8_t test_pin = 12;
 using SWG  = my_mcu::Square_wave_burst_generator0_g;

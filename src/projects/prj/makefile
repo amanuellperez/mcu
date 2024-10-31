@@ -4,7 +4,6 @@ DIRS =  calculator	\
 		datalogger	\
 		dc_motor	\
 		IR_remote_control	\
-		music		\
 		POV_toy		\
 		sdinspector	\
 		sensor		\
@@ -15,7 +14,8 @@ DIRS =  calculator	\
 # Revisar:
 #		signal_generator \
 		stroboscope	\
-		oscilloscope
+		oscilloscope	\
+		music		\
 
 include $(MCU_RECRULES)
 

@@ -61,7 +61,7 @@ void generate_square_wave_no_use_wait( typename Miniclock::counter_type time_ms_
 	while (Miniclock::time() < time_ms_or_us){
 	    // This takes a lot of time in us ==> this function can't generate
 	    // a square wave of microseconds!!!
-	    if (myu::UART_basic::are_there_data_unread())
+	    if (myu::UART_basic::are_there_unread_data())
 		return;
 	}
 	Pin::toggle();
@@ -81,7 +81,7 @@ void generate_square_wave_use_wait(typename Miniclock::counter_type time_ms_or_u
 	Miniclock::wait(time_ms_or_us);
 	Pin::toggle();
 
-	if (myu::UART_basic::are_there_data_unread())
+	if (myu::UART_basic::are_there_unread_data())
 	    return;
     }
 }

@@ -17,6 +17,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#include "../../mega_watchdog.h" 
 #include "../../mega_cfg.h"
 #include "../../mega_pin.h"
 #include "../../mega_micro.h"
@@ -25,19 +26,17 @@
 
 // microcontroller
 // ---------------
-namespace my_mcu = mega_;
-using Micro = my_mcu::Micro;
-#include "../../mega_watchdog.h" // TODO: orden
+namespace myu = mega_;
 
 // pin connections
 // ---------------
 constexpr uint8_t npin = 15;
-using Pin = my_mcu::Pin<npin>;
+using Pin = myu::Pin<npin>;
 
 
 // Hwd Devices
 // -----------
-using Watchdog = my_mcu::Watchdog;
+using Watchdog = myu::Watchdog;
 
 
 /***************************************************************************
@@ -51,8 +50,8 @@ volatile bool counter;
 // ---------
 void init_uart()
 {
-    my_mcu::UART_iostream uart;
-    my_mcu::basic_cfg(uart);
+    myu::UART_iostream uart;
+    myu::basic_cfg(uart);
     uart.turn_on();
 }
 
@@ -63,7 +62,7 @@ int main()
     counter = false;
 
 // menu
-    my_mcu::UART_iostream uart;
+    myu::UART_iostream uart;
     uart << "\n\nWatchdog test\n"
 	        "-------------\n"
 		"Connect oscilloscope to pin " << (int) Pin::number << "\n"
@@ -102,7 +101,7 @@ int main()
 	    break; default:  Watchdog::interrupt_mode<Watchdog::Period::T1_s>();
 	}
 
-	Micro::enable_interrupts();
+	myu::enable_interrupts();
 
 	uart << "Press a key to stop the watchdog\n";
 	uart >> opt;

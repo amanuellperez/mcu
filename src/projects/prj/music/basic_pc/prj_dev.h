@@ -77,8 +77,8 @@ class UART : public my_mcu::UART_iostream {
 public:
     static void init();
 
-    static bool are_there_data_unread()
-    { return my_mcu::UART_basic::are_there_data_unread();}
+    static bool are_there_unread_data()
+    { return my_mcu::UART_basic::are_there_unread_data();}
 
     static void enable_interrupt_unread_data()
     {my_mcu::UART_basic::enable_interrupt_unread_data();}

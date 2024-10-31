@@ -22,7 +22,7 @@
 #include <avr_atmega.h>	// macro pgm_read_byte!!! 
 
 namespace music{
-
+// TODO: progmem_read ya no está en atd!!!
 Note progmem_read(const Note& x)
 {
     uint8_t midi_number = atd::progmem_read(x.midi_number);

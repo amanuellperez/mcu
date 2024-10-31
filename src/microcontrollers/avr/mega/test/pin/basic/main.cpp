@@ -22,25 +22,24 @@
 #include "../../../mega_micro.h"
 #include "../../../mega_UART_iostream.h"
 
-namespace my_mcu = mega_;
-using Micro = my_mcu::Micro;
+namespace myu = mega_;
 
 constexpr uint8_t npin = 13;
-using Pin = my_mcu::Pin<npin>;
+using Pin = myu::Pin<npin>;
 
 void blink()
 {
     Pin::as_output();
 
-    my_mcu::UART_iostream uart;
+    myu::UART_iostream uart;
     for (uint8_t i = 0; i < 10; ++i){
 	uart << '.';
 
 	Pin::write_one();
-	Micro::wait_ms(500);
+	myu::wait_ms(500);
 
 	Pin::write_zero();
-	Micro::wait_ms(500);
+	myu::wait_ms(500);
     }
     uart << " DONE\n";
 }
@@ -50,8 +49,8 @@ void blink()
 int main()
 {
 // uart_init();
-    my_mcu::UART_iostream uart;
-    my_mcu::basic_cfg(uart);
+    myu::UART_iostream uart;
+    myu::basic_cfg(uart);
     uart.turn_on();
 
 // menu

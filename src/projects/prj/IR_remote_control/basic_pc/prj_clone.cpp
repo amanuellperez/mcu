@@ -60,7 +60,7 @@ void Main::clone_pulses()
 
 bool Main::clone_read_uart()
 {
-    if (!UART::are_there_data_unread())
+    if (!UART::are_there_unread_data())
 	return false;
 
     UART uart;

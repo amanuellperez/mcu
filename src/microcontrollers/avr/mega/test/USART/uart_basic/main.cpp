@@ -86,7 +86,7 @@ uint8_t write(const char* s, uint16_t timeout = max_timeout_ms)
 // :???
 uint8_t read_byte(uint16_t timeout = max_timeout_ms)
 {
-    while(!UART::are_there_data_unread()) {
+    while(!UART::are_there_unread_data()) {
 	if (timeout == 0)
 	    return read_byte_fail;
 

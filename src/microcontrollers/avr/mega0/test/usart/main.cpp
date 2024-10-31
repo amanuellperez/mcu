@@ -50,13 +50,14 @@ void init(void)
 {
     USART::baud(baud_rate_to_baud_register(9600));
     USART::enable_transmitter();
+    USART::enable_receiver();
 }
 
 void print(char c)
 {
     while (!USART::is_transmit_data_empty()) { ; }
 
-    USART::data_register_low_byte(c);
+    USART::transmit_data_register_low_byte(c);
 }
 
 void print(const char str[])
@@ -65,10 +66,17 @@ void print(const char str[])
         print(str[i]);
 }
 
-void hello_world()
+char read()
 {
-    print("Hello world!\r\n");
-    _delay_ms(500);
+    while (!USART::are_there_unread_data()) { ; }
+    
+    return USART::receive_data_register_low_byte();
+}
+
+void hello()
+{
+    print ("USART basic test\r\n");
+    print ("----------------\r\n\n");
 }
 
 
@@ -76,8 +84,14 @@ int main()
 {
     init();
  
+    hello();
+
     while (1){
-	hello_world();
+	print("Write a letter: ");
+	char c = read();
+	print ("\r\nYou have written: [");
+	print (c);
+	print ("]\r\n");
     }
 }
 

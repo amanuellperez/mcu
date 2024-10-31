@@ -278,10 +278,35 @@ struct USART_bits{
     static constexpr uint8_t MPCM = USART_MPCM_bp;
 
 // CTRLC
+    static constexpr uint8_t SBMODE = USART_SBMODE_bp;
+
 // TODO
 
 
 
+};
+
+// Diferentes valores que pueden tomar los registros
+struct USART_values{
+    // Modes
+    static constexpr uint8_t CMODE_ASYNCHRONOUS = USART_CMODE_ASYNCHRONOUS_gc;
+    static constexpr uint8_t CMODE_SYNCHRONOUS = USART_CMODE_SYNCHRONOUS_gc;
+    static constexpr uint8_t CMODE_IRCOM = USART_CMODE_IRCOM_gc;
+    static constexpr uint8_t CMODE_MSPI = USART_CMODE_MSPI_gc;
+
+    // Parity
+    static constexpr uint8_t PMODE_DISABLED = USART_PMODE_DISABLED_gc;
+    static constexpr uint8_t PMODE_EVEN = USART_PMODE_EVEN_gc;
+    static constexpr uint8_t PMODE_ODD = USART_PMODE_ODD_gc;
+
+    // Character size
+    static constexpr uint8_t CHSIZE_5BIT = USART_CHSIZE_5BIT_gc;
+    static constexpr uint8_t CHSIZE_6BIT = USART_CHSIZE_6BIT_gc;
+    static constexpr uint8_t CHSIZE_7BIT = USART_CHSIZE_7BIT_gc;
+    static constexpr uint8_t CHSIZE_8BIT = USART_CHSIZE_8BIT_gc;
+
+    static constexpr uint8_t CHSIZE_9BITL = USART_CHSIZE_9BITL_gc;
+    static constexpr uint8_t CHSIZE_9BITH = USART_CHSIZE_9BITH_gc;
 };
 
 }// private_
@@ -298,6 +323,9 @@ struct USART1 {
     // posiciones de los bits dentro de los registros
     using bit_pos = private_::USART_bits;
 
+    // valores
+    using value = private_::USART_values;
+    
     // pines que configuran este USART
     static constexpr uint8_t TxD_pin = 1;
     static constexpr uint8_t RxD_pin = 2;
@@ -306,6 +334,8 @@ struct USART1 {
 
     static void enable_Tx_pin() { PORTC.DIR |= PIN0_bm;}
     static void enable_Rx_pin() { PORTC.DIR &= ~PIN1_bm;}
+    // XCK puede ser enable como in or out!!!
+//    static void enable_XCK_pin() { PORTC.DIR |= PIN2_bm;}
 };
 
 
