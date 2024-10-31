@@ -243,7 +243,70 @@ auto pin_ctrl()
 /***************************************************************************
  *				USART
  ***************************************************************************/
+namespace private_{
 
+// Posición de los bits en los registros
+struct USART_bits{
+// RXDATAH
+    static constexpr uint8_t RXCIF = USART_RXCIF_bp;
+    static constexpr uint8_t FERR  = USART_FERR_bp;
+    static constexpr uint8_t PERR  = USART_PERR_bp;
+    static constexpr uint8_t DATA8 = USART_DATA8_bp;
+
+// STATUS
+//    static constexpr uint8_t RXCIF= USART_RXCIF_bp;
+    static constexpr uint8_t TXCIF= USART_TXCIF_bp;
+    static constexpr uint8_t DREIF= USART_DREIF_bp;
+    static constexpr uint8_t RXSIF= USART_RXSIF_bp;
+    static constexpr uint8_t ISFIF= USART_ISFIF_bp;
+    static constexpr uint8_t BDF  = USART_BDF_bp;
+    static constexpr uint8_t WFB  = USART_WFB_bp;
+
+// CTRLA
+    static constexpr uint8_t RXCIE = USART_RXCIE_bp;
+    static constexpr uint8_t TXCIE = USART_TXCIE_bp;
+    static constexpr uint8_t DREIE = USART_DREIE_bp;
+    static constexpr uint8_t RXSIE = USART_RXSIE_bp;
+    static constexpr uint8_t LBME = USART_LBME_bp;
+    static constexpr uint8_t ABEIE = USART_ABEIE_bp;
+
+// CTRLB
+    static constexpr uint8_t RXEN = USART_RXEN_bp;
+    static constexpr uint8_t TXEN = USART_TXEN_bp;
+    static constexpr uint8_t SFDEN = USART_SFDEN_bp;
+    static constexpr uint8_t ODME = USART_ODME_bp;
+    static constexpr uint8_t MPCM = USART_MPCM_bp;
+
+// CTRLC
+// TODO
+
+
+
+};
+
+}// private_
+
+// USART1
+// ------
+inline auto usart1_registers() { return &USART1; }
+#undef USART1
+
+struct USART1 {
+    // reg = registers
+    static auto reg() {return usart1_registers();}
+   
+    // posiciones de los bits dentro de los registros
+    using bit_pos = private_::USART_bits;
+
+    // pines que configuran este USART
+    static constexpr uint8_t TxD_pin = 1;
+    static constexpr uint8_t RxD_pin = 2;
+    static constexpr uint8_t XCK_pin = 3;
+    static constexpr uint8_t XDIR_pin= 4;
+
+    static void enable_Tx_pin() { PORTC.DIR |= PIN0_bm;}
+    static void enable_Rx_pin() { PORTC.DIR &= ~PIN1_bm;}
+};
 
 
 }// namespace cfg
