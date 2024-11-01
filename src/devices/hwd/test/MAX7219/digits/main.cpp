@@ -29,6 +29,7 @@ using namespace test;
 // ---------------
 namespace myu = atmega;
 using Micro   = myu::Micro;
+using UART_iostream = mcu::UART_iostream<myu::UART>;
 
 // UART
 // ----
@@ -63,8 +64,8 @@ using MAX7219 = dev::MAX7219_digits<MAX7219_cfg>;
 // ---------
 void init_uart()
 {
-    myu::UART_iostream uart;
-    myu::basic_cfg<baud_rate>(uart);
+    UART_iostream uart;
+    myu::UART_basic_cfg<baud_rate>();
     uart.turn_on();
 }
 
@@ -77,7 +78,7 @@ void init_spi()
 
 void init_max7219()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
 
     MAX7219::init(); 
     MAX7219::intensity(0x00);
@@ -87,7 +88,7 @@ void init_max7219()
 
 void hello()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\n\nMAX7219 digits test\n"
 	        "-------------------\n"
 		"Connections:\n"
@@ -109,7 +110,7 @@ void blink(uint8_t d, uint8_t value)
 
 void test_basic()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\nBasic test\n"
 	      "----------\n";
 
@@ -120,7 +121,7 @@ void test_basic()
 
 void test_basic_counter()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
 
     static constexpr uint16_t ms = 500;
 
@@ -147,7 +148,7 @@ void test_basic_counter()
 
 void test_counter()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
 
     uart << "\nCounter test\n"
 	      "------------\n";
@@ -179,7 +180,7 @@ int main()
 
     hello();
 
-    myu::UART_iostream uart;
+    UART_iostream uart;
     
     MAX7219::clear();
     while (1){

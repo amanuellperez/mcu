@@ -18,14 +18,16 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "../../../mega_cfg.h"
-#include "../../../mega_UART_iostream.h"
+#include "../../../mega_UART.h"
+#include <mcu_UART_iostream.h>
 #include "../../../mega_timer0.h"
 #include "../../../mega_timer1.h"
 
-namespace my_mcu = mega_;
+namespace myu = mega_;
+using UART_iostream = mcu::UART_iostream<myu::UART>;
 
-using SWG0 = my_mcu::Square_wave_generator0_g;
-using SWG1 = my_mcu::Square_wave_generator1_g;
+using SWG0 = myu::Square_wave_generator0_g;
+using SWG1 = myu::Square_wave_generator1_g;
 
 enum class Use_timer{zero, one };
 
@@ -38,8 +40,8 @@ static_assert(SWG1::is_pin(16));
 
 int main()
 {
-    my_mcu::UART_iostream uart;
-    my_mcu::basic_cfg(uart);
+    UART_iostream uart;
+    myu::UART_basic_cfg();
     uart.turn_on();
 
     uart << "\n\nSquare wave test\n"

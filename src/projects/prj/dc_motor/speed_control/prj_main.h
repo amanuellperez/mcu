@@ -44,7 +44,7 @@ public:
     void run();
     
 // User interface 
-    inline static myu::UART_iostream uart;
+    inline static UART_iostream uart;
 
 // Global vbles
 

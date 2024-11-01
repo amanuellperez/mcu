@@ -64,7 +64,7 @@ Mínimo hay 3 formas diferentes de trabajar con el `atmega4809`:
 
 ### Criterio de diseño de los traductores
 
-* Los traductores no quitar funcionalidad a los dispositivos.
+* Los traductores no quitan funcionalidad a los dispositivos.
 
 Los traductores se limitan a traducir la datasheet, nada más. Eso implica que
 no puedo dar por supuesto la existencia de una frecuencia fija `F_CPU` ya que

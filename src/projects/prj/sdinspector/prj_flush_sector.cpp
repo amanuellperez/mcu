@@ -25,7 +25,7 @@
 
 void Main::flush_sector()
 {
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
     auto res = SDCard::write(sector.address, sector);
     uart << '\n';
     print(uart, res);

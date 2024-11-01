@@ -22,6 +22,12 @@
 #include <avr_atmega.h>
 #include "../buffer.h"
 
+// Microcontroller
+// ---------------
+namespace myu = atmega;
+using Micro   = myu::Micro;
+using UART_iostream = mcu::UART_iostream<myu::UART>;
+
 using Buffer = Linear_array<20>;
 
 inline std::ostream& operator<<(std::ostream& out, const Buffer& buf)
@@ -33,8 +39,8 @@ inline std::ostream& operator<<(std::ostream& out, const Buffer& buf)
 int main()
 {
 // init_UART();
-    atmega::UART_iostream uart;
-    atmega::basic_cfg(uart);
+    UART_iostream uart;
+    myu::UART_basic_cfg();
     uart.turn_on();
     
     uart << "\n-----\n";

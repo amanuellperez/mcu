@@ -1,7 +1,6 @@
 BIN = xx
 
-SOURCES= main.cpp	\
-		 ../../../mega_UART.cpp 
+SOURCES= main.cpp
 
 
 MCU = atmega328p
@@ -23,4 +22,4 @@ F_CPU=1000000UL
 # Conectar cristal externo sacando la señal del reloj por CLKO:
 #LFUSE=0xB7
 
-include $(AVR_GENRULES)
+include $(HWD_GENRULES)

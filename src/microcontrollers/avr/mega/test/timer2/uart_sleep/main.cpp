@@ -17,7 +17,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "../../../mega_UART_iostream.h"
+#include "../../../mega_UART.h"
+#include <mcu_UART_iostream.h>
 
 #include "../../../mega_pin.h"
 #include <avr_time.h>
@@ -28,7 +29,8 @@
 
 // Microcontroller
 // ---------------
-namespace my_mcu = mega_;
+namespace myu = mega_;
+using UART_iostream = mcu::UART_iostream<myu::UART>;
 
 
 // Pin connections
@@ -37,20 +39,20 @@ static constexpr uint8_t led_pin = 14;
 
 // Hwd devices
 // -----------
-using Counter = my_mcu::Time_counter2_32kHz_g<1000>;
-using Pin     = my_mcu::Pin<led_pin>;
+using Counter = myu::Time_counter2_32kHz_g<1000>;
+using Pin     = myu::Pin<led_pin>;
 
 
 // Terminal
 // --------
-my_mcu::UART_iostream uart; // análogo a std::cout/std::cin
+UART_iostream uart; // análogo a std::cout/std::cin
 
 						
 // Functions
 // ---------
 void init_uart()
 {
-    my_mcu::basic_cfg(uart);
+    myu::UART_basic_cfg();
 
     uart.turn_on();
 }
@@ -69,8 +71,8 @@ void init()
     init_uart();
     Pin::as_output();
     Counter::turn_on_with_overflow_to_count_1s();
-    my_mcu::enable_interrupts();
-    my_mcu::sleep_mode(my_mcu::Sleep::mode::power_save);
+    myu::enable_interrupts();
+    myu::sleep_mode(myu::Sleep::mode::power_save);
 
 }
 
@@ -83,8 +85,8 @@ void print()
 
 void flush()
 {
-    my_mcu::print_registers_uart(uart);
-    while (!my_mcu::UART_basic::is_transmit_complete())
+    myu::print_registers_uart(uart);
+    while (!myu::UART_basic::is_transmit_complete())
     {;}
     // Datasheet: The TXC0 Flag bit is automatically cleared
     // when a transmit complete interrupt is executed, 
@@ -106,7 +108,7 @@ int main()
     while (1) {
 	flush();    // comment this line. The program generates garbage
 
-	my_mcu::sleep();
+	myu::sleep();
 
 	print();
     }

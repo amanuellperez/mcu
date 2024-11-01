@@ -3,7 +3,8 @@ DIRS = clocks		\
 		onewire		\
 		SPI			\
 		train_of_pulses	\
-		TWI
+		TWI			\
+		UART_iostream
 
 
 include $(MCU_RECRULES)

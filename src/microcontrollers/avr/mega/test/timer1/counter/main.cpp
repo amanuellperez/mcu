@@ -18,7 +18,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "../../../mega_cfg.h"
-#include "../../../mega_UART_iostream.h"
+#include "../../../mega_UART.h"
+#include <mcu_UART_iostream.h>
 #include "../../../mega_timer1_basic.h"
 #include <avr_time.h>
 #include "../../../mega_interrupt.h"
@@ -36,6 +37,7 @@ using namespace test;
 // Microcontroller
 // ---------------
 namespace myu = mega_;
+using UART_iostream = mcu::UART_iostream<myu::UART>;
 
 // UART
 // ----
@@ -59,8 +61,8 @@ volatile uint32_t counter = 0;
 // ---------
 void init_uart()
 {
-    myu::UART_iostream uart;
-    myu::basic_cfg<baud_rate>(uart);
+    UART_iostream uart;
+    myu::UART_basic_cfg<baud_rate>();
     uart.turn_on();
 }
  
@@ -74,7 +76,7 @@ void init_timer_clock()
 
 void hello()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\n\nTimer1 counter test\n"
 	        "--------------------\n"
 		"Connections: none\n";
@@ -127,7 +129,7 @@ std::ostream& operator<<(std::ostream& out, const time_in_days& t)
 
 void print(uint64_t time_en_us)
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << us_to_time_in_days(time_en_us) << "\n\r";
 }
 
@@ -135,7 +137,7 @@ void test_clock()
 {
     init_timer_clock();
 
-    myu::UART_iostream uart;
+    UART_iostream uart;
     while (1){
 	Timer::counter_type v;
 	uint32_t c;
@@ -156,7 +158,7 @@ void test_clock()
 
 void test_flag_interrupt()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
 
     myu::disable_interrupts();
 
@@ -193,7 +195,7 @@ int main()
     myu::enable_interrupts();
 
     hello();
-    myu::UART_iostream uart;
+    UART_iostream uart;
 
     while(1){
 	uart << "\n\nMenu\n"

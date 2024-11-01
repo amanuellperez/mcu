@@ -20,10 +20,16 @@
 #include "../../../mega_cfg.h"
 #include "../../../mega_SPI.h"
 #include "../../../mega_interrupt.h"
-#include "../../../mega_UART_iostream.h"
+#include "../../../mega_UART.h"
+#include <mcu_UART_iostream.h>
 
 
-using SPI = mega_::SPI_slave;
+// Microcontroller
+// ---------------
+namespace myu = mega_;
+using UART_iostream = mcu::UART_iostream<myu::UART>;
+
+using SPI = myu::SPI_slave;
 
 constexpr uint16_t periodo_en_us = 2;	
 
@@ -31,8 +37,8 @@ constexpr uint16_t periodo_en_us = 2;
 int main() 
 {
 // init_uart()
-    mega_::UART_iostream uart;
-    mega_::basic_cfg(uart);
+    UART_iostream uart;
+    myu::UART_basic_cfg();
     uart.turn_on();
 
 
@@ -54,7 +60,7 @@ int main()
 //	if (data != uint8_t{0}){
 //	    uint8_t ndata{0};
 //	    {
-//                mega_::Interrupts_lock lock;
+//                myu::Interrupts_lock lock;
 //                ndata = data;
 //                data  = uint8_t{0};
 //	    }

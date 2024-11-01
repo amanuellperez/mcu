@@ -25,19 +25,19 @@
 #define __DEV_STRINGS_H__ 
 
 
-constexpr my_mcu::ROM_string<3> msg_yes	
+constexpr myu::ROM_string<3> msg_yes	
 	PROGMEM{"yes"};
 
-constexpr my_mcu::ROM_string<2> msg_no	
+constexpr myu::ROM_string<2> msg_no	
 	PROGMEM{"no"};
 
-constexpr my_mcu::ROM_string<2> msg_ok	
+constexpr myu::ROM_string<2> msg_ok	
 	PROGMEM{"ok"};
 
-constexpr my_mcu::ROM_string<24> msg_press_key_to_continue   
+constexpr myu::ROM_string<24> msg_press_key_to_continue   
 	PROGMEM{"Press a key to continue\n"};
 
-constexpr my_mcu::ROM_string<32> msg_line    
+constexpr myu::ROM_string<32> msg_line    
 	PROGMEM{"-------------------------------\n"};
 
 

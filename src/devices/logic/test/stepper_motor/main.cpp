@@ -43,6 +43,7 @@ using namespace test;
 // myu = my_mcu (???) <-- today, I like myu! Tomorrow... :?
 namespace myu = atmega;
 using Micro   = myu::Micro;
+using UART_iostream = mcu::UART_iostream<myu::UART>;
 
 #include "../../dev_stepper_motor.h"
 template <uint8_t n>
@@ -105,14 +106,14 @@ using NSteps_t= Motor::NSteps_t;
 // ---------
 void init_uart()
 {
-    myu::UART_iostream uart;
-    myu::basic_cfg<baud_rate>(uart);
+    UART_iostream uart;
+    myu::UART_basic_cfg<baud_rate>();
     uart.turn_on();
 }
 
 void press_key_to_continue()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "Press a key to continue\n";
 
     char c{};
@@ -123,7 +124,7 @@ void press_key_to_continue()
 template <uint8_t npin>
 void print_pin_number(const char* name)
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
 
     uart << name << " = ";
 
@@ -145,7 +146,7 @@ void print_pin_number(const char* name)
 
 void hello()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << msg_hello;
     uart << "Connections:\n"
 		"\tDIR = " << (int) A4988_pins::DIR << 
@@ -168,7 +169,7 @@ void hello()
 
 void test_turn()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\nNumber of degrees to turn: ";
     int16_t degree{};
     uart >> degree;
@@ -192,7 +193,7 @@ void test_angle2freq(Test& test, const Degree& degree, const Speed& speed,
     CHECK_TRUE(test,
 		nsteps == res_nsteps and freq == res_freq, "angle2freq");
 
-//    myu::UART_iostream uart;
+//    UART_iostream uart;
 //    uart << "nsteps = " << nsteps << " ?= " << res_nsteps << '\n';
 //    uart << "freq   = " << freq << " ?= " << res_freq << '\n';
 }
@@ -210,7 +211,7 @@ void test_automatic()
     // Los overflows y los casting dan dolor de cabeza. Hagamos algunas
     // comprobaciones básicas:
     
-    myu::UART_iostream uart;
+    UART_iostream uart;
 
     auto test = Test::interface(uart, "angle2direction");
 
@@ -286,7 +287,7 @@ void print_mode()
 {
     using Mode = Motor::Mode;
 
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\n\n";
     switch (Motor::mode()){
 	break; case Mode::full_step: uart << "Mode full_step\n";
@@ -300,7 +301,7 @@ void print_mode()
 template <typename Motor>
 void test_mode()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\nMode\n"
 	      "----\n"
 	      "0. Read mode\n";
@@ -339,7 +340,7 @@ void test_mode()
 template <typename Motor>
 void test_enable()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\nTo enable/disable you have to connect pin NO_ENABLE\n";
 }
 
@@ -347,7 +348,7 @@ template <typename Motor>
     requires requires {Motor::Driver::enable();}
 void test_enable()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\nenable/disable (e/d): ";
     char opt{};
     uart >> opt;
@@ -366,7 +367,7 @@ void test_enable()
 template <typename Motor>
 void test_sleep()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\nTo sleep/awake you have to connect pin NO_SLEEP\n";
 }
 
@@ -374,7 +375,7 @@ template <typename Motor>
     requires requires {Motor::Driver::sleep();}
 void test_sleep()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\nsleep/awake (s/a): ";
     char opt{};
     uart >> opt;
@@ -393,7 +394,7 @@ void test_sleep()
 template <typename Motor>
 void test_engage()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\nTo engage/disengage you have to connect pin NO_RESET\n";
 }
 
@@ -401,7 +402,7 @@ template <typename Motor>
     requires requires {Motor::Driver::engage();}
 void test_engage()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\nengage/disengage (e/d): ";
     char opt{};
     uart >> opt;
@@ -427,7 +428,7 @@ int main()
     hello();
 
     Micro::enable_interrupts();
-    myu::UART_iostream uart;
+    UART_iostream uart;
 
     while(1){
 	uart << "\nMenu\n"

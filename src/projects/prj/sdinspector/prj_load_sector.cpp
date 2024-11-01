@@ -26,7 +26,7 @@
 
 bool Main::load_sector()
 {
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
 
     print_question(uart, msg_sector_address, false);
     SDCard::Address add;

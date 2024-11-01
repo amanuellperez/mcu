@@ -26,16 +26,17 @@
 
 // Devices
 // -------
-namespace my_mcu = atmega;
-using Micro   = my_mcu::Micro;
+namespace myu = atmega;
+using Micro   = myu::Micro;
+using UART_iostream = mcu::UART_iostream<myu::UART>;
 
 constexpr uint8_t test_pin = 12;
 
-using Pin = my_mcu::Output_pin<test_pin>;
-using Miniclock1_us = mcu::Miniclock_us<my_mcu::Micro, my_mcu::Time_counter1>;
+using Pin = myu::Output_pin<test_pin>;
+using Miniclock1_us = mcu::Miniclock_us<myu::Micro, myu::Time_counter1>;
 
 using SWG_us = 
-	dev::Square_wave_burst_generator< my_mcu::Square_wave_burst_generator0_g
+	dev::Square_wave_burst_generator< myu::Square_wave_burst_generator0_g
 					  , Pin
 					  , Miniclock1_us>;
 
@@ -47,8 +48,8 @@ using SWG_us =
 // ---------
 void init_uart()
 {
-    my_mcu::UART_iostream uart;
-    my_mcu::basic_cfg(uart);
+    UART_iostream uart;
+    myu::UART_basic_cfg();
     uart.turn_on();
 }
 
@@ -59,7 +60,7 @@ void generate(const uint32_t& freq, const uint16_t& t)
 {
     constexpr uint16_t nburst = 1000;
 
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
     uart << "Generating " << nburst << " pulses of " << freq << " Hz"
 	 << " of " << t << " us\n";
 
@@ -75,7 +76,7 @@ int main()
 {
     init_uart();
 
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
 
     uart << "\n\nSquare wave burst test\n"
 	        "----------------------\n"

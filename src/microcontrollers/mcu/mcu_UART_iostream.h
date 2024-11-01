@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 Manuel Perez 
+// Copyright (C) 2019-2024 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -19,11 +19,15 @@
 
 #pragma once
 
-#ifndef __MEGA_UART_IOSTREAM_H__
-#define __MEGA_UART_IOSTREAM_H__
+#ifndef __MCU_UART_IOSTREAM_H__
+#define __MCU_UART_IOSTREAM_H__
 /****************************************************************************
  *
  *  - DESCRIPCION: Implementación del flujo uart.
+ *  
+ *  TODO: el flujo da por supuesto que la configuración es la definida en
+ *  UART_basic_cfg (sobre todo que el character size es de 8 bits, con 9 bits
+ *  ahora no funcionaría).
  *
  *  - HISTORIA:
  *    Manuel Perez
@@ -45,19 +49,21 @@
  *	           estoy obligado a usar `myterm` para que funcione todo. Eso
  *	           me obligará a ir mejorando poco a poco ese terminal.
  *
+ *	01/11/2024 Generalizado: lo parametrizo por el traductor de USART para 
+ *		   poderlo usar con cualquier dispositivo UART.
+ *
+ *
  ****************************************************************************/
-
-#include "mega_UART.h"
-
 #include <iostream>
 #include <streambuf>
 #include <atd_ascii.h>
 
-namespace mega_{
+namespace mcu{
 
 /***************************************************************************
  *			UART_streambuf_unbuffered
  ***************************************************************************/
+template <typename UART_basic>
 class UART_streambuf_unbuffered : public std::streambuf {
 public:
     using UART = UART_basic;
@@ -112,7 +118,7 @@ private:
     // fallo).
     virtual int sync() override 
     { 
-	return UART_flush(10); // TODO: parametrizar
+	return UART::flush(10); // TODO: parametrizar
 			       // a 9600 baudios en menos de 1 milisegundo
 			       // a enviado un bytee, 10 milisegundos es
 			       // excesivo, pero al añadir esta función sin
@@ -188,7 +194,8 @@ private:
 };
 
 
-inline void UART_streambuf_unbuffered::turn_on()	
+template <typename U>
+inline void UART_streambuf_unbuffered<U>::turn_on()	
 {                                
     if (!UART::is_receiver_enable())
 	UART::enable_receiver();
@@ -197,7 +204,8 @@ inline void UART_streambuf_unbuffered::turn_on()
 	UART::enable_transmitter();
 }
 
-inline void UART_streambuf_unbuffered::turn_off()	
+template <typename U>
+inline void UART_streambuf_unbuffered<U>::turn_off()	
 {                                
     if (UART::is_receiver_enable())
 	UART::disable_receiver();
@@ -222,8 +230,9 @@ inline void UART_streambuf_unbuffered::turn_off()
 //          lo volveré a mover a un .h teniendo que cambiarlo de nuevo todo.
 //      Por estos motivos implemento estas funciones en el .h y no en el .cpp
 //      (teniendo que ser inline)
+template <typename U>
 inline 
-std::streamsize UART_streambuf_unbuffered::xsgetn(char_type* s, std::streamsize N) 
+std::streamsize UART_streambuf_unbuffered<U>::xsgetn(char_type* s, std::streamsize N) 
 {
     std::streamsize i = 0;
     for (; i < N; ++i){
@@ -241,8 +250,9 @@ std::streamsize UART_streambuf_unbuffered::xsgetn(char_type* s, std::streamsize 
     return i;
 }
 
+template <typename U>
 inline 
-std::streambuf::int_type UART_streambuf_unbuffered::underflow() 
+std::streambuf::int_type UART_streambuf_unbuffered<U>::underflow() 
 {
     if (state_ == State::consumido)
 	buf_ = receive_byte();
@@ -251,8 +261,9 @@ std::streambuf::int_type UART_streambuf_unbuffered::underflow()
     return buf_;
 }
 
+template <typename U>
 inline 
-std::streambuf::int_type UART_streambuf_unbuffered::uflow()
+std::streambuf::int_type UART_streambuf_unbuffered<U>::uflow()
 {
     if (state_ == State::consumido)
 	buf_ = receive_byte();
@@ -263,8 +274,9 @@ std::streambuf::int_type UART_streambuf_unbuffered::uflow()
 }
 
 
+template <typename U>
 inline
-std::streamsize UART_streambuf_unbuffered::xsputn(const char_type* s, std::streamsize n)
+std::streamsize UART_streambuf_unbuffered<U>::xsputn(const char_type* s, std::streamsize n)
 { 
     state_ = State::consumido;
 
@@ -275,8 +287,9 @@ std::streamsize UART_streambuf_unbuffered::xsputn(const char_type* s, std::strea
 }
 
 
+template <typename U>
 inline
-void UART_streambuf_unbuffered::put_(char_type c)
+void UART_streambuf_unbuffered<U>::put_(char_type c)
 {
 // 09/01/2024: Lo que comento no puede venir aqui.
 // El procesamiento de los caracteres lo lleva a cabo ostream y no el
@@ -291,8 +304,9 @@ void UART_streambuf_unbuffered::put_(char_type c)
 }
 
 
+template <typename U>
 inline 
-void UART_streambuf_unbuffered::put_unguarded(char_type c)
+void UART_streambuf_unbuffered<U>::put_unguarded(char_type c)
 {
     // TODO: aqui se puede poner un contador y esperar un tiempo máximo?
     // TODO: Sí que se puede hacer. Una forma es parametrizar con el
@@ -319,8 +333,9 @@ void UART_streambuf_unbuffered::put_unguarded(char_type c)
     UART::data_register(c);
 }
 
+template <typename U>
 inline 
-std::streambuf::int_type UART_streambuf_unbuffered::receive_byte()
+std::streambuf::int_type UART_streambuf_unbuffered<U>::receive_byte()
 {
     while(!UART::are_there_unread_data()) 
 	; 
@@ -338,6 +353,7 @@ std::streambuf::int_type UART_streambuf_unbuffered::receive_byte()
  *			    UART_iostream
  ***************************************************************************/
 // TODO: crear un istream/ostream (uno enable rx, el otro tx)
+template <typename UART_basic>
 class UART_iostream : public std::iostream {
 public:
     UART_iostream():iostream{&sb_} { }
@@ -360,20 +376,10 @@ public:
     { return UART_basic::are_there_unread_data();}
 
 private:
-    UART_streambuf_unbuffered sb_;
+    UART_streambuf_unbuffered<UART_basic> sb_;
 
 };
 
-
-// El parámetro lo usamos para sobrecargar: quiero que configures el flujo
-// con la configuración básica.
-template <uint32_t baud_rate = 9600u,
-	  uint32_t f_clock   = avr_::clock_frequency_in_hz,
-	  uint32_t tolerance = 2>
-inline void basic_cfg(UART_iostream&) 
-{ 
-    UART_basic_cfg<baud_rate, f_clock, tolerance>();
-}
 
 
 }// namespace

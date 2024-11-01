@@ -21,10 +21,16 @@
 #include <avr_atmega.h>
 #include <bit>
 
+// Microcontroller
+// ---------------
+namespace myu = atmega;
+using Micro   = myu::Micro;
+using UART_iostream = mcu::UART_iostream<myu::UART>;
+
 void show_sizes_types()
 {
-    atmega::UART_iostream uart;
-    atmega::basic_cfg(uart);
+    UART_iostream uart;
+    myu::UART_basic_cfg();
     uart.turn_on();
 
     while(1){

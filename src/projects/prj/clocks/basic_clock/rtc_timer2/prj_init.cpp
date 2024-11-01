@@ -22,7 +22,7 @@
 
 void Main::init_uart()
 {
-    my_mcu::basic_cfg(uart);
+    myu::UART_basic_cfg();
     uart.turn_on();
 }
 
@@ -33,8 +33,8 @@ Main::Main()
 
     init_uart();
 
-    Micro::sleep_mode(my_mcu::Sleep::mode::power_save);
-    //Micro::sleep_mode(my_mcu::Sleep::mode::idle);
+    Micro::sleep_mode(myu::Sleep::mode::power_save);
+    //Micro::sleep_mode(myu::Sleep::mode::idle);
 
     if (Clock::turn_on() == false)
 	uart << "Error: can't initialize Clock\n";

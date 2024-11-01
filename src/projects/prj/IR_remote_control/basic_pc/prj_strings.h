@@ -43,15 +43,15 @@
 //        a funcionar mal el programa por culpa (creo) de un stackoverflow.
 //
 //
-//constexpr my_mcu::ROM_string<1> msg_return <-- lo probé y no parece 
+//constexpr myu::ROM_string<1> msg_return <-- lo probé y no parece 
 //    PROGMEM{"\n"};				  disminuir la memoria RAM
 
-constexpr my_mcu::ROM_string<37> msg_run_menu1 
+constexpr myu::ROM_string<37> msg_run_menu1 
     PROGMEM{"\nMenu\n"
 	    "----\n"
 	    "1. Generate 38kHz on pin "};
 
-constexpr my_mcu::ROM_string<107> msg_run_menu2 
+constexpr myu::ROM_string<107> msg_run_menu2 
     PROGMEM{"\n2. Send message\n"
 	    "3. Replay\n"
 	    "4. Research remote control\n"
@@ -59,14 +59,14 @@ constexpr my_mcu::ROM_string<107> msg_run_menu2
 	    "6. Test remote control\n"
 	    "7. Receive messages\n"};
 
-constexpr my_mcu::ROM_string<40> msg_generate_38kHz_on_msg 
+constexpr myu::ROM_string<40> msg_generate_38kHz_on_msg 
     PROGMEM{"Generating 38kHz. Press a key to stop.\n"};
 
 
-constexpr my_mcu::ROM_string<34> msg_receive_data_menu1 
+constexpr myu::ROM_string<34> msg_receive_data_menu1 
     PROGMEM{"\n\nConnect the IR receiver to pin "};
 
-constexpr my_mcu::ROM_string<194> msg_receive_data_menu2 
+constexpr myu::ROM_string<194> msg_receive_data_menu2 
     PROGMEM{", point the TV remote to it and read the data.\n"
 	    "\nMenu\n"
 	    "----\n"
@@ -77,101 +77,101 @@ constexpr my_mcu::ROM_string<194> msg_receive_data_menu2
 	    "e. End reception\n\n"};
 
 
-constexpr my_mcu::ROM_string<2> msg_ok 
+constexpr myu::ROM_string<2> msg_ok 
     PROGMEM{"OK"};
 
-constexpr my_mcu::ROM_string<4> msg_fail 
+constexpr myu::ROM_string<4> msg_fail 
     PROGMEM{"FAIL"};
 
-constexpr my_mcu::ROM_string<5> msg_error
+constexpr myu::ROM_string<5> msg_error
     PROGMEM{"ERROR"};
 
-constexpr my_mcu::ROM_string<3> msg_unknown
+constexpr myu::ROM_string<3> msg_unknown
     PROGMEM{"???"};
 
-constexpr my_mcu::ROM_string<60> msg_menu_replay
+constexpr myu::ROM_string<60> msg_menu_replay
     PROGMEM{"\nReplay\n" 
 	    "------\n"
 	    "Press a button of your remote control ... "};
 
-constexpr my_mcu::ROM_string<27> msg_press_a_key_to_replay 
+constexpr myu::ROM_string<27> msg_press_a_key_to_replay 
     PROGMEM{"Press a key to replay ... "};
 
-constexpr my_mcu::ROM_string<18> msg_no_data_received 
+constexpr myu::ROM_string<18> msg_no_data_received 
     PROGMEM{"No data received.\n"};
 
-constexpr my_mcu::ROM_string<92> msg_error_buffer_full
+constexpr myu::ROM_string<92> msg_error_buffer_full
     PROGMEM{"ERROR: se ha llenado el buffer de datos.\n"
 	    "Modificar el programa aumentando `max_num_data`.\n"};
 
-constexpr my_mcu::ROM_string<32> msg_line
+constexpr myu::ROM_string<32> msg_line
     PROGMEM{"------------------------------\n"};
 
-constexpr my_mcu::ROM_string<26> msg_total_number_of_pulses
+constexpr myu::ROM_string<26> msg_total_number_of_pulses
     PROGMEM{"\nTotal number of pulses: "};
 
-constexpr my_mcu::ROM_string<56> msg_print_raw_data_header1
+constexpr myu::ROM_string<56> msg_print_raw_data_header1
     PROGMEM{"RAW data: (time_low, time_high) = period\n"
 	    "num pulses = "};
 
-constexpr my_mcu::ROM_string<12> msg_polarity
+constexpr myu::ROM_string<12> msg_polarity
     PROGMEM{"Polarity = "};
 
-constexpr my_mcu::ROM_string<50> msg_ask_NEC_message
+constexpr myu::ROM_string<50> msg_ask_NEC_message
     PROGMEM{"Message (write everything in hexadecimal 0x...):\n"};
 
-constexpr my_mcu::ROM_string<10> msg_address
+constexpr myu::ROM_string<10> msg_address
     PROGMEM{"Address: "};
 
-constexpr my_mcu::ROM_string<19> msg_inverted_address
+constexpr myu::ROM_string<19> msg_inverted_address
     PROGMEM{"Inverted address: "};
 
-constexpr my_mcu::ROM_string<10> msg_command
+constexpr myu::ROM_string<10> msg_command
     PROGMEM{"Command: "};
 
-constexpr my_mcu::ROM_string<19> msg_inverted_command
+constexpr myu::ROM_string<19> msg_inverted_command
     PROGMEM{"Inverted command: "};
 
-constexpr my_mcu::ROM_string<30> msg_transmit_data
+constexpr myu::ROM_string<30> msg_transmit_data
     PROGMEM{"Transmit data\n"
 	    "-------------\n"};
 
-constexpr my_mcu::ROM_string<41> msg_transmit_data_menu_protocol
+constexpr myu::ROM_string<41> msg_transmit_data_menu_protocol
     PROGMEM{"Protocol:\n"
 	    "(1) NEC (now the only option)\n"};
 
-constexpr my_mcu::ROM_string<46> msg_transmit_data_menu_first_burst
+constexpr myu::ROM_string<46> msg_transmit_data_menu_first_burst
     PROGMEM{"Length of first burst:\n"
 	    "(1) 9.0 ms\n"
 	    "(2) 4.5 ms\n"};
 
-constexpr my_mcu::ROM_string<10> msg_sending
+constexpr myu::ROM_string<10> msg_sending
     PROGMEM{"Sending: "};
 
-constexpr my_mcu::ROM_string<146> msg_research_remote_control_help
+constexpr myu::ROM_string<146> msg_research_remote_control_help
     PROGMEM{"Research remote control\n"
 	    "-----------------------\n"
 	    "Write the name of the button and press the key in the remote control.\n"
 	    "Write a blank line to end.\n\n"};
 
-constexpr my_mcu::ROM_string<21> msg_error_reading_line
+constexpr myu::ROM_string<21> msg_error_reading_line
     PROGMEM{"Error reading line.\n"};
 
-constexpr my_mcu::ROM_string<41> msg_test_remote_control
+constexpr myu::ROM_string<41> msg_test_remote_control
     PROGMEM{"Test remote control\n"
 	    "-------------------\n"};
 
-constexpr my_mcu::ROM_string<71> msg_clone_remote_control
+constexpr myu::ROM_string<71> msg_clone_remote_control
     PROGMEM{"Clone remote control\n"
 	    "--------------------\n"
 	    "[c] Clear buffer\n"
 	    "[e] Return\n"};
 
-constexpr my_mcu::ROM_string<60> msg_clone_msg_full
+constexpr myu::ROM_string<60> msg_clone_msg_full
     PROGMEM{"Buffer full. Can't add more elements. "
 	    "Please clear buffer.\n"};
 
-constexpr my_mcu::ROM_string<15> msg_clone_msg_clear
+constexpr myu::ROM_string<15> msg_clone_msg_clear
     PROGMEM{"Buffer empty.\n"};
 
 #endif

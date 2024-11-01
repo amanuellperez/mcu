@@ -27,7 +27,13 @@
 #include <avr_time.h>
 
 
-using namespace avr;
+// Microcontroller
+// ---------------
+namespace myu = atmega;
+using UART = myu::UART;
+using UART_iostream = mcu::UART_iostream<UART>;
+
+using namespace myu; // TODO
 
 
 

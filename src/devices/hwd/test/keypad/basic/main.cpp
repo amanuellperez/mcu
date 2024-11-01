@@ -25,7 +25,11 @@
 
 #include <avr_atmega.h>
 
-namespace my_mcu = atmega;
+// Microcontroller
+// ---------------
+namespace myu = atmega;
+using UART = myu::UART;
+using UART_iostream = mcu::UART_iostream<UART>;
 
 // Este es el keypad barato que venden en internet de 4 x 3
 //using Rows = dev::Keypad_rows<28, 27, 26, 25>;
@@ -60,7 +64,7 @@ using Keyboard = dev::Keyboard_keypad<Keypad>;
 
 void test_keypad()
 {
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
     
     uart << "\n-----\n";
     uart << "Keypad\n";
@@ -71,17 +75,17 @@ void test_keypad()
 
     while(1){
 	while (!keypad.scan())
-	    my_mcu::Micro::wait_ms(100);
+	    myu::Micro::wait_ms(100);
 
 	uart << "(" << (int) keypad.row() << ", " << (int) keypad.col() << ") = "
 	    << (int) keypad.last_key() << '\n';
-	my_mcu::Micro::wait_ms(100);
+	myu::Micro::wait_ms(100);
     }
 }
 
 void test_keyboard()
 {
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
     
     uart << "\n-----\n";
     uart << "Keyboard\n";
@@ -101,7 +105,7 @@ void test_keyboard()
 	    default: uart << c; break;
 	}
 
-	my_mcu::Micro::wait_ms(100); // debouncing
+	myu::Micro::wait_ms(100); // debouncing
     }
 }
 
@@ -113,8 +117,8 @@ void test_keyboard()
 int main()
 {
 // init_UART();
-    my_mcu::UART_iostream uart;
-    my_mcu::basic_cfg(uart);
+    UART_iostream uart;
+    myu::UART_basic_cfg();
     uart.turn_on();
  
     uart << "\n------------\n";

@@ -22,8 +22,8 @@
 
 void UART::init()
 {
-    my_mcu::UART_iostream uart;
-    my_mcu::basic_cfg(uart);
+    UART_iostream uart;
+    myu::UART_basic_cfg();
     uart.turn_on();
 }
 

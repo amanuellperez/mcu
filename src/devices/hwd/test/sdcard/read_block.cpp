@@ -36,7 +36,7 @@ void print_block(std::ostream& out, SDCard::Block data)
 
 bool read_block(SDCard::Address addr, SDCard::Block data)
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
 
     auto r = SDCard::read(addr, data);
     print(uart, r);
@@ -55,7 +55,7 @@ bool read_block(SDCard::Address addr, SDCard::Block data)
 
 void read_block()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
 
     atd::print(uart, msg_main_read);
     uart << (int) SDCard::block_size << '\n';

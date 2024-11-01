@@ -21,12 +21,14 @@
 #include "../../mega_cfg.h"
 #include "../../mega_pin.h"
 #include "../../mega_micro.h"
-#include "../../mega_UART_iostream.h"
+#include "../../mega_UART.h"
+#include <mcu_UART_iostream.h>
 #include <atd_ostream.h>
 
 // microcontroller
 // ---------------
 namespace myu = mega_;
+using UART_iostream = mcu::UART_iostream<myu::UART>;
 
 // pin connections
 // ---------------
@@ -50,8 +52,8 @@ volatile bool counter;
 // ---------
 void init_uart()
 {
-    myu::UART_iostream uart;
-    myu::basic_cfg(uart);
+    UART_iostream uart;
+    myu::UART_basic_cfg();
     uart.turn_on();
 }
 
@@ -62,7 +64,7 @@ int main()
     counter = false;
 
 // menu
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\n\nWatchdog test\n"
 	        "-------------\n"
 		"Connect oscilloscope to pin " << (int) Pin::number << "\n"

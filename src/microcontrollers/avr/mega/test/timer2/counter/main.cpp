@@ -19,7 +19,8 @@
 
 // Ejemplo básico de uso del Timer como contador
 #include "../../../mega_cfg.h"
-#include "../../../mega_UART_iostream.h"
+#include "../../../mega_UART.h"
+#include <mcu_UART_iostream.h>
 #include "../../../mega_timer2_basic.h"
 #include <avr_time.h>
 
@@ -29,11 +30,12 @@
 
 // Microcontroller
 // ---------------
-namespace my_mcu = mega_;
+namespace myu = mega_;
+using UART_iostream = mcu::UART_iostream<myu::UART>;
 
 // Hwd devices
 // -----------
-using Timer = my_mcu::Timer2;
+using Timer = myu::Timer2;
 
 // Cfg
 // ---
@@ -48,14 +50,14 @@ volatile uint32_t counter = 0;
 // ---------
 void init_uart()
 {
-    my_mcu::UART_iostream uart;
-    my_mcu::basic_cfg(uart);
+    UART_iostream uart;
+    myu::UART_basic_cfg();
     uart.turn_on();
 }
 
 void print_register(const char* name, uint8_t value)
 {
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
     uart << name << "\t= ";
     atd::print_int_as_hex(uart, value);
     uart << '\n';
@@ -63,7 +65,7 @@ void print_register(const char* name, uint8_t value)
 
 void print_registers()
 {
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
     print_register("TCCR2A", TCCR2A);
     print_register("TCCR2B", TCCR2B);
     print_register("TCNT2", TCNT2);
@@ -83,7 +85,7 @@ int main()
 {
     init_uart();
 
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\nTimer2 counter test\n"
 	      "-------------------\n";
 
@@ -94,7 +96,7 @@ int main()
     print_registers();
 
 // start:
-    my_mcu::enable_interrupts();
+    myu::enable_interrupts();
 					      
 
 
@@ -102,7 +104,7 @@ int main()
 	Timer::counter_type v;
 	uint32_t c{};
 	{
-	    my_mcu::Disable_interrupts di;
+	    myu::Disable_interrupts di;
 	    v = Timer::counter();
 	    c = counter;
 	}
@@ -111,7 +113,7 @@ int main()
 	uint64_t t_s = t_us / uint64_t{1'000'000};
 	uart << t_s << " s\n";
 
-	my_mcu::wait_ms(1000);
+	myu::wait_ms(1000);
     }
 }
 

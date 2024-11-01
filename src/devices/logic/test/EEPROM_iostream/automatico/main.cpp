@@ -34,6 +34,12 @@
 #include <atd_cstddef.h>
 #include <std_iomanip.h>
 
+// Microcontroller
+// ---------------
+namespace myu = atmega;
+using Micro   = myu::Micro;
+using UART_iostream = mcu::UART_iostream<myu::UART>;
+
 constexpr uint8_t period_in_us = 16;
 
 constexpr uint8_t num_pin_chip_select = 16;
@@ -67,7 +73,7 @@ void check_buffer()
 	return;
     comprobado = true;
 
-    atmega::UART_iostream uart;
+    UART_iostream uart;
     for (uint16_t i = 0; i < sz; ++i){
 	if (buf[i] != uint8_t{0x55})
 	    uart << ">>> " << ERROR << "stack overflow!!! buffer corrupto\n";
@@ -80,7 +86,7 @@ void check_buffer()
 // Inicializa a 0 los bytes [address, address + n)
 void reset_eeprom(EEPROM_lineal& eeprom, uint16_t address, uint16_t n)
 {
-    atmega::UART_iostream uart;
+    UART_iostream uart;
 
     uint8_t buffer[sz];
     n = std::min<uint16_t>(n, sz);
@@ -98,7 +104,7 @@ bool check(EEPROM_lineal& eeprom,
            char* res, uint8_t n,
            const char* msg)
 {
-    atmega::UART_iostream uart;
+    UART_iostream uart;
     uart << msg << " ... ";
 
     uint8_t buf[sz];
@@ -124,7 +130,7 @@ bool check(EEPROM_lineal& eeprom,
 
 bool test_only_tm()
 {
-    atmega::UART_iostream uart;
+    UART_iostream uart;
 
     constexpr uint8_t APP_ID = 0x1F;
     tm t0;
@@ -190,7 +196,7 @@ bool test_only_tm()
 bool test(uint16_t addr0)
 {
     EEPROM_ostream out;
-    atmega::UART_iostream uart;
+    UART_iostream uart;
 
     reset_eeprom(out.eeprom(), addr0, 10);
     uart << "Pruebas básicas de escritura. Dirección: " << addr0 << "\n";
@@ -235,7 +241,7 @@ bool test(uint16_t addr0)
 bool test_ostream_automatico()
 {
     EEPROM_ostream out;
-    atmega::UART_iostream uart;
+    UART_iostream uart;
 
     uart << "\n\nEEPROM ostream (automático)\n"
 	 << "---------------------------\n";
@@ -379,7 +385,7 @@ bool test_ostream_automatico()
 
 bool test_istream_automatico()
 {
-    atmega::UART_iostream uart;
+    UART_iostream uart;
     uart << "EEPROM istream (automático)\n";
     const char msg[] =
 	"En un lugar de la mancha,\nde cuyo nombre no quiero "
@@ -446,9 +452,9 @@ bool test_istream_automatico()
 
 void test_eeprom_automatico()
 {
-    atmega::UART_iostream uart;
-    atmega::SPI_master::clock_period_in_us<period_in_us>();
-    atmega::SPI_master::turn_on();
+    UART_iostream uart;
+    myu::SPI_master::clock_period_in_us<period_in_us>();
+    myu::SPI_master::turn_on();
 
     if (test_ostream_automatico())
 	test_istream_automatico();
@@ -456,8 +462,8 @@ void test_eeprom_automatico()
 
 int main()
 {
-    atmega::UART_iostream uart;
-    atmega::basic_cfg(uart);
+    UART_iostream uart;
+    myu::UART_basic_cfg();
     uart.turn_on();
 
     while(1){

@@ -27,6 +27,7 @@
 // ---------------
 namespace myu = atmega;
 using Micro   = myu::Micro;
+using UART_iostream = mcu::UART_iostream<myu::UART>;
 
 
 // Devices
@@ -46,7 +47,7 @@ constexpr uint8_t TWI_scl_frequency = 100; // 100 kHz
 // ---------
 void twi_print_error()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
 
     if (TWI::no_response())
 	uart << "Slave no response.\n";
@@ -63,7 +64,7 @@ void twi_print_error()
 
 void twi_print_state()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
 
     if (TWI::error())
 	uart << "state == error()\n";
@@ -108,7 +109,7 @@ void twi_print_state()
 
 void twi_print_state_as_hex()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "state = ";
     atd::print_int_as_hex(uart, static_cast<uint8_t>(TWI::state()));
     uart << '\n';
@@ -117,7 +118,7 @@ void twi_print_state_as_hex()
 
 void scan_address(TWI::Address addr)
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "Looking for slave with address " << (int) addr << " ... ";
 
     if (TWI::probe(addr))
@@ -128,7 +129,7 @@ void scan_address(TWI::Address addr)
 
 void scan_slaves()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\nScan for slaves\n"
 	      "---------------\n"
 	      "Scan from address: ";
@@ -176,8 +177,8 @@ void scan_slaves()
 
 void init_uart()
 {
-    myu::UART_iostream uart;
-    myu::basic_cfg(uart);
+    UART_iostream uart;
+    myu::UART_basic_cfg();
     uart.turn_on();
 }
 
@@ -188,7 +189,7 @@ void init_TWI()
 
 void hello()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\n\nTWI scan slaves\n"
 	        "---------------\n"
 		"This program scan looking for devices connected to TWI.\n"

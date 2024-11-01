@@ -21,13 +21,15 @@
 #include "../../../mega_timer2.h" 
 #include "../../../mega_debug.h"
 
-#include "../../../mega_UART_iostream.h"
+#include "../../../mega_UART.h"
+#include <mcu_UART_iostream.h>
 #include "../../../mega_cfg.h"
 #include "../../../mega_pin.h"
 
 // Microcontroller
 // ---------------
-namespace my_mcu = mega_;
+namespace myu = mega_;
+using UART_iostream = mcu::UART_iostream<myu::UART>;
 
 // Pin conections
 // --------------
@@ -35,8 +37,8 @@ static constexpr uint8_t led_pin = 14;
 
 // Devices
 // -------
-using Pin2      = my_mcu::Pin<led_pin>;
-using Counter2  = my_mcu::Time_counter2_32kHz_g<>;
+using Pin2      = myu::Pin<led_pin>;
+using Counter2  = myu::Time_counter2_32kHz_g<>;
 
 
 // Global vbles
@@ -47,14 +49,14 @@ volatile uint32_t nseconds = 0;
 // ---------
 void init_uart()
 {
-    my_mcu::UART_iostream uart;
-    my_mcu::basic_cfg(uart);
+    UART_iostream uart;
+    myu::UART_basic_cfg();
     uart.turn_on();
 }
 
 void main_hello()
 {
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
 
     uart << "\n\nTime counter asyncrhonous test\n"
 	        "-------------------------------\n"
@@ -72,19 +74,19 @@ int main()
     init_uart();
     Pin2::as_output();
     
-    my_mcu::enable_interrupts();
+    myu::enable_interrupts();
 
     main_hello();
 
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
     
     if (Counter2::turn_on_with_overflow_to_count_1s() != 1)
 	uart << "ERROR: can't start Counter 2\n";
 
     while(1){
-	my_mcu::wait_ms(1000);
+	myu::wait_ms(1000);
 	{
-	    my_mcu::Disable_interrupts lock;
+	    myu::Disable_interrupts lock;
 	    uart << nseconds << " s\n";
 	}
     }

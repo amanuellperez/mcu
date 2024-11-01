@@ -13,7 +13,8 @@ INCS= 	mcu_clock.h					\
 		mcu_TWI_master.h			\
 		mcu_TWI_master_ioxtream.h	\
 		mcu_TWI_memory_type.h		\
-		mcu_TWI_slave.h
+		mcu_TWI_slave.h				\
+		mcu_UART_iostream.h
 
 
 # Aunque esta librería es genérica, hay que compilarla para el target

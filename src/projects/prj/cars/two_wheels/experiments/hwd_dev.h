@@ -38,10 +38,11 @@
 // cfg
 // ---
 					     
-// microcontroller
+// Microcontroller
 // ---------------
-namespace my_mcu = atmega;
-using Micro   = my_mcu::Micro;
+namespace myu = atmega;
+using Micro   = myu::Micro;
+using UART_iostream = mcu::UART_iostream<myu::UART>;
 
 namespace priv_{
 // pin connections
@@ -61,8 +62,8 @@ static constexpr uint8_t IN4_pin = 14;
 static constexpr uint8_t ENA_pin = 15;
 static constexpr uint8_t ENB_pin = 16;
 
-using PWM_pinA = my_mcu::PWM1_pin<ENA_pin>;
-using PWM_pinB = my_mcu::PWM1_pin<ENB_pin>;
+using PWM_pinA = myu::PWM1_pin<ENA_pin>;
+using PWM_pinB = myu::PWM1_pin<ENB_pin>;
 
 // Not using SPI: available pins 16, 17, 18, 19
 

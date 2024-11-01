@@ -27,9 +27,9 @@ void Main::init_hwd()
 
 void Main::init_uart()
 {
-    my_mcu::basic_cfg(uart);
+    myu::UART_basic_cfg();
     uart.turn_on();
-    my_mcu::UART_basic::enable_interrupt_unread_data();
+    myu::UART_basic::enable_interrupt_unread_data();
 }
 
 void Main::init_sensor()

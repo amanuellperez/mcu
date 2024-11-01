@@ -21,12 +21,18 @@
 #include "../../../mega_timer1_basic.h"
 #include <avr_time.h>
 #include "../../../mega_interrupt.h"
-#include "../../../mega_UART_iostream.h"
+#include "../../../mega_UART.h"
+#include <mcu_UART_iostream.h>
 #include "../../../mega_micro.h"
 
 
-using namespace mega_::literals;
-using Timer = mega_::Timer1;
+// Microcontroller
+// ---------------
+namespace myu = mega_;
+using UART_iostream = mcu::UART_iostream<myu::UART>;
+
+using namespace myu::literals;
+using Timer = myu::Timer1;
 
 // Probar cada periodo con diferentes frecuencias: 1 MHz y 8 MHz.
 // Para los 8 MHz hay que definir el fuse correspondiente y F_CPU en el
@@ -39,8 +45,8 @@ using Timer = mega_::Timer1;
 
 void timer_on_1MHz(uint16_t period_in_us)
 {
-    if constexpr (mega_::clock_frequency == 1_MHz){
-	mega_::UART_iostream uart;
+    if constexpr (myu::clock_frequency == 1_MHz){
+	UART_iostream uart;
 
 	switch(period_in_us){
 	    case 1: Timer::clock_frequency_no_prescaling(); break;
@@ -58,9 +64,9 @@ void timer_on_1MHz(uint16_t period_in_us)
 
 void timer_on_8MHz(uint16_t period_in_us)
 {
-    if constexpr (mega_::clock_frequency == 8_MHz){// si no se pone aunque no se llame a 
+    if constexpr (myu::clock_frequency == 8_MHz){// si no se pone aunque no se llame a 
 	    // timer_on_8MHz (por ser a 1MHz) la compila, generando error!!!
-	mega_::UART_iostream uart;
+	UART_iostream uart;
 
 	switch(period_in_us){
 	    case 1: Timer::clock_frequency_divide_by_8(); break;
@@ -78,17 +84,17 @@ void timer_on_8MHz(uint16_t period_in_us)
 
 void timer_on(uint16_t period_in_us)
 {
-    if constexpr (mega_::clock_frequency == 1_MHz)
+    if constexpr (myu::clock_frequency == 1_MHz)
 	timer_on_1MHz(period_in_us);
 
-    else if constexpr (mega_::clock_frequency == 8_MHz)
+    else if constexpr (myu::clock_frequency == 8_MHz)
 	timer_on_8MHz(period_in_us);
 
 }
 
 uint16_t select_period_1MHz()
 {
-    mega_::UART_iostream uart;
+    UART_iostream uart;
 
     uart << "\n\nperiod_in_us (avr a 1MHz):\n"
 	    "1\n"
@@ -113,7 +119,7 @@ uint16_t select_period_1MHz()
 
 uint16_t select_period_8MHz()
 {
-    mega_::UART_iostream uart;
+    UART_iostream uart;
 
     uart << "\n\nperiod_in_us (avr a 8MHz):\n"
 	    "1\n"
@@ -139,14 +145,14 @@ uint16_t select_period_8MHz()
 
 uint16_t select_period()
 {
-    if constexpr (mega_::clock_frequency == 1_MHz)
+    if constexpr (myu::clock_frequency == 1_MHz)
 	return select_period_1MHz();
 
-    else if constexpr (mega_::clock_frequency == 8_MHz)
+    else if constexpr (myu::clock_frequency == 8_MHz)
 	return select_period_8MHz();
 
     else{
-	mega_::UART_iostream uart;
+	UART_iostream uart;
 	uart << "ERROR: select_period(), frecuencia desconocida\n";
 	return 1;
     }
@@ -156,7 +162,7 @@ uint16_t select_period()
 
 void oca_menu()
 {
-    mega_::UART_iostream uart;
+    UART_iostream uart;
 
     uart << "\nOCA menu:\n"
 	    "[d]isconnect\n"
@@ -191,7 +197,7 @@ void oca_menu()
 
 void ocb_menu()
 {
-    mega_::UART_iostream uart;
+    UART_iostream uart;
 
     uart << "\nOCB menu:\n"
 	    "[d]isconnect\n"
@@ -228,8 +234,8 @@ void ocb_menu()
 int main()
 {
 // init_uart()
-    mega_::UART_iostream uart;
-    mega_::basic_cfg(uart);
+    UART_iostream uart;
+    myu::UART_basic_cfg();
     uart.turn_on();
 
 // init_timer()
@@ -239,7 +245,7 @@ int main()
     //Timer::mode_CTC_top_OCRA();
     //Timer::output_compare_register_A(top);
     Timer::CTC_mode_top_ICR();
-    { mega_::Disable_interrupts l; Timer::unsafe_input_capture_register(top);}
+    { myu::Disable_interrupts l; Timer::unsafe_input_capture_register(top);}
     Timer::CTC_pin_A_toggle_on_compare_match(); // para que se vea algo al ppio
     Timer::CTC_pin_B_toggle_on_compare_match();
     timer_on(period_in_us);
@@ -290,7 +296,7 @@ int main()
 		uart >> top;
 		uart << top << '\n';
 		//Timer::output_compare_register_A(top);
-		{ mega_::Disable_interrupts l; 
+		{ myu::Disable_interrupts l; 
 		  Timer::unsafe_input_capture_register(top);}
 
 	    break; default: uart << "Unknown option\n";

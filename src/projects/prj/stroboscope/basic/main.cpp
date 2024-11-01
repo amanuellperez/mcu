@@ -20,8 +20,14 @@
 #include <avr_atmega.h>
 
 
-using Timer = atmega::Timer1;
-using namespace atmega::literals;
+// Microcontroller
+// ---------------
+namespace myu = atmega;
+using Micro   = myu::Micro;
+using UART_iostream = mcu::UART_iostream<myu::UART>;
+
+using Timer = myu::Timer1;
+using namespace myu::literals;
 
 
 // fg = ft / (1 + top); 
@@ -57,8 +63,8 @@ void select_frequency(const uint16_t freq)
 int main()
 {
 // init_uart()
-    atmega::UART_iostream uart;
-    atmega::basic_cfg(uart);
+    UART_iostream uart;
+    myu::UART_basic_cfg();
     uart.turn_on();
 
 // data

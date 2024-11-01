@@ -38,6 +38,12 @@
 
 #include "dev_debug_eeprom.h"
 
+// Microcontroller
+// ---------------
+namespace myu = atmega;
+using Micro   = myu::Micro;
+using UART_iostream = mcu::UART_iostream<myu::UART>;
+
 constexpr uint8_t period_in_us = 16;
 
 constexpr uint8_t num_pin_chip_select = 16;
@@ -55,21 +61,21 @@ constexpr uint8_t sz = 255;
 
 void init_UART()
 {
-    atmega::UART_iostream uart;
-    atmega::basic_cfg(uart);
+    UART_iostream uart;
+    myu::UART_basic_cfg();
     uart.turn_on();
 }
 
 void init_SPI()
 {
-    atmega::SPI_master::clock_period_in_us<period_in_us>();
-    atmega::SPI_master::turn_on();
+    myu::SPI_master::clock_period_in_us<period_in_us>();
+    myu::SPI_master::turn_on();
 }
 
 
 void presentacion(const char title[])
 {
-    atmega::UART_iostream uart;
+    UART_iostream uart;
 
     uart << '\n' << title << '\n';
     uart <<     "-----------\n";
@@ -81,7 +87,7 @@ void presentacion(const char title[])
 
 std::pair<uint16_t, uint8_t> user_read_peticion()
 {
-    atmega::UART_iostream uart;
+    UART_iostream uart;
 
     uint16_t addr = 0;
     uart << "\n¿Dirección a partir de la que leer? (0 por defecto)\n";
@@ -111,7 +117,7 @@ void run()
     auto [addr, n] = user_read_peticion();
 
     EEPROM_lineal eeprom;
-    atmega::UART_iostream uart;
+    UART_iostream uart;
     dev::EEPROM_debug::send(eeprom, uart, addr, n);
 }
 

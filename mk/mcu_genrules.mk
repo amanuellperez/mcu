@@ -186,8 +186,18 @@ ifdef BIN
 all: $(HEADERS) $(BIN).hex 
 	@$(PRINTF) "-------------------------------------\n"
 	@$(PRINTF) "Compilados: $(SOURCES) $(ASM_SOURCES)\n"
-	@$(PRINTF) "MCU             = $(MCU)\n"
-	@$(PRINTF) "Micro frequency = $(F_CPU)\n"
+	@$(PRINTF) "MCU            = $(MCU)\n"
+	@$(PRINTF) "Frequencies:\n"
+
+ifneq ($(CLK_MAIN),0)
+	@$(PRINTF) "      CLK_MAIN = $(CLK_MAIN)\n"
+endif
+
+ifneq ($(CLK_PER),$(F_CPU))
+	@$(PRINTF) "      CLK_PER  = $(CLK_PER)\n"
+endif
+
+	@$(PRINTF) "      F_CPU    = $(F_CPU)\n"
 	@$(PRINTF) "-------------------------------------\n\n"
 
 

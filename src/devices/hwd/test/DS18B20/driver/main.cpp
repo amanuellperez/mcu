@@ -25,15 +25,17 @@
 
 // Micro
 // -----
-namespace my_mcu = atmega; 
-using Micro = my_mcu::Micro;
+namespace myu = atmega; 
+using Micro = myu::Micro;
+using UART_iostream = mcu::UART_iostream<myu::UART>;
+
 
 // pins
 constexpr uint8_t one_wire_pin = 15;
 
 // One wire protocol
 // -----------------
-using Cfg = mcu::One_wire_cfg<my_mcu::Micro, one_wire_pin>;
+using Cfg = mcu::One_wire_cfg<myu::Micro, one_wire_pin>;
 using One_wire = mcu::One_wire<Cfg>;
 using Search = mcu::One_wire_search<Cfg>;
 
@@ -48,8 +50,8 @@ using Sensor = dev::DS18B20<Micro, One_wire>;
 // ---------
 void init_uart()
 {
-    my_mcu::UART_iostream uart;
-    my_mcu::basic_cfg(uart);
+    UART_iostream uart;
+    myu::UART_basic_cfg();
     uart.turn_on();
 }
 
@@ -58,7 +60,7 @@ bool is_return_cmd_ok(Sensor::Result result)
 {
     using Result = Sensor::Result;
 
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
     switch(result){
 	break; case Result::ok: 
 			// uart << "Ok"; 
@@ -80,7 +82,7 @@ bool is_return_cmd_ok(Sensor::Result result)
 
 void print(const Sensor::Scratchpad& s)
 {
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
 
     uart << "Scratchpad\n"
 	    "\tTemperature (LSB MSB = 0x50 0x05)= ";
@@ -158,7 +160,7 @@ private:
 // ---------
 void Main::print_menu(bool all_options) const
 {
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
 
     uart << "\n\nMenu\n"
 	      "----\n"
@@ -178,7 +180,7 @@ void Main::print_menu(bool all_options) const
 
 void Main::bind_device()
 {
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
     uart << "Binding ... ";
     
     Search search;
@@ -201,7 +203,7 @@ void Main::bind_device()
 
 void Main::convert_T() const
 {
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
     
     uart << "Sending convert_T cmd ... ";
     auto result = sensor_.convert_T();
@@ -220,7 +222,7 @@ void Main::convert_T() const
 
 void Main::read_scratchpad() const
 {
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
     
     uart << "Sending `read scractpad` cmd ... ";
     Sensor::Scratchpad s;
@@ -240,7 +242,7 @@ void Main::read_scratchpad() const
 
 void Main::write_scratchpad() const
 {
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
     
     uart << "Write to scratchpad:\n"
 	    "\tTH = ";
@@ -283,7 +285,7 @@ void Main::write_scratchpad() const
 
 void Main::copy_scratchpad() const
 {
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
     
     uart << "Sending `copy scractpad` cmd ... ";
 
@@ -298,7 +300,7 @@ void Main::copy_scratchpad() const
 
 void Main::recall_e2() const
 {
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
     
     uart << "Sending `recall2` cmd ... ";
     
@@ -318,7 +320,7 @@ void Main::recall_e2() const
 
 void Main::read_temperature()
 {
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
     
     uart << "Reading temperature ... ";
     auto T = sensor_.read_temperature(time_out_max);
@@ -347,7 +349,7 @@ Main::Main()
 
 void Main::run()
 {
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
 
     uart << "\n\nDS18B20 driver test\n"
 	        "-------------------\n"

@@ -58,6 +58,7 @@ using namespace test;
 // ---------------
 namespace myu = atmega;
 using Micro   = myu::Micro;
+using UART_iostream = mcu::UART_iostream<myu::UART>;
 
 // UART
 // ----
@@ -110,8 +111,8 @@ using Rect = SDD1306::PageCol_rectangle;
 // ---------
 void init_uart()
 {
-    myu::UART_iostream uart;
-    myu::basic_cfg<baud_rate>(uart);
+    UART_iostream uart;
+    myu::UART_basic_cfg<baud_rate>();
     uart.turn_on();
 }
 
@@ -122,7 +123,7 @@ void init_TWI()
 
 void init_sdd1306()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "Connecting with SDD1306 ... ";
 
     if (SDD1306::probe()){
@@ -139,7 +140,7 @@ void init_sdd1306()
 
 void hello()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\n\nSDD1306 test\n"
 	        "------------\n"
 		"Connections:\n"
@@ -378,7 +379,7 @@ int main()
 
     SDD1306::init<SDD1306_init_cfg>();
 
-    myu::UART_iostream uart;
+    UART_iostream uart;
 
     while(1){
 //	test_basic();

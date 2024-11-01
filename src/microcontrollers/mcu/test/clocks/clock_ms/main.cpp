@@ -21,10 +21,12 @@
 #include <avr_atmega.h>
 #include <atd_time.h>
 
-namespace my_mcu = atmega;
-using Micro   = my_mcu::Micro;
+namespace myu = atmega;
+using Micro   = myu::Micro;
+using UART_iostream = mcu::UART_iostream<myu::UART>;
 
-using Clock = mcu::Clock_ms<Micro, my_mcu::Time_counter1>;
+
+using Clock = mcu::Clock_ms<Micro, myu::Time_counter1>;
 
 
 
@@ -37,7 +39,7 @@ ISR_TIMER1_COMPA
 
 
 
-void print_time(my_mcu::UART_iostream& uart, const Clock::Time& t)
+void print_time(UART_iostream& uart, const Clock::Time& t)
 {
     uart << std::setw(2) << (int) t.hours << ':'
 	 << std::setw(2) << (int) t.minutes << ':'
@@ -49,8 +51,8 @@ void print_time(my_mcu::UART_iostream& uart, const Clock::Time& t)
 
 void test_clock()
 {
-    my_mcu::UART_iostream uart;
-//    using UART = my_mcu::UART_basic;
+    UART_iostream uart;
+//    using UART = myu::UART_basic;
 
     uart << "\n\nClock test\n"
 	        "----------\n"
@@ -63,7 +65,7 @@ void test_clock()
     while(1){
 	print_time(uart, Clock::now_as_time());
 
-	my_mcu::Micro::wait_ms(100);
+	myu::Micro::wait_ms(100);
 
 //	if(UART::are_there_data_unread()){
 //	    char ans = static_cast<char>(UART::data_register());
@@ -79,8 +81,8 @@ void test_clock()
 
 void init_uart()
 {
-    my_mcu::UART_iostream uart;
-    my_mcu::basic_cfg(uart);
+    UART_iostream uart;
+    myu::UART_basic_cfg();
     uart.turn_on();
 }
 

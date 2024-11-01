@@ -25,21 +25,22 @@
 
 // Devices
 // -------
-namespace my_mcu = atmega;
-using Micro = my_mcu::Micro;
+namespace myu = atmega;
+using Micro = myu::Micro;
+using UART_iostream = mcu::UART_iostream<myu::UART>;
 
 constexpr uint8_t test_pin = 12;
 
-using Pin = my_mcu::Output_pin<test_pin>;
-using Miniclock1_us = mcu::Miniclock_us<my_mcu::Micro, my_mcu::Time_counter1>;
-using Miniclock1_ms = mcu::Miniclock_ms<my_mcu::Micro, my_mcu::Time_counter1>;
+using Pin = myu::Output_pin<test_pin>;
+using Miniclock1_us = mcu::Miniclock_us<myu::Micro, myu::Time_counter1>;
+using Miniclock1_ms = mcu::Miniclock_ms<myu::Micro, myu::Time_counter1>;
 
-using SWG_us = dev::Square_wave_generator< my_mcu::Square_wave_generator0_g
+using SWG_us = dev::Square_wave_generator< myu::Square_wave_generator0_g
 					  , Pin
 					  , Miniclock1_us
 					  , false>;
 
-using SWG_ms = dev::Square_wave_generator< my_mcu::Square_wave_generator0_g
+using SWG_ms = dev::Square_wave_generator< myu::Square_wave_generator0_g
 					  , Pin
 					  , Miniclock1_ms
 					  , false>;
@@ -53,15 +54,15 @@ enum class Cfg{ in_ms, in_us };
 
 void init_uart()
 {
-    my_mcu::UART_iostream uart;
-    my_mcu::basic_cfg(uart);
+    UART_iostream uart;
+    myu::UART_basic_cfg();
     uart.turn_on();
 }
 
 
 void ask_cfg(Cfg& cfg)
 {
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
 
     uart << "\nTime in:\n"
 	  "1. microseconds\n"
@@ -81,7 +82,7 @@ void generate(const uint32_t& freq, const uint16_t& t)
 {
     constexpr uint16_t nburst = 400;
 
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
     uart << "Generating " << (int) nburst << " burst of " 
 	 << freq << " Hz of " << t;
 
@@ -114,7 +115,7 @@ int main()
 {
     init_uart();
 
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
 
     uart << "\n\nSquare wave test\n"
 	        "----------------\n"

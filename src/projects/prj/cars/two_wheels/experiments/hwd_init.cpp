@@ -26,7 +26,7 @@ void Main::init_hwd()
 
 void Main::init_uart()
 {
-    my_mcu::basic_cfg(uart);
+    myu::UART_basic_cfg();
     uart.turn_on();
 }
 

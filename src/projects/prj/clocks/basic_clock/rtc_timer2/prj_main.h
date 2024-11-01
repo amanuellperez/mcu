@@ -50,7 +50,7 @@ private:
     using Date_time = Clock::Date_time;
 
 // User interface
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
 
 
 // Functions

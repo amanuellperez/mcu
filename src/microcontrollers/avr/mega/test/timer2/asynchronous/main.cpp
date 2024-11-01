@@ -18,7 +18,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "../../../mega_cfg.h"
-#include "../../../mega_UART_iostream.h"
+#include "../../../mega_UART.h"
+#include <mcu_UART_iostream.h>
 #include "../../../mega_timer2_basic.h"
 #include <avr_time.h>
 #include "../../../mega_debug.h"
@@ -30,11 +31,12 @@
 
 // Microcontroller
 // ---------------
-namespace my_mcu = mega_;
+namespace myu = mega_;
+using UART_iostream = mcu::UART_iostream<myu::UART>;
 
 // Hwd devices
 // -----------
-using Timer = my_mcu::Timer2;
+using Timer = myu::Timer2;
 
 // Cfg
 // ---
@@ -49,8 +51,8 @@ volatile uint32_t counter = 0;
 // ---------
 void init_uart()
 {
-    my_mcu::UART_iostream uart;
-    my_mcu::basic_cfg(uart);
+    UART_iostream uart;
+    myu::UART_basic_cfg();
     uart.turn_on();
 }
 
@@ -59,7 +61,7 @@ void init_uart()
 // (ver punto "22.9 Asynchronous Operation of Timer/Counter2" de la datasheet)
 void timer_init_asynchronous_mode()
 {
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
 
     Timer::disable_interrupts();
     Timer::enable_asynchronous_mode();
@@ -77,7 +79,7 @@ void timer_init_asynchronous_mode()
 
 	atd::print_int_as_hex(uart, ASSR);
 	uart << " ";
-	my_mcu::wait_ms(400);
+	myu::wait_ms(400);
     }
     uart << "OK\n";
 
@@ -89,7 +91,7 @@ int main()
 {
     init_uart();
 
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\nTimer2 counter test\n"
 	      "-------------------\n"
 	      "Connect a crystal of 32kHz to pins TOSC1, TOSC2\n"
@@ -99,20 +101,20 @@ int main()
 
 
     timer_init_asynchronous_mode();
-    my_mcu::print_registers_timer2(uart);
+    myu::print_registers_timer2(uart);
 
 // start:
-    my_mcu::enable_interrupts();
+    myu::enable_interrupts();
 					      
 
 
     while(1){
 	{// atomic
-	    my_mcu::Disable_interrupts di;
+	    myu::Disable_interrupts di;
 	    uart << (int) counter << " s\n";
 	}
 
-	my_mcu::wait_ms(1000);
+	myu::wait_ms(1000);
     }
 }
 
@@ -120,7 +122,7 @@ int main()
 
 ISR_TIMER2_OVF
 {
-//    my_mcu::UART_iostream uart;
+//    UART_iostream uart;
 //    uart << "int\n";
     counter = counter + 1;
 }

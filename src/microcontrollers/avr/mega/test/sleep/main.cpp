@@ -27,13 +27,15 @@
 #include "../../mega_interrupt.h"
 #include "../../mega_pin.h"
 #include <avr_time.h>
-#include "../../mega_UART_iostream.h"
+#include "../../mega_UART.h"
+#include <mcu_UART_iostream.h>
 
 
 // Micro
 // -----
-namespace my_mcu = mega_;
-//using Micro = my_mcu::Micro;
+namespace myu = mega_;
+using UART_iostream = mcu::UART_iostream<myu::UART>;
+//using Micro = myu::Micro;
 
 // Pins
 // ----
@@ -45,13 +47,13 @@ constexpr uint8_t npin    = 14;
 
 // Hwd Devices
 // -----------
-using Pin     = my_mcu::Pin<npin>;
+using Pin     = myu::Pin<npin>;
 
 
 void init_uart()
 {
-    my_mcu::UART_iostream uart;
-    basic_cfg(uart);
+    UART_iostream uart;
+    myu::UART_basic_cfg();
     uart.turn_on();
 
 }
@@ -60,7 +62,7 @@ void init()
 {
     init_uart();
 
-    my_mcu::enable_interrupts();
+    myu::enable_interrupts();
 
     Pin::as_input_with_pullup();
 }
@@ -68,7 +70,7 @@ void init()
 
 void select_mode()
 {
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
 
     uart << "\nSelect mode\n"
 	      "-----------\n"
@@ -83,37 +85,37 @@ void select_mode()
     uart >> ans;
 
     switch(ans){
-	break; case '1': my_mcu::Sleep::idle_mode();
-	break; case '2': my_mcu::Sleep::ADC_noise_reduction_mode();
-	break; case '3': my_mcu::Sleep::power_down_mode();
-	break; case '4': my_mcu::Sleep::power_save_mode();
+	break; case '1': myu::Sleep::idle_mode();
+	break; case '2': myu::Sleep::ADC_noise_reduction_mode();
+	break; case '3': myu::Sleep::power_down_mode();
+	break; case '4': myu::Sleep::power_save_mode();
 	break; default : uart << "Unknown option\n";
     }
 }
 
 void test_sleep()
 {
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
 
     uart << "\nSleeping ... \n"
 	    "To wake me up:\n"
 	    "\t1. press a key (only sleep idle mode)\n"
 	    "\t2. change level in pin number " << (int) Pin::number << "\n";
 
-    my_mcu::UART_basic::enable_interrupt_unread_data();
+    myu::UART_basic::enable_interrupt_unread_data();
     Pin::enable_change_level_interrupt();
 
 // >>> sleep()
-    my_mcu::Sleep::enable();
-    my_mcu::Sleep::instruction();
-    my_mcu::Sleep::disable();
+    myu::Sleep::enable();
+    myu::Sleep::instruction();
+    myu::Sleep::disable();
 // <<< sleep()
 
-    my_mcu::UART_basic::disable_interrupt_unread_data();
+    myu::UART_basic::disable_interrupt_unread_data();
     Pin::disable_change_level_interrupt();
 
     // vaciamos el buffer para que no vuelva a saltar la interrupcion
-    while (my_mcu::UART_basic::are_there_unread_data()){
+    while (myu::UART_basic::are_there_unread_data()){
 	char ans{};
 	uart >> ans; 
     }
@@ -126,7 +128,7 @@ int main()
 {
     init();
 
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\nSleep teset\n"
 	      "-----------\n";
 
@@ -150,7 +152,7 @@ int main()
 }
 
 ISR_PIN{
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
     uart << "Inside ISR_PIN!\n";
 
 }

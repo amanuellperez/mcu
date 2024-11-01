@@ -22,8 +22,9 @@
 
 // Microcontroller
 // ---------------
-namespace my_mcu = atmega;
-using Micro = my_mcu::Micro;
+namespace myu = atmega;
+using Micro = myu::Micro;
+using UART_iostream = mcu::UART_iostream<myu::UART>;
 
 // Pin connections
 // ---------------
@@ -40,8 +41,8 @@ using Button = dev::Push_button_level_change<Micro, button_pin>;
 int main()
 {
 // init_uart()
-    my_mcu::UART_iostream uart;
-    my_mcu::basic_cfg(uart);
+    UART_iostream uart;
+    myu::UART_basic_cfg();
     uart.turn_on();
 
     Button button;

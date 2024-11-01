@@ -39,6 +39,7 @@ using namespace test;
 // myu = my_mcu (???) <-- today, I like myu! Tomorrow... :?
 namespace myu = atmega;
 using Micro   = myu::Micro;
+using UART_iostream = mcu::UART_iostream<myu::UART>;
 
 template <uint8_t n>
 using Pin = typename Micro::Pin<n>;
@@ -98,15 +99,15 @@ using A4988 = dev::A4988_basic<Micro, A4988_pins>;
 // ---------
 void init_uart()
 {
-    myu::UART_iostream uart;
-    myu::basic_cfg<baud_rate>(uart);
+    UART_iostream uart;
+    myu::UART_basic_cfg<baud_rate>();
     uart.turn_on();
 }
 
 template <uint8_t npin>
 void print_pin_number(const char* name)
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
 
     uart << name << " = ";
 
@@ -128,7 +129,7 @@ void print_pin_number(const char* name)
 
 void hello()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << msg_hello <<
 		"Connections:\n"
 		"\tDIR = " << (int) A4988_pins::DIR << 
@@ -149,7 +150,7 @@ void hello()
 
 void test_step()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\nFrequency (in Hz): ";
     uint32_t freq;
     uart >> freq;
@@ -167,7 +168,7 @@ void test_step()
 
 void test_direction()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\nDirection (+/-): ";
     char d{};
     uart >> d;
@@ -190,7 +191,7 @@ template <typename Driver>
 void print_menu_enable()
     requires requires {Driver::enable(); }
 { 
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "4. enable/disable\n";
 }
 
@@ -203,7 +204,7 @@ template <typename Driver>
 void test_enable()
     requires requires {Driver::enable(); }
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\nEnable/disable (e/d): ";
 
     char opt{};
@@ -231,7 +232,7 @@ template <typename Driver>
 void print_menu_sleep()
     requires requires {Driver::sleep(); Driver::awake();}
 { 
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "5. sleep/awake\n";
 }
 
@@ -243,7 +244,7 @@ template <typename Driver>
 void test_sleep()
     requires requires {Driver::sleep(); Driver::awake();}
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\nSleep/awake (s/a): ";
 
     char opt{};
@@ -270,7 +271,7 @@ template <typename Driver>
     requires requires {Driver::engage(); Driver::disengage();}
 void print_menu_reset()
 { 
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "6. engage/disengage\n";
 }
 
@@ -282,7 +283,7 @@ template <typename Driver>
 void test_reset()
     requires requires {Driver::engage(); Driver::disengage();}
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\nEngage/disengage (e/d): ";
 
     char opt{};
@@ -309,7 +310,7 @@ template <typename Driver>
 void print_menu_mode()
     requires (Driver::MS123_connected())
 { 
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "7. Write mode\n";
 }
 
@@ -321,7 +322,7 @@ template <typename Driver>
 void test_mode_automatic_check()
     requires (Driver::MS123_connected())
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     auto test = Test::interface(uart, "mode()");
 
     Driver::full_step_mode();
@@ -348,7 +349,7 @@ void test_mode_automatic_check()
 template <typename Driver>
 void test_mode()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\nMode\n"
 	      "----\n"
 	      "0. Automatic check\n";
@@ -367,7 +368,7 @@ template <typename Driver>
 void test_mode()
     requires (Driver::MS123_connected())
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\nMode\n"
 	      "----\n"
 	      "0. Automatic check\n"
@@ -396,7 +397,7 @@ void test_read_mode()
 {
     using Mode = A4988::Mode;
 
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\n\n";
     switch (A4988::mode()){
 	break; case Mode::full_step: uart << "Mode full_step\n";
@@ -420,7 +421,7 @@ int main()
     hello();
 
     Micro::enable_interrupts();
-    myu::UART_iostream uart;
+    UART_iostream uart;
 
     while(1){
 	uart << "\nMenu\n"

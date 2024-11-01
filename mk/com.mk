@@ -66,3 +66,18 @@ INSTALL_INC_STD = $(MCU_INCLUDE)/std
 # errores, ya que mi <iostream> no suministra cout (¿qué sentido tiene cout en
 # un micro? No tiene por qué tener terminal de salida).
 CPATH:=$(CPATH):$(INSTALL_INC_STD)
+
+
+# Frecuencias de reloj
+# --------------------
+# Si no se definen explícitamente, valen 0
+ifdef F_CPU
+	CLK_PER = $(F_CPU)
+else
+	CLK_PER  ?= 0
+endif 
+
+F_CPU ?= 0
+CLK_MAIN ?= 0
+
+

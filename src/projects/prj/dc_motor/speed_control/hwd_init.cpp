@@ -36,7 +36,7 @@ void Main::init_hwd()
 
 void Main::init_uart()
 {
-    myu::basic_cfg(uart);
+    myu::UART_basic_cfg();
     uart.turn_on();
 }
 

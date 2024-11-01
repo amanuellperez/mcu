@@ -21,7 +21,8 @@
 #include "../../../mega_timer0.h"
 #include "../../../mega_timer1.h"
 #include "../../../mega_import_avr.h"
-#include "../../../mega_UART_iostream.h"
+#include "../../../mega_UART.h"
+#include <mcu_UART_iostream.h>
 
 #include <atd_test.h>
 using namespace test;
@@ -33,6 +34,7 @@ constexpr bool timer0_both_pins = false;
 // Microcontroller
 // ---------------
 namespace myu = mega_;
+using UART_iostream = mcu::UART_iostream<myu::UART>;
 
 					 
 // Hwd devices
@@ -68,8 +70,8 @@ constexpr static uint8_t nmax_pulses = 8;
 // ---------
 void init_uart()
 {
-    myu::UART_iostream uart;
-    myu::basic_cfg(uart);
+    UART_iostream uart;
+    myu::UART_basic_cfg();
     uart.turn_on();
 }
 
@@ -86,7 +88,7 @@ void init_timers()
 // esto es `abort` pero ya hay una función abort 
 bool user_press_key()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
 
     if (uart.is_there_something_to_read()){
 	char c{};
@@ -99,7 +101,7 @@ bool user_press_key()
 
 void hello()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\n\n**************************************************\n"
 	        "                  PWM_pin test\n"
                 "**************************************************\n";
@@ -154,7 +156,7 @@ void print(std::ostream& out,
 template <typename PWM_pin>
 void print_debug()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     using Timer = typename PWM_pin::Timer;
 
     if constexpr (PWM_pin::number == 11 or  PWM_pin::number == 12){
@@ -197,7 +199,7 @@ Int ask(std::iostream& out, const char* msg)
 template <typename PWM_pin>
 void automatic_duty_cycle_test()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
 
     uart << "\n\nAutomatic generation of a range of duty cycles\n"
 	        "----------------------------------------------\n";
@@ -256,7 +258,7 @@ void automatic_duty_cycle_test()
 template <typename PWM_pin>
 void automatic_frequency_test()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\n\nAutomatic generation of a range of frequencies\n"
 	    "----------------------------------------------\n";
 
@@ -290,7 +292,7 @@ void automatic_frequency_test()
 template <typename PWM_pin>
 void generate_pwm_signal()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\nFrequency (in Hz): ";
     uint32_t freq{0};
     uart >> freq;
@@ -322,7 +324,7 @@ void generate_pwm_signal()
 template <typename PWM_pin>
 void change_duty_cycle()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\nDuty cycle (as number): ";
     uint16_t duty_cycle{0};
     uart >> duty_cycle;
@@ -339,7 +341,7 @@ void pulse_wave_generation()
     if constexpr (PWM_pin::number == 15 or
 		  PWM_pin::number == 16) {
 
-    myu::UART_iostream uart;
+    UART_iostream uart;
     auto freq = ask<uint32_t>(uart, "\n\nFrequency in Hz: ");
     if (freq == 0) return;
 
@@ -388,7 +390,7 @@ void pulse_wave_generation()
 template <typename PWM_pin>
 void connect_pin()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\n\nConnect or disconnect? (c/d) ";
     char ans{};
     uart >> ans;
@@ -404,7 +406,7 @@ void connect_pin()
 template <typename PWM_pin>
 void test_pin()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\nTest pin " << uint16_t{PWM_pin::number} << "\n"
 	    "-------------\n"
 	    "Connect oscilloscope to pin number " 
@@ -445,7 +447,7 @@ int main()
 
     hello();
 
-    myu::UART_iostream uart;
+    UART_iostream uart;
 
     while(1){
 	uart << "\nMenu\n"

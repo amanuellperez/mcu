@@ -34,6 +34,14 @@
 
 #include <avr_atmega.h>
 
+
+// Microcontroller
+// ---------------
+namespace myu = atmega;
+using Micro   = myu::Micro;
+using UART_iostream = mcu::UART_iostream<myu::UART>;
+
+
 constexpr uint8_t period_in_us = 16;
 
 constexpr uint8_t num_pin_chip_select = 16;
@@ -44,7 +52,7 @@ using EEPROM_lineal =
 using EEPROM_ostream = dev::EEPROM_ostream<EEPROM_lineal, buffer_size>;
 using EEPROM_istream = dev::EEPROM_istream<EEPROM_lineal, buffer_size>;
 
-using SPI = atmega::SPI_master;
+using SPI = myu::SPI_master;
 
 constexpr int sz = 80;
 
@@ -53,7 +61,7 @@ constexpr const char ERROR[] = "ERROR: ";
 
 void print_buffer(uint16_t addr0, uint8_t* buf, uint8_t n)
 {
-    atmega::UART_iostream uart;
+    UART_iostream uart;
 
     uint8_t* pe = buf + n;
 
@@ -99,7 +107,7 @@ void check_buffer()
 	return;
     comprobado = true;
 
-    atmega::UART_iostream uart;
+    UART_iostream uart;
     for (uint16_t i = 0; i < sz; ++i){
 	if (buf[i] != uint8_t{0x55})
 	    uart << ">>> " << ERROR << "stack overflow!!! buffer corrupto\n";
@@ -110,7 +118,7 @@ void check_buffer()
 void read_and_print(EEPROM_lineal& eeprom, uint16_t addr0, uint8_t n = sz)
 {
     check_buffer();
-    atmega::UART_iostream uart;
+    UART_iostream uart;
 
     if (!eeprom.good()) {
 	uart << ERROR << "eeprom en mal estado!\n";
@@ -137,7 +145,7 @@ MENU_INTERACTIVO[] =  "Elige:\n"
 
 void test_eeprom_interactiva()
 {
-    atmega::UART_iostream uart;
+    UART_iostream uart;
     SPI::clock_period_in_us<period_in_us>();
     SPI::turn_on();
 
@@ -279,8 +287,8 @@ void test_eeprom_interactiva()
 
 int main()
 {
-    atmega::UART_iostream uart;
-    atmega::basic_cfg(uart);
+    UART_iostream uart;
+    myu::UART_basic_cfg();
     uart.turn_on();
 
     while(1){

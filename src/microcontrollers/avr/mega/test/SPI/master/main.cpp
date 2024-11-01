@@ -20,7 +20,8 @@
 #include "../../../mega_cfg.h"
 #include "../../../mega_SPI.h"
 #include "../../../mega_pin.h"
-#include "../../../mega_UART_iostream.h"
+#include "../../../mega_UART.h"
+#include <mcu_UART_iostream.h>
 #include "../../../mega_debug.h"
 
 #include <atd_ostream.h>
@@ -29,6 +30,7 @@
 // Microcontroller
 // ---------------
 namespace myu = mega_;
+using UART_iostream = mcu::UART_iostream<myu::UART>;
 
 // SPI protocol
 // ------------
@@ -41,7 +43,7 @@ using no_CS = myu::Pin<SPI::SS_pin_number>;
 
 void SPI_write(uint8_t x)
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "SPI_write(";
     atd::print_int_as_hex(uart, x);
     uart << ")\n";
@@ -54,7 +56,7 @@ void SPI_write(uint8_t x)
 
 void SPI_write(uint8_t x1, uint8_t x2)
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "SPI_write(";
     atd::print_int_as_hex(uart, x1);
     uart << ", ";
@@ -71,8 +73,8 @@ void SPI_write(uint8_t x1, uint8_t x2)
 // ---------
 void init_uart()
 {
-    myu::UART_iostream uart;
-    myu::basic_cfg<9'600>(uart);
+    UART_iostream uart;
+    myu::UART_basic_cfg<9'600>();
     uart.turn_on();
 }
 
@@ -86,7 +88,7 @@ void init_SPI()
 
 void hello()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\n\nSPI master test\n"
 		"---------------\n"
 		"Connections:\n"
@@ -97,7 +99,7 @@ void hello()
 
 void send_byte()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\nByte to send: ";
     uint16_t x{};
     uart >> x;
@@ -106,7 +108,7 @@ void send_byte()
 
 void send_two_bytes()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\nFirst byte: ";
     uint16_t x1{};
     uart >> x1;
@@ -119,7 +121,7 @@ void send_two_bytes()
 
 void cfg_cpol_cpha()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\nCPOL (0/1): ";
     uint16_t cpol{};
     uart >> cpol;
@@ -137,7 +139,7 @@ void cfg_cpol_cpha()
 
 void cfg_order()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
 
     uart << "\nMost Significant Bit first? (y/n) ";
     char c{};
@@ -162,7 +164,7 @@ int main()
 
     hello();
 
-    myu::UART_iostream uart;
+    UART_iostream uart;
     while (1) {
 	uart << "\n\nMenu\n"
 		"----\n"

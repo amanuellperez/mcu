@@ -26,10 +26,11 @@
 #include <mcu_clock.h>
 #include <dev_push_button.h>
 
-// MICROCONTROLLER
+// Microcontroller
 // ---------------
-namespace my_mcu = atmega;
-using Micro   = my_mcu::Micro;
+namespace myu = atmega;
+using Micro   = myu::Micro;
+using UART_iostream = mcu::UART_iostream<myu::UART>;
 
 
 // PIN
@@ -59,7 +60,7 @@ static constexpr uint8_t button_pin = 14;
 // -------
 
 // Clock
-using Time_counter = my_mcu::Time_counter2_32kHz_g<3000>;
+using Time_counter = myu::Time_counter2_32kHz_g<3000>;
 using Clock	   = mcu::Clock_s<Micro, Time_counter>;
 #define ISR_CLOCK ISR_TIMER2_COMPA
 

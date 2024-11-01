@@ -27,6 +27,7 @@ using namespace test;
 // ---------------
 namespace myu = atmega;
 using Micro   = myu::Micro;
+using UART_iostream = mcu::UART_iostream<myu::UART>;
 
 // UART
 // ----
@@ -48,8 +49,8 @@ using SPI_array = mcu::SPI_pin_array_selector<Micro, npin0, npin1, npin2, npin3>
 // ---------
 void init_uart()
 {
-    myu::UART_iostream uart;
-    myu::basic_cfg<baud_rate>(uart);
+    UART_iostream uart;
+    myu::UART_basic_cfg<baud_rate>();
     uart.turn_on();
 }
 
@@ -57,7 +58,7 @@ void init_uart()
 
 void hello()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\n\nSPI_pin_array_selector test\n"
 	        "----------------------------\n"
 		"Connections:\n"
@@ -69,7 +70,7 @@ void hello()
 
 void test_SPI_pin_array_selector()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "SPI_pin_array_selector test\n"
 	    "---------------------------\n";
 
@@ -163,7 +164,7 @@ void test_SPI_pin_array_selector()
 }
 void test_SPI_selector_with_deselect_delay()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "SPI_selector_with_deselect_delay test\n"
 	    "-------------------------------------\n";
 
@@ -228,7 +229,7 @@ int main()
     hello();
     
     SPI_array::init();
-    myu::UART_iostream uart;
+    UART_iostream uart;
 
     while(1){
 //	test_SPI_pin_array_selector();

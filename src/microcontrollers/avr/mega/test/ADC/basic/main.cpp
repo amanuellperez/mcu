@@ -46,14 +46,16 @@
 //  sirviendo para nada.
 #include "../../../mega_cfg.h"
 #include "../../../mega_ADC.h"
-#include "../../../mega_UART_iostream.h"
+#include "../../../mega_UART.h"
 #include "../../../mega_debug.h"
 #include <avr_time.h>
+#include <mcu_UART_iostream.h>
 
 
 // Microcontroller
 // ---------------
-namespace my_mcu = mega_;
+namespace myu = mega_;
+using UART_iostream = mcu::UART_iostream<myu::UART>;
 
 
 // Pin connections
@@ -62,17 +64,17 @@ constexpr uint8_t ADC_pin = 28;
 
 // Hwd devices
 // -----------
-using ADC = my_mcu::ADC_basic;
+using ADC = myu::ADC_basic;
 
 // Cfg
 // ---
-using namespace my_mcu::literals;
+using namespace myu::literals;
 
 
 // Global 
 // ------
 namespace global{
-my_mcu::Potential AREF= 5_V;
+myu::Potential AREF= 5_V;
 }
 
 
@@ -80,15 +82,15 @@ my_mcu::Potential AREF= 5_V;
 // ---------
 void init_uart()
 {
-    my_mcu::UART_iostream uart;
-    my_mcu::basic_cfg(uart);
+    UART_iostream uart;
+    myu::UART_basic_cfg();
     uart.turn_on();
 }
 
 
 void hello()
 {
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\n\nADC basic test\n"
 	        "--------------\n"
 		"* DON'T FORGET to connect AVCC to power.\n"
@@ -98,7 +100,7 @@ void hello()
 
 void press_key_to_continue()
 {
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
     uart << "Press a key to continue\n";
 
     char c{};
@@ -116,10 +118,10 @@ enum class User_wish{
 // Damos la opción al usuario ha cancelar el wait
 User_wish wait_ms(uint16_t time_ms)
 {
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
 
     for (uint8_t i = 1; i < time_ms / 100u; ++i){
-	my_mcu::wait_ms(100);
+	myu::wait_ms(100);
 	if (uart.is_there_something_to_read()){
 	    // uart.consume_char(): (???)
 	    char ans{}; 
@@ -139,9 +141,9 @@ void wait_until_conversion_is_complete()
 {while(!ADC::is_the_conversion_complete()) ;}
 
 
-my_mcu::Potential ADC_in_volts(const my_mcu::Potential& AREF, uint16_t arefs)
+myu::Potential ADC_in_volts(const myu::Potential& AREF, uint16_t arefs)
 {
-    my_mcu::Potential res = my_mcu::Millivolt{AREF};
+    myu::Potential res = myu::Millivolt{AREF};
     res *= arefs;
     res /= uint32_t{1024};
 
@@ -151,11 +153,11 @@ my_mcu::Potential ADC_in_volts(const my_mcu::Potential& AREF, uint16_t arefs)
 
 void ADC_clock_frequency_125kHz()
 {
-    if constexpr (my_mcu::clock_frequency == 1_MHz)
+    if constexpr (myu::clock_frequency == 1_MHz)
 	ADC::clock_frequency_divide_by_8();
 
     else {
-	my_mcu::UART_iostream uart;
+	UART_iostream uart;
 	uart << "Case not implemented!\n";
     }
 }
@@ -163,7 +165,7 @@ void ADC_clock_frequency_125kHz()
 
 void choose_aref()
 {
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\n\nAREF:\n"
 	    "\t1. External\n"
 	    "\t2. Internal to AVCC\n"
@@ -205,7 +207,7 @@ void choose_aref()
 
 void choose_adjust()
 {
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\nLeft or right adjust? (l/r) ";
 
     char opt{};
@@ -242,7 +244,7 @@ bool is_valid_prescaler(uint16_t prescaler)
 
 void select_prescaler()
 {
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\nSelect prescaler: 2, 4, 8, 16, 32, 64 or 128\n";
 
     uint16_t prescaler{0};
@@ -253,7 +255,7 @@ void select_prescaler()
 	return;
     }
 
-    my_mcu::KiloHertz freq = my_mcu::clock_frequency / prescaler;
+    myu::KiloHertz freq = myu::clock_frequency / prescaler;
     
     // datasheet: 28.4.
     // La frecuencia para 10 bits de resolución debe de ir de 50kHz a 200kHz
@@ -287,7 +289,7 @@ void select_prescaler()
 
 void test_single_conversion_mode()
 {
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
 
     uart << "\n\nSingle conversion mode automatic test\n"
 	        "-------------------------------------\n"
@@ -302,7 +304,7 @@ void test_single_conversion_mode()
     if (AREF_mV == 0)
 	AREF_mV = 5000;
 
-    my_mcu::Millivolt AREF = AREF_mV;
+    myu::Millivolt AREF = AREF_mV;
 
 
     // Configuración automática: dejar esto asi como ejemplo
@@ -331,7 +333,7 @@ void test_single_conversion_mode()
 // TODO: elaborar más este test y probarlo
 void manual_test() 
 {
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
 
     while (1) {
         uart << "\n\nManual test\n"
@@ -352,7 +354,7 @@ void manual_test()
 	    break; case 'r': case 'R': return;
 	    break; case 'p': case 'P': 
 			    uart << '\n';
-			    my_mcu::print_registers_adc(uart);
+			    myu::print_registers_adc(uart);
 
 	    break; case '0': ADC::disable();
 	    break; case '1': ADC::enable();
@@ -370,7 +372,7 @@ int main()
     init_uart();
     hello();
 
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
 
     while (1) {
         uart << "\n\nMenu\n"

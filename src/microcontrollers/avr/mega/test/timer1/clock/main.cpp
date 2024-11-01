@@ -19,7 +19,8 @@
 
 // Reloj de sistema básico. Me baso en time.h
 #include "../../../mega_cfg.h"
-#include "../../../mega_UART_iostream.h"
+#include "../../../mega_UART.h"
+#include <mcu_UART_iostream.h>
 #include "../../../mega_timer1_basic.h"
 #include <avr_time.h>
 #include "../../../mega_interrupt.h"
@@ -27,9 +28,10 @@
 
 #include <time.h>
 
-namespace my_mcu = mega_;
+namespace myu = mega_;
+using UART_iostream = mcu::UART_iostream<myu::UART>;
 
-using Timer = my_mcu::Timer1;
+using Timer = myu::Timer1;
 
 
 ISR_TIMER1_COMPA
@@ -51,7 +53,7 @@ std::ostream& operator<<(std::ostream& out, const tm& t)
 
 void print_time()
 {
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
     time_t sec = time(nullptr);
     tm* t = gmtime(&sec);
 
@@ -75,13 +77,13 @@ void init_time()
 
 int main()
 {
-    my_mcu::UART_iostream uart;
-    my_mcu::basic_cfg(uart);
+    UART_iostream uart;
+    myu::UART_basic_cfg();
     uart.turn_on();
 
     Timer::clock_frequency_divide_by_64();
     Timer::enable_output_compare_A_match_interrupt();
-    my_mcu::enable_interrupts();
+    myu::enable_interrupts();
 
     // Elegimos OCR1A para generar una señal de 1 Hz
     // El osciloscopio la marca de 996ms. Hay que calibrar el número o usar un
@@ -91,7 +93,7 @@ int main()
 
     Timer::CTC_mode_top_OCRA();
     {
-	my_mcu::Disable_interrupts l;
+	myu::Disable_interrupts l;
 	Timer::unsafe_output_compare_register_A(ocr1a);
     }
 
@@ -99,7 +101,7 @@ int main()
     Timer::clock_frequency_divide_by_64();
 
     while(1){
-	my_mcu::wait_ms(1000);
+	myu::wait_ms(1000);
 	print_time();
     }
 }

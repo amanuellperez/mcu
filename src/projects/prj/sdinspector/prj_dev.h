@@ -26,10 +26,11 @@
 
 #include "dev_sector.h"
 
-// microcontroller
+// Microcontroller
 // ---------------
-namespace my_mcu = atmega;
-using Micro   = my_mcu::Micro;
+namespace myu = atmega;
+using Micro   = myu::Micro;
+using UART_iostream = mcu::UART_iostream<myu::UART>;
 			
 #include <dev_sdcard.h>
 
@@ -42,9 +43,9 @@ using Micro   = my_mcu::Micro;
 // ---------------------------
 // Dispositivos SPI
 using Chip_select = 
-    dev::SDCard_select<my_mcu::Output_pin<my_mcu::SPI::noCS_pin_number>, my_mcu::SPI_master>;
+    dev::SDCard_select<myu::Output_pin<myu::SPI::noCS_pin_number>, myu::SPI_master>;
 
-using SDCard_cfg = dev::SDCard_cfg<my_mcu::Micro, my_mcu::SPI_master, Chip_select>;
+using SDCard_cfg = dev::SDCard_cfg<myu::Micro, myu::SPI_master, Chip_select>;
 
 using SDCard = dev::SDCard_basic<SDCard_cfg>;
 

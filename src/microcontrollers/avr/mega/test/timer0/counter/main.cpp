@@ -19,7 +19,8 @@
 
 // Ejemplo básico de uso del Timer como contador
 #include "../../../mega_cfg.h"
-#include "../../../mega_UART_iostream.h"
+#include "../../../mega_UART.h"
+#include <mcu_UART_iostream.h>
 #include "../../../mega_timer0_basic.h"
 #include <avr_time.h>
 
@@ -27,9 +28,10 @@
 #include <stdlib.h>
 #include <std_type_traits.h>
 
-namespace my_mcu = mega_;
+namespace myu = mega_;
+using UART_iostream = mcu::UART_iostream<myu::UART>;
 
-using Timer = my_mcu::Timer0;
+using Timer = myu::Timer0;
 using time_t = uint32_t;
 
 constexpr uint16_t period_in_us = 1024;
@@ -86,7 +88,7 @@ std::ostream& operator<<(std::ostream& out, const time_in_days& t)
 
 void print(uint64_t time_en_us)
 {
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
     uart << us_to_time_in_days(time_en_us) << "\n\r";
 }
 
@@ -94,20 +96,20 @@ void print(uint64_t time_en_us)
 int main()
 {
 // UART_init();
-    my_mcu::UART_iostream uart;
-    my_mcu::basic_cfg(uart);
+    UART_iostream uart;
+    myu::UART_basic_cfg();
     uart.turn_on();
 
 // clock_init();
     Timer::clock_frequency_divide_by_1024();
     Timer::enable_overflow_interrupt(); 
-    my_mcu::enable_interrupts();
+    myu::enable_interrupts();
 
     while(1){
 	Timer::counter_type v;
 	time_t c;
 	{// lo más atómico posible (esto creo que sobra con el Timer0!!!)
-	    my_mcu::Disable_interrupts l;
+	    myu::Disable_interrupts l;
 	    v = Timer::counter();
 	    c = contador;
 	}
@@ -119,7 +121,7 @@ int main()
         print (t_us);
 	uart << ".";
 
-	my_mcu::wait_ms(1000);
+	myu::wait_ms(1000);
     }
 }
 

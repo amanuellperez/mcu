@@ -38,6 +38,7 @@ using namespace test;
 // ---------------
 namespace myu = atmega;
 using Micro   = myu::Micro;
+using UART_iostream = mcu::UART_iostream<myu::UART>;
 
 // UART
 // ----
@@ -195,8 +196,8 @@ void print_bg(std::ostream& out, const atd::Text_block_with_view<C>& txt)
 // ---------
 void init_uart()
 {
-    myu::UART_iostream uart;
-    myu::basic_cfg<baud_rate>(uart);
+    UART_iostream uart;
+    myu::UART_basic_cfg<baud_rate>();
     uart.turn_on();
 }
 
@@ -209,7 +210,7 @@ void init_spi()
 
 void init_max7219_matrix()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     Test test{uart};
     CHECK_TRUE(test, MAX7219_matrix::nstrips == matrix_nstrips, 
 						    "MAX7219_matrix::nstrips");
@@ -224,7 +225,7 @@ void init_max7219_matrix()
 
 void hello()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\n\nMAX7219 test\n"
 	        "------------\n"
 		"Connections:\n"
@@ -243,7 +244,7 @@ void test_write_bitmatrix()
 {
     using Bitmatrix  = typename MAX7219_matrix::Bitmatrix;
 
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "write::MAX7219_matrix\n";
 
     uart << "matrix of " << (int) MAX7219_matrix::rows 
@@ -274,7 +275,7 @@ void test_font_dogica()
     using Bitmatrix = typename MAX7219::Bitmatrix;
     using Coord = typename Bitmatrix::Coord_ij;
 
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "Font dogica\n";
 
     static constexpr auto h = Font::rows;
@@ -317,7 +318,7 @@ void test_font_upheavtt()
     using Bitmatrix = typename MAX7219::Bitmatrix;
     using Coord = typename Bitmatrix::Coord_ij;
 
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "Font upheavtt\n";
 
     static constexpr auto h = Font::rows;
@@ -350,7 +351,7 @@ template <typename MAX7219>
     requires (std::is_same_v<MAX7219, MAX7219_matrix_cols>)
 void test_font()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "Font test\n"
 	    "---------\n";
 
@@ -368,7 +369,7 @@ template <typename MAX7219>
     requires (std::is_same_v<MAX7219, MAX7219_matrix_rows>)
 void test_font()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "Font test\n"
 	    "---------\n";
 
@@ -384,7 +385,7 @@ void test_font()
 
 void test_basic()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\nBasit test\n"
 	      "----------\n";
 	    
@@ -403,7 +404,7 @@ void test_basic()
 
 void test_write()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\nWrite test\n"
 	      "----------\n"
 	      "Writing 0x01 in strip 0\n"
@@ -429,7 +430,7 @@ void test_write()
 template <typename MAX7219, typename Font>
 void test_display_dogica()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\nTest display dogica\n";
     
     using Cfg = Display_cfg<Font, MAX7219, 4, 20>;
@@ -485,7 +486,7 @@ void test_display_dogica()
 template <typename MAX7219, typename Font>
 void test_display_upheavtt()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\nTest display upheavtt\n"
 	    "WARNING: this font has 14 rows x 13 cols.\n"
 	    "         In a 32 x 32 display we get a View of only 2 x 2\n"
@@ -537,7 +538,7 @@ template <typename MAX7219>
     requires (std::is_same_v<MAX7219, MAX7219_matrix_cols>)
 void test_display()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "Test display\n"
 	    "------------\n";
 
@@ -553,7 +554,7 @@ template <typename MAX7219>
     requires (std::is_same_v<MAX7219, MAX7219_matrix_rows>)
 void test_display()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "Test display\n"
 	    "------------\n";
 
@@ -576,7 +577,7 @@ int main()
 
     hello();
 
-    myu::UART_iostream uart;
+    UART_iostream uart;
 
     while (1){
 	uart << "\nMenu\n"

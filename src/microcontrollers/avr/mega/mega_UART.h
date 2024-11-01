@@ -63,12 +63,16 @@ void UART_basic_cfg()
     UART::character_size_8();
 }
 
-// Como de momento solo tengo esta función de driver la defino como función.
-// Con todo es más práctico meterlo en una clase `UART` hija de `UART_basic`
-// para poderla pasar como parámetro a UART_iostream.
-// Hace un flush del flujo (fundamental llamar a esta función antes de dormir
-// el microcontrolador. En caso de no llamarla se genera basura)
-int UART_flush(uint16_t time_out_ms);
+class UART : public UART_basic{
+public:
+    UART() = delete;
+
+    // Hace un flush del flujo (fundamental llamar a esta función antes de 
+    // dormir el microcontrolador. En caso de no llamarla se genera basura)
+    static int flush(uint16_t time_out_ms);
+};
+
+
 
 
 }// namespace

@@ -29,7 +29,7 @@
 
 void Main::read_status()
 {
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
 
     auto r2 = SDCard::send_status();
     print(uart, r2);
@@ -38,8 +38,8 @@ void Main::read_status()
 
 void Main::init_uart()
 {
-    my_mcu::UART_iostream uart;
-    my_mcu::basic_cfg(uart);
+    UART_iostream uart;
+    myu::UART_basic_cfg();
     uart.turn_on();
 }
 
@@ -47,7 +47,7 @@ Main::Main()
 {
     init_uart();
 
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
     atd::print(uart, msg_hello);
 
     Chip_select::init();

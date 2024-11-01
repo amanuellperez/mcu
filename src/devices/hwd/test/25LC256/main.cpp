@@ -24,6 +24,12 @@
 
 #include <avr_atmega.h>
 
+// Microcontroller
+// ---------------
+namespace myu = atmega;
+using UART = myu::UART;
+using UART_iostream = mcu::UART_iostream<UART>;
+
 using namespace dev;
 
 
@@ -34,7 +40,7 @@ using EEPROM  = EEPROM_25LC256<num_pin_chip_select>;
 
 void print_table(EEPROM& eeprom)
 {
-    atmega::UART_iostream uart;
+    UART_iostream uart;
 
     uart << "Address value\r\n";
     uint8_t r[10];
@@ -48,7 +54,7 @@ void print_table(EEPROM& eeprom)
 
 void print_eeprom(EEPROM& eeprom)
 {
-    atmega::UART_iostream uart;
+    UART_iostream uart;
     
     constexpr uint16_t sz = EEPROM::page_size() * 2;
 
@@ -69,7 +75,7 @@ void print_eeprom(EEPROM& eeprom)
     uart << "\r\n";
 }
 
-uint8_t read_uint8_t(const char* msg, atmega::UART_iostream& uart)
+uint8_t read_uint8_t(const char* msg, UART_iostream& uart)
 {
     uart << msg;
 
@@ -85,7 +91,7 @@ uint8_t read_uint8_t(const char* msg, atmega::UART_iostream& uart)
 
 void test_write(EEPROM& eeprom)
 {
-    atmega::UART_iostream uart;
+    UART_iostream uart;
 
     uart << "¿A partir de qué dirección quieres escribir?\r\n";
     uint16_t address;
@@ -111,12 +117,12 @@ void test_write(EEPROM& eeprom)
 
 
 void test_uint8_t() {
-    atmega::UART_iostream uart;
-    atmega::basic_cfg(uart);
+    UART_iostream uart;
+    myu::UART_basic_cfg();
     uart.turn_on();
 
-    atmega::SPI_master::clock_period_in_us<periodo_en_us>();
-    atmega::SPI_master::turn_on();
+    myu::SPI_master::clock_period_in_us<periodo_en_us>();
+    myu::SPI_master::turn_on();
 
     EEPROM eeprom;
     eeprom.cfg_SPI();

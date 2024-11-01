@@ -25,217 +25,217 @@
 #define __SDC_STRINGS_H__ 
 
 
-constexpr my_mcu::ROM_string<11> msg_cmd0_fail		
+constexpr myu::ROM_string<11> msg_cmd0_fail		
 	PROGMEM{"CMD0 error\n"};
 
-constexpr my_mcu::ROM_string<15> msg_cmd8_crc_error	
+constexpr myu::ROM_string<15> msg_cmd8_crc_error	
 	PROGMEM{"CMD8 CRC error\n"};
 
-constexpr my_mcu::ROM_string<24> msg_voltage_mismatch	
+constexpr myu::ROM_string<24> msg_voltage_mismatch	
 	PROGMEM{"ERROR: voltage mismatch\n"};
 
-constexpr my_mcu::ROM_string<16> msg_cmd8_echo_fail	
+constexpr myu::ROM_string<16> msg_cmd8_echo_fail	
 	PROGMEM{"CMD8 echo error\n"};
 
-constexpr my_mcu::ROM_string<38> msg_acmd41_in_idle_state 
+constexpr myu::ROM_string<38> msg_acmd41_in_idle_state 
 	PROGMEM{"ACMD41 fail: card still in idle state\n"};
 
-constexpr my_mcu::ROM_string<35> msg_card_no_power_up	
+constexpr myu::ROM_string<35> msg_card_no_power_up	
 	PROGMEM{"CMD58 fail: card still no power up\n"};
 
-constexpr my_mcu::ROM_string<24> msg_init_SDSC_card_ok	
+constexpr myu::ROM_string<24> msg_init_SDSC_card_ok	
 	PROGMEM{"Init OK: SDSC card type\n"};
 
-constexpr my_mcu::ROM_string<32> msg_init_SDHC_or_SDXC_ok 
+constexpr myu::ROM_string<32> msg_init_SDHC_or_SDXC_ok 
 	PROGMEM{"Init OK: SDHC or SDXC card type\n"};
 
-constexpr my_mcu::ROM_string<45> msg_go_idle_state   
+constexpr myu::ROM_string<45> msg_go_idle_state   
 	PROGMEM{"go_idle_state (cmd0) ... = entering SPI mode\n"};
 
-constexpr my_mcu::ROM_string<26> msg_send_if_cond    
+constexpr myu::ROM_string<26> msg_send_if_cond    
 	PROGMEM{"\nsend_if_cond (cmd8) ... \n"};
 
-constexpr my_mcu::ROM_string<14> msg_legacy_card	    
+constexpr myu::ROM_string<14> msg_legacy_card	    
 	PROGMEM{"\tLegacy card\n"};
 
-constexpr my_mcu::ROM_string<15> msg_vca_mismatch    
+constexpr myu::ROM_string<15> msg_vca_mismatch    
 	PROGMEM{"\tVCA mismatch\n"};
 
-constexpr my_mcu::ROM_string<10> msg_cmd8_ok	    
+constexpr myu::ROM_string<10> msg_cmd8_ok	    
 	PROGMEM{"\tCMD8 ok\n"};
 
-constexpr my_mcu::ROM_string<44> msg_read_ocr1	    
+constexpr myu::ROM_string<44> msg_read_ocr1	    
 	PROGMEM{"\nread_ocr (cmd58) ... = supported voltages?\n"};
 
-constexpr my_mcu::ROM_string<31> msg_send_op_cond    
+constexpr myu::ROM_string<31> msg_send_op_cond    
 	PROGMEM{"\nsd_send_op_cond (acmd41) ... \n"};
 
-constexpr my_mcu::ROM_string<52> msg_read_ocr2	    
+constexpr myu::ROM_string<52> msg_read_ocr2	    
 	PROGMEM{"\nread_ocr (cmd58) ... = is SDSC or SDHC/SDXC card? \n"};
 
-constexpr my_mcu::ROM_string<19> msg_r1_response	
+constexpr myu::ROM_string<19> msg_r1_response	
 	PROGMEM{"R1 response\n\tR1 : "};
 
-constexpr my_mcu::ROM_string<20> msg_invalid_r1		
+constexpr myu::ROM_string<20> msg_invalid_r1		
 	PROGMEM{"\tError: invalid r1\n"};
 
-constexpr my_mcu::ROM_string<13> msg_card_ready		
+constexpr myu::ROM_string<13> msg_card_ready		
 	PROGMEM{"\tCard ready\n"};
 
-constexpr my_mcu::ROM_string<16> msg_in_idle_state	
+constexpr myu::ROM_string<16> msg_in_idle_state	
 	PROGMEM{"\tIn idle state\n"};
 
-constexpr my_mcu::ROM_string<20> msg_erase_reset_error	
+constexpr myu::ROM_string<20> msg_erase_reset_error	
 	PROGMEM{"\tErase reset error\n"};
 
-constexpr my_mcu::ROM_string<18> msg_illegal_command	
+constexpr myu::ROM_string<18> msg_illegal_command	
 	PROGMEM{"\tIllegal command\n"};
 
-constexpr my_mcu::ROM_string<12> msg_crc_error		
+constexpr myu::ROM_string<12> msg_crc_error		
 	PROGMEM{"\tCRC error\n"};
 
-constexpr my_mcu::ROM_string<23> msg_erase_sequence_error 
+constexpr myu::ROM_string<23> msg_erase_sequence_error 
 	PROGMEM{"\tErase sequence error\n"};
 
-constexpr my_mcu::ROM_string<16> msg_address_error	
+constexpr myu::ROM_string<16> msg_address_error	
 	PROGMEM{"\tAddress error\n"};
 
-constexpr my_mcu::ROM_string<18> msg_parameter_error	
+constexpr myu::ROM_string<18> msg_parameter_error	
 	PROGMEM{"\tParameter error\n"};
 
-constexpr my_mcu::ROM_string<5> msg_r1	    
+constexpr myu::ROM_string<5> msg_r1	    
 	PROGMEM{"\tr1["};
 
-constexpr my_mcu::ROM_string<9> msg_error1  
+constexpr myu::ROM_string<9> msg_error1  
 	PROGMEM{"] ERROR:\n"};
 
-constexpr my_mcu::ROM_string<11> msg_r3 
+constexpr myu::ROM_string<11> msg_r3 
 	PROGMEM{"\tR3     : "};
 
-constexpr my_mcu::ROM_string<12> msg_r3_response 
+constexpr myu::ROM_string<12> msg_r3_response 
 	PROGMEM{"R3 response\n"};
 
-constexpr my_mcu::ROM_string<30> msg_card_has_finished_power_up 
+constexpr myu::ROM_string<30> msg_card_has_finished_power_up 
 	PROGMEM{"\tCard has finished power up? "};
 
-constexpr my_mcu::ROM_string<14> msg_card_type	    
+constexpr myu::ROM_string<14> msg_card_type	    
 	PROGMEM{"\tCard type : "};
 
-constexpr my_mcu::ROM_string<4> msg_SDSC	    
+constexpr myu::ROM_string<4> msg_SDSC	    
 	PROGMEM{"SDSC"};
 
-constexpr my_mcu::ROM_string<12> msg_SDHC_or_SDXC    
+constexpr myu::ROM_string<12> msg_SDHC_or_SDXC    
 	PROGMEM{"SDHC or SDXC"};
 
-constexpr my_mcu::ROM_string<18> msg_support_3_5_3_6V 
+constexpr myu::ROM_string<18> msg_support_3_5_3_6V 
 	PROGMEM{"support 3.5-3-6V()"};
 
-constexpr my_mcu::ROM_string<18> msg_support_3_4_3_5V 
+constexpr myu::ROM_string<18> msg_support_3_4_3_5V 
 	PROGMEM{"support 3.4-3-5V()"};
 
-constexpr my_mcu::ROM_string<18> msg_support_3_3_3_4V 
+constexpr myu::ROM_string<18> msg_support_3_3_3_4V 
 	PROGMEM{"support 3.3-3-4V()"};
 
-constexpr my_mcu::ROM_string<18> msg_support_3_2_3_3V 
+constexpr myu::ROM_string<18> msg_support_3_2_3_3V 
 	PROGMEM{"support 3.2-3-3V()"};
 
-constexpr my_mcu::ROM_string<18> msg_support_3_1_3_2V 
+constexpr myu::ROM_string<18> msg_support_3_1_3_2V 
 	PROGMEM{"support 3.1-3-2V()"};
 
-constexpr my_mcu::ROM_string<18> msg_support_3_0_3_1V 
+constexpr myu::ROM_string<18> msg_support_3_0_3_1V 
 	PROGMEM{"support 3.0-3-1V()"};
 
-constexpr my_mcu::ROM_string<18> msg_support_2_9_3_0V 
+constexpr myu::ROM_string<18> msg_support_2_9_3_0V 
 	PROGMEM{"support 2.9-3-0V()"};
 
-constexpr my_mcu::ROM_string<18> msg_support_2_8_2_9V 
+constexpr myu::ROM_string<18> msg_support_2_8_2_9V 
 	PROGMEM{"support 2.8-2-9V()"};
 
-constexpr my_mcu::ROM_string<18> msg_support_2_7_2_8V 
+constexpr myu::ROM_string<18> msg_support_2_7_2_8V 
 	PROGMEM{"support 2.7-2-8V()"};
 
-constexpr my_mcu::ROM_string<12> msg_r7_response 
+constexpr myu::ROM_string<12> msg_r7_response 
 	PROGMEM{"R7 response\n"};
 
-constexpr my_mcu::ROM_string<11> msg_r7		
+constexpr myu::ROM_string<11> msg_r7		
 	PROGMEM{"\tR7     : "};
 
-constexpr my_mcu::ROM_string<11> msg_version	
+constexpr myu::ROM_string<11> msg_version	
 	PROGMEM{"\tVersion: "};
 
-constexpr my_mcu::ROM_string<11> msg_voltage	
+constexpr myu::ROM_string<11> msg_voltage	
 	PROGMEM{"\tVoltage: "};
 
-constexpr my_mcu::ROM_string<12> msg_not_defined	    
+constexpr myu::ROM_string<12> msg_not_defined	    
 	PROGMEM{"not defined!"};
 
-constexpr my_mcu::ROM_string<16> msg_from_2_7_to_3_6V 
+constexpr myu::ROM_string<16> msg_from_2_7_to_3_6V 
 	PROGMEM{"from 2.7 to 3.6V"};
 
-constexpr my_mcu::ROM_string<11> msg_low_voltage	    
+constexpr myu::ROM_string<11> msg_low_voltage	    
 	PROGMEM{"low voltage"};
 
-constexpr my_mcu::ROM_string<8> msg_reserved	    
+constexpr myu::ROM_string<8> msg_reserved	    
 	PROGMEM{"reserved"};
 
-constexpr my_mcu::ROM_string<11> msg_pattern	    
+constexpr myu::ROM_string<11> msg_pattern	    
 	PROGMEM{"\tPattern: "};
 
-constexpr my_mcu::ROM_string<14> msg_read_return_response 
+constexpr myu::ROM_string<14> msg_read_return_response 
 	PROGMEM{"Read response\n"};
 
-constexpr my_mcu::ROM_string<8> msg_timeout	
+constexpr myu::ROM_string<8> msg_timeout	
 	PROGMEM{"time out"};
 
-constexpr my_mcu::ROM_string<5> msg_r1_ok	
+constexpr myu::ROM_string<5> msg_r1_ok	
 	PROGMEM{"R1 ok"};
 
-constexpr my_mcu::ROM_string<5> msg_error	
+constexpr myu::ROM_string<5> msg_error	
 	PROGMEM{"error"};
 
-constexpr my_mcu::ROM_string<8> msg_CC_error    
+constexpr myu::ROM_string<8> msg_CC_error    
 	PROGMEM{"CC error"};
 
-constexpr my_mcu::ROM_string<15> msg_card_ECC_failed   
+constexpr myu::ROM_string<15> msg_card_ECC_failed   
 	PROGMEM{"card ECC failed"};
 
-constexpr my_mcu::ROM_string<12> msg_out_of_range    
+constexpr myu::ROM_string<12> msg_out_of_range    
 	PROGMEM{"out of range"};
 
-constexpr my_mcu::ROM_string<12> msg_r2_response	    
+constexpr myu::ROM_string<12> msg_r2_response	    
 	PROGMEM{"R2 response\n"};
 
-constexpr my_mcu::ROM_string<14> msg_card_is_locked  
+constexpr myu::ROM_string<14> msg_card_is_locked  
 	PROGMEM{"card is locked"};
 
-constexpr my_mcu::ROM_string<23> msg_write_protect_erase_skip	
+constexpr myu::ROM_string<23> msg_write_protect_erase_skip	
 	PROGMEM{"write protec erase skip"};
 
-constexpr my_mcu::ROM_string<23> msg_write_protect_violation 
+constexpr myu::ROM_string<23> msg_write_protect_violation 
 	PROGMEM{"write protect violation"};
 
-constexpr my_mcu::ROM_string<11> msg_erase_param		    
+constexpr myu::ROM_string<11> msg_erase_param		    
 	PROGMEM{"erase param"};
 
-constexpr my_mcu::ROM_string<22> msg_write_return_response   
+constexpr myu::ROM_string<22> msg_write_return_response   
 	PROGMEM{"Write_return response\n"};
 
-constexpr my_mcu::ROM_string<10> msg_write_ok	
+constexpr myu::ROM_string<10> msg_write_ok	
 	PROGMEM{"\tWrite OK"};
 
-constexpr my_mcu::ROM_string<20> msg_data_response_token	
+constexpr myu::ROM_string<20> msg_data_response_token	
 	PROGMEM{"Data response token\n"};
 
-constexpr my_mcu::ROM_string<5> msg_is_valid		
+constexpr myu::ROM_string<5> msg_is_valid		
 	PROGMEM{"valid"};
 
-constexpr my_mcu::ROM_string<13> msg_data_accepted	
+constexpr myu::ROM_string<13> msg_data_accepted	
 	PROGMEM{"data accepted"};
 
-constexpr my_mcu::ROM_string<24> msg_data_rejected_CRC_error	
+constexpr myu::ROM_string<24> msg_data_rejected_CRC_error	
 	PROGMEM{"data rejected, CRC error"};
 
-constexpr my_mcu::ROM_string<26> msg_data_rejected_write_error	
+constexpr myu::ROM_string<26> msg_data_rejected_write_error	
 	PROGMEM{"data rejected, write error"};
 
 

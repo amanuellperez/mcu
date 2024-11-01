@@ -28,7 +28,7 @@ void Main::print_time()
 
 int get_int(const char* name)
 {
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
 
     int x{};
 

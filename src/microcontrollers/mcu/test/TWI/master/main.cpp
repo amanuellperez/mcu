@@ -26,8 +26,9 @@
 
 // Microcontroller
 // ---------------
-namespace my_mcu = atmega;
-using Micro   = my_mcu::Micro;
+namespace myu = atmega;
+using Micro   = myu::Micro;
+using UART_iostream = mcu::UART_iostream<myu::UART>;
 
 
 // Devices
@@ -35,7 +36,7 @@ using Micro   = my_mcu::Micro;
 constexpr uint8_t TWI_buffer_size = 10;
 
 using TWI_master_cfg = mcu::TWI_master_cfg<Micro, 
-                                           my_mcu::TWI_basic,
+                                           myu::TWI_basic,
 					   TWI_buffer_size>;
 
 using TWI = mcu::TWI_master<TWI_master_cfg>;
@@ -54,14 +55,14 @@ constexpr uint8_t service_id[nservices] = {0x34, 0x87};
 inline void traza_twcr()
 {
     auto tmp = TWCR;
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
     uart << "TWCR = " << static_cast<uint16_t>(tmp) << '\n';
 }
 
 
 void twi_print_error()
 {
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
 
     if (TWI::no_response())
 	uart << "Slave no response.\n";
@@ -78,7 +79,7 @@ void twi_print_error()
 
 void twi_print_state()
 {
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
 
     if (TWI::error())
 	uart << "state == error()\n";
@@ -111,7 +112,7 @@ void twi_print_state()
 
 void twi_print_state(TWI::iostate st)
 {
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
 
     switch(st){
     case TWI::iostate::ok:
@@ -185,7 +186,7 @@ void twi_print_state(TWI::iostate st)
 
 void send_service0()
 {
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\n\n=================\n";
     uart << "Service 0:\n";
 
@@ -300,7 +301,7 @@ void send_service0()
 
 void send_service1()
 {
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\n\n=================\n";
     uart << "Service 1:\n";
 
@@ -334,7 +335,7 @@ void send_service1()
 
 void send_service2()
 {
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\n\n=================\n";
     uart << "Service 2:\n";
 
@@ -455,8 +456,8 @@ void send_service2()
 
 void init_uart()
 {
-    my_mcu::UART_iostream uart;
-    my_mcu::basic_cfg(uart);
+    UART_iostream uart;
+    myu::UART_basic_cfg();
     uart.turn_on();
 }
 
@@ -467,7 +468,7 @@ void init_TWI()
 
 void hello()
 {
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\n\nTWI master test\n"
 	        "---------------\n"
 		"Connect via TWI to another microcontroller with the slave program installed.\n\n"
@@ -486,7 +487,7 @@ void hello()
 
 void automatic_mode()
 {
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\n\nThis option is to test the slave program\n\n";
     Micro::wait_ms(1000);
 
@@ -511,7 +512,7 @@ int main()
 
  
     while (1) {
-	my_mcu::UART_iostream uart;
+	UART_iostream uart;
 	uart << "\nMenu\n"
 	          "----\n"
 		  "0. Send service 0\n"

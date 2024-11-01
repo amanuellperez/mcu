@@ -84,10 +84,8 @@
 
 #include <mega_ADC.h>
 
-// TODO: mirar qué depende del micro realmente y qué se basa en un UART
-// genérico. Mover a `mcu` lo que sea genérico.
 #include <mega_UART.h>
-#include <mega_UART_iostream.h>
+#include <mcu_UART_iostream.h>	// es comodo meterlo aqui
 
 // Built-in devices for atmega
 #include <mega_atmega_dev.h>

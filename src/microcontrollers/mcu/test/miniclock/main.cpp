@@ -23,6 +23,7 @@
 // Devices
 // -------
 namespace myu = atmega;
+using UART_iostream = mcu::UART_iostream<myu::UART>;
 
 constexpr uint8_t test_pin = 14;
 
@@ -44,8 +45,8 @@ enum class Cfg{
 
 void init_uart()
 {
-    myu::UART_iostream uart;
-    myu::basic_cfg(uart);
+    UART_iostream uart;
+    myu::UART_basic_cfg();
     uart.turn_on();
 }
 
@@ -53,7 +54,7 @@ void init_uart()
 template <typename Miniclock, typename Pin>
 void generate_square_wave_no_use_wait( typename Miniclock::counter_type time_ms_or_us)
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "Not using Miniclock::wait() function\n";
 
     while (1){
@@ -73,7 +74,7 @@ void generate_square_wave_no_use_wait( typename Miniclock::counter_type time_ms_
 template <typename Miniclock, typename Pin>
 void generate_square_wave_use_wait(typename Miniclock::counter_type time_ms_or_us)
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "Using Miniclock::wait() function\n";
 
     while (1){
@@ -90,7 +91,7 @@ void generate_square_wave_use_wait(typename Miniclock::counter_type time_ms_or_u
 
 void print_menu()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
 
     uart << "\n----------------\n"
 	    "1. Miniclock0_us\n"
@@ -104,7 +105,7 @@ void print_menu()
 
 void ask_clock(Cfg& cfg, bool& use_wait)
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
 
     char c{};
     uart >> c;
@@ -122,7 +123,7 @@ void ask_clock(Cfg& cfg, bool& use_wait)
 template <typename Miniclock_ms, typename Pin>
 void generate_ms(bool use_wait)
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uint16_t time_ms;
 
     uart << "\nWrite semiperiod, in ms, of square wave to generate:\n"
@@ -144,7 +145,7 @@ void generate_ms(bool use_wait)
 template <typename Miniclock_us, typename Pin>
 void generate_us(bool use_wait)
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uint16_t time_us;
 
     uart << "\nWARNING: in microseconds this test doesn't work correctly\n"
@@ -170,7 +171,7 @@ int main()
     init_uart();
     Miniclock0_ms::init();
 
-    myu::UART_iostream uart;
+    UART_iostream uart;
     Cfg cfg = Cfg::miniclock0_ms;
     bool use_wait = false;
 

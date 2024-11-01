@@ -21,16 +21,21 @@
 // Conectar el FTDI y abrir screen. Lo que se escriba en teclado se envia
 // al microcontrolador que lo devuelve, con lo que lo vemos en pantalla.
 #include "../../mega_import_avr.h"
-#include "../../mega_UART_iostream.h"
+#include "../../mega_UART.h"
+#include <mcu_UART_iostream.h>
 
 
+// Microcontroller
+// ---------------
+namespace myu = mega_;
+using UART_iostream = mcu::UART_iostream<myu::UART>;
 
 
 
 void test_cfg()
 {
-    mega_::UART_iostream uart;
-    mega_::basic_cfg(uart);
+    UART_iostream uart;
+    myu::UART_basic_cfg();
     uart.turn_on();
 
     while(1){
@@ -38,7 +43,7 @@ void test_cfg()
 	uart << "Variables cfg!\n";
 	uart << "---------------\n";
 
-	uart << "clock_frequency = " << mega_::clock_frequency << '\n';
+	uart << "clock_frequency = " << myu::clock_frequency << '\n';
 	char c{};
 	uart >> c;
     }

@@ -19,10 +19,11 @@
 
 // Ejemplo básico de uso del Timer como contador
 #include "../../mega_cfg.h"
-#include "../../mega_UART_iostream.h"
 #include "../../mega_timer0_basic.h"
 #include "../../mega_timer1_basic.h"
+#include "../../mega_UART.h"
 #include <avr_time.h>
+#include <mcu_UART_iostream.h>
 
 #include <atd_ostream.h>
 #include <stdlib.h>
@@ -34,6 +35,7 @@ using namespace test;
 // Microcontroller
 // ---------------
 namespace myu = mega_;
+using UART_iostream = mcu::UART_iostream<myu::UART>;
 
 // pin connections
 // ---------------
@@ -67,14 +69,14 @@ static constexpr uint8_t input_pin_without_pullup = 14;
 // ---------
 void init_uart()
 {
-    myu::UART_iostream uart;
-    myu::basic_cfg(uart);
+    UART_iostream uart;
+    myu::UART_basic_cfg();
     uart.turn_on();
 }
 
 void press_key_to_continue()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\nPress key to continue\n";
     char key{};
     uart >> key;
@@ -82,7 +84,7 @@ void press_key_to_continue()
 
 void hello()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\n\nAutomatic test\n"
 	        "--------------\n"
 		"Connect pin " << (int) output_pin << " to pins to "
@@ -97,7 +99,7 @@ void hello()
 
 void test_timer0()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     auto test = Test::interface(uart, "Timer0");
 
     using Timer = myu::Timer0;
@@ -183,7 +185,7 @@ void test_timer1()
 {
     myu::Disable_interrupts lock; // para poder usar las funciones unsafe
 
-    myu::UART_iostream uart;
+    UART_iostream uart;
     auto test = Test::interface(uart, "Timer1");
 
     using Timer = myu::Timer1;
@@ -320,7 +322,7 @@ void test_timer1()
 
 void test_pin()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     auto test = Test::interface(uart, "Pin<14>");
 
     using Pin		= myu::Pin<output_pin>;

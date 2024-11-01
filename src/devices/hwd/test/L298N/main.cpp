@@ -27,6 +27,7 @@ using namespace test;
 // ---------------
 namespace myu = atmega;
 using Micro   = myu::Micro;
+using UART_iostream = mcu::UART_iostream<myu::UART>;
 
 // UART
 // ----
@@ -69,14 +70,14 @@ using L298N_H_bridge = dev::L298N_H_bridge<L298N, n>;
 // ---------
 void init_uart()
 {
-    myu::UART_iostream uart;
-    myu::basic_cfg<baud_rate>(uart);
+    UART_iostream uart;
+    myu::UART_basic_cfg<baud_rate>();
     uart.turn_on();
 }
 
 void hello()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\n\nL298N test\n"
 	        "----------\n"
 		"Connections:\n"
@@ -120,7 +121,7 @@ atd::Sign ask_sign(std::iostream& out)
 
 void port1_voltage()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\nPercentage: ";
     uint16_t per{0};
     uart >> per;
@@ -142,7 +143,7 @@ void port1_voltage()
 
 void port1_percentage()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\nPercentage: ";
     uint16_t per{0};
     uart >> per;
@@ -162,7 +163,7 @@ void port1_percentage()
 
 void port1_sign()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     auto sign = ask_sign(uart);
 
     L298N::voltage1_sign(sign);
@@ -175,7 +176,7 @@ void port1_sign()
 
 void test_port1()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\n\nPort 1 change:\n"
 	    "\t0. stop\n"
 	    "\t1. Voltage\n"
@@ -199,7 +200,7 @@ void test_port1()
 
 void port2_voltage()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\nPercentage: ";
     uint16_t per{0};
     uart >> per;
@@ -220,7 +221,7 @@ void port2_voltage()
 
 void port2_percentage()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\nPercentage: ";
     uint16_t per{0};
     uart >> per;
@@ -239,7 +240,7 @@ void port2_percentage()
 
 void port2_sign()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     atd::Sign sign = ask_sign(uart);
 
     L298N::voltage2_sign(sign);
@@ -252,7 +253,7 @@ void port2_sign()
 
 void test_port2()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\n\nPort 2 change:\n"
 	    "\t0. stop\n"
 	    "\t1. Voltage\n"
@@ -279,7 +280,7 @@ void port_voltage()
 {
     using Bridge = L298N_H_bridge<n>;
 
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\nPercentage: ";
     uint16_t per{0};
     uart >> per;
@@ -303,7 +304,7 @@ void port_percentage()
 {
     using Bridge = L298N_H_bridge<n>;
 
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\nPercentage: ";
     uint16_t per{0};
     uart >> per;
@@ -325,7 +326,7 @@ void port_sign()
 {
     using Bridge = L298N_H_bridge<n>;
 
-    myu::UART_iostream uart;
+    UART_iostream uart;
     atd::Sign sign = ask_sign(uart);
 
     Bridge::voltage_sign(sign);
@@ -341,7 +342,7 @@ void test_port()
 {
     using Bridge = L298N_H_bridge<n>;
 
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\n\nPort " << Bridge::nport << " change:\n"
 	    "\t0. stop\n"
 	    "\t1. Voltage\n"
@@ -371,7 +372,7 @@ int main()
 
     hello();
 
-    myu::UART_iostream uart;
+    UART_iostream uart;
 
     while(1){
 	uart << "\nMenu\n"

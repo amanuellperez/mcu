@@ -25,7 +25,7 @@
 // Funciones que solo dependen de la SD Card y de los mensajes.
 #include "prj_dev.h"	// OBLIGATORIO PONERLO.
 			// Tal como está hecho ahora, las `strings` usan 
-			// my_mcu::Progmem <-- necesitan saber el micro `mcu` que
+			// myu::Progmem <-- necesitan saber el micro `mcu` que
 			// se usa!!! ¿Cómo parametrizarlo? ¿Se pueden hacer
 			// estos mensajes genéricos de tal manera que si no se
 			// llaman no se guarde nada en PROGMEM?

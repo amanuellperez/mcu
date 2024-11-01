@@ -1,5 +1,4 @@
-DIRS = uart_basic	\
-		iostream
+DIRS = uart_basic
 
 
 # Estos se compilan con g++, no con avr-g++!!

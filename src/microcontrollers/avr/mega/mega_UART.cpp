@@ -22,7 +22,7 @@
 
 namespace mega_{
 
-int UART_flush(uint16_t time_out_ms)
+int UART::flush(uint16_t time_out_ms)
 {
     while (!UART_basic::is_transmit_complete())
     {

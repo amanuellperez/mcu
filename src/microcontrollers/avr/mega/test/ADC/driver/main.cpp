@@ -18,13 +18,15 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "../../../mega_cfg.h"
 #include "../../../mega_ADC.h"
-#include "../../../mega_UART_iostream.h"
+#include "../../../mega_UART.h"
+#include <mcu_UART_iostream.h>
 #include <avr_time.h>
 
 
 // Microcontroller
 // ---------------
-namespace my_mcu = mega_;
+namespace myu = mega_;
+using UART_iostream = mcu::UART_iostream<myu::UART>;
 		
 // Pin connections
 // ---------------
@@ -32,17 +34,17 @@ constexpr uint8_t ADC_npin = 28;
 
 // Hwd devices
 // -----------
-using ADC = my_mcu::ADC;
-using ADC_pin = my_mcu::ADC_pin_single_mode<ADC_npin, 5'000>;
+using ADC = myu::ADC;
+using ADC_pin = myu::ADC_pin_single_mode<ADC_npin, 5'000>;
 
 // Cfg
 // ---
-using namespace my_mcu::literals;
+using namespace myu::literals;
 
 
-my_mcu::Potential ADC_in_volts(const my_mcu::Potential& AREF, uint16_t arefs)
+myu::Potential ADC_in_volts(const myu::Potential& AREF, uint16_t arefs)
 {
-    my_mcu::Millivolt res{AREF};
+    myu::Millivolt res{AREF};
     res *= arefs;
     res /= uint32_t{1024};
 
@@ -53,15 +55,15 @@ my_mcu::Potential ADC_in_volts(const my_mcu::Potential& AREF, uint16_t arefs)
 // ---------
 void init_uart()
 {
-    my_mcu::UART_iostream uart;
-    my_mcu::basic_cfg(uart);
+    UART_iostream uart;
+    myu::UART_basic_cfg();
     uart.turn_on();
 }
 
 
 void hello()
 {
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\n\nADC driver test\n"
 	        "---------------\n"
 		"* DON'T FORGET to connect AVCC to power.\n"
@@ -71,7 +73,7 @@ void hello()
 
 void press_key_to_continue()
 {
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
     uart << "Press a key to continue\n";
 
     char c{};
@@ -89,10 +91,10 @@ enum class User_wish{
 // Damos la opción al usuario ha cancelar el wait
 User_wish wait_ms(uint16_t time_ms)
 {
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
 
     for (uint8_t i = 1; i < time_ms / 100u; ++i){
-	my_mcu::wait_ms(100);
+	myu::wait_ms(100);
 	if (uart.is_there_something_to_read()){
 	    // uart.consume_char(): (???)
 	    char ans{}; 
@@ -109,7 +111,7 @@ User_wish wait_ms(uint16_t time_ms)
 
 void test_single_conversion_mode()
 {
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
 
     uart << "\n\nSingle conversion mode automatic test\n"
 	        "-------------------------------------\n"
@@ -124,7 +126,7 @@ void test_single_conversion_mode()
     if (AREF_mV == 0)
 	AREF_mV = 5000;
 
-    my_mcu::Millivolt AREF = AREF_mV;
+    myu::Millivolt AREF = AREF_mV;
 
 
     ADC::single_mode<ADC::AREF_connect_to_internal_AVCC, 125>();

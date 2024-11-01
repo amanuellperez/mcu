@@ -20,40 +20,42 @@
 #include "../../../mega_cfg.h"
 #include "../../../mega_timer1.h"
 #include <avr_time.h>
-#include "../../../mega_UART_iostream.h"
+#include "../../../mega_UART.h"
+#include <mcu_UART_iostream.h>
 
 
 // Microcontroller
 // ---------------
-namespace my_mcu = mega_;
+namespace myu = mega_;
+using UART_iostream = mcu::UART_iostream<myu::UART>;
 
 					 
 // Hwd devices
 // -----------
-using Timer    = my_mcu::Timer1;
-// DONT_COMPILE(using SWG1_pin1 = my_mcu::SWG1_pin<18>;)
-using SWG_pin1 = my_mcu::SWG1_pin<15>;
-using SWG_pin2 = my_mcu::SWG1_pin<16>;
+using Timer    = myu::Timer1;
+// DONT_COMPILE(using SWG1_pin1 = myu::SWG1_pin<18>;)
+using SWG_pin1 = myu::SWG1_pin<15>;
+using SWG_pin2 = myu::SWG1_pin<16>;
 
 
 // Cfg
 // ---
-using namespace my_mcu::literals;
+using namespace myu::literals;
 
 
 // FUNCTIONS
 // ---------
 void init_uart()
 {
-    my_mcu::UART_iostream uart;
-    my_mcu::basic_cfg(uart);
+    UART_iostream uart;
+    myu::UART_basic_cfg();
     uart.turn_on();
 }
 
 
 void hello()
 {
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\n\nSWG1_pin test\n"
 	        "-------------\n"
             "Connect oscilloscope to pins "
@@ -66,7 +68,7 @@ void hello()
 
 void generate_sw_signal_pin_A()
 {
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\nFrequency: ";
     uint32_t freq{0};
     uart >> freq;
@@ -77,7 +79,7 @@ void generate_sw_signal_pin_A()
     uint16_t npulses;
     uart >> npulses;
 
-    my_mcu::SW_signal sw{freq};
+    myu::SW_signal sw{freq};
 
     if (npulses == 0){
 	uart << "Generating " << sw.frequency() << '\n';
@@ -92,7 +94,7 @@ void generate_sw_signal_pin_A()
 
 void test_pin_A()
 {
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\nTest pin A\n"
 	    "-------------\n"
 	    "0. Write 0\n"
@@ -122,21 +124,21 @@ void test_pin_A()
 
 void generate_sw_signal_pin_B()
 {
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\nFrequency: ";
     uint32_t freq{0};
     uart >> freq;
 
     if (freq == 0) return;
 
-    my_mcu::SW_signal sw{freq};
+    myu::SW_signal sw{freq};
     SWG_pin2::generate(sw);
 }
 
 
 void test_pin_B()
 {
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\nTest pin B\n"
 	    "-------------\n"
 	    "0. Write 0\n"
@@ -169,9 +171,9 @@ int main()
     
     hello();
     
-    my_mcu::enable_interrupts();
+    myu::enable_interrupts();
 
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
 
     while(1){
 	uart << "\nMenu\n"

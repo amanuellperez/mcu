@@ -31,15 +31,16 @@
 
 // Microcontroller
 // ---------------
-namespace my_mcu = atmega;
-using Micro   = my_mcu::Micro;
+namespace myu = atmega;
+using Micro   = myu::Micro;
+using UART_iostream = mcu::UART_iostream<myu::UART>;
 
 
 // TWI Protocol
 // ------------
 static constexpr uint8_t TWI_buffer_size = 70; 
 using TWI_master_cfg = mcu::TWI_master_cfg<Micro, 
-                                           my_mcu::TWI_basic,
+                                           myu::TWI_basic,
 					   TWI_buffer_size>;
 
 using TWI = mcu::TWI_master<TWI_master_cfg>;
@@ -52,7 +53,7 @@ using RTC = dev::DS1307_basic<TWI>;
 
 void twi_print_state()
 {
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
 
     if (TWI::error())
 	uart << "state == error()\n";
@@ -85,7 +86,7 @@ void twi_print_state()
 
 void twi_print_error()
 {
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
 
     if (TWI::no_response())
 	uart << "Slave no responde.\n";
@@ -115,7 +116,7 @@ void twi_print_error()
 // del DS1307.h!!! ¿por qué? Debería de coger la función más especializada.
 // Con todo con concepts este problema debería de desaparecer ya que la
 // template quedaría sobrecargada solo para IOxtreams.
-my_mcu::UART_iostream& operator<<(my_mcu::UART_iostream& out,
+UART_iostream& operator<<(UART_iostream& out,
                                const dev::__DS1307_timekeeper& t)
 {
     if (t.clock_on){
@@ -145,7 +146,7 @@ my_mcu::UART_iostream& operator<<(my_mcu::UART_iostream& out,
 
 void test_clock()
 {
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
 
     uart << "\nProbando clock\n"
 	 <<   "==============\n";
@@ -199,7 +200,7 @@ void test_clock()
 
 void test_bateria()
 {
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
 
     uart << "\nProbando la batería auxiliar\n"
 	 << "Prueba a desconectar el reloj de la batería principal y "
@@ -248,7 +249,7 @@ void test_bateria()
 
 void test_ram()
 {
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
 
     uart << "\n\nRAM test\n"
 	 << "--------\n";
@@ -330,7 +331,7 @@ void test_ram()
 
 void test_output()
 {
-    my_mcu::UART_iostream uart;
+    UART_iostream uart;
 
     uart <<  "Probando output\n"
 	 << "Conectar el osciloscopio al pin 7 y recordar haber puesto\n"
@@ -385,8 +386,8 @@ void test_output()
 int main()
 {
 // init_UART();
-    my_mcu::UART_iostream uart;
-    my_mcu::basic_cfg(uart);
+    UART_iostream uart;
+    myu::UART_basic_cfg();
     uart.turn_on();
 
 // init_TWI();

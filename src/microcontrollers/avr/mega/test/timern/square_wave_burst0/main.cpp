@@ -18,23 +18,25 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "../../../mega_cfg.h"
-#include "../../../mega_UART_iostream.h"
+#include "../../../mega_UART.h"
+#include <mcu_UART_iostream.h>
 #include "../../../mega_timer0.h"
 #include "../../../mega_timer1.h"
 
-namespace my_mcu = mega_;
+namespace myu = mega_;
+using UART_iostream = mcu::UART_iostream<myu::UART>;
 
 static constexpr uint8_t test_pin = 12;
-using SWG  = my_mcu::Square_wave_burst_generator0_g;
-using Timer = my_mcu::Time_counter1;
+using SWG  = myu::Square_wave_burst_generator0_g;
+using Timer = myu::Time_counter1;
 
 static constexpr uint32_t frequency = 38000;
 static constexpr Timer::counter_type T = 500; 
 
 int main()
 {
-    my_mcu::UART_iostream uart;
-    my_mcu::basic_cfg(uart);
+    UART_iostream uart;
+    myu::UART_basic_cfg();
     uart.turn_on();
 
     uart << "\n\nSquare burst wave test\n"

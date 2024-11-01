@@ -23,13 +23,15 @@
 #include "../../../mega_timer2.h" 
 #include "../../../mega_debug.h"
 
-#include "../../../mega_UART_iostream.h"
+#include "../../../mega_UART.h"
+#include <mcu_UART_iostream.h>
 #include "../../../mega_cfg.h"
 #include "../../../mega_pin.h"
 
 // Microcontroller
 // ---------------
 namespace myu = mega_;
+using UART_iostream = mcu::UART_iostream<myu::UART>;
 
 // Pin conections
 // --------------
@@ -85,14 +87,14 @@ using Max_type = Counter1::counter_type;
 
 void init_uart()
 {
-    myu::UART_iostream uart;
-    myu::basic_cfg(uart);
+    UART_iostream uart;
+    myu::UART_basic_cfg();
     uart.turn_on();
 }
 
 void main_hello()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
 
     uart << "\n\nTime counter test\n"
 	        "-----------------\n"
@@ -114,7 +116,7 @@ void init_pins()
 template <typename Counter, uint16_t period>
 void generate(uint32_t top)
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     Counter::init(static_cast<typename Counter::counter_type>(top));
     Counter::template turn_on_with_clock_period_of<period>::us();
     Counter::enable_top_interrupt();
@@ -128,7 +130,7 @@ void generate(uint32_t top)
 
 char choose_timer()
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     uart << "\nMenu\n"
 	    "----\n"       
 	    "0. Timer 0\n"
@@ -143,7 +145,7 @@ char choose_timer()
 
 char choose_period(char timer)
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
 
     uart << "\nPeriod:\n"
 	    "0. Turn off\n"
@@ -172,7 +174,7 @@ char choose_period(char timer)
 
 Max_type choose_max_value(char timer, Max_type max)
 {
-    myu::UART_iostream uart;
+    UART_iostream uart;
     
     uart << "Max. value (from 0 to ";
 
@@ -193,7 +195,7 @@ Max_type choose_max_value(char timer, Max_type max)
 void test_bugs()
 {// Posibles bugs encontrados en otros programas.
  // Aqui compruebo automaticamente si son realmente bugs de Time_counter o no
-    myu::UART_iostream uart;
+    UART_iostream uart;
 
     Counter1::turn_on_with_overflow_to_count_1s();
 
@@ -222,7 +224,7 @@ int main()
 
     test_bugs();
 
-    myu::UART_iostream uart;
+    UART_iostream uart;
 
 
     Max_type max_value = 10;

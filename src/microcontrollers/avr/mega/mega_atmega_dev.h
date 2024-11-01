@@ -31,7 +31,8 @@
  *
  ****************************************************************************/
 #include "mega_import_avr.h"    // import avr_;
-			
+#include <mcu_UART_iostream.h>
+
 /***************************************************************************
  *			BUILT-IN DEVICES FOR ATMEGA
  ***************************************************************************/
@@ -142,7 +143,7 @@ namespace atmega{
 
 // PROTOCOLS
     using UART_basic    = mega_::UART_basic;
-    using UART_iostream = mega_::UART_iostream;
+    using UART_iostream = mcu::UART_iostream<UART_basic>;
 
     using SPI        = mega_::SPI_basic;
     using SPI_master = mega_::SPI_master;
@@ -196,11 +197,11 @@ namespace atmega{
 // ¿dónde meter esto? ¿qué son?
     // El parámetro lo usamos para sobrecargar: quiero que configures el flujo
     // con la configuración básica.
-    template <uint32_t baud_rate = 9600u,
-	      uint32_t f_clock   = mega_::clock_frequency_in_hz,
-	      uint32_t tolerance = 2>
-    inline static void basic_cfg(mega_::UART_iostream&) 
-    { return mega_::UART_basic_cfg<baud_rate, f_clock, tolerance>(); }
+template <uint32_t baud_rate = 9600u,
+	  uint32_t f_clock   = avr_::clock_frequency_in_hz,
+	  uint32_t tolerance = 2>
+inline void UART_basic_cfg() 
+{ mega_::UART_basic_cfg<baud_rate, f_clock, tolerance>(); }
 
 }// namespace
 
