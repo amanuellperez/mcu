@@ -44,6 +44,7 @@ int UART_8bits::flush(uint16_t time_out_ms)
     // when a transmit complete interrupt is executed, 
     // or it can be cleared by writing a one to its bit location.
     
+    // Basic::clear_transmit_complete_flag();
     atd::write_bit<TXC0>::to<1>::in(UCSR0A);
 
     return 0;

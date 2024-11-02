@@ -81,7 +81,15 @@ FIC_TAGS 	:= tags
 
 
 # Flags para el preprocesador
-CPPFLAGS += -DMCU=$(MCU) -DF_CPU=$(F_CPU) $(PROJ_CPPFLAGS)
+CPPFLAGS += -DMCU=$(MCU) 
+
+# F_CPU es para el atmega328p, mientras que CLK_MAIN/CLK_PER para el
+# atmega4809. En realidad:
+# 	F_CPU: para avrs donde fijamos la frecuencia en tiempo de compilación
+# 	CLK_MAIN/CLK_PER: para cuando la fijamos dinámicamente
+# Estos flags los necesita mega0_clock_frequencies.h 
+CPPFLAGS += -DCLK_MAIN=$(CLK_MAIN) -DCLK_PER=$(CLK_PER) -DF_CPU=$(F_CPU)
+CPPFLAGS += $(PROJ_CPPFLAGS)
 
 
 # ------------------------

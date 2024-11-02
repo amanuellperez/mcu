@@ -21,41 +21,25 @@
 #include <util/delay.h>
 #include <string.h>
 #include "../../mega0_usart_basic.h"
+#include "../../mega0_uart.h"
 #include "../../mega0_cfg.h"
 
 namespace myu = mega0_;
 using USART = myu::USART_basic<myu::cfg::USART1>;
-
-// TODO: calcular baud rate
-// Calcula el valor del baud_register para ese baud_rate
-// TODO: ¿2 versiones?
-//  1) usa F_CPU: se define en tiempo de compilación
-//  2) no usa F_CPU: en este micro se puede configurar dinamicamente el
-//  divisor del reloj!!!
-//	
-//  Distinguir entre:
-//	    CLK_MAIN = frecuencia fijada por los fuses, conocida en tiempo de
-//		       compilacion
-//	    CLK_CPU   
-//	    CLK_PER  = esta es la que usa UART? Se configura dinámicamente.
-//
-//  ¿dos tipos de aplicaciones? ¿aquellas con F_CPU fija, y aquellas con
-//  CLK_MAIN que será dinámica? (el problema es que sin F_CPU fija no se puede
-//  usar _delay_ms)
-constexpr uint16_t baud_rate_to_baud_register(uint32_t baud_rate)
-{ return ((float)(F_CPU * 64 / (16 * (float)baud_rate)) + 0.5); }
+using UART_8bits = myu::UART_8bits<myu::cfg::USART1>;
 
 
 void init(void)
 {
-    USART::baud(baud_rate_to_baud_register(9600));
+    UART_8bits::init(); // probamos que se configure correctamente
+
     USART::enable_transmitter();
     USART::enable_receiver();
 }
 
 void print(char c)
 {
-    while (!USART::is_transmit_data_empty()) { ; }
+    while (!USART::is_transmit_data_register_empty()) { ; }
 
     USART::transmit_data_register_low_byte(c);
 }
@@ -75,7 +59,7 @@ char read()
 
 void hello()
 {
-    print ("USART basic test\r\n");
+    print ("\r\n\nUSART basic test\r\n");
     print ("----------------\r\n\n");
 }
 

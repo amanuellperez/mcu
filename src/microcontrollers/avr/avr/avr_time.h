@@ -55,6 +55,10 @@ namespace avr_{
 //
 // Da la impresión de que si se llama a `wait_cpu_ticks(t)` la función
 // realmente espera `2*t + 2` ticks de CPU. Aproximadamente `2*t`
+//
+// TODO: el compilador elimina la función si se llama con t < 18!!!
+//      ¿considera que no le va a dar tiempo a ejecutar nada y por eso la
+//      elimina?
 template <std::integral Int>
 inline constexpr void 
 __attribute__((optimize("O0")))	// impide que se optimice la función 

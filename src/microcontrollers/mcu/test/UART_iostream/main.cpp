@@ -20,18 +20,47 @@
 // Probamos el UART.
 // Conectar el FTDI y abrir screen. Lo que se escriba en teclado se envia
 // al microcontrolador que lo devuelve, con lo que lo vemos en pantalla.
+//#define ATMEGA328P
+#define ATMEGA4809
+
+
 #include "../../mcu_UART_iostream.h"
-#include <avr_atmega.h> 
 
 #include <atd_istream.h>
 #include <atd_ostream.h>
 
-#include <avr/power.h>
+
+#ifdef ATMEGA328P
+#include <avr_atmega.h> 
+namespace myu = atmega;
+using UART = myu::UART_8bits;
+void myu_init()
+{}
+
+void uart_init() 
+{
+    UART_iostream uart;
+    myu::UART_basic_cfg<baud_rate, F_CPU, max_error>();
+}
+
+#elif defined ATMEGA4809
+#include <mega0.h> 
+namespace myu = atmega4809;
+using UART = myu::UART1_8bits;
+void myu_init()
+{
+    myu::init();
+//    myu::Clock_controller::clk_main_divided_by_16(); // a 1 MHz
+}
+void uart_init()
+{
+    UART::init();
+}
+
+#endif
 
 // Microcontroller
 // ---------------
-namespace myu = atmega;
-using UART = myu::UART_8bits;
 using UART_iostream = mcu::UART_iostream<UART>;
 
 constexpr char end_of_line = '\n'; // para usar `myterm`
@@ -85,7 +114,7 @@ using traits = std::char_traits<char>;
 //    }
 //}
 
-    template <typename Int>
+template <typename Int>
 void test_int(UART_iostream& uart, const char* type)
 {
     uart << "\n\nReading of a " << type << "\n";
@@ -122,6 +151,8 @@ void test_int(UART_iostream& uart, const char* type)
 
 volatile bool time_out = false;
 
+// TODO: que compile para el atmega4809. Faltan las interrupciones
+#ifdef ATMEGA328P
 void test_interrupt_receive()
 {
     UART_iostream uart;
@@ -146,11 +177,17 @@ void test_interrupt_receive()
     uart >> c;
     uart << "\tYou have written [" << c << "]\n";
 }
+#else
+
+// TODO: probar interrupciones para el atmega4809
+void test_interrupt_receive() { }
+#endif
 
 void test_iostream()
 {
+    uart_init();
+
     UART_iostream uart;
-    myu::UART_basic_cfg<baud_rate, F_CPU, max_error>();
     uart.turn_on();
 
     uart << "\n----------\n";
@@ -293,11 +330,14 @@ void test_iostream()
 
 int main()
 {
+    myu_init();
+    
     //    test_streambuf();
     test_iostream();
 }
 
 
+#ifdef ATMEGA328P
 ISR_USART_RX{
     UART_iostream uart;
 
@@ -317,4 +357,6 @@ ISR_USART_RX{
     time_out = true;
 
 }
+#endif
+
 

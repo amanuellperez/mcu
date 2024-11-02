@@ -37,6 +37,9 @@
 #include "mega0_micro.h"
 #include "mega0_clock.h"
 
+#include "mega0_usart_basic.h"
+#include "mega0_uart.h"
+
 #include "mega0_cfg.h"
 
 
@@ -56,6 +59,18 @@ namespace atmega4809_40{
     using Micro = mega0_::Micro<mega0_::cfg::pins_40>;
 
     using Clock_controller = mega0_::Clock_controller;
+
+// USART
+    using USART1 = mega0_::USART_basic<mega0_::cfg::USART1>;
+//    using USART2 = mega0_::USART_basic<mega0_::cfg::USART2>;
+//    using USART3 = mega0_::USART_basic<mega0_::cfg::USART3>;
+//    using USART4 = mega0_::USART_basic<mega0_::cfg::USART4>;
+
+    using UART1_8bits = mega0_::UART_8bits<mega0_::cfg::USART1>;
+//    using UART2_8bits = mega0_::UART_8bits<mega0_::cfg::USART2>;
+//    using UART3_8bits = mega0_::UART_8bits<mega0_::cfg::USART3>;
+//    using UART4_8bits = mega0_::UART_8bits<mega0_::cfg::USART4>;
+
 }
 
 // La única diferencia entre estos dos namespace son los pines y la función

@@ -2,7 +2,7 @@ BIN = xx
 
 SOURCES= main.cpp	
 
-USER_CXXFLAGS=-save-temps -fverbose-asm
+#USER_CXXFLAGS=-save-temps -fverbose-asm
 
 # para probar
 #F_CPU = 8000000UL

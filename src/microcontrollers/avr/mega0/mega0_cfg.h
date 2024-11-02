@@ -307,6 +307,13 @@ struct USART_values{
 
     static constexpr uint8_t CHSIZE_9BITL = USART_CHSIZE_9BITL_gc;
     static constexpr uint8_t CHSIZE_9BITH = USART_CHSIZE_9BITH_gc;
+    
+    // Receiver mode
+    static constexpr uint8_t RXMODE_NORMAL = USART_RXMODE_NORMAL_gc;
+    static constexpr uint8_t RXMODE_CLK2X = USART_RXMODE_CLK2X_gc;
+    static constexpr uint8_t RXMODE_GENAUTO = USART_RXMODE_GENAUTO_gc;
+    static constexpr uint8_t RXMODE_LINAUTO = USART_RXMODE_LINAUTO_gc;
+
 };
 
 }// private_

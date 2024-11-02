@@ -99,11 +99,14 @@ public:
 // STATUS::RXCIF
     static bool are_there_unread_data();
 
-
-// TODO: STATUS::TXCIF
+// STATUS::TXCIF
+    static bool is_transmit_complete();
+    static void clear_transmit_complete_flag();
 
 // STATUS::DREIF
-    static bool is_transmit_data_empty();
+    static bool is_transmit_data_register_empty();
+
+// TODO: STATUS::DREIF
 
 // TODO: STATUS::RXSIF
 // TODO: STATUS::ISFIF
@@ -133,7 +136,15 @@ public:
 
 // TODO: CTRLB::SFDEN
 // TODO: CTRLB::ODME
-// TODO: CTRLB::RXMODE
+// CTRLB::RXMODE
+    // DUDA: 23.5.7: La datasheet indica que si se configura el en modo
+    // asíncrono, hay que configurar el receiver en normal speed mode. ¿Es
+    // correcto o una errata y querían decir síncrono? @_@
+    static void receiver_normal_speed_mode();
+    static void receiver_double_speed_mode();
+    static void receiver_generic_auto_baud_mode();
+    static void receiver_LIN_constrained_auto_baud_mode();
+
 // TODO: CTRLB::MPCM
 
 // CTRLC - normal mode
@@ -219,9 +230,17 @@ inline bool USART_basic<C>::are_there_unread_data()
 
 // STATUS::DREIF
 template <typename C>
-inline bool USART_basic<C>::is_transmit_data_empty()
+inline bool USART_basic<C>::is_transmit_data_register_empty()
 { return atd::is_one_bit<pos::DREIF>::of(reg()->STATUS); }
 
+// STATUS::TXCIF
+template <typename C>
+inline bool USART_basic<C>::is_transmit_complete()
+{ return atd::is_one_bit<pos::TXCIF>::of(reg()->STATUS); }
+
+template <typename C>
+inline void USART_basic<C>::clear_transmit_complete_flag()
+{ atd::write_bit<pos::TXCIF>::template to<1>::in(reg()->STATUS); }
 
 
 // CTRLA
@@ -265,6 +284,25 @@ inline bool USART_basic<C>::is_transmitter_enable()
 
 // TODO: CTRLB::SFDEN
 // TODO: CTRLB::ODME
+
+// CTRLB::RXMODE
+template <typename C>
+inline void USART_basic<C>::receiver_normal_speed_mode()
+{ reg()->CTRLB |= value::RXMODE_NORMAL;}
+
+template <typename C>
+inline void USART_basic<C>::receiver_double_speed_mode()
+{ reg()->CTRLB |= value::RXMODE_CLK2X;}
+
+template <typename C>
+inline void USART_basic<C>::receiver_generic_auto_baud_mode()
+{ reg()->CTRLB |= value::RXMODE_GENAUTO;}
+
+template <typename C>
+inline void USART_basic<C>::receiver_LIN_constrained_auto_baud_mode()
+{ reg()->CTRLB |= value::RXMODE_LINAUTO;}
+
+
 // TODO: CTRLB::MPCM
 
 // CTRLC - normal mode

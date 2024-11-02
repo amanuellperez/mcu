@@ -119,6 +119,8 @@ public:
     /// Usamos la velocidad normal de transmisión
     // DUDA: en la datasheet pone que siempre que se escriba en UCSR0A
     // hay que escribir ciertos bits a 0 (vg: el bit DOR0 y otros) ???
+    // TODO: nombre: esto es receiver_normal_speed_mode. Es la forma de
+    // muestrear cuando se recibe, NO cuando se transmite. Revisar datasheet.
     static void normal_transmission_speed()
     { atd::write_bit<U2X0>::to<0>::in(UCSR0A);}
 
