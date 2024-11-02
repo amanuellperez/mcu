@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 Manuel Perez 
+// Copyright (C) 2024 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -26,68 +26,50 @@
  *
  *  - DESCRIPCION: Funciones para manejo de tiempos en los AVR
  *
- *  - COMENTARIOS:
- *     CUIDADO: Todas las macros dependen de F_CPU, luego no se pueden 
- *     usar dentro para implementar el .cpp de una bibioteca!!!
- *     He intentado hacer una función genérica:
- *	    inline void wait_ms(uint8_t ms);
- *	pero no funciona, ya que todas las macros esperan una constante.
- *	Además en la práctica no necesito esa función.
- *
  *  - HISTORIA:
  *    Manuel Perez
- *	27/01/2019 Reestructurado.
- *	11/12/2022 Encapsulamos macros en funciones de C++
- *	10/07/2024 Wait_1_us/Wait_1_ms
+ *	02/11/2024 wait_cpu_ticks
  *
  ****************************************************************************/
-// TODO: hay avrs, como el atmega328, que funcionan a una F_CPU fija, definida
-// en tiempo de compilación, pero otros, como el atmega4809, no. Puede ser
-// dinámica. Si se define F_CPU implementar wait_ms en función de _delay_ms;
-// si no se define ...???
-#ifndef F_CPU
-#error "To include these header you need to define F_CPU"
+#ifdef F_CPU
+#include "avr_time_fcpu.h"
 #endif
-
-// Si no se define __DELAY_ROUND_CLOSEST__ antes de delay.h
-// genera un error _delay_ms al definir F_CPU = 16MHz/6.
-#define __DELAY_ROUND_CLOSEST__
-#include <util/delay.h>
-#undef __DELAY_ROUND_CLOSEST__
 
 #include <concepts>
 
 namespace avr_{
-/// Espera t microsegundos
-/// t tiene que ser una constante en tiempo de compilación.
+
+// wait_cpu_ticks
+// --------------
+// Espera t ticks de CPU aproximadamente.
+// (RRR) ¿cómo esperar un tiempo cuando no está definida F_CPU?
+//       Una forma es esperar en ticks de F_CPU
+//
+// La siguiente función, al experimentar, genera el siguiente código asm:
+//
+//	ldi r24,lo8(123)
+//	ldi r25,0
+//.L2:
+//	sbiw r24, 1	
+//	brne .L2
+//
+// Da la impresión de que si se llama a `wait_cpu_ticks(t)` la función
+// realmente espera `2*t + 2` ticks de CPU. Aproximadamente `2*t`
 template <std::integral Int>
-inline constexpr void wait_us(Int t)
+inline constexpr void 
+__attribute__((optimize("O0")))	// impide que se optimice la función 
+				// (con -Os gcc directamente la elimina)
+__attribute__((always_inline))  // fuerza que sea inline
+wait_cpu_ticks(Int t) 
 {
-    _delay_us(t);
+    while (t > 0){
+	--t;
+    }
 }
-
-/// Espera t milisegundos.
-/// t tiene que ser una constante en tiempo de compilación.
-template <std::integral Int>
-inline constexpr void wait_ms(Int t)
-{
-    _delay_ms(t);
-}
-
-#undef _delay_us
-#undef _delay_ms
-
-// Wait_1_us/ms
-// ------------
-struct Wait_1_us{
-    void operator()() {wait_us(1);}
-};
-
-struct Wait_1_ms{
-    void operator()() {wait_ms(1);}
-};
 
 }// namespace
+
+
 
 
 

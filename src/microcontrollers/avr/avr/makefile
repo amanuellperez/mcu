@@ -14,6 +14,7 @@ DIST =\
 		avr_micro.h		\
 		avr_private.h	\
 		avr_time.h		\
+		avr_time_fcpu.h	\
 		avr_types.h
 
 
