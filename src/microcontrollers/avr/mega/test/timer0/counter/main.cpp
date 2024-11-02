@@ -29,7 +29,7 @@
 #include <std_type_traits.h>
 
 namespace myu = mega_;
-using UART_iostream = mcu::UART_iostream<myu::UART>;
+using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
 
 using Timer = myu::Timer0;
 using time_t = uint32_t;

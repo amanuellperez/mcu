@@ -63,13 +63,25 @@ namespace mcu{
 /***************************************************************************
  *			UART_streambuf_unbuffered
  ***************************************************************************/
-template <typename UART_basic>
+// (RRR) ¿por qué UART_streambuf_unbuffered() no llama a UART_8bits::init()?
+//       En la práctica configuro el UART y luego en cada función creo un
+//       objeto UART_iostream. Si llamo a init en el constructor cada vez que
+//       creo el objeto UART_iostream estaría llamando a init, cosa
+//       innecesaria (introduciendo ineficiencias gratuitas).
+template <typename UART_8bits>
 class UART_streambuf_unbuffered : public std::streambuf {
 public:
-    using UART = UART_basic;
+    using UART = UART_8bits;
 
     UART_streambuf_unbuffered() : state_{State::consumido} 
-    { UART::asynchronous_mode(); } // es UART, no USART, siempre asincrono.
+    { }
+
+    // TODO: pensarlo. ¿Pasar la configuración del UART? Sí.
+    // Pero el atmega4809 puede definir la frecuencia del reloj de forma
+    // dinámica. Hasta no tener definido cómo operar con el reloj, no
+    // implementar esto (???)
+//    // Configuración del UART_streambuf_unbuffered
+//    static void init() { UART::init(); }
 
     // Enciende el UART. Antes de encenderlo recordar haberlo configurado.
     static void turn_on();
@@ -290,18 +302,7 @@ std::streamsize UART_streambuf_unbuffered<U>::xsputn(const char_type* s, std::st
 template <typename U>
 inline
 void UART_streambuf_unbuffered<U>::put_(char_type c)
-{
-// 09/01/2024: Lo que comento no puede venir aqui.
-// El procesamiento de los caracteres lo lleva a cabo ostream y no el
-// streambuf. Esta conversión la necesitaba para poder usar screen
-//    if (c == '\r')
-//	return;
-//
-//    if (c == '\n')	// retorno de carro = \n\r
-//	put_unguarded('\r');
-
-    put_unguarded(c);
-}
+{ put_unguarded(c); }
 
 
 template <typename U>
@@ -326,11 +327,10 @@ void UART_streambuf_unbuffered<U>::put_unguarded(char_type c)
     //
     //  De esta forma evitamos bloquear el programa en caso de que falle
     //  UART.
-    //while(!UART::is_ready_to_transmit()) // wait_mientras_esta_transmitiendo();
-    while(!UART::is_data_register_empty()) 
+    while(!UART::is_ready_to_transmit()) // wait_mientras_esta_transmitiendo();
 	;   
 
-    UART::data_register(c);
+    UART::transmit_data_register(c);
 }
 
 template <typename U>
@@ -340,7 +340,7 @@ std::streambuf::int_type UART_streambuf_unbuffered<U>::receive_byte()
     while(!UART::are_there_unread_data()) 
 	; 
 
-    int_type d = static_cast<char_type>(UART::data_register());
+    int_type d = static_cast<char_type>(UART::receive_data_register());
 
     if (static_cast<char_type>(d) == atd::ASCII::EOT)
 	return traits_type::eof();
@@ -353,7 +353,7 @@ std::streambuf::int_type UART_streambuf_unbuffered<U>::receive_byte()
  *			    UART_iostream
  ***************************************************************************/
 // TODO: crear un istream/ostream (uno enable rx, el otro tx)
-template <typename UART_basic>
+template <typename UART_8bits>
 class UART_iostream : public std::iostream {
 public:
     UART_iostream():iostream{&sb_} { }
@@ -373,10 +373,17 @@ public:
     // lo bloquee, solo mirar.
     // La necesito sistemáticamente.
     bool is_there_something_to_read() 
-    { return UART_basic::are_there_unread_data();}
+    { return UART_8bits::are_there_unread_data();}
+
+// Interrupts
+    static void enable_interrupt_unread_data()
+    { UART_8bits::enable_interrupt_unread_data(); }
+
+    static void disable_interrupt_unread_data()
+    { UART_8bits::disable_interrupt_unread_data(); }
 
 private:
-    UART_streambuf_unbuffered<UART_basic> sb_;
+    UART_streambuf_unbuffered<UART_8bits> sb_;
 
 };
 

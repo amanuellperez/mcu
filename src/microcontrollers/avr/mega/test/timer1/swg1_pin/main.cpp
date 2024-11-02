@@ -27,7 +27,7 @@
 // Microcontroller
 // ---------------
 namespace myu = mega_;
-using UART_iostream = mcu::UART_iostream<myu::UART>;
+using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
 
 					 
 // Hwd devices

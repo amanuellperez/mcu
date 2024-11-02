@@ -42,7 +42,7 @@
 // ---------------
 namespace myu = atmega;
 using Micro   = myu::Micro;
-using UART_iostream = mcu::UART_iostream<myu::UART>;
+using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
 
 constexpr uint8_t period_in_us = 16;
 

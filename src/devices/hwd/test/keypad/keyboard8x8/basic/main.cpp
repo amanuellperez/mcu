@@ -34,7 +34,7 @@
 // Microcontroller
 // ---------------
 namespace myu = atmega;
-using UART = myu::UART;
+using UART = myu::UART_8bits;
 using UART_iostream = mcu::UART_iostream<UART>;
 
 void test_keypad()

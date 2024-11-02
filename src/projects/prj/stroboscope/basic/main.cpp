@@ -24,7 +24,7 @@
 // ---------------
 namespace myu = atmega;
 using Micro   = myu::Micro;
-using UART_iostream = mcu::UART_iostream<myu::UART>;
+using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
 
 using Timer = myu::Timer1;
 using namespace myu::literals;

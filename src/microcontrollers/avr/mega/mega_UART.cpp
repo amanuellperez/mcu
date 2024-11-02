@@ -22,9 +22,16 @@
 
 namespace mega_{
 
-int UART::flush(uint16_t time_out_ms)
+void UART_8bits::init()
 {
-    while (!UART_basic::is_transmit_complete())
+    Basic::asynchronous_mode(); 
+    Basic::character_size_8();
+}
+
+
+int UART_8bits::flush(uint16_t time_out_ms)
+{
+    while (!Basic::is_transmit_complete())
     {
 	wait_ms(1);
 	if (time_out_ms == 0)

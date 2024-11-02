@@ -24,7 +24,7 @@
 #include <mcu_UART_iostream.h>
 
 namespace myu = mega_;
-using UART_iostream = mcu::UART_iostream<myu::UART>;
+using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
 
 constexpr uint8_t npin = 13;
 using Pin = myu::Pin<npin>;

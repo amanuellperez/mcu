@@ -66,7 +66,7 @@ using Search = mcu::One_wire_search<Cfg>;
 
 // UART
 // ----
-using UART = mcu::UART_iostream<myu::UART>;
+using UART = mcu::UART_iostream<myu::UART_8bits>;
 
 
 // Hwd Devices

@@ -28,7 +28,7 @@
 // Microcontroller
 // ---------------
 namespace myu = atmega;
-using UART = myu::UART;
+using UART = myu::UART_8bits;
 using UART_iostream = mcu::UART_iostream<UART>;
 
 // Este es el keypad barato que venden en internet de 4 x 3

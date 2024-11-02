@@ -28,7 +28,7 @@
 // -----
 namespace myu = atmega; 
 using Micro   = myu::Micro;
-using UART_iostream = mcu::UART_iostream<myu::UART>;
+using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
 
 // pins
 constexpr uint8_t trigger_pin = 13;

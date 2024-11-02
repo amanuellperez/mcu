@@ -23,7 +23,7 @@
 
 namespace myu = atmega;
 using Micro   = myu::Micro;
-using UART_iostream = mcu::UART_iostream<myu::UART>;
+using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
 
 
 using Clock = mcu::Clock_ms<Micro, myu::Time_counter1>;
@@ -52,7 +52,6 @@ void print_time(UART_iostream& uart, const Clock::Time& t)
 void test_clock()
 {
     UART_iostream uart;
-//    using UART = myu::UART_basic;
 
     uart << "\n\nClock test\n"
 	        "----------\n"

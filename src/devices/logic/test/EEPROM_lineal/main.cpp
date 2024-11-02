@@ -26,7 +26,7 @@
 // Microcontroller
 // ---------------
 namespace myu = atmega;
-using UART_iostream = mcu::UART_iostream<myu::UART>;
+using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
 
 using SPI = myu::SPI_master;
 

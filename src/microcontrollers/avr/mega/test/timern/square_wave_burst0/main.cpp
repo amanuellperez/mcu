@@ -24,7 +24,7 @@
 #include "../../../mega_timer1.h"
 
 namespace myu = mega_;
-using UART_iostream = mcu::UART_iostream<myu::UART>;
+using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
 
 static constexpr uint8_t test_pin = 12;
 using SWG  = myu::Square_wave_burst_generator0_g;

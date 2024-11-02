@@ -39,7 +39,7 @@ using namespace test;
 // myu = my_mcu (???) <-- today, I like myu! Tomorrow... :?
 namespace myu = atmega;
 using Micro   = myu::Micro;
-using UART_iostream = mcu::UART_iostream<myu::UART>;
+using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
 
 template <uint8_t n>
 using Pin = typename Micro::Pin<n>;

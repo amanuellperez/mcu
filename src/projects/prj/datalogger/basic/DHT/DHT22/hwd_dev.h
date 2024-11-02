@@ -40,7 +40,7 @@ static constexpr uint16_t timeout_ms = 3000; // esperamos máximo 3 segundos
 // ---------------
 namespace myu = atmega;
 using Micro   = myu::Micro;
-using UART_iostream = mcu::UART_iostream<myu::UART>;
+using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
 
 
 // pin connections

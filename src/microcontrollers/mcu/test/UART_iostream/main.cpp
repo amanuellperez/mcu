@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 Manuel Perez 
+// Copyright (C) 2019-2024 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -31,7 +31,7 @@
 // Microcontroller
 // ---------------
 namespace myu = atmega;
-using UART = myu::UART;
+using UART = myu::UART_8bits;
 using UART_iostream = mcu::UART_iostream<UART>;
 
 constexpr char end_of_line = '\n'; // para usar `myterm`
@@ -42,20 +42,20 @@ constexpr const char end_of_line_as_char[] = "\\n";
 // Probados a 8 MHz:
 //constexpr uint32_t baud_rate = 4'800u;    // funciona
 constexpr uint32_t baud_rate = 9600u;	    // funciona
-					    //constexpr uint32_t baud_rate = 14'400u;      NO FUNCIONA!!!
-					    //constexpr uint32_t baud_rate = 19'200u;	    // funciona
-					    //constexpr uint32_t baud_rate = 28'800u;	    NO funciona
-					    //constexpr uint32_t baud_rate = 38'400u;	    // funciona
-					    //constexpr uint32_t baud_rate = 57'600u;	    // funciona
-					    //constexpr uint32_t baud_rate = 76'800u;	    NO funciona
-					    // Los siguientes no funcionan a 8MHz pero sí a 16MHz:
-					    //constexpr uint32_t baud_rate = 115'200;   
-					    //constexpr uint32_t baud_rate = 230'400;	// FUNCIONA!!!
-					    //constexpr uint32_t baud_rate = 250000; //NO funciona (???)
-					    //constexpr uint32_t baud_rate = 460'800: <-- no aparece en la avr306
-					    //constexpr uint32_t baud_rate = 500'000; // FUNCIONA!!!
-					    //constexpr uint32_t baud_rate = 921'600;// No FUNCIONA (error 9%)
-					    //constexpr uint32_t baud_rate = 1'000'000; // FUNCIONA!!!
+//constexpr uint32_t baud_rate = 14'400u;      NO FUNCIONA!!!
+//constexpr uint32_t baud_rate = 19'200u;	    // funciona
+//constexpr uint32_t baud_rate = 28'800u;	    NO funciona
+//constexpr uint32_t baud_rate = 38'400u;	    // funciona
+//constexpr uint32_t baud_rate = 57'600u;	    // funciona
+//constexpr uint32_t baud_rate = 76'800u;	    NO funciona
+// Los siguientes no funcionan a 8MHz pero sí a 16MHz:
+//constexpr uint32_t baud_rate = 115'200;   
+//constexpr uint32_t baud_rate = 230'400;	// FUNCIONA!!!
+//constexpr uint32_t baud_rate = 250000; //NO funciona (???)
+//constexpr uint32_t baud_rate = 460'800: <-- no aparece en la avr306
+//constexpr uint32_t baud_rate = 500'000; // FUNCIONA!!!
+//constexpr uint32_t baud_rate = 921'600;// No FUNCIONA (error 9%)
+//constexpr uint32_t baud_rate = 1'000'000; // FUNCIONA!!!
 constexpr uint32_t max_error = 3; // Típico error +-2.5%
 
 

@@ -43,7 +43,7 @@ using namespace test;
 // myu = my_mcu (???) <-- today, I like myu! Tomorrow... :?
 namespace myu = atmega;
 using Micro   = myu::Micro;
-using UART_iostream = mcu::UART_iostream<myu::UART>;
+using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
 
 #include "../../dev_stepper_motor.h"
 template <uint8_t n>

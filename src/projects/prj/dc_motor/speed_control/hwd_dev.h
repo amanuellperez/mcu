@@ -50,7 +50,7 @@ static constexpr uint8_t motor_time_ms_intertia = 0;
 // ---------------
 namespace myu = atmega;
 using Micro   = myu::Micro;
-using UART_iostream = mcu::UART_iostream<myu::UART>;
+using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
 
 // priv_: dispositivos a partir de los cuales se crean los dispositivos reales
 // que usara el sofwador
