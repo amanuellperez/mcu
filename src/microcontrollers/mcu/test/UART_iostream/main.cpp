@@ -20,8 +20,7 @@
 // Probamos el UART.
 // Conectar el FTDI y abrir screen. Lo que se escriba en teclado se envia
 // al microcontrolador que lo devuelve, con lo que lo vemos en pantalla.
-//#define ATMEGA328P
-#define ATMEGA4809
+
 
 
 #include "../../mcu_UART_iostream.h"
@@ -30,23 +29,30 @@
 #include <atd_ostream.h>
 
 
-#ifdef ATMEGA328P
+#ifdef IF_atmega328p
 #include <avr_atmega.h> 
 namespace myu = atmega;
 using UART = myu::UART_8bits;
+using UART_iostream = mcu::UART_iostream<UART>;
+
 void myu_init()
 {}
 
 void uart_init() 
 {
     UART_iostream uart;
-    myu::UART_basic_cfg<baud_rate, F_CPU, max_error>();
+    //myu::UART_basic_cfg<baud_rate, F_CPU, max_error>();
+    myu::UART_basic_cfg();
 }
 
-#elif defined ATMEGA4809
+#define ISR_uart ISR_USART_RX 
+
+#elifdef IF_atmega4809
 #include <mega0.h> 
 namespace myu = atmega4809;
 using UART = myu::UART1_8bits;
+using UART_iostream = mcu::UART_iostream<UART>;
+
 void myu_init()
 {
     myu::init();
@@ -57,11 +63,12 @@ void uart_init()
     UART::init();
 }
 
+#define ISR_uart ISR_UART_8bits_unread_data(USART1)
+
 #endif
 
 // Microcontroller
 // ---------------
-using UART_iostream = mcu::UART_iostream<UART>;
 
 constexpr char end_of_line = '\n'; // para usar `myterm`
 constexpr const char end_of_line_as_char[] = "\\n";
@@ -151,8 +158,6 @@ void test_int(UART_iostream& uart, const char* type)
 
 volatile bool time_out = false;
 
-// TODO: que compile para el atmega4809. Faltan las interrupciones
-#ifdef ATMEGA328P
 void test_interrupt_receive()
 {
     UART_iostream uart;
@@ -177,11 +182,7 @@ void test_interrupt_receive()
     uart >> c;
     uart << "\tYou have written [" << c << "]\n";
 }
-#else
 
-// TODO: probar interrupciones para el atmega4809
-void test_interrupt_receive() { }
-#endif
 
 void test_iostream()
 {
@@ -337,8 +338,7 @@ int main()
 }
 
 
-#ifdef ATMEGA328P
-ISR_USART_RX{
+ISR_uart{
     UART_iostream uart;
 
 // Es obligatorio o bien vaciar el buffer o desactivar la interrupción para
@@ -352,11 +352,10 @@ ISR_USART_RX{
 // --------
     UART::disable_interrupt_unread_data();
 
-    uart << "\n\tInterruption: Inside ISR_USART_RX\n\n";
+    uart << "\n\tInterruption: Inside ISR_uart\n\n";
 
     time_out = true;
 
 }
-#endif
 
 

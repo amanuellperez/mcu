@@ -343,8 +343,72 @@ struct USART1 {
     static void enable_Rx_pin() { PORTC.DIR &= ~PIN1_bm;}
     // XCK puede ser enable como in or out!!!
 //    static void enable_XCK_pin() { PORTC.DIR |= PIN2_bm;}
+
 };
 
+// USART interrupts
+// -----------------
+// WARNING: es posible (???) que todos estos defines sean propios del
+// atmega4809. Si es así habría que meterlos todos en atmega4809_cfg.h
+// e incluir ese archivo solo si MCU = atmega4809.
+//
+// (???) Lo ideal sería poder anotar dentro de USART1 los números de
+// interruptción, de tal manera que la llamada a la interrupción fuera:
+//	void isr<USART1::receive_complete_interrupt_number>() { ... }
+//
+// El problema es que al escribir ISR(xx){...} realmente se está escribiendo
+//  (prototipo de __vector_26 con atributos) más
+//  void __vector_26(void) { ... }
+//
+// Y esta, supongo (?), será la función que se llame al generar la
+// interrupción. ¿cómo convertir 
+//	void isr<USART1::receive_complete_interrupt_number>()
+//  en 
+//	void __vector_26(void)
+//  usando el compilador y no el preprocesador? 
+//
+// Solución temporal:
+//	Los acrónimos de las interrupciones parecen ser únicos (los de USART
+//	fijo lo son para el atmega4809). Si esto es así podemos usar el nombre
+//	de la clase USART1 para generar el nombre de la ISR correspondiente:
+//
+//	    ISR_RXC(USART1) { ... }
+//	    ISR_RXC(USART2) { ... }
+//	    ...
+//
+//       El problema de los siguientes defines es que son cripticos:
+//
+//#define ISR_RXC(usart) ISR(usart ## _RXC_vect)
+//#define ISR_DRE(usart) ISR(usart ## _DRE_vect)
+//#define ISR_TXC(usart) ISR(usart ## _TXC_vect)
+
+// Por ello, opto por defines que tengan significado:
+//#define ISR_receive_complete(usart) ISR(usart ## _RXC_vect)
+//#define ISR_data_register_empty(usart) ISR(usart ## _DRE_vect)
+//#define ISR_receiver_start_frame(usart) ISR(usart ## _TXC_vect)
+//
+// Pero el problema con los anteriores defines es que tanto USART como SPI 
+// tienen una ISR_receive_complete!!!
+// Por ello me veo obligado a implementarlo de otra forma:
+
+// ISR_receive_complete(device): // función para preprocesador
+//	if (device == USART)
+//		return ISR(USART_RXC_vect);
+//	if (device == SPI)
+//		return ISR(SPI_INT_vect);
+#define ISR_receive_complete(device) ISR_ ## device ## _RXC_vect
+
+#define ISR_USART0_RXC_vect ISR(USART0_RXC_vect)
+#define ISR_USART1_RXC_vect ISR(USART1_RXC_vect)
+#define ISR_USART2_RXC_vect ISR(USART2_RXC_vect)
+#define ISR_USART3_RXC_vect ISR(USART3_RXC_vect)
+
+#define ISR_SPI0_RXC_vect ISR(SPI0_INT_vect)
+
+// Si en el futuro se ve que otros devices usan estos mismos nombres, basta
+// con reescribir esto de forma análoga a ISR_receive_complete
+#define ISR_data_register_empty(usart) ISR(usart ## _DRE_vect)
+#define ISR_receiver_start_frame(usart) ISR(usart ## _TXC_vect)
 
 }// namespace cfg
  

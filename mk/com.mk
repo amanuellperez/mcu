@@ -68,6 +68,7 @@ INSTALL_INC_STD = $(MCU_INCLUDE)/std
 CPATH:=$(CPATH):$(INSTALL_INC_STD)
 
 
+# --------------------
 # Frecuencias de reloj
 # --------------------
 # Si no se definen explícitamente, valen 0
@@ -81,3 +82,13 @@ F_CPU ?= 0
 CLK_MAIN ?= 0
 
 
+
+# -------------
+# Preprocesador
+# -------------
+# Defino la variable IF_$(MCU) para poder compilar condicionalmente los
+# programas. 
+# Ejemplo: quiero probar los test de mcu con diferentes micros (atmega328p,
+# atmega4809, ...) Este define permite poder compilar el programa para cada
+# micro, simplemente cambiando la variable MCU.
+CPPFLAGS += -DIF_$(MCU)

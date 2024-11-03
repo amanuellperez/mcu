@@ -216,9 +216,17 @@ public:
     static void enable_interrupt_unread_data();
     static void disable_interrupt_unread_data();
 
+    // TODO: ¿cómo poder eliminar estos defines?
+    // Los necesito para que el usuario no tenga que recordar si tiene que
+    // definir la ISR para RXC o DRE o TXC. El nombre que defino aquí tiene
+    // que coincidir con el nombre de la función "enable_interrupt_xxx"
+#define ISR_UART_8bits_unread_data(usart) ISR_receive_complete(usart)
     // TODO: por consistencia debería de poderse habilitar la interrupcion que
     // informa de que se ha transmitido todo y no hay nada pendiente de
-    // transmitir
+    // transmitir.
+    // ¿hay datos pendientes de transmitir?
+    // static void enable_interrupt_are_there_data_to_transmit() <-- poner
+    //						    un nombre mas corto
 };
 
 // init
