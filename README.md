@@ -394,6 +394,26 @@ pueda entender sin necesidad de comentarios. Me quedo con snake case porque
 para mi es el que se parece más a la forma normal de escribir: en lugar de
 espacios entre palabras escribes un underscore.
 
+### Namespaces 
+
+Cada vez es más frecuente el uso de ciertos espacios de nombre auxiliares.
+
+1. Todos los namespaces que acaban en `_` son privados, reservandome el
+   derecho a cambiar el nombre en el futuro. Incluyen detalles de
+   implementación, como `avr_`, `mega_`, `mega0_`,... 
+
+2. Hay algunos namespaces que poco a poco empiezo a usar:
+
+   * `default_cfg`: incluyen configuraciones por defecto de templates (o
+     cualquier otra cosa). 
+
+   * `impl_of`: incluye la implementación de alguna función. Bajo ningún
+     concepto el usuario debe llamar a las funciones definidas aquí.
+
+   * `private_`: preferiría llamarlo simplemente `private` pero esa es una
+     keyword de C++. Esto incluye detalles de implementación. No se deben de
+     llamar.
+
 
 
 

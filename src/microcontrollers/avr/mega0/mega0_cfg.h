@@ -254,7 +254,7 @@ struct USART_bits{
     static constexpr uint8_t DATA8 = USART_DATA8_bp;
 
 // STATUS
-//    static constexpr uint8_t RXCIF= USART_RXCIF_bp;
+//    static constexpr uint8_t RXCIF= USART_RXCIF_bp; es igual a RXDATAH::RXCIF
     static constexpr uint8_t TXCIF= USART_TXCIF_bp;
     static constexpr uint8_t DREIF= USART_DREIF_bp;
     static constexpr uint8_t RXSIF= USART_RXSIF_bp;

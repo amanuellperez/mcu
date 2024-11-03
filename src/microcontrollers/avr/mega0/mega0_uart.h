@@ -120,53 +120,76 @@ bool cfg_baud_rate(uint32_t f_clk_per, uint32_t baud_rate)
 /***************************************************************************
  *				UART_8bits
  ***************************************************************************/
-namespace default_{
-struct UART_basic_cfg{
-    static constexpr uint32_t baud_rate = 9'600;
+namespace default_cfg{
+struct UART_8bits{
+    static constexpr uint32_t baud_rate      = 9'600;
     static constexpr bool parity_mode_enable = false;
-    static constexpr bool one_stop_bit = true; 
+    static constexpr bool one_stop_bit       = true; 
+    static constexpr uint8_t character_size  = 8;
 };
 
 } // default_
 
-// (RRR) ¿Cómo se va a comunicar mi avr con otro dispositivo via UART?
-//       El protocolo lo conoce el hardwador, conociendose por tanto en tiempo
-//       de compilación. Por eso pasa Cfg como parámetro de template
-template <typename USART_basic_cfg, typename Cfg = default_::UART_basic_cfg>
-void UART_basic_cfg()
-{                                
-    using UART = USART_basic<USART_basic_cfg>;
 
-    UART::asynchronous_mode();
-    private_::cfg_baud_rate<UART>(clk_per(), Cfg::baud_rate);
+namespace impl_of{
+template <typename USART, typename Cfg>
+bool UART_cfg()
+{                                
+    USART::asynchronous_mode();
+    if (private_::cfg_baud_rate<USART>(clk_per(), Cfg::baud_rate) == false)
+	return false;
     
     if constexpr (Cfg::parity_mode_enable)
-	UART::parity_mode_enable();
+	USART::parity_mode_enable();
     else
-	UART::parity_mode_disabled();
+	USART::parity_mode_disabled();
 
     if constexpr (Cfg::one_stop_bit)
-	UART::one_stop_bit();
+	USART::one_stop_bit();
     else
-	UART::two_stop_bit();
+	USART::two_stop_bit();
 
-    UART::character_size_8(); 
+// character size
+    if constexpr (Cfg::character_size == 8)
+	USART::character_size_8(); 
+
+    else if constexpr (Cfg::character_size == 5)
+	USART::character_size_5(); 
+
+    else if constexpr (Cfg::character_size == 6)
+	USART::character_size_6(); 
+
+    else if constexpr (Cfg::character_size == 7)
+	USART::character_size_7(); 
+
+    else
+	static_assert(true, "Wrong value of character_size");
+
+    // TODO: ¿cómo elegir character size == 9? 
+    // Hay dos opciones: 9L o 9H
+
+    return true;
 }
+
+}// impl_of
+ 
 
 
 // UART_8bits
 // ----------
-template <typename Cfg>
+template <typename USART_basic_cfg>
 class UART_8bits {
 public:
 // Types
-    using Basic = USART_basic<Cfg>;
+    using USART = USART_basic<USART_basic_cfg>;
 
 // Constructor
     UART_8bits() = delete;
 
-    // TODO: pasar como parámetros la configuración
-    static void init() { UART_basic_cfg<Cfg>(); }
+    // Devuelve true si configura correctamente UART_8bits, y false si no
+    // puede configurarlo.
+    template <typename UART_8bits_cfg = default_cfg::UART_8bits>
+    static bool init();
 
 // Receiver
     static void enable_receiver();
@@ -189,56 +212,70 @@ public:
     static int flush(uint16_t time_in_cpu_ticks);
 
 // Interrupts
-// TODO:
-//    static void enable_interrupt_unread_data();
-//    static void disable_interrupt_unread_data();
+    // ¿hay data pendiente de leer?
+    static void enable_interrupt_unread_data();
+    static void disable_interrupt_unread_data();
 
+    // TODO: por consistencia debería de poderse habilitar la interrupcion que
+    // informa de que se ha transmitido todo y no hay nada pendiente de
+    // transmitir
 };
+
+// init
+// ----
+// (RRR) ¿Cómo se va a comunicar mi avr con otro dispositivo via UART?
+//       El protocolo lo conoce el hardwador, conociendose por tanto en tiempo
+//       de compilación. Por eso pasa Cfg como parámetro de template
+template <typename C>
+template <typename UART_8bits_cfg>
+bool UART_8bits<C>::init()
+{ return impl_of::UART_cfg<USART, UART_8bits_cfg>(); }
+
 
 // Receiver
 // --------
 template <typename C>
 inline void UART_8bits<C>::enable_receiver()
-{ Basic::enable_receiver();}
+{ USART::enable_receiver();}
 
 template <typename C>
 inline void UART_8bits<C>::disable_receiver()
-{ Basic::disable_receiver();}
+{ USART::disable_receiver();}
 
 template <typename C>
 inline bool UART_8bits<C>::is_receiver_enable()
-{ return Basic::is_receiver_enable();}
+{ return USART::is_receiver_enable();}
 
 template <typename C>
 inline uint8_t UART_8bits<C>::receive_data_register()
-{ return Basic::receive_data_register_low_byte(); }
+{ return USART::receive_data_register_low_byte(); }
 
 template <typename C>
 inline bool UART_8bits<C>::are_there_unread_data()
-{ return Basic::are_there_unread_data();}
+{ return USART::are_there_unread_data();}
 
 
 // Transmitter
 // -----------
 template <typename C>
 inline void UART_8bits<C>::enable_transmitter()
-{ Basic::enable_transmitter();}
+{ USART::enable_transmitter();}
 
 template <typename C>
 inline void UART_8bits<C>::disable_transmitter()
-{ Basic::disable_transmitter();}
+{ USART::disable_transmitter();}
 
 template <typename C>
 inline bool UART_8bits<C>::is_transmitter_enable()
-{ return Basic::is_transmitter_enable();}
+{ return USART::is_transmitter_enable();}
 
 template <typename C>
 inline bool UART_8bits<C>::is_ready_to_transmit()
-{ return Basic::is_transmit_data_register_empty(); }
+{ return USART::is_transmit_data_register_empty(); }
 
 template <typename C>
 inline void UART_8bits<C>::transmit_data_register(uint8_t c)
-{ Basic::transmit_data_register_low_byte(c); }
+{ USART::transmit_data_register_low_byte(c); }
 
 // TODO: es mentira que se espere time_in_cpu_ticks, sino
 // 100*time_in_cpu_ticks. ¿Dividimos time_in_cpu_ticks / 100? 
@@ -247,8 +284,8 @@ inline void UART_8bits<C>::transmit_data_register(uint8_t c)
 template <typename C>
 int UART_8bits<C>::flush(uint16_t time_in_cpu_ticks)
 {
-    // while (!Basic::is_transmit_complete()) 
-    while (!Basic::is_transmit_data_register_empty())
+    // while (!USART::is_transmit_complete()) 
+    while (!USART::is_transmit_data_register_empty())
     {
 	wait_cpu_ticks(100); // mínimo 16 ticks
 	if (time_in_cpu_ticks == 0)
@@ -257,7 +294,7 @@ int UART_8bits<C>::flush(uint16_t time_in_cpu_ticks)
 	--time_in_cpu_ticks;
     }
 
-//    Basic::clear_transmit_complete_flag();
+//    USART::clear_transmit_complete_flag();
 
     return 0;
 
@@ -265,13 +302,13 @@ int UART_8bits<C>::flush(uint16_t time_in_cpu_ticks)
 
 // Interrupts
 // ----------
-//template <typename C>
-//inline void UART_8bits<C>::enable_interrupt_unread_data()
-//{ Basic::enable_interrupt_unread_data();}
-//
-//template <typename C>
-//inline void UART_8bits<C>::disable_interrupt_unread_data()
-//{ Basic::disable_interrupt_unread_data();}
+template <typename C>
+inline void UART_8bits<C>::enable_interrupt_unread_data()
+{ USART::enable_receive_complete_interrupt();}
+
+template <typename C>
+inline void UART_8bits<C>::disable_interrupt_unread_data()
+{ USART::disable_receive_complete_interrupt();}
 
 }// mega0_
 

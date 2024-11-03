@@ -106,18 +106,28 @@ public:
 // STATUS::DREIF
     static bool is_transmit_data_register_empty();
 
-// TODO: STATUS::DREIF
-
 // TODO: STATUS::RXSIF
 // TODO: STATUS::ISFIF
 // TODO: STATUS::BDF
 // TODO: STATUS::WFB
 
 // CTRLA
-// TODO: CTRLA::RXCIE
-// TODO: CTRLA::TXCIE
-// TODO: CTRLA::DREIE
-// TODO: CTRLA::RXSIE
+// CTRLA::RXCIE
+    static void enable_receive_complete_interrupt();
+    static void disable_receive_complete_interrupt();
+
+// CTRLA::TXCIE
+    static void enable_transmit_complete_interrupt();
+    static void disable_transmit_complete_interrupt();
+
+// CTRLA::DREIE
+    static void enable_data_register_empty_interrupt();
+    static void disable_data_register_empty_interrupt();
+
+// CTRLA::RXSIE
+    static void enable_receiver_start_frame_interrupt();
+    static void disable_receiver_start_frame_interrupt();
+
 // TODO: CTRLA::LBME
 // TODO: CTRLA::ABEIE
 // TODO: CTRLA::RS485
@@ -244,7 +254,46 @@ inline void USART_basic<C>::clear_transmit_complete_flag()
 
 
 // CTRLA
-// TODO
+// CTRLA::RXCIE
+template <typename C>
+inline void USART_basic<C>::enable_receive_complete_interrupt()
+{ atd::write_bit<pos::RXCIE>::template to<1>::in(reg()->CTRLA); }
+
+template <typename C>
+inline void USART_basic<C>::disable_receive_complete_interrupt()
+{ atd::write_bit<pos::RXCIE>::template to<0>::in(reg()->CTRLA); }
+
+
+// CTRLA::TXCIE
+template <typename C>
+inline void USART_basic<C>::enable_transmit_complete_interrupt()
+{ atd::write_bit<pos::TXCIE>::template to<1>::in(reg()->CTRLA); }
+
+template <typename C>
+inline void USART_basic<C>::disable_transmit_complete_interrupt()
+{ atd::write_bit<pos::TXCIE>::template to<0>::in(reg()->CTRLA); }
+
+
+// CTRLA::DREIE
+template <typename C>
+inline void USART_basic<C>::enable_data_register_empty_interrupt()
+{ atd::write_bit<pos::DREIE>::template to<1>::in(reg()->CTRLA); }
+
+template <typename C>
+inline void USART_basic<C>::disable_data_register_empty_interrupt()
+{ atd::write_bit<pos::DREIE>::template to<0>::in(reg()->CTRLA); }
+
+
+// CTRLA::RXSIE
+template <typename C>
+inline void USART_basic<C>::enable_receiver_start_frame_interrupt()
+{ atd::write_bit<pos::RXSIE>::template to<1>::in(reg()->CTRLA); }
+
+template <typename C>
+inline void USART_basic<C>::disable_receiver_start_frame_interrupt()
+{ atd::write_bit<pos::RXSIE>::template to<0>::in(reg()->CTRLA); }
+
+
 
 // CTRLB
 // -----
