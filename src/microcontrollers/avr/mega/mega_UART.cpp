@@ -22,16 +22,9 @@
 
 namespace mega_{
 
-void UART_8bits::init()
-{
-    Basic::asynchronous_mode(); 
-    Basic::character_size_8();
-}
-
-
 int UART_8bits::flush(uint16_t time_out_ms)
 {
-    while (!Basic::is_transmit_complete())
+    while (!USART::is_transmit_complete())
     {
 	wait_ms(1);
 	if (time_out_ms == 0)
@@ -44,7 +37,7 @@ int UART_8bits::flush(uint16_t time_out_ms)
     // when a transmit complete interrupt is executed, 
     // or it can be cleared by writing a one to its bit location.
     
-    // Basic::clear_transmit_complete_flag();
+    // USART::clear_transmit_complete_flag();
     atd::write_bit<TXC0>::to<1>::in(UCSR0A);
 
     return 0;

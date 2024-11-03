@@ -35,7 +35,7 @@ using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
 void test_cfg()
 {
     UART_iostream uart;
-    myu::UART_basic_cfg();
+    UART_iostream::init();
     uart.turn_on();
 
     while(1){

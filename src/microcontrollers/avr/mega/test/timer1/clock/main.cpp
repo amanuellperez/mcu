@@ -78,7 +78,7 @@ void init_time()
 int main()
 {
     UART_iostream uart;
-    myu::UART_basic_cfg();
+    UART_iostream::init();
     uart.turn_on();
 
     Timer::clock_frequency_divide_by_64();

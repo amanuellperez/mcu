@@ -112,7 +112,7 @@ using Rect = SDD1306::PageCol_rectangle;
 void init_uart()
 {
     UART_iostream uart;
-    myu::UART_basic_cfg<baud_rate>();
+    UART_iostream::init();
     uart.turn_on();
 }
 

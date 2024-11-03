@@ -70,7 +70,7 @@ static constexpr uint8_t input_pin_without_pullup = 14;
 void init_uart()
 {
     UART_iostream uart;
-    myu::UART_basic_cfg();
+    UART_iostream::init();
     uart.turn_on();
 }
 

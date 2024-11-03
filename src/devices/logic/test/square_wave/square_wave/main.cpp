@@ -55,7 +55,7 @@ enum class Cfg{ in_ms, in_us };
 void init_uart()
 {
     UART_iostream uart;
-    myu::UART_basic_cfg();
+    UART_iostream::init();
     uart.turn_on();
 }
 

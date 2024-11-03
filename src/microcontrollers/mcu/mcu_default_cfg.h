@@ -19,33 +19,41 @@
 
 #pragma once
 
-#ifndef __AVR_PRIVATE_H__
-#define __AVR_PRIVATE_H__
+#ifndef __MCU_DEFAULT_CFG_H__
+#define __MCU_DEFAULT_CFG_H__
 /****************************************************************************
  *
  * DESCRIPCION
- *	Todo lo definido aquí es para ser incluido en los namespaces de los
- *	micros correspondientes (atmega328p, atmega4809...)
- *
- *	Para facilitar esa inclusión aquí defino todos los archivos de
- *	cabecera de este directorio.
- *
- *	No se incluyen los archivos que dependen de F_CPU. 
+ *	Guardemos la default configuración de diferentes dispositivos de los
+ *	avrs.	
  *
  * HISTORIA
  *    Manuel Perez
- *    19/10/2024 Escrito
+ *    03/11/2024 default_cfg::UART_8bis
  *
  ****************************************************************************/
 
-#include <avr_constants.h>
-#include <avr_clock_frequencies.h>
-#include <avr_interrupt.h>
-#include <avr_memory.h>
-#include <avr_micro.h>
-#include <avr_types.h>
-#include <avr_time.h>
+namespace mcu {
+namespace default_cfg{
 
+// UART_8bits
+// ----------
+template <uint32_t baud_rate0>
+struct UART_8bits{
+    static constexpr uint32_t baud_rate      = baud_rate0;
+    static constexpr bool parity_mode_enable = false;
+    static constexpr bool one_stop_bit       = true; 
+    static constexpr uint8_t character_size  = 8;
+
+// De momento el max_error solo lo usa atmega328p
+    static constexpr uint8_t max_error       = 2;
+};
+
+using UART_8bits_9600_bauds = UART_8bits<9'600>;
+
+} // default_
+
+}// mcu
 
 #endif
 

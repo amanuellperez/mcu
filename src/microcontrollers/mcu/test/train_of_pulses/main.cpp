@@ -71,7 +71,7 @@ using Train_of_pulses = mcu::Train_of_pulses<nmax_pulses>;
 void init_uart()
 {
     UART_iostream uart;
-    myu::UART_basic_cfg();
+    UART_iostream::init();
     uart.turn_on();
 }
 

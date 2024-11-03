@@ -74,7 +74,7 @@ void SPI_write(uint8_t x1, uint8_t x2)
 void init_uart()
 {
     UART_iostream uart;
-    myu::UART_basic_cfg<9'600>();
+    UART_iostream::init();
     uart.turn_on();
 }
 

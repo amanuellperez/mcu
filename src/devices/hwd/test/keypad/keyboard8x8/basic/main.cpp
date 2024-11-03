@@ -93,7 +93,7 @@ int main()
 {
 // init_UART();
     UART_iostream uart;
-    myu::UART_basic_cfg();
+    UART_iostream::init();
     uart.turn_on();
  
     uart << "\n------------\n";

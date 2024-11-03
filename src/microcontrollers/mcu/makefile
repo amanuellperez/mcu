@@ -3,6 +3,7 @@ SOURCES= mcu_one_wire.cpp
 INCS= 	mcu_clock.h					\
 		mcu_concepts.h				\
 		mcu_cycle.h					\
+		mcu_default_cfg.h			\
 		mcu_miniclock.h				\
 		mcu_one_wire.h				\
 		mcu_pin.h					\

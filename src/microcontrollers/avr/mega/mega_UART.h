@@ -52,21 +52,53 @@
 #include "mega_import_avr.h"	// clock_frequency_in_hz
 
 namespace mega_{
-template <uint32_t baud_rate = 9600u,
-	  uint32_t f_clock   = clock_frequency_in_hz,
-	  uint32_t max_error = 2>
-void UART_basic_cfg()
+/***************************************************************************
+ *				UART_8bits
+ ***************************************************************************/
+// Esta función configura el UART tanto en 8 bits como en los demás character
+// size. Por eso no puede ser UART_8bits::init
+// TODO: f_clock -> f_cpu() 
+namespace impl_of{
+template <typename USART, typename Cfg>
+bool UART_cfg()
 {                                
-    using UART = UART_basic;
+    USART::asynchronous_mode();
 
-    UART::asynchronous_mode();
-    UART::baud_speed<f_clock, baud_rate, max_error>();
+    USART::template baud_speed<f_cpu(), Cfg::baud_rate, Cfg::max_error>();
+    
+    if constexpr (Cfg::parity_mode_enable)
+	USART::parity_mode_enable();
+    else
+	USART::parity_mode_disabled();
 
-    UART::parity_mode_disabled();
+    if constexpr (Cfg::one_stop_bit)
+	USART::one_stop_bit();
+    else
+	USART::two_stop_bit();
 
-    UART::one_stop_bit();
-    UART::character_size_8(); 
+// character size
+    if constexpr (Cfg::character_size == 8)
+	USART::character_size_8(); 
+
+    else if constexpr (Cfg::character_size == 5)
+	USART::character_size_5(); 
+
+    else if constexpr (Cfg::character_size == 6)
+	USART::character_size_6(); 
+
+    else if constexpr (Cfg::character_size == 7)
+	USART::character_size_7(); 
+
+    else
+	static_assert(true, "Wrong value of character_size");
+
+    // TODO: ¿cómo elegir character size == 9? 
+    // Hay dos opciones: 9L o 9H
+
+    return true;
 }
+
+} // impl_of
 
 
 // UART_8bits
@@ -81,12 +113,13 @@ void UART_basic_cfg()
 class UART_8bits {
 public:
 // Types
-    using Basic = UART_basic;
+    using USART = UART_basic;
 
 // Constructor
     UART_8bits() = delete;
 
-    void init();
+    template <typename UART_8bits_cfg>
+    static bool init();
 
 // Receiver
     static void enable_receiver();
@@ -114,48 +147,54 @@ public:
 
 };
 
+// init
+// ----
+template <typename UART_8bits_cfg>
+bool UART_8bits::init()
+{ return impl_of::UART_cfg<USART, UART_8bits_cfg>(); }
+
 // Receiver
 // --------
 inline void UART_8bits::enable_receiver()
-{ Basic::enable_receiver();}
+{ USART::enable_receiver();}
 
 inline void UART_8bits::disable_receiver()
-{ Basic::disable_receiver();}
+{ USART::disable_receiver();}
 
 inline bool UART_8bits::is_receiver_enable()
-{ return Basic::is_receiver_enable();}
+{ return USART::is_receiver_enable();}
 
 inline uint8_t UART_8bits::receive_data_register()
-{ return Basic::data_register(); }
+{ return USART::data_register(); }
 
 inline bool UART_8bits::are_there_unread_data()
-{ return Basic::are_there_unread_data();}
+{ return USART::are_there_unread_data();}
 
 
 // Transmitter
 // -----------
 inline void UART_8bits::enable_transmitter()
-{ Basic::enable_transmitter();}
+{ USART::enable_transmitter();}
 
 inline void UART_8bits::disable_transmitter()
-{ Basic::disable_transmitter();}
+{ USART::disable_transmitter();}
 
 inline bool UART_8bits::is_transmitter_enable()
-{ return Basic::is_transmitter_enable();}
+{ return USART::is_transmitter_enable();}
 
 inline bool UART_8bits::is_ready_to_transmit()
-{ return Basic::is_data_register_empty(); }
+{ return USART::is_data_register_empty(); }
 
 inline void UART_8bits::transmit_data_register(uint8_t c)
-{ Basic::data_register(c); }
+{ USART::data_register(c); }
 
 // Interrupts
 // ----------
 inline void UART_8bits::enable_interrupt_unread_data()
-{ Basic::enable_interrupt_unread_data();}
+{ USART::enable_interrupt_unread_data();}
 
 inline void UART_8bits::disable_interrupt_unread_data()
-{ Basic::disable_interrupt_unread_data();}
+{ USART::disable_interrupt_unread_data();}
 
 
 }// namespace

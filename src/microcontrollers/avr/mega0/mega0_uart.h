@@ -33,7 +33,6 @@
  ****************************************************************************/
 
 #include "mega0_import_avr.h"	// wait_cpu_ticks
-#include "mega0_clock_frequencies.h"	// clk_per
 
 namespace mega0_{
 /***************************************************************************
@@ -120,18 +119,9 @@ bool cfg_baud_rate(uint32_t f_clk_per, uint32_t baud_rate)
 /***************************************************************************
  *				UART_8bits
  ***************************************************************************/
-namespace default_cfg{
-struct UART_8bits{
-    static constexpr uint32_t baud_rate      = 9'600;
-    static constexpr bool parity_mode_enable = false;
-    static constexpr bool one_stop_bit       = true; 
-    static constexpr uint8_t character_size  = 8;
-};
-
-} // default_
-
-
 namespace impl_of{
+// Esta función configura el UART tanto en 8 bits como en los demás character
+// size. Por eso no puede ser UART_8bits::init
 template <typename USART, typename Cfg>
 bool UART_cfg()
 {                                
@@ -188,7 +178,7 @@ public:
 
     // Devuelve true si configura correctamente UART_8bits, y false si no
     // puede configurarlo.
-    template <typename UART_8bits_cfg = default_cfg::UART_8bits>
+    template <typename UART_8bits_cfg>
     static bool init();
 
 // Receiver

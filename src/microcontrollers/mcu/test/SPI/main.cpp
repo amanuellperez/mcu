@@ -50,7 +50,7 @@ using SPI_array = mcu::SPI_pin_array_selector<Micro, npin0, npin1, npin2, npin3>
 void init_uart()
 {
     UART_iostream uart;
-    myu::UART_basic_cfg<baud_rate>();
+    UART_iostream::init();
     uart.turn_on();
 }
 

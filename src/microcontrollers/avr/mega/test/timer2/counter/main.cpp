@@ -51,7 +51,7 @@ volatile uint32_t counter = 0;
 void init_uart()
 {
     UART_iostream uart;
-    myu::UART_basic_cfg();
+    UART_iostream::init();
     uart.turn_on();
 }
 

@@ -1,4 +1,4 @@
-DIRS = uart_basic
+DIRS = uart_8bits
 
 
 # Estos se compilan con g++, no con avr-g++!!

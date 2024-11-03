@@ -118,7 +118,7 @@ void test_write(EEPROM& eeprom)
 
 void test_uint8_t() {
     UART_iostream uart;
-    myu::UART_basic_cfg();
+    UART_iostream::init();
     uart.turn_on();
 
     myu::SPI_master::clock_period_in_us<periodo_en_us>();

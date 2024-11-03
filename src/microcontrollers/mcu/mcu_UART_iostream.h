@@ -57,6 +57,7 @@
 #include <iostream>
 #include <streambuf>
 #include <atd_ascii.h>
+#include <mcu_default_cfg.h>	// default_cfg
 
 namespace mcu{
 
@@ -357,6 +358,9 @@ template <typename UART_8bits>
 class UART_iostream : public std::iostream {
 public:
     UART_iostream():iostream{&sb_} { }
+
+    template <typename Cfg = default_cfg::UART_8bits_9600_bauds>
+    static bool init() {return UART_8bits::template init<Cfg>(); }
 
     /// Enciende el UART en caso de que estuviera apagado.
     /// Recordar haber configurado el UART antes de llamar a esta función.

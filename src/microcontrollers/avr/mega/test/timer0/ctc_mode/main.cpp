@@ -292,7 +292,7 @@ void main_menu(Timer::counter_type& top, uint16_t& period_in_us)
 void init_uart()
 {
     UART_iostream uart;
-    myu::UART_basic_cfg();
+    UART_iostream::init();
     uart.turn_on();
 }
 

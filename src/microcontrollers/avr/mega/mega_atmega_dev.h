@@ -194,14 +194,6 @@ namespace atmega{
 /***************************************************************************
  *			FUNCIONES AUXILIARES
  ***************************************************************************/
-// ¿dónde meter esto? ¿qué son?
-    // El parámetro lo usamos para sobrecargar: quiero que configures el flujo
-    // con la configuración básica.
-template <uint32_t baud_rate = 9600u,
-	  uint32_t f_clock   = avr_::clock_frequency_in_hz,
-	  uint32_t tolerance = 2>
-inline void UART_basic_cfg() 
-{ mega_::UART_basic_cfg<baud_rate, f_clock, tolerance>(); }
 
 }// namespace
 

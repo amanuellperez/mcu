@@ -36,7 +36,7 @@ static constexpr Timer::counter_type T = 500;
 int main()
 {
     UART_iostream uart;
-    myu::UART_basic_cfg();
+    UART_iostream::init();
     uart.turn_on();
 
     uart << "\n\nSquare burst wave test\n"

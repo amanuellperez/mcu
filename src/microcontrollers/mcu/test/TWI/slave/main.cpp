@@ -366,7 +366,7 @@ void test_read()
 int main() 
 {
     UART_iostream uart;
-    myu::UART_basic_cfg();
+    UART_iostream::init();
     uart.turn_on();
 
     uart << "TWI slave\n"

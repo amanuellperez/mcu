@@ -79,7 +79,7 @@ int main()
 {
 // init_uart()
     UART_iostream uart;
-    myu::UART_basic_cfg();
+    UART_iostream::init();
     uart.turn_on();
 
 // init_SPI()

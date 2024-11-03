@@ -88,7 +88,7 @@ using Max_type = Counter1::counter_type;
 void init_uart()
 {
     UART_iostream uart;
-    myu::UART_basic_cfg();
+    UART_iostream::init();
     uart.turn_on();
 }
 

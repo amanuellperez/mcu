@@ -33,17 +33,10 @@
 #include <avr_atmega.h> 
 namespace myu = atmega;
 using UART = myu::UART_8bits;
-using UART_iostream = mcu::UART_iostream<UART>;
 
 void myu_init()
 {}
 
-void uart_init() 
-{
-    UART_iostream uart;
-    //myu::UART_basic_cfg<baud_rate, F_CPU, max_error>();
-    myu::UART_basic_cfg();
-}
 
 #define ISR_uart ISR_USART_RX 
 
@@ -51,16 +44,11 @@ void uart_init()
 #include <mega0.h> 
 namespace myu = atmega4809;
 using UART = myu::UART1_8bits;
-using UART_iostream = mcu::UART_iostream<UART>;
 
 void myu_init()
 {
     myu::init();
 //    myu::Clock_controller::clk_main_divided_by_16(); // a 1 MHz
-}
-void uart_init()
-{
-    UART::init();
 }
 
 #define ISR_uart ISR_UART_8bits_unread_data(USART1)
@@ -69,13 +57,14 @@ void uart_init()
 
 // Microcontroller
 // ---------------
+using UART_iostream = mcu::UART_iostream<UART>;
 
 constexpr char end_of_line = '\n'; // para usar `myterm`
 constexpr const char end_of_line_as_char[] = "\\n";
 //constexpr char end_of_line = '\r'; // para usar `screen` como terminal
 //constexpr const char end_of_line_as_char[] = "\\r";
 
-// Probados a 8 MHz:
+// Probados a 8 MHz (atmega328p):
 //constexpr uint32_t baud_rate = 4'800u;    // funciona
 constexpr uint32_t baud_rate = 9600u;	    // funciona
 //constexpr uint32_t baud_rate = 14'400u;      NO FUNCIONA!!!
@@ -94,10 +83,16 @@ constexpr uint32_t baud_rate = 9600u;	    // funciona
 //constexpr uint32_t baud_rate = 1'000'000; // FUNCIONA!!!
 constexpr uint32_t max_error = 3; // Típico error +-2.5%
 
+using UART_8bits_cfg = mcu::default_cfg::UART_8bits<baud_rate>;
 
 using int_type = std::char_traits<char>::int_type;
 using char_type = std::char_traits<char>::char_type;
 using traits = std::char_traits<char>;
+
+void uart_init()
+{
+    UART_iostream::init<UART_8bits_cfg>();
+}
 
 //void test_streambuf()
 //{ 

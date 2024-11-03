@@ -41,7 +41,7 @@ static_assert(SWG1::is_pin(16));
 int main()
 {
     UART_iostream uart;
-    myu::UART_basic_cfg();
+    UART_iostream::init();
     uart.turn_on();
 
     uart << "\n\nSquare wave test\n"

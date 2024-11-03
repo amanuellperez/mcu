@@ -272,7 +272,7 @@ void pins_as_input_with_pullup()
 void init_uart()
 {
     UART_iostream uart;
-    myu::UART_basic_cfg();
+    UART_iostream::init();
     uart.turn_on();
 }
 

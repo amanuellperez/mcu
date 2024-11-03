@@ -52,7 +52,7 @@ UART_iostream uart; // análogo a std::cout/std::cin
 // ---------
 void init_uart()
 {
-    myu::UART_basic_cfg();
+    UART_iostream::init();
 
     uart.turn_on();
 }

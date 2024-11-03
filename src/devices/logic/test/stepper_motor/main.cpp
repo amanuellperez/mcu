@@ -107,7 +107,7 @@ using NSteps_t= Motor::NSteps_t;
 void init_uart()
 {
     UART_iostream uart;
-    myu::UART_basic_cfg<baud_rate>();
+    UART_iostream::init();
     uart.turn_on();
 }
 

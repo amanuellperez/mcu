@@ -65,7 +65,7 @@ using MAX7219 = dev::MAX7219_digits<MAX7219_cfg>;
 void init_uart()
 {
     UART_iostream uart;
-    myu::UART_basic_cfg<baud_rate>();
+    UART_iostream::init();
     uart.turn_on();
 }
 

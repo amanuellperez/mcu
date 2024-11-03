@@ -52,7 +52,7 @@ int main()
 {
 // uart_init();
     UART_iostream uart;
-    myu::UART_basic_cfg();
+    UART_iostream::init();
     uart.turn_on();
 
 // menu

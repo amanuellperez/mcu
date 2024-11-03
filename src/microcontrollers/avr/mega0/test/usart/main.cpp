@@ -23,6 +23,7 @@
 #include "../../mega0_usart_basic.h"
 #include "../../mega0_uart.h"
 #include "../../mega0_cfg.h"
+#include <mcu_default_cfg.h>
 
 namespace myu = mega0_;
 using USART = myu::USART_basic<myu::cfg::USART1>;
@@ -31,7 +32,8 @@ using UART_8bits = myu::UART_8bits<myu::cfg::USART1>;
 
 void init(void)
 {
-    UART_8bits::init(); // probamos que se configure correctamente
+    // probamos que se configure correctamente
+    UART_8bits::init<mcu::default_cfg::UART_8bits_9600_bauds>(); 
 
     USART::enable_transmitter();
     USART::enable_receiver();

@@ -20,15 +20,16 @@
 #include "../../../mega_UART.h"
 
 #include <atd_ostream.h>
+#include <mcu_default_cfg.h>
 
 // Microcontroller
 // ---------------
-namespace my_mcu = mega_;
+namespace myu = mega_;
 
 
 // Hwd devices
 // -----------
-using UART = my_mcu::UART_basic;
+using UART = myu::UART_8bits;
 
 // Cfg
 // ---
@@ -39,7 +40,7 @@ static constexpr uint8_t read_byte_fail = 0x04; // EOT
 // ---------
 void init_uart()
 {
-    my_mcu::UART_basic_cfg();
+    UART::init<mcu::default_cfg::UART_8bits_9600_bauds>();
 
     UART::enable_receiver();
     UART::enable_transmitter();
@@ -48,16 +49,16 @@ void init_uart()
 // Devuelve el número de caracteres escritos.
 uint8_t write(char c, uint16_t timeout = max_timeout_ms)
 {
-    while (!UART::is_data_register_empty())
+    while (!UART::is_ready_to_transmit())
     { 
 	if (timeout == 0)
 	    return 0;
 
 	--timeout;
-	my_mcu::wait_ms(1);
+	myu::wait_ms(1);
     }
 
-    UART::data_register(c);
+    UART::transmit_data_register(c);
 
     return 1;
 }
@@ -91,10 +92,10 @@ uint8_t read_byte(uint16_t timeout = max_timeout_ms)
 	    return read_byte_fail;
 
 	--timeout;
-	my_mcu::wait_ms(1);
+	myu::wait_ms(1);
     }
 
-    return UART::data_register();
+    return UART::receive_data_register();
 }
 
 

@@ -197,7 +197,7 @@ void print_bg(std::ostream& out, const atd::Text_block_with_view<C>& txt)
 void init_uart()
 {
     UART_iostream uart;
-    myu::UART_basic_cfg<baud_rate>();
+    UART_iostream::init();
     uart.turn_on();
 }
 

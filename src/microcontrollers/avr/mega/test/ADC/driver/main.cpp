@@ -56,7 +56,7 @@ myu::Potential ADC_in_volts(const myu::Potential& AREF, uint16_t arefs)
 void init_uart()
 {
     UART_iostream uart;
-    myu::UART_basic_cfg();
+    UART_iostream::init();
     uart.turn_on();
 }
 

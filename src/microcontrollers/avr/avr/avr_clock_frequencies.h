@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __MEGA0_CLOCK_FREQUENCIES_H__
-#define __MEGA0_CLOCK_FREQUENCIES_H__
+#ifndef __AVR_CLOCK_FREQUENCIES_H__
+#define __AVR_CLOCK_FREQUENCIES_H__
 
 /****************************************************************************
  *
@@ -42,7 +42,11 @@
  *
  ****************************************************************************/
 
-namespace mega0_{
+namespace avr_{
+
+inline constexpr uint32_t f_cpu()
+{ return F_CPU; }
+
 
 // frecuencia en Hz a la que funciona el reloj conectado al avr
 inline constexpr uint32_t clk_main()
@@ -80,6 +84,6 @@ inline constexpr uint32_t clk_per()
 }
 
 
-}// mega0_
+}// avr_
 
 #endif

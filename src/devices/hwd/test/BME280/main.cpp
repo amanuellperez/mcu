@@ -62,7 +62,7 @@ using Sensor = dev::BME280_TWI<TWI_master, sensor_address>;
 void init_UART()
 {
     UART_iostream uart;
-    myu::UART_basic_cfg();
+    UART_iostream::init();
     uart.turn_on();
 }
 
