@@ -19,7 +19,7 @@
 
 #include "../../../dev_push_button.h"
 #include "../../../dev_led.h"
-#include <avr_atmega.h>
+#include <mega.h>
 
 // Microcontroller
 // ---------------

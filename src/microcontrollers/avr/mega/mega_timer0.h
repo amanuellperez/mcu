@@ -169,7 +169,7 @@ inline Time clock_period_in_us_8MHz()
 }
 
 
-template<uint32_t clock_frequency_in_Hz = clock_frequency_in_hz>
+template<uint32_t clock_frequency_in_Hz = clock_cpu()>
 inline Time clock_period()
 {
     if constexpr (clock_frequency_in_Hz == 1000000UL)
@@ -351,13 +351,13 @@ public:
     //		
     // Time_counter::turn_on_with_period_of<1>::us(); 
     template<uint16_t period_in_us
-	    , uint32_t clock_frequency_in_Hz = clock_frequency_in_hz>
+	    , uint32_t clock_frequency_in_Hz = clock_cpu()>
     struct turn_on_with_clock_period_of{
 	static void us()
 	{timer0_::set_clock_period_in_us<period_in_us, clock_frequency_in_Hz>();}
     };
 
-    template <uint32_t clock_frequency_in_hz = clock_frequency_in_hz>
+    template <uint32_t clock_frequency_in_hz = clock_cpu()>
     static counter_type turn_on_with_overflow_to_count_1s();
 
 // TODO: escribirla cuando modifique Clock_ms
@@ -467,7 +467,7 @@ protected:
     static void init(){ Timer::CTC_mode();}
 
     template<uint16_t period_in_us
-	    , uint32_t clock_frequency_in_Hz = clock_frequency_in_hz>
+	    , uint32_t clock_frequency_in_Hz = clock_cpu()>
     static void turn_on()
     {timer0_::set_clock_period_in_us<period_in_us, clock_frequency_in_Hz>();}
 
@@ -480,7 +480,7 @@ protected:
     /// Función inversa a la prescaler_top_to_frequency_in_Hz:
     /// Devuelve el par (prescaler factor, top) necesario para generar la
     /// frecuencia freq_in_Hz.
-    template <uint32_t f_clock_in_Hz = clock_frequency_in_hz>
+    template <uint32_t f_clock_in_Hz = clock_cpu()>
     static constexpr 
     std::pair<uint32_t, uint32_t> 
     frequency_in_Hz_to_prescaler_top(uint32_t freq_in_Hz)

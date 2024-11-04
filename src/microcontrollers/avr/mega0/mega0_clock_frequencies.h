@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __AVR_CLOCK_FREQUENCIES_H__
-#define __AVR_CLOCK_FREQUENCIES_H__
+#ifndef __MEGA0_CLOCK_FREQUENCIES_H__
+#define __MEGA0_CLOCK_FREQUENCIES_H__
 
 /****************************************************************************
  *
@@ -41,14 +41,12 @@
  *    01/11/2024 Primer intento
  *
  ****************************************************************************/
+#include <cstdint>
 
-namespace avr_{
-
-inline constexpr uint32_t f_cpu()
-{ return F_CPU; }
+namespace mega0_{
 
 
-// frecuencia en Hz a la que funciona el reloj conectado al avr
+// frecuencia en Hz a la que funciona el reloj principal conectado al avr
 inline constexpr uint32_t clk_main()
 { 
     if constexpr (CLK_MAIN != 0)
@@ -73,17 +71,31 @@ inline constexpr uint32_t clk_main()
 inline constexpr uint32_t clk_per()
 { 
     if constexpr (CLK_PER != 0){
-	static_assert(F_CPU == CLK_PER);
-
 	return CLK_PER; 
     }
 
     else {
+	// Esta es la clk_main() / prescaler.
+	// Hay que mirar el valor del prescaler en el microcontrolador
 	static_assert(true, "TODO");
     }
 }
 
+inline constexpr uint32_t clk_cpu() { return clk_per(); }
 
-}// avr_
+// Alias (uso la notación del atmega4809)
+// -----
+// ¿mejor clk_main() ó clock_main()? Aunque el segundo es más claro, hoy me
+// gusta más el primero. Que el uso sea el que decida.
+// Clock principal: reloj al que está conectado el avr
+inline constexpr uint32_t clock_main() {return clk_main(); }
+
+// Clock al que funciona la CPU
+inline constexpr uint32_t clock_cpu() { return clk_cpu(); }
+
+// Clock al que funcionan los peripherals
+inline constexpr uint32_t clock_peripherals() { return clk_per(); }
+
+}// mega0_
 
 #endif

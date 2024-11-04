@@ -48,8 +48,8 @@
  *
  ****************************************************************************/
 
-#include "mega_UART_basic.h"
-#include "mega_import_avr.h"	// clock_frequency_in_hz
+#include "mega_USART_basic.h"
+#include "mega_clock_frequencies.h"	
 
 namespace mega_{
 /***************************************************************************
@@ -64,7 +64,7 @@ bool UART_cfg()
 {                                
     USART::asynchronous_mode();
 
-    USART::template baud_speed<f_cpu(), Cfg::baud_rate, Cfg::max_error>();
+    USART::template baud_speed<clock_cpu(), Cfg::baud_rate, Cfg::max_error>();
     
     if constexpr (Cfg::parity_mode_enable)
 	USART::parity_mode_enable();

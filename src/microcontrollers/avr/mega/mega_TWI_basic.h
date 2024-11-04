@@ -42,6 +42,7 @@
 #include <avr/io.h> // registros: DDRB... PORT...
 #include "mega_import_avr.h"
 #include "mega_cfg.h"
+#include "mega_clock_frequencies.h"	
 
 namespace mega_{
 
@@ -126,7 +127,7 @@ public:
     /// Definimos la frecuencia del reloj SCL.
     /// f_scl = frecuencia en kHz de SCL (tipica: 100 kHz y 400 kHz).
     /// f_clock = frecuencia a la que funciona el reloj del avr.
-    template <uint16_t f_scl, uint32_t f_clock = clock_frequency_in_hz>
+    template <uint16_t f_scl, uint32_t f_clock = clock_cpu()>
     static void SCL_frequency_in_kHz();
     
 

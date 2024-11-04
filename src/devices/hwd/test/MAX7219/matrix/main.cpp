@@ -19,7 +19,7 @@
 
 
 #include "../../../dev_MAX7219.h"
-#include <avr_atmega.h>
+#include <mega.h>
 #include <mcu_SPI.h>
 
 #include <rom_font_dogica_8x8_cr.h>

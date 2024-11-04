@@ -17,7 +17,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include <avr_atmega.h>
+#include <mega.h>
 
 constexpr uint8_t pin_number = 15;
 #define ISR_PCINT  ISR_PCINT_PIN15

@@ -18,7 +18,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "../../dev_74HC595.h"
-#include <avr_atmega.h>
+#include <mega.h>
 
 namespace my_mcu = atmega;
 

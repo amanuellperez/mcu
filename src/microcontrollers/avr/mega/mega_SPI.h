@@ -34,6 +34,7 @@
  *
  ****************************************************************************/
 #include "mega_SPI_basic.h"
+#include "mega_clock_frequencies.h"	
 
 namespace mega_{
 
@@ -57,11 +58,11 @@ public:
     // When the SPI is configured as Slave, the SPI is only guaranteed 
     // to work at fosc/4 or lower
     template<uint16_t period
-	    , uint32_t clock_frequency_in_hz = clock_frequency_in_hz>
+	    , uint32_t clock_frequency_in_hz = clock_cpu()>
     static void clock_period_in_us();
 
     template<uint32_t frequency
-	    , uint32_t clock_frequency_in_hz = clock_frequency_in_hz>
+	    , uint32_t clock_frequency_in_hz = clock_cpu()>
     static void clock_frequency_in_hz();
 
     // Las transmisiones del SPI nunca van a fallar: al enviar un byte el SPI

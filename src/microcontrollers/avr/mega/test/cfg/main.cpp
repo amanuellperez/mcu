@@ -43,7 +43,7 @@ void test_cfg()
 	uart << "Variables cfg!\n";
 	uart << "---------------\n";
 
-	uart << "clock_frequency = " << myu::clock_frequency << '\n';
+	uart << "clock_cpu = " << myu::clock_cpu() << '\n';
 	char c{};
 	uart >> c;
     }

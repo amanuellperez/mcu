@@ -45,7 +45,7 @@ using Timer = myu::Timer1;
 
 void timer_on_1MHz(uint16_t period_in_us)
 {
-    if constexpr (myu::clock_frequency == 1_MHz){
+    if constexpr (myu::clock_cpu() == 1'000'000){
 	UART_iostream uart;
 
 	switch(period_in_us){
@@ -64,7 +64,7 @@ void timer_on_1MHz(uint16_t period_in_us)
 
 void timer_on_8MHz(uint16_t period_in_us)
 {
-    if constexpr (myu::clock_frequency == 8_MHz){// si no se pone aunque no se llame a 
+    if constexpr (myu::clock_cpu() == 8'000'000){// si no se pone aunque no se llame a 
 	    // timer_on_8MHz (por ser a 1MHz) la compila, generando error!!!
 	UART_iostream uart;
 
@@ -84,10 +84,10 @@ void timer_on_8MHz(uint16_t period_in_us)
 
 void timer_on(uint16_t period_in_us)
 {
-    if constexpr (myu::clock_frequency == 1_MHz)
+    if constexpr (myu::clock_cpu() == 1'000'000)
 	timer_on_1MHz(period_in_us);
 
-    else if constexpr (myu::clock_frequency == 8_MHz)
+    else if constexpr (myu::clock_cpu() == 8'000'000)
 	timer_on_8MHz(period_in_us);
 
 }
@@ -145,10 +145,10 @@ uint16_t select_period_8MHz()
 
 uint16_t select_period()
 {
-    if constexpr (myu::clock_frequency == 1_MHz)
+    if constexpr (myu::clock_cpu() == 1'000'000)
 	return select_period_1MHz();
 
-    else if constexpr (myu::clock_frequency == 8_MHz)
+    else if constexpr (myu::clock_cpu() == 8'000'000)
 	return select_period_8MHz();
 
     else{

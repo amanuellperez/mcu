@@ -21,7 +21,7 @@
 #include <atd_ostream.h>
 #include <atd_istream.h>
 
-#include <avr_atmega.h>
+#include <mega.h>
 #include "../../dev_OV7670_rom.h"
 #include <mcu_TWI_master.h>
 #include <mcu_TWI_master_ioxtream.h>

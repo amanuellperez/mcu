@@ -19,7 +19,7 @@
 
 #include "../../dev_joystick.h"
 
-#include <avr_atmega.h>
+#include <mega.h>
 
 // Micro
 // -----

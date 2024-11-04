@@ -20,7 +20,7 @@
 
 #include "main.h"
 
-#include <avr_atmega.h>
+#include <mega.h>
 
 
 ISR(TWI_vect)

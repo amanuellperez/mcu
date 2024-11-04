@@ -24,7 +24,7 @@
 constexpr int font_test = 3; 
 
 #include "../../dev_SDD1306.h"
-#include <avr_atmega.h>
+#include <mega.h>
 #include <mcu_TWI_master.h>
 #include <mcu_TWI_master_ioxtream.h>
 

@@ -19,7 +19,7 @@
 
 // Este microcontrolador dialoga con el test/TWI/master
 #include "../../../mcu_TWI_slave.h"
-#include <avr_atmega.h>
+#include <mega.h>
 
 
 // Microcontroller

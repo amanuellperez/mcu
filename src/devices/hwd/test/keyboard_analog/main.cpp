@@ -19,7 +19,7 @@
 
 #include "../../dev_keyboard_analog.h"
 
-#include <avr_atmega.h>
+#include <mega.h>
 
 constexpr uint8_t npin = 28;
 constexpr uint16_t aref0 = 382;

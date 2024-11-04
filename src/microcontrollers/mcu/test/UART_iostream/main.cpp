@@ -30,7 +30,7 @@
 
 
 #ifdef IF_atmega328p
-#include <avr_atmega.h> 
+#include <mega.h> 
 namespace myu = atmega;
 using UART = myu::UART_8bits;
 

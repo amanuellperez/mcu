@@ -34,6 +34,7 @@
 #include "mega_timer2_basic.h"
 #include "mega_import_avr.h"
 #include "mega_interrupt.h" // Disable_interrupts
+#include "mega_clock_frequencies.h"	
 
 
 #include <atd_type_traits.h>
@@ -114,10 +115,10 @@ template<uint16_t period
 	, uint32_t clock_frequency_in_Hz>
 inline void set_clock_period_in_us()
 {
-    if constexpr (clock_frequency_in_Hz == 1000000UL)
+    if constexpr (clock_cpu() == 1000000UL)
 	set_clock_period_in_us_1MHz<period>();
 
-//    else if constexpr (clock_frequency_in_Hz == 8000000UL)
+//    else if constexpr (clock_cpu() == 8000000UL)
 //	set_clock_period_in_us_8MHz<period>();
 
     else
@@ -170,10 +171,10 @@ public:
     // Encendemos el Counter en modo síncrono. El usuario será responsable de
     // llamar a la función init y activar las interrupciones si las necesita.
     template<uint16_t period_in_us
-	    , uint32_t clock_frequency_in_Hz = clock_frequency_in_hz>
+	    , uint32_t clock_frequency_in_Hz = clock_cpu()>
     struct turn_on_with_clock_period_of{ static void us(); };
 
-    template <uint32_t clock_frequency_in_hz = clock_frequency_in_hz>
+    template <uint32_t clock_frequency_in_hz = clock_cpu()>
     static counter_type turn_on_with_overflow_to_count_1s();
 
     /// Apagamos el generador de señales.
@@ -269,7 +270,7 @@ class Time_counter2_32kHz_g{
 public:
 // Asserts
 // -------
-    static_assert(clock_frequency_in_hz >= 4 * 32768,
+    static_assert(clock_cpu() >= 4 * 32768,
 		"The CPU main clock frequency must be more "
 		"than four times the oscillator frequency");
 

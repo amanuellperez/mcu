@@ -21,7 +21,7 @@
 #ifndef __STROBOSCOPE_STROBOSCOPE_H__
 #define __STROBOSCOPE_STROBOSCOPE_H__
 
-#include <avr_atmega.h>
+#include <mega.h>
 
 template <uint32_t freq_mcu>
 struct __Stroboscope_cfg;

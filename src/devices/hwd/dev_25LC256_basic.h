@@ -40,7 +40,7 @@
  *	2.- ¿otros errores?
  *
  ****************************************************************************/
-#include <avr_atmega.h> // TODO: parametrizar SPI en la EEPROM
+#include <mega.h> // TODO: parametrizar SPI en la EEPROM
 #include "not_generic.h"
 
 #include <cstddef>    // byte

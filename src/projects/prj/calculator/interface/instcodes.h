@@ -23,7 +23,7 @@
 #define __INSTCODES_H__
 
 
-#include <avr_atmega.h>
+#include <mega.h>
 
 
 struct Instructions_code

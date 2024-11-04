@@ -20,7 +20,7 @@
 
 
 #include <atd_magnitude.h>
-#include <avr_atmega.h>
+#include <mega.h>
 #include <dev_A4988.h>
 
 #include <atd_test.h>

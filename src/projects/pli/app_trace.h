@@ -33,7 +33,7 @@
  *
  ****************************************************************************/
 #ifdef TRACES_ON
-#include <avr_atmega.h>
+#include <mega.h>
 
 inline void init_traces()
 {

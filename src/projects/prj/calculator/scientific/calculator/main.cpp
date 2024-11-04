@@ -22,7 +22,7 @@
 // evitar cortocircuitos, y en las columnas al conectar los pines los
 // configuramos con pullup resistor.
 // Sacamos la salida por un LCD
-#include <avr_atmega.h>
+#include <mega.h>
 
 #include "main.h"
 #include "../../interface.h"

@@ -28,7 +28,7 @@
 // El resto del programa NO tiene que saber qué dispositivos concretos usamos. 
 // Lo ideal es usar dispositivos genéricos en el resto, de esa forma se puede
 // cambiar el hardware sin tocar el software.
-#include <avr_atmega.h>
+#include <mega.h>
 #include <mcu_one_wire.h>
 #include <mcu_clock.h>
 #include <dev_DS18B20.h>

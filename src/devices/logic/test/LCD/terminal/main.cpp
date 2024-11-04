@@ -19,7 +19,7 @@
 
 #include "../../../dev_LCD_terminal.h"
 #include <dev_HD44780_generic.h>
-#include <avr_atmega.h>
+#include <mega.h>
 #include <stddef.h>
 
 namespace myu = atmega;

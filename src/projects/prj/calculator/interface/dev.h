@@ -35,7 +35,7 @@
 
 #include <dev_keypad.h>
 
-#include <avr_atmega.h>
+#include <mega.h>
 
 #include "lcd.h"
 

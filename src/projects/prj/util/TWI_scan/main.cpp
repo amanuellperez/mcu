@@ -19,7 +19,7 @@
 
 // Este microcontrolador dialoga con el test/TWI/slave
 #include <mcu_TWI_master.h>
-#include <avr_atmega.h>
+#include <mega.h>
 #include <atd_ostream.h>    // print_int_as_hex
 
 

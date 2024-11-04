@@ -28,7 +28,7 @@
 #include "error.h"
 #include "../../buffer.h"	// read
 
-#include <avr_atmega.h>
+#include <mega.h>
 
 int yylex()
 {

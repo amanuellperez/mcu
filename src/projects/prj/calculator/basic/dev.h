@@ -38,7 +38,7 @@
 
 #include "lcd.h"
 
-#include <avr_atmega.h>
+#include <mega.h>
 
 namespace my_mcu = atmega;
 

@@ -27,7 +27,7 @@
 // Lo ideal es usar dispositivos genéricos en el resto, de esa forma se puede
 // cambiar el hardware sin tocar el software.
 #include <stdint.h>
-#include <avr_atmega.h>
+#include <mega.h>
 
 #include <dev_HD44780.h>
 #include <dev_LCD_screen.h>

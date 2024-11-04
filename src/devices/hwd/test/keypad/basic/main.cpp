@@ -23,7 +23,7 @@
 #include "../../../dev_keypad.h"
 #include "../../../dev_keyboard_code.h"
 
-#include <avr_atmega.h>
+#include <mega.h>
 
 // Microcontroller
 // ---------------

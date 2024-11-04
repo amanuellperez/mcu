@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __AVR_CONSTANTS_H__
-#define __AVR_CONSTANTS_H__
+#ifndef __MEGA_CLOCK_FREQUENCIES_H__
+#define __MEGA_CLOCK_FREQUENCIES_H__
 /****************************************************************************
  *
  *   - DESCRIPCION: Configuración del avr que vamos a usar
@@ -35,27 +35,27 @@
  *    27/01/2020 v0.0
  *
  ****************************************************************************/
-#include "avr_types.h"
+#include "mega_import_avr.h"
+
 
 #ifndef F_CPU
 #error "To include these header you need to define F_CPU"
 #endif
 
-namespace avr_{
+namespace mega_{
 
-// DUDA: ¿Cuál de las siguientes dos versiones usar?
-// (1) Para parámetro de template queda mejor el uint32_t.
-// (2) Para el resto mejor `Frequency`.
-// De momento suministro las dos y que el uso elija.
-//
-constexpr uint32_t clock_frequency_in_hz = F_CPU;
+inline constexpr uint32_t clock_cpu() { return F_CPU; }
+
+// TODO: eliminar o cambiar el nombre ??? 
 constexpr Frequency clock_frequency{F_CPU};
+
 
 }// namespace
 
 // F_CPU lo usa <util/delay.h>. No se puede hacer el undef
 // sin incluir antes delay.h
 //#undef F_CPU
+
 
 
 

@@ -23,7 +23,7 @@
 
 #include <algorithm>
 
-#include <avr_atmega.h>
+#include <mega.h>
 
 namespace myu = atmega;
 using Micro = myu::Micro;

@@ -31,7 +31,7 @@
 
 #include "car_2wheels.h"
 
-#include <avr_atmega.h>
+#include <mega.h>
 #include <dev_L298N.h>
 
 

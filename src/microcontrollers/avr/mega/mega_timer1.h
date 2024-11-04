@@ -98,6 +98,7 @@
 #include "mega_interrupt.h"
 #include "mega_import_avr.h"
 #include "mega_micro.h"
+#include "mega_clock_frequencies.h"	
 
 #include <atd_math.h>
 #include <atd_names.h>
@@ -233,7 +234,7 @@ inline Frequency clock_frequency_in_Hz_8MHz()
 
 
 
-template<uint32_t clock_frequency_in_hz = avr_::clock_frequency_in_hz>
+template<uint32_t clock_frequency_in_hz = clock_cpu()>
 inline Time clock_period()
 {
     if constexpr (clock_frequency_in_hz == 1000000UL)
@@ -390,7 +391,7 @@ public:
     /// tiempo directamente del contador.
     // Leer notas en Time_counter0
     template<uint16_t period_in_us
-	    , uint32_t clock_frequency_in_hz = avr_::clock_frequency_in_hz>
+	    , uint32_t clock_frequency_in_hz = clock_cpu() >
     struct turn_on_with_clock_period_of{
 	static void us()
 	{timer1_::set_clock_period_in_us<period_in_us, clock_frequency_in_hz>();}
@@ -408,10 +409,10 @@ public:
     /// para que se haya alcanzado 1s)
     /// Recordar que el cliente es responsable de llamar a `enable_interrupts()`
     /// para que funcione.
-    template <uint32_t clock_frequency_in_hz = clock_frequency_in_hz>
+    template <uint32_t clock_frequency_in_hz = clock_cpu()>
     static counter_type turn_on_with_overflow_to_count_1s();
 
-    template <uint32_t clock_frequency_in_hz = clock_frequency_in_hz>
+    template <uint32_t clock_frequency_in_hz = clock_cpu()>
     static void turn_on_with_overflow_every_1ms();
 
     /// Apagamos el contador
@@ -606,7 +607,7 @@ private:
     static void init(){ Timer::CTC_mode_top_ICR();}
 
     template<uint16_t period
-	    , uint32_t clock_frequency_in_hz = clock_frequency_in_hz>
+	    , uint32_t clock_frequency_in_hz = clock_cpu()>
     static void turn_on()
     {timer1_::set_clock_period_in_us<period, clock_frequency_in_hz>();}
 
@@ -634,7 +635,7 @@ private:
     /// Devuelve la frecuencia, en Hz,  que se genera dados 
     /// el prescaler factor d (divisor de frecuencia) y el top M. 
     /// (pag 132 datasheet)
-    template <uint32_t f_clock_in_Hz = clock_frequency_in_hz>
+    template <uint32_t f_clock_in_Hz = clock_cpu()>
     static constexpr 
     uint32_t prescaler_top_to_frequency_in_Hz(uint32_t d, uint32_t M)
     { return mega_::timer_::CTC_mode::
@@ -643,7 +644,7 @@ private:
     /// Función inversa a la prescaler_top_to_frequency_in_Hz:
     /// Devuelve el par (prescaler factor, top) necesario para generar la
     /// frecuencia freq_in_Hz.
-    template <uint32_t f_clock_in_Hz = clock_frequency_in_hz>
+    template <uint32_t f_clock_in_Hz = clock_cpu()>
     static constexpr 
     std::pair<uint32_t, uint32_t> 
     frequency_in_Hz_to_prescaler_top(uint32_t freq_in_Hz)
@@ -736,7 +737,7 @@ public:
 
 // cfg
     static constexpr uint8_t number  = npin0;
-    static constexpr Frequency clock_frequency = avr_::clock_frequency;
+    static constexpr Frequency clock_frequency = mega_::clock_frequency;
 
 // basic interface
     // Genera la señal SW indicada. Enciende el Timer en caso de que
@@ -999,7 +1000,7 @@ public:
 
 // cfg
     static constexpr uint8_t number  = npin0;
-    static constexpr Frequency clock_frequency = avr_::clock_frequency;
+    static constexpr Frequency clock_frequency = mega_::clock_frequency;
 
 // constructor
     PWM1_pin() = delete; // de momento static interface

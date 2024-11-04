@@ -18,7 +18,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "../../../mcu_clock.h"
-#include <avr_atmega.h>
+#include <mega.h>
 #include <atd_time.h>
 
 namespace myu = atmega;

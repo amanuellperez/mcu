@@ -22,7 +22,7 @@
 
 #include <algorithm>
 
-#include <avr_atmega.h>
+#include <mega.h>
 
 // Microcontroller
 // ---------------

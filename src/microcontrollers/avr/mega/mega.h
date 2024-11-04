@@ -1,4 +1,4 @@
-// Copyright (C) 2024 Manuel Perez 
+// Copyright (C) 2022 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -23,20 +23,65 @@
 #define __MEGA_H__
 /****************************************************************************
  *
- * DESCRIPCION
- *	Built-in devices que suministra cada micro de la familia mega
+ *  DESCRIPCION
+ *	Microcontroladores de la familia mega
  *
- * HISTORIA
+ *	De momento solo es para el atmega328p. 
+ *
+ *
+ *  HISTORIA:
  *    Manuel Perez
- *    19/10/2024 Empezando...
+ *    03/12/2022 Escrito
+ *    04/11/2024 avr_atmega.h -> mega.h
  *
  ****************************************************************************/
-#include <mega_import_avr.h>   // importamos todo avr_
-#include <mega_import_avr_fcpu.h>   // importamos todo avr_
+// Cosas genéricas a todas las familias de avrs
+// --------------------------------------------
+#include <mega_import_avr.h>
+
+// Configuración del micro
+// -----------------------
+#include <mega_cfg.h>
+
+// Micro
+// -----
+#include <mega_micro.h>
+
+// Traductores
+// -----------
+#include <mega_USART_basic.h>
+#include <mega_SPI_basic.h>
+#include <mega_TWI_basic.h>
+
+#include <mega_timer0_basic.h>
+#include <mega_timer1_basic.h>
+#include <mega_timer2_basic.h>
+
+#include <mega_ADC_basic.h>
+
+#include <mega_interrupt.h>
+
+#include <mega_pin.h>
+#include <mega_port_basic.h>
+#include <mega_sleep.h>
+#include <mega_watchdog.h>
 
 
-#include <avr_atmega.h>
+// Dispositivos genéricos
+// ----------------------
+#include <mega_SPI.h>
 
+#include <mega_timer0.h>
+#include <mega_timer1.h>
+#include <mega_timer2.h>
+
+#include <mega_ADC.h>
+
+#include <mega_UART.h>
+#include <mcu_UART_iostream.h>	// es comodo meterlo aqui
+
+// Built-in devices for atmega
+#include <mega_atmega_dev.h>
 
 #endif
 

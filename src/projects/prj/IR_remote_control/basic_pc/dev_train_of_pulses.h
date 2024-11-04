@@ -28,7 +28,7 @@
 #include "dev_cycle.h"
 
 #include <atd_array.h>
-#include <avr_atmega.h>	    // TODO: esto depende del avr. Generic_pin???
+#include <mega.h>	    // TODO: esto depende del avr. Generic_pin???
 
 // TODO: estoy duplicando la memoria. Al implementar Train_of_pulses_receiver
 //       puedo usar la memoria alojada en él para Train_of_pulses.

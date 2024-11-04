@@ -21,7 +21,7 @@
 // UART.
 #include "../../dev_keyrow.h"
 
-#include <avr_atmega.h>
+#include <mega.h>
 
 // Microcontroller
 // ----------------

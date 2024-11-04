@@ -18,7 +18,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "../../mcu_SPI.h"
-#include <avr_atmega.h>
+#include <mega.h>
 
 #include <atd_test.h>
 using namespace test;

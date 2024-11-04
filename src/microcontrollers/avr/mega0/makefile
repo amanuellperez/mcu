@@ -5,6 +5,7 @@ INCS=\
 	mega0.h			\
 	mega0_cfg.h		\
 	mega0_clock.h	\
+	mega0_clock_frequencies.h	\
 	mega0_import_avr.h	\
 	mega0_micro.h	\
 	mega0_pin.h		\

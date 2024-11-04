@@ -72,9 +72,12 @@
 #include <atd_bit.h>
 #include <atd_type_traits.h>
 
+// TODO: avr/io.h sobra de aqui 
 #include <avr/io.h> // registros: DDRB... PORT...
+
 #include "mega_pin.h"
 #include "mega_import_avr.h"
+#include "mega_clock_frequencies.h"
 
 namespace mega_{
 /*!
@@ -169,7 +172,7 @@ public:
 
     /// Frecuencia a la que funciona internamente el timer.
     /// Se cumple que clock_frequency() = 1 / clock_period();
-    template <uint32_t clock_frequency_in_hz = avr_::clock_frequency_in_hz>
+    template <uint32_t clock_frequency_in_hz = clock_cpu()>
     static Frequency clock_frequency();
 
 

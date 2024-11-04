@@ -18,7 +18,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 // ¿Qué tamaños tienen los distintos tipos básicos en avr-gcc?
-#include <avr_atmega.h>
+#include <mega.h>
 #include <bit>
 
 // Microcontroller

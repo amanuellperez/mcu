@@ -42,7 +42,7 @@
  ****************************************************************************/
 
 #include "buffer.h"
-#include <avr_atmega.h>
+#include <mega.h>
 
 
 // meto Interface dentro de calc, para poder definir Interface en dev.h

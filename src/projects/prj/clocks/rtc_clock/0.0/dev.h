@@ -41,7 +41,7 @@
 #include <dev_DS1307_clock.h>
 #include <mcu_TWI_master.h>
 
-#include <avr_atmega.h>
+#include <mega.h>
 
 
 // Microcontroller

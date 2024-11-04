@@ -20,7 +20,7 @@
 // Es más eficiente y más sencillo de implementar usando los puertos
 // (ver ejemplo de port/POV_toy). Sin embargo, es más fácil soldar con estas
 // conexiones.
-#include <avr_atmega.h>
+#include <mega.h>
 
 // prj_dev.h
 namespace my_mcu = atmega;

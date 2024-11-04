@@ -20,7 +20,7 @@
 #include "../../mcu_one_wire.h"
 
 #include <atd_ostream.h>
-#include <avr_atmega.h>	
+#include <mega.h>	
 
 // Microcontroller
 // ----------------

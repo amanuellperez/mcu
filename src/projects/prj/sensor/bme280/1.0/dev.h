@@ -22,7 +22,7 @@
 #ifndef __SENSOR_DEV_H__
 #define __SENSOR_DEV_H__
 
-#include <avr_atmega.h>
+#include <mega.h>
 
 #include <dev_LCD_screen.h>
 #include <dev_HD44780.h>

@@ -33,7 +33,7 @@
  *    19/12/2021 v0.0
  *
  ****************************************************************************/
-#include <avr_atmega.h>
+#include <mega.h>
 
 template <typename SPI_select0, uint16_t period_in_us0>
 class SPI_Keyboard{

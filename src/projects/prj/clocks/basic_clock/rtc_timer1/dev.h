@@ -32,7 +32,7 @@
  *
  ****************************************************************************/
 #include <stdint.h>
-#include <avr_atmega.h>
+#include <mega.h>
 
 #include <dev_HD44780.h>
 #include <dev_LCD_screen.h>

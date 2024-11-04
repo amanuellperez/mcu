@@ -23,7 +23,7 @@
 #define __CHRONO_DEV_H__
 
 #include <stdint.h>
-#include <avr_atmega.h>
+#include <mega.h>
 
 #include <dev_HD44780.h>
 #include <dev_LCD_screen.h>

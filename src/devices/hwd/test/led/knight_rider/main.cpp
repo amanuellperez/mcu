@@ -19,7 +19,7 @@
 
 // Hacemos el coche fantástico 
 #include "../../../dev_led.h"
-#include <avr_atmega.h>
+#include <mega.h>
 
 // Microcontroller
 // ---------------

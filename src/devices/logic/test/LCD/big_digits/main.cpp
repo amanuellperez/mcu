@@ -21,7 +21,7 @@
 
 #include "../../../dev_LCD_screen.h" // TODO: siempre ponerlo al principio
 				     
-#include <avr_atmega.h>	// define MCU::ROM_read. Ponerlo antes que los rom.h
+#include <mega.h>	// define MCU::ROM_read. Ponerlo antes que los rom.h
 #include <rom_LCD_font_2x1.h>
 #include <rom_LCD_font_2x2.h>
 #include <rom_LCD_font_2x3.h>

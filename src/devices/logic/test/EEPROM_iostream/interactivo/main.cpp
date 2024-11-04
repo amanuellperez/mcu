@@ -32,7 +32,7 @@
 #include <atd_cast.h>
 #include <atd_cstddef.h>
 
-#include <avr_atmega.h>
+#include <mega.h>
 
 
 // Microcontroller

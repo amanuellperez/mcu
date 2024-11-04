@@ -19,7 +19,7 @@
 
 #include "mus_musician.h"
 #include <atd_memory.h>
-#include <avr_atmega.h>	// macro pgm_read_byte!!! 
+#include <mega.h>	// macro pgm_read_byte!!! 
 
 namespace music{
 // TODO: progmem_read ya no está en atd!!!

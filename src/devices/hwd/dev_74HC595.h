@@ -35,7 +35,7 @@
  *
  ****************************************************************************/
 
-#include <avr_atmega.h>	// parametrizar <Micro, SPI>
+#include <mega.h>	// parametrizar <Micro, SPI>
 #include "not_generic.h"
 
 namespace dev{

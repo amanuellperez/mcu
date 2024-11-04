@@ -23,7 +23,7 @@
 
 
 #ifdef ATMEGA328P
-#include <avr_atmega.h>
+#include <mega.h>
 #include <rom_glyphs_5x8.h> // siempre despues de avr_atmega.h o equivalente
 			    
 namespace myu = atmega;

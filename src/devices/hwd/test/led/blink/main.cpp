@@ -18,7 +18,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "../../../dev_led.h"
-#include <avr_atmega.h>
+#include <mega.h>
 
 // Microcontroller
 // ---------------

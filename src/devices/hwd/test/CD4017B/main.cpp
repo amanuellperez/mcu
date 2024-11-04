@@ -19,7 +19,7 @@
 
 #include "../../dev_CD4017B.h"
 
-#include <avr_atmega.h>
+#include <mega.h>
 
 namespace my_mcu = atmega;
 

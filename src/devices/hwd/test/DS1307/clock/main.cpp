@@ -24,7 +24,7 @@
 #include <atd_cstddef.h>
 #include <atd_time.h>
 
-#include <avr_atmega.h>
+#include <mega.h>
 
 #include <mcu_TWI_master.h>
 

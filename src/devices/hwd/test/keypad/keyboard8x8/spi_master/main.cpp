@@ -25,7 +25,7 @@
  *    12/12/2021 v0.0
  *
  ****************************************************************************/
-#include <avr_atmega.h>
+#include <mega.h>
 #include "../dev.h"
 
 // Microcontroller

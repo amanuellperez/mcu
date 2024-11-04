@@ -22,7 +22,7 @@
 #ifndef __PRJ_DEV_H__
 #define __PRJ_DEV_H__
 
-#include <avr_atmega.h>
+#include <mega.h>
 #include <mcu_clock.h>
 #include <dev_push_button.h>
 

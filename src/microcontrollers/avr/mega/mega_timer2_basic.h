@@ -40,7 +40,7 @@
 
 #include "mega_interrupt.h"
 #include "mega_pin.h"
-#include "mega_import_avr.h"   // clock_frequency_in_Hz
+#include "mega_clock_frequencies.h"	
 
 #include <array>
 
@@ -114,7 +114,7 @@ public:
 
     /// Frecuencia a la que funciona internamente el timer.
     /// Se cumple que clock_frequency() = 1 / clock_period();
-    template <uint32_t clock_frequency_in_Hz = clock_frequency_in_hz>
+    template <uint32_t clock_frequency_in_Hz = clock_cpu()>
     static Frequency clock_frequency();
 
 

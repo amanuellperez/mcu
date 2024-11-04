@@ -8,8 +8,6 @@
 # Archivos a distribuir (pueden ser .h, .tcc, ..., cualquier cosa que no se
 # compile aquí)
 DIST =\
-		avr_constants.h	\
-		avr_clock_frequencies.h	\
 		avr_interrupt.h	\
 		avr_memory.h	\
 		avr_micro.h		\

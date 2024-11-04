@@ -50,7 +50,7 @@
 // Conectar un teclado de 8 x 8
 // El teclado es una matriz de pulsadores.
 // Sacamos la salida por UART
-#include <avr_atmega.h>
+#include <mega.h>
 
 #include "dev.h"
 

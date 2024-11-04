@@ -21,7 +21,7 @@
 #include "../../../dev_HD44780_basic.h"
 
 #include <cstring>
-#include <avr_atmega.h>
+#include <mega.h>
 #include <rom_glyphs_5x8.h>
 
 namespace myu = atmega;

@@ -18,8 +18,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #pragma once
-#ifndef __MEGA_UART_BASIC_H__
-#define __MEGA_UART_BASIC_H__
+#ifndef __MEGA_USART_BASIC_H__
+#define __MEGA_USART_BASIC_H__
 /****************************************************************************
  *
  * - DESCRIPCION: Traductor del módulo UART del avr.
@@ -255,6 +255,8 @@ public:
     static void asynchronous_mode() // modo 00
     {atd::write_bits<UMSEL01, UMSEL00>::to<0, 0>::in(UCSR0C);}
 
+    // TODO: esta función no pertenece al traductor. No usarla aquí. Dejarla
+    // en UART_8bits o como helper.
     /// Definimos la velocidad a la que queremos transmitir datos.
     template <uint32_t f_clock, uint32_t baud_rate, uint32_t tolerance = 2>
     static void baud_speed();

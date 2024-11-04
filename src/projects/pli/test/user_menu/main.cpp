@@ -23,7 +23,7 @@
 #include <dev_HD44780.h>
 #include <dev_keyrow.h>
 
-#include <avr_atmega.h>
+#include <mega.h>
 
 // Microcontroller
 // ---------------

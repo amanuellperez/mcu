@@ -21,7 +21,7 @@
 #include "../../mcu_miniclock.h"
 
 #include <atd_ostream.h>
-#include <avr_atmega.h>	
+#include <mega.h>	
 
 // Cfg
 // ---

@@ -153,7 +153,7 @@ myu::Potential ADC_in_volts(const myu::Potential& AREF, uint16_t arefs)
 
 void ADC_clock_frequency_125kHz()
 {
-    if constexpr (myu::clock_frequency == 1_MHz)
+    if constexpr (myu::clock_cpu() == 1'000'000)
 	ADC::clock_frequency_divide_by_8();
 
     else {
@@ -255,7 +255,7 @@ void select_prescaler()
 	return;
     }
 
-    myu::KiloHertz freq = myu::clock_frequency / prescaler;
+    myu::KiloHertz freq = myu::clock_cpu() / prescaler;
     
     // datasheet: 28.4.
     // La frecuencia para 10 bits de resolución debe de ir de 50kHz a 200kHz

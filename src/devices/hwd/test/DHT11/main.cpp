@@ -19,7 +19,7 @@
 
 #include "../../dev_DHT11.h"
 
-#include <avr_atmega.h>
+#include <mega.h>
 
 // Micro
 // -----

@@ -33,7 +33,7 @@
 #include "my_miniclock.h"
 #include <mcu_time.h>
 
-#include <avr_atmega.h>
+#include <mega.h>
 #include <dev_L298N.h>
 #include <dev_dc_motor.h>
 

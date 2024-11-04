@@ -21,7 +21,7 @@
 #include "../../dev_HCSR04.h" 
 
 #include <limits>
-#include <avr_atmega.h>
+#include <mega.h>
 #include <mcu_miniclock.h>
 
 // Micro

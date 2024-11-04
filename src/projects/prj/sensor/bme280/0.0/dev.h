@@ -25,7 +25,7 @@
 #include <dev_HD44780.h>
 #include <dev_BME280_basic.h>
 
-#include <avr_atmega.h>
+#include <mega.h>
 #include <mcu_TWI_master.h>
 
 // Microcontroller

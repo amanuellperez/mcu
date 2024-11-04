@@ -20,7 +20,7 @@
 #include "../../../dev_LCD_screen.h"// TODO: siempre ponerlo al principio
 #include <dev_HD44780_generic.h>
 
-#include <avr_atmega.h>	// antes de la rom, para definir MCU::ROM_read
+#include <mega.h>	// antes de la rom, para definir MCU::ROM_read
 #include <rom_LCD_font_2x1.h>
 #include <rom_LCD_font_2x2.h>
 #include <rom_LCD_font_2x3.h>

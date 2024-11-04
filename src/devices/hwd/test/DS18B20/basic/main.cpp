@@ -19,7 +19,7 @@
 
 #include "../../../dev_DS18B20.h"
 
-#include <avr_atmega.h>	
+#include <mega.h>	
 #include <mcu_one_wire.h>
 #include <atd_ostream.h>
 

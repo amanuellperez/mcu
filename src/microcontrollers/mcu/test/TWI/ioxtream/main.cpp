@@ -20,7 +20,7 @@
 // Este microcontrolador dialoga con el test/TWI/slave
 #include "../../../mcu_TWI_master_ioxtream.h"
 #include "../../../mcu_TWI_master.h"
-#include <avr_atmega.h>
+#include <mega.h>
 
 // Microcontroller
 // ---------------

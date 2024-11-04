@@ -14,11 +14,11 @@ SOURCES= mega_sleep.cpp			\
 
 
 INCS= \
-	avr_atmega.h		\
 	mega_ADC_basic.h	\
 	mega_ADC.h			\
 	mega_atmega_dev.h	\
 	mega_cfg.h			\
+	mega_clock_frequencies.h\
 	mega_debug.h			\
 	mega_interrupt.h		\
 	mega_micro.h			\
@@ -37,7 +37,7 @@ INCS= \
 	mega_timer2.h\
 	mega_TWI_basic.h		\
 	mega_UART.h				\
-	mega_UART_basic.h		\
+	mega_USART_basic.h		\
 	mega_UART_baud_rate.h	\
 	mega_watchdog.h			\
 	mega.h	

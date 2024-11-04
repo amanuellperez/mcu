@@ -19,7 +19,7 @@
 
 
 #include "../../../dev_MAX7219.h"
-#include <avr_atmega.h>
+#include <mega.h>
 #include <mcu_SPI.h>
 
 #include <atd_test.h>

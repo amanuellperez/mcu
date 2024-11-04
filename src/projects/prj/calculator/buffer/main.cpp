@@ -19,7 +19,7 @@
 
 // Probamos buffer
 // Sacamos la salida por UART
-#include <avr_atmega.h>
+#include <mega.h>
 #include "../buffer.h"
 
 // Microcontroller

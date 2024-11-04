@@ -29,7 +29,7 @@
 
 #include <atd_time.h>
 
-#include <avr_atmega.h>
+#include <mega.h>
 #include <atd_cast.h>
 #include <atd_cstddef.h>
 #include <std_iomanip.h>

@@ -18,7 +18,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "../../mcu_miniclock.h"
-#include <avr_atmega.h>
+#include <mega.h>
 
 // Devices
 // -------

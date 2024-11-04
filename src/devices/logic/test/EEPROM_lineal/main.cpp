@@ -19,7 +19,7 @@
 
 #include "../../dev_EEPROM_lineal.h"
 #include <dev_25LC256_basic.h>
-#include <avr_atmega.h>
+#include <mega.h>
 #include <atd_cast.h>
 #include <atd_cstddef.h>
 
