@@ -17,21 +17,26 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include <avr/io.h>
-#include <util/delay.h>
-#include <string.h>
 #include "../../mega0_usart_basic.h"
 #include "../../mega0_uart.h"
 #include "../../mega0_cfg.h"
 #include <mcu_default_cfg.h>
 
 namespace myu = mega0_;
-using USART = myu::USART_basic<myu::cfg::USART1>;
-using UART_8bits = myu::UART_8bits<myu::cfg::USART1>;
+
+// Descomentar para elegir qué USART probar
+//using USART_cfg = myu::cfg_40_pins::USART0;
+using USART_cfg = myu::cfg_40_pins::USART1; // pines 0,1
+//using USART_cfg = myu::cfg_40_pins::USART2;
+
+using USART = myu::USART_basic<USART_cfg>;
+using UART_8bits = myu::UART_8bits<USART_cfg>;
 
 
-void init(void)
+void init()
 {
+    myu::cfg_40_pins::pins::init();
+
     // probamos que se configure correctamente
     UART_8bits::init<mcu::default_cfg::UART_8bits_9600_bauds>(); 
 

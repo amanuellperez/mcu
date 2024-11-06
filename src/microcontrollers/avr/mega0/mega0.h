@@ -50,26 +50,24 @@ namespace atmega4809_40{
     using namespace avr_;
 
     // Fundamental: llamar a esta función init!!!
-    inline void init() { mega0_::cfg::pins_40::init();}
+    inline void init() { mega0_::cfg_40_pins::pins::init();}
 
 
     template <uint8_t n>
-    using Pin = mega0_::Pin<n, mega0_::cfg::pins_40>;
+    using Pin = mega0_::Pin<n, mega0_::cfg_40_pins::pins>;
 
-    using Micro = mega0_::Micro<mega0_::cfg::pins_40>;
+    using Micro = mega0_::Micro<mega0_::cfg_40_pins::pins>;
 
     using Clock_controller = mega0_::Clock_controller;
 
 // USART
-    using USART1 = mega0_::USART_basic<mega0_::cfg::USART1>;
-//    using USART2 = mega0_::USART_basic<mega0_::cfg::USART2>;
-//    using USART3 = mega0_::USART_basic<mega0_::cfg::USART3>;
-//    using USART4 = mega0_::USART_basic<mega0_::cfg::USART4>;
+    using USART0 = mega0_::USART_basic<mega0_::cfg_40_pins::USART0>;
+    using USART1 = mega0_::USART_basic<mega0_::cfg_40_pins::USART1>;
+    using USART2 = mega0_::USART_basic<mega0_::cfg_40_pins::USART2>;
 
-    using UART1_8bits = mega0_::UART_8bits<mega0_::cfg::USART1>;
-//    using UART2_8bits = mega0_::UART_8bits<mega0_::cfg::USART2>;
-//    using UART3_8bits = mega0_::UART_8bits<mega0_::cfg::USART3>;
-//    using UART4_8bits = mega0_::UART_8bits<mega0_::cfg::USART4>;
+    using UART0_8bits = mega0_::UART_8bits<mega0_::cfg_40_pins::USART0>;
+    using UART1_8bits = mega0_::UART_8bits<mega0_::cfg_40_pins::USART1>;
+    using UART2_8bits = mega0_::UART_8bits<mega0_::cfg_40_pins::USART2>;
 
 }
 

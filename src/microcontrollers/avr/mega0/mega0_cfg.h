@@ -41,7 +41,92 @@
 #include <avr/io.h>
 
 namespace mega0_{
-namespace cfg{
+
+/***************************************************************************
+ *		    CONFIGURACIÓN COMUN A TODOS LOS MEGA-0
+ ***************************************************************************/
+namespace cfg {
+
+namespace private_{
+
+// Posición de los bits en los registros
+struct USART_bits{
+// RXDATAH
+    static constexpr uint8_t RXCIF = USART_RXCIF_bp;
+    static constexpr uint8_t FERR  = USART_FERR_bp;
+    static constexpr uint8_t PERR  = USART_PERR_bp;
+    static constexpr uint8_t DATA8 = USART_DATA8_bp;
+
+// STATUS
+//    static constexpr uint8_t RXCIF= USART_RXCIF_bp; es igual a RXDATAH::RXCIF
+    static constexpr uint8_t TXCIF= USART_TXCIF_bp;
+    static constexpr uint8_t DREIF= USART_DREIF_bp;
+    static constexpr uint8_t RXSIF= USART_RXSIF_bp;
+    static constexpr uint8_t ISFIF= USART_ISFIF_bp;
+    static constexpr uint8_t BDF  = USART_BDF_bp;
+    static constexpr uint8_t WFB  = USART_WFB_bp;
+
+// CTRLA
+    static constexpr uint8_t RXCIE = USART_RXCIE_bp;
+    static constexpr uint8_t TXCIE = USART_TXCIE_bp;
+    static constexpr uint8_t DREIE = USART_DREIE_bp;
+    static constexpr uint8_t RXSIE = USART_RXSIE_bp;
+    static constexpr uint8_t LBME = USART_LBME_bp;
+    static constexpr uint8_t ABEIE = USART_ABEIE_bp;
+
+// CTRLB
+    static constexpr uint8_t RXEN = USART_RXEN_bp;
+    static constexpr uint8_t TXEN = USART_TXEN_bp;
+    static constexpr uint8_t SFDEN = USART_SFDEN_bp;
+    static constexpr uint8_t ODME = USART_ODME_bp;
+    static constexpr uint8_t MPCM = USART_MPCM_bp;
+
+// CTRLC
+    static constexpr uint8_t SBMODE = USART_SBMODE_bp;
+
+// TODO
+
+
+
+};
+
+// Diferentes valores que pueden tomar los registros
+struct USART_values{
+    // Modes
+    static constexpr uint8_t CMODE_ASYNCHRONOUS = USART_CMODE_ASYNCHRONOUS_gc;
+    static constexpr uint8_t CMODE_SYNCHRONOUS = USART_CMODE_SYNCHRONOUS_gc;
+    static constexpr uint8_t CMODE_IRCOM = USART_CMODE_IRCOM_gc;
+    static constexpr uint8_t CMODE_MSPI = USART_CMODE_MSPI_gc;
+
+    // Parity
+    static constexpr uint8_t PMODE_DISABLED = USART_PMODE_DISABLED_gc;
+    static constexpr uint8_t PMODE_EVEN = USART_PMODE_EVEN_gc;
+    static constexpr uint8_t PMODE_ODD = USART_PMODE_ODD_gc;
+
+    // Character size
+    static constexpr uint8_t CHSIZE_5BIT = USART_CHSIZE_5BIT_gc;
+    static constexpr uint8_t CHSIZE_6BIT = USART_CHSIZE_6BIT_gc;
+    static constexpr uint8_t CHSIZE_7BIT = USART_CHSIZE_7BIT_gc;
+    static constexpr uint8_t CHSIZE_8BIT = USART_CHSIZE_8BIT_gc;
+
+    static constexpr uint8_t CHSIZE_9BITL = USART_CHSIZE_9BITL_gc;
+    static constexpr uint8_t CHSIZE_9BITH = USART_CHSIZE_9BITH_gc;
+    
+    // Receiver mode
+    static constexpr uint8_t RXMODE_NORMAL = USART_RXMODE_NORMAL_gc;
+    static constexpr uint8_t RXMODE_CLK2X = USART_RXMODE_CLK2X_gc;
+    static constexpr uint8_t RXMODE_GENAUTO = USART_RXMODE_GENAUTO_gc;
+    static constexpr uint8_t RXMODE_LINAUTO = USART_RXMODE_LINAUTO_gc;
+
+};
+
+}// private_
+} // namespace cfg
+  
+/***************************************************************************
+ *		    CONFIGURACIÓN DE LOS MEGA-0 DE 40 pins
+ ***************************************************************************/
+namespace cfg_40_pins{
 
 /***************************************************************************
  *				PINS    
@@ -64,7 +149,7 @@ struct pins{
 // pins_40
 // -------
 // Pines del atmega4809 de 40 pins
-struct pins_40 : impl_of::pins{
+struct pins : impl_of::pins{
 
 // datasheet: pag 20, nota 4:
 // The 40-pin version of the ATmega4809 is using the die of the 48-pin 
@@ -243,80 +328,35 @@ auto pin_ctrl()
 /***************************************************************************
  *				USART
  ***************************************************************************/
-namespace private_{
 
-// Posición de los bits en los registros
-struct USART_bits{
-// RXDATAH
-    static constexpr uint8_t RXCIF = USART_RXCIF_bp;
-    static constexpr uint8_t FERR  = USART_FERR_bp;
-    static constexpr uint8_t PERR  = USART_PERR_bp;
-    static constexpr uint8_t DATA8 = USART_DATA8_bp;
+// USART0
+// ------
+inline auto usart0_registers() { return &USART0; }
+#undef USART0
 
-// STATUS
-//    static constexpr uint8_t RXCIF= USART_RXCIF_bp; es igual a RXDATAH::RXCIF
-    static constexpr uint8_t TXCIF= USART_TXCIF_bp;
-    static constexpr uint8_t DREIF= USART_DREIF_bp;
-    static constexpr uint8_t RXSIF= USART_RXSIF_bp;
-    static constexpr uint8_t ISFIF= USART_ISFIF_bp;
-    static constexpr uint8_t BDF  = USART_BDF_bp;
-    static constexpr uint8_t WFB  = USART_WFB_bp;
+struct USART0 {
+    // reg = registers
+    static auto reg() {return usart0_registers();}
+   
+    // posiciones de los bits dentro de los registros
+    using bit_pos = cfg::private_::USART_bits;
 
-// CTRLA
-    static constexpr uint8_t RXCIE = USART_RXCIE_bp;
-    static constexpr uint8_t TXCIE = USART_TXCIE_bp;
-    static constexpr uint8_t DREIE = USART_DREIE_bp;
-    static constexpr uint8_t RXSIE = USART_RXSIE_bp;
-    static constexpr uint8_t LBME = USART_LBME_bp;
-    static constexpr uint8_t ABEIE = USART_ABEIE_bp;
-
-// CTRLB
-    static constexpr uint8_t RXEN = USART_RXEN_bp;
-    static constexpr uint8_t TXEN = USART_TXEN_bp;
-    static constexpr uint8_t SFDEN = USART_SFDEN_bp;
-    static constexpr uint8_t ODME = USART_ODME_bp;
-    static constexpr uint8_t MPCM = USART_MPCM_bp;
-
-// CTRLC
-    static constexpr uint8_t SBMODE = USART_SBMODE_bp;
-
-// TODO
-
-
-
-};
-
-// Diferentes valores que pueden tomar los registros
-struct USART_values{
-    // Modes
-    static constexpr uint8_t CMODE_ASYNCHRONOUS = USART_CMODE_ASYNCHRONOUS_gc;
-    static constexpr uint8_t CMODE_SYNCHRONOUS = USART_CMODE_SYNCHRONOUS_gc;
-    static constexpr uint8_t CMODE_IRCOM = USART_CMODE_IRCOM_gc;
-    static constexpr uint8_t CMODE_MSPI = USART_CMODE_MSPI_gc;
-
-    // Parity
-    static constexpr uint8_t PMODE_DISABLED = USART_PMODE_DISABLED_gc;
-    static constexpr uint8_t PMODE_EVEN = USART_PMODE_EVEN_gc;
-    static constexpr uint8_t PMODE_ODD = USART_PMODE_ODD_gc;
-
-    // Character size
-    static constexpr uint8_t CHSIZE_5BIT = USART_CHSIZE_5BIT_gc;
-    static constexpr uint8_t CHSIZE_6BIT = USART_CHSIZE_6BIT_gc;
-    static constexpr uint8_t CHSIZE_7BIT = USART_CHSIZE_7BIT_gc;
-    static constexpr uint8_t CHSIZE_8BIT = USART_CHSIZE_8BIT_gc;
-
-    static constexpr uint8_t CHSIZE_9BITL = USART_CHSIZE_9BITL_gc;
-    static constexpr uint8_t CHSIZE_9BITH = USART_CHSIZE_9BITH_gc;
+    // valores
+    using value = cfg::private_::USART_values;
     
-    // Receiver mode
-    static constexpr uint8_t RXMODE_NORMAL = USART_RXMODE_NORMAL_gc;
-    static constexpr uint8_t RXMODE_CLK2X = USART_RXMODE_CLK2X_gc;
-    static constexpr uint8_t RXMODE_GENAUTO = USART_RXMODE_GENAUTO_gc;
-    static constexpr uint8_t RXMODE_LINAUTO = USART_RXMODE_LINAUTO_gc;
+    // pines que configuran este USART
+    static constexpr uint8_t TxD_pin = 33;
+    static constexpr uint8_t RxD_pin = 34;
+    static constexpr uint8_t XCK_pin = 35;
+    static constexpr uint8_t XDIR_pin= 36;
+
+    static void enable_Tx_pin() { PORTA.DIR |= PIN0_bm;}
+    static void enable_Rx_pin() { PORTA.DIR &= ~PIN1_bm;}
+    // XCK puede ser enable como in or out!!!
+//    static void enable_XCK_pin() { PORTA.DIR |= PIN2_bm;}
 
 };
 
-}// private_
 
 // USART1
 // ------
@@ -328,10 +368,10 @@ struct USART1 {
     static auto reg() {return usart1_registers();}
    
     // posiciones de los bits dentro de los registros
-    using bit_pos = private_::USART_bits;
+    using bit_pos = cfg::private_::USART_bits;
 
     // valores
-    using value = private_::USART_values;
+    using value = cfg::private_::USART_values;
     
     // pines que configuran este USART
     static constexpr uint8_t TxD_pin = 1;
@@ -346,8 +386,43 @@ struct USART1 {
 
 };
 
-// USART interrupts
-// -----------------
+
+// USART2
+// ------
+inline auto usart2_registers() { return &USART2; }
+#undef USART2
+
+struct USART2 {
+    // reg = registers
+    static auto reg() {return usart2_registers();}
+   
+    // posiciones de los bits dentro de los registros
+    using bit_pos = cfg::private_::USART_bits;
+
+    // valores
+    using value = cfg::private_::USART_values;
+    
+    // pines que configuran este USART
+    static constexpr uint8_t TxD_pin = 23;
+    static constexpr uint8_t RxD_pin = 24;
+    static constexpr uint8_t XCK_pin = 25;
+    static constexpr uint8_t XDIR_pin= 26;
+
+    static void enable_Tx_pin() { PORTF.DIR |= PIN0_bm;}
+    static void enable_Rx_pin() { PORTF.DIR &= ~PIN1_bm;}
+    // XCK puede ser enable como in or out!!!
+//    static void enable_XCK_pin() { PORTF.DIR |= PIN2_bm;}
+
+};
+
+
+// USART3
+// ------
+// El atmega4809 de 40 pins no tiene USART3
+
+/***************************************************************************
+ *			    USART interrupts
+ ***************************************************************************/
 // WARNING: es posible (???) que todos estos defines sean propios del
 // atmega4809. Si es así habría que meterlos todos en atmega4809_cfg.h
 // e incluir ese archivo solo si MCU = atmega4809.
@@ -410,7 +485,7 @@ struct USART1 {
 #define ISR_data_register_empty(usart) ISR(usart ## _DRE_vect)
 #define ISR_receiver_start_frame(usart) ISR(usart ## _TXC_vect)
 
-}// namespace cfg
+}// namespace cfg_40_pins
  
 }// namespace mega0_
  

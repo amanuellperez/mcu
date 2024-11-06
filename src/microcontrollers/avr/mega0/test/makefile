@@ -5,7 +5,8 @@
 DIRS = \
 		clock		\
 		hello_world	\
-		pin
+		pin			\
+		usart
 
 
 # TWI: el test de TWI está dentro de mcu.
