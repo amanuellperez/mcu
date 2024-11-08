@@ -31,8 +31,6 @@ using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
 
 using SPI = myu::SPI_slave;
 
-constexpr uint16_t periodo_en_us = 2;	
-
 
 int main() 
 {

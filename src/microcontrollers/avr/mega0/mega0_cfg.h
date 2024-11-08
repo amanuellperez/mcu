@@ -49,6 +49,8 @@ namespace cfg {
 
 namespace private_{
 
+// USART
+// -----
 // Posición de los bits en los registros
 struct USART_bits{
 // RXDATAH
@@ -118,6 +120,54 @@ struct USART_values{
     static constexpr uint8_t RXMODE_GENAUTO = USART_RXMODE_GENAUTO_gc;
     static constexpr uint8_t RXMODE_LINAUTO = USART_RXMODE_LINAUTO_gc;
 
+};
+
+// SPI
+// ---
+// Posición de los bits en los registros
+struct SPI_bits{
+// CTRLA
+    static constexpr uint8_t DORD   = SPI_DORD_bp;
+    static constexpr uint8_t MASTER = SPI_MASTER_bp;
+    static constexpr uint8_t CLK2X  = SPI_CLK2X_bp;
+    static constexpr uint8_t ENABLE = SPI_ENABLE_bp;
+
+// CTRLB
+    static constexpr uint8_t BUFEN = SPI_BUFEN_bp;
+    static constexpr uint8_t BUFWR = SPI_BUFWR_bp;
+    static constexpr uint8_t SSD   = SPI_SSD_bp;
+
+// INTCRTL
+    static constexpr uint8_t RXCIE = SPI_RXCIE_bp;
+    static constexpr uint8_t TXCIE = SPI_TXCIE_bp;
+    static constexpr uint8_t DREIE = SPI_DREIE_bp;
+    static constexpr uint8_t SSIE  = SPI_SSIE_bp;
+    static constexpr uint8_t IE    = SPI_IE_bp;
+
+
+// TODO: INTFLAGS
+// TODO: INTFLAGS::IF
+// TODO: INTFLAGS::WRCOL
+// TODO: INTFLAGS::RXCIF
+// TODO: INTFLAGS::TXCIF
+// TODO: INTFLAGS::DREIF
+// TODO: INTFLAGS::SSIF
+// TODO: INTFLAGS::BUFOVF
+
+};
+
+struct SPI_values{
+    // Prescaler
+    static constexpr uint8_t PRESC_DIV4   = SPI_PRESC_DIV4_gc;
+    static constexpr uint8_t PRESC_DIV16  = SPI_PRESC_DIV16_gc;
+    static constexpr uint8_t PRESC_DIV64  = SPI_PRESC_DIV64_gc;
+    static constexpr uint8_t PRESC_DIV128 = SPI_PRESC_DIV128_gc;
+
+    // Modes
+    static constexpr uint8_t MODE_0 = SPI_MODE_0_gc;
+    static constexpr uint8_t MODE_1 = SPI_MODE_1_gc;
+    static constexpr uint8_t MODE_2 = SPI_MODE_2_gc;
+    static constexpr uint8_t MODE_3 = SPI_MODE_3_gc;
 };
 
 }// private_
@@ -421,7 +471,34 @@ struct USART2 {
 // El atmega4809 de 40 pins no tiene USART3
 
 /***************************************************************************
- *			    USART interrupts
+ *				SPI
+ ***************************************************************************/
+// SPI0
+// ----
+inline auto spi0_registers() { return &SPI0; }
+#undef SPI0
+
+struct SPI0 {
+    // reg = registers
+    static auto reg() {return spi0_registers();}
+   
+    // posiciones de los bits dentro de los registros
+    using bit_pos = cfg::private_::SPI_bits;
+
+    // valores
+    using value = cfg::private_::SPI_values;
+    
+    // pines que configuran este SPI
+    static constexpr uint8_t MOSI_pin = 37;
+    static constexpr uint8_t MISO_pin = 38;
+    static constexpr uint8_t SCK_pin  = 39;
+    static constexpr uint8_t SS_pin   = 40;
+};
+
+
+
+/***************************************************************************
+ *				INTERRUPTS
  ***************************************************************************/
 // WARNING: es posible (???) que todos estos defines sean propios del
 // atmega4809. Si es así habría que meterlos todos en atmega4809_cfg.h
