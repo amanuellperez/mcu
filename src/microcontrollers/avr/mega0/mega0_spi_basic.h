@@ -161,19 +161,19 @@ inline void SPI_basic<C>::clock_double_speed()
 // CTRLA::PRESC
 template <typename C>
 inline void SPI_basic<C>::clock_peripheral_divide_by_2()
-{ reg()->CTRLA |= value::DIV4;}
+{ reg()->CTRLA |= value::PRESC_DIV4;}
 
 template <typename C>
 inline void SPI_basic<C>::clock_peripheral_divide_by_16()
-{ reg()->CTRLA |= value::DIV16;}
+{ reg()->CTRLA |= value::PRESC_DIV16;}
 
 template <typename C>
 inline void SPI_basic<C>::clock_peripheral_divide_by_64()
-{ reg()->CTRLA |= value::DIV64;}
+{ reg()->CTRLA |= value::PRESC_DIV64;}
 
 template <typename C>
 inline void SPI_basic<C>::clock_peripheral_divide_by_128()
-{ reg()->CTRLA |= value::DIV128;}
+{ reg()->CTRLA |= value::PRESC_DIV128;}
 
 
 // CTRLA::ENABLE
