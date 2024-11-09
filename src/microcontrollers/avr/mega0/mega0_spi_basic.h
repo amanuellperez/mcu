@@ -45,6 +45,12 @@ public:
     using pos   = Cfg::bit_pos; // posiciones de los bits dentro de los registros
     using value = Cfg::value;
 
+// pines a los que está conectado el SPI
+    static constexpr uint8_t MOSI_pin = Cfg::MOSI_pin;
+    static constexpr uint8_t MISO_pin = Cfg::MISO_pin;
+    static constexpr uint8_t SCK_pin  = Cfg::SCK_pin;
+    static constexpr uint8_t SS_pin   = Cfg::SS_pin;
+
 // Constructor
     SPI_basic() = delete;
 
@@ -113,7 +119,13 @@ public:
     static void disable_interrupt();
 
 // TODO: INTFLAGS
-// TODO: INTFLAGS::IF
+// INTFLAGS::IF
+    static bool is_interrupt_flag_set();
+
+    // El ejemplo del SPI client hace un clear (by writting 1) del interrupt
+    // flag.
+    static void clear_interrupt_flag();
+
 // TODO: INTFLAGS::WRCOL
 // TODO: INTFLAGS::RXCIF
 // TODO: INTFLAGS::TXCIF
@@ -282,7 +294,15 @@ inline void SPI_basic<C>::disable_interrupt()
 
 
 // TODO: INTFLAGS
-// TODO: INTFLAGS::IF
+// INTFLAGS::IF
+template <typename C>
+inline bool SPI_basic<C>::is_interrupt_flag_set()
+{ return atd::is_one_bit<pos::IF>::of(reg()->INTFLAGS);}
+
+template <typename C>
+inline void SPI_basic<C>::clear_interrupt_flag()
+{ atd::write_bit<pos::IF>::template to<1>::in(reg()->INTFLAGS); }
+
 // TODO: INTFLAGS::WRCOL
 // TODO: INTFLAGS::RXCIF
 // TODO: INTFLAGS::TXCIF

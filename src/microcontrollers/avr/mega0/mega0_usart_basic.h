@@ -65,6 +65,12 @@ public:
     using pos   = Cfg::bit_pos; // posiciones de los bits dentro de los registros
     using value = Cfg::value;
 
+// pines a los que está conectado el SPI
+    static constexpr uint8_t TxD_pin = Cfg::TxD_pin;
+    static constexpr uint8_t RxD_pin = Cfg::RxD_pin;
+    static constexpr uint8_t XCK_pin = Cfg::XCK_pin;
+    static constexpr uint8_t XDIR_pin= Cfg::XDIR_pin;
+    
 // Constructor
     USART_basic() = delete;
 

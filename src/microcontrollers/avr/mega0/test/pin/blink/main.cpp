@@ -22,7 +22,6 @@
 #include "../../../mega0_pin.h"
 #include "../../../mega0.h"
 
-#include <avr_time.h>
 
 // Microcontroller
 // ---------------

@@ -145,14 +145,14 @@ struct SPI_bits{
     static constexpr uint8_t IE    = SPI_IE_bp;
 
 
-// TODO: INTFLAGS
-// TODO: INTFLAGS::IF
-// TODO: INTFLAGS::WRCOL
-// TODO: INTFLAGS::RXCIF
-// TODO: INTFLAGS::TXCIF
-// TODO: INTFLAGS::DREIF
-// TODO: INTFLAGS::SSIF
-// TODO: INTFLAGS::BUFOVF
+// INTFLAGS
+    static constexpr uint8_t IF    = SPI_IF_bp;
+    static constexpr uint8_t WRCOL = SPI_WRCOL_bp;
+    static constexpr uint8_t RXCIF = SPI_RXCIF_bp;
+    static constexpr uint8_t TXCIF = SPI_TXCIF_bp;
+    static constexpr uint8_t DREIF = SPI_DREIF_bp;
+    static constexpr uint8_t SSIF  = SPI_SSIF_bp;
+    static constexpr uint8_t BUFOVF= SPI_BUFOVF_bp;
 
 };
 
