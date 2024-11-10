@@ -19,7 +19,7 @@
 
 #include "../../mega0_usart_basic.h"
 #include "../../mega0_uart.h"
-#include "../../mega0_cfg.h"
+#include "../../mega0_registers.h"
 #include <mcu_default_cfg.h>
 
 namespace myu = mega0_;

@@ -6,6 +6,7 @@ DIRS = \
 		clock		\
 		hello_world	\
 		pin			\
+		spi			\
 		usart
 
 

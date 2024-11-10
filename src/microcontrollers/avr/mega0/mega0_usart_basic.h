@@ -55,21 +55,21 @@
 
 namespace mega0_{
 
-template <typename Cfg0>
+template <typename Registers>
 class USART_basic{
 public:
 // syntactic sugar
-    using Cfg = Cfg0;
+    using Reg = Registers;
 
-    static auto reg() { return Cfg::reg(); }
-    using pos   = Cfg::bit_pos; // posiciones de los bits dentro de los registros
-    using value = Cfg::value;
+    static auto reg() { return Reg::reg(); }
+    using pos   = Reg::bit_pos; // posiciones de los bits dentro de los registros
+    using value = Reg::value;
 
 // pines a los que está conectado el SPI
-    static constexpr uint8_t TxD_pin = Cfg::TxD_pin;
-    static constexpr uint8_t RxD_pin = Cfg::RxD_pin;
-    static constexpr uint8_t XCK_pin = Cfg::XCK_pin;
-    static constexpr uint8_t XDIR_pin= Cfg::XDIR_pin;
+    static constexpr uint8_t TxD_pin = Reg::TxD_pin;
+    static constexpr uint8_t RxD_pin = Reg::RxD_pin;
+    static constexpr uint8_t XCK_pin = Reg::XCK_pin;
+    static constexpr uint8_t XDIR_pin= Reg::XDIR_pin;
     
 // Constructor
     USART_basic() = delete;
@@ -307,7 +307,7 @@ inline void USART_basic<C>::disable_receiver_start_frame_interrupt()
 template <typename C>
 inline void USART_basic<C>::enable_receiver()
 {
-    Cfg::enable_Rx_pin();
+    Reg::enable_Rx_pin();
     atd::write_bit<pos::RXEN>::template to<1>::in(reg()->CTRLB); 
 }
 
@@ -324,7 +324,7 @@ inline bool USART_basic<C>::is_receiver_enable()
 template <typename C>
 inline void USART_basic<C>::enable_transmitter()
 { 
-    Cfg::enable_Tx_pin();
+    Reg::enable_Tx_pin();
     atd::write_bit<pos::TXEN>::template to<1>::in(reg()->CTRLB); 
 }
 
@@ -368,7 +368,7 @@ inline void USART_basic<C>::asynchronous_mode()
 //template <typename C>
 //inline void USART_basic<C>::synchronous_mode()
 //{ sin probar!!!
-//    Cfg::enable_XCK_pin(); <-- OJO: puede ser in or out!!!
+//    Reg::enable_XCK_pin(); <-- OJO: puede ser in or out!!!
 //    reg()->CTRLC |= value::CMODE_SYNCHRONOUS; 
 //}
 //

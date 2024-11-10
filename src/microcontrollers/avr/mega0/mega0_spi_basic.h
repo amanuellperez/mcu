@@ -35,21 +35,21 @@
 
 namespace mega0_{
 
-template <typename Cfg0>
+template <typename Registers>
 class SPI_basic{
 public:
 // syntactic sugar
-    using Cfg = Cfg0;
+    using Reg = Registers;
 
-    static auto reg() { return Cfg::reg(); }
-    using pos   = Cfg::bit_pos; // posiciones de los bits dentro de los registros
-    using value = Cfg::value;
+    static auto reg() { return Reg::reg(); }
+    using pos   = Reg::bit_pos; // posiciones de los bits dentro de los registros
+    using value = Reg::value;
 
 // pines a los que está conectado el SPI
-    static constexpr uint8_t MOSI_pin = Cfg::MOSI_pin;
-    static constexpr uint8_t MISO_pin = Cfg::MISO_pin;
-    static constexpr uint8_t SCK_pin  = Cfg::SCK_pin;
-    static constexpr uint8_t SS_pin   = Cfg::SS_pin;
+    static constexpr uint8_t MOSI_pin = Reg::MOSI_pin;
+    static constexpr uint8_t MISO_pin = Reg::MISO_pin;
+    static constexpr uint8_t SCK_pin  = Reg::SCK_pin;
+    static constexpr uint8_t SS_pin   = Reg::SS_pin;
 
 // Constructor
     SPI_basic() = delete;

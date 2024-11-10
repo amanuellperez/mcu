@@ -20,7 +20,7 @@
 #include "../../mega0_spi_basic.h"
 #include "../../mega0_usart_basic.h"
 #include "../../mega0_uart.h"
-#include "../../mega0_cfg.h"
+#include "../../mega0_registers.h"
 #include "../../mega0_debug.h"
 #include "../../mega0_pin.h"
 #include <mcu_UART_iostream.h>

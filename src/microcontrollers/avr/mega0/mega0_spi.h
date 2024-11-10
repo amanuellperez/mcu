@@ -41,11 +41,11 @@ namespace mega0_{
 
 namespace private_{
 
-template <typename SPI_cfg>
-class SPI_base : public SPI_basic<SPI_cfg>{
+template <typename Registers>
+class SPI_base : public SPI_basic<Registers>{
 public:
 // Sugar
-    using SPI = SPI_basic<SPI_cfg>;
+    using SPI = SPI_basic<Registers>;
 
 // Constructor
     SPI_basic() = delete;
@@ -128,15 +128,17 @@ inline bool SPI_base<C>::SCK_frequency_in_hz_static(uint32_t clk_per_in_hz)
 // Observar que SPI_master no hace el Select del slave correspondiente.
 // Eso es responsabilidad del cliente, que será el que sepa cómo se
 // seleccioinaran los slaves.
-template <typename SPI_cfg>
-class SPI_master : public private_::SPI_base<SPI_cfg>{
+template <typename Registers>
+class SPI_master : public private_::SPI_base<Registers>{
 public:
+    using SPI = SPI_basic<Registers>;
+
 // Constructor
     SPI_master() = delete;
     
     // Configura el SPI como master con la configuración pasada
     // No lo enciende. Hay que llamar a turn_on explicitamente.
-    template <typename Cfg>
+    template <typename SPI_cfg>
     static void init();
 
 // On/off
@@ -155,7 +157,67 @@ public:
 
 private:
     
+    static void cfg_pins();
 };
+
+// Será el usuario el que defina el selector de SPI, no usando SS. Por eso
+// llamamos a disable_client_select_line()
+template <typename R>
+void SPI_master<R>::cfg_pins()
+{
+    Pin<SPI::MOSI_pin>::as_output();
+    Pin<SPI::MISO_pin>::as_input_without_pullup();
+    Pin<SPI::SCK_pin>::as_output();
+
+    // 24.3.2.1.3 (datasheet)
+    // If SSD in SPIn.CTRLB is ‘1’, the SPI does not use the SS pin. 
+    // It can be used as a regular I/O pin or by other peripheral modules.
+    SPI::disable_client_select_line();
+}
+
+// Ejemplo de SPI_cfg:
+//
+// struct SPI_cfg{
+//	static constexpr bool data_order_LSB = false;
+//	static constexpr uint8_t polarity    = 0;
+//	static constexpr uint8_t phase       = 1;
+//	static constexpr frequency_in_hz     = xxxx
+// };
+//
+// Esta configuración la define el harwador en prj_dev.h para cada dispositivo
+// SPI que se conecta.
+template <typename R>
+    template <typename SPI_cfg>
+void SPI_master<R>::init()
+{
+    cfg_pins();
+    
+// as master
+    SPI::host_mode();
+
+// data order
+    if constexpr (SPI_cfg::data_order_LSB)
+	SPI::data_order_LSB();
+    else
+	SPI::data_order_MSB();
+
+
+// mode
+    if constexpr (SPI_cfg::polarity == 0){
+	if constexpr (SPI_cfg::phase == 0) SPI::mode_0();
+	else                               SPI::mode_1();
+    } else { // polarity == 1
+	if constexpr (SPI_cfg::phase == 0) SPI::mode_2();
+	else                               SPI::mode_3();
+    }
+
+// frequency
+    SCK_frequency_in_hz<SPI_cfg::frequency_in_hz>();
+
+// TODO: poder definir buffer mode y demás.
+// Usar `requires(SPI_cfg::buffer_mode)` para en general no sea obligatorio
+// tener que definir esta variable.
+}
 
 
 

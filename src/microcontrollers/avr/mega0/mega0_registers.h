@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __MEGA0_CFG_H__
-#define __MEGA0_CFG_H__
+#ifndef __MEGA0_REGISTERS_H_
+#define __MEGA0_REGISTERS_H_
 /****************************************************************************
  *
  * DESCRIPCION
@@ -33,6 +33,13 @@
  *		 una misma familia se llaman igual. Por ello basta con definir
  *		 una única configuración para todos ellos comunes (salvo en
  *		 pines, que hay que clasificarlos por número de pins).
+ *    10/11/2024 ¿Qué es lo que hay aqui? Los nombres de los registros que
+ *               tienen los micros, en concreto el atmega4809 de 40 pins, las
+ *               posiciones de cada bit en cada registro y los posibles 
+ *               valores que podemos escribir en esos registros. 
+ *               ¡Este fichero contiene informacion sobre los registros de la
+ *               familia mega0!!! En lugar de llamarlo "mega0_cfg.h" mejor
+ *               "mega0_registers.h" 
  *
  ****************************************************************************/
 
