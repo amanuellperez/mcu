@@ -54,6 +54,22 @@ Mínimo hay 3 formas diferentes de trabajar con el `atmega4809`:
    En este caso `CLK_MAIN` está definido en tiempo de compilación, pero no así
    `F_CPU`. No se pueden usar las funciones `_delay_us/ms`.
 
+   Definiremos `F_CPU = 0`, `CLK_PER = 0` para indicar que vamos a calcular
+   dinámicamente `clock_peripheral()`. Usando el valor de `0` podemos hacer
+   cosas del tipo:
+
+   ```
+   template <uint32_t frequency>
+   constexpr void SCK_frequency()
+   {
+      if constexpr (is_clk_per_constant())
+        SCK_frequency_constant<frequency, clk_per()>();
+
+    else
+        SCK_frequency_dynamic<frequency>(clk_per()); 
+   }
+   ```
+
 
 
 3. Cambiar dinámicamente el reloj que estamos usando.

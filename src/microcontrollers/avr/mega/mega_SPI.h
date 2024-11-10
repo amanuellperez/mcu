@@ -39,6 +39,7 @@
 namespace mega_{
 
 
+namespace private_{
 class SPI_base : public SPI_basic{
 public:
     SPI_base() = delete;
@@ -87,6 +88,15 @@ public:
 
 
     /// Lee un byte. Espera hasta que haya leido el byte.
+    /// TODO: esto está mal para el slave.
+    ///	      El slave en la interrupción:
+    ///		1) Lee el byte que ha enviado el master
+    ///		2) Escribe el nuevo byte que quiere enviar cuando el master 
+    ///		   le envie un nuevo byte.
+    ///	        3) Hace clear del flag de la interrupción
+    ///
+    ///	Como son diferentes las formas de leer/escribir de master/slave estas
+    ///	funciones son realmente de SPI_master y SPI_slave!!!
     static uint8_t read()
     { return transfer(transfer_value_); }
 
@@ -126,8 +136,9 @@ private:
 
 };
 
+}// private_
 
-class SPI_master : public SPI_base {
+class SPI_master : public private_::SPI_base {
 public:
     SPI_master() = delete;
 
@@ -149,7 +160,7 @@ public:
 };
 
 
-class SPI_slave : public SPI_base {
+class SPI_slave : public private_::SPI_base {
 public:
     SPI_slave() = delete;
 
@@ -167,6 +178,7 @@ private:
     static void init();
 };
 
+namespace private_{
 // En caso de que se pase una frecuencia no soportada, el compilador
 // tiene que decirlo.
 template<uint32_t frequency
@@ -285,8 +297,9 @@ inline void SPI_base::clock_period_in_us<8u, 8000000UL>()
 template<>
 inline void SPI_base::clock_period_in_us<16u, 8000000UL>() 
 {clock_frequency_divide_by_128();}
-
-}// namespace avr
+}// private_
+ 
+}// namespace mega_
 
 
 #endif 

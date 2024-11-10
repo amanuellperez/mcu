@@ -45,6 +45,8 @@
 
 namespace mega0_{
 
+inline constexpr bool is_clk_main_constant()
+{ return CLK_MAIN != 0;}
 
 // frecuencia en Hz a la que funciona el reloj principal conectado al avr
 inline constexpr uint32_t clk_main()
@@ -66,6 +68,11 @@ inline constexpr uint32_t clk_main()
     }
 }
 
+// Definir CLK_PER != 0 indica que CLK_PER está definido en tiempo de
+// compilación y no cambiará durante todo el programa. Saber esto permitirá
+// hacer optimizaciones.
+inline constexpr bool is_clk_per_constant()
+{ return CLK_PER != 0;}
 
 // frecuencia en Hz a la que funcionan los perifericos
 inline constexpr uint32_t clk_per()

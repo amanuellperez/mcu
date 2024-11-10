@@ -4,7 +4,7 @@ MCU++ library
 (scroll down this document))
 
 Libraries and applications for microcontrollers (right now, only for
-ATMEGA328).
+ATMEGA328 and atmega4809).
 
 # Toolchain
 `binutils 2.42`
@@ -29,7 +29,7 @@ This directory contains the following:
 2. [Microcontrollers](src/microcontrollers): (microcontroller level?)
 
     * [avr](src/microcontrollers/avr/README.md): "Drivers" for avr microcontrollers 
-	(right now, only for ATMEGA328). 
+	(right now, only for ATMEGA328 and atmega4809). 
       
     * [mcu](src/microcontrollers/mcu/README.md): Generic microcontrollers components.
 
@@ -66,7 +66,7 @@ probably you need to download `alp_test.h`, `alp_test.cpp` and maybe
 
 ---
 Bibliotecas y aplicaciones para microcontroladores (en principio solo el
-ATMEGA328).
+ATMEGA328 y el atmega4809).
 
 # Índice
 * [Compilador y toolchain](#compilador)
