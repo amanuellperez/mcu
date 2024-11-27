@@ -21,7 +21,7 @@
 
 namespace mega_{
 
-// ¿es genérico o depende del Timer0?
+// ¿es genérico o depende del hwd::Timer0?
 // Por culpa de frequency_in_Hz_to_prescaler_top que conoce la implementación
 // del Timer esta función no es genérica.
 void Square_wave_generator0_g::generate(uint32_t freq_in_Hz, uint8_t npin)
@@ -109,14 +109,14 @@ atd::Percentage PWM_cfg::calculate_cfg_top_OCRA(const Frequency::Rep& freq_clk,
 			   const Frequency::Rep& freq_gen)
 {
     auto error = calculate_cfg_top_OCRA(freq_clk, freq_gen, 
-						Timer0::prescaler_factor[0]);
+						hwd::Timer0::prescaler_factor[0]);
 
     PWM_cfg tmp;
 
-    for (uint8_t i = 1; i < Timer0::prescaler_factor.size(); ++i){
+    for (uint8_t i = 1; i < hwd::Timer0::prescaler_factor.size(); ++i){
 	auto error2 = 
 		tmp.calculate_cfg_top_OCRA(freq_clk, freq_gen, 
-				    Timer0::prescaler_factor[i]);
+				    hwd::Timer0::prescaler_factor[i]);
 	
 	if (error2 < error){
 	    *this = tmp;

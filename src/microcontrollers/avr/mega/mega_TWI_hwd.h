@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __MEGA_HWD_TWI_H__
-#define __MEGA_HWD_TWI_H__
+#ifndef __MEGA_TWI_HWD_H__
+#define __MEGA_TWI_HWD_H__
 /****************************************************************************
  *
  *   - DESCRIPCION: Traductor del TWI (I2C)
@@ -41,10 +41,11 @@
 #include <atd_type_traits.h>	// always_false_v
 #include <avr/io.h> // registros: DDRB... PORT...
 #include "mega_import_avr.h"
-#include "mega_cfg.h"
+#include "mega_cfg_hwd.h"
 #include "mega_clock_frequencies.h"	
 
 namespace mega_{
+namespace hwd{
 
 
 /*!
@@ -430,6 +431,7 @@ inline void TWI_basic::SCL_frequency_in_kHz()
 }
 
 
+}// namespace
 }// namespace
 
 

@@ -17,7 +17,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "../../../mega_cfg.h"
+#include "../../../mega_cfg_hwd.h"
 #include "../../../mega_timer0.h"
 #include "../../../mega_timer1.h"
 #include "../../../mega_import_avr.h"
@@ -34,12 +34,13 @@ constexpr bool timer0_both_pins = false;
 // Microcontroller
 // ---------------
 namespace myu = mega_;
+namespace hwd = mega_::hwd;
 using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
 
 					 
 // Hwd devices
 // -----------
-// DONT_COMPILE(using PWM_pin1 = myu::PWM0_pin<10>;)
+// DONT_COMPILE(using PWM_pin1 = hwd::PWM0_pin<10>;)
 
 using PWM_pin1 = myu::PWM0_pin<11>;
 using PWM_pin2 = myu::PWM0_pin<12>;
@@ -174,7 +175,7 @@ void print_debug()
 	uart << "res = " << res << '\n';
 
 
-	myu::timer_::PWM_cfg<myu::Timer1> pwm;
+	hwd::timer_::PWM_cfg<hwd::Timer1> pwm;
 	pwm.prescaler = 1;
 	pwm.top = 999;
 	auto res2 = pwm.frequency_fast_mode(freq_clk);
@@ -210,7 +211,7 @@ void automatic_duty_cycle_test()
     
     // Aquí todavia no hemos llamado a PWM_pin::generate con lo que 
     // PWM_pin::frequency es 0!!! Si se quiere imprimir ponerlo despues.
-//    myu::Frequency freq_gen = PWM_pin::frequency();
+//    hwd::Frequency freq_gen = PWM_pin::frequency();
 //    uart << "Generating frequency " << freq_gen << '\n';
 
     Test test{uart};

@@ -17,9 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "../../../mega_cfg.h"
+#include "../../../mega_cfg_hwd.h"
 #include "../../../mega_interrupt.h"
-#include "../../../mega_pin.h"
+#include "../../../mega_pin_hwd.h"
 #include <avr_time.h>
 #include "../../../mega_UART.h"
 #include <mcu_UART_iostream.h>
@@ -28,13 +28,14 @@
 // Micro
 // -----
 namespace myu = mega_;
+namespace hwd = mega_::hwd;
 using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
-//using Micro = myu::Micro;
+//using Micro = hwd::Micro;
 
 // Pins
 // ----
 template <uint8_t n>
-using Pin = myu::Pin<n>;
+using Pin = hwd::Pin<n>;
 
 // Hwd Devices
 // -----------
@@ -380,7 +381,7 @@ void test_pcint()
     while(1){
 	check_pcints();
 
-	if (myu::UART_basic::are_there_unread_data()){
+	if (hwd::UART_basic::are_there_unread_data()){
 	    char tmp{};
 	    uart >> tmp; // borramos el caracter usado para entrar aqui
 	    if (menu_pcint())

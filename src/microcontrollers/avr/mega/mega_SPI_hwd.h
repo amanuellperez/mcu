@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __MEGA_HWD_SPI_H__
-#define __MEGA_HWD_SPI_H__
+#ifndef __MEGA_SPI_HWD_H__
+#define __MEGA_SPI_HWD_H__
 /****************************************************************************
  *
  *  - DESCRIPCION: Traductor del SPI.
@@ -54,11 +54,12 @@
 #include <stdint.h> // uint8_t
 #include <avr/io.h> // registros: DDRB... PORT...
 #include <atd_bit.h>
-#include "mega_pin.h"
+#include "mega_pin_hwd.h"
 #include "mega_interrupt.h"
 #include "mega_import_avr.h"	// clock_frequency_in_hz
 
 namespace mega_{
+namespace hwd{
 
 class SPI_basic{
 public:
@@ -157,7 +158,8 @@ public:
 
 
 
-}// namespace avr
+}// namespace 
+}// namespace 
 
 
 #endif 

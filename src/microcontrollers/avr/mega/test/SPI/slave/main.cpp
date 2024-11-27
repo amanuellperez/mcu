@@ -17,7 +17,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "../../../mega_cfg.h"
+#include "../../../mega_cfg_hwd.h"
 #include "../../../mega_SPI.h"
 #include "../../../mega_interrupt.h"
 #include "../../../mega_UART.h"

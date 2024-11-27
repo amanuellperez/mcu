@@ -1,7 +1,7 @@
 BIN = xx
 
 SOURCES= main.cpp \
-		 ../../../mega_debug.cpp	\
+		 ../../../mega_debug_hwd.cpp	\
 		 ../../../mega_UART.cpp
 
 MCU = atmega328p

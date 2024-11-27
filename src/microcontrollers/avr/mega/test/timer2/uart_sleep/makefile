@@ -1,8 +1,8 @@
 BIN = xx
 
 SOURCES= main.cpp \
-		 ../../../mega_sleep.cpp	\
-		 ../../../mega_debug.cpp \
+		 ../../../mega_sleep_hwd.cpp	\
+		 ../../../mega_debug_hwd.cpp \
 		 ../../../mega_UART.cpp
 
 

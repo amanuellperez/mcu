@@ -70,7 +70,7 @@ constexpr uint8_t ir_receiver_pin = 15;	   // Timer1::OCA
 using Miniclock_us = mcu::Miniclock_us<myu::Micro, myu::Time_counter1>;
 
 using SWG = dev::Square_wave_burst_generator< myu::Square_wave_burst_generator0_g
-					  , myu::Output_pin<ir_transmitter_pin>
+					  , myu::hwd::Output_pin<ir_transmitter_pin>
 					  , Miniclock_us>;
 
 

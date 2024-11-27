@@ -48,7 +48,7 @@
  *
  ****************************************************************************/
 
-#include "mega_hwd_ADC.h"
+#include "mega_ADC_hwd.h"
 #include "mega_clock_frequencies.h"	
 
 #include <atd_names.h>	// nm::ok/fail
@@ -57,7 +57,7 @@ namespace mega_{
 /***************************************************************************
  *				ADC
  ***************************************************************************/
-class ADC : public ADC_basic {
+class ADC : public hwd::ADC_basic {
 public:
 // Types
     using AREF_type = ADC_basic::AREF_type;
@@ -78,10 +78,10 @@ public:
     // Tiene el inconveniente de que no se puede cambiar dinámicamente la
     // frecuencia.
     template<uint16_t adc_frequency_in_kHz
-	, uint32_t clk_freq_in_hz = clock_cpu()>
+	, uint32_t clk_freq_in_hz = hwd::clock_cpu()>
     static void clock_frequency_in_kHz();
 
-    template<uint32_t clk_freq_in_hz = clock_cpu()>
+    template<uint32_t clk_freq_in_hz = hwd::clock_cpu()>
     static nm::Result clock_frequency(const Frequency& freq);
     
     // El cómo se conecta el ADC se tiene que conocer en tiempo de
@@ -377,6 +377,8 @@ inline void ADC::clock_frequency_in_kHz()
 template<uint32_t clock_frequency_en_hz>
 nm::Result ADC::clock_frequency(const Frequency& adc_freq)
 {
+    using namespace hwd;
+
     if constexpr (clock_cpu() == 1'000'000UL)
 	return clock_frequency_in_kHz_1MHz(KiloHertz{adc_freq}.value());
 

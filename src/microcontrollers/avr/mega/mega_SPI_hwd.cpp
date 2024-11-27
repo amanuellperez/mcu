@@ -17,7 +17,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "mega_hwd_SPI.h"
+#include "mega_SPI_hwd.h"
 
 #include <atd_bit.h>
 
@@ -25,6 +25,7 @@
 // vez. No es imprescindible que sean las más eficientes.
 
 namespace mega_{
+namespace hwd{
 
 
 void SPI_basic::spi_mode(uint8_t cpol, uint8_t cpha)
@@ -87,4 +88,5 @@ void SPI_basic::clock_frequency_divide_by_128()
 
 
 
+} // namespace
 } // namespace

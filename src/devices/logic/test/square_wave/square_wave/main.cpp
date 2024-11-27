@@ -31,7 +31,7 @@ using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
 
 constexpr uint8_t test_pin = 12;
 
-using Pin = myu::Output_pin<test_pin>;
+using Pin = myu::hwd::Output_pin<test_pin>;
 using Miniclock1_us = mcu::Miniclock_us<myu::Micro, myu::Time_counter1>;
 using Miniclock1_ms = mcu::Miniclock_ms<myu::Micro, myu::Time_counter1>;
 

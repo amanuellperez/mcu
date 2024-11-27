@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __MEGA_HWD_ADC_H__
-#define __MEGA_HWD_ADC_H__
+#ifndef __MEGA_ADC_HWD_H__
+#define __MEGA_ADC_HWD_H__
 
 /****************************************************************************
  *
@@ -46,9 +46,10 @@
 #include <avr/io.h> // registros: DDRB... PORT...
 		    
 #include "mega_import_avr.h"
-#include "mega_cfg.h"	// cfg
+#include "mega_cfg_hwd.h"	// ((TODO)) parametrizar Cfg
 
 namespace mega_{
+namespace hwd{
 
 // Al definir avr la macro ADC, no me deja crear la clase ADC, así que lo
 // primero que hay que hacer es eliminar ADC. El problema es que necesito esta
@@ -394,6 +395,7 @@ inline void ADC_basic::auto_trigger_source_timer1_capture_event()
 
 
 
+}// namespace hwd
 }// namespace
 
 #endif

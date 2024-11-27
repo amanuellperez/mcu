@@ -18,9 +18,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 // Ejemplo básico de uso del Timer como contador
-#include "../../mega_cfg.h"
-#include "../../mega_hwd_timer0.h"
-#include "../../mega_hwd_timer1.h"
+#include "../../mega_cfg_hwd.h"
+#include "../../mega_timer0_hwd.h"
+#include "../../mega_timer1_hwd.h"
 #include "../../mega_UART.h"
 #include <avr_time.h>
 #include <mcu_UART_iostream.h>
@@ -35,6 +35,7 @@ using namespace test;
 // Microcontroller
 // ---------------
 namespace myu = mega_;
+namespace hwd = mega_::hwd;
 using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
 
 // pin connections
@@ -102,7 +103,7 @@ void test_timer0()
     UART_iostream uart;
     auto test = Test::interface(uart, "Timer0");
 
-    using Timer = myu::Timer0;
+    using Timer = hwd::Timer0;
 
     Timer::off();
 
@@ -188,7 +189,7 @@ void test_timer1()
     UART_iostream uart;
     auto test = Test::interface(uart, "Timer1");
 
-    using Timer = myu::Timer1;
+    using Timer = hwd::Timer1;
 
     Timer::off();
 
@@ -325,9 +326,9 @@ void test_pin()
     UART_iostream uart;
     auto test = Test::interface(uart, "Pin<14>");
 
-    using Pin		= myu::Pin<output_pin>;
-    using Pin_with	= myu::Pin<input_pin_with_pullup>;
-    using Pin_without	= myu::Pin<input_pin_without_pullup>;
+    using Pin		= hwd::Pin<output_pin>;
+    using Pin_with	= hwd::Pin<input_pin_with_pullup>;
+    using Pin_without	= hwd::Pin<input_pin_without_pullup>;
 
     Pin_with::as_input_with_pullup();
     CHECK_TRUE(test, Pin_with::is_input_with_pullup_pin() == true, 

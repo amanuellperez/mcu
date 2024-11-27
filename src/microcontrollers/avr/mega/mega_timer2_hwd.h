@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __MEGA_HWD_TIMER2_H__
-#define __MEGA_HWD_TIMER2_H__
+#ifndef __MEGA_TIMER2_HWD_H__
+#define __MEGA_TIMER2_HWD_H__
 
 /****************************************************************************
  *
@@ -33,18 +33,19 @@
  *
  ****************************************************************************/
 #include <avr/io.h> // registros: DDRB... PORT...
-#include "mega_hwd_timern.h"
+#include "mega_timern_hwd.h"
 
 #include <atd_bit.h>
 #include <atd_type_traits.h>
 
 #include "mega_interrupt.h"
-#include "mega_pin.h"
+#include "mega_pin_hwd.h"
 #include "mega_clock_frequencies.h"	
 
 #include <array>
 
 namespace mega_{
+namespace hwd{
 
 // La creo como clase para luego poderla pasar como parámetro a templates
 // (por ejemplo, a Contador). Si la defino como namespace no puedo hacerlo.
@@ -513,7 +514,8 @@ inline void Timer2::wait_till_registers_are_ready()
 }
 
 
-}// namespace avr
+}// namespace 
+}// namespace
 
 
 #endif

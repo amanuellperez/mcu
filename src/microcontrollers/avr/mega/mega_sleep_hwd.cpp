@@ -17,9 +17,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "mega_sleep.h"
+#include "mega_sleep_hwd.h"
 
 namespace mega_{
+
+//((DUDA)) ¿Esto es de hwd o no?
+namespace hwd{
 
 void sleep_mode(Sleep::mode mode)
 {
@@ -59,5 +62,6 @@ void sleep()
 
 }
 
+}// namespace
 }// namespace
  

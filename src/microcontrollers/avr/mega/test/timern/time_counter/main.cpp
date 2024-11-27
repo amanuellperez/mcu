@@ -21,16 +21,17 @@
 #include "../../../mega_timer0.h"
 #include "../../../mega_timer1.h"
 #include "../../../mega_timer2.h" 
-#include "../../../mega_debug.h"
+#include "../../../mega_debug_hwd.h"
 
 #include "../../../mega_UART.h"
 #include <mcu_UART_iostream.h>
-#include "../../../mega_cfg.h"
-#include "../../../mega_pin.h"
+#include "../../../mega_cfg_hwd.h"
+#include "../../../mega_pin_hwd.h"
 
 // Microcontroller
 // ---------------
 namespace myu = mega_;
+namespace hwd = mega_::hwd;
 using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
 
 // Pin conections
@@ -46,9 +47,9 @@ using Counter0  = myu::Time_counter0;
 using Counter1  = myu::Time_counter1;
 using Counter2  = myu::Time_counter2;
 
-using Pin0 = myu::Pin<npin0>;
-using Pin1 = myu::Pin<npin1>;
-using Pin2 = myu::Pin<npin2>;
+using Pin0 = hwd::Pin<npin0>;
+using Pin1 = hwd::Pin<npin1>;
+using Pin2 = hwd::Pin<npin2>;
 
 
 // CUIDADO: hay mucha diferencia entre tener el reloj del micro a 1MHz o a 8
@@ -207,7 +208,7 @@ void test_bugs()
     else
 	uart << "ERROR!!!\n";
 
-//    myu::print_registers_timer1(uart);
+//    hwd::print_registers_timer1(uart);
     Counter1::turn_off();
 
 }
@@ -247,7 +248,7 @@ int main()
 		break; case '7': generate<Counter0, 1024>(max_value);
 		break; case 'p': 
 			    uart << '\n';
-			    myu::print_registers_timer1(uart);
+			    hwd::print_registers_timer1(uart);
 		break; default: uart << "Unknwon option\n";
 	    }
 	}
@@ -264,7 +265,7 @@ int main()
 		break; case '7': generate<Counter1, 1024>(max_value);
 		break; case 'p': 
 			    uart << '\n';
-			    myu::print_registers_timer1(uart);
+			    hwd::print_registers_timer1(uart);
 
 		break; default: uart << "Unknwon option\n";
 	    }
@@ -284,7 +285,7 @@ int main()
 		break; case '7': generate<Counter2, 1024>(max_value);
 		break; case 'p': 
 			    uart << '\n';
-			    myu::print_registers_timer2(uart);
+			    hwd::print_registers_timer2(uart);
 
 		break; default: uart << "Unknwon option\n";
 	    }

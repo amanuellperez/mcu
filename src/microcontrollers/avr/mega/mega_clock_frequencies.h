@@ -43,6 +43,7 @@
 #endif
 
 namespace mega_{
+namespace hwd{
 
 inline constexpr uint32_t clock_cpu() { return F_CPU; }
 
@@ -50,6 +51,7 @@ inline constexpr uint32_t clock_cpu() { return F_CPU; }
 constexpr Frequency clock_frequency{F_CPU};
 
 
+}// namespace
 }// namespace
 
 // F_CPU lo usa <util/delay.h>. No se puede hacer el undef

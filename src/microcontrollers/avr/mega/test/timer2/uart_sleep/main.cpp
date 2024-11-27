@@ -20,16 +20,17 @@
 #include "../../../mega_UART.h"
 #include <mcu_UART_iostream.h>
 
-#include "../../../mega_pin.h"
+#include "../../../mega_pin_hwd.h"
 #include <avr_time.h>
-#include "../../../mega_sleep.h"
-#include "../../../mega_debug.h"
+#include "../../../mega_sleep_hwd.h"
+#include "../../../mega_debug_hwd.h"
 #include "../../../mega_timer2.h"
 
 
 // Microcontroller
 // ---------------
 namespace myu = mega_;
+namespace hwd = mega_::hwd;
 using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
 
 
@@ -40,7 +41,7 @@ static constexpr uint8_t led_pin = 14;
 // Hwd devices
 // -----------
 using Counter = myu::Time_counter2_32kHz_g<1000>;
-using Pin     = myu::Pin<led_pin>;
+using Pin     = hwd::Pin<led_pin>;
 
 
 // Terminal
@@ -72,7 +73,7 @@ void init()
     Pin::as_output();
     Counter::turn_on_with_overflow_to_count_1s();
     myu::enable_interrupts();
-    myu::sleep_mode(myu::Sleep::mode::power_save);
+    hwd::sleep_mode(hwd::Sleep::mode::power_save);
 
 }
 
@@ -85,8 +86,8 @@ void print()
 
 void flush()
 {
-    myu::print_registers_uart(uart);
-    while (!myu::UART_basic::is_transmit_complete())
+    hwd::print_registers_uart(uart);
+    while (!hwd::UART_basic::is_transmit_complete())
     {;}
     // Datasheet: The TXC0 Flag bit is automatically cleared
     // when a transmit complete interrupt is executed, 
@@ -108,7 +109,7 @@ int main()
     while (1) {
 	flush();    // comment this line. The program generates garbage
 
-	myu::sleep();
+	hwd::sleep();
 
 	print();
     }

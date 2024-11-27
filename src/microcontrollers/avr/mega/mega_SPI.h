@@ -33,14 +33,14 @@
  *		   para frecuencias no soportadas.
  *
  ****************************************************************************/
-#include "mega_hwd_SPI.h"
+#include "mega_SPI_hwd.h"
 #include "mega_clock_frequencies.h"	
 
 namespace mega_{
 
 
 namespace private_{
-class SPI_base : public SPI_basic{
+class SPI_base : public hwd::SPI_basic{
 public:
     SPI_base() = delete;
 
@@ -59,11 +59,11 @@ public:
     // When the SPI is configured as Slave, the SPI is only guaranteed 
     // to work at fosc/4 or lower
     template<uint16_t period
-	    , uint32_t clock_frequency_in_hz = clock_cpu()>
+	    , uint32_t clock_frequency_in_hz = hwd::clock_cpu()>
     static void clock_period_in_us();
 
     template<uint32_t frequency
-	    , uint32_t clock_frequency_in_hz = clock_cpu()>
+	    , uint32_t clock_frequency_in_hz = hwd::clock_cpu()>
     static void clock_frequency_in_hz();
 
     // Las transmisiones del SPI nunca van a fallar: al enviar un byte el SPI

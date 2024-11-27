@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __MEGA_SLEEP_H__
-#define __MEGA_SLEEP_H__
+#ifndef __MEGA_SLEEP_HWD_H__
+#define __MEGA_SLEEP_HWD_H__
 /****************************************************************************
  *
  *  DESCRIPCION
@@ -43,6 +43,7 @@
 #include <atd_bit.h>
 
 namespace mega_{
+namespace hwd{
 // ----------------
 // Traductor básico 
 // ----------------
@@ -137,6 +138,7 @@ void sleep();
 //	    sleep();
 void sleep(Sleep::mode mode);
 
+}// namespace
 }// namespace
 
 #endif

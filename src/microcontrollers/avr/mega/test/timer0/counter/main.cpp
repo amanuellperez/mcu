@@ -18,10 +18,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 // Ejemplo básico de uso del Timer como contador
-#include "../../../mega_cfg.h"
+#include "../../../mega_cfg_hwd.h"
 #include "../../../mega_UART.h"
 #include <mcu_UART_iostream.h>
-#include "../../../mega_hwd_timer0.h"
+#include "../../../mega_timer0_hwd.h"
 #include <avr_time.h>
 
 #include <atd_ostream.h>
@@ -29,9 +29,10 @@
 #include <std_type_traits.h>
 
 namespace myu = mega_;
+namespace hwd = mega_::hwd;
 using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
 
-using Timer = myu::Timer0;
+using Timer = hwd::Timer0;
 using time_t = uint32_t;
 
 constexpr uint16_t period_in_us = 1024;

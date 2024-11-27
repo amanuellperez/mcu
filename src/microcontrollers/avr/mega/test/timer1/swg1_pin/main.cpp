@@ -17,7 +17,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "../../../mega_cfg.h"
+#include "../../../mega_cfg_hwd.h"
 #include "../../../mega_timer1.h"
 #include <avr_time.h>
 #include "../../../mega_UART.h"
@@ -27,13 +27,14 @@
 // Microcontroller
 // ---------------
 namespace myu = mega_;
+namespace hwd = mega_::hwd;
 using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
 
 					 
 // Hwd devices
 // -----------
-using Timer    = myu::Timer1;
-// DONT_COMPILE(using SWG1_pin1 = myu::SWG1_pin<18>;)
+using Timer    = hwd::Timer1;
+// DONT_COMPILE(using SWG1_pin1 = hwd::SWG1_pin<18>;)
 using SWG_pin1 = myu::SWG1_pin<15>;
 using SWG_pin2 = myu::SWG1_pin<16>;
 

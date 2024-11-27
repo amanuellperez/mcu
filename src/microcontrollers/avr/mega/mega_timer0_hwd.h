@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __MEGA_HWD_TIMER0_H__
-#define __MEGA_HWD_TIMER0_H__
+#ifndef __MEGA_TIMER0_HWD_H__
+#define __MEGA_TIMER0_HWD_H__
 
 /****************************************************************************
  *
@@ -49,23 +49,24 @@
  *
  *	08/07/2024	 mode(), prescaler()
  ****************************************************************************/
-// TODO: avr/io.h sobra de aqui (hacerlo como atmega4809, pasarle Cfg)
+// ((TODO)) avr/io.h sobra de aqui (hacerlo como atmega4809, pasarle Cfg)
 #include <avr/io.h> // registros: DDRB... PORT...
 
 
-#include "mega_hwd_timern.h"
+#include "mega_timern_hwd.h"
 
 #include <atd_bit.h>
 #include <atd_type_traits.h>
 
 #include "mega_interrupt.h"
-#include "mega_pin.h"
+#include "mega_pin_hwd.h"
 #include "mega_import_avr.h"
 #include "mega_clock_frequencies.h"
 
 #include <array>
 
 namespace mega_{
+namespace hwd{
 
 // La creo como clase para luego poderla pasar como parámetro a templates
 // (por ejemplo, a Contador). Si la defino como namespace no puedo hacerlo.
@@ -500,7 +501,8 @@ inline void Timer0::disable_output_compare_B_match_interrupt()
 inline void Timer0::clear_pending_interrupts()
 { atd::write_bits<OCF0B, OCF0A, TOV0>::to<0,0,0>::in(TIFR0); }
 
-}// namespace avr
+}// namespace 
+}// namespace
 
 
 #endif

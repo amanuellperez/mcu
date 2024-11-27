@@ -44,10 +44,10 @@
 //  Para que funcione es fundamental conectar a un voltage regulator (por 
 //  ejemplo el 7805) la fuente de alimentación. Si no oscila mucho AREF no
 //  sirviendo para nada.
-#include "../../../mega_cfg.h"
+#include "../../../mega_cfg_hwd.h"
 #include "../../../mega_ADC.h"
 #include "../../../mega_UART.h"
-#include "../../../mega_debug.h"
+#include "../../../mega_debug_hwd.h"
 #include <avr_time.h>
 #include <mcu_UART_iostream.h>
 
@@ -55,6 +55,7 @@
 // Microcontroller
 // ---------------
 namespace myu = mega_;
+namespace hwd = mega_::hwd;
 using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
 
 
@@ -64,7 +65,7 @@ constexpr uint8_t ADC_pin = 28;
 
 // Hwd devices
 // -----------
-using ADC = myu::ADC_basic;
+using ADC = hwd::ADC_basic;
 
 // Cfg
 // ---
@@ -153,7 +154,7 @@ myu::Potential ADC_in_volts(const myu::Potential& AREF, uint16_t arefs)
 
 void ADC_clock_frequency_125kHz()
 {
-    if constexpr (myu::clock_cpu() == 1'000'000)
+    if constexpr (hwd::clock_cpu() == 1'000'000)
 	ADC::clock_frequency_divide_by_8();
 
     else {
@@ -255,7 +256,7 @@ void select_prescaler()
 	return;
     }
 
-    myu::KiloHertz freq = myu::clock_cpu() / prescaler;
+    myu::KiloHertz freq = hwd::clock_cpu() / prescaler;
     
     // datasheet: 28.4.
     // La frecuencia para 10 bits de resolución debe de ir de 50kHz a 200kHz
@@ -354,7 +355,7 @@ void manual_test()
 	    break; case 'r': case 'R': return;
 	    break; case 'p': case 'P': 
 			    uart << '\n';
-			    myu::print_registers_adc(uart);
+			    hwd::print_registers_adc(uart);
 
 	    break; case '0': ADC::disable();
 	    break; case '1': ADC::enable();

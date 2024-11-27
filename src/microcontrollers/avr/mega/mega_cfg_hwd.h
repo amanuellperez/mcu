@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __MEGA_CFG_H__
-#define __MEGA_CFG_H__
+#ifndef __MEGA_CFG_HWD_H__
+#define __MEGA_CFG_HWD_H__
 /****************************************************************************
  *
  * DESCRIPCION
@@ -37,6 +37,7 @@
 #include <atd_static.h> // static_array
 
 namespace mega_{
+namespace hwd{
 
 namespace cfg{ // ir incluyendo el resto según vaya reescribiendo codigo
 // CONFIGURACIÓN DE LOS PINES
@@ -551,6 +552,7 @@ namespace impl_of{
 }// namespace cfg
 
 
+}// namespace
 }// namespace
 
 

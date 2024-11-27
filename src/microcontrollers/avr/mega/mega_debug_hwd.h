@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 Manuel Perez 
+// Copyright (C) 2023 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -16,57 +16,42 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #pragma once
 
-#ifndef __MEGA_HWD_PORT_H__
-#define __MEGA_HWD_PORT_H__
+#ifndef __MEGA_DEBUG_HWD_H__
+#define __MEGA_DEBUG_HWD_H__
 /****************************************************************************
  *
- *   - DESCRIPCION: Clases para manejar los puertos enteros
+ * DESCRIPCION
+ *	Funciones para depurar el avr. Este archivo no se distribuye.
  *
- *
- *   - HISTORIA:
+ * HISTORIA
  *    Manuel Perez
- *    03/06/2019 Escrito
+ *    14/09/2023 Escrito
+ *    14/06/2024 print_registers_adc
+ *    22/08/2024 print_registers_spi
  *
  ****************************************************************************/
-#include <avr/io.h>
+#include <ostream>
+
 
 namespace mega_{
+namespace hwd{
 
-/*!
- *  \brief  Es el puerto B con todos los pines definidos como salida.
- *
- *  La ventaja de esta clase frente a llamar a PORTB directamente es que no 
- *  hay que recordar inicializar el puerto como salida, ya que es automático.
- *
- */
-struct Output_portB{
-    Output_portB() {DDRB = 0xFF;}
-    Output_portB& operator=(uint8_t x)
-    {
-        PORTB = x;
-        return *this;
-    }
-};
+// Impresión de los registros del avr
+// ----------------------------------
+void print_registers_uart(std::ostream& out);
 
-/*!
- *  \brief  Es el puerto D con todos los pines definidos como salida.
- *
- *  La ventaja de esta clase frente a llamar a PORTD directamente es que no 
- *  hay que recordar inicializar el puerto como salida, ya que es automático.
- *
- */
-struct Output_portD{
-    Output_portD() {DDRD = 0xFF;}
-    Output_portD& operator=(uint8_t x)
-    {
-        PORTD = x;
-        return *this;
-    }
-};
+void print_registers_spi(std::ostream& out);
+
+void print_registers_timer0(std::ostream& out);
+void print_registers_timer1(std::ostream& out);
+void print_registers_timer2(std::ostream& out);
+
+void print_registers_adc(std::ostream& out);
 
 }// namespace
+}// namespace
 
+ 
 #endif

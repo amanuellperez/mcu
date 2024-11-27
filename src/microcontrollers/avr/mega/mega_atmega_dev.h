@@ -69,15 +69,15 @@ namespace atmega{
     using namespace mega_;
 
 // MICRO
-    using Micro = mega_::Micro<cfg::pins_28>;
+    using Micro = mega_::Micro<hwd::cfg::pins_28>;
 
 
 // PINS
     template <uint8_t n>
-    using Pin = mega_::Pin<n>;
+    using Pin = hwd::Pin<n>;
 
     template <uint8_t n>
-    using Enable_change_level_interrupt = mega_::Enable_change_level_interrupt<n>;
+    using Enable_change_level_interrupt = hwd::Enable_change_level_interrupt<n>;
 
 //    template<uint8_t n>
 //    using Output_pin = avr_::Output_pin<n>;
@@ -89,7 +89,7 @@ namespace atmega{
 //    using Input_pin_without_pullup = avr_::Input_pin_without_pullup<n>;
 
 // ADC
-    using ADC_basic = mega_::ADC_basic;
+    using ADC_basic = hwd::ADC_basic;
     using ADC	    = mega_::ADC;
 
     template <uint8_t AREF_connect_to, uint16_t adc_frequency_in_kHz>
@@ -108,7 +108,7 @@ namespace atmega{
     //
     // Timer0
     // ------
-    using Timer0         = mega_::Timer0;
+    using Timer0         = hwd::Timer0;
     using Time_counter0  = mega_::Time_counter0;
     // TODO: borrar Square_wave_generator0_g a favor de SWG0_pin
     using Square_wave_generator0_g = mega_::Square_wave_generator0_g;
@@ -120,7 +120,7 @@ namespace atmega{
 
     // Timer1
     // ------
-    using Timer1         = mega_::Timer1;
+    using Timer1         = hwd::Timer1;
     using Time_counter1  = mega_::Time_counter1;
 
     template <uint8_t npin>
@@ -135,25 +135,25 @@ namespace atmega{
 
     // Timer2
     // ------
-    using Timer2         = mega_::Timer2;
+    using Timer2         = hwd::Timer2;
     using Time_counter2  = mega_::Time_counter2;
 
     template <uint16_t timeout_ms_max>
     using Time_counter2_32kHz_g= mega_::Time_counter2_32kHz_g<timeout_ms_max>;
 
 // PROTOCOLS
-    using UART_basic    = mega_::UART_basic;
+    using UART_basic    = hwd::UART_basic;
     using UART_iostream = mcu::UART_iostream<UART_basic>;
 
-    using SPI        = mega_::SPI_basic;
+    using SPI        = hwd::SPI_basic;
     using SPI_master = mega_::SPI_master;
     using SPI_slave  = mega_::SPI_slave;
 
-    using TWI_basic  = mega_::TWI_basic;
+    using TWI_basic  = hwd::TWI_basic;
 
 // MCU UTILITIES
-    using Sleep    = mega_::Sleep;
-    using Watchdog = mega_::Watchdog;
+    using Sleep    = hwd::Sleep;
+    using Watchdog = hwd::Watchdog;
 
 // ROM (Generic interface of progmem)
     template <typename T>

@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __MEGA_HWD_TIMER1_H__
-#define __MEGA_HWD_TIMER1_H__
+#ifndef __MEGA_TIMER1_HWD_H__
+#define __MEGA_TIMER1_HWD_H__
 /****************************************************************************
  *
  *  - DESCRIPCION: Traductor del timer 1 del AVR. 
@@ -75,11 +75,12 @@
 // TODO: avr/io.h sobra de aqui 
 #include <avr/io.h> // registros: DDRB... PORT...
 
-#include "mega_pin.h"
+#include "mega_pin_hwd.h"
 #include "mega_import_avr.h"
 #include "mega_clock_frequencies.h"
 
 namespace mega_{
+namespace hwd{
 /*!
  *  \brief  Funciones genéricas del Timer1.
  *
@@ -740,7 +741,8 @@ inline void Timer1::CTC_pin_B_set_on_compare_match()
 
 
 
-}// namespace avr
+}// namespace
+}// namespace
 
 
 

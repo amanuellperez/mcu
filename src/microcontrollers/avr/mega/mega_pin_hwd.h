@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __MEGA_PIN_H__
-#define __MEGA_PIN_H__
+#ifndef __MEGA_PIN_HWD_H__
+#define __MEGA_PIN_HWD_H__
 /****************************************************************************
  *
  * DESCRIPCION
@@ -91,12 +91,13 @@
  *	           pines.
  *
  ****************************************************************************/
-#include "mega_cfg.h" 
+#include "mega_cfg_hwd.h" 
     
 #include <atd_bit.h>
 #include <mcu_pin.h>
 
 namespace mega_{
+namespace hwd{
 
 // Traductor de las interrupciones INT0, INT1, ...
 //
@@ -119,8 +120,8 @@ public:
 private:
     static void enable_interrupt()
     {
-	constexpr uint8_t i = cfg::INT_POS::at<n>;
-	//atd::write_bit<cfg::INT_POS::at<n> >::template to<1>::in(EIMSK);
+	constexpr uint8_t i = hwd::cfg::INT_POS::at<n>;
+	//atd::write_bit<hwd::cfg::INT_POS::at<n> >::template to<1>::in(EIMSK);
 	atd::write_bit<i>::template to<1>::in(EIMSK);
     }
 
@@ -130,8 +131,8 @@ private:
 template <int8_t n>
 void INT__<n>::enable_when_is_zero()
 {
-    constexpr uint8_t ISC1 = cfg::ISC1::at<n>; // = ISCn1
-    constexpr uint8_t ISC0 = cfg::ISC0::at<n>; // = ISCn0
+    constexpr uint8_t ISC1 = hwd::cfg::ISC1::at<n>; // = ISCn1
+    constexpr uint8_t ISC0 = hwd::cfg::ISC0::at<n>; // = ISCn0
 
     atd::write_bits<ISC1, ISC0>::template to<0,0>::in(EICRA);
     //atd::write_bits<ISC01, ISC00>::to<0,0>::in(EICRA);
@@ -141,8 +142,8 @@ void INT__<n>::enable_when_is_zero()
 template <int8_t n>
 void INT__<n>::enable_change_level()
 {
-    constexpr uint8_t ISC1 = cfg::ISC1::at<n>; // = ISCn1
-    constexpr uint8_t ISC0 = cfg::ISC0::at<n>; // = ISCn0
+    constexpr uint8_t ISC1 = hwd::cfg::ISC1::at<n>; // = ISCn1
+    constexpr uint8_t ISC0 = hwd::cfg::ISC0::at<n>; // = ISCn0
 
     atd::write_bits<ISC1, ISC0>::template to<0,1>::in(EICRA);
     // atd::write_bits<ISC01, ISC00>::to<0,1>::in(EICRA);
@@ -153,8 +154,8 @@ void INT__<n>::enable_change_level()
 template <int8_t n>
 void INT__<n>::enable_when_falling_edge()
 {
-    constexpr uint8_t ISC1 = cfg::ISC1::at<n>; // = ISCn1
-    constexpr uint8_t ISC0 = cfg::ISC0::at<n>; // = ISCn0
+    constexpr uint8_t ISC1 = hwd::cfg::ISC1::at<n>; // = ISCn1
+    constexpr uint8_t ISC0 = hwd::cfg::ISC0::at<n>; // = ISCn0
 
     atd::write_bits<ISC1, ISC0>::template to<1,0>::in(EICRA);
     // atd::write_bits<ISC01, ISC00>::to<1,0>::in(EICRA);
@@ -164,8 +165,8 @@ void INT__<n>::enable_when_falling_edge()
 template <int8_t n>
 void INT__<n>::enable_when_rising_edge()
 {
-    constexpr uint8_t ISC1 = cfg::ISC1::at<n>; // = ISCn1
-    constexpr uint8_t ISC0 = cfg::ISC0::at<n>; // = ISCn0
+    constexpr uint8_t ISC1 = hwd::cfg::ISC1::at<n>; // = ISCn1
+    constexpr uint8_t ISC0 = hwd::cfg::ISC0::at<n>; // = ISCn0
 
     atd::write_bits<ISC1, ISC0>::template to<1,1>::in(EICRA);
     // atd::write_bits<ISC01, ISC00>::to<1,1>::in(EICRA);
@@ -176,9 +177,9 @@ void INT__<n>::enable_when_rising_edge()
 template <int8_t n>
 inline void INT__<n>::disable()
 {
-    constexpr uint8_t i = cfg::INT_POS::at<n>;
+    constexpr uint8_t i = hwd::cfg::INT_POS::at<n>;
     atd::write_bit<i>::template to<0>::in(EIMSK);
-    //atd::write_bit<cfg::INT_POS::at<n> >::template to<0>::in(EIMSK);
+    //atd::write_bit<hwd::cfg::INT_POS::at<n> >::template to<0>::in(EIMSK);
 }
 
 // Especialización para que de error al compilar si 
@@ -221,7 +222,7 @@ public:
 // INFO
     static constexpr uint8_t number = n;
 
-// CONFIGURAMOS EL cfg::PIN
+// CONFIGURAMOS EL hwd::cfg::PIN
     static void as_output() __attribute__((always_inline));
     static void as_input_with_pullup() __attribute__((always_inline));
     static void as_input_without_pullup() __attribute__((always_inline));
@@ -261,7 +262,7 @@ public:
     static void enable_change_level_interrupt();
     static void disable_change_level_interrupt();
 
-    using INT = INT__<cfg::nINT_of_pin<n>()>;
+    using INT = INT__<hwd::cfg::nINT_of_pin<n>()>;
 
 private:
 // En la datasheet se habla de DDRn, PORTn, ... pero en código tenemos DDRB,
@@ -284,7 +285,7 @@ private:
 // --------------
 template <uint8_t n, typename Cfg>
 inline void Pin<n, Cfg>::as_output() 
-//{ atd::write_bit<cfg::pin_bit<n>>::template to<1>::in(*cfg::DDR[n]); }
+//{ atd::write_bit<hwd::cfg::pin_bit<n>>::template to<1>::in(*hwd::cfg::DDR[n]); }
 { atd::write_bit<pin_bit()>::template to<1>::in(*ddr()); }
 
 template <uint8_t n, typename Cfg>
@@ -384,7 +385,7 @@ inline void Pin<n, Cfg>::disable_change_level_interrupt()
 //using Pin = mcu::Pin<private_::Pin<n, Cfg>>::type;
 
 // TODO: este es temporal, en lo que reestructuro el código
-template <uint8_t n, typename Cfg = mega_::cfg::pins_28>
+template <uint8_t n, typename Cfg = hwd::cfg::pins_28>
 using Pin = mcu::Pin<private_::Pin<n, Cfg>>::type;
 
 
@@ -392,8 +393,8 @@ using Pin = mcu::Pin<private_::Pin<n, Cfg>>::type;
  *			ENABLE_CHANGE_LEVEL_INTERRUPT
  ***************************************************************************/
 // Equivalente a Enable_interrupts pero solo para el pin correspondiente
-// TODO: quitar el valor por defecto cfg::pins_28
-template <uint8_t n, typename Cfg = mega_::cfg::pins_28>
+// TODO: quitar el valor por defecto hwd::cfg::pins_28
+template <uint8_t n, typename Cfg = hwd::cfg::pins_28>
 struct Enable_change_level_interrupt{
     Enable_change_level_interrupt() 
 	{Pin<n, Cfg>::enable_change_level_interrupt(); }
@@ -407,7 +408,7 @@ struct Enable_change_level_interrupt{
 // Me gusta más configurar los pines en el driver directamente porque así
 // controlo lo que hago. 
 /***************************************************************************
- *			    OUTPUT cfg::PIN
+ *			    OUTPUT hwd::cfg::PIN
  ***************************************************************************/
 /*!
  *  \brief  Creamos un pin que es de salida
@@ -464,7 +465,7 @@ class Output_pin<0>{ };
 // controlo lo que hago. 
 // Comentadas el 20/10/2024. Borrarlas si no se usan.
 ///***************************************************************************
-// *			    INPUT cfg::PIN WITH PULLUP
+// *			    INPUT hwd::cfg::PIN WITH PULLUP
 // ***************************************************************************/
 ///*!
 // *  \brief  Creamos un pin de entrada con pull-up
@@ -498,7 +499,7 @@ class Output_pin<0>{ };
 //
 //
 ///***************************************************************************
-// *			INPUT cfg::PIN WITHOUT PULLUP
+// *			INPUT hwd::cfg::PIN WITHOUT PULLUP
 // ***************************************************************************/
 ///*!
 // *  \brief  Creamos un pin de entrada sin pull-up
@@ -529,6 +530,7 @@ class Output_pin<0>{ };
 //};
 
 
+}// namespace avr
 }// namespace avr
 
 

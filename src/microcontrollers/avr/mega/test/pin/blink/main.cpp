@@ -18,26 +18,27 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 // (???) Este programa es genérico salvo los archivos de cabecera y el
-// namespace myu. Se podría usar para probar cualquier micro???
-#include "../../../mega_pin.h"
+// namespace hwd. Se podría usar para probar cualquier micro???
+#include "../../../mega_pin_hwd.h"
 #include "../../../mega_import_avr.h" // wait_ms
 
 // Microcontroller
 // ---------------
 namespace myu = mega_;
+namespace hwd = mega_::hwd;
 
 // Conectar un LED al pin 'led_pin'. Tiene que parpadear.
 constexpr uint8_t led_pin = 15;
 
-using Pin = myu::Pin<led_pin>;
+using Pin = hwd::Pin<led_pin>;
 
 // ¿Compila is_a_valid_pin()?
-static_assert(myu::Pin<led_pin>::is_a_valid_pin());
+static_assert(hwd::Pin<led_pin>::is_a_valid_pin());
 
-static_assert(!myu::Pin<mcu::Pin_connection_type::floating>::is_a_valid_pin());
-static_assert(myu::Pin<mcu::Pin_connection_type::floating>::is_a_valid_connection());
+static_assert(!hwd::Pin<mcu::Pin_connection_type::floating>::is_a_valid_pin());
+static_assert(hwd::Pin<mcu::Pin_connection_type::floating>::is_a_valid_connection());
 
-//DONT_COMPILE(static_assert(!myu::Pin<100>::is_a_valid_pin());)
+//DONT_COMPILE(static_assert(!hwd::Pin<100>::is_a_valid_pin());)
 
 constexpr uint16_t time_ms = 500;
 

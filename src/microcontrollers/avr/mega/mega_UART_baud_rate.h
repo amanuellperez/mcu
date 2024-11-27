@@ -45,6 +45,7 @@
 #include <utility>
 
 namespace mega_{
+namespace hwd{
 // Modos de funcionamento del UART
 enum class UART_mode{
     normal, 
@@ -206,6 +207,7 @@ constexpr inline std::pair<UART_mode, uint32_t> UBBRn()
     return {UART_mode::double_speed, 0};
 }
 
+}// namespace
 }// namespace
 
 #endif

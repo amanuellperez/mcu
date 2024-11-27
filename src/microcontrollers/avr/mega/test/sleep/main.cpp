@@ -22,10 +22,10 @@
 // volviendo a iluminarse.
 // Para ver que cualquier pin puede despertar al avr, defino 2 interrupciones.
 // Funciona con los 2 pines correctamente. Probar a descomentar el pin2.
-#include "../../mega_cfg.h"
-#include "../../mega_sleep.h"
+#include "../../mega_cfg_hwd.h"
+#include "../../mega_sleep_hwd.h"
 #include "../../mega_interrupt.h"
-#include "../../mega_pin.h"
+#include "../../mega_pin_hwd.h"
 #include <avr_time.h>
 #include "../../mega_UART.h"
 #include <mcu_UART_iostream.h>
@@ -34,8 +34,9 @@
 // Micro
 // -----
 namespace myu = mega_;
+namespace hwd = mega_::hwd;
 using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
-//using Micro = myu::Micro;
+//using Micro = hwd::Micro;
 
 // Pins
 // ----
@@ -47,7 +48,7 @@ constexpr uint8_t npin    = 14;
 
 // Hwd Devices
 // -----------
-using Pin     = myu::Pin<npin>;
+using Pin     = hwd::Pin<npin>;
 
 
 void init_uart()
@@ -85,10 +86,10 @@ void select_mode()
     uart >> ans;
 
     switch(ans){
-	break; case '1': myu::Sleep::idle_mode();
-	break; case '2': myu::Sleep::ADC_noise_reduction_mode();
-	break; case '3': myu::Sleep::power_down_mode();
-	break; case '4': myu::Sleep::power_save_mode();
+	break; case '1': hwd::Sleep::idle_mode();
+	break; case '2': hwd::Sleep::ADC_noise_reduction_mode();
+	break; case '3': hwd::Sleep::power_down_mode();
+	break; case '4': hwd::Sleep::power_save_mode();
 	break; default : uart << "Unknown option\n";
     }
 }
@@ -102,20 +103,20 @@ void test_sleep()
 	    "\t1. press a key (only sleep idle mode)\n"
 	    "\t2. change level in pin number " << (int) Pin::number << "\n";
 
-    myu::UART_basic::enable_interrupt_unread_data();
+    hwd::UART_basic::enable_interrupt_unread_data();
     Pin::enable_change_level_interrupt();
 
 // >>> sleep()
-    myu::Sleep::enable();
-    myu::Sleep::instruction();
-    myu::Sleep::disable();
+    hwd::Sleep::enable();
+    hwd::Sleep::instruction();
+    hwd::Sleep::disable();
 // <<< sleep()
 
-    myu::UART_basic::disable_interrupt_unread_data();
+    hwd::UART_basic::disable_interrupt_unread_data();
     Pin::disable_change_level_interrupt();
 
     // vaciamos el buffer para que no vuelva a saltar la interrupcion
-    while (myu::UART_basic::are_there_unread_data()){
+    while (hwd::UART_basic::are_there_unread_data()){
 	char ans{};
 	uart >> ans; 
     }

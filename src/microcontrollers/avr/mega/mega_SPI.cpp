@@ -18,12 +18,14 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "mega_SPI.h"
-#include "mega_pin.h"
+#include "mega_pin_hwd.h"
 
 // Observar que todas son funciones de configuración que se ejecutan una sola
 // vez. No es imprescindible que sean las más eficientes.
 
 namespace mega_{
+using namespace hwd;
+namespace cfg = hwd::cfg;
 
 // En la appnote "AVR151: Setup And use of the SPI", indican que:
 // The MISO, MOSI, and SCK lines of all the other slaves are tristated 
@@ -35,6 +37,7 @@ namespace mega_{
 // cerrado. Da la impresión de no necesitar pull-up resistors (???)
 void SPI_master::cfg_pins()
 {
+
     // Configuración de los pins
     Pin<cfg::spi::SCK_pin_number>::as_output();
     Pin<cfg::spi::MOSI_pin_number>::as_output();
@@ -50,10 +53,12 @@ void SPI_master::cfg_pins()
 
 void SPI_slave::init()
 {
+    namespace cfg = hwd::cfg;
+
     // Configuración de los pins (table 23-1). 
 //    Pin<SPI_num_pin_SCK>::as_input_without_pullup();
 //    Pin<SPI_num_pin_MOSI>::as_input_without_pullup();
-    Pin<cfg::spi::MISO_pin_number>::as_output();
+    hwd::Pin<cfg::spi::MISO_pin_number>::as_output();
 //    Pin<SPI_num_pin_SS>::as_input_without_pullup(); 
 }
 

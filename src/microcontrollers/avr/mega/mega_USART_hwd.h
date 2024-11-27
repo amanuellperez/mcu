@@ -18,8 +18,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #pragma once
-#ifndef __MEGA_HWD_USART_H__
-#define __MEGA_HWD_USART_H__
+#ifndef __MEGA_USART_HWD_H__
+#define __MEGA_USART_HWD_H__
 
 /****************************************************************************
  *
@@ -40,6 +40,7 @@
 #include "mega_UART_baud_rate.h"
 
 namespace mega_{
+namespace hwd{
 
 
 /*!
@@ -279,6 +280,7 @@ void UART_basic::baud_speed()
 	double_transmission_speed();
 }
 
+}// namespace
 }// namespace
 
 

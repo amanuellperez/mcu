@@ -17,11 +17,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "mega_debug.h"
+#include "mega_debug_hwd.h"
 #include <atd_ostream.h>    // print_int_as_hex
 #include <avr/io.h> // registros: DDRB... PORT...
 
 namespace mega_{
+namespace hwd{
 
 template <typename Int>
 static 
@@ -128,5 +129,6 @@ void print_registers_spi(std::ostream& out)
 }
 
 
+}// namespace
 }// namespace
  

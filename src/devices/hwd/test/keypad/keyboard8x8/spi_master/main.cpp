@@ -60,7 +60,7 @@ void print_code(uint8_t code)
 void test_keyboard()
 {
 
-    myu::Output_pin<SPI_SS_pin> no_SS;
+    myu::hwd::Output_pin<SPI_SS_pin> no_SS;
 
     while (1) {
 	no_SS.write_zero();

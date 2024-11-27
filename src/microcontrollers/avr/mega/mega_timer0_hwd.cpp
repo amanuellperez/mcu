@@ -17,9 +17,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "mega_hwd_timer0.h"
+#include "mega_timer0_hwd.h"
 
 namespace mega_{
+namespace hwd{
 
 // Table 19-10: Clock Select Bit Description
 Timer0::Frequency_divisor Timer0::frequency_divisor()
@@ -109,5 +110,6 @@ void Timer0::prescaler(uint16_t prescaler_factor)
 
 }
 
+}// namespace
 }// namespace
  

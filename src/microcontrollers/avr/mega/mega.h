@@ -41,7 +41,7 @@
 
 // Configuración del micro
 // -----------------------
-#include <mega_cfg.h>
+#include <mega_cfg_hwd.h>
 
 // Micro
 // -----
@@ -49,22 +49,22 @@
 
 // Traductores
 // -----------
-#include <mega_hwd_USART.h>
-#include <mega_hwd_SPI.h>
-#include <mega_hwd_TWI.h>
+#include <mega_USART_hwd.h>
+#include <mega_SPI_hwd.h>
+#include <mega_TWI_hwd.h>
 
-#include <mega_hwd_timer0.h>
-#include <mega_hwd_timer1.h>
-#include <mega_hwd_timer2.h>
+#include <mega_timer0_hwd.h>
+#include <mega_timer1_hwd.h>
+#include <mega_timer2_hwd.h>
 
-#include <mega_hwd_ADC.h>
+#include <mega_ADC_hwd.h>
 
 #include <mega_interrupt.h>
 
-#include <mega_pin.h>
-#include <mega_hwd_port.h>
-#include <mega_sleep.h>
-#include <mega_watchdog.h>
+#include <mega_pin_hwd.h>
+#include <mega_port_hwd.h>
+#include <mega_sleep_hwd.h>
+#include <mega_watchdog_hwd.h>
 
 
 // Dispositivos genéricos

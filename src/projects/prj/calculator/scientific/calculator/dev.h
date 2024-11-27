@@ -82,7 +82,7 @@ struct SPI_select{
     SPI_select () { no_SS.write_zero();}
     ~SPI_select () { no_SS.write_one();}
 
-    atmega::Output_pin<SPI_SS_pin> no_SS;
+    atmega::hwd::Output_pin<SPI_SS_pin> no_SS;
 };
 
 // Hardware connections

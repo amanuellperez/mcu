@@ -31,14 +31,14 @@ public:
     void run();
 
 private:
-    atmega::Output_pin<15> p1_;
-    atmega::Output_pin<16> p2_;
-    atmega::Output_pin<17> p3_;
-    atmega::Output_pin<18> p4_;
-    atmega::Output_pin<19> p5_;
-    atmega::Output_pin<23> p6_;
-    atmega::Output_pin<24> p7_;
-    atmega::Output_pin<25> p8_;
+    atmega::hwd::Output_pin<15> p1_;
+    atmega::hwd::Output_pin<16> p2_;
+    atmega::hwd::Output_pin<17> p3_;
+    atmega::hwd::Output_pin<18> p4_;
+    atmega::hwd::Output_pin<19> p5_;
+    atmega::hwd::Output_pin<23> p6_;
+    atmega::hwd::Output_pin<24> p7_;
+    atmega::hwd::Output_pin<25> p8_;
 
     void POVDisplay(uint8_t fila_glyph);
     void clear();

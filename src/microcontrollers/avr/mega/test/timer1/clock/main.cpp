@@ -18,10 +18,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 // Reloj de sistema básico. Me baso en time.h
-#include "../../../mega_cfg.h"
+#include "../../../mega_cfg_hwd.h"
 #include "../../../mega_UART.h"
 #include <mcu_UART_iostream.h>
-#include "../../../mega_hwd_timer1.h"
+#include "../../../mega_timer1_hwd.h"
 #include <avr_time.h>
 #include "../../../mega_interrupt.h"
 #include "../../../mega_micro.h"
@@ -29,9 +29,10 @@
 #include <time.h>
 
 namespace myu = mega_;
+namespace hwd = mega_::hwd;
 using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
 
-using Timer = myu::Timer1;
+using Timer = hwd::Timer1;
 
 
 ISR_TIMER1_COMPA

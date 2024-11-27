@@ -17,12 +17,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "../../../mega_cfg.h"
+#include "../../../mega_cfg_hwd.h"
 #include "../../../mega_SPI.h"
-#include "../../../mega_pin.h"
+#include "../../../mega_pin_hwd.h"
 #include "../../../mega_UART.h"
 #include <mcu_UART_iostream.h>
-#include "../../../mega_debug.h"
+#include "../../../mega_debug_hwd.h"
 
 #include <atd_ostream.h>
 
@@ -30,6 +30,7 @@
 // Microcontroller
 // ---------------
 namespace myu = mega_;
+namespace hwd = mega_::hwd;
 using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
 
 // SPI protocol
@@ -39,7 +40,7 @@ using SPI = myu::SPI_master;
 // OJO: clave periodo a 8 us. Si pongo a 2 us al slave no le da tiempo a leer
 // y se lee basura y pierden datos.
 constexpr uint16_t period_in_us = 8;	
-using no_CS = myu::Pin<SPI::SS_pin_number>;
+using no_CS = hwd::Pin<SPI::SS_pin_number>;
 
 void SPI_write(uint8_t x)
 {
@@ -179,7 +180,7 @@ int main()
 	switch (opt){
 	    break; case '0': 
 		    uart << '\n';
-		    print_registers_spi(uart);
+		    hwd::print_registers_spi(uart);
 		    uart << '\n';
 	    break; case '1': send_byte();
 	    break; case '2': send_two_bytes();

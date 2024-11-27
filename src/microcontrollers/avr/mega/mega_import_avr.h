@@ -34,6 +34,7 @@
 
 #include <avr_private.h>
 
+
 namespace mega_{
     using namespace avr_;
 }

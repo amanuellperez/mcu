@@ -33,8 +33,8 @@
  ****************************************************************************/
 #include <avr_micro.h>
 
-#include "mega_sleep.h"
-#include "mega_pin.h"
+#include "mega_sleep_hwd.h"
+#include "mega_pin_hwd.h"
 
 namespace mega_{
 
@@ -43,7 +43,7 @@ namespace mega_{
  ***************************************************************************/
 template <typename Cfg_pins>
 struct Micro : avr_::protected_::Micro {
-    // interfaz static
+// Constructor
     Micro() = delete;
 
 // Cfg
@@ -53,27 +53,29 @@ struct Micro : avr_::protected_::Micro {
 // Pins
 // ----
     template <uint8_t n>
-    using Pin = mega_::Pin<n, Cfg_pins>;
+    using Pin = hwd::Pin<n, Cfg_pins>;
 
 // Interrupts
 // ----------
     template <uint8_t n>
     using Enable_change_level_interrupt 
-				    = mega_::Enable_change_level_interrupt<n>;
+				    = hwd::Enable_change_level_interrupt<n>;
 
 // Sleep
 // -----
+    using Sleep = hwd::Sleep;
+
     // Definimos el modo del sleep
-    static void sleep_mode(Sleep::mode mode) {mega_::sleep_mode(mode);}
+    static void sleep_mode(Sleep::mode mode) {hwd::sleep_mode(mode);}
 
     // Dormimos. 
     // Precondicion: haber definido el modo con `sleep_mode`.
-    static void sleep() {mega_::sleep();}
+    static void sleep() {hwd::sleep();}
 
     // Equivalente a:
     //	    sleep_mode(mode);
     //	    sleep();
-    static void sleep(Sleep::mode mode) {mega_::sleep(mode);}
+    static void sleep(Sleep::mode mode) {hwd::sleep(mode);}
 
 };// Micro
 

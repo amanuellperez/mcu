@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __MEGA_WATCHDOG_H__
-#define __MEGA_WATCHDOG_H__
+#ifndef __MEGA_WATCHDOG_HWD_H__
+#define __MEGA_WATCHDOG_HWD_H__
 /****************************************************************************
  *
  * DESCRIPCION
@@ -41,6 +41,7 @@
 #include "mega_interrupt.h"
 
 namespace mega_{
+namespace hwd{
 
 class Watchdog{
 public:
@@ -140,6 +141,7 @@ inline void Watchdog::interrupt_and_system_reset_mode()
 
 
 
+}// namespace
 }// namespace
  
 

@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __MEGA_HWD_TIMERN_H__
-#define __MEGA_HWD_TIMERN_H__
+#ifndef __MEGA_TIMERN_HWD_H__
+#define __MEGA_TIMERN_HWD_H__
 /****************************************************************************
  *
  *  - DESCRIPCION: Cosas comunes a los atmega::Timers
@@ -37,6 +37,7 @@
 #include "mega_import_avr.h"
 
 namespace mega_{
+namespace hwd{
 
 namespace timer_{ // private. Don't use them 
 
@@ -236,6 +237,7 @@ uint8_t PWM_cfg<C>::percentage_error(const Int& x, const Int& y)
 
 }// namespace timer_
  
+}// namespace
 }// namespace
 
 

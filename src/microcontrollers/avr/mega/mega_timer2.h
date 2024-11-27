@@ -24,14 +24,14 @@
 /****************************************************************************
  *
  *  DESCRIPCION
- *	Generic views of Timer2
+ *	Generic views of hwd::Timer2
  *    
  *  HISTORIA
  *    Manuel Perez
  *    13/00/2023 Escrito
  *
  ****************************************************************************/
-#include "mega_hwd_timer2.h"
+#include "mega_timer2_hwd.h"
 #include "mega_import_avr.h"
 #include "mega_interrupt.h" // Disable_interrupts
 #include "mega_clock_frequencies.h"	
@@ -55,29 +55,29 @@ template<uint16_t period>
 inline void set_clock_period_in_us_1MHz() 
 {
     if constexpr (period == 1u)
-	Timer2::clock_frequency_no_prescaling();
+	hwd::Timer2::clock_frequency_no_prescaling();
     
     else if constexpr (period == 8u)
-	Timer2::clock_frequency_divide_by_8();
+	hwd::Timer2::clock_frequency_divide_by_8();
 
     else if constexpr (period == 32u)
-	Timer2::clock_frequency_divide_by_32();
+	hwd::Timer2::clock_frequency_divide_by_32();
 
     else if constexpr (period == 64u)
-	Timer2::clock_frequency_divide_by_64();
+	hwd::Timer2::clock_frequency_divide_by_64();
 
     else if constexpr (period == 128u)
-	Timer2::clock_frequency_divide_by_128();
+	hwd::Timer2::clock_frequency_divide_by_128();
 
     else if constexpr (period == 256u)
-	Timer2::clock_frequency_divide_by_256();
+	hwd::Timer2::clock_frequency_divide_by_256();
 
     else if constexpr (period == 1024u)
-	Timer2::clock_frequency_divide_by_1024();
+	hwd::Timer2::clock_frequency_divide_by_1024();
 
     else
 	static_assert(atd::always_false_v<int>,
-		    "Incorrect Timer2 period. Try another one. "
+		    "Incorrect hwd::Timer2 period. Try another one. "
 		    "Valid ones: 1, 8, 32, 64, 128, 256 or 1024.");
 }
 
@@ -85,7 +85,7 @@ inline void set_clock_period_in_us_1MHz()
 // -----------------
 // a 125 ns
 //template<>
-//inline void Timer2::clock_period_in_ns<125u, 8000000UL>() 
+//inline void hwd::Timer2::clock_period_in_ns<125u, 8000000UL>() 
 //{clock_frequency_no_prescaling();}
 
 // TODO: revisar y escribir
@@ -93,20 +93,20 @@ inline void set_clock_period_in_us_1MHz()
 //inline void set_clock_period_in_us_8MHz() 
 //{
 //    if constexpr (period == 1u)
-//	Timer2::clock_frequency_divide_by_8();
+//	hwd::Timer2::clock_frequency_divide_by_8();
 //
 //    else if constexpr (period == 8u)
-//	Timer2::clock_frequency_divide_by_64();
+//	hwd::Timer2::clock_frequency_divide_by_64();
 //
 //    else if constexpr (period == 32u)
-//	Timer2::clock_frequency_divide_by_256();
+//	hwd::Timer2::clock_frequency_divide_by_256();
 // 
 //    else if constexpr (period == 128u)
-//	Timer2::clock_frequency_divide_by_1024();
+//	hwd::Timer2::clock_frequency_divide_by_1024();
 // 
 //    else
 //	static_assert(atd::always_false_v<int>,
-//		    "Incorrect Timer2 period. Try another one. "
+//		    "Incorrect hwd::Timer2 period. Try another one. "
 //		    "Valid ones: 1, 8, 32 or 128.");
 //}
 
@@ -115,7 +115,7 @@ template<uint16_t period
 	, uint32_t clock_frequency_in_Hz>
 inline void set_clock_period_in_us()
 {
-    if constexpr (clock_cpu() == 1000000UL)
+    if constexpr (hwd::clock_cpu() == 1000000UL)
 	set_clock_period_in_us_1MHz<period>();
 
 //    else if constexpr (clock_cpu() == 8000000UL)
@@ -140,8 +140,8 @@ class Time_counter2{
 public:
 // Types
 // -----
-    using Hwd	       = mega_::Timer2; // hardware que hay por debajo
-    using Timer        = mega_::Timer2;
+    using Hwd	       = mega_::hwd::Timer2; // hardware que hay por debajo
+    using Timer        = mega_::hwd::Timer2;
     using counter_type = typename Timer::counter_type;
     static constexpr counter_type minus_one = static_cast<counter_type>(-1); 
 
@@ -157,7 +157,7 @@ public:
 // ----------
     /// Hay veces que puede ser interesante controlar cuándo el contador hace
     /// overflow. El único problema es que hay que definir la interrupción
-    /// ISR_TIMER0_OVF que depende del Timer2 y no es genérico.
+    /// ISR_TIMER0_OVF que depende del hwd::Timer2 y no es genérico.
     // Genera una interrupción cuando llega al top.
     // Capturarla con ISR_TIMER2_COMPA
     static void enable_top_interrupt()
@@ -172,10 +172,10 @@ public:
     // Encendemos el Counter en modo síncrono. El usuario será responsable de
     // llamar a la función init y activar las interrupciones si las necesita.
     template<uint16_t period_in_us
-	    , uint32_t clock_frequency_in_Hz = clock_cpu()>
+	    , uint32_t clock_frequency_in_Hz = hwd::clock_cpu()>
     struct turn_on_with_clock_period_of{ static void us(); };
 
-    template <uint32_t clock_frequency_in_hz = clock_cpu()>
+    template <uint32_t clock_frequency_in_hz = hwd::clock_cpu()>
     static counter_type turn_on_with_overflow_to_count_1s();
 
     /// Apagamos el generador de señales.
@@ -250,8 +250,8 @@ Time_counter2::turn_on_with_overflow_to_count_1s()
 /***************************************************************************
  *			    Time_counter2_32kHz_g
  ***************************************************************************/
-// Conectamos el Timer2 a un cristal externo de 32kHz.
-// El Timer2 tiene que funcionar en modo asíncrono.
+// Conectamos el hwd::Timer2 a un cristal externo de 32kHz.
+// El hwd::Timer2 tiene que funcionar en modo asíncrono.
 // De acuerdo a la datasheet:
 // When writing to one of the registers TCNT2, OCR2x, or TCCR2x, the value 
 // is transferred to a temporary register, and latched after two positive 
@@ -269,23 +269,23 @@ Time_counter2::turn_on_with_overflow_to_count_1s()
 template <uint16_t max_timeout_ms0 = 3000>
 class Time_counter2_32kHz_g{
 public:
-    using Hwd	       = mega_::Timer2; // hardware que hay por debajo
+    using Hwd	       = mega_::hwd::Timer2; // hardware que hay por debajo
 
 // Asserts
 // -------
-    static_assert(clock_cpu() >= 4 * 32768,
+    static_assert(hwd::clock_cpu() >= 4 * 32768,
 		"The CPU main clock frequency must be more "
 		"than four times the oscillator frequency");
 
 // Conections
 // ----------
     // Pines donde hay que conectar el cristal
-    static constexpr uint8_t crystal_32_kHz_pin1 = cfg::timer2::TOSC1_pin;
-    static constexpr uint8_t crystal_32_kHz_pin2 = cfg::timer2::TOSC2_pin;
+    static constexpr uint8_t crystal_32_kHz_pin1 = hwd::cfg::timer2::TOSC1_pin;
+    static constexpr uint8_t crystal_32_kHz_pin2 = hwd::cfg::timer2::TOSC2_pin;
 
 // Types
 // -----
-    using Timer        = mega_::Timer2;
+    using Timer        = mega_::hwd::Timer2;
     using counter_type = typename Timer::counter_type;
     static constexpr counter_type minus_one = static_cast<counter_type>(-1); 
 
@@ -304,7 +304,7 @@ public:
 // ----------
     /// Hay veces que puede ser interesante controlar cuándo el contador hace
     /// overflow. El único problema es que hay que definir la interrupción
-    /// ISR_TIMER0_OVF que depende del Timer2 y no es genérico.
+    /// ISR_TIMER0_OVF que depende del hwd::Timer2 y no es genérico.
     // Genera una interrupción cuando llega al top.
     // Capturarla con ISR_TIMER2_COMPA
     static void enable_top_interrupt()
@@ -359,7 +359,7 @@ public:
 //
 
 
-// La forma de inicializar el Timer2 en modo asíncrono viene en el punto 22.9
+// La forma de inicializar el hwd::Timer2 en modo asíncrono viene en el punto 22.9
 // de la datasheet "Asynchronous Operation of Timer/Counter2"
 template <uint16_t mto>
 Time_counter2_32kHz_g<mto>::counter_type 

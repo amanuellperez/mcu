@@ -19,16 +19,17 @@
 
 
 #include "../../../mega_timer2.h" 
-#include "../../../mega_debug.h"
+#include "../../../mega_debug_hwd.h"
 
 #include "../../../mega_UART.h"
 #include <mcu_UART_iostream.h>
-#include "../../../mega_cfg.h"
-#include "../../../mega_pin.h"
+#include "../../../mega_cfg_hwd.h"
+#include "../../../mega_pin_hwd.h"
 
 // Microcontroller
 // ---------------
 namespace myu = mega_;
+namespace hwd = mega_::hwd;
 using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
 
 // Pin conections
@@ -37,7 +38,7 @@ static constexpr uint8_t led_pin = 14;
 
 // Devices
 // -------
-using Pin2      = myu::Pin<led_pin>;
+using Pin2      = hwd::Pin<led_pin>;
 using Counter2  = myu::Time_counter2_32kHz_g<>;
 
 

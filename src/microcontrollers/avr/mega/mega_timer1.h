@@ -24,9 +24,9 @@
 /****************************************************************************
  *
  *  DESCRIPCION
- *	Diferentes formas de usar el Timer1
+ *	Diferentes formas de usar el hwd::Timer1
  *
- *	El Timer1 del avr realmente tiene 4 diferentes usos:
+ *	El hwd::Timer1 del avr realmente tiene 4 diferentes usos:
  *	(1) Pulse_counter: cuenta el número de pulsos en un pin 
  *		           TODO: implementar. El nombre Pulse_counter es
  *		           temporal. ¿dejarlo? Esta capacidad no la tiene el
@@ -38,7 +38,7 @@
  *
  *	Esas, creo, son los distintos usos que podemos dar al hardware
  *	correspondiente. Al traductor del hardware lo llamo directamente
- *	Timer1, mientras que a sus usos los nombres anteriores.
+ *	hwd::Timer1, mientras que a sus usos los nombres anteriores.
  *
  *  COMENTARIOS ANTIGUOS
  *	Estas clases sirven para separar las responsabilidades del Timer.
@@ -63,7 +63,7 @@
  *	   Aunque esa parece una forma muy sencilla de definir el SW_pin, en
  *	   la definición anterior no se indica el Timer que se usa. Creo (???)
  *	   que es conveniente dejarlo indicado en `dev.h` para que el
- *	   programador sea consciente de que se está usando el Timer1. Por
+ *	   programador sea consciente de que se está usando el hwd::Timer1. Por
  *	   ello de momento opto por
  *		using SW_pin = Micro::SW1_pin<15>;
  *
@@ -93,8 +93,8 @@
  *			   generada
  *
  ****************************************************************************/
-#include "mega_hwd_timer1.h"
-#include "mega_hwd_timern.h"
+#include "mega_timer1_hwd.h"
+#include "mega_timern_hwd.h"
 #include "mega_interrupt.h"
 #include "mega_import_avr.h"
 #include "mega_micro.h"
@@ -113,23 +113,23 @@ template<uint16_t period>
 inline void set_clock_period_in_us_1MHz() 
 {
     if constexpr (period == 1u)
-	Timer1::clock_frequency_no_prescaling();
+	hwd::Timer1::clock_frequency_no_prescaling();
     
     else if constexpr (period == 8u)
-	Timer1::clock_frequency_divide_by_8();
+	hwd::Timer1::clock_frequency_divide_by_8();
 
     else if constexpr (period == 64u)
-	Timer1::clock_frequency_divide_by_64();
+	hwd::Timer1::clock_frequency_divide_by_64();
 
     else if constexpr (period == 256u)
-	Timer1::clock_frequency_divide_by_256();
+	hwd::Timer1::clock_frequency_divide_by_256();
 
     else if constexpr (period == 1024u)
-	Timer1::clock_frequency_divide_by_1024();
+	hwd::Timer1::clock_frequency_divide_by_1024();
 
     else
 	static_assert(atd::always_false_v<int>,
-		    "Incorrect Timer1 period. Try another one. "
+		    "Incorrect hwd::Timer1 period. Try another one. "
 		    "Valid ones: 1, 8, 64, 256 or 1024.");
 }
 
@@ -137,13 +137,13 @@ inline void set_clock_period_in_us_1MHz()
 inline Time clock_period_in_us_1MHz()
 {
     using namespace literals;
-    switch(Timer1::frequency_divisor()){
-	case Timer1::Frequency_divisor::no_prescaling	: return 1_us;
-	case Timer1::Frequency_divisor::divide_by_8	: return 8_us;
-	case Timer1::Frequency_divisor::divide_by_64	: return 64_us;
-	case Timer1::Frequency_divisor::divide_by_256	: return 256_us;
-	case Timer1::Frequency_divisor::divide_by_1024	: return 1024_us;
-	case Timer1::Frequency_divisor::off		: return 0_us;
+    switch(hwd::Timer1::frequency_divisor()){
+	case hwd::Timer1::Frequency_divisor::no_prescaling	: return 1_us;
+	case hwd::Timer1::Frequency_divisor::divide_by_8	: return 8_us;
+	case hwd::Timer1::Frequency_divisor::divide_by_64	: return 64_us;
+	case hwd::Timer1::Frequency_divisor::divide_by_256	: return 256_us;
+	case hwd::Timer1::Frequency_divisor::divide_by_1024	: return 1024_us;
+	case hwd::Timer1::Frequency_divisor::off		: return 0_us;
     }
 
     return 0_us;
@@ -153,16 +153,16 @@ inline Frequency clock_frequency_in_Hz_1MHz()
 {
     using namespace literals;
 
-    switch(Timer1::frequency_divisor()){
-	case Timer1::Frequency_divisor::no_prescaling	: return 1_MHz;
-	case Timer1::Frequency_divisor::divide_by_8	: return 125_kHz;
-	case Timer1::Frequency_divisor::divide_by_64	: 
+    switch(hwd::Timer1::frequency_divisor()){
+	case hwd::Timer1::Frequency_divisor::no_prescaling	: return 1_MHz;
+	case hwd::Timer1::Frequency_divisor::divide_by_8	: return 125_kHz;
+	case hwd::Timer1::Frequency_divisor::divide_by_64	: 
 					return Frequency{15'625ul};
-	case Timer1::Frequency_divisor::divide_by_256	: 
+	case hwd::Timer1::Frequency_divisor::divide_by_256	: 
 					return Frequency{3'906ul};
-	case Timer1::Frequency_divisor::divide_by_1024	: 
+	case hwd::Timer1::Frequency_divisor::divide_by_1024	: 
 					return Frequency{977};
-	case Timer1::Frequency_divisor::off		: return 0_Hz;
+	case hwd::Timer1::Frequency_divisor::off		: return 0_Hz;
     }
 
     return 0_Hz;
@@ -174,26 +174,26 @@ inline Frequency clock_frequency_in_Hz_1MHz()
 //// a 125 ns
 //template<>
 //inline void set_clock_period_in_ns<125u, 8000000UL>() 
-//{Timer1::clock_frequency_no_prescaling();}
+//{hwd::Timer1::clock_frequency_no_prescaling();}
 
 template<uint16_t period>
 inline void set_clock_period_in_us_8MHz() 
 {
     if constexpr (period == 1u)
-	Timer1::clock_frequency_divide_by_8();
+	hwd::Timer1::clock_frequency_divide_by_8();
 
     else if constexpr (period == 8u)
-	Timer1::clock_frequency_divide_by_64();
+	hwd::Timer1::clock_frequency_divide_by_64();
 
     else if constexpr (period == 32u)
-	Timer1::clock_frequency_divide_by_256();
+	hwd::Timer1::clock_frequency_divide_by_256();
  
     else if constexpr (period == 128u)
-	Timer1::clock_frequency_divide_by_1024();
+	hwd::Timer1::clock_frequency_divide_by_1024();
  
     else
 	static_assert(atd::always_false_v<int>,
-		    "Incorrect Timer1 period. Try another one. "
+		    "Incorrect hwd::Timer1 period. Try another one. "
 		    "Valid ones: 1, 8, 32 or 128.");
 }
 
@@ -201,13 +201,13 @@ inline void set_clock_period_in_us_8MHz()
 inline Time clock_period_in_us_8MHz()
 {
     using namespace literals;
-    switch(Timer1::frequency_divisor()){
-	case Timer1::Frequency_divisor::no_prescaling	: return 0_us;
-	case Timer1::Frequency_divisor::divide_by_8	: return 1_us;
-	case Timer1::Frequency_divisor::divide_by_64	: return 8_us;
-	case Timer1::Frequency_divisor::divide_by_256	: return 32_us;
-	case Timer1::Frequency_divisor::divide_by_1024	: return 128_us;
-	case Timer1::Frequency_divisor::off		: return 0_us;
+    switch(hwd::Timer1::frequency_divisor()){
+	case hwd::Timer1::Frequency_divisor::no_prescaling	: return 0_us;
+	case hwd::Timer1::Frequency_divisor::divide_by_8	: return 1_us;
+	case hwd::Timer1::Frequency_divisor::divide_by_64	: return 8_us;
+	case hwd::Timer1::Frequency_divisor::divide_by_256	: return 32_us;
+	case hwd::Timer1::Frequency_divisor::divide_by_1024	: return 128_us;
+	case hwd::Timer1::Frequency_divisor::off		: return 0_us;
     }
 
     return 0_us;
@@ -216,15 +216,15 @@ inline Time clock_period_in_us_8MHz()
 inline Frequency clock_frequency_in_Hz_8MHz()
 {
     using namespace literals;
-    switch(Timer1::frequency_divisor()){
-	case Timer1::Frequency_divisor::no_prescaling	: return 0_MHz;
-	case Timer1::Frequency_divisor::divide_by_8	: return 1_MHz;
-	case Timer1::Frequency_divisor::divide_by_64	: return 125_kHz;
-	case Timer1::Frequency_divisor::divide_by_256	: 
+    switch(hwd::Timer1::frequency_divisor()){
+	case hwd::Timer1::Frequency_divisor::no_prescaling	: return 0_MHz;
+	case hwd::Timer1::Frequency_divisor::divide_by_8	: return 1_MHz;
+	case hwd::Timer1::Frequency_divisor::divide_by_64	: return 125_kHz;
+	case hwd::Timer1::Frequency_divisor::divide_by_256	: 
 				return Frequency{31'250ul};
-	case Timer1::Frequency_divisor::divide_by_1024	: 
+	case hwd::Timer1::Frequency_divisor::divide_by_1024	: 
 				return Frequency{7'813ul};// exacto: 7812.5 +-10%
-	case Timer1::Frequency_divisor::off		: return 0_Hz;
+	case hwd::Timer1::Frequency_divisor::off		: return 0_Hz;
     }
 
     return 0_Hz;
@@ -234,7 +234,7 @@ inline Frequency clock_frequency_in_Hz_8MHz()
 
 
 
-template<uint32_t clock_frequency_in_hz = clock_cpu()>
+template<uint32_t clock_frequency_in_hz = hwd::clock_cpu()>
 inline Time clock_period()
 {
     if constexpr (clock_frequency_in_hz == 1000000UL)
@@ -288,7 +288,7 @@ inline Frequency clock_frequency()
 
 // PWM modes
 // ---------
-class PWM_cfg : public timer_::PWM_cfg<Timer1>{
+class PWM_cfg : public hwd::timer_::PWM_cfg<hwd::Timer1>{
 public:
     bool fast_mode; // if false, then mode == phase_mode
 		    
@@ -323,8 +323,8 @@ public:
 
 // Types
 // -----
-    using Hwd	       = mega_::Timer1; // hardware que hay por debajo
-    using Timer        = mega_::Timer1;
+    using Hwd	       = mega_::hwd::Timer1; // hardware que hay por debajo
+    using Timer        = mega_::hwd::Timer1;
     using counter_type = typename Timer::counter_type;
     using Disable_interrupts = mega_::Disable_interrupts;
     static constexpr counter_type minus_one = static_cast<counter_type>(-1); 
@@ -363,7 +363,7 @@ public:
 // ----------
     /// Hay veces que puede ser interesante controlar cuándo el contador hace
     /// overflow. El único problema es que hay que definir la interrupción
-    /// ISR_TIMER1_OVF que depende del Timer1 y no es genérico.
+    /// ISR_TIMER1_OVF que depende del hwd::Timer1 y no es genérico.
     // ¿Cómo independizarlo del avr este ISR_TIMER1_OVF? <-- En el dev.h
     // al seleccionar el Time_counter1 se puede definir
     // ISR_GENERIC_TIMER_OVF = ISR_TIMER1_OVF.
@@ -392,7 +392,7 @@ public:
     /// tiempo directamente del contador.
     // Leer notas en Time_counter0
     template<uint16_t period_in_us
-	    , uint32_t clock_frequency_in_hz = clock_cpu() >
+	    , uint32_t clock_frequency_in_hz = hwd::clock_cpu() >
     struct turn_on_with_clock_period_of{
 	static void us()
 	{timer1_::set_clock_period_in_us<period_in_us, clock_frequency_in_hz>();}
@@ -410,10 +410,10 @@ public:
     /// para que se haya alcanzado 1s)
     /// Recordar que el cliente es responsable de llamar a `enable_interrupts()`
     /// para que funcione.
-    template <uint32_t clock_frequency_in_hz = clock_cpu()>
+    template <uint32_t clock_frequency_in_hz = hwd::clock_cpu()>
     static counter_type turn_on_with_overflow_to_count_1s();
 
-    template <uint32_t clock_frequency_in_hz = clock_cpu()>
+    template <uint32_t clock_frequency_in_hz = hwd::clock_cpu()>
     static void turn_on_with_overflow_every_1ms();
 
     /// Apagamos el contador
@@ -541,12 +541,12 @@ class Square_wave_generator1_g{
 public:
 // Hardware device
 // ---------------
-    using Hwd	       = mega_::Timer1; // hardware que hay por debajo
-    using Timer        = mega_::Timer1;
+    using Hwd	       = mega_::hwd::Timer1; // hardware que hay por debajo
+    using Timer        = mega_::hwd::Timer1;
 
 // Características del Timer
 // -------------------------
-    static constexpr uint8_t number_of_pins = cfg::timer1::number_of_pins;
+    static constexpr uint8_t number_of_pins = hwd::cfg::timer1::number_of_pins;
 
     // pin[0], pin[1], ..., pin[number_of_pins - 1] = pins a los que podemos
     // conectar el SWG
@@ -609,7 +609,7 @@ private:
     static void init(){ Timer::CTC_mode_top_ICR();}
 
     template<uint16_t period
-	    , uint32_t clock_frequency_in_hz = clock_cpu()>
+	    , uint32_t clock_frequency_in_hz = hwd::clock_cpu()>
     static void turn_on()
     {timer1_::set_clock_period_in_us<period, clock_frequency_in_hz>();}
 
@@ -637,20 +637,20 @@ private:
     /// Devuelve la frecuencia, en Hz,  que se genera dados 
     /// el prescaler factor d (divisor de frecuencia) y el top M. 
     /// (pag 132 datasheet)
-    template <uint32_t f_clock_in_Hz = clock_cpu()>
+    template <uint32_t f_clock_in_Hz = hwd::clock_cpu()>
     static constexpr 
     uint32_t prescaler_top_to_frequency_in_Hz(uint32_t d, uint32_t M)
-    { return mega_::timer_::CTC_mode::
+    { return hwd::timer_::CTC_mode::
 	    prescaler_top_to_frequency_in_Hz<f_clock_in_Hz>(d, M);}
 
     /// Función inversa a la prescaler_top_to_frequency_in_Hz:
     /// Devuelve el par (prescaler factor, top) necesario para generar la
     /// frecuencia freq_in_Hz.
-    template <uint32_t f_clock_in_Hz = clock_cpu()>
+    template <uint32_t f_clock_in_Hz = hwd::clock_cpu()>
     static constexpr 
     std::pair<uint32_t, uint32_t> 
     frequency_in_Hz_to_prescaler_top(uint32_t freq_in_Hz)
-    { return mega_::timer_::CTC_mode::
+    { return hwd::timer_::CTC_mode::
     frequency_in_Hz_to_prescaler_top<Timer, f_clock_in_Hz>(freq_in_Hz); 
     }
 };
@@ -714,24 +714,24 @@ inline void Square_wave_generator1_g::disconnect_all_pins()
 /*!
  *  \brief pin donde se genera una señal cuadrada 
  *	    
- *  Esta clase oculta la configuración del Timer1 para generar ondas
+ *  Esta clase oculta la configuración del hwd::Timer1 para generar ondas
  *  cuadradas.
  *
  *  Leer el comentario a PWM1_pin, es aplicable casi todo aquí.
  *
  */
 template <uint8_t npin0>
-//    requires (npin0 == Timer1::OCA_pin() or npin0 == Timer1::OCB_pin())
+//    requires (npin0 == hwd::Timer1::OCA_pin() or npin0 == hwd::Timer1::OCB_pin())
 //    En g++ 13 si defino la clase con requires luego todas las
 //    implementaciones tienen que llevar ese require ==> hay que modificar
 //    todas las funciones definidas fuera de la clase para añadirles el
 //    requires @_@ <-- por eso, por pereza prefiero usar el static_assert
 class SWG1_pin{
-    static_assert(npin0 == Timer1::OCA_pin() or npin0 == Timer1::OCB_pin());
+    static_assert(npin0 == hwd::Timer1::OCA_pin() or npin0 == hwd::Timer1::OCB_pin());
 public:
 // types
-    using Hwd	       = mega_::Timer1; // hardware que hay por debajo
-    using Timer        = mega_::Timer1;
+    using Hwd	       = mega_::hwd::Timer1; // hardware que hay por debajo
+    using Timer        = mega_::hwd::Timer1;
     using SW_signal    = avr_::SW_signal;
     using counter_type = Timer::counter_type;
     using NPulses_t    = uint16_t;
@@ -740,7 +740,7 @@ public:
 
 // cfg
     static constexpr uint8_t number  = npin0;
-    static constexpr Frequency clock_frequency = mega_::clock_frequency;
+    static constexpr Frequency clock_frequency = hwd::clock_frequency;
 
 // basic interface
     // Genera la señal SW indicada. Enciende el Timer en caso de que
@@ -766,7 +766,7 @@ public:
 
     // Desconecta el pin del SWG sin modificar el estado del Timer
     // No modifico el estado del Timer por si acaso se está generando en el
-    // otro pin del Timer1 una señal.
+    // otro pin del hwd::Timer1 una señal.
     static void disconnect();
 
     // Paramos el Timer
@@ -812,7 +812,7 @@ void SWG1_pin<n>::generate(const SW_signal& sw)
     write_zero(); // garantizamos empezar a contar correctamente (para
 		  // npulses_)
 
-    using CTC = timer_::CTC_mode;
+    using CTC = hwd::timer_::CTC_mode;
     auto [d, t] = CTC::frequency_to_prescaler_top
 			    <Timer, clock_frequency.value()> (sw.frequency());
 
@@ -892,20 +892,20 @@ inline void SWG1_pin<n>::stop()
 template <uint8_t n>
 void SWG1_pin<n>::pin_as_output() {
     disconnect();
-    Pin<n>::as_output();
+    hwd::Pin<n>::as_output();
 }
 
 template <uint8_t n>
 void SWG1_pin<n>::write_zero() {
     pin_as_output();
-    Pin<n>::write_zero();
+    hwd::Pin<n>::write_zero();
 }
 
 
 template <uint8_t n>
 void SWG1_pin<n>::write_one() {
     pin_as_output();
-    Pin<n>::write_one();
+    hwd::Pin<n>::write_one();
 }
 
 
@@ -916,17 +916,17 @@ void SWG1_pin<n>::write_one() {
 /*!
  *  \brief  pin donde se genera una señal PWM.
  *
- *	Esta clase pretende ocultar toda la configuración del Timer1 para
+ *	Esta clase pretende ocultar toda la configuración del hwd::Timer1 para
  *	generar una señal PWM.
  *
  *	De momento es una implementación mínima, pero la idea es que esta
  *	clase elija la configuración óptima para generar una señal.
  *	El cliente de esta clase no debe de saber nada de cómo se configura el
- *	Timer1 del avr, solo se limita a pedirle que genere una señal PWM de
+ *	hwd::Timer1 del avr, solo se limita a pedirle que genere una señal PWM de
  *	100kHz de frecuencia y un 30% de duty cycle en el pin indicado y
  *	mágicamente aparecerá esa señal, sin saber nada de la configuración.
  *	
- *	Por ello la meto dentro de generic: permite usar el Timer1 
+ *	Por ello la meto dentro de generic: permite usar el hwd::Timer1 
  *	como generador de señales PWM sin necesidad de saber cómo funciona por
  *	dentro.
  *
@@ -955,7 +955,7 @@ void SWG1_pin<n>::write_one() {
  *	Para generar este tipo de señales necesito no perder tiempo pasando de
  *	atd::Percentage a OCR. Por ello, suministro un interfaz más eficiente
  *	para este caso. Observar que el interfaz está diseñado para que el
- *	usuario no tenga que saber nada de cómo funciona el Timer1 (eso es
+ *	usuario no tenga que saber nada de cómo funciona el hwd::Timer1 (eso es
  *	requisito indispensable de esta clase).
  *
  *
@@ -974,7 +974,7 @@ void SWG1_pin<n>::write_one() {
  *
  *  
  * NOTACIÓN
- *	El 1 del PWM1 indica que se está usando el Timer1.
+ *	El 1 del PWM1 indica que se está usando el hwd::Timer1.
  *
  *
  * ADVERTENCIA
@@ -984,17 +984,17 @@ void SWG1_pin<n>::write_one() {
  * (???) ¿Desacoplarlo? ¿Gestionarlo internamente con algo parecido a share_ptr? 
  */
 template <uint8_t npin0>
-//    requires (npin0 == Timer1::OCA_pin() or npin0 == Timer1::OCB_pin())
+//    requires (npin0 == hwd::Timer1::OCA_pin() or npin0 == hwd::Timer1::OCB_pin())
 //    En g++ 13 si defino la clase con requires luego todas las
 //    implementaciones tienen que llevar ese require ==> hay que modificar
 //    todas las funciones definidas fuera de la clase para añadirles el
 //    requires @_@
 class PWM1_pin{
-    static_assert(npin0 == Timer1::OCA_pin() or npin0 == Timer1::OCB_pin());
+    static_assert(npin0 == hwd::Timer1::OCA_pin() or npin0 == hwd::Timer1::OCB_pin());
 public:
 // types
-    using Hwd	       = mega_::Timer1; // hardware que hay por debajo
-    using Timer        = mega_::Timer1;
+    using Hwd	       = mega_::hwd::Timer1; // hardware que hay por debajo
+    using Timer        = mega_::hwd::Timer1;
     using counter_type = Timer::counter_type;
 
     using PWM_signal   = avr_::PWM_signal;
@@ -1004,7 +1004,7 @@ public:
 
 // cfg
     static constexpr uint8_t number  = npin0;
-    static constexpr Frequency clock_frequency = mega_::clock_frequency;
+    static constexpr Frequency clock_frequency = hwd::clock_frequency;
 
 // constructor
     PWM1_pin() = delete; // de momento static interface
@@ -1033,16 +1033,16 @@ public:
 
 
 // Interfaz 2: Generamos una señal PWM de pulsos VARIABLES en longitud.
-    // Calcula la configuración del Timer1 para generar la frecuencia freq_gen
+    // Calcula la configuración del hwd::Timer1 para generar la frecuencia freq_gen
     static nm::Result cfg_to_generate(const Frequency& freq_gen, Timer_cfg& cfg);
 
-    // Configura el Timer1 con la configuración obtenida en cfg_to_generate
+    // Configura el hwd::Timer1 con la configuración obtenida en cfg_to_generate
     static void cfg(const Timer_cfg& cfg);
 
-    // Enciende el Timer1, empezando a generar la señal PWM
+    // Enciende el hwd::Timer1, empezando a generar la señal PWM
     static void turn_on(const uint16_t& prescaler);
 
-    // Calcula el valor que usa internamente el Timer1 para obtener ese duty
+    // Calcula el valor que usa internamente el hwd::Timer1 para obtener ese duty
     // cycle.
     static counter_type 
 	    duty_cycle(const Timer_cfg& cfg, const atd::Percentage& p);
@@ -1060,7 +1060,7 @@ public:
 
     // Desconecta el pin del PWM sin modificar el estado del Timer
     // No modifico el estado del Timer por si acaso se está generando en el
-    // otro pin del Timer1 una señal.
+    // otro pin del hwd::Timer1 una señal.
     static void disconnect();
 
     // Paramos el Timer
@@ -1393,13 +1393,13 @@ inline void PWM1_pin<n>::stop()
 template <uint8_t n>
 void PWM1_pin<n>::pin_as_output() {
     disconnect();
-    Pin<n>::as_output();
+    hwd::Pin<n>::as_output();
 }
 
 template <uint8_t n>
 void PWM1_pin<n>::write_zero() {
     pin_as_output();
-    Pin<n>::write_zero();
+    hwd::Pin<n>::write_zero();
 }
 
 
@@ -1407,33 +1407,33 @@ template <uint8_t n>
 void PWM1_pin<n>::write_one() 
 {
     pin_as_output();
-    Pin<n>::write_one();
+    hwd::Pin<n>::write_one();
 }
 
 template <uint8_t n>
 bool PWM1_pin<n>::is_zero() 
 {
     if (!is_disconnected()) return false;
-    return Pin<n>::is_zero();
+    return hwd::Pin<n>::is_zero();
 }
 
 template <uint8_t n>
 bool PWM1_pin<n>::is_one() 
 {
     if (!is_disconnected()) return false;
-    return Pin<n>::is_one();
+    return hwd::Pin<n>::is_one();
 }
 
 //  Esta función es casi idéntica a la de PWM0_pin
 template <uint8_t n>
 Frequency PWM1_pin<n>::frequency()
 {
-    using Mode = Timer1::Mode;
-    Mode mode  = Timer1::mode();       
+    using Mode = hwd::Timer1::Mode;
+    Mode mode  = hwd::Timer1::mode();       
 
     Timer_cfg cfg;
     cfg.top       = top();
-    cfg.prescaler = Timer1::prescaler();
+    cfg.prescaler = hwd::Timer1::prescaler();
 
     if (cfg.prescaler == 0) // timer apagado?
 	return Frequency{0}; 

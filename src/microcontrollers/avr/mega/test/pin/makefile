@@ -1,5 +1,5 @@
 DIRS = \
-	   basic 	\
+	   hwd \
 	   blink	\
 	   interrupts
 

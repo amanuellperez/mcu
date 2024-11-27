@@ -48,7 +48,7 @@
  *
  ****************************************************************************/
 
-#include "mega_hwd_USART.h"
+#include "mega_USART_hwd.h"
 #include "mega_clock_frequencies.h"	
 
 namespace mega_{
@@ -64,7 +64,7 @@ bool UART_cfg()
 {                                
     USART::asynchronous_mode();
 
-    USART::template baud_speed<clock_cpu(), Cfg::baud_rate, Cfg::max_error>();
+    USART::template baud_speed<hwd::clock_cpu(), Cfg::baud_rate, Cfg::max_error>();
     
     if constexpr (Cfg::parity_mode_enable)
 	USART::parity_mode_enable();
@@ -113,7 +113,8 @@ bool UART_cfg()
 class UART_8bits {
 public:
 // Types
-    using USART = UART_basic;
+    using Hwd   = hwd::UART_basic;
+    using USART = Hwd;
 
 // Constructor
     UART_8bits() = delete;
