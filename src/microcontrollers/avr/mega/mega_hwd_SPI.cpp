@@ -17,7 +17,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "mega_SPI_basic.h"
+#include "mega_hwd_SPI.h"
 
 #include <atd_bit.h>
 

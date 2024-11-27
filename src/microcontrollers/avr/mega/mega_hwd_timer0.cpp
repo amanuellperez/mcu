@@ -17,7 +17,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "mega_timer0_basic.h"
+#include "mega_hwd_timer0.h"
 
 namespace mega_{
 

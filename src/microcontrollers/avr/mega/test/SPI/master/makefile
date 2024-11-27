@@ -1,7 +1,7 @@
 BIN = xx
 
 SOURCES= main.cpp \
-		 ../../../mega_SPI_basic.cpp	\
+		 ../../../mega_hwd_SPI.cpp	\
 		 ../../../mega_SPI.cpp\
 		 ../../../mega_debug.cpp\
 		 ../../../mega_UART.cpp

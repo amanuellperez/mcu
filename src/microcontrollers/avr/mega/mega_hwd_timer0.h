@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __MEGA_TIMER0_BASIC_H__
-#define __MEGA_TIMER0_BASIC_H__
+#ifndef __MEGA_HWD_TIMER0_H__
+#define __MEGA_HWD_TIMER0_H__
 
 /****************************************************************************
  *
@@ -53,7 +53,7 @@
 #include <avr/io.h> // registros: DDRB... PORT...
 
 
-#include "mega_timern_basic.h"
+#include "mega_hwd_timern.h"
 
 #include <atd_bit.h>
 #include <atd_type_traits.h>

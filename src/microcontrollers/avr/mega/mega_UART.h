@@ -48,7 +48,7 @@
  *
  ****************************************************************************/
 
-#include "mega_USART_basic.h"
+#include "mega_hwd_USART.h"
 #include "mega_clock_frequencies.h"	
 
 namespace mega_{

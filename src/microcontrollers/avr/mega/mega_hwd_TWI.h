@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __MEGA_TWI_BASIC_H__
-#define __MEGA_TWI_BASIC_H__
+#ifndef __MEGA_HWD_TWI_H__
+#define __MEGA_HWD_TWI_H__
 /****************************************************************************
  *
  *   - DESCRIPCION: Traductor del TWI (I2C)

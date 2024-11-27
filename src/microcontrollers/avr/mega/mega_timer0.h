@@ -48,7 +48,7 @@
  *					      el nombre)
  *
  ****************************************************************************/
-#include "mega_timer0_basic.h"
+#include "mega_hwd_timer0.h"
 #include "mega_import_avr.h"
 
 #include <tuple>    // std::tie

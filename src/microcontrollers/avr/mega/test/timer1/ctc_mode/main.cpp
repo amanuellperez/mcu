@@ -18,7 +18,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "../../../mega_cfg.h"
-#include "../../../mega_timer1_basic.h"
+#include "../../../mega_hwd_timer1.h"
 #include <avr_time.h>
 #include "../../../mega_interrupt.h"
 #include "../../../mega_UART.h"

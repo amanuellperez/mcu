@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __MEGA_SPI_BASIC_H__
-#define __MEGA_SPI_BASIC_H__
+#ifndef __MEGA_HWD_SPI_H__
+#define __MEGA_HWD_SPI_H__
 /****************************************************************************
  *
  *  - DESCRIPCION: Traductor del SPI.

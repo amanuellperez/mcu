@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __MEGA_TIMER1_BASIC_H__
-#define __MEGA_TIMER1_BASIC_H__
+#ifndef __MEGA_HWD_TIMER1_H__
+#define __MEGA_HWD_TIMER1_H__
 /****************************************************************************
  *
  *  - DESCRIPCION: Traductor del timer 1 del AVR. 

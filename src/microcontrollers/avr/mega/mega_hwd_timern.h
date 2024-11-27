@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __MEGA_TIMERN_BASIC_H__
-#define __MEGA_TIMERN_BASIC_H__
+#ifndef __MEGA_HWD_TIMERN_H__
+#define __MEGA_HWD_TIMERN_H__
 /****************************************************************************
  *
  *  - DESCRIPCION: Cosas comunes a los atmega::Timers

@@ -2,7 +2,6 @@
 
 * [Capas](#capas)
 * [Notación](#notación)
-* [SPI](#spi)
 
 ## <a name="capas"></a>Capas
 

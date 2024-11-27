@@ -93,8 +93,8 @@
  *			   generada
  *
  ****************************************************************************/
-#include "mega_timer1_basic.h"
-#include "mega_timern_basic.h"
+#include "mega_hwd_timer1.h"
+#include "mega_hwd_timern.h"
 #include "mega_interrupt.h"
 #include "mega_import_avr.h"
 #include "mega_micro.h"

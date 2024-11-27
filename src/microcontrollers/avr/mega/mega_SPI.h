@@ -33,7 +33,7 @@
  *		   para frecuencias no soportadas.
  *
  ****************************************************************************/
-#include "mega_SPI_basic.h"
+#include "mega_hwd_SPI.h"
 #include "mega_clock_frequencies.h"	
 
 namespace mega_{

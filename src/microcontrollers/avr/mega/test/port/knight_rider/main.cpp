@@ -18,7 +18,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 // Conectar el puerto B a 8 leds. Hacemos el coche fantástico.
-#include "../../../mega_port_basic.h"
+#include "../../../mega_hwd_port.h"
 #include "../../../mega_import_avr.h" // wait_ms
 
 

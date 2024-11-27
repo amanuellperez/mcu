@@ -21,7 +21,7 @@
 #include "../../../mega_cfg.h"
 #include "../../../mega_UART.h"
 #include <mcu_UART_iostream.h>
-#include "../../../mega_timer1_basic.h"
+#include "../../../mega_hwd_timer1.h"
 #include <avr_time.h>
 #include "../../../mega_interrupt.h"
 #include "../../../mega_micro.h"

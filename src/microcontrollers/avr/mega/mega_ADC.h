@@ -25,7 +25,7 @@
  *
  * DESCRIPCION
  *	¿Cómo implementar un driver?
- *	1) El traductor: avr_ADC_basic.h
+ *	1) El traductor: avr_hwd_ADC.h
  *	2) Un (o varios) drivers: avr_ADC_drivers.h
  *	3) Interfaz genérico: avr_ADC_generic.h
  *
@@ -48,7 +48,7 @@
  *
  ****************************************************************************/
 
-#include "mega_ADC_basic.h"
+#include "mega_hwd_ADC.h"
 #include "mega_clock_frequencies.h"	
 
 #include <atd_names.h>	// nm::ok/fail

@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __MEGA_ADC_BASIC_H__
-#define __MEGA_ADC_BASIC_H__
+#ifndef __MEGA_HWD_ADC_H__
+#define __MEGA_HWD_ADC_H__
 
 /****************************************************************************
  *

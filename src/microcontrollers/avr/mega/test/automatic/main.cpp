@@ -19,8 +19,8 @@
 
 // Ejemplo básico de uso del Timer como contador
 #include "../../mega_cfg.h"
-#include "../../mega_timer0_basic.h"
-#include "../../mega_timer1_basic.h"
+#include "../../mega_hwd_timer0.h"
+#include "../../mega_hwd_timer1.h"
 #include "../../mega_UART.h"
 #include <avr_time.h>
 #include <mcu_UART_iostream.h>

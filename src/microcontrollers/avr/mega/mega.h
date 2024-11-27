@@ -49,20 +49,20 @@
 
 // Traductores
 // -----------
-#include <mega_USART_basic.h>
-#include <mega_SPI_basic.h>
-#include <mega_TWI_basic.h>
+#include <mega_hwd_USART.h>
+#include <mega_hwd_SPI.h>
+#include <mega_hwd_TWI.h>
 
-#include <mega_timer0_basic.h>
-#include <mega_timer1_basic.h>
-#include <mega_timer2_basic.h>
+#include <mega_hwd_timer0.h>
+#include <mega_hwd_timer1.h>
+#include <mega_hwd_timer2.h>
 
-#include <mega_ADC_basic.h>
+#include <mega_hwd_ADC.h>
 
 #include <mega_interrupt.h>
 
 #include <mega_pin.h>
-#include <mega_port_basic.h>
+#include <mega_hwd_port.h>
 #include <mega_sleep.h>
 #include <mega_watchdog.h>
 

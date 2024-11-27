@@ -31,7 +31,7 @@
  *    13/00/2023 Escrito
  *
  ****************************************************************************/
-#include "mega_timer2_basic.h"
+#include "mega_hwd_timer2.h"
 #include "mega_import_avr.h"
 #include "mega_interrupt.h" // Disable_interrupts
 #include "mega_clock_frequencies.h"	
