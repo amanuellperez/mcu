@@ -447,8 +447,8 @@ int main()
     while (1){
 	uart << "\n\nMenu\n"
 	            "----\n"
-		    "1. Host test\n"
-		    "2. Client test\n"
+		    "1. Host test (master test)\n"
+		    "2. Client test (slave test)\n"
 		    "3. Low level test\n";
 
 	char opt{};

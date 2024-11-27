@@ -1,4 +1,10 @@
-# AVR microcontrollers
+# Índice
+
+* [AVR microcontrollers](#avr_micros)
+* [Hardware and Hardware Abstraction Layer](hardware_abstraction.md)
+
+
+# <a name="avr_micros"></a> AVR microcontrollers
 
 De momento voy a probar a separar el código de los avr por familias, creando
 los siguientes directorios:

@@ -323,6 +323,7 @@ public:
 
 // Types
 // -----
+    using Hwd	       = mega_::Timer1; // hardware que hay por debajo
     using Timer        = mega_::Timer1;
     using counter_type = typename Timer::counter_type;
     using Disable_interrupts = mega_::Disable_interrupts;
@@ -540,6 +541,7 @@ class Square_wave_generator1_g{
 public:
 // Hardware device
 // ---------------
+    using Hwd	       = mega_::Timer1; // hardware que hay por debajo
     using Timer        = mega_::Timer1;
 
 // Características del Timer
@@ -728,6 +730,7 @@ class SWG1_pin{
     static_assert(npin0 == Timer1::OCA_pin() or npin0 == Timer1::OCB_pin());
 public:
 // types
+    using Hwd	       = mega_::Timer1; // hardware que hay por debajo
     using Timer        = mega_::Timer1;
     using SW_signal    = avr_::SW_signal;
     using counter_type = Timer::counter_type;
@@ -990,6 +993,7 @@ class PWM1_pin{
     static_assert(npin0 == Timer1::OCA_pin() or npin0 == Timer1::OCB_pin());
 public:
 // types
+    using Hwd	       = mega_::Timer1; // hardware que hay por debajo
     using Timer        = mega_::Timer1;
     using counter_type = Timer::counter_type;
 

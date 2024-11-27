@@ -304,6 +304,7 @@ private:
 class Time_counter0{
 public:
 // types
+    using Hwd	       = mega_::Timer0; // hardware que hay por debajo
     using Timer        = mega_::Timer0;
     using counter_type = typename Timer::counter_type;
     static constexpr counter_type minus_one = static_cast<counter_type>(-1); 
@@ -425,6 +426,7 @@ Time_counter0::turn_on_with_overflow_to_count_1s()
 class Square_wave_generator0_g_base{
 public:
 // Types
+    using Hwd	       = mega_::Timer0; // hardware que hay por debajo
     using Timer        = mega_::Timer0;
 
 // Características del Timer
@@ -572,6 +574,8 @@ inline void Square_wave_generator0_g_base::disconnect_all_pins()
 // TODO: obsoleta: escribir SWG0_pin. Copiar de Timer1.
 class Square_wave_generator0_g : public Square_wave_generator0_g_base{
 public:
+    using Hwd	       = mega_::Timer0; // hardware que hay por debajo
+					
 // Interfaz static
     Square_wave_generator0_g() = delete;
 
@@ -598,6 +602,8 @@ public:
 // ------------------------------
 class Square_wave_burst_generator0_g: public Square_wave_generator0_g_base{
 public:
+    using Hwd	       = mega_::Timer0; // hardware que hay por debajo
+					
     Square_wave_burst_generator0_g(uint32_t freq_in_Hz);
 
     template <uint8_t npin>

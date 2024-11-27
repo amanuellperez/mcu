@@ -78,7 +78,7 @@ inline bool SPI_base<C>::SCK_frequency_in_hz()
 	return SCK_frequency_in_hz_dynamic<frequency_in_hz>(clk_per());
 }
 
-// C++: ¿cuándo `switch constexpr (prescaler)` ?
+// ((C++)) ¿cuándo `switch constexpr (prescaler)` ?
 template <typename C>
 template <uint32_t frequency_in_hz, uint32_t clk_per_in_hz>
 inline bool SPI_base<C>::SCK_frequency_in_hz_static()
@@ -103,7 +103,7 @@ inline bool SPI_base<C>::SCK_frequency_in_hz_static()
     return true;
 }
 
-// DUDA: esta función y la anterior son iguales. ¿Se pueden fusionar en una
+// ((DUDA)) esta función y la anterior son iguales. ¿Se pueden fusionar en una
 // sin perder que la anterior se calcula todo en tiempo de compilación?
 template <typename C>
 template <uint32_t frequency_in_hz>
@@ -131,7 +131,8 @@ inline bool SPI_base<C>::SCK_frequency_in_hz_static(uint32_t clk_per_in_hz)
 template <typename Registers>
 class SPI_master : public private_::SPI_base<Registers>{
 public:
-    using SPI = SPI_basic<Registers>;
+    using Hwd = SPI_basic<Registers>; // hardware que hay por debajo
+    using SPI = Hwd;
 
 // Constructor
     SPI_master() = delete;
@@ -148,16 +149,22 @@ public:
 // Transfer
     // Envia el byte x. Devuelve el valor recibido del slave
     // Bloquea el micro: no devuelve el control hasta transmitir el byte.
-    static uint8_t write(uint8_t x);
+    static uint8_t write(uint8_t x)
+    { return transfer(x); }
 
     // Lee un byte del slave. 
     // `x` es el byte que tiene que enviar el master al slave.
     // Bloquea el micro: no devuelve el control hasta transmitir el byte.
-    static uint8_t write(uint8_t x = 0xFF);
+    static uint8_t read(uint8_t x = 0x00)
+    { return transfer(x); }
+
+    static void wait_untill_transfer_is_complete();
 
 private:
     
     static void cfg_pins();
+    static void transfer(uint8_t x);
+
 };
 
 // Será el usuario el que defina el selector de SPI, no usando SS. Por eso
@@ -214,12 +221,35 @@ void SPI_master<R>::init()
 // frequency
     SCK_frequency_in_hz<SPI_cfg::frequency_in_hz>();
 
-// TODO: poder definir buffer mode y demás.
+// ((TODO)) poder definir buffer mode y demás.
 // Usar `requires(SPI_cfg::buffer_mode)` para en general no sea obligatorio
 // tener que definir esta variable.
 }
 
+template <typename R>
+inline void SPI_master<R>::turn_on()
+{ SPI::enable(); }
 
+template <typename R>
+inline void SPI_master<R>::turn_off()
+{ SPI::disable(); }
+
+
+template <typename R>
+inline void SPI_master<R>::transfer(uint8_t x)
+{
+    data(x);	// escribimos x y lo enviamos
+    wait_untill_transfer_is_complete();
+
+    return data();// valor recibido
+}
+
+template <typename R>
+inline void SPI_master<R>::wait_untill_transfer_is_complete()
+{
+    while (!SPI::is_interrupt_flag_set()) 
+    { ; }
+}
 
 }// mega0_
 

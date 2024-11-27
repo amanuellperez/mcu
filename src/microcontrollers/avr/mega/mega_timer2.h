@@ -140,6 +140,7 @@ class Time_counter2{
 public:
 // Types
 // -----
+    using Hwd	       = mega_::Timer2; // hardware que hay por debajo
     using Timer        = mega_::Timer2;
     using counter_type = typename Timer::counter_type;
     static constexpr counter_type minus_one = static_cast<counter_type>(-1); 
@@ -268,6 +269,8 @@ Time_counter2::turn_on_with_overflow_to_count_1s()
 template <uint16_t max_timeout_ms0 = 3000>
 class Time_counter2_32kHz_g{
 public:
+    using Hwd	       = mega_::Timer2; // hardware que hay por debajo
+
 // Asserts
 // -------
     static_assert(clock_cpu() >= 4 * 32768,

@@ -60,8 +60,8 @@ public:
     static void data_order_LSB();
 
 // CTRLA::MASTER
-    static void host_mode();
-    static void client_mode();
+    static void host_mode();	// == master_mode
+    static void client_mode();	// == slave_mode
 
 // CTRLA::CLK2X
     static void clock_normal_speed();
@@ -82,7 +82,7 @@ public:
     static void buffer_mode_enable();
     static void buffer_mode_disable();
 
-// TODO: CTRLB::BUFWR
+// ((TODO)) CTRLB::BUFWR
 // ¿cómo llamar a estas funciones?
 
 // CTRLB::SSD
@@ -118,7 +118,7 @@ public:
     static void enable_interrupt();
     static void disable_interrupt();
 
-// TODO: INTFLAGS
+// ((TODO)) INTFLAGS
 // INTFLAGS::IF
     static bool is_interrupt_flag_set();
 
@@ -126,12 +126,12 @@ public:
     // flag.
     static void clear_interrupt_flag();
 
-// TODO: INTFLAGS::WRCOL
-// TODO: INTFLAGS::RXCIF
-// TODO: INTFLAGS::TXCIF
-// TODO: INTFLAGS::DREIF
-// TODO: INTFLAGS::SSIF
-// TODO: INTFLAGS::BUFOVF
+// ((TODO)) INTFLAGS::WRCOL
+// ((TODO)) INTFLAGS::RXCIF
+// ((TODO)) INTFLAGS::TXCIF
+// ((TODO)) INTFLAGS::DREIF
+// ((TODO)) INTFLAGS::SSIF
+// ((TODO)) INTFLAGS::BUFOVF
 
 
 // DATA
@@ -209,7 +209,7 @@ inline void SPI_basic<C>::buffer_mode_disable()
 { atd::write_bit<pos::BUFEN>::template to<1>::in(reg()->CTRLB); }
 
 
-// TODO: CTRLB::BUFWR
+// ((TODO)) CTRLB::BUFWR
 // ¿cómo llamar a estas funciones?
 
 // CTRLB::SSD
@@ -293,7 +293,7 @@ inline void SPI_basic<C>::disable_interrupt()
 { atd::write_bit<pos::IE>::template to<0>::in(reg()->INTCTRL); }
 
 
-// TODO: INTFLAGS
+// ((TODO)) INTFLAGS
 // INTFLAGS::IF
 template <typename C>
 inline bool SPI_basic<C>::is_interrupt_flag_set()
@@ -303,12 +303,12 @@ template <typename C>
 inline void SPI_basic<C>::clear_interrupt_flag()
 { atd::write_bit<pos::IF>::template to<1>::in(reg()->INTFLAGS); }
 
-// TODO: INTFLAGS::WRCOL
-// TODO: INTFLAGS::RXCIF
-// TODO: INTFLAGS::TXCIF
-// TODO: INTFLAGS::DREIF
-// TODO: INTFLAGS::SSIF
-// TODO: INTFLAGS::BUFOVF
+// ((TODO)) INTFLAGS::WRCOL
+// ((TODO)) INTFLAGS::RXCIF
+// ((TODO)) INTFLAGS::TXCIF
+// ((TODO)) INTFLAGS::DREIF
+// ((TODO)) INTFLAGS::SSIF
+// ((TODO)) INTFLAGS::BUFOVF
 
 
 // DATA
