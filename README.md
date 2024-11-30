@@ -304,27 +304,28 @@ experimento, no creo (a día de hoy) que merezca mucho la pena escribir la
 capa de arduino ya que el estilo de arduino es muy diferente al estilo que 
 uso aquí.
 
+### Capas definidas
+
+Las capas que (a día de hoy) hay definidas son:
+
+1. Hardware layer (`hwd`): son los traductores.
+
+2. Hardware abstraction layer (`hal` = `driver`): son interfaces genéricos de
+   los traductores.
+
+3. Logic layer: son devices a los que les amplio la capacidad por software o
+   composición de diferentes dispositivos para formar uno mayor.
+
+4. Application layer: son las aplicaciones (proyectos) del usuario final.
+
+
 ### Traductores vs drivers
-La capa más básica son los traductores: de momento, a los traductores les
-pongo el sufijo `_basic`. De esa forma puedes tener el traductor del
-controlador de motor `A4988_basic` y el driver `A4988`. Cada día tengo mis
-dudas de seguir manteniendo el `_basic`: por una parte es un incordio a la
-hora de leer el código, pero por otra parte recuerda al programador que se
-está usando un traductor y por tanto no se (debería de) introducir ningún tipo
-de ineficiencia: lo único que hace el traductor es que en lugar de tener que
-recordar qué bits son los que hay que modificar para hacer tal cosa y usar
-código críptico que nadie entiende, el traductor le da un nombre más legible.
- Nada más. 
+La capa más básica son los traductores que se encuentran dentro del namespace
+`hwd`. Quiero que el cliente explícitamente indique si quiere usar un
+traductor o un driver, ya que el segundo puede que introduzca ineficiencias
+que no tiene el primero. Por ello se distingue entre: `hwd::A4988` y
+`driver::A4988`.
 
-Por otra parte, si el programador ve en el código que se va a usar el `A4988`
-sin el `_basic` sabrá que es un driver pudiendo estar introduciendo
-funciones de más alto nivel que pueden ralentizar la ejecución del programa u
-ocupar más memoria de la necesaria. 
-
-Por eso sigo manteniendo el `_basic`, pero cada vez me gusta menos verlo en el
-código. Si bien es verdad que solo lo ve el hardwador... me resulta feo.
-¿Quitarlo o mantenerlo? Esa duda corroe mi corazón en estos momentos. De
-momento mantengámoslo a ver si lo acabo odiando o no.
 
 ### Static interface vs objects
 
@@ -351,8 +352,8 @@ usas para generar una señal PWM o lo usas para medir tiempos. A día de hoy, es
 el hardwador el responsable de ello, definiendo en `hwd_dev.h` algo del tipo:
 
 ```
-using PWM_pin      = myu::PWM1_pin<15>;
-using Miniclock_ms = mcu::Miniclock_ms<Micro, myu::Time_counter1>;
+using PWM_pin      = myu::driver::PWM1_pin<15>;
+using Miniclock_ms = mcu::Miniclock_ms<Micro, myu::driver::Time_counter1>;
 ```
 
 Si, como hago ahora, uso las clases como static interface el hardwador llamará
@@ -427,7 +428,12 @@ Esto es un proyecto de aprendizaje y para experimentar, pudiendo haber partes
 muy inestables. Aunque según voy escribiendo cosas algunas ya van siendo muy
 estables, otras, las más nuevas o las que apenas he usado son todavía
 inestables. Por eso no tengo ninguna intención de dedicar mi tiempo en
-escribir documentación.
+escribir documentación. 
+
+Con todo, para aclarar mis ideas y recordar lo que he
+hecho voy escribiendo algo de documentación. El problema es que al no
+mantenerla hay partes de la documentación completamente obsoletas, generando
+una documentación inconsistente.
 
 Con todo existen dos fuentes reales para entender el código:
 
