@@ -28,7 +28,7 @@ namespace mega_{
 namespace hwd{
 
 
-void SPI_basic::spi_mode(uint8_t cpol, uint8_t cpha)
+void SPI::spi_mode(uint8_t cpol, uint8_t cpha)
 {
     if (cpol == 0)
 	atd::write_bit<CPOL>::to<0>::in(SPCR);
@@ -44,43 +44,43 @@ void SPI_basic::spi_mode(uint8_t cpol, uint8_t cpha)
 
 
 // De acuerdo con la tabla 23-5
-void SPI_basic::clock_frequency_divide_by_2()
+void SPI::clock_frequency_divide_by_2()
 {// 100
     atd::write_bit<SPI2X>::to<1>::in(SPSR);
     atd::write_bits<SPR1, SPR0>::to<0,0>::in(SPCR);
 }
 
-void SPI_basic::clock_frequency_divide_by_4()
+void SPI::clock_frequency_divide_by_4()
 {// 000
     atd::write_bit<SPI2X>::to<0>::in(SPSR);
     atd::write_bits<SPR1, SPR0>::to<0,0>::in(SPCR);
 }
 
-void SPI_basic::clock_frequency_divide_by_8()
+void SPI::clock_frequency_divide_by_8()
 {// 101
     atd::write_bit<SPI2X>::to<1>::in(SPSR);
     atd::write_bits<SPR1, SPR0>::to<0,1>::in(SPCR);
 }
 
-void SPI_basic::clock_frequency_divide_by_16()
+void SPI::clock_frequency_divide_by_16()
 {// 001
     atd::write_bit<SPI2X>::to<0>::in(SPSR);
     atd::write_bits<SPR1, SPR0>::to<0,1>::in(SPCR);
 }
 
-void SPI_basic::clock_frequency_divide_by_32()
+void SPI::clock_frequency_divide_by_32()
 {// 110
     atd::write_bit<SPI2X>::to<1>::in(SPSR);
     atd::write_bits<SPR1, SPR0>::to<1,0>::in(SPCR);
 }
 
-void SPI_basic::clock_frequency_divide_by_64()
+void SPI::clock_frequency_divide_by_64()
 {// 010
     atd::write_bit<SPI2X>::to<0>::in(SPSR);
     atd::write_bits<SPR1, SPR0>::to<1,0>::in(SPCR);
 }
 
-void SPI_basic::clock_frequency_divide_by_128()
+void SPI::clock_frequency_divide_by_128()
 {// 011
     atd::write_bit<SPI2X>::to<0>::in(SPSR);
     atd::write_bits<SPR1, SPR0>::to<1,1>::in(SPCR);

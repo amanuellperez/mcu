@@ -87,7 +87,7 @@ static constexpr uint8_t NO_SLEEP= mcu::Pin_connection_type::floating;
 static constexpr uint8_t DIR     = 15;
 static constexpr uint8_t STEP_pin= 16;
 
-using STEP = myu::SWG1_pin<STEP_pin>;
+using STEP = myu::driver::SWG1_pin<STEP_pin>;
 };
 
 // Devices

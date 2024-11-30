@@ -19,7 +19,7 @@
 
 // Ejemplo básico de uso del Timer como contador
 #include "../../../mega_cfg_hwd.h"
-#include "../../../mega_UART.h"
+#include "../../../mega_UART_hal.h"
 #include <mcu_UART_iostream.h>
 #include "../../../mega_timer2_hwd.h"
 #include <avr_time.h>
@@ -32,7 +32,7 @@
 // ---------------
 namespace myu = mega_;
 namespace hwd = mega_::hwd;
-using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
+using UART_iostream = mcu::UART_iostream<myu::hal::UART_8bits>;
 
 // Hwd devices
 // -----------

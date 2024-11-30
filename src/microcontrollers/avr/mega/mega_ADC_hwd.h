@@ -70,14 +70,14 @@ inline auto ADC_macro() {return ADC;}
  *		que al acabar una conversión empieza otra automáticamente.
  *
  */
-class ADC_basic{
+class ADC{
 public:
 // Types
     using AREF_type = uint16_t;
 
 // Constructor
     // Static interface only
-    ADC_basic() = delete;
+    ADC() = delete;
 
 
 // ADC Voltage Reference Selection
@@ -247,147 +247,147 @@ private:
 
 // ADMUX register
 // --------------
-inline void ADC_basic::AREF_external()
+inline void ADC::AREF_external()
 {// 00
     atd::write_bits<REFS1, REFS0>::to<0,0>::in(ADMUX);
 }
 
-inline void ADC_basic::AREF_internal_to_AVCC()
+inline void ADC::AREF_internal_to_AVCC()
 {// 01
     atd::write_bits<REFS1, REFS0>::to<0,1>::in(ADMUX);
 }
 
 
-inline void ADC_basic::AREF_internal_to_1_1V()
+inline void ADC::AREF_internal_to_1_1V()
 {// 11
     atd::write_bits<REFS1, REFS0>::to<1,1>::in(ADMUX);
 }
 
-inline void ADC_basic::left_adjust_result()
+inline void ADC::left_adjust_result()
 {atd::write_bits<ADLAR>::to<1>::in(ADMUX);}
 
-inline void ADC_basic::right_adjust_result()
+inline void ADC::right_adjust_result()
 {atd::write_bits<ADLAR>::to<0>::in(ADMUX);}
 
 
 template <uint8_t num_pin>
-inline void ADC_basic::select_pin()
+inline void ADC::select_pin()
 { select_pin_<cfg::ADC_PIN<num_pin>::value>(); }
 
-inline void ADC_basic::select_temperature_sensor()
+inline void ADC::select_temperature_sensor()
 {// 1000 
     atd::write_bits<MUX3, MUX2, MUX1, MUX0>::to<1,0,0,0>::in(ADMUX); 
 }
 
-inline void ADC_basic::select_channel_1_1V()
+inline void ADC::select_channel_1_1V()
 {// 1110
     atd::write_bits<MUX3, MUX2, MUX1, MUX0>::to<1,1,1,0>::in(ADMUX); 
 }
 
-inline void ADC_basic::select_channel_0V()
+inline void ADC::select_channel_0V()
 {// 1111
     atd::write_bits<MUX3, MUX2, MUX1, MUX0>::to<1,1,1,1>::in(ADMUX); 
 }
 
-inline void ADC_basic::enable() 
+inline void ADC::enable() 
 {atd::write_bits<ADEN>::to<1>::in(ADCSRA);}
 
-inline void ADC_basic::disable() 
+inline void ADC::disable() 
 {atd::write_bits<ADEN>::to<0>::in(ADCSRA);}
 
 
 // ADCSRA register
 // ---------------
-inline void ADC_basic::start_conversion() 
+inline void ADC::start_conversion() 
 {atd::write_bits<ADSC>::to<1>::in(ADCSRA);}
 
-inline bool ADC_basic::is_the_conversion_complete()
+inline bool ADC::is_the_conversion_complete()
 {return atd::is_zero_bit<ADSC>::of(ADCSRA);}
 
-inline void ADC_basic::auto_trigger_mode()
+inline void ADC::auto_trigger_mode()
 {atd::write_bits<ADATE>::to<1>::in(ADCSRA);}
 
-inline void ADC_basic::single_conversion_mode()
+inline void ADC::single_conversion_mode()
 {atd::write_bits<ADATE>::to<0>::in(ADCSRA);}
 
 
-inline void ADC_basic::interrupt_enable()
+inline void ADC::interrupt_enable()
 {atd::write_bits<ADIE>::to<1>::in(ADCSRA);}
 
-inline void ADC_basic::interrupt_disable()
+inline void ADC::interrupt_disable()
 {atd::write_bits<ADIE>::to<0>::in(ADCSRA);}
 
 
-inline void ADC_basic::clock_frequency_divide_by_2()
+inline void ADC::clock_frequency_divide_by_2()
 {// 000 ó 001
     atd::write_bits<ADPS2, ADPS1, ADPS0>::to<0,0,0>::in(ADCSRA);
 }
 
-inline void ADC_basic::clock_frequency_divide_by_4()
+inline void ADC::clock_frequency_divide_by_4()
 { atd::write_bits<ADPS2, ADPS1, ADPS0>::to<0,1,0>::in(ADCSRA); }
 
-inline void ADC_basic::clock_frequency_divide_by_8()
+inline void ADC::clock_frequency_divide_by_8()
 { atd::write_bits<ADPS2, ADPS1, ADPS0>::to<0,1,1>::in(ADCSRA); }
 
-inline void ADC_basic::clock_frequency_divide_by_16()
+inline void ADC::clock_frequency_divide_by_16()
 { atd::write_bits<ADPS2, ADPS1, ADPS0>::to<1,0,0>::in(ADCSRA); }
 
-inline void ADC_basic::clock_frequency_divide_by_32()
+inline void ADC::clock_frequency_divide_by_32()
 { atd::write_bits<ADPS2, ADPS1, ADPS0>::to<1,0,1>::in(ADCSRA); }
 
-inline void ADC_basic::clock_frequency_divide_by_64()
+inline void ADC::clock_frequency_divide_by_64()
 { atd::write_bits<ADPS2, ADPS1, ADPS0>::to<1,1,0>::in(ADCSRA); }
 
-inline void ADC_basic::clock_frequency_divide_by_128()
+inline void ADC::clock_frequency_divide_by_128()
 { atd::write_bits<ADPS2, ADPS1, ADPS0>::to<1,1,1>::in(ADCSRA); }
 
 // ADCH-ADCL registers
 // -------------------
-inline uint16_t ADC_basic::ADC_in_arefs()
+inline uint16_t ADC::ADC_in_arefs()
 {return impl_of::ADC_macro();}
 
-inline uint8_t ADC_basic::ADCH_in_arefs()
+inline uint8_t ADC::ADCH_in_arefs()
 {return ADCH;}
 
 
 // ADCSRB register
 // ---------------
-inline void ADC_basic::auto_trigger_source_free_running_mode()
+inline void ADC::auto_trigger_source_free_running_mode()
 {// 000
     atd::write_bits<ADTS2, ADTS1, ADTS0>::to<0,0,0>::in(ADCSRB);
 }
 
-inline void ADC_basic::auto_trigger_source_analog_comparator()
+inline void ADC::auto_trigger_source_analog_comparator()
 {// 001
     atd::write_bits<ADTS2, ADTS1, ADTS0>::to<0,0,1>::in(ADCSRB);
 }
 
-inline void ADC_basic::auto_trigger_source_external_interrup_request_0()
+inline void ADC::auto_trigger_source_external_interrup_request_0()
 {// 010
     atd::write_bits<ADTS2, ADTS1, ADTS0>::to<0,1,0>::in(ADCSRB);
 }
 
-inline void ADC_basic::auto_trigger_source_timer0_compare_match_A()
+inline void ADC::auto_trigger_source_timer0_compare_match_A()
 {// 011
     atd::write_bits<ADTS2, ADTS1, ADTS0>::to<0,1,1>::in(ADCSRB);
 }
 
-inline void ADC_basic::auto_trigger_source_timer0_overflow()
+inline void ADC::auto_trigger_source_timer0_overflow()
 {// 100
     atd::write_bits<ADTS2, ADTS1, ADTS0>::to<1,0,0>::in(ADCSRB);
 }
 
-inline void ADC_basic::auto_trigger_source_timer1_compare_match_B()
+inline void ADC::auto_trigger_source_timer1_compare_match_B()
 {// 101
     atd::write_bits<ADTS2, ADTS1, ADTS0>::to<1,0,1>::in(ADCSRB);
 }
 
-inline void ADC_basic::auto_trigger_source_timer1_overflow()
+inline void ADC::auto_trigger_source_timer1_overflow()
 {// 110
     atd::write_bits<ADTS2, ADTS1, ADTS0>::to<1,1,0>::in(ADCSRB);
 }
 
-inline void ADC_basic::auto_trigger_source_timer1_capture_event()
+inline void ADC::auto_trigger_source_timer1_capture_event()
 {// 111
     atd::write_bits<ADTS2, ADTS1, ADTS0>::to<1,1,1>::in(ADCSRB);
 }

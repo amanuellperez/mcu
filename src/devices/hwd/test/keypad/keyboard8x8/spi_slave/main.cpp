@@ -107,7 +107,7 @@ int main()
     SPI::data_order_LSB();
     SPI::interrupt_enable();
     //myu::Interrupt::enable_pin<SPI_SS_pin>();
-    myu::Pin<SPI_SS_pin>::enable_change_level_interrupt();
+    myu::hwd::Pin<SPI_SS_pin>::enable_change_level_interrupt();
     myu::Micro::enable_interrupts();
 
 
@@ -128,7 +128,7 @@ ISR_SPI_STC{
 
 
 ISR_PCINT_PIN_SS{
-    if (myu::Pin<SPI_SS_pin>::is_one()){
+    if (myu::hwd::Pin<SPI_SS_pin>::is_one()){
 	SPI::data_register(uint8_t{data});
 	data = 0; // escrito
     }

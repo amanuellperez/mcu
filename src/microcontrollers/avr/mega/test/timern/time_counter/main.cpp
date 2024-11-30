@@ -18,12 +18,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-#include "../../../mega_timer0.h"
-#include "../../../mega_timer1.h"
-#include "../../../mega_timer2.h" 
+#include "../../../mega_timer0_hal.h"
+#include "../../../mega_timer1_hal.h"
+#include "../../../mega_timer2_hal.h" 
 #include "../../../mega_debug_hwd.h"
 
-#include "../../../mega_UART.h"
+#include "../../../mega_UART_hal.h"
 #include <mcu_UART_iostream.h>
 #include "../../../mega_cfg_hwd.h"
 #include "../../../mega_pin_hwd.h"
@@ -32,7 +32,8 @@
 // ---------------
 namespace myu = mega_;
 namespace hwd = mega_::hwd;
-using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
+namespace driver = mega_::hal;
+using UART_iostream = mcu::UART_iostream<myu::hal::UART_8bits>;
 
 // Pin conections
 // --------------
@@ -43,9 +44,9 @@ constexpr uint8_t npin2 = 28;
 
 // Devices
 // -------
-using Counter0  = myu::Time_counter0;
-using Counter1  = myu::Time_counter1;
-using Counter2  = myu::Time_counter2;
+using Counter0  = driver::Time_counter0;
+using Counter1  = driver::Time_counter1;
+using Counter2  = driver::Time_counter2;
 
 using Pin0 = hwd::Pin<npin0>;
 using Pin1 = hwd::Pin<npin1>;

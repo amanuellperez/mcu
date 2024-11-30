@@ -82,7 +82,7 @@ namespace hwd{
  *	    1.- Escribir un 0 en TWINT = NO HACE NADA!!!
  *	    2.- Escribir un 1 en TWINT = hace un clear.
  */
-class TWI_basic{
+class TWI{
 public:
 // Types
     using streamsize = uint8_t;
@@ -415,7 +415,7 @@ constexpr TWBR_prescaler TWI_TWBR_prescaler()
 
 }// impl_of
 template <uint16_t f_scl, uint32_t f_clock>
-inline void TWI_basic::SCL_frequency_in_kHz()
+inline void TWI::SCL_frequency_in_kHz()
 {
     constexpr
 	auto res = impl_of::TWI_TWBR_prescaler<f_scl, f_clock>();

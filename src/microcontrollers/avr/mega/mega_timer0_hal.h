@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __MEGA_TIMER0_H__
-#define __MEGA_TIMER0_H__
+#ifndef __MEGA_TIMER0_HAL_H__
+#define __MEGA_TIMER0_HAL_H__
 /****************************************************************************
  *
  *  DESCRIPCION
@@ -58,6 +58,7 @@
 #include <atd_names.h>
 
 namespace mega_{
+namespace hal{
 
 namespace timer0_{
 
@@ -1015,6 +1016,7 @@ Frequency PWM0_pin<n>::frequency()
 }
 
 
+}// namespace 
 }// namespace 
 
 

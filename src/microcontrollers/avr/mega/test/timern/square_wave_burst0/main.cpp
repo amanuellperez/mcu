@@ -18,17 +18,19 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "../../../mega_cfg_hwd.h"
-#include "../../../mega_UART.h"
+#include "../../../mega_UART_hal.h"
 #include <mcu_UART_iostream.h>
-#include "../../../mega_timer0.h"
-#include "../../../mega_timer1.h"
+#include "../../../mega_timer0_hal.h"
+#include "../../../mega_timer1_hal.h"
 
 namespace myu = mega_;
-using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
+namespace driver = mega_::hal;
+
+using UART_iostream = mcu::UART_iostream<myu::hal::UART_8bits>;
 
 static constexpr uint8_t test_pin = 12;
-using SWG  = myu::Square_wave_burst_generator0_g;
-using Timer = myu::Time_counter1;
+using SWG  = driver::Square_wave_burst_generator0_g;
+using Timer = driver::Time_counter1;
 
 static constexpr uint32_t frequency = 38000;
 static constexpr Timer::counter_type T = 500; 

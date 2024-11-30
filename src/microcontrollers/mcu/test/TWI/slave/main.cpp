@@ -34,7 +34,7 @@ using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
 constexpr uint8_t TWI_buffer_size = 100; // voy a enviarle un tipo de cada: int8, int16, ...
 					 
 using TWI_slave_cfg = mcu::TWI_slave_cfg<Micro, 
-                                         myu::TWI_basic,
+                                         myu::hwd::TWI,
 					 TWI_buffer_size>;
 
 using TWI = mcu::TWI_slave<TWI_slave_cfg>;

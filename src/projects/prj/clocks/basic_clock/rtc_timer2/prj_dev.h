@@ -60,7 +60,7 @@ static constexpr uint8_t button_pin = 14;
 // -------
 
 // Clock
-using Time_counter = myu::Time_counter2_32kHz_g<3000>;
+using Time_counter = myu::driver::Time_counter2_32kHz_g<3000>;
 using Clock	   = mcu::Clock_s<Micro, Time_counter>;
 #define ISR_CLOCK ISR_TIMER2_COMPA
 

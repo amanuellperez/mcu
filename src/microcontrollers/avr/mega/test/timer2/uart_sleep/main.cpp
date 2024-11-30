@@ -17,21 +17,21 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "../../../mega_UART.h"
+#include "../../../mega_UART_hal.h"
 #include <mcu_UART_iostream.h>
 
 #include "../../../mega_pin_hwd.h"
 #include <avr_time.h>
 #include "../../../mega_sleep_hwd.h"
 #include "../../../mega_debug_hwd.h"
-#include "../../../mega_timer2.h"
+#include "../../../mega_timer2_hal.h"
 
 
 // Microcontroller
 // ---------------
 namespace myu = mega_;
 namespace hwd = mega_::hwd;
-using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
+using UART_iostream = mcu::UART_iostream<myu::hal::UART_8bits>;
 
 
 // Pin connections
@@ -40,7 +40,7 @@ static constexpr uint8_t led_pin = 14;
 
 // Hwd devices
 // -----------
-using Counter = myu::Time_counter2_32kHz_g<1000>;
+using Counter = myu::hal::Time_counter2_32kHz_g<1000>;
 using Pin     = hwd::Pin<led_pin>;
 
 
@@ -87,7 +87,7 @@ void print()
 void flush()
 {
     hwd::print_registers_uart(uart);
-    while (!hwd::UART_basic::is_transmit_complete())
+    while (!hwd::UART::is_transmit_complete())
     {;}
     // Datasheet: The TXC0 Flag bit is automatically cleared
     // when a transmit complete interrupt is executed, 

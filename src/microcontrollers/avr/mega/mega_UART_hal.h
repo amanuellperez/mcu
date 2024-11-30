@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __MEGA_UART_H__
-#define __MEGA_UART_H__
+#ifndef __MEGA_UART_HAL_H__
+#define __MEGA_UART_HAL_H__
 /****************************************************************************
  *
  * DESCRIPCION
@@ -52,6 +52,7 @@
 #include "mega_clock_frequencies.h"	
 
 namespace mega_{
+namespace hal{
 /***************************************************************************
  *				UART_8bits
  ***************************************************************************/
@@ -104,16 +105,16 @@ bool UART_cfg()
 // UART_8bits
 // ----------
 // DUDA: 2 posibles formas de implementarlo.
-//  1) Heredar de UART_basic. En este caso UART_8bits tendría acceso directo a
-//     todas las funciones de UART_basic.
+//  1) Heredar de UART. En este caso UART_8bits tendría acceso directo a
+//     todas las funciones de UART.
 //  2) Como wrapper. Queda un interfaz más limpio porque controlamos qué
-//     funciones son visibles y podemos dar acceso a UART_basic vía Basic.
+//     funciones son visibles y podemos dar acceso a UART vía Basic.
 //     De momento pruebo con esta segunda opción por tener más control sobre
 //     el interfaz de UART_8bits.
 class UART_8bits {
 public:
 // Types
-    using Hwd   = hwd::UART_basic;
+    using Hwd   = hwd::UART;
     using USART = Hwd;
 
 // Constructor
@@ -198,6 +199,7 @@ inline void UART_8bits::disable_interrupt_unread_data()
 { USART::disable_interrupt_unread_data();}
 
 
+}// namespace
 }// namespace
  
 

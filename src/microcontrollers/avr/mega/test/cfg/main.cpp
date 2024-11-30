@@ -21,14 +21,14 @@
 // Conectar el FTDI y abrir screen. Lo que se escriba en teclado se envia
 // al microcontrolador que lo devuelve, con lo que lo vemos en pantalla.
 #include "../../mega_import_avr.h"
-#include "../../mega_UART.h"
+#include "../../mega_UART_hal.h"
 #include <mcu_UART_iostream.h>
 
 
 // Microcontroller
 // ---------------
 namespace myu = mega_;
-using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
+using UART_iostream = mcu::UART_iostream<myu::hal::UART_8bits>;
 
 
 

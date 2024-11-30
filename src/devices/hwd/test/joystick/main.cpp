@@ -35,12 +35,11 @@ constexpr uint8_t y_pin = 28;
 
 // Hwd Devices
 // -----------
-using ADC = myu::ADC;
+using ADC = myu::driver::ADC;
 constexpr uint16_t AREF_in_mV = 5'000;
 constexpr uint8_t AREF_connection = ADC::AREF_connect_to_internal_AVCC;
-using kk = myu::ADC_pin_single_mode<28, 5'000>;
-using ADC_x_pin = myu::ADC_pin_single_mode<x_pin, AREF_in_mV>;
-using ADC_y_pin = myu::ADC_pin_single_mode<y_pin, AREF_in_mV>;
+using ADC_x_pin = myu::driver::ADC_pin_single_mode<x_pin, AREF_in_mV>;
+using ADC_y_pin = myu::driver::ADC_pin_single_mode<y_pin, AREF_in_mV>;
 
 using Cfg = dev::Joystick_cfg_type1<Micro, 
 				    ADC_x_pin, ADC_y_pin,

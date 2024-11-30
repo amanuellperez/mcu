@@ -67,17 +67,17 @@
 #include <mega_watchdog_hwd.h>
 
 
-// Dispositivos genéricos
-// ----------------------
-#include <mega_SPI.h>
+// Hardware abstraction layer
+// --------------------------
+#include <mega_SPI_hal.h>
 
-#include <mega_timer0.h>
-#include <mega_timer1.h>
-#include <mega_timer2.h>
+#include <mega_timer0_hal.h>
+#include <mega_timer1_hal.h>
+#include <mega_timer2_hal.h>
 
-#include <mega_ADC.h>
+#include <mega_ADC_hal.h>
 
-#include <mega_UART.h>
+#include <mega_UART_hal.h>
 #include <mcu_UART_iostream.h>	// es comodo meterlo aqui
 
 // Built-in devices for atmega

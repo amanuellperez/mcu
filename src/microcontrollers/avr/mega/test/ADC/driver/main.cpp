@@ -17,8 +17,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "../../../mega_cfg_hwd.h"
-#include "../../../mega_ADC.h"
-#include "../../../mega_UART.h"
+#include "../../../mega_ADC_hal.h"
+#include "../../../mega_UART_hal.h"
 #include <mcu_UART_iostream.h>
 #include <avr_time.h>
 
@@ -26,7 +26,7 @@
 // Microcontroller
 // ---------------
 namespace myu = mega_;
-using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
+using UART_iostream = mcu::UART_iostream<myu::hal::UART_8bits>;
 		
 // Pin connections
 // ---------------
@@ -34,8 +34,8 @@ constexpr uint8_t ADC_npin = 28;
 
 // Hwd devices
 // -----------
-using ADC = myu::ADC;
-using ADC_pin = myu::ADC_pin_single_mode<ADC_npin, 5'000>;
+using ADC = myu::hal::ADC;
+using ADC_pin = myu::hal::ADC_pin_single_mode<ADC_npin, 5'000>;
 
 // Cfg
 // ---

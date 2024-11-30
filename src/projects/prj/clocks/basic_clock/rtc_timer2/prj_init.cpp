@@ -33,7 +33,7 @@ Main::Main()
 
     init_uart();
 
-    Micro::sleep_mode(myu::Sleep::mode::power_save);
+    Micro::sleep_mode(myu::hwd::Sleep::mode::power_save);
     //Micro::sleep_mode(myu::Sleep::mode::idle);
 
     if (Clock::turn_on() == false)

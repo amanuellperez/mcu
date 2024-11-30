@@ -27,13 +27,13 @@ using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
 
 constexpr uint8_t test_pin = 14;
 
-using Pin = myu::Pin<test_pin>;
+using Pin = myu::hwd::Pin<test_pin>;
 
-using Miniclock0_us = mcu::Miniclock_us<myu::Micro, myu::Time_counter0>;
-using Miniclock0_ms = mcu::Miniclock_ms<myu::Micro, myu::Time_counter0>;
+using Miniclock0_us = mcu::Miniclock_us<myu::Micro, myu::driver::Time_counter0>;
+using Miniclock0_ms = mcu::Miniclock_ms<myu::Micro, myu::driver::Time_counter0>;
 
-using Miniclock1_us = mcu::Miniclock_us<myu::Micro, myu::Time_counter1>;
-using Miniclock1_ms = mcu::Miniclock_ms<myu::Micro, myu::Time_counter1>;
+using Miniclock1_us = mcu::Miniclock_us<myu::Micro, myu::driver::Time_counter1>;
+using Miniclock1_ms = mcu::Miniclock_ms<myu::Micro, myu::driver::Time_counter1>;
 
 
 // Functions
@@ -62,7 +62,7 @@ void generate_square_wave_no_use_wait( typename Miniclock::counter_type time_ms_
 	while (Miniclock::time() < time_ms_or_us){
 	    // This takes a lot of time in us ==> this function can't generate
 	    // a square wave of microseconds!!!
-	    if (myu::UART_basic::are_there_unread_data())
+	    if (myu::hwd::UART::are_there_unread_data())
 		return;
 	}
 	Pin::toggle();
@@ -82,7 +82,7 @@ void generate_square_wave_use_wait(typename Miniclock::counter_type time_ms_or_u
 	Miniclock::wait(time_ms_or_us);
 	Pin::toggle();
 
-	if (myu::UART_basic::are_there_unread_data())
+	if (myu::hwd::UART::are_there_unread_data())
 	    return;
     }
 }

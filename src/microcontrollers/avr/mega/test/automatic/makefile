@@ -1,7 +1,7 @@
 BIN = xx
 
 SOURCES= main.cpp \
-		../../mega_UART.cpp 			\
+		../../mega_UART_hal.cpp 			\
 		../../mega_timer0_hwd.cpp 	\
 		../../mega_timer1_hwd.cpp 	
 

@@ -67,9 +67,9 @@ constexpr uint8_t ir_receiver_pin = 15;	   // Timer1::OCA
 // -------
 // Uso: Timer0 como SWG0_g
 //	Timer1 como Miniclock_us
-using Miniclock_us = mcu::Miniclock_us<myu::Micro, myu::Time_counter1>;
+using Miniclock_us = mcu::Miniclock_us<myu::Micro, myu::driver::Time_counter1>;
 
-using SWG = dev::Square_wave_burst_generator< myu::Square_wave_burst_generator0_g
+using SWG = dev::Square_wave_burst_generator< myu::driver::Square_wave_burst_generator0_g
 					  , myu::hwd::Output_pin<ir_transmitter_pin>
 					  , Miniclock_us>;
 
@@ -97,7 +97,7 @@ bool receive(dev::Train_of_pulses<N>& pulse, volatile bool& user_abort)
 // UART
 // ----
 // Interfaz static para leer/escribir en UART
-// Como vamos a llamar a funciones del traductor `UART_basic`
+// Como vamos a llamar a funciones del traductor `UART`
 // hay que implementarlo como una clase. Si no habría valido con un
 // using UART = myu::UART_iostream;
 class UART : public UART_iostream {
@@ -105,13 +105,13 @@ public:
     static void init();
 
     static bool are_there_unread_data()
-    { return myu::UART_basic::are_there_unread_data();}
+    { return myu::hwd::UART::are_there_unread_data();}
 
     static void enable_interrupt_unread_data()
-    {myu::UART_basic::enable_interrupt_unread_data();}
+    {myu::hwd::UART::enable_interrupt_unread_data();}
 
     static void disable_interrupt_unread_data()
-    {myu::UART_basic::disable_interrupt_unread_data();}
+    {myu::hwd::UART::disable_interrupt_unread_data();}
 
 };
 

@@ -18,10 +18,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "../../../mega_cfg_hwd.h"
-#include "../../../mega_timer0.h"
-#include "../../../mega_timer1.h"
+#include "../../../mega_timer0_hal.h"
+#include "../../../mega_timer1_hal.h"
 #include "../../../mega_import_avr.h"
-#include "../../../mega_UART.h"
+#include "../../../mega_UART_hal.h"
 #include <mcu_UART_iostream.h>
 
 #include <atd_test.h>
@@ -35,22 +35,22 @@ constexpr bool timer0_both_pins = false;
 // ---------------
 namespace myu = mega_;
 namespace hwd = mega_::hwd;
-using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
+using UART_iostream = mcu::UART_iostream<myu::hal::UART_8bits>;
 
 					 
 // Hwd devices
 // -----------
 // DONT_COMPILE(using PWM_pin1 = hwd::PWM0_pin<10>;)
 
-using PWM_pin1 = myu::PWM0_pin<11>;
-using PWM_pin2 = myu::PWM0_pin<12>;
+using PWM_pin1 = myu::hal::PWM0_pin<11>;
+using PWM_pin2 = myu::hal::PWM0_pin<12>;
 // Este static assert es un comentario para el programador, para recordarle
 // que el pin A de este micro es el número 12
 static_assert(PWM_pin1::pin_number_A() == 12);
 
 // DONT_COMPILE(using PWM_pin3 = myu::PWM1_pin<18>;)
-using PWM_pin3 = myu::PWM1_pin<15>;
-using PWM_pin4 = myu::PWM1_pin<16>;
+using PWM_pin3 = myu::hal::PWM1_pin<15>;
+using PWM_pin4 = myu::hal::PWM1_pin<16>;
 
 // Cfg
 // ---

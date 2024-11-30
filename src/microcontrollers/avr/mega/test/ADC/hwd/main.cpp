@@ -45,9 +45,9 @@
 //  ejemplo el 7805) la fuente de alimentación. Si no oscila mucho AREF no
 //  sirviendo para nada.
 #include "../../../mega_cfg_hwd.h"
-#include "../../../mega_ADC.h"
-#include "../../../mega_UART.h"
 #include "../../../mega_debug_hwd.h"
+#include "../../../mega_ADC_hal.h"
+#include "../../../mega_UART_hal.h"
 #include <avr_time.h>
 #include <mcu_UART_iostream.h>
 
@@ -56,7 +56,7 @@
 // ---------------
 namespace myu = mega_;
 namespace hwd = mega_::hwd;
-using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
+using UART_iostream = mcu::UART_iostream<myu::hal::UART_8bits>;
 
 
 // Pin connections
@@ -65,7 +65,7 @@ constexpr uint8_t ADC_pin = 28;
 
 // Hwd devices
 // -----------
-using ADC = hwd::ADC_basic;
+using ADC = hwd::ADC;
 
 // Cfg
 // ---

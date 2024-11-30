@@ -2,10 +2,10 @@ BIN = xx
 
 SOURCES= main.cpp 	\
 		 ../../../mega_timer0_hwd.cpp	\
-		 ../../../mega_timer0.cpp	\
+		 ../../../mega_timer0_hal.cpp	\
 		 ../../../mega_timer1_hwd.cpp \
-		 ../../../mega_timer1.cpp \
-		 ../../../mega_UART.cpp
+		 ../../../mega_timer1_hal.cpp \
+		 ../../../mega_UART_hal.cpp
 
 
 MCU = atmega328p

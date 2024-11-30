@@ -113,7 +113,7 @@ private:
 
 // Cfg
     static constexpr uint8_t ir_receiver_pin = Cfg::ir_receiver_pin;
-    using Receiver_pin = atmega::Pin<ir_receiver_pin>;
+    using Receiver_pin = atmega::hwd::Pin<ir_receiver_pin>;
     using Miniclock_us = Cfg::Miniclock_us;
 
 // Functions
@@ -240,7 +240,7 @@ void Train_of_pulses_receiver<C>::receive_semipulses(volatile bool& abort)
     Receiver_pin::as_input_without_pullup();
 
     // atmega::Interrupt::enable_pin<ir_receiver_pin>();
-    atmega::Pin<ir_receiver_pin>::enable_change_level_interrupt();
+    atmega::hwd::Pin<ir_receiver_pin>::enable_change_level_interrupt();
 
     Miniclock_us::start();
     
@@ -261,7 +261,7 @@ void Train_of_pulses_receiver<C>::receive_semipulses(volatile bool& abort)
     Miniclock_us::stop(); 
 
     //atmega::Interrupt::disable_pin<ir_receiver_pin>();
-    atmega::Pin<ir_receiver_pin>::disable_change_level_interrupt();
+    atmega::hwd::Pin<ir_receiver_pin>::disable_change_level_interrupt();
 
 // anotamos el último semiperiodo
     buffer_[nsemipulse_] = time_overflow;

@@ -18,9 +18,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "../../../mega_cfg_hwd.h"
-#include "../../../mega_timer1.h"
+#include "../../../mega_timer1_hal.h"
 #include <avr_time.h>
-#include "../../../mega_UART.h"
+#include "../../../mega_UART_hal.h"
 #include <mcu_UART_iostream.h>
 
 
@@ -28,15 +28,15 @@
 // ---------------
 namespace myu = mega_;
 namespace hwd = mega_::hwd;
-using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
+using UART_iostream = mcu::UART_iostream<myu::hal::UART_8bits>;
 
 					 
 // Hwd devices
 // -----------
 using Timer    = hwd::Timer1;
 // DONT_COMPILE(using SWG1_pin1 = hwd::SWG1_pin<18>;)
-using SWG_pin1 = myu::SWG1_pin<15>;
-using SWG_pin2 = myu::SWG1_pin<16>;
+using SWG_pin1 = myu::hal::SWG1_pin<15>;
+using SWG_pin2 = myu::hal::SWG1_pin<16>;
 
 
 // Cfg

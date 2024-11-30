@@ -55,9 +55,9 @@ correspondiente.
 
 
 
-## <a name="notacion"></a>Notación
+## <a name="notacion"></a>Notación (experimental)
 
-(Experimental) Hasta ahora llamaba `_basic` a los traductores. La idea del
+Hasta ahora llamaba `_basic` a los traductores. La idea del
 `_basic` es que el harwador al escribir `prj_dev.h` supiera si está trabajando
 con un traductor o con un driver. Sin embargo, puede que quede mejor meterlo
 todo dentro de un `namespace hwd`. De esa forma queda claro que al escribir
@@ -68,6 +68,19 @@ claro lo que está haciendo.
 
 A su vez, como la API de los drivers es independiente del hardware, se pueden
 escribir tests genéricos que valgan para todos los microcontroladores.
+
+### ¿hal versus drivers?
+
+Voy a crear dos namespaces:
+
+* `hwd`: capa de los traductores, o de hardware.
+
+* `hal`: hardware abstraction layer.
+
+Como `hal` es corto voy a usar este acrónimo internamente. Sin embargo, voy a
+usar el alias  `driver`. Parece más legible `myu::driver::Timer0` que
+`myu::hal::Timer0`.
+
 
 
 

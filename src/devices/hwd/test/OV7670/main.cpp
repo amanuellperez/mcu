@@ -29,8 +29,8 @@
 #include "../../dev_OV7670.h" // TODO: orden
 // Micro
 // -----
-namespace my_mcu = atmega; 
-using Micro   = my_mcu::Micro;
+namespace myu = atmega; 
+using Micro   = myu::Micro;
 
 // Pin connections
 // ---------------
@@ -106,7 +106,7 @@ constexpr uint32_t baud_rate = 500'000u;
 constexpr uint8_t TWI_buffer_size = 100; // TODO: determinar cantidad
 
 using TWI_master_cfg = dev::TWI_master_cfg<Micro, 
-                                           my_mcu::TWI_basic,
+                                           myu::hwd::TWI,
 					   TWI_buffer_size>;
 
 using TWI_master = dev::TWI_master<TWI_master_cfg>;
@@ -135,15 +135,15 @@ using OV7670 = dev::OV7670<OV7670_cfg>;
 
 void init_uart()
 {
-    my_mcu::UART_iostream uart;
-    my_mcu::basic_cfg<baud_rate>(uart);
+    myu::UART_iostream uart;
+    myu::basic_cfg<baud_rate>(uart);
     uart.turn_on();
 }
 
 
 void help()
 {
-    my_mcu::UART_iostream uart;
+    myu::UART_iostream uart;
     uart << "*** IMPORTANT ***\n"
 	    "Remember to run the command `make fuses` "
 	    "to change the value of the LFUSE\n"
@@ -154,7 +154,7 @@ void help()
 
 void hello()
 {
-    my_mcu::UART_iostream uart;
+    myu::UART_iostream uart;
     uart << "\n\nCamera OV7670 test\n"
 	        "------------------\n";
 
@@ -169,7 +169,7 @@ void init_TWI()
 
 void test_cam_connected()
 {
-    my_mcu::UART_iostream uart;
+    myu::UART_iostream uart;
 
     while(1){
 	uart << "Scanning for cam ... ";
@@ -188,7 +188,7 @@ void test_cam_connected()
 
 void init_cam()
 {
-    my_mcu::UART_iostream uart;
+    myu::UART_iostream uart;
     uart << "Init cam ... ";
 
     if (OV7670::init())
@@ -201,7 +201,7 @@ void init_cam()
 
 inline bool check_twi_state(const char* msg)
 {
-    my_mcu::UART_iostream uart;
+    myu::UART_iostream uart;
     if (TWI_master::error()){
 	uart << "ERROR(" << msg << "): ";
 	TWI_master::print_state(uart);
@@ -214,7 +214,7 @@ inline bool check_twi_state(const char* msg)
 
 void read_cam_ram_address(uint8_t addr)
 {
-    my_mcu::UART_iostream uart;
+    myu::UART_iostream uart;
 
     uint8_t b = OV7670::read_register(addr);
 
@@ -237,7 +237,7 @@ void read_cam_ram_address(uint8_t addr)
 
 void test_read_register()
 {
-    my_mcu::UART_iostream uart;
+    myu::UART_iostream uart;
     uart << "\n\nread_register test\n"
 	      "------------------\n";
 
@@ -266,7 +266,7 @@ void test_read_register()
 
 void test_write_register()
 {
-    my_mcu::UART_iostream uart;
+    myu::UART_iostream uart;
     uart << "\n\nwrite_register test\n"
 	        "-------------------\n";
 
@@ -299,7 +299,7 @@ void test_write_register()
 template <typename It>
 void write_registers(It p0, It pe)
 {
-    my_mcu::UART_iostream uart;
+    myu::UART_iostream uart;
 
     uart << "Writing registers ... ";
     if (OV7670::write(p0, pe) == true)
@@ -311,7 +311,7 @@ void write_registers(It p0, It pe)
 
 void test_interactive_read()
 {
-    my_mcu::UART_iostream uart;
+    myu::UART_iostream uart;
     uart << "\n\nRead register\n"
 	    "-------------\n"
 	    "Register address (in hex): ";
@@ -337,7 +337,7 @@ void test_interactive_read()
 
 void test_resolution()
 {
-    my_mcu::UART_iostream uart;
+    myu::UART_iostream uart;
     uart << "\n\nResolution:\n"
 	    "1. VGA\n"
 	    "2. QVGA\n"
@@ -359,7 +359,7 @@ void test_pclk()
 {
     namespace cfg = dev::OV7670_register_cfg;
 
-    my_mcu::UART_iostream uart;
+    myu::UART_iostream uart;
     uart << "\n\nPrescalar of PCLK (see changes in oscilloscope)\n";
 
     while (1){
@@ -384,7 +384,7 @@ void test_pclk()
 
 void test_capture_image()
 {
-    my_mcu::UART_iostream uart;
+    myu::UART_iostream uart;
 
     namespace cfg = dev::OV7670_register_cfg;
     write_registers(cfg::color_bar_test.begin(), cfg::color_bar_test.end());
@@ -421,7 +421,7 @@ int main()
     init_cam();
 
     while(1){
-	my_mcu::UART_iostream uart;
+	myu::UART_iostream uart;
 	uart << "\n\n-------------------\n";
 
 	test_read_register();

@@ -33,6 +33,7 @@
  ****************************************************************************/
 #include <mega_import_avr.h> // wait_ms
 #include <mega_pin_hwd.h>
+#include <mega_SPI_hal.h>
 
 // TODO: Como esto lo he ido desarrollando poco a poco, a medida que he ido
 // aprendiendo la mayoria de los dispositivos acceden directamente a las
@@ -44,6 +45,7 @@
 namespace not_generic{
 using namespace mega_;
 using namespace mega_::hwd;
+using namespace mega_::hal;
 }
 
 #endif

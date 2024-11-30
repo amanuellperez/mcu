@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __MEGA_TIMER2_GENERIC_H__
-#define __MEGA_TIMER2_GENERIC_H__
+#ifndef __MEGA_TIMER2_HAL_H__
+#define __MEGA_TIMER2_HAL_H__
 /****************************************************************************
  *
  *  DESCRIPCION
@@ -41,6 +41,7 @@
 #include <tuple>    // std::tie
 		    
 namespace mega_{
+namespace hal{
 
 namespace timer2_{
 
@@ -390,6 +391,7 @@ Time_counter2_32kHz_g<mto>::
 
 
 
+}// namespace 
 }// namespace 
 
 

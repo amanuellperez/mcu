@@ -125,11 +125,11 @@ Nada más.
 
 De momento pruebo con la siguiente notación:
 
-* `atmega_timer0_basic.h`: contiene el traductor del `Timer0` del `atmega`
+* `atmega_timer0_hwd.h`: contiene el traductor del `Timer0` del `atmega`
 
-* `atmega_timer0.h`: contiene el dispositivo genérico correspondiente.
+* `atmega_timer0_hal.h`: contiene el dispositivo genérico correspondiente.
 
-A día de hoy es `avr_timer0_basic.h` ya que, de momento, voy a suponer que
+A día de hoy es `avr_timer0_hwd.h` ya que, de momento, voy a suponer que
 todos los timer0 del avr funcionan igual (según se vayan programando otros
 avr diferentes del atmega, supongo que habrá que volver a la notación
 `atmega_timer0_basic.h`).
@@ -141,9 +141,9 @@ Para poder depurar un programa se necesita una forma de trazarlo. En el caso
 del atmega conviene programar cuanto antes el traductor del UART ya que una
 vez definido ese traductor automáticamente deberíamos de tener `UART_iostream`
 (desconozco si se puede hacer pero quedaría bastante bien poder programar un
-`UART_iostream` parametrizado por un `UART_generic`. Una vez programado el
-traductor `UART_basic`, con escribir `UART_generic` podríamos definir `using
-atmega::UART_iostream = generic::UART_iostream<UART_generic>`).
+`UART_iostream` parametrizado por un `driver::UART`. Una vez programado el
+traductor `hwd::UART`, con escribir `driver::UART` podríamos definir `using
+atmega::UART_iostream = generic::UART_iostream<driver::UART>`).
 
 
 ### Algunos ejemplos

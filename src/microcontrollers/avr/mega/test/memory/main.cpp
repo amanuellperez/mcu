@@ -19,13 +19,13 @@
 
 
 #include <avr_time.h>
-#include "../../mega_UART.h"
+#include "../../mega_UART_hal.h"
 #include <mcu_UART_iostream.h>
 #include <avr_memory.h>
 
 
 namespace myu = mega_;
-using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
+using UART_iostream = mcu::UART_iostream<myu::hal::UART_8bits>;
 
 /***************************************************************************
  *			    TEST BÁSICO 

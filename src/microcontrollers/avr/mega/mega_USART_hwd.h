@@ -56,7 +56,7 @@ namespace hwd{
  *  uart. 
  *
  */
-class UART_basic{
+class UART{
 public:
     // Configuración del UART
     // -----------------------
@@ -267,7 +267,7 @@ public:
 
 
 template <uint32_t f_clock, uint32_t baud_rate, uint32_t tolerance>
-void UART_basic::baud_speed()
+void UART::baud_speed()
 {
     auto [mode, ubbr] = UBBRn<f_clock, baud_rate, tolerance>();
 

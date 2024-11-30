@@ -20,14 +20,14 @@
 #include "../../../mega_cfg_hwd.h"
 #include "../../../mega_timer0_hwd.h"
 #include <avr_time.h>
-#include "../../../mega_UART.h"
+#include "../../../mega_UART_hal.h"
 #include <mcu_UART_iostream.h>
 
 
 // Microcontroller
 // ---------------
 namespace myu = mega_;
-using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
+using UART_iostream = mcu::UART_iostream<myu::hal::UART_8bits>;
 
 using namespace myu::literals;
 using Timer = myu::Timer0;

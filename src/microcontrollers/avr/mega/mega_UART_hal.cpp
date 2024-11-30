@@ -17,10 +17,11 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "mega_UART.h"
+#include "mega_UART_hal.h"
 #include "mega_import_avr.h"
 
 namespace mega_{
+namespace hal{
 
 int UART_8bits::flush(uint16_t time_out_ms)
 {
@@ -43,4 +44,5 @@ int UART_8bits::flush(uint16_t time_out_ms)
     return 0;
 }
 
+}// namespace
 }// namespace

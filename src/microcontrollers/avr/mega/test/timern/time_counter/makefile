@@ -2,7 +2,7 @@ BIN = xx
 
 SOURCES= main.cpp \
 	../../../mega_debug_hwd.cpp	\
-	../../../mega_UART.cpp
+	../../../mega_UART_hal.cpp
 	
 
 

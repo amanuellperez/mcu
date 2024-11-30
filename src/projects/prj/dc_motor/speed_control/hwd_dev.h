@@ -113,10 +113,10 @@ static constexpr uint8_t IN4_pin = IN2_pin;
 // Timer1 para medir el tiempo en milisegundos, de esa forma podemos medir
 // perfectamente hasta 1 segundo (1'000 ms), dejando el Timer0 como generador
 // de PWM.
-using PWM_pinA = myu::PWM0_pin<ENA_pin>;
+using PWM_pinA = myu::driver::PWM0_pin<ENA_pin>;
 using PWM_pinB = PWM_pinA; // = mcu::Pin_connection::floating;
 
-using Miniclock_ms = my::Miniclock_ms<Micro, myu::Time_counter1>;
+using Miniclock_ms = my::Miniclock_ms<Micro, myu::driver::Time_counter1>;
 
 // PROTOCOLS
 // ---------

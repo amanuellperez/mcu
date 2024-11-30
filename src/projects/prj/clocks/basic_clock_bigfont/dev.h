@@ -99,7 +99,7 @@ using Keyboard     = dev::Basic_keyrow<Micro, Keyrow_pins, Keyrow_codes>;
 // system_clock
 // ------------
 using System_clock = 
-	mcu::Clock_s<Micro, my_mcu::Time_counter1>;
+	mcu::Clock_s<Micro, my_mcu::driver::Time_counter1>;
 
 
 #endif

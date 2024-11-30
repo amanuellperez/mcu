@@ -18,9 +18,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "../../../mega_cfg_hwd.h"
-#include "../../../mega_SPI.h"
+#include "../../../mega_SPI_hal.h"
 #include "../../../mega_pin_hwd.h"
-#include "../../../mega_UART.h"
+#include "../../../mega_UART_hal.h"
 #include <mcu_UART_iostream.h>
 #include "../../../mega_debug_hwd.h"
 
@@ -31,11 +31,11 @@
 // ---------------
 namespace myu = mega_;
 namespace hwd = mega_::hwd;
-using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
+using UART_iostream = mcu::UART_iostream<myu::hal::UART_8bits>;
 
 // SPI protocol
 // ------------
-using SPI = myu::SPI_master;
+using SPI = myu::hal::SPI_master;
 
 // OJO: clave periodo a 8 us. Si pongo a 2 us al slave no le da tiempo a leer
 // y se lee basura y pierden datos.

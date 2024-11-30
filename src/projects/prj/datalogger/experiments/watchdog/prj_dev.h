@@ -71,7 +71,7 @@ using UART = mcu::UART_iostream<myu::UART_8bits>;
 
 // Hwd Devices
 // -----------
-using Watchdog = myu::Watchdog;
+using Watchdog = myu::hwd::Watchdog;
 using Sensor   = dev::DS18B20<Micro, One_wire>;
 
 

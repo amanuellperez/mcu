@@ -18,16 +18,16 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "../../../mega_cfg_hwd.h"
-#include "../../../mega_UART.h"
+#include "../../../mega_UART_hal.h"
 #include <mcu_UART_iostream.h>
-#include "../../../mega_timer0.h"
-#include "../../../mega_timer1.h"
+#include "../../../mega_timer0_hal.h"
+#include "../../../mega_timer1_hal.h"
 
 namespace myu = mega_;
-using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
+using UART_iostream = mcu::UART_iostream<myu::hal::UART_8bits>;
 
-using SWG0 = myu::Square_wave_generator0_g;
-using SWG1 = myu::Square_wave_generator1_g;
+using SWG0 = myu::hal::Square_wave_generator0_g;
+using SWG1 = myu::hal::Square_wave_generator1_g;
 
 enum class Use_timer{zero, one };
 

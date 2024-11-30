@@ -16,10 +16,10 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#include "mega_ADC.h"
+#include "mega_ADC_hal.h"
 
 namespace mega_{
-
+namespace hal{
 
 /// Hace una petición de conversión y espera hasta que haya finalizado
 /// devolviendo el valor convertido en arefs (1 aref = AREF/1024 mV).
@@ -34,10 +34,10 @@ namespace mega_{
 //		3.- Ha ocurrido un error (¿puede saberse esto?)
 ADC::AREF_type ADC::read_in_arefs()
 {
-    ADC_basic::start_conversion();
+    hwd::ADC::start_conversion();
     wait_until_conversion_is_complete();
 
-    return ADC_basic::ADC_in_arefs();
+    return hwd::ADC::ADC_in_arefs();
 }
 
 
@@ -104,4 +104,5 @@ nm::Result ADC::clock_frequency_in_kHz_12MHz(uint16_t adc_frequency)
 }
 
 
+}// namespace
 }// namespace

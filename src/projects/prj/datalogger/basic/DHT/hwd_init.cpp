@@ -29,7 +29,7 @@ void Main::init_uart()
 {
     UART_iostream::init();
     uart.turn_on();
-    myu::UART_basic::enable_interrupt_unread_data();
+    myu::hwd::UART::enable_interrupt_unread_data();
 }
 
 void Main::init_sensor()

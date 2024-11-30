@@ -31,7 +31,7 @@ void Main::run()
     Watchdog::interrupt_mode<Watchdog::Period::T1_s>();
     Micro::enable_interrupts();
 
-    Micro::sleep_mode(myu::Sleep::mode::idle);
+    Micro::sleep_mode(myu::hwd::Sleep::mode::idle);
 
     while (1){
 	Micro::sleep();

@@ -17,7 +17,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <avr_time.h>
-#include "../../../mega_UART.h"
+#include "../../../mega_UART_hal.h"
 
 #include <atd_ostream.h>
 #include <mcu_default_cfg.h>
@@ -29,7 +29,7 @@ namespace myu = mega_;
 
 // Hwd devices
 // -----------
-using UART = myu::UART_8bits;
+using UART = myu::hal::UART_8bits;
 
 // Cfg
 // ---
@@ -161,8 +161,8 @@ void print_registers()
 
 void main_hello()
 {
-    write("\r\n\nUART_basic test\n\r"
-	        "---------------\n\r");
+    write("\r\n\nhwd::UART test\n\r"
+	        "--------------\n\r");
 }
 
 

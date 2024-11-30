@@ -26,7 +26,7 @@ using Micro   = myu::Micro;
 using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
 
 
-using Clock = mcu::Clock_ms<Micro, myu::Time_counter1>;
+using Clock = mcu::Clock_ms<Micro, myu::driver::Time_counter1>;
 
 
 

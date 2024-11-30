@@ -36,7 +36,7 @@ using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
 constexpr uint8_t TWI_buffer_size = 10;
 
 using TWI_master_cfg = mcu::TWI_master_cfg<Micro, 
-                                           myu::TWI_basic,
+                                           myu::hwd::TWI,
 					   TWI_buffer_size>;
 
 using TWI = mcu::TWI_master<TWI_master_cfg>;

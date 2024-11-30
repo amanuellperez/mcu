@@ -33,10 +33,10 @@ using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
 constexpr uint8_t test_pin = 12;
 
 using Pin = myu::hwd::Output_pin<test_pin>;
-using Miniclock1_us = mcu::Miniclock_us<myu::Micro, myu::Time_counter1>;
+using Miniclock1_us = mcu::Miniclock_us<myu::Micro, myu::driver::Time_counter1>;
 
 using SWG_us = 
-	dev::Square_wave_burst_generator< myu::Square_wave_burst_generator0_g
+	dev::Square_wave_burst_generator< myu::driver::Square_wave_burst_generator0_g
 					  , Pin
 					  , Miniclock1_us>;
 

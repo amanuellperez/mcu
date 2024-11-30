@@ -44,7 +44,7 @@
  *	10/04/2018 v0.0
  *	10/07/2019 Reescrito. Comienzo con traductor.
  *	19/10/2019 Lo dejo como un traductor puro.
- *	10/04/2021 SPI_basic_basic, SPI_master, SPI_slave
+ *	10/04/2021 SPI, SPI_master, SPI_slave
  *	12/02/2023 Elimino std::byte a favor de uint8_t. Usar std::byte obliga
  *		   a tener que estar haciendo castings todo el rato. Puede que
  *		   no sepa usarlo. De momento me quedo con uint8_t para
@@ -61,7 +61,7 @@
 namespace mega_{
 namespace hwd{
 
-class SPI_basic{
+class SPI{
 public:
 // CARACTERÍSTICAS DEL SPI
     // Slave select
@@ -82,7 +82,7 @@ public:
 
 // CONSTRUCTOR
     // No permitimos que se construya este objeto
-    SPI_basic() = delete;
+    SPI() = delete;
 
     // ---------
     // Traductor

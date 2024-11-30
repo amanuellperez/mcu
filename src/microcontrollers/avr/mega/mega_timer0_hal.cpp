@@ -17,9 +17,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "mega_timer0.h"
+#include "mega_timer0_hal.h"
 
 namespace mega_{
+namespace hal {
 
 // ¿es genérico o depende del hwd::Timer0?
 // Por culpa de frequency_in_Hz_to_prescaler_top que conoce la implementación
@@ -134,4 +135,5 @@ atd::Percentage PWM_cfg::calculate_cfg_top_OCRA(const Frequency::Rep& freq_clk,
 
 
 }// namespace timer0_
-}// namespace avr_
+}// namespace hal
+}// namespace mega_

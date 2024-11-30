@@ -94,7 +94,7 @@ inline void UART::empty_read_buffer()
 // DEVICES
 // -------
 // Clock
-using Time_counter = myu::Time_counter2_32kHz_g<timeout_ms>;
+using Time_counter = myu::driver::Time_counter2_32kHz_g<timeout_ms>;
 using Clock	   = mcu::Clock_s<Micro, Time_counter>;
 #define ISR_CLOCK ISR_TIMER2_COMPA
 

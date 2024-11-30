@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __MEGA_SPI_GENERIC_H__
-#define __MEGA_SPI_GENERIC_H__
+#ifndef __MEGA_SPI_HAL_H__
+#define __MEGA_SPI_HAL_H__
 /****************************************************************************
  *
  *  DESCRIPCION
@@ -37,10 +37,10 @@
 #include "mega_clock_frequencies.h"	
 
 namespace mega_{
-
+namespace hal{
 
 namespace private_{
-class SPI_base : public hwd::SPI_basic{
+class SPI_base : public hwd::SPI{
 public:
     SPI_base() = delete;
 
@@ -299,7 +299,8 @@ inline void SPI_base::clock_period_in_us<16u, 8000000UL>()
 {clock_frequency_divide_by_128();}
 }// private_
  
-}// namespace mega_
+}// namespace 
+}// namespace
 
 
 #endif 

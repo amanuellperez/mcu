@@ -44,8 +44,8 @@ static constexpr uint8_t IN4_pin = 14;
 static constexpr uint8_t ENA_pin = 15;
 static constexpr uint8_t ENB_pin = 16;
 
-using PWM_pinA = myu::PWM1_pin<ENA_pin>;
-using PWM_pinB = myu::PWM1_pin<ENB_pin>;
+using PWM_pinA = myu::driver::PWM1_pin<ENA_pin>;
+using PWM_pinB = myu::driver::PWM1_pin<ENB_pin>;
 
 // Devices
 // -------

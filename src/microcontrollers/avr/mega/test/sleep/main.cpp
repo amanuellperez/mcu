@@ -27,7 +27,7 @@
 #include "../../mega_interrupt.h"
 #include "../../mega_pin_hwd.h"
 #include <avr_time.h>
-#include "../../mega_UART.h"
+#include "../../mega_UART_hal.h"
 #include <mcu_UART_iostream.h>
 
 
@@ -35,7 +35,7 @@
 // -----
 namespace myu = mega_;
 namespace hwd = mega_::hwd;
-using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
+using UART_iostream = mcu::UART_iostream<myu::hal::UART_8bits>;
 //using Micro = hwd::Micro;
 
 // Pins
@@ -103,7 +103,7 @@ void test_sleep()
 	    "\t1. press a key (only sleep idle mode)\n"
 	    "\t2. change level in pin number " << (int) Pin::number << "\n";
 
-    hwd::UART_basic::enable_interrupt_unread_data();
+    hwd::UART::enable_interrupt_unread_data();
     Pin::enable_change_level_interrupt();
 
 // >>> sleep()
@@ -112,11 +112,11 @@ void test_sleep()
     hwd::Sleep::disable();
 // <<< sleep()
 
-    hwd::UART_basic::disable_interrupt_unread_data();
+    hwd::UART::disable_interrupt_unread_data();
     Pin::disable_change_level_interrupt();
 
     // vaciamos el buffer para que no vuelva a saltar la interrupcion
-    while (hwd::UART_basic::are_there_unread_data()){
+    while (hwd::UART::are_there_unread_data()){
 	char ans{};
 	uart >> ans; 
     }

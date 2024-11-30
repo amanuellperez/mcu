@@ -30,9 +30,9 @@ using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
 
 // Devices
 // -------
-using Clock0 = mcu::Clock_s<Micro, myu::Time_counter0>;
-using Clock1 = mcu::Clock_s<Micro, myu::Time_counter1>;
-using Clock2 = mcu::Clock_s<Micro, myu::Time_counter2>;
+using Clock0 = mcu::Clock_s<Micro, myu::driver::Time_counter0>;
+using Clock1 = mcu::Clock_s<Micro, myu::driver::Time_counter1>;
+using Clock2 = mcu::Clock_s<Micro, myu::driver::Time_counter2>;
 
 
 // Functions

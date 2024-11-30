@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __MEGA_ADC_H__
-#define __MEGA_ADC_H__
+#ifndef __MEGA_ADC_HAL_H__
+#define __MEGA_ADC_HAL_H__
 /****************************************************************************
  *
  * DESCRIPCION
@@ -54,13 +54,14 @@
 #include <atd_names.h>	// nm::ok/fail
 
 namespace mega_{
+namespace hal{
 /***************************************************************************
  *				ADC
  ***************************************************************************/
-class ADC : public hwd::ADC_basic {
+class ADC : public hwd::ADC {
 public:
 // Types
-    using AREF_type = ADC_basic::AREF_type;
+    using AREF_type = hwd::ADC::AREF_type;
     using Potential = mega_::Potential;
 
 // Cfg
@@ -160,13 +161,13 @@ template <uint8_t AREF_connect_to>
 inline void ADC::AREF_selection()
 {
     if constexpr (AREF_connect_to ==  AREF_connect_to_internal_AVCC)
-	    ADC_basic::AREF_internal_to_AVCC();
+	    hwd::ADC::AREF_internal_to_AVCC();
 
     else if constexpr (AREF_connect_to == AREF_connect_to_external)
-	    ADC_basic::AREF_external();
+	    hwd::ADC::AREF_external();
 
     else if constexpr (AREF_connect_to == AREF_connect_to_internal_1_1V)
-	    ADC_basic::AREF_internal_to_1_1V();
+	    hwd::ADC::AREF_internal_to_1_1V();
 
     else 
 	static_assert(atd::always_false_v<int>,
@@ -188,8 +189,8 @@ nm::Result ADC::single_mode(const Frequency& freq)
 	return nm::fail;
 
     AREF_selection<AREF_connect_to>();
-    ADC_basic::single_conversion_mode();
-    ADC_basic::enable();
+    hwd::ADC::single_conversion_mode();
+    hwd::ADC::enable();
 
     return nm::ok;
 }
@@ -205,8 +206,8 @@ void ADC::single_mode()
     clock_frequency_in_kHz<adc_frequency_in_kHz>();
 
     AREF_selection<AREF_connect_to>();
-    ADC_basic::single_conversion_mode();
-    ADC_basic::enable();
+    hwd::ADC::single_conversion_mode();
+    hwd::ADC::enable();
 }
 
 
@@ -226,7 +227,7 @@ void ADC::single_mode()
 
 /// Esperamos hasta que el ADC haya finalizado con la lectura
 inline void ADC::wait_until_conversion_is_complete()
-{while(!ADC_basic::is_the_conversion_complete()) ;}
+{while(!hwd::ADC::is_the_conversion_complete()) ;}
 
 
 
@@ -280,16 +281,16 @@ void ADC::clock_frequency_in_kHz_1MHz()
 {
     // Voy a empezar en 500kHz aunque seguramente sea demasiado rápida (???)
     if constexpr (adc_frequency == 500u)
-	ADC_basic::clock_frequency_divide_by_2();
+	hwd::ADC::clock_frequency_divide_by_2();
 
     else if constexpr (adc_frequency == 250u)
-	ADC_basic::clock_frequency_divide_by_4();
+	hwd::ADC::clock_frequency_divide_by_4();
     
     else if constexpr (adc_frequency == 125u)
-	ADC_basic::clock_frequency_divide_by_8();
+	hwd::ADC::clock_frequency_divide_by_8();
 
     else if constexpr (adc_frequency == 62u or adc_frequency == 63u)
-	ADC_basic::clock_frequency_divide_by_16();
+	hwd::ADC::clock_frequency_divide_by_16();
     // El resto da frecuencias inferiores a 50kHz
 
     else
@@ -308,16 +309,16 @@ void ADC::clock_frequency_in_kHz_8MHz()
 // resolución son de 50kHz a 200kHz.
 // Voy a empezar en 500kHz aunque seguramente sea demasiado rápida (???)
     if constexpr (adc_frequency == 500u)
-	ADC_basic::clock_frequency_divide_by_16();
+	hwd::ADC::clock_frequency_divide_by_16();
 
     else if constexpr (adc_frequency == 250u)
-	ADC_basic::clock_frequency_divide_by_32();
+	hwd::ADC::clock_frequency_divide_by_32();
     
     else if constexpr (adc_frequency == 125u)
-	ADC_basic::clock_frequency_divide_by_64();
+	hwd::ADC::clock_frequency_divide_by_64();
 
     else if constexpr (adc_frequency == 62u or adc_frequency == 63u)
-	ADC_basic::clock_frequency_divide_by_128();
+	hwd::ADC::clock_frequency_divide_by_128();
 
     else
 	static_assert(atd::always_false_v<int>,
@@ -336,13 +337,13 @@ void ADC::clock_frequency_in_kHz_12MHz()
 // resolución son de 50kHz a 200kHz.
 // Voy a empezar en 500kHz aunque seguramente sea demasiado rápida (???)
     if constexpr (adc_frequency == 375u)
-	ADC_basic::clock_frequency_divide_by_32();
+	hwd::ADC::clock_frequency_divide_by_32();
 
     else if constexpr (adc_frequency == 187u or adc_frequency == 188u)
-	ADC_basic::clock_frequency_divide_by_64();
+	hwd::ADC::clock_frequency_divide_by_64();
     
     else if constexpr (adc_frequency == 94u)
-	ADC_basic::clock_frequency_divide_by_128();
+	hwd::ADC::clock_frequency_divide_by_128();
 
 
     else
@@ -468,8 +469,8 @@ public:
     {return read_potential(); }
 };
 
-
-}// namespace avr_
+}// namespace 
+}// namespace 
 
 #endif
 
