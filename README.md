@@ -179,6 +179,11 @@ Se puede organizar el código en diferentes niveles:
 * `rom` contiene constantes guardadas en la ROM del microcontrolador.
 * `atmega`, `attiny`, ... son funciones concretas de microcontroladores
    concretos.
+
+   A su vez, dentro de cada micro, se encuentran definidos los namespaces
+   `hwd` (traductores) y `hal` (hardware abstraction layer). `hal` tiene como
+   sinónimo `driver`.
+
 * `dev` incluye todos los traductores y drivers de dispositivos. Observar que
    en este namespace estoy incluyendo dos cosas diferentes: por una parte
    traductores de dispositivos reales de hardware (como el L298N que es un
