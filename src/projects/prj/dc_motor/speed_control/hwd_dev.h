@@ -140,7 +140,7 @@ struct L298N_cfg : dev::default_cfg::L298N {
 };
 
 
-using L298N = dev::L298N_basic<L298N_cfg>;
+using L298N = dev::hwd::L298N<L298N_cfg>;
 using H_bridge = dev::L298N_H_bridge1<L298N>;
 
 

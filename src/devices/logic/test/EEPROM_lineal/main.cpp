@@ -18,7 +18,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "../../dev_EEPROM_lineal.h"
-#include <dev_25LC256_basic.h>
+#include <dev_25LC256_hwd.h>
 #include <mega.h>
 #include <atd_cast.h>
 #include <atd_cstddef.h>

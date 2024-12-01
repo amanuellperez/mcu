@@ -1,4 +1,4 @@
-#include "dev_BMP280_basic.h"
+#include "dev_BMP280_hwd.h"
 
 #include <atd_bit.h>
 namespace dev{

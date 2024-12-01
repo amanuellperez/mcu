@@ -42,7 +42,7 @@ using Search = mcu::One_wire_search<Cfg>;
 
 // Hwd Devices
 // -----------
-using Sensor = dev::DS18B20_basic<Micro, One_wire>;
+using Sensor = dev::hwd::DS18B20<Micro, One_wire>;
 
 
 

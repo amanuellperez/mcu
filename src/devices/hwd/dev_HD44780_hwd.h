@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __DEV_LCD_HD4780_BASIC_H__
-#define __DEV_LCD_HD4780_BASIC_H__
+#ifndef __DEV_LCD_HD4780_HWD_H__
+#define __DEV_LCD_HD4780_HWD_H__
 /****************************************************************************
  *
  *  DESCRIPCION
@@ -123,6 +123,7 @@ struct HD44780_base_pins4{
 
 
 
+namespace hwd{
 
 /*!
  *  \brief  Traductor del HD44780
@@ -302,7 +303,7 @@ private:
     static void write_d4(uint8_t d);
 //    void write_d8(uint8_t d);
 };
-
+} // namespace hwd
 
 /***************************************************************************
  *		  HD44780: display 16 x 2 or 20 x 4
@@ -323,6 +324,7 @@ struct HD44780_pins4{
     static constexpr uint8_t E  = pin_E::E;
 };
 
+namespace hwd{
 /*!
  * La forma de definir un LCD es de la siguiente forma:
  *
@@ -463,7 +465,8 @@ void HD44780<M, pin>::init()
 }
 
 
-
+}// namespace hwd
+ 
 /***************************************************************************
  *		  HD44780_4004: display 40 x 04
  ***************************************************************************/
@@ -485,6 +488,7 @@ struct HD44780_4004_pins4{
     static constexpr uint8_t E2  = pin_E::E2;
 };
 
+namespace hwd{
 /*!
  *  \brief  LCD de 40 x 04 basado en el HD44780 driver.
  *
@@ -656,7 +660,8 @@ template <typename Micro, typename pin>
 using HD44780_2004 = HD44780<Micro, pin>;
 
 }// namespace
+}// namespace
 
-#include "dev_HD44780_basic.tcc"
+#include "dev_HD44780_hwd.tcc"
 
 #endif

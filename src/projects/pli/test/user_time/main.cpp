@@ -64,7 +64,7 @@ using Keyrow = dev::Basic_keyrow<Micro, Keyrow_pins, Keyrow_codes>;
 
 // LCD
 // NO USAR EL DE 16 x 02. USAR SOLO EL DE 20x04 para que se vea bien.
-using LCD_2004 = dev::LCD_HD44780_2004<Micro, LCD_pins>;
+using LCD_2004 = dev::HD44780_2004<Micro, LCD_pins>;
 using Screen_2004 = dev::LCD_screen_2004<LCD_2004>;
 //using LCD_ostream_2004 = dev::LCD_ostream_1602<Generic_LCD_2004>;
 

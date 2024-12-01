@@ -17,7 +17,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "../../dev_BMP280_basic.h"
+#include "../../dev_BMP280_hwd.h"
 
 #include <atd_cstddef.h>
 

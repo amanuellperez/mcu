@@ -28,7 +28,7 @@
  *
  * HISTORIA
  *    Manuel Perez
- *    09/06/2024 L298N_basic
+ *    09/06/2024 L298N
  *    16/07/2024 L298N_H_bridge
  *
  ****************************************************************************/
@@ -46,6 +46,7 @@ namespace default_cfg{
 }// default_cfg
  
 
+namespace hwd{
 // Ejemplo cfg
 // -----------
 // Si pin_IN2 == pin_IN1 se entiende que están conectados 
@@ -74,10 +75,10 @@ namespace default_cfg{
 //	 PWM. Para manejar un motor, aplicación típica, un primer modelo sería
 //	 el anterior (pero es un modelo muy simple: ¿qué error se comete?)
 template <typename Cfg>
-class L298N_basic{
+class L298N{
 public:
 // Constructors
-    L298N_basic() = delete;	// static interface
+    L298N() = delete;	// static interface
     static void init() {}
 
 // port 1
@@ -162,7 +163,7 @@ private:
 // port 1
 // ------
 template <typename C>
-void L298N_basic<C>::voltage1(atd::Sign sign, const atd::Percentage& p)
+void L298N<C>::voltage1(atd::Sign sign, const atd::Percentage& p)
 {
     voltage1_sign(sign); 
     voltage1_percentage(p);
@@ -170,7 +171,7 @@ void L298N_basic<C>::voltage1(atd::Sign sign, const atd::Percentage& p)
 
 
 template <typename C>
-void L298N_basic<C>::voltage1_percentage(const atd::Percentage& p)
+void L298N<C>::voltage1_percentage(const atd::Percentage& p)
 {
     if (p == atd::Percentage{0})
 	write1_zero();
@@ -185,7 +186,7 @@ void L298N_basic<C>::voltage1_percentage(const atd::Percentage& p)
 }
 
 template <typename C>
-atd::Percentage L298N_basic<C>::voltage1_percentage()
+atd::Percentage L298N<C>::voltage1_percentage()
 {
     if (PWM_pin1::is_zero())
 	return atd::Percentage{0};
@@ -197,7 +198,7 @@ atd::Percentage L298N_basic<C>::voltage1_percentage()
 }
 
 template <typename C>
-inline void L298N_basic<C>::voltage1_sign(atd::Sign sign) 
+inline void L298N<C>::voltage1_sign(atd::Sign sign) 
 {
     if (sign == atd::Sign::positive){
 	IN1::write_one();
@@ -214,7 +215,7 @@ inline void L298N_basic<C>::voltage1_sign(atd::Sign sign)
 
 
 template <typename C>
-inline atd::Sign L298N_basic<C>::voltage1_sign() 
+inline atd::Sign L298N<C>::voltage1_sign() 
 {
     if constexpr (IN1::number != IN2::number){
 	if (IN1::is_one() and IN2::is_zero()) 
@@ -237,12 +238,12 @@ inline atd::Sign L298N_basic<C>::voltage1_sign()
 
 
 template <typename C>
-inline void L298N_basic<C>::write1_zero() 
+inline void L298N<C>::write1_zero() 
     { PWM_pin1::write_zero(); }
 
 
 template <typename C>
-inline void L298N_basic<C>::stop1() 
+inline void L298N<C>::stop1() 
 {
     PWM_pin1::write_zero(); // garantizamos que genere 0
     PWM_pin1::stop();
@@ -253,7 +254,7 @@ inline void L298N_basic<C>::stop1()
 // port 2
 // ------
 template <typename C>
-void L298N_basic<C>::voltage2(atd::Sign sign, const atd::Percentage& p)
+void L298N<C>::voltage2(atd::Sign sign, const atd::Percentage& p)
 {
     voltage2_sign(sign); 
     voltage2_percentage(p);
@@ -261,7 +262,7 @@ void L298N_basic<C>::voltage2(atd::Sign sign, const atd::Percentage& p)
 
 
 template <typename C>
-void L298N_basic<C>::voltage2_percentage(const atd::Percentage& p)
+void L298N<C>::voltage2_percentage(const atd::Percentage& p)
 {
     if (p == atd::Percentage{0})
 	write2_zero();
@@ -276,7 +277,7 @@ void L298N_basic<C>::voltage2_percentage(const atd::Percentage& p)
 }
 
 template <typename C>
-atd::Percentage L298N_basic<C>::voltage2_percentage()
+atd::Percentage L298N<C>::voltage2_percentage()
 {
     if (PWM_pin2::is_zero())
 	return atd::Percentage{0};
@@ -288,7 +289,7 @@ atd::Percentage L298N_basic<C>::voltage2_percentage()
 }
 
 template <typename C>
-inline void L298N_basic<C>::voltage2_sign(atd::Sign sign) 
+inline void L298N<C>::voltage2_sign(atd::Sign sign) 
 {
     if (sign == atd::Sign::positive){
 	IN3::write_one();
@@ -304,7 +305,7 @@ inline void L298N_basic<C>::voltage2_sign(atd::Sign sign)
 }
 
 template <typename C>
-inline atd::Sign L298N_basic<C>::voltage2_sign() 
+inline atd::Sign L298N<C>::voltage2_sign() 
 {
     if constexpr (IN3::number != IN4::number){
 	if (IN3::is_one() and IN4::is_zero()) 
@@ -326,16 +327,18 @@ inline atd::Sign L298N_basic<C>::voltage2_sign()
 
 
 template <typename C>
-inline void L298N_basic<C>::write2_zero() 
+inline void L298N<C>::write2_zero() 
     { PWM_pin2::write_zero(); }
 
 
 template <typename C>
-inline void L298N_basic<C>::stop2() 
+inline void L298N<C>::stop2() 
 {
     PWM_pin2::write_zero(); // garantizamos que genere 0
     PWM_pin2::stop();
 }
+
+} // namespace
 
 /***************************************************************************
  *			    L298N_H_BRIDGE

@@ -70,17 +70,17 @@ using Keyrow_pins = dev::Keyrow_pins<23, 24, 25>;
 
 // Hardware connections
 // --------------------
-using LCD_pins = dev::LCD_HD44780_pins4<dev::LCD_HD44780_RS<LCD_RS_pin>,
-					dev::LCD_HD44780_RW<LCD_RW_pin>,
-					dev::LCD_HD44780_E<LCD_E_pin>,
-					dev::LCD_HD44780_D4<LCD_D4_pin, 
+using LCD_pins = dev::HD44780_pins4<dev::HD44780_RS<LCD_RS_pin>,
+					dev::HD44780_RW<LCD_RW_pin>,
+					dev::HD44780_E<LCD_E_pin>,
+					dev::HD44780_D4<LCD_D4_pin, 
 							    LCD_D5_pin, 
 							    LCD_D6_pin, 
 							    LCD_D7_pin>>;
 
 // LCD
 // ---
-using LCD_1602         = dev::LCD_HD44780_1602<LCD_pins>;
+using LCD_1602         = dev::HD44780_1602<LCD_pins>;
 using Generic_LCD_1602 = dev::Generic_LCD<LCD_1602>;
 using Screen_1602      = dev::LCD_screen_1602<Generic_LCD_1602>;
 using LCD              = Screen_1602;

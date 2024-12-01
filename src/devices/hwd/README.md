@@ -72,9 +72,10 @@ de sencillo: para ver si una función tiene un error basta con leer la
 datasheet y ver si el código realmente hace lo que dice la datasheet.
 
 #### Nombre
-A falta de nombre he decidido poner el subfijo `_basic` a todas las clases que
-representan traductores puros. Ejemplo: `DS18B20_basic` es el traductor del
-sensor de temperatura `DS18B20`
+
+Los traductores pertenecen a la capa de hardware, por ello van dentro del
+namespace `hwd`. De momento, los drivers no los meto dentro de ningún
+namespace `hal` (o `driver`). 
 
 #### Parámetros
 Un device se conecta al micro usando un determinado protocolo (pins, SPI,
@@ -83,20 +84,24 @@ Un device se conecta al micro usando un determinado protocolo (pins, SPI,
 
 Ejemplo: 
 ```
+namespace hwd{
+
 template <typename Micro, typename Protocol>
-class Device_basic{
+class Device{
 ...
 };
+
+} // hwd
 ```
 
 Cuando se tratan de protocolos es sencillo identificar qué parámetros pasar:
 
-+ Si el protocolo es One Wire, parametrizamos la clase como `DS18B20<Micro,
++ Si el protocolo es One Wire, parametrizamos la clase como `hwd::DS18B20<Micro,
    One_wire>`. 
 
-+ Si es Two Wire, serán `BME280_basic<Micro, TWI>`.
++ Si es Two Wire, serán `hwd::BME280<Micro, TWI>`.
 
-+ Si es SPI, `25LC256_basic<Micro, SPI, SPI_selector>`.
++ Si es SPI, `hwd::25LC256<Micro, SPI, SPI_selector>`.
 
 Pero ¿qué parámetros pasar cuando el device se comunique con el micro usando
 pines del microcontrolador? ¿Qué es mejor `Push_button<Micro, numero_de_pin>`,
@@ -514,7 +519,7 @@ Los dispositivos que fijo que funcionan (por lo menos a día de hoy) son:
 
 Formado por varios ficheros:
 
-* `dev_EEPROM_25LC256_basic.h`:   es el traductor de la EEPROM 25LC256. 
+* `dev_EEPROM_25LC256_hwd.h`:   es el traductor de la EEPROM 25LC256. 
 * `dev_EEPROM_lineal.h`: concebimos la memoria como lineal.
 
 * `dev_EEPROM_iostream.h`: concebimos la memoria como un flujo normal.
@@ -537,7 +542,7 @@ Es el típico LCD 16 x 2 ó 20 x 4.
 
 Formado por varios ficheros:
 
-* `dev_LCD_HD44780_basic.h`: es el traductor del dispositivo.
+* `dev_LCD_HD44780_hwd.h`: es el traductor del dispositivo.
 * `dev_LCD_screen.h`: concebimos el LCD como terminal.
    Un terminal es un terminal vulgar y corriente: vas escribiendo en él. 
    Cuando llegas a la última columna automáticamente pasa a la siguiente 

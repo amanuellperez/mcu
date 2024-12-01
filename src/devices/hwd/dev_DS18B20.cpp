@@ -20,6 +20,7 @@
 #include "dev_DS18B20.h"
 
 namespace dev{
+namespace hwd{
 
 _Scratchpad::Celsius _Scratchpad::temperature(uint8_t T0, uint8_t T1,
 								Resolution res)
@@ -79,5 +80,6 @@ uint8_t _Scratchpad::to_cfg_register(Resolution res)
 }
 
 
+}// namespace
 }// namespace
  

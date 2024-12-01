@@ -46,7 +46,7 @@ private:
     void print_lcd_symbol(char c);
 
     using Parent = dev::LCD_ostream_1602<Generic_LCD_t>;
-    //using LCD = dev::LCD_HD44780<LCD_pins>;
+    //using LCD = dev::HD44780<LCD_pins>;
 };
 
 

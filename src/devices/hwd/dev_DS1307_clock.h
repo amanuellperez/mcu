@@ -33,16 +33,16 @@
  *    25/12/2020 v0.0
  *
  ****************************************************************************/
-#include "dev_DS1307_basic.h"
+#include "dev_DS1307_hwd.h"
 
 #include <chrono>
 #include <atd_time.h>
 
 namespace atd{
 template<>
-struct Generic_time_translator<dev::__DS1307_timekeeper>{
+struct Generic_time_translator<dev::hwd::__DS1307_timekeeper>{
     
-    using DS = dev::__DS1307_timekeeper;
+    using DS = dev::hwd::__DS1307_timekeeper;
 
     static int seconds(const DS& t) { return t.seconds; }
     static void seconds(DS& t, int s) { t.seconds= s; }
@@ -88,10 +88,10 @@ namespace dev{
  *
  */
 template <typename TWI_master>
-class DS1307_clock : public DS1307_basic<TWI_master> {
+class DS1307_clock : public hwd::DS1307<TWI_master> {
 public:
-// From DS1307_basic
-    using Time_point = DS1307_basic<TWI_master>::Time_point;
+// From DS1307
+    using Time_point = hwd::DS1307<TWI_master>::Time_point;
 
 // As a clock
     using duration  = std::chrono::seconds; 

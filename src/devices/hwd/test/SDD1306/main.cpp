@@ -90,7 +90,7 @@ constexpr uint16_t TWI_scl_frequency = 400; // 400 kHz
 
 // Devices
 // -------
-//using SDD1306 = dev::SDD1306_basic<TWI_master>;
+//using SDD1306 = dev::hwd::SDD1306<TWI_master>;
 
 struct SDD1306_cfg {
     using TWI_master = ::TWI_master;

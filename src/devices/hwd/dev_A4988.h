@@ -52,6 +52,7 @@
 
 namespace dev{
 
+namespace hwd{
 // Cfg
 // ---
 // Admite una estructura con los números de pines correspondientes.
@@ -101,7 +102,7 @@ struct A4988_pins{
 // Class
 // -----
 template <typename Micro0, typename Pins_numbers>
-class A4988_basic {
+class A4988 {
 public:
 // Types
     using Micro = Micro0;
@@ -131,7 +132,7 @@ public:
     using NSteps_t  = STEP::NPulses_t;
 
 // Constructor 
-    A4988_basic() = delete; // static interface
+    A4988() = delete; // static interface
     
     static void init();
 
@@ -210,7 +211,7 @@ private:
 
 
 template <typename M, typename P>
-void A4988_basic<M, P>::init()
+void A4988<M, P>::init()
 {
     DIR::as_output();
 
@@ -242,7 +243,7 @@ void A4988_basic<M, P>::init()
 //	cambia la dirección? ¿Puede generar algún problema? Si el driver es
 //	robusto, no. ¿Lo es?
 template <typename M, typename P>
-void A4988_basic<M, P>::direction(Direction dir) 
+void A4988<M, P>::direction(Direction dir) 
 {
 // stop() (???)
     if (dir == Direction::positive) 
@@ -254,7 +255,7 @@ void A4988_basic<M, P>::direction(Direction dir)
 
 
 template <typename M, typename P>
-void A4988_basic<M, P>::step(const Frequency& freq, const NSteps_t& nsteps)
+void A4988<M, P>::step(const Frequency& freq, const NSteps_t& nsteps)
 {
     SW_signal sw{freq};
     STEP::generate(sw, nsteps); 
@@ -265,13 +266,13 @@ void A4988_basic<M, P>::step(const Frequency& freq, const NSteps_t& nsteps)
 // ---------
 template <typename M, typename P>
 inline 
-void A4988_basic<M, P>::enable()
+void A4988<M, P>::enable()
     requires (NO_ENABLE::is_a_valid_pin())
 { NO_ENABLE::write_zero(); }
 
 template <typename M, typename P>
 inline 
-void A4988_basic<M, P>::disable()
+void A4988<M, P>::disable()
     requires (NO_ENABLE::is_a_valid_pin())
 { NO_ENABLE::write_one(); }
 
@@ -280,13 +281,13 @@ void A4988_basic<M, P>::disable()
 // --------
 template <typename M, typename P>
 inline 
-void A4988_basic<M, P>::sleep()
+void A4988<M, P>::sleep()
     requires (NO_SLEEP::is_a_valid_pin())
 { NO_SLEEP::write_zero(); }
 
 template <typename M, typename P>
 inline 
-void A4988_basic<M, P>::awake()
+void A4988<M, P>::awake()
     requires (NO_SLEEP::is_a_valid_pin())
 { 
     NO_SLEEP::write_one(); 
@@ -305,13 +306,13 @@ void A4988_basic<M, P>::awake()
 // --------
 template <typename M, typename P>
 inline 
-void A4988_basic<M, P>::engage()
+void A4988<M, P>::engage()
     requires (NO_RESET::is_a_valid_pin())
 { NO_RESET::write_one(); }
 
 template <typename M, typename P>
 inline 
-void A4988_basic<M, P>::disengage()
+void A4988<M, P>::disengage()
     requires (NO_RESET::is_a_valid_pin())
 { NO_RESET::write_zero(); }
 
@@ -319,7 +320,7 @@ void A4988_basic<M, P>::disengage()
 // modes
 // -----
 template <typename M, typename P>
-void A4988_basic<M, P>::full_step_mode()	
+void A4988<M, P>::full_step_mode()	
     requires (MS123_connected())
 {// 000
     MS1::write_zero();
@@ -328,7 +329,7 @@ void A4988_basic<M, P>::full_step_mode()
 }
 
 template <typename M, typename P>
-void A4988_basic<M, P>::half_step_mode()	
+void A4988<M, P>::half_step_mode()	
     requires (MS123_connected())
 {// 100
     MS1::write_one();
@@ -337,7 +338,7 @@ void A4988_basic<M, P>::half_step_mode()
 }
 
 template <typename M, typename P>
-void A4988_basic<M, P>::quarter_step_mode()	
+void A4988<M, P>::quarter_step_mode()	
     requires (MS123_connected())
 {// 010
     MS1::write_zero();
@@ -346,7 +347,7 @@ void A4988_basic<M, P>::quarter_step_mode()
 }
 
 template <typename M, typename P>
-void A4988_basic<M, P>::eighth_step_mode()	
+void A4988<M, P>::eighth_step_mode()	
     requires (MS123_connected())
 {// 110
     MS1::write_one();
@@ -355,7 +356,7 @@ void A4988_basic<M, P>::eighth_step_mode()
 }
 
 template <typename M, typename P>
-void A4988_basic<M, P>::sixteenth_step_mode()	
+void A4988<M, P>::sixteenth_step_mode()	
     requires (MS123_connected())
 {// 111
     MS1::write_one();
@@ -364,7 +365,7 @@ void A4988_basic<M, P>::sixteenth_step_mode()
 }
 
 template <typename M, typename P>
-constexpr bool A4988_basic<M, P>::step_mode_at_compile_time()
+constexpr bool A4988<M, P>::step_mode_at_compile_time()
 {
     if constexpr (MS123_connected())
 	return false;
@@ -390,7 +391,7 @@ constexpr bool A4988_basic<M, P>::step_mode_at_compile_time()
 //	es un pelín más ineficiente y genera un poco más código que el
 //	siguiente monstruo:
 template <typename M, typename P>
-A4988_basic<M, P>::Mode A4988_basic<M, P>::mode()
+A4988<M, P>::Mode A4988<M, P>::mode()
     requires (MS123_connected())
 {
     if (MS1::is_zero()){// 0..
@@ -417,7 +418,7 @@ A4988_basic<M, P>::Mode A4988_basic<M, P>::mode()
 
 template <typename M, typename P>
 inline 
-A4988_basic<M, P>::Mode A4988_basic<M, P>::mode()
+A4988<M, P>::Mode A4988<M, P>::mode()
     requires (!MS123_connected())
 {
     if constexpr (mcu::pin<MS1>::is_floating() and
@@ -456,6 +457,7 @@ A4988_basic<M, P>::Mode A4988_basic<M, P>::mode()
 }
 
 
+}// namespace
 }// namespace
 
 

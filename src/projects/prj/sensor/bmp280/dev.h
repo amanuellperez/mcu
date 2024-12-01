@@ -26,7 +26,7 @@
 #include <dev_HD44780.h>
 #include <dev_LCD_ostream.h>
 
-#include <dev_BMP280_basic.h>
+#include <dev_BMP280_hwd.h>
 #include <mcu_TWI_master.h>
 
 // Microcontroller
@@ -80,7 +80,7 @@ using LCD_pins = dev::HD44780_pins4<dev::HD44780_RS<LCD_RS_pin>,
 
 // LCD
 // ---
-using LCD_1602         = dev::LCD_HD44780_1602<Micro, LCD_pins>;
+using LCD_1602         = dev::HD44780_1602<Micro, LCD_pins>;
 using LCD_ostream      = dev::LCD_ostream_1602<LCD_1602>;
 using lcd_symbol       = dev::HD44780_charset_A00;
 

@@ -45,16 +45,17 @@
 #include <mcu_TWI_master_ioxtream.h>
 
 namespace dev{
+namespace hwd{
 
 /***************************************************************************
- *			    SDD1306_basic<TWI>
+ *			    SDD1306<TWI>
  ***************************************************************************/
-// (RRR) Al usar el concept TWI_master podemos sobrecargar SDD1306_basic y
+// (RRR) Al usar el concept TWI_master podemos sobrecargar SDD1306 y
 //       usar este mismo nombre tanto si lo conectamos via SPI o TWI.
 //
 template <Type::TWI_master TWI_master0, 
 	  typename TWI_master0::Address address0 = 0x3C>
-class SDD1306_basic{
+class SDD1306{
 public:
 // Types
     using TWI_master = TWI_master0;
@@ -196,36 +197,36 @@ private:
 
 
 template <Type::TWI_master T, typename T::Address A>
-void SDD1306_basic<T, A>::prepare_to_send_command(TWI& twi)
+void SDD1306<T, A>::prepare_to_send_command(TWI& twi)
 { twi << control_byte; }
 
 template <Type::TWI_master T, typename T::Address A>
-void SDD1306_basic<T, A>::prepare_to_write_gddram(TWI& twi)
+void SDD1306<T, A>::prepare_to_write_gddram(TWI& twi)
 { twi << data_byte; }
 
 template <Type::TWI_master T, typename T::Address A>
 inline
-void SDD1306_basic<T, A>::set_contrast_control(TWI& twi, uint8_t contrast)
+void SDD1306<T, A>::set_contrast_control(TWI& twi, uint8_t contrast)
 { twi << uint8_t{0x81} << contrast; }
 
 template <Type::TWI_master T, typename T::Address A>
 inline
-void SDD1306_basic<T, A>::enable_display_on_follows_RAM_content(TWI& twi)
+void SDD1306<T, A>::enable_display_on_follows_RAM_content(TWI& twi)
 { twi << uint8_t{0xA4}; }
 
 template <Type::TWI_master T, typename T::Address A>
 inline
-void SDD1306_basic<T, A>::enable_display_on_ignore_RAM_content(TWI& twi)
+void SDD1306<T, A>::enable_display_on_ignore_RAM_content(TWI& twi)
 { twi << uint8_t{0xA5}; }
     
 template <Type::TWI_master T, typename T::Address A>
 inline
-void SDD1306_basic<T, A>::display_normal_mode(TWI& twi)
+void SDD1306<T, A>::display_normal_mode(TWI& twi)
 { twi << uint8_t{0xA6}; }
 
 template <Type::TWI_master T, typename T::Address A>
 inline
-void SDD1306_basic<T, A>::display_inverse_mode(TWI& twi)
+void SDD1306<T, A>::display_inverse_mode(TWI& twi)
 { twi << uint8_t{0xA7}; }
 
 
@@ -233,48 +234,48 @@ void SDD1306_basic<T, A>::display_inverse_mode(TWI& twi)
 
 template <Type::TWI_master T, typename T::Address A>
 inline
-void SDD1306_basic<T, A>::set_display_on(TWI& twi)
+void SDD1306<T, A>::set_display_on(TWI& twi)
 { twi << uint8_t{0xAF}; }
 
 template <Type::TWI_master T, typename T::Address A>
 inline
-void SDD1306_basic<T, A>::set_display_off(TWI& twi)
+void SDD1306<T, A>::set_display_off(TWI& twi)
 { twi << uint8_t{0xAE}; }
 
 
 
 template <Type::TWI_master T, typename T::Address A>
 inline
-void SDD1306_basic<T, A>::set_horizontal_addressing_mode(TWI& twi)
+void SDD1306<T, A>::set_horizontal_addressing_mode(TWI& twi)
 { twi << uint8_t{0x20} << uint8_t{0x00}; }
 
 
 
 template <Type::TWI_master T, typename T::Address A>
 inline
-void SDD1306_basic<T, A>::set_vertical_addressing_mode(TWI& twi)
+void SDD1306<T, A>::set_vertical_addressing_mode(TWI& twi)
 { twi << uint8_t{0x20} << uint8_t{0x01}; }
 
 
 template <Type::TWI_master T, typename T::Address A>
 inline
-void SDD1306_basic<T, A>::set_page_addressing_mode(TWI& twi)
+void SDD1306<T, A>::set_page_addressing_mode(TWI& twi)
 { twi << uint8_t{0x20} << uint8_t{0x02}; }
 
 template <Type::TWI_master T, typename T::Address A>
 inline
-void SDD1306_basic<T, A>::hv_mode_column_address(TWI& twi, 
+void SDD1306<T, A>::hv_mode_column_address(TWI& twi, 
 				    uint8_t column_start, uint8_t column_end)
 { twi << uint8_t{0x21} << column_start << column_end; }
 
 template <Type::TWI_master T, typename T::Address A>
 inline
-void SDD1306_basic<T, A>::hv_mode_page_address(TWI& twi,
+void SDD1306<T, A>::hv_mode_page_address(TWI& twi,
 				    uint8_t page_start, uint8_t page_end)
 { twi << uint8_t{0x22} << page_start << page_end; }
 
 template <Type::TWI_master T, typename T::Address A>
-void SDD1306_basic<T, A>::
+void SDD1306<T, A>::
 page_mode_column_start_address(TWI& twi, uint8_t start_address)
 {
     uint8_t lower_nibble = (start_address & 0x0F);
@@ -284,7 +285,7 @@ page_mode_column_start_address(TWI& twi, uint8_t start_address)
 
 template <Type::TWI_master T, typename T::Address A>
 inline
-void SDD1306_basic<T, A>::page_mode_page_start_address(TWI& twi, uint8_t npage)
+void SDD1306<T, A>::page_mode_page_start_address(TWI& twi, uint8_t npage)
 { 
     uint8_t page = (0x07 & npage); // Garantizo que los 5 primeros bits sean 0
     uint8_t address = (0xB0 | page);
@@ -294,7 +295,7 @@ void SDD1306_basic<T, A>::page_mode_page_start_address(TWI& twi, uint8_t npage)
 
 template <Type::TWI_master T, typename T::Address A>
 inline
-void SDD1306_basic<T, A>::set_display_start_line(TWI& twi, uint8_t start_line)
+void SDD1306<T, A>::set_display_start_line(TWI& twi, uint8_t start_line)
 {
     uint8_t sl = (0x3F & start_line); // Garantizo que los 2 primeros bits sean 0
     uint8_t line = (0x40 | sl);
@@ -304,37 +305,37 @@ void SDD1306_basic<T, A>::set_display_start_line(TWI& twi, uint8_t start_line)
 
 template <Type::TWI_master T, typename T::Address A>
 inline
-void SDD1306_basic<T, A>::map_COL0_to_SEG0(TWI& twi)
+void SDD1306<T, A>::map_COL0_to_SEG0(TWI& twi)
 { twi << uint8_t{0xA0}; }
 
 
 template <Type::TWI_master T, typename T::Address A>
 inline
-void SDD1306_basic<T, A>::map_COL127_to_SEG0(TWI& twi)
+void SDD1306<T, A>::map_COL127_to_SEG0(TWI& twi)
 { twi << uint8_t{0xA1}; }
 
 template <Type::TWI_master T, typename T::Address A>
 inline
-void SDD1306_basic<T, A>::set_multiplex_ratio(TWI& twi, uint8_t mux_ratio)
+void SDD1306<T, A>::set_multiplex_ratio(TWI& twi, uint8_t mux_ratio)
 { twi << uint8_t{0xA8} << mux_ratio; }
 
 template <Type::TWI_master T, typename T::Address A>
 inline
-void SDD1306_basic<T, A>::scan_from_COM0_to_COMn_1(TWI& twi)
+void SDD1306<T, A>::scan_from_COM0_to_COMn_1(TWI& twi)
 { twi << uint8_t{0xC0}; }
 
 template <Type::TWI_master T, typename T::Address A>
 inline
-void SDD1306_basic<T, A>::scan_from_COMn_1_to_COM0(TWI& twi)
+void SDD1306<T, A>::scan_from_COMn_1_to_COM0(TWI& twi)
 { twi << uint8_t{0xC8}; }
 
 template <Type::TWI_master T, typename T::Address A>
 inline
-void SDD1306_basic<T, A>::set_display_offset(TWI& twi, uint8_t offset)
+void SDD1306<T, A>::set_display_offset(TWI& twi, uint8_t offset)
 { twi << uint8_t{0xD3} << offset; }
 
 template <Type::TWI_master T, typename T::Address A>
-void SDD1306_basic<T, A>::set_COM_pins(TWI& twi, 
+void SDD1306<T, A>::set_COM_pins(TWI& twi, 
 			    bool alternative_cfg, bool enable_left_right_remap)
 {
     uint8_t cmd = 0x02;
@@ -352,7 +353,7 @@ void SDD1306_basic<T, A>::set_COM_pins(TWI& twi,
 
 template <Type::TWI_master T, typename T::Address A>
 inline
-void SDD1306_basic<T, A>::set_display_clock(TWI& twi, 
+void SDD1306<T, A>::set_display_clock(TWI& twi, 
 				uint8_t divide_ratio,
 				uint8_t oscillatory_frequency)
 {
@@ -365,7 +366,7 @@ void SDD1306_basic<T, A>::set_display_clock(TWI& twi,
 
 template <Type::TWI_master T, typename T::Address A>
 inline
-void SDD1306_basic<T, A>::
+void SDD1306<T, A>::
 	set_precharge_period(TWI& twi, uint8_t phase1, uint8_t phase2)
 {
     uint8_t data = ((phase2 & 0x0F) << 4) |
@@ -379,32 +380,32 @@ void SDD1306_basic<T, A>::
 
 template <Type::TWI_master T, typename T::Address A>
 inline
-void SDD1306_basic<T, A>::set_Vcomh_deselect_level_065(TWI& twi)
+void SDD1306<T, A>::set_Vcomh_deselect_level_065(TWI& twi)
 { twi << uint8_t{0xDB} << uint8_t{0x00}; }
 
 template <Type::TWI_master T, typename T::Address A>
 inline
-void SDD1306_basic<T, A>::set_Vcomh_deselect_level_077(TWI& twi)
+void SDD1306<T, A>::set_Vcomh_deselect_level_077(TWI& twi)
 { twi << uint8_t{0xDB} << uint8_t{0x20}; }
 
 template <Type::TWI_master T, typename T::Address A>
 inline
-void SDD1306_basic<T, A>::set_Vcomh_deselect_level_083(TWI& twi)
+void SDD1306<T, A>::set_Vcomh_deselect_level_083(TWI& twi)
 { twi << uint8_t{0xDB} << uint8_t{0x30}; }
 
 template <Type::TWI_master T, typename T::Address A>
 inline
-void SDD1306_basic<T, A>::nop(TWI& twi)
+void SDD1306<T, A>::nop(TWI& twi)
 { twi << uint8_t{0xE3};}
 
 template <Type::TWI_master T, typename T::Address A>
 inline
-void SDD1306_basic<T, A>::enable_charge_pump_regulator(TWI& twi)
+void SDD1306<T, A>::enable_charge_pump_regulator(TWI& twi)
 { twi << uint8_t{0x8D} << uint8_t{0x14}; }
 
 template <Type::TWI_master T, typename T::Address A>
 inline
-void SDD1306_basic<T, A>::disable_charge_pump_regulator(TWI& twi)
+void SDD1306<T, A>::disable_charge_pump_regulator(TWI& twi)
 { twi << uint8_t{0x8D} << uint8_t{0x10}; }
 
 
@@ -413,7 +414,7 @@ void SDD1306_basic<T, A>::disable_charge_pump_regulator(TWI& twi)
 template <Type::TWI_master T, typename T::Address A>
 inline
 std::span<uint8_t>::size_type
-		SDD1306_basic<T, A>::gddram_write(std::span<uint8_t> data)
+		SDD1306<T, A>::gddram_write(std::span<uint8_t> data)
 {
     using size_type = std::span<uint8_t>::size_type;
 
@@ -436,7 +437,7 @@ std::span<uint8_t>::size_type
 
     return data.size();
 }
-
+} // namespace hwd
 
 /***************************************************************************
  *			    SDD1306_driver
@@ -453,7 +454,7 @@ std::span<uint8_t>::size_type
 // Para poder definir: SDD1306_128x64, y SDD1306_128x32.
 template <typename Cfg, uint8_t ncols0, uint8_t nrows0>
 class SDD1306_I2C_driver : 
-    public SDD1306_basic<typename Cfg::TWI_master, Cfg::twi_address>{
+    public hwd::SDD1306<typename Cfg::TWI_master, Cfg::twi_address>{
 public:
 // Types
     using TWI_master = typename Cfg::TWI_master;
@@ -523,7 +524,7 @@ public:
 
 private:
 // Por culpa de la herencia de templates necesito este `Base`
-    using Base = SDD1306_basic<TWI_master, address>;
+    using Base = hwd::SDD1306<TWI_master, address>;
 };
 
 template <typename C, uint8_t nc, uint8_t nr>

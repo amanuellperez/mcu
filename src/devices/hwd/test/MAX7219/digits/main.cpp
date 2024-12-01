@@ -56,7 +56,7 @@ struct MAX7219_cfg{
     using SPI_selector = mcu::SPI_pin_selector<Micro, spi_no_select_pin>;
 };
 
-//using MAX7219 = dev::MAX7219_basic<MAX7219_cfg>;
+//using MAX7219 = dev::hwd::MAX7219<MAX7219_cfg>;
 using MAX7219 = dev::MAX7219_digits<MAX7219_cfg>;
 
 

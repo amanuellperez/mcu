@@ -28,7 +28,7 @@
  ****************************************************************************/
 #include <dev_EEPROM_iostream.h>
 #include <dev_EEPROM_lineal.h>
-#include <dev_25LC256_basic.h>
+#include <dev_25LC256_hwd.h>
 
 #include <mega.h>
 

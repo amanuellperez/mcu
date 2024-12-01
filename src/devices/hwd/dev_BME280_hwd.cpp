@@ -1,9 +1,8 @@
-#include "dev_BME280_basic.h"
+#include "dev_BME280_hwd.h"
 
 #include <atd_bit.h>
 
 namespace dev{
-
 
 // Output value of “5123” equals 51.23 DegC.  
 // From datasheet  (4.2.3)

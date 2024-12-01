@@ -42,7 +42,7 @@ static constexpr uint8_t IN4_pin = 14;
 using ULN2003_cfg = dev::ULN2003_basic_cfg<Micro, 
 					   IN1_pin, IN2_pin, IN3_pin, IN4_pin>;
 
-using ULN2003 = dev::ULN2003_basic<ULN2003_cfg>;
+using ULN2003 = dev::hwd::ULN2003<ULN2003_cfg>;
 
 
 // Functions

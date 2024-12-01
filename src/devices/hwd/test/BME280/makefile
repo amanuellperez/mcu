@@ -1,7 +1,7 @@
 BIN = xx
 
 SOURCES= main.cpp \
-		../../dev_BME280_basic.cpp
+		../../dev_BME280_hwd.cpp
 
 # para probar
 #F_CPU = 8000000UL

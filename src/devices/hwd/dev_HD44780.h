@@ -24,8 +24,8 @@
 
 // Cuando un usuario quiera usar este LCD basta con que incluya este archivo
 // de cabecera sin tener que recordar qué archivos necesita.
-#include "dev_HD44780_basic.h"
-#include "dev_HD44780_generic.h"
+#include "dev_HD44780_hwd.h"
+#include "dev_HD44780_hal.h"
 #include "dev_HD44780_charset.h"
 
 #endif

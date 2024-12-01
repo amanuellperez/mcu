@@ -92,7 +92,7 @@ struct L298N_cfg : dev::default_cfg::L298N {
     static constexpr uint8_t IN4 = IN4_pin;
 };
 
-using L298N = dev::L298N_basic<L298N_cfg>;
+using L298N = dev::hwd::L298N<L298N_cfg>;
 
 using Right_wheel = dev::L298N_H_bridge1<L298N>;
 using Left_wheel  = dev::L298N_H_bridge2<L298N>;

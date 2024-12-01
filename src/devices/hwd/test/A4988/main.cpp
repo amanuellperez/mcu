@@ -92,7 +92,7 @@ using STEP = myu::driver::SWG1_pin<STEP_pin>;
 
 // Devices
 // -------
-using A4988 = dev::A4988_basic<Micro, A4988_pins>;
+using A4988 = dev::hwd::A4988<Micro, A4988_pins>;
 
 
 // Functions

@@ -18,7 +18,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "../../../dev_LCD_screen.h" // TODO: siempre ponerlo al principio
-#include <dev_HD44780_generic.h>
+#include <dev_HD44780.h>
 #include <mega.h>
 #include <rom_glyphs_5x8.h>
 #include <stddef.h>
@@ -42,9 +42,9 @@ using LCD_pins_4004 = dev::HD44780_4004_pins4<dev::HD44780_RS<4>,
 				       >;
 
 // Dispositivos reales conectados
-using LCD_1602 = dev::LCD_HD44780_1602<myu::Micro, LCD_pins_1602>;
-using LCD_2004 = dev::LCD_HD44780_2004<myu::Micro, LCD_pins_2004>;
-using LCD_4004 = dev::LCD_HD44780_4004<myu::Micro, LCD_pins_4004>;
+using LCD_1602 = dev::HD44780_1602<myu::Micro, LCD_pins_1602>;
+using LCD_2004 = dev::HD44780_2004<myu::Micro, LCD_pins_2004>;
+using LCD_4004 = dev::HD44780_4004<myu::Micro, LCD_pins_4004>;
 
 // Screens
 using Screen_1602 = dev::LCD_screen_1602<LCD_1602>;

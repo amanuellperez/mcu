@@ -19,7 +19,7 @@
 #define ATMEGA328P
 //#define ATMEGA4809
 
-#include "../../../dev_HD44780_basic.h"
+#include "../../../dev_HD44780_hwd.h"
 
 
 #ifdef ATMEGA328P
@@ -59,7 +59,7 @@ void myu_init()
 }
 #endif
 
-using LCD = dev::HD44780<myu::Micro, LCD_pins>;
+using LCD = dev::hwd::HD44780<myu::Micro, LCD_pins>;
 
 namespace gl = rom::glyphs_5x8;
 using Glyph = gl::Glyph<myu::ROM_read>;

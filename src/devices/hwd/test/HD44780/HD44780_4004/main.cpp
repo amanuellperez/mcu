@@ -18,7 +18,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-#include "../../../dev_HD44780_basic.h"
+#include "../../../dev_HD44780_hwd.h"
 
 #include <cstring>
 #include <mega.h>
@@ -33,7 +33,7 @@ using LCD_pins = dev::HD44780_4004_pins4<dev::HD44780_RS<4>,
 				       dev::HD44780_D4<11,12,13,14>
 				       >;
 
-using LCD = dev::HD44780_4004<myu::Micro, LCD_pins>;
+using LCD = dev::hwd::HD44780_4004<myu::Micro, LCD_pins>;
 
 namespace gl = rom::glyphs_5x8;
 using Glyph = gl::Glyph<myu::ROM_read>;

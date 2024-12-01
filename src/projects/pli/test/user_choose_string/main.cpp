@@ -22,7 +22,7 @@
 #include "../../user_choose_string.h"
 #include <mega.h>
 
-#include <dev_HD44780_generic.h>
+#include <dev_HD44780.h>
 #include <dev_keyrow.h>
 
 #include <atd_cstring.h>    // nstring
@@ -58,8 +58,8 @@ using Keyrow_codes  = dev::Keyrow_codes<OK_KEY, UP_KEY, DOWN_KEY>;
 using Keyrow = dev::Basic_keyrow<Micro, Keyrow_pins, Keyrow_codes>;
 
 // Dispositivos reales conectados
-using LCD_1602 = dev::LCD_HD44780_1602<Micro, LCD_pins>;
-using LCD_2004 = dev::LCD_HD44780_2004<Micro, LCD_pins>;
+using LCD_1602 = dev::HD44780_1602<Micro, LCD_pins>;
+using LCD_2004 = dev::HD44780_2004<Micro, LCD_pins>;
 
 // Screens
 using Screen_1602 = dev::LCD_screen_1602<LCD_1602>;

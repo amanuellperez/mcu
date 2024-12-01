@@ -18,7 +18,7 @@
 /****************************************************************************
  *
  * DESCRIPCION
- *	Implementación de HD44780_basic
+ *	Implementación de HD44780
  *
  * HISTORIA
  *    Manuel Perez
@@ -34,6 +34,7 @@
 #include <avr_time.h>
 
 namespace dev{
+namespace hwd{
 
 
 // Escribe solo los bits d4-d7 de 'd' (los más significativos)
@@ -566,5 +567,6 @@ void HD44780_base<M, P>::return_home()
     write_d<pin_E>(0,0, 0x02);
 }
 
+}// namespace
 }// namespace
 

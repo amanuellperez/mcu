@@ -56,6 +56,7 @@
 #include <atd_basic_types.h>	// View_of_int
 				
 namespace dev{
+namespace hwd{
 
 /***************************************************************************
  *				MAX7219
@@ -68,13 +69,13 @@ namespace private_{
 // si los conectamos en matriz es de otra. Por eso hay que desacoplar el envio
 // del packet de la inicialización.
 template <typename SPI0>
-class  MAX7219{
+class  MAX7219_base{
 public:
 // Types
     using SPI = SPI0;
 
 // Constructor
-    MAX7219() = delete;
+    MAX7219_base() = delete;
 
 // SPI connection
     static void SPI_cfg();
@@ -119,14 +120,14 @@ private:
 
 
 template <typename C>
-void MAX7219<C>::SPI_cfg() 
+void MAX7219_base<C>::SPI_cfg() 
 {
     SPI::spi_mode(0, 0); // CPOL = 0, CPHA = 0
     SPI::data_order_MSB();
 }
 
 template <typename C>
-void MAX7219<C>::send_packet(uint8_t address, uint8_t data)
+void MAX7219_base<C>::send_packet(uint8_t address, uint8_t data)
 {
     SPI::write(address);
     // TODO: no funciona wait_transmission_complete!!!
@@ -138,7 +139,7 @@ void MAX7219<C>::send_packet(uint8_t address, uint8_t data)
   
 
 /***************************************************************************
- *				MAX7219_basic
+ *				MAX7219
  ***************************************************************************/
 // struct MAX7219_cfg {
 //	using SPI_master   = myu::SPI_master;
@@ -154,10 +155,10 @@ void MAX7219<C>::send_packet(uint8_t address, uint8_t data)
 //
 // Este es el traductor del MAX7219
 template <typename Cfg>
-class  MAX7219_basic{
+class  MAX7219{
 public:
 // Constructor
-    MAX7219_basic() = delete;
+    MAX7219() = delete;
     static void init() { SPI_select::init(); }
 
 // digits values
@@ -199,120 +200,120 @@ private:
     using SelectoR   = Cfg::SPI_selector;
     using SPI_select = mcu::SPI_selector_with_deselect_delay<SelectoR, 1>;
 
-    using MAX7219 = private_::MAX7219<SPI>;
+    using Base = private_::MAX7219_base<SPI>;
 
 };
 
 
 template <typename C>
-void MAX7219_basic<C>::digit(uint8_t ndigit, uint8_t x)
+void MAX7219<C>::digit(uint8_t ndigit, uint8_t x)
 {
-    MAX7219::SPI_cfg();
+    Base::SPI_cfg();
     SPI_select select;
 
-    MAX7219::digit(ndigit, x);
+    Base::digit(ndigit, x);
 }
 
 
 template <typename C>
-void MAX7219_basic<C>::no_op()
+void MAX7219<C>::no_op()
 {
-    MAX7219::SPI_cfg();
+    Base::SPI_cfg();
     SPI_select select;
 
-    MAX7219::no_op();
+    Base::no_op();
 }
 
 template <typename C>
-void MAX7219_basic<C>::enable_decode_mode()
+void MAX7219<C>::enable_decode_mode()
 {
-    MAX7219::SPI_cfg();
+    Base::SPI_cfg();
     SPI_select select;
 
-    MAX7219::enable_decode_mode();
+    Base::enable_decode_mode();
 }
 
 template <typename C>
-void MAX7219_basic<C>::disable_decode_mode()
+void MAX7219<C>::disable_decode_mode()
 {
-    MAX7219::SPI_cfg();
+    Base::SPI_cfg();
     SPI_select select;
 
-    MAX7219::disable_decode_mode();
+    Base::disable_decode_mode();
 }
 
 template <typename C>
-void MAX7219_basic<C>::decode_mode(uint8_t mode)
+void MAX7219<C>::decode_mode(uint8_t mode)
 {
-    MAX7219::SPI_cfg();
+    Base::SPI_cfg();
     SPI_select select;
 
-    MAX7219::decode_mode(mode);
+    Base::decode_mode(mode);
 }
 
 template <typename C>
-void MAX7219_basic<C>::intensity(uint8_t I)
+void MAX7219<C>::intensity(uint8_t I)
 {
-    MAX7219::SPI_cfg();
+    Base::SPI_cfg();
     SPI_select select;
 
-    MAX7219::intensity(I);
+    Base::intensity(I);
 }
 
 template <typename C>
-void MAX7219_basic<C>::scan_limit(uint8_t n)
+void MAX7219<C>::scan_limit(uint8_t n)
 {
-    MAX7219::SPI_cfg();
+    Base::SPI_cfg();
     SPI_select select;
 
-    MAX7219::scan_limit(n);
+    Base::scan_limit(n);
 }
 
 template <typename C>
-void MAX7219_basic<C>::scan_all_digits()
+void MAX7219<C>::scan_all_digits()
 {
-    MAX7219::SPI_cfg();
+    Base::SPI_cfg();
     SPI_select select;
 
-    MAX7219::scan_all_digits();
+    Base::scan_all_digits();
 }
 
 template <typename C>
-void MAX7219_basic<C>::normal_mode()
+void MAX7219<C>::normal_mode()
 {
-    MAX7219::SPI_cfg();
+    Base::SPI_cfg();
     SPI_select select;
 
-    MAX7219::normal_mode();
+    Base::normal_mode();
 }
 
 template <typename C>
-void MAX7219_basic<C>::shutdown()
+void MAX7219<C>::shutdown()
 {
-    MAX7219::SPI_cfg();
+    Base::SPI_cfg();
     SPI_select select;
 
-    MAX7219::shutdown();
+    Base::shutdown();
 }
 
 template <typename C>
-void MAX7219_basic<C>::display_test_on()
+void MAX7219<C>::display_test_on()
 {
-    MAX7219::SPI_cfg();
+    Base::SPI_cfg();
     SPI_select select;
 
-    MAX7219::display_test_on();
+    Base::display_test_on();
 }
 
 template <typename C>
-void MAX7219_basic<C>::display_test_off()
+void MAX7219<C>::display_test_off()
 {
-    MAX7219::SPI_cfg();
+    Base::SPI_cfg();
     SPI_select select;
 
-    MAX7219::display_test_off();
+    Base::display_test_off();
 }
-
+} // namespace hwd
 
 /***************************************************************************
  *				MAX7219_matrix
@@ -526,7 +527,7 @@ private:
     using SelectoR   = Cfg::SPI_selector;
     using SPI_select = mcu::SPI_selector_with_deselect_delay<SelectoR, 1>;
 
-    using MAX7219    = private_::MAX7219<SPI>;
+    using MAX7219    = hwd::private_::MAX7219_base<SPI>;
     
 // Helpers
     static void move_command_till_last(uint8_t nstrip);
@@ -791,10 +792,10 @@ void MAX7219_matrix<C, np, nm>::display_test_off()
 // DUDA: de momento solo está implementado 1 MAX7219. ¿Merece la pena conectar
 // en serie varios MAX7219 digits? La modificación es sencilla.
 template <typename Cfg>
-class MAX7219_digits : private MAX7219_basic<Cfg>{
+class MAX7219_digits : private hwd::MAX7219<Cfg>{
 public:
 // Types
-    using Base = MAX7219_basic<Cfg>;
+    using Base = hwd::MAX7219<Cfg>;
 
 // Cfg
     static constexpr uint8_t ndigits = 8;

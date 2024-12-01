@@ -17,7 +17,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "../../../dev_DS1307_basic.h"	
+#include "../../../dev_DS1307_hwd.h"	
 
 #include <cstddef>
 #include <numeric>
@@ -48,7 +48,7 @@ using TWI = mcu::TWI_master<TWI_master_cfg>;
 
 // Devices
 // -------
-using RTC = dev::DS1307_basic<TWI>;
+using RTC = dev::hwd::DS1307<TWI>;
 
 
 void twi_print_state()
@@ -117,7 +117,7 @@ void twi_print_error()
 // Con todo con concepts este problema debería de desaparecer ya que la
 // template quedaría sobrecargada solo para IOxtreams.
 UART_iostream& operator<<(UART_iostream& out,
-                               const dev::__DS1307_timekeeper& t)
+                               const dev::hwd::__DS1307_timekeeper& t)
 {
     if (t.clock_on){
 	out << "Encendido: "

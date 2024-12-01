@@ -22,6 +22,7 @@
 #ifndef __DEV_SDCARD_H__
 #define __DEV_SDCARD_H__
 /****************************************************************************
+ * ((TODO)) meterlo en namespace hwd!!! 
  *
  * DESCRIPCION
  *	Traductor del interfaz SPI de la SD card.
@@ -63,7 +64,7 @@
  ***************************************************************************/
 namespace dev{
 
-// Clase por defecto para seleccionar la SDCard_basic
+// Clase por defecto para seleccionar la SDCard
 // El `Selector_SPI` lo define en general el cliente. Es el que diseña el
 // hardware de la aplicación el que sabe cómo va a conectar los diferentes
 // dispositivos SPI. `SDCard_select` es el selector más básico: usa un pin
@@ -510,7 +511,7 @@ private:
 
 } // namespace SDCard_types
 
-// Configuración de SDCard_basic
+// Configuración de SDCard
 template <typename Micro_t,	    // ¿a qué micro conectamos la SD card?
 	  typename SPI_master,	    // driver de SPI que usamos
 	  typename Chip_select_t,    // ¿cómo seleccionamos el chip?

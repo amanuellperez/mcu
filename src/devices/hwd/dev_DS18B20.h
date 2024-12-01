@@ -44,6 +44,7 @@
 #include <atd_bit.h>
 
 namespace dev{
+namespace hwd{
 
 /***************************************************************************
  *			TRADUCTOR DEL DS18B20
@@ -118,7 +119,7 @@ inline bool _Scratchpad::is_CRC_ok() const
 //    + one-wire es el medio de comunicación entre el micro y
 //      el sensor. El medio podría ser otro: TWI, SPI, UART, ...
 template <typename Micro0, typename One_wire0>
-class DS18B20_basic{
+class DS18B20{
 public:
 // Types
     using Micro    = Micro0;
@@ -164,14 +165,14 @@ public:
     Result recall_e2() const;
 
     // CUIDADO: esta función no habla con este sensor concreto sino con todos
-    // los DS18B20_basic, preguntándo si alguno de los sensores DS18B20_basic está
+    // los DS18B20, preguntándo si alguno de los sensores DS18B20 está
     // usando parasite power.
     // TODO
     // static Result read_power_supply();
     
 
     // TODO: nombre mal puesto. Esta función lo que hace es esperar a que el
-    // DS18B20_basic haya acabado de ejecutar el comando solicitado. Si lo acaba
+    // DS18B20 haya acabado de ejecutar el comando solicitado. Si lo acaba
     // antes de `time_out_ms` milisegundos devuelve Result::ok. Si no lo acaba
     // devuelve Result::time_out. ¿cómo llamar a esta función?
     // Función a llamar despues de convert_T o recall_e2 para ver si el sensor
@@ -188,12 +189,12 @@ private:
 };
 
 template <typename M, typename OW>
-inline void DS18B20_basic<M,OW>::bind(const Device& dev)
+inline void DS18B20<M,OW>::bind(const Device& dev)
 { dev_ = dev; }
 
 
 template <typename M, typename OW>
-bool DS18B20_basic<M,OW>::send_command(uint8_t cmd) const
+bool DS18B20<M,OW>::send_command(uint8_t cmd) const
 {
     if (!One_wire::reset())
 	return false;
@@ -206,9 +207,9 @@ bool DS18B20_basic<M,OW>::send_command(uint8_t cmd) const
 
 
 template <typename M, typename OW>
-DS18B20_basic<M,OW>::Result 
-	    //DS18B20_basic<M,OW>::convert_T(const uint16_t& time_out_ms) const
-	    DS18B20_basic<M,OW>::convert_T() const
+DS18B20<M,OW>::Result 
+	    //DS18B20<M,OW>::convert_T(const uint16_t& time_out_ms) const
+	    DS18B20<M,OW>::convert_T() const
 {
     if (!send_command(0x44))
 	return Result::not_found;
@@ -219,7 +220,7 @@ DS18B20_basic<M,OW>::Result
 
 
 template <typename M, typename OW>
-DS18B20_basic<M,OW>::Result DS18B20_basic<M,OW>::
+DS18B20<M,OW>::Result DS18B20<M,OW>::
 	write_scratchpad(int8_t TH, int8_t TL, Resolution res) const
 {
     if (!send_command(0x4E))
@@ -233,8 +234,8 @@ DS18B20_basic<M,OW>::Result DS18B20_basic<M,OW>::
 }
 
 template <typename M, typename OW>
-DS18B20_basic<M,OW>::Result
-DS18B20_basic<M,OW>::read_scratchpad(Scratchpad& scratchpad) const
+DS18B20<M,OW>::Result
+DS18B20<M,OW>::read_scratchpad(Scratchpad& scratchpad) const
 {
     if (!send_command(0xBE))
 	return Result::not_found;
@@ -247,7 +248,7 @@ DS18B20_basic<M,OW>::read_scratchpad(Scratchpad& scratchpad) const
 
 
 template <typename M, typename OW>
-DS18B20_basic<M,OW>::Result DS18B20_basic<M,OW>::copy_scratchpad() const
+DS18B20<M,OW>::Result DS18B20<M,OW>::copy_scratchpad() const
 {
     if (!send_command(0x48))
 	return Result::not_found;
@@ -257,8 +258,8 @@ DS18B20_basic<M,OW>::Result DS18B20_basic<M,OW>::copy_scratchpad() const
 
 
 template <typename M, typename OW>
-DS18B20_basic<M,OW>::Result 
-DS18B20_basic<M,OW>::recall_e2() const
+DS18B20<M,OW>::Result 
+DS18B20<M,OW>::recall_e2() const
 {
     if (!send_command(0xB8))
 	return Result::not_found;
@@ -268,8 +269,8 @@ DS18B20_basic<M,OW>::recall_e2() const
 }
 
 template <typename M, typename OW>
-DS18B20_basic<M,OW>::Result 
-DS18B20_basic<M,OW>::wait_until(const uint16_t& time_out_ms) const
+DS18B20<M,OW>::Result 
+DS18B20<M,OW>::wait_until(const uint16_t& time_out_ms) const
 {
     if (time_out_ms == 0)
 	return Result::time_out;
@@ -286,6 +287,7 @@ DS18B20_basic<M,OW>::wait_until(const uint16_t& time_out_ms) const
 
     return Result::ok;
 }
+} // namespace hwd
 
 /***************************************************************************
  *			    DS18B20 DRIVER
@@ -301,10 +303,10 @@ DS18B20_basic<M,OW>::wait_until(const uint16_t& time_out_ms) const
 //       no nos referimos a una función global. 
 //       Personalmente me gusta mas el `Base` (hoy, mañana...)
 template <typename Micro0, typename One_wire0>
-class DS18B20 : public DS18B20_basic<Micro0, One_wire0>{
+class DS18B20 : public hwd::DS18B20<Micro0, One_wire0>{
 public:
 // Types
-    using Base     = DS18B20_basic<Micro0, One_wire0>;
+    using Base     = hwd::DS18B20<Micro0, One_wire0>;
 
     using Micro    = Micro0;
     using One_wire = One_wire0;
@@ -312,7 +314,7 @@ public:
     using Result    = Base::Result;
 
 // CFG
-    using Scratchpad = _Scratchpad;
+    using Scratchpad = Base::Scratchpad;
     using Resolution = Scratchpad::Resolution;
     using Celsius    = Scratchpad::Celsius;
 

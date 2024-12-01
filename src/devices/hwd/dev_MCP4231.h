@@ -31,7 +31,7 @@
  *	17/04/2021       Reestructurado.
  *
  ****************************************************************************/
-#include <avr_SPI_basic.h>
+//#include <avr_SPI_basic.h>
 #include "not_generic.h"
 
 #include <atd_bit.h>

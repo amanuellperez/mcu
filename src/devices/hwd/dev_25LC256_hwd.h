@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __DEV_EEPROM_25LC256_BASIC_H__
-#define __DEV_EEPROM_25LC256_BASIC_H__
+#ifndef __DEV_EEPROM_25LC256_HWD_H__
+#define __DEV_EEPROM_25LC256_HWD_H__
 /****************************************************************************
  *
  * TODO
