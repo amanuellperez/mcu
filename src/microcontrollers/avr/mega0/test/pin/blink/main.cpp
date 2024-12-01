@@ -19,7 +19,7 @@
 
 // (???) Este programa es genérico salvo los archivos de cabecera y el
 // namespace myu. Se podría usar para probar cualquier micro???
-#include "../../../mega0_pin.h"
+#include "../../../mega0_pin_hwd.h"
 #include "../../../mega0.h"
 
 
@@ -30,12 +30,15 @@ namespace myu = atmega4809_40;
 // Conectar un LED al pin 'led_pin'. Tiene que parpadear.
 constexpr uint8_t led_pin = 2;
 
-using Pin = myu::Pin<led_pin>;
+template <uint8_t n>
+using Pin = myu::hwd::Pin<n>;
+
+using Led = myu::hwd::Pin<led_pin>;
 
 // ¿Compila is_a_valid_pin()?
-static_assert(myu::Pin<2>::is_a_valid_pin());
-static_assert(!myu::Pin<mcu::Pin_connection_type::floating>::is_a_valid_pin());
-static_assert(myu::Pin<mcu::Pin_connection_type::floating>::is_a_valid_connection());
+static_assert(Pin<2>::is_a_valid_pin());
+static_assert(!Pin<mcu::Pin_connection_type::floating>::is_a_valid_pin());
+static_assert(Pin<mcu::Pin_connection_type::floating>::is_a_valid_connection());
 
 //DONT_COMPILE(static_assert(!myu::Pin<100>::is_a_valid_pin());)
 
@@ -43,20 +46,20 @@ int main()
 {
     myu::init();
 
-    Pin::as_output();
+    Led::as_output();
 
     while (1)
     {
-	Pin::write_one();
+	Led::write_one();
 	myu::wait_ms(500);
 
-	Pin::write_zero();
+	Led::write_zero();
 	myu::wait_ms(500);
 
-	Pin::toggle();
+	Led::toggle();
 	myu::wait_ms(500);
 
-	Pin::toggle();
+	Led::toggle();
 	myu::wait_ms(500);
     }
 

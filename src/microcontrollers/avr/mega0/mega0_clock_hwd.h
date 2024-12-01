@@ -34,6 +34,7 @@
 #include <avr/io.h>
 
 namespace mega0_{
+namespace hwd{
 
 class Clock_controller{
 public:
@@ -148,6 +149,7 @@ inline void Clock_controller::clk_main_divided_by_48()
 {_PROTECTED_WRITE(CLKCTRL.MCLKCTRLB, CLKCTRL_PDIV_48X_gc | CLKCTRL_PEN_bm);}
 
 
+}// namespace
 }// namespace
  
 

@@ -19,8 +19,8 @@
 
 // (???) Este programa es genérico salvo los archivos de cabecera y el
 // namespace myu. Se podría usar para probar cualquier micro???
-#include "../../mega0_clock.h"
-#include "../../mega0_pin.h"
+#include "../../mega0_clock_hwd.h"
+#include "../../mega0_pin_hwd.h"
 #include "../../mega0.h"
 
 #include <avr_time.h>
@@ -39,8 +39,8 @@ constexpr uint8_t push_button_pin = 3;
 
 // Devices
 // -------
-using Clock = mega0_::Clock_controller;
-using Push = myu::Pin<push_button_pin>;
+using Clock = mega0_::hwd::Clock_controller;
+using Push = myu::hwd::Pin<push_button_pin>;
 
 
 int main()

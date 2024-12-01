@@ -34,6 +34,7 @@
 
 #include "mega0_import_avr.h"	// wait_cpu_ticks
 #include "mega0_clock_frequencies.h"
+#include "mega0_usart_hwd.h"
 
 namespace mega0_{
 /***************************************************************************
@@ -168,11 +169,11 @@ bool UART_cfg()
 
 // UART_8bits
 // ----------
-template <typename USART_basic_cfg>
+template <typename USART_cfg>
 class UART_8bits {
 public:
 // Types
-    using USART = USART_basic<USART_basic_cfg>;
+    using USART = hwd::USART<USART_cfg>;
 
 // Constructor
     UART_8bits() = delete;

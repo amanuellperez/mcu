@@ -33,11 +33,11 @@
  ****************************************************************************/
 #include "mega0_import_avr.h"
 
-#include "mega0_pin.h"
+#include "mega0_pin_hwd.h"
 #include "mega0_micro.h"
-#include "mega0_clock.h"
+#include "mega0_clock_hwd.h"
 
-#include "mega0_usart_basic.h"
+#include "mega0_usart_hwd.h"
 #include "mega0_uart.h"
 
 #include "mega0_registers.h"
@@ -52,19 +52,23 @@ namespace atmega4809_40{
     // Fundamental: llamar a esta función init!!!
     inline void init() { mega0_::cfg_40_pins::pins::init();}
 
+namespace hwd{
 
     template <uint8_t n>
-    using Pin = mega0_::Pin<n, mega0_::cfg_40_pins::pins>;
+    using Pin = mega0_::hwd::Pin<n, mega0_::cfg_40_pins::pins>;
 
-    using Micro = mega0_::Micro<mega0_::cfg_40_pins::pins>;
-
-    using Clock_controller = mega0_::Clock_controller;
+    using Clock_controller = mega0_::hwd::Clock_controller;
 
 // USART
-    using USART0 = mega0_::USART_basic<mega0_::cfg_40_pins::USART0>;
-    using USART1 = mega0_::USART_basic<mega0_::cfg_40_pins::USART1>;
-    using USART2 = mega0_::USART_basic<mega0_::cfg_40_pins::USART2>;
+    using USART0 = mega0_::hwd::USART<mega0_::cfg_40_pins::USART0>;
+    using USART1 = mega0_::hwd::USART<mega0_::cfg_40_pins::USART1>;
+    using USART2 = mega0_::hwd::USART<mega0_::cfg_40_pins::USART2>;
+} // hwd
 
+// Drivers
+    using Micro = mega0_::Micro<mega0_::cfg_40_pins::pins>;
+
+// UART_8bits
     using UART0_8bits = mega0_::UART_8bits<mega0_::cfg_40_pins::USART0>;
     using UART1_8bits = mega0_::UART_8bits<mega0_::cfg_40_pins::USART1>;
     using UART2_8bits = mega0_::UART_8bits<mega0_::cfg_40_pins::USART2>;

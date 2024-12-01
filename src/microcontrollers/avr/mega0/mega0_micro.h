@@ -34,7 +34,7 @@
 #include <avr_micro.h>
 
 // #include "mega_sleep.h" TODO
-#include "mega0_pin.h"
+#include "mega0_pin_hwd.h"
 
 namespace mega0_{
 
@@ -49,7 +49,7 @@ struct Micro : avr_::protected_::Micro {
 // Pins
 // ----
     template <uint8_t n>
-    using Pin = mega0_::Pin<n, Cfg_pins>;
+    using Pin = mega0_::hwd::Pin<n, Cfg_pins>;
 
 
 // Sleep

@@ -154,7 +154,7 @@ namespace driver{
 }
 
 // PROTOCOLS
-// ((DUDA)) ¿meterlos en hal o no? Hoy opto por no. (mañana... ???)
+// De momento dejo esto fuera de driver. Hoy me gusta así. (mañana...)
     using UART_8bits    = mega_::hal::UART_8bits;
 
     using SPI_master = mega_::hal::SPI_master;

@@ -17,7 +17,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "../../mega0_usart_basic.h"
+#include "../../mega0_usart_hwd.h"
 #include "../../mega0_uart.h"
 #include "../../mega0_registers.h"
 #include <mcu_default_cfg.h>
@@ -29,7 +29,7 @@ namespace myu = mega0_;
 using USART_cfg = myu::cfg_40_pins::USART1; // pines 0,1
 //using USART_cfg = myu::cfg_40_pins::USART2;
 
-using USART = myu::USART_basic<USART_cfg>;
+using USART = myu::hwd::USART<USART_cfg>;
 using UART_8bits = myu::UART_8bits<USART_cfg>;
 
 

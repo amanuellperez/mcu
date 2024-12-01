@@ -17,12 +17,11 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "../../mega0_spi_basic.h"
-#include "../../mega0_usart_basic.h"
+#include "../../mega0_spi_hwd.h"
 #include "../../mega0_uart.h"
 #include "../../mega0_registers.h"
 #include "../../mega0_debug.h"
-#include "../../mega0_pin.h"
+#include "../../mega0_pin_hwd.h"
 #include <mcu_UART_iostream.h>
 
 			    
@@ -30,14 +29,14 @@ namespace myu = mega0_;
 
 // Pin
 template <uint8_t n>
-using Pin = myu::Pin<n, myu::cfg_40_pins::pins>;
+using Pin = myu::hwd::Pin<n, myu::cfg_40_pins::pins>;
 
 // USART
 using UART_8bits = myu::UART_8bits<myu::cfg_40_pins::USART1>;
 using UART_iostream = mcu::UART_iostream<UART_8bits>;
 
 // SPI
-using SPI = myu::SPI_basic<myu::cfg_40_pins::SPI0>;
+using SPI = myu::hwd::SPI<myu::cfg_40_pins::SPI0>;
 using SS_pin = Pin<SPI::SS_pin>;
 
 // vbles globales (que nunca se deben de usar ... @_@)

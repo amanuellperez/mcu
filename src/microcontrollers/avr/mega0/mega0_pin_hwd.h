@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __MEGA0_PIN_H__
-#define __MEGA0_PIN_H__
+#ifndef __MEGA0_PIN_HWD_H__
+#define __MEGA0_PIN_HWD_H__
 
 /****************************************************************************
  *
@@ -35,6 +35,7 @@
 #include <mcu_pin.h>
 
 namespace mega0_{
+namespace hwd{
 
 
 namespace private_ {
@@ -205,6 +206,7 @@ inline void Pin<n, C>::write(uint8_t x)
 template <uint8_t n, typename Cfg>
 using Pin = mcu::Pin<private_::Pin<n, Cfg>>::type;
 
+} // namespace
 }// namespace mega0_
 
 

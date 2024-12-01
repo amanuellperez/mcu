@@ -19,18 +19,18 @@
 
 #pragma once
 
-#ifndef __MEGA0_USART_BASIC_H__
-#define __MEGA0_USART_BASIC_H__
+#ifndef __MEGA0_USART_HWD_H__
+#define __MEGA0_USART_HWD_H__
 /****************************************************************************
  *
  * DESCRIPCION
  *	Traductor de USART	
  *
  * COMENTARIOS
- *	Voy a definir una clase genérica USART_basic que toma como parámetro 
+ *	Voy a definir una clase genérica USART que toma como parámetro 
  *  la configuración de ese USART en concreto. De esa forma podre definir:
- *	    using USART0 = USART_basic<Cfg0>;
- *	    using USART1 = USART_basic<Cfg1>;
+ *	    using USART0 = USART<Cfg0>;
+ *	    using USART1 = USART<Cfg1>;
  *	    ...
  *
  *	El problema con este planteamiento es el de siempre: el compilador
@@ -54,9 +54,12 @@
 
 
 namespace mega0_{
+namespace hwd{
+
+#undef USART
 
 template <typename Registers>
-class USART_basic{
+class USART{
 public:
 // syntactic sugar
     using Reg = Registers;
@@ -72,7 +75,7 @@ public:
     static constexpr uint8_t XDIR_pin= Reg::XDIR_pin;
     
 // Constructor
-    USART_basic() = delete;
+    USART() = delete;
 
 // RXDATAL
     static uint8_t receive_data_register_low_byte();
@@ -218,85 +221,85 @@ public:
 
 // RXDATAL
 template <typename C>
-inline uint8_t USART_basic<C>::receive_data_register_low_byte()
+inline uint8_t USART<C>::receive_data_register_low_byte()
 { return reg()->RXDATAL;}
 
 // RXDATAH
 template <typename C>
-inline uint8_t USART_basic<C>::receive_data_register_high_byte()
+inline uint8_t USART<C>::receive_data_register_high_byte()
 { return reg()->RXDATAH;}
 
 
 // TXDATAL
 template <typename C>
-inline void USART_basic<C>::transmit_data_register_low_byte(uint8_t x)
+inline void USART<C>::transmit_data_register_low_byte(uint8_t x)
 { reg()->TXDATAL = x; }
 
 // TXDATAH
 template <typename C>
-inline void USART_basic<C>::transmit_data_register_high_byte(uint8_t x)
+inline void USART<C>::transmit_data_register_high_byte(uint8_t x)
 { reg()->TXDATAH = x; }
 
 // STATUS
 
 // STATUS::RXCIF
 template <typename C>
-inline bool USART_basic<C>::are_there_unread_data()
+inline bool USART<C>::are_there_unread_data()
 { return atd::is_one_bit<pos::RXCIF>::of(reg()->STATUS); }
 
 // STATUS::DREIF
 template <typename C>
-inline bool USART_basic<C>::is_transmit_data_register_empty()
+inline bool USART<C>::is_transmit_data_register_empty()
 { return atd::is_one_bit<pos::DREIF>::of(reg()->STATUS); }
 
 // STATUS::TXCIF
 template <typename C>
-inline bool USART_basic<C>::is_transmit_complete()
+inline bool USART<C>::is_transmit_complete()
 { return atd::is_one_bit<pos::TXCIF>::of(reg()->STATUS); }
 
 template <typename C>
-inline void USART_basic<C>::clear_transmit_complete_flag()
+inline void USART<C>::clear_transmit_complete_flag()
 { atd::write_bit<pos::TXCIF>::template to<1>::in(reg()->STATUS); }
 
 
 // CTRLA
 // CTRLA::RXCIE
 template <typename C>
-inline void USART_basic<C>::enable_receive_complete_interrupt()
+inline void USART<C>::enable_receive_complete_interrupt()
 { atd::write_bit<pos::RXCIE>::template to<1>::in(reg()->CTRLA); }
 
 template <typename C>
-inline void USART_basic<C>::disable_receive_complete_interrupt()
+inline void USART<C>::disable_receive_complete_interrupt()
 { atd::write_bit<pos::RXCIE>::template to<0>::in(reg()->CTRLA); }
 
 
 // CTRLA::TXCIE
 template <typename C>
-inline void USART_basic<C>::enable_transmit_complete_interrupt()
+inline void USART<C>::enable_transmit_complete_interrupt()
 { atd::write_bit<pos::TXCIE>::template to<1>::in(reg()->CTRLA); }
 
 template <typename C>
-inline void USART_basic<C>::disable_transmit_complete_interrupt()
+inline void USART<C>::disable_transmit_complete_interrupt()
 { atd::write_bit<pos::TXCIE>::template to<0>::in(reg()->CTRLA); }
 
 
 // CTRLA::DREIE
 template <typename C>
-inline void USART_basic<C>::enable_data_register_empty_interrupt()
+inline void USART<C>::enable_data_register_empty_interrupt()
 { atd::write_bit<pos::DREIE>::template to<1>::in(reg()->CTRLA); }
 
 template <typename C>
-inline void USART_basic<C>::disable_data_register_empty_interrupt()
+inline void USART<C>::disable_data_register_empty_interrupt()
 { atd::write_bit<pos::DREIE>::template to<0>::in(reg()->CTRLA); }
 
 
 // CTRLA::RXSIE
 template <typename C>
-inline void USART_basic<C>::enable_receiver_start_frame_interrupt()
+inline void USART<C>::enable_receiver_start_frame_interrupt()
 { atd::write_bit<pos::RXSIE>::template to<1>::in(reg()->CTRLA); }
 
 template <typename C>
-inline void USART_basic<C>::disable_receiver_start_frame_interrupt()
+inline void USART<C>::disable_receiver_start_frame_interrupt()
 { atd::write_bit<pos::RXSIE>::template to<0>::in(reg()->CTRLA); }
 
 
@@ -305,35 +308,35 @@ inline void USART_basic<C>::disable_receiver_start_frame_interrupt()
 // -----
 // CTRLB::RXEN
 template <typename C>
-inline void USART_basic<C>::enable_receiver()
+inline void USART<C>::enable_receiver()
 {
     Reg::enable_Rx_pin();
     atd::write_bit<pos::RXEN>::template to<1>::in(reg()->CTRLB); 
 }
 
 template <typename C>
-inline void USART_basic<C>::disable_receiver()
+inline void USART<C>::disable_receiver()
 { atd::write_bit<pos::RXEN>::template to<0>::in(reg()->CTRLB); }
 
 template <typename C>
-inline bool USART_basic<C>::is_receiver_enable()
+inline bool USART<C>::is_receiver_enable()
 { return atd::is_one_bit<pos::RXEN>::of(reg()->CTRLB); }
 
 
 // CTRLB::TXEN
 template <typename C>
-inline void USART_basic<C>::enable_transmitter()
+inline void USART<C>::enable_transmitter()
 { 
     Reg::enable_Tx_pin();
     atd::write_bit<pos::TXEN>::template to<1>::in(reg()->CTRLB); 
 }
 
 template <typename C>
-inline void USART_basic<C>::disable_transmitter()
+inline void USART<C>::disable_transmitter()
 { atd::write_bit<pos::TXEN>::template to<0>::in(reg()->CTRLB); }
 
 template <typename C>
-inline bool USART_basic<C>::is_transmitter_enable()
+inline bool USART<C>::is_transmitter_enable()
 { return atd::is_one_bit<pos::TXEN>::of(reg()->CTRLB); }
 
 
@@ -342,19 +345,19 @@ inline bool USART_basic<C>::is_transmitter_enable()
 
 // CTRLB::RXMODE
 template <typename C>
-inline void USART_basic<C>::receiver_normal_speed_mode()
+inline void USART<C>::receiver_normal_speed_mode()
 { reg()->CTRLB |= value::RXMODE_NORMAL;}
 
 template <typename C>
-inline void USART_basic<C>::receiver_double_speed_mode()
+inline void USART<C>::receiver_double_speed_mode()
 { reg()->CTRLB |= value::RXMODE_CLK2X;}
 
 template <typename C>
-inline void USART_basic<C>::receiver_generic_auto_baud_mode()
+inline void USART<C>::receiver_generic_auto_baud_mode()
 { reg()->CTRLB |= value::RXMODE_GENAUTO;}
 
 template <typename C>
-inline void USART_basic<C>::receiver_LIN_constrained_auto_baud_mode()
+inline void USART<C>::receiver_LIN_constrained_auto_baud_mode()
 { reg()->CTRLB |= value::RXMODE_LINAUTO;}
 
 
@@ -362,79 +365,79 @@ inline void USART_basic<C>::receiver_LIN_constrained_auto_baud_mode()
 
 // CTRLC - normal mode
 template <typename C>
-inline void USART_basic<C>::asynchronous_mode()
+inline void USART<C>::asynchronous_mode()
 { reg()->CTRLC |= value::CMODE_ASYNCHRONOUS; }
 
 //template <typename C>
-//inline void USART_basic<C>::synchronous_mode()
+//inline void USART<C>::synchronous_mode()
 //{ sin probar!!!
 //    Reg::enable_XCK_pin(); <-- OJO: puede ser in or out!!!
 //    reg()->CTRLC |= value::CMODE_SYNCHRONOUS; 
 //}
 //
 //template <typename C>
-//inline void USART_basic<C>::infrared_mode()
+//inline void USART<C>::infrared_mode()
 //
 //template <typename C>
-//inline void USART_basic<C>::host_SPI_mode()
+//inline void USART<C>::host_SPI_mode()
 
 // CRTLC::PMODE
 template <typename C>
-inline void USART_basic<C>::parity_mode_disabled()
+inline void USART<C>::parity_mode_disabled()
 { reg()->CTRLC |= value::PMODE_DISABLED; }
 
 template <typename C>
-inline void USART_basic<C>::parity_mode_even()
+inline void USART<C>::parity_mode_even()
 { reg()->CTRLC |= value::PMODE_EVEN; }
 
 template <typename C>
-inline void USART_basic<C>::parity_mode_odd()
+inline void USART<C>::parity_mode_odd()
 { reg()->CTRLC |= value::PMODE_ODD; }
 
 
 // CTRLC::SBMODE
 template <typename C>
-inline void USART_basic<C>::one_stop_bit()
+inline void USART<C>::one_stop_bit()
 { atd::write_bit<pos::SBMODE>::template to<0>::in(reg()->CTRLC); }
 
 template <typename C>
-inline void USART_basic<C>::two_stop_bit()
+inline void USART<C>::two_stop_bit()
 { atd::write_bit<pos::SBMODE>::template to<1>::in(reg()->CTRLC); }
 
 // CTRLC::CHSIZE
 template <typename C>
-inline void USART_basic<C>::character_size_5()
+inline void USART<C>::character_size_5()
 { reg()->CTRLC |= value::CHSIZE_5BIT; }
 
 template <typename C>
-inline void USART_basic<C>::character_size_6()
+inline void USART<C>::character_size_6()
 { reg()->CTRLC |= value::CHSIZE_6BIT; }
 
 template <typename C>
-inline void USART_basic<C>::character_size_7()
+inline void USART<C>::character_size_7()
 { reg()->CTRLC |= value::CHSIZE_7BIT; }
 
 template <typename C>
-inline void USART_basic<C>::character_size_8()
+inline void USART<C>::character_size_8()
 { reg()->CTRLC |= value::CHSIZE_8BIT; }
 
 template <typename C>
-inline void USART_basic<C>::character_size_9L()
+inline void USART<C>::character_size_9L()
 { reg()->CTRLC |= value::CHSIZE_9BITL; }
 
 template <typename C>
-inline void USART_basic<C>::character_size_9H()
+inline void USART<C>::character_size_9H()
 { reg()->CTRLC |= value::CHSIZE_9BITH; }
 
 
 // BAUD
 // ----
 template <typename C>
-inline void USART_basic<C>::baud(uint16_t value)
+inline void USART<C>::baud(uint16_t value)
 { reg()->BAUD = value; }
 
 template <typename C>
-inline uint16_t USART_basic<C>::baud() 
+inline uint16_t USART<C>::baud() 
 { return reg()->BAUD; }
 
 // CTRLD
@@ -452,6 +455,7 @@ inline uint16_t USART_basic<C>::baud()
 // RXPLCTRL
 // TODO
 
+}// namespace
 }// namespace
  
 

@@ -19,7 +19,7 @@
 
 // (???) Este programa es genérico salvo los archivos de cabecera y el
 // namespace myu. Se podría usar para probar cualquier micro???
-#include "../../../mega0_pin.h"
+#include "../../../mega0_pin_hwd.h"
 #include "../../../mega0.h"
 
 #include <avr_time.h>
@@ -27,13 +27,14 @@
 // Microcontroller
 // ---------------
 namespace myu = atmega4809_40;
+namespace hwd = myu::hwd;
 
 // pines
 constexpr uint8_t push_button_pin = 3;
 constexpr uint8_t led_pin         = 2;
 
-using Led  = myu::Pin<led_pin>;
-using Push = myu::Pin<push_button_pin>;
+using Led  = hwd::Pin<led_pin>;
+using Push = hwd::Pin<push_button_pin>;
 
 int main()
 {
