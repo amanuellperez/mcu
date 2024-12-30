@@ -34,21 +34,24 @@
  *    10/11/2024 Implementación mínima
  *
  ****************************************************************************/
-
-#include "mega0_spi_basic.h"
+#include "mega0_spi_hwd.h"
+#include "mega0_clock_frequencies.h"
+#include "mega0_pin_hwd.h"
 
 namespace mega0_{
+
+namespace hal{
 
 namespace private_{
 
 template <typename Registers>
-class SPI_base : public SPI_basic<Registers>{
+class SPI_base : public hwd::SPI<Registers>{
 public:
 // Sugar
-    using SPI = SPI_basic<Registers>;
+    using SPI = hwd::SPI<Registers>;
 
 // Constructor
-    SPI_basic() = delete;
+    SPI_base() = delete;
 
 // SCK_frequency
     // La frecuencia SPI la sabemos en tiempo de compilación
@@ -60,10 +63,10 @@ public:
 private:
 // Helpers
     template <uint32_t frequency_in_hz, uint32_t clk_per_in_hz>
-    bool SCK_frequency_in_hz_static();
+    static bool SCK_frequency_in_hz_static();
 
     template <uint32_t frequency_in_hz>
-    bool SCK_frequency_in_hz_static(uint32_t clk_per_in_hz);
+    static bool SCK_frequency_in_hz_static(uint32_t clk_per_in_hz);
 };
 
 
@@ -79,6 +82,17 @@ inline bool SPI_base<C>::SCK_frequency_in_hz()
 }
 
 // ((C++)) ¿cuándo `switch constexpr (prescaler)` ?
+//
+// TODO: 
+//  1. Añadir el SPI::clock_double_speed() para poder operar a frecuencias más
+//     rápidas.
+//  2. Garantizar que en client mode:
+//	"To ensure correct sampling of this clock signal, the minimum low and
+//	  high periods must each be longer than two peripheral clock cycles."
+//	  (datasheet 24.3.2.2) Que genere un error en tiempo de compilación 
+//	  pero ¿no sabemos que esta en client_mode? Sí, si quien llama a esta
+//	  función es SPI_slave!!! (pasarle is_slave a 
+//	  SCK_frequency_in_hz_static<is_slave>)
 template <typename C>
 template <uint32_t frequency_in_hz, uint32_t clk_per_in_hz>
 inline bool SPI_base<C>::SCK_frequency_in_hz_static()
@@ -127,20 +141,39 @@ inline bool SPI_base<C>::SCK_frequency_in_hz_static(uint32_t clk_per_in_hz)
 
 // Observar que SPI_master no hace el Select del slave correspondiente.
 // Eso es responsabilidad del cliente, que será el que sepa cómo se
-// seleccioinaran los slaves.
-template <typename Registers>
+// seleccionaran los slaves.
+//
+// Ejemplo de SPI_cfg:
+//
+// struct SPI_cfg{
+//	template <uint8_t n>
+//	using Pin = myu::hwd::Pin<n, myu::cfg_40_pins::pins>;
+//
+//	static constexpr uint32_t frequency_in_hz     = xxxx
+//	
+// };
+//
+template <typename Registers, 
+	  typename SPI_cfg // configuración global del SPI
+	  >
 class SPI_master : public private_::SPI_base<Registers>{
 public:
-    using Hwd = SPI_basic<Registers>; // hardware que hay por debajo
+    using Hwd = hwd::SPI<Registers>; // hardware que hay por debajo
     using SPI = Hwd;
+    using Base= private_::SPI_base<Registers>;
 
 // Constructor
     SPI_master() = delete;
     
-    // Configura el SPI como master con la configuración pasada
+    // Inicializa el SPI como master. Se le pasa la configuración común a la
+    // comunicación con todos los dispositivos SPI.
     // No lo enciende. Hay que llamar a turn_on explicitamente.
-    template <typename SPI_cfg>
     static void init();
+
+    // Configura el SPI como master con la configuración pasada.
+    // Cada dispositivo tendrá una configuración diferente.
+    template <typename SPI_dev_cfg>
+    static void cfg();
 
 // On/off
     static void turn_on();
@@ -149,6 +182,7 @@ public:
 // Transfer
     // Envia el byte x. Devuelve el valor recibido del slave
     // Bloquea el micro: no devuelve el control hasta transmitir el byte.
+    // CUIDADO: recordar seleccionar el chip antes de escribir.
     static uint8_t write(uint8_t x)
     { return transfer(x); }
 
@@ -162,15 +196,18 @@ public:
 
 private:
     
+    template <template <uint8_t n> typename Pin>
     static void cfg_pins();
-    static void transfer(uint8_t x);
+
+    static uint8_t transfer(uint8_t x);
 
 };
 
 // Será el usuario el que defina el selector de SPI, no usando SS. Por eso
 // llamamos a disable_client_select_line()
-template <typename R>
-void SPI_master<R>::cfg_pins()
+template <typename R, typename C>
+    template <template <uint8_t n> typename Pin>
+void SPI_master<R, C>::cfg_pins()
 {
     Pin<SPI::MOSI_pin>::as_output();
     Pin<SPI::MISO_pin>::as_input_without_pullup();
@@ -182,75 +219,82 @@ void SPI_master<R>::cfg_pins()
     SPI::disable_client_select_line();
 }
 
-// Ejemplo de SPI_cfg:
-//
-// struct SPI_cfg{
-//	static constexpr bool data_order_LSB = false;
-//	static constexpr uint8_t polarity    = 0;
-//	static constexpr uint8_t phase       = 1;
-//	static constexpr frequency_in_hz     = xxxx
-// };
-//
-// Esta configuración la define el harwador en prj_dev.h para cada dispositivo
-// SPI que se conecta.
-template <typename R>
-    template <typename SPI_cfg>
-void SPI_master<R>::init()
+
+template <typename R, typename C>
+void SPI_master<R, C>::init()
 {
-    cfg_pins();
+    cfg_pins<C::template Pin>();
     
 // as master
     SPI::host_mode();
 
+// frequency
+    Base::template SCK_frequency_in_hz<C::frequency_in_hz>();
+
+// ((TODO)) poder definir buffer mode y demás.
+// Usar `requires(SPI_dev_cfg::buffer_mode)` para en general no sea obligatorio
+// tener que definir esta variable.
+}
+
+// Ejemplo de SPI_dev_cfg:
+//
+// struct SPI_dev_cfg{
+//	static constexpr bool data_order_LSB = false;
+//	static constexpr uint8_t polarity    = 0;
+//	static constexpr uint8_t phase       = 1;
+// };
+//
+// Esta configuración la define el harwador en prj_dev.h para cada dispositivo
+// SPI que se conecta.
+template <typename R, typename C>
+    template <typename SPI_dev_cfg>
+void SPI_master<R, C>::cfg()
+{
 // data order
-    if constexpr (SPI_cfg::data_order_LSB)
+    if constexpr (SPI_dev_cfg::data_order_LSB)
 	SPI::data_order_LSB();
     else
 	SPI::data_order_MSB();
 
 
 // mode
-    if constexpr (SPI_cfg::polarity == 0){
-	if constexpr (SPI_cfg::phase == 0) SPI::mode_0();
+    if constexpr (SPI_dev_cfg::polarity == 0){
+	if constexpr (SPI_dev_cfg::phase == 0) SPI::mode_0();
 	else                               SPI::mode_1();
     } else { // polarity == 1
-	if constexpr (SPI_cfg::phase == 0) SPI::mode_2();
+	if constexpr (SPI_dev_cfg::phase == 0) SPI::mode_2();
 	else                               SPI::mode_3();
     }
 
-// frequency
-    SCK_frequency_in_hz<SPI_cfg::frequency_in_hz>();
-
-// ((TODO)) poder definir buffer mode y demás.
-// Usar `requires(SPI_cfg::buffer_mode)` para en general no sea obligatorio
-// tener que definir esta variable.
 }
 
-template <typename R>
-inline void SPI_master<R>::turn_on()
+
+template <typename R, typename C>
+inline void SPI_master<R, C>::turn_on()
 { SPI::enable(); }
 
-template <typename R>
-inline void SPI_master<R>::turn_off()
+template <typename R, typename C>
+inline void SPI_master<R, C>::turn_off()
 { SPI::disable(); }
 
 
-template <typename R>
-inline void SPI_master<R>::transfer(uint8_t x)
+template <typename R, typename C>
+inline uint8_t SPI_master<R, C>::transfer(uint8_t x)
 {
-    data(x);	// escribimos x y lo enviamos
+    SPI::data(x);	// escribimos x y lo enviamos
     wait_untill_transfer_is_complete();
 
-    return data();// valor recibido
+    return SPI::data();// valor recibido
 }
 
-template <typename R>
-inline void SPI_master<R>::wait_untill_transfer_is_complete()
+template <typename R, typename C>
+inline void SPI_master<R, C>::wait_untill_transfer_is_complete()
 {
     while (!SPI::is_interrupt_flag_set()) 
     { ; }
 }
 
+} // namespace hal
 }// mega0_
 
 

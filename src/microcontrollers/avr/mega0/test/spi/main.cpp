@@ -92,7 +92,7 @@ void write_data()
     while (!SPI::is_interrupt_flag_set()) // wait_till_end_transmit
     { ; }
 
-    // FUNDAMENTAL: leer el datao antes de hacer el client deselect, sino se
+    // FUNDAMENTAL: leer el data antes de hacer el client deselect, sino se
     // pierde!!!
     data.receive = SPI::data();
 
@@ -177,10 +177,14 @@ void host_cfg()
     SPI::disable();
     
     host_mode();
-    SPI::data_order_LSB();
-    SPI::clock_double_speed();	// observar que el host va mas despacio que el 
+
+    SPI::data_order_MSB();
+    SPI::clock_double_speed();	// observar que el host va mas rápido que el 
 				// clock del client.
-    SPI::clock_peripheral_divide_by_16();
+    //SPI::clock_peripheral_divide_by_16();
+    // Cuanto más lento, más sencillo leerlo con el digital analyzer (barato)
+    SPI::clock_peripheral_divide_by_128();
+    SPI::disable_interrupt();
 
     SPI::enable();
 }
@@ -192,7 +196,7 @@ void client_cfg()
     SPI::disable();
 
     client_mode();
-    SPI::data_order_LSB();
+    SPI::data_order_MSB();
     
     SPI::enable();
 
@@ -373,7 +377,6 @@ void client_test()
 	uart << "\n\nClient test menu\n"
 		    "----------------\n"
 		"0. Print registers\n"
-		"1. Transmit data\n"
 		"2. Return main menu\n\n";
 
 	char opt{};
@@ -381,7 +384,6 @@ void client_test()
 
 	switch (opt){
 	    break; case '0': print_registers();
-	    break; case '1': transmit_data();
 	    break; case '2': return; // SPI::disable() ???
 	    break; default: unkwon_option();
 	}
@@ -467,7 +469,7 @@ int main()
 ISR(SPI0_INT_vect)
 {
     data.receive = SPI::data();
-    SPI::data(data.transmit);
+//    SPI::data(data.transmit); <-- en client test no relleno transmit
     SPI::clear_interrupt_flag();
     UART_iostream uart;
     uart << "Receive data = [";

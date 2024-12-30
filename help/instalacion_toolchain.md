@@ -478,6 +478,25 @@ opinión. Dentro de unos años (escribo esto en octubre del 2024), cuando lo
 haya usado ya opinaré. 
 
 
+## <a name="pulseview">Pulse view (logic analyzer)</a>
+
+1. Instalación:
+```
+$ sudo apt install pulseview
+```
+
+
+2. Instalar el driver:
+```
+$ sudo apt install pulseview
+```
+$ sudo apt install sigrok-firmware-fx2lafw 
+```
+
+Ya debería de detectar el logic analyzer (si es genérico).
+
+
+
 ---
 Manuel Perez (https://github.com/amanuellperez/mcu)
 

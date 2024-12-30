@@ -51,7 +51,6 @@ void print_spi_registers(std::ostream& out)
     print_register(out, "CTRLA", SPI::reg()->CTRLA);
     print_register(out, "CTRLB", SPI::reg()->CTRLB);
     print_register(out, "INTCTRL", SPI::reg()->INTCTRL);
-    print_register(out, "INTCTRL", SPI::reg()->INTCTRL);
     print_register(out, "INTFLAGS", SPI::reg()->INTFLAGS);
     print_register(out, "DATA", SPI::reg()->DATA);
 }
