@@ -138,6 +138,16 @@ inline bool SPI_base<C>::SCK_frequency_in_hz_static(uint32_t clk_per_in_hz)
 
 }// private_
  
+// Configuración de SPI_master
+struct SPI_master_cfg{
+// Modes
+    // Como se lee mejor normal_mode que Mode::normal, optó por definirlo como
+    // uint8_t en vez de enum (y total, son solo dos posibles valores)
+    // enum class Mode{ normal, buffer}; 
+    static constexpr uint8_t normal_mode = 0;
+    static constexpr uint8_t buffer_mode = 1;
+
+};
 
 // Observar que SPI_master no hace el Select del slave correspondiente.
 // Eso es responsabilidad del cliente, que será el que sepa cómo se
@@ -150,6 +160,7 @@ inline bool SPI_base<C>::SCK_frequency_in_hz_static(uint32_t clk_per_in_hz)
 //	using Pin = myu::hwd::Pin<n, myu::cfg_40_pins::pins>;
 //
 //	static constexpr uint32_t frequency_in_hz     = xxxx
+//	static constexpr auto mode = SPI_master_cfg::normal_mode;
 //	
 // };
 //
@@ -179,27 +190,33 @@ public:
     static void turn_on();
     static void turn_off();
 
-// Transfer
+// Write/read (polling method)
+// ----------
+// Las siguientes funciones bloquean el micro, no devolviendo el control hasta
+// que el SPI no acabe de escribir o leer.
     // Envia el byte x. Devuelve el valor recibido del slave
     // Bloquea el micro: no devuelve el control hasta transmitir el byte.
     // CUIDADO: recordar seleccionar el chip antes de escribir.
-    static uint8_t write(uint8_t x)
-    { return transfer(x); }
+    static uint8_t write(uint8_t x);
 
     // Lee un byte del slave. 
     // `x` es el byte que tiene que enviar el master al slave.
     // Bloquea el micro: no devuelve el control hasta transmitir el byte.
-    static uint8_t read(uint8_t x = 0x00)
-    { return transfer(x); }
+    // TODO: probarla
+//    static uint8_t read(uint8_t x = 0x00);
 
     static void wait_untill_transfer_is_complete();
 
 private:
-    
+// Types
+    using Cfg = SPI_cfg;
+
+// helpers
     template <template <uint8_t n> typename Pin>
     static void cfg_pins();
 
-    static uint8_t transfer(uint8_t x);
+    static void wait_untill_write_is_complete();
+    static void wait_untill_read_is_complete();
 
 };
 
@@ -223,17 +240,24 @@ void SPI_master<R, C>::cfg_pins()
 template <typename R, typename C>
 void SPI_master<R, C>::init()
 {
-    cfg_pins<C::template Pin>();
+    cfg_pins<Cfg::template Pin>();
     
 // as master
     SPI::host_mode();
 
 // frequency
-    Base::template SCK_frequency_in_hz<C::frequency_in_hz>();
+    Base::template SCK_frequency_in_hz<Cfg::frequency_in_hz>();
 
-// ((TODO)) poder definir buffer mode y demás.
-// Usar `requires(SPI_dev_cfg::buffer_mode)` para en general no sea obligatorio
-// tener que definir esta variable.
+// Mode
+    if constexpr (Cfg::mode == SPI_master_cfg::normal_mode)
+	SPI::buffer_mode_disable();
+
+    else if constexpr (Cfg::mode == SPI_master_cfg::buffer_mode)
+	SPI::buffer_mode_enable();
+
+    else 
+	static_assert(true, "Wrong mode");
+
 }
 
 // Ejemplo de SPI_dev_cfg:
@@ -279,19 +303,60 @@ inline void SPI_master<R, C>::turn_off()
 
 
 template <typename R, typename C>
-inline uint8_t SPI_master<R, C>::transfer(uint8_t x)
+inline uint8_t SPI_master<R, C>::write(uint8_t x)
 {
     SPI::data(x);	// escribimos x y lo enviamos
-    wait_untill_transfer_is_complete();
-
+    wait_untill_write_is_complete();
+    
     return SPI::data();// valor recibido
 }
 
+// TODO: descomentarla cuando se pruebe
+//template <typename R, typename C>
+//inline uint8_t SPI_master<R, C>::read(uint8_t x)
+//{
+//    SPI::data(x);	// escribimos x y lo enviamos
+//    wait_untill_read_is_complete();
+//
+//    return SPI::data();// valor recibido
+//}
+
 template <typename R, typename C>
-inline void SPI_master<R, C>::wait_untill_transfer_is_complete()
+inline void SPI_master<R, C>::wait_untill_write_is_complete()
 {
-    while (!SPI::is_interrupt_flag_set()) 
-    { ; }
+    if constexpr (Cfg::mode == SPI_master_cfg::normal_mode){
+	while (!SPI::is_interrupt_flag_set()) 
+	{ ; }
+    }
+
+    else if constexpr (Cfg::mode == SPI_master_cfg::buffer_mode){
+	while (!SPI::is_transfer_complete_flag_set()) { ; }
+
+	while (!SPI::is_receive_complete_flag_set()) { ; }
+    }
+
+    else
+	static_assert(true, "Why did you call this function without init SPI?");
+
+
+}
+
+
+template <typename R, typename C>
+inline void SPI_master<R, C>::wait_untill_read_is_complete()
+{
+    if constexpr (Cfg::mode == SPI_master_cfg::normal_mode){
+	while (!SPI::is_interrupt_flag_set()) 
+	{ ; }
+    }
+
+    else if constexpr (Cfg::mode == SPI_master_cfg::buffer_mode){
+	while (!SPI::is_receive_complete_flag_set()) 
+	{ ; }
+    }
+
+    else
+	static_assert(true, "Why did you call this function without init SPI?");
 }
 
 } // namespace hal

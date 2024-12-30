@@ -1,9 +1,9 @@
-# TODO: si se implementan más micros, 
-# crear un directorio fuera `generic` para probar todos los dispositivos
-# genéricos sea cual sea el micro.
+# TODO: si se implementan más micros,
+# 		sacar el directorio hal fuera. Debería de ser genérico.
 
 DIRS = \
 		clock		\
+		hal			\
 		hello_world	\
 		pin			\
 		spi			\

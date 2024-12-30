@@ -28,7 +28,14 @@ myterm --port /dev/ttyUSB1
 myterm --port /dev/ttyUSB2
 ```
 
-[Esta foto](spi_test_breadboard.jpg) es un ejemplo de conexiones.
+[Esta foto](spi_test_breadboard.jpg) es un ejemplo de conexiones. Para depurar
+he comprado un logic analyzer en Aliexpress (unos 5 euros) y, de momento, 
+da la impresión de que funciona bien. Eso sí: al tener un dispositivo más que
+conectar me ha generado el problema de que me faltan puertos USB en el
+ordenador. [Esta otra foto](spi_test_breadboard02.jpg) muestra todo conectado.
+
+Para averiguar el puerto USB al que está conectado ejecutar: `$ sudo dmesg -w`
+y conectar el dispositivo. 
 
  
 

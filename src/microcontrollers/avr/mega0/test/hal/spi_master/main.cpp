@@ -43,19 +43,21 @@ using UART_iostream = mcu::UART_iostream<UART_8bits>;
 
 
 // Configuración de SPI
-struct SPI_master_init{
-    static constexpr uint32_t frequency_in_hz = (20'000'000 / 6) / 64;
-
+struct SPI_master_cfg{
     template <uint8_t n>
     using Pin = myu::hwd::Pin<n, myu::cfg_40_pins::pins>;
+
+    static constexpr uint32_t frequency_in_hz = (20'000'000 / 6) / 64;
+    static constexpr auto mode = myu::hal::SPI_master_cfg::normal_mode;
+    //static constexpr auto mode = myu::hal::SPI_master_cfg::buffer_mode;
 };
 
 
-using SPI = myu::hal::SPI_master<myu::cfg_40_pins::SPI0, SPI_master_init>;
+using SPI = myu::hal::SPI_master<myu::cfg_40_pins::SPI0, SPI_master_cfg>;
 using SS_pin = Pin<SPI::Hwd::SS_pin>;
 
 
-struct SPI_cfg{
+struct SPI_dev_cfg{
     static constexpr bool data_order_LSB = false;
     static constexpr uint8_t polarity    = 0;
     static constexpr uint8_t phase       = 0;
@@ -81,6 +83,14 @@ void hello()
     UART_iostream uart;
     uart << "\n\nSPI_master test\n"
 	        "---------------\n";
+    if (SPI_master_cfg::mode == myu::hal::SPI_master_cfg::normal_mode)
+	uart << "Normal mode\n";
+    else
+	uart << "Buffer mode\n";
+
+    uart << "frequency_in_hz = " << SPI_master_cfg::frequency_in_hz << "Hz \n";
+
+    uart << "\nTo change from normal to buffer mode you have to recompile.\n";
 }
 
 
@@ -132,7 +142,7 @@ void spi_init()
     SS_pin::as_output();
     SS_pin::write_one();
 
-    SPI::cfg<SPI_cfg>();
+    SPI::cfg<SPI_dev_cfg>();
     SPI::turn_on();
 }
 
@@ -146,7 +156,6 @@ int main()
     spi_init();
 
     UART_iostream uart;
-    uart << "frequency_in_hz = " << SPI_master_init::frequency_in_hz << "Hz \n";
 
     while (1) {
 	uart << "\n\nMenu\n"

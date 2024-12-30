@@ -2,14 +2,16 @@ SOURCES=
 
 
 INCS=\
-	mega0.h			\
+	mega0.h				\
 	mega0_clock_hwd.h	\
 	mega0_clock_frequencies.h	\
 	mega0_import_avr.h	\
-	mega0_micro.h	\
+	mega0_micro.h		\
 	mega0_pin_hwd.h		\
-	mega0_registers.h		\
-	mega0_uart.h	\
+	mega0_registers.h	\
+	mega0_spi_hal.h		\
+	mega0_spi_hwd.h		\
+	mega0_uart.h		\
 	mega0_usart_hwd.h
 
 

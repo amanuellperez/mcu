@@ -26,6 +26,8 @@
  * DESCRIPCION
  *	Configuración de la familia de micros mega-0 avr.	
  *
+ * DUDA: llamar el namespace cfg o registers??? Queda mejor registers... :?
+ *
  * HISTORIA
  *    Manuel Perez
  *    18/10/2024 Empezando...

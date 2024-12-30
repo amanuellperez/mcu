@@ -121,7 +121,8 @@ public:
     static void enable_interrupt();
     static void disable_interrupt();
 
-// ((TODO)) INTFLAGS
+// INTFLAGS: normal mode
+//           -----------
 // INTFLAGS::IF
     static bool is_interrupt_flag_set();
 
@@ -130,9 +131,21 @@ public:
     static void clear_interrupt_flag();
 
 // ((TODO)) INTFLAGS::WRCOL
-// ((TODO)) INTFLAGS::RXCIF
-// ((TODO)) INTFLAGS::TXCIF
-// ((TODO)) INTFLAGS::DREIF
+
+// INTFLAGS: buffer mode
+//           -----------
+// INTFLAGS::RXCIF
+    static bool is_receive_complete_flag_set();
+    static void clear_receive_complete_flag();
+
+// INTFLAGS::TXCIF
+    static bool is_transfer_complete_flag_set();
+    static void clear_transfer_complete_flag();
+
+// INTFLAGS::DREIF
+    static bool is_data_register_empty_flag_set();
+    // No tiene función clear ya que: is cleared by writing to DATA.
+
 // ((TODO)) INTFLAGS::SSIF
 // ((TODO)) INTFLAGS::BUFOVF
 
@@ -204,12 +217,13 @@ inline void SPI<C>::enable()
 // CTRLB
 // CTRLB::BUFEN
 template <typename C>
-inline void SPI<C>::buffer_mode_enable()
+inline void SPI<C>::buffer_mode_disable()
 { atd::write_bit<pos::BUFEN>::template to<0>::in(reg()->CTRLB); }
 
 template <typename C>
-inline void SPI<C>::buffer_mode_disable()
+inline void SPI<C>::buffer_mode_enable()
 { atd::write_bit<pos::BUFEN>::template to<1>::in(reg()->CTRLB); }
+
 
 
 // ((TODO)) CTRLB::BUFWR
@@ -307,9 +321,34 @@ inline void SPI<C>::clear_interrupt_flag()
 { atd::write_bit<pos::IF>::template to<1>::in(reg()->INTFLAGS); }
 
 // ((TODO)) INTFLAGS::WRCOL
-// ((TODO)) INTFLAGS::RXCIF
-// ((TODO)) INTFLAGS::TXCIF
-// ((TODO)) INTFLAGS::DREIF
+
+// INTFLAGS::RXCIF
+template <typename C>
+inline bool SPI<C>::is_receive_complete_flag_set()
+{ return atd::is_one_bit<pos::RXCIF>::of(reg()->INTFLAGS);}
+
+template <typename C>
+inline void SPI<C>::clear_receive_complete_flag()
+{ atd::write_bit<pos::RXCIF>::template to<1>::in(reg()->INTFLAGS); }
+
+
+// INTFLAGS::TXCIF
+template <typename C>
+inline bool SPI<C>::is_transfer_complete_flag_set()
+{ return atd::is_one_bit<pos::TXCIF>::of(reg()->INTFLAGS);}
+
+template <typename C>
+inline void SPI<C>::clear_transfer_complete_flag()
+{ atd::write_bit<pos::TXCIF>::template to<1>::in(reg()->INTFLAGS); }
+
+
+// INTFLAGS::DREIF
+template <typename C>
+inline bool SPI<C>::is_data_register_empty_flag_set()
+{ return atd::is_one_bit<pos::DREIF>::of(reg()->INTFLAGS);}
+
+
+
 // ((TODO)) INTFLAGS::SSIF
 // ((TODO)) INTFLAGS::BUFOVF
 
