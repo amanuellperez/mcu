@@ -18,7 +18,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 // Ejemplo básico de uso del Timer como contador
-#include "../../../mega_cfg_hwd.h"
+#include "../../../mega_registers.h"
 #include "../../../mega_UART_hal.h"
 #include <mcu_UART_iostream.h>
 #include "../../../mega_timer0_hwd.h"

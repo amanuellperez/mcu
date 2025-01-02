@@ -35,6 +35,7 @@
  ****************************************************************************/
 #include <mega.h>
 
+
 template <typename SPI_select0, uint16_t period_in_us0>
 class SPI_Keyboard{
 public:
@@ -44,7 +45,13 @@ public:
     uint8_t getchar();
 
 private:
-    using SPI = atmega::SPI_master;
+struct SPI_master_cfg{
+    template <uint8_t n>
+    using Pin = atmega::hwd::Pin<n>;
+
+    static constexpr uint32_t period_in_us = period_in_us0;
+};
+    using SPI = atmega::SPI_master<SPI_master_cfg>;
     static constexpr uint16_t SPI_period_in_us = period_in_us0;
 };
 
@@ -52,9 +59,9 @@ private:
 template <typename S, uint16_t T>
 void SPI_Keyboard<S, T>::init_SPI()
 {
-    SPI::spi_mode(0,0);
+    SPI::mode(0,0);
     SPI::data_order_LSB();
-    SPI::clock_period_in_us<SPI_period_in_us>();
+    SPI::template SCK_period_in_us<SPI_period_in_us>();
     SPI::turn_on();
 }
 

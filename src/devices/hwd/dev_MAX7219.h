@@ -118,13 +118,15 @@ private:
     static void send_packet(uint8_t address, uint8_t data);
 };
 
+struct SPI_MAX7219_cfg{
+    static constexpr bool data_order_MSB = true;
+    static constexpr uint8_t polarity    = 0;
+    static constexpr uint8_t phase       = 0;
+};
 
 template <typename C>
 void MAX7219_base<C>::SPI_cfg() 
-{
-    SPI::spi_mode(0, 0); // CPOL = 0, CPHA = 0
-    SPI::data_order_MSB();
-}
+{ SPI::template cfg<SPI_MAX7219_cfg>(); }
 
 template <typename C>
 void MAX7219_base<C>::send_packet(uint8_t address, uint8_t data)
@@ -458,6 +460,8 @@ constexpr uint8_t cols()
 } // namespace
   
 
+// MAX7219_matrix
+// --------------
 template <typename Cfg, uint8_t nstrips0, uint8_t nmodules_per_strip0>
 class MAX7219_matrix {
 public:

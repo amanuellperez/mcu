@@ -48,12 +48,15 @@ constexpr uint8_t period_in_us = 16;
 
 constexpr uint8_t num_pin_chip_select = 16;
 
+using EEPROM = dev::EEPROM_25LC256<num_pin_chip_select>;
+
 using EEPROM_lineal =
     dev::EEPROM_lineal<dev::EEPROM_25LC256<num_pin_chip_select>>;
 
 using EEPROM_ostream = dev::EEPROM_ostream<EEPROM_lineal>;
 using EEPROM_istream = dev::EEPROM_istream<EEPROM_lineal>;
 
+using SPI_master = EEPROM::SPI_master;
 
 constexpr const char ERROR[] = "ERROR ";
 
@@ -68,8 +71,8 @@ void init_UART()
 
 void init_SPI()
 {
-    myu::SPI_master::clock_period_in_us<period_in_us>();
-    myu::SPI_master::turn_on();
+    SPI_master::SCK_period_in_us<period_in_us>();
+    SPI_master::turn_on();
 }
 
 

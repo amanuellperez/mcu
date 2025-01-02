@@ -17,7 +17,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "../../../mega_cfg_hwd.h"
+#include "../../../mega_registers.h"
 #include "../../../mega_SPI_hal.h"
 #include "../../../mega_interrupt.h"
 #include "../../../mega_UART_hal.h"
@@ -42,7 +42,7 @@ int main()
 
 // init_SPI()
     SPI::turn_on();
-    SPI::spi_mode(0,0);
+    SPI::mode(0,0);
     SPI::data_order_LSB();
 
 

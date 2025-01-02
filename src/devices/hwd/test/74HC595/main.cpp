@@ -24,13 +24,13 @@ namespace my_mcu = atmega;
 
 // dev
 constexpr uint16_t period_in_us = 2;	
-using SPI = atmega::SPI_master;
 
 using Register_pins =
     dev::Register_74HC595_pins<dev::Register_74HC595_RCLK<12>,
                                dev::Register_74HC595_NO_SRCLR<16>>;
 
 using Register = dev::Register_74HC595_SPI<Register_pins>;
+using SPI = Register::SPI_master;
 
 
 // src
@@ -62,9 +62,9 @@ void counter(Register& reg)
 int main() 
 {
 // init_SPI()
-    SPI::spi_mode(0,0);
+    SPI::mode(0,0);
     SPI::data_order_LSB();
-    SPI::clock_period_in_us<period_in_us>();
+    SPI::SCK_period_in_us<period_in_us>();
     SPI::turn_on();
 
 //    select_register();

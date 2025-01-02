@@ -115,7 +115,7 @@ int main()
  
 // init_SPI()
     SPI::turn_on();
-    SPI::spi_mode(0,0);
+    SPI::mode(0,0);
     SPI::data_order_LSB();
     SPI::interrupt_enable();
     //myu::Interrupt::enable_pin<SPI_SS_pin>();

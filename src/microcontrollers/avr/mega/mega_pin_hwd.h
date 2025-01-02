@@ -91,7 +91,7 @@
  *	           pines.
  *
  ****************************************************************************/
-#include "mega_cfg_hwd.h" 
+#include "mega_registers.h" 
     
 #include <atd_bit.h>
 #include <mcu_pin.h>

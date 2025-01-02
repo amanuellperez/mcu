@@ -39,11 +39,22 @@ using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
 
 // dispositivos que conectamos
 // ---------------------------
+struct SPI_master_cfg{
+    template <uint8_t n>
+    using Pin = myu::hwd::Pin<n>;
+
+// TODO:
+//    static constexpr uint32_t frequency_in_hz = 500'000; // máx. 10MHz
+};
+
+using SPI_master = myu::SPI_master<SPI_master_cfg>;
+
 // Dispositivos SPI
 using Chip_select = 
-    dev::SDCard_select<myu::hwd::Output_pin<myu::hwd::SPI::noCS_pin_number>, myu::SPI_master>;
+    dev::SDCard_select<myu::hwd::Output_pin<myu::hwd::SPI::SS_pin>, 
+						SPI_master>;
 
-using SDCard_cfg = dev::SDCard_cfg<myu::Micro, myu::SPI_master, Chip_select>;
+using SDCard_cfg = dev::SDCard_cfg<myu::Micro, SPI_master, Chip_select>;
 
 using SDCard = dev::SDCard_basic<SDCard_cfg>;
 

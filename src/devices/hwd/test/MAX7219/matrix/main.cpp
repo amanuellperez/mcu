@@ -56,15 +56,21 @@ static constexpr uint8_t matrix_nstrips = 4;
 
 // SPI protocol
 // ------------
-using SPI = myu::SPI_master;
-constexpr uint32_t spi_frequency_in_hz = 500'000; // máx. 10MHz
-static_assert (noCS == myu::SPI_master::noCS_pin_number);
+struct SPI_master_cfg{
+    template <uint8_t n>
+    using Pin = myu::hwd::Pin<n>;
+
+    static constexpr uint32_t frequency_in_hz = 500'000; // máx. 10MHz
+};
+
+using SPI = myu::SPI_master<SPI_master_cfg>;
+static_assert (noCS == SPI::SS_pin);
 
 
 // Devices
 // -------
 struct MAX7219_cfg_by_rows{
-    using SPI_master	= myu::SPI_master;
+    using SPI_master	= SPI;
     using SPI_selector	= 
 	mcu::SPI_pin_array_selector<Micro, strip0, strip1, strip2, strip3>;
 
@@ -75,7 +81,7 @@ struct MAX7219_cfg_by_rows{
 };
 
 struct MAX7219_cfg_by_columns{
-    using SPI_master	= myu::SPI_master;
+    using SPI_master	= SPI;
     using SPI_selector	= 
 	mcu::SPI_pin_array_selector<Micro, strip0, strip1, strip2, strip3>;
 
@@ -203,7 +209,7 @@ void init_uart()
 
 void init_spi()
 {
-    SPI::clock_frequency_in_hz<spi_frequency_in_hz>();
+    SPI::SCK_frequency_in_hz<SPI_master_cfg::frequency_in_hz>();
     SPI::turn_on();
 }
 

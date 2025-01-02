@@ -18,7 +18,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "../../mega_watchdog_hwd.h" 
-#include "../../mega_cfg_hwd.h"
+#include "../../mega_registers.h"
 #include "../../mega_pin_hwd.h"
 #include "../../mega_micro.h"
 #include "../../mega_UART_hal.h"

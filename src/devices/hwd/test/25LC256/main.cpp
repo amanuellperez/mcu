@@ -37,6 +37,7 @@ constexpr uint8_t num_pin_chip_select = 16;
 constexpr uint8_t periodo_en_us = 16;
 using EEPROM  = EEPROM_25LC256<num_pin_chip_select>;
 
+using SPI_master = EEPROM::SPI_master;
 
 void print_table(EEPROM& eeprom)
 {
@@ -121,8 +122,8 @@ void test_uint8_t() {
     UART_iostream::init();
     uart.turn_on();
 
-    myu::SPI_master::clock_period_in_us<periodo_en_us>();
-    myu::SPI_master::turn_on();
+    SPI_master::SCK_period_in_us<periodo_en_us>();
+    SPI_master::turn_on();
 
     EEPROM eeprom;
     eeprom.cfg_SPI();

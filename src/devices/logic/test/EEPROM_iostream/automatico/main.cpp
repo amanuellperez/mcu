@@ -44,11 +44,14 @@ constexpr uint8_t period_in_us = 16;
 
 constexpr uint8_t num_pin_chip_select = 16;
 constexpr uint8_t buffer_size = 2;
+using EEPROM = dev::EEPROM_25LC256<num_pin_chip_select>;
 using EEPROM_lineal =
     dev::EEPROM_lineal<dev::EEPROM_25LC256<num_pin_chip_select>>;
 
 using EEPROM_ostream = dev::EEPROM_ostream<EEPROM_lineal, buffer_size>;
 using EEPROM_istream = dev::EEPROM_istream<EEPROM_lineal, buffer_size>;
+
+using SPI_master = EEPROM::SPI_master;
 
 constexpr int sz = 80;
 
@@ -453,8 +456,8 @@ bool test_istream_automatico()
 void test_eeprom_automatico()
 {
     UART_iostream uart;
-    myu::SPI_master::clock_period_in_us<period_in_us>();
-    myu::SPI_master::turn_on();
+    SPI_master::SCK_period_in_us<period_in_us>();
+    SPI_master::turn_on();
 
     if (test_ostream_automatico())
 	test_istream_automatico();

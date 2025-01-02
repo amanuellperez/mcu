@@ -44,7 +44,7 @@
 //  Para que funcione es fundamental conectar a un voltage regulator (por 
 //  ejemplo el 7805) la fuente de alimentación. Si no oscila mucho AREF no
 //  sirviendo para nada.
-#include "../../../mega_cfg_hwd.h"
+#include "../../../mega_registers.h"
 #include "../../../mega_debug_hwd.h"
 #include "../../../mega_ADC_hal.h"
 #include "../../../mega_UART_hal.h"

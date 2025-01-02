@@ -28,12 +28,15 @@
 namespace myu = atmega;
 using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
 
-using SPI = myu::SPI_master;
 
 constexpr uint8_t period_in_us = 16;
 
 constexpr uint8_t num_pin_chip_select = 16;
+
+using EEPROM_base = dev::EEPROM_25LC256<num_pin_chip_select>;
 using EEPROM = dev::EEPROM_lineal<dev::EEPROM_25LC256<num_pin_chip_select>>;
+
+using SPI = EEPROM_base::SPI_master;
 
 constexpr uint16_t sz = 300;
 
@@ -89,7 +92,7 @@ void check_true(bool ok, const char* msg)
 void test_eeprom_interactiva()
 {
     UART_iostream uart;
-    SPI::clock_period_in_us<period_in_us>();
+    SPI::SCK_period_in_us<period_in_us>();
     SPI::turn_on();
 
     EEPROM eeprom;
@@ -224,7 +227,7 @@ void test_fill_n(EEPROM& eeprom)
 void test_eeprom_automatico()
 {
     UART_iostream uart;
-    SPI::clock_period_in_us<period_in_us>();
+    SPI::SCK_period_in_us<period_in_us>();
     SPI::turn_on();
     EEPROM eeprom;
 

@@ -25,7 +25,7 @@
 
 #include "../../../mega_UART_hal.h"
 #include <mcu_UART_iostream.h>
-#include "../../../mega_cfg_hwd.h"
+#include "../../../mega_registers.h"
 #include "../../../mega_pin_hwd.h"
 
 // Microcontroller

@@ -63,10 +63,9 @@ namespace hwd{
 
 class SPI{
 public:
-// CARACTERÍSTICAS DEL SPI
-    // Slave select
-    static constexpr uint8_t SS_pin_number = cfg::spi::SS_pin_number;
+    using Reg = cfg::spi;
 
+// CARACTERÍSTICAS DEL SPI
     // Chip select: el atmega tiene la característica de que cuando se usa
     // como master este pin obligatoriamente tiene que estar como output:
     // usémoslo como chip select!!! (esto será genérico? qué hacen otros
@@ -77,8 +76,12 @@ public:
     // SPI-slave!!!
     // Si no se trabaja en un entorno con varios SPI-master, definirlo como
     // output es la configuración más sencilla.
-    static constexpr uint8_t noCS_pin_number = cfg::spi::SS_pin_number;
 
+// pines a los que está conectado el SPI
+    static constexpr uint8_t MOSI_pin = Reg::MOSI_pin;
+    static constexpr uint8_t MISO_pin = Reg::MISO_pin;
+    static constexpr uint8_t SCK_pin  = Reg::SCK_pin;
+    static constexpr uint8_t SS_pin   = Reg::SS_pin;
 
 // CONSTRUCTOR
     // No permitimos que se construya este objeto
@@ -123,7 +126,7 @@ public:
 
     /// Configuramos el modo de operación: la polaridad cpol y la fase cpha
     /// cpol y cpha son números: 0 ó 1
-    static void spi_mode(uint8_t cpol, uint8_t cpha);
+    static void mode(uint8_t cpol, uint8_t cpha);
 
 
     // Selección de la velocidad del reloj.

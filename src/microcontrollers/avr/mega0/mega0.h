@@ -45,6 +45,8 @@
 
 #include "mega0_registers.h"
 
+#include <mcu_UART_iostream.h>  // Este lo incluyo por comodidad aquí
+
 /***************************************************************************
  *			    ATMEGA4809 de 40 pins
  ***************************************************************************/
@@ -67,7 +69,7 @@ namespace hwd{
     using USART2 = mega0_::hwd::USART<mega0_::cfg_40_pins::USART2>;
 
 // SPI
-    using SPI = mega0_::hwd::SPI<myu::cfg_40_pins::SPI0>;
+    using SPI = mega0_::hwd::SPI<mega0_::cfg_40_pins::SPI0>;
 
 } // hwd
 
@@ -81,12 +83,12 @@ namespace hwd{
 
 // SPI
     template <typename Cfg>
-    using SPI_master = mega0_::hal::SPI_master<myu::cfg_40_pins::SPI0, Cfg>;
+    using SPI_master = mega0_::hal::SPI_master<mega0_::cfg_40_pins::SPI0, Cfg>;
 }
 
 // La única diferencia entre estos dos namespace son los pines y la función
 // init del atmega4809_40.  El resto es igual (???)
-//namespace atmega4809 = atmega4809_40;
+namespace atmega4809 = atmega4809_40;
 
 #endif
 

@@ -46,7 +46,7 @@
 #include <avr/io.h> // registros: DDRB... PORT...
 		    
 #include "mega_import_avr.h"
-#include "mega_cfg_hwd.h"	// ((TODO)) parametrizar Cfg
+#include "mega_registers.h"	// ((TODO)) parametrizar Cfg
 
 namespace mega_{
 namespace hwd{

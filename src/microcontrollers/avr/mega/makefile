@@ -17,7 +17,7 @@ INCS= \
 	mega_ADC_hwd.h	\
 	mega_ADC_hal.h			\
 	mega_atmega_dev.h	\
-	mega_cfg_hwd.h			\
+	mega_registers.h			\
 	mega_clock_frequencies.h\
 	mega_debug_hwd.h			\
 	mega_interrupt.h		\

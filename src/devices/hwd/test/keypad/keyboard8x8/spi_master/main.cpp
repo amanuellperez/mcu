@@ -34,13 +34,21 @@ namespace myu = atmega;
 using UART = myu::UART_8bits;
 using UART_iostream = mcu::UART_iostream<UART>;
 
-using SPI = myu::SPI_master;
+// Observar que esta cfg no debería de estar aquí, sino que hay que 
+// pasar SPI_master como parámetro
+struct SPI_master_cfg{
+    template <uint8_t n>
+    using Pin = not_generic::hwd::Pin<n>;
 
 // La frecuencia del master tiene que ser 4 veces más lenta que la del slave.
 // El slave lo tenemos a 1MHz, luego el periodo máximo debe ser 4 us.
 // De hecho, al principio probe con 2 us y no funcionaba bien.
 // Con 4 funciona bien, garanticemos 8 us.
-constexpr uint16_t period_in_us = 8;	
+    static constexpr uint16_t period_in_us = 8;	
+};
+
+using SPI = myu::SPI_master<SPI_master_cfg>;
+
 
 
 void print_code(uint8_t code)
@@ -83,9 +91,9 @@ int main()
     uart.turn_on();
 
 // init_SPI()
-    SPI::spi_mode(0,0);
+    SPI::mode(0,0);
     SPI::data_order_LSB();
-    SPI::clock_period_in_us<period_in_us>();
+    SPI::SCK_period_in_us<SPI_master_cfg::period_in_us>();
     SPI::turn_on();
 
     uart << "\n\nTest driver keyboard\n"

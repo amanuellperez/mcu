@@ -31,7 +31,7 @@
  *
  ****************************************************************************/
 #include "mega_import_avr.h"    // import avr_;
-#include <mcu_UART_iostream.h>
+#include <mcu_UART_iostream.h>  // Este lo incluyo por comodidad aquí
 
 /***************************************************************************
  *			BUILT-IN DEVICES FOR ATMEGA
@@ -157,7 +157,9 @@ namespace driver{
 // De momento dejo esto fuera de driver. Hoy me gusta así. (mañana...)
     using UART_8bits    = mega_::hal::UART_8bits;
 
-    using SPI_master = mega_::hal::SPI_master;
+    template <typename Cfg>
+    using SPI_master = mega_::hal::SPI_master<Cfg>;
+
     using SPI_slave  = mega_::hal::SPI_slave;
 
 

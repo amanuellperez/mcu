@@ -41,7 +41,7 @@
 
 // Configuración del micro
 // -----------------------
-#include <mega_cfg_hwd.h>
+#include <mega_registers.h>
 
 // Micro
 // -----

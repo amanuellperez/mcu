@@ -354,13 +354,13 @@ inline constexpr int8_t nINT_of_pin()
 }
 
 
-// CONFIGURACIÓN DEL SPI
-// ---------------------
+// SPI
+// ---
     struct spi{
-	static constexpr uint8_t SCK_pin_number  = 19u;
-	static constexpr uint8_t MISO_pin_number = 18u;
-	static constexpr uint8_t MOSI_pin_number= 17u;
-	static constexpr uint8_t SS_pin_number = 16u;
+	static constexpr uint8_t SCK_pin = 19u;
+	static constexpr uint8_t MISO_pin = 18u;
+	static constexpr uint8_t MOSI_pin = 17u;
+	static constexpr uint8_t SS_pin = 16u;
     };
 
 // Timer0

@@ -19,17 +19,49 @@
 
 
 #include "../../../dev_MAX7219.h"
-#include <mega.h>
+
+
 #include <mcu_SPI.h>
 
 #include <atd_test.h>
 using namespace test;
 
+#ifdef IF_atmega328p
+#include <mega.h>
+
+namespace myu = atmega;
+using UART = myu::UART_8bits;
+
+struct SPI_master_cfg{
+    template <uint8_t n>
+    using Pin = myu::hwd::Pin<n>;
+
+    static constexpr uint32_t frequency_in_hz = 500'000; // máx. 10MHz
+};
+
+void init_mcu()
+{}
+
+#elifdef IF_atmega4809
+
+#include <mega0.h>
+
+namespace myu = atmega4809;
+using UART = myu::UART1_8bits;
+
+void init_mcu()
+{
+    myu::init();
+//    myu::Clock_controller::clk_main_divided_by_16(); // a 1 MHz
+}
+
+#endif
+
+
 // Microcontroller
 // ---------------
-namespace myu = atmega;
 using Micro   = myu::Micro;
-using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
+using UART_iostream = mcu::UART_iostream<UART>;
 
 // UART
 // ----
@@ -43,17 +75,17 @@ static constexpr uint8_t spi_no_select_pin = noCS;
 
 // SPI protocol
 // ------------
-using SPI = myu::SPI_master;
-constexpr uint32_t spi_frequency_in_hz = 500'000; // máx. 10MHz
-static_assert (noCS == myu::SPI_master::noCS_pin_number);
+using SPI = myu::SPI_master<SPI_master_cfg>;
+static_assert (noCS == SPI::SS_pin);
 
 
 // Devices
 // -------
 //using MAX7219_matrix_cols = dev::MAX7219_matrix<MAX7219_cfg_by_columns, matrix_nstrips, 4>;
 struct MAX7219_cfg{
-    using SPI_master   = myu::SPI_master;
+    using SPI_master   = SPI;
     using SPI_selector = mcu::SPI_pin_selector<Micro, spi_no_select_pin>;
+
 };
 
 //using MAX7219 = dev::hwd::MAX7219<MAX7219_cfg>;
@@ -71,8 +103,7 @@ void init_uart()
 
 void init_spi()
 {
-    SPI::clock_frequency_in_hz<spi_frequency_in_hz>();
-    SPI::turn_on();
+    SPI::init();
 }
 
 
@@ -174,6 +205,7 @@ void test_counter()
 // ----
 int main() 
 {
+    init_mcu();
     init_uart();
     init_spi();
     init_max7219();

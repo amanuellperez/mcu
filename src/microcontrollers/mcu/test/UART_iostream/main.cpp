@@ -34,7 +34,7 @@
 namespace myu = atmega;
 using UART = myu::UART_8bits;
 
-void myu_init()
+void init_mcu()
 {}
 
 
@@ -45,7 +45,7 @@ void myu_init()
 namespace myu = atmega4809;
 using UART = myu::UART1_8bits;
 
-void myu_init()
+void init_mcu()
 {
     myu::init();
 //    myu::Clock_controller::clk_main_divided_by_16(); // a 1 MHz
@@ -326,7 +326,7 @@ void test_iostream()
 
 int main()
 {
-    myu_init();
+    init_mcu();
     
     //    test_streambuf();
     test_iostream();

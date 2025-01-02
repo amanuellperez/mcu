@@ -75,9 +75,22 @@ struct Register_74HC595_pins{
 template <typename pin>
 class Register_74HC595_SPI{
 public:
+// TODO: pasar esto como parámetro
+// Observar que esta cfg no debería de estar aquí, sino que hay que 
+// pasar SPI_master como parámetro
+    struct SPI_master_cfg{
+	template <uint8_t n>
+	using Pin = not_generic::hwd::Pin<n>;
+
+// Esta la define el main.cpp. 
+//	static constexpr uint32_t period_in_us = 8;
+    };
+
+    using SPI_master = not_generic::SPI_master<SPI_master_cfg>;
+
     Register_74HC595_SPI() 
     { 
-	not_generic::SPI_master::data_order_LSB();
+	SPI_master::data_order_LSB();
 	NO_SRCLR_.write_one(); 
     }
 
@@ -85,7 +98,7 @@ public:
     /// hasta no acabar de escribir.
     // Observar que esta función se puede definir como const. Sin embargo,
     // el cliente supondrá que es no const. La dejo con el prototipo esperado.
-    void buffer_write(uint8_t x) { not_generic::SPI_master::write(uint8_t{x}); }
+    void buffer_write(uint8_t x) { SPI_master::write(uint8_t{x}); }
 
     void buffer_clear() 
     { 

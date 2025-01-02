@@ -17,7 +17,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "../../../mega_cfg_hwd.h"
+#include "../../../mega_registers.h"
 #include "../../../mega_SPI_hal.h"
 #include "../../../mega_pin_hwd.h"
 #include "../../../mega_UART_hal.h"
@@ -35,12 +35,25 @@ using UART_iostream = mcu::UART_iostream<myu::hal::UART_8bits>;
 
 // SPI protocol
 // ------------
-using SPI = myu::hal::SPI_master;
+struct SPI_master_cfg{
+    template <uint8_t n>
+    using Pin = myu::hwd::Pin<n>;
 
 // OJO: clave periodo a 8 us. Si pongo a 2 us al slave no le da tiempo a leer
 // y se lee basura y pierden datos.
-constexpr uint16_t period_in_us = 8;	
-using no_CS = hwd::Pin<SPI::SS_pin_number>;
+    static constexpr uint32_t period_in_us = 8;
+};
+
+using SPI = myu::hal::SPI_master<SPI_master_cfg>;
+
+
+struct SPI_dev_cfg{
+    static constexpr bool data_order_LSB = true;
+    static constexpr uint8_t polarity    = 0;
+    static constexpr uint8_t phase       = 0;
+};
+
+using no_CS = hwd::Pin<SPI::SS_pin>;
 
 void SPI_write(uint8_t x)
 {
@@ -81,9 +94,12 @@ void init_uart()
 
 void init_SPI()
 {
-    SPI::spi_mode(0,0);
-    SPI::data_order_LSB();
-    SPI::clock_period_in_us<period_in_us>();
+    SPI::init();
+    SPI::cfg<SPI_dev_cfg>();
+
+//    SPI::mode(0,0);
+//    SPI::data_order_LSB();
+//    SPI::SCK_period_in_us<SPI_master_cfg::period_in_us>();
     SPI::turn_on();
 }
 
@@ -135,7 +151,7 @@ void cfg_cpol_cpha()
     if (!(cpha == 0 or cpha == 1))
 	return;
 
-    SPI::spi_mode(static_cast<uint8_t>(cpol), static_cast<uint8_t>(cpha));
+    SPI::mode(static_cast<uint8_t>(cpol), static_cast<uint8_t>(cpha));
 }
 
 void cfg_order()

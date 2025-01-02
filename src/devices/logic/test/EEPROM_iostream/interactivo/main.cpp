@@ -46,13 +46,15 @@ constexpr uint8_t period_in_us = 16;
 
 constexpr uint8_t num_pin_chip_select = 16;
 constexpr uint8_t buffer_size = 2;
+
+using EEPROM = dev::EEPROM_25LC256<num_pin_chip_select>;
 using EEPROM_lineal =
     dev::EEPROM_lineal<dev::EEPROM_25LC256<num_pin_chip_select>>;
 
 using EEPROM_ostream = dev::EEPROM_ostream<EEPROM_lineal, buffer_size>;
 using EEPROM_istream = dev::EEPROM_istream<EEPROM_lineal, buffer_size>;
 
-using SPI = myu::SPI_master;
+using SPI = EEPROM::SPI_master;
 
 constexpr int sz = 80;
 
@@ -146,7 +148,7 @@ MENU_INTERACTIVO[] =  "Elige:\n"
 void test_eeprom_interactiva()
 {
     UART_iostream uart;
-    SPI::clock_period_in_us<period_in_us>();
+    SPI::SCK_period_in_us<period_in_us>();
     SPI::turn_on();
 
     EEPROM_ostream out;

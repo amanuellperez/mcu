@@ -41,7 +41,7 @@
 #include <atd_type_traits.h>	// always_false_v
 #include <avr/io.h> // registros: DDRB... PORT...
 #include "mega_import_avr.h"
-#include "mega_cfg_hwd.h"
+#include "mega_registers.h"
 #include "mega_clock_frequencies.h"	
 
 namespace mega_{

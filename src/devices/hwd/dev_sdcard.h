@@ -856,8 +856,18 @@ inline void SDCard_basic<Cfg>::SPI_write_uint32_t(const uint32_t& x)
 template <typename Cfg>
 void SDCard_basic<Cfg>::SPI_cfg__()
 {
+//struct SPI_SDCard_cfg{
+//    static constexpr bool data_order_MSB = true;
+//    static constexpr uint8_t polarity    = 0;
+//    static constexpr uint8_t phase       = 0;
+//};
+
+    // TODO: el cfg_pins lo hace el SPI::init() no lo puede hacer SDCard 
+    // El responsable de conectar el SPI o no es el micro, no el device. 
+    // Corregir esto
     SPI::cfg_pins();
-    SPI::spi_mode(0,0);
+
+    SPI::mode(0,0);
     SPI::data_order_MSB();
     SPI::default_transfer_value(0xFF); // 0xFF sería un error de R1
 				       // al tener el bit[7] == '1'
@@ -870,7 +880,7 @@ template <typename Cfg>
 void SDCard_basic<Cfg>::SPI_turn_on()
 {
     SPI_cfg__();
-    SPI::template clock_frequency_in_hz<frequency>();
+    SPI::template SCK_frequency_in_hz<frequency>();
     SPI::turn_on();
 }
 

@@ -138,6 +138,11 @@ inline bool SPI_base<C>::SCK_frequency_in_hz_static(uint32_t clk_per_in_hz)
 
 }// private_
  
+
+
+/***************************************************************************
+ *				SPI_master
+ ***************************************************************************/
 // Configuración de SPI_master
 struct SPI_master_cfg{
 // Modes

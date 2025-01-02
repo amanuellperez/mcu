@@ -28,7 +28,7 @@ namespace mega_{
 namespace hwd{
 
 
-void SPI::spi_mode(uint8_t cpol, uint8_t cpha)
+void SPI::mode(uint8_t cpol, uint8_t cpha)
 {
     if (cpol == 0)
 	atd::write_bit<CPOL>::to<0>::in(SPCR);

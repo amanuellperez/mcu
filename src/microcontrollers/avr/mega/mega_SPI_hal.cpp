@@ -29,39 +29,16 @@ namespace hal{
 using namespace hwd;
 namespace cfg = hwd::cfg;
 
-// En la appnote "AVR151: Setup And use of the SPI", indican que:
-// The MISO, MOSI, and SCK lines of all the other slaves are tristated 
-// (configured as input pins of a high impedance with no pullup resistors
-// enabled). 
-// ==> Conclusión: no tienen pull-up resistor.
-// Pero en el momento en el que haces el chip_select conectas el registro del
-// SPI del master con el registro del SPI del slave formando un circuito
-// cerrado. Da la impresión de no necesitar pull-up resistors (???)
-void SPI_master::cfg_pins()
-{
-
-    // Configuración de los pins
-    Pin<cfg::spi::SCK_pin_number>::as_output();
-    Pin<cfg::spi::MOSI_pin_number>::as_output();
-//    Pin<SPI_num_pin_MISO>::as_input_without_pullup();
-    Pin<cfg::spi::SS_pin_number>::as_output(); // fundamental para que no sea slave:
-				     // punto 23.3.2: leer este punto. Indica
-				     // que si se define como entrada tiene
-				     // que mantenerse high, si cambia a low
-				     // cambia el modo del SPI a slave!!!
-    
-}
-
 
 void SPI_slave::init()
 {
     namespace cfg = hwd::cfg;
 
     // Configuración de los pins (table 23-1). 
-//    Pin<SPI_num_pin_SCK>::as_input_without_pullup();
-//    Pin<SPI_num_pin_MOSI>::as_input_without_pullup();
-    hwd::Pin<cfg::spi::MISO_pin_number>::as_output();
-//    Pin<SPI_num_pin_SS>::as_input_without_pullup(); 
+//    Pin<SPI::SCK_pin>::as_input_without_pullup();
+//    Pin<SPI::MOSI_pin>::as_input_without_pullup();
+    hwd::Pin<SPI::MISO_pin>::as_output();
+//    Pin<SPI::SS_pin>::as_input_without_pullup(); 
 }
 
 

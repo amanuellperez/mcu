@@ -332,7 +332,7 @@ private:
 
 void Pot_MCP4231_basic::SPI_cfg()
 {
-    SPI::spi_mode(0, 0);
+    SPI::mode(0, 0);
     SPI::data_order_MSB();
 }
 

@@ -131,6 +131,18 @@ public:
     constexpr static size_type max_address() 
     {return MAX_ADDRESS;}
 
+// TODO: pasar esto como parámetro
+// Observar que esta cfg no debería de estar aquí, sino que hay que 
+// pasar SPI_master como parámetro
+    struct SPI_master_cfg{
+	template <uint8_t n>
+	using Pin = not_generic::hwd::Pin<n>;
+
+// Esta la define el main.cpp. 
+//	static constexpr uint32_t period_in_us = 8;
+    };
+
+    using SPI_master = not_generic::SPI_master<SPI_master_cfg>;
 private:
     // Pines del device
     // ----------------
@@ -194,10 +206,11 @@ private:
     };
 
 
+
     void write_address(Address address)
     {	// Data order: MSB first, LSB last
-	not_generic::SPI_master::write(static_cast<uint8_t>(address >> 8));
-	not_generic::SPI_master::write(static_cast<uint8_t>(address));
+	SPI_master::write(static_cast<uint8_t>(address >> 8));
+	SPI_master::write(static_cast<uint8_t>(address));
     }
 
     void write_cmd(uint8_t cmd);
@@ -207,8 +220,8 @@ private:
 template <uint8_t no_CS, uint8_t no_WP, uint8_t no_HOLD>
 void EEPROM_25LC256<no_CS, no_WP, no_HOLD>::cfg_SPI()
 {
-    not_generic::SPI_master::spi_mode(0, 0);
-    not_generic::SPI_master::data_order_MSB();
+    SPI_master::mode(0, 0);
+    SPI_master::data_order_MSB();
 }
 
 
@@ -222,10 +235,10 @@ EEPROM_25LC256<no_CS, no_WP, no_HOLD>::read(Address address,
 {
     Select select{*this};
 
-    not_generic::SPI_master::write(READ);
+    SPI_master::write(READ);
     write_address(address);
     for (size_type i = 0; i < n; ++i){
-	*buf = not_generic::SPI_master::read();
+	*buf = SPI_master::read();
 	++buf;
     }
 
@@ -243,12 +256,12 @@ uint8_t EEPROM_25LC256<no_CS, no_WP, no_HOLD>::
 {
     Select select{*this};
 
-    not_generic::SPI_master::write(WRITE);
+    SPI_master::write(WRITE);
     write_address(address);
     
     uint8_t i = 0;
     for (; i < n; ++i){
-	not_generic::SPI_master::write(*buf);
+	SPI_master::write(*buf);
 	++buf;
     }
 
@@ -260,7 +273,7 @@ template <uint8_t no_CS, uint8_t no_WP, uint8_t no_HOLD>
 void EEPROM_25LC256<no_CS, no_WP, no_HOLD>::write_cmd(uint8_t cmd)
 {
     Select select{*this};
-    not_generic::SPI_master::write(cmd);
+    SPI_master::write(cmd);
 }
 
 
@@ -269,8 +282,8 @@ uint8_t EEPROM_25LC256<no_CS, no_WP, no_HOLD>::
 					read_status_register()
 {
     Select select{*this};
-    not_generic::SPI_master::write(RDSR);
-    uint8_t status = not_generic::SPI_master::read();
+    SPI_master::write(RDSR);
+    uint8_t status = SPI_master::read();
 
     return status;
 }

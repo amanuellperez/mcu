@@ -22,7 +22,7 @@
 // volviendo a iluminarse.
 // Para ver que cualquier pin puede despertar al avr, defino 2 interrupciones.
 // Funciona con los 2 pines correctamente. Probar a descomentar el pin2.
-#include "../../mega_cfg_hwd.h"
+#include "../../mega_registers.h"
 #include "../../mega_sleep_hwd.h"
 #include "../../mega_interrupt.h"
 #include "../../mega_pin_hwd.h"

@@ -17,8 +17,10 @@ DIRS = 	25LC256			\
 		led				\
 		MAX7219			\
 		push_button		\
-		sdcard			\
 		SDD1306
+
+# TODO: revisar
+#		sdcard			\
 
 
 
