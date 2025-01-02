@@ -1,4 +1,4 @@
-// Copyright (C) 2024 Manuel Perez 
+// Copyright (C) 2024-2025 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -30,6 +30,10 @@ using namespace test;
 #include <mega.h>
 
 namespace myu = atmega;
+
+void init_mcu()
+{}
+
 using UART = myu::UART_8bits;
 
 struct SPI_master_cfg{
@@ -39,21 +43,29 @@ struct SPI_master_cfg{
     static constexpr uint32_t frequency_in_hz = 500'000; // máx. 10MHz
 };
 
-void init_mcu()
-{}
 
 #elifdef IF_atmega4809
 
 #include <mega0.h>
 
 namespace myu = atmega4809;
-using UART = myu::UART1_8bits;
 
 void init_mcu()
 {
     myu::init();
 //    myu::Clock_controller::clk_main_divided_by_16(); // a 1 MHz
 }
+
+using UART = myu::UART1_8bits;
+
+
+struct SPI_master_cfg{
+    template <uint8_t n>
+    using Pin = myu::hwd::Pin<n>;
+
+    static constexpr uint32_t frequency_in_hz = 500'000; // máx. 10MHz
+    static constexpr auto mode = myu::SPI_master_cfg::normal_mode;
+};
 
 #endif
 
@@ -67,16 +79,13 @@ using UART_iostream = mcu::UART_iostream<UART>;
 // ----
 constexpr uint32_t baud_rate = 9'600;
 
-// Pin connections
-// ---------------
-static constexpr uint8_t noCS = 16;
-static constexpr uint8_t spi_no_select_pin = noCS;
-
-
 // SPI protocol
 // ------------
 using SPI = myu::SPI_master<SPI_master_cfg>;
-static_assert (noCS == SPI::SS_pin);
+
+// Pin connections
+// ---------------
+static constexpr uint8_t spi_no_select_pin = SPI::SS_pin;
 
 
 // Devices
@@ -123,7 +132,7 @@ void hello()
     uart << "\n\nMAX7219 digits test\n"
 	        "-------------------\n"
 		"Connections:\n"
-		"\tConnect MAX7219 to SPI via " << (int) noCS << " pin\n"
+		"\tConnect MAX7219 to SPI via " << (int) spi_no_select_pin << " pin\n"
 		<< "\n\n";
 }
 

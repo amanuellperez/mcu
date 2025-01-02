@@ -38,6 +38,9 @@
 
 namespace mcu {
 
+/***************************************************************************
+ *			SPI_pin_selector
+ ***************************************************************************/
 // Este es un selector básico que no hay por qué usar. Cada aplicación podrá
 // (y deberá) de escribir sus propios selectores
 //

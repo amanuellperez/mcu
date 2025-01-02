@@ -279,12 +279,24 @@ template <typename R, typename C>
     template <typename SPI_dev_cfg>
 void SPI_master<R, C>::cfg()
 {
+// TODO: esta función de "data order" coincide con la definida en mega, y se
+// podría generalizar `if
+// (is_defined<SPI_dev_cfg::data_order_LSB>::and_is_true()) ... pero no se
+// cómo hacerlo.
 // data order
-    if constexpr (SPI_dev_cfg::data_order_LSB)
-	SPI::data_order_LSB();
-    else
-	SPI::data_order_MSB();
+    if constexpr (requires {SPI_dev_cfg::data_order_LSB;})
+    {
+	if constexpr (SPI_dev_cfg::data_order_LSB)
+	    SPI::data_order_LSB();
+	else
+	    SPI::data_order_MSB();
 
+    } else if constexpr (requires {SPI_dev_cfg::data_order_MSB;}){
+	if constexpr (SPI_dev_cfg::data_order_MSB)
+	    SPI::data_order_MSB();
+	else
+	    SPI::data_order_LSB();
+    }
 
 // mode
     if constexpr (SPI_dev_cfg::polarity == 0){

@@ -51,39 +51,49 @@
  *			    ATMEGA4809 de 40 pins
  ***************************************************************************/
 namespace atmega4809_40{
-    using namespace avr_;
+// cosas comunes a todos los avrs
+    using namespace avr_; 
+	
+// Configuración de este chip con 40 pins
+    namespace cfg = mega0_::cfg_40_pins;
 
     // Fundamental: llamar a esta función init!!!
-    inline void init() { mega0_::cfg_40_pins::pins::init();}
+    inline void init() { cfg::pins::init();}
 
+
+// hwd layer
+// ---------
 namespace hwd{
 
     template <uint8_t n>
-    using Pin = mega0_::hwd::Pin<n, mega0_::cfg_40_pins::pins>;
+    using Pin = mega0_::hwd::Pin<n, cfg::pins>;
 
     using Clock_controller = mega0_::hwd::Clock_controller;
 
 // USART
-    using USART0 = mega0_::hwd::USART<mega0_::cfg_40_pins::USART0>;
-    using USART1 = mega0_::hwd::USART<mega0_::cfg_40_pins::USART1>;
-    using USART2 = mega0_::hwd::USART<mega0_::cfg_40_pins::USART2>;
+    using USART0 = mega0_::hwd::USART<cfg::USART0>;
+    using USART1 = mega0_::hwd::USART<cfg::USART1>;
+    using USART2 = mega0_::hwd::USART<cfg::USART2>;
 
 // SPI
-    using SPI = mega0_::hwd::SPI<mega0_::cfg_40_pins::SPI0>;
+    using SPI = mega0_::hwd::SPI<cfg::SPI0>;
 
 } // hwd
 
 // Drivers
-    using Micro = mega0_::Micro<mega0_::cfg_40_pins::pins>;
+// -------
+    using Micro = mega0_::Micro<cfg::pins>;
 
 // UART_8bits
-    using UART0_8bits = mega0_::UART_8bits<mega0_::cfg_40_pins::USART0>;
-    using UART1_8bits = mega0_::UART_8bits<mega0_::cfg_40_pins::USART1>;
-    using UART2_8bits = mega0_::UART_8bits<mega0_::cfg_40_pins::USART2>;
+    using UART0_8bits = mega0_::UART_8bits<cfg::USART0>;
+    using UART1_8bits = mega0_::UART_8bits<cfg::USART1>;
+    using UART2_8bits = mega0_::UART_8bits<cfg::USART2>;
 
 // SPI
     template <typename Cfg>
-    using SPI_master = mega0_::hal::SPI_master<mega0_::cfg_40_pins::SPI0, Cfg>;
+    using SPI_master = mega0_::hal::SPI_master<cfg::SPI0, Cfg>;
+
+    using SPI_master_cfg = mega0_::hal::SPI_master_cfg;
 }
 
 // La única diferencia entre estos dos namespace son los pines y la función
