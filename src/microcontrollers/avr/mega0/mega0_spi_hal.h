@@ -38,6 +38,8 @@
 #include "mega0_clock_frequencies.h"
 #include "mega0_pin_hwd.h"
 
+#include <atd_type_traits.h>	// always_false_v
+
 namespace mega0_{
 
 namespace hal{
@@ -63,10 +65,10 @@ public:
 private:
 // Helpers
     template <uint32_t frequency_in_hz, uint32_t clk_per_in_hz>
-    static bool SCK_frequency_in_hz_static();
+    static constexpr bool SCK_frequency_in_hz_static();
 
     template <uint32_t frequency_in_hz>
-    static bool SCK_frequency_in_hz_static(uint32_t clk_per_in_hz);
+    static constexpr bool SCK_frequency_in_hz_static(uint32_t clk_per_in_hz);
 };
 
 
@@ -95,7 +97,7 @@ inline bool SPI_base<C>::SCK_frequency_in_hz()
 //	  SCK_frequency_in_hz_static<is_slave>)
 template <typename C>
 template <uint32_t frequency_in_hz, uint32_t clk_per_in_hz>
-inline bool SPI_base<C>::SCK_frequency_in_hz_static()
+inline constexpr bool SPI_base<C>::SCK_frequency_in_hz_static()
 {
     constexpr uint32_t prescaler = clk_per_in_hz / frequency_in_hz;
 
@@ -112,7 +114,7 @@ inline bool SPI_base<C>::SCK_frequency_in_hz_static()
 	SPI::clock_peripheral_divide_by_128();
 
     else
-	static_assert(true, "Frequency not supported");
+	static_assert(atd::always_false_v<C>, "Frequency not supported");
 
     return true;
 }
@@ -121,7 +123,8 @@ inline bool SPI_base<C>::SCK_frequency_in_hz_static()
 // sin perder que la anterior se calcula todo en tiempo de compilación?
 template <typename C>
 template <uint32_t frequency_in_hz>
-inline bool SPI_base<C>::SCK_frequency_in_hz_static(uint32_t clk_per_in_hz)
+inline constexpr 
+bool SPI_base<C>::SCK_frequency_in_hz_static(uint32_t clk_per_in_hz)
 {
     uint32_t prescaler = clk_per_in_hz / frequency_in_hz;
 
@@ -261,7 +264,7 @@ void SPI_master<R, C>::init()
 	SPI::buffer_mode_enable();
 
     else 
-	static_assert(true, "Wrong mode");
+	static_assert(atd::always_false_v<R>, "Wrong mode");
 
 }
 
@@ -338,6 +341,8 @@ inline uint8_t SPI_master<R, C>::write(uint8_t x)
 //    return SPI::data();// valor recibido
 //}
 
+// TODO: añadirle un counter. Si supera más de x que devuelva el control, asi
+// evitamos que se quede colgado.
 template <typename R, typename C>
 inline void SPI_master<R, C>::wait_untill_write_is_complete()
 {
@@ -353,7 +358,8 @@ inline void SPI_master<R, C>::wait_untill_write_is_complete()
     }
 
     else
-	static_assert(true, "Why did you call this function without init SPI?");
+	static_assert(atd::always_false_v<R>, 
+			"Why did you call this function without init SPI?");
 
 
 }
@@ -373,7 +379,7 @@ inline void SPI_master<R, C>::wait_untill_read_is_complete()
     }
 
     else
-	static_assert(true, "Why did you call this function without init SPI?");
+	static_assert(atd::always_false_v<R>, "Why did you call this function without init SPI?");
 }
 
 } // namespace hal

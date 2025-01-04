@@ -47,7 +47,11 @@ struct SPI_master_cfg{
     template <uint8_t n>
     using Pin = myu::hwd::Pin<n, myu::cfg_40_pins::pins>;
 
-    static constexpr uint32_t frequency_in_hz = (20'000'000 / 6) / 64;
+    static constexpr uint8_t prescaler = 64;
+    //static constexpr uint8_t prescaler = 10; // este no tiene que compilar
+
+    // static constexpr uint32_t frequency_in_hz = (20'000'000 / 6) / prescaler;
+    static constexpr uint32_t frequency_in_hz = myu::clk_per() / prescaler;
     static constexpr auto mode = myu::hal::SPI_master_cfg::normal_mode;
     //static constexpr auto mode = myu::hal::SPI_master_cfg::buffer_mode;
 };
@@ -144,6 +148,7 @@ void spi_init()
 
     SPI::cfg<SPI_dev_cfg>();
     SPI::turn_on();
+
 }
 
 
@@ -154,6 +159,7 @@ int main()
     hello();
 
     spi_init();
+
 
     UART_iostream uart;
 

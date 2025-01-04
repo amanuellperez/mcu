@@ -5,6 +5,7 @@ DIRS = \
 		clock		\
 		hal			\
 		hello_world	\
+		micro		\
 		pin			\
 		spi			\
 		usart

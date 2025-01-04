@@ -33,6 +33,8 @@
  ****************************************************************************/
 #include <atd_bit.h>
 
+#include "mega0_debug.h"	// print_register
+
 namespace mega0_{
 namespace hwd{
 
@@ -154,7 +156,10 @@ public:
     static void data(uint8_t x);
     static uint8_t data();
 
+// debug
+    static void print_registers(std::ostream& out);
 };
+
 
 // CTRLA
 // CTRLA::DORD
@@ -361,6 +366,19 @@ inline void SPI<C>::data(uint8_t x)
 template <typename C>
 inline uint8_t SPI<C>::data()
 { return reg()->DATA;}
+
+
+// debug
+template <typename C>
+void SPI<C>::print_registers(std::ostream& out)
+{
+    print_register(out, "CTRLA", reg()->CTRLA);
+    print_register(out, "CTRLB", reg()->CTRLB);
+    print_register(out, "INTCTRL", reg()->INTCTRL);
+    print_register(out, "INTFLAGS", reg()->INTFLAGS);
+    print_register(out, "DATA", reg()->DATA);
+}
+
 
 
 }// hwd

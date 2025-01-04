@@ -53,7 +53,8 @@
 namespace atmega4809_40{
 // cosas comunes a todos los avrs
     using namespace avr_; 
-	
+    using namespace mega0_::clocks; 
+
 // Configuración de este chip con 40 pins
     namespace cfg = mega0_::cfg_40_pins;
 

@@ -249,7 +249,7 @@ inline constexpr T rom_read(const T& x)
 	return T{pgm_read_word(&x)};
 
     else
-	static_assert(atd::always_false_v<int>, "Not implemented");
+	static_assert(atd::always_false_v<T>, "Not implemented");
 }
 
 struct ROM_read{

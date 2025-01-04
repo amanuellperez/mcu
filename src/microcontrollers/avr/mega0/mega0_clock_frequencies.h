@@ -42,9 +42,12 @@
  *
  ****************************************************************************/
 #include <cstdint>
-
+#include <atd_type_traits.h>	// always_false
+				
 namespace mega0_{
 
+namespace clocks{ // uso clocks para poder importar en atmega4809 todas estas
+		  // funciones de golpe
 inline constexpr bool is_clk_main_constant()
 { return CLK_MAIN != 0;}
 
@@ -56,7 +59,12 @@ inline constexpr uint32_t clk_main()
 
  
     else {
-	static_assert(true, "TODO: mirar los registros correspondientes para averiguar CLK_MAIN");
+	// TODO: revisar esto. Ahora CLK_MAIN no está definida (la defino como
+	// 0 en com.mk)
+	return CLK_MAIN;
+
+//	static_assert(CLK_MAIN != 0, 
+//		    "TODO: mirar los registros correspondientes para averiguar CLK_MAIN");
 	// Hay que mirar:
 	//  1) a qué reloj está conectado el avr (OSCM20, ...)
 	//  2) Si es OSCM20 ¿a 16MHz o 20MHz? <-- esto es en un fuse, luego
@@ -84,7 +92,7 @@ inline constexpr uint32_t clk_per()
     else {
 	// Esta es la clk_main() / prescaler.
 	// Hay que mirar el valor del prescaler en el microcontrolador
-	static_assert(true, "TODO");
+	static_assert(CLK_PER != 0, "TODO");
     }
 }
 
@@ -102,6 +110,10 @@ inline constexpr uint32_t clock_cpu() { return clk_cpu(); }
 
 // Clock al que funcionan los peripherals
 inline constexpr uint32_t clock_peripherals() { return clk_per(); }
+
+} // namespace clocks
+
+using namespace clocks;
 
 }// mega0_
 

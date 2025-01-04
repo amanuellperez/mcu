@@ -26,6 +26,8 @@
  * DESCRIPCION
  *	Funciones internas para depurar.	
  *
+ *  TODO: print_register es una función genérica, meterla en avr_? o en atd?
+ *
  * HISTORIA
  *    Manuel Perez
  *    08/11/2024 print_spi_registers
@@ -45,15 +47,15 @@ void print_register(std::ostream& out, const char* name, Int value)
 }
 
 
-template <typename SPI>
-void print_spi_registers(std::ostream& out)
-{
-    print_register(out, "CTRLA", SPI::reg()->CTRLA);
-    print_register(out, "CTRLB", SPI::reg()->CTRLB);
-    print_register(out, "INTCTRL", SPI::reg()->INTCTRL);
-    print_register(out, "INTFLAGS", SPI::reg()->INTFLAGS);
-    print_register(out, "DATA", SPI::reg()->DATA);
-}
+//template <typename SPI>
+//void print_spi_registers(std::ostream& out)
+//{
+//    print_register(out, "CTRLA", SPI::reg()->CTRLA);
+//    print_register(out, "CTRLB", SPI::reg()->CTRLB);
+//    print_register(out, "INTCTRL", SPI::reg()->INTCTRL);
+//    print_register(out, "INTFLAGS", SPI::reg()->INTFLAGS);
+//    print_register(out, "DATA", SPI::reg()->DATA);
+//}
 
 }// mega0_
 

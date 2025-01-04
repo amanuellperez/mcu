@@ -132,6 +132,7 @@ template <typename C>
 void MAX7219_base<C>::send_packet(uint8_t address, uint8_t data)
 {
     SPI::write(address);
+
     // TODO: no funciona wait_transmission_complete!!!
 //    SPI::wait_transmission_complete();
     SPI::write(data);
@@ -856,7 +857,6 @@ template <typename C>
 void MAX7219_digits<C>::init()
 {
     Base::init();
-
     Base::enable_decode_mode();
     Base::scan_all_digits();
 }

@@ -18,16 +18,40 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "../../mcu_SPI.h"
-#include <mega.h>
 
 #include <atd_test.h>
 using namespace test;
 
+#ifdef IF_atmega328p
+#include <mega.h> 
+namespace myu = atmega;
+using UART = myu::UART_8bits;
+
+void init_mcu()
+{}
+
+
+#define ISR_uart ISR_USART_RX 
+
+#elifdef IF_atmega4809
+
+#include <mega0.h> 
+namespace myu = atmega4809;
+using UART = myu::UART1_8bits;
+
+void init_mcu()
+{
+    myu::init();
+//    myu::Clock_controller::clk_main_divided_by_16(); // a 1 MHz
+}
+
+#endif
+
+
 // Microcontroller
 // ---------------
-namespace myu = atmega;
 using Micro   = myu::Micro;
-using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
+using UART_iostream = mcu::UART_iostream<UART>;
 
 // UART
 // ----
@@ -224,6 +248,7 @@ void test_SPI_selector_with_deselect_delay()
 // ----
 int main()
 {
+    init_mcu();
     init_uart();
 
     hello();
@@ -232,8 +257,8 @@ int main()
     UART_iostream uart;
 
     while(1){
-//	test_SPI_pin_array_selector();
-	test_SPI_selector_with_deselect_delay();
+	test_SPI_pin_array_selector();
+//	test_SPI_selector_with_deselect_delay();
     }
 }
 

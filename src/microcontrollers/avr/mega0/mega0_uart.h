@@ -155,7 +155,7 @@ bool UART_cfg()
 	USART::character_size_7(); 
 
     else
-	static_assert(true, "Wrong value of character_size");
+	static_assert(false, "Wrong value of character_size");
 
     // TODO: ¿cómo elegir character size == 9? 
     // Hay dos opciones: 9L o 9H

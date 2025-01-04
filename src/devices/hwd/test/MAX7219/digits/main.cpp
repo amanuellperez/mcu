@@ -18,9 +18,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+
+
 #include "../../../dev_MAX7219.h"
-
-
 #include <mcu_SPI.h>
 
 #include <atd_test.h>
@@ -63,7 +63,8 @@ struct SPI_master_cfg{
     template <uint8_t n>
     using Pin = myu::hwd::Pin<n>;
 
-    static constexpr uint32_t frequency_in_hz = 500'000; // máx. 10MHz
+    static constexpr uint8_t prescaler = 16;
+    static constexpr uint32_t frequency_in_hz = myu::clk_per() / prescaler; // máx. 10MHz
     static constexpr auto mode = myu::SPI_master_cfg::normal_mode;
 };
 
@@ -113,6 +114,7 @@ void init_uart()
 void init_spi()
 {
     SPI::init();
+    SPI::turn_on();
 }
 
 
@@ -121,8 +123,11 @@ void init_max7219()
     UART_iostream uart;
 
     MAX7219::init(); 
+    uart << "\ninit\n";
     MAX7219::intensity(0x00);
+    uart << "\nintensity\n";
     MAX7219::turn_on();
+    uart << "\nturn_on\n";
 }
 
 
@@ -216,12 +221,19 @@ int main()
 {
     init_mcu();
     init_uart();
+    UART_iostream uart;
+    uart << "spi_no_select_pin = " << (int) spi_no_select_pin << '\n';
+    uart << "frequency_in_hz = " << SPI_master_cfg::frequency_in_hz << '\n';
     init_spi();
+    uart << "\nSPI\n";
+    SPI::Hwd::print_registers(uart);
+
     init_max7219();
+    uart << "\nMAX\n";
 
     hello();
 
-    UART_iostream uart;
+//    UART_iostream uart;
     
     MAX7219::clear();
     while (1){
