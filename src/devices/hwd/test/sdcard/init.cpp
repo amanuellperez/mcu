@@ -59,13 +59,23 @@ void step_by_step_init()
     UART_iostream uart;
 
     SDCard::SPI_cfg_init();
-    atd::print(uart, msg_go_idle_state);
     SDCard::R1 r1 = SDCard::go_idle_state();
+
+    SDCard::R7 r7;
+    SDCard::send_if_cond(r7);
+
+    SDCard::R3 r3;
+    SDCard::read_ocr(r3);
+
+    SDCard::R1 r1_op_cond = SDCard::sd_send_op_cond();
+
+    SDCard::R3 r3_ocr;
+    SDCard::read_ocr(r3_ocr);
+
+    atd::print(uart, msg_go_idle_state);
     print(uart, r1);
 
     atd::print(uart, msg_send_if_cond);
-    SDCard::R7 r7;
-    SDCard::send_if_cond(r7);
     print(uart, r7);
 
     // Posibles respuestas con significado (ver 7.3.1.4)
@@ -95,16 +105,12 @@ void step_by_step_init()
     // En este caso la tarjeta devolverá que está `busy`, sin inicializar. Es
     // normal (ver 7.2.1@physical_layer)
     atd::print(uart, msg_read_ocr1);
-    SDCard::R3 r3;
-    SDCard::read_ocr(r3);
     print(uart, r3);
 
     atd::print(uart, msg_send_op_cond);
-    r1 = SDCard::sd_send_op_cond();
-    print(uart, r1);
+    print(uart, r1_op_cond);
     // TODO: si falla retry???
 
     atd::print(uart, msg_read_ocr2);
-    SDCard::read_ocr(r3);
-    print_type_card(uart, r3);
+    print_type_card(uart, r3_ocr);
 }

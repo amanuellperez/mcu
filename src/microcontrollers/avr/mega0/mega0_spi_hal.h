@@ -310,6 +310,10 @@ void SPI_master<R, C>::cfg()
 	else                               SPI::mode_3();
     }
 
+// TODO: de esta forma podemos trabajar con dispositivos que funcionen con
+// frecuencias diferentes.
+// if constexpr (requires (SPI_dev_cfg::frequency_in_hz))
+//	Base::template SCK_frequency_in_hz<Cfg::frequency_in_hz>();
 }
 
 

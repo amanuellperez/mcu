@@ -47,6 +47,7 @@ INCS= atd_algorithm.h	\
 	atd_string.h		\
 	atd_test.h			\
 	atd_time.h			\
+	atd_trace.h			\
 	atd_type_traits.h	\
 	atd_units.h
 

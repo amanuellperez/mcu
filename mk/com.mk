@@ -28,7 +28,10 @@ ifeq ($(MCU), atmega4809)
 	PROGRAMMER_BAUDRATE ?= 57600
 else
 	PROGRAMMER_TYPE     ?= usbasp
-	PROGRAMMER_BAUDRATE ?= 9600
+# Resulta que al comparar 9600 con 115200 el tiempo que tarda el avrdude es el
+# mismo @_@ 
+	#PROGRAMMER_BAUDRATE ?= 9600
+	PROGRAMMER_BAUDRATE ?= 115200
 endif
 
 PROGRAMMER_PORT ?= /dev/ttyUSB0

@@ -50,6 +50,7 @@ void ask_modify_block(SDCard::Block data)
     data[2] = 0xEF;
 }
 
+
 void write_block()
 {
     UART_iostream uart;
@@ -61,9 +62,14 @@ void write_block()
     uart >> add;
     uart << add << '\n';
 
+    constexpr bool wait = false; // para depurar
     uint8_t data[SDCard::block_size];
     if (read_block(add, data)){
 	ask_modify_block(data);
+
+	if (wait)
+	    press_key_to_continue();
+
 	auto res = SDCard::write(add, data);
 	print(uart, res);
     }
@@ -72,37 +78,52 @@ void write_block()
 }
 
 
+void menu()
+{
+    UART_iostream uart;
+    while(1){
+	atd::print(uart, msg_main_menu2);
+
+	char opt{};
+	uart >> opt;
+
+	switch(opt){
+	    break; case '1': read_status();
+	    break; case '2': read_block();
+	    break; case '3': write_block();
+	    break; case 'r': return;
+	}
+    }
+}
+
 int main()
 {
+    init_mcu();
+
 // init_UART();
     UART_iostream uart;
     UART_iostream::init();
     uart.turn_on();
 
-    Chip_select::init();
+// init_SPI();
+    SPI::init();
+    SPI::turn_on();
 
     atd::print(uart, msg_hello);
-    atd::print(uart, msg_main_menu);
 
-    char ans{};
-    uart >> ans;
+    while (1) {
+	atd::print(uart, msg_main_menu);
 
-    if (ans == '1')
-	step_by_step_init();
-
-    else
-	automatic_init();
-
-    
-    while(1){
-	atd::print(uart, msg_main_menu2);
+	char ans{};
 	uart >> ans;
 
-	switch(ans){
-	    break; case '1': read_status();
-	    break; case '2': read_block();
-	    break; case '3': write_block();
-	}
+	if (ans == '1')
+	    step_by_step_init();
+
+	else
+	    automatic_init();
+
+	menu();
     }
 }
 

@@ -435,7 +435,7 @@ hecho voy escribiendo algo de documentación. El problema es que al no
 mantenerla hay partes de la documentación completamente obsoletas, generando
 una documentación inconsistente.
 
-Con todo existen dos fuentes reales para entender el código:
+Existen dos fuentes reales para entender el código:
 
 1. El propio código: uno de los objetivos de todo el código es que se pueda
    leer. Si no se puede leer (salvo las partes de bajo nivel) está mal
@@ -444,6 +444,27 @@ Con todo existen dos fuentes reales para entender el código:
 2. Los tests: son ejemplos de cómo tengo intención de usar la librería 
    correspondiente.
 
+
+### Forma de hablar
+
+Voy clasificando mentalmente a los programadores. De momento (a falta de
+mejores nombres) uso:
+
+* Librador? Bibliotecador? (suenan fatal, estos no los uso xD):
+  Programador que escribe una librería (una biblioteca).
+
+* Usuario de biblioteca (???): un programador que llama a funciones de una
+  biblioteca. ¿Cómo llamarlo?
+
+* Mainador: es el cliente final o usuario final. Es el programador que escribe
+  la aplicación: el programa que tiene el `main` (de ahí el nombre). El
+  mainador lo clasifico en dos:
+
+  + Harwador: el programador que conoce el hardware de la aplicación. Es
+    responsable de configurar dicho harwdare.
+
+  + Sofwador: programador que no sabe nada de hardware: no tiene ni idea de
+    los dispositivos reales que hay por debajo, y vive feliz ignorándolo.
 
 
 ## <a name="licencia"></a>GPL

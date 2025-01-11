@@ -255,8 +255,11 @@ Al conectar por primera vez una SD card al SPI el programador falla. ¿Por qué?
 El avr se programa usando SPI con lo que se puede generar un SPI driver
 contention entre el programador y la SD card. La application note AVR910 da la
 solución: para evitar este problema poner una resistencia en serie
-entre las líneas SCK/MISO/MOSI de la SD card y el avr. Al probar con 10k
-funciona.
+entre las líneas ~~SCK/MISO/MOSI de la SD card y el avr. Al probar con 10k
+funciona.~~ Al volver a intentar probar el test de la SD card falló la
+inicialización (el cmd8 no devolvía el pattern correcto). Después de demasiado
+tiempo depurando, probé a eliminar las resistencias de MOSI y SCK y funcionó.
+Solo he dejado la de MISO. De hecho elm-chan solo conecta la MISO.
 
 Si se quiere dejar el producto final con la posibilidad de reprogramarlo hay
 que dejar esas resistencias. 

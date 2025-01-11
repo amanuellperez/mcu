@@ -226,7 +226,7 @@ int main()
     uart << "frequency_in_hz = " << SPI_master_cfg::frequency_in_hz << '\n';
     init_spi();
     uart << "\nSPI\n";
-    SPI::Hwd::print_registers(uart);
+//    SPI::Hwd::print_registers(uart);
 
     init_max7219();
     uart << "\nMAX\n";

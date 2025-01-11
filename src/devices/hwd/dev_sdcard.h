@@ -1,4 +1,4 @@
-// Copyright (C) 2023 Manuel Perez 
+// Copyright (C) 2023-2025 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -22,7 +22,6 @@
 #ifndef __DEV_SDCARD_H__
 #define __DEV_SDCARD_H__
 /****************************************************************************
- * ((TODO)) meterlo en namespace hwd!!! 
  *
  * DESCRIPCION
  *	Traductor del interfaz SPI de la SD card.
@@ -32,7 +31,7 @@
  *	Estoy implementando un traductor: voy leyendo la datasheet y la
  *	traduzco en código. 
  *
- *	Ejemplo: al escrribir la función write() la datasheet pone que tengo
+ *	Ejemplo: al escribir la función write() la datasheet pone que tengo
  *	que enviar el start token que es 0xFE. Usando números mágicos el
  *	código queda:
  *	    SPI::write(0xFE);
@@ -43,14 +42,30 @@
  *	y para comprobar que está bien tendré que ir a ver la definición de
  *	write_start_token lo cual es incómodo.
  *
+ * DUDA
+ *	¿Quién es el responsable de configurar la frecuencia SPI a la que
+ *	funciona la SD card? 
+ *
+ *	1) El mainador configura la frecuencia de SPI para todos los
+ *	dispositivos la misma. 
+ *
+ *	2) Cada dispositivo configura su propia frecuencia.
+ *
+ *	De momento, uso 2). Se podría generalizar fácilmente: si se pasa en la
+ *	SDCard_cfg la variable SPI_frequency entonces la SD card es la
+ *	responsable de configurar la frecuencia. Si no se pasa esta variable
+ *	es el mainador. ¿Merece la pena implementarlo?
  *
  * HISTORIA
  *    Manuel Perez
  *    11/02/2023 Escrito.
+ *    11/01/2025 Generalizado para poder usar tanto atmega328 y atmega4809.
  *
  ****************************************************************************/
 
 #include <span>
+#include <atd_trace.h>	// Log_type
+#include <atd_bit.h>
 
 /***************************************************************************
  *  SDCARD
@@ -64,62 +79,7 @@
  ***************************************************************************/
 namespace dev{
 
-// Clase por defecto para seleccionar la SDCard
-// El `Selector_SPI` lo define en general el cliente. Es el que diseña el
-// hardware de la aplicación el que sabe cómo va a conectar los diferentes
-// dispositivos SPI. `SDCard_select` es el selector más básico: usa un pin
-// (que por defecto será el que SPI::noCS_pin_number).
-// TODO: Generalizar esta clase. Se puede meter en mcu_SPI.h ya que no depende
-// del micro concreto a usar ni de los dispositivos. Se basa en un pin.
-template <typename Output_pin, typename SPI>
-class SDCard_select{
-public:
-    static void init() 
-    {
-	Output_pin::as_output();
-	deselect();
-    }
-
-    // En general el usuario no debería de llamar a esta función.
-    // Sin embargo, SDCard::initialization_sequence necesita garantizar que
-    // el chip no esté seleccionado (¿podría omitir eso?) Por ello dejo
-    // público esta función.
-    static void deselect()
-    {
-//	SPI::write(0xFF);   // hacemos MOSI = 1
-	Output_pin::write_one();
-//	SPI::write(0xFF);   // hacemos MOSI = 1
-    }
-
-    // TODO: revisar la lógica, esto está raro... Usar mcu::SPI_pin_selector?
-    SDCard_select() 
-    {
-	selected = Output_pin::is_one();
-	select();
-    }
-
-    ~SDCard_select() 
-    {
-	if (!selected)
-	    deselect();
-    }
-
-private:
-    // selected permite llamar de forma anidada SDCard_select{}
-    // Esto evitará muchos errores a la hora de mantener el código. Si no se
-    // hace así, hay que llevar un control total de cuándo se ha seleccionado
-    // o no el Chip. No seleccionarlo o deseleccionarlo generaría un error que
-    // seguro lleva bastante tiempo encontrar. 
-    bool selected = false;
-
-    static void select()
-    { 
-//	SPI::write(0xFF);   // hacemos MOSI = 1
-	Output_pin::write_zero(); 
-//	SPI::write(0xFF);   // hacemos MOSI = 1
-    }
-};
-
+namespace hwd{
 
 namespace SDCard_types{
 
@@ -448,6 +408,8 @@ public:
     static bool is_valid(uint8_t x)
     { return (atd::is_zero_bit<4>::of(x) and atd::is_one_bit<0>::of(x)); }
 
+// Debug
+    uint8_t value() const { return data; }
 
 private:
     Data_response_token(uint8_t d) : data{d} { }
@@ -512,24 +474,21 @@ private:
 } // namespace SDCard_types
 
 // Configuración de SDCard
-template <typename Micro_t,	    // ¿a qué micro conectamos la SD card?
-	  typename SPI_master,	    // driver de SPI que usamos
-	  typename Chip_select_t,    // ¿cómo seleccionamos el chip?
-	  uint32_t SPI_init_frequency0 = 250'000, // 250 kHz <= 400 kHz
-	  uint32_t SPI_frequency0      = 500'000  // 500 kHz
-	  >
-struct SDCard_cfg{
-    using Micro	      = Micro_t;
-    using SPI	      = SPI_master;
-    using Chip_select = Chip_select_t;
-
-    static constexpr uint32_t SPI_init_frequency = SPI_init_frequency0;
-    static_assert(SPI_init_frequency <= 400'000, 
-		"SD card SPI init frequency must be at most 400'000 Hz");
-
-    static constexpr uint32_t SPI_frequency      = SPI_frequency0;
+//struct SDCard_cfg{
+//    using Micr    = myu::Micro;
+//    using SPI	    = myu::SPI_master;
+//    using SPI_select = mcu::SPI_select...;
+//    static constexpr uint32_t SPI_frequency      = 500'000; // 500kHz
+//    using log = ...
+//};
+//
+namespace private_{
+struct SPI_SDCard_cfg{
+    static constexpr bool data_order_MSB = true;
+    static constexpr uint8_t polarity    = 0;
+    static constexpr uint8_t phase       = 0;
 };
-
+}  // private_
 
 // Documentos que uso:
 //	"Part 1 - physical layer simplified specivication ver9.0"
@@ -537,11 +496,11 @@ struct SDCard_cfg{
 // Este es el documento que voy a traducir aquí en código.
 //
 template <typename Cfg>
-class SDCard_basic{
+class SDCard{
 public:
     using Micro	      = typename Cfg::Micro;
     using SPI	      = typename Cfg::SPI;
-    using Select_chip = typename Cfg::Chip_select;
+    using SPI_select = typename Cfg::SPI_select;
     
 // Types
     using Init_return = SDCard_types::Init_return;
@@ -556,20 +515,24 @@ public:
     using Write_return= SDCard_types::Write_return;
     using Data_response_token = SDCard_types::Data_response_token;
 
-    using Address = uint32_t;	// para cards SDHC/SDXC
+// 7.2: In case of SDHC and SDXC Cards, block length is fixed to 512 bytes.
+// 7.2.3: In case of SDHC and SDXC Cards, block length is fixed to 512 Bytes 
+//        regardless of the block length set by CMD16.
+    using Address = uint32_t;	
     static constexpr uint16_t block_size = 512;
     using Block   = std::span<uint8_t, block_size>; 
 
 
 // Constructor
-    // Interfaz static. Solo hay una SDCard de este tipo porque el Select_chip
+    // Interfaz static. Solo hay una SDCard de este tipo porque el SPI_select
     // es unico. (probemos así, el uso marcará si esto es útil)
-    SDCard_basic() = delete;
+    SDCard() = delete;
 
 
 // COMMANDS
 // --------
     // Inicializa la SDCard en SPI mode, dejándola preparada para funcionar
+    template <uint32_t SPI_init_frequency = 250'000> // 250 kHz <= 400 kHz
     static Init_return init(uint8_t nretries = max_retries_acmd41_command, 
 			    bool HCS = true);
 
@@ -609,13 +572,17 @@ public:
 //
 //	 (2) Sirven para depurar esta clase.
 //
-    static void SPI_cfg()
-    { SPI_turn_on<SPI_frequency>(); }
-
 // Implementation of init() function
     // Cfg SPI para ejecutar la inicialización de la tarjeta
+    template <uint32_t SPI_init_frequency = 250'000> // 250 kHz <= 400 kHz
     static void SPI_cfg_init()
-    { SPI_turn_on<SPI_init_frequency>(); }
+    {
+	SPI_select::init();
+
+	static_assert(SPI_init_frequency <= 400'000, 
+		"SD card SPI init frequency must be at most 400'000 Hz");
+	SPI_turn_on<SPI_init_frequency>(); 
+    }
 
     // Devuelve response R1. Si todo va bien r1_is_in_idle_state(R1) == true
     static R1 go_idle_state();
@@ -648,15 +615,16 @@ private:
 // + send_    : no seleccionan el chip. Serán llamadas dentro de otra
 //              función responsable de ello.
 //
-    
+ 
+    using log = atd::Log_type<Cfg>;
+
 // CFG
     // DUDA: ¿qué valor para max_retries? Los de Arduino indican que hay
     // mínimo de de 1 a 8 bytes antes de que responda la SD card. No he
-    // encontrado en la especificación del SDCard_basic los tiempos de respuesta
+    // encontrado en la especificación del SDCard los tiempos de respuesta
     // (???). Arduino usa 10, usemos 10 de momento.
     static constexpr uint8_t max_retries = 10;
     static constexpr uint8_t max_retries_acmd41_command = 100;
-    static constexpr uint32_t SPI_init_frequency = Cfg::SPI_init_frequency;
     static constexpr uint32_t SPI_frequency      = Cfg::SPI_frequency;
 
     // ¿Cuánto tiempo debemos de esperar a que finalice de escribir el bloque
@@ -671,9 +639,25 @@ private:
 
     // CMD8 data:
     static constexpr uint32_t cmd8_supply_voltage = 0x01;
+    //static constexpr uint32_t cmd8_supply_voltage = 0x02;
     static constexpr uint32_t cmd8_pattern = 0xAA;
+
+    // De acuerdo a 7.2.2: 
+    // The SPI interface is initialized in the CRC OFF mode in default.
+    // After the card is put into SPI mode, CRC check for all commands 
+    // including CMD0 will be done according to CMD59 setting.
+    // Luego, en principio, debería de ignorar este CRC.
+    // En la práctica si no se define correctamente el CRC devuelve "CRC error"
+    // El CRC7 se puede calcular: https://kyuhyuk.kr/crc7-mmc-calc/
     static constexpr uint8_t cmd8_crc = 0x86;//TODO: calcularlo dentro de send_cmd8
+    //Para cmd8_supply_voltage = 0x02:
+//    static constexpr uint8_t cmd8_crc = 0xBC;
 							
+
+    using SPI_SDCard_cfg = private_::SPI_SDCard_cfg;
+
+    static void SPI_cfg()
+    { SPI_turn_on<SPI_frequency>(); }
 
     // 7.3.1.1@physical_layer: 
     //   All the SD Memory Card commands are 6 bytes long. 
@@ -785,10 +769,10 @@ private:
 // Sí, pero dentro de SPI hay que mirar si el SPI está configurando enviando
 // el MSB primero o no.
 // No puedo especializarla para cada T (ya que parece ser que 1º hay que
-// especializar SDCard_basic<...>) por eso uso el if constexpr
+// especializar SDCard<...>) por eso uso el if constexpr
 template <typename Cfg>
 template <typename T>
-inline T SDCard_basic<Cfg>::SPI_read()
+inline T SDCard<Cfg>::SPI_read()
 {
     if constexpr (std::is_same_v<T, uint16_t>)
 	return SPI_read_uint16_t();
@@ -801,7 +785,7 @@ inline T SDCard_basic<Cfg>::SPI_read()
 }
 
 template <typename Cfg>
-inline uint16_t SDCard_basic<Cfg>::SPI_read_uint16_t()
+inline uint16_t SDCard<Cfg>::SPI_read_uint16_t()
 {
     uint8_t b[2];
 
@@ -812,7 +796,7 @@ inline uint16_t SDCard_basic<Cfg>::SPI_read_uint16_t()
 }
 
 template <typename Cfg>
-inline uint32_t SDCard_basic<Cfg>::SPI_read_uint32_t()
+inline uint32_t SDCard<Cfg>::SPI_read_uint32_t()
 {
     uint8_t b[4];
 
@@ -830,14 +814,14 @@ inline uint32_t SDCard_basic<Cfg>::SPI_read_uint32_t()
 // first) (endianness, ¿por qué lo llaman Big & little endian cuando
 // realmente es most/least significant byte??? @_@)
 template <typename Cfg>
-inline void SDCard_basic<Cfg>::SPI_write_uint16_t(uint16_t x)
+inline void SDCard<Cfg>::SPI_write_uint16_t(uint16_t x)
 {
     SPI::write(atd::byte<1>(x));
     SPI::write(atd::byte<0>(x));
 }
 
 template <typename Cfg>
-inline void SDCard_basic<Cfg>::SPI_write_uint32_t(const uint32_t& x)
+inline void SDCard<Cfg>::SPI_write_uint32_t(const uint32_t& x)
 {
     SPI::write(atd::byte<3>(x));
     SPI::write(atd::byte<2>(x));
@@ -854,21 +838,17 @@ inline void SDCard_basic<Cfg>::SPI_write_uint32_t(const uint32_t& x)
 //
 // 7.3.2@physical_layer: All responses are transmitted MSB first.
 template <typename Cfg>
-void SDCard_basic<Cfg>::SPI_cfg__()
+void SDCard<Cfg>::SPI_cfg__()
 {
-//struct SPI_SDCard_cfg{
-//    static constexpr bool data_order_MSB = true;
-//    static constexpr uint8_t polarity    = 0;
-//    static constexpr uint8_t phase       = 0;
-//};
 
     // TODO: el cfg_pins lo hace el SPI::init() no lo puede hacer SDCard 
     // El responsable de conectar el SPI o no es el micro, no el device. 
     // Corregir esto
-    SPI::cfg_pins();
+//    SPI::cfg_pins();
 
-    SPI::mode(0,0);
-    SPI::data_order_MSB();
+//    SPI::mode(0,0);
+//    SPI::data_order_MSB();
+    SPI::template cfg<SPI_SDCard_cfg>();
     SPI::default_transfer_value(0xFF); // 0xFF sería un error de R1
 				       // al tener el bit[7] == '1'
 				       // ¿Servirá para detectar errores
@@ -877,7 +857,7 @@ void SDCard_basic<Cfg>::SPI_cfg__()
 
 template <typename Cfg>
     template<uint32_t frequency>
-void SDCard_basic<Cfg>::SPI_turn_on()
+void SDCard<Cfg>::SPI_turn_on()
 {
     SPI_cfg__();
     SPI::template SCK_frequency_in_hz<frequency>();
@@ -892,9 +872,9 @@ void SDCard_basic<Cfg>::SPI_turn_on()
 //   the first command.
 // + In case of SPI mode, CS shall be held to high during 74 clock cycles.
 template <typename Cfg>
-void SDCard_basic<Cfg>::initialization_sequence()
+void SDCard<Cfg>::initialization_sequence()
 {
-    Select_chip::deselect();    // CS shall be held high!!!
+    SPI_select::deselect();    // CS shall be held high!!!
 
     Micro::wait_ms(1); // power up time
 
@@ -929,7 +909,7 @@ void SDCard_basic<Cfg>::initialization_sequence()
 // En la práctica lo conozco todo en tiempo de compilación. De momento
 // pruebo con la más sencilla:
 template <typename Cfg>
-inline void SDCard_basic<Cfg>::
+inline void SDCard<Cfg>::
 	send_cmd8(uint8_t supply_voltage, uint8_t pattern, uint8_t crc)
 {
     // 7.3.1.3@physical_layer
@@ -948,10 +928,10 @@ inline void SDCard_basic<Cfg>::
 // por {cmd55, ...}. CMD55 lo llaman app_cmd
 // return: R1 response
 template <typename Cfg>
-uint8_t SDCard_basic<Cfg>::transfer_app_cmd__()
+uint8_t SDCard<Cfg>::transfer_app_cmd__()
 {
 //	SPI_cfg_init();
-    Select_chip select{};
+    SPI_select select{};
 
     send(55u);
 
@@ -962,10 +942,10 @@ uint8_t SDCard_basic<Cfg>::transfer_app_cmd__()
 // Solo hay que enviar HCS en el 
 // return: R1 response
 template <typename Cfg>
-uint8_t SDCard_basic<Cfg>::transfer_sd_send_op_cond__(bool HCS)
+uint8_t SDCard<Cfg>::transfer_sd_send_op_cond__(bool HCS)
 {
 //	SPI_cfg_init();
-    Select_chip select{};
+    SPI_select select{};
     uint32_t arg{0};
     if (HCS) 
 	atd::write_bit<30>::to<1>::in(arg);
@@ -977,24 +957,25 @@ uint8_t SDCard_basic<Cfg>::transfer_sd_send_op_cond__(bool HCS)
 
 
 template <typename Cfg>
-SDCard_basic<Cfg>::R1 
-	    SDCard_basic<Cfg>::go_idle_state()
+SDCard<Cfg>::R1 
+	    SDCard<Cfg>::go_idle_state()
 {
 //	SPI_cfg_init(); <-- Lo llama init
     initialization_sequence();
 
-    Select_chip select{};
+    SPI_select select{};
 
     send_cmd0();
     return R1{read_R1()};
 }
 
 // return: r7
+// Ver 7.3.1.4 para posibles valores de r7
 template <typename Cfg>
-void SDCard_basic<Cfg>::send_if_cond(R7& r7)
+void SDCard<Cfg>::send_if_cond(R7& r7)
 {
 //	SPI_cfg_init();
-    Select_chip select{};
+    SPI_select select{};
 
     // TODO: pasar como argumentos supply_voltage y pattern. Para ello
     // necesito escribir primero la funcion de CRC7.
@@ -1006,10 +987,10 @@ void SDCard_basic<Cfg>::send_if_cond(R7& r7)
 
 // return: r3
 template <typename Cfg>
-void SDCard_basic<Cfg>::read_ocr(R3& r3)
+void SDCard<Cfg>::read_ocr(R3& r3)
 {
 //	SPI_cfg_init();
-    Select_chip select{};
+    SPI_select select{};
 
     send(58u);
 
@@ -1019,10 +1000,10 @@ void SDCard_basic<Cfg>::read_ocr(R3& r3)
 
 // return: r2
 template <typename Cfg>
-SDCard_basic<Cfg>::R2 SDCard_basic<Cfg>::send_status()
+SDCard<Cfg>::R2 SDCard<Cfg>::send_status()
 {
 //	SPI_cfg();
-    Select_chip select{};
+    SPI_select select{};
 
     send(13u);
 
@@ -1036,7 +1017,7 @@ SDCard_basic<Cfg>::R2 SDCard_basic<Cfg>::send_status()
 // + A command may be rejected in, entre otros casos, "it is sent while
 //   the card is in Busy".
 //
-//   Luego si la SDCard_basic esta ocupada responderá con error.
+//   Luego si la SDCard esta ocupada responderá con error.
 //
 // 7.3.2.1@physical_layer
 //   +  El bit '7' tiene que ser igual a '0'.
@@ -1058,7 +1039,7 @@ SDCard_basic<Cfg>::R2 SDCard_basic<Cfg>::send_status()
 //	Return: R1 si todo va bien (bit<7>::of(R1) == 0)
 //		0xFF en caso de error.
 template <typename Cfg>
-uint8_t SDCard_basic<Cfg>::read_R1()
+uint8_t SDCard<Cfg>::read_R1()
 {
     // SPI::read(); //TODO: descomentar si falla. Los de Arduino descartan
     // el primer byte "to avoid MISO pull-up problem" (???) Aunque tal
@@ -1077,7 +1058,7 @@ uint8_t SDCard_basic<Cfg>::read_R1()
 
 
 template <typename Cfg>
-inline SDCard_basic<Cfg>::R2 SDCard_basic<Cfg>::read_R2()
+inline SDCard<Cfg>::R2 SDCard<Cfg>::read_R2()
 {
     uint8_t r = read_R1(); 
 
@@ -1090,7 +1071,7 @@ inline SDCard_basic<Cfg>::R2 SDCard_basic<Cfg>::read_R2()
 
 
 template <typename Cfg>
-void SDCard_basic<Cfg>::read_R3(R3& r3)
+void SDCard<Cfg>::read_R3(R3& r3)
 {
     // Leemos R1
     uint8_t r = read_R1(); 
@@ -1146,8 +1127,9 @@ void SDCard_basic<Cfg>::read_R3(R3& r3)
 // Args: (supply_voltage, pattern0) son los pasados a CMD8
 // return: R7
 //
+// TODO: supply_voltage y pattern0 hay que validarlos
 template <typename Cfg>
-void SDCard_basic<Cfg>::read_R7(uint8_t supply_voltage, uint8_t pattern0,
+void SDCard<Cfg>::read_R7(uint8_t supply_voltage, uint8_t pattern0,
 				    R7& r7)
 {
     // Leemos R1
@@ -1156,6 +1138,7 @@ void SDCard_basic<Cfg>::read_R7(uint8_t supply_voltage, uint8_t pattern0,
 
     if (r == 0x09)
 	return;
+
 
     // Al principio puse: `if(r != 0x01)` pero fallaba ya que la SDcard
     // devolvía '0'!!!
@@ -1180,8 +1163,8 @@ void SDCard_basic<Cfg>::read_R7(uint8_t supply_voltage, uint8_t pattern0,
 // Si en el futuro encuentro la referencia en la datasheet correspondiente
 // modificaré el codigo de acuerdo.
 template <typename Cfg>
-SDCard_basic<Cfg>::Data_response_token 
-		SDCard_basic<Cfg>::read_data_response_token()
+SDCard<Cfg>::Data_response_token 
+		SDCard<Cfg>::read_data_response_token()
 {
     constexpr uint16_t n = time_as_number_of_transfers<timeout_write_busy>();
 
@@ -1216,8 +1199,12 @@ SDCard_basic<Cfg>::Data_response_token
 // (salvo que configuremos CRC ON). Salvo en el CMD0 el valor del CRC
 // puede ser cualquiera (por eso por defecto 0x00).
 template<typename Cfg>
-void SDCard_basic<Cfg>::send(uint8_t cmd, uint32_t arg, uint8_t crc)
+void SDCard<Cfg>::send(uint8_t cmd, uint32_t arg, uint8_t crc)
 {
+// DUDA: De acuerdo a https://stackoverflow.com/questions/2365897/initializing-sd-card-in-spi-issues
+// a veces conviene hacer esto. Los de Arduino lo hacen en read_R1
+    while (SPI::read() != 0xFF) { ; } // enviamos 0xFF hasta que devuelve 0xFF
+
     SPI_write_uint8_t(cmd | 0x40u);	
 
     SPI_write_uint32_t(arg);
@@ -1229,7 +1216,7 @@ void SDCard_basic<Cfg>::send(uint8_t cmd, uint32_t arg, uint8_t crc)
 //   If a command does not require an argument, the value of 
 //   this field should be set to zero.
 template<typename Cfg>
-void SDCard_basic<Cfg>::send(uint8_t cmd)
+void SDCard<Cfg>::send(uint8_t cmd)
 {
     SPI::write(cmd | 0x40);	   
 
@@ -1241,11 +1228,12 @@ void SDCard_basic<Cfg>::send(uint8_t cmd)
     SPI::write(0x01);
 }
 
-template<typename Cfg>
-SDCard_basic<Cfg>::Init_return SDCard_basic<Cfg>::
+template<typename C>
+    template<uint32_t SPI_init_frequency>
+SDCard<C>::Init_return SDCard<C>::
 					init(uint8_t nretries, bool HCS)
 {
-    SPI_cfg_init();
+    SPI_cfg_init<SPI_init_frequency>();
 
     R1 r1 = go_idle_state();
     if (r1.is_illegal_command())
@@ -1262,8 +1250,9 @@ SDCard_basic<Cfg>::Init_return SDCard_basic<Cfg>::
 //	res = Init_return::card_version1;
 //
 //    else {
-	if (r7.r1.data == 0x09)
+	if (r7.r1.data == 0x09){
 	    return Init_return::cmd8_crc_error;
+	}
 
 	if (r7.VCA() == 0) 
 	    return Init_return::voltage_mismatch;
@@ -1276,7 +1265,6 @@ SDCard_basic<Cfg>::Init_return SDCard_basic<Cfg>::
 	    return Init_return::cmd8_echo_fail;
 	    
 //    }
-
 
     // Enviamos CMD58 (opcional) para averiguar qué potenciales es a los que
     // trabaja la tarjeta. Si nuestro hardware no trabaja con esos potenciales
@@ -1305,8 +1293,8 @@ SDCard_basic<Cfg>::Init_return SDCard_basic<Cfg>::
 
 
 template<typename Cfg>
-SDCard_basic<Cfg>::R1 
-	SDCard_basic<Cfg>::sd_send_op_cond(uint8_t nretries, bool HCS)
+SDCard<Cfg>::R1 
+	SDCard<Cfg>::sd_send_op_cond(uint8_t nretries, bool HCS)
 {
     // Devolverá in_idle_state mientras no haya inicializado. La datasheet
     // indica que hay que reintentar ACMD41 hasta que finalice la
@@ -1334,7 +1322,7 @@ SDCard_basic<Cfg>::R1
  *				READ
  ***************************************************************************/
 template<typename Cfg>
-uint8_t SDCard_basic<Cfg>::send_read_single_block(const Address& addr)
+uint8_t SDCard<Cfg>::send_read_single_block(const Address& addr)
 {
     send(17u, addr);
     return read_R1();
@@ -1348,7 +1336,7 @@ uint8_t SDCard_basic<Cfg>::send_read_single_block(const Address& addr)
 //	0xFF: timeout
 //	otro valor: error (formato de 'data error token')
 template<typename Cfg>
-uint8_t SDCard_basic<Cfg>::read_start_block_token()
+uint8_t SDCard<Cfg>::read_start_block_token()
 {
     // DUDA: No he encontrado el tiempo máximo que tiene que esperar el micro
     // para que la SDCard responda. En una página web ponía 100 ms.
@@ -1367,8 +1355,8 @@ uint8_t SDCard_basic<Cfg>::read_start_block_token()
 }
 
 template<typename Cfg>
-SDCard_basic<Cfg>::Read_return
-	SDCard_basic<Cfg>::read_data_block(Block b)
+SDCard<Cfg>::Read_return
+	SDCard<Cfg>::read_data_block(Block b)
 {
     uint8_t r = read_start_block_token();
     if (r == 0xFF)
@@ -1392,12 +1380,12 @@ SDCard_basic<Cfg>::Read_return
 
 // 7.2.3@physical_layer
 template<typename Cfg>
-SDCard_basic<Cfg>::Read_return
-	SDCard_basic<Cfg>::read(const Address& addr, Block b)
+SDCard<Cfg>::Read_return
+	SDCard<Cfg>::read(const Address& addr, Block b)
 {
     SPI_cfg();
 
-    Select_chip select{};
+    SPI_select select{};
 
     R1 r1{send_read_single_block(addr)};
 
@@ -1412,7 +1400,7 @@ SDCard_basic<Cfg>::Read_return
  *				WRITE
  ***************************************************************************/
 template<typename Cfg>
-uint8_t SDCard_basic<Cfg>::send_write_single_block(const Address& addr)
+uint8_t SDCard<Cfg>::send_write_single_block(const Address& addr)
 {
     send(24u, addr);
     return read_R1();
@@ -1420,12 +1408,12 @@ uint8_t SDCard_basic<Cfg>::send_write_single_block(const Address& addr)
 
 // 7.2.4@physical_layer
 template<typename Cfg>
-SDCard_basic<Cfg>::Write_return
-	SDCard_basic<Cfg>::write(const Address& addr, const Block b)
+SDCard<Cfg>::Write_return
+	SDCard<Cfg>::write(const Address& addr, const Block b)
 {
     SPI_cfg();
 
-    Select_chip select{};
+    SPI_select select{};
     R1 r1{send_write_single_block(addr)};
     if (r1.is_an_error())
 	return Write_return::r1_error(r1); 
@@ -1442,8 +1430,8 @@ SDCard_basic<Cfg>::Write_return
 
 
 template<typename Cfg>
-SDCard_basic<Cfg>::Data_response_token
-    SDCard_basic<Cfg>::read_response_send_data_block()
+SDCard<Cfg>::Data_response_token
+    SDCard<Cfg>::read_response_send_data_block()
 {
     Data_response_token dt = read_data_response_token();
     if (!dt.data_accepted())
@@ -1461,7 +1449,7 @@ SDCard_basic<Cfg>::Data_response_token
 
 // 7.3.3.2@physical_layer
 template<typename Cfg>
-void SDCard_basic<Cfg>::send_data_block(const Block b)
+void SDCard<Cfg>::send_data_block(const Block b)
 {
     SPI::write(0xFE); // start block token
 		      
@@ -1475,7 +1463,7 @@ void SDCard_basic<Cfg>::send_data_block(const Block b)
 }
 
 
-
+} // namespace hwd
 }// namespace
 
 #endif

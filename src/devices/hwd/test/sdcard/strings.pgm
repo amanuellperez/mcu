@@ -23,7 +23,7 @@ msg_line    "-------------------------------\n"
 msg_cmd0_fail		"CMD0 error\n"
 msg_cmd8_crc_error	"CMD8 CRC error\n"
 msg_voltage_mismatch	"ERROR: voltage mismatch\n"
-msg_cmd8_echo_fail	"CMD8 echo error\n"
+msg_cmd8_echo_fail	"CMD8 echo fail\n"
 msg_acmd41_in_idle_state "ACMD41 fail: card still in idle state\n"
 msg_card_no_power_up	"CMD58 fail: card still no power up\n"
 msg_init_SDSC_card_ok	"Init OK: SDSC card type\n"
@@ -55,6 +55,7 @@ msg_main_menu2	"\n----\n"
 		"1. Read status register\n"
 		"2. Read block\n"
 		"3. Write block\n"
+		"r. Return\n"
 
 
 # read block
@@ -133,6 +134,7 @@ msg_out_of_range    "out of range"
 
 # print(R2)
 msg_r2_response	    "R2 response\n"
+		    "\tR2 : "
 msg_card_is_locked  "card is locked"
 msg_write_protect_erase_skip	"write protec erase skip"
 #msg_error		    "error"
@@ -147,7 +149,7 @@ msg_write_return_response   "Write_return response\n"
 msg_write_ok	"\tWrite OK"
 
 # print(Data_response_token)
-msg_data_response_token	"Data response token\n"
+msg_data_response_token	"Data response token = "
 msg_is_valid		"valid"
 msg_data_accepted	"data accepted"
 msg_data_rejected_CRC_error	"data rejected, CRC error"

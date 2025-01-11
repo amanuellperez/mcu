@@ -252,6 +252,9 @@ void print(std::ostream& out, const SDCard::R2& r)
     print(out, r.r1);
 
     atd::print(out, msg_r2_response);
+    atd::print_int_as_hex(out, r.r2);
+    out << '\n';
+
     print_question(out, msg_card_is_locked);
     print_bool_as_yes_no(out, r.card_is_locked());
 
@@ -281,7 +284,9 @@ void print(std::ostream& out, const SDCard::R2& r)
 void print(std::ostream& out, const SDCard::Data_response_token& r)
 {
     atd::print(out, msg_data_response_token);
-
+    atd::print_int_as_hex(out, r.value());
+    out << '\n';
+    
     print_question(out, msg_is_valid);
     print_bool_as_yes_no(out, r.is_valid());
 

@@ -22,15 +22,66 @@
 #ifndef __DEV_H__
 #define __DEV_H__
 
+#include <mcu_SPI.h>
+#include "../../dev_sdcard.h"
+
+
+// atmega328p
+// ----------
+#ifdef IF_atmega328p
 #include <mega.h>
+
+namespace myu = atmega;
+
+inline void init_mcu()
+{}
+
+using UART = myu::UART_8bits;
+
+
+struct SPI_master_cfg{
+    template <uint8_t n>
+    using Pin = myu::hwd::Pin<n>;
+
+//    static constexpr uint32_t frequency_in_hz = 500'000; // máx. 10MHz
+};
+
+
+// atmega4809
+// ----------
+#elifdef IF_atmega4809
+
+#include <mega0.h>
+
+namespace myu = atmega4809;
+
+inline void init_mcu()
+{
+    myu::init();
+//    myu::Clock_controller::clk_main_divided_by_16(); // a 1 MHz
+}
+
+using UART = myu::UART1_8bits;
+
+
+struct SPI_master_cfg{
+    template <uint8_t n>
+    using Pin = myu::hwd::Pin<n>;
+
+//    static constexpr uint8_t prescaler = 16;
+//    static constexpr uint32_t frequency_in_hz = myu::clk_per() / prescaler; // máx. 10MHz
+    static constexpr auto mode = myu::SPI_master_cfg::normal_mode;
+};
+
+#endif
+
+
 
 // microcontroller
 // ---------------
-namespace myu = atmega;
 using Micro   = myu::Micro;
-using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
+using UART_iostream = mcu::UART_iostream<UART>;
 			
-#include "../../dev_sdcard.h"
 
 
 // pines que usamos
@@ -39,24 +90,40 @@ using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
 
 // dispositivos que conectamos
 // ---------------------------
-struct SPI_master_cfg{
-    template <uint8_t n>
-    using Pin = myu::hwd::Pin<n>;
-
-// TODO:
-//    static constexpr uint32_t frequency_in_hz = 500'000; // máx. 10MHz
-};
-
-using SPI_master = myu::SPI_master<SPI_master_cfg>;
+using SPI = myu::SPI_master<SPI_master_cfg>;
 
 // Dispositivos SPI
-using Chip_select = 
-    dev::SDCard_select<myu::hwd::Output_pin<myu::hwd::SPI::SS_pin>, 
-						SPI_master>;
 
-using SDCard_cfg = dev::SDCard_cfg<myu::Micro, SPI_master, Chip_select>;
+template <typename Iostream>
+struct Log{
+    template<typename T>
+    Log(const T& x)
+    {
+	Iostream out;
+	out << x; 
+    }
 
-using SDCard = dev::SDCard_basic<SDCard_cfg>;
+    template <typename T>
+    Log& operator<<(const T& x)
+    { 
+	Iostream out;
+	out << x; 
+	return *this;
+    }
+    
+};
+
+
+struct SDCard_cfg{
+    using Micro = myu::Micro;
+    using SPI = ::SPI;
+    using SPI_select = mcu::SPI_pin_selector<Micro, SPI::SS_pin>;
+    static constexpr uint32_t SPI_frequency      = 500'000;
+
+    using log = Log<UART_iostream>;
+};
+
+using SDCard = dev::hwd::SDCard<SDCard_cfg>;
 
 
 #endif

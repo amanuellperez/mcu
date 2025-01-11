@@ -1,4 +1,4 @@
-// Copyright (C) 2024 Manuel Perez 
+// Copyright (C) 2025 Manuel Perez 
 // mail: <manuel2perez@proton.me> 
 // https://github.com/amanuellperez/mcu 
 // 
@@ -49,8 +49,8 @@ constexpr myu::ROM_string<15> msg_cmd8_crc_error
 constexpr myu::ROM_string<24> msg_voltage_mismatch	
 	PROGMEM{"ERROR: voltage mismatch\n"};
 
-constexpr myu::ROM_string<16> msg_cmd8_echo_fail	
-	PROGMEM{"CMD8 echo error\n"};
+constexpr myu::ROM_string<15> msg_cmd8_echo_fail	
+	PROGMEM{"CMD8 echo fail\n"};
 
 constexpr myu::ROM_string<38> msg_acmd41_in_idle_state 
 	PROGMEM{"ACMD41 fail: card still in idle state\n"};
@@ -94,8 +94,8 @@ constexpr myu::ROM_string<90> msg_hello
 constexpr myu::ROM_string<74> msg_main_menu	
 	PROGMEM{"Menu\n----\nChoose type of initialization:\n\t1. Step by step\n\t2. Automatic\n"};
 
-constexpr myu::ROM_string<59> msg_main_menu2	
-	PROGMEM{"\n----\n1. Read status register\n2. Read block\n3. Write block\n"};
+constexpr myu::ROM_string<69> msg_main_menu2	
+	PROGMEM{"\n----\n1. Read status register\n2. Read block\n3. Write block\nr. Return\n"};
 
 constexpr myu::ROM_string<23> msg_main_read	
 	PROGMEM{"Read\n----\nblock_size = "};
@@ -238,8 +238,8 @@ constexpr myu::ROM_string<15> msg_card_ECC_failed
 constexpr myu::ROM_string<12> msg_out_of_range    
 	PROGMEM{"out of range"};
 
-constexpr myu::ROM_string<12> msg_r2_response	    
-	PROGMEM{"R2 response\n"};
+constexpr myu::ROM_string<19> msg_r2_response	    
+	PROGMEM{"R2 response\n\tR2 : "};
 
 constexpr myu::ROM_string<14> msg_card_is_locked  
 	PROGMEM{"card is locked"};
@@ -259,8 +259,8 @@ constexpr myu::ROM_string<22> msg_write_return_response
 constexpr myu::ROM_string<10> msg_write_ok	
 	PROGMEM{"\tWrite OK"};
 
-constexpr myu::ROM_string<20> msg_data_response_token	
-	PROGMEM{"Data response token\n"};
+constexpr myu::ROM_string<22> msg_data_response_token	
+	PROGMEM{"Data response token = "};
 
 constexpr myu::ROM_string<5> msg_is_valid		
 	PROGMEM{"valid"};
