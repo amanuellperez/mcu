@@ -5,13 +5,13 @@ DIRS =  calculator	\
 		dc_motor	\
 		IR_remote_control	\
 		POV_toy		\
+		sdinspector	\
 		sensor		\
 		util		
 
 
 
 # Revisar:
-#		sdinspector	\
 #		signal_generator \
 		stroboscope	\
 		oscilloscope	\

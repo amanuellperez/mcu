@@ -43,14 +43,20 @@ void Main::init_uart()
     uart.turn_on();
 }
 
+void Main::init_spi()
+{
+    SPI::init();
+    SPI::turn_on();
+}
+
 Main::Main()
 {
     init_uart();
+    init_spi();
 
     UART_iostream uart;
     atd::print(uart, msg_hello);
 
-    Chip_select::init();
     sdcard_init();
 }
 

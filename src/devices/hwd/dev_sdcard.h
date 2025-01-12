@@ -1239,7 +1239,7 @@ SDCard<C>::Init_return SDCard<C>::
     if (r1.is_illegal_command())
 	return Init_return::cmd0_fail;
 
-    R7 r7;
+    R7 r7{};
     send_if_cond(r7);
 
 

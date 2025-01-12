@@ -23,6 +23,8 @@
 #define __PRJ_DEV_H__
 
 #include <mega.h>
+#include <mcu_SPI.h>
+#include <dev_sdcard.h>
 
 #include "dev_sector.h"
 
@@ -32,7 +34,6 @@ namespace myu = atmega;
 using Micro   = myu::Micro;
 using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
 			
-#include <dev_sdcard.h>
 
 
 // pines que usamos
@@ -42,12 +43,26 @@ using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
 // dispositivos que conectamos
 // ---------------------------
 // Dispositivos SPI
-using Chip_select = 
-    dev::SDCard_select<myu::hwd::Output_pin<myu::hwd::SPI::noCS_pin_number>, myu::SPI_master>;
 
-using SDCard_cfg = dev::SDCard_cfg<myu::Micro, myu::SPI_master, Chip_select>;
+struct SPI_master_cfg{
+    template <uint8_t n>
+    using Pin = myu::hwd::Pin<n>;
 
-using SDCard = dev::SDCard_basic<SDCard_cfg>;
+//    static constexpr uint32_t frequency_in_hz = 500'000; // máx. 10MHz
+};
+
+using SPI = myu::SPI_master<SPI_master_cfg>;
+
+struct SDCard_cfg{
+    using Micro = myu::Micro;
+    using SPI = ::SPI;
+    using SPI_select = mcu::SPI_pin_selector<Micro, SPI::SS_pin>;
+    static constexpr uint32_t SPI_frequency      = 500'000;
+
+    // using log = Log<UART_iostream>;
+};
+
+using SDCard = dev::hwd::SDCard<SDCard_cfg>;
 
 using Sector_cfg = dev::Sector_cfg<SDCard::block_size>;
 using Sector     = dev::Sector<Sector_cfg>;

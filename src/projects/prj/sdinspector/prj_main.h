@@ -51,6 +51,7 @@ private:
 
 // Functions
     void init_uart();
+    void init_spi();
 
     // Cargamos en memoria `sector`
     bool load_sector();
