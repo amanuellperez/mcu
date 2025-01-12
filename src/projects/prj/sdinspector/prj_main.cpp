@@ -51,6 +51,7 @@ void Main::init_spi()
 
 Main::Main()
 {
+    init_mcu();
     init_uart();
     init_spi();
 

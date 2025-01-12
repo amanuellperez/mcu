@@ -478,7 +478,7 @@ private:
 //    using Micr    = myu::Micro;
 //    using SPI	    = myu::SPI_master;
 //    using SPI_select = mcu::SPI_select...;
-//    static constexpr uint32_t SPI_frequency      = 500'000; // 500kHz
+//    static constexpr uint32_t SPI_frequency      = 500'000; // máx 20MHz
 //    using log = ...
 //};
 //
@@ -626,6 +626,11 @@ private:
     static constexpr uint8_t max_retries = 10;
     static constexpr uint8_t max_retries_acmd41_command = 100;
     static constexpr uint32_t SPI_frequency      = Cfg::SPI_frequency;
+
+// Table 5-6, al hablar de TRAN_SPEED dice que 
+// "Note that for current SD Memory Cards, this field shall be always 
+// 0_0110_010b (032h) which is equal to 25 MHz"
+    static_assert(SPI_frequency <= 25'000'000);
 
     // ¿Cuánto tiempo debemos de esperar a que finalice de escribir el bloque
     // enviado? 4.6.2.2@physical_layer: máximo 250 ms

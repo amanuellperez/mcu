@@ -194,6 +194,10 @@ public:
     template <typename SPI_dev_cfg>
     static void cfg();
 
+// cfg
+    static void default_transfer_value(uint8_t x)
+    { transfer_value_ = x;}
+
 // On/off
     static void turn_on();
     static void turn_off();
@@ -210,14 +214,16 @@ public:
     // Lee un byte del slave. 
     // `x` es el byte que tiene que enviar el master al slave.
     // Bloquea el micro: no devuelve el control hasta transmitir el byte.
-    // TODO: probarla
-//    static uint8_t read(uint8_t x = 0x00);
+    static uint8_t read(uint8_t x = transfer_value_);
 
     static void wait_untill_transfer_is_complete();
 
 private:
 // Types
     using Cfg = SPI_cfg;
+
+// Cfg
+    inline static uint8_t transfer_value_ = 0;
 
 // helpers
     template <template <uint8_t n> typename Pin>
@@ -254,7 +260,8 @@ void SPI_master<R, C>::init()
     SPI::host_mode();
 
 // frequency
-    Base::template SCK_frequency_in_hz<Cfg::frequency_in_hz>();
+    if constexpr (requires {Cfg::frequency_in_hz;})
+	Base::template SCK_frequency_in_hz<Cfg::frequency_in_hz>();
 
 // Mode
     if constexpr (Cfg::mode == SPI_master_cfg::normal_mode)
@@ -335,15 +342,10 @@ inline uint8_t SPI_master<R, C>::write(uint8_t x)
     return SPI::data();// valor recibido
 }
 
-// TODO: descomentarla cuando se pruebe
-//template <typename R, typename C>
-//inline uint8_t SPI_master<R, C>::read(uint8_t x)
-//{
-//    SPI::data(x);	// escribimos x y lo enviamos
-//    wait_untill_read_is_complete();
-//
-//    return SPI::data();// valor recibido
-//}
+template <typename R, typename C>
+inline uint8_t SPI_master<R, C>::read(uint8_t x)
+{ return write(x); }
+
 
 // TODO: añadirle un counter. Si supera más de x que devuelva el control, asi
 // evitamos que se quede colgado.

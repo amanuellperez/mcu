@@ -26,7 +26,7 @@ bool sdcard_init()
     using Init = SDCard::Init_return;
 
     UART_iostream uart;
-    switch (SDCard::init()){
+    switch (SDCard::init<SPI_init_frequency>()){
 	break; case Init::cmd0_fail	: 
 		    atd::print(uart, msg_cmd0_fail);
 

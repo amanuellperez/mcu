@@ -103,7 +103,7 @@ void print_registers()
     UART_iostream uart;
     uart << "\nRegisters\n"
 	      "---------\n";
-    myu::print_spi_registers<SPI>(uart);
+    SPI::print_registers(uart);
 
 }
 

@@ -123,3 +123,39 @@ siguientes capas:
   (timers, pins, ...).
 
 
+
+# SPI
+
+¿Cómo operar con dispositivos SPI? 
+
+Al desconocer la forma real de cómo se usan estos dispositivos y carecer de
+experiencia, voy haciendo lo que me parece y modificando según voy usándolo.
+
+En principio podemos tener dos escenarios:
+
+1. Monodevice: el microcontrolador se conecta exclusivamente a un único
+   dispositivo. 
+
+2. Multidevice: conectamos el microcontrolador a múltiples dispositivos.
+
+De momento, voy a centrarme en el segundo escenario.
+
+¿Quién es el responsable de configurar el hardware SPI del microcontrolador?
+El mainador ya que es el que conoce el microcontrolador.
+
+¿Quién es el responsable de configurar la polaridad, fase y si es MSB o LSB?
+El device, que es quien conoce el protocolo.
+
+¿Quién define la frecuencia del SPI?
+A día de hoy tengo aquí tengo mis dudas. Dos posibilidades:
+
+1. Que se use la misma frecuencia para todos los SPI-devices. En este caso el
+   mainador configurará la frecuencia del SPI en el `init_spi()` y nos
+   podremos olvidar del tema.
+
+2. Que se usen diferentes frecuencias con cada SPI-device. En este caso será
+   el device el que defina la frecuencia.
+
+Como no sé qué opción es mejor la elijo en tiempo de compilación.
+
+

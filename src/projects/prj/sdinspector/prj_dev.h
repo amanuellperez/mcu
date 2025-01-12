@@ -1,4 +1,4 @@
-// Copyright (C) 2023 Manuel Perez 
+// Copyright (C) 2023-2025 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -22,27 +22,26 @@
 #ifndef __PRJ_DEV_H__
 #define __PRJ_DEV_H__
 
-#include <mega.h>
 #include <mcu_SPI.h>
 #include <dev_sdcard.h>
 
 #include "dev_sector.h"
 
-// Microcontroller
-// ---------------
+/***************************************************************************
+ *			    MICROCONTROLLER
+ ***************************************************************************/
+// atmega328p
+// ----------
+#ifdef IF_atmega328p
+#include <mega.h>
+
 namespace myu = atmega;
-using Micro   = myu::Micro;
-using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
-			
 
+inline void init_mcu()
+{}
 
-// pines que usamos
-// ----------------
+using UART = myu::UART_8bits;
 
-
-// dispositivos que conectamos
-// ---------------------------
-// Dispositivos SPI
 
 struct SPI_master_cfg{
     template <uint8_t n>
@@ -51,13 +50,68 @@ struct SPI_master_cfg{
 //    static constexpr uint32_t frequency_in_hz = 500'000; // máx. 10MHz
 };
 
+static constexpr uint32_t SPI_init_frequency = 250'000; // < 400kHz
+static constexpr uint32_t SPI_frequency      = 500'000; // 500kHz < 25MHz
+
+// atmega4809
+// ----------
+#elifdef IF_atmega4809
+
+#include <mega0.h>
+
+namespace myu = atmega4809;
+
+inline void init_mcu()
+{
+    myu::init();
+//    myu::Clock_controller::clk_main_divided_by_16(); // a 1 MHz
+}
+
+using UART = myu::UART1_8bits;
+
+
+struct SPI_master_cfg{
+    template <uint8_t n>
+    using Pin = myu::hwd::Pin<n>;
+
+//    static constexpr uint8_t prescaler = 16;
+//    static constexpr uint32_t frequency_in_hz = myu::clk_per() / prescaler; // máx. 10MHz
+    static constexpr auto mode = myu::SPI_master_cfg::normal_mode;
+};
+
+							
+// clk_per == 20MHz / 6
+static_assert(myu::clk_per() == 20'000'000 / 6);
+static constexpr uint32_t SPI_init_frequency = myu::clk_per() / 16; // < 400kHz
+static constexpr uint32_t SPI_frequency = myu::clk_per() / 2; // máx.  25 MHz
+#endif
+
+
+/***************************************************************************
+ *				DEVICES
+ ***************************************************************************/
+// Microcontroller
+// ---------------
+using Micro   = myu::Micro;
+using UART_iostream = mcu::UART_iostream<UART>;
+
+
+
+// pines que usamos
+// ----------------
+
+
+// dispositivos que conectamos
+// ---------------------------
 using SPI = myu::SPI_master<SPI_master_cfg>;
+
+// Dispositivos SPI
 
 struct SDCard_cfg{
     using Micro = myu::Micro;
     using SPI = ::SPI;
     using SPI_select = mcu::SPI_pin_selector<Micro, SPI::SS_pin>;
-    static constexpr uint32_t SPI_frequency      = 500'000;
+    static constexpr uint32_t SPI_frequency      = ::SPI_frequency;
 
     // using log = Log<UART_iostream>;
 };

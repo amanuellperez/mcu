@@ -26,7 +26,7 @@ void automatic_init()
 
     UART_iostream uart;
     uart << "\nSDCard::init() ...\n";
-    switch (SDCard::init()){
+    switch (SDCard::init<SPI_init_frequency>()){
 	break; case Init::cmd0_fail	: 
 		    atd::print(uart, msg_cmd0_fail);
 
@@ -58,7 +58,7 @@ void step_by_step_init()
 {
     UART_iostream uart;
 
-    SDCard::SPI_cfg_init();
+    SDCard::SPI_cfg_init<SPI_init_frequency>();
     SDCard::R1 r1 = SDCard::go_idle_state();
 
     SDCard::R7 r7;
