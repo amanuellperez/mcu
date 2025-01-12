@@ -23,7 +23,7 @@
 #include "dev_print.h"
 #include "sdc_print.h"
 #include "prj_main.h"
-
+#include "dev_fat.h"
 
 void Main::print_sector()
 {
@@ -83,6 +83,38 @@ void Main::print_sector_fromto()
     uart << '\n';
     print_line(uart);
     sector.print(uart, from, sz);
+
+}
+
+
+void Main::print_sector_as_MBR()
+{
+    UART_iostream uart;
+    uart << '\n';
+    atd::print(uart, msg_print_sector_as_MBR);
+    print_line(uart);
+
+    using MBR = dev::FAT32::MBR;
+    using MBR_type = dev::FAT32::MBR::Partition_type;
+
+    MBR* mbr = reinterpret_cast<MBR*>(sector.data());
+
+    print_question(uart, msg_is_MBR_valid_sig, false);
+    print_bool_as_yes_no(uart, mbr->is_valid());
+
+    uart << '\n';
+    atd::print(uart, msg_partition1);
+
+    print_question(uart, msg_is_fat32);
+    print_bool_as_yes_no(uart, mbr->partition1.type == MBR_type::fat32_lba);
+
+    uart << '\t';
+    atd::print(uart, msg_lba_offset);
+    uart << " = " << mbr->partition1.lba_offset << '\n';
+
+    print_question(uart, msg_is_bootable);
+    print_bool_as_yes_no(uart, mbr->partition1.is_bootable());
+
 
 }
 

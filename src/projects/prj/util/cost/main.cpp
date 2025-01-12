@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2020 Manuel Perez 
+// Copyright (C) 2019-2025 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -18,14 +18,48 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 // ¿Qué tamaños tienen los distintos tipos básicos en avr-gcc?
-#include <mega.h>
 #include <bit>
 
-// Microcontroller
-// ---------------
+/***************************************************************************
+ *			    MICROCONTROLLER
+ ***************************************************************************/
+// atmega328p
+// ----------
+#ifdef IF_atmega328p
+#include <mega.h>
+
 namespace myu = atmega;
+
+inline void init_mcu()
+{}
+
+using UART = myu::UART_8bits;
+
+
+// atmega4809
+// ----------
+#elifdef IF_atmega4809
+
+#include <mega0.h>
+
+namespace myu = atmega4809;
+
+inline void init_mcu()
+{
+    myu::init();
+//    myu::Clock_controller::clk_main_divided_by_16(); // a 1 MHz
+}
+
+using UART = myu::UART1_8bits;
+
+#endif
+
+
+/***************************************************************************
+ *				DEVICES
+ ***************************************************************************/
 using Micro   = myu::Micro;
-using UART_iostream = mcu::UART_iostream<myu::UART_8bits>;
+using UART_iostream = mcu::UART_iostream<UART>;
 
 void show_sizes_types()
 {
@@ -37,16 +71,18 @@ void show_sizes_types()
 	uart << "Type sizes\n";
 	uart << "----------\n";
 	uart << "sizeof(char) = " << sizeof(char) << "\n";
-	uart << "sizeof(short) = " << sizeof(short) << "\n";
-	uart << "sizeof(int) = " << sizeof(int) << "\n";
-	uart << "sizeof(long) = " << sizeof(long) << "\n";
-	uart << "sizeof(long long) = " << sizeof(long long) << "\n";
-	uart << "\n";
 
-	uart << "sizeof(unsigned short) = " << sizeof(unsigned short) << "\n";
-	uart << "sizeof(unsigned int) = " << sizeof(unsigned int) << "\n";
-	uart << "sizeof(unsigned long) = " << sizeof(unsigned long) << "\n";
-	uart << "sizeof(unsigned long long) = " << sizeof(unsigned long long) << "\n";
+	uart << "sizeof(short) = " << sizeof(short) 
+	     << "\tsizeof(unsigned short) = " << sizeof(unsigned short) << "\n";
+
+	uart << "sizeof(int) = " << sizeof(int)
+	     << "\t\tsizeof(unsigned int) = " << sizeof(unsigned int) << "\n";
+
+	uart << "sizeof(long) = " << sizeof(long) 
+	     << "\tsizeof(unsigned long) = " << sizeof(unsigned long) << "\n";
+
+	uart << "sizeof(long long) = " << sizeof(long long)
+	     << "\tsizeof(unsigned long long) = " << sizeof(unsigned long long) << "\n";
 	uart << "\n";
 
 	uart << "sizeof(int8_t) = " << sizeof(int8_t) << "\n";

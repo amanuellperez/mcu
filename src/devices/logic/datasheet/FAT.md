@@ -3,6 +3,7 @@
 
 ## Bibliografía
 
+* [elm-chan intro a FAT32 (sencillo de entender)](http://elm-chan.org/docs/fat_e.html)
 * [Master Boot Record](https://en.wikipedia.org/wiki/Master_boot_record)
 * [Boot sector](https://en.wikipedia.org/wiki/Boot_sector)
 

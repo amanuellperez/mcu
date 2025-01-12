@@ -74,6 +74,8 @@ private:
 
     void print_sector_fromto();
 	bool print_sector_fromto_ask(Sector::Address& from, size_t& sz);
+
+    void print_sector_as_MBR();
 };
 
 
