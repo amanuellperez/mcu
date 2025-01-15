@@ -57,9 +57,9 @@ private:
     bool load_sector();
 
 // Main menu
-    char main_menu();
-    void run_command_invalid_sector(char cmd);
-    void run_command_valid_sector(char cmd);
+    uint16_t main_menu();
+    void run_command_invalid_sector(uint16_t cmd);
+    void run_command_valid_sector(uint16_t cmd);
 
 // User commands:
     void read_status();
@@ -76,6 +76,7 @@ private:
 	bool print_sector_fromto_ask(Sector::Address& from, size_t& sz);
 
     void print_sector_as_MBR();
+    void print_sector_as_FS_info();
     void print_sector_as_FAT32_boot_sector();
 };
 

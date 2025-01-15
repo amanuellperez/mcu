@@ -19,7 +19,7 @@
 #include "prj_main.h"
 #include "dev_print.h"	// print_line
 			
-char Main::main_menu()
+uint16_t Main::main_menu()
 {
     UART_iostream uart;
 
@@ -40,33 +40,34 @@ char Main::main_menu()
     if (sector.is_valid())
 	atd::print(uart, msg_main_menu2);
 
-    char ans{};
+    uint16_t ans{};
     uart >> ans;
 
 
     return ans;
 }
 
-void Main::run_command_invalid_sector(char cmd)
+void Main::run_command_invalid_sector(uint16_t cmd)
 {
     switch(cmd){
-	break; case '1': read_status();
-	break; case '2': load_sector();
+	break; case 1: read_status();
+	break; case 2: load_sector();
     }
 }
 
-void Main::run_command_valid_sector(char cmd)
+void Main::run_command_valid_sector(uint16_t cmd)
 {
     switch(cmd){
-	break; case '1': read_status();
-	break; case '2': load_sector();
-	break; case '3': print_sector();
-	break; case '4': print_sector_fromto();
-	break; case '5': edit_sector(true);
-	break; case '6': edit_sector(false);
-	break; case '7': flush_sector();
-	break; case '8': print_sector_as_MBR();
-	break; case '9': print_sector_as_FAT32_boot_sector();
+	break; case 1: read_status();
+	break; case 2: load_sector();
+	break; case 3: print_sector();
+	break; case 4: print_sector_fromto();
+	break; case 5: edit_sector(true);
+	break; case 6: edit_sector(false);
+	break; case 7: flush_sector();
+	break; case 8: print_sector_as_MBR();
+	break; case 9: print_sector_as_FAT32_boot_sector();
+	break; case 10: print_sector_as_FS_info();
     }
 }
 
@@ -80,7 +81,7 @@ void Main::run_command_valid_sector(char cmd)
 void Main::run()
 {
     while(1){
-	char cmd = main_menu();
+	uint16_t cmd = main_menu();
 	if (sector.is_invalid())
 	    run_command_invalid_sector(cmd);
 

@@ -203,6 +203,31 @@ struct Boot_sector{
     uint32_t data_area_size() const {return data_area_number_of_sectors(); }
 };
 
+struct FS_info{
+    static_assert(std::endian::native == std::endian::little);
+    
+    uint32_t lead_sig;
+    uint8_t reserved1[480];
+    uint32_t struct_sig;
+    uint32_t free_count;
+    uint32_t nxt_free;
+    uint8_t reserved2[12];
+    uint32_t trail_sig;
+
+
+    // FAT32 specification: section 5
+    bool check_integrity() const
+    {
+	// reserved1[i] == 0 and reserved2[i] == 0
+	return	lead_sig == 0x41615252 and
+		struct_sig == 0x61417272 and
+		trail_sig == 0xAA550000;
+    }
+
+    uint32_t last_known_free_cluster_count() const {return free_count;}
+    uint32_t first_available_free_cluster() const {return nxt_free;}
+};
+
 }// namespace FAT32
 
 }// namespace dev

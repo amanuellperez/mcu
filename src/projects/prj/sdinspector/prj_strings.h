@@ -37,8 +37,8 @@ constexpr myu::ROM_string<27> msg_main_sector_load
 constexpr myu::ROM_string<57> msg_main_menu	
 	PROGMEM{"1. Read status register\n2. Load sector (MBR is sector 0)\n"};
 
-constexpr myu::ROM_string<175> msg_main_menu2	
-	PROGMEM{"3. Print sector\n4. Print sector bytes from a to b\n5. Edit sector in hexadecimal\n6. Edit sector with chars\n7. Flush sector\n\nPrint sector as:\n8. MBR sector\n9. FAT32 boot sector\n"};
+constexpr myu::ROM_string<194> msg_main_menu2	
+	PROGMEM{"3. Print sector\n4. Print sector bytes from a to b\n5. Edit sector in hexadecimal\n6. Edit sector with chars\n7. Flush sector\n\nPrint sector as:\n8. MBR sector\n9. FAT32 boot sector\n10. FS info sector\n"};
 
 constexpr myu::ROM_string<16> msg_sector_address	
 	PROGMEM{"Sector address: "};
@@ -87,6 +87,9 @@ constexpr myu::ROM_string<11> msg_is_bootable
 
 constexpr myu::ROM_string<19> msg_print_sector_as_FAT_boot_sector 
 	PROGMEM{"FAT32: boot sector\n"};
+
+constexpr myu::ROM_string<15> msg_print_sector_as_FS_info 
+	PROGMEM{"FAT32: FS info\n"};
 
 
  

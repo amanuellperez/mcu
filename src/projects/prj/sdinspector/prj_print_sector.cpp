@@ -155,22 +155,25 @@ void Main::print_sector_as_FAT32_boot_sector()
     << "num_fats \t" << (int) bt->num_fats << '\n'
     << "root_ent_cnt\t" << bt->root_ent_cnt << '\n'
     << "tot_sec16\t" << bt->tot_sec16 << '\n'
-    << "media    \t" << (int) bt->media << '\n'
-    << "fat_sz16 \t" << bt->fat_sz16 << '\n'
+    << "media    \t";
+    atd::print_int_as_hex(uart, bt->media);
+    uart << "\nfat_sz16 \t" << bt->fat_sz16 << '\n'
     << "sec_per_trk\t" << bt->sec_per_trk << '\n'
     << "num_heads\t" << bt->num_heads << '\n'
     << "hidd_sec \t" << bt->hidd_sec << '\n'
     << "tot_sec32\t" << bt->tot_sec32 << '\n'
     << "fat_sz32 \t" << bt->fat_sz32 << '\n'
     << "ext_flags\t" << bt->ext_flags << '\n'
-    << "fs_ver   \t" << bt->fs_ver << '\n'
-    << "root_clus\t" << bt->root_clus << '\n'
+    << "fs_ver   \t";
+    atd::print_int_as_hex(uart, bt->fs_ver);
+    uart << "\nroot_clus\t" << bt->root_clus << '\n'
     << "fs_info  \t" << bt->fs_info << '\n'
     << "bk_boot_sec\t" << bt->bk_boot_sec << '\n'
     << "reserved[12]\t";
     print_as_str(uart, bt->reserved);
-    uart << "\ndrv_num \t" << (int) bt->drv_num << '\n'
-    << "reserved1\t" << (int) bt->reserved1 << '\n'
+    uart << "\ndrv_num \t";
+    atd::print_int_as_hex(uart, bt->drv_num);
+    uart << "\nreserved1\t" << (int) bt->reserved1 << '\n'
     << "boot_sig\t";
     atd::print_int_as_hex(uart, bt->boot_sig);
     uart << "\nvol_id  \t" << bt->vol_id << '\n'
@@ -198,4 +201,25 @@ void Main::print_sector_as_FAT32_boot_sector()
 
 }
 
+void Main::print_sector_as_FS_info()
+{
+    UART_iostream uart;
+    uart << '\n';
+    atd::print(uart, msg_print_sector_as_FS_info);
+    print_line(uart);
+
+    using FS_info = dev::FAT32::FS_info;
+
+    FS_info* info = reinterpret_cast<FS_info*>(sector.data());
+
+    uart << "Check integrity? ";
+    print_bool_as_yes_no(uart, info->check_integrity());
+
+    uart << "\nLast known free cluster count: "
+	 << info->last_known_free_cluster_count() 
+	 << "\nFirst available free cluster: "
+	 << info->first_available_free_cluster()
+	 << '\n';
+
+}
 
