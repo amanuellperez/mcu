@@ -66,6 +66,7 @@ void Main::run_command_valid_sector(char cmd)
 	break; case '6': edit_sector(false);
 	break; case '7': flush_sector();
 	break; case '8': print_sector_as_MBR();
+	break; case '9': print_sector_as_FAT32_boot_sector();
     }
 }
 

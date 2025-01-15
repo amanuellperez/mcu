@@ -39,10 +39,9 @@
 		
 namespace dev{
     
-// TODO: todos los datos de FAT son little endian.
-// Que en tiempo de compilación se elija el formato adecuado.
-namespace FAT32{
-
+/***************************************************************************
+ *				MBR
+ ***************************************************************************/
 namespace private_{
 
 // ---
@@ -109,6 +108,100 @@ struct MBR{
 };
 
 
+/***************************************************************************
+ *				    FAT32
+ ***************************************************************************/
+// TODO: todos los datos de FAT son little endian.
+// Que en tiempo de compilación se elija el formato adecuado.
+namespace FAT32{
+
+// Boot sector = VBR (volume boot record) = PBR (private boot record)
+// Nombres: 3.1 de la FAT specification (o la página de elm-chan)
+struct Boot_sector{
+    static_assert(std::endian::native == std::endian::little);
+
+// Uso los nombres crípticos de la FAT specification (son horribles :(
+
+// Parte común a FAT12/16/32
+    uint8_t jmp_boot[3];
+    uint8_t OEM_name[8];
+    uint16_t byte_per_sec; // 512 para máxima compatibilidad según elm-chan
+    uint8_t sec_per_clus;
+    uint16_t rsvd_sec_cnt;
+    uint8_t num_fats;
+    uint16_t root_ent_cnt;
+    uint16_t tot_sec16;
+    uint8_t media;
+    uint16_t fat_sz16;
+    uint16_t sec_per_trk;
+    uint16_t num_heads;
+    uint32_t hidd_sec;
+    uint32_t tot_sec32;
+
+// Parte específica de FAT32
+    uint32_t fat_sz32;
+    uint16_t ext_flags;
+    uint16_t fs_ver;
+    uint32_t root_clus;
+    uint16_t fs_info;
+    uint16_t bk_boot_sec;
+    uint8_t reserved[12];
+    uint8_t drv_num;
+    uint8_t reserved1;
+    uint8_t boot_sig;
+    uint32_t vol_id;
+    uint8_t vol_lab[11];
+    uint8_t fil_sys_type[8]; // == "FAT32   "
+    uint8_t boot_code[420];
+    uint16_t sign;	    // == 0xAA55
+
+// Chechs of integrity
+    bool is_sign_valid() const {return sign == 0xAA55;}
+    bool check_integrity() const
+    {
+	return is_sign_valid() 
+	       and fat_sz16 == 0 // FAT32 tiene el size en fat_sz32
+	       and num_fats >= 1
+	       and root_ent_cnt == 0 // for FAT32 siempre vale 0
+	       and tot_sec32 != 0
+	       ;
+    }
+
+// FAT area
+// --------
+    // offset del primer sector de la FAT area
+    uint16_t FAT_offset() const {return rsvd_sec_cnt;}
+    uint32_t FAT_number_of_sectors() const {return fat_sz32 * num_fats;}
+
+    // Me gusta más este sinónimo:
+    uint32_t FAT_size() const {return FAT_number_of_sectors(); }
+
+// Root directory (FAT12/16 solo)
+// --------------
+    uint32_t root_directory_offset() const 
+    {return FAT_offset() * FAT_number_of_sectors(); }
+
+    static constexpr uint8_t dir_entry_size = 32;
+
+    // Como root_ent_cnt == 0, la root directory area para FAT32 siempre es 0.
+    // Dejo esto por si implemento FAT12 en el futuro
+    uint32_t root_directory_number_of_sectors() const
+    {return (dir_entry_size * root_ent_cnt + byte_per_sec - 1) / byte_per_sec; }
+
+    uint32_t root_directory_size() const  
+    {return root_directory_number_of_sectors(); }
+
+
+// Data area
+// ---------
+    uint32_t data_area_offset() const 
+    {return root_directory_offset() + root_directory_size(); }
+
+    uint32_t data_area_number_of_sectors() const 
+    { return data_area_offset() + tot_sec32;}
+
+    uint32_t data_area_size() const {return data_area_number_of_sectors(); }
+};
 
 }// namespace FAT32
 

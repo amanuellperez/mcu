@@ -76,6 +76,7 @@ private:
 	bool print_sector_fromto_ask(Sector::Address& from, size_t& sz);
 
     void print_sector_as_MBR();
+    void print_sector_as_FAT32_boot_sector();
 };
 
 

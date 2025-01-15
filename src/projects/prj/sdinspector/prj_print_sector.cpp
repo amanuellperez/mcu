@@ -25,6 +25,8 @@
 #include "prj_main.h"
 #include "dev_fat.h"
 
+#include <atd_ostream.h>
+
 void Main::print_sector()
 {
     UART_iostream uart;
@@ -94,8 +96,8 @@ void Main::print_sector_as_MBR()
     atd::print(uart, msg_print_sector_as_MBR);
     print_line(uart);
 
-    using MBR = dev::FAT32::MBR;
-    using MBR_type = dev::FAT32::MBR::Partition_type;
+    using MBR = dev::MBR;
+    using MBR_type = dev::MBR::Partition_type;
 
     MBR* mbr = reinterpret_cast<MBR*>(sector.data());
 
@@ -112,9 +114,88 @@ void Main::print_sector_as_MBR()
     atd::print(uart, msg_lba_offset);
     uart << " = " << mbr->partition1.lba_offset << '\n';
 
+    uart << "\tlba size = " << mbr->partition1.lba_size << '\n';
+
     print_question(uart, msg_is_bootable);
     print_bool_as_yes_no(uart, mbr->partition1.is_bootable());
 
 
 }
+
+void print_as_str(std::ostream& out, std::span<uint8_t> str)
+{
+    out << "'";
+    for (auto c: str)
+	out << c;
+    out << "'";
+}
+
+void Main::print_sector_as_FAT32_boot_sector()
+{
+    UART_iostream uart;
+    uart << '\n';
+    atd::print(uart, msg_print_sector_as_FAT_boot_sector);
+    print_line(uart);
+
+    using Boot_sector = dev::FAT32::Boot_sector;
+
+    Boot_sector* bt = reinterpret_cast<Boot_sector*>(sector.data());
+
+    uart << "jmp_boot[3]\t";
+    atd::print_int_as_hex(uart, bt->jmp_boot[0]);
+    uart << ' ';
+    atd::print_int_as_hex(uart, bt->jmp_boot[1]);
+    uart << ' ';
+    atd::print_int_as_hex(uart, bt->jmp_boot[2]);
+    uart << "\nOEM_name[8]\t";
+    print_as_str(uart, bt->OEM_name);
+    uart << "\nbyte_per_sec\t" << bt->byte_per_sec << '\n'
+    << "sec_per_clus\t" << (int) bt->sec_per_clus << '\n'
+    << "rsvd_sec_cnt\t" << bt->rsvd_sec_cnt << '\n'
+    << "num_fats \t" << (int) bt->num_fats << '\n'
+    << "root_ent_cnt\t" << bt->root_ent_cnt << '\n'
+    << "tot_sec16\t" << bt->tot_sec16 << '\n'
+    << "media    \t" << (int) bt->media << '\n'
+    << "fat_sz16 \t" << bt->fat_sz16 << '\n'
+    << "sec_per_trk\t" << bt->sec_per_trk << '\n'
+    << "num_heads\t" << bt->num_heads << '\n'
+    << "hidd_sec \t" << bt->hidd_sec << '\n'
+    << "tot_sec32\t" << bt->tot_sec32 << '\n'
+    << "fat_sz32 \t" << bt->fat_sz32 << '\n'
+    << "ext_flags\t" << bt->ext_flags << '\n'
+    << "fs_ver   \t" << bt->fs_ver << '\n'
+    << "root_clus\t" << bt->root_clus << '\n'
+    << "fs_info  \t" << bt->fs_info << '\n'
+    << "bk_boot_sec\t" << bt->bk_boot_sec << '\n'
+    << "reserved[12]\t";
+    print_as_str(uart, bt->reserved);
+    uart << "\ndrv_num \t" << (int) bt->drv_num << '\n'
+    << "reserved1\t" << (int) bt->reserved1 << '\n'
+    << "boot_sig\t";
+    atd::print_int_as_hex(uart, bt->boot_sig);
+    uart << "\nvol_id  \t" << bt->vol_id << '\n'
+    << "vol_lab[11]\t";
+    print_as_str(uart, bt->vol_lab);
+    uart << "\nfil_sys_type[8]\t";
+    print_as_str(uart, bt->fil_sys_type);
+//    uart << "boot_code[420]\t" << bt->boot_code << '\n'
+   uart << "\nboot_code[420]\t...\n"
+	<< "sign     \t";
+   atd::print_int_as_hex(uart, bt->sign);
+   uart << '\n';
+    
+   uart << "FAT area first sector = "
+        << sector.address << " + " << bt->FAT_offset()  << " = "
+	<< (sector.address + bt->FAT_offset()) << '\n';
+
+   uart << "FAT size (number of sectors) = " << bt->FAT_size() << '\n';
+
+   uart << "DATA area first sector = "
+        << sector.address << " + " << bt->data_area_offset()  << " = "
+	<< (sector.address + bt->data_area_offset()) << '\n';
+
+   uart << "DATA area size (number of sectors) = " << bt->data_area_size () << '\n';
+
+}
+
 
