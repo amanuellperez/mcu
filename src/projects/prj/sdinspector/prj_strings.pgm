@@ -23,6 +23,7 @@ msg_main_menu2	"3. Print sector\n"
 		"8. MBR sector\n"
 		"9. FAT32 boot sector\n"
 		"10. FS info sector\n"
+		"11. As directory array\n"
 
 
 

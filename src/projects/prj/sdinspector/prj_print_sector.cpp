@@ -188,16 +188,17 @@ void Main::print_sector_as_FAT32_boot_sector()
    uart << '\n';
     
    uart << "FAT area first sector = "
-        << sector.address << " + " << bt->FAT_offset()  << " = "
-	<< (sector.address + bt->FAT_offset()) << '\n';
+        << sector.address << " + " << bt->FAT_area_offset()  << " = "
+	<< (sector.address + bt->FAT_area_offset()) << '\n';
 
-   uart << "FAT size (number of sectors) = " << bt->FAT_size() << '\n';
+   uart << "FAT size (number of sectors) = " << bt->FAT_area_size() << '\n';
 
    uart << "DATA area first sector = "
         << sector.address << " + " << bt->data_area_offset()  << " = "
 	<< (sector.address + bt->data_area_offset()) << '\n';
 
-   uart << "DATA area size (number of sectors) = " << bt->data_area_size () << '\n';
+   uart << "DATA area size (number of sectors) = " 
+        << bt->data_area_size () << '\n';
 
 }
 
@@ -223,3 +224,58 @@ void Main::print_sector_as_FS_info()
 
 }
 
+void print_directory(std::ostream& out, const dev::FAT32::Directory& dir)
+{
+    if (!dir.check_integrity()){
+	out << "no\n";
+	return;
+    }
+    
+    out << "yes\t";
+
+    for (uint8_t i = 0; i < 11; ++i)
+	out << dir.name[i];
+
+
+    out << '\t' << dir.first_data_cluster_number()
+	  << '\t' <<  dir.file_size;
+
+    out << '\t';
+    atd::print_int_as_hex(out, dir.atrr);
+    out << '\t';
+    atd::print_int_as_hex(out, dir.nt_res);
+    out << '\t';
+    atd::print_int_as_hex(out, dir.crt_time_tenth);
+    out << '\t';
+    atd::print_int_as_hex(out, dir.crt_time);
+    out << '\t';
+    atd::print_int_as_hex(out, dir.crt_date);
+    out << '\t';
+    atd::print_int_as_hex(out, dir.lst_acc_date);
+    out << '\t';
+    atd::print_int_as_hex(out, dir.wrt_time);
+    out << '\t';
+    atd::print_int_as_hex(out, dir.wrt_date);
+ 
+    out << '\n';
+
+}
+
+void Main::print_sector_as_directory_array()
+{
+    UART_iostream uart;
+    uart << "FAT32: directory\n";
+
+    print_line(uart);
+
+    using Dir = dev::FAT32::Directory;
+
+    Dir** dir = reinterpret_cast<Dir**>(sector.data());
+
+    uart << "n \t|name\t|ok?\t|cluster\t|size\t|attr\t|tenth\t|time\t|date\t|acc_date\t|wrt\t|wrt\t|\n";
+    for (uint8_t i = 0; i < sector.size() / sizeof(Dir); ++i){
+	uart << (int) i << '\t';
+	print_directory(uart, *(dir[i]));
+    }
+
+}

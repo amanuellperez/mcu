@@ -78,6 +78,8 @@ private:
     void print_sector_as_MBR();
     void print_sector_as_FS_info();
     void print_sector_as_FAT32_boot_sector();
+    void print_sector_as_directory_array();
+
 };
 
 

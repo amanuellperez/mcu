@@ -37,6 +37,8 @@
 #include <cstdlib>
 #include <bit>	// endianness
 		
+#include <atd_bit.h> // concat_bytes
+
 namespace dev{
     
 /***************************************************************************
@@ -144,7 +146,7 @@ struct Boot_sector{
     uint16_t fs_ver;
     uint32_t root_clus;
     uint16_t fs_info;
-    uint16_t bk_boot_sec;
+    uint16_t bk_boot_sec;   // == 6 siempre (3.6)
     uint8_t reserved[12];
     uint8_t drv_num;
     uint8_t reserved1;
@@ -163,39 +165,40 @@ struct Boot_sector{
 	       and fat_sz16 == 0 // FAT32 tiene el size en fat_sz32
 	       and num_fats >= 1
 	       and root_ent_cnt == 0 // for FAT32 siempre vale 0
-	       and tot_sec32 != 0
+	       and tot_sec32 != 0 
+	       and bk_boot_sec == 6
 	       ;
     }
 
 // FAT area
 // --------
     // offset del primer sector de la FAT area
-    uint16_t FAT_offset() const {return rsvd_sec_cnt;}
-    uint32_t FAT_number_of_sectors() const {return fat_sz32 * num_fats;}
+    uint16_t FAT_area_offset() const {return rsvd_sec_cnt;}
+    uint32_t FAT_area_number_of_sectors() const {return fat_sz32 * num_fats;}
 
     // Me gusta más este sinónimo:
-    uint32_t FAT_size() const {return FAT_number_of_sectors(); }
+    uint32_t FAT_area_size() const {return FAT_area_number_of_sectors(); }
 
 // Root directory (FAT12/16 solo)
 // --------------
-    uint32_t root_directory_offset() const 
-    {return FAT_offset() * FAT_number_of_sectors(); }
+    uint32_t root_directory_area_offset() const 
+    {return FAT_area_offset() + FAT_area_size(); }
 
     static constexpr uint8_t dir_entry_size = 32;
 
     // Como root_ent_cnt == 0, la root directory area para FAT32 siempre es 0.
     // Dejo esto por si implemento FAT12 en el futuro
-    uint32_t root_directory_number_of_sectors() const
+    uint32_t root_directory_area_number_of_sectors() const
     {return (dir_entry_size * root_ent_cnt + byte_per_sec - 1) / byte_per_sec; }
 
-    uint32_t root_directory_size() const  
-    {return root_directory_number_of_sectors(); }
+    uint32_t root_directory_area_size() const  
+    {return root_directory_area_number_of_sectors(); }
 
 
 // Data area
 // ---------
     uint32_t data_area_offset() const 
-    {return root_directory_offset() + root_directory_size(); }
+    {return root_directory_area_offset() + root_directory_area_size(); }
 
     uint32_t data_area_number_of_sectors() const 
     { return data_area_offset() + tot_sec32;}
@@ -203,6 +206,8 @@ struct Boot_sector{
     uint32_t data_area_size() const {return data_area_number_of_sectors(); }
 };
 
+
+// Section 5, FAT specification
 struct FS_info{
     static_assert(std::endian::native == std::endian::little);
     
@@ -227,6 +232,41 @@ struct FS_info{
     uint32_t last_known_free_cluster_count() const {return free_count;}
     uint32_t first_available_free_cluster() const {return nxt_free;}
 };
+
+
+// Section 6, FAT specification
+struct Directory{
+    static_assert(std::endian::native == std::endian::little);
+
+    uint8_t name[11];
+    uint8_t atrr;
+    uint8_t nt_res;
+    uint8_t crt_time_tenth; // tenths of a second
+    uint16_t crt_time;
+    uint16_t crt_date;
+    uint16_t lst_acc_date;
+    uint8_t fst_clus_hi[2];
+    uint16_t wrt_time;
+    uint16_t wrt_date;
+    uint8_t fst_clus_lo[2];
+    uint32_t file_size;
+    
+
+
+    bool check_integrity() const
+    {
+	return nt_res == 0 and
+	    0 <= crt_time_tenth and crt_time_tenth <= 199;
+    }
+
+    
+    uint32_t first_data_cluster_number() const 
+    {
+	return atd::concat_bytes<uint32_t>(fst_clus_hi[1], fst_clus_hi[0],
+				 fst_clus_lo[1], fst_clus_lo[0]);
+    }
+};
+    
 
 }// namespace FAT32
 
