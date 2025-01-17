@@ -28,6 +28,7 @@
  *
  * REFERENCES
  *	http://elm-chan.org/docs/fat_e.html
+ *	https://wiki.osdev.org/FAT#Long_File_Names (referencia osdev)
  *
  * HISTORIA
  *    Manuel Perez
@@ -172,17 +173,21 @@ struct Boot_sector{
 
 // FAT area
 // --------
-    // offset del primer sector de la FAT area
-    uint16_t FAT_area_offset() const {return rsvd_sec_cnt;}
+    // offset del primer sector de la FAT area i
+    uint16_t FAT_area_offset(uint8_t i) const 
+    {return hidd_sec + rsvd_sec_cnt + fat_sz32 * i;}
+
     uint32_t FAT_area_number_of_sectors() const {return fat_sz32 * num_fats;}
 
     // Me gusta más este sinónimo:
     uint32_t FAT_area_size() const {return FAT_area_number_of_sectors(); }
 
+    uint8_t number_of_FATs() const {return num_fats;}
+
 // Root directory (FAT12/16 solo)
 // --------------
     uint32_t root_directory_area_offset() const 
-    {return FAT_area_offset() + FAT_area_size(); }
+    {return FAT_area_offset(0) + FAT_area_size(); }
 
     static constexpr uint8_t dir_entry_size = 32;
 
@@ -204,6 +209,14 @@ struct Boot_sector{
     { return data_area_offset() + tot_sec32;}
 
     uint32_t data_area_size() const {return data_area_number_of_sectors(); }
+
+    uint32_t first_sector_of_cluster(uint32_t n) const
+    {return  data_area_offset() + (n-2) * sec_per_clus;}
+
+    // Este es el primer sector del root directory
+    uint32_t first_sector_of_root_directory() const
+    {return  first_sector_of_cluster(root_clus);}
+
 };
 
 
@@ -234,12 +247,28 @@ struct FS_info{
 };
 
 
+// Section 7, FAT specification
+// De acuerdo a osdev, los caracteres son de 2 bytes (y coincide con el
+// ejemplo de la FAT specification). Según un foro son UTF16 (ref???)
+struct Long_file_name_entry{
+    uint8_t ord;
+    uint16_t name1[5]; 
+    uint8_t attr; // == long_name
+    uint8_t type; // == 0
+    uint8_t chk_sum;
+    uint16_t name2[6];
+    uint16_t fst_clus_lo; // == 0
+    uint16_t name3[2];
+
+    bool is_last_entry() const {return 0x40 & ord; }
+};
+
 // Section 6, FAT specification
 struct Directory{
     static_assert(std::endian::native == std::endian::little);
 
     uint8_t name[11];
-    uint8_t atrr;
+    uint8_t attr;
     uint8_t nt_res;
     uint8_t crt_time_tenth; // tenths of a second
     uint16_t crt_time;
@@ -252,11 +281,28 @@ struct Directory{
     uint32_t file_size;
     
 
+    // TODO: 0xE5 es un kanji y en japones es válido. Esto no funcionaria con
+    // japones.
+    bool is_empty() const 
+    {return name[0] == 0x00 or name[0] == 0xE5;}
+
+    enum class Attribute : uint8_t{
+	read_only = 0x01,
+	hidden    = 0x02,
+	system    = 0x04,
+	volume_id = 0x08,
+	directory = 0x10,
+	archive   = 0x20,
+	// pag. 23: 
+	long_name = read_only | hidden | system | volume_id
+    };
 
     bool check_integrity() const
     {
-	return nt_res == 0 and
-	    0 <= crt_time_tenth and crt_time_tenth <= 199;
+	return true; 
+	// no funciona para el attr == long_name; revisar.
+//	return nt_res == 0 and
+//	    0 <= crt_time_tenth and crt_time_tenth <= 199;
     }
 
     
@@ -265,6 +311,10 @@ struct Directory{
 	return atd::concat_bytes<uint32_t>(fst_clus_hi[1], fst_clus_hi[0],
 				 fst_clus_lo[1], fst_clus_lo[0]);
     }
+
+
+    Attribute attribute() const {return Attribute{attr};}
+
 };
     
 

@@ -166,8 +166,7 @@ void Main::print_sector_as_FAT32_boot_sector()
     << "ext_flags\t" << bt->ext_flags << '\n'
     << "fs_ver   \t";
     atd::print_int_as_hex(uart, bt->fs_ver);
-    uart << "\nroot_clus\t" << bt->root_clus << '\n'
-    << "fs_info  \t" << bt->fs_info << '\n'
+    uart << "\nfs_info  \t" << bt->fs_info << '\n'
     << "bk_boot_sec\t" << bt->bk_boot_sec << '\n'
     << "reserved[12]\t";
     print_as_str(uart, bt->reserved);
@@ -187,19 +186,26 @@ void Main::print_sector_as_FAT32_boot_sector()
    atd::print_int_as_hex(uart, bt->sign);
    uart << '\n';
     
-   uart << "FAT area first sector = "
-        << sector.address << " + " << bt->FAT_area_offset()  << " = "
-	<< (sector.address + bt->FAT_area_offset()) << '\n';
+   uart << "FAT area\n";
+   uart << "\tFAT size (number of sectors) = " << bt->FAT_area_size() << '\n';
 
-   uart << "FAT size (number of sectors) = " << bt->FAT_area_size() << '\n';
+   for (uint8_t i = 0; i < bt->number_of_FATs(); ++i){
+       uart << "\tfirst sector FAT" << (int) i 
+	<< ": " << bt->FAT_area_offset(i) << '\n';
+   }
 
-   uart << "DATA area first sector = "
-        << sector.address << " + " << bt->data_area_offset()  << " = "
-	<< (sector.address + bt->data_area_offset()) << '\n';
 
-   uart << "DATA area size (number of sectors) = " 
+   uart << "DATA area\n"
+        << "\tfirst sector:  "
+	<< bt->data_area_offset() << '\n';
+
+   uart << "\tsize (number of sectors) = " 
         << bt->data_area_size () << '\n';
 
+    uart << "\nRoot directory\n"
+	 << "\tfirst sector: " 
+	 << bt->first_sector_of_root_directory() 
+	 << '\n';
 }
 
 void Main::print_sector_as_FS_info()
@@ -224,15 +230,31 @@ void Main::print_sector_as_FS_info()
 
 }
 
-void print_directory(std::ostream& out, const dev::FAT32::Directory& dir)
+void print_long_name_entry(std::ostream& out, const dev::FAT32::Long_file_name_entry& fn)
 {
-    if (!dir.check_integrity()){
-	out << "no\n";
-	return;
-    }
-    
-    out << "yes\t";
+    for (uint8_t i = 0; i < 10 / 2; ++i){
+	if (fn.name1[i] == 0x0000) return;
 
+	out << (uint8_t) fn.name1[i];
+    }
+
+    for (uint8_t i = 0; i < 12 / 2; ++i){
+	if (fn.name2[i] == 0x0000) return;
+
+	out << (uint8_t) fn.name2[i];
+    }
+
+    for (uint8_t i = 0; i < 4 / 2; ++i){
+	if (fn.name3[i] == 0x0000) return;
+
+	out << (uint8_t) fn.name3[i];
+    }
+
+}
+
+void print_directory_entry(std::ostream& out, const dev::FAT32::Directory& dir)
+{
+    // name
     for (uint8_t i = 0; i < 11; ++i)
 	out << dir.name[i];
 
@@ -241,7 +263,7 @@ void print_directory(std::ostream& out, const dev::FAT32::Directory& dir)
 	  << '\t' <<  dir.file_size;
 
     out << '\t';
-    atd::print_int_as_hex(out, dir.atrr);
+
     out << '\t';
     atd::print_int_as_hex(out, dir.nt_res);
     out << '\t';
@@ -257,8 +279,36 @@ void print_directory(std::ostream& out, const dev::FAT32::Directory& dir)
     out << '\t';
     atd::print_int_as_hex(out, dir.wrt_date);
  
-    out << '\n';
+}
 
+void print_directory(std::ostream& out, const dev::FAT32::Directory& dir)
+{
+    using Dir = dev::FAT32::Directory;
+
+    if (dir.is_empty()){
+	out << "EMPTY\n";
+	return;
+    }
+
+    switch (dir.attribute()){
+	break; case Dir::Attribute::read_only: out << "read only";
+	break; case Dir::Attribute::hidden: out << "hidden";
+	break; case Dir::Attribute::system: out << "system";
+	break; case Dir::Attribute::volume_id: out << "volume_id";
+	break; case Dir::Attribute::directory: out << "directory";
+	break; case Dir::Attribute::archive: out << "archive\t";
+	break; case Dir::Attribute::long_name: out << "long_name";
+    }
+
+    out << '\t';
+
+    if (dir.attribute() == Dir::Attribute::long_name)
+	print_long_name_entry(out, 
+		    reinterpret_cast<const dev::FAT32::Long_file_name_entry&>(dir));
+    else
+	print_directory_entry(out, dir);
+
+    out << '\n';
 }
 
 void Main::print_sector_as_directory_array()
@@ -270,12 +320,12 @@ void Main::print_sector_as_directory_array()
 
     using Dir = dev::FAT32::Directory;
 
-    Dir** dir = reinterpret_cast<Dir**>(sector.data());
+    Dir* dir = reinterpret_cast<Dir*>(sector.data());
 
-    uart << "n \t|name\t|ok?\t|cluster\t|size\t|attr\t|tenth\t|time\t|date\t|acc_date\t|wrt\t|wrt\t|\n";
+    uart << "n \t|attr\t\t|name\t|cluster\t|size\t|tenth\t|time\t|date\t|acc_date\t|wrt\t|wrt\t|\n";
     for (uint8_t i = 0; i < sector.size() / sizeof(Dir); ++i){
 	uart << (int) i << '\t';
-	print_directory(uart, *(dir[i]));
+	print_directory(uart, dir[i]);
     }
 
 }
