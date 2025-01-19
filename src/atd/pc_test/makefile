@@ -29,6 +29,7 @@ DIRS = 	algorithm	\
 		names		\
 		ostream		\
 		percentage	\
+		print		\
 		pwm			\
 		ratio		\
 		rom			\

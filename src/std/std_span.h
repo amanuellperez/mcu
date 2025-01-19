@@ -164,15 +164,19 @@ public:
 	requires ((extent == dynamic_extent || extent == N) and
 		 atd_::is_array_convertible_v<U, element_type>)
     constexpr span(array<U, N>& x) noexcept
-	: ptr_{x.data()}, size_{x.size()} 
+	: span{x.data(), N}
     { }
 
 
+// DUDA: los de gcc hacen un static_cast<pointer> ???
+// De hecho, para pasarle un `const std::array` es necesario que el pointer
+// sea de tipo const! (std::span<const int> ...)
+//                               ~~~~~ 
     template <typename U, size_t N>
 	requires ((extent == dynamic_extent || extent == N) and
 		 atd_::is_array_convertible_v<U, element_type>)
     constexpr span(const array<U, N>& x) noexcept
-	: ptr_{x.data()}, size_{x.size()} 
+	: span{static_cast<pointer>(x.data()), N}
     { }
 
 // Iterators

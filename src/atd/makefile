@@ -3,6 +3,7 @@ SOURCES= atd_bcd.cpp		\
 		 atd_cstddef.cpp 	\
 		 atd_cstring.cpp	\
 		 atd_double.cpp		\
+		 atd_print.cpp		\
 		 atd_test.cpp		\
 		 atd_time.cpp
 
@@ -39,6 +40,7 @@ INCS= atd_algorithm.h	\
 	atd_names.h			\
 	atd_ostream.h		\
 	atd_percentage.h	\
+	atd_print.h			\
 	atd_pwm.h			\
 	atd_ratio.h			\
 	atd_rom.h			\

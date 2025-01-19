@@ -23,7 +23,7 @@
 #include "dev_print.h"
 #include "sdc_print.h"
 #include "prj_main.h"
-#include "dev_fat.h"
+#include "atd_fat.h"
 
 #include <atd_ostream.h>
 
@@ -31,7 +31,7 @@ void Main::print_sector()
 {
     UART_iostream uart;
     print_line(uart);
-    sector.print(uart);
+    print(uart, sector);
 
 }
 
@@ -44,9 +44,9 @@ bool Main::print_sector_fromto_ask(Sector::Address& from, size_t& sz)
 
     print_question(uart, msg_print_sector_from, false);
     uart >> from;
-    if (from > Sector::sector_size){
+    if (from > Sector::size()){
 	atd::print(uart, msg_print_sector_from_to_big);
-	uart << Sector::sector_size << '\n';
+	uart << Sector::size()<< '\n';
 	return false;
     }
 
@@ -59,9 +59,9 @@ bool Main::print_sector_fromto_ask(Sector::Address& from, size_t& sz)
 		// Al rato ha empezado a funcionar bien (???)
 
     if (sz == 0)    // imprimimos hasta el final
-	sz = Sector::sector_size - from;
+	sz = Sector::size() - from;
 
-    else if (from + sz > Sector::sector_size){
+    else if (from + sz > Sector::size()){
 	atd::print(uart, msg_print_sector_size_to_big);
 	uart << '\n';
 	return false;
@@ -84,7 +84,7 @@ void Main::print_sector_fromto()
 
     uart << '\n';
     print_line(uart);
-    sector.print(uart, from, sz);
+    print(uart, sector, from, sz);
 
 }
 
@@ -96,8 +96,8 @@ void Main::print_sector_as_MBR()
     atd::print(uart, msg_print_sector_as_MBR);
     print_line(uart);
 
-    using MBR = dev::MBR;
-    using MBR_type = dev::MBR::Partition_type;
+    using MBR = atd::MBR;
+    using MBR_type = atd::MBR::Partition_type;
 
     MBR* mbr = reinterpret_cast<MBR*>(sector.data());
 
@@ -137,7 +137,7 @@ void Main::print_sector_as_FAT32_boot_sector()
     atd::print(uart, msg_print_sector_as_FAT_boot_sector);
     print_line(uart);
 
-    using Boot_sector = dev::FAT32::Boot_sector;
+    using Boot_sector = atd::FAT32::Boot_sector;
 
     Boot_sector* bt = reinterpret_cast<Boot_sector*>(sector.data());
 
@@ -215,7 +215,7 @@ void Main::print_sector_as_FS_info()
     atd::print(uart, msg_print_sector_as_FS_info);
     print_line(uart);
 
-    using FS_info = dev::FAT32::FS_info;
+    using FS_info = atd::FAT32::FS_info;
 
     FS_info* info = reinterpret_cast<FS_info*>(sector.data());
 
@@ -230,7 +230,7 @@ void Main::print_sector_as_FS_info()
 
 }
 
-void print_long_name_entry(std::ostream& out, const dev::FAT32::Long_file_name_entry& fn)
+void print_long_name_entry(std::ostream& out, const atd::FAT32::Long_file_name_entry& fn)
 {
     for (uint8_t i = 0; i < 10 / 2; ++i){
 	if (fn.name1[i] == 0x0000) return;
@@ -252,7 +252,7 @@ void print_long_name_entry(std::ostream& out, const dev::FAT32::Long_file_name_e
 
 }
 
-void print_directory_entry(std::ostream& out, const dev::FAT32::Directory& dir)
+void print_directory_entry(std::ostream& out, const atd::FAT32::Directory& dir)
 {
     // name
     for (uint8_t i = 0; i < 11; ++i)
@@ -281,9 +281,9 @@ void print_directory_entry(std::ostream& out, const dev::FAT32::Directory& dir)
  
 }
 
-void print_directory(std::ostream& out, const dev::FAT32::Directory& dir)
+void print_directory(std::ostream& out, const atd::FAT32::Directory& dir)
 {
-    using Dir = dev::FAT32::Directory;
+    using Dir = atd::FAT32::Directory;
 
     if (dir.is_empty()){
 	out << "EMPTY\n";
@@ -304,7 +304,7 @@ void print_directory(std::ostream& out, const dev::FAT32::Directory& dir)
 
     if (dir.attribute() == Dir::Attribute::long_name)
 	print_long_name_entry(out, 
-		    reinterpret_cast<const dev::FAT32::Long_file_name_entry&>(dir));
+		    reinterpret_cast<const atd::FAT32::Long_file_name_entry&>(dir));
     else
 	print_directory_entry(out, dir);
 
@@ -318,7 +318,7 @@ void Main::print_sector_as_directory_array()
 
     print_line(uart);
 
-    using Dir = dev::FAT32::Directory;
+    using Dir = atd::FAT32::Directory;
 
     Dir* dir = reinterpret_cast<Dir*>(sector.data());
 

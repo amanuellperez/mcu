@@ -25,7 +25,7 @@
 #include <mcu_SPI.h>
 #include <dev_sdcard.h>
 
-#include "dev_sector.h"
+#include "atd_sector.h"
 
 /***************************************************************************
  *			    MICROCONTROLLER
@@ -118,7 +118,13 @@ struct SDCard_cfg{
 
 using SDCard = dev::hwd::SDCard<SDCard_cfg>;
 
-using Sector_cfg = dev::Sector_cfg<SDCard::block_size>;
-using Sector     = dev::Sector<Sector_cfg>;
+struct Sector_cfg{
+    static constexpr size_t sector_size = SDCard::block_size;
+    static constexpr uint8_t nbytes_per_line = 16;
+    using Address = SDCard::Address;
+};
+
+
+using Sector     = atd::Sector<Sector_cfg>;
 
 #endif

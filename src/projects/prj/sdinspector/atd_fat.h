@@ -19,8 +19,8 @@
 
 #pragma once
 
-#ifndef __DEV_FAT_H__
-#define __DEV_FAT_H__
+#ifndef __ATD_FAT_H__
+#define __ATD_FAT_H__
 /****************************************************************************
  *
  * DESCRIPCION
@@ -40,7 +40,7 @@
 		
 #include <atd_bit.h> // concat_bytes
 
-namespace dev{
+namespace atd{
     
 /***************************************************************************
  *				MBR
@@ -317,6 +317,14 @@ struct Directory{
 
 };
     
+
+
+// Iteramos por las entradas de un directorio
+struct Directory_iterator{
+};
+
+
+
 
 }// namespace FAT32
 
