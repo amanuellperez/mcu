@@ -1,4 +1,4 @@
-// Copyright (C) 2022 Manuel Perez 
+// Copyright (C) 2022-2025 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -35,6 +35,7 @@
  *    Manuel Perez
  *    23/12/2022 Versión mínima
  *    22/08/2023 rbegin/rend
+ *    19/01/2025 Añadidos algunos requirements
  *
  ****************************************************************************/
 #include "std_config.h"
@@ -104,7 +105,6 @@ private:
 };
 
 
-
 } // namespace private_
   
 
@@ -127,26 +127,51 @@ public:
 // Member constant
     static constexpr size_t extent = size0;
 
+// Traits
+    template<typename U>
+    static constexpr bool is_compatible_ref_v = 
+	    atd_::is_array_convertible_v<remove_reference_t<iter_reference_t<U>>
+							  , element_type>;
+
+
 // Constructor
     constexpr span() noexcept
 	requires (extent == 0 || extent == dynamic_extent)
 	: ptr_{nullptr}, size_{0} { }
 
-    template <typename It>
-    explicit (extent != dynamic_extent)
-    constexpr span(It p0, size_type N) 
-	    : ptr_{to_address(p0)}, size_{N} { }
+    template <contiguous_iterator It>
+	requires (is_compatible_ref_v<It>)
+	constexpr explicit (extent != dynamic_extent)
+	span(It p0, size_type N) 
+	    : ptr_{STD::to_address(p0)}, size_{N} { }
+
+    //TODO: falta requirement sized_sentinel_for
+    //template <contiguous_iterator It, sized_sentinel_for<It> End>
+    template <contiguous_iterator It, typename  End>
+	requires (is_compatible_ref_v<It> and 
+		  !is_convertible_v<End, size_t>)
+	constexpr explicit (extent != dynamic_extent)
+	span(It p0, End pe)
+	    : ptr_{STD::to_address(p0)}, 
+		    size_{static_cast<size_type>(pe - p0)} { }
 
     template <size_type N>
 	requires (extent == dynamic_extent || N == extent)
-	// TODO: require remove_pointer_t <...>
     constexpr span(type_identity_t<element_type> (&x)[N]) noexcept
 		: ptr_{static_cast<pointer>(x)}, size_{N} { }
 
     template <typename U, size_t N>
-	requires (extent == dynamic_extent || N == extent)
-	// TODO: require remove_pointer_t <...>
+	requires ((extent == dynamic_extent || extent == N) and
+		 atd_::is_array_convertible_v<U, element_type>)
     constexpr span(array<U, N>& x) noexcept
+	: ptr_{x.data()}, size_{x.size()} 
+    { }
+
+
+    template <typename U, size_t N>
+	requires ((extent == dynamic_extent || extent == N) and
+		 atd_::is_array_convertible_v<U, element_type>)
+    constexpr span(const array<U, N>& x) noexcept
 	: ptr_{x.data()}, size_{x.size()} 
     { }
 

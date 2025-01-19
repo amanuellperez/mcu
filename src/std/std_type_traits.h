@@ -61,7 +61,7 @@
  *               Forma de probarla: en caso de duda intentar una enumeración
  *               exhaustiva }:), ver el test)
  *    05/10/2023 Escribo bastantes.
- *		 
+ *    18/01/2025 atd_::is_array_convertible 
  *
  ****************************************************************************/
 #include "std_config.h"
@@ -2575,6 +2575,19 @@ using underlying_type_t = typename underlying_type<T>::type;
 // TODO
 
 
+
+
+namespace atd_{
+// is_array_convertible
+// --------------------
+template<typename From, typename To>
+using is_array_convertible = is_convertible<From(*)[], To(*)[]>;
+
+template <typename From, typename To>
+inline constexpr bool is_array_convertible_v 
+				= is_array_convertible<From, To>::value;
+
+} // namespace atd_
 
 }// namespace
 

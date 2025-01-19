@@ -327,7 +327,6 @@ It int_to_cstring(It p0, It pe, Int x)
     return pc;
 }
 
-
 }// namespace atd_
 
 
