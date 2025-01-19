@@ -83,7 +83,7 @@ struct MBR_partition{
     Type type;
     uint8_t end_hd;
     uint16_t end_cy_sc;
-    uint32_t lba_offset;
+    uint32_t lba_first_sector;
     uint32_t lba_size;
 
     bool is_bootable() const {return boot_id == 0x80;}
@@ -132,12 +132,12 @@ struct Boot_sector{
     uint8_t sec_per_clus;
     uint16_t rsvd_sec_cnt;
     uint8_t num_fats;
-    uint16_t root_ent_cnt;
-    uint16_t tot_sec16;
-    uint8_t media;
-    uint16_t fat_sz16;
-    uint16_t sec_per_trk;
-    uint16_t num_heads;
+    uint16_t root_ent_cnt;  // == 0
+    uint16_t tot_sec16;	    // == 0
+    uint8_t media;	    // ???
+    uint16_t fat_sz16;	    // == 0
+    uint16_t sec_per_trk;   // ???
+    uint16_t num_heads;	    // ???
     uint32_t hidd_sec;
     uint32_t tot_sec32;
 
@@ -149,7 +149,7 @@ struct Boot_sector{
     uint16_t fs_info;
     uint16_t bk_boot_sec;   // == 6 siempre (3.6)
     uint8_t reserved[12];
-    uint8_t drv_num;
+    uint8_t drv_num;	    // ???
     uint8_t reserved1;
     uint8_t boot_sig;
     uint32_t vol_id;
@@ -163,58 +163,87 @@ struct Boot_sector{
     bool check_integrity() const
     {
 	return is_sign_valid() 
+	       and root_ent_cnt == 0 
+	       and tot_sec16 == 0
 	       and fat_sz16 == 0 // FAT32 tiene el size en fat_sz32
 	       and num_fats >= 1
-	       and root_ent_cnt == 0 // for FAT32 siempre vale 0
 	       and tot_sec32 != 0 
 	       and bk_boot_sec == 6
 	       ;
     }
 
+
+// Hidden area
+// -----------
+// La hidden area son todos los sectores que hay antes del primer sector de
+// este volumen.
+    uint32_t hidden_area_size() const {return hidd_sec; }
+
+// Volume info
+// -----------
+    uint32_t volume_size() const {return tot_sec32;}
+    uint16_t bytes_per_sector() const {return byte_per_sec;}
+    uint8_t sectors_per_cluster() const {return sec_per_clus;}
+
+    bool is_volume_label_and_id_set() const {return boot_sig == 0x29;}
+    std::span<const uint8_t, 11> volumen_label() const {return vol_lab;}
+    uint32_t volume_id() const {return vol_id;}
+
+// Reserved area
+// -------------
+    uint32_t reserved_area_first_sector() const {return hidden_area_size();}
+    uint32_t reserved_area_size() const {return rsvd_sec_cnt;}
+    uint16_t FS_Info_sector() const {return fs_info;}
+    uint16_t backup_boot_sector() const {return bk_boot_sec;}
+
 // FAT area
 // --------
-    // offset del primer sector de la FAT area i
-    uint16_t FAT_area_offset(uint8_t i) const 
+    // Primer sector de la FAT area i
+    uint32_t FAT_area_first_sector(uint8_t i) const 
     {return hidd_sec + rsvd_sec_cnt + fat_sz32 * i;}
 
-    uint32_t FAT_area_number_of_sectors() const {return fat_sz32 * num_fats;}
+    uint32_t FAT_area_first_sector() const 
+    { return FAT_area_first_sector(0); }
 
-    // Me gusta más este sinónimo:
-    uint32_t FAT_area_size() const {return FAT_area_number_of_sectors(); }
+    uint32_t FAT_area_size() const {return fat_sz32 * num_fats;}
 
     uint8_t number_of_FATs() const {return num_fats;}
+    
+    bool is_FAT_mirror_enabled() const
+    { return (ext_flags & 0x0040) == 0; }
 
-// Root directory (FAT12/16 solo)
-// --------------
-    uint32_t root_directory_area_offset() const 
-    {return FAT_area_offset(0) + FAT_area_size(); }
+    // Cuando is_FAT_mirror_enabled() == false, solo hay una FAT activa:
+    uint8_t number_of_active_FAT() const 
+    { return ext_flags & 0x0007; }
 
-    static constexpr uint8_t dir_entry_size = 32;
 
-    // Como root_ent_cnt == 0, la root directory area para FAT32 siempre es 0.
-    // Dejo esto por si implemento FAT12 en el futuro
-    uint32_t root_directory_area_number_of_sectors() const
-    {return (dir_entry_size * root_ent_cnt + byte_per_sec - 1) / byte_per_sec; }
-
-    uint32_t root_directory_area_size() const  
-    {return root_directory_area_number_of_sectors(); }
+// FAT32 no tiene Root area. NO BORRAR de momento.
+// Lo dejo como ejemplo por si se implementa FAT12/16.
+//// Root directory (FAT12/16 solo)
+//// --------------
+//    uint32_t root_directory_area_first_sector() const 
+//    {return FAT_area_first_sector(0) + FAT_area_size(); }
+//
+//    static constexpr uint8_t dir_entry_size = 32;
+//
+//    // Como root_ent_cnt == 0, la root directory area para FAT32 siempre es 0.
+//    // Dejo esto por si implemento FAT12 en el futuro
+//    uint32_t root_directory_area_size() const
+//    {return (dir_entry_size * root_ent_cnt + byte_per_sec - 1) / byte_per_sec; }
 
 
 // Data area
 // ---------
-    uint32_t data_area_offset() const 
-    {return root_directory_area_offset() + root_directory_area_size(); }
+    uint32_t data_area_first_sector() const 
+    {return FAT_area_first_sector() + FAT_area_size(); }
 
-    uint32_t data_area_number_of_sectors() const 
-    { return data_area_offset() + tot_sec32;}
-
-    uint32_t data_area_size() const {return data_area_number_of_sectors(); }
+    uint32_t data_area_size() const 
+    { return tot_sec32 - FAT_area_size() - reserved_area_size();}
 
     uint32_t first_sector_of_cluster(uint32_t n) const
-    {return  data_area_offset() + (n-2) * sec_per_clus;}
+    {return  data_area_first_sector() + (n-2) * sectors_per_cluster();}
 
-    // Este es el primer sector del root directory
-    uint32_t first_sector_of_root_directory() const
+    uint32_t root_directory_first_sector() const
     {return  first_sector_of_cluster(root_clus);}
 
 };
@@ -264,7 +293,7 @@ struct Long_file_name_entry{
 };
 
 // Section 6, FAT specification
-struct Directory{
+struct Directory_entry{
     static_assert(std::endian::native == std::endian::little);
 
     uint8_t name[11];
@@ -318,10 +347,23 @@ struct Directory{
 };
     
 
-
-// Iteramos por las entradas de un directorio
-struct Directory_iterator{
-};
+//// Nosotros concebimos un fichero como un conjunto contiguo de bytes.
+//// Sin embargo, como almacenamos los bytes en sectores, parece más práctico
+//// concebirlo como un conjunto contiguo de sectores, ya que cada sector es la
+//// unidad básica que podemos leer/escribir.
+////
+//// FAT32 divide esos sectores en clusters que almacena en diferentes
+//// posiciones. Esta clase se encarga de ocultar el almacenamiento en clusters
+//// permitiendo concebir el fichero como un conjunto contiguo de sectores.
+//struct File{
+//};
+//
+//
+//// Iteramos por las entradas de un directorio
+//
+//struct Directory_iterator{
+//
+//};
 
 
 

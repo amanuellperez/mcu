@@ -38,8 +38,6 @@
 
 #include <array>
 #include <ostream>
-#include <atd_ostream.h>
-#include <atd_math.h>
 #include <limits>
 
 #include <atd_print.h>
@@ -50,7 +48,6 @@ namespace atd{
 //
 //  struct Sector_cfg{
 //      static constexpr size_t sector_size = SDCard::block_size;
-//      static constexpr uint8_t nbytes_per_line = 16;
 //      using Address = SDCard::Address;
 //  };
 //
@@ -61,7 +58,6 @@ struct Sector: std::array<uint8_t, Cfg::sector_size>{
     static constexpr Address size() {return Cfg::sector_size;}
 
 // Data
-// uint8_t data[sector_size]; <-- implícito al heredar de std::array
     // me suena mejor 'number' que 'address' (???)
     // Si address == max ==> el sector consideramos que no está cargado en
     // memoria.
@@ -70,10 +66,6 @@ struct Sector: std::array<uint8_t, Cfg::sector_size>{
     bool is_valid() const { return !is_invalid(); }
     bool is_invalid() const 
 		{return address == std::numeric_limits<Address>::max();}
-
-
-private:
-
 
 };
 
