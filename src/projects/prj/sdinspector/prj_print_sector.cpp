@@ -195,46 +195,55 @@ void Main::print_sector_as_FAT32_boot_sector()
 	print_as_str(uart, bt->volumen_label());
 	uart << "\n\tID   : " << bt->volume_id() << '\n';
     }
-    uart << "\tNumber of sectors: " << bt->volume_size() <<
-	   "\n\tBytes per sector : " << bt->bytes_per_sector() <<
-	   "\n\tNumber of sectors per cluster: " << (int) bt->sectors_per_cluster() <<
-	   "\n";
+    uart <<     "\tNumber of sectors: " << bt->volume_number_of_sectors() 
+	   << "\n\tBytes per sector : " << bt->bytes_per_sector() 
+	   << '\n';
 
     uart << "HIDDEN AREA\n"
-	   "\tNumber of sectors: " << bt->hidden_area_size() << '\n';
+	   "\tNumber of sectors: " << bt->hidden_area_number_of_sectors() << '\n';
 
     uart << "RESERVED AREA\n"
-	     "\tNumber of sectors : " << bt->reserved_area_size() <<
+	     "\tNumber of sectors : " << bt->reserved_area_number_of_sectors() <<
 	   "\n\tFS Info sector    : " << bt->FS_Info_sector()<<
 	   "\n\tBackup boot sector: " << bt->backup_boot_sector()<<
 	   "\n";
 
    uart << "FAT AREA\n";
-   uart << "\tNumber of sectors: " << bt->FAT_area_size() <<
-         "\n\tis FAT mirrored at runtime into all FATs? ";
+   uart << "\tNumber of sectors: " << bt->FAT_area_number_of_sectors() 
+        << "\n\tis FAT mirrored at runtime into all FATs? ";
 
-   if (bt->is_FAT_mirror_enabled())
+   if (bt->FAT_is_mirror_enabled())
        uart << "yes\n";
 
    else {
        uart << "no\n"
-	       "\tActive FAT: " << (int) bt->number_of_active_FAT() 
+	       "\tActive FAT: " << (int) bt->number_of_active_FATs() 
 	       << '\n';
     }
-
 
     uart << "\tNumber of FATs: " << (int) bt->number_of_FATs() << '\n';
    
     for (uint8_t i = 0; i < bt->number_of_FATs(); ++i){
 	uart << "\t\tFirst sector FAT" << (int) i 
-	<< ": " << bt->FAT_area_first_sector(i) << '\n';
+	<< ": " << bt->FAT_first_sector(i) << '\n';
     }
 
+   uart << "FAT[i]"
+	<< "\n\tNumber of entries : " << bt->FAT_number_of_entries()
+        << "\n\tNumber of sectors : " << (int) bt->FAT_number_of_sectors() 
+        << "\n\tNumber of entries per sector: " << (int) bt->FAT_number_of_entries_per_sector()
+	<< "\n\tUnused entries    : " << bt->FAT_unused_entries()
+	<< "\n\tUnused sectors    : " << bt->FAT_unused_sectors() 
+	<< '\n';
+
+
    uart << "DATA AREA\n"
-	     "\tNumber of sectors : " << bt->data_area_size () <<
-	   "\n\tFirst sector:  " << bt->data_area_first_sector() << 
-	   "\n\tRoot directory sector: " << bt->root_directory_first_sector()  <<
-	   '\n';
+	     "\tNumber of sectors    : " << bt->data_area_number_of_sectors() 
+	<< "\n\tSectors per cluster  : " << (int) bt->data_area_sectors_per_cluster()
+	<< "\n\tNumber of clusters   : " << bt->data_area_number_of_clusters()
+	<< "\n\tFirst sector         : " << bt->data_area_first_sector()
+	<< "\n\tRoot directory sector: " << bt->root_directory_first_sector()
+	<< '\n';
 
 
 }

@@ -11,9 +11,10 @@ SOURCES= dev_print.cpp	\
 		 prj_load_sector.cpp	
 
 
-#MCU = atmega328p
+# NO USAR atmega328p!!! SOLO TIENE 2kB de RAM!!! MCU = atmega328p
 #F_CPU = 1000000UL
 
+# El atmega4809 tiene 6 kB de RAM!!!
 MCU = atmega4809
 F_CPU = 3333333UL
 

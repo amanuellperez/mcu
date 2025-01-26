@@ -177,13 +177,12 @@ struct Boot_sector{
 // -----------
 // La hidden area son todos los sectores que hay antes del primer sector de
 // este volumen.
-    uint32_t hidden_area_size() const {return hidd_sec; }
+    uint32_t hidden_area_number_of_sectors() const {return hidd_sec; }
 
 // Volume info
 // -----------
-    uint32_t volume_size() const {return tot_sec32;}
+    uint32_t volume_number_of_sectors() const {return tot_sec32;}
     uint16_t bytes_per_sector() const {return byte_per_sec;}
-    uint8_t sectors_per_cluster() const {return sec_per_clus;}
 
     bool is_volume_label_and_id_set() const {return boot_sig == 0x29;}
     std::span<const uint8_t, 11> volumen_label() const {return vol_lab;}
@@ -191,30 +190,66 @@ struct Boot_sector{
 
 // Reserved area
 // -------------
-    uint32_t reserved_area_first_sector() const {return hidden_area_size();}
-    uint32_t reserved_area_size() const {return rsvd_sec_cnt;}
+    uint32_t reserved_area_first_sector() const {return hidden_area_number_of_sectors();}
+    uint32_t reserved_area_number_of_sectors() const {return rsvd_sec_cnt;}
     uint16_t FS_Info_sector() const {return fs_info;}
     uint16_t backup_boot_sector() const {return bk_boot_sec;}
 
 // FAT area
 // --------
+// El FAT area está formada por una sucesión de FATs:
+//
+//	FAT area = FAT[0] U FAT[1] U FAT[2] U ... FAT[n-1]
+//
+// siendo U el símbolo de unión.
+// En lo que sigue `FAT_area_...` se referirá a la unión de las FATs, mientras
+// que `FAT_...` será información de una única FAT.
     // Primer sector de la FAT area i
-    uint32_t FAT_area_first_sector(uint8_t i) const 
+    uint32_t FAT_first_sector(uint8_t i) const 
     {return hidd_sec + rsvd_sec_cnt + fat_sz32 * i;}
 
     uint32_t FAT_area_first_sector() const 
-    { return FAT_area_first_sector(0); }
-
-    uint32_t FAT_area_size() const {return fat_sz32 * num_fats;}
+    { return FAT_first_sector(0); }
 
     uint8_t number_of_FATs() const {return num_fats;}
+
+    // número de sectores que ocupa el FAT area
+    uint32_t FAT_area_number_of_sectors() const {return fat_sz32 * num_fats;}
+
+    // número de sectores de una FAT
+    uint32_t FAT_number_of_sectors() const
+    { return FAT_area_number_of_sectors() / number_of_FATs(); }
     
-    bool is_FAT_mirror_enabled() const
+    bool FAT_is_mirror_enabled() const
     { return (ext_flags & 0x0040) == 0; }
 
     // Cuando is_FAT_mirror_enabled() == false, solo hay una FAT activa:
-    uint8_t number_of_active_FAT() const 
+    uint8_t number_of_active_FATs() const 
     { return ext_flags & 0x0007; }
+
+    // en FAT32 cada entrada es un uint32_t
+    static constexpr uint8_t FAT_bytes_per_entry() { return sizeof(uint32_t);}
+
+    uint8_t FAT_number_of_entries_per_sector() const
+    { return bytes_per_sector() / FAT_bytes_per_entry(); }
+
+    uint32_t FAT_number_of_entries() const
+    { return FAT_number_of_entries_per_sector() * FAT_number_of_sectors();}
+
+    // El número de entradas en una FAT es:
+    //	    2 + data_area_number_of_clusters()
+    // donde los 2 proceden de que FAT[0] y FAT[1] son reserved.
+    // En la práctica parece ser que se reserva más tamaño del necesario. Esta
+    // función devuelve el exceso de sectores.
+    // Cada entry de una FAT corresponde co un cluster del data area.
+    // 
+    // (HACK) ¿Se podría usar esta zona para guardar documentos secretos?
+    uint32_t FAT_unused_entries() const
+    { return FAT_number_of_entries() 
+				    - (2 + data_area_number_of_clusters());}
+
+    uint32_t FAT_unused_sectors() const
+    { return (FAT_unused_entries() * FAT_bytes_per_entry()) / bytes_per_sector();}
 
 
 // FAT32 no tiene Root area. NO BORRAR de momento.
@@ -235,13 +270,19 @@ struct Boot_sector{
 // Data area
 // ---------
     uint32_t data_area_first_sector() const 
-    {return FAT_area_first_sector() + FAT_area_size(); }
+    {return FAT_area_first_sector() + FAT_area_number_of_sectors(); }
 
-    uint32_t data_area_size() const 
-    { return tot_sec32 - FAT_area_size() - reserved_area_size();}
+    uint32_t data_area_number_of_sectors() const 
+    { return tot_sec32 - FAT_area_number_of_sectors() - reserved_area_number_of_sectors();}
+
+    uint8_t data_area_sectors_per_cluster() const {return sec_per_clus;}
+
+
+    uint32_t data_area_number_of_clusters() const
+    { return data_area_number_of_sectors() / data_area_sectors_per_cluster(); }
 
     uint32_t first_sector_of_cluster(uint32_t n) const
-    {return  data_area_first_sector() + (n-2) * sectors_per_cluster();}
+    {return  data_area_first_sector() + (n-2) * data_area_sectors_per_cluster();}
 
     uint32_t root_directory_first_sector() const
     {return  first_sector_of_cluster(root_clus);}
@@ -347,23 +388,162 @@ struct Directory_entry{
 };
     
 
-//// Nosotros concebimos un fichero como un conjunto contiguo de bytes.
-//// Sin embargo, como almacenamos los bytes en sectores, parece más práctico
-//// concebirlo como un conjunto contiguo de sectores, ya que cada sector es la
-//// unidad básica que podemos leer/escribir.
-////
-//// FAT32 divide esos sectores en clusters que almacena en diferentes
-//// posiciones. Esta clase se encarga de ocultar el almacenamiento en clusters
-//// permitiendo concebir el fichero como un conjunto contiguo de sectores.
-//struct File{
-//};
+
+
+/***************************************************************************
+ *				FAT
+ *
+ *  Concebimos la FAT como un array lineal, en lugar de un conjunto de
+ *  sectores. Esta clase oculta el hecho de que la FAT realmente esté formada
+ *  realmente por un array de sectores.
+ *
+ *  Oculta también el número de copias de FATs que hay. El cliente no tiene
+ *  que preocuparse de saber nada de eso, concibiendo la FAT como una única
+ *  FAT.
+ *
+ ***************************************************************************/
+// Internamente la FAT puede:
+//  1. Ser una única FAT, cuando Boot_sector::is_FAT_mirror_enabled() == true
+//  2. Estar duplicada en diferentes FATs, cuando is_FAT_mirror_enabled()== false
+//     Entiendo (???) que en este caso todas las FATs serán contiguas, siendo
+//     sus sectores [sector[n], sector[n+1] - 1], siendo 
+//     sector[n] = sector[0] + n * Boot_sector::FAT_area_size()
 //
+// En principio, como voy a dar por supuesto que tengo poca memoria RAM (el
+// atmega328p tiene solo 2K y un sector ocupa 512 bytes), no voy a guardar en
+// memoria la FAT. Cada vez que queramos acceder a ella, leeré el sector
+// correspondiente, leeré el dato buscado, y eliminaré de memoria el sector.
 //
-//// Iteramos por las entradas de un directorio
+// El problema es que eso es muy ineficiente. Si hicieramos:
 //
-//struct Directory_iterator{
+//	    uint32_t x = FAT[cluster]; // esto carga el sector, y lee el valor
 //
-//};
+//  sería muy ineficiente leer los clusters de un fichero.
+//
+//  Por ello, la función `read` lee no solo el valor de un cluster de un
+//  fichero sino N valores. Si la lista de clusters de un fichero es:
+//
+//	c0 -> c1 -> c2 -> c3 -> c4 -> ... -> cn
+//
+//  podemos hacer:
+//	
+//	    uint32_t file[4];
+//	    FAT.read(c3, file); 
+//
+//  Esta función intenta meter en file c4, c5, c6 y c7 siempre todos estos
+//  clusters esten en el MISMO sector. Si no estuvieran en el mismo sector,
+//  read solo devuelve los clusters de ese sector, teniendo que volver a
+//  llamar a `read` para leer el resto.
+//
+class FAT{
+public:
+// Constructors
+    //(???) Dos opciones: o pasamos el boot sector o lo leemos. ¿Cuál es más
+    //práctica? Ni idea. Experimentemos.
+    FAT(const Boot_sector& bs);
+
+    // Lee los clusters que siguen al cluster0 y los mete en file_clusters.
+    template <uint8_t N>
+    uint8_t read(uint32_t cluster0, std::span<uint32_t, N> file_clusters);
+
+
+// Como está clase es de bajo nivel voy a dejar visibles todas estas clases
+// para poder depurar
+    // Sector inicial donde empieza FAT[n]
+    uint32_t first_sector(uint8_t n) const 
+    {return sector0_ + n * number_of_sectors_;}
+
+// Info
+    uint32_t number_of_sectors() const {return number_of_sectors_;}
+    uint32_t number_of_entries() const {return number_of_entries_;}
+
+    uint8_t number_of_active_FATs() const {return nFATs_;}
+
+private:
+// Data
+    uint32_t sector0_;	// sector donde empieza la primera FAT
+    uint8_t nFATs_;	// número de FATs activas
+    uint32_t number_of_sectors_; // número total de sectores de 1 FAT
+    uint32_t number_of_entries_; // número de entradas de la FAT
+				 // Es el número de clusters de la data area
+
+// Cfg de FAT
+    enum class Cluster_state{ free, allocated, bad, end_of_file, reserved };
+
+    // Observar la forma de hablar: la FAT es un conjunto de entradas, donde
+    // la posición de cada entrada hace referencia al cluster de esa posición.
+    // Así, la entrada 10 de la FAT contiene:
+    //	1. El estado de ese cluster: free, allocated, bad, ...
+    //	2. En el caso de que sea allocated indica el valor del siguiente
+    //	   cluster.
+    Cluster_state cluster_state(uint32_t entry) const;
+
+// Helpers
+};
+
+FAT::FAT(const Boot_sector& bs)
+{
+    sector0_ = bs.FAT_area_first_sector();
+    nFATs_   = bs.number_of_active_FATs();
+    number_of_sectors_ = bs.FAT_number_of_sectors();
+    number_of_entries_ = bs.data_area_number_of_clusters();
+}
+
+
+
+// Section 4. FAT specification
+FAT::Cluster_state FAT::cluster_state(uint32_t entry) const
+{
+    // Section 4.  Note: "The high 4 bits of a FAT32 FAT entry are reserved"
+    entry &= 0x0FFFFFFF;  
+
+    if (entry == 0x00000000) return Cluster_state::free;
+    if (entry == 0x0FFFFFF7) return Cluster_state::bad;
+    if (entry == 0x0FFFFFFF) return Cluster_state::end_of_file;
+    
+    // entrys 0 y 1 están reservados
+    // section 3.5
+    if (0x00000002 <= entry 
+		and entry <= number_of_entries_ + 1) 
+	return Cluster_state::allocated;
+	
+
+    // DUDA: La FAT specification indica que 
+    // "Reserved and should not be used.
+    //  May be interpreted as an allocated entry and the final
+    //  entry in the file (indicating end-of-file condition)"
+    //  ¿son reserved or end_of_file? @_@
+    if (0x0FFFFFF8 <= entry and entry <= 0x0FFFFFFE)
+	return Cluster_state::reserved;
+
+    return Cluster_state::reserved;
+}
+//
+//template <uint8_t N>
+//uint8_t FAT::read(uint32_t cluster, std::span<uint32_t, N> file_clusters)
+//{
+//    auto [nsector0, pos] = cluster2sector_pos(cluster);
+//
+//    Sector sector = read_sector(nsector0);
+//
+//    uint32_t nsector{};
+//
+//    for (uint8_t i = 0; i < N; ++i){
+//	cluster = sector[pos];
+//
+//	if (
+//	file_clusters[i] = cluster;
+//	std::tie(nsector, pos) = cluster2sector_pos(cluster);
+//
+//	if (nsector != nsector0)
+//	    return i;
+//    }
+//
+//}
+
+
+
+
 
 
 
