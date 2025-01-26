@@ -442,31 +442,51 @@ void test_array_view()
 
 }
 
+template <typename Array>
+void test_array_of_bytes_view(Array& a)
+{
+    for (auto& x: a)
+	x = 0;
+
+    // Lo siguiente está escrito en little endian
+    static_assert(std::endian::native == std::endian::little);
+
+    a[0] = 0xF4; // 500
+    a[1] = 0x01;
+
+    a[4] = 0x80; // 80.000
+    a[5] = 0x38;
+    a[6] = 0x01;
+
+    atd::Array_of_bytes_view<Array, uint32_t> v{a};
+    CHECK_TRUE(v[0] == 500, "read(0)");
+    CHECK_TRUE(v[1] == 80'000, "read(1)");
+
+    v[1] = 79534;
+    CHECK_TRUE(v[1] == 79534, "write(0)");
+
+}
 
 
-//void test_container_view()
-//{
-//    test::interface("const_Container_view");
-//
-//    {// array
-//    int x[2];
-//    x[0] = 20;
-//    x[1] = 30;
-//    auto view = atd::const_container_view(x);
-//    CHECK_TRUE(view.size() == 2, "size");
-//    CHECK_TRUE(view[0] == x[0], "operator[]");
-//    CHECK_TRUE(view[1] == x[1], "operator[]");
-//    }
-//
-//    {// std::array
-//    std::array<int,2> x = {11, 22};
-//    auto view = atd::const_container_view(x);
-//    CHECK_TRUE(view.size() == x.size(), "size");
-//    CHECK_TRUE(view[0] == x[0], "operator[]");
-//    CHECK_TRUE(view[1] == x[1], "operator[]");
-//    }
-//
-//}
+void test_array_of_bytes_view()
+{
+    test::interface("Array_of_bytes_view");
+    
+    uint8_t a[24];
+    test_array_of_bytes_view(a);
+
+    std::array<uint8_t, 24> b;
+    test_array_of_bytes_view(b);
+
+//    atd::Array<uint8_t, 24> c; <-- no funciona por culpa de que atd::Array
+//    no se puede inicializar de la forma normal, sino que hay que usar
+//    push_back (lo cual es un incordio!!!)
+//    test_array_of_bytes_view(c);
+}
+
+
+
+
 
 int main()
 {
@@ -477,7 +497,7 @@ try{
     test_linear_array();
     test_array();
     test_array_view();
-//    test_container_view();
+    test_array_of_bytes_view();
 
 }catch(std::exception& e)
 {

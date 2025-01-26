@@ -39,6 +39,8 @@
 #include <bit>	// endianness
 		
 #include <atd_bit.h> // concat_bytes
+#include "atd_sector.h"
+
 
 namespace atd{
     
@@ -435,15 +437,19 @@ struct Directory_entry{
 //  read solo devuelve los clusters de ese sector, teniendo que volver a
 //  llamar a `read` para leer el resto.
 //
+template <size_t sector_size = 512>
 class FAT{
 public:
+// Types
+    using Sector = atd::Sector<uint32_t, sector_size>;
+
 // Constructors
     //(???) Dos opciones: o pasamos el boot sector o lo leemos. ¿Cuál es más
     //práctica? Ni idea. Experimentemos.
     FAT(const Boot_sector& bs);
 
     // Lee los clusters que siguen al cluster0 y los mete en file_clusters.
-    template <uint8_t N>
+    template <uint8_t N, typename Sector_reader>
     uint8_t read(uint32_t cluster0, std::span<uint32_t, N> file_clusters);
 
 
@@ -481,7 +487,8 @@ private:
 // Helpers
 };
 
-FAT::FAT(const Boot_sector& bs)
+template <size_t S>
+FAT<S>::FAT(const Boot_sector& bs)
 {
     sector0_ = bs.FAT_area_first_sector();
     nFATs_   = bs.number_of_active_FATs();
@@ -492,7 +499,8 @@ FAT::FAT(const Boot_sector& bs)
 
 
 // Section 4. FAT specification
-FAT::Cluster_state FAT::cluster_state(uint32_t entry) const
+template <size_t S>
+FAT<S>::Cluster_state FAT<S>::cluster_state(uint32_t entry) const
 {
     // Section 4.  Note: "The high 4 bits of a FAT32 FAT entry are reserved"
     entry &= 0x0FFFFFFF;  
@@ -518,28 +526,38 @@ FAT::Cluster_state FAT::cluster_state(uint32_t entry) const
 
     return Cluster_state::reserved;
 }
-//
-//template <uint8_t N>
-//uint8_t FAT::read(uint32_t cluster, std::span<uint32_t, N> file_clusters)
-//{
-//    auto [nsector0, pos] = cluster2sector_pos(cluster);
-//
-//    Sector sector = read_sector(nsector0);
-//
-//    uint32_t nsector{};
-//
-//    for (uint8_t i = 0; i < N; ++i){
-//	cluster = sector[pos];
-//
-//	if (
-//	file_clusters[i] = cluster;
-//	std::tie(nsector, pos) = cluster2sector_pos(cluster);
-//
-//	if (nsector != nsector0)
-//	    return i;
-//    }
-//
-//}
+
+
+template <size_t S>
+std::pair<uint32_t, uint8_t> FAT<S>::cluster_state(uint32_t entry) const
+
+template <size_t S>
+template <uint8_t N, typename Sector_reader>
+uint8_t FAT<S>::read(uint32_t cluster, std::span<uint32_t, N> file_clusters)
+{
+    auto [nsector0, pos] = cluster2sector_pos(cluster);
+
+    Sector sector{};
+    Sector_reader::read(nsector0, sector);
+
+    uint32_t nsector{};
+
+    uint8_t i = 0;
+    for (; i < N; ++i){
+	uint32_t entry = sector[pos];
+
+	if (cluster_state(entry) == Cluster_state::allocated){
+	    file_clusters[i] = entry;
+	    std::tie(nsector, pos) = cluster2sector_pos(cluster);
+
+	    if (nsector != nsector0)
+		return i;
+	}
+    }
+
+    return i;
+
+}
 
 
 
