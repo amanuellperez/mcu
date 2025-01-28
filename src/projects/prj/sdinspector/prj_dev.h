@@ -118,13 +118,25 @@ struct SDCard_cfg{
 
 using SDCard = dev::hwd::SDCard<SDCard_cfg>;
 
-struct Sector_cfg{
-    static constexpr size_t sector_size = SDCard::block_size;
-    static constexpr uint8_t nbytes_per_line = 16;
-    using Address = SDCard::Address;
+
+// Sector_driver es el driver que se usa para acceder a un dispositivo físico
+// que almacena la memoria en sectores (en este caso la SDCard).
+struct Sector_driver{
+    using Sector = atd::Sector<512>;
+
+    static bool read(const SDCard::Address& add, Sector& sector)
+    {
+	auto r = SDCard::read(add, sector);
+	return r.ok();
+    }
+
+    static bool write(const SDCard::Address& add, Sector& sector)
+    {
+	auto r = SDCard::write(add, sector);
+	return r.ok();
+    }
 };
 
 
-using Sector     = atd::Sector<Sector_cfg>;
 
 #endif

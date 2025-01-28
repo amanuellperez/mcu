@@ -18,7 +18,7 @@ SOURCES= dev_print.cpp	\
 MCU = atmega4809
 F_CPU = 3333333UL
 
-
+USER_CXXFLAGS=-DTRACE_LEVEL=9
 
 include $(PRJ_GENRULES)
 

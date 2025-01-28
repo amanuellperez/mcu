@@ -35,7 +35,7 @@ void Main::print_sector()
 
 }
 
-bool Main::print_sector_fromto_ask(Sector::Address& from, size_t& sz)
+bool Main::print_sector_fromto_ask(Sector::size_type& from, size_t& sz)
 {
     UART_iostream uart;
 
@@ -77,7 +77,7 @@ void Main::print_sector_fromto()
 {
     UART_iostream uart;
 
-    Sector::Address from{};
+    Sector::size_type from{};
     size_t sz{};
     if (!print_sector_fromto_ask(from, sz))
 	return;
@@ -370,3 +370,53 @@ void Main::print_sector_as_directory_array()
     }
 
 }
+
+void Main::print_FAT32_entry()
+{
+    UART_iostream uart;
+
+    uart << "\nFAT32 boot sector number: ";
+    uint32_t nsector;
+
+    uart >> nsector;
+    if (!load_sector(nsector)){
+	uart << "ERROR!!!\n";
+	return;
+    }
+
+    using Boot_sector = atd::FAT32::Boot_sector;
+    Boot_sector* bt = reinterpret_cast<Boot_sector*>(sector.data());
+
+    atd::FAT32::FAT fat(*bt);
+
+    if constexpr (trace()){
+	uart << "FAT:"
+	        "\n\tfirst_sector         : " << fat.first_sector(0) 
+	     << "\n\tnumber of sectors    : " << fat.number_of_sectors()
+	     << "\n\tnumber of entries    : " << fat.number_of_entries()
+	     << "\n\tbytes per sector     : " << fat.bytes_per_sector()
+	     << "\n\tnumber of active FATs: " << (uint16_t) fat.number_of_active_FATs()
+	     << '\n';
+
+    }
+
+    uart << "Cluster to print: ";
+    uint32_t cluster{};
+    uart >> cluster;
+    
+    static constexpr uint8_t file_size = 4;
+    std::array<uint32_t, file_size> file{};
+
+    auto n = fat.read<Sector_driver, file_size>(cluster, file);
+
+    uart << (uint16_t) n << " clusters readed: ";
+    for (uint8_t i = 0; i < n; ++i)
+	uart << file[i] << "; ";
+    uart << '\n';
+    
+
+}
+
+
+
+

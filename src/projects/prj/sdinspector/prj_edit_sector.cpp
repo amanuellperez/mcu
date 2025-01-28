@@ -32,7 +32,7 @@ void Main::edit_sector(bool in_hexadecimal)
     print_line(uart);
     print_question(uart, msg_edit_sector_from, false);
 
-    Sector::Address addr;
+    Sector::size_type addr;
     uart >> addr;
     uart << '\n';
 
@@ -43,7 +43,7 @@ void Main::edit_sector(bool in_hexadecimal)
 	edit_sector_from_with_chars(addr);
 }
 
-void Main::edit_sector_from_in_hexadecimal(Sector::Address addr)
+void Main::edit_sector_from_in_hexadecimal(Sector::size_type addr)
 {
     UART_iostream uart;
     atd::print(uart, msg_edit_sector_instructions_in_hex);
@@ -70,7 +70,7 @@ void Main::edit_sector_from_in_hexadecimal(Sector::Address addr)
 
 }
 
-void Main::edit_sector_from_with_chars(Sector::Address addr)
+void Main::edit_sector_from_with_chars(Sector::size_type addr)
 {
     UART_iostream uart;
     atd::print(uart, msg_edit_sector_instructions_in_char);

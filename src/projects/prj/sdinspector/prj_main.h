@@ -36,6 +36,23 @@
 #include "prj_strings.h"
 
 
+// Si TRACE_LEVEL está definido trazamos todas las trazas menores que ese
+// level.
+// Considero:
+//	1 - trazas críticas
+//	2 - menos críticas
+//	9 - trazando para depurar programa
+static constexpr bool trace(uint8_t trace_level = 9)
+{
+#ifdef TRACE_LEVEL
+    return trace_level <= TRACE_LEVEL;
+#else
+    return false;
+#endif
+}
+
+
+
 class Main{
 public:
     Main();
@@ -45,6 +62,8 @@ private:
 // Hardware
 
 // Data
+    using Sector = Sector_driver::Sector;
+
     // Último sector leído. En caso de no haberse leido nada contendrá basura.
     Sector sector; 
 
@@ -55,6 +74,7 @@ private:
 
     // Cargamos en memoria `sector`
     bool load_sector();
+    bool load_sector(const SDCard::Address&);
 
 // Main menu
     uint16_t main_menu();
@@ -67,21 +87,21 @@ private:
     void flush_sector();
 
     void edit_sector(bool in_hexadecimal);
-    void edit_sector_from_in_hexadecimal(Sector::Address);
-    void edit_sector_from_with_chars(Sector::Address);
+    void edit_sector_from_in_hexadecimal(Sector::size_type);
+    void edit_sector_from_with_chars(Sector::size_type);
 
     void print_sector();
 
     void print_sector_fromto();
-	bool print_sector_fromto_ask(Sector::Address& from, size_t& sz);
+	bool print_sector_fromto_ask(Sector::size_type& from, size_t& sz);
 
     void print_sector_as_MBR();
     void print_sector_as_FS_info();
     void print_sector_as_FAT32_boot_sector();
     void print_sector_as_directory_array();
+    void print_FAT32_entry();
 
 };
-
 
 #endif
 

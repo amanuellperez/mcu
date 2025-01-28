@@ -23,6 +23,21 @@
 #include "sdc_print.h"
 #include "prj_main.h"
 
+bool Main::load_sector(const SDCard::Address& add)
+{
+    auto r = SDCard::read(add, sector);
+
+    if (r.ok()){
+	sector.number= add;
+	return true;
+    }
+    else{
+	// TODO: poner "error!!!: DETALLES"
+	UART_iostream uart;
+	print(uart, r);
+	return false;
+    }
+}
 
 bool Main::load_sector()
 {
@@ -33,16 +48,6 @@ bool Main::load_sector()
     uart >> add;
     uart << add << '\n';
 
-    auto r = SDCard::read(add, sector);
-
-    if (r.ok()){
-	sector.address = add;
-	return true;
-    }
-    else{
-	// TODO: poner "error!!!: DETALLES"
-	print(uart, r);
-	return false;
-    }
+    return load_sector(add);
 }
 

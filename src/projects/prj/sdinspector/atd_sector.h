@@ -44,42 +44,40 @@
 
 namespace atd{
 
-// Ejemplo de Cfg:
-//
-//  struct Sector_cfg{
-//      static constexpr size_t sector_size = SDCard::block_size;
-//      using Address = SDCard::Address;
-//  };
-//
-template <typename Cfg>
-struct Sector: std::array<uint8_t, Cfg::sector_size>{
-// Cfg del sector
-    using Address = Cfg::Address;
-    static constexpr Address size() {return Cfg::sector_size;}
+// La única diferencia entre un sector y un array es que el sector tiene un
+// número de sector.
+template <size_t sector_size>
+struct Sector: std::array<uint8_t, sector_size>{
+// Types
+    using Base = std::array<uint8_t, sector_size>;
+    using size_type = Base::size_type;
 
 // Data
-    // me suena mejor 'number' que 'address' (???)
-    // Si address == max ==> el sector consideramos que no está cargado en
+    // Si number == max ==> el sector consideramos que no está cargado en
     // memoria.
-    Address address = std::numeric_limits<Address>::max(); 
+    size_type number = std::numeric_limits<size_type>::max(); 
+
+// Functions
+    // (???) ¿Por qué no es static size() en std::array?
+    static constexpr size_type size() {return sector_size; }
 
     bool is_valid() const { return !is_invalid(); }
     bool is_invalid() const 
-		{return address == std::numeric_limits<Address>::max();}
+		{return number == std::numeric_limits<size_type>::max();}
 
 };
 
 
-template <typename Cfg>
-void print(std::ostream& out, const Sector<Cfg>& sector, size_t i0, size_t sz)
+template <size_t N>
+void print(std::ostream& out, const Sector<N>& sector, size_t i0, size_t sz)
 {
-    out << "Sector: " << sector.address << '\n';
+    out << "Sector: " << sector.number << '\n';
 
     atd::xxd_print(out, sector, i0, sz);
 }
 
-template <typename Cfg>
-void print(std::ostream& out, const Sector<Cfg>& sector)
+template <size_t N>
+void print(std::ostream& out, const Sector<N>& sector)
 {
     atd::xxd_print(out, sector, 0u, sector.size());
 }

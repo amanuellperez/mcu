@@ -30,7 +30,7 @@ uint16_t Main::main_menu()
 
     else {
 	atd::print(uart, msg_main_sector_load);
-	uart << sector.address;
+	uart << sector.number;
     }
 
     uart << '\n';
@@ -69,6 +69,7 @@ void Main::run_command_valid_sector(uint16_t cmd)
 	break; case 9: print_sector_as_FAT32_boot_sector();
 	break; case 10: print_sector_as_FS_info();
 	break; case 11: print_sector_as_directory_array();
+	break; case 12: print_FAT32_entry();
     }
 }
 
