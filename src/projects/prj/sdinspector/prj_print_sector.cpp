@@ -373,6 +373,8 @@ void Main::print_sector_as_directory_array()
 
 void Main::print_FAT32_entry()
 {
+    using FAT = atd::FAT32::FAT;
+
     UART_iostream uart;
 
     uart << "\nFAT32 boot sector number: ";
@@ -387,7 +389,7 @@ void Main::print_FAT32_entry()
     using Boot_sector = atd::FAT32::Boot_sector;
     Boot_sector* bt = reinterpret_cast<Boot_sector*>(sector.data());
 
-    atd::FAT32::FAT fat(*bt);
+    FAT fat(*bt);
 
     if constexpr (trace()){
 	uart << "FAT:"
@@ -407,12 +409,21 @@ void Main::print_FAT32_entry()
     static constexpr uint8_t file_size = 4;
     std::array<uint32_t, file_size> file{};
 
-    auto n = fat.read<Sector_driver, file_size>(cluster, file);
+    auto res = fat.read_next<Sector_driver, file_size>(cluster, file);
 
-    uart << (uint16_t) n << " clusters readed: ";
-    for (uint8_t i = 0; i < n; ++i)
+    uart << (uint16_t) res.nread << " clusters readed: ";
+    for (uint8_t i = 0; i < res.nread; ++i)
 	uart << file[i] << "; ";
-    uart << '\n';
+    uart << "; state = ";
+    using State = FAT::Cluster_state;
+    switch (res.state){
+	break; case State::free: uart << "free\n";
+	break; case State::allocated: uart << "allocate\n";
+	break; case State::bad     : uart << "bad\n";
+	break; case State::end_of_file: uart << "EOC\n";
+	break; case State::reserved: uart << "reserved\n";
+    }
+    
     
 
 }

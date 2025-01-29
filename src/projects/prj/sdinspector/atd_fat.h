@@ -438,8 +438,32 @@ struct Directory_entry{
 //  read solo devuelve los clusters de ese sector, teniendo que volver a
 //  llamar a `read` para leer el resto.
 //
+namespace impl_of{
+
+enum class FAT_Cluster_state : uint8_t
+{ free = 0, allocated, bad, end_of_file, reserved };
+
+// De momento, como no quiero que ocupe demasiado, limito nread a 5 bits 
+// (se pueden leer hasta 32 uint32_t, que son 32 x 4 = 128 bytes, más los
+// sectores cargados en memoria... se usaría bastante memoria)
+struct FAT_Result_read_next{
+    FAT_Cluster_state state : 3;
+    uint8_t nread           : 5; // (???) nread? otro nombre? 
+
+    FAT_Result_read_next(FAT_Cluster_state st, uint8_t n)
+	: state{st}, nread{n} {}
+};
+
+static_assert(sizeof(FAT_Result_read_next) == 1);
+
+}// impl_of
+ 
 class FAT{
 public:
+// Types
+    using Cluster_state    = impl_of::FAT_Cluster_state;
+    using Result_read_next = impl_of::FAT_Result_read_next;
+
 // Constructors
     //(???) Dos opciones: o pasamos el boot sector o lo leemos. ¿Cuál es más
     //práctica? Ni idea. Experimentemos.
@@ -447,7 +471,8 @@ public:
 
     // Lee los clusters que siguen al cluster0 y los mete en file_clusters.
     template <typename Sector_driver, uint8_t N>
-    uint8_t read(const uint32_t& cluster0, std::span<uint32_t, N> file_clusters);
+    Result_read_next read_next(const uint32_t& cluster0, 
+					std::span<uint32_t, N> file_clusters);
 
 
 // Como está clase es de bajo nivel voy a dejar visibles todas estas clases
@@ -473,7 +498,6 @@ private:
     uint32_t sector_size_; // número de bytes por sector
 
 // Cfg de FAT
-    enum class Cluster_state{ free, allocated, bad, end_of_file, reserved };
 
     // Observar la forma de hablar: la FAT es un conjunto de entradas, donde
     // la posición de cada entrada hace referencia al cluster de esa posición.
@@ -552,7 +576,7 @@ std::pair<uint32_t, uint32_t> FAT::cluster2sector_pos(uint32_t entry) const
 { return atd::div(entry, sector_size_ / sizeof(uint32_t)); }
 
 template <typename Sector_driver, uint8_t N>
-uint8_t FAT::read(const uint32_t& cluster, 
+FAT::Result_read_next FAT::read_next(const uint32_t& cluster, 
 					std::span<uint32_t, N> file_clusters)
 {
     using Sector = Sector_driver::Sector;
@@ -568,22 +592,23 @@ uint8_t FAT::read(const uint32_t& cluster,
 
     uint32_t nsector{};
 
-    uint8_t i = 0;
-    for (; i < N; ++i){
+    for (uint8_t i = 0; i < N; ++i){
 	uint32_t entry = sector[pos];
 
-	if (cluster_state(entry) == Cluster_state::allocated){
-	    file_clusters[i] = entry;
+	auto state = cluster_state(entry);
+	if (state != Cluster_state::allocated)
+	    return {state, i};
 
-	    std::tie(nsector, pos) = cluster2sector_pos(entry);
+	file_clusters[i] = entry;
 
-	    if (nsector != nsector0) // solo leemos 1 sector cada vez
-		return i;
-	}
+	std::tie(nsector, pos) = cluster2sector_pos(entry);
+
+	if (nsector != nsector0) // solo leemos 1 sector cada vez
+	    return {Cluster_state::allocated, static_cast<uint8_t>(i + 1)};
+
     }
 
-// TODO: hay que devolver el estado del cluster ¿bad? ¿EOC? ...
-    return i;
+    return {Cluster_state::allocated, N};
 
 }
 
