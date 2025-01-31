@@ -25,7 +25,6 @@
 #include <mcu_SPI.h>
 #include <dev_sdcard.h>
 
-#include "atd_sector.h"
 
 /***************************************************************************
  *			    MICROCONTROLLER
@@ -121,16 +120,31 @@ using SDCard = dev::hwd::SDCard<SDCard_cfg>;
 
 // Sector_driver es el driver que se usa para acceder a un dispositivo físico
 // que almacena la memoria en sectores (en este caso la SDCard).
+// (RRR) ¿Por qué uso Sector_span?
+//       Al querer implementar Volume::read(Boot_sector) como Boot_sector es
+//       una struct necesito convertirla a un array de bytes. Este array de
+//       bytes es el que paso a read.
+//       Por otra parte, si se quiere leer un sector usaremos Sector que es un
+//       std::array. Para leerlo necesito pasarlo a read.
+//       std::span es una view de los arrays de C como de std::array
+//       fusionando los dos interfaces.
 struct Sector_driver{
-    using Sector = atd::Sector<512>;
+    static constexpr uint16_t sector_size = 512;
+    //using Sector = atd::Sector<sector_size>;
+    using Sector = std::array<uint8_t, sector_size>;
+    using Sector_span = std::span<uint8_t, sector_size>;
 
-    static bool read(const SDCard::Address& add, Sector& sector)
+    static_assert(sector_size == SDCard::block_size);
+    
+    //static bool read(const SDCard::Address& add, Sector& sector)
+    static bool read(const SDCard::Address& add, Sector_span sector)
     {
 	auto r = SDCard::read(add, sector);
 	return r.ok();
     }
 
-    static bool write(const SDCard::Address& add, Sector& sector)
+    //static bool write(const SDCard::Address& add, Sector& sector)
+    static bool write(const SDCard::Address& add, Sector_span sector)
     {
 	auto r = SDCard::write(add, sector);
 	return r.ok();

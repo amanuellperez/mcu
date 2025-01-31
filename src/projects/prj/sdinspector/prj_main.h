@@ -35,6 +35,7 @@
 //#include "prj_cfg.h"
 #include "prj_strings.h"
 
+#include <atd_print.h> // xxd_print
 
 // Si TRACE_LEVEL está definido trazamos todas las trazas menores que ese
 // level.
@@ -66,7 +67,11 @@ private:
 
     // Último sector leído. En caso de no haberse leido nada contendrá basura.
     Sector sector; 
+    uint32_t sector_number = std::numeric_limits<uint32_t>::max();
 
+    bool sector_is_valid() const { return !sector_is_invalid(); }
+    bool sector_is_invalid() const 
+    {return sector_number == std::numeric_limits<uint32_t>::max();}
 
 // Functions
     void init_uart();
@@ -100,6 +105,16 @@ private:
     void print_sector_as_FAT32_boot_sector();
     void print_sector_as_directory_array();
     void print_FAT32_entry();
+
+    void print_sector(std::ostream& out, const Sector& sector, size_t i0, size_t sz)
+    {
+	out << "Sector: " << sector_number << '\n';
+
+	atd::xxd_print(out, sector, i0, sz);
+    }
+
+    void print_sector(std::ostream& out, const Sector& sector)
+    { atd::xxd_print(out, sector, 0u, sector.size()); }
 
 };
 

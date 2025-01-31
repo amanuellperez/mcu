@@ -31,7 +31,7 @@ void Main::print_sector()
 {
     UART_iostream uart;
     print_line(uart);
-    print(uart, sector);
+    print_sector(uart, sector);
 
 }
 
@@ -44,9 +44,9 @@ bool Main::print_sector_fromto_ask(Sector::size_type& from, size_t& sz)
 
     print_question(uart, msg_print_sector_from, false);
     uart >> from;
-    if (from > Sector::size()){
+    if (from > sector.size()){
 	atd::print(uart, msg_print_sector_from_to_big);
-	uart << Sector::size()<< '\n';
+	uart << sector.size()<< '\n';
 	return false;
     }
 
@@ -59,9 +59,9 @@ bool Main::print_sector_fromto_ask(Sector::size_type& from, size_t& sz)
 		// Al rato ha empezado a funcionar bien (???)
 
     if (sz == 0)    // imprimimos hasta el final
-	sz = Sector::size() - from;
+	sz = sector.size() - from;
 
-    else if (from + sz > Sector::size()){
+    else if (from + sz > sector.size()){
 	atd::print(uart, msg_print_sector_size_to_big);
 	uart << '\n';
 	return false;
@@ -84,7 +84,7 @@ void Main::print_sector_fromto()
 
     uart << '\n';
     print_line(uart);
-    print(uart, sector, from, sz);
+    print_sector(uart, sector, from, sz);
 
 }
 
@@ -145,104 +145,110 @@ void Main::print_sector_as_FAT32_boot_sector()
     atd::print(uart, msg_print_sector_as_FAT_boot_sector);
     print_line(uart);
 
+    uart << "Volume first sector: ";
+    uint32_t nsector{};
+    uart >> nsector;
+
+    using Volume = atd::FAT32::Volume<Sector_driver>;
     using Boot_sector = atd::FAT32::Boot_sector;
 
-    Boot_sector* bt = reinterpret_cast<Boot_sector*>(sector.data());
+    Boot_sector bs{};
+    Volume::read_global(nsector, bs);
 
 // Volcado de datos para depurar y entender cómo funciona FAT32
 // ------------------------------------------------------------
     uart << "jmp_boot[3]\t";
-    atd::print_int_as_hex(uart, bt->jmp_boot[0]);
+    atd::print_int_as_hex(uart, bs.jmp_boot[0]);
     uart << ' ';
-    atd::print_int_as_hex(uart, bt->jmp_boot[1]);
+    atd::print_int_as_hex(uart, bs.jmp_boot[1]);
     uart << ' ';
-    atd::print_int_as_hex(uart, bt->jmp_boot[2]);
+    atd::print_int_as_hex(uart, bs.jmp_boot[2]);
     uart << "\nOEM_name[8]\t";
-    print_as_str(uart, bt->OEM_name);
-    uart << "\nnum_fats \t" << (int) bt->num_fats << '\n'
-    << "root_ent_cnt\t" << bt->root_ent_cnt << '\n'
-    << "tot_sec16\t" << bt->tot_sec16 << '\n'
+    print_as_str(uart, bs.OEM_name);
+    uart << "\nnum_fats \t" << (int) bs.num_fats << '\n'
+    << "root_ent_cnt\t" << bs.root_ent_cnt << '\n'
+    << "tot_sec16\t" << bs.tot_sec16 << '\n'
     << "media    \t";
-    atd::print_int_as_hex(uart, bt->media);
-    uart << "\nfat_sz16 \t" << bt->fat_sz16 << '\n'
-    << "sec_per_trk\t" << bt->sec_per_trk << '\n'
-    << "num_heads\t" << bt->num_heads << '\n'
-    << "fat_sz32 \t" << bt->fat_sz32 << '\n'
-    << "ext_flags\t" << bt->ext_flags << '\n'
+    atd::print_int_as_hex(uart, bs.media);
+    uart << "\nfat_sz16 \t" << bs.fat_sz16 << '\n'
+    << "sec_per_trk\t" << bs.sec_per_trk << '\n'
+    << "num_heads\t" << bs.num_heads << '\n'
+    << "fat_sz32 \t" << bs.fat_sz32 << '\n'
+    << "ext_flags\t" << bs.ext_flags << '\n'
     << "fs_ver   \t";
-    atd::print_int_as_hex(uart, bt->fs_ver);
+    atd::print_int_as_hex(uart, bs.fs_ver);
     uart << "\nreserved[12]\t";
-    print_as_str(uart, bt->reserved);
+    print_as_str(uart, bs.reserved);
     uart << "\ndrv_num \t";
-    atd::print_int_as_hex(uart, bt->drv_num);
-    uart << "\nreserved1\t" << (int) bt->reserved1 << '\n'
+    atd::print_int_as_hex(uart, bs.drv_num);
+    uart << "\nreserved1\t" << (int) bs.reserved1 << '\n'
     << "boot_sig\t";
-    atd::print_int_as_hex(uart, bt->boot_sig);
+    atd::print_int_as_hex(uart, bs.boot_sig);
     uart << "\nfil_sys_type[8]\t";
-    print_as_str(uart, bt->fil_sys_type);
-//    uart << "boot_code[420]\t" << bt->boot_code << '\n'
+    print_as_str(uart, bs.fil_sys_type);
+//    uart << "boot_code[420]\t" << bs.boot_code << '\n'
     uart << "\nboot_code[420]\t...\n"
 	<< "sign     \t";
-    atd::print_int_as_hex(uart, bt->sign);
+    atd::print_int_as_hex(uart, bs.sign);
     uart << '\n';
  
 // Estructuramos la salida
 // -----------------------
     uart << "\nVOLUME\n";
 
-    if (bt->is_volume_label_and_id_set()){
+    if (bs.is_volume_label_and_id_set()){
 	uart << "\tLabel: ";
-	print_as_str(uart, bt->volumen_label());
-	uart << "\n\tID   : " << bt->volume_id() << '\n';
+	print_as_str(uart, bs.volumen_label());
+	uart << "\n\tID   : " << bs.volume_id() << '\n';
     }
-    uart <<     "\tNumber of sectors: " << bt->volume_number_of_sectors() 
-	   << "\n\tBytes per sector : " << bt->bytes_per_sector() 
+    uart <<     "\tNumber of sectors: " << bs.volume_number_of_sectors() 
+	   << "\n\tBytes per sector : " << bs.bytes_per_sector() 
 	   << '\n';
 
     uart << "HIDDEN AREA\n"
-	   "\tNumber of sectors: " << bt->hidden_area_number_of_sectors() << '\n';
+	   "\tNumber of sectors: " << bs.hidden_area_number_of_sectors() << '\n';
 
     uart << "RESERVED AREA\n"
-	     "\tNumber of sectors : " << bt->reserved_area_number_of_sectors() <<
-	   "\n\tFS Info sector    : " << bt->FS_Info_sector()<<
-	   "\n\tBackup boot sector: " << bt->backup_boot_sector()<<
+	     "\tNumber of sectors : " << bs.reserved_area_number_of_sectors() <<
+	   "\n\tFS Info sector    : " << bs.FS_Info_sector()<<
+	   "\n\tBackup boot sector: " << bs.backup_boot_sector()<<
 	   "\n";
 
    uart << "FAT AREA\n";
-   uart << "\tNumber of sectors: " << bt->FAT_area_number_of_sectors() 
+   uart << "\tNumber of sectors: " << bs.FAT_area_number_of_sectors() 
         << "\n\tis FAT mirrored at runtime into all FATs? ";
 
-   if (bt->FAT_is_mirror_enabled())
+   if (bs.FAT_is_mirror_enabled())
        uart << "yes\n";
 
    else {
        uart << "no\n"
-	       "\tActive FAT: " << (int) bt->number_of_active_FATs() 
+	       "\tActive FAT: " << (int) bs.number_of_active_FATs() 
 	       << '\n';
     }
 
-    uart << "\tNumber of FATs: " << (int) bt->number_of_FATs() << '\n';
+    uart << "\tNumber of FATs: " << (int) bs.number_of_FATs() << '\n';
    
-    for (uint8_t i = 0; i < bt->number_of_FATs(); ++i){
+    for (uint8_t i = 0; i < bs.number_of_FATs(); ++i){
 	uart << "\t\tFirst sector FAT" << (int) i 
-	<< ": " << bt->FAT_first_sector(i) << '\n';
+	<< ": " << bs.FAT_first_sector(i) << '\n';
     }
 
    uart << "FAT[i]"
-	<< "\n\tNumber of entries : " << bt->FAT_number_of_entries()
-        << "\n\tNumber of sectors : " << (int) bt->FAT_number_of_sectors() 
-        << "\n\tNumber of entries per sector: " << (int) bt->FAT_number_of_entries_per_sector()
-	<< "\n\tUnused entries    : " << bt->FAT_unused_entries()
-	<< "\n\tUnused sectors    : " << bt->FAT_unused_sectors() 
+	<< "\n\tNumber of entries : " << bs.FAT_number_of_entries()
+        << "\n\tNumber of sectors : " << (int) bs.FAT_number_of_sectors() 
+        << "\n\tNumber of entries per sector: " << (int) bs.FAT_number_of_entries_per_sector()
+	<< "\n\tUnused entries    : " << bs.FAT_unused_entries()
+	<< "\n\tUnused sectors    : " << bs.FAT_unused_sectors() 
 	<< '\n';
 
 
    uart << "DATA AREA\n"
-	     "\tNumber of sectors    : " << bt->data_area_number_of_sectors() 
-	<< "\n\tSectors per cluster  : " << (int) bt->data_area_sectors_per_cluster()
-	<< "\n\tNumber of clusters   : " << bt->data_area_number_of_clusters()
-	<< "\n\tFirst sector         : " << bt->data_area_first_sector()
-	<< "\n\tRoot directory sector: " << bt->root_directory_first_sector()
+	     "\tNumber of sectors    : " << bs.data_area_number_of_sectors() 
+	<< "\n\tSectors per cluster  : " << (int) bs.data_area_sectors_per_cluster()
+	<< "\n\tNumber of clusters   : " << bs.data_area_number_of_clusters()
+	<< "\n\tFirst sector         : " << bs.data_area_first_sector()
+	<< "\n\tRoot directory sector: " << bs.root_directory_first_sector()
 	<< '\n';
 
 
@@ -373,31 +379,30 @@ void Main::print_sector_as_directory_array()
 
 void Main::print_FAT32_entry()
 {
-    using FAT = atd::FAT32::FAT;
+    using Volume = atd::FAT32::Volume<Sector_driver>;
 
     UART_iostream uart;
 
-    uart << "\nFAT32 boot sector number: ";
-    uint32_t nsector;
-
+    uart << "Volume first sector: ";
+    uint32_t nsector{};
     uart >> nsector;
-    if (!load_sector(nsector)){
-	uart << "ERROR!!!\n";
+
+
+    Volume vol{nsector};
+
+    if (vol.error()){
+	uart << "ERROR\n";
 	return;
     }
 
-    using Boot_sector = atd::FAT32::Boot_sector;
-    Boot_sector* bt = reinterpret_cast<Boot_sector*>(sector.data());
-
-    FAT fat(*bt);
 
     if constexpr (trace()){
 	uart << "FAT:"
-	        "\n\tfirst_sector         : " << fat.first_sector(0) 
-	     << "\n\tnumber of sectors    : " << fat.number_of_sectors()
-	     << "\n\tnumber of entries    : " << fat.number_of_entries()
-	     << "\n\tbytes per sector     : " << fat.bytes_per_sector()
-	     << "\n\tnumber of active FATs: " << (uint16_t) fat.number_of_active_FATs()
+	        "\n\tfirst_sector         : " << vol.fat_area.first_sector(0) 
+	     << "\n\tnumber of sectors    : " << vol.fat_area.number_of_sectors()
+	     << "\n\tnumber of entries    : " << vol.fat_area.number_of_entries()
+	     << "\n\tbytes per sector     : " << vol.fat_area.bytes_per_sector()
+	     << "\n\tnumber of active FATs: " << (uint16_t) vol.fat_area.number_of_active_FATs()
 	     << '\n';
 
     }
@@ -409,19 +414,21 @@ void Main::print_FAT32_entry()
     static constexpr uint8_t file_size = 4;
     std::array<uint32_t, file_size> file{};
 
-    auto res = fat.read_next<Sector_driver, file_size>(cluster, file);
+    auto res = vol.fat_area.read_next<Sector_driver, file_size>(cluster, file);
 
     uart << (uint16_t) res.nread << " clusters readed: ";
     for (uint8_t i = 0; i < res.nread; ++i)
 	uart << file[i] << "; ";
     uart << "; state = ";
-    using State = FAT::Cluster_state;
+    using State = Volume::Cluster_state;
+
     switch (res.state){
 	break; case State::free: uart << "free\n";
 	break; case State::allocated: uart << "allocate\n";
 	break; case State::bad     : uart << "bad\n";
 	break; case State::end_of_file: uart << "EOC\n";
 	break; case State::reserved: uart << "reserved\n";
+	break; case State::error: uart << "read error\n";
     }
     
     

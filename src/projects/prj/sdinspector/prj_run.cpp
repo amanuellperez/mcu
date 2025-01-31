@@ -25,19 +25,19 @@ uint16_t Main::main_menu()
 
     uart << '\n';
     print_line(uart);
-    if (sector.is_invalid())
+    if (sector_is_invalid())
 	atd::print(uart, msg_main_no_sector_load);
 
     else {
 	atd::print(uart, msg_main_sector_load);
-	uart << sector.number;
+	uart << sector_number;
     }
 
     uart << '\n';
     print_line(uart);
 
     atd::print(uart, msg_main_menu);
-    if (sector.is_valid())
+    if (sector_is_valid())
 	atd::print(uart, msg_main_menu2);
 
     uint16_t ans{};
@@ -84,7 +84,7 @@ void Main::run()
 {
     while(1){
 	uint16_t cmd = main_menu();
-	if (sector.is_invalid())
+	if (sector_is_invalid())
 	    run_command_invalid_sector(cmd);
 
 	else

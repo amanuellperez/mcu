@@ -26,7 +26,7 @@
 void Main::flush_sector()
 {
     UART_iostream uart;
-    auto res = SDCard::write(sector.number, sector);
+    auto res = SDCard::write(sector_number, sector);
     uart << '\n';
     print(uart, res);
     uart << '\n';

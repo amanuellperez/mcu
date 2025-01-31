@@ -1,6 +1,7 @@
 BIN = xx
 
-SOURCES= dev_print.cpp	\
+SOURCES= atd_fat.cpp	\
+		 dev_print.cpp	\
 		 sdc_print.cpp	\
 		 prj_main.cpp	\
 		 prj_run.cpp	\

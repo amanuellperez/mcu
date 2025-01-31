@@ -28,7 +28,7 @@ bool Main::load_sector(const SDCard::Address& add)
     auto r = SDCard::read(add, sector);
 
     if (r.ok()){
-	sector.number= add;
+	sector_number= add;
 	return true;
     }
     else{
