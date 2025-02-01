@@ -25,6 +25,7 @@ msg_main_menu2	"3. Print sector\n"
 		"10. FS info sector\n"
 		"11. As directory array\n"
 		"12. FAT entries\n"
+		"13. Print file sectors\n"
 
 
 

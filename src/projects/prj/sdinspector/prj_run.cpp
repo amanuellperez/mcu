@@ -70,6 +70,7 @@ void Main::run_command_valid_sector(uint16_t cmd)
 	break; case 10: print_sector_as_FS_info();
 	break; case 11: print_sector_as_directory_array();
 	break; case 12: print_FAT32_entry();
+	break; case 13: print_file_sectors();
     }
 }
 

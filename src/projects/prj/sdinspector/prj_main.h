@@ -105,6 +105,7 @@ private:
     void print_sector_as_FAT32_boot_sector();
     void print_sector_as_directory_array();
     void print_FAT32_entry();
+    void print_file_sectors();
 
     void print_sector(std::ostream& out, const Sector& sector, size_t i0, size_t sz)
     {

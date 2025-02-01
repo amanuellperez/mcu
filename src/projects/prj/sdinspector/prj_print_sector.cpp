@@ -414,7 +414,8 @@ void Main::print_FAT32_entry()
     static constexpr uint8_t file_size = 4;
     std::array<uint32_t, file_size> file{};
 
-    auto res = vol.fat_area.read_next<Sector_driver, file_size>(cluster, file);
+    //auto res = vol.fat_area.read_next<Sector_driver, file_size>(cluster, file);
+    auto res = vol.fat_area.read_next<Sector_driver>(cluster, file);
 
     uart << (uint16_t) res.nread << " clusters readed: ";
     for (uint8_t i = 0; i < res.nread; ++i)
@@ -428,13 +429,63 @@ void Main::print_FAT32_entry()
 	break; case State::bad     : uart << "bad\n";
 	break; case State::end_of_file: uart << "EOC\n";
 	break; case State::reserved: uart << "reserved\n";
-	break; case State::error: uart << "read error\n";
+	break; case State::read_error: uart << "read error\n";
     }
     
     
 
 }
 
+void Main::print_file_sectors()
+{
+    using Volume = atd::FAT32::Volume<Sector_driver>;
+    using File   = atd::FAT32::File<Sector_driver, 4>;
+//    using Sector = File::Sector;
+
+    UART_iostream uart;
+
+    uart << "Volume first sector: ";
+    uint32_t nsector{};
+    uart >> nsector;
 
 
+    Volume vol{nsector};
+
+    if (vol.error()){
+	uart << "ERROR\n";
+	return;
+    }
+
+
+    uart << "First cluster of the file (>= 2): ";
+    uint32_t cluster0{};
+    uart >> cluster0;
+    
+    if (cluster0 < 0){
+	uart << "Error, cluster has to be >= 2\n";
+	return;
+    }
+
+    File file(vol, cluster0);    // file.begin(cluster0);
+   
+    if(file.error()){
+	uart << "Error creating file\n";
+	return;
+    }
+
+//    Sector sector{};
+    for (uint8_t i = 0; i < 10; ++i){
+	uart << file.sector_number() << ' ';
+	file.next_sector();
+	if (file.end_of_file()){
+	    uart << "EOC\n";
+	    return;
+	} else if(file.error()){
+	    uart << "Error\n";
+	    return;
+	}
+
+    }
+
+}
 
