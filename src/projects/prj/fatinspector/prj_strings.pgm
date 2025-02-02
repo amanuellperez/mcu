@@ -11,13 +11,15 @@ msg_hello   "\n\n----------------------------------------\n"
 msg_main_no_sector_load "No sector in memory"
 msg_main_sector_load "Sector in memory. Address: "
 
-msg_main_menu	"1. Read status register\n"
-		"2. Read MBR boot sector\n"
-		"3. Read FAT32 boot sector\n"
-		"4. FS info sector\n"
-		"5. As directory array\n"
-		"6. FAT entries\n"
-		"7. Print file sectors\n"
+msg_main_menu	"Read:\n"
+                "\t1. Status register\n"
+		"\t2. Sector\n"
+		"\t3. MBR boot sector\n"
+		"\t4. FAT32 boot sector\n"
+		"\t5. FS info sector\n"
+		"\t6. FAT entries\n"
+		"\t7. Root directory\n"
+		"\t8. File sectors\n"
 
 
 

@@ -17,6 +17,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#include "prj_dev.h"	// TODO: borrame
+			
 #include "atd_fat.h"
 
 namespace atd{

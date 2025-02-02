@@ -27,6 +27,24 @@
 
 #include <atd_ostream.h>
 
+void Main::print_sector()
+{
+    uart << "Sector number to print: ";
+    uint32_t nsector{};
+    uart >> nsector;
+
+    Sector_driver::Sector sector{};
+    Sector_driver::read(nsector, sector);
+
+    print_line(uart);
+
+    uart << "Sector: " << nsector << '\n';
+    atd::xxd_print(uart, sector);
+    
+}
+
+
+
 void Main::print_MBR_boot_sector()
 {
     uart << '\n';
@@ -152,7 +170,7 @@ void Main::print_FAT32_boot_sector()
 
     uart << "RESERVED AREA\n"
 	     "\tNumber of sectors : " << bs.reserved_area_number_of_sectors() <<
-	   "\n\tFS Info sector    : " << bs.FS_Info_sector()<<
+	   "\n\tFS Info sector    : " << bs.FS_info_sector()<<
 	   "\n\tBackup boot sector: " << bs.backup_boot_sector()<<
 	   "\n";
 
@@ -198,28 +216,40 @@ void Main::print_FAT32_boot_sector()
 
 void Main::print_FS_info()
 {
+    using Volume = atd::FAT32::Volume<Sector_driver>;
+//    using Boot_sector = atd::FAT32::Boot_sector;
+    using Boot_sector_min = atd::FAT32::Boot_sector_min;
+    using FS_info = atd::FAT32::FS_info;
+
     uart << '\n';
     atd::print(uart, msg_print_sector_as_FS_info);
     print_line(uart);
 
-    using FS_info = atd::FAT32::FS_info;
+    auto nsector = fat_volume_first_sector(1); // de momento solo leo
+					       // particion 1
+    if (nsector == 0){
+	uart << "Error: can't read first sector of FAT volume\n";
+	return;
+    }
 
-    uart << "Sector number: ";
-    uint32_t nsector{};
-    uart >> nsector;
+    Boot_sector_min bs_min;
+    Volume vol{nsector, bs_min};
 
-    Sector sector{};
-    Sector_driver::read(nsector, sector);
+    if (vol.error()){
+	uart << "ERROR\n";
+	return;
+    }
 
-    FS_info* info = reinterpret_cast<FS_info*>(sector.data());
+    FS_info info;
+    vol.read(bs_min.FS_info_sector(), info);
 
     uart << "Check integrity? ";
-    print_bool_as_yes_no(uart, info->check_integrity());
+    print_bool_as_yes_no(uart, info.check_integrity());
 
     uart << "\nLast known free cluster count: "
-	 << info->last_known_free_cluster_count() 
+	 << info.last_known_free_cluster_count() 
 	 << "\nFirst available free cluster: "
-	 << info->first_available_free_cluster()
+	 << info.first_available_free_cluster()
 	 << '\n';
 
 }
@@ -335,10 +365,12 @@ void Main::print_FAT32_entry()
 {
     using Volume = atd::FAT32::Volume<Sector_driver>;
 
-
-    uart << "Volume first sector: ";
-    uint32_t nsector{};
-    uart >> nsector;
+    auto nsector = fat_volume_first_sector(1); // de momento solo leo
+					       // particion 1
+    if (nsector == 0){
+	uart << "Error: can't read first sector of FAT volume\n";
+	return;
+    }
 
 
     Volume vol{nsector};
@@ -348,17 +380,13 @@ void Main::print_FAT32_entry()
 	return;
     }
 
-
-    if constexpr (trace()){
-	uart << "FAT:"
+    atd::ctrace<9>() << "FAT:"
 	        "\n\tfirst_sector         : " << vol.fat_area.first_sector(0) 
 	     << "\n\tnumber of sectors    : " << vol.fat_area.number_of_sectors()
 	     << "\n\tnumber of entries    : " << vol.fat_area.number_of_entries()
 	     << "\n\tbytes per sector     : " << vol.fat_area.bytes_per_sector()
 	     << "\n\tnumber of active FATs: " << (uint16_t) vol.fat_area.number_of_active_FATs()
 	     << '\n';
-
-    }
 
     uart << "Cluster to print: ";
     uint32_t cluster{};
@@ -396,18 +424,19 @@ void Main::print_file_sectors()
 //    using Sector = File::Sector;
 
 
-    uart << "Volume first sector: ";
-    uint32_t nsector{};
-    uart >> nsector;
-
+    auto nsector = fat_volume_first_sector(1); // de momento solo leo
+					       // particion 1
+    if (nsector == 0){
+	uart << "Error: can't read first sector of FAT volume\n";
+	return;
+    }
 
     Volume vol{nsector};
 
     if (vol.error()){
-	uart << "ERROR\n";
+	uart << "ERROR reading FAT volume\n";
 	return;
     }
-
 
     uart << "First cluster of the file (>= 2): ";
     uint32_t cluster0{};
@@ -425,10 +454,11 @@ void Main::print_file_sectors()
 	return;
     }
 
-//    Sector sector{};
     for (uint8_t i = 0; i < 10; ++i){
-	uart << file.sector_number() << ' ';
-	file.next_sector();
+	uart << "Cluster " << (uint16_t) i << ": " 
+			   << file.sector_number() << '\n';
+	//file.next_sector();
+	file.next_cluster();
 	if (file.end_of_file()){
 	    uart << "EOC\n";
 	    return;

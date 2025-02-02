@@ -206,7 +206,7 @@ struct Boot_sector{
 // -------------
     uint32_t reserved_area_first_sector() const {return hidden_area_number_of_sectors();}
     uint32_t reserved_area_number_of_sectors() const {return rsvd_sec_cnt;}
-    uint16_t FS_Info_sector() const {return fs_info;}
+    uint16_t FS_info_sector() const {return fs_info;}
     uint16_t backup_boot_sector() const {return bk_boot_sec;}
 
 // FAT area
@@ -303,6 +303,16 @@ struct Boot_sector{
 
 };
 
+// En el boot sector hay un montón de bytes desperdiciados que no los quiero
+// para nada. Nos quedamos con la información mínima que no vamos a guardar en
+// Volume para poder devolverla al leer el Boot_sector
+// Lo iré rellenando según vaya necesitando cosas (quiero que sea lo más
+// pequeña posible)
+struct Boot_sector_min{
+    uint16_t fs_info;
+
+    uint16_t FS_info_sector() const {return fs_info;}
+};
 
 // Section 5, FAT specification
 struct FS_info{
@@ -659,6 +669,10 @@ public:
 // Constructors
     Volume(const uint32_t& sector0);
 
+    // Esta devuelve la información del boot sector que no queda anotada por
+    // defecto en Volume
+    Volume(const uint32_t& sector0, Boot_sector_min& bs);
+
 // State
     bool error() const {return sector_size_ == 0;}
 
@@ -681,19 +695,24 @@ public:
     bool read(uint32_t nsector, Sector_span sector) const
     { return Sector_driver::read(sector0_ + nsector, sector); }
 
+    bool read(Boot_sector& bs) const;
+    bool read(uint32_t nsector, FS_info& fs) const;
+
 
 private:
 // Reserved area
     uint32_t sector0_; // volume first sector
     uint32_t sector_size_; // número de bytes por sector
-		       
+	
+// Helpers
+    void init(Boot_sector& bs);
+
 };
 
+// precondition: sector0_ valido
 template <typename SD>
-Volume<SD>::Volume(const uint32_t& sector0)
-    :sector0_{sector0}
+void Volume<SD>::init(Boot_sector& bs)
 {
-    Boot_sector bs;
     if (!read_global(sector0_, bs))
 	sector_size_ = 0;
 
@@ -704,6 +723,25 @@ Volume<SD>::Volume(const uint32_t& sector0)
     data_area.init(bs);
 }
 
+template <typename SD>
+Volume<SD>::Volume(const uint32_t& sector0)
+    :sector0_{sector0}
+{
+    Boot_sector bs;
+    init(bs);
+}
+
+template <typename SD>
+Volume<SD>::Volume(const uint32_t& sector0, Boot_sector_min& bs_min)
+    :sector0_{sector0}
+{
+    Boot_sector bs;
+    init(bs);
+
+    bs_min.fs_info = bs.fs_info;
+}
+
+
 
 template <typename SD>
 inline bool Volume<SD>::read_global(uint32_t nsector, Boot_sector& bs)
@@ -712,6 +750,17 @@ inline bool Volume<SD>::read_global(uint32_t nsector, Boot_sector& bs)
 	    Sector_span{reinterpret_cast<uint8_t*>(&bs), sizeof(Boot_sector)});
 }
 
+template <typename SD>
+inline bool Volume<SD>::read(Boot_sector& bs) const
+{ return read_global(sector0_, bs); }
+
+
+template <typename SD>
+inline bool Volume<SD>::read(uint32_t nsector, FS_info& fs) const
+{
+    return read(nsector, 
+	    Sector_span{reinterpret_cast<uint8_t*>(&fs), sizeof(FS_info)});
+}
 
 
 /***************************************************************************
@@ -887,14 +936,17 @@ bool File<SD,N>::update_cache_with_next_clusters(uint32_t cluster0
 
 
     auto res = vol_.fat_area.template
-		    read_next<Sector_driver>(cluster0, {cluster_.begin() + incr, cluster_.end()});
+		    read_next<Sector_driver>(cluster0, 
+				    {cluster_.begin() + incr, cluster_.end()});
 
     if (res.state == Volume::Cluster_state::read_error)
 	state_ = State::read_error;
     else
 	state_ = State::ok;
 
-    cluster_size_ = res.nread;
+    // cluster_size_ indica cuántos elementos hay en el cluster.
+    // Si hemos guardado cluster[0] los leídos son nread + 1
+    cluster_size_ = res.nread + incr;
 
     c_ = 0;
     s_ = 0;

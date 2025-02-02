@@ -17,8 +17,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "atd_fat.h"
 #include "prj_main.h"
+#include "atd_fat.h"
 
 uint32_t Main::fat_volume_first_sector(const atd::MBR_partition& p, uint8_t n)
 {

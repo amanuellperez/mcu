@@ -46,14 +46,14 @@
 //	2 - menos críticas
 //	5 - errores de funciones de biblioteca.
 //	9 - trazando para depurar programa
-static constexpr bool trace(uint8_t trace_level = 9)
-{
-#ifdef TRACE_LEVEL
-    return trace_level <= TRACE_LEVEL;
-#else
-    return false;
-#endif
-}
+//static constexpr bool trace(uint8_t trace_level = 9)
+//{
+//#ifdef TRACE_LEVEL
+//    return trace_level <= TRACE_LEVEL;
+//#else
+//    return false;
+//#endif
+//}
 
 
 
@@ -80,6 +80,7 @@ private:
 // User commands:
     void read_status();
 
+    void print_sector();
     void print_MBR_boot_sector();
     void print_FS_info();
     void print_FAT32_boot_sector();

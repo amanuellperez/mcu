@@ -1,4 +1,4 @@
-// Copyright (C) 2023 Manuel Perez 
+// Copyright (C) 2023-2025 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -33,12 +33,13 @@ void Main::run()
 
 	switch(cmd){
 	    break; case 1: read_status();
-	    break; case 2: print_MBR_boot_sector();
-	    break; case 3: print_FAT32_boot_sector();
-	    break; case 4: print_FS_info();
-	    break; case 5: print_sector_as_directory_array();
+	    break; case 2: print_sector();
+	    break; case 3: print_MBR_boot_sector();
+	    break; case 4: print_FAT32_boot_sector();
+	    break; case 5: print_FS_info();
 	    break; case 6: print_FAT32_entry();
-	    break; case 7: print_file_sectors();
+	    break; case 7: print_sector_as_directory_array();
+	    break; case 8: print_file_sectors();
 	}
     }
 }
