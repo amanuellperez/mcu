@@ -12,7 +12,7 @@ msg_main_no_sector_load "No sector in memory"
 msg_main_sector_load "Sector in memory. Address: "
 
 msg_main_menu	"1. Read status register\n"
-		"2. Load volume\n"
+		"2. Read MBR boot sector\n"
 		"3. Read FAT32 boot sector\n"
 		"4. FS info sector\n"
 		"5. As directory array\n"

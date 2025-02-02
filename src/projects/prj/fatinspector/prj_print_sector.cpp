@@ -1,4 +1,4 @@
-// Copyright (C) 2023 Manuel Perez 
+// Copyright (C) 2023-2025 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -27,9 +27,8 @@
 
 #include <atd_ostream.h>
 
-void Main::print_sector_as_MBR()
+void Main::print_MBR_boot_sector()
 {
-    UART_iostream uart;
     uart << '\n';
     atd::print(uart, msg_print_sector_as_MBR);
     print_line(uart);
@@ -79,28 +78,18 @@ void print_as_str(std::ostream& out, std::span<uint8_t> str)
 }
 
 
-void Main::print_sector_as_FAT32_boot_sector()
+void Main::print_FAT32_boot_sector()
 {
-    UART_iostream uart;
     uart << '\n';
     atd::print(uart, msg_print_sector_as_FAT_boot_sector);
     print_line(uart);
 
-    atd::MBR mbr{};
-    atd::read<Sector_driver>(mbr);
-
-    if (!mbr.is_valid()){
-	uart << "Error: MBR invalid\n";
+    auto nsector = fat_volume_first_sector(1); // de momento solo leo
+					       // particion 1
+    if (nsector == 0){
+	uart << "Error: can't read first sector of FAT volume\n";
 	return;
     }
-
-    if (mbr.partition1.type != atd::MBR::Partition_type::fat32_lba){
-	uart << "Error: partition 1 is not FAT32 lba!!!\n";
-	return;
-    }
-
-    // primer sector de la particion 1
-    uint32_t nsector = mbr.partition1.lba_first_sector;
 
     using Volume = atd::FAT32::Volume<Sector_driver>;
     using Boot_sector = atd::FAT32::Boot_sector;
@@ -207,9 +196,8 @@ void Main::print_sector_as_FAT32_boot_sector()
 
 }
 
-void Main::print_sector_as_FS_info()
+void Main::print_FS_info()
 {
-    UART_iostream uart;
     uart << '\n';
     atd::print(uart, msg_print_sector_as_FS_info);
     print_line(uart);
@@ -320,7 +308,6 @@ void print_directory(std::ostream& out, const atd::FAT32::Directory_entry& dir)
 
 void Main::print_sector_as_directory_array()
 {
-    UART_iostream uart;
     uart << "FAT32: directory\n";
 
     print_line(uart);
@@ -348,7 +335,6 @@ void Main::print_FAT32_entry()
 {
     using Volume = atd::FAT32::Volume<Sector_driver>;
 
-    UART_iostream uart;
 
     uart << "Volume first sector: ";
     uint32_t nsector{};
@@ -409,7 +395,6 @@ void Main::print_file_sectors()
     using File   = atd::FAT32::File<Sector_driver, 4>;
 //    using Sector = File::Sector;
 
-    UART_iostream uart;
 
     uart << "Volume first sector: ";
     uint32_t nsector{};

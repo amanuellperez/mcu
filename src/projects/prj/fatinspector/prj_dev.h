@@ -95,6 +95,9 @@ static constexpr uint32_t SPI_frequency = myu::clk_per() / 2; // máx.  25 MHz
 using Micro   = myu::Micro;
 using UART_iostream = mcu::UART_iostream<UART>;
 
+// Flujo de entrada/salida por defecto
+// (DUDA) ¿cómo definir cout/cin siendo el mismo flujo uart?
+extern UART_iostream uart;
 
 
 // pines que usamos

@@ -37,11 +37,14 @@
 
 #include <atd_print.h> // xxd_print
 
+#include "atd_fat.h"
+
 // Si TRACE_LEVEL está definido trazamos todas las trazas menores que ese
 // level.
 // Considero:
 //	1 - trazas críticas
 //	2 - menos críticas
+//	5 - errores de funciones de biblioteca.
 //	9 - trazando para depurar programa
 static constexpr bool trace(uint8_t trace_level = 9)
 {
@@ -65,7 +68,6 @@ private:
 // Data
     using Sector = Sector_driver::Sector;
 
-
 // Functions
     void init_uart();
     void init_spi();
@@ -74,12 +76,13 @@ private:
     bool load_sector();
     bool load_sector(const SDCard::Address&);
 
+
 // User commands:
     void read_status();
 
-    void print_sector_as_MBR();
-    void print_sector_as_FS_info();
-    void print_sector_as_FAT32_boot_sector();
+    void print_MBR_boot_sector();
+    void print_FS_info();
+    void print_FAT32_boot_sector();
     void print_sector_as_directory_array();
     void print_FAT32_entry();
     void print_file_sectors();
@@ -90,6 +93,9 @@ private:
     void print_sector(std::ostream& out, const Sector& sector)
     { atd::xxd_print(out, sector, 0u, sector.size()); }
 
+// FAT
+    uint32_t fat_volume_first_sector(uint8_t npartition);
+	uint32_t fat_volume_first_sector(const atd::MBR_partition& p, uint8_t n);
 };
 
 #endif

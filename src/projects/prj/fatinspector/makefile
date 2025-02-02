@@ -3,6 +3,8 @@ BIN = xx
 SOURCES= atd_fat.cpp	\
 		 dev_print.cpp	\
 		 sdc_print.cpp	\
+		 prj_dev.cpp	\
+		 prj_fat.cpp	\
 		 prj_main.cpp	\
 		 prj_run.cpp	\
 		 prj_init.cpp	\
@@ -16,7 +18,7 @@ SOURCES= atd_fat.cpp	\
 MCU = atmega4809
 F_CPU = 3333333UL
 
-USER_CXXFLAGS=-DTRACE_LEVEL=9
+USER_CXXFLAGS=-DTRACE_LEVEL=5
 
 include $(PRJ_GENRULES)
 

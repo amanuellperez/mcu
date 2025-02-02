@@ -114,6 +114,10 @@ using Log_type = typename impl_of::Log_type<T>::log;
  *				ctrace
  ***************************************************************************/
 struct Null_ostream : std::ostream{
+// (DUDA) puedo construirlo con un nullptr?? Debiera ya que no voy a usar
+// ninguna función de ostream.
+    Null_ostream() : std::ostream(nullptr) {}
+
     template <typename T>
     Null_ostream& operator<<(const T&) {return *this;}
 };

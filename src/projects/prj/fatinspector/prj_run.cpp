@@ -22,11 +22,10 @@
 
 void Main::run()
 {
-    UART_iostream uart;
     while(1){
 	uart << '\n';
 	print_line(uart);
-
+	
 	atd::print(uart, msg_main_menu);
 
 	uint16_t cmd{};
@@ -34,9 +33,9 @@ void Main::run()
 
 	switch(cmd){
 	    break; case 1: read_status();
-	    break; case 2: print_sector_as_MBR();
-	    break; case 3: print_sector_as_FAT32_boot_sector();
-	    break; case 4: print_sector_as_FS_info();
+	    break; case 2: print_MBR_boot_sector();
+	    break; case 3: print_FAT32_boot_sector();
+	    break; case 4: print_FS_info();
 	    break; case 5: print_sector_as_directory_array();
 	    break; case 6: print_FAT32_entry();
 	    break; case 7: print_file_sectors();

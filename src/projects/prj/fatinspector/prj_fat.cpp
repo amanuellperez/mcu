@@ -1,4 +1,4 @@
-// Copyright (C) 2023 Manuel Perez 
+// Copyright (C) 2025 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -17,35 +17,37 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "prj_dev.h"
-#include "prj_strings.h"
-#include "dev_print.h"
-#include "sdc_print.h"
+#include "atd_fat.h"
 #include "prj_main.h"
 
-bool Main::load_sector(const SDCard::Address& add)
+uint32_t Main::fat_volume_first_sector(const atd::MBR_partition& p, uint8_t n)
 {
-    auto r = SDCard::read(add, sector);
+    if (p.type != atd::MBR::Partition_type::fat32_lba){
+	atd::ctrace<4>() << "Error: partition" << n << " is not FAT32 lba!!!\n";
+	return 0;
+    }
 
-    if (r.ok()){
-	sector_number= add;
-	return true;
-    }
-    else{
-	// TODO: poner "error!!!: DETALLES"
-	print(uart, r);
-	return false;
-    }
+    return p.lba_first_sector;
 }
 
-bool Main::load_sector()
+
+uint32_t Main::fat_volume_first_sector(uint8_t npartition)
 {
+    atd::MBR mbr{};
+    atd::read<Sector_driver>(mbr);
 
-    print_question(uart, msg_sector_address, false);
-    SDCard::Address add;
-    uart >> add;
-    uart << add << '\n';
+    if (!mbr.is_valid()){
+	atd::ctrace<4>() << "Error: MBR invalid\n";
+	return 0;
+    }
 
-    return load_sector(add);
+    switch (npartition){
+	break; case 1: return fat_volume_first_sector(mbr.partition1, 1);
+	break; case 2: return fat_volume_first_sector(mbr.partition2, 2);
+	break; case 3: return fat_volume_first_sector(mbr.partition3, 3);
+	break; case 4: return fat_volume_first_sector(mbr.partition4, 4);
+    }
+
+    return 0;
 }
 
