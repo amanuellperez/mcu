@@ -5,6 +5,7 @@ SOURCES= atd_bcd.cpp		\
 		 atd_double.cpp		\
 		 atd_print.cpp		\
 		 atd_test.cpp		\
+		 atd_trace.cpp		\
 		 atd_time.cpp
 
 INCS= atd_algorithm.h	\

@@ -36,6 +36,7 @@ DIRS = 	algorithm	\
 		static		\
 		string		\
 		time		\
+		trace		\
 		type_traits	\
 		units
 

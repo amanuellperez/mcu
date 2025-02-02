@@ -26,14 +26,52 @@
  * DESCRIPCION
  *	Funciones para manejar trazas/logs ...
  *
+ *	De momento suministro dos formas de trazas:
+ *
+ *	1. Log_type, pensada para trazar clases de biblioteca.
+ *	   Cuando depuro una nueva clase me encuentro con que necesito poder
+ *	   trazar el interior de las funciones de esa clase, cosa que no puedo
+ *	   sin modificar el código. Log_type sirve para eso.
+ *	   Amen que se pueden dejar trazas importantes que si se pasa Cfg::log
+ *	   permitirá trazarlas.
+ *
+ *	2. Para trazar un programa grande son útiles las trazas con niveles:
+ *		ctrace(9) << "se traza si TRACE_LEVEL <= 9";
+ *
+ *	   Como en micros estoy obsesionado con no generar más código del
+ *	   necesario en lugar de la anterior usaré
+ *		ctrace<9>() << "se traza si TRACE_LEVEL <= 9";
+ *		
+ *	    para garantizar que el compilador elimine esta llamada si
+ *	    TRACE_LEVEL < 9 o si no está definida TRACE_LEVEL.
+ *
  * HISTORIA
  *    Manuel Perez
- *    11/01/2025 Empty_log, 
+ *    11/01/2025 Empty_log, Log_type
+ *    02/02/2025 ctrace
  *
  ****************************************************************************/
+#include <ostream>
 
 namespace atd{
 
+/***************************************************************************
+ *				Log_type
+ ***************************************************************************/
+// La idea es poder trazar de forma condicional las clases pasándole como
+// parámetro o no el flujo Cfg::log. Si se pasa Cfg::log se trazaran las
+// funciones, en caso contrario no se incluirá nada de código de trazado.
+//
+// Ejemplo:
+//	template<typename Cfg>
+//	struct A{
+//	    using log = atd::Log_type<Cfg>;
+//	};
+//
+//	Y para usarla:
+//	struct Cfg{
+//	    using log = Log<UART_iostream>;
+//	};
 // Empty_log
 // ---------
 struct Empty_log{
@@ -69,6 +107,41 @@ struct Log_type<T, false>{
 
 template <typename T>
 using Log_type = typename impl_of::Log_type<T>::log;
+
+
+
+/***************************************************************************
+ *				ctrace
+ ***************************************************************************/
+struct Null_ostream : std::ostream{
+    template <typename T>
+    Null_ostream& operator<<(const T&) {return *this;}
+};
+
+extern Null_ostream null_ostream;
+
+struct CTrace{
+    inline static std::ostream* log = &null_ostream;
+};
+
+inline void ctrace_bind(std::ostream& out) 
+{ CTrace::log = &out; }
+
+template <int n>
+std::ostream& ctrace()
+{
+#ifdef TRACE_LEVEL
+    if constexpr (n <= TRACE_LEVEL)
+	return *CTrace::log;
+
+    else
+	return null_ostream;
+#else
+    return null_ostream;
+#endif
+
+}
+
 
 }// atd
 
