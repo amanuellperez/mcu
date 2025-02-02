@@ -111,7 +111,18 @@ struct MBR{
     uint16_t sig;
 
     bool is_valid() const {return sig == 0xAA55;}
+
 };
+
+// read/write
+// La MBR siempre está en el sector 0
+template <typename Sector_driver>
+inline bool read(MBR& mbr)
+{ 
+    using Sector_span = typename Sector_driver::Sector_span;
+    return Sector_driver::read(0, 
+	    Sector_span{reinterpret_cast<uint8_t*>(&mbr), sizeof(MBR)});
+}
 
 
 /***************************************************************************
@@ -751,15 +762,19 @@ public:
 // Constructors
     File(Volume& volume, uint32_t cluster0);
 
+// Operations
+    // Pasa al siguiente cluster de la lista enlazada.
+    // Devuelve true si lo obtiene, false si falla. 
+    bool next_sector();
+
+
+// Info
     // Devuelve el número del sector global actual
     uint32_t sector_number() const;
 
     // Lee el sector actual cargándolo en `sector`
     bool read(Sector_span& sector) const;
 
-    // Pasa al siguiente cluster de la lista enlazada.
-    // Devuelve true si lo obtiene, false si falla. 
-    bool next_sector();
 
     // Al ser una lista enlazada para conocer el size hay que iterar por todos
     // los elementos, no siendo muy eficiente. Implementarlo si se necesita.
@@ -772,6 +787,11 @@ public:
     bool error() const {return state_ == State::read_error;}
     bool end_of_file() const {return state_ == State::end_of_file;}
 
+// Para depurar
+    // Pasa a apuntar al primer sector del siguiente cluster, en caso de que
+    // exista. Si existe devuelve true, en caso contrario false.
+    bool next_cluster();    
+
 private:
 // Data
     Volume& vol_;
@@ -780,11 +800,13 @@ private:
     // +---+---+---+---+---+---+---+---+
     // |   |   |   |   | / | / | / | / | x
     // +---+---+---+---+---+---+---+---+
-    //  0  .. c_ ..      ^               ^
+    //  0  ..    c_ ..   ^               ^
     //                   |               |
     //             cluster_size_     capacity_ (=cluster_sublist_size)
     //  Donde / significa que es un elemento del array sin usar, y xx es que
-    //  no pertenece al array (es el end).
+    //  no pertenece al array (es el end). (c_ es el index de la posición
+    //  actual). Esta es un array genérico, debería de crear esta estructura
+    //  pero... ¿qué nombre darle?
     //
     std::array<uint32_t, cluster_sublist_size> cluster_;    // cache
     uint8_t cluster_size_;  // número de elementos de la cache validos
@@ -820,14 +842,8 @@ inline bool File<SD,N>::read(Sector_span& sector) const
 { return vol_.read_global(sector_number(), sector); }
 
 template<typename SD, uint8_t N>
-bool File<SD,N>::next_sector()
+bool File<SD,N>::next_cluster()
 {
-    state_ = State::ok;
-
-    ++s_;
-    if (s_ < vol_.data_area.sectors_per_cluster())
-	return true;
-
     s_ = 0;
     ++c_;
     if (c_ < cluster_size_)
@@ -842,6 +858,19 @@ bool File<SD,N>::next_sector()
     }
 
     return update_cache_with_next_clusters(cluster_[c_ - 1], false);
+}
+
+
+template<typename SD, uint8_t N>
+bool File<SD,N>::next_sector()
+{
+    state_ = State::ok;
+
+    ++s_;
+    if (s_ < vol_.data_area.sectors_per_cluster())
+	return true;
+
+    return next_cluster();
 }
 
 

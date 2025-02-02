@@ -65,13 +65,6 @@ private:
 // Data
     using Sector = Sector_driver::Sector;
 
-    // Último sector leído. En caso de no haberse leido nada contendrá basura.
-    Sector sector; 
-    uint32_t sector_number = std::numeric_limits<uint32_t>::max();
-
-    bool sector_is_valid() const { return !sector_is_invalid(); }
-    bool sector_is_invalid() const 
-    {return sector_number == std::numeric_limits<uint32_t>::max();}
 
 // Functions
     void init_uart();
@@ -81,31 +74,18 @@ private:
     bool load_sector();
     bool load_sector(const SDCard::Address&);
 
-// Main menu
-    uint16_t main_menu();
-    void run_command_invalid_sector(uint16_t cmd);
-    void run_command_valid_sector(uint16_t cmd);
-
 // User commands:
     void read_status();
 
-    void flush_sector();
-
-    void edit_sector(bool in_hexadecimal);
-    void edit_sector_from_in_hexadecimal(Sector::size_type);
-    void edit_sector_from_with_chars(Sector::size_type);
-
-    void print_sector();
-
-    void print_sector_fromto();
-	bool print_sector_fromto_ask(Sector::size_type& from, size_t& sz);
+    void print_sector_as_MBR();
+    void print_sector_as_FS_info();
+    void print_sector_as_FAT32_boot_sector();
+    void print_sector_as_directory_array();
+    void print_FAT32_entry();
+    void print_file_sectors();
 
     void print_sector(std::ostream& out, const Sector& sector, size_t i0, size_t sz)
-    {
-	out << "Sector: " << sector_number << '\n';
-
-	atd::xxd_print(out, sector, i0, sz);
-    }
+    { atd::xxd_print(out, sector, i0, sz); }
 
     void print_sector(std::ostream& out, const Sector& sector)
     { atd::xxd_print(out, sector, 0u, sector.size()); }

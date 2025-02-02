@@ -12,13 +12,12 @@ msg_main_no_sector_load "No sector in memory"
 msg_main_sector_load "Sector in memory. Address: "
 
 msg_main_menu	"1. Read status register\n"
-		"2. Load sector (MBR is sector 0)\n"
-
-msg_main_menu2	"3. Print sector\n"
-		"4. Print sector bytes from a to b\n"
-		"5. Edit sector in hexadecimal\n"
-		"6. Edit sector with chars\n"
-		"7. Flush sector\n"
+		"2. Load volume\n"
+		"3. Read FAT32 boot sector\n"
+		"4. FS info sector\n"
+		"5. As directory array\n"
+		"6. FAT entries\n"
+		"7. Print file sectors\n"
 
 
 
@@ -42,4 +41,19 @@ msg_edit_sector_instructions_in_char "Write all modifications in chars.\n"
 msg_edit_sector_from "First byte to edit"
 msg_edit_sector_from_error "Error reading"
 
+
+# print_sector_as_MBR
+msg_print_sector_as_MBR "Master Boot Record\n"
+msg_is_MBR_valid_sig "MBR has a valid sig"
+msg_partition1 "Partition 1\n"
+msg_is_fat32 "is FAT32"
+msg_lba_offset "LBA offset"
+msg_is_bootable "is bootable"
+
+
+# print_sector_as_FAT32_boot_sector
+msg_print_sector_as_FAT_boot_sector "FAT32: boot sector\n"
+
+# print_sector_as_FS_info
+msg_print_sector_as_FS_info "FAT32: FS info\n"
 

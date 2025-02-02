@@ -23,9 +23,7 @@ un error al intentar programarlo (driver contention)
  (1). De hecho el reloj apenas parece reloj. Elimino las resistencias de
  SCK/MOSI manteniendo la de MISO y todo funciona bien.
 
- No puedo eliminar la de MISO sino el programador me da error (todo esto para
- el `atmega328p` que no conviene usar porque tiene solo 2K de RAM; usar mejor
- el  `atmega4809` o algún chip con más RAM).
+ No puedo eliminar la de MISO sino el programador me da error.
 
 
 

@@ -1,14 +1,12 @@
 BIN = xx
 
-SOURCES= dev_print.cpp	\
+SOURCES= atd_fat.cpp	\
+		 dev_print.cpp	\
 		 sdc_print.cpp	\
 		 prj_main.cpp	\
 		 prj_run.cpp	\
 		 prj_init.cpp	\
-		 prj_flush_sector.cpp	\
-		 prj_edit_sector.cpp	\
-		 prj_print_sector.cpp	\
-		 prj_load_sector.cpp	
+		 prj_print_sector.cpp
 
 
 # NO USAR atmega328p!!! SOLO TIENE 2kB de RAM!!! MCU = atmega328p
