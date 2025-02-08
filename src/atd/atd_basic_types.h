@@ -1,4 +1,4 @@
-// Copyright (C) 2024 Manuel Perez 
+// Copyright (C) 2024-2025 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -29,6 +29,7 @@
  * HISTORIA
  *    Manuel Perez
  *    06/10/2024 view_of(int)
+ *    08/02/2025 Uninitialized
  *
  ****************************************************************************/
 #include <limits>
@@ -116,7 +117,7 @@ View_of_int_digit_iterator<Int> view_of_int_digit_iterator_end()
 
 }// namespace private_
  
-// Creamos una view de un int para poder modificarla
+// Creamos una view de un int
 template <Type::Integer Int>
 class View_of_int{
 public:
@@ -127,7 +128,7 @@ public:
     explicit View_of_int(Int& x) : x_{x} {}
 
 
-// Iteradores por las cifras
+// Iteradores por las cifras del número
     Digit_iterator digit_begin() const 
     {return private_::view_of_int_digit_iterator_begin<Int>(x_);}
 
@@ -137,6 +138,90 @@ public:
 private:
     Int& x_;
 };
+
+
+
+// Uninitialized
+// -------------
+// Hay veces que interesa posponer la inicialización de una variable, como por
+// ejemplo, cuando se quiere cargar un sector de una SDCard en memoria. Opto
+// por cargarlo la primera vez que lo necesito.
+// Aunque se podía usar std::optional<Int> esa clase duplica el tamaño de Int
+// y ando buscando eficiencia. Por eso creo esta clase específica para
+// enteros.
+// (FUTURO) Se puede dividir esta clase en dos:
+//	class Uninitialized : public View_as_class<Int> { ... }
+//      donde View_as_class no hace más que concebir las clases básicas
+//      (uint8_t, uint16_t, ...) como clases para poder heredar de ellas.
+template <Type::Integer Int>
+class Uninitialized{
+public:
+// De momento uso max() como valor para indicar que no se ha inicializado.
+// Se podía pasar como parámetro de template
+    static constexpr Int uninitialized = std::numeric_limits<Int>::max();
+
+// Constructor
+    Uninitialized() : value_ {uninitialized} { }
+    Uninitialized(const Int& v) : value_{v} { }
+
+// ¿Tiene valor?
+    explicit operator bool() const { return value_ != uninitialized;}
+    bool operator!() const {return value_ == uninitialized;}
+
+// Assign
+    operator Int() const { return value_;}
+    Uninitialized& operator=(const Int& x) { value_ = x; return *this; }
+
+// Operators
+    Uninitialized& operator++() {++value_; return *this;}
+    Uninitialized operator++(int) 
+    {
+	Uninitialized res{value_};
+	++value_; 
+	return res;
+    }
+
+    Uninitialized& operator--() {--value_; return *this;}
+    Uninitialized operator--(int) 
+    {
+	Uninitialized res{value_};
+	--value_; 
+	return res;
+    }
+
+
+    Uninitialized& operator+=(const Int& x)
+    { value_ += x; return *this; }
+
+    Uninitialized& operator-=(const Int& x)
+    { value_ -= x; return *this; }
+
+    Uninitialized& operator*=(const Int& x)
+    { value_ *= x; return *this; }
+
+    Uninitialized& operator/=(const Int& x)
+    { value_ /= x; return *this; }
+
+private:
+    Int value_;
+
+};
+
+template <Type::Integer Int>
+inline Uninitialized<Int> operator+(Uninitialized<Int> a, const Int& b)
+{ return a += b; }
+
+template <Type::Integer Int>
+inline Uninitialized<Int> operator-(Uninitialized<Int> a, const Int& b)
+{ return a -= b; }
+
+template <Type::Integer Int>
+inline Uninitialized<Int> operator*(Uninitialized<Int> a, const Int& b)
+{ return a *= b; }
+
+template <Type::Integer Int>
+inline Uninitialized<Int> operator/(Uninitialized<Int> a, const Int& b)
+{ return a /= b; }
 
 
 }// namespace

@@ -1,4 +1,4 @@
-// Copyright (C) 2024 Manuel Perez 
+// Copyright (C) 2024-2025 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -61,6 +61,84 @@ void test_digit_iterator()
 }
 
 
+void test_uninitialized()
+{
+    test::interface("Uninitialized");
+
+    atd::Uninitialized<int> x;
+
+    CHECK_TRUE(!x, "Uninitialized");
+
+    x = 10;
+
+// Igualdad
+    CHECK_TRUE(!x == false, "initialized");
+    CHECK_TRUE(x == 10, "operator==");
+    CHECK_TRUE(10 == x, "operator==");
+
+// Orden
+    CHECK_TRUE(x < 20, "operator<");
+    CHECK_TRUE(x <= 20, "operator<=");
+    CHECK_TRUE(x > 2, "operator>");
+    CHECK_TRUE(x >= 2, "operator>=");
+
+// Algebra
+    auto y = ++x;
+    CHECK_TRUE(y == 11, "operator++");
+    CHECK_TRUE(x == 11, "operator++");
+
+    y = x++;
+    CHECK_TRUE(y == 11, "operator++");
+    CHECK_TRUE(x == 12, "operator++");
+
+    y = --x;
+    CHECK_TRUE(y == 11, "operator--");
+    CHECK_TRUE(x == 11, "operator--");
+
+    y = x--;
+    CHECK_TRUE(y == 11, "operator--");
+    CHECK_TRUE(x == 10, "operator--");
+
+    x += 2;
+    CHECK_TRUE(x == 12, "operator+=");
+
+    x -= 2;
+    CHECK_TRUE(x == 10, "operator-=");
+
+    y = x + 4;
+    CHECK_TRUE(y == 14, "operator+");
+
+    y = 4 + x;
+    CHECK_TRUE(y == 14, "operator+");
+
+    y = x - 4;
+    CHECK_TRUE(y == 6, "operator-");
+
+    x = 2;
+    y =  10 - x;
+    CHECK_TRUE(y == 8, "operator-");
+
+    x = 50;
+    x *= 2;
+    CHECK_TRUE(x == 100, "operator*=");
+
+    x /= 2;
+    CHECK_TRUE(x == 50, "operator/=");
+
+    y = x * 4;
+    CHECK_TRUE(y == 200, "operator *");
+
+    y = 4 * x;
+    CHECK_TRUE(y == 200, "operator *");
+
+    y = x / 2;
+    CHECK_TRUE(y == 25, "operator /");
+
+    x = 4;
+    y = 100 / x;
+    CHECK_TRUE(y == 25, "operator /");
+
+}
 
 
 int main()
@@ -69,6 +147,7 @@ try{
     test::header("atd_basic_types");
 
     test_digit_iterator();
+    test_uninitialized();
 
 }catch(std::exception& e)
 {
