@@ -29,48 +29,48 @@ namespace impl_of{
 /***************************************************************************
  *				FAT AREA
  ***************************************************************************/
-void FAT_area::init(const Boot_sector& bs)
-{
-    sector0_ = bs.FAT_area_first_sector();
-
-    if (bs.FAT_is_mirror_enabled())
-	nFATs_   = bs.number_of_FATs();
-    else
-	nFATs_   = bs.number_of_active_FATs();
-
-    number_of_sectors_ = bs.FAT_number_of_sectors();
-    number_of_entries_ = bs.data_area_number_of_clusters();
-    sector_size_ = bs.bytes_per_sector();
-}
-
-
-// Section 4. FAT specification
-FAT_area::Cluster_state FAT_area::cluster_state(uint32_t entry) const
-{
-    // Section 4.  Note: "The high 4 bits of a FAT32 FAT entry are reserved"
-    entry &= 0x0FFFFFFF;  
-
-    if (entry == 0x00000000) return Cluster_state::free;
-    if (entry == 0x0FFFFFF7) return Cluster_state::bad;
-    if (entry == 0x0FFFFFFF) return Cluster_state::end_of_file;
-    
-    // entrys 0 y 1 están reservados
-    // section 3.5
-    if (0x00000002 <= entry 
-		and entry <= number_of_entries_ + 1) 
-	return Cluster_state::allocated;
-	
-
-    // DUDA: La FAT specification indica que 
-    // "Reserved and should not be used.
-    //  May be interpreted as an allocated entry and the final
-    //  entry in the file (indicating end-of-file condition)"
-    //  ¿son reserved or end_of_file? @_@
-    if (0x0FFFFFF8 <= entry and entry <= 0x0FFFFFFE)
-	return Cluster_state::reserved;
-
-    return Cluster_state::reserved;
-}
+//void FAT_area::init(const Boot_sector& bs)
+//{
+//    sector0_ = bs.FAT_area_first_sector();
+//
+//    if (bs.FAT_is_mirror_enabled())
+//	nFATs_   = bs.number_of_FATs();
+//    else
+//	nFATs_   = bs.number_of_active_FATs();
+//
+//    number_of_sectors_ = bs.FAT_number_of_sectors();
+//    number_of_entries_ = bs.data_area_number_of_clusters();
+//    sector_size_ = bs.bytes_per_sector();
+//}
+//
+//
+//// Section 4. FAT specification
+//FAT_area::Cluster_state FAT_area::cluster_state(uint32_t entry) const
+//{
+//    // Section 4.  Note: "The high 4 bits of a FAT32 FAT entry are reserved"
+//    entry &= 0x0FFFFFFF;  
+//
+//    if (entry == 0x00000000) return Cluster_state::free;
+//    if (entry == 0x0FFFFFF7) return Cluster_state::bad;
+//    if (entry == 0x0FFFFFFF) return Cluster_state::end_of_file;
+//    
+//    // entrys 0 y 1 están reservados
+//    // section 3.5
+//    if (0x00000002 <= entry 
+//		and entry <= number_of_entries_ + 1) 
+//	return Cluster_state::allocated;
+//	
+//
+//    // DUDA: La FAT specification indica que 
+//    // "Reserved and should not be used.
+//    //  May be interpreted as an allocated entry and the final
+//    //  entry in the file (indicating end-of-file condition)"
+//    //  ¿son reserved or end_of_file? @_@
+//    if (0x0FFFFFF8 <= entry and entry <= 0x0FFFFFFE)
+//	return Cluster_state::reserved;
+//
+//    return Cluster_state::reserved;
+//}
 
 
 /***************************************************************************

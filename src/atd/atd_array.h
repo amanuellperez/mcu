@@ -728,6 +728,9 @@ inline void Array_view<T>::pop_back()
 template <typename Array_bytes, typename T>
 struct Array_of_bytes_view{
 
+// (TODO) El reinterpret_cast funciona solo si:
+//    static_assert(std::endian::native == endiannes_of_array_of_bytes);
+
     using size_type = size_t;
 
     Array_of_bytes_view(Array_bytes& s0) : s{s0} {}

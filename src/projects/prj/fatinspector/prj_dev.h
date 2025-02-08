@@ -22,9 +22,15 @@
 #ifndef __PRJ_DEV_H__
 #define __PRJ_DEV_H__
 
+#include <bit>	// endianness
+#include <atd_basic_types.h> // atd::Uninitialized
+		
 #include <mcu_SPI.h>
 #include <dev_sdcard.h>
 
+// Niveles de traza usados
+// 3: error
+// 9: traza para depurar, borrarlas al final.
 
 /***************************************************************************
  *			    MICROCONTROLLER
@@ -132,22 +138,102 @@ using SDCard = dev::hwd::SDCard<SDCard_cfg>;
 //       std::array. Para leerlo necesito pasarlo a read.
 //       std::span es una view de los arrays de C como de std::array
 //       fusionando los dos interfaces.
-struct Sector_driver{
+//
+// (RRR) ¿Por qué Sector_driver?
+//      El static interface es el usado para acceder al dispositivo físico,
+//      pero ¿para qué necesito un objeto de tipo Sector_driver?
+//      Al empezar a implementar FAT32::Volume encuentro con que necesito
+//      cargar sectores en memoria para poder leerlos: los cargo en FAT_area,
+//      los cargo en File, ... y lo hago dentro de funciones generando el
+//      siguiente problema:
+//	    File::f()
+//	    {
+//		Sector s; // reserva 512 bytes
+//		FAT_area::g(); // internamente reserva 512 bytes
+//	    }
+//	En este escenario mínimo estoy reservando 1K de RAM (y el atmega32 
+//	solo tiene 2K).
+//	Para evitar uso Sector_driver. Como alguien tiene que ser responsable
+//	de gestionar la memoria usada para leer los sectores opto por que sea
+//	Volume:
+//	    class FAT32::Volume{
+//		...
+//		Sector_driver driver;
+//	    };
+//
+//	Y cualquier función que quiera acceder a los bytes este disco tendrá
+//	que hacerlo obligatoriamente via Volume. 
+//
+class Sector_driver{
+public:
+    // Básicoo state para salir del paso
+    enum class State : uint8_t { ok, read_error };
+
     static constexpr uint16_t sector_size = 512;
+    using size_type = uint16_t;  // máximo 512
     //using Sector = atd::Sector<sector_size>;
     using Sector = std::array<uint8_t, sector_size>;
     using Sector_span = std::span<uint8_t, sector_size>;
+    using Address = SDCard::Address;
 
     static_assert(sector_size == SDCard::block_size);
+
+    // Los reinterpret_cast solo funcionan si el micro es little endian, ya
+    // que estamos leyendo sectores de FAT32 que son little endian.
+    static_assert(std::endian::native == std::endian::little);
     
-    //static bool read(const SDCard::Address& add, Sector& sector)
+
+// Constructor
+    Sector_driver() : state_ {State::ok} {}
+
+// Lectura del sector actual
+// (TODO) ¿Qué pasa si falla la lectura? No está devolviendo error!!!
+// Añadir un state para saber si el sector se ha leido adecuadamente!!!
+    // Devuelve el tipo T del sector nsector de la posición pos
+    template <Type::Integer Int>
+    Int read(const Address& nsector, const size_type& pos)
+    {
+	if (nsector_ != nsector){
+	    if (read (nsector, sector_))
+		state_ = State::ok;
+	    else
+		state_ = State::read_error;
+	}
+
+	return *(reinterpret_cast<Int*>(&sector_[pos * sizeof(Int)]));
+    }
+
+    template <typename T>
+    T* sector_pointer_as(const Address& nsector)
+    { 
+	if (nsector_ != nsector){
+	    if (read (nsector, sector_))
+		state_ = State::ok;
+	    else
+		state_ = State::read_error;
+	}
+
+	return reinterpret_cast<T*>(&sector_); 
+    }
+
+// Info
+    bool ok() const {return state_ == State::ok;}
+
+// Static interface
+// (DUDA) ¿Necesito realmente estas funciones?
+// Lo usa MBR. Reescribir MBR y hacer private esta función
     static bool read(const SDCard::Address& add, Sector_span sector)
     {
 	auto r = SDCard::read(add, sector);
 	return r.ok();
     }
-
-    //static bool write(const SDCard::Address& add, Sector& sector)
+private:
+// Data
+    atd::Uninitialized<Address> nsector_; 
+    Sector sector_;
+    State state_;
+    
+// Static interface
     static bool write(const SDCard::Address& add, Sector_span sector)
     {
 	auto r = SDCard::write(add, sector);

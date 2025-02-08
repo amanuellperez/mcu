@@ -28,7 +28,7 @@
  *
  * REFERENCES
  *	http://elm-chan.org/docs/fat_e.html
- *	https://wiki.osdev.org/FAT#Long_File_Names (referencia osdev)
+ *	https://wiki.osdev.org/FAT (referencia osdev)
  *
  * HISTORIA
  *    Manuel Perez
@@ -413,6 +413,10 @@ struct Directory_entry{
     
 
 
+// FAT_area hace referencia a Volume
+template <typename S>
+class Volume;
+
 namespace impl_of{
 /***************************************************************************
  *				FAT
@@ -482,14 +486,17 @@ static_assert(sizeof(FAT_Result_read_next) == 1);
 
 }// impl_of
  
+template <typename Sector_driver>
 class FAT_area{
 public:
 // Types
+    using Volume           = atd::FAT32::Volume<Sector_driver>;
     using Cluster_state    = impl_of::FAT_Cluster_state;
     using Result_read_next = impl_of::FAT_Result_read_next;
-
+    using size_type        = uint16_t; // de 512 habitualmente < 2^16
+				       
 // Constructors
-    FAT_area() = default; // recordar llamar a init
+    FAT_area(Volume* vol) : volume_{vol} {}
     void init(const Boot_sector& bs);
 
     FAT_area(const Boot_sector& bs) {init(bs);}
@@ -497,15 +504,17 @@ public:
 
     // Lee los clusters que siguen al cluster0 y los mete en file_clusters.
     //template <typename Sector_driver, uint8_t N>
-    template <typename Sector_driver>
     Result_read_next read_next(const uint32_t& cluster0, 
-			    //std::span<uint32_t, N> file_clusters) const;
 			    std::span<uint32_t> file_clusters) const;
 
+    // Lee el sector nsector de la FAT area.
+    // nsector es relativo a la FAT area.
+    template <Type::Integer Int>
+    Int read(uint32_t nsector, size_type pos) const
+    { return volume_->template read_global<Int>(sector0_ + nsector, pos);}
 
-    template <typename Sector_driver>
-    bool read(uint32_t nsector, typename Sector_driver::Sector& sector) const
-    { return Sector_driver::read(sector0_ + nsector, sector); }
+    // Indica si ha habido algún error en la llamada de `read`
+    bool read_error() const{ return !volume_->ok();}
 
 // FAT_area Info
 // --------
@@ -523,6 +532,8 @@ public:
 
 
 private:
+    Volume* volume_;
+
 // FAT_area info
     uint32_t sector0_;	// sector donde empieza la primera FAT_area
     uint8_t nFATs_;	// número de FATs activas
@@ -562,49 +573,59 @@ private:
 // specification y calcular la posición del uint8_t y luega hacer el casting
 // ya que concibo la FAT_area como un array lineal de uint32_t)
 // 
+// tanto entry, como (nsector, pos) son coordenadas locales a la FAT area.
+template <typename S>
 inline 
-std::pair<uint32_t, uint32_t> FAT_area::cluster2sector_pos(uint32_t entry) const
+std::pair<uint32_t, uint32_t> FAT_area<S>::cluster2sector_pos(uint32_t entry) const
 { return atd::div(entry, sector_size_ / sizeof(uint32_t)); }
 
-//template <typename Sector_driver, uint8_t N>
-template <typename Sector_driver>
-FAT_area::Result_read_next FAT_area::read_next(const uint32_t& cluster, 
-				//std::span<uint32_t, N> file_clusters) const
-				std::span<uint32_t> file_clusters) const
+
+
+template <typename S>
+void FAT_area<S>::init(const Boot_sector& bs)
 {
-    using Sector = Sector_driver::Sector;
+    sector0_ = bs.FAT_area_first_sector();
 
-    // nsector0 es relativo al primer sector de este volumen
-    auto [nsector0, pos] = cluster2sector_pos(cluster);
+    if (bs.FAT_is_mirror_enabled())
+	nFATs_   = bs.number_of_FATs();
+    else
+	nFATs_   = bs.number_of_active_FATs();
 
-    Sector sector_container{};
-    if (!read<Sector_driver>(nsector0, sector_container))
-	return {Cluster_state::read_error, 0};
-    
-    atd::Array_of_bytes_view<Sector, uint32_t> sector{sector_container};
-
-    uint32_t nsector{};
-
-    for (uint8_t i = 0; i < file_clusters.size(); ++i){
-	uint32_t entry = sector[pos];
-
-	auto state = cluster_state(entry);
-	if (state != Cluster_state::allocated)
-	    return {state, i};
-
-	file_clusters[i] = entry;
-
-	std::tie(nsector, pos) = cluster2sector_pos(entry);
-
-	if (nsector != nsector0) // solo leemos 1 sector cada vez
-	    return {Cluster_state::allocated, static_cast<uint8_t>(i + 1)};
-
-    }
-
-    return {Cluster_state::allocated, 
-			    static_cast<uint8_t>(file_clusters.size())};
-
+    number_of_sectors_ = bs.FAT_number_of_sectors();
+    number_of_entries_ = bs.data_area_number_of_clusters();
+    sector_size_ = bs.bytes_per_sector();
 }
+
+
+// Section 4. FAT specification
+template <typename S>
+FAT_area<S>::Cluster_state FAT_area<S>::cluster_state(uint32_t entry) const
+{
+    // Section 4.  Note: "The high 4 bits of a FAT32 FAT entry are reserved"
+    entry &= 0x0FFFFFFF;  
+
+    if (entry == 0x00000000) return Cluster_state::free;
+    if (entry == 0x0FFFFFF7) return Cluster_state::bad;
+    if (entry == 0x0FFFFFFF) return Cluster_state::end_of_file;
+    
+    // entrys 0 y 1 están reservados
+    // section 3.5
+    if (0x00000002 <= entry 
+		and entry <= number_of_entries_ + 1) 
+	return Cluster_state::allocated;
+	
+
+    // DUDA: La FAT specification indica que 
+    // "Reserved and should not be used.
+    //  May be interpreted as an allocated entry and the final
+    //  entry in the file (indicating end-of-file condition)"
+    //  ¿son reserved or end_of_file? @_@
+    if (0x0FFFFFF8 <= entry and entry <= 0x0FFFFFFE)
+	return Cluster_state::reserved;
+
+    return Cluster_state::reserved;
+}
+
 
 
 /***************************************************************************
@@ -658,9 +679,9 @@ public:
     using Sector_span   = typename Sector_driver::Sector_span;
     static constexpr auto sector_size = Sector_driver::sector_size;
 
-    using FAT_area  = impl_of::FAT_area;
+    using FAT_area  = impl_of::FAT_area<Sector_driver>;
     using Data_area = impl_of::Data_area;
-    using Cluster_state = impl_of::FAT_area::Cluster_state;
+    using Cluster_state = FAT_area::Cluster_state;
 
 // Data
     FAT_area fat_area;
@@ -674,29 +695,38 @@ public:
     Volume(const uint32_t& sector0, Boot_sector_min& bs);
 
 // State
-    bool error() const {return sector_size_ == 0;}
+    bool ok() const { return driver_.ok() == true and sector_size_ != 0;}
+    bool error() const { return !ok(); }
 
 // Reserved area
     uint32_t volume_first_sector() const {return sector0_;}
     uint32_t bytes_per_sector() const {return sector_size_;}
 
 
-// Sectors read/write
+// Lectura/escritura de sectores
+    // nsector es coordenada local, 
+    // el número de sector referido al principio del volumen
+    template <Type::Integer Int = uint8_t>
+    Int read(const uint32_t& nsector, uint8_t pos)
+    { return driver_.template read<Int>(sector0_ + nsector, pos); }
+    
+    // nsector es coordenada global, 
+    // es el número de sector referido al  principio del disco
+    template <Type::Integer Int = uint8_t>
+    Int read_global(const uint32_t& nsector, uint8_t pos)
+    { return driver_.template read<Int>(nsector, pos); }
+
 // Funciones globales (nsectors son relativos a todo el disco duro)
-    // Lee el boot sector que se encuentra en el sector `nsector` del disco.
-    static bool read_global(uint32_t nsector, Boot_sector& bs); 
+// (TODO) ¿Qué pasa si falla la lectura? No está devolviendo error!!!
+// Añadir un state para saber si el sector se ha leido adecuadamente!!!
+    template <typename T>
+    T* read_global_as(const uint32_t& nsector)
+    { return driver_.template sector_pointer_as<T>(nsector); }
 
-    static bool read_global(uint32_t nsector, Sector_span sector) 
-    { return Sector_driver::read(nsector, sector); }
-
-
-// Funciones locales (nsectors son relativos al volumen)
-    // Lee el sector `nsector` del volumen. `nsector` es relativo al volumen.
-    bool read(uint32_t nsector, Sector_span sector) const
-    { return Sector_driver::read(sector0_ + nsector, sector); }
-
-    bool read(Boot_sector& bs) const;
-    bool read(uint32_t nsector, FS_info& fs) const;
+// (TODO) ¿Qué pasa si falla la lectura? No está devolviendo error!!!
+    template <typename T>
+    T* read_as(const uint32_t& nsector)
+    { return read_global_as<T>(sector0_ + nsector);}
 
 
 private:
@@ -704,8 +734,28 @@ private:
     uint32_t sector0_; // volume first sector
     uint32_t sector_size_; // número de bytes por sector
 	
+// Sectores cargados en memoria
+    Sector_driver driver_;
+
 // Helpers
     void init(Boot_sector& bs);
+
+
+
+// Funciones locales (nsectors son relativos al volumen)
+    static bool read_global(uint32_t nsector, Boot_sector& bs); 
+
+    static bool read_global(uint32_t nsector, Sector_span sector) 
+    { return Sector_driver::read(nsector, sector); }
+//
+//    // Lee el sector `nsector` del volumen. `nsector` es relativo al volumen.
+//    bool read(uint32_t nsector, Sector_span sector) const
+//    { return Sector_driver::read(sector0_ + nsector, sector); }
+//
+//    // Lee el boot sector que se encuentra en el sector `nsector` del disco.
+//    bool read(uint32_t nsector, FS_info& fs) const;
+//
+//    bool read(Boot_sector& bs) const;
 
 };
 
@@ -713,8 +763,10 @@ private:
 template <typename SD>
 void Volume<SD>::init(Boot_sector& bs)
 {
-    if (!read_global(sector0_, bs))
+    if (!read_global(sector0_, bs)){
 	sector_size_ = 0;
+	return;
+    }
 
 // Reserved area
     sector_size_ = bs.bytes_per_sector();
@@ -723,9 +775,10 @@ void Volume<SD>::init(Boot_sector& bs)
     data_area.init(bs);
 }
 
+
 template <typename SD>
 Volume<SD>::Volume(const uint32_t& sector0)
-    :sector0_{sector0}
+    : fat_area{this}, sector0_{sector0}
 {
     Boot_sector bs;
     init(bs);
@@ -733,7 +786,7 @@ Volume<SD>::Volume(const uint32_t& sector0)
 
 template <typename SD>
 Volume<SD>::Volume(const uint32_t& sector0, Boot_sector_min& bs_min)
-    :sector0_{sector0}
+    : fat_area{this}, sector0_{sector0}
 {
     Boot_sector bs;
     init(bs);
@@ -750,18 +803,61 @@ inline bool Volume<SD>::read_global(uint32_t nsector, Boot_sector& bs)
 	    Sector_span{reinterpret_cast<uint8_t*>(&bs), sizeof(Boot_sector)});
 }
 
-template <typename SD>
-inline bool Volume<SD>::read(Boot_sector& bs) const
-{ return read_global(sector0_, bs); }
+//template <typename SD>
+//inline bool Volume<SD>::read(Boot_sector& bs) const
+//{ return read_global(sector0_, bs); }
+//
+//
+//template <typename SD>
+//inline bool Volume<SD>::read(uint32_t nsector, FS_info& fs) const
+//{
+//    return read(nsector, 
+//	    Sector_span{reinterpret_cast<uint8_t*>(&fs), sizeof(FS_info)});
+//}
 
 
-template <typename SD>
-inline bool Volume<SD>::read(uint32_t nsector, FS_info& fs) const
+/***************************************************************************
+ *			  FAT AREA IMPLEMENTATION
+ ***************************************************************************/
+namespace impl_of{
+// Funciones que necesitan conocer la definición de Volume
+template <typename Sector_driver>
+FAT_area<Sector_driver>::Result_read_next 
+	FAT_area<Sector_driver>::read_next(const uint32_t& cluster, 
+				std::span<uint32_t> file_clusters) const
 {
-    return read(nsector, 
-	    Sector_span{reinterpret_cast<uint8_t*>(&fs), sizeof(FS_info)});
+    // nsector0 es relativo al primer sector de este volumen
+    auto [nsector0, pos] = cluster2sector_pos(cluster);
+
+    for (uint8_t i = 0; i < file_clusters.size(); ++i){
+	uint32_t entry = read<uint32_t>(nsector0, pos);
+
+	if (read_error()){
+	    ctrace<3>() << "Volume read error\n";
+	    return {Cluster_state::read_error, 0};
+	}
+
+
+	auto state = cluster_state(entry);
+	if (state != Cluster_state::allocated)
+	    return {state, i};
+
+	file_clusters[i] = entry;
+
+	uint32_t nsector;
+	std::tie(nsector, pos) = cluster2sector_pos(entry);
+
+	if (nsector != nsector0) // solo leemos 1 sector cada vez
+	    return {Cluster_state::allocated, static_cast<uint8_t>(i + 1)};
+
+    }
+
+    return {Cluster_state::allocated, 
+			    static_cast<uint8_t>(file_clusters.size())};
+
 }
 
+} // namespace impl_of
 
 /***************************************************************************
  *				FILE
@@ -935,8 +1031,7 @@ bool File<SD,N>::update_cache_with_next_clusters(uint32_t cluster0
     }
 
 
-    auto res = vol_.fat_area.template
-		    read_next<Sector_driver>(cluster0, 
+    auto res = vol_.fat_area.read_next(cluster0, 
 				    {cluster_.begin() + incr, cluster_.end()});
 
     if (res.state == Volume::Cluster_state::read_error)
@@ -953,6 +1048,62 @@ bool File<SD,N>::update_cache_with_next_clusters(uint32_t cluster0
 
     return state_ == State::ok;
 }
+
+
+/***************************************************************************
+ *				    DIRECTORY
+ ***************************************************************************/
+namespace impl_of{
+enum class Directory_type : uint8_t{
+    read_only = 0x01,
+    hidden    = 0x02,
+    system    = 0x04,
+    volume_id = 0x08,
+    directory = 0x10,
+    archive   = 0x20,
+    long_name = read_only | hidden | system | volume_id
+};
+}// impl_of
+ 
+template <typename Sector_driver0> 
+class Directory{
+public:
+// Types
+    using Volume	= atd::FAT32::Volume<Sector_driver0>;
+    using File          = atd::FAT32::File<Sector_driver0, 1>;
+    using Sector_driver = Sector_driver0;
+    using Sector	= typename Volume::Sector;
+    using Sector_span   = typename Volume::Sector_span;
+    using Type          = impl_of::Directory_type;
+
+// Constructors
+    Directory(Volume& volume, uint32_t cluster0);
+
+// ls: iteramos por todos los ficheros/directorios del Directory
+    bool ls_begin();
+    bool ls_next();
+
+// TODO: cd
+// cd(const char dir_dst[]);
+
+
+// Funciones de bajo nivel
+    
+private:
+    File file_; // fichero con los sectores del directorio
+};
+
+template <typename S> 
+Directory<S>::Directory(Volume& volume, uint32_t cluster0)
+    : file_{volume, cluster0}
+{ }
+
+//template <typename S> 
+//bool Directory<S>::ls_begin()
+//{
+//    Sector_driver::
+//}
+
 
 
 }// namespace FAT32
