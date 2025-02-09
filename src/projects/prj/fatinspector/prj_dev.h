@@ -187,8 +187,6 @@ public:
     Sector_driver() : state_ {State::ok} {}
 
 // Lectura del sector actual
-// (TODO) ¿Qué pasa si falla la lectura? No está devolviendo error!!!
-// Añadir un state para saber si el sector se ha leido adecuadamente!!!
     // Devuelve el tipo T del sector nsector de la posición pos
     template <Type::Integer Int>
     Int read(const Address& nsector, const size_type& pos)

@@ -503,7 +503,8 @@ public:
 
 
     // Lee los clusters que siguen al cluster0 y los mete en file_clusters.
-    //template <typename Sector_driver, uint8_t N>
+    // Devuelve el número de clusters leídos y el estado del último cluster
+    // leído (allocated, end_of_file, ...)
     Result_read_next read_next(const uint32_t& cluster0, 
 			    std::span<uint32_t> file_clusters) const;
 
@@ -862,14 +863,14 @@ FAT_area<Sector_driver>::Result_read_next
 /***************************************************************************
  *				FILE
  ***************************************************************************/
-// Un FAT32::File es:
+// Un FAT32::File_sectors es:
 //
 //  1) para el usuario una lista enlazada de S sectores.
 //  2) implementado internamente como una lista enlazada de C clusters.
 //
 // Internamente guardamos parte de la lista de clusters del fichero:
 //
-// File: C clusters:
+// File_sectors: C clusters:
 //       +---+---+---+---+---+---+---+---+---+---+---+---+
 //       | 0 | 1 | 2 | 3 | 4 | 5 |...|   |   |   |   |C-1|
 //       +---+---+---+---+---+---+---+---+---+---+---+---+
@@ -886,14 +887,14 @@ FAT_area<Sector_driver>::Result_read_next
 namespace impl_of{
 enum class File_state : uint8_t {
     ok
-    , read_error
+    , error
     , end_of_file
 };
 
 
 }// impl_of
 template <typename Sector_driver0, uint8_t cluster_sublist_size> 
-class File{
+class File_sectors{
 public:
 // Types
     using Volume	= atd::FAT32::Volume<Sector_driver0>;
@@ -904,22 +905,27 @@ public:
 
     static_assert(cluster_sublist_size > 0);
 
+// Data
+    Volume& volume;
+
 // Constructors
-    File(Volume& volume, uint32_t cluster0);
+    File_sectors(Volume& volume); // no olvidar llamar a first_sector!!!
+    File_sectors(Volume& volume, uint32_t cluster0);
+
+    void first_sector(uint32_t cluster0);
 
 // Operations
     // Pasa al siguiente cluster de la lista enlazada.
     // Devuelve true si lo obtiene, false si falla. 
     bool next_sector();
 
-
-// Info
+// read/write
     // Devuelve el número del sector global actual
-    uint32_t sector_number() const;
+    uint32_t global_sector_number() const;
 
-    // Lee el sector actual cargándolo en `sector`
-    bool read(Sector_span& sector) const;
-
+    // Devuelve el byte i del sector actual al que apunta global_sector_number
+    uint8_t read_byte(uint32_t i) const
+    { return volume.read_global(global_sector_number(), i); }
 
     // Al ser una lista enlazada para conocer el size hay que iterar por todos
     // los elementos, no siendo muy eficiente. Implementarlo si se necesita.
@@ -929,7 +935,7 @@ public:
 
 // State
     bool ok() const {return state_ == State::ok;}
-    bool error() const {return state_ == State::read_error;}
+    bool error() const {return state_ == State::error;}
     bool end_of_file() const {return state_ == State::end_of_file;}
 
 // Para depurar
@@ -938,8 +944,6 @@ public:
     bool next_cluster();    
 
 private:
-// Data
-    Volume& vol_;
 
     // Vamos a usar una pequeña cache para almacenar los clusters:
     // +---+---+---+---+---+---+---+---+
@@ -972,22 +976,27 @@ private:
 };
 
 template<typename SD, uint8_t N>
-inline File<SD, N>::File(Volume& vol,  uint32_t cluster0)
-    : vol_{vol}
+inline File_sectors<SD, N>::File_sectors(Volume& vol)
+    : volume{vol}
+{ state_ = State::error; }
+
+template<typename SD, uint8_t N>
+inline File_sectors<SD, N>::File_sectors(Volume& vol,  uint32_t cluster0)
+    : volume{vol}
+{ update_cache_with_next_clusters(cluster0, true); }
+
+template<typename SD, uint8_t N>
+inline void File_sectors<SD, N>::first_sector(uint32_t cluster0)
 { update_cache_with_next_clusters(cluster0, true); }
 
 // Precondition: cluster_[c_] >= vol_.data_area.first_sector();
 template<typename SD, uint8_t N>
-inline uint32_t File<SD,N>::sector_number() const
-{ return vol_.data_area.first_sector_of_cluster(cluster_[c_]) + s_; }
+inline uint32_t File_sectors<SD,N>::global_sector_number() const
+{ return volume.data_area.first_sector_of_cluster(cluster_[c_]) + s_; }
 
 
 template<typename SD, uint8_t N>
-inline bool File<SD,N>::read(Sector_span& sector) const
-{ return vol_.read_global(sector_number(), sector); }
-
-template<typename SD, uint8_t N>
-bool File<SD,N>::next_cluster()
+bool File_sectors<SD,N>::next_cluster()
 {
     s_ = 0;
     ++c_;
@@ -1007,12 +1016,12 @@ bool File<SD,N>::next_cluster()
 
 
 template<typename SD, uint8_t N>
-bool File<SD,N>::next_sector()
+bool File_sectors<SD,N>::next_sector()
 {
     state_ = State::ok;
 
     ++s_;
-    if (s_ < vol_.data_area.sectors_per_cluster())
+    if (s_ < volume.data_area.sectors_per_cluster())
 	return true;
 
     return next_cluster();
@@ -1020,7 +1029,7 @@ bool File<SD,N>::next_sector()
 
 
 template<typename SD, uint8_t N>
-bool File<SD,N>::update_cache_with_next_clusters(uint32_t cluster0
+bool File_sectors<SD,N>::update_cache_with_next_clusters(uint32_t cluster0
 					    , bool save_first_cluster)
 {
     uint8_t incr = 0; // guardamos en cluster_[0..end)
@@ -1031,11 +1040,11 @@ bool File<SD,N>::update_cache_with_next_clusters(uint32_t cluster0
     }
 
 
-    auto res = vol_.fat_area.read_next(cluster0, 
+    auto res = volume.fat_area.read_next(cluster0, 
 				    {cluster_.begin() + incr, cluster_.end()});
 
     if (res.state == Volume::Cluster_state::read_error)
-	state_ = State::read_error;
+	state_ = State::error;
     else
 	state_ = State::ok;
 
@@ -1049,62 +1058,200 @@ bool File<SD,N>::update_cache_with_next_clusters(uint32_t cluster0
     return state_ == State::ok;
 }
 
+/***************************************************************************
+ *				    FILE
+ ***************************************************************************/
+namespace impl_of{
+
+template <typename Sector_driver0, uint8_t cluster_sublist_size> 
+struct const_File_iterator;
+
+struct const_File_iterator_end{};
+
+}// impl_of
+ 
+// Se trata de una vista de File_sectors que permite concebirlo como un
+// conjunto continuo de bytes.
+template <typename Sector_driver0, uint8_t cluster_sublist_size> 
+class File{
+public:
+// Types
+    using File_sectors = atd::FAT32::File_sectors<Sector_driver0, cluster_sublist_size>;
+    using Volume = typename File_sectors::Volume;
+
+    using const_iterator     = 
+	    impl_of::const_File_iterator<Sector_driver0, cluster_sublist_size>;
+    using const_iterator_end = impl_of::const_File_iterator_end;
+
+// Constructors
+    File(Volume& volume, uint32_t cluster0);
+
+// Acceso aleatorio
+// uint8_t operator[](size_type i); // puede ser costoso en tiempo
+
+// Iteradores
+//    iterator begin();
+//    iterator end();
+
+    const_iterator begin();
+    const_iterator_end end() const;
+
+private:
+   File_sectors sectors_; 
+   uint32_t cluster0_; // para poder llamar a begin sin pasarle cluster0
+};
+
+
+template <typename SD, uint8_t N> 
+inline File<SD,N>::File(Volume& volume, uint32_t cluster0)
+    : sectors_(volume, cluster0), cluster0_{cluster0}
+{}
+
+namespace impl_of{
+
+// CUIDADO: observar cómo const_File_iterator modifica el estado de File_sectors que
+// está almacenado en File. Si se intentan usar 2 iteradores a la vez o
+// iterar y acceder aleatoriamente a la vez dará error. Pero hay una
+// disciplina impuesta de que iteras de begin... end, o usas operator[] pero
+// no mezclas, con lo que no debería de generar nunca problema. 
+// (¿por qué no evitar esto? Porque no se cómo evitarlo y hacer un
+// const_File_iterator de tamaño mínimo. Si guardo File_sectors dentro de
+// const_File_iterator el sizeof(const_File_iterator) no será pequeño)
+template <typename Sector_driver0, uint8_t cluster_sublist_size> 
+struct const_File_iterator{
+// Data
+    using File_sectors = atd::FAT32::File_sectors<Sector_driver0, cluster_sublist_size>;
+
+    File_sectors& sector;
+    uint32_t i; // byte actual al que apuntamo del sector
+
+    const_File_iterator(File_sectors& s, uint32_t cluster0) 
+	: sector{s}, i{0} { sector.first_sector(cluster0); }
+
+    const_File_iterator& operator++()
+    {
+	if (sector.end_of_file() or sector.error())
+	    return *this;
+
+	++i;
+	if (i < sector.volume.bytes_per_sector())
+	    return *this;
+
+	i = 0;
+	sector.next_sector(); // puede devolver error o end_of_file en state
+
+	return *this;
+    }
+    
+    const_File_iterator operator++(int)
+    {
+	const_File_iterator tmp = *this;
+	++*this;
+	return tmp;
+    }
+
+    // Observar que como es un const_iterator puedo devolver 
+    // directamente un uint8_t en lugar de uint8_t&
+    uint8_t operator*()
+    {
+	// if (sector.end_of_file() or sector.error()) return 0xEA;
+	return sector.read_byte(i);
+    }
+
+    //pointer operator->() { return &(**this); }
+
+    friend
+    bool operator==(const const_File_iterator& a, const const_File_iterator_end&)
+    { return a.i == 0 and a.sector.end_of_file(); }
+
+    friend
+    bool operator!=(const const_File_iterator& a, const const_File_iterator_end& b)
+    { return !(a == b); }
+};
+
+
+}// impl_of
+
+
+
+template <typename SD, uint8_t N> 
+inline File<SD,N>::const_iterator File<SD,N>::begin()
+{ return const_iterator{sectors_, cluster0_}; }
+
+template <typename SD, uint8_t N> 
+inline File<SD,N>::const_iterator_end File<SD,N>::end() const
+{ return const_iterator_end{}; }
+
 
 /***************************************************************************
  *				    DIRECTORY
  ***************************************************************************/
-namespace impl_of{
-enum class Directory_type : uint8_t{
-    read_only = 0x01,
-    hidden    = 0x02,
-    system    = 0x04,
-    volume_id = 0x08,
-    directory = 0x10,
-    archive   = 0x20,
-    long_name = read_only | hidden | system | volume_id
-};
-}// impl_of
- 
-template <typename Sector_driver0> 
-class Directory{
-public:
-// Types
-    using Volume	= atd::FAT32::Volume<Sector_driver0>;
-    using File          = atd::FAT32::File<Sector_driver0, 1>;
-    using Sector_driver = Sector_driver0;
-    using Sector	= typename Volume::Sector;
-    using Sector_span   = typename Volume::Sector_span;
-    using Type          = impl_of::Directory_type;
-
-// Constructors
-    Directory(Volume& volume, uint32_t cluster0);
-
-// ls: iteramos por todos los ficheros/directorios del Directory
-    bool ls_begin();
-    bool ls_next();
-
-// TODO: cd
-// cd(const char dir_dst[]);
-
-
-// Funciones de bajo nivel
-    
-private:
-    File file_; // fichero con los sectores del directorio
-};
-
-template <typename S> 
-Directory<S>::Directory(Volume& volume, uint32_t cluster0)
-    : file_{volume, cluster0}
-{ }
-
+//namespace impl_of{
+//enum class Directory_type : uint8_t{
+//    read_only = 0x01,
+//    hidden    = 0x02,
+//    system    = 0x04,
+//    volume_id = 0x08,
+//    directory = 0x10,
+//    archive   = 0x20,
+//    long_name = read_only | hidden | system | volume_id
+//};
+//}// impl_of
+// 
+//template <typename Sector_driver0> 
+//class Directory{
+//public:
+//// Types
+//    using Volume	= atd::FAT32::Volume<Sector_driver0>;
+//    using File_sectors          = atd::FAT32::File_sectors<Sector_driver0, 1>;
+//    using Sector_driver = Sector_driver0;
+//    using Sector	= typename Volume::Sector;
+//    using Sector_span   = typename Volume::Sector_span;
+//    using Type          = impl_of::Directory_type;
+//
+//// Constructors
+//    Directory(Volume& volume, uint32_t cluster0);
+//
+//// ls: iteramos por todos los ficheros/directorios del Directory
+//    bool ls_begin();
+//    bool ls_next();
+//
+//// TODO: cd
+//// cd(const char dir_dst[]);
+//
+//
+//// Funciones de bajo nivel
+//    
+//private:
+//    File_sectors file_; // fichero con los sectores del directorio
+//};
+//
 //template <typename S> 
-//bool Directory<S>::ls_begin()
+//Directory<S>::Directory(Volume& volume)
+//    : file_{volume}
+//{ }
+//
+//template <typename S> 
+//bool Directory<S>::ls_begin(uint32_t cluster0)
 //{
-//    Sector_driver::
+//    if (file_.end_of_file())
+//	return false;
+//
+//    file_.first_sector(cluster0);
+//
+//    return true;
 //}
-
-
+//
+//
+//template <typename S> 
+//bool Directory<S>::ls_next()
+//{
+//    if (file_.end_of_file() or file_.error())
+//	return false;
+//
+//    file_.next_sector();
+//    file_.sector_number();
+//}
 
 }// namespace FAT32
 

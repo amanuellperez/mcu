@@ -17,6 +17,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#include <ctype.h> // isprint
 
 #include "prj_dev.h"
 #include "prj_strings.h"
@@ -343,16 +344,61 @@ void print_directory(std::ostream& out, const atd::FAT32::Directory_entry& dir)
 
 void Main::print_sector_as_directory_array()
 {
-    uart << "FAT32: directory\n";
+    using Volume = atd::FAT32::Volume<Sector_driver>;
 
+    auto nsector = fat_volume_first_sector(1); // de momento solo leo
+					       // particion 1
+    if (nsector == 0){
+	uart << "Error: can't read first sector of FAT volume\n";
+	return;
+    }
+
+
+    Volume vol{nsector};
+
+    if (vol.error()){
+	uart << "ERROR\n";
+	return;
+    }
+
+
+    using File = atd::FAT32::File<Sector_driver, 4>;
+    
+    File f{vol, 2}; // El root directory es el cluster 2
+		    // (TODO) ¿dónde lo pone???
+    
+    uint32_t counter =  0; // limitamos el número de entradas
+    for (auto p = f.begin(); 
+	 p != f.end() and counter < 32 * sizeof(uint32_t); // 30 entradas máximo
+	 ++p, ++counter){
+	
+	if ((counter % 32) == 0 and counter != 0)
+	    uart << '\n';
+
+	atd::print_int_as_hex(uart, *p, false);
+	uart << ' ';
+    }
+    uart << '\n';
     print_line(uart);
 
-    uart << "Sector number: ";
-    uint32_t nsector{};
-    uart >> nsector;
+    counter = 0;
+    for (auto p = f.begin(); 
+	 p != f.end() and counter < 32 * sizeof(uint32_t); // 30 entradas máximo
+	 ++p, ++counter){
+	
+	if ((counter % 32) == 0 and counter != 0)
+	    uart << '\n';
+
+	if (isprint(*p))
+	    uart << *p;
+	else
+	    uart << '.';
+    }
+    uart << '\n';
+    print_line(uart);
 
     Sector sector{};
-    Sector_driver::read(nsector, sector);
+    Sector_driver::read(vol.data_area.first_sector(), sector);
 
     using Dir = atd::FAT32::Directory_entry;
 
@@ -400,7 +446,6 @@ void Main::print_FAT32_entry()
     static constexpr uint8_t file_size = 4;
     std::array<uint32_t, file_size> file{};
 
-    //auto res = vol.fat_area.read_next<Sector_driver, file_size>(cluster, file);
     auto res = vol.fat_area.read_next(cluster, file);
 
     uart << (uint16_t) res.nread << " clusters readed: ";
@@ -425,8 +470,8 @@ void Main::print_FAT32_entry()
 void Main::print_file_sectors()
 {
     using Volume = atd::FAT32::Volume<Sector_driver>;
-    using File   = atd::FAT32::File<Sector_driver, 4>;
-//    using Sector = File::Sector;
+    using File_sectors   = atd::FAT32::File_sectors<Sector_driver, 4>;
+//    using Sector = File_sectors::Sector;
 
 
     auto nsector = fat_volume_first_sector(1); // de momento solo leo
@@ -452,7 +497,7 @@ void Main::print_file_sectors()
 	return;
     }
 
-    File file(vol, cluster0);    // file.begin(cluster0);
+    File_sectors file(vol, cluster0);    // file.begin(cluster0);
    
     if(file.error()){
 	uart << "Error creating file\n";
@@ -461,7 +506,10 @@ void Main::print_file_sectors()
 
     for (uint8_t i = 0; i < 10; ++i){
 	uart << "Cluster " << (uint16_t) i << ": " 
-			   << file.sector_number() << '\n';
+			   << file.global_sector_number() 
+			   << "; first sector (global to disk): " 
+			   << file.global_sector_number() 
+			   << '\n';
 	//file.next_sector();
 	file.next_cluster();
 	if (file.end_of_file()){
@@ -471,8 +519,8 @@ void Main::print_file_sectors()
 	    uart << "Error\n";
 	    return;
 	}
-
     }
+
 
 }
 
