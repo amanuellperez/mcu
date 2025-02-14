@@ -362,7 +362,7 @@ void Main::print_sector_as_directory_array()
     }
 
 
-    using File = atd::FAT32::File<Sector_driver, 4>;
+    using File = atd::FAT32::File<Sector_driver, uint8_t>;
     
     File f{vol, 2}; // El root directory es el cluster 2
 		    // (TODO) ¿dónde lo pone???
@@ -396,6 +396,7 @@ void Main::print_sector_as_directory_array()
     }
     uart << '\n';
     print_line(uart);
+
 
     Sector sector{};
     Sector_driver::read(vol.data_area.first_sector(), sector);
@@ -470,7 +471,7 @@ void Main::print_FAT32_entry()
 void Main::print_file_sectors()
 {
     using Volume = atd::FAT32::Volume<Sector_driver>;
-    using File_sectors   = atd::FAT32::File_sectors<Sector_driver, 4>;
+    using File_sectors   = atd::FAT32::File_sectors<Sector_driver>;
 //    using Sector = File_sectors::Sector;
 
 
