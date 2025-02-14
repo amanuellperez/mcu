@@ -918,6 +918,8 @@ public:
     File_sectors(Volume& volume); // no olvidar llamar a first_sector!!!
     File_sectors(Volume& volume, uint32_t cluster0);
 
+    // Reiniciamos el File_sectors, haciendo que apunte al primer sector del
+    // cluster0
     void first_sector(uint32_t cluster0);
 
 // Operations
@@ -1043,26 +1045,41 @@ namespace impl_of{
 template <typename Sector_driver0, Type::Integer Int> 
 struct const_File_iterator;
 
-struct const_File_iterator_end{};
+struct const_iterator_end{};
 
 }// impl_of
  
 // Se trata de una vista de File_sectors que permite concebirlo como un
 // conjunto continuo de bytes.
 template <typename Sector_driver0
-	, Type::Integer Int	    // es un fichero de Ints
+	, Type::Integer Int0 = uint8_t // es un fichero de Ints
 	> 
 class File{
 public:
 // Types
+    using Int    = Int0;
     using File_sectors = atd::FAT32::File_sectors<Sector_driver0>;
     using Volume = typename File_sectors::Volume;
+    using State  = typename File_sectors::State;
 
     using const_iterator     = impl_of::const_File_iterator<Sector_driver0, Int>;
-    using const_iterator_end = impl_of::const_File_iterator_end;
+    using const_iterator_end = impl_of::const_iterator_end;
+
+    friend const_iterator;
 
 // Constructors
     File(Volume& volume, uint32_t cluster0);
+
+    
+// Iteramos usando esta clase
+    // Reinicia el fichero, haciendo que apunte al principio de nuevo
+    void reset();
+
+    // Avanza nInts. Por ejemplo, si Int = uint8_t y nInts = 32, avanza 32
+    // bytes. Pero si Int = uin32_t y nInts = 32, avanza 32 uint32_t.
+    void next(uint8_t nInts = 1);
+
+    uint8_t read();
 
 // Acceso aleatorio
 // uint8_t operator[](size_type i); // puede ser costoso en tiempo
@@ -1074,49 +1091,94 @@ public:
     const_iterator begin();
     const_iterator_end end() const;
 
+// State
+    bool ok() const {return sectors_.ok(); }
+    bool error() const {return sectors_.error(); }
+    bool end_of_file() const {return sectors_.end_of_file();}
+
+// Info
+    Volume& volume() {return sectors_.volume;}
+
+
 private:
-   File_sectors sectors_; 
-   uint32_t cluster0_; // para poder llamar a begin sin pasarle cluster0
+    uint32_t cluster0_; // primer cluster del fichero
+			
+    File_sectors sectors_; 
+    uint16_t i; // byte actual al que apuntamos dentro del sector
+    // assert(volume.bytes_per_sector() < 2^sizeof(uint16_t));
+    
+
+// Funciones de implementacion 
+    static uint16_t next_byte(File_sectors& sector, uint16_t i);
 };
 
 
 template <typename SD, Type::Integer I> 
 inline File<SD, I>::File(Volume& volume, uint32_t cluster0)
-    : sectors_(volume, cluster0), cluster0_{cluster0}
+    : cluster0_{cluster0}, sectors_(volume, cluster0)
 {}
+
+template <typename SD, Type::Integer I> 
+inline void File<SD, I>::reset()
+{
+    sectors_.first_sector(cluster0_);
+    i = 0;
+}
+
+// (DUDA) modificar next_byte directamente para que avance directamente
+// sizeof(Int)? La implementación que ahora suministro es sencilla de
+// entender y mantener.
+template <typename SD, Type::Integer I> 
+inline void File<SD, I>::next(uint8_t nInts)
+{ 
+    for (; nInts > 0; --nInts){
+	for (uint8_t k = 0; k < sizeof(Int); ++k)
+	    i = next_byte(sectors_, i); 
+    }
+}
+
+template <typename SD, Type::Integer I> 
+inline uint8_t File<SD, I>::read()
+{ 
+    // if (sector.end_of_file() or sector.error()) return 0xEA;
+    return sectors_.template read<Int>(i); 
+}
+
+
+template <typename SD, Type::Integer I> 
+uint16_t File<SD, I>::next_byte(File_sectors& sector, uint16_t i)
+{
+    if (sector.end_of_file() or sector.error())
+	return i;
+
+    ++i;
+    if (i < sector.volume.bytes_per_sector())
+	return i;
+
+    i = 0;
+    sector.next_sector(); // puede devolver error o end_of_file en state
+    
+    return i;
+}
 
 namespace impl_of{
 
-// CUIDADO: observar cómo const_File_iterator modifica el estado de File_sectors que
-// está almacenado en File. Si se intentan usar 2 iteradores a la vez o
-// iterar y acceder aleatoriamente a la vez dará error. Pero hay una
-// disciplina impuesta de que iteras de begin... end, o usas operator[] pero
-// no mezclas, con lo que no debería de generar nunca problema. 
-// (¿por qué no evitar esto? Porque no se cómo evitarlo y hacer un
-// const_File_iterator de tamaño mínimo. Si guardo File_sectors dentro de
-// const_File_iterator el sizeof(const_File_iterator) no será pequeño)
 template <typename Sector_driver0, Type::Integer Int> 
 struct const_File_iterator{
 // Data
     using File_sectors = atd::FAT32::File_sectors<Sector_driver0>;
+    using File	       = atd::FAT32::File<Sector_driver0>;
 
-    File_sectors& sector;
-    uint32_t i; // byte actual al que apuntamo del sector
+    File_sectors sector;
+    uint16_t i; // byte actual al que apuntamos dentro del sector
 
-    const_File_iterator(File_sectors& s, uint32_t cluster0) 
+    const_File_iterator(const File_sectors& s, uint32_t cluster0) 
 	: sector{s}, i{0} { sector.first_sector(cluster0); }
 
     const_File_iterator& operator++()
     {
-	if (sector.end_of_file() or sector.error())
-	    return *this;
-
-	++i;
-	if (i < sector.volume.bytes_per_sector())
-	    return *this;
-
-	i = 0;
-	sector.next_sector(); // puede devolver error o end_of_file en state
+	for (uint8_t k = 0; k < sizeof(Int); ++k)
+	    i = File::next_byte(sector, i); 
 
 	return *this;
     }
@@ -1139,11 +1201,11 @@ struct const_File_iterator{
     //pointer operator->() { return &(**this); }
 
     friend
-    bool operator==(const const_File_iterator& a, const const_File_iterator_end&)
+    bool operator==(const const_File_iterator& a, const const_iterator_end&)
     { return a.i == 0 and a.sector.end_of_file(); }
 
     friend
-    bool operator!=(const const_File_iterator& a, const const_File_iterator_end& b)
+    bool operator!=(const const_File_iterator& a, const const_iterator_end& b)
     { return !(a == b); }
 };
 
@@ -1164,72 +1226,87 @@ inline File<SD, I>::const_iterator_end File<SD, I>::end() const
 /***************************************************************************
  *				    DIRECTORY
  ***************************************************************************/
-//namespace impl_of{
-//enum class Directory_type : uint8_t{
-//    read_only = 0x01,
-//    hidden    = 0x02,
-//    system    = 0x04,
-//    volume_id = 0x08,
-//    directory = 0x10,
-//    archive   = 0x20,
-//    long_name = read_only | hidden | system | volume_id
-//};
-//}// impl_of
-// 
-//template <typename Sector_driver0> 
-//class Directory{
-//public:
-//// Types
-//    using Volume	= atd::FAT32::Volume<Sector_driver0>;
-//    using File_sectors          = atd::FAT32::File_sectors<Sector_driver0, 1>;
-//    using Sector_driver = Sector_driver0;
-//    using Sector	= typename Volume::Sector;
-//    using Sector_span   = typename Volume::Sector_span;
-//    using Type          = impl_of::Directory_type;
-//
-//// Constructors
-//    Directory(Volume& volume, uint32_t cluster0);
-//
-//// ls: iteramos por todos los ficheros/directorios del Directory
-//    bool ls_begin();
-//    bool ls_next();
-//
-//// TODO: cd
-//// cd(const char dir_dst[]);
-//
-//
-//// Funciones de bajo nivel
-//    
-//private:
-//    File_sectors file_; // fichero con los sectores del directorio
-//};
-//
-//template <typename S> 
-//Directory<S>::Directory(Volume& volume)
-//    : file_{volume}
-//{ }
-//
-//template <typename S> 
-//bool Directory<S>::ls_begin(uint32_t cluster0)
-//{
-//    if (file_.end_of_file())
-//	return false;
-//
-//    file_.first_sector(cluster0);
-//
-//    return true;
-//}
-//
-//
-//template <typename S> 
-//bool Directory<S>::ls_next()
-//{
-//    if (file_.end_of_file() or file_.error())
-//	return false;
-//
-//    file_.next_sector();
-//    file_.sector_number();
-//}
+namespace impl_of{
+enum class Directory_type : uint8_t{
+    read_only = 0x01,
+    hidden    = 0x02,
+    system    = 0x04,
+    volume_id = 0x08,
+    directory = 0x10,
+    archive   = 0x20,
+    long_name = read_only | hidden | system | volume_id
+};
+
+struct Directory_entry{
+    static constexpr uint8_t size = 32;
+
+    std::array<uint8_t, size> data;
+};
+
+
+
+template <typename Sector_driver0>
+struct const_Entry_iterator;
+
+}// impl_of
+ 
+template <typename Sector_driver0> 
+class Directory_of_entries{
+public:
+// Types
+    using Volume    = atd::FAT32::Volume<Sector_driver0>;
+    using File	    = atd::FAT32::File<Sector_driver0>;
+    using Type	    = impl_of::Directory_type;
+    using Entry	    = impl_of::Directory_entry;
+
+
+// Constructors
+    // Enlaza con el directorio que se encuentra en el cluster0
+    Directory_of_entries(Volume& volume, uint32_t cluster0);
+
+// Operaciones
+    void first_entry();
+    void next_entry();
+    
+    // Lee la entry actual almacenándola en entry
+    void read(Entry& entry);
+
+// State
+    bool ok() const {return dir_.ok(); }
+    bool error() const {return dir_.error(); }
+    bool end_of_file() const {return dir_.end_of_file();}
+
+private:
+    File dir_; // fichero con los sectores del directorio
+    
+    static constexpr uint8_t sizeof_entry = Entry::size;
+};
+
+template <typename S> 
+Directory_of_entries<S>::Directory_of_entries(Volume& volume, uint32_t cluster0)
+    : dir_{volume, cluster0}
+{ }
+
+template <typename S> 
+inline void Directory_of_entries<S>::first_entry()
+{ dir_.reset(); }
+
+template <typename S> 
+inline void Directory_of_entries<S>::next_entry()
+{ dir_.next(sizeof_entry); }
+
+template <typename S> 
+inline void Directory_of_entries<S>::read(Entry& entry)
+{
+    if (dir_.end_of_file() or dir_.error())
+	return;
+
+// (TODO) dir_.read(entry.data); // lee los 32 bytes. Es un std::span 
+    for (uint8_t i = 0; i < sizeof_entry; ++i){
+	entry.data[i] = dir_.read();
+	dir_.next();
+    }
+}
 
 }// namespace FAT32
 
