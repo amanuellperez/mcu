@@ -28,6 +28,13 @@
 
 #include <atd_ostream.h>
 
+void print(std::ostream& out, std::span<uint8_t> str)
+{
+    for (auto x: str)
+	out << x;
+}
+
+
 void Main::print_sector()
 {
     uart << "Sector number to print: ";
@@ -408,9 +415,42 @@ void Main::print_sector_as_directory_array()
 	Entry entry;
 	dir.read(entry);
 	
+	std::array<uint8_t, 30> name;
+	if (entry.type() == Entry::Type::short_entry){
+	    entry.copy_short_name(name);
+
+	    uart << "SHORT ENTRY"
+		<< "\nname: [";
+	    print(uart, name);
+
+	    uart << "]; file cluster: " << entry.file_cluster()
+		<< "; file size: " << entry.file_size()
+		<< "\ncreation time: " 
+		<< entry.creation_time_seconds() << "."
+		<< entry.creation_time_tenth_of_seconds() 
+		<< "; creation date: " << entry.creation_date() 
+		<< "\nlast access date: " << entry.last_access_date()
+		<< "; last modification: " 
+		<< entry.last_modification_date() << "/"
+		<< entry.last_modification_time() 
+		<< '\n';
+
+	} else{
+	    entry.copy_long_name(name);
+
+	    uart << "LONG ENTRY "
+		<< "\nname: [";
+	    print(uart, name);
+	    uart << "]; check sum: " << entry.check_sum() 
+		<< '\n';
+	}
+	uart << '\n';
+
 	atd::xxd_print(uart, entry.data);
 	uart << '\n';
-	dir.next_entry();
+
+//	dir.next_entry();
+	
     }
     uart << '\n';
     print_line(uart);

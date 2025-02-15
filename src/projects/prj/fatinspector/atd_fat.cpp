@@ -82,6 +82,55 @@ void Data_area::init(const Boot_sector& bs)
     data_area_sectors_per_cluster_ = bs.data_area_sectors_per_cluster();
 }
 
+
+
+
+/***************************************************************************
+ *			    DIRECTORY ENTRY
+ ***************************************************************************/
+// Section 6.1, FAT specification
+Directory_entry::Type Directory_entry::type() const
+{
+    if (data[0] == 0x00) return Type::free_and_no_more_entries;
+    if (data[0] == 0xE5) return Type::free;
+
+    if (attribute_type() == Attribute_type::long_name) 
+	return Type::long_entry;
+
+    return Type::short_entry;
+}
+
+// (TODO) ¿no sería mejor pasar std::span<uint8_t, 11>???
+uint8_t Directory_entry::copy_short_name(std::span<uint8_t> str)
+{
+    if (str.size() < 11) return 0;
+
+    for (uint8_t i = 0; i < 11; ++i)
+	str[i] = data[i];
+
+    return 11;
+}
+
+uint8_t Directory_entry::copy_long_name(std::span<uint8_t> str)
+{
+    if (str.size() < 10) return 0;
+
+    for (uint8_t i = 0; i < 10; ++i)
+	str[i] = data[1 + i];
+
+    if (str.size() < 22) return 10;
+
+    for (uint8_t i = 0; i < 12; ++i)
+	str[10 + i] = data[14 + i];
+
+    if (str.size() < 26) return 22;
+
+    for (uint8_t i = 0; i < 4; ++i)
+	str[22 + i] = data[28 + i];
+
+    return 30;
+}
+
 } // impl_of
 } // namespace FAT32
 } // namespace atd

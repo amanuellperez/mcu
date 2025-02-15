@@ -1227,7 +1227,7 @@ inline File<SD, I>::const_iterator_end File<SD, I>::end() const
  *				    DIRECTORY
  ***************************************************************************/
 namespace impl_of{
-enum class Directory_type : uint8_t{
+enum class Entry_attribute_type: uint8_t{
     read_only = 0x01,
     hidden    = 0x02,
     system    = 0x04,
@@ -1237,11 +1237,73 @@ enum class Directory_type : uint8_t{
     long_name = read_only | hidden | system | volume_id
 };
 
+enum class Entry_type : uint8_t{
+    free,			
+    free_and_no_more_entries,
+    short_entry,    
+    long_entry
+};
+
+
 struct Directory_entry{
+// Types
+    using Attribute_type = Entry_attribute_type;
+    using Type = Entry_type;
+
+// Cfg
     static constexpr uint8_t size = 32;
 
+// Data
     std::array<uint8_t, size> data;
+
+// Tipo de entrada
+    Type type() const;
+
+// short entry (section 6, FAT specification)
+    // devuelve el número de caracteres copiados
+    uint8_t copy_short_name(std::span<uint8_t> str);
+
+    Attribute_type attribute_type() const { return Attribute_type{data[11]}; }
+    // data[12] == 0
+    
+    uint8_t creation_time_tenth_of_seconds() const {return data[12];}
+    uint16_t creation_time_seconds() const 
+	    {return atd::concat_bytes<uint16_t>(data[15], data[14]);}
+
+    uint16_t creation_date() const
+	    {return atd::concat_bytes<uint16_t>(data[17], data[16]);}
+
+    uint16_t last_access_date() const
+	    {return atd::concat_bytes<uint16_t>(data[19], data[18]);}
+
+    // devuelve el cluster del file asociado con esta entrada
+    uint32_t file_cluster() const
+    {return atd::concat_bytes<uint32_t>(data[21], data[20], data[27], data[26]);}
+
+    uint16_t last_modification_time() const
+	    {return atd::concat_bytes<uint16_t>(data[23], data[22]);}
+
+    uint16_t last_modification_date() const
+	    {return atd::concat_bytes<uint16_t>(data[25], data[24]);}
+
+    uint32_t file_size() const
+    {return atd::concat_bytes<uint32_t>(data[31], data[30], data[29], data[28]);}
+
+
+// long name entry (section 7, FAT specification)
+    uint8_t extended_order() const {return data[0];}
+    // data[1..11) = long name
+    // data[11] = attribute. En este caso ATTR_LONG_NAME
+    // data[12] == 0
+    uint8_t check_sum() const { return data[13]; }
+    // data[14..26) = long name
+    // data[26] == 0 and data[27] == 0
+    // data[28..32) = long name
+    // devuelve el número de caracteres copiados
+    uint8_t copy_long_name(std::span<uint8_t> str);
+
 };
+
 
 
 
@@ -1256,7 +1318,6 @@ public:
 // Types
     using Volume    = atd::FAT32::Volume<Sector_driver0>;
     using File	    = atd::FAT32::File<Sector_driver0>;
-    using Type	    = impl_of::Directory_type;
     using Entry	    = impl_of::Directory_entry;
 
 
@@ -1266,9 +1327,10 @@ public:
 
 // Operaciones
     void first_entry();
-    void next_entry();
+//    void next_entry();
     
     // Lee la entry actual almacenándola en entry
+    // Consume esa entry, esto es, pasa a apuntar a la siguiente entry.
     void read(Entry& entry);
 
 // State
@@ -1291,10 +1353,10 @@ template <typename S>
 inline void Directory_of_entries<S>::first_entry()
 { dir_.reset(); }
 
-template <typename S> 
-inline void Directory_of_entries<S>::next_entry()
-{ dir_.next(sizeof_entry); }
-
+//template <typename S> 
+//inline void Directory_of_entries<S>::next_entry()
+//{ dir_.next(sizeof_entry); }
+//
 template <typename S> 
 inline void Directory_of_entries<S>::read(Entry& entry)
 {
