@@ -91,10 +91,10 @@ void Data_area::init(const Boot_sector& bs)
 // Section 6.1, FAT specification
 Directory_entry::Type Directory_entry::type() const
 {
-    if (data[0] == 0x00) return Type::free_and_no_more_entries;
+    if (data[0] == 0x00) return Type::last_entry;
     if (data[0] == 0xE5) return Type::free;
 
-    if (attribute_type() == Attribute_type::long_name) 
+    if (attribute() == Attribute::long_name) 
 	return Type::long_entry;
 
     return Type::short_entry;
@@ -111,24 +111,41 @@ uint8_t Directory_entry::copy_short_name(std::span<uint8_t> str)
     return 11;
 }
 
+// (TODO) Los caracteres se almacenan en 2 bytes, de momento solo me quedo con
+// el primer byte por tratar con caracteres de 1 byte. Para 2 bytes esto no
+// funciona.
 uint8_t Directory_entry::copy_long_name(std::span<uint8_t> str)
 {
-    if (str.size() < 10) return 0;
+    if (str.size() < 5) return 0;
 
-    for (uint8_t i = 0; i < 10; ++i)
-	str[i] = data[1 + i];
+    // Se almacenan en 2 bytes, siendo el más significativo el correspondiente
+    // al ASCII (ref???)
+    for (uint8_t i = 0; i < 10 / 2; ++i){
+	str[i] = data[1 + 2*i];
 
-    if (str.size() < 22) return 10;
+	if (data[1 + 2*i] == 0x00) 
+	    return i;
+    }
 
-    for (uint8_t i = 0; i < 12; ++i)
-	str[10 + i] = data[14 + i];
+    if (str.size() < 22 / 2) return 5;
 
-    if (str.size() < 26) return 22;
+    for (uint8_t i = 0; i < 12 / 2; ++i){
+	str[5 + i] = data[14 + 2*i];
 
-    for (uint8_t i = 0; i < 4; ++i)
-	str[22 + i] = data[28 + i];
+	if (data[14 + 2*i] == 0x00) 
+	    return 5 + i;
+    }
 
-    return 30;
+    if (str.size() < 26 / 2) return 12;
+
+    for (uint8_t i = 0; i < 4 / 2; ++i){
+	str[11 + i] = data[28 + 2*i];
+
+	if (data[28 + 2*i] == 0x00) 
+	    return 11 + i;
+    }
+
+    return 13; 
 }
 
 } // impl_of

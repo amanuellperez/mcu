@@ -267,7 +267,8 @@ void Main::print_FS_info()
 
 }
 
-void print_long_name_entry(std::ostream& out, const atd::FAT32::Long_file_name_entry& fn)
+void print_long_name_entry(std::ostream& out, 
+				const atd::FAT32::Long_file_name_entry& fn)
 {
     for (uint8_t i = 0; i < 10 / 2; ++i){
 	if (fn.name1[i] == 0x0000) return;
@@ -349,6 +350,23 @@ void print_directory(std::ostream& out, const atd::FAT32::Directory_entry& dir)
     out << '\n';
 }
 
+void print(std::ostream& out, 
+    atd::FAT32::Directory_of_entries<Sector_driver>::Attribute att)
+{
+    using Att = atd::FAT32::Directory_of_entries<Sector_driver>::Attribute;
+
+    switch(att){
+	break; case Att::read_only  : out << "read_only";
+	break; case Att::hidden	    : out << "hidden";
+	break; case Att::system	    : out << "system";
+	break; case Att::volume_id  : out << "volume_id";
+	break; case Att::directory  : out << "directory";
+	break; case Att::archive    : out << "archive";
+	break; case Att::long_name  : out << "long_name";
+    }
+
+}
+
 void Main::print_sector_as_directory_array()
 {
     using Volume = atd::FAT32::Volume<Sector_driver>;
@@ -369,41 +387,41 @@ void Main::print_sector_as_directory_array()
     }
 
 
-    using File = atd::FAT32::File<Sector_driver, uint8_t>;
+//    using File = atd::FAT32::File<Sector_driver, uint8_t>;
     
 // ----------------
-    File f{vol, 2}; // El root directory es el cluster 2
-		    // (TODO) ¿dónde lo pone???
-    
-    uint32_t counter =  0; // limitamos el número de entradas
-    for (auto p = f.begin(); 
-	 p != f.end() and counter < 32 * sizeof(uint32_t); // 30 entradas máximo
-	 ++p, ++counter){
-	
-	if ((counter % 32) == 0 and counter != 0)
-	    uart << '\n';
-
-	atd::print_int_as_hex(uart, *p, false);
-	uart << ' ';
-    }
-    uart << '\n';
-    print_line(uart);
-
-    counter = 0;
-    for (auto p = f.begin(); 
-	 p != f.end() and counter < 32 * sizeof(uint32_t); // 30 entradas máximo
-	 ++p, ++counter){
-	
-	if ((counter % 32) == 0 and counter != 0)
-	    uart << '\n';
-
-	if (isprint(*p))
-	    uart << *p;
-	else
-	    uart << '.';
-    }
-    uart << '\n';
-    print_line(uart);
+//    File f{vol, 2}; // El root directory es el cluster 2
+//		    // (TODO) ¿dónde lo pone???
+//    
+//    uint32_t counter =  0; // limitamos el número de entradas
+//    for (auto p = f.begin(); 
+//	 p != f.end() and counter < 32 * sizeof(uint32_t); // 30 entradas máximo
+//	 ++p, ++counter){
+//	
+//	if ((counter % 32) == 0 and counter != 0)
+//	    uart << '\n';
+//
+//	atd::print_int_as_hex(uart, *p, false);
+//	uart << ' ';
+//    }
+//    uart << '\n';
+//    print_line(uart);
+//
+//    counter = 0;
+//    for (auto p = f.begin(); 
+//	 p != f.end() and counter < 32 * sizeof(uint32_t); // 30 entradas máximo
+//	 ++p, ++counter){
+//	
+//	if ((counter % 32) == 0 and counter != 0)
+//	    uart << '\n';
+//
+//	if (isprint(*p))
+//	    uart << *p;
+//	else
+//	    uart << '.';
+//    }
+//    uart << '\n';
+//    print_line(uart);
 // ----------------
     {
     using Entry_dir = atd::FAT32::Directory_of_entries<Sector_driver>;
@@ -411,45 +429,51 @@ void Main::print_sector_as_directory_array()
 
     Entry_dir dir{vol, 2};
     dir.first_entry();
-    for (uint8_t i = 0; i < 4; ++i){
+    for (uint8_t i = 0; i < 25; ++i){
 	Entry entry;
 	dir.read(entry);
 	
 	std::array<uint8_t, 30> name;
 	if (entry.type() == Entry::Type::short_entry){
-	    entry.copy_short_name(name);
+	    auto len = entry.copy_short_name(name);
 
-	    uart << "SHORT ENTRY"
-		<< "\nname: [";
-	    print(uart, name);
+	    uart << "SHORT ENTRY: [";
+	    print(uart, std::span<uint8_t>{name.data(), len});
 
-	    uart << "]; file cluster: " << entry.file_cluster()
+	    uart << "]; ";
+	    print(uart, entry.attribute());
+	    uart << "; file cluster: " << entry.file_cluster()
 		<< "; file size: " << entry.file_size()
-		<< "\ncreation time: " 
+		<< "\n\tcreation time: " 
 		<< entry.creation_time_seconds() << "."
-		<< entry.creation_time_tenth_of_seconds() 
+		<< (uint16_t) entry.creation_time_tenth_of_seconds() 
 		<< "; creation date: " << entry.creation_date() 
-		<< "\nlast access date: " << entry.last_access_date()
+		<< "\n\tlast access date: " << entry.last_access_date()
 		<< "; last modification: " 
 		<< entry.last_modification_date() << "/"
 		<< entry.last_modification_time() 
 		<< '\n';
 
-	} else{
-	    entry.copy_long_name(name);
+	} else if (entry.type() == Entry::Type::long_entry){
+	    auto len = entry.copy_long_name(name);
 
-	    uart << "LONG ENTRY "
-		<< "\nname: [";
-	    print(uart, name);
-	    uart << "]; check sum: " << entry.check_sum() 
-		<< '\n';
+	    uart << "LONG ENTRY: [";
+	    print(uart, std::span<uint8_t>{name.data(), len});
+	    uart << "]; ";
+	    print(uart, entry.attribute());
+	    uart << "; check sum: ";
+	    atd::print_int_as_hex(uart,  entry.check_sum());
+	    uart << '\n';
+	} else if (entry.type() == Entry::Type::free){
+	    uart << "FREE ENTRY\n";
+	} else if (entry.type() == Entry::Type::last_entry){
+	    uart << "LAST ENTRY\n";
 	}
 	uart << '\n';
 
-	atd::xxd_print(uart, entry.data);
-	uart << '\n';
+//	atd::xxd_print(uart, entry.data);
+//	uart << '\n';
 
-//	dir.next_entry();
 	
     }
     uart << '\n';

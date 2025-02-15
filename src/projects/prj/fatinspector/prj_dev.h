@@ -192,8 +192,10 @@ public:
     Int read(const Address& nsector, const size_type& pos)
     {
 	if (nsector_ != nsector){
-	    if (read (nsector, sector_))
+	    if (read (nsector, sector_)){
 		state_ = State::ok;
+		nsector_ = nsector;
+	    }
 	    else
 		state_ = State::read_error;
 	}
@@ -222,6 +224,7 @@ public:
 // Lo usa MBR. Reescribir MBR y hacer private esta función
     static bool read(const SDCard::Address& add, Sector_span sector)
     {
+	atd::ctrace<100>() << "SDCard::read(" << add << ")\n";
 	auto r = SDCard::read(add, sector);
 	return r.ok();
     }

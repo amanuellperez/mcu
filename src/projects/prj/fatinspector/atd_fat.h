@@ -708,16 +708,17 @@ public:
 
 
 // Lectura/escritura de sectores
-    // nsector es coordenada local, 
-    // el número de sector referido al principio del volumen
+    // Lee el Int (byte) que está en la posición `pos` del sector nsector.
+    // Siendo nsector coordenada local, el número de sector referido 
+    // al principio del volumen.
     template <Type::Integer Int = uint8_t>
-    Int read(const uint32_t& nsector, uint8_t pos)
+    Int read(const uint32_t& nsector, uint16_t pos)
     { return driver_.template read<Int>(sector0_ + nsector, pos); }
     
     // nsector es coordenada global, 
     // es el número de sector referido al  principio del disco
     template <Type::Integer Int = uint8_t>
-    Int read_global(const uint32_t& nsector, uint8_t pos)
+    Int read_global(const uint32_t& nsector, uint16_t pos)
     { return driver_.template read<Int>(nsector, pos); }
 
 // Funciones globales (nsectors son relativos a todo el disco duro)
@@ -1239,7 +1240,7 @@ enum class Entry_attribute_type: uint8_t{
 
 enum class Entry_type : uint8_t{
     free,			
-    free_and_no_more_entries,
+    last_entry, // == 0x00, no hay más entries a partir de esta
     short_entry,    
     long_entry
 };
@@ -1247,7 +1248,7 @@ enum class Entry_type : uint8_t{
 
 struct Directory_entry{
 // Types
-    using Attribute_type = Entry_attribute_type;
+    using Attribute = Entry_attribute_type;
     using Type = Entry_type;
 
 // Cfg
@@ -1263,7 +1264,7 @@ struct Directory_entry{
     // devuelve el número de caracteres copiados
     uint8_t copy_short_name(std::span<uint8_t> str);
 
-    Attribute_type attribute_type() const { return Attribute_type{data[11]}; }
+    Attribute attribute() const { return Attribute{data[11]}; }
     // data[12] == 0
     
     uint8_t creation_time_tenth_of_seconds() const {return data[12];}
@@ -1319,6 +1320,7 @@ public:
     using Volume    = atd::FAT32::Volume<Sector_driver0>;
     using File	    = atd::FAT32::File<Sector_driver0>;
     using Entry	    = impl_of::Directory_entry;
+    using Attribute = impl_of::Directory_entry::Attribute;
 
 
 // Constructors
