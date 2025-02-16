@@ -30,6 +30,26 @@
  *	http://elm-chan.org/docs/fat_e.html
  *	https://wiki.osdev.org/FAT (referencia osdev)
  *
+ * COMENTARIOS
+ *	Duda de diseño:
+ *	¿Consumir o no consumir los elementos leídos?
+ *
+ *	(1) Iteradores:
+ *	    Los iteradores no consumen cuando leen:
+ *	    p = begin();
+ *	    std::cout << *p << *p;  // imprime dos veces el mismo valor
+ *	    ++p;		    // consume el elemento pasando al siguiente
+ *	    std::cout << *p;	    // imprime el siguiente elemento
+ *
+ *	(2) Flujos:
+ *	    read(x); // lee x y consume ese elemento pasando al siguiente!!!
+ *
+ *	    read(x) es el equivalente a *p con la diferencia de que read
+ *	    consume mientras que *p no consume el elemento actual.
+ *
+ *	Como no tenía claro esto cuando empecé a escribir esta biblioteca está
+ *	todo mezclado. (TODO: unificar criterio).
+ *
  * HISTORIA
  *    Manuel Perez
  *    12/01/2025 Experimentando
@@ -44,7 +64,15 @@
 #include <atd_cmath.h>	// div
 
 namespace atd{
-    
+ 
+// Lock/unlock class 
+template <typename T>
+struct Lock{
+    T& obj;
+    Lock(T& obj0) : obj{obj0} { obj.lock();}
+    ~Lock() { obj.unlock();}
+};
+
 /***************************************************************************
  *				MBR
  ***************************************************************************/
@@ -703,9 +731,11 @@ public:
     bool error() const { return !ok(); }
 
 // Reserved area
-    uint32_t volume_first_sector() const {return sector0_;}
+    // Primer sector del volumen
+    uint32_t first_sector() const {return sector0_;}
+
     uint32_t bytes_per_sector() const {return sector_size_;}
-    uint32_t root_directory_first_cluster() const;
+    uint32_t root_directory_first_cluster();
 
 // Lectura/escritura de sectores
     // Lee el Int (byte) que está en la posición `pos` del sector nsector.
@@ -721,18 +751,6 @@ public:
     Int read_global(const uint32_t& nsector, uint16_t pos)
     { return driver_.template read<Int>(nsector, pos); }
 
-// Funciones globales (nsectors son relativos a todo el disco duro)
-// (TODO) ¿Qué pasa si falla la lectura? No está devolviendo error!!!
-// Añadir un state para saber si el sector se ha leido adecuadamente!!!
-    template <typename T>
-    T* read_global_as(const uint32_t& nsector)
-    { return driver_.template sector_pointer_as<T>(nsector); }
-
-// (TODO) ¿Qué pasa si falla la lectura? No está devolviendo error!!!
-    template <typename T>
-    T* read_as(const uint32_t& nsector)
-    { return read_global_as<T>(sector0_ + nsector);}
-
 
 private:
 // Reserved area
@@ -743,32 +761,33 @@ private:
     Sector_driver driver_;
 
 // Helpers
-    void init(Boot_sector& bs);
+    Boot_sector* init();
 
-
-
-// Funciones locales (nsectors son relativos al volumen)
-    bool read_global(uint32_t nsector, Boot_sector& bs) const;
-
-    bool read_global(uint32_t nsector, Sector_span sector) const
-    { return driver_.read(nsector, sector); }
-
+    template <typename T>
+    T* read_global_as_pointer(const uint32_t& nsector)
+    { return driver_.template sector_pointer_as<T>(nsector);}
 };
 
 // precondition: sector0_ valido
 template <typename SD>
-void Volume<SD>::init(Boot_sector& bs)
+Boot_sector* Volume<SD>::init()
 {
-    if (!read_global(sector0_, bs)){
-	sector_size_ = 0;
-	return;
+    //Boot_sector* bs = driver_.template sector_pointer_as<Boot_sector>(sector0_);
+    Boot_sector* bs = read_global_as_pointer<Boot_sector>(sector0_);
+    if (bs == nullptr){
+	atd::ctrace<3>() << "ERROR: can't initialize Volume::init\n";
+
+	sector_size_ = 0; // error
+	return nullptr;
     }
 
 // Reserved area
-    sector_size_ = bs.bytes_per_sector();
+    sector_size_ = bs->bytes_per_sector();
 
-    fat_area.init(bs);
-    data_area.init(bs);
+    fat_area.init(*bs);
+    data_area.init(*bs);
+
+    return bs;
 }
 
 
@@ -776,39 +795,45 @@ template <typename SD>
 Volume<SD>::Volume(const uint32_t& sector0)
     : fat_area{this}, sector0_{sector0}
 {
-    Boot_sector bs;
-    init(bs);
+    Lock lock{driver_};
+    init();
 }
 
 template <typename SD>
 Volume<SD>::Volume(const uint32_t& sector0, Boot_sector_min& bs_min)
     : fat_area{this}, sector0_{sector0}
 {
-    Boot_sector bs;
-    init(bs);
+    Lock lock{driver_};
+    Boot_sector* bs = init();
 
-    bs_min.fs_info = bs.fs_info;
+    if (bs == nullptr)
+	return;
+
+    bs_min.fs_info = bs->fs_info;
 }
 
-
-
-template <typename SD>
-inline bool Volume<SD>::read_global(uint32_t nsector, Boot_sector& bs) const
-{
-    return read_global(nsector, 
-	    Sector_span{reinterpret_cast<uint8_t*>(&bs), sizeof(Boot_sector)});
-}
 
 // De momento opto por leerlo de disco en lugar de memorizarlo. ¿se usará
 // mucho?
 template <typename SD>
-uint32_t Volume<SD>::root_directory_first_cluster() const
+uint32_t Volume<SD>::root_directory_first_cluster() 
 {
-    Boot_sector bs;
-    if (!read_global(sector0_, bs))
-	return 0; // error
+    Lock lock{driver_};
 
-    return bs.root_directory_first_cluster();
+    Boot_sector* bs = read_global_as_pointer<Boot_sector>(sector0_);
+    if (bs == nullptr){
+	atd::ctrace<3>() << "ERROR: can't read boot sector\n";
+
+	return 0; // error
+    }
+    
+    return bs->root_directory_first_cluster();
+    
+//    Boot_sector bs;
+//    if (!read_global(sector0_, bs))
+//	return 0; // error
+//
+//    return bs.root_directory_first_cluster();
 }
 
 
@@ -1284,7 +1309,14 @@ struct Directory_entry{
 
 
 // long name entry (section 7, FAT specification)
-    uint8_t extended_order() const {return data[0];}
+    uint8_t extended_order_with_mask() const {return data[0];}
+
+    // El order de la última entrada de un long name se masquea con 0x40
+    // (jejeje, yo masqueo, tu masqueas, él masquea xD. Masquear `a` es `a|0x40`)
+    // Mejor: el bit número 6 order de la última entrada de un long name es 1.
+    uint8_t extended_order() const {return data[0] & ~0x40; }
+    bool is_last_member_of_long_name() const {return data[0] & 0x40; }
+
     // data[1..11) = long name
     // data[11] = attribute. En este caso ATTR_LONG_NAME
     // data[12] == 0
@@ -1305,11 +1337,44 @@ struct Directory_entry{
 
     static void uint16_t2time(uint16_t time, 
 			      uint8_t& seconds, uint8_t& minutes, uint8_t& hours);
+
+// Funciones internas
+    // Como data[12] tiene que ser 0, usemos ese valor para indicar que la
+    // entry es invalida
+    void null_entry() { data[12] = 1; }
+    bool is_null_entry() const {return data[12] == 1;}
+};
+
+
+// Info básica que necesita un usuario de una entrada.
+// Solo le falta el nombre que al ser de longitud variable dejo que sea el
+// cliente quien decida cuánta memoria reservar para él.
+struct Entry_info{
+    using Attribute = Entry_attribute_type;
+
+    Attribute attribute;
+
+    uint32_t file_cluster;
+    uint32_t file_size;
+
+    uint16_t creation_date;
+    uint16_t creation_time_seconds;
+    uint8_t  creation_time_tenth_of_seconds;
+
+    uint16_t last_access_date;
+
+    uint16_t last_modification_date;
+    uint16_t last_modification_time;
 };
 
 
 template <typename Sector_driver0>
 struct const_Entry_iterator;
+
+enum class Directory_of_entries_state{
+    ok, read_error, last_entry
+};
+
 
 }// impl_of
  
@@ -1320,8 +1385,9 @@ public:
     using Volume    = atd::FAT32::Volume<Sector_driver0>;
     using File	    = atd::FAT32::File<Sector_driver0>;
     using Entry	    = impl_of::Directory_entry;
+    using Entry_info= impl_of::Entry_info;
     using Attribute = impl_of::Directory_entry::Attribute;
-
+    using State     = impl_of::Directory_of_entries_state;
 
 // Constructors
     // Enlaza con el directorio que se encuentra en el cluster0
@@ -1329,48 +1395,104 @@ public:
 
 // Operaciones
     void first_entry();
-//    void next_entry();
+//    void next_entry(); // read consume la entry, no se necesita next.
     
     // Lee la entry actual almacenándola en entry
     // Consume esa entry, esto es, pasa a apuntar a la siguiente entry.
     void read(Entry& entry);
 
+    // Lee la siguiente entrada que haya devolviendo la información básica en
+    // info, y el nombre del fichero en long_name. Si el nombre del fichero no
+    // entra en long_name lo trunca.
+    void read_long_entry(Entry_info& info, std::span<uint8_t> long_name);
+
+
 // State
-    bool ok() const {return dir_.ok(); }
-    bool error() const {return dir_.error(); }
-    bool end_of_file() const {return dir_.end_of_file();}
+// (DUDA) File tiene un state, y esta clase otro: uso un uint16_t (2 x
+// uint8_t) para el estado lo cual es desperdiciar un byte. ¿Se podría
+// fusionar en 1 byte los 2 states? Si la solución no es sencilla ¿merece la
+// pena complicar todo el código por ahorrar 1 byte? 
+    bool ok() const {return dir_.ok() and state_ == State::ok; }
+    bool read_error() const {return state_ == State::read_error; }
+    bool last_entry() const {return state_ == State::last_entry; }
+    bool error() const {return dir_.error() or state_ == State::read_error; }
 
 private:
     File dir_; // fichero con los sectores del directorio
+    State state_;
     
     static constexpr uint8_t sizeof_entry = Entry::size;
+
+    // Este state no lo necesito fuera
+    bool end_of_file() const {return dir_.end_of_file();}
 };
 
 template <typename S> 
+inline 
 Directory_of_entries<S>::Directory_of_entries(Volume& volume, uint32_t cluster0)
-    : dir_{volume, cluster0}
+    : dir_{volume, cluster0}, state_{State::ok}
 { }
 
 template <typename S> 
 inline void Directory_of_entries<S>::first_entry()
-{ dir_.reset(); }
+{ 
+    dir_.reset(); 
+    state_ = State::ok;
+}
 
 //template <typename S> 
 //inline void Directory_of_entries<S>::next_entry()
 //{ dir_.next(sizeof_entry); }
-//
 template <typename S> 
-inline void Directory_of_entries<S>::read(Entry& entry)
+void Directory_of_entries<S>::read(Entry& entry)
 {
-    if (dir_.end_of_file() or dir_.error())
+    if (dir_.end_of_file() or dir_.error()){
+	atd::ctrace<5>() << "Trying to read EOC/error file\n";
+	state_ = State::read_error;
 	return;
+    }
 
 // (TODO) dir_.read(entry.data); // lee los 32 bytes. Es un std::span 
     for (uint8_t i = 0; i < sizeof_entry; ++i){
 	entry.data[i] = dir_.read();
 	dir_.next();
     }
+
+    state_ = State::ok;
 }
+
+
+
+//template <typename S>
+//void Directory_of_entries<S>::read_long_entry(Entry_info& info, 
+//					std::span<uint8_t> long_name)
+//{
+//    using Type = Entry::Type;
+//
+//    Entry entry;
+//    
+//// find_first_not_free_entry:
+//    do{
+//	read(entry);
+//
+//	if (read_error())
+//	    return;
+//    }while (entry.type() == Type::free);
+//
+//    if (entry.type() == Type::last_entry){
+//	state_ = State::last_entry;
+//	return;
+//    }
+//
+//    if (entry.type() == Type::short_entry)
+//	read_short_entry(entry, info, long_name); // copia entry en info/long_name
+//
+//    else // == Type::long_entry
+//	read_long_entry(entry, info, long_name); // entry es la last_entry
+//					        // entrada del long_name
+//
+//}
+
 
 }// namespace FAT32
 

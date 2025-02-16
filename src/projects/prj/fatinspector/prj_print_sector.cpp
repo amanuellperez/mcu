@@ -117,17 +117,17 @@ void Main::print_FAT32_boot_sector()
 	return;
     }
 
-    using Volume = atd::FAT32::Volume<Sector_driver>;
     using Boot_sector = atd::FAT32::Boot_sector;
 
-    Volume vol{nsector};
+    Sector_driver driver;
 
-    if (vol.error()){
-	uart << "ERROR\n";
+    atd::Lock lock(driver);
+    Boot_sector* bs = driver.sector_pointer_as<Boot_sector>(nsector);
+    if (bs == nullptr){
+	uart << "ERROR: can't read boot sector\n";
 	return;
     }
 
-    Boot_sector* bs = vol.read_global_as<Boot_sector>(nsector);
 
 // Volcado de datos para depurar y entender cómo funciona FAT32
 // ------------------------------------------------------------
@@ -246,7 +246,11 @@ void Main::print_FS_info()
 	return;
     }
 
-    Boot_sector_min bs_min;
+// TODO: esto es un poco ineficiente. Por una parte Volume tiene un
+// Sector_driver dentro, que son 512 bytes y luego el Sector_driver que creo
+// localmente aquí tiene otros 512 bytes, reservando 1KB de memoria en esta
+// función!!! (Pero como estoy probando tampoco preocupa)
+    Boot_sector_min bs_min{};
     Volume vol{nsector, bs_min};
 
     if (vol.error()){
@@ -254,7 +258,16 @@ void Main::print_FS_info()
 	return;
     }
 
-    FS_info* info = vol.read_as<FS_info>(bs_min.FS_info_sector());
+    Sector_driver driver;
+
+    atd::Lock lock(driver);
+    FS_info* info = driver.sector_pointer_as<FS_info>(
+	    vol.first_sector() + bs_min.FS_info_sector());
+
+    if (info == nullptr){
+	uart << "ERROR: can't FS info sector\n";
+	return;
+    }
 
     uart << "Check integrity? ";
     print_bool_as_yes_no(uart, info->check_integrity());
@@ -498,6 +511,11 @@ void Main::print_sector_as_directory_array()
 	    print(uart, std::span<uint8_t>{name.data(), len});
 	    uart << "\t";
 	    print(uart, entry.attribute());
+	    uart << "\torder: ";
+	    atd::print_int_as_hex(uart, entry.extended_order_with_mask());
+	    if (entry.is_last_member_of_long_name()){
+		uart << "(last: " << (uint16_t) entry.extended_order() << ")";
+	    }
 	    uart << "\tcheck sum: ";
 	    atd::print_int_as_hex(uart,  entry.check_sum());
 	    uart << '\n';

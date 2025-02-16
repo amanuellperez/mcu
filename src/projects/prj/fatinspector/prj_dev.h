@@ -203,6 +203,7 @@ struct Sector_driver_struct{
 };
 
 }
+
 class Sector_driver{
 public:
     using State_struct = impl_of::Sector_driver_struct;
@@ -259,8 +260,10 @@ public:
 	if (nsector_ != nsector){
 	    if (read (nsector, sector_))
 		state_ = State::ok;
-	    else
+	    else{
 		state_ = State::read_error;
+		return nullptr;
+	    }
 	}
 
 	return reinterpret_cast<T*>(&sector_); 
@@ -308,6 +311,7 @@ private:
 //	return r.ok();
 //    }
 };
+
 
 
 
