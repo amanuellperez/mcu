@@ -17,9 +17,11 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "prj_dev.h"	// TODO: borrame
+#include "prj_dev.h"	// TODO: borrame 
+#include <atd_bit.h>
 			
 #include "atd_fat.h"
+
 
 namespace atd{
 namespace FAT32{
@@ -147,6 +149,31 @@ uint8_t Directory_entry::copy_long_name(std::span<uint8_t> str)
 
     return 13; 
 }
+
+
+// 6.3 FAT specification
+void Directory_entry::uint16_t2date(uint16_t date, 
+			      uint8_t& day, uint8_t& month, uint16_t& year)
+{
+    //day   = date & 0x001F; // bits del 0-4
+    day   = date & atd::make_range_bitmask<0, 4, uint16_t>();
+    month = static_cast<uint8_t>(
+		(date & atd::make_range_bitmask<5, 8, uint16_t>()) >> 5);
+    year  = 1980 + ((date & atd::make_range_bitmask<9, 15, uint16_t>()) >> 9);
+}
+
+
+// 6.3 FAT specification
+void Directory_entry::uint16_t2time(uint16_t time, 
+		uint8_t& seconds, uint8_t& minutes, uint8_t& hours)
+{
+    seconds = 2*(time & atd::make_range_bitmask<0, 4, uint16_t>());
+    minutes = static_cast<uint8_t>(
+		(time & atd::make_range_bitmask<5, 10, uint16_t>()) >> 5);
+    hours   = static_cast<uint8_t>(
+		(time & atd::make_range_bitmask<11, 15, uint16_t>()) >> 11);
+}
+
 
 } // impl_of
 } // namespace FAT32

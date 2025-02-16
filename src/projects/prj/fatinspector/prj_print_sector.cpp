@@ -222,7 +222,7 @@ void Main::print_FAT32_boot_sector()
 	<< "\n\tSectors per cluster  : " << (int) bs->data_area_sectors_per_cluster()
 	<< "\n\tNumber of clusters   : " << bs->data_area_number_of_clusters()
 	<< "\n\tFirst sector         : " << bs->data_area_first_sector()
-	<< "\n\tRoot directory sector: " << bs->root_directory_first_sector()
+	<< "\n\tRoot directory cluster: " << bs->root_directory_first_cluster()
 	<< '\n';
 
 
@@ -361,7 +361,7 @@ void print(std::ostream& out,
 	break; case Att::system	    : out << "system";
 	break; case Att::volume_id  : out << "volume_id";
 	break; case Att::directory  : out << "directory";
-	break; case Att::archive    : out << "archive";
+	break; case Att::archive    : out << "archive\t";
 	break; case Att::long_name  : out << "long_name";
     }
 
@@ -390,8 +390,7 @@ void Main::print_sector_as_directory_array()
 //    using File = atd::FAT32::File<Sector_driver, uint8_t>;
     
 // ----------------
-//    File f{vol, 2}; // El root directory es el cluster 2
-//		    // (TODO) ¿dónde lo pone???
+//    File f{vol, root_dir}; 
 //    
 //    uint32_t counter =  0; // limitamos el número de entradas
 //    for (auto p = f.begin(); 
@@ -427,41 +426,79 @@ void Main::print_sector_as_directory_array()
     using Entry_dir = atd::FAT32::Directory_of_entries<Sector_driver>;
     using Entry = Entry_dir::Entry;
 
-    Entry_dir dir{vol, 2};
+    uart << "n \t|type\t|name\t\t|attr\t|cluster\t|size\t|"
+	"created\t|access\t|modified\t|\n";
+
+    auto root_dir = vol.root_directory_first_cluster();
+    if (root_dir == 0){
+	uart << "Error reading root_directory_first_cluster\n";
+	return;
+    }
+
+    Entry_dir dir{vol, root_dir};
     dir.first_entry();
     for (uint8_t i = 0; i < 25; ++i){
 	Entry entry;
 	dir.read(entry);
 	
+	uart << (uint16_t) i << '\t';
+
 	std::array<uint8_t, 30> name;
 	if (entry.type() == Entry::Type::short_entry){
 	    auto len = entry.copy_short_name(name);
 
-	    uart << "SHORT ENTRY: [";
+	    uart << "short\t";
 	    print(uart, std::span<uint8_t>{name.data(), len});
 
-	    uart << "]; ";
+	    uart << '\t';
 	    print(uart, entry.attribute());
-	    uart << "; file cluster: " << entry.file_cluster()
-		<< "; file size: " << entry.file_size()
-		<< "\n\tcreation time: " 
-		<< entry.creation_time_seconds() << "."
-		<< (uint16_t) entry.creation_time_tenth_of_seconds() 
-		<< "; creation date: " << entry.creation_date() 
-		<< "\n\tlast access date: " << entry.last_access_date()
-		<< "; last modification: " 
-		<< entry.last_modification_date() << "/"
-		<< entry.last_modification_time() 
+	    uart << "\t" << entry.file_cluster()
+		<< '\t' << entry.file_size()
+		<< '\t';
+
+	    uint8_t seconds, minutes, hours;
+	    uint8_t day, month;
+	    uint16_t year;
+
+	    Entry::uint16_t2time(entry.creation_time_seconds(),
+						    seconds, minutes, hours);
+	    Entry::uint16_t2date(entry.creation_date(), day, month, year);
+
+	    uart << (uint16_t) day << '/'
+		 << (uint16_t) month << '/'
+		 << year << ' '
+		 << (uint16_t) hours 
+		 << ':' << (uint16_t) minutes 
+		 << ':' << (uint16_t) seconds
+		 << '.' << (uint16_t) entry.creation_time_tenth_of_seconds() 
+		<< '\t';
+
+	    Entry::uint16_t2date(entry.last_access_date(), day, month, year);
+	    uart << (uint16_t) day << '/'
+		 << (uint16_t) month << '/'
+		 << year << ' '
+		<< '\t';
+
+	    Entry::uint16_t2date(entry.last_modification_date(), 
+							    day, month, year);
+	    Entry::uint16_t2time(entry.last_modification_time(),
+						    seconds, minutes, hours);
+	    uart << (uint16_t) day << '/'
+		 << (uint16_t) month << '/'
+		 << year << ' '
+		 << (uint16_t) hours 
+		 << ':' << (uint16_t) minutes 
+		 << ':' << (uint16_t) seconds
 		<< '\n';
 
 	} else if (entry.type() == Entry::Type::long_entry){
 	    auto len = entry.copy_long_name(name);
 
-	    uart << "LONG ENTRY: [";
+	    uart << "long\t";
 	    print(uart, std::span<uint8_t>{name.data(), len});
-	    uart << "]; ";
+	    uart << "\t";
 	    print(uart, entry.attribute());
-	    uart << "; check sum: ";
+	    uart << "\tcheck sum: ";
 	    atd::print_int_as_hex(uart,  entry.check_sum());
 	    uart << '\n';
 	} else if (entry.type() == Entry::Type::free){
@@ -469,7 +506,6 @@ void Main::print_sector_as_directory_array()
 	} else if (entry.type() == Entry::Type::last_entry){
 	    uart << "LAST ENTRY\n";
 	}
-	uart << '\n';
 
 //	atd::xxd_print(uart, entry.data);
 //	uart << '\n';

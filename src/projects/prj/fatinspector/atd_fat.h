@@ -298,8 +298,8 @@ struct Boot_sector{
     uint32_t first_sector_of_cluster(uint32_t n) const
     {return  data_area_first_sector() + (n-2) * data_area_sectors_per_cluster();}
 
-    uint32_t root_directory_first_sector() const
-    {return  first_sector_of_cluster(root_clus);}
+    uint32_t root_directory_first_cluster() const
+    {return  root_clus;}
 
 };
 
@@ -705,7 +705,7 @@ public:
 // Reserved area
     uint32_t volume_first_sector() const {return sector0_;}
     uint32_t bytes_per_sector() const {return sector_size_;}
-
+    uint32_t root_directory_first_cluster() const;
 
 // Lectura/escritura de sectores
     // Lee el Int (byte) que está en la posición `pos` del sector nsector.
@@ -748,19 +748,10 @@ private:
 
 
 // Funciones locales (nsectors son relativos al volumen)
-    static bool read_global(uint32_t nsector, Boot_sector& bs); 
+    bool read_global(uint32_t nsector, Boot_sector& bs) const;
 
-    static bool read_global(uint32_t nsector, Sector_span sector) 
-    { return Sector_driver::read(nsector, sector); }
-//
-//    // Lee el sector `nsector` del volumen. `nsector` es relativo al volumen.
-//    bool read(uint32_t nsector, Sector_span sector) const
-//    { return Sector_driver::read(sector0_ + nsector, sector); }
-//
-//    // Lee el boot sector que se encuentra en el sector `nsector` del disco.
-//    bool read(uint32_t nsector, FS_info& fs) const;
-//
-//    bool read(Boot_sector& bs) const;
+    bool read_global(uint32_t nsector, Sector_span sector) const
+    { return driver_.read(nsector, sector); }
 
 };
 
@@ -802,23 +793,24 @@ Volume<SD>::Volume(const uint32_t& sector0, Boot_sector_min& bs_min)
 
 
 template <typename SD>
-inline bool Volume<SD>::read_global(uint32_t nsector, Boot_sector& bs)
+inline bool Volume<SD>::read_global(uint32_t nsector, Boot_sector& bs) const
 {
     return read_global(nsector, 
 	    Sector_span{reinterpret_cast<uint8_t*>(&bs), sizeof(Boot_sector)});
 }
 
-//template <typename SD>
-//inline bool Volume<SD>::read(Boot_sector& bs) const
-//{ return read_global(sector0_, bs); }
-//
-//
-//template <typename SD>
-//inline bool Volume<SD>::read(uint32_t nsector, FS_info& fs) const
-//{
-//    return read(nsector, 
-//	    Sector_span{reinterpret_cast<uint8_t*>(&fs), sizeof(FS_info)});
-//}
+// De momento opto por leerlo de disco en lugar de memorizarlo. ¿se usará
+// mucho?
+template <typename SD>
+uint32_t Volume<SD>::root_directory_first_cluster() const
+{
+    Boot_sector bs;
+    if (!read_global(sector0_, bs))
+	return 0; // error
+
+    return bs.root_directory_first_cluster();
+}
+
 
 
 /***************************************************************************
@@ -1303,9 +1295,17 @@ struct Directory_entry{
     // devuelve el número de caracteres copiados
     uint8_t copy_long_name(std::span<uint8_t> str);
 
+
+// Funciones de conversión de formato
+// (TODO) devolver time_t...
+    // Extrae day/month/year de `date`, que será lo que devuelva
+    // creation_date, last_modification_date ...
+    static void uint16_t2date(uint16_t date, 
+			      uint8_t& day, uint8_t& month, uint16_t& year);
+
+    static void uint16_t2time(uint16_t time, 
+			      uint8_t& seconds, uint8_t& minutes, uint8_t& hours);
 };
-
-
 
 
 template <typename Sector_driver0>

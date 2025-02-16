@@ -24,13 +24,18 @@
 
 #include <bit>	// endianness
 #include <atd_basic_types.h> // atd::Uninitialized
-		
+#include <atd_trace.h>
+
 #include <mcu_SPI.h>
 #include <dev_sdcard.h>
 
 // Niveles de traza usados
-// 3: error
+// 1: Error crítico
+// 3: Error
+// 5: warnings
 // 9: traza para depurar, borrarlas al final.
+
+
 
 /***************************************************************************
  *			    MICROCONTROLLER
@@ -164,10 +169,44 @@ using SDCard = dev::hwd::SDCard<SDCard_cfg>;
 //	Y cualquier función que quiera acceder a los bytes este disco tendrá
 //	que hacerlo obligatoriamente via Volume. 
 //
+namespace impl_of{
+enum class Sector_driver_state :uint8_t {
+    ok = 0,
+    fail = 1,	    // last operation fail?
+    read_error = 2
+};
+
+
+struct Sector_driver_struct{
+    using State = Sector_driver_state;
+
+    Sector_driver_state state : 7;
+    uint8_t locked : 1;
+
+    Sector_driver_struct() : state{State::ok}, locked{0}{}
+    
+    void operator=(State st) {state = st; }
+    bool operator==(State st) const {return state == st;}
+
+    void lock() {locked = 1;}
+    void unlock() {locked = 0;}
+
+
+    bool ok() const {return state == State::ok;}
+    bool fail() const {return state == State::fail;}
+    bool read_error() const {return state == State::read_error;}
+
+    bool is_locked() const {return locked == 1;}
+    bool is_unlocked() const {return locked == 0;}
+
+
+};
+
+}
 class Sector_driver{
 public:
-    // Básicoo state para salir del paso
-    enum class State : uint8_t { ok, read_error };
+    using State_struct = impl_of::Sector_driver_struct;
+    using State = State_struct::State;
 
     static constexpr uint16_t sector_size = 512;
     using size_type = uint16_t;  // máximo 512
@@ -184,13 +223,19 @@ public:
     
 
 // Constructor
-    Sector_driver() : state_ {State::ok} {}
+    Sector_driver(){}
 
 // Lectura del sector actual
     // Devuelve el tipo T del sector nsector de la posición pos
     template <Type::Integer Int>
     Int read(const Address& nsector, const size_type& pos)
     {
+	if (is_locked()){
+	    atd::ctrace<3>() << "ERROR: Trying to read a locked sector\n";
+	    state_.fail();
+	    return 0;
+	}
+
 	if (nsector_ != nsector){
 	    if (read (nsector, sector_)){
 		state_ = State::ok;
@@ -206,6 +251,11 @@ public:
     template <typename T>
     T* sector_pointer_as(const Address& nsector)
     { 
+	if constexpr (atd::trace_level<9>()){// 9 == estoy depurando
+	    if (is_unlocked()) // 5 == warning
+		atd::ctrace<5>() << "An error? You forgot to lock the sector\n";
+	}
+
 	if (nsector_ != nsector){
 	    if (read (nsector, sector_))
 		state_ = State::ok;
@@ -216,15 +266,32 @@ public:
 	return reinterpret_cast<T*>(&sector_); 
     }
 
-// Info
-    bool ok() const {return state_ == State::ok;}
+// State
+    void lock() 
+    {
+	if constexpr (atd::trace_level<9>()){
+	    if (is_locked())
+		atd::ctrace<3>() << "ERROR: locking a locked sector\n";
+	}
+	state_.lock();
+    }
 
+    void unlock() { state_.unlock();}
+
+
+// Info
+    bool ok() const {return state_ == State::ok;;}
+    bool fail() const {return state_ == State::fail; }
+    bool is_locked() const {return state_.is_locked();}
+    bool is_unlocked() const {return state_.is_unlocked();}
+	
 // Static interface
 // (DUDA) ¿Necesito realmente estas funciones?
 // Lo usa MBR. Reescribir MBR y hacer private esta función
     static bool read(const SDCard::Address& add, Sector_span sector)
     {
 	atd::ctrace<100>() << "SDCard::read(" << add << ")\n";
+
 	auto r = SDCard::read(add, sector);
 	return r.ok();
     }
@@ -232,14 +299,14 @@ private:
 // Data
     atd::Uninitialized<Address> nsector_; 
     Sector sector_;
-    State state_;
+    State_struct state_;
     
 // Static interface
-    static bool write(const SDCard::Address& add, Sector_span sector)
-    {
-	auto r = SDCard::write(add, sector);
-	return r.ok();
-    }
+//    static bool write(const SDCard::Address& add, Sector_span sector)
+//    {
+//	auto r = SDCard::write(add, sector);
+//	return r.ok();
+//    }
 };
 
 

@@ -49,6 +49,7 @@
  *    Manuel Perez
  *    11/01/2025 Empty_log, Log_type
  *    02/02/2025 ctrace
+ *    16/02/2025 trace_level
  *
  ****************************************************************************/
 #include <ostream>
@@ -146,6 +147,24 @@ std::ostream& ctrace()
 
 }
 
+
+// trace_level_gt
+// --------------
+// Pensada para escribir cosas del tipo:
+//
+//	if constexpr (trace_level<9>()){
+//	...
+//	}
+//
+template <uint8_t level>
+inline constexpr bool trace_level()
+{ 
+#ifdef TRACE_LEVEL
+    return level <= TRACE_LEVEL; 
+#else
+    return false;
+#endif
+}
 
 }// atd
 
