@@ -18,8 +18,9 @@ msg_main_menu	"Read:\n"
 		"\t4. FAT32 boot sector\n"
 		"\t5. FS info sector\n"
 		"\t6. FAT entries\n"
-		"\t7. Root directory\n"
-		"\t8. File sectors\n"
+		"\t7. Root directory (short entries)\n"
+		"\t8. Root directory (long entries)\n"
+		"\t9. File sectors\n"
 
 
 

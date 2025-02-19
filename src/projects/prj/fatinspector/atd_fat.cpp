@@ -19,7 +19,8 @@
 
 #include "prj_dev.h"	// TODO: borrame 
 #include <atd_bit.h>
-			
+#include <atd_algorithm.h>  // atd::copy
+
 #include "atd_fat.h"
 
 
@@ -103,14 +104,11 @@ Directory_entry::Type Directory_entry::type() const
 }
 
 // (TODO) ¿no sería mejor pasar std::span<uint8_t, 11>???
-uint8_t Directory_entry::copy_short_name(std::span<uint8_t> str)
+uint8_t Directory_entry::copy_short_name(std::span<uint8_t> str) const
 {
-    if (str.size() < 11) return 0;
-
-    for (uint8_t i = 0; i < 11; ++i)
-	str[i] = data[i];
-
-    return 11;
+    auto [p, q] = atd::copy(data.begin(), data.end(), 
+			    str.begin(), str.end());
+    return (p - data.begin());
 }
 
 // (TODO) Los caracteres se almacenan en 2 bytes, de momento solo me quedo con
@@ -172,6 +170,25 @@ void Directory_entry::uint16_t2time(uint16_t time,
 		(time & atd::make_range_bitmask<5, 10, uint16_t>()) >> 5);
     hours   = static_cast<uint8_t>(
 		(time & atd::make_range_bitmask<11, 15, uint16_t>()) >> 11);
+}
+
+
+
+void copy(const Directory_entry& entry, Entry_info& info)
+{
+    info.attribute = entry.attribute();
+
+    info.file_cluster = entry.file_cluster();
+    info.file_size = entry.file_size();
+
+    info.creation_date = entry.creation_date();
+    info.creation_time_seconds = entry.creation_time_seconds();
+    info.creation_time_tenth_of_seconds = entry.creation_time_tenth_of_seconds();
+
+    info.last_access_date = entry.last_access_date();
+
+    info.last_modification_date = entry.last_modification_date();
+    info.last_modification_time = entry.last_modification_time();
 }
 
 

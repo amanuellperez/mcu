@@ -28,6 +28,16 @@
 
 #include <atd_ostream.h>
 
+void print_as_char(std::ostream& out, std::span<uint8_t> str)
+{
+    for (auto x: str){
+	if (x == '\0')
+	    return;
+
+	out << x;
+    }
+}
+
 void print(std::ostream& out, std::span<uint8_t> str)
 {
     for (auto x: str)
@@ -380,7 +390,7 @@ void print(std::ostream& out,
 
 }
 
-void Main::print_sector_as_directory_array()
+void Main::print_root_directory_short_entries()
 {
     using Volume = atd::FAT32::Volume<Sector_driver>;
 
@@ -450,7 +460,7 @@ void Main::print_sector_as_directory_array()
 
     Entry_dir dir{vol, root_dir};
     dir.first_entry();
-    for (uint8_t i = 0; i < 25; ++i){
+    for (uint8_t i = 0; i < 30; ++i){
 	Entry entry;
 	dir.read(entry);
 	
@@ -549,6 +559,68 @@ void Main::print_sector_as_directory_array()
     }
 
 }
+
+
+
+void Main::print_root_directory_long_entries()
+{
+    using Volume = atd::FAT32::Volume<Sector_driver>;
+
+    auto nsector = fat_volume_first_sector(1); // de momento solo leo
+					       // particion 1
+    if (nsector == 0){
+	uart << "Error: can't read first sector of FAT volume\n";
+	return;
+    }
+
+
+    Volume vol{nsector};
+
+    if (vol.error()){
+	uart << "ERROR\n";
+	return;
+    }
+
+
+    using Entry_dir = atd::FAT32::Directory_of_entries<Sector_driver>;
+    using Entry_info = Entry_dir::Entry_info;
+
+    auto root_dir = vol.root_directory_first_cluster();
+    if (root_dir == 0){
+	uart << "Error reading root_directory_first_cluster\n";
+	return;
+    }
+
+    Entry_dir dir{vol, root_dir};
+    dir.first_entry();
+    
+    for (uint8_t i = 0; i < 25; ++i){
+	Entry_info info;
+	std::array<uint8_t, 30> name;
+
+	if (!dir.read_long_entry(info, name)){
+	    uart << "read_long_entry error!!!\n";
+	    return;
+	}
+
+    
+	uart << (uint16_t) i << ": [";
+	print_as_char(uart, name);
+	uart << "]";
+
+	uart << " " 
+	     << info.file_cluster 
+	     << " "
+	     << info.file_size
+	     << '\n';
+
+    }
+    uart << '\n';
+    print_line(uart);
+
+}
+
+
 
 void Main::print_FAT32_entry()
 {

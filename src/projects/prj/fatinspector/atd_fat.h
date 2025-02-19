@@ -1271,6 +1271,9 @@ struct Directory_entry{
 // Cfg
     static constexpr uint8_t size = 32;
 
+    // número de caracteres ASCII que admite un long_name
+    static constexpr uint8_t ascii_long_name_len = 13;
+
 // Data
     std::array<uint8_t, size> data;
 
@@ -1279,14 +1282,14 @@ struct Directory_entry{
 
 // short entry (section 6, FAT specification)
     // devuelve el número de caracteres copiados
-    uint8_t copy_short_name(std::span<uint8_t> str);
+    uint8_t copy_short_name(std::span<uint8_t> str) const;
 
     Attribute attribute() const { return Attribute{data[11]}; }
     // data[12] == 0
     
     uint8_t creation_time_tenth_of_seconds() const {return data[12];}
     uint16_t creation_time_seconds() const 
-	    {return atd::concat_bytes<uint16_t>(data[15], data[14]);}
+{return atd::concat_bytes<uint16_t>(data[15], data[14]);}
 
     uint16_t creation_date() const
 	    {return atd::concat_bytes<uint16_t>(data[17], data[16]);}
@@ -1309,11 +1312,13 @@ struct Directory_entry{
 
 
 // long name entry (section 7, FAT specification)
+    // Devuelve el orden de la entrada con la mask 0x40
     uint8_t extended_order_with_mask() const {return data[0];}
 
     // El order de la última entrada de un long name se masquea con 0x40
     // (jejeje, yo masqueo, tu masqueas, él masquea xD. Masquear `a` es `a|0x40`)
     // Mejor: el bit número 6 order de la última entrada de un long name es 1.
+    // Devuelve el orden de la entrada
     uint8_t extended_order() const {return data[0] & ~0x40; }
     bool is_last_member_of_long_name() const {return data[0] & 0x40; }
 
@@ -1365,14 +1370,18 @@ struct Entry_info{
 
     uint16_t last_modification_date;
     uint16_t last_modification_time;
+
 };
+
+// Copia entry en info: entry -> info;
+void copy(const Directory_entry& entry, Entry_info& info);
 
 
 template <typename Sector_driver0>
 struct const_Entry_iterator;
 
 enum class Directory_of_entries_state{
-    ok, read_error, last_entry
+    ok, read_error, last_entry, long_entry_corrupted
 };
 
 
@@ -1385,6 +1394,7 @@ public:
     using Volume    = atd::FAT32::Volume<Sector_driver0>;
     using File	    = atd::FAT32::File<Sector_driver0>;
     using Entry	    = impl_of::Directory_entry;
+    using Type      = Entry::Type;
     using Entry_info= impl_of::Entry_info;
     using Attribute = impl_of::Directory_entry::Attribute;
     using State     = impl_of::Directory_of_entries_state;
@@ -1404,7 +1414,8 @@ public:
     // Lee la siguiente entrada que haya devolviendo la información básica en
     // info, y el nombre del fichero en long_name. Si el nombre del fichero no
     // entra en long_name lo trunca.
-    void read_long_entry(Entry_info& info, std::span<uint8_t> long_name);
+    // Devuelve true si todo va bien, false si hay un error
+    bool read_long_entry(Entry_info& info, std::span<uint8_t> long_name);
 
 
 // State
@@ -1412,10 +1423,19 @@ public:
 // uint8_t) para el estado lo cual es desperdiciar un byte. ¿Se podría
 // fusionar en 1 byte los 2 states? Si la solución no es sencilla ¿merece la
 // pena complicar todo el código por ahorrar 1 byte? 
+// (TODO) Observar que hay varios tipos de estado diferentes:
+//	(1) El estado del file interno (ok, error de lectura)
+//	(2) El estado del array de entries (last_entry)
+//	(3) El resultado de la última operación realizada
+//	    (long_entry_corrupted es el resultado erróneo de la función
+//	    read_long_entry)
+//	¡Aclarar esto!
     bool ok() const {return dir_.ok() and state_ == State::ok; }
     bool read_error() const {return state_ == State::read_error; }
     bool last_entry() const {return state_ == State::last_entry; }
-    bool error() const {return dir_.error() or state_ == State::read_error; }
+    bool long_entry_corrupted() const {return state_ == State::long_entry_corrupted; }
+    bool error() const {return dir_.error() 
+			    or state_ == State::read_error; }
 
 private:
     File dir_; // fichero con los sectores del directorio
@@ -1425,6 +1445,16 @@ private:
 
     // Este state no lo necesito fuera
     bool end_of_file() const {return dir_.end_of_file();}
+
+
+// Helpers
+    bool read_long_entry(Entry& entry, Entry_info& info,
+						    std::span<uint8_t> name);
+    // Lo llamo copy porque realmente no lee ninguna entrada, se limita a
+    // copiar la información de entry en [info, name]
+    void copy_short_entry(const Entry& entry, Entry_info& info, 
+					std::span<uint8_t> name);
+
 };
 
 template <typename S> 
@@ -1455,43 +1485,97 @@ void Directory_of_entries<S>::read(Entry& entry)
 // (TODO) dir_.read(entry.data); // lee los 32 bytes. Es un std::span 
     for (uint8_t i = 0; i < sizeof_entry; ++i){
 	entry.data[i] = dir_.read();
-	dir_.next();
+	dir_.next(); // esto es lo que "consume" el byte
     }
 
     state_ = State::ok;
 }
 
 
+// precondition: entry es la last_entry de un long_name
+// entry: es de entrada/salida. Se modifica dejando la última entrada leida
+//	 (in) contiene la last_entry de un long_name
+//	 (output) la short_entry del long_name
+template <typename S>
+bool Directory_of_entries<S>::read_long_entry(Entry& entry,
+					Entry_info& info, 
+					std::span<uint8_t> long_name)
+{
+    static constexpr uint8_t size = Entry::ascii_long_name_len;
 
-//template <typename S>
-//void Directory_of_entries<S>::read_long_entry(Entry_info& info, 
-//					std::span<uint8_t> long_name)
-//{
-//    using Type = Entry::Type;
-//
-//    Entry entry;
-//    
-//// find_first_not_free_entry:
-//    do{
-//	read(entry);
-//
-//	if (read_error())
-//	    return;
-//    }while (entry.type() == Type::free);
-//
-//    if (entry.type() == Type::last_entry){
-//	state_ = State::last_entry;
-//	return;
-//    }
-//
-//    if (entry.type() == Type::short_entry)
-//	read_short_entry(entry, info, long_name); // copia entry en info/long_name
-//
-//    else // == Type::long_entry
-//	read_long_entry(entry, info, long_name); // entry es la last_entry
-//					        // entrada del long_name
-//
-//}
+    for (uint8_t nentry = entry.extended_order(); nentry > 0; --nentry){
+	uint8_t i = nentry - 1;
+
+	if ((entry.type() != Type::long_entry) 
+	    or (entry.extended_order() != nentry)){ // ¿están ordenadas?
+	    state_ = State::long_entry_corrupted;
+	    return false;
+	}
+
+	if (i * size < long_name.size()){// copiamos nombre si podemos
+	    uint8_t n = std::min<uint8_t>(size, 
+					long_name.size() - i * size);
+	    entry.copy_long_name({long_name.begin() + i * size, n});
+	}
+
+	read(entry);
+	if (read_error())
+	    return false;
+	
+    }
+
+// Después de las long_name entries siempre viene una short_entry
+    if (entry.type() != Type::short_entry){
+	state_ = State::long_entry_corrupted;
+	return false;
+    }
+
+    impl_of::copy(entry, info);
+
+    return true;
+}
+
+
+template <typename S>
+void Directory_of_entries<S>::copy_short_entry(const Entry& entry,
+					Entry_info& info, 
+					std::span<uint8_t> name)
+{
+    impl_of::copy(entry, info);
+    entry.copy_short_name(name);
+
+}
+
+template <typename S>
+bool Directory_of_entries<S>::read_long_entry(Entry_info& info, 
+					std::span<uint8_t> long_name)
+{
+    using Type = Entry::Type;
+
+    Entry entry;
+    
+// find_first_not_free_entry:
+    do{
+	read(entry);
+
+	if (read_error()) // este nombre es un poco confuso @_@
+	    return false;
+    }while (entry.type() == Type::free);
+
+    if (entry.type() == Type::last_entry){
+	state_ = State::last_entry;
+	return false;
+    }
+
+    if (entry.type() == Type::short_entry)
+	copy_short_entry(entry, info, long_name); // copia entry en info/long_name
+
+    else // == Type::long_entry
+	return read_long_entry(entry, info, long_name); // entry es la last_entry
+					        // entrada del long_name
+
+    return true;
+}
 
 
 }// namespace FAT32

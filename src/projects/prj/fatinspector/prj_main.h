@@ -84,7 +84,8 @@ private:
     void print_MBR_boot_sector();
     void print_FS_info();
     void print_FAT32_boot_sector();
-    void print_sector_as_directory_array();
+    void print_root_directory_short_entries();
+    void print_root_directory_long_entries();
     void print_FAT32_entry();
     void print_file_sectors();
 
