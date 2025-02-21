@@ -29,6 +29,8 @@
 #include <mcu_SPI.h>
 #include <dev_sdcard.h>
 
+#include "atd_fat.h"
+
 // Niveles de traza usados
 // 1: Error crítico
 // 3: Error
@@ -313,6 +315,11 @@ private:
 };
 
 
+// Tipos usados
+using Volume = atd::FAT32::Volume<Sector_driver>;
+using Directory = atd::FAT32::Directory<Sector_driver>;
+using Entry_info = Directory::Entry_info;
+using Attribute = Directory::Attribute;
 
 
 #endif

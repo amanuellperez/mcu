@@ -20,7 +20,8 @@ msg_main_menu	"Read:\n"
 		"\t6. FAT entries\n"
 		"\t7. Root directory (short entries)\n"
 		"\t8. Root directory (long entries)\n"
-		"\t9. File sectors\n"
+		"\t9. Directories (ls and cd) \n"
+		"\t10. File sectors\n"
 
 
 

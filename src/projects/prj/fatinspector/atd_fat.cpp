@@ -106,9 +106,9 @@ Directory_entry::Type Directory_entry::type() const
 // (TODO) ¿no sería mejor pasar std::span<uint8_t, 11>???
 uint8_t Directory_entry::copy_short_name(std::span<uint8_t> str) const
 {
-    auto [p, q] = atd::copy(data.begin(), data.end(), 
+    atd::copy(data.begin(), data.begin() + ascii_short_name_len,
 			    str.begin(), str.end());
-    return (p - data.begin());
+    return ascii_short_name_len;
 }
 
 // (TODO) Los caracteres se almacenan en 2 bytes, de momento solo me quedo con

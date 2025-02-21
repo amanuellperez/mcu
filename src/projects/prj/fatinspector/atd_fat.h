@@ -386,6 +386,8 @@ struct Long_file_name_entry{
 };
 
 // Section 6, FAT specification
+// TODO: esto lo he reescrito más adelante. ¿Borrarlo o dejarlo?
+// ¡¡¡No usar!!!
 struct Directory_entry{
     static_assert(std::endian::native == std::endian::little);
 
@@ -1093,6 +1095,9 @@ public:
     // Reinicia el fichero, haciendo que apunte al principio de nuevo
     void reset();
 
+    // Reinicia el fichero, enlazándolo a un nuevo cluster0
+    void reset(uint32_t cluster0);
+
     // Avanza nInts. Por ejemplo, si Int = uint8_t y nInts = 32, avanza 32
     // bytes. Pero si Int = uin32_t y nInts = 32, avanza 32 uint32_t.
     void next(uint8_t nInts = 1);
@@ -1143,11 +1148,18 @@ inline void File<SD, I>::reset()
     i = 0;
 }
 
+template <typename SD, Type::Integer I> 
+inline void File<SD, I>::reset(uint32_t cluster0)
+{
+    cluster0_ = cluster0;
+    reset();
+}
+
 // (DUDA) modificar next_byte directamente para que avance directamente
 // sizeof(Int)? La implementación que ahora suministro es sencilla de
 // entender y mantener.
 template <typename SD, Type::Integer I> 
-inline void File<SD, I>::next(uint8_t nInts)
+void File<SD, I>::next(uint8_t nInts)
 { 
     for (; nInts > 0; --nInts){
 	for (uint8_t k = 0; k < sizeof(Int); ++k)
@@ -1272,6 +1284,7 @@ struct Directory_entry{
     static constexpr uint8_t size = 32;
 
     // número de caracteres ASCII que admite un long_name
+    static constexpr uint8_t ascii_short_name_len= 11;
     static constexpr uint8_t ascii_long_name_len = 13;
 
 // Data
@@ -1289,7 +1302,7 @@ struct Directory_entry{
     
     uint8_t creation_time_tenth_of_seconds() const {return data[12];}
     uint16_t creation_time() const 
-{return atd::concat_bytes<uint16_t>(data[15], data[14]);}
+	    {return atd::concat_bytes<uint16_t>(data[15], data[14]);}
 
     uint16_t creation_date() const
 	    {return atd::concat_bytes<uint16_t>(data[17], data[16]);}
@@ -1380,7 +1393,7 @@ void copy(const Directory_entry& entry, Entry_info& info);
 template <typename Sector_driver0>
 struct const_Entry_iterator;
 
-enum class Directory_of_entries_state{
+enum class Directory_state{
     ok, read_error, last_entry, long_entry_corrupted
 };
 
@@ -1388,7 +1401,7 @@ enum class Directory_of_entries_state{
 }// impl_of
  
 template <typename Sector_driver0> 
-class Directory_of_entries{
+class Directory{
 public:
 // Types
     using Volume    = atd::FAT32::Volume<Sector_driver0>;
@@ -1397,13 +1410,15 @@ public:
     using Type      = Entry::Type;
     using Entry_info= impl_of::Entry_info;
     using Attribute = impl_of::Directory_entry::Attribute;
-    using State     = impl_of::Directory_of_entries_state;
+    using State     = impl_of::Directory_state;
 
 // Constructors
     // Enlaza con el directorio que se encuentra en el cluster0
-    Directory_of_entries(Volume& volume, uint32_t cluster0);
+    Directory(Volume& volume, uint32_t cluster0);
 
-// Operaciones
+// ls (listado del directorio)
+    // Reinicia la lectura. La siguiente llamada a `read_xxx` devolverá la
+    // primera entrada que encuentre.
     void first_entry();
 //    void next_entry(); // read consume la entry, no se necesita next.
     
@@ -1419,7 +1434,22 @@ public:
     //	    1. Llega a la última entrada, no pudiendo leer más.
     //	    2. Algún error.
     // Por ello mirar el state después de llamar a read_long_entry.
-    bool read_long_entry(Entry_info& info, std::span<uint8_t> long_name);
+    bool read_long_entry(Entry_info& info, 
+			 std::span<uint8_t> long_name);
+
+    // Devuelve la siguiente entrada correspondiente al attribute att.
+    // De esta forma se puede hacer un ls de solo los ficheros, o solo los
+    // directorios.
+    bool read_long_entry(Entry_info& info, 
+			 std::span<uint8_t> long_name, 
+			 Attribute att);
+
+// cd (cambio de directorio)
+    // 2 posibles formas de hacer cd:
+    //	    cd("directory_name") vs cd(cluster_number)
+    // La primera es muy ineficiente ya que habría que recorrer todo el
+    // directorio actual hasta encontrar el cluster correspondiente.
+    void cd(uint32_t cluster0);
 
 
 // State
@@ -1463,22 +1493,32 @@ private:
 
 template <typename S> 
 inline 
-Directory_of_entries<S>::Directory_of_entries(Volume& volume, uint32_t cluster0)
+Directory<S>::Directory(Volume& volume, uint32_t cluster0)
     : dir_{volume, cluster0}, state_{State::ok}
 { }
 
 template <typename S> 
-inline void Directory_of_entries<S>::first_entry()
+inline void Directory<S>::first_entry()
 { 
     dir_.reset(); 
     state_ = State::ok;
 }
 
+// Esta función es idéntica a first_entry()
+template <typename S>
+void Directory<S>::cd(uint32_t cluster0)
+{
+    dir_.reset(cluster0);
+    state_ = State::ok;
+    
+}
+
+
 //template <typename S> 
-//inline void Directory_of_entries<S>::next_entry()
+//inline void Directory<S>::next_entry()
 //{ dir_.next(sizeof_entry); }
 template <typename S> 
-void Directory_of_entries<S>::read(Entry& entry)
+void Directory<S>::read(Entry& entry)
 {
     if (dir_.end_of_file() or dir_.error()){
 	atd::ctrace<5>() << "Trying to read EOC/error file\n";
@@ -1496,12 +1536,13 @@ void Directory_of_entries<S>::read(Entry& entry)
 }
 
 
+
 // precondition: entry es la last_entry de un long_name
 // entry: es de entrada/salida. Se modifica dejando la última entrada leida
 //	 (in) contiene la last_entry de un long_name
 //	 (output) la short_entry del long_name
 template <typename S>
-bool Directory_of_entries<S>::read_long_entry(Entry& entry,
+bool Directory<S>::read_long_entry(Entry& entry,
 					Entry_info& info, 
 					std::span<uint8_t> long_name)
 {
@@ -1540,8 +1581,11 @@ bool Directory_of_entries<S>::read_long_entry(Entry& entry,
 }
 
 
+
+
+
 template <typename S>
-void Directory_of_entries<S>::copy_short_entry(const Entry& entry,
+void Directory<S>::copy_short_entry(const Entry& entry,
 					Entry_info& info, 
 					std::span<uint8_t> name)
 {
@@ -1551,7 +1595,7 @@ void Directory_of_entries<S>::copy_short_entry(const Entry& entry,
 }
 
 template <typename S>
-bool Directory_of_entries<S>::read_long_entry(Entry_info& info, 
+bool Directory<S>::read_long_entry(Entry_info& info, 
 					std::span<uint8_t> long_name)
 {
     using Type = Entry::Type;
@@ -1581,6 +1625,23 @@ bool Directory_of_entries<S>::read_long_entry(Entry_info& info,
 
     return true;
 }
+
+
+
+template <typename S>
+bool Directory<S>::read_long_entry(Entry_info& info, 
+					std::span<uint8_t> long_name,
+					Attribute att)
+{
+    while (read_long_entry(info, long_name) == true){
+	if (info.attribute == att)
+	    return true;
+    }
+
+    return false;
+}
+
+
 
 
 }// namespace FAT32

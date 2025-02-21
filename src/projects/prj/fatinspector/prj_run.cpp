@@ -40,7 +40,8 @@ void Main::run()
 	    break; case 6: print_FAT32_entry();
 	    break; case 7: print_root_directory_short_entries();
 	    break; case 8: print_root_directory_long_entries();
-	    break; case 9: print_file_sectors();
+	    break; case 9: print_directory_ls();
+	    break; case 10: print_file_sectors();
 	}
     }
 }

@@ -86,8 +86,10 @@ private:
     void print_FAT32_boot_sector();
     void print_root_directory_short_entries();
     void print_root_directory_long_entries();
+    void print_directory_ls();
     void print_FAT32_entry();
     void print_file_sectors();
+    void print_ls(Volume& vol, Directory& dir, Attribute att);
 
     void print_sector(std::ostream& out, const Sector& sector, size_t i0, size_t sz)
     { atd::xxd_print(out, sector, i0, sz); }
