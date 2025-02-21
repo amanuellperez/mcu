@@ -343,6 +343,24 @@ void print_directory_entry(std::ostream& out,
  
 }
 
+void print(std::ostream& out, 
+    atd::FAT32::Directory_of_entries<Sector_driver>::Attribute att)
+{
+    using Att = atd::FAT32::Directory_of_entries<Sector_driver>::Attribute;
+
+    switch(att){
+	break; case Att::read_only  : out << "read_only";
+	break; case Att::hidden	    : out << "hidden";
+	break; case Att::system	    : out << "system";
+	break; case Att::volume_id  : out << "volume_id";
+	break; case Att::directory  : out << "directory";
+	break; case Att::archive    : out << "archive\t";
+	break; case Att::long_name  : out << "long_name";
+    }
+
+}
+
+
 void print_directory(std::ostream& out, const atd::FAT32::Directory_entry& dir)
 {
     using Dir = atd::FAT32::Directory_entry;
@@ -373,22 +391,6 @@ void print_directory(std::ostream& out, const atd::FAT32::Directory_entry& dir)
     out << '\n';
 }
 
-void print(std::ostream& out, 
-    atd::FAT32::Directory_of_entries<Sector_driver>::Attribute att)
-{
-    using Att = atd::FAT32::Directory_of_entries<Sector_driver>::Attribute;
-
-    switch(att){
-	break; case Att::read_only  : out << "read_only";
-	break; case Att::hidden	    : out << "hidden";
-	break; case Att::system	    : out << "system";
-	break; case Att::volume_id  : out << "volume_id";
-	break; case Att::directory  : out << "directory";
-	break; case Att::archive    : out << "archive\t";
-	break; case Att::long_name  : out << "long_name";
-    }
-
-}
 
 void Main::print_root_directory_short_entries()
 {
@@ -483,7 +485,7 @@ void Main::print_root_directory_short_entries()
 	    uint8_t day, month;
 	    uint16_t year;
 
-	    Entry::uint16_t2time(entry.creation_time_seconds(),
+	    Entry::uint16_t2time(entry.creation_time(),
 						    seconds, minutes, hours);
 	    Entry::uint16_t2date(entry.creation_date(), day, month, year);
 
@@ -584,6 +586,7 @@ void Main::print_root_directory_long_entries()
 
     using Entry_dir = atd::FAT32::Directory_of_entries<Sector_driver>;
     using Entry_info = Entry_dir::Entry_info;
+    using Entry     = Entry_dir::Entry;
 
     auto root_dir = vol.root_directory_first_cluster();
     if (root_dir == 0){
@@ -594,26 +597,67 @@ void Main::print_root_directory_long_entries()
     Entry_dir dir{vol, root_dir};
     dir.first_entry();
     
+    uart << "n|name\t|attr\t\t|cluster\t|size\t|"
+	"created\t|access\t|modified\t|\n";
     for (uint8_t i = 0; i < 25; ++i){
 	Entry_info info;
-	std::array<uint8_t, 30> name;
+	std::array<uint8_t, 32> name;
 
 	if (!dir.read_long_entry(info, name)){
-	    uart << "read_long_entry error!!!\n";
+	    if (dir.last_entry())
+		uart << "LAST ENTRY found\n";
+	    else
+		uart << "Error\n";
 	    return;
 	}
 
     
 	uart << (uint16_t) i << ": [";
 	print_as_char(uart, name);
-	uart << "]";
+	uart << "]\n\t";
 
-	uart << " " 
+	print(uart, info.attribute);
+
+	uart << '\t'
 	     << info.file_cluster 
-	     << " "
+	     << '\t'
 	     << info.file_size
-	     << '\n';
+	     << '\t';
 
+	    uint8_t seconds, minutes, hours;
+	    uint8_t day, month;
+	    uint16_t year;
+
+	    Entry::uint16_t2time(info.creation_time,
+						    seconds, minutes, hours);
+	    Entry::uint16_t2date(info.creation_date, day, month, year);
+
+	    uart << (uint16_t) day << '/'
+		 << (uint16_t) month << '/'
+		 << year << ' '
+		 << (uint16_t) hours 
+		 << ':' << (uint16_t) minutes 
+		 << ':' << (uint16_t) seconds
+		 << '.' << (uint16_t) info.creation_time_tenth_of_seconds
+		<< '\t';
+
+	    Entry::uint16_t2date(info.last_access_date, day, month, year);
+	    uart << (uint16_t) day << '/'
+		 << (uint16_t) month << '/'
+		 << year << ' '
+		<< '\t';
+
+	    Entry::uint16_t2date(info.last_modification_date, 
+							    day, month, year);
+	    Entry::uint16_t2time(info.last_modification_time,
+						    seconds, minutes, hours);
+	    uart << (uint16_t) day << '/'
+		 << (uint16_t) month << '/'
+		 << year << ' '
+		 << (uint16_t) hours 
+		 << ':' << (uint16_t) minutes 
+		 << ':' << (uint16_t) seconds
+		<< '\n';
     }
     uart << '\n';
     print_line(uart);

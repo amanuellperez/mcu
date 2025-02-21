@@ -1288,7 +1288,7 @@ struct Directory_entry{
     // data[12] == 0
     
     uint8_t creation_time_tenth_of_seconds() const {return data[12];}
-    uint16_t creation_time_seconds() const 
+    uint16_t creation_time() const 
 {return atd::concat_bytes<uint16_t>(data[15], data[14]);}
 
     uint16_t creation_date() const
@@ -1363,7 +1363,7 @@ struct Entry_info{
     uint32_t file_size;
 
     uint16_t creation_date;
-    uint16_t creation_time_seconds;
+    uint16_t creation_time;
     uint8_t  creation_time_tenth_of_seconds;
 
     uint16_t last_access_date;
@@ -1414,7 +1414,11 @@ public:
     // Lee la siguiente entrada que haya devolviendo la información básica en
     // info, y el nombre del fichero en long_name. Si el nombre del fichero no
     // entra en long_name lo trunca.
-    // Devuelve true si todo va bien, false si hay un error
+    // Devuelve true si lee una entrada, false en caso de no poder hacerlo.
+    // Devuelve false si:
+    //	    1. Llega a la última entrada, no pudiendo leer más.
+    //	    2. Algún error.
+    // Por ello mirar el state después de llamar a read_long_entry.
     bool read_long_entry(Entry_info& info, std::span<uint8_t> long_name);
 
 
@@ -1553,13 +1557,13 @@ bool Directory_of_entries<S>::read_long_entry(Entry_info& info,
     using Type = Entry::Type;
 
     Entry entry;
-    
+
 // find_first_not_free_entry:
     do{
 	read(entry);
 
 	if (read_error()) // este nombre es un poco confuso @_@
-	    return false;
+	    return false; // el state lo marcar read
     }while (entry.type() == Type::free);
 
     if (entry.type() == Type::last_entry){
@@ -1567,8 +1571,9 @@ bool Directory_of_entries<S>::read_long_entry(Entry_info& info,
 	return false;
     }
 
-    if (entry.type() == Type::short_entry)
+    if (entry.type() == Type::short_entry){
 	copy_short_entry(entry, info, long_name); // copia entry en info/long_name
+    }
 
     else // == Type::long_entry
 	return read_long_entry(entry, info, long_name); // entry es la last_entry

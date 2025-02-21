@@ -116,36 +116,32 @@ uint8_t Directory_entry::copy_short_name(std::span<uint8_t> str) const
 // funciona.
 uint8_t Directory_entry::copy_long_name(std::span<uint8_t> str)
 {
-    if (str.size() < 5) return 0;
+    auto str_len = str.size();
 
     // Se almacenan en 2 bytes, siendo el más significativo el correspondiente
     // al ASCII (ref???)
-    for (uint8_t i = 0; i < 10 / 2; ++i){
+    for (uint8_t i = 0; i < 10 / 2 and str_len > 0; ++i, --str_len){
 	str[i] = data[1 + 2*i];
 
 	if (data[1 + 2*i] == 0x00) 
 	    return i;
     }
 
-    if (str.size() < 22 / 2) return 5;
-
-    for (uint8_t i = 0; i < 12 / 2; ++i){
+    for (uint8_t i = 0; i < 12 / 2 and str_len > 0; ++i, --str_len){
 	str[5 + i] = data[14 + 2*i];
 
 	if (data[14 + 2*i] == 0x00) 
 	    return 5 + i;
     }
 
-    if (str.size() < 26 / 2) return 12;
-
-    for (uint8_t i = 0; i < 4 / 2; ++i){
+    for (uint8_t i = 0; i < 4 / 2 and str_len > 0; ++i, --str_len){
 	str[11 + i] = data[28 + 2*i];
 
 	if (data[28 + 2*i] == 0x00) 
 	    return 11 + i;
     }
 
-    return 13; 
+    return (str.size() - str_len);
 }
 
 
@@ -182,7 +178,7 @@ void copy(const Directory_entry& entry, Entry_info& info)
     info.file_size = entry.file_size();
 
     info.creation_date = entry.creation_date();
-    info.creation_time_seconds = entry.creation_time_seconds();
+    info.creation_time= entry.creation_time();
     info.creation_time_tenth_of_seconds = entry.creation_time_tenth_of_seconds();
 
     info.last_access_date = entry.last_access_date();
