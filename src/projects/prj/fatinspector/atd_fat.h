@@ -501,18 +501,6 @@ enum class FAT_Cluster_state : uint8_t
 	  // leer un sector de la FAT (realmente no debería ir aqui) (???)
 };
 
-// De momento, como no quiero que ocupe demasiado, limito nread a 5 bits 
-// (se pueden leer hasta 32 uint32_t, que son 32 x 4 = 128 bytes, más los
-// sectores cargados en memoria... se usaría bastante memoria)
-struct FAT_Result_read_next{
-    FAT_Cluster_state state : 3;
-    uint8_t nread           : 5; // (???) nread? otro nombre? 
-
-    FAT_Result_read_next(FAT_Cluster_state st, uint8_t n)
-	: state{st}, nread{n} {}
-};
-
-static_assert(sizeof(FAT_Result_read_next) == 1);
 
 }// impl_of
  
@@ -522,7 +510,6 @@ public:
 // Types
     using Volume           = atd::FAT32::Volume<Sector_driver>;
     using Cluster_state    = impl_of::FAT_Cluster_state;
-    using Result_read_next = impl_of::FAT_Result_read_next;
     using size_type        = uint16_t; // de 512 habitualmente < 2^16
 				       
 // Constructors
@@ -532,14 +519,9 @@ public:
     FAT_area(const Boot_sector& bs) {init(bs);}
 
 
-    // Lee los clusters que siguen al cluster0 y los mete en file_clusters.
-    // Devuelve el número de clusters leídos y el estado del último cluster
-    // leído (allocated, end_of_file, ...)
-    Result_read_next read_next(const uint32_t& cluster0, 
-			    std::span<uint32_t> file_clusters) const;
-
-    // Lee el siguiente cluster a cluster0 guardándolo en next_cluster.
-    Result_read_next read_next(const uint32_t& cluster0, uint32_t& next_cluster);
+    // Lee el siguiente cluster a cluster0. Solo cuando state == allocated
+    // tendrá sentido el valor de next_cluster.
+    Cluster_state read_next(const uint32_t& cluster0, uint32_t& next_cluster);
 
     // Lee el sector nsector de la FAT area.
     // nsector es relativo a la FAT area.
@@ -589,6 +571,7 @@ private:
     std::pair<uint32_t, uint32_t> cluster2sector_pos(uint32_t entry) const;
 
 // Helpers
+
 };
 
 
@@ -844,56 +827,33 @@ uint32_t Volume<SD>::root_directory_first_cluster()
  *			  FAT AREA IMPLEMENTATION
  ***************************************************************************/
 namespace impl_of{
-// Funciones que necesitan conocer la definición de Volume
-template <typename Sector_driver>
-FAT_area<Sector_driver>::Result_read_next 
-	FAT_area<Sector_driver>::read_next(const uint32_t& cluster, 
-				std::span<uint32_t> file_clusters) const
-{
-    // nsector0 es relativo al primer sector de este volumen
-    auto [nsector0, pos] = cluster2sector_pos(cluster);
-
-    for (uint8_t i = 0; i < file_clusters.size(); ++i){
-	uint32_t entry = read<uint32_t>(nsector0, pos);
-
-	if (read_error()){
-	    ctrace<3>() << "Volume read error\n";
-	    return {Cluster_state::read_error, 0};
-	}
-
-
-	auto state = cluster_state(entry);
-	if (state != Cluster_state::allocated)
-	    return {state, i};
-
-	file_clusters[i] = entry;
-
-	uint32_t nsector;
-	std::tie(nsector, pos) = cluster2sector_pos(entry);
-
-	if (nsector != nsector0) // solo leemos 1 sector cada vez
-	    return {Cluster_state::allocated, static_cast<uint8_t>(i + 1)};
-
-    }
-
-    return {Cluster_state::allocated, 
-			    static_cast<uint8_t>(file_clusters.size())};
-
-}
-
-// (FUTURO) Como esto está pensado para micros con poca memoria, basta con ir
+// Como esto está pensado para micros con poca memoria, basta con ir
 // cargando 1 cluster de uno en uno (cada cluster tiene 32 sectores que hay
 // que leer, que ocupan 32 x 512 bytes = 16 kB. Los micros que uso tienen
 // máximo 6kB, no entrando en memoria)
 template <typename Sector_driver>
-FAT_area<Sector_driver>::Result_read_next 
-	FAT_area<Sector_driver>::read_next(const uint32_t& cluster, uint32_t& next_cluster)
+FAT_area<Sector_driver>::Cluster_state
+	FAT_area<Sector_driver>::read_next(const uint32_t& cluster,
+							uint32_t& next_cluster)
 {
-    uint32_t n[1];
-    auto res = read_next(cluster, n);
-    next_cluster = n[0];
+    // nsector0 es relativo al primer sector de este volumen
+    auto [nsector0, pos] = cluster2sector_pos(cluster);
 
-    return res;
+    uint32_t entry = read<uint32_t>(nsector0, pos);
+
+    if (read_error()){
+	ctrace<3>() << "Volume read error\n";
+	return Cluster_state::read_error;
+    }
+
+
+    auto state = cluster_state(entry);
+    if (state != Cluster_state::allocated)
+	return state;
+
+    next_cluster = entry;
+
+    return Cluster_state::allocated;
 }
 
 } // namespace impl_of
@@ -973,7 +933,7 @@ public:
     bool next_cluster();    
 
 private:
-    uint8_t cluster_; // cluster actual
+    uint32_t cluster_; // cluster actual
     uint8_t sector_;  // sector al que apuntamos dentro de cluster_
 
     State state_;
@@ -1035,17 +995,25 @@ template<typename SD>
 bool File_sectors<SD>::update_cache_with_next_clusters(uint32_t cluster0)
 {
     uint32_t next_cluster;
-    auto res = volume.fat_area.read_next(cluster0, next_cluster);
+    auto state = volume.fat_area.read_next(cluster0, next_cluster);
 
-    if (res.state == Volume::Cluster_state::read_error)
+
+    if (state == Volume::Cluster_state::end_of_file){
+	state_ = State::end_of_file;
+	return false;
+    }
+
+    if (state != Volume::Cluster_state::allocated){
 	state_ = State::error;
-    else
-	state_ = State::ok;
+	return false;
+    }
+
+    state_ = State::ok;
 
     cluster_ = next_cluster;
     sector_  = 0;
 
-    return state_ == State::ok;
+    return true;
 }
 
 /***************************************************************************

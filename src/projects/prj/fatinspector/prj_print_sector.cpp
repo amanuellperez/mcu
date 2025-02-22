@@ -779,25 +779,36 @@ void Main::print_FAT32_entry()
     uint32_t cluster{};
     uart >> cluster;
     
-    static constexpr uint8_t file_size = 4;
-    std::array<uint32_t, file_size> file{};
-
-    auto res = vol.fat_area.read_next(cluster, file);
-
-    uart << (uint16_t) res.nread << " clusters readed: ";
-    for (uint8_t i = 0; i < res.nread; ++i)
-	uart << file[i] << "; ";
-    uart << "; state = ";
     using State = Volume::Cluster_state;
 
-    switch (res.state){
-	break; case State::free: uart << "free\n";
-	break; case State::allocated: uart << "allocate\n";
-	break; case State::bad     : uart << "bad\n";
-	break; case State::end_of_file: uart << "EOC\n";
-	break; case State::reserved: uart << "reserved\n";
-	break; case State::read_error: uart << "read error\n";
+    uart << "Max. number of cluster to read (0 to read all): ";
+    uint16_t nclusters = 0;
+    uart >> nclusters;
+    if (nclusters == 0)
+	nclusters = std::numeric_limits<uint16_t>::max();
+
+    for (uint16_t i = 0; i < nclusters; ++i){
+	uint32_t next_cluster;
+	auto state = vol.fat_area.read_next(cluster, next_cluster);
+
+	if (state != State::allocated){
+	    switch (state){
+		break; case State::free: uart << "free\n";
+		break; case State::allocated: uart << "allocate\n";
+		break; case State::bad     : uart << "bad\n";
+		break; case State::end_of_file: uart << "EOC\n";
+		break; case State::reserved: uart << "reserved\n";
+		break; case State::read_error: uart << "read error\n";
+	    }
+
+	    break;
+	}
+	uart << next_cluster << ' ';
+	cluster = next_cluster;
     }
+
+    uart << '\n';
+
     
     
 
@@ -839,14 +850,19 @@ void Main::print_file_sectors()
 	return;
     }
 
-    for (uint8_t i = 0; i < 10; ++i){
+    uart << "Number of cluster to read (0 to read all): ";
+    uint16_t nsectors = 0;
+    uart >> nsectors;
+
+    if (nsectors == 0)
+	nsectors = std::numeric_limits<uint16_t>::max();
+
+    for (uint16_t i = 0; i < nsectors; ++i){
 	uart << "Cluster " << (uint16_t) i << ": " 
 			   << file.global_sector_number() 
 			   << "; first sector (global to disk): " 
 			   << file.global_sector_number() 
 			   << '\n';
-	//file.next_sector();
-	file.next_cluster();
 	if (file.end_of_file()){
 	    uart << "EOC\n";
 	    return;
@@ -854,6 +870,17 @@ void Main::print_file_sectors()
 	    uart << "Error\n";
 	    return;
 	}
+
+	//file.next_sector();
+	if(!file.next_cluster()){
+	    if (file.end_of_file())
+		uart << "EOC\n";
+	    else
+		uart << "ERROR reading cluster\n";
+
+	    return;
+	}
+
     }
 
 
