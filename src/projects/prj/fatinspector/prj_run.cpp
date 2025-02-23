@@ -42,6 +42,7 @@ void Main::run()
 	    break; case 8: print_root_directory_long_entries();
 	    break; case 9: print_directory_ls();
 	    break; case 10: print_file_sectors();
+
 	}
     }
 }

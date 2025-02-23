@@ -313,35 +313,6 @@ void print_long_name_entry(std::ostream& out,
 
 }
 
-void print_directory_entry(std::ostream& out, 
-				const atd::FAT32::Directory_entry& dir)
-{
-    // name
-    for (uint8_t i = 0; i < 11; ++i)
-	out << dir.name[i];
-
-
-    out << '\t' << dir.first_data_cluster_number()
-	  << '\t' <<  dir.file_size;
-
-    out << '\t';
-
-    out << '\t';
-    atd::print_int_as_hex(out, dir.nt_res);
-    out << '\t';
-    atd::print_int_as_hex(out, dir.crt_time_tenth);
-    out << '\t';
-    atd::print_int_as_hex(out, dir.crt_time);
-    out << '\t';
-    atd::print_int_as_hex(out, dir.crt_date);
-    out << '\t';
-    atd::print_int_as_hex(out, dir.lst_acc_date);
-    out << '\t';
-    atd::print_int_as_hex(out, dir.wrt_time);
-    out << '\t';
-    atd::print_int_as_hex(out, dir.wrt_date);
- 
-}
 
 void print(std::ostream& out, Attribute att, bool with_tab = true)
 {
@@ -361,36 +332,6 @@ void print(std::ostream& out, Attribute att, bool with_tab = true)
 
 }
 
-
-void print_directory(std::ostream& out, const atd::FAT32::Directory_entry& dir)
-{
-    using Dir = atd::FAT32::Directory_entry;
-
-    if (dir.is_empty()){
-	out << "EMPTY\n";
-	return;
-    }
-
-    switch (dir.attribute()){
-	break; case Dir::Attribute::read_only: out << "read only";
-	break; case Dir::Attribute::hidden: out << "hidden";
-	break; case Dir::Attribute::system: out << "system";
-	break; case Dir::Attribute::volume_id: out << "volume_id";
-	break; case Dir::Attribute::directory: out << "directory";
-	break; case Dir::Attribute::archive: out << "archive\t";
-	break; case Dir::Attribute::long_name: out << "long_name";
-    }
-
-    out << '\t';
-
-    if (dir.attribute() == Dir::Attribute::long_name)
-	print_long_name_entry(out, 
-		    reinterpret_cast<const atd::FAT32::Long_file_name_entry&>(dir));
-    else
-	print_directory_entry(out, dir);
-
-    out << '\n';
-}
 
 
 void Main::print_root_directory_short_entries()
@@ -544,20 +485,6 @@ void Main::print_root_directory_short_entries()
     }
     uart << '\n';
     print_line(uart);
-    }
-// ----------------
-
-    Sector sector{};
-    Sector_driver::read(vol.data_area.first_sector(), sector);
-
-    using Dir = atd::FAT32::Directory_entry;
-
-    Dir* dir = reinterpret_cast<Dir*>(sector.data());
-
-    uart << "n \t|attr\t\t|name\t|cluster\t|size\t|tenth\t|time\t|date\t|acc_date\t|wrt\t|wrt\t|\n";
-    for (uint8_t i = 0; i < sector.size() / sizeof(Dir); ++i){
-	uart << (int) i << '\t';
-	print_directory(uart, dir[i]);
     }
 
 }
@@ -730,7 +657,8 @@ void Main::print_directory_ls()
 		"\t0. return\n"
 		"\t1. ls archives\n"
 		"\t2. ls directories\n"
-		"\t3. cd\n";
+		"\t3. cd\n"
+		"\t4. Print file\n";
 
 	uint16_t opt{};
 	uart >> opt;
@@ -743,6 +671,8 @@ void Main::print_directory_ls()
 			uart << "Cluster new directory: ";
 			uart >> cluster;
 			dir.cd(cluster);
+
+	    break; case 4: print_file();
 	}
 
     }
@@ -817,8 +747,6 @@ void Main::print_FAT32_entry()
 void Main::print_file_sectors()
 {
     using File_sectors   = atd::FAT32::File_sectors<Sector_driver>;
-//    using Sector = File_sectors::Sector;
-
 
     auto nsector = fat_volume_first_sector(1); // de momento solo leo
 					       // particion 1
@@ -883,6 +811,42 @@ void Main::print_file_sectors()
 
     }
 
+}
+
+void Main::print_file()
+{
+    auto nsector = fat_volume_first_sector(1); // de momento solo leo
+					       // particion 1
+    if (nsector == 0){
+	uart << "Error: can't read first sector of FAT volume\n";
+	return;
+    }
+
+    Volume vol{nsector};
+
+    if (vol.error()){
+	uart << "ERROR reading FAT volume\n";
+	return;
+    }
+
+    uart << "File cluster to print: ";
+    uint32_t fcluster{};
+    uart >> fcluster;
+
+    uart << "File size: ";
+    size_t fsize;
+    uart >> fsize;
+
+    // TODO: size
+    File file{vol, fcluster};
+    
+    uint32_t counter = 20;
+    std::array<uint8_t, 16> data;
+
+    for (; file.read(data) != 0 and counter > 0; --counter){
+	atd::xxd_print(uart, data);
+    }
 
 }
+
 

@@ -24,7 +24,6 @@ msg_main_menu	"Read:\n"
 		"\t10. File sectors\n"
 
 
-
 # load sector
 msg_sector_address	"Sector address: "
 
