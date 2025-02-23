@@ -30,6 +30,7 @@
  *    Manuel Perez
  *    06/10/2024 view_of(int)
  *    08/02/2025 Uninitialized
+ *    23/02/2025 Uninitialized_safe
  *
  ****************************************************************************/
 #include <limits>
@@ -222,6 +223,141 @@ inline Uninitialized<Int> operator*(Uninitialized<Int> a, const Int& b)
 template <Type::Integer Int>
 inline Uninitialized<Int> operator/(Uninitialized<Int> a, const Int& b)
 { return a /= b; }
+
+
+
+// Uninitialized_safe
+// ------------------
+// Esta clase viene sugerida porque al implementar FAT mientras que los
+// ficheros conozco el size en los directorios no. Quiero tener un uint32_t
+// con el size para los ficheros pero que no tenga valor para los directorios.
+// Podía usar Uninitialized pero el problema es que cada vez que quisiera
+// operar con el size tendría que andar mirando si está inicializado o no, y
+// fijo voy a olvidar hacerlo. Por ello, delego esa responsabilidad en esta
+// clase: puedo operar con el size sin preouparme de si está inicializado o no
+// la variable.
+//
+//  Dos posibles implementaciones:
+//	1) En cada operación miramos que la variable esté inicializada:
+//		if (value_ != uninitialized) ...
+//
+//	   De esa forma garantizamos que value_ apunte al valor correcto este
+//	   o no inicializada la variable.
+//
+//	2) Almacenamos otra variable indicando si está inicializada o no. El
+//	problema de esto es que usamos más memoria.
+//
+//  De momento pruebo con la primera.
+
+template <Type::Integer Int>
+class Uninitialized_safe{
+public:
+// De momento uso max() como valor para indicar que no se ha inicializado.
+// Se podía pasar como parámetro de template
+    static constexpr Int uninitialized = std::numeric_limits<Int>::max();
+
+// Constructor
+    Uninitialized_safe() : value_ {uninitialized} { }
+    Uninitialized_safe(const Int& v) : value_{v} { }
+
+// ¿Tiene valor?
+    explicit operator bool() const { return is_initialized();} 
+    bool operator!() const {return !is_initialized();}
+
+// Assign
+    // No voy a dejar convertir a Int ya que si se olvida no mirar que no está
+    // inicializada sería un error
+//    operator Int() const { return value_;}
+    // Antes de llamar a value, garantizar que esté inicializada.
+    Int value() const {return value_;}
+
+    // Observar que así la inicializamos. Asignarle un valor la deja
+    // inicializada. Esto no me permite comparar con Ints, hay que hacerlo
+    // explícitamente
+    Uninitialized_safe& operator=(const Int& x) { value_ = x; return *this; }
+
+// Operators
+    Uninitialized_safe& operator++() 
+    {	if (is_initialized()) ++value_; return *this;}
+
+    Uninitialized_safe operator++(int) 
+    {
+	Uninitialized_safe res{value_};
+	if (is_initialized()) ++value_; 
+	return res;
+    }
+
+    Uninitialized_safe& operator--() 
+    { if(is_initialized()) --value_; return *this;}
+
+    Uninitialized_safe operator--(int) 
+    {
+	Uninitialized_safe res{value_};
+	if(is_initialized()) --value_; 
+	return res;
+    }
+
+
+    Uninitialized_safe& operator+=(const Int& x)
+    { if(is_initialized()) value_ += x; return *this; }
+
+    Uninitialized_safe& operator-=(const Int& x)
+    { if(is_initialized()) value_ -= x; return *this; }
+
+    Uninitialized_safe& operator*=(const Int& x)
+    { if(is_initialized()) value_ *= x; return *this; }
+
+    Uninitialized_safe& operator/=(const Int& x)
+    { if(is_initialized()) value_ /= x; return *this; }
+
+private:
+    Int value_;
+
+    bool is_initialized() const { return value_ != uninitialized;}
+
+};
+
+template <Type::Integer Int>
+inline Uninitialized_safe<Int> 
+	    operator+(Uninitialized_safe<Int> a, const Int& b)
+{ return a += b; }
+
+template <Type::Integer Int>
+inline Uninitialized_safe<Int> 
+	    operator+( const Int& b, Uninitialized_safe<Int> a)
+{ return a += b; }
+
+template <Type::Integer Int>
+inline Uninitialized_safe<Int> 
+	    operator-(Uninitialized_safe<Int> a, const Int& b)
+{ return a -= b; }
+
+
+template <Type::Integer Int>
+inline Uninitialized_safe<Int> 
+	    operator-(const Int& b, const Uninitialized_safe<Int>& a)
+{ return b - a.value(); }
+
+template <Type::Integer Int>
+inline Uninitialized_safe<Int> 
+	    operator*(Uninitialized_safe<Int> a, const Int& b)
+{ return a *= b; }
+
+
+template <Type::Integer Int>
+inline Uninitialized_safe<Int> 
+	    operator*(const Int& b, Uninitialized_safe<Int> a)
+{ return a *= b; }
+
+template <Type::Integer Int>
+inline Uninitialized_safe<Int> 
+	    operator/(Uninitialized_safe<Int> a, const Int& b)
+{ return a /= b; }
+
+template <Type::Integer Int>
+inline Uninitialized_safe<Int> 
+	    operator/(const Int& b, const Uninitialized_safe<Int>& a)
+{ return b / a.value(); }
 
 
 }// namespace

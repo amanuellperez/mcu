@@ -140,6 +140,99 @@ void test_uninitialized()
 
 }
 
+void test_uninitialized_safe()
+{
+    test::interface("Uninitialized_safe");
+
+    atd::Uninitialized_safe<int> x;
+
+    CHECK_TRUE(!x, "Uninitialized");
+
+    x += 10;
+    CHECK_TRUE(!x, "Uninitialized");
+
+    x -= 10;
+    CHECK_TRUE(!x, "Uninitialized");
+
+    x *= 10;
+    CHECK_TRUE(!x, "Uninitialized");
+
+    x /= 10;
+    CHECK_TRUE(!x, "Uninitialized");
+
+    auto y = x;
+    CHECK_TRUE(!y, "Uninitialized");
+
+    x = 10;
+
+// Igualdad
+    CHECK_TRUE(!x == false, "initialized");
+    CHECK_TRUE(x.value() == 10, "operator==");
+    CHECK_TRUE(10 == x.value(), "operator==");
+
+// Orden
+    CHECK_TRUE(x.value() < 20, "operator<");
+    CHECK_TRUE(x.value() <= 20, "operator<=");
+    CHECK_TRUE(x.value() > 2, "operator>");
+    CHECK_TRUE(x.value() >= 2, "operator>=");
+
+// Algebra
+    y = ++x;
+    CHECK_TRUE(y.value() == 11, "operator++");
+    CHECK_TRUE(x.value() == 11, "operator++");
+
+    y = x++;
+    CHECK_TRUE(y.value() == 11, "operator++");
+    CHECK_TRUE(x.value() == 12, "operator++");
+
+    y = --x;
+    CHECK_TRUE(y.value() == 11, "operator--");
+    CHECK_TRUE(x.value() == 11, "operator--");
+
+    y = x--;
+    CHECK_TRUE(y.value() == 11, "operator--");
+    CHECK_TRUE(x.value() == 10, "operator--");
+
+    x += 2;
+    CHECK_TRUE(x.value() == 12, "operator+=");
+
+    x -= 2;
+    CHECK_TRUE(x.value() == 10, "operator-=");
+
+    y = x + 4;
+    CHECK_TRUE(y.value() == 14, "operator+");
+
+    y = 4 + x;
+    CHECK_TRUE(y.value() == 14, "operator+");
+
+    y = x - 4;
+    CHECK_TRUE(y.value() == 6, "operator-");
+
+    x = 2;
+    y =  10 - x;
+    CHECK_TRUE(y.value() == 8, "operator-");
+
+    x = 50;
+    x *= 2;
+    CHECK_TRUE(x.value() == 100, "operator*=");
+
+    x /= 2;
+    CHECK_TRUE(x.value() == 50, "operator/=");
+
+    y = x * 4;
+    CHECK_TRUE(y.value() == 200, "operator *");
+
+    y = 4 * x;
+    CHECK_TRUE(y.value() == 200, "operator *");
+
+    y = x / 2;
+    CHECK_TRUE(y.value() == 25, "operator /");
+
+    x = 4;
+    y = 100 / x;
+    CHECK_TRUE(y.value() == 25, "operator /");
+
+}
 
 int main()
 {
@@ -148,6 +241,7 @@ try{
 
     test_digit_iterator();
     test_uninitialized();
+    test_uninitialized_safe();
 
 }catch(std::exception& e)
 {
