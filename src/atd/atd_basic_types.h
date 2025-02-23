@@ -169,6 +169,8 @@ public:
     explicit operator bool() const { return value_ != uninitialized;}
     bool operator!() const {return value_ == uninitialized;}
 
+    bool is_initialized() const {return value_ != uninitialized;}
+
 // Assign
     operator Int() const { return value_;}
     Uninitialized& operator=(const Int& x) { value_ = x; return *this; }

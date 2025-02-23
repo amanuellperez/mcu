@@ -791,7 +791,7 @@ void Main::print_file_sectors()
 			   << "; first sector (global to disk): " 
 			   << file.global_sector_number() 
 			   << '\n';
-	if (file.end_of_file()){
+	if (file.end_of_sectors()){
 	    uart << "EOC\n";
 	    return;
 	} else if(file.error()){
@@ -801,7 +801,7 @@ void Main::print_file_sectors()
 
 	//file.next_sector();
 	if(!file.next_cluster()){
-	    if (file.end_of_file())
+	    if (file.end_of_sectors())
 		uart << "EOC\n";
 	    else
 		uart << "ERROR reading cluster\n";
@@ -834,17 +834,21 @@ void Main::print_file()
     uart >> fcluster;
 
     uart << "File size: ";
-    size_t fsize;
+    uint32_t fsize;
     uart >> fsize;
 
-    // TODO: size
-    File file{vol, fcluster};
+    File file{vol, fcluster, fsize};
     
-    uint32_t counter = 20;
     std::array<uint8_t, 16> data;
 
-    for (; file.read(data) != 0 and counter > 0; --counter){
-	atd::xxd_print(uart, data);
+    for (uint32_t counter = 0; counter < 20; ++counter){
+	auto n = file.read(data);
+
+	if (n == 0)
+	    return;
+
+	atd::xxd_print(uart, {data.data(), n});
+
     }
 
 }
