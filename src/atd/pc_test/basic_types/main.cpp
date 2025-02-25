@@ -142,9 +142,9 @@ void test_uninitialized()
 
 void test_uninitialized_safe()
 {
-    test::interface("Uninitialized_safe");
+    test::interface("safe_Uninitialized");
 
-    atd::Uninitialized_safe<int> x;
+    atd::safe_Uninitialized<int> x;
 
     CHECK_TRUE(!x, "Uninitialized");
 

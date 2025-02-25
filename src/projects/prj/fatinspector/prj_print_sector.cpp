@@ -654,7 +654,7 @@ void Main::print_directory_ls()
 
 	uart << "\nMenu\n"
 		"----\n"
-		"\t0. return\n"
+		"\t0. Back main menu\n"
 		"\t1. ls archives\n"
 		"\t2. ls directories\n"
 		"\t3. cd\n"
@@ -680,6 +680,8 @@ void Main::print_directory_ls()
 
 
 
+// Esta función prueba FAT_area
+// Aunque es parecida a print_file_sectors, esa otra prueba File_sectors
 void Main::print_FAT32_entry()
 {
     auto nsector = fat_volume_first_sector(1); // de momento solo leo
@@ -711,13 +713,7 @@ void Main::print_FAT32_entry()
     
     using State = Volume::Cluster_state;
 
-    uart << "Max. number of cluster to read (0 to read all): ";
-    uint16_t nclusters = 0;
-    uart >> nclusters;
-    if (nclusters == 0)
-	nclusters = std::numeric_limits<uint16_t>::max();
-
-    for (uint16_t i = 0; i < nclusters; ++i){
+    while (1){
 	uint32_t next_cluster;
 	auto state = vol.fat_area.read_next(cluster, next_cluster);
 
@@ -731,19 +727,21 @@ void Main::print_FAT32_entry()
 		break; case State::read_error: uart << "read error\n";
 	    }
 
+	    uart << '\n';
 	    break;
 	}
 	uart << next_cluster << ' ';
 	cluster = next_cluster;
     }
 
-    uart << '\n';
 
     
     
 
 }
 
+// Esta función prueba File_sectors
+// Aunque es parecida a print_FAT32_entry, esa otra prueba FAT_area
 void Main::print_file_sectors()
 {
     using File_sectors   = atd::FAT32::File_sectors<Sector_driver>;
@@ -778,14 +776,9 @@ void Main::print_file_sectors()
 	return;
     }
 
-    uart << "Number of cluster to read (0 to read all): ";
-    uint16_t nsectors = 0;
-    uart >> nsectors;
+    uint32_t i = 0;
 
-    if (nsectors == 0)
-	nsectors = std::numeric_limits<uint16_t>::max();
-
-    for (uint16_t i = 0; i < nsectors; ++i){
+    while(1){
 	uart << "Cluster " << (uint16_t) i << ": " 
 			   << file.global_sector_number() 
 			   << "; first sector (global to disk): " 
@@ -808,7 +801,8 @@ void Main::print_file_sectors()
 
 	    return;
 	}
-
+    
+	++i;
     }
 
 }
@@ -841,13 +835,22 @@ void Main::print_file()
     
     std::array<uint8_t, 16> data;
 
-    for (uint32_t counter = 0; counter < 20; ++counter){
+    uint32_t addr = 0;
+
+    while(1){
 	auto n = file.read(data);
 
-	if (n == 0)
-	    return;
+	if (n == 0){
+	    if (file.end_of_file())
+		uart << "EOF\n";
+	    else
+		uart << "Error: n == 0 but is not EOF\n";
 
-	atd::xxd_print(uart, {data.data(), n});
+	    return;
+	}
+
+	atd::xxd_print(uart, {data.data(), n}, addr);
+	addr += atd::Xxd::nbytes_per_line;
 
     }
 

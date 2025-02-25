@@ -43,12 +43,18 @@ void test_xxd_print()
 		   'a','b','c','d'};
 
     atd::xxd_print(std::cout, x);
-		   
+    
+    std::cout << "\n\n";
     std::array<uint8_t, 36> a{0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,
 	           16,17,18,19,20,21,22,23,24,25,26,27,28,29,30, 31, 
 		   'a','b','c','d'};
     atd::xxd_print(std::cout, a);
 
+    std::cout << "\n\n";
+    atd::xxd_print(std::cout, a, 100);
+
+
+    std::cout << "\n\n";
     print(std::cout, a);
 
 }

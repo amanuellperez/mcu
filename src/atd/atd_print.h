@@ -48,33 +48,37 @@ public:
     // Muestra en el flujo indicado el sector cargado en memoria.
     // De momento es responsabilidad del usuario garantizar que se haya
     // cargado el sector correspondiente.
-    static void print(std::ostream& out, std::span<const uint8_t> bf) 
-    { print(out, bf, 0, bf.size()); }
+    static void print(std::ostream& out, std::span<const uint8_t> bf
+				       , size_t addr0 = 0) 
+    { print(out, bf, 0, bf.size(), addr0); }
 
     // Imprimimos bf[i0 .. i0 + N)
     // De momento no se valida que i0, i0+N estén dentro de bf. Es
     // responsabilidad del cliente.
-    static void print(std::ostream& out, std::span<const uint8_t> bf, 
-					size_t i0, size_t N);
-
-private:
-
+    static void print(std::ostream& out, std::span<const uint8_t> bf
+				       , size_t i0, size_t N
+				       , size_t addr0 = 0);
 // Cfg
     static constexpr uint8_t nbytes_per_line = 16;
 
+private:
+
 // Helpers
-    static void print_line(std::ostream& out, std::span<const uint8_t> bf, 
-							size_t i, size_t N);
+    static void print_line(std::ostream& out, std::span<const uint8_t> bf
+					    , size_t i, size_t N
+					    , size_t addr0 = 0);
     
 };
 
 
-inline void xxd_print(std::ostream& out, std::span<const uint8_t> bf) 
-{ Xxd::print(out, bf); }
+inline void xxd_print(std::ostream& out, std::span<const uint8_t> bf
+				       , size_t addr0 = 0) 
+{ Xxd::print(out, bf, addr0); }
 
 inline void xxd_print(std::ostream& out, std::span<const uint8_t> bf
-			    , size_t i0, size_t N) 
-{ Xxd::print(out, bf, i0, N); }
+			    , size_t i0, size_t N
+			    , size_t addr0 = 0) 
+{ Xxd::print(out, bf, i0, N, addr0); }
 
 
 }// namespace td

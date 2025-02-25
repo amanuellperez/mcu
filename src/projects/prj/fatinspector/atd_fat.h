@@ -985,7 +985,7 @@ enum class File_state : uint8_t{
 //	(2) Los ficheros: su tamaño viene almacenado en la entry
 //	    correspondiente del directorio.
 //
-//  ¿Cómo mezclar los dos tipos? Podía usar Uniniatialized_safe<uint32_t> size;
+//  ¿Cómo mezclar los dos tipos? Podía usar safe_Uniniatialized<uint32_t> size;
 //  pero como quiero poder hacer un reset necesito recordar el tamaño del
 //  fichero. Por eso uso dos sizes:
 //	    Uniniatialized size_: tamaño del fichero (si está inicializado)
@@ -1053,7 +1053,7 @@ private:
 
     File_sectors sector_; // lista enlazada con los sectores del fichero
     uint16_t i; // byte actual al que apuntamos dentro del sector
-    atd::Uninitialized_safe<uint32_t> remainder_bytes_; // numero de bytes que quedan por leer
+    atd::safe_Uninitialized<uint32_t> remainder_bytes_; // numero de bytes que quedan por leer
 
     State state_;
 
@@ -1125,7 +1125,7 @@ inline uint8_t File<SD>::read(std::span<uint8_t> buf)
 	--remainder_bytes_; 
 	if (remainder_bytes_.value() == 0){
 	    state_ = State::end_of_file;
-	    return n;
+	    return n + 1u;
 	}
 
 	++i;
@@ -1134,7 +1134,7 @@ inline uint8_t File<SD>::read(std::span<uint8_t> buf)
 	    sector_.next_sector(); 
 
 	    if (sector_.end_of_sectors() or sector_.error())
-		return n;
+		return n + 1u;
 
 	    i = 0;
 	}
@@ -1517,6 +1517,7 @@ bool Directory<S>::read_long_entry(Entry& entry,
 {
     static constexpr uint8_t size = Entry::ascii_long_name_len;
 
+// Copiamos el name en long_name
     for (uint8_t nentry = entry.extended_order(); nentry > 0; --nentry){
 	uint8_t i = nentry - 1;
 

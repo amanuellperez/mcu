@@ -30,7 +30,7 @@
  *    Manuel Perez
  *    06/10/2024 view_of(int)
  *    08/02/2025 Uninitialized
- *    23/02/2025 Uninitialized_safe
+ *    23/02/2025 safe_Uninitialized
  *
  ****************************************************************************/
 #include <limits>
@@ -175,6 +175,8 @@ public:
     operator Int() const { return value_;}
     Uninitialized& operator=(const Int& x) { value_ = x; return *this; }
 
+    Int value() const {return value_;}
+
 // Operators
     Uninitialized& operator++() {++value_; return *this;}
     Uninitialized operator++(int) 
@@ -227,8 +229,11 @@ inline Uninitialized<Int> operator/(Uninitialized<Int> a, const Int& b)
 { return a /= b; }
 
 
+template <Type::Integer Int>
+inline std::ostream& operator<<(std::ostream& out, const Uninitialized<Int>& a)
+{ return out << a.value(); }
 
-// Uninitialized_safe
+// safe_Uninitialized
 // ------------------
 // Esta clase viene sugerida porque al implementar FAT mientras que los
 // ficheros conozco el size en los directorios no. Quiero tener un uint32_t
@@ -252,15 +257,15 @@ inline Uninitialized<Int> operator/(Uninitialized<Int> a, const Int& b)
 //  De momento pruebo con la primera.
 
 template <Type::Integer Int>
-class Uninitialized_safe{
+class safe_Uninitialized{
 public:
 // De momento uso max() como valor para indicar que no se ha inicializado.
 // Se podía pasar como parámetro de template
     static constexpr Int uninitialized = std::numeric_limits<Int>::max();
 
 // Constructor
-    Uninitialized_safe() : value_ {uninitialized} { }
-    Uninitialized_safe(const Int& v) : value_{v} { }
+    safe_Uninitialized() : value_ {uninitialized} { }
+    safe_Uninitialized(const Int& v) : value_{v} { }
 
 // ¿Tiene valor?
     explicit operator bool() const { return is_initialized();} 
@@ -276,40 +281,40 @@ public:
     // Observar que así la inicializamos. Asignarle un valor la deja
     // inicializada. Esto no me permite comparar con Ints, hay que hacerlo
     // explícitamente
-    Uninitialized_safe& operator=(const Int& x) { value_ = x; return *this; }
+    safe_Uninitialized& operator=(const Int& x) { value_ = x; return *this; }
 
 // Operators
-    Uninitialized_safe& operator++() 
+    safe_Uninitialized& operator++() 
     {	if (is_initialized()) ++value_; return *this;}
 
-    Uninitialized_safe operator++(int) 
+    safe_Uninitialized operator++(int) 
     {
-	Uninitialized_safe res{value_};
+	safe_Uninitialized res{value_};
 	if (is_initialized()) ++value_; 
 	return res;
     }
 
-    Uninitialized_safe& operator--() 
+    safe_Uninitialized& operator--() 
     { if(is_initialized()) --value_; return *this;}
 
-    Uninitialized_safe operator--(int) 
+    safe_Uninitialized operator--(int) 
     {
-	Uninitialized_safe res{value_};
+	safe_Uninitialized res{value_};
 	if(is_initialized()) --value_; 
 	return res;
     }
 
 
-    Uninitialized_safe& operator+=(const Int& x)
+    safe_Uninitialized& operator+=(const Int& x)
     { if(is_initialized()) value_ += x; return *this; }
 
-    Uninitialized_safe& operator-=(const Int& x)
+    safe_Uninitialized& operator-=(const Int& x)
     { if(is_initialized()) value_ -= x; return *this; }
 
-    Uninitialized_safe& operator*=(const Int& x)
+    safe_Uninitialized& operator*=(const Int& x)
     { if(is_initialized()) value_ *= x; return *this; }
 
-    Uninitialized_safe& operator/=(const Int& x)
+    safe_Uninitialized& operator/=(const Int& x)
     { if(is_initialized()) value_ /= x; return *this; }
 
 private:
@@ -320,46 +325,50 @@ private:
 };
 
 template <Type::Integer Int>
-inline Uninitialized_safe<Int> 
-	    operator+(Uninitialized_safe<Int> a, const Int& b)
+inline safe_Uninitialized<Int> 
+	    operator+(safe_Uninitialized<Int> a, const Int& b)
 { return a += b; }
 
 template <Type::Integer Int>
-inline Uninitialized_safe<Int> 
-	    operator+( const Int& b, Uninitialized_safe<Int> a)
+inline safe_Uninitialized<Int> 
+	    operator+( const Int& b, safe_Uninitialized<Int> a)
 { return a += b; }
 
 template <Type::Integer Int>
-inline Uninitialized_safe<Int> 
-	    operator-(Uninitialized_safe<Int> a, const Int& b)
+inline safe_Uninitialized<Int> 
+	    operator-(safe_Uninitialized<Int> a, const Int& b)
 { return a -= b; }
 
 
 template <Type::Integer Int>
-inline Uninitialized_safe<Int> 
-	    operator-(const Int& b, const Uninitialized_safe<Int>& a)
+inline safe_Uninitialized<Int> 
+	    operator-(const Int& b, const safe_Uninitialized<Int>& a)
 { return b - a.value(); }
 
 template <Type::Integer Int>
-inline Uninitialized_safe<Int> 
-	    operator*(Uninitialized_safe<Int> a, const Int& b)
+inline safe_Uninitialized<Int> 
+	    operator*(safe_Uninitialized<Int> a, const Int& b)
 { return a *= b; }
 
 
 template <Type::Integer Int>
-inline Uninitialized_safe<Int> 
-	    operator*(const Int& b, Uninitialized_safe<Int> a)
+inline safe_Uninitialized<Int> 
+	    operator*(const Int& b, safe_Uninitialized<Int> a)
 { return a *= b; }
 
 template <Type::Integer Int>
-inline Uninitialized_safe<Int> 
-	    operator/(Uninitialized_safe<Int> a, const Int& b)
+inline safe_Uninitialized<Int> 
+	    operator/(safe_Uninitialized<Int> a, const Int& b)
 { return a /= b; }
 
 template <Type::Integer Int>
-inline Uninitialized_safe<Int> 
-	    operator/(const Int& b, const Uninitialized_safe<Int>& a)
+inline safe_Uninitialized<Int> 
+	    operator/(const Int& b, const safe_Uninitialized<Int>& a)
 { return b / a.value(); }
+
+template <Type::Integer Int>
+inline std::ostream& operator<<(std::ostream& out, const safe_Uninitialized<Int>& a)
+{ return out << a.value(); }
 
 
 }// namespace

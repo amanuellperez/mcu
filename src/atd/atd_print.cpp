@@ -25,24 +25,26 @@
 namespace atd{
 
 void Xxd::print(std::ostream& out, std::span<const uint8_t> bf, 
-		size_t i0, size_t sz) 
+		size_t i0, size_t sz, size_t addr0) 
 {
     size_t ie = i0 + sz; // [i0, ie) intervalo a imprimir
     for (; ie - i0 > nbytes_per_line; i0 += nbytes_per_line){
-	print_line(out, bf, i0, nbytes_per_line);
+	print_line(out, bf, i0, nbytes_per_line, addr0);
+	addr0 += nbytes_per_line;
     }
 
-    print_line(out, bf, i0, ie - i0);
+    print_line(out, bf, i0, ie - i0, addr0);
 
 }
 
-void Xxd::print_line(std::ostream& out, std::span<const uint8_t> bf, 
-					size_t i, size_t N) 
+void Xxd::print_line(std::ostream& out, std::span<const uint8_t> bf
+				      , size_t i, size_t N
+				      , size_t addr0) 
 {
 // header:
     out.fill('0');
     out.width(3);
-    out << i << ':';
+    out << addr0 << ':';
 
 // in hexadecimal:
     for (uint8_t k = 0; k < N; ++k){
