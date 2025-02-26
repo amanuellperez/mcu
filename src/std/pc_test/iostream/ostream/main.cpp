@@ -20,6 +20,8 @@
 #include "../../../std_ostream.h"
 #include "../../../std_iomanip.h"
 
+#include "../../../std_string_view.h"
+
 #include "../alp_streambuf.h"
 
 #include <alp_test.h>
@@ -76,7 +78,7 @@ void test_int(mtd::my_ostream& out, const std::string& msg)
 
 void test_ostream()
 {
-    test::interfaz("ostream");
+    test::interface("ostream");
 
     LCD lcd;
     mtd::my_ostream out{lcd};
@@ -115,7 +117,7 @@ void test_ostream()
 
 void test_fix_ostream()
 {
-    test::interfaz("fix_ostream");
+    test::interface("fix_ostream");
 
     UART uart;
     mtd::fix_ostream out{uart};
@@ -190,7 +192,7 @@ void test_fix_ostream()
 
 void test_fill()
 {
-    test::interfaz("fill");
+    test::interface("fill");
 
     UART uart;
     mtd::fix_ostream out{uart};
@@ -253,6 +255,22 @@ void test_bugs()
 //    out << "] =? 0x00\n";
 }
 
+
+void test_string_view()
+{
+    test::interface("string_view");
+    UART uart;
+    mtd::fix_ostream out{uart};
+
+    const char str[] = "This is not an automatic test";
+    std::string_view sview{str};
+    mtd::string_view mview{str};
+
+    std::cout << sview << '\n';
+    out << mview << '\n';
+}
+
+
 int main()
 {
 try{
@@ -265,6 +283,7 @@ try{
 //  test_hexadecimal();
     test_bugs();
 
+    test_string_view();
 }catch(alp::Excepcion& e){
     cerr << e.what() << '\n';
     return 1;

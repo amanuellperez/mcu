@@ -576,6 +576,7 @@ try{
     test_find_first_not_of();
     test_find_last_not_of();
 
+    // test_ostream(); <-- este está dentro de pc_test/iostream/ostream
 }catch(std::exception& e)
 {
     std::cerr << e.what() << '\n';

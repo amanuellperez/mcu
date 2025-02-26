@@ -1,4 +1,4 @@
-// Copyright (C) 2023 Manuel Perez 
+// Copyright (C) 2023-2025 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -33,6 +33,8 @@
  *               comentados aquellos apartados que no implemento, para saber
  *               qué hay que es lo que falta implementar.
  *
+ *    26/02/2025 operator<<(std::ostream, std::string_view)
+ *
  ****************************************************************************/
 #include "std_config.h"
 #include "std_char_traits.h"
@@ -41,6 +43,7 @@
 #include "std_range_access.h"
 #include "std_stdexcept.h"  // out_of_range
 #include "std_algorithm.h"  // min
+#include "std_ostream.h"
 
 namespace STD{
 
@@ -832,6 +835,10 @@ using string_view = basic_string_view<char>;
 //    // TODO: resto para char8_t, char16_t, ...
 //} // namespace string_view_literals
 //}// namespace literals
+
+inline ostream& operator<<(ostream& out, string_view s)
+{ return out.write(s.data(), s.size()); }
+
 
 
 }// namespace
