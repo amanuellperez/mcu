@@ -20,6 +20,7 @@ INCS= atd_algorithm.h	\
 	atd_char.h			\
 	atd_cmath.h			\
 	atd_concepts.h		\
+	atd_contracts.h		\
 	atd_coordinates.h	\
 	atd_crc.h			\
 	atd_cstddef.h		\

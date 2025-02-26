@@ -68,7 +68,8 @@
 #include <atd_bit.h> // concat_bytes
 #include <atd_array.h>	// Array_of_bytes_view
 #include <atd_cmath.h>	// div
-
+#include <atd_contracts.h>  // precondition
+			    
 namespace atd{
  
 // Lock/unlock class 
@@ -458,9 +459,12 @@ public:
     FAT_area(const Boot_sector& bs) {init(bs);}
 
 // Creación/modificación de listas
-    // uint32_t new_list();    // crea una nueva lista de 1 cluster,
-			       // devolviendo el primer cluster
-    // remove_list(cluster0); // borra toda la lista a partir de cluster0
+    // Crea una nueva lista de 1 cluster, devolviendo el primer cluster.
+    // Devuelve 0 en caso de no poder crear la nueva lista.
+    uint32_t new_list();    
+
+    // Borra toda la lista a partir de cluster0
+    // remove_list(cluster0);
 
 // Acceso a una lista enlazada
 // Cuando pueda voy a usar la notación de std::list.
@@ -525,6 +529,13 @@ private:
 
 // Cfg de FAT_area
 
+
+// Tipos de entradas, valores
+    static constexpr uint32_t free_entry = 0x00000000;
+    static constexpr uint32_t bad_entry = 0x0FFFFFF7;
+    static constexpr uint32_t end_of_file_entry = 0x0FFFFFFF;
+
+// Helpers
     // Observar la forma de hablar: la FAT_area es un conjunto de entradas,
     // donde la posición de cada entrada hace referencia al cluster de esa
     // posición.
@@ -534,20 +545,42 @@ private:
     //	   cluster.
     Cluster_state cluster_state(uint32_t entry) const;
     std::pair<uint32_t, uint32_t> cluster2sector_pos(uint32_t entry) const;
+    uint32_t sector0_area(uint8_t i) const;
 
-// Helpers
-// Funciones de acceso a los sectores
-    // Lee el sector nsector de la FAT area.
-    // nsector es relativo a la FAT area.
-    template <Type::Integer Int>
-    Int read(uint32_t nsector, size_type pos) const
-    { return volume_->template read_global<Int>(sector0_ + nsector, pos);}
+// Funciones de acceso a los clusters.
+// Estas dos funciones permiten concebir la FAT area como un array de
+// clusters. Son las equivalentes a:
+//	v = FAT_area[cluster]; <---> v = read(cluster);
+//	FAT_area[cluster] = v; <---> write(cluster, v);
+//
+// Además, write es la función que oculta que hay múltiples FAT areas.
+// Observar que estoy usando cluster y entry como sinónimos.
 
-    template <Type::Integer Int>
-    uint8_t write( const uint32_t& nsector, size_type pos
-	      , const uint32_t& value) const
-    { return volume_->template write_global<Int>(sector0_ + nsector, pos
-						, value);}
+    // Lee el valor del cluster indicado
+    uint32_t read(const uint32_t& cluster) const
+    { 
+	auto [nsector, pos] = cluster2sector_pos(cluster);
+	return volume_->template read_global<uint32_t>(sector0_ + nsector, pos);
+    }
+
+    // Escribe value en el cluster indicado
+    // (TODO) Gestionar los errores. ¿Qué devolver o hacer si write_in_area
+    // falla?
+    bool write(const uint32_t& cluster, const uint32_t& value) const
+    { 
+	for (uint8_t i = 0; i < nFATs_; ++i)
+	    write_in_area(i, cluster, value);
+
+	return true; // (TODO) Gestionar
+    }
+
+    uint8_t write_in_area(uint8_t i
+		      , const uint32_t& cluster, const uint32_t& value) const
+    {
+	auto [nsector, pos] = cluster2sector_pos(cluster);
+	return volume_->template 
+	write_global<uint32_t>(sector0_area(i) + nsector, pos, value);
+    }
 };
 
 
@@ -569,7 +602,8 @@ private:
 // tanto entry, como (nsector, pos) son coordenadas locales a la FAT area.
 template <typename S>
 inline 
-std::pair<uint32_t, uint32_t> FAT_area<S>::cluster2sector_pos(uint32_t entry) const
+std::pair<uint32_t, uint32_t> 
+	FAT_area<S>::cluster2sector_pos(uint32_t entry) const
 { return atd::div(entry, sector_size_ / sizeof(uint32_t)); }
 
 
@@ -589,8 +623,19 @@ void FAT_area<S>::init(const Boot_sector& bs)
     sector_size_ = bs.bytes_per_sector();
 }
 
+template <typename S>
+inline uint32_t FAT_area<S>::sector0_area(uint8_t i) const
+{
+    atd::precondition<9>(i < nFATs_, "Error: FAT area number too big");
+    
+    return sector0_ + i * number_of_sectors_;
+}
+
 
 // Section 4. FAT specification
+// (RRR) Aunque podía usar free_entry, ... opto por dejar los valores
+// numéricos porque así puedo ver que no los estoy duplicando y comparar con
+// la tabla de la section 4.
 template <typename S>
 FAT_area<S>::Cluster_state FAT_area<S>::cluster_state(uint32_t entry) const
 {
@@ -618,6 +663,19 @@ FAT_area<S>::Cluster_state FAT_area<S>::cluster_state(uint32_t entry) const
 
     return Cluster_state::reserved;
 }
+
+// (DUDA) ¿Añadir state para indicar que ha habido un error de escritura?
+//template <typename S>
+//uint32_t FAT_area<S>::new_list()
+//{
+//    uint32_t cluster = find_first_free_cluster();
+//
+//    if (write(cluster, end_of_file_entry) == 0)
+//	return 0;
+//
+//    return cluster;
+//}
+
 
 
 
@@ -817,10 +875,7 @@ FAT_area<Sector_driver>::Cluster_state
 	FAT_area<Sector_driver>::next_cluster(const uint32_t& cluster,
 							uint32_t& next_cluster)
 {
-    // nsector0 es relativo al primer sector de este volumen
-    auto [nsector0, pos] = cluster2sector_pos(cluster);
-
-    uint32_t entry = read<uint32_t>(nsector0, pos);
+    uint32_t entry = read(cluster);
 
     if (read_error()){
 	ctrace<3>() << "Volume read error\n";

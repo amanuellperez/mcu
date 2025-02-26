@@ -10,6 +10,7 @@ DIRS = 	algorithm	\
 		char		\
 		cmath		\
 		concepts	\
+		contracts	\
 		coordinates \
 		crc			\
 		cstddef		\
