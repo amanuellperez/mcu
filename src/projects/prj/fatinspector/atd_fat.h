@@ -398,15 +398,21 @@ class Volume;
 
 namespace impl_of{
 /***************************************************************************
- *				FAT
+ *				FAT area
  *
- *  Concebimos la FAT como un array lineal, en lugar de un conjunto de
- *  sectores. Esta clase oculta el hecho de que la FAT realmente esté formada
- *  realmente por un array de sectores.
+ *  La FAT area es:
+ *	(1) Un conjunto de sectores contiguos,
+ *	(2) usados para almacenar las listas enlazadas que forman los clusters
+ *	    de los diferentes ficheros del volumen.
+ *	(3) Es redundante, esto es, la FAT area está duplicada.
  *
- *  Oculta también el número de copias de FATs que hay. El cliente no tiene
- *  que preocuparse de saber nada de eso, concibiendo la FAT como una única
- *  FAT.
+ * La concebimos como un driver de listas enlazadas que puede:
+ *	(1) Crear/borrar una lista enlazada completa.
+ *	(2) Modificar una lista enlazada añadiendo/borrando nodos.
+ *
+ *  Esta clase oculta también el número de copias de FATs que hay. El cliente
+ *  no tiene que preocuparse de saber nada de eso, concibiendo la FAT como una
+ *  única FAT.
  *
  ***************************************************************************/
 // Internamente la FAT puede:
@@ -416,31 +422,15 @@ namespace impl_of{
 //     sus sectores [sector[n], sector[n+1] - 1], siendo 
 //     sector[n] = sector[0] + n * Boot_sector::FAT_area_size()
 //
-// En principio, como voy a dar por supuesto que tengo poca memoria RAM (el
+// (old) En principio, como voy a dar por supuesto que tengo poca memoria RAM (el
 // atmega328p tiene solo 2K y un sector ocupa 512 bytes), no voy a guardar en
 // memoria la FAT. Cada vez que queramos acceder a ella, leeré el sector
 // correspondiente, leeré el dato buscado, y eliminaré de memoria el sector.
 //
-// El problema es que eso es muy ineficiente. Si hicieramos:
-//
-//	    uint32_t x = FAT[cluster]; // esto carga el sector, y lee el valor
-//
-//  sería muy ineficiente leer los clusters de un fichero.
-//
-//  Por ello, la función `read` lee no solo el valor de un cluster de un
-//  fichero sino N valores. Si la lista de clusters de un fichero es:
-//
-//	c0 -> c1 -> c2 -> c3 -> c4 -> ... -> cn
-//
-//  podemos hacer:
-//	
-//	    uint32_t file[4];
-//	    FAT.read(c3, file); 
-//
-//  Esta función intenta meter en file c4, c5, c6 y c7 siempre todos estos
-//  clusters esten en el MISMO sector. Si no estuvieran en el mismo sector,
-//  read solo devuelve los clusters de ese sector, teniendo que volver a
-//  llamar a `read` para leer el resto.
+// (new) Voy a dejar que sea el cliente el que decida lo que guarde en memoria
+// o no via Sector_driver. Esa clase será la que gestionará el número de
+// sectores guardados en memoria, pudiendo tener 0 sectores o todo el disco
+// duro en RAM (casos extremos). 
 //
 namespace impl_of{
 
@@ -467,22 +457,48 @@ public:
 
     FAT_area(const Boot_sector& bs) {init(bs);}
 
+// Creación/modificación de listas
+    // uint32_t new_list();    // crea una nueva lista de 1 cluster,
+			       // devolviendo el primer cluster
+    // remove_list(cluster0); // borra toda la lista a partir de cluster0
 
+// Acceso a una lista enlazada
+// Cuando pueda voy a usar la notación de std::list.
     // Lee el siguiente cluster a cluster0. Solo cuando state == allocated
     // tendrá sentido el valor de next_cluster.
     Cluster_state read_next(const uint32_t& cluster0, uint32_t& next_cluster);
+    // TODO: mejor llamarlo next_cluster?
 
-    // Lee el sector nsector de la FAT area.
-    // nsector es relativo a la FAT area.
-    template <Type::Integer Int>
-    Int read(uint32_t nsector, size_type pos) const
-    { return volume_->template read_global<Int>(sector0_ + nsector, pos);}
+    // Añade el cluster en cluster0. (me gusta más `instert_cluster` pero
+    // insert en std::list inserta antes y no después como hago aquí)
+    //
+    // Ejemplo:
+    //	   si la lista es c0 -> c1 -> c2 -> c3 -> c4
+    //
+    // llamar a add_cluster(c2, d), modifica la lista
+    //
+    //			 c0 -> c1 -> c2 -> d -> c3 -> c4
+    //
+    // add_cluster(cluster0, cluster)
+    
+    // Borra el cluster0.
+    // Ejemplo:
+    //	   si la lista es c0 -> c1 -> c2 -> c3 -> c4
+    //
+    // al llamar a remove_cluster(c2) la lista pasa a ser
+    //			  c0 -> c1 -> c3 -> c4
+    //
+    // remove_cluster(cluster0); 
 
+
+
+// State
     // Indica si ha habido algún error en la llamada de `read`
     bool read_error() const{ return !volume_->ok();}
 
+
 // FAT_area Info
-// --------
+// -------------
 // Como está clase es de bajo nivel voy a dejar visibles todas estas clases
 // para poder depurar
     // Sector inicial donde empieza FAT_area[n]
@@ -510,8 +526,9 @@ private:
 
 // Cfg de FAT_area
 
-    // Observar la forma de hablar: la FAT_area es un conjunto de entradas, donde
-    // la posición de cada entrada hace referencia al cluster de esa posición.
+    // Observar la forma de hablar: la FAT_area es un conjunto de entradas,
+    // donde la posición de cada entrada hace referencia al cluster de esa
+    // posición.
     // Así, la entrada 10 de la FAT_area contiene:
     //	1. El estado de ese cluster: free, allocated, bad, ...
     //	2. En el caso de que sea allocated indica el valor del siguiente
@@ -520,6 +537,12 @@ private:
     std::pair<uint32_t, uint32_t> cluster2sector_pos(uint32_t entry) const;
 
 // Helpers
+// Funciones de acceso a los sectores
+    // Lee el sector nsector de la FAT area.
+    // nsector es relativo a la FAT area.
+    template <Type::Integer Int>
+    Int read(uint32_t nsector, size_type pos) const
+    { return volume_->template read_global<Int>(sector0_ + nsector, pos);}
 
 };
 
@@ -1330,6 +1353,10 @@ struct Directory_entry{
     // entry es invalida
     void null_entry() { data[12] = 1; }
     bool is_null_entry() const {return data[12] == 1;}
+
+private:
+    uint8_t copy_long_name_impl(std::span<uint8_t> str);
+
 };
 
 
@@ -1517,8 +1544,15 @@ bool Directory<S>::read_long_entry(Entry& entry,
 {
     static constexpr uint8_t size = Entry::ascii_long_name_len;
 
+// Garantizamos que la cadena acabe en '\0' en el caso de que sea el long_name
+// justo múltiplo de size (de 13 caracteres)
+    uint8_t nentry = entry.extended_order();
+
+    if (nentry * size < long_name.size())
+	long_name[nentry * size] = '\0';
+
 // Copiamos el name en long_name
-    for (uint8_t nentry = entry.extended_order(); nentry > 0; --nentry){
+    for (; nentry > 0; --nentry){
 	uint8_t i = nentry - 1;
 
 	if ((entry.type() != Type::long_entry) 

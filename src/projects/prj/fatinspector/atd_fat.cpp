@@ -111,10 +111,21 @@ uint8_t Directory_entry::copy_short_name(std::span<uint8_t> str) const
     return ascii_short_name_len;
 }
 
+uint8_t Directory_entry::copy_long_name(std::span<uint8_t> str)
+{
+    auto n = copy_long_name_impl(str);
+
+    if (n < str.size())
+	str[n] = '\0';
+
+    return n;
+}
+
+
 // (TODO) Los caracteres se almacenan en 2 bytes, de momento solo me quedo con
 // el primer byte por tratar con caracteres de 1 byte. Para 2 bytes esto no
 // funciona.
-uint8_t Directory_entry::copy_long_name(std::span<uint8_t> str)
+uint8_t Directory_entry::copy_long_name_impl(std::span<uint8_t> str)
 {
     auto str_len = str.size();
 
