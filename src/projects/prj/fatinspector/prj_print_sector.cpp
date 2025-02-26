@@ -715,7 +715,7 @@ void Main::print_FAT32_entry()
 
     while (1){
 	uint32_t next_cluster;
-	auto state = vol.fat_area.read_next(cluster, next_cluster);
+	auto state = vol.fat_area.next_cluster(cluster, next_cluster);
 
 	if (state != State::allocated){
 	    switch (state){

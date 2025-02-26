@@ -466,8 +466,7 @@ public:
 // Cuando pueda voy a usar la notación de std::list.
     // Lee el siguiente cluster a cluster0. Solo cuando state == allocated
     // tendrá sentido el valor de next_cluster.
-    Cluster_state read_next(const uint32_t& cluster0, uint32_t& next_cluster);
-    // TODO: mejor llamarlo next_cluster?
+    Cluster_state next_cluster(const uint32_t& cluster0, uint32_t& next_cluster);
 
     // Añade el cluster en cluster0. (me gusta más `instert_cluster` pero
     // insert en std::list inserta antes y no después como hago aquí)
@@ -544,6 +543,11 @@ private:
     Int read(uint32_t nsector, size_type pos) const
     { return volume_->template read_global<Int>(sector0_ + nsector, pos);}
 
+    template <Type::Integer Int>
+    uint8_t write( const uint32_t& nsector, size_type pos
+	      , const uint32_t& value) const
+    { return volume_->template write_global<Int>(sector0_ + nsector, pos
+						, value);}
 };
 
 
@@ -708,6 +712,11 @@ public:
     Int read_global(const uint32_t& nsector, uint16_t pos)
     { return driver_.template read<Int>(nsector, pos); }
 
+    template <Type::Integer Int = uint8_t>
+    uint8_t write_global( const uint32_t& nsector, uint16_t pos
+		     , const uint32_t& value)
+    { return driver_.template write<Int>(nsector, pos, value); }
+
 
 private:
 // Reserved area
@@ -805,7 +814,7 @@ namespace impl_of{
 // máximo 6kB, no entrando en memoria)
 template <typename Sector_driver>
 FAT_area<Sector_driver>::Cluster_state
-	FAT_area<Sector_driver>::read_next(const uint32_t& cluster,
+	FAT_area<Sector_driver>::next_cluster(const uint32_t& cluster,
 							uint32_t& next_cluster)
 {
     // nsector0 es relativo al primer sector de este volumen
@@ -936,7 +945,7 @@ template<typename SD>
 bool File_sectors<SD>::next_cluster()
 {
     uint32_t next_cluster;
-    auto state = volume.fat_area.read_next(cluster_, next_cluster);
+    auto state = volume.fat_area.next_cluster(cluster_, next_cluster);
 
 
     if (state == Volume::Cluster_state::end_of_file){
