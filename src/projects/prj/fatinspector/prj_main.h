@@ -1,4 +1,4 @@
-// Copyright (C) 2023 Manuel Perez 
+// Copyright (C) 2025 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -24,11 +24,11 @@
 /****************************************************************************
  *
  * DESCRIPCION
- *	Inspector de SD cards
+ *	Inspector de FAT32 filesystems
  *
  * HISTORIA
  *    Manuel Perez
- *    24/04/2023 Escrito
+ *    24/04/2025 Escrito
  *
  ****************************************************************************/
 #include "prj_dev.h"
@@ -38,22 +38,6 @@
 #include <atd_print.h> // xxd_print
 
 #include "atd_fat.h"
-
-// Si TRACE_LEVEL está definido trazamos todas las trazas menores que ese
-// level.
-// Considero:
-//	1 - trazas críticas
-//	2 - menos críticas
-//	5 - errores de funciones de biblioteca.
-//	9 - trazando para depurar programa
-//static constexpr bool trace(uint8_t trace_level = 9)
-//{
-//#ifdef TRACE_LEVEL
-//    return trace_level <= TRACE_LEVEL;
-//#else
-//    return false;
-//#endif
-//}
 
 
 
@@ -77,17 +61,29 @@ private:
     bool load_sector(const SDCard::Address&);
 
 
-// User commands:
+// SD card commands
     void read_status();
-
     void print_sector();
+
+// MBR test
     void print_MBR_boot_sector();
-    void print_FS_info();
+
+// Reserved area test
     void print_FAT32_boot_sector();
-    void print_root_directory_short_entries();
-    void print_root_directory_long_entries();
+    void print_FS_info();
+
+// FAT area test
+    void FAT32_area_menu();
+	void FAT32_area_print_clusters();
+	void FAT32_area_new_list();
+
+// Root directory test
+    void root_directory_menu();
+	void root_directory_print_short_entries();
+	void root_directory_print_long_entries();
+
     void print_directory_ls();
-    void print_FAT32_entry();
+
     void print_file_sectors();
     void print_ls(Volume& vol, Directory& dir, Attribute att);
     void print_file();

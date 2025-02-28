@@ -1,4 +1,4 @@
-// Copyright (C) 2025 Manuel Perez 
+//// Copyright (C) 2025 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -72,13 +72,6 @@
 			    
 namespace atd{
  
-// Lock/unlock class 
-template <typename T>
-struct Lock{
-    T& obj;
-    Lock(T& obj0) : obj{obj0} { obj.lock();}
-    ~Lock() { obj.unlock();}
-};
 
 /***************************************************************************
  *				MBR
@@ -151,14 +144,14 @@ struct MBR{
 
 // read/write
 // La MBR siempre está en el sector 0
-template <typename Sector_driver>
-inline bool read(MBR& mbr)
-{ 
-    using Sector_span = typename Sector_driver::Sector_span;
-    return Sector_driver::read(0, 
-	    Sector_span{reinterpret_cast<uint8_t*>(&mbr), sizeof(MBR)});
-}
-
+//template <typename Sector_driver>
+//inline bool read(MBR& mbr)
+//{ 
+//    using Sector_span = typename Sector_driver::Sector_span;
+//    return Sector_driver::read(0, 
+//	    Sector_span{reinterpret_cast<uint8_t*>(&mbr), sizeof(MBR)});
+//}
+//
 
 /***************************************************************************
  *				    FAT32
@@ -279,11 +272,11 @@ struct Boot_sector{
     // en FAT32 cada entrada es un uint32_t
     static constexpr uint8_t FAT_bytes_per_entry() { return sizeof(uint32_t);}
 
-    uint8_t FAT_number_of_entries_per_sector() const
+    uint8_t FAT_number_of_clusters_per_sector() const
     { return bytes_per_sector() / FAT_bytes_per_entry(); }
 
-    uint32_t FAT_number_of_entries() const
-    { return FAT_number_of_entries_per_sector() * FAT_number_of_sectors();}
+    uint32_t FAT_number_of_clusters() const
+    { return FAT_number_of_clusters_per_sector() * FAT_number_of_sectors();}
 
     // El número de entradas en una FAT es:
     //	    2 + data_area_number_of_clusters()
@@ -294,7 +287,7 @@ struct Boot_sector{
     // 
     // (HACK) ¿Se podría usar esta zona para guardar documentos secretos?
     uint32_t FAT_unused_entries() const
-    { return FAT_number_of_entries() 
+    { return FAT_number_of_clusters() 
 				    - (2 + data_area_number_of_clusters());}
 
     uint32_t FAT_unused_sectors() const
@@ -509,7 +502,7 @@ public:
     {return sector0_ + n * number_of_sectors_;}
 
     uint32_t number_of_sectors() const {return number_of_sectors_;}
-    uint32_t number_of_entries() const {return number_of_entries_;}
+    uint32_t number_of_clusters() const {return number_of_clusters_;}
     uint32_t bytes_per_sector() const {return sector_size_;}
 
     uint8_t number_of_active_FATs() const {return nFATs_;}
@@ -522,10 +515,9 @@ private:
     uint32_t sector0_;	// sector donde empieza la primera FAT_area
     uint8_t nFATs_;	// número de FATs activas
     uint32_t number_of_sectors_; // número total de sectores de 1 FAT_area
-    uint32_t number_of_entries_; // número de entradas de la FAT_area
+    uint32_t number_of_clusters_; // número de clusters de la FAT_area
 				 // Es el número de clusters de la data area
     uint32_t sector_size_; // número de bytes por sector
-			   
 
 // Cfg de FAT_area
 
@@ -547,7 +539,14 @@ private:
     std::pair<uint32_t, uint32_t> cluster2sector_pos(uint32_t entry) const;
     uint32_t sector0_area(uint8_t i) const;
 
-// Funciones de acceso a los clusters.
+    // Devuelve el primer cluster libre después de cluster0,
+    // ó 0 en caso de no encontrar ninguno.
+    // El valor por defecto es 2 ya que el primer cluster es 2, no 0.
+    uint32_t find_first_free_cluster(uint32_t cluster0 = 2) const;
+
+
+// Funciones de acceso a los clusters
+// ----------------------------------
 // Estas dos funciones permiten concebir la FAT area como un array de
 // clusters. Son las equivalentes a:
 //	v = FAT_area[cluster]; <---> v = read(cluster);
@@ -619,13 +618,15 @@ void FAT_area<S>::init(const Boot_sector& bs)
 	nFATs_   = bs.number_of_active_FATs();
 
     number_of_sectors_ = bs.FAT_number_of_sectors();
-    number_of_entries_ = bs.data_area_number_of_clusters();
+    number_of_clusters_ = bs.data_area_number_of_clusters();
     sector_size_ = bs.bytes_per_sector();
 }
 
 template <typename S>
 inline uint32_t FAT_area<S>::sector0_area(uint8_t i) const
 {
+atd::ctrace<9>() << "sector0_area(" << (uint16_t) i << " < " <<
+    (int) nFATs_ << ")\n";
     atd::precondition<9>(i < nFATs_, "Error: FAT area number too big");
     
     return sector0_ + i * number_of_sectors_;
@@ -649,7 +650,7 @@ FAT_area<S>::Cluster_state FAT_area<S>::cluster_state(uint32_t entry) const
     // entrys 0 y 1 están reservados
     // section 3.5
     if (0x00000002 <= entry 
-		and entry <= number_of_entries_ + 1) 
+		and entry <= number_of_clusters_ + 1) 
 	return Cluster_state::allocated;
 	
 
@@ -664,17 +665,42 @@ FAT_area<S>::Cluster_state FAT_area<S>::cluster_state(uint32_t entry) const
     return Cluster_state::reserved;
 }
 
+// (DUDA) Se puede optimizar esta función iterando en lugar por el número de
+// clusters por (sector, pos) con 
+//	sector = [sector0_ ... sector0_ + number_of_sectors_)
+//	pos = [0 .. 512)
+// Y llamar directamente a volume->read_global. De esa forma evitamos el estar
+// llamando continuamente a la función cluster2sector_pos dentro de read.
+// Pero como estoy aprendiendo FAT32 opto por una implementación sencilla que
+// entienda y no tenga errores, que una más eficiente que pueda tener errores.
+template <typename S>
+uint32_t FAT_area<S>::find_first_free_cluster(uint32_t cluster) const
+{
+    for (; cluster < number_of_clusters_; ++cluster){
+	auto v = read(cluster);
+	if (v == free_entry)
+	    return cluster;
+    }
+
+    atd::ctrace<2>() << "FAT area full\n";
+    return 0;
+}
+
+
 // (DUDA) ¿Añadir state para indicar que ha habido un error de escritura?
-//template <typename S>
-//uint32_t FAT_area<S>::new_list()
-//{
-//    uint32_t cluster = find_first_free_cluster();
-//
-//    if (write(cluster, end_of_file_entry) == 0)
-//	return 0;
-//
-//    return cluster;
-//}
+template <typename S>
+uint32_t FAT_area<S>::new_list()
+{
+    uint32_t cluster = find_first_free_cluster();
+    
+    if (cluster == 0) // si no hay más clusters libres
+	return 0;
+
+    if (write(cluster, end_of_file_entry) == 0)
+	return 0;
+
+    return cluster;
+}
 
 
 
@@ -775,6 +801,8 @@ public:
 		     , const uint32_t& value)
     { return driver_.template write<Int>(nsector, pos, value); }
 
+    // Devuelve true si hace el flush correctamente, false en caso de error
+    bool flush() { return driver_.flush();}
 
 private:
 // Reserved area
@@ -785,24 +813,30 @@ private:
     Sector_driver driver_;
 
 // Helpers
-    Boot_sector* init();
+    // Devuelve fs_info
+    uint16_t init();
 
-    template <typename T>
-    T* read_global_as_pointer(const uint32_t& nsector)
-    { return driver_.template sector_pointer_as<T>(nsector);}
+//    template <typename T>
+//    T* read_global_as_pointer(const uint32_t& nsector)
+//    { return driver_.template lock_sector<T>(nsector);}
 };
 
 // precondition: sector0_ valido
 template <typename SD>
-Boot_sector* Volume<SD>::init()
+uint16_t Volume<SD>::init()
 {
-    //Boot_sector* bs = driver_.template sector_pointer_as<Boot_sector>(sector0_);
-    Boot_sector* bs = read_global_as_pointer<Boot_sector>(sector0_);
-    if (bs == nullptr){
+//    Boot_sector* bs = read_global_as_pointer<Boot_sector>(sector0_);
+//    bs = driver_.template lock_sector<T>(nsector);}
+//    Boot_sector* bs = 
+//	reinterpret_cast<Boot_sector*>(driver_.template lock_sector(nsector)); 
+
+    auto bs = driver_.template lock_sector_and_view_as<Boot_sector>(sector0_);
+
+    if (bs.is_null()){
 	atd::ctrace<3>() << "ERROR: can't initialize Volume::init\n";
 
 	sector_size_ = 0; // error
-	return nullptr;
+	return 0;
     }
 
 // Reserved area
@@ -811,7 +845,8 @@ Boot_sector* Volume<SD>::init()
     fat_area.init(*bs);
     data_area.init(*bs);
 
-    return bs;
+
+    return bs->fs_info;
 }
 
 
@@ -819,7 +854,6 @@ template <typename SD>
 Volume<SD>::Volume(const uint32_t& sector0)
     : fat_area{this}, sector0_{sector0}
 {
-    Lock lock{driver_};
     init();
 }
 
@@ -827,13 +861,13 @@ template <typename SD>
 Volume<SD>::Volume(const uint32_t& sector0, Boot_sector_min& bs_min)
     : fat_area{this}, sector0_{sector0}
 {
-    Lock lock{driver_};
-    Boot_sector* bs = init();
-
-    if (bs == nullptr)
-	return;
-
-    bs_min.fs_info = bs->fs_info;
+//    Boot_sector* bs = init();
+//
+//    if (bs == nullptr)
+//	return;
+//
+//    bs_min.fs_info = bs->fs_info;
+    bs_min.fs_info = init();
 }
 
 
@@ -842,10 +876,12 @@ Volume<SD>::Volume(const uint32_t& sector0, Boot_sector_min& bs_min)
 template <typename SD>
 uint32_t Volume<SD>::root_directory_first_cluster() 
 {
-    Lock lock{driver_};
+//    Lock lock{driver_};
+//    Boot_sector* bs = read_global_as_pointer<Boot_sector>(sector0_);
 
-    Boot_sector* bs = read_global_as_pointer<Boot_sector>(sector0_);
-    if (bs == nullptr){
+    auto bs = driver_.template lock_sector_and_view_as<Boot_sector>(sector0_);
+    //if (bs == nullptr){
+    if (bs.is_null()){
 	atd::ctrace<3>() << "ERROR: can't read boot sector\n";
 
 	return 0; // error
@@ -853,11 +889,6 @@ uint32_t Volume<SD>::root_directory_first_cluster()
     
     return bs->root_directory_first_cluster();
     
-//    Boot_sector bs;
-//    if (!read_global(sector0_, bs))
-//	return 0; // error
-//
-//    return bs.root_directory_first_cluster();
 }
 
 
@@ -1231,82 +1262,6 @@ inline uint8_t File<SD>::read(std::span<uint8_t> buf)
 }
 
 
-
-//template <typename SD> 
-//uint16_t File<SD>::next_byte(File_sectors& sector, uint16_t i)
-//{
-//    if (sector.end_of_file() or sector.error())
-//	return i;
-//
-//    ++i;
-//    if (i < sector.volume.bytes_per_sector())
-//	return i;
-//
-//    i = 0;
-//    sector.next_sector(); // puede devolver error o end_of_file en state
-//    
-//    return i;
-//}
-
-//namespace impl_of{
-//
-//template <typename Sector_driver0> 
-//struct const_File_iterator{
-//// Data
-//    using File_sectors = atd::FAT32::File_sectors<Sector_driver0>;
-//    using File	       = atd::FAT32::File<Sector_driver0>;
-//
-//    File_sectors sector;
-//    uint16_t i; // byte actual al que apuntamos dentro del sector
-//
-//    const_File_iterator(const File_sectors& s, uint32_t cluster0) 
-//	: sector{s}, i{0} { sector.first_sector(cluster0); }
-//
-//    const_File_iterator& operator++()
-//    {
-//	i = File::next_byte(sector, i); 
-//
-//	return *this;
-//    }
-//    
-//    const_File_iterator operator++(int)
-//    {
-//	const_File_iterator tmp = *this;
-//	++*this;
-//	return tmp;
-//    }
-//
-//    // Observar que como es un const_iterator puedo devolver 
-//    // directamente un Int en lugar de Int&
-//    uint8_t operator*()
-//    {
-//	// if (sector.end_of_file() or sector.error()) return 0xEA;
-//	return sector.template read<uint8_t>(i);
-//    }
-//
-//    //pointer operator->() { return &(**this); }
-//
-//    friend
-//    bool operator==(const const_File_iterator& a, const const_iterator_end&)
-//    { return a.i == 0 and a.sector.end_of_file(); }
-//
-//    friend
-//    bool operator!=(const const_File_iterator& a, const const_iterator_end& b)
-//    { return !(a == b); }
-//};
-//
-//
-//}// impl_of
-
-
-
-//template <typename SD> 
-//inline File<SD>::const_iterator File<SD>::begin()
-//{ return const_iterator{sector_, cluster0_}; }
-//
-//template <typename SD> 
-//inline File<SD>::const_iterator_end File<SD>::end() const
-//{ return const_iterator_end{}; }
 
 
 /***************************************************************************

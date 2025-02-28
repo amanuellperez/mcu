@@ -37,14 +37,64 @@ void Main::run()
 	    break; case 3: print_MBR_boot_sector();
 	    break; case 4: print_FAT32_boot_sector();
 	    break; case 5: print_FS_info();
-	    break; case 6: print_FAT32_entry();
-	    break; case 7: print_root_directory_short_entries();
-	    break; case 8: print_root_directory_long_entries();
-	    break; case 9: print_directory_ls();
-	    break; case 10: print_file_sectors();
+	    break; case 6: FAT32_area_menu();
+	    break; case 7: root_directory_menu();
+	    break; case 8: print_directory_ls();
+	    break; case 9: print_file_sectors();
 
 	}
     }
 }
 
 
+void Main::FAT32_area_menu()
+{
+    while(1){
+	uart << '\n';
+	print_line(uart);
+	
+	//atd::print(uart, msg_fat_area_menu);
+    
+	uart << "FAT area menu\n"
+		"\t0. Back main menu\n"
+	        "\t1. Print list of clusters of a file\n"
+		"\t2. New list\n";
+
+	uint16_t cmd{};
+	uart >> cmd;
+
+	switch(cmd){
+	    break; case 0: return;
+	    break; case 1: FAT32_area_print_clusters();
+	    break; case 2: FAT32_area_new_list();
+
+	}
+    }
+
+}
+
+void Main::root_directory_menu()
+{
+    while(1){
+	uart << '\n';
+	print_line(uart);
+	
+	//atd::print(uart, msg_root_directory_menu);
+    
+	uart << "Root directory menu\n"
+		"\t0. Back main menu\n"
+	        "\t1. Print short entries\n"
+		"\t2. Print long entries\n";
+
+	uint16_t cmd{};
+	uart >> cmd;
+
+	switch(cmd){
+	    break; case 0: return;
+	    break; case 1: root_directory_print_short_entries();
+	    break; case 2: root_directory_print_long_entries();
+
+	}
+    }
+
+}

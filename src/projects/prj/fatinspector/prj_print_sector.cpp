@@ -52,7 +52,11 @@ void Main::print_sector()
     uart >> nsector;
 
     Sector_driver::Sector sector{};
-    Sector_driver::read(nsector, sector);
+    auto r = SDCard::read(nsector, sector);
+    if (!r.ok()){
+	uart << "ERROR reading sector " << nsector << '\n';
+	return;
+    }
 
     print_line(uart);
 
@@ -72,26 +76,27 @@ void Main::print_MBR_boot_sector()
     using MBR = atd::MBR;
     using MBR_type = atd::MBR::Partition_type;
     
-    MBR mbr{};
-    atd::read<Sector_driver>(mbr);
+    Sector_driver driver;
+    auto mbr = driver.template lock_sector_and_view_as<MBR>(0);
+
 
     print_question(uart, msg_is_MBR_valid_sig, false);
-    print_bool_as_yes_no(uart, mbr.is_valid());
+    print_bool_as_yes_no(uart, mbr->is_valid());
 
     uart << '\n';
     atd::print(uart, msg_partition1);
 
     print_question(uart, msg_is_fat32);
-    print_bool_as_yes_no(uart, mbr.partition1.type == MBR_type::fat32_lba);
+    print_bool_as_yes_no(uart, mbr->partition1.type == MBR_type::fat32_lba);
 
     uart << '\t';
     atd::print(uart, msg_lba_offset);
-    uart << " = " << mbr.partition1.lba_first_sector << '\n';
+    uart << " = " << mbr->partition1.lba_first_sector << '\n';
 
-    uart << "\tlba size = " << mbr.partition1.lba_size << '\n';
+    uart << "\tlba size = " << mbr->partition1.lba_size << '\n';
 
     print_question(uart, msg_is_bootable);
-    print_bool_as_yes_no(uart, mbr.partition1.is_bootable());
+    print_bool_as_yes_no(uart, mbr->partition1.is_bootable());
 
 
 }
@@ -131,9 +136,8 @@ void Main::print_FAT32_boot_sector()
 
     Sector_driver driver;
 
-    atd::Lock lock(driver);
-    Boot_sector* bs = driver.sector_pointer_as<Boot_sector>(nsector);
-    if (bs == nullptr){
+    auto bs = driver.template lock_sector_and_view_as<Boot_sector>(nsector);
+    if (bs.is_null()){
 	uart << "ERROR: can't read boot sector\n";
 	return;
     }
@@ -219,9 +223,9 @@ void Main::print_FAT32_boot_sector()
     }
 
    uart << "FAT[i]"
-	<< "\n\tNumber of entries : " << bs->FAT_number_of_entries()
+	<< "\n\tNumber of entries : " << bs->FAT_number_of_clusters()
         << "\n\tNumber of sectors : " << (int) bs->FAT_number_of_sectors() 
-        << "\n\tNumber of entries per sector: " << (int) bs->FAT_number_of_entries_per_sector()
+        << "\n\tNumber of entries per sector: " << (int) bs->FAT_number_of_clusters_per_sector()
 	<< "\n\tUnused entries    : " << bs->FAT_unused_entries()
 	<< "\n\tUnused sectors    : " << bs->FAT_unused_sectors() 
 	<< '\n';
@@ -269,12 +273,10 @@ void Main::print_FS_info()
     }
 
     Sector_driver driver;
-
-    atd::Lock lock(driver);
-    FS_info* info = driver.sector_pointer_as<FS_info>(
+    auto info = driver.template lock_sector_and_view_as<FS_info>(
 	    vol.first_sector() + bs_min.FS_info_sector());
 
-    if (info == nullptr){
+    if (info.is_null()){
 	uart << "ERROR: can't FS info sector\n";
 	return;
     }
@@ -334,7 +336,7 @@ void print(std::ostream& out, Attribute att, bool with_tab = true)
 
 
 
-void Main::print_root_directory_short_entries()
+void Main::root_directory_print_short_entries()
 {
     using Volume = atd::FAT32::Volume<Sector_driver>;
 
@@ -491,7 +493,7 @@ void Main::print_root_directory_short_entries()
 
 
 
-void Main::print_root_directory_long_entries()
+void Main::root_directory_print_long_entries()
 {
     using Volume = atd::FAT32::Volume<Sector_driver>;
 
@@ -682,7 +684,7 @@ void Main::print_directory_ls()
 
 // Esta función prueba FAT_area
 // Aunque es parecida a print_file_sectors, esa otra prueba File_sectors
-void Main::print_FAT32_entry()
+void Main::FAT32_area_print_clusters()
 {
     auto nsector = fat_volume_first_sector(1); // de momento solo leo
 					       // particion 1
@@ -702,7 +704,7 @@ void Main::print_FAT32_entry()
     atd::ctrace<9>() << "FAT:"
 	        "\n\tfirst_sector         : " << vol.fat_area.first_sector(0) 
 	     << "\n\tnumber of sectors    : " << vol.fat_area.number_of_sectors()
-	     << "\n\tnumber of entries    : " << vol.fat_area.number_of_entries()
+	     << "\n\tnumber of entries    : " << vol.fat_area.number_of_clusters()
 	     << "\n\tbytes per sector     : " << vol.fat_area.bytes_per_sector()
 	     << "\n\tnumber of active FATs: " << (uint16_t) vol.fat_area.number_of_active_FATs()
 	     << '\n';
@@ -733,12 +735,37 @@ void Main::print_FAT32_entry()
 	uart << next_cluster << ' ';
 	cluster = next_cluster;
     }
-
-
-    
-    
-
 }
+
+
+void Main::FAT32_area_new_list()
+{
+    auto nsector = fat_volume_first_sector(1); // de momento solo leo
+					       // particion 1
+    if (nsector == 0){
+	uart << "Error: can't read first sector of FAT volume\n";
+	return;
+    }
+
+
+    Volume vol{nsector};
+
+    if (vol.error()){
+	uart << "ERROR\n";
+	return;
+    }
+
+       
+    auto cluster = vol.fat_area.new_list();
+
+    if (cluster != 0)
+	uart << "New cluster: " << cluster << '\n';
+    else
+	uart << "new_list FAIL!\n";
+
+    vol.flush();
+}
+
 
 // Esta función prueba File_sectors
 // Aunque es parecida a print_FAT32_entry, esa otra prueba FAT_area

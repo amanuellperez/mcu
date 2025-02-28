@@ -29,8 +29,9 @@
 
 #include "atd_fat.h"
 
-// Niveles de traza usados
-// 1: Error crítico
+// Niveles de traza usados (borrador)
+// 1: Error crítico: fallo de comunicación, error de hardware.
+// 2: Error: no hay espacio en disco duro, ...
 // 3: Error
 // 5: warnings
 // 9: traza para depurar, borrarlas al final.

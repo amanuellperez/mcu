@@ -33,19 +33,19 @@ uint32_t Main::fat_volume_first_sector(const atd::MBR_partition& p, uint8_t n)
 
 uint32_t Main::fat_volume_first_sector(uint8_t npartition)
 {
-    atd::MBR mbr{};
-    atd::read<Sector_driver>(mbr);
+    Sector_driver driver;
+    auto mbr = driver.template lock_sector_and_view_as<atd::MBR>(0);
 
-    if (!mbr.is_valid()){
+    if (mbr.is_null() or !mbr->is_valid()){
 	atd::ctrace<4>() << "Error: MBR invalid\n";
 	return 0;
     }
 
     switch (npartition){
-	break; case 1: return fat_volume_first_sector(mbr.partition1, 1);
-	break; case 2: return fat_volume_first_sector(mbr.partition2, 2);
-	break; case 3: return fat_volume_first_sector(mbr.partition3, 3);
-	break; case 4: return fat_volume_first_sector(mbr.partition4, 4);
+	break; case 1: return fat_volume_first_sector(mbr->partition1, 1);
+	break; case 2: return fat_volume_first_sector(mbr->partition2, 2);
+	break; case 3: return fat_volume_first_sector(mbr->partition3, 3);
+	break; case 4: return fat_volume_first_sector(mbr->partition4, 4);
     }
 
     return 0;
