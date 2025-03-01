@@ -5,7 +5,9 @@ SOURCES= atd_fat.cpp	\
 		 sdc_print.cpp	\
 		 prj_dev.cpp	\
 		 prj_fat.cpp	\
-		 prj_fat_area_print.cpp	\
+		 prj_sector_driver_test.cpp	\
+		 prj_fat_area_test.cpp	\
+		 prj_reserved_area_test.cpp	\
 		 prj_main.cpp	\
 		 prj_run.cpp	\
 		 prj_init.cpp	\

@@ -1,4 +1,4 @@
-// Copyright (C) 2023 Manuel Perez 
+// Copyright (C) 2025 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -17,35 +17,42 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+
 #include "prj_dev.h"
 #include "prj_strings.h"
 #include "dev_print.h"
 #include "sdc_print.h"
 #include "prj_main.h"
+#include "atd_fat.h"
 
-bool Main::load_sector(const SDCard::Address& add)
+#include <atd_ostream.h>
+
+
+void Main::sector_driver_fill_n_test()
 {
-    auto r = SDCard::read(add, sector);
+    uart << "Sector driver fill_n test\n"
+	    "sector0: ";
 
-    if (r.ok()){
-	sector_number= add;
-	return true;
-    }
-    else{
-	// TODO: poner "error!!!: DETALLES"
-	print(uart, r);
-	return false;
-    }
-}
+    uint32_t sector0;
+    uart >> sector0;
 
-bool Main::load_sector()
-{
+    if (sector0 == 0)
+	return;
 
-    print_question(uart, msg_sector_address, false);
-    SDCard::Address add;
-    uart >> add;
-    uart << add << '\n';
+    uart << "number of sectors to fill: ";
+    uint32_t nsectors;
+    uart >> nsectors;
 
-    return load_sector(add);
+    uart << "value: ";
+    uint8_t value{};
+    uart >> value;
+
+    Sector_driver sd;
+    auto nfill = sd.fill_n(sector0, nsectors, value);
+
+    if (nfill == nsectors)
+	uart << "OK\n";
+    else
+	uart << "FAIL\n";
 }
 

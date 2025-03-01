@@ -35,7 +35,7 @@ constexpr myu::ROM_string<27> msg_main_sector_load
 	PROGMEM{"Sector in memory. Address: "};
 
 constexpr myu::ROM_string<185> msg_main_menu	
-	PROGMEM{"Read:\n\t1. Status register\n\t2. Sector\n\t3. MBR boot sector\n\t4. FAT32 boot sector\n\t5. FS info sector\n\t6. FAT area\n\t7. Root directory\n\t8. Directories (ls and cd) \n\t9. File sectors\n"};
+	PROGMEM{"Read:\n\t1. Status register\n\t2. Sector\n\t3. Sector driver test\n\t4. MBR boot sector\n\t5. Reserved area\n\t6. FAT area\n\t7. Root directory\n\t8. Directories (ls and cd) \n\t9. File sectors\n"};
 
 constexpr myu::ROM_string<16> msg_sector_address	
 	PROGMEM{"Sector address: "};

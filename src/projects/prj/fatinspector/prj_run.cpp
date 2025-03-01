@@ -34,9 +34,9 @@ void Main::run()
 	switch(cmd){
 	    break; case 1: read_status();
 	    break; case 2: print_sector();
-	    break; case 3: print_MBR_boot_sector();
-	    break; case 4: print_FAT32_boot_sector();
-	    break; case 5: print_FS_info();
+	    break; case 3: sector_driver_menu();
+	    break; case 4: print_MBR_boot_sector();
+	    break; case 5: reserved_area_menu();
 	    break; case 6: FAT32_area_menu();
 	    break; case 7: root_directory_menu();
 	    break; case 8: print_directory_ls();
@@ -104,3 +104,55 @@ void Main::root_directory_menu()
     }
 
 }
+
+
+void Main::reserved_area_menu()
+{
+    while(1){
+	uart << '\n';
+	print_line(uart);
+	
+	//atd::print(uart, msg_root_directory_menu);
+    
+	uart << "Reserved area menu\n"
+		"\t0. Back main menu\n"
+	        "\t1. Print FAT32 boot sector\n"
+		"\t2. Print FS info sector\n";
+
+	uint16_t cmd{};
+	uart >> cmd;
+
+	switch(cmd){
+	    break; case 0: return;
+	    break; case 1: reserved_area_print_FAT32_boot_sector();
+	    break; case 2: reserved_area_print_FS_info();
+
+	}
+    }
+
+}
+
+void Main::sector_driver_menu()
+{
+    while(1){
+	uart << '\n';
+	print_line(uart);
+	
+	//atd::print(uart, msg_root_directory_menu);
+    
+	uart << "Sector driver test\n"
+		"\t0. Back main menu\n"
+	        "\t1. fill_n test\n";
+
+	uint16_t cmd{};
+	uart >> cmd;
+
+	switch(cmd){
+	    break; case 0: return;
+	    break; case 1: sector_driver_fill_n_test();
+
+	}
+    }
+
+}
+

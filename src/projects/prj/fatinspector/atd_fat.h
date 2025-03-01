@@ -142,16 +142,6 @@ struct MBR{
 
 };
 
-// read/write
-// La MBR siempre está en el sector 0
-//template <typename Sector_driver>
-//inline bool read(MBR& mbr)
-//{ 
-//    using Sector_span = typename Sector_driver::Sector_span;
-//    return Sector_driver::read(0, 
-//	    Sector_span{reinterpret_cast<uint8_t*>(&mbr), sizeof(MBR)});
-//}
-//
 
 /***************************************************************************
  *				    FAT32
@@ -1226,11 +1216,6 @@ public:
     using Volume = typename File_sectors::Volume;
     using State  = impl_of::File_state;
 
-//    using const_iterator     = impl_of::const_File_iterator<Sector_driver0>;
-//    using const_iterator_end = impl_of::const_iterator_end;
-//
-//    friend const_iterator;
-
 // Constructors
     File(Volume& volume, const uint32_t& cluster0);
     File(Volume& volume, const uint32_t& cluster0, const uint32_t& size_in_bytes);
@@ -1247,15 +1232,6 @@ public:
     // Devuelve el número de caracteres leídos.
     uint8_t read(std::span<uint8_t> buf);
 
-// Acceso aleatorio
-// uint8_t operator[](size_type i); // muy costoso en tiempo
-
-// Iteradores
-//    iterator begin();
-//    iterator end();
-
-//    const_iterator begin();
-//    const_iterator_end end() const;
 
 // State
     bool ok() const {return sector_.ok(); }
@@ -1332,6 +1308,9 @@ inline void File<SD>::reset(uint32_t cluster0)
 //       Porque los bytes de un fichero están dispersos por diferentes
 //       sectores. En principio el Sector_driver carga en memoria un sector,
 //       con lo que no debería de ser ineficiente leer 1 byte detrás de otro.
+//       (TODO) Crear en sector_driver::read(span) y que el valor devuelto
+//       sea el número de bytes escritos. Sería un poco más eficiente que esta
+//       función.
 template <typename SD> 
 inline uint8_t File<SD>::read(std::span<uint8_t> buf)
 {
@@ -1371,7 +1350,10 @@ inline uint8_t File<SD>::read(std::span<uint8_t> buf)
 
 
 /***************************************************************************
- *				    DIRECTORY
+ *				DIRECTORY
+ *
+ *  Un directory es un array de entries.
+ *
  ***************************************************************************/
 namespace impl_of{
 enum class Entry_attribute_type: uint8_t{
@@ -1541,7 +1523,6 @@ public:
     // Reinicia la lectura. La siguiente llamada a `read_xxx` devolverá la
     // primera entrada que encuentre.
     void first_entry();
-//    void next_entry(); // read consume la entry, no se necesita next.
     
     // Lee la entry actual almacenándola en entry
     // Consume esa entry, esto es, pasa a apuntar a la siguiente entry.
@@ -1558,13 +1539,13 @@ public:
     //	    2. Algún error.
     // Por ello mirar el state después de llamar a read_long_entry.
     bool read_long_entry(Entry_info& info, 
-			 std::span<uint8_t> long_name);
+			 std::span<uint8_t> name);
 
     // Devuelve la siguiente entrada correspondiente al attribute att.
     // De esta forma se puede hacer un ls de solo los ficheros, o solo los
     // directorios.
     bool read_long_entry(Entry_info& info, 
-			 std::span<uint8_t> long_name, 
+			 std::span<uint8_t> name, 
 			 Attribute att);
 
 // cd (cambio de directorio)
@@ -1573,6 +1554,28 @@ public:
     // La primera es muy ineficiente ya que habría que recorrer todo el
     // directorio actual hasta encontrar el cluster correspondiente.
     void cd(uint32_t cluster0);
+
+// mkdir, mkfile (creación de ficheros)
+    // mkdir
+    // mkfile
+
+// rmdir, rmfile (borrado de ficheros)
+    // rmdir
+    // rmfile (en unix es `rm` pero queda más claro rmfile)
+
+
+
+
+// Primitivas de implementación
+    // Crea una nueva entrada de nombre `name` y características dadas en
+    // info. De info, ignora los access/modification times.
+    // Devuelve el número de entrada de la short_entry de este nuevo fichero
+    // creado ó 0 en caso de error. (0??? en general, salvo en el root
+    // directory la entrada 0 corresponde al directorio actual (.) no siendo
+    // una entrada válida en general, por eso puedo devolver 0 como error)
+    uint32_t new_entry(const Entry_info& info, std::span<uint8_t> name);
+
+//    void remove_entry();
 
 
 // State
@@ -1770,6 +1773,53 @@ bool Directory<S>::read_long_entry(Entry_info& info,
     return false;
 }
 
+//// (DUDA) Al pasarle uint8_t limito la longitud del nombre a 255 caracteres. 
+//// ¿Algún problema? 255 es demasiado largo (long_name es el nombre del
+//// fichero, no todo el path).
+//template <typename S>
+//bool Directory<S>::find_first_free_entry(uint8_t long_name_size)
+//{
+//    Entry entry;
+//
+//    read(entry);
+//    if (read_error())
+//	return read_error;
+//
+//    if (dir_.end_of_file())
+//	return end_of_file;
+//
+//    if(dir_.error()){
+//	atd::ctrace<5>() << "Trying to read EOC/error file\n";
+//	state_ = State::read_error;
+//	return false;
+//    }
+//
+//    if (dir_.read(entry.data) != entry.data.size()){
+//	atd::ctrace<5>() << "Can't read Entry\n";
+//	state_ = State::read_error;
+//	return false;
+//    }
+//
+//    state_ = State::ok;
+//    return true;
+//    
+//}
+
+
+//template <typename S>
+//uint32_t 
+//Directory<S>::new_entry(const Entry_info& info , std::span<uint8_t> name)
+//{
+//// find_first_free_entry: 
+//    uint32_t ne = find_first_free_entry(name.size()); // que entre el name
+//    if (ne == 0)
+//	dir_.add_cluster(0x00); // 0x00 valor por defecto en los directorios
+//    
+//// new_entry_impl:
+//    para toda parte de name:
+//	new_long_entry(name[...]);
+//    new_short_entry(info);
+//}
 
 
 

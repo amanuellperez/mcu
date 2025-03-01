@@ -52,25 +52,25 @@ private:
 // Data
     using Sector = Sector_driver::Sector;
 
-// Functions
+// Init
     void init_uart();
     void init_spi();
-
-    // Cargamos en memoria `sector`
-    bool load_sector();
-    bool load_sector(const SDCard::Address&);
-
 
 // SD card commands
     void read_status();
     void print_sector();
 
-// MBR test
+// Sector driver test
+    void sector_driver_menu();
+	void sector_driver_fill_n_test();
+    
+// MBR area test
     void print_MBR_boot_sector();
 
 // Reserved area test
-    void print_FAT32_boot_sector();
-    void print_FS_info();
+    void reserved_area_menu();
+	void reserved_area_print_FAT32_boot_sector();
+	void reserved_area_print_FS_info();
 
 // FAT area test
     void FAT32_area_menu();

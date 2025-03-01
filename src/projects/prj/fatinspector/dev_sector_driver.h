@@ -33,6 +33,7 @@
  *    26/02/2025 Experimentando con Sector_driver
  *
  ****************************************************************************/
+#include <algorithm>	// fill
 #include <bit>	// endianness
 #include <atd_basic_types.h> // atd::Uninitialized
 #include <atd_trace.h>
@@ -192,6 +193,14 @@ public:
     bool flush();
 
 
+// Algorithms
+    // Rellena los sectores [sector0 .. sector0 + n) con el valor `value`
+    // Esto lo necesitamos, por ejemplo, cuando creamos un directorio todos
+    // los valores tienen que ser 0x00.
+    //
+    // Devuelve el número de sectores inicializados con value.
+    // (si todo va bien debería devolver `n`).
+    Address fill_n(const Address& sector0, const Address& n, uint8_t value);
 
 // State
     bool ok() const {return state_ == State::ok;;}
@@ -353,6 +362,26 @@ bool Sector_driver<SD>::is_unlocked_and_ok() const
     }
 
     return true;
+}
+
+template <typename SD>
+Sector_driver<SD>::Address 
+Sector_driver<SD>::fill_n(const Address& sector0
+			, const Address& n, uint8_t value)
+{
+    if (n == 0) return 0;
+
+    if (!flush())
+	return 0;
+
+    std::fill(sector_.begin(), sector_.end(), value);
+
+    for (Address i = 0; i < n; ++i){
+	if (!write(sector0 + i, sector_))
+	    return i;
+    }
+
+    return n;
 }
 
 
