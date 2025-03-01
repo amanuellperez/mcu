@@ -457,7 +457,19 @@ public:
     uint32_t new_list();    
 
     // Borra toda la lista a partir de cluster0
-    // remove_list(cluster0);
+    // Precondicion: cluster0 es el primer elemento de una lista.
+    // Si no fuera el primer elemento dejaría inconsistente la lista.
+    // Ejemplo:
+    //	Si la lista es 
+    //	    c0 -> c1 -> c2 -> c3 -> EOF
+    //
+    //	y llamamos remove_list(c2) el resultado será
+    //	    c0 -> c1 -> FREE
+    //
+    //	Observar que c1 no apunta a EOF sino a FREE.
+    //
+    //	Devuelve true si todo va bien, false en caso de error.
+    bool remove_list(uint32_t cluster0);
 
 // Acceso a una lista enlazada
 // Cuando pueda voy a usar la notación de std::list.
@@ -471,12 +483,14 @@ public:
     // Ejemplo:
     //	   si la lista es c0 -> c1 -> c2 -> c3 -> c4
     //
-    // llamar a add_cluster(c2, d), modifica la lista
+    // llamar a add_cluster(c2), modifica la lista
     //
     //			 c0 -> c1 -> c2 -> d -> c3 -> c4
     //
-    // add_cluster(cluster0, cluster)
-    
+    // Devuelve el cluster nuevo 'd' al que apunta c2.
+    // En caso  de error devuelve 0.
+    uint32_t add_cluster(const uint32_t& cluster);
+
     // Borra el cluster0.
     // Ejemplo:
     //	   si la lista es c0 -> c1 -> c2 -> c3 -> c4
@@ -484,7 +498,14 @@ public:
     // al llamar a remove_cluster(c2) la lista pasa a ser
     //			  c0 -> c1 -> c3 -> c4
     //
-    // remove_cluster(cluster0); 
+    // Devuelve el cluster al que apunta `cluster` (c3 en el ejemplo)
+    // En caso  de error devuelve 0.
+    //
+    // Observar que no estamos borrando el cluster0 sino el cluster al que
+    // apunta cluster0, de ahí el nombre 'next'. (borrar el cluster0 es muy
+    // ineficiente ya que, al ser una lista enlazada, habría que buscar el
+    // elemento anterior a cluster0 lo cual es costoso en tiempo).
+    uint32_t remove_next_cluster(const uint32_t& cluster0); 
 
 
 
@@ -527,6 +548,11 @@ private:
     static constexpr uint32_t bad_entry = 0x0FFFFFF7;
     static constexpr uint32_t end_of_file_entry = 0x0FFFFFFF;
 
+    static bool is_allocated(const uint32_t& cluster)
+    { return	    cluster != free_entry 
+		and cluster != bad_entry
+		and cluster != end_of_file_entry; }
+
 // Helpers
     // Observar la forma de hablar: la FAT_area es un conjunto de entradas,
     // donde la posición de cada entrada hace referencia al cluster de esa
@@ -565,6 +591,19 @@ private:
     // Escribe value en el cluster indicado
     // (TODO) Gestionar los errores. ¿Qué devolver o hacer si write_in_area
     // falla?
+    //
+    // COMENTARIOS
+    // Todas las funciones new_list, remove_list, add_cluster, ...
+    // tienen que leer de FAT0 y luego escribir en FAT0, FAT1, leer en FAT0,
+    // escribir en FAT0, FAT1, ... Si se activan las trazas a nivel 100 se ve
+    // muy bien los accesos a SDCard::read/write. ¡Accede demasiado! Pero ese
+    // es el precio a pagar por solo mantener un sector en memoria. Se podía
+    // hacer más eficiente si Sector_driver mantuviese 2 sectores en memoria,
+    // de esa forma se ahorrarían muchos SDCard::read. Pero eso necesita más
+    // memoria de RAM. Lo bueno del planteamiento es que es el cliente, a
+    // través de la clase Sector_driver, el que decide esto.
+    // Con todo ¿se podrá implementar de otra forma más eficiente para
+    // Sector_driver que solo mantentan 1 sector en memoria?
     bool write(const uint32_t& cluster, const uint32_t& value) const
     { 
 	for (uint8_t i = 0; i < nFATs_; ++i)
@@ -625,8 +664,6 @@ void FAT_area<S>::init(const Boot_sector& bs)
 template <typename S>
 inline uint32_t FAT_area<S>::sector0_area(uint8_t i) const
 {
-atd::ctrace<9>() << "sector0_area(" << (uint16_t) i << " < " <<
-    (int) nFATs_ << ")\n";
     atd::precondition<9>(i < nFATs_, "Error: FAT area number too big");
     
     return sector0_ + i * number_of_sectors_;
@@ -703,6 +740,75 @@ uint32_t FAT_area<S>::new_list()
 }
 
 
+// Borra toda la lista de clusters c0 -> ...
+template <typename S>
+bool FAT_area<S>::remove_list(uint32_t cluster0)
+{
+    while (is_allocated(cluster0)){
+
+	auto cluster1 = read(cluster0); // (TODO) ¿qué pasa si read falla? 
+					
+	if (write(cluster0, free_entry) == 0)
+	    return false;
+
+	cluster0 = cluster1;
+    }
+
+    return true;
+    
+}
+
+
+// Convertimos:
+//	c0 -> c1
+//
+//  en
+//	c0 -> d -> c1
+//
+//  devolviendo d.
+template <typename S>
+uint32_t FAT_area<S>::add_cluster(const uint32_t& cluster0)
+{
+    auto cluster1 = read(cluster0); // (TODO) ¿qué pasa si read falla? 
+
+    uint32_t d = find_first_free_cluster();
+
+    if (d == 0) // si no hay más clusters libres
+	return 0;
+
+    if (write(d, cluster1) == 0)
+	return 0;
+
+    if (write(cluster0, d) == 0)
+	return 0;
+
+    return d;
+}
+
+
+// Convertimos:
+//	c0 -> c1 -> c2
+// en
+//	c0 -> c2
+//
+template <typename S>
+uint32_t FAT_area<S>::remove_next_cluster(const uint32_t& cluster0)
+{
+    auto cluster1 = read(cluster0); // (TODO) ¿qué pasa si read falla? 
+
+    if (!is_allocated(cluster1))
+	return 0;
+
+    auto cluster2 = read(cluster1); // (TODO) ¿qué pasa si read falla? 
+				    
+    if (write(cluster1, free_entry) == 0)
+	return 0;
+
+    if (write(cluster0, cluster2) == 0)
+	return 0;
+
+    return cluster2;
+}
 
 
 /***************************************************************************

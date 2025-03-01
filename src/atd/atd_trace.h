@@ -137,9 +137,10 @@ template <int n>
 std::ostream& ctrace()
 {
 #ifdef TRACE_LEVEL
-    if constexpr (n <= TRACE_LEVEL)
+    if constexpr (n <= TRACE_LEVEL){
+	(*CTrace::log) << 'T' << n << ": ";
 	return *CTrace::log;
-
+    }
     else
 	return null_ostream;
 #else

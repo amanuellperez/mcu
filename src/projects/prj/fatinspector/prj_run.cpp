@@ -58,7 +58,10 @@ void Main::FAT32_area_menu()
 	uart << "FAT area menu\n"
 		"\t0. Back main menu\n"
 	        "\t1. Print list of clusters of a file\n"
-		"\t2. New list\n";
+		"\t2. New list\n"
+		"\t3. Remove list\n"
+		"\t4. Add cluster\n"
+		"\t5. Remove next cluster\n";
 
 	uint16_t cmd{};
 	uart >> cmd;
@@ -67,6 +70,9 @@ void Main::FAT32_area_menu()
 	    break; case 0: return;
 	    break; case 1: FAT32_area_print_clusters();
 	    break; case 2: FAT32_area_new_list();
+	    break; case 3: FAT32_area_remove_list();
+	    break; case 4: FAT32_area_add_cluster();
+	    break; case 5: FAT32_area_remove_next_cluster();
 
 	}
     }
