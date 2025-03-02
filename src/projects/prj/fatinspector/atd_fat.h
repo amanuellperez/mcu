@@ -144,7 +144,7 @@ struct MBR{
 
 
 /***************************************************************************
- *				    FAT32
+ *				FAT32
  ***************************************************************************/
 // TODO: todos los datos de FAT son little endian.
 // Que en tiempo de compilación se elija el formato adecuado.
@@ -366,7 +366,8 @@ class Volume;
 
 namespace impl_of{
 /***************************************************************************
- *				FAT area
+ *				FAT AREA
+ * -------------------------------------------------------------------------
  *
  *  La FAT area es:
  *	(1) Un conjunto de sectores contiguos,
@@ -1050,42 +1051,42 @@ FAT_area<Sector_driver>::Cluster_state
 } // namespace impl_of
 
 /***************************************************************************
- *				FILE_SECTORS
+ *			FAT AREA LIST (of clusters)
  * -------------------------------------------------------------------------
  *
- * Un FAT32::File_sectors se puede ver de 2 formas:
+ * Un FAT32::FAT_area_list es una lista de clusters concreta de la FAT area.
+ * La podemos ver de dos formas:
  *
  *  1) como una lista enlazada de S sectores.
  *  2) como una lista enlazada de C clusters cada uno de ellos con un número
  *     determinado de sectores.
- *     (se podía basar en FAT_area_list que representaría una lista enlazada
- *     de clusters de la FAT area, pero de moment omito crear esta clase).
  *
  ***************************************************************************/
 namespace impl_of{
 // Resultado de la última operacion
-enum class File_sectors_errno: uint8_t {
+enum class FAT_area_list_errno: uint8_t {
     ok = 0  // fail == distinto de 0
     , next_cluster_no_allocated = 1
+    , end_of_sectors		= 2
 };
 
 // ¿En qué estado se puede encontrar la lista enlazada de los sectores?
-enum class File_sectors_state : uint8_t {
+enum class FAT_area_list_state : uint8_t {
     ok             = 0,	// apunta a un sector válido
     uninitialized  = 1, // no se ha inicializado
     end_of_sectors = 2  // se ha llegado al final de los sectores
 };
 
 
-struct File_sectors_struct {
-    using Errno = File_sectors_errno;
-    using State = File_sectors_state;
+struct FAT_area_list_struct {
+    using Errno = FAT_area_list_errno;
+    using State = FAT_area_list_state;
 
     State state : 4;
     Errno errno : 4;
 
     // Añado este constructor para evitar warnings del compilador @_@
-    File_sectors_struct() :state{}, errno{}{} 
+    FAT_area_list_struct() :state{}, errno{}{} 
 
     void operator=(State st) { state = st; }
     void operator=(Errno e)  { errno = e; }
@@ -1098,30 +1099,30 @@ struct File_sectors_struct {
 
 };
 
-static_assert(sizeof(File_sectors_state) == 1);
+static_assert(sizeof(FAT_area_list_state) == 1);
 
 }// impl_of
  
 
 template <typename Sector_driver0> 
-class File_sectors{
+class FAT_area_list{
 public:
 // Types
     using Volume	= atd::FAT32::Volume<Sector_driver0>;
     using Sector_driver = Sector_driver0;
     using Sector	= typename Volume::Sector;
     using Sector_span   = typename Volume::Sector_span;
-    using State         = impl_of::File_sectors_struct::State;
-    using Errno         = impl_of::File_sectors_struct::Errno;
+    using State         = impl_of::FAT_area_list_struct::State;
+    using Errno         = impl_of::FAT_area_list_struct::Errno;
 
 // Data
     Volume& volume;
 
 // Constructors
-    File_sectors(Volume& volume); // no olvidar llamar a first_sector!!!
-    File_sectors(Volume& volume, uint32_t cluster0);
+    FAT_area_list(Volume& volume); // no olvidar llamar a first_sector!!!
+    FAT_area_list(Volume& volume, uint32_t cluster0);
 
-    // Reiniciamos el File_sectors, haciendo que apunte al primer sector del
+    // Reiniciamos el FAT_area_list, haciendo que apunte al primer sector del
     // cluster0
     void first_sector(uint32_t cluster0);
 
@@ -1172,26 +1173,28 @@ private:
     uint32_t cluster_; // cluster actual
     uint8_t sector_;   // sector al que apuntamos dentro de cluster_
 
-    impl_of::File_sectors_struct errno_state_;
+    impl_of::FAT_area_list_struct errno_state_;
 
-    void errno(Errno e) {errno_state_.errno = e; }
     void state(State st) {errno_state_.state = st; }
+
+    bool ok() {errno_state_.errno = Errno::ok; return true; }
+    bool errno(Errno e) {errno_state_.errno = e; return false;}
     
 };
 
 
 template<typename SD>
-inline File_sectors<SD>::File_sectors(Volume& vol)
+inline FAT_area_list<SD>::FAT_area_list(Volume& vol)
     : volume{vol}, cluster_{0}, sector_{0} // inicializo a 0 para detectar errores
 { state(State::uninitialized); } 
 
 template<typename SD>
-inline File_sectors<SD>::File_sectors(Volume& vol,  uint32_t cluster0)
+inline FAT_area_list<SD>::FAT_area_list(Volume& vol,  uint32_t cluster0)
     : volume{vol}
 { first_sector(cluster0); }
 
 template<typename SD>
-inline void File_sectors<SD>::first_sector(uint32_t cluster0)
+inline void FAT_area_list<SD>::first_sector(uint32_t cluster0)
 { 
     cluster_ = cluster0;
     sector_  = 0;
@@ -1202,12 +1205,12 @@ inline void File_sectors<SD>::first_sector(uint32_t cluster0)
 
 // Precondition: cluster_.sector_ >= vol_.data_area.first_sector();
 template<typename SD>
-inline uint32_t File_sectors<SD>::global_sector_number() const
+inline uint32_t FAT_area_list<SD>::global_sector_number() const
 { return volume.data_area.first_sector_of_cluster(cluster_) + sector_; }
 
 
 template<typename SD>
-bool File_sectors<SD>::next_sector()
+bool FAT_area_list<SD>::next_sector()
 {
     if (end_of_sectors())
 	return false;
@@ -1216,7 +1219,7 @@ bool File_sectors<SD>::next_sector()
 
     if (sector_ < volume.data_area.sectors_per_cluster()){
 	state(State::ok);
-	return true;
+	return ok();
     }
 
     return next_cluster();
@@ -1224,35 +1227,33 @@ bool File_sectors<SD>::next_sector()
 
 
 // Postcondition:
-//  if(File_sectors.end_of_sectors()) 
+//  if(FAT_area_list.end_of_sectors()) 
 //	==> sector_ > data_area.sectors_per_cluster();
 template<typename SD>
-bool File_sectors<SD>::next_cluster()
+bool FAT_area_list<SD>::next_cluster()
 {
     uint32_t next_cluster;
     auto cluster_state = volume.fat_area.next_cluster(cluster_, next_cluster);
 
     if (cluster_state == Volume::Cluster_state::end_of_clusters){
 	state(State::end_of_sectors);
-	return false;
+	return errno(Errno::end_of_sectors);
     }
 
-    if (cluster_state != Volume::Cluster_state::allocated){
-	errno(Errno::next_cluster_no_allocated);
-	return false;
-    }
+    if (cluster_state != Volume::Cluster_state::allocated)
+	return errno(Errno::next_cluster_no_allocated);
 
     state(State::ok);
 
     cluster_ = next_cluster;
     sector_  = 0;
 
-    return true;
+    return ok();
 }
 
 
 template<typename SD>
-uint32_t File_sectors<SD>::push_back_cluster()
+uint32_t FAT_area_list<SD>::push_back_cluster()
 {
     uint32_t new_cluster = volume.fat_area.push_back_cluster(cluster_);
 
@@ -1270,7 +1271,7 @@ uint32_t File_sectors<SD>::push_back_cluster()
 }
 
 template<typename SD>
-uint32_t File_sectors<SD>::push_back_cluster_fill_with(uint8_t value)
+uint32_t FAT_area_list<SD>::push_back_cluster_fill_with(uint8_t value)
 {
     auto new_cluster = push_back_cluster();
 
@@ -1314,7 +1315,7 @@ enum class File_state : uint8_t{
 }// impl_of
  
 
-// Se trata de una vista de File_sectors que permite concebirlo como un
+// Se trata de una vista de FAT_area_list que permite concebirlo como un
 // conjunto continuo de bytes.
 //
 // Hay 2 tipos de ficheros:
@@ -1337,8 +1338,8 @@ template <typename Sector_driver0>
 class File{
 public:
 // Types
-    using File_sectors = atd::FAT32::File_sectors<Sector_driver0>;
-    using Volume = typename File_sectors::Volume;
+    using FAT_area_list = atd::FAT32::FAT_area_list<Sector_driver0>;
+    using Volume = typename FAT_area_list::Volume;
     using State  = impl_of::File_state;
 
 // Constructors
@@ -1362,7 +1363,18 @@ public:
 // (TODO) Se mezcla el errno con el state!!! Separarlo.
     bool ok() const {return sector_.last_operation_ok(); }
     bool error() const {return sector_.last_operation_fail(); }
+
+    // ¿Hemos llegado al final del fichero?
     bool end_of_file() const {return state_ == State::end_of_file;}
+
+    // Cuando queremos añadir bytes a un fichero, incrementamos la posición
+    // del end_of_file. Pero puede ocurrir que lleguemos al final de la lista
+    // enlazada de sectores, no teniendo más sectores donde escribir bytes.
+    // En ese momento habrá que llamar a FAT_area::add_cluster() para añadir
+    // sectores a ese fichero donde poder escribir. La siguiente función nos
+    // dice cuándo hemos alcanzado el final de los sectores y no tenemos más
+    // donde escribir.
+    bool end_of_sectors() const {return sector_.end_of_sectors(); }
 
 // Info
     Volume& volume() {return sector_.volume;}
@@ -1377,7 +1389,7 @@ private:
 					 // contrario quiere decir que es
 					 // directorio
 
-    File_sectors sector_; // lista enlazada con los sectores del fichero
+    FAT_area_list sector_; // lista enlazada con los sectores del fichero
     uint16_t i; // byte actual al que apuntamos dentro del sector
     atd::safe_Uninitialized<uint32_t> remainder_bytes_; // numero de bytes que quedan por leer
 
@@ -1386,7 +1398,7 @@ private:
 // Funciones de implementacion 
 // next_byte la necesito en const_iterator, pero... quiero implementarlo así
 // de verdad? Mejor como un wrapper sobre esta clase.
-//    static uint16_t next_byte(File_sectors& sector, uint16_t i);
+//    static uint16_t next_byte(FAT_area_list& sector, uint16_t i);
 
     uint8_t read_byte(uint32_t i) const
     { return sector_.volume.template read_global<uint8_t>
@@ -1477,8 +1489,27 @@ inline uint8_t File<SD>::read(std::span<uint8_t> buf)
 
 /***************************************************************************
  *				DIRECTORY
+ * -------------------------------------------------------------------------
  *
  *  Un directory es un array de entries.
+ *
+ *  La forma de determinar el final del array es con un centinela: el 0x00 de
+ *  DIR_name[0].
+ *
+ *  Tenemos, la lista de clusters (o de sectores):
+ *	s0 -> s1 -> s2 -> s3 -> ... -> sn -> ... -> s31 -> x
+ *	                                                   ^
+ *	                                                   |
+ *	                                           final  del cluster
+ *
+ *  Pero en sn tenemos la última entrada del directorio. (La analogía es
+ *  pensar en un libro de líneas, donde en cada línea escribimos una entry.
+ *  Llenamos el libro hasta sn y el resto de las páginas está vacía. El libro
+ *  acaba en 'x'. Si llenamos el libro tenemos que comprar un nuevo cuaderno
+ *  llamando a FAT_area::add_cluster()).
+ *
+ *  Es importante observar la diferencia con los ficheros, que se definen por
+ *  su tamaño (file_size = número de bytes que tienen).
  *
  ***************************************************************************/
 namespace impl_of{
@@ -1618,14 +1649,42 @@ struct Entry_info{
 // Copia entry en info: entry -> info;
 void copy(const Directory_entry& entry, Entry_info& info);
 
-
-template <typename Sector_driver0>
-struct const_Entry_iterator;
+enum class Directory_errno : uint8_t{
+    ok = 0, // fail distinto de 0
+    read_error, 
+    long_entry_corrupted,
+    end_of_sectors, // se ha llegado al final del último cluster
+    last_entry	    // se ha alcanzado la última entrada, no hay más
+};
 
 enum class Directory_state : uint8_t{
-    ok = 0,
-    read_error, last_entry, long_entry_corrupted
+    ok          = 0,	// apunta a una entrada válida
+    last_entry  = 1	// se ha llegado a la última entrada del directorio
 };
+
+
+struct Directory_struct {
+    using Errno = Directory_errno;
+    using State = Directory_state;
+
+    State state : 4;
+    Errno errno : 4;
+
+    // Añado este constructor para evitar warnings del compilador @_@
+    Directory_struct() :state{State::ok}, errno{Errno::ok}{} 
+
+    void operator=(State st) { state = st; }
+    void operator=(Errno e)  { errno = e; }
+
+    bool operator==(State st) const { return state == st; }
+    bool operator!=(State st) const { return state != st; }
+    
+    bool operator==(Errno e) const { return errno == e; }
+    bool operator!=(Errno e) const { return errno != e; }
+
+};
+
+static_assert(sizeof(Directory_state) == 1);
 
 
 }// impl_of
@@ -1640,6 +1699,7 @@ public:
     using Type      = Entry::Type;
     using Entry_info= impl_of::Entry_info;
     using Attribute = impl_of::Directory_entry::Attribute;
+    using Errno	    = impl_of::Directory_errno;
     using State     = impl_of::Directory_state;
 
 // Constructors
@@ -1705,29 +1765,39 @@ public:
 //    void remove_entry();
 
 
-// State
-// (TODO) Observar que hay varios tipos de estado diferentes:
-//	(1) El estado del file interno (ok, error de lectura)
-//	(2) El estado del array de entries (last_entry)
-//	(3) El resultado de la última operación realizada
-//	    (long_entry_corrupted es el resultado erróneo de la función
-//	    read_long_entry)
-//	¡Aclarar esto!
-    bool ok() const {return dir_.ok() and state_ == State::ok; }
-    bool error() const {return !ok(); }
+// Errno = resultado de la última operación
+    bool last_operation_ok() const {return errno() == Errno::ok; }
+    bool last_operation_fail() const {return errno() != Errno::ok; }
 
-    bool read_error() const {return state_ == State::read_error; }
-    bool last_entry() const {return state_ == State::last_entry; }
-    bool long_entry_corrupted() const {return state_ == State::long_entry_corrupted; }
+    bool read_error() const {return errno() == Errno::read_error; }
+    bool long_entry_corrupted() const 
+		    {return errno() == Errno::long_entry_corrupted; }
+
+    // DUDA: usar funciones o hacer switch con errno()
+    Errno errno() const {return errno_state_.errno;}
+
+// State
+    // DUDA: usar funciones o hacer switch con state()
+    State state() const {return errno_state_.state;}
+
+    bool last_entry() const {return state() == State::last_entry; }
 
 private:
     File dir_; // fichero con los sectores del directorio
-    State state_;
+    impl_of::Directory_struct errno_state_;
     
     static constexpr uint8_t sizeof_entry = Entry::size;
 
     // Este state no lo necesito fuera
     bool end_of_file() const {return dir_.end_of_file();}
+
+    void state(State st) {errno_state_.state = st; }
+
+    bool ok() {errno_state_.errno = Errno::ok; return true; }
+    bool errno(Errno e) {errno_state_.errno = e; return false;}
+
+    // hace que tanto state como errno sean ok
+    void state_ok();
 
 
 // Helpers
@@ -1743,14 +1813,14 @@ private:
 template <typename S> 
 inline 
 Directory<S>::Directory(Volume& volume, uint32_t cluster0)
-    : dir_{volume, cluster0}, state_{State::ok}
+    : dir_{volume, cluster0}
 { }
 
 template <typename S> 
 inline void Directory<S>::first_entry()
 { 
     dir_.reset(); 
-    state_ = State::ok;
+    state_ok();
 }
 
 // Esta función es idéntica a first_entry()
@@ -1758,27 +1828,39 @@ template <typename S>
 void Directory<S>::cd(uint32_t cluster0)
 {
     dir_.reset(cluster0);
-    state_ = State::ok;
-    
+    state_ok();
 }
 
+template <typename S>
+inline void Directory<S>::state_ok()
+{
+    state(State::ok);
+    errno(Errno::ok);
+}
 
+// Observar que este read no marca el error, eso se lo dejo a quien lo llame
 template <typename S> 
 bool Directory<S>::read(Entry& entry)
 {
-    if (dir_.end_of_file() or dir_.error()){
-	atd::ctrace<5>() << "Trying to read EOC/error file\n";
-	state_ = State::read_error;
+    if (dir_.end_of_sectors()){
+	atd::ctrace<5>() << "Trying to read EOC file\n";
+// TODO: mentira!! esta no es la last_entry, hemos alcanzado el final de los
+// clusters.
+	state(State::last_entry); // ¿es redundante? ¿Ponerlo como
+				   // precondition?
+	return false;
+    }
+
+    if (dir_.error()){
+	atd::ctrace<5>() << "Trying to read an error file\n";
 	return false;
     }
 
     if (dir_.read(entry.data) != entry.data.size()){
 	atd::ctrace<5>() << "Can't read Entry\n";
-	state_ = State::read_error;
 	return false;
     }
 
-    state_ = State::ok;
     return true;
 }
 
@@ -1808,8 +1890,7 @@ bool Directory<S>::read_long_entry(Entry& entry,
 
 	if ((entry.type() != Type::long_entry) 
 	    or (entry.extended_order() != nentry)){ // ¿están ordenadas?
-	    state_ = State::long_entry_corrupted;
-	    return false;
+	    return errno(Errno::long_entry_corrupted);
 	}
 
 	if (i * size < long_name.size()){// copiamos nombre si podemos
@@ -1818,21 +1899,18 @@ bool Directory<S>::read_long_entry(Entry& entry,
 	    entry.copy_long_name({long_name.begin() + i * size, n});
 	}
 
-	read(entry);
-	if (read_error())
-	    return false;
+	if (!read(entry))
+	    return errno(Errno::read_error);
 	
     }
 
 // Después de las long_name entries siempre viene una short_entry
-    if (entry.type() != Type::short_entry){
-	state_ = State::long_entry_corrupted;
-	return false;
-    }
+    if (entry.type() != Type::short_entry)
+	return errno(Errno::long_entry_corrupted); 
 
     impl_of::copy(entry, info);
 
-    return true;
+    return ok();
 }
 
 
@@ -1859,15 +1937,14 @@ bool Directory<S>::read_long_entry(Entry_info& info,
 
 // find_first_not_free_entry:
     do{
-	read(entry);
+	if(!read(entry))
+	    return errno(Errno::read_error);
 
-	if (read_error()) // este nombre es un poco confuso @_@
-	    return false; // el state lo marcar read
     }while (entry.type() == Type::free);
 
     if (entry.type() == Type::last_entry){
-	state_ = State::last_entry;
-	return false;
+	state(State::last_entry);
+	return ok();
     }
 
     if (entry.type() == Type::short_entry){
@@ -1878,7 +1955,7 @@ bool Directory<S>::read_long_entry(Entry_info& info,
 	return read_long_entry(entry, info, long_name); // entry es la last_entry
 					        // entrada del long_name
 
-    return true;
+    return ok();
 }
 
 
@@ -1896,36 +1973,33 @@ bool Directory<S>::read_long_entry(Entry_info& info,
     return false;
 }
 
-//// (DUDA) Al pasarle uint8_t limito la longitud del nombre a 255 caracteres. 
-//// ¿Algún problema? 255 es demasiado largo (long_name es el nombre del
-//// fichero, no todo el path).
+// (DUDA) Al pasarle uint8_t limito la longitud del nombre a 255 caracteres. 
+// ¿Algún problema? 255 es demasiado largo (long_name es el nombre del
+// fichero, no todo el path).
 //template <typename S>
 //bool Directory<S>::find_first_free_entry(uint8_t long_name_size)
 //{
+//    if (state() == State::last_entry)
+//	return errno(Errno::last_entry);
+//
 //    Entry entry;
 //
-//    read(entry);
-//    if (read_error())
-//	return read_error;
-//
-//    if (dir_.end_of_file())
-//	return end_of_file;
-//
-//    if(dir_.error()){
-//	atd::ctrace<5>() << "Trying to read EOC/error file\n";
-//	state_ = State::read_error;
-//	return false;
+//    if (!read(entry)){
+//	if (dir_.end_of_sectors()){
+//	return errno(Errno::end_of_sectors);
 //    }
 //
-//    if (dir_.read(entry.data) != entry.data.size()){
-//	atd::ctrace<5>() << "Can't read Entry\n";
-//	state_ = State::read_error;
-//	return false;
+//
+//    if (entry.type() == Entry_type::last_entry){
+//	state(State::last_entry);
+//	return errno(Errno::end_of_file);
 //    }
 //
-//    state_ = State::ok;
-//    return true;
-//    
+//    if (entry.type() == Entry_type::free){
+//    CONTAR CONTIGUAS PARA QUE ENTRE LONG_NAME
+//    }
+//
+//    return ok();
 //}
 
 

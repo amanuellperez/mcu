@@ -474,11 +474,11 @@ void Main::print_directory_ls()
 
 
 
-// Esta función prueba File_sectors
+// Esta función prueba FAT_area_list
 // Aunque es parecida a print_FAT32_entry, esa otra prueba FAT_area
 void Main::print_file_sectors()
 {
-    using File_sectors   = atd::FAT32::File_sectors<Sector_driver>;
+    using FAT_area_list   = atd::FAT32::FAT_area_list<Sector_driver>;
 
     auto nsector = fat_volume_first_sector(1); // de momento solo leo
 					       // particion 1
@@ -503,7 +503,7 @@ void Main::print_file_sectors()
 	return;
     }
 
-    File_sectors file(vol, cluster0);    // file.begin(cluster0);
+    FAT_area_list file(vol, cluster0);    // file.begin(cluster0);
    
     if(file.last_operation_fail()){
 	uart << "Error creating file\n";
