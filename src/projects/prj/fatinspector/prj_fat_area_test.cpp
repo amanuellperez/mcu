@@ -62,6 +62,8 @@ void Main::FAT32_area_print_clusters()
     
     using State = Volume::Cluster_state;
 
+    uart << cluster << " -> ";
+
     while (1){
 	uint32_t next_cluster;
 	auto state = vol.fat_area.next_cluster(cluster, next_cluster);
@@ -71,7 +73,7 @@ void Main::FAT32_area_print_clusters()
 		break; case State::free: uart << "FREE\n";
 		break; case State::allocated: uart << "allocate\n";
 		break; case State::bad     : uart << "bad\n";
-		break; case State::end_of_file: uart << "EOC\n";
+		break; case State::end_of_clusters: uart << "EOC\n";
 		break; case State::reserved: uart << "reserved\n";
 		break; case State::read_error: uart << "read error\n";
 	    }
@@ -79,7 +81,7 @@ void Main::FAT32_area_print_clusters()
 	    uart << '\n';
 	    break;
 	}
-	uart << next_cluster << ' ';
+	uart << next_cluster << " -> ";
 	cluster = next_cluster;
     }
 }
@@ -167,7 +169,15 @@ void Main::FAT32_area_add_cluster()
     uint32_t cluster0;
     uart >> cluster0;
 
-    auto cluster = vol.fat_area.add_cluster(cluster0);
+    uart << "Add only to the end? y/n ";
+    char yesno{};
+    uart >> yesno;
+    uint32_t cluster;
+
+    if (yesno == 'y' or yesno == 'Y')
+	cluster = vol.fat_area.push_back_cluster(cluster0);
+    else
+	cluster = vol.fat_area.add_cluster(cluster0);
 
     if (cluster != 0)
 	uart << "New cluster: " << cluster << '\n';

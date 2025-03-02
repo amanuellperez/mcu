@@ -80,10 +80,9 @@ namespace dev{
 //
 namespace impl_of{
 enum class Sector_driver_state :uint8_t {
-    ok = 0,
-    fail = 1,	    // last operation fail?
-    read_error = 2,
-    write_error = 3 // DUDA: usar bits o números? 0x01 << 3???
+    ok = 0, // != 0 significa error
+    read_error = 1,
+    write_error = 2 
 };
 
 
@@ -108,8 +107,9 @@ struct Sector_driver_struct{
 
 
     bool ok() const {return state == State::ok;}
-    bool fail() const {return state == State::fail;}
+    bool fail() const {return !ok(); }
     bool read_error() const {return state == State::read_error;}
+    bool write_error() const {return state == State::write_error;}
 
     bool is_locked() const {return locked == 1;}
     bool is_unlocked() const {return locked == 0;}
@@ -203,8 +203,11 @@ public:
     Address fill_n(const Address& sector0, const Address& n, uint8_t value);
 
 // State
-    bool ok() const {return state_ == State::ok;;}
-    bool fail() const {return state_ == State::fail; }
+    bool ok() const {return state_.ok();;}
+    bool fail() const {return state_.fail(); }
+    bool read_error() const {return state_.read_error(); }
+    bool write_error() const {return state_.write_error(); }
+
     bool is_locked() const {return state_.is_locked();}
     bool is_unlocked() const {return state_.is_unlocked();}
 	

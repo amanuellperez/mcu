@@ -105,28 +105,6 @@ void Main::print_MBR_boot_sector()
 }
 
 
-void print_long_name_entry(std::ostream& out, 
-				const atd::FAT32::Long_file_name_entry& fn)
-{
-    for (uint8_t i = 0; i < 10 / 2; ++i){
-	if (fn.name1[i] == 0x0000) return;
-
-	out << (uint8_t) fn.name1[i];
-    }
-
-    for (uint8_t i = 0; i < 12 / 2; ++i){
-	if (fn.name2[i] == 0x0000) return;
-
-	out << (uint8_t) fn.name2[i];
-    }
-
-    for (uint8_t i = 0; i < 4 / 2; ++i){
-	if (fn.name3[i] == 0x0000) return;
-
-	out << (uint8_t) fn.name3[i];
-    }
-
-}
 
 
 void print(std::ostream& out, Attribute att, bool with_tab = true)
@@ -527,7 +505,7 @@ void Main::print_file_sectors()
 
     File_sectors file(vol, cluster0);    // file.begin(cluster0);
    
-    if(file.error()){
+    if(file.last_operation_fail()){
 	uart << "Error creating file\n";
 	return;
     }
@@ -543,7 +521,7 @@ void Main::print_file_sectors()
 	if (file.end_of_sectors()){
 	    uart << "EOC\n";
 	    return;
-	} else if(file.error()){
+	} else if(file.last_operation_fail()){
 	    uart << "Error\n";
 	    return;
 	}

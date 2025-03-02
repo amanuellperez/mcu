@@ -359,22 +359,6 @@ struct FS_info{
 };
 
 
-// Section 7, FAT specification
-// De acuerdo a osdev, los caracteres son de 2 bytes (y coincide con el
-// ejemplo de la FAT specification). Según un foro son UTF16 (ref???)
-struct Long_file_name_entry{
-    uint8_t ord;
-    uint16_t name1[5]; 
-    uint8_t attr; // == long_name
-    uint8_t type; // == 0
-    uint8_t chk_sum;
-    uint16_t name2[6];
-    uint16_t fst_clus_lo; // == 0
-    uint16_t name3[2];
-
-    bool is_last_entry() const {return 0x40 & ord; }
-};
-
 
 // FAT_area hace referencia a Volume
 template <typename S>
@@ -419,7 +403,7 @@ namespace impl_of{
 namespace impl_of{
 
 enum class FAT_Cluster_state : uint8_t
-{ free = 0, allocated, bad, end_of_file, reserved, 
+{ free = 0, allocated, bad, end_of_clusters, reserved, 
     read_error // este no es un estado del cluster sino un intento fallido de
 	  // leer un sector de la FAT (realmente no debería ir aqui) (???)
 };
@@ -438,8 +422,6 @@ public:
 // Constructors
     FAT_area(Volume* vol) : volume_{vol} {}
     void init(const Boot_sector& bs);
-
-    FAT_area(const Boot_sector& bs) {init(bs);}
 
 // Creación/modificación de listas
     // Crea una nueva lista de 1 cluster, devolviendo el primer cluster.
@@ -462,7 +444,6 @@ public:
     bool remove_list(uint32_t cluster0);
 
 // Acceso a una lista enlazada
-// Cuando pueda voy a usar la notación de std::list.
     // Lee el siguiente cluster a cluster0. Solo cuando state == allocated
     // tendrá sentido el valor de next_cluster.
     Cluster_state next_cluster(const uint32_t& cluster0, uint32_t& next_cluster);
@@ -479,7 +460,13 @@ public:
     //
     // Devuelve el cluster nuevo 'd' al que apunta c2.
     // En caso  de error devuelve 0.
-    uint32_t add_cluster(const uint32_t& cluster);
+    uint32_t add_cluster(const uint32_t& cluster0);
+
+    // Igual que add_cluster con la única diferencia de que solo añade el
+    // cluster si cluster0 es el último elemento de la lista. Si no lo es, no
+    // hace nada devolviendo 0.
+    uint32_t push_back_cluster(const uint32_t& cluster0);
+
 
     // Borra el cluster0.
     // Ejemplo:
@@ -498,10 +485,6 @@ public:
     uint32_t remove_next_cluster(const uint32_t& cluster0); 
 
 
-
-// State
-    // Indica si ha habido algún error en la llamada de `read`
-    bool read_error() const{ return !volume_->ok();}
 
 
 // FAT_area Info
@@ -560,6 +543,7 @@ private:
     // El valor por defecto es 2 ya que el primer cluster es 2, no 0.
     uint32_t find_first_free_cluster(uint32_t cluster0 = 2) const;
 
+    uint32_t add_cluster(const uint32_t& cluster, bool only_at_the_end);
 
 // Funciones de acceso a los clusters
 // ----------------------------------
@@ -577,6 +561,8 @@ private:
 	auto [nsector, pos] = cluster2sector_pos(cluster);
 	return volume_->template read_global<uint32_t>(sector0_ + nsector, pos);
     }
+
+    bool read_error() const {return volume_->read_error(); }
 
     // Escribe value en el cluster indicado
     // (TODO) Gestionar los errores. ¿Qué devolver o hacer si write_in_area
@@ -596,18 +582,24 @@ private:
     // Sector_driver que solo mantentan 1 sector en memoria?
     bool write(const uint32_t& cluster, const uint32_t& value) const
     { 
-	for (uint8_t i = 0; i < nFATs_; ++i)
-	    write_in_area(i, cluster, value);
+	for (uint8_t i = 0; i < nFATs_; ++i){
+	    if (write_in_area(i, cluster, value) == 0)
+		return false;
+	}
 
-	return true; // (TODO) Gestionar
+	return true; 
     }
 
+    
+    // Devuelve el número de `value` escritos: 
+    // 0 si hay error, 1 si todo va bien.
     uint8_t write_in_area(uint8_t i
 		      , const uint32_t& cluster, const uint32_t& value) const
     {
 	auto [nsector, pos] = cluster2sector_pos(cluster);
-	return volume_->template 
-	write_global<uint32_t>(sector0_area(i) + nsector, pos, value);
+	return 
+	    volume_->template 
+		write_global<uint32_t>(sector0_area(i) + nsector, pos, value);
     }
 };
 
@@ -672,7 +664,7 @@ FAT_area<S>::Cluster_state FAT_area<S>::cluster_state(uint32_t entry) const
 
     if (entry == 0x00000000) return Cluster_state::free;
     if (entry == 0x0FFFFFF7) return Cluster_state::bad;
-    if (entry == 0x0FFFFFFF) return Cluster_state::end_of_file;
+    if (entry == 0x0FFFFFFF) return Cluster_state::end_of_clusters;
     
     // entrys 0 y 1 están reservados
     // section 3.5
@@ -705,6 +697,10 @@ uint32_t FAT_area<S>::find_first_free_cluster(uint32_t cluster) const
 {
     for (; cluster < number_of_clusters_; ++cluster){
 	auto v = read(cluster);
+	
+	if (read_error())
+	    return 0;
+
 	if (v == free_entry)
 	    return cluster;
     }
@@ -736,7 +732,10 @@ bool FAT_area<S>::remove_list(uint32_t cluster0)
 {
     while (is_allocated(cluster0)){
 
-	auto cluster1 = read(cluster0); // (TODO) ¿qué pasa si read falla? 
+	auto cluster1 = read(cluster0); 
+					
+	if (read_error())
+	    return false;
 					
 	if (write(cluster0, free_entry) == 0)
 	    return false;
@@ -756,24 +755,43 @@ bool FAT_area<S>::remove_list(uint32_t cluster0)
 //	c0 -> d -> c1
 //
 //  devolviendo d.
+//
+//  Si only_at_the_end == true solo añade el cluster en caso de que cluster0
+//  sea el último cluster de la lista.
 template <typename S>
-uint32_t FAT_area<S>::add_cluster(const uint32_t& cluster0)
+uint32_t FAT_area<S>::add_cluster(const uint32_t& cluster0
+		      , bool only_at_the_end)
 {
-    auto cluster1 = read(cluster0); // (TODO) ¿qué pasa si read falla? 
+    auto cluster1 = read(cluster0);
+		
+    if (read_error())
+	return 0;
+
+    if (only_at_the_end and cluster1 != end_of_file_entry)
+	return 0;
 
     uint32_t d = find_first_free_cluster();
 
     if (d == 0) // si no hay más clusters libres
 	return 0;
 
-    if (write(d, cluster1) == 0)
+    if (write(d, cluster1) == 0){
 	return 0;
+    }
 
     if (write(cluster0, d) == 0)
 	return 0;
 
     return d;
 }
+
+template <typename S>
+inline uint32_t FAT_area<S>::add_cluster(const uint32_t& cluster0)
+{ return add_cluster(cluster0, false); }
+
+template <typename S>
+inline uint32_t FAT_area<S>::push_back_cluster(const uint32_t& cluster0)
+{ return add_cluster(cluster0, true); }
 
 
 // Convertimos:
@@ -784,12 +802,19 @@ uint32_t FAT_area<S>::add_cluster(const uint32_t& cluster0)
 template <typename S>
 uint32_t FAT_area<S>::remove_next_cluster(const uint32_t& cluster0)
 {
-    auto cluster1 = read(cluster0); // (TODO) ¿qué pasa si read falla? 
+    auto cluster1 = read(cluster0);
+
+    if (read_error())
+	return 0;
 
     if (!is_allocated(cluster1))
 	return 0;
 
-    auto cluster2 = read(cluster1); // (TODO) ¿qué pasa si read falla? 
+    auto cluster2 = read(cluster1);
+				    
+    if (read_error())
+	return 0;
+
 				    
     if (write(cluster1, free_entry) == 0)
 	return 0;
@@ -827,6 +852,8 @@ public:
 
     uint32_t sector_number(uint32_t c, uint8_t s) const
     { return first_sector_of_cluster(c) + s; }
+
+
 
 private:
 // Data Area info 
@@ -867,10 +894,6 @@ public:
     // defecto en Volume
     Volume(const uint32_t& sector0, Boot_sector_min& bs);
 
-// State
-    bool ok() const { return driver_.ok() == true and sector_size_ != 0;}
-    bool error() const { return !ok(); }
-
 // Reserved area
     // Primer sector del volumen
     uint32_t first_sector() const {return sector0_;}
@@ -878,20 +901,23 @@ public:
     uint32_t bytes_per_sector() const {return sector_size_;}
     uint32_t root_directory_first_cluster();
 
-// Lectura/escritura de sectores
+// Lectura/escritura de sectores 
     // Lee el Int (byte) que está en la posición `pos` del sector nsector.
     // Siendo nsector coordenada local, el número de sector referido 
     // al principio del volumen.
-    template <Type::Integer Int = uint8_t>
-    Int read(const uint32_t& nsector, uint16_t pos)
-    { return driver_.template read<Int>(sector0_ + nsector, pos); }
+//    template <Type::Integer Int = uint8_t>
+//    Int read(const uint32_t& nsector, uint16_t pos)
+//    { return driver_.template read<Int>(sector0_ + nsector, pos); }
     
     // nsector es coordenada global, 
     // es el número de sector referido al  principio del disco
+    // Para ver si falla mirar el state correspondiente
     template <Type::Integer Int = uint8_t>
     Int read_global(const uint32_t& nsector, uint16_t pos)
     { return driver_.template read<Int>(nsector, pos); }
 
+    // Devuelve 1 si todo va bien, 0 si no consigue escribir.
+    // Si falla mirar el state correspondiente para ver error (write_error())
     template <Type::Integer Int = uint8_t>
     uint8_t write_global( const uint32_t& nsector, uint16_t pos
 		     , const uint32_t& value)
@@ -899,6 +925,18 @@ public:
 
     // Devuelve true si hace el flush correctamente, false en caso de error
     bool flush() { return driver_.flush();}
+
+// Algorithms
+    // Rellena todo el cluster con el valor indicado.
+    // Devuelve true si todo va bien.
+    bool fill_cluster(const uint32_t& cluster, uint8_t value);
+
+
+// State
+    bool ok() const { return driver_.ok() == true and sector_size_ != 0;}
+    bool error() const { return !ok(); }
+    bool read_error() const { return driver_.read_error(); }
+    bool write_error() const { return driver_.write_error(); }
 
 private:
 // Reserved area
@@ -912,20 +950,12 @@ private:
     // Devuelve fs_info
     uint16_t init();
 
-//    template <typename T>
-//    T* read_global_as_pointer(const uint32_t& nsector)
-//    { return driver_.template lock_sector<T>(nsector);}
 };
 
 // precondition: sector0_ valido
 template <typename SD>
 uint16_t Volume<SD>::init()
 {
-//    Boot_sector* bs = read_global_as_pointer<Boot_sector>(sector0_);
-//    bs = driver_.template lock_sector<T>(nsector);}
-//    Boot_sector* bs = 
-//	reinterpret_cast<Boot_sector*>(driver_.template lock_sector(nsector)); 
-
     auto bs = driver_.template lock_sector_and_view_as<Boot_sector>(sector0_);
 
     if (bs.is_null()){
@@ -947,24 +977,16 @@ uint16_t Volume<SD>::init()
 
 
 template <typename SD>
+inline 
 Volume<SD>::Volume(const uint32_t& sector0)
     : fat_area{this}, sector0_{sector0}
-{
-    init();
-}
+{ init(); }
 
 template <typename SD>
+inline
 Volume<SD>::Volume(const uint32_t& sector0, Boot_sector_min& bs_min)
     : fat_area{this}, sector0_{sector0}
-{
-//    Boot_sector* bs = init();
-//
-//    if (bs == nullptr)
-//	return;
-//
-//    bs_min.fs_info = bs->fs_info;
-    bs_min.fs_info = init();
-}
+{ bs_min.fs_info = init(); }
 
 
 // De momento opto por leerlo de disco en lugar de memorizarlo. ¿se usará
@@ -972,11 +994,7 @@ Volume<SD>::Volume(const uint32_t& sector0, Boot_sector_min& bs_min)
 template <typename SD>
 uint32_t Volume<SD>::root_directory_first_cluster() 
 {
-//    Lock lock{driver_};
-//    Boot_sector* bs = read_global_as_pointer<Boot_sector>(sector0_);
-
     auto bs = driver_.template lock_sector_and_view_as<Boot_sector>(sector0_);
-    //if (bs == nullptr){
     if (bs.is_null()){
 	atd::ctrace<3>() << "ERROR: can't read boot sector\n";
 
@@ -987,6 +1005,16 @@ uint32_t Volume<SD>::root_directory_first_cluster()
     
 }
 
+template <typename SD>
+inline 
+bool Volume<SD>::fill_cluster(const uint32_t& cluster, uint8_t value)
+{
+    if (driver_.fill_n(cluster, data_area.sectors_per_cluster(), value)
+		!= data_area.sectors_per_cluster())
+	return false;
+
+    return true;
+}
 
 
 /***************************************************************************
@@ -1025,24 +1053,52 @@ FAT_area<Sector_driver>::Cluster_state
  *				FILE_SECTORS
  * -------------------------------------------------------------------------
  *
- * Un FAT32::File_sectors es:
+ * Un FAT32::File_sectors se puede ver de 2 formas:
  *
- *  1) para el usuario una lista enlazada de S sectores.
- *  2) implementado internamente como una lista enlazada de C clusters.
- *
- * Lo que nos permite es iterar por los sectores de un fichero.
+ *  1) como una lista enlazada de S sectores.
+ *  2) como una lista enlazada de C clusters cada uno de ellos con un número
+ *     determinado de sectores.
+ *     (se podía basar en FAT_area_list que representaría una lista enlazada
+ *     de clusters de la FAT area, pero de moment omito crear esta clase).
  *
  ***************************************************************************/
 namespace impl_of{
-enum class File_sectors_state : uint8_t {
-    ok
-    , error
-    , end_of_sectors // no es end of file, ya que, en general, un fichero no
-		     // ocupa todos los sectores de un cluster quedando
-		     // sectores vacíos. Pero estos sectores pertenecen al
-		     // cluster.
+// Resultado de la última operacion
+enum class File_sectors_errno: uint8_t {
+    ok = 0  // fail == distinto de 0
+    , next_cluster_no_allocated = 1
 };
 
+// ¿En qué estado se puede encontrar la lista enlazada de los sectores?
+enum class File_sectors_state : uint8_t {
+    ok             = 0,	// apunta a un sector válido
+    uninitialized  = 1, // no se ha inicializado
+    end_of_sectors = 2  // se ha llegado al final de los sectores
+};
+
+
+struct File_sectors_struct {
+    using Errno = File_sectors_errno;
+    using State = File_sectors_state;
+
+    State state : 4;
+    Errno errno : 4;
+
+    // Añado este constructor para evitar warnings del compilador @_@
+    File_sectors_struct() :state{}, errno{}{} 
+
+    void operator=(State st) { state = st; }
+    void operator=(Errno e)  { errno = e; }
+
+    bool operator==(State st) const { return state == st; }
+    bool operator!=(State st) const { return state != st; }
+    
+    bool operator==(Errno e) const { return errno == e; }
+    bool operator!=(Errno e) const { return errno != e; }
+
+};
+
+static_assert(sizeof(File_sectors_state) == 1);
 
 }// impl_of
  
@@ -1055,7 +1111,8 @@ public:
     using Sector_driver = Sector_driver0;
     using Sector	= typename Volume::Sector;
     using Sector_span   = typename Volume::Sector_span;
-    using State         = impl_of::File_sectors_state;
+    using State         = impl_of::File_sectors_struct::State;
+    using Errno         = impl_of::File_sectors_struct::Errno;
 
 // Data
     Volume& volume;
@@ -1073,34 +1130,60 @@ public:
     // Devuelve true si lo obtiene, false si falla. 
     bool next_sector();
 
+    // Añade un nuevo cluster solo si el cluster actual es el último de la
+    // lista de clusters.
+    // Devuelve el nuevo cluster añadido ó 0 en caso de error.
+    uint32_t push_back_cluster();
+
+    // Añade un nuevo cluster y llena todo el cluster con el valor value.
+    // Necesario para los directorios: los cluster hay que inicializarlos a 0.
+    // Devuelve el nuevo cluster añadido ó 0 en caso de error.
+    uint32_t push_back_cluster_fill_with(uint8_t value);
+
 // read/write
     // Devuelve el número del sector global actual
     uint32_t global_sector_number() const;
 
+// Errno = resultado de la última operación
+    bool last_operation_ok() const {return errno() == Errno::ok; }
+    bool last_operation_fail() const {return errno() != Errno::ok; }
+
+    bool next_cluster_no_allocated() const 
+    {return errno() == Errno::next_cluster_no_allocated;}
+
+    Errno errno() const {return errno_state_.errno;}
+
 // State
-    bool ok() const {return state_ == State::ok;}
-    bool error() const {return state_ == State::error;}
-    bool end_of_sectors() const {return state_ == State::end_of_sectors;}
+    State state() const {return errno_state_.state;}
+
+    bool uninitialized() const { return state() == State::uninitialized; }
+    bool end_of_sectors() const {return state() == State::end_of_sectors;}
+
 
 // Para depurar
     // Pasa a apuntar al primer sector del siguiente cluster, en caso de que
     // exista. Si existe devuelve true, en caso contrario false.
     bool next_cluster();    
 
+    
 private:
+    // Un sector dentro de una lista enlazada de clusters viene definido por
+    // el par (cluster, sector)
     uint32_t cluster_; // cluster actual
-    uint8_t sector_;  // sector al que apuntamos dentro de cluster_
+    uint8_t sector_;   // sector al que apuntamos dentro de cluster_
 
-    State state_;
+    impl_of::File_sectors_struct errno_state_;
 
-// Helpers
+    void errno(Errno e) {errno_state_.errno = e; }
+    void state(State st) {errno_state_.state = st; }
     
 };
+
 
 template<typename SD>
 inline File_sectors<SD>::File_sectors(Volume& vol)
     : volume{vol}, cluster_{0}, sector_{0} // inicializo a 0 para detectar errores
-{ state_ = State::error; } 
+{ state(State::uninitialized); } 
 
 template<typename SD>
 inline File_sectors<SD>::File_sectors(Volume& vol,  uint32_t cluster0)
@@ -1112,7 +1195,7 @@ inline void File_sectors<SD>::first_sector(uint32_t cluster0)
 { 
     cluster_ = cluster0;
     sector_  = 0;
-    state_   = State::ok;
+    state(State::ok);
 }
 
 
@@ -1124,23 +1207,42 @@ inline uint32_t File_sectors<SD>::global_sector_number() const
 
 
 template<typename SD>
+bool File_sectors<SD>::next_sector()
+{
+    if (end_of_sectors())
+	return false;
+
+    ++sector_;
+
+    if (sector_ < volume.data_area.sectors_per_cluster()){
+	state(State::ok);
+	return true;
+    }
+
+    return next_cluster();
+}
+
+
+// Postcondition:
+//  if(File_sectors.end_of_sectors()) 
+//	==> sector_ > data_area.sectors_per_cluster();
+template<typename SD>
 bool File_sectors<SD>::next_cluster()
 {
     uint32_t next_cluster;
-    auto state = volume.fat_area.next_cluster(cluster_, next_cluster);
+    auto cluster_state = volume.fat_area.next_cluster(cluster_, next_cluster);
 
-
-    if (state == Volume::Cluster_state::end_of_file){
-	state_ = State::end_of_sectors;
+    if (cluster_state == Volume::Cluster_state::end_of_clusters){
+	state(State::end_of_sectors);
 	return false;
     }
 
-    if (state != Volume::Cluster_state::allocated){
-	state_ = State::error;
+    if (cluster_state != Volume::Cluster_state::allocated){
+	errno(Errno::next_cluster_no_allocated);
 	return false;
     }
 
-    state_ = State::ok;
+    state(State::ok);
 
     cluster_ = next_cluster;
     sector_  = 0;
@@ -1150,15 +1252,38 @@ bool File_sectors<SD>::next_cluster()
 
 
 template<typename SD>
-bool File_sectors<SD>::next_sector()
+uint32_t File_sectors<SD>::push_back_cluster()
 {
-    state_ = State::ok;
+    uint32_t new_cluster = volume.fat_area.push_back_cluster(cluster_);
 
-    ++sector_;
-    if (sector_ < volume.data_area.sectors_per_cluster())
-	return true;
+    if (new_cluster == 0)
+	return 0;
 
-    return next_cluster();
+    if (end_of_sectors()){
+	end_of_sectors(false); // tenemos un nuevo cluster
+	sector_ = volume.data_area.sectors_per_cluster(); // no necesario,
+				// pero me da garantias de que funcione bien
+	next_sector();
+    }
+
+    return next_cluster;
+}
+
+template<typename SD>
+uint32_t File_sectors<SD>::push_back_cluster_fill_with(uint8_t value)
+{
+    auto new_cluster = push_back_cluster();
+
+    if (new_cluster == 0)
+	return 0;
+
+    if (!volume.fill_cluster(new_cluster, value)){
+	atd::ctrace<3>() << "Can't initialize cluster " << new_cluster 
+			 << " to " << (uint16_t) value << '\n';
+
+    }
+
+    return new_cluster;
 }
 
 
@@ -1234,8 +1359,9 @@ public:
 
 
 // State
-    bool ok() const {return sector_.ok(); }
-    bool error() const {return sector_.error(); }
+// (TODO) Se mezcla el errno con el state!!! Separarlo.
+    bool ok() const {return sector_.last_operation_ok(); }
+    bool error() const {return sector_.last_operation_fail(); }
     bool end_of_file() const {return state_ == State::end_of_file;}
 
 // Info
@@ -1316,7 +1442,7 @@ inline uint8_t File<SD>::read(std::span<uint8_t> buf)
 {
     using size = std::span<uint8_t>::size_type;
 
-    if (sector_.end_of_sectors() or sector_.error()
+    if (sector_.end_of_sectors() or sector_.last_operation_fail()
 	or remainder_bytes_.value() == 0)
 	return 0;
 
@@ -1336,7 +1462,7 @@ inline uint8_t File<SD>::read(std::span<uint8_t> buf)
 	if (i >= sector_.volume.bytes_per_sector()){
 	    sector_.next_sector(); 
 
-	    if (sector_.end_of_sectors() or sector_.error())
+	    if (sector_.end_of_sectors() or sector_.last_operation_fail())
 		return n + 1u;
 
 	    i = 0;
@@ -1496,8 +1622,9 @@ void copy(const Directory_entry& entry, Entry_info& info);
 template <typename Sector_driver0>
 struct const_Entry_iterator;
 
-enum class Directory_state{
-    ok, read_error, last_entry, long_entry_corrupted
+enum class Directory_state : uint8_t{
+    ok = 0,
+    read_error, last_entry, long_entry_corrupted
 };
 
 
@@ -1579,10 +1706,6 @@ public:
 
 
 // State
-// (DUDA) File tiene un state, y esta clase otro: uso un uint16_t (2 x
-// uint8_t) para el estado lo cual es desperdiciar un byte. ¿Se podría
-// fusionar en 1 byte los 2 states? Si la solución no es sencilla ¿merece la
-// pena complicar todo el código por ahorrar 1 byte? 
 // (TODO) Observar que hay varios tipos de estado diferentes:
 //	(1) El estado del file interno (ok, error de lectura)
 //	(2) El estado del array de entries (last_entry)
@@ -1591,11 +1714,11 @@ public:
 //	    read_long_entry)
 //	¡Aclarar esto!
     bool ok() const {return dir_.ok() and state_ == State::ok; }
+    bool error() const {return !ok(); }
+
     bool read_error() const {return state_ == State::read_error; }
     bool last_entry() const {return state_ == State::last_entry; }
     bool long_entry_corrupted() const {return state_ == State::long_entry_corrupted; }
-    bool error() const {return dir_.error() 
-			    or state_ == State::read_error; }
 
 private:
     File dir_; // fichero con los sectores del directorio

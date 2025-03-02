@@ -32,7 +32,8 @@
 // Niveles de traza usados (borrador)
 // 1: Error crítico: fallo de comunicación, error de hardware.
 // 2: Error: no hay espacio en disco duro, ...
-// 3: Error
+// 3: Error: no se ha podido hacer algo pero se puede continuar aunque quedará
+// todo inconsistente.
 // 5: warnings
 // 9: traza para depurar, borrarlas al final.
 
