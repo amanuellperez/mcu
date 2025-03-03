@@ -80,14 +80,21 @@ private:
 	void FAT32_area_add_cluster();
 	void FAT32_area_remove_next_cluster();
 
+// FAT area list test
+    void FAT32_area_list_menu();
+	void FAT32_area_list_print_ls();
+	void FAT32_area_push_back_cluster();
+
 // Root directory test
     void root_directory_menu();
 	void root_directory_print_short_entries();
 	void root_directory_print_long_entries();
 
+
+
+// Directory ???
     void print_directory_ls();
 
-    void print_file_sectors();
     void print_ls(Volume& vol, Directory& dir, Attribute att);
     void print_file();
 

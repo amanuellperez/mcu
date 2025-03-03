@@ -69,7 +69,9 @@
 #include <atd_array.h>	// Array_of_bytes_view
 #include <atd_cmath.h>	// div
 #include <atd_contracts.h>  // precondition
-			    
+#include <atd_basic_types.h>	// Uniniatialized	
+
+
 namespace atd{
  
 
@@ -512,6 +514,9 @@ private:
     uint32_t number_of_sectors_; // número total de sectores de 1 FAT_area
     uint32_t number_of_clusters_; // número de clusters de la FAT_area
 				 // Es el número de clusters de la data area
+
+    // (TODO) sector_size_ está repetido aquí y en Volume. No almacenarlo 2
+    // veces!!!
     uint32_t sector_size_; // número de bytes por sector
 
 // Cfg de FAT_area
@@ -528,15 +533,16 @@ private:
 		and cluster != end_of_file_entry; }
 
 // Helpers
-    // Observar la forma de hablar: la FAT_area es un conjunto de entradas,
+    // Observar la forma de hablar: la FAT_area es un conjunto de clusters,
     // donde la posición de cada entrada hace referencia al cluster de esa
     // posición.
     // Así, la entrada 10 de la FAT_area contiene:
     //	1. El estado de ese cluster: free, allocated, bad, ...
     //	2. En el caso de que sea allocated indica el valor del siguiente
     //	   cluster.
-    Cluster_state cluster_state(uint32_t entry) const;
-    std::pair<uint32_t, uint32_t> cluster2sector_pos(uint32_t entry) const;
+    Cluster_state cluster_state(uint32_t cluster) const;
+    std::pair<uint32_t, uint32_t> 
+			    cluster2sector_pos(const uint32_t& cluster) const;
     uint32_t sector0_area(uint8_t i) const;
 
     // Devuelve el primer cluster libre después de cluster0,
@@ -610,22 +616,22 @@ private:
 // array bidimensional de 512 uint8_t cada fila.
 //
 // Tenemos dos sistemas de coordenadas: un índice líneal que es el número de
-// entry, y un par (nsector, pos) que nos dice en qué sector está la entrada y
+// cluster0, y un par (nsector, pos) que nos dice en qué sector está la entrada y
 // en que posición dentro de ese sector. La forma de relacionarlos es la
 // habitual:
-//		entry = nsector * 128 + pos
+//		cluster0 = nsector * 128 + pos
 //
 // A partir de esta fórmula calculamos nsector y pos.
 // (el 128 = 512 / 4; yo no voy a complicar la cosa como hace la FAT_area
 // specification y calcular la posición del uint8_t y luega hacer el casting
 // ya que concibo la FAT_area como un array lineal de uint32_t)
 // 
-// tanto entry, como (nsector, pos) son coordenadas locales a la FAT area.
+// tanto cluster0, como (nsector, pos) son coordenadas locales a la FAT area.
 template <typename S>
 inline 
 std::pair<uint32_t, uint32_t> 
-	FAT_area<S>::cluster2sector_pos(uint32_t entry) const
-{ return atd::div(entry, sector_size_ / sizeof(uint32_t)); }
+	FAT_area<S>::cluster2sector_pos(const uint32_t& cluster) const
+{ return atd::div(cluster, sector_size_ / sizeof(uint32_t)); }
 
 
 
@@ -658,28 +664,28 @@ inline uint32_t FAT_area<S>::sector0_area(uint8_t i) const
 // numéricos porque así puedo ver que no los estoy duplicando y comparar con
 // la tabla de la section 4.
 template <typename S>
-FAT_area<S>::Cluster_state FAT_area<S>::cluster_state(uint32_t entry) const
+FAT_area<S>::Cluster_state FAT_area<S>::cluster_state(uint32_t cluster) const
 {
-    // Section 4.  Note: "The high 4 bits of a FAT32 FAT entry are reserved"
-    entry &= 0x0FFFFFFF;  
+    // Section 4.  Note: "The high 4 bits of a FAT32 FAT cluster are reserved"
+    cluster &= 0x0FFFFFFF;  
 
-    if (entry == 0x00000000) return Cluster_state::free;
-    if (entry == 0x0FFFFFF7) return Cluster_state::bad;
-    if (entry == 0x0FFFFFFF) return Cluster_state::end_of_clusters;
+    if (cluster == 0x00000000) return Cluster_state::free;
+    if (cluster == 0x0FFFFFF7) return Cluster_state::bad;
+    if (cluster == 0x0FFFFFFF) return Cluster_state::end_of_clusters;
     
-    // entrys 0 y 1 están reservados
+    // clusters 0 y 1 están reservados
     // section 3.5
-    if (0x00000002 <= entry 
-		and entry <= number_of_clusters_ + 1) 
+    if (0x00000002 <= cluster 
+		and cluster <= number_of_clusters_ + 1) 
 	return Cluster_state::allocated;
 	
 
     // DUDA: La FAT specification indica que 
     // "Reserved and should not be used.
-    //  May be interpreted as an allocated entry and the final
-    //  entry in the file (indicating end-of-file condition)"
+    //  May be interpreted as an allocated cluster and the final
+    //  cluster in the file (indicating end-of-file condition)"
     //  ¿son reserved or end_of_file? @_@
-    if (0x0FFFFFF8 <= entry and entry <= 0x0FFFFFFE)
+    if (0x0FFFFFF8 <= cluster and cluster <= 0x0FFFFFFE)
 	return Cluster_state::reserved;
 
     return Cluster_state::reserved;
@@ -846,13 +852,13 @@ public:
     uint8_t  sectors_per_cluster() const
     { return data_area_sectors_per_cluster_;}
 
-    // Esta es la función fundamental que vamos a usar para localizar los
-    // sectores
-    uint32_t first_sector_of_cluster(uint32_t n) const
-    {return  first_sector() + (n-2) * sectors_per_cluster();}
+    // Devuelve el primer sector del `cluster` indicado. 
+    // El sector devuelto es global (coordenadas de SDCard)
+    uint32_t first_sector_of_cluster(uint32_t cluster) const
+    {return  first_sector() + (cluster - 2) * sectors_per_cluster();}
 
-    uint32_t sector_number(uint32_t c, uint8_t s) const
-    { return first_sector_of_cluster(c) + s; }
+//    uint32_t sector_number(uint32_t cluster, uint8_t sector) const
+//    { return first_sector_of_cluster(cluster) + sector; }
 
 
 
@@ -1010,7 +1016,9 @@ template <typename SD>
 inline 
 bool Volume<SD>::fill_cluster(const uint32_t& cluster, uint8_t value)
 {
-    if (driver_.fill_n(cluster, data_area.sectors_per_cluster(), value)
+    auto sector0 = data_area.first_sector_of_cluster(cluster);
+
+    if (driver_.fill_n(sector0, data_area.sectors_per_cluster(), value)
 		!= data_area.sectors_per_cluster())
 	return false;
 
@@ -1142,7 +1150,7 @@ public:
     uint32_t push_back_cluster_fill_with(uint8_t value);
 
 // read/write
-    // Devuelve el número del sector global actual
+    // Devuelve el número del sector global actual 
     uint32_t global_sector_number() const;
 
 // Errno = resultado de la última operación
@@ -1166,6 +1174,8 @@ public:
     // exista. Si existe devuelve true, en caso contrario false.
     bool next_cluster();    
 
+    // Devuelve el número de cluster actual al que apunta la lista
+    uint32_t ncluster() const {return cluster_;}
     
 private:
     // Un sector dentro de una lista enlazada de clusters viene definido por
@@ -1261,13 +1271,13 @@ uint32_t FAT_area_list<SD>::push_back_cluster()
 	return 0;
 
     if (end_of_sectors()){
-	end_of_sectors(false); // tenemos un nuevo cluster
+	state(State::ok);
 	sector_ = volume.data_area.sectors_per_cluster(); // no necesario,
 				// pero me da garantias de que funcione bien
 	next_sector();
     }
 
-    return next_cluster;
+    return new_cluster;
 }
 
 template<typename SD>
@@ -1278,6 +1288,8 @@ uint32_t FAT_area_list<SD>::push_back_cluster_fill_with(uint8_t value)
     if (new_cluster == 0)
 	return 0;
 
+atd::ctrace<9>() << "new_cluster = " << new_cluster << "(" << global_sector_number()
+    << ")\n";
     if (!volume.fill_cluster(new_cluster, value)){
 	atd::ctrace<3>() << "Can't initialize cluster " << new_cluster 
 			 << " to " << (uint16_t) value << '\n';

@@ -18,9 +18,9 @@ msg_main_menu	"Read:\n"
 		"\t4. MBR boot sector\n"
 		"\t5. Reserved area\n"
 		"\t6. FAT area\n"
-		"\t7. Root directory\n"
-		"\t8. Directories (ls and cd) \n"
-		"\t9. File sectors\n"
+		"\t7. FAT area list\n"
+		"\t8. Root directory\n"
+		"\t9. Directories (ls and cd) \n"
 
 
 # load sector

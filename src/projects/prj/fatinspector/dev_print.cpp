@@ -26,6 +26,8 @@
  *    24/04/2023 Escrito
  *
  ****************************************************************************/
+#include "prj_dev.h"
+
 #include "dev_print.h"
 #include "dev_strings.h"
 
