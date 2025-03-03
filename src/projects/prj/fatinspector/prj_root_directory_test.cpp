@@ -68,14 +68,16 @@ void Main::root_directory_print_short_entries()
 
     Volume vol{nsector};
 
-    if (vol.error()){
+    if (vol.last_operation_fail()){
 	uart << "ERROR\n";
 	return;
     }
 
 
-    {
     using Entry = Directory::Entry;
+
+    static constexpr uint16_t max_entries = 60;
+    uart << "Printing " << max_entries << " entries\n";
 
     uart << "n \t|type\t|name\t\t|attr\t|cluster\t|size\t|"
 	"created\t|access\t|modified\t|\n";
@@ -88,7 +90,7 @@ void Main::root_directory_print_short_entries()
 
     Directory dir{vol, root_dir};
     dir.first_entry();
-    for (uint8_t i = 0; i < 30; ++i){
+    for (uint8_t i = 0; i < max_entries; ++i){
 	Entry entry;
 	dir.read(entry);
 	
@@ -161,6 +163,7 @@ void Main::root_directory_print_short_entries()
 	    uart << "FREE ENTRY\n";
 	} else if (entry.type() == Entry::Type::last_entry){
 	    uart << "LAST ENTRY\n";
+	    return;
 	}
 
 //	atd::xxd_print(uart, entry.data);
@@ -170,7 +173,6 @@ void Main::root_directory_print_short_entries()
     }
     uart << '\n';
     print_line(uart);
-    }
 
 }
 
@@ -190,7 +192,7 @@ void Main::root_directory_print_long_entries()
 
     Volume vol{nsector};
 
-    if (vol.error()){
+    if (vol.last_operation_fail()){
 	uart << "ERROR\n";
 	return;
     }
@@ -213,8 +215,10 @@ void Main::root_directory_print_long_entries()
 	std::array<uint8_t, 32> name;
 
 	if (!dir.read_long_entry(info, name)){
-	    if (dir.last_entry())
+	    if (dir.last_entry()){
 		uart << "LAST ENTRY found\n";
+		return;
+	    }
 	    else
 		uart << "Error\n";
 	    return;

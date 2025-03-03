@@ -70,7 +70,7 @@ void Main::reserved_area_print_FS_info()
     Boot_sector_min bs_min{};
     Volume vol{nsector, bs_min};
 
-    if (vol.error()){
+    if (vol.last_operation_fail()){
 	uart << "ERROR\n";
 	return;
     }

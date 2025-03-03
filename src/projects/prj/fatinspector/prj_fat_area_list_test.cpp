@@ -64,7 +64,7 @@ void Main::FAT32_area_list_print_ls()
 
     Volume vol{nsector};
 
-    if (vol.error()){
+    if (vol.last_operation_fail()){
 	uart << "ERROR reading FAT volume\n";
 	return;
     }
@@ -115,7 +115,7 @@ void Main::FAT32_area_push_back_cluster()
 
     Volume vol{nsector};
 
-    if (vol.error()){
+    if (vol.last_operation_fail()){
 	uart << "ERROR reading FAT volume\n";
 	return;
     }

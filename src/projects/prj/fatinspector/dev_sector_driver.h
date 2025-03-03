@@ -79,37 +79,38 @@ namespace dev{
 //	que hacerlo obligatoriamente via Volume. 
 //
 namespace impl_of{
-enum class Sector_driver_state :uint8_t {
+enum class Sector_driver_errno : uint8_t {
     ok = 0, // != 0 significa error
     read_error = 1,
-    write_error = 2 
+    write_error = 2,
+    lock_sector = 3
 };
 
 
 struct Sector_driver_struct{
-    using State = Sector_driver_state;
+    using Errno = Sector_driver_errno;
 
-    Sector_driver_state state : 6;
-    bool modified  : 1; // indica que el sector ha sido modificado en RAM
+    Errno errno   : 6;
+    bool modified : 1; // indica que el sector ha sido modificado en RAM
 			// con lo que hay que hacerle un flush antes de leer
 			// un nuevo sector
     uint8_t locked : 1;
 
-    Sector_driver_struct() : state{State::ok}
+    Sector_driver_struct() : errno{Errno::ok}
 			    , modified{false}
 			    , locked{0}{}
     
-    void operator=(State st) {state = st; }
-    bool operator==(State st) const {return state == st;}
+    void operator=(Errno e) {errno = e; }
+    bool operator==(Errno e) const {return errno == e;}
 
     void lock() {locked = 1;}
     void unlock() {locked = 0;}
 
 
-    bool ok() const {return state == State::ok;}
+    bool ok() const {return errno == Errno::ok;}
     bool fail() const {return !ok(); }
-    bool read_error() const {return state == State::read_error;}
-    bool write_error() const {return state == State::write_error;}
+    bool read_error() const {return errno == Errno::read_error;}
+    bool write_error() const {return errno == Errno::write_error;}
 
     bool is_locked() const {return locked == 1;}
     bool is_unlocked() const {return locked == 0;}
@@ -141,9 +142,7 @@ class Sector_driver{
 public:
 // Types
     using SDCard = SDCard0;
-
-    using State_struct = impl_of::Sector_driver_struct;
-    using State = State_struct::State;
+    using Errno = impl_of::Sector_driver_struct::Errno;
     
     // Este es el tamaño del sector de la SD card que supongo (?) es igual al
     // tamaño del sector usado por FAT32. Pero Sector_driver es genérico y no
@@ -175,11 +174,20 @@ public:
     template <Type::Integer Int>
     Int read(const Address& nsector, const size_type& pos);
 
+    // Intenta leer buf.size() bytes almacenándolos en buf.
+    // Los bytes los lee del sector `nsector` a partir de la posición pos.
+    // Intenta hacer:	    
+    //		buf[0..size()) = sector[pos.. pos + size())
+    // Si no hay suficientes elementos en el sector devuelve un número menor
+    // que buf.size() y anota en errno end_of_sector.
+    size_type read( const Address& nsector, const size_type& pos
+		  , std::span<uint8_t> buf);
+
     // Devuelve un puntero con el array de bytes que forman el sector
     // y bloquea el sector impidiendo que Sector_driver pueda modificar el
     // sector_ mientras esté bloqueado.
     uint8_t* lock_sector(const Address& nsector);
-    void unlock() { state_.unlock();}
+    void unlock() { errno_state_.unlock();}
 
     template <typename T>
     Lock<T> lock_sector_and_view_as(const Address& nsector);
@@ -202,27 +210,33 @@ public:
     // (si todo va bien debería devolver `n`).
     Address fill_n(const Address& sector0, const Address& n, uint8_t value);
 
-// State
-    bool ok() const {return state_.ok();;}
-    bool fail() const {return state_.fail(); }
-    bool read_error() const {return state_.read_error(); }
-    bool write_error() const {return state_.write_error(); }
+// Errno
+    bool last_operation_ok() const {return errno() == Errno::ok; }
+    bool last_operation_fail() const {return errno() != Errno::ok; }
 
-    bool is_locked() const {return state_.is_locked();}
-    bool is_unlocked() const {return state_.is_unlocked();}
+    bool read_error() const {return errno() == Errno::read_error; }
+    bool write_error() const {return errno() == Errno::write_error; }
+
+    bool is_locked() const {return errno_state_.is_locked();}
+    bool is_unlocked() const {return errno_state_.is_unlocked();}
 	
 
 private:
 // Data
     atd::Uninitialized<Address> nsector_; // num. de sector en memoria
     Sector sector_;	// sector en memoria
-    State_struct state_;
+    impl_of::Sector_driver_struct errno_state_;
     
+// State/errno
+    void state_modified(bool m) {errno_state_.modified = m;}
+    void state_lock() {errno_state_.locked = true;}
+    bool state_is_modified() const {return errno_state_.modified;}
 
+    bool ok() {errno_state_.errno = Errno::ok; return true; }
+    bool errno(Errno e) {errno_state_.errno = e; return false;}
+    Errno errno() const {return errno_state_.errno;}
 
 // Helpers
-    bool is_unlocked_and_ok() const;
-
     // Lee el sector nsector de la SD card cargándolo en memoria
     bool read_sector(const Address& nsector);
 
@@ -255,7 +269,7 @@ private:
     void sector_write(size_type pos, const Int& value)
     { 
 	*(reinterpret_cast<Int*>(&sector_[pos * sizeof(Int)])) = value;
-	state_.modified = true;
+	state_modified(true);
     }
 };
 
@@ -263,24 +277,24 @@ private:
 template <typename SD>
 bool Sector_driver<SD>::read_sector(const Address& nsector)
 {
-    if (!is_unlocked_and_ok())
-	return false;
+    if (is_locked()){
+	atd::ctrace<3>() << "ERROR: Trying to access a locked sector\n";
+	return errno(Errno::lock_sector);
+    }
 
     if (nsector_ != nsector){
 	if (!flush())
 	    return false;
 
-	if (read(nsector, sector_)){
-	    state_ = State::ok;
-	    state_.modified = false;
+	if (!read(nsector, sector_))
+	    return errno(Errno::read_error);
 
-	    nsector_ = nsector;
-	}
-	else
-	    state_ = State::read_error;
+	state_modified(false);
+
+	nsector_ = nsector;
     }
 
-    return state_ == State::ok;
+    return ok();
 }
 
 
@@ -297,6 +311,24 @@ Int Sector_driver<SD>::read(const Address& nsector, const size_type& pos)
 
 
 template <typename SD>
+Sector_driver<SD>::size_type 
+    Sector_driver<SD>::read( const Address& nsector, const size_type& pos
+		  , std::span<uint8_t> buf)
+{
+    if (!read_sector(nsector))
+	return 0;
+
+    auto n = std::min(buf.size(), sector_size - pos);
+    std::copy_n(sector_.begin() + pos, n, buf.begin());
+
+    return n;
+}
+
+
+
+
+
+template <typename SD>
 uint8_t* Sector_driver<SD>::lock_sector(const Address& nsector)
 { 
     atd::precondition<9>(is_unlocked(), "ERROR? Locking a locked sector");
@@ -304,7 +336,7 @@ uint8_t* Sector_driver<SD>::lock_sector(const Address& nsector)
     if (!read_sector(nsector))
 	return nullptr;
 
-    state_.lock();
+    state_lock();
 
     return sector_.data();
 }
@@ -321,7 +353,8 @@ uint8_t Sector_driver<SD>::
 	return 0;
 
     sector_write(pos, value);
-    state_ = State::ok;
+
+    errno(Errno::ok);
 
     return 1;
 }
@@ -330,42 +363,17 @@ uint8_t Sector_driver<SD>::
 template <typename SD>
 bool Sector_driver<SD>::flush()
 {
-    if (!state_.is_modified())
+    if (!state_is_modified())
 	return true;
 
-    if (state_.fail()){
-	atd::ctrace<3>() << "ERROR: sector state == fail!!!\n";
-	return false;
-    }
+    if (!write(nsector_, sector_))
+	return errno(Errno::write_error);
 
-    if (!write(nsector_, sector_)){
-	state_ = State::write_error;
-	return false;
-    }
-
-    state_.modified = false;
+    state_modified(false);
 
     return true;
 }
 
-
-
-template <typename SD>
-bool Sector_driver<SD>::is_unlocked_and_ok() const
-{
-    if (is_locked()){
-	atd::ctrace<3>() << "ERROR: Trying to access a locked sector\n";
-	state_.fail();
-	return false;
-    }
-
-    if (state_.fail()){
-	atd::ctrace<3>() << "ERROR: sector state == fail!!!\n";
-	return false;
-    }
-
-    return true;
-}
 
 template <typename SD>
 Sector_driver<SD>::Address 

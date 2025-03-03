@@ -142,7 +142,7 @@ void Main::print_directory_ls()
 
     Volume vol{nsector};
 
-    if (vol.error()){
+    if (vol.last_operation_fail()){
 	uart << "ERROR\n";
 	return;
     }
@@ -200,7 +200,7 @@ void Main::print_file()
 
     Volume vol{nsector};
 
-    if (vol.error()){
+    if (vol.last_operation_fail()){
 	uart << "ERROR reading FAT volume\n";
 	return;
     }

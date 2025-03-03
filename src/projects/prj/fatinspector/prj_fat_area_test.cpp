@@ -74,7 +74,7 @@ void Main::FAT32_area_print_clusters()
 
     Volume vol{nsector};
 
-    if (vol.error()){
+    if (vol.last_operation_fail()){
 	uart << "ERROR\n";
 	return;
     }
@@ -130,7 +130,7 @@ void Main::FAT32_area_new_list()
 
     Volume vol{nsector};
 
-    if (vol.error()){
+    if (vol.last_operation_fail()){
 	uart << "ERROR\n";
 	return;
     }
@@ -158,7 +158,7 @@ void Main::FAT32_area_remove_list()
 
     Volume vol{nsector};
 
-    if (vol.error()){
+    if (vol.last_operation_fail()){
 	uart << "ERROR\n";
 	return;
     }
@@ -190,7 +190,7 @@ void Main::FAT32_area_add_cluster()
 
     Volume vol{nsector};
 
-    if (vol.error()){
+    if (vol.last_operation_fail()){
 	uart << "ERROR\n";
 	return;
     }
@@ -231,7 +231,7 @@ void Main::FAT32_area_remove_next_cluster()
 
     Volume vol{nsector};
 
-    if (vol.error()){
+    if (vol.last_operation_fail()){
 	uart << "ERROR\n";
 	return;
     }

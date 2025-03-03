@@ -909,6 +909,9 @@ public:
     uint32_t root_directory_first_cluster();
 
 // Lectura/escritura de sectores 
+    // (DUDA) Esto no es más que llamar a las funciones de Sector_driver.
+    //        ¿Merce la pena?
+    //
     // Lee el Int (byte) que está en la posición `pos` del sector nsector.
     // Siendo nsector coordenada local, el número de sector referido 
     // al principio del volumen.
@@ -922,6 +925,10 @@ public:
     template <Type::Integer Int = uint8_t>
     Int read_global(const uint32_t& nsector, uint16_t pos)
     { return driver_.template read<Int>(nsector, pos); }
+
+    uint32_t read_global(const uint32_t& nsector, const uint32_t& pos
+		  , std::span<uint8_t> buf)
+    {return driver_.read(nsector, pos, buf); }
 
     // Devuelve 1 si todo va bien, 0 si no consigue escribir.
     // Si falla mirar el state correspondiente para ver error (write_error())
@@ -939,9 +946,12 @@ public:
     bool fill_cluster(const uint32_t& cluster, uint8_t value);
 
 
-// State
-    bool ok() const { return driver_.ok() == true and sector_size_ != 0;}
-    bool error() const { return !ok(); }
+// Errno
+    bool last_operation_ok() const 
+    { return driver_.last_operation_ok() == true and sector_size_ != 0;}
+
+    bool last_operation_fail() const { return !last_operation_ok(); }
+
     bool read_error() const { return driver_.read_error(); }
     bool write_error() const { return driver_.write_error(); }
 
@@ -1086,7 +1096,7 @@ enum class FAT_area_list_state : uint8_t {
 };
 
 
-struct FAT_area_list_struct {
+struct FAT_area_list_ertate {
     using Errno = FAT_area_list_errno;
     using State = FAT_area_list_state;
 
@@ -1094,7 +1104,7 @@ struct FAT_area_list_struct {
     Errno errno : 4;
 
     // Añado este constructor para evitar warnings del compilador @_@
-    FAT_area_list_struct() :state{}, errno{}{} 
+    FAT_area_list_ertate() :state{}, errno{}{} 
 
     void operator=(State st) { state = st; }
     void operator=(Errno e)  { errno = e; }
@@ -1120,8 +1130,8 @@ public:
     using Sector_driver = Sector_driver0;
     using Sector	= typename Volume::Sector;
     using Sector_span   = typename Volume::Sector_span;
-    using State         = impl_of::FAT_area_list_struct::State;
-    using Errno         = impl_of::FAT_area_list_struct::Errno;
+    using State         = impl_of::FAT_area_list_ertate::State;
+    using Errno         = impl_of::FAT_area_list_ertate::Errno;
 
 // Data
     Volume& volume;
@@ -1183,7 +1193,7 @@ private:
     uint32_t cluster_; // cluster actual
     uint8_t sector_;   // sector al que apuntamos dentro de cluster_
 
-    impl_of::FAT_area_list_struct errno_state_;
+    impl_of::FAT_area_list_ertate errno_state_;
 
     void state(State st) {errno_state_.state = st; }
 
@@ -1462,7 +1472,7 @@ inline void File<SD>::reset(uint32_t cluster0)
 //       sea el número de bytes escritos. Sería un poco más eficiente que esta
 //       función.
 template <typename SD> 
-inline uint8_t File<SD>::read(std::span<uint8_t> buf)
+uint8_t File<SD>::read(std::span<uint8_t> buf)
 {
     using size = std::span<uint8_t>::size_type;
 
@@ -1675,7 +1685,7 @@ enum class Directory_state : uint8_t{
 };
 
 
-struct Directory_struct {
+struct Directory_ertate {
     using Errno = Directory_errno;
     using State = Directory_state;
 
@@ -1683,7 +1693,7 @@ struct Directory_struct {
     Errno errno : 4;
 
     // Añado este constructor para evitar warnings del compilador @_@
-    Directory_struct() :state{State::ok}, errno{Errno::ok}{} 
+    Directory_ertate() :state{State::ok}, errno{Errno::ok}{} 
 
     void operator=(State st) { state = st; }
     void operator=(Errno e)  { errno = e; }
@@ -1706,7 +1716,7 @@ class Directory{
 public:
 // Types
     using Volume    = atd::FAT32::Volume<Sector_driver0>;
-    using File	    = atd::FAT32::File<Sector_driver0>;
+    using FAT_area_list = atd::FAT32::FAT_area_list<Sector_driver0>;
     using Entry	    = impl_of::Directory_entry;
     using Type      = Entry::Type;
     using Entry_info= impl_of::Entry_info;
@@ -1785,28 +1795,29 @@ public:
     bool long_entry_corrupted() const 
 		    {return errno() == Errno::long_entry_corrupted; }
 
-    // DUDA: usar funciones o hacer switch con errno()
-    Errno errno() const {return errno_state_.errno;}
 
 // State
-    // DUDA: usar funciones o hacer switch con state()
-    State state() const {return errno_state_.state;}
-
     bool last_entry() const {return state() == State::last_entry; }
 
 private:
-    File dir_; // fichero con los sectores del directorio
-    impl_of::Directory_struct errno_state_;
+    FAT_area_list sector_;  // lista con los clusters que forman el directorio
+			    
+    uint32_t cluster0_; // primer cluster del directorio
+    uint16_t nentry_;	// Número de entrada a la que apuntamos
+			// CUIDADO: es ínidice global, no relativo al sector.
+// TODO: cambiar i por nentry_
+//    uint16_t i; // byte actual al que apuntamos dentro del sector
+    impl_of::Directory_ertate errno_state_;
     
     static constexpr uint8_t sizeof_entry = Entry::size;
 
     // Este state no lo necesito fuera
-    bool end_of_file() const {return dir_.end_of_file();}
-
+    State state() const {return errno_state_.state;}
     void state(State st) {errno_state_.state = st; }
 
     bool ok() {errno_state_.errno = Errno::ok; return true; }
     bool errno(Errno e) {errno_state_.errno = e; return false;}
+    Errno errno() const {return errno_state_.errno;}
 
     // hace que tanto state como errno sean ok
     void state_ok();
@@ -1820,27 +1831,42 @@ private:
     void copy_short_entry(const Entry& entry, Entry_info& info, 
 					std::span<uint8_t> name);
 
+// nentry
+    Volume& volume() {return sector_.volume; }
+    const Volume& volume() const {return sector_.volume; }
+
+    uint16_t number_of_entries_per_sector() const
+    { return volume().bytes_per_sector() / Entry::size; }
+
+    uint16_t local_nentry(uint16_t nentry) const
+    { return nentry % number_of_entries_per_sector(); }
+
+    bool nentry_is_first_entry_of_a_sector(uint16_t nentry) const
+    { return (nentry % number_of_entries_per_sector()) == 0; }
 };
 
 template <typename S> 
 inline 
 Directory<S>::Directory(Volume& volume, uint32_t cluster0)
-    : dir_{volume, cluster0}
+    : sector_{volume, cluster0}, cluster0_{cluster0}, nentry_{0} //i{0}
 { }
 
 template <typename S> 
 inline void Directory<S>::first_entry()
 { 
-    dir_.reset(); 
+    sector_.first_sector(cluster0_); 
     state_ok();
+    nentry_ = 0;
+    //i = 0;
 }
 
 // Esta función es idéntica a first_entry()
 template <typename S>
 void Directory<S>::cd(uint32_t cluster0)
 {
-    dir_.reset(cluster0);
-    state_ok();
+    sector_.first_sector(cluster0);
+    cluster0_ = cluster0;
+    first_entry();
 }
 
 template <typename S>
@@ -1854,26 +1880,36 @@ inline void Directory<S>::state_ok()
 template <typename S> 
 bool Directory<S>::read(Entry& entry)
 {
-    if (dir_.end_of_sectors()){
+    if (state() == State::last_entry){
 	atd::ctrace<5>() << "Trying to read EOC file\n";
-// TODO: mentira!! esta no es la last_entry, hemos alcanzado el final de los
-// clusters.
-	state(State::last_entry); // ¿es redundante? ¿Ponerlo como
-				   // precondition?
-	return false;
+	return errno(Errno::last_entry);
     }
 
-    if (dir_.error()){
-	atd::ctrace<5>() << "Trying to read an error file\n";
-	return false;
+    auto pos = local_nentry(nentry_) * Entry::size;
+
+    auto n = 
+	volume().read_global(sector_.global_sector_number(), pos,
+								entry.data);
+    
+    if (n != Entry::size){
+	atd::ctrace<3>() << "Can't read next directory entry\n";
+	return errno(Errno::read_error);
     }
 
-    if (dir_.read(entry.data) != entry.data.size()){
-	atd::ctrace<5>() << "Can't read Entry\n";
-	return false;
+    ++nentry_;
+
+    if (nentry_is_first_entry_of_a_sector(nentry_)){
+	sector_.next_sector(); 
+
+	if (sector_.last_operation_fail())
+	    return false;
+
+	if (sector_.end_of_sectors())
+	    state(State::last_entry);
     }
 
     return true;
+
 }
 
 
@@ -1997,7 +2033,7 @@ bool Directory<S>::read_long_entry(Entry_info& info,
 //    Entry entry;
 //
 //    if (!read(entry)){
-//	if (dir_.end_of_sectors()){
+//	if (sector_.end_of_sectors()){
 //	return errno(Errno::end_of_sectors);
 //    }
 //
@@ -2022,7 +2058,7 @@ bool Directory<S>::read_long_entry(Entry_info& info,
 //// find_first_free_entry: 
 //    uint32_t ne = find_first_free_entry(name.size()); // que entre el name
 //    if (ne == 0)
-//	dir_.add_cluster(0x00); // 0x00 valor por defecto en los directorios
+//	sector_.add_cluster(0x00); // 0x00 valor por defecto en los directorios
 //    
 //// new_entry_impl:
 //    para toda parte de name:
