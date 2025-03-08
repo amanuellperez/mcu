@@ -20,7 +20,6 @@ msg_main_menu	"Read:\n"
 		"\t6. FAT area\n"
 		"\t7. FAT area list\n"
 		"\t8. Root directory\n"
-		"\t9. Directories (ls and cd) \n"
 
 
 # load sector

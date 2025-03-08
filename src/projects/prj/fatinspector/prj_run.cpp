@@ -40,7 +40,6 @@ void Main::run()
 	    break; case 6: FAT32_area_menu();
 	    break; case 7: FAT32_area_list_menu();
 	    break; case 8: root_directory_menu();
-	    break; case 9: print_directory_ls();
 
 	}
     }

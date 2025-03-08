@@ -1307,8 +1307,6 @@ uint32_t FAT_area_list<SD>::push_back_cluster_fill_with(uint8_t value)
     if (new_cluster == 0)
 	return 0;
 
-atd::ctrace<9>() << "new_cluster = " << new_cluster << "(" << sd_sector_number()
-    << ")\n";
     if (!volume.fill_cluster(new_cluster, value)){
 	atd::ctrace<3>() << "Can't initialize cluster " << new_cluster 
 			 << " to " << (uint16_t) value << '\n';
@@ -1991,40 +1989,22 @@ public:
     Directory(Volume& volume, uint32_t cluster0);
 
 // ls (listado del directorio)
-    // Reinicia la lectura. La siguiente llamada a `read_xxx` devolverá la
-    // primera entrada que encuentre.
-    void first_entry();
-
     // Devuelve un index a la primera entry del directorio
     Short_index short_index_begin()
 	{return Short_index{volume(), cluster0_};}
     
-    // Lee la entry actual almacenándola en entry
-    // Consume esa entry, esto es, pasa a apuntar a la siguiente entry.
-    // Devuelve true si lee la siguiente entry, false si no puede hacerlo.
-    // En caso de error mirar state.
-    // TODO: eliminar esta función
-    bool read(Entry& entry);
-
-//  Eliminar la read anterior en favor de esta
+    //  Lee la entrada apuntada por i
     bool read(const Short_index& i, Entry& entry);
 
-    // Lee la siguiente entrada que haya devolviendo la información básica en
-    // info, y el nombre del fichero en long_name. Si el nombre del fichero no
-    // entra en long_name lo trunca.
-    // Devuelve true si lee una entrada, false en caso de no poder hacerlo.
-    // Devuelve false si:
-    //	    1. Llega a la última entrada, no pudiendo leer más.
-    //	    2. Algún error.
-    // Por ello mirar el state después de llamar a read_long_entry.
-    bool read_long_entry(Entry_info& info, 
+    // Lee la long entry. Deja i en la siguiente entrada a leer.
+    bool read_long_entry(Short_index& i, Entry_info& info, 
 			 std::span<uint8_t> name);
 
     // Devuelve la siguiente entrada correspondiente al attribute att.
     // De esta forma se puede hacer un ls de solo los ficheros, o solo los
     // directorios.
-    bool read_long_entry(Entry_info& info, 
-			 std::span<uint8_t> name, 
+    bool read_long_entry(Short_index& i, Entry_info& info, 
+			 std::span<uint8_t> name,
 			 Attribute att);
 
 // cd (cambio de directorio)
@@ -2064,125 +2044,54 @@ public:
     bool read_error() const {return errno() == Errno::read_error; }
     bool long_entry_corrupted() const 
 		    {return errno() == Errno::long_entry_corrupted; }
+    bool last_entry() const {return errno() == Errno::last_entry; }
 
-
-// State
-    bool last_entry() const {return state() == State::last_entry; }
 
 private:
-    FAT_area_list sector_;  // lista con los clusters que forman el directorio
-			    
+// Data
+    Volume vol_;
     uint32_t cluster0_; // primer cluster del directorio
-    uint16_t nentry_;	// Número de entrada a la que apuntamos
-			// CUIDADO: es ínidice global, no relativo al sector.
-// TODO: cambiar i por nentry_
-//    uint16_t i; // byte actual al que apuntamos dentro del sector
+
     impl_of::Directory_ertate ertate_;
     
-    static constexpr uint8_t sizeof_entry = Entry::size;
-
-    // Este state no lo necesito fuera
-    State state() const {return ertate_.state;}
-    void state(State st) {ertate_.state = st; }
-
+// errno
     bool ok() {ertate_.errno = Errno::ok; return true; }
     bool errno(Errno e) {ertate_.errno = e; return false;}
     Errno errno() const {return ertate_.errno;}
-
-    // hace que tanto state como errno sean ok
-    void state_ok();
+    bool throw_errno() const {return false; }
 
 
 // Helpers
-    bool read_long_entry(Entry& entry, Entry_info& info,
+    bool read_long_entry(Short_index& i, Entry& entry, Entry_info& info,
 						    std::span<uint8_t> name);
     // Lo llamo copy porque realmente no lee ninguna entrada, se limita a
     // copiar la información de entry en [info, name]
     void copy_short_entry(const Entry& entry, Entry_info& info, 
 					std::span<uint8_t> name);
 
+    bool find_first_not_free_entry(Short_index& i, Entry& entry);
+
 // nentry
-    Volume& volume() {return sector_.volume; }
-    const Volume& volume() const {return sector_.volume; }
-
-// TODO: borrar estas, ahora están dentro de Short_index
-    uint16_t nentries_per_sector() const
-    { return volume().bytes_per_sector() / Entry::size; }
-
-    uint16_t local_nentry(uint16_t nentry) const
-    { return nentry % nentries_per_sector(); }
-
-    bool nentry_is_first_entry_of_a_sector(uint16_t nentry) const
-    { return (nentry % nentries_per_sector()) == 0; }
+    Volume& volume() {return vol_; }
+    const Volume& volume() const {return vol_; }
 };
 
 template <typename S> 
 inline 
 Directory<S>::Directory(Volume& volume, uint32_t cluster0)
-    : sector_{volume, cluster0}, cluster0_{cluster0}, nentry_{0} //i{0}
+    : vol_{volume}, cluster0_{cluster0}
 { }
 
-template <typename S> 
-inline void Directory<S>::first_entry()
-{ 
-    sector_.first_sector(cluster0_); 
-    state_ok();
-    nentry_ = 0;
-    //i = 0;
-}
 
 // Esta función es idéntica a first_entry()
 template <typename S>
 void Directory<S>::cd(uint32_t cluster0)
 {
-    sector_.first_sector(cluster0);
-    cluster0_ = cluster0;
-    first_entry();
+    atd::ctrace<1>() << "TODO: revisar\n";
+//    sector_.first_sector(cluster0);
+//    cluster0_ = cluster0;
+//    first_entry();
 }
-
-template <typename S>
-inline void Directory<S>::state_ok()
-{
-    state(State::ok);
-    errno(Errno::ok);
-}
-
-// Observar que este read no marca el error, eso se lo dejo a quien lo llame
-template <typename S> 
-bool Directory<S>::read(Entry& entry)
-{
-    if (state() == State::last_entry){
-	atd::ctrace<5>() << "Trying to read EOC file\n";
-	return errno(Errno::last_entry);
-    }
-
-    auto pos = local_nentry(nentry_) * Entry::size;
-
-    auto n = 
-	volume().sd_read(sector_.sd_sector_number(), pos,
-								entry.data);
-    
-    if (n != Entry::size){
-	atd::ctrace<3>() << "Can't read next directory entry\n";
-	return errno(Errno::read_error);
-    }
-
-    ++nentry_;
-
-    if (nentry_is_first_entry_of_a_sector(nentry_)){
-	sector_.next_sector(); 
-
-	if (sector_.last_operation_fail())
-	    return false;
-
-	if (sector_.end_of_sectors())
-	    state(State::last_entry);
-    }
-
-    return true;
-
-}
-
 
 
 // Observar que este read no marca el error, eso se lo dejo a quien lo llame
@@ -2206,12 +2115,10 @@ bool Directory<S>::read(const Short_index& i, Entry& entry)
 }
 
 
-// precondition: entry es la last_entry de un long_name
-// entry: es de entrada/salida. Se modifica dejando la última entrada leida
-//	 (in) contiene la last_entry de un long_name
-//	 (output) la short_entry del long_name
+// Precondición: i apunta a la entrada entry, que es la primera entrada de la
+// long_entry.
 template <typename S>
-bool Directory<S>::read_long_entry(Entry& entry,
+bool Directory<S>::read_long_entry(Short_index& i, Entry& entry,
 					Entry_info& info, 
 					std::span<uint8_t> long_name)
 {
@@ -2226,20 +2133,25 @@ bool Directory<S>::read_long_entry(Entry& entry,
 
 // Copiamos el name en long_name
     for (; nentry > 0; --nentry){
-	uint8_t i = nentry - 1;
+	uint8_t k = nentry - 1;
 
 	if ((entry.type() != Type::long_entry) 
 	    or (entry.extended_order() != nentry)){ // ¿están ordenadas?
 	    return errno(Errno::long_entry_corrupted);
 	}
 
-	if (i * size < long_name.size()){// copiamos nombre si podemos
+	if (k * size < long_name.size()){// copiamos nombre si podemos
 	    uint8_t n = std::min<uint8_t>(size, 
-					long_name.size() - i * size);
-	    entry.copy_long_name({long_name.begin() + i * size, n});
+					long_name.size() - k * size);
+	    entry.copy_long_name({long_name.begin() + k * size, n});
 	}
 
-	if (!read(entry))
+	++i;
+
+	if (i.last_entry())
+	    return errno(Errno::last_entry);
+
+	if (!read(i, entry))
 	    return errno(Errno::read_error);
 	
     }
@@ -2250,9 +2162,10 @@ bool Directory<S>::read_long_entry(Entry& entry,
 
     impl_of::copy(entry, info);
 
+    ++i; // dejamos apuntando a la siguiente entrada
+
     return ok();
 }
-
 
 
 
@@ -2267,51 +2180,70 @@ void Directory<S>::copy_short_entry(const Entry& entry,
 
 }
 
+
+
 template <typename S>
-bool Directory<S>::read_long_entry(Entry_info& info, 
-					std::span<uint8_t> long_name)
+bool Directory<S>::read_long_entry(Short_index& i
+				  , Entry_info& info
+				  , std::span<uint8_t> long_name)
 {
     using Type = Entry::Type;
 
     Entry entry;
 
-// find_first_not_free_entry:
-    do{
-	if(!read(entry))
-	    return errno(Errno::read_error);
-
-    }while (entry.type() == Type::free);
-
-    if (entry.type() == Type::last_entry){
-	state(State::last_entry);
-	return ok();
-    }
+    if (!find_first_not_free_entry(i, entry))
+	return throw_errno();	
 
     if (entry.type() == Type::short_entry){
 	copy_short_entry(entry, info, long_name); // copia entry en info/long_name
+	++i;
     }
 
     else // == Type::long_entry
-	return read_long_entry(entry, info, long_name); // entry es la last_entry
-					        // entrada del long_name
+	return read_long_entry(i, entry, info, long_name); 
 
     return ok();
 }
 
 
-
 template <typename S>
-bool Directory<S>::read_long_entry(Entry_info& info, 
+bool Directory<S>::read_long_entry(Short_index& i, Entry_info& info, 
 					std::span<uint8_t> long_name,
 					Attribute att)
 {
-    while (read_long_entry(info, long_name) == true){
+    while (read_long_entry(i, info, long_name) == true){
 	if (info.attribute == att)
 	    return true;
     }
 
     return false;
 }
+
+
+// Si tiene éxito, devuelve en `entry` la primera entrada not free dejando el
+// Short_index i apuntando a dicha entrada.
+template <typename S>
+bool Directory<S>::find_first_not_free_entry(Short_index& i, Entry& entry)
+{
+    using Type = Entry::Type;
+
+    while (1){
+
+	if(!read(i, entry))
+	    return errno(Errno::read_error);
+
+	if (entry.type() == Type::last_entry)
+	    return errno(Errno::last_entry);
+
+	if (entry.type() != Type::free)
+	    return ok();
+
+	++i; // modificamos la Short_index
+	if (i.last_entry()) // fin de los clusters
+	    return errno(Errno::last_entry);
+    }
+}
+
 
 // (DUDA) Al pasarle uint8_t limito la longitud del nombre a 255 caracteres. 
 // ¿Algún problema? 255 es demasiado largo (long_name es el nombre del

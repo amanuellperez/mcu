@@ -29,33 +29,6 @@
 
 void Main::root_directory_menu()
 {
-    while(1){
-	uart << '\n';
-	print_line(uart);
-	
-	//atd::print(uart, msg_root_directory_menu);
-    
-	uart << "Root directory menu\n"
-		"\t0. Back main menu\n"
-	        "\t1. Print short entries\n"
-		"\t2. Print long entries\n";
-
-	uint16_t cmd{};
-	uart >> cmd;
-
-	switch(cmd){
-	    break; case 0: return;
-	    break; case 1: root_directory_print_short_entries();
-	    break; case 2: root_directory_print_long_entries();
-
-	}
-    }
-
-}
-
-
-void Main::root_directory_print_short_entries()
-{
     using Volume = atd::FAT32::Volume<Sector_driver>;
 
     auto nsector = fat_volume_first_sector(1); // de momento solo leo
@@ -73,15 +46,6 @@ void Main::root_directory_print_short_entries()
 	return;
     }
 
-
-    using Entry = Directory::Entry;
-
-    static constexpr uint16_t max_entries = 60;
-    uart << "Printing " << max_entries << " entries\n";
-
-    uart << "n \t|type\t|name\t\t|attr\t|cluster\t|size\t|"
-	"created\t|access\t|modified\t|\n";
-
     auto root_dir = vol.root_directory_first_cluster();
     if (root_dir == 0){
 	uart << "Error reading root_directory_first_cluster\n";
@@ -89,6 +53,56 @@ void Main::root_directory_print_short_entries()
     }
 
     Directory dir{vol, root_dir};
+
+    while(1){
+	uart << '\n';
+	print_line(uart);
+	
+	//atd::print(uart, msg_root_directory_menu);
+    
+	uart << "Root directory menu\n"
+		"\t0. Back main menu\n"
+	        "\t1. Print short entries\n"
+		"\t2. Print long entries\n"
+		"\t3. ls archives\n"
+		"\t4. ls directories\n"
+		"\t5. cd\n"
+		"\t6. Print file\n";
+
+	uint16_t cmd{};
+	uart >> cmd;
+
+	uint32_t cluster{};
+
+	switch(cmd){
+	    break; case 0: return;
+	    break; case 1: root_directory_print_short_entries(vol, dir);
+	    break; case 2: root_directory_print_long_entries(vol, dir);
+	    break; case 3: print_ls(vol, dir, Attribute::archive);
+	    break; case 4: print_ls(vol, dir, Attribute::directory);
+    //	break; case '3': att = Attribute::archive | Attribute::read_only;
+	    break; case 5: 
+			uart << "Cluster new directory: ";
+			uart >> cluster;
+			dir.cd(cluster);
+
+	    break; case 6: print_file();
+
+	}
+    }
+
+}
+
+
+void Main::root_directory_print_short_entries(Volume& vol, Directory& dir)
+{
+    using Entry = Directory::Entry;
+
+    static constexpr uint16_t max_entries = 60;
+    uart << "Printing " << max_entries << " entries\n";
+
+    uart << "n \t|type\t|name\t\t|attr\t|cluster\t|size\t|"
+	"created\t|access\t|modified\t|\n";
 
     uint8_t k = 0;
     for (auto i = dir.short_index_begin(); 
@@ -180,54 +194,41 @@ void Main::root_directory_print_short_entries()
 
 
 
-void Main::root_directory_print_long_entries()
+void Main::root_directory_print_long_entries(Volume& vol, Directory& dir)
 {
-    using Volume = atd::FAT32::Volume<Sector_driver>;
 
-    auto nsector = fat_volume_first_sector(1); // de momento solo leo
-					       // particion 1
-    if (nsector == 0){
-	uart << "Error: can't read first sector of FAT volume\n";
-	return;
-    }
-
-
-    Volume vol{nsector};
-
-    if (vol.last_operation_fail()){
-	uart << "ERROR\n";
-	return;
-    }
-
-
-    auto root_dir = vol.root_directory_first_cluster();
-    if (root_dir == 0){
-	uart << "Error reading root_directory_first_cluster\n";
-	return;
-    }
     using Entry = Directory::Entry;
-
-    Directory dir{vol, root_dir};
-    dir.first_entry();
     
     uart << "n|name\t|attr\t\t|cluster\t|size\t|"
 	"created\t|access\t|modified\t|\n";
-    for (uint8_t i = 0; i < 25; ++i){
+    
+    uint8_t k = 0;
+    for (auto i = dir.short_index_begin(); 
+	 i.last_entry() == false and k < 25; ++k){
+//	 ++i, ++k){ TODO: queda raro no incrementar ++i!!!
 	Entry_info info;
 	std::array<uint8_t, 32> name;
 
-	if (!dir.read_long_entry(info, name)){
+	if (!dir.read_long_entry(i, info, name)){
 	    if (dir.last_entry()){
 		uart << "LAST ENTRY found\n";
 		return;
 	    }
-	    else
-		uart << "Error\n";
+	    else{
+		uart << "ERROR: ";
+		if(dir.read_error())
+		    uart << "Read error\n";
+		else if (dir.long_entry_corrupted())
+		    uart << "long entry corrupted\n";
+		else
+		    uart << "Unknown\n";
+
+	    }
 	    return;
 	}
 
     
-	uart << (uint16_t) i << ": [";
+	uart << (uint16_t) k << ": [";
 	print_as_char(uart, name);
 	uart << "]\n\t";
 
@@ -278,3 +279,40 @@ void Main::root_directory_print_long_entries()
     print_line(uart);
 
 }
+
+
+void Main::print_ls(Volume& vol, Directory& dir, Attribute att)
+{
+    uint8_t k = 0;
+    for (auto i = dir.short_index_begin(); 
+	 i.last_entry() == false and k < 25; ++k){
+
+	Entry_info info;
+	std::array<uint8_t, 32> name;
+
+	if (!dir.read_long_entry(i, info, name, att)){
+	    if (dir.last_entry())
+		uart << "LAST ENTRY found\n";
+	    else
+		uart << "Error\n";
+	    return;
+	}
+
+    
+	uart << (uint16_t) k << ": [";
+	print_as_char(uart, name);
+	uart << "] (";
+
+	print(uart, info.attribute, false);
+
+	uart << "); cluster = "
+	     << info.file_cluster 
+	     << "; size = "
+	     << info.file_size
+	     << '\n';
+
+    }
+    uart << '\n';
+    print_line(uart);
+}
+

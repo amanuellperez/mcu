@@ -87,16 +87,10 @@ private:
 
 // Root directory test
     void root_directory_menu();
-	void root_directory_print_short_entries();
-	void root_directory_print_long_entries();
-
-
-
-// Directory ???
-    void print_directory_ls();
-
-    void print_ls(Volume& vol, Directory& dir, Attribute att);
-    void print_file();
+	void root_directory_print_short_entries(Volume& vol, Directory& dir);
+	void root_directory_print_long_entries(Volume& vol, Directory& dir);
+	void print_ls(Volume& vol, Directory& dir, Attribute att);
+	void print_file();
 
     void print_sector(std::ostream& out, const Sector& sector, size_t i0, size_t sz)
     { atd::xxd_print(out, sector, i0, sz); }
