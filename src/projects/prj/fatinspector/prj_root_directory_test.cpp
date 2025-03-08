@@ -89,12 +89,14 @@ void Main::root_directory_print_short_entries()
     }
 
     Directory dir{vol, root_dir};
-    dir.first_entry();
-    for (uint8_t i = 0; i < max_entries; ++i){
+
+    uint8_t k = 0;
+    for (auto i = dir.short_index_begin(); 
+	 i.last_entry() == false and k < max_entries; ++i, ++k){
 	Entry entry;
-	dir.read(entry);
-	
-	uart << (uint16_t) i << '\t';
+	dir.read(i, entry);
+
+	uart << (uint16_t) k << '\t';
 
 	std::array<uint8_t, 30> name;
 	if (entry.type() == Entry::Type::short_entry){

@@ -87,7 +87,7 @@ void Main::FAT32_area_list_print_ls()
 
     while(1){
 	uart << cluster_list.ncluster()
-	     << '(' << cluster_list.global_sector_number() << ") -> ";
+	     << '(' << cluster_list.sd_sector_number() << ") -> ";
 
 	if(!cluster_list.next_cluster()){
 	    if (cluster_list.end_of_sectors())

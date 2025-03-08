@@ -96,7 +96,7 @@ void Main::FAT32_area_print_clusters()
     uart << cluster << " -> ";
 
     while (1){
-	uint32_t next_cluster;
+	uint32_t next_cluster{};
 	auto state = vol.fat_area.next_cluster(cluster, next_cluster);
 
 	if (state != State::allocated){

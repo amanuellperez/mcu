@@ -56,6 +56,12 @@
  *	    como las clásicas de C ==> consumen los caracteres que
  *	    leen/escriben.
  *
+ *
+ * DUDAS    
+ *  1. Estoy copiando un puntero a Volumen dentro de la mayoría de las clases,
+ *  lo cual consume memoria. ¿Es preocupante? ¿Hay que modificar eso?
+ *
+ *
  * HISTORIA
  *    Manuel Perez
  *    12/01/2025 Experimentando
@@ -406,7 +412,9 @@ namespace impl_of{
 namespace impl_of{
 
 enum class FAT_Cluster_state : uint8_t
-{ free = 0, allocated, bad, end_of_clusters, reserved, 
+{ free = 0, allocated, bad, 
+    end_of_clusters, // es el último cluster de esa lista
+    reserved, 
     read_error // este no es un estado del cluster sino un intento fallido de
 	  // leer un sector de la FAT (realmente no debería ir aqui) (???)
 };
@@ -566,7 +574,7 @@ private:
     uint32_t read(const uint32_t& cluster) const
     { 
 	auto [nsector, pos] = cluster2sector_pos(cluster);
-	return volume_->template read_global<uint32_t>(sector0_ + nsector, pos);
+	return volume_->template sd_read<uint32_t>(sector0_ + nsector, pos);
     }
 
     bool read_error() const {return volume_->read_error(); }
@@ -695,7 +703,7 @@ FAT_area<S>::Cluster_state FAT_area<S>::cluster_state(uint32_t cluster) const
 // clusters por (sector, pos) con 
 //	sector = [sector0_ ... sector0_ + number_of_sectors_)
 //	pos = [0 .. 512)
-// Y llamar directamente a volume->read_global. De esa forma evitamos el estar
+// Y llamar directamente a volume->sd_read. De esa forma evitamos el estar
 // llamando continuamente a la función cluster2sector_pos dentro de read.
 // Pero como estoy aprendiendo FAT32 opto por una implementación sencilla que
 // entienda y no tenga errores, que una más eficiente que pueda tener errores.
@@ -846,7 +854,8 @@ public:
 
 // Info
 // ----
-    uint32_t first_sector() const
+    // Primer sector de la data area relativa a la SD card (global)
+    uint32_t sd_first_sector() const
     { return data_area_first_sector_;}
 
     uint8_t  sectors_per_cluster() const
@@ -854,11 +863,12 @@ public:
 
     // Devuelve el primer sector del `cluster` indicado. 
     // El sector devuelto es global (coordenadas de SDCard)
-    uint32_t first_sector_of_cluster(uint32_t cluster) const
-    {return  first_sector() + (cluster - 2) * sectors_per_cluster();}
+    uint32_t sd_first_sector_of_cluster(uint32_t cluster) const
+    {return  sd_first_sector() + (cluster - 2) * sectors_per_cluster();}
 
-//    uint32_t sector_number(uint32_t cluster, uint8_t sector) const
-//    { return first_sector_of_cluster(cluster) + sector; }
+    // Número de sector relativo a la SD card (es el número de sector global)
+    uint32_t sd_sector_number(uint32_t cluster, uint8_t sector) const
+    { return sd_first_sector_of_cluster(cluster) + sector; }
 
 
 
@@ -923,10 +933,10 @@ public:
     // es el número de sector referido al  principio del disco
     // Para ver si falla mirar el state correspondiente
     template <Type::Integer Int = uint8_t>
-    Int read_global(const uint32_t& nsector, uint16_t pos)
+    Int sd_read(const uint32_t& nsector, uint16_t pos)
     { return driver_.template read<Int>(nsector, pos); }
 
-    uint32_t read_global(const uint32_t& nsector, const uint32_t& pos
+    uint32_t sd_read(const uint32_t& nsector, const uint32_t& pos
 		  , std::span<uint8_t> buf)
     {return driver_.read(nsector, pos, buf); }
 
@@ -1026,7 +1036,7 @@ template <typename SD>
 inline 
 bool Volume<SD>::fill_cluster(const uint32_t& cluster, uint8_t value)
 {
-    auto sector0 = data_area.first_sector_of_cluster(cluster);
+    auto sector0 = data_area.sd_first_sector_of_cluster(cluster);
 
     if (driver_.fill_n(sector0, data_area.sectors_per_cluster(), value)
 		!= data_area.sectors_per_cluster())
@@ -1049,19 +1059,18 @@ FAT_area<Sector_driver>::Cluster_state
 	FAT_area<Sector_driver>::next_cluster(const uint32_t& cluster,
 							uint32_t& next_cluster)
 {
-    uint32_t entry = read(cluster);
+    uint32_t value = read(cluster);
 
     if (read_error()){
 	ctrace<3>() << "Volume read error\n";
 	return Cluster_state::read_error;
     }
 
+    auto state = cluster_state(value);
 
-    auto state = cluster_state(entry);
-    if (state != Cluster_state::allocated)
-	return state;
-
-    next_cluster = entry;
+    // Solo actualizamos el valor de next_cluster en caso de que exista.
+    if (state == Cluster_state::allocated)
+	next_cluster = value;
 
     return Cluster_state::allocated;
 }
@@ -1117,7 +1126,7 @@ struct FAT_area_list_ertate {
 
 };
 
-static_assert(sizeof(FAT_area_list_state) == 1);
+static_assert(sizeof(FAT_area_list_ertate) == 1);
 
 }// impl_of
  
@@ -1161,7 +1170,7 @@ public:
 
 // read/write
     // Devuelve el número del sector global actual 
-    uint32_t global_sector_number() const;
+    uint32_t sd_sector_number() const;
 
 // Errno = resultado de la última operación
     bool last_operation_ok() const {return errno() == Errno::ok; }
@@ -1170,10 +1179,10 @@ public:
     bool next_cluster_no_allocated() const 
     {return errno() == Errno::next_cluster_no_allocated;}
 
-    Errno errno() const {return errno_state_.errno;}
+    Errno errno() const {return ertate_.errno;}
 
 // State
-    State state() const {return errno_state_.state;}
+    State state() const {return ertate_.state;}
 
     bool uninitialized() const { return state() == State::uninitialized; }
     bool end_of_sectors() const {return state() == State::end_of_sectors;}
@@ -1193,12 +1202,12 @@ private:
     uint32_t cluster_; // cluster actual
     uint8_t sector_;   // sector al que apuntamos dentro de cluster_
 
-    impl_of::FAT_area_list_ertate errno_state_;
+    impl_of::FAT_area_list_ertate ertate_;
 
-    void state(State st) {errno_state_.state = st; }
+    void state(State st) {ertate_.state = st; }
 
-    bool ok() {errno_state_.errno = Errno::ok; return true; }
-    bool errno(Errno e) {errno_state_.errno = e; return false;}
+    bool ok() {ertate_.errno = Errno::ok; return true; }
+    bool errno(Errno e) {ertate_.errno = e; return false;}
     
 };
 
@@ -1225,8 +1234,8 @@ inline void FAT_area_list<SD>::first_sector(uint32_t cluster0)
 
 // Precondition: cluster_.sector_ >= vol_.data_area.first_sector();
 template<typename SD>
-inline uint32_t FAT_area_list<SD>::global_sector_number() const
-{ return volume.data_area.first_sector_of_cluster(cluster_) + sector_; }
+inline uint32_t FAT_area_list<SD>::sd_sector_number() const
+{ return volume.data_area.sd_first_sector_of_cluster(cluster_) + sector_; }
 
 
 template<typename SD>
@@ -1252,7 +1261,7 @@ bool FAT_area_list<SD>::next_sector()
 template<typename SD>
 bool FAT_area_list<SD>::next_cluster()
 {
-    uint32_t next_cluster;
+    uint32_t next_cluster{};
     auto cluster_state = volume.fat_area.next_cluster(cluster_, next_cluster);
 
     if (cluster_state == Volume::Cluster_state::end_of_clusters){
@@ -1298,7 +1307,7 @@ uint32_t FAT_area_list<SD>::push_back_cluster_fill_with(uint8_t value)
     if (new_cluster == 0)
 	return 0;
 
-atd::ctrace<9>() << "new_cluster = " << new_cluster << "(" << global_sector_number()
+atd::ctrace<9>() << "new_cluster = " << new_cluster << "(" << sd_sector_number()
     << ")\n";
     if (!volume.fill_cluster(new_cluster, value)){
 	atd::ctrace<3>() << "Can't initialize cluster " << new_cluster 
@@ -1423,8 +1432,8 @@ private:
 //    static uint16_t next_byte(FAT_area_list& sector, uint16_t i);
 
     uint8_t read_byte(uint32_t i) const
-    { return sector_.volume.template read_global<uint8_t>
-				    (sector_.global_sector_number(), i); }
+    { return sector_.volume.template sd_read<uint8_t>
+				    (sector_.sd_sector_number(), i); }
 };
 
 
@@ -1535,6 +1544,10 @@ uint8_t File<SD>::read(std::span<uint8_t> buf)
  *
  ***************************************************************************/
 namespace impl_of{
+
+/***************************************************************************
+ *				DIRECTORY_ENTRY
+ ***************************************************************************/
 enum class Entry_attribute_type: uint8_t{
     read_only = 0x01,
     hidden    = 0x02,
@@ -1671,6 +1684,255 @@ struct Entry_info{
 // Copia entry en info: entry -> info;
 void copy(const Directory_entry& entry, Entry_info& info);
 
+
+
+
+/***************************************************************************
+ *				DIRECTORY_INDEX
+ ***************************************************************************/
+enum class Directory_short_entries_index_state : uint8_t {
+    ok = 0,	  // el índice apunta a un valor válido
+    last_entry    // el índice ha alcanzado la última entrada
+};
+
+enum class Directory_short_entries_index_errno : uint8_t{
+    ok = 0,	    // no hay error
+    cluster_error   // de momento no identifico el error (merece la pena
+		    // copiarlo de Cluster_state???)
+};
+
+struct Directory_short_entries_index_ertate{
+    using State = Directory_short_entries_index_state;
+    using Errno = Directory_short_entries_index_errno;
+
+    State state : 4;
+    Errno errno : 4;
+
+    Directory_short_entries_index_ertate() : state{State::ok}, errno{Errno::ok} { }
+
+    void operator=(State st) { state = st; }
+    void operator=(Errno e)  { errno = e; }
+
+    bool operator==(State st) const { return state == st; }
+    bool operator!=(State st) const { return state != st; }
+    
+    bool operator==(Errno e) const { return errno == e; }
+    bool operator!=(Errno e) const { return errno != e; }
+};
+
+static_assert(sizeof(Directory_short_entries_index_ertate) == 1);
+
+
+// Al concebir un directorio como un array de entries, tiene sentido iterar
+// por las diferentes entradas usando un índice. Esta clase representa ese
+// índice.
+
+// CUIDADO:
+//	Este índice permite iterar por TODAS las short entries del directorio,
+//  independientemente de que estén free o empty.
+//	Es parecido a std::array<int, 10> x; Tú reservas un array de 10 ints,
+//  y al hacer:
+//	    for (int i = 0; i < 10; ++o)
+//		x[i] ...
+//  no sabes en principio si está inicializado x[i] o no. Eso lo dará la
+//  lógica del programa. Este índice es igual de torpe.
+//
+//  Los únicos accesos a la SDCard que hace es para mirar el siguiente cluster
+//  de la lista enlazada que forma el directorio. No lee las entries (pretende
+//  ser lo más eficiente posible (???))
+template <typename Sector_driver0> 
+class Directory_short_entries_index{
+public:
+// Types
+    using Volume  = atd::FAT32::Volume<Sector_driver0>;
+    using State = Directory_short_entries_index_state;
+    using Errno = Directory_short_entries_index_errno;
+
+// Constructor
+    // Precondicion: cluster0 es el cluster donde se encuentra la entrada
+    // nentry.
+    Directory_short_entries_index(Volume& vol, 
+		    const uint32_t& cluster0, uint32_t nentry = 0);
+
+// Operations
+    // Pasamos a apuntar la siguiente entrada
+    Directory_short_entries_index& operator++();
+    Directory_short_entries_index operator++(int);
+
+// Info
+    // Devuelve el número de sector global a la SD card
+    uint32_t sd_sector_number() const
+    { return sd_sector_number(cluster_, clus_sector_number()); }
+
+    // Número de entrada relativa al sector actual
+    uint32_t sec_nentry() const
+    { return clus_nentry() % nentries_per_sector(); }
+
+    // Posición del primer byte de la entrada actual dentro del sector actual
+    uint32_t sec_first_byte_entry() const 
+    { return sec_nentry() * sizeof_entry; }
+
+// state
+    bool last_entry() const {return state() == State::last_entry;}
+
+private:
+// Data
+    Volume& volume_;	// Para poder acceder al siguiente cluster de la lista
+
+    uint32_t cluster_;	// cluster donde se encuentra el nentry
+    uint32_t nentry_;	// número de entrada (es global a todo el array)
+    
+    Directory_short_entries_index_ertate ertate_;
+
+// Funciones que dependen del volumen
+    using FAT_area= typename Volume::FAT_area;
+
+    uint32_t bytes_per_sector() const {return volume_.bytes_per_sector(); }
+    uint32_t sectors_per_cluster() const 
+	{return volume_.data_area.sectors_per_cluster(); }
+
+    // Devuelve el número de sector dentro de la SDCard que ocupa el sector
+    // definido por el par (cluster, sector) (sector es relativo al cluster)
+    uint32_t sd_sector_number(const uint32_t& cluster, uint8_t sector) const 
+	{return volume_.data_area.sd_sector_number(cluster, sector); }
+
+    using Cluster_state = FAT_area::Cluster_state;
+
+    Cluster_state next_cluster(const uint32_t& cluster0, 
+				 uint32_t& next_cluster)
+    { return volume_.fat_area.next_cluster(cluster_, cluster_);}
+
+
+// Helpers
+    bool next();
+    bool next_cluster();
+
+    static constexpr uint8_t sizeof_entry = Directory_entry::size;
+    
+    // número de entries por sector
+    uint32_t nentries_per_sector() const
+    { return bytes_per_sector() / sizeof_entry; }
+
+    uint32_t nentries_per_cluster() const 
+    { return nentries_per_sector() * sectors_per_cluster(); }
+
+
+// Las entradas las agrupamos en clusters:
+//
+//	    c0 -> c1 -> c2 -> ...
+//
+// En cada cluster hay 512 entradas (= nentries_per_cluster()), luego la
+// primera entrada del cluster c será 512 * c. 
+//
+// Dentro de cada cluster, agrupamos las entradas por sectores:
+//
+//	    s0 -> s1 -> s2 -> ...
+//
+// Como en cada sector hay 16 entradas (= nentries_per_sector()), la
+// primera entrada del sector actual s es 16 * s.
+//
+// Luego: nentry = 512 * c + 16 * s + e
+// (siendo 512 = nentries_per_cluster() y 16 = nentries_per_sector())
+//
+// siendo e (= clus_sector_number) el número de entrada relativo al
+// sector actual s.
+//
+// s = número de sector relativo al cluster c actual = clus_nsector()
+// 16 * s + e = número de entry relativa al cluster c actual = clus_nentry()
+//          e = número de entry relativa al sector actual = sec_nentry()
+//
+// Observar que si agrupamos las entradas por sectores, en lugar de
+// clusters, obtenemos:
+//	    nentry = 16*S + e
+//	siendo S = el número de sector global al array, y e el número de entry
+//	relativa al sector actual.
+    
+    // Número de sector relativo al cluster actual.
+    uint32_t clus_nentry() const
+    { return nentry_ % nentries_per_cluster(); }
+
+    // Número de sector relativo al cluster actual
+    uint32_t clus_sector_number() const
+    { return clus_nentry() / nentries_per_sector(); }
+
+
+    // Las entradas dentro de un cluster las numero de [0..512)
+    // de un cluster será (512 * c - 1)
+    bool is_last_entry_of_cluster() const
+    { return clus_nentry() == nentries_per_cluster() - 1; }
+
+// ertate
+    State state() const {return ertate_.state;}
+    void state(State st) {ertate_.state = st; }
+
+    bool ok() {ertate_.errno = Errno::ok; return true; }
+    bool errno(Errno e) {ertate_.errno = e; return false;}
+    Errno errno() const {return ertate_.errno;}
+};
+
+template <typename SD>
+inline 
+Directory_short_entries_index<SD>::Directory_short_entries_index(Volume& vol, 
+				const uint32_t& cluster0, uint32_t nentry)
+    : volume_{vol}, cluster_{cluster0}, nentry_{nentry}
+{ }
+
+template <typename SD>
+inline
+Directory_short_entries_index<SD>& Directory_short_entries_index<SD>::operator++()
+{ 
+    next();
+    return *this;
+}
+
+template <typename SD>
+inline
+Directory_short_entries_index<SD> Directory_short_entries_index<SD>::operator++(int)
+{ 
+    Directory_short_entries_index tmp{*this};
+    next();
+    return tmp;
+}
+
+template <typename SD>
+inline 
+bool Directory_short_entries_index<SD>::next()
+{
+    if (is_last_entry_of_cluster()){
+	if (!next_cluster())
+	    return false;
+    }
+
+    ++nentry_;
+
+    return true;
+}
+
+
+template <typename SD>
+inline 
+bool Directory_short_entries_index<SD>::next_cluster()
+{
+    auto cluster_state = next_cluster(cluster_, cluster_);
+
+    if (cluster_state == Cluster_state::allocated){
+	state(State::ok);
+	return ok();
+    }
+
+    if (cluster_state == Cluster_state::end_of_clusters){
+	state(State::last_entry);
+	return false; // responde indicando que no puede calcular el siguiente
+		      // cluster pero no es un error ya que no hay más.
+		      // Por eso cambiamos el state a end_of_clusters.
+    }
+
+    return errno(Errno::cluster_error);
+}
+
+/***************************************************************************
+ *				DIRECTORY
+ ***************************************************************************/
 enum class Directory_errno : uint8_t{
     ok = 0, // fail distinto de 0
     read_error, 
@@ -1706,8 +1968,7 @@ struct Directory_ertate {
 
 };
 
-static_assert(sizeof(Directory_state) == 1);
-
+static_assert(sizeof(Directory_ertate) == 1);
 
 }// impl_of
  
@@ -1723,6 +1984,7 @@ public:
     using Attribute = impl_of::Directory_entry::Attribute;
     using Errno	    = impl_of::Directory_errno;
     using State     = impl_of::Directory_state;
+    using Short_index = impl_of::Directory_short_entries_index<Sector_driver0>;
 
 // Constructors
     // Enlaza con el directorio que se encuentra en el cluster0
@@ -1732,12 +1994,20 @@ public:
     // Reinicia la lectura. La siguiente llamada a `read_xxx` devolverá la
     // primera entrada que encuentre.
     void first_entry();
+
+    // Devuelve un index a la primera entry del directorio
+    Short_index short_index_begin()
+	{return Short_index{volume(), cluster0_};}
     
     // Lee la entry actual almacenándola en entry
     // Consume esa entry, esto es, pasa a apuntar a la siguiente entry.
     // Devuelve true si lee la siguiente entry, false si no puede hacerlo.
     // En caso de error mirar state.
+    // TODO: eliminar esta función
     bool read(Entry& entry);
+
+//  Eliminar la read anterior en favor de esta
+    bool read(const Short_index& i, Entry& entry);
 
     // Lee la siguiente entrada que haya devolviendo la información básica en
     // info, y el nombre del fichero en long_name. Si el nombre del fichero no
@@ -1807,17 +2077,17 @@ private:
 			// CUIDADO: es ínidice global, no relativo al sector.
 // TODO: cambiar i por nentry_
 //    uint16_t i; // byte actual al que apuntamos dentro del sector
-    impl_of::Directory_ertate errno_state_;
+    impl_of::Directory_ertate ertate_;
     
     static constexpr uint8_t sizeof_entry = Entry::size;
 
     // Este state no lo necesito fuera
-    State state() const {return errno_state_.state;}
-    void state(State st) {errno_state_.state = st; }
+    State state() const {return ertate_.state;}
+    void state(State st) {ertate_.state = st; }
 
-    bool ok() {errno_state_.errno = Errno::ok; return true; }
-    bool errno(Errno e) {errno_state_.errno = e; return false;}
-    Errno errno() const {return errno_state_.errno;}
+    bool ok() {ertate_.errno = Errno::ok; return true; }
+    bool errno(Errno e) {ertate_.errno = e; return false;}
+    Errno errno() const {return ertate_.errno;}
 
     // hace que tanto state como errno sean ok
     void state_ok();
@@ -1835,14 +2105,15 @@ private:
     Volume& volume() {return sector_.volume; }
     const Volume& volume() const {return sector_.volume; }
 
-    uint16_t number_of_entries_per_sector() const
+// TODO: borrar estas, ahora están dentro de Short_index
+    uint16_t nentries_per_sector() const
     { return volume().bytes_per_sector() / Entry::size; }
 
     uint16_t local_nentry(uint16_t nentry) const
-    { return nentry % number_of_entries_per_sector(); }
+    { return nentry % nentries_per_sector(); }
 
     bool nentry_is_first_entry_of_a_sector(uint16_t nentry) const
-    { return (nentry % number_of_entries_per_sector()) == 0; }
+    { return (nentry % nentries_per_sector()) == 0; }
 };
 
 template <typename S> 
@@ -1888,7 +2159,7 @@ bool Directory<S>::read(Entry& entry)
     auto pos = local_nentry(nentry_) * Entry::size;
 
     auto n = 
-	volume().read_global(sector_.global_sector_number(), pos,
+	volume().sd_read(sector_.sd_sector_number(), pos,
 								entry.data);
     
     if (n != Entry::size){
@@ -1912,6 +2183,27 @@ bool Directory<S>::read(Entry& entry)
 
 }
 
+
+
+// Observar que este read no marca el error, eso se lo dejo a quien lo llame
+template <typename S> 
+bool Directory<S>::read(const Short_index& i, Entry& entry)
+{
+    if (i.last_entry()){
+	atd::ctrace<5>() << "Trying to read last_entry index\n";
+	return false;
+    }
+
+    auto n = volume().sd_read( i.sd_sector_number(), i.sec_first_byte_entry()
+			     , entry.data);
+    
+    if (n != Entry::size){
+	atd::ctrace<3>() << "Can't read next directory entry\n";
+	return errno(Errno::read_error);
+    }
+
+    return true;
+}
 
 
 // precondition: entry es la last_entry de un long_name
