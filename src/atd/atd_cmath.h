@@ -64,7 +64,7 @@ inline constexpr Int abs(const Int& x)
 // ---
 // El standard no define std::div como constexpr!!!
 template <typename Int>
-inline constexpr std::pair<Int, Int> div(Int x, Int y)
+inline constexpr std::pair<Int, Int> div(const Int& x, const Int& y)
 {
     return {x / y, x % y};
 }

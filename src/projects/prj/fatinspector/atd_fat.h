@@ -1635,6 +1635,18 @@ struct Directory_entry{
     uint8_t copy_long_name(std::span<uint8_t> str);
 
 
+// Numero de short entries que se necesitan para almacenar una long entry
+    static uint8_t nshort_entries_for_store_long_entry(uint8_t name_len)
+    { 
+	auto [q, r] = std::div(name_len, ascii_long_name_len);
+	
+	if (r != 0u)
+	    ++q;	// q = número de entradas para almacenar name_len
+
+	return q + 1u; // el +1 es para almacenar al short_entry que tienen
+		      // todas las entradas
+    }
+
 // Funciones de conversión de formato
 // (TODO) devolver time_t...
     // Extrae day/month/year de `date`, que será lo que devuelva
@@ -2271,6 +2283,9 @@ Directory<S>::Short_index
 {
     using Type = Entry::Type;
 
+    if (i == Short_index::end())
+	return i;
+
     while (1){
 
 	if(!read(i, entry)){
@@ -2293,25 +2308,39 @@ Directory<S>::Short_index
 }
 
 
+
 // (DUDA) Al pasarle uint8_t limito la longitud del nombre a 255 caracteres. 
 // ¿Algún problema? 255 es demasiado largo (long_name es el nombre del
 // fichero, no todo el path).
+//
+// TODO: devolver un Long_entry_index??? Aprovecharía el Volumen interno, e
+// incluso en lugar de tener dos [uint32_t nentry_0, uint32_t nentry_e) podía
+// almacenarlo como [uint32_t nentry_0, uint8_t incremento] ahorrando espacio
 //template <typename S>
-//Directory<S>::Short_index
-//Directory<S>::find_first_free_entry(Short_index i, uint8_t long_name_size)
+//std::pair<Directory<S>::Short_index, Directory<S>::Short_index>
+//Directory<S>::find_first_free_long_entry(Short_index i0, uint8_t nshort_entries)
 //{
 //    Entry entry;
 //
 //    while (1) {
-//	if(!read(i, entry))
-//	    return errno(Errno::read_error);
+//	if(!read(i0, entry)){
+//	    errno(Errno::read_error);
+//	    return {short_index_end(), short_index_end()};
+//	}
 //
-//	if (entry.type() == Type::last_entry)
-//	    return i; // es la última entrada, pero no se garantiza que entre
-//		      // long_name_size. DUDA: ¿lo garantizo aquí o fuera?
+//	if (entry.type() == Type::last_entry){
+//	    return i; // la ultima entrada esta libre, pero ¿habrá suficiente
+//		      // espacio para almacenar long_name_size? TODO:
+//		      // garantizarlo(???)
+//	}
 //
+//	// Si el volumen es consistente después de una free entry tiene que
+//	// haber fijo alguna not_free entry, no puede alcanzarse last_entry.
+//	// Con lo que la llamada a find_first_not_free_entry tiene que tener
+//	// éxito (salvo error  de lectura)
 //	if (entry.type() == Type::free){
-//	    Short_index j = find_first_not_free_long_entry(i, long_name_size);
+//	    ++i;
+//	    Short_index j = find_first_not_free_entry(i, entry);
 //	    if (j != Short_index::end()) // encontrada
 //		return i;
 //
@@ -2319,7 +2348,7 @@ Directory<S>::Short_index
 //	}
 //
 //	++i; 
-//	if (i.end())
+//	if (i == Short_index::end()) // fin de los clusters
 //	    return i;
 //    }
 //}
@@ -2329,8 +2358,10 @@ Directory<S>::Short_index
 //uint32_t 
 //Directory<S>::new_entry(const Entry_info& info , std::span<uint8_t> name)
 //{
+//    auto nshort_entries = Entry::nshort_entries_for_store_long_entry(name.size());
+//
 //// find_first_free_entry: 
-//    uint32_t ne = find_first_free_entry(name.size()); // que entre el name
+//    uint32_t ne = find_first_free_long_entry(nshort_entries); 
 //    if (ne == 0)
 //	sector_.add_cluster(0x00); // 0x00 valor por defecto en los directorios
 //    
@@ -2339,8 +2370,8 @@ Directory<S>::Short_index
 //	new_long_entry(name[...]);
 //    new_short_entry(info);
 //}
-
-
+//
+//
 
 }// namespace FAT32
 

@@ -29,6 +29,20 @@
 
 void Main::FAT32_area_list_menu()
 {
+    auto nsector = fat_volume_first_sector(1); // de momento solo leo
+					       // particion 1
+    if (nsector == 0){
+	uart << "Error: can't read first sector of FAT volume\n";
+	return;
+    }
+
+    Volume vol{nsector};
+
+    if (vol.last_operation_fail()){
+	uart << "ERROR reading FAT volume\n";
+	return;
+    }
+
     while(1){
 	uart << '\n';
 	print_line(uart);
@@ -43,31 +57,18 @@ void Main::FAT32_area_list_menu()
 
 	switch(cmd){
 	    break; case 0: return;
-	    break; case 1: FAT32_area_list_print_ls();
-	    break; case 2: FAT32_area_push_back_cluster();
+	    break; case 1: FAT32_area_list_print_ls(vol);
+	    break; case 2: FAT32_area_push_back_cluster(vol);
 
 	}
     }
 
 }
 
-void Main::FAT32_area_list_print_ls()
+void Main::FAT32_area_list_print_ls(Volume& vol)
 {
     using FAT_area_list   = atd::FAT32::FAT_area_list<Sector_driver>;
 
-    auto nsector = fat_volume_first_sector(1); // de momento solo leo
-					       // particion 1
-    if (nsector == 0){
-	uart << "Error: can't read first sector of FAT volume\n";
-	return;
-    }
-
-    Volume vol{nsector};
-
-    if (vol.last_operation_fail()){
-	uart << "ERROR reading FAT volume\n";
-	return;
-    }
 
     uart << "First cluster of the file (>= 2): ";
     uint32_t cluster0{};
@@ -102,23 +103,9 @@ void Main::FAT32_area_list_print_ls()
 }
 
 
-void Main::FAT32_area_push_back_cluster()
+void Main::FAT32_area_push_back_cluster(Volume& vol)
 {
     using FAT_area_list   = atd::FAT32::FAT_area_list<Sector_driver>;
-
-    auto nsector = fat_volume_first_sector(1); // de momento solo leo
-					       // particion 1
-    if (nsector == 0){
-	uart << "Error: can't read first sector of FAT volume\n";
-	return;
-    }
-
-    Volume vol{nsector};
-
-    if (vol.last_operation_fail()){
-	uart << "ERROR reading FAT volume\n";
-	return;
-    }
 
     uart << "Last cluster of a list of clusters: ";
     uint32_t cluster0{};

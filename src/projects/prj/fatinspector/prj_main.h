@@ -74,16 +74,16 @@ private:
 
 // FAT area test
     void FAT32_area_menu();
-	void FAT32_area_print_clusters();
-	void FAT32_area_new_list();
-	void FAT32_area_remove_list();
-	void FAT32_area_add_cluster();
-	void FAT32_area_remove_next_cluster();
+	void FAT32_area_print_clusters(Volume& vol);
+	void FAT32_area_new_list(Volume& vol);
+	void FAT32_area_remove_list(Volume& vol);
+	void FAT32_area_add_cluster(Volume& vol);
+	void FAT32_area_remove_next_cluster(Volume& vol);
 
 // FAT area list test
     void FAT32_area_list_menu();
-	void FAT32_area_list_print_ls();
-	void FAT32_area_push_back_cluster();
+	void FAT32_area_list_print_ls(Volume& vol);
+	void FAT32_area_push_back_cluster(Volume& vol);
 
 // Root directory test
     void root_directory_menu();

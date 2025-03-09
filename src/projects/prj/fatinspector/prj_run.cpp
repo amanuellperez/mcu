@@ -49,31 +49,6 @@ void Main::run()
 
 
 
-void Main::reserved_area_menu()
-{
-    while(1){
-	uart << '\n';
-	print_line(uart);
-	
-	//atd::print(uart, msg_root_directory_menu);
-    
-	uart << "Reserved area menu\n"
-		"\t0. Back main menu\n"
-	        "\t1. Print FAT32 boot sector\n"
-		"\t2. Print FS info sector\n";
-
-	uint16_t cmd{};
-	uart >> cmd;
-
-	switch(cmd){
-	    break; case 0: return;
-	    break; case 1: reserved_area_print_FAT32_boot_sector();
-	    break; case 2: reserved_area_print_FS_info();
-
-	}
-    }
-
-}
 
 void Main::sector_driver_menu()
 {
