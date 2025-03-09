@@ -1688,38 +1688,6 @@ void copy(const Directory_entry& entry, Entry_info& info);
 /***************************************************************************
  *				DIRECTORY_INDEX
  ***************************************************************************/
-enum class Directory_short_entries_index_state : uint8_t {
-    ok = 0,	  // el índice apunta a un valor válido
-    last_entry    // el índice ha alcanzado la última entrada
-};
-
-enum class Directory_short_entries_index_errno : uint8_t{
-    ok = 0,	    // no hay error
-    cluster_error   // de momento no identifico el error (merece la pena
-		    // copiarlo de Cluster_state???)
-};
-
-struct Directory_short_entries_index_ertate{
-    using State = Directory_short_entries_index_state;
-    using Errno = Directory_short_entries_index_errno;
-
-    State state : 4;
-    Errno errno : 4;
-
-    Directory_short_entries_index_ertate() : state{State::ok}, errno{Errno::ok} { }
-
-    void operator=(State st) { state = st; }
-    void operator=(Errno e)  { errno = e; }
-
-    bool operator==(State st) const { return state == st; }
-    bool operator!=(State st) const { return state != st; }
-    
-    bool operator==(Errno e) const { return errno == e; }
-    bool operator!=(Errno e) const { return errno != e; }
-};
-
-static_assert(sizeof(Directory_short_entries_index_ertate) == 1);
-
 
 // Al concebir un directorio como un array de entries, tiene sentido iterar
 // por las diferentes entradas usando un índice. Esta clase representa ese
@@ -1743,14 +1711,16 @@ class Directory_short_entries_index{
 public:
 // Types
     using Volume  = atd::FAT32::Volume<Sector_driver0>;
-    using State = Directory_short_entries_index_state;
-    using Errno = Directory_short_entries_index_errno;
 
 // Constructor
     // Precondicion: cluster0 es el cluster donde se encuentra la entrada
     // nentry.
+    Directory_short_entries_index(Volume* vol, 
+		    const uint32_t& cluster0, const uint32_t& nentry = 0);
     Directory_short_entries_index(Volume& vol, 
-		    const uint32_t& cluster0, uint32_t nentry = 0);
+		    const uint32_t& cluster0, const uint32_t& nentry = 0);
+    Directory_short_entries_index(const Directory_short_entries_index& x);
+//    Directory_short_entries_index& operator=(const Directory_short_entries_index& x);
 
 // Operations
     // Pasamos a apuntar la siguiente entrada
@@ -1770,35 +1740,52 @@ public:
     uint32_t sec_first_byte_entry() const 
     { return sec_nentry() * sizeof_entry; }
 
-// state
-    bool last_entry() const {return state() == State::last_entry;}
+// end
+    static Directory_short_entries_index end() 
+    {return Directory_short_entries_index{nullptr, 0, end_nentry}; }
+
+    // precondición: son entradas del mismo directorio (volumen iguales)
+    bool operator==(const Directory_short_entries_index& x) const
+    { return x.nentry_ == nentry_; }
+
+    bool operator!=(const Directory_short_entries_index& x) const
+    { return x.nentry_ != nentry_; }
 
 private:
 // Data
-    Volume& volume_;	// Para poder acceder al siguiente cluster de la lista
+    // (TODO) Como es una entrada de un directorio, tiene sentido vincularla
+    // con el directorio al que pertenece en lugar del Volume. Y acceder a
+    // Volume via Directory.
+    Volume* volume_;	// Para poder acceder al siguiente cluster de la lista
 
     uint32_t cluster_;	// cluster donde se encuentra el nentry
     uint32_t nentry_;	// número de entrada (es global a todo el array)
     
-    Directory_short_entries_index_ertate ertate_;
+
+// Cfg
+    static constexpr uint32_t end_nentry = std::numeric_limits<uint32_t>::max();
+    bool is_end() const {return nentry_ == end_nentry; }
 
 // Funciones que dependen del volumen
     using FAT_area= typename Volume::FAT_area;
 
-    uint32_t bytes_per_sector() const {return volume_.bytes_per_sector(); }
+    Volume& volume() {return *volume_;}
+    const Volume& volume() const {return *volume_;}
+
+    uint32_t bytes_per_sector() const {return volume().bytes_per_sector(); }
     uint32_t sectors_per_cluster() const 
-	{return volume_.data_area.sectors_per_cluster(); }
+	{return volume().data_area.sectors_per_cluster(); }
 
     // Devuelve el número de sector dentro de la SDCard que ocupa el sector
     // definido por el par (cluster, sector) (sector es relativo al cluster)
     uint32_t sd_sector_number(const uint32_t& cluster, uint8_t sector) const 
-	{return volume_.data_area.sd_sector_number(cluster, sector); }
+	{return volume().data_area.sd_sector_number(cluster, sector); }
 
     using Cluster_state = FAT_area::Cluster_state;
 
     Cluster_state next_cluster(const uint32_t& cluster0, 
 				 uint32_t& next_cluster)
-    { return volume_.fat_area.next_cluster(cluster_, cluster_);}
+    { return volume().fat_area.next_cluster(cluster_, cluster_);}
 
 
 // Helpers
@@ -1860,32 +1847,69 @@ private:
     { return clus_nentry() == nentries_per_cluster() - 1; }
 
 // ertate
-    State state() const {return ertate_.state;}
-    void state(State st) {ertate_.state = st; }
-
-    bool ok() {ertate_.errno = Errno::ok; return true; }
-    bool errno(Errno e) {ertate_.errno = e; return false;}
-    Errno errno() const {return ertate_.errno;}
+//    State state() const {return ertate_.state;}
+//    void state(State st) {ertate_.state = st; }
+//
+//    bool ok() {ertate_.errno = Errno::ok; return true; }
+//    bool errno(Errno e) {ertate_.errno = e; return false;}
+//    Errno errno() const {return ertate_.errno;}
 };
+
 
 template <typename SD>
 inline 
-Directory_short_entries_index<SD>::Directory_short_entries_index(Volume& vol, 
-				const uint32_t& cluster0, uint32_t nentry)
+Directory_short_entries_index<SD>::Directory_short_entries_index(Volume* vol, 
+				const uint32_t& cluster0, const uint32_t& nentry)
     : volume_{vol}, cluster_{cluster0}, nentry_{nentry}
 { }
 
 template <typename SD>
+inline 
+Directory_short_entries_index<SD>::Directory_short_entries_index(Volume& vol, 
+				const uint32_t& cluster0, const uint32_t& nentry)
+    : Directory_short_entries_index{&vol, cluster0, nentry}
+{ }
+
+template <typename SD>
 inline
-Directory_short_entries_index<SD>& Directory_short_entries_index<SD>::operator++()
+Directory_short_entries_index<SD>::Directory_short_entries_index
+    (const Directory_short_entries_index& x)
+    : volume_{x.volume_}, cluster_{x.cluster_}, nentry_{x.nentry_}
+{}
+
+//template <typename SD>
+//inline
+//Directory_short_entries_index<SD>& 
+//Directory_short_entries_index<SD>::
+//    operator=(const Directory_short_entries_index& x)
+//{
+//    if (volume_ != x.volume_){
+//	atd::ctrace<3>() << "Different directories entries!\n";
+//	volume_ = x.volume_;
+//    }
+//
+//    cluster_ = x.cluster_;
+//    nentry_ = x.nentry_;
+//
+//    return *this;
+//}
+
+
+template <typename SD>
+inline
+Directory_short_entries_index<SD>&
+	    Directory_short_entries_index<SD>::operator++()
 { 
     next();
     return *this;
 }
 
+
+
 template <typename SD>
 inline
-Directory_short_entries_index<SD> Directory_short_entries_index<SD>::operator++(int)
+Directory_short_entries_index<SD> 
+	    Directory_short_entries_index<SD>::operator++(int)
 { 
     Directory_short_entries_index tmp{*this};
     next();
@@ -1893,7 +1917,6 @@ Directory_short_entries_index<SD> Directory_short_entries_index<SD>::operator++(
 }
 
 template <typename SD>
-inline 
 bool Directory_short_entries_index<SD>::next()
 {
     if (is_last_entry_of_cluster()){
@@ -1908,25 +1931,25 @@ bool Directory_short_entries_index<SD>::next()
 
 
 template <typename SD>
-inline 
 bool Directory_short_entries_index<SD>::next_cluster()
 {
     auto cluster_state = next_cluster(cluster_, cluster_);
 
-    if (cluster_state == Cluster_state::allocated){
-	state(State::ok);
-	return ok();
-    }
+    if (cluster_state == Cluster_state::allocated)
+	return true;
 
     if (cluster_state == Cluster_state::end_of_clusters){
-	state(State::last_entry);
+	nentry_ = end_nentry;
 	return false; // responde indicando que no puede calcular el siguiente
 		      // cluster pero no es un error ya que no hay más.
 		      // Por eso cambiamos el state a end_of_clusters.
     }
 
-    return errno(Errno::cluster_error);
+    return false; 
+//    return errno(Errno::cluster_error); quiero que Short_index sea lo más
+//    pequeña posible, por ello no quiero que tenga state.
 }
+
 
 /***************************************************************************
  *				DIRECTORY
@@ -1935,31 +1958,32 @@ enum class Directory_errno : uint8_t{
     ok = 0, // fail distinto de 0
     read_error, 
     long_entry_corrupted,
-    end_of_sectors, // se ha llegado al final del último cluster
-    last_entry	    // se ha alcanzado la última entrada, no hay más
+    end_of_clusters, // se ha llegado al final del último cluster
+    last_entry,	    // se ha alcanzado la última entrada, no hay más
 };
 
-enum class Directory_state : uint8_t{
-    ok          = 0,	// apunta a una entrada válida
-    last_entry  = 1	// se ha llegado a la última entrada del directorio
-};
+//enum class Directory_state : uint8_t{
+//    ok          = 0,	// apunta a una entrada válida
+//    last_entry  = 1	// se ha llegado a la última entrada del directorio
+//};
 
 
 struct Directory_ertate {
     using Errno = Directory_errno;
-    using State = Directory_state;
+//    using State = Directory_state;
 
-    State state : 4;
+//    State state : 4;
     Errno errno : 4;
 
     // Añado este constructor para evitar warnings del compilador @_@
-    Directory_ertate() :state{State::ok}, errno{Errno::ok}{} 
+    //Directory_ertate() :state{State::ok}, errno{Errno::ok}{} 
+    Directory_ertate() :errno{Errno::ok}{} 
 
-    void operator=(State st) { state = st; }
+//    void operator=(State st) { state = st; }
     void operator=(Errno e)  { errno = e; }
 
-    bool operator==(State st) const { return state == st; }
-    bool operator!=(State st) const { return state != st; }
+//    bool operator==(State st) const { return state == st; }
+//    bool operator!=(State st) const { return state != st; }
     
     bool operator==(Errno e) const { return errno == e; }
     bool operator!=(Errno e) const { return errno != e; }
@@ -1981,7 +2005,7 @@ public:
     using Entry_info= impl_of::Entry_info;
     using Attribute = impl_of::Directory_entry::Attribute;
     using Errno	    = impl_of::Directory_errno;
-    using State     = impl_of::Directory_state;
+//    using State     = impl_of::Directory_state;
     using Short_index = impl_of::Directory_short_entries_index<Sector_driver0>;
 
 // Constructors
@@ -1989,21 +2013,26 @@ public:
     Directory(Volume& volume, uint32_t cluster0);
 
 // ls (listado del directorio)
-    // Devuelve un index a la primera entry del directorio
+    // Iteramos usando índices
     Short_index short_index_begin()
 	{return Short_index{volume(), cluster0_};}
+
+    auto short_index_end() {return Short_index::end(); }
     
     //  Lee la entrada apuntada por i
     bool read(const Short_index& i, Entry& entry);
 
     // Lee la long entry. Deja i en la siguiente entrada a leer.
-    bool read_long_entry(Short_index& i, Entry_info& info, 
+    // En caso de error devuelve short_index_end() y anota el error en errno.
+    Short_index read_long_entry(Short_index i, Entry_info& info, 
 			 std::span<uint8_t> name);
 
     // Devuelve la siguiente entrada correspondiente al attribute att.
     // De esta forma se puede hacer un ls de solo los ficheros, o solo los
     // directorios.
-    bool read_long_entry(Short_index& i, Entry_info& info, 
+    // Deja i en la siguiente entrada a leer.
+    // En caso de error devuelve short_index_end() y anota el error en errno.
+    Short_index read_long_entry(Short_index i, Entry_info& info, 
 			 std::span<uint8_t> name,
 			 Attribute att);
 
@@ -2027,7 +2056,7 @@ public:
 
 // Primitivas de implementación
     // Crea una nueva entrada de nombre `name` y características dadas en
-    // info. De info, ignora los access/modification times.
+    // info, ignorando los access/modification times de `info`.
     // Devuelve el número de entrada de la short_entry de este nuevo fichero
     // creado ó 0 en caso de error. (0??? en general, salvo en el root
     // directory la entrada 0 corresponde al directorio actual (.) no siendo
@@ -2042,9 +2071,9 @@ public:
     bool last_operation_fail() const {return errno() != Errno::ok; }
 
     bool read_error() const {return errno() == Errno::read_error; }
-    bool long_entry_corrupted() const 
+    bool long_entry_corrupted_error() const 
 		    {return errno() == Errno::long_entry_corrupted; }
-    bool last_entry() const {return errno() == Errno::last_entry; }
+    bool last_entry_error() const {return errno() == Errno::last_entry; }
 
 
 private:
@@ -2062,14 +2091,14 @@ private:
 
 
 // Helpers
-    bool read_long_entry(Short_index& i, Entry& entry, Entry_info& info,
+    Short_index read_long_entry(Short_index i, Entry& entry, Entry_info& info,
 						    std::span<uint8_t> name);
     // Lo llamo copy porque realmente no lee ninguna entrada, se limita a
     // copiar la información de entry en [info, name]
     void copy_short_entry(const Entry& entry, Entry_info& info, 
 					std::span<uint8_t> name);
 
-    bool find_first_not_free_entry(Short_index& i, Entry& entry);
+    Short_index find_first_not_free_entry(Short_index i, Entry& entry);
 
 // nentry
     Volume& volume() {return vol_; }
@@ -2098,7 +2127,7 @@ void Directory<S>::cd(uint32_t cluster0)
 template <typename S> 
 bool Directory<S>::read(const Short_index& i, Entry& entry)
 {
-    if (i.last_entry()){
+    if (i == Short_index::end()){
 	atd::ctrace<5>() << "Trying to read last_entry index\n";
 	return false;
     }
@@ -2118,7 +2147,8 @@ bool Directory<S>::read(const Short_index& i, Entry& entry)
 // Precondición: i apunta a la entrada entry, que es la primera entrada de la
 // long_entry.
 template <typename S>
-bool Directory<S>::read_long_entry(Short_index& i, Entry& entry,
+Directory<S>::Short_index
+    Directory<S>::read_long_entry(Short_index i, Entry& entry,
 					Entry_info& info, 
 					std::span<uint8_t> long_name)
 {
@@ -2137,7 +2167,8 @@ bool Directory<S>::read_long_entry(Short_index& i, Entry& entry,
 
 	if ((entry.type() != Type::long_entry) 
 	    or (entry.extended_order() != nentry)){ // ¿están ordenadas?
-	    return errno(Errno::long_entry_corrupted);
+	    errno(Errno::long_entry_corrupted);
+	    return short_index_end();
 	}
 
 	if (k * size < long_name.size()){// copiamos nombre si podemos
@@ -2148,23 +2179,29 @@ bool Directory<S>::read_long_entry(Short_index& i, Entry& entry,
 
 	++i;
 
-	if (i.last_entry())
-	    return errno(Errno::last_entry);
+	if (i == Short_index::end()){
+	    errno(Errno::end_of_clusters);
+	    return i;
+	}
 
-	if (!read(i, entry))
-	    return errno(Errno::read_error);
+	if (!read(i, entry)){
+	    errno(Errno::read_error);
+	    return short_index_end();
+	}
 	
     }
 
 // Después de las long_name entries siempre viene una short_entry
-    if (entry.type() != Type::short_entry)
-	return errno(Errno::long_entry_corrupted); 
+    if (entry.type() != Type::short_entry){
+	errno(Errno::long_entry_corrupted); 
+	return short_index_end();
+    }
 
     impl_of::copy(entry, info);
 
     ++i; // dejamos apuntando a la siguiente entrada
 
-    return ok();
+    return i;
 }
 
 
@@ -2183,7 +2220,7 @@ void Directory<S>::copy_short_entry(const Entry& entry,
 
 
 template <typename S>
-bool Directory<S>::read_long_entry(Short_index& i
+Directory<S>::Short_index Directory<S>::read_long_entry(Short_index i
 				  , Entry_info& info
 				  , std::span<uint8_t> long_name)
 {
@@ -2191,56 +2228,67 @@ bool Directory<S>::read_long_entry(Short_index& i
 
     Entry entry;
 
-    if (!find_first_not_free_entry(i, entry))
-	return throw_errno();	
+    i = find_first_not_free_entry(i, entry);
+    if (i == short_index_end())
+	return i;
 
     if (entry.type() == Type::short_entry){
 	copy_short_entry(entry, info, long_name); // copia entry en info/long_name
 	++i;
+	return i;
     }
 
     else // == Type::long_entry
 	return read_long_entry(i, entry, info, long_name); 
 
-    return ok();
 }
 
 
 template <typename S>
-bool Directory<S>::read_long_entry(Short_index& i, Entry_info& info, 
+Directory<S>::Short_index 
+	    Directory<S>::read_long_entry(Short_index i, Entry_info& info, 
 					std::span<uint8_t> long_name,
 					Attribute att)
 {
-    while (read_long_entry(i, info, long_name) == true){
+    while (1){
+	i = read_long_entry(i, info, long_name);
+
+	if (i == short_index_end())
+	    return i;
+
 	if (info.attribute == att)
-	    return true;
+	    return i;
     }
 
-    return false;
 }
 
 
 // Si tiene éxito, devuelve en `entry` la primera entrada not free dejando el
 // Short_index i apuntando a dicha entrada.
 template <typename S>
-bool Directory<S>::find_first_not_free_entry(Short_index& i, Entry& entry)
+Directory<S>::Short_index
+    Directory<S>::find_first_not_free_entry(Short_index i, Entry& entry)
 {
     using Type = Entry::Type;
 
     while (1){
 
-	if(!read(i, entry))
-	    return errno(Errno::read_error);
+	if(!read(i, entry)){
+	    errno(Errno::read_error);
+	    return short_index_end();
+	}
 
-	if (entry.type() == Type::last_entry)
-	    return errno(Errno::last_entry);
+	if (entry.type() == Type::last_entry){
+	    errno(Errno::last_entry);
+	    return short_index_end();
+	}
 
 	if (entry.type() != Type::free)
-	    return ok();
+	    return i;
 
 	++i; // modificamos la Short_index
-	if (i.last_entry()) // fin de los clusters
-	    return errno(Errno::last_entry);
+	if (i == Short_index::end()) // fin de los clusters
+	    return i;
     }
 }
 
@@ -2249,29 +2297,31 @@ bool Directory<S>::find_first_not_free_entry(Short_index& i, Entry& entry)
 // ¿Algún problema? 255 es demasiado largo (long_name es el nombre del
 // fichero, no todo el path).
 //template <typename S>
-//bool Directory<S>::find_first_free_entry(uint8_t long_name_size)
+//Directory<S>::Short_index
+//Directory<S>::find_first_free_entry(Short_index i, uint8_t long_name_size)
 //{
-//    if (state() == State::last_entry)
-//	return errno(Errno::last_entry);
-//
 //    Entry entry;
 //
-//    if (!read(entry)){
-//	if (sector_.end_of_sectors()){
-//	return errno(Errno::end_of_sectors);
+//    while (1) {
+//	if(!read(i, entry))
+//	    return errno(Errno::read_error);
+//
+//	if (entry.type() == Type::last_entry)
+//	    return i; // es la última entrada, pero no se garantiza que entre
+//		      // long_name_size. DUDA: ¿lo garantizo aquí o fuera?
+//
+//	if (entry.type() == Type::free){
+//	    Short_index j = find_first_not_free_long_entry(i, long_name_size);
+//	    if (j != Short_index::end()) // encontrada
+//		return i;
+//
+//
+//	}
+//
+//	++i; 
+//	if (i.end())
+//	    return i;
 //    }
-//
-//
-//    if (entry.type() == Entry_type::last_entry){
-//	state(State::last_entry);
-//	return errno(Errno::end_of_file);
-//    }
-//
-//    if (entry.type() == Entry_type::free){
-//    CONTAR CONTIGUAS PARA QUE ENTRE LONG_NAME
-//    }
-//
-//    return ok();
 //}
 
 

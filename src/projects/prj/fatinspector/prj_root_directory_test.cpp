@@ -106,7 +106,7 @@ void Main::root_directory_print_short_entries(Volume& vol, Directory& dir)
 
     uint8_t k = 0;
     for (auto i = dir.short_index_begin(); 
-	 i.last_entry() == false and k < max_entries; ++i, ++k){
+	 i != dir.short_index_end() and k < max_entries; ++i, ++k){
 	Entry entry;
 	dir.read(i, entry);
 
@@ -196,7 +196,6 @@ void Main::root_directory_print_short_entries(Volume& vol, Directory& dir)
 
 void Main::root_directory_print_long_entries(Volume& vol, Directory& dir)
 {
-
     using Entry = Directory::Entry;
     
     uart << "n|name\t|attr\t\t|cluster\t|size\t|"
@@ -204,13 +203,13 @@ void Main::root_directory_print_long_entries(Volume& vol, Directory& dir)
     
     uint8_t k = 0;
     for (auto i = dir.short_index_begin(); 
-	 i.last_entry() == false and k < 25; ++k){
-//	 ++i, ++k){ TODO: queda raro no incrementar ++i!!!
+	 i != dir.short_index_end() and k < 25; ++k){
 	Entry_info info;
 	std::array<uint8_t, 32> name;
 
-	if (!dir.read_long_entry(i, info, name)){
-	    if (dir.last_entry()){
+	i = dir.read_long_entry(i, info, name);
+	if (i == dir.short_index_end()){
+	    if (dir.last_entry_error()){
 		uart << "LAST ENTRY found\n";
 		return;
 	    }
@@ -218,7 +217,7 @@ void Main::root_directory_print_long_entries(Volume& vol, Directory& dir)
 		uart << "ERROR: ";
 		if(dir.read_error())
 		    uart << "Read error\n";
-		else if (dir.long_entry_corrupted())
+		else if (dir.long_entry_corrupted_error())
 		    uart << "long entry corrupted\n";
 		else
 		    uart << "Unknown\n";
@@ -285,13 +284,14 @@ void Main::print_ls(Volume& vol, Directory& dir, Attribute att)
 {
     uint8_t k = 0;
     for (auto i = dir.short_index_begin(); 
-	 i.last_entry() == false and k < 25; ++k){
+	 i != dir.short_index_end() and k < 25; ++k){
 
 	Entry_info info;
 	std::array<uint8_t, 32> name;
 
-	if (!dir.read_long_entry(i, info, name, att)){
-	    if (dir.last_entry())
+	i = dir.read_long_entry(i, info, name, att);
+	if (i == dir.short_index_end()){
+	    if (dir.last_entry_error())
 		uart << "LAST ENTRY found\n";
 	    else
 		uart << "Error\n";
