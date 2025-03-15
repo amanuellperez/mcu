@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2024 Manuel Perez 
+// Copyright (C) 2019-2025 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -122,6 +122,34 @@ void test_concat_bytes()
 
     }
 }
+
+void test_split_bytes16(uint16_t x)
+{
+    uint8_t a, b;
+    atd::split_bytes(x, a, b);
+    CHECK_TRUE(atd::concat_bytes<uint16_t>(a, b) == x, "split_bytes");
+}
+
+void test_split_bytes32(uint32_t x)
+{
+    uint8_t a, b, c, d;
+    atd::split_bytes(x, a, b, c, d);
+    CHECK_TRUE(atd::concat_bytes<uint32_t>(a, b, c, d) == x, "split_bytes");
+}
+
+void test_split_bytes()
+{
+    test::interface("split_bytes");
+    
+    test_split_bytes16(0x0);
+    test_split_bytes16(0xABCD);
+    test_split_bytes16(0x1234);
+
+    test_split_bytes32(0x0);
+    test_split_bytes32(0x12345678);
+    test_split_bytes32(0xABCDEF01);
+}
+
 
 void test_bitmask()
 {
@@ -949,6 +977,7 @@ try{
     test_mask();
     test_bit();
     test_concat_bytes();
+    test_split_bytes();
     test_write_bits();
     test_write_range_bits();
     test_read_bits();

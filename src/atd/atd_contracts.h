@@ -44,8 +44,9 @@ template <uint8_t level>
 inline void precondition(bool condition, std::string_view msg)
 {
     if constexpr (trace_level<level>()){
-	if (!condition)
+	if (!condition){
 	    ctrace<level>() << msg << '\n';
+	}
     }
 }
 

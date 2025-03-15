@@ -65,6 +65,7 @@
  *  21/08/23: reverse_bits
  *  29/08/24: bit  (versión dinámica)
  *  27/09/24: in(x).bit(4).write_byte(a);
+ *  15/03/25: split_bytes
  *
  ****************************************************************************/
 #include <stdint.h> // uint8_t
@@ -123,7 +124,29 @@ constexpr inline Int concat_bytes(Byte b0, Tail... b1_bn)
 }
 
 
+// -----------
+// split_bytes
+// -----------
+// Descompone un entero de más de 1 byte en sus bytes correspondientes.
+// uint16_t -> {MSB, LSB}
+constexpr 
+inline void split_bytes(const uint16_t& x, uint8_t& b1, uint8_t& b0)
+{
+    b1 = (0xFF00 & x) >> 8;
+    b0 = 0x00FF & x;
+}
 
+// (DUDA) ¿inline or not inline?
+// uint32_t -> {MSB...LSB}
+constexpr 
+inline void split_bytes( const uint32_t& x
+			, uint8_t& b3, uint8_t& b2, uint8_t& b1, uint8_t& b0)
+{
+    b3 = (0xFF000000 & x) >> 24;
+    b2 = (0x00FF0000 & x) >> 16;
+    b1 = (0x0000FF00 & x) >>  8;
+    b0 = 0x000000FF & x;
+}
 
 // -------
 // bitmask
