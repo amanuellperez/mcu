@@ -36,6 +36,7 @@
  *    23/12/2022 Versión mínima
  *    22/08/2023 rbegin/rend
  *    19/01/2025 Añadidos algunos requirements
+ *    16/03/2025 Deduction guides
  *
  ****************************************************************************/
 #include "std_config.h"
@@ -233,6 +234,12 @@ private:
 // ----------------
 template <typename T, size_t N>
 span(T (&)[N]) -> span<T, N>;
+
+template<typename T, size_t N >
+span(array<T, N>& ) -> span<T, N>;
+
+template<typename T, size_t N >
+span(const array<T, N>& ) -> span<const T, N>;
 
 }// namespace
 

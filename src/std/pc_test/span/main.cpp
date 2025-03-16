@@ -173,7 +173,14 @@ void test_span()
 
     }
 
+    {// Deduction guides
+    std::array<int, 10> sa;
+    mtd::array<int, 10> ma;
 
+    std::span sb{sa};
+    mtd::span mb{ma};
+    CHECK_TRUE(sb.size() == mb.size(), "Deduction guides");
+    }
 
 }
 
