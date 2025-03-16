@@ -123,18 +123,18 @@ void Main::root_directory_print_short_entries(Volume& vol, Directory& dir)
 	"created\t|access\t|modified\t|\n";
 
     uint8_t k = 0;
-    for (auto i = dir.short_index_begin(); 
-	 i != dir.short_index_end() and k < max_entries; ++i, ++k){
+    for (auto i = dir.index_begin(); 
+	 i != dir.index_end() and k < max_entries; ++i, ++k){
 	Entry entry;
 	dir.read_short_entry(i, entry);
 
 	uart << (uint16_t) k << '\t';
 
 	std::array<uint8_t, 30> name;
-	if (entry.type() == Entry::Type::short_entry){
+	if (entry.type() == Entry::Type::info_entry){
 	    auto len = entry.read_short_name(name);
 
-	    uart << "short\t[";
+	    uart << "info\t[";
 	    print(uart, std::span<uint8_t>{name.data(), len});
 
 	    uart << "]\t";
@@ -169,12 +169,15 @@ void Main::root_directory_print_short_entries(Volume& vol, Directory& dir)
 	    print_date(uart, day, month, year);
 	    uart << ' ';
 	    print_time(uart, hours, minutes, seconds);
+
+//	    uart << "check_sum = ";
+//	    atd::print_int_as_hex(uart,  entry.info_entry_check_sum());
 	    uart << '\n';
 
-	} else if (entry.type() == Entry::Type::long_entry){
+	} else if (entry.type() == Entry::Type::name_entry){
 	    auto len = entry.read_long_name(name);
 
-	    uart << "long\t[";
+	    uart << "name\t[";
 	    print(uart, std::span<uint8_t>{name.data(), len});
 	    uart << "]\t";
 	    print(uart, entry.attribute());
@@ -183,8 +186,11 @@ void Main::root_directory_print_short_entries(Volume& vol, Directory& dir)
 	    if (entry.is_last_member_of_long_name()){
 		uart << "(last: " << (uint16_t) entry.extended_order() << ")";
 	    }
+	    else
+		uart << '\t';
+
 	    uart << "\tcheck sum: ";
-	    atd::print_int_as_hex(uart,  entry.check_sum());
+	    atd::print_int_as_hex(uart,  entry.name_entry_check_sum());
 	    uart << '\n';
 	} else if (entry.type() == Entry::Type::free_available){
 	    uart << "AVAILABLE ENTRY\n";
@@ -213,13 +219,13 @@ void Main::root_directory_print_long_entries(Volume& vol, Directory& dir)
 	"created\t|access\t|modified\t|\n";
     
     uint8_t k = 0;
-    for (auto i = dir.short_index_begin(); 
-	 i != dir.short_index_end() and k < 25; ++k){
+    for (auto i = dir.index_begin(); 
+	 i != dir.index_end() and k < 25; ++k){
 	Entry_info info;
 	std::array<uint8_t, 32> name;
 
 	i = dir.read_long_entry(i, info, name);
-	if (i == dir.short_index_end()){
+	if (i == dir.index_end()){
 	    if (dir.last_entry_error()){
 		uart << "LAST ENTRY found\n";
 		return;
@@ -288,14 +294,14 @@ void Main::root_directory_print_long_entries(Volume& vol, Directory& dir)
 void Main::print_ls(Volume& vol, Directory& dir, Attribute att)
 {
     uint8_t k = 0;
-    for (auto i = dir.short_index_begin(); 
-	 i != dir.short_index_end() and k < 25; ++k){
+    for (auto i = dir.index_begin(); 
+	 i != dir.index_end() and k < 25; ++k){
 
 	Entry_info info;
 	std::array<uint8_t, 32> name;
 
 	i = dir.read_long_entry(i, info, name, att);
-	if (i == dir.short_index_end()){
+	if (i == dir.index_end()){
 	    if (dir.last_entry_error())
 		uart << "LAST ENTRY found\n";
 	    else
@@ -340,8 +346,7 @@ void Main::new_entry(Volume& vol, Directory& dir)
     // (TODO) Esto es peligroso!!! Simplificar
     // ¿usar string_view en vez de span para new_long_entry?
     auto sz = strlen((const char*)(name.data()));
-    std::span<uint8_t> sp{name.data(), sz};
-    uint8_t n = dir.new_long_entry(info, sp);
+    uint8_t n = dir.new_long_entry(info, {name.data(), sz});
     uart << (int) n << " new short entries!!!\n";
 
     vol.flush();

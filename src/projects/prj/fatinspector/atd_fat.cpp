@@ -29,52 +29,6 @@ namespace FAT32{
 
 namespace impl_of{
 
-/***************************************************************************
- *				FAT AREA
- ***************************************************************************/
-//void FAT_area::init(const Boot_sector& bs)
-//{
-//    sector0_ = bs.FAT_area_first_sector();
-//
-//    if (bs.FAT_is_mirror_enabled())
-//	nFATs_   = bs.number_of_FATs();
-//    else
-//	nFATs_   = bs.number_of_active_FATs();
-//
-//    number_of_sectors_ = bs.FAT_number_of_sectors();
-//    number_of_entries_ = bs.data_area_number_of_clusters();
-//    sector_size_ = bs.bytes_per_sector();
-//}
-//
-//
-//// Section 4. FAT specification
-//FAT_area::Cluster_state FAT_area::cluster_state(uint32_t entry) const
-//{
-//    // Section 4.  Note: "The high 4 bits of a FAT32 FAT entry are reserved"
-//    entry &= 0x0FFFFFFF;  
-//
-//    if (entry == 0x00000000) return Cluster_state::free;
-//    if (entry == 0x0FFFFFF7) return Cluster_state::bad;
-//    if (entry == 0x0FFFFFFF) return Cluster_state::end_of_file;
-//    
-//    // entrys 0 y 1 están reservados
-//    // section 3.5
-//    if (0x00000002 <= entry 
-//		and entry <= number_of_entries_ + 1) 
-//	return Cluster_state::allocated;
-//	
-//
-//    // DUDA: La FAT specification indica que 
-//    // "Reserved and should not be used.
-//    //  May be interpreted as an allocated entry and the final
-//    //  entry in the file (indicating end-of-file condition)"
-//    //  ¿son reserved or end_of_file? @_@
-//    if (0x0FFFFFF8 <= entry and entry <= 0x0FFFFFFE)
-//	return Cluster_state::reserved;
-//
-//    return Cluster_state::reserved;
-//}
-
 
 /***************************************************************************
  *				DATA AREA
@@ -99,9 +53,9 @@ Directory_entry::Type Directory_entry::type() const
     if (data[0] == 0xE5) return Type::free_available;
 
     if (attribute() == Attribute::long_name) 
-	return Type::long_entry;
+	return Type::name_entry;
 
-    return Type::short_entry;
+    return Type::info_entry;
 }
 
 uint8_t Directory_entry::free_type_to_uint8_t(Type type)
@@ -122,29 +76,43 @@ uint8_t Directory_entry::read_short_name(std::span<uint8_t> str) const
 }
 
 // (TODO)
+//  El nombre tiene que ser único. ¿Tengo que escanear todo el directorio
+//  para crear una nueva short entry?
+//
+// No la defino inline ya que tengo que comprobar lo anterior.
+void Directory_entry::write_short_name(std::span<const uint8_t> str)
+{
+    std::span<uint8_t, ascii_short_name_len> 
+			short_name{data.data(), ascii_short_name_len};
+
+    long_name2short_name(str, short_name);
+}
+
+
+// (TODO)
 //  1. Eliminar caracteres del nombre según 6.1 FAT specification
 //  2. El primer caracter no puede ser 0x20 (esto se puede imponer quitando
 //  todos los espacios del principio del name cuando se intente crear una
 //  nueva entrada).
-//  3. El nombre tiene que ser único. ¿Tengo que escanear todo el directorio
-//  para crear una nueva short entry?
-//	
-void Directory_entry::write_short_name(const std::span<uint8_t> str)
+//
+// str -> res
+void Directory_entry::long_name2short_name(std::span<const uint8_t> str
+				, std::span<uint8_t, ascii_short_name_len> res)
 {
     static constexpr 
 		uint8_t fname_len = ascii_short_name_len - ascii_extension_len;
 
 // clear: (TODO) Esto se puede optimizar y hacerlo luego, pero complica código
-    std::fill_n(data.begin(), ascii_short_name_len, ' ');
+    std::fill_n(res.begin(), ascii_short_name_len, ' ');
 
 // copy fname:
     uint8_t i = 0;
     for(; i < str.size() and i < fname_len and str[i] != '.'; ++i){
 
 	if (isprint(str[i])) // creo que estoy admitiendo de más
-	    data[i] = toupper(str[i]);
+	    res[i] = toupper(str[i]);
 	else
-	    data[i] = '~'; // (DUDA) ¿qué caracter poner?
+	    res[i] = '~'; // (DUDA) ¿qué caracter poner?
 		      
     }
 
@@ -157,14 +125,14 @@ void Directory_entry::write_short_name(const std::span<uint8_t> str)
 	return;
 
     if (i > fname_len)
-	data[fname_len - 1] = '~'; // así es como suelen indicar que el nombre
+	res[fname_len - 1] = '~'; // así es como suelen indicar que el nombre
 				   // es más largo
 
     ++i; // excluimos el '.'
 
 // copy extension:
     for(uint8_t j = 0; j < ascii_extension_len and i < str.size(); ++i, ++j)
-	data[fname_len + j] = toupper(str[i]);
+	res[fname_len + j] = toupper(str[i]);
 
 }
 
@@ -220,7 +188,7 @@ uint8_t Directory_entry::read_long_name_impl(std::span<uint8_t> str)
 //
 // 7.3 FAT specification: los long_name acaban en '\0' y van seguidos de 0xFF
 // para detectar corrupción
-void Directory_entry::write_long_name(std::span<uint8_t> str)
+void Directory_entry::write_long_name(std::span<const uint8_t> str)
 {
     uint8_t j = 1;
 
@@ -287,6 +255,24 @@ uint8_t Directory_entry::nname_entries_for_store_long_entry(uint8_t name_len)
 
 
 
+// La siguiente función es copia literal del punto 7.2 de la FAT specification
+uint8_t Directory_entry::
+	    check_sum_of(std::span<const uint8_t, ascii_short_name_len> str)
+{
+    uint8_t sum = 0;
+
+    auto p = str.data();
+
+    for (uint8_t i = 11; i != 0; --i) {
+    // NOTE: The operation is an unsigned char rotate right
+        sum = ((sum & 1) ? 0x80 : 0) + (sum >> 1) + *p++;
+    }
+
+    return sum;
+}
+
+
+
 void copy(const Directory_entry& entry, Entry_info& info)
 {
     info.attribute = entry.attribute();
@@ -322,7 +308,7 @@ void copy(const Entry_info& info, Directory_entry& entry)
     entry.last_modification_time(info.last_modification_time);
 }
 
-void info_name2short_entry(const Entry_info& info, const std::span<uint8_t> name
+void info_name2short_entry(const Entry_info& info, std::span<const uint8_t> name
 				   , Directory_entry& entry)
 {
     copy(info, entry);
@@ -337,7 +323,7 @@ void short_entry2info_name(const Directory_entry& entry,
 
 }
 
-void long_name2short_entry(uint8_t order, const std::span<uint8_t> name, 
+void long_name2short_entry(uint8_t order, std::span<const uint8_t> name, 
 						    Directory_entry& entry)
 {
     entry.data.fill(0);

@@ -38,6 +38,7 @@
 #include <atd_print.h> // xxd_print
 
 #include "atd_fat.h"
+#include "atd_mbr.h"
 
 
 
