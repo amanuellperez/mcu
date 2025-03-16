@@ -170,24 +170,21 @@ void Main::root_directory_print_short_entries(Volume& vol, Directory& dir)
 	    uart << ' ';
 	    print_time(uart, hours, minutes, seconds);
 
-//	    uart << "check_sum = ";
-//	    atd::print_int_as_hex(uart,  entry.info_entry_check_sum());
 	    uart << '\n';
 
 	} else if (entry.type() == Entry::Type::name_entry){
 	    auto len = entry.read_long_name(name);
 
-	    uart << "name\t[";
+	    uart << "name("
+		 << (uint16_t) entry.extended_order()
+		 << ")";
+
+	    uart << "\t[";
 	    print(uart, std::span<uint8_t>{name.data(), len});
 	    uart << "]\t";
+
+
 	    print(uart, entry.attribute());
-	    uart << "\torder: ";
-	    atd::print_int_as_hex(uart, entry.extended_order_with_mask());
-	    if (entry.is_last_member_of_long_name()){
-		uart << "(last: " << (uint16_t) entry.extended_order() << ")";
-	    }
-	    else
-		uart << '\t';
 
 	    uart << "\tcheck sum: ";
 	    atd::print_int_as_hex(uart,  entry.name_entry_check_sum());
@@ -346,7 +343,11 @@ void Main::new_entry(Volume& vol, Directory& dir)
     // (TODO) Esto es peligroso!!! Simplificar
     // ¿usar string_view en vez de span para new_long_entry?
     auto sz = strlen((const char*)(name.data()));
-    uint8_t n = dir.new_long_entry(info, {name.data(), sz});
+uart << "size = " << sz << '\n';
+std::span<const uint8_t> sp{name.data(), sz};
+uart << "sp.size = " << sp.size() << '\n';
+    //uint8_t n = dir.new_long_entry(info, {name.data(), sz});
+    uint8_t n = dir.new_long_entry(info, sp);
     uart << (int) n << " new short entries!!!\n";
 
     vol.flush();

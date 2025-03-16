@@ -1567,7 +1567,7 @@ struct Directory_entry{
 
 // Tipo de entrada
     Type type() const;
-    void type(Type type);
+//    void type(Type type);
     static uint8_t free_type_to_uint8_t(Type type);
 
     // Las entradas pueden estar o ocupadas o no. Las no ocupadas son las
@@ -1715,9 +1715,6 @@ private:
 
 };
 
-// escribe la long_name como short_entry
-void long_name2short_entry(uint8_t order, std::span<const uint8_t> name, 
-						    Directory_entry& entry);
 
 // Info básica que necesita un usuario de una entrada.
 // Solo le falta el nombre que al ser de longitud variable dejo que sea el
@@ -2632,7 +2629,11 @@ Directory<S>::write_name_entry( Index i
 {
     Entry entry;
 
-    long_name2short_entry(order, name, entry);
+    entry.data.fill(0);
+
+    entry.attribute(Entry::Attribute::long_name);
+    entry.extended_order_with_mask(order);
+    entry.write_long_name(name);
     entry.name_entry_check_sum(check_sum);
 
     return write(i, entry);

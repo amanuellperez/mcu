@@ -103,7 +103,8 @@ void Directory_entry::long_name2short_name(std::span<const uint8_t> str
 		uint8_t fname_len = ascii_short_name_len - ascii_extension_len;
 
 // clear: (TODO) Esto se puede optimizar y hacerlo luego, pero complica código
-    std::fill_n(res.begin(), ascii_short_name_len, ' ');
+    std::fill_n(res.begin(), res.size(), ' ');
+
 
 // copy fname:
     uint8_t i = 0;
@@ -116,10 +117,10 @@ void Directory_entry::long_name2short_name(std::span<const uint8_t> str
 		      
     }
 
-
 // look for '.':
     while (i < str.size() and str[i] != '.')
 	++i;
+
 
     if (i == str.size())
 	return;
@@ -129,7 +130,7 @@ void Directory_entry::long_name2short_name(std::span<const uint8_t> str
 				   // es más largo
 
     ++i; // excluimos el '.'
-
+	 
 // copy extension:
     for(uint8_t j = 0; j < ascii_extension_len and i < str.size(); ++i, ++j)
 	res[fname_len + j] = toupper(str[i]);
@@ -193,24 +194,27 @@ void Directory_entry::write_long_name(std::span<const uint8_t> str)
     uint8_t j = 1;
 
     for (uint8_t i = 0; i < str.size() and j < data.size(); ++i){
-	data[j] = str[i];
+	data[j]   = str[i];
+	data[j+1] = '\0';
 
 	j += 2;
 	if (j == 11) j = 14;
 	if (j == 26) j = 28;
     }
 
-    if (j != data.size()){
+    if (j + 1u < data.size()){
 	data[j] = '\0';
 	data[j + 1] = '\0';
+
 	j += 2;
+	if (j == 11) j = 14;
+	if (j == 26) j = 28;
     }
 
     while(j < data.size()){
 	data[j] = 0xFF;		
-	data[j + 1] = 0xFF;
 
-	j += 2;
+	++j;
 	if (j == 11) j = 14;
 	if (j == 26) j = 28;
     }
@@ -323,15 +327,6 @@ void short_entry2info_name(const Directory_entry& entry,
 
 }
 
-void long_name2short_entry(uint8_t order, std::span<const uint8_t> name, 
-						    Directory_entry& entry)
-{
-    entry.data.fill(0);
-
-    entry.attribute(Directory_entry::Attribute::long_name);
-    entry.extended_order_with_mask(order);
-    entry.write_long_name(name);
-}
 
 
 } // impl_of
