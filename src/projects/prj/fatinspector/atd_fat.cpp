@@ -95,8 +95,8 @@ void Data_area::init(const Boot_sector& bs)
 // Section 6.1, FAT specification
 Directory_entry::Type Directory_entry::type() const
 {
-    if (data[0] == 0x00) return Type::last_entry;
-    if (data[0] == 0xE5) return Type::free;
+    if (data[0] == 0x00) return Type::free_nomore;
+    if (data[0] == 0xE5) return Type::free_available;
 
     if (attribute() == Attribute::long_name) 
 	return Type::long_entry;
@@ -104,17 +104,74 @@ Directory_entry::Type Directory_entry::type() const
     return Type::short_entry;
 }
 
+uint8_t Directory_entry::free_type_to_uint8_t(Type type)
+{
+    if (type == Type::free_nomore) return 0x00;
+    if (type == Type::free_available) return 0xE5;
+
+    return 0xE5; // en caso de error opto por devolver free
+}
+
+
 // (TODO) ¿no sería mejor pasar std::span<uint8_t, 11>???
-uint8_t Directory_entry::copy_short_name(std::span<uint8_t> str) const
+uint8_t Directory_entry::read_short_name(std::span<uint8_t> str) const
 {
     atd::copy(data.begin(), data.begin() + ascii_short_name_len,
 			    str.begin(), str.end());
     return ascii_short_name_len;
 }
 
-uint8_t Directory_entry::copy_long_name(std::span<uint8_t> str)
+// (TODO)
+//  1. Eliminar caracteres del nombre según 6.1 FAT specification
+//  2. El primer caracter no puede ser 0x20 (esto se puede imponer quitando
+//  todos los espacios del principio del name cuando se intente crear una
+//  nueva entrada).
+//  3. El nombre tiene que ser único. ¿Tengo que escanear todo el directorio
+//  para crear una nueva short entry?
+//	
+void Directory_entry::write_short_name(const std::span<uint8_t> str)
 {
-    auto n = copy_long_name_impl(str);
+    static constexpr 
+		uint8_t fname_len = ascii_short_name_len - ascii_extension_len;
+
+// clear: (TODO) Esto se puede optimizar y hacerlo luego, pero complica código
+    std::fill_n(data.begin(), ascii_short_name_len, ' ');
+
+// copy fname:
+    uint8_t i = 0;
+    for(; i < str.size() and i < fname_len and str[i] != '.'; ++i){
+
+	if (isprint(str[i])) // creo que estoy admitiendo de más
+	    data[i] = toupper(str[i]);
+	else
+	    data[i] = '~'; // (DUDA) ¿qué caracter poner?
+		      
+    }
+
+
+// look for '.':
+    while (i < str.size() and str[i] != '.')
+	++i;
+
+    if (i == str.size())
+	return;
+
+    if (i > fname_len)
+	data[fname_len - 1] = '~'; // así es como suelen indicar que el nombre
+				   // es más largo
+
+    ++i; // excluimos el '.'
+
+// copy extension:
+    for(uint8_t j = 0; j < ascii_extension_len and i < str.size(); ++i, ++j)
+	data[fname_len + j] = toupper(str[i]);
+
+}
+
+
+uint8_t Directory_entry::read_long_name(std::span<uint8_t> str)
+{
+    auto n = read_long_name_impl(str);
 
     if (n < str.size())
 	str[n] = '\0';
@@ -126,7 +183,7 @@ uint8_t Directory_entry::copy_long_name(std::span<uint8_t> str)
 // (TODO) Los caracteres se almacenan en 2 bytes, de momento solo me quedo con
 // el primer byte por tratar con caracteres de 1 byte. Para 2 bytes esto no
 // funciona.
-uint8_t Directory_entry::copy_long_name_impl(std::span<uint8_t> str)
+uint8_t Directory_entry::read_long_name_impl(std::span<uint8_t> str)
 {
     auto str_len = str.size();
 
@@ -157,6 +214,43 @@ uint8_t Directory_entry::copy_long_name_impl(std::span<uint8_t> str)
 }
 
 
+// (TODO) Los caracteres se almacenan en 2 bytes, de momento solo me quedo con
+// el primer byte por tratar con caracteres de 1 byte. Para 2 bytes esto no
+// funciona.
+//
+// 7.3 FAT specification: los long_name acaban en '\0' y van seguidos de 0xFF
+// para detectar corrupción
+void Directory_entry::write_long_name(std::span<uint8_t> str)
+{
+    uint8_t j = 1;
+
+    for (uint8_t i = 0; i < str.size() and j < data.size(); ++i){
+	data[j] = str[i];
+
+	j += 2;
+	if (j == 11) j = 14;
+	if (j == 26) j = 28;
+    }
+
+    if (j != data.size()){
+	data[j] = '\0';
+	data[j + 1] = '\0';
+	j += 2;
+    }
+
+    while(j < data.size()){
+	data[j] = 0xFF;		
+	data[j + 1] = 0xFF;
+
+	j += 2;
+	if (j == 11) j = 14;
+	if (j == 26) j = 28;
+    }
+
+
+}
+
+
 // 6.3 FAT specification
 void Directory_entry::uint16_t2date(uint16_t date, 
 			      uint8_t& day, uint8_t& month, uint16_t& year)
@@ -181,6 +275,17 @@ void Directory_entry::uint16_t2time(uint16_t time,
 }
 
 
+uint8_t Directory_entry::nname_entries_for_store_long_entry(uint8_t name_len)
+{ 
+    auto [q, r] = std::div(name_len, ascii_long_name_len);
+    
+    if (r != 0u)
+	++q;	// q = número de entradas para almacenar name_len
+
+    return q;
+}
+
+
 
 void copy(const Directory_entry& entry, Entry_info& info)
 {
@@ -197,6 +302,49 @@ void copy(const Directory_entry& entry, Entry_info& info)
 
     info.last_modification_date = entry.last_modification_date();
     info.last_modification_time = entry.last_modification_time();
+}
+
+
+void copy(const Entry_info& info, Directory_entry& entry)
+{
+    entry.attribute(info.attribute);
+
+    entry.file_cluster(info.file_cluster);
+    entry.file_size(info.file_size);
+
+    entry.creation_date(info.creation_date);
+    entry.creation_time(info.creation_time);
+    entry.creation_time_tenth_of_seconds(info.creation_time_tenth_of_seconds);
+
+    entry.last_access_date(info.last_access_date);
+
+    entry.last_modification_date(info.last_modification_date);
+    entry.last_modification_time(info.last_modification_time);
+}
+
+void info_name2short_entry(const Entry_info& info, const std::span<uint8_t> name
+				   , Directory_entry& entry)
+{
+    copy(info, entry);
+    entry.write_short_name(name);
+}
+
+void short_entry2info_name(const Directory_entry& entry,
+			    Entry_info& info, std::span<uint8_t> name)
+{
+    copy(entry, info);
+    entry.read_short_name(name);
+
+}
+
+void long_name2short_entry(uint8_t order, const std::span<uint8_t> name, 
+						    Directory_entry& entry)
+{
+    entry.data.fill(0);
+
+    entry.attribute(Directory_entry::Attribute::long_name);
+    entry.extended_order_with_mask(order);
+    entry.write_long_name(name);
 }
 
 

@@ -34,11 +34,11 @@ void Main::run()
 	switch(cmd){
 	    break; case 1: read_status();
 	    break; case 2: print_sector();
-	    break; case 3: sector_driver_menu();
-	    break; case 4: print_MBR_boot_sector();
-	    break; case 5: reserved_area_menu();
-	    break; case 6: FAT32_area_menu();
-	    break; case 7: FAT32_area_list_menu();
+//	    break; case 3: sector_driver_menu();
+//	    break; case 4: print_MBR_boot_sector();
+//	    break; case 5: reserved_area_menu();
+//	    break; case 6: FAT32_area_menu();
+//	    break; case 7: FAT32_area_list_menu();
 	    break; case 8: root_directory_menu();
 
 	}

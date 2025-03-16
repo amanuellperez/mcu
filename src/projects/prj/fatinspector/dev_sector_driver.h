@@ -198,6 +198,13 @@ public:
     uint8_t write(const Address& nsector, const size_type& pos
 	      , const Int& value);
 
+    // Intenta escribir buf[0...size()) en el sector[pos..].  Si no entra todo
+    // el bufer escribe todo lo que puede. Devuelve el número de bytes
+    // escritos.
+    size_type write( const Address& nsector, const size_type& pos
+		  , std::span<uint8_t> buf);
+
+
     bool flush();
 
 
@@ -325,6 +332,23 @@ Sector_driver<SD>::size_type
 }
 
 
+template <typename SD>
+Sector_driver<SD>::size_type 
+    Sector_driver<SD>::write( const Address& nsector, const size_type& pos
+		  , std::span<uint8_t> buf)
+{
+    if (!read_sector(nsector))
+	return 0;
+
+    auto n = std::min(buf.size(), sector_size - pos);
+    std::copy_n(buf.begin(), n, sector_.data() + pos);
+
+    state_modified(true);
+
+    return n;
+
+}
+
 
 
 
@@ -354,6 +378,7 @@ uint8_t Sector_driver<SD>::
 
     sector_write(pos, value);
 
+    state_modified(true);
     errno(Errno::ok);
 
     return 1;
@@ -363,6 +388,7 @@ uint8_t Sector_driver<SD>::
 template <typename SD>
 bool Sector_driver<SD>::flush()
 {
+
     if (!state_is_modified())
 	return true;
 

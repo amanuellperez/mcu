@@ -30,5 +30,7 @@ void print_as_char(std::ostream& out, std::span<uint8_t> str);
 void print(std::ostream& out, std::span<uint8_t> str);
 void print(std::ostream& out, Attribute att, bool with_tab = true);
 
+uint8_t read_cstring(std::ostream& out, std::span<uint8_t> str);
+
 
 #endif

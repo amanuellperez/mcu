@@ -32,7 +32,7 @@
  *	https://wiki.osdev.org/FAT (referencia osdev)
  *
  * COMENTARIOS
- *	Duda de diseño:
+ *  + Duda de diseño:
  *	¿Consumir o no consumir los elementos leídos?
  *
  *	(1) Iteradores:
@@ -55,11 +55,51 @@
  *	    Al final uso las funciones read/write que tienen que funcionar
  *	    como las clásicas de C ==> consumen los caracteres que
  *	    leen/escriben.
- *
+ * 
+ *  + std::span vs std::string_view:
+ *	Los nombres de los ficheros son cadenas de caracteres. ¿Cómo pasarlos
+ *	a las funciones? Cuando quiero rellenar el nombre en una cadena no
+ *	puedo usar string_view ya que es una cadena de tipo const. Eso me
+ *	obliga a usar std::span para poder escribir las cadenas. Por
+ *	consistencia, lo uso también para leerlo. (necesitaba una
+ *	atd::string_fix similar a std::string pero de tamaño fijo).
  *
  * DUDAS    
  *  1. Estoy copiando un puntero a Volumen dentro de la mayoría de las clases,
  *  lo cual consume memoria. ¿Es preocupante? ¿Hay que modificar eso?
+ *
+ * NOTACIÓN
+ *  Directorios
+ *  -----------
+ *  1) Un directorio es un array de short entries. En principio podemos
+ *     concebir el array como de tamaño infinito. Es un sparse-array, esto es,
+ *     no todas las entradas del array están ocupadas. Por ello, las entries
+ *     de un directorio las clasifico en:
+ *	    a) entry: son entradas ocupadas. Pueden ser info o name entry.
+ *	    b) free : que puede estar available (está en medio de entradas
+ *	              ocupadas) o nomore (ya no hay más entries a partir de
+ *	              esta entrada).
+ *
+ *  2) Una long_entry es un conjunto de short entries, la primera de ellas
+ *     sirve para contener la información de la long_entry (fecha de creación,
+ *     modificación...) y el resto contienen el long_name. Por ello, las distingo
+ *     en: name_entries e info_entry.
+ *
+ *     Además, se colocan en orden inverso. Usando el ejemplo de la FAT
+ *     specificacion, el fichero "The quick brown.fox" se escribe:
+ *
+ *	    +-------------------------------------------------------+
+ *	    | 0x42 | wn.fox                 | check_sum             |
+ *	    +-------------------------------------------------------+
+ *	    | 0x01 | The quick bro          | check_sum             |
+ *	    +-------------------------------------------------------+
+ *	    | info_entry: 'THEQUI~FOX', creation date,...           |
+ *	    +-------------------------------------------------------+
+ *	
+ *	Esta long_entry tiene 2 name_entries y una info_entry. Observar que
+ *	las name_entries se ordenan 1, 2, ..., n, escribiendo el orden de la
+ *	mayor como 0x40|n. (por eso es 0x42 la primera del ejemplo, en lugar
+ *	de 0x02)
  *
  *
  * HISTORIA
@@ -598,7 +638,7 @@ private:
     bool write(const uint32_t& cluster, const uint32_t& value) const
     { 
 	for (uint8_t i = 0; i < nFATs_; ++i){
-	    if (write_in_area(i, cluster, value) == 0)
+	    if (!write_in_area(i, cluster, value))
 		return false;
 	}
 
@@ -606,15 +646,13 @@ private:
     }
 
     
-    // Devuelve el número de `value` escritos: 
-    // 0 si hay error, 1 si todo va bien.
-    uint8_t write_in_area(uint8_t i
+    bool write_in_area(uint8_t i
 		      , const uint32_t& cluster, const uint32_t& value) const
     {
 	auto [nsector, pos] = cluster2sector_pos(cluster);
 	return 
 	    volume_->template 
-		write_global<uint32_t>(sector0_area(i) + nsector, pos, value);
+		sd_write<uint32_t>(sector0_area(i) + nsector, pos, value);
     }
 };
 
@@ -661,7 +699,7 @@ void FAT_area<S>::init(const Boot_sector& bs)
 template <typename S>
 inline uint32_t FAT_area<S>::sector0_area(uint8_t i) const
 {
-    atd::precondition<9>(i < nFATs_, "Error: FAT area number too big");
+    atd::precondition<7>(i < nFATs_, "Error: FAT area number too big");
     
     return sector0_ + i * number_of_sectors_;
 }
@@ -940,12 +978,16 @@ public:
 		  , std::span<uint8_t> buf)
     {return driver_.read(nsector, pos, buf); }
 
-    // Devuelve 1 si todo va bien, 0 si no consigue escribir.
+    // Devuelve true si todo va bien, false si no consigue escribir.
     // Si falla mirar el state correspondiente para ver error (write_error())
-    template <Type::Integer Int = uint8_t>
-    uint8_t write_global( const uint32_t& nsector, uint16_t pos
-		     , const uint32_t& value)
-    { return driver_.template write<Int>(nsector, pos, value); }
+    template <Type::Integer Int>
+    bool sd_write( const uint32_t& nsector, uint16_t pos
+		     , const Int& value)
+    { return driver_.template write<Int>(nsector, pos, value) == 1; }
+
+    uint32_t sd_write(const uint32_t& nsector, uint16_t pos
+		     , const std::span<uint8_t>& buf)
+    { return driver_.write(nsector, pos, buf); }
 
     // Devuelve true si hace el flush correctamente, false en caso de error
     bool flush() { return driver_.flush();}
@@ -1557,10 +1599,10 @@ enum class Entry_attribute_type: uint8_t{
 };
 
 enum class Entry_type : uint8_t{
-    free,			
-    last_entry, // == 0x00, no hay más entries a partir de esta
-    short_entry,    
-    long_entry
+    free_available, // == 0xE5, después de esta entry habrá alguna ocupada
+    free_nomore, // == 0x00, no hay más entries ocupadas a partir de esta
+    short_entry,// entry ocupada por una short entry
+    long_entry  // entry que contiene parte del nombre de una long entry
 };
 
 
@@ -1574,6 +1616,7 @@ struct Directory_entry{
 
     // número de caracteres ASCII que admite un long_name
     static constexpr uint8_t ascii_short_name_len= 11;
+    static constexpr uint8_t ascii_extension_len = 3;
     static constexpr uint8_t ascii_long_name_len = 13;
 
 // Data
@@ -1581,41 +1624,79 @@ struct Directory_entry{
 
 // Tipo de entrada
     Type type() const;
+    void type(Type type);
+    static uint8_t free_type_to_uint8_t(Type type);
+
+    // Las entradas pueden estar o ocupadas o no. Las no ocupadas son las
+    // llamadas free type, que pueden ser de dos tipos, las que están entre
+    // entradas ocupadas (0xE5) y las que están al final del todo (0x00).
+    bool is_free() const
+    { return type() == Type::free_available or type() == Type::free_nomore; }
 
 // short entry (section 6, FAT specification)
-    // devuelve el número de caracteres copiados
-    uint8_t copy_short_name(std::span<uint8_t> str) const;
+    // Lee el short name de la entry copiándolo en `str`.
+    // Devuelve el número de caracteres copiados.
+    uint8_t read_short_name(std::span<uint8_t> str) const;
+
+    // Escribe str en la short name
+    void write_short_name(const std::span<uint8_t> str);
 
     Attribute attribute() const { return Attribute{data[11]}; }
+    void attribute(Attribute att) { data[11] = static_cast<uint8_t>(att); }
+
     // data[12] == 0
     
     uint8_t creation_time_tenth_of_seconds() const {return data[12];}
+    void creation_time_tenth_of_seconds(uint8_t t) {data[12] = t;}
+
     uint16_t creation_time() const 
 	    {return atd::concat_bytes<uint16_t>(data[15], data[14]);}
+
+    void creation_time(const uint16_t& t)
+	    {return atd::split_bytes(t, data[15], data[14]);}
 
     uint16_t creation_date() const
 	    {return atd::concat_bytes<uint16_t>(data[17], data[16]);}
 
+    void creation_date(const uint16_t& t) 
+	    {return atd::split_bytes(t, data[17], data[16]);}
+
     uint16_t last_access_date() const
 	    {return atd::concat_bytes<uint16_t>(data[19], data[18]);}
+
+    void last_access_date(const uint16_t& t) 
+	    {return atd::split_bytes(t, data[19], data[18]);}
 
     // devuelve el cluster del file asociado con esta entrada
     uint32_t file_cluster() const
     {return atd::concat_bytes<uint32_t>(data[21], data[20], data[27], data[26]);}
 
+    void file_cluster(const uint32_t& fc) 
+    {return atd::split_bytes(fc, data[21], data[20], data[27], data[26]);}
+
     uint16_t last_modification_time() const
 	    {return atd::concat_bytes<uint16_t>(data[23], data[22]);}
+
+    void last_modification_time(const uint16_t& t)
+	    {return atd::split_bytes(t, data[23], data[22]);}
 
     uint16_t last_modification_date() const
 	    {return atd::concat_bytes<uint16_t>(data[25], data[24]);}
 
+    void last_modification_date(const uint16_t& t)
+	    {return atd::split_bytes(t, data[25], data[24]);}
+
     uint32_t file_size() const
     {return atd::concat_bytes<uint32_t>(data[31], data[30], data[29], data[28]);}
+
+    void file_size(const uint32_t& fs) 
+    {return atd::split_bytes(fs, data[31], data[30], data[29], data[28]);}
 
 
 // long name entry (section 7, FAT specification)
     // Devuelve el orden de la entrada con la mask 0x40
     uint8_t extended_order_with_mask() const {return data[0];}
+    void extended_order_with_mask(uint8_t x) { data[0] = x; }
 
     // El order de la última entrada de un long name se masquea con 0x40
     // (jejeje, yo masqueo, tu masqueas, él masquea xD. Masquear `a` es `a|0x40`)
@@ -1624,6 +1705,10 @@ struct Directory_entry{
     uint8_t extended_order() const {return data[0] & ~0x40; }
     bool is_last_member_of_long_name() const {return data[0] & 0x40; }
 
+    // Devuelve el orden de la primera entrada
+    static uint8_t first_order_name_entry(uint8_t order) 
+    { return order | 0x40; }
+
     // data[1..11) = long name
     // data[11] = attribute. En este caso ATTR_LONG_NAME
     // data[12] == 0
@@ -1631,21 +1716,20 @@ struct Directory_entry{
     // data[14..26) = long name
     // data[26] == 0 and data[27] == 0
     // data[28..32) = long name
-    // devuelve el número de caracteres copiados
-    uint8_t copy_long_name(std::span<uint8_t> str);
+    // Lee el long name de la entry copiandolo en `str`.
+    // Devuelve el número de caracteres copiados
+    uint8_t read_long_name(std::span<uint8_t> str);
+
+    void write_long_name(std::span<uint8_t> str);
 
 
 // Numero de short entries que se necesitan para almacenar una long entry
+// Cada long entry está formada por una short entry más las entries para
+// almacenar el nombre (cada una de estas entries almacena solo 13 caracteres)
+    static uint8_t nname_entries_for_store_long_entry(uint8_t name_len);
     static uint8_t nshort_entries_for_store_long_entry(uint8_t name_len)
-    { 
-	auto [q, r] = std::div(name_len, ascii_long_name_len);
-	
-	if (r != 0u)
-	    ++q;	// q = número de entradas para almacenar name_len
+    { return nname_entries_for_store_long_entry(name_len) + 1; }
 
-	return q + 1u; // el +1 es para almacenar al short_entry que tienen
-		      // todas las entradas
-    }
 
 // Funciones de conversión de formato
 // (TODO) devolver time_t...
@@ -1660,20 +1744,25 @@ struct Directory_entry{
 // Funciones internas
     // Como data[12] tiene que ser 0, usemos ese valor para indicar que la
     // entry es invalida
-    void null_entry() { data[12] = 1; }
-    bool is_null_entry() const {return data[12] == 1;}
+//    void null_entry() { data[12] = 1; }
+//    bool is_null_entry() const {return data[12] == 1;}
 
 private:
-    uint8_t copy_long_name_impl(std::span<uint8_t> str);
+    uint8_t read_long_name_impl(std::span<uint8_t> str);
 
 };
 
+// escribe la long_name como short_entry
+void long_name2short_entry(uint8_t order, const std::span<uint8_t> name, 
+						    Directory_entry& entry);
 
 // Info básica que necesita un usuario de una entrada.
 // Solo le falta el nombre que al ser de longitud variable dejo que sea el
 // cliente quien decida cuánta memoria reservar para él.
 struct Entry_info{
     using Attribute = Entry_attribute_type;
+
+    static Entry_info make_empty_entry();
 
     Attribute attribute;
 
@@ -1691,10 +1780,28 @@ struct Entry_info{
 
 };
 
+inline 
+Entry_info Entry_info::make_empty_entry()
+{
+    Entry_info info;
+    memset(&info, 0, sizeof(Entry_info));
+    return info;
+}
+
 // Copia entry en info: entry -> info;
 void copy(const Directory_entry& entry, Entry_info& info);
 
+// Copia info en entry: info -> entry;
+void copy(const Entry_info& info, Directory_entry& entry);
 
+
+// entry -> [info, name]
+void short_entry2info_name(const Directory_entry& entry, Entry_info& info, 
+				    std::span<uint8_t> name);
+// [info, name] -> entry
+void info_name2short_entry( const Entry_info& info
+			       , const std::span<uint8_t> name
+			       , Directory_entry& entry);
 
 
 /***************************************************************************
@@ -1734,6 +1841,15 @@ public:
     Directory_short_entries_index(const Directory_short_entries_index& x);
 //    Directory_short_entries_index& operator=(const Directory_short_entries_index& x);
 
+    // Reinicia el index, pero en lugar de reiniciarlo en 0 en el primer
+    // cluster del directorio, lo inicia en 0 en el siguiente cluster.
+    // (RRR) Este es un forward_index. Cuando ha llegado al final, a
+    // end_of_array, si añadimos un cluster nuevo ¿cómo poder continuar con el
+    // siguiente index? No puedo ya que end_of_array no guarda información del
+    // nentry que ocupa. Por ello, opto por reiniciar el índice a 0 en el
+    // siguiente cluster.
+    bool reset_to_zero_in_next_cluster();
+
 // Operations
     // Pasamos a apuntar la siguiente entrada
     Directory_short_entries_index& operator++();
@@ -1752,9 +1868,22 @@ public:
     uint32_t sec_first_byte_entry() const 
     { return sec_nentry() * sizeof_entry; }
 
+    // Número de entrada de la short entry. (es el índice global de la short
+    // entry en el array de entries del directorio)
+    uint32_t nentry() const 
+    { return nentry_; }
+
 // end
-    static Directory_short_entries_index end() 
-    {return Directory_short_entries_index{nullptr, 0, end_nentry}; }
+    // En los directorios tenemos dos fines diferentes:
+    //	1) El end of array, que indica dónde acaba el array (no hay más
+    //	   entradas reservadas en la SD card)
+    //	2) La last entry, que indica dónde acaban las entradas. A partir de
+    //	last_entry no hay más entradas ocupadas.
+    //
+    //	Para no confundirlo en código distingo entre end_of_array y
+    //	last_entry.
+    static Directory_short_entries_index end_of_array() 
+    {return Directory_short_entries_index{nullptr, 0, end_of_array_nentry}; }
 
     // precondición: son entradas del mismo directorio (volumen iguales)
     bool operator==(const Directory_short_entries_index& x) const
@@ -1775,8 +1904,9 @@ private:
     
 
 // Cfg
-    static constexpr uint32_t end_nentry = std::numeric_limits<uint32_t>::max();
-    bool is_end() const {return nentry_ == end_nentry; }
+    static constexpr uint32_t end_of_array_nentry 
+					= std::numeric_limits<uint32_t>::max();
+    bool is_end_of_array() const {return nentry_ == end_of_array_nentry; }
 
 // Funciones que dependen del volumen
     using FAT_area= typename Volume::FAT_area;
@@ -1889,6 +2019,20 @@ Directory_short_entries_index<SD>::Directory_short_entries_index
     : volume_{x.volume_}, cluster_{x.cluster_}, nentry_{x.nentry_}
 {}
 
+
+template <typename SD>
+bool Directory_short_entries_index<SD>::reset_to_zero_in_next_cluster()
+{
+    if (!next_cluster())
+	return false;
+
+    nentry_ = 0;
+    return true;
+}
+
+
+
+
 //template <typename SD>
 //inline
 //Directory_short_entries_index<SD>& 
@@ -1951,7 +2095,7 @@ bool Directory_short_entries_index<SD>::next_cluster()
 	return true;
 
     if (cluster_state == Cluster_state::end_of_clusters){
-	nentry_ = end_nentry;
+	nentry_ = end_of_array_nentry;
 	return false; // responde indicando que no puede calcular el siguiente
 		      // cluster pero no es un error ya que no hay más.
 		      // Por eso cambiamos el state a end_of_clusters.
@@ -1965,6 +2109,22 @@ bool Directory_short_entries_index<SD>::next_cluster()
 
 /***************************************************************************
  *				DIRECTORY
+ *
+ * Un directorio es un array de short enties. 
+ *
+ * Hay 2 tipos de short entries:
+ *	1. name_entry: almacenan parte del nombre de una long entry.
+ *	2. info_entry: contiene el short name y la info de la long entry.
+ *
+ * Una long entry es un conjunto de short entries, la entry[0] es una
+ * info_entry, mientras que el resto entry[1..] son name_entries que contienen
+ * el nombre del fichero. Se almacenan en orden inverso en el array.
+ *
+ * La característica fundamental del directory es que es un sparse-array, esto
+ * es, algunas de las entradas están ocupadas y otras no, por ello no se puede
+ * iterar de forma secuencial sobre él, sino que hay que ir mirando si la
+ * entry esta free o no.
+ *
  ***************************************************************************/
 enum class Directory_errno : uint8_t{
     ok = 0, // fail distinto de 0
@@ -2029,11 +2189,8 @@ public:
     Short_index short_index_begin()
 	{return Short_index{volume(), cluster0_};}
 
-    auto short_index_end() {return Short_index::end(); }
+    auto short_index_end() {return Short_index::end_of_array(); }
     
-    //  Lee la entrada apuntada por i
-    bool read(const Short_index& i, Entry& entry);
-
     // Lee la long entry. Deja i en la siguiente entrada a leer.
     // En caso de error devuelve short_index_end() y anota el error en errno.
     Short_index read_long_entry(Short_index i, Entry_info& info, 
@@ -2067,15 +2224,17 @@ public:
 
 
 // Primitivas de implementación
+    //  Lee la entrada apuntada por i
+    bool read_short_entry(const Short_index& i, Entry& entry);
+
     // Crea una nueva entrada de nombre `name` y características dadas en
     // info, ignorando los access/modification times de `info`.
     // Devuelve el número de entrada de la short_entry de este nuevo fichero
     // creado ó 0 en caso de error. (0??? en general, salvo en el root
     // directory la entrada 0 corresponde al directorio actual (.) no siendo
     // una entrada válida en general, por eso puedo devolver 0 como error)
-    uint32_t new_entry(const Entry_info& info, std::span<uint8_t> name);
-
-//    void remove_entry();
+    uint32_t new_long_entry(const Entry_info& info , std::span<uint8_t> name);
+    bool remove_short_entry(const uint32_t& nentry);
 
 
 // Errno = resultado de la última operación
@@ -2105,12 +2264,27 @@ private:
 // Helpers
     Short_index read_long_entry(Short_index i, Entry& entry, Entry_info& info,
 						    std::span<uint8_t> name);
-    // Lo llamo copy porque realmente no lee ninguna entrada, se limita a
-    // copiar la información de entry en [info, name]
-    void copy_short_entry(const Entry& entry, Entry_info& info, 
-					std::span<uint8_t> name);
+
+    // Devuelve el número de short entries escritas
+    uint32_t write_long_entry( Short_index i
+			 , const Entry_info& info , std::span<uint8_t> name);
+
+    bool write_name_entry( Short_index i
+			 , uint8_t order, const std::span<uint8_t> name);
+
+    bool write_info_entry(const Short_index& i
+			  , const Entry_info& info , std::span<uint8_t> name);
+
+    bool write(const Short_index& i, Entry& entry);
+
+    bool remove_short_entry(const Short_index& i);
 
     Short_index find_first_not_free_entry(Short_index i, Entry& entry);
+
+    bool find_first_free_long_entry(uint8_t nshort_entries
+				    , Short_index& i0, uint32_t& nentry_e);
+    bool advance_at_most_entries_of_same_type( Entry& entry
+		                  , uint8_t nshort_entries, Short_index& i);
 
 // nentry
     Volume& volume() {return vol_; }
@@ -2135,11 +2309,10 @@ void Directory<S>::cd(uint32_t cluster0)
 }
 
 
-// Observar que este read no marca el error, eso se lo dejo a quien lo llame
 template <typename S> 
-bool Directory<S>::read(const Short_index& i, Entry& entry)
+bool Directory<S>::read_short_entry(const Short_index& i, Entry& entry)
 {
-    if (i == Short_index::end()){
+    if (i == Short_index::end_of_array()){
 	atd::ctrace<5>() << "Trying to read last_entry index\n";
 	return false;
     }
@@ -2155,23 +2328,37 @@ bool Directory<S>::read(const Short_index& i, Entry& entry)
     return true;
 }
 
+template <typename S> 
+bool Directory<S>::write(const Short_index& i, Entry& entry)
+{
+    atd::precondition<7>(i != Short_index::end_of_array(), 
+				    "Trying to write last_entry index\n");
+
+    return (volume().sd_write( i.sd_sector_number(), i.sec_first_byte_entry()
+			     , entry.data) == entry.data.size());
+}
+
 
 // Precondición: i apunta a la entrada entry, que es la primera entrada de la
 // long_entry.
+// El long_name de una long_entry está repartido en varias name_entries. Por
+// ello, tenemos que leer todas las name_entries para poder componerlo. Cada
+// name_entry tiene 13 caracteres del long_name (salvo la última name_entry
+// que puede tener menos). 
 template <typename S>
 Directory<S>::Short_index
     Directory<S>::read_long_entry(Short_index i, Entry& entry,
 					Entry_info& info, 
 					std::span<uint8_t> long_name)
 {
-    static constexpr uint8_t size = Entry::ascii_long_name_len;
+    static constexpr uint8_t esize = Entry::ascii_long_name_len;
 
 // Garantizamos que la cadena acabe en '\0' en el caso de que sea el long_name
 // justo múltiplo de size (de 13 caracteres)
-    uint8_t nentry = entry.extended_order();
+    uint8_t nentry = entry.extended_order(); // == nentries de la long_name
 
-    if (nentry * size < long_name.size())
-	long_name[nentry * size] = '\0';
+    if (nentry * esize < long_name.size())
+	long_name[nentry * esize] = '\0';
 
 // Copiamos el name en long_name
     for (; nentry > 0; --nentry){
@@ -2183,20 +2370,19 @@ Directory<S>::Short_index
 	    return short_index_end();
 	}
 
-	if (k * size < long_name.size()){// copiamos nombre si podemos
-	    uint8_t n = std::min<uint8_t>(size, 
-					long_name.size() - k * size);
-	    entry.copy_long_name({long_name.begin() + k * size, n});
+	if (k * esize < long_name.size()){// copiamos nombre si podemos
+	    uint8_t n = std::min<uint8_t>(esize, long_name.size() - k * esize);
+	    entry.read_long_name({long_name.begin() + k * esize, n});
 	}
 
 	++i;
 
-	if (i == Short_index::end()){
+	if (i == Short_index::end_of_array()){
 	    errno(Errno::end_of_clusters);
 	    return i;
 	}
 
-	if (!read(i, entry)){
+	if (!read_short_entry(i, entry)){
 	    errno(Errno::read_error);
 	    return short_index_end();
 	}
@@ -2219,16 +2405,6 @@ Directory<S>::Short_index
 
 
 
-template <typename S>
-void Directory<S>::copy_short_entry(const Entry& entry,
-					Entry_info& info, 
-					std::span<uint8_t> name)
-{
-    impl_of::copy(entry, info);
-    entry.copy_short_name(name);
-
-}
-
 
 
 template <typename S>
@@ -2245,7 +2421,7 @@ Directory<S>::Short_index Directory<S>::read_long_entry(Short_index i
 	return i;
 
     if (entry.type() == Type::short_entry){
-	copy_short_entry(entry, info, long_name); // copia entry en info/long_name
+	short_entry2info_name(entry, info, long_name); // copia entry en info/long_name
 	++i;
 	return i;
     }
@@ -2283,95 +2459,238 @@ Directory<S>::Short_index
 {
     using Type = Entry::Type;
 
-    if (i == Short_index::end())
+    if (i == Short_index::end_of_array())
 	return i;
 
     while (1){
 
-	if(!read(i, entry)){
+	if(!read_short_entry(i, entry)){
 	    errno(Errno::read_error);
 	    return short_index_end();
 	}
 
-	if (entry.type() == Type::last_entry){
+	if (entry.type() == Type::free_nomore){
 	    errno(Errno::last_entry);
 	    return short_index_end();
 	}
 
-	if (entry.type() != Type::free)
+	if (entry.type() != Type::free_available)
 	    return i;
 
 	++i; // modificamos la Short_index
-	if (i == Short_index::end()) // fin de los clusters
+	if (i == Short_index::end_of_array()) // fin de los clusters
 	    return i;
     }
 }
 
+// Avanza, como mucho, el índice i nshort_entries siempre y cuando sean del
+// mismo tipo que entry.type(). Actualiza el valor de i0 haciendo que apunte
+// al siguiente elemento del array.
+// Devuelve false en caso de algún error de lectura.
+// Preconcidición: entry == directory.entry[i];
+template <typename S>
+bool Directory<S>::
+	advance_at_most_entries_of_same_type( Entry& entry
+		                  , uint8_t nshort_entries
+				  , Short_index& i)
+{
+    auto type = entry.type();
+
+    for (; nshort_entries > 0; --nshort_entries){
+    
+	++i; 
+
+	if (i == Short_index::end_of_array())
+	    return true;
+
+	if (!read_short_entry(i, entry))
+	    return false;
+
+	if (entry.type() != type)
+	    return true;
+
+    }
+
+    return true;
+}
 
 
-// (DUDA) Al pasarle uint8_t limito la longitud del nombre a 255 caracteres. 
-// ¿Algún problema? 255 es demasiado largo (long_name es el nombre del
-// fichero, no todo el path).
+
+// i0 como parámetro de entrada indica a partir de qué short entry buscar la
+// free long_entry.
 //
-// TODO: devolver un Long_entry_index??? Aprovecharía el Volumen interno, e
-// incluso en lugar de tener dos [uint32_t nentry_0, uint32_t nentry_e) podía
-// almacenarlo como [uint32_t nentry_0, uint8_t incremento] ahorrando espacio
-//template <typename S>
-//std::pair<Directory<S>::Short_index, Directory<S>::Short_index>
-//Directory<S>::find_first_free_long_entry(Short_index i0, uint8_t nshort_entries)
-//{
-//    Entry entry;
-//
-//    while (1) {
-//	if(!read(i0, entry)){
-//	    errno(Errno::read_error);
-//	    return {short_index_end(), short_index_end()};
-//	}
-//
-//	if (entry.type() == Type::last_entry){
-//	    return i; // la ultima entrada esta libre, pero ¿habrá suficiente
-//		      // espacio para almacenar long_name_size? TODO:
-//		      // garantizarlo(???)
-//	}
-//
-//	// Si el volumen es consistente después de una free entry tiene que
-//	// haber fijo alguna not_free entry, no puede alcanzarse last_entry.
-//	// Con lo que la llamada a find_first_not_free_entry tiene que tener
-//	// éxito (salvo error  de lectura)
-//	if (entry.type() == Type::free){
-//	    ++i;
-//	    Short_index j = find_first_not_free_entry(i, entry);
-//	    if (j != Short_index::end()) // encontrada
-//		return i;
-//
-//
-//	}
-//
-//	++i; 
-//	if (i == Short_index::end()) // fin de los clusters
-//	    return i;
-//    }
-//}
+// Return:
+//  Devuelve false para indicar que ha habido un error de lectura.
+//  En caso de éxito anotará en [i0, nentry_e) las entradas que ocupa la
+//  long_entry. Usando nentry_e - i0.nentry se puede saber si hay suficiente
+//  espacio o no en el array de short entries para la long entry.
+template <typename S>
+bool Directory<S>::find_first_free_long_entry(uint8_t nshort_entries
+		, Short_index& i0, uint32_t& nentry_e)
+{
+
+    while(i0 != Short_index::end_of_array()){
+
+	Entry entry;
+	if(!read_short_entry(i0, entry))
+	    return false;
+
+	if (entry.is_free()){
+	    Short_index i = i0;
+	    if (!advance_at_most_entries_of_same_type(entry, nshort_entries, i))
+		return false;
+
+	    if (i.nentry() - i0.nentry() == nshort_entries){
+		nentry_e = i.nentry();
+		return true;
+	    }
+
+	    i0 = i;
+	}
+	else
+	    ++i0;
+
+    }
+
+    nentry_e = i0.nentry();
+    return true;
+}
 
 
-//template <typename S>
-//uint32_t 
-//Directory<S>::new_entry(const Entry_info& info , std::span<uint8_t> name)
-//{
-//    auto nshort_entries = Entry::nshort_entries_for_store_long_entry(name.size());
+// Devuelve 0 en caso de error (aunque tal como está implementada sí que está
+// creando short entries) (¿corregir y que quede consistente?)
+template <typename S>
+uint32_t 
+Directory<S>::new_long_entry(const Entry_info& info , std::span<uint8_t> name)
+{
+    auto nshort_entries = 
+			Entry::nshort_entries_for_store_long_entry(name.size());
+
+// 1. Encontramos/garantizamos la primera long_entry donde entra name
+    Short_index i = short_index_begin();
+    uint32_t nentry_e{};
+    if (!find_first_free_long_entry(nshort_entries, i, nentry_e))
+	return 0;
+
+    if (nentry_e - i.nentry() < nshort_entries){ // si no hay espacio en el array
+	volume().fat_area.add_cluster(0x00); // (FAT specification 6.5)
+				   // 0x00 valor por defecto en los directorios
+	if (i == Short_index::end_of_array())
+	    i.reset_to_zero_in_next_cluster();
+    }
+
+// 2. Escribimos la información en la long entry
+// (TODO) ¿cómo gestionar los errores? Si no se hace flush las modificaciones
+// del sector no se grabarán. ¿Antes de llamar a esta función que el cliente
+// haga flush, y si falla que cargue de nuevo el sector?
+    if (write_long_entry(i, info, name) != nshort_entries)
+	return 0;
+
+    return nshort_entries;
+}
+
+
+// Una long_entry está formada por un conjunto de short entries de dos
+// tipos: la mayoría solo contienen el nombre (name_entry) y la última (o
+// primera realmente) contiene la info name (info_entry)
 //
-//// find_first_free_entry: 
-//    uint32_t ne = find_first_free_long_entry(nshort_entries); 
-//    if (ne == 0)
-//	sector_.add_cluster(0x00); // 0x00 valor por defecto en los directorios
-//    
-//// new_entry_impl:
-//    para toda parte de name:
-//	new_long_entry(name[...]);
-//    new_short_entry(info);
-//}
-//
-//
+// precondition: hay suficientes free entries a partir de i 
+//		(==> no tenemos que validar que ++i pueda fallar)
+//		(???) podría fallar ++i por errores de lectura a la SD card
+template <typename S>
+uint32_t 
+Directory<S>::write_long_entry(Short_index i, 
+			      const Entry_info& info , std::span<uint8_t> name)
+{
+// write_name_entries:
+    static constexpr uint8_t esize = Entry::ascii_long_name_len;
+    auto nentries = Entry::nname_entries_for_store_long_entry(name.size());
+
+    // Primera entrada: su número de orden es 0x40|order, y en general será de
+    // menor longitud que el resto.
+    if (!write_name_entry(i, Entry::first_order_name_entry(nentries),
+		    {name.begin() + (nentries - 1) * esize
+				    , name.size() - (nentries - 1) * esize}))
+	return 0;
+
+
+    ++i;
+
+    // Resto de entradas
+    for (uint8_t j = 1; j < nentries; ++j, ++i){
+	uint8_t k = nentries - j;
+
+	if (!write_name_entry(i, k, {name.begin() + (k - 1) * esize, esize}))
+	    return j;
+    }
+
+// write_info_entry:
+    if (!write_info_entry(i, info, name))
+	return nentries;
+
+    return nentries + 1;
+}
+
+template <typename S>
+bool 
+Directory<S>::write_info_entry(const Short_index& i, 
+			      const Entry_info& info , std::span<uint8_t> name)
+{
+    Entry entry;
+
+    info_name2short_entry(info, name, entry);
+
+    return write(i, entry);
+}
+
+template <typename S>
+bool 
+Directory<S>::write_name_entry( Short_index i
+			      , uint8_t order, const std::span<uint8_t> name)
+{
+    Entry entry;
+
+    long_name2short_entry(order, name, entry);
+    return write(i, entry);
+}
+
+template <typename S>
+inline 
+bool 
+Directory<S>::remove_short_entry(const uint32_t& nentry)
+{ return remove_short_entry(Short_index{volume(), cluster0_, nentry}); }
+
+// ¿Qué pasa si `Short_index i` apunta más alla de la última entry?
+// Lo que haría es perder tiempo, pero lo dejaría todo consistente.
+template <typename S>
+bool 
+Directory<S>::remove_short_entry(const Short_index& i)
+{
+    Entry::Type type = Type::free_available;
+
+    Entry entry;
+
+// type = free_available or free_nomore?
+    auto j = i;
+    ++j;
+    if (j == Short_index::end_of_array()){
+	type = Type::free_nomore;
+
+    } else{
+	if (!read_short_entry(j, entry))
+	    return errno(Errno::read_error);
+
+	if (entry.type() == Type::free_nomore)
+	    type = Type::free_nomore;
+    }
+
+    return volume().template sd_write<uint8_t>(i.sd_sector_number(), 
+			       i.sec_first_byte_entry(),
+			       Entry::free_type_to_uint8_t(type));
+    
+}
+
+
 
 }// namespace FAT32
 

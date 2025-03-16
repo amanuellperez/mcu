@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2023 Manuel Perez 
+// Copyright (C) 2019-2025 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //

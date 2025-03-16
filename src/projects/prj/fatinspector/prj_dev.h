@@ -35,6 +35,7 @@
 // 3: Error: no se ha podido hacer algo pero se puede continuar aunque quedará
 // todo inconsistente.
 // 5: warnings
+// 7: precondiciones
 // 9: traza para depurar, borrarlas al final.
 
 

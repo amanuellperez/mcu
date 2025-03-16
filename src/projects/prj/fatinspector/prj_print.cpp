@@ -55,4 +55,23 @@ void print(std::ostream& out, Attribute att, bool with_tab)
 
 }
 
+uint8_t read_cstring(std::ostream& out, std::span<uint8_t> str)
+{
+    uint8_t c{};
+
+    uint8_t i = 0;
+    for (; i < str.size(); ++i){
+	uart >> c;
+	if (c == '\n'){
+	    str[i] = '\0';
+	    return i;
+	}
+
+	else
+	    str[i] = c;
+    }
+
+    str[str.size() - 1] = '\0'; // ¿Poner '\0' o no?
+    return i;
+}
 
