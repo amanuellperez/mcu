@@ -83,8 +83,9 @@ void Main::root_directory_menu()
 		"\t4. ls directories\n"
 		"\t5. New entry\n"
 		"\t6. Remove short entry\n"
-		"\t7. cd\n"
-		"\t8. Print file\n";
+		"\t7. Remove long entry\n"
+		"\t8. cd\n"
+		"\t9. Print file\n";
 
 	uint16_t cmd{};
 	uart >> cmd;
@@ -99,12 +100,13 @@ void Main::root_directory_menu()
 	    break; case 4: print_ls(vol, dir, Attribute::directory);
 	    break; case 5: new_entry(vol, dir);
 	    break; case 6: remove_short_entry(vol, dir);
-	    break; case 7: 
+	    break; case 7: remove_long_entry(vol, dir);
+	    break; case 8: 
 			uart << "Cluster new directory: ";
 			uart >> cluster;
 			dir.cd(cluster);
 
-	    break; case 8: print_file();
+	    break; case 9: print_file();
 
 	}
     }
@@ -360,9 +362,28 @@ void Main::remove_short_entry(Volume& vol, Directory& dir)
     uint16_t nentry{};
     uart >> nentry;
 
-    if (dir.remove_short_entry(nentry))
+    if (dir.remove_short_entry(nentry)){
 	uart << "OK\n";
+	vol.flush();
+    }
     else
 	uart << "FAIL\n";
+}
+
+
+
+void Main::remove_long_entry(Volume& vol, Directory& dir)
+{
+    uart << "Long entry to remove: ";
+    uint16_t nentry{};
+    uart >> nentry;
+
+    if (dir.remove_long_entry(nentry)){
+	uart << "OK\n";
+	vol.flush();
+    }
+    else
+	uart << "FAIL\n";
+
 }
 

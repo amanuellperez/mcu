@@ -1,4 +1,4 @@
-//// Copyright (C) 2025 Manuel Perez 
+// Copyright (C) 2025 Manuel Perez 
 //           mail: <manuel2perez@proton.me>
 //           https://github.com/amanuellperez/mcu
 //
@@ -1795,8 +1795,8 @@ public:
     using Volume  = atd::FAT32::Volume<Sector_driver0>;
 
 // Constructor
-    // Precondicion: cluster0 es el cluster donde se encuentra la entrada
-    // nentry.
+    // cluster0 = primer cluster del directorio
+    // nentry   = número de entrada (global) al directorio
     Directory_short_entries_index(Volume* vol, 
 		    const uint32_t& cluster0, const uint32_t& nentry = 0);
     Directory_short_entries_index(Volume& vol, 
@@ -1888,14 +1888,17 @@ private:
 
     using Cluster_state = FAT_area::Cluster_state;
 
-    Cluster_state next_cluster(const uint32_t& cluster0, 
+    Cluster_state next_cluster(const uint32_t& cluster,  
 				 uint32_t& next_cluster)
-    { return volume().fat_area.next_cluster(cluster_, cluster_);}
+    { return volume().fat_area.next_cluster(cluster, next_cluster);}
 
 
 // Helpers
     bool next();
     bool next_cluster();
+
+    // Devuelve el cluster en el que se encuentra nentry (global al directory)
+    uint32_t cluster_of_entry(uint32_t cluster0, const uint32_t& nentry);
 
     static constexpr uint8_t sizeof_entry = Directory_entry::size;
     
@@ -1960,13 +1963,40 @@ private:
 //    Errno errno() const {return ertate_.errno;}
 };
 
+// Devuelve el número de cluster en el que se encuentra la entrada nentry.
+// cluster0 = primer cluster del directorio
+// nentry   = numero de entrada global de la entrada a la que apuntamos
+template <typename SD>
+uint32_t
+Directory_short_entries_index<SD>::
+	cluster_of_entry(uint32_t cluster0, const uint32_t& nentry)
+{
+// nentry = c * nentries_per_cluster() + clus_nentry();
+// siendo c el número de cluster en el que se encuentra nentry.
+    uint32_t c = nentry / nentries_per_cluster();
+
+
+    for (; c > 0; --c){
+	if (next_cluster(cluster0, cluster0) != Cluster_state::allocated){
+	    return 0;  // No existe cluster 0, luego esto indica error
+	}
+    }
+    
+    return cluster0;
+}
+
+
 
 template <typename SD>
 inline 
 Directory_short_entries_index<SD>::Directory_short_entries_index(Volume* vol, 
 				const uint32_t& cluster0, const uint32_t& nentry)
-    : volume_{vol}, cluster_{cluster0}, nentry_{nentry}
-{ }
+    : volume_{vol}, nentry_{nentry}
+{
+    if (vol == nullptr) return; // == end_of_array()
+
+    cluster_ = cluster_of_entry(cluster0, nentry);
+}
 
 template <typename SD>
 inline 
@@ -2092,6 +2122,7 @@ bool Directory_short_entries_index<SD>::next_cluster()
 enum class Directory_errno : uint8_t{
     ok = 0, // fail distinto de 0
     read_error, 
+    write_error,
     long_entry_corrupted,
     end_of_clusters, // se ha llegado al final del último cluster
     last_entry,	    // se ha alcanzado la última entrada, no hay más
@@ -2190,6 +2221,9 @@ public:
     //  Lee la entrada apuntada por i
     bool read_short_entry(const Index& i, Entry& entry);
 
+    // Borra la entrada nentry
+    bool remove_short_entry(const uint32_t& nentry);
+
     // Crea una nueva entrada de nombre `name` y características dadas en
     // info, ignorando los access/modification times de `info`.
     // Devuelve el número de entrada de la short_entry de este nuevo fichero
@@ -2198,7 +2232,8 @@ public:
     // una entrada válida en general, por eso puedo devolver 0 como error)
     uint32_t new_long_entry( const Entry_info& info
 			   , std::span<const uint8_t> name);
-    bool remove_short_entry(const uint32_t& nentry);
+
+    bool remove_long_entry(const uint32_t& nentry);
 
 
 // Errno = resultado de la última operación
@@ -2224,6 +2259,8 @@ private:
     Errno errno() const {return ertate_.errno;}
     bool throw_errno() const {return false; }
 
+    void errno_ok() {ertate_.errno = Errno::ok; }
+
 
 // Helpers
     Index read_long_entry(Index i, Entry& entry, Entry_info& info,
@@ -2244,7 +2281,9 @@ private:
 
     bool write(const Index& i, Entry& entry);
 
+    bool remove_entry(const Index& i, Entry::Type type);
     bool remove_short_entry(const Index& i);
+    bool remove_long_entry (Index i);
 
     Index find_first_not_free_entry(Index i, Entry& entry);
 
@@ -2645,6 +2684,20 @@ bool
 Directory<S>::remove_short_entry(const uint32_t& nentry)
 { return remove_short_entry(Index{volume(), cluster0_, nentry}); }
 
+
+template <typename S>
+bool 
+Directory<S>::remove_entry(const Index& i, Entry::Type type)
+{
+    if (volume().template sd_write<uint8_t>(i.sd_sector_number(), 
+			       i.sec_first_byte_entry(),
+			       Entry::free_type_to_uint8_t(type)))
+	return ok();
+
+    else 
+	return errno(Errno::write_error);
+}
+
 // ¿Qué pasa si `Index i` apunta más alla de la última entry?
 // Lo que haría es perder tiempo, pero lo dejaría todo consistente.
 template <typename S>
@@ -2653,9 +2706,12 @@ Directory<S>::remove_short_entry(const Index& i)
 {
     Entry::Type type = Type::free_available;
 
+    errno_ok(); 
+
     Entry entry;
 
-// type = free_available or free_nomore?
+// 1. Hay que decidir si el type es free_available or free_nomore?
+//    Eso lo sabemos mirando el tipo de la siguiente entrada
     auto j = i;
     ++j;
     if (j == Index::end_of_array()){
@@ -2669,13 +2725,53 @@ Directory<S>::remove_short_entry(const Index& i)
 	    type = Type::free_nomore;
     }
 
-    return volume().template sd_write<uint8_t>(i.sd_sector_number(), 
-			       i.sec_first_byte_entry(),
-			       Entry::free_type_to_uint8_t(type));
-    
+    return remove_entry(i, type);
 }
 
 
+template <typename S>
+inline 
+bool 
+Directory<S>::remove_long_entry(const uint32_t& nentry)
+{ return remove_long_entry(Index{volume(), cluster0_, nentry}); }
+
+
+template <typename S>
+bool 
+Directory<S>::remove_long_entry(Index i)
+{
+    errno_ok(); 
+
+// (DUDA) 1. Miramos que i apunte realmente a una long_entry no corrupta
+// (comprobaríamos que el checksum es el mismo y corresponde al checksum de
+// la info_entry)
+
+// 2. remove_long_entry
+    Entry entry;
+
+// remove_contiguous_name_entries(i):
+    for (; i != Index::end_of_array(); ++i){
+
+	if (!read_short_entry(i, entry))
+	    return errno(Errno::read_error);
+
+	if (entry.type() != Type::name_entry)
+	    break;
+
+	if (!remove_entry(i, Type::free_available))
+	    return errno(Errno::read_error);
+    }
+
+
+    if (i == Index::end_of_array())
+	return errno(Errno::end_of_clusters);
+
+// remove_info_entry(i);
+    if (entry.type() != Type::info_entry)
+	return errno(Errno::long_entry_corrupted);
+
+    return remove_short_entry(i); // no llamar a remove_entry, quedaría inconsistente
+}
 
 }// namespace FAT32
 
