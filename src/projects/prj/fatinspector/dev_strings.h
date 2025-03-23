@@ -34,6 +34,9 @@ constexpr myu::ROM_string<2> msg_no
 constexpr myu::ROM_string<2> msg_ok	
 	PROGMEM{"ok"};
 
+constexpr myu::ROM_string<4> msg_fail 
+	PROGMEM{"fail"};
+
 constexpr myu::ROM_string<24> msg_press_key_to_continue   
 	PROGMEM{"Press a key to continue\n"};
 

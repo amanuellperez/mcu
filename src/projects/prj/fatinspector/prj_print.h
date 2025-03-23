@@ -25,11 +25,17 @@
 #include <ostream>
 #include <span>
 #include "prj_main.h"
+#include "dev_strings.h"
 
 void print_as_char(std::ostream& out, std::span<uint8_t> str);
 void print(std::ostream& out, std::span<uint8_t> str);
 void print(std::ostream& out, Attribute att, bool with_tab = true);
 
+inline void print_ok(std::ostream& out) 
+{ 
+    atd::print(out, msg_ok);
+    out << '\n';
+}
 inline void print_fail(std::ostream& out) 
 { 
     atd::print(out, msg_fail);

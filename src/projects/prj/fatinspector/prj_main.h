@@ -96,6 +96,7 @@ private:
 	void remove_short_entry(Volume& vol, Directory& dir);
 	void remove_long_entry(Volume& vol, Directory& dir);
 	void mkfile(Volume& vol, Directory& dir);
+	void rmfile(Volume& vol, Directory& dir);
 
     void print_sector(std::ostream& out, const Sector& sector, size_t i0, size_t sz)
     { atd::xxd_print(out, sector, i0, sz); }

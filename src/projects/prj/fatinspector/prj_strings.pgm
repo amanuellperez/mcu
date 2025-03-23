@@ -3,9 +3,6 @@
 #	$ str2progmem strings.pgm
 #
 
-# Generic
-msg_fail "FAIL"
-
 # main
 msg_hello   "\n\n----------------------------------------\n"
 	    "SDCard inspector\n"
@@ -75,5 +72,6 @@ msg_root_directory_menu "Root directory menu\n"
 			"\t7. ls directories\n"
 			"\t8. cd\n"
 			"\t9. mkfile\n"
-			"\t10. Print file\n"
+			"\t10. rmfile\n"
+			"\t11. Print file\n"
 

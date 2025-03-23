@@ -422,7 +422,7 @@ public:
     //	Observar que c1 no apunta a EOF sino a FREE.
     //
     //	Devuelve true si todo va bien, false en caso de error.
-    bool remove_list(uint32_t cluster0);
+    bool remove_list(const uint32_t& cluster0);
 
 // Acceso a una lista enlazada
     // Lee el siguiente cluster a cluster0. Solo cuando state == allocated
@@ -558,6 +558,15 @@ private:
 	return volume_->template sd_read<uint32_t>(sector0_ + nsector, pos);
     }
 
+    // Lee en la area i, el cluster indicado
+    uint32_t read_in_area(uint8_t i, const uint32_t& cluster) const
+    { 
+	auto [nsector, pos] = cluster2sector_pos(cluster);
+	return 
+	    volume_->template 
+			    sd_read<uint32_t>(sector0_area(i) + nsector, pos);
+    }
+
     bool read_error() const {return volume_->read_error(); }
 
     // Escribe value en el cluster indicado
@@ -595,6 +604,8 @@ private:
 	    volume_->template 
 		sd_write<uint32_t>(sector0_area(i) + nsector, pos, value);
     }
+
+    bool remove_list_in_area(uint8_t i, uint32_t cluster0);
 };
 
 
@@ -723,16 +734,28 @@ uint32_t FAT_area<S>::new_list()
 
 // Borra toda la lista de clusters c0 -> ...
 template <typename S>
-bool FAT_area<S>::remove_list(uint32_t cluster0)
+bool FAT_area<S>::remove_list(const uint32_t& cluster0)
+{
+    for (uint8_t i = 0; i < nFATs_; ++i){
+	if (!remove_list_in_area(i, cluster0))
+	    return false;
+    }
+
+    return true;
+
+}
+
+template <typename S>
+bool FAT_area<S>::remove_list_in_area(uint8_t i, uint32_t cluster0)
 {
     while (is_allocated(cluster0)){
 
-	auto cluster1 = read(cluster0); 
+	auto cluster1 = read_in_area(i, cluster0); 
 					
 	if (read_error())
 	    return false;
 					
-	if (write(cluster0, free_entry) == 0)
+	if (write_in_area(i, cluster0, free_entry) == 0)
 	    return false;
 
 	cluster0 = cluster1;
@@ -2197,6 +2220,7 @@ enum class Directory_errno : uint8_t{
     long_entry_corrupted,
     end_of_clusters, // se ha llegado al final del último cluster
     last_entry,	    // se ha alcanzado la última entrada, no hay más
+    fat_area_remove_list_error
 };
 
 //enum class Directory_state : uint8_t{
@@ -2288,8 +2312,10 @@ public:
 
 // rmdir, rmfile (borrado de ficheros)
     // rmdir
-    // rmfile (en unix es `rm` pero queda más claro rmfile)
 
+    // Borra el fichero asociado a nentry. 
+    // Precondition: nentry es la primera entrada de la long_entry
+    bool rmfile(const uint32_t& nentry);
 
 
 
@@ -2298,6 +2324,8 @@ public:
     bool read_short_entry(const Index& i, Entry& entry);
 
     // Borra la entrada nentry
+    // cluster0: es de salida, contiene el cluster al que apuntaba la short
+    // entry
     bool remove_short_entry(const uint32_t& nentry);
 
     // Crea una nueva entrada de nombre `name` y características dadas en
@@ -2306,7 +2334,10 @@ public:
     // número de entrada
     bool new_long_entry(Entry_info& info, std::span<const uint8_t> name);
 
-    bool remove_long_entry(const uint32_t& nentry);
+    // Borra la long_entry `nentry` devolviendo en cluster0 el primer cluster
+    // del fichero apuntado por esa long_entry. Con ese cluster0 se podrá
+    // borrar la lista de clusters de la FAT area.
+    bool remove_long_entry(const uint32_t& nentry, uint32_t& cluster0);
 
 
 // Errno = resultado de la última operación
@@ -2321,7 +2352,7 @@ public:
 
 private:
 // Data
-    Volume vol_;
+    Volume& vol_;
     uint32_t cluster0_; // primer cluster del directorio
 
     impl_of::Directory_ertate ertate_;
@@ -2356,7 +2387,7 @@ private:
 
     bool remove_entry(const Index& i, Entry::Type type);
     bool remove_short_entry(const Index& i);
-    bool remove_long_entry (Index i);
+    bool remove_long_entry (Index i, uint32_t& cluster0);
 
     Index find_first_not_free_entry(Index i, Entry& entry);
 
@@ -2400,7 +2431,7 @@ bool Directory<S>::read_short_entry(const Index& i, Entry& entry)
 			     , entry.data);
     
     if (n != Entry::size){
-	atd::ctrace<3>() << "Can't read next directory entry\n";
+	atd::ctrace<3>() << "Can't read next directory entry; n = " << n << '\n';
 	return errno(Errno::read_error);
     }
 
@@ -2431,6 +2462,8 @@ Directory<S>::Index
 					std::span<uint8_t> long_name)
 {
     static constexpr uint8_t esize = Entry::ascii_long_name_len;
+
+    info.nentry = i.nentry(); // anotamos la primera entrada de la  long_entry
 
 // Garantizamos que la cadena acabe en '\0' en el caso de que sea el long_name
 // justo múltiplo de size (de 13 caracteres)
@@ -2807,13 +2840,13 @@ Directory<S>::remove_short_entry(const Index& i)
 template <typename S>
 inline 
 bool 
-Directory<S>::remove_long_entry(const uint32_t& nentry)
-{ return remove_long_entry(Index{volume(), cluster0_, nentry}); }
+Directory<S>::remove_long_entry(const uint32_t& nentry, uint32_t& cluster)
+{ return remove_long_entry(Index{volume(), cluster0_, nentry}, cluster); }
 
 
 template <typename S>
 bool 
-Directory<S>::remove_long_entry(Index i)
+Directory<S>::remove_long_entry(Index i, uint32_t& cluster0)
 {
     errno_ok(); 
 
@@ -2845,6 +2878,8 @@ Directory<S>::remove_long_entry(Index i)
     if (entry.type() != Type::info_entry)
 	return errno(Errno::long_entry_corrupted);
 
+    cluster0 = entry.file_cluster();
+
     return remove_short_entry(i); // no llamar a remove_entry, quedaría inconsistente
 }
 
@@ -2867,6 +2902,21 @@ Directory<S>::mkfile(Entry_info& info , std::span<const uint8_t> name)
     return ok();
 }
 
+
+template <typename S>
+bool
+Directory<S>::rmfile(const uint32_t& nentry)
+{
+    uint32_t cluster{};
+
+    if (!remove_long_entry(nentry, cluster))
+	return throw_errno();
+
+    if (!volume().fat_area.remove_list(cluster))
+	return errno(Errno::fat_area_remove_list_error);
+
+    return ok();
+}
 
 
 }// namespace FAT32

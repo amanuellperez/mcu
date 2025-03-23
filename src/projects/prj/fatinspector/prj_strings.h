@@ -25,9 +25,6 @@
 #define __PRJ_STRINGS_H__ 
 
 
-constexpr myu::ROM_string<4> msg_fail 
-	PROGMEM{"FAIL"};
-
 constexpr myu::ROM_string<102> msg_hello   
 	PROGMEM{"\n\n----------------------------------------\nSDCard inspector\n----------------------------------------\n\n"};
 
@@ -91,8 +88,8 @@ constexpr myu::ROM_string<19> msg_print_sector_as_FAT_boot_sector
 constexpr myu::ROM_string<15> msg_print_sector_as_FS_info 
 	PROGMEM{"FAT32: FS info\n"};
 
-constexpr myu::ROM_string<279> msg_root_directory_menu 
-	PROGMEM{"Root directory menu\n\t0. Back main menu\n\t------------------------\n\t1. Print short entries\n\t2. Print long entries\n\t3. New entry\n\t4. Remove short entry\n\t5. Remove long entry\n\t------------------------\n\t6. ls archives\n\t7. ls directories\n\t8. cd\n\t9. mkfile\n\t10. Print file\n"};
+constexpr myu::ROM_string<292> msg_root_directory_menu 
+	PROGMEM{"Root directory menu\n\t0. Back main menu\n\t------------------------\n\t1. Print short entries\n\t2. Print long entries\n\t3. New entry\n\t4. Remove short entry\n\t5. Remove long entry\n\t------------------------\n\t6. ls archives\n\t7. ls directories\n\t8. cd\n\t9. mkfile\n\t10. rmfile\n\t11. Print file\n"};
 
 
  

@@ -166,8 +166,9 @@ public:
     
 
 // Constructor
-    Sector_driver(){}
-    ~Sector_driver() { flush(); }
+    Sector_driver(){ atd::ctrace<100>() << "Sector_driver::Sector_driver()\n";}
+    ~Sector_driver(){atd::ctrace<100>() << "Sector_driver::~Sector_driver()\n";
+	flush(); }
 
 // Lectura del sector actual
     // Devuelve el tipo T del sector nsector de la posición pos
@@ -388,7 +389,7 @@ uint8_t Sector_driver<SD>::
 template <typename SD>
 bool Sector_driver<SD>::flush()
 {
-
+    atd::ctrace<100>() << "SDCard::flush(" << nsector_ << ")?\n";
     if (!state_is_modified())
 	return true;
 
@@ -412,6 +413,7 @@ Sector_driver<SD>::fill_n(const Address& sector0
 	return 0;
 
     std::fill(sector_.begin(), sector_.end(), value);
+    state_modified(true);
 
     for (Address i = 0; i < n; ++i){
 	if (!write(sector0 + i, sector_))

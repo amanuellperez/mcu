@@ -98,7 +98,8 @@ void Main::root_directory_menu()
 			dir.cd(cluster);
 
 	    break; case 9: mkfile(vol, dir);
-	    break; case 10: print_file();
+	    break; case 10: rmfile(vol, dir);
+	    break; case 11: print_file();
 
 	}
     }
@@ -206,7 +207,7 @@ void Main::root_directory_print_long_entries(Volume& vol, Directory& dir)
 {
     using Entry = Directory::Entry;
     
-    uart << "n|name\t|attr\t\t|cluster\t|size\t|"
+    uart << "nentry|name\t|attr\t\t|cluster\t|size\t|"
 	"created\t|access\t|modified\t|\n";
     
     uint8_t k = 0;
@@ -235,7 +236,7 @@ void Main::root_directory_print_long_entries(Volume& vol, Directory& dir)
 	}
 
     
-	uart << (uint16_t) k << ": [";
+	uart << info.nentry << ": [";
 	print_as_char(uart, name);
 	uart << "]\n\t";
 
@@ -366,8 +367,9 @@ void Main::remove_long_entry(Volume& vol, Directory& dir)
     uint16_t nentry{};
     uart >> nentry;
 
-    if (dir.remove_long_entry(nentry)){
-	uart << "OK\n";
+    uint32_t cluster{};
+    if (dir.remove_long_entry(nentry, cluster)){
+	uart << "OK; FAT area first cluster = " << cluster << "\n";
 	vol.flush();
     }
     else
@@ -397,5 +399,21 @@ void Main::mkfile(Volume& vol, Directory& dir)
 	print_fail(uart);
 
 }
+
+void Main::rmfile(Volume& vol, Directory& dir)
+{
+    uart << "nentry to remove: ";
+    uint32_t nentry;
+    uart >> nentry;
+
+    if (dir.rmfile(nentry)){
+	print_ok(uart);
+//	vol.flush();
+    }
+    else
+	print_fail(uart);
+
+}
+
 
 

@@ -6,5 +6,6 @@
 msg_yes	"yes"
 msg_no	"no"
 msg_ok	"ok"
+msg_fail "fail"
 msg_press_key_to_continue   "Press a key to continue\n"
 msg_line    "-------------------------------\n"
