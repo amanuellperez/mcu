@@ -139,6 +139,7 @@ using Sector_driver = dev::Sector_driver<SDCard>;
 
 using Volume = atd::FAT32::Volume<Sector_driver>;
 using Directory = atd::FAT32::Directory<Sector_driver>;
+using Entry      = Directory::Entry;
 using Entry_info = Directory::Entry_info;
 using Attribute = Directory::Attribute;
 using File = atd::FAT32::File<Sector_driver>;

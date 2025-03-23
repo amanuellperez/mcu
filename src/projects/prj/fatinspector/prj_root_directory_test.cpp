@@ -73,20 +73,8 @@ void Main::root_directory_menu()
 	uart << '\n';
 	print_line(uart);
 	
-	//atd::print(uart, msg_root_directory_menu);
+	atd::print(uart, msg_root_directory_menu);
     
-	uart << "Root directory menu\n"
-		"\t0. Back main menu\n"
-	        "\t1. Print short entries\n"
-		"\t2. Print long entries\n"
-		"\t3. ls archives\n"
-		"\t4. ls directories\n"
-		"\t5. New entry\n"
-		"\t6. Remove short entry\n"
-		"\t7. Remove long entry\n"
-		"\t8. cd\n"
-		"\t9. Print file\n";
-
 	uint16_t cmd{};
 	uart >> cmd;
 
@@ -94,19 +82,23 @@ void Main::root_directory_menu()
 
 	switch(cmd){
 	    break; case 0: return;
+
 	    break; case 1: root_directory_print_short_entries(vol, dir);
 	    break; case 2: root_directory_print_long_entries(vol, dir);
-	    break; case 3: print_ls(vol, dir, Attribute::archive);
-	    break; case 4: print_ls(vol, dir, Attribute::directory);
-	    break; case 5: new_entry(vol, dir);
-	    break; case 6: remove_short_entry(vol, dir);
-	    break; case 7: remove_long_entry(vol, dir);
+	    break; case 3: new_entry(vol, dir);
+	    break; case 4: remove_short_entry(vol, dir);
+	    break; case 5: remove_long_entry(vol, dir);
+
+	    break; case 6: print_ls(vol, dir, Attribute::archive);
+	    break; case 7: print_ls(vol, dir, Attribute::directory);
+
 	    break; case 8: 
 			uart << "Cluster new directory: ";
 			uart >> cluster;
 			dir.cd(cluster);
 
-	    break; case 9: print_file();
+	    break; case 9: mkfile(vol, dir);
+	    break; case 10: print_file();
 
 	}
     }
@@ -149,9 +141,9 @@ void Main::root_directory_print_short_entries(Volume& vol, Directory& dir)
 	    uint8_t day, month;
 	    uint16_t year;
 
-	    Entry::uint16_t2time(entry.creation_time(),
-						    seconds, minutes, hours);
-	    Entry::uint16_t2date(entry.creation_date(), day, month, year);
+	    Entry::time_as_brokendown(entry.creation_time(),
+						    hours, minutes, seconds);
+	    Entry::date_as_brokendown(entry.creation_date(), day, month, year);
 
 	    print_date(uart, day, month, year);
 	    uart << ' ';
@@ -160,14 +152,14 @@ void Main::root_directory_print_short_entries(Volume& vol, Directory& dir)
 		<< '\t';
 
 
-	    Entry::uint16_t2date(entry.last_access_date(), day, month, year);
+	    Entry::date_as_brokendown(entry.last_access_date(), day, month, year);
 	    print_date(uart, day, month, year);
 	    uart << '\t';
 
-	    Entry::uint16_t2date(entry.last_modification_date(), 
+	    Entry::date_as_brokendown(entry.last_modification_date(), 
 							    day, month, year);
-	    Entry::uint16_t2time(entry.last_modification_time(),
-						    seconds, minutes, hours);
+	    Entry::time_as_brokendown(entry.last_modification_time(),
+						    hours, minutes, seconds);
 	    print_date(uart, day, month, year);
 	    uart << ' ';
 	    print_time(uart, hours, minutes, seconds);
@@ -259,9 +251,9 @@ void Main::root_directory_print_long_entries(Volume& vol, Directory& dir)
 	    uint8_t day, month;
 	    uint16_t year;
 
-	    Entry::uint16_t2time(info.creation_time,
-						    seconds, minutes, hours);
-	    Entry::uint16_t2date(info.creation_date, day, month, year);
+	    Entry::time_as_brokendown(info.creation_time,
+						    hours, minutes, seconds);
+	    Entry::date_as_brokendown(info.creation_date, day, month, year);
 	
 	    print_date(uart, day, month, year);
 	    uart << ' ';
@@ -270,14 +262,14 @@ void Main::root_directory_print_long_entries(Volume& vol, Directory& dir)
 		<< '\t';
 
 
-	    Entry::uint16_t2date(info.last_access_date, day, month, year);
+	    Entry::date_as_brokendown(info.last_access_date, day, month, year);
 	    print_date(uart, day, month, year);
 	    uart << '\t';
 
-	    Entry::uint16_t2date(info.last_modification_date, 
+	    Entry::date_as_brokendown(info.last_modification_date, 
 							    day, month, year);
-	    Entry::uint16_t2time(info.last_modification_time,
-						    seconds, minutes, hours);
+	    Entry::time_as_brokendown(info.last_modification_time,
+						    hours, minutes, seconds);
 	    print_date(uart, day, month, year);
 	    uart << ' ';
 	    print_time(uart, hours, minutes, seconds);
@@ -334,25 +326,21 @@ void Main::new_entry(Volume& vol, Directory& dir)
     std::array<uint8_t, 30> name;
     name.fill(0);
 
-    read_cstring(uart, name);
+    auto name_len = read_cstring(uart, name);
 
-    auto info = Directory::Entry_info::make_empty_entry();
+    auto info = Entry_info::make_zero_entry();
 
     info.attribute = Directory::Attribute::archive;
     info.file_cluster = 25;
     info.file_size = 123;
 
-    // (TODO) Esto es peligroso!!! Simplificar
-    // ¿usar string_view en vez de span para new_long_entry?
-    auto sz = strlen((const char*)(name.data()));
-uart << "size = " << sz << '\n';
-std::span<const uint8_t> sp{name.data(), sz};
-uart << "sp.size = " << sp.size() << '\n';
-    //uint8_t n = dir.new_long_entry(info, {name.data(), sz});
-    uint8_t n = dir.new_long_entry(info, sp);
-    uart << (int) n << " new short entries!!!\n";
+    if (dir.new_long_entry(info, {name.data(), name_len})){
+	uart << "nentry: " << info.nentry << '\n';
+	vol.flush();
+    }
+    else
+	print_fail(uart);
 
-    vol.flush();
 
 }
 
@@ -367,7 +355,7 @@ void Main::remove_short_entry(Volume& vol, Directory& dir)
 	vol.flush();
     }
     else
-	uart << "FAIL\n";
+	print_fail(uart);
 }
 
 
@@ -383,7 +371,31 @@ void Main::remove_long_entry(Volume& vol, Directory& dir)
 	vol.flush();
     }
     else
-	uart << "FAIL\n";
+	print_fail(uart);
 
 }
+
+void Main::mkfile(Volume& vol, Directory& dir)
+{
+    uart << "Filename of new entry: ";
+    std::array<uint8_t, 30> name;
+    name.fill(0);
+
+    auto name_len = read_cstring(uart, name);
+
+    auto info = Entry_info::make_zero_entry();
+    info.attribute = Entry_info::Attribute::archive;
+
+    info.creation_time = Entry::to_time(10, 20, 30);
+    info.creation_date = Entry::to_date(4, 5, 2025);
+
+    if (dir.mkfile(info, {name.data(), name_len})){
+	uart << "nentry = " << info.nentry
+	     << "; cluster = " << info.file_cluster 
+	     << '\n';
+    }else
+	print_fail(uart);
+
+}
+
 

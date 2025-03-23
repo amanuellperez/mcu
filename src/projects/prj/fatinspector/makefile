@@ -4,6 +4,7 @@ SOURCES= atd_fat.cpp	\
 		 dev_print.cpp	\
 		 sdc_print.cpp	\
 		 prj_dev.cpp	\
+		 prj_automatic_test.cpp \
 		 prj_mbr.cpp	\
 		 prj_print.cpp	\
 		 prj_sector_driver_test.cpp	\

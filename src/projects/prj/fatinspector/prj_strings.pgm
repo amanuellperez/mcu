@@ -3,6 +3,9 @@
 #	$ str2progmem strings.pgm
 #
 
+# Generic
+msg_fail "FAIL"
+
 # main
 msg_hello   "\n\n----------------------------------------\n"
 	    "SDCard inspector\n"
@@ -57,4 +60,20 @@ msg_print_sector_as_FAT_boot_sector "FAT32: boot sector\n"
 
 # print_sector_as_FS_info
 msg_print_sector_as_FS_info "FAT32: FS info\n"
+
+# root_directory
+msg_root_directory_menu "Root directory menu\n"
+			"\t0. Back main menu\n"
+			"\t------------------------\n"
+			"\t1. Print short entries\n"
+			"\t2. Print long entries\n"
+			"\t3. New entry\n"
+			"\t4. Remove short entry\n"
+			"\t5. Remove long entry\n"
+			"\t------------------------\n"
+			"\t6. ls archives\n"
+			"\t7. ls directories\n"
+			"\t8. cd\n"
+			"\t9. mkfile\n"
+			"\t10. Print file\n"
 

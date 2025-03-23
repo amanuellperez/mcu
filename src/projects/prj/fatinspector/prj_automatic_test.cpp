@@ -17,27 +17,34 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#pragma once
-
-#ifndef __PRJ_PRINT_H__
-#define __PRJ_PRINT_H__
-
-#include <ostream>
-#include <span>
 #include "prj_main.h"
 
-void print_as_char(std::ostream& out, std::span<uint8_t> str);
-void print(std::ostream& out, std::span<uint8_t> str);
-void print(std::ostream& out, Attribute att, bool with_tab = true);
+void Main::automatic_test()
+{
+    using Entry = Directory::Entry;
 
-inline void print_fail(std::ostream& out) 
-{ 
-    atd::print(out, msg_fail);
-    out << '\n';
+    uint8_t hours = 10;
+    uint8_t minutes = 59;
+    uint8_t seconds = 44;
+
+    uint8_t day = 13;
+    uint8_t month = 2;
+    uint16_t year = 2025;
+
+    uint16_t time = Entry::to_time(hours, minutes, seconds);
+    uint16_t date = Entry::to_date(day, month, year);
+
+    uint8_t h, m, s;
+    uint8_t d, month2;
+    uint16_t y;
+
+    Entry::time_as_brokendown(time, h, m, s);
+    Entry::date_as_brokendown(date, d, month2, y);
+
+    if (h != hours or m != minutes or s != seconds)
+	uart << "Entry::to_time error\n";
+
+    if (d != day or month2 != month or y != year)
+	uart << "Entry::to_date error\n";
 }
 
-
-uint8_t read_cstring(std::ostream& out, std::span<uint8_t> str);
-
-
-#endif

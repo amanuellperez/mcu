@@ -95,6 +95,7 @@ private:
 	void new_entry(Volume& vol, Directory& dir);
 	void remove_short_entry(Volume& vol, Directory& dir);
 	void remove_long_entry(Volume& vol, Directory& dir);
+	void mkfile(Volume& vol, Directory& dir);
 
     void print_sector(std::ostream& out, const Sector& sector, size_t i0, size_t sz)
     { atd::xxd_print(out, sector, i0, sz); }
@@ -105,6 +106,9 @@ private:
 // FAT
     uint32_t fat_volume_first_sector(uint8_t npartition);
 	uint32_t fat_volume_first_sector(const atd::MBR_partition& p, uint8_t n);
+
+// Automatic
+    void automatic_test();
 };
 
 #endif

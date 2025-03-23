@@ -224,7 +224,7 @@ void Directory_entry::write_long_name(std::span<const uint8_t> str)
 
 
 // 6.3 FAT specification
-void Directory_entry::uint16_t2date(uint16_t date, 
+void Directory_entry::date_as_brokendown(uint16_t date, 
 			      uint8_t& day, uint8_t& month, uint16_t& year)
 {
     //day   = date & 0x001F; // bits del 0-4
@@ -236,8 +236,8 @@ void Directory_entry::uint16_t2date(uint16_t date,
 
 
 // 6.3 FAT specification
-void Directory_entry::uint16_t2time(uint16_t time, 
-		uint8_t& seconds, uint8_t& minutes, uint8_t& hours)
+void Directory_entry::time_as_brokendown(uint16_t time, 
+		uint8_t& hours, uint8_t& minutes, uint8_t& seconds)
 {
     seconds = 2*(time & atd::make_range_bitmask<0, 4, uint16_t>());
     minutes = static_cast<uint8_t>(

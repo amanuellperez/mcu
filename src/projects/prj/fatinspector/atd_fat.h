@@ -443,10 +443,19 @@ public:
     // En caso  de error devuelve 0.
     uint32_t add_cluster(const uint32_t& cluster0);
 
+    // Igual que add_cluster pero rellena todo el cluster con el valor inicial
+    // `value`
+    uint32_t add_cluster_and_fill_with( const uint32_t& cluster0, uint8_t value);
+
     // Igual que add_cluster con la única diferencia de que solo añade el
     // cluster si cluster0 es el último elemento de la lista. Si no lo es, no
     // hace nada devolviendo 0.
     uint32_t push_back_cluster(const uint32_t& cluster0);
+
+    // Igual que push_back_cluster pero rellena todo el cluster con el valor
+    // inicial `value`
+    uint32_t push_back_cluster_and_fill_with( const uint32_t& cluster0
+					    , uint8_t value);
 
 
     // Borra el cluster0.
@@ -529,6 +538,8 @@ private:
     uint32_t find_first_free_cluster(uint32_t cluster0 = 2) const;
 
     uint32_t add_cluster(const uint32_t& cluster, bool only_at_the_end);
+    uint32_t add_cluster_and_fill_with( const uint32_t& cluster
+				      , bool only_at_the_end, uint8_t value);
 
 // Funciones de acceso a los clusters
 // ----------------------------------
@@ -647,7 +658,8 @@ FAT_area<S>::Cluster_state FAT_area<S>::cluster_state(uint32_t cluster) const
 
     if (cluster == 0x00000000) return Cluster_state::free;
     if (cluster == 0x0FFFFFF7) return Cluster_state::bad;
-    if (cluster == 0x0FFFFFFF) return Cluster_state::end_of_clusters;
+    if (cluster == 0x0FFFFFFF)
+	return Cluster_state::end_of_clusters;
     
     // clusters 0 y 1 están reservados
     // section 3.5
@@ -775,6 +787,37 @@ inline uint32_t FAT_area<S>::add_cluster(const uint32_t& cluster0)
 template <typename S>
 inline uint32_t FAT_area<S>::push_back_cluster(const uint32_t& cluster0)
 { return add_cluster(cluster0, true); }
+
+
+template <typename S>
+uint32_t FAT_area<S>::add_cluster_and_fill_with(const uint32_t& cluster0
+		      , bool only_at_the_end, uint8_t value)
+{
+    auto new_cluster = add_cluster(cluster0, only_at_the_end);
+
+    if (new_cluster == 0)
+	return 0;
+
+    if (!volume_->fill_cluster(new_cluster, value)){
+	atd::ctrace<3>() << "Can't initialize cluster " << new_cluster 
+			 << " to " << (uint16_t) value << '\n';
+    }
+
+    return new_cluster;
+}
+
+
+template <typename S>
+inline 
+uint32_t FAT_area<S>::add_cluster_and_fill_with( const uint32_t& cluster0
+					       , uint8_t value)
+{ return add_cluster_and_fill_with(cluster0, false, value); }
+
+template <typename S>
+inline uint32_t 
+    FAT_area<S>::push_back_cluster_and_fill_with( const uint32_t& cluster0
+						, uint8_t value)
+{ return add_cluster_and_fill_with(cluster0, true, value); }
 
 
 // Convertimos:
@@ -1044,7 +1087,7 @@ FAT_area<Sector_driver>::Cluster_state
     if (state == Cluster_state::allocated)
 	next_cluster = value;
 
-    return Cluster_state::allocated;
+    return state;
 }
 
 } // namespace impl_of
@@ -1695,14 +1738,34 @@ struct Directory_entry{
 				    
 
 // Funciones de conversión de formato
-// (TODO) devolver time_t...
+// (TODO) devolver time_t... Mejor no: habría que calcularlo teniendo en
+// cuenta años bisiestos => hay que incluir las funciones de tiempo => más
+// grande esta biblioteca...
     // Extrae day/month/year de `date`, que será lo que devuelva
     // creation_date, last_modification_date ...
-    static void uint16_t2date(uint16_t date, 
+    // (DUDA) Esta forma de pasar los argumentos es la española @_@
+    //	      Escribimos: day/month/year 
+    //	      No es muy internacional esta funcion ¬_¬'
+    static void date_as_brokendown(uint16_t date, 
 			      uint8_t& day, uint8_t& month, uint16_t& year);
 
-    static void uint16_t2time(uint16_t time, 
-			      uint8_t& seconds, uint8_t& minutes, uint8_t& hours);
+    static void time_as_brokendown(uint16_t time, 
+			      uint8_t& hours, uint8_t& minutes, uint8_t& seconds);
+
+    static uint16_t to_date(uint8_t day, uint8_t month, uint16_t year)
+    {
+	year -= 1980;
+	return (year << 9) | (month << 5) | day;
+    }
+
+
+    static uint16_t to_time(uint8_t hours, uint8_t minutes, uint8_t seconds)
+    {
+	seconds /= 2;
+	return ((hours << 11) | (minutes << 5) | seconds);
+    }
+
+
 
 // Funciones internas
     // Como data[12] tiene que ser 0, usemos ese valor para indicar que la
@@ -1722,7 +1785,10 @@ private:
 struct Entry_info{
     using Attribute = Entry_attribute;
 
-    static Entry_info make_empty_entry();
+    static Entry_info make_zero_entry();
+
+    uint32_t nentry;	// número de la primera short entry de la long_entry
+			// dentro del directorio 
 
     Attribute attribute;
 
@@ -1741,7 +1807,7 @@ struct Entry_info{
 };
 
 inline 
-Entry_info Entry_info::make_empty_entry()
+Entry_info Entry_info::make_zero_entry()
 {
     Entry_info info;
     memset(&info, 0, sizeof(Entry_info));
@@ -1835,6 +1901,10 @@ public:
     // entry en el array de entries del directorio)
     uint32_t nentry() const 
     { return nentry_; }
+
+    // Número de cluster donde se encuentra la entrada actual
+    uint32_t ncluster() const
+    { return cluster_; }
 
 // end
     // En los directorios tenemos dos fines diferentes:
@@ -2123,6 +2193,7 @@ enum class Directory_errno : uint8_t{
     ok = 0, // fail distinto de 0
     read_error, 
     write_error,
+    add_cluster_error,
     long_entry_corrupted,
     end_of_clusters, // se ha llegado al final del último cluster
     last_entry,	    // se ha alcanzado la última entrada, no hay más
@@ -2206,9 +2277,14 @@ public:
     // directorio actual hasta encontrar el cluster correspondiente.
     void cd(uint32_t cluster0);
 
-// mkdir, mkfile (creación de ficheros)
+// Creación de ficheros
+    // Crea el fichero indicado
+    // Devuelve true en caso de que todo vaya bien, y anota en `info`
+    // el nentry de la long_entry y el file_cluster (primer cluster al que
+    // apunta el fichero)
+    bool mkfile(Entry_info& info , std::span<const uint8_t> name);
+
     // mkdir
-    // mkfile
 
 // rmdir, rmfile (borrado de ficheros)
     // rmdir
@@ -2226,12 +2302,9 @@ public:
 
     // Crea una nueva entrada de nombre `name` y características dadas en
     // info, ignorando los access/modification times de `info`.
-    // Devuelve el número de entrada de la short_entry de este nuevo fichero
-    // creado ó 0 en caso de error. (0??? en general, salvo en el root
-    // directory la entrada 0 corresponde al directorio actual (.) no siendo
-    // una entrada válida en general, por eso puedo devolver 0 como error)
-    uint32_t new_long_entry( const Entry_info& info
-			   , std::span<const uint8_t> name);
+    // En caso de que todo vaya bien, devuelve true y anota en info.nentry la
+    // número de entrada
+    bool new_long_entry(Entry_info& info, std::span<const uint8_t> name);
 
     bool remove_long_entry(const uint32_t& nentry);
 
@@ -2267,7 +2340,7 @@ private:
 						    std::span<uint8_t> name);
 
     // Devuelve el número de short entries escritas
-    uint32_t write_long_entry( Index i
+    bool write_long_entry( Index i
 			 , const Entry_info& info
 			 , std::span<const uint8_t> name);
 
@@ -2389,7 +2462,7 @@ Directory<S>::Index
 	}
 
 	if (!read_short_entry(i, entry)){
-	    errno(Errno::read_error);
+	    // errno(Errno::read_error); throw_errno();
 	    return index_end();
 	}
 	
@@ -2471,7 +2544,7 @@ Directory<S>::Index
     while (1){
 
 	if(!read_short_entry(i, entry)){
-	    errno(Errno::read_error);
+	    // errno(Errno::read_error); = throw_errno()
 	    return index_end();
 	}
 
@@ -2539,12 +2612,12 @@ bool Directory<S>::find_first_free_long_entry(uint8_t nshort_entries
 
 	Entry entry;
 	if(!read_short_entry(i0, entry))
-	    return false;
+	    return throw_errno();
 
 	if (entry.is_free()){
 	    Index i = i0;
 	    if (!advance_at_most_entries_of_same_type(entry, nshort_entries, i))
-		return false;
+		return throw_errno();
 
 	    if (i.nentry() - i0.nentry() == nshort_entries){
 		nentry_e = i.nentry();
@@ -2559,15 +2632,15 @@ bool Directory<S>::find_first_free_long_entry(uint8_t nshort_entries
     }
 
     nentry_e = i0.nentry();
+
     return true;
 }
 
 
-// Devuelve 0 en caso de error (aunque tal como está implementada sí que está
-// creando short entries) (¿corregir y que quede consistente?)
+// Devuelve 0 en caso de error
 template <typename S>
-uint32_t 
-Directory<S>::new_long_entry( const Entry_info& info
+bool
+Directory<S>::new_long_entry( Entry_info& info
 			    , std::span<const uint8_t> name)
 {
     auto nshort_entries = 
@@ -2577,23 +2650,25 @@ Directory<S>::new_long_entry( const Entry_info& info
     Index i = index_begin();
     uint32_t nentry_e{};
     if (!find_first_free_long_entry(nshort_entries, i, nentry_e))
-	return 0;
+	return throw_errno();
 
     if (nentry_e - i.nentry() < nshort_entries){ // si no hay espacio en el array
-	volume().fat_area.add_cluster(0x00); // (FAT specification 6.5)
-				   // 0x00 valor por defecto en los directorios
+	// (FAT specification 6.5): 0x00 valor por defecto en los directorios
+	if (!volume().fat_area.push_back_cluster_and_fill_with(i.ncluster(), 0x00))
+	    return errno(Errno::add_cluster_error);
+
 	if (i == Index::end_of_array())
 	    i.reset_to_zero_in_next_cluster();
     }
 
 // 2. Escribimos la información en la long entry
-// (TODO) ¿cómo gestionar los errores? Si no se hace flush las modificaciones
-// del sector no se grabarán. ¿Antes de llamar a esta función que el cliente
-// haga flush, y si falla que cargue de nuevo el sector?
-    if (write_long_entry(i, info, name) != nshort_entries)
-	return 0;
+    info.nentry = i.nentry(); // anotamos dónde queremos crear la long_entry
 
-    return nshort_entries;
+    if (!write_long_entry(i, info, name))
+	return throw_errno();
+
+
+    return ok();
 }
 
 
@@ -2605,7 +2680,7 @@ Directory<S>::new_long_entry( const Entry_info& info
 //		(==> no tenemos que validar que ++i pueda fallar)
 //		(???) podría fallar ++i por errores de lectura a la SD card
 template <typename S>
-uint32_t 
+bool
 Directory<S>::write_long_entry(Index i
 			      , const Entry_info& info
 			      , std::span<const uint8_t> name)
@@ -2625,8 +2700,7 @@ Directory<S>::write_long_entry(Index i
 		    , {name.begin() + (nentries - 1) * esize
 				    , name.size() - (nentries - 1) * esize}
 		    , check_sum))
-	return 0;
-
+	return errno(Errno::write_error);
 
     ++i;
 
@@ -2637,15 +2711,16 @@ Directory<S>::write_long_entry(Index i
 	if (!write_name_entry( i, k
 			     , {name.begin() + (k - 1) * esize, esize}
 			     , check_sum))
-	    return j;
+	    return errno(Errno::write_error);
     }
 
 // write_info_entry:
     if (!write_info_entry(i, info, name))
-	return nentries;
+	return errno(Errno::write_error);
 
-    return nentries + 1;
+    return ok();
 }
+
 
 template <typename S>
 bool 
@@ -2772,6 +2847,27 @@ Directory<S>::remove_long_entry(Index i)
 
     return remove_short_entry(i); // no llamar a remove_entry, quedaría inconsistente
 }
+
+
+
+template <typename S>
+bool
+Directory<S>::mkfile(Entry_info& info , std::span<const uint8_t> name)
+{
+    auto ncluster = volume().fat_area.new_list();
+    if (ncluster == 0)
+	return errno(Errno::add_cluster_error);
+
+    info.file_cluster = ncluster;
+//    info.file_size    = 0;
+
+    if (!new_long_entry(info, name))
+	return throw_errno();
+
+    return ok();
+}
+
+
 
 }// namespace FAT32
 

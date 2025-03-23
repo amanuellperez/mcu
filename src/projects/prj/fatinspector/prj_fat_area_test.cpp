@@ -111,7 +111,7 @@ void Main::FAT32_area_print_clusters(Volume& vol)
 	    }
 
 	    uart << '\n';
-	    break;
+	    return;
 	}
 	uart << next_cluster << " -> ";
 	cluster = next_cluster;
